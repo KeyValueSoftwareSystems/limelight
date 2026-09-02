@@ -16,9 +16,24 @@
        padding:4px 9px;font-size:12px}
   .btn:hover{border-color:var(--acc)}
   .btn.on{background:var(--acc);color:#170c04;border-color:var(--acc);font-weight:640}
-  .wrap{display:grid;grid-template-columns:1fr 308px;gap:12px;padding:12px 15px 26px;max-width:1620px;margin:0 auto}
-  @media(max-width:1040px){.wrap{grid-template-columns:1fr}}
-  #room{width:100%;border-radius:11px;background:#000;border:1px solid var(--line);display:block}
+  .wrap{display:grid;grid-template-columns:1fr 306px;gap:0;height:calc(100vh - 39px)}
+  body.solo .wrap{grid-template-columns:1fr}
+  body.solo aside{display:none}
+  #stage{position:relative;background:#000;overflow:hidden}
+  #room{width:100%;height:100%;display:block}
+  aside{overflow-y:auto;border-left:1px solid var(--line);background:var(--bg);padding:10px 11px 40px}
+  .hud{position:absolute;left:0;right:0;pointer-events:none;z-index:3}
+  .hud.t{top:0;padding:10px 14px;display:flex;gap:10px;align-items:center;
+     background:linear-gradient(180deg,rgba(4,5,8,.78),rgba(4,5,8,0))}
+  .hud.b{bottom:0;padding:0 0 0 0;background:linear-gradient(0deg,rgba(4,5,8,.86),rgba(4,5,8,0))}
+  .hud .in{pointer-events:auto}
+  .chip2{font:11px ui-monospace,Menlo,monospace;color:#cdd3dd;background:rgba(20,24,32,.72);
+     border:1px solid rgba(255,255,255,.08);padding:3px 8px;border-radius:5px;backdrop-filter:blur(6px)}
+  .chip2 b{color:var(--acc)}
+  .hud .transport{margin:0 14px 8px;backdrop-filter:blur(8px);background:rgba(14,17,23,.80)}
+  #tl{margin:0 14px 12px;width:calc(100% - 28px)}
+  #stage:fullscreen #room{height:100vh}
+  .fsbtn{position:absolute;right:12px;top:10px;z-index:4;pointer-events:auto}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:10px}
   .card h3{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim2);
        margin:0 0 8px;font-weight:650}
@@ -79,21 +94,33 @@
 </div>
 
 <div class="wrap">
-  <div>
+  <div id="stage">
     <canvas id="room"></canvas>
-    <div class="transport">
+    <div class="hud t">
+      <span class="chip2" id="hchap">&mdash;</span>
+      <span class="chip2" id="hbar">&mdash;</span>
+      <span class="chip2" id="hen">&mdash;</span>
+      <span class="chip2" id="hlook">&mdash;</span>
+      <span style="flex:1"></span>
+      <span class="chip2" id="hfps">&mdash;</span>
+    </div>
+    <button class="btn fsbtn" onclick="fullscreen()" title="f">&#9974; full screen</button>
+    <div class="hud b">
+    <div class="transport in">
       <button class="pl" id="pl" onclick="toggle()">&#9654;</button>
       <input id="scrub" type="range" min="0" max="175.68" step="0.01" value="0" oninput="seek(+this.value)">
       <div class="bb" id="bb"><i>1</i><i>2</i><i>3</i><i>4</i></div>
       <span class="phr" id="phr">&mdash;</span>
       <span class="look" id="lk">idle</span>
       <span class="tc" id="tc">0:00.0</span>
+      <button class="btn" onclick="document.body.classList.toggle('solo')" title="tab">&#9776;</button>
     </div>
-    <canvas id="tl" width="1560" height="66" onclick="tlclick(event)"></canvas>
-    <div class="card" style="margin-top:8px"><div class="chips" id="chips"></div></div>
+    <canvas id="tl" class="in" width="1560" height="66" onclick="tlclick(event)"></canvas>
+    </div>
   </div>
 
-  <div>
+  <aside>
+    <div class="card"><div class="chips" id="chips"></div></div>
     <div class="card"><h3>View</h3>
       <div class="row"><label>camera</label>
         <button class="btn on" id="v0" onclick="setView(0)">crowd</button>
@@ -139,6 +166,8 @@
         <kbd>1 2 3 4</kbd><span>bar phase</span>
         <kbd>l</kbd><span><b>the look is wrong</b> &mdash; logs a recipe complaint with this frame attached</span>
         <kbd>e</kbd><span>export</span>
+        <kbd>f</kbd><span>full screen</span>
+        <kbd>tab</kbd><span>hide the panels &mdash; just the room</span>
       </div>
     </div>
 
@@ -173,12 +202,12 @@
     <div class="card"><h3>Audio</h3>
       <div class="bar" id="au" style="color:var(--dim2)">Internal clock. Load your mp3 to drive it from the audio device.</div>
       <audio id="a" controls style="width:100%;margin-top:6px;height:30px"></audio></div>
-  </div>
+  </aside>
 </div>
 
 <script>
 const MAP = {"period":0.476217,"phase":0.284,"dur":175.682,"bar_phase":1,"chapters":[[0.0,"intro"],[15.999,"verse"],[31.238,"break"],[38.858,"build"],[63.621,"drop"],[107.433,"break"],[115.052,"build"],[139.816,"drop"],[168.389,"outro"]],"spans":[["build",38.858,63.621,"late"],["build",115.052,141.721,"steady"]],"moments":[[31.238,"quiet",null],[63.621,"drop",0.9],[107.433,"quiet",null],[139.816,"drop",1.0],[153.626,"stop",1.25],[168.389,"return",null]],"energy":[[0.76,0.278],[2.665,0.396],[4.57,0.464],[6.475,0.434],[8.38,0.389],[10.285,0.387],[12.189,0.412],[14.094,0.47],[15.999,0.617],[17.904,0.823],[19.809,0.964],[21.714,1.0],[23.619,1.0],[25.524,0.999],[27.428,0.962],[29.333,0.84],[31.238,0.684],[33.143,0.565],[35.048,0.467],[36.953,0.387],[38.858,0.348],[40.762,0.326],[42.667,0.276],[44.572,0.23],[46.477,0.247],[48.382,0.286],[50.287,0.276],[52.192,0.227],[54.097,0.161],[56.001,0.106],[57.906,0.109],[59.811,0.218],[61.716,0.441],[63.621,0.683],[65.526,0.822],[67.431,0.858],[69.336,0.861],[71.24,0.86],[73.145,0.838],[75.05,0.761],[76.955,0.649],[78.86,0.552],[80.765,0.474],[82.67,0.418],[84.574,0.395],[86.479,0.395],[88.384,0.4],[90.289,0.43],[92.194,0.545],[94.099,0.728],[96.004,0.862],[97.909,0.899],[99.813,0.888],[101.718,0.878],[103.623,0.847],[105.528,0.748],[107.433,0.616],[109.338,0.507],[111.243,0.402],[113.148,0.313],[115.052,0.272],[116.957,0.251],[118.862,0.218],[120.767,0.201],[122.672,0.22],[124.577,0.239],[126.482,0.228],[128.386,0.192],[130.291,0.143],[132.196,0.11],[134.101,0.122],[136.006,0.203],[137.911,0.381],[139.816,0.6],[141.721,0.736],[143.625,0.77],[145.53,0.754],[147.435,0.726],[149.34,0.688],[151.245,0.621],[153.15,0.594],[155.055,0.677],[156.96,0.777],[158.864,0.805],[160.769,0.784],[162.674,0.757],[164.579,0.726],[166.484,0.638],[168.389,0.475],[170.294,0.252],[172.198,0.014],[174.103,0.0]]};
-const LAYOUT = {"layout":"0.3","room":"club","note":"A realistic small-club rig. The browser room and the real rig share this file.","size_m":{"w":8.0,"d":6.0,"h":3.4},"limits":{"max_strobe_hz":4.0,"laser_zones":["ceiling"],"max_pan_per_s":0.45,"max_tilt_per_s":0.55},"zones":[{"name":"dancefloor","fixtures":["par_1","par_2","par_3","par_4","par_5","par_6","strip_1"]},{"name":"backwall","fixtures":["up_1","up_2","up_3","up_4"]},{"name":"stage","fixtures":["head_1","head_2","head_3","head_4","strobe_1","strobe_2","strip_2","fog_1"]},{"name":"ceiling","fixtures":[]}],"fixtures":[{"id":"par_1","kind":"par","can":["colour","level"],"at":[0.8,2.9,5.2]},{"id":"par_2","kind":"par","can":["colour","level"],"at":[2.08,2.9,5.2]},{"id":"par_3","kind":"par","can":["colour","level"],"at":[3.36,2.9,5.2]},{"id":"par_4","kind":"par","can":["colour","level"],"at":[4.64,2.9,5.2]},{"id":"par_5","kind":"par","can":["colour","level"],"at":[5.92,2.9,5.2]},{"id":"par_6","kind":"par","can":["colour","level"],"at":[7.2,2.9,5.2]},{"id":"up_1","kind":"uplight","can":["colour","level"],"at":[1.3,0.15,5.8]},{"id":"up_2","kind":"uplight","can":["colour","level"],"at":[3.3,0.15,5.8]},{"id":"up_3","kind":"uplight","can":["colour","level"],"at":[4.7,0.15,5.8]},{"id":"up_4","kind":"uplight","can":["colour","level"],"at":[6.7,0.15,5.8]},{"id":"head_1","kind":"head","can":["colour","level","move","strobe"],"at":[1.6,3.15,1.2]},{"id":"head_2","kind":"head","can":["colour","level","move","strobe"],"at":[3.4,3.15,1.2]},{"id":"head_3","kind":"head","can":["colour","level","move","strobe"],"at":[4.6,3.15,1.2]},{"id":"head_4","kind":"head","can":["colour","level","move","strobe"],"at":[6.4,3.15,1.2]},{"id":"strobe_1","kind":"strobe","can":["level","strobe"],"at":[0.55,3.15,1.2]},{"id":"strobe_2","kind":"strobe","can":["level","strobe"],"at":[7.45,3.15,1.2]},{"id":"strip_1","kind":"strip","can":["pixels"],"pixels":24,"at":[0.0,0.1,5.85]},{"id":"strip_2","kind":"strip","can":["pixels"],"pixels":24,"at":[0.0,0.1,0.45]},{"id":"fog_1","kind":"fog","can":["burst"],"at":[0.5,0.3,0.6]}]};
+const LAYOUT = {"layout":"0.3","room":"club","note":"A realistic small-club rig. The browser room and the real rig share this file.","size_m":{"w":8.0,"d":6.0,"h":3.4},"limits":{"max_strobe_hz":4.0,"laser_zones":["ceiling"],"max_pan_per_s":0.85,"max_tilt_per_s":0.95,"note":"A decent moving head does 540 degrees of pan in about 2 s, which is roughly 0.85 of its range per second. Cheap heads are half that. Measured against these in the renderer test, so a recipe that would tear a motor fails a check instead of a fixture."},"zones":[{"name":"dancefloor","fixtures":["par_1","par_2","par_3","par_4","par_5","par_6","strip_1"]},{"name":"backwall","fixtures":["up_1","up_2","up_3","up_4"]},{"name":"stage","fixtures":["head_1","head_2","head_3","head_4","strobe_1","strobe_2","strip_2","fog_1"]},{"name":"ceiling","fixtures":[]}],"fixtures":[{"id":"par_1","kind":"par","can":["colour","level"],"at":[0.8,2.9,5.2]},{"id":"par_2","kind":"par","can":["colour","level"],"at":[2.08,2.9,5.2]},{"id":"par_3","kind":"par","can":["colour","level"],"at":[3.36,2.9,5.2]},{"id":"par_4","kind":"par","can":["colour","level"],"at":[4.64,2.9,5.2]},{"id":"par_5","kind":"par","can":["colour","level"],"at":[5.92,2.9,5.2]},{"id":"par_6","kind":"par","can":["colour","level"],"at":[7.2,2.9,5.2]},{"id":"up_1","kind":"uplight","can":["colour","level"],"at":[1.3,0.15,5.8]},{"id":"up_2","kind":"uplight","can":["colour","level"],"at":[3.3,0.15,5.8]},{"id":"up_3","kind":"uplight","can":["colour","level"],"at":[4.7,0.15,5.8]},{"id":"up_4","kind":"uplight","can":["colour","level"],"at":[6.7,0.15,5.8]},{"id":"head_1","kind":"head","can":["colour","level","move","strobe"],"at":[1.6,3.15,1.2]},{"id":"head_2","kind":"head","can":["colour","level","move","strobe"],"at":[3.4,3.15,1.2]},{"id":"head_3","kind":"head","can":["colour","level","move","strobe"],"at":[4.6,3.15,1.2]},{"id":"head_4","kind":"head","can":["colour","level","move","strobe"],"at":[6.4,3.15,1.2]},{"id":"strobe_1","kind":"strobe","can":["level","strobe"],"at":[0.55,3.15,1.2]},{"id":"strobe_2","kind":"strobe","can":["level","strobe"],"at":[7.45,3.15,1.2]},{"id":"strip_1","kind":"strip","can":["pixels"],"pixels":24,"at":[0.0,0.1,5.85]},{"id":"strip_2","kind":"strip","can":["pixels"],"pixels":24,"at":[0.0,0.1,0.45]},{"id":"fog_1","kind":"fog","can":["burst"],"at":[0.5,0.3,0.6]}]};
 const $ = s => document.querySelector(s);
 let PER=MAP.period, PH=MAP.phase, DUR=MAP.dur, DBP=MAP.bar_phase;
 let STOP_REAL=true, ANT=true, HAZE=0.28, DRIFT=true, VIEW=0;
@@ -280,28 +309,82 @@ function lookWeights(t){const i=segAt(t),s=SEG[i],x=XF(s.look),d=t-s.from;
   if(i>0&&d<x){const w=ss(0,x,d);return[[SEG[i-1].look,1-w],[s.look,w]]}
   return[[s.look,1]]}
 
-/* ---- palette: crossfades on chapter change, drifts slowly within ---- */
-const PAL={intro:[[26,64,180],[64,104,214]], verse:[[214,120,54],[152,72,116]],
-  break:[[22,60,168],[58,42,150]], build:[[255,138,24],[255,74,58]],
-  drop:[[255,250,244],[255,44,148]], outro:[[36,76,196],[22,48,136]],
-  quiet:[[22,60,168],[48,58,166]]};
-function palOf(name,t){const p=PAL[name]||PAL.verse;
-  const f=0.5+0.5*Math.sin(2*Math.PI*(t/(8*BAR)));
-  return [lerp(p[0][0],p[1][0],f),lerp(p[0][1],p[1][1],f),lerp(p[0][2],p[1][2],f)]}
-function pal(t){const j=chIdx(t),a=CH[j][0],XFC=1.6;
-  const cur=palOf(CH[j][1],t);
-  if(j>0&&t-a<XFC){const w=ss(0,XFC,t-a),prv=palOf(CH[j-1][1],t);
-    return [lerp(prv[0],cur[0],w),lerp(prv[1],cur[1],w),lerp(prv[2],cur[2],w)].map(Math.round)}
-  return cur.map(Math.round)}
-const cool=c=>[Math.round(c[0]*0.45),Math.round(c[1]*0.72),Math.round(c[2]*1.0>255?255:c[2]*1.0)];
+/* ---- colour, in hue space ----
+   v0.4 hardcoded two RGB values per chapter, so the whole show had fourteen
+   colours in it and every fixture in the room was the same one. A rig gets its
+   depth from hue OFFSETS across fixtures and from the complement, not from more
+   presets. Each chapter now carries a hue anchor and a range it may wander. */
+function hsl(h,s,l){
+  h=((h%360)+360)%360; const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs(((h/60)%2)-1)), m=l-c/2;
+  let r,g,b;
+  if(h<60){r=c;g=x;b=0} else if(h<120){r=x;g=c;b=0} else if(h<180){r=0;g=c;b=x}
+  else if(h<240){r=0;g=x;b=c} else if(h<300){r=x;g=0;b=c} else {r=c;g=0;b=x}
+  return [Math.round((r+m)*255),Math.round((g+m)*255),Math.round((b+m)*255)]}
+
+const HUE={
+  intro:{h:210,span: 44,s:0.74,l:0.40}, verse:{h: 26,span: 40,s:0.80,l:0.46},
+  break:{h:246,span: 52,s:0.72,l:0.36}, build:{h: 30,span: 64,s:0.94,l:0.50},
+  drop :{h:330,span:130,s:0.90,l:0.56}, outro:{h:218,span: 40,s:0.66,l:0.34},
+  quiet:{h:252,span: 46,s:0.70,l:0.36}, stop :{h:  0,span:  0,s:0.00,l:0.00},
+  flash:{h: 40,span:  0,s:0.06,l:0.98}, spotlight:{h: 32,span: 10,s:0.62,l:0.56}};
+
+/* base hue walks its range on a two-phrase clock, and energy pushes it toward
+   the hot end of the range while raising saturation */
+function hueBase(name,t,e){
+  const H=HUE[name]||HUE.verse;
+  const walk=0.5+0.5*Math.sin(2*Math.PI*(t/(32*PER)));
+  return {h:H.h+H.span*(0.30*walk+0.70*e-0.35), s:cl(H.s*(0.66+0.42*e),0,1),
+          l:cl(H.l*(0.80+0.34*e),0,1)}}
+function chapterHue(t,e){
+  const j=chIdx(t),a=CH[j][0],XFC=1.9;
+  const cur=hueBase(CH[j][1],t,e);
+  if(j>0&&t-a<XFC){const w=ss(0,XFC,t-a),p=hueBase(CH[j-1][1],t,e);
+    let dh=((cur.h-p.h+540)%360)-180;                 // take the short way round the wheel
+    return {h:p.h+dh*w,s:lerp(p.s,cur.s,w),l:lerp(p.l,cur.l,w)}}
+  return cur}
+/* per-fixture: a gradient across the room, plus the complement for the beams */
+const OFF={par:14, up:-22, head:166, strip:8, headSpread:30};   // degrees
+function fixColour(t,L,kind,xn,e){
+  const B=(HUE[L]&&(L==='flash'||L==='stop'||L==='spotlight'))?hueBase(L,t,e):chapterHue(t,e);
+  if(L==='stop') return [0,0,0];
+  const spread=(kind==='par')?OFF.par:(kind==='up')?OFF.up:(kind==='strip')?OFF.strip:
+               (kind==='head')?OFF.headSpread:0;
+  const grad=(xn-0.5)*2;
+  let h=B.h+grad*spread*(0.55+0.75*e);
+  let s=B.s, l=B.l;
+  if(kind==='head'){h+=OFF.head; s=cl(s*1.06,0,1); l=cl(l*1.02,0,1)}
+  if(kind==='up'){s=cl(s+0.12,0,1); l=cl(l*0.72,0,1)}
+  if(L==='flash'){return [255,252,244]}
+  return hsl(h,s,l)}
+
 const sc=(c,g)=>[Math.round(cl(c[0]*g,0,255)),Math.round(cl(c[1]*g,0,255)),Math.round(cl(c[2]*g,0,255))];
-const W_=[255,252,246], MG=[255,44,148];
+const W_=[255,252,246];
 const NPX=24, CAP=4.0;
+
+/* ---- fixtures are individuals, addressed by where they are ----
+   Indexing by i/n hardcodes this one rig. A designer thinks in positions and
+   sub-groups, and the same recipe then works on a different layout -- which is
+   the entire reason layout and recipe are separate files. Everything below is
+   derived from layout.json at load. */
+const GEO=(function(){
+  const xs=LAYOUT.fixtures.map(f=>f.at[0]);
+  const lo=Math.min.apply(null,xs), hi=Math.max.apply(null,xs), sp=Math.max(0.001,hi-lo);
+  const g={};
+  LAYOUT.fixtures.forEach(function(f,idx){
+    const xn=(f.at[0]-lo)/sp;
+    g[f.id]={xn:xn, x:f.at[0], y:f.at[1], z:f.at[2], kind:f.kind,
+             outer:(xn<0.26||xn>0.74), centre:(xn>=0.36&&xn<=0.64),
+             left:xn<0.5, odd:idx%2===1};
+  });
+  return g})();
+const KIND=k=>LAYOUT.fixtures.filter(f=>f.kind===k).map(f=>f.id);
+const PARS=KIND('par'), UPS=KIND('uplight'), HEADS=KIND('head'),
+      STROBES=KIND('strobe'), STRIPS=KIND('strip');
 
 /* ---- one look, evaluated at t ---- */
 function lookFrame(t,L){
   const e=en(t),p=bph(t),k=beatInBar(t),bx=barIdx(t),bp4=phrPh(t),bp=barPh(t);
-  const A=accent(p,e), col=pal(t), F=[];
+  const A=accent(p,e), F=[];
   let dip=1;
   if(ANT){const[d,dt]=until('drop',t,BAR); if(d) dip=1-0.74*ss(0,1,1-dt/BAR)}
   const z=spanAt(t);
@@ -312,70 +395,107 @@ function lookFrame(t,L){
   const off=L==='stop';
 
   // 6 PARs on the back truss: a wash with a travelling wave, one pass per phrase
-  for(let i=0;i<6;i++){
-    let c=col.slice(), lv=0;
+  PARS.forEach(function(id,i){
+    const G=GEO[id];
+    let c=fixColour(t,L,'par',G.xn,e), lv=0;
     if(off){c=[0,0,0]}
-    else if(L==='flash'){c=W_.slice();lv=1}
+    else if(L==='flash'){lv=1}
     else if(L==='spotlight'){c=[0,0,0];lv=0}
     else{
       const base={drop:0.26,build:0.11,verse:0.13,quiet:0.075,idle:0.055,outro:0.06}[L]??0.10;
-      const wave=0.70+0.30*Math.cos(2*Math.PI*((i/6)-bp4));
+      const wave=0.70+0.30*Math.cos(2*Math.PI*(G.xn-bp4));   // travels in metres, not in indices
       lv=(base+0.30*e*(L==='drop'?1:0.6))*wave + (0.03+0.07*e)*A*0.35;
       if(L==='build') lv*=lerp(0.30,1,layer(1));
-      if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(t/(4*BAR))+i*0.5);
+      if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(t/(4*BAR))+G.xn*2.2);
+      if(G.outer) lv*=1.10; else lv*=0.92;   // the outer pair carries the wash
     }
-    F.push({id:'par_'+(i+1),r:c[0],g:c[1],b:c[2],level:+cl(lv*dip).toFixed(3)})}
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip).toFixed(3)})});
 
   // 4 uplights on the back wall: a slow colour bed. Almost never pulses.
-  for(let i=0;i<4;i++){
-    let c=cool(col), lv=0;
+  const upSwap=ss(0.25,0.75,barPh(t));      // odds hand over to evens across the bar
+  UPS.forEach(function(id,i){
+    const G=GEO[id];
+    let c=fixColour(t,L,'up',G.xn,e), lv=0;
     if(off){c=[0,0,0]}
-    else if(L==='flash'){c=W_.slice();lv=0.85}
+    else if(L==='flash'){lv=0.85}
     else{
-      lv=(0.07+0.20*e*(L==='drop'?1.1:0.75))*(0.78+0.22*Math.sin(2*Math.PI*(t/(8*BAR))+i*0.8));
+      const share=(i%2===0)?(1-upSwap):upSwap;
+      const bed=(0.05+0.13*e*(L==='drop'?1.1:0.75));
+      lv=bed*(0.55+0.90*share)*(0.84+0.16*Math.sin(2*Math.PI*(t/(8*BAR))+G.xn*3.1));
       if(L==='build') lv*=lerp(0.35,1,layer(0));
-      if(L==='spotlight') lv*=0.25;
+      if(L==='spotlight') lv*=0.22;
     }
-    F.push({id:'up_'+(i+1),r:c[0],g:c[1],b:c[2],level:+cl(lv*dip).toFixed(3)})}
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip).toFixed(3)})});
 
-  // 4 moving heads: always moving, on a slow musical path, mirrored in pairs
+  // 4 moving heads.
+  //
+  // v0.4 drifted on one sinusoid and read as lifeless. The first fix used discrete
+  // modes per look -- sway, circle, ballyhoo -- and that TELEPORTED the heads at
+  // 22.96 units/s, because different modes read the phase at different harmonics
+  // so the phase itself jumped at a mode change. A level can cut in one frame; a
+  // motor cannot. So there are no modes: the character is driven by energy, which
+  // is continuous, and only amplitudes and shapes vary.
   const th=motionPhase(t);
-  for(let i=0;i<4;i++){
-    const mir=(i<2)?1:-1, ph=(i%2)*Math.PI*0.5;
-    const pan=cl(0.5+0.32*Math.sin(th+ph)*mir);
-    const tilt=cl(0.44+0.18*Math.sin(2*th+ph));
-    let c=col.slice(), lv=0, hz=0;
+  const shape=ss(0.35,0.85,e);            // sway ....... circle
+  const amp=0.13+0.30*e, tam=0.07+0.22*e;
+  const dw=0.55*(1-e)*(1-0.6*shape);      // hold still more when the music is calm
+  // No fast path for d==0. `return u` is NOT the d->0 limit of the branch below
+  // (ss(m) != m), so crossing zero jumped the phase by ~0.6 rad and slewed the
+  // heads at 9.8 units/s. Always ease -- which is what a real motor does anyway.
+  const dwell=(u,d)=>{const m=u-Math.floor(u), mv=Math.max(1e-6,1-d);
+    return Math.floor(u)+(m<mv?ss(0,1,m/mv):1)};
+  const u=dwell(th/(2*Math.PI),dw)*2*Math.PI;
+  // A lamp can black out in one frame; a motor cannot reposition in 0.22 s. So
+  // position deliberately ignores `stop` -- a real head holds its aim while its
+  // lamp goes dark. Only `spotlight`, whose crossfade is 0.9 s, asks for stillness.
+  const still=(L==='spotlight')?0.06:1;
+  HEADS.forEach(function(id,i){
+    const G=GEO[id];
+    // fan and mirror come from WHERE the head hangs, so a rig with a different
+    // number of heads or different spacing still reads correctly
+    const mir=G.left?1:-1, hoff=G.xn*2*Math.PI*0.75, fan=(G.xn-0.5)*2;
+    const pSway=amp*Math.sin(u+hoff)*mir + fan*0.13;
+    const pCirc=amp*Math.sin(u+hoff)*mir;
+    const tSway=tam*Math.sin(2*u+hoff);
+    const tCirc=tam*Math.cos(u+hoff);
+    let pan =cl(0.5 +(lerp(pSway,pCirc,shape))*still);
+    let tilt=cl(0.45+(lerp(tSway,tCirc,shape))*still);
+    let c=fixColour(t,L,'head',G.xn,e), lv=0, hz=0;
     if(off){c=[0,0,0]}
-    else if(L==='flash'){c=W_.slice();lv=1}
-    else if(L==='spotlight'){c=[255,182,96];lv=(i===1)?0.78:0.0}
+    else if(L==='flash'){lv=1}
+    else if(L==='spotlight'){lv=(i===1)?0.78:0.0}
     else{
-      const lead=(((bx%2)+2)%2===0)?(i===0||i===3):(i===1||i===2);
-      const base=0.085+0.20*e;
-      const amp=(L==='drop'?0.22+0.34*e:0.13+0.28*e);
-      lv=base+amp*A*(lead?1:0.28)*busy;
+      const lead=(((bx%2)+2)%2===0)?G.outer:!G.outer;   // outer pair, then inner pair
+      // a small positional term, so the four heads are never identical even
+      // between accents -- in a real rig no two fixtures read the same
+      const base=(0.085+0.20*e)*(0.86+0.28*G.xn);
+      const lamp=(L==='drop'?0.22+0.34*e:0.13+0.28*e);
+      lv=base+lamp*A*(lead?1:0.28)*busy;
       if(L==='build') lv*=lerp(0.25,1,layer(2));
       if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(t/(4*BAR))));
-      if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(t/(8*BAR))+i));
+      if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(t/(8*BAR))+G.xn*4));
       if(L==='drop'){const[d,s]=since('drop',t,8);
         if(s!==null&&s<BAR) hz=Math.min(CAP,1.6+2.2*(d.v??0.9))}
     }
-    F.push({id:'head_'+(i+1),r:c[0],g:c[1],b:c[2],level:+cl(lv*dip).toFixed(3),
-            pan:+pan.toFixed(3),tilt:+tilt.toFixed(3),strobe:+hz.toFixed(3)})}
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip).toFixed(3),
+            pan:+pan.toFixed(3),tilt:+tilt.toFixed(3),strobe:+hz.toFixed(3)})});
 
   // 2 strobes: ramped in and out, never a hard gate
-  for(let i=0;i<2;i++){
+  STROBES.forEach(function(id,i){
+    const G=GEO[id];
     let lv=0,hz=0;
     if(L==='flash'){lv=1}
     else if(L==='drop'){const[d,s]=since('drop',t,8);
       if(s!==null&&s<BAR){lv=(1-ss(BAR*0.6,BAR,s));hz=Math.min(CAP,2+2*(d.v??0.9))}}
     else if(L==='build'&&z){const rem=z.to-t;
-      if(rem<=2*BAR){lv=ss(0,1,1-rem/(2*BAR))*(i===(((bx%2)+2)%2)?1:0.5);
+      if(rem<=2*BAR){lv=ss(0,1,1-rem/(2*BAR))*((G.left===(((bx%2)+2)%2===0))?1:0.5);
         hz=Math.min(CAP,1.5+2.5*e)}}
-    F.push({id:'strobe_'+(i+1),level:+cl(lv*dip).toFixed(3),strobe:+hz.toFixed(3)})}
+    F.push({id:id,level:+cl(lv*dip).toFixed(3),strobe:+hz.toFixed(3)})});
 
   // strips: upstage sweeps over four bars, downstage answers on 2 and 4
   {
-    const base=(L==='drop'?MG:col);
+    const base=fixColour(t,L,'strip',0.25,e);
+    const alt=fixColour(t,L,'head',0.75,e);
     let p1=new Array(NPX),p2=new Array(NPX);
     if(off||L==='spotlight'){p1.fill([0,0,0]);p2.fill([0,0,0])}
     else if(L==='flash'){p1.fill(W_.slice());p2.fill(W_.slice())}
@@ -383,7 +503,7 @@ function lookFrame(t,L){
       const head=bp4*NPX, w=6.5-2.6*e, amb=(L==='quiet'?0.10:0.05)+0.09*e;
       const g1=lerp(0.4,1,L==='build'?layer(2):1);
       for(let i=0;i<NPX;i++){let d=Math.abs(i-head);d=Math.min(d,NPX-d);
-        p1[i]=sc(base,(Math.max(0,1-d/w)*(0.5+0.45*e)*g1+amb)*dip)}
+        p1[i]=sc(i%2?base:alt,(Math.max(0,1-d/w)*(0.5+0.45*e)*g1+amb)*dip)}
       // beats since the last backbeat, continuous 0..2, with an attack AND a
       // long decay so the value is zero at both ends of the cycle
       const bsb=(k===1||k===3)?bph(t):1+bph(t);
@@ -392,7 +512,7 @@ function lookFrame(t,L){
       // which is exactly the complaint.
       const back = bsb<0.30 ? ss(0,0.30,bsb) : 1-ss(0,1,cl((bsb-0.30)/1.45));
       const g2=(amb*0.8+(0.14+0.46*e)*back)*lerp(0.3,1,L==='build'?layer(3):1);
-      for(let i=0;i<NPX;i++) p2[i]=sc(base,g2*dip);
+      for(let i=0;i<NPX;i++) p2[i]=sc((Math.floor(i/4)%2)?alt:base,g2*dip);
     }
     F.push({id:'strip_1',pixels:p1}); F.push({id:'strip_2',pixels:p2});
   }
@@ -812,6 +932,10 @@ const mmss=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0')+'.'+
 let T=0,playing=false,last=0,fr=0,fpsT=0,LAST=null;
 function render(){const f=frame(T);LAST=f;drawRoom(f);drawTl(T);
   $('#lk').textContent=f.look;$('#tc').textContent=mmss(T);$('#scrub').value=T;
+  $('#hchap').innerHTML='<b>'+chAt(T)+'</b>';
+  $('#hbar').textContent='bar '+(barIdx(T)+1)+' · phrase '+(Math.floor(barIdx(T)/4)+1);
+  $('#hen').innerHTML='e <b>'+en(T).toFixed(2)+'</b>  haze '+(window.__haze||0).toFixed(2);
+  $('#hlook').innerHTML='<b>'+f.look+'</b>';
   const k=beatInBar(T);[...$('#bb').children].forEach((el,i)=>{
     el.classList.toggle('on',i===k);el.classList.toggle('one',i===0)});
   $('#phr').textContent='bar '+(barIdx(T)+1)+' / phrase '+(Math.floor(barIdx(T)/4)+1);
@@ -826,7 +950,7 @@ function render(){const f=frame(T);LAST=f;drawRoom(f);drawTl(T);
 function tick(ts){const a=$('#a');
   if(playing){ if(a.src&&!a.paused){T=a.currentTime}else{T+=(ts-last)/1000} }
   last=ts;if(T>DUR)T=0;
-  fr++;if(ts-fpsT>1000){$('#fps').textContent=fr+' fps';fr=0;fpsT=ts}
+  fr++;if(ts-fpsT>1000){$('#fps').textContent=fr+' fps';$('#hfps').textContent=fr+' fps';fr=0;fpsT=ts}
   render();requestAnimationFrame(tick)}
 function toggle(){playing=!playing;$('#pl').innerHTML=playing?'&#10074;&#10074;':'&#9654;';
   const a=$('#a');if(a.src){playing?a.play():a.pause()}}
