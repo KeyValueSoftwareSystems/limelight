@@ -75,3 +75,50 @@ The visualiser is now the page. Full-bleed stage, translucent HUD over it, panel
 
 p90 0.082, p99 0.137, and **9 frames of 7,026 change by more than 0.15** — the drops, a strobe
 entry, the return, and two uplight handovers at 0.153.
+
+---
+
+# v0.5.1 — speed, and eight heads
+
+## "Speed is still not good enough"
+
+Correct, and the cause was one number: **the motion period was a flat eight bars**, so no matter
+what the amplitude did, a head took twelve seconds to complete a sweep. It is now **seven bars
+when calm and two bars at peak** — a whole sweep every two bars during a drop.
+
+There is a hard physical constraint underneath, worth stating because it governs everything here.
+Peak angular speed of a sinusoid is `amplitude × ω`, so **speed and travel trade against each
+other** inside a fixed slew limit. You cannot have both a wide arc and a fast one. A designer's
+answer is to move fast over a short arc, or slowly over a wide one — and to **snap, then hold**,
+because a head that crosses in a burst and waits reads far faster than one drifting at the same
+average.
+
+So amplitude is now **derived from the slew budget** rather than checked against it:
+
+```
+amp = min(0.46, max_pan_per_s × 0.86 × duty / (ω × 1.5))
+```
+
+where `duty` is the fraction of each cycle spent moving. The recipe therefore *cannot* ask a
+fixture for more than the motor has — the limit became an input instead of a test.
+
+Measured on the real map:
+
+| | cycle | travel per 8 s | peak speed |
+|---|---|---|---|
+| breakdown, e=0.23 | 5.8 bars | 0.25 | 0.32 /s |
+| verse, e=0.39 | 5.0 bars | 0.61 | 0.36 /s |
+| drop, e=0.88 | **2.6 bars** | 0.56 | **0.68 /s** |
+
+Peak pan speed roughly doubled and the cycle got three times shorter, still inside a 0.85 limit.
+
+## Four more heads, on a high upstage truss
+
+Eight heads now: four on the front truss at `z = 1.2` aiming down at the floor, four upstage at
+`z = 4.6, y = 3.3` aiming **out over the crowd**. The upstage four **counter-rotate** against the
+front four, so the beams cross above the floor instead of sweeping in parallel.
+
+Adding them needed **no code change in the recipe** — position-derived addressing picked them up,
+which is the first payoff of that refactor. The renderer did need one: it still counted `i<=4` for
+heads and `i<=6` for PARs, and now reads the rig from `layout.json` like everything else. Twenty-
+three fixtures.
