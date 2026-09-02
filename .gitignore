@@ -1,0 +1,29 @@
+# never commit music
+songs/**/audio.*
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.aac
+
+# never commit model weights
+models/
+*.pt
+*.pth
+*.safetensors
+*.bin
+
+# generated
+maps/**/vectors/
+*.f16
+*.npy
+
+# the usual
+__pycache__/
+*.pyc
+.venv/
+venv/
+node_modules/
+.DS_Store
+.env
+*.log

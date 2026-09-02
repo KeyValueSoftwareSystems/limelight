@@ -1,0 +1,22 @@
+{
+  "song":    { "title": "The Nights", "artist": "Avicii", "length": null },
+  "made_by": { "how": "by ear", "who": "renjith", "when": "2026-09-02" },
+
+  "_note": "You do NOT need to tap all ~330 beats. Tap one clean 30-second window.",
+  "beats_window": { "from": null, "to": null },
+  "beats": [],
+
+  "_note2": "These matter most. Right to a tenth of a second.",
+  "chapters": [
+    { "at": 0.0,  "name": "intro" },
+    { "at": null, "name": "verse" },
+    { "at": null, "name": "build" },
+    { "at": null, "name": "drop"  }
+  ],
+
+  "moments": [
+    { "at": null, "kind": "drop",      "note": "the riff lands" },
+    { "at": null, "kind": "quiet",     "note": "drums drop out" },
+    { "at": null, "kind": "spotlight", "of": "voice" }
+  ]
+}
