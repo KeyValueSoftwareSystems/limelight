@@ -13,8 +13,9 @@ check:
 	  assert m['map']=='0.1'; assert len(m['beats'])==32; assert m['vectors'] is None; \
 	  print('map file  OK  ', len(m['beats']),'beats,',len(m['moments']),'moments')"
 	@test -f MAP.md && echo "MAP.md    OK"
-	@test -f FRAME.md && echo "FRAME.md  OK"
-	@test -f RECIPE.md && echo "RECIPE.md OK"
+	@test -f readers/lights/FRAME.md && echo "FRAME.md  OK  (lighting reader)"
+	@test -f readers/lights/RECIPE.md && echo "RECIPE.md OK  (lighting reader)"
+	@test -f listen/GPU.md && echo "GPU.md    OK"
 	@echo "--- not built yet (this is expected on day one) ---"
 	@test -f bench/bench.py            || echo "  bench/bench.py              -> Sebastian"
 	@test -f play/play.py              || echo "  play/play.py                -> Dheeraj"
