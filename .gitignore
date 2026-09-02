@@ -28,3 +28,6 @@ node_modules/
 .env
 *.log
 
+
+# packs carry the mp3 for testing; the repo never does
+*.zip

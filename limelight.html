@@ -531,9 +531,9 @@ function lookFrame(t,L){
       /* Darkness is a tool, and I was never using it: every section sat above
          0.05 so the room was always faintly on. Breaks and quiets now go
          genuinely dark, which is what makes a drop land. */
-      const base={drop:0.26,build:0.10,verse:0.13,quiet:0.022,idle:0.030,outro:0.035}[L]??0.09;
+      const base={drop:0.38,build:0.15,verse:0.20,quiet:0.028,idle:0.036,outro:0.042}[L]??0.13;
       const wave=0.70+0.30*Math.cos(2*Math.PI*(G.xn-bp4));   // travels in metres, not in indices
-      lv=(base+0.30*e*(L==='drop'?1:0.6))*wave*EX.arc + (0.03+0.07*e)*A*0.35*grow;
+      lv=(base+0.40*e*(L==='drop'?1:0.62))*wave*EX.arc + (0.04+0.10*e)*A*0.35*grow;
       if(L==='build') lv*=lerp(0.30,1,layer(1));
       if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(t/(4*BAR))+G.xn*2.2);
       if(G.outer) lv*=1.10; else lv*=0.92;   // the outer pair carries the wash
@@ -549,7 +549,7 @@ function lookFrame(t,L){
     else if(L==='flash'){lv=0.85}
     else{
       const share=(i%2===0)?(1-upSwap):upSwap;
-      const bed=((L==='quiet'?0.012:0.045)+0.13*e*(L==='drop'?1.1:0.75))*(0.50+0.62*stem('bass',t));
+      const bed=((L==='quiet'?0.016:0.070)+0.19*e*(L==='drop'?1.1:0.78))*(0.50+0.62*stem('bass',t));
       lv=bed*(0.55+0.90*share)*(0.84+0.16*Math.sin(2*Math.PI*(t/(8*BAR))+G.xn*3.1));
       if(L==='build') lv*=lerp(0.35,1,layer(0));
       if(L==='spotlight') lv*=0.22;
@@ -632,8 +632,8 @@ function lookFrame(t,L){
       const lead=(((bx%2)+2)%2===0)?G.outer:!G.outer;   // outer pair, then inner pair
       // a small positional term, so the four heads are never identical even
       // between accents -- in a real rig no two fixtures read the same
-      const base=(0.085+0.20*e)*(0.86+0.28*G.xn);
-      const lamp=(L==='drop'?0.22+0.34*e:0.13+0.28*e);
+      const base=(0.11+0.26*e)*(0.86+0.28*G.xn);
+      const lamp=(L==='drop'?0.30+0.44*e:0.18+0.36*e);
       lv=base*EX.arc+lamp*A*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5);
       if(L==='build') lv*=lerp(0.25,1,layer(2));
       if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(t/(4*BAR))));
@@ -681,8 +681,8 @@ function lookFrame(t,L){
     else if(L==='flash'){c=W_.slice();lv=0.90}
     else{
       const wave=0.72+0.28*Math.cos(2*Math.PI*(G.xn*1.5-bp4));
-      const base={drop:0.20,build:0.085,verse:0.10,quiet:0.030,idle:0.035,outro:0.04}[L]??0.075;
-      lv=(base+0.24*e*(L==='drop'?1:0.62))*wave*EX.arc;
+      const base={drop:0.28,build:0.12,verse:0.15,quiet:0.036,idle:0.042,outro:0.05}[L]??0.10;
+      lv=(base+0.32*e*(L==='drop'?1:0.64))*wave*EX.arc;
       if(L==='build') lv*=lerp(0.30,1,layer(1));
       if(L==='spotlight') lv*=0.18;
     }
@@ -917,7 +917,7 @@ function droneFrame(t){
   for(let i=0;i<N_DRONE;i++){
     const p=dronePos(i,t,e);
     const ng=noteGlow(i,t);
-    const base=(L==='stop')?0.02:(0.12+0.42*e);
+    const base=(L==='stop')?0.03:(0.20+0.52*e);
     const lv=cl((base+0.55*ng+0.22*stab)*dip);
     const mix=cl(0.25+0.75*ng);
     const c=[Math.round(lerp(col[0],alt[0],mix)),Math.round(lerp(col[1],alt[1],mix)),
@@ -948,7 +948,7 @@ let POS={};
 LAYOUT.fixtures.forEach(f=>{POS[f.id]=[f.at[0],f.at[1],f.at[2]]});
 const OF=k=>LAYOUT.fixtures.filter(f=>f.kind===k).map(f=>f.id);
 let R_PARS=OF('par'),R_UPS=OF('uplight'),R_HEADS=OF('head'),
-      R_STROBES=OF('strobe'),R_STRIPS=OF('strip');
+      R_STROBES=OF('strobe').concat(OF('blinder')),R_STRIPS=OF('strip');
 let PAR_AIM={};
 R_PARS.forEach(function(id){const p=POS[id];
   PAR_AIM[id]=[p[0]+(4.0-p[0])*0.34,0,Math.max(0.9,p[2]-3.9)]});
@@ -956,13 +956,13 @@ const UP_AIM={};
 R_UPS.forEach(function(id){UP_AIM[id]=[POS[id][0],ROOM.h,ROOM.d-0.12]});
 const STROBE_AIM={};
 R_STROBES.forEach(function(id){STROBE_AIM[id]=[POS[id][0]<4?2.4:5.6,0.30,4.4]});
-let TRUSS=(function(){const m={};LAYOUT.fixtures.forEach(function(f){
+const TRUSS=(function(){const m={};LAYOUT.fixtures.forEach(function(f){
   if(f.kind==='head'||f.kind==='strobe'){const k=f.at[2].toFixed(1);
     m[k]=Math.max(m[k]||0,f.at[1])}});return m})();
 /* tight beams. A real head is 5-15 degrees; v1 used a wide cone that read as a blob */
 const SPREAD={head:0.19,par:0.62,uplight:0.34,strobe:1.25,blinder:2.20};      // metres at the aim point (v2)
 const HALF={blinder:26.0,head:0.070,par:0.300,uplight:0.160,strobe:0.400};    // half-angle in radians (v3)
-/* NPXof comes from the recipe, which is loaded first */
+/* NPXof comes from the recipe */
 
 function headAim(id,pan,tilt){
   const p=POS[id];
@@ -980,7 +980,7 @@ function hazeAt(t){
       h+=0.42*filled*Math.exp(-Math.max(0,t-on1)/45)}}
   return Math.min(1,h)}
 
-let CWv=0,CHv=0,DPR=Math.min(2,window.devicePixelRatio||1);  /* QUAL lives in the shell */
+let CWv=0,CHv=0,DPR=Math.min(2,window.devicePixelRatio||1);
 let cv=$('#room');                  /* the surface snap() saves; re-pointed if we fall back */
 let RMODE='pending';                 /* 'pending' | 'gl' | '2d' */
 /* strobe: chop the level rather than the fixture, exactly as v2 did */
@@ -1054,7 +1054,7 @@ function cone(src,aim,c,lv,haze,spread,mul){
               proj([q[0]+pv[0]*rr,q[1],q[2]+pv[2]*rr],CAM)]};
     const r0=0.035*mul, r1=spread*mul;
     const A=mk(t0,r0+(r1-r0)*t0), B=mk(t1,r0+(r1-r0)*t1);
-    const al=lv*Math.pow(1-t0,1.6)*(0.06+0.40*haze)/mul;
+    const al=lv*Math.pow(1-t0,1.6)*(0.09+0.52*haze)/mul;
     poly([A[0],A[1],B[1],B[0]],'rgba('+c[0]+','+c[1]+','+c[2]+','+al.toFixed(4)+')')}}
 function beam(src,aim,c,lv,haze,spread){
   if(lv<0.006) return;
@@ -1068,13 +1068,13 @@ function beam(src,aim,c,lv,haze,spread){
 /* a polished floor is geometrically exact: mirror source and aim through y=0 */
 function beamRefl(src,aim,c,lv,haze,spread){
   if(lv<0.010) return;
-  beam([src[0],-src[1],src[2]],[aim[0],-aim[1],aim[2]],c,lv*0.34,haze*0.85,spread)}
+  beam([src[0],-src[1],src[2]],[aim[0],-aim[1],aim[2]],c,lv*0.32,haze*0.85,spread)}
 
 function pool(a,c,lv,rr){
   if(lv<0.006) return;
   const K=QUAL?20:12;
   g.globalCompositeOperation='lighter';
-  for(const [k,al] of [[1.0,0.13],[0.55,0.17],[0.26,0.24]]){
+  for(const [k,al] of [[1.0,0.095],[0.55,0.13],[0.26,0.185]]){
     const pts=[];
     for(let i=0;i<K;i++){const th=i/K*Math.PI*2;
       pts.push(proj([a[0]+Math.cos(th)*rr*k,0.004,a[2]+Math.sin(th)*rr*k*0.78],CAM))}
@@ -1120,15 +1120,18 @@ function stripDraw(id,px){
 
 /* a dark crowd in the foreground: scale, occlusion, and instantly a room */
 const CROWD=(function(){const r=[],R=(s=>()=>(s=(s*16807)%2147483647)/2147483647)(7);
-  for(let i=0;i<34;i++) r.push([0.35+R()*7.3, 0.9+R()*2.6, 0.80+R()*0.22, R()]);
+  for(let i=0;i<34;i++){const u=R();
+    // depth biased AWAY from the camera so the crowd recedes instead of forming
+    // a fence, and shoulders vary, and the height is a real human height
+    r.push([0.30+R()*7.4, 0.55+Math.pow(u,0.55)*4.15, 1.52+R()*0.34, R(), 0.80+R()*0.46])}
   return r.sort((a,b)=>b[1]-a[1])})();
 function crowd(t,e){
   CROWD.forEach(function(p){
     const bob=0.035*Math.sin(2*Math.PI*(t/(2*BAR))+p[3]*6.3)*(0.4+0.9*e);
     const h=p[2]+bob, q=proj([p[0],h,p[1]],CAM), f=proj([p[0],0,p[1]],CAM);
     if(!q||!f) return;
-    const w=Math.max(3,0.30*q.s), hh=Math.abs(f.y-q.y);
-    g.fillStyle='rgba(0,0,0,0.94)';
+    const w=Math.max(3,0.30*q.s*(p[4]||1)), hh=Math.abs(f.y-q.y);
+    g.fillStyle='#000';
     g.beginPath();
     g.moveTo(q.x-w*0.62,f.y); g.lineTo(q.x-w*0.62,q.y+hh*0.30);
     g.quadraticCurveTo(q.x-w*0.60,q.y,q.x,q.y);
@@ -1140,12 +1143,10 @@ function scene2D(f){
   g.clearRect(0,0,CWv,CHv);
   g.fillStyle='#000';g.fillRect(0,0,CWv,CHv);                 // near-black, no wash
   const G={};f.fixtures.forEach(o=>G[o.id]=o);
-  /* A fixture id that is not in this frame must not crash the room. It happens
-     the moment anyone changes rigs, and it did. */
   const ZED={id:'-',r:0,g:0,b:0,level:0,strobe:0,pan:0.5,tilt:0.5,zoom:0.5,pixels:[]};
   const get=id=>G[id]||ZED;
   const hz=hazeAt(t), gm=v=>Math.pow(Math.max(0,v),1/1.7);
-  const stro=id=>{const o=get(id); if(!o) return 0; return o.strobe>0?o.level*((((t*o.strobe)%1)<0.42)?1:0.03):o.level};
+  const stro=id=>{const o=get(id);return o.strobe>0?o.level*((((t*o.strobe)%1)<0.42)?1:0.03):o.level};
 
   // trusses, barely there
   g.strokeStyle='rgba(255,255,255,.055)';g.lineWidth=2.5;
@@ -1189,6 +1190,13 @@ function scene2D(f){
   if(get('fog_1').level>0){g.fillStyle='#28c98a';g.font='600 12px ui-sans-serif';g.textAlign='left';
     g.fillText('fog — commanded 9 s early',16,CHv-46)}}
 
+/* the 2-D path had no exposure control at all, so a drop simply clipped. Same
+   idea as the GL path: measure the frame's own emitted light and stop down. */
+function load2D(f){let s=0,n=0;
+  for(const o of f.fixtures){ if(o.id==='fog_1'||o.held_back) continue;
+    if('level'in o){s+=o.level;n++}
+    else if(o.pixels){let m=0;for(const q of o.pixels)m=Math.max(m,(q[0]+q[1]+q[2])/765);s+=m;n++}}
+  return n?s/n:0}
 function drawRoom2D(f){
   if(DRIFT){const w=0.26*Math.sin(f.t*0.094),hh=0.10*Math.sin(f.t*0.067+1.1);
     CAM={...VIEWS[VIEW]};
@@ -1204,8 +1212,9 @@ function drawRoom2D(f){
   /* bloom: two blurred additive passes. Every real club image has glare around
      a bright source; without it light reads as coloured plastic. */
   cx.globalCompositeOperation='lighter';
-  cx.filter='blur('+Math.round(7*DPR)+'px)'; cx.globalAlpha=0.62; cx.drawImage(OC,0,0);
-  cx.filter='blur('+Math.round(26*DPR)+'px)';cx.globalAlpha=0.40; cx.drawImage(OC,0,0);
+  const EX2=1.25/(1+1.0*load2D(f));
+  cx.filter='blur('+Math.round(7*DPR)+'px)'; cx.globalAlpha=0.42*EX2; cx.drawImage(OC,0,0);
+  cx.filter='blur('+Math.round(26*DPR)+'px)';cx.globalAlpha=0.26*EX2; cx.drawImage(OC,0,0);
   cx.filter='none';cx.globalAlpha=1;cx.globalCompositeOperation='source-over';
   cx.setTransform(DPR,0,0,DPR,0,0);
   const sf=window.__sf||0;
@@ -1284,7 +1293,7 @@ const ACES_SHADER={
   '  gl_FragColor = vec4( srgb( aces( c * exposure ) ), 1.0 );',
   '}'].join('\n')};
 
-const GAIN={par:0.72,up:0.66,head:1.05,strobe:0.95};   // beam brightness per kind
+const GAIN={par:1.05,up:0.92,head:1.45,strobe:1.30};   // beam brightness per kind
 /* AUTO-EXPOSURE. The old chain raised exposure with brightness (1.05 + 0.35*haze
    + 0.30*strobe), multiplied a 2.30 strobe gain, and fed a bloom at strength
    1.135 -- so a drop went pure white and nothing was judgeable. A camera in a
@@ -1536,7 +1545,7 @@ function initGL(){
       format:T3.RGBAFormat,type:T3.HalfFloatType,depthBuffer:true,stencilBuffer:false});
     composer=new T3.EffectComposer(R,rt);
     composer.addPass(new T3.RenderPass(SC,CM));
-    bloom=new T3.UnrealBloomPass(new T3.Vector2(pw,ph),0.42,0.66,1.05);
+    bloom=new T3.UnrealBloomPass(new T3.Vector2(pw,ph),0.58,0.70,0.92);
     try{[bloom.renderTargetBright].concat(bloom.renderTargetsHorizontal,
       bloom.renderTargetsVertical).forEach(function(x){x.texture.type=T3.HalfFloatType})}catch(e){}
     composer.addPass(bloom);
@@ -1677,7 +1686,7 @@ function drawRoomGL(f){
   camApply(t);
   const G=GL.map, F=f.fixtures;
   for(let i=0;i<F.length;i++) G[F[i].id]=F[i];
-  const dens=0.24+0.52*hz;
+  const dens=0.34+0.66*hz;
   let sf=0;
 
   for(let i=0;i<R_PARS.length;i++){const id=R_PARS[i],o=get(id);
@@ -1715,10 +1724,10 @@ function drawRoomGL(f){
   fogChip(!!(get('fog_1')&&get('fog_1').level>0));
 
   const load=frameLoad(f);
-  const ex=(1.02+0.16*hz)/(1.0+2.15*load);
+  const ex=(1.28+0.18*hz)/(1.0+1.05*load);
   GL.r.toneMappingExposure=ex;
   if(QUAL&&GL.composer){
-    if(GL.bloom) GL.bloom.strength=0.34+0.20*hz;
+    if(GL.bloom) GL.bloom.strength=0.46+0.26*hz;
     if(GL.aces){GL.aces.uniforms.exposure.value=ex;GL.aces.uniforms.air.value=hz}
     GL.composer.render();
   }else{
@@ -1819,22 +1828,16 @@ function boot(why){
   nextGroup()})();
 
 
-/* A venue switch changes which fixtures exist. The renderer keeps its own lists
-   and its own scene, and rebuilding only the recipe's tables left this one
-   looking up ids that were no longer in the frame -- which crashed the room the
-   first time anyone changed rigs. */
+
+/* A venue switch changes which fixtures exist; these lists were built once. */
 function rendererReset(){
   POS={}; LAYOUT.fixtures.forEach(f=>{POS[f.id]=[f.at[0],f.at[1],f.at[2]]});
   R_PARS=OF('par'); R_UPS=OF('uplight'); R_HEADS=OF('head').concat(OF('wash'));
   R_STROBES=OF('strobe').concat(OF('blinder')); R_STRIPS=OF('strip');
-  PAR_AIM={};
-  R_PARS.forEach(function(id){const p=POS[id];
-    PAR_AIM[id]=[p[0]+(LAYOUT.size_m.w/2-p[0])*0.32, 0, Math.max(0.9,p[2]-3.6)]});
-  TRUSS={}; LAYOUT.fixtures.forEach(function(f){
-    if(f.kind==='head'||f.kind==='strobe'||f.kind==='wash'||f.kind==='blinder'){
-      const k=f.at[2].toFixed(1); TRUSS[k]=Math.max(TRUSS[k]||0,f.at[1])}});
+  PAR_AIM={}; R_PARS.forEach(function(id){const p=POS[id];
+    PAR_AIM[id]=[p[0]+(ROOM.w/2-p[0])*0.32,0,Math.max(0.9,p[2]-3.6)]});
   ROOM.w=LAYOUT.size_m.w; ROOM.h=LAYOUT.size_m.h; ROOM.d=LAYOUT.size_m.d;
-}
+  if(typeof GL!=='undefined'&&GL){GL=null;BOOTED=false;RMODE='pending';boot('venue change')}}
 
 /* ================= renderer: SKY =================
    Drones are points of light against black, which is a much easier thing to draw
@@ -1842,10 +1845,10 @@ function rendererReset(){
    to front, is most of the way there. */
 const skyCv=$('#sky'), sx=skyCv.getContext('2d');
 let SW=0,SH=0;
-const SKYVIEWS=[{eye:[0,1.7,-92],at:[0,44,0],fov:52},
-                {eye:[-74,10,-58],at:[0,46,0],fov:56},
-                {eye:[0,96,-16],at:[0,34,0],fov:64},
-                {eye:[0,3,-42],at:[0,54,0],fov:74}];
+const SKYVIEWS=[{eye:[0,4,-150],at:[0,42,0],fov:38},
+                {eye:[-118,16,-86],at:[0,44,0],fov:40},
+                {eye:[0,132,-30],at:[0,30,0],fov:52},
+                {eye:[0,6,-72],at:[0,50,0],fov:56}];
 function skyFit(){SW=window.innerWidth;SH=window.innerHeight;
   const d=Math.min(2,window.devicePixelRatio||1);
   skyCv.width=SW*d;skyCv.height=SH*d;sx.setTransform(d,0,0,d,0,0)}
@@ -1877,15 +1880,30 @@ function drawSky(f){
   sx.globalCompositeOperation='lighter';
   for(const [q,d] of pts){
     const lv=Math.pow(d.level,1/1.6); if(lv<0.004) continue;
-    const R=Math.max(1.1,3.4*q.s);
-    const gr=sx.createRadialGradient(q.x,q.y,0,q.x,q.y,R*9);
-    gr.addColorStop(0,'rgba('+d.r+','+d.g+','+d.b+','+(0.95*lv).toFixed(3)+')');
-    gr.addColorStop(0.13,'rgba('+d.r+','+d.g+','+d.b+','+(0.34*lv).toFixed(3)+')');
+    /* A drone ninety metres away is a POINT. The radius must be a small pixel
+       size that falls off with distance, not the raw projection scale -- that
+       gave 38 px cores and 340 px glows, and a hundred and twenty of them
+       additively is a sun. And the per-drone alpha has to be low enough that a
+       dense formation stays a swarm rather than a white mass. */
+    const R=Math.max(1.1,Math.min(5.0, 190/q.z));
+    const GLOW=R*4.0;
+    const gr=sx.createRadialGradient(q.x,q.y,0,q.x,q.y,GLOW);
+    gr.addColorStop(0,'rgba('+d.r+','+d.g+','+d.b+','+(0.60*lv).toFixed(3)+')');
+    gr.addColorStop(0.30,'rgba('+d.r+','+d.g+','+d.b+','+(0.16*lv).toFixed(3)+')');
     gr.addColorStop(1,'rgba(0,0,0,0)');
-    sx.fillStyle=gr;sx.beginPath();sx.arc(q.x,q.y,R*9,0,7);sx.fill();
-    sx.fillStyle='rgba(255,255,255,'+(0.75*lv).toFixed(3)+')';
-    sx.beginPath();sx.arc(q.x,q.y,R*0.62,0,7);sx.fill()}
-  sx.globalCompositeOperation='source-over'}
+    sx.fillStyle=gr;sx.beginPath();sx.arc(q.x,q.y,GLOW,0,7);sx.fill();
+    sx.fillStyle='rgba('+d.r+','+d.g+','+d.b+','+(0.85*lv).toFixed(3)+')';
+    sx.beginPath();sx.arc(q.x,q.y,R,0,7);sx.fill();
+    if(lv>0.55){sx.fillStyle='rgba(255,255,255,'+(0.55*(lv-0.55)/0.45).toFixed(3)+')';
+      sx.beginPath();sx.arc(q.x,q.y,R*0.5,0,7);sx.fill()}}
+  sx.globalCompositeOperation='source-over';
+  /* a soft ceiling: dim the whole frame back when a lot of drones are bright at
+     once, which is the additive equivalent of stopping a camera down */
+  const load=f.drones.reduce((a,d)=>a+d.level,0)/f.drones.length;
+  if(load>0.42){sx.globalCompositeOperation='multiply';
+    const k=Math.max(0.45,1-(load-0.42)*1.3);
+    sx.fillStyle='rgba('+Math.round(255*k)+','+Math.round(255*k)+','+Math.round(255*k)+',1)';
+    sx.fillRect(0,0,SW,SH);sx.globalCompositeOperation='source-over'}}
 
 const MF=MAP_FULL, SOBS=MAP_FULL.observations;
 /* X() and W() were defined in the old score page's own scope and were lost in
@@ -2082,7 +2100,10 @@ function loop(ts){
   if(playing){ if(a.src&&!a.paused){T=a.currentTime}else{T+=(ts-lastTs)/1000} }
   lastTs=ts; if(T>DUR)T=0;
   fc++; if(ts-fT>1000){fps=fc;fc=0;fT=ts;
-    const m=$('#metafps'); if(m)m.textContent=fps+' fps'}
+    const m=$('#metafps');
+    if(m){const r=(typeof RMODE!=='undefined')?RMODE:'?';
+      m.textContent=fps+' fps · '+(MODE===0?('room: '+(r==='gl'?'webgl':r==='2d'?'canvas 2d':'loading')):
+        MODE===1?'sky: canvas 2d':'score')}}
   render(); requestAnimationFrame(loop)}
 
 /* ---- score, built on demand ---- */
