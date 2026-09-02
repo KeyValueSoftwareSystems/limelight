@@ -5,9 +5,9 @@ If you need a sixth word, say so out loud — it usually means something is desi
 | word | the plain question it answers | how often it changes | owner |
 |---|---|---|---|
 | **map** | what is the *music* doing? | once per song, ever | Amal |
-| **layout** | what is *in this room*? | once per venue | Nikhita |
+| **layout** | what is *in this room*? | once per venue | Nikitha |
 | **wiring** | how is it *connected*? | once per rig | Alnas |
-| **recipe** | what should a *moment look like*? | whenever taste changes | Renjith, with Nikhita |
+| **recipe** | what should a *moment look like*? | whenever taste changes | Renjith, with Nikitha |
 | **frame** | so *what is lit right now*? | forty times a second | Dheeraj produces it |
 
 ## The whole system in one line

@@ -41,7 +41,7 @@ bug, not a task.
 |---|---|---|
 | `listen/` | Amal | song → map |
 | `play/` | Dheeraj | map + time → frame |
-| `readers/lights/` | Nikhita | the club, in a browser |
+| `readers/lights/` | Nikitha | the club, in a browser |
 | `readers/chapters/` | anyone, 20 lines | map in, chapter list out. proves "same file" |
 | `portal/` | Muzammil | upload, view, fix a moment, preview |
 | `bench/` | Sebastian | the tapping tool and the scoreboard |

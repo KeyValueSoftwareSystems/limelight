@@ -79,7 +79,7 @@ Everywhere else: choose the fastest thing and stop thinking about it.
 | Amal | song → map | the timestamp gets found by a machine, not typed by a human |
 | Sebastian | the instruments | the tapping tool and the scoreboard |
 | Dheeraj | map + time → frame | one number becomes a whole show, on the clock |
-| Nikhita | the rooms · how it feels | the club stops being a rectangle and becomes something people gasp at |
+| Nikitha | the rooms · how it feels | the club stops being a rectangle and becomes something people gasp at |
 | Alnas | frame → photons | makes it real. browser first, wire second |
 | Muzammil | the portal | drag a moment, save. the correction beat |
 

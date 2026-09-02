@@ -1,6 +1,6 @@
 # room — the club, in a browser
 
-**Owner: Nikhita.** One fixed setup: four floods, two moving lights, two strips, a fog nozzle.
+**Owner: Nikitha.** One fixed setup: four floods, two moving lights, two strips, a fog nozzle.
 
 ## It already runs
 
@@ -8,7 +8,7 @@
 make lights        # or just open readers/lights/index.html
 ```
 
-**Nikhita owns this.** A working v1 is in the repo so nobody is blocked waiting for it, and so
+**Nikitha owns this.** A working v1 is in the repo so nobody is blocked waiting for it, and so
 you inherit something running rather than an empty file. Everything in it is yours to replace.
 
 What it does today: reads `club/layout.json` and a map, applies `RECIPE.md`, draws the room,
