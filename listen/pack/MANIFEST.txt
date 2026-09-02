@@ -1,0 +1,32 @@
+Limelight — analysis lane pack v0.2   ·   2 September 2026
+
+Humans: open START-HERE.html
+Claude Code: read CLAUDE.md first, fully, before your first tool call
+
+  python3 bench/selftest.py                    start here
+  python3 bench/bench.py <truth> <candidate>   three numbers
+  python3 validate.py <map>                    is it legal?
+
+No audio in this pack, ever. Bring your own copies.
+truth/the-nights.truth.synthetic.json is a STAND-IN, not a listening record.
+maps/sketch/*.map.json are SKETCHES: plausible, internally consistent, not measured.
+9d0f40de8be7ca087c370fb11df11e0c497a37bfb7d84e5b2852fad57b52441e  CLAUDE.md
+80e533d3f98c6a9bbe46db71011085f2f79d37425ac8cb2d04b5bcb5b6f7ba64  START-HERE.html
+1966248cd5162da9aff0825a61aeae31595f43f94d8ba42cda3d7bfe2b5dda55  LEVELS.md
+92340cc4953ebfd02cdf86c2e471c24f6d24d684c2a4de10999f56694f1c9bd4  GPU.md
+9814c91c91a14287a367acf05f27ac00fc322d8e04f8695360c95d275036795a  validate.py
+72849c1751cd91e951980b9244d05a868ac6a79b182a16d0f6ebe3b5368884f3  bench/bench.py
+7a5c8a9d9a7e063ee9c275428a03576d4d347cc559d896c6af1196fffc3ce1f2  bench/selftest.py
+99b2630a91e339d4bb06a5aab2825f16aad74456e1a706ed4e667a19aed0d4ae  contracts/FRAME.md
+dd42f76af5a9e5ece400a43cd7819f9339285012f0ace610035ec31ea3a924fb  contracts/layout.json
+3c1d769dfdfdc586007935e8f2b6418705d54eca7e1321497abf5da5407c2917  contracts/MAP.md
+4170b251c3017274438adf71ad39c8c4ab69ec82a4fc752e207ca254acd84dad  contracts/RECIPE.md
+8b653d227ee94a59d22b28720676c4947b95b441b5061ab26dd4b01426862124  contracts/WORDS.md
+cdf9ab5fb6429cf614ec8bb6d9bc7a3d038bb565a3a939460c2bce04cc2cd02d  truth/PROTOCOL.md
+fb0bc48b737cb2b5edfdb5622994a02da00b28e12fd72de51d8c3642a7fb2f47  truth/the-nights.truth.synthetic.json
+f84132cfe1cedb9bd32493a044adf7821259ab5a69106a51af12c9331afa91db  truth/truth.template.json
+7a2d7582e6814d8c04550606a55e6aec8a0c526bc8d0fd3905e15984e340c4df  example/expected-report.txt
+e67609a7a0b94167726095c25e3b537d87588f392826f362849bd33e9adb98cf  example/the-nights.candidate.json
+6f378176e5807aff984d32a9ffc860dde0af943ba2d9e5bb2821f90204f4244c  maps/sketch/opus.map.json
+7ae6170aecb8acd7e6e9969782a06b1036e1c5e07b3a3d746b08e105c054b488  maps/sketch/strobe.map.json
+c29ca801ceaa87c427e5531893dedf0b055bd9d46e581780d2a35e7fb3e0f04a  maps/sketch/the-nights.map.json

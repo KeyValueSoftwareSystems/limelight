@@ -1,35 +1,35 @@
-# score — the instruments and the game
+# The bench
 
-**Owner: Sebastian.** You build the measuring tools. You do not define what is true or what is
-good — Renjith does. You hand him a better microscope.
+One command, three numbers.
 
-## Tonight (2 hours)
-**The tapping tool**, as one web page: load a local audio file, play it, spacebar marks a beat,
-three buttons mark drop / stop / quiet, download JSON. No install.
-
-**Done:** Renjith can use it tomorrow. He is blocked until it exists, so it is first.
-
-## Then
-The scoreboard. One command, three numbers per song:
-
-- **beats** — share of our beats within ~70 ms of a tapped beat (the tolerance researchers use,
-  so the number means something outside this room)
-- **chapters** — boundaries found within 0.5 s, and within 3 s
-- **moments** — hit or miss each, plus the error in seconds
-
-```
-SONG                 BEATS   CHAPTERS   MOMENTS
-the nights            94%      80%      2 of 3   ***
-raga of revenge       31%      20%      1 of 3   *
------------------------------------------------
-TEAM SCORE  54 / 100          yesterday: 41
+```bash
+python3 bench/selftest.py                    # does the bench measure what it claims?
+python3 bench/bench.py <truth> <candidate>   # score a map against a truth file
+python3 bench/bench.py <truth> <candidate> --json
 ```
 
-## Then the useful part
-**The failure page.** For each song, where our map disagrees with truth, with timestamps. That
-page tells Amal what to fix, and it is worth more than any percentage.
+Run `selftest.py` before you trust a single number. It takes one map, breaks it in eleven specific
+ways, and prints what the bench notices — which is the fastest way to learn what each metric is
+**blind** to.
 
-## Two things worth knowing
-A number a machine can read is a number a machine can climb — your script is what lets an agent
-improve things overnight. And by the end of week one you will know these songs better than
-anyone here, because you will have listened to them fifty times with a stopwatch.
+## Tolerances, and why they are not negotiable mid-experiment
+
+| metric | tolerance | why that number |
+|---|---|---|
+| beats, downbeats | ±70 ms | the standard in the beat-tracking literature, so our numbers are comparable to published ones |
+| chapter boundaries | 0.5 s and 3.0 s | two tolerances, two verdicts. "Roughly the right section" and "the right moment" are different achievements |
+| moments | ±1.0 s to match, then the error is reported | matching and accuracy are separate questions |
+| `holds` on a stop | flagged audible above 100 ms | a stop 300 ms short reads as a mistake in the room, and onset accuracy alone is blind to it |
+| span IoU | 0.70 to pass | position only. `rise` shape is scored separately, because getting one right proves nothing about the other |
+
+Moving a tolerance to make a number look better is the one form of cheating this file cannot
+detect. Argue a tolerance in the open, before the experiment.
+
+## What the bench cannot do
+
+It cannot tell you whether a show is beautiful. Numbers grade correctness; beauty is graded by
+putting two versions of the same fifteen seconds side by side and asking which is better — a
+question humans answer reliably, unlike "rate this out of ten". Both gates matter and neither
+substitutes for the other.
+
+Sebastian owns this file. `bench.py` is v0 so that nobody is blocked waiting for it.

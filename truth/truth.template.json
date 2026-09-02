@@ -1,0 +1,30 @@
+{
+  "map": "0.2",
+  "song": { "title": null, "artist": null, "length": null },
+  "made_by": { "how": "truth", "who": null, "when": null,
+               "listened_on": "headphones | monitors | laptop speakers" },
+
+  "beats_window": [null, null],
+  "beats": [],
+  "downbeats": [],
+
+  "chapters": [
+    { "at": 0.0, "name": "intro" }
+  ],
+
+  "moments": [
+    { "at": null, "kind": "stop", "holds": null, "note": "measure the gap, do not estimate it" },
+    { "at": null, "kind": "drop", "size": null,  "note": "size 0-1, how hard it hits" }
+  ],
+
+  "spans": [
+    { "kind": "build", "from": null, "to": null, "rise": "steady | late | early | stepped" }
+  ],
+
+  "energy": [],
+
+  "confidence": 1.0,
+  "vectors": null,
+
+  "note": "Anything ambiguous. Places where two listeners disagreed. Sections you skipped."
+}

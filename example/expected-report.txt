@@ -1,0 +1,23 @@
+
+  The Nights   truth by SYNTHETIC — stand-in, not a human listening   candidate by model
+
+  BEATS       F=0.979   P=1.000 R=0.959   355/370 within 70 ms
+  DOWNBEATS   F=0.099                       9/93 within 70 ms
+  CHAPTERS    F=0.857 at 0.5s              6/7 boundaries   (7 proposed)
+  CHAPTERS    F=1.000 at 3.0s              7/7 boundaries   (7 proposed)
+  MOMENTS     6/7 hit within 1.0s   1 false   mean error 60 ms
+                stop       truth   51.000  got   51.000        +0 ms   holds -350 ms  !! audible
+                drop       truth   52.000  got   52.180      +180 ms
+                quiet      truth   75.000  got   75.000        +0 ms
+                stop       truth  111.000  got  111.000        +0 ms   holds -350 ms  !! audible
+                drop       truth  112.000  got  112.180      +180 ms
+                spotlight  truth  140.000  MISSED
+                return     truth  143.000  got  143.000        +0 ms
+                quiet                false alarm at   63.500
+  SPANS       1/2 with IoU >= 0.70
+                build         37.0->   52.0  got    43.0->   52.0  IoU=0.60  rise ok
+                build         97.0->  112.0  got    97.0->  112.0  IoU=1.00  rise wrong (steady)
+  ENERGY      r=0.981
+
+  confidence claimed: 0.62   vectors: no
+

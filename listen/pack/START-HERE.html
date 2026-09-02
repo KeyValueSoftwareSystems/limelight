@@ -1,0 +1,448 @@
+<title>The Listener</title>
+<style>
+  :root{--ink:#16181d;--dim:#5d636e;--dim2:#8b929c;--line:#e2e5ea;--bg:#fbfbfc;--card:#fff;
+        --acc:#7c3aed;--acc2:#1d4ed8;--ok:#047857;--warn:#b45309;--hot:#c2410c}
+  body{background:var(--bg);color:var(--ink);margin:0;
+       font:16px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:900px;margin:0 auto;padding:56px 24px 96px}
+  h1{font-size:42px;line-height:1.08;letter-spacing:-.028em;margin:0 0 10px;font-weight:680}
+  h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+     margin:58px 0 16px;font-weight:650;border-top:1px solid var(--line);padding-top:16px}
+  h3{font-size:19px;margin:28px 0 6px;letter-spacing:-.01em;font-weight:640}
+  p{margin:0 0 14px;max-width:68ch}
+  .lede{font-size:20px;color:var(--dim);max-width:62ch;line-height:1.5}
+  .kicker{font:12px ui-monospace,Menlo,monospace;color:var(--dim2);letter-spacing:.06em;margin-bottom:22px}
+  code,kbd{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+     background:#f1f3f6;padding:1.5px 5px;border-radius:4px}
+  pre{background:#14161a;color:#e7e9ee;padding:16px 18px;border-radius:9px;overflow-x:auto;
+     font:12.5px/1.65 ui-monospace,Menlo,monospace;margin:0 0 14px}
+  pre code{background:none;padding:0;color:inherit;font-size:inherit}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;margin:0 0 14px}
+  th,td{text-align:left;padding:8px 12px 8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);font-weight:650}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin:0 0 18px}
+  .big{border-left:3px solid var(--acc)}
+  .prob{border-left:3px solid var(--hot)}
+  .prob h3{margin-top:0}
+  .dl{display:grid;grid-template-columns:88px 1fr;gap:6px 16px;font-size:14.5px;margin-top:12px}
+  .dl dt{color:var(--dim);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:650;padding-top:3px}
+  .dl dd{margin:0}
+  .trap{color:var(--warn)}
+  figure{margin:22px 0 26px}
+  figcaption{font-size:13.5px;color:var(--dim);margin-top:8px;max-width:64ch}
+  svg{display:block;max-width:100%;height:auto}
+  .scroll{overflow-x:auto}
+  ol,ul{max-width:68ch;padding-left:22px}
+  li{margin-bottom:7px}
+  .mono-sm{font:12.5px ui-monospace,Menlo,monospace;color:var(--dim)}
+  .pull{font-size:19px;line-height:1.5;border-left:3px solid var(--acc);padding-left:20px;
+        margin:26px 0;color:var(--ink);max-width:62ch}
+</style>
+
+<div class="wrap">
+
+<h1>You are building the listener</h1>
+<p class="lede">A machine that hears a piece of music and writes down what it is doing. Everything
+else in this project is a consumer of that one file.</p>
+<p class="kicker" style="margin-top:22px">Limelight · analysis lane · 2 September 2026 · sixteen days to KeyCode</p>
+
+<h2>1 · Where your work actually sits</h2>
+
+<p>It is easy to look at this project and conclude that we are building a lighting system, and
+that your job is to feed it. That reading is backwards, and it will make you build the wrong
+thing.</p>
+
+<p><strong>The product is the understanding.</strong> The map file is what understanding looks
+like when written down, and you are the only person who produces it. Lighting is one reader among
+many — it is first because it gives feedback in milliseconds and looks extraordinary in a room,
+which is exactly what a demo needs, and for no other reason. If we deleted the entire lighting
+lane tomorrow, your work would be unchanged.</p>
+
+<figure>
+<svg viewBox="0 0 880 330" role="img" aria-label="Audio flows into the listener, which produces the map; seven readers consume the map, lighting being one of them">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,1 L7,4.5 L0,8" fill="none" stroke="#8b929c" stroke-width="1.4"/></marker>
+    <marker id="ap" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,1 L7,4.5 L0,8" fill="none" stroke="#7c3aed" stroke-width="1.6"/></marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui" font-size="13">
+    <rect x="4" y="132" width="104" height="56" rx="9" fill="#f1f3f6" stroke="#d6dae1"/>
+    <text x="56" y="158" text-anchor="middle" fill="#5d636e" font-weight="640">audio</text>
+    <text x="56" y="175" text-anchor="middle" fill="#8b929c" font-size="10.5">local file</text>
+    <path d="M112,160 L152,160" stroke="#7c3aed" stroke-width="1.6" marker-end="url(#ap)"/>
+
+    <rect x="158" y="112" width="176" height="96" rx="12" fill="#f4f0ff" stroke="#c4aef5" stroke-width="1.8"/>
+    <text x="246" y="146" text-anchor="middle" fill="#7c3aed" font-weight="690" font-size="16">the listener</text>
+    <text x="246" y="167" text-anchor="middle" fill="#7c3aed" font-size="11.5">your lane</text>
+    <text x="246" y="187" text-anchor="middle" fill="#9b7ce0" font-size="10.5">the whole product</text>
+
+    <path d="M338,160 L382,160" stroke="#7c3aed" stroke-width="1.6" marker-end="url(#ap)"/>
+    <rect x="388" y="126" width="122" height="68" rx="10" fill="#fff" stroke="#7c3aed" stroke-width="1.8"/>
+    <text x="449" y="155" text-anchor="middle" fill="#7c3aed" font-weight="680" font-size="15">map.json</text>
+    <text x="449" y="174" text-anchor="middle" fill="#8b929c" font-size="10.5">11 KB · no audio</text>
+
+    <g stroke="#c8ccd3" stroke-width="1.2" fill="none">
+      <path d="M514,148 C560,148 566,26 606,26" marker-end="url(#ar)"/>
+      <path d="M514,152 C560,152 566,70 606,70" marker-end="url(#ar)"/>
+      <path d="M514,158 C560,158 566,114 606,114" marker-end="url(#ar)"/>
+      <path d="M514,164 C560,164 566,204 606,204" marker-end="url(#ar)"/>
+      <path d="M514,170 C560,170 566,248 606,248" marker-end="url(#ar)"/>
+      <path d="M514,176 C560,176 566,292 606,292" marker-end="url(#ar)"/>
+    </g>
+    <path d="M514,160 C560,160 566,158 606,158" stroke="#c2410c" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+
+    <g font-size="12.5">
+      <rect x="612" y="10" width="230" height="32" rx="7" fill="#f7f8fa" stroke="#e2e5ea"/>
+      <text x="626" y="31" fill="#5d636e">video editor — cut points</text>
+      <rect x="612" y="54" width="230" height="32" rx="7" fill="#f7f8fa" stroke="#e2e5ea"/>
+      <text x="626" y="75" fill="#5d636e">rhythm game — note chart</text>
+      <rect x="612" y="98" width="230" height="32" rx="7" fill="#f7f8fa" stroke="#e2e5ea"/>
+      <text x="626" y="119" fill="#5d636e">fitness app — interval cues</text>
+
+      <rect x="612" y="142" width="230" height="32" rx="7" fill="#fff1e8" stroke="#e79a6d" stroke-width="1.6"/>
+      <text x="626" y="163" fill="#c2410c" font-weight="640">lighting — one reader</text>
+
+      <rect x="612" y="188" width="230" height="32" rx="7" fill="#f7f8fa" stroke="#e2e5ea"/>
+      <text x="626" y="209" fill="#5d636e">50,000 phones in a crowd</text>
+      <rect x="612" y="232" width="230" height="32" rx="7" fill="#f7f8fa" stroke="#e2e5ea"/>
+      <text x="626" y="253" fill="#5d636e">drone show — flight path</text>
+      <rect x="612" y="276" width="230" height="32" rx="7" fill="#f7f8fa" stroke="#e2e5ea"/>
+      <text x="626" y="297" fill="#5d636e">the next one, unbuilt</text>
+    </g>
+  </g>
+</svg>
+<figcaption>Every reader on the right is downstream of one file. Only one of them is about light,
+and it is highlighted because it is the demo, not because it is the point.</figcaption>
+</figure>
+
+<p class="pull">The test of whether the machine understood the music is whether a program that has
+never heard the audio can act on what it wrote. That is the whole specification, and it is why
+this is an interesting problem rather than a plumbing exercise.</p>
+
+<h2>2 · What "understanding" decomposes into</h2>
+
+<p>Understanding is not one thing, and the map does not treat it as one. It carries six kinds of
+fact, and each of them is something a musician would recognise as a separate question about a
+piece of music.</p>
+
+<div class="scroll">
+<table>
+<tr><th>Field</th><th>The musical question</th><th>State of the art</th></tr>
+<tr><td><code>beats</code></td><td>Where is the pulse?</td>
+    <td>Largely solved. Neural trackers are strong on steady material</td></tr>
+<tr><td><code>downbeats</code></td><td>Where does the bar begin?</td>
+    <td>A separate, harder problem. <strong>Not</strong> every fourth beat</td></tr>
+<tr><td><code>chapters</code></td><td>What is the form? Where does the character change?</td>
+    <td>Self-similarity over beat-synchronous features. Workable, noisy</td></tr>
+<tr><td><code>moments</code></td><td>What happens, and exactly when?</td>
+    <td>Drops are tractable. Stops need the gap <em>measured</em></td></tr>
+<tr><td><code>spans</code></td><td>Where is it going, and how fast?</td>
+    <td><strong>Effectively unsolved.</strong> The interesting one</td></tr>
+<tr><td><code>energy</code></td><td>How intense is it, right now?</td>
+    <td>Easy to fake with loudness. Hard to get right</td></tr>
+</table>
+</div>
+
+<p>And then there is everything left over. There is no word for "this feels like the second half
+of a Coldplay song", and there never will be, so that residue lands in a second tier —
+<code>vectors</code>, one row per beat, everything the model noticed. It is <code>null</code>
+today and its slot is already specified, so filling it later changes nothing downstream.</p>
+
+<p>The asymmetry between the two tiers is worth holding on to: <strong>the vector is the evidence
+and the field is the verdict</strong>, and only a verdict can be argued with. You cannot hand a
+person 768 numbers and ask whether they are wrong. Since corrections from real users are the
+thing this project is ultimately accumulating, the named tier is the asset — not scaffolding to
+be discarded once the embeddings get good.</p>
+
+<h2>3 · The hard part: a trajectory is not an event</h2>
+
+<p>Version 0.1 of the map could say <em>a drop happens at 52.0</em> and could not say <em>it lifts
+from 1:05 to 1:20</em>. A drop is an instant, so a point describes it exactly. An elevation is a
+stretch with a direction, and there is no honest way to write it as a point.</p>
+
+<p>This is not an edge case. <em>Opus</em> is one monotonic four-and-a-half-minute riser and
+almost nothing else; a point-only map cannot express that song at all. So the map gained two
+fields, and producing them is your most interesting problem, because unlike beat tracking there
+is no library to call.</p>
+
+<figure>
+<svg viewBox="0 0 880 250" role="img" aria-label="A span with a rise shape, an energy curve, and three different rise shapes compared">
+  <g font-family="ui-sans-serif,system-ui" font-size="12">
+    <text x="4" y="26" fill="#5d636e" font-weight="640" font-size="13">span</text>
+    <text x="4" y="42" fill="#8b929c" font-size="10.5">where + shape</text>
+    <rect x="150" y="14" width="420" height="26" rx="5" fill="#f4f0ff" stroke="#a98ae8"/>
+    <text x="360" y="31" text-anchor="middle" fill="#7c3aed" font-size="11.5" font-weight="620">
+      { kind: "build", from: 65.0, to: 80.0, rise: ? }</text>
+    <text x="586" y="31" fill="#8b929c" font-size="11">two numbers and one word</text>
+
+    <text x="4" y="86" fill="#5d636e" font-weight="640" font-size="13">energy</text>
+    <text x="4" y="102" fill="#8b929c" font-size="10.5">per downbeat</text>
+
+    <!-- three rise shapes -->
+    <g>
+      <text x="150" y="76" fill="#1d4ed8" font-size="11" font-weight="620">steady</text>
+      <rect x="150" y="82" width="200" height="86" fill="#fafbfd" stroke="#e2e5ea"/>
+      <path d="M150,164 L350,88" fill="none" stroke="#1d4ed8" stroke-width="2"/>
+      <text x="154" y="182" fill="#8b929c" font-size="10.5">climbs evenly</text>
+    </g>
+    <g>
+      <text x="370" y="76" fill="#7c3aed" font-size="11" font-weight="620">late</text>
+      <rect x="370" y="82" width="200" height="86" fill="#fafbfd" stroke="#e2e5ea"/>
+      <path d="M370,164 C450,162 500,155 530,120 C548,100 560,92 570,88"
+            fill="none" stroke="#7c3aed" stroke-width="2"/>
+      <text x="374" y="182" fill="#8b929c" font-size="10.5">sits still, then rushes</text>
+    </g>
+    <g>
+      <text x="590" y="76" fill="#047857" font-size="11" font-weight="620">stepped</text>
+      <rect x="590" y="82" width="200" height="86" fill="#fafbfd" stroke="#e2e5ea"/>
+      <path d="M590,164 H640 V145 H690 V126 H740 V107 H790" fill="none" stroke="#047857" stroke-width="2"/>
+      <text x="594" y="182" fill="#8b929c" font-size="10.5">arrives in layers</text>
+    </g>
+
+    <rect x="150" y="200" width="640" height="38" rx="8" fill="#fffaf0" stroke="#e8c98a"/>
+    <text x="166" y="216" fill="#8a6520" font-size="12">All three occupy the same fifteen seconds. All three feel completely different in a room.</text>
+    <text x="166" y="232" fill="#8a6520" font-size="12">The bench scores position and shape separately, because getting one right proves nothing about the other.</text>
+  </g>
+</svg>
+<figcaption>Three builds, identical <code>from</code> and <code>to</code>, three different
+<code>rise</code> values. This is why the shape is a field and not a comment.</figcaption>
+</figure>
+
+<div class="card big">
+<p style="margin:0"><strong>Energy is not loudness.</strong> A build can get quieter and still
+lift — a layer arrives, a filter opens, the pitch rises, the density thickens, the snare starts
+landing on every beat instead of every other one. An RMS curve calls the drop the loudest point
+and the build flat, which is the exact opposite of the shape a room needs. This is the single
+most common way to produce a technically valid map that feels wrong.</p>
+</div>
+
+<h2>4 · How you are graded, and by whom</h2>
+
+<p>Your output is statistical, which means there is no answer key to hand you — nobody can ship
+you the correct map for a song the way we shipped the lighting lane its correct frames. What can
+be made exact is the <em>measurement</em>. So the pack contains a bench rather than an answer.</p>
+
+<figure>
+<svg viewBox="0 0 880 226" role="img" aria-label="Two paths from audio: a human writes truth, the model writes a map, and the bench compares them">
+  <g font-family="ui-sans-serif,system-ui" font-size="13">
+    <rect x="4" y="86" width="96" height="52" rx="9" fill="#f1f3f6" stroke="#d6dae1"/>
+    <text x="52" y="117" text-anchor="middle" fill="#5d636e" font-weight="640">audio</text>
+    <path d="M104,100 C140,100 150,44 190,44" fill="none" stroke="#047857" stroke-width="1.5" marker-end="url(#ar)"/>
+    <path d="M104,124 C140,124 150,180 190,180" fill="none" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#ar)"/>
+
+    <rect x="196" y="22" width="210" height="46" rx="9" fill="#e7f6ef" stroke="#9dd3bb"/>
+    <text x="212" y="43" fill="#047857" font-weight="640" font-size="13.5">a human, listening</text>
+    <text x="212" y="60" fill="#5d636e" font-size="11">Renjith · one careful hour</text>
+
+    <rect x="196" y="158" width="210" height="46" rx="9" fill="#f4f0ff" stroke="#c4aef5"/>
+    <text x="212" y="179" fill="#7c3aed" font-weight="640" font-size="13.5">your pipeline</text>
+    <text x="212" y="196" fill="#5d636e" font-size="11">seconds, and improving</text>
+
+    <path d="M410,45 L452,45" stroke="#047857" stroke-width="1.5" marker-end="url(#ar)"/>
+    <path d="M410,181 L452,181" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#ar)"/>
+    <rect x="458" y="26" width="128" height="38" rx="8" fill="#fff" stroke="#047857" stroke-width="1.6"/>
+    <text x="522" y="50" text-anchor="middle" fill="#047857" font-weight="650">truth.json</text>
+    <rect x="458" y="162" width="128" height="38" rx="8" fill="#fff" stroke="#7c3aed" stroke-width="1.6"/>
+    <text x="522" y="186" text-anchor="middle" fill="#7c3aed" font-weight="650">map.json</text>
+
+    <path d="M590,45 C630,45 636,100 668,106" fill="none" stroke="#8b929c" stroke-width="1.3" marker-end="url(#ar)"/>
+    <path d="M590,181 C630,181 636,126 668,118" fill="none" stroke="#8b929c" stroke-width="1.3" marker-end="url(#ar)"/>
+    <rect x="674" y="80" width="128" height="64" rx="10" fill="#14161a"/>
+    <text x="738" y="106" text-anchor="middle" fill="#fff" font-weight="650">bench.py</text>
+    <text x="738" y="126" text-anchor="middle" fill="#9aa1ab" font-size="11">three numbers</text>
+
+    <text x="196" y="126" fill="#b45309" font-size="12" font-weight="620">separation of powers</text>
+    <text x="196" y="143" fill="#8b929c" font-size="11">you never write the file you are graded against</text>
+  </g>
+</svg>
+<figcaption>Not procedure for its own sake. Someone who both builds the model and decides what
+counts as correct will grade generously — not through dishonesty, through hope.</figcaption>
+</figure>
+
+<p>Start by running the bench's own self-test. It takes one map, breaks it in eleven specific
+ways, and prints what the bench notices, which is the fastest available way to learn what each
+metric is <em>blind</em> to before you trust it on something real.</p>
+
+<pre><code>$ python3 bench/selftest.py
+
+  break                 beat F   db F  b@0.5  b@3.0     mom  false   span  energy r
+  beats jitter 30ms      1.000  1.000  1.000  1.000     7/7      0    2/2      1.00   inside the 70 ms tolerance — invisible
+  beats jitter 120ms     0.586  0.538  1.000  1.000     7/7      0    2/2      1.00   collapses. the edge of audible
+  half tempo             0.667  1.000  1.000  1.000     7/7      0    2/2      1.00   octave warning fires
+  chapters +2.0s         1.000  1.000  0.000  1.000     7/7      0    2/2      1.00   two tolerances, two verdicts
+  rise shape swapped     1.000  1.000  1.000  1.000     7/7      0    2/2      1.00   IoU perfect, shape wrong
+  energy inverted        1.000  1.000  1.000  1.000     7/7      0    2/2     -1.00   the curve is there, backwards</code></pre>
+
+<p>Then read <code>example/expected-report.txt</code>, which is the bench run against a
+deliberately ordinary first attempt. Four things in it are worth studying before you write any
+code, because each one is a mistake you would otherwise make yourself:</p>
+
+<ol>
+<li><strong>Beats 0.979, downbeats 0.099.</strong> The candidate derived downbeats as
+<code>beats[::4]</code>. One missing beat shifts the bar phase and it never recovers. Beats and
+downbeats are different problems with different models.</li>
+<li><strong>A stop 350 ms short, flagged audible.</strong> Onset accuracy was perfect and the
+<code>holds</code> value was estimated rather than measured. In a room this reads as a mistake.</li>
+<li><strong>One span with IoU 1.00 and the wrong <code>rise</code>.</strong> Perfect position,
+wrong shape — a room that lifts at the wrong time.</li>
+<li><strong>Energy r = 0.981, with heavy noise added.</strong> Correlation flatters any curve with
+strong structure. Look at the shape; do not trust the coefficient.</li>
+</ol>
+
+<h2>5 · The ladder</h2>
+
+<p>We are not building something that understands all music. We are building something that
+understands one song, then a song with exactly one new hard property, then another. Full table in
+<code>LEVELS.md</code>.</p>
+
+<div class="scroll">
+<table>
+<tr><th></th><th>New difficulty</th><th>Song</th><th>What breaks if you skip ahead</th></tr>
+<tr><td><strong>1</strong></td><td>A rigid grid — constant tempo, 4/4, machine-made</td>
+    <td><em>The Nights</em></td><td>Nothing. Calibration: if the bench is not near 1.0 here, the bug is yours</td></tr>
+<tr><td><strong>2</strong></td><td>Long-form trajectory — structure in minutes</td>
+    <td><em>Opus</em>, <em>Strobe</em></td><td>Span detection. A pop-tuned model finds no boundary at all in a four-minute riser</td></tr>
+<tr><td><strong>3</strong></td><td>Human timing — tempo drifts continuously</td>
+    <td>live rock</td><td>Every constant-beat-interval assumption</td></tr>
+<tr><td><strong>4</strong></td><td>A different meter — cycles that are not four beats</td>
+    <td>taal, 7/8</td><td>Downbeats. "Every fourth beat" stops being a definition</td></tr>
+<tr><td><strong>5</strong></td><td>Deliberate tempo change</td>
+    <td>film score</td><td>The single global tempo, wherever it is hiding</td></tr>
+<tr><td><strong>6</strong></td><td>Structure without a pulse</td>
+    <td><em>Raga of Revenge</em>, from <em>DC</em></td><td>The assumption that structure is built on beats at all</td></tr>
+</table>
+</div>
+
+<p><strong>All six are measured; three are demoed.</strong> A level costs one truth file, an hour
+of careful listening. A demo costs a week. Track the bench <em>per level</em> — if level 2
+improves while you work on level 1, the method transfers and we know the curriculum is real
+rather than one-song overfitting.</p>
+
+<p>Level 6 is the one that matters for KeyCode and the one we expect to fail. That turns out to be
+useful: playing a song where the machine scores a third, saying so out loud, correcting two
+moments by hand and playing it again is a stronger demonstration than any song it gets right.</p>
+
+<h2>6 · The six problems</h2>
+
+<div class="card prob">
+<h3>Problem 1 — Emit a legal map</h3>
+<p>Audio in, a map out that survives the validator and renders without a crash in the lighting
+reader. Beats, downbeats, chapters. Nothing clever.</p>
+<dl class="dl">
+  <dt>Passes</dt><dd><code>python3 validate.py yours.map.json</code> exits 0 with no errors</dd>
+  <dt class="trap">Trap</dt><dd class="trap">Units. The validator rejects a beat outside the song
+    length precisely because emitting frames or milliseconds is the most common first bug, and it
+    otherwise fails silently three lanes downstream.</dd>
+</dl>
+</div>
+
+<div class="card prob">
+<h3>Problem 2 — Beat the bench on level 1</h3>
+<p>Beat F ≥ 0.85 at ±70 ms on <em>The Nights</em>, with no octave warning.</p>
+<dl class="dl">
+  <dt>Passes</dt><dd>the number, and the absence of the warning</dd>
+  <dt class="trap">Trap</dt><dd class="trap">A tracker locked to 63 BPM instead of 126 hits every
+    beat it claims and looks perfect to the eye. The bench prints an explicit octave check; it is
+    there because this fools people, repeatedly.</dd>
+</dl>
+</div>
+
+<div class="card prob">
+<h3>Problem 3 — Downbeats as their own problem</h3>
+<p>Downbeat F ≥ 0.80. Detect them; do not index into the beat array.</p>
+<dl class="dl">
+  <dt>Passes</dt><dd>the number holds even when beat recall is imperfect</dd>
+  <dt class="trap">Trap</dt><dd class="trap">Round chapter boundaries to the nearest downbeat. A
+    boundary between downbeats is almost always a mis-hear, and it makes the room lurch.</dd>
+</dl>
+</div>
+
+<div class="card prob">
+<h3>Problem 4 — Form: within 3 s, then within 0.5 s</h3>
+<p>Self-similarity over beat-synchronous features. Get the loose tolerance first; the tight one is
+a different quality of work.</p>
+<dl class="dl">
+  <dt>Passes</dt><dd>boundary F ≥ 0.70 at 3 s, then ≥ 0.50 at 0.5 s</dd>
+  <dt class="trap">Trap</dt><dd class="trap">Over-segmenting is punished — precision is in the
+    F-measure, so twenty proposed boundaries to catch seven real ones scores worse than seven
+    confident ones.</dd>
+</dl>
+</div>
+
+<div class="card prob">
+<h3>Problem 5 — Spans and energy. The real one.</h3>
+<p>Detect that a stretch is a build, find its start and end, name its <code>rise</code> shape, and
+emit an energy point per downbeat. There is no library for this. Nothing downstream can invent it,
+which is exactly why it is yours.</p>
+<dl class="dl">
+  <dt>Passes</dt><dd>span IoU ≥ 0.70 on both builds in <em>The Nights</em>; correct
+    <code>rise</code> on at least one; an energy curve whose <em>shape</em> survives inspection</dd>
+  <dt class="trap">Trap</dt><dd class="trap">Energy is not loudness. Try onset density, spectral
+    centroid, stem count from Demucs, high-frequency content, and harmonic tension — then look at
+    the curve next to the waveform and ask whether it lifts where the music lifts.</dd>
+</dl>
+</div>
+
+<div class="card prob">
+<h3>Problem 6 — Honest confidence <span class="mono-sm">· week two</span></h3>
+<p>One number, 0 to 1, that actually predicts whether the map is right.</p>
+<dl class="dl">
+  <dt>Passes</dt><dd>on a deliberately hard track, confidence <em>falls</em></dd>
+  <dt class="trap">Trap</dt><dd class="trap">The correction interface ranks by confidence, so a
+    model that is confidently wrong is worse than one that abstains. A calibration curve is worth
+    more here than another point of F-measure.</dd>
+</dl>
+</div>
+
+<h2>7 · What to reach for</h2>
+
+<div class="scroll">
+<table>
+<tr><th>For</th><th>Reach for</th><th>Note</th></tr>
+<tr><td>Stems</td><td>Demucs</td><td>Four stems. Per-stem onset density is a strong energy signal</td></tr>
+<tr><td>Beats, downbeats</td><td>madmom, Beat This, or a recent neural tracker</td>
+    <td>Compare at least two — they fail differently, and the disagreement is itself a confidence signal</td></tr>
+<tr><td>Form</td><td>Beat-synchronous chroma and MFCC, then a self-similarity matrix</td>
+    <td>Beat-synchronous, not fixed-window. This is what makes it tempo-invariant</td></tr>
+<tr><td>Embeddings</td><td>MERT (95M, then 330M)</td><td>A BERT for music. Freeze it, train a small head</td></tr>
+<tr><td>Metrics</td><td><code>mir_eval</code></td><td>Cross-check our bench against it once, early. If they disagree, our bench is wrong</td></tr>
+<tr><td>Labelled data</td><td>Harmonix Set (~900 songs), SALAMI (~1,400)</td>
+    <td>Beat, downbeat and segment annotations. <strong>Labels only, no audio</strong> — by design</td></tr>
+<tr><td>Audio you may keep</td><td>MTG-Jamendo (55k full CC tracks), Free Music Archive</td>
+    <td>Clean licence. Use for anything we train on</td></tr>
+</table>
+</div>
+
+<div class="card">
+<p style="margin:0"><strong>On sourcing audio, since it will come up in the first hour.</strong>
+Streaming accounts cannot give us samples, and this is settled rather than merely difficult:
+Spotify playback is decrypted inside the browser's DRM module where no script can reach it, and
+their beat and section analysis closed to new applications in November 2024. What streaming
+<em>can</em> give is identity and position — which recording, and where in it. That is enough for
+a renderer and useless for a listener. So: local files you own for analysis, CC catalogues for
+training, and a fingerprint (Chromaprint / AcoustID) to key the map to a recording. <strong>A map
+is an annotation, not a recording</strong>, which is what makes the corpus distributable even when
+the songs are not.</p>
+</div>
+
+<h2>8 · Tonight, in about two hours</h2>
+
+<ol>
+<li><code>python3 bench/selftest.py</code>. Read the table. Understand what a 30 ms error means.</li>
+<li><code>python3 bench/bench.py truth/the-nights.truth.synthetic.json example/the-nights.candidate.json</code>.
+Find all four planted lessons in the output before reading §4 again.</li>
+<li>Open <code>maps/sketch/opus.map.json</code>. That is the shape you must produce. Note that
+<code>spans</code> and <code>energy</code> carry almost all of the information in that song.</li>
+<li>Get <em>The Nights</em> onto your machine, run any beat tracker you like on it, write a map,
+and put a real number on the board. It does not matter if it is bad. It matters that it is
+measured.</li>
+<li>Tell Renjith what you need to be unblocked tomorrow — GPU access, a truth file, a decision.</li>
+</ol>
+
+<p><strong>Do not write a truth file yourself.</strong> Read <code>truth/PROTOCOL.md</code> to
+understand what one is and why you are not the person who makes it. And never invent a timestamp
+to fill a blank — <code>null</code> is a legitimate answer, and one guessed number makes every
+bench result afterwards a lie that still prints.</p>
+
+</div>

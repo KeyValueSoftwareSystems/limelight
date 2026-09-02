@@ -1,59 +1,61 @@
-# GPUs — what they are for, and what they are not for
+# The two L40S
 
-Two NVIDIA L40S, 48 GB each. **Owner: Amal. Reproducibility: Sebastian.**
+48 GB each. Here is the honest accounting of what they are for.
 
-## Week one needs no GPU at all
+## Week one does not need them
 
-The whole pipeline runs on a laptop CPU. Beat tracking is a small network. Stem separation takes
-a couple of minutes instead of twenty seconds. For six songs that is fine.
+The whole first pipeline — stem separation, beat tracking, chroma, a self-similarity matrix,
+writing a map — runs on a laptop CPU in minutes per song. If you find yourself blocked on GPU
+access in the first four days, something has gone wrong with the plan, not with the hardware.
 
-**Nothing this week is allowed to be blocked on GPU provisioning.** Set it up in the background,
-between other things, and if it fights you, walk away and come back — the pipeline does not care.
+Start on the laptop. Move when a wait becomes annoying, not before.
 
-## What the GPUs actually buy us in sixteen days
+## What the cards actually buy
 
-| | why it matters |
-|---|---|
-| **Speed** — 20 s a song instead of 3 min | matters the moment a stranger uploads a song to the 24-hour screen |
-| **The vectors** — per-beat embeddings from an open music model | this is the AI-native claim. **Inference, not training.** An afternoon |
-| **Batch analysis** — a 200-song fallback library | 20 minutes on GPU, 10 hours on CPU |
-| **One honest training run** | so "we trained it on our own hardware" is literally true |
+1. **Speed on inference.** Demucs and a neural beat tracker are minutes on CPU and seconds on a
+   card. This matters when you are iterating on twenty songs, not one.
+2. **The vectors.** Running MERT over a catalogue to produce per-beat embeddings is an afternoon
+   on one card and a week on a laptop. This is the clearest win.
+3. **Batch analysis.** Forty songs overnight, so that the bench has a population to talk about
+   instead of an anecdote.
+4. **One honest training run**, scoped as below.
 
-## The training run, scoped honestly
+## The training run, scoped so it can finish
 
-Do **not** attempt to fine-tune a large music model in sixteen days. The right shape:
+**Freeze the big model. Train a small head.**
 
-> **Freeze the big model. Train a small head.**
+Take a pretrained music encoder (MERT is the obvious starting point — a BERT for music, 95M and
+330M variants), freeze it, and train a small head on top that predicts the fields we need:
+boundary probability per beat, span onset and shape, energy. That is a few million parameters on
+pooled features, not a foundation model, and it fits comfortably in an afternoon on one card
+with room to try several variants.
 
-Take the frozen embeddings as fixed input. Train a small moment-detector on the public annotated
-sets plus our own truth files. Compare it against the rules baseline **on our own bench**.
+Do **not** attempt to pretrain an audio encoder from scratch. It does not fit in sixteen days and
+it is not where the value is; the value is in the head, the labels, and the corrections.
 
-A day's work on one card. Genuinely a trained model. Produces a number we can defend, and if
-the number is worse than the rules, we say so and ship the rules — that is a result too.
+**Beat-aligned pooling** is the detail worth getting right: pool encoder features between
+consecutive beats rather than on a fixed time grid. A model trained that way is tempo-invariant
+almost for free, because 126 BPM and 84 BPM produce the same sequence length.
 
-## Setup, in order. Stop at any step that fights you and come back later.
+## Setting up, in order
 
-1. **Find the machine.** Where are the two cards — a box in the office, a server, a cloud
-   instance? How do we reach it? Who else uses it? Write the answer in `ENV.md`.
-2. **`nvidia-smi` runs.** Note the driver version. Everything downstream keys off it.
-3. **One environment, pinned.** Python 3.11 in a venv. Install the PyTorch build that matches
-   the driver's CUDA — not the newest one, the matching one.
-4. **Put the weights somewhere with space.** Set `HF_HOME` and `TORCH_HOME` to a disk with
-   room, **outside this repo**. Model weights are gigabytes and the repo must never see them.
-   *(Check free space first — the dev laptop is near full.)*
-5. **Smoke-test each model alone before chaining any of them.** Stems on ten seconds of audio.
-   Embeddings on ten seconds. Beat tracking on ten seconds. One at a time.
-6. **Then chain them** into one command that writes a map.
-7. **Write `ENV.md`** — exact versions of driver, CUDA, torch, and every model. Then hand it to
-   Sebastian, who rebuilds the environment from that file on a different machine. If he cannot,
-   the file is wrong, and we have one person's magic instead of an environment.
+1. Find the machine and confirm you can reach it. `nvidia-smi` — note driver and CUDA version.
+2. **One pinned environment.** Install torch matching that CUDA version *first*, then everything
+   else, then check `torch.cuda.is_available()` before installing another package.
+3. `export HF_HOME=/some/big/disk/hf` and `TORCH_HOME` likewise, **outside the repo**. Check free
+   space first; weights are tens of gigabytes and a full disk mid-download fails in confusing ways.
+4. Smoke-test each model **alone** before chaining any of them. One line of audio in, tensor out.
+5. Then chain them. Then write down exactly what you installed in `ENV.md`, because you will need
+   to reproduce it on the second card and nobody remembers.
 
-## Traps that have each cost somebody a day
+## Five traps
 
-| trap | what happens |
-|---|---|
-| driver / CUDA / torch mismatch | the classic. torch installs, sees no GPU, and says nothing useful |
-| a model package pulls its own torch | your working install silently breaks. Install, then re-check `torch.cuda.is_available()` |
-| old audio libraries vs modern Python | some beat-tracking packages fight current numpy. Isolate them in their own environment rather than bending the main one |
-| weights cached into the repo or a full disk | gigabytes in the wrong place. Set the cache paths **first**, not after the first download |
-| more than one decode path | two libraries opening audio differently gives timestamps that disagree by tens of milliseconds. **One tool, one sample rate, everywhere** |
+- **Driver, CUDA and torch mismatch.** The error message will not say this. Check all three first.
+- **A package that pulls its own torch** and silently replaces the working one. Pin it, then
+  re-check `torch.cuda.is_available()` after every install.
+- **Old audio libraries** that cannot decode what you feed them, failing as a shape error three
+  functions later rather than at the decode.
+- **Weights cached in the wrong place** — inside the repo, or on a disk that fills.
+- **More than one decode path.** If librosa and torchaudio load the same file at different sample
+  rates or with different resampling, your timestamps disagree with themselves and you will spend
+  a day on it. Pick one loader, one sample rate, and write it down.
