@@ -1,0 +1,47 @@
+Limelight — measurement lane pack v0.2   ·   2 September 2026
+
+Humans: open START-HERE.html
+Claude Code: read CLAUDE.md first, fully, before your first tool call
+
+  python3 bench/selftest.py                    start here
+  python3 bench/bench.py <truth> <candidate>
+  python3 validate.py <map>
+
+cohort/ and every truth file here are SYNTHETIC. They test tooling, not models.
+No number derived from them may be quoted to anyone as a result.
+Read cohort/EXPECTED.md only after you have built something.
+c5f6463b86ad6867add1c769bf2bfbe9f44426bab2e4879f3c7a5a14a4a636d6  CLAUDE.md
+6bcd3c44f32337a5dce4717291e00edf8f8d4d2137ce711248bb681e9b2fa057  START-HERE.html
+1966248cd5162da9aff0825a61aeae31595f43f94d8ba42cda3d7bfe2b5dda55  LEVELS.md
+92340cc4953ebfd02cdf86c2e471c24f6d24d684c2a4de10999f56694f1c9bd4  GPU.md
+9814c91c91a14287a367acf05f27ac00fc322d8e04f8695360c95d275036795a  validate.py
+72849c1751cd91e951980b9244d05a868ac6a79b182a16d0f6ebe3b5368884f3  bench/bench.py
+7a5c8a9d9a7e063ee9c275428a03576d4d347cc559d896c6af1196fffc3ce1f2  bench/selftest.py
+99b2630a91e339d4bb06a5aab2825f16aad74456e1a706ed4e667a19aed0d4ae  contracts/FRAME.md
+dd42f76af5a9e5ece400a43cd7819f9339285012f0ace610035ec31ea3a924fb  contracts/layout.json
+3c1d769dfdfdc586007935e8f2b6418705d54eca7e1321497abf5da5407c2917  contracts/MAP.md
+4170b251c3017274438adf71ad39c8c4ab69ec82a4fc752e207ca254acd84dad  contracts/RECIPE.md
+8b653d227ee94a59d22b28720676c4947b95b441b5061ab26dd4b01426862124  contracts/WORDS.md
+cdf9ab5fb6429cf614ec8bb6d9bc7a3d038bb565a3a939460c2bce04cc2cd02d  truth/PROTOCOL.md
+f84132cfe1cedb9bd32493a044adf7821259ab5a69106a51af12c9331afa91db  truth/truth.template.json
+7a2d7582e6814d8c04550606a55e6aec8a0c526bc8d0fd3905e15984e340c4df  example/expected-report.txt
+e67609a7a0b94167726095c25e3b537d87588f392826f362849bd33e9adb98cf  example/the-nights.candidate.json
+6f378176e5807aff984d32a9ffc860dde0af943ba2d9e5bb2821f90204f4244c  maps/sketch/opus.map.json
+7ae6170aecb8acd7e6e9969782a06b1036e1c5e07b3a3d746b08e105c054b488  maps/sketch/strobe.map.json
+c29ca801ceaa87c427e5531893dedf0b055bd9d46e581780d2a35e7fb3e0f04a  maps/sketch/the-nights.map.json
+a3c9bbb83bd63d9dd4d2f9193f66e5702ff7442df95d48f00618b2d71f70e56d  cohort/cand_01.json
+7d4e414c4549ea4ece9c1493389ffd7f4f645124cd9a943d02193273522eda35  cohort/cand_02.json
+142ccbda4b92d27baba11dec2a314a6b36b88d725cda14fba599d94260a6463d  cohort/cand_03.json
+9ad7f0dd5220e625c32163b45e2858ac20473218b4e5ede5473daf9a373429c1  cohort/cand_04.json
+aa6ee0edefce6c4e856889390505ce4c470449b3632eb74f57537fa1f10a84cb  cohort/cand_05.json
+e4d371ffbbeeae15c8bd1236ca7340cd451246497dce36fb51a9d088c85e7193  cohort/cand_06.json
+ecd7295695269fc0e8f1f0cccf0ebc0e9d94b61cdfcca80db0804689c9e7224d  cohort/cand_07.json
+a920946d729be1031e79dbe18c588212b5e8bd808c34c3f1c97b83e7fe3b72e1  cohort/cand_08.json
+d7c513111d346182e06afbb1a4199354dda2a3de941c0582557e38f600377fd5  cohort/cand_09.json
+58ff881c1c3bba86801167827f209d60f8895d13405722d2358db8185d319496  cohort/cand_10.json
+b7466d088c638f66a07ddf157ecf92e7affce17f0081fb16dbc19a032b17ede0  cohort/cand_11.json
+6d1de5b57a657f949ecf7c3db999f6f5369c357447e3a920f7e72a556496ec61  cohort/cand_12.json
+2f6ac0ced7638144b39bc3e890dd048323209a85cbf7c15dcc44fcd4392e9b74  cohort/EXPECTED.md
+57bdbfb90945654a9513ad19b8e6b1cd0e0347dd6e08b31f841aab1daa9be0c4  cohort/truth_opus.json
+9d5dfa9fc42185b80cf61361f6e87ac85f9fc9ec647e26e648fd72eccbe252ad  cohort/truth_strobe.json
+a9367b39ffc6cb7c5a79c13d4f0b503a955aded18d03954df9e4d372dbc06782  cohort/truth_the-nights.json
