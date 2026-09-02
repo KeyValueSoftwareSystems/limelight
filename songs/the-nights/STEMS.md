@@ -137,3 +137,64 @@ intended: the *map* says what the music does, the *recipe* decides what to react
 to 0.153, and the hits that remain are the fills, which is what was asked for.
 
 The first six stabs: 1.715 hat, 2.100 hat, 2.425 snare, 2.829 snare, 3.152 kick, 4.103 kick.
+
+---
+
+# The observation tier — 2026-09-03
+
+> *The idea is to capture everything in a music, every single beat, including the ones like at the
+> start, the instruments, their volume envelope, feeling, notes and chords.*
+
+This exposed a real tension. I had been applying *a field goes in when a reader breaks without it*,
+which is a **minimalist** rule. The ask is **completeness**. Both are right, and the resolution is
+that the rule was never about what to measure — it was about what to **promise**.
+
+| tier | contents | policy |
+|---|---|---|
+| **interface** | beats, downbeats, chapters, moments, spans, energy | what readers compile against. Small, stable, human-correctable, a one-way door. **Be miserly.** |
+| **observation** | accents, stems, envelopes, chords, key, notes | what was measured. Additive, append-only, nothing breaks by adding. **Be generous.** |
+| **learned** | `vectors` | everything with no name — which is where *feeling* lives |
+
+## What is measured now
+
+**Volume envelopes** — per beat, per stem, in dB below each stem's own 99th percentile. 369 values
+× 6 stems. These were already being computed and thrown away every pass.
+
+**Chords** — per bar, chroma template match over bass + other + guitar + piano against 36 templates
+(major, minor, dominant 7th), median-smoothed across three bars. The song sits almost entirely on
+**F#7 / B / D#m / F#**, which is coherent with:
+
+**Key: F#**, by Krumhansl-Schmuckler profile correlation at 0.860 — a high correlation, so this is
+a confident estimate rather than a guess.
+
+**Bass notes** — per beat, autocorrelation f0 on the 38–420 Hz band of the bass stem. 175 of 369
+beats voiced, and the most common roots are **C# (53), F# (39), B (37), D# (22)** — the tonic,
+dominant and relative minor of F#. Two independent methods agreeing on the tonality.
+
+Note the first sixteen beats are all unvoiced, which is correct: the bass does not enter until
+bar 10, exactly as Renjith said.
+
+## Still missing, honestly
+
+- **Polyphonic notes.** Chords give the harmony; a full note-level transcription of the synths is
+  a genuinely hard problem and not close to free.
+- **Feeling.** This is not a named field and should not become one. It is the argument for the
+  vector tier: there is no word for *this feels like the second half of a Coldplay song*, and the
+  only honest place for it is a learned representation with the named fields decoded out of it.
+
+## First look at the WebGL render, and three fixes
+
+The beams were right first time — tight cones, real volumetric falloff, the front and upstage
+trusses crossing properly. Three things made it look wrong, and one had been predicted:
+
+1. **The crowd was not black.** `0x010105` is a *linear* value, and small linear values lift hard
+   through the sRGB encode — about 14/255 — with bloom from the beams bleeding on top. A silhouette
+   has to be 0. Same correction applied to the walls and the truss, which were reading as grey
+   scaffolding floating mid-room.
+2. **Thirty-six people packed into 2.6 m of depth** merged into a fence across the frame. Depth now
+   spreads to 4.7 m and is biased away from the camera, so the crowd recedes; shoulder width varies
+   per person. The heights were always right at 1.52–1.86 m.
+3. **The floor read as a magenta carpet.** Pool intensities were roughly 2.5× too high, and the
+   floor's mirror share was 0.42. Now 0.24/0.40/0.20 and 0.30 — light on a floor rather than paint.
+
+The LED bars were also 12 cm slabs; a real one is a couple of centimetres.
