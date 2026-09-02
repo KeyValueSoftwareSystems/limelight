@@ -54,6 +54,18 @@
   .hint{color:var(--dim2);font-size:10.5px;line-height:1.45;margin:6px 0 0}
   input[type=file]{font-size:11.5px;color:var(--dim);max-width:172px}
   input[type=range].sm{width:88px;accent-color:var(--acc2)}
+  .ne{display:flex;gap:6px;align-items:baseline;font:10.5px ui-monospace,Menlo,monospace;
+      color:var(--dim);padding:3px 0;border-bottom:1px solid #171b23}
+  .ne span{color:var(--dim2);width:52px;flex:0 0 52px}
+  .ne b{color:var(--ink);font-weight:600;flex:1}
+  .ne i{color:var(--acc2);font-style:normal}
+  .ne.mine b{color:var(--ok)}
+  .le{font:10.5px ui-monospace,Menlo,monospace;color:var(--dim);padding:2px 0}
+  .le b{color:var(--acc);font-weight:600} .le i{color:var(--dim2);font-style:normal}
+  .keys{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;font:10.5px ui-monospace,Menlo,monospace;
+        color:var(--dim2);margin-top:8px}
+  .keys kbd{background:#1c2229;border:1px solid var(--line);border-radius:3px;padding:0 4px;
+        color:var(--ink);font:inherit}
 </style>
 
 <div class="top">
@@ -109,6 +121,34 @@
       than 0.15, and all six are at a drop, a strobe entry or the return.</p>
     </div>
 
+    <div class="card"><h3>Fix &mdash; one keypress each</h3>
+      <div id="near"></div>
+      <div class="keys">
+        <kbd>space</kbd><span>play / pause</span>
+        <kbd>&larr; &rarr;</kbd><span>step a beat &middot; <kbd>shift</kbd> a bar</span>
+        <kbd>d s q o r</kbd><span>add drop / stop / quiet / spotlight / return <em>at the snapped grid point</em></span>
+        <kbd>shift+d&hellip;</kbd><span>retype the nearest moment instead of adding</span>
+        <kbd>, .</kbd><span>move nearest moment one grid step</span>
+        <kbd>x</kbd><span>delete nearest moment</span>
+        <kbd>h H</kbd><span>stop holds shorter / longer, by a beat</span>
+        <kbd>i v b k p u</kbd><span>chapter here: intro verse build break drop outro</span>
+        <kbd>[ ]</kbd><span>move nearest boundary a downbeat &middot; <kbd>X</kbd> delete it</span>
+        <kbd>{ } ( )</kbd><span>span from / to, by a four-bar line</span>
+        <kbd>w</kbd><span>cycle rise: steady late early stepped</span>
+        <kbd>&uarr; &darr;</kbd><span>energy at this downbeat &middot; <kbd>shift</kbd> coarse</span>
+        <kbd>1 2 3 4</kbd><span>bar phase</span>
+        <kbd>l</kbd><span><b>the look is wrong</b> &mdash; logs a recipe complaint with this frame attached</span>
+        <kbd>e</kbd><span>export</span>
+      </div>
+    </div>
+
+    <div class="card"><h3>Change log &mdash; <span id="logn">0</span></h3>
+      <div id="log"></div>
+      <p class="hint">Map fixes you make here take effect on the next frame, so you can test them
+      in the same second. Look complaints go to the recipe, which is code &mdash; they come to me
+      with the frame attached.</p>
+    </div>
+
     <div class="card"><h3>Corrections</h3>
       <div class="row"><label>bar phase</label>
         <button class="btn" onclick="setPhase(0)" id="p0">0</button>
@@ -143,7 +183,8 @@ const $ = s => document.querySelector(s);
 let PER=MAP.period, PH=MAP.phase, DUR=MAP.dur, DBP=MAP.bar_phase;
 let STOP_REAL=true, ANT=true, HAZE=0.28, DRIFT=true, VIEW=0;
 const BAR=4*PER;
-const BEATS=[]; for(let t=PH;t<DUR;t+=PER) BEATS.push(+t.toFixed(4));
+const BEATS=[]; for(let t=PH;t<DUR;t+=PER) BEATS.push(+t.toFixed(3));
+let DOWNS_DIRTY=true;
 const CH=MAP.chapters, SP=MAP.spans.map(s=>({kind:s[0],from:s[1],to:s[2],rise:s[3]}));
 let MO=MAP.moments.map(m=>({at:m[0],kind:m[1],v:m[2]}));
 const EN=MAP.energy;
@@ -578,6 +619,175 @@ function drawRoom(f){
   if(G.fog_1.level>0){cx.fillStyle='#28c98a';cx.font='600 12px ui-sans-serif';cx.textAlign='left';
     cx.fillText('fog burst — commanded 9 s early',16,CHv-14)}}
 
+/* ================= the fix loop =================
+   A human is reliable to about +/-200 ms; the grid is known to ~10 ms. So a
+   click is snapped to the grid the FIELD belongs on -- drops and chapters to
+   downbeats, spans to four-bar lines, stops to any beat. Energy has no time
+   snap because it is a value, not an instant.                              */
+const DOWNS = BEATS.filter((_,i)=>((i-DBP)%4+4)%4===0);
+const nearest=(t,arr)=>arr.reduce((a,b)=>Math.abs(b-t)<Math.abs(a-t)?b:a,arr[0]);
+const snapBeat=t=>+nearest(t,BEATS).toFixed(3);
+const snapDown=t=>+nearest(t,DOWNS.length?DOWNS:BEATS).toFixed(3);
+const snapBar4=t=>{const f=DOWNS.filter((_,i)=>i%4===0);return +nearest(t,f.length?f:DOWNS).toFixed(3)};
+const SNAP={drop:snapDown, stop:snapBeat, quiet:snapDown, spotlight:snapBeat,
+            build:snapBar4, return:snapDown, chapter:snapBar4, span:snapBar4};
+
+let LOG=[];
+function logIt(kind,what){LOG.push({t:+T.toFixed(3),bar:barIdx(T)+1,kind:kind,what:what,
+  by:'renjith',when:new Date().toISOString()});drawLog()}
+function drawLog(){const el=$('#log');
+  el.innerHTML=LOG.length? LOG.slice(-7).reverse().map(function(x){
+    return '<div class="le"><b>'+x.kind+'</b> '+x.what+' <i>@'+mmss(x.t)+'</i></div>'}).join('')
+    : '<div class="hint">Nothing yet. Every edit is recorded with who and when, so the export is '
+      +'both a corrected map and a partial truth file.</div>';
+  $('#logn').textContent=LOG.length}
+
+/* ---- moments ---- */
+function addMoment(kind,extra){
+  const at=(SNAP[kind]||snapBeat)(T);
+  MO=MO.filter(m=>!(m.kind===kind&&Math.abs(m.at-at)<0.05));
+  const m={at:at,kind:kind,v:extra===undefined?(kind==='drop'?0.9:kind==='stop'?1.0:undefined):extra,
+           by:'renjith'};
+  MO.push(m);MO.sort((a,b)=>a.at-b.at);
+  const off=Math.abs(at-T), far=off>BAR/2;
+  logIt('add',kind+' at '+at.toFixed(3)+' ('+((at-T)*1000).toFixed(0)+' ms from playhead, snapped to '
+    +(SNAP[kind]===snapDown?'downbeat':SNAP[kind]===snapBar4?'4-bar line':'beat')+')'
+    +(far?'  << moved more than half a bar: either the click was loose or the bar phase is wrong':''));
+  refresh()}
+function delNearest(){
+  if(!MO.length)return;
+  const m=MO.reduce((a,b)=>Math.abs(b.at-T)<Math.abs(a.at-T)?b:a,MO[0]);
+  if(Math.abs(m.at-T)>4){logIt('skip','nothing within 4 s to delete');return}
+  MO=MO.filter(x=>x!==m);
+  logIt('delete',m.kind+' at '+m.at.toFixed(3));refresh()}
+function moveNearest(dir){
+  if(!MO.length)return;
+  const m=MO.reduce((a,b)=>Math.abs(b.at-T)<Math.abs(a.at-T)?b:a,MO[0]);
+  if(Math.abs(m.at-T)>6)return;
+  const grid=(SNAP[m.kind]===snapDown)?DOWNS:BEATS;
+  let i=grid.findIndex(x=>Math.abs(x-m.at)<0.06);
+  if(i<0)i=grid.indexOf(nearest(m.at,grid));
+  const j=Math.max(0,Math.min(grid.length-1,i+dir));
+  m.at=+grid[j].toFixed(3);m.by='renjith';
+  logIt('move',m.kind+' -> '+m.at.toFixed(3)+(dir>0?' (+1)':' (-1)')+
+    (grid===DOWNS?' downbeat':' beat'));refresh()}
+function retype(kind){
+  if(!MO.length)return;
+  const m=MO.reduce((a,b)=>Math.abs(b.at-T)<Math.abs(a.at-T)?b:a,MO[0]);
+  if(Math.abs(m.at-T)>4){addMoment(kind);return}
+  const old=m.kind;m.kind=kind;m.at=(SNAP[kind]||snapBeat)(m.at);m.by='renjith';
+  // `size` on a drop and `holds` on a stop are different quantities in different units.
+  // Carrying one into the other silently turned a 0.9 size into a 0.9-second hold.
+  delete m.v;
+  if(kind==='drop')m.v=0.9; if(kind==='stop')m.v=1.0;
+  logIt('retype',old+' -> '+kind+' at '+m.at.toFixed(3));refresh()}
+function holds(d){
+  const m=MO.filter(x=>x.kind==='stop').reduce((a,b)=>
+    (!a||Math.abs(b.at-T)<Math.abs(a.at-T))?b:a,null);
+  if(!m)return; m.v=Math.max(0.1,+((m.v||1)+d*PER).toFixed(3));m.by='renjith';
+  logIt('holds','stop at '+m.at.toFixed(3)+' holds '+m.v+' s ('+(m.v/PER).toFixed(1)+' beats)');refresh()}
+
+/* ---- chapters ---- */
+function chapterHere(name){
+  const at=snapBar4(T);
+  const ex=CH.find(c=>Math.abs(c[0]-at)<0.05);
+  if(ex){const old=ex[1];ex[1]=name;logIt('relabel',old+' -> '+name+' at '+at.toFixed(3))}
+  else{CH.push([at,name]);CH.sort((a,b)=>a[0]-b[0]);
+    logIt('add','chapter '+name+' at '+at.toFixed(3)+' (snapped to 4-bar line, '
+      +((at-T)*1000).toFixed(0)+' ms from playhead)')}
+  refresh()}
+function moveBoundary(dir){
+  const cs=CH.filter(c=>c[0]>0);if(!cs.length)return;
+  const c=cs.reduce((a,b)=>Math.abs(b[0]-T)<Math.abs(a[0]-T)?b:a,cs[0]);
+  if(Math.abs(c[0]-T)>8)return;
+  let i=DOWNS.indexOf(nearest(c[0],DOWNS));
+  const j=Math.max(0,Math.min(DOWNS.length-1,i+dir));
+  c[0]=+DOWNS[j].toFixed(3);CH.sort((a,b)=>a[0]-b[0]);
+  logIt('move','boundary '+c[1]+' -> '+c[0].toFixed(3)+' (1 downbeat)');refresh()}
+function delBoundary(){
+  const cs=CH.filter(c=>c[0]>0);if(!cs.length)return;
+  const c=cs.reduce((a,b)=>Math.abs(b[0]-T)<Math.abs(a[0]-T)?b:a,cs[0]);
+  if(Math.abs(c[0]-T)>8)return;
+  const k=CH.indexOf(c);CH.splice(k,1);
+  logIt('delete','boundary '+c[1]+' at '+c[0].toFixed(3));refresh()}
+
+/* ---- spans ---- */
+function spanEdge(which,dir){
+  if(!SP.length)return;
+  const s=SP.reduce((a,b)=>Math.min(Math.abs(b.from-T),Math.abs(b.to-T))<
+    Math.min(Math.abs(a.from-T),Math.abs(a.to-T))?b:a,SP[0]);
+  const f=DOWNS.filter((_,i)=>i%4===0);
+  const key=which==='from'?'from':'to';
+  let i=f.indexOf(nearest(s[key],f));
+  const j=Math.max(0,Math.min(f.length-1,i+dir));
+  const v=+f[j].toFixed(3);
+  if(key==='from'&&v>=s.to-1)return; if(key==='to'&&v<=s.from+1)return;
+  s[key]=v;logIt('span',s.kind+' '+key+' -> '+v.toFixed(3)+' (1 four-bar line)');refresh()}
+function cycleRise(){
+  if(!SP.length)return;
+  const s=SP.reduce((a,b)=>Math.abs((b.from+b.to)/2-T)<Math.abs((a.from+a.to)/2-T)?b:a,SP[0]);
+  const R=['steady','late','early','stepped'];
+  s.rise=R[(R.indexOf(s.rise)+1)%4];
+  logIt('rise',s.kind+' '+s.from.toFixed(1)+'-'+s.to.toFixed(1)+' -> '+s.rise);refresh()}
+
+/* ---- energy ---- */
+function nudgeEnergy(d){
+  const k=EN.reduce((a,b,i)=>Math.abs(EN[i][0]-T)<Math.abs(EN[a][0]-T)?i:a,0);
+  EN[k][1]=+Math.max(0,Math.min(1,EN[k][1]+d)).toFixed(3);
+  logIt('energy','downbeat '+EN[k][0].toFixed(2)+' -> '+EN[k][1]);refresh()}
+
+/* ---- look complaint: goes to the recipe, not the map ---- */
+function complain(){
+  const txt=prompt('What is wrong with the LOOK here? (this is a recipe change, not a map change)');
+  if(!txt)return;
+  LOG.push({t:+T.toFixed(3),bar:barIdx(T)+1,kind:'RECIPE',what:txt,look:LAST.look,
+    energy:+en(T).toFixed(3),chapter:chAt(T),frame:LAST.fixtures,by:'renjith',
+    when:new Date().toISOString()});
+  drawLog();
+  $('#logn').textContent=LOG.length}
+
+function refresh(){SEG=buildSegs();drawNear();render()}
+function drawNear(){
+  const rows=[];
+  MO.forEach(m=>{if(Math.abs(m.at-T)<6)rows.push(
+    ['moment',m.kind+(m.v!==undefined?' '+m.v:''),m.at,m.by==='renjith'])});
+  CH.filter(c=>c[0]>0).forEach(c=>{if(Math.abs(c[0]-T)<8)rows.push(['chapter',c[1],c[0],false])});
+  SP.forEach(s=>{if(T>s.from-6&&T<s.to+6)rows.push(['span',s.kind+' '+s.rise,s.from,false])});
+  rows.sort((a,b)=>Math.abs(a[2]-T)-Math.abs(b[2]-T));
+  $('#near').innerHTML=rows.length? rows.slice(0,5).map(function(r){
+    const d=(r[2]-T)*1000;
+    return '<div class="ne'+(r[3]?' mine':'')+'"><span>'+r[0]+'</span> <b>'+r[1]+'</b> '
+      +'<i>'+(d>=0?'+':'')+d.toFixed(0)+' ms</i></div>'}).join('')
+    : '<div class="hint">Nothing within a few seconds of the playhead.</div>'}
+
+document.addEventListener('keydown',function(ev){
+  if(ev.target.tagName==='INPUT'||ev.target.tagName==='TEXTAREA')return;
+  const k=ev.key, S=ev.shiftKey;
+  const step=S?4*PER:PER;
+  if(k===' '){toggle();ev.preventDefault();return}
+  if(k==='ArrowLeft'){seek(Math.max(0,T-step));ev.preventDefault();return}
+  if(k==='ArrowRight'){seek(Math.min(DUR,T+step));ev.preventDefault();return}
+  if(k==='ArrowUp'){nudgeEnergy(S?0.15:0.05);ev.preventDefault();return}
+  if(k==='ArrowDown'){nudgeEnergy(S?-0.15:-0.05);ev.preventDefault();return}
+  const map={d:'drop',s:'stop',q:'quiet',o:'spotlight',r:'return'};
+  if(map[k]){S?retype(map[k]):addMoment(map[k]);return}
+  if(k==='x'){delNearest();return}
+  if(k===','){moveNearest(-1);return}
+  if(k==='.'){moveNearest(1);return}
+  if(k==='h'){holds(-1);return} if(k==='H'){holds(1);return}
+  if(k==='['){moveBoundary(-1);return} if(k===']'){moveBoundary(1);return}
+  if(k==='X'){delBoundary();return}
+  if(k==='{'){spanEdge('from',-1);return} if(k==='}'){spanEdge('from',1);return}
+  if(k==='('){spanEdge('to',-1);return} if(k===')'){spanEdge('to',1);return}
+  if(k==='w'){cycleRise();return}
+  if(k==='l'){complain();return}
+  if(k==='e'){exportMap();return}
+  if('1234'.indexOf(k)>=0){setPhase(+k-1);return}
+  if(k==='i'){chapterHere('intro')} if(k==='v'){chapterHere('verse')}
+  if(k==='b'){chapterHere('build')} if(k==='k'){chapterHere('break')}
+  if(k==='p'){chapterHere('drop')}  if(k==='u'){chapterHere('outro')}
+});
+
 /* ---------- timeline ---------- */
 const tl=$('#tl'),tx=tl.getContext('2d');
 function drawTl(t){const W=tl.width,H=tl.height;tx.fillStyle='#0a0c10';tx.fillRect(0,0,W,H);
@@ -624,7 +834,8 @@ function seek(v){T=v;const a=$('#a');if(a.src)a.currentTime=v;render()}
 function loadAudio(i){const f=i.files[0];if(!f)return;$('#a').src=URL.createObjectURL(f);
   $('#au').textContent=f.name+' — clock from the audio device.'}
 function setPhase(p){DBP=p;[0,1,2,3].forEach(i=>$('#p'+i).classList.toggle('on',i===p));
-  SEG=buildSegs();render()}
+  if(typeof rebuildDowns==='function')rebuildDowns();
+  SEG=buildSegs();if(typeof drawNear==='function')drawNear();render()}
 function setDrop(i,t){const d=MO.filter(m=>m.kind==='drop')[i];
   if(d){d.at=+t.toFixed(3);SEG=buildSegs();render()}}
 function dropHere(i){setDrop(i,T)}
@@ -656,9 +867,23 @@ function exportMap(){
       const o={at:m.at,kind:m.kind};
       if(m.kind==='drop')o.size=m.v; if(m.kind==='stop')o.holds=m.v; return o}),
     energy:EN,confidence:0.8};
+  const mine=MO.filter(m=>m.by==='renjith');
+  out.verified=mine.map(m=>({at:m.at,kind:m.kind,by:'renjith'}));
+  out.change_log=(typeof LOG!=='undefined')?LOG.filter(x=>x.kind!=='RECIPE'):[];
+  out.recipe_complaints=(typeof LOG!=='undefined')?LOG.filter(x=>x.kind==='RECIPE'):[];
+  out.made_by.edits=out.change_log.length;
+  out.made_by.note='Map fixes were snapped to the grid the field belongs on: drops, quiets and '+
+    'chapter boundaries to downbeats or four-bar lines, stops to any beat. A human is reliable to '+
+    'about 200 ms and the grid is known to ~10 ms, so snapping turns a sloppy click into an exact '+
+    'musical fact. Anything in `verified` was placed by a human and is truth; the rest is model '+
+    'output and is not.';
   const b=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download='the-nights.corrected.map.json';a.click()}
+  a.download='the-nights.corrected.map.json';a.click();
+  if(out.recipe_complaints.length){
+    const c=new Blob([JSON.stringify(out.recipe_complaints,null,2)],{type:'application/json'});
+    const a2=document.createElement('a');a2.href=URL.createObjectURL(c);
+    a2.download='recipe-complaints.json';a2.click()}}
 
 $('#grid').textContent=(60/PER).toFixed(2)+' bpm · '+BEATS.length+' beats';
 $('#rig').textContent=LAYOUT.fixtures.length+' fixtures · 6 par · 4 up · 4 head · 2 strobe · 2 strip';
@@ -666,5 +891,5 @@ $('#chips').innerHTML=[['intro',2],['verse',18],['break 1',32],['build',40],['mi
   ['fog primes',54.8],['the dip',62.3],['DROP 1',63.7],['+1 bar',65.6],['peak',97],['break 2',108],
   ['build 2',116],['DROP 2',139.9],['sub dip',153.7],['return',168.5]]
   .map(function(a){return '<span class="chip" onclick="seek('+a[1]+')">'+a[0]+' · '+mmss(a[1])+'</span>'}).join('');
-fit();setPhase(DBP);setView(0);render();requestAnimationFrame(tick);
+fit();setPhase(DBP);setView(0);drawLog();drawNear();render();requestAnimationFrame(tick);
 </script>
