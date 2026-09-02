@@ -133,7 +133,7 @@
         <button class="btn on" id="dr" onclick="DRIFT=!DRIFT;this.classList.toggle('on')">on</button></div>
       <div class="row"><label>quality</label>
         <button class="btn on" id="ql" onclick="QUAL=QUAL?0:1;this.classList.toggle('on');
-          this.textContent=QUAL?'high':'fast';render()">high</button></div>
+          this.textContent=QUAL?'high':'fast';render()">high + bloom</button></div>
     </div>
 
     <div class="card"><h3>The four clocks</h3>
@@ -461,6 +461,11 @@ function lookFrame(t,L){
   // position deliberately ignores `stop` -- a real head holds its aim while its
   // lamp goes dark. Only `spotlight`, whose crossfade is 0.9 s, asks for stillness.
   const still=(L==='spotlight')?0.06:1;
+  // Real design alternates truss groups: front for a phrase, upstage for the next,
+  // everything at the drop. Having all eight heads lit in every look is why a big
+  // rig can read as flat -- contrast comes from what is OFF.
+  const alt=0.5+0.5*Math.cos(2*Math.PI*(t/(32*PER)));   // one cycle per two phrases
+  const bothTrusses=(L==='drop'||L==='flash')?1:0;
   HEADS.forEach(function(id,i){
     const G=GEO[id];
     // fan and mirror come from WHERE the head hangs, so a rig with a different
@@ -476,6 +481,8 @@ function lookFrame(t,L){
     let pan =cl(0.5 +(lerp(pSway,pCirc,shape))*still);
     // the upstage truss aims out over the crowd; the front truss aims down
     let tilt=cl((back?0.62:0.42)+(lerp(tSway,tCirc,shape))*still);
+    const share=back?(1-alt):alt;
+    const gate=bothTrusses?1:(0.10+0.90*share);
     let c=fixColour(t,L,'head',G.xn,e), lv=0, hz=0;
     if(off){c=[0,0,0]}
     else if(L==='flash'){lv=1}
@@ -493,7 +500,7 @@ function lookFrame(t,L){
       if(L==='drop'){const[d,s]=since('drop',t,8);
         if(s!==null&&s<BAR) hz=Math.min(CAP,1.6+2.2*(d.v??0.9))}
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip).toFixed(3),
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*gate).toFixed(3),
             pan:+pan.toFixed(3),tilt:+tilt.toFixed(3),strobe:+hz.toFixed(3)})});
 
   // 2 strobes: ramped in and out, never a hard gate
@@ -559,19 +566,35 @@ function frame(t){const ws=lookWeights(t);
   if(ws.length===1) return lookFrame(t,ws[0][0]);
   return blend(lookFrame(t,ws[0][0]),lookFrame(t,ws[1][0]),ws[1][1])}
 
-/* ================= 3-D renderer, no dependencies ================= */
+/* ================= renderer v2 =================
+   v1 optimised the data and neglected the image. Five things were wrong and all
+   five are image problems, not frame problems:
+     no bloom, a room that was not dark, flat banded beams, no floor reflection,
+     and no sense of a place.                                                  */
 const cv=$('#room'),cx=cv.getContext('2d');
+const OC=document.createElement('canvas'), ox=OC.getContext('2d');   // scene buffer
 let CWv=0,CHv=0,DPR=Math.min(2,window.devicePixelRatio||1),QUAL=1;
-function fit(){const w=cv.clientWidth||1000;CWv=w;CHv=Math.round(w*0.585);
+let g=cx;                                        // the context currently drawn into
+function fit(){const st=document.getElementById('stage');
+  CWv=st.clientWidth||1000; CHv=st.clientHeight||Math.round(CWv*0.585);
   cv.width=Math.round(CWv*DPR);cv.height=Math.round(CHv*DPR);
-  cx.setTransform(DPR,0,0,DPR,0,0)}
-new ResizeObserver(fit).observe(cv);
+  OC.width=cv.width;OC.height=cv.height;
+  cx.setTransform(DPR,0,0,DPR,0,0);ox.setTransform(DPR,0,0,DPR,0,0)}
+new ResizeObserver(function(){fit();if(typeof render==='function')render()})
+  .observe(document.getElementById('stage'));
+function fullscreen(){const st=document.getElementById('stage');
+  if(document.fullscreenElement) document.exitFullscreen();
+  else if(st.requestFullscreen) st.requestFullscreen();
+  else if(st.webkitRequestFullscreen) st.webkitRequestFullscreen()}
+document.addEventListener('fullscreenchange',function(){setTimeout(function(){fit();render()},60)});
 
 const ROOM={w:8,h:3.4,d:6};
-const VIEWS=[{eye:[4.0,1.55,-6.6],at:[4.0,1.45,3.4],fov:56},
-             {eye:[-2.9,1.95,-2.6],at:[4.4,1.25,3.8],fov:60},
-             {eye:[4.0,4.3,-3.0],at:[4.0,0.15,3.4],fov:64},
-             {eye:[4.0,1.30,4.9],at:[4.0,2.30,-1.0],fov:66}];
+/* lower, wider, in the crowd looking up at the trusses -- an eye-level box at
+   56 degrees reads as an architectural diagram */
+const VIEWS=[{eye:[4.0,1.35,-3.4],at:[4.0,2.05,4.2],fov:74},
+             {eye:[-1.4,1.15,-1.2],at:[4.6,1.90,4.6],fov:76},
+             {eye:[4.0,3.15,-1.2],at:[4.0,0.20,4.0],fov:78},
+             {eye:[4.0,1.05,5.2],at:[4.0,2.60,-1.5],fov:80}];
 let CAM={...VIEWS[0]};
 function setView(i){VIEW=i;[0,1,2,3].forEach(j=>{const b=$('#v'+j);if(b)b.classList.toggle('on',i===j)});
   CAM={...VIEWS[i]};render()}
@@ -584,117 +607,135 @@ function proj(p,cam){
   const uy=[rx[1]*fz[2]-rx[2]*fz[1],rx[2]*fz[0]-rx[0]*fz[2],rx[0]*fz[1]-rx[1]*fz[0]];
   const d=[p[0]-cam.eye[0],p[1]-cam.eye[1],p[2]-cam.eye[2]];
   const zz=d[0]*fz[0]+d[1]*fz[1]+d[2]*fz[2];
-  if(zz<=0.08) return null;
+  if(zz<=0.06) return null;
   const xx=d[0]*rx[0]+d[1]*rx[1]+d[2]*rx[2];
   const yy=d[0]*uy[0]+d[1]*uy[1]+d[2]*uy[2];
   const k=(CHv*0.5)/Math.tan(cam.fov*Math.PI/360);
   return {x:CWv/2+k*xx/zz,y:CHv/2-k*yy/zz,z:zz,s:k/zz}}
 
-/* Nothing here counts fixtures. Same lesson as the recipe: the renderer reads
-   the rig from layout.json, so adding four heads needs no code change. */
 const POS={};
 LAYOUT.fixtures.forEach(f=>{POS[f.id]=[f.at[0],f.at[1],f.at[2]]});
 const OF=k=>LAYOUT.fixtures.filter(f=>f.kind===k).map(f=>f.id);
-const R_PARS=OF('par'), R_UPS=OF('uplight'), R_HEADS=OF('head'),
-      R_STROBES=OF('strobe'), R_STRIPS=OF('strip');
+const R_PARS=OF('par'),R_UPS=OF('uplight'),R_HEADS=OF('head'),
+      R_STROBES=OF('strobe'),R_STRIPS=OF('strip');
 const PAR_AIM={};
 R_PARS.forEach(function(id){const p=POS[id];
-  // a PAR washes the floor just downstage of itself, angled toward the centre
-  PAR_AIM[id]=[p[0]+(4.0-p[0])*0.30, 0, Math.max(1.1,p[2]-3.6)]});
+  PAR_AIM[id]=[p[0]+(4.0-p[0])*0.34,0,Math.max(0.9,p[2]-3.9)]});
 const TRUSS=(function(){const m={};LAYOUT.fixtures.forEach(function(f){
   if(f.kind==='head'||f.kind==='strobe'){const k=f.at[2].toFixed(1);
-    (m[k]=m[k]||[]).push([f.at[0],f.at[1]])}});return m})();
+    m[k]=Math.max(m[k]||0,f.at[1])}});return m})();
+/* tight beams. A real head is 5-15 degrees; v1 used a wide cone that read as a blob */
+const SPREAD={head:0.19,par:0.62,uplight:0.34,strobe:1.25};
 
 function headAim(id,pan,tilt){
   const p=POS[id];
   const yaw=(pan-0.5)*2*(58*Math.PI/180);
-  const pit=0.22+tilt*1.02;
+  const pit=0.20+tilt*1.10;
   const dir=[Math.sin(pit)*Math.sin(yaw),-Math.cos(pit),Math.sin(pit)*Math.cos(yaw)];
-  const s=Math.min(9.5,p[1]/Math.max(Math.cos(pit),0.12));
+  const s=Math.min(10.5,p[1]/Math.max(Math.cos(pit),0.10));
   return [p[0]+dir[0]*s,Math.max(0,p[1]+dir[1]*s),p[2]+dir[2]*s]}
 
 function poly(pts,fill){for(const q of pts) if(!q) return;
-  cx.beginPath();cx.moveTo(pts[0].x,pts[0].y);
-  for(let i=1;i<pts.length;i++)cx.lineTo(pts[i].x,pts[i].y);
-  cx.closePath();cx.fillStyle=fill;cx.fill()}
+  g.beginPath();g.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++)g.lineTo(pts[i].x,pts[i].y);
+  g.closePath();g.fillStyle=fill;g.fill()}
 
-function beam(src,aim,c,lv,haze,spread,rings){
-  if(lv<0.005) return;
+/* A beam is three nested cones -- wide and faint, medium, and a narrow hot core.
+   Additive, so the profile across the beam falls off instead of banding. */
+function cone(src,aim,c,lv,haze,spread,mul){
   const dir=[aim[0]-src[0],aim[1]-src[1],aim[2]-src[2]];
   const len=Math.hypot(dir[0],dir[1],dir[2]); if(len<0.05) return;
   const u=[dir[0]/len,dir[1]/len,dir[2]/len];
-  let pv=[u[2],0,-u[0]]; const pl=Math.hypot(pv[0],pv[1],pv[2])||1;
-  pv=[pv[0]/pl,0,pv[2]/pl];
-  const R=rings||(QUAL?5:3), r0=0.07, r1=spread;
-  cx.globalCompositeOperation='lighter';
+  let pv=[u[2],0,-u[0]]; const pl=Math.hypot(pv[0],pv[1],pv[2])||1; pv=[pv[0]/pl,0,pv[2]/pl];
+  const R=QUAL?6:3;
   for(let i=0;i<R;i++){
     const t0=i/R,t1=(i+1)/R;
     const mk=(tt,rr)=>{const q=[src[0]+u[0]*len*tt,src[1]+u[1]*len*tt,src[2]+u[2]*len*tt];
       return [proj([q[0]-pv[0]*rr,q[1],q[2]-pv[2]*rr],CAM),
               proj([q[0]+pv[0]*rr,q[1],q[2]+pv[2]*rr],CAM)]};
+    const r0=0.035*mul, r1=spread*mul;
     const A=mk(t0,r0+(r1-r0)*t0), B=mk(t1,r0+(r1-r0)*t1);
-    const al=lv*(1-t0)*(1-t0)*(0.05+0.34*haze);
-    poly([A[0],A[1],B[1],B[0]],'rgba('+c[0]+','+c[1]+','+c[2]+','+al.toFixed(4)+')')}
-  cx.globalCompositeOperation='source-over'}
+    const al=lv*Math.pow(1-t0,1.6)*(0.06+0.40*haze)/mul;
+    poly([A[0],A[1],B[1],B[0]],'rgba('+c[0]+','+c[1]+','+c[2]+','+al.toFixed(4)+')')}}
+function beam(src,aim,c,lv,haze,spread){
+  if(lv<0.006) return;
+  g.globalCompositeOperation='lighter';
+  cone(src,aim,c,lv,haze,spread,2.6);          // outer glow
+  cone(src,aim,c,lv,haze,spread,1.0);          // body
+  cone(src,aim,[Math.min(255,c[0]+70),Math.min(255,c[1]+70),Math.min(255,c[2]+70)],
+       lv,haze,spread,0.34);                    // hot core
+  g.globalCompositeOperation='source-over'}
+
+/* a polished floor is geometrically exact: mirror source and aim through y=0 */
+function beamRefl(src,aim,c,lv,haze,spread){
+  if(lv<0.010) return;
+  beam([src[0],-src[1],src[2]],[aim[0],-aim[1],aim[2]],c,lv*0.34,haze*0.85,spread)}
 
 function pool(a,c,lv,rr){
-  if(lv<0.005) return;
-  const K=QUAL?18:12,pts=[],inn=[];
-  for(let i=0;i<K;i++){const th=i/K*Math.PI*2;
-    pts.push(proj([a[0]+Math.cos(th)*rr,0.004,a[2]+Math.sin(th)*rr*0.8],CAM));
-    inn.push(proj([a[0]+Math.cos(th)*rr*0.44,0.005,a[2]+Math.sin(th)*rr*0.35],CAM))}
-  cx.globalCompositeOperation='lighter';
-  poly(pts,'rgba('+c[0]+','+c[1]+','+c[2]+','+(0.15*lv).toFixed(4)+')');
-  poly(inn,'rgba('+c[0]+','+c[1]+','+c[2]+','+(0.19*lv).toFixed(4)+')');
-  cx.globalCompositeOperation='source-over'}
+  if(lv<0.006) return;
+  const K=QUAL?20:12;
+  g.globalCompositeOperation='lighter';
+  for(const [k,al] of [[1.0,0.13],[0.55,0.17],[0.26,0.24]]){
+    const pts=[];
+    for(let i=0;i<K;i++){const th=i/K*Math.PI*2;
+      pts.push(proj([a[0]+Math.cos(th)*rr*k,0.004,a[2]+Math.sin(th)*rr*k*0.78],CAM))}
+    poly(pts,'rgba('+c[0]+','+c[1]+','+c[2]+','+(al*lv).toFixed(4)+')')}
+  g.globalCompositeOperation='source-over'}
 
 function wallGlow(x,c,lv){
-  if(lv<0.005) return;
-  const a=proj([x-0.85,0.0,ROOM.d-0.02],CAM), b=proj([x+0.85,0.0,ROOM.d-0.02],CAM),
-        t2=proj([x+0.85,ROOM.h,ROOM.d-0.02],CAM), t1=proj([x-0.85,ROOM.h,ROOM.d-0.02],CAM);
+  if(lv<0.006) return;
+  const a=proj([x-0.95,0.0,ROOM.d-0.02],CAM), b=proj([x+0.95,0.0,ROOM.d-0.02],CAM),
+        t2=proj([x+0.95,ROOM.h,ROOM.d-0.02],CAM), t1=proj([x-0.95,ROOM.h,ROOM.d-0.02],CAM);
   if(!a||!b||!t1||!t2) return;
-  cx.globalCompositeOperation='lighter';
-  const g=cx.createLinearGradient(a.x,a.y,t1.x,t1.y);
-  g.addColorStop(0,'rgba('+c[0]+','+c[1]+','+c[2]+','+(0.30*lv).toFixed(4)+')');
-  g.addColorStop(1,'rgba('+c[0]+','+c[1]+','+c[2]+',0)');
-  cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.lineTo(t2.x,t2.y);cx.lineTo(t1.x,t1.y);
-  cx.closePath();cx.fillStyle=g;cx.fill();cx.globalCompositeOperation='source-over'}
+  g.globalCompositeOperation='lighter';
+  const gr=g.createLinearGradient(a.x,a.y,t1.x,t1.y);
+  gr.addColorStop(0,'rgba('+c[0]+','+c[1]+','+c[2]+','+(0.34*lv).toFixed(4)+')');
+  gr.addColorStop(0.55,'rgba('+c[0]+','+c[1]+','+c[2]+','+(0.10*lv).toFixed(4)+')');
+  gr.addColorStop(1,'rgba(0,0,0,0)');
+  g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.lineTo(t2.x,t2.y);g.lineTo(t1.x,t1.y);
+  g.closePath();g.fillStyle=gr;g.fill();g.globalCompositeOperation='source-over'}
 
 function body(id,c,lv,kind){
   const q=proj(POS[id],CAM); if(!q) return;
-  const R=Math.max(3.4,(kind==='head'?11:kind==='strobe'?13:8)*q.s/150);
-  if(lv>0.01&&QUAL){cx.globalCompositeOperation='lighter';
-    const g=cx.createRadialGradient(q.x,q.y,1,q.x,q.y,R*6);
-    g.addColorStop(0,'rgba('+c[0]+','+c[1]+','+c[2]+','+(0.85*lv).toFixed(3)+')');
-    g.addColorStop(0.3,'rgba('+c[0]+','+c[1]+','+c[2]+','+(0.26*lv).toFixed(3)+')');
-    g.addColorStop(1,'rgba(0,0,0,0)');
-    cx.fillStyle=g;cx.beginPath();cx.arc(q.x,q.y,R*6,0,7);cx.fill();
-    cx.globalCompositeOperation='source-over'}
-  cx.fillStyle='#12161d';cx.strokeStyle='#29313d';cx.lineWidth=1.1;
-  if(kind==='strobe'){cx.beginPath();cx.roundRect(q.x-R*1.5,q.y-R*0.6,R*3,R*1.2,2);cx.fill();cx.stroke();
-    cx.fillStyle='rgba(255,253,248,'+Math.pow(lv,0.6).toFixed(3)+')';
-    cx.beginPath();cx.roundRect(q.x-R*1.2,q.y-R*0.36,R*2.4,R*0.72,1.6);cx.fill()}
-  else{cx.beginPath();cx.arc(q.x,q.y,R,0,7);cx.fill();cx.stroke();
-    cx.fillStyle='rgba('+c[0]+','+c[1]+','+c[2]+','+Math.pow(lv,0.6).toFixed(3)+')';
-    cx.beginPath();cx.arc(q.x,q.y,R*0.6,0,7);cx.fill()}}
+  const R=Math.max(2.4,(kind==='head'?8:kind==='strobe'?11:6)*q.s/170);
+  g.fillStyle='#0a0d12';g.strokeStyle='rgba(255,255,255,.10)';g.lineWidth=1;
+  if(kind==='strobe'){g.beginPath();g.roundRect(q.x-R*1.6,q.y-R*0.6,R*3.2,R*1.2,2);g.fill();g.stroke()}
+  else{g.beginPath();g.arc(q.x,q.y,R,0,7);g.fill();g.stroke()}
+  if(lv>0.01){g.globalCompositeOperation='lighter';
+    g.fillStyle='rgba('+c[0]+','+c[1]+','+c[2]+','+Math.pow(lv,0.55).toFixed(3)+')';
+    g.beginPath();g.arc(q.x,q.y,R*0.66,0,7);g.fill();
+    g.globalCompositeOperation='source-over'}}
 
 function stripDraw(id,px){
   const f=LAYOUT.fixtures.find(x=>x.id===id), y=f.at[1], z=f.at[2], n=px.length;
-  cx.globalCompositeOperation='lighter';
-  for(let i=0;i<n;i++){const c=px[i]; if(c[0]+c[1]+c[2]<7) continue;
+  g.globalCompositeOperation='lighter';
+  for(let i=0;i<n;i++){const c=px[i]; if(c[0]+c[1]+c[2]<8) continue;
     const x0=0.25+(ROOM.w-0.5)*i/n, x1=0.25+(ROOM.w-0.5)*(i+1)/n;
-    poly([proj([x0,y-0.05,z],CAM),proj([x1,y-0.05,z],CAM),
+    poly([proj([x0,y-0.04,z],CAM),proj([x1,y-0.04,z],CAM),
           proj([x1,y+0.07,z],CAM),proj([x0,y+0.07,z],CAM)],
-         'rgba('+c[0]+','+c[1]+','+c[2]+',0.9)');
-    if(QUAL){const m=proj([(x0+x1)/2,y,z],CAM);
-      if(m){const R=Math.max(5,24*m.s/160);
-        const g=cx.createRadialGradient(m.x,m.y,1,m.x,m.y,R);
-        g.addColorStop(0,'rgba('+c[0]+','+c[1]+','+c[2]+',0.26)');g.addColorStop(1,'rgba(0,0,0,0)');
-        cx.fillStyle=g;cx.beginPath();cx.arc(m.x,m.y,R,0,7);cx.fill()}}}
-  cx.globalCompositeOperation='source-over'}
+         'rgba('+c[0]+','+c[1]+','+c[2]+',0.95)');
+    poly([proj([x0,-y+0.04,z],CAM),proj([x1,-y+0.04,z],CAM),
+          proj([x1,-y-0.07,z],CAM),proj([x0,-y-0.07,z],CAM)],
+         'rgba('+c[0]+','+c[1]+','+c[2]+',0.30)');}
+  g.globalCompositeOperation='source-over'}
 
-/* haze as a pure function of t: fog bursts are known, so convolve them
-   analytically instead of smoothing across frames. Scrubbing stays exact. */
+/* a dark crowd in the foreground: scale, occlusion, and instantly a room */
+const CROWD=(function(){const r=[],R=(s=>()=>(s=(s*16807)%2147483647)/2147483647)(7);
+  for(let i=0;i<34;i++) r.push([0.35+R()*7.3, 0.9+R()*2.6, 0.80+R()*0.22, R()]);
+  return r.sort((a,b)=>b[1]-a[1])})();
+function crowd(t,e){
+  CROWD.forEach(function(p){
+    const bob=0.035*Math.sin(2*Math.PI*(t/(2*BAR))+p[3]*6.3)*(0.4+0.9*e);
+    const h=p[2]+bob, q=proj([p[0],h,p[1]],CAM), f=proj([p[0],0,p[1]],CAM);
+    if(!q||!f) return;
+    const w=Math.max(3,0.30*q.s), hh=Math.abs(f.y-q.y);
+    g.fillStyle='rgba(0,0,0,0.94)';
+    g.beginPath();
+    g.moveTo(q.x-w*0.62,f.y); g.lineTo(q.x-w*0.62,q.y+hh*0.30);
+    g.quadraticCurveTo(q.x-w*0.60,q.y,q.x,q.y);
+    g.quadraticCurveTo(q.x+w*0.60,q.y,q.x+w*0.62,q.y+hh*0.30);
+    g.lineTo(q.x+w*0.62,f.y); g.closePath(); g.fill()})}
+
 function hazeAt(t){
   let h=HAZE;
   for(const m of MO) if(m.kind==='drop'){
@@ -703,67 +744,79 @@ function hazeAt(t){
       h+=0.42*filled*Math.exp(-Math.max(0,t-on1)/45)}}
   return Math.min(1,h)}
 
-function drawRoom(f){
+function scene(f){
   const t=f.t;
-  if(DRIFT){const w=0.34*Math.sin(t*0.098),hh=0.12*Math.sin(t*0.071+1.1);
-    CAM={...VIEWS[VIEW]};
-    CAM.eye=[VIEWS[VIEW].eye[0]+w,VIEWS[VIEW].eye[1]+hh,VIEWS[VIEW].eye[2]]}
-  else CAM={...VIEWS[VIEW]};
-  const g0=cx.createLinearGradient(0,0,0,CHv);
-  g0.addColorStop(0,'#040508');g0.addColorStop(1,'#090b11');
-  cx.fillStyle=g0;cx.fillRect(0,0,CWv,CHv);
-  poly([proj([0,0,0],CAM),proj([ROOM.w,0,0],CAM),proj([ROOM.w,0,ROOM.d],CAM),proj([0,0,ROOM.d],CAM)],'#0b0d13');
-  poly([proj([0,0,ROOM.d],CAM),proj([ROOM.w,0,ROOM.d],CAM),
-        proj([ROOM.w,ROOM.h,ROOM.d],CAM),proj([0,ROOM.h,ROOM.d],CAM)],'#080a0f');
-  cx.strokeStyle='rgba(255,255,255,.03)';cx.lineWidth=1;
-  for(let x=0;x<=ROOM.w;x++){const a=proj([x,0,0],CAM),b=proj([x,0,ROOM.d],CAM);
-    if(a&&b){cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
-  for(let z=0;z<=ROOM.d;z++){const a=proj([0,0,z],CAM),b=proj([ROOM.w,0,z],CAM);
-    if(a&&b){cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
-  cx.strokeStyle='rgba(255,255,255,.11)';cx.lineWidth=3;
-  Object.keys(TRUSS).forEach(function(z){
-    const ys=TRUSS[z].map(p=>p[1]), y=Math.max.apply(null,ys);
-    const a=proj([0.3,y,+z],CAM),b=proj([ROOM.w-0.3,y,+z],CAM);
-    if(a&&b){cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}});
-  {const y=2.90,z=5.20,a=proj([0.3,y,z],CAM),b=proj([ROOM.w-0.3,y,z],CAM);
-   if(a&&b){cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
-
+  g.clearRect(0,0,CWv,CHv);
+  g.fillStyle='#000';g.fillRect(0,0,CWv,CHv);                 // near-black, no wash
   const G={};f.fixtures.forEach(o=>G[o.id]=o);
   const hz=hazeAt(t), gm=v=>Math.pow(Math.max(0,v),1/1.7);
-
   const stro=id=>{const o=G[id];return o.strobe>0?o.level*((((t*o.strobe)%1)<0.42)?1:0.03):o.level};
+
+  // trusses, barely there
+  g.strokeStyle='rgba(255,255,255,.055)';g.lineWidth=2.5;
+  Object.keys(TRUSS).forEach(function(z){
+    const a=proj([0.25,TRUSS[z],+z],CAM),b=proj([ROOM.w-0.25,TRUSS[z],+z],CAM);
+    if(a&&b){g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke()}});
+  {const a=proj([0.25,2.90,5.20],CAM),b=proj([ROOM.w-0.25,2.90,5.20],CAM);
+   if(a&&b){g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke()}}
+
   R_UPS.forEach(function(id){const o=G[id],lv=gm(o.level);
     wallGlow(POS[id][0],[o.r,o.g,o.b],lv);
-    beam(POS[id],[POS[id][0],ROOM.h,ROOM.d-0.1],[o.r,o.g,o.b],lv,hz,0.55,4)});
-  R_PARS.forEach(function(id){const o=G[id];pool(PAR_AIM[id],[o.r,o.g,o.b],gm(o.level),1.25)});
+    beam(POS[id],[POS[id][0],ROOM.h,ROOM.d-0.12],[o.r,o.g,o.b],lv,hz,SPREAD.uplight)});
+  R_PARS.forEach(function(id){const o=G[id];pool(PAR_AIM[id],[o.r,o.g,o.b],gm(o.level),1.30)});
   R_HEADS.forEach(function(id){const o=G[id];
-    pool(headAim(id,o.pan,o.tilt),[o.r,o.g,o.b],gm(o.level),0.75)});
-  R_PARS.forEach(function(id){const o=G[id];
-    beam(POS[id],PAR_AIM[id],[o.r,o.g,o.b],gm(o.level),hz,1.05,QUAL?5:3)});
+    pool(headAim(id,o.pan,o.tilt),[o.r,o.g,o.b],gm(o.level),0.42)});
+  // reflections under the floor, then the real thing on top
   R_HEADS.forEach(function(id){const o=G[id];let lv=gm(o.level);
     if(o.strobe>0) lv*=(((t*o.strobe)%1)<0.45)?1:0.06;
-    beam(POS[id],headAim(id,o.pan,o.tilt),[o.r,o.g,o.b],lv,hz,0.58,QUAL?7:4)});
+    beamRefl(POS[id],headAim(id,o.pan,o.tilt),[o.r,o.g,o.b],lv,hz,SPREAD.head)});
+  R_PARS.forEach(function(id){const o=G[id];
+    beamRefl(POS[id],PAR_AIM[id],[o.r,o.g,o.b],gm(o.level),hz,SPREAD.par)});
+  R_PARS.forEach(function(id){const o=G[id];
+    beam(POS[id],PAR_AIM[id],[o.r,o.g,o.b],gm(o.level),hz,SPREAD.par)});
+  R_HEADS.forEach(function(id){const o=G[id];let lv=gm(o.level);
+    if(o.strobe>0) lv*=(((t*o.strobe)%1)<0.45)?1:0.06;
+    beam(POS[id],headAim(id,o.pan,o.tilt),[o.r,o.g,o.b],lv,hz,SPREAD.head)});
   let sf=0;
   R_STROBES.forEach(function(id){const on=stro(id); sf=Math.max(sf,on);
-    const tx=POS[id][0]<4?2.2:5.8;
-    beam(POS[id],[tx,0.35,4.6],[255,253,248],on,hz,1.6,QUAL?6:3);
-    pool([tx,0,4.6],[255,253,248],on*0.6,1.5)});
+    const tx=POS[id][0]<4?2.4:5.6;
+    beam(POS[id],[tx,0.30,4.4],[255,252,246],on,hz,SPREAD.strobe)});
   R_STRIPS.forEach(function(id){stripDraw(id,G[id].pixels)});
   R_PARS.forEach(function(id){const o=G[id];body(id,[o.r,o.g,o.b],gm(o.level),'par')});
   R_UPS.forEach(function(id){const o=G[id];body(id,[o.r,o.g,o.b],gm(o.level),'par')});
   R_HEADS.forEach(function(id){const o=G[id];body(id,[o.r,o.g,o.b],gm(o.level),'head')});
-  R_STROBES.forEach(function(id){body(id,[255,253,248],stro(id),'strobe')});
-  if(hz>0.02){cx.globalCompositeOperation='lighter';
-    cx.fillStyle='rgba(122,142,182,'+(0.010+0.020*hz).toFixed(4)+')';cx.fillRect(0,0,CWv,CHv);
-    cx.globalCompositeOperation='source-over'}
+  R_STROBES.forEach(function(id){body(id,[255,252,246],stro(id),'strobe')});
+  crowd(t,en(t));
+  if(hz>0.02){g.globalCompositeOperation='lighter';
+    g.fillStyle='rgba(96,116,158,'+(0.008+0.016*hz).toFixed(4)+')';g.fillRect(0,0,CWv,CHv);
+    g.globalCompositeOperation='source-over'}
+  window.__haze=hz; window.__sf=sf;
+  if(G.fog_1.level>0){g.fillStyle='#28c98a';g.font='600 12px ui-sans-serif';g.textAlign='left';
+    g.fillText('fog — commanded 9 s early',16,CHv-46)}}
+
+function drawRoom(f){
+  if(DRIFT){const w=0.26*Math.sin(f.t*0.094),hh=0.10*Math.sin(f.t*0.067+1.1);
+    CAM={...VIEWS[VIEW]};
+    CAM.eye=[VIEWS[VIEW].eye[0]+w,VIEWS[VIEW].eye[1]+hh,VIEWS[VIEW].eye[2]]}
+  else CAM={...VIEWS[VIEW]};
+  if(!QUAL){ g=cx; scene(f); return }
+  g=ox; scene(f);                                   // draw into the buffer
+  g=cx;
+  cx.setTransform(1,0,0,1,0,0);
+  cx.globalCompositeOperation='source-over';
+  cx.clearRect(0,0,cv.width,cv.height);
+  cx.drawImage(OC,0,0);
+  /* bloom: two blurred additive passes. Every real club image has glare around
+     a bright source; without it light reads as coloured plastic. */
+  cx.globalCompositeOperation='lighter';
+  cx.filter='blur('+Math.round(7*DPR)+'px)'; cx.globalAlpha=0.62; cx.drawImage(OC,0,0);
+  cx.filter='blur('+Math.round(26*DPR)+'px)';cx.globalAlpha=0.40; cx.drawImage(OC,0,0);
+  cx.filter='none';cx.globalAlpha=1;cx.globalCompositeOperation='source-over';
+  cx.setTransform(DPR,0,0,DPR,0,0);
+  const sf=window.__sf||0;
   if(sf>0.02){cx.globalCompositeOperation='lighter';
-    cx.fillStyle='rgba(255,253,248,'+(0.10*sf).toFixed(3)+')';cx.fillRect(0,0,CWv,CHv);
-    cx.globalCompositeOperation='source-over'}
-  cx.fillStyle='rgba(255,255,255,.19)';cx.font='600 12px ui-monospace,Menlo,monospace';
-  cx.textAlign='right';
-  cx.fillText(chAt(t)+'  ·  e='+en(t).toFixed(2)+'  ·  bar '+(barIdx(t)+1)+'  ·  haze '+hz.toFixed(2),CWv-14,22);
-  if(G.fog_1.level>0){cx.fillStyle='#28c98a';cx.font='600 12px ui-sans-serif';cx.textAlign='left';
-    cx.fillText('fog burst — commanded 9 s early',16,CHv-14)}}
+    cx.fillStyle='rgba(255,252,246,'+(0.13*sf).toFixed(3)+')';cx.fillRect(0,0,CWv,CHv);
+    cx.globalCompositeOperation='source-over'}}
 
 /* ================= the fix loop =================
    A human is reliable to about +/-200 ms; the grid is known to ~10 ms. So a
