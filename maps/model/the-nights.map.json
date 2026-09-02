@@ -1569,5 +1569,5930 @@
       120.767,
       137.911
     ]
+  },
+  "accents": {
+    "of": "drums",
+    "how": "onsets on the lag-corrected Demucs drums stem, prominence>0.055",
+    "note": "Individual percussive events. NOT beats -- 61%% of these do not sit on the grid -- and not moments, which are the six structural kinds. A reader that wants to stab three times at second 2 cannot get those times from `beats` or from `stems`, so this field goes in under the rule: a field goes in when a reader breaks without it.",
+    "events": [
+      {
+        "at": 1.496,
+        "of": "hat",
+        "strength": 0.063,
+        "on_grid": false
+      },
+      {
+        "at": 1.599,
+        "of": "hat",
+        "strength": 0.082,
+        "on_grid": false
+      },
+      {
+        "at": 1.715,
+        "of": "hat",
+        "strength": 0.729,
+        "on_grid": true
+      },
+      {
+        "at": 1.836,
+        "of": "snare",
+        "strength": 0.482,
+        "on_grid": false
+      },
+      {
+        "at": 1.923,
+        "of": "hat",
+        "strength": 0.515,
+        "on_grid": false
+      },
+      {
+        "at": 2.013,
+        "of": "hat",
+        "strength": 0.451,
+        "on_grid": false
+      },
+      {
+        "at": 2.1,
+        "of": "hat",
+        "strength": 0.714,
+        "on_grid": false
+      },
+      {
+        "at": 2.212,
+        "of": "snare",
+        "strength": 0.176,
+        "on_grid": true
+      },
+      {
+        "at": 2.324,
+        "of": "snare",
+        "strength": 0.131,
+        "on_grid": false
+      },
+      {
+        "at": 2.425,
+        "of": "snare",
+        "strength": 0.635,
+        "on_grid": false
+      },
+      {
+        "at": 2.572,
+        "of": "snare",
+        "strength": 0.405,
+        "on_grid": false
+      },
+      {
+        "at": 2.663,
+        "of": "snare",
+        "strength": 0.707,
+        "on_grid": true
+      },
+      {
+        "at": 2.829,
+        "of": "snare",
+        "strength": 0.446,
+        "on_grid": false
+      },
+      {
+        "at": 2.994,
+        "of": "kick",
+        "strength": 0.488,
+        "on_grid": false
+      },
+      {
+        "at": 3.152,
+        "of": "kick",
+        "strength": 0.622,
+        "on_grid": true
+      },
+      {
+        "at": 3.249,
+        "of": "kick",
+        "strength": 0.308,
+        "on_grid": false
+      },
+      {
+        "at": 3.348,
+        "of": "kick",
+        "strength": 0.322,
+        "on_grid": false
+      },
+      {
+        "at": 3.444,
+        "of": "kick",
+        "strength": 0.295,
+        "on_grid": false
+      },
+      {
+        "at": 3.538,
+        "of": "kick",
+        "strength": 0.325,
+        "on_grid": false
+      },
+      {
+        "at": 3.663,
+        "of": "kick",
+        "strength": 0.333,
+        "on_grid": false
+      },
+      {
+        "at": 3.783,
+        "of": "kick",
+        "strength": 0.254,
+        "on_grid": false
+      },
+      {
+        "at": 3.927,
+        "of": "kick",
+        "strength": 0.23,
+        "on_grid": false
+      },
+      {
+        "at": 4.018,
+        "of": "kick",
+        "strength": 0.16,
+        "on_grid": false
+      },
+      {
+        "at": 4.103,
+        "of": "kick",
+        "strength": 0.553,
+        "on_grid": true
+      },
+      {
+        "at": 4.19,
+        "of": "kick",
+        "strength": 0.178,
+        "on_grid": false
+      },
+      {
+        "at": 4.315,
+        "of": "kick",
+        "strength": 0.219,
+        "on_grid": false
+      },
+      {
+        "at": 4.58,
+        "of": "kick",
+        "strength": 0.305,
+        "on_grid": true
+      },
+      {
+        "at": 5.056,
+        "of": "kick",
+        "strength": 0.386,
+        "on_grid": true
+      },
+      {
+        "at": 5.267,
+        "of": "snare",
+        "strength": 0.246,
+        "on_grid": false
+      },
+      {
+        "at": 5.532,
+        "of": "kick",
+        "strength": 0.384,
+        "on_grid": true
+      },
+      {
+        "at": 6.008,
+        "of": "kick",
+        "strength": 0.378,
+        "on_grid": true
+      },
+      {
+        "at": 6.484,
+        "of": "kick",
+        "strength": 0.374,
+        "on_grid": true
+      },
+      {
+        "at": 6.961,
+        "of": "kick",
+        "strength": 0.393,
+        "on_grid": true
+      },
+      {
+        "at": 7.175,
+        "of": "snare",
+        "strength": 0.103,
+        "on_grid": false
+      },
+      {
+        "at": 7.335,
+        "of": "snare",
+        "strength": 0.078,
+        "on_grid": false
+      },
+      {
+        "at": 7.437,
+        "of": "kick",
+        "strength": 0.325,
+        "on_grid": true
+      },
+      {
+        "at": 7.913,
+        "of": "kick",
+        "strength": 0.389,
+        "on_grid": true
+      },
+      {
+        "at": 8.397,
+        "of": "kick",
+        "strength": 0.248,
+        "on_grid": true
+      },
+      {
+        "at": 8.866,
+        "of": "kick",
+        "strength": 0.395,
+        "on_grid": true
+      },
+      {
+        "at": 9.075,
+        "of": "snare",
+        "strength": 0.087,
+        "on_grid": false
+      },
+      {
+        "at": 9.342,
+        "of": "kick",
+        "strength": 0.371,
+        "on_grid": true
+      },
+      {
+        "at": 9.553,
+        "of": "hat",
+        "strength": 0.065,
+        "on_grid": false
+      },
+      {
+        "at": 9.818,
+        "of": "kick",
+        "strength": 0.322,
+        "on_grid": true
+      },
+      {
+        "at": 10.294,
+        "of": "kick",
+        "strength": 0.355,
+        "on_grid": true
+      },
+      {
+        "at": 10.77,
+        "of": "kick",
+        "strength": 0.358,
+        "on_grid": true
+      },
+      {
+        "at": 11.246,
+        "of": "kick",
+        "strength": 0.358,
+        "on_grid": true
+      },
+      {
+        "at": 11.723,
+        "of": "kick",
+        "strength": 0.398,
+        "on_grid": true
+      },
+      {
+        "at": 11.934,
+        "of": "hat",
+        "strength": 0.065,
+        "on_grid": false
+      },
+      {
+        "at": 12.199,
+        "of": "kick",
+        "strength": 0.368,
+        "on_grid": true
+      },
+      {
+        "at": 12.41,
+        "of": "hat",
+        "strength": 0.13,
+        "on_grid": false
+      },
+      {
+        "at": 12.675,
+        "of": "kick",
+        "strength": 0.385,
+        "on_grid": true
+      },
+      {
+        "at": 13.151,
+        "of": "kick",
+        "strength": 0.381,
+        "on_grid": true
+      },
+      {
+        "at": 13.363,
+        "of": "hat",
+        "strength": 0.06,
+        "on_grid": false
+      },
+      {
+        "at": 13.628,
+        "of": "kick",
+        "strength": 0.403,
+        "on_grid": true
+      },
+      {
+        "at": 14.104,
+        "of": "kick",
+        "strength": 0.354,
+        "on_grid": true
+      },
+      {
+        "at": 14.313,
+        "of": "hat",
+        "strength": 0.091,
+        "on_grid": false
+      },
+      {
+        "at": 14.58,
+        "of": "kick",
+        "strength": 0.393,
+        "on_grid": true
+      },
+      {
+        "at": 15.056,
+        "of": "kick",
+        "strength": 0.386,
+        "on_grid": true
+      },
+      {
+        "at": 15.532,
+        "of": "kick",
+        "strength": 0.379,
+        "on_grid": true
+      },
+      {
+        "at": 16.008,
+        "of": "kick",
+        "strength": 0.368,
+        "on_grid": true
+      },
+      {
+        "at": 16.485,
+        "of": "kick",
+        "strength": 0.395,
+        "on_grid": true
+      },
+      {
+        "at": 16.961,
+        "of": "kick",
+        "strength": 0.375,
+        "on_grid": true
+      },
+      {
+        "at": 17.179,
+        "of": "hat",
+        "strength": 0.056,
+        "on_grid": false
+      },
+      {
+        "at": 17.437,
+        "of": "kick",
+        "strength": 0.31,
+        "on_grid": true
+      },
+      {
+        "at": 17.659,
+        "of": "hat",
+        "strength": 0.89,
+        "on_grid": false
+      },
+      {
+        "at": 17.897,
+        "of": "hat",
+        "strength": 0.87,
+        "on_grid": true
+      },
+      {
+        "at": 18.126,
+        "of": "hat",
+        "strength": 0.358,
+        "on_grid": false
+      },
+      {
+        "at": 18.374,
+        "of": "hat",
+        "strength": 0.915,
+        "on_grid": true
+      },
+      {
+        "at": 18.603,
+        "of": "hat",
+        "strength": 0.155,
+        "on_grid": false
+      },
+      {
+        "at": 18.853,
+        "of": "snare",
+        "strength": 0.937,
+        "on_grid": true
+      },
+      {
+        "at": 19.077,
+        "of": "hat",
+        "strength": 0.526,
+        "on_grid": false
+      },
+      {
+        "at": 19.329,
+        "of": "hat",
+        "strength": 0.924,
+        "on_grid": true
+      },
+      {
+        "at": 19.56,
+        "of": "hat",
+        "strength": 0.23,
+        "on_grid": false
+      },
+      {
+        "at": 19.802,
+        "of": "hat",
+        "strength": 0.865,
+        "on_grid": true
+      },
+      {
+        "at": 20.041,
+        "of": "hat",
+        "strength": 0.214,
+        "on_grid": false
+      },
+      {
+        "at": 20.278,
+        "of": "hat",
+        "strength": 0.91,
+        "on_grid": true
+      },
+      {
+        "at": 20.505,
+        "of": "hat",
+        "strength": 0.392,
+        "on_grid": false
+      },
+      {
+        "at": 20.754,
+        "of": "hat",
+        "strength": 0.991,
+        "on_grid": true
+      },
+      {
+        "at": 20.991,
+        "of": "hat",
+        "strength": 0.198,
+        "on_grid": false
+      },
+      {
+        "at": 21.23,
+        "of": "hat",
+        "strength": 0.952,
+        "on_grid": true
+      },
+      {
+        "at": 21.466,
+        "of": "hat",
+        "strength": 0.193,
+        "on_grid": false
+      },
+      {
+        "at": 21.71,
+        "of": "snare",
+        "strength": 0.898,
+        "on_grid": true
+      },
+      {
+        "at": 21.935,
+        "of": "snare",
+        "strength": 0.377,
+        "on_grid": false
+      },
+      {
+        "at": 22.206,
+        "of": "kick",
+        "strength": 0.849,
+        "on_grid": true
+      },
+      {
+        "at": 22.415,
+        "of": "hat",
+        "strength": 0.338,
+        "on_grid": false
+      },
+      {
+        "at": 22.689,
+        "of": "kick",
+        "strength": 0.852,
+        "on_grid": true
+      },
+      {
+        "at": 22.88,
+        "of": "hat",
+        "strength": 0.274,
+        "on_grid": false
+      },
+      {
+        "at": 23.135,
+        "of": "hat",
+        "strength": 0.888,
+        "on_grid": true
+      },
+      {
+        "at": 23.386,
+        "of": "hat",
+        "strength": 0.291,
+        "on_grid": false
+      },
+      {
+        "at": 23.642,
+        "of": "kick",
+        "strength": 0.795,
+        "on_grid": true
+      },
+      {
+        "at": 23.832,
+        "of": "hat",
+        "strength": 0.151,
+        "on_grid": false
+      },
+      {
+        "at": 24.11,
+        "of": "kick",
+        "strength": 0.917,
+        "on_grid": true
+      },
+      {
+        "at": 24.312,
+        "of": "hat",
+        "strength": 0.307,
+        "on_grid": false
+      },
+      {
+        "at": 24.4,
+        "of": "hat",
+        "strength": 0.074,
+        "on_grid": false
+      },
+      {
+        "at": 24.587,
+        "of": "kick",
+        "strength": 0.865,
+        "on_grid": true
+      },
+      {
+        "at": 24.806,
+        "of": "hat",
+        "strength": 0.213,
+        "on_grid": false
+      },
+      {
+        "at": 25.063,
+        "of": "kick",
+        "strength": 0.853,
+        "on_grid": true
+      },
+      {
+        "at": 25.29,
+        "of": "hat",
+        "strength": 0.102,
+        "on_grid": false
+      },
+      {
+        "at": 25.547,
+        "of": "kick",
+        "strength": 0.865,
+        "on_grid": true
+      },
+      {
+        "at": 25.766,
+        "of": "hat",
+        "strength": 0.083,
+        "on_grid": false
+      },
+      {
+        "at": 26.015,
+        "of": "kick",
+        "strength": 0.84,
+        "on_grid": true
+      },
+      {
+        "at": 26.233,
+        "of": "hat",
+        "strength": 0.188,
+        "on_grid": false
+      },
+      {
+        "at": 26.468,
+        "of": "hat",
+        "strength": 0.94,
+        "on_grid": true
+      },
+      {
+        "at": 26.71,
+        "of": "hat",
+        "strength": 0.147,
+        "on_grid": false
+      },
+      {
+        "at": 26.944,
+        "of": "hat",
+        "strength": 0.874,
+        "on_grid": true
+      },
+      {
+        "at": 27.188,
+        "of": "hat",
+        "strength": 0.228,
+        "on_grid": false
+      },
+      {
+        "at": 27.424,
+        "of": "hat",
+        "strength": 0.875,
+        "on_grid": true
+      },
+      {
+        "at": 27.664,
+        "of": "hat",
+        "strength": 0.209,
+        "on_grid": false
+      },
+      {
+        "at": 27.92,
+        "of": "kick",
+        "strength": 0.759,
+        "on_grid": true
+      },
+      {
+        "at": 28.137,
+        "of": "hat",
+        "strength": 0.27,
+        "on_grid": false
+      },
+      {
+        "at": 28.377,
+        "of": "hat",
+        "strength": 0.859,
+        "on_grid": true
+      },
+      {
+        "at": 28.62,
+        "of": "hat",
+        "strength": 0.203,
+        "on_grid": false
+      },
+      {
+        "at": 28.88,
+        "of": "kick",
+        "strength": 0.839,
+        "on_grid": true
+      },
+      {
+        "at": 29.111,
+        "of": "hat",
+        "strength": 0.188,
+        "on_grid": false
+      },
+      {
+        "at": 29.329,
+        "of": "snare",
+        "strength": 0.825,
+        "on_grid": true
+      },
+      {
+        "at": 29.57,
+        "of": "hat",
+        "strength": 0.313,
+        "on_grid": false
+      },
+      {
+        "at": 29.801,
+        "of": "hat",
+        "strength": 0.873,
+        "on_grid": true
+      },
+      {
+        "at": 30.047,
+        "of": "hat",
+        "strength": 0.229,
+        "on_grid": false
+      },
+      {
+        "at": 30.308,
+        "of": "kick",
+        "strength": 0.843,
+        "on_grid": true
+      },
+      {
+        "at": 30.478,
+        "of": "hat",
+        "strength": 0.315,
+        "on_grid": false
+      },
+      {
+        "at": 30.572,
+        "of": "hat",
+        "strength": 0.058,
+        "on_grid": false
+      },
+      {
+        "at": 30.784,
+        "of": "kick",
+        "strength": 0.833,
+        "on_grid": true
+      },
+      {
+        "at": 30.995,
+        "of": "hat",
+        "strength": 0.148,
+        "on_grid": false
+      },
+      {
+        "at": 31.231,
+        "of": "snare",
+        "strength": 0.592,
+        "on_grid": true
+      },
+      {
+        "at": 31.326,
+        "of": "kick",
+        "strength": 0.323,
+        "on_grid": false
+      },
+      {
+        "at": 31.416,
+        "of": "snare",
+        "strength": 0.195,
+        "on_grid": false
+      },
+      {
+        "at": 31.521,
+        "of": "kick",
+        "strength": 0.242,
+        "on_grid": false
+      },
+      {
+        "at": 31.622,
+        "of": "hat",
+        "strength": 0.112,
+        "on_grid": false
+      },
+      {
+        "at": 31.713,
+        "of": "kick",
+        "strength": 0.255,
+        "on_grid": true
+      },
+      {
+        "at": 31.863,
+        "of": "hat",
+        "strength": 0.325,
+        "on_grid": false
+      },
+      {
+        "at": 31.972,
+        "of": "hat",
+        "strength": 0.28,
+        "on_grid": false
+      },
+      {
+        "at": 32.094,
+        "of": "hat",
+        "strength": 0.406,
+        "on_grid": false
+      },
+      {
+        "at": 32.197,
+        "of": "hat",
+        "strength": 0.535,
+        "on_grid": true
+      },
+      {
+        "at": 33.195,
+        "of": "kick",
+        "strength": 0.402,
+        "on_grid": false
+      },
+      {
+        "at": 33.366,
+        "of": "kick",
+        "strength": 0.158,
+        "on_grid": false
+      },
+      {
+        "at": 33.46,
+        "of": "kick",
+        "strength": 0.208,
+        "on_grid": false
+      },
+      {
+        "at": 33.568,
+        "of": "kick",
+        "strength": 0.068,
+        "on_grid": false
+      },
+      {
+        "at": 46.095,
+        "of": "hat",
+        "strength": 0.063,
+        "on_grid": false
+      },
+      {
+        "at": 46.312,
+        "of": "hat",
+        "strength": 0.083,
+        "on_grid": false
+      },
+      {
+        "at": 46.401,
+        "of": "snare",
+        "strength": 0.164,
+        "on_grid": false
+      },
+      {
+        "at": 46.497,
+        "of": "snare",
+        "strength": 0.094,
+        "on_grid": true
+      },
+      {
+        "at": 46.604,
+        "of": "hat",
+        "strength": 0.138,
+        "on_grid": false
+      },
+      {
+        "at": 46.763,
+        "of": "hat",
+        "strength": 0.182,
+        "on_grid": false
+      },
+      {
+        "at": 46.882,
+        "of": "hat",
+        "strength": 0.134,
+        "on_grid": false
+      },
+      {
+        "at": 46.978,
+        "of": "hat",
+        "strength": 0.213,
+        "on_grid": true
+      },
+      {
+        "at": 47.086,
+        "of": "hat",
+        "strength": 0.216,
+        "on_grid": false
+      },
+      {
+        "at": 47.188,
+        "of": "hat",
+        "strength": 0.25,
+        "on_grid": false
+      },
+      {
+        "at": 47.33,
+        "of": "hat",
+        "strength": 0.238,
+        "on_grid": false
+      },
+      {
+        "at": 47.419,
+        "of": "hat",
+        "strength": 0.104,
+        "on_grid": true
+      },
+      {
+        "at": 47.911,
+        "of": "hat",
+        "strength": 0.089,
+        "on_grid": true
+      },
+      {
+        "at": 48.038,
+        "of": "hat",
+        "strength": 0.111,
+        "on_grid": false
+      },
+      {
+        "at": 48.153,
+        "of": "hat",
+        "strength": 0.261,
+        "on_grid": false
+      },
+      {
+        "at": 48.253,
+        "of": "hat",
+        "strength": 0.424,
+        "on_grid": false
+      },
+      {
+        "at": 48.374,
+        "of": "hat",
+        "strength": 1.0,
+        "on_grid": true
+      },
+      {
+        "at": 48.469,
+        "of": "kick",
+        "strength": 0.779,
+        "on_grid": false
+      },
+      {
+        "at": 48.564,
+        "of": "kick",
+        "strength": 0.535,
+        "on_grid": false
+      },
+      {
+        "at": 48.724,
+        "of": "kick",
+        "strength": 0.467,
+        "on_grid": false
+      },
+      {
+        "at": 48.89,
+        "of": "hat",
+        "strength": 0.468,
+        "on_grid": true
+      },
+      {
+        "at": 49.017,
+        "of": "kick",
+        "strength": 0.306,
+        "on_grid": false
+      },
+      {
+        "at": 49.105,
+        "of": "hat",
+        "strength": 0.269,
+        "on_grid": false
+      },
+      {
+        "at": 49.203,
+        "of": "kick",
+        "strength": 0.25,
+        "on_grid": false
+      },
+      {
+        "at": 49.301,
+        "of": "kick",
+        "strength": 0.131,
+        "on_grid": true
+      },
+      {
+        "at": 49.401,
+        "of": "kick",
+        "strength": 0.277,
+        "on_grid": false
+      },
+      {
+        "at": 49.512,
+        "of": "hat",
+        "strength": 0.147,
+        "on_grid": false
+      },
+      {
+        "at": 49.618,
+        "of": "hat",
+        "strength": 0.121,
+        "on_grid": false
+      },
+      {
+        "at": 49.706,
+        "of": "hat",
+        "strength": 0.111,
+        "on_grid": false
+      },
+      {
+        "at": 49.871,
+        "of": "hat",
+        "strength": 0.187,
+        "on_grid": false
+      },
+      {
+        "at": 49.958,
+        "of": "hat",
+        "strength": 0.08,
+        "on_grid": false
+      },
+      {
+        "at": 50.083,
+        "of": "hat",
+        "strength": 0.159,
+        "on_grid": false
+      },
+      {
+        "at": 50.333,
+        "of": "hat",
+        "strength": 0.236,
+        "on_grid": false
+      },
+      {
+        "at": 50.45,
+        "of": "hat",
+        "strength": 0.064,
+        "on_grid": false
+      },
+      {
+        "at": 50.558,
+        "of": "hat",
+        "strength": 0.143,
+        "on_grid": false
+      },
+      {
+        "at": 50.786,
+        "of": "hat",
+        "strength": 0.3,
+        "on_grid": true
+      },
+      {
+        "at": 50.871,
+        "of": "hat",
+        "strength": 0.107,
+        "on_grid": false
+      },
+      {
+        "at": 51.008,
+        "of": "hat",
+        "strength": 0.148,
+        "on_grid": false
+      },
+      {
+        "at": 51.094,
+        "of": "hat",
+        "strength": 0.061,
+        "on_grid": false
+      },
+      {
+        "at": 51.264,
+        "of": "hat",
+        "strength": 0.336,
+        "on_grid": true
+      },
+      {
+        "at": 51.377,
+        "of": "hat",
+        "strength": 0.127,
+        "on_grid": false
+      },
+      {
+        "at": 51.519,
+        "of": "hat",
+        "strength": 0.188,
+        "on_grid": false
+      },
+      {
+        "at": 51.647,
+        "of": "snare",
+        "strength": 0.09,
+        "on_grid": false
+      },
+      {
+        "at": 51.744,
+        "of": "hat",
+        "strength": 0.299,
+        "on_grid": true
+      },
+      {
+        "at": 51.849,
+        "of": "hat",
+        "strength": 0.113,
+        "on_grid": false
+      },
+      {
+        "at": 51.948,
+        "of": "hat",
+        "strength": 0.136,
+        "on_grid": false
+      },
+      {
+        "at": 52.039,
+        "of": "hat",
+        "strength": 0.071,
+        "on_grid": false
+      },
+      {
+        "at": 52.217,
+        "of": "hat",
+        "strength": 0.254,
+        "on_grid": true
+      },
+      {
+        "at": 52.303,
+        "of": "hat",
+        "strength": 0.129,
+        "on_grid": false
+      },
+      {
+        "at": 52.455,
+        "of": "hat",
+        "strength": 0.142,
+        "on_grid": false
+      },
+      {
+        "at": 52.714,
+        "of": "hat",
+        "strength": 0.236,
+        "on_grid": false
+      },
+      {
+        "at": 52.809,
+        "of": "hat",
+        "strength": 0.066,
+        "on_grid": false
+      },
+      {
+        "at": 52.941,
+        "of": "hat",
+        "strength": 0.14,
+        "on_grid": false
+      },
+      {
+        "at": 53.164,
+        "of": "hat",
+        "strength": 0.291,
+        "on_grid": true
+      },
+      {
+        "at": 53.256,
+        "of": "hat",
+        "strength": 0.106,
+        "on_grid": false
+      },
+      {
+        "at": 53.417,
+        "of": "hat",
+        "strength": 0.162,
+        "on_grid": false
+      },
+      {
+        "at": 53.645,
+        "of": "hat",
+        "strength": 0.203,
+        "on_grid": true
+      },
+      {
+        "at": 53.733,
+        "of": "hat",
+        "strength": 0.094,
+        "on_grid": false
+      },
+      {
+        "at": 53.887,
+        "of": "hat",
+        "strength": 0.115,
+        "on_grid": false
+      },
+      {
+        "at": 54.092,
+        "of": "hat",
+        "strength": 0.248,
+        "on_grid": true
+      },
+      {
+        "at": 54.2,
+        "of": "hat",
+        "strength": 0.114,
+        "on_grid": false
+      },
+      {
+        "at": 54.346,
+        "of": "hat",
+        "strength": 0.116,
+        "on_grid": false
+      },
+      {
+        "at": 54.437,
+        "of": "hat",
+        "strength": 0.063,
+        "on_grid": false
+      },
+      {
+        "at": 54.598,
+        "of": "hat",
+        "strength": 0.301,
+        "on_grid": true
+      },
+      {
+        "at": 54.683,
+        "of": "hat",
+        "strength": 0.11,
+        "on_grid": false
+      },
+      {
+        "at": 54.846,
+        "of": "hat",
+        "strength": 0.123,
+        "on_grid": false
+      },
+      {
+        "at": 55.069,
+        "of": "hat",
+        "strength": 0.257,
+        "on_grid": true
+      },
+      {
+        "at": 55.16,
+        "of": "hat",
+        "strength": 0.062,
+        "on_grid": false
+      },
+      {
+        "at": 55.318,
+        "of": "hat",
+        "strength": 0.151,
+        "on_grid": false
+      },
+      {
+        "at": 55.411,
+        "of": "hat",
+        "strength": 0.08,
+        "on_grid": false
+      },
+      {
+        "at": 55.546,
+        "of": "hat",
+        "strength": 0.206,
+        "on_grid": true
+      },
+      {
+        "at": 55.65,
+        "of": "hat",
+        "strength": 0.087,
+        "on_grid": false
+      },
+      {
+        "at": 55.789,
+        "of": "hat",
+        "strength": 0.137,
+        "on_grid": false
+      },
+      {
+        "at": 56.048,
+        "of": "hat",
+        "strength": 0.201,
+        "on_grid": false
+      },
+      {
+        "at": 56.243,
+        "of": "hat",
+        "strength": 0.104,
+        "on_grid": false
+      },
+      {
+        "at": 56.517,
+        "of": "hat",
+        "strength": 0.193,
+        "on_grid": true
+      },
+      {
+        "at": 56.606,
+        "of": "hat",
+        "strength": 0.061,
+        "on_grid": false
+      },
+      {
+        "at": 56.709,
+        "of": "hat",
+        "strength": 0.12,
+        "on_grid": false
+      },
+      {
+        "at": 56.995,
+        "of": "hat",
+        "strength": 0.176,
+        "on_grid": true
+      },
+      {
+        "at": 57.087,
+        "of": "hat",
+        "strength": 0.063,
+        "on_grid": false
+      },
+      {
+        "at": 57.201,
+        "of": "hat",
+        "strength": 0.113,
+        "on_grid": false
+      },
+      {
+        "at": 57.474,
+        "of": "hat",
+        "strength": 0.221,
+        "on_grid": false
+      },
+      {
+        "at": 57.678,
+        "of": "hat",
+        "strength": 0.121,
+        "on_grid": false
+      },
+      {
+        "at": 57.931,
+        "of": "hat",
+        "strength": 0.19,
+        "on_grid": true
+      },
+      {
+        "at": 58.041,
+        "of": "hat",
+        "strength": 0.083,
+        "on_grid": false
+      },
+      {
+        "at": 58.155,
+        "of": "hat",
+        "strength": 0.172,
+        "on_grid": false
+      },
+      {
+        "at": 58.247,
+        "of": "hat",
+        "strength": 0.071,
+        "on_grid": false
+      },
+      {
+        "at": 58.374,
+        "of": "hat",
+        "strength": 0.22,
+        "on_grid": true
+      },
+      {
+        "at": 58.483,
+        "of": "hat",
+        "strength": 0.131,
+        "on_grid": false
+      },
+      {
+        "at": 58.613,
+        "of": "hat",
+        "strength": 0.168,
+        "on_grid": false
+      },
+      {
+        "at": 58.722,
+        "of": "hat",
+        "strength": 0.076,
+        "on_grid": false
+      },
+      {
+        "at": 58.901,
+        "of": "hat",
+        "strength": 0.213,
+        "on_grid": true
+      },
+      {
+        "at": 58.996,
+        "of": "hat",
+        "strength": 0.086,
+        "on_grid": false
+      },
+      {
+        "at": 59.092,
+        "of": "hat",
+        "strength": 0.195,
+        "on_grid": false
+      },
+      {
+        "at": 59.221,
+        "of": "hat",
+        "strength": 0.122,
+        "on_grid": false
+      },
+      {
+        "at": 59.391,
+        "of": "hat",
+        "strength": 0.191,
+        "on_grid": false
+      },
+      {
+        "at": 59.483,
+        "of": "hat",
+        "strength": 0.104,
+        "on_grid": false
+      },
+      {
+        "at": 59.594,
+        "of": "hat",
+        "strength": 0.138,
+        "on_grid": false
+      },
+      {
+        "at": 59.688,
+        "of": "hat",
+        "strength": 0.102,
+        "on_grid": false
+      },
+      {
+        "at": 59.817,
+        "of": "hat",
+        "strength": 0.203,
+        "on_grid": true
+      },
+      {
+        "at": 59.948,
+        "of": "hat",
+        "strength": 0.117,
+        "on_grid": false
+      },
+      {
+        "at": 60.039,
+        "of": "hat",
+        "strength": 0.161,
+        "on_grid": false
+      },
+      {
+        "at": 60.131,
+        "of": "hat",
+        "strength": 0.105,
+        "on_grid": false
+      },
+      {
+        "at": 60.3,
+        "of": "hat",
+        "strength": 0.17,
+        "on_grid": true
+      },
+      {
+        "at": 60.385,
+        "of": "hat",
+        "strength": 0.093,
+        "on_grid": false
+      },
+      {
+        "at": 60.47,
+        "of": "hat",
+        "strength": 0.076,
+        "on_grid": false
+      },
+      {
+        "at": 60.562,
+        "of": "hat",
+        "strength": 0.137,
+        "on_grid": false
+      },
+      {
+        "at": 60.675,
+        "of": "hat",
+        "strength": 0.097,
+        "on_grid": false
+      },
+      {
+        "at": 60.797,
+        "of": "hat",
+        "strength": 0.218,
+        "on_grid": true
+      },
+      {
+        "at": 60.883,
+        "of": "hat",
+        "strength": 0.118,
+        "on_grid": false
+      },
+      {
+        "at": 61.011,
+        "of": "hat",
+        "strength": 0.154,
+        "on_grid": false
+      },
+      {
+        "at": 61.123,
+        "of": "hat",
+        "strength": 0.17,
+        "on_grid": false
+      },
+      {
+        "at": 61.274,
+        "of": "hat",
+        "strength": 0.198,
+        "on_grid": true
+      },
+      {
+        "at": 61.377,
+        "of": "hat",
+        "strength": 0.154,
+        "on_grid": false
+      },
+      {
+        "at": 61.529,
+        "of": "hat",
+        "strength": 0.214,
+        "on_grid": false
+      },
+      {
+        "at": 61.633,
+        "of": "hat",
+        "strength": 0.145,
+        "on_grid": false
+      },
+      {
+        "at": 61.745,
+        "of": "hat",
+        "strength": 0.195,
+        "on_grid": true
+      },
+      {
+        "at": 61.83,
+        "of": "hat",
+        "strength": 0.094,
+        "on_grid": false
+      },
+      {
+        "at": 61.916,
+        "of": "hat",
+        "strength": 0.247,
+        "on_grid": false
+      },
+      {
+        "at": 62.004,
+        "of": "hat",
+        "strength": 0.156,
+        "on_grid": false
+      },
+      {
+        "at": 62.164,
+        "of": "hat",
+        "strength": 0.193,
+        "on_grid": true
+      },
+      {
+        "at": 62.329,
+        "of": "hat",
+        "strength": 0.204,
+        "on_grid": false
+      },
+      {
+        "at": 62.43,
+        "of": "hat",
+        "strength": 0.24,
+        "on_grid": false
+      },
+      {
+        "at": 62.531,
+        "of": "hat",
+        "strength": 0.235,
+        "on_grid": false
+      },
+      {
+        "at": 62.631,
+        "of": "hat",
+        "strength": 0.221,
+        "on_grid": true
+      },
+      {
+        "at": 62.72,
+        "of": "snare",
+        "strength": 0.604,
+        "on_grid": false
+      },
+      {
+        "at": 62.817,
+        "of": "snare",
+        "strength": 0.203,
+        "on_grid": false
+      },
+      {
+        "at": 62.908,
+        "of": "snare",
+        "strength": 0.862,
+        "on_grid": false
+      },
+      {
+        "at": 63.027,
+        "of": "snare",
+        "strength": 0.232,
+        "on_grid": false
+      },
+      {
+        "at": 63.147,
+        "of": "snare",
+        "strength": 0.475,
+        "on_grid": true
+      },
+      {
+        "at": 63.275,
+        "of": "snare",
+        "strength": 0.519,
+        "on_grid": false
+      },
+      {
+        "at": 63.396,
+        "of": "snare",
+        "strength": 0.564,
+        "on_grid": false
+      },
+      {
+        "at": 63.522,
+        "of": "kick",
+        "strength": 0.245,
+        "on_grid": false
+      },
+      {
+        "at": 63.662,
+        "of": "kick",
+        "strength": 0.816,
+        "on_grid": true
+      },
+      {
+        "at": 63.785,
+        "of": "kick",
+        "strength": 0.583,
+        "on_grid": false
+      },
+      {
+        "at": 63.9,
+        "of": "hat",
+        "strength": 0.228,
+        "on_grid": false
+      },
+      {
+        "at": 63.997,
+        "of": "hat",
+        "strength": 0.228,
+        "on_grid": false
+      },
+      {
+        "at": 64.087,
+        "of": "hat",
+        "strength": 0.558,
+        "on_grid": true
+      },
+      {
+        "at": 64.174,
+        "of": "kick",
+        "strength": 0.45,
+        "on_grid": false
+      },
+      {
+        "at": 64.261,
+        "of": "hat",
+        "strength": 0.304,
+        "on_grid": false
+      },
+      {
+        "at": 64.365,
+        "of": "hat",
+        "strength": 0.273,
+        "on_grid": false
+      },
+      {
+        "at": 64.497,
+        "of": "hat",
+        "strength": 0.23,
+        "on_grid": false
+      },
+      {
+        "at": 64.592,
+        "of": "kick",
+        "strength": 0.531,
+        "on_grid": true
+      },
+      {
+        "at": 64.728,
+        "of": "kick",
+        "strength": 0.378,
+        "on_grid": false
+      },
+      {
+        "at": 64.829,
+        "of": "hat",
+        "strength": 0.18,
+        "on_grid": false
+      },
+      {
+        "at": 64.935,
+        "of": "hat",
+        "strength": 0.143,
+        "on_grid": false
+      },
+      {
+        "at": 65.04,
+        "of": "hat",
+        "strength": 0.559,
+        "on_grid": true
+      },
+      {
+        "at": 65.125,
+        "of": "kick",
+        "strength": 0.37,
+        "on_grid": false
+      },
+      {
+        "at": 65.214,
+        "of": "kick",
+        "strength": 0.227,
+        "on_grid": false
+      },
+      {
+        "at": 65.318,
+        "of": "hat",
+        "strength": 0.228,
+        "on_grid": false
+      },
+      {
+        "at": 65.411,
+        "of": "hat",
+        "strength": 0.14,
+        "on_grid": false
+      },
+      {
+        "at": 65.566,
+        "of": "kick",
+        "strength": 0.553,
+        "on_grid": true
+      },
+      {
+        "at": 65.66,
+        "of": "kick",
+        "strength": 0.349,
+        "on_grid": false
+      },
+      {
+        "at": 65.751,
+        "of": "hat",
+        "strength": 0.259,
+        "on_grid": false
+      },
+      {
+        "at": 65.905,
+        "of": "hat",
+        "strength": 0.136,
+        "on_grid": false
+      },
+      {
+        "at": 65.992,
+        "of": "hat",
+        "strength": 0.617,
+        "on_grid": true
+      },
+      {
+        "at": 66.087,
+        "of": "kick",
+        "strength": 0.368,
+        "on_grid": false
+      },
+      {
+        "at": 66.177,
+        "of": "kick",
+        "strength": 0.211,
+        "on_grid": false
+      },
+      {
+        "at": 66.266,
+        "of": "kick",
+        "strength": 0.307,
+        "on_grid": false
+      },
+      {
+        "at": 66.351,
+        "of": "hat",
+        "strength": 0.153,
+        "on_grid": false
+      },
+      {
+        "at": 66.519,
+        "of": "kick",
+        "strength": 0.534,
+        "on_grid": true
+      },
+      {
+        "at": 66.662,
+        "of": "hat",
+        "strength": 0.294,
+        "on_grid": false
+      },
+      {
+        "at": 66.818,
+        "of": "hat",
+        "strength": 0.126,
+        "on_grid": false
+      },
+      {
+        "at": 66.904,
+        "of": "hat",
+        "strength": 0.103,
+        "on_grid": false
+      },
+      {
+        "at": 66.994,
+        "of": "kick",
+        "strength": 0.537,
+        "on_grid": true
+      },
+      {
+        "at": 67.098,
+        "of": "kick",
+        "strength": 0.265,
+        "on_grid": false
+      },
+      {
+        "at": 67.208,
+        "of": "hat",
+        "strength": 0.215,
+        "on_grid": false
+      },
+      {
+        "at": 67.354,
+        "of": "kick",
+        "strength": 0.363,
+        "on_grid": false
+      },
+      {
+        "at": 67.456,
+        "of": "kick",
+        "strength": 0.531,
+        "on_grid": true
+      },
+      {
+        "at": 67.545,
+        "of": "kick",
+        "strength": 0.346,
+        "on_grid": false
+      },
+      {
+        "at": 67.644,
+        "of": "hat",
+        "strength": 0.255,
+        "on_grid": false
+      },
+      {
+        "at": 67.795,
+        "of": "hat",
+        "strength": 0.114,
+        "on_grid": false
+      },
+      {
+        "at": 67.896,
+        "of": "hat",
+        "strength": 0.578,
+        "on_grid": true
+      },
+      {
+        "at": 67.983,
+        "of": "kick",
+        "strength": 0.434,
+        "on_grid": false
+      },
+      {
+        "at": 68.111,
+        "of": "kick",
+        "strength": 0.254,
+        "on_grid": false
+      },
+      {
+        "at": 68.198,
+        "of": "hat",
+        "strength": 0.192,
+        "on_grid": false
+      },
+      {
+        "at": 68.29,
+        "of": "hat",
+        "strength": 0.074,
+        "on_grid": false
+      },
+      {
+        "at": 68.379,
+        "of": "snare",
+        "strength": 0.594,
+        "on_grid": true
+      },
+      {
+        "at": 68.468,
+        "of": "kick",
+        "strength": 0.416,
+        "on_grid": false
+      },
+      {
+        "at": 68.557,
+        "of": "kick",
+        "strength": 0.331,
+        "on_grid": false
+      },
+      {
+        "at": 68.659,
+        "of": "hat",
+        "strength": 0.146,
+        "on_grid": false
+      },
+      {
+        "at": 68.759,
+        "of": "hat",
+        "strength": 0.075,
+        "on_grid": false
+      },
+      {
+        "at": 68.855,
+        "of": "snare",
+        "strength": 0.609,
+        "on_grid": true
+      },
+      {
+        "at": 68.945,
+        "of": "kick",
+        "strength": 0.384,
+        "on_grid": false
+      },
+      {
+        "at": 69.094,
+        "of": "hat",
+        "strength": 0.263,
+        "on_grid": false
+      },
+      {
+        "at": 69.231,
+        "of": "hat",
+        "strength": 0.137,
+        "on_grid": false
+      },
+      {
+        "at": 69.325,
+        "of": "hat",
+        "strength": 0.601,
+        "on_grid": true
+      },
+      {
+        "at": 69.412,
+        "of": "kick",
+        "strength": 0.388,
+        "on_grid": false
+      },
+      {
+        "at": 69.509,
+        "of": "kick",
+        "strength": 0.309,
+        "on_grid": false
+      },
+      {
+        "at": 69.612,
+        "of": "kick",
+        "strength": 0.152,
+        "on_grid": false
+      },
+      {
+        "at": 69.714,
+        "of": "hat",
+        "strength": 0.094,
+        "on_grid": false
+      },
+      {
+        "at": 69.801,
+        "of": "hat",
+        "strength": 0.558,
+        "on_grid": true
+      },
+      {
+        "at": 69.887,
+        "of": "kick",
+        "strength": 0.366,
+        "on_grid": false
+      },
+      {
+        "at": 70.046,
+        "of": "hat",
+        "strength": 0.194,
+        "on_grid": false
+      },
+      {
+        "at": 70.187,
+        "of": "hat",
+        "strength": 0.124,
+        "on_grid": false
+      },
+      {
+        "at": 70.284,
+        "of": "snare",
+        "strength": 0.543,
+        "on_grid": true
+      },
+      {
+        "at": 70.373,
+        "of": "kick",
+        "strength": 0.324,
+        "on_grid": false
+      },
+      {
+        "at": 70.471,
+        "of": "kick",
+        "strength": 0.272,
+        "on_grid": false
+      },
+      {
+        "at": 70.564,
+        "of": "hat",
+        "strength": 0.148,
+        "on_grid": false
+      },
+      {
+        "at": 70.705,
+        "of": "hat",
+        "strength": 0.068,
+        "on_grid": false
+      },
+      {
+        "at": 70.796,
+        "of": "kick",
+        "strength": 0.578,
+        "on_grid": true
+      },
+      {
+        "at": 70.888,
+        "of": "kick",
+        "strength": 0.299,
+        "on_grid": false
+      },
+      {
+        "at": 71.04,
+        "of": "kick",
+        "strength": 0.267,
+        "on_grid": false
+      },
+      {
+        "at": 71.23,
+        "of": "hat",
+        "strength": 0.591,
+        "on_grid": true
+      },
+      {
+        "at": 71.316,
+        "of": "kick",
+        "strength": 0.388,
+        "on_grid": false
+      },
+      {
+        "at": 71.404,
+        "of": "kick",
+        "strength": 0.305,
+        "on_grid": false
+      },
+      {
+        "at": 71.496,
+        "of": "hat",
+        "strength": 0.245,
+        "on_grid": false
+      },
+      {
+        "at": 71.706,
+        "of": "hat",
+        "strength": 0.582,
+        "on_grid": true
+      },
+      {
+        "at": 71.792,
+        "of": "kick",
+        "strength": 0.401,
+        "on_grid": false
+      },
+      {
+        "at": 71.961,
+        "of": "snare",
+        "strength": 0.233,
+        "on_grid": false
+      },
+      {
+        "at": 72.075,
+        "of": "snare",
+        "strength": 0.134,
+        "on_grid": false
+      },
+      {
+        "at": 72.217,
+        "of": "kick",
+        "strength": 0.52,
+        "on_grid": true
+      },
+      {
+        "at": 72.307,
+        "of": "kick",
+        "strength": 0.353,
+        "on_grid": false
+      },
+      {
+        "at": 72.397,
+        "of": "kick",
+        "strength": 0.252,
+        "on_grid": false
+      },
+      {
+        "at": 72.489,
+        "of": "hat",
+        "strength": 0.073,
+        "on_grid": false
+      },
+      {
+        "at": 72.693,
+        "of": "kick",
+        "strength": 0.564,
+        "on_grid": true
+      },
+      {
+        "at": 72.793,
+        "of": "kick",
+        "strength": 0.339,
+        "on_grid": false
+      },
+      {
+        "at": 72.913,
+        "of": "snare",
+        "strength": 0.218,
+        "on_grid": false
+      },
+      {
+        "at": 73.17,
+        "of": "kick",
+        "strength": 0.535,
+        "on_grid": true
+      },
+      {
+        "at": 73.259,
+        "of": "kick",
+        "strength": 0.31,
+        "on_grid": false
+      },
+      {
+        "at": 73.349,
+        "of": "kick",
+        "strength": 0.265,
+        "on_grid": false
+      },
+      {
+        "at": 73.622,
+        "of": "snare",
+        "strength": 0.54,
+        "on_grid": true
+      },
+      {
+        "at": 73.726,
+        "of": "kick",
+        "strength": 0.361,
+        "on_grid": false
+      },
+      {
+        "at": 73.879,
+        "of": "kick",
+        "strength": 0.256,
+        "on_grid": false
+      },
+      {
+        "at": 73.989,
+        "of": "kick",
+        "strength": 0.107,
+        "on_grid": false
+      },
+      {
+        "at": 74.138,
+        "of": "kick",
+        "strength": 0.512,
+        "on_grid": true
+      },
+      {
+        "at": 74.261,
+        "of": "kick",
+        "strength": 0.267,
+        "on_grid": false
+      },
+      {
+        "at": 74.363,
+        "of": "kick",
+        "strength": 0.177,
+        "on_grid": false
+      },
+      {
+        "at": 74.51,
+        "of": "hat",
+        "strength": 0.064,
+        "on_grid": false
+      },
+      {
+        "at": 74.598,
+        "of": "kick",
+        "strength": 0.547,
+        "on_grid": true
+      },
+      {
+        "at": 74.687,
+        "of": "kick",
+        "strength": 0.31,
+        "on_grid": false
+      },
+      {
+        "at": 74.842,
+        "of": "kick",
+        "strength": 0.296,
+        "on_grid": false
+      },
+      {
+        "at": 74.961,
+        "of": "kick",
+        "strength": 0.291,
+        "on_grid": false
+      },
+      {
+        "at": 75.075,
+        "of": "kick",
+        "strength": 0.566,
+        "on_grid": true
+      },
+      {
+        "at": 75.174,
+        "of": "kick",
+        "strength": 0.331,
+        "on_grid": false
+      },
+      {
+        "at": 75.285,
+        "of": "kick",
+        "strength": 0.237,
+        "on_grid": false
+      },
+      {
+        "at": 75.551,
+        "of": "kick",
+        "strength": 0.565,
+        "on_grid": true
+      },
+      {
+        "at": 75.64,
+        "of": "kick",
+        "strength": 0.331,
+        "on_grid": false
+      },
+      {
+        "at": 75.802,
+        "of": "kick",
+        "strength": 0.259,
+        "on_grid": false
+      },
+      {
+        "at": 75.898,
+        "of": "snare",
+        "strength": 0.155,
+        "on_grid": false
+      },
+      {
+        "at": 75.992,
+        "of": "hat",
+        "strength": 0.54,
+        "on_grid": true
+      },
+      {
+        "at": 76.078,
+        "of": "kick",
+        "strength": 0.438,
+        "on_grid": false
+      },
+      {
+        "at": 76.234,
+        "of": "snare",
+        "strength": 0.295,
+        "on_grid": false
+      },
+      {
+        "at": 76.48,
+        "of": "snare",
+        "strength": 0.628,
+        "on_grid": true
+      },
+      {
+        "at": 76.583,
+        "of": "kick",
+        "strength": 0.355,
+        "on_grid": false
+      },
+      {
+        "at": 76.754,
+        "of": "kick",
+        "strength": 0.304,
+        "on_grid": false
+      },
+      {
+        "at": 76.873,
+        "of": "kick",
+        "strength": 0.098,
+        "on_grid": false
+      },
+      {
+        "at": 77.186,
+        "of": "snare",
+        "strength": 0.242,
+        "on_grid": false
+      },
+      {
+        "at": 77.281,
+        "of": "hat",
+        "strength": 0.144,
+        "on_grid": false
+      },
+      {
+        "at": 77.711,
+        "of": "kick",
+        "strength": 0.228,
+        "on_grid": false
+      },
+      {
+        "at": 77.826,
+        "of": "kick",
+        "strength": 0.201,
+        "on_grid": false
+      },
+      {
+        "at": 78.14,
+        "of": "snare",
+        "strength": 0.262,
+        "on_grid": false
+      },
+      {
+        "at": 78.294,
+        "of": "hat",
+        "strength": 0.102,
+        "on_grid": false
+      },
+      {
+        "at": 78.406,
+        "of": "hat",
+        "strength": 0.182,
+        "on_grid": true
+      },
+      {
+        "at": 78.518,
+        "of": "hat",
+        "strength": 0.138,
+        "on_grid": false
+      },
+      {
+        "at": 78.606,
+        "of": "hat",
+        "strength": 0.16,
+        "on_grid": false
+      },
+      {
+        "at": 78.702,
+        "of": "hat",
+        "strength": 0.308,
+        "on_grid": false
+      },
+      {
+        "at": 78.789,
+        "of": "hat",
+        "strength": 0.523,
+        "on_grid": false
+      },
+      {
+        "at": 78.88,
+        "of": "kick",
+        "strength": 0.647,
+        "on_grid": true
+      },
+      {
+        "at": 79.0,
+        "of": "hat",
+        "strength": 0.371,
+        "on_grid": false
+      },
+      {
+        "at": 79.086,
+        "of": "hat",
+        "strength": 0.435,
+        "on_grid": false
+      },
+      {
+        "at": 79.216,
+        "of": "kick",
+        "strength": 0.497,
+        "on_grid": false
+      },
+      {
+        "at": 79.342,
+        "of": "kick",
+        "strength": 0.533,
+        "on_grid": true
+      },
+      {
+        "at": 79.494,
+        "of": "kick",
+        "strength": 0.385,
+        "on_grid": false
+      },
+      {
+        "at": 79.617,
+        "of": "kick",
+        "strength": 0.392,
+        "on_grid": false
+      },
+      {
+        "at": 79.728,
+        "of": "kick",
+        "strength": 0.429,
+        "on_grid": false
+      },
+      {
+        "at": 79.853,
+        "of": "kick",
+        "strength": 0.354,
+        "on_grid": true
+      },
+      {
+        "at": 79.958,
+        "of": "kick",
+        "strength": 0.192,
+        "on_grid": false
+      },
+      {
+        "at": 80.049,
+        "of": "hat",
+        "strength": 0.324,
+        "on_grid": false
+      },
+      {
+        "at": 80.143,
+        "of": "hat",
+        "strength": 0.104,
+        "on_grid": false
+      },
+      {
+        "at": 80.294,
+        "of": "kick",
+        "strength": 0.27,
+        "on_grid": true
+      },
+      {
+        "at": 80.381,
+        "of": "kick",
+        "strength": 0.098,
+        "on_grid": false
+      },
+      {
+        "at": 80.504,
+        "of": "hat",
+        "strength": 0.202,
+        "on_grid": false
+      },
+      {
+        "at": 80.589,
+        "of": "kick",
+        "strength": 0.107,
+        "on_grid": false
+      },
+      {
+        "at": 80.77,
+        "of": "kick",
+        "strength": 0.329,
+        "on_grid": true
+      },
+      {
+        "at": 80.98,
+        "of": "snare",
+        "strength": 0.527,
+        "on_grid": false
+      },
+      {
+        "at": 81.246,
+        "of": "kick",
+        "strength": 0.339,
+        "on_grid": true
+      },
+      {
+        "at": 81.456,
+        "of": "snare",
+        "strength": 0.107,
+        "on_grid": false
+      },
+      {
+        "at": 81.723,
+        "of": "kick",
+        "strength": 0.361,
+        "on_grid": true
+      },
+      {
+        "at": 81.937,
+        "of": "snare",
+        "strength": 0.481,
+        "on_grid": false
+      },
+      {
+        "at": 82.199,
+        "of": "kick",
+        "strength": 0.366,
+        "on_grid": true
+      },
+      {
+        "at": 82.675,
+        "of": "kick",
+        "strength": 0.354,
+        "on_grid": true
+      },
+      {
+        "at": 82.901,
+        "of": "snare",
+        "strength": 0.066,
+        "on_grid": false
+      },
+      {
+        "at": 83.151,
+        "of": "kick",
+        "strength": 0.345,
+        "on_grid": true
+      },
+      {
+        "at": 83.628,
+        "of": "kick",
+        "strength": 0.395,
+        "on_grid": true
+      },
+      {
+        "at": 84.104,
+        "of": "kick",
+        "strength": 0.381,
+        "on_grid": true
+      },
+      {
+        "at": 84.58,
+        "of": "kick",
+        "strength": 0.355,
+        "on_grid": true
+      },
+      {
+        "at": 84.789,
+        "of": "hat",
+        "strength": 0.318,
+        "on_grid": false
+      },
+      {
+        "at": 85.056,
+        "of": "kick",
+        "strength": 0.381,
+        "on_grid": true
+      },
+      {
+        "at": 85.532,
+        "of": "kick",
+        "strength": 0.383,
+        "on_grid": true
+      },
+      {
+        "at": 86.008,
+        "of": "kick",
+        "strength": 0.346,
+        "on_grid": true
+      },
+      {
+        "at": 86.485,
+        "of": "kick",
+        "strength": 0.349,
+        "on_grid": true
+      },
+      {
+        "at": 86.699,
+        "of": "snare",
+        "strength": 0.081,
+        "on_grid": false
+      },
+      {
+        "at": 86.961,
+        "of": "kick",
+        "strength": 0.361,
+        "on_grid": true
+      },
+      {
+        "at": 87.437,
+        "of": "kick",
+        "strength": 0.374,
+        "on_grid": true
+      },
+      {
+        "at": 87.648,
+        "of": "snare",
+        "strength": 0.209,
+        "on_grid": false
+      },
+      {
+        "at": 87.913,
+        "of": "kick",
+        "strength": 0.391,
+        "on_grid": true
+      },
+      {
+        "at": 88.124,
+        "of": "snare",
+        "strength": 0.194,
+        "on_grid": false
+      },
+      {
+        "at": 88.389,
+        "of": "kick",
+        "strength": 0.366,
+        "on_grid": true
+      },
+      {
+        "at": 88.599,
+        "of": "snare",
+        "strength": 0.508,
+        "on_grid": false
+      },
+      {
+        "at": 88.866,
+        "of": "kick",
+        "strength": 0.376,
+        "on_grid": true
+      },
+      {
+        "at": 89.075,
+        "of": "hat",
+        "strength": 0.068,
+        "on_grid": false
+      },
+      {
+        "at": 89.342,
+        "of": "kick",
+        "strength": 0.345,
+        "on_grid": true
+      },
+      {
+        "at": 89.818,
+        "of": "kick",
+        "strength": 0.369,
+        "on_grid": true
+      },
+      {
+        "at": 90.294,
+        "of": "kick",
+        "strength": 0.327,
+        "on_grid": true
+      },
+      {
+        "at": 90.77,
+        "of": "kick",
+        "strength": 0.387,
+        "on_grid": true
+      },
+      {
+        "at": 91.246,
+        "of": "kick",
+        "strength": 0.379,
+        "on_grid": true
+      },
+      {
+        "at": 91.456,
+        "of": "hat",
+        "strength": 0.146,
+        "on_grid": false
+      },
+      {
+        "at": 91.723,
+        "of": "kick",
+        "strength": 0.32,
+        "on_grid": true
+      },
+      {
+        "at": 92.199,
+        "of": "kick",
+        "strength": 0.287,
+        "on_grid": true
+      },
+      {
+        "at": 92.675,
+        "of": "kick",
+        "strength": 0.375,
+        "on_grid": true
+      },
+      {
+        "at": 93.151,
+        "of": "kick",
+        "strength": 0.377,
+        "on_grid": true
+      },
+      {
+        "at": 93.627,
+        "of": "kick",
+        "strength": 0.242,
+        "on_grid": true
+      },
+      {
+        "at": 93.88,
+        "of": "kick",
+        "strength": 0.829,
+        "on_grid": false
+      },
+      {
+        "at": 93.988,
+        "of": "hat",
+        "strength": 0.057,
+        "on_grid": false
+      },
+      {
+        "at": 94.118,
+        "of": "kick",
+        "strength": 0.793,
+        "on_grid": true
+      },
+      {
+        "at": 94.332,
+        "of": "hat",
+        "strength": 0.136,
+        "on_grid": false
+      },
+      {
+        "at": 94.458,
+        "of": "hat",
+        "strength": 0.077,
+        "on_grid": false
+      },
+      {
+        "at": 94.594,
+        "of": "kick",
+        "strength": 0.799,
+        "on_grid": true
+      },
+      {
+        "at": 94.822,
+        "of": "hat",
+        "strength": 0.136,
+        "on_grid": false
+      },
+      {
+        "at": 94.93,
+        "of": "hat",
+        "strength": 0.098,
+        "on_grid": false
+      },
+      {
+        "at": 95.07,
+        "of": "kick",
+        "strength": 0.85,
+        "on_grid": true
+      },
+      {
+        "at": 95.181,
+        "of": "hat",
+        "strength": 0.057,
+        "on_grid": false
+      },
+      {
+        "at": 95.281,
+        "of": "hat",
+        "strength": 0.138,
+        "on_grid": false
+      },
+      {
+        "at": 95.519,
+        "of": "snare",
+        "strength": 0.798,
+        "on_grid": true
+      },
+      {
+        "at": 95.774,
+        "of": "hat",
+        "strength": 0.142,
+        "on_grid": false
+      },
+      {
+        "at": 95.996,
+        "of": "hat",
+        "strength": 0.833,
+        "on_grid": true
+      },
+      {
+        "at": 96.217,
+        "of": "hat",
+        "strength": 0.281,
+        "on_grid": false
+      },
+      {
+        "at": 96.499,
+        "of": "kick",
+        "strength": 0.816,
+        "on_grid": true
+      },
+      {
+        "at": 96.696,
+        "of": "hat",
+        "strength": 0.225,
+        "on_grid": false
+      },
+      {
+        "at": 96.835,
+        "of": "hat",
+        "strength": 0.096,
+        "on_grid": false
+      },
+      {
+        "at": 96.944,
+        "of": "hat",
+        "strength": 0.947,
+        "on_grid": true
+      },
+      {
+        "at": 97.191,
+        "of": "hat",
+        "strength": 0.161,
+        "on_grid": false
+      },
+      {
+        "at": 97.312,
+        "of": "hat",
+        "strength": 0.091,
+        "on_grid": false
+      },
+      {
+        "at": 97.421,
+        "of": "hat",
+        "strength": 0.896,
+        "on_grid": true
+      },
+      {
+        "at": 97.66,
+        "of": "hat",
+        "strength": 0.163,
+        "on_grid": false
+      },
+      {
+        "at": 97.785,
+        "of": "hat",
+        "strength": 0.071,
+        "on_grid": false
+      },
+      {
+        "at": 97.927,
+        "of": "kick",
+        "strength": 0.822,
+        "on_grid": true
+      },
+      {
+        "at": 98.136,
+        "of": "hat",
+        "strength": 0.235,
+        "on_grid": false
+      },
+      {
+        "at": 98.377,
+        "of": "kick",
+        "strength": 0.854,
+        "on_grid": true
+      },
+      {
+        "at": 98.591,
+        "of": "hat",
+        "strength": 0.058,
+        "on_grid": false
+      },
+      {
+        "at": 98.88,
+        "of": "kick",
+        "strength": 0.824,
+        "on_grid": true
+      },
+      {
+        "at": 99.086,
+        "of": "hat",
+        "strength": 0.14,
+        "on_grid": false
+      },
+      {
+        "at": 99.212,
+        "of": "hat",
+        "strength": 0.076,
+        "on_grid": false
+      },
+      {
+        "at": 99.356,
+        "of": "kick",
+        "strength": 0.818,
+        "on_grid": true
+      },
+      {
+        "at": 99.562,
+        "of": "hat",
+        "strength": 0.163,
+        "on_grid": false
+      },
+      {
+        "at": 99.832,
+        "of": "kick",
+        "strength": 0.813,
+        "on_grid": true
+      },
+      {
+        "at": 100.041,
+        "of": "hat",
+        "strength": 0.132,
+        "on_grid": false
+      },
+      {
+        "at": 100.174,
+        "of": "hat",
+        "strength": 0.08,
+        "on_grid": false
+      },
+      {
+        "at": 100.308,
+        "of": "kick",
+        "strength": 0.856,
+        "on_grid": true
+      },
+      {
+        "at": 100.54,
+        "of": "hat",
+        "strength": 0.19,
+        "on_grid": false
+      },
+      {
+        "at": 100.645,
+        "of": "hat",
+        "strength": 0.095,
+        "on_grid": false
+      },
+      {
+        "at": 100.784,
+        "of": "kick",
+        "strength": 0.91,
+        "on_grid": true
+      },
+      {
+        "at": 101.015,
+        "of": "hat",
+        "strength": 0.139,
+        "on_grid": false
+      },
+      {
+        "at": 101.12,
+        "of": "hat",
+        "strength": 0.111,
+        "on_grid": false
+      },
+      {
+        "at": 101.234,
+        "of": "hat",
+        "strength": 0.848,
+        "on_grid": true
+      },
+      {
+        "at": 101.493,
+        "of": "hat",
+        "strength": 0.133,
+        "on_grid": false
+      },
+      {
+        "at": 101.599,
+        "of": "hat",
+        "strength": 0.07,
+        "on_grid": false
+      },
+      {
+        "at": 101.737,
+        "of": "kick",
+        "strength": 0.802,
+        "on_grid": true
+      },
+      {
+        "at": 101.94,
+        "of": "hat",
+        "strength": 0.092,
+        "on_grid": false
+      },
+      {
+        "at": 102.182,
+        "of": "hat",
+        "strength": 0.823,
+        "on_grid": true
+      },
+      {
+        "at": 102.423,
+        "of": "hat",
+        "strength": 0.114,
+        "on_grid": false
+      },
+      {
+        "at": 102.55,
+        "of": "hat",
+        "strength": 0.106,
+        "on_grid": false
+      },
+      {
+        "at": 102.662,
+        "of": "hat",
+        "strength": 0.836,
+        "on_grid": true
+      },
+      {
+        "at": 102.91,
+        "of": "hat",
+        "strength": 0.093,
+        "on_grid": false
+      },
+      {
+        "at": 103.139,
+        "of": "hat",
+        "strength": 0.863,
+        "on_grid": true
+      },
+      {
+        "at": 103.377,
+        "of": "hat",
+        "strength": 0.132,
+        "on_grid": false
+      },
+      {
+        "at": 103.642,
+        "of": "kick",
+        "strength": 0.8,
+        "on_grid": true
+      },
+      {
+        "at": 103.853,
+        "of": "hat",
+        "strength": 0.096,
+        "on_grid": false
+      },
+      {
+        "at": 104.118,
+        "of": "kick",
+        "strength": 0.77,
+        "on_grid": true
+      },
+      {
+        "at": 104.331,
+        "of": "hat",
+        "strength": 0.115,
+        "on_grid": false
+      },
+      {
+        "at": 104.453,
+        "of": "hat",
+        "strength": 0.085,
+        "on_grid": false
+      },
+      {
+        "at": 104.568,
+        "of": "snare",
+        "strength": 0.851,
+        "on_grid": true
+      },
+      {
+        "at": 104.829,
+        "of": "hat",
+        "strength": 0.141,
+        "on_grid": false
+      },
+      {
+        "at": 104.93,
+        "of": "hat",
+        "strength": 0.072,
+        "on_grid": false
+      },
+      {
+        "at": 105.07,
+        "of": "kick",
+        "strength": 0.859,
+        "on_grid": true
+      },
+      {
+        "at": 105.32,
+        "of": "hat",
+        "strength": 0.124,
+        "on_grid": false
+      },
+      {
+        "at": 105.406,
+        "of": "hat",
+        "strength": 0.072,
+        "on_grid": false
+      },
+      {
+        "at": 105.546,
+        "of": "kick",
+        "strength": 0.806,
+        "on_grid": true
+      },
+      {
+        "at": 105.761,
+        "of": "hat",
+        "strength": 0.141,
+        "on_grid": false
+      },
+      {
+        "at": 105.885,
+        "of": "hat",
+        "strength": 0.073,
+        "on_grid": false
+      },
+      {
+        "at": 106.023,
+        "of": "kick",
+        "strength": 0.823,
+        "on_grid": true
+      },
+      {
+        "at": 106.233,
+        "of": "hat",
+        "strength": 0.148,
+        "on_grid": false
+      },
+      {
+        "at": 106.499,
+        "of": "kick",
+        "strength": 0.782,
+        "on_grid": true
+      },
+      {
+        "at": 106.723,
+        "of": "hat",
+        "strength": 0.122,
+        "on_grid": false
+      },
+      {
+        "at": 106.834,
+        "of": "hat",
+        "strength": 0.084,
+        "on_grid": false
+      },
+      {
+        "at": 106.975,
+        "of": "kick",
+        "strength": 0.805,
+        "on_grid": true
+      },
+      {
+        "at": 107.184,
+        "of": "hat",
+        "strength": 0.133,
+        "on_grid": false
+      },
+      {
+        "at": 107.312,
+        "of": "snare",
+        "strength": 0.091,
+        "on_grid": false
+      },
+      {
+        "at": 107.421,
+        "of": "snare",
+        "strength": 0.787,
+        "on_grid": true
+      },
+      {
+        "at": 107.574,
+        "of": "kick",
+        "strength": 0.279,
+        "on_grid": false
+      },
+      {
+        "at": 107.712,
+        "of": "kick",
+        "strength": 0.232,
+        "on_grid": false
+      },
+      {
+        "at": 107.814,
+        "of": "snare",
+        "strength": 0.196,
+        "on_grid": false
+      },
+      {
+        "at": 107.904,
+        "of": "kick",
+        "strength": 0.283,
+        "on_grid": true
+      },
+      {
+        "at": 108.046,
+        "of": "hat",
+        "strength": 0.32,
+        "on_grid": false
+      },
+      {
+        "at": 108.133,
+        "of": "hat",
+        "strength": 0.231,
+        "on_grid": false
+      },
+      {
+        "at": 108.22,
+        "of": "hat",
+        "strength": 0.418,
+        "on_grid": false
+      },
+      {
+        "at": 108.388,
+        "of": "hat",
+        "strength": 0.476,
+        "on_grid": true
+      },
+      {
+        "at": 109.386,
+        "of": "kick",
+        "strength": 0.555,
+        "on_grid": false
+      },
+      {
+        "at": 109.484,
+        "of": "kick",
+        "strength": 0.161,
+        "on_grid": false
+      },
+      {
+        "at": 109.652,
+        "of": "kick",
+        "strength": 0.264,
+        "on_grid": false
+      },
+      {
+        "at": 109.738,
+        "of": "kick",
+        "strength": 0.162,
+        "on_grid": false
+      },
+      {
+        "at": 109.825,
+        "of": "kick",
+        "strength": 0.142,
+        "on_grid": true
+      },
+      {
+        "at": 109.957,
+        "of": "kick",
+        "strength": 0.123,
+        "on_grid": false
+      },
+      {
+        "at": 110.065,
+        "of": "snare",
+        "strength": 0.109,
+        "on_grid": false
+      },
+      {
+        "at": 110.156,
+        "of": "snare",
+        "strength": 0.162,
+        "on_grid": false
+      },
+      {
+        "at": 110.332,
+        "of": "kick",
+        "strength": 0.126,
+        "on_grid": true
+      },
+      {
+        "at": 110.485,
+        "of": "snare",
+        "strength": 0.106,
+        "on_grid": false
+      },
+      {
+        "at": 110.591,
+        "of": "kick",
+        "strength": 0.073,
+        "on_grid": false
+      },
+      {
+        "at": 110.689,
+        "of": "kick",
+        "strength": 0.117,
+        "on_grid": false
+      },
+      {
+        "at": 110.866,
+        "of": "snare",
+        "strength": 0.084,
+        "on_grid": false
+      },
+      {
+        "at": 111.024,
+        "of": "snare",
+        "strength": 0.123,
+        "on_grid": false
+      },
+      {
+        "at": 111.168,
+        "of": "kick",
+        "strength": 0.118,
+        "on_grid": false
+      },
+      {
+        "at": 111.256,
+        "of": "kick",
+        "strength": 0.071,
+        "on_grid": true
+      },
+      {
+        "at": 111.417,
+        "of": "kick",
+        "strength": 0.113,
+        "on_grid": false
+      },
+      {
+        "at": 111.507,
+        "of": "snare",
+        "strength": 0.154,
+        "on_grid": false
+      },
+      {
+        "at": 111.658,
+        "of": "kick",
+        "strength": 0.146,
+        "on_grid": false
+      },
+      {
+        "at": 111.763,
+        "of": "kick",
+        "strength": 0.141,
+        "on_grid": false
+      },
+      {
+        "at": 111.871,
+        "of": "kick",
+        "strength": 0.127,
+        "on_grid": false
+      },
+      {
+        "at": 112.043,
+        "of": "snare",
+        "strength": 0.149,
+        "on_grid": false
+      },
+      {
+        "at": 112.133,
+        "of": "kick",
+        "strength": 0.092,
+        "on_grid": false
+      },
+      {
+        "at": 112.218,
+        "of": "kick",
+        "strength": 0.132,
+        "on_grid": true
+      },
+      {
+        "at": 112.311,
+        "of": "snare",
+        "strength": 0.091,
+        "on_grid": false
+      },
+      {
+        "at": 112.43,
+        "of": "kick",
+        "strength": 0.058,
+        "on_grid": false
+      },
+      {
+        "at": 112.841,
+        "of": "kick",
+        "strength": 0.059,
+        "on_grid": false
+      },
+      {
+        "at": 122.394,
+        "of": "snare",
+        "strength": 0.063,
+        "on_grid": false
+      },
+      {
+        "at": 122.621,
+        "of": "snare",
+        "strength": 0.158,
+        "on_grid": false
+      },
+      {
+        "at": 122.773,
+        "of": "hat",
+        "strength": 0.093,
+        "on_grid": false
+      },
+      {
+        "at": 122.862,
+        "of": "snare",
+        "strength": 0.17,
+        "on_grid": false
+      },
+      {
+        "at": 122.953,
+        "of": "snare",
+        "strength": 0.103,
+        "on_grid": false
+      },
+      {
+        "at": 123.052,
+        "of": "hat",
+        "strength": 0.159,
+        "on_grid": false
+      },
+      {
+        "at": 123.145,
+        "of": "hat",
+        "strength": 0.134,
+        "on_grid": true
+      },
+      {
+        "at": 123.235,
+        "of": "hat",
+        "strength": 0.15,
+        "on_grid": false
+      },
+      {
+        "at": 123.396,
+        "of": "hat",
+        "strength": 0.257,
+        "on_grid": false
+      },
+      {
+        "at": 123.487,
+        "of": "hat",
+        "strength": 0.156,
+        "on_grid": false
+      },
+      {
+        "at": 123.575,
+        "of": "hat",
+        "strength": 0.078,
+        "on_grid": false
+      },
+      {
+        "at": 124.101,
+        "of": "snare",
+        "strength": 0.501,
+        "on_grid": true
+      },
+      {
+        "at": 124.218,
+        "of": "hat",
+        "strength": 0.422,
+        "on_grid": false
+      },
+      {
+        "at": 124.326,
+        "of": "snare",
+        "strength": 0.494,
+        "on_grid": false
+      },
+      {
+        "at": 124.464,
+        "of": "hat",
+        "strength": 0.438,
+        "on_grid": false
+      },
+      {
+        "at": 124.563,
+        "of": "hat",
+        "strength": 0.863,
+        "on_grid": true
+      },
+      {
+        "at": 124.67,
+        "of": "hat",
+        "strength": 0.683,
+        "on_grid": false
+      },
+      {
+        "at": 124.755,
+        "of": "hat",
+        "strength": 0.368,
+        "on_grid": false
+      },
+      {
+        "at": 124.892,
+        "of": "kick",
+        "strength": 0.454,
+        "on_grid": false
+      },
+      {
+        "at": 125.007,
+        "of": "kick",
+        "strength": 0.294,
+        "on_grid": false
+      },
+      {
+        "at": 125.099,
+        "of": "hat",
+        "strength": 0.269,
+        "on_grid": false
+      },
+      {
+        "at": 125.223,
+        "of": "hat",
+        "strength": 0.246,
+        "on_grid": false
+      },
+      {
+        "at": 125.308,
+        "of": "hat",
+        "strength": 0.22,
+        "on_grid": false
+      },
+      {
+        "at": 125.398,
+        "of": "hat",
+        "strength": 0.175,
+        "on_grid": false
+      },
+      {
+        "at": 125.565,
+        "of": "hat",
+        "strength": 0.166,
+        "on_grid": true
+      },
+      {
+        "at": 125.65,
+        "of": "hat",
+        "strength": 0.124,
+        "on_grid": false
+      },
+      {
+        "at": 125.816,
+        "of": "hat",
+        "strength": 0.142,
+        "on_grid": false
+      },
+      {
+        "at": 125.951,
+        "of": "hat",
+        "strength": 0.104,
+        "on_grid": false
+      },
+      {
+        "at": 126.058,
+        "of": "hat",
+        "strength": 0.15,
+        "on_grid": false
+      },
+      {
+        "at": 126.229,
+        "of": "hat",
+        "strength": 0.137,
+        "on_grid": false
+      },
+      {
+        "at": 126.324,
+        "of": "hat",
+        "strength": 0.082,
+        "on_grid": false
+      },
+      {
+        "at": 126.522,
+        "of": "hat",
+        "strength": 0.171,
+        "on_grid": true
+      },
+      {
+        "at": 126.615,
+        "of": "hat",
+        "strength": 0.078,
+        "on_grid": false
+      },
+      {
+        "at": 126.721,
+        "of": "hat",
+        "strength": 0.13,
+        "on_grid": false
+      },
+      {
+        "at": 126.81,
+        "of": "hat",
+        "strength": 0.068,
+        "on_grid": false
+      },
+      {
+        "at": 126.984,
+        "of": "hat",
+        "strength": 0.164,
+        "on_grid": true
+      },
+      {
+        "at": 127.12,
+        "of": "hat",
+        "strength": 0.066,
+        "on_grid": false
+      },
+      {
+        "at": 127.226,
+        "of": "hat",
+        "strength": 0.14,
+        "on_grid": false
+      },
+      {
+        "at": 127.455,
+        "of": "hat",
+        "strength": 0.175,
+        "on_grid": true
+      },
+      {
+        "at": 127.547,
+        "of": "hat",
+        "strength": 0.071,
+        "on_grid": false
+      },
+      {
+        "at": 127.663,
+        "of": "hat",
+        "strength": 0.139,
+        "on_grid": false
+      },
+      {
+        "at": 127.748,
+        "of": "hat",
+        "strength": 0.074,
+        "on_grid": false
+      },
+      {
+        "at": 127.948,
+        "of": "hat",
+        "strength": 0.153,
+        "on_grid": true
+      },
+      {
+        "at": 128.189,
+        "of": "hat",
+        "strength": 0.144,
+        "on_grid": false
+      },
+      {
+        "at": 128.427,
+        "of": "hat",
+        "strength": 0.231,
+        "on_grid": true
+      },
+      {
+        "at": 128.535,
+        "of": "hat",
+        "strength": 0.058,
+        "on_grid": false
+      },
+      {
+        "at": 128.656,
+        "of": "hat",
+        "strength": 0.138,
+        "on_grid": false
+      },
+      {
+        "at": 128.898,
+        "of": "hat",
+        "strength": 0.18,
+        "on_grid": true
+      },
+      {
+        "at": 129.114,
+        "of": "hat",
+        "strength": 0.12,
+        "on_grid": false
+      },
+      {
+        "at": 129.354,
+        "of": "hat",
+        "strength": 0.235,
+        "on_grid": true
+      },
+      {
+        "at": 129.443,
+        "of": "hat",
+        "strength": 0.133,
+        "on_grid": false
+      },
+      {
+        "at": 129.594,
+        "of": "hat",
+        "strength": 0.148,
+        "on_grid": false
+      },
+      {
+        "at": 129.695,
+        "of": "hat",
+        "strength": 0.062,
+        "on_grid": false
+      },
+      {
+        "at": 129.855,
+        "of": "hat",
+        "strength": 0.163,
+        "on_grid": true
+      },
+      {
+        "at": 129.949,
+        "of": "hat",
+        "strength": 0.062,
+        "on_grid": false
+      },
+      {
+        "at": 130.074,
+        "of": "hat",
+        "strength": 0.132,
+        "on_grid": false
+      },
+      {
+        "at": 130.163,
+        "of": "hat",
+        "strength": 0.085,
+        "on_grid": false
+      },
+      {
+        "at": 130.318,
+        "of": "hat",
+        "strength": 0.181,
+        "on_grid": true
+      },
+      {
+        "at": 130.404,
+        "of": "hat",
+        "strength": 0.191,
+        "on_grid": false
+      },
+      {
+        "at": 130.57,
+        "of": "hat",
+        "strength": 0.131,
+        "on_grid": false
+      },
+      {
+        "at": 130.793,
+        "of": "hat",
+        "strength": 0.244,
+        "on_grid": true
+      },
+      {
+        "at": 130.891,
+        "of": "hat",
+        "strength": 0.097,
+        "on_grid": false
+      },
+      {
+        "at": 131.014,
+        "of": "hat",
+        "strength": 0.158,
+        "on_grid": false
+      },
+      {
+        "at": 131.129,
+        "of": "hat",
+        "strength": 0.087,
+        "on_grid": false
+      },
+      {
+        "at": 131.282,
+        "of": "hat",
+        "strength": 0.196,
+        "on_grid": true
+      },
+      {
+        "at": 131.374,
+        "of": "hat",
+        "strength": 0.059,
+        "on_grid": false
+      },
+      {
+        "at": 131.477,
+        "of": "hat",
+        "strength": 0.163,
+        "on_grid": false
+      },
+      {
+        "at": 131.598,
+        "of": "hat",
+        "strength": 0.075,
+        "on_grid": false
+      },
+      {
+        "at": 131.743,
+        "of": "hat",
+        "strength": 0.156,
+        "on_grid": true
+      },
+      {
+        "at": 131.837,
+        "of": "hat",
+        "strength": 0.099,
+        "on_grid": false
+      },
+      {
+        "at": 131.955,
+        "of": "hat",
+        "strength": 0.157,
+        "on_grid": false
+      },
+      {
+        "at": 132.074,
+        "of": "hat",
+        "strength": 0.072,
+        "on_grid": false
+      },
+      {
+        "at": 132.212,
+        "of": "hat",
+        "strength": 0.205,
+        "on_grid": true
+      },
+      {
+        "at": 132.311,
+        "of": "hat",
+        "strength": 0.09,
+        "on_grid": false
+      },
+      {
+        "at": 132.43,
+        "of": "hat",
+        "strength": 0.138,
+        "on_grid": false
+      },
+      {
+        "at": 132.549,
+        "of": "hat",
+        "strength": 0.133,
+        "on_grid": false
+      },
+      {
+        "at": 132.665,
+        "of": "hat",
+        "strength": 0.194,
+        "on_grid": true
+      },
+      {
+        "at": 132.779,
+        "of": "hat",
+        "strength": 0.128,
+        "on_grid": false
+      },
+      {
+        "at": 132.913,
+        "of": "hat",
+        "strength": 0.213,
+        "on_grid": false
+      },
+      {
+        "at": 133.019,
+        "of": "hat",
+        "strength": 0.112,
+        "on_grid": false
+      },
+      {
+        "at": 133.162,
+        "of": "hat",
+        "strength": 0.158,
+        "on_grid": true
+      },
+      {
+        "at": 133.268,
+        "of": "hat",
+        "strength": 0.187,
+        "on_grid": false
+      },
+      {
+        "at": 133.38,
+        "of": "hat",
+        "strength": 0.227,
+        "on_grid": false
+      },
+      {
+        "at": 133.499,
+        "of": "hat",
+        "strength": 0.138,
+        "on_grid": false
+      },
+      {
+        "at": 133.641,
+        "of": "hat",
+        "strength": 0.198,
+        "on_grid": true
+      },
+      {
+        "at": 133.727,
+        "of": "snare",
+        "strength": 0.147,
+        "on_grid": false
+      },
+      {
+        "at": 133.86,
+        "of": "hat",
+        "strength": 0.24,
+        "on_grid": false
+      },
+      {
+        "at": 133.984,
+        "of": "hat",
+        "strength": 0.161,
+        "on_grid": false
+      },
+      {
+        "at": 134.119,
+        "of": "hat",
+        "strength": 0.191,
+        "on_grid": true
+      },
+      {
+        "at": 134.21,
+        "of": "hat",
+        "strength": 0.206,
+        "on_grid": false
+      },
+      {
+        "at": 134.327,
+        "of": "hat",
+        "strength": 0.204,
+        "on_grid": false
+      },
+      {
+        "at": 134.46,
+        "of": "hat",
+        "strength": 0.219,
+        "on_grid": false
+      },
+      {
+        "at": 134.598,
+        "of": "hat",
+        "strength": 0.399,
+        "on_grid": true
+      },
+      {
+        "at": 134.703,
+        "of": "hat",
+        "strength": 0.289,
+        "on_grid": false
+      },
+      {
+        "at": 134.82,
+        "of": "hat",
+        "strength": 0.301,
+        "on_grid": false
+      },
+      {
+        "at": 134.937,
+        "of": "hat",
+        "strength": 0.288,
+        "on_grid": false
+      },
+      {
+        "at": 135.044,
+        "of": "hat",
+        "strength": 0.404,
+        "on_grid": true
+      },
+      {
+        "at": 135.173,
+        "of": "hat",
+        "strength": 0.319,
+        "on_grid": false
+      },
+      {
+        "at": 135.294,
+        "of": "hat",
+        "strength": 0.275,
+        "on_grid": false
+      },
+      {
+        "at": 135.417,
+        "of": "hat",
+        "strength": 0.232,
+        "on_grid": false
+      },
+      {
+        "at": 135.516,
+        "of": "hat",
+        "strength": 0.189,
+        "on_grid": true
+      },
+      {
+        "at": 135.639,
+        "of": "hat",
+        "strength": 0.196,
+        "on_grid": false
+      },
+      {
+        "at": 135.778,
+        "of": "hat",
+        "strength": 0.257,
+        "on_grid": false
+      },
+      {
+        "at": 135.887,
+        "of": "hat",
+        "strength": 0.195,
+        "on_grid": false
+      },
+      {
+        "at": 135.997,
+        "of": "hat",
+        "strength": 0.249,
+        "on_grid": true
+      },
+      {
+        "at": 136.153,
+        "of": "hat",
+        "strength": 0.169,
+        "on_grid": false
+      },
+      {
+        "at": 136.253,
+        "of": "hat",
+        "strength": 0.291,
+        "on_grid": false
+      },
+      {
+        "at": 136.371,
+        "of": "hat",
+        "strength": 0.274,
+        "on_grid": false
+      },
+      {
+        "at": 136.498,
+        "of": "hat",
+        "strength": 0.271,
+        "on_grid": true
+      },
+      {
+        "at": 136.605,
+        "of": "hat",
+        "strength": 0.244,
+        "on_grid": false
+      },
+      {
+        "at": 136.727,
+        "of": "hat",
+        "strength": 0.287,
+        "on_grid": false
+      },
+      {
+        "at": 136.851,
+        "of": "hat",
+        "strength": 0.202,
+        "on_grid": false
+      },
+      {
+        "at": 136.954,
+        "of": "hat",
+        "strength": 0.392,
+        "on_grid": true
+      },
+      {
+        "at": 137.085,
+        "of": "hat",
+        "strength": 0.299,
+        "on_grid": false
+      },
+      {
+        "at": 137.195,
+        "of": "hat",
+        "strength": 0.333,
+        "on_grid": false
+      },
+      {
+        "at": 137.321,
+        "of": "hat",
+        "strength": 0.297,
+        "on_grid": false
+      },
+      {
+        "at": 137.438,
+        "of": "hat",
+        "strength": 0.324,
+        "on_grid": true
+      },
+      {
+        "at": 137.567,
+        "of": "hat",
+        "strength": 0.298,
+        "on_grid": false
+      },
+      {
+        "at": 137.664,
+        "of": "hat",
+        "strength": 0.371,
+        "on_grid": false
+      },
+      {
+        "at": 137.792,
+        "of": "hat",
+        "strength": 0.32,
+        "on_grid": false
+      },
+      {
+        "at": 137.889,
+        "of": "hat",
+        "strength": 0.194,
+        "on_grid": true
+      },
+      {
+        "at": 139.333,
+        "of": "snare",
+        "strength": 0.478,
+        "on_grid": true
+      },
+      {
+        "at": 139.443,
+        "of": "snare",
+        "strength": 0.61,
+        "on_grid": false
+      },
+      {
+        "at": 139.561,
+        "of": "snare",
+        "strength": 0.518,
+        "on_grid": false
+      },
+      {
+        "at": 139.706,
+        "of": "snare",
+        "strength": 0.068,
+        "on_grid": false
+      },
+      {
+        "at": 139.852,
+        "of": "kick",
+        "strength": 0.827,
+        "on_grid": true
+      },
+      {
+        "at": 139.956,
+        "of": "kick",
+        "strength": 0.596,
+        "on_grid": false
+      },
+      {
+        "at": 140.057,
+        "of": "hat",
+        "strength": 0.444,
+        "on_grid": false
+      },
+      {
+        "at": 140.186,
+        "of": "hat",
+        "strength": 0.277,
+        "on_grid": false
+      },
+      {
+        "at": 140.312,
+        "of": "kick",
+        "strength": 0.6,
+        "on_grid": true
+      },
+      {
+        "at": 140.432,
+        "of": "hat",
+        "strength": 0.418,
+        "on_grid": false
+      },
+      {
+        "at": 140.522,
+        "of": "hat",
+        "strength": 0.358,
+        "on_grid": false
+      },
+      {
+        "at": 140.611,
+        "of": "hat",
+        "strength": 0.256,
+        "on_grid": false
+      },
+      {
+        "at": 140.76,
+        "of": "snare",
+        "strength": 0.591,
+        "on_grid": true
+      },
+      {
+        "at": 140.859,
+        "of": "kick",
+        "strength": 0.446,
+        "on_grid": false
+      },
+      {
+        "at": 140.945,
+        "of": "hat",
+        "strength": 0.084,
+        "on_grid": false
+      },
+      {
+        "at": 141.03,
+        "of": "hat",
+        "strength": 0.41,
+        "on_grid": false
+      },
+      {
+        "at": 141.158,
+        "of": "hat",
+        "strength": 0.254,
+        "on_grid": false
+      },
+      {
+        "at": 141.265,
+        "of": "kick",
+        "strength": 0.647,
+        "on_grid": true
+      },
+      {
+        "at": 141.365,
+        "of": "kick",
+        "strength": 0.399,
+        "on_grid": false
+      },
+      {
+        "at": 141.476,
+        "of": "hat",
+        "strength": 0.34,
+        "on_grid": false
+      },
+      {
+        "at": 141.565,
+        "of": "hat",
+        "strength": 0.294,
+        "on_grid": false
+      },
+      {
+        "at": 141.706,
+        "of": "hat",
+        "strength": 0.608,
+        "on_grid": true
+      },
+      {
+        "at": 141.821,
+        "of": "kick",
+        "strength": 0.473,
+        "on_grid": false
+      },
+      {
+        "at": 141.973,
+        "of": "hat",
+        "strength": 0.444,
+        "on_grid": false
+      },
+      {
+        "at": 142.136,
+        "of": "hat",
+        "strength": 0.289,
+        "on_grid": false
+      },
+      {
+        "at": 142.224,
+        "of": "kick",
+        "strength": 0.631,
+        "on_grid": true
+      },
+      {
+        "at": 142.317,
+        "of": "kick",
+        "strength": 0.291,
+        "on_grid": false
+      },
+      {
+        "at": 142.43,
+        "of": "hat",
+        "strength": 0.368,
+        "on_grid": false
+      },
+      {
+        "at": 142.517,
+        "of": "hat",
+        "strength": 0.241,
+        "on_grid": false
+      },
+      {
+        "at": 142.658,
+        "of": "hat",
+        "strength": 0.619,
+        "on_grid": true
+      },
+      {
+        "at": 142.744,
+        "of": "kick",
+        "strength": 0.408,
+        "on_grid": false
+      },
+      {
+        "at": 142.832,
+        "of": "kick",
+        "strength": 0.295,
+        "on_grid": false
+      },
+      {
+        "at": 142.934,
+        "of": "hat",
+        "strength": 0.323,
+        "on_grid": false
+      },
+      {
+        "at": 143.024,
+        "of": "hat",
+        "strength": 0.172,
+        "on_grid": false
+      },
+      {
+        "at": 143.134,
+        "of": "hat",
+        "strength": 0.674,
+        "on_grid": true
+      },
+      {
+        "at": 143.221,
+        "of": "kick",
+        "strength": 0.479,
+        "on_grid": false
+      },
+      {
+        "at": 143.309,
+        "of": "kick",
+        "strength": 0.316,
+        "on_grid": false
+      },
+      {
+        "at": 143.44,
+        "of": "hat",
+        "strength": 0.39,
+        "on_grid": false
+      },
+      {
+        "at": 143.527,
+        "of": "hat",
+        "strength": 0.133,
+        "on_grid": false
+      },
+      {
+        "at": 143.617,
+        "of": "snare",
+        "strength": 0.688,
+        "on_grid": true
+      },
+      {
+        "at": 143.716,
+        "of": "kick",
+        "strength": 0.389,
+        "on_grid": false
+      },
+      {
+        "at": 143.865,
+        "of": "hat",
+        "strength": 0.398,
+        "on_grid": false
+      },
+      {
+        "at": 143.96,
+        "of": "hat",
+        "strength": 0.18,
+        "on_grid": false
+      },
+      {
+        "at": 144.093,
+        "of": "snare",
+        "strength": 0.626,
+        "on_grid": true
+      },
+      {
+        "at": 144.183,
+        "of": "kick",
+        "strength": 0.444,
+        "on_grid": false
+      },
+      {
+        "at": 144.34,
+        "of": "hat",
+        "strength": 0.352,
+        "on_grid": false
+      },
+      {
+        "at": 144.449,
+        "of": "hat",
+        "strength": 0.167,
+        "on_grid": false
+      },
+      {
+        "at": 144.598,
+        "of": "kick",
+        "strength": 0.597,
+        "on_grid": true
+      },
+      {
+        "at": 144.697,
+        "of": "kick",
+        "strength": 0.421,
+        "on_grid": false
+      },
+      {
+        "at": 144.811,
+        "of": "hat",
+        "strength": 0.491,
+        "on_grid": false
+      },
+      {
+        "at": 144.924,
+        "of": "hat",
+        "strength": 0.158,
+        "on_grid": false
+      },
+      {
+        "at": 145.075,
+        "of": "kick",
+        "strength": 0.659,
+        "on_grid": true
+      },
+      {
+        "at": 145.174,
+        "of": "kick",
+        "strength": 0.364,
+        "on_grid": false
+      },
+      {
+        "at": 145.286,
+        "of": "hat",
+        "strength": 0.426,
+        "on_grid": false
+      },
+      {
+        "at": 145.375,
+        "of": "hat",
+        "strength": 0.202,
+        "on_grid": false
+      },
+      {
+        "at": 145.516,
+        "of": "hat",
+        "strength": 0.626,
+        "on_grid": true
+      },
+      {
+        "at": 145.602,
+        "of": "kick",
+        "strength": 0.442,
+        "on_grid": false
+      },
+      {
+        "at": 145.689,
+        "of": "kick",
+        "strength": 0.34,
+        "on_grid": false
+      },
+      {
+        "at": 145.804,
+        "of": "hat",
+        "strength": 0.377,
+        "on_grid": false
+      },
+      {
+        "at": 145.896,
+        "of": "hat",
+        "strength": 0.202,
+        "on_grid": false
+      },
+      {
+        "at": 145.993,
+        "of": "hat",
+        "strength": 0.651,
+        "on_grid": true
+      },
+      {
+        "at": 146.078,
+        "of": "kick",
+        "strength": 0.467,
+        "on_grid": false
+      },
+      {
+        "at": 146.166,
+        "of": "kick",
+        "strength": 0.27,
+        "on_grid": false
+      },
+      {
+        "at": 146.289,
+        "of": "hat",
+        "strength": 0.419,
+        "on_grid": false
+      },
+      {
+        "at": 146.383,
+        "of": "hat",
+        "strength": 0.123,
+        "on_grid": false
+      },
+      {
+        "at": 146.474,
+        "of": "snare",
+        "strength": 0.55,
+        "on_grid": true
+      },
+      {
+        "at": 146.563,
+        "of": "kick",
+        "strength": 0.342,
+        "on_grid": false
+      },
+      {
+        "at": 146.652,
+        "of": "kick",
+        "strength": 0.253,
+        "on_grid": false
+      },
+      {
+        "at": 146.744,
+        "of": "hat",
+        "strength": 0.358,
+        "on_grid": false
+      },
+      {
+        "at": 146.864,
+        "of": "hat",
+        "strength": 0.14,
+        "on_grid": false
+      },
+      {
+        "at": 146.994,
+        "of": "kick",
+        "strength": 0.605,
+        "on_grid": true
+      },
+      {
+        "at": 147.098,
+        "of": "kick",
+        "strength": 0.301,
+        "on_grid": false
+      },
+      {
+        "at": 147.187,
+        "of": "hat",
+        "strength": 0.411,
+        "on_grid": false
+      },
+      {
+        "at": 147.28,
+        "of": "hat",
+        "strength": 0.113,
+        "on_grid": false
+      },
+      {
+        "at": 147.371,
+        "of": "hat",
+        "strength": 0.056,
+        "on_grid": false
+      },
+      {
+        "at": 147.456,
+        "of": "kick",
+        "strength": 0.524,
+        "on_grid": true
+      },
+      {
+        "at": 147.545,
+        "of": "kick",
+        "strength": 0.291,
+        "on_grid": false
+      },
+      {
+        "at": 147.67,
+        "of": "hat",
+        "strength": 0.279,
+        "on_grid": false
+      },
+      {
+        "at": 147.758,
+        "of": "hat",
+        "strength": 0.121,
+        "on_grid": false
+      },
+      {
+        "at": 147.844,
+        "of": "hat",
+        "strength": 0.078,
+        "on_grid": false
+      },
+      {
+        "at": 147.932,
+        "of": "kick",
+        "strength": 0.578,
+        "on_grid": true
+      },
+      {
+        "at": 148.021,
+        "of": "kick",
+        "strength": 0.338,
+        "on_grid": false
+      },
+      {
+        "at": 148.181,
+        "of": "hat",
+        "strength": 0.326,
+        "on_grid": false
+      },
+      {
+        "at": 148.268,
+        "of": "hat",
+        "strength": 0.103,
+        "on_grid": false
+      },
+      {
+        "at": 148.372,
+        "of": "hat",
+        "strength": 0.689,
+        "on_grid": true
+      },
+      {
+        "at": 148.459,
+        "of": "kick",
+        "strength": 0.352,
+        "on_grid": false
+      },
+      {
+        "at": 148.545,
+        "of": "kick",
+        "strength": 0.079,
+        "on_grid": false
+      },
+      {
+        "at": 148.63,
+        "of": "hat",
+        "strength": 0.323,
+        "on_grid": false
+      },
+      {
+        "at": 148.738,
+        "of": "hat",
+        "strength": 0.143,
+        "on_grid": false
+      },
+      {
+        "at": 148.9,
+        "of": "kick",
+        "strength": 0.579,
+        "on_grid": true
+      },
+      {
+        "at": 149.003,
+        "of": "kick",
+        "strength": 0.266,
+        "on_grid": false
+      },
+      {
+        "at": 149.116,
+        "of": "hat",
+        "strength": 0.328,
+        "on_grid": false
+      },
+      {
+        "at": 149.21,
+        "of": "hat",
+        "strength": 0.089,
+        "on_grid": false
+      },
+      {
+        "at": 149.325,
+        "of": "hat",
+        "strength": 0.665,
+        "on_grid": true
+      },
+      {
+        "at": 149.411,
+        "of": "kick",
+        "strength": 0.405,
+        "on_grid": false
+      },
+      {
+        "at": 149.573,
+        "of": "hat",
+        "strength": 0.367,
+        "on_grid": false
+      },
+      {
+        "at": 149.669,
+        "of": "hat",
+        "strength": 0.221,
+        "on_grid": false
+      },
+      {
+        "at": 149.807,
+        "of": "snare",
+        "strength": 0.54,
+        "on_grid": true
+      },
+      {
+        "at": 149.897,
+        "of": "kick",
+        "strength": 0.357,
+        "on_grid": false
+      },
+      {
+        "at": 149.986,
+        "of": "kick",
+        "strength": 0.234,
+        "on_grid": false
+      },
+      {
+        "at": 150.086,
+        "of": "hat",
+        "strength": 0.328,
+        "on_grid": false
+      },
+      {
+        "at": 150.18,
+        "of": "hat",
+        "strength": 0.059,
+        "on_grid": false
+      },
+      {
+        "at": 150.278,
+        "of": "hat",
+        "strength": 0.699,
+        "on_grid": true
+      },
+      {
+        "at": 150.392,
+        "of": "kick",
+        "strength": 0.321,
+        "on_grid": false
+      },
+      {
+        "at": 150.557,
+        "of": "hat",
+        "strength": 0.418,
+        "on_grid": false
+      },
+      {
+        "at": 150.657,
+        "of": "hat",
+        "strength": 0.135,
+        "on_grid": false
+      },
+      {
+        "at": 150.753,
+        "of": "hat",
+        "strength": 0.596,
+        "on_grid": true
+      },
+      {
+        "at": 150.84,
+        "of": "kick",
+        "strength": 0.411,
+        "on_grid": false
+      },
+      {
+        "at": 150.938,
+        "of": "kick",
+        "strength": 0.221,
+        "on_grid": false
+      },
+      {
+        "at": 151.028,
+        "of": "hat",
+        "strength": 0.379,
+        "on_grid": false
+      },
+      {
+        "at": 151.113,
+        "of": "hat",
+        "strength": 0.111,
+        "on_grid": false
+      },
+      {
+        "at": 151.23,
+        "of": "hat",
+        "strength": 0.673,
+        "on_grid": true
+      },
+      {
+        "at": 151.316,
+        "of": "kick",
+        "strength": 0.399,
+        "on_grid": false
+      },
+      {
+        "at": 151.404,
+        "of": "kick",
+        "strength": 0.269,
+        "on_grid": false
+      },
+      {
+        "at": 151.495,
+        "of": "hat",
+        "strength": 0.368,
+        "on_grid": false
+      },
+      {
+        "at": 151.582,
+        "of": "hat",
+        "strength": 0.111,
+        "on_grid": false
+      },
+      {
+        "at": 151.757,
+        "of": "kick",
+        "strength": 0.62,
+        "on_grid": true
+      },
+      {
+        "at": 151.85,
+        "of": "kick",
+        "strength": 0.287,
+        "on_grid": false
+      },
+      {
+        "at": 151.961,
+        "of": "hat",
+        "strength": 0.421,
+        "on_grid": false
+      },
+      {
+        "at": 152.048,
+        "of": "hat",
+        "strength": 0.141,
+        "on_grid": false
+      },
+      {
+        "at": 152.233,
+        "of": "kick",
+        "strength": 0.547,
+        "on_grid": true
+      },
+      {
+        "at": 152.356,
+        "of": "kick",
+        "strength": 0.312,
+        "on_grid": false
+      },
+      {
+        "at": 152.457,
+        "of": "hat",
+        "strength": 0.343,
+        "on_grid": false
+      },
+      {
+        "at": 152.584,
+        "of": "hat",
+        "strength": 0.107,
+        "on_grid": false
+      },
+      {
+        "at": 152.709,
+        "of": "kick",
+        "strength": 0.628,
+        "on_grid": true
+      },
+      {
+        "at": 152.812,
+        "of": "kick",
+        "strength": 0.311,
+        "on_grid": false
+      },
+      {
+        "at": 152.913,
+        "of": "hat",
+        "strength": 0.363,
+        "on_grid": false
+      },
+      {
+        "at": 153.004,
+        "of": "hat",
+        "strength": 0.158,
+        "on_grid": false
+      },
+      {
+        "at": 153.138,
+        "of": "hat",
+        "strength": 0.33,
+        "on_grid": true
+      },
+      {
+        "at": 153.233,
+        "of": "hat",
+        "strength": 0.086,
+        "on_grid": false
+      },
+      {
+        "at": 153.375,
+        "of": "hat",
+        "strength": 0.459,
+        "on_grid": false
+      },
+      {
+        "at": 153.466,
+        "of": "hat",
+        "strength": 0.213,
+        "on_grid": false
+      },
+      {
+        "at": 153.613,
+        "of": "hat",
+        "strength": 0.369,
+        "on_grid": true
+      },
+      {
+        "at": 153.726,
+        "of": "hat",
+        "strength": 0.117,
+        "on_grid": false
+      },
+      {
+        "at": 153.87,
+        "of": "hat",
+        "strength": 0.499,
+        "on_grid": false
+      },
+      {
+        "at": 154.014,
+        "of": "hat",
+        "strength": 0.188,
+        "on_grid": false
+      },
+      {
+        "at": 154.345,
+        "of": "hat",
+        "strength": 0.4,
+        "on_grid": false
+      },
+      {
+        "at": 154.431,
+        "of": "hat",
+        "strength": 0.141,
+        "on_grid": false
+      },
+      {
+        "at": 154.565,
+        "of": "hat",
+        "strength": 0.425,
+        "on_grid": true
+      },
+      {
+        "at": 154.728,
+        "of": "hat",
+        "strength": 0.351,
+        "on_grid": false
+      },
+      {
+        "at": 154.822,
+        "of": "hat",
+        "strength": 0.43,
+        "on_grid": false
+      },
+      {
+        "at": 154.912,
+        "of": "hat",
+        "strength": 0.179,
+        "on_grid": false
+      },
+      {
+        "at": 154.998,
+        "of": "hat",
+        "strength": 0.583,
+        "on_grid": false
+      },
+      {
+        "at": 155.091,
+        "of": "kick",
+        "strength": 0.654,
+        "on_grid": true
+      },
+      {
+        "at": 155.195,
+        "of": "kick",
+        "strength": 0.51,
+        "on_grid": false
+      },
+      {
+        "at": 155.282,
+        "of": "hat",
+        "strength": 0.464,
+        "on_grid": false
+      },
+      {
+        "at": 155.377,
+        "of": "hat",
+        "strength": 0.361,
+        "on_grid": false
+      },
+      {
+        "at": 155.516,
+        "of": "hat",
+        "strength": 0.742,
+        "on_grid": true
+      },
+      {
+        "at": 155.621,
+        "of": "hat",
+        "strength": 0.437,
+        "on_grid": false
+      },
+      {
+        "at": 155.762,
+        "of": "hat",
+        "strength": 0.453,
+        "on_grid": false
+      },
+      {
+        "at": 155.929,
+        "of": "hat",
+        "strength": 0.216,
+        "on_grid": false
+      },
+      {
+        "at": 156.042,
+        "of": "kick",
+        "strength": 0.585,
+        "on_grid": true
+      },
+      {
+        "at": 156.165,
+        "of": "hat",
+        "strength": 0.422,
+        "on_grid": false
+      },
+      {
+        "at": 156.264,
+        "of": "hat",
+        "strength": 0.315,
+        "on_grid": false
+      },
+      {
+        "at": 156.382,
+        "of": "hat",
+        "strength": 0.201,
+        "on_grid": false
+      },
+      {
+        "at": 156.468,
+        "of": "hat",
+        "strength": 0.591,
+        "on_grid": true
+      },
+      {
+        "at": 156.554,
+        "of": "kick",
+        "strength": 0.367,
+        "on_grid": false
+      },
+      {
+        "at": 156.711,
+        "of": "hat",
+        "strength": 0.312,
+        "on_grid": false
+      },
+      {
+        "at": 156.873,
+        "of": "hat",
+        "strength": 0.215,
+        "on_grid": false
+      },
+      {
+        "at": 156.995,
+        "of": "kick",
+        "strength": 0.589,
+        "on_grid": true
+      },
+      {
+        "at": 157.099,
+        "of": "kick",
+        "strength": 0.396,
+        "on_grid": false
+      },
+      {
+        "at": 157.187,
+        "of": "hat",
+        "strength": 0.446,
+        "on_grid": false
+      },
+      {
+        "at": 157.29,
+        "of": "hat",
+        "strength": 0.248,
+        "on_grid": false
+      },
+      {
+        "at": 157.426,
+        "of": "snare",
+        "strength": 0.637,
+        "on_grid": true
+      },
+      {
+        "at": 157.516,
+        "of": "kick",
+        "strength": 0.381,
+        "on_grid": false
+      },
+      {
+        "at": 157.665,
+        "of": "hat",
+        "strength": 0.31,
+        "on_grid": false
+      },
+      {
+        "at": 157.8,
+        "of": "hat",
+        "strength": 0.208,
+        "on_grid": false
+      },
+      {
+        "at": 157.897,
+        "of": "hat",
+        "strength": 0.657,
+        "on_grid": true
+      },
+      {
+        "at": 158.031,
+        "of": "kick",
+        "strength": 0.358,
+        "on_grid": false
+      },
+      {
+        "at": 158.14,
+        "of": "hat",
+        "strength": 0.37,
+        "on_grid": false
+      },
+      {
+        "at": 158.245,
+        "of": "hat",
+        "strength": 0.224,
+        "on_grid": false
+      },
+      {
+        "at": 158.372,
+        "of": "hat",
+        "strength": 0.743,
+        "on_grid": true
+      },
+      {
+        "at": 158.459,
+        "of": "kick",
+        "strength": 0.468,
+        "on_grid": false
+      },
+      {
+        "at": 158.547,
+        "of": "kick",
+        "strength": 0.297,
+        "on_grid": false
+      },
+      {
+        "at": 158.635,
+        "of": "hat",
+        "strength": 0.327,
+        "on_grid": false
+      },
+      {
+        "at": 158.762,
+        "of": "hat",
+        "strength": 0.249,
+        "on_grid": false
+      },
+      {
+        "at": 158.849,
+        "of": "hat",
+        "strength": 0.59,
+        "on_grid": true
+      },
+      {
+        "at": 158.935,
+        "of": "kick",
+        "strength": 0.426,
+        "on_grid": false
+      },
+      {
+        "at": 159.105,
+        "of": "hat",
+        "strength": 0.406,
+        "on_grid": false
+      },
+      {
+        "at": 159.191,
+        "of": "hat",
+        "strength": 0.154,
+        "on_grid": false
+      },
+      {
+        "at": 159.325,
+        "of": "hat",
+        "strength": 0.575,
+        "on_grid": true
+      },
+      {
+        "at": 159.412,
+        "of": "kick",
+        "strength": 0.402,
+        "on_grid": false
+      },
+      {
+        "at": 159.499,
+        "of": "kick",
+        "strength": 0.231,
+        "on_grid": false
+      },
+      {
+        "at": 159.604,
+        "of": "hat",
+        "strength": 0.374,
+        "on_grid": false
+      },
+      {
+        "at": 159.694,
+        "of": "hat",
+        "strength": 0.166,
+        "on_grid": false
+      },
+      {
+        "at": 159.801,
+        "of": "hat",
+        "strength": 0.691,
+        "on_grid": true
+      },
+      {
+        "at": 159.888,
+        "of": "kick",
+        "strength": 0.413,
+        "on_grid": false
+      },
+      {
+        "at": 160.047,
+        "of": "hat",
+        "strength": 0.387,
+        "on_grid": false
+      },
+      {
+        "at": 160.141,
+        "of": "hat",
+        "strength": 0.168,
+        "on_grid": false
+      },
+      {
+        "at": 160.277,
+        "of": "hat",
+        "strength": 0.65,
+        "on_grid": true
+      },
+      {
+        "at": 160.364,
+        "of": "kick",
+        "strength": 0.385,
+        "on_grid": false
+      },
+      {
+        "at": 160.45,
+        "of": "hat",
+        "strength": 0.074,
+        "on_grid": false
+      },
+      {
+        "at": 160.535,
+        "of": "hat",
+        "strength": 0.442,
+        "on_grid": false
+      },
+      {
+        "at": 160.646,
+        "of": "hat",
+        "strength": 0.161,
+        "on_grid": false
+      },
+      {
+        "at": 160.755,
+        "of": "hat",
+        "strength": 0.658,
+        "on_grid": true
+      },
+      {
+        "at": 160.84,
+        "of": "kick",
+        "strength": 0.394,
+        "on_grid": false
+      },
+      {
+        "at": 161.002,
+        "of": "hat",
+        "strength": 0.548,
+        "on_grid": false
+      },
+      {
+        "at": 161.112,
+        "of": "hat",
+        "strength": 0.138,
+        "on_grid": false
+      },
+      {
+        "at": 161.229,
+        "of": "hat",
+        "strength": 0.623,
+        "on_grid": true
+      },
+      {
+        "at": 161.316,
+        "of": "kick",
+        "strength": 0.323,
+        "on_grid": false
+      },
+      {
+        "at": 161.404,
+        "of": "kick",
+        "strength": 0.215,
+        "on_grid": false
+      },
+      {
+        "at": 161.492,
+        "of": "hat",
+        "strength": 0.341,
+        "on_grid": false
+      },
+      {
+        "at": 161.596,
+        "of": "hat",
+        "strength": 0.129,
+        "on_grid": false
+      },
+      {
+        "at": 161.706,
+        "of": "hat",
+        "strength": 0.759,
+        "on_grid": true
+      },
+      {
+        "at": 161.792,
+        "of": "kick",
+        "strength": 0.32,
+        "on_grid": false
+      },
+      {
+        "at": 161.948,
+        "of": "hat",
+        "strength": 0.396,
+        "on_grid": false
+      },
+      {
+        "at": 162.044,
+        "of": "hat",
+        "strength": 0.137,
+        "on_grid": false
+      },
+      {
+        "at": 162.182,
+        "of": "hat",
+        "strength": 0.709,
+        "on_grid": true
+      },
+      {
+        "at": 162.269,
+        "of": "kick",
+        "strength": 0.396,
+        "on_grid": false
+      },
+      {
+        "at": 162.356,
+        "of": "kick",
+        "strength": 0.227,
+        "on_grid": false
+      },
+      {
+        "at": 162.462,
+        "of": "hat",
+        "strength": 0.439,
+        "on_grid": false
+      },
+      {
+        "at": 162.55,
+        "of": "hat",
+        "strength": 0.104,
+        "on_grid": false
+      },
+      {
+        "at": 162.658,
+        "of": "hat",
+        "strength": 0.586,
+        "on_grid": true
+      },
+      {
+        "at": 162.745,
+        "of": "kick",
+        "strength": 0.349,
+        "on_grid": false
+      },
+      {
+        "at": 162.907,
+        "of": "hat",
+        "strength": 0.429,
+        "on_grid": false
+      },
+      {
+        "at": 163.003,
+        "of": "hat",
+        "strength": 0.14,
+        "on_grid": false
+      },
+      {
+        "at": 163.135,
+        "of": "hat",
+        "strength": 0.602,
+        "on_grid": true
+      },
+      {
+        "at": 163.222,
+        "of": "kick",
+        "strength": 0.215,
+        "on_grid": false
+      },
+      {
+        "at": 163.382,
+        "of": "hat",
+        "strength": 0.368,
+        "on_grid": false
+      },
+      {
+        "at": 163.509,
+        "of": "hat",
+        "strength": 0.171,
+        "on_grid": false
+      },
+      {
+        "at": 163.611,
+        "of": "hat",
+        "strength": 0.667,
+        "on_grid": true
+      },
+      {
+        "at": 163.697,
+        "of": "kick",
+        "strength": 0.337,
+        "on_grid": false
+      },
+      {
+        "at": 163.866,
+        "of": "hat",
+        "strength": 0.469,
+        "on_grid": false
+      },
+      {
+        "at": 163.971,
+        "of": "hat",
+        "strength": 0.155,
+        "on_grid": false
+      },
+      {
+        "at": 164.087,
+        "of": "hat",
+        "strength": 0.637,
+        "on_grid": true
+      },
+      {
+        "at": 164.173,
+        "of": "kick",
+        "strength": 0.323,
+        "on_grid": false
+      },
+      {
+        "at": 164.272,
+        "of": "kick",
+        "strength": 0.182,
+        "on_grid": false
+      },
+      {
+        "at": 164.365,
+        "of": "hat",
+        "strength": 0.287,
+        "on_grid": false
+      },
+      {
+        "at": 164.459,
+        "of": "hat",
+        "strength": 0.099,
+        "on_grid": false
+      },
+      {
+        "at": 164.563,
+        "of": "hat",
+        "strength": 0.565,
+        "on_grid": true
+      },
+      {
+        "at": 164.65,
+        "of": "kick",
+        "strength": 0.356,
+        "on_grid": false
+      },
+      {
+        "at": 164.807,
+        "of": "hat",
+        "strength": 0.454,
+        "on_grid": false
+      },
+      {
+        "at": 164.908,
+        "of": "hat",
+        "strength": 0.246,
+        "on_grid": false
+      },
+      {
+        "at": 165.039,
+        "of": "hat",
+        "strength": 0.673,
+        "on_grid": true
+      },
+      {
+        "at": 165.135,
+        "of": "kick",
+        "strength": 0.415,
+        "on_grid": false
+      },
+      {
+        "at": 165.224,
+        "of": "kick",
+        "strength": 0.238,
+        "on_grid": false
+      },
+      {
+        "at": 165.314,
+        "of": "hat",
+        "strength": 0.325,
+        "on_grid": false
+      },
+      {
+        "at": 165.4,
+        "of": "hat",
+        "strength": 0.185,
+        "on_grid": false
+      },
+      {
+        "at": 165.516,
+        "of": "hat",
+        "strength": 0.676,
+        "on_grid": true
+      },
+      {
+        "at": 165.602,
+        "of": "kick",
+        "strength": 0.414,
+        "on_grid": false
+      },
+      {
+        "at": 165.691,
+        "of": "kick",
+        "strength": 0.32,
+        "on_grid": false
+      },
+      {
+        "at": 165.841,
+        "of": "hat",
+        "strength": 0.37,
+        "on_grid": false
+      },
+      {
+        "at": 165.992,
+        "of": "hat",
+        "strength": 0.904,
+        "on_grid": true
+      },
+      {
+        "at": 166.088,
+        "of": "kick",
+        "strength": 0.381,
+        "on_grid": false
+      },
+      {
+        "at": 166.241,
+        "of": "hat",
+        "strength": 0.276,
+        "on_grid": false
+      },
+      {
+        "at": 166.377,
+        "of": "hat",
+        "strength": 0.171,
+        "on_grid": false
+      },
+      {
+        "at": 166.468,
+        "of": "hat",
+        "strength": 0.641,
+        "on_grid": true
+      },
+      {
+        "at": 166.554,
+        "of": "kick",
+        "strength": 0.377,
+        "on_grid": false
+      },
+      {
+        "at": 166.642,
+        "of": "kick",
+        "strength": 0.289,
+        "on_grid": false
+      },
+      {
+        "at": 166.735,
+        "of": "hat",
+        "strength": 0.364,
+        "on_grid": false
+      },
+      {
+        "at": 166.832,
+        "of": "hat",
+        "strength": 0.154,
+        "on_grid": false
+      },
+      {
+        "at": 166.944,
+        "of": "hat",
+        "strength": 0.706,
+        "on_grid": true
+      },
+      {
+        "at": 167.031,
+        "of": "kick",
+        "strength": 0.345,
+        "on_grid": false
+      },
+      {
+        "at": 167.119,
+        "of": "kick",
+        "strength": 0.201,
+        "on_grid": false
+      },
+      {
+        "at": 167.222,
+        "of": "hat",
+        "strength": 0.347,
+        "on_grid": false
+      },
+      {
+        "at": 167.334,
+        "of": "hat",
+        "strength": 0.19,
+        "on_grid": false
+      },
+      {
+        "at": 167.421,
+        "of": "hat",
+        "strength": 0.56,
+        "on_grid": true
+      },
+      {
+        "at": 167.506,
+        "of": "kick",
+        "strength": 0.364,
+        "on_grid": false
+      },
+      {
+        "at": 167.667,
+        "of": "hat",
+        "strength": 0.457,
+        "on_grid": false
+      },
+      {
+        "at": 167.757,
+        "of": "hat",
+        "strength": 0.177,
+        "on_grid": false
+      },
+      {
+        "at": 167.896,
+        "of": "hat",
+        "strength": 0.731,
+        "on_grid": true
+      },
+      {
+        "at": 167.983,
+        "of": "kick",
+        "strength": 0.394,
+        "on_grid": false
+      },
+      {
+        "at": 168.137,
+        "of": "hat",
+        "strength": 0.378,
+        "on_grid": false
+      },
+      {
+        "at": 168.301,
+        "of": "hat",
+        "strength": 0.215,
+        "on_grid": false
+      },
+      {
+        "at": 168.391,
+        "of": "hat",
+        "strength": 0.06,
+        "on_grid": true
+      },
+      {
+        "at": 168.614,
+        "of": "hat",
+        "strength": 0.35,
+        "on_grid": false
+      },
+      {
+        "at": 168.703,
+        "of": "hat",
+        "strength": 0.108,
+        "on_grid": false
+      },
+      {
+        "at": 168.858,
+        "of": "hat",
+        "strength": 0.2,
+        "on_grid": true
+      },
+      {
+        "at": 168.943,
+        "of": "hat",
+        "strength": 0.116,
+        "on_grid": false
+      },
+      {
+        "at": 169.089,
+        "of": "hat",
+        "strength": 0.368,
+        "on_grid": false
+      },
+      {
+        "at": 169.207,
+        "of": "hat",
+        "strength": 0.13,
+        "on_grid": false
+      },
+      {
+        "at": 169.297,
+        "of": "hat",
+        "strength": 0.061,
+        "on_grid": false
+      },
+      {
+        "at": 169.566,
+        "of": "hat",
+        "strength": 0.398,
+        "on_grid": false
+      },
+      {
+        "at": 169.665,
+        "of": "hat",
+        "strength": 0.096,
+        "on_grid": false
+      },
+      {
+        "at": 169.806,
+        "of": "hat",
+        "strength": 0.139,
+        "on_grid": true
+      },
+      {
+        "at": 170.093,
+        "of": "hat",
+        "strength": 0.341,
+        "on_grid": false
+      },
+      {
+        "at": 170.223,
+        "of": "hat",
+        "strength": 0.347,
+        "on_grid": false
+      },
+      {
+        "at": 170.309,
+        "of": "kick",
+        "strength": 0.668,
+        "on_grid": true
+      },
+      {
+        "at": 170.441,
+        "of": "snare",
+        "strength": 0.458,
+        "on_grid": false
+      },
+      {
+        "at": 170.557,
+        "of": "kick",
+        "strength": 0.481,
+        "on_grid": false
+      },
+      {
+        "at": 170.688,
+        "of": "kick",
+        "strength": 0.625,
+        "on_grid": false
+      },
+      {
+        "at": 170.795,
+        "of": "kick",
+        "strength": 0.632,
+        "on_grid": true
+      },
+      {
+        "at": 170.895,
+        "of": "kick",
+        "strength": 0.495,
+        "on_grid": false
+      },
+      {
+        "at": 171.016,
+        "of": "kick",
+        "strength": 0.481,
+        "on_grid": false
+      },
+      {
+        "at": 171.107,
+        "of": "kick",
+        "strength": 0.498,
+        "on_grid": false
+      },
+      {
+        "at": 171.24,
+        "of": "kick",
+        "strength": 0.399,
+        "on_grid": true
+      },
+      {
+        "at": 171.359,
+        "of": "kick",
+        "strength": 0.535,
+        "on_grid": false
+      },
+      {
+        "at": 171.445,
+        "of": "kick",
+        "strength": 0.447,
+        "on_grid": false
+      },
+      {
+        "at": 171.555,
+        "of": "kick",
+        "strength": 0.531,
+        "on_grid": false
+      },
+      {
+        "at": 171.657,
+        "of": "kick",
+        "strength": 0.483,
+        "on_grid": false
+      },
+      {
+        "at": 171.79,
+        "of": "kick",
+        "strength": 0.415,
+        "on_grid": false
+      },
+      {
+        "at": 171.907,
+        "of": "kick",
+        "strength": 0.254,
+        "on_grid": false
+      },
+      {
+        "at": 172.018,
+        "of": "kick",
+        "strength": 0.207,
+        "on_grid": false
+      },
+      {
+        "at": 172.131,
+        "of": "snare",
+        "strength": 0.153,
+        "on_grid": false
+      },
+      {
+        "at": 172.246,
+        "of": "snare",
+        "strength": 0.118,
+        "on_grid": false
+      },
+      {
+        "at": 172.365,
+        "of": "snare",
+        "strength": 0.177,
+        "on_grid": false
+      },
+      {
+        "at": 172.457,
+        "of": "snare",
+        "strength": 0.103,
+        "on_grid": false
+      },
+      {
+        "at": 172.571,
+        "of": "snare",
+        "strength": 0.096,
+        "on_grid": false
+      },
+      {
+        "at": 172.667,
+        "of": "snare",
+        "strength": 0.068,
+        "on_grid": true
+      },
+      {
+        "at": 172.873,
+        "of": "snare",
+        "strength": 0.08,
+        "on_grid": false
+      }
+    ]
+  },
+  "verified_by_human": {
+    "kick_region": {
+      "from_bar": 10,
+      "to_bar": 16,
+      "from": 17.904,
+      "to": 31.238,
+      "by": "renjith",
+      "measured": "drums-stem kick energy steps from 0.383 in bar 9 to 0.949 in bar 10, holds 0.906-0.956 through bar 16, then collapses to 0.143 in bar 17. A 2.5x step in and a 6.7x drop out, both on the bar he named.",
+      "note": "Not stored as a new field: `stems.drums` already carries it and no reader breaks without a declaration. Recorded as verification of the measured curve."
+    },
+    "three_hits_at_2s": {
+      "by": "renjith",
+      "candidates": [
+        1.715,
+        2.1,
+        2.425
+      ],
+      "note": "the three most prominent drum onsets between 1.5 and 3.0 s; a pickup into bar 2 at 2.663"
+    }
   }
 }

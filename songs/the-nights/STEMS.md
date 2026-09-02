@@ -62,3 +62,78 @@ This is the gap flagged in `FINDINGS.md` after the first pass — *kick presence
 informative signal in the song and it is neither a moment nor a span nor an energy value* — and
 the same hole meant a lighting reader wanting to spotlight the voice had no way to know where the
 voice was. It goes in under the rule: a field goes in when a reader breaks without it.
+
+---
+
+# First section reviewed by ear — 2026-09-03
+
+Renjith, listening to the first thirty seconds:
+
+> *around second 2, you hear 3 drum sounds which have to be accounted for*
+> *the start of bar 10 marks the start of kicks that then stop at the end of bar 16*
+
+Both check out on the isolated drums stem, and one of them lands exactly on a boundary I had
+already detected — which is the strongest validation the grid has had.
+
+## The kick region
+
+Kick energy at beat positions, per bar, measured on the lag-corrected drums stem:
+
+```
+bars 2-9    0.345 - 0.457      toms, not the kick
+bar 10      0.949   <- steps up 2.5x
+bars 11-16  0.906 - 0.956      holds
+bar 17      0.143   <- drops 6.7x
+bars 19+    0.000
+```
+
+Bar 10 starts at **17.904 s** and bar 17 at **31.238 s**. That second number is *exactly* the
+chapter boundary the analysis had already found at 31.238 — the same instant, from two unrelated
+methods, one of them a human ear. The grid, the period, the phase and the bar phase are all
+implicated in that agreement, so all four are now much better attested than before.
+
+Bar 9 versus bar 10 also turned out to be two different events rather than one: **the bass enters
+at bar 10** (0.000 → 0.191) together with the kick, while my detected boundary at 16.00 s is
+bar 9. So something changes a bar before the band arrives — which is ordinary in pop and means the
+boundary at 16.00 is probably right *and* incomplete.
+
+**Why my first pass got this wrong:** I measured "kick presence" on the low band of the *full
+mix*, where a bass note and a kick are indistinguishable. That reported the kick as present from
+0.69 s. On the isolated drums stem the distinction is unambiguous — bars 2–9 are toms at 0.39, and
+the four-on-the-floor is 0.95. Separation earns its keep here.
+
+**Not stored as a new field.** `stems.drums` already carries this and no reader breaks without a
+declaration, so it is recorded under `verified_by_human` as confirmation of the measured curve.
+The rule holds: a field goes in when a reader breaks without it, not when a fact is interesting.
+
+## The three drum sounds — a real format gap
+
+This one *does* break a reader. The loudest drum onsets between 1.5 and 3.0 s:
+
+| at | what | strength | position |
+|---|---|---|---|
+| 1.715 | hat | 0.729 | beat 3 + 0.00 — **on** the grid |
+| 2.100 | hat | 0.714 | beat 3 + 0.81 — **off** the grid |
+| 2.425 | snare | 0.635 | beat 4 + 0.50 — **off** the grid |
+| 2.663 | snare | 0.707 | beat 4 + 1.00 — the downbeat of bar 2 |
+
+Two of the three sit *between* beats. So a reader asked to stab three times at second 2 cannot get
+those times from `beats`, and `stems` is sampled per downbeat so it cannot either. They are not
+`moments` — the six kinds are structural and closed. **The map had no way to express them.**
+
+Hence `accents`: individual percussive events with a time, a strength and which drum. Across the
+song there are **983 of them, and 71% do not sit on the beat grid** — so a reader working from
+`beats` alone was missing most of the percussion in the record.
+
+## The map records everything; the recipe chooses
+
+Making the show react to all 983 put the flicker straight back in — frames changing by more than
+0.15 went from 10 to 208, and p99 from 0.137 to 0.180. It was also wrong musically: nobody stabs
+every hi-hat.
+
+So the recipe keeps accents above 0.42 strength and thins them so two stabs are never inside
+300 ms — **173 stabs out of 983 recorded**. That is the separation of concerns working exactly as
+intended: the *map* says what the music does, the *recipe* decides what to react to. p99 is back
+to 0.153, and the hits that remain are the fills, which is what was asked for.
+
+The first six stabs: 1.715 hat, 2.100 hat, 2.425 snare, 2.829 snare, 3.152 kick, 4.103 kick.
