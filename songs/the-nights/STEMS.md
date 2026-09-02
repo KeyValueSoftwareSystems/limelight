@@ -275,3 +275,87 @@ cheap (the fix loop, done), collect enough of them that a preference model can b
 of two fifteen-second versions a human picked, and let *that* choose the look. Until then the
 honest description is: **the machine now knows the song thoroughly and still has someone else's
 taste.**
+
+---
+
+# The vector tier found what the named tier missed — 2026-09-03
+
+> *If Avicii was looking at this, he would feel terrible because he knows every note and every
+> point in the song … we cannot be just 80% there … we will capture things that we cannot even
+> name at this point when we have our own model.*
+
+## Auditing against that bar caught a number that was simply wrong
+
+Micro-timing was recorded as *median +9.4 ms, IQR ±115 ms*. Half a beat at 126 BPM is 119 ms, so
+an IQR of ±115 ms means the values were spread uniformly across the beat. I had measured each
+hit's distance from the nearest **beat**, when almost every hit sits on a **subdivision**. Pure
+artifact.
+
+| grid | IQR width | within 20 ms |
+|---|---|---|
+| 1/4 of a beat | 33.8 ms | 57% |
+| 1/8 | 26.3 ms | 75% |
+| **1/16** | **16.6 ms** | **100%** |
+
+**The Nights is quantised to 1/16 of a beat and every one of its 983 drum hits lands within 15 ms
+of that grid.** Median deviation −1.3 ms. It is programmed, dead tight. The number I had would
+have told its author his record was sloppy.
+
+## The notes hold up; the chords do not
+
+3,863 notes from `basic-pitch`, cross-checked against the key: **98.3% to 99.9% diatonic to F#
+major** across all five stems, against ~58% by chance. So the transcription is sound *and* it
+confirms the key by a completely different route than the Krumhansl profile.
+
+But only **69.4%** of those notes belong to the chord I labelled that bar. Above the 55% "broken"
+line and far below where it should be — my chroma template match is almost certainly calling C#
+major `F#7`, which is the V chord of the song mislabelled throughout. That needs a real chord
+model.
+
+## Then the learned space contradicted my structure
+
+`MERT-v1-95M`, beat-aligned pooling — the mean of 75 Hz frames between consecutive beats, then
+L2-normalised, which makes it tempo-invariant almost for free. 369 beats × 768 dims, 553 KB, out
+of line as the format always specified.
+
+Cosine similarity between my hand-labelled section centroids, **in the learned space**:
+
+```
+drop E  vs  drop G   0.951     I had said these were different sections
+break C vs  break F  0.950     I had also split these
+verse B vs  drop  E  0.940     the sixth signal that my 16.00-31.24 label is wrong
+```
+
+So I ran a checkerboard novelty over the MERT vectors and re-clustered. It returns a structure my
+chroma novelty never saw:
+
+```
+A #1  0:00-0:15   8.4 bars        A #2  1:18-1:32   7.0 bars
+B #1  0:17-0:31   7.0 bars        B #2  1:32-1:47   8.0 bars
+C #1  0:31-0:38   4.0 bars        C #2  1:47-1:55   4.0 bars
+D #1  0:38-0:48   5.0 bars        D #2  1:55-2:04   5.0 bars
+E #1  0:48-1:03   8.0 bars        E #2  2:04-2:19   8.0 bars
+F #1  1:03-1:18   8.0 bars        F #2  2:19-2:35   8.0 bars
+                                  F #3  2:35-2:48   7.0 bars
+                                  G #1  2:48-2:55   3.8 bars
+```
+
+**The song is two identical passes of a six-part cycle**, and the bar counts come out as clean
+integers — 8, 7, 4, 5, 8, 8 both times. That is not a fit; that is a structure.
+
+It also reconciles with Gemini's recalled outline: its pre-chorus 2 at **1:47** matches C #2
+exactly, and its drop 2 at 2:02 sits two seconds from E #2. Its *shape* was right all along; only
+its absolute times drifted, because it was describing the longer master.
+
+**Consequence for the show:** seven repeats to escalate instead of one. "Make the second chorus
+bigger than the first" now applies six more times.
+
+Recorded as `segmentation_proposal`, **not applied.** Structure is Renjith's call and he is at bar
+16 of 92. But the evidence is now six independent methods and integer bar counts, and I would
+accept it.
+
+## Why this matters more than the map growing
+
+The vector tier did not add detail. It **corrected the named tier** — found three section
+identities the named features missed, and a structure that is obviously right once seen. That is
+the argument for having it, made by the thing itself rather than by me.
