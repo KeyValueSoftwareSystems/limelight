@@ -198,3 +198,80 @@ trusses crossing properly. Three things made it look wrong, and one had been pre
    floor's mirror share was 0.42. Now 0.24/0.40/0.20 and 0.30 — light on a floor rather than paint.
 
 The LED bars were also 12 cm slabs; a real one is a couple of centimetres.
+
+---
+
+# Auto-exposure, and what "designed for this one song" actually requires
+
+> *some are just too bright … music does not feel like it is fully captured, it cannot be just
+> slightly better than the current systems, it really has to be agile and know the music like it
+> was designed to play for that one song*
+
+## The blow-out was a conceptual error, not a constant
+
+At the second drop the whole frame went white. Four things compounded, and the root one is that
+**my exposure went UP when the room got bright**:
+
+```
+ex     = 1.05 + 0.35·haze + 0.30·strobe   ->  1.55 at the drop
+strobe beam gain 2.30, head gain 1.55
+bloom strength   0.75 + 0.55·haze         ->  1.135
+beam density     0.30 + 0.95·haze         ->  0.965, over 20 additive beams
+```
+
+A camera in a club **stops down**. So exposure is now driven by the frame's own emitted light:
+
+```
+load = mean level across the 22 emitters
+ex   = (1.02 + 0.16·haze) / (1 + 2.15·load)
+```
+
+At an idle load that is 1.02; at a full drop it is about 0.42 — a two-and-a-half stop pull-down,
+computed from the frame, so it is still a pure function of `t` with no state and scrubbing stays
+exact. Gains cut to par 0.72 / head 1.05 / strobe 0.95, bloom to 0.42 at threshold 1.05, density
+to `0.24 + 0.52·haze`.
+
+## The harder point: completeness of observation does not produce taste
+
+This is worth being exact about, because it is the difference between the project succeeding and
+being a slightly better SoundSwitch.
+
+A human designer's show feels written for one song because of five things. Four of them are
+missing information, and are now fixable:
+
+| what a designer does | what it needs | state |
+|---|---|---|
+| hits *that specific* fill, not a class of fill | `accents` — 983 events, 71% off-grid | **done** |
+| stops when the music stops | `stems.drums` gating the accent | **done** |
+| makes the second chorus bigger than the first | **section identity** — which sections are the *same* | **done, this pass** |
+| grows the whole show toward its end | **arc** — position in the song | **done, this pass** |
+| chooses a look *for this song* | taste | **not information at all** |
+
+**Section identity is the one that was really missing.** Two chapters both called `drop` were
+indistinguishable, so a reader could not make the second bigger than the first — and escalating a
+repeat is most of what separates a written show from a reactive one. Sections are now clustered by
+cosine similarity of a 19-dimension centroid (six stem presences, energy, twelve chord bins) and
+carry an `id`, a `repeat` count and an `arc`. Measured effect: build #2 now runs at ×1.26 against
+build #1's ×0.94, and the final drop at ×1.09 against the first drop's ×0.97.
+
+The clustering also **independently re-flagged the segmentation error**. The two builds merged into
+one identity `D`; the two drops did *not*, coming out `E` and `G`. That is because "drop 1" is
+63.62–107.43, forty-four seconds covering **two** chorus passes with a vocal section between them,
+while drop 2 is a single pass. Three separate methods have now pointed at a missing boundary near
+78–92 s: the energy dip at 84–88, the vocal returning at 78.860, and now the section clustering
+refusing to match the two drops. I have not moved it — Renjith is reviewing by ear in order and is
+only at bar 16.
+
+## What cannot be fixed by measuring more
+
+The fifth row. **Taste is not information about the music**, so no amount of completeness in the
+observation tier produces it. A perfectly complete map still yields a generic show if the recipe
+mapping it to light is generic — and right now the recipe is one hand-written file, v0.5, argued
+about by eye.
+
+That is exactly what the correction corpus is for, and it is the part of this project with
+long-term value. The path is: get the observation tier complete (nearly there), make corrections
+cheap (the fix loop, done), collect enough of them that a preference model can be trained on which
+of two fifteen-second versions a human picked, and let *that* choose the look. Until then the
+honest description is: **the machine now knows the song thoroughly and still has someone else's
+taste.**

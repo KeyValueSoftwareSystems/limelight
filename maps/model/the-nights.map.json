@@ -10577,5 +10577,83 @@
         null
       ]
     }
+  },
+  "sections": {
+    "note": "Which sections are the SAME section. Two chapters both called `drop` were previously indistinguishable, so a reader could not make the second one bigger than the first -- and escalating a repeat is most of what makes a show feel written for one song rather than driven by a features. `id` groups them by measured similarity of stem presence, energy and chord content; `repeat` counts occurrences; `arc` is position in the song.",
+    "how": "cosine similarity of a 19-dim per-chapter centroid, greedy clustering at 0.955",
+    "entries": [
+      {
+        "at": 0.0,
+        "to": 15.999,
+        "name": "intro",
+        "id": "A",
+        "repeat": 1,
+        "arc": 0.0
+      },
+      {
+        "at": 15.999,
+        "to": 31.238,
+        "name": "verse",
+        "id": "B",
+        "repeat": 1,
+        "arc": 0.091
+      },
+      {
+        "at": 31.238,
+        "to": 38.858,
+        "name": "break",
+        "id": "C",
+        "repeat": 1,
+        "arc": 0.178
+      },
+      {
+        "at": 38.858,
+        "to": 63.621,
+        "name": "build",
+        "id": "D",
+        "repeat": 1,
+        "arc": 0.221
+      },
+      {
+        "at": 63.621,
+        "to": 107.433,
+        "name": "drop",
+        "id": "E",
+        "repeat": 1,
+        "arc": 0.362
+      },
+      {
+        "at": 107.433,
+        "to": 115.052,
+        "name": "break",
+        "id": "F",
+        "repeat": 1,
+        "arc": 0.612
+      },
+      {
+        "at": 115.052,
+        "to": 139.816,
+        "name": "build",
+        "id": "D",
+        "repeat": 2,
+        "arc": 0.655
+      },
+      {
+        "at": 139.816,
+        "to": 168.389,
+        "name": "drop",
+        "id": "G",
+        "repeat": 1,
+        "arc": 0.796
+      },
+      {
+        "at": 168.389,
+        "to": 175.682,
+        "name": "outro",
+        "id": "H",
+        "repeat": 1,
+        "arc": 0.958
+      }
+    ]
   }
 }
