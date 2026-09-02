@@ -1,0 +1,156 @@
+{
+  "layout": "0.1",
+  "room": "club",
+  "note": "One canonical club. The browser and the real rig share this file.",
+  "size_m": {
+    "w": 8.0,
+    "d": 6.0,
+    "h": 3.2
+  },
+  "zones": [
+    {
+      "name": "dancefloor",
+      "fixtures": [
+        "flood_1",
+        "flood_2",
+        "flood_3",
+        "flood_4",
+        "strip_1"
+      ]
+    },
+    {
+      "name": "stage",
+      "fixtures": [
+        "head_1",
+        "head_2",
+        "strip_2"
+      ]
+    },
+    {
+      "name": "ceiling",
+      "fixtures": []
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "flood_1",
+      "kind": "flood",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        1.0,
+        5.0,
+        2.8
+      ]
+    },
+    {
+      "id": "flood_2",
+      "kind": "flood",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        3.0,
+        5.0,
+        2.8
+      ]
+    },
+    {
+      "id": "flood_3",
+      "kind": "flood",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        5.0,
+        5.0,
+        2.8
+      ]
+    },
+    {
+      "id": "flood_4",
+      "kind": "flood",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        7.0,
+        5.0,
+        2.8
+      ]
+    },
+    {
+      "id": "head_1",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        2.5,
+        1.0,
+        3.0
+      ]
+    },
+    {
+      "id": "head_2",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        5.5,
+        1.0,
+        3.0
+      ]
+    },
+    {
+      "id": "strip_1",
+      "kind": "strip",
+      "can": [
+        "pixels"
+      ],
+      "pixels": 60,
+      "at": [
+        0.0,
+        6.0,
+        0.2
+      ]
+    },
+    {
+      "id": "strip_2",
+      "kind": "strip",
+      "can": [
+        "pixels"
+      ],
+      "pixels": 60,
+      "at": [
+        0.0,
+        0.5,
+        0.2
+      ]
+    },
+    {
+      "id": "fog_1",
+      "kind": "fog",
+      "can": [
+        "burst"
+      ],
+      "at": [
+        0.5,
+        0.5,
+        0.3
+      ]
+    }
+  ]
+}

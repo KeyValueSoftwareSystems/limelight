@@ -1,0 +1,83 @@
+{
+  "wiring": "0.1",
+  "room": "club",
+  "note": "Only the hardware layer reads this. The browser never does.",
+  "universes": [
+    {
+      "id": 1,
+      "how": "sacn",
+      "host": "192.168.8.50"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "flood_1",
+      "universe": 1,
+      "address": 1,
+      "mode": "rgb+dim",
+      "lag_ms": 2
+    },
+    {
+      "id": "flood_2",
+      "universe": 1,
+      "address": 5,
+      "mode": "rgb+dim",
+      "lag_ms": 2
+    },
+    {
+      "id": "flood_3",
+      "universe": 1,
+      "address": 9,
+      "mode": "rgb+dim",
+      "lag_ms": 2
+    },
+    {
+      "id": "flood_4",
+      "universe": 1,
+      "address": 13,
+      "mode": "rgb+dim",
+      "lag_ms": 2
+    },
+    {
+      "id": "head_1",
+      "universe": 1,
+      "address": 17,
+      "mode": "14ch",
+      "lag_ms": 180
+    },
+    {
+      "id": "head_2",
+      "universe": 1,
+      "address": 31,
+      "mode": "14ch",
+      "lag_ms": 180
+    },
+    {
+      "id": "strip_1",
+      "how": "sacn",
+      "host": "192.168.8.61",
+      "universe": 2,
+      "address": 1
+    },
+    {
+      "id": "strip_2",
+      "how": "sacn",
+      "host": "192.168.8.62",
+      "universe": 3,
+      "address": 1
+    },
+    {
+      "id": "fog_1",
+      "universe": 1,
+      "address": 45,
+      "mode": "1ch",
+      "lag_ms": 9000
+    }
+  ],
+  "safety": {
+    "max_strobe_hz": 4,
+    "laser_zones": [
+      "ceiling"
+    ]
+  }
+}

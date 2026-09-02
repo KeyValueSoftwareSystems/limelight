@@ -28,6 +28,10 @@ in advance.
 **The map describes the song. The frame describes the room.** One per song, versus forty per
 second. Other readers have their own output shapes and never touch the frame.
 
+Five words and the set is closed — **map · layout · wiring · recipe · frame**. One line for the
+whole system, and what each word means: [`WORDS.md`](WORDS.md). Read it before you invent a
+sixth word.
+
 If you ever need something *else* to pass between two people, say so out loud. That is a design
 bug, not a task.
 
