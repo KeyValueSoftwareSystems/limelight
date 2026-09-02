@@ -1,156 +1,28 @@
 {
-  "layout": "0.1",
+  "layout": "0.2",
   "room": "club",
-  "note": "One canonical club. The browser and the real rig share this file.",
-  "size_m": {
-    "w": 8.0,
-    "d": 6.0,
-    "h": 3.2
-  },
+  "note": "One canonical club. The browser room and the real rig share this file. Only wiring differs.",
+  "size_m": { "w": 8.0, "d": 6.0, "h": 3.2 },
+  "limits": { "max_strobe_hz": 4.0, "laser_zones": ["ceiling"] },
   "zones": [
-    {
-      "name": "dancefloor",
-      "fixtures": [
-        "flood_1",
-        "flood_2",
-        "flood_3",
-        "flood_4",
-        "strip_1"
-      ]
-    },
-    {
-      "name": "stage",
-      "fixtures": [
-        "head_1",
-        "head_2",
-        "strip_2"
-      ]
-    },
-    {
-      "name": "ceiling",
-      "fixtures": []
-    }
+    { "name": "dancefloor", "fixtures": ["par_1", "par_2", "par_3", "par_4", "strip_1"] },
+    { "name": "stage",      "fixtures": ["strobe_1", "strobe_2", "strip_2", "fog_1"] },
+    { "name": "ceiling",    "fixtures": [] }
   ],
   "fixtures": [
-    {
-      "id": "flood_1",
-      "kind": "flood",
-      "can": [
-        "colour",
-        "level"
-      ],
-      "at": [
-        1.0,
-        5.0,
-        2.8
-      ]
-    },
-    {
-      "id": "flood_2",
-      "kind": "flood",
-      "can": [
-        "colour",
-        "level"
-      ],
-      "at": [
-        3.0,
-        5.0,
-        2.8
-      ]
-    },
-    {
-      "id": "flood_3",
-      "kind": "flood",
-      "can": [
-        "colour",
-        "level"
-      ],
-      "at": [
-        5.0,
-        5.0,
-        2.8
-      ]
-    },
-    {
-      "id": "flood_4",
-      "kind": "flood",
-      "can": [
-        "colour",
-        "level"
-      ],
-      "at": [
-        7.0,
-        5.0,
-        2.8
-      ]
-    },
-    {
-      "id": "head_1",
-      "kind": "head",
-      "can": [
-        "colour",
-        "level",
-        "move",
-        "strobe"
-      ],
-      "at": [
-        2.5,
-        1.0,
-        3.0
-      ]
-    },
-    {
-      "id": "head_2",
-      "kind": "head",
-      "can": [
-        "colour",
-        "level",
-        "move",
-        "strobe"
-      ],
-      "at": [
-        5.5,
-        1.0,
-        3.0
-      ]
-    },
-    {
-      "id": "strip_1",
-      "kind": "strip",
-      "can": [
-        "pixels"
-      ],
-      "pixels": 60,
-      "at": [
-        0.0,
-        6.0,
-        0.2
-      ]
-    },
-    {
-      "id": "strip_2",
-      "kind": "strip",
-      "can": [
-        "pixels"
-      ],
-      "pixels": 60,
-      "at": [
-        0.0,
-        0.5,
-        0.2
-      ]
-    },
-    {
-      "id": "fog_1",
-      "kind": "fog",
-      "can": [
-        "burst"
-      ],
-      "at": [
-        0.5,
-        0.5,
-        0.3
-      ]
-    }
+    { "id": "par_1",    "kind": "par",    "can": ["colour", "level"],  "at": [1.0, 5.0, 2.8] },
+    { "id": "par_2",    "kind": "par",    "can": ["colour", "level"],  "at": [3.0, 5.0, 2.8] },
+    { "id": "par_3",    "kind": "par",    "can": ["colour", "level"],  "at": [5.0, 5.0, 2.8] },
+    { "id": "par_4",    "kind": "par",    "can": ["colour", "level"],  "at": [7.0, 5.0, 2.8] },
+    { "id": "strobe_1", "kind": "strobe", "can": ["level", "strobe"],  "at": [2.5, 1.0, 3.0] },
+    { "id": "strobe_2", "kind": "strobe", "can": ["level", "strobe"],  "at": [5.5, 1.0, 3.0] },
+    { "id": "strip_1",  "kind": "strip",  "can": ["pixels"], "pixels": 24, "at": [0.0, 6.0, 0.2] },
+    { "id": "strip_2",  "kind": "strip",  "can": ["pixels"], "pixels": 24, "at": [0.0, 0.5, 0.2] },
+    { "id": "fog_1",    "kind": "fog",    "can": ["burst"],            "at": [0.5, 0.5, 0.3] },
+
+    { "id": "head_1", "kind": "head", "optional": true,
+      "can": ["colour", "level", "move", "strobe"], "at": [2.5, 1.0, 3.1] },
+    { "id": "head_2", "kind": "head", "optional": true,
+      "can": ["colour", "level", "move", "strobe"], "at": [5.5, 1.0, 3.1] }
   ]
 }

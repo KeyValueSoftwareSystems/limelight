@@ -1,0 +1,410 @@
+<title>Limelight — the frame problem</title>
+<style>
+  :root{--ink:#16181d;--dim:#5d636e;--line:#e2e5ea;--bg:#fbfbfc;--card:#fff;
+        --acc:#c2410c;--acc2:#1d4ed8;--ok:#047857;--warn:#b45309}
+  body{background:var(--bg);color:var(--ink);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0}
+  .wrap{max-width:900px;margin:0 auto;padding:56px 24px 96px}
+  h1{font-size:40px;line-height:1.1;letter-spacing:-.025em;margin:0 0 8px;font-weight:680}
+  h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+     margin:56px 0 16px;font-weight:650;border-top:1px solid var(--line);padding-top:16px}
+  h3{font-size:19px;margin:28px 0 6px;letter-spacing:-.01em;font-weight:640}
+  p{margin:0 0 14px;max-width:68ch}
+  .lede{font-size:19px;color:var(--dim);max-width:64ch;margin-bottom:4px}
+  code,kbd{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+     background:#f1f3f6;padding:1.5px 5px;border-radius:4px}
+  pre{background:#14161a;color:#e7e9ee;padding:16px 18px;border-radius:9px;overflow-x:auto;
+     font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;margin:0 0 14px}
+  pre code{background:none;padding:0;color:inherit;font-size:inherit}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;margin:0 0 14px}
+  th,td{text-align:left;padding:8px 12px 8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);font-weight:650}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin:0 0 18px}
+  .prob{border-left:3px solid var(--acc)}
+  .prob h3{margin-top:0}
+  .dl{display:grid;grid-template-columns:88px 1fr;gap:6px 16px;font-size:14.5px;margin-top:12px}
+  .dl dt{color:var(--dim);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:650;padding-top:3px}
+  .dl dd{margin:0}
+  .trap{color:var(--warn)}
+  figure{margin:20px 0 24px}
+  figcaption{font-size:13.5px;color:var(--dim);margin-top:8px;max-width:64ch}
+  svg{display:block;max-width:100%;height:auto}
+  .scroll{overflow-x:auto}
+  .tag{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+     font-weight:650;padding:2.5px 8px;border-radius:20px;background:#eef1f5;color:var(--dim)}
+  .tag.you{background:#fff1e8;color:var(--acc)}
+  .tag.given{background:#eaf0ff;color:var(--acc2)}
+  ol,ul{max-width:68ch;padding-left:22px}
+  li{margin-bottom:7px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:700px){.two{grid-template-columns:1fr}}
+  .mono-sm{font:12.5px ui-monospace,Menlo,monospace;color:var(--dim)}
+</style>
+
+<div class="wrap">
+
+<h1>The frame problem</h1>
+<p class="lede">Everything a lighting rig does, at one instant, computed from three files and a
+number. Three songs, nine fixtures, one function to write.</p>
+<p class="mono-sm">Limelight · reader lane · v0.2 · 2 September 2026</p>
+
+<h2>1 · What you are building</h2>
+
+<p>One function. It takes the music, the room, the taste and a clock reading, and returns what
+every light is doing right now.</p>
+
+<figure>
+<svg viewBox="0 0 880 250" role="img" aria-label="Pipeline from map, layout, recipe and t to frame to DMX bytes">
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,1 L7,4.5 L0,8" fill="none" stroke="#5d636e" stroke-width="1.4"/></marker>
+  </defs>
+  <g font-family="ui-sans-serif,system-ui" font-size="13">
+    <g fill="#eaf0ff" stroke="#c3d2f7">
+      <rect x="6" y="14" width="150" height="40" rx="8"/>
+      <rect x="6" y="62" width="150" height="40" rx="8"/>
+      <rect x="6" y="110" width="150" height="40" rx="8"/>
+      <rect x="6" y="158" width="150" height="40" rx="8"/>
+    </g>
+    <g fill="#1d4ed8" font-weight="640">
+      <text x="20" y="33">map.json</text><text x="20" y="81">layout.json</text>
+      <text x="20" y="129">RECIPE.md</text><text x="20" y="177">t  (seconds)</text>
+    </g>
+    <g fill="#5d636e" font-size="11">
+      <text x="20" y="47">what the music does</text><text x="20" y="95">what is in the room</text>
+      <text x="20" y="143">what a moment looks like</text><text x="20" y="191">from the audio device</text>
+    </g>
+
+    <path d="M162,34 C210,34 210,106 250,106" fill="none" stroke="#5d636e" stroke-width="1.3" marker-end="url(#a)"/>
+    <path d="M162,82 C210,82 210,106 250,106" fill="none" stroke="#5d636e" stroke-width="1.3" marker-end="url(#a)"/>
+    <path d="M162,130 C210,130 210,106 250,106" fill="none" stroke="#5d636e" stroke-width="1.3" marker-end="url(#a)"/>
+    <path d="M162,178 C210,178 210,106 250,106" fill="none" stroke="#5d636e" stroke-width="1.3" marker-end="url(#a)"/>
+
+    <rect x="256" y="70" width="188" height="72" rx="10" fill="#fff1e8" stroke="#f0b090" stroke-width="1.6"/>
+    <text x="350" y="98" text-anchor="middle" fill="#c2410c" font-weight="680" font-size="14">frame(t)</text>
+    <text x="350" y="118" text-anchor="middle" fill="#c2410c" font-size="11">you write this</text>
+    <text x="350" y="133" text-anchor="middle" fill="#a35a3a" font-size="10.5">pure · no state · no memory</text>
+
+    <path d="M450,106 L510,106" fill="none" stroke="#5d636e" stroke-width="1.3" marker-end="url(#a)"/>
+    <rect x="516" y="76" width="150" height="60" rx="9" fill="#e7f6ef" stroke="#9dd3bb"/>
+    <text x="591" y="101" text-anchor="middle" fill="#047857" font-weight="640">frame</text>
+    <text x="591" y="119" text-anchor="middle" fill="#047857" font-size="11">9 fixtures · 40×/sec</text>
+
+    <path d="M672,106 L732,106" fill="none" stroke="#5d636e" stroke-width="1.3" marker-end="url(#a)"/>
+    <rect x="738" y="62" width="136" height="88" rx="9" fill="#f1f3f6" stroke="#d6dae1"/>
+    <text x="806" y="88" text-anchor="middle" fill="#5d636e" font-weight="640">wire()</text>
+    <text x="806" y="106" text-anchor="middle" fill="#5d636e" font-size="11">wiring.json</text>
+    <text x="806" y="122" text-anchor="middle" fill="#5d636e" font-size="11">→ DMX bytes</text>
+    <text x="806" y="140" text-anchor="middle" fill="#8b929c" font-size="10.5">Alnas · not you</text>
+
+    <line x1="6" y1="220" x2="874" y2="220" stroke="#e2e5ea"/>
+    <text x="6" y="240" fill="#8b929c" font-size="11.5">Given to you</text>
+    <text x="256" y="240" fill="#c2410c" font-size="11.5" font-weight="640">Yours</text>
+    <text x="516" y="240" fill="#047857" font-size="11.5">Your output — and the thing that gets graded</text>
+  </g>
+</svg>
+<figcaption>Two interfaces only. You read <code>map</code> + <code>layout</code> + <code>recipe</code>;
+you emit <code>frame</code>. Nothing else crosses.</figcaption>
+</figure>
+
+<h2>2 · How you know the music lifts from 1:05 to 1:20</h2>
+
+<p>This is the question worth answering before you write a line. You have no audio. You have a
+file. So the file must say it.</p>
+
+<p>A drop is an <em>instant</em>, and a point in time describes it exactly. An elevation is not an
+instant, and there is no honest way to write it as one. So <code>map.json</code> carries three
+different shapes of fact, and each answers a different question.</p>
+
+<figure>
+<svg viewBox="0 0 880 320" role="img" aria-label="Moments as points, span as a bar, energy as a curve, and the resulting brightness envelope">
+  <g font-family="ui-sans-serif,system-ui" font-size="12">
+    <!-- axis -->
+    <line x1="120" y1="286" x2="856" y2="286" stroke="#c8ccd3"/>
+    <g fill="#8b929c" font-size="11">
+      <text x="120" y="303">1:00</text><text x="240" y="303">1:05</text>
+      <text x="480" y="303">1:15</text><text x="600" y="303">1:20</text><text x="800" y="303">1:28</text>
+    </g>
+    <g stroke="#eef0f3"><line x1="240" y1="20" x2="240" y2="286"/><line x1="600" y1="20" x2="600" y2="286"/></g>
+
+    <!-- row 1: moments -->
+    <text x="6" y="34" fill="#5d636e" font-weight="640">moments</text>
+    <text x="6" y="50" fill="#8b929c" font-size="10.5">instants</text>
+    <line x1="120" y1="42" x2="856" y2="42" stroke="#e2e5ea"/>
+    <g stroke="#c2410c" stroke-width="2.5"><line x1="624" y1="26" x2="624" y2="58"/><line x1="600" y1="30" x2="600" y2="54"/></g>
+    <text x="596" y="72" fill="#c2410c" font-size="11" text-anchor="end">stop</text>
+    <text x="632" y="72" fill="#c2410c" font-size="11">drop</text>
+    <text x="140" y="46" fill="#b0b6be" font-size="11">nothing here — and that is the problem</text>
+
+    <!-- row 2: span -->
+    <text x="6" y="110" fill="#5d636e" font-weight="640">span</text>
+    <text x="6" y="126" fill="#8b929c" font-size="10.5">stretches</text>
+    <rect x="240" y="96" width="360" height="26" rx="5" fill="#fff1e8" stroke="#e79a6d"/>
+    <text x="420" y="113" text-anchor="middle" fill="#c2410c" font-size="11.5" font-weight="620">build · from 65.0 → to 80.0 · rise "steady"</text>
+
+    <!-- row 3: energy -->
+    <text x="6" y="182" fill="#5d636e" font-weight="640">energy</text>
+    <text x="6" y="198" fill="#8b929c" font-size="10.5">per downbeat</text>
+    <path d="M120,206 L240,202 L300,190 L360,178 L420,166 L480,153 L540,141 L600,130 L624,206 L648,146 L800,150"
+          fill="none" stroke="#1d4ed8" stroke-width="2"/>
+    <g fill="#1d4ed8">
+      <circle cx="240" cy="202" r="3"/><circle cx="300" cy="190" r="3"/><circle cx="360" cy="178" r="3"/>
+      <circle cx="420" cy="166" r="3"/><circle cx="480" cy="153" r="3"/><circle cx="540" cy="141" r="3"/>
+      <circle cx="600" cy="130" r="3"/>
+    </g>
+    <text x="614" y="124" fill="#1d4ed8" font-size="11">0.95</text>
+    <text x="228" y="218" fill="#1d4ed8" font-size="11" text-anchor="end">0.18</text>
+
+    <!-- row 4: result -->
+    <text x="6" y="256" fill="#c2410c" font-weight="640">your PARs</text>
+    <text x="6" y="272" fill="#8b929c" font-size="10.5">the consequence</text>
+    <g fill="#f4a261" stroke="none">
+      <rect x="242" y="266" width="7" height="20"/><rect x="272" y="262" width="7" height="24"/>
+      <rect x="302" y="258" width="7" height="28"/><rect x="332" y="253" width="7" height="33"/>
+      <rect x="362" y="248" width="7" height="38"/><rect x="392" y="243" width="7" height="43"/>
+      <rect x="422" y="238" width="7" height="48"/><rect x="452" y="232" width="7" height="54"/>
+      <rect x="482" y="226" width="7" height="60"/><rect x="512" y="220" width="7" height="66"/>
+      <rect x="542" y="214" width="7" height="72"/><rect x="572" y="208" width="7" height="78"/>
+    </g>
+    <rect x="600" y="278" width="24" height="8" fill="#d8dce2"/>
+    <g fill="#c2410c"><rect x="626" y="200" width="10" height="86"/><rect x="644" y="212" width="10" height="74"/>
+       <rect x="662" y="222" width="10" height="64"/></g>
+    <text x="596" y="196" fill="#8b929c" font-size="10.5" text-anchor="end">peak rises, decay sharpens</text>
+  </g>
+</svg>
+<figcaption>The span says <em>where</em> the lift is and what shape it has. The energy curve says
+<em>how much</em>, at any instant, by linear interpolation between downbeats. Neither is
+guessable from the moments alone.</figcaption>
+</figure>
+
+<p>Two things follow, and both are in <code>RECIPE.md</code>. The pulse <em>floor</em> and
+<em>peak</em> both climb with energy, and the decay exponent sharpens, so a build that runs for
+three minutes gets brighter, snappier and denser the whole way — driven entirely by one
+interpolated number, with no extra fields and no state.</p>
+
+<div class="card">
+<p style="margin:0"><strong>The rule that produced this.</strong> Version 0.1 of the map had no
+energy curve, on the principle that you never store a derivable fact — loudness is in the audio.
+That was wrong, and here is the corrected version:</p>
+<p style="margin:12px 0 0"><strong>A fact is only redundant if the person who needs it can derive
+it.</strong> Energy is derivable for the analysis lane, which holds the audio, and unobtainable
+for you, who hold only the map. The old rule deleted information at exactly the boundary where it
+mattered.</p>
+</div>
+
+<h2>3 · The room</h2>
+
+<p>Nine fixtures. Two moving heads are in <code>layout.json</code> marked
+<code>"optional": true</code> and are <strong>not</strong> in v1 frames — no pan, no tilt, no
+motor lag to model yet.</p>
+
+<figure>
+<svg viewBox="0 0 880 300" role="img" aria-label="Top-down plan of the club: four PARs upstage, two strobes downstage, two LED strips, one fog machine">
+  <g font-family="ui-sans-serif,system-ui" font-size="12">
+    <rect x="130" y="16" width="620" height="248" rx="6" fill="#fff" stroke="#c8ccd3"/>
+    <rect x="130" y="16" width="620" height="96" fill="#f6f8fb"/>
+    <rect x="130" y="200" width="620" height="64" fill="#fdf6f1"/>
+    <text x="742" y="36" text-anchor="end" fill="#a8aeb7" font-size="11">dancefloor zone</text>
+    <text x="742" y="256" text-anchor="end" fill="#c99b7d" font-size="11">stage zone</text>
+
+    <!-- strip_1 back -->
+    <rect x="130" y="20" width="620" height="7" fill="#1d4ed8" opacity=".55"/>
+    <text x="136" y="46" fill="#1d4ed8" font-size="11">strip_1 · 24 px</text>
+
+    <!-- PARs -->
+    <g><circle cx="207" cy="90" r="17" fill="#fff1e8" stroke="#e79a6d" stroke-width="1.6"/>
+       <text x="207" y="94" text-anchor="middle" fill="#c2410c" font-size="11" font-weight="650">P1</text></g>
+    <g><circle cx="362" cy="90" r="17" fill="#fff1e8" stroke="#e79a6d" stroke-width="1.6"/>
+       <text x="362" y="94" text-anchor="middle" fill="#c2410c" font-size="11" font-weight="650">P2</text></g>
+    <g><circle cx="517" cy="90" r="17" fill="#fff1e8" stroke="#e79a6d" stroke-width="1.6"/>
+       <text x="517" y="94" text-anchor="middle" fill="#c2410c" font-size="11" font-weight="650">P3</text></g>
+    <g><circle cx="672" cy="90" r="17" fill="#fff1e8" stroke="#e79a6d" stroke-width="1.6"/>
+       <text x="672" y="94" text-anchor="middle" fill="#c2410c" font-size="11" font-weight="650">P4</text></g>
+    <text x="207" y="128" text-anchor="middle" fill="#8b929c" font-size="10.5">4 × PAR — colour + level</text>
+    <text x="362" y="70" text-anchor="middle" fill="#b45309" font-size="10">↑ the spotlight one</text>
+
+    <!-- strobes -->
+    <g><rect x="330" y="222" width="34" height="22" rx="4" fill="#f1f3f6" stroke="#9aa1ab" stroke-width="1.4"/>
+       <text x="347" y="238" text-anchor="middle" font-size="10.5" font-weight="650" fill="#495059">S1</text></g>
+    <g><rect x="516" y="222" width="34" height="22" rx="4" fill="#f1f3f6" stroke="#9aa1ab" stroke-width="1.4"/>
+       <text x="533" y="238" text-anchor="middle" font-size="10.5" font-weight="650" fill="#495059">S2</text></g>
+    <text x="440" y="216" text-anchor="middle" fill="#8b929c" font-size="10.5">2 × strobe — level + Hz, capped at 4.0</text>
+
+    <!-- strip_2 front -->
+    <rect x="130" y="255" width="620" height="7" fill="#1d4ed8" opacity=".55"/>
+    <text x="136" y="278" fill="#1d4ed8" font-size="11">strip_2 · 24 px</text>
+
+    <!-- fog -->
+    <g><rect x="152" y="222" width="30" height="22" rx="4" fill="#e7f6ef" stroke="#9dd3bb" stroke-width="1.4"/>
+       <text x="167" y="238" text-anchor="middle" font-size="10.5" font-weight="650" fill="#047857">F</text></g>
+    <text x="152" y="216" fill="#047857" font-size="10.5">fog · 9 s lag</text>
+
+    <!-- optional heads -->
+    <g opacity=".4" stroke-dasharray="4 3">
+      <circle cx="347" cy="188" r="14" fill="none" stroke="#9aa1ab" stroke-width="1.4"/>
+      <circle cx="533" cy="188" r="14" fill="none" stroke="#9aa1ab" stroke-width="1.4"/></g>
+    <text x="440" y="176" text-anchor="middle" fill="#a8aeb7" font-size="10.5">2 × moving head — optional, not in v1</text>
+
+    <text x="440" y="292" text-anchor="middle" fill="#a8aeb7" font-size="11">8.0 m × 6.0 m × 3.2 m</text>
+  </g>
+</svg>
+<figcaption>The browser room and the real rig read this same <code>layout.json</code>. Only
+<code>wiring.json</code> differs, and you never read that.</figcaption>
+</figure>
+
+<h2>4 · The three songs</h2>
+
+<p>Chosen so that each one breaks something the previous one let you get away with.</p>
+
+<div class="scroll">
+<table>
+<tr><th>Song</th><th>Length</th><th>BPM</th><th>Shape</th><th>What it tests</th></tr>
+<tr><td><strong>The Nights</strong><br><span class="mono-sm">Avicii</span></td><td>2:56</td><td>126</td>
+    <td>Two builds, two drops, a stop before each</td>
+    <td>The easy case. Points do most of the work. Start here.</td></tr>
+<tr><td><strong>Strobe</strong><br><span class="mono-sm">deadmau5</span></td><td>10:37</td><td>128</td>
+    <td>A three-minute elevation that <em>plateaus before it climbs</em></td>
+    <td><code>rise: "late"</code>. A linear reading of this span looks wrong for two full minutes.</td></tr>
+<tr><td><strong>Opus</strong><br><span class="mono-sm">Eric Prydz</span></td><td>9:04</td><td>126</td>
+    <td>One monotonic 4.7-minute riser and almost nothing else</td>
+    <td>A point-only map cannot express this song at all. If your span handling is weak, this is where it shows.</td></tr>
+</table>
+</div>
+
+<p><strong>These maps are sketches, not truth.</strong> Every one carries
+<code>"how": "sketch"</code> and <code>"confidence": 0.3</code>. The timings are plausible and
+internally consistent; they were not measured against audio. That is deliberate and it does not
+weaken your task one bit — your job is to reproduce frames from a map, and a sketch map is a
+perfectly good map for that. It does mean you must never copy these numbers into anything that
+claims to be truth.</p>
+
+<h2>5 · What you have</h2>
+
+<pre><code>inputs/
+  MAP.md                     the map contract — read section "Why spans and energy exist"
+  RECIPE.md                  taste, written as formulas. This is your specification
+  FRAME.md                   the output contract
+  layout.json                the nine fixtures
+  wiring.json                for reference only — you never read this
+  maps/the-nights.map.json
+  maps/strobe.map.json
+  maps/opus.map.json
+expected/
+  *.keyframes.json           8–15 annotated instants per song. Read these first
+  *.frames.jsonl.gz          every frame, 40/sec, gzipped. Your target
+check.py                     compares your stream to the golden one</code></pre>
+
+<p>You do not get the reference implementation. That is the whole point — the answers are in
+<code>expected/</code>, and the method is yours to find.</p>
+
+<h2>6 · The four problems</h2>
+
+<div class="card prob">
+<h3>Problem 1 — Read one instant</h3>
+<p>Write the map lookups: <code>bi</code>, <code>beat_len</code>, <code>phase</code>,
+<code>bar_phase</code>, <code>energy</code>, <code>chapter</code>, <code>span</code>,
+<code>stop</code>, <code>since</code>. Then the look selector from
+<code>RECIPE.md §Look selection</code>.</p>
+<dl class="dl">
+  <dt>Given</dt><dd>a map and a <code>t</code></dd>
+  <dt>Produce</dt><dd>the correct <code>look</code> string</dd>
+  <dt>Passes</dt><dd>every <code>look</code> in every keyframes file matches</dd>
+  <dt class="trap">Trap</dt><dd class="trap">Binary-search the beats array. A linear scan is 1,359
+    comparisons per frame on <em>Strobe</em>, 40 times a second — it will work and then it will not.</dd>
+</dl>
+</div>
+
+<div class="card prob">
+<h3>Problem 2 — Reproduce the keyframes</h3>
+<p>Implement the per-fixture formulas until every annotated instant matches.</p>
+<dl class="dl">
+  <dt>Given</dt><dd><code>expected/*.keyframes.json</code> — 36 instants across the three songs</dd>
+  <dt>Produce</dt><dd>an identical frame at each of those <code>t</code> values</dd>
+  <dt>Passes</dt><dd>levels within 0.01, colours within 2, strobe within 0.05 Hz</dd>
+  <dt class="trap">Trap</dt><dd class="trap">Off means <em>actually</em> zero — during a
+    <code>stop</code>, r, g and b are 0 as well as the level. A dark red PAR is not a dark room.</dd>
+</dl>
+</div>
+
+<div class="card prob">
+<h3>Problem 3 — Reproduce every frame</h3>
+<p>Emit the full stream at 40 fps and pass the checker on all three songs. 54,280 frames.</p>
+<pre style="margin-top:12px"><code>python3 check.py expected/opus.frames.jsonl.gz mine/opus.frames.jsonl.gz
+PASS  21760 frames identical within tolerance (544.0s)</code></pre>
+<dl class="dl">
+  <dt>Passes</dt><dd>three PASS lines</dd>
+  <dt class="trap">Trap</dt><dd class="trap">The <code>return</code> rule multiplies levels
+    <em>after</em> the look is computed, and fog is exempt from it. Two ordering mistakes hide here.</dd>
+</dl>
+</div>
+
+<div class="card prob">
+<h3>Problem 4 — Prove it is pure</h3>
+<p>A property test: pick 500 random <code>t</code> values, render each one cold, and render the
+same 500 again in a different order. The frames must be byte-identical.</p>
+<dl class="dl">
+  <dt>Passes</dt><dd>no divergence, in any order, with no warm-up</dd>
+  <dt class="trap">Trap</dt><dd class="trap">If you catch yourself writing "when a drop starts,
+    begin a fade", stop. Write <code>brightness = f(position in beat)</code> instead. The map is
+    your history — <em>when was the last beat</em> is a lookup, not a memory. This is the one
+    constraint that buys scrubbing, joining a show late, and running on a hundred phones.</dd>
+</dl>
+</div>
+
+<h2>7 · What comes next, so you can see where this goes</h2>
+
+<p>The named fields you are reading now — <code>spans</code>, <code>energy</code>,
+<code>moments</code> — will eventually be produced by a model rather than written by hand. Some of
+what the model notices will have no name at all, and that residue lands in a second tier.</p>
+
+<figure>
+<svg viewBox="0 0 880 176" role="img" aria-label="Two tiers: a learned vector tier and a named field tier, both shipped in the map">
+  <g font-family="ui-sans-serif,system-ui" font-size="12">
+    <rect x="6" y="30" width="150" height="86" rx="9" fill="#f6f8fb" stroke="#c8ccd3"/>
+    <text x="81" y="66" text-anchor="middle" fill="#5d636e" font-weight="640">audio</text>
+    <text x="81" y="86" text-anchor="middle" fill="#8b929c" font-size="11">analysis lane only</text>
+    <path d="M162,73 L214,73" stroke="#5d636e" stroke-width="1.3" marker-end="url(#a)"/>
+
+    <rect x="220" y="12" width="270" height="60" rx="9" fill="#eef2fa" stroke="#b9c8ea"/>
+    <text x="236" y="36" fill="#1d4ed8" font-weight="640">learned tier — vectors</text>
+    <text x="236" y="55" fill="#5d636e" font-size="11">one row per beat · everything it noticed · opaque</text>
+
+    <rect x="220" y="82" width="270" height="60" rx="9" fill="#fff1e8" stroke="#e79a6d"/>
+    <text x="236" y="106" fill="#c2410c" font-weight="640">named tier — fields</text>
+    <text x="236" y="125" fill="#5d636e" font-size="11">beats · spans · energy · readable · correctable</text>
+
+    <path d="M355,72 L355,82" stroke="#8b929c" stroke-width="1.3" marker-end="url(#a)"/>
+    <text x="366" y="80" fill="#8b929c" font-size="10.5">decoded into names</text>
+
+    <path d="M496,42 C540,42 540,73 580,73" fill="none" stroke="#b9c8ea" stroke-width="1.3" marker-end="url(#a)"/>
+    <path d="M496,112 C540,112 540,73 580,73" fill="none" stroke="#e79a6d" stroke-width="1.6" marker-end="url(#a)"/>
+    <rect x="586" y="43" width="140" height="60" rx="9" fill="#e7f6ef" stroke="#9dd3bb"/>
+    <text x="656" y="68" text-anchor="middle" fill="#047857" font-weight="640">your reader</text>
+    <text x="656" y="86" text-anchor="middle" fill="#047857" font-size="11">names today</text>
+
+    <path d="M732,73 L784,73" stroke="#5d636e" stroke-width="1.3" marker-end="url(#a)"/>
+    <text x="792" y="70" fill="#5d636e" font-size="11.5" font-weight="640">frame</text>
+    <text x="792" y="88" fill="#8b929c" font-size="10.5">unchanged</text>
+  </g>
+</svg>
+<figcaption>The vector is the evidence; the field is the verdict. Only a verdict can be argued
+with — you cannot hand a human 768 numbers and ask whether they are wrong.</figcaption>
+</figure>
+
+<p>Which is why nothing you write now becomes disposable. Your reader compiles against names, and
+names are the one tier a person can correct. As the model improves, the vectors get better
+silently and the field values get more accurate — the <em>shape</em> of what you read does not
+move. <code>vectors</code> is <code>null</code> in all three maps today, and its slot is already
+specified in <code>MAP.md</code> so that filling it changes nothing here.</p>
+
+<h2>8 · If a golden frame looks wrong</h2>
+
+<p>Say so, with the timestamp. The golden stream is a <strong>conformance target, not a claim
+about music</strong> — it encodes recipe v0.2 exactly, and recipe v0.2 is a first guess at taste
+that will be replaced the moment something looks better. If you think a moment should look
+different, that is a recipe argument and a welcome one; it is settled by putting two versions of
+the same fifteen seconds side by side, never by rating one out of ten.</p>
+
+<p>What is <em>not</em> negotiable is that your output matches until the recipe changes. When it
+changes, the golden files are regenerated and you re-run the checker.</p>
+
+</div>

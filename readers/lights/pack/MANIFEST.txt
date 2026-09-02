@@ -1,0 +1,21 @@
+Limelight — reader lane pack v0.2   ·   2 September 2026
+Open START-HERE.html first.
+
+  START-HERE.html            the brief. Diagrams, the three songs, the four problems.
+  inputs/                    everything your function is allowed to read
+  expected/                  the answers
+  check.py                   python3 check.py <golden> <yours>
+
+6f378176e5807aff984d32a9ffc860dde0af943ba2d9e5bb2821f90204f4244c  inputs/maps/opus.map.json
+7ae6170aecb8acd7e6e9969782a06b1036e1c5e07b3a3d746b08e105c054b488  inputs/maps/strobe.map.json
+c29ca801ceaa87c427e5531893dedf0b055bd9d46e581780d2a35e7fb3e0f04a  inputs/maps/the-nights.map.json
+dd42f76af5a9e5ece400a43cd7819f9339285012f0ace610035ec31ea3a924fb  inputs/layout.json
+61965061220f62a7ce515779e939488bbb4b81b0bf7307c50b29662ff2003ecb  inputs/wiring.json
+98ba21ce575798c45ffce9635b2102f5ed274e311cce37e9b82d6d68a57ce0d3  expected/opus.frames.jsonl.gz
+68d906e78d564d5a1d03456bd7bdfd2cf21ba6945c50937f2af25482c006cd17  expected/opus.keyframes.json
+7e0ad9c2d9cdc78664576f0ae2cc4d21d49a9d08ac4e526cc6851a1f68fd400b  expected/strobe.frames.jsonl.gz
+bcb8ae50d3c5de1414554a44d045d3e52ba7b545e4b0f48c8a0191f488ac2cef  expected/strobe.keyframes.json
+cefab2c67113eca1aaa5fe1c7c5f7c0b13c9b98ab052cede263bb4c12bba982b  expected/the-nights.frames.jsonl.gz
+7fdf82eec85a1b9ea52983e02b640141da5f55972cece52a9c8adb269decb77a  expected/the-nights.keyframes.json
+e323ec28fb1b8dd7dfbec0c661bd68c4cc4b1f27a84786c269da11b61bedbab1  check.py
+6a135c72efd525f740d45e5fbb11c3a0d2893e68de8b00cf74cb35f95bad9f42  START-HERE.html
