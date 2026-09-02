@@ -1,94 +1,81 @@
-# The map file — v0.2
+# The map file — v0.3
 
-What the music does. **Never** what a light should do — a video editor and a rhythm game read
-this same file. The moment it says "strobe" it becomes a lighting file and the idea collapses.
+What the music does. Never what a light should do: a drone show and a video editor read this same
+file. The moment it says "strobe" it becomes a lighting file and the idea collapses.
 
-## Fields
+One file per recording. `the-nights.map.json` is a real one, measured from a real mp3.
 
-| field | plain words |
-|---|---|
-| `map` | format version |
-| `song` | title, artist, `length` in seconds |
-| `made_by` | who or what wrote this, and when. `truth`, `model` or `sketch` |
-| `beats` | time of every beat, seconds from the start |
-| `downbeats` | the "one" of each bar |
-| `chapters` | `{at, name}` — where the song changes character |
-| `moments` | `{at, kind, …}` — an **instant** something happens |
-| `spans` | `{kind, from, to, rise}` — a **stretch** during which something is happening |
-| `energy` | `[[t, 0..1], …]` — one point per downbeat. **Readers interpolate linearly between points** |
-| `confidence` | 0–1. How much the writer trusts this |
-| `vectors` | `null`, or a pointer to a side file. See below |
+## Three tiers, and the difference between them is the whole design
 
-## The six kinds. No others.
+| tier | what it holds | policy |
+|---|---|---|
+| **interface** | `grid` `beats` `downbeats` `chapters` `spans` `moments` `energy` `sections` | what readers compile against. Small, stable, human-correctable, **a one-way door.** Be miserly. |
+| **observation** | `accents` `stems` `observations.*` | what was measured. Additive, append-only, nothing breaks by adding. **Be generous.** |
+| **learned** | `vectors` | everything nobody has a word for |
 
-`build` · `drop` · `stop` · `quiet` · `spotlight` · `return`
+The rule that governs the interface tier: **a field goes in when a reader breaks without it.** Not
+when a fact is interesting. Twice now a field earned its place by that test — `accents`, because
+71% of the drum hits in this song are off the beat grid and a reader asked to punctuate them
+cannot get the times from `beats`; and `sections`, because two chapters both called `drop` were
+indistinguishable, so no reader could make the second bigger than the first.
 
-The same six words are used for both moments and spans, because they are the same six ideas
-seen at two time scales. Extras: `holds` (how long a stop lasts), `size` (how hard a drop hits,
-0–1), `of` (what a spotlight is on), `rise` (the shape of a span: `steady`, `late`, `early`,
-`stepped`), `note` (free text for humans).
+The rule that does **not** apply to the observation tier: completeness is the goal there, and the
+minimalist rule was never about what to measure — it was about what to promise.
 
-## Why spans and energy exist
+## Interface tier
 
-A drop is an instant, so a point in time describes it perfectly. **An elevation is not.** "It
-lifts from 1:05 to 1:20" is a stretch with a direction, and there is no honest way to write it
-as a point. Songs like *Opus* are one four-minute elevation and almost nothing else — a
-point-only map cannot express such a song at all.
+| field | shape | notes |
+|---|---|---|
+| `grid` | `{period, phase, bpm, bar_phase, locked}` | 369 beats reproduce from `period` and `phase` alone. `bar_phase` says which beat is the "one" |
+| `beats` `downbeats` | `[t, …]` seconds | downbeats are a subset of beats |
+| `chapters` | `[{at, name}]` | plain names: intro, verse, break, build, drop, outro |
+| `spans` | `[{kind, from, to, rise}]` | a stretch with a shape. `rise` is `steady` `late` `early` `stepped` |
+| `moments` | `[{at, kind, …}]` | six kinds only: `build` `drop` `stop` `quiet` `spotlight` `return` |
+| `energy` | `[[t, 0..1], …]` | one point per downbeat. **Readers interpolate between points** |
+| `sections` | `[{at, id, repeat, arc, name}]` | which sections are the *same* section. `repeat` is what lets a reader escalate |
+| `confidence_by_field` | per field | one global number could not say "9 ms sure of the period, a coin toss on the bar phase" |
 
-So a span says *where* the lift happens and *what shape* it has, and the energy curve says
-*how much* at any instant. Together they let a reader make the room climb for four minutes
-without knowing the first thing about music.
+## Observation tier
 
-## The rule I had wrong
+| field | rate | what |
+|---|---|---|
+| `accents` | events | every percussive hit: time, strength, which drum, and whether it is on the grid. **983 here, 71% off-grid** |
+| `stems` | per downbeat | presence of vocals, drums, bass, other, guitar, piano |
+| `observations.envelope` | per beat | per-stem level in dB below that stem's own 99th percentile |
+| `observations.notes` | events | polyphonic transcription per stem. **3,863 here**, 98–99.9% diatonic to the detected key |
+| `observations.melody` | per sixteenth | the vocal pitch contour |
+| `observations.bass_notes` | per beat | monophonic root |
+| `observations.chords` | per bar | with a confidence |
+| `observations.key` | song | with the correlation that produced it |
+| `observations.microtiming` | song | deviation from the grid the music is actually played on. This record is **1/16 quantised, 100% of hits inside 15 ms** |
+| `observations.stereo` | per downbeat | width and pan, for the mix and every stem |
+| `observations.brightness` | per downbeat | spectral centroid per stem. Texture, not level |
+| `observations.lyrics` | word times | from the isolated vocal. **Times are good; words are not** — see the caveat in the file |
+| `observations.vocal_silence` | spans | where the voice is absent. The cleanest structural signal in this song |
 
-The old rule said: **never store a derivable fact** — no loudness curve, it is in the audio.
-That rule quietly deleted the energy curve, and it was wrong, because it left out half the
-question:
-
-> **A fact is only redundant if the person who needs it can derive it.**
-
-Energy is derivable from the audio, so it is redundant *for the analysis lane*, which holds the
-audio. It is unobtainable for every downstream reader, which holds only the map. The rule
-deleted information at exactly the boundary where it was needed. The corrected rule:
-
-1. **Time is always seconds**, decimal, from the start of the song.
-2. **A reader ignores fields it does not recognise.** That is what lets us add things later.
-3. **A field goes in when a reader breaks without it** — and a reader breaks when it cannot
-   derive the fact from what it holds.
-4. **One writer per fact.** Two lanes computing the same number will eventually disagree.
-
-## `vectors` — the learned tier
-
-Named fields cannot carry everything a model notices. There is no word for "this feels like the
-second half of a Coldplay song", and there never will be. So the map has two tiers:
-
-- the **named tier** — beats, chapters, moments, spans, energy. Small, readable, arguable, and
-  **correctable by hand**. This is the interface every reader compiles against.
-- the **learned tier** — `vectors`, one row per beat. Everything the model noticed, including
-  what we have no words for.
-
-The vector is the evidence. The field is the verdict. We ship both, and readers choose their
-tier. The important asymmetry: **only a verdict can be argued with.** You cannot hand a human a
-768-number row and ask "is this wrong?" — so if corrections are the moat, the named tier is the
-moat, not a scaffold to throw away later.
-
-Vectors live **out of line**, because a six-thousand-beat song at 768 dimensions is nine
-megabytes and JSON is the wrong container for that:
+## Learned tier
 
 ```json
-"vectors": {
-  "model": "mert-v1-95m",
-  "rate": "per_beat",
-  "rows": 1143,
-  "dim": 768,
-  "dtype": "float16",
-  "layout": "row_major",
-  "file": "opus.vec.f16"
-}
+"vectors": { "model":"m-a-p/MERT-v1-95M", "rate":"per_beat", "rows":369, "dim":768,
+             "dtype":"float16", "file":"the-nights.vec.f16" }
 ```
 
-`null` today. The slot is specified now so that nothing has to change when it fills.
+Out of line, because 369 × 768 float16 does not belong in JSON. Beat-aligned pooling makes it
+tempo-invariant nearly for free: 126 bpm and 84 bpm give the same sequence length.
 
-## Deliberately absent
+**It earned its place by correcting the named tier.** In the learned space the two sections I had
+labelled as different drops score **0.951** — the same section. Re-clustering on the vectors
+returns two identical passes of a six-part cycle with integer bar counts both times. That is
+recorded as `segmentation_proposal`, not applied, because structure is a human's call.
 
-Lighting words. Hardware. Channels. Fixtures. Colours. Tempo (it is in the beats).
+## Four rules
+
+1. **Time is always seconds**, decimal, from the start. Never ms, bars, samples or frames.
+2. **A reader ignores fields it does not recognise.** That is what lets the file grow.
+3. **A field goes into the interface tier when a reader breaks without it.**
+4. **One writer per fact.** Two lanes computing the same number will eventually disagree.
+
+## What is deliberately absent
+
+Lighting words. Hardware. Channels. Fixtures. Colours. Tempo, because it is in the beats. Those
+live in `layouts/` and in the recipe, or nowhere.

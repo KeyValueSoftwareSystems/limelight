@@ -1,0 +1,2076 @@
+{
+  "layout": "0.5",
+  "room": "the-grind",
+  "note": "The Grind: 35 m x 20 m x 8 m, stage 25 m wide at 1.2 m elevation. Built from the supplied spec sheet. Two numbers in that sheet conflict -- a 25 m stage inside a 20 m width -- so the stage is taken as full width and 6 m deep, and that reconciliation is recorded rather than silently chosen.",
+  "size_m": {
+    "w": 20.0,
+    "h": 8.0,
+    "d": 35.0
+  },
+  "stage": {
+    "z_from": 29.0,
+    "z_to": 35.0,
+    "elevation": 1.2,
+    "width_m": 20.0
+  },
+  "zones": [
+    {
+      "name": "stage",
+      "fixtures": [
+        "spot_m1",
+        "spot_m2",
+        "spot_m3",
+        "spot_m4",
+        "spot_m5",
+        "spot_u1",
+        "spot_u2",
+        "spot_u3",
+        "spot_u4",
+        "spot_u5",
+        "wash_101",
+        "wash_102",
+        "wash_103",
+        "wash_104",
+        "wash_105",
+        "wash_106",
+        "wash_107",
+        "wash_108",
+        "wash_109",
+        "wash_110",
+        "wash_111",
+        "wash_112",
+        "wash_201",
+        "wash_202",
+        "wash_203",
+        "wash_204",
+        "wash_205",
+        "wash_206",
+        "wash_207",
+        "wash_208",
+        "wash_209",
+        "wash_210",
+        "wash_211",
+        "wash_212",
+        "par_l07",
+        "par_l08",
+        "par_r07",
+        "par_r08",
+        "strobe_l1",
+        "strobe_l2",
+        "strobe_l3",
+        "strobe_l4",
+        "strobe_r1",
+        "strobe_r2",
+        "strobe_r3",
+        "strobe_r4",
+        "laser_l1",
+        "laser_l2",
+        "laser_r1",
+        "laser_r2",
+        "wall_1",
+        "strip_1",
+        "fog_1"
+      ]
+    },
+    {
+      "name": "dancefloor",
+      "fixtures": [
+        "spot_f1",
+        "spot_f2",
+        "spot_f3",
+        "spot_f4",
+        "spot_f5",
+        "spot_f6",
+        "spot_f7",
+        "spot_f8",
+        "par_f01",
+        "par_f02",
+        "par_f03",
+        "par_f04",
+        "par_f05",
+        "par_f06",
+        "par_f07",
+        "par_f08",
+        "par_f09",
+        "par_f10",
+        "par_f11",
+        "par_f12",
+        "par_l01",
+        "par_l02",
+        "par_l03",
+        "par_l04",
+        "par_l05",
+        "par_l06",
+        "par_r01",
+        "par_r02",
+        "par_r03",
+        "par_r04",
+        "par_r05",
+        "par_r06",
+        "strip_2",
+        "haze_1"
+      ]
+    },
+    {
+      "name": "balcony",
+      "fixtures": [
+        "par_b01",
+        "par_b02",
+        "par_b03",
+        "par_b04",
+        "par_b05",
+        "par_b06",
+        "par_b07",
+        "par_b08"
+      ]
+    },
+    {
+      "name": "ceiling",
+      "fixtures": []
+    }
+  ],
+  "limits": {
+    "max_strobe_hz": 4.0,
+    "max_pan_per_s": 1.05,
+    "max_tilt_per_s": 1.15,
+    "laser_zones": [
+      "stage"
+    ],
+    "laser_min_height_m": 3.0,
+    "note": "Lasers are the only fixture here that can injure an audience. laser_min_height_m is a hard floor, not a preference."
+  },
+  "power": {
+    "stage_drops": "2 x 120 A 3-phase",
+    "av_feed": "63 A"
+  },
+  "control": {
+    "console": "grandMA3 full-size",
+    "parameters": 12288,
+    "dmx_channels_used": 1532,
+    "universes_needed": 3
+  },
+  "fixtures": [
+    {
+      "id": "spot_f1",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        1.6,
+        7.6,
+        22.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_f2",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        4.0,
+        7.6,
+        22.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_f3",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        6.4,
+        7.6,
+        22.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_f4",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        8.8,
+        7.6,
+        22.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_f5",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        11.2,
+        7.6,
+        22.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_f6",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        13.6,
+        7.6,
+        22.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_f7",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        16.0,
+        7.6,
+        22.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_f8",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        18.4,
+        7.6,
+        22.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_m1",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        2.6,
+        7.6,
+        26.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_m2",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        6.3,
+        7.6,
+        26.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_m3",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        10.0,
+        7.6,
+        26.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_m4",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        13.7,
+        7.6,
+        26.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_m5",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        17.4,
+        7.6,
+        26.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_u1",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        2.6,
+        7.4,
+        31.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_u2",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        6.3,
+        7.4,
+        31.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_u3",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        10.0,
+        7.4,
+        31.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_u4",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        13.7,
+        7.4,
+        31.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "spot_u5",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe",
+        "zoom",
+        "prism",
+        "gobo"
+      ],
+      "at": [
+        17.4,
+        7.4,
+        31.0
+      ],
+      "model": "MegaPointe / 10R",
+      "zoom_deg": [
+        3,
+        47
+      ],
+      "dmx_ch": 30
+    },
+    {
+      "id": "wash_101",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        1.2,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_102",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        2.8,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_103",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        4.4,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_104",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        6.0,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_105",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        7.6,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_106",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        9.2,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_107",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        10.8,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_108",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        12.4,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_109",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        14.0,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_110",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        15.6,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_111",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        17.2,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_112",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        18.8,
+        7.2,
+        26.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_201",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        1.2,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_202",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        2.8,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_203",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        4.4,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_204",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        6.0,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_205",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        7.6,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_206",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        9.2,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_207",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        10.8,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_208",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        12.4,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_209",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        14.0,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_210",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        15.6,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_211",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        17.2,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "wash_212",
+      "kind": "wash",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "zoom"
+      ],
+      "at": [
+        18.8,
+        7.0,
+        31.6
+      ],
+      "model": "MAC Aura",
+      "zoom_deg": [
+        10,
+        60
+      ],
+      "dmx_ch": 20
+    },
+    {
+      "id": "par_f01",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        1.0,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f02",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        2.64,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f03",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        4.27,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f04",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        5.91,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f05",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        7.55,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f06",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        9.18,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f07",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        10.82,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f08",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        12.45,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f09",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        14.09,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f10",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        15.73,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f11",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        17.36,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_f12",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        19.0,
+        7.3,
+        21.4
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_l01",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        0.45,
+        4.2,
+        8.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_l02",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        0.45,
+        4.2,
+        11.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_l03",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        0.45,
+        4.2,
+        14.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_l04",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        0.45,
+        4.2,
+        17.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_l05",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        0.45,
+        4.2,
+        20.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_l06",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        0.45,
+        4.2,
+        23.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_l07",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        0.45,
+        4.2,
+        26.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_l08",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        0.45,
+        4.2,
+        29.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_r01",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        19.55,
+        4.2,
+        8.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_r02",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        19.55,
+        4.2,
+        11.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_r03",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        19.55,
+        4.2,
+        14.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_r04",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        19.55,
+        4.2,
+        17.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_r05",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        19.55,
+        4.2,
+        20.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_r06",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        19.55,
+        4.2,
+        23.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_r07",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        19.55,
+        4.2,
+        26.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_r08",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        19.55,
+        4.2,
+        29.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_b01",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        1.4,
+        4.05,
+        7.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_b02",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        3.86,
+        4.05,
+        7.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_b03",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        6.31,
+        4.05,
+        7.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_b04",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        8.77,
+        4.05,
+        7.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_b05",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        11.23,
+        4.05,
+        7.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_b06",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        13.69,
+        4.05,
+        7.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_b07",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        16.14,
+        4.05,
+        7.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "par_b08",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level",
+        "zoom"
+      ],
+      "at": [
+        18.6,
+        4.05,
+        7.0
+      ],
+      "model": "COLORado 1-Quad Zoom",
+      "zoom_deg": [
+        13,
+        45
+      ],
+      "dmx_ch": 12
+    },
+    {
+      "id": "strobe_l1",
+      "kind": "blinder",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        4.2,
+        3.2,
+        29.6
+      ],
+      "model": "Atomic 3000 / 2-Lite DWE",
+      "dmx_ch": 10,
+      "aims_at": "audience"
+    },
+    {
+      "id": "strobe_l2",
+      "kind": "strobe",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        4.2,
+        4.6,
+        29.6
+      ],
+      "model": "Atomic 3000 / 2-Lite DWE",
+      "dmx_ch": 10
+    },
+    {
+      "id": "strobe_l3",
+      "kind": "blinder",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        4.2,
+        6.0,
+        29.6
+      ],
+      "model": "Atomic 3000 / 2-Lite DWE",
+      "dmx_ch": 10,
+      "aims_at": "audience"
+    },
+    {
+      "id": "strobe_l4",
+      "kind": "strobe",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        4.2,
+        7.0,
+        29.6
+      ],
+      "model": "Atomic 3000 / 2-Lite DWE",
+      "dmx_ch": 10
+    },
+    {
+      "id": "strobe_r1",
+      "kind": "blinder",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        15.8,
+        3.2,
+        29.6
+      ],
+      "model": "Atomic 3000 / 2-Lite DWE",
+      "dmx_ch": 10,
+      "aims_at": "audience"
+    },
+    {
+      "id": "strobe_r2",
+      "kind": "strobe",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        15.8,
+        4.6,
+        29.6
+      ],
+      "model": "Atomic 3000 / 2-Lite DWE",
+      "dmx_ch": 10
+    },
+    {
+      "id": "strobe_r3",
+      "kind": "blinder",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        15.8,
+        6.0,
+        29.6
+      ],
+      "model": "Atomic 3000 / 2-Lite DWE",
+      "dmx_ch": 10,
+      "aims_at": "audience"
+    },
+    {
+      "id": "strobe_r4",
+      "kind": "strobe",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        15.8,
+        7.0,
+        29.6
+      ],
+      "model": "Atomic 3000 / 2-Lite DWE",
+      "dmx_ch": 10
+    },
+    {
+      "id": "laser_l1",
+      "kind": "laser",
+      "can": [
+        "pattern",
+        "level",
+        "scan"
+      ],
+      "at": [
+        5.0,
+        5.4,
+        30.2
+      ],
+      "model": "Kvant ClubMAX 3-6W RGB",
+      "control": "ILDA + DMX",
+      "safety": "aerial only above 3.0 m; audience scanning prohibited"
+    },
+    {
+      "id": "laser_l2",
+      "kind": "laser",
+      "can": [
+        "pattern",
+        "level",
+        "scan"
+      ],
+      "at": [
+        5.0,
+        6.6,
+        30.2
+      ],
+      "model": "Kvant ClubMAX 3-6W RGB",
+      "control": "ILDA + DMX",
+      "safety": "aerial only above 3.0 m; audience scanning prohibited"
+    },
+    {
+      "id": "laser_r1",
+      "kind": "laser",
+      "can": [
+        "pattern",
+        "level",
+        "scan"
+      ],
+      "at": [
+        15.0,
+        5.4,
+        30.2
+      ],
+      "model": "Kvant ClubMAX 3-6W RGB",
+      "control": "ILDA + DMX",
+      "safety": "aerial only above 3.0 m; audience scanning prohibited"
+    },
+    {
+      "id": "laser_r2",
+      "kind": "laser",
+      "can": [
+        "pattern",
+        "level",
+        "scan"
+      ],
+      "at": [
+        15.0,
+        6.6,
+        30.2
+      ],
+      "model": "Kvant ClubMAX 3-6W RGB",
+      "control": "ILDA + DMX",
+      "safety": "aerial only above 3.0 m; audience scanning prohibited"
+    },
+    {
+      "id": "wall_1",
+      "kind": "video",
+      "can": [
+        "pixels"
+      ],
+      "at": [
+        10.0,
+        4.6,
+        34.4
+      ],
+      "grid": [
+        96,
+        54
+      ],
+      "pitch_mm": 3.9,
+      "size_m": [
+        12.0,
+        6.75
+      ],
+      "note": "upstage LED video wall"
+    },
+    {
+      "id": "strip_1",
+      "kind": "strip",
+      "can": [
+        "pixels"
+      ],
+      "at": [
+        0.0,
+        1.28,
+        28.6
+      ],
+      "pixels": 120,
+      "role": "stage lip"
+    },
+    {
+      "id": "strip_2",
+      "kind": "strip",
+      "can": [
+        "pixels"
+      ],
+      "at": [
+        0.0,
+        0.16,
+        10.0
+      ],
+      "pixels": 120,
+      "role": "dancefloor edge"
+    },
+    {
+      "id": "fog_1",
+      "kind": "fog",
+      "can": [
+        "burst"
+      ],
+      "at": [
+        1.2,
+        0.4,
+        28.0
+      ]
+    },
+    {
+      "id": "haze_1",
+      "kind": "fog",
+      "can": [
+        "burst"
+      ],
+      "at": [
+        18.8,
+        4.2,
+        14.0
+      ]
+    }
+  ]
+}
