@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>club — limelight</title>
+<style>
+:root{
+  --bg:#07070c; --panel:#101018; --line:#23232f; --ink:#eef0f6; --dim:#9aa0b4; --faint:#5f657a;
+  --hot:#ff9d4d; --ok:#5fe3b0; --blue:#5b8cff;
+  --mono:"Ubuntu Mono",ui-monospace,Menlo,monospace;
+  --sans:"Lato",system-ui,-apple-system,sans-serif;
+}
+:root[data-theme="light"],:root[data-theme="dark"]{color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:1rem;padding:.55rem .9rem;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--hot)}
+.meta{font-family:var(--mono);font-size:.72rem;color:var(--faint)}
+.meta b{color:var(--ink);font-weight:400}
+label.file{font-family:var(--mono);font-size:.7rem;color:var(--dim);border:1px solid var(--line);
+  padding:.3rem .55rem;cursor:pointer;background:var(--panel)}
+label.file:hover{color:var(--ink);border-color:var(--dim)}
+label.file input{display:none}
+main{flex:1;display:grid;grid-template-columns:1fr 300px;min-height:0}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+#stage{background:#040408;position:relative;min-height:0}
+#stage svg{display:block;width:100%;height:100%}
+aside{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+aside h3{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  padding:.55rem .7rem .3rem}
+#frame{flex:1;overflow:auto;font-family:var(--mono);font-size:.68rem;line-height:1.5;color:var(--dim);
+  padding:0 .7rem .7rem;white-space:pre}
+#frame .k{color:var(--blue)}#frame .v{color:var(--hot)}#frame .z{color:#3d4256}
+#next{font-family:var(--mono);font-size:.74rem;color:var(--ok);padding:.4rem .7rem;border-top:1px solid var(--line)}
+#recipe{font-family:var(--mono);font-size:.68rem;color:var(--faint);padding:.45rem .7rem;border-top:1px solid var(--line)}
+#recipe b{color:var(--hot);font-weight:400}
+footer{border-top:1px solid var(--line);padding:.5rem .9rem .7rem}
+#lanes{display:block;width:100%;height:96px}
+.controls{display:flex;align-items:center;gap:.55rem;margin-top:.45rem;flex-wrap:wrap}
+button{font-family:var(--mono);font-size:.72rem;background:var(--panel);color:var(--dim);
+  border:1px solid var(--line);padding:.34rem .6rem;cursor:pointer}
+button:hover{color:var(--ink);border-color:var(--dim)}
+button.on{border-color:var(--ok);color:var(--ok)}
+#t{font-family:var(--mono);font-size:.76rem;color:var(--ink);min-width:9.5rem}
+#t span{color:var(--faint)}
+audio{display:none}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="brand">club</span>
+  <span class="meta" id="songmeta"></span>
+  <span style="flex:1"></span>
+  <label class="file">load map<input type="file" id="mapfile" accept=".json"></label>
+  <label class="file">load audio<input type="file" id="audiofile" accept="audio/*"></label>
+  <span class="meta" id="clocksrc">clock: <b>internal</b></span>
+</header>
+
+<main>
+  <div id="stage"><svg id="scene" viewBox="0 0 800 460" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <aside>
+    <h3>frame — what play/ must produce</h3>
+    <div id="frame"></div>
+    <div id="next"></div>
+    <div id="recipe"></div>
+  </aside>
+</main>
+
+<footer>
+  <svg id="lanes" viewBox="0 0 1000 96" preserveAspectRatio="none"></svg>
+  <div class="controls">
+    <button id="play">▶ play</button>
+    <span id="t"></span>
+    <button data-jump="build1">build</button>
+    <button data-jump="stop1">the stop</button>
+    <button data-jump="drop1">drop</button>
+    <button data-jump="spot">spotlight</button>
+    <button data-jump="drop2">drop 2</button>
+    <button id="slow">¼ speed</button>
+    <button id="fogtoggle" class="on">haze</button>
+  </div>
+</footer>
+
+<audio id="au"></audio>
+
+<script>
+"use strict";
+/* ---------- data: injected so this works from file:// with no server ---------- */
+const LAYOUT = {
+  "layout": "0.1",
+  "room": "club",
+  "note": "One canonical club. The browser and the real rig share this file.",
+  "size_m": {
+    "w": 8.0,
+    "d": 6.0,
+    "h": 3.2
+  },
+  "zones": [
+    {
+      "name": "dancefloor",
+      "fixtures": [
+        "flood_1",
+        "flood_2",
+        "flood_3",
+        "flood_4",
+        "strip_1"
+      ]
+    },
+    {
+      "name": "stage",
+      "fixtures": [
+        "head_1",
+        "head_2",
+        "strip_2"
+      ]
+    },
+    {
+      "name": "ceiling",
+      "fixtures": []
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "flood_1",
+      "kind": "flood",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        1.0,
+        5.0,
+        2.8
+      ]
+    },
+    {
+      "id": "flood_2",
+      "kind": "flood",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        3.0,
+        5.0,
+        2.8
+      ]
+    },
+    {
+      "id": "flood_3",
+      "kind": "flood",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        5.0,
+        5.0,
+        2.8
+      ]
+    },
+    {
+      "id": "flood_4",
+      "kind": "flood",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        7.0,
+        5.0,
+        2.8
+      ]
+    },
+    {
+      "id": "head_1",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        2.5,
+        1.0,
+        3.0
+      ]
+    },
+    {
+      "id": "head_2",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        5.5,
+        1.0,
+        3.0
+      ]
+    },
+    {
+      "id": "strip_1",
+      "kind": "strip",
+      "can": [
+        "pixels"
+      ],
+      "pixels": 60,
+      "at": [
+        0.0,
+        6.0,
+        0.2
+      ]
+    },
+    {
+      "id": "strip_2",
+      "kind": "strip",
+      "can": [
+        "pixels"
+      ],
+      "pixels": 60,
+      "at": [
+        0.0,
+        0.5,
+        0.2
+      ]
+    },
+    {
+      "id": "fog_1",
+      "kind": "fog",
+      "can": [
+        "burst"
+      ],
+      "at": [
+        0.5,
+        0.5,
+        0.3
+      ]
+    }
+  ]
+};
+let MAP = {
+  "map": "0.1",
+  "song": {
+    "title": "Demo Track",
+    "artist": "nobody",
+    "length": 186.0
+  },
+  "made_by": {
+    "how": "hand-written",
+    "who": "renjith+claude",
+    "when": "2026-09-02"
+  },
+  "tempo_hint": 126.0,
+  "beats": [
+    0.31,
+    0.786,
+    1.262,
+    1.739,
+    2.215,
+    2.691,
+    3.167,
+    3.643,
+    4.12,
+    4.596,
+    5.072,
+    5.548,
+    6.024,
+    6.5,
+    6.977,
+    7.453,
+    7.929,
+    8.405,
+    8.881,
+    9.358,
+    9.834,
+    10.31,
+    10.786,
+    11.262,
+    11.739,
+    12.215,
+    12.691,
+    13.167,
+    13.643,
+    14.12,
+    14.596,
+    15.072,
+    15.548,
+    16.024,
+    16.5,
+    16.977,
+    17.453,
+    17.929,
+    18.405,
+    18.881,
+    19.358,
+    19.834,
+    20.31,
+    20.786,
+    21.262,
+    21.739,
+    22.215,
+    22.691,
+    23.167,
+    23.643,
+    24.12,
+    24.596,
+    25.072,
+    25.548,
+    26.024,
+    26.5,
+    26.977,
+    27.453,
+    27.929,
+    28.405,
+    28.881,
+    29.358,
+    29.834,
+    30.31,
+    30.786,
+    31.262,
+    31.739,
+    32.215,
+    32.691,
+    33.167,
+    33.643,
+    34.12,
+    34.596,
+    35.072,
+    35.548,
+    36.024,
+    36.5,
+    36.977,
+    37.453,
+    37.929,
+    38.405,
+    38.881,
+    39.358,
+    39.834,
+    40.31,
+    40.786,
+    41.262,
+    41.739,
+    42.215,
+    42.691,
+    43.167,
+    43.643,
+    44.12,
+    44.596,
+    45.072,
+    45.548,
+    46.024,
+    46.5,
+    46.977,
+    47.453,
+    47.929,
+    48.405,
+    48.881,
+    49.358,
+    49.834,
+    50.31,
+    50.786,
+    51.262,
+    51.739,
+    52.215,
+    52.691,
+    53.167,
+    53.643,
+    54.12,
+    54.596,
+    55.072,
+    55.548,
+    56.024,
+    56.5,
+    56.977,
+    57.453,
+    57.929,
+    58.405,
+    58.881,
+    59.358,
+    59.834,
+    60.31,
+    60.786,
+    61.262,
+    61.739,
+    62.215,
+    62.691,
+    63.167,
+    63.643,
+    64.12,
+    64.596,
+    65.072,
+    65.548,
+    66.024,
+    66.5,
+    66.977,
+    67.453,
+    67.929,
+    68.405,
+    68.881,
+    69.358,
+    69.834,
+    70.31,
+    70.786,
+    71.262,
+    71.739,
+    72.215,
+    72.691,
+    73.167,
+    73.643,
+    74.12,
+    74.596,
+    75.072,
+    75.548,
+    76.024,
+    76.5,
+    76.977,
+    77.453,
+    77.929,
+    78.405,
+    78.881,
+    79.358,
+    79.834,
+    80.31,
+    80.786,
+    81.262,
+    81.739,
+    82.215,
+    82.691,
+    83.167,
+    83.643,
+    84.12,
+    84.596,
+    85.072,
+    85.548,
+    86.024,
+    86.5,
+    86.977,
+    87.453,
+    87.929,
+    88.405,
+    88.881,
+    89.358,
+    89.834,
+    90.31,
+    90.786,
+    91.262,
+    91.739,
+    92.215,
+    92.691,
+    93.167,
+    93.643,
+    94.12,
+    94.596,
+    95.072,
+    95.548,
+    96.024,
+    96.5,
+    96.977,
+    97.453,
+    97.929,
+    98.405,
+    98.881,
+    99.358,
+    99.834,
+    100.31,
+    100.786,
+    101.262,
+    101.739,
+    102.215,
+    102.691,
+    103.167,
+    103.643,
+    104.12,
+    104.596,
+    105.072,
+    105.548,
+    106.024,
+    106.5,
+    106.977,
+    107.453,
+    107.929,
+    108.405,
+    108.881,
+    109.358,
+    109.834,
+    110.31,
+    110.786,
+    111.262,
+    111.739,
+    112.215,
+    112.691,
+    113.167,
+    113.643,
+    114.12,
+    114.596,
+    115.072,
+    115.548,
+    116.024,
+    116.5,
+    116.977,
+    117.453,
+    117.929,
+    118.405,
+    118.881,
+    119.358,
+    119.834,
+    120.31,
+    120.786,
+    121.262,
+    121.739,
+    122.215,
+    122.691,
+    123.167,
+    123.643,
+    124.12,
+    124.596,
+    125.072,
+    125.548,
+    126.024,
+    126.5,
+    126.977,
+    127.453,
+    127.929,
+    128.405,
+    128.881,
+    129.358,
+    129.834,
+    130.31,
+    130.786,
+    131.262,
+    131.739,
+    132.215,
+    132.691,
+    133.167,
+    133.643,
+    134.12,
+    134.596,
+    135.072,
+    135.548,
+    136.024,
+    136.5,
+    136.977,
+    137.453,
+    137.929,
+    138.405,
+    138.881,
+    139.358,
+    139.834,
+    140.31,
+    140.786,
+    141.262,
+    141.739,
+    142.215,
+    142.691,
+    143.167,
+    143.643,
+    144.12,
+    144.596,
+    145.072,
+    145.548,
+    146.024,
+    146.5,
+    146.977,
+    147.453,
+    147.929,
+    148.405,
+    148.881,
+    149.358,
+    149.834,
+    150.31,
+    150.786,
+    151.262,
+    151.739,
+    152.215,
+    152.691,
+    153.167,
+    153.643,
+    154.12,
+    154.596,
+    155.072,
+    155.548,
+    156.024,
+    156.5,
+    156.977,
+    157.453,
+    157.929,
+    158.405,
+    158.881,
+    159.358,
+    159.834,
+    160.31,
+    160.786,
+    161.262,
+    161.739,
+    162.215,
+    162.691,
+    163.167,
+    163.643,
+    164.12,
+    164.596,
+    165.072,
+    165.548,
+    166.024,
+    166.5,
+    166.977,
+    167.453,
+    167.929,
+    168.405,
+    168.881,
+    169.358,
+    169.834,
+    170.31,
+    170.786,
+    171.262,
+    171.739,
+    172.215,
+    172.691,
+    173.167,
+    173.643,
+    174.12,
+    174.596,
+    175.072,
+    175.548,
+    176.024,
+    176.5,
+    176.977,
+    177.453,
+    177.929,
+    178.405,
+    178.881,
+    179.358,
+    179.834,
+    180.31,
+    180.786,
+    181.262,
+    181.739,
+    182.215,
+    182.691,
+    183.167,
+    183.643,
+    184.12,
+    184.596,
+    185.072,
+    185.548
+  ],
+  "downbeats": [
+    0.31,
+    2.215,
+    4.12,
+    6.024,
+    7.929,
+    9.834,
+    11.739,
+    13.643,
+    15.548,
+    17.453,
+    19.358,
+    21.262,
+    23.167,
+    25.072,
+    26.977,
+    28.881,
+    30.786,
+    32.691,
+    34.596,
+    36.5,
+    38.405,
+    40.31,
+    42.215,
+    44.12,
+    46.024,
+    47.929,
+    49.834,
+    51.739,
+    53.643,
+    55.548,
+    57.453,
+    59.358,
+    61.262,
+    63.167,
+    65.072,
+    66.977,
+    68.881,
+    70.786,
+    72.691,
+    74.596,
+    76.5,
+    78.405,
+    80.31,
+    82.215,
+    84.12,
+    86.024,
+    87.929,
+    89.834,
+    91.739,
+    93.643,
+    95.548,
+    97.453,
+    99.358,
+    101.262,
+    103.167,
+    105.072,
+    106.977,
+    108.881,
+    110.786,
+    112.691,
+    114.596,
+    116.5,
+    118.405,
+    120.31,
+    122.215,
+    124.12,
+    126.024,
+    127.929,
+    129.834,
+    131.739,
+    133.643,
+    135.548,
+    137.453,
+    139.358,
+    141.262,
+    143.167,
+    145.072,
+    146.977,
+    148.881,
+    150.786,
+    152.691,
+    154.596,
+    156.5,
+    158.405,
+    160.31,
+    162.215,
+    164.12,
+    166.024,
+    167.929,
+    169.834,
+    171.739,
+    173.643,
+    175.548,
+    177.453,
+    179.358,
+    181.262,
+    183.167,
+    185.072
+  ],
+  "chapters": [
+    {
+      "at": 0.0,
+      "name": "intro"
+    },
+    {
+      "at": 15.548,
+      "name": "verse"
+    },
+    {
+      "at": 44.12,
+      "name": "build"
+    },
+    {
+      "at": 59.358,
+      "name": "drop"
+    },
+    {
+      "at": 89.834,
+      "name": "break"
+    },
+    {
+      "at": 105.072,
+      "name": "verse"
+    },
+    {
+      "at": 120.31,
+      "name": "build"
+    },
+    {
+      "at": 135.548,
+      "name": "drop"
+    },
+    {
+      "at": 164.12,
+      "name": "outro"
+    }
+  ],
+  "moments": [
+    {
+      "at": 44.12,
+      "kind": "build",
+      "note": "first riser"
+    },
+    {
+      "at": 58.882,
+      "kind": "stop",
+      "holds": 0.476,
+      "note": "one beat of silence"
+    },
+    {
+      "at": 59.358,
+      "kind": "drop",
+      "size": 0.95,
+      "note": "the riff lands"
+    },
+    {
+      "at": 89.834,
+      "kind": "quiet",
+      "note": "drums out"
+    },
+    {
+      "at": 95.548,
+      "kind": "spotlight",
+      "of": "voice",
+      "note": "vocal alone"
+    },
+    {
+      "at": 105.072,
+      "kind": "return",
+      "note": "drums back"
+    },
+    {
+      "at": 120.31,
+      "kind": "build",
+      "note": "second riser"
+    },
+    {
+      "at": 134.596,
+      "kind": "stop",
+      "holds": 0.952,
+      "note": "two beats of silence"
+    },
+    {
+      "at": 135.548,
+      "kind": "drop",
+      "size": 1.0,
+      "note": "bigger"
+    },
+    {
+      "at": 164.12,
+      "kind": "quiet",
+      "note": "fade out"
+    }
+  ],
+  "confidence": 1.0,
+  "vectors": null
+};
+
+/* ---------- helpers ---------- */
+const NS="http://www.w3.org/2000/svg";
+const el=(p,n,a)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,u)=>a+(b-a)*u;
+function hash(i,s){let n=(i*2654435761)^(s*40503);n=((n^(n>>>15))*2246822519)&0xffffffff;return ((n^(n>>>13))&0xffff)/65535;}
+
+/* ---------- map queries. the map is the history: lookups, never memory ---------- */
+const M={
+  beatLen(){const b=MAP.beats;return b.length>1?(b[b.length-1]-b[0])/(b.length-1):0.5;},
+  chapterAt(t){let c=MAP.chapters[0];for(const x of MAP.chapters)if(t>=x.at)c=x;return c;},
+  chapterSpan(t){const cs=MAP.chapters;for(let i=0;i<cs.length;i++){const a=cs[i].at,b=i+1<cs.length?cs[i+1].at:MAP.song.length;if(t>=a&&t<b)return[a,b,cs[i].name];}return[0,MAP.song.length,"intro"];},
+  lastBeat(t){const b=MAP.beats;let lo=0,hi=b.length-1,r=b[0];while(lo<=hi){const m=(lo+hi)>>1;if(b[m]<=t){r=b[m];lo=m+1}else hi=m-1}return r;},
+  beatIndex(t){const b=MAP.beats;let lo=0,hi=b.length-1,r=0;while(lo<=hi){const m=(lo+hi)>>1;if(b[m]<=t){r=m;lo=m+1}else hi=m-1}return r;},
+  beatPhase(t){const bl=this.beatLen();return clamp((t-this.lastBeat(t))/bl,0,1);},
+  isDown(t){const b=this.lastBeat(t);return MAP.downbeats.some(d=>Math.abs(d-b)<1e-6);},
+  active(t){let best=null;
+    for(const m of MAP.moments){
+      const end = m.holds!=null ? m.at+m.holds : m.at+0.45;
+      if(t>=m.at && t<end) best=m;
+    } return best;},
+  nextMoment(t){for(const m of MAP.moments)if(m.at>t)return m;return null;},
+  find(kind,n=1){let c=0;for(const m of MAP.moments)if(m.kind===kind&&++c===n)return m;return null;}
+};
+
+/* ---------- the recipe: six moments -> looks. readers/lights/RECIPE.md ---------- */
+const RGB={white:[255,255,255],amber:[255,168,60],magenta:[255,92,168],cyan:[65,201,234],
+           blue:[40,70,190],violet:[157,123,255],warm:[255,214,160],off:[0,0,0]};
+
+function recipe(t){
+  const [a,b,name]=M.chapterSpan(t), mom=M.active(t), ph=M.beatPhase(t), bi=M.beatIndex(t);
+  const prog=clamp((t-a)/Math.max(0.001,b-a),0,1);
+  const S={label:name,note:"",floods:[],heads:[],strips:[],fog:0};
+
+  if(mom && mom.kind==="stop"){
+    S.label="STOP"; S.note="everything to zero — it knows what is coming";
+    for(let i=0;i<4;i++)S.floods.push({rgb:RGB.off,level:0});
+    for(let i=0;i<2;i++)S.heads.push({rgb:RGB.off,level:0,pan:.5,tilt:.35,strobe:0});
+    S.strips=[0,0]; S.fog=0; return S;
+  }
+  if(name==="drop"){
+    const flash=ph<.42, alt=bi%2===0, c=alt?RGB.white:RGB.magenta;
+    S.note="white on the downbeat, alternating, strobing";
+    for(let i=0;i<4;i++)S.floods.push({rgb:c,level:(i%2===(alt?0:1))?(flash?1:.25):.08});
+    for(let i=0;i<2;i++)S.heads.push({rgb:RGB.white,level:flash?1:.3,
+      pan:.5+Math.sin(t*3.1+i*Math.PI)*.42,tilt:.28,strobe:8});
+    S.strips=[flash?1:.2,flash?1:.2]; S.fog=.85; return S;
+  }
+  if(name==="build"){
+    const rate=1.5+prog*2.6, pulse=Math.max(0,1-ph*rate);
+    S.note="pulse every beat, faster as it rises";
+    const c=RGB.amber;
+    for(let i=0;i<4;i++)S.floods.push({rgb:c,level:pulse*(0.45+prog*0.55)});
+    for(let i=0;i<2;i++)S.heads.push({rgb:c,level:pulse*.8,
+      pan:.5+Math.sin(t*(0.8+prog*3))*(0.15+prog*0.3),tilt:.3+prog*.15,strobe:0});
+    S.strips=[prog,prog];
+    S.fog=prog>.55?.6:.25;   // primed early: fog has 9 s of lag
+    return S;
+  }
+  if(mom && mom.kind==="spotlight"){
+    S.label="spotlight"; S.note="one head warm and alone. contrast carries it";
+    for(let i=0;i<4;i++)S.floods.push({rgb:RGB.off,level:0});
+    S.heads.push({rgb:RGB.warm,level:.95,pan:.5,tilt:.42,strobe:0});
+    S.heads.push({rgb:RGB.off,level:0,pan:.5,tilt:.35,strobe:0});
+    S.strips=[0,0]; S.fog=.35; return S;
+  }
+  if(name==="verse"){
+    const d=M.isDown(t)?Math.max(0,1-ph*2.2):0;
+    S.note="gentle. a pulse on downbeats only";
+    for(let i=0;i<4;i++)S.floods.push({rgb:RGB.cyan,level:.10+d*.5*(i%2?1:.6)});
+    for(let i=0;i<2;i++)S.heads.push({rgb:RGB.cyan,level:.12,pan:.5+Math.sin(t*.4+i)*.18,tilt:.32,strobe:0});
+    S.strips=[.18,.18]; S.fog=.2; return S;
+  }
+  if(name==="break"||(mom&&mom.kind==="quiet")){
+    S.note="cool, low, drifting. nothing moves fast";
+    for(let i=0;i<4;i++)S.floods.push({rgb:RGB.violet,level:.10+.05*Math.sin(t*.6+i)});
+    for(let i=0;i<2;i++)S.heads.push({rgb:RGB.violet,level:.10,pan:.5+Math.sin(t*.25+i)*.12,tilt:.3,strobe:0});
+    S.strips=[.12,.12]; S.fog=.25; return S;
+  }
+  // intro / outro / return
+  const base=.08+.06*Math.sin(t*.5);
+  S.note="dim and cool. the room pacing itself";
+  for(let i=0;i<4;i++)S.floods.push({rgb:RGB.blue,level:base*(i%2?1:.7)});
+  for(let i=0;i<2;i++)S.heads.push({rgb:RGB.blue,level:.07,pan:.5+Math.sin(t*.3+i)*.1,tilt:.3,strobe:0});
+  S.strips=[.08,.08]; S.fog=.15; return S;
+}
+
+/* ---------- state -> the frame that play/ must produce ---------- */
+function frameFrom(t,S){
+  const fx=[], L=LAYOUT.fixtures;
+  const floods=L.filter(f=>f.kind==="flood"), heads=L.filter(f=>f.kind==="head"),
+        strips=L.filter(f=>f.kind==="strip"), fog=L.filter(f=>f.kind==="fog");
+  floods.forEach((f,i)=>{const s=S.floods[i]||S.floods[0];
+    fx.push({id:f.id,r:s.rgb[0],g:s.rgb[1],b:s.rgb[2],level:+s.level.toFixed(3)});});
+  heads.forEach((f,i)=>{const s=S.heads[i]||S.heads[0];
+    fx.push({id:f.id,r:s.rgb[0],g:s.rgb[1],b:s.rgb[2],level:+s.level.toFixed(3),
+             pan:+s.pan.toFixed(3),tilt:+s.tilt.toFixed(3),strobe:s.strobe});});
+  strips.forEach((f,i)=>fx.push({id:f.id,level:+(S.strips[i]||0).toFixed(3)}));
+  fog.forEach(f=>fx.push({id:f.id,level:+S.fog.toFixed(3)}));
+  return {t:+t.toFixed(3),fixtures:fx};
+}
+
+/* ---------- the scene ---------- */
+const scene=document.getElementById("scene");
+let G={};
+function buildScene(){
+  scene.textContent="";
+  el(scene,"rect",{x:0,y:0,width:800,height:460,fill:"#040408"});
+  G.haze=el(scene,"rect",{x:0,y:0,width:800,height:460,fill:"#7a8ab5",opacity:0});
+  G.wash=el(scene,"rect",{x:0,y:330,width:800,height:130,fill:"#2050e0",opacity:0});
+  const floods=LAYOUT.fixtures.filter(f=>f.kind==="flood");
+  const heads=LAYOUT.fixtures.filter(f=>f.kind==="head");
+  G.fbeam=[];G.fdot=[];G.hbeam=[];G.hdot=[];
+  floods.forEach((f,i)=>{const x=90+i*205;
+    G.fbeam.push(el(scene,"polygon",{points:`${x},34 ${x-60},400 ${x+60},400`,fill:"#4d7cff",opacity:0}));
+    G.fdot.push(el(scene,"circle",{cx:x,cy:26,r:9,fill:"#171722"}));
+    const lb=el(scene,"text",{x:x,y:14,"text-anchor":"middle",fill:"#40465c","font-size":9});
+    lb.style.fontFamily="Ubuntu Mono, monospace"; lb.textContent=f.id;});
+  heads.forEach((f,i)=>{const x=280+i*240;
+    G.hbeam.push(el(scene,"polygon",{points:`${x},58 ${x-26},400 ${x+26},400`,fill:"#fff",opacity:0}));
+    G.hdot.push(el(scene,"circle",{cx:x,cy:50,r:11,fill:"#171722"}));
+    const lb=el(scene,"text",{x:x,y:74,"text-anchor":"middle",fill:"#40465c","font-size":9});
+    lb.style.fontFamily="Ubuntu Mono, monospace"; lb.textContent=f.id;});
+  G.hx=[280,520];
+  G.strip=[[],[]];
+  for(let s=0;s<2;s++)for(let i=0;i<30;i++)
+    G.strip[s].push(el(scene,"rect",{x:22+i*25.5,y:s===0?438:418,width:20,height:7,fill:"#13131c"}));
+  G.big=el(scene,"text",{x:400,y:250,"text-anchor":"middle",fill:"#ff5ca8","font-size":26,
+    "letter-spacing":8,opacity:0}); G.big.style.fontFamily="Ubuntu Mono, monospace";
+}
+function paint(S){
+  const hz = hazeOn ? S.fog : 0;
+  G.haze.setAttribute("opacity",(0.03+hz*0.07).toFixed(3));
+  const f0=S.floods[0]||{rgb:[0,0,0],level:0};
+  G.wash.setAttribute("fill",`rgb(${f0.rgb.join(",")})`);
+  G.wash.setAttribute("opacity",(f0.level*0.22).toFixed(3));
+  S.floods.forEach((s,i)=>{ if(!G.fdot[i])return;
+    const c=`rgb(${s.rgb.join(",")})`, lv=Math.pow(clamp(s.level,0,1),1/2.2);
+    G.fdot[i].setAttribute("fill", lv>0.02?c:"#171722");
+    G.fdot[i].setAttribute("r", (9+lv*3).toFixed(1));
+    G.fbeam[i].setAttribute("fill",c);
+    G.fbeam[i].setAttribute("opacity",(lv*(0.10+hz*0.30)).toFixed(3));});
+  S.heads.forEach((s,i)=>{ if(!G.hdot[i])return;
+    const c=`rgb(${s.rgb.join(",")})`, lv=Math.pow(clamp(s.level,0,1),1/2.2);
+    G.hdot[i].setAttribute("fill", lv>0.02?c:"#171722");
+    G.hbeam[i].setAttribute("fill",c);
+    G.hbeam[i].setAttribute("opacity",(lv*(0.14+hz*0.42)).toFixed(3));
+    const x=G.hx[i], sx=(s.pan-0.5)*260, w=14+s.tilt*26;
+    G.hbeam[i].setAttribute("points",`${x},58 ${x+sx-w},400 ${x+sx+w},400`);});
+  for(let s=0;s<2;s++){const lv=S.strips[s]||0;
+    G.strip[s].forEach((r,i)=>{const on=(i/30)<lv || (lv>0.5 && (i+Math.floor(now*8))%3===0);
+      r.setAttribute("fill", on?`rgb(${(S.floods[0]||{rgb:[0,0,0]}).rgb.join(",")})`:"#13131c");});}
+  if(S.label==="STOP"){G.big.setAttribute("opacity",1);G.big.textContent="· · ·";}
+  else G.big.setAttribute("opacity",0);
+}
+
+/* ---------- the timeline ---------- */
+const lanes=document.getElementById("lanes");
+let PH;
+function buildLanes(){
+  lanes.textContent="";
+  const W=1000,X=t=>(t/MAP.song.length)*W;
+  const CH={intro:"#5b6480",verse:"#41c9ea",build:"#ff9d4d",drop:"#ff5ca8",break:"#9d7bff",outro:"#5b6480"};
+  MAP.chapters.forEach((c,i)=>{const a=X(c.at),b=i+1<MAP.chapters.length?X(MAP.chapters[i+1].at):W;
+    el(lanes,"rect",{x:a,y:0,width:Math.max(1,b-a-1),height:22,fill:CH[c.name]||"#5b6480",opacity:.85});
+    if(b-a>44){const tx=el(lanes,"text",{x:a+4,y:15,fill:"#07070c","font-size":9,"letter-spacing":1});
+      tx.style.fontFamily="Ubuntu Mono, monospace"; tx.textContent=c.name.toUpperCase();}});
+  MAP.beats.forEach((b,i)=>{const d=MAP.downbeats.some(x=>Math.abs(x-b)<1e-6);
+    el(lanes,"rect",{x:X(b),y:d?28:33,width:d?1.4:.7,height:d?16:9,fill:"#ff9d4d",opacity:d?.9:.3});});
+  MAP.moments.forEach(m=>{const x=X(m.at);
+    const col=m.kind==="drop"?"#ffffff":m.kind==="stop"?"#ff5ca8":m.kind==="spotlight"?"#41c9ea":"#ff9d4d";
+    el(lanes,"path",{d:`M${x},52 l5,6 l-5,6 l-5,-6 Z`,fill:col});
+    const tx=el(lanes,"text",{x:x,y:78,fill:"#5f657a","font-size":8.5,"text-anchor":"middle"});
+    tx.style.fontFamily="Ubuntu Mono, monospace"; tx.textContent=m.kind;});
+  PH=el(lanes,"line",{x1:0,y1:0,x2:0,y2:70,stroke:"#fff","stroke-width":1.6,opacity:.9});
+}
+
+/* ---------- one clock: the audio element if loaded, else internal ---------- */
+const au=document.getElementById("au"), playBtn=document.getElementById("play");
+const tEl=document.getElementById("t"), clocksrc=document.getElementById("clocksrc");
+let now=0, playing=false, speed=1, last=null, haveAudio=false, hazeOn=true;
+
+function clockNow(dtms){
+  if(haveAudio) return au.currentTime;             // the audio device owns time
+  if(playing){ if(last!=null) now += (dtms-last)/1000*speed; last=dtms; }
+  else last=null;
+  return now;
+}
+function loop(ts){
+  const t=clamp(clockNow(ts),0,MAP.song.length);
+  now=t;
+  const S=recipe(t);
+  paint(S);
+  const X=(t/MAP.song.length)*1000; PH.setAttribute("x1",X); PH.setAttribute("x2",X);
+  renderFrame(t,S);
+  const mm=String(Math.floor(t/60)).padStart(2,"0"), ss=(t%60).toFixed(2).padStart(5,"0");
+  tEl.innerHTML=`${mm}:${ss} <span>/ ${MAP.song.length.toFixed(0)}s · ${S.label}</span>`;
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+const frameEl=document.getElementById("frame"), nextEl=document.getElementById("next"),
+      recipeEl=document.getElementById("recipe");
+function renderFrame(t,S){
+  const F=frameFrom(t,S);
+  let s=`{\n  <span class="k">"t"</span>: <span class="v">${F.t}</span>,\n  <span class="k">"fixtures"</span>: [\n`;
+  F.fixtures.forEach(f=>{
+    const dim=f.level<0.02?' class="z"':'';
+    let parts=`<span class="k">"id"</span>:<span class="v">"${f.id}"</span>`;
+    if(f.r!=null) parts+=` <span class="k">"rgb"</span>:<span class="v">[${f.r},${f.g},${f.b}]</span>`;
+    parts+=` <span class="k">"level"</span>:<span class="v">${f.level}</span>`;
+    if(f.pan!=null) parts+=` <span class="k">"pan"</span>:<span class="v">${f.pan}</span>`;
+    if(f.strobe) parts+=` <span class="k">"strobe"</span>:<span class="v">${f.strobe}</span>`;
+    s+=`    <span${dim}>{ ${parts} }</span>\n`;});
+  s+="  ]\n}";
+  frameEl.innerHTML=s;
+  const nm=M.nextMoment(t);
+  nextEl.textContent = nm ? `next: ${nm.kind} in ${(nm.at-t).toFixed(2)}s` : "next: —";
+  recipeEl.innerHTML = S.note ? `<b>${S.label}</b> — ${S.note}` : `<b>${S.label}</b>`;
+}
+
+/* ---------- controls ---------- */
+playBtn.addEventListener("click",()=>{
+  playing=!playing; playBtn.textContent=playing?"❙❙ pause":"▶ play";
+  playBtn.classList.toggle("on",playing);
+  if(haveAudio){ playing?au.play():au.pause(); }
+});
+document.getElementById("slow").addEventListener("click",e=>{
+  speed = speed===1?0.25:1; e.target.classList.toggle("on",speed!==1);
+  if(haveAudio) au.playbackRate=speed;
+});
+document.getElementById("fogtoggle").addEventListener("click",e=>{
+  hazeOn=!hazeOn; e.target.classList.toggle("on",hazeOn);
+});
+const JUMPS={build1:()=>M.find("build",1),stop1:()=>M.find("stop",1),drop1:()=>M.find("drop",1),
+             spot:()=>M.find("spotlight",1),drop2:()=>M.find("drop",2)};
+document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>{
+  const m=JUMPS[b.dataset.jump](); if(!m) return;
+  const t=Math.max(0,m.at-2.0);
+  now=t; if(haveAudio) au.currentTime=t;
+  speed=0.25; document.getElementById("slow").classList.add("on");
+  if(haveAudio) au.playbackRate=0.25;
+  if(!playing){ playing=true; playBtn.textContent="❙❙ pause"; playBtn.classList.add("on"); if(haveAudio)au.play(); }
+}));
+lanes.addEventListener("click",e=>{
+  const r=lanes.getBoundingClientRect();
+  const t=clamp(((e.clientX-r.left)/r.width)*MAP.song.length,0,MAP.song.length);
+  now=t; if(haveAudio) au.currentTime=t;
+});
+document.getElementById("mapfile").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ try{ const m=JSON.parse(rd.result);
+      if(!m.beats||!m.chapters) throw new Error("not a map: needs beats and chapters");
+      MAP=m; now=0; buildLanes(); meta(); }
+    catch(err){ alert("could not read that map: "+err.message); } };
+  rd.readAsText(f);
+});
+document.getElementById("audiofile").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  au.src=URL.createObjectURL(f); haveAudio=true;
+  clocksrc.innerHTML='clock: <b>audio device</b>';
+  au.playbackRate=speed;
+  if(playing) au.play();
+});
+function meta(){
+  document.getElementById("songmeta").innerHTML =
+    `<b>${MAP.song.title}</b> · ${MAP.beats.length} beats · ${MAP.chapters.length} chapters · ${MAP.moments.length} moments`;
+}
+buildScene(); buildLanes(); meta();
+</script>
+</body>
+</html>
