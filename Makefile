@@ -1,10 +1,11 @@
-.PHONY: help check score room demo
+.PHONY: help check bench lights chapters demo
 .DEFAULT_GOAL := help
 
 help:
 	@echo "make check   - is everything wired"
-	@echo "make score   - the scoreboard: maps vs truth"
-	@echo "make room    - open the club in a browser"
+	@echo "make bench   - the scoreboard: maps vs truth"
+	@echo "make lights  - open the club in a browser"
+	@echo "make chapters- the 20-line second reader. same file"
 	@echo "make demo    - the whole chain, one song"
 
 check:
@@ -15,18 +16,23 @@ check:
 	@test -f FRAME.md && echo "FRAME.md  OK"
 	@test -f RECIPE.md && echo "RECIPE.md OK"
 	@echo "--- not built yet (this is expected on day one) ---"
-	@test -f score/score.py  || echo "  score/score.py     -> Sebastian"
-	@test -f play/play.py    || echo "  play/play.py       -> Dheeraj"
-	@test -f room/index.html || echo "  room/index.html    -> Nikhita"
-	@test -f listen/listen.py|| echo "  listen/listen.py   -> Amal"
+	@test -f bench/bench.py            || echo "  bench/bench.py              -> Sebastian"
+	@test -f play/play.py              || echo "  play/play.py                -> Dheeraj"
+	@test -f readers/lights/index.html || echo "  readers/lights/index.html   -> Nikhita"
+	@test -f listen/listen.py          || echo "  listen/listen.py            -> Amal"
+	@echo "--- already works ---"
+	@printf "  chapters reader: "; python3 readers/chapters/chapters.py maps/example.map.json | tr "\n" " "; echo
 
-score:
-	@test -f score/score.py && python3 score/score.py || \
-	  echo "score/score.py does not exist yet. Sebastian owns it. See score/README.md"
+bench:
+	@test -f bench/bench.py && python3 bench/bench.py || \
+	  echo "bench/bench.py does not exist yet. Sebastian owns it. See bench/README.md"
 
-room:
-	@test -f room/index.html && (xdg-open room/index.html 2>/dev/null || open room/index.html) || \
-	  echo "room/index.html does not exist yet. Nikhita owns it. See room/README.md"
+chapters:
+	@python3 readers/chapters/chapters.py maps/example.map.json
+
+lights:
+	@test -f readers/lights/index.html && (xdg-open readers/lights/index.html 2>/dev/null || open readers/lights/index.html) || \
+	  echo "readers/lights/index.html does not exist yet. Nikhita owns it. See readers/lights/README.md"
 
 demo:
 	@echo "the whole chain. target: Friday 4 September."

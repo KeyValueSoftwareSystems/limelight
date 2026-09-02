@@ -1,4 +1,8 @@
-# The frame
+# The frame — the lighting reader's output format
+
+**This format belongs to the lighting reader only.** It is not universal. A video-edit reader
+outputs cut points; a game outputs a note chart. The universal artifact is the *map*
+([`../../MAP.md`](../../MAP.md)), which knows nothing about output devices.
 
 What every light is doing at one instant. `play/` produces it; `room/` draws it and hardware
 sends it. Normalised, so nothing here knows about DMX channels or fixture models.

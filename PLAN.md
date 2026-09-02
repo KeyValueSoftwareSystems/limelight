@@ -13,7 +13,9 @@ Twelve build days, three rehearsal days.
 | level one, properly | levels two and three are the same machinery on harder songs | Sun 6 |
 | **real lights** | **the thing people feel in their chest. this is the demo** | week two |
 | **the big screen, 24 hours** | hundreds of strangers instead of one eight-minute slot | week two |
+| **a second reader, 20 lines** | "same file" — proves this is a format, not a light show | this week |
 | vectors in the map | "light my track like Strobe" — impossible with named fields | week two |
+| one trained head on our own cards | "we trained it ourselves" becomes literally true | week two |
 | more rooms | living room, car, drone. a day each once the first works | after 18 Sep |
 | the full portal | artists do all of this without us in the room | after 18 Sep |
 
@@ -72,6 +74,8 @@ Everywhere else: choose the fastest thing and stop thinking about it.
 | who | owns | in one line |
 |---|---|---|
 | Renjith | truth · taste · the pitch | whether it is true, and whether it is good |
+| Amal | GPUs | provisioning, inference speed, the vectors, the one training run |
+| Sebastian | reproducibility | rebuilds Amal's environment from `listen/ENV.md` on another machine |
 | Amal | song → map | the timestamp gets found by a machine, not typed by a human |
 | Sebastian | the instruments | the tapping tool and the scoreboard |
 | Dheeraj | map + time → frame | one number becomes a whole show, on the clock |
