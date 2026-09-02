@@ -1,0 +1,50 @@
+{
+  "map": "0.2",
+  "song": {
+    "title": "The Nights",
+    "artist": "Avicii",
+    "length": 175.682
+  },
+  "made_by": {
+    "how": "truth",
+    "who": "renjith",
+    "when": "2026-09-02",
+    "listened_on": "unrecorded \u2014 fill this in",
+    "status": "PARTIAL. Only fields marked verified below have been confirmed by ear. Everything else is null on purpose. The bench scores per field, so a partial truth file is usable today \u2014 it simply scores less."
+  },
+  "verified": {
+    "drop_1": {
+      "at": 63.621,
+      "how": "Renjith picked it by ear from three candidates on 2026-09-02. Reported as 63.55 against the then-current grid; 63.621 is the same instant on the corrected grid.",
+      "consequence": "resolved the bar phase as a side effect \u2014 only phase 1 puts this instant on beat 0 of a bar"
+    }
+  },
+  "beats_window": [
+    null,
+    null
+  ],
+  "beats": null,
+  "downbeats": null,
+  "grid_provisional": {
+    "period": 0.476217,
+    "phase": 0.284,
+    "bpm": 125.993,
+    "bar_phase": 1,
+    "status": "AWAITING EAR. A first grid was rejected by Renjith (phase 75 ms early). This is the refit, verified only against itself so far. Three minutes with the-nights-CLICK-v2.mp3 promotes it into `beats`, or rejects it again.",
+    "evidence": "fitted on 35-130 Hz of the original mix, only where the kick plays. On-beat vs off-beat energy in that band reaches 17:1.",
+    "how_to_promote": "if the ticks stay glued and the low thud lands on the one, copy period, phase and bar_phase into beats/downbeats and set beats_window."
+  },
+  "chapters": null,
+  "spans": null,
+  "moments": [
+    {
+      "at": 63.621,
+      "kind": "drop",
+      "size": null,
+      "verified": true
+    }
+  ],
+  "energy": null,
+  "confidence": 1.0,
+  "note": "One verified number. That is not a failure of effort, it is what an honest truth file looks like after one listening pass. Nothing here was inferred from a model, a tracklist or a sketch. Model output for the same song lives in the-nights.map.json and must never be copied into this file."
+}

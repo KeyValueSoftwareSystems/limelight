@@ -22,14 +22,27 @@ def check(m):
         A(k in m, f"missing required field: {k}")
     if e: return e, w
 
+    # A truth file may be PARTIAL. `null` is a legitimate answer and is worth more than a
+    # guess, so a half-filled truth file is a valid artifact -- the bench scores per field
+    # and simply scores less. A model, by contrast, has no excuse for a null.
+    is_truth = m["made_by"].get("how") == "truth"
+    blank = [k for k in ("beats", "downbeats", "chapters", "moments", "spans", "energy")
+             if m.get(k) in (None, [])]
+    if blank:
+        if is_truth:
+            for k in blank: w.append(f"{k}: null — awaiting a human. Not an error in a truth file")
+        else:
+            for k in ("beats", "downbeats", "chapters") :
+                if k in blank: e.append(f"{k} is null, and this is not a truth file")
+
     song = m["song"]
     A(isinstance(song.get("length"), (int, float)) and song["length"] > 0, "song.length must be a positive number")
     A(m["made_by"].get("how") in HOWS, f"made_by.how must be one of {sorted(HOWS)}, got {m['made_by'].get('how')!r}")
     A(isinstance(m["confidence"], (int, float)) and 0 <= m["confidence"] <= 1, "confidence must be 0-1")
 
     L = song.get("length", 0)
-    b = m["beats"]
-    A(len(b) > 1, "beats: need at least two")
+    b = m.get("beats") or []
+    if b: A(len(b) > 1, "beats: need at least two")
     if len(b) > 1:
         A(all(b[i] < b[i+1] for i in range(len(b)-1)), "beats must be strictly increasing")
         A(all(0 <= x <= L + 0.5 for x in b), "a beat falls outside the song length -- are these seconds, or did you emit frames or ms?")
@@ -40,25 +53,27 @@ def check(m):
         W(cover > 0.75, f"beats cover only {cover*100:.0f}% of the song")
 
     bs = set(round(x, 3) for x in b)
-    d = m["downbeats"]
-    A(all(round(x, 3) in bs for x in d), "every downbeat must also appear in beats")
+    d = m.get("downbeats") or []
+    if b: A(all(round(x, 3) in bs for x in d), "every downbeat must also appear in beats")
     A(all(d[i] < d[i+1] for i in range(len(d)-1)), "downbeats must be strictly increasing")
-    W(len(d) > 0, "no downbeats -- a reader cannot find the bar")
+    if not is_truth: W(len(d) > 0, "no downbeats -- a reader cannot find the bar")
 
-    ch = m["chapters"]
-    A(len(ch) > 0, "at least one chapter")
+    ch = m.get("chapters") or []
+    if not is_truth: A(len(ch) > 0, "at least one chapter")
     A(all(ch[i]["at"] < ch[i+1]["at"] for i in range(len(ch)-1)), "chapters must be sorted by at")
     A(all("name" in c for c in ch), "every chapter needs a name")
-    W(ch and ch[0]["at"] == 0.0, "first chapter should start at 0.0 so every t is covered")
+    if ch: W(ch[0]["at"] == 0.0, "first chapter should start at 0.0 so every t is covered")
 
-    for x in m["moments"]:
+    for x in (m.get("moments") or []):
         A(x.get("kind") in KINDS, f"moment kind {x.get('kind')!r} is not one of the six")
         A(isinstance(x.get("at"), (int, float)), "every moment needs a numeric at")
         A(0 <= x.get("at", -1) <= L, f"moment at {x.get('at')} is outside the song")
-        if x.get("kind") == "stop": A("holds" in x, "a stop must say how long it holds")
-        if x.get("kind") == "drop": W("size" in x, "a drop without size -- readers must guess how hard it hits")
+        if x.get("kind") == "stop" and not is_truth:
+            A("holds" in x, "a stop must say how long it holds")
+        if x.get("kind") == "drop" and x.get("size") is None:
+            (w if is_truth else w).append("a drop without size -- readers must guess how hard it hits")
 
-    sp = m.get("spans", [])
+    sp = m.get("spans") or []
     for s in sp:
         A(s.get("kind") in KINDS, f"span kind {s.get('kind')!r} is not one of the six")
         A(s.get("from", 0) < s.get("to", 0), f"span {s.get('kind')} has from >= to")
@@ -69,7 +84,7 @@ def check(m):
             a2, b2 = sp[i], sp[j]
             if a2["from"] < b2["to"] and b2["from"] < a2["to"]:
                 e.append(f"spans overlap: {a2['kind']} {a2['from']}-{a2['to']} and {b2['kind']} {b2['from']}-{b2['to']}")
-    W(len(sp) > 0, "no spans -- an elevation cannot be expressed as a point")
+    if not is_truth: W(len(sp) > 0, "no spans -- an elevation cannot be expressed as a point")
 
     en = m.get("energy") or []
     if en:
@@ -77,11 +92,11 @@ def check(m):
         A(all(en[i][0] < en[i+1][0] for i in range(len(en)-1)), "energy points must be sorted by time")
         A(all(0 <= p[1] <= 1 for p in en), "energy values must be 0-1")
         W(len(en) >= len(d) * 0.8 if d else True, f"only {len(en)} energy points for {len(d)} downbeats")
-    else:
+    elif not is_truth:
         W(False, "no energy curve -- downstream readers have to fake the rise")
 
     v = m.get("vectors")
-    if v not in (None,):
+    if isinstance(v, dict):
         for k in ("model", "rate", "rows", "dim", "dtype", "file"):
             A(k in v, f"vectors.{k} is required once vectors are present")
 

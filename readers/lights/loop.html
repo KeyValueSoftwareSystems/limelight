@@ -1,0 +1,310 @@
+<title>The Nights — Loop</title>
+<style>
+  :root{--bg:#08090c;--panel:#111318;--panel2:#171a21;--line:#242932;--ink:#e9ebf0;
+        --dim:#8a919e;--dim2:#5b6270;--acc:#ff7a2f;--acc2:#5b8cff;--ok:#28c98a;--warn:#f0b429}
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);margin:0;
+       font:14.5px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .top{display:flex;align-items:center;gap:14px;padding:11px 18px;border-bottom:1px solid var(--line);
+       background:var(--panel);position:sticky;top:0;z-index:9;flex-wrap:wrap}
+  .top h1{font-size:14.5px;margin:0;font-weight:650;letter-spacing:-.01em}
+  .tag{font:11px ui-monospace,Menlo,monospace;color:var(--dim2);border:1px solid var(--line);
+       padding:2px 7px;border-radius:5px}
+  .sp{flex:1}
+  button{font:inherit;cursor:pointer}
+  .btn{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:7px;
+       padding:5px 11px;font-size:12.5px}
+  .btn:hover{border-color:var(--acc)}
+  .btn.on{background:var(--acc);color:#170c04;border-color:var(--acc);font-weight:640}
+  .wrap{display:grid;grid-template-columns:1fr 320px;gap:14px;padding:14px 18px 30px;max-width:1500px;margin:0 auto}
+  @media(max-width:1000px){.wrap{grid-template-columns:1fr}}
+  #room{width:100%;border-radius:12px;background:#000;border:1px solid var(--line);display:block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:12px}
+  .card h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim2);
+       margin:0 0 9px;font-weight:650}
+  .transport{display:flex;align-items:center;gap:12px;margin-top:12px;background:var(--panel);
+       border:1px solid var(--line);border-radius:11px;padding:10px 14px}
+  .pl{width:36px;height:36px;border-radius:50%;border:0;background:var(--acc);color:#160b04;
+       font-size:14px;display:grid;place-items:center;flex:0 0 36px}
+  #scrub{flex:1;accent-color:var(--acc)}
+  .tc{font:12.5px ui-monospace,Menlo,monospace;color:var(--dim);min-width:112px;text-align:right}
+  .look{font:640 11px inherit;letter-spacing:.07em;text-transform:uppercase;padding:5px 9px;
+        border-radius:20px;background:#242a34;color:var(--acc);min-width:74px;text-align:center}
+  .beatbox{display:flex;gap:5px}
+  .beatbox i{width:26px;height:26px;border-radius:6px;background:#1c212a;display:grid;place-items:center;
+       font:700 12px ui-monospace,Menlo,monospace;color:var(--dim2);font-style:normal}
+  .beatbox i.on{background:var(--acc);color:#160b04}
+  .beatbox i.one{box-shadow:inset 0 0 0 1.5px var(--acc2)}
+  #tl{width:100%;height:74px;display:block;border-radius:9px;background:#0c0e12;
+      border:1px solid var(--line);margin-top:10px;cursor:pointer}
+  pre{background:#050608;border:1px solid var(--line);border-radius:9px;padding:10px;margin:0;
+      font:11px/1.45 ui-monospace,Menlo,monospace;color:#aab2be;max-height:230px;overflow:auto}
+  .bars{display:flex;flex-direction:column;gap:6px}
+  .bar{display:flex;align-items:center;gap:8px;font:11px ui-monospace,Menlo,monospace;color:var(--dim)}
+  .bar .t{width:52px;flex:0 0 52px}
+  .bar .tr{flex:1;height:6px;background:#1b202a;border-radius:3px;overflow:hidden}
+  .bar .fi{height:100%;border-radius:3px;width:0}
+  .chips{display:flex;flex-wrap:wrap;gap:4px}
+  .chip{font:11px ui-monospace,Menlo,monospace;padding:3px 7px;border-radius:5px;background:#1b202a;
+        color:var(--dim);border:1px solid transparent}
+  .chip:hover{border-color:var(--acc);color:var(--ink)}
+  .row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12.5px;color:var(--dim)}
+  .row label{flex:1}
+  .warn{color:var(--warn);font-size:11.5px;line-height:1.45;margin:8px 0 0}
+  a.dl{color:var(--acc2);font-size:12px}
+  input[type=file]{font-size:12px;color:var(--dim)}
+</style>
+
+<div class="top">
+  <h1>The Nights — the loop</h1>
+  <span class="tag" id="grid">126.0 bpm · grid-locked</span>
+  <input type="file" accept="audio/*" onchange="load(this)">
+  <span class="sp"></span>
+  <span class="tag" id="fps">– fps</span>
+</div>
+
+<div class="wrap">
+  <div>
+    <canvas id="room" width="1400" height="760"></canvas>
+    <div class="transport">
+      <button class="pl" id="pl" onclick="toggle()">&#9654;</button>
+      <input id="scrub" type="range" min="0" max="175.68" step="0.01" value="0" oninput="seek(+this.value)">
+      <div class="beatbox" id="bb"><i>1</i><i>2</i><i>3</i><i>4</i></div>
+      <span class="look" id="lk">idle</span>
+      <span class="tc" id="tc">0:00.0 / 2:55</span>
+    </div>
+    <canvas id="tl" width="1400" height="74" onclick="tlclick(event)"></canvas>
+    <div class="card" style="margin-top:10px"><div class="chips" id="chips"></div></div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h3>Corrections — this is the point</h3>
+      <div class="row"><label>bar phase</label>
+        <button class="btn" onclick="setPhase(0)" id="p0">0</button>
+        <button class="btn" onclick="setPhase(1)" id="p1">1</button>
+        <button class="btn" onclick="setPhase(2)" id="p2">2</button>
+        <button class="btn" onclick="setPhase(3)" id="p3">3</button></div>
+      <p class="warn" id="phw">Watch the 1 2 3 4 box while it plays. If <b>1</b> does not land where you hear the bar start,
+      click through the phases until it does. <b>My two cues disagree</b> &mdash; harmony says 1, the
+      snare backbeat rule says 2 &mdash; so this stays a coin toss until you settle it.</p>
+      <div class="row" style="margin-top:12px"><label>drop 1</label>
+        <button class="btn" onclick="setDrop(0,61.64)">61.64</button>
+        <button class="btn on" onclick="setDrop(0,63.621)">63.621 &#10003;</button>
+        <button class="btn" onclick="setDrop(0,65.45)">65.45</button></div>
+      <div class="row"><label></label><button class="btn" onclick="dropHere(0)">set to now</button>
+        <button class="btn" onclick="nudge(0,-0.4762)">&minus;beat</button>
+        <button class="btn" onclick="nudge(0,+0.4762)">+beat</button></div>
+      <div class="row" style="margin-top:12px"><label>the 153.4 s stop</label>
+        <button class="btn on" id="stopBtn" onclick="toggleStop()">real</button></div>
+      <p class="warn">I found no silence anywhere — only a 1.25 s sub-bass drop-out. If it does not
+      read as a stop, switch it off and the recipe stops blacking out the room.</p>
+      <div class="row" style="margin-top:12px"><label></label>
+        <a class="dl" id="exp" href="#" onclick="exportMap()">download corrected map &#8595;</a></div>
+    </div>
+    <div class="card"><h3>Now</h3>
+      <div class="bars">
+        <div class="bar"><span class="t">energy</span><span class="tr"><span class="fi" id="be" style="background:#5b8cff"></span></span></div>
+        <div class="bar"><span class="t">par</span><span class="tr"><span class="fi" id="bp" style="background:#ff7a2f"></span></span></div>
+        <div class="bar"><span class="t">strobe</span><span class="tr"><span class="fi" id="bs" style="background:#e9ebf0"></span></span></div>
+        <div class="bar"><span class="t">fog</span><span class="tr"><span class="fi" id="bf" style="background:#28c98a"></span></span></div>
+      </div></div>
+    <div class="card"><h3>Frame out — 40/sec</h3><pre id="js">&ndash;</pre></div>
+    <div class="card"><h3>Audio</h3>
+      <div class="bar" id="au" style="color:var(--dim2)">Internal clock. Load your mp3 to drive it from the audio device.</div>
+      <audio id="a" controls style="width:100%;margin-top:8px;height:32px"></audio></div>
+  </div>
+</div>
+
+<script>
+const MAP = {"period":0.476217,"phase":0.284,"dur":175.682,"chapters":[[0.0,"intro"],[15.999,"verse"],[31.238,"break"],[38.858,"build"],[63.621,"drop"],[107.433,"break"],[115.052,"build"],[139.816,"drop"],[168.389,"outro"]],"spans":[["build",38.858,63.621,"late"],["build",115.052,141.721,"steady"]],"moments":[[31.238,"quiet",null],[63.621,"drop",0.9],[107.433,"quiet",null],[139.816,"drop",1.0],[153.626,"stop",1.25],[168.389,"return",null]],"energy":[[0.685,0.551],[2.59,0.635],[4.495,0.715],[6.4,0.748],[8.305,0.748],[10.21,0.752],[12.115,0.759],[14.02,0.74],[15.925,0.714],[17.829,0.713],[19.734,0.722],[21.639,0.726],[23.544,0.72],[25.449,0.708],[27.354,0.701],[29.259,0.69],[31.164,0.657],[33.069,0.603],[34.974,0.547],[36.879,0.521],[38.783,0.53],[40.688,0.548],[42.593,0.551],[44.498,0.561],[46.403,0.588],[48.308,0.59],[50.213,0.574],[52.118,0.575],[54.023,0.576],[55.928,0.574],[57.833,0.586],[59.737,0.618],[61.642,0.664],[63.547,0.688],[65.452,0.667],[67.357,0.638],[69.262,0.623],[71.167,0.615],[73.072,0.61],[74.977,0.609],[76.882,0.618],[78.787,0.638],[80.692,0.667],[82.597,0.698],[84.501,0.724],[86.406,0.742],[88.311,0.734],[90.216,0.689],[92.121,0.65],[94.026,0.658],[95.931,0.681],[97.836,0.69],[99.741,0.683],[101.646,0.671],[103.551,0.664],[105.456,0.653],[107.36,0.632],[109.265,0.591],[111.17,0.539],[113.075,0.515],[114.98,0.525],[116.885,0.542],[118.79,0.545],[120.695,0.556],[122.6,0.58],[124.505,0.579],[126.409,0.559],[128.314,0.56],[130.219,0.574],[132.124,0.596],[134.029,0.63],[135.934,0.655],[137.839,0.67],[139.744,0.683],[141.649,0.68],[143.554,0.67],[145.459,0.663],[147.364,0.656],[149.268,0.653],[151.173,0.658],[153.078,0.673],[154.983,0.686],[156.888,0.682],[158.793,0.672],[160.698,0.662],[162.603,0.652],[164.508,0.645],[166.413,0.634],[168.318,0.592],[170.223,0.465],[172.127,0.255],[174.032,0.087]]};
+const $ = s => document.querySelector(s);
+let PER = MAP.period, PH = MAP.phase, DUR = MAP.dur, DBP = 1, STOP_REAL = true;
+const BEATS = []; for (let t = PH; t < DUR; t += PER) BEATS.push(+t.toFixed(4));
+const CH = MAP.chapters, SP = MAP.spans.map(s => ({kind:s[0], from:s[1], to:s[2], rise:s[3]}));
+let MO = MAP.moments.map(m => ({at:m[0], kind:m[1], v:m[2]}));
+const EN = MAP.energy;
+$('#grid').textContent = (60/PER).toFixed(2) + ' bpm · ' + BEATS.length + ' beats · grid-locked';
+
+const cl=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const bi=t=>{let lo=0,hi=BEATS.length-1,r=-1;while(lo<=hi){const m=(lo+hi)>>1;
+  if(BEATS[m]<=t){r=m;lo=m+1}else hi=m-1}return r};
+const phase=t=>{const i=bi(t);return i<0?0:cl((t-BEATS[i])/PER)};
+const barPhase=t=>{const i=bi(t);if(i<0)return 0;const k=((i-DBP)%4+4)%4;return cl((k+phase(t))/4)};
+const beatInBar=t=>{const i=bi(t);return i<0?0:((i-DBP)%4+4)%4};
+function en(t){let k=-1;for(let i=0;i<EN.length;i++)if(EN[i][0]<=t)k=i;else break;
+  if(k<0)return EN[0][1]; if(k+1>=EN.length)return EN[EN.length-1][1];
+  const f=(t-EN[k][0])/(EN[k+1][0]-EN[k][0]);return EN[k][1]+f*(EN[k+1][1]-EN[k][1])}
+const chAt=t=>{let n=CH[0][1];for(const[a,x]of CH){if(a<=t)n=x;else break}return n};
+const spanAt=t=>SP.find(s=>s.from<=t&&t<s.to)||null;
+const stopAt=t=>STOP_REAL?(MO.find(m=>m.kind==='stop'&&m.at<=t&&t<m.at+(m.v||0.5))||null):null;
+function since(k,t,w){let b=null;for(const m of MO)if(m.kind===k&&m.at<=t&&t<m.at+w&&(!b||m.at>b.at))b=m;
+  return b?[b,t-b.at]:[null,null]}
+const dec=(p,e)=>Math.pow(1-p,1.5+4*e);
+const CAP=4.0,N=24;
+const W_=[255,255,255],MG=[255,40,160],AM=[255,140,20],CO=[40,80,200],DP=[20,60,180],
+      WM=[255,180,90],VR=[200,120,60];
+const sc=(c,g)=>[Math.round(cl(c[0]*g,0,255)),Math.round(cl(c[1]*g,0,255)),Math.round(cl(c[2]*g,0,255))];
+function look(t){ if(stopAt(t))return'stop';
+  const[d,s]=since('drop',t,8); if(d)return s<0.25?'flash':'drop';
+  if(since('spotlight',t,4)[0])return'spotlight';
+  if(since('quiet',t,8)[0])return'quiet';
+  const z=spanAt(t); if(z&&z.kind==='build')return'build';
+  if((z&&z.kind==='quiet')||['break','quiet'].includes(chAt(t)))return'quiet';
+  if(chAt(t)==='drop')return'drop'; if(chAt(t)==='verse')return'verse'; return'idle'}
+function frame(t){const L=look(t),e=en(t),p=phase(t),bp=barPhase(t),b=bi(t),F=[];
+  ['par_1','par_2','par_3','par_4'].forEach((id,o)=>{let c=[0,0,0],lv=0;
+    if(L==='stop'){}
+    else if(L==='flash'){c=W_;lv=1}
+    else if(L==='drop'){const[d]=since('drop',t,8);c=((b+o)%2===0)?W_:MG;lv=0.55+0.45*dec(p,0.95)}
+    else if(L==='spotlight'){if(id==='par_2'){c=WM;lv=0.75}}
+    else if(L==='build'){const fl=0.10+0.35*e,pk=0.45+0.55*e;c=AM;lv=fl+(pk-fl)*dec(p,e)}
+    else if(L==='quiet'){const fl=0.10+0.35*e;c=DP;lv=fl*(0.8+0.2*Math.sin(2*Math.PI*t/8))}
+    else if(L==='verse'){c=VR;lv=0.20+0.30*dec(bp,e)}
+    else {c=CO;lv=0.12}
+    F.push({id,r:c[0],g:c[1],b:c[2],level:+cl(lv).toFixed(3)})});
+  ['strobe_1','strobe_2'].forEach(id=>{let lv=0,hz=0;
+    if(L==='flash'){lv=1}
+    else if(L==='drop'){const[d,s]=since('drop',t,8);if(s!==null&&s<2){lv=1;hz=Math.min(CAP,2+2*(d.v??0.9))}}
+    else if(L==='build'){const z=spanAt(t),rem=z?z.to-t:99;
+      if(rem<=2){lv=0.30+0.70*(1-rem/2);hz=Math.min(CAP,2+2*e)}}
+    F.push({id,level:+cl(lv).toFixed(3),strobe:+hz.toFixed(3)})});
+  ['strip_1','strip_2'].forEach(id=>{let px=Array.from({length:N},()=>[0,0,0]);
+    if(L==='flash')px=px.map(()=>W_.slice());
+    else if(L==='drop'){const g=dec(p,0.95),[x,y2]=(b%2===0)?[W_,MG]:[MG,W_];
+      px=px.map((_,i)=>sc(i<N/2?x:y2,g))}
+    else if(L==='build'){const h=bp*N,w=6-4*e;
+      px=px.map((_,i)=>{let d=Math.abs(i-h);d=Math.min(d,N-d);return sc(AM,Math.max(0,1-d/w))})}
+    else if(L==='quiet')px=px.map((_,i)=>sc(DP,cl(0.15+0.15*Math.sin(2*Math.PI*(i/N)+t/3))));
+    else if(L==='verse'){const i0=Math.floor(bp*N)%N;px[i0]=sc(VR,0.5);px[(i0+N/2)%N]=sc(VR,0.5)}
+    else if(L==='idle')px[Math.floor(((t/4)%1)*N)%N]=sc(CO,0.4);
+    F.push({id,pixels:px})});
+  let fg=0; for(const m of MO)if(m.kind==='drop'&&t>=m.at-9&&t<m.at-7)fg=1;
+  F.push({id:'fog_1',level:fg});
+  const[r,s]=since('return',t,2*PER);
+  if(r){const k=cl(s/(2*PER));F.forEach(o=>{if(o.id==='fog_1')return;
+    if('level'in o)o.level=+(o.level*k).toFixed(3);
+    if(o.pixels)o.pixels=o.pixels.map(q=>sc(q,k))})}
+  return{t:+t.toFixed(3),look:L,fixtures:F}}
+
+const cv=$('#room'),cx=cv.getContext('2d'),CW=cv.width,CHh=cv.height;
+const gam=v=>Math.pow(cl(v),1/2.2);
+const PXY=[[300,510],[590,510],[880,510],[1170,510]];
+function drawStrip(px,y){const w=(CW-160)/N;
+  px.forEach((c,i)=>{cx.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`;cx.fillRect(80+i*w+1,y,w-2,13);
+    if(c[0]+c[1]+c[2]>30){const g=cx.createRadialGradient(80+i*w+w/2,y+6,2,80+i*w+w/2,y+6,84);
+      g.addColorStop(0,`rgba(${c[0]},${c[1]},${c[2]},.28)`);g.addColorStop(1,'rgba(0,0,0,0)');
+      cx.fillStyle=g;cx.fillRect(80+i*w-74,y-74,w+148,160)}})}
+function draw(f){
+  cx.fillStyle='#000';cx.fillRect(0,0,CW,CHh);
+  cx.fillStyle='#0a0c11';cx.fillRect(56,56,CW-112,CHh-112);
+  const fog=f.fixtures.find(x=>x.id==='fog_1').level;
+  drawStrip(f.fixtures.find(x=>x.id==='strip_1').pixels,66);
+  f.fixtures.filter(x=>x.id.startsWith('par')).forEach((p,i)=>{
+    const[x,y]=PXY[i],lv=gam(p.level);
+    if(lv>0.004){const g=cx.createLinearGradient(x,y,x,CHh-84);
+      g.addColorStop(0,`rgba(${p.r},${p.g},${p.b},${0.5*lv})`);
+      g.addColorStop(1,`rgba(${p.r},${p.g},${p.b},0)`);
+      cx.globalAlpha=0.5+0.5*fog;cx.fillStyle=g;cx.beginPath();
+      cx.moveTo(x-32,y+16);cx.lineTo(x+32,y+16);cx.lineTo(x+190,CHh-84);cx.lineTo(x-190,CHh-84);
+      cx.closePath();cx.fill();cx.globalAlpha=1;
+      const r=cx.createRadialGradient(x,y,3,x,y,112);
+      r.addColorStop(0,`rgba(${p.r},${p.g},${p.b},${0.9*lv})`);r.addColorStop(1,'rgba(0,0,0,0)');
+      cx.fillStyle=r;cx.beginPath();cx.arc(x,y,112,0,7);cx.fill()}
+    cx.fillStyle='#181d25';cx.strokeStyle='#2c333f';cx.lineWidth=2;
+    cx.beginPath();cx.arc(x,y,21,0,7);cx.fill();cx.stroke();
+    cx.fillStyle=`rgba(${p.r},${p.g},${p.b},${lv})`;cx.beginPath();cx.arc(x,y,13,0,7);cx.fill();
+    cx.fillStyle='#464e5d';cx.font='600 14px ui-monospace,Menlo,monospace';cx.textAlign='center';
+    cx.fillText('P'+(i+1),x,y+46)});
+  f.fixtures.filter(x=>x.id.startsWith('strobe')).forEach((s,i)=>{
+    const x=[520,940][i],y=CHh-142;
+    let on=s.level; if(s.strobe>0) on=s.level*(((f.t*s.strobe)%1)<0.5?1:0.05);
+    if(on>0.01){const g=cx.createRadialGradient(x,y,4,x,y,320);
+      g.addColorStop(0,`rgba(255,255,255,${0.8*on})`);g.addColorStop(1,'rgba(0,0,0,0)');
+      cx.fillStyle=g;cx.beginPath();cx.arc(x,y,320,0,7);cx.fill()}
+    cx.fillStyle='#141922';cx.strokeStyle='#2c333f';cx.lineWidth=2;
+    cx.beginPath();cx.roundRect(x-40,y-15,80,30,5);cx.fill();cx.stroke();
+    cx.fillStyle=`rgba(255,255,255,${on})`;cx.beginPath();cx.roundRect(x-32,y-8,64,16,3);cx.fill();
+    cx.fillStyle='#464e5d';cx.font='600 13px ui-monospace,Menlo,monospace';cx.textAlign='center';
+    cx.fillText('S'+(i+1),x,y+38)});
+  drawStrip(f.fixtures.find(x=>x.id==='strip_2').pixels,CHh-80);
+  if(fog>0){cx.fillStyle='rgba(190,205,225,.045)';cx.fillRect(56,56,CW-112,CHh-112);
+    cx.fillStyle='#28c98a';cx.font='600 14px ui-sans-serif';cx.textAlign='left';
+    cx.fillText('fog burst — commanded 9 s early',80,CHh-104)}
+  cx.fillStyle='#2b323d';cx.font='600 14px ui-monospace,Menlo,monospace';cx.textAlign='right';
+  cx.fillText(chAt(f.t)+'  ·  e='+en(f.t).toFixed(2)+'  ·  bar '+
+    Math.floor((f.t-PH)/(4*PER)+1),CW-80,96)}
+
+const tl=$('#tl'),tx=tl.getContext('2d');
+function drawTl(t){const W=tl.width,H=tl.height;tx.clearRect(0,0,W,H);
+  tx.fillStyle='#0c0e12';tx.fillRect(0,0,W,H);
+  const X=s=>s/DUR*W;
+  for(let i=0;i<CH.length;i++){const a=X(CH[i][0]),b=X(i+1<CH.length?CH[i+1][0]:DUR);
+    tx.fillStyle={intro:'#141a26',verse:'#1a1a24',break:'#101822',build:'#241a10',drop:'#2a1018',outro:'#12141a'}[CH[i][1]]||'#15171d';
+    tx.fillRect(a,0,b-a,20);
+    tx.fillStyle='#5b6270';tx.font='10px ui-monospace,Menlo,monospace';tx.textAlign='left';
+    if(b-a>36)tx.fillText(CH[i][1],a+4,14)}
+  tx.beginPath();tx.strokeStyle='#5b8cff';tx.lineWidth=1.5;
+  EN.forEach((p,i)=>{const x=X(p[0]),y=64-p[1]*36;i?tx.lineTo(x,y):tx.moveTo(x,y)});tx.stroke();
+  SP.forEach(s=>{tx.fillStyle='rgba(255,122,47,.22)';tx.fillRect(X(s.from),24,X(s.to)-X(s.from),12);
+    tx.fillStyle='#ff7a2f';tx.font='9px ui-monospace,Menlo,monospace';
+    tx.fillText(s.rise,X(s.from)+3,33)});
+  MO.forEach(m=>{if(m.kind==='stop'&&!STOP_REAL)return;
+    tx.strokeStyle={drop:'#ff2f5e',stop:'#ffffff',quiet:'#5b8cff',return:'#28c98a'}[m.kind]||'#8a919e';
+    tx.lineWidth=2;tx.beginPath();tx.moveTo(X(m.at),20);tx.lineTo(X(m.at),H);tx.stroke()});
+  tx.strokeStyle='#ff7a2f';tx.lineWidth=1.5;tx.beginPath();
+  tx.moveTo(X(t),0);tx.lineTo(X(t),H);tx.stroke()}
+function tlclick(e){const r=tl.getBoundingClientRect();seek((e.clientX-r.left)/r.width*DUR)}
+
+const mmss=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}.${Math.floor(t*10%10)}`;
+let T=0,playing=false,last=0,frames=0,fpsT=0;
+function render(){const f=frame(T);draw(f);drawTl(T);
+  $('#lk').textContent=f.look;$('#tc').textContent=mmss(T)+' / 2:55';$('#scrub').value=T;
+  const k=beatInBar(T);[...$('#bb').children].forEach((el,i)=>{
+    el.classList.toggle('on',i===k);el.classList.toggle('one',i===0)});
+  $('#be').style.width=(en(T)*100)+'%';
+  $('#bp').style.width=(f.fixtures[0].level*100)+'%';
+  $('#bs').style.width=(f.fixtures[4].level*100)+'%';
+  $('#bf').style.width=(f.fixtures[8].level*100)+'%';
+  const trim=o=>o.pixels?{id:o.id,pixels:[o.pixels[0],o.pixels[1],'…'+o.pixels.length+'px']}:o;
+  $('#js').textContent=JSON.stringify({t:f.t,look:f.look,fixtures:f.fixtures.map(trim)},null,1)}
+function tick(ts){const a=$('#a');
+  if(playing){ if(a.src&&!a.paused){T=a.currentTime}else{T+=(ts-last)/1000} }
+  last=ts;if(T>DUR)T=0;
+  frames++;if(ts-fpsT>1000){$('#fps').textContent=frames+' fps';frames=0;fpsT=ts}
+  render();requestAnimationFrame(tick)}
+function toggle(){playing=!playing;$('#pl').innerHTML=playing?'&#10074;&#10074;':'&#9654;';
+  const a=$('#a');if(a.src){playing?a.play():a.pause()}}
+function seek(v){T=v;const a=$('#a');if(a.src)a.currentTime=v;render()}
+function load(i){const f=i.files[0];if(!f)return;$('#a').src=URL.createObjectURL(f);
+  $('#au').textContent=f.name+' — clock now comes from the audio device.'}
+function setPhase(p){DBP=p;[0,1,2,3].forEach(i=>$('#p'+i).classList.toggle('on',i===p));
+  $('#phw').innerHTML='bar phase <b>'+p+'</b> — the "one" sits at '+
+    (PH+p*PER).toFixed(3)+' s, then every '+(4*PER).toFixed(3)+' s.';render()}
+function setDrop(i,t){const d=MO.filter(m=>m.kind==='drop')[i];if(d){d.at=t;render()}}
+function dropHere(i){setDrop(i,+T.toFixed(3))}
+function nudge(i,dt){const d=MO.filter(m=>m.kind==='drop')[i];if(d)setDrop(i,+(d.at+dt).toFixed(3))}
+function toggleStop(){STOP_REAL=!STOP_REAL;
+  $('#stopBtn').textContent=STOP_REAL?'real':'not a stop';
+  $('#stopBtn').classList.toggle('on',STOP_REAL);render()}
+function exportMap(){
+  const beats=[];for(let t=PH;t<DUR;t+=PER)beats.push(+t.toFixed(3));
+  const downs=beats.filter((_,i)=>((i-DBP)%4+4)%4===0);
+  const out={map:'0.2',song:{title:'The Nights',artist:'Avicii',length:DUR},
+    made_by:{how:'model+human',who:'baseline-listener-v0, corrected by Renjith',when:new Date().toISOString().slice(0,10)},
+    grid:{period:PER,phase:PH,bpm:+(60/PER).toFixed(3),bar_phase:DBP},
+    beats,downbeats:downs,
+    chapters:CH.map(c=>({at:c[0],name:c[1]})),
+    spans:SP.map(s=>({kind:s.kind,from:s.from,to:s.to,rise:s.rise})),
+    moments:MO.filter(m=>!(m.kind==='stop'&&!STOP_REAL)).map(m=>({at:m.at,kind:m.kind,
+      ...(m.kind==='drop'?{size:m.v}:{}),...(m.kind==='stop'?{holds:m.v}:{})})),
+    energy:EN,confidence:0.8};
+  const b=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='the-nights.corrected.map.json';a.click();return false}
+$('#chips').innerHTML=[['intro',2],['verse',17],['break 1',32],['build starts',39.3],
+  ['mid build',52],['fog primes',54.6],['pre-drop',62],['DROP 1',63.621],['+1 beat',64.03],
+  ['peak',86],['break 2',108],['build 2',116],['DROP 2',139.74],['sub drop-out',153.4],['outro',169]]
+  .map(([n,t])=>`<span class="chip" onclick="seek(${t})">${n} · ${mmss(t)}</span>`).join('');
+setPhase(1);render();requestAnimationFrame(tick);
+</script>
