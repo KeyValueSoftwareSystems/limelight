@@ -1,7 +1,7 @@
 {
   "layout": "0.3",
   "room": "club",
-  "note": "A realistic small-club rig. The browser room and the real rig share this file.",
+  "note": "One canonical club. Blinders face the audience rather than the floor -- pointing light AT the crowd is the strongest single gesture in the concert vocabulary and nothing in the rig could make it.",
   "size_m": {
     "w": 8.0,
     "d": 6.0,
@@ -30,7 +30,9 @@
         "head_5",
         "head_6",
         "head_7",
-        "head_8"
+        "head_8",
+        "blind_1",
+        "blind_2"
       ]
     },
     {
@@ -336,6 +338,34 @@
         3.15,
         1.2
       ]
+    },
+    {
+      "id": "blind_1",
+      "kind": "blinder",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        2.6,
+        2.55,
+        2.6
+      ],
+      "aims_at": "audience"
+    },
+    {
+      "id": "blind_2",
+      "kind": "blinder",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        5.4,
+        2.55,
+        2.6
+      ],
+      "aims_at": "audience"
     },
     {
       "id": "strip_1",
