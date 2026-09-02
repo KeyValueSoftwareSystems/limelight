@@ -1,0 +1,1047 @@
+{
+  "layout": "0.4",
+  "room": "venue",
+  "note": "A real small venue, read off a reference render: front and upstage overhead head trusses, two rows of PAR bars up each side wall, wash heads on the balcony rails, an upstage LED wall, floor uplights on the stage lip. Swapping this in is a LAYOUT change, not a code change -- which is the whole reason layout and recipe are separate files.",
+  "size_m": {
+    "w": 18.0,
+    "h": 7.2,
+    "d": 20.0
+  },
+  "limits": {
+    "max_strobe_hz": 4.0,
+    "max_pan_per_s": 1.05,
+    "max_tilt_per_s": 1.15,
+    "laser_zones": [
+      "ceiling"
+    ]
+  },
+  "zones": [
+    {
+      "name": "stage",
+      "fixtures": [
+        "par_l17",
+        "par_l27",
+        "par_r17",
+        "par_r27",
+        "wall_1",
+        "up_1",
+        "up_2",
+        "up_3",
+        "up_4",
+        "up_5",
+        "up_6",
+        "strip_1",
+        "fog_1"
+      ]
+    },
+    {
+      "name": "dancefloor",
+      "fixtures": [
+        "head_f1",
+        "head_f2",
+        "head_f3",
+        "head_f4",
+        "head_f5",
+        "head_f6",
+        "head_f7",
+        "head_f8",
+        "head_f9",
+        "head_f10",
+        "head_u1",
+        "head_u2",
+        "head_u3",
+        "head_u4",
+        "head_u5",
+        "head_u6",
+        "head_u7",
+        "head_u8",
+        "par_l11",
+        "par_l12",
+        "par_l13",
+        "par_l14",
+        "par_l15",
+        "par_l16",
+        "par_l21",
+        "par_l22",
+        "par_l23",
+        "par_l24",
+        "par_l25",
+        "par_l26",
+        "par_r11",
+        "par_r12",
+        "par_r13",
+        "par_r14",
+        "par_r15",
+        "par_r16",
+        "par_r21",
+        "par_r22",
+        "par_r23",
+        "par_r24",
+        "par_r25",
+        "par_r26",
+        "wash_l1",
+        "wash_l2",
+        "wash_l3",
+        "wash_l4",
+        "wash_r1",
+        "wash_r2",
+        "wash_r3",
+        "wash_r4",
+        "blind_1",
+        "blind_2",
+        "strobe_1",
+        "strobe_2",
+        "strip_2"
+      ]
+    },
+    {
+      "name": "ceiling",
+      "fixtures": []
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "head_f1",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        2.2,
+        6.4,
+        7.5
+      ]
+    },
+    {
+      "id": "head_f2",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        3.71,
+        6.4,
+        7.5
+      ]
+    },
+    {
+      "id": "head_f3",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        5.22,
+        6.4,
+        7.5
+      ]
+    },
+    {
+      "id": "head_f4",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        6.73,
+        6.4,
+        7.5
+      ]
+    },
+    {
+      "id": "head_f5",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        8.24,
+        6.4,
+        7.5
+      ]
+    },
+    {
+      "id": "head_f6",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        9.76,
+        6.4,
+        7.5
+      ]
+    },
+    {
+      "id": "head_f7",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        11.27,
+        6.4,
+        7.5
+      ]
+    },
+    {
+      "id": "head_f8",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        12.78,
+        6.4,
+        7.5
+      ]
+    },
+    {
+      "id": "head_f9",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        14.29,
+        6.4,
+        7.5
+      ]
+    },
+    {
+      "id": "head_f10",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        15.8,
+        6.4,
+        7.5
+      ]
+    },
+    {
+      "id": "head_u1",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        3.0,
+        6.8,
+        14.5
+      ]
+    },
+    {
+      "id": "head_u2",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        4.71,
+        6.8,
+        14.5
+      ]
+    },
+    {
+      "id": "head_u3",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        6.43,
+        6.8,
+        14.5
+      ]
+    },
+    {
+      "id": "head_u4",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        8.14,
+        6.8,
+        14.5
+      ]
+    },
+    {
+      "id": "head_u5",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        9.86,
+        6.8,
+        14.5
+      ]
+    },
+    {
+      "id": "head_u6",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        11.57,
+        6.8,
+        14.5
+      ]
+    },
+    {
+      "id": "head_u7",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        13.29,
+        6.8,
+        14.5
+      ]
+    },
+    {
+      "id": "head_u8",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        15.0,
+        6.8,
+        14.5
+      ]
+    },
+    {
+      "id": "par_l11",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        4.3,
+        4.0
+      ]
+    },
+    {
+      "id": "par_l12",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        4.3,
+        6.0
+      ]
+    },
+    {
+      "id": "par_l13",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        4.3,
+        8.0
+      ]
+    },
+    {
+      "id": "par_l14",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        4.3,
+        10.0
+      ]
+    },
+    {
+      "id": "par_l15",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        4.3,
+        12.0
+      ]
+    },
+    {
+      "id": "par_l16",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        4.3,
+        14.0
+      ]
+    },
+    {
+      "id": "par_l17",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        4.3,
+        16.0
+      ]
+    },
+    {
+      "id": "par_l21",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        5.6,
+        4.0
+      ]
+    },
+    {
+      "id": "par_l22",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        5.6,
+        6.0
+      ]
+    },
+    {
+      "id": "par_l23",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        5.6,
+        8.0
+      ]
+    },
+    {
+      "id": "par_l24",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        5.6,
+        10.0
+      ]
+    },
+    {
+      "id": "par_l25",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        5.6,
+        12.0
+      ]
+    },
+    {
+      "id": "par_l26",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        5.6,
+        14.0
+      ]
+    },
+    {
+      "id": "par_l27",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        0.55,
+        5.6,
+        16.0
+      ]
+    },
+    {
+      "id": "par_r11",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        4.3,
+        4.0
+      ]
+    },
+    {
+      "id": "par_r12",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        4.3,
+        6.0
+      ]
+    },
+    {
+      "id": "par_r13",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        4.3,
+        8.0
+      ]
+    },
+    {
+      "id": "par_r14",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        4.3,
+        10.0
+      ]
+    },
+    {
+      "id": "par_r15",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        4.3,
+        12.0
+      ]
+    },
+    {
+      "id": "par_r16",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        4.3,
+        14.0
+      ]
+    },
+    {
+      "id": "par_r17",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        4.3,
+        16.0
+      ]
+    },
+    {
+      "id": "par_r21",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        5.6,
+        4.0
+      ]
+    },
+    {
+      "id": "par_r22",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        5.6,
+        6.0
+      ]
+    },
+    {
+      "id": "par_r23",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        5.6,
+        8.0
+      ]
+    },
+    {
+      "id": "par_r24",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        5.6,
+        10.0
+      ]
+    },
+    {
+      "id": "par_r25",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        5.6,
+        12.0
+      ]
+    },
+    {
+      "id": "par_r26",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        5.6,
+        14.0
+      ]
+    },
+    {
+      "id": "par_r27",
+      "kind": "par",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        17.45,
+        5.6,
+        16.0
+      ]
+    },
+    {
+      "id": "wash_l1",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        1.6,
+        3.9,
+        6.0
+      ]
+    },
+    {
+      "id": "wash_l2",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        1.6,
+        3.9,
+        9.0
+      ]
+    },
+    {
+      "id": "wash_l3",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        1.6,
+        3.9,
+        12.0
+      ]
+    },
+    {
+      "id": "wash_l4",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        1.6,
+        3.9,
+        15.0
+      ]
+    },
+    {
+      "id": "wash_r1",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        16.4,
+        3.9,
+        6.0
+      ]
+    },
+    {
+      "id": "wash_r2",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        16.4,
+        3.9,
+        9.0
+      ]
+    },
+    {
+      "id": "wash_r3",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        16.4,
+        3.9,
+        12.0
+      ]
+    },
+    {
+      "id": "wash_r4",
+      "kind": "head",
+      "can": [
+        "colour",
+        "level",
+        "move",
+        "strobe"
+      ],
+      "at": [
+        16.4,
+        3.9,
+        15.0
+      ]
+    },
+    {
+      "id": "wall_1",
+      "kind": "video",
+      "can": [
+        "pixels"
+      ],
+      "at": [
+        9.0,
+        4.6,
+        18.8
+      ],
+      "grid": [
+        64,
+        36
+      ],
+      "note": "upstage LED wall"
+    },
+    {
+      "id": "up_1",
+      "kind": "uplight",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        4.0,
+        0.3,
+        16.6
+      ]
+    },
+    {
+      "id": "up_2",
+      "kind": "uplight",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        6.0,
+        0.3,
+        16.6
+      ]
+    },
+    {
+      "id": "up_3",
+      "kind": "uplight",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        8.0,
+        0.3,
+        16.6
+      ]
+    },
+    {
+      "id": "up_4",
+      "kind": "uplight",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        10.0,
+        0.3,
+        16.6
+      ]
+    },
+    {
+      "id": "up_5",
+      "kind": "uplight",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        12.0,
+        0.3,
+        16.6
+      ]
+    },
+    {
+      "id": "up_6",
+      "kind": "uplight",
+      "can": [
+        "colour",
+        "level"
+      ],
+      "at": [
+        14.0,
+        0.3,
+        16.6
+      ]
+    },
+    {
+      "id": "blind_1",
+      "kind": "blinder",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        5.4,
+        5.2,
+        8.0
+      ],
+      "aims_at": "audience"
+    },
+    {
+      "id": "blind_2",
+      "kind": "blinder",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        12.6,
+        5.2,
+        8.0
+      ],
+      "aims_at": "audience"
+    },
+    {
+      "id": "strobe_1",
+      "kind": "strobe",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        3.4,
+        6.3,
+        7.0
+      ]
+    },
+    {
+      "id": "strobe_2",
+      "kind": "strobe",
+      "can": [
+        "level",
+        "strobe"
+      ],
+      "at": [
+        14.6,
+        6.3,
+        7.0
+      ]
+    },
+    {
+      "id": "strip_1",
+      "kind": "strip",
+      "can": [
+        "pixels"
+      ],
+      "at": [
+        0.0,
+        0.22,
+        18.0
+      ],
+      "pixels": 90,
+      "role": "stage lip"
+    },
+    {
+      "id": "strip_2",
+      "kind": "strip",
+      "can": [
+        "pixels"
+      ],
+      "at": [
+        0.0,
+        0.22,
+        3.0
+      ],
+      "pixels": 90,
+      "role": "dancefloor edge"
+    },
+    {
+      "id": "fog_1",
+      "kind": "fog",
+      "can": [
+        "burst"
+      ],
+      "at": [
+        1.0,
+        0.4,
+        17.4
+      ]
+    }
+  ]
+}
