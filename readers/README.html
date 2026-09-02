@@ -1,0 +1,618 @@
+<title>Limelight</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F5F6F9; --surface:#FFFFFF; --raise:#FBFBFD;
+  --ink:#191C25; --muted:#5A6070; --faint:#878DA0;
+  --rule:#DDE0E9; --rule-strong:#C4C9D6;
+  --tungsten:#A9661B; --tungsten-ink:#8A5313; --tungsten-soft:#F7E9D3;
+  --learned:#4A55CC; --learned-soft:#E4E6FB;
+  --verified:#2C7048; --disputed:#A93E1B;
+  --shadow:0 1px 2px rgba(20,24,40,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12141C; --surface:#191C25; --raise:#1F232E;
+  --ink:#E6E9F1; --muted:#989EAF; --faint:#6B7183;
+  --rule:#272B39; --rule-strong:#393E50;
+  --tungsten:#F0A93C; --tungsten-ink:#F5BE68; --tungsten-soft:#37290F;
+  --learned:#8F9AFF; --learned-soft:#1F2338;
+  --verified:#69BE86; --disputed:#E88055;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}}
+:root[data-theme="dark"]{
+  --ground:#12141C; --surface:#191C25; --raise:#1F232E;
+  --ink:#E6E9F1; --muted:#989EAF; --faint:#6B7183;
+  --rule:#272B39; --rule-strong:#393E50;
+  --tungsten:#F0A93C; --tungsten-ink:#F5BE68; --tungsten-soft:#37290F;
+  --learned:#8F9AFF; --learned-soft:#1F2338;
+  --verified:#69BE86; --disputed:#E88055;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);
+  font:400 16px/1.62 "IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  -webkit-font-smoothing:antialiased;padding:0 20px 90px}
+.wrap{max-width:960px;margin:0 auto}
+.col{max-width:68ch}
+h1,h2,h3,.disp{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  font-weight:700;text-wrap:balance;letter-spacing:-.005em}
+h1{font-size:clamp(46px,8.5vw,84px);line-height:.94;margin:0;text-transform:uppercase;letter-spacing:.005em}
+h2{font-size:26px;line-height:1.16;margin:0 0 2px}
+h3{font-size:17px;line-height:1.3;margin:0 0 6px;font-weight:600}
+p{margin:0 0 14px}
+a{color:var(--tungsten-ink);text-decoration-color:var(--rule-strong);text-underline-offset:2px}
+a:hover{text-decoration-color:var(--tungsten)}
+code,.mono,.ax{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+code{font-size:.88em;background:var(--raise);border:1px solid var(--rule);
+  border-radius:3px;padding:.06em .34em}
+.lede{font-size:20px;line-height:1.48;color:var(--ink);max-width:56ch;margin:20px 0 0}
+.lede b{font-weight:600;color:var(--tungsten-ink)}
+
+/* the beat grid: short ticks are beats, tall ticks are bars. four beats to a bar. */
+.tick{position:relative;height:11px;margin:0 0 26px}
+.tick::before,.tick::after{content:"";position:absolute;left:0;right:0;bottom:0}
+.tick::before{height:4px;background:repeating-linear-gradient(90deg,var(--rule) 0 1px,transparent 1px 11px)}
+.tick::after{height:11px;background:repeating-linear-gradient(90deg,var(--rule-strong) 0 1px,transparent 1px 44px)}
+
+header{padding:64px 0 0}
+.meta{display:flex;flex-wrap:wrap;gap:6px 22px;margin:28px 0 0;
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:500}
+section{margin:64px 0 0}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);margin:0 0 12px}
+.after-h2{margin-top:18px}
+
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+.scroll{overflow-x:auto;margin:22px 0 0}
+th,td{text-align:left;vertical-align:top;padding:11px 16px 11px 0;border-bottom:1px solid var(--rule)}
+th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);font-weight:500;border-bottom:1px solid var(--rule-strong);
+  padding-bottom:8px;white-space:nowrap}
+td:last-child,th:last-child{padding-right:0}
+tbody tr:last-child td{border-bottom:none}
+td.f{font-family:"IBM Plex Mono",monospace;font-size:13px;white-space:nowrap;color:var(--ink)}
+td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sz{color:var(--faint);font-size:12px}
+
+.tiers td:first-child{width:1%;white-space:nowrap}
+.badge{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:11px;
+  letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:2px;font-weight:500}
+.b-i{background:var(--tungsten-soft);color:var(--tungsten-ink)}
+.b-o{background:var(--raise);color:var(--muted);border:1px solid var(--rule)}
+.b-l{background:var(--learned-soft);color:var(--learned)}
+
+.rule-box{border-left:2px solid var(--tungsten);padding:2px 0 2px 20px;margin:26px 0}
+.rule-box p{margin:0 0 10px}
+.rule-box p:last-child{margin:0}
+.rule-box .k{font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600;font-size:19px;
+  color:var(--ink);letter-spacing:-.01em}
+
+figure{margin:26px 0 0}
+figcaption{font-size:13px;color:var(--muted);margin:10px 0 0;max-width:62ch}
+svg{display:block;max-width:100%;height:auto}
+.ax{font-size:10.5px;fill:var(--faint)}
+.dlabel{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:13px;font-weight:600;fill:var(--ink)}
+.ditem{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--muted)}
+
+.strip{display:flex;margin:22px 0 0;border:1px solid var(--rule);border-radius:2px;overflow:hidden}
+.ch{min-width:0;padding:8px 5px;border-right:1px solid var(--rule);background:var(--raise);
+  display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.ch:last-child{border-right:none}
+.ch span{font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600;font-size:11px;
+  text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch em{font-family:"IBM Plex Mono",monospace;font-size:10px;font-style:normal;color:var(--faint);
+  white-space:nowrap;overflow:hidden}
+.ch-drop{background:var(--tungsten-soft)}.ch-drop span{color:var(--tungsten-ink)}
+.ch-build span{color:var(--tungsten-ink)}
+
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(224px,1fr));gap:1px;
+  background:var(--rule);border:1px solid var(--rule);border-radius:2px;margin:22px 0 0}
+.cell{background:var(--surface);padding:16px 18px}
+.cell .num{font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:700;font-size:30px;
+  line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cell .lab{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin:7px 0 0}
+
+ul.plain{list-style:none;padding:0;margin:18px 0 0}
+ul.plain>li{padding:13px 0;border-bottom:1px solid var(--rule);display:grid;
+  grid-template-columns:118px 1fr;gap:4px 18px}
+ul.plain>li:last-child{border-bottom:none}
+ul.plain .tag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;padding-top:4px}
+.t-open{color:var(--disputed)}.t-ok{color:var(--verified)}.t-lane{color:var(--tungsten-ink)}
+ul.plain b{font-weight:600}
+ul.plain p{margin:0;color:var(--muted);font-size:14.5px}
+@media (max-width:560px){ul.plain>li{grid-template-columns:1fr}}
+
+.fx{display:flex;gap:0;margin:20px 0 0;align-items:flex-end}
+.fx>div{flex:1;text-align:center;padding:0 4px}
+.fx .bar{background:var(--tungsten);opacity:.85;border-radius:1px 1px 0 0}
+.fx .fl{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin:8px 0 0}
+.fx .fn{font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:700;font-size:18px;
+  font-variant-numeric:tabular-nums;margin:0 0 6px}
+
+footer{margin:76px 0 0;padding:24px 0 0;border-top:1px solid var(--rule-strong);
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);
+  display:flex;flex-wrap:wrap;gap:8px 26px}
+:focus-visible{outline:2px solid var(--tungsten);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">KeyValue &middot; KeyCode &middot; Learning Machines</div>
+  <h1>Limelight</h1>
+  <p class="lede">A file that writes down what a song <b>does</b>. Then anything can read it &mdash;
+     a light rig, a drone swarm, whatever comes next.</p>
+  <div class="meta">
+    <span>format <b>0.3</b></span>
+    <span>The Nights &middot; <b>Avicii</b></span>
+    <span><b>175.682</b> s</span>
+    <span><b>125.99</b> BPM</span>
+    <span>measured <b>2 Sep 2026</b></span>
+  </div>
+</header>
+
+<section>
+  <div class="tick"></div>
+  <h2>What is in this folder</h2>
+  <p class="after-h2 col">Six things. You need the first one and probably the second.
+     Everything else is here so nobody has to ask me for it.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Open</th><th>What it is</th><th>Who needs it</th></tr></thead>
+    <tbody>
+      <tr><td class="f"><a href="the-nights.map.json">the-nights.map.json</a><br><span class="sz">547 KB</span></td>
+          <td>The map for this song. The product. Measured from the mp3 in this folder, not guessed.</td>
+          <td>Everyone, first.</td></tr>
+      <tr><td class="f"><a href="limelight.html">limelight.html</a><br><span class="sz">1.3 MB</span></td>
+          <td>The emulator. Open it, click the button, pick the mp3 next to it. Three tabs: the score,
+              a club lit from it, 120 drones flying it. Nothing uploads.</td>
+          <td>Anyone who would rather watch than read.</td></tr>
+      <tr><td class="f"><a href="the-nights.vec.f16">the-nights.vec.f16</a><br><span class="sz">554 KB</span></td>
+          <td>369 &times; 768 float16, row major. MERT&#8209;v1&#8209;95M, mean&#8209;pooled between beats,
+              L2 normalised. The learned tier.</td>
+          <td>Amal, Sebastian.</td></tr>
+      <tr><td class="f"><a href="spec/MAP.md">spec/MAP.md</a><br><span class="sz">4.9 KB</span></td>
+          <td>The format, field by field. This page summarises it; that file is the source of truth
+              the repo builds against.</td>
+          <td>Anyone writing against the map.</td></tr>
+      <tr><td class="f"><a href="spec/FRAME.md">spec/FRAME.md</a><br><span class="sz">2.1 KB</span></td>
+          <td>What a lighting reader outputs, forty times a second. The contract between the map and
+              a rig.</td>
+          <td>Dheeraj.</td></tr>
+      <tr><td class="f"><a href="layouts/">layouts/</a><br><span class="sz">3 files</span></td>
+          <td>The three rigs: <code>club.json</code> 25 fixtures, <code>venue.json</code> 68,
+              <code>the-grind.json</code> 94. Real hardware, real positions, real limits.</td>
+          <td>Nikitha, Alnas.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="rule-box col">
+    <p class="k">Running the emulator</p>
+    <p>Open <code>limelight.html</code>, click the button, pick <code>The Nights.mp3</code> from this
+       folder. Nothing uploads &mdash; the page reads the file off your disk. The score is already
+       baked into the HTML, so it works with no network.</p>
+    <p><code>space</code> play &middot; <code>&larr; &rarr;</code> skip a bar &middot;
+       <code>1 2 3</code> switch tabs &middot; <code>g</code> toggle the disputed section boundary
+       so you can hear both readings.</p>
+    <p>The badge in the corner says which renderer is live &mdash; <code>webgl</code> or
+       <code>canvas 2d</code>. If it says canvas 2d, WebGL failed on your machine. It still runs,
+       but tell me, because that is a bug I am chasing.</p>
+  </div>
+</section>
+
+<section class="col">
+  <div class="tick"></div>
+  <h2>The product is the file, not the light show</h2>
+  <div class="after-h2">
+  <p>We listen to a song once and write down what it does. That file is the map.</p>
+  <p>A <em>reader</em> then turns the map into an art form. Lighting is the first reader. A drone
+     show is the second. Neither one is the product, and that distinction is the whole bet:
+     if the map is right, every future reader is cheap. If the map is wrong, every reader
+     inherits the same blindness.</p>
+  <p>So the interesting work is not the show. It is deciding what a song <em>is</em>, in fields.</p>
+  </div>
+</section>
+
+<section>
+  <div class="tick"></div>
+  <h2>How it fits together</h2>
+  <figure>
+  <svg viewBox="0 0 980 250" role="img" aria-label="Audio goes through listeners into the map, which readers consume">
+    <rect x="1" y="52" width="118" height="62" rx="2" fill="var(--raise)" stroke="var(--rule-strong)"/>
+    <text x="60" y="79" class="dlabel" text-anchor="middle">audio</text>
+    <text x="60" y="97" class="ditem" text-anchor="middle">one file</text>
+    <path d="M124 83 h26 m-6 -4 l6 4 -6 4" fill="none" stroke="var(--rule-strong)" stroke-width="1.4"/>
+
+    <rect x="156" y="16" width="186" height="218" rx="2" fill="var(--surface)" stroke="var(--rule-strong)"/>
+    <text x="170" y="38" class="dlabel">listeners</text>
+    <text x="170" y="60" class="ditem">spectral flux onsets</text>
+    <text x="170" y="78" class="ditem">Ellis beat tracker</text>
+    <text x="170" y="96" class="ditem">Krumhansl key</text>
+    <text x="170" y="114" class="ditem">chroma chords</text>
+    <text x="170" y="132" class="ditem">Demucs, 6 stems</text>
+    <text x="170" y="150" class="ditem">basic-pitch notes</text>
+    <text x="170" y="168" class="ditem">Whisper words</text>
+    <text x="170" y="186" class="ditem">novelty segmentation</text>
+    <text x="170" y="204" class="ditem" fill="var(--learned)">MERT-v1-95M</text>
+    <text x="170" y="224" class="ditem" fill="var(--faint)">&#8230; add one, add a field</text>
+    <path d="M347 122 h26 m-6 -4 l6 4 -6 4" fill="none" stroke="var(--rule-strong)" stroke-width="1.4"/>
+
+    <rect x="379" y="16" width="266" height="218" rx="2" fill="var(--surface)" stroke="var(--tungsten)" stroke-width="1.5"/>
+    <text x="393" y="38" class="dlabel">the map</text>
+    <text x="631" y="38" class="ditem" text-anchor="end">.map.json</text>
+    <rect x="393" y="52" width="238" height="52" rx="2" fill="var(--tungsten-soft)"/>
+    <text x="405" y="71" class="dlabel" fill="var(--tungsten-ink)">interface</text>
+    <text x="405" y="90" class="ditem" fill="var(--tungsten-ink)">beats bars chapters moments</text>
+    <rect x="393" y="112" width="238" height="52" rx="2" fill="var(--raise)" stroke="var(--rule)"/>
+    <text x="405" y="131" class="dlabel">observation</text>
+    <text x="405" y="150" class="ditem">stems accents chords lyrics &#8230;</text>
+    <rect x="393" y="172" width="238" height="48" rx="2" fill="var(--learned-soft)"/>
+    <text x="405" y="191" class="dlabel" fill="var(--learned)">learned</text>
+    <text x="405" y="209" class="ditem" fill="var(--learned)">369 &times; 768 float16</text>
+    <path d="M650 122 h26 m-6 -4 l6 4 -6 4" fill="none" stroke="var(--rule-strong)" stroke-width="1.4"/>
+
+    <rect x="682" y="40" width="140" height="46" rx="2" fill="var(--raise)" stroke="var(--rule-strong)"/>
+    <text x="696" y="60" class="dlabel">lights</text>
+    <text x="696" y="77" class="ditem">25 / 68 / 94 fixtures</text>
+    <rect x="682" y="99" width="140" height="46" rx="2" fill="var(--raise)" stroke="var(--rule-strong)"/>
+    <text x="696" y="119" class="dlabel">drones</text>
+    <text x="696" y="136" class="ditem">120 craft</text>
+    <rect x="682" y="158" width="140" height="46" rx="2" fill="none" stroke="var(--rule)" stroke-dasharray="3 3"/>
+    <text x="696" y="178" class="dlabel" fill="var(--faint)">next reader</text>
+    <text x="696" y="195" class="ditem" fill="var(--faint)">video, game, stage</text>
+    <text x="838" y="119" class="ditem" fill="var(--faint)">one file,</text>
+    <text x="838" y="135" class="ditem" fill="var(--faint)">nothing shared</text>
+  </svg>
+  <figcaption>Each listener writes into the map. No listener knows a reader exists, and no reader
+    knows another reader exists. The lighting reader and the drone reader share this one file and
+    nothing else &mdash; no shared code, no shared helpers.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="tick"></div>
+  <h2>Three tiers, three different promises</h2>
+  <p class="after-h2 col">Everything measured goes in the file. What changes between tiers is not
+     the data &mdash; it is what we promise about it. That was the insight that unlocked this:
+     <em>the minimalist rule was never about what to measure, it was about what to promise.</em></p>
+  <div class="scroll"><table class="tiers">
+    <thead><tr><th>Tier</th><th>Holds</th><th>The promise</th><th>How it changes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge b-i">interface</span></td>
+        <td class="f">grid, beats, downbeats,<br>chapters, sections,<br>spans, moments, energy</td>
+        <td>A reader may compile against these. They will not move under you.</td>
+        <td>Deliberately small. Adding a field here is a one&#8209;way door.</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-o">observation</span></td>
+        <td class="f">stems, accents, chords,<br>key, lyrics, melody, stereo,<br>microtiming, brightness,<br>envelope, bass notes,<br>vocal silence</td>
+        <td>Everything we measured, with how we measured it. Read what you need.</td>
+        <td>Append only. A new listener adds here, and breaks nothing.</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-l">learned</span></td>
+        <td class="f">vectors<br><span class="sz">369 beats &times; 768 dims</span></td>
+        <td>What we measured but cannot name.</td>
+        <td>Replaced whenever the model improves.</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <div class="rule-box col">
+    <p class="k">A field goes in when a reader breaks without it.</p>
+    <p>Two fields earned their place that way, and both were found by a reader failing, not by
+       planning. <code>stems</code> went in because the lighting reader wanted to spotlight the
+       voice and had no way to find the voice. <code>accents</code> went in because a reader wanted
+       to stab three times at second two. 71% of the drum hits in this song miss the beat grid &mdash; though only 5% miss the <em>sixteenth</em>, which is the real shape of the programming &mdash; so neither <code>beats</code> nor <code>moments</code> could supply those times.</p>
+    <p>Be miserly with promises. Be generous with observations.</p>
+  </div>
+</section>
+
+<section>
+  <div class="tick"></div>
+  <h2>Five words, and who owns each</h2>
+  <p class="after-h2 col">The whole system is five nouns. If you find yourself needing a sixth,
+     say it out loud &mdash; it usually means something is designed wrong.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Word</th><th>The plain question it answers</th><th>Changes</th><th>Owner</th></tr></thead>
+    <tbody>
+      <tr><td class="f">map</td><td>What is the <em>music</em> doing?</td>
+          <td class="n">once per song, ever</td><td>Amal, Sebastian</td></tr>
+      <tr><td class="f">layout</td><td>What is <em>in this room</em>?</td>
+          <td class="n">once per venue</td><td>Nikitha</td></tr>
+      <tr><td class="f">wiring</td><td>How is it <em>connected</em>?</td>
+          <td class="n">once per rig</td><td>Alnas</td></tr>
+      <tr><td class="f">recipe</td><td>What should a <em>moment look like</em>?</td>
+          <td class="n">whenever taste changes</td><td>Renjith, with Nikitha</td></tr>
+      <tr><td class="f">frame</td><td>So <em>what is lit right now</em>?</td>
+          <td class="n">forty times a second</td><td>Dheeraj</td></tr>
+    </tbody>
+  </table></div>
+  <div class="rule-box col">
+    <p class="k">frame = f(map, layout, recipe, t) &nbsp;&rarr;&nbsp; bytes = wire(frame, wiring)</p>
+    <p>Map and layout are nouns. The frame is a verb. The map says what the music is doing, the
+       layout says what is in the room, and the frame answers &ldquo;so what should be on right
+       now&rdquo;.</p>
+  </div>
+
+  <h3 style="margin-top:34px">What I need back by tomorrow night</h3>
+  <ul class="plain">
+    <li><span class="tag t-lane">Amal, Sebastian</span>
+      <div><b>The map is your input, not your output.</b><p>Two questions. What should a model
+      predict that we measure by hand today? And what do we measure today that a model would do
+      better? The <code>.vec.f16</code> file is our current answer to &ldquo;what we cannot
+      name&rdquo; &mdash; argue with it.</p></div></li>
+    <li><span class="tag t-lane">Dheeraj</span>
+      <div><b><code>spec/FRAME.md</code> is the contract between us.</b><p>Try to break it and tell me
+      where it bends. If you need a fact the map does not carry, that is a finding, not a blocker
+      &mdash; it is exactly how <code>stems</code> and <code>accents</code> got in.</p></div></li>
+    <li><span class="tag t-lane">Everyone</span>
+      <div><b>Ears.</b><p>Play it against the song and say what is wrong, by the nearest bar. Specific
+      beats polite: &ldquo;the build at bar 40 feels late&rdquo; is worth ten times &ldquo;the build
+      feels off&rdquo;.</p></div></li>
+  </ul>
+</section>
+
+<section>
+  <div class="tick"></div>
+  <h2>The song, measured</h2>
+  <figure>
+  <svg viewBox="0 0 1000 152" role="img" aria-label="Energy across The Nights, with chapter boundaries and the two drops marked">
+    <text x="40" y="30" class="ax" text-anchor="end">1.0</text>
+    <text x="40" y="122" class="ax" text-anchor="end">0.0</text>
+    <line x1="46" y1="118" x2="986" y2="118" stroke="var(--rule-strong)"/>
+    <line x1="46" y1="26" x2="986" y2="26" stroke="var(--rule)" stroke-dasharray="2 4"/>
+    <rect x="386.4" y="22" width="234.4" height="96.0" fill="var(--disputed)" opacity="0.10"/>
+    <line x1="131.6" y1="22" x2="131.6" y2="118" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="2 3"/><line x1="213.1" y1="22" x2="213.1" y2="118" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="2 3"/><line x1="253.9" y1="22" x2="253.9" y2="118" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="2 3"/><line x1="386.4" y1="22" x2="386.4" y2="118" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="2 3"/><line x1="620.8" y1="22" x2="620.8" y2="118" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="2 3"/><line x1="661.6" y1="22" x2="661.6" y2="118" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="2 3"/><line x1="794.1" y1="22" x2="794.1" y2="118" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="2 3"/><line x1="947.0" y1="22" x2="947.0" y2="118" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="2 3"/>
+    <polygon points="50.1,118.0 50.1,92.4 60.3,81.6 70.5,75.3 80.6,78.1 90.8,82.2 101.0,82.4 111.2,80.1 121.4,74.8 131.6,61.2 141.8,42.3 152.0,29.3 162.2,26.0 172.4,26.0 182.6,26.1 192.8,29.5 202.9,40.7 213.1,55.1 223.3,66.0 233.5,75.0 243.7,82.4 253.9,86.0 264.1,88.0 274.3,92.6 284.5,96.8 294.7,95.3 304.9,91.7 315.1,92.6 325.3,97.1 335.5,103.2 345.6,108.2 355.8,108.0 366.0,97.9 376.2,77.4 386.4,55.2 396.6,42.4 406.8,39.1 417.0,38.8 427.2,38.9 437.4,40.9 447.6,48.0 457.8,58.3 467.9,67.2 478.1,74.4 488.3,79.5 498.5,81.7 508.7,81.7 518.9,81.2 529.1,78.4 539.3,67.9 549.5,51.0 559.7,38.7 569.9,35.3 580.1,36.3 590.2,37.2 600.4,40.1 610.6,49.2 620.8,61.3 631.0,71.4 641.2,81.0 651.4,89.2 661.6,93.0 671.8,94.9 682.0,97.9 692.2,99.5 702.4,97.8 712.6,96.0 722.8,97.0 732.9,100.3 743.1,104.8 753.3,107.9 763.5,106.8 773.7,99.3 783.9,82.9 794.1,62.8 804.3,50.3 814.5,47.2 824.7,48.6 834.9,51.2 845.1,54.7 855.2,60.9 865.4,63.4 875.6,55.7 885.8,46.5 896.0,43.9 906.2,45.9 916.4,48.4 926.6,51.2 936.8,59.3 947.0,74.3 957.2,94.8 967.4,116.7 977.6,118.0 977.6,118.0" fill="var(--tungsten)" opacity="0.13"/>
+    <polyline points="50.1,92.4 60.3,81.6 70.5,75.3 80.6,78.1 90.8,82.2 101.0,82.4 111.2,80.1 121.4,74.8 131.6,61.2 141.8,42.3 152.0,29.3 162.2,26.0 172.4,26.0 182.6,26.1 192.8,29.5 202.9,40.7 213.1,55.1 223.3,66.0 233.5,75.0 243.7,82.4 253.9,86.0 264.1,88.0 274.3,92.6 284.5,96.8 294.7,95.3 304.9,91.7 315.1,92.6 325.3,97.1 335.5,103.2 345.6,108.2 355.8,108.0 366.0,97.9 376.2,77.4 386.4,55.2 396.6,42.4 406.8,39.1 417.0,38.8 427.2,38.9 437.4,40.9 447.6,48.0 457.8,58.3 467.9,67.2 478.1,74.4 488.3,79.5 498.5,81.7 508.7,81.7 518.9,81.2 529.1,78.4 539.3,67.9 549.5,51.0 559.7,38.7 569.9,35.3 580.1,36.3 590.2,37.2 600.4,40.1 610.6,49.2 620.8,61.3 631.0,71.4 641.2,81.0 651.4,89.2 661.6,93.0 671.8,94.9 682.0,97.9 692.2,99.5 702.4,97.8 712.6,96.0 722.8,97.0 732.9,100.3 743.1,104.8 753.3,107.9 763.5,106.8 773.7,99.3 783.9,82.9 794.1,62.8 804.3,50.3 814.5,47.2 824.7,48.6 834.9,51.2 845.1,54.7 855.2,60.9 865.4,63.4 875.6,55.7 885.8,46.5 896.0,43.9 906.2,45.9 916.4,48.4 926.6,51.2 936.8,59.3 947.0,74.3 957.2,94.8 967.4,116.7 977.6,118.0" fill="none" stroke="var(--tungsten)" stroke-width="1.7"
+      stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="386.4" cy="35.2" r="3.4" fill="var(--tungsten)" stroke="var(--surface)" stroke-width="1.4"/><circle cx="794.1" cy="26.0" r="3.4" fill="var(--tungsten)" stroke="var(--surface)" stroke-width="1.4"/>
+    <text x="46.0" y="133" class="ax" text-anchor="middle">0:00</text><text x="206.5" y="133" class="ax" text-anchor="middle">0:30</text><text x="367.0" y="133" class="ax" text-anchor="middle">1:00</text><text x="527.6" y="133" class="ax" text-anchor="middle">1:30</text><text x="688.1" y="133" class="ax" text-anchor="middle">2:00</text><text x="848.6" y="133" class="ax" text-anchor="middle">2:30</text>
+    <text x="986" y="30" class="ax" text-anchor="end" fill="var(--disputed)">shaded &#61; structure disputed</text>
+  </svg>
+  <figcaption>Energy, one value per bar, measured. Dashed lines are my chapter boundaries.
+    Dots are the two drops &mdash; the first one you confirmed by ear at 63.55 s. The shaded stretch
+    is where six methods say my boundaries are wrong.</figcaption>
+  </figure>
+
+  <div class="strip"><div class="ch ch-intro" style="flex:0 0 9.107%" title="intro &mdash; 0:00.0 to 0:16.0, 16.0 s"><span>intro</span><em>0:00</em></div><div class="ch ch-verse" style="flex:0 0 8.674%" title="verse &mdash; 0:16.0 to 0:31.2, 15.2 s"><span>verse</span><em>0:15</em></div><div class="ch ch-break" style="flex:0 0 4.337%" title="break &mdash; 0:31.2 to 0:38.9, 7.6 s"><span>brk</span><em>0:31</em></div><div class="ch ch-build" style="flex:0 0 14.095%" title="build &mdash; 0:38.9 to 1:03.6, 24.8 s"><span>build</span><em>0:38</em></div><div class="ch ch-drop" style="flex:0 0 24.938%" title="drop &mdash; 1:03.6 to 1:47.4, 43.8 s"><span>drop</span><em>1:03</em></div><div class="ch ch-break" style="flex:0 0 4.337%" title="break &mdash; 1:47.4 to 1:55.1, 7.6 s"><span>brk</span><em>1:47</em></div><div class="ch ch-build" style="flex:0 0 14.096%" title="build &mdash; 1:55.1 to 2:19.8, 24.8 s"><span>build</span><em>1:55</em></div><div class="ch ch-drop" style="flex:0 0 16.264%" title="drop &mdash; 2:19.8 to 2:48.4, 28.6 s"><span>drop</span><em>2:19</em></div><div class="ch ch-outro" style="flex:0 0 4.151%" title="outro &mdash; 2:48.4 to 2:55.7, 7.3 s"><span>outro</span><em>2:48</em></div></div>
+  <div class="grid2">
+    <div class="cell"><div class="num">0.476217</div><div class="lab">seconds per beat</div></div>
+    <div class="cell"><div class="num">1.904868</div><div class="lab">seconds per bar</div></div>
+    <div class="cell"><div class="num">92</div><div class="lab">bars</div></div>
+    <div class="cell"><div class="num">369</div><div class="lab">beats</div></div>
+    <div class="cell"><div class="num">983</div><div class="lab">drum accents, off&#8209;grid and on</div></div>
+    <div class="cell"><div class="num">243</div><div class="lab">lyric words, timed</div></div>
+    <div class="cell"><div class="num">6</div><div class="lab">separated stems</div></div>
+    <div class="cell"><div class="num">F&#9839;</div><div class="lab">key estimate, 0.86 confident</div></div>
+  </div>
+
+  <div class="rule-box col">
+    <p class="k">Giving feedback: say the bar, not the millisecond.</p>
+    <p>Bar <em>N</em> starts at <code>0.760 + (N&minus;1) &times; 1.905</code> seconds. Bar 40 is about
+       1:15. &ldquo;The build at bar 40 feels late&rdquo; is enough for me to fix it &mdash; the tools
+       snap to the nearest beat anyway, so chasing the exact millisecond wastes your time.</p>
+  </div>
+</section>
+
+<section>
+  <div class="tick"></div>
+  <h2>One rule makes a reader testable</h2>
+  <div class="after-h2 col">
+  <p><code>frame = f(map, layout, recipe, t)</code></p>
+  <p>Ask for <code>t = 47</code> twice and get identical bytes. Ask for <code>t = 47</code> without
+     having played the first 47 seconds and still get the right answer. That is what lets us scrub
+     during rehearsal, join a show late, and test against golden frames at all.</p>
+  <p>It costs something real, and this is the part worth arguing about: <b>an effect cannot be a
+     state machine.</b> Not &ldquo;on the beat, start a fade&rdquo; but &ldquo;brightness =
+     f(position in the beat)&rdquo;. The map is your history. &ldquo;When was the last beat&rdquo;
+     is a lookup, never a memory.</p>
+  </div>
+</section>
+
+<section>
+  <div class="tick"></div>
+  <h2>Field reference</h2>
+  <p class="after-h2 col">Everything the map promises. <code>spec/MAP.md</code> is the same thing in
+     the form the repo builds against.</p>
+
+  <h3 style="margin-top:30px"><span class="badge b-i">interface</span> &nbsp;readers compile against these</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>Field</th><th>Shape</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="f">grid</td><td class="f">{period, phase, bpm,<br>bar_phase, locked}</td>
+          <td>All 369 beats reproduce from <code>period</code> and <code>phase</code> alone.
+              <code>bar_phase</code> says which beat is the &ldquo;one&rdquo;.</td></tr>
+      <tr><td class="f">beats<br>downbeats</td><td class="f">[t, &hellip;] seconds</td>
+          <td>Downbeats are a subset of beats. 369 and 92 here.</td></tr>
+      <tr><td class="f">chapters</td><td class="f">[{at, name}]</td>
+          <td>Plain names only: intro, verse, break, build, drop, outro.</td></tr>
+      <tr><td class="f">spans</td><td class="f">[{kind, from, to, rise}]</td>
+          <td>A stretch with a shape. <code>rise</code> is steady, late, early or stepped.</td></tr>
+      <tr><td class="f">moments</td><td class="f">[{at, kind, &hellip;}]</td>
+          <td>Six kinds, and no more: build, drop, stop, quiet, spotlight, return.</td></tr>
+      <tr><td class="f">energy</td><td class="f">[[t, 0..1], &hellip;]</td>
+          <td>One point per downbeat. <b>Readers interpolate between points.</b></td></tr>
+      <tr><td class="f">sections</td><td class="f">[{at, id, repeat, arc, name}]</td>
+          <td>Which sections are the <em>same</em> section. <code>repeat</code> is what lets a reader
+              make the second chorus bigger than the first.</td></tr>
+      <tr><td class="f">confidence_by_field</td><td class="f">per field</td>
+          <td>One global number could not say &ldquo;9 ms sure of the period, a coin toss on the bar
+              phase&rdquo;.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:34px"><span class="badge b-o">observation</span> &nbsp;read what you need</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>Field</th><th>Rate</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td class="f">accents</td><td class="n">events</td>
+          <td>Every percussive hit: time, strength, which drum, on&#8209;grid or not.
+              <b>983 here, 71% off the beat</b> and only 5% off the sixteenth.</td></tr>
+      <tr><td class="f">stems</td><td class="n">per downbeat</td>
+          <td>Presence of vocals, drums, bass, other, guitar, piano. Six&#8209;stem separation,
+              lag&#8209;corrected by 25.08 ms.</td></tr>
+      <tr><td class="f">observations.envelope</td><td class="n">per beat</td>
+          <td>Per&#8209;stem level, dB below that stem&rsquo;s own 99th percentile.</td></tr>
+      <tr><td class="f">observations.notes</td><td class="n">events</td>
+          <td>Polyphonic transcription per stem. <b>3,863 here</b>, 98&ndash;99.9% diatonic to the
+              detected key.</td></tr>
+      <tr><td class="f">observations.melody</td><td class="n">per sixteenth</td>
+          <td>The vocal pitch contour.</td></tr>
+      <tr><td class="f">observations.bass_notes</td><td class="n">per beat</td><td>Monophonic root.</td></tr>
+      <tr><td class="f">observations.chords</td><td class="n">per bar</td>
+          <td>With a confidence. Weak &mdash; see what is wrong, below.</td></tr>
+      <tr><td class="f">observations.key</td><td class="n">song</td>
+          <td>F&#9839;, with the correlation that produced it.</td></tr>
+      <tr><td class="f">observations.microtiming</td><td class="n">song</td>
+          <td>Deviation from the grid the music is actually played on. This record is 1/16 quantised,
+              <b>100% of hits inside 15 ms</b>. Machine&#8209;tight.</td></tr>
+      <tr><td class="f">observations.stereo</td><td class="n">per downbeat</td>
+          <td>Width and pan, for the mix and for every stem.</td></tr>
+      <tr><td class="f">observations.brightness</td><td class="n">per downbeat</td>
+          <td>Spectral centroid per stem. Texture, not level.</td></tr>
+      <tr><td class="f">observations.lyrics</td><td class="n">word times</td>
+          <td>243 words from the isolated vocal. <b>Times are good, words are not.</b></td></tr>
+      <tr><td class="f">observations.vocal_silence</td><td class="n">spans</td>
+          <td>Where the voice is absent. The cleanest structural signal in this song.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:34px"><span class="badge b-l">learned</span> &nbsp;what nobody has a word for</h3>
+  <p class="col">369 &times; 768 float16, out of line because that does not belong in JSON. Pooling
+     between beats makes it nearly tempo&#8209;invariant for free: 126 BPM and 84 BPM give the same
+     sequence length.</p>
+  <p class="col"><b>It earned its place by correcting the named tier.</b> In the learned space the two
+     stretches I had labelled as different drops score <b>0.951</b> &mdash; the same section.
+     Re&#8209;clustering on the vectors returns two identical passes of a six&#8209;part cycle, with
+     whole bar counts both times. That sits in the file as
+     <code>segmentation_proposal</code>, recorded and not applied.</p>
+
+  <h3 style="margin-top:34px">What a lighting reader outputs</h3>
+  <p class="col">This shape belongs to the lighting reader alone. It is <em>not</em> universal &mdash;
+     a video editor outputs cut points, a rhythm game outputs a note chart. Normalised: nothing here
+     knows about DMX.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Field</th><th>Range</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="f">t</td><td class="n">seconds</td><td>Which instant this frame is for.</td></tr>
+      <tr><td class="f">look</td><td class="n">string</td>
+          <td><b>Diagnostic only.</b> Which recipe branch ran. Not part of the contract, but the first
+              thing to compare when a frame is wrong.</td></tr>
+      <tr><td class="f">r g b</td><td class="n">0&ndash;255</td>
+          <td>Colour. When <code>level</code> is 0 these are 0 too &mdash; off means actually zero.</td></tr>
+      <tr><td class="f">level</td><td class="n">0&ndash;1</td>
+          <td>Brightness, linear. Display gamma is the room&rsquo;s business, not the frame&rsquo;s.</td></tr>
+      <tr><td class="f">pan tilt</td><td class="n">0&ndash;1</td>
+          <td>Where a moving light points, as a fraction of its own range.</td></tr>
+      <tr><td class="f">strobe</td><td class="n">Hz</td>
+          <td>0 means steady. Capped by the layout&rsquo;s <code>max_strobe_hz</code>, never by the recipe.</td></tr>
+      <tr><td class="f">pixels</td><td class="n">[[r,g,b], &hellip;]</td>
+          <td>Strips only. Brightness is baked into the rgb; strips have no <code>level</code>.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:34px">Why layout and wiring are two files</h3>
+  <p class="col">Lighting people bolt these together and call it a &ldquo;patch&rdquo;. They are
+     unrelated. <b>Layout</b> is which fixtures exist, what each can do, and where it sits.
+     <b>Wiring</b> is universe, channel, channel map and physical lag.</p>
+  <p class="col">Splitting them buys one property worth the trouble: <b>the browser club and the real
+     club load the same layout file.</b> Only the wiring differs. So what we tune in the simulator is
+     what happens in the room by construction, not by hope &mdash; which is the entire reason the
+     simulator can be trusted. It also settles who reads what: the browser room must never see a DMX
+     address, and the wire code must never care about zones.</p>
+
+  <h3 style="margin-top:34px">Four rules, and what is deliberately missing</h3>
+  <ul class="plain">
+    <li><span class="tag">1</span><div><b>Time is always seconds.</b><p>Decimal, from the start of the
+      recording. Never milliseconds, bars, samples or frames.</p></div></li>
+    <li><span class="tag">2</span><div><b>A reader ignores fields it does not recognise.</b><p>That is
+      what lets the file grow without a migration.</p></div></li>
+    <li><span class="tag">3</span><div><b>A field enters the interface tier when a reader breaks
+      without it.</b><p>Not when a fact is interesting.</p></div></li>
+    <li><span class="tag">4</span><div><b>One writer per fact.</b><p>Two lanes computing the same
+      number will eventually disagree, and then both are suspect.</p></div></li>
+    <li><span class="tag t-open">absent</span><div><b>No lighting words anywhere in the map.</b>
+      <p>No hardware, channels, fixtures or colours. No tempo either, because it is already in the
+      beats. Those live in <code>layouts/</code> and in the recipe, or nowhere. The moment the map
+      says &ldquo;strobe&rdquo; it becomes a lighting file and the whole idea collapses.</p></div></li>
+  </ul>
+</section>
+
+<section>
+  <div class="tick"></div>
+  <h2>The universality claim, tested rather than asserted</h2>
+  <p class="after-h2 col">Same map, same recipe, three rigs of different size. Fixtures are addressed
+     by <em>position</em> in the room, not by index, which is the reason one recipe drives all three
+     without a line changing.</p>
+  <div class="fx">
+    <div><div class="fn">25</div><div class="bar" style="height:26px"></div><div class="fl">club</div></div>
+    <div><div class="fn">68</div><div class="bar" style="height:71px"></div><div class="fl">venue</div></div>
+    <div><div class="fn">94</div><div class="bar" style="height:98px"></div><div class="fl">the grind</div></div>
+    <div><div class="fn">120</div><div class="bar" style="height:125px;background:var(--learned);opacity:.8"></div><div class="fl">drones</div></div>
+  </div>
+  <p class="col" style="margin-top:20px">The drone reader is the actual test. It reads the same
+     file, produces positions and colours instead of beams, and shares no code with the lighting
+     reader at all. If the map were secretly a lighting format, that would have been impossible to
+     write.</p>
+</section>
+
+<section>
+  <div class="tick"></div>
+  <h2>What is wrong right now</h2>
+  <p class="after-h2 col">Six things, so nobody rediscovers them. Every one of these is open on
+     purpose rather than hidden.</p>
+  <ul class="plain">
+    <li><span class="tag t-open">not solved</span>
+      <div><b>Drone separation.</b><p>Craft pass 0.07 m apart against a 2.6 m minimum. Three attempts
+      at speed limits fixed the speed and not the spacing. This needs real path planning, not another
+      clamp.</p></div></li>
+    <li><span class="tag t-open">disputed</span>
+      <div><b>Structure from 1:03 to 1:47.</b><p>Six independent methods disagree with my chapter
+      boundaries, including the learned space, which scores the two &ldquo;drops&rdquo; at 0.951
+      similar &mdash; the same section. Recorded as <code>segmentation_proposal</code> and not
+      applied. Structure is a human call.</p></div></li>
+    <li><span class="tag t-open">weak</span>
+      <div><b>Chords.</b><p>Template matching agrees with the detected notes only 69.4% of the time.
+      It is probably calling C&#9839; major &ldquo;F&#9839;7&rdquo;. Needs a real chord model.</p></div></li>
+    <li><span class="tag t-open">weak</span>
+      <div><b>Lyric words.</b><p>Whisper heard &ldquo;What&rsquo;s up on a young year&rdquo; for
+      &ldquo;Once upon a younger year&rdquo;. The times are good, the words are not. The fix is
+      forced alignment: recall for the words, measurement for the times.</p></div></li>
+    <li><span class="tag t-open">thin</span>
+      <div><b>Human truth.</b><p>One verified moment in the whole song. Everything else is measured
+      but unconfirmed. About fifteen minutes of somebody&rsquo;s ears would fix this.</p></div></li>
+    <li><span class="tag t-ok">held, not solved</span>
+      <div><b>Moving&#8209;head speed.</b><p>Inside the rig&rsquo;s declared slew limit &mdash; 0.96
+      against 1.05 &mdash; but held there by a blunt cap rather than by understanding. It works and
+      it is not right.</p></div></li>
+  </ul>
+</section>
+
+<section>
+  <div class="tick"></div>
+  <h2>Rules that do not bend</h2>
+  <ul class="plain">
+    <li><span class="tag">audio</span>
+      <div><b>No song files in the repo. Ever.</b><p>Scores, never songs. The mp3 ships inside the
+      zip for local testing and stays out of git. Friday&rsquo;s video uses licensed or generated
+      audio. This is also the reason the map can be shared at all when the recording cannot.</p></div></li>
+    <li><span class="tag">truth</span>
+      <div><b>Never invent a timestamp.</b><p>A guess lives in <code>maps/sketch/</code> marked
+      <code>"how": "sketch"</code>, never mixed with measurement. One invented timestamp makes every
+      number after it a lie that still prints.</p></div></li>
+    <li><span class="tag">safety</span>
+      <div><b>Safety lives in the layout, not the recipe.</b><p>Strobes cap at 4 Hz. Lasers stay
+      above 3.0 m &mdash; a hard floor, not a preference. No audience scanning. A blackout must
+      survive the engine crashing.</p></div></li>
+  </ul>
+</section>
+
+<footer>
+  <span>KeyCode &middot; Friday 18 September 2026</span>
+  <span>Learning Machines</span>
+  <span>map format 0.3</span>
+</footer>
+</div>
