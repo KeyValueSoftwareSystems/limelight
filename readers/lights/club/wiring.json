@@ -1,17 +1,189 @@
 {
-  "wiring": "0.2",
-  "room": "club",
-  "note": "Only the hardware layer reads this. The browser never does. Safety limits live in layout.json.",
-  "universes": [ { "id": 1, "how": "sacn", "host": "192.168.8.50" } ],
-  "fixtures": [
-    { "id": "par_1",    "universe": 1, "address": 1,  "mode": "rgb+dim", "lag_ms": 2 },
-    { "id": "par_2",    "universe": 1, "address": 5,  "mode": "rgb+dim", "lag_ms": 2 },
-    { "id": "par_3",    "universe": 1, "address": 9,  "mode": "rgb+dim", "lag_ms": 2 },
-    { "id": "par_4",    "universe": 1, "address": 13, "mode": "rgb+dim", "lag_ms": 2 },
-    { "id": "strobe_1", "universe": 1, "address": 17, "mode": "dim+rate", "lag_ms": 2 },
-    { "id": "strobe_2", "universe": 1, "address": 19, "mode": "dim+rate", "lag_ms": 2 },
-    { "id": "fog_1",    "universe": 1, "address": 45, "mode": "1ch",     "lag_ms": 9000 },
-    { "id": "strip_1",  "how": "sacn", "host": "192.168.8.61", "universe": 2, "address": 1 },
-    { "id": "strip_2",  "how": "sacn", "host": "192.168.8.62", "universe": 3, "address": 1 }
-  ]
+ "wiring": "0.2",
+ "room": "club",
+ "note": "Only the hardware layer reads this. The browser never does. Safety limits live in layout.json. Every fixture in the layout is patched here so a universe is not mostly empty -- addresses are a starting point and belong to whoever wires the real rig.",
+ "universes": [
+  {
+   "id": 1,
+   "how": "sacn",
+   "host": "192.168.8.50"
+  }
+ ],
+ "fixtures": [
+  {
+   "id": "par_1",
+   "universe": 1,
+   "address": 1,
+   "mode": "rgb+dim",
+   "lag_ms": 2
+  },
+  {
+   "id": "par_2",
+   "universe": 1,
+   "address": 5,
+   "mode": "rgb+dim",
+   "lag_ms": 2
+  },
+  {
+   "id": "par_3",
+   "universe": 1,
+   "address": 9,
+   "mode": "rgb+dim",
+   "lag_ms": 2
+  },
+  {
+   "id": "par_4",
+   "universe": 1,
+   "address": 13,
+   "mode": "rgb+dim",
+   "lag_ms": 2
+  },
+  {
+   "id": "strobe_1",
+   "universe": 1,
+   "address": 17,
+   "mode": "dim+rate",
+   "lag_ms": 2
+  },
+  {
+   "id": "strobe_2",
+   "universe": 1,
+   "address": 19,
+   "mode": "dim+rate",
+   "lag_ms": 2
+  },
+  {
+   "id": "fog_1",
+   "universe": 1,
+   "address": 45,
+   "mode": "1ch",
+   "lag_ms": 9000
+  },
+  {
+   "id": "strip_1",
+   "how": "sacn",
+   "host": "192.168.8.61",
+   "universe": 2,
+   "address": 1
+  },
+  {
+   "id": "strip_2",
+   "how": "sacn",
+   "host": "192.168.8.62",
+   "universe": 3,
+   "address": 1
+  },
+  {
+   "id": "par_5",
+   "universe": 1,
+   "address": 53,
+   "mode": "rgb+dim",
+   "lag_ms": 2
+  },
+  {
+   "id": "par_6",
+   "universe": 1,
+   "address": 57,
+   "mode": "rgb+dim",
+   "lag_ms": 2
+  },
+  {
+   "id": "up_1",
+   "universe": 1,
+   "address": 61,
+   "mode": "rgb+dim",
+   "lag_ms": 2
+  },
+  {
+   "id": "up_2",
+   "universe": 1,
+   "address": 65,
+   "mode": "rgb+dim",
+   "lag_ms": 2
+  },
+  {
+   "id": "up_3",
+   "universe": 1,
+   "address": 69,
+   "mode": "rgb+dim",
+   "lag_ms": 2
+  },
+  {
+   "id": "up_4",
+   "universe": 1,
+   "address": 73,
+   "mode": "rgb+dim",
+   "lag_ms": 2
+  },
+  {
+   "id": "head_1",
+   "universe": 1,
+   "address": 77,
+   "mode": "head8",
+   "lag_ms": 2
+  },
+  {
+   "id": "head_2",
+   "universe": 1,
+   "address": 85,
+   "mode": "head8",
+   "lag_ms": 2
+  },
+  {
+   "id": "head_3",
+   "universe": 1,
+   "address": 93,
+   "mode": "head8",
+   "lag_ms": 2
+  },
+  {
+   "id": "head_4",
+   "universe": 1,
+   "address": 101,
+   "mode": "head8",
+   "lag_ms": 2
+  },
+  {
+   "id": "head_5",
+   "universe": 1,
+   "address": 109,
+   "mode": "head8",
+   "lag_ms": 2
+  },
+  {
+   "id": "head_6",
+   "universe": 1,
+   "address": 117,
+   "mode": "head8",
+   "lag_ms": 2
+  },
+  {
+   "id": "head_7",
+   "universe": 1,
+   "address": 125,
+   "mode": "head8",
+   "lag_ms": 2
+  },
+  {
+   "id": "head_8",
+   "universe": 1,
+   "address": 133,
+   "mode": "head8",
+   "lag_ms": 2
+  },
+  {
+   "id": "blind_1",
+   "universe": 1,
+   "address": 141,
+   "mode": "dim+rate",
+   "lag_ms": 2
+  },
+  {
+   "id": "blind_2",
+   "universe": 1,
+   "address": 143,
+   "mode": "dim+rate",
+   "lag_ms": 2
+  }
+ ]
 }

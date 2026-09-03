@@ -1,0 +1,185 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Universe</title><style>
+:root{--bg:#0e1016;--surface:#171a23;--raise:#1e222d;--ink:#e6e9f1;--muted:#959bac;
+ --faint:#666c7e;--rule:#252935;--rule2:#373c4d;--tung:#f0a93c;--good:#69be86;--bad:#e88055}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);padding:20px 18px 50px;
+ font:14px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1180px;margin:0 auto}
+a.back{color:var(--faint);text-decoration:none;font-family:ui-monospace,monospace;font-size:12px}
+a.back:hover{color:var(--tung)}
+h1{font:700 13px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.15em;text-transform:uppercase;
+ margin:16px 0 4px;color:var(--tung)}
+.sub{color:var(--muted);margin:0 0 16px;max-width:84ch;font-size:13.5px}
+.mono,select,button,td,th{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.bar{display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin:0 0 15px;padding:10px 13px;
+ background:var(--surface);border:1px solid var(--rule);border-radius:3px}
+label{color:var(--faint);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase}
+select,button{background:var(--raise);color:var(--ink);border:1px solid var(--rule2);
+ border-radius:3px;padding:6px 10px;font-size:12.5px;cursor:pointer}
+button.go{background:var(--tung);color:#20160a;border-color:var(--tung);font-weight:700;padding:7px 17px}
+#grid{display:grid;grid-template-columns:repeat(32,1fr);gap:2px;background:var(--surface);
+ border:1px solid var(--rule);border-radius:3px;padding:9px}
+.cell{aspect-ratio:1;border-radius:1px;background:#0b0d12;position:relative}
+.cell.used{outline:1px solid #232838}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 0;color:var(--faint);
+ font-family:ui-monospace,monospace;font-size:11px}
+table{border-collapse:collapse;width:100%;font-size:12px;margin-top:6px}
+th,td{text-align:left;padding:5px 12px 5px 0;border-bottom:1px solid var(--rule);white-space:nowrap}
+th{color:var(--faint);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+td.n{font-variant-numeric:tabular-nums}
+h2{font:600 11px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;
+ color:var(--faint);margin:26px 0 8px}
+.box{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:14px 16px}
+.box li{color:var(--muted);font-size:13.5px;margin:0 0 7px}
+audio{width:100%;margin-top:12px;filter:invert(.92) hue-rotate(180deg)}
+#hov{font-family:ui-monospace,monospace;font-size:12px;color:var(--tung);min-height:18px;margin-top:8px}
+</style></head><body><div class="wrap">
+<a class="back" href="/">← everything</a>
+<h1>Universe 1 · what actually goes down the cable</h1>
+<p class="sub">Every frame turned into 512 bytes by <code>readers/lights/wire.js</code>, in time
+with the music. No hardware needed — if this looks right, a real rig will look right, because the
+only thing between here and the room is a network socket.</p>
+
+<div class="bar">
+  <label for="mode">run</label>
+  <select id="mode"><option value="show">a show</option>
+    <option value="calibrate">calibration sweep</option></select>
+  <label for="song">song</label><select id="song"></select>
+  <label for="rig">rig</label><select id="rig"><option>club</option></select>
+  <button class="go" id="play">▶ Play</button>
+  <span id="stat" class="mono" style="color:var(--muted);font-size:12px"></span>
+</div>
+
+<div id="step" style="display:none;background:var(--surface);border:1px solid var(--tung);
+ border-left-width:3px;border-radius:3px;padding:13px 16px;margin:0 0 13px">
+ <p id="ssay" style="margin:0 0 5px;font:700 17px/1.3 ui-sans-serif,system-ui,sans-serif"></p>
+ <p id="scheck" style="margin:0;color:var(--muted);font-size:13.5px"></p>
+ <p id="sclock" class="mono" style="margin:7px 0 0;color:var(--faint);font-size:11.5px"></p></div>
+<div id="grid"></div>
+<div class="legend">
+  <span>512 channels, 32 per row · brighter = higher value</span>
+  <span>outlined = patched to a fixture</span>
+  <span id="active">—</span>
+</div>
+<div id="hov">hover a channel</div>
+<audio id="aud" controls preload="auto"></audio>
+
+<h2>Patch — live values</h2>
+<div class="box" style="max-height:300px;overflow:auto"><table id="patch"></table></div>
+
+<h2>Known wrong, and yours to fix</h2>
+<div class="box"><ul id="todo" style="margin:0;padding-left:18px"></ul></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let RECIPE="",WIRE=null,OWN={},G=null,F=null,W=null,DUR=0,cells=[],CAL=null,MODE="show",LAY=null;
+const TODO=[
+ "8-bit only. Real moving heads want 16-bit pan and tilt or they visibly step across a slow move.",
+ "lag_ms is recorded per fixture and ignored. Fog takes nine seconds to reach the room and an LED takes two; sending both at the same instant means the haze is always late.",
+ "No dimmer curve. Hardware dimming is not linear in perceived brightness, so a 50% value does not look half as bright.",
+ "Strobe rate is written raw rather than mapped to each fixture's own rate table.",
+ "Addresses in wiring.json are a starting point. They belong to whoever patches the real rig.",
+];
+function prep(m){
+  const PER=m.grid.period,PH=m.grid.phase,D=m.song.length;
+  const BEATS=[];for(let t=PH;t<D;t+=PER)BEATS.push(+t.toFixed(3));
+  const sec=Array.isArray(m.sections)?m.sections:((m.sections&&m.sections.entries)||[]);
+  return {MAP:{accents:m.accents,obs:m.observations,sections:sec,stems:m.stems},
+    CH:(m.chapters||[]).map(c=>[c.at,c.name]),
+    SP:(m.spans||[]).map(s=>({kind:s.kind,from:s.from,to:s.to,rise:s.rise})),
+    MO:(m.moments||[]).map(x=>({at:x.at,kind:x.kind,v:x.size!==undefined?x.size:x.holds})),
+    EN:m.energy||[],BEATS,PER,PH,DUR:D,BAR:4*PER,DBP:m.grid.bar_phase};
+}
+function mkReader(map,layout){
+  const g=prep(map);
+  return new Function("MAP","LAYOUT","CH","SP","MO","EN","BEATS","PER","PH","DUR","BAR","DBP",
+    "STOP_REAL","ANT",RECIPE+"\n;return frame;")(
+    g.MAP,layout,g.CH,g.SP,g.MO,g.EN,g.BEATS,g.PER,g.PH,g.DUR,g.BAR,g.DBP,true,true);
+}
+function buildGrid(){
+  const g=$("grid"); g.innerHTML=""; cells=[];
+  for(let i=0;i<512;i++){
+    const d=document.createElement("div"); d.className="cell";
+    if(OWN["1:"+(i+1)]) d.classList.add("used");
+    d.onmouseenter=()=>{ $("hov").textContent=
+      `channel ${i+1}  ·  ${OWN["1:"+(i+1)]||"unpatched"}  ·  value ${cells[i].v|0}` };
+    g.appendChild(d); cells.push({el:d,v:0});
+  }
+}
+function paint(u){
+  let on=0;
+  for(let i=0;i<512;i++){
+    const v=u[i]||0; cells[i].v=v;
+    if(v>0) on++;
+    cells[i].el.style.background = v ? `rgb(${40+v*0.62|0},${28+v*0.55|0},${12+v*0.18|0})` : "#0b0d12";
+  }
+  $("active").textContent=`${on} channels live`;
+}
+function paintPatch(fr,u){
+  const rows=(W.fixtures||[]).map(p=>{
+    const m=({"rgb+dim":4,"dim+rate":2,"1ch":1,"head8":8})[p.mode]||0;
+    const vals=[];for(let i=0;i<m;i++) vals.push(u[(p.address-1)+i]||0);
+    return `<tr><td>${p.id}</td><td class="n">${p.address}</td><td>${p.mode}</td>
+      <td class="n">${vals.join(" ")}</td><td class="n" style="color:${p.lag_ms>100?"var(--bad)":"var(--faint)"}">${p.lag_ms} ms</td></tr>`;
+  }).join("");
+  $("patch").innerHTML="<thead><tr><th>fixture</th><th>addr</th><th>mode</th><th>values</th>"
+    +"<th>lag</th></tr></thead><tbody>"+rows+"</tbody>";
+}
+let last=-1, calT0=performance.now()/1000;
+function tick(){
+  try{
+    const a=$("aud");
+    const t = MODE==="calibrate"
+      ? ((performance.now()/1000 - calT0) % CAL.CAL_DUR)
+      : (a.src?a.currentTime:0);
+    if(Math.abs(t-last)>0.02){
+      const fr = MODE==="calibrate" ? CAL.calFrame(t,LAY) : F(Math.min(t,DUR-0.01));
+      const u=WIRE.wire(fr,W)[1];
+      paint(u); paintPatch(fr,u); last=t;
+      if(MODE==="calibrate"){
+        const st=CAL.calStep(t);
+        $("ssay").textContent=st.say; $("scheck").textContent=st.check;
+        $("sclock").textContent=`step ${st.id}  ·  ${t.toFixed(1)}s of ${CAL.CAL_DUR}s`;
+      }
+    }
+  }catch(e){ $("stat").style.color="#e88055"; $("stat").textContent="tick: "+e.message; return }
+  requestAnimationFrame(tick);
+}
+(async()=>{
+ try{
+  RECIPE=await (await fetch("/static/recipe4.js")).text();
+  const src=await (await fetch("/static/wire.js")).text();
+  WIRE=new Function(src+"\n;return {wire,channelOwners};")();
+  const csrc=await (await fetch("/static/calibrate.js")).text();
+  CAL=new Function(csrc+"\n;return {calFrame,calStep,CAL_STEPS,CAL_DUR};")();
+  const Q=new URLSearchParams(location.search);
+  G=await (await fetch("/api/song?song="+encodeURIComponent(Q.get("song")||""))).json();
+  if(G.error) throw new Error(G.error);
+  W=await (await fetch("/api/wiring")).json();
+  OWN=WIRE.channelOwners(W);
+  $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>
+    `<option value="${k}"${k===G.song?" selected":""}>${v.label}</option>`).join("");
+  $("song").onchange=e=>{const u=new URL(location);u.searchParams.set("song",e.target.value);
+    location.href=u.toString()};
+  LAY=G.layouts.club; DUR=G.map.song.length;
+  F=mkReader(G.map,LAY);
+  MODE=Q.get("run")==="calibrate"?"calibrate":"show";
+  $("mode").value=MODE;
+  $("mode").onchange=e=>{const u=new URL(location);u.searchParams.set("run",e.target.value);
+    location.href=u.toString()};
+  if(MODE==="calibrate"){
+    $("step").style.display="block"; $("song").disabled=true; $("aud").style.display="none";
+    $("play").textContent="restart"; $("play").onclick=()=>{calT0=performance.now()/1000};
+  }
+  buildGrid();
+  $("aud").src="/api/audio?song="+G.song;
+  if(MODE!=="calibrate") $("play").onclick=()=>{const a=$("aud");
+    if(a.paused){a.play();$("play").textContent="❚❚ Pause"}else{a.pause();$("play").textContent="▶ Play"}};
+  $("todo").innerHTML=TODO.map(t=>`<li>${t}</li>`).join("");
+  $("stat").textContent=`${(W.fixtures||[]).length} fixtures patched · ${G.song}`;
+  paint(WIRE.wire(MODE==="calibrate"?CAL.calFrame(0,LAY):F(0),W)[1]); tick();
+ }catch(e){ $("stat").style.color="#e88055"; $("stat").textContent=e.message }
+})();
+</script></body></html>

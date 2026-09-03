@@ -337,11 +337,11 @@ def status():
     out["wire"] = {"owner": "Alnas",
                    "fixtures": len((wired or {}).get("fixtures", [])),
                    "universes": len((wired or {}).get("universes", [])),
-                   "built": False,
+                   "built": os.path.exists(os.path.join(ROOT, "readers", "lights", "wire.js")),
                    "job": "Hardware, exclusively. Frames into bytes onto real fixtures. Works "
                           "hand in hand with the frame lane — they are one problem split in two.",
-                   "next": "Write wire(frame, wiring) and print a universe to screen.",
-                   "link": "/wire"}
+                   "next": "Open the universe view and watch 512 bytes move with the music.",
+                   "link": "/dmx"}
     # The single most useful thing the page can say: what to do RIGHT NOW.
     # Derived from real state, so it is never advice the situation has outgrown.
     songs_n = out["songs"]["count"]
@@ -609,6 +609,19 @@ class H(http.server.BaseHTTPRequestHandler):
                                   "text/html; charset=utf-8")
             if u.path == "/rooms":
                 return self._send(200, open(os.path.join(HERE, "rooms.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path == "/static/calibrate.js":
+                return self._send(200, open(os.path.join(ROOT, "readers", "lights",
+                                                         "calibrate.js")).read(),
+                                  "text/plain; charset=utf-8")
+            if u.path == "/static/wire.js":
+                return self._send(200, open(os.path.join(ROOT, "readers", "lights", "wire.js")).read(),
+                                  "text/plain; charset=utf-8")
+            if u.path == "/api/wiring":
+                return self._send(200, open(os.path.join(ROOT, "readers", "lights", "club",
+                                                         "wiring.json")).read())
+            if u.path == "/dmx":
+                return self._send(200, open(os.path.join(HERE, "dmx.html")).read(),
                                   "text/html; charset=utf-8")
             if u.path == "/static/recipe4.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "src", "recipe4.js")).read(),
