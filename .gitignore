@@ -31,3 +31,6 @@ node_modules/
 
 # packs carry the mp3 for testing; the repo never does
 *.zip
+
+# synthetic renders regenerate in seconds; the repo holds scores, never songs
+synth/out/

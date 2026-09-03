@@ -11,7 +11,7 @@ import json, sys
 
 KINDS = {"build", "drop", "stop", "quiet", "spotlight", "return"}
 RISES = {"steady", "late", "early", "stepped"}
-HOWS  = {"truth", "model", "sketch", "hand-written"}
+HOWS  = {"truth", "model", "sketch", "hand-written", "synthetic"}
 
 def check(m):
     e, w = [], []

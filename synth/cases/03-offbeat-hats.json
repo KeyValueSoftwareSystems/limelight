@@ -1,0 +1,419 @@
+{
+ "map": "0.3",
+ "song": {
+  "title": "offbeat hats 124",
+  "artist": "limelight synth",
+  "length": 24.0
+ },
+ "made_by": {
+  "how": "synthetic",
+  "who": "synth/author.py",
+  "why": "The 75 ms bug, on purpose. Kick on downbeats only, hats on every eighth-note offbeat, so full-mix onset energy is dominated by the hats and a naive fit locks half a subdivision early. Passing this requires fitting on the low band where the kick lives.",
+  "warning": "AUTHORED, not measured. Every time here is a cause, not an observation. This file is ground truth for the listener precisely because the audio was rendered from it -- never treat it as a listening record."
+ },
+ "grid": {
+  "period": 0.483871,
+  "phase": 0.25,
+  "bpm": 124.0,
+  "bar_phase": 1,
+  "locked": true,
+  "how": "authored. the renderer places every event on this grid."
+ },
+ "beats": [
+  0.25,
+  0.733871,
+  1.217742,
+  1.701613,
+  2.185484,
+  2.669355,
+  3.153226,
+  3.637097,
+  4.120968,
+  4.604839,
+  5.08871,
+  5.572581,
+  6.056452,
+  6.540323,
+  7.024194,
+  7.508065,
+  7.991935,
+  8.475806,
+  8.959677,
+  9.443548,
+  9.927419,
+  10.41129,
+  10.895161,
+  11.379032,
+  11.862903,
+  12.346774,
+  12.830645,
+  13.314516,
+  13.798387,
+  14.282258,
+  14.766129,
+  15.25,
+  15.733871,
+  16.217742,
+  16.701613,
+  17.185484,
+  17.669355,
+  18.153226,
+  18.637097,
+  19.120968,
+  19.604839,
+  20.08871,
+  20.572581,
+  21.056452,
+  21.540323,
+  22.024194,
+  22.508065,
+  22.991935,
+  23.475806,
+  23.959677
+ ],
+ "downbeats": [
+  0.25,
+  2.185484,
+  4.120968,
+  6.056452,
+  7.991935,
+  9.927419,
+  11.862903,
+  13.798387,
+  15.733871,
+  17.669355,
+  19.604839,
+  21.540323,
+  23.475806
+ ],
+ "downbeats_note": null,
+ "chapters": [
+  {
+   "at": 0.0,
+   "name": "intro"
+  }
+ ],
+ "moments": [],
+ "spans": [],
+ "beats_window": [
+  0.0,
+  24.0
+ ],
+ "confidence": 1.0,
+ "hold_out": false,
+ "render": {
+  "sample_rate": 48000,
+  "events": [
+   {
+    "at": 0.25,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 0.491935,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 0.975806,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 1.459677,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 1.943548,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 2.185484,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 2.427419,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 2.91129,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 3.395161,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 3.879032,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 4.120968,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 4.362903,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 4.846774,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 5.330645,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 5.814516,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 6.056452,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 6.298387,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 6.782258,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 7.266129,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 7.75,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 7.991935,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 8.23387,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 8.717741,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 9.201612,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 9.685483,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 9.927419,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 10.169354,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 10.653225,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 11.137096,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 11.620967,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 11.862903,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 12.104838,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 12.588709,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 13.07258,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 13.556451,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 13.798387,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 14.040322,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 14.524193,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 15.008064,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 15.491935,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 15.733871,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 15.975806,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 16.459677,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 16.943548,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 17.427419,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 17.669355,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 17.91129,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 18.395161,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 18.879032,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 19.362903,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 19.604839,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 19.846774,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 20.330645,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 20.814516,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 21.298387,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 21.540323,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 21.782258,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 22.266129,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 22.75,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 23.23387,
+    "voice": "hat",
+    "gain": 0.7
+   },
+   {
+    "at": 23.475806,
+    "voice": "kick",
+    "gain": 1.0
+   },
+   {
+    "at": 23.717741,
+    "voice": "hat",
+    "gain": 0.7
+   }
+  ]
+ }
+}

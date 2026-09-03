@@ -68,6 +68,31 @@ labelled as different drops score **0.951** — the same section. Re-clustering 
 returns two identical passes of a six-part cycle with integer bar counts both times. That is
 recorded as `segmentation_proposal`, not applied, because structure is a human's call.
 
+## Provenance: the `how` field is the safety mechanism
+
+`made_by.how` is the only thing standing between a measurement and a guess wearing its clothes,
+so it is a closed set:
+
+| `how` | what it means | may it be used as truth? |
+|---|---|---|
+| `truth` | a human, with the audio playing. See `truth/PROTOCOL.md` | yes, it is the authority |
+| `synthetic` | **the times are causes, not observations** — audio was rendered from this map, so it is ground truth by construction | yes, within the limits below |
+| `model` | a listener measured it from a recording | no, this is what gets graded |
+| `hand-written` | a human typed times they believe | no |
+| `sketch` | a guess, quarantined in `maps/sketch/`, confidence <= 0.5 | never |
+
+`synthetic` is not a stronger `hand-written`, it is a different kind of claim. A hand-written map
+asserts times a person believes; a synthetic map *defines* times that audio was then built to
+match, and `synth/render.py` refuses to ship a render whose events sit more than 2 ms from what
+the map declares. That is what makes it usable as ground truth, and it is also the limit: a
+synthetic map can only test what we already know how to name, so it can never validate the
+learned tier, and human ears stay the authority on everything else.
+
+A map must not claim a fact its audio cannot support. `synth/cases/01-metronome.json` is
+identical clicks with no accent, so the bar is unknowable from the signal and `downbeats` is
+empty on purpose — a listener that reports downbeats there is inventing them, and the bench
+counts it against them.
+
 ## Four rules
 
 1. **Time is always seconds**, decimal, from the start. Never ms, bars, samples or frames.
