@@ -331,6 +331,43 @@ def status():
                           "block you: build it against a printed universe now.",
                    "next": "Write wire(frame, wiring) and print a universe to screen.",
                    "link": "/wire"}
+    # The single most useful thing the page can say: what to do RIGHT NOW.
+    # Derived from real state, so it is never advice the situation has outgrown.
+    songs_n = out["songs"]["count"]
+    best = out["listen"]["best"]
+    if songs_n == 0:
+        out["do_now"] = {"say": "No songs yet. Press Generate all ten on the Songs card.",
+                         "why": "It writes ten songs and their exact answers. About 90 seconds.",
+                         "where": "songs"}
+    elif not best:
+        out["do_now"] = {"say": "Press Score all ten on the Listener card.",
+                         "why": f"{songs_n} songs are ready. This gives you the number to beat.",
+                         "where": "listen"}
+    else:
+        nxt = None
+        rp = os.path.join(HERE, "RESULTS.tsv")
+        if os.path.exists(rp):
+            lines = [l for l in open(rp).read().strip().split("\n") if l]
+            if len(lines) > 1:
+                head = lines[0].split("\t"); idx = {k: i for i, k in enumerate(head)}
+                rows = [r.split("\t") for r in lines[1:]]
+                rows = [r for r in rows if len(r) == len(head)
+                        and r[idx["listener"]] == best["listener"]]
+                seen = {}
+                for r in rows: seen[r[idx["level"]]] = r
+                for k in sorted(seen):
+                    if "pass" in idx and seen[k][idx["pass"]] == "0": nxt = k; break
+        if best["passed"] == best["of"] and best["of"] >= songs_n:
+            out["do_now"] = {"say": "Every level passes. The Nights is the final exam.",
+                             "why": "readers/lights/pack/ — real music, and its map is not "
+                                    "trustworthy, which is the point.",
+                             "where": "frames"}
+        else:
+            out["do_now"] = {"say": f"Best so far: {best['passed']} of {best['of']} levels."
+                                    + (f" Next to fix: {nxt}." if nxt else ""),
+                             "why": "Open Two rooms to see what a map error actually costs, "
+                                    "or Songs to add a harder level.",
+                             "where": "listen"}
     return out
 
 

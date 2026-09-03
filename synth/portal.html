@@ -64,6 +64,10 @@ code{font-family:ui-monospace,monospace;font-size:12.5px;background:var(--raise)
 <h1>Lime<span>light</span></h1>
 <p class="lede">A file that says what a song does. Everything here reads that file. Pick your part —
 it is already running, and already missing you.</p>
+<div id="now" style="display:none;background:var(--surface);border:1px solid var(--tung);
+ border-left-width:3px;border-radius:4px;padding:14px 17px;margin:20px 0 0">
+ <p id="nowsay" style="margin:0 0 4px;font:700 17px/1.3 ui-sans-serif,system-ui,sans-serif"></p>
+ <p id="nowwhy" style="margin:0;color:var(--muted);font-size:14px"></p></div>
 
 <div id="err" style="display:none;background:#2a1410;border:1px solid var(--bad);
   border-radius:4px;padding:14px 16px;margin:20px 0 0;font-family:ui-monospace,monospace;
@@ -172,6 +176,8 @@ async function load(){
     (await fetch("/api/status")).json(),
     (await fetch("/api/listeners2")).json()]);
   if(s.error) return fail(s.error);
+  if(s.do_now){ $("#now").style.display="block";
+    $("#nowsay").textContent=s.do_now.say; $("#nowwhy").textContent=s.do_now.why }
   $("#doors").innerHTML=LANES.map(([k,t,sub])=>card(k,t,sub,s[k])).join("")
    + `<div class="door">
         <p class="who">everyone</p>
