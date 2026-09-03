@@ -71,9 +71,12 @@ KICK, HAT, CLICK = ("kick", 1.0), ("hat", 0.7), ("click", 1.0)
 
 CASES = [
     case("01-metronome", "metronome 120", 
-         "The floor. Identical clicks, round tempo, offset phase. If period and phase cannot be "
-         "recovered from this, nothing downstream is worth measuring. Carries no downbeat cue at "
-         "all, so a listener that reports downbeats here is inventing them.",
+         "PHASE is what this case tests, not tempo. Identical clicks determine the set of beat "
+         "times but not the period uniquely: a grid at 60 bpm is a perfect subset of one at 120, "
+         "and with no accent anywhere in the signal nothing can break that tie. The tempo octave "
+         "is genuinely undetermined here, which makes this the case that asks whether a listener "
+         "reports the ambiguity or quietly guesses. It also carries no bar cue at all, so a "
+         "listener that reports downbeats is inventing them.",
          bpm=120.0, phase=0.500, dur=20.0, pattern={-1: [CLICK]}, bar_cue=False),
 
     case("02-kick-hat", "kick and hat 126.4",

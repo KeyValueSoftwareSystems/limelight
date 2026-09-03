@@ -8,7 +8,7 @@
  "made_by": {
   "how": "synthetic",
   "who": "synth/author.py",
-  "why": "The floor. Identical clicks, round tempo, offset phase. If period and phase cannot be recovered from this, nothing downstream is worth measuring. Carries no downbeat cue at all, so a listener that reports downbeats here is inventing them.",
+  "why": "PHASE is what this case tests, not tempo. Identical clicks determine the set of beat times but not the period uniquely: a grid at 60 bpm is a perfect subset of one at 120, and with no accent anywhere in the signal nothing can break that tie. The tempo octave is genuinely undetermined here, which makes this the case that asks whether a listener reports the ambiguity or quietly guesses. It also carries no bar cue at all, so a listener that reports downbeats is inventing them.",
   "warning": "AUTHORED, not measured. Every time here is a cause, not an observation. This file is ground truth for the listener precisely because the audio was rendered from it -- never treat it as a listening record."
  },
  "grid": {
