@@ -77,3 +77,35 @@ rather than as a memory.
 **Never fill a field you did not measure.** An empty value is worth more than a guess, because once
 a guess is written down nobody can tell it from a measurement. Level 01 declares no downbeats for
 exactly this reason, and a listener that reports them there is marked wrong.
+
+## Bringing your own songs
+
+Generated songs sound like a machine. Real ones will not. If you write a song — in a DAW, or with
+a generator — it can join the ladder, but **the answer sheet has to come from you authoring it, not
+from us listening to it.** You know the tempo and where each section starts because you set them.
+The moment we have to detect those, we are back to marking an exam with no answers.
+
+```
+python3 synth/import.py                       # writes a template to fill in
+python3 synth/import.py synth/incoming/night-drive.song.json
+```
+
+Put the wav next to the spec in `synth/incoming/`, which is gitignored. You tell us four things:
+
+| you tell us | why you and not us |
+|---|---|
+| `bpm` | you set it in the DAW |
+| `first_downbeat` | seconds to the start of bar 1 |
+| `sections` | name and length in bars, in order |
+| `plays` | which instruments are in each section |
+
+Everything else is measured from your audio, not guessed — energy per bar, length, and the beat
+grid derived from your tempo. If you export stems named `drums.wav`, `bass.wav`, `other.wav`,
+`vocals.wav`, `guitar.wav`, `piano.wav` into a folder and point `stems_dir` at it, instrument
+presence is measured exactly instead of taken from the on/off list.
+
+Audio never enters git. 16-bit wav only — the importer refuses anything else rather than reading it
+wrong.
+
+Verified by round-trip: a generated song re-imported from its own arrangement reproduces its map
+exactly, including the repeated section and energy to four decimal places.

@@ -34,3 +34,6 @@ node_modules/
 
 # synthetic renders regenerate in seconds; the repo holds scores, never songs
 synth/out/
+
+# songs you bring in: audio stays out of git, the map goes in
+synth/incoming/
