@@ -42,14 +42,17 @@ audio{width:100%;margin-top:12px;filter:invert(.92) hue-rotate(180deg)}
 @media(max-width:900px){.rooms{grid-template-columns:1fr}}
 </style></head><body><div class="wrap">
 <h1>Two rooms · the same song, two maps</h1>
+<p class="sub" id="caveat"></p>
 <p class="sub"><b>Flash match</b> is the number that matters: it asks whether the two rooms change
 at the same instants, which is what an audience sees. <b>Levels match</b> asks whether they are on
 average equally bright, and it is generous to the point of dishonesty — a room firing on the wrong
-half of the beat still scores 98% on it.<br>Left is the show built from the map we measured. Right is the show built from a map
+half of the beat still scores 98% on it.<br>Left is the show built from the reference map. Right is the show built from a map
 with one thing wrong. Same song, same rig, same recipe — the only difference is the file. This is
 what a map error <em>costs</em>, which is not something a beat-accuracy number can tell you.</p>
 
 <div class="bar">
+  <label for="song">song</label>
+  <select id="song"></select>
   <label for="dmg">what is wrong on the right</label>
   <select id="dmg"></select>
   <label for="lay">rig</label>
@@ -59,7 +62,7 @@ what a map error <em>costs</em>, which is not something a beat-accuracy number c
 </div>
 
 <div class="rooms">
-  <div class="room"><div class="rhead"><span class="rname t">measured map</span>
+  <div class="room"><div class="rhead"><span class="rname t" id="n1">authored map</span>
     <span class="rmeta" id="m1">—</span></div><canvas class="room" id="r1"></canvas></div>
   <div class="room wrong" id="room2"><div class="rhead"><span class="rname c" id="n2">damaged map</span>
     <span class="rmeta" id="m2">—</span></div><canvas class="room" id="r2"></canvas></div>
@@ -333,7 +336,17 @@ function rebuild(){
 
 (async()=>{
   RECIPE=await (await fetch("/static/recipe4.js")).text();
-  G=await (await fetch("/api/song")).json();
+  const Q0=new URLSearchParams(location.search);
+  const which=Q0.get("song")||"first-light";
+  G=await (await fetch("/api/song?song="+which)).json();
+  if(G.error){ $("stat").style.color="#e88055"; $("stat").textContent=G.error; return }
+  $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>
+    `<option value="${k}"${k===which?" selected":""}>${v.label}</option>`).join("");
+  $("song").onchange=e=>{ const u=new URL(location); u.searchParams.set("song",e.target.value);
+    location.href=u.toString() };
+  $("n1").textContent=G.songs[which].left;
+  $("caveat").innerHTML=(G.songs[which].canonical?"":"<b>Careful: </b>")+G.songs[which].note;
+  $("caveat").style.color=G.songs[which].canonical?"var(--muted)":"var(--bad)";
   LAYOUTS=G.layouts; DUR=G.map.song.length;
   // ?d= / ?rig= / ?t= so a specific comparison is a link, which also makes the
   // control case testable from the command line
@@ -343,7 +356,7 @@ function rebuild(){
   const rig=Q.get("rig")||"club";
   $("lay").innerHTML=Object.keys(LAYOUTS).map(k=>
     `<option${k===rig?" selected":""}>${k}</option>`).join("");
-  if(G.audio){ $("aud").src="/api/audio" } else {
+  if(G.audio){ $("aud").src="/api/audio?song="+which } else {
     $("aud").style.display="none";
     $("stat").textContent="no audio found — running on an internal clock";
   }

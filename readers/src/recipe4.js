@@ -16,7 +16,12 @@ const barPh=t=>cl((beatInBar(t)+bph(t))/4);
 const phrPh=t=>{const k=((bi(t)-DBP)%16+16)%16;return cl((k+bph(t))/16)};
 
 /* energy: smoothstep between downbeat samples, so there is no slope kink */
-function en(t){let k=-1;for(let i=0;i<EN.length;i++)if(EN[i][0]<=t)k=i;else break;
+/* A reader must survive a map that does not carry a field -- rule 2 of the format,
+   which this function was breaking. A grid-only map used to take the whole reader
+   down on the first frame; now it produces a flat, dull show, which is the honest
+   answer to "we measured the beats and nothing else". */
+function en(t){if(!EN||EN.length===0)return 0.5;
+  let k=-1;for(let i=0;i<EN.length;i++)if(EN[i][0]<=t)k=i;else break;
   if(k<0)return EN[0][1]; if(k+1>=EN.length)return EN[EN.length-1][1];
   const f=ss(0,1,(t-EN[k][0])/(EN[k+1][0]-EN[k][0]));
   return lerp(EN[k][1],EN[k+1][1],f)}

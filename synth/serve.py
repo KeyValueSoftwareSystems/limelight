@@ -104,20 +104,50 @@ NIGHTS = "/home/renjithbaby/Pencil/Code/boxed-2/limelight-nights"
 MP3 = "/home/renjithbaby/Downloads/Avicii - The Nights (Audio).mp3"
 
 
-def song():
-    """The measured map plus every rig, for the two-room comparison.
+SONGS = {
+    "first-light": {
+        "label": "First Light (ours, canonical)",
+        "map": os.path.join(HERE, "songs", "first-light.map.json"),
+        "wav": os.path.join(HERE, "out", "first-light.wav"),
+        "canonical": True,
+        "left": "authored map",
+        "note": "We wrote the arrangement, rendered the audio from it, then measured the map from "
+                "the individual instrument tracks. Every field is exact because we caused it, so "
+                "the left room is correct by construction.",
+    },
+    "the-nights": {
+        "label": "The Nights (real, NOT canonical)",
+        "map": os.path.join(NIGHTS, "the-nights.map.json"),
+        "wav": MP3,
+        "canonical": False,
+        "left": "measured map",
+        "note": "A real record, and the reference here is not trustworthy: six methods dispute its "
+                "section boundaries between 1:03 and 1:47, its chord labels agree with its own "
+                "detected notes 69% of the time, and one moment in it has been verified by ear. "
+                "The left room is a different map, not a correct one. This is the final exam for a "
+                "listener, not a reference to build against.",
+    },
+}
 
-    The map and the audio both live outside the repo -- the map because it is
-    large and generated, the audio because the repo holds scores and never
-    songs. If the mp3 is not on this machine the page runs on its own clock and
-    says so, rather than failing."""
-    m = json.load(open(os.path.join(NIGHTS, "the-nights.map.json")))
+
+def song(which="first-light"):
+    """A map plus every rig, for the two-room comparison.
+
+    Defaults to the song we authored ourselves. The Nights is reachable but
+    labelled, because comparing against a map whose structure is still disputed
+    measures agreement with a file nobody can vouch for."""
+    sp = SONGS.get(which) or SONGS["first-light"]
+    if not os.path.exists(sp["map"]):
+        return {"error": f"{which} has no map yet -- run python3 synth/compose.py"}
+    m = json.load(open(sp["map"]))
     lays = {}
     for name, f in (("club", "layout.json"), ("venue", "venue.json"), ("the-grind", "grind.json")):
         p = os.path.join(NIGHTS, f)
         if os.path.exists(p): lays[name] = json.load(open(p))
     return {"map": m, "layouts": lays, "chapters": m.get("chapters", []),
-            "audio": os.path.exists(MP3)}
+            "audio": os.path.exists(sp["wav"]), "song": which,
+            "songs": {k: {"label": v["label"], "canonical": v["canonical"],
+                          "left": v["left"], "note": v["note"]} for k, v in SONGS.items()}}
 
 
 PAGE = r"""<!doctype html><html><head><meta charset="utf-8">
@@ -337,10 +367,17 @@ class H(http.server.BaseHTTPRequestHandler):
             if u.path == "/static/recipe4.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "src", "recipe4.js")).read(),
                                   "text/plain; charset=utf-8")
-            if u.path == "/api/song":       return self._send(200, json.dumps(song()))
+            if u.path == "/api/song":
+                return self._send(200, json.dumps(song((q.get("song") or ["first-light"])[0])))
             if u.path == "/api/audio":
-                if not os.path.exists(MP3): return self._send(404, json.dumps({"error": "no audio"}))
-                return self._send(200, open(MP3, "rb").read(), "audio/mpeg")
+                sp = SONGS.get((q.get("song") or ["first-light"])[0])
+                if not sp: return self._send(404, json.dumps({"error": "unknown song"}))
+                w = sp["wav"]
+                if not os.path.exists(w) and w.endswith(".wav"):
+                    subprocess.run([sys.executable, os.path.join(HERE, "compose.py")], cwd=ROOT)
+                if not os.path.exists(w): return self._send(404, json.dumps({"error": "no audio"}))
+                return self._send(200, open(w, "rb").read(),
+                                  "audio/wav" if w.endswith(".wav") else "audio/mpeg")
             if u.path == "/api/cases":      return self._send(200, json.dumps(cases()))
             if u.path == "/api/listeners":  return self._send(200, json.dumps(listeners()))
             if u.path == "/api/results":    return self._send(200, json.dumps(results()))
