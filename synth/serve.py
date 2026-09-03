@@ -150,6 +150,90 @@ def song(which="first-light"):
                           "left": v["left"], "note": v["note"]} for k, v in SONGS.items()}}
 
 
+def status():
+    """Live state of every lane, read from the files themselves.
+
+    Nothing here is typed in by hand, because a status board that can be wrong is
+    worse than no status board."""
+    out = {}
+
+    songs = []
+    sd = os.path.join(HERE, "songs")
+    if os.path.isdir(sd):
+        for f in sorted(os.listdir(sd)):
+            if not f.endswith(".map.json"): continue
+            m = json.load(open(os.path.join(sd, f)))
+            songs.append({"file": f, "title": m["song"]["title"],
+                          "seconds": m["song"]["length"], "bpm": m["grid"]["bpm"],
+                          "sections": len((m.get("sections") or {}).get("entries", [])),
+                          "moments": len(m.get("moments", []))})
+    out["songs"] = {"owner": "Muzammil", "count": len(songs),
+                    "seconds": round(sum(s["seconds"] for s in songs), 1), "list": songs,
+                    "job": "Write more songs. Each one is a level, and a training example the "
+                           "model lane cannot work without.",
+                    "next": "Edit the PLAN table in synth/compose.py and run it.",
+                    "link": "/songs"}
+
+    rigs = []
+    for name, f in (("club", "layout.json"), ("venue", "venue.json"), ("the-grind", "grind.json")):
+        p2 = os.path.join(NIGHTS, f)
+        if os.path.exists(p2):
+            L = json.load(open(p2))
+            rigs.append({"name": name, "fixtures": len(L.get("fixtures", [])),
+                         "kinds": len({x.get("kind") for x in L.get("fixtures", [])})})
+    out["venues"] = {"owner": "Nikitha", "count": len(rigs), "list": rigs,
+                     "job": "Build the room we actually demo in, and say whether the show looks "
+                            "right in it. That judgement is not a number.",
+                     "next": "Copy a layout, move the fixtures, watch the show in your room.",
+                     "link": "/rooms"}
+
+    best, runs = None, 0
+    rp = os.path.join(HERE, "RESULTS.tsv")
+    if os.path.exists(rp):
+        rows = [l.split("\t") for l in open(rp).read().strip().split("\n")[1:]]
+        head = open(rp).readline().strip().split("\t")
+        i_f, i_h, i_l = head.index("beats_f"), head.index("held_out"), head.index("listener")
+        by = {}
+        for r in rows:
+            if len(r) < len(head) or r[i_h] == "1": continue
+            by.setdefault(r[i_l], []).append(float(r[i_f]))
+        runs = len(rows)
+        if by: best = {"listener": max(by, key=lambda k: sum(by[k]) / len(by[k])),
+                       "mean_beats_f": round(max(sum(v) / len(v) for v in by.values()), 3)}
+    out["listen"] = {"owner": "Amal + Sebastian", "runs": runs, "best": best,
+                     "job": "Turn audio into a map. You are graded against maps we authored, so "
+                            "every disagreement is yours and not an argument.",
+                     "next": "Write a listener that reads a WAV path and prints a map.",
+                     "link": "/listen"}
+
+    cases, stale = [], None
+    cp = os.path.join(ROOT, "readers", "lights", "pack", "CASES.json")
+    if os.path.exists(cp):
+        cj = json.load(open(cp)); cases = cj.get("cases", [])
+        gold = os.path.join(ROOT, "readers", "lights", "pack", "expected",
+                            "first-light.frames.jsonl.gz")
+        rec = os.path.join(ROOT, "readers", "src", "recipe4.js")
+        if os.path.exists(gold) and os.path.exists(rec):
+            stale = os.path.getmtime(rec) > os.path.getmtime(gold)
+    out["frames"] = {"owner": "Dheeraj", "cases": len(cases), "list": cases, "stale": stale,
+                     "job": "One function: map plus layout plus time gives what every light is "
+                            "doing. FRAME.md is the contract between us.",
+                     "next": "node readers/lights/pack/make.js, then check.py against yours.",
+                     "link": "/frames"}
+
+    wf = os.path.join(ROOT, "readers", "lights", "club", "wiring.json")
+    wired = json.load(open(wf)) if os.path.exists(wf) else None
+    out["wire"] = {"owner": "Alnas",
+                   "fixtures": len((wired or {}).get("fixtures", [])),
+                   "universes": len((wired or {}).get("universes", [])),
+                   "built": False,
+                   "job": "Turn a frame into bytes on a wire. The hub comes last and does not "
+                          "block you: build it against a printed universe now.",
+                   "next": "Write wire(frame, wiring) and print a universe to screen.",
+                   "link": "/wire"}
+    return out
+
+
 PAGE = r"""<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Limelight — synth loop</title><style>
@@ -360,7 +444,14 @@ class H(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         u = urllib.parse.urlparse(self.path); q = urllib.parse.parse_qs(u.query)
         try:
-            if u.path in ("/", "/index.html"): return self._send(200, PAGE, "text/html; charset=utf-8")
+            if u.path in ("/", "/index.html"):
+                return self._send(200, open(os.path.join(HERE, "portal.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path == "/listen": return self._send(200, PAGE, "text/html; charset=utf-8")
+            if u.path == "/api/status": return self._send(200, json.dumps(status()))
+            if u.path in ("/songs", "/frames", "/wire"):
+                return self._send(200, open(os.path.join(HERE, "lane.html")).read(),
+                                  "text/html; charset=utf-8")
             if u.path == "/rooms":
                 return self._send(200, open(os.path.join(HERE, "rooms.html")).read(),
                                   "text/html; charset=utf-8")

@@ -1,0 +1,82 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Limelight — lane</title><style>
+:root{--bg:#0e1016;--surface:#171a23;--raise:#1e222d;--ink:#e6e9f1;--muted:#959bac;
+ --faint:#666c7e;--rule:#252935;--rule2:#373c4d;--tung:#f0a93c;--good:#69be86;--bad:#e88055}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);padding:30px 20px 60px;
+ font:15px/1.6 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:860px;margin:0 auto}
+a.back{color:var(--faint);text-decoration:none;font-family:ui-monospace,monospace;font-size:12px}
+a.back:hover{color:var(--tung)}
+.who{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--tung);margin:20px 0 3px}
+h1{font:700 30px/1.1 ui-sans-serif,system-ui,sans-serif;margin:0 0 10px;letter-spacing:-.02em}
+.job{color:var(--muted);margin:0 0 24px;max-width:70ch;font-size:16px}
+.big{display:flex;gap:26px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--rule);
+ border-radius:4px;padding:15px 18px;margin:0 0 18px}
+.big div{font-family:ui-monospace,monospace;font-size:11px;color:var(--faint)}
+.big b{display:block;font:700 24px/1.15 ui-sans-serif,system-ui,sans-serif;color:var(--ink);
+ font-variant-numeric:tabular-nums}
+h2{font:600 11.5px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;
+ color:var(--faint);margin:30px 0 10px}
+.box{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:16px 18px}
+.box p{margin:0 0 10px;color:var(--muted);font-size:14.5px}.box p:last-child{margin:0}
+code{font-family:ui-monospace,monospace;font-size:12.5px;background:var(--raise);
+ border:1px solid var(--rule);border-radius:3px;padding:2px 6px;color:var(--ink);
+ display:inline-block;margin:2px 0}
+table{border-collapse:collapse;width:100%;font-size:13px;font-family:ui-monospace,monospace}
+th,td{text-align:left;padding:7px 14px 7px 0;border-bottom:1px solid var(--rule)}
+th{color:var(--faint);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+.flag{display:inline-block;font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.07em;
+ text-transform:uppercase;padding:2px 7px;border-radius:2px;margin-left:8px;vertical-align:3px}
+.flag.bad{background:#3a1d13;color:var(--bad)}.flag.good{background:#16301f;color:var(--good)}
+</style></head><body><div class="wrap">
+<a class="back" href="/">← everything</a>
+<p class="who" id="who">—</p>
+<h1 id="title">—</h1>
+<p class="job" id="job"></p>
+<div class="big" id="big"></div>
+<h2>Do this</h2>
+<div class="box" id="do"></div>
+<div id="extra"></div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const LANE=location.pathname.replace("/","");
+const TITLES={songs:"Songs",frames:"Frames",wire:"Wire",venues:"Rooms",listen:"Listener"};
+const HOW={
+ songs:[["Make a new song","Open <code>synth/compose.py</code>, copy the PLAN table, change the sections and which instruments play in each, then run <code>python3 synth/compose.py</code>. You get audio and a perfect map together."],
+        ["Why it matters","The model lane has exactly one song to learn from. It cannot train on one. Every song you add is both a level in the game and a training example, and because we author the arrangement first, its map is exact — no guessing, nothing to verify by ear."],
+        ["What good looks like","A song with a clear build, two passes of the same section so the show can grow, and at least one moment where almost everything stops."]],
+ frames:[["Regenerate the answers","<code>node readers/lights/pack/make.js</code> writes the golden frames from the current recipe. They are generated, never kept by hand — the old pack was pinned to an old recipe and wasted your time."],
+        ["Check yours","<code>python3 readers/lights/pack/check.py expected/first-light.frames.jsonl.gz mine.jsonl.gz</code>. It stops at the first real difference and names the time, the fixture and the field."],
+        ["The contract","<code>readers/lights/FRAME.md</code>. One rule: the frame is a function of time alone. Ask for t=47 twice, get identical bytes. Ask for t=47 without playing the first 47 seconds, still get the right answer."]],
+ wire:[["Nothing is blocking you","The hub arrives last and you do not need it. A frame is normalised — levels 0 to 1, colours 0 to 255 — and <code>readers/lights/club/wiring.json</code> already says which universe and address each fixture sits on."],
+        ["Build this","<code>wire(frame, wiring)</code> → bytes, and print one universe to the screen as 512 numbers. When hardware arrives it is already correct, because the layout the simulator uses and the layout the real room uses are the same file. Only the wiring differs."],
+        ["Then the useful part","A map written to exercise every fixture in turn, so a room can be commissioned and its declared limits checked against what the motors actually do. We shipped a rig last week whose layout claimed 25% more speed than the fixtures have."]],
+};
+(async()=>{
+  const s=await (await fetch("/api/status")).json();
+  const d=s[LANE]; if(!d){ $("#title").textContent="Unknown lane"; return }
+  $("#who").textContent=d.owner;
+  $("#title").innerHTML=(TITLES[LANE]||LANE)+(LANE==="frames"&&d.stale?
+    '<span class="flag bad">goldens stale</span>':LANE==="frames"?'<span class="flag good">current</span>':"");
+  $("#job").textContent=d.job;
+  const b=[];
+  if(LANE==="songs") b.push(["songs",d.count],["seconds of music",d.seconds]);
+  if(LANE==="frames") b.push(["golden cases",d.cases],["frames",d.list.reduce((a,c)=>a+c.frames,0)]);
+  if(LANE==="wire") b.push(["fixtures patched",d.fixtures],["universes",d.universes],["written",d.built?"yes":"not yet"]);
+  $("#big").innerHTML=b.map(([k,v])=>`<div>${k}<b>${v}</b></div>`).join("");
+  $("#do").innerHTML=(HOW[LANE]||[]).map(([h,t])=>
+    `<p><b style="color:var(--ink)">${h}.</b> ${t}</p>`).join("");
+  if(LANE==="songs"&&d.list.length) $("#extra").innerHTML='<h2>Songs so far</h2><div class="box">'+
+    '<table><thead><tr><th>title</th><th>bpm</th><th>seconds</th><th>sections</th><th>moments</th></tr></thead><tbody>'+
+    d.list.map(x=>`<tr><td>${x.title}</td><td>${x.bpm}</td><td>${x.seconds}</td><td>${x.sections}</td><td>${x.moments}</td></tr>`).join("")+
+    '</tbody></table></div>';
+  if(LANE==="frames"&&d.list.length) $("#extra").innerHTML='<h2>Golden cases</h2><div class="box">'+
+    '<table><thead><tr><th>case</th><th>frames</th><th>seconds</th><th>map</th></tr></thead><tbody>'+
+    d.list.map(x=>`<tr><td>${x.name}</td><td>${x.frames}</td><td>${x.seconds}</td><td>${x.how}</td></tr>`).join("")+
+    '</tbody></table></div>';
+})();
+</script></body></html>

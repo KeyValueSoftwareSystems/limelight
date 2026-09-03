@@ -1,0 +1,103 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Limelight</title><style>
+:root{--bg:#0e1016;--surface:#171a23;--raise:#1e222d;--ink:#e6e9f1;--muted:#959bac;
+ --faint:#666c7e;--rule:#252935;--rule2:#373c4d;--tung:#f0a93c;--learn:#8f9aff;
+ --good:#69be86;--bad:#e88055}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);padding:34px 20px 60px;
+ font:15px/1.6 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font:700 34px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:-.02em;margin:0 0 8px}
+h1 span{color:var(--tung)}
+.lede{color:var(--muted);margin:0 0 6px;max-width:70ch}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:28px 0 0}
+a.door{display:block;text-decoration:none;color:inherit;background:var(--surface);
+ border:1px solid var(--rule);border-radius:4px;padding:17px 18px;transition:border-color .12s}
+a.door:hover{border-color:var(--tung)}
+a.door.soon{border-style:dashed;opacity:.72}
+.who{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--tung);margin:0 0 3px}
+.what{font:700 20px/1.2 ui-sans-serif,system-ui,sans-serif;margin:0 0 8px;letter-spacing:-.01em}
+.job{color:var(--muted);font-size:14px;margin:0 0 13px}
+.big{display:flex;gap:20px;align-items:baseline;flex-wrap:wrap;padding-top:11px;
+ border-top:1px solid var(--rule)}
+.big div{font-family:ui-monospace,monospace;font-size:11px;color:var(--faint)}
+.big b{display:block;font:700 21px/1.15 ui-sans-serif,system-ui,sans-serif;color:var(--ink);
+ font-variant-numeric:tabular-nums}
+.next{margin:11px 0 0;font-family:ui-monospace,monospace;font-size:11.5px;color:var(--faint)}
+.warn{color:var(--bad)}.ok{color:var(--good)}
+.flag{display:inline-block;font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.07em;
+ text-transform:uppercase;padding:2px 7px;border-radius:2px;margin-left:7px;vertical-align:2px}
+.flag.bad{background:#3a1d13;color:var(--bad)} .flag.good{background:#16301f;color:var(--good)}
+.flag.soon{background:var(--raise);color:var(--faint)}
+h2{font:600 11.5px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;
+ color:var(--faint);margin:38px 0 12px}
+.start{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:16px 18px}
+.start p{margin:0 0 9px;color:var(--muted);font-size:14px}
+code{font-family:ui-monospace,monospace;font-size:12.5px;background:var(--raise);
+ border:1px solid var(--rule);border-radius:3px;padding:2px 6px;color:var(--ink)}
+.rule{color:var(--faint);font-size:13px;margin:26px 0 0;max-width:78ch}
+</style></head><body><div class="wrap">
+<h1>Lime<span>light</span></h1>
+<p class="lede">A file that says what a song does. Everything here reads that file. Pick your part —
+it is already running, and already missing you.</p>
+
+<div class="doors" id="doors"></div>
+
+<h2>If nothing loads</h2>
+<div class="start">
+  <p>One command, from the repo. No install, no network, nothing to unzip.</p>
+  <p><code>python3 synth/serve.py</code></p>
+  <p>Audio is not stored anywhere — it is generated. <code>python3 synth/compose.py</code> writes the
+     song from 12 KB of code, identically every time, on every machine.</p>
+</div>
+
+<p class="rule">Two rules that do not bend. No song files in git, ever — we ship the generator, not
+the audio. And never fill a field you did not verify: an empty value is worth more than a guess,
+because once a guess is written down nobody can tell it apart from a measurement.</p>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const LANES=[
+  ["songs","Songs","the ladder"],
+  ["listen","Listener","audio → map"],
+  ["frames","Frames","map → light"],
+  ["venues","Rooms","where it plays"],
+  ["wire","Wire","light → hardware"],
+];
+function num(v){return v===null||v===undefined?"—":v}
+function card(k,title,sub,d){
+  const soon = (k==="wire"&&!d.built) || (k==="songs"&&d.count===0);
+  let big="";
+  if(k==="songs") big=`<div>songs<b>${d.count}</b></div><div>seconds of music<b>${d.seconds}</b></div>`;
+  if(k==="venues") big=d.list.map(r=>`<div>${r.name}<b>${r.fixtures}</b></div>`).join("");
+  if(k==="listen") big=`<div>best mean beats F<b class="${d.best&&d.best.mean_beats_f>0.9?'ok':'warn'}">${
+     d.best?d.best.mean_beats_f:"—"}</b></div><div>runs logged<b>${d.runs}</b></div>`;
+  if(k==="frames") big=`<div>golden cases<b>${d.cases}</b></div><div>frames<b>${
+     d.list.reduce((a,c)=>a+c.frames,0)}</b></div>`;
+  if(k==="wire") big=`<div>fixtures patched<b>${d.fixtures}</b></div><div>universes<b>${d.universes}</b></div>`;
+  let flag="";
+  if(k==="frames"&&d.stale===true) flag='<span class="flag bad">stale — recipe changed after these</span>';
+  if(k==="frames"&&d.stale===false) flag='<span class="flag good">current</span>';
+  if(soon) flag='<span class="flag soon">not built yet</span>';
+  return `<a class="door${soon?" soon":""}" href="${d.link}">
+    <p class="who">${d.owner}</p>
+    <p class="what">${title}${flag}</p>
+    <p class="job">${d.job}</p>
+    <div class="big">${big}</div>
+    <p class="next">next: ${d.next}</p></a>`;
+}
+(async()=>{
+  const s=await (await fetch("/api/status")).json();
+  $("#doors").innerHTML=LANES.map(([k,t,sub])=>card(k,t,sub,s[k])).join("")
+   + `<a class="door" href="/rooms">
+        <p class="who">everyone</p>
+        <p class="what">Two rooms</p>
+        <p class="job">The same song played from two maps, side by side, in time with the audio.
+           This is how you see what a mistake actually costs.</p>
+        <div class="big"><div>reference<b>ours</b></div><div>rigs<b>3</b></div></div>
+        <p class="next">next: press play and watch the right-hand room be wrong.</p></a>`;
+})();
+</script></body></html>
