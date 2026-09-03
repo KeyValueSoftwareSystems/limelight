@@ -55,9 +55,9 @@ def case(cid, title, why, bpm, phase, dur, pattern, bar=4, hold=False, bar_cue=T
         # and declaring downbeats there would score the listener against something we
         # invented -- the same sin as an invented timestamp, wearing a tidier costume.
         "downbeats": downs if bar_cue else [],
-        "downbeats_note": None if bar_cue else
+        **({} if bar_cue else {"downbeats_note":
             "EMPTY BY DESIGN. The audio carries no bar cue, so any downbeat a listener "
-            "reports here is invented and should be counted against it.",
+            "reports here is invented and should be counted against it."}),
         "chapters": [{"at": 0.0, "name": "intro"}],
         "moments": [],
         "spans": [],

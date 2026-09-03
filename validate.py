@@ -26,14 +26,22 @@ def check(m):
     # guess, so a half-filled truth file is a valid artifact -- the bench scores per field
     # and simply scores less. A model, by contrast, has no excuse for a null.
     is_truth = m["made_by"].get("how") == "truth"
+    is_synth = m.get("made_by", {}).get("how") == "synthetic"
     blank = [k for k in ("beats", "downbeats", "chapters", "moments", "spans", "energy")
              if m.get(k) in (None, [])]
     if blank:
         if is_truth:
             for k in blank: w.append(f"{k}: null — awaiting a human. Not an error in a truth file")
         else:
-            for k in ("beats", "downbeats", "chapters") :
-                if k in blank: e.append(f"{k} is null, and this is not a truth file")
+            for k in ("beats", "downbeats", "chapters"):
+                if k not in blank: continue
+                # A synthetic map may leave a field empty when its audio genuinely cannot
+                # carry that fact -- identical clicks have no recoverable bar -- but only
+                # when it says so in <field>_note. Silence still reads as an omission.
+                if is_synth and m.get(f"{k}_note"):
+                    w.append(f"{k}: empty by design — {str(m[f'{k}_note'])[:60]}")
+                else:
+                    e.append(f"{k} is null, and this is not a truth file")
 
     song = m["song"]
     A(isinstance(song.get("length"), (int, float)) and song["length"] > 0, "song.length must be a positive number")
