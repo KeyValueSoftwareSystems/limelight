@@ -104,41 +104,125 @@ NIGHTS = "/home/renjithbaby/Pencil/Code/boxed-2/limelight-nights"
 MP3 = "/home/renjithbaby/Downloads/Avicii - The Nights (Audio).mp3"
 
 
-SONGS = {
-    "first-light": {
-        "label": "First Light (ours, canonical)",
-        "map": os.path.join(HERE, "songs", "first-light.map.json"),
-        "wav": os.path.join(HERE, "out", "first-light.wav"),
-        "canonical": True,
-        "left": "authored map",
-        "note": "We wrote the arrangement, rendered the audio from it, then measured the map from "
-                "the individual instrument tracks. Every field is exact because we caused it, so "
-                "the left room is correct by construction.",
-    },
-    "the-nights": {
-        "label": "The Nights (real, NOT canonical)",
-        "map": os.path.join(NIGHTS, "the-nights.map.json"),
-        "wav": MP3,
-        "canonical": False,
-        "left": "measured map",
-        "note": "A real record, and the reference here is not trustworthy: six methods dispute its "
-                "section boundaries between 1:03 and 1:47, its chord labels agree with its own "
-                "detected notes 69% of the time, and one moment in it has been verified by ear. "
-                "The left room is a different map, not a correct one. This is the final exam for a "
-                "listener, not a reference to build against.",
-    },
-}
+
+# ---- jobs -------------------------------------------------------------------
+# The page can start work, but only from this list. An endpoint that runs a
+# string from the browser is a remote shell whatever interface it wears, so the
+# action name is looked up here and the arguments are validated, never passed
+# through.
+import threading, collections
+
+JOBS = collections.OrderedDict()
+JOB_LOCK = threading.Lock()
+
+def _listener_ok(cmd):
+    """A listener must be a file that exists in listen/. Nothing else runs."""
+    parts = (cmd or "").split()
+    if not parts: return None
+    for p in parts:
+        if p.endswith(".py"):
+            base = os.path.basename(p)
+            if base in os.listdir(os.path.join(ROOT, "listen")):
+                return f"{sys.executable} listen/{base}"
+    return None
+
+def start_job(action, params):
+    if action == "compose":
+        lvl = (params.get("level") or "").strip()
+        args = [sys.executable, os.path.join(HERE, "compose.py")]
+        if lvl:
+            if not (len(lvl) == 2 and lvl.isdigit()): return None, "level must be two digits"
+            args.append(lvl)
+        label = f"compose {lvl or 'all ten songs'}"
+    elif action == "loop":
+        lis = _listener_ok(params.get("listener") or "python3 listen/baseline.py")
+        if not lis: return None, "that listener is not a file in listen/"
+        args = [sys.executable, os.path.join(HERE, "loop.py"), "--listener", lis]
+        lvl = (params.get("level") or "").strip()
+        if lvl:
+            if not (len(lvl) == 2 and lvl.isdigit()): return None, "level must be two digits"
+            args += ["--level", lvl]
+        label = f"score {lis.split('/')[-1]}" + (f" on level {lvl}" if lvl else "")
+    elif action == "frames":
+        node = "node"
+        args = [node, os.path.join(ROOT, "readers", "lights", "pack", "make.js")]
+        label = "rebuild golden frames"
+    else:
+        return None, "unknown action"
+
+    jid = f"{action}-{int(time.time()*1000)}"
+    job = {"id": jid, "action": action, "label": label, "state": "running",
+           "started": time.time(), "out": "", "code": None}
+    with JOB_LOCK:
+        JOBS[jid] = job
+        while len(JOBS) > 20: JOBS.popitem(last=False)
+
+    def run():
+        try:
+            p = subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=900)
+            job["out"] = (p.stdout or "") + (p.stderr or "")
+            job["code"] = p.returncode
+        except Exception as e:
+            job["out"] = f"{type(e).__name__}: {e}"; job["code"] = -1
+        job["state"] = "done"; job["ended"] = time.time()
+    threading.Thread(target=run, daemon=True).start()
+    return jid, None
 
 
-def song(which="first-light"):
+def listeners_available():
+    d = os.path.join(ROOT, "listen")
+    return sorted(f for f in os.listdir(d) if f.endswith(".py") and not f.startswith("_"))
+
+
+def songs_index():
+    """Every song the ladder has, discovered from disk.
+
+    This used to be a hard-coded dict with one entry called first-light. Renaming
+    the ladder silently broke the rooms page, so nothing here is written down
+    twice."""
+    out = {}
+    sd = os.path.join(HERE, "songs")
+    if os.path.isdir(sd):
+        for f in sorted(os.listdir(sd)):
+            if not f.endswith(".map.json"): continue
+            slug = f[:-9]
+            m = json.load(open(os.path.join(sd, f)))
+            lvl = (m.get("level") or {})
+            out[slug] = {
+                "label": f"{slug}  ·  {m['song']['title']}",
+                "map": os.path.join(sd, f),
+                "wav": os.path.join(HERE, "out", slug + ".wav"),
+                "canonical": True, "left": "authored map",
+                "teaches": lvl.get("teaches", ""),
+                "note": "We wrote the arrangement, rendered the audio from it, then measured the "
+                        "map back out of the individual instrument tracks. Every field is exact, "
+                        "so the left room is correct by construction. "
+                        + (lvl.get("teaches", "")),
+            }
+    if os.path.exists(os.path.join(NIGHTS, "the-nights.map.json")):
+        out["the-nights"] = {
+            "label": "the-nights  ·  real record, NOT canonical",
+            "map": os.path.join(NIGHTS, "the-nights.map.json"), "wav": MP3,
+            "canonical": False, "left": "measured map", "teaches": "the final exam",
+            "note": "A real record, and the reference here is not trustworthy: six methods dispute "
+                    "its section boundaries between 1:03 and 1:47, its chord labels agree with its "
+                    "own detected notes 69% of the time, and one moment in it has been verified by "
+                    "ear. The left room is a different map, not a correct one.",
+        }
+    return out
+
+
+def song(which=None):
     """A map plus every rig, for the two-room comparison.
 
     Defaults to the song we authored ourselves. The Nights is reachable but
     labelled, because comparing against a map whose structure is still disputed
     measures agreement with a file nobody can vouch for."""
-    sp = SONGS.get(which) or SONGS["first-light"]
-    if not os.path.exists(sp["map"]):
-        return {"error": f"{which} has no map yet -- run python3 synth/compose.py"}
+    idx = songs_index()
+    if not idx:
+        return {"error": "no songs yet — press Generate songs, or run python3 synth/compose.py"}
+    if which not in idx: which = sorted(idx)[0]
+    sp = idx[which]
     m = json.load(open(sp["map"]))
     lays = {}
     for name, f in (("club", "layout.json"), ("venue", "venue.json"), ("the-grind", "grind.json")):
@@ -147,7 +231,7 @@ def song(which="first-light"):
     return {"map": m, "layouts": lays, "chapters": m.get("chapters", []),
             "audio": os.path.exists(sp["wav"]), "song": which,
             "songs": {k: {"label": v["label"], "canonical": v["canonical"],
-                          "left": v["left"], "note": v["note"]} for k, v in SONGS.items()}}
+                          "left": v["left"], "note": v["note"]} for k, v in idx.items()}}
 
 
 def status():
@@ -465,6 +549,13 @@ class H(http.server.BaseHTTPRequestHandler):
                                   "text/html; charset=utf-8")
             if u.path == "/listen": return self._send(200, PAGE, "text/html; charset=utf-8")
             if u.path == "/api/status": return self._send(200, json.dumps(status()))
+            if u.path == "/api/listeners2": return self._send(200, json.dumps(listeners_available()))
+            if u.path == "/api/job":
+                j = JOBS.get((q.get("id") or [""])[0])
+                if not j: return self._send(404, json.dumps({"error": "no such job"}))
+                return self._send(200, json.dumps(j))
+            if u.path == "/api/jobs":
+                return self._send(200, json.dumps(list(JOBS.values())[-6:]))
             if u.path in ("/songs", "/frames", "/wire"):
                 return self._send(200, open(os.path.join(HERE, "lane.html")).read(),
                                   "text/html; charset=utf-8")
@@ -475,9 +566,10 @@ class H(http.server.BaseHTTPRequestHandler):
                 return self._send(200, open(os.path.join(ROOT, "readers", "src", "recipe4.js")).read(),
                                   "text/plain; charset=utf-8")
             if u.path == "/api/song":
-                return self._send(200, json.dumps(song((q.get("song") or ["first-light"])[0])))
+                return self._send(200, json.dumps(song((q.get("song") or [None])[0])))
             if u.path == "/api/audio":
-                sp = SONGS.get((q.get("song") or ["first-light"])[0])
+                idx = songs_index()
+                sp = idx.get((q.get("song") or [None])[0]) or (idx and idx[sorted(idx)[0]])
                 if not sp: return self._send(404, json.dumps({"error": "unknown song"}))
                 w = sp["wav"]
                 if not os.path.exists(w) and w.endswith(".wav"):
@@ -504,6 +596,15 @@ class H(http.server.BaseHTTPRequestHandler):
             self._send(404, json.dumps({"error": "no route"}))
         except Exception as e:
             self._send(500, json.dumps({"error": f"{type(e).__name__}: {e}"}))
+
+    def do_POST(self):
+        u = urllib.parse.urlparse(self.path); q = urllib.parse.parse_qs(u.query)
+        if u.path != "/api/run":
+            return self._send(404, json.dumps({"error": "no route"}))
+        params = {k: v[0] for k, v in q.items()}
+        jid, err = start_job(params.get("action", ""), params)
+        if err: return self._send(400, json.dumps({"error": err}))
+        return self._send(200, json.dumps({"id": jid}))
 
     def log_message(self, *a): pass
 

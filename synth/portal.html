@@ -13,10 +13,31 @@ h1 span{color:var(--tung)}
 .lede{color:var(--muted);margin:0 0 6px;max-width:70ch}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:28px 0 0}
-a.door{display:block;text-decoration:none;color:inherit;background:var(--surface);
- border:1px solid var(--rule);border-radius:4px;padding:17px 18px;transition:border-color .12s}
-a.door:hover{border-color:var(--tung)}
-a.door.soon{border-style:dashed;opacity:.72}
+.door{background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+ padding:17px 18px;display:flex;flex-direction:column}
+.door.soon{border-style:dashed;opacity:.78}
+.door .what a{color:inherit;text-decoration:none}
+.door .what a:hover{color:var(--tung)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:13px 0 0;
+ padding-top:12px;border-top:1px solid var(--rule)}
+.acts button,.acts select,.acts a.go{background:var(--raise);color:var(--ink);
+ border:1px solid var(--rule2);border-radius:3px;padding:6px 12px;font-size:12.5px;
+ font-family:ui-monospace,monospace;cursor:pointer;text-decoration:none}
+.acts button.primary{background:var(--tung);color:#20160a;border-color:var(--tung);font-weight:700}
+.acts button:disabled{opacity:.45;cursor:default}
+.acts a.go:hover,.acts button:hover:not(:disabled){border-color:var(--tung)}
+#console{margin:26px 0 0;background:#0a0c11;border:1px solid var(--rule);border-radius:4px;
+ display:none}
+#console .top{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;
+ border-bottom:1px solid var(--rule);font-family:ui-monospace,monospace;font-size:11.5px;
+ color:var(--faint)}
+#console pre{margin:0;padding:13px 15px;font-family:ui-monospace,monospace;font-size:12px;
+ line-height:1.5;color:var(--ink);white-space:pre-wrap;max-height:400px;overflow:auto}
+.spin{display:inline-block;width:9px;height:9px;border:1.5px solid var(--tung);
+ border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite;
+ vertical-align:-1px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
 .who{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
  color:var(--tung);margin:0 0 3px}
 .what{font:700 20px/1.2 ui-sans-serif,system-ui,sans-serif;margin:0 0 8px;letter-spacing:-.01em}
@@ -48,6 +69,10 @@ it is already running, and already missing you.</p>
   border-radius:4px;padding:14px 16px;margin:20px 0 0;font-family:ui-monospace,monospace;
   font-size:13px;color:var(--bad)"></div>
 <div class="doors" id="doors"></div>
+<div id="console"><div class="top"><span id="ctitle">—</span>
+ <button onclick="document.getElementById('console').style.display='none'"
+   style="background:none;border:none;color:var(--faint);cursor:pointer;font-size:15px">×</button></div>
+ <pre id="cout"></pre></div>
 
 <h2>If nothing loads</h2>
 <div class="start">
@@ -75,6 +100,16 @@ const LANES=[
   ["wire","Wire","light → hardware"],
 ];
 function num(v){return v===null||v===undefined?"—":v}
+function acts(k,d){
+  const open=`<a class="go" href="${d.link}">open →</a>`;
+  if(k==="songs") return `<button class="primary" onclick="run('compose',{},this)">Generate all ten</button>
+    <select id="lvl">${[...Array(10)].map((_,i)=>`<option value="${String(i+1).padStart(2,'0')}">level ${String(i+1).padStart(2,'0')}</option>`).join("")}</select>
+    <button onclick="run('compose',{level:document.getElementById('lvl').value},this)">just that one</button>${open}`;
+  if(k==="listen") return `<select id="lis"></select>
+    <button class="primary" onclick="run('loop',{listener:document.getElementById('lis').value},this)">Score all ten</button>${open}`;
+  if(k==="frames") return `<button class="primary" onclick="run('frames',{},this)">Rebuild goldens</button>${open}`;
+  return open;
+}
 function card(k,title,sub,d){
   const soon = (k==="wire"&&!d.built) || (k==="songs"&&d.count===0);
   let big="";
@@ -91,12 +126,38 @@ function card(k,title,sub,d){
   if(k==="frames"&&d.stale===true) flag='<span class="flag bad">stale — recipe changed after these</span>';
   if(k==="frames"&&d.stale===false) flag='<span class="flag good">current</span>';
   if(soon) flag='<span class="flag soon">not built yet</span>';
-  return `<a class="door${soon?" soon":""}" href="${d.link}">
+  return `<div class="door${soon?" soon":""}">
     <p class="who">${d.owner}</p>
-    <p class="what">${title}${flag}</p>
+    <p class="what"><a href="${d.link}">${title}</a>${flag}</p>
     <p class="job">${d.job}</p>
     <div class="big">${big}</div>
-    <p class="next">next: ${d.next}</p></a>`;
+    <div class="acts">${acts(k,d)}</div></div>`;
+}
+
+/* Start a job on the server and follow it. The page can only ask for actions the
+   server already knows by name -- it cannot name a command to run. */
+async function run(action,params,btn){
+  const c=$("#console"), out=$("#cout"), title=$("#ctitle");
+  const qs=new URLSearchParams({action,...params}).toString();
+  c.style.display="block"; out.textContent="starting…";
+  document.querySelectorAll(".acts button").forEach(b=>b.disabled=true);
+  try{
+    const r=await (await fetch("/api/run?"+qs,{method:"POST"})).json();
+    if(r.error){ out.textContent=r.error; throw new Error(r.error) }
+    let t0=Date.now();
+    for(;;){
+      const j=await (await fetch("/api/job?id="+r.id)).json();
+      const secs=((Date.now()-t0)/1000).toFixed(0);
+      title.innerHTML=(j.state==="running"?'<span class="spin"></span>':"")+j.label+
+        (j.state==="running"?`  ${secs}s`:`  finished in ${secs}s, exit ${j.code}`);
+      out.textContent=j.out||"working…";
+      out.scrollTop=out.scrollHeight;
+      if(j.state==="done") break;
+      await new Promise(r=>setTimeout(r,900));
+    }
+  }catch(e){ title.textContent="failed"; out.textContent+="\n"+e.message }
+  document.querySelectorAll(".acts button").forEach(b=>b.disabled=false);
+  load();
 }
 function fail(msg){
   const e=$("#err"); e.style.display="block";
@@ -105,19 +166,23 @@ function fail(msg){
     +"is how an hour gets lost, so here is the actual error.";
 }
 addEventListener("error",e=>fail(e.message||String(e.error)));
-(async()=>{
+async function load(){
  try{
-  const r=await fetch("/api/status");
-  const s=await r.json();
+  const [s,ls]=await Promise.all([
+    (await fetch("/api/status")).json(),
+    (await fetch("/api/listeners2")).json()]);
   if(s.error) return fail(s.error);
   $("#doors").innerHTML=LANES.map(([k,t,sub])=>card(k,t,sub,s[k])).join("")
-   + `<a class="door" href="/rooms">
+   + `<div class="door">
         <p class="who">everyone</p>
-        <p class="what">Two rooms</p>
+        <p class="what"><a href="/rooms">Two rooms</a></p>
         <p class="job">The same song played from two maps, side by side, in time with the audio.
            This is how you see what a mistake actually costs.</p>
         <div class="big"><div>reference<b>ours</b></div><div>rigs<b>3</b></div></div>
-        <p class="next">next: press play and watch the right-hand room be wrong.</p></a>`;
+        <div class="acts"><a class="go" href="/rooms">open →</a></div></div>`;
+  const sel=$("#lis");
+  if(sel) sel.innerHTML=ls.map(l=>`<option value="python3 listen/${l}">${l}</option>`).join("");
  }catch(e){ fail(e.message||String(e)) }
-})();
+}
+load();
 </script></body></html>

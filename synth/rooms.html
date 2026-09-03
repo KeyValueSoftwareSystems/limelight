@@ -337,9 +337,12 @@ function rebuild(){
 (async()=>{
   RECIPE=await (await fetch("/static/recipe4.js")).text();
   const Q0=new URLSearchParams(location.search);
-  const which=Q0.get("song")||"first-light";
-  G=await (await fetch("/api/song?song="+which)).json();
+  const asked=Q0.get("song")||"";
+  G=await (await fetch("/api/song?song="+encodeURIComponent(asked))).json();
   if(G.error){ $("stat").style.color="#e88055"; $("stat").textContent=G.error; return }
+  // the server decides which song was actually served -- trusting the URL is how
+  // this page broke when the ladder was renamed
+  const which=G.song;
   $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>
     `<option value="${k}"${k===which?" selected":""}>${v.label}</option>`).join("");
   $("song").onchange=e=>{ const u=new URL(location); u.searchParams.set("song",e.target.value);

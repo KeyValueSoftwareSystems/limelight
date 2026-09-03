@@ -7,6 +7,11 @@ there is nothing to argue about.
 
 ## Set up (about two minutes, once)
 
+Everything after the clone can be done from the page — generating songs, scoring a listener,
+rebuilding the golden frames. The commands below are what those buttons run, and they still work if
+you prefer a terminal.
+
+
 ```
 git clone git@github.com:KeyValueSoftwareSystems/limelight.git
 cd limelight
