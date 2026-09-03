@@ -1,12 +1,11 @@
 when	sha	listener	level	beats_f	grid_err_ms	bpm	downbeats_f	octave	listen_s	pass
-2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	01-pulse	0.6598	4.0	60.0	0.0	double	1.21	0
-2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	02-backbeat	0.6598	4.0	60.0	0.0	double	1.082	0
-2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	03-offbeat	0.6531	4.1	62.0	0.0	double	1.131	0
-2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	04-odd-tempo	0.1515	191.0	79.0	0.0	ok	1.294	0
-2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	05-sections	0.6575	1.2	64.0	0.0	double	1.74	0
-2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	06-repeat	0.6593	0.2	63.0	0.0	double	2.123	0
-2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	07-voice	0.6598	2.1	62.0	0.0	double	2.286	0
-2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	08-syncopation	0.9811	4.0	125.0	0.0	ok	1.943	1
-2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	09-half-time	0.6598	1.2	64.0	0.0	double	2.14	0
-2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	10-everything	0.6617	4.2	61.0	0.0	double	3.095	0
-2026-09-04T01:43:06	f0e47f7	/usr/bin/python3 listen/baseline.py	01-pulse	0.6598	4.0	60.0	0.0	double	0.907	0
+2026-09-04T02:30:16	fb09e22	python3 listen/baseline.py	01-pulse	0.9771	0.0	96.0	0.0	ok	1.324	1
+2026-09-04T02:30:16	fb09e22	python3 listen/baseline.py	02-backbeat	0.9771	0.0	108.0	0.0	ok	1.207	1
+2026-09-04T02:30:16	fb09e22	python3 listen/baseline.py	03-offbeat	0.6531	4.1	62.0	0.0	double	1.068	0
+2026-09-04T02:30:16	fb09e22	python3 listen/baseline.py	04-odd-tempo	0.1515	91.0	78.979	0.0	ok	1.214	0
+2026-09-04T02:30:16	fb09e22	python3 listen/baseline.py	05-sections	0.9846	4.0	118.0	0.0	ok	1.573	1
+2026-09-04T02:30:16	fb09e22	python3 listen/baseline.py	06-repeat	0.6593	4.0	64.027	0.6522	half	1.561	0
+2026-09-04T02:30:16	fb09e22	python3 listen/baseline.py	07-voice	0.9884	4.0	100.0	0.9846	ok	2.018	1
+2026-09-04T02:30:16	fb09e22	python3 listen/baseline.py	08-syncopation	0.0	223.5	66.0	0.0	ok	1.285	0
+2026-09-04T02:30:16	fb09e22	python3 listen/baseline.py	09-half-time	0.6598	7.4	70.033	0.0	double	1.476	0
+2026-09-04T02:30:16	fb09e22	python3 listen/baseline.py	10-everything	0.0	223.7	112.0	0.0	double	3.065	0

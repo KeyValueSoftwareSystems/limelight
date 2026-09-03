@@ -25,8 +25,73 @@ BPB = 4
 
 def midi(n): return 440.0 * (2.0 ** ((n - 69) / 12.0))
 
-CHORDS = [("Am", [57, 60, 64]), ("F", [53, 57, 60]), ("C", [48, 55, 64]), ("G", [55, 59, 62])]
-LEAD = [69, 72, 71, 67, 69, 76, 74, 72]
+# ---- musical identity, one per song -----------------------------------------
+# The first version gave every song the same key, the same four chords, the same
+# melody and a tempo between 120 and 128, so ten levels were really two sounds:
+# a drum pattern and one tune. A ladder of arrangements is not a ladder of songs.
+
+NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+QUAL = {"m": ([0, 3, 7], "m"), "M": ([0, 4, 7], ""), "m7": ([0, 3, 7, 10], "m7"),
+        "M7": ([0, 4, 7, 11], "maj7"), "sus": ([0, 5, 7], "sus4"), "7": ([0, 4, 7, 10], "7")}
+
+PROGS = {
+  "minor_pop":  [(0, "m"), (8, "M"), (3, "M"), (10, "M")],
+  "andalusian": [(0, "m"), (10, "M"), (8, "M"), (7, "M")],
+  "major_pop":  [(0, "M"), (7, "M"), (9, "m"), (5, "M")],
+  "minor_four": [(0, "m"), (5, "m"), (8, "M"), (7, "M")],
+  "suspense":   [(0, "m"), (0, "sus"), (10, "M"), (8, "M")],
+  "gospel":     [(0, "M7"), (9, "m7"), (2, "m7"), (7, "7")],
+  "dorian":     [(0, "m"), (5, "M"), (0, "m"), (10, "M")],
+}
+MELODIES = {
+  "rise":   [0, 2, 4, 7, 4, 2, 0, -3],
+  "fall":   [7, 5, 4, 2, 0, 2, 0, -1],
+  "hook":   [0, 0, 3, 2, 0, -2, 0, 5],
+  "arch":   [0, 4, 7, 9, 7, 4, 2, 0],
+  "call":   [4, 4, 2, 0, 4, 4, 5, 7],
+  "riff":   [0, 3, 5, 3, 0, 3, 7, 5],
+  "sparse": [0, None, 7, None, 5, None, 3, None],
+  "climb":  [-3, 0, 2, 3, 5, 7, 9, 7],
+}
+MINOR = [0, 2, 3, 5, 7, 8, 10]
+MAJOR = [0, 2, 4, 5, 7, 9, 11]
+
+# One row per song: its own key, chords, tune, bass feel and tempo. Kept in one
+# table rather than spread across the song definitions, so the whole ladder's
+# variety can be read at a glance and nothing silently repeats.
+IDENTITY = {
+ "01-pulse":       dict(bpm=96.0,  root=53, prog="minor_pop",  mel="hook",   minor=True,  bass="root"),
+ "02-backbeat":    dict(bpm=108.0, root=48, prog="minor_four", mel="riff",   minor=True,  bass="root"),
+ "03-offbeat":     dict(bpm=124.0, root=55, prog="andalusian", mel="fall",   minor=True,  bass="eighths"),
+ "04-odd-tempo":   dict(bpm=126.4, root=50, prog="dorian",     mel="call",   minor=True,  bass="octave"),
+ "05-sections":    dict(bpm=118.0, root=52, prog="andalusian", mel="arch",   minor=True,  bass="eighths"),
+ "06-repeat":      dict(bpm=128.0, root=57, prog="minor_pop",  mel="hook",   minor=True,  bass="octave"),
+ "07-voice":       dict(bpm=100.0, root=58, prog="major_pop",  mel="rise",   minor=False, bass="root"),
+ "08-syncopation": dict(bpm=132.0, root=54, prog="minor_four", mel="riff",   minor=True,  bass="walk"),
+ "09-half-time":   dict(bpm=140.0, root=49, prog="suspense",   mel="sparse", minor=True,  bass="root"),
+ "10-everything":  dict(bpm=112.0, root=55, prog="gospel",     mel="climb",  minor=False, bass="walk"),
+}
+
+
+def chords_for(root, prog):
+    """Triads voiced near middle C, so different keys stay in the same register."""
+    out = []
+    for off, q in PROGS[prog]:
+        base = root + off
+        while base > 62: base -= 12
+        while base < 50: base += 12
+        out.append((NAMES[(root + off) % 12] + QUAL[q][1], [base + i for i in QUAL[q][0]]))
+    return out
+
+
+def melody_for(root, mel, minor=True):
+    sc = MINOR if minor else MAJOR
+    out = []
+    for d in MELODIES[mel]:
+        if d is None: out.append(None); continue
+        octv, deg = divmod(d, 7)
+        out.append(root + 12 + 12 * octv + sc[deg])
+    return out
 
 
 def envelope(n, atk, dec):
@@ -150,6 +215,11 @@ SONGS = [
 
 
 def build(spec):
+    ident = IDENTITY.get(spec["slug"], {})
+    spec = {**spec, **{k: v for k, v in ident.items() if k != "bass"}}
+    CH_LOCAL = chords_for(spec.get("root", 57), spec.get("prog", "minor_pop"))
+    MEL_LOCAL = melody_for(spec.get("root", 57), spec.get("mel", "hook"), spec.get("minor", True))
+    bassmode = ident.get("bass", "eighths")
     bpm = spec["bpm"]; beat = 60.0 / bpm; bar = beat * BPB
     phase = spec.get("phase", 0.0)
     swing = spec.get("swing", 0.0)
@@ -183,16 +253,19 @@ def build(spec):
         half = name in halftime
         for k in range(nb):
             bi = b0 + k; t0 = phase + bi * bar
-            cname, notes = CHORDS[bi % len(CHORDS)]
+            cname, notes = CH_LOCAL[bi % len(CH_LOCAL)]
             bar_chord.append({"at": round(t0, 6), "chord": cname, "confidence": 1.0})
             if "pad" in mix:
                 for nt in notes:
                     add(tracks["pad"], tone(midi(nt), bar * 0.98, atk=0.09, dec=1.6), t0, mix["pad"] * 0.30)
             if "bass" in mix:
-                step = beat if half else beat / 2
-                cnt = BPB if half else 8
+                one = half or bassmode == "root"
+                step, cnt = (beat, BPB) if one else (beat / 2, 8)
                 for e in range(cnt):
-                    add(tracks["bass"], tone(midi(notes[0] - 24), step * 0.46, dec=0.10, kind="saw"),
+                    nb = notes[0] - 24
+                    if bassmode == "octave" and e % 2 == 1: nb += 12
+                    if bassmode == "walk": nb += [0, 0, 3, 5, 7, 5, 3, 2][e % 8]
+                    add(tracks["bass"], tone(midi(nb), step * 0.46, dec=0.10, kind="saw"),
                         t0 + e * step + jitter(), mix["bass"] * 0.55)
             if "kick" in mix:
                 hits = [0, 2] if half else list(range(BPB))
@@ -215,7 +288,8 @@ def build(spec):
                     add(tracks["hat"], HAT, t0 + frac * bar + jitter(), 0.22)
             if "lead" in mix:
                 for q in range(BPB):
-                    nt = LEAD[(bi * BPB + q) % len(LEAD)]
+                    nt = MEL_LOCAL[(bi * BPB + q) % len(MEL_LOCAL)]
+                    if nt is None: continue
                     add(tracks["lead"], tone(midi(nt), beat * 0.9, atk=0.006, dec=0.26),
                         t0 + q * beat + jitter(), mix["lead"] * 0.34)
         b0 += nb
@@ -308,7 +382,9 @@ def build(spec):
                   "note": "Measured per bar from each instrument's own track before mixing. drums is "
                           "kick plus clap plus hat, other is the pad, vocals is the lead. guitar and "
                           "piano are explicit zeros -- an absent field would read as 0.5."},
-        "observations": {"key": {"estimate": "A minor", "how": "authored", "confidence": 1.0},
+        "observations": {"key": {"estimate": NAMES[spec.get("root", 57) % 12]
+                                             + (" minor" if spec.get("minor", True) else " major"),
+                                 "how": "authored", "confidence": 1.0},
                          "chords": {"rate": "per_bar", "how": "authored", "events": bar_chord}},
         "arrangement": [{"name": p[0], "id": p[1], "repeat": p[2], "bars": p[3],
                          "plays": sorted(p[4])} for p in plan],
