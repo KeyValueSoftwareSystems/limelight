@@ -64,6 +64,14 @@ code{font-family:ui-monospace,monospace;font-size:12.5px;background:var(--raise)
 <h1>Lime<span>light</span></h1>
 <p class="lede">A file that says what a song does. Everything here reads that file. Pick your part —
 it is already running, and already missing you.</p>
+<a href="/rooms" style="display:block;text-decoration:none;color:inherit;margin:22px 0 0;
+ background:linear-gradient(180deg,#1d2130,#171a23);border:1px solid var(--tung);border-radius:5px;
+ padding:20px 22px">
+ <p style="margin:0 0 5px;font:700 24px/1.2 ui-sans-serif,system-ui,sans-serif;color:var(--tung)">
+   Watch the show →</p>
+ <p style="margin:0;color:var(--muted);font-size:14.5px;max-width:74ch">The same song played twice,
+   side by side, in time with the music. One room reads a correct file, the other reads a broken
+   one. If you only ever click one thing here, click this.</p></a>
 <div id="now" style="display:none;background:var(--surface);border:1px solid var(--tung);
  border-left-width:3px;border-radius:4px;padding:14px 17px;margin:20px 0 0">
  <p id="nowsay" style="margin:0 0 4px;font:700 17px/1.3 ui-sans-serif,system-ui,sans-serif"></p>
@@ -97,11 +105,11 @@ because once a guess is written down nobody can tell it apart from a measurement
 <script>
 const $=s=>document.querySelector(s);
 const LANES=[
-  ["songs","Songs","the ladder"],
-  ["listen","Listener","audio → map"],
   ["frames","Frames","map → light"],
-  ["venues","Rooms","where it plays"],
-  ["wire","Wire","light → hardware"],
+  ["wire","Hardware","light → fixtures"],
+  ["venues","Emulator & look","how it all appears"],
+  ["songs","Songs","the demo material"],
+  ["listen","Listener","parked"],
 ];
 function num(v){return v===null||v===undefined?"—":v}
 function acts(k,d){
@@ -130,6 +138,7 @@ function card(k,title,sub,d){
   if(k==="frames"&&d.stale===true) flag='<span class="flag bad">stale — recipe changed after these</span>';
   if(k==="frames"&&d.stale===false) flag='<span class="flag good">current</span>';
   if(soon) flag='<span class="flag soon">not built yet</span>';
+  if(k==="listen") flag='<span class="flag soon">parked</span>';
   return `<div class="door${soon?" soon":""}">
     <p class="who">${d.owner}</p>
     <p class="what"><a href="${d.link}">${title}</a>${flag}</p>

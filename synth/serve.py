@@ -188,12 +188,15 @@ def songs_index():
             slug = f[:-9]
             m = json.load(open(os.path.join(sd, f)))
             lvl = (m.get("level") or {})
+            en = [e[1] for e in m.get("energy", [])] or [1.0]
+            thin = (max(en) - min(en)) < 0.12
             out[slug] = {
                 "label": f"{slug}  ·  {m['song']['title']}",
                 "map": os.path.join(sd, f),
                 "wav": os.path.join(HERE, "out", slug + ".wav"),
                 "canonical": True, "left": "authored map",
-                "teaches": lvl.get("teaches", ""),
+                "teaches": lvl.get("teaches", ""), "thin": thin,
+                "span": round(max(en) - min(en), 3),
                 "note": "We wrote the arrangement, rendered the audio from it, then measured the "
                         "map back out of the individual instrument tracks. Every field is exact, "
                         "so the left room is correct by construction. "
@@ -221,7 +224,11 @@ def song(which=None):
     idx = songs_index()
     if not idx:
         return {"error": "no songs yet — press Generate songs, or run python3 synth/compose.py"}
-    if which not in idx: which = sorted(idx)[0]
+    if which not in idx:
+        # open on the song with the most dynamic range, not the first alphabetically:
+        # levels 01-04 are flat by design and the room barely moves on them
+        rich = [k for k, v in idx.items() if v.get("canonical") and not v.get("thin")]
+        which = max(rich, key=lambda k: idx[k].get("span", 0)) if rich else sorted(idx)[0]
     sp = idx[which]
     m = json.load(open(sp["map"]))
     lays = {}
@@ -231,7 +238,8 @@ def song(which=None):
     return {"map": m, "layouts": lays, "chapters": m.get("chapters", []),
             "audio": os.path.exists(sp["wav"]), "song": which,
             "songs": {k: {"label": v["label"], "canonical": v["canonical"],
-                          "left": v["left"], "note": v["note"]} for k, v in idx.items()}}
+                          "left": v["left"], "note": v["note"],
+                          "thin": v.get("thin", False)} for k, v in idx.items()}}
 
 
 def status():
@@ -253,11 +261,11 @@ def status():
                           "teaches": (m.get("level") or {}).get("teaches", ""),
                           "sections": len((m.get("sections") or {}).get("entries", [])),
                           "moments": len(m.get("moments", []))})
-    out["songs"] = {"owner": "Muzammil", "count": len(songs),
+    out["songs"] = {"owner": "Renjith", "count": len(songs),
                     "seconds": round(sum(s["seconds"] for s in songs), 1), "list": songs,
-                    "job": "Ten levels exist. Add harder ones, and songs that sound less like a "
-                           "machine — every song is both a level and a training example.",
-                    "next": "Add an entry to SONGS in synth/compose.py, then run it.",
+                    "job": "The demo material. Renjith writes these, and their maps are exact "
+                           "because he authors the arrangement before any sound exists.",
+                    "next": "python3 synth/import.py to bring in a song you wrote.",
                     "link": "/songs"}
 
     rigs = []
@@ -268,9 +276,10 @@ def status():
             rigs.append({"name": name, "fixtures": len(L.get("fixtures", [])),
                          "kinds": len({x.get("kind") for x in L.get("fixtures", [])})})
     out["venues"] = {"owner": "Nikitha", "count": len(rigs), "list": rigs,
-                     "job": "Build the room we actually demo in, and say whether the show looks "
-                            "right in it. That judgement is not a number.",
-                     "next": "Copy a layout, move the fixtures, watch the show in your room.",
+                     "job": "The emulator and the whole look of it. How the room is drawn, how "
+                            "these pages feel, and whether the show reads as beautiful — which is "
+                            "a judgement, not a number.",
+                     "next": "Open the rooms view and tell us what is wrong with how it looks.",
                      "link": "/rooms"}
 
     # Read the log by COLUMN NAME and tolerate a schema that has moved, because the
@@ -299,10 +308,11 @@ def status():
                 passed, meanf = sc(by[who])
                 best = {"listener": who, "passed": passed, "of": len(by[who]),
                         "mean_beats_f": round(meanf, 3)}
-    out["listen"] = {"owner": "Amal + Sebastian", "runs": runs, "best": best,
+    out["listen"] = {"owner": "parked", "runs": runs, "best": best,
                      "levels": levels_total,
-                     "job": "Turn audio into a map. Ten levels, each adding one new thing, all "
-                            "graded against maps we authored — so a disagreement is yours.",
+                     "job": "Hearing a song and writing its map. PARKED for the hackathon — we "
+                            "author the songs instead, so nothing is blocked on solving it. The "
+                            "ladder stays here because it is how we would prove it later.",
                      "next": "python3 synth/loop.py --listener \"python3 listen/mine.py\"",
                      "link": "/listen"}
 
@@ -315,9 +325,10 @@ def status():
         rec = os.path.join(ROOT, "readers", "src", "recipe4.js")
         if os.path.exists(gold) and os.path.exists(rec):
             stale = os.path.getmtime(rec) > os.path.getmtime(gold)
-    out["frames"] = {"owner": "Dheeraj", "cases": len(cases), "list": cases, "stale": stale,
-                     "job": "One function: map plus layout plus time gives what every light is "
-                            "doing. FRAME.md is the contract between us.",
+    out["frames"] = {"owner": "Dheeraj + Amal + Sebastian", "cases": len(cases), "list": cases, "stale": stale,
+                     "job": "Map plus layout plus time gives what every light is doing, forty "
+                            "times a second. This is now the main event: three people on it, and "
+                            "it is what Alnas puts on real hardware.",
                      "next": "node readers/lights/pack/make.js, then check.py against yours.",
                      "link": "/frames"}
 
@@ -327,8 +338,8 @@ def status():
                    "fixtures": len((wired or {}).get("fixtures", [])),
                    "universes": len((wired or {}).get("universes", [])),
                    "built": False,
-                   "job": "Turn a frame into bytes on a wire. The hub comes last and does not "
-                          "block you: build it against a printed universe now.",
+                   "job": "Hardware, exclusively. Frames into bytes onto real fixtures. Works "
+                          "hand in hand with the frame lane — they are one problem split in two.",
                    "next": "Write wire(frame, wiring) and print a universe to screen.",
                    "link": "/wire"}
     # The single most useful thing the page can say: what to do RIGHT NOW.

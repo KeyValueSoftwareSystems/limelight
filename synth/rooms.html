@@ -305,7 +305,7 @@ function tick(){
 }
 function tickOnce(){
   const a=$("aud");
-  const t = a.src && !a.paused ? a.currentTime : (playing ? base+(performance.now()-t0)/1000 : base);
+  const t = a.src ? a.currentTime : (playing ? base+(performance.now()-t0)/1000 : base);
   if(t>=DUR){ playing=false; $("play").textContent="▶ Play" }
   const cur=Math.min(t,DUR-0.01);
   const f1=F1(cur), f2=F2(cur);
@@ -337,6 +337,9 @@ function rebuild(){
 (async()=>{
   RECIPE=await (await fetch("/static/recipe4.js")).text();
   const Q0=new URLSearchParams(location.search);
+  // Levels 01-04 are drum patterns with flat energy -- they exist to test a
+  // listener, not to be watched, and the room is nearly static on them. Default to
+  // the richest song so the page opens on something worth looking at.
   const asked=Q0.get("song")||"";
   G=await (await fetch("/api/song?song="+encodeURIComponent(asked))).json();
   if(G.error){ $("stat").style.color="#e88055"; $("stat").textContent=G.error; return }
@@ -344,7 +347,14 @@ function rebuild(){
   // this page broke when the ladder was renamed
   const which=G.song;
   $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>
-    `<option value="${k}"${k===which?" selected":""}>${v.label}</option>`).join("");
+    `<option value="${k}"${k===which?" selected":""}>${v.label}${
+      v.thin?"   (flat — for testing a listener, not for watching)":""}</option>`).join("");
+  if(G.songs[which] && G.songs[which].thin){
+    $("caveat").innerHTML="<b>This song has no dynamics.</b> Its loudness is identical in every "
+      +"bar, so both rooms sit almost still and there is nothing to judge. Pick a song further "
+      +"down the list to actually see the difference.";
+    $("caveat").style.color="var(--bad)";
+  }
   $("song").onchange=e=>{ const u=new URL(location); u.searchParams.set("song",e.target.value);
     location.href=u.toString() };
   $("n1").textContent=G.songs[which].left;
