@@ -1,9 +1,11 @@
-when	sha	listener	case	beats_f	grid_err_ms	bpm	downbeats_f	octave	listen_s	held_out
-2026-09-04T00:20:05	3d563c2	python3 listen/baseline.py	01-metronome	0.6667	4.0	60.0	0.0	half	0.618	0
-2026-09-04T00:20:05	3d563c2	python3 listen/baseline.py	02-kick-hat	0.6579	1.0	63.199	0.7	half	0.737	0
-2026-09-04T00:20:05	3d563c2	python3 listen/baseline.py	03-offbeat-hats	0.0	238.0	62.0	0.0	ok	0.75	0
-2026-09-04T00:20:05	3d563c2	python3 listen/baseline.py	04-octave-trap	0.6579	4.0	63.0	0.6316	half	0.778	1
-2026-09-04T01:10:29	21a236a	python3 listen/baseline.py	01-metronome	0.6667	4.0	60.0	0.0	half	0.736	0
-2026-09-04T01:10:29	21a236a	python3 listen/baseline.py	02-kick-hat	0.6579	1.0	63.199	0.7	half	0.877	0
-2026-09-04T01:10:29	21a236a	python3 listen/baseline.py	03-offbeat-hats	0.0	238.0	62.0	0.0	ok	0.879	0
-2026-09-04T01:10:29	21a236a	python3 listen/baseline.py	04-octave-trap	0.6579	4.0	63.0	0.6316	half	0.857	1
+when	sha	listener	level	beats_f	grid_err_ms	bpm	downbeats_f	octave	listen_s	pass
+2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	01-pulse	0.6598	4.0	60.0	0.0	double	1.21	0
+2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	02-backbeat	0.6598	4.0	60.0	0.0	double	1.082	0
+2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	03-offbeat	0.6531	4.1	62.0	0.0	double	1.131	0
+2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	04-odd-tempo	0.1515	191.0	79.0	0.0	ok	1.294	0
+2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	05-sections	0.6575	1.2	64.0	0.0	double	1.74	0
+2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	06-repeat	0.6593	0.2	63.0	0.0	double	2.123	0
+2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	07-voice	0.6598	2.1	62.0	0.0	double	2.286	0
+2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	08-syncopation	0.9811	4.0	125.0	0.0	ok	1.943	1
+2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	09-half-time	0.6598	1.2	64.0	0.0	double	2.14	0
+2026-09-04T01:36:27	952d3e5	python3 listen/baseline.py	10-everything	0.6617	4.2	61.0	0.0	double	3.095	0
