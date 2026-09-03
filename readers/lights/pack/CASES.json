@@ -1,0 +1,24 @@
+{
+ "generated_by": "readers/lights/pack/make.js",
+ "fps": 20,
+ "layout": "readers/lights/club/layout.json",
+ "note": "Golden frames are GENERATED from committed inputs at the current recipe. Never hand-kept. Regenerate with: node readers/lights/pack/make.js",
+ "cases": [
+  {
+   "name": "first-light",
+   "map": "synth/songs/first-light.map.json",
+   "how": "synthetic — canonical",
+   "frames": 1200,
+   "fps": 20,
+   "seconds": 60
+  },
+  {
+   "name": "the-nights",
+   "map": "maps/model/the-nights.map.json",
+   "how": "model — real record, structure disputed",
+   "frames": 3513,
+   "fps": 20,
+   "seconds": 175.682
+  }
+ ]
+}

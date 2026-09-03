@@ -1,18 +1,33 @@
-# The reader pack
+# The reader lane — golden frames
 
-What Dheeraj takes home. Zipped and handed over on 2 September 2026.
+**Owner: Dheeraj.** Your job is one function: given a map, a layout and a time, return what every
+light is doing at that instant. `../FRAME.md` is the contract.
 
-- `START-HERE.html` — the brief: diagrams, the three songs, four problems
-- `expected/*.keyframes.json` — 36 annotated instants across the three songs
-- `expected/*.frames.jsonl.gz` — every frame at 40 fps. 54,280 in total
-- `check.py` — compares a candidate stream to the golden one, first divergence wins
+```
+node readers/lights/pack/make.js      # regenerate the golden frames
+python3 check.py expected/first-light.frames.jsonl.gz mine/first-light.frames.jsonl.gz
+```
 
-Inputs are the repo's own files: `../../../MAP.md`, `../RECIPE.md`, `../FRAME.md`,
-`../club/layout.json`, `../../../maps/sketch/*.map.json`.
+## Two cases, and they are different jobs
 
-**The reference implementation is deliberately not in this repo.** The pack is a problem, not a
-tutorial: same three inputs, reproduce the same output. When the recipe changes, the golden files
-are regenerated and the checker re-run.
+`first-light` is the one to work against. It is 60 seconds of music we composed ourselves — we
+wrote the arrangement, rendered the audio from it, then measured the map from the individual
+instrument tracks. Every field in it is exact, so it is a fair test.
 
-Tolerances: `level` ±0.01, `strobe` ±0.05 Hz, colour channels ±2. `look` is compared first
-because every number downstream depends on it.
+`the-nights` is a real record and its map is **not** trustworthy: six methods dispute its section
+boundaries, its chord labels agree with its own detected notes 69% of the time, and one moment in
+it has been verified by a human ear. It is here because a reader should survive real data, not
+because the answers are right.
+
+## Why these are generated and never hand-kept
+
+The pack that shipped on 2 September was pinned to recipe v0.2 while the recipe moved several
+versions past it, so any failure it reported was ours and not yours. Golden frames are now produced
+by `make.js` from committed inputs at the current recipe, and regenerating is one command. If your
+output differs from these, the difference is real.
+
+The two cases from that old pack, `opus` and `strobe`, are gone. They were sketch maps with no grid
+field, so no reader could run on them and the frames that shipped for them cannot be reproduced from
+anything in this repository.
+
+`CASES.json` records what was generated, from which map, at what frame rate.
