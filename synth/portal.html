@@ -44,14 +44,21 @@ code{font-family:ui-monospace,monospace;font-size:12.5px;background:var(--raise)
 <p class="lede">A file that says what a song does. Everything here reads that file. Pick your part —
 it is already running, and already missing you.</p>
 
+<div id="err" style="display:none;background:#2a1410;border:1px solid var(--bad);
+  border-radius:4px;padding:14px 16px;margin:20px 0 0;font-family:ui-monospace,monospace;
+  font-size:13px;color:var(--bad)"></div>
 <div class="doors" id="doors"></div>
 
 <h2>If nothing loads</h2>
 <div class="start">
-  <p>One command, from the repo. No install, no network, nothing to unzip.</p>
-  <p><code>python3 synth/serve.py</code></p>
-  <p>Audio is not stored anywhere — it is generated. <code>python3 synth/compose.py</code> writes the
-     song from 12 KB of code, identically every time, on every machine.</p>
+  <p>Three commands, once. Python 3 only — no pip, no node, no network, nothing to unzip.</p>
+  <p><code>python3 synth/compose.py</code> &nbsp; makes all ten songs, audio and answers together
+     (about 90 seconds)</p>
+  <p><code>python3 synth/loop.py</code> &nbsp; scores the example listener — this is the number to
+     beat</p>
+  <p><code>python3 synth/serve.py</code> &nbsp; serves this page</p>
+  <p>Audio is never stored, only generated. 14 KB of code writes every song identically on every
+     machine, so two people cannot end up listening to different things without knowing.</p>
 </div>
 
 <p class="rule">Two rules that do not bend. No song files in git, ever — we ship the generator, not
@@ -71,10 +78,12 @@ function num(v){return v===null||v===undefined?"—":v}
 function card(k,title,sub,d){
   const soon = (k==="wire"&&!d.built) || (k==="songs"&&d.count===0);
   let big="";
-  if(k==="songs") big=`<div>songs<b>${d.count}</b></div><div>seconds of music<b>${d.seconds}</b></div>`;
+  if(k==="songs") big=`<div>levels<b>${d.count}</b></div><div>seconds of music<b>${d.seconds}</b></div>`;
   if(k==="venues") big=d.list.map(r=>`<div>${r.name}<b>${r.fixtures}</b></div>`).join("");
-  if(k==="listen") big=`<div>best mean beats F<b class="${d.best&&d.best.mean_beats_f>0.9?'ok':'warn'}">${
-     d.best?d.best.mean_beats_f:"—"}</b></div><div>runs logged<b>${d.runs}</b></div>`;
+  if(k==="listen") big=`<div>levels passed<b class="${d.best&&d.best.passed===d.levels?'ok':'warn'}">${
+     d.best?d.best.passed+" / "+d.best.of:"— / "+d.levels}</b></div>`
+     +`<div>mean beats F<b>${d.best?d.best.mean_beats_f:"—"}</b></div>`
+     +`<div>runs logged<b>${d.runs}</b></div>`;
   if(k==="frames") big=`<div>golden cases<b>${d.cases}</b></div><div>frames<b>${
      d.list.reduce((a,c)=>a+c.frames,0)}</b></div>`;
   if(k==="wire") big=`<div>fixtures patched<b>${d.fixtures}</b></div><div>universes<b>${d.universes}</b></div>`;
@@ -89,8 +98,18 @@ function card(k,title,sub,d){
     <div class="big">${big}</div>
     <p class="next">next: ${d.next}</p></a>`;
 }
+function fail(msg){
+  const e=$("#err"); e.style.display="block";
+  e.textContent="This page could not load its state: "+msg
+    +"   —   the server is running but /api/status failed. Rendering nothing and saying nothing "
+    +"is how an hour gets lost, so here is the actual error.";
+}
+addEventListener("error",e=>fail(e.message||String(e.error)));
 (async()=>{
-  const s=await (await fetch("/api/status")).json();
+ try{
+  const r=await fetch("/api/status");
+  const s=await r.json();
+  if(s.error) return fail(s.error);
   $("#doors").innerHTML=LANES.map(([k,t,sub])=>card(k,t,sub,s[k])).join("")
    + `<a class="door" href="/rooms">
         <p class="who">everyone</p>
@@ -99,5 +118,6 @@ function card(k,title,sub,d){
            This is how you see what a mistake actually costs.</p>
         <div class="big"><div>reference<b>ours</b></div><div>rigs<b>3</b></div></div>
         <p class="next">next: press play and watch the right-hand room be wrong.</p></a>`;
+ }catch(e){ fail(e.message||String(e)) }
 })();
 </script></body></html>

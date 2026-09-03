@@ -165,13 +165,15 @@ def status():
             m = json.load(open(os.path.join(sd, f)))
             songs.append({"file": f, "title": m["song"]["title"],
                           "seconds": m["song"]["length"], "bpm": m["grid"]["bpm"],
+                          "level": (m.get("level") or {}).get("n"),
+                          "teaches": (m.get("level") or {}).get("teaches", ""),
                           "sections": len((m.get("sections") or {}).get("entries", [])),
                           "moments": len(m.get("moments", []))})
     out["songs"] = {"owner": "Muzammil", "count": len(songs),
                     "seconds": round(sum(s["seconds"] for s in songs), 1), "list": songs,
-                    "job": "Write more songs. Each one is a level, and a training example the "
-                           "model lane cannot work without.",
-                    "next": "Edit the PLAN table in synth/compose.py and run it.",
+                    "job": "Ten levels exist. Add harder ones, and songs that sound less like a "
+                           "machine — every song is both a level and a training example.",
+                    "next": "Add an entry to SONGS in synth/compose.py, then run it.",
                     "link": "/songs"}
 
     rigs = []
@@ -187,23 +189,37 @@ def status():
                      "next": "Copy a layout, move the fixtures, watch the show in your room.",
                      "link": "/rooms"}
 
-    best, runs = None, 0
+    # Read the log by COLUMN NAME and tolerate a schema that has moved, because the
+    # last time these two files disagreed the whole portal rendered blank.
+    best, runs, levels_total = None, 0, len(songs)
     rp = os.path.join(HERE, "RESULTS.tsv")
     if os.path.exists(rp):
-        rows = [l.split("\t") for l in open(rp).read().strip().split("\n")[1:]]
-        head = open(rp).readline().strip().split("\t")
-        i_f, i_h, i_l = head.index("beats_f"), head.index("held_out"), head.index("listener")
-        by = {}
-        for r in rows:
-            if len(r) < len(head) or r[i_h] == "1": continue
-            by.setdefault(r[i_l], []).append(float(r[i_f]))
-        runs = len(rows)
-        if by: best = {"listener": max(by, key=lambda k: sum(by[k]) / len(by[k])),
-                       "mean_beats_f": round(max(sum(v) / len(v) for v in by.values()), 3)}
+        lines = [l for l in open(rp).read().strip().split("\n") if l]
+        if len(lines) > 1:
+            head = lines[0].split("\t")
+            idx = {k: head.index(k) for k in head}
+            rows = [r.split("\t") for r in lines[1:]]
+            rows = [r for r in rows if len(r) == len(head)]
+            runs = len(rows)
+            by = {}
+            for r in rows:
+                who = r[idx["listener"]]
+                key = r[idx.get("level", idx.get("case", 3))]
+                f = float(r[idx["beats_f"]])
+                ok = int(r["pass" in idx and idx["pass"] or 0] if "pass" in idx else 0) \
+                     if "pass" in idx else int(f >= 0.90)
+                by.setdefault(who, {})[key] = (f, ok)
+            if by:
+                def sc(d): return (sum(v[1] for v in d.values()), sum(v[0] for v in d.values()) / len(d))
+                who = max(by, key=lambda k: sc(by[k]))
+                passed, meanf = sc(by[who])
+                best = {"listener": who, "passed": passed, "of": len(by[who]),
+                        "mean_beats_f": round(meanf, 3)}
     out["listen"] = {"owner": "Amal + Sebastian", "runs": runs, "best": best,
-                     "job": "Turn audio into a map. You are graded against maps we authored, so "
-                            "every disagreement is yours and not an argument.",
-                     "next": "Write a listener that reads a WAV path and prints a map.",
+                     "levels": levels_total,
+                     "job": "Turn audio into a map. Ten levels, each adding one new thing, all "
+                            "graded against maps we authored — so a disagreement is yours.",
+                     "next": "python3 synth/loop.py --listener \"python3 listen/mine.py\"",
                      "link": "/listen"}
 
     cases, stale = [], None
