@@ -1,0 +1,341 @@
+#!/usr/bin/env python3
+"""A local page for the synth loop. Stdlib only, no setup, no network.
+
+    python3 synth/serve.py            # then open http://127.0.0.1:8770
+
+Why a page at all: a 238 ms grid error is an abstract number and an obvious
+picture. Drawing the recovered beats against the onset envelope shows a listener
+sitting on the offbeat at a glance, which no table does.
+
+Binds to localhost only. The listener is chosen from the files actually present
+in listen/ and validated against that set -- the browser never gets to name a
+command to run, because an endpoint that executes an arbitrary string is a
+remote shell whichever interface it wears.
+"""
+import http.server, importlib.util, io, json, os, socketserver, subprocess, sys, time, urllib.parse
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+PORT = int(os.environ.get("PORT", "8770"))
+
+def _load(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m); return m
+
+R = _load("render", os.path.join(HERE, "render.py"))
+B = _load("bench", os.path.join(ROOT, "bench", "bench.py"))
+L = _load("baseline", os.path.join(ROOT, "listen", "baseline.py"))
+
+
+def cases():
+    out = []
+    for f in sorted(os.listdir(os.path.join(HERE, "cases"))):
+        if not f.endswith(".json"): continue
+        c = json.load(open(os.path.join(HERE, "cases", f)))
+        out.append({"id": f[:-5], "title": c["song"]["title"], "bpm": c["grid"]["bpm"],
+                    "phase": c["grid"]["phase"], "length": c["song"]["length"],
+                    "beats": len(c["beats"]), "held_out": bool(c.get("hold_out")),
+                    "why": c["made_by"]["why"]})
+    return out
+
+
+def listeners():
+    d = os.path.join(ROOT, "listen")
+    return sorted(f for f in os.listdir(d) if f.endswith(".py") and not f.startswith("_"))
+
+
+def envelope_for(buf, sr, points=2400):
+    en, hop = L.flux(buf, sr)
+    step = max(1, len(en) // points)
+    return [round(max(en[i:i + step] or [0.0]), 4) for i in range(0, len(en), step)], hop * step / sr
+
+
+def run_case(cid, listener):
+    if listener not in listeners():
+        raise ValueError("unknown listener")
+    path = os.path.join(HERE, "cases", cid + ".json")
+    truth = json.load(open(path))
+    t0 = time.time()
+    buf, sr = R.render(truth)
+    wav = os.path.join(HERE, "out", cid + ".wav")
+    R.write_wav(wav, buf, sr)
+    v = R.verify(truth, buf, sr)
+    t1 = time.time()
+    ok = not (v["missed"] or v["extra"] or (v["max_err_ms"] or 0) > v["tol_ms"])
+    if not ok:
+        return {"case": cid, "render_ok": False, "verify": v}
+    p = subprocess.run([sys.executable, os.path.join(ROOT, "listen", listener), wav],
+                       cwd=ROOT, capture_output=True, text=True)
+    t2 = time.time()
+    if p.returncode != 0:
+        return {"case": cid, "render_ok": True, "listener_error": p.stderr.strip()[-400:]}
+    cand = json.loads(p.stdout)
+    res = B.run(truth, cand, quiet=True)
+    gp, cp = truth["grid"], cand["grid"]
+    d = abs(cp["phase"] - gp["phase"]) % gp["period"]
+    gerr = min(d, gp["period"] - d) * 1000.0
+    oct_ = res["octave"]
+    flag = ("half" if oct_["truth_halved"] > res["beats_f"] + 0.15 else
+            "double" if oct_["cand_doubled"] > res["beats_f"] + 0.15 else "ok")
+    env, dt = envelope_for(buf, sr)
+    return {"case": cid, "render_ok": True, "verify": v,
+            "truth": {"beats": truth["beats"], "downbeats": truth["downbeats"],
+                      "bpm": gp["bpm"], "phase": gp["phase"],
+                      "downbeats_empty_note": truth.get("downbeats_note")},
+            "cand": {"beats": cand["beats"], "downbeats": cand.get("downbeats", []),
+                     "bpm": cp["bpm"], "phase": cp["phase"], "who": cand["made_by"].get("who")},
+            "score": {"beats_f": round(res["beats_f"], 4),
+                      "downbeats_f": round(res["downbeats_f"], 4),
+                      "grid_err_ms": round(gerr, 1), "octave": flag},
+            "env": env, "env_dt": dt, "length": truth["song"]["length"],
+            "render_s": round(t1 - t0, 2), "listen_s": round(t2 - t1, 2),
+            "held_out": bool(truth.get("hold_out"))}
+
+
+def results():
+    p = os.path.join(HERE, "RESULTS.tsv")
+    if not os.path.exists(p): return []
+    lines = open(p).read().strip().split("\n")
+    head = lines[0].split("\t")
+    return [dict(zip(head, l.split("\t"))) for l in lines[1:]][-60:]
+
+
+PAGE = r"""<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Limelight — synth loop</title><style>
+:root{--bg:#12141c;--surface:#191c25;--raise:#1f232e;--ink:#e6e9f1;--muted:#989eaf;
+ --faint:#6b7183;--rule:#272b39;--rule2:#393e50;--tung:#f0a93c;--learn:#8f9aff;
+ --good:#69be86;--bad:#e88055}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);padding:26px 22px 70px;
+ font:14px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1140px;margin:0 auto}
+h1{font:700 15px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;
+ margin:0 0 4px;color:var(--tung)}
+.sub{color:var(--muted);margin:0 0 24px;max-width:74ch}
+.mono,td,th,button,select{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 20px;
+ padding:12px 14px;background:var(--surface);border:1px solid var(--rule);border-radius:3px}
+label{color:var(--faint);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+select,button{background:var(--raise);color:var(--ink);border:1px solid var(--rule2);
+ border-radius:3px;padding:6px 11px;font-size:13px;cursor:pointer}
+button.go{background:var(--tung);color:#20160a;border-color:var(--tung);font-weight:600}
+button:disabled{opacity:.5;cursor:default}
+.case{background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+ margin:0 0 16px;overflow:hidden}
+.chead{display:flex;gap:14px;align-items:baseline;padding:12px 15px;border-bottom:1px solid var(--rule);
+ flex-wrap:wrap}
+.cid{font:600 14px ui-monospace,monospace}
+.pill{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:2px;
+ background:var(--raise);color:var(--muted);border:1px solid var(--rule2)}
+.pill.held{color:var(--learn);border-color:var(--learn)}
+.pill.ok{color:var(--good);border-color:var(--good)}
+.pill.bad{color:var(--bad);border-color:var(--bad)}
+.why{padding:0 15px 12px;color:var(--muted);font-size:13px;max-width:96ch}
+.nums{display:flex;gap:26px;flex-wrap:wrap;padding:11px 15px;background:var(--raise);
+ border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.nums div{font-family:ui-monospace,monospace;font-size:12.5px}
+.nums b{display:block;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.nums span{color:var(--faint);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+canvas{display:block;width:100%;height:150px}
+.legend{display:flex;gap:18px;padding:9px 15px;font-size:11.5px;color:var(--muted);
+ font-family:ui-monospace,monospace;flex-wrap:wrap;align-items:center}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+audio{width:100%;margin:0;display:block;filter:invert(.92) hue-rotate(180deg)}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:8px}
+th,td{text-align:left;padding:6px 12px 6px 0;border-bottom:1px solid var(--rule);white-space:nowrap}
+th{color:var(--faint);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+td.n{font-variant-numeric:tabular-nums}
+.err{color:var(--bad);padding:12px 15px;font-family:ui-monospace,monospace;font-size:12.5px;
+ white-space:pre-wrap}
+h2{font:600 12px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;
+ color:var(--faint);margin:34px 0 0}
+</style></head><body><div class="wrap">
+<h1>Limelight · synth loop</h1>
+<p class="sub">The map is authored first and the audio is rendered from it, so the beats below in
+amber are <em>causes</em> rather than observations. Blue is what the listener recovered. Where blue
+sits between amber, the listener is on the offbeat — which is a great deal more obvious here than
+it is as a number in a table.</p>
+
+<div class="bar">
+  <label for="lis">listener</label>
+  <select id="lis"></select>
+  <label for="zoom">window</label>
+  <select id="zoom"><option value="6">first 6 s</option><option value="12">first 12 s</option>
+   <option value="0">whole case</option></select>
+  <button class="go" id="run">Run all cases</button>
+  <span id="stat" class="mono" style="color:var(--muted);font-size:12.5px"></span>
+</div>
+<div id="sum" class="bar" style="display:none"></div>
+<div id="out"></div>
+<h2>History — synth/RESULTS.tsv</h2>
+<div id="hist"></div>
+</div><script>
+const $=s=>document.querySelector(s), out=$("#out");
+let CASES=[], ZOOM=6;
+const f2=n=>Number(n).toFixed(2), f3=n=>Number(n).toFixed(3);
+
+function draw(cv,r){
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=150;
+  cv.width=W*dpr; cv.height=H*dpr; const g=cv.getContext("2d"); g.scale(dpr,dpr);
+  const span=ZOOM||r.length, x=t=>t/span*W;
+  g.fillStyle="#12141c"; g.fillRect(0,0,W,H);
+  const mid=94, env=r.env, dt=r.env_dt, peak=Math.max(...env)||1;
+  g.beginPath(); g.moveTo(0,mid);
+  for(let i=0;i<env.length;i++){const t=i*dt; if(t>span)break; g.lineTo(x(t),mid-env[i]/peak*62)}
+  g.lineTo(W,mid); g.closePath();
+  g.fillStyle="rgba(230,233,241,.13)"; g.fill();
+  g.strokeStyle="rgba(230,233,241,.42)"; g.lineWidth=1; g.stroke();
+  const tick=(ts,col,y0,y1,w)=>{g.strokeStyle=col; g.lineWidth=w;
+    for(const t of ts){ if(t>span)break; g.beginPath(); g.moveTo(x(t),y0); g.lineTo(x(t),y1); g.stroke() }};
+  tick(r.truth.beats,"#f0a93c",mid+2,mid+22,1.4);
+  tick(r.truth.downbeats,"#f0a93c",mid+2,mid+34,2.6);
+  tick(r.cand.beats,"#8f9aff",mid-62,mid-42,1.4);
+  tick(r.cand.downbeats,"#8f9aff",mid-74,mid-42,2.6);
+  g.strokeStyle="rgba(230,233,241,.20)"; g.lineWidth=1;
+  g.beginPath(); g.moveTo(0,mid); g.lineTo(W,mid); g.stroke();
+  g.fillStyle="#6b7183"; g.font="10px ui-monospace,monospace";
+  for(let s=0;s<=span;s+=(span>12?2:1)){ g.fillText(s+"s",x(s)+3,H-4);
+    g.strokeStyle="rgba(230,233,241,.08)"; g.beginPath(); g.moveTo(x(s),0); g.lineTo(x(s),H-14); g.stroke() }
+}
+
+function card(r){
+  const c=CASES.find(c=>c.id===r.case)||{}, d=document.createElement("div"); d.className="case";
+  if(!r.render_ok){ d.innerHTML=`<div class="chead"><span class="cid">${r.case}</span>
+    <span class="pill bad">render corrupt</span></div>
+    <div class="err">Refusing to score against this. ${JSON.stringify(r.verify)}</div>`; return d }
+  if(r.listener_error){ d.innerHTML=`<div class="chead"><span class="cid">${r.case}</span>
+    <span class="pill bad">listener failed</span></div><div class="err">${r.listener_error}</div>`; return d }
+  const s=r.score, phaseOK=s.grid_err_ms<=15, octOK=s.octave==="ok";
+  d.innerHTML=`<div class="chead">
+      <span class="cid">${r.case}</span>
+      <span class="pill">${c.bpm} bpm authored</span>
+      <span class="pill">phase ${c.phase}</span>
+      ${r.held_out?'<span class="pill held">held out</span>':''}
+      <span class="pill ${octOK?'ok':'bad'}">octave ${s.octave}</span>
+      <span class="pill ${phaseOK?'ok':'bad'}">phase ${s.grid_err_ms} ms</span>
+    </div>
+    <div class="why">${c.why||""}</div>
+    <div class="nums">
+      <div><span>beats F</span><b style="color:${s.beats_f>.9?'var(--good)':s.beats_f<.3?'var(--bad)':'var(--ink)'}">${f3(s.beats_f)}</b></div>
+      <div><span>downbeat F</span><b>${f3(s.downbeats_f)}</b></div>
+      <div><span>bpm found</span><b>${f2(r.cand.bpm)}</b></div>
+      <div><span>phase error</span><b style="color:${phaseOK?'var(--good)':'var(--bad)'}">${s.grid_err_ms} ms</b></div>
+      <div><span>render</span><b>${r.render_s}s</b></div>
+      <div><span>listen</span><b>${r.listen_s}s</b></div>
+    </div>
+    <canvas></canvas>
+    <div class="legend">
+      <span><i class="sw" style="background:#8f9aff"></i>recovered by listener (above)</span>
+      <span><i class="sw" style="background:#f0a93c"></i>authored truth (below)</span>
+      <span>tall tick = downbeat</span>
+      ${r.truth.downbeats_empty_note?'<span style="color:var(--bad)">truth has no downbeats: '+r.truth.downbeats_empty_note.slice(0,58)+'…</span>':''}
+    </div>
+    <audio controls preload="none" src="/api/wav?case=${r.case}"></audio>`;
+  requestAnimationFrame(()=>draw(d.querySelector("canvas"),r));
+  d._r=r; return d
+}
+
+async function runAll(){
+  const b=$("#run"), lis=$("#lis").value; b.disabled=true; out.innerHTML="";
+  $("#sum").style.display="none";
+  let done=0, got=[];
+  for(const c of CASES){
+    $("#stat").textContent=`running ${c.id} … (${done}/${CASES.length})`;
+    try{ const r=await (await fetch(`/api/run?case=${c.id}&listener=${encodeURIComponent(lis)}`)).json();
+         out.appendChild(card(r)); if(r.score) got.push(r) }
+    catch(e){ const d=document.createElement("div"); d.className="case";
+              d.innerHTML=`<div class="err">${c.id}: ${e}</div>`; out.appendChild(d) }
+    done++;
+  }
+  // wall clock comes from the server's own measurements: the browser's clock is
+  // fast-forwarded under headless capture and reports nonsense
+  const secs=got.reduce((a,r)=>a+r.render_s+r.listen_s,0);
+  $("#stat").textContent=`${done} case(s), ${secs.toFixed(1)}s of work`;
+  if(got.length){
+    const scored=got.filter(r=>!r.held_out), use=scored.length?scored:got;
+    const meanF=use.reduce((a,r)=>a+r.score.beats_f,0)/use.length;
+    const worst=use.reduce((a,r)=>r.score.grid_err_ms>a.score.grid_err_ms?r:a);
+    const octs=got.filter(r=>r.score.octave!=="ok").length;
+    const inv=got.filter(r=>r.truth.downbeats.length===0&&r.cand.downbeats.length>0).length;
+    $("#sum").style.display="flex";
+    $("#sum").innerHTML=
+      `<div class="mono" style="font-size:13px">mean beats F <b style="font-size:17px;color:${
+        meanF>0.9?'var(--good)':meanF<0.5?'var(--bad)':'var(--ink)'}">${meanF.toFixed(3)}</b>
+        <span style="color:var(--faint)">over ${use.length} scored${scored.length<got.length?', held-out excluded':''}</span></div>
+      <div class="mono" style="font-size:13px">worst phase <b style="font-size:17px;color:${
+        worst.score.grid_err_ms>15?'var(--bad)':'var(--good)'}">${worst.score.grid_err_ms} ms</b>
+        <span style="color:var(--faint)">on ${worst.case}</span></div>
+      <div class="mono" style="font-size:13px">octave errors <b style="font-size:17px;color:${
+        octs?'var(--bad)':'var(--good)'}">${octs}</b><span style="color:var(--faint)"> of ${got.length}</span></div>
+      <div class="mono" style="font-size:13px">invented downbeats <b style="font-size:17px;color:${
+        inv?'var(--bad)':'var(--good)'}">${inv}</b><span style="color:var(--faint)"> case(s)</span></div>`;
+  }
+  b.disabled=false; loadHist();
+}
+
+async function loadHist(){
+  const rows=await (await fetch("/api/results")).json();
+  if(!rows.length){ $("#hist").innerHTML='<p class="sub">No runs logged yet. '+
+    'Use <span class="mono">python3 synth/loop.py --all</span> to append a row.</p>'; return }
+  const cols=["when","sha","case","beats_f","grid_err_ms","bpm","downbeats_f","octave","listen_s","held_out"];
+  $("#hist").innerHTML='<table><thead><tr>'+cols.map(c=>`<th>${c}</th>`).join("")+
+    '</tr></thead><tbody>'+rows.slice().reverse().map(r=>'<tr>'+cols.map(c=>
+      `<td class="${isNaN(+r[c])?'':'n'}">${r[c]??""}</td>`).join("")+'</tr>').join("")+'</tbody></table>';
+}
+
+$("#zoom").onchange=e=>{ZOOM=+e.target.value;
+  [...out.children].forEach(d=>{const cv=d.querySelector("canvas"); if(cv&&d._r)draw(cv,d._r)})};
+$("#run").onclick=runAll;
+addEventListener("resize",()=>[...out.children].forEach(d=>{
+  const cv=d.querySelector("canvas"); if(cv&&d._r)draw(cv,d._r)}));
+(async()=>{
+  CASES=await (await fetch("/api/cases")).json();
+  const ls=await (await fetch("/api/listeners")).json();
+  $("#lis").innerHTML=ls.map(l=>`<option${l==="baseline.py"?" selected":""}>${l}</option>`).join("");
+  await loadHist(); runAll();
+})();
+</script></body></html>"""
+
+
+class H(http.server.BaseHTTPRequestHandler):
+    def _send(self, code, body, ctype="application/json"):
+        if isinstance(body, str): body = body.encode()
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers(); self.wfile.write(body)
+
+    def do_GET(self):
+        u = urllib.parse.urlparse(self.path); q = urllib.parse.parse_qs(u.query)
+        try:
+            if u.path in ("/", "/index.html"): return self._send(200, PAGE, "text/html; charset=utf-8")
+            if u.path == "/api/cases":      return self._send(200, json.dumps(cases()))
+            if u.path == "/api/listeners":  return self._send(200, json.dumps(listeners()))
+            if u.path == "/api/results":    return self._send(200, json.dumps(results()))
+            if u.path == "/api/run":
+                cid = (q.get("case") or [""])[0]
+                if cid not in {c["id"] for c in cases()}: return self._send(400, json.dumps({"error": "unknown case"}))
+                lis = (q.get("listener") or ["baseline.py"])[0]
+                return self._send(200, json.dumps(run_case(cid, lis)))
+            if u.path == "/api/wav":
+                cid = (q.get("case") or [""])[0]
+                if cid not in {c["id"] for c in cases()}: return self._send(404, json.dumps({"error": "unknown case"}))
+                p = os.path.join(HERE, "out", cid + ".wav")
+                if not os.path.exists(p):
+                    truth = json.load(open(os.path.join(HERE, "cases", cid + ".json")))
+                    buf, sr = R.render(truth); R.write_wav(p, buf, sr)
+                return self._send(200, open(p, "rb").read(), "audio/wav")
+            self._send(404, json.dumps({"error": "no route"}))
+        except Exception as e:
+            self._send(500, json.dumps({"error": f"{type(e).__name__}: {e}"}))
+
+    def log_message(self, *a): pass
+
+
+if __name__ == "__main__":
+    os.makedirs(os.path.join(HERE, "out"), exist_ok=True)
+    with socketserver.ThreadingTCPServer(("127.0.0.1", PORT), H) as srv:
+        srv.allow_reuse_address = True
+        print(f"  synth loop on http://127.0.0.1:{PORT}   (localhost only, ctrl-c to stop)")
+        srv.serve_forever()
