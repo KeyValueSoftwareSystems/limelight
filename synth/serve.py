@@ -100,6 +100,26 @@ def results():
     return [dict(zip(head, l.split("\t"))) for l in lines[1:]][-60:]
 
 
+NIGHTS = "/home/renjithbaby/Pencil/Code/boxed-2/limelight-nights"
+MP3 = "/home/renjithbaby/Downloads/Avicii - The Nights (Audio).mp3"
+
+
+def song():
+    """The measured map plus every rig, for the two-room comparison.
+
+    The map and the audio both live outside the repo -- the map because it is
+    large and generated, the audio because the repo holds scores and never
+    songs. If the mp3 is not on this machine the page runs on its own clock and
+    says so, rather than failing."""
+    m = json.load(open(os.path.join(NIGHTS, "the-nights.map.json")))
+    lays = {}
+    for name, f in (("club", "layout.json"), ("venue", "venue.json"), ("the-grind", "grind.json")):
+        p = os.path.join(NIGHTS, f)
+        if os.path.exists(p): lays[name] = json.load(open(p))
+    return {"map": m, "layouts": lays, "chapters": m.get("chapters", []),
+            "audio": os.path.exists(MP3)}
+
+
 PAGE = r"""<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Limelight — synth loop</title><style>
@@ -152,7 +172,8 @@ h2{font:600 12px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.12em;text-
  color:var(--faint);margin:34px 0 0}
 </style></head><body><div class="wrap">
 <h1>Limelight · synth loop</h1>
-<p class="sub">The map is authored first and the audio is rendered from it, so the beats below in
+<p class="sub"><a href="/rooms" style="color:var(--tung)">Two rooms, side by side &rarr;</a>
+&nbsp; what a map error actually costs, on the real song.<br>The map is authored first and the audio is rendered from it, so the beats below in
 amber are <em>causes</em> rather than observations. Blue is what the listener recovered. Where blue
 sits between amber, the listener is on the offbeat — which is a great deal more obvious here than
 it is as a number in a table.</p>
@@ -310,6 +331,16 @@ class H(http.server.BaseHTTPRequestHandler):
         u = urllib.parse.urlparse(self.path); q = urllib.parse.parse_qs(u.query)
         try:
             if u.path in ("/", "/index.html"): return self._send(200, PAGE, "text/html; charset=utf-8")
+            if u.path == "/rooms":
+                return self._send(200, open(os.path.join(HERE, "rooms.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path == "/static/recipe4.js":
+                return self._send(200, open(os.path.join(ROOT, "readers", "src", "recipe4.js")).read(),
+                                  "text/plain; charset=utf-8")
+            if u.path == "/api/song":       return self._send(200, json.dumps(song()))
+            if u.path == "/api/audio":
+                if not os.path.exists(MP3): return self._send(404, json.dumps({"error": "no audio"}))
+                return self._send(200, open(MP3, "rb").read(), "audio/mpeg")
             if u.path == "/api/cases":      return self._send(200, json.dumps(cases()))
             if u.path == "/api/listeners":  return self._send(200, json.dumps(listeners()))
             if u.path == "/api/results":    return self._send(200, json.dumps(results()))
@@ -335,7 +366,10 @@ class H(http.server.BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     os.makedirs(os.path.join(HERE, "out"), exist_ok=True)
+    # must be set on the class BEFORE bind, not on the instance after it, or a
+    # restart inside the TIME_WAIT window fails with "address already in use"
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer(("127.0.0.1", PORT), H) as srv:
-        srv.allow_reuse_address = True
+        srv.daemon_threads = True
         print(f"  synth loop on http://127.0.0.1:{PORT}   (localhost only, ctrl-c to stop)")
         srv.serve_forever()

@@ -86,3 +86,43 @@ takes four minutes a song is not usable.
 Synthetic truth can only test what we can already name. It cannot validate the learned tier, whose
 whole premise is that some of what matters has no field yet, and a listener tuned only on rendered
 audio will learn the renderer. Human ears stay the authority: see `truth/PROTOCOL.md`.
+
+## Two rooms
+
+```
+python3 synth/serve.py     # then http://127.0.0.1:8770/rooms
+```
+
+The same song, the same rig, the same recipe, and two maps — one measured, one with a single thing
+broken. It plays in sync with the audio, so a map error stops being a number and becomes visible
+ugliness. `?d=phase-half&rig=the-grind&t=63` makes any particular comparison a link.
+
+**Flash match** is the number that matters. It correlates the *change* in emitted light between the
+two rooms, because a show reads as events and an audience sees when things happen, not the average
+brightness. **Levels match** is the naive mean and it is generous to the point of dishonesty.
+
+| what is broken | flash | levels | seconds visibly wrong |
+|---|---|---|---|
+| nothing (control) | 100.0% | 100.0% | 0s |
+| grid phase out by half a beat | **10.7%** | 97.8% | 26s |
+| tempo halved | 62.2% | 93.8% | 69s |
+| energy flat at 0.5 | 89.4% | 94.9% | 56s |
+| drum accents removed | 99.7% | 99.9% | 0s |
+| stems removed | 99.5% | 99.6% | 0s |
+| sections removed | 100.0% | 99.8% | 0s |
+
+Read that table honestly, because it is uncomfortable. A half-beat phase error scores 97.8% on the
+naive metric and 10.7% on the honest one, which is the whole argument for measuring transients. But
+removing `sections`, `stems` and `accents` — the three fields with the strongest stories about why
+they earned their place — costs almost nothing by either measure.
+
+Two things are true at once. The metric averages a whole song, so it dilutes anything local or
+structural: the vocal spotlight is one moment in 176 seconds, and escalation only makes one repeated
+section 20% denser. And the recipe's use of those fields really is subtler than the arguments for
+them implied.
+
+The fix is not a better average. It is **scoring per moment**: compare a short window around each
+declared moment and each section boundary, so the result reads "you found the drop and lost the
+spotlight" instead of a single number that hides both. That is the next thing to build, and it is
+also how the levels in a playground should be scored — on the moments they unlock, never on a
+whole-song mean.
