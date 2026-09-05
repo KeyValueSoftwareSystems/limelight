@@ -287,14 +287,21 @@ def songs_index():
             slug = f[:-4]
             if slug in out: continue
             ref = truth_path(slug)
+            held = ref is not None
+            if not ref:
+                cands = candidate_maps(slug)
+                picks = [v["path"] for k, v in cands.items()
+                         if k not in ("authored", "answer") and os.path.exists(v["path"])]
+                ref = picks[0] if picks else None
             if not ref: continue
             try: mm = json.load(open(ref))
             except Exception: continue
             en = [e[1] for e in mm.get("energy", [])] or [1.0]
             out[slug] = {
-                "label": f"{slug}  ·  {mm.get('song', {}).get('title', slug)}  (real, answer held out)",
+                "label": f"{slug}  ·  {mm.get('song', {}).get('title', slug)}"
+                         + ("  (real, answer held out)" if held else "  (real)"),
                 "map": ref, "wav": os.path.join(od, f), "canonical": False,
-                "left": "the answer (held out)", "teaches": "",
+                "left": "the answer (held out)" if held else "a candidate map", "teaches": "",
                 "thin": (max(en) - min(en)) < 0.12, "span": round(max(en) - min(en), 3),
                 "note": "A real record. The reference map is not in the repository and is never "
                         "sent to a browser on a shared instance — upload a map and you get "
