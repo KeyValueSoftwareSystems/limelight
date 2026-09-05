@@ -336,7 +336,7 @@ function buildAt(t){
     const shape = sp.rise === "late"  ? Math.pow(x, 2.0)
                 : sp.rise === "early" ? Math.pow(x, 0.55)
                 : x;
-    return { x, shape };
+    return { x, shape, len: sp.to - sp.from, from: sp.from, to: sp.to };
   }
   return null;
 }
@@ -553,6 +553,59 @@ function frame(t){
                pan:+cl(pan,0,1).toFixed(4), tilt:+cl(tilt,0,1).toFixed(4),
                r:col[0], g:col[1], b:col[2] });
     });
+  }
+
+  /* ---- strobes: the impact fixture, and the only one with a real safety limit
+     A strobe is not a brighter lamp, it is a different gesture: it removes motion
+     from a room for a second and hands it back. Used on anything but an impact it
+     is just noise, so these fire on a drop and on the last bar of a build, and
+     nowhere else in the song.
+
+     The rate comes from the layout, not from here. Sustained flashing above about
+     three hertz is a photosensitivity risk, so on top of the layout's ceiling the
+     recipe holds every burst under 1.2 s. Both limits are stated where they can be
+     checked rather than buried in a coefficient. */
+  const SHZ = Math.min(12, (LAYOUT.limits && LAYOUT.limits.max_strobe_hz) || 4);
+  const SBURST = 1.2;
+  for(const f of LAYOUT.fixtures){
+    if(f.kind !== "strobe") continue;
+    let on = 0, since = null;
+    const D5 = dropAt(t), B3 = buildAt(t);
+    if(D5 && D5.dt >= 0 && D5.dt < SBURST) since = D5.dt;
+    /* seconds, not a scaled fraction. Deriving it from B3.x times a constant made
+       the flash rate depend on how long the build was, so a long build strobed
+       slower than the layout allows and a short one would have strobed faster. */
+    else if(B3 && B3.x > 0.90) since = (B3.x - 0.90) * B3.len;   // the last of a build
+    if(since !== null && since < SBURST){
+      const phase = since * SHZ;
+      on = (phase % 1) < 0.42 ? 1 : 0;                          // hard on, hard off
+      on *= 1 - since / SBURST;                                 // and it runs out
+    }
+    F.push({ id:f.id, level:+cl(on,0,1).toFixed(4), r:255, g:253, b:246 });
+  }
+
+  /* ---- the LED wall ------------------------------------------------------
+     On a festival stage the screen is the biggest light source in the building
+     and treating it as scenery wastes it. It carries the chapter colour at the
+     song's own level -- a wash you cannot get from any lamp -- and it goes white
+     on the drop with everything else. It is deliberately SLOW: the wall states
+     where the song is, and the lamps do the rhythm. A screen that flickers with
+     the beat is a screen fighting the rig. */
+  for(const f of LAYOUT.fixtures){
+    if(f.kind !== "screen") continue;
+    const e = energyAt(t), D4 = dropAt(t);
+    const B2 = buildAt(t);
+    let lv = 0.10 + 0.45 * e;
+    if(B2) lv *= 0.55 + 0.85 * B2.shape;
+    if(D4){
+      if(D4.pre !== null) lv *= Math.max(0.05, D4.pre);
+      else if(D4.hit)     lv = 1;
+    }
+    const ch = chordState(t);
+    const base = PAL.a;
+    const col = (D4 && D4.hit) ? WHITE
+              : hsl(base[0] + (ch ? ch.shift : 0), cl(base[1]*0.9,0,1), cl(base[2]*0.85,0,1));
+    F.push({ id:f.id, level:+cl(lv,0,1).toFixed(4), r:col[0], g:col[1], b:col[2] });
   }
 
   // ---- blinders: they exist for one moment in a song, and it is the drop ----

@@ -97,30 +97,99 @@ function build(){
   const W=$("wrap"), w=W.clientWidth, h=W.clientHeight;
   renderer=new THREE.WebGLRenderer({antialias:true});
   renderer.setPixelRatio(Math.min(2,devicePixelRatio));
-  renderer.setSize(w,h); W.appendChild(renderer.domElement);
+  renderer.setSize(w,h);
+  /* Fifty-two additive fixtures at full saturate to flat white, and the drop --
+     the one moment you most want to see the shape of -- became a blank page. An
+     eye and a camera both solve this with exposure rather than by asking the room
+     to be dimmer, so the renderer does the same. The recipe still asks for 44
+     times the brightness of the bar before; the highlights just roll off instead
+     of clipping. */
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.85;
+  W.appendChild(renderer.domElement);
   scene=new THREE.Scene();
-  scene.fog=new THREE.FogExp2(0x05060a, 0.055);
+  scene.fog=new THREE.FogExp2(0x05060a, 0.030);
   cam=new THREE.PerspectiveCamera(52, w/h, 0.1, 100);
 
-  const S=LAY.size_m||{w:6,d:5,h:3.4};
-  // floor, back wall, and just enough side wall to catch a beam
+  const S=LAY.size_m||{w:6,d:5,h:3.4}, DECK=LAY.deck_m||0;
   const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.95,metalness:0});
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(S.w*2,S.d*2), mat(0x0d0f15));
+  const steel=new THREE.MeshStandardMaterial({color:0x2b3140,roughness:.55,metalness:.75});
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(S.w*3,S.d*4), mat(0x0a0c11));
   floor.rotation.x=-Math.PI/2; floor.position.set(S.w/2,0,S.d/2); scene.add(floor);
-  const back=new THREE.Mesh(new THREE.PlaneGeometry(S.w*1.6,S.h*1.6), mat(0x0b0d13));
-  back.position.set(S.w/2,S.h*0.8,S.d+0.05); back.rotation.y=Math.PI; scene.add(back);
-  scene.add(new THREE.AmbientLight(0x22262f, 0.5));
+  scene.add(new THREE.AmbientLight(0x22262f, DECK?0.35:0.5));
   GLOW=glowTexture();
 
-  // the truss the pars hang on, so the row reads as a row
-  const truss=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,S.w+0.6,10),
-                             new THREE.MeshStandardMaterial({color:0x2a2f3c,roughness:.6,metalness:.7}));
-  truss.rotation.z=Math.PI/2;
-  const parY=(LAY.fixtures.find(f=>f.kind==="par")||{at:[0,3,4.6]}).at;
-  truss.position.set(S.w/2, parY[1]+0.22, parY[2]); scene.add(truss);
+  /* A festival stage is architecture, and the architecture is why it reads as one.
+     Ground-support towers either side, a roof grid over the top, a front truss
+     hung under it, rear ladders upstage, and an LED wall behind everything. A
+     layout that declares deck_m gets built this way; a plain room does not. */
+  const bar=(x,y,z,len,axis)=>{
+    const m=new THREE.Mesh(new THREE.CylinderGeometry(0.055,0.055,len,8), steel);
+    if(axis==="x") m.rotation.z=Math.PI/2;
+    if(axis==="z") m.rotation.x=Math.PI/2;
+    m.position.set(x,y,z); scene.add(m); return m;
+  };
+  /* a truss is four chords and a zigzag; drawn as chords plus a few diagonals it
+     reads as truss from the field without thousands of triangles */
+  const truss3=(x,y,z,len,axis,w2)=>{
+    const o=w2||0.28;
+    for(const [dy,dz] of [[o,o],[o,-o],[-o,o],[-o,-o]])
+      axis==="x" ? bar(x, y+dy, z+dz, len, "x")
+                 : bar(x+dy, y+dz*(axis==="y"?0:1), z+(axis==="y"?dz:0), len, axis);
+  };
+
+  if(DECK){
+    const deck=new THREE.Mesh(new THREE.BoxGeometry(S.w*0.72, DECK, S.d*0.72),
+                              mat(0x14171f));
+    deck.position.set(S.w/2, DECK/2, S.d*0.62); scene.add(deck);
+    // ground-support towers, one each side, the full height of the roof
+    for(const tx of [S.w*0.055, S.w*0.945]){
+      truss3(tx, S.h*0.5, S.d*0.60, S.h, "y", 0.55);
+      for(let k=1;k<7;k++) bar(tx, S.h*k/7, S.d*0.60, 1.1, "z");
+      // line array hung off the inside face
+      for(let k=0;k<9;k++){
+        const b=new THREE.Mesh(new THREE.BoxGeometry(0.85,0.36,0.62),
+                               mat(0x101319));
+        const lean=k*0.055;
+        b.position.set(tx + (tx<S.w/2?1.15:-1.15), S.h*0.80 - k*0.40, S.d*0.44 + k*0.09);
+        b.rotation.x=lean; scene.add(b);
+      }
+    }
+    // the roof grid
+    for(let k=0;k<=6;k++) truss3(S.w/2, S.h - 0.35, S.d*0.22 + k*(S.d*0.62)/6, S.w*0.94, "x", 0.22);
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(S.w*1.02, 0.12, S.d*0.72), mat(0x0e1116));
+    roof.position.set(S.w/2, S.h+0.05, S.d*0.55); scene.add(roof);
+    // rear lighting ladders, one per column of heads
+    const lx=[...new Set(LAY.fixtures.filter(f=>/^head_l/.test(f.id)).map(f=>f.at[0]))];
+    for(const x of lx){ truss3(x, S.h*0.42, 9.6, S.h*0.84, "y", 0.20);
+      for(let k=1;k<5;k++) bar(x, S.h*0.84*k/5, 9.6, 0.4, "x"); }
+    // and the front truss the pars hang from
+    const py=(LAY.fixtures.find(f=>f.kind==="par")||{at:[0,7,7]}).at;
+    truss3(S.w/2, py[1]+0.34, py[2], S.w*0.92, "x", 0.24);
+  } else {
+    const back=new THREE.Mesh(new THREE.PlaneGeometry(S.w*1.6,S.h*1.6), mat(0x0b0d13));
+    back.position.set(S.w/2,S.h*0.8,S.d+0.05); back.rotation.y=Math.PI; scene.add(back);
+    const truss=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,S.w+0.6,10), steel);
+    truss.rotation.z=Math.PI/2;
+    const parY=(LAY.fixtures.find(f=>f.kind==="par")||{at:[0,3,4.6]}).at;
+    truss.position.set(S.w/2, parY[1]+0.22, parY[2]); scene.add(truss);
+  }
 
   for(const f of (LAY.fixtures||[])){
     if(f.kind==="fog") continue;
+    if(f.kind==="screen"){
+      const sz=f.size_m||{w:10,h:5};
+      const wall=new THREE.Mesh(new THREE.PlaneGeometry(sz.w,sz.h),
+        new THREE.MeshBasicMaterial({color:0x000000}));
+      wall.position.set(f.at[0],f.at[1],f.at[2]); wall.rotation.y=Math.PI;
+      scene.add(wall);
+      const bloom=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW,color:0xffffff,
+        transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+      bloom.position.set(f.at[0],f.at[1],f.at[2]-0.3);
+      bloom.scale.set(sz.w*1.5,sz.h*1.7,1); scene.add(bloom);
+      fixtures.push({def:f,wall,bloom,screen:true});
+      continue;
+    }
     const at=f.at||[S.w/2,3,4.6];
     const g=new THREE.Group(); g.position.set(at[0],at[1],at[2]); scene.add(g);
     /* A par can is a real object and you should be able to see it. These were dark
@@ -128,9 +197,13 @@ function build(){
        and the rig read as an effect rather than as lights. Bigger, lighter, and
        with a yoke, which is most of what tells you which way a lamp is pointing. */
     const shell=new THREE.MeshStandardMaterial({color:0x39414f,roughness:.45,metalness:.75});
+    /* A strobe panel is a wide flat bar and a par is a round can -- on a real
+       truss they hang in two rows and you can tell them apart at fifty metres by
+       shape alone, which is most of why the truss reads as a truss. */
     const body=new THREE.Mesh(
       f.kind==="head"    ? new THREE.SphereGeometry(0.15,18,14)
     : f.kind==="blinder" ? new THREE.BoxGeometry(0.42,0.30,0.16)
+    : f.kind==="strobe"  ? new THREE.BoxGeometry(0.62,0.20,0.13)
                          : new THREE.CylinderGeometry(0.135,0.155,0.34,18),
       shell);
     if(f.kind==="par") body.rotation.x=Math.PI/2;
@@ -141,9 +214,15 @@ function build(){
     // scattering falls off across the beam and one flat cone reads as plastic.
     /* a blinder is a flood pointed at the crowd, not a beam: short, very wide,
        and its whole job is the half second it is on */
+    /* Throw scales with the room. Fixed lengths were tuned for a six-metre club
+       and left every beam stopping in mid-air on an eighteen-metre stage. */
+    const reach=Math.max(6, (S.d||5)*1.25);
     const deg=(f.beam_deg||24)*Math.PI/180,
-          len=f.kind==="head"?11:f.kind==="blinder"?3.2:7.0;
-    const cones=[[1.6,0.055],[1.0,0.13],[0.45,0.42]].map(([k,a])=>{
+          len=f.kind==="head"    ? reach*1.35
+            : f.kind==="blinder" ? reach*0.42
+            : f.kind==="strobe"  ? reach*0.55      // a strobe throws wide and short
+                                 : reach;
+    const cones=[[1.6,0.07],[1.0,0.17],[0.45,0.52]].map(([k,a])=>{
       const r=Math.tan(deg/2)*len*k;
       const m=new THREE.Mesh(new THREE.ConeGeometry(r,len,26,1,true),
         new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,
@@ -151,9 +230,12 @@ function build(){
       m.geometry.translate(0,-len/2,0);      // apex at the lamp
       m.userData.alpha=a; g.add(m); return m;
     });
-    const lens=new THREE.Mesh(new THREE.CircleGeometry(0.125,20),
+    const lens=new THREE.Mesh(
+      f.kind==="strobe"  ? new THREE.PlaneGeometry(0.56,0.15)
+    : f.kind==="blinder" ? new THREE.PlaneGeometry(0.36,0.24)
+                         : new THREE.CircleGeometry(0.125,20),
       new THREE.MeshBasicMaterial({color:0x0b0d12,side:THREE.DoubleSide}));
-    lens.rotation.x=-Math.PI/2; lens.position.y=-0.17; g.add(lens);
+    lens.rotation.x=-Math.PI/2; lens.position.y=f.kind==="strobe"?-0.11:-0.17; g.add(lens);
     /* the halo is what a lamp pointed at you actually looks like: a bloom around
        the lens that grows with output. Without it the brightest thing on stage was
        the middle of the beam rather than its source, which is backwards. */
@@ -177,6 +259,8 @@ function place(){
   const S=LAY.size_m||{w:6,d:5,h:3.4}, mode=$("cam").value;
   if(mode==="above"){ cam.position.set(S.w/2, S.h*2.6, S.d/2+0.01); cam.lookAt(S.w/2,0,S.d/2) }
   else if(mode==="side"){ cam.position.set(-S.w*0.55, S.h*0.5, S.d*0.25); cam.lookAt(S.w/2,S.h*0.35,S.d*0.7) }
+  else if(LAY.deck_m){ cam.position.set(S.w/2, 1.7, -S.d*0.55);
+                       cam.lookAt(S.w/2, S.h*0.44, S.d*0.78) }
   else { cam.position.set(S.w/2, 1.6, -S.d*0.42); cam.lookAt(S.w/2, S.h*0.52, S.d*0.80) }
 }
 
@@ -193,7 +277,7 @@ function aim(fx, o){
        you see the face of the lamp and the beam coming toward you. They were aimed
        at the floor just under the truss, which is why every lens was edge-on and
        invisible. The row also fans slightly outward, as a real rig is rigged. */
-    if(fx.def.kind==="blinder"){
+    if(fx.def.kind==="blinder" || fx.def.kind==="strobe"){
       target=new THREE.Vector3(at[0], 1.5, -3.0);       // straight at the audience
     } else {
       const mid=S.w/2, fan=(at[0]-mid)*0.55;
@@ -207,29 +291,50 @@ function aim(fx, o){
   fx.pool.position.set(hit.x, 0.012, hit.z);
 }
 
+/* Auto-exposure, because tone mapping alone cannot fix this. In r128 tone mapping
+   runs per material, so fifty-two additively blended cones still sum past white
+   after every one of them has been compressed. A camera does not solve a bright
+   room by asking it to be dimmer -- it closes down -- so the renderer measures how
+   much light the frame contains and stops down accordingly, and opens back up in
+   the dark. The FRAMES ARE UNTOUCHED: this changes what the picture looks like and
+   nothing about what would be sent to a real rig. */
+let EXPO=1;
 function render(t){
   if(!F) return;
   const fr=F(t);
   const by={}; for(const o of fr.fixtures) by[o.id]=o;
+  let total=0;
+  for(const o of fr.fixtures) if("level" in o && !/^fog/.test(o.id)) total+=o.level;
+  const REF=5.5;
+  const want=Math.max(0.16, Math.min(1, REF/Math.max(REF, total)));
+  EXPO += (want-EXPO) * 0.22;                 // follows fast enough to catch a drop
   let haze=0;
   for(const o of fr.fixtures) if(/^fog/.test(o.id)) haze=Math.max(haze,o.level||0);
   for(const fx of fixtures){
     const o=by[fx.def.id]||{}, L=Math.max(0, Math.min(1, o.level||0));
+    if(fx.screen){
+      const cc=new THREE.Color((o.r||0)/255,(o.g||0)/255,(o.b||0)/255);
+      fx.wall.material.color.copy(cc).multiplyScalar(L);
+      fx.bloom.material.color.copy(cc); fx.bloom.material.opacity=L*0.30*EXPO;
+      continue;
+    }
     const c=new THREE.Color((o.r!==undefined?o.r:255)/255,
                             (o.g!==undefined?o.g:255)/255,
                             (o.b!==undefined?o.b:255)/255);
     aim(fx,o);
     for(const m of fx.cones){
       m.material.color.copy(c);
-      m.material.opacity = Math.pow(L,0.8) * m.userData.alpha * (0.45 + 0.55*Math.min(1,haze+0.5));
+      m.material.opacity = Math.pow(L,0.8) * m.userData.alpha * EXPO
+                         * (0.45 + 0.55*Math.min(1,haze+0.5));
     }
     fx.lens.material.color.copy(c).multiplyScalar(Math.min(1, 0.20 + L));
-    fx.halo.material.opacity = Math.min(0.95, L*0.85);
+    fx.halo.material.opacity = Math.min(0.95, L*0.85*(0.35+0.65*EXPO));
     fx.halo.material.color.copy(c);
-    const hs = (fx.def.kind==="blinder" ? 0.8 : 0.30) + (fx.def.kind==="blinder"?3.2:1.25)*L;
+    const wide = fx.def.kind==="blinder" || fx.def.kind==="strobe";
+    const hs = (wide ? 0.8 : 0.30) + (wide ? 3.2 : 1.25)*L;
     fx.halo.scale.set(hs, hs, 1);
     fx.pool.material.color.copy(c);
-    fx.pool.material.opacity = L*0.22;
+    fx.pool.material.opacity = L*0.22*EXPO;
   }
   renderer.render(scene,cam);
 }
@@ -256,7 +361,7 @@ function rebuild(){
   SONG=Q.get("song")||"levels";
   const sg=await (await fetch("/api/song?song="+SONG)).json();
   const want=Q.get("rig");
-  LAY=(sg.layouts||{})[want] || (sg.layouts||{}).show
+  LAY=(sg.layouts||{})[want] || (sg.layouts||{}).mainstage || (sg.layouts||{}).show
       || (sg.layouts||{}).small || (sg.layouts||{}).beat;
   const G=await (await fetch("/api/maps?song="+SONG)).json();
   SONG=G.song; MAP=G.maps.answer||Object.values(G.maps)[0];

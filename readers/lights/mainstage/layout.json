@@ -1,0 +1,898 @@
+{
+ "layout": "mainstage",
+ "room": "mainstage",
+ "note": "A festival mainstage: ground-support towers either side, a roof grid, a front truss of pars and heads hung under it, four rear lighting ladders carrying heads up their height, blinders across the front and an LED wall behind the whole thing. The ladders are the reason this reads as a festival rather than a club -- beams arriving from BEHIND and BELOW the performer are what a front truss alone can never do.",
+ "size_m": {
+  "w": 18.0,
+  "d": 11.0,
+  "h": 9.5
+ },
+ "deck_m": 1.4,
+ "limits": {
+  "max_strobe_hz": 10.0,
+  "max_pan_per_s": 1.9,
+  "max_tilt_per_s": 2.1,
+  "note": "Sharpy-class heads: 540 degrees of pan in about 1.4 s is 1.9 range/s.",
+  "strobe_note": "Ten hertz, and the recipe DERIVES its flash rate from this rather than being permitted by it. Real festival strobes reach 25 Hz, but sustained flashing above roughly three hertz is a photosensitivity risk, so the recipe is also limited to bursts under 1.2 s and fires only on a drop or the last bar of a build. Lower this number and the strobes slow down; there is no way to make them exceed it from the recipe, which is the whole reason the limit lives here and not there."
+ },
+ "zones": [
+  {
+   "name": "front",
+   "fixtures": [
+    "par_1",
+    "par_2",
+    "par_3",
+    "par_4",
+    "par_5",
+    "par_6",
+    "par_7",
+    "par_8",
+    "par_9",
+    "par_10",
+    "par_11",
+    "par_12",
+    "par_13",
+    "par_14",
+    "strobe_1",
+    "strobe_2",
+    "strobe_3",
+    "strobe_4",
+    "strobe_5",
+    "strobe_6",
+    "strobe_7",
+    "strobe_8",
+    "strobe_9",
+    "strobe_10",
+    "blind_1",
+    "blind_2",
+    "blind_3",
+    "blind_4",
+    "blind_5"
+   ]
+  },
+  {
+   "name": "air",
+   "fixtures": [
+    "head_f1",
+    "head_f2",
+    "head_f3",
+    "head_f4",
+    "head_f5",
+    "head_f6",
+    "head_f7",
+    "head_f8",
+    "head_l1_1",
+    "head_l1_2",
+    "head_l1_3",
+    "head_l2_1",
+    "head_l2_2",
+    "head_l2_3",
+    "head_l3_1",
+    "head_l3_2",
+    "head_l3_3",
+    "head_l4_1",
+    "head_l4_2",
+    "head_l4_3"
+   ]
+  },
+  {
+   "name": "back",
+   "fixtures": [
+    "screen_1"
+   ]
+  }
+ ],
+ "fixtures": [
+  {
+   "id": "par_1",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    2.2,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_2",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    3.25,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_3",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    4.29,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_4",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    5.34,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_5",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    6.38,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_6",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    7.43,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_7",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    8.48,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_8",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    9.52,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_9",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    10.57,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_10",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    11.62,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_11",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    12.66,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_12",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    13.71,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_13",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    14.75,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "par_14",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    15.8,
+    7.6,
+    7.2
+   ],
+   "zone": "front",
+   "beam_deg": 12
+  },
+  {
+   "id": "strobe_1",
+   "kind": "strobe",
+   "can": [
+    "level"
+   ],
+   "at": [
+    2.6,
+    6.95,
+    7.2
+   ],
+   "beam_deg": 85,
+   "zone": "front"
+  },
+  {
+   "id": "strobe_2",
+   "kind": "strobe",
+   "can": [
+    "level"
+   ],
+   "at": [
+    4.02,
+    6.95,
+    7.2
+   ],
+   "beam_deg": 85,
+   "zone": "front"
+  },
+  {
+   "id": "strobe_3",
+   "kind": "strobe",
+   "can": [
+    "level"
+   ],
+   "at": [
+    5.44,
+    6.95,
+    7.2
+   ],
+   "beam_deg": 85,
+   "zone": "front"
+  },
+  {
+   "id": "strobe_4",
+   "kind": "strobe",
+   "can": [
+    "level"
+   ],
+   "at": [
+    6.87,
+    6.95,
+    7.2
+   ],
+   "beam_deg": 85,
+   "zone": "front"
+  },
+  {
+   "id": "strobe_5",
+   "kind": "strobe",
+   "can": [
+    "level"
+   ],
+   "at": [
+    8.29,
+    6.95,
+    7.2
+   ],
+   "beam_deg": 85,
+   "zone": "front"
+  },
+  {
+   "id": "strobe_6",
+   "kind": "strobe",
+   "can": [
+    "level"
+   ],
+   "at": [
+    9.71,
+    6.95,
+    7.2
+   ],
+   "beam_deg": 85,
+   "zone": "front"
+  },
+  {
+   "id": "strobe_7",
+   "kind": "strobe",
+   "can": [
+    "level"
+   ],
+   "at": [
+    11.13,
+    6.95,
+    7.2
+   ],
+   "beam_deg": 85,
+   "zone": "front"
+  },
+  {
+   "id": "strobe_8",
+   "kind": "strobe",
+   "can": [
+    "level"
+   ],
+   "at": [
+    12.56,
+    6.95,
+    7.2
+   ],
+   "beam_deg": 85,
+   "zone": "front"
+  },
+  {
+   "id": "strobe_9",
+   "kind": "strobe",
+   "can": [
+    "level"
+   ],
+   "at": [
+    13.98,
+    6.95,
+    7.2
+   ],
+   "beam_deg": 85,
+   "zone": "front"
+  },
+  {
+   "id": "strobe_10",
+   "kind": "strobe",
+   "can": [
+    "level"
+   ],
+   "at": [
+    15.4,
+    6.95,
+    7.2
+   ],
+   "beam_deg": 85,
+   "zone": "front"
+  },
+  {
+   "id": "head_f1",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    2.8,
+    7.2,
+    6.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_f2",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    4.57,
+    7.2,
+    6.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_f3",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    6.34,
+    7.2,
+    6.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_f4",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    8.11,
+    7.2,
+    6.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_f5",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    9.89,
+    7.2,
+    6.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_f6",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    11.66,
+    7.2,
+    6.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_f7",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    13.43,
+    7.2,
+    6.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_f8",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    15.2,
+    7.2,
+    6.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l1_1",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    3.2,
+    2.6,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l1_2",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    3.2,
+    4.4,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l1_3",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    3.2,
+    6.2,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l2_1",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    7.0,
+    2.6,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l2_2",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    7.0,
+    4.4,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l2_3",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    7.0,
+    6.2,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l3_1",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    11.0,
+    2.6,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l3_2",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    11.0,
+    4.4,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l3_3",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    11.0,
+    6.2,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l4_1",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    14.8,
+    2.6,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l4_2",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    14.8,
+    4.4,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "head_l4_3",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "pan",
+    "tilt"
+   ],
+   "at": [
+    14.8,
+    6.2,
+    9.6
+   ],
+   "zone": "air",
+   "beam_deg": 8
+  },
+  {
+   "id": "blind_1",
+   "kind": "blinder",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    3.4,
+    6.9,
+    6.9
+   ],
+   "zone": "front",
+   "beam_deg": 70
+  },
+  {
+   "id": "blind_2",
+   "kind": "blinder",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    6.2,
+    6.9,
+    6.9
+   ],
+   "zone": "front",
+   "beam_deg": 70
+  },
+  {
+   "id": "blind_3",
+   "kind": "blinder",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    9.0,
+    6.9,
+    6.9
+   ],
+   "zone": "front",
+   "beam_deg": 70
+  },
+  {
+   "id": "blind_4",
+   "kind": "blinder",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    11.8,
+    6.9,
+    6.9
+   ],
+   "zone": "front",
+   "beam_deg": 70
+  },
+  {
+   "id": "blind_5",
+   "kind": "blinder",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    14.6,
+    6.9,
+    6.9
+   ],
+   "zone": "front",
+   "beam_deg": 70
+  },
+  {
+   "id": "screen_1",
+   "kind": "screen",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    9.0,
+    4.5,
+    10.1
+   ],
+   "zone": "back",
+   "size_m": {
+    "w": 12.4,
+    "h": 6.2
+   }
+  },
+  {
+   "id": "fog_1",
+   "kind": "fog",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    1.7,
+    8.0
+   ],
+   "zone": "floor"
+  },
+  {
+   "id": "fog_2",
+   "kind": "fog",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    16.8,
+    1.7,
+    8.0
+   ],
+   "zone": "floor"
+  }
+ ]
+}
