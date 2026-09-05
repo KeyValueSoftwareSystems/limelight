@@ -103,3 +103,68 @@ node readers/lights/pack/make.js && python3 readers/lights/pack/check.py …
 
 `smooth.js` reads the limits the layout declares rather than a constant, so a wrong layout produces
 a green test. Check the layout too.
+
+---
+
+# The drive knob (added later)
+
+One setting at the end of the chain decides how hard the room is pushed. The map does not change
+and neither does the layout: the same song on the same rig gives a restrained show or an aggressive
+one because a person turned a knob, which is what an operator actually does.
+
+**It stays pure.** `ENERGY` is a recipe parameter, not state. `frame(t)` at drive `high` is still
+the same answer every time it is asked.
+
+```
+ENERGY ∈ {low, medium, high}                                  medium is the default
+
+K = {                base  span  chase  accent  motion  strobe  haze
+      low:           0.72  0.80   0.45    0.55    0.55    0.35   0.75
+      medium:        1.00  1.00   1.00    1.00    1.00    1.00   1.00
+      high:          1.18  1.30   1.45    1.55    1.45    1.60   1.20 }
+```
+
+Where each one enters:
+
+```
+base   = clamp(0.20 + (base[L] − 0.20)·K.span) · K.base       span opens the gap around the middle
+accent term                              · K.accent           how hard the room answers a hit
+chase mix = clamp(chaseMix[L]·K.chase, 0, 0.85)               capped: see below
+chase floor = 0.06 / max(0.5, K.chase)                        deeper gaps between pulses
+SLEW_CAP = clamp(0.60·(LIMP/0.85)·K.motion, 0.30, 1.0) · 0.68
+fog      = (base + 0.55·burst) · K.haze
+```
+
+**It is deliberately not a brightness control.** Turning a whole show up makes it flat and bright.
+What changes is how much of each behaviour is allowed. Measured inside drop looks on the small rig:
+
+| drive | brightest par | spatial spread | head travel | chase steps/min |
+|---|---|---|---|---|
+| low | 0.517 | 1.6× | 0.48 | 43 |
+| medium | 0.431 | 2.4× | 0.79 | 79 |
+| high | 0.463 | 2.9× | 0.79 | 80 |
+
+Total light output is roughly flat across the three, and that is correct: a wash lights five lamps
+at once and a chase lights one, so "more energy" shows up as more contrast and more movement rather
+than as more lumens. Head travel saturates between medium and high on this rig because it is already
+at its ceiling; on the club rig, which declares half the pan budget, it rises 0.32 → 0.56 → 0.80.
+
+## Two clamps that exist for a reason
+
+**The chase mix is capped at 0.85.** Letting it reach 1.0 left four lamps of five sitting on the
+chase floor, so the room got *darker* as the knob went up — measured, p95 output fell from 3.35 to
+2.26 while the setting said "more".
+
+**`SLEW_HEADROOM = 0.68` is empirical and is labelled as such in the code.** The analytic bound —
+amplitude times 2π over the shortest move period — says 1.0 is safe. Measurement says otherwise: the
+achieved peak came out 2.2× that, so something in the pan chain contributes beyond the amplitude
+term and I have not found it. A recipe must never ask a motor for more than its layout declares, so
+the cap carries a measured factor until the analysis is finished. Verified across every combination
+of two maps, two rigs and three drive settings — twelve runs, all within the declared pan and tilt
+budgets.
+
+Check it yourself after any change to head motion:
+
+```
+node readers/src/smooth.js      # peak slew against the layout's own declared limits
+```

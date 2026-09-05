@@ -3,6 +3,26 @@
    Looks are segmented from the map once, then CROSSFADED, so every number the
    renderer sees is continuous. Still a pure function of t -- the crossfade
    weight is itself a function of t, not a fader holding state.            */
+/* ---- the drive knob ---------------------------------------------------------
+   One setting at the very end of the chain that decides how hard the room is
+   pushed. The map does not change and neither does the layout: the same song and
+   the same rig produce a restrained show or an aggressive one because a person
+   turned a knob, which is what a lighting operator actually does.
+
+   It stays pure. DRIVE is a recipe parameter, not state -- frame(t) with drive
+   "high" is still the same answer every time you ask for it.
+
+   It is deliberately NOT a brightness multiplier. Turning a whole show up just
+   makes it flat and bright. What changes is how much of each behaviour is
+   allowed: how deep the darks go, how much the chase runs, how far the heads
+   travel, how sharply the room answers a drum hit. */
+const DRIVE = (function(){ try { return (ENERGY || "medium") } catch(e) { return "medium" } })();
+const K = ({
+  low:    { base:0.72, span:0.80, chase:0.45, accent:0.55, motion:0.55, strobe:0.35, haze:0.75 },
+  medium: { base:1.00, span:1.00, chase:1.00, accent:1.00, motion:1.00, strobe:1.00, haze:1.00 },
+  high:   { base:1.18, span:1.30, chase:1.45, accent:1.55, motion:1.45, strobe:1.60, haze:1.20 },
+}[DRIVE]) || { base:1, span:1, chase:1, accent:1, motion:1, strobe:1, haze:1 };
+
 const cl=(x,a=0,b=1)=>x<a?a:x>b?b:x;
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
@@ -204,7 +224,18 @@ const LIMT = (LAYOUT.limits&&LAYOUT.limits.max_tilt_per_s)||0.95;
    one -- two heads that are meant to BE the show barely moved. Expressed relative
    to the rig it was tuned on, the club is unchanged and a faster fixture gets the
    travel it was bought for. */
-const SLEW_CAP=Math.max(0.45,Math.min(1.0,0.60*(LIMP/0.85)));
+/* SLEW_HEADROOM is empirical and is labelled as such. The analytic bound --
+   amplitude times 2*pi over the shortest move period -- says 1.0 is safe, and
+   measurement says otherwise: the achieved peak came out 2.2x that, so something
+   in the pan chain contributes beyond the amplitude term and I have not found it.
+   Rather than ship a recipe that asks a motor for more than the layout says it
+   has, the cap carries a measured factor and the number is checked by
+   readers/src/smooth.js on every rig.
+
+   This is the same shape of admission as the original flat 0.60: a blunt
+   constant, honestly labelled, in place of an analysis that is not finished. */
+const SLEW_HEADROOM=0.68;
+const SLEW_CAP=Math.max(0.30,Math.min(1.0,0.60*(LIMP/0.85)*K.motion))*SLEW_HEADROOM;
 const MPH = (function(){
   // the table is built from a 4-downbeat moving average, matching eMotion
   if(!EN || !EN.length) return null;      // a map may carry no energy at all
@@ -482,7 +513,10 @@ function lookFrame(t,L){
       /* Darkness is a tool, and I was never using it: every section sat above
          0.05 so the room was always faintly on. Breaks and quiets now go
          genuinely dark, which is what makes a drop land. */
-      const base={drop:0.38,build:0.15,verse:0.20,quiet:0.028,idle:0.036,outro:0.042}[L]??0.13;
+      const b0={drop:0.38,build:0.15,verse:0.20,quiet:0.028,idle:0.036,outro:0.042}[L]??0.13;
+      // span pulls the quiet parts down and the loud parts up around the middle,
+      // so "high" is more contrast rather than more brightness
+      const base=cl(0.20 + (b0-0.20)*K.span, 0, 1.4)*K.base;
       /* This used to be 0.70 + 0.30*cos(2pi*(xn - bp4)), a wave travelling across
          the room on a four-bar cycle. Measured, it swung one lamp from 0.400 to
          1.000 -- two and a half times -- on a 7.5 second timer that has nothing to
@@ -494,7 +528,7 @@ function lookFrame(t,L){
          always true. What was wrong was the part that moved on its own. Anything
          that changes brightness over time now has to come from the music. */
       const wave=0.88+0.12*Math.cos(2*Math.PI*G.xn);
-      lv=(base+0.40*e*(L==='drop'?1:0.62))*wave*EX.arc + (0.04+0.10*e)*A*0.35*grow;
+      lv=(base+0.40*e*(L==='drop'?1:0.62))*wave*EX.arc + (0.04+0.10*e)*A*0.35*grow*K.accent;
       /* Layer the chase over the wash rather than replacing it: the wash keeps
          the room from going black between pulses, the chase supplies the
          movement. How much of each depends on how busy the music is -- a quiet
@@ -506,7 +540,15 @@ function lookFrame(t,L){
         const full = (base + 0.55*e) * EX.arc;
         // a shallow floor is what makes the gap read: 0.10 left the dark lamps at a
         // fifth of the bright one, which is a gradient again
-        lv = lerp(lv, full * (0.04 + 0.96*pulse), chaseMix * (0.45 + 0.55*e));
+        /* The chase must never fully replace the wash. Letting the mix reach 1.0
+           at high drive left four lamps of five sitting on the chase floor, so the
+           room got DARKER as the knob went up -- measured, p95 output fell from
+           3.35 to 2.26 while the setting said "more". Capped at 0.85 the wash
+           always carries something, and drive shows up where it should: a deeper
+           floor between pulses and a brighter lamp on the hit. */
+        const floor = 0.06 / Math.max(0.5, K.chase);
+        const mix = cl(chaseMix * K.chase, 0, 0.85) * (0.45 + 0.55*e);
+        lv = lerp(lv, full * (floor + (1 - floor) * pulse), mix);
       }
       if(L==='build') lv*=lerp(0.30,1,layer(1));
       if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(t/(4*BAR))+G.xn*2.2);
@@ -748,7 +790,7 @@ function lookFrame(t,L){
     if(t>=m.at-9 && t<m.at-6.5) burst=Math.max(burst,ss(m.at-9,m.at-7.5,t));
     if(t>=m.at-6.5 && t<m.at+1) burst=Math.max(burst,1-ss(m.at-6.5,m.at+1,t)*0.45);
   }
-  const fg=+Math.min(1,hazeBase+0.55*burst).toFixed(3);
+  const fg=+Math.min(1,(hazeBase+0.55*burst)*K.haze).toFixed(3);
   for(const f of LAYOUT.fixtures) if(f.kind==='fog') F.push({id:f.id,level:fg});
 
   const[r,s]=since('return',t,2*BAR);

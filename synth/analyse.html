@@ -47,6 +47,8 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
   <label for="song">song</label><select id="song"></select>
   <label for="mine">editing</label><select id="mine"></select>
   <label for="other">against</label><select id="other"></select>
+  <label for="drive">energy</label>
+  <select id="drive"><option>low</option><option selected>medium</option><option>high</option></select>
   <button id="tool-sec" class="on">sections</button>
   <button id="tool-mom">moments</button>
   <button class="go" id="save">Save</button>
@@ -108,6 +110,7 @@ let RECIPE="", RM=null, LAY=null, F1=null, F2=null, rebuildTimer=null, scoreTime
 // fixtures by default: this panel is for checking the output is what you meant,
 // not for imagining what the room looks like
 let VIEWMODE="fixtures";
+let DRIVE = localStorage.getItem("limelight.drive") || "medium";
 const clampView=D=>{ VIEW.span=Math.max(4,Math.min(D,VIEW.span||D));
   VIEW.t0=Math.max(0,Math.min(D-VIEW.span,VIEW.t0)) };
 
@@ -279,9 +282,9 @@ function dirty(){
 function rebuildShow(){
   if(!RM||!LAY||!MINE) return;
   try{
-    F1=RM.mkReader(MINE,LAY);
-    F2=OTHER?RM.mkReader(OTHER,LAY):null;
-    $("rmeta").textContent=`${mineKey} · ${LAY.room} · ${LAY.fixtures.length} fixtures`;
+    F1=RM.mkReader(MINE,LAY,DRIVE);
+    F2=OTHER?RM.mkReader(OTHER,LAY,DRIVE):null;
+    $("rmeta").textContent=`${mineKey} · ${LAY.room} · ${LAY.fixtures.length} fixtures · energy ${DRIVE}`;
     $("vsname").textContent=otherKey||"—";
     $("vstale").textContent="";
     clearTimeout(scoreTimer); scoreTimer=setTimeout(rescore,60);
@@ -431,6 +434,9 @@ function drawRoom(){
   $("sync").oninput=e=>{ SYNC=+e.target.value;
     $("syncv").textContent=SYNC+" ms"+(SYNC_AUTO?"  (device says "+SYNC_AUTO+")":"");
     localStorage.setItem("limelight.sync",SYNC) };
+  $("drive").value=DRIVE;
+  $("drive").onchange=e=>{ DRIVE=e.target.value;
+    localStorage.setItem("limelight.drive",DRIVE); rebuildShow() };
   $("viewtog").onclick=()=>{ VIEWMODE = VIEWMODE==="fixtures" ? "room" : "fixtures";
     $("viewtog").textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view" };
   VIEW={t0:0,span:dur(MINE)};
