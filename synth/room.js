@@ -182,6 +182,87 @@ function pearson(a,b){
 function totalLight(fr){ let s=0; for(const o of fr.fixtures) s+=(o.level||0); return s }
 
 
+/* ---- fixtures, up close ------------------------------------------------------
+   Not a room. One tile per fixture, big enough to read, for checking that the
+   output is what you meant rather than for seeing what it would look like.
+   A lamp shows its colour at its brightness; a head also shows where it points.
+*/
+function drawFixtures(cv, fr, layout){
+  const W = cv.clientWidth, H = cv.clientHeight || 240, dpr = window.devicePixelRatio || 1;
+  if(cv.width !== W*dpr || cv.height !== H*dpr){ cv.width = W*dpr; cv.height = H*dpr }
+  const g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  g.fillStyle = "#0b0d12"; g.fillRect(0,0,W,H);
+  if(!fr || !layout) return;
+
+  const fx = (layout.fixtures||[]).filter(f => f.kind !== "fog");
+  const by = {}; for(const o of fr.fixtures) by[o.id] = o;
+  const fogs = (layout.fixtures||[]).filter(f => f.kind === "fog")
+                 .map(f => by[f.id]).filter(Boolean);
+  const haze = fogs.length ? Math.max(...fogs.map(o => o.level||0)) : 0;
+
+  const n = fx.length || 1;
+  const gap = 10, pad = 12;
+  const tw = (W - pad*2 - gap*(n-1)) / n;
+  const th = Math.min(H - pad*2 - 26, tw * 1.35);
+  const top = pad;
+
+  fx.forEach((f, i) => {
+    const o = by[f.id] || {};
+    const L = o.level || 0;
+    const r = o.r!==undefined?o.r:255, gg = o.g!==undefined?o.g:255, b = o.b!==undefined?o.b:255;
+    const x = pad + i*(tw+gap), y = top;
+
+    g.fillStyle = "#12151d"; g.strokeStyle = "#232838"; g.lineWidth = 1;
+    g.beginPath(); g.roundRect(x, y, tw, th, 5); g.fill(); g.stroke();
+
+    // the lens: colour at brightness, with a glow that scales with level
+    const cx = x + tw/2, cy = y + th*0.40, rad = Math.min(tw, th)*0.24;
+    if(L > 0.01){
+      const glow = g.createRadialGradient(cx,cy,0,cx,cy,rad*2.6);
+      glow.addColorStop(0, `rgba(${r},${gg},${b},${(0.55*L).toFixed(3)})`);
+      glow.addColorStop(1, `rgba(${r},${gg},${b},0)`);
+      g.fillStyle = glow; g.beginPath(); g.arc(cx,cy,rad*2.6,0,6.2832); g.fill();
+    }
+    g.fillStyle = L > 0.01 ? `rgb(${(r*L)|0},${(gg*L)|0},${(b*L)|0})` : "#191d27";
+    g.beginPath(); g.arc(cx,cy,rad,0,6.2832); g.fill();
+    g.strokeStyle = "#2c3242"; g.stroke();
+
+    // where a head is pointing: a stub from the lens, plus the two numbers
+    if(o.pan !== undefined){
+      const ang = (o.pan - 0.5) * 2.4;                 // -1.2..1.2 rad across the room
+      const len = rad*1.35 + rad*1.1*(o.tilt!==undefined?o.tilt:0.5);
+      g.strokeStyle = L>0.01 ? `rgba(${r},${gg},${b},0.85)` : "#2c3242";
+      g.lineWidth = 3; g.lineCap = "round";
+      g.beginPath(); g.moveTo(cx,cy);
+      g.lineTo(cx + Math.sin(ang)*len, cy + Math.cos(ang)*len*0.75); g.stroke();
+      g.lineWidth = 1; g.lineCap = "butt";
+    }
+    if(o.strobe > 0){
+      g.fillStyle = "#f0a93c"; g.font = "600 10px ui-monospace,monospace";
+      g.fillText(o.strobe.toFixed(1)+" Hz", x+8, y+16);
+    }
+
+    // the numbers, because this view exists to be checked against
+    g.textAlign = "center";
+    g.fillStyle = "#e6e9f1"; g.font = "600 12px ui-monospace,monospace";
+    g.fillText(f.id, cx, y + th - 34);
+    g.fillStyle = "#959bac"; g.font = "11px ui-monospace,monospace";
+    g.fillText(L.toFixed(3), cx, y + th - 19);
+    g.fillStyle = "#666c7e"; g.font = "9.5px ui-monospace,monospace";
+    if(o.pan !== undefined)
+      g.fillText(`pan ${o.pan.toFixed(2)}  tilt ${(o.tilt||0).toFixed(2)}`, cx, y + th - 6);
+    else if(o.r !== undefined)
+      g.fillText(`${r} ${gg} ${b}`, cx, y + th - 6);
+    g.textAlign = "left";
+  });
+
+  // one line for the things that are not a lamp
+  g.fillStyle = "#666c7e"; g.font = "10.5px ui-monospace,monospace";
+  const lit = fx.filter(f => (by[f.id]||{}).level > 0.012).length;
+  g.fillText(`haze ${haze.toFixed(2)}   ·   ${lit}/${fx.length} lit   ·   look ${fr.look||"—"}`,
+             pad, H - 8);
+}
+
 if (typeof window !== "undefined") {
-  window.LimelightRoom = { mkReader, prep, drawRoom, frameDiff, pearson, totalLight };
+  window.LimelightRoom = { mkReader, prep, drawRoom, drawFixtures, frameDiff, pearson, totalLight };
 }

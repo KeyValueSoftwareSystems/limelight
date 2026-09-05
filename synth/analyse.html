@@ -21,6 +21,9 @@ button.on{border-color:var(--tung);color:var(--tung)}
 .track{background:var(--surface);border:1px solid var(--rule);border-radius:4px;margin:0 0 7px;
  overflow:hidden;flex:1 1 0;display:flex;flex-direction:column;min-height:0}
 .track canvas{flex:1 1 0;min-height:0}
+/* the fixture panel is a fixed instrument, not a timeline -- the flex rule above
+   is for the tracks and was shrinking it to a strip */
+#room{flex:0 0 auto!important;height:250px!important}
 .track.edit{border-color:var(--tung)}
 .thead{display:flex;justify-content:space-between;align-items:baseline;padding:7px 12px;
  border-bottom:1px solid var(--rule);font-family:ui-monospace,monospace;font-size:11.5px}
@@ -60,9 +63,12 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
 
 <div id="live" style="display:flex;gap:8px;flex:0 0 auto;margin:0 0 7px">
   <div class="track" style="flex:1 1 0;margin:0">
-    <div class="thead"><b>the show, from the map above</b>
-      <span id="rmeta">—</span></div>
-    <canvas id="room" style="height:250px"></canvas></div>
+    <div class="thead"><b>the fixtures, from the map above</b>
+      <span><button id="viewtog" style="background:var(--raise);color:var(--muted);
+        border:1px solid var(--rule2);border-radius:3px;padding:2px 8px;font-size:10.5px;
+        cursor:pointer;font-family:ui-monospace,monospace">room view</button>
+      <span id="rmeta" style="margin-left:8px">—</span></span></div>
+    <canvas id="room"></canvas></div>
   <div class="track" style="flex:0 0 250px;margin:0">
     <div class="thead"><b>vs <span id="vsname">—</span></b><span id="vstale"></span></div>
     <div style="padding:11px 13px;font-family:ui-monospace,monospace;font-size:12px;line-height:1.9">
@@ -95,6 +101,9 @@ let VIEW={t0:0, span:0}, FOLLOW=true, drag=null;
 // the room is rebuilt from MINE on every edit, so a boundary moved on the
 // timeline changes the lights immediately -- that is the loop worth having
 let RECIPE="", RM=null, LAY=null, F1=null, F2=null, rebuildTimer=null, scoreTimer=null;
+// fixtures by default: this panel is for checking the output is what you meant,
+// not for imagining what the room looks like
+let VIEWMODE="fixtures";
 const clampView=D=>{ VIEW.span=Math.max(4,Math.min(D,VIEW.span||D));
   VIEW.t0=Math.max(0,Math.min(D-VIEW.span,VIEW.t0)) };
 
@@ -344,7 +353,9 @@ addEventListener("resize",redraw);
 function drawRoom(){
   if(!F1||!RM) return;
   const a=$("aud"), t=Math.min(a.src?a.currentTime:0, dur(MINE)-0.02);
-  try{ RM.drawRoom($("room"), F1(t), LAY) }catch(e){}
+  try{ (VIEWMODE==="room" ? RM.drawRoom : RM.drawFixtures)($("room"), F1(t), LAY) }
+  catch(e){ if(!window.__drawErr){ window.__drawErr=1;
+    $("stat").style.color="#e88055"; $("stat").textContent="draw: "+e.message } }
 }
 (function tick(){
   const a=$("aud");
@@ -362,7 +373,7 @@ function drawRoom(){
   const Q=new URLSearchParams(location.search);
   RECIPE=await (await fetch("/static/recipe4.js")).text();
   const rj=await (await fetch("/static/room.js")).text();
-  RM=new Function("RECIPE", rj+"\n;return {mkReader,prep,drawRoom,frameDiff,pearson,totalLight};")(RECIPE);
+  RM=new Function("RECIPE", rj+"\n;return {mkReader,prep,drawRoom,drawFixtures,frameDiff,pearson,totalLight};")(RECIPE);
   const sg=await (await fetch("/api/song?song="+encodeURIComponent(Q.get("song")||""))).json();
   LAY=(sg.layouts||{}).small||(sg.layouts||{}).club||Object.values(sg.layouts||{})[0];
   G=await (await fetch("/api/maps?song="+encodeURIComponent(Q.get("song")||""))).json();
@@ -384,6 +395,8 @@ function drawRoom(){
     $("n1").textContent=mineKey+"  (editing)"; $("n2").textContent=otherKey||"—";
     rebuildShow(); redraw() };
   $("mine").onchange=load; $("other").onchange=load; load();
+  $("viewtog").onclick=()=>{ VIEWMODE = VIEWMODE==="fixtures" ? "room" : "fixtures";
+    $("viewtog").textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view" };
   VIEW={t0:0,span:dur(MINE)};
   $("aud").src="/api/audio?song="+SONG;
   // ?t= opens at a moment worth looking at, which matters when judging the room:
