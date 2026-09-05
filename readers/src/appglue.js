@@ -24,6 +24,42 @@ function full(){const e=document.documentElement;
 function drawer(){$('#drawer').classList.toggle('open');
   $('#tools').children[2].classList.toggle('on')}
 
+
+const SAFE=(function(){
+  const M=(typeof MAP_FULL!=='undefined'&&MAP_FULL)?MAP_FULL:{};
+  const O=M.observations||{};
+  const arr=x=>Array.isArray(x)?x:[];
+  const title=(typeof SONG_TITLE==='string'&&SONG_TITLE)?SONG_TITLE
+    :((M.song&&M.song.title)?String(M.song.title).replace(/\.[a-z0-9]+$/i,''):'Limelight');
+  const bpm=(M.grid&&M.grid.bpm)!==undefined?M.grid.bpm
+    :(typeof PER==='number'&&PER>0?(60/PER).toFixed(1):'?');
+  const key=(O.key&&O.key.estimate)?O.key.estimate:'';
+  const acc=arr(M.accents&&M.accents.events);
+  const beats=arr(M.beats);
+  const vec=(M.vectors&&M.vectors.rows&&M.vectors.dim)?M.vectors:null;
+  function rows(){
+    const out=[['beats',beats.length],['grid','<b>'+bpm+'</b> bpm']];
+    if(key) out.push(['key','<b>'+key+'</b>']);
+    const mt=O.microtiming;
+    if(mt&&typeof mt.quantisation==='string')
+      out.push(['quantised','1/'+mt.quantisation.split('/').pop()+' of a beat'
+        +(mt.within_15ms_pct!==undefined?', '+mt.within_15ms_pct+'% inside 15 ms':'')]);
+    const learned=M.segmentation_proposal&&arr(M.segmentation_proposal.sections).length;
+    out.push(['sections',(typeof SEC!=='undefined'?SEC.length:0)+' mine'
+      +(learned?', '+learned+' learned':'')]);
+    if(O.chords) out.push(['chords',arr(O.chords.events).length+' bars']);
+    if(M.stems&&M.stems.sources) out.push(['stems',Object.keys(M.stems.sources).length]);
+    if(acc.length) out.push(['accents','<b>'+acc.length+'</b>, '
+      +Math.round(100*acc.filter(a=>!a.on_grid).length/acc.length)+'% off-grid']);
+    if(O.lyrics) out.push(['lyrics',arr(O.lyrics.words).length+' word times']);
+    for(const k of ['melody','harmony','voice'])
+      if(O[k]&&arr(O[k].value).length) out.push([k,arr(O[k].value).length+' points']);
+    if(vec) out.push(['vectors',vec.rows+'&times;'+vec.dim]);
+    return out;
+  }
+  return {title:title,bpm:bpm,key:key,beats:beats,vectors:vec,rows:rows};
+})();
+
 /* ---- transport ---- */
 function pick(inp){const f=inp.files[0]; if(!f) return;
   $('#audio').src=URL.createObjectURL(f);
@@ -106,7 +142,9 @@ function drawScoreCursor(){
 
 /* ---- the drawer, which is where every remaining control went ---- */
 function fillDrawer(){
-  const O=MAP_FULL.observations, n=Object.values(O.notes.sources).reduce((s,a)=>s+a.length,0);
+  const O=(MAP_FULL&&MAP_FULL.observations)||{};
+  const n=(O.notes&&O.notes.sources)
+    ? Object.values(O.notes.sources).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0) : 0;
   const venues=Object.keys(LAYOUTS);
   $('#drawer').innerHTML=
    '<h2>Venue</h2><div class="row"><span>rig</span><div class="seg" id="vseg">'
@@ -129,21 +167,11 @@ function fillDrawer(){
    + '<p class="mono">Six methods say the hand segmentation is wrong between 1:03 and 1:47. The '
    + 'learned one carries <b>7</b> repeats to escalate against <b>1</b>.</p>'
    + '<h2>Take it away</h2>'
-   + '<div class="row"><a class="link" href="#" onclick="dlScore();return false">the score, '+(MAP_FULL.beats.length)+' beats &#8595;</a></div>'
-   + '<div class="row"><a class="link" href="#" onclick="dlVec();return false">the vectors, '
-   + MAP_FULL.vectors.rows+'&times;'+MAP_FULL.vectors.dim+' &#8595;</a></div>'
+   + '<div class="row"><a class="link" href="#" onclick="dlScore();return false">the score, '+(SAFE.beats.length)+' beats &#8595;</a></div>'
+   + (SAFE.vectors ? '<div class="row"><a class="link" href="#" onclick="dlVec();return false">the vectors, '
+      + SAFE.vectors.rows+'&times;'+SAFE.vectors.dim+' &#8595;</a></div>' : '')
    + '<h2>What is in the file</h2><div class="mono">'
-   + [['beats',MAP_FULL.beats.length],['grid','<b>'+MAP_FULL.grid.bpm+'</b> bpm'],
-      ['key','<b>'+O.key.estimate+'</b>'],['quantised','1/'+O.microtiming.quantisation.split('/')[1]
-        +' of a beat, '+O.microtiming.within_15ms_pct+'% inside 15 ms'],
-      ['sections',SEC.length+' mine, '+MAP_FULL.segmentation_proposal.sections.length+' learned'],
-      ['chords',O.chords.events.length+' bars'],['stems','6'],
-      ['notes','<b>'+n+'</b> polyphonic'],
-      ['accents','<b>'+MAP_FULL.accents.events.length+'</b>, '
-        +Math.round(100*MAP_FULL.accents.events.filter(a=>!a.on_grid).length/MAP_FULL.accents.events.length)+'% off-grid'],
-      ['lyrics',O.lyrics.words.length+' word times'],
-      ['vectors',MAP_FULL.vectors.rows+'&times;'+MAP_FULL.vectors.dim]]
-     .map(r=>'<div>'+r[0]+' &middot; '+r[1]+'</div>').join('')+'</div>'
+   + SAFE.rows().map(r=>'<div>'+r[0]+' &middot; '+r[1]+'</div>').join('')+'</div>'
    + '<h2>Keys</h2><div class="keys">'
    + [['space','play'],['&larr; &rarr;','a bar'],['1 2 3','room / sky / score'],
       ['c','camera'],['f','full screen'],['g','swap segmentation'],['.','more']]
@@ -181,8 +209,8 @@ function dlVec(){const r=atob(VEC_B64),u=new Uint8Array(r.length);
   a.download='the-nights.vec.f16';a.click()}
 
 /* ---- meta, top left: four lines, no chrome ---- */
-$('#meta').innerHTML='<div><b>The Nights</b> &middot; Avicii</div>'
-  +'<div>'+MAP_FULL.grid.bpm+' bpm &middot; '+MAP_FULL.observations.key.estimate
+$('#meta').innerHTML='<div><b>'+SAFE.title+'</b></div>'
+  +'<div>'+SAFE.bpm+' bpm'+(SAFE.key?' &middot; '+SAFE.key:'')
   +' &middot; '+BEATS.length+' beats</div>'
   +'<div id="metafps">&mdash;</div>';
 
@@ -205,31 +233,34 @@ window.addEventListener('resize',()=>{fit();skyFit();render()});
 const AUD=document.createElement('audio'); AUD.id='audio'; document.body.appendChild(AUD);
 fillDrawer(); fit(); skyFit(); mode(0); requestAnimationFrame(loop);
 
-(function(){
+function serverAudio(){
   if(typeof SONG_SLUG!=='string'||!SONG_SLUG) return;
-  const a=document.getElementById('audio');
-  if(!a || typeof a.addEventListener!=='function') return;
+  const d=document;
+  const a=d.getElementById('audio');
+  const pick=d.getElementById('picker'), hint=d.getElementById('pickhint');
+  if(!a||!pick||d.getElementById('playnow')) return;
   const url='/api/audio?song='+encodeURIComponent(SONG_SLUG);
-  a.addEventListener('loadedmetadata',function(){
-    const pick=document.getElementById('picker'), hint=document.getElementById('pickhint');
-    if(!pick||document.getElementById('playnow')) return;
-    const b=document.createElement('button');
-    b.id='playnow'; b.textContent='Play';
-    b.onclick=function(){
-      const h=document.getElementById('hello'); if(h) h.classList.add('hide');
-      playing=true; const pb=document.getElementById('play');
-      if(pb) pb.innerHTML='&#10074;&#10074;';
-      a.play();
-    };
-    pick.parentNode.insertBefore(b,pick);
-    pick.style.display='none';
-    if(hint) hint.textContent='Playing the copy on this machine. Or choose another file.';
-    const alt=document.createElement('a');
-    alt.href='#'; alt.textContent='choose a different file';
-    alt.style.cssText='display:block;margin-top:10px;opacity:.6;font-size:13px';
-    alt.onclick=function(e){e.preventDefault();pick.style.display='';alt.remove()};
-    if(hint) hint.parentNode.insertBefore(alt,hint.nextSibling);
-  });
+  const b=d.createElement('button');
+  b.id='playnow'; b.type='button'; b.textContent='Play';
+  b.onclick=function(){
+    try{
+      if(!a.src) a.src=url;
+      const two=d.getElementById('audio2'); if(two&&!two.src) two.src=url;
+      const h=d.getElementById('hello'); if(h) h.classList.add('hide');
+      playing=true;
+      const pb=d.getElementById('play'); if(pb) pb.innerHTML='&#10074;&#10074;';
+      const p=a.play(); if(p&&p.catch) p.catch(function(){});
+    }catch(e){}
+  };
+  pick.parentNode.insertBefore(b,pick);
+  pick.style.display='none';
+  if(hint) hint.textContent='This machine already has the audio.';
+  const alt=d.createElement('a');
+  alt.href='#'; alt.textContent='choose a different file instead';
+  alt.style.cssText='display:block;margin-top:12px;opacity:.55;font-size:13px;color:inherit';
+  alt.onclick=function(e){e.preventDefault();pick.style.display='';b.remove();alt.remove()};
+  if(hint&&hint.parentNode) hint.parentNode.insertBefore(alt,hint.nextSibling);
   a.src=url;
-  const b2=document.getElementById('audio2'); if(b2) b2.src=url;
-})();
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',serverAudio);
+else serverAudio();
