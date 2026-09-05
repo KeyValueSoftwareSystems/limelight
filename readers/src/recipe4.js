@@ -113,7 +113,7 @@ function accentHit(t){
    could not be bigger than the first. Escalating a repeat, and growing across
    the whole song, is most of what separates a show WRITTEN for one track from
    one merely driven by its features. */
-let SEC=(MAP.sections||[]).map(x=>Object.assign({},x));
+let SEC=(function(x){const a=Array.isArray(x)?x:(x&&x.entries)||[];return a.map(y=>Object.assign({},y))})(MAP.sections);
 function sectionAt(t){
   let r=null; for(const s of SEC){ if(s.at<=t) r=s; else break } return r}
 function escal(t){
@@ -126,9 +126,13 @@ function escal(t){
    pan      : the mix's own left-right balance drives the rig's balance
    melody   : the smoothed pitch contour drifts the hue, so the light follows the tune
    brightness: timbre whitens the colour, because bright is not the same as loud   */
-const OBS=MAP.obs||{};
+const OBS=(()=>{const o=MAP.obs||{},n=MAP.observations||{},out={};
+  for(const k in o) if(k!=='at') out[k]={at:o.at||[],value:o[k]};
+  for(const k in n){const c=n[k]; if(c&&c.at&&c.value) out[k]={at:c.at,value:c.value};}
+  return out})();
 function obsAt(k,t,dflt){
-  const v=OBS[k], at=OBS.at;
+  const c=OBS[k]; if(!c) return dflt;
+  const v=c.value, at=c.at;
   if(!v||!at||!v.length) return dflt;
   let i=-1; for(let j=0;j<at.length;j++) if(at[j]<=t) i=j; else break;
   if(i<0) return v[0]; if(i+1>=at.length||i+1>=v.length) return v[v.length-1];
@@ -136,6 +140,9 @@ function obsAt(k,t,dflt){
 const panAt   =t=>obsAt('pan',t,0);
 const meloAt  =t=>obsAt('melody',t,0.5);
 const briteAt =t=>obsAt('brite',t,0.5);
+const meloDrift=t=>cl((meloAt(t)-0.5)*2,-1,1);
+const harmAt  =t=>obsAt('harmony',t,0);
+const voxAt   =t=>obsAt('voice',t,0.5);
 
 const chIdx=t=>{let j=0;for(let i=0;i<CH.length;i++)if(CH[i][0]<=t)j=i;else break;return j};
 const chAt=t=>CH[chIdx(t)][1];
@@ -325,13 +332,17 @@ const PROFILES = {
 };
 const PROFILE = (function(){ try { return (COLOUR || "garrix") } catch(e) { return "garrix" } })();
 const PAL = PROFILES[PROFILE] || PROFILES.sunset;
-const ACT_ORDER = ['sunset','neon','ice','amber'];
 const DROP_TIMES = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
+const FINALE = {garrix:'garrix-red', 'garrix-red':'garrix', sunset:'neon',
+                neon:'ice', ice:'neon', amber:'sunset', white:'white'};
+const FINALE_AT = (function(){
+  if(DROP_TIMES.length < 3) return Infinity;
+  const last = DROP_TIMES[DROP_TIMES.length-1];
+  return (last > DUR*0.55) ? last : Infinity;
+})();
 function palAt(t){
-  let act=0; for(const d of DROP_TIMES){ if(d<=t+1e-9) act++; else break }
-  if(act===0) return PAL;
-  const name=ACT_ORDER[(ACT_ORDER.indexOf(PROFILE)+act)%ACT_ORDER.length];
-  return PROFILES[name]||PAL;
+  if(t + 1e-9 < FINALE_AT) return PAL;
+  return PROFILES[FINALE[PROFILE]] || PAL;
 }
 /* [primary, partner] per chapter. Warm carries the song, cool carries the room,
    deep carries the dark, and the build hands over to the drop by going hot. */
@@ -340,11 +351,28 @@ const ROLES = {
   build:['hot','lead'],  drop :['lead','hot'],  outro:['cool','deep'],
   quiet:['deep','cool'], spotlight:['lead','hot'],
 };
-function roleRGB(role,e,bri,pal){
+const SONG_DRIVE = (function(){
+  const bpm = 60/Math.max(0.05, PER);
+  const ev = (MAP.accents && MAP.accents.events) || [];
+  const rate = DUR>0 ? ev.length/DUR : 0;
+  return cl(0.5*ss(84,128,bpm) + 0.5*ss(3.4,7.0,rate));
+})();
+const HOT_OK = SONG_DRIVE > 0.45;
+const STROBE_GAIN = ss(0.25, 0.60, SONG_DRIVE);
+const STROBE_HZ   = lerp(0.40, 1.0, SONG_DRIVE);
+function rolesFor(name){
+  const r = ROLES[name] || ROLES.verse;
+  if(HOT_OK) return r;
+  return [r[0]==='hot'?'lead':r[0], r[1]==='hot'?'cool':r[1]];
+}
+const MELODY_DEG = 9;
+const MEL_TILT = 0.055;
+function roleRGB(role,e,bri,pal,drift){
   const P = pal || PAL;
   const c = P[role] || P.lead;
-  return hsl(c[0], cl(c[1]*(0.86+0.20*e),0,1),
-                   cl(c[2]*(0.84+0.28*e)*(0.94+0.12*bri),0,1));
+  const d = (drift===undefined?0:drift) * MELODY_DEG;
+  return hsl(c[0] + d, cl(c[1]*(0.86+0.20*e),0,1),
+                       cl(c[2]*(0.84+0.28*e)*(0.94+0.12*bri),0,1));
 }
 
 /* ---- the chase -------------------------------------------------------------
@@ -425,7 +453,7 @@ function chaseAt(t, e, n){
 /* One lamp is on the hit, the one before it is still letting go. The envelope is
    measured against the gap to the NEXT hit rather than a fixed time, so a fill
    reads as a fill instead of five lamps all half-lit at once. */
-const MIRROR = (function(){
+const RIG_MIRRORED = (function(){
   const fx=(LAYOUT.fixtures||[]).filter(f=>f.kind!=='fog');
   if(fx.length<6) return false;
   const xs=fx.map(f=>f.at[0]);
@@ -436,7 +464,7 @@ const MIRROR = (function(){
     if(fx.some(g=>g!==f&&g.kind===f.kind&&Math.abs(g.at[0]-want)<0.35&&Math.abs(g.at[1]-f.at[1])<0.35)) paired++;
   }
   return paired/fx.length >= 0.7;})();
-const sym = xn => MIRROR ? Math.abs(xn-0.5)*2 : xn;
+const sym = xn => RIG_MIRRORED ? Math.abs(xn-0.5)*2 : xn;
 const CENTRE_PAIR = (function(){
   const hs=(LAYOUT.fixtures||[]).filter(f=>f.kind==='head');
   if(hs.length<4) return 1;
@@ -446,16 +474,16 @@ const CENTRE_PAIR = (function(){
   return d[Math.min(d.length-1,3)]+1e-4;})();
 function chaseGain(xn, c){
   const half = Math.max(1, Math.floor(c.n/2));
-  const fold = MIRROR ? Math.abs(xn - 0.5) * 2 : xn;
-  const span = MIRROR ? half : c.n;
+  const fold = RIG_MIRRORED ? Math.abs(xn - 0.5) * 2 : xn;
+  const span = RIG_MIRRORED ? half : c.n;
   const here = Math.round(fold * (span - 1));
-  const pos = MIRROR ? (c.pos % span) : c.pos;
+  const pos = RIG_MIRRORED ? (c.pos % span) : c.pos;
   let d = Math.abs(here - pos);
   d = Math.min(d, span - d);
   const env = Math.exp(-(c.age / Math.max(0.09, c.gap * 0.75)) * 1.9);
   if(d === 0) return (0.30 + 0.70 * env) * c.alive;
   if(d === 1) return 0.28 * env * c.alive;
-  if(d === 2 && MIRROR) return 0.10 * env * c.alive;
+  if(d === 2 && RIG_MIRRORED) return 0.10 * env * c.alive;
   return 0.0;
 }
 
@@ -465,21 +493,27 @@ function fixColour(t,L,kind,xn,e){
   if(L==='stop')  return [0,0,0];
   if(L==='flash') return [255,252,244];
   const bri=briteAt(t), XFC=1.9, j=chIdx(t);
+  const dr=meloDrift(t), hm=harmAt(t), P=palAt(t);
   const pick=(roles)=>{
-    let role;
-    if(kind==='up') role='deep';
-    else if(kind==='head') role=roles[1];
-    else { const fi = MIRROR ? Math.round(Math.abs(xn-0.5)*2*(PARN-1)) : Math.round(xn*(PARN-1));
-           role = (fi % 2 === 0) ? roles[0] : roles[1]; }
-    const c=roleRGB(role,e,bri,palAt(t));
+    let role, alt;
+    if(kind==='up'){ role='deep'; alt=roles[1] }
+    else if(kind==='head'){ role=roles[1]; alt=roles[0] }
+    else { const fi = RIG_MIRRORED ? Math.round(Math.abs(xn-0.5)*2*(PARN-1)) : Math.round(xn*(PARN-1));
+           role = (fi % 2 === 0) ? roles[0] : roles[1];
+           alt  = (fi % 2 === 0) ? roles[1] : roles[0]; }
+    const base=roleRGB(role,e,bri,P,dr);
+    const w=0.38*hm;
+    let c=base;
+    if(w>0.004){ const o=roleRGB(alt,e,bri,P,dr);
+      c=[base[0]+(o[0]-base[0])*w|0, base[1]+(o[1]-base[1])*w|0, base[2]+(o[2]-base[2])*w|0] }
     return kind==='up' ? [c[0]*0.74|0, c[1]*0.74|0, c[2]*0.74|0] : c;
   };
-  const R = (L==='spotlight') ? ROLES.spotlight : (ROLES[CH[j][1]] || ROLES.verse);
+  const R = (L==='spotlight') ? rolesFor('spotlight') : rolesFor(CH[j][1]);
   const cur = pick(R);
   // one crossfade, in RGB, at the chapter join -- the only place an in-between
   // colour is allowed, and it lasts under two seconds
   if(j>0 && t-CH[j][0] < XFC && L!=='spotlight'){
-    const w=ss(0,XFC,t-CH[j][0]), p=pick(ROLES[CH[j-1][1]] || ROLES.verse);
+    const w=ss(0,XFC,t-CH[j][0]), p=pick(rolesFor(CH[j-1][1]));
     return [Math.round(lerp(p[0],cur[0],w)),Math.round(lerp(p[1],cur[1],w)),
             Math.round(lerp(p[2],cur[2],w))];
   }
@@ -528,6 +562,8 @@ const DEPLOY = {
   blinder: {arc:0.00, act:0},
   strobe:  {arc:0.00, act:0},
   fog:     {arc:0.00, act:0},
+  pyro:    {arc:0.55, act:2},
+  video:   {arc:0.00, act:0},
 };
 function deployed(kind, t){
   const d = DEPLOY[kind]; if(!d) return 1;
@@ -538,25 +574,39 @@ function deployed(kind, t){
   return ss(d.arc, d.arc+0.10, arc);
 }
 
+const GATE_RATE  = {wash:3.2, uplight:3.2, strip:2.2, head:1.0, par:1.0};
+const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:0.12, par:0.14};
+function buildProg(t){
+  const sp = spanAt(t);
+  if(!sp || sp.kind !== 'build' || !(sp.to > sp.from)) return -1;
+  return cl((t - sp.from) / (sp.to - sp.from));
+}
 function arrayGate(G, t, e, L, n){
   const dep = deployed(G.kind, t);
   if(dep <= 0) return 0;
   if(!n || n <= ARRAY_MIN) return dep;
   const ceil = {drop:0.46, build:0.40, verse:0.34, quiet:0.26, idle:0.22,
                 outro:0.26, spotlight:0.18, stop:0, flash:1}[L];
-  const top = (ceil===undefined?0.52:ceil);
+  const bp = buildProg(t);
+  const top = (bp >= 0) ? lerp(0.16, 0.52, bp) : (ceil===undefined?0.52:ceil);
   const cov = (top<=0||top>=1) ? top : cl(0.10 + (top-0.10)*(0.18+0.82*e), 0.08, 1);
   if(cov >= 1) return 1;
   if(cov <= 0) return 0;
   const cyc = {drop:0.25, build:0.5, verse:0.5, quiet:2, idle:2, outro:2, spotlight:2}[L];
-  const bars = (cyc===undefined?1:cyc) * (1.7 - 0.9*e);
+  const kmul = GATE_RATE[G.kind] === undefined ? 1 : GATE_RATE[G.kind];
+  const accel = (bp >= 0) ? lerp(2.4, 0.30, bp*bp) : 1;
+  const drive = lerp(1.9, 1.0, SONG_DRIVE);
+  const bars = (cyc===undefined?1:cyc) * kmul * accel * drive * (1.7 - 0.9*e);
   const ph = (t - PH) / (BAR*Math.max(0.12, bars));
   const fx = (n > ARRAY_MIN) ? Math.abs(G.xn - 0.5)*2 : G.xn;
   const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(fx*1.2 + G.yn*0.6 - ph));
   const soft = 0.16 + 0.22*e;
   const edge = 1 - cov;
   const gate = cl((wave - edge + soft) / (soft*2), 0, 1);
-  return gate * cl(1/Math.max(0.12, cov), 1, 2.4) * dep;
+  const fl = GATE_FLOOR[G.kind];
+  const held = (fl === undefined || L === 'stop' || L === 'spotlight')
+             ? gate : fl + (1 - fl) * gate;
+  return held * cl(1/Math.max(0.12, cov), 1, 2.4) * dep;
 }
 let PARS=KIND('par'), UPS=KIND('uplight'), HEADS=KIND('head'),
     STROBES=KIND('strobe'), STRIPS=KIND('strip'), BLINDERS=KIND('blinder'),
@@ -766,7 +816,8 @@ function lookFrame(t,L){
     const tCirc=tam*Math.cos(u+hoff);
     let pan =cl(0.5 +(lerp(pSway,pCirc,shape))*still);
     // the upstage truss aims out over the crowd; the front truss aims down
-    let tilt=cl((back?0.62:0.42)+(lerp(tSway,tCirc,shape))*still);
+    let tilt=cl((back?0.62:0.42)+(lerp(tSway,tCirc,shape))*still
+                + MEL_TILT*meloDrift(t)*still*(back?1:-1));
     const share=back?(1-alt):alt;
     const gate=bothTrusses?1:(0.10+0.90*share);
     let c=fixColour(t,L,'head',G.xn,e), lv=0, hz=0;
@@ -774,19 +825,20 @@ function lookFrame(t,L){
     else if(L==='flash'){lv=1}
     else if(L==='spotlight'){
       const near=Math.abs(G.xn-0.5);
-      lv = near<=CENTRE_PAIR ? (0.30+0.62*stem('vocals',t))*(1-0.5*near/Math.max(1e-6,CENTRE_PAIR)) : 0.0}
+      const voc=Math.max(stem('vocals',t), voxAt(t));
+      lv = near<=CENTRE_PAIR ? (0.30+0.62*voc)*(1-0.5*near/Math.max(1e-6,CENTRE_PAIR)) : 0.0}
     else{
       const lead=(((bx%2)+2)%2===0)?G.outer:!G.outer;   // outer pair, then inner pair
       // a small positional term, so the four heads are never identical even
       // between accents -- in a real rig no two fixtures read the same
       const base=(0.11+0.26*e)*(0.86+0.28*sym(G.xn));
-      const lamp=(L==='drop'?0.30+0.44*e:0.18+0.36*e);
+      const lamp=(L==='drop'?0.30+0.44*e:0.18+0.36*e)*(0.84+0.28*voxAt(t));
       lv=base*EX.arc+lamp*A*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5);
       if(L==='build') lv*=lerp(0.25,1,layer(2));
       if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(t/(4*BAR))));
       if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(t/(8*BAR))+sym(G.xn)*4));
       if(L==='drop'){const[d,s]=since('drop',t,8);
-        if(s!==null&&s<BAR) hz=Math.min(CAP,1.6+2.2*(d.v??0.9))}
+        if(s!==null&&s<BAR) hz=Math.min(CAP,(1.6+2.2*(d.v??0.9))*STROBE_HZ)}
     }
     F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*gate*panBias(G.xn)*arrayGate(G,t,e,L,HEADS.length)).toFixed(3),
             pan:+pan.toFixed(3),tilt:+tilt.toFixed(3),strobe:+hz.toFixed(3),
@@ -798,11 +850,11 @@ function lookFrame(t,L){
     let lv=0,hz=0;
     if(L==='flash'){lv=1}
     else if(L==='drop'){const[d,s]=since('drop',t,8);
-      if(s!==null&&s<BAR){lv=(1-ss(BAR*0.6,BAR,s));hz=Math.min(CAP,2+2*(d.v??0.9))}}
+      if(s!==null&&s<BAR){lv=(1-ss(BAR*0.6,BAR,s));hz=Math.min(CAP,(2+2*(d.v??0.9))*STROBE_HZ)}}
     else if(L==='build'&&z){const rem=z.to-t;
       if(rem<=2*BAR){lv=ss(0,1,1-rem/(2*BAR))*((G.left===(((bx%2)+2)%2===0))?1:0.5)*Math.min(1,grow);
-        hz=Math.min(CAP,1.5+2.5*e)}}
-    F.push({id:id,level:+cl(lv*dip*deployed('strobe',t)).toFixed(3),strobe:+hz.toFixed(3)})});
+        hz=Math.min(CAP,(1.5+2.5*e)*STROBE_HZ)}}
+    F.push({id:id,level:+cl(lv*dip*STROBE_GAIN*deployed('strobe',t)).toFixed(3),strobe:+hz.toFixed(3)})});
 
   /* Blinders point AT the crowd. Used sparingly and only on the biggest hits --
      a blinder that is on often is just a lamp. Two windows: the first bar of a
@@ -812,7 +864,7 @@ function lookFrame(t,L){
     if(L==='flash'){ lv=1 }
     else if(L==='drop'){ const[d,sd]=since('drop',t,8);
       if(sd!==null&&sd<BAR){ lv=(1-ss(BAR*0.35,BAR,sd))*(0.75+0.25*(d.v??0.9));
-        hz=Math.min(CAP,2.0+2.0*(d.v??0.9)) } }
+        hz=Math.min(CAP,(2.0+2.0*(d.v??0.9))*STROBE_HZ) } }
     else if(L==='build'&&z){ const rem=z.to-t;
       if(rem<=2*BAR) lv=0.55*ss(0,1,1-rem/(2*BAR))*(i===(((bx%2)+2)%2)?1:0.6) }
     F.push({id:id,level:+cl(lv*dip*Math.min(1,grow)*deployed('blinder',t)).toFixed(3),strobe:+hz.toFixed(3)})});
@@ -885,15 +937,29 @@ function lookFrame(t,L){
             note:'once, on the last drop -- confetti fired twice is confetti nobody notices'})});
 
   KIND('pyro').forEach(function(id){
-    const G=GEO[id], zones=((LAYOUT.limits||{}).pyro_zones)||[];
-    const armed = zones.indexOf(G.zone)>=0;
-    F.push({id:id,level:0,
-            held_back: armed ? 'armed zone but no operator interlock in this reader'
-                             : ('zone '+G.zone+' is not a declared pyro zone')})});
+    const G=GEO[id], lim=(LAYOUT.limits||{}), zones=lim.pyro_zones||[];
+    const armed = zones.indexOf(G.zone)>=0 && !!lim.pyro_interlock;
+    if(!armed){ F.push({id:id,level:0,
+      held_back: zones.indexOf(G.zone)<0 ? ('zone '+G.zone+' is not a declared pyro zone')
+                                         : 'declared zone but the layout names no interlock'});
+      return }
+    const gap=lim.pyro_min_gap_s||20;
+    let cue=null;
+    for(const d of DROPS_AT){ if(d>t) break;
+      if(cue===null || d-cue>=gap) cue=d }
+    let lv=0;
+    if(cue!==null){ const age=t-cue, dur=Math.min(1.6, BAR*0.7);
+      if(age>=0 && age<dur) lv=(1-ss(0,dur,age)) }
+    F.push({id:id, level:+cl(lv*deployed('pyro',t),0,1).toFixed(3), armed:true,
+            interlock:lim.pyro_interlock})});
 
   VIDEO.forEach(function(id){
-    F.push({id:id,level:0,
-            held_back:'a screen is not a light; it needs a video reader, not a lighting field'})});
+    const R=rolesFor(L==='drop'?'drop':(L==='build'?'build':'verse'));
+    const c=roleRGB(R[1], e, 1, palAt(t), meloDrift(t));
+    const pulse=0.30+0.45*e*(0.55+0.45*(1-bph(t)));
+    F.push({id:id, level:+cl((off?0:pulse)*deployed('video',t),0,1).toFixed(3),
+            r:c[0], g:c[1], b:c[2], content:'wash',
+            note:'a level and a colour so the wall is lit; real pixels need a video reader'})});
 
   // strips: upstage sweeps over four bars, downstage answers on 2 and 4
   {
