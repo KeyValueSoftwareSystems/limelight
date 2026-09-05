@@ -21,6 +21,11 @@ musicstate build song.mp3 --core               # librosa only, no heavy models (
 musicstate build song.mp3 -v                    # verbose per-analyzer logs
 ```
 
+The `notes` layer uses **basic-pitch** via its ONNX backend (`pip install
+'basic-pitch[onnx]' onnxruntime`, in the `deep` extra). basic-pitch pulls in
+`resampy`, which imports `pkg_resources`, so the env also needs `setuptools<81`
+— the same gotcha the allin1 env documents.
+
 Every build logs each stage and prints a **time-usage report**; the per-stage
 timings are also kept in the MusicState's `provenance.timing`. `--core` fills the
 interface tier from librosa and leaves `stems`/`vectors`/`observations.semantic`
@@ -39,13 +44,16 @@ src/musicstate/
     base.py           the Analyzer contract
     dsp.py            L1  dense DSP frames (librosa)
     structure.py      L2  tempo/beats/downbeats/key/sections/events (librosa)
+    chords.py         L2  per-bar chords, maj/min/dom7 chroma templates (librosa)
+    melody.py         L2  per-sixteenth pyin f0 contour (librosa)
     allin1.py         L2  labelled segments + downbeats (allin1, separate env)
     stems.py          L2  per-stem presence (Demucs)
     semantic.py       L3  mood/danceability/voice/genre (Essentia, separate env)
     embedding.py      L4  per-beat MERT embeddings
+    notes.py          L4  polyphonic note events (basic-pitch, ONNX backend)
     workers/          the scripts run inside the sibling envs
   schema/             the MusicState JSON schema
-  tools/              click-track generator (test ground truth)
+  tools/              click-track + tone/chord generators (test ground truth)
 tests/                port unit tests + pipeline verification
 ```
 
@@ -53,8 +61,8 @@ tests/                port unit tests + pipeline verification
 
 | set | analyzers | needs |
 |---|---|---|
-| **core** (`--core`) | dsp, structure | `limelight-ms` only |
-| **deep** (default) | + allin1, stems, semantic, embedding | all three envs |
+| **core** (`--core`) | dsp, structure, chords | `limelight-ms` only |
+| **deep** (default) | + allin1, melody, stems, semantic, embedding, notes | all three envs |
 
 Each deep analyzer degrades gracefully: if its env/deps are missing it is recorded
 `not_available` in `provenance.analyzers` and skipped — the rest still produce a
@@ -74,6 +82,9 @@ valid map.
 | `observations.semantic` | Essentia discogs-effnet (mood/danceability/voice/genre) |
 | `observations.frames` | librosa dense stream (~43 Hz): rms, onset, low/mid/high |
 | `observations.key` | key estimate + confidence |
+| `observations.chords` | per-bar chord (maj/min/dom7 templates on chroma, median-smoothed); core |
+| `observations.melody` | per-sixteenth pyin f0 contour, unvoiced=null; deep |
+| `observations.notes` | polyphonic note events via basic-pitch (ONNX backend); deep |
 | `vectors` | MERT per-beat embeddings (out-of-line file) |
 | `confidence` | mean of `confidence_by_field` |
 

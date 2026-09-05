@@ -11,7 +11,8 @@ requires-python = ">=3.10"
 dependencies = ["numpy<2", "scipy", "soundfile", "librosa==0.10.2.post1", "jsonschema"]
 
 [project.optional-dependencies]
-deep = ["torch", "torchaudio", "demucs", "transformers", "nnAudio"]
+deep = ["torch", "torchaudio", "demucs", "transformers", "nnAudio",
+        "basic-pitch[onnx]", "onnxruntime"]
 dev = ["pytest"]
 
 [project.scripts]

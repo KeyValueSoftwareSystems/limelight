@@ -16,8 +16,11 @@ from . import __version__
 from .analyzers import (
     Allin1Analyzer,
     Analyzer,
+    ChordsAnalyzer,
     DspAnalyzer,
     EmbeddingAnalyzer,
+    MelodyAnalyzer,
+    NoteTranscriptionAnalyzer,
     SemanticAnalyzer,
     StemsAnalyzer,
     StructureAnalyzer,
@@ -29,7 +32,7 @@ log = logging.getLogger("musicstate.pipeline")
 
 def core_analyzers() -> list[Analyzer]:
     """The reliable core — librosa only, no model downloads, runs anywhere."""
-    return [DspAnalyzer(), StructureAnalyzer()]
+    return [DspAnalyzer(), StructureAnalyzer(), ChordsAnalyzer()]
 
 
 def deep_analyzers() -> list[Analyzer]:
@@ -38,9 +41,12 @@ def deep_analyzers() -> list[Analyzer]:
         DspAnalyzer(),
         StructureAnalyzer(),
         Allin1Analyzer(),
+        ChordsAnalyzer(),        # per-bar chords on the (allin1) beat grid
+        MelodyAnalyzer(),        # pyin melody contour
         StemsAnalyzer(),
         SemanticAnalyzer(),
         EmbeddingAnalyzer(),
+        NoteTranscriptionAnalyzer(),  # polyphonic notes via basic-pitch (onnx)
     ]
 
 
