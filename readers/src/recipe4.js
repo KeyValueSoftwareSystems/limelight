@@ -299,13 +299,20 @@ function hsl(h,s,l){
    Two colours are on stage at a time: the chapter's primary and its partner.
    Pars alternate between them, heads take the partner so they read against the
    wash, uplights take the deep. Energy moves saturation and lightness, never hue. */
+/* garrix and garrix-red come from the look of his shows rather than from measuring
+   any footage: a cold saturated base, ONE hot accent, white reserved for impact,
+   and very few colours on stage at any moment. The restraint is the character --
+   his stages are mostly two colours and a blinder, not a rainbow. If a specific
+   show is wanted these are the numbers to change. */
 const PROFILES = {
+  garrix:      { lead:[214,.95,.52], hot:[356,.94,.50], cool:[188,.92,.48], deep:[230,.90,.28] },
+  "garrix-red":{ lead:[356,.94,.50], hot:[  8,.96,.52], cool:[206,.94,.50], deep:[224,.88,.26] },
   sunset: { lead:[ 24,.90,.50], hot:[  6,.94,.48], cool:[196,.86,.44], deep:[240,.78,.34] },
   ice:    { lead:[202,.88,.48], hot:[318,.86,.50], cool:[184,.84,.44], deep:[258,.78,.34] },
   neon:   { lead:[316,.92,.52], hot:[ 42,.94,.54], cool:[172,.88,.46], deep:[272,.84,.38] },
   amber:  { lead:[ 34,.84,.52], hot:[ 16,.92,.50], cool:[ 44,.62,.50], deep:[ 26,.70,.32] },
 };
-const PROFILE = (function(){ try { return (COLOUR || "sunset") } catch(e) { return "sunset" } })();
+const PROFILE = (function(){ try { return (COLOUR || "garrix") } catch(e) { return "garrix" } })();
 const PAL = PROFILES[PROFILE] || PROFILES.sunset;
 const ACT_ORDER = ['sunset','neon','ice','amber'];
 const DROP_TIMES = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);

@@ -77,7 +77,14 @@ const DOWNSET  = new Set(DOWN.map(t => +t.toFixed(3)));
 
 /* rung 5: colour, from a fixed profile. Two on stage at a time, never a hue
    between them -- the whole reason the old show looked random. */
+/* garrix and garrix-red come from the look of his shows rather than from measuring
+   any footage: a cold saturated base, ONE hot accent, white reserved for impact,
+   and very few colours on stage at any moment. The restraint is the character --
+   his stages are mostly two colours and a blinder, not a rainbow. If a specific
+   show is wanted these are the numbers to change. */
 const PROFILES = {
+  garrix:     { a:[214,.95,.52], b:[356,.94,.50] },   // electric blue, red accent
+  "garrix-red":{ a:[356,.94,.50], b:[206,.94,.50] },  // red base, blue accent
   sunset: { a:[ 24,.90,.50], b:[196,.86,.44] },
   ice:    { a:[202,.88,.48], b:[318,.86,.50] },
   neon:   { a:[316,.92,.52], b:[ 42,.94,.54] },

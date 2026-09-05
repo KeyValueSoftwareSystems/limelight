@@ -60,7 +60,7 @@ input[type=text]{background:var(--raise);color:var(--ink);border:1px solid var(-
   <select id="song"></select>
   <select id="map"></select>
   <label class="note">colour</label>
-  <select id="pal"><option>sunset</option><option>ice</option><option>neon</option><option>amber</option></select>
+  <select id="pal"><option selected>garrix</option><option>garrix-red</option><option>sunset</option><option>ice</option><option>neon</option><option>amber</option></select>
   <span style="flex:1"></span>
   <span id="stat" class="note"></span>
 </header>
@@ -157,7 +157,7 @@ const RUNGS=[
 ];
 
 let SONG="", MAPS={}, MAP=null, MAPKEY="", LAY=null, LAYBEAT=null, RM=null, RECIPE="", ROOMJS="";
-let STEP=1, KNOB=null, LEARN={song:"",steps:[]}, WAVE=null, LIGHT=null, VIEW={t0:0,span:12}, PAL="sunset";
+let STEP=1, KNOB=null, LEARN={song:"",steps:[]}, WAVE=null, LIGHT=null, VIEW={t0:0,span:12}, PAL=(new URLSearchParams(location.search).get("pal")||"garrix");
 const HZ=50;
 const dur=m=>(m.song&&m.song.length)||240;
 
@@ -474,6 +474,10 @@ $("song").onchange=e=>location.href=`/build?song=${e.target.value}`;
   const qs=parseInt(Q.get("step")||"",10);        // a rung is linkable
   if(qs>=1&&qs<=8) STEP=qs;
   $("aud").src=`/api/audio?song=${SONG}`;
+  // ?t= opens on a moment, so a link can point at the drop rather than the intro
+  const qt=parseFloat(Q.get("t")||"");
+  if(isFinite(qt)) $("aud").addEventListener("loadedmetadata",
+    ()=>{ $("aud").currentTime=qt; VIEW.t0=Math.max(0,qt-2); rebuild() },{once:true});
   fetch(`/api/wave?song=${SONG}`).then(r=>r.json()).then(w=>{
     if(!w.error){ WAVE=w; drawAll(); refreshVerdict() } });
   VIEW={t0:0,span:12};
