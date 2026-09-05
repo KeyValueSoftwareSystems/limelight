@@ -312,6 +312,21 @@ const CHT = (function(){
   return out})();
 const CHTT = CHT.map(a => a.at);
 
+/* Raw hit strengths in this record run from about 0.21 to 0.46, so mapping them
+   straight into an amplitude gave a range of 0.64 to 0.76 and every hit looked
+   the same size -- Renjith's second complaint. Ranking each hit against the whole
+   song's distribution uses the range that is actually there: the quietest hits
+   land near 0, the loudest near 1, and a hard hit finally reads as a hard hit. */
+const CHRANK = (function(){
+  const sorted = CHT.map(a => a.strength).sort((x, y) => x - y);
+  const rank = {};
+  CHT.forEach((a, i) => {
+    let lo = 0, hi = sorted.length - 1, k = 0;
+    while(lo <= hi){ const mi = (lo + hi) >> 1; if(sorted[mi] <= a.strength){ k = mi; lo = mi + 1 } else hi = mi - 1 }
+    rank[i] = sorted.length > 1 ? k / (sorted.length - 1) : 0.5;
+  });
+  return rank})();
+
 function chaseAt(t, e, n){
   // which hit are we on, and how long ago was it
   let lo = 0, hi = CHTT.length - 1, i = -1;
@@ -326,7 +341,7 @@ function chaseAt(t, e, n){
   if(alive < 0.02) return null;
   const fwd = Math.floor((t - PH) / (BAR * 8)) % 2 === 0;
   const pos = ((fwd ? i : -i) % n + n) % n;
-  return { pos, age, gap, n, alive, strength: CHT[i].strength };
+  return { pos, age, gap, n, alive, strength: CHRANK[i] };
 }
 
 /* One lamp is on the hit, the one before it is still letting go. The envelope is
@@ -468,7 +483,17 @@ function lookFrame(t,L){
          0.05 so the room was always faintly on. Breaks and quiets now go
          genuinely dark, which is what makes a drop land. */
       const base={drop:0.38,build:0.15,verse:0.20,quiet:0.028,idle:0.036,outro:0.042}[L]??0.13;
-      const wave=0.70+0.30*Math.cos(2*Math.PI*(G.xn-bp4));   // travels in metres, not in indices
+      /* This used to be 0.70 + 0.30*cos(2pi*(xn - bp4)), a wave travelling across
+         the room on a four-bar cycle. Measured, it swung one lamp from 0.400 to
+         1.000 -- two and a half times -- on a 7.5 second timer that has nothing to
+         do with the music, so the same beat at a different point in the phrase came
+         out at a different brightness. That is the inconsistency Renjith heard.
+
+         A STATIC gradient is fine and even wanted: the room should have a shape,
+         and par_1 being a little dimmer than par_3 is consistent because it is
+         always true. What was wrong was the part that moved on its own. Anything
+         that changes brightness over time now has to come from the music. */
+      const wave=0.88+0.12*Math.cos(2*Math.PI*G.xn);
       lv=(base+0.40*e*(L==='drop'?1:0.62))*wave*EX.arc + (0.04+0.10*e)*A*0.35*grow;
       /* Layer the chase over the wash rather than replacing it: the wash keeps
          the room from going black between pulses, the chase supplies the
@@ -477,7 +502,7 @@ function lookFrame(t,L){
       const chaseMix = {drop:0.78,build:0.55,verse:0.30,flash:0.0,quiet:0.0,idle:0.0,outro:0.0}[L] ?? 0.25;
       const c = chaseMix > 0.01 ? chaseAt(t, e, PARN) : null;
       if(c){
-        const pulse = chaseGain(G.xn, c) * (0.55 + 0.45 * c.strength);
+        const pulse = chaseGain(G.xn, c) * (0.30 + 0.70 * c.strength);
         const full = (base + 0.55*e) * EX.arc;
         // a shallow floor is what makes the gap read: 0.10 left the dark lamps at a
         // fifth of the bright one, which is a gradient again

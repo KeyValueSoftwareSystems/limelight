@@ -110,6 +110,26 @@ def check(m):
 
     if m["made_by"].get("how") == "sketch":
         W(m["confidence"] <= 0.5, "a sketch claiming confidence above 0.5 is a lie waiting to happen")
+
+    # A label that contradicts its own measured energy is the error that made a
+    # show look inconsistent while the recipe was behaving perfectly: a chapter
+    # called "break" whose energy averaged 0.75 and peaked at 0.97. Nothing else
+    # here catches a map that disagrees with itself.
+    ch, en = m.get("chapters") or [], m.get("energy") or []
+    if ch and en:
+        QUIET = {"break", "quiet", "intro", "outro", "start", "end"}
+        LOUD = {"drop", "chorus", "flash"}
+        for i, c in enumerate(ch):
+            a = c.get("at", 0)
+            b = ch[i + 1]["at"] if i + 1 < len(ch) else 1e9
+            seg = [v for t, v in en if a <= t < b]
+            if len(seg) < 3: continue
+            avg = sum(seg) / len(seg)
+            nm = str(c.get("name", "")).lower()
+            if nm in QUIET and avg > 0.72:
+                w.append(f"chapter '{nm}' at {a:.1f}s averages energy {avg:.2f} — that is not quiet")
+            if nm in LOUD and avg < 0.40:
+                w.append(f"chapter '{nm}' at {a:.1f}s averages energy {avg:.2f} — that is not loud")
     return e, w
 
 if __name__ == "__main__":

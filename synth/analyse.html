@@ -53,6 +53,10 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
   <label>zoom</label>
   <button id="zout">−</button><button id="zin">+</button><button id="zall">all</button>
   <button id="follow" class="on">follow</button>
+  <label for="sync" title="the picture runs ahead of the sound by however long your audio takes to reach the speakers">sync</label>
+  <input id="sync" type="range" min="-250" max="100" step="5" value="0"
+    style="width:110px;accent-color:var(--tung)">
+  <span id="syncv" class="mono" style="color:var(--faint);font-size:11.5px">0 ms</span>
   <span id="stat" class="mono" style="color:var(--muted);font-size:12px"></span>
 </div>
 
@@ -350,9 +354,18 @@ addEventListener("mousemove",e=>{
 });
 addEventListener("mouseup",()=>{ setTimeout(()=>{drag=null},0) });
 addEventListener("resize",redraw);
+/* The browser reports currentTime as the DECODE position. The sound reaches the
+   speakers 20-150 ms later depending on the machine, so a picture drawn at
+   currentTime is ahead of what you hear -- which is exactly what "the sync is
+   off" looks like when the frames themselves are on time, and they are: measured,
+   the light peaks a median 0 ms from the hit it responds to.
+   There is no reliable way to read output latency from an <audio> element, so
+   this is a dial you set once by eye and the browser remembers. */
+let SYNC = +(localStorage.getItem("limelight.sync") || 0);
 function drawRoom(){
   if(!F1||!RM) return;
-  const a=$("aud"), t=Math.min(a.src?a.currentTime:0, dur(MINE)-0.02);
+  const a=$("aud");
+  const t=Math.max(0, Math.min((a.src?a.currentTime:0) + SYNC/1000, dur(MINE)-0.02));
   try{ (VIEWMODE==="room" ? RM.drawRoom : RM.drawFixtures)($("room"), F1(t), LAY) }
   catch(e){ if(!window.__drawErr){ window.__drawErr=1;
     $("stat").style.color="#e88055"; $("stat").textContent="draw: "+e.message } }
@@ -395,6 +408,9 @@ function drawRoom(){
     $("n1").textContent=mineKey+"  (editing)"; $("n2").textContent=otherKey||"—";
     rebuildShow(); redraw() };
   $("mine").onchange=load; $("other").onchange=load; load();
+  $("sync").value=SYNC; $("syncv").textContent=SYNC+" ms";
+  $("sync").oninput=e=>{ SYNC=+e.target.value; $("syncv").textContent=SYNC+" ms";
+    localStorage.setItem("limelight.sync",SYNC) };
   $("viewtog").onclick=()=>{ VIEWMODE = VIEWMODE==="fixtures" ? "room" : "fixtures";
     $("viewtog").textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view" };
   VIEW={t0:0,span:dur(MINE)};
