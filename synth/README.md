@@ -109,3 +109,32 @@ wrong.
 
 Verified by round-trip: a generated song re-imported from its own arrangement reproduces its map
 exactly, including the repeated section and energy to four decimal places.
+
+## Putting it on a shared screen
+
+```
+bash synth/share.sh
+```
+
+Binds to every interface, starts **read-only**, and opens an ngrok tunnel. It prints one URL for the
+board and one for the rooms view.
+
+Read-only is not optional. The portal can generate songs, score listeners and rebuild frames, and an
+endpoint that runs a job is a remote shell however friendly the button looks — that URL is public.
+The shared instance shows everything and plays everything; it just cannot be told to execute
+anything. Generate and score on your own machine.
+
+## Where maps live
+
+One folder per person: `synth/maps/<who>/<song>.map.json`.
+
+```
+synth/maps/renjith/levels.map.json
+synth/maps/amal/levels.map.json
+synth/maps/dheeraj/levels.map.json
+```
+
+Two people never touch the same file, a pull request shows at a glance whose reading of a song
+changed, and everything appears on the board and in both dropdowns automatically — discovered from
+disk, nothing to register. The timestamp shown next to each name is the file's own, so you can see
+who has pushed since you last looked.

@@ -17,6 +17,10 @@ import http.server, importlib.util, io, json, os, socketserver, subprocess, sys,
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 PORT = int(os.environ.get("PORT", "8770"))
+# The portal can start jobs. Behind a public tunnel that is a remote shell, so a
+# shared instance runs read-only: it still shows everything and plays everything,
+# it just cannot be told to execute anything.
+READONLY = os.environ.get("LIMELIGHT_READONLY", "") not in ("", "0", "false")
 
 def _load(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -182,16 +186,28 @@ def candidate_maps(slug):
     out = {"authored": {"label": "authored answer (the truth)",
                         "path": os.path.join(HERE, "songs", slug + ".map.json")}}
     d = os.path.join(HERE, "maps")
+    found = []
     if os.path.isdir(d):
-        for f in sorted(os.listdir(d)):
-            if not (f.startswith(slug + ".") and f.endswith(".map.json")): continue
-            who = f[len(slug) + 1:-9]
-            try:
-                m = json.load(open(os.path.join(d, f)))
-                how = (m.get("made_by") or {}).get("how", "?")
-            except Exception:
-                how = "unreadable"
-            out[who] = {"label": f"{who}  ({how})", "path": os.path.join(d, f)}
+        # one folder per person, so two people never touch the same file and a pull
+        # request shows at a glance whose reading of a song changed
+        for who in sorted(os.listdir(d)):
+            sub = os.path.join(d, who)
+            if not os.path.isdir(sub): continue
+            for f in sorted(os.listdir(sub)):
+                if f == slug + ".map.json": found.append((who, os.path.join(sub, f)))
+                elif f.startswith(slug + ".") and f.endswith(".map.json"):
+                    found.append((f"{who}/{f[len(slug)+1:-9]}", os.path.join(sub, f)))
+        for f in sorted(os.listdir(d)):            # flat layout still works
+            if f.startswith(slug + ".") and f.endswith(".map.json"):
+                found.append((f[len(slug) + 1:-9], os.path.join(d, f)))
+    for who, path in found:
+        try:
+            m = json.load(open(path))
+            how = (m.get("made_by") or {}).get("how", "?")
+            when = time.strftime("%H:%M", time.localtime(os.path.getmtime(path)))
+        except Exception:
+            how, when = "unreadable", "?"
+        out[who] = {"label": f"{who}  ({how}, {when})", "path": path}
     return {k: v for k, v in out.items() if os.path.exists(v["path"])}
 
 
@@ -226,14 +242,14 @@ def songs_index():
     # Real records have no authored answer -- only whatever maps people have made.
     # Discovered from an audio file in out/ plus at least one candidate in maps/.
     md = os.path.join(HERE, "maps")
-    if os.path.isdir(md):
-        for f in sorted(os.listdir(md)):
+    for root, _d, files in os.walk(md):
+        for f in sorted(files):
             if not f.endswith(".map.json"): continue
-            slug = f.split(".")[0]
+            slug = f[:-9].split(".")[0]
             if slug in out: continue
             wav = os.path.join(HERE, "out", slug + ".wav")
             if not os.path.exists(wav): continue
-            first = os.path.join(md, f)
+            first = os.path.join(root, f)
             try: mm = json.load(open(first))
             except Exception: continue
             en = [e[1] for e in mm.get("energy", [])] or [1.0]
@@ -331,18 +347,24 @@ def game():
 
     maps = []
     md = os.path.join(HERE, "maps")
-    if os.path.isdir(md):
-        for f in sorted(os.listdir(md)):
+    for root, _dirs, files in os.walk(md):
+        for f in sorted(files):
             if not f.endswith(".map.json"): continue
-            parts = f[:-9].split(".")
-            try: m = json.load(open(os.path.join(md, f)))
+            rel = os.path.relpath(root, md)
+            who = rel if rel != "." else "?"
+            song = f[:-9]
+            if who == "?" and "." in song:
+                song, who = song.split(".", 1)
+            try: m = json.load(open(os.path.join(root, f)))
             except Exception: continue
             secs = m.get("sections")
-            maps.append({"song": parts[0], "who": ".".join(parts[1:]) or "?",
+            maps.append({"song": song, "who": who,
                          "how": (m.get("made_by") or {}).get("how", "?"),
                          "beats": len(m.get("beats", [])),
                          "sections": len(secs.get("entries", []) if isinstance(secs, dict) else (secs or [])),
-                         "moments": len(m.get("moments", []))})
+                         "moments": len(m.get("moments", [])),
+                         "when": time.strftime("%H:%M", time.localtime(
+                             os.path.getmtime(os.path.join(root, f))))})
 
     verdicts = []
     vp = os.path.join(HERE, "VERDICTS.tsv")
@@ -360,7 +382,7 @@ def game():
         try: title = json.load(open(idx[song]["map"]))["song"]["title"]
         except Exception: pass
     return {"song": song, "song_title": title, "deadline": dl, "candidates": cands,
-            "board": board, "maps": maps, "verdicts": verdicts[-12:]}
+            "board": board, "maps": maps, "verdicts": verdicts[-12:], "readonly": READONLY}
 
 
 def status():
@@ -785,6 +807,11 @@ class H(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urllib.parse.urlparse(self.path); q = urllib.parse.parse_qs(u.query)
+        if READONLY:
+            return self._send(403, json.dumps({"error":
+                "This instance is read-only. It is shared beyond one machine, and an endpoint "
+                "that runs a job is a remote shell however friendly the button looks. "
+                "Run it locally to generate, score or rebuild."}))
         if u.path == "/api/verdict":
             p = {k: v[0] for k, v in q.items()}
             with open(os.path.join(HERE, "VERDICTS.tsv"), "a") as fh:
@@ -805,8 +832,10 @@ if __name__ == "__main__":
     os.makedirs(os.path.join(HERE, "out"), exist_ok=True)
     # must be set on the class BEFORE bind, not on the instance after it, or a
     # restart inside the TIME_WAIT window fails with "address already in use"
+    HOST = os.environ.get("HOST", "127.0.0.1")
     socketserver.ThreadingTCPServer.allow_reuse_address = True
-    with socketserver.ThreadingTCPServer(("127.0.0.1", PORT), H) as srv:
+    with socketserver.ThreadingTCPServer((HOST, PORT), H) as srv:
         srv.daemon_threads = True
-        print(f"  synth loop on http://127.0.0.1:{PORT}   (localhost only, ctrl-c to stop)")
+        print(f"  limelight on http://{HOST}:{PORT}"
+              + ("   READ-ONLY (safe to tunnel)" if READONLY else "   (localhost only, ctrl-c to stop)"))
         srv.serve_forever()
