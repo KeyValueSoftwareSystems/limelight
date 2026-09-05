@@ -24,6 +24,10 @@ const K = ({
 }[DRIVE]) || { base:1, span:1, chase:1, accent:1, motion:1, strobe:1, haze:1 };
 
 const cl=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+CH = (CH && CH.length) ? CH : [[0, 'verse']];
+EN = EN || [];
+MO = MO || [];
+SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
 
