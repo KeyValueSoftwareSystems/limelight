@@ -62,7 +62,7 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
   <div class="track" style="flex:1 1 0;margin:0">
     <div class="thead"><b>the show, from the map above</b>
       <span id="rmeta">—</span></div>
-    <canvas id="room" style="height:170px"></canvas></div>
+    <canvas id="room" style="height:250px"></canvas></div>
   <div class="track" style="flex:0 0 250px;margin:0">
     <div class="thead"><b>vs <span id="vsname">—</span></b><span id="vstale"></span></div>
     <div style="padding:11px 13px;font-family:ui-monospace,monospace;font-size:12px;line-height:1.9">
@@ -268,7 +268,7 @@ function rebuildShow(){
   try{
     F1=RM.mkReader(MINE,LAY);
     F2=OTHER?RM.mkReader(OTHER,LAY):null;
-    $("rmeta").textContent=`${mineKey} · club · ${(MINE.beats||[]).length} beats`;
+    $("rmeta").textContent=`${mineKey} · ${LAY.room} · ${LAY.fixtures.length} fixtures`;
     $("vsname").textContent=otherKey||"—";
     $("vstale").textContent="";
     clearTimeout(scoreTimer); scoreTimer=setTimeout(rescore,60);
@@ -364,7 +364,7 @@ function drawRoom(){
   const rj=await (await fetch("/static/room.js")).text();
   RM=new Function("RECIPE", rj+"\n;return {mkReader,prep,drawRoom,frameDiff,pearson,totalLight};")(RECIPE);
   const sg=await (await fetch("/api/song?song="+encodeURIComponent(Q.get("song")||""))).json();
-  LAY=(sg.layouts||{}).club||Object.values(sg.layouts||{})[0];
+  LAY=(sg.layouts||{}).small||(sg.layouts||{}).club||Object.values(sg.layouts||{})[0];
   G=await (await fetch("/api/maps?song="+encodeURIComponent(Q.get("song")||""))).json();
   SONG=G.song;
   $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>
@@ -386,6 +386,10 @@ function drawRoom(){
   $("mine").onchange=load; $("other").onchange=load; load();
   VIEW={t0:0,span:dur(MINE)};
   $("aud").src="/api/audio?song="+SONG;
+  // ?t= opens at a moment worth looking at, which matters when judging the room:
+  // at 0:00 nothing is lit and a black rectangle tells you nothing
+  const t0=parseFloat(Q.get("t")||"");
+  if(isFinite(t0)) $("aud").addEventListener("loadedmetadata",()=>{$("aud").currentTime=t0},{once:true});
   $("help").textContent="wheel to zoom · shift-wheel or drag to pan · click the top strip to add a "
    +"section, the row under it for a moment · click a marker to rename or delete · snaps to the "
    +"nearest downbeat · space plays · arrows seek 2s, shift 30s";

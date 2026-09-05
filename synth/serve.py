@@ -334,6 +334,9 @@ def song(which=None):
     sp = idx[which]
     m = json.load(open(sp["map"]))
     lays = {}
+    # the rig we actually own goes first, because it is the one being tuned
+    small = os.path.join(ROOT, "readers", "lights", "small", "layout.json")
+    if os.path.exists(small): lays["small"] = json.load(open(small))
     for name, f in (("club", "layout.json"), ("venue", "venue.json"), ("the-grind", "grind.json")):
         p = os.path.join(NIGHTS, f)
         if os.path.exists(p): lays[name] = json.load(open(p))

@@ -187,7 +187,6 @@ const EMAX=(function(){
    Capped empirically to land under the limit, with the derivation left in place
    for whoever fixes it properly. Correctness beats elegance here; the asset
    needs the attention more than the motor model does. */
-const SLEW_CAP=0.60;
 const DADE=0.62;
 const MOVE_BARS=[8,4,2,1];
 const MOVE_EDGE=[[0.26,0.34],[0.51,0.59],[0.74,0.82]];
@@ -200,6 +199,12 @@ const movePeriod=e=>{
 const rateAt = e => 2*Math.PI/movePeriod(e);   // fed eMotion, not en()
 const LIMP = (LAYOUT.limits&&LAYOUT.limits.max_pan_per_s)||0.85;
 const LIMT = (LAYOUT.limits&&LAYOUT.limits.max_tilt_per_s)||0.95;
+/* This was a flat 0.60, chosen against a rig whose declared pan budget was 0.85.
+   Written as a constant it silently throttled a fast rig to the speed of a slow
+   one -- two heads that are meant to BE the show barely moved. Expressed relative
+   to the rig it was tuned on, the club is unchanged and a faster fixture gets the
+   travel it was bought for. */
+const SLEW_CAP=Math.max(0.45,Math.min(1.0,0.60*(LIMP/0.85)));
 const MPH = (function(){
   // the table is built from a 4-downbeat moving average, matching eMotion
   if(!EN || !EN.length) return null;      // a map may carry no energy at all
@@ -617,11 +622,25 @@ function lookFrame(t,L){
     F.push({id:'strip_1',pixels:p1}); F.push({id:'strip_2',pixels:p2});
   }
 
-  let fg=0; for(const m of MO)if(m.kind==='drop'&&t>=m.at-9&&t<m.at-7)fg=1;
-  F.push({id:'fog_1',level:fg});
+  /* Fog. A hazer runs LOW AND CONTINUOUS -- that is what puts beams in the air,
+     and a room with the haze off has no beams at all, only pools on the floor.
+     The old version fired one fixture for two seconds nine seconds before a drop
+     and sat at zero the rest of the time, so the beams this recipe carefully
+     aims were invisible for the whole song. A burst still goes in before a drop,
+     on top of the base rather than instead of it. */
+  const hazeBase=0.30+0.45*en(t)*(L==='drop'?1:0.72);
+  let burst=0;
+  for(const m of MO){
+    if(m.kind!=='drop') continue;
+    if(t>=m.at-9 && t<m.at-6.5) burst=Math.max(burst,ss(m.at-9,m.at-7.5,t));
+    if(t>=m.at-6.5 && t<m.at+1) burst=Math.max(burst,1-ss(m.at-6.5,m.at+1,t)*0.45);
+  }
+  const fg=+Math.min(1,hazeBase+0.55*burst).toFixed(3);
+  for(const f of LAYOUT.fixtures) if(f.kind==='fog') F.push({id:f.id,level:fg});
 
   const[r,s]=since('return',t,2*BAR);
-  if(r){const g=0.38+0.62*ss(0,1,cl(s/(2*BAR)));F.forEach(o=>{if(o.id==='fog_1')return;
+  if(r){const g=0.38+0.62*ss(0,1,cl(s/(2*BAR)));const FOGIDS=new Set(LAYOUT.fixtures.filter(f=>f.kind==='fog').map(f=>f.id));
+    F.forEach(o=>{if(FOGIDS.has(o.id))return;
     if('level'in o)o.level=+(o.level*g).toFixed(3);
     if(o.pixels)o.pixels=o.pixels.map(q=>sc(q,g))})}
   return {t:+t.toFixed(3),look:L,fixtures:F}}

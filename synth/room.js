@@ -20,83 +20,126 @@ function prep(m){
     MO:(m.moments||[]).map(x=>({at:x.at,kind:x.kind,v:x.size!==undefined?x.size:x.holds})),
     EN:m.energy||[], BEATS, PER, PH, DUR:D, BAR:4*PER, DBP:m.grid.bar_phase||0};
 }
-/* ---- the room: a front elevation, same projection both sides so a difference
-   in the picture is a difference in the show and never in the drawing ---- */
+/* ---- the room ---------------------------------------------------------------
+   A front elevation, drawn for a rig you can count on two hands. Seven fixtures
+   have to look real; ninety-four can hide behind their own number.
+
+   What makes a beam read as light in air rather than a coloured triangle:
+     - it is drawn three times, wide and faint, then narrower, then a bright
+       core. Real scattering falls off across the cone, and one flat gradient
+       cannot show that.
+     - everything is additive, so where two beams cross they brighten, which is
+       the single most recognisable thing about a hazed room.
+     - the whole thing is scaled by how much haze is in the air. No fog, no
+       beam -- you only ever see the pool on the floor, which is exactly what
+       happens in a room with the foggers off.
+     - the lens itself glows, the floor takes an elliptical pool, and both are
+       drawn separately from the beam because they survive when the haze does not.
+*/
 function drawRoom(cv, fr, layout){
-  const dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=340;
-  if(cv.width!==W*dpr||cv.height!==H*dpr){cv.width=W*dpr;cv.height=H*dpr}
-  const g=cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
-  g.fillStyle="#07080c"; g.fillRect(0,0,W,H);
-  if(!fr) return;
-  const fx=layout.fixtures, xs=fx.map(f=>f.at[0]), ys=fx.map(f=>f.at[1]);
-  const x0=Math.min(...xs), x1=Math.max(...xs), y1=Math.max(...ys, 3.4);
-  const pad=44, sx=v=>pad+(v-x0)/Math.max(0.1,x1-x0)*(W-2*pad);
-  const floor=H-52, sy=v=>floor-(v/y1)*(floor-26);
-  const byId={}; for(const o of fr.fixtures) byId[o.id]=o;
-  const lit=o=>o&&(o.level||0)>0.012;
-  // a strobe and a blinder emit white and carry no colour in the frame, which is
-  // correct -- the frame only states what a fixture can actually be told
-  const C=o=>[o.r!==undefined?o.r:255, o.g!==undefined?o.g:255, o.b!==undefined?o.b:255];
+  const W = cv.clientWidth, Hpx = cv.clientHeight || 200, dpr = window.devicePixelRatio || 1;
+  if(cv.width !== W*dpr || cv.height !== Hpx*dpr){ cv.width = W*dpr; cv.height = Hpx*dpr }
+  const g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  g.fillStyle = "#05060a"; g.fillRect(0,0,W,Hpx);
+  if(!fr || !layout) return;
 
-  // haze first, so beams read through it
-  let load=0; for(const o of fr.fixtures) load+=(o.level||0); load/=Math.max(1,fr.fixtures.length);
-  g.fillStyle="rgba(150,165,205,"+(0.012+0.05*load).toFixed(3)+")"; g.fillRect(0,0,W,floor);
+  const fx = layout.fixtures || [];
+  const size = layout.size_m || {w:8,h:3.4};
+  const pad = Math.max(18, W*0.045);
+  const sx = v => pad + (v/size.w) * (W - 2*pad);
+  const floorY = Hpx * 0.80;
+  const sy = v => floorY - (v/(size.h||3.4)) * (floorY - Hpx*0.06);
 
-  // beams: heads and pars, drawn additively so overlap brightens
-  g.globalCompositeOperation="lighter";
+  const by = {}; for(const o of fr.fixtures) by[o.id] = o;
+  const C = o => [o.r!==undefined?o.r:255, o.g!==undefined?o.g:255, o.b!==undefined?o.b:255];
+  const lit = o => o && (o.level||0) > 0.012;
+
+  // haze comes from the foggers, and everything airborne is scaled by it
+  let haze = 0;
+  for(const f of fx) if(f.kind==="fog" && by[f.id]) haze = Math.max(haze, by[f.id].level||0);
+  haze = 0.30 + 0.70*haze;                       // never quite zero: rooms are dusty
+
+  // the air itself, thicker near the floor
+  const air = g.createLinearGradient(0, Hpx*0.05, 0, floorY);
+  air.addColorStop(0, `rgba(120,140,190,${(0.010*haze).toFixed(4)})`);
+  air.addColorStop(1, `rgba(120,140,190,${(0.055*haze).toFixed(4)})`);
+  g.fillStyle = air; g.fillRect(0,0,W,floorY);
+
+  g.globalCompositeOperation = "lighter";
   for(const f of fx){
-    const o=byId[f.id]; if(!lit(o)) continue;
-    if(f.kind!=="head"&&f.kind!=="par"&&f.kind!=="blinder") continue;
-    const px=sx(f.at[0]), py=sy(f.at[1]);
-    const pan=(o.pan!==undefined?o.pan:0.5), tilt=(o.tilt!==undefined?o.tilt:0.55);
-    const ang=(pan-0.5)*1.55, reach=(0.34+0.66*tilt)*(floor-py)+34;
-    const tx=px+Math.sin(ang)*reach*0.92, ty=py+Math.cos(ang*0.4)*reach;
-    const half=(f.kind==="head"?10:20)+reach*0.055;
-    const [cr,cg,cb]=C(o);
-    const gr=g.createLinearGradient(px,py,tx,ty);
-    const a=Math.min(0.5,0.44*o.level);
-    gr.addColorStop(0,`rgba(${cr},${cg},${cb},${a.toFixed(3)})`);
-    gr.addColorStop(1,`rgba(${cr},${cg},${cb},0)`);
-    g.fillStyle=gr; g.beginPath(); g.moveTo(px-3,py); g.lineTo(px+3,py);
-    g.lineTo(tx+half,ty); g.lineTo(tx-half,ty); g.closePath(); g.fill();
-    const pool=g.createRadialGradient(tx,Math.min(ty,floor),0,tx,Math.min(ty,floor),half*1.7);
-    pool.addColorStop(0,`rgba(${cr},${cg},${cb},${(0.30*o.level).toFixed(3)})`);
-    pool.addColorStop(1,`rgba(${cr},${cg},${cb},0)`);
-    g.fillStyle=pool; g.beginPath();
-    g.ellipse(tx,Math.min(ty,floor),half*1.7,half*0.62,0,0,6.284); g.fill();
-  }
-  g.globalCompositeOperation="source-over";
+    const o = by[f.id];
+    if(!lit(o) || f.kind==="fog" || f.kind==="strip") continue;
+    const [r,gr,b] = C(o), L = o.level;
+    const px = sx(f.at[0]), py = sy(f.at[1]);
 
-  // floor and a black crowd, so brightness has something to read against
-  g.strokeStyle="rgba(230,233,241,.16)"; g.lineWidth=1;
-  g.beginPath(); g.moveTo(0,floor); g.lineTo(W,floor); g.stroke();
-  g.fillStyle="#04050a";
-  for(let i=0;i<46;i++){
-    const hx=((i*97)%1000)/1000*W, hh=15+((i*53)%9);
-    g.beginPath(); g.ellipse(hx,floor+11,4.6,hh*0.5,0,0,6.284); g.fill();
-  }
+    // where it points. A head sweeps across the room and down; a par hangs.
+    const pan  = o.pan  !== undefined ? o.pan  : 0.5;
+    const tilt = o.tilt !== undefined ? o.tilt : 0.62;
+    const reachY = floorY - py;
+    const tx = f.kind === "head"
+      ? px + (pan - 0.5) * (W - 2*pad) * 1.15
+      : px + (pan - 0.5) * (W - 2*pad) * 0.14;
+    // a par hangs and lights the floor; a head can aim short or long. Either way
+    // the beam has to REACH the floor or there is no pool, and the pool is the
+    // part that survives when the haze thins
+    const ty = f.kind === "head" ? py + reachY * (0.62 + 0.52*tilt) : floorY;
 
-  // the fixtures themselves
-  for(const f of fx){
-    const o=byId[f.id], px=sx(f.at[0]), py=sy(f.at[1]);
-    if(f.kind==="strip"){
-      const px2=o&&o.pixels?o.pixels:null, wid=(W-2*pad)/2.6, x=px-wid/2;
-      g.fillStyle="#14161d"; g.fillRect(x,py-3,wid,6);
-      if(px2) for(let i=0;i<px2.length;i++){
-        const p=px2[i]; g.fillStyle=`rgb(${p[0]},${p[1]},${p[2]})`;
-        g.fillRect(x+i/px2.length*wid,py-3,wid/px2.length+0.6,6)}
-      continue;
+    const spread = Math.tan(((f.beam_deg || 22) * Math.PI/180) / 2);
+    const len = Math.hypot(tx-px, ty-py) || 1;
+    const half = Math.max(5, spread * len);
+
+    // three passes: wide and faint, mid, then a bright core
+    for(const [wf, af, lf] of [[1.00, 0.42, 1.00], [0.52, 0.58, 0.98], [0.18, 0.85, 0.95]]){
+      const ex = px + (tx-px)*lf, ey = py + (ty-py)*lf, hw = half*wf;
+      const grad = g.createLinearGradient(px,py,ex,ey);
+      const a0 = Math.min(0.92, af * (0.35 + 0.65*L) * haze);
+      grad.addColorStop(0,    `rgba(${r},${gr},${b},${a0.toFixed(3)})`);
+      grad.addColorStop(0.55, `rgba(${r},${gr},${b},${(a0*0.45).toFixed(3)})`);
+      grad.addColorStop(1,    `rgba(${r},${gr},${b},0)`);
+      g.fillStyle = grad;
+      g.beginPath();
+      g.moveTo(px - 2.5, py); g.lineTo(px + 2.5, py);
+      g.lineTo(ex + hw, ey);  g.lineTo(ex - hw, ey);
+      g.closePath(); g.fill();
     }
-    const on=lit(o), rad=f.kind==="head"?5.4:f.kind==="strobe"?4.6:f.kind==="fog"?3:4.4;
-    if(on){
-      const [cr,cg,cb]=C(o);
-      const gl=g.createRadialGradient(px,py,0,px,py,rad*4.6);
-      gl.addColorStop(0,`rgba(${cr},${cg},${cb},${(0.85*o.level).toFixed(3)})`);
-      gl.addColorStop(1,`rgba(${cr},${cg},${cb},0)`);
-      g.fillStyle=gl; g.beginPath(); g.arc(px,py,rad*4.6,0,6.284); g.fill();
-      g.fillStyle=`rgb(${cr},${cg},${cb})`;
-    } else g.fillStyle="#1b1f2a";
-    g.beginPath(); g.arc(px,py,rad,0,6.284); g.fill();
+
+    // the pool on the floor survives with no haze at all
+    if(ty > floorY - reachY*0.25){
+      const pw = Math.max(14, half*1.7), ph = Math.max(6, half*0.40);
+      const pool = g.createRadialGradient(tx,floorY,0,tx,floorY,pw);
+      pool.addColorStop(0,   `rgba(${r},${gr},${b},${(0.60*L).toFixed(3)})`);
+      pool.addColorStop(0.5, `rgba(${r},${gr},${b},${(0.22*L).toFixed(3)})`);
+      pool.addColorStop(1,   `rgba(${r},${gr},${b},0)`);
+      g.fillStyle = pool;
+      g.beginPath(); g.ellipse(tx, floorY, pw, ph, 0, 0, 6.2832); g.fill();
+    }
+
+    // the lens
+    const gl = g.createRadialGradient(px,py,0,px,py,16 + 26*L);
+    gl.addColorStop(0, `rgba(${r},${gr},${b},${Math.min(0.95,0.85*L).toFixed(3)})`);
+    gl.addColorStop(1, `rgba(${r},${gr},${b},0)`);
+    g.fillStyle = gl; g.beginPath(); g.arc(px,py,16+26*L,0,6.2832); g.fill();
+  }
+  g.globalCompositeOperation = "source-over";
+
+  // floor, then a black crowd so brightness has something to read against
+  g.strokeStyle = "rgba(200,215,255,.13)"; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(0,floorY); g.lineTo(W,floorY); g.stroke();
+  g.fillStyle = "#020306";
+  const n = Math.max(14, (W/34)|0);
+  for(let i=0;i<n;i++){
+    const hx = (i+0.5)/n*W + ((i*37)%11 - 5);
+    const hh = (Hpx-floorY)*(0.34 + ((i*53)%7)/26);
+    g.beginPath(); g.ellipse(hx, floorY + hh*0.55, Math.max(3,W/n*0.30), hh*0.62, 0, 0, 6.2832);
+    g.fill();
+  }
+
+  // the bodies of the fixtures, so an unlit rig is still visible
+  for(const f of fx){
+    if(f.kind==="fog") continue;
+    const o = by[f.id], px = sx(f.at[0]), py = sy(f.at[1]);
+    g.fillStyle = lit(o) ? "#0c0e14" : "#151924";
+    g.beginPath(); g.arc(px,py,f.kind==="head"?4.6:3.6,0,6.2832); g.fill();
   }
 }
 
