@@ -216,7 +216,9 @@ function drawFixtures(cv, fr, layout){
     g.beginPath(); g.roundRect(x, y, tw, th, 5); g.fill(); g.stroke();
 
     // the lens: colour at brightness, with a glow that scales with level
-    const cx = x + tw/2, cy = y + th*0.40, rad = Math.min(tw, th)*0.24;
+    const head = o.pan !== undefined;
+    const cx = x + tw/2, cy = y + th*(head?0.30:0.40);
+    const rad = Math.min(tw, th)*(head?0.19:0.24);
     if(L > 0.01){
       const glow = g.createRadialGradient(cx,cy,0,cx,cy,rad*2.6);
       glow.addColorStop(0, `rgba(${r},${gg},${b},${(0.55*L).toFixed(3)})`);
@@ -227,15 +229,30 @@ function drawFixtures(cv, fr, layout){
     g.beginPath(); g.arc(cx,cy,rad,0,6.2832); g.fill();
     g.strokeStyle = "#2c3242"; g.stroke();
 
-    // where a head is pointing: a stub from the lens, plus the two numbers
+    // A head gets a position pad, which is how a lighting desk shows one: pan
+    // across, tilt down, and a dot where the beam is aimed. A stub sticking out
+    // of the lens told you the direction and nothing about the range it sits in.
     if(o.pan !== undefined){
-      const ang = (o.pan - 0.5) * 2.4;                 // -1.2..1.2 rad across the room
-      const len = rad*1.35 + rad*1.1*(o.tilt!==undefined?o.tilt:0.5);
-      g.strokeStyle = L>0.01 ? `rgba(${r},${gg},${b},0.85)` : "#2c3242";
-      g.lineWidth = 3; g.lineCap = "round";
-      g.beginPath(); g.moveTo(cx,cy);
-      g.lineTo(cx + Math.sin(ang)*len, cy + Math.cos(ang)*len*0.75); g.stroke();
-      g.lineWidth = 1; g.lineCap = "butt";
+      const pw = tw*0.62, ph = Math.min(th*0.26, pw*0.55);
+      const px0 = cx - pw/2, py0 = y + th*0.60;
+      g.fillStyle = "#0a0c11"; g.strokeStyle = "#242a38"; g.lineWidth = 1;
+      g.beginPath(); g.roundRect(px0, py0, pw, ph, 3); g.fill(); g.stroke();
+      g.strokeStyle = "#1b2029";
+      g.beginPath(); g.moveTo(px0+pw/2, py0); g.lineTo(px0+pw/2, py0+ph);
+      g.moveTo(px0, py0+ph/2); g.lineTo(px0+pw, py0+ph/2); g.stroke();
+      const ax = px0 + o.pan*pw, ay = py0 + (o.tilt!==undefined?o.tilt:0.5)*ph;
+      // a line from the lens to the aim point, so the pad reads as the beam
+      g.strokeStyle = L>0.01 ? `rgba(${r},${gg},${b},0.35)` : "#232838";
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(cx, cy+rad*0.7); g.lineTo(ax, ay); g.stroke();
+      if(L > 0.01){
+        const dg = g.createRadialGradient(ax,ay,0,ax,ay,9);
+        dg.addColorStop(0, `rgba(${r},${gg},${b},0.95)`);
+        dg.addColorStop(1, `rgba(${r},${gg},${b},0)`);
+        g.fillStyle = dg; g.beginPath(); g.arc(ax,ay,9,0,6.2832); g.fill();
+      }
+      g.fillStyle = L>0.01 ? `rgb(${r},${gg},${b})` : "#39414f";
+      g.beginPath(); g.arc(ax,ay,2.6,0,6.2832); g.fill();
     }
     if(o.strobe > 0){
       g.fillStyle = "#f0a93c"; g.font = "600 10px ui-monospace,monospace";

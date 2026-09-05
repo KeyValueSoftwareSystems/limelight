@@ -269,6 +269,57 @@ function chapterHue(t,e){
   return cur}
 /* per-fixture: a gradient across the room, plus the complement for the beams */
 const OFF={par:14, up:-22, head:166, strip:8, headSpread:30};   // degrees
+/* ---- the chase -------------------------------------------------------------
+   A wave that never dims anything below 70% is a gradient, not movement. A chase
+   is a NARROW pulse crossing the rig, so only one or two fixtures are lit at any
+   instant -- that gap is the whole effect, and it is why "position" has to mean
+   metres rather than an index in a list.
+
+   The step rate is a musical subdivision, never a free-running timer. At low
+   energy the pulse advances once a beat; at a peak, four times a beat. Locking it
+   to the grid is what makes a chase land WITH the music instead of drifting
+   across it, and it is exactly the precision Renjith is asking for: to place five
+   lamps in sequence you have to know the sixteenth, not just the bar.
+
+   Direction flips every eight bars, so a long drop does not become hypnotic in
+   the boring sense. */
+const CHASE_DIV = e => e < 0.35 ? 1 : e < 0.60 ? 2 : e < 0.82 ? 3 : 4;   // steps per beat
+
+function chaseAt(t, e, n){
+  const div = CHASE_DIV(e);
+  const step = PER / div;
+  const k = Math.floor((t - PH) / step);            // which subdivision we are in
+  const frac = ((t - PH) / step) - k;               // how far through it
+  const fwd = Math.floor((t - PH) / (BAR * 8)) % 2 === 0;
+  const pos = ((fwd ? k : -k) % n + n) % n;         // which fixture, in order
+  return { pos, frac, div, n };
+}
+
+/* How strongly a fixture is lit by the pulse right now.
+
+   The pulse STEPS from lamp to lamp rather than sliding between them. A sliding
+   pulse spreads its brightest change over the middle of a step, so the movement
+   lands nowhere in particular -- measured, only 57% of its changes fell within
+   30 ms of a sixteenth, which reads as flicker rather than as a chase. Stepping
+   puts every change on the subdivision, which is the whole point: five lamps in
+   sequence is only an effect if the sequence is the music's.
+
+   Each lamp still gets an envelope inside its step -- fast up, decaying across
+   the step -- because a lamp that switches looks like a fault and a lamp that
+   fades looks like a chase. The one behind keeps a little light so the rig does
+   not go black between steps. */
+function chaseGain(xn, c){
+  const here = Math.round(xn * (c.n - 1));          // this fixture's slot
+  let d = Math.abs(here - c.pos);
+  d = Math.min(d, c.n - d);                         // the rig wraps
+  const env = Math.exp(-c.frac * 2.6);              // decay across its own step
+  if(d === 0) return 0.38 + 0.62 * env;             // the lamp on the beat
+  if(d === 1) return 0.22 * env;                    // the one it just left
+  return 0.0;
+}
+
+const PARN = Math.max(2, (LAYOUT.fixtures||[]).filter(f=>f.kind==='par').length);
+
 function fixColour(t,L,kind,xn,e){
   const B=(HUE[L]&&(L==='flash'||L==='stop'||L==='spotlight'))?hueBase(L,t,e):chapterHue(t,e);
   if(L==='stop') return [0,0,0];
@@ -395,6 +446,19 @@ function lookFrame(t,L){
       const base={drop:0.38,build:0.15,verse:0.20,quiet:0.028,idle:0.036,outro:0.042}[L]??0.13;
       const wave=0.70+0.30*Math.cos(2*Math.PI*(G.xn-bp4));   // travels in metres, not in indices
       lv=(base+0.40*e*(L==='drop'?1:0.62))*wave*EX.arc + (0.04+0.10*e)*A*0.35*grow;
+      /* Layer the chase over the wash rather than replacing it: the wash keeps
+         the room from going black between pulses, the chase supplies the
+         movement. How much of each depends on how busy the music is -- a quiet
+         section has no business chasing. */
+      const chaseMix = {drop:0.78,build:0.55,verse:0.30,flash:0.0,quiet:0.0,idle:0.0,outro:0.0}[L] ?? 0.25;
+      if(chaseMix > 0.01){
+        const c = chaseAt(t, e, PARN);
+        const pulse = chaseGain(G.xn, c);
+        const full = (base + 0.55*e) * EX.arc;
+        // a shallow floor is what makes the gap read: 0.10 left the dark lamps at a
+        // fifth of the bright one, which is a gradient again
+        lv = lerp(lv, full * (0.04 + 0.96*pulse), chaseMix * (0.45 + 0.55*e));
+      }
       if(L==='build') lv*=lerp(0.30,1,layer(1));
       if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(t/(4*BAR))+G.xn*2.2);
       if(G.outer) lv*=1.10; else lv*=0.92;   // the outer pair carries the wash
