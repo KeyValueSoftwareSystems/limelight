@@ -54,6 +54,10 @@ what a map error <em>costs</em>, which is not something a beat-accuracy number c
   <label for="song">song</label>
   <select id="song"></select>
   <label for="left">left</label><select id="left"></select>
+  <input type="file" id="drop" accept=".json,application/json" multiple hidden>
+  <button id="dropbtn" style="background:var(--raise);color:var(--ink);
+    border:1px dashed var(--rule2);border-radius:3px;padding:6px 11px;font-size:12.5px;
+    cursor:pointer;font-family:ui-monospace,monospace">＋ load a map file</button>
   <label for="dmg">right</label>
   <select id="dmg"></select>
   <label for="lay">rig</label>
@@ -145,7 +149,9 @@ function prep(m){
     MO:(m.moments||[]).map(x=>({at:x.at,kind:x.kind,v:x.size!==undefined?x.size:x.holds})),
     EN:m.energy||[], BEATS, PER, PH, DUR:D, BAR:4*PER, DBP:m.grid.bar_phase||0};
 }
+const LOCAL={};   // maps dropped in from disk, tested without committing anything
 function pick(id){
+  if(LOCAL[id]) return LOCAL[id];
   // a candidate map wins over a synthetic damage; this is how one person's map is
   // played against another's on the same audio at the same instant
   if(G.candidate_maps && G.candidate_maps[id]) return G.candidate_maps[id];
@@ -399,18 +405,23 @@ function rebuild(){
   // ?d= / ?rig= / ?t= so a specific comparison is a link, which also makes the
   // control case testable from the command line
   const Q=new URLSearchParams(location.search);
-  const cand=G.candidates||{};
-  const candOpts=Object.entries(cand).map(([k,v])=>
-    `<option value="${k}"${k===Q.get("d")?" selected":""}>${v}</option>`).join("");
-  $("left").innerHTML=candOpts;
-  $("left").value=Q.get("left")||"authored";
+  window.rebuildPickers=function(){
+    const keepL=$("left").value, keepR=$("dmg").value;
+    const cand=Object.assign({}, G.candidates||{},
+      Object.fromEntries(Object.keys(LOCAL).map(k=>[k, k])));
+    const candOpts=Object.entries(cand).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+    $("left").innerHTML=candOpts;
+    $("dmg").innerHTML=(Object.keys(cand).length
+        ? '<optgroup label="a map">'+candOpts+'</optgroup>' : "")
+      +'<optgroup label="a deliberate mistake">'
+      +DAMAGE.map(d=>`<option value="${d.id}">${d.name}</option>`).join("")+'</optgroup>';
+    $("left").value = (keepL && cand[keepL]) ? keepL : (Q.get("left") || Object.keys(cand)[0] || "");
+    const wantR = keepR || Q.get("d");
+    if(wantR) $("dmg").value = wantR;
+    if(!$("dmg").value) $("dmg").value = Object.keys(cand)[0] || "none";
+  };
+  rebuildPickers();
   $("left").onchange=rebuild;
-  $("dmg").innerHTML=(Object.keys(cand).length
-      ? '<optgroup label="someone\'s map">'+candOpts+'</optgroup>' : "")
-    +'<optgroup label="a deliberate mistake">'
-    +DAMAGE.map(d=>`<option value="${d.id}"${d.id===Q.get("d")?" selected":""}>${d.name}</option>`).join("")
-    +'</optgroup>';
-  if(Q.get("d")) $("dmg").value=Q.get("d");
   const rig=Q.get("rig")||"club";
   $("lay").innerHTML=Object.keys(LAYOUTS).map(k=>
     `<option${k===rig?" selected":""}>${k}</option>`).join("");
@@ -419,6 +430,31 @@ function rebuild(){
     $("stat").textContent="no audio found — running on an internal clock";
   }
   $("dmg").onchange=rebuild; $("lay").onchange=rebuild;
+  // A file dropped here is tested immediately and never leaves the browser. Somebody
+  // sends a map on Slack, you drag it in, you watch it against yours. Committing it
+  // is a separate decision.
+  $("dropbtn").onclick=()=>$("drop").click();
+  $("drop").onchange=async e=>{
+    for(const f of e.target.files){
+      try{
+        const m=JSON.parse(await f.text());
+        if(!m.grid||!m.grid.period) throw new Error("no grid.period — is this a map file?");
+        const who=(m.made_by&&m.made_by.who)||f.name.replace(/\.map\.json$|\.json$/,"");
+        const key="file: "+f.name.replace(/\.map\.json$|\.json$/,"");
+        LOCAL[key]=m;
+        $("stat").style.color="var(--muted)";
+        $("stat").textContent=`loaded ${f.name} — ${(60/m.grid.period).toFixed(2)} bpm, `
+          +`${(m.beats||[]).length} beats, ${(m.moments||[]).length} moments`;
+      }catch(err){
+        $("stat").style.color="#e88055";
+        $("stat").textContent=`${f.name}: ${err.message}`;
+      }
+    }
+    const keys=Object.keys(LOCAL);
+    rebuildPickers();
+    if(keys.length){ $("dmg").value=keys[keys.length-1] }
+    rebuild();
+  };
   $("play").onclick=()=>{
     const a=$("aud");
     if(a.src){ if(a.paused){a.play();$("play").textContent="❚❚ Pause"} else {a.pause();$("play").textContent="▶ Play"} }
