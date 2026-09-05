@@ -175,7 +175,11 @@ function drawParts(){
     const rows=chs.map((c,i)=>{
       const t0=c.at, t1=(i+1<chs.length)?chs[i+1].at:D;
       if(t1-t0 < 2) return null;
-      let res; try{ res=runCheck(STEP,t0,t1) }catch(e){ res={ok:false,v:0,txt:"—"} }
+      let res; try{ res=runCheck(STEP,t0,t1) }catch(e){
+  document.body.innerHTML='<div style="padding:26px;font:14px ui-monospace,monospace;color:#e8705a">'
+    + 'This page could not start.<br><br>' + String(e.message||e)
+    + '<br><br><span style="color:#8f98ad">If that mentions a route or a 404, the running '
+    + 'server is older than the code. Stop it and start it again.</span></div>'; res={ok:false,v:0,txt:"—"} }
       return {name:c.name, t0, t1, res};
     }).filter(Boolean);
     el.innerHTML=rows.map(r=>
