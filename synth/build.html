@@ -12,6 +12,7 @@ select,button{background:var(--raise);color:var(--ink);border:1px solid var(--ru
         padding:4px 10px;font:12px ui-monospace,monospace;cursor:pointer}
 button:disabled{opacity:.4;cursor:not-allowed}
 button.go{background:var(--good);color:#08210f;border-color:var(--good);font-weight:700}
+button.on{background:var(--tung);color:#20160a;border-color:var(--tung);font-weight:700}
 button.no{background:transparent;color:var(--bad);border-color:var(--rule2)}
 main{flex:1 1 0;display:flex;min-height:0}
 #ladder{flex:0 0 268px;background:var(--pan);border-right:1px solid var(--rule);overflow:auto;padding:8px}
@@ -59,6 +60,7 @@ input[type=text]{background:var(--raise);color:var(--ink);border:1px solid var(-
   <h1>build</h1>
   <select id="song"></select>
   <select id="map"></select>
+  <button id="solo" title="run this rung on its own, with nothing else moving">solo</button>
   <label class="note">energy</label>
   <select id="drive"><option>low</option><option selected>medium</option><option>high</option></select>
   <label class="note">colour</label>
@@ -102,7 +104,7 @@ const Q=new URLSearchParams(location.search);
 /* RUNGS comes from checks.js so the page and the runner cannot disagree */
 
 let SONG="", MAPS={}, MAP=null, MAPKEY="", LAY=null, LAYBEAT=null, RM=null, RECIPE="", ROOMJS="";
-let STEP=1, KNOB=null, LEARN={song:"",steps:[]}, WAVE=null, LIGHT=null, VIEW={t0:0,span:12}, PAL=(new URLSearchParams(location.search).get("pal")||"garrix"),
+let STEP=1, KNOB=null, SOLO=false, LEARN={song:"",steps:[]}, WAVE=null, LIGHT=null, VIEW={t0:0,span:12}, PAL=(new URLSearchParams(location.search).get("pal")||"garrix"),
     DRIVE=(new URLSearchParams(location.search).get("energy")||localStorage.getItem("limelight.drive")||"medium");
 const HZ=50;
 const dur=m=>(m.song&&m.song.length)||240;
@@ -147,7 +149,7 @@ function rebuild(){
   CURLAY = lay;
   buildLight();
   drawLadder(); drawAll();
-  $("rigmeta").textContent=`${lay.fixtures.length} fixtures · rung ${STEP} · ${DRIVE} · ${r_of(STEP).adds}`;
+  $("rigmeta").textContent=`${lay.fixtures.length} fixtures · rung ${STEP}${SOLO?" ON ITS OWN":""} · ${DRIVE} · ${r_of(STEP).adds}`;
   refreshVerdict();
 }
 let CURLAY=null;

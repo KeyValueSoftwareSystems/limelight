@@ -65,12 +65,33 @@ const E = ({
 
 const STEP = (function(){ try { return Math.max(1, Math.min(11, +LADDER || 1)) } catch(e) { return 1 } })();
 
+/* ---- one rung on its own -------------------------------------------------
+   The ladder is cumulative, so rung 9 means rungs 1 to 9 all running at once.
+   That is right for building a show and wrong for finding out whether ONE thing
+   works: if the melody looks bad while eight other elements are moving, you
+   cannot say which of the nine is at fault.
+
+   SOLO runs a single rung on a plain carrier. Rungs about WHEN something happens
+   keep the beat, because without it there is nothing to be on time with. The rest
+   sit on a steady wash, so the only thing moving on stage is the element being
+   judged. use(n) is the gate everything reads: cumulative normally, exactly one
+   rung when soloing. */
+const SOLO = (function(){ try { return SOLORUNG ? +SOLORUNG : 0 } catch(e) { return 0 } })();
+/* A few rungs speak THROUGH another one and cannot be seen without it. Chords
+   change the colour, so soloing chords with the colour machinery off gives five
+   white lamps and tells you nothing. Written down rather than left implicit. */
+const NEEDS = { 10: [6] };            // chords are expressed as colour
+const use  = n => SOLO ? (n === SOLO || (NEEDS[SOLO] || []).indexOf(n) >= 0)
+                       : (STEP >= n);
+const BEATY = { 1:1, 2:1, 3:1, 7:1 };
+const SOLO_STEADY = SOLO && !BEATY[SOLO];
+
 const DECAY    = Math.max(0.055, PER * 0.22);
 /* One number per rung, set on the page and written into the learning file, so the
    value that survives is the one a human chose while watching -- not one I picked
    while writing this. */
 const K = (function(){ try { return (KNOB===null||KNOB===undefined) ? null : +KNOB } catch(e){ return null } })();
-const OFFBEAT  = K!==null && STEP===2 ? K : 0.5;   // rung 2: beats 2-4 against the downbeat
+const OFFBEAT  = K!==null && (SOLO||STEP)===2 ? K : 0.5;   // rung 2: beats 2-4 against the downbeat
 
 /* ---- rung 4: the pump -------------------------------------------------------
    Levels is built on its sidechain. Every kick ducks the whole mix and it
@@ -92,13 +113,13 @@ const OFFBEAT  = K!==null && STEP===2 ? K : 0.5;   // rung 2: beats 2-4 against 
    Real pumping rigs are mostly ON. The bed is the sustained wash the compressor
    acts on; the flashes ride on top of it. That is a visible change to the look
    and it is the point of this rung rather than a side effect. */
-const BED       = (K!==null && STEP===4 ? K : 0.55) * E.bed;
+const BED       = (K!==null && (SOLO||STEP)===4 ? K : 0.55) * E.bed;
 const DUCK_GAIN = 2.2;
 const DUCK_MAX  = 0.62;
 const PUMPING   = !!(PUMP && PUMP.present);
 const RELEASE   = (PUMP && PUMP.release_at_beat_fraction) || 0.38;
 function duckAt(t){
-  if(STEP < 4 || !PUMPING) return 1;
+  if(!use(4) || !PUMPING) return 1;
   let d = PUMP.depth || 0;
   const pc = PUMP.per_chapter || [];
   for(const [at, dep, ok] of pc){ if(at <= t){ d = ok ? dep : 0 } else break }
@@ -152,7 +173,7 @@ function energyAt(t){
 /* rung 6: the hits that are NOT on a beat. Rung 1 already covers the beats, so
    this rung adds only what the grid cannot express. */
 const OFFGRID = (function(){
-  if(STEP < 6) return [];
+  if(!use(7)) return [];
   const src = (MAP.accents && MAP.accents.events) || [];
   const out = [];
   for(const a of src){
@@ -199,7 +220,7 @@ const blockStart = (t, bars) => BAR0 + Math.floor(barOf(t) / bars) * bars * BAR;
    unless the arrangement really has almost nothing in it. A rig that drops to two
    lamps every other bar reads as broken rather than as restraint. */
 function widthAt(t){
-  if(STEP < 8 || !INSTR || !INSTR.density_per_bar || !INSTR.density_per_bar.length) return NP;
+  if(!use(8) || !INSTR || !INSTR.density_per_bar || !INSTR.density_per_bar.length) return NP;
   const D = INSTR.density_per_bar, t0 = blockStart(t, HOLD.width);
   let sum = 0, n = 0;
   for(const [at, d] of D){ if(at >= t0 - PHRASE*BAR && at < t0 + HOLD.width*BAR){ sum += d; n++ } }
@@ -213,7 +234,7 @@ function widthAt(t){
    somewhere new eight times a second, which is the single worst thing in this
    file and the reason the melody rung looked terrible. */
 function pitchPos(t){
-  if(STEP < 9 || !MELRANGE || !MELN.length) return null;
+  if(!use(9) || !MELRANGE || !MELN.length) return null;
   const t0 = blockStart(t, HOLD.melody);
   let sum = 0, n = 0;
   for(let i = lastAtOrBefore(MELN, t0 + HOLD.melody*BAR, x => x[0]); i >= 0; i--){
@@ -229,7 +250,7 @@ function pitchPos(t){
    each four-bar block decides the colour, so the rig states a colour, holds it
    long enough to mean something, and moves when the harmony has actually moved. */
 function chordState(t){
-  if(STEP < 10 || !CHORDS.length) return null;
+  if(!use(10) || !CHORDS.length) return null;
   const t0 = blockStart(t, HOLD.colour), t1 = t0 + HOLD.colour*BAR;
   const inBlock = [];
   for(let i = lastAtOrBefore(CHORDS, t1, x => x.at); i >= 0; i--){
@@ -261,7 +282,7 @@ const BIGT = (function(){
   for(const m of MO) if(m.kind === "drop" || m.kind === "stop") out.push(m.at);
   return out.sort((a,b) => a-b) })();
 function bigMoment(t){
-  if(STEP < 10) return true;                 // before the chords rung, every bar
+  if(!use(10)) return true;                 // before the chords rung, every bar
   for(const b of BIGT) if(Math.abs(b - t) < 0.25) return true;
   return false;
 }
@@ -276,15 +297,16 @@ function frame(t){
   const k  = beatIndex(t);
   const bt = k < 0 ? -99 : BEATS[k];
   const isDown = k >= 0 && DOWNSET.has(+bt.toFixed(3));
-  const env = k < 0 ? 0 : Math.exp(-(t - bt) / DECAY);
+  /* a soloed non-beat rung gets a steady wash, not a decaying flash */
+  const env = SOLO_STEADY ? 1 : (k < 0 ? 0 : Math.exp(-(t - bt) / DECAY));
 
   // ---- rung 1: every beat, flat -------------------------------------------
   let amp = 1;
   // ---- rung 2: the bar ----------------------------------------------------
-  if(STEP >= 2 && !isDown) amp = OFFBEAT;
+  if(use(2) && !isDown) amp = OFFBEAT;
   // ---- rung 5: the song gets bigger and smaller ---------------------------
   let size = 1;
-  if(STEP >= 5) size = 0.34 + 0.66 * cl(energyAt(t), 0, 1);
+  if(use(5)) size = 0.34 + 0.66 * cl(energyAt(t), 0, 1);
   // ---- rung 4: and it breathes with the sidechain -------------------------
   const duck = duckAt(t);
 
@@ -293,7 +315,7 @@ function frame(t){
      five. That is the smallest use of the fact that a rig has positions, and it
      is the reason position has to be in the layout at all. */
   let lit = null;                                    // null = every par
-  if(STEP >= 3 && k >= 0 && !isDown){
+  if(use(3) && k >= 0 && !isDown){
     let d = 0; for(let j=k; j>=0 && !DOWNSET.has(+BEATS[j].toFixed(3)); j--) d++;
     lit = d % NP;
   }
@@ -302,7 +324,7 @@ function frame(t){
      rather than a rig with holes in it */
   const w = widthAt(t);
   const half = (NP - w) / 2;
-  const inPlay = i => (STEP < 8) || (i >= Math.floor(half) && i < Math.floor(half) + w);
+  const inPlay = i => (!use(8)) || (i >= Math.floor(half) && i < Math.floor(half) + w);
   /* rung 9: the tune picks the lamp, replacing the mechanical walk -- that walk
      was the thing Renjith called overdone, and it was: it moved for its own sake */
   const pp = pitchPos(t);
@@ -320,7 +342,7 @@ function frame(t){
        Lighting the bed only on the selected par left four of five dark and the
        breathing had nowhere to show. The chase and the flash ride on top of it. */
     const on = (lit === null || lit === i) && inPlay(i);
-    const bed = (STEP >= 4 && PUMPING) ? BED : 0;
+    const bed = (use(4) && PUMPING) ? BED : (SOLO_STEADY ? 0.5 : 0);
     /* a soft spot rather than one lamp snapping on: the neighbours catch some of
        it, so the tune reads as movement along the row instead of a lamp race */
     let share = on ? 1 : 0;
@@ -328,12 +350,16 @@ function frame(t){
       const d2 = Math.abs(i - spot);
       share = Math.max(share, d2 < 1.6 ? Math.pow(1 - d2/1.6, 1.6) : 0);
     }
-    let lv = (bed + (1 - bed) * share * amp * env) * size * duck;
-    if(STEP < 4) lv = share * amp * env * size;
+    /* the wash respects the arrangement too. It did not, so a lamp that rung 8 had
+       taken out of play still sat at bed level -- every lamp lit all the time, and
+       soloing the instruments rung showed it at once. */
+    const bedHere = inPlay(i) ? bed : 0;
+    let lv = (bedHere + (1 - bedHere) * share * amp * env) * size * duck;
+    if(!use(4) && !SOLO_STEADY) lv = share * amp * env * size;
     lv *= E.lvl;
     let col = WHITE;
     // ---- rung 5: colour ---------------------------------------------------
-    if(STEP >= 6){
+    if(use(6)){
       /* rung 10: the harmony decides which colour leads and when it changes. Before
          that rung the two colours simply alternate along the row, which looks fine
          and means nothing. */
@@ -362,7 +388,7 @@ function frame(t){
   });
 
   // ---- rung 6: the hits between the beats ---------------------------------
-  if(STEP >= 7 && OFFGRID.length){
+  if(use(7) && OFFGRID.length){
     let lo=0, hi=OFFGRID.length-1, j=-1;
     while(lo<=hi){ const mi=(lo+hi)>>1; if(OFFGRID[mi].at<=t){ j=mi; lo=mi+1 } else hi=mi-1 }
     if(j >= 0){
@@ -376,7 +402,7 @@ function frame(t){
   }
 
   // ---- rung 7: the heads --------------------------------------------------
-  if(STEP >= 11){
+  if(use(11)){
     const e = energyAt(t), sweep = Math.sin(2*Math.PI * t / (BAR*2));
     HEADS.forEach((f, i) => {
       const s = i === 0 ? sweep : -sweep;
@@ -387,5 +413,6 @@ function frame(t){
     });
   }
 
-  return { t:+t.toFixed(3), look:"step"+STEP, step:STEP, fixtures:F };
+  return { t:+t.toFixed(3), look: SOLO ? "solo"+SOLO : "step"+STEP,
+           step: STEP, solo: SOLO || undefined, fixtures:F };
 }

@@ -83,6 +83,9 @@ function songs() {
 
 const args = process.argv.slice(2);
 const wantParts = args.includes("--parts");
+/* --solo runs each rung on its own instead of on top of the ones below it, which
+   is how you find out whether ONE element works rather than whether the stack does */
+const wantSolo = args.includes("--solo");
 const only = args.filter(a => !a.startsWith("--"));
 const LAY = read(path.join(ROOT, "readers/lights/small/layout.json"));
 const LAYB = read(path.join(ROOT, "readers/lights/beat/layout.json"));
@@ -94,10 +97,11 @@ for (const [slug, s] of Object.entries(songs())) {
   const map = read(s.map);
   if (!map.beats || map.beats.length < 8) { console.log(`${slug}: no beats`); continue }
   const W = wave(s.wav);
-  process.stdout.write(`\n${slug}  (${s.kind})\n`);
+  process.stdout.write(`\n${slug}  (${s.kind})${wantSolo ? "   each rung on its own" : ""}\n`);
   for (const r of RUNGS) {
     const lay = r.n >= 11 ? LAY : LAYB;
-    const F = RM.mkReader(map, lay, process.env.ENERGY || "medium", "garrix", r.n);
+    const F = RM.mkReader(map, lay, process.env.ENERGY || "medium", "garrix", r.n,
+                          null, wantSolo ? r.n : 0);
     const C = makeChecks({ MAP: map, LAY: lay, F, LIGHT: light(F, map), WAVE: W, HZ });
     let res; try { res = C.runCheck(r.n) } catch (e) { res = { ok: false, v: 0, txt: "threw: " + e.message } }
     if (res.na) skip++; else res.ok ? pass++ : fail++;
