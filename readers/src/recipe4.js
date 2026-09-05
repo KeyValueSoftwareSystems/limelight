@@ -95,7 +95,7 @@ function accentHit(t){
   while(lo<=hi){const mi=(lo+hi)>>1; if(ACT[mi]<=t){i=mi;lo=mi+1}else hi=mi-1}
   for(let j=i;j>=0&&j>i-6;j--){
     const dt=t-ACT[j]; if(dt<0||dt>0.34) continue;
-    const at=0.17, dc=0.30;
+    const at=0.014, dc=0.26;
     const env=dt<at?ss(0,at,dt):1-ss(0,1,cl((dt-at)/dc));
     best=Math.max(best,env*ACC[j].strength);
   }
@@ -143,7 +143,7 @@ function until(k,t,w){let b=null;for(const m of MO)if(m.kind===k&&m.at>t&&m.at-t
 function accent(p,e){
   // 0.28 of a beat is ~133 ms at 126 bpm. Below about 100 ms a level change on a
   // large surface reads as a flash rather than a hit, which is the whole complaint.
-  const at=0.28, dc=0.40+0.30*(1-e);
+  const at=0.035, dc=0.40+0.30*(1-e);
   if(p<at) return ss(0,at,p);
   return 1-ss(0,1,cl((p-at)/dc))}
 
@@ -414,13 +414,19 @@ function chaseAt(t, e, n){
 /* One lamp is on the hit, the one before it is still letting go. The envelope is
    measured against the gap to the NEXT hit rather than a fixed time, so a fill
    reads as a fill instead of five lamps all half-lit at once. */
+const MIRROR = (LAYOUT.fixtures||[]).filter(f=>f.kind==='par').length > 12;
 function chaseGain(xn, c){
-  const here = Math.round(xn * (c.n - 1));
-  let d = Math.abs(here - c.pos);
-  d = Math.min(d, c.n - d);
+  const half = Math.max(1, Math.floor(c.n/2));
+  const fold = MIRROR ? Math.abs(xn - 0.5) * 2 : xn;
+  const span = MIRROR ? half : c.n;
+  const here = Math.round(fold * (span - 1));
+  const pos = MIRROR ? (c.pos % span) : c.pos;
+  let d = Math.abs(here - pos);
+  d = Math.min(d, span - d);
   const env = Math.exp(-(c.age / Math.max(0.09, c.gap * 0.75)) * 1.9);
   if(d === 0) return (0.30 + 0.70 * env) * c.alive;
-  if(d === 1) return 0.20 * env * c.alive;
+  if(d === 1) return 0.28 * env * c.alive;
+  if(d === 2 && MIRROR) return 0.10 * env * c.alive;
   return 0.0;
 }
 
@@ -434,7 +440,8 @@ function fixColour(t,L,kind,xn,e){
     let role;
     if(kind==='up') role='deep';
     else if(kind==='head') role=roles[1];
-    else role = (Math.round(xn*(PARN-1)) % 2 === 0) ? roles[0] : roles[1];
+    else { const fi = MIRROR ? Math.round(Math.abs(xn-0.5)*2*(PARN-1)) : Math.round(xn*(PARN-1));
+           role = (fi % 2 === 0) ? roles[0] : roles[1]; }
     const c=roleRGB(role,e,bri,palAt(t));
     return kind==='up' ? [c[0]*0.74|0, c[1]*0.74|0, c[2]*0.74|0] : c;
   };
@@ -480,14 +487,16 @@ function buildGeo(){
 const ARRAY_MIN = 12;
 function arrayGate(G, t, e, L, n){
   if(!n || n <= ARRAY_MIN) return 1;
-  const cover = {drop:0.62, build:0.46, verse:0.34, quiet:0.24, idle:0.20,
-                 outro:0.26, spotlight:0.18, stop:0, flash:1}[L];
-  const cov = (cover===undefined?0.34:cover);
+  const ceil = {drop:0.72, build:0.62, verse:0.52, quiet:0.40, idle:0.34,
+                outro:0.40, spotlight:0.26, stop:0, flash:1}[L];
+  const top = (ceil===undefined?0.52:ceil);
+  const cov = (top<=0||top>=1) ? top : cl(0.10 + (top-0.10)*(0.18+0.82*e), 0.08, 1);
   if(cov >= 1) return 1;
   if(cov <= 0) return 0;
   const bars = (L==='drop') ? 2 : 4;
   const ph = (t - PH) / (BAR*bars);
-  const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(G.xn*1.5 + G.yn*0.7 - ph));
+  const fx = (n > ARRAY_MIN) ? Math.abs(G.xn - 0.5)*2 : G.xn;
+  const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(fx*1.2 + G.yn*0.6 - ph));
   const soft = 0.16 + 0.22*e;
   const edge = 1 - cov;
   const gate = cl((wave - edge + soft) / (soft*2), 0, 1);
@@ -590,7 +599,9 @@ function lookFrame(t,L){
          always true. What was wrong was the part that moved on its own. Anything
          that changes brightness over time now has to come from the music. */
       const wave=0.88+0.12*Math.cos(2*Math.PI*G.xn);
-      lv=(base+0.40*e*(L==='drop'?1:0.62))*wave*EX.arc + (0.04+0.10*e)*A*0.35*grow*K.accent;
+      const musical=(0.15+0.85*e)*(L==='drop'?1:0.72);
+      lv=(base*0.42 + 0.95*musical)*wave*EX.arc
+         + (0.10+0.34*e)*A*grow*K.accent*drumGate;
       /* Layer the chase over the wash rather than replacing it: the wash keeps
          the room from going black between pulses, the chase supplies the
          movement. How much of each depends on how busy the music is -- a quiet
@@ -845,7 +856,7 @@ function lookFrame(t,L){
       // 0.30 of a beat is ~140 ms. Real LED fixtures are programmed with fades
       // of that order; an instant snap on a surface this large reads as a flash,
       // which is exactly the complaint.
-      const back = bsb<0.30 ? ss(0,0.30,bsb) : 1-ss(0,1,cl((bsb-0.30)/1.45));
+      const back = bsb<0.045 ? ss(0,0.045,bsb) : 1-ss(0,1,cl((bsb-0.045)/1.20));
       const g2=(amb*0.8+(0.14+0.46*e)*back+0.19*stab)*lerp(0.3,1,L==='build'?layer(3):1);
       for(let i=0;i<N2;i++){
         const mix=0.5+0.5*Math.sin(2*Math.PI*(i/N2*1.5-bp4));

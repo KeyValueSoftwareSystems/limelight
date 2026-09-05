@@ -703,7 +703,7 @@ function drawRoom(){
   $("viewtog").onclick=()=>{ VIEWMODE = VIEWMODE==="fixtures" ? "room" : "fixtures";
     localStorage.setItem("limelight.view", VIEWMODE);
     $("viewtog").textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view" };
-  fillRigs(); LAY=pickLayout();
+  fillRigs(); LAY=pickLayout(); setBeatOnly(BEATONLY); LAY=pickLayout();
   if(!VIEWMODE) VIEWMODE = ((LAY&&LAY.fixtures||[]).length > 40) ? "room" : "fixtures";
   { const b=$("viewtog"); if(b) b.textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view"; }
   $("palette").value=PALETTE;
