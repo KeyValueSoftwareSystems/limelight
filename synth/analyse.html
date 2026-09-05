@@ -58,6 +58,19 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
 <div class="track" id="t2"><div class="thead"><b id="n2">—</b><span id="d2"></span></div>
   <canvas id="c2"></canvas></div>
 
+<div id="live" style="display:flex;gap:8px;flex:0 0 auto;margin:0 0 7px">
+  <div class="track" style="flex:1 1 0;margin:0">
+    <div class="thead"><b>the show, from the map above</b>
+      <span id="rmeta">—</span></div>
+    <canvas id="room" style="height:170px"></canvas></div>
+  <div class="track" style="flex:0 0 250px;margin:0">
+    <div class="thead"><b>vs <span id="vsname">—</span></b><span id="vstale"></span></div>
+    <div style="padding:11px 13px;font-family:ui-monospace,monospace;font-size:12px;line-height:1.9">
+      <div>flash match <b id="lflash" style="font-size:19px;color:var(--tung)">—</b></div>
+      <div>seconds wrong <b id="lbad" style="font-size:15px">—</b></div>
+      <div style="color:var(--faint);font-size:11px;margin-top:6px" id="lnote"></div>
+    </div></div>
+</div>
 <audio id="aud" controls preload="auto"></audio>
 <p class="help" id="help"></p>
 </div>
@@ -79,6 +92,9 @@ let G=null, SONG="", MINE=null, OTHER=null, mineKey="", otherKey="", tool="secti
 // the visible window. A whole song across 1500 px puts a bar at twelve pixels,
 // which is not enough to see whether a boundary is where you heard it.
 let VIEW={t0:0, span:0}, FOLLOW=true, drag=null;
+// the room is rebuilt from MINE on every edit, so a boundary moved on the
+// timeline changes the lights immediately -- that is the loop worth having
+let RECIPE="", RM=null, LAY=null, F1=null, F2=null, rebuildTimer=null, scoreTimer=null;
 const clampView=D=>{ VIEW.span=Math.max(4,Math.min(D,VIEW.span||D));
   VIEW.t0=Math.max(0,Math.min(D-VIEW.span,VIEW.t0)) };
 
@@ -242,7 +258,38 @@ $("seldel").onclick=()=>{
 };
 $("selclose").onclick=()=>{ sel=null; $("sel").style.display="none" };
 let changed=false;
-function dirty(){ changed=true; $("save").textContent="Save •" }
+function dirty(){
+  changed=true; $("save").textContent="Save •";
+  clearTimeout(rebuildTimer);
+  rebuildTimer=setTimeout(rebuildShow,120);
+}
+function rebuildShow(){
+  if(!RM||!LAY||!MINE) return;
+  try{
+    F1=RM.mkReader(MINE,LAY);
+    F2=OTHER?RM.mkReader(OTHER,LAY):null;
+    $("rmeta").textContent=`${mineKey} · club · ${(MINE.beats||[]).length} beats`;
+    $("vsname").textContent=otherKey||"—";
+    $("vstale").textContent="";
+    clearTimeout(scoreTimer); scoreTimer=setTimeout(rescore,60);
+  }catch(e){ $("rmeta").textContent="reader failed: "+e.message }
+}
+function rescore(){
+  if(!F1||!F2||!RM){ $("lflash").textContent="—"; $("lbad").textContent="—";
+    $("lnote").textContent=otherKey?"":"pick something in “against” to compare"; return }
+  const D=dur(MINE), FD=0.06;
+  const L1=[],L2=[];
+  for(let t=0;t<D;t+=FD){ L1.push(RM.totalLight(F1(t))); L2.push(RM.totalLight(F2(t))) }
+  const d1=[],d2=[];
+  for(let i=1;i<L1.length;i++){ d1.push(L1[i]-L1[i-1]); d2.push(L2[i]-L2[i-1]) }
+  const r=Math.max(0,RM.pearson(d1,d2))*100;
+  let bad=0;
+  for(let t=0;t<D;t+=0.5) if(RM.frameDiff(F1(t),F2(t))>0.06) bad+=0.5;
+  $("lflash").textContent=r.toFixed(1)+"%";
+  $("lflash").style.color = r>97?"var(--good)":r<60?"var(--bad)":"var(--tung)";
+  $("lbad").textContent=bad.toFixed(0)+"s / "+D.toFixed(0)+"s";
+  $("lnote").textContent="recalculated on every edit";
+}
 $("save").onclick=async()=>{
   const to = mineKey==="answer" ? "truth" : mineKey;
   const r=await fetch(`/api/save_map?song=${SONG}&to=${encodeURIComponent(to)}`,
@@ -294,6 +341,11 @@ addEventListener("mousemove",e=>{
 });
 addEventListener("mouseup",()=>{ setTimeout(()=>{drag=null},0) });
 addEventListener("resize",redraw);
+function drawRoom(){
+  if(!F1||!RM) return;
+  const a=$("aud"), t=Math.min(a.src?a.currentTime:0, dur(MINE)-0.02);
+  try{ RM.drawRoom($("room"), F1(t), LAY) }catch(e){}
+}
 (function tick(){
   const a=$("aud");
   if(FOLLOW && a.src && !a.paused && MINE){
@@ -302,12 +354,17 @@ addEventListener("resize",redraw);
       VIEW.t0=t-VIEW.span*0.35; clampView(D);
     }
   }
-  redraw(); requestAnimationFrame(tick);
+  redraw(); drawRoom(); requestAnimationFrame(tick);
 })();
 
 (async()=>{
  try{
   const Q=new URLSearchParams(location.search);
+  RECIPE=await (await fetch("/static/recipe4.js")).text();
+  const rj=await (await fetch("/static/room.js")).text();
+  RM=new Function("RECIPE", rj+"\n;return {mkReader,prep,drawRoom,frameDiff,pearson,totalLight};")(RECIPE);
+  const sg=await (await fetch("/api/song?song="+encodeURIComponent(Q.get("song")||""))).json();
+  LAY=(sg.layouts||{}).club||Object.values(sg.layouts||{})[0];
   G=await (await fetch("/api/maps?song="+encodeURIComponent(Q.get("song")||""))).json();
   SONG=G.song;
   $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>
@@ -325,7 +382,7 @@ addEventListener("resize",redraw);
     MINE=JSON.parse(JSON.stringify(G.maps[mineKey]));
     OTHER=otherKey?G.maps[otherKey]:null;
     $("n1").textContent=mineKey+"  (editing)"; $("n2").textContent=otherKey||"—";
-    redraw() };
+    rebuildShow(); redraw() };
   $("mine").onchange=load; $("other").onchange=load; load();
   VIEW={t0:0,span:dur(MINE)};
   $("aud").src="/api/audio?song="+SONG;

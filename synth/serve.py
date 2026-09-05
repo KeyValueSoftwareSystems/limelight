@@ -855,15 +855,17 @@ class H(http.server.BaseHTTPRequestHandler):
                 return self._send(200, open(os.path.join(HERE, "analyse.html")).read(),
                                   "text/html; charset=utf-8")
             if u.path == "/api/maps":
-                song = (q.get("song") or [""])[0]
+                # NOT `song` -- that is the name of a function in this module, and a
+                # local assignment here made every later call to it unbound
+                slug = (q.get("song") or [""])[0]
                 idx = songs_index()
-                if song not in idx: song = sorted(idx)[0] if idx else ""
+                if slug not in idx: slug = sorted(idx)[0] if idx else ""
                 out = {}
-                for k, v in candidate_maps(song).items():
+                for k, v in candidate_maps(slug).items():
                     try: out[k] = json.load(open(v["path"]))
                     except Exception: pass
                 return self._send(200, json.dumps(
-                    {"song": song, "maps": out, "editable": (not READONLY),
+                    {"song": slug, "maps": out, "editable": (not READONLY),
                      "songs": {k: v["label"] for k, v in idx.items()}}))
             if u.path == "/api/status": return self._send(200, json.dumps(status()))
             if u.path == "/api/listeners2": return self._send(200, json.dumps(listeners_available()))
@@ -882,6 +884,9 @@ class H(http.server.BaseHTTPRequestHandler):
             if u.path == "/static/calibrate.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "lights",
                                                          "calibrate.js")).read(),
+                                  "text/plain; charset=utf-8")
+            if u.path == "/static/room.js":
+                return self._send(200, open(os.path.join(HERE, "room.js")).read(),
                                   "text/plain; charset=utf-8")
             if u.path == "/static/wire.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "lights", "wire.js")).read(),
