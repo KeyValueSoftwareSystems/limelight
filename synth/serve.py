@@ -178,6 +178,11 @@ def listeners_available():
     return sorted(f for f in os.listdir(d) if f.endswith(".py") and not f.startswith("_"))
 
 
+def truth_path(slug):
+    p = os.path.join(HERE, "truth", slug + ".map.json")
+    return p if os.path.exists(p) else None
+
+
 def candidate_maps(slug):
     """Every map anyone has produced for this song, plus the authored answer.
 
@@ -185,6 +190,12 @@ def candidate_maps(slug):
     to register anything."""
     out = {"authored": {"label": "authored answer (the truth)",
                         "path": os.path.join(HERE, "songs", slug + ".map.json")}}
+    # The held-out answer drives the reference room, but only on the machine that
+    # holds it. A shared instance must never send it to a browser -- the whole
+    # point of holding it out is that a model cannot be tuned to reproduce a file.
+    tp = truth_path(slug)
+    if tp and not READONLY:
+        out["answer"] = {"label": "the answer (yours, held out)", "path": tp}
     d = os.path.join(HERE, "maps")
     found = []
     if os.path.isdir(d):
@@ -239,6 +250,31 @@ def songs_index():
                         "so the left room is correct by construction. "
                         + (lvl.get("teaches", "")),
             }
+    # A real song is discoverable from its audio plus ANY map that describes it --
+    # the held-out answer counts, so removing the reference from git does not make
+    # the song disappear from the board.
+    od = os.path.join(HERE, "out")
+    if os.path.isdir(od):
+        for f in sorted(os.listdir(od)):
+            if not f.endswith(".wav"): continue
+            slug = f[:-4]
+            if slug in out: continue
+            ref = truth_path(slug)
+            if not ref: continue
+            try: mm = json.load(open(ref))
+            except Exception: continue
+            en = [e[1] for e in mm.get("energy", [])] or [1.0]
+            out[slug] = {
+                "label": f"{slug}  ·  {mm.get('song', {}).get('title', slug)}  (real, answer held out)",
+                "map": ref, "wav": os.path.join(od, f), "canonical": False,
+                "left": "the answer (held out)", "teaches": "",
+                "thin": (max(en) - min(en)) < 0.12, "span": round(max(en) - min(en), 3),
+                "note": "A real record. The reference map is not in the repository and is never "
+                        "sent to a browser on a shared instance — upload a map and you get "
+                        "numbers back, never the answer. A model tuned until it reproduces a "
+                        "file has learned the file, not the music.",
+            }
+
     # Real records have no authored answer -- only whatever maps people have made.
     # Discovered from an audio file in out/ plus at least one candidate in maps/.
     md = os.path.join(HERE, "maps")
@@ -329,6 +365,28 @@ def game():
         except Exception:
             cands[k] = {"how": "unreadable"}
 
+    scores = []
+    sp = os.path.join(HERE, "SCORES.tsv")
+    if os.path.exists(sp):
+        ls = [l for l in open(sp).read().strip().split("\n") if l]
+        if len(ls) > 1:
+            hd = ls[0].split("\t"); ix = {k: i for i, k in enumerate(hd)}
+            best = {}
+            for r in [x.split("\t") for x in ls[1:]]:
+                if len(r) != len(hd) or r[ix["song"]] != song: continue
+                k = r[ix["who"]]
+                if k not in best or float(r[ix["beats_f"]]) > float(best[k][ix["beats_f"]]):
+                    best[k] = r
+            for k, r in best.items():
+                scores.append({"who": k, "beats_f": float(r[ix["beats_f"]]),
+                               "downbeats_f": float(r[ix["downbeats_f"]]),
+                               "grid_err_ms": float(r[ix["grid_err_ms"]]),
+                               "octave": r[ix["octave"]],
+                               "boundary": r[ix["boundary_3s"]],
+                               "moments": f"{r[ix['moments_hit']]}/{r[ix['moments_total']]}",
+                               "when": r[ix["when"]][11:16]})
+            scores.sort(key=lambda x: -x["beats_f"])
+
     board = []
     rp = os.path.join(HERE, "RESULTS.tsv")
     if os.path.exists(rp):
@@ -387,7 +445,8 @@ def game():
         try: title = json.load(open(idx[song]["map"]))["song"]["title"]
         except Exception: pass
     return {"song": song, "song_title": title, "deadline": dl, "candidates": cands,
-            "board": board, "maps": maps, "verdicts": verdicts[-12:], "readonly": READONLY}
+            "board": board, "maps": maps, "verdicts": verdicts[-12:], "readonly": READONLY,
+            "scores": scores, "has_truth": bool(truth_path(song))}
 
 
 def status():
@@ -855,11 +914,58 @@ class H(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urllib.parse.urlparse(self.path); q = urllib.parse.parse_qs(u.query)
-        if READONLY:
+        # Read-only blocks jobs, not submissions. Scoring reads a file and runs the
+        # bench -- no shell, no subprocess -- and it is the one thing a shared
+        # instance exists to do. Blocking it made the tunnel pointless.
+        if READONLY and u.path not in ("/api/score", "/api/upload_map", "/api/verdict"):
             return self._send(403, json.dumps({"error":
-                "This instance is read-only. It is shared beyond one machine, and an endpoint "
-                "that runs a job is a remote shell however friendly the button looks. "
-                "Run it locally to generate, score or rebuild."}))
+                "This instance is read-only: it will score a map and record a verdict, but it "
+                "will not run jobs. Generating songs or rebuilding frames is a shell, and this "
+                "URL is shared. Do those locally."}))
+        if u.path == "/api/score":
+            # Upload a map, get a number. The answer never travels back -- a model
+            # tuned until it reproduces a file has learned the file, not the music.
+            try:
+                n = int(self.headers.get("Content-Length", 0))
+                cand = json.loads(self.rfile.read(n).decode())
+            except Exception as e:
+                return self._send(400, json.dumps({"error": f"not JSON: {e}"}))
+            song = (q.get("song") or [""])[0]
+            who = "".join(c for c in (q.get("who") or ["anon"])[0]
+                          if c.isalnum() or c in "-_")[:32] or "anon"
+            tp = os.path.join(HERE, "truth", song + ".map.json")
+            if not os.path.exists(tp):
+                return self._send(404, json.dumps(
+                    {"error": f"no answer key for '{song}' on this machine"}))
+            if not (cand.get("grid") or {}).get("period"):
+                return self._send(400, json.dumps({"error": "no grid.period in your map"}))
+            truth = json.load(open(tp))
+            res = B.run(truth, cand, quiet=True)
+            gp, cp = truth["grid"], cand["grid"]
+            d = abs(cp["phase"] - gp["phase"]) % gp["period"]
+            gerr = min(d, gp["period"] - d) * 1000.0
+            o = res["octave"]
+            flag = ("half" if o["truth_halved"] > res["beats_f"] + 0.15 else
+                    "double" if o["cand_doubled"] > res["beats_f"] + 0.15 else "ok")
+            out = {"song": song, "who": who,
+                   "beats_f": round(res["beats_f"], 4),
+                   "downbeats_f": round(res["downbeats_f"], 4),
+                   "grid_err_ms": round(gerr, 1), "octave": flag,
+                   "boundary_f": [round(x, 4) for x in res["boundary_f"]],
+                   "moments_hit": res["moments_hit"], "moments_total": res["moments_total"],
+                   "moments_false": res["moments_false"],
+                   "energy_r": (round(res["energy_r"], 4) if res["energy_r"] is not None else None),
+                   "note": "Scored against a reference you cannot read. Nothing about it is "
+                           "returned beyond these numbers, on purpose."}
+            with open(os.path.join(HERE, "SCORES.tsv"), "a") as fh:
+                if fh.tell() == 0:
+                    fh.write("when\twho\tsong\tbeats_f\tdownbeats_f\tgrid_err_ms\toctave\t"
+                             "boundary_3s\tmoments_hit\tmoments_total\tenergy_r\n")
+                fh.write(f"{time.strftime('%Y-%m-%dT%H:%M:%S')}\t{who}\t{song}\t"
+                         f"{out['beats_f']}\t{out['downbeats_f']}\t{out['grid_err_ms']}\t"
+                         f"{flag}\t{out['boundary_f'][-1] if out['boundary_f'] else ''}\t"
+                         f"{out['moments_hit']}\t{out['moments_total']}\t{out['energy_r']}\n")
+            return self._send(200, json.dumps(out))
         if u.path == "/api/upload_map":
             # A map somebody sent you, dropped straight in. It becomes a real file so
             # both the board and the rooms view see it -- keeping it only in one
