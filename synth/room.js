@@ -5,12 +5,12 @@
    a stale twin of its own 2-D fallback and every fix went into the other one.
    Both pages load this file. */
 
-function mkReader(map, layout, drive, colour){
+function mkReader(map, layout, drive, colour, ladder){
   const g = prep(map);
   return new Function("MAP","LAYOUT","CH","SP","MO","EN","BEATS","PER","PH","DUR","BAR","DBP",
-                      "DOWN","STOP_REAL","ANT","ENERGY","COLOUR", RECIPE + "\n;return frame;")(
+                      "DOWN","STOP_REAL","ANT","ENERGY","COLOUR","LADDER", RECIPE + "\n;return frame;")(
     g.MAP, layout, g.CH, g.SP, g.MO, g.EN, g.BEATS, g.PER, g.PH, g.DUR, g.BAR, g.DBP, g.DOWN, true, true,
-    drive || "medium", colour || "sunset");
+    drive || "medium", colour || "sunset", ladder || 1);
 }
 function prep(m){
   const PER=m.grid.period, PH=m.grid.phase, D=m.song.length;

@@ -859,6 +859,17 @@ class H(http.server.BaseHTTPRequestHandler):
             if u.path == "/analyse":
                 return self._send(200, open(os.path.join(HERE, "analyse.html")).read(),
                                   "text/html; charset=utf-8")
+            if u.path == "/build":
+                return self._send(200, open(os.path.join(HERE, "build.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path == "/api/learn":
+                # What was accepted, why, and the number that backed it. This is the
+                # output of the learning phase -- the show is a by-product.
+                sl = (q.get("song") or ["levels"])[0]
+                fp = os.path.join(HERE, "learning", sl + ".json")
+                if os.path.exists(fp):
+                    return self._send(200, open(fp).read())
+                return self._send(200, json.dumps({"song": sl, "steps": []}))
             if u.path == "/api/maps":
                 # NOT `song` -- that is the name of a function in this module, and a
                 # local assignment here made every later call to it unbound
@@ -935,6 +946,9 @@ class H(http.server.BaseHTTPRequestHandler):
             if u.path == "/dmx":
                 return self._send(200, open(os.path.join(HERE, "dmx.html")).read(),
                                   "text/html; charset=utf-8")
+            if u.path == "/static/recipe_steps.js":
+                return self._send(200, open(os.path.join(ROOT, "readers", "src", "recipe_steps.js")).read(),
+                                  "application/javascript")
             if u.path == "/static/recipe_beat.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "src", "recipe_beat.js")).read(),
                                   "application/javascript")
@@ -982,6 +996,19 @@ class H(http.server.BaseHTTPRequestHandler):
                 "This instance is read-only: it will score a map and record a verdict, but it "
                 "will not run jobs. Generating songs or rebuilding frames is a shell, and this "
                 "URL is shared. Do those locally."}))
+        if u.path == "/api/learn":
+            try:
+                n = int(self.headers.get("Content-Length", 0))
+                body = json.loads(self.rfile.read(n).decode())
+            except Exception as e:
+                return self._send(400, json.dumps({"error": f"not JSON: {e}"}))
+            sl = (q.get("song") or ["levels"])[0]
+            d = os.path.join(HERE, "learning"); os.makedirs(d, exist_ok=True)
+            fp = os.path.join(d, sl + ".json")
+            body["song"] = sl
+            body["updated"] = __import__("datetime").datetime.now().isoformat(timespec="seconds")
+            open(fp, "w").write(json.dumps(body, indent=1) + "\n")
+            return self._send(200, json.dumps({"ok": True, "path": os.path.relpath(fp, ROOT)}))
         if u.path == "/api/save_map":
             # Writes the held-out answer. Never on a shared instance: the reference
             # is the one file nobody but its author may change.

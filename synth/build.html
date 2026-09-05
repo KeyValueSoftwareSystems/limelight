@@ -1,0 +1,347 @@
+<title>Limelight · build</title>
+<style>
+:root{--bg:#0f1117;--pan:#161a23;--raise:#1d222e;--rule:#252b39;--rule2:#333b4c;
+      --ink:#e6e9f1;--mut:#8f98ad;--faint:#666c7e;--tung:#f0a93c;--good:#54c98a;--bad:#e8705a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.5 ui-sans-serif,system-ui,sans-serif;
+     height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--pan);
+       border-bottom:1px solid var(--rule);flex:0 0 auto}
+h1{font:600 13px ui-monospace,monospace;margin:0;letter-spacing:.06em;text-transform:uppercase;color:var(--tung)}
+select,button{background:var(--raise);color:var(--ink);border:1px solid var(--rule2);border-radius:4px;
+        padding:4px 10px;font:12px ui-monospace,monospace;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.go{background:var(--good);color:#08210f;border-color:var(--good);font-weight:700}
+button.no{background:transparent;color:var(--bad);border-color:var(--rule2)}
+main{flex:1 1 0;display:flex;min-height:0}
+#ladder{flex:0 0 268px;background:var(--pan);border-right:1px solid var(--rule);overflow:auto;padding:8px}
+.rung{padding:8px 10px;border-radius:5px;border:1px solid transparent;margin-bottom:3px;cursor:pointer}
+.rung:hover{background:var(--raise)}
+.rung.now{background:var(--raise);border-color:var(--tung)}
+.rung.done{opacity:.92}
+.rung .t{font:600 12px ui-monospace,monospace;display:flex;justify-content:space-between;gap:6px}
+.rung .d{color:var(--mut);font-size:11px;margin-top:2px;line-height:1.35}
+.tick{color:var(--good)} .lock{color:var(--faint)} .cur{color:var(--tung)}
+#work{flex:1 1 0;display:flex;flex-direction:column;min-width:0;padding:8px;gap:7px;overflow:hidden}
+.pane{background:var(--pan);border:1px solid var(--rule);border-radius:6px;display:flex;flex-direction:column;min-height:0}
+.ph{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;
+    border-bottom:1px solid var(--rule);font:11px ui-monospace,monospace;color:var(--mut);
+    letter-spacing:.05em;text-transform:uppercase;flex:0 0 auto}
+canvas{display:block;width:100%}
+#q{font-size:14px;color:var(--ink)} #q b{color:var(--tung)}
+#verdict{font:12px ui-monospace,monospace}
+.big{font-size:19px;font-weight:700}
+footer{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--pan);
+       border-top:1px solid var(--rule)}
+audio{height:30px;flex:1 1 auto}
+.note{color:var(--faint);font-size:11px}
+input[type=text]{background:var(--raise);color:var(--ink);border:1px solid var(--rule2);
+       border-radius:4px;padding:4px 8px;font:12px ui-sans-serif;flex:1 1 auto}
+</style>
+
+<header>
+  <h1>build</h1>
+  <select id="song"></select>
+  <select id="map"></select>
+  <label class="note">colour</label>
+  <select id="pal"><option>sunset</option><option>ice</option><option>neon</option><option>amber</option></select>
+  <span style="flex:1"></span>
+  <span id="stat" class="note"></span>
+</header>
+
+<main>
+  <div id="ladder"></div>
+  <div id="work">
+    <div class="pane" style="flex:0 0 auto">
+      <div class="ph"><span id="q">—</span><span id="verdict">—</span></div>
+      <canvas id="wave" style="height:96px"></canvas>
+      <canvas id="light" style="height:104px"></canvas>
+    </div>
+    <div class="pane" style="flex:1 1 0">
+      <div class="ph"><span>the rig · <span id="rigmeta"></span></span>
+        <span><button id="zoomout">−</button> <button id="zoomin">+</button></span></div>
+      <canvas id="rig" style="flex:1 1 0;min-height:0"></canvas>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <audio id="aud" controls preload="auto"></audio>
+  <input type="text" id="why" placeholder="what you saw (saved with the decision)">
+  <button class="no" id="reject">Not yet</button>
+  <button class="go" id="accept">Accept · next rung</button>
+</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const Q=new URLSearchParams(location.search);
+
+/* Seven rungs. Each one adds a single element, and carries the QUESTION it is
+   meant to answer plus a CHECK that can fail. A rung is not accepted because it
+   looks nice; it is accepted because the check passes and a human agrees. */
+const RUNGS=[
+ {n:1,name:"beats",     adds:"every beat, all five pars, flat",
+  q:"Does a flash land on <b>every</b> beat, and nothing in between?",
+  check:"how much louder the kick is under the flashes than elsewhere", pass:135, unit:"%"},
+ {n:2,name:"bar",       adds:"beat 1 brighter than beats 2-4",
+  q:"Do the <b>tall</b> flashes land where the bar starts?",
+  check:"share of section starts and moments on a downbeat", pass:80, unit:"%"},
+ {n:3,name:"position",  adds:"which par, rather than all of them",
+  q:"Does the bar <b>walk across</b> the five, and open wide on beat 1?",
+  check:"least-used par, as a share of an even split", pass:60, unit:"%"},
+ {n:4,name:"sections",  adds:"the rig gets bigger and smaller with the song",
+  q:"Does the rig <b>grow</b> where the song grows?",
+  check:"correlation of light per bar with the song's energy", pass:50, unit:"%"},
+ {n:5,name:"colour",    adds:"a profile, two colours at a time",
+  q:"Are there only <b>two colours</b>, and does white mark the downbeat?",
+  check:"distinct hues on stage (8 or fewer passes)", pass:0, unit:" hues", invert:true, limit:8},
+ {n:6,name:"accents",   adds:"the drum hits between the beats",
+  q:"Do the extra flashes sit on <b>real hits</b>, not on the grid?",
+  check:"share of all flashes still in time to a sixteenth", pass:90, unit:"%"},
+ {n:7,name:"heads",     adds:"the two moving heads come back",
+  q:"Do the heads move <b>within the motor budget</b>?",
+  check:"peak movement as a share of what the layout allows", pass:0, unit:"%", invert:true, limit:100},
+];
+
+let SONG="", MAPS={}, MAP=null, MAPKEY="", LAY=null, LAYBEAT=null, RM=null, RECIPE="", ROOMJS="";
+let STEP=1, LEARN={song:"",steps:[]}, WAVE=null, LIGHT=null, VIEW={t0:0,span:12}, PAL="sunset";
+const HZ=50;
+const dur=m=>(m.song&&m.song.length)||240;
+
+/* ---- the ladder ---------------------------------------------------------- */
+function drawLadder(){
+  $("ladder").innerHTML=RUNGS.map(r=>{
+    const rec=LEARN.steps.find(s=>s.n===r.n);
+    const st = rec&&rec.accepted ? "done" : r.n===STEP ? "now" : "";
+    const mark = rec&&rec.accepted ? '<span class="tick">accepted</span>'
+               : r.n===STEP ? '<span class="cur">now</span>'
+               : r.n<STEP ? '<span class="lock">skipped</span>' : '<span class="lock">—</span>';
+    return `<div class="rung ${st}" data-n="${r.n}">
+      <div class="t"><span>${r.n}. ${r.name}</span>${mark}</div>
+      <div class="d">${r.adds}</div></div>`}).join("");
+  [...document.querySelectorAll(".rung")].forEach(el=>
+    el.onclick=()=>{ STEP=+el.dataset.n; rebuild() });
+}
+
+/* ---- the checks, one per rung. Each returns a number and whether it passed.
+   They are computed from the frames this recipe actually produced, never from
+   the settings that produced them, so a check can genuinely fail. ---------- */
+function flashTimes(){
+  const out=[], v=LIGHT.v, mx=LIGHT.max||1;
+  for(let i=2;i<v.length-2;i++){
+    const rise=v[i]-v[i-1];
+    if(rise < mx*0.06) continue;
+    if(v[i]-v[i-2] < v[i+1]-v[i-1]) continue;
+    out.push(i/HZ - 0.5/HZ);
+  }
+  return out;
+}
+function onGridShare(){
+  const T=flashTimes(); if(!T.length) return 0;
+  const PER=MAP.grid.period, PH=MAP.grid.phase, SUB=PER/4;
+  return 100*T.filter(t=>Math.abs(t-(PH+Math.round((t-PH)/SUB)*SUB))<=0.04).length/T.length;
+}
+function runCheck(n){
+  if(!LIGHT||!MAP) return {v:0,ok:false,txt:"no render"};
+  /* Rung 1 must anchor to the RECORDING, not to the map. Measuring flashes against
+     the map's own grid is circular: shift the whole map half a beat and the flashes
+     shift with it, so the check passes on a map that is audibly late. This asks the
+     only question that cannot be gamed -- is the kick actually loud at the instant
+     the light comes on? -- by comparing the low band under the flashes against the
+     low band everywhere else. */
+  if(n===1){
+    const T=flashTimes(); if(!T.length) return {v:0,ok:false,txt:"no flashes"};
+    if(!WAVE) return {v:0,ok:false,txt:"waveform not loaded yet"};
+    const L=WAVE.low, dt=WAVE.dt;
+    const at=t=>{ const i=Math.round(t/dt); let p=0;
+      for(let j=Math.max(0,i-1);j<Math.min(L.length,i+2);j++) p=Math.max(p,L[j]); return p };
+    let hit=0; for(const t of T) hit+=at(t);
+    let all=0; for(let i=0;i<L.length;i++) all+=L[i];
+    const ratio=(hit/T.length)/(all/L.length);
+    return {v:ratio*100, ok:ratio>=1.35,
+            txt:`kick is ${ratio.toFixed(2)}x louder under the flashes than elsewhere`} }
+  /* Rung 6 measures against the map's grid, which is only safe because rung 1
+     already anchored that grid to the recording. Accepting 6 without 1 means
+     nothing. */
+  if(n===6){ const s=onGridShare();
+    return {v:s, ok:s>=RUNGS[n-1].pass, txt:`${s.toFixed(0)}% of ${flashTimes().length} flashes in time`} }
+  if(n===2){
+    const B=MAP.beats||[], D=new Set((MAP.downbeats||[]).map(x=>+x.toFixed(3)));
+    const marks=[...(MAP.chapters||[]).map(c=>c.at), ...(MAP.moments||[]).map(m=>m.at)];
+    if(!marks.length||!D.size) return {v:0,ok:false,txt:"no sections to test against"};
+    const hit=marks.filter(t=>[...D].some(d=>Math.abs(d-t)<=0.06)).length;
+    const s=100*hit/marks.length;
+    return {v:s, ok:s>=80, txt:`${hit} of ${marks.length} section starts on a downbeat`} }
+  if(n===3){
+    const use=new Array(LAY.fixtures.filter(f=>f.kind==="par").length).fill(0);
+    for(let t=VIEW.t0;t<Math.min(dur(MAP),VIEW.t0+90);t+=0.04){
+      const fr=F(t); fr.fixtures.forEach((o,i)=>{ if(i<use.length && (o.level||0)>0.25) use[i]++ }) }
+    const tot=use.reduce((a,b)=>a+b,0); if(!tot) return {v:0,ok:false,txt:"nothing lit"};
+    const even=tot/use.length, s=100*Math.min(...use)/even;
+    return {v:s, ok:s>=60, txt:`least-used par gets ${s.toFixed(0)}% of an even share`} }
+  if(n===4){
+    /* Correlating the light against the map's OWN energy field is circular -- the
+       recipe derives brightness from that field, so the answer is 1.00 whatever
+       the field says, including when it is wrong. This measures the light against
+       the RECORDING instead: the loudness envelope computed from the audio, which
+       the recipe never sees. Now a bad energy curve fails. */
+    const E=MAP.energy||[]; if(E.length<8) return {v:0,ok:false,txt:"no energy curve"};
+    if(!WAVE) return {v:0,ok:false,txt:"waveform not loaded yet"};
+    const loud=t=>{ const i=Math.round(t/WAVE.dt); let p=0;
+      for(let j=Math.max(0,i);j<Math.min(WAVE.peak.length,i+Math.round(MAP.grid.period*4/WAVE.dt));j++)
+        p+=WAVE.peak[j];
+      return p };
+    const xs=[],ys=[];
+    for(const [t] of E){ if(t>dur(MAP)-1) continue;
+      let s=0,c=0; for(let u=t;u<t+MAP.grid.period*4;u+=0.05){ const fr=F(u);
+        s+=fr.fixtures.reduce((a,o)=>a+(o.level||0),0); c++ }
+      xs.push(loud(t)); ys.push(s/Math.max(1,c)) }
+    const mx=xs.reduce((a,b)=>a+b,0)/xs.length, my=ys.reduce((a,b)=>a+b,0)/ys.length;
+    let sxy=0,sxx=0,syy=0;
+    for(let i=0;i<xs.length;i++){const a=xs[i]-mx,b=ys[i]-my; sxy+=a*b; sxx+=a*a; syy+=b*b}
+    const r=sxy/Math.sqrt(sxx*syy||1), s=100*r;
+    return {v:s, ok:s>=50, txt:`r = ${r.toFixed(2)} between light and how loud the record is`} }
+  if(n===5){
+    const H=new Set();
+    for(let t=VIEW.t0;t<Math.min(dur(MAP),VIEW.t0+90);t+=0.1)
+      for(const o of F(t).fixtures){ if((o.level||0)<0.2) continue;
+        H.add(`${Math.round((o.r||0)/26)},${Math.round((o.g||0)/26)},${Math.round((o.b||0)/26)}`) }
+    const s=H.size;
+    return {v:s, ok:s<=8, txt:`${s} distinct colours on stage (8 or fewer passes)`} }
+  if(n===7){
+    const L=(LAY.limits||{}), mp=L.max_pan_per_s||1.55, mt=L.max_tilt_per_s||1.7;
+    let worst=0, prev=null;
+    for(let t=VIEW.t0;t<Math.min(dur(MAP),VIEW.t0+60);t+=0.02){
+      const fr=F(t); const h=fr.fixtures.filter(o=>o.pan!==undefined);
+      if(prev) h.forEach((o,i)=>{ if(!prev[i]) return;
+        worst=Math.max(worst, Math.abs(o.pan-prev[i].pan)/0.02/mp, Math.abs(o.tilt-prev[i].tilt)/0.02/mt) });
+      prev=h }
+    const s=100*worst;
+    return {v:s, ok:s<=100, txt:`peak ${s.toFixed(0)}% of the motor budget`} }
+  return {v:0,ok:false,txt:"—"};
+}
+
+/* ---- render -------------------------------------------------------------- */
+let F=null;
+function rebuild(){
+  if(!RM||!MAP) return;
+  const lay = STEP>=7 ? LAY : LAYBEAT;
+  F = RM.mkReader(MAP, lay, "medium", PAL, STEP);
+  CURLAY = lay;
+  buildLight();
+  drawLadder(); drawAll();
+  $("rigmeta").textContent=`${lay.fixtures.length} fixtures · rung ${STEP} · ${r_of(STEP).adds}`;
+  refreshVerdict();
+}
+let CURLAY=null;
+const r_of=n=>RUNGS[n-1];
+/* the verdict is recomputed on its own, so a check whose evidence arrives late
+   (the waveform) is not left reading FAIL for a reason that is not the show's */
+function refreshVerdict(){
+  const r=r_of(STEP), c=runCheck(STEP);
+  $("q").innerHTML=`<b>${r.n}.</b> ${r.q}`;
+  $("verdict").innerHTML=`${c.txt} &nbsp; <span class="big" style="color:${c.ok?"var(--good)":"var(--bad)"}">${c.ok?"PASS":"FAIL"}</span>`;
+  window.__verdict={step:STEP, ok:c.ok, value:+c.v.toFixed(2), said:c.txt};
+}
+function buildLight(){
+  const D=dur(MAP), n=Math.floor(D*HZ), out=new Float32Array(n);
+  for(let i=0;i<n;i++){ let s=0;
+    for(const o of F(i/HZ).fixtures) if("level" in o && !/^fog/.test(o.id)) s+=o.level;
+    out[i]=s }
+  let mx=0; for(const v of out) if(v>mx) mx=v;
+  LIGHT={v:out,max:mx||1};
+}
+function drawAll(){ drawWave(); drawLight(); drawRig() }
+function axis(cv){ const W=cv.clientWidth,H=cv.clientHeight,d=window.devicePixelRatio||1;
+  if(cv.width!==W*d||cv.height!==H*d){cv.width=W*d;cv.height=H*d}
+  const g=cv.getContext("2d"); g.setTransform(d,0,0,d,0,0); return [g,W,H] }
+const X=(t,W)=>(t-VIEW.t0)/VIEW.span*W;
+function grid(g,W,H){
+  g.strokeStyle="rgba(230,233,241,.18)"; g.lineWidth=1;
+  for(const t of (MAP.beats||[])){ if(t<VIEW.t0||t>VIEW.t0+VIEW.span) continue;
+    g.beginPath(); g.moveTo(X(t,W),0); g.lineTo(X(t,W),H); g.stroke() }
+  g.strokeStyle="rgba(143,154,255,.8)"; g.lineWidth=1.5;
+  for(const t of (MAP.downbeats||[])){ if(t<VIEW.t0||t>VIEW.t0+VIEW.span) continue;
+    g.beginPath(); g.moveTo(X(t,W),0); g.lineTo(X(t,W),H); g.stroke() }
+}
+function drawWave(){
+  const [g,W,H]=axis($("wave")); g.fillStyle="#0a0c11"; g.fillRect(0,0,W,H);
+  if(WAVE){ const dt=WAVE.dt;
+    for(const [band,col,sc] of [["peak","rgba(150,160,190,.55)",1],["low","rgba(240,169,60,.85)",.6]]){
+      g.fillStyle=col; const A=WAVE[band]||[];
+      for(let x=0;x<W;x++){ const t=VIEW.t0+x/W*VIEW.span, i=Math.round(t/dt);
+        if(i<0||i>=A.length) continue; const h=A[i]*H*sc;
+        g.fillRect(x,(H-h)/2,1,h) } } }
+  grid(g,W,H); playhead(g,W,H);
+}
+function drawLight(){
+  const [g,W,H]=axis($("light")); g.fillStyle="#0a0c11"; g.fillRect(0,0,W,H);
+  grid(g,W,H);
+  if(LIGHT){ g.beginPath(); g.moveTo(0,H);
+    for(let x=0;x<W;x++){ const t=VIEW.t0+x/W*VIEW.span, i=Math.round(t*HZ);
+      const v=(i>=0&&i<LIGHT.v.length)?LIGHT.v[i]:0;
+      g.lineTo(x,H-2-(v/LIGHT.max)*(H-8)) }
+    g.lineTo(W,H); g.closePath(); g.fillStyle="rgba(240,169,60,.20)"; g.fill();
+    g.strokeStyle="#f0a93c"; g.lineWidth=1.4; g.stroke() }
+  playhead(g,W,H);
+}
+function playhead(g,W,H){ const t=$("aud").currentTime;
+  g.strokeStyle="#fff"; g.lineWidth=1.2; g.beginPath();
+  g.moveTo(X(t,W),0); g.lineTo(X(t,W),H); g.stroke() }
+function drawRig(){ if(RM&&CURLAY) RM.drawFixtures($("rig"), F($("aud").currentTime), CURLAY) }
+
+/* ---- the record ---------------------------------------------------------- */
+async function decide(ok){
+  const r=RUNGS[STEP-1], c=runCheck(STEP);
+  const rec={ n:r.n, name:r.name, accepted:ok, when:new Date().toISOString(),
+    map:MAPKEY, colour:PAL, adds:r.adds, question:r.q.replace(/<[^>]+>/g,""),
+    check:{ what:r.check, value:+c.v.toFixed(2), passed:c.ok, said:c.txt },
+    said_by_renjith: $("why").value.trim() || null };
+  LEARN.steps=LEARN.steps.filter(s=>s.n!==r.n).concat([rec]).sort((a,b)=>a.n-b.n);
+  const res=await fetch(`/api/learn?song=${SONG}`,{method:"POST",body:JSON.stringify(LEARN)});
+  const j=await res.json();
+  $("stat").textContent=j.error?j.error:`saved → ${j.path}`;
+  $("why").value="";
+  if(ok && STEP<7) STEP++;
+  rebuild();
+}
+$("accept").onclick=()=>decide(true);
+$("reject").onclick=()=>decide(false);
+$("zoomin").onclick=()=>{ VIEW.span=Math.max(3,VIEW.span/1.6); drawAll() };
+$("zoomout").onclick=()=>{ VIEW.span=Math.min(dur(MAP),VIEW.span*1.6); drawAll() };
+$("pal").onchange=e=>{ PAL=e.target.value; rebuild() };
+$("map").onchange=e=>{ MAPKEY=e.target.value; MAP=MAPS[MAPKEY]; rebuild() };
+$("song").onchange=e=>location.href=`/build?song=${e.target.value}`;
+
+(async()=>{
+  RECIPE=await (await fetch("/static/recipe_steps.js")).text();
+  ROOMJS=await (await fetch("/static/room.js")).text();
+  RM=new Function("RECIPE",ROOMJS+"\n;return {mkReader,prep,drawRoom,drawFixtures};")(RECIPE);
+  SONG=Q.get("song")||"levels";
+  const sg=await (await fetch("/api/song?song="+SONG)).json();
+  LAY=(sg.layouts||{}).small; LAYBEAT=(sg.layouts||{}).beat||LAY;
+  const G=await (await fetch("/api/maps?song="+SONG)).json();
+  MAPS=G.maps; SONG=G.song;
+  $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>
+    `<option value="${k}"${k===SONG?" selected":""}>${v}</option>`).join("");
+  MAPKEY = Q.get("map") && MAPS[Q.get("map")] ? Q.get("map")
+         : MAPS.answer ? "answer" : Object.keys(MAPS)[0];
+  $("map").innerHTML=Object.keys(MAPS).map(k=>
+    `<option${k===MAPKEY?" selected":""}>${k}</option>`).join("");
+  MAP=MAPS[MAPKEY];
+  LEARN=await (await fetch(`/api/learn?song=${SONG}`)).json();
+  if(!LEARN.steps) LEARN={song:SONG,steps:[]};
+  const done=LEARN.steps.filter(s=>s.accepted).map(s=>s.n);
+  STEP=Math.min(7,(done.length?Math.max(...done):0)+1);
+  const qs=parseInt(Q.get("step")||"",10);        // a rung is linkable
+  if(qs>=1&&qs<=7) STEP=qs;
+  $("aud").src=`/api/audio?song=${SONG}`;
+  fetch(`/api/wave?song=${SONG}`).then(r=>r.json()).then(w=>{
+    if(!w.error){ WAVE=w; drawAll(); refreshVerdict() } });
+  VIEW={t0:0,span:12};
+  rebuild();
+  (function loop(){ const t=$("aud").currentTime;
+    if(!$("aud").paused){ VIEW.t0=Math.max(0,t-VIEW.span*0.35) }
+    drawAll(); requestAnimationFrame(loop) })();
+})();
+</script>
