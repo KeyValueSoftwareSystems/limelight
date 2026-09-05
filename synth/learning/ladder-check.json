@@ -1,0 +1,71 @@
+{
+ "when": "2026-09-05T21:00:12.308Z",
+ "pass": 7,
+ "fail": 1,
+ "rows": [
+  {
+   "slug": "the-nights",
+   "n": 1,
+   "name": "beats",
+   "ok": true,
+   "v": 181.7949543947826,
+   "txt": "the drum is 1.82 times louder under the flashes than elsewhere"
+  },
+  {
+   "slug": "the-nights",
+   "n": 2,
+   "name": "the bar",
+   "ok": true,
+   "v": 87.5,
+   "txt": "14 of 16 new parts start on a blue line"
+  },
+  {
+   "slug": "the-nights",
+   "n": 3,
+   "name": "position",
+   "ok": true,
+   "v": 77.02702702702703,
+   "txt": "the least-used lamp gets 77% of an even share"
+  },
+  {
+   "slug": "the-nights",
+   "n": 4,
+   "name": "breathing",
+   "ok": true,
+   "v": -0.6741755874657404,
+   "txt": "this song does not do it, and the lamps do not either"
+  },
+  {
+   "slug": "the-nights",
+   "n": 5,
+   "name": "loud and quiet",
+   "ok": false,
+   "v": 42.89398587582243,
+   "txt": "the light follows how loud the song is, 0.43 out of a possible 1.00"
+  },
+  {
+   "slug": "the-nights",
+   "n": 6,
+   "name": "colour",
+   "ok": true,
+   "v": 3,
+   "txt": "3 different colours on stage, counting white as one"
+  },
+  {
+   "slug": "the-nights",
+   "n": 7,
+   "name": "drum hits",
+   "ok": true,
+   "v": 94.00749063670412,
+   "txt": "94% of 267 flashes are in time"
+  },
+  {
+   "slug": "the-nights",
+   "n": 8,
+   "name": "moving lamps",
+   "ok": true,
+   "v": 95.88235294117669,
+   "txt": "the fastest movement is 96% of what the rig allows"
+  }
+ ]
+}

@@ -971,6 +971,9 @@ class H(http.server.BaseHTTPRequestHandler):
             if u.path == "/dmx":
                 return self._send(200, open(os.path.join(HERE, "dmx.html")).read(),
                                   "text/html; charset=utf-8")
+            if u.path == "/static/checks.js":
+                return self._send(200, open(os.path.join(ROOT, "readers", "src", "checks.js")).read(),
+                                  "application/javascript")
             if u.path == "/static/recipe_steps.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "src", "recipe_steps.js")).read(),
                                   "application/javascript")
