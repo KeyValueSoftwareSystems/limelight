@@ -51,6 +51,7 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
   <select id="drive"><option>low</option><option selected>medium</option><option>high</option></select>
   <label for="palette">colour</label>
   <select id="palette"><option>sunset</option><option>ice</option><option>neon</option><option>amber</option></select>
+  <button id="beatonly">beats only</button>
   <button id="tool-sec" class="on">sections</button>
   <button id="tool-mom">moments</button>
   <button class="go" id="save">Save</button>
@@ -124,10 +125,28 @@ let G=null, SONG="", MINE=null, OTHER=null, mineKey="", otherKey="", tool="secti
 let VIEW={t0:0, span:0}, FOLLOW=true, drag=null;
 // the room is rebuilt from MINE on every edit, so a boundary moved on the
 // timeline changes the lights immediately -- that is the loop worth having
-let RECIPE="", RM=null, LAY=null, F1=null, F2=null, rebuildTimer=null, scoreTimer=null;
+let RECIPE="", RECIPE_BEAT="", ROOMJS="", LAYOUTS={}, BEATONLY=false, RM=null, LAY=null, F1=null, F2=null, rebuildTimer=null, scoreTimer=null;
 // fixtures by default: this panel is for checking the output is what you meant,
 // not for imagining what the room looks like
 let VIEWMODE="fixtures";
+const mkRM=r=>new Function("RECIPE",
+  ROOMJS+"\n;return {mkReader,prep,drawRoom,drawFixtures,frameDiff,pearson,totalLight};")(r);
+/* "beats only" throws the show away and leaves the one question underneath it:
+   on a beat, all five pars go to full. No chase, no colour, no build, no heads.
+   Six things were moving at once, and only one of them was the beat, so a late
+   look could not be traced to what was late. Here a beat that looks wrong is the
+   grid, not the recipe. */
+const pickLayout=()=> BEATONLY
+  ? (LAYOUTS.beat || LAYOUTS.small || Object.values(LAYOUTS)[0])
+  : (LAYOUTS.small || LAYOUTS.club || Object.values(LAYOUTS)[0]);
+function setBeatOnly(on){
+  BEATONLY=on; RM=mkRM(on?RECIPE_BEAT:RECIPE); LAY=pickLayout();
+  const b=$("beatonly"); if(b){ b.classList.toggle("on",on);
+    b.textContent = on ? "beats only ✓" : "beats only" }
+  ["drive","palette"].forEach(id=>{ const e=$(id); if(e) e.disabled=on });
+  if(VIEWMODE==="room"){ VIEWMODE="fixtures"; $("viewtog").textContent="room view" }
+  rebuildShow();
+}
 let BIG=false;
 let PALETTE = new URLSearchParams(location.search).get("pal")
            || localStorage.getItem("limelight.palette") || "sunset";
@@ -164,7 +183,10 @@ function measureSync(){
     const rise=v[i]-v[i-1];
     if(rise < LIGHT.max*0.06) continue;
     if(v[i]-v[i-2] < v[i+1]-v[i-1]) continue;     // keep the steepest point of a rise
-    const t=i/hz;
+    /* a rise found at sample i happened somewhere inside the 20 ms before it, so
+       the midpoint of that interval is the estimate -- without this every number
+       on this line carries a fixed half-sample of fake lateness */
+    const t=i/hz - 0.5/hz;
     offs.push(Math.abs(t-(PH+Math.round((t-PH)/SUB)*SUB))*1000);
     let lo=0,hi=B.length-1,best=0;
     while(lo<=hi){const mi=(lo+hi)>>1; if(B[mi]<=t){best=mi;lo=mi+1}else hi=mi-1}
@@ -450,7 +472,12 @@ function rescore(){
   $("lflash").textContent=r.toFixed(1)+"%";
   $("lflash").style.color = r>97?"var(--good)":r<60?"var(--bad)":"var(--tung)";
   $("lbad").textContent=bad.toFixed(0)+"s / "+D.toFixed(0)+"s";
-  $("lnote").textContent="recalculated on every edit";
+  /* beats-only reads nothing from the map but the grid, so two maps that agree
+     on tempo and phase score 100% however far apart the rest of them is. Saying
+     so stops a meaningless perfect score being read as a real one. */
+  $("lnote").textContent = BEATONLY
+    ? "beats only: this compares the two grids and nothing else"
+    : "recalculated on every edit";
 }
 $("save").onclick=async()=>{
   const to = mineKey==="answer" ? "truth" : mineKey;
@@ -552,10 +579,13 @@ function drawRoom(){
  try{
   const Q=new URLSearchParams(location.search);
   RECIPE=await (await fetch("/static/recipe4.js")).text();
-  const rj=await (await fetch("/static/room.js")).text();
-  RM=new Function("RECIPE", rj+"\n;return {mkReader,prep,drawRoom,drawFixtures,frameDiff,pearson,totalLight};")(RECIPE);
+  RECIPE_BEAT=await (await fetch("/static/recipe_beat.js")).text();
+  ROOMJS=await (await fetch("/static/room.js")).text();
+  RM=mkRM(RECIPE);
   const sg=await (await fetch("/api/song?song="+encodeURIComponent(Q.get("song")||""))).json();
-  LAY=(sg.layouts||{}).small||(sg.layouts||{}).club||Object.values(sg.layouts||{})[0];
+  LAYOUTS=sg.layouts||{};
+  if(new URLSearchParams(location.search).get("beat")==="1") BEATONLY=true;
+  LAY=pickLayout();
   G=await (await fetch("/api/maps?song="+encodeURIComponent(Q.get("song")||""))).json();
   SONG=G.song;
   $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>
@@ -614,6 +644,8 @@ function drawRoom(){
   $("viewtog").onclick=()=>{ VIEWMODE = VIEWMODE==="fixtures" ? "room" : "fixtures";
     $("viewtog").textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view" };
   $("palette").value=PALETTE;
+  $("beatonly").onclick=()=>setBeatOnly(!BEATONLY);
+  if(BEATONLY) setBeatOnly(true);
   $("palette").onchange=e=>{ PALETTE=e.target.value;
     localStorage.setItem("limelight.palette",PALETTE); rebuildShow() };
   /* The fixtures get the whole window on demand. Judging a colour or a chase in

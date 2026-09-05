@@ -337,6 +337,8 @@ def song(which=None):
     # the rig we actually own goes first, because it is the one being tuned
     small = os.path.join(ROOT, "readers", "lights", "small", "layout.json")
     if os.path.exists(small): lays["small"] = json.load(open(small))
+    beat = os.path.join(ROOT, "readers", "lights", "beat", "layout.json")
+    if os.path.exists(beat): lays["beat"] = json.load(open(beat))
     for name, f in (("club", "layout.json"), ("venue", "venue.json"), ("the-grind", "grind.json")):
         p = os.path.join(NIGHTS, f)
         if os.path.exists(p): lays[name] = json.load(open(p))
@@ -933,6 +935,9 @@ class H(http.server.BaseHTTPRequestHandler):
             if u.path == "/dmx":
                 return self._send(200, open(os.path.join(HERE, "dmx.html")).read(),
                                   "text/html; charset=utf-8")
+            if u.path == "/static/recipe_beat.js":
+                return self._send(200, open(os.path.join(ROOT, "readers", "src", "recipe_beat.js")).read(),
+                                  "application/javascript")
             if u.path == "/static/recipe4.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "src", "recipe4.js")).read(),
                                   "text/plain; charset=utf-8")

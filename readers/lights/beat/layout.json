@@ -1,0 +1,136 @@
+{
+ "layout": "0.2",
+ "room": "beat",
+ "note": "Five pars and nothing else. Built to answer one question -- do the lights land on the beat -- with every other variable removed, so nothing can hide a timing error or take credit for one.",
+ "size_m": {
+  "w": 6.0,
+  "d": 5.0,
+  "h": 3.4
+ },
+ "limits": {
+  "max_strobe_hz": 4.0
+ },
+ "zones": [
+  {
+   "name": "dancefloor",
+   "fixtures": [
+    "par_1",
+    "par_2",
+    "par_3",
+    "par_4",
+    "par_5",
+    "par_6",
+    "strip_1",
+    "head_5",
+    "head_6",
+    "head_7",
+    "head_8",
+    "blind_1",
+    "blind_2"
+   ]
+  },
+  {
+   "name": "backwall",
+   "fixtures": [
+    "up_1",
+    "up_2",
+    "up_3",
+    "up_4"
+   ]
+  },
+  {
+   "name": "stage",
+   "fixtures": [
+    "head_1",
+    "head_2",
+    "head_3",
+    "head_4",
+    "strobe_1",
+    "strobe_2",
+    "strip_2",
+    "fog_1"
+   ]
+  },
+  {
+   "name": "ceiling",
+   "fixtures": []
+  }
+ ],
+ "fixtures": [
+  {
+   "id": "par_1",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    0.7,
+    2.85,
+    4.6
+   ],
+   "beam_deg": 26,
+   "zone": "front"
+  },
+  {
+   "id": "par_2",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.95,
+    2.85,
+    4.6
+   ],
+   "beam_deg": 26,
+   "zone": "front"
+  },
+  {
+   "id": "par_3",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    3.0,
+    2.85,
+    4.6
+   ],
+   "beam_deg": 26,
+   "zone": "front"
+  },
+  {
+   "id": "par_4",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    4.05,
+    2.85,
+    4.6
+   ],
+   "beam_deg": 26,
+   "zone": "front"
+  },
+  {
+   "id": "par_5",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    5.3,
+    2.85,
+    4.6
+   ],
+   "beam_deg": 26,
+   "zone": "front"
+  }
+ ]
+}
