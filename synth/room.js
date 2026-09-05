@@ -165,9 +165,11 @@ function drawRoom(cv, fr, layout){
   // the bodies of the fixtures, so an unlit rig is still visible
   for(const f of fx){
     if(f.kind==="fog") continue;
-    const o = by[f.id], px = sx(f.at[0]), py = sy(f.at[1]);
-    g.fillStyle = lit(o) ? "#0c0e14" : "#151924";
-    g.beginPath(); g.arc(px,py,Math.max(1.2,(f.kind==="head"?4.6:3.6)*Math.max(0.5,gk)),0,6.2832); g.fill();
+    const o = by[f.id];
+    if(lit(o)) continue;
+    const px = sx(f.at[0]), py = sy(f.at[1]);
+    g.fillStyle = "#141824";
+    g.beginPath(); g.arc(px,py,Math.max(1.2,(f.kind==="head"?3.2:2.4)*Math.max(0.5,gk)),0,6.2832); g.fill();
   }
 }
 
