@@ -24,10 +24,14 @@
 const DECAY = Math.max(0.055, PER * 0.22);
 const WHITE = [255, 250, 242];
 
+/* Reads the map's beat list, NOT tempo and phase. That is the whole point: the
+   file is the control surface, so deleting an entry removes a flash and moving
+   one moves it. Deriving the beats from a formula here would silently ignore
+   every hand edit. */
 function frame(t){
-  const k = Math.floor((t - PH) / PER);
-  const age = t - (PH + k * PER);
-  const lv = (k < 0 || age < 0) ? 0 : Math.exp(-age / DECAY);
+  let lo = 0, hi = BEATS.length - 1, k = -1;
+  while(lo <= hi){ const mi = (lo + hi) >> 1; if(BEATS[mi] <= t){ k = mi; lo = mi + 1 } else hi = mi - 1 }
+  const lv = k < 0 ? 0 : Math.exp(-(t - BEATS[k]) / DECAY);
 
   const F = [];
   for(const f of LAYOUT.fixtures){

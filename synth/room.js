@@ -14,7 +14,13 @@ function mkReader(map, layout, drive, colour){
 }
 function prep(m){
   const PER=m.grid.period, PH=m.grid.phase, D=m.song.length;
-  const BEATS=[]; for(let t=PH;t<D;t+=PER) BEATS.push(+t.toFixed(3));
+  /* The file's beat list wins. This used to regenerate the beats from tempo and
+     phase and throw away whatever the map actually said, which meant a map could
+     not express a beat anywhere except where the formula put it -- and editing
+     the list by hand did nothing at all. A map that carries beats is obeyed; one
+     that does not still gets the formula. */
+  const BEATS = (m.beats && m.beats.length) ? m.beats.slice().sort((a,b)=>a-b)
+              : (()=>{ const b=[]; for(let t=PH;t<D;t+=PER) b.push(+t.toFixed(3)); return b })();
   return {MAP:{accents:m.accents,obs:m.observations,sections:(m.sections&&m.sections.entries)||[],stems:m.stems},
     CH:(m.chapters||[]).map(c=>[c.at,c.name]),
     SP:(m.spans||[]).map(s=>({kind:s.kind,from:s.from,to:s.to,rise:s.rise})),
