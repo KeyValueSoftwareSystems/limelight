@@ -51,7 +51,12 @@ tr.me td:first-child{color:var(--tung)}
 <div class="card">
   <div class="pickrow">
     <select id="a"></select><span class="vs">against</span><select id="b"></select>
+    <input type="file" id="drop" accept=".json,application/json" multiple hidden>
+    <button id="dropbtn" style="background:var(--raise);color:var(--ink);
+      border:1px dashed var(--rule2);border-radius:4px;padding:11px 14px;font-size:14px;
+      cursor:pointer;font-family:ui-monospace,monospace">＋ import a map file</button>
   </div>
+  <p class="note" id="imported"></p>
   <iframe id="show" src="" title="the show"
     style="width:100%;height:470px;border:1px solid var(--rule);border-radius:4px;
            margin:16px 0 0;background:#07080c"></iframe>
@@ -127,5 +132,26 @@ for(const [id,said] of [["vA","left"],["vT","tie"],["vB","right"]])
   $("said").textContent=j.error?j.error:"recorded — "+$("a").value+" vs "+$("b").value+": "+said;
   load();
  };
+$("dropbtn").onclick=()=>$("drop").click();
+$("drop").onchange=async e=>{
+  const out=[];
+  for(const f of e.target.files){
+    // the name decides whose it is: levels.amal.map.json or amal.json -> amal
+    const stem=f.name.replace(/\.map\.json$|\.json$/,"");
+    const parts=stem.split(".");
+    const who=(parts.length>1?parts[parts.length-1]:stem).toLowerCase();
+    try{
+      const text=await f.text();
+      JSON.parse(text);
+      const r=await fetch(`/api/upload_map?song=${SONG}&who=${encodeURIComponent(who)}`,
+        {method:"POST",body:text});
+      const j=await r.json();
+      out.push(j.error?`${f.name}: ${j.error}`:`${f.name} → ${j.path}`);
+    }catch(err){ out.push(`${f.name}: ${err.message}`) }
+  }
+  $("imported").textContent=out.join("   ·   ");
+  e.target.value="";
+  load();
+};
 load(); setInterval(load,15000);
 </script></body></html>

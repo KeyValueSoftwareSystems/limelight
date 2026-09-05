@@ -860,6 +860,27 @@ class H(http.server.BaseHTTPRequestHandler):
                 "This instance is read-only. It is shared beyond one machine, and an endpoint "
                 "that runs a job is a remote shell however friendly the button looks. "
                 "Run it locally to generate, score or rebuild."}))
+        if u.path == "/api/upload_map":
+            # A map somebody sent you, dropped straight in. It becomes a real file so
+            # both the board and the rooms view see it -- keeping it only in one
+            # browser tab is why the button was invisible from the other page.
+            try:
+                n = int(self.headers.get("Content-Length", 0))
+                m = json.loads(self.rfile.read(n).decode())
+            except Exception as e:
+                return self._send(400, json.dumps({"error": f"not JSON: {e}"}))
+            if not isinstance(m, dict) or not (m.get("grid") or {}).get("period"):
+                return self._send(400, json.dumps(
+                    {"error": "no grid.period — that does not look like a map file"}))
+            song = (q.get("song") or ["unknown"])[0]
+            who = (q.get("who") or ["dropped"])[0]
+            safe = "".join(c for c in who if c.isalnum() or c in "-_")[:32] or "dropped"
+            d = os.path.join(HERE, "maps", safe)
+            os.makedirs(d, exist_ok=True)
+            path = os.path.join(d, f"{song}.map.json")
+            json.dump(m, open(path, "w"), indent=1)
+            return self._send(200, json.dumps({"ok": True, "who": safe,
+                                               "path": os.path.relpath(path, ROOT)}))
         if u.path == "/api/verdict":
             p = {k: v[0] for k, v in q.items()}
             with open(os.path.join(HERE, "VERDICTS.tsv"), "a") as fh:
