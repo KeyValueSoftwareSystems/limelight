@@ -496,8 +496,9 @@ function arrayGate(G, t, e, L, n){
   const cov = (top<=0||top>=1) ? top : cl(0.10 + (top-0.10)*(0.18+0.82*e), 0.08, 1);
   if(cov >= 1) return 1;
   if(cov <= 0) return 0;
-  const bars = (L==='drop') ? 2 : 4;
-  const ph = (t - PH) / (BAR*bars);
+  const cyc = {drop:0.25, build:0.5, verse:0.5, quiet:2, idle:2, outro:2, spotlight:2}[L];
+  const bars = (cyc===undefined?1:cyc) * (1.7 - 0.9*e);
+  const ph = (t - PH) / (BAR*Math.max(0.12, bars));
   const fx = (n > ARRAY_MIN) ? Math.abs(G.xn - 0.5)*2 : G.xn;
   const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(fx*1.2 + G.yn*0.6 - ph));
   const soft = 0.16 + 0.22*e;
