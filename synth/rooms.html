@@ -332,7 +332,7 @@ function tickOnce(){
 function rebuild(){
   const dmg=$("dmg").value, lay=LAYOUTS[$("lay").value];
   const cand=G.candidates||{};
-  const d=DAMAGE.find(x=>x.id===dmg);
+  const d=DAMAGE.find(x=>x.id===dmg) || DAMAGE.find(x=>x.id==="none");
   const lname=cand[$("left").value]||"authored answer";
   $("n1").textContent=lname;
   if(cand[dmg]){
@@ -388,7 +388,7 @@ function rebuild(){
   $("left").innerHTML=candOpts;
   $("left").value=Q.get("left")||"authored";
   $("left").onchange=rebuild;
-  $("dmg").innerHTML=(Object.keys(cand).length>1
+  $("dmg").innerHTML=(Object.keys(cand).length
       ? '<optgroup label="someone\'s map">'+candOpts+'</optgroup>' : "")
     +'<optgroup label="a deliberate mistake">'
     +DAMAGE.map(d=>`<option value="${d.id}"${d.id===Q.get("d")?" selected":""}>${d.name}</option>`).join("")

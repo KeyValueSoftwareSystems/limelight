@@ -52,7 +52,10 @@ tr.me td:first-child{color:var(--tung)}
   <div class="pickrow">
     <select id="a"></select><span class="vs">against</span><select id="b"></select>
   </div>
-  <a class="watch" id="watch" href="#">▶ Watch them side by side</a>
+  <iframe id="show" src="" title="the show"
+    style="width:100%;height:420px;border:1px solid var(--rule);border-radius:4px;
+           margin:16px 0 0;background:#07080c"></iframe>
+  <a class="watch" id="watch" href="#" target="_blank">▶ Open it full size</a>
   <div class="judge">
     <button id="vA">← left is closer</button>
     <button id="vT" class="tie">same</button>
@@ -107,7 +110,13 @@ async function load(){
      <td class="n">${r.mean_f}</td><td class="n" style="color:var(--faint)">${r.when}</td></tr>`).join("")
     :'<tr><td colspan="4" style="color:var(--faint)">nobody has run it yet</td></tr>')+"</tbody>";
 }
-function upd(){ $("watch").href=`/rooms?song=${SONG}&left=${$("a").value}&d=${$("b").value}` }
+function upd(){
+  const u=`/rooms?song=${SONG}&left=${$("a").value}&d=${$("b").value}`;
+  $("watch").href=u;
+  // show it here rather than only linking to it -- "watch them side by side" was
+  // a link to a page nobody clicked, so the board looked empty
+  if($("show").dataset.u!==u){ $("show").dataset.u=u; $("show").src=u }
+}
 $("a").onchange=upd; $("b").onchange=upd;
 for(const [id,said] of [["vA","left"],["vT","tie"],["vB","right"]])
  $(id).onclick=async()=>{
