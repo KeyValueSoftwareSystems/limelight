@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MusicState",
+  "type": "object",
+  "required": ["musicstate_version", "source", "meta", "frames", "beats",
+               "confidence_by_field", "provenance"],
+  "properties": {
+    "musicstate_version": {"type": "string"},
+    "source": {
+      "type": "object",
+      "required": ["path", "sha1", "duration_s", "sample_rate"],
+      "properties": {
+        "path": {"type": "string"},
+        "sha1": {"type": "string"},
+        "duration_s": {"type": "number"},
+        "sample_rate": {"type": "integer"}
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": ["duration_s"],
+      "properties": {
+        "duration_s": {"type": "number"},
+        "tempo_bpm": {"type": ["number", "null"]},
+        "key": {"type": ["string", "null"]},
+        "mode": {"type": ["string", "null"]},
+        "time_signature": {"type": ["string", "null"]}
+      }
+    },
+    "frames": {
+      "type": "object",
+      "required": ["hop_s", "n", "rms", "onset", "bands"],
+      "properties": {
+        "hop_s": {"type": "number"},
+        "t0": {"type": "number"},
+        "n": {"type": "integer"},
+        "rms": {"type": "array", "items": {"type": "number"}},
+        "onset": {"type": "array", "items": {"type": "number"}},
+        "bands": {
+          "type": "object",
+          "required": ["low", "mid", "high"],
+          "properties": {
+            "low": {"type": "array", "items": {"type": "number"}},
+            "mid": {"type": "array", "items": {"type": "number"}},
+            "high": {"type": "array", "items": {"type": "number"}}
+          }
+        }
+      }
+    },
+    "beats": {"type": "array", "items": {"type": "number"}},
+    "downbeats": {"type": "array", "items": {"type": "number"}},
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["t0", "t1", "label"],
+        "properties": {
+          "t0": {"type": "number"},
+          "t1": {"type": "number"},
+          "label": {"type": "string"},
+          "energy": {"type": ["number", "null"]},
+          "conf": {"type": "number"}
+        }
+      }
+    },
+    "energy": {
+      "type": "array",
+      "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["t", "type"],
+        "properties": {
+          "t": {"type": "number"},
+          "type": {"type": "string"},
+          "conf": {"type": "number"}
+        }
+      }
+    },
+    "semantic": {"type": "object", "required": ["status"]},
+    "embedding": {"type": "object", "required": ["status"]},
+    "confidence_by_field": {"type": "object"},
+    "provenance": {
+      "type": "object",
+      "required": ["tool", "analyzers"],
+      "properties": {
+        "tool": {"type": "string"},
+        "built_at": {"type": "string"},
+        "analyzers": {"type": "array", "items": {"type": "object"}}
+      }
+    }
+  }
+}
