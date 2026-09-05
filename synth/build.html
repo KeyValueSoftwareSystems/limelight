@@ -267,7 +267,7 @@ async function decide(ok){
   const j=await res.json();
   $("stat").textContent=j.error?j.error:`saved → ${j.path}`;
   $("why").value="";
-  if(ok && STEP<15) STEP++;
+  if(ok && STEP<16) STEP++;
   rebuild();
 }
 $("accept").onclick=()=>decide(true);
@@ -306,9 +306,9 @@ $("song").onchange=e=>location.href=`/build?song=${e.target.value}`;
   if(!LEARN.steps) LEARN={song:SONG,steps:[]};
   const done=LEARN.steps.filter(s=>s.accepted&&RUNGS.some(r=>r.name===s.name))
                         .map(s=>RUNGS.find(r=>r.name===s.name).n);
-  STEP=Math.min(15,(done.length?Math.max(...done):0)+1);
+  STEP=Math.min(16,(done.length?Math.max(...done):0)+1);
   const qs=parseInt(Q.get("step")||"",10);        // a rung is linkable
-  if(qs>=1&&qs<=15) STEP=qs;
+  if(qs>=1&&qs<=16) STEP=qs;
   $("aud").src=`/api/audio?song=${SONG}`;
   // ?t= opens on a moment, so a link can point at the drop rather than the intro
   const qt=parseFloat(Q.get("t")||"");

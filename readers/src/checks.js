@@ -104,6 +104,13 @@ const RUNGS=[
   bad:"every lamp rising and falling together, so the rig is one animal",
   fix:"this song has no instrument breakdown. Run synth/enrich.py on it.",
   check:"how alike the fixture groups behave -- lower is better", pass:0, limit:70},
+ {n:16,name:"light and dark", adds:"whole sections go dark, and the screen with them",
+  q:"Does the rig actually <b>go out</b>, or is it on all song?",
+  look:"the breaks and the quiet parts, and the wall behind",
+  good:"whole sections near black, the screen off, then the next part arriving",
+  bad:"always lit, only brighter and dimmer, and a wall that never goes out",
+  fix:"the map has no breaks or quiet moments marked, so there is nothing to go dark for.",
+  check:"how much of the song the rig is nearly out", pass:8},
 ];
 
 /* The rung checks, in one place.
@@ -407,6 +414,32 @@ function makeChecks(C){
      the groups against each other. Identical behaviour scores 1.00 and fails; groups
      doing genuinely different jobs land far below it. This is the only check here
      that wants a LOW number. */
+  /* Renjith: we do not need to keep them on all the time. A rig that never goes
+     out has nothing to give you, and no amount of level-riding imitates a group
+     being switched off. Measured as the share of the song that is near black --
+     and it can fail in BOTH directions, because a show that is dark half the time
+     is not restraint, it is a broken rig. */
+  if(n===16){
+    /* Dark relative to THIS show's own peak, not to a per-fixture constant. A
+       fixed threshold called a 55-fixture rig at a quarter brightness "out",
+       which is dim, not dark, and made a reasonable show read as 69% black. */
+    const fx=(LAY.fixtures||[]).filter(f=>!/^fog|^co2/.test(f.id));
+    const tots=[];
+    for(let t=A;t<Math.min(B2,A+150);t+=0.05){
+      const by={}; for(const o of F(t).fixtures) by[o.id]=o;
+      tots.push(fx.reduce((a,f)=>a+((by[f.id]||{}).level||0),0));
+    }
+    if(!tots.length) return {v:0,ok:false,na:true,txt:"nothing rendered here"};
+    const mx=Math.max(...tots), mn=Math.min(...tots);
+    const dark=tots.filter(v=>v < mx*0.05).length, n2=tots.length;
+    if(!n2) return {v:0,ok:false,na:true,txt:"nothing rendered here"};
+    const pct=100*dark/n2;
+    if(pct < 4) return {v:pct, ok:false,
+      txt:`the rig is never out -- it stays lit all song, dimmest ${mn.toFixed(1)} of ${mx.toFixed(0)}`};
+    if(pct > 55) return {v:pct, ok:false,
+      txt:`the rig is out ${pct.toFixed(0)}% of the song, which is a dark show rather than a restrained one`};
+    return {v:pct, ok:true,
+      txt:`the rig goes out for ${pct.toFixed(0)}% of the song, dimmest ${mn.toFixed(2)} of ${mx.toFixed(0)}`} }
   if(n===15){
     const I=(MAP.observations||{}).instruments;
     if(!I||!I.parts) return {v:0,ok:false,na:true,txt:"this song has no instrument breakdown yet"};

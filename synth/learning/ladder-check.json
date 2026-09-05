@@ -1,6 +1,6 @@
 {
- "when": "2026-09-05T23:31:04.703Z",
- "pass": 15,
+ "when": "2026-09-05T23:44:35.381Z",
+ "pass": 16,
  "fail": 0,
  "skip": 0,
  "rows": [
@@ -138,6 +138,15 @@
    "na": false,
    "v": 55.5532187519204,
    "txt": "the groups behave 56% alike, and under 70% is different enough"
+  },
+  {
+   "slug": "levels",
+   "n": 16,
+   "name": "light and dark",
+   "ok": true,
+   "na": false,
+   "v": 43.585471509496834,
+   "txt": "the rig goes out for 44% of the song, dimmest 0.01 of 5"
   }
  ]
 }

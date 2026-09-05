@@ -63,7 +63,7 @@ const E = ({
   high:   { lvl:1.16, bed:1.14, spread:0.80, flash:1.22 },
 }[DRIVE]) || { lvl:1, bed:1, spread:1, flash:1 };
 
-const STEP = (function(){ try { return Math.max(1, Math.min(15, +LADDER || 1)) } catch(e) { return 1 } })();
+const STEP = (function(){ try { return Math.max(1, Math.min(16, +LADDER || 1)) } catch(e) { return 1 } })();
 
 /* ---- one rung on its own -------------------------------------------------
    The ladder is cumulative, so rung 9 means rungs 1 to 9 all running at once.
@@ -490,6 +490,77 @@ function presetOf(cue, job, i, n){
   return (HPOS[list[cue.idx % list.length]] || HPOS.home)(i, n);
 }
 
+/* ---- the look: what exists at all, section by section ----------------------
+   Everything so far has been always ON, only brighter or dimmer, and a rig that
+   never goes out has nothing to give you. Darkness is an instrument. A break that
+   drops to almost nothing makes the next verse arrive; a quiet section with the
+   screen black and two lamps on makes the room look at the singer.
+
+   So each section gets a LOOK: how much of each group exists, what the screen is
+   doing, and how dark the room is. Groups are switched off, not merely dimmed --
+   the front truss can be gone entirely for eight bars, which is a thing no amount
+   of level-riding can imitate.
+
+   Sections also ESCALATE. The same look is thinner the first time you hear it and
+   full by the third, because a show that spends everything in verse one has
+   nothing left. */
+const LOOK = {
+  intro:  {pars:0.30, heads:0.00, strips:0.55, screen:"dim",    floor:0.10},
+  verse:  {pars:0.80, heads:0.50, strips:0.65, screen:"colour", floor:0.55},
+  break:  {pars:0.20, heads:0.26, strips:0.30, screen:"black",  floor:0.10},
+  build:  {pars:1.00, heads:0.85, strips:1.00, screen:"pulse",  floor:0.60},
+  drop:   {pars:1.00, heads:1.00, strips:1.00, screen:"hot",    floor:1.00},
+  quiet:  {pars:0.12, heads:0.00, strips:0.22, screen:"black",  floor:0.05},
+  stop:   {pars:0.00, heads:0.00, strips:0.00, screen:"black",  floor:0.00},
+  outro:  {pars:0.35, heads:0.18, strips:0.45, screen:"dim",    floor:0.30},
+};
+function sectionAt(t){
+  const S = MAP.sections || [];
+  let cur = null;
+  for(const e of S){ if(e.at <= t) cur = e; else break }
+  return cur;
+}
+function lookAt(t){
+  const name = CH.length ? CH[chIdx(t)][1] : "verse";
+  const L0 = LOOK[name] || LOOK.verse;
+  const sec = sectionAt(t);
+  /* the escalation: first time through, hold a third of it back */
+  const rep = sec && sec.repeat ? Math.min(3, sec.repeat) : 3;
+  const grow = /intro|outro|stop/.test(name) ? 1 : (0.72 + 0.13 * rep);
+
+  /* a build is not one look, it is a sequence: pars first, then the heads join,
+     then the strips, and the strobes only at the very top */
+  const B = buildAt(t);
+  let pars = L0.pars, heads = L0.heads, strips = L0.strips;
+  if(B){
+    pars   = 0.45 + 0.55 * ss(0.00, 0.30, B.x);
+    heads  = 0.10 + 0.90 * ss(0.25, 0.65, B.x);
+    strips = 0.20 + 0.80 * ss(0.45, 0.95, B.x);
+  }
+  /* and a transition is an EVENT: a bump of near-black at every section start, so
+     one part of the song ends rather than merely stopping */
+  let bump = 1;
+  if(CH.length){
+    const at = CH[chIdx(t)][0], dt = t - at;
+    if(dt >= 0 && dt < 0.34) bump = 0.10 + 0.90 * ss(0, 1, dt / 0.34);
+  }
+  /* a quiet or stop moment overrides the chapter entirely: the room drops out and
+     climbs back over two bars, which is the gesture the map already records and
+     nothing was using */
+  let qk = 1;
+  for(const mo of MO){
+    if(mo.kind !== "quiet" && mo.kind !== "stop") continue;
+    const dt = t - mo.at;
+    if(dt >= 0 && dt < BAR * 2) qk = Math.min(qk, 0.25 + 0.75 * ss(0, 1, dt / (BAR * 2)));
+  }
+
+  return { pars:   pars   * grow * bump * qk,
+           heads:  heads  * grow * bump * qk,
+           strips: strips * grow * bump * qk,
+           screen: B ? "pulse" : (L0.screen || "colour"),
+           bump };
+}
+
 function leadAt(t){
   const e = energyAt(t);
   for(const sp of SP) if(sp.kind === "build" && sp.from <= t && t < sp.to) return "rise";
@@ -535,6 +606,7 @@ function frame(t){
   /* rung 8: the arrangement decides how much of the row is in play at all, and
      the window sits in the middle so a thin arrangement reads as a narrow rig
      rather than a rig with holes in it */
+  const LK = use(16) ? lookAt(t) : {pars:1,heads:1,strips:1,screen:null,bump:1};
   const LEAD = use(13) ? RECEDE[leadAt(t)] : {flash:1, spot:1, colour:1};
   const w = widthAt(t);
   const half = (NP - w) / 2;
@@ -571,7 +643,7 @@ function frame(t){
        taken out of play still sat at bed level -- every lamp lit all the time, and
        soloing the instruments rung showed it at once. */
     const bedHere = inPlay(i) ? bed : 0;
-    let lv = (bedHere + (1 - bedHere) * share * amp * env * LEAD.flash) * size * duck * sideGain(f, t);
+    let lv = (bedHere + (1 - bedHere) * share * amp * env * LEAD.flash) * size * duck * sideGain(f, t) * LK.pars;
     const B = buildAt(t);
     if(B){ lv *= 0.55 + 0.75 * B.shape;                     // it climbs
            if(B.shape > 0.72 && (i === 0 || i === PARS.length-1)) lv *= 0.4 }  // and tightens
@@ -682,7 +754,7 @@ function frame(t){
       const D2 = dropAt(t);
       F.push({ id:f.id,
                level:+cl((0.28 + 0.62*e) * (0.5 + 0.5*env) * (D2 && D2.hit ? 1.6 : 1)
-                         * sideGain(f, t), 0, 1).toFixed(4),
+                         * sideGain(f, t) * LK.heads, 0, 1).toFixed(4),
                pan:+cl(pan,0,1).toFixed(4), tilt:+cl(tilt,0,1).toFixed(4),
                r:col[0], g:col[1], b:col[2] });
     });
@@ -701,7 +773,7 @@ function frame(t){
     if(Db){ if(Db.pre !== null) lv *= Math.max(0.06, Db.pre); else if(Db.hit) lv = 1 }
     const cc = (Db && Db.hit) ? COLDW
              : hsl(PAL.b[0] + (ch3 ? ch3.shift : 0), 0.92, 0.52);
-    F.push({ id:f.id, level:+cl(lv,0,1).toFixed(4), r:cc[0], g:cc[1], b:cc[2] });
+    F.push({ id:f.id, level:+cl(lv*LK.strips,0,1).toFixed(4), r:cc[0], g:cc[1], b:cc[2] });
   }
 
   /* ---- CO2 ------------------------------------------------------------------
@@ -754,18 +826,28 @@ function frame(t){
      the beat is a screen fighting the rig. */
   for(const f of LAYOUT.fixtures){
     if(f.kind !== "screen") continue;
-    const e = energyAt(t), D4 = dropAt(t);
-    const B2 = buildAt(t);
-    let lv = 0.10 + 0.45 * e;
-    if(B2) lv *= 0.55 + 0.85 * B2.shape;
+    /* The wall had one behaviour all song, which on a stage this size is the
+       biggest surface in the building doing nothing. It has MODES now, chosen by
+       the section: black in a break or a quiet part, a dim bed in an intro, solid
+       colour through a verse, pulsing on the bar through a build, hot on a drop.
+       Black is the important one -- a wall that is never off cannot come back. */
+    const e = energyAt(t), D4 = dropAt(t), B2 = buildAt(t), ch = chordState(t);
+    const mode = use(16) ? (LK.screen || "colour") : "colour";
+    const beat = BEATS.length ? (t - BEATS[Math.max(0, beatIndex(t))]) : 1;
+    let lv, sat = 0.9, lig = 0.85;
+    if(mode === "black")      { lv = 0.015; }
+    else if(mode === "dim")   { lv = 0.10 + 0.14 * e; lig = 0.55 }
+    else if(mode === "pulse") { lv = (0.20 + 0.55 * (B2 ? B2.shape : e))
+                                     * (0.45 + 0.55 * Math.exp(-beat / (PER * 0.30))); }
+    else if(mode === "hot")   { lv = 0.72 + 0.28 * e; sat = 1.0; lig = 1.0 }
+    else                      { lv = 0.16 + 0.42 * e; }
     if(D4){
-      if(D4.pre !== null) lv *= Math.max(0.05, D4.pre);
+      if(D4.pre !== null) lv *= Math.max(0.04, D4.pre);
       else if(D4.hit)     lv = 1;
     }
-    const ch = chordState(t);
     const base = PAL.a;
     const col = (D4 && D4.hit) ? WHITE
-              : hsl(base[0] + (ch ? ch.shift : 0), cl(base[1]*0.9,0,1), cl(base[2]*0.85,0,1));
+              : hsl(base[0] + (ch ? ch.shift : 0), cl(base[1]*sat,0,1), cl(base[2]*lig,0,1));
     F.push({ id:f.id, level:+cl(lv,0,1).toFixed(4), r:col[0], g:col[1], b:col[2] });
   }
 
