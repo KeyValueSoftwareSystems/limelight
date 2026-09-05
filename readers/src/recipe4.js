@@ -67,8 +67,22 @@ function stem(k,t){
    all 983 pushed frames-over-threshold from 10 to 208 and put the flicker back
    in -- and it is wrong musically too: nobody stabs every hi-hat. Keep the
    strong ones, and thin them so two stabs are never inside 300 ms. */
+/* Onset detection carries its own jitter, roughly +-40 ms, and that jitter is
+   what Renjith hears as "not in sync": a hit the drummer played ON the beat gets
+   stamped 30 ms late, the chase steps 30 ms late, and the flash misses.
+   Syncopation is NOT that -- a hit deliberately played off the grid belongs off
+   the grid, and quantising it would flatten the groove into a drum machine.
+   The two are separable by distance. A hit within SNAP_TOL of a sixteenth was
+   almost certainly meant to be on it, so it gets pulled exactly on. A hit
+   further out was meant to be there, so it is left alone. */
+const SNAP_TOL = 0.045;
+const SNAP_SUB = PER / 4;
+function snapT(t){
+  const g = PH + Math.round((t - PH) / SNAP_SUB) * SNAP_SUB;
+  return Math.abs(g - t) <= SNAP_TOL ? +g.toFixed(4) : t;
+}
 const ACC=(function(){
-  const src=(MAP.accents&&MAP.accents.events)||[];
+  const src=((MAP.accents&&MAP.accents.events)||[]).map(a=>({...a, at:snapT(a.at)}));
   const strong=src.filter(a=>a.strength>0.42).sort((x,y)=>x.at-y.at);
   const out=[];
   for(const a of strong) if(!out.length||a.at-out[out.length-1].at>=0.30) out.push(a);
@@ -277,29 +291,35 @@ function hsl(h,s,l){
   else if(h<240){r=0;g=x;b=c} else if(h<300){r=x;g=0;b=c} else {r=c;g=0;b=x}
   return [Math.round((r+m)*255),Math.round((g+m)*255),Math.round((b+m)*255)]}
 
-const HUE={
-  intro:{h:210,span: 44,s:0.74,l:0.40}, verse:{h: 26,span: 40,s:0.80,l:0.46},
-  break:{h:246,span: 52,s:0.72,l:0.36}, build:{h: 30,span: 64,s:0.94,l:0.50},
-  drop :{h:330,span:130,s:0.90,l:0.56}, outro:{h:218,span: 40,s:0.66,l:0.34},
-  quiet:{h:252,span: 46,s:0.70,l:0.36}, stop :{h:  0,span:  0,s:0.00,l:0.00},
-  flash:{h: 40,span:  0,s:0.06,l:0.98}, spotlight:{h: 32,span: 10,s:0.62,l:0.56}};
+/* A profile is a short list of colours a designer chose, and the show may use
+   NOTHING else. The previous version let hue wander continuously -- a walk clock,
+   plus energy, plus the melody contour, plus a per-fixture offset in degrees --
+   so the rig passed through every hue between the ones anybody intended, and
+   landed on olive and mustard on the way. That is what "random colours" was.
+   Two colours are on stage at a time: the chapter's primary and its partner.
+   Pars alternate between them, heads take the partner so they read against the
+   wash, uplights take the deep. Energy moves saturation and lightness, never hue. */
+const PROFILES = {
+  sunset: { lead:[ 24,.90,.50], hot:[  6,.94,.48], cool:[196,.86,.44], deep:[240,.78,.34] },
+  ice:    { lead:[202,.88,.48], hot:[318,.86,.50], cool:[184,.84,.44], deep:[258,.78,.34] },
+  neon:   { lead:[316,.92,.52], hot:[ 42,.94,.54], cool:[172,.88,.46], deep:[272,.84,.38] },
+  amber:  { lead:[ 34,.84,.52], hot:[ 16,.92,.50], cool:[ 44,.62,.50], deep:[ 26,.70,.32] },
+};
+const PROFILE = (function(){ try { return (COLOUR || "sunset") } catch(e) { return "sunset" } })();
+const PAL = PROFILES[PROFILE] || PROFILES.sunset;
+/* [primary, partner] per chapter. Warm carries the song, cool carries the room,
+   deep carries the dark, and the build hands over to the drop by going hot. */
+const ROLES = {
+  intro:['cool','deep'], verse:['lead','cool'], break:['deep','cool'],
+  build:['hot','lead'],  drop :['lead','hot'],  outro:['cool','deep'],
+  quiet:['deep','cool'], spotlight:['lead','hot'],
+};
+function roleRGB(role,e,bri){
+  const c = PAL[role] || PAL.lead;
+  return hsl(c[0], cl(c[1]*(0.86+0.20*e),0,1),
+                   cl(c[2]*(0.84+0.28*e)*(0.94+0.12*bri),0,1));
+}
 
-/* base hue walks its range on a two-phrase clock, and energy pushes it toward
-   the hot end of the range while raising saturation */
-function hueBase(name,t,e){
-  const H=HUE[name]||HUE.verse;
-  const walk=0.5+0.5*Math.sin(2*Math.PI*(t/(32*PER)));
-  return {h:H.h+H.span*(0.30*walk+0.70*e-0.35), s:cl(H.s*(0.66+0.42*e),0,1),
-          l:cl(H.l*(0.80+0.34*e),0,1)}}
-function chapterHue(t,e){
-  const j=chIdx(t),a=CH[j][0],XFC=1.9;
-  const cur=hueBase(CH[j][1],t,e);
-  if(j>0&&t-a<XFC){const w=ss(0,XFC,t-a),p=hueBase(CH[j-1][1],t,e);
-    let dh=((cur.h-p.h+540)%360)-180;                 // take the short way round the wheel
-    return {h:p.h+dh*w,s:lerp(p.s,cur.s,w),l:lerp(p.l,cur.l,w)}}
-  return cur}
-/* per-fixture: a gradient across the room, plus the complement for the beams */
-const OFF={par:14, up:-22, head:166, strip:8, headSpread:30};   // degrees
 /* ---- the chase -------------------------------------------------------------
    A wave that never dims anything below 70% is a gradient, not movement. A chase
    is a NARROW pulse crossing the rig, so only one or two fixtures are lit at any
@@ -333,7 +353,7 @@ const OFF={par:14, up:-22, head:166, strip:8, headSpread:30};   // degrees
    chase wants the whole hit list, quiet ones included, because a chase follows
    the pattern rather than punctuating it. */
 const CHT = (function(){
-  const src = (MAP.accents && MAP.accents.events) || [];
+  const src = ((MAP.accents && MAP.accents.events) || []).map(a=>({...a, at:snapT(a.at)}));
   const out = [];
   for(const a of src){
     if(a.strength < 0.10) continue;
@@ -391,24 +411,27 @@ function chaseGain(xn, c){
 const PARN = Math.max(2, (LAYOUT.fixtures||[]).filter(f=>f.kind==='par').length);
 
 function fixColour(t,L,kind,xn,e){
-  const B=(HUE[L]&&(L==='flash'||L==='stop'||L==='spotlight'))?hueBase(L,t,e):chapterHue(t,e);
-  if(L==='stop') return [0,0,0];
-  const spread=(kind==='par')?OFF.par:(kind==='up')?OFF.up:(kind==='strip')?OFF.strip:
-               (kind==='head')?OFF.headSpread:0;
-  const grad=(xn-0.5)*2;
-  // fixColour is top level, so it reads the listeners itself rather than
-  // inheriting locals from lookFrame
-  const MELc=meloAt(t), BRIc=briteAt(t);
-  let h=B.h+grad*spread*(0.55+0.75*e)+(MELc-0.5)*36;    // the tune moves the hue
-  /* Saturation was backwards. I had bright timbre DESATURATING the colour, but
-     designers keep saturation high precisely because saturated light cuts through
-     haze and reads across a room -- and saturated light measures as more arousing.
-     Energy now RAISES saturation; only the flash goes white. */
-  let s=cl(B.s*(0.80+0.34*e)), l=B.l*(0.94+0.14*BRIc);
-  if(kind==='head'){h+=OFF.head; s=cl(s*1.06,0,1); l=cl(l*1.02,0,1)}
-  if(kind==='up'){s=cl(s+0.12,0,1); l=cl(l*0.72,0,1)}
-  if(L==='flash'){return [255,252,244]}
-  return hsl(h,s,l)}
+  if(L==='stop')  return [0,0,0];
+  if(L==='flash') return [255,252,244];
+  const bri=briteAt(t), XFC=1.9, j=chIdx(t);
+  const pick=(roles)=>{
+    let role;
+    if(kind==='up') role='deep';
+    else if(kind==='head') role=roles[1];
+    else role = (Math.round(xn*(PARN-1)) % 2 === 0) ? roles[0] : roles[1];
+    const c=roleRGB(role,e,bri);
+    return kind==='up' ? [c[0]*0.74|0, c[1]*0.74|0, c[2]*0.74|0] : c;
+  };
+  const R = (L==='spotlight') ? ROLES.spotlight : (ROLES[CH[j][1]] || ROLES.verse);
+  const cur = pick(R);
+  // one crossfade, in RGB, at the chapter join -- the only place an in-between
+  // colour is allowed, and it lasts under two seconds
+  if(j>0 && t-CH[j][0] < XFC && L!=='spotlight'){
+    const w=ss(0,XFC,t-CH[j][0]), p=pick(ROLES[CH[j-1][1]] || ROLES.verse);
+    return [Math.round(lerp(p[0],cur[0],w)),Math.round(lerp(p[1],cur[1],w)),
+            Math.round(lerp(p[2],cur[2],w))];
+  }
+  return cur}
 
 const sc=(c,g)=>[Math.round(cl(c[0]*g,0,255)),Math.round(cl(c[1]*g,0,255)),Math.round(cl(c[2]*g,0,255))];
 const W_=[255,252,246];

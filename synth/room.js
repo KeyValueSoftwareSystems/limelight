@@ -5,12 +5,12 @@
    a stale twin of its own 2-D fallback and every fix went into the other one.
    Both pages load this file. */
 
-function mkReader(map, layout, drive){
+function mkReader(map, layout, drive, colour){
   const g = prep(map);
   return new Function("MAP","LAYOUT","CH","SP","MO","EN","BEATS","PER","PH","DUR","BAR","DBP",
-                      "STOP_REAL","ANT","ENERGY", RECIPE + "\n;return frame;")(
+                      "STOP_REAL","ANT","ENERGY","COLOUR", RECIPE + "\n;return frame;")(
     g.MAP, layout, g.CH, g.SP, g.MO, g.EN, g.BEATS, g.PER, g.PH, g.DUR, g.BAR, g.DBP, true, true,
-    drive || "medium");
+    drive || "medium", colour || "sunset");
 }
 function prep(m){
   const PER=m.grid.period, PH=m.grid.phase, D=m.song.length;
@@ -192,7 +192,7 @@ function drawFixtures(cv, fr, layout){
   const W = cv.clientWidth, H = cv.clientHeight || 240, dpr = window.devicePixelRatio || 1;
   if(cv.width !== W*dpr || cv.height !== H*dpr){ cv.width = W*dpr; cv.height = H*dpr }
   const g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
-  g.fillStyle = "#0b0d12"; g.fillRect(0,0,W,H);
+  g.fillStyle = "#1a1e28"; g.fillRect(0,0,W,H);
   if(!fr || !layout) return;
 
   const fx = (layout.fixtures||[]).filter(f => f.kind !== "fog");
@@ -213,7 +213,7 @@ function drawFixtures(cv, fr, layout){
     const r = o.r!==undefined?o.r:255, gg = o.g!==undefined?o.g:255, b = o.b!==undefined?o.b:255;
     const x = pad + i*(tw+gap), y = top;
 
-    g.fillStyle = "#12151d"; g.strokeStyle = "#232838"; g.lineWidth = 1;
+    g.fillStyle = "#252b39"; g.strokeStyle = "#3c4457"; g.lineWidth = 1;
     g.beginPath(); g.roundRect(x, y, tw, th, 5); g.fill(); g.stroke();
 
     // the lens: colour at brightness, with a glow that scales with level
@@ -226,9 +226,9 @@ function drawFixtures(cv, fr, layout){
       glow.addColorStop(1, `rgba(${r},${gg},${b},0)`);
       g.fillStyle = glow; g.beginPath(); g.arc(cx,cy,rad*2.6,0,6.2832); g.fill();
     }
-    g.fillStyle = L > 0.01 ? `rgb(${(r*L)|0},${(gg*L)|0},${(b*L)|0})` : "#191d27";
+    g.fillStyle = L > 0.01 ? `rgb(${(r*L)|0},${(gg*L)|0},${(b*L)|0})` : "#333b4c";
     g.beginPath(); g.arc(cx,cy,rad,0,6.2832); g.fill();
-    g.strokeStyle = "#2c3242"; g.stroke();
+    g.strokeStyle = "#4a5468"; g.stroke();
 
     // A head gets a position pad, which is how a lighting desk shows one: pan
     // across, tilt down, and a dot where the beam is aimed. A stub sticking out

@@ -49,6 +49,8 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
   <label for="other">against</label><select id="other"></select>
   <label for="drive">energy</label>
   <select id="drive"><option>low</option><option selected>medium</option><option>high</option></select>
+  <label for="palette">colour</label>
+  <select id="palette"><option>sunset</option><option>ice</option><option>neon</option><option>amber</option></select>
   <button id="tool-sec" class="on">sections</button>
   <button id="tool-mom">moments</button>
   <button class="go" id="save">Save</button>
@@ -86,6 +88,9 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
       <span><button id="viewtog" style="background:var(--raise);color:var(--muted);
         border:1px solid var(--rule2);border-radius:3px;padding:2px 8px;font-size:10.5px;
         cursor:pointer;font-family:ui-monospace,monospace">room view</button>
+      <button id="bigtog" style="background:var(--raise);color:var(--muted);
+        border:1px solid var(--rule2);border-radius:3px;padding:2px 8px;font-size:10.5px;
+        margin-left:5px;cursor:pointer;font-family:ui-monospace,monospace">full screen</button>
       <span id="rmeta" style="margin-left:8px">—</span></span></div>
     <canvas id="room"></canvas></div>
   <div class="track" style="flex:0 0 250px;margin:0">
@@ -123,6 +128,9 @@ let RECIPE="", RM=null, LAY=null, F1=null, F2=null, rebuildTimer=null, scoreTime
 // fixtures by default: this panel is for checking the output is what you meant,
 // not for imagining what the room looks like
 let VIEWMODE="fixtures";
+let BIG=false;
+let PALETTE = new URLSearchParams(location.search).get("pal")
+           || localStorage.getItem("limelight.palette") || "sunset";
 let WAVE=null;
 /* The light the rig is actually emitting, sampled once per map and cached, so it
    can be drawn on the SAME axis as the waveform and the beats. Asking "are the
@@ -146,25 +154,32 @@ function buildLight(){
    and measure how far it sits from the nearest beat. */
 function measureSync(){
   if(!LIGHT||!MINE||!MINE.beats||!MINE.beats.length){ $("syncverdict").textContent="—"; return }
-  const v=LIGHT.v, hz=LIGHT.hz, B=MINE.beats;
-  const offs=[];
+  /* Measuring against quarter notes was the wrong question. A flash on a
+     syncopated sixteenth is dead in time and would score as 100 ms wrong, so the
+     number punished exactly the playing that makes the show feel human. The grid
+     the music is on is the sixteenth, so that is what a flash is measured to. */
+  const v=LIGHT.v, hz=LIGHT.hz, PER=MINE.grid.period, PH=MINE.grid.phase, SUB=PER/4;
+  const B=MINE.beats, offs=[], beatoffs=[];
   for(let i=2;i<v.length-2;i++){
     const rise=v[i]-v[i-1];
     if(rise < LIGHT.max*0.06) continue;
     if(v[i]-v[i-2] < v[i+1]-v[i-1]) continue;     // keep the steepest point of a rise
     const t=i/hz;
+    offs.push(Math.abs(t-(PH+Math.round((t-PH)/SUB)*SUB))*1000);
     let lo=0,hi=B.length-1,best=0;
     while(lo<=hi){const mi=(lo+hi)>>1; if(B[mi]<=t){best=mi;lo=mi+1}else hi=mi-1}
-    const cand=[B[best],B[Math.min(B.length-1,best+1)]];
-    offs.push(Math.min(...cand.map(b=>Math.abs(b-t)))*1000);
+    beatoffs.push(Math.min(Math.abs(B[best]-t),
+                           Math.abs(B[Math.min(B.length-1,best+1)]-t))*1000);
   }
   if(!offs.length){ $("syncverdict").textContent="no flashes found"; return }
+  const n=offs.length;
+  const onGrid=offs.filter(o=>o<=40).length/n*100;
+  const onBeat=beatoffs.filter(o=>o<=40).length/n*100;
   offs.sort((a,b)=>a-b);
-  const med=offs[offs.length>>1];
-  const onBeat=offs.filter(o=>o<=40).length/offs.length*100;
   const el=$("syncverdict");
-  el.textContent=`${offs.length} flashes · ${onBeat.toFixed(0)}% within 40 ms of a beat · median ${med.toFixed(0)} ms`;
-  el.style.color = onBeat>75 ? "var(--good)" : onBeat>45 ? "var(--tung)" : "var(--bad)";
+  el.textContent=`${n} flashes · ${onGrid.toFixed(0)}% in time (within 40 ms of a 16th)`
+               + ` · median ${offs[n>>1].toFixed(0)} ms · ${onBeat.toFixed(0)}% land on a beat`;
+  el.style.color = onGrid>85 ? "var(--good)" : onGrid>60 ? "var(--tung)" : "var(--bad)";
 }
 function drawLight(){
   const cv=$("lightlane"); if(!cv||!MINE) return;
@@ -412,9 +427,9 @@ function dirty(){
 function rebuildShow(){
   if(!RM||!LAY||!MINE) return;
   try{
-    F1=RM.mkReader(MINE,LAY,DRIVE);
-    F2=OTHER?RM.mkReader(OTHER,LAY,DRIVE):null;
-    $("rmeta").textContent=`${mineKey} · ${LAY.room} · ${LAY.fixtures.length} fixtures · energy ${DRIVE}`;
+    F1=RM.mkReader(MINE,LAY,DRIVE,PALETTE);
+    F2=OTHER?RM.mkReader(OTHER,LAY,DRIVE,PALETTE):null;
+    $("rmeta").textContent=`${mineKey} · ${LAY.room} · ${LAY.fixtures.length} fixtures · ${DRIVE} · ${PALETTE}`;
     $("vsname").textContent=otherKey||"—";
     $("vstale").textContent="";
     buildLight();
@@ -598,11 +613,31 @@ function drawRoom(){
     localStorage.setItem("limelight.drive",DRIVE); rebuildShow() };
   $("viewtog").onclick=()=>{ VIEWMODE = VIEWMODE==="fixtures" ? "room" : "fixtures";
     $("viewtog").textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view" };
+  $("palette").value=PALETTE;
+  $("palette").onchange=e=>{ PALETTE=e.target.value;
+    localStorage.setItem("limelight.palette",PALETTE); rebuildShow() };
+  /* The fixtures get the whole window on demand. Judging a colour or a chase in
+     a 150 px strip under three timelines is not judging it at all. Escape or the
+     button comes back; the transport and the score stay on screen. */
+  const big=()=>{ const L=$("live");
+    L.style.cssText = BIG
+      ? "display:flex;gap:8px;position:fixed;inset:44px 10px 96px;z-index:60;margin:0"
+      : "display:flex;gap:8px;flex:0 0 auto;margin:0 0 7px";
+    $("bigtog").textContent = BIG ? "exit full screen" : "full screen";
+    $("bigtog").classList.toggle("on", BIG);
+    document.querySelectorAll(".track.edit,#t2,#tw").forEach(el=>{
+      if(el) el.style.visibility = BIG ? "hidden" : "" });
+    requestAnimationFrame(()=>tick(true)); };
+  $("bigtog").onclick=()=>{ BIG=!BIG; big() };
+  addEventListener("keydown",e=>{ if(e.key==="Escape"&&BIG){ BIG=false; big() } });
   // ?span= and ?t= open on a window worth looking at, which is how a screenshot
   // or a shared link can point at one specific bar
   const sp=parseFloat(Q.get("span")||"");
   VIEW = isFinite(sp) ? {t0:Math.max(0,(parseFloat(Q.get("t")||"0"))-sp/2), span:sp}
                       : {t0:0, span:dur(MINE)};
+  // a shared link lands on the moment, sound and lights together
+  const qt=parseFloat(Q.get("t")||"");
+  if(isFinite(qt)) $("aud").addEventListener("loadedmetadata",()=>{ $("aud").currentTime=qt },{once:true});
   $("aud").src="/api/audio?song="+SONG;
   // ?t= opens at a moment worth looking at, which matters when judging the room:
   // at 0:00 nothing is lit and a black rectangle tells you nothing
