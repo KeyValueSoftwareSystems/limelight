@@ -203,6 +203,11 @@ const SONG_DRIVE = (function(){
   const rate = DUR>0 ? ev.length/DUR : 0;
   return cl(Math.sqrt(ss(84,128,bpm) * ss(3.4,7.0,rate)));
 })();
+const HOT_OK = SONG_DRIVE > 0.45;
+const STROBE_GAIN = ss(0.25, 0.60, SONG_DRIVE);
+const STROBE_HZ   = lerp(0.40, 1.0, SONG_DRIVE);
+const BANG = ss(0.25, 0.60, SONG_DRIVE);
+const SLOWXF = lerp(1.9, 1.0, SONG_DRIVE);
 
 const bi=t=>{let lo=0,hi=BEATS.length-1,r=-1;while(lo<=hi){const m=(lo+hi)>>1;
   if(BEATS[m]<=t){r=m;lo=m+1}else hi=m-1}return r};
@@ -275,7 +280,7 @@ function accentHit(t){
   while(lo<=hi){const mi=(lo+hi)>>1; if(ACT[mi]<=t){i=mi;lo=mi+1}else hi=mi-1}
   for(let j=i;j>=0&&j>i-6;j--){
     const dt=t-ACT[j]; if(dt<0||dt>0.34) continue;
-    const at=0.014, dc=0.26;
+    const at=0.014+0.060*(1-SONG_DRIVE), dc=0.26;
     const env=dt<at?ss(0,at,dt):1-ss(0,1,cl((dt-at)/dc));
     best=Math.max(best,env*ACC[j].strength);
   }
@@ -402,13 +407,13 @@ function until(k,t,w){let b=null;for(const m of MO)if(m.kind===k&&m.at>t&&m.at-t
 function accent(p,e){
   // 0.28 of a beat is ~133 ms at 126 bpm. Below about 100 ms a level change on a
   // large surface reads as a flash rather than a hit, which is the whole complaint.
-  const at=0.035, dc=0.20+0.30*(1-e);
+  const at=lerp(0.15,0.035,SONG_DRIVE), dc=0.20+0.30*(1-e);
   if(p<at) return ss(0,at,p);
   return 1-ss(0,1,cl((p-at)/dc))}
 
 /* ---- look segmentation, derived from the map, rebuilt only on a correction ---- */
 function primaryLook(t){ if(stopAt(t))return'stop';
-  const[d,s]=since('drop',t,8); if(d)return s<0.30?'flash':'drop';
+  const[d,s]=since('drop',t,8); if(d)return (s<0.30&&HOT_OK)?'flash':'drop';
   if(since('spotlight',t,4)[0])return'spotlight';
   if(since('quiet',t,8)[0])return'quiet';
   const z=spanAt(t); if(z&&z.kind==='build')return'build';
@@ -562,7 +567,7 @@ function motionPhase(t){
 const eMotionSlowNote=1;
 const segAt=t=>{let lo=0,hi=SEG.length-1,r=0;while(lo<=hi){const m=(lo+hi)>>1;
   if(SEG[m].from<=t){r=m;lo=m+1}else hi=m-1}return r};
-const XF=to=>to==='flash'?0.03:to==='stop'?0.22:to==='drop'?0.30:1.10;
+const XF=to=>(to==='flash'?0.03:to==='stop'?0.22:to==='drop'?0.30:1.10)*SLOWXF;
 function lookWeights(t){const i=segAt(t),s=SEG[i],x=XF(s.look),d=t-s.from;
   if(i>0&&d<x){const w=ss(0,x,d);return[[SEG[i-1].look,1-w],[s.look,w]]}
   return[[s.look,1]]}
@@ -625,9 +630,6 @@ const ROLES = {
   build:['hot','lead'],  drop :['lead','hot'],  outro:['cool','deep'],
   quiet:['deep','cool'], spotlight:['lead','hot'],
 };
-const HOT_OK = SONG_DRIVE > 0.45;
-const STROBE_GAIN = ss(0.25, 0.60, SONG_DRIVE);
-const STROBE_HZ   = lerp(0.40, 1.0, SONG_DRIVE);
 function rolesFor(name){
   const r = ROLES[name] || ROLES.verse;
   if(HOT_OK) return r;
@@ -849,6 +851,38 @@ function buildProg(t){
   if(!sp || sp.kind !== 'build' || !(sp.to > sp.from)) return -1;
   return cl((t - sp.from) / (sp.to - sp.from));
 }
+function gateBars(kind, tt){
+  const L = primaryLook(tt), e = en(tt);
+  const cyc = {drop:0.25, build:0.5, verse:0.5, quiet:2, idle:2, outro:2, spotlight:2}[L];
+  const kmul = GATE_RATE[kind] === undefined ? 1 : GATE_RATE[kind];
+  const bp = buildProg(tt);
+  const accel = (bp >= 0) ? lerp(2.4, 0.30, bp*bp) : 1;
+  const drive = lerp(1.9, 1.0, SONG_DRIVE);
+  return (cyc===undefined?1:cyc) * kmul * accel * drive * (1.7 - 0.9*e);
+}
+const GPH = (function(){
+  if(!EN || !EN.length) return null;
+  const ts = EN.map(p=>p[0]), out = {};
+  const kinds = {};
+  for(const f of (LAYOUT.fixtures||[])) kinds[f.kind] = 1;
+  for(const kind in kinds){
+    const rs = ts.map(tt => 1/(BAR*Math.max(0.12, gateBars(kind, tt))));
+    const cum = [0];
+    for(let i=0;i<ts.length-1;i++) cum.push(cum[i] + 0.5*(rs[i]+rs[i+1])*(ts[i+1]-ts[i]));
+    out[kind] = {ts:ts, rs:rs, cum:cum};
+  }
+  return out;
+})();
+function gatePhase(kind, t){
+  const T = GPH && GPH[kind];
+  if(!T) return (t-PH)/(BAR*Math.max(0.12, gateBars(kind, t)));
+  let k=0, lo=0, hi=T.ts.length-1;
+  while(lo<=hi){const m=(lo+hi)>>1; if(T.ts[m]<=t){k=m;lo=m+1}else hi=m-1}
+  const dt = t - T.ts[k];
+  if(k+1 >= T.rs.length) return T.cum[k] + T.rs[k]*dt;
+  const span = T.ts[k+1]-T.ts[k], f = span>0 ? cl(dt/span) : 0;
+  return T.cum[k] + T.rs[k]*dt + 0.5*(T.rs[k+1]-T.rs[k])*dt*f;
+}
 function arrayGate(G, t, e, L, n){
   const dep = deployed(G.kind, t);
   if(dep <= 0) return 0;
@@ -865,7 +899,7 @@ function arrayGate(G, t, e, L, n){
   const accel = (bp >= 0) ? lerp(2.4, 0.30, bp*bp) : 1;
   const drive = lerp(1.9, 1.0, SONG_DRIVE);
   const bars = (cyc===undefined?1:cyc) * kmul * accel * drive * (1.7 - 0.9*e);
-  const ph = (t - PH) / (BAR*Math.max(0.12, bars));
+  const ph = gatePhase(G.kind, t);
   const fx = (n > ARRAY_MIN) ? Math.abs(G.xn - 0.5)*2 : G.xn;
   const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(fx*1.2 + G.yn*0.6 - ph));
   const soft = 0.16 + 0.22*e;
@@ -1136,7 +1170,7 @@ function lookFrame(t,L){
         hz=Math.min(CAP,(2.0+2.0*(d.v??0.9))*STROBE_HZ) } }
     else if(L==='build'&&z){ const rem=z.to-t;
       if(rem<=2*BAR) lv=0.55*ss(0,1,1-rem/(2*BAR))*(i===(((bx%2)+2)%2)?1:0.6) }
-    F.push({id:id,level:+cl(lv*dip*Math.min(1,grow)*deployed('blinder',t)).toFixed(3),strobe:+hz.toFixed(3)})});
+    F.push({id:id,level:+cl(lv*dip*Math.min(1,grow)*(0.25+0.75*BANG)*deployed('blinder',t)).toFixed(3),strobe:+hz.toFixed(3)})});
 
   /* 24 LED wash zoom on the mid and upstage trusses: the BACKLIGHT layer. They
      move slowly, sit wide, and carry the harmonic bed -- so they hold the room
@@ -1176,12 +1210,16 @@ function lookFrame(t,L){
                                  : ('mounted at '+G.y.toFixed(1)+' m, below the '+floorM+' m floor')});
       return }
     let lv=0;
-    if(L==='drop'){ const[d,sd]=since('drop',t,8);
-      lv = 0.55 + 0.45*(d&&d.v!==undefined?d.v:0.9);
-      if(sd!==null && sd<BAR*0.5) lv*=ss(0,1,sd/(BAR*0.5)); }
-    else if(L==='build'&&z){ const rem=z.to-t;
-      if(rem<=4*BAR) lv=0.70*ss(0,1,1-rem/(4*BAR)); }
-    else if(L==='flash'){ lv=0.9 }
+    const[dL,sdL]=since('drop',t,BAR*8);
+    if(dL && sdL!==null){
+      const rise=ss(0,1,sdL/(BAR*0.5));
+      const fall=1-ss(0,1,cl((sdL-BAR*3)/BAR));
+      lv=(0.55+0.45*(dL.v!==undefined?dL.v:0.9))*rise*fall;
+    }
+    if(L==='build'&&z){ const rem=z.to-t;
+      if(rem<=4*BAR) lv=Math.max(lv,0.70*ss(0,1,1-rem/(4*BAR))); }
+    if(L==='flash') lv=Math.max(lv,0.9);
+    lv*=0.30+0.70*BANG;
     const fan = 0.55+0.45*Math.cos(2*Math.PI*(sym(G.xn)*2 - (t-PH)/(BAR*2)));
     const c = fixColour(t,L,'head',G.xn,e);
     F.push({id:id, level:+cl(lv*fan*dip*EX.arc*deployed('laser',t),0,1).toFixed(3),
@@ -1196,13 +1234,13 @@ function lookFrame(t,L){
     if(L==='drop'){ const[d,sd]=since('drop',t,8);
       const burst=Math.min((LAYOUT.limits||{}).co2_max_burst_s||1.2, BAR*0.6);
       if(sd!==null && sd<burst) lv=(1-ss(0,burst,sd))*(0.6+0.4*(d&&d.v!==undefined?d.v:0.9)); }
-    F.push({id:id,level:+cl(lv*deployed('co2',t),0,1).toFixed(3)})});
+    F.push({id:id,level:+cl(lv*BANG*deployed('co2',t),0,1).toFixed(3)})});
 
   KIND('confetti').forEach(function(id){
     let lv=0;
     const last=DROPS_AT.length?DROPS_AT[DROPS_AT.length-1]:null;
     if(last!==null && t>=last && t-last<BAR*4) lv=1-ss(0,BAR*4,t-last);
-    F.push({id:id,level:+cl(lv,0,1).toFixed(3),
+    F.push({id:id,level:+cl(lv*BANG,0,1).toFixed(3),
             note:'once, on the last drop -- confetti fired twice is confetti nobody notices'})});
 
   KIND('pyro').forEach(function(id){
@@ -1219,7 +1257,7 @@ function lookFrame(t,L){
     let lv=0;
     if(cue!==null){ const age=t-cue, dur=Math.min(1.6, BAR*0.7);
       if(age>=0 && age<dur) lv=(1-ss(0,dur,age)) }
-    F.push({id:id, level:+cl(lv*deployed('pyro',t),0,1).toFixed(3), armed:true,
+    F.push({id:id, level:+cl(lv*BANG*deployed('pyro',t),0,1).toFixed(3), armed:true,
             interlock:lim.pyro_interlock})});
 
   VIDEO.forEach(function(id){
