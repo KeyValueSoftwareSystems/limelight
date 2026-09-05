@@ -71,7 +71,10 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
     <button id="fitgrid" style="background:var(--raise);color:var(--tung);border:1px solid var(--tung);
       border-radius:3px;padding:2px 10px;font-size:11px;cursor:pointer;font-family:ui-monospace,monospace">snap to kicks</button>
     <span id="gridinfo" style="margin-left:9px">—</span></span></div>
-  <canvas id="wave" style="height:150px;flex:0 0 auto"></canvas></div>
+  <canvas id="wave" style="height:120px;flex:0 0 auto"></canvas>
+  <div class="thead" style="border-top:1px solid var(--rule)"><b>light out · is it on the beat?</b>
+    <span id="syncverdict">—</span></div>
+  <canvas id="lightlane" style="height:96px;flex:0 0 auto"></canvas></div>
 <div class="track edit" id="t1"><div class="thead"><b id="n1">—</b><span id="d1"></span></div>
   <canvas id="c1"></canvas></div>
 <div class="track" id="t2"><div class="thead"><b id="n2">—</b><span id="d2"></span></div>
@@ -121,6 +124,82 @@ let RECIPE="", RM=null, LAY=null, F1=null, F2=null, rebuildTimer=null, scoreTime
 // not for imagining what the room looks like
 let VIEWMODE="fixtures";
 let WAVE=null;
+/* The light the rig is actually emitting, sampled once per map and cached, so it
+   can be drawn on the SAME axis as the waveform and the beats. Asking "are the
+   lights on the beat" is then a thing you look at rather than a thing you try to
+   hear -- which is what Renjith has been unable to do, correctly, because nothing
+   on this page ever showed the two together. */
+let LIGHT=null, LIGHT_HZ=50;
+function buildLight(){
+  if(!F1||!MINE){ LIGHT=null; return }
+  const D=dur(MINE), n=Math.floor(D*LIGHT_HZ), out=new Float32Array(n);
+  for(let i=0;i<n;i++){
+    let s=0; const fr=F1(i/LIGHT_HZ);
+    for(const o of fr.fixtures) if("level" in o && !/^fog/.test(o.id)) s+=o.level;
+    out[i]=s;
+  }
+  let mx=0; for(const v of out) if(v>mx) mx=v;
+  LIGHT={v:out, hz:LIGHT_HZ, max:mx||1};
+  measureSync();
+}
+/* The number, so it is not a matter of opinion: find each rise in emitted light
+   and measure how far it sits from the nearest beat. */
+function measureSync(){
+  if(!LIGHT||!MINE||!MINE.beats||!MINE.beats.length){ $("syncverdict").textContent="—"; return }
+  const v=LIGHT.v, hz=LIGHT.hz, B=MINE.beats;
+  const offs=[];
+  for(let i=2;i<v.length-2;i++){
+    const rise=v[i]-v[i-1];
+    if(rise < LIGHT.max*0.06) continue;
+    if(v[i]-v[i-2] < v[i+1]-v[i-1]) continue;     // keep the steepest point of a rise
+    const t=i/hz;
+    let lo=0,hi=B.length-1,best=0;
+    while(lo<=hi){const mi=(lo+hi)>>1; if(B[mi]<=t){best=mi;lo=mi+1}else hi=mi-1}
+    const cand=[B[best],B[Math.min(B.length-1,best+1)]];
+    offs.push(Math.min(...cand.map(b=>Math.abs(b-t)))*1000);
+  }
+  if(!offs.length){ $("syncverdict").textContent="no flashes found"; return }
+  offs.sort((a,b)=>a-b);
+  const med=offs[offs.length>>1];
+  const onBeat=offs.filter(o=>o<=40).length/offs.length*100;
+  const el=$("syncverdict");
+  el.textContent=`${offs.length} flashes · ${onBeat.toFixed(0)}% within 40 ms of a beat · median ${med.toFixed(0)} ms`;
+  el.style.color = onBeat>75 ? "var(--good)" : onBeat>45 ? "var(--tung)" : "var(--bad)";
+}
+function drawLight(){
+  const cv=$("lightlane"); if(!cv||!MINE) return;
+  const W=cv.clientWidth,H=cv.clientHeight||96,dpr=window.devicePixelRatio||1;
+  if(cv.width!==W*dpr||cv.height!==H*dpr){cv.width=W*dpr;cv.height=H*dpr}
+  const g=cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  g.fillStyle="#0a0c11"; g.fillRect(0,0,W,H);
+  const D=dur(MINE), x=t=>(t-VIEW.t0)/VIEW.span*W;
+  // beats first, so the light is drawn over them
+  if(VIEW.span<90){
+    g.strokeStyle="rgba(230,233,241,.22)"; g.lineWidth=1;
+    for(const t of (MINE.beats||[])){ if(t<VIEW.t0||t>VIEW.t0+VIEW.span) continue;
+      g.beginPath(); g.moveTo(x(t),0); g.lineTo(x(t),H); g.stroke() }
+    g.strokeStyle="rgba(143,154,255,.75)"; g.lineWidth=1.5;
+    for(const t of (MINE.downbeats||[])){ if(t<VIEW.t0||t>VIEW.t0+VIEW.span) continue;
+      g.beginPath(); g.moveTo(x(t),0); g.lineTo(x(t),H); g.stroke() }
+  }
+  if(LIGHT){
+    const hz=LIGHT.hz;
+    g.beginPath(); g.moveTo(0,H);
+    const i0=Math.max(0,Math.floor(VIEW.t0*hz)), i1=Math.min(LIGHT.v.length,Math.ceil((VIEW.t0+VIEW.span)*hz));
+    const stride=Math.max(1,Math.floor((i1-i0)/Math.max(1,W)));
+    for(let i=i0;i<i1;i+=stride){ let p=0;
+      for(let j=i;j<Math.min(i1,i+stride);j++) if(LIGHT.v[j]>p) p=LIGHT.v[j];
+      g.lineTo(x(i/hz), H-2-(p/LIGHT.max)*(H-8)) }
+    g.lineTo(W,H); g.closePath();
+    g.fillStyle="rgba(240,169,60,.22)"; g.fill();
+    g.strokeStyle="#f0a93c"; g.lineWidth=1.4; g.stroke();
+  }
+  const a=$("aud"), pt=(a.src?a.currentTime:0)+SYNC/1000;
+  g.strokeStyle="#fff"; g.lineWidth=1.2;
+  g.beginPath(); g.moveTo(x(pt),0); g.lineTo(x(pt),H); g.stroke();
+  if(VIEW.span>=90){ g.fillStyle="#666c7e"; g.font="10px ui-monospace,monospace";
+    g.fillText("zoom in past 90 s to line the flashes up against the beats",8,14) }
+}
 let DRIVE = localStorage.getItem("limelight.drive") || "medium";
 const clampView=D=>{ VIEW.span=Math.max(4,Math.min(D,VIEW.span||D));
   VIEW.t0=Math.max(0,Math.min(D-VIEW.span,VIEW.t0)) };
@@ -256,7 +335,7 @@ function drawWave(){
   g.strokeStyle="#fff"; g.lineWidth=1.2;
   g.beginPath(); g.moveTo(x(pt),0); g.lineTo(x(pt),H); g.stroke();
 }
-function redraw(){ drawWave(); draw($("c1"),MINE,true); draw($("c2"),OTHER,false);
+function redraw(){ drawWave(); drawLight(); draw($("c1"),MINE,true); draw($("c2"),OTHER,false);
   $("d1").textContent=MINE?desc(MINE):""; $("d2").textContent=OTHER?desc(OTHER):"" }
 const desc=m=>`${(m.beats||[]).length} beats · ${secs(m).length} sections · `
   +`${(m.moments||[]).length} moments · ${(m.energy||[]).length} energy`;
@@ -338,6 +417,7 @@ function rebuildShow(){
     $("rmeta").textContent=`${mineKey} · ${LAY.room} · ${LAY.fixtures.length} fixtures · energy ${DRIVE}`;
     $("vsname").textContent=otherKey||"—";
     $("vstale").textContent="";
+    buildLight();
     clearTimeout(scoreTimer); scoreTimer=setTimeout(rescore,60);
   }catch(e){ $("rmeta").textContent="reader failed: "+e.message }
 }
@@ -518,7 +598,11 @@ function drawRoom(){
     localStorage.setItem("limelight.drive",DRIVE); rebuildShow() };
   $("viewtog").onclick=()=>{ VIEWMODE = VIEWMODE==="fixtures" ? "room" : "fixtures";
     $("viewtog").textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view" };
-  VIEW={t0:0,span:dur(MINE)};
+  // ?span= and ?t= open on a window worth looking at, which is how a screenshot
+  // or a shared link can point at one specific bar
+  const sp=parseFloat(Q.get("span")||"");
+  VIEW = isFinite(sp) ? {t0:Math.max(0,(parseFloat(Q.get("t")||"0"))-sp/2), span:sp}
+                      : {t0:0, span:dur(MINE)};
   $("aud").src="/api/audio?song="+SONG;
   // ?t= opens at a moment worth looking at, which matters when judging the room:
   // at 0:00 nothing is lit and a black rectangle tells you nothing
