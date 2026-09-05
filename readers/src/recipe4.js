@@ -407,13 +407,19 @@ function chaseAt(t, e, n){
 /* One lamp is on the hit, the one before it is still letting go. The envelope is
    measured against the gap to the NEXT hit rather than a fixed time, so a fill
    reads as a fill instead of five lamps all half-lit at once. */
+const MIRROR = (LAYOUT.fixtures||[]).filter(f=>f.kind==='par').length > 12;
 function chaseGain(xn, c){
-  const here = Math.round(xn * (c.n - 1));
-  let d = Math.abs(here - c.pos);
-  d = Math.min(d, c.n - d);
+  const half = Math.max(1, Math.floor(c.n/2));
+  const fold = MIRROR ? Math.abs(xn - 0.5) * 2 : xn;
+  const span = MIRROR ? half : c.n;
+  const here = Math.round(fold * (span - 1));
+  const pos = MIRROR ? (c.pos % span) : c.pos;
+  let d = Math.abs(here - pos);
+  d = Math.min(d, span - d);
   const env = Math.exp(-(c.age / Math.max(0.09, c.gap * 0.75)) * 1.9);
   if(d === 0) return (0.30 + 0.70 * env) * c.alive;
-  if(d === 1) return 0.20 * env * c.alive;
+  if(d === 1) return 0.28 * env * c.alive;
+  if(d === 2 && MIRROR) return 0.10 * env * c.alive;
   return 0.0;
 }
 
@@ -427,7 +433,8 @@ function fixColour(t,L,kind,xn,e){
     let role;
     if(kind==='up') role='deep';
     else if(kind==='head') role=roles[1];
-    else role = (Math.round(xn*(PARN-1)) % 2 === 0) ? roles[0] : roles[1];
+    else { const fi = MIRROR ? Math.round(Math.abs(xn-0.5)*2*(PARN-1)) : Math.round(xn*(PARN-1));
+           role = (fi % 2 === 0) ? roles[0] : roles[1]; }
     const c=roleRGB(role,e,bri,palAt(t));
     return kind==='up' ? [c[0]*0.74|0, c[1]*0.74|0, c[2]*0.74|0] : c;
   };
@@ -481,7 +488,8 @@ function arrayGate(G, t, e, L, n){
   if(cov <= 0) return 0;
   const bars = (L==='drop') ? 2 : 4;
   const ph = (t - PH) / (BAR*bars);
-  const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(G.xn*1.5 + G.yn*0.7 - ph));
+  const fx = (n > ARRAY_MIN) ? Math.abs(G.xn - 0.5)*2 : G.xn;
+  const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(fx*1.2 + G.yn*0.6 - ph));
   const soft = 0.16 + 0.22*e;
   const edge = 1 - cov;
   const gate = cl((wave - edge + soft) / (soft*2), 0, 1);
