@@ -38,8 +38,12 @@ def check(m):
                 # A synthetic map may leave a field empty when its audio genuinely cannot
                 # carry that fact -- identical clicks have no recoverable bar -- but only
                 # when it says so in <field>_note. Silence still reads as an omission.
+                conf = (m.get("confidence_by_field") or {}).get(k)
+                abstained = m.get(f"{k}_note") and isinstance(conf, (int, float)) and conf <= 0.5
                 if is_synth and m.get(f"{k}_note"):
                     w.append(f"{k}: empty by design — {str(m[f'{k}_note'])[:60]}")
+                elif abstained:
+                    w.append(f"{k}: abstained at confidence {conf} — {str(m[f'{k}_note'])[:50]}")
                 else:
                     e.append(f"{k} is null, and this is not a truth file")
 
