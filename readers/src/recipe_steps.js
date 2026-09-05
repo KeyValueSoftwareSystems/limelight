@@ -26,7 +26,11 @@
 const STEP = (function(){ try { return Math.max(1, Math.min(7, +LADDER || 1)) } catch(e) { return 1 } })();
 
 const DECAY    = Math.max(0.055, PER * 0.22);
-const OFFBEAT  = 0.5;              // rung 2: beats 2-4 against the downbeat
+/* One number per rung, set on the page and written into the learning file, so the
+   value that survives is the one a human chose while watching -- not one I picked
+   while writing this. */
+const K = (function(){ try { return (KNOB===null||KNOB===undefined) ? null : +KNOB } catch(e){ return null } })();
+const OFFBEAT  = K!==null && STEP===2 ? K : 0.5;   // rung 2: beats 2-4 against the downbeat
 const WHITE    = [255, 250, 242];
 const PARS     = LAYOUT.fixtures.filter(f => f.kind === "par");
 const HEADS    = LAYOUT.fixtures.filter(f => f.kind === "head");

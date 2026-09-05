@@ -8,7 +8,21 @@
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);padding:0;overflow:hidden;
  font:14px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
-.wrap{height:100%;display:flex;flex-direction:column;padding:10px 14px 8px}
+.wrap{height:100%;display:flex;flex-direction:column;padding:10px 14px 64px}
+/* The transport is pinned. It used to be the last child of a 100vh flex column
+   whose children added up to more than 100vh, so on a shorter window it was
+   pushed below the fold -- and the body being overflow:hidden meant there was no
+   way to scroll down to it. Measured at a 713 px viewport: the player sat at
+   707-741 and elementFromPoint on the play button returned nothing at all. */
+#foot{position:fixed;left:0;right:0;bottom:0;height:56px;z-index:80;
+      display:flex;align-items:center;gap:14px;padding:0 14px;
+      background:var(--surface);border-top:1px solid var(--rule)}
+#foot audio{height:34px;flex:0 0 400px}
+#foot .help{flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+            margin:0;font-size:11px}
+/* and the lanes give way instead of overflowing the window */
+#tw{flex:1 1 auto;min-height:150px}
+#live{flex:1 1 auto;min-height:130px}
 a.back{color:var(--faint);text-decoration:none;font-family:ui-monospace,monospace;font-size:12px}
 .mono,select,button{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .bar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:8px 11px;margin:0 0 8px;
@@ -102,8 +116,8 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
       <div style="color:var(--faint);font-size:11px;margin-top:6px" id="lnote"></div>
     </div></div>
 </div>
-<audio id="aud" controls preload="auto"></audio>
-<p class="help" id="help"></p>
+<div id="foot"><audio id="aud" controls preload="auto"></audio>
+  <span class="help" id="help"></span></div>
 </div>
 
 <div id="sel"><h3 id="selt">—</h3>
@@ -653,7 +667,7 @@ function drawRoom(){
      button comes back; the transport and the score stay on screen. */
   const big=()=>{ const L=$("live");
     L.style.cssText = BIG
-      ? "display:flex;gap:8px;position:fixed;inset:44px 10px 96px;z-index:60;margin:0"
+      ? "display:flex;gap:8px;position:fixed;inset:44px 10px 62px;z-index:60;margin:0"
       : "display:flex;gap:8px;flex:0 0 auto;margin:0 0 7px";
     $("bigtog").textContent = BIG ? "exit full screen" : "full screen";
     $("bigtog").classList.toggle("on", BIG);
@@ -680,4 +694,18 @@ function drawRoom(){
    +"nearest downbeat · space plays · arrows seek 2s, shift 30s";
  }catch(e){ $("stat").style.color="#e88055"; $("stat").textContent=e.message }
 })();
+
+/* ?geom=1 reports where things actually are. Written because "the play button is
+   hard to hit" was a layout overflow that no screenshot at my window size showed. */
+if(new URLSearchParams(location.search).get("geom")==="1") setTimeout(()=>{
+  const out=[];
+  for(const sel of ["#foot","#aud",".wrap","#tw","#live","#t1","#t2"]){
+    const e=document.querySelector(sel); if(!e) continue;
+    const r=e.getBoundingClientRect();
+    out.push(`${sel} top=${r.top|0} bottom=${r.bottom|0} h=${r.height|0}`) }
+  const a=$("aud").getBoundingClientRect();
+  const hit=document.elementFromPoint(a.left+22, a.top+a.height/2);
+  out.push("viewport="+innerHeight, "on the play button: "+(hit?hit.tagName+"#"+hit.id:"NOTHING"));
+  document.title="GEOM "+out.join(" | ");
+},1500);
 </script></body></html>

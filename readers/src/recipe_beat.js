@@ -24,17 +24,11 @@
 const DECAY = Math.max(0.055, PER * 0.22);
 const WHITE = [255, 250, 242];
 
-/* Step 2: the bar. Beat 1 is the only thing added, and it is added as brightness
-   alone -- same five pars, same instant, same colour -- so if the bar reads wrong
-   it is the map's downbeat list that is wrong and nothing else.
-
-   The ratio lives HERE and not in the map on purpose. "These times are downbeats"
-   is a fact about the song and belongs in the map. "A downbeat is twice as bright
-   as the beats around it" is a lighting decision and belongs in the recipe. Put
-   that number in the map and the map stops describing the song and starts
-   describing one light rig. */
-const OFFBEAT = 0.5;
-const DOWNSET = new Set(DOWN.map(t => +t.toFixed(3)));
+/* Flat, and it stays flat. This file is rung 1 and nothing else -- every beat the
+   same, which is the thing Renjith checked and approved. The bar belongs to rung 2
+   and lives in recipe_steps.js, behind /build, where it has to be accepted before
+   it is switched on. Adding it here put an unaccepted rung into a view that was
+   already signed off, and the show stopped matching what he had agreed to. */
 
 /* Reads the map's beat list, NOT tempo and phase. That is the whole point: the
    file is the control surface, so deleting an entry removes a flash and moving
@@ -43,9 +37,7 @@ const DOWNSET = new Set(DOWN.map(t => +t.toFixed(3)));
 function frame(t){
   let lo = 0, hi = BEATS.length - 1, k = -1;
   while(lo <= hi){ const mi = (lo + hi) >> 1; if(BEATS[mi] <= t){ k = mi; lo = mi + 1 } else hi = mi - 1 }
-  const bt = k < 0 ? 0 : BEATS[k];
-  const amp = (k >= 0 && DOWNSET.has(+bt.toFixed(3))) ? 1 : OFFBEAT;
-  const lv = k < 0 ? 0 : amp * Math.exp(-(t - bt) / DECAY);
+  const lv = k < 0 ? 0 : Math.exp(-(t - BEATS[k]) / DECAY);
 
   const F = [];
   for(const f of LAYOUT.fixtures){
