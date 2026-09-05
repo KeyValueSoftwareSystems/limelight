@@ -183,6 +183,33 @@ def truth_path(slug):
     return p if os.path.exists(p) else None
 
 
+def discover_layouts():
+    root = os.path.join(ROOT, "readers", "lights")
+    found = {}
+    if not os.path.isdir(root):
+        return found
+    for entry in sorted(os.listdir(root)):
+        full = os.path.join(root, entry)
+        if os.path.isdir(full):
+            cand = os.path.join(full, "layout.json")
+            name = entry
+        elif entry.endswith(".json"):
+            cand = full
+            name = os.path.splitext(entry)[0]
+        else:
+            continue
+        if not os.path.exists(cand):
+            continue
+        try:
+            data = json.load(open(cand))
+        except Exception:
+            continue
+        if not isinstance(data, dict) or not data.get("fixtures"):
+            continue
+        found[data.get("room") or name] = data
+    return found
+
+
 def candidate_maps(slug):
     """Every map anyone has produced for this song, plus the authored answer.
 
@@ -335,13 +362,7 @@ def song(which=None):
     m = json.load(open(sp["map"]))
     lays = {}
     # the rig we actually own goes first, because it is the one being tuned
-    small = os.path.join(ROOT, "readers", "lights", "small", "layout.json")
-    if os.path.exists(small): lays["small"] = json.load(open(small))
-    beat = os.path.join(ROOT, "readers", "lights", "beat", "layout.json")
-    if os.path.exists(beat): lays["beat"] = json.load(open(beat))
-    for name, f in (("club", "layout.json"), ("venue", "venue.json"), ("the-grind", "grind.json")):
-        p = os.path.join(NIGHTS, f)
-        if os.path.exists(p): lays[name] = json.load(open(p))
+    lays.update(discover_layouts())
     cands = candidate_maps(which) if which in songs_index() else {}
     cand_maps = {}
     for k, v in cands.items():
@@ -481,12 +502,9 @@ def status():
                     "link": "/songs"}
 
     rigs = []
-    for name, f in (("club", "layout.json"), ("venue", "venue.json"), ("the-grind", "grind.json")):
-        p2 = os.path.join(NIGHTS, f)
-        if os.path.exists(p2):
-            L = json.load(open(p2))
-            rigs.append({"name": name, "fixtures": len(L.get("fixtures", [])),
-                         "kinds": len({x.get("kind") for x in L.get("fixtures", [])})})
+    for name, L in discover_layouts().items():
+        rigs.append({"name": name, "fixtures": len(L.get("fixtures", [])),
+                     "kinds": len({x.get("kind") for x in L.get("fixtures", [])})})
     out["venues"] = {"owner": "Nikitha", "count": len(rigs), "list": rigs,
                      "job": "The emulator and the whole look of it. How the room is drawn, how "
                             "these pages feel, and whether the show reads as beautiful — which is "

@@ -307,6 +307,14 @@ const PROFILES = {
 };
 const PROFILE = (function(){ try { return (COLOUR || "sunset") } catch(e) { return "sunset" } })();
 const PAL = PROFILES[PROFILE] || PROFILES.sunset;
+const ACT_ORDER = ['sunset','neon','ice','amber'];
+const DROP_TIMES = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
+function palAt(t){
+  let act=0; for(const d of DROP_TIMES){ if(d<=t+1e-9) act++; else break }
+  if(act===0) return PAL;
+  const name=ACT_ORDER[(ACT_ORDER.indexOf(PROFILE)+act)%ACT_ORDER.length];
+  return PROFILES[name]||PAL;
+}
 /* [primary, partner] per chapter. Warm carries the song, cool carries the room,
    deep carries the dark, and the build hands over to the drop by going hot. */
 const ROLES = {
@@ -314,8 +322,9 @@ const ROLES = {
   build:['hot','lead'],  drop :['lead','hot'],  outro:['cool','deep'],
   quiet:['deep','cool'], spotlight:['lead','hot'],
 };
-function roleRGB(role,e,bri){
-  const c = PAL[role] || PAL.lead;
+function roleRGB(role,e,bri,pal){
+  const P = pal || PAL;
+  const c = P[role] || P.lead;
   return hsl(c[0], cl(c[1]*(0.86+0.20*e),0,1),
                    cl(c[2]*(0.84+0.28*e)*(0.94+0.12*bri),0,1));
 }
@@ -419,7 +428,7 @@ function fixColour(t,L,kind,xn,e){
     if(kind==='up') role='deep';
     else if(kind==='head') role=roles[1];
     else role = (Math.round(xn*(PARN-1)) % 2 === 0) ? roles[0] : roles[1];
-    const c=roleRGB(role,e,bri);
+    const c=roleRGB(role,e,bri,palAt(t));
     return kind==='up' ? [c[0]*0.74|0, c[1]*0.74|0, c[2]*0.74|0] : c;
   };
   const R = (L==='spotlight') ? ROLES.spotlight : (ROLES[CH[j][1]] || ROLES.verse);
@@ -442,28 +451,40 @@ const CAP=4.0;
    sub-groups, and the same recipe then works on a different layout -- which is
    the entire reason layout and recipe are separate files. Everything below is
    derived from layout.json at load. */
-let GEO=(function(){
-  const xs=LAYOUT.fixtures.map(f=>f.at[0]);
-  const lo=Math.min.apply(null,xs), hi=Math.max.apply(null,xs), sp=Math.max(0.001,hi-lo);
-  const g={};
-  LAYOUT.fixtures.forEach(function(f,idx){
-    const xn=(f.at[0]-lo)/sp;
-    g[f.id]={xn:xn, x:f.at[0], y:f.at[1], z:f.at[2], kind:f.kind,
-             outer:(xn<0.26||xn>0.74), centre:(xn>=0.36&&xn<=0.64),
-             left:xn<0.5, odd:idx%2===1};
-  });
-  return g})();
+let GEO=buildGeo();
 const KIND=k=>LAYOUT.fixtures.filter(f=>f.kind===k).map(f=>f.id);
 function buildGeo(){
   const xs=LAYOUT.fixtures.map(f=>f.at[0]);
   const lo=Math.min.apply(null,xs), hi=Math.max.apply(null,xs), sp=Math.max(0.001,hi-lo);
+  const ysAll=LAYOUT.fixtures.map(f=>f.at[1]);
+  const ylo=Math.min.apply(null,ysAll), yhi=Math.max.apply(null,ysAll), ysp=Math.max(0.001,yhi-ylo);
+  const seen={};
   const g={};
   LAYOUT.fixtures.forEach(function(f,idx){
     const xn=(f.at[0]-lo)/sp;
-    g[f.id]={xn:xn,x:f.at[0],y:f.at[1],z:f.at[2],kind:f.kind,
+    const k=f.kind; seen[k]=(seen[k]||0);
+    g[f.id]={xn:xn,yn:(f.at[1]-ylo)/ysp,x:f.at[0],y:f.at[1],z:f.at[2],kind:k,
+             ki:seen[k]++, zone:f.zone||null,
              outer:(xn<0.26||xn>0.74), centre:(xn>=0.36&&xn<=0.64),
              left:xn<0.5, odd:idx%2===1}});
+  Object.keys(g).forEach(function(id){ g[id].kn = seen[g[id].kind] });
   return g}
+
+const ARRAY_MIN = 12;
+function arrayGate(G, t, e, L, n){
+  if(!n || n <= ARRAY_MIN) return 1;
+  const cover = {drop:0.62, build:0.46, verse:0.34, quiet:0.24, idle:0.20,
+                 outro:0.26, spotlight:0.18, stop:0, flash:1}[L];
+  const cov = (cover===undefined?0.34:cover);
+  if(cov >= 1) return 1;
+  if(cov <= 0) return 0;
+  const bars = (L==='drop') ? 2 : 4;
+  const ph = (t - PH) / (BAR*bars);
+  const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(G.xn*1.5 + G.yn*0.7 - ph));
+  const soft = 0.16 + 0.22*e;
+  const edge = 1 - cov;
+  return cl((wave - edge + soft) / (soft*2), 0, 1);
+}
 let PARS=KIND('par'), UPS=KIND('uplight'), HEADS=KIND('head'),
     STROBES=KIND('strobe'), STRIPS=KIND('strip'), BLINDERS=KIND('blinder'),
     WASHES=KIND('wash'), LASERS=KIND('laser'), VIDEO=KIND('video');
@@ -587,7 +608,7 @@ function lookFrame(t,L){
       if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(t/(4*BAR))+G.xn*2.2);
       if(G.outer) lv*=1.10; else lv*=0.92;   // the outer pair carries the wash
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip).toFixed(3)})});
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*arrayGate(G,t,e,L,PARS.length)).toFixed(3)})});
 
   // 4 uplights on the back wall: a slow colour bed. Almost never pulses.
   const upSwap=ss(0.25,0.75,barPh(t));      // odds hand over to evens across the bar
@@ -603,7 +624,7 @@ function lookFrame(t,L){
       if(L==='build') lv*=lerp(0.35,1,layer(0));
       if(L==='spotlight') lv*=0.22;
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip).toFixed(3)})});
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*arrayGate(G,t,e,L,UPS.length)).toFixed(3)})});
 
   // 4 moving heads.
   //
@@ -690,7 +711,7 @@ function lookFrame(t,L){
       if(L==='drop'){const[d,s]=since('drop',t,8);
         if(s!==null&&s<BAR) hz=Math.min(CAP,1.6+2.2*(d.v??0.9))}
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*gate*panBias(G.xn)).toFixed(3),
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*gate*panBias(G.xn)*arrayGate(G,t,e,L,HEADS.length)).toFixed(3),
             pan:+pan.toFixed(3),tilt:+tilt.toFixed(3),strobe:+hz.toFixed(3),
             zoom:+zoomAt(t,e,L).toFixed(3)})});
 
@@ -737,7 +758,7 @@ function lookFrame(t,L){
     }
     // slow counter-rotating tilt, so the backlight fans against the front beams
     const th2=motionPhase(t)*0.5+(G.z>29?Math.PI:0);
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*panBias(G.xn)).toFixed(3),
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*panBias(G.xn)*arrayGate(G,t,e,L,WASHES.length)).toFixed(3),
             pan:+cl(0.5+0.16*Math.sin(th2+G.xn*3.1)).toFixed(3),
             tilt:+cl(0.34+0.12*Math.sin(th2*2)).toFixed(3),
             zoom:+cl(zW*1.15).toFixed(3)})});
@@ -747,8 +768,26 @@ function lookFrame(t,L){
      aerial-only zones, a hard height floor, an interlock -- that does not exist
      yet. A zero here is a decision, not an omission. */
   LASERS.forEach(function(id){
-    F.push({id:id,level:0,pattern:0,scan:0,
-            held_back:'no safety layer yet: aerial-only zones and a height floor are unimplemented'})});
+    const G=GEO[id], lim=(LAYOUT.limits||{});
+    const zones=lim.laser_zones||[], floorM=(lim.laser_min_height_m!==undefined?lim.laser_min_height_m:3.0);
+    const okZone = zones.indexOf(G.zone)>=0;
+    const okHigh = G.y >= floorM;
+    if(!(okZone && okHigh)){
+      F.push({id:id,level:0,pattern:0,scan:0,
+              held_back: !okZone ? ('zone '+G.zone+' is not a declared laser zone')
+                                 : ('mounted at '+G.y.toFixed(1)+' m, below the '+floorM+' m floor')});
+      return }
+    let lv=0;
+    if(L==='drop'){ const[d,sd]=since('drop',t,8);
+      lv = 0.55 + 0.45*(d&&d.v!==undefined?d.v:0.9);
+      if(sd!==null && sd<BAR*0.5) lv*=ss(0,1,sd/(BAR*0.5)); }
+    else if(L==='build'&&z){ const rem=z.to-t;
+      if(rem<=4*BAR) lv=0.70*ss(0,1,1-rem/(4*BAR)); }
+    else if(L==='flash'){ lv=0.9 }
+    const fan = 0.55+0.45*Math.cos(2*Math.PI*(G.xn*2 - (t-PH)/(BAR*2)));
+    const c = fixColour(t,L,'head',G.xn,e);
+    F.push({id:id, level:+cl(lv*fan*dip*EX.arc,0,1).toFixed(3),
+            r:c[0], g:c[1], b:c[2], pattern:1, scan:0, aerial:true})});
 
   /* The video wall is emitted as a declaration, not pixels. 96x54 is 5,184
      pixels a frame, and more importantly a screen is not a light: it wants its
@@ -807,7 +846,7 @@ function lookFrame(t,L){
         const taper=Math.min(1,Math.min(i,N2-1-i)/(N2*0.10));
         p2[i]=sc(col,g2*taper*dip)}
     }
-    F.push({id:'strip_1',pixels:p1}); F.push({id:'strip_2',pixels:p2});
+    STRIPS.forEach(function(id,i){ F.push({id:id, pixels:(i%2===0?p1:p2)}) });
   }
 
   /* Fog. A hazer runs LOW AND CONTINUOUS -- that is what puts beams in the air,
