@@ -146,7 +146,7 @@ function until(k,t,w){let b=null;for(const m of MO)if(m.kind===k&&m.at>t&&m.at-t
 function accent(p,e){
   // 0.28 of a beat is ~133 ms at 126 bpm. Below about 100 ms a level change on a
   // large surface reads as a flash rather than a hit, which is the whole complaint.
-  const at=0.035, dc=0.40+0.30*(1-e);
+  const at=0.035, dc=0.20+0.30*(1-e);
   if(p<at) return ss(0,at,p);
   return 1-ss(0,1,cl((p-at)/dc))}
 
@@ -418,6 +418,14 @@ function chaseAt(t, e, n){
    measured against the gap to the NEXT hit rather than a fixed time, so a fill
    reads as a fill instead of five lamps all half-lit at once. */
 const MIRROR = (LAYOUT.fixtures||[]).filter(f=>f.kind==='par').length > 12;
+const sym = xn => MIRROR ? Math.abs(xn-0.5)*2 : xn;
+const CENTRE_PAIR = (function(){
+  const hs=(LAYOUT.fixtures||[]).filter(f=>f.kind==='head');
+  if(hs.length<4) return 1;
+  const xs=LAYOUT.fixtures.map(f=>f.at[0]);
+  const lo=Math.min.apply(null,xs), sp=Math.max(0.001,Math.max.apply(null,xs)-lo);
+  const d=hs.map(f=>Math.abs((f.at[0]-lo)/sp-0.5)).sort((a,b)=>a-b);
+  return d[Math.min(d.length-1,3)]+1e-4;})();
 function chaseGain(xn, c){
   const half = Math.max(1, Math.floor(c.n/2));
   const fold = MIRROR ? Math.abs(xn - 0.5) * 2 : xn;
@@ -605,7 +613,7 @@ function lookFrame(t,L){
       const wave=0.88+0.12*Math.cos(2*Math.PI*G.xn);
       const musical=(0.15+0.85*e)*(L==='drop'?1:0.72);
       lv=(base*0.42 + 0.95*musical)*wave*EX.arc
-         + (0.10+0.34*e)*A*grow*K.accent*drumGate;
+         + (0.16+0.52*e)*A*grow*K.accent*drumGate;
       /* Layer the chase over the wash rather than replacing it: the wash keeps
          the room from going black between pulses, the chase supplies the
          movement. How much of each depends on how busy the music is -- a quiet
@@ -628,7 +636,7 @@ function lookFrame(t,L){
         lv = lerp(lv, full * (floor + (1 - floor) * pulse), mix);
       }
       if(L==='build') lv*=lerp(0.30,1,layer(1));
-      if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(t/(4*BAR))+G.xn*2.2);
+      if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(t/(4*BAR))+sym(G.xn)*2.2);
       if(G.outer) lv*=1.10; else lv*=0.92;   // the outer pair carries the wash
     }
     F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*arrayGate(G,t,e,L,PARS.length)).toFixed(3)})});
@@ -643,7 +651,7 @@ function lookFrame(t,L){
     else{
       const share=(i%2===0)?(1-upSwap):upSwap;
       const bed=((L==='quiet'?0.016:0.070)+0.19*e*(L==='drop'?1.1:0.78))*(0.28+1.10*ss(0.12,0.86,stem('bass',t)));
-      lv=bed*(0.55+0.90*share)*(0.84+0.16*Math.sin(2*Math.PI*(t/(8*BAR))+G.xn*3.1));
+      lv=bed*(0.55+0.90*share)*(0.84+0.16*Math.sin(2*Math.PI*(t/(8*BAR))+sym(G.xn)*3.1));
       if(L==='build') lv*=lerp(0.35,1,layer(0));
       if(L==='spotlight') lv*=0.22;
     }
@@ -720,17 +728,19 @@ function lookFrame(t,L){
     let c=fixColour(t,L,'head',G.xn,e), lv=0, hz=0;
     if(off){c=[0,0,0]}
     else if(L==='flash'){lv=1}
-    else if(L==='spotlight'){lv=(i===1)?(0.30+0.62*stem('vocals',t)):0.0}
+    else if(L==='spotlight'){
+      const near=Math.abs(G.xn-0.5);
+      lv = near<=CENTRE_PAIR ? (0.30+0.62*stem('vocals',t))*(1-0.5*near/Math.max(1e-6,CENTRE_PAIR)) : 0.0}
     else{
       const lead=(((bx%2)+2)%2===0)?G.outer:!G.outer;   // outer pair, then inner pair
       // a small positional term, so the four heads are never identical even
       // between accents -- in a real rig no two fixtures read the same
-      const base=(0.11+0.26*e)*(0.86+0.28*G.xn);
+      const base=(0.11+0.26*e)*(0.86+0.28*sym(G.xn));
       const lamp=(L==='drop'?0.30+0.44*e:0.18+0.36*e);
       lv=base*EX.arc+lamp*A*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5);
       if(L==='build') lv*=lerp(0.25,1,layer(2));
       if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(t/(4*BAR))));
-      if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(t/(8*BAR))+G.xn*4));
+      if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(t/(8*BAR))+sym(G.xn)*4));
       if(L==='drop'){const[d,s]=since('drop',t,8);
         if(s!==null&&s<BAR) hz=Math.min(CAP,1.6+2.2*(d.v??0.9))}
     }
@@ -773,7 +783,7 @@ function lookFrame(t,L){
     if(off){c=[0,0,0]}
     else if(L==='flash'){c=W_.slice();lv=0.90}
     else{
-      const wave=0.72+0.28*Math.cos(2*Math.PI*(G.xn*1.5-bp4));
+      const wave=0.72+0.28*Math.cos(2*Math.PI*(sym(G.xn)*1.5-bp4));
       const base={drop:0.28,build:0.12,verse:0.15,quiet:0.036,idle:0.042,outro:0.05}[L]??0.10;
       lv=(base+0.32*e*(L==='drop'?1:0.64))*wave*EX.arc;
       if(L==='build') lv*=lerp(0.30,1,layer(1));
@@ -807,7 +817,7 @@ function lookFrame(t,L){
     else if(L==='build'&&z){ const rem=z.to-t;
       if(rem<=4*BAR) lv=0.70*ss(0,1,1-rem/(4*BAR)); }
     else if(L==='flash'){ lv=0.9 }
-    const fan = 0.55+0.45*Math.cos(2*Math.PI*(G.xn*2 - (t-PH)/(BAR*2)));
+    const fan = 0.55+0.45*Math.cos(2*Math.PI*(sym(G.xn)*2 - (t-PH)/(BAR*2)));
     const c = fixColour(t,L,'head',G.xn,e);
     F.push({id:id, level:+cl(lv*fan*dip*EX.arc,0,1).toFixed(3),
             r:c[0], g:c[1], b:c[2], pattern:1, scan:0, aerial:true})});
