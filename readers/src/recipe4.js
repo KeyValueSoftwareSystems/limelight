@@ -32,7 +32,7 @@ function en(t){if(!EN||EN.length===0)return 0.5;
    nothing was pulsing. These curves let the show track what is actually
    playing instead of one energy scalar. */
 const STEMS=(MAP.stems&&MAP.stems.sources)||{};
-const STT=(MAP.stems&&MAP.stems.at)||EN.map(p=>p[0]);
+const STT=(MAP.stems&&MAP.stems.at)||(EN||[]).map(p=>p[0]);
 function stem(k,t){
   const v=STEMS[k]; if(!v||!v.length) return 0.5;
   let i=-1; for(let j=0;j<STT.length;j++) if(STT[j]<=t) i=j; else break;
@@ -202,6 +202,7 @@ const LIMP = (LAYOUT.limits&&LAYOUT.limits.max_pan_per_s)||0.85;
 const LIMT = (LAYOUT.limits&&LAYOUT.limits.max_tilt_per_s)||0.95;
 const MPH = (function(){
   // the table is built from a 4-downbeat moving average, matching eMotion
+  if(!EN || !EN.length) return null;      // a map may carry no energy at all
   const sm=EN.map((p,i)=>{let s=0,n=0;
     for(let k=-3;k<=1;k++){const j=i+k; if(j<0||j>=EN.length)continue; s+=EN[j][1]; n++}
     return n?s/n:p[1]});
@@ -213,6 +214,10 @@ function motionPhase(t){
   // continuously varying energy inside a segment makes the extrapolated phase
   // disagree with the next segment's accumulated value -- a jump at every
   // downbeat, which is what slewed the heads at 2.9 units/s.
+  // With no energy curve there is nothing to integrate, so the heads move at one
+  // constant speed. A thinner map means a duller show, never a broken one -- pan
+  // used to come out null here and take the whole renderer down with it.
+  if(!MPH || !MPH.ts.length) return 2*Math.PI*t/movePeriod(0.5);
   let k=0,lo=0,hi=MPH.ts.length-1;
   while(lo<=hi){const m=(lo+hi)>>1; if(MPH.ts[m]<=t){k=m;lo=m+1}else hi=m-1}
   return MPH.cum[k] + MPH.rs[k]*(t-MPH.ts[k])}

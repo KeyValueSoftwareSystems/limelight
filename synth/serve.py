@@ -174,6 +174,27 @@ def listeners_available():
     return sorted(f for f in os.listdir(d) if f.endswith(".py") and not f.startswith("_"))
 
 
+def candidate_maps(slug):
+    """Every map anyone has produced for this song, plus the authored answer.
+
+    Named <slug>.<who>.map.json in synth/maps/. Discovered from disk so nobody has
+    to register anything."""
+    out = {"authored": {"label": "authored answer (the truth)",
+                        "path": os.path.join(HERE, "songs", slug + ".map.json")}}
+    d = os.path.join(HERE, "maps")
+    if os.path.isdir(d):
+        for f in sorted(os.listdir(d)):
+            if not (f.startswith(slug + ".") and f.endswith(".map.json")): continue
+            who = f[len(slug) + 1:-9]
+            try:
+                m = json.load(open(os.path.join(d, f)))
+                how = (m.get("made_by") or {}).get("how", "?")
+            except Exception:
+                how = "unreadable"
+            out[who] = {"label": f"{who}  ({how})", "path": os.path.join(d, f)}
+    return {k: v for k, v in out.items() if os.path.exists(v["path"])}
+
+
 def songs_index():
     """Every song the ladder has, discovered from disk.
 
@@ -235,7 +256,15 @@ def song(which=None):
     for name, f in (("club", "layout.json"), ("venue", "venue.json"), ("the-grind", "grind.json")):
         p = os.path.join(NIGHTS, f)
         if os.path.exists(p): lays[name] = json.load(open(p))
+    cands = candidate_maps(which) if which in songs_index() else {}
+    cand_maps = {}
+    for k, v in cands.items():
+        if k == "authored": continue
+        try: cand_maps[k] = json.load(open(v["path"]))
+        except Exception: pass
     return {"map": m, "layouts": lays, "chapters": m.get("chapters", []),
+            "candidates": {k: v["label"] for k, v in cands.items()},
+            "candidate_maps": cand_maps,
             "audio": os.path.exists(sp["wav"]), "song": which,
             "songs": {k: {"label": v["label"], "canonical": v["canonical"],
                           "left": v["left"], "note": v["note"],

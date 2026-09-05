@@ -53,7 +53,8 @@ what a map error <em>costs</em>, which is not something a beat-accuracy number c
 <div class="bar">
   <label for="song">song</label>
   <select id="song"></select>
-  <label for="dmg">what is wrong on the right</label>
+  <label for="left">left</label><select id="left"></select>
+  <label for="dmg">right</label>
   <select id="dmg"></select>
   <label for="lay">rig</label>
   <select id="lay"></select>
@@ -125,7 +126,14 @@ function prep(m){
     CH:(m.chapters||[]).map(c=>[c.at,c.name]),
     SP:(m.spans||[]).map(s=>({kind:s.kind,from:s.from,to:s.to,rise:s.rise})),
     MO:(m.moments||[]).map(x=>({at:x.at,kind:x.kind,v:x.size!==undefined?x.size:x.holds})),
-    EN:m.energy, BEATS, PER, PH, DUR:D, BAR:4*PER, DBP:m.grid.bar_phase};
+    EN:m.energy||[], BEATS, PER, PH, DUR:D, BAR:4*PER, DBP:m.grid.bar_phase||0};
+}
+function pick(id){
+  // a candidate map wins over a synthetic damage; this is how one person's map is
+  // played against another's on the same audio at the same instant
+  if(G.candidate_maps && G.candidate_maps[id]) return G.candidate_maps[id];
+  if(id==="authored") return G.map;
+  return damage(G.map, id);
 }
 function damage(m, id){
   const d=JSON.parse(JSON.stringify(m));
@@ -323,13 +331,23 @@ function tickOnce(){
 
 function rebuild(){
   const dmg=$("dmg").value, lay=LAYOUTS[$("lay").value];
+  const cand=G.candidates||{};
   const d=DAMAGE.find(x=>x.id===dmg);
-  $("why").innerHTML="<b>"+d.name+"</b> — "+d.why;
-  $("n2").textContent=d.id==="none"?"identical map (control)":d.name;
-  $("room2").className="room"+(d.id==="none"?"":" wrong");
+  const lname=cand[$("left").value]||"authored answer";
+  $("n1").textContent=lname;
+  if(cand[dmg]){
+    $("why").innerHTML="<b>"+cand[dmg]+"</b> played against <b>"+lname+"</b> on the same audio. "
+      +"Where the two rooms differ, one of them is wrong about the music.";
+    $("n2").textContent=cand[dmg];
+    $("room2").className="room";
+  } else {
+    $("why").innerHTML="<b>"+d.name+"</b> — "+d.why;
+    $("n2").textContent=d.id==="none"?"identical map (control)":d.name;
+    $("room2").className="room"+(d.id==="none"?"":" wrong");
+  }
   const t=performance.now();
-  F1=mkReader(G.map, lay);
-  F2=mkReader(damage(G.map,dmg), lay);
+  F1=mkReader(pick($("left").value||"authored"), lay);
+  F2=mkReader(pick(dmg), lay);
   buildDiv();
   $("stat").textContent=`${DIV.length} frames compared in ${(performance.now()-t|0)}ms`;
 }
@@ -364,8 +382,18 @@ function rebuild(){
   // ?d= / ?rig= / ?t= so a specific comparison is a link, which also makes the
   // control case testable from the command line
   const Q=new URLSearchParams(location.search);
-  $("dmg").innerHTML=DAMAGE.map(d=>`<option value="${d.id}"${
-    d.id===Q.get("d")?" selected":""}>${d.name}</option>`).join("");
+  const cand=G.candidates||{};
+  const candOpts=Object.entries(cand).map(([k,v])=>
+    `<option value="${k}"${k===Q.get("d")?" selected":""}>${v}</option>`).join("");
+  $("left").innerHTML=candOpts;
+  $("left").value=Q.get("left")||"authored";
+  $("left").onchange=rebuild;
+  $("dmg").innerHTML=(Object.keys(cand).length>1
+      ? '<optgroup label="someone\'s map">'+candOpts+'</optgroup>' : "")
+    +'<optgroup label="a deliberate mistake">'
+    +DAMAGE.map(d=>`<option value="${d.id}"${d.id===Q.get("d")?" selected":""}>${d.name}</option>`).join("")
+    +'</optgroup>';
+  if(Q.get("d")) $("dmg").value=Q.get("d");
   const rig=Q.get("rig")||"club";
   $("lay").innerHTML=Object.keys(LAYOUTS).map(k=>
     `<option${k===rig?" selected":""}>${k}</option>`).join("");
