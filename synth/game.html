@@ -53,7 +53,7 @@ tr.me td:first-child{color:var(--tung)}
     <select id="a"></select><span class="vs">against</span><select id="b"></select>
   </div>
   <iframe id="show" src="" title="the show"
-    style="width:100%;height:420px;border:1px solid var(--rule);border-radius:4px;
+    style="width:100%;height:470px;border:1px solid var(--rule);border-radius:4px;
            margin:16px 0 0;background:#07080c"></iframe>
   <a class="watch" id="watch" href="#" target="_blank">▶ Open it full size</a>
   <div class="judge">
@@ -113,9 +113,10 @@ async function load(){
 function upd(){
   const u=`/rooms?song=${SONG}&left=${$("a").value}&d=${$("b").value}`;
   $("watch").href=u;
+  const bare=u+"&bare=1";
   // show it here rather than only linking to it -- "watch them side by side" was
   // a link to a page nobody clicked, so the board looked empty
-  if($("show").dataset.u!==u){ $("show").dataset.u=u; $("show").src=u }
+  if($("show").dataset.u!==bare){ $("show").dataset.u=bare; $("show").src=bare }
 }
 $("a").onchange=upd; $("b").onchange=upd;
 for(const [id,said] of [["vA","left"],["vT","tie"],["vB","right"]])

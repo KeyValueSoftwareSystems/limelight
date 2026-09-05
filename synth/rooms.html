@@ -85,6 +85,23 @@ what a map error <em>costs</em>, which is not something a beat-accuracy number c
 </div>
 <script>
 const $=id=>document.getElementById(id);
+// ?bare=1 strips everything that explains the page, for embedding on the board
+// where the surrounding page already says what this is
+if(new URLSearchParams(location.search).get("bare")){
+  document.documentElement.classList.add("bare");
+  const css=document.createElement("style");
+  css.textContent=`.bare h1,.bare .sub,.bare #caveat,.bare .bar,.bare .legend,
+    .bare audio,.bare .note{display:none!important}
+    .bare body{padding:10px 12px 12px}
+    .bare .rooms{grid-template-columns:1fr 1fr!important;gap:8px}
+    .bare canvas.room{height:210px}
+    .bare .rhead{padding:6px 10px}
+    .bare .rname{font-size:10.5px}
+    .bare .scores{margin-top:10px;padding:9px 12px}
+    .bare .scores b{font-size:18px}
+    .bare canvas#div{height:56px;margin-top:9px}`;
+  document.head.appendChild(css);
+}
 // a page that fails silently wastes more time than one that looks ugly
 let ERRD=false;
 function fail(where,e){ if(ERRD) return; ERRD=true;
