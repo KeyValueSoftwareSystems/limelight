@@ -283,38 +283,62 @@ const OFF={par:14, up:-22, head:166, strip:8, headSpread:30};   // degrees
 
    Direction flips every eight bars, so a long drop does not become hypnotic in
    the boring sense. */
-const CHASE_DIV = e => e < 0.35 ? 1 : e < 0.60 ? 2 : e < 0.82 ? 3 : 4;   // steps per beat
+/* ---- the chase -------------------------------------------------------------
+   A pulse that steps across the rig one lamp at a time. The gap between lit and
+   unlit is the effect; a wave that never dims below 70% is a gradient.
+
+   It steps on the DRUM HITS, not on a metronome. The first version advanced on a
+   fixed subdivision and Renjith's verdict was that it got boring, which is
+   exactly right and is a fact about music rather than about tuning: a metronomic
+   chase is the same four bars forever, while the drumming is not. 56% of the
+   hits in this record sit off the grid, so stepping on them gives the chase the
+   record's own rhythm -- it hurries through a fill and waits through a held bar.
+
+   It is also intermittent. A chase running for a whole drop stops being an
+   effect and becomes wallpaper, so it fires in phrases and rests between them. */
+
+/* ACC is thinned for stabs: strong hits, 300 ms apart, median gap 1.88 s -- which
+   is nearly a bar, so a chase driven by it sits on one lamp and does nothing. The
+   chase wants the whole hit list, quiet ones included, because a chase follows
+   the pattern rather than punctuating it. */
+const CHT = (function(){
+  const src = (MAP.accents && MAP.accents.events) || [];
+  const out = [];
+  for(const a of src){
+    if(a.strength < 0.10) continue;
+    if(out.length && a.at - out[out.length-1].at < 0.09) continue;
+    out.push(a);
+  }
+  return out})();
+const CHTT = CHT.map(a => a.at);
 
 function chaseAt(t, e, n){
-  const div = CHASE_DIV(e);
-  const step = PER / div;
-  const k = Math.floor((t - PH) / step);            // which subdivision we are in
-  const frac = ((t - PH) / step) - k;               // how far through it
+  // which hit are we on, and how long ago was it
+  let lo = 0, hi = CHTT.length - 1, i = -1;
+  while(lo <= hi){ const mi = (lo + hi) >> 1; if(CHTT[mi] <= t){ i = mi; lo = mi + 1 } else hi = mi - 1 }
+  if(i < 0) return null;
+  const age = t - CHTT[i];
+  const gap = (i + 1 < CHTT.length ? CHTT[i + 1] : t + 0.5) - CHTT[i];
+  if(age > 1.2) return null;                 // the drums stopped; so does the chase
+  // rest between phrases: on for six bars, off for two, so it stays an event
+  const phrase = ((t - PH) / (BAR * 8)) % 1;
+  const alive = phrase < 0.75 ? 1 : ss(1.0, 0.80, phrase);
+  if(alive < 0.02) return null;
   const fwd = Math.floor((t - PH) / (BAR * 8)) % 2 === 0;
-  const pos = ((fwd ? k : -k) % n + n) % n;         // which fixture, in order
-  return { pos, frac, div, n };
+  const pos = ((fwd ? i : -i) % n + n) % n;
+  return { pos, age, gap, n, alive, strength: CHT[i].strength };
 }
 
-/* How strongly a fixture is lit by the pulse right now.
-
-   The pulse STEPS from lamp to lamp rather than sliding between them. A sliding
-   pulse spreads its brightest change over the middle of a step, so the movement
-   lands nowhere in particular -- measured, only 57% of its changes fell within
-   30 ms of a sixteenth, which reads as flicker rather than as a chase. Stepping
-   puts every change on the subdivision, which is the whole point: five lamps in
-   sequence is only an effect if the sequence is the music's.
-
-   Each lamp still gets an envelope inside its step -- fast up, decaying across
-   the step -- because a lamp that switches looks like a fault and a lamp that
-   fades looks like a chase. The one behind keeps a little light so the rig does
-   not go black between steps. */
+/* One lamp is on the hit, the one before it is still letting go. The envelope is
+   measured against the gap to the NEXT hit rather than a fixed time, so a fill
+   reads as a fill instead of five lamps all half-lit at once. */
 function chaseGain(xn, c){
-  const here = Math.round(xn * (c.n - 1));          // this fixture's slot
+  const here = Math.round(xn * (c.n - 1));
   let d = Math.abs(here - c.pos);
-  d = Math.min(d, c.n - d);                         // the rig wraps
-  const env = Math.exp(-c.frac * 2.6);              // decay across its own step
-  if(d === 0) return 0.38 + 0.62 * env;             // the lamp on the beat
-  if(d === 1) return 0.22 * env;                    // the one it just left
+  d = Math.min(d, c.n - d);
+  const env = Math.exp(-(c.age / Math.max(0.09, c.gap * 0.75)) * 1.9);
+  if(d === 0) return (0.30 + 0.70 * env) * c.alive;
+  if(d === 1) return 0.20 * env * c.alive;
   return 0.0;
 }
 
@@ -451,9 +475,9 @@ function lookFrame(t,L){
          movement. How much of each depends on how busy the music is -- a quiet
          section has no business chasing. */
       const chaseMix = {drop:0.78,build:0.55,verse:0.30,flash:0.0,quiet:0.0,idle:0.0,outro:0.0}[L] ?? 0.25;
-      if(chaseMix > 0.01){
-        const c = chaseAt(t, e, PARN);
-        const pulse = chaseGain(G.xn, c);
+      const c = chaseMix > 0.01 ? chaseAt(t, e, PARN) : null;
+      if(c){
+        const pulse = chaseGain(G.xn, c) * (0.55 + 0.45 * c.strength);
         const full = (base + 0.55*e) * EX.arc;
         // a shallow floor is what makes the gap read: 0.10 left the dark lamps at a
         // fifth of the bright one, which is a gradient again
