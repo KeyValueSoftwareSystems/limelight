@@ -20,7 +20,7 @@
   },
   {
    "n": 2,
-   "name": "bar",
+   "name": "the bar",
    "accepted": true,
    "when": "2026-09-05T20:26:56.388Z",
    "map": "answer",
@@ -53,8 +53,8 @@
    "said_by_renjith": null
   },
   {
-   "n": 4,
-   "name": "sections",
+   "n": 5,
+   "name": "loud and quiet",
    "accepted": true,
    "when": "2026-09-05T20:27:29.624Z",
    "map": "answer",
@@ -70,5 +70,6 @@
    "said_by_renjith": null
   }
  ],
- "updated": "2026-09-06T01:57:29"
+ "updated": "2026-09-06T01:57:29",
+ "renumbered": "The pump was inserted as rung 4 after these were accepted, so every rung above it moved up by one. Records are matched by NAME now, not by number, because a number silently re-attributes an acceptance to a rung nobody saw."
 }
