@@ -99,7 +99,7 @@ for (const [slug, s] of Object.entries(songs())) {
   const W = wave(s.wav);
   process.stdout.write(`\n${slug}  (${s.kind})${wantSolo ? "   each rung on its own" : ""}\n`);
   for (const r of RUNGS) {
-    const lay = r.n >= 12 ? LAY : LAYB;
+    const lay = r.n >= 14 ? LAY : LAYB;
     const F = RM.mkReader(map, lay, process.env.ENERGY || "medium", "garrix", r.n,
                           null, wantSolo ? r.n : 0);
     const C = makeChecks({ MAP: map, LAY: lay, F, LIGHT: light(F, map), WAVE: W, HZ });

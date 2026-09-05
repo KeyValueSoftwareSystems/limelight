@@ -34,49 +34,63 @@ const RUNGS=[
   bad:"the same height all the way through, or bright in the quiet parts",
   fix:"the song's loud-and-quiet track is flat or wrong in that part.",
   check:"whether the light rises and falls with how loud the song is", pass:50},
- {n:6,name:"colour",    adds:"two colours at a time, from a set you pick",
+ {n:6,name:"the build", adds:"the rig climbs through a build and tightens",
+  q:"Does the rig <b>climb</b> through a build instead of sitting still?",
+  look:"the height of the lane across a build, and the outer lamps near the top",
+  good:"steadily brighter, and narrowing to the middle as it peaks",
+  bad:"flat through the build, or bright at the start with nowhere left to go",
+  fix:"the map has no build marked there. Builds live in spans.",
+  check:"whether the light rises across a build", pass:50},
+ {n:7,name:"the drop", adds:"dark before it, everything on it",
+  q:"Does the rig <b>fall away</b> before a drop and then open on it?",
+  look:"the bar before the drop, then the instant itself",
+  good:"fading to nearly black over the last bar, then all five white at once",
+  bad:"the same brightness either side, so the drop passes unmarked",
+  fix:"the map has no drop marked there. Drops live in moments.",
+  check:"how much brighter the drop is than the bar before it", pass:300},
+ {n:8,name:"colour",    adds:"two colours at a time, from a set you pick",
   q:"Are there only <b>two colours</b>, with white on the bar starts?",
   look:"the colours of the five lamps",
   good:"two colours alternating along the row, white only on a blue line",
   bad:"more than two colours, or a colour nobody chose",
   fix:"the colour set is a fixed list, so a third colour means something is ignoring it.",
   check:"how many different colours are on stage", pass:0, limit:4},
- {n:7,name:"drum hits", adds:"the hits that fall between the beats",
+ {n:9,name:"drum hits", adds:"the hits that fall between the beats",
   q:"Do the extra flashes sit on <b>real hits</b>, not on the beat?",
   look:"the small flashes between the grey lines",
   good:"extra flashes on real drum hits, still in time with the song",
   bad:"extra flashes at even spacing, which means it is guessing rather than listening",
   fix:"it is reacting to quiet hits like hi-hats. Raise the threshold.",
   check:"how many of all the flashes are still in time", pass:90},
- {n:8,name:"instruments", adds:"how wide the rig is follows how full the song is",
+ {n:10,name:"instruments", adds:"how wide the rig is follows how full the song is",
   q:"Does the rig get <b>wider</b> when more instruments play?",
   look:"how many lamps are lit at once, as instruments come and go",
   good:"one lamp for a solo voice, all five when the whole band is in",
   bad:"the same number of lamps lit all the way through",
   fix:"this song has no instrument breakdown yet. Run synth/enrich.py on it.",
   check:"whether the number of lit lamps follows how full the song is", pass:50},
- {n:9,name:"melody",     adds:"which lamp follows the pitch of the tune",
+ {n:11,name:"melody",     adds:"which lamp follows the pitch of the tune",
   q:"Does the light <b>walk up the row</b> when the tune goes up?",
   look:"which lamp is brightest, as the tune rises and falls",
   good:"the bright lamp moves along the row with the tune, using the whole row",
   bad:"the bright lamp moving on its own, ignoring the tune",
   fix:"this song has no tune written down yet, so there is nothing to follow.",
   check:"whether the lit lamp follows the pitch of the tune", pass:45},
- {n:10,name:"chords",    adds:"the colour changes when the harmony changes",
+ {n:12,name:"chords",    adds:"the colour changes when the harmony changes",
   q:"Does the colour change <b>on the chord</b>, and at no other time?",
   look:"when the colours swap over, against where the chords change",
   good:"colour swaps land on chord changes and nowhere else",
   bad:"colour swapping on the beat, or drifting whenever it likes",
   fix:"this song has no chords written down yet.",
   check:"how many colour changes land on a chord change", pass:60},
- {n:11,name:"restraint", adds:"one thing leads at a time, the rest hold back",
+ {n:13,name:"restraint", adds:"one thing leads at a time, the rest hold back",
   q:"Is the rig doing <b>one thing</b> at a time, or everything at once?",
   look:"the whole rig, and whether you know where to look",
   good:"one idea at a time -- the pulse, or the tune, or the rise -- the rest quiet",
   bad:"everything moving at once, so there is nothing to watch",
   fix:"this is applied last. If it still looks busy, a rung below it is too loud.",
   check:"how many times a second the picture changes", pass:0, limit:400},
- {n:12,name:"moving lamps", adds:"the two moving lamps come back",
+ {n:14,name:"moving lamps", adds:"the two moving lamps come back",
   q:"Do the moving lamps stay <b>within what a real motor can do</b>?",
   look:"the two moving lamps, and whether the movement looks achievable",
   good:"movement a real motor could follow",
@@ -162,7 +176,7 @@ function makeChecks(C){
   /* Rung 6 measures against the map's grid, which is only safe because rung 1
      already anchored that grid to the recording. Accepting 6 without 1 means
      nothing. */
-  if(n===7){ const s=onGridShare(A,B2);
+  if(n===9){ const s=onGridShare(A,B2);
     return {v:s, ok:s>=RUNGS_[n-1].pass,
             txt:`${s.toFixed(0)}% of ${flashTimes(A,B2).length} flashes are in time`} }
   if(n===2){
@@ -194,6 +208,38 @@ function makeChecks(C){
       txt:`this song does not do it, and the lamps do not either`};
     return {v:r*100, ok:r>0,
       txt:`the song grows +${P.depth} between beats, the light grows ${r>=0?"+":""}${r.toFixed(3)}`} }
+  /* Measured on the light, against where the map says the build and the drop are.
+     Both can fail: a rig that is flat through a build, or one that is the same
+     brightness either side of a drop, gets caught. */
+  if(n===6){
+    const sp=(MAP.spans||[]).filter(s=>s.kind==="build" && s.to>A && s.from<B2);
+    if(!sp.length) return {v:0,ok:false,na:true,txt:"no build marked in this part"};
+    const xs=[],ys=[];
+    for(const s of sp) for(let t=s.from;t<s.to;t+=0.25){
+      let v=0,c=0;
+      for(let u=t;u<t+0.25;u+=0.02){ v+=F(u).fixtures.reduce((a,o)=>a+(o.level||0),0); c++ }
+      xs.push((t-s.from)/(s.to-s.from)); ys.push(v/Math.max(1,c)) }
+    if(xs.length<8) return {v:0,ok:false,na:true,txt:"the builds here are too short to tell"};
+    const mx=xs.reduce((a,b)=>a+b,0)/xs.length, my=ys.reduce((a,b)=>a+b,0)/ys.length;
+    let sxy=0,sxx=0,syy=0;
+    for(let i=0;i<xs.length;i++){const a2=xs[i]-mx,b2=ys[i]-my; sxy+=a2*b2; sxx+=a2*a2; syy+=b2*b2}
+    if(syy<1e-9) return {v:0,ok:false,txt:"the rig is flat through the build"};
+    const r=sxy/Math.sqrt(sxx*syy||1);
+    return {v:100*r, ok:r>=0.5,
+      txt:`the rig climbs through the build, ${r.toFixed(2)} out of a possible 1.00`} }
+  if(n===7){
+    const dr=(MAP.moments||[]).filter(m=>m.kind==="drop" && m.at>=A && m.at<=B2);
+    if(!dr.length) return {v:0,ok:false,na:true,txt:"no drop marked in this part"};
+    const mean=(a,b)=>{ let v=0,c=0;
+      for(let t=a;t<b;t+=0.02){ v+=F(t).fixtures.reduce((x,o)=>x+(o.level||0),0); c++ }
+      return c? v/c : 0 };
+    const ratios=[];
+    for(const d of dr){
+      const before=mean(d.at-0.5, d.at-0.02), on=mean(d.at, d.at+0.3);
+      ratios.push(on / Math.max(0.02, before)) }
+    const r=ratios.reduce((a,b)=>a+b,0)/ratios.length;
+    return {v:100*r, ok:r>=3,
+      txt:`the drop is ${r.toFixed(1)} times brighter than the bar before it`} }
   if(n===3){
     const use=new Array(LAY.fixtures.filter(f=>f.kind==="par").length).fill(0);
     for(let t=A;t<Math.min(B2,A+90);t+=0.04){
@@ -225,7 +271,7 @@ function makeChecks(C){
     const r=sxy/Math.sqrt(sxx*syy||1), s=100*r;
     return {v:s, ok:s>=50,
       txt:`the light follows how loud the song is, ${r.toFixed(2)} out of a possible 1.00`} }
-  if(n===6){
+  if(n===8){
     /* Count HUES, not raw values. Bucketing r,g,b counted every brightness of the
        same colour as a new one, so adding the breathing rung -- which changes
        brightness and nothing else -- made this fail with ten. White is counted
@@ -247,7 +293,7 @@ function makeChecks(C){
      deliberate limit -- an independent version would need the separated instrument
      audio, which we do not have. Stated here rather than hidden, because the whole
      value of this file is that a green result means something. */
-  if(n===8){
+  if(n===10){
     const I=(MAP.observations||{}).instruments;
     if(!I||!I.density_per_bar) return {v:0,ok:false,txt:"this song has no instrument breakdown yet", na:true};
     const D=I.density_per_bar.filter(x=>x[0]>=A&&x[0]<=B2);
@@ -263,7 +309,7 @@ function makeChecks(C){
     const r=sxy/Math.sqrt(sxx*syy||1);
     return {v:100*r, ok:r>=0.5,
       txt:`the rig widens with the song, ${r.toFixed(2)} out of a possible 1.00`} }
-  if(n===9){
+  if(n===11){
     const M=(MAP.observations||{}).melody;
     const N=((M&&M.notes)||[]).filter(e=>e&&e.length>=3&&isFinite(e[2])&&e[0]>=A&&e[0]<=B2);
     if(N.length<12) return {v:0,ok:false,txt:"this song has no tune written down here", na:true};
@@ -296,7 +342,7 @@ function makeChecks(C){
     const nPar=LAY.fixtures.filter(f=>f.kind==="par").length;
     return {v:100*r, ok:r>=0.45 && seen.size>=Math.min(4,nPar),
       txt:`the lit lamp follows the tune ${r.toFixed(2)} out of 1.00, using ${seen.size} of ${nPar} lamps`} }
-  if(n===10){
+  if(n===12){
     const C2=((MAP.observations||{}).chords||{}).events||[];
     const ch=C2.filter(c=>c.at>=A&&c.at<=B2);
     if(ch.length<4) return {v:0,ok:false,txt:"this song has no chords written down here", na:true};
@@ -331,7 +377,7 @@ function makeChecks(C){
      two or three changes a second; past that a rig stops reading as a show and
      starts reading as flicker. Brightness is counted in coarse steps so a smooth
      fade is one change and not fifty. */
-  if(n===11){
+  if(n===13){
     /* Quantising brightness counted a fading flash as a stream of changes, so even
        one flash a beat scored as chaos. A viewer sees a fade as ONE event. What
        the eye actually registers is a change of picture: which lamps are lit, and
@@ -350,7 +396,7 @@ function makeChecks(C){
     const per=changes/(n2*0.02);
     return {v:per*100, ok:per<=4,
       txt:`the picture changes ${per.toFixed(1)} times a second, and a room can follow about 4`} }
-  if(n===12){
+  if(n===14){
     const L=(LAY.limits||{}), mp=L.max_pan_per_s||1.55, mt=L.max_tilt_per_s||1.7;
     let worst=0, prev=null;
     for(let t=A;t<Math.min(B2,A+60);t+=0.02){

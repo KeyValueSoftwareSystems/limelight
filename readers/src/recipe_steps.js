@@ -63,7 +63,7 @@ const E = ({
   high:   { lvl:1.16, bed:1.14, spread:0.80, flash:1.22 },
 }[DRIVE]) || { lvl:1, bed:1, spread:1, flash:1 };
 
-const STEP = (function(){ try { return Math.max(1, Math.min(12, +LADDER || 1)) } catch(e) { return 1 } })();
+const STEP = (function(){ try { return Math.max(1, Math.min(14, +LADDER || 1)) } catch(e) { return 1 } })();
 
 /* ---- one rung on its own -------------------------------------------------
    The ladder is cumulative, so rung 9 means rungs 1 to 9 all running at once.
@@ -80,10 +80,10 @@ const SOLO = (function(){ try { return SOLORUNG ? +SOLORUNG : 0 } catch(e) { ret
 /* A few rungs speak THROUGH another one and cannot be seen without it. Chords
    change the colour, so soloing chords with the colour machinery off gives five
    white lamps and tells you nothing. Written down rather than left implicit. */
-const NEEDS = { 10: [6] };            // chords are expressed as colour
+const NEEDS = { 12: [8] };            // chords are expressed as colour
 const use  = n => SOLO ? (n === SOLO || (NEEDS[SOLO] || []).indexOf(n) >= 0)
                        : (STEP >= n);
-const BEATY = { 1:1, 2:1, 3:1, 7:1 };
+const BEATY = { 1:1, 2:1, 3:1, 7:1, 9:1 };
 const SOLO_STEADY = SOLO && !BEATY[SOLO];
 
 const DECAY    = Math.max(0.055, PER * 0.22);
@@ -177,7 +177,7 @@ function energyAt(t){
 /* rung 6: the hits that are NOT on a beat. Rung 1 already covers the beats, so
    this rung adds only what the grid cannot express. */
 const OFFGRID = (function(){
-  if(!use(7)) return [];
+  if(!use(9)) return [];
   const src = (MAP.accents && MAP.accents.events) || [];
   const out = [];
   for(const a of src){
@@ -224,7 +224,7 @@ const blockStart = (t, bars) => BAR0 + Math.floor(barOf(t) / bars) * bars * BAR;
    unless the arrangement really has almost nothing in it. A rig that drops to two
    lamps every other bar reads as broken rather than as restraint. */
 function widthAt(t){
-  if(!use(8) || !INSTR || !INSTR.density_per_bar || !INSTR.density_per_bar.length) return NP;
+  if(!use(10) || !INSTR || !INSTR.density_per_bar || !INSTR.density_per_bar.length) return NP;
   const D = INSTR.density_per_bar, t0 = blockStart(t, HOLD.width);
   let sum = 0, n = 0;
   for(const [at, d] of D){ if(at >= t0 - PHRASE*BAR && at < t0 + HOLD.width*BAR){ sum += d; n++ } }
@@ -238,7 +238,7 @@ function widthAt(t){
    somewhere new eight times a second, which is the single worst thing in this
    file and the reason the melody rung looked terrible. */
 function pitchPos(t){
-  if(!use(9) || !MELRANGE || !MELN.length) return null;
+  if(!use(11) || !MELRANGE || !MELN.length) return null;
   const t0 = blockStart(t, HOLD.melody);
   let sum = 0, n = 0;
   for(let i = lastAtOrBefore(MELN, t0 + HOLD.melody*BAR, x => x[0]); i >= 0; i--){
@@ -254,7 +254,7 @@ function pitchPos(t){
    each four-bar block decides the colour, so the rig states a colour, holds it
    long enough to mean something, and moves when the harmony has actually moved. */
 function chordState(t){
-  if(!use(10) || !CHORDS.length) return null;
+  if(!use(12) || !CHORDS.length) return null;
   const t0 = blockStart(t, HOLD.colour), t1 = t0 + HOLD.colour*BAR;
   const inBlock = [];
   for(let i = lastAtOrBefore(CHORDS, t1, x => x.at); i >= 0; i--){
@@ -286,7 +286,7 @@ const BIGT = (function(){
   for(const m of MO) if(m.kind === "drop" || m.kind === "stop") out.push(m.at);
   return out.sort((a,b) => a-b) })();
 function bigMoment(t){
-  if(!use(10)) return true;                 // before the chords rung, every bar
+  if(!use(12)) return true;                 // before the chords rung, every bar
   for(const b of BIGT) if(Math.abs(b - t) < 0.25) return true;
   return false;
 }
@@ -309,6 +309,50 @@ function beatIndex(t){
    drop wants the pulse, a quiet vocal section wants the tune, a build wants the
    rise. Nothing is switched off, only pulled back -- a rig where elements vanish
    looks broken rather than restrained. */
+/* ---- rungs 6 and 7: the two gestures that make a room feel designed ---------
+   Everything below these rungs REACTS to the song. A club show does something
+   else as well: it sets up a moment and then pays it off, and the pay-off is
+   mostly made of the darkness before it. A drop with no blackout in front of it
+   is just a loud bar.
+
+   The build ramps. Not brightness alone -- the rig tightens as it rises, because
+   a build that only gets brighter has nowhere left to go at the top.
+
+   The drop is three things in order: the rig falls away over the last bar, cuts
+   to near black for a beat, then everything opens white. The map already carries
+   the drop instants and the build spans; nothing here is invented. */
+function buildAt(t){
+  if(!use(6)) return null;
+  for(const sp of SP){
+    if(sp.kind !== "build" || t < sp.from || t >= sp.to) continue;
+    const x = (t - sp.from) / Math.max(0.001, sp.to - sp.from);
+    // the map says HOW it rises; a late build holds back and then goes
+    const shape = sp.rise === "late"  ? Math.pow(x, 2.0)
+                : sp.rise === "early" ? Math.pow(x, 0.55)
+                : x;
+    return { x, shape };
+  }
+  return null;
+}
+const DROPS = MO.filter(m => m.kind === "drop").map(m => m.at).sort((a,b) => a-b);
+function dropAt(t){
+  if(!use(7) || !DROPS.length) return null;
+  for(const d of DROPS){
+    const dt = t - d;
+    if(dt >= -BAR && dt < BAR * 2){
+      return { dt, bar: BAR,
+               /* the last bar falls AWAY: full a bar out, near black on the
+                  instant. Written the other way round first, which darkened a bar
+                  early and then brightened into the drop -- the exact opposite of
+                  the gesture, and it reads as a mistake rather than as tension. */
+               pre:  dt < 0 ? Math.max(0, Math.min(1, -dt / BAR)) : null,
+               hit:  dt >= 0 && dt < 0.28,
+               after: dt >= 0 ? Math.min(1, dt / (BAR * 2)) : null };
+    }
+  }
+  return null;
+}
+
 function leadAt(t){
   const e = energyAt(t);
   for(const sp of SP) if(sp.kind === "build" && sp.from <= t && t < sp.to) return "rise";
@@ -352,10 +396,10 @@ function frame(t){
   /* rung 8: the arrangement decides how much of the row is in play at all, and
      the window sits in the middle so a thin arrangement reads as a narrow rig
      rather than a rig with holes in it */
-  const LEAD = use(11) ? RECEDE[leadAt(t)] : {flash:1, spot:1, colour:1};
+  const LEAD = use(13) ? RECEDE[leadAt(t)] : {flash:1, spot:1, colour:1};
   const w = widthAt(t);
   const half = (NP - w) / 2;
-  const inPlay = i => (!use(8)) || (i >= Math.floor(half) && i < Math.floor(half) + w);
+  const inPlay = i => (!use(10)) || (i >= Math.floor(half) && i < Math.floor(half) + w);
   /* rung 9: the tune picks the lamp, replacing the mechanical walk -- that walk
      was the thing Renjith called overdone, and it was: it moved for its own sake */
   const pp = pitchPos(t);
@@ -386,12 +430,21 @@ function frame(t){
        soloing the instruments rung showed it at once. */
     const bedHere = inPlay(i) ? bed : 0;
     let lv = (bedHere + (1 - bedHere) * share * amp * env * LEAD.flash) * size * duck;
+    const B = buildAt(t);
+    if(B){ lv *= 0.55 + 0.75 * B.shape;                     // it climbs
+           if(B.shape > 0.72 && (i === 0 || i === PARS.length-1)) lv *= 0.4 }  // and tightens
+    const D = dropAt(t);
+    if(D){
+      if(D.pre !== null) lv *= Math.max(0.06, Math.pow(D.pre, 1.8));  // fall away, then black
+      else if(D.hit)     lv = 1;                                      // everything, white
+      else               lv *= 0.85 + 0.35 * D.after;                 // and come back bigger
+    }
     if(!use(4) && !SOLO_STEADY) lv = share * amp * env * size;
     lv *= E.lvl;
     let col = WHITE;
     // ---- rung 5: colour ---------------------------------------------------
-    if(use(6)){
-      /* rung 10: the harmony decides which colour leads and when it changes. Before
+    if(use(8)){
+      /* rung 12: the harmony decides which colour leads and when it changes. Before
          that rung the two colours simply alternate along the row, which looks fine
          and means nothing. */
       const ch = chordState(t);
@@ -413,13 +466,13 @@ function frame(t){
          starts too, so the one moment the colour moved was the one moment the rig
          went white. White is kept for the starts of PARTS of the song now -- an
          accent worth having rather than a tick every two seconds. */
-      col = (isDown && bigMoment(t)) ? WHITE : hsl(hu, cl(c[1]*(0.86+0.20*e),0,1), li);
+      col = (isDown && bigMoment(t)) || (dropAt(t) && dropAt(t).hit) ? WHITE : hsl(hu, cl(c[1]*(0.86+0.20*e),0,1), li);
     }
     F.push({ id:f.id, level:+cl(lv,0,1).toFixed(4), r:col[0], g:col[1], b:col[2] });
   });
 
   // ---- rung 6: the hits between the beats ---------------------------------
-  if(use(7) && OFFGRID.length){
+  if(use(9) && OFFGRID.length){
     let lo=0, hi=OFFGRID.length-1, j=-1;
     while(lo<=hi){ const mi=(lo+hi)>>1; if(OFFGRID[mi].at<=t){ j=mi; lo=mi+1 } else hi=mi-1 }
     if(j >= 0){
@@ -433,7 +486,7 @@ function frame(t){
   }
 
   // ---- rung 7: the heads --------------------------------------------------
-  if(use(12)){
+  if(use(14)){
     const e = energyAt(t), sweep = Math.sin(2*Math.PI * t / (BAR*2));
     HEADS.forEach((f, i) => {
       const s = i === 0 ? sweep : -sweep;
