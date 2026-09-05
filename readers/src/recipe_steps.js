@@ -40,6 +40,29 @@
    than a tuning session: the accepted settings are the starting point for a song
    nobody has mapped yet. */
 
+/* ---- the rate a room can read -------------------------------------------
+   Every musical fact has its own speed and none of them is a lighting speed.
+   The tune moves 7.9 notes a second, the chords change every 1.9 seconds, the
+   arrangement shifts every bar. Driving a lamp directly from any of those makes
+   a strobe, which is what Renjith saw and called terrible -- and it was, and it
+   was the same mistake three times.
+
+   A lighting designer does not rebuild the rig every two seconds. Each element
+   below is SMOOTHED over a phrase and then HELD, so the rig states one idea long
+   enough to be read before it states the next. The musical fact decides WHAT the
+   rig does; these numbers decide how often it is allowed to say it. */
+const PHRASE = 2;                  // bars a gesture is averaged over
+const HOLD   = { melody: 1, width: 4, colour: 4 };   // bars before it may change again
+
+/* ---- energy: the last thing applied, so it never changes what the show says,
+   only how hard it says it ------------------------------------------------- */
+const DRIVE = (function(){ try { return (ENERGY || "medium") } catch(e) { return "medium" } })();
+const E = ({
+  low:    { lvl:0.74, bed:0.80, spread:1.25, flash:0.80 },
+  medium: { lvl:1.00, bed:1.00, spread:1.00, flash:1.00 },
+  high:   { lvl:1.16, bed:1.14, spread:0.80, flash:1.22 },
+}[DRIVE]) || { lvl:1, bed:1, spread:1, flash:1 };
+
 const STEP = (function(){ try { return Math.max(1, Math.min(11, +LADDER || 1)) } catch(e) { return 1 } })();
 
 const DECAY    = Math.max(0.055, PER * 0.22);
@@ -69,7 +92,7 @@ const OFFBEAT  = K!==null && STEP===2 ? K : 0.5;   // rung 2: beats 2-4 against 
    Real pumping rigs are mostly ON. The bed is the sustained wash the compressor
    acts on; the flashes ride on top of it. That is a visible change to the look
    and it is the point of this rung rather than a side effect. */
-const BED       = K!==null && STEP===4 ? K : 0.55;
+const BED       = (K!==null && STEP===4 ? K : 0.55) * E.bed;
 const DUCK_GAIN = 2.2;
 const DUCK_MAX  = 0.62;
 const PUMPING   = !!(PUMP && PUMP.present);
@@ -163,26 +186,59 @@ const lastAtOrBefore = (arr, t, key) => {
   while(lo <= hi){ const mi = (lo+hi)>>1; if(key(arr[mi]) <= t){ k = mi; lo = mi+1 } else hi = mi-1 }
   return k };
 
-/* rung 8: how many lamps are in play, from how full the arrangement is */
+/* the bar this instant belongs to, and the start of the block it is held in.
+   Counting from the first BEAT rather than the first BAR put every block one beat
+   off the music, so a colour change that was meant to land on a chord landed
+   between two of them. The bar line is where the downbeats are. */
+const BAR0 = (DOWN && DOWN.length) ? DOWN[0] : PH;
+const barOf = t => Math.floor((t - BAR0) / BAR);
+const blockStart = (t, bars) => BAR0 + Math.floor(barOf(t) / bars) * bars * BAR;
+
+/* rung 8: how many lamps are in play, from how full the arrangement is --
+   averaged over a phrase and held for four bars, and never below three lamps
+   unless the arrangement really has almost nothing in it. A rig that drops to two
+   lamps every other bar reads as broken rather than as restraint. */
 function widthAt(t){
   if(STEP < 8 || !INSTR || !INSTR.density_per_bar || !INSTR.density_per_bar.length) return NP;
-  const D = INSTR.density_per_bar;
-  const k = lastAtOrBefore(D, t, x => x[0]);
-  const d = k < 0 ? D[0][1] : D[k][1];
-  return Math.max(1, Math.min(NP, Math.round(1 + d * (NP - 1))));
+  const D = INSTR.density_per_bar, t0 = blockStart(t, HOLD.width);
+  let sum = 0, n = 0;
+  for(const [at, d] of D){ if(at >= t0 - PHRASE*BAR && at < t0 + HOLD.width*BAR){ sum += d; n++ } }
+  if(!n){ const k = lastAtOrBefore(D, t, x => x[0]); sum = k<0?D[0][1]:D[k][1]; n = 1 }
+  const d = sum / n;
+  const floor = d < 0.12 ? 1 : 3;                  // a real solo may have one lamp
+  return Math.max(floor, Math.min(NP, Math.round(1 + d * (NP - 1) * E.spread)));
 }
-/* rung 9: where along the row, from the pitch of the tune */
+/* rung 9: where along the row, from the pitch of the tune -- as the average of a
+   phrase, moving at most once a bar. Following note to note put the lit lamp
+   somewhere new eight times a second, which is the single worst thing in this
+   file and the reason the melody rung looked terrible. */
 function pitchPos(t){
   if(STEP < 9 || !MELRANGE || !MELN.length) return null;
-  const k = lastAtOrBefore(MELN, t, x => x[0]);
-  if(k < 0) return null;
-  if(t - MELN[k][0] > 0.9) return null;            // the tune has stopped; no note to follow
-  return cl((MELN[k][1] - MELRANGE.lo) / (MELRANGE.hi - MELRANGE.lo), 0, 1);
+  const t0 = blockStart(t, HOLD.melody);
+  let sum = 0, n = 0;
+  for(let i = lastAtOrBefore(MELN, t0 + HOLD.melody*BAR, x => x[0]); i >= 0; i--){
+    if(MELN[i][0] < t0 - PHRASE*BAR) break;
+    sum += MELN[i][1]; n++;
+  }
+  if(n < 3) return null;                            // the tune is not really playing here
+  return cl((sum/n - MELRANGE.lo) / (MELRANGE.hi - MELRANGE.lo), 0, 1);
 }
 /* rung 10: which of the two colours leads, changing only when the chord changes */
+/* rung 10: which colour, from the harmony -- but not on every chord. Changing
+   colour every 1.9 seconds is wallpaper with a faster loop. The dominant root of
+   each four-bar block decides the colour, so the rig states a colour, holds it
+   long enough to mean something, and moves when the harmony has actually moved. */
 function chordState(t){
   if(STEP < 10 || !CHORDS.length) return null;
-  const k = lastAtOrBefore(CHORDS, t, x => x.at);
+  const t0 = blockStart(t, HOLD.colour), t1 = t0 + HOLD.colour*BAR;
+  const inBlock = [];
+  for(let i = lastAtOrBefore(CHORDS, t1, x => x.at); i >= 0; i--){
+    if(CHORDS[i].at < t0) break;
+    inBlock.push(CHORDS[i]);
+  }
+  const k = inBlock.length
+    ? CHORDS.indexOf(inBlock[Math.floor(inBlock.length/2)])   // the middle of the block
+    : lastAtOrBefore(CHORDS, t, x => x.at);
   if(k < 0) return null;
   const name = CHORDS[k].chord || "";
   /* The root note moves the hue. Swapping which lamp holds which colour was a
@@ -195,8 +251,8 @@ function chordState(t){
                  "G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
   const rm = name.match(/^([A-G][#b]?)/);
   const root = rm ? (ROOTS[rm[1]] ?? 0) : 0;
-  return { i: k, root, shift: (root / 12 - 0.5) * 30,
-           minor: /m(?!aj)/.test(name.replace(/^[A-G][#b]?/, "")), at: CHORDS[k].at };
+  return { i: Math.floor(barOf(t) / HOLD.colour), root, shift: (root / 12 - 0.5) * 30,
+           minor: /m(?!aj)/.test(name.replace(/^[A-G][#b]?/, "")), at: blockStart(t, HOLD.colour) };
 }
 
 /* the starts of parts, and the drops: where white earns its place */
@@ -250,9 +306,11 @@ function frame(t){
   /* rung 9: the tune picks the lamp, replacing the mechanical walk -- that walk
      was the thing Renjith called overdone, and it was: it moved for its own sake */
   const pp = pitchPos(t);
+  let spot = null;
   if(pp !== null && !isDown){
     const first = Math.floor(half), last = first + w - 1;
-    lit = Math.round(first + pp * (last - first));
+    spot = first + pp * (last - first);            // a place on the row, not a lamp index
+    lit = Math.round(spot);
   }
 
   const F = [];
@@ -263,8 +321,16 @@ function frame(t){
        breathing had nowhere to show. The chase and the flash ride on top of it. */
     const on = (lit === null || lit === i) && inPlay(i);
     const bed = (STEP >= 4 && PUMPING) ? BED : 0;
-    let lv = (bed + (1 - bed) * (on ? amp * env : 0)) * size * duck;
-    if(STEP < 4) lv = on ? amp * env * size : 0;
+    /* a soft spot rather than one lamp snapping on: the neighbours catch some of
+       it, so the tune reads as movement along the row instead of a lamp race */
+    let share = on ? 1 : 0;
+    if(spot !== null && inPlay(i)){
+      const d2 = Math.abs(i - spot);
+      share = Math.max(share, d2 < 1.6 ? Math.pow(1 - d2/1.6, 1.6) : 0);
+    }
+    let lv = (bed + (1 - bed) * share * amp * env) * size * duck;
+    if(STEP < 4) lv = share * amp * env * size;
+    lv *= E.lvl;
     let col = WHITE;
     // ---- rung 5: colour ---------------------------------------------------
     if(STEP >= 6){

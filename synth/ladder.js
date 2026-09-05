@@ -87,7 +87,7 @@ const only = args.filter(a => !a.startsWith("--"));
 const LAY = read(path.join(ROOT, "readers/lights/small/layout.json"));
 const LAYB = read(path.join(ROOT, "readers/lights/beat/layout.json"));
 
-let pass = 0, fail = 0;
+let pass = 0, fail = 0, skip = 0;
 const rows = [];
 for (const [slug, s] of Object.entries(songs())) {
   if (only.length && !only.includes(slug)) continue;
@@ -97,24 +97,25 @@ for (const [slug, s] of Object.entries(songs())) {
   process.stdout.write(`\n${slug}  (${s.kind})\n`);
   for (const r of RUNGS) {
     const lay = r.n >= 11 ? LAY : LAYB;
-    const F = RM.mkReader(map, lay, "medium", "garrix", r.n);
+    const F = RM.mkReader(map, lay, process.env.ENERGY || "medium", "garrix", r.n);
     const C = makeChecks({ MAP: map, LAY: lay, F, LIGHT: light(F, map), WAVE: W, HZ });
     let res; try { res = C.runCheck(r.n) } catch (e) { res = { ok: false, v: 0, txt: "threw: " + e.message } }
-    res.ok ? pass++ : fail++;
-    rows.push({ slug, n: r.n, name: r.name, ok: res.ok, v: res.v, txt: res.txt });
-    console.log(`  ${r.n} ${r.name.padEnd(15)} ${res.ok ? "ok  " : "FAIL"}  ${res.txt}`);
+    if (res.na) skip++; else res.ok ? pass++ : fail++;
+    rows.push({ slug, n: r.n, name: r.name, ok: res.ok, na: !!res.na, v: res.v, txt: res.txt });
+    console.log(`  ${r.n} ${r.name.padEnd(15)} ${res.na ? "--  " : res.ok ? "ok  " : "FAIL"}  ${res.txt}`);
     if (wantParts && map.chapters) {
       const chs = map.chapters, D = (map.song && map.song.length) || 240;
       for (let i = 0; i < chs.length; i++) {
         const t0 = chs[i].at, t1 = (i + 1 < chs.length) ? chs[i + 1].at : D;
         if (t1 - t0 < 2) continue;
         let p; try { p = C.runCheck(r.n, t0, t1) } catch (e) { p = { ok: false, txt: "threw" } }
-        if (!p.ok) console.log(`        ${chs[i].name.padEnd(10)} ${t0.toFixed(0)}s  ${p.txt}`);
+        if (!p.ok && !p.na) console.log(`        ${chs[i].name.padEnd(10)} ${t0.toFixed(0)}s  ${p.txt}`);
       }
     }
   }
 }
-console.log(`\n${pass} ok, ${fail} failed, across ${new Set(rows.map(r => r.slug)).size} songs`);
+console.log(`\n${pass} ok, ${fail} failed, ${skip} with nothing to measure, across `
+  + `${new Set(rows.map(r => r.slug)).size} songs`);
 fs.writeFileSync(path.join(ROOT, "synth/learning/ladder-check.json"),
-  JSON.stringify({ when: new Date().toISOString(), pass, fail, rows }, null, 1) + "\n");
+  JSON.stringify({ when: new Date().toISOString(), pass, fail, skip, rows }, null, 1) + "\n");
 process.exit(fail ? 1 : 0);

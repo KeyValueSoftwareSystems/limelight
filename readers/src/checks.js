@@ -94,6 +94,11 @@ const RUNGS=[
      WAVE   {dt, peak, low} -- the recording's own envelope, which is what the
             checks that must not be circular are measured against
    Nothing here reads the page. */
+/* A check with nothing to measure returns na:true. "This song has no chords
+   written down" is not a broken show and must not be counted as one -- a runner
+   that conflates missing data with failure produces a number nobody can act on.
+   A rig that never changes colour, or leaves the lamps off while the tune plays,
+   is NOT na: that is the show failing and it stays a failure. */
 function makeChecks(C){
   const {MAP, LAY, F, LIGHT, WAVE, HZ} = C;
   const dur = m => (m.song && m.song.length) || 240;
@@ -116,7 +121,7 @@ function makeChecks(C){
   return 100*T.filter(t=>Math.abs(t-(PH+Math.round((t-PH)/SUB)*SUB))<=0.04).length/T.length;
 }
   function runCheck(n, w0, w1){
-  if(!LIGHT||!MAP) return {v:0,ok:false,txt:"no render"};
+  if(!LIGHT||!MAP) return {v:0,ok:false,txt:"no render", na:true};
   /* A rung can be right across the song and wrong in one part of it, which is
      exactly the thing worth knowing, so every check takes a window and the strip
      under the lane runs it once per part. */
@@ -129,14 +134,14 @@ function makeChecks(C){
      low band everywhere else. */
   if(n===1){
     const T=flashTimes(A,B2); if(!T.length) return {v:0,ok:false,txt:"no flashes here"};
-    if(!WAVE) return {v:0,ok:false,txt:"still loading the sound"};
+    if(!WAVE) return {v:0,ok:false,txt:"still loading the sound", na:true};
     const L=WAVE.low, dt=WAVE.dt;
     const at=t=>{ const i=Math.round(t/dt); let p=0;
       for(let j=Math.max(0,i-1);j<Math.min(L.length,i+2);j++) p=Math.max(p,L[j]); return p };
     let hit=0; for(const t of T) hit+=at(t);
     let all=0, cnt=0;
     for(let i=Math.max(0,(A/dt)|0);i<Math.min(L.length,(B2/dt)|0);i++){ all+=L[i]; cnt++ }
-    if(!cnt) return {v:0,ok:false,txt:"no sound here"};
+    if(!cnt) return {v:0,ok:false,txt:"no sound here", na:true};
     const ratio=(hit/T.length)/(all/cnt);
     return {v:ratio*100, ok:ratio>=1.35,
             txt:`the drum is ${ratio.toFixed(2)} times louder under the flashes than elsewhere`} }
@@ -150,7 +155,7 @@ function makeChecks(C){
     const B=MAP.beats||[], D=new Set((MAP.downbeats||[]).map(x=>+x.toFixed(3)));
     const marks=[...(MAP.chapters||[]).map(c=>c.at), ...(MAP.moments||[]).map(m=>m.at)]
       .filter(t=>t>=A&&t<=B2);
-    if(!marks.length||!D.size) return {v:0,ok:false,txt:"nothing here to test against"};
+    if(!marks.length||!D.size) return {v:0,ok:false,txt:"nothing here to test against", na:true};
     const hit=marks.filter(t=>[...D].some(d=>Math.abs(d-t)<=0.06)).length;
     const s=100*hit/marks.length;
     return {v:s, ok:s>=80, txt:`${hit} of ${marks.length} new parts start on a blue line`} }
@@ -170,7 +175,7 @@ function makeChecks(C){
         if(a1+b1>0) v.push((b1-a1)/(a1+b1)) }
       return v.length? v.reduce((a,b)=>a+b,0)/v.length : 0 };
     const r=win(0.45,0.95);
-    if(!P) return {v:0,ok:false,txt:"nobody has measured this song yet (run listen/pump.py)"};
+    if(!P) return {v:0,ok:false,txt:"nobody has measured this song yet (run listen/pump.py)", na:true};
     if(!P.present) return {v:r,ok:true,
       txt:`this song does not do it, and the lamps do not either`};
     return {v:r*100, ok:r>0,
@@ -188,8 +193,8 @@ function makeChecks(C){
        the field says, including when it is wrong. This measures the light against
        the RECORDING instead: the loudness envelope computed from the audio, which
        the recipe never sees. Now a bad energy curve fails. */
-    const E=MAP.energy||[]; if(E.length<8) return {v:0,ok:false,txt:"no energy curve"};
-    if(!WAVE) return {v:0,ok:false,txt:"waveform not loaded yet"};
+    const E=MAP.energy||[]; if(E.length<8) return {v:0,ok:false,txt:"no energy curve", na:true};
+    if(!WAVE) return {v:0,ok:false,txt:"waveform not loaded yet", na:true};
     const loud=t=>{ const i=Math.round(t/WAVE.dt); let p=0;
       for(let j=Math.max(0,i);j<Math.min(WAVE.peak.length,i+Math.round(MAP.grid.period*4/WAVE.dt));j++)
         p+=WAVE.peak[j];
@@ -202,7 +207,7 @@ function makeChecks(C){
     const mx=xs.reduce((a,b)=>a+b,0)/xs.length, my=ys.reduce((a,b)=>a+b,0)/ys.length;
     let sxy=0,sxx=0,syy=0;
     for(let i=0;i<xs.length;i++){const a=xs[i]-mx,b=ys[i]-my; sxy+=a*b; sxx+=a*a; syy+=b*b}
-    if(xs.length<4) return {v:0,ok:false,txt:"not enough of the song here to tell"};
+    if(xs.length<4) return {v:0,ok:false,txt:"not enough of the song here to tell", na:true};
     const r=sxy/Math.sqrt(sxx*syy||1), s=100*r;
     return {v:s, ok:s>=50,
       txt:`the light follows how loud the song is, ${r.toFixed(2)} out of a possible 1.00`} }
@@ -230,9 +235,9 @@ function makeChecks(C){
      value of this file is that a green result means something. */
   if(n===8){
     const I=(MAP.observations||{}).instruments;
-    if(!I||!I.density_per_bar) return {v:0,ok:false,txt:"this song has no instrument breakdown yet"};
+    if(!I||!I.density_per_bar) return {v:0,ok:false,txt:"this song has no instrument breakdown yet", na:true};
     const D=I.density_per_bar.filter(x=>x[0]>=A&&x[0]<=B2);
-    if(D.length<4) return {v:0,ok:false,txt:"not enough of the song here to tell"};
+    if(D.length<4) return {v:0,ok:false,txt:"not enough of the song here to tell", na:true};
     const xs=[],ys=[];
     for(const [t,d] of D){ let n2=0,c=0;
       for(let u=t;u<t+1.5;u+=0.05){ n2+=F(u).fixtures.filter(o=>(o.level||0)>0.15).length; c++ }
@@ -247,13 +252,28 @@ function makeChecks(C){
   if(n===9){
     const M=(MAP.observations||{}).melody;
     const N=((M&&M.notes)||[]).filter(e=>e&&e.length>=3&&isFinite(e[2])&&e[0]>=A&&e[0]<=B2);
-    if(N.length<12) return {v:0,ok:false,txt:"this song has no tune written down here"};
+    if(N.length<12) return {v:0,ok:false,txt:"this song has no tune written down here", na:true};
+    /* Measured over a bar, not note to note. Following each note put the lit lamp
+       somewhere new eight times a second, which is a strobe rather than a show, so
+       the rig deliberately follows the PHRASE. The check has to ask the same
+       question the design answers: does the light sit where the tune is sitting.
+       Note-level following would score this design badly and a strobe well. */
+    const BARS=(MAP.grid.period||0.5)*4;
+    const bins=new Map();
+    for(const [t,,mid] of N){ const b=Math.floor(t/BARS);
+      if(!bins.has(b)) bins.set(b,[]); bins.get(b).push(mid) }
     const xs=[],ys=[]; const seen=new Set();
-    for(const [t,,mid] of N){
-      const fr=F(t+0.02); let bi=-1,bv=0.15;
-      fr.fixtures.forEach((o,i)=>{ if((o.level||0)>bv){ bv=o.level; bi=i } });
-      if(bi<0) continue; seen.add(bi); xs.push(mid); ys.push(bi) }
-    if(xs.length<12) return {v:0,ok:false,txt:"the lamps are off while the tune plays here"};
+    for(const [b,ms] of bins){
+      if(ms.length<3) continue;
+      const t=(b+0.5)*BARS;
+      let sum=0,c=0;
+      for(let u=b*BARS;u<(b+1)*BARS;u+=0.08){
+        const fr=F(u); let bi=-1,bv=0.15;
+        fr.fixtures.forEach((o,i)=>{ if((o.level||0)>bv){ bv=o.level; bi=i } });
+        if(bi>=0){ seen.add(bi); sum+=bi; c++ } }
+      if(!c) continue;
+      xs.push(ms.reduce((a,b2)=>a+b2,0)/ms.length); ys.push(sum/c) }
+    if(xs.length<8) return {v:0,ok:false,txt:"the lamps are off while the tune plays here"};
     const mx=xs.reduce((a,b)=>a+b,0)/xs.length, my=ys.reduce((a,b)=>a+b,0)/ys.length;
     let sxy=0,sxx=0,syy=0;
     for(let i=0;i<xs.length;i++){const a2=xs[i]-mx,b3=ys[i]-my; sxy+=a2*b3; sxx+=a2*a2; syy+=b3*b3}
@@ -265,7 +285,7 @@ function makeChecks(C){
   if(n===10){
     const C2=((MAP.observations||{}).chords||{}).events||[];
     const ch=C2.filter(c=>c.at>=A&&c.at<=B2);
-    if(ch.length<4) return {v:0,ok:false,txt:"this song has no chords written down here"};
+    if(ch.length<4) return {v:0,ok:false,txt:"this song has no chords written down here", na:true};
     const hue=o=>{const r=(o.r||0)/255,g=(o.g||0)/255,b=(o.b||0)/255;
       const M2=Math.max(r,g,b),m2=Math.min(r,g,b),d=M2-m2;
       if(d<0.06) return -1;
