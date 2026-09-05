@@ -496,8 +496,32 @@ function buildGeo(){
   return g}
 
 const ARRAY_MIN = 12;
+const DROPS_AT = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
+function actNo(t){ let k=0; for(const d of DROPS_AT){ if(d<=t+1e-9) k++; else break } return k }
+const DEPLOY = {
+  par:     {arc:0.00, act:0},
+  strip:   {arc:0.06, act:0},
+  head:    {arc:0.12, act:0},
+  wash:    {arc:0.30, act:1},
+  uplight: {arc:0.10, act:0},
+  laser:   {arc:0.45, act:2},
+  blinder: {arc:0.00, act:0},
+  strobe:  {arc:0.00, act:0},
+  fog:     {arc:0.00, act:0},
+};
+function deployed(kind, t){
+  const d = DEPLOY[kind]; if(!d) return 1;
+  const arc = cl(t/Math.max(1,DUR));
+  if(actNo(t) < d.act) return 0;
+  if(arc >= d.arc + 0.10) return 1;
+  if(arc <= d.arc) return 0;
+  return ss(d.arc, d.arc+0.10, arc);
+}
+
 function arrayGate(G, t, e, L, n){
-  if(!n || n <= ARRAY_MIN) return 1;
+  const dep = deployed(G.kind, t);
+  if(dep <= 0) return 0;
+  if(!n || n <= ARRAY_MIN) return dep;
   const ceil = {drop:0.46, build:0.40, verse:0.34, quiet:0.26, idle:0.22,
                 outro:0.26, spotlight:0.18, stop:0, flash:1}[L];
   const top = (ceil===undefined?0.52:ceil);
@@ -512,7 +536,7 @@ function arrayGate(G, t, e, L, n){
   const soft = 0.16 + 0.22*e;
   const edge = 1 - cov;
   const gate = cl((wave - edge + soft) / (soft*2), 0, 1);
-  return gate * cl(1/Math.max(0.12, cov), 1, 2.4);
+  return gate * cl(1/Math.max(0.12, cov), 1, 2.4) * dep;
 }
 let PARS=KIND('par'), UPS=KIND('uplight'), HEADS=KIND('head'),
     STROBES=KIND('strobe'), STRIPS=KIND('strip'), BLINDERS=KIND('blinder'),
@@ -758,7 +782,7 @@ function lookFrame(t,L){
     else if(L==='build'&&z){const rem=z.to-t;
       if(rem<=2*BAR){lv=ss(0,1,1-rem/(2*BAR))*((G.left===(((bx%2)+2)%2===0))?1:0.5)*Math.min(1,grow);
         hz=Math.min(CAP,1.5+2.5*e)}}
-    F.push({id:id,level:+cl(lv*dip).toFixed(3),strobe:+hz.toFixed(3)})});
+    F.push({id:id,level:+cl(lv*dip*deployed('strobe',t)).toFixed(3),strobe:+hz.toFixed(3)})});
 
   /* Blinders point AT the crowd. Used sparingly and only on the biggest hits --
      a blinder that is on often is just a lamp. Two windows: the first bar of a
@@ -771,7 +795,7 @@ function lookFrame(t,L){
         hz=Math.min(CAP,2.0+2.0*(d.v??0.9)) } }
     else if(L==='build'&&z){ const rem=z.to-t;
       if(rem<=2*BAR) lv=0.55*ss(0,1,1-rem/(2*BAR))*(i===(((bx%2)+2)%2)?1:0.6) }
-    F.push({id:id,level:+cl(lv*dip*Math.min(1,grow)).toFixed(3),strobe:+hz.toFixed(3)})});
+    F.push({id:id,level:+cl(lv*dip*Math.min(1,grow)*deployed('blinder',t)).toFixed(3),strobe:+hz.toFixed(3)})});
 
   /* 24 LED wash zoom on the mid and upstage trusses: the BACKLIGHT layer. They
      move slowly, sit wide, and carry the harmonic bed -- so they hold the room
@@ -819,7 +843,7 @@ function lookFrame(t,L){
     else if(L==='flash'){ lv=0.9 }
     const fan = 0.55+0.45*Math.cos(2*Math.PI*(sym(G.xn)*2 - (t-PH)/(BAR*2)));
     const c = fixColour(t,L,'head',G.xn,e);
-    F.push({id:id, level:+cl(lv*fan*dip*EX.arc,0,1).toFixed(3),
+    F.push({id:id, level:+cl(lv*fan*dip*EX.arc*deployed('laser',t),0,1).toFixed(3),
             r:c[0], g:c[1], b:c[2], pattern:1, scan:0, aerial:true})});
 
   /* The video wall is emitted as a declaration, not pixels. 96x54 is 5,184
@@ -879,7 +903,10 @@ function lookFrame(t,L){
         const taper=Math.min(1,Math.min(i,N2-1-i)/(N2*0.10));
         p2[i]=sc(col,g2*taper*dip)}
     }
-    STRIPS.forEach(function(id,i){ F.push({id:id, pixels:(i%2===0?p1:p2)}) });
+    const sdep=deployed('strip',t);
+    STRIPS.forEach(function(id,i){
+      const src0=(i%2===0?p1:p2);
+      F.push({id:id, pixels: sdep>=0.999 ? src0 : src0.map(q=>[Math.round(q[0]*sdep),Math.round(q[1]*sdep),Math.round(q[2]*sdep)])}) });
   }
 
   /* Fog. A hazer runs LOW AND CONTINUOUS -- that is what puts beams in the air,
