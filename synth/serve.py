@@ -286,10 +286,15 @@ def song(which=None):
     if not idx:
         return {"error": "no songs yet — press Generate songs, or run python3 synth/compose.py"}
     if which not in idx:
-        # open on the song with the most dynamic range, not the first alphabetically:
-        # levels 01-04 are flat by design and the room barely moves on them
-        rich = [k for k, v in idx.items() if v.get("canonical") and not v.get("thin")]
-        which = max(rich, key=lambda k: idx[k].get("span", 0)) if rich else sorted(idx)[0]
+        # whatever people are actually working on: the song with the most maps
+        # handed in. Falls back to the richest authored song when nobody has yet.
+        counts = {k: len(candidate_maps(k)) for k in idx}
+        worked = [k for k, c in counts.items() if c > 1]
+        if worked:
+            which = max(worked, key=lambda k: counts[k])
+        else:
+            rich = [k for k, v in idx.items() if v.get("canonical") and not v.get("thin")]
+            which = max(rich, key=lambda k: idx[k].get("span", 0)) if rich else sorted(idx)[0]
     sp = idx[which]
     m = json.load(open(sp["map"]))
     lays = {}
