@@ -1,0 +1,74 @@
+{
+ "song": "levels",
+ "steps": [
+  {
+   "n": 1,
+   "name": "beats",
+   "accepted": true,
+   "when": "2026-09-05T20:26:55.772Z",
+   "map": "answer",
+   "colour": "sunset",
+   "adds": "every beat, all five pars, flat",
+   "question": "Does a flash land on every beat, and nothing in between?",
+   "check": {
+    "what": "how much louder the kick is under the flashes than elsewhere",
+    "value": 152.9,
+    "passed": true,
+    "said": "kick is 1.53x louder under the flashes than elsewhere"
+   },
+   "said_by_renjith": null
+  },
+  {
+   "n": 2,
+   "name": "bar",
+   "accepted": true,
+   "when": "2026-09-05T20:26:56.388Z",
+   "map": "answer",
+   "colour": "sunset",
+   "adds": "beat 1 brighter than beats 2-4",
+   "question": "Do the tall flashes land where the bar starts?",
+   "check": {
+    "what": "share of section starts and moments on a downbeat",
+    "value": 87.5,
+    "passed": true,
+    "said": "21 of 24 section starts on a downbeat"
+   },
+   "said_by_renjith": null
+  },
+  {
+   "n": 3,
+   "name": "position",
+   "accepted": true,
+   "when": "2026-09-05T20:27:01.022Z",
+   "map": "answer",
+   "colour": "sunset",
+   "adds": "which par, rather than all of them",
+   "question": "Does the bar walk across the five, and open wide on beat 1?",
+   "check": {
+    "what": "least-used par, as a share of an even split",
+    "value": 77.13,
+    "passed": true,
+    "said": "least-used par gets 77% of an even share"
+   },
+   "said_by_renjith": null
+  },
+  {
+   "n": 4,
+   "name": "sections",
+   "accepted": true,
+   "when": "2026-09-05T20:27:29.624Z",
+   "map": "answer",
+   "colour": "sunset",
+   "adds": "the rig gets bigger and smaller with the song",
+   "question": "Does the rig grow where the song grows?",
+   "check": {
+    "what": "correlation of light per bar with the song's energy",
+    "value": 96.5,
+    "passed": true,
+    "said": "r = 0.96 between light and how loud the record is"
+   },
+   "said_by_renjith": null
+  }
+ ],
+ "updated": "2026-09-06T01:57:29"
+}

@@ -8,8 +8,8 @@
 function mkReader(map, layout, drive, colour, ladder, knob){
   const g = prep(map);
   return new Function("MAP","LAYOUT","CH","SP","MO","EN","BEATS","PER","PH","DUR","BAR","DBP",
-                      "DOWN","STOP_REAL","ANT","ENERGY","COLOUR","LADDER","KNOB", RECIPE + "\n;return frame;")(
-    g.MAP, layout, g.CH, g.SP, g.MO, g.EN, g.BEATS, g.PER, g.PH, g.DUR, g.BAR, g.DBP, g.DOWN, true, true,
+                      "DOWN","PUMP","STOP_REAL","ANT","ENERGY","COLOUR","LADDER","KNOB", RECIPE + "\n;return frame;")(
+    g.MAP, layout, g.CH, g.SP, g.MO, g.EN, g.BEATS, g.PER, g.PH, g.DUR, g.BAR, g.DBP, g.DOWN, g.PUMP, true, true,
     drive || "medium", colour || "sunset", ladder || 1,
     (knob===undefined||knob===null) ? null : +knob);
 }
@@ -27,6 +27,8 @@ function prep(m){
     SP:(m.spans||[]).map(s=>({kind:s.kind,from:s.from,to:s.to,rise:s.rise})),
     MO:(m.moments||[]).map(x=>({at:x.at,kind:x.kind,v:x.size!==undefined?x.size:x.holds})),
     EN:m.energy||[], BEATS, PER, PH, DUR:D, BAR:4*PER, DBP:m.grid.bar_phase||0,
+    /* what the record does between kicks: the sidechain, measured not assumed */
+    PUMP:((m.observations||{}).pump)||null,
     /* the downbeats the MAP names, not ones re-derived from bar_phase -- on Levels
        those two disagreed and the field was the one that was wrong */
     DOWN:(m.downbeats&&m.downbeats.length) ? m.downbeats.slice().sort((a,b)=>a-b)

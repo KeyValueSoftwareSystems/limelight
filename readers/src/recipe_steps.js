@@ -12,10 +12,11 @@
      1 beats       every beat, all five pars, flat
      2 bar         beat 1 brighter than beats 2-4
      3 position    which par, rather than all of them
-     4 sections    the rig gets bigger and smaller with the song
-     5 colour      a profile, two colours at a time
-     6 accents     the drum hits between the beats
-     7 heads       the two moving heads come back
+     4 pump        the rig breathes with the sidechain
+     5 sections    the rig gets bigger and smaller with the song
+     6 colour      a profile, two colours at a time
+     7 accents     the drum hits between the beats
+     8 heads       the two moving heads come back
 
    Each rung is judged by a check in build.html that can FAIL, not by whether it
    looks nice. Rungs are accepted one at a time and written to
@@ -23,7 +24,7 @@
    than a tuning session: the accepted settings are the starting point for a song
    nobody has mapped yet. */
 
-const STEP = (function(){ try { return Math.max(1, Math.min(7, +LADDER || 1)) } catch(e) { return 1 } })();
+const STEP = (function(){ try { return Math.max(1, Math.min(8, +LADDER || 1)) } catch(e) { return 1 } })();
 
 const DECAY    = Math.max(0.055, PER * 0.22);
 /* One number per rung, set on the page and written into the learning file, so the
@@ -31,6 +32,43 @@ const DECAY    = Math.max(0.055, PER * 0.22);
    while writing this. */
 const K = (function(){ try { return (KNOB===null||KNOB===undefined) ? null : +KNOB } catch(e){ return null } })();
 const OFFBEAT  = K!==null && STEP===2 ? K : 0.5;   // rung 2: beats 2-4 against the downbeat
+
+/* ---- rung 4: the pump -------------------------------------------------------
+   Levels is built on its sidechain. Every kick ducks the whole mix and it
+   breathes back over the beat that follows, and lights that merely flash on time
+   miss the thing that makes the record feel the way it does.
+
+   The map says WHETHER the record pumps and BY HOW MUCH, per chapter, because
+   that is a fact about the recording -- listen/pump.py measures it and it comes
+   out negative on music that cannot pump. How far the light ducks is a lighting
+   decision and lives here. DUCK_GAIN converts the measured recovery into a duck
+   depth; it is the one number in this rung that nobody measured. */
+/* A duck needs something to duck. Flashing on the beat and ducking on the beat
+   are opposite gestures -- the flash is brightest at the kick, the sidechain is
+   darkest there -- so a rig that only flashes has decayed to nothing by the time
+   the pump recovers and there is no breathing to see. Measured: the emitted light
+   recovered -0.63 with the pump on versus -0.67 with it off, which is the flash's
+   own decay and nothing else.
+
+   Real pumping rigs are mostly ON. The bed is the sustained wash the compressor
+   acts on; the flashes ride on top of it. That is a visible change to the look
+   and it is the point of this rung rather than a side effect. */
+const BED       = K!==null && STEP===4 ? K : 0.55;
+const DUCK_GAIN = 2.2;
+const DUCK_MAX  = 0.62;
+const PUMPING   = !!(PUMP && PUMP.present);
+const RELEASE   = (PUMP && PUMP.release_at_beat_fraction) || 0.38;
+function duckAt(t){
+  if(STEP < 4 || !PUMPING) return 1;
+  let d = PUMP.depth || 0;
+  const pc = PUMP.per_chapter || [];
+  for(const [at, dep, ok] of pc){ if(at <= t){ d = ok ? dep : 0 } else break }
+  const amt = Math.min(DUCK_MAX, Math.max(0, d * DUCK_GAIN));
+  const k = beatIndex(t); if(k < 0) return 1;
+  const nb = (k+1 < BEATS.length) ? BEATS[k+1] : BEATS[k] + PER;
+  const ph = (t - BEATS[k]) / Math.max(1e-6, nb - BEATS[k]);
+  return 1 - amt * Math.exp(-ph / RELEASE);       // ducked at the kick, back by the next
+}
 const WHITE    = [255, 250, 242];
 const PARS     = LAYOUT.fixtures.filter(f => f.kind === "par");
 const HEADS    = LAYOUT.fixtures.filter(f => f.kind === "head");
@@ -97,9 +135,11 @@ function frame(t){
   let amp = 1;
   // ---- rung 2: the bar ----------------------------------------------------
   if(STEP >= 2 && !isDown) amp = OFFBEAT;
-  // ---- rung 4: the song gets bigger and smaller ---------------------------
+  // ---- rung 5: the song gets bigger and smaller ---------------------------
   let size = 1;
-  if(STEP >= 4) size = 0.34 + 0.66 * cl(energyAt(t), 0, 1);
+  if(STEP >= 5) size = 0.34 + 0.66 * cl(energyAt(t), 0, 1);
+  // ---- rung 4: and it breathes with the sidechain -------------------------
+  const duck = duckAt(t);
 
   /* ---- rung 3: WHICH par, not all of them --------------------------------
      The bar walks across the rig, one par per beat, and the downbeat opens all
@@ -113,10 +153,17 @@ function frame(t){
 
   const F = [];
   PARS.forEach((f, i) => {
-    let lv = (lit === null || lit === i) ? amp * env * size : 0;
+    /* The bed is the WASH: every par carries it, because a compressor acts on the
+       whole mix and not on whichever fixture the chase happens to be pointing at.
+       Lighting the bed only on the selected par left four of five dark and the
+       breathing had nowhere to show. The chase and the flash ride on top of it. */
+    const on = (lit === null || lit === i);
+    const bed = (STEP >= 4 && PUMPING) ? BED : 0;
+    let lv = (bed + (1 - bed) * (on ? amp * env : 0)) * size * duck;
+    if(STEP < 4) lv = on ? amp * env * size : 0;
     let col = WHITE;
     // ---- rung 5: colour ---------------------------------------------------
-    if(STEP >= 5){
+    if(STEP >= 6){
       const c = (i % 2 === 0) ? PAL.a : PAL.b;
       const e = energyAt(t);
       col = isDown ? WHITE : hsl(c[0], cl(c[1]*(0.86+0.20*e),0,1), cl(c[2]*(0.84+0.28*e),0,1));
@@ -125,12 +172,12 @@ function frame(t){
   });
 
   // ---- rung 6: the hits between the beats ---------------------------------
-  if(STEP >= 6 && OFFGRID.length){
+  if(STEP >= 7 && OFFGRID.length){
     let lo=0, hi=OFFGRID.length-1, j=-1;
     while(lo<=hi){ const mi=(lo+hi)>>1; if(OFFGRID[mi].at<=t){ j=mi; lo=mi+1 } else hi=mi-1 }
     if(j >= 0){
       const a = OFFGRID[j], ae = Math.exp(-(t - a.at) / (DECAY * 0.55));
-      const add = 0.55 * ae * cl(a.strength / 0.45, 0, 1) * (STEP >= 4 ? (0.34+0.66*energyAt(t)) : 1);
+      const add = 0.55 * ae * cl(a.strength / 0.45, 0, 1) * (STEP >= 5 ? (0.34+0.66*energyAt(t)) : 1);
       if(add > 0.004){
         const p = Math.abs(Math.round(a.at * 1000)) % NP;   // deterministic, not random
         F[p].level = +cl(F[p].level + add, 0, 1).toFixed(4);
@@ -139,7 +186,7 @@ function frame(t){
   }
 
   // ---- rung 7: the heads --------------------------------------------------
-  if(STEP >= 7){
+  if(STEP >= 8){
     const e = energyAt(t), sweep = Math.sin(2*Math.PI * t / (BAR*2));
     HEADS.forEach((f, i) => {
       const s = i === 0 ? sweep : -sweep;

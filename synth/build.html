@@ -89,22 +89,25 @@ const RUNGS=[
  {n:3,name:"position",  adds:"which par, rather than all of them",
   q:"Does the bar <b>walk across</b> the five, and open wide on beat 1?",
   check:"least-used par, as a share of an even split", pass:60, unit:"%"},
- {n:4,name:"sections",  adds:"the rig gets bigger and smaller with the song",
+ {n:4,name:"pump",      adds:"the rig breathes with the sidechain",
+  q:"Does the rig <b>duck on the kick</b> and swell back before the next one?",
+  check:"recovery of the light between kicks, against what the record does", pass:0, unit:""},
+ {n:5,name:"sections",  adds:"the rig gets bigger and smaller with the song",
   q:"Does the rig <b>grow</b> where the song grows?",
   check:"correlation of light per bar with the song's energy", pass:50, unit:"%"},
- {n:5,name:"colour",    adds:"a profile, two colours at a time",
+ {n:6,name:"colour",    adds:"a profile, two colours at a time",
   q:"Are there only <b>two colours</b>, and does white mark the downbeat?",
   check:"distinct hues on stage (8 or fewer passes)", pass:0, unit:" hues", invert:true, limit:8},
- {n:6,name:"accents",   adds:"the drum hits between the beats",
+ {n:7,name:"accents",   adds:"the drum hits between the beats",
   q:"Do the extra flashes sit on <b>real hits</b>, not on the grid?",
   check:"share of all flashes still in time to a sixteenth", pass:90, unit:"%"},
- {n:7,name:"heads",     adds:"the two moving heads come back",
+ {n:8,name:"heads",     adds:"the two moving heads come back",
   q:"Do the heads move <b>within the motor budget</b>?",
   check:"peak movement as a share of what the layout allows", pass:0, unit:"%", invert:true, limit:100},
 ];
 
 let SONG="", MAPS={}, MAP=null, MAPKEY="", LAY=null, LAYBEAT=null, RM=null, RECIPE="", ROOMJS="";
-let STEP=1, LEARN={song:"",steps:[]}, WAVE=null, LIGHT=null, VIEW={t0:0,span:12}, PAL="sunset";
+let STEP=1, KNOB=null, LEARN={song:"",steps:[]}, WAVE=null, LIGHT=null, VIEW={t0:0,span:12}, PAL="sunset";
 const HZ=50;
 const dur=m=>(m.song&&m.song.length)||240;
 
@@ -163,7 +166,7 @@ function runCheck(n){
   /* Rung 6 measures against the map's grid, which is only safe because rung 1
      already anchored that grid to the recording. Accepting 6 without 1 means
      nothing. */
-  if(n===6){ const s=onGridShare();
+  if(n===7){ const s=onGridShare();
     return {v:s, ok:s>=RUNGS[n-1].pass, txt:`${s.toFixed(0)}% of ${flashTimes().length} flashes in time`} }
   if(n===2){
     const B=MAP.beats||[], D=new Set((MAP.downbeats||[]).map(x=>+x.toFixed(3)));
@@ -172,6 +175,26 @@ function runCheck(n){
     const hit=marks.filter(t=>[...D].some(d=>Math.abs(d-t)<=0.06)).length;
     const s=100*hit/marks.length;
     return {v:s, ok:s>=80, txt:`${hit} of ${marks.length} section starts on a downbeat`} }
+  /* Rung 4 asks whether the light agrees with the RECORD. The window starts at 45%
+     of the beat so the flash from rung 1 has decayed and what is left is the bed
+     the compressor acts on. A record that pumps must make the light recover; a
+     record that does not must leave it alone. Always breathing would fail here. */
+  if(n===4){
+    const P=(MAP.observations||{}).pump, B=MAP.beats||[];
+    const win=(lo,hi)=>{ const v=[];
+      for(let i=0;i<B.length-1;i++){ if(B[i]<25||B[i]>Math.min(60,dur(MAP))) continue;
+        const per=B[i+1]-B[i], S=[];
+        for(let x=lo;x<hi;x+=0.03) S.push(F(B[i]+per*x).fixtures.reduce((a,o)=>a+(o.level||0),0));
+        const t3=Math.max(1,Math.floor(S.length/3));
+        const a1=S.slice(0,t3).reduce((a,b)=>a+b,0)/t3, b1=S.slice(-t3).reduce((a,b)=>a+b,0)/t3;
+        if(a1+b1>0) v.push((b1-a1)/(a1+b1)) }
+      return v.length? v.reduce((a,b)=>a+b,0)/v.length : 0 };
+    const r=win(0.45,0.95);
+    if(!P) return {v:0,ok:false,txt:"no pump measurement in this map -- run listen/pump.py"};
+    if(!P.present) return {v:r,ok:true,
+      txt:`this record does not pump (measured ${P.depth>=0?"+":""}${P.depth}) and the rig does not either`};
+    return {v:r*100, ok:r>0,
+      txt:`record recovers +${P.depth} between kicks, the light recovers ${r>=0?"+":""}${r.toFixed(3)}`} }
   if(n===3){
     const use=new Array(LAY.fixtures.filter(f=>f.kind==="par").length).fill(0);
     for(let t=VIEW.t0;t<Math.min(dur(MAP),VIEW.t0+90);t+=0.04){
@@ -179,7 +202,7 @@ function runCheck(n){
     const tot=use.reduce((a,b)=>a+b,0); if(!tot) return {v:0,ok:false,txt:"nothing lit"};
     const even=tot/use.length, s=100*Math.min(...use)/even;
     return {v:s, ok:s>=60, txt:`least-used par gets ${s.toFixed(0)}% of an even share`} }
-  if(n===4){
+  if(n===5){
     /* Correlating the light against the map's OWN energy field is circular -- the
        recipe derives brightness from that field, so the answer is 1.00 whatever
        the field says, including when it is wrong. This measures the light against
@@ -201,14 +224,14 @@ function runCheck(n){
     for(let i=0;i<xs.length;i++){const a=xs[i]-mx,b=ys[i]-my; sxy+=a*b; sxx+=a*a; syy+=b*b}
     const r=sxy/Math.sqrt(sxx*syy||1), s=100*r;
     return {v:s, ok:s>=50, txt:`r = ${r.toFixed(2)} between light and how loud the record is`} }
-  if(n===5){
+  if(n===6){
     const H=new Set();
     for(let t=VIEW.t0;t<Math.min(dur(MAP),VIEW.t0+90);t+=0.1)
       for(const o of F(t).fixtures){ if((o.level||0)<0.2) continue;
         H.add(`${Math.round((o.r||0)/26)},${Math.round((o.g||0)/26)},${Math.round((o.b||0)/26)}`) }
     const s=H.size;
     return {v:s, ok:s<=8, txt:`${s} distinct colours on stage (8 or fewer passes)`} }
-  if(n===7){
+  if(n===8){
     const L=(LAY.limits||{}), mp=L.max_pan_per_s||1.55, mt=L.max_tilt_per_s||1.7;
     let worst=0, prev=null;
     for(let t=VIEW.t0;t<Math.min(dur(MAP),VIEW.t0+60);t+=0.02){
@@ -225,7 +248,7 @@ function runCheck(n){
 let F=null;
 function rebuild(){
   if(!RM||!MAP) return;
-  const lay = STEP>=7 ? LAY : LAYBEAT;
+  const lay = STEP>=8 ? LAY : LAYBEAT;
   F = RM.mkReader(MAP, lay, "medium", PAL, STEP);
   CURLAY = lay;
   buildLight();
@@ -296,13 +319,14 @@ async function decide(ok){
   const rec={ n:r.n, name:r.name, accepted:ok, when:new Date().toISOString(),
     map:MAPKEY, colour:PAL, adds:r.adds, question:r.q.replace(/<[^>]+>/g,""),
     check:{ what:r.check, value:+c.v.toFixed(2), passed:c.ok, said:c.txt },
+    knob: KNOB,
     said_by_renjith: $("why").value.trim() || null };
   LEARN.steps=LEARN.steps.filter(s=>s.n!==r.n).concat([rec]).sort((a,b)=>a.n-b.n);
   const res=await fetch(`/api/learn?song=${SONG}`,{method:"POST",body:JSON.stringify(LEARN)});
   const j=await res.json();
   $("stat").textContent=j.error?j.error:`saved → ${j.path}`;
   $("why").value="";
-  if(ok && STEP<7) STEP++;
+  if(ok && STEP<8) STEP++;
   rebuild();
 }
 $("accept").onclick=()=>decide(true);
@@ -332,9 +356,9 @@ $("song").onchange=e=>location.href=`/build?song=${e.target.value}`;
   LEARN=await (await fetch(`/api/learn?song=${SONG}`)).json();
   if(!LEARN.steps) LEARN={song:SONG,steps:[]};
   const done=LEARN.steps.filter(s=>s.accepted).map(s=>s.n);
-  STEP=Math.min(7,(done.length?Math.max(...done):0)+1);
+  STEP=Math.min(8,(done.length?Math.max(...done):0)+1);
   const qs=parseInt(Q.get("step")||"",10);        // a rung is linkable
-  if(qs>=1&&qs<=7) STEP=qs;
+  if(qs>=1&&qs<=8) STEP=qs;
   $("aud").src=`/api/audio?song=${SONG}`;
   fetch(`/api/wave?song=${SONG}`).then(r=>r.json()).then(w=>{
     if(!w.error){ WAVE=w; drawAll(); refreshVerdict() } });
