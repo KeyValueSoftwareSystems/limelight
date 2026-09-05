@@ -493,8 +493,18 @@ function lookFrame(t,L){
     const d=Math.abs(xn-panC);
     return 0.52+0.85*(1-Math.min(1,d*1.35))};
   const A=accent(p,e)*drumGate, F=[];
+  /* The pull-back before a drop. It used to start a full BAR out and take 74% off,
+     which is not an anticipation -- it is a long sag that eats the top of the
+     build. Measured, the light climbed 1.55 -> 3.65 and then fell to 2.93 in the
+     last second, so the build stopped building exactly where it should have been
+     most urgent, and the flash afterwards read as disconnected rather than earned.
+     A pull-back has to be SHORT and late: hold the climb, cut hard for half a
+     beat, then slam. */
   let dip=1;
-  if(ANT){const[d,dt]=until('drop',t,BAR); if(d) dip=1-0.74*ss(0,1,1-dt/BAR)}
+  if(ANT){
+    const[d,dt]=until('drop',t,PER*0.5);
+    if(d) dip=1-0.82*ss(0,1,1-dt/(PER*0.5));
+  }
   const z=spanAt(t);
   const prog=(L==='build'&&z)?cl((t-z.from)/(z.to-z.from)):1;
   const layer=i=>ss(i/4-0.14,i/4+0.14,prog);          // continuous, never a step

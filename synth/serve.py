@@ -894,6 +894,39 @@ class H(http.server.BaseHTTPRequestHandler):
             if u.path == "/static/wire.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "lights", "wire.js")).read(),
                                   "text/plain; charset=utf-8")
+            if u.path == "/api/wave":
+                # A peak envelope of the audio, so beats can be SEEN against the
+                # waveform rather than trusted. Two bands: the low one is where the
+                # kick lives, which is what a beat grid should line up with.
+                slug = (q.get("song") or [""])[0]
+                wav = os.path.join(HERE, "out", slug + ".wav")
+                if not os.path.exists(wav):
+                    return self._send(404, json.dumps({"error": "no audio for " + slug}))
+                import wave as _w, math as _m, array
+                with _w.open(wav, "rb") as w:
+                    sr, n, ch = w.getframerate(), w.getnframes(), w.getnchannels()
+                    raw = w.readframes(n)
+                a = array.array("h"); a.frombytes(raw[:len(raw) - (len(raw) % 2)])
+                if ch > 1: a = a[::ch]
+                N = len(a)
+                hop = max(1, int(sr / 200))              # 5 ms per point
+                # one-pole low pass at 130 Hz for the kick band
+                al = _m.exp(-2 * _m.pi * 130.0 / sr)
+                lo, y = [], 0.0
+                full = []
+                for i in range(0, N - hop, hop):
+                    seg = a[i:i + hop]
+                    pk = 0
+                    for v in seg:
+                        y = (1 - al) * v + al * y
+                        if abs(y) > pk: pk = abs(y)
+                    lo.append(pk)
+                    full.append(max(abs(v) for v in seg))
+                mx1 = max(full) or 1; mx2 = max(lo) or 1
+                return self._send(200, json.dumps(
+                    {"song": slug, "dt": hop / sr, "sr": sr,
+                     "peak": [round(v / mx1, 3) for v in full],
+                     "low": [round(v / mx2, 3) for v in lo]}))
             if u.path == "/api/wiring":
                 return self._send(200, open(os.path.join(ROOT, "readers", "lights", "club",
                                                          "wiring.json")).read())

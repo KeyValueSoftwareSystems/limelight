@@ -62,6 +62,16 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
   <span id="stat" class="mono" style="color:var(--muted);font-size:12px"></span>
 </div>
 
+<div class="track" id="tw" style="flex:0 0 auto">
+  <div class="thead"><b>audio · beats · downbeats</b>
+    <span><button id="nudgeL" style="background:var(--raise);color:var(--ink);border:1px solid var(--rule2);
+      border-radius:3px;padding:2px 9px;font-size:11px;cursor:pointer;font-family:ui-monospace,monospace">◀ 5ms</button>
+    <button id="nudgeR" style="background:var(--raise);color:var(--ink);border:1px solid var(--rule2);
+      border-radius:3px;padding:2px 9px;font-size:11px;cursor:pointer;font-family:ui-monospace,monospace">5ms ▶</button>
+    <button id="fitgrid" style="background:var(--raise);color:var(--tung);border:1px solid var(--tung);
+      border-radius:3px;padding:2px 10px;font-size:11px;cursor:pointer;font-family:ui-monospace,monospace">snap to kicks</button>
+    <span id="gridinfo" style="margin-left:9px">—</span></span></div>
+  <canvas id="wave" style="height:150px;flex:0 0 auto"></canvas></div>
 <div class="track edit" id="t1"><div class="thead"><b id="n1">—</b><span id="d1"></span></div>
   <canvas id="c1"></canvas></div>
 <div class="track" id="t2"><div class="thead"><b id="n2">—</b><span id="d2"></span></div>
@@ -110,6 +120,7 @@ let RECIPE="", RM=null, LAY=null, F1=null, F2=null, rebuildTimer=null, scoreTime
 // fixtures by default: this panel is for checking the output is what you meant,
 // not for imagining what the room looks like
 let VIEWMODE="fixtures";
+let WAVE=null;
 let DRIVE = localStorage.getItem("limelight.drive") || "medium";
 const clampView=D=>{ VIEW.span=Math.max(4,Math.min(D,VIEW.span||D));
   VIEW.t0=Math.max(0,Math.min(D-VIEW.span,VIEW.t0)) };
@@ -205,7 +216,47 @@ function draw(cv,m,editable){
   g.strokeStyle="#fff"; g.lineWidth=1.3;
   g.beginPath(); g.moveTo(x(t),0); g.lineTo(x(t),y); g.stroke();
 }
-function redraw(){ draw($("c1"),MINE,true); draw($("c2"),OTHER,false);
+/* The audio itself, with the grid drawn on top. Beat alignment is not something
+   to be trusted from a number -- the kick is visible in the low band and either
+   the marks sit on it or they do not. */
+function drawWave(){
+  const cv=$("wave"); if(!cv||!WAVE||!MINE) return;
+  const W=cv.clientWidth, H=cv.clientHeight||150, dpr=window.devicePixelRatio||1;
+  if(cv.width!==W*dpr||cv.height!==H*dpr){cv.width=W*dpr;cv.height=H*dpr}
+  const g=cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  g.fillStyle="#0a0c11"; g.fillRect(0,0,W,H);
+  const D=dur(MINE); clampView(D);
+  const x=t=>(t-VIEW.t0)/VIEW.span*W;
+  const mid=H*0.52;
+  const i0=Math.max(0,Math.floor(VIEW.t0/WAVE.dt)), i1=Math.min(WAVE.peak.length,Math.ceil((VIEW.t0+VIEW.span)/WAVE.dt));
+  const stride=Math.max(1,Math.floor((i1-i0)/Math.max(1,W)));
+  g.strokeStyle="rgba(150,165,200,.40)"; g.lineWidth=1; g.beginPath();
+  for(let i=i0;i<i1;i+=stride){ const t=i*WAVE.dt; let p=0;
+    for(let j=i;j<Math.min(i1,i+stride);j++) p=Math.max(p,WAVE.peak[j]);
+    g.moveTo(x(t),mid-p*mid*0.9); g.lineTo(x(t),mid+p*mid*0.9) }
+  g.stroke();
+  g.strokeStyle="rgba(240,169,60,.85)"; g.beginPath();
+  for(let i=i0;i<i1;i+=stride){ const t=i*WAVE.dt; let p=0;
+    for(let j=i;j<Math.min(i1,i+stride);j++) p=Math.max(p,WAVE.low[j]);
+    g.moveTo(x(t),H-2); g.lineTo(x(t),H-2-p*(H*0.40)) }
+  g.stroke();
+  const showBeats = VIEW.span < 90;
+  if(showBeats){
+    g.strokeStyle="rgba(230,233,241,.30)"; g.lineWidth=1;
+    for(const t of (MINE.beats||[])){ if(t<VIEW.t0||t>VIEW.t0+VIEW.span) continue;
+      g.beginPath(); g.moveTo(x(t),0); g.lineTo(x(t),H*0.22); g.stroke() }
+    g.strokeStyle="#8f9aff"; g.lineWidth=2;
+    for(const t of (MINE.downbeats||[])){ if(t<VIEW.t0||t>VIEW.t0+VIEW.span) continue;
+      g.beginPath(); g.moveTo(x(t),0); g.lineTo(x(t),H*0.38); g.stroke() }
+  } else {
+    g.fillStyle="#666c7e"; g.font="10px ui-monospace,monospace";
+    g.fillText("zoom in past 90 s to see the grid",8,14);
+  }
+  const a=$("aud"), pt=(a.src?a.currentTime:0)+SYNC/1000;
+  g.strokeStyle="#fff"; g.lineWidth=1.2;
+  g.beginPath(); g.moveTo(x(pt),0); g.lineTo(x(pt),H); g.stroke();
+}
+function redraw(){ drawWave(); draw($("c1"),MINE,true); draw($("c2"),OTHER,false);
   $("d1").textContent=MINE?desc(MINE):""; $("d2").textContent=OTHER?desc(OTHER):"" }
 const desc=m=>`${(m.beats||[]).length} beats · ${secs(m).length} sections · `
   +`${(m.moments||[]).length} moments · ${(m.energy||[]).length} energy`;
@@ -434,6 +485,34 @@ function drawRoom(){
   $("sync").oninput=e=>{ SYNC=+e.target.value;
     $("syncv").textContent=SYNC+" ms"+(SYNC_AUTO?"  (device says "+SYNC_AUTO+")":"");
     localStorage.setItem("limelight.sync",SYNC) };
+  fetch("/api/wave?song="+SONG).then(r=>r.json()).then(w=>{ if(!w.error){WAVE=w; redraw()} });
+  const gi=()=>{ $("gridinfo").textContent =
+    `${(60/MINE.grid.period).toFixed(3)} bpm · phase ${MINE.grid.phase.toFixed(4)}s` };
+  const shift=ms=>{ MINE.grid.phase=+(MINE.grid.phase+ms/1000).toFixed(6);
+    const D=dur(MINE), P=MINE.grid.period;
+    MINE.beats=[]; for(let t=MINE.grid.phase;t<D;t+=P) MINE.beats.push(+t.toFixed(6));
+    const bp=MINE.grid.bar_phase||0;
+    MINE.downbeats=MINE.beats.filter((_,i)=>((i-bp)%4+4)%4===0);
+    gi(); dirty(); redraw() };
+  $("nudgeL").onclick=()=>shift(-5); $("nudgeR").onclick=()=>shift(5);
+  /* Fit the phase to the kick rather than nudging blind: try every offset across
+     one beat and keep the one where the low band is loudest on the beats. This is
+     the same test that broke the tempo octave, applied to phase. */
+  $("fitgrid").onclick=()=>{
+    if(!WAVE) return;
+    const P=MINE.grid.period, D=dur(MINE);
+    const at=t=>{const i=Math.round(t/WAVE.dt); let p=0;
+      for(let j=Math.max(0,i-2);j<Math.min(WAVE.low.length,i+3);j++) p=Math.max(p,WAVE.low[j]); return p};
+    let best=null,bv=-1;
+    for(let o=0;o<P;o+=0.002){
+      let s=0,n=0;
+      for(let t=(MINE.grid.phase%P)+o;t<D;t+=P){ s+=at(t); n++ }
+      const v=n?s/n:0; if(v>bv){bv=v;best=o}
+    }
+    shift(best*1000);
+    $("gridinfo").textContent+=`  · snapped ${(best*1000).toFixed(0)} ms`;
+  };
+  gi();
   $("drive").value=DRIVE;
   $("drive").onchange=e=>{ DRIVE=e.target.value;
     localStorage.setItem("limelight.drive",DRIVE); rebuildShow() };
