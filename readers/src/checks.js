@@ -97,6 +97,13 @@ const RUNGS=[
   bad:"jumping between positions, or the number above 100%",
   fix:"the limit comes from the rig description, not from the light program.",
   check:"the fastest movement, against what the rig allows", pass:0, limit:100},
+ {n:15,name:"taking sides", adds:"each part of the rig gets a different job",
+  q:"Are the two sides of the stage doing <b>different things</b>?",
+  look:"the left ladders against the right ones, and both against the front truss",
+  good:"the left pulsing with the bass while the right follows the voice",
+  bad:"every lamp rising and falling together, so the rig is one animal",
+  fix:"this song has no instrument breakdown. Run synth/enrich.py on it.",
+  check:"how alike the fixture groups behave -- lower is better", pass:0, limit:70},
 ];
 
 /* The rung checks, in one place.
@@ -396,6 +403,43 @@ function makeChecks(C){
     const per=changes/(n2*0.02);
     return {v:per*100, ok:per<=4,
       txt:`the picture changes ${per.toFixed(1)} times a second, and a room can follow about 4`} }
+  /* Renjith's complaint, made measurable: "the lights all move like one". Correlate
+     the groups against each other. Identical behaviour scores 1.00 and fails; groups
+     doing genuinely different jobs land far below it. This is the only check here
+     that wants a LOW number. */
+  if(n===15){
+    const I=(MAP.observations||{}).instruments;
+    if(!I||!I.parts) return {v:0,ok:false,na:true,txt:"this song has no instrument breakdown yet"};
+    const fx=(LAY.fixtures||[]);
+    const xs=fx.map(f=>(f.at||[0])[0]);
+    const midx=(Math.min(...xs)+Math.max(...xs))/2;
+    const hz=fx.filter(f=>f.kind==="head").map(f=>(f.at||[0,0,0])[2]);
+    const backz=hz.length?(Math.min(...hz)+Math.max(...hz))/2:0;
+    const groups={
+      pars:  f=>f.kind==="par",
+      left:  f=>f.kind==="head"&&(f.at||[0,0,0])[2]>=backz&&f.at[0]<midx,
+      right: f=>f.kind==="head"&&(f.at||[0,0,0])[2]>=backz&&f.at[0]>=midx,
+      front: f=>f.kind==="head"&&(f.at||[0,0,0])[2]<backz };
+    const names=Object.keys(groups).filter(k2=>fx.some(groups[k2]));
+    if(names.length<2) return {v:0,ok:false,na:true,txt:"this rig has only one group of lamps"};
+    const series={}; names.forEach(k2=>series[k2]=[]);
+    for(let t=A;t<Math.min(B2,A+100);t+=0.25){
+      const by={}; for(const o of F(t).fixtures) by[o.id]=o;
+      for(const k2 of names)
+        series[k2].push(fx.filter(groups[k2]).reduce((a,f)=>a+((by[f.id]||{}).level||0),0));
+    }
+    const cor=(a,b)=>{const n2=a.length; if(n2<4) return 1;
+      const ma=a.reduce((x,y)=>x+y,0)/n2, mb=b.reduce((x,y)=>x+y,0)/n2;
+      let sx=0,sy=0,sxy=0;
+      for(let i2=0;i2<n2;i2++){const p2=a[i2]-ma,q=b[i2]-mb; sxy+=p2*q; sx+=p2*p2; sy+=q*q}
+      if(sx<1e-9||sy<1e-9) return 1;
+      return sxy/Math.sqrt(sx*sy)};
+    const ps=[];
+    for(let i2=0;i2<names.length;i2++) for(let j2=i2+1;j2<names.length;j2++)
+      ps.push(cor(series[names[i2]],series[names[j2]]));
+    const mean=ps.reduce((a,b)=>a+b,0)/ps.length;
+    return {v:100*mean, ok:mean<=0.70,
+      txt:`the groups behave ${(100*mean).toFixed(0)}% alike, and under 70% is different enough`} }
   if(n===14){
     const L=(LAY.limits||{}), mp=L.max_pan_per_s||1.55, mt=L.max_tilt_per_s||1.7;
     let worst=0, prev=null;

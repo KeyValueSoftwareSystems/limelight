@@ -1,7 +1,7 @@
 {
  "layout": "mainstage",
  "room": "mainstage",
- "note": "A festival mainstage: ground-support towers either side, a roof grid, a front truss of pars and heads hung under it, four rear lighting ladders carrying heads up their height, blinders across the front and an LED wall behind the whole thing. The ladders are the reason this reads as a festival rather than a club -- beams arriving from BEHIND and BELOW the performer are what a front truss alone can never do.",
+ "note": "A festival mainstage: ground-support towers either side, a roof grid, a front truss of pars and heads hung under it, four rear lighting ladders carrying heads up their height, blinders across the front and an LED wall behind the whole thing. The ladders are the reason this reads as a festival rather than a club -- beams arriving from BEHIND and BELOW the performer are what a front truss alone can never do. Side screens, vertical LED battens up the tower edges, a horizontal batten framing the wall and six CO2 jets along the deck front, all from Renjith's reference photographs of that stage.",
  "size_m": {
   "w": 18.0,
   "d": 11.0,
@@ -13,7 +13,8 @@
   "max_pan_per_s": 1.9,
   "max_tilt_per_s": 2.1,
   "note": "Sharpy-class heads: 540 degrees of pan in about 1.4 s is 1.9 range/s.",
-  "strobe_note": "Ten hertz, and the recipe DERIVES its flash rate from this rather than being permitted by it. Real festival strobes reach 25 Hz, but sustained flashing above roughly three hertz is a photosensitivity risk, so the recipe is also limited to bursts under 1.2 s and fires only on a drop or the last bar of a build. Lower this number and the strobes slow down; there is no way to make them exceed it from the recipe, which is the whole reason the limit lives here and not there."
+  "strobe_note": "Ten hertz, and the recipe DERIVES its flash rate from this rather than being permitted by it. Real festival strobes reach 25 Hz, but sustained flashing above roughly three hertz is a photosensitivity risk, so the recipe is also limited to bursts under 1.2 s and fires only on a drop or the last bar of a build. Lower this number and the strobes slow down; there is no way to make them exceed it from the recipe, which is the whole reason the limit lives here and not there.",
+  "co2_max_burst_s": 1.4
  },
  "zones": [
   {
@@ -78,7 +79,12 @@
   {
    "name": "back",
    "fixtures": [
-    "screen_1"
+    "screen_1",
+    "screen_s1",
+    "screen_s2",
+    "strip_v1",
+    "strip_v2",
+    "strip_h1"
    ]
   }
  ],
@@ -891,6 +897,177 @@
     16.8,
     1.7,
     8.0
+   ],
+   "zone": "floor"
+  },
+  {
+   "id": "screen_s1",
+   "kind": "screen",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    2.6,
+    4.3,
+    9.9
+   ],
+   "size_m": {
+    "w": 4.2,
+    "h": 5.4
+   },
+   "zone": "back"
+  },
+  {
+   "id": "screen_s2",
+   "kind": "screen",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    15.4,
+    4.3,
+    9.9
+   ],
+   "size_m": {
+    "w": 4.2,
+    "h": 5.4
+   },
+   "zone": "back"
+  },
+  {
+   "id": "strip_v1",
+   "kind": "strip",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    0.75,
+    4.275,
+    9.2
+   ],
+   "size_m": {
+    "w": 0.18,
+    "h": 6.84
+   },
+   "axis": "y",
+   "zone": "back"
+  },
+  {
+   "id": "strip_v2",
+   "kind": "strip",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    17.25,
+    4.275,
+    9.2
+   ],
+   "size_m": {
+    "w": 0.18,
+    "h": 6.84
+   },
+   "axis": "y",
+   "zone": "back"
+  },
+  {
+   "id": "strip_h1",
+   "kind": "strip",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    9.0,
+    7.800000000000001,
+    9.85
+   ],
+   "size_m": {
+    "w": 12.8,
+    "h": 0.18
+   },
+   "axis": "x",
+   "zone": "back"
+  },
+  {
+   "id": "co2_1",
+   "kind": "co2",
+   "can": [
+    "level"
+   ],
+   "at": [
+    3.0,
+    1.5,
+    6.0
+   ],
+   "zone": "floor"
+  },
+  {
+   "id": "co2_2",
+   "kind": "co2",
+   "can": [
+    "level"
+   ],
+   "at": [
+    5.4,
+    1.5,
+    6.0
+   ],
+   "zone": "floor"
+  },
+  {
+   "id": "co2_3",
+   "kind": "co2",
+   "can": [
+    "level"
+   ],
+   "at": [
+    7.8,
+    1.5,
+    6.0
+   ],
+   "zone": "floor"
+  },
+  {
+   "id": "co2_4",
+   "kind": "co2",
+   "can": [
+    "level"
+   ],
+   "at": [
+    10.2,
+    1.5,
+    6.0
+   ],
+   "zone": "floor"
+  },
+  {
+   "id": "co2_5",
+   "kind": "co2",
+   "can": [
+    "level"
+   ],
+   "at": [
+    12.6,
+    1.5,
+    6.0
+   ],
+   "zone": "floor"
+  },
+  {
+   "id": "co2_6",
+   "kind": "co2",
+   "can": [
+    "level"
+   ],
+   "at": [
+    15.0,
+    1.5,
+    6.0
    ],
    "zone": "floor"
   }

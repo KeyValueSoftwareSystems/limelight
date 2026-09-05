@@ -1,6 +1,6 @@
 {
- "when": "2026-09-05T23:16:16.816Z",
- "pass": 14,
+ "when": "2026-09-05T23:25:08.528Z",
+ "pass": 15,
  "fail": 0,
  "skip": 0,
  "rows": [
@@ -109,8 +109,8 @@
    "name": "chords",
    "ok": true,
    "na": false,
-   "v": 93.54838709677419,
-   "txt": "29 of 31 colour changes land on a chord change"
+   "v": 75,
+   "txt": "42 of 56 colour changes land on a chord change"
   },
   {
    "slug": "levels",
@@ -129,6 +129,15 @@
    "na": false,
    "v": 74.19354838709684,
    "txt": "the fastest movement is 74% of what the rig allows"
+  },
+  {
+   "slug": "levels",
+   "n": 15,
+   "name": "taking sides",
+   "ok": true,
+   "na": false,
+   "v": 55.5532187519204,
+   "txt": "the groups behave 56% alike, and under 70% is different enough"
   }
  ]
 }

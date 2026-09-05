@@ -177,6 +177,30 @@ function build(){
 
   for(const f of (LAY.fixtures||[])){
     if(f.kind==="fog") continue;
+    /* battens are edges, not lamps: a thin emissive bar tracing the architecture */
+    if(f.kind==="strip"){
+      const sz=f.size_m||{w:0.2,h:3};
+      const barM=new THREE.Mesh(new THREE.BoxGeometry(sz.w,sz.h,0.10),
+        new THREE.MeshBasicMaterial({color:0x000000}));
+      barM.position.set(f.at[0],f.at[1],f.at[2]); scene.add(barM);
+      const bl=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW,color:0xffffff,
+        transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+      bl.position.set(f.at[0],f.at[1],f.at[2]-0.15);
+      bl.scale.set(Math.max(sz.w,0.9)*2.2, sz.h*1.25, 1); scene.add(bl);
+      fixtures.push({def:f,wall:barM,bloom:bl,screen:true});
+      continue;
+    }
+    /* a CO2 jet is a plume, not a beam: it goes UP and it is the only thing on
+       this stage that is not light */
+    if(f.kind==="co2"){
+      const plume=new THREE.Mesh(new THREE.ConeGeometry(0.55,5.0,16,1,true),
+        new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,
+          blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+      plume.geometry.translate(0,2.5,0);
+      plume.position.set(f.at[0],f.at[1],f.at[2]); scene.add(plume);
+      fixtures.push({def:f,plume,jet:true});
+      continue;
+    }
     if(f.kind==="screen"){
       const sz=f.size_m||{w:10,h:5};
       const wall=new THREE.Mesh(new THREE.PlaneGeometry(sz.w,sz.h),
@@ -312,6 +336,12 @@ function render(t){
   for(const o of fr.fixtures) if(/^fog/.test(o.id)) haze=Math.max(haze,o.level||0);
   for(const fx of fixtures){
     const o=by[fx.def.id]||{}, L=Math.max(0, Math.min(1, o.level||0));
+    if(fx.jet){
+      fx.plume.material.opacity = L*0.40*EXPO;
+      const g2 = 0.4 + 1.5*L;                       // it grows as it fires
+      fx.plume.scale.set(g2, 0.55 + 0.75*L, g2);
+      continue;
+    }
     if(fx.screen){
       const cc=new THREE.Color((o.r||0)/255,(o.g||0)/255,(o.b||0)/255);
       fx.wall.material.color.copy(cc).multiplyScalar(L);

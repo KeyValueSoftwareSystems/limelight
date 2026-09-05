@@ -63,7 +63,7 @@ const E = ({
   high:   { lvl:1.16, bed:1.14, spread:0.80, flash:1.22 },
 }[DRIVE]) || { lvl:1, bed:1, spread:1, flash:1 };
 
-const STEP = (function(){ try { return Math.max(1, Math.min(14, +LADDER || 1)) } catch(e) { return 1 } })();
+const STEP = (function(){ try { return Math.max(1, Math.min(15, +LADDER || 1)) } catch(e) { return 1 } })();
 
 /* ---- one rung on its own -------------------------------------------------
    The ladder is cumulative, so rung 9 means rungs 1 to 9 all running at once.
@@ -129,7 +129,11 @@ function duckAt(t){
   const ph = (t - BEATS[k]) / Math.max(1e-6, nb - BEATS[k]);
   return 1 - amt * Math.exp(-ph / RELEASE);       // ducked at the kick, back by the next
 }
-const WHITE    = [255, 250, 242];
+/* Real white is never 255,255,255. A tungsten-ish par sits near 3200K and reads
+   warm; an LED strobe is a cold 6500K and reads blue-white. Using one white for
+   both is most of why a rig renders as a computer graphic. */
+const WHITE    = [255, 238, 214];        // par white, warm
+const COLDW    = [232, 241, 255];        // strobe and blinder white, cold
 const PARS     = LAYOUT.fixtures.filter(f => f.kind === "par");
 const HEADS    = LAYOUT.fixtures.filter(f => f.kind === "head");
 const NP       = Math.max(1, PARS.length);
@@ -143,6 +147,12 @@ const DOWNSET  = new Set(DOWN.map(t => +t.toFixed(3)));
    his stages are mostly two colours and a blinder, not a rainbow. If a specific
    show is wanted these are the numbers to change. */
 const PROFILES = {
+  /* Named after the gels these actually are. Saturated primaries are what a screen
+     does, not what a lamp does: a real deep blue is congo, a real stage red sits
+     nearer magenta than primary, and that difference is most of why one render
+     looks like lighting and the other looks like a chart. */
+  gel:        { a:[214,.94,.40], b:[344,.86,.46] },   // congo blue, deep magenta-red
+  gel_amber:  { a:[ 32,.80,.52], b:[196,.88,.42] },   // straw amber, steel blue
   /* white only: colour removed from the picture entirely, so a problem with
      timing, position or width can be judged without colour arguing with it. The
      chords rung has nothing to say under this theme and its check says so. */
@@ -359,6 +369,70 @@ function dropAt(t){
   return null;
 }
 
+/* ---- rung 15: the rig takes sides ----------------------------------------
+   Every fixture has been reading the same signal, so the whole rig moves as one
+   animal and the show repeats itself. That is not what a designer does. They give
+   each group of lamps a JOB, and the jobs are different: the front truss takes the
+   beat, one side of the stage takes the low end, the other takes the voice, and
+   the heads over the deck take whatever is carrying the tune. Then the rig stops
+   being one gesture and becomes four having a conversation.
+
+   The map already knows how loud each instrument is in every bar, so none of this
+   is invented -- the left ladders genuinely pulse with the bass because the bass
+   is genuinely there. Which is also why it stops repeating: verse two has a
+   different arrangement from verse one, so the rig behaves differently in it
+   without anybody writing a second cue. */
+const STEMS_AVAIL = Object.keys((INSTR && INSTR.parts) || {});
+const pickStem = prefs => prefs.find(p => STEMS_AVAIL.indexOf(p) >= 0) || STEMS_AVAIL[0] || null;
+const VOICE = {
+  beat:  pickStem(["drums"]),
+  low:   pickStem(["bass"]),
+  lead:  pickStem(["other", "guitar", "piano"]),
+  voice: pickStem(["vocals", "piano", "guitar"]),
+};
+function stemAt(name, t){
+  if(!name || !INSTR || !INSTR.parts[name]) return 1;
+  const v = INSTR.parts[name].level_per_bar, D = INSTR.density_per_bar || [];
+  if(!v || !v.length || !D.length) return 1;
+  const k = lastAtOrBefore(D, t, x => x[0]);
+  const i = Math.max(0, Math.min(v.length - 1, k < 0 ? 0 : k));
+  return cl(v[i], 0, 1);
+}
+/* which job each fixture has, decided once from where it is on the stage */
+const MIDX = (function(){
+  const xs = LAYOUT.fixtures.map(f => (f.at||[0])[0]);
+  return (Math.min(...xs) + Math.max(...xs)) / 2 })();
+const BACKZ = (function(){
+  const zs = LAYOUT.fixtures.filter(f => f.kind === "head").map(f => (f.at||[0,0,0])[2]);
+  return zs.length ? (Math.min(...zs) + Math.max(...zs)) / 2 : 0 })();
+function jobOf(f){
+  if(f.kind === "par") return "beat";
+  if(f.kind !== "head") return null;
+  if((f.at||[0,0,0])[2] < BACKZ) return "lead";            // over the deck
+  return (f.at[0] < MIDX) ? "low" : "voice";               // the two sides
+}
+/* and how much of the rig is in play, by how far into the song this part is.
+   A show that gives you everything in verse one has nowhere to go. */
+function sectionReach(t){
+  const S = MAP.sections || [];
+  if(!S.length) return 3;
+  let cur = null;
+  for(const e of S){ if(e.at <= t) cur = e; else break }
+  if(!cur) return 3;
+  const rep = cur.repeat || 1;
+  if(/intro|outro/.test(cur.name)) return 1;
+  if(/drop|build/.test(cur.name))  return 3;
+  return Math.min(3, rep);                                  // verse 1 thin, verse 3 full
+}
+const JOB_RANK = { beat:1, lead:1, low:2, voice:3 };
+function sideGain(f, t){
+  if(!use(15)) return 1;
+  const job = jobOf(f);
+  if(!job) return 1;
+  if(JOB_RANK[job] > sectionReach(t)) return 0.18;          // present, but held back
+  return 0.30 + 0.85 * stemAt(VOICE[job], t);
+}
+
 function leadAt(t){
   const e = energyAt(t);
   for(const sp of SP) if(sp.kind === "build" && sp.from <= t && t < sp.to) return "rise";
@@ -440,7 +514,7 @@ function frame(t){
        taken out of play still sat at bed level -- every lamp lit all the time, and
        soloing the instruments rung showed it at once. */
     const bedHere = inPlay(i) ? bed : 0;
-    let lv = (bedHere + (1 - bedHere) * share * amp * env * LEAD.flash) * size * duck;
+    let lv = (bedHere + (1 - bedHere) * share * amp * env * LEAD.flash) * size * duck * sideGain(f, t);
     const B = buildAt(t);
     if(B){ lv *= 0.55 + 0.75 * B.shape;                     // it climbs
            if(B.shape > 0.72 && (i === 0 || i === PARS.length-1)) lv *= 0.4 }  // and tightens
@@ -465,6 +539,13 @@ function frame(t){
          rather than harmony. From rung 10 the whole rig shares one colour at a
          time and the chord is the only thing that changes it. Below that rung the
          alternation stays, because there nothing else is using the row. */
+      /* The colour language from the reference photographs, which is not one
+         palette applied to everything. On that stage the par row is a WARM WHITE
+         wash -- amber, almost tungsten -- the moving heads are the saturated
+         colour, cyan and magenta cutting through the haze, and the strobes are
+         cold white. Painting all three from the same two hues is most of why this
+         rendered as a chart rather than as a show. Pars stay warm and only take
+         the palette when the song is quiet enough for colour to be the event. */
       const ch2 = chordState(t);
       const c = ch2 ? (ch2.i % 2 === 0 ? PAL.a : PAL.b)
                     : ((i % 2 === 0) ? PAL.a : PAL.b);
@@ -477,7 +558,9 @@ function frame(t){
          starts too, so the one moment the colour moved was the one moment the rig
          went white. White is kept for the starts of PARTS of the song now -- an
          accent worth having rather than a tick every two seconds. */
-      col = (isDown && bigMoment(t)) || (dropAt(t) && dropAt(t).hit) ? WHITE : hsl(hu, cl(c[1]*(0.86+0.20*e),0,1), li);
+      const warmth = cl(1 - energyAt(t) * 1.15, 0, 1);      // quiet songs get colour
+      col = (isDown && bigMoment(t)) || (dropAt(t) && dropAt(t).hit) ? WHITE : hsl(hu, cl(c[1]*(0.86+0.20*e)*(0.30+0.70*warmth), 0, 1),
+                     cl(li*(1 + 0.30*(1-warmth)), 0, 1));
     }
     F.push({ id:f.id, level:+cl(lv,0,1).toFixed(4), r:col[0], g:col[1], b:col[2] });
   });
@@ -547,12 +630,44 @@ function frame(t){
         pan  = lerp(pan,  fanPan,  w);
         tilt = lerp(tilt, fanTilt, w);
       }
-      const col = hsl(PAL.b[0], 0.88, 0.50);
+      /* the heads carry the saturated colour, and the two sides of the stage take
+         opposite ends of the pair -- which is the other half of taking sides */
+      const side = (f.at && f.at[0] < MIDX) ? PAL.a : PAL.b;
+      const col = hsl(side[0], 0.90, 0.52);
       F.push({ id:f.id,
-               level:+cl((0.28 + 0.62*e) * (0.5 + 0.5*env) * (D2 && D2.hit ? 1.6 : 1), 0, 1).toFixed(4),
+               level:+cl((0.28 + 0.62*e) * (0.5 + 0.5*env) * (D2 && D2.hit ? 1.6 : 1)
+                         * sideGain(f, t), 0, 1).toFixed(4),
                pan:+cl(pan,0,1).toFixed(4), tilt:+cl(tilt,0,1).toFixed(4),
                r:col[0], g:col[1], b:col[2] });
     });
+  }
+
+  /* ---- LED battens ---------------------------------------------------------
+     The vertical strips up the towers and the bar across the wall are not lamps;
+     they are edges. They trace the architecture, so they take the harmony colour
+     and move slowly -- a batten flickering on the beat turns the stage frame into
+     a fairground. They rise with the build and go white on the drop like the wall. */
+  for(const f of LAYOUT.fixtures){
+    if(f.kind !== "strip") continue;
+    const e = energyAt(t), Db = dropAt(t), Bb = buildAt(t), ch3 = chordState(t);
+    let lv = 0.16 + 0.50 * e;
+    if(Bb) lv *= 0.5 + 0.9 * Bb.shape;
+    if(Db){ if(Db.pre !== null) lv *= Math.max(0.06, Db.pre); else if(Db.hit) lv = 1 }
+    const cc = (Db && Db.hit) ? COLDW
+             : hsl(PAL.b[0] + (ch3 ? ch3.shift : 0), 0.92, 0.52);
+    F.push({ id:f.id, level:+cl(lv,0,1).toFixed(4), r:cc[0], g:cc[1], b:cc[2] });
+  }
+
+  /* ---- CO2 ------------------------------------------------------------------
+     One gesture, one moment. A jet on anything but a drop is a jet nobody looks
+     at, and the layout caps the burst because a real one empties a cylinder. */
+  const CO2MAX = (LAYOUT.limits && LAYOUT.limits.co2_max_burst_s) || 1.2;
+  for(const f of LAYOUT.fixtures){
+    if(f.kind !== "co2") continue;
+    const Dc = dropAt(t);
+    let lv = 0;
+    if(Dc && Dc.dt >= 0 && Dc.dt < CO2MAX) lv = 1 - Dc.dt / CO2MAX;
+    F.push({ id:f.id, level:+cl(lv,0,1).toFixed(4), r:255, g:255, b:255 });
   }
 
   /* ---- strobes: the impact fixture, and the only one with a real safety limit
@@ -581,7 +696,7 @@ function frame(t){
       on = (phase % 1) < 0.42 ? 1 : 0;                          // hard on, hard off
       on *= 1 - since / SBURST;                                 // and it runs out
     }
-    F.push({ id:f.id, level:+cl(on,0,1).toFixed(4), r:255, g:253, b:246 });
+    F.push({ id:f.id, level:+cl(on,0,1).toFixed(4), r:COLDW[0], g:COLDW[1], b:COLDW[2] });
   }
 
   /* ---- the LED wall ------------------------------------------------------
@@ -617,7 +732,7 @@ function frame(t){
       if(D3.hit) lv = 1;
       else if(D3.dt > 0 && D3.dt < BAR * 0.5) lv = Math.max(0, 1 - D3.dt / (BAR*0.5)) * 0.55;
     }
-    F.push({ id:f.id, level:+lv.toFixed(4), r:255, g:246, b:228 });
+    F.push({ id:f.id, level:+lv.toFixed(4), r:COLDW[0], g:COLDW[1], b:COLDW[2] });
   }
 
   return { t:+t.toFixed(3), look: SOLO ? "solo"+SOLO : "step"+STEP,
