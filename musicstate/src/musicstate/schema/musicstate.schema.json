@@ -79,6 +79,56 @@
         }
       }
     },
+    "chords": {
+      "type": "object",
+      "required": ["rate", "events"],
+      "properties": {
+        "rate": {"type": "string"},
+        "how": {"type": "string"},
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["at", "chord", "confidence"],
+            "properties": {
+              "at": {"type": "number"},
+              "chord": {"type": "string"},
+              "confidence": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "melody": {
+      "type": "object",
+      "required": ["rate", "notes"],
+      "properties": {
+        "rate": {"type": "string"},
+        "of": {"type": "string"},
+        "how": {"type": "string"},
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["at", "hz"],
+            "properties": {
+              "at": {"type": "number"},
+              "hz": {"type": ["number", "null"]},
+              "note": {"type": ["string", "null"]}
+            }
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "object",
+      "required": ["how", "sources"],
+      "properties": {
+        "how": {"type": "string"},
+        "format": {"type": "string"},
+        "sources": {"type": "object"}
+      }
+    },
     "semantic": {"type": "object", "required": ["status"]},
     "embedding": {"type": "object", "required": ["status"]},
     "confidence_by_field": {"type": "object"},
