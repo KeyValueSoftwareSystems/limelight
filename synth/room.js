@@ -8,8 +8,8 @@
 function mkReader(map, layout, drive, colour){
   const g = prep(map);
   return new Function("MAP","LAYOUT","CH","SP","MO","EN","BEATS","PER","PH","DUR","BAR","DBP",
-                      "STOP_REAL","ANT","ENERGY","COLOUR", RECIPE + "\n;return frame;")(
-    g.MAP, layout, g.CH, g.SP, g.MO, g.EN, g.BEATS, g.PER, g.PH, g.DUR, g.BAR, g.DBP, true, true,
+                      "DOWN","STOP_REAL","ANT","ENERGY","COLOUR", RECIPE + "\n;return frame;")(
+    g.MAP, layout, g.CH, g.SP, g.MO, g.EN, g.BEATS, g.PER, g.PH, g.DUR, g.BAR, g.DBP, g.DOWN, true, true,
     drive || "medium", colour || "sunset");
 }
 function prep(m){
@@ -25,7 +25,11 @@ function prep(m){
     CH:(m.chapters||[]).map(c=>[c.at,c.name]),
     SP:(m.spans||[]).map(s=>({kind:s.kind,from:s.from,to:s.to,rise:s.rise})),
     MO:(m.moments||[]).map(x=>({at:x.at,kind:x.kind,v:x.size!==undefined?x.size:x.holds})),
-    EN:m.energy||[], BEATS, PER, PH, DUR:D, BAR:4*PER, DBP:m.grid.bar_phase||0};
+    EN:m.energy||[], BEATS, PER, PH, DUR:D, BAR:4*PER, DBP:m.grid.bar_phase||0,
+    /* the downbeats the MAP names, not ones re-derived from bar_phase -- on Levels
+       those two disagreed and the field was the one that was wrong */
+    DOWN:(m.downbeats&&m.downbeats.length) ? m.downbeats.slice().sort((a,b)=>a-b)
+         : BEATS.filter((_,i)=>((i-(m.grid.bar_phase||0))%4+4)%4===0)};
 }
 /* ---- the room ---------------------------------------------------------------
    A front elevation, drawn for a rig you can count on two hands. Seven fixtures

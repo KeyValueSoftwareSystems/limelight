@@ -14,7 +14,8 @@
   "period": 0.46875,
   "phase": 0.223314,
   "bpm": 128.0,
-  "bar_phase": 1
+  "bar_phase": 0,
+  "bar_phase_corrected": "was 1, which contradicted this file's own downbeats list (beat index 0 of every bar) and put all 14 chapter starts exactly one beat off a bar line. At 0, 21 of 24 structural marks land on a downbeat; at 1, none do. Almost certainly carried over from the-nights during the merge, where 1 is correct."
  },
  "how_to_use": [
   "In the editor pick 'beats' in the editing dropdown and turn on 'beats only'.",
