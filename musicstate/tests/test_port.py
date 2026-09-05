@@ -32,6 +32,12 @@ STATE = {
               "per_downbeat": [{"t": 0.5, "drums": 0.2, "vocals": 0.1},
                                {"t": 2.0, "drums": 0.4, "vocals": 0.6}],
               "vocal_present_fraction": 0.5},
+    "chords": {"rate": "per_bar", "how": "chroma templates",
+               "events": [{"at": 0.5, "chord": "Am", "confidence": 0.8}]},
+    "melody": {"rate": "per_sixteenth", "of": "mix", "how": "pyin",
+               "notes": [{"at": 0.5, "hz": 440.0, "note": "A4"}]},
+    "notes": {"how": "basic-pitch onnx", "format": "[onset_s, offset_s, midi, amplitude]",
+              "sources": {"mix": [[0.5, 1.0, 69, 0.8]]}},
     "semantic": {"status": "ok", "backend": "essentia", "mood": {"party": 0.8},
                  "danceability": 0.9, "voice": 0.5, "genre_top": [["House", 0.4]]},
     "embedding": {"status": "not_computed"},
@@ -106,3 +112,18 @@ def test_key_and_semantic_note():
     obs = _m()["observations"]
     assert obs["key"]["estimate"] == "A minor" and obs["key"]["confidence"] == 0.6
     assert "party and danceability" in obs["semantic"]["note"]
+
+
+def test_harmony_layers_lifted_into_observations():
+    obs = _m()["observations"]
+    assert obs["chords"]["rate"] == "per_bar"
+    assert obs["chords"]["events"][0]["chord"] == "Am"
+    assert obs["melody"]["notes"][0]["note"] == "A4"
+    assert obs["notes"]["sources"]["mix"][0][2] == 69  # midi A4
+
+
+def test_harmony_layers_null_when_unmeasured():
+    from musicstate.port import to_map
+    bare = {k: v for k, v in STATE.items() if k not in ("chords", "melody", "notes")}
+    obs = to_map(bare)["observations"]
+    assert obs["chords"] is None and obs["melody"] is None and obs["notes"] is None

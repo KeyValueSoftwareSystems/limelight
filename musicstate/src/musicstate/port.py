@@ -126,6 +126,10 @@ def to_map(state: dict, vec_filename: str | None = None,
         if sem.get("status") == "ok" else None,
         "frames": frames_obs,
         "key": {"estimate": keyest, "how": "musicstate", "confidence": cbf.get("key")},
+        # harmony layers: the analyzers write the full block; the port only lifts it
+        "chords": state.get("chords"),
+        "melody": state.get("melody"),
+        "notes": state.get("notes"),
     }
 
     # ---- learned tier ----
