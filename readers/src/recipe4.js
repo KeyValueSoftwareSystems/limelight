@@ -419,6 +419,13 @@ function chaseAt(t, e, n){
    reads as a fill instead of five lamps all half-lit at once. */
 const MIRROR = (LAYOUT.fixtures||[]).filter(f=>f.kind==='par').length > 12;
 const sym = xn => MIRROR ? Math.abs(xn-0.5)*2 : xn;
+const CENTRE_PAIR = (function(){
+  const hs=(LAYOUT.fixtures||[]).filter(f=>f.kind==='head');
+  if(hs.length<4) return 1;
+  const xs=LAYOUT.fixtures.map(f=>f.at[0]);
+  const lo=Math.min.apply(null,xs), sp=Math.max(0.001,Math.max.apply(null,xs)-lo);
+  const d=hs.map(f=>Math.abs((f.at[0]-lo)/sp-0.5)).sort((a,b)=>a-b);
+  return d[Math.min(d.length-1,3)]+1e-4;})();
 function chaseGain(xn, c){
   const half = Math.max(1, Math.floor(c.n/2));
   const fold = MIRROR ? Math.abs(xn - 0.5) * 2 : xn;
@@ -721,7 +728,9 @@ function lookFrame(t,L){
     let c=fixColour(t,L,'head',G.xn,e), lv=0, hz=0;
     if(off){c=[0,0,0]}
     else if(L==='flash'){lv=1}
-    else if(L==='spotlight'){lv=(i===1)?(0.30+0.62*stem('vocals',t)):0.0}
+    else if(L==='spotlight'){
+      const near=Math.abs(G.xn-0.5);
+      lv = near<=CENTRE_PAIR ? (0.30+0.62*stem('vocals',t))*(1-0.5*near/Math.max(1e-6,CENTRE_PAIR)) : 0.0}
     else{
       const lead=(((bx%2)+2)%2===0)?G.outer:!G.outer;   // outer pair, then inner pair
       // a small positional term, so the four heads are never identical even
