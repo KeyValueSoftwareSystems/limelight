@@ -519,7 +519,7 @@ def segment(rows, curve=None):
             novelty[i] += 2.0 * abs(curve[i][1] - curve[i - 1][1])
     mean = sum(novelty) / len(novelty)
     spread = (sum((v - mean) ** 2 for v in novelty) / len(novelty)) ** 0.5
-    threshold = mean + 0.35 * spread
+    threshold = mean + 0.20 * spread
     last_usable = len(rows) - MIN_SECTION_BARS
     bounds = [0]
     for i in range(1, last_usable):
@@ -576,6 +576,7 @@ def classify(rows, bounds, n_bars):
 DROP_SNAP_RISE = 0.05
 DROP_SNAP_MAX_BARS = 3
 MERGE_ENERGY_TOL = 0.15
+MERGE_MAX_BARS = 12
 ALWAYS_MERGE = ("break", "verse", "outro", "intro")
 
 
@@ -599,6 +600,7 @@ def merge_runs(bounds, labels, curve, n_bars):
         while (
             j + 1 < len(bounds)
             and labels[j + 1] == labels[i]
+            and (bounds[j + 1] - bounds[i]) <= MERGE_MAX_BARS
             and (
                 labels[i] in ALWAYS_MERGE
                 or abs(section_energy(j + 1) - section_energy(j)) < MERGE_ENERGY_TOL
