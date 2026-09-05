@@ -76,6 +76,22 @@ let STEP=7, SOLO=false, DRIVE="medium", PAL="garrix";
 let scene, cam, renderer, fixtures=[], clock=0;
 const V=THREE?THREE.Vector3:null;
 
+/* A Sprite with no texture is a square, which is what the halos were: five red
+   blocks hanging behind the lamps. A glow needs a radial falloff, so one is drawn
+   once into a canvas and shared by every fixture. */
+function glowTexture(){
+  const c=document.createElement("canvas"); c.width=c.height=128;
+  const g=c.getContext("2d");
+  const rg=g.createRadialGradient(64,64,0,64,64,64);
+  rg.addColorStop(0.00,"rgba(255,255,255,1)");
+  rg.addColorStop(0.18,"rgba(255,255,255,0.72)");
+  rg.addColorStop(0.45,"rgba(255,255,255,0.18)");
+  rg.addColorStop(1.00,"rgba(255,255,255,0)");
+  g.fillStyle=rg; g.fillRect(0,0,128,128);
+  const t=new THREE.CanvasTexture(c); t.needsUpdate=true; return t;
+}
+let GLOW=null;
+
 function build(){
   const W=$("wrap"), w=W.clientWidth, h=W.clientHeight;
   renderer=new THREE.WebGLRenderer({antialias:true});
@@ -93,6 +109,7 @@ function build(){
   const back=new THREE.Mesh(new THREE.PlaneGeometry(S.w*1.6,S.h*1.6), mat(0x0b0d13));
   back.position.set(S.w/2,S.h*0.8,S.d+0.05); back.rotation.y=Math.PI; scene.add(back);
   scene.add(new THREE.AmbientLight(0x22262f, 0.5));
+  GLOW=glowTexture();
 
   // the truss the pars hang on, so the row reads as a row
   const truss=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,S.w+0.6,10),
@@ -103,12 +120,19 @@ function build(){
     if(f.kind==="fog") continue;
     const at=f.at||[S.w/2,3,4.6];
     const g=new THREE.Group(); g.position.set(at[0],at[1],at[2]); scene.add(g);
+    /* A par can is a real object and you should be able to see it. These were dark
+       grey at distance against a black room, so the beams appeared out of nowhere
+       and the rig read as an effect rather than as lights. Bigger, lighter, and
+       with a yoke, which is most of what tells you which way a lamp is pointing. */
+    const shell=new THREE.MeshStandardMaterial({color:0x39414f,roughness:.45,metalness:.75});
     const body=new THREE.Mesh(
-      f.kind==="head" ? new THREE.SphereGeometry(0.11,16,12)
-                      : new THREE.CylinderGeometry(0.09,0.11,0.22,14),
-      new THREE.MeshStandardMaterial({color:0x1b1f29,roughness:.5,metalness:.6}));
+      f.kind==="head" ? new THREE.SphereGeometry(0.15,18,14)
+                      : new THREE.CylinderGeometry(0.135,0.155,0.34,18),
+      shell);
     if(f.kind!=="head") body.rotation.x=Math.PI/2;
     g.add(body);
+    const yoke=new THREE.Mesh(new THREE.TorusGeometry(0.17,0.022,8,20), shell);
+    yoke.rotation.y=Math.PI/2; g.add(yoke);
     // three nested cones: wide and faint, then narrower, then a core. Real
     // scattering falls off across the beam and one flat cone reads as plastic.
     const deg=(f.beam_deg||24)*Math.PI/180, len=f.kind==="head"?7.5:5.4;
@@ -120,15 +144,22 @@ function build(){
       m.geometry.translate(0,-len/2,0);      // apex at the lamp
       m.userData.alpha=a; g.add(m); return m;
     });
-    const lens=new THREE.Mesh(new THREE.SphereGeometry(0.075,14,10),
-      new THREE.MeshBasicMaterial({color:0x000000}));
-    lens.position.y=-0.02; g.add(lens);
+    const lens=new THREE.Mesh(new THREE.CircleGeometry(0.125,20),
+      new THREE.MeshBasicMaterial({color:0x0b0d12,side:THREE.DoubleSide}));
+    lens.rotation.x=-Math.PI/2; lens.position.y=-0.17; g.add(lens);
+    /* the halo is what a lamp pointed at you actually looks like: a bloom around
+       the lens that grows with output. Without it the brightest thing on stage was
+       the middle of the beam rather than its source, which is backwards. */
+    const halo=new THREE.Sprite(new THREE.SpriteMaterial({
+      map:GLOW, color:0xffffff, transparent:true, opacity:0,
+      blending:THREE.AdditiveBlending, depthWrite:false, depthTest:false}));
+    halo.scale.set(0.5,0.5,1); g.add(halo);
     // where the beam lands
     const pool=new THREE.Mesh(new THREE.CircleGeometry(Math.tan(deg/2)*len*1.1,28),
-      new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,
+      new THREE.MeshBasicMaterial({map:GLOW,color:0xffffff,transparent:true,opacity:0,
         blending:THREE.AdditiveBlending,depthWrite:false}));
     pool.rotation.x=-Math.PI/2; pool.position.y=0.012; scene.add(pool);
-    fixtures.push({def:f,g,cones,lens,pool,len});
+    fixtures.push({def:f,g,cones,lens,halo,pool,len});
   }
   place();
   addEventListener("resize",()=>{ const w=W.clientWidth,h=W.clientHeight;
@@ -139,7 +170,7 @@ function place(){
   const S=LAY.size_m||{w:6,d:5,h:3.4}, mode=$("cam").value;
   if(mode==="above"){ cam.position.set(S.w/2, 8.5, S.d/2+0.01); cam.lookAt(S.w/2,0,S.d/2) }
   else if(mode==="side"){ cam.position.set(-3.4, 2.2, 1.6); cam.lookAt(S.w/2,1.4,S.d*0.7) }
-  else { cam.position.set(S.w/2, 1.62, -3.1); cam.lookAt(S.w/2, 1.5, S.d*0.8) }
+  else { cam.position.set(S.w/2, 1.45, -2.4); cam.lookAt(S.w/2, 1.95, S.d*0.80) }
 }
 
 /* aim: pars are fixed and rake down the floor; heads obey pan and tilt */
@@ -151,8 +182,12 @@ function aim(fx, o){
     target=new THREE.Vector3(at[0]+Math.sin(pan)*6, at[1]-Math.cos(tilt*0.9)*6,
                              at[2]-Math.cos(pan)*4.0);
   } else {
-    const i=fixtures.indexOf(fx), n=fixtures.filter(f=>f.def.kind==="par").length||1;
-    target=new THREE.Vector3(at[0]*0.82+S.w*0.09, 0, S.d*0.30);
+    /* Front-truss pars point at the CROWD, down and forward, so from the audience
+       you see the face of the lamp and the beam coming toward you. They were aimed
+       at the floor just under the truss, which is why every lens was edge-on and
+       invisible. The row also fans slightly outward, as a real rig is rigged. */
+    const mid=S.w/2, fan=(at[0]-mid)*0.55;
+    target=new THREE.Vector3(mid+fan, 0, -0.6);
   }
   const dir=target.clone().sub(new THREE.Vector3(...at)).normalize();
   const q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,-1,0), dir);
@@ -177,7 +212,11 @@ function render(t){
       m.material.color.copy(c);
       m.material.opacity = Math.pow(L,0.8) * m.userData.alpha * (0.45 + 0.55*Math.min(1,haze+0.5));
     }
-    fx.lens.material.color.copy(c).multiplyScalar(Math.min(1, 0.15 + L));
+    fx.lens.material.color.copy(c).multiplyScalar(Math.min(1, 0.20 + L));
+    fx.halo.material.opacity = Math.min(0.95, L*0.85);
+    fx.halo.material.color.copy(c);
+    const hs = 0.30 + 1.25*L;
+    fx.halo.scale.set(hs, hs, 1);
     fx.pool.material.color.copy(c);
     fx.pool.material.opacity = L*0.22;
   }
