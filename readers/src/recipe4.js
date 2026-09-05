@@ -53,8 +53,11 @@ function en(t){if(!EN||EN.length===0)return 0.5;
    playing instead of one energy scalar. */
 const STEMS=(MAP.stems&&MAP.stems.sources)||{};
 const STT=(MAP.stems&&MAP.stems.at)||(EN||[]).map(p=>p[0]);
+const STEM_FALLBACK={vocals:'other', guitar:'other', piano:'other', drums:'drums', bass:'bass'};
 function stem(k,t){
-  const v=STEMS[k]; if(!v||!v.length) return 0.5;
+  let v=STEMS[k];
+  if((!v||!v.length) && STEM_FALLBACK[k]) v=STEMS[STEM_FALLBACK[k]];
+  if(!v||!v.length) return 0.5;
   let i=-1; for(let j=0;j<STT.length;j++) if(STT[j]<=t) i=j; else break;
   if(i<0) return v[0]; if(i+1>=STT.length||i+1>=v.length) return v[v.length-1];
   return lerp(v[i],v[i+1],ss(0,1,(t-STT[i])/(STT[i+1]-STT[i])))}
@@ -113,7 +116,7 @@ function escal(t){
   const s=sectionAt(t);
   const rep=s?(s.repeat||1):1, arc=s?(s.arc||0):(t/DUR);
   // a repeat is denser; and the show grows from start to finish
-  return {rep:1+0.20*(rep-1), arc:0.88+0.26*arc, id:s?s.id:'?'}}
+  return {rep:1+0.42*(rep-1), arc:0.78+0.44*arc, id:s?s.id:'?'}}
 
 /* ---- three more listeners the recipe can now hear ----
    pan      : the mix's own left-right balance drives the rig's balance
@@ -542,7 +545,7 @@ const ASSIGN=[
 /* ---- one look, evaluated at t ---- */
 function lookFrame(t,L){
   const e=en(t),p=bph(t),k=beatInBar(t),bx=barIdx(t),bp4=phrPh(t),bp=barPh(t);
-  const drumGate=0.18+0.82*ss(0.08,0.42,stem('drums',t));
+  const drumGate=0.14+0.86*ss(0.14,0.82,stem('drums',t));
   const EX=escal(t), grow=EX.rep*EX.arc;
   const PAN=panAt(t);
   /* Pan was a 34%% multiplicative bias, which is invisible. Now the CENTRE of
@@ -638,7 +641,7 @@ function lookFrame(t,L){
     else if(L==='flash'){lv=0.85}
     else{
       const share=(i%2===0)?(1-upSwap):upSwap;
-      const bed=((L==='quiet'?0.016:0.070)+0.19*e*(L==='drop'?1.1:0.78))*(0.50+0.62*stem('bass',t));
+      const bed=((L==='quiet'?0.016:0.070)+0.19*e*(L==='drop'?1.1:0.78))*(0.28+1.10*ss(0.12,0.86,stem('bass',t)));
       lv=bed*(0.55+0.90*share)*(0.84+0.16*Math.sin(2*Math.PI*(t/(8*BAR))+G.xn*3.1));
       if(L==='build') lv*=lerp(0.35,1,layer(0));
       if(L==='spotlight') lv*=0.22;
