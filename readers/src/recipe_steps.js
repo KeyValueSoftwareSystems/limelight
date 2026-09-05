@@ -433,6 +433,63 @@ function sideGain(f, t){
   return 0.30 + 0.85 * stemAt(VOICE[job], t);
 }
 
+/* ---- the head cuelist ------------------------------------------------------
+   Positions are PRESETS with names, cues pick one per group, and the cuelist is
+   built once as an ordered list rather than derived per chapter. That ordering is
+   the whole point: cue n fades from cue n-1's target, so the rig is continuous by
+   construction. Deriving the cue index inside each chapter looked equivalent and
+   was not -- at a chapter boundary the index restarted and every head teleported,
+   which measured as 1538% of the motor budget. */
+const HPOS = {
+  home:     (i,n)=>({pan:0.50, tilt:0.44}),
+  centre:   (i,n)=>({pan:0.50, tilt:0.32}),
+  crowd:    (i,n)=>({pan:0.50 + ((i/(n-1||1))-0.5)*0.22, tilt:0.78}),
+  fanwide:  (i,n)=>({pan:0.50 + ((i/(n-1||1))-0.5)*0.70, tilt:0.28}),
+  fantight: (i,n)=>({pan:0.50 + ((i/(n-1||1))-0.5)*0.16, tilt:0.34}),
+  cross:    (i,n)=>({pan:0.50 + (i%2?0.28:-0.28),        tilt:0.36}),
+  splitL:   (i,n)=>({pan:0.22, tilt:0.40}),
+  splitR:   (i,n)=>({pan:0.78, tilt:0.40}),
+  up:       (i,n)=>({pan:0.50 + ((i/(n-1||1))-0.5)*0.34, tilt:0.06}),
+};
+/* one cue list per group: twenty heads sharing one idea is the motion equivalent
+   of every lamp reading the same signal */
+const HLISTS = {
+  lead:  { intro:["home"], verse:["cross","fantight"], break:["up","centre"],
+           build:["fantight","fanwide"], drop:["crowd","fanwide"],
+           quiet:["centre"], outro:["home"] },
+  low:   { intro:["home"], verse:["splitL","fantight"], break:["up"],
+           build:["fantight","fanwide"], drop:["fanwide","crowd"],
+           quiet:["centre"], outro:["home"] },
+  voice: { intro:["home"], verse:["splitR","cross"], break:["centre","up"],
+           build:["fantight","fanwide"], drop:["fanwide","crowd"],
+           quiet:["centre"], outro:["home"] },
+};
+const HHOLD = { drop:1, build:2, verse:4, break:4, quiet:8, intro:8, outro:8 };
+const HFADE = { drop:0.22, build:0.5, verse:1.1, break:2.2, quiet:3.0, intro:2.5, outro:3.0 };
+const HEFF  = { drop:{attr:"tilt", size:0.045, bars:1}, build:{attr:"pan", size:0.05, bars:1},
+                verse:{attr:"pan", size:0.035, bars:4},
+                break:null, quiet:null, intro:null, outro:null };
+
+const CUELIST = (function(){
+  const out = [];
+  if(!CH.length) return [{at: BAR0, kind:"verse", idx:0}];
+  for(let j = 0; j < CH.length; j++){
+    const t0 = CH[j][0], t1 = (j+1 < CH.length) ? CH[j+1][0] : DUR;
+    const kind = HLISTS.lead[CH[j][1]] ? CH[j][1] : "verse";
+    const hold = HHOLD[kind] || 4;
+    let bar = Math.ceil((t0 - BAR0) / BAR), k = 0;
+    if(BAR0 + bar*BAR > t1) { out.push({at:t0, kind, idx:0}); continue }
+    for(; BAR0 + bar*BAR < t1; bar += hold, k++)
+      out.push({at: BAR0 + bar*BAR, kind, idx: k});
+  }
+  return out.length ? out : [{at: BAR0, kind:"verse", idx:0}];
+})();
+const CUET = CUELIST.map(c => c.at);
+function presetOf(cue, job, i, n){
+  const list = (HLISTS[job] || HLISTS.lead)[cue.kind] || ["home"];
+  return (HPOS[list[cue.idx % list.length]] || HPOS.home)(i, n);
+}
+
 function leadAt(t){
   const e = energyAt(t);
   for(const sp of SP) if(sp.kind === "build" && sp.from <= t && t < sp.to) return "rise";
@@ -580,60 +637,49 @@ function frame(t){
   }
 
   // ---- rung 7: the heads --------------------------------------------------
-  // ---- rung 14: the heads ------------------------------------------------
+  // ---- rung 14: the heads, programmed the way a desk would ---------------
   if(use(14)){
-    /* They were sweeping one cycle every two bars, which is a head taking nearly
-       four seconds to get anywhere -- slow enough to read as a fault. A moving
-       head is fast; the thing that makes it look alive is short throws taken
-       quickly, not long ones taken slowly, and both cost the same motor.
+    /* An oscillator has no events in it. Every head swept sideways at one rate
+       forever, which is motion without punctuation and as dull as a drum machine
+       with no accents. This runs a cuelist instead: a cue picks a preset per
+       group, fades to it over a stated time, and the fade is DELAYED across the
+       group so the move ripples along the row rather than the whole rig arriving
+       together. Between cues the heads hold still, and the holding is what makes
+       the move an event.
 
-       So the frequency rises with the song and the AMPLITUDE is derived from the
-       motor budget rather than merely permitted by it: peak angular speed is
-       amplitude * 2*pi*frequency, so solving for amplitude at the budget means
-       the heads always move as fast as the fixture allows and can never be asked
-       to do more. Raise max_pan_per_s in the layout and they swing wider; lower
-       it and they tighten. The recipe never has to know what a real motor does. */
+       Every fade is checked against the motor. A move of distance d cannot take
+       less than d / budget, so a requested time is raised when it has to be, and
+       there is no way to program a move this rig could not physically make. */
     const e = energyAt(t);
     const LIMP = (LAYOUT.limits && LAYOUT.limits.max_pan_per_s) || 1.55;
-    const LIMT = (LAYOUT.limits && LAYOUT.limits.max_tilt_per_s) || 1.7;
-    /* The frequency is FIXED, and that is not a style choice. Writing it as
-       sin(2*pi*f(t)*t) with f rising on energy jumps the phase every time energy
-       steps -- the head teleports, and the motor check reported 1782% of budget
-       for motion that looked smooth on a graph. A pure function has no phase to
-       accumulate, so the honest fix is a constant rate and let energy drive how
-       BRIGHT the heads are rather than how fast they move.
-       One sweep per bar, with the amplitude solved from the motor budget. */
-    const HF  = 1.0 / BAR;
-    const APAN = Math.min(0.36, (LIMP * 0.70) / (2 * Math.PI * HF));
-    const ATIL = Math.min(0.20, (LIMT * 0.55) / (2 * Math.PI * HF * 0.5));
-    const D2 = dropAt(t);
     const nh = Math.max(1, HEADS.length);
-    HEADS.forEach((f, i) => {
-      // fanned, and every other one mirrored, so the rig crosses rather than herds
-      const ph = (i / nh) * Math.PI * 2, dir = (i % 2 === 0) ? 1 : -1;
-      let pan  = 0.5 + dir * APAN * Math.sin(2*Math.PI*HF*t + ph);
-      let tilt = 0.44 + ATIL * Math.sin(Math.PI*HF*t + ph*0.5);
-      /* On the drop they stop chasing and open into a fixed fan -- the oldest
-         trick there is and still the one that reads from the back of a room.
+    let ci = 0;
+    { let lo = 0, hi = CUET.length - 1;
+      while(lo <= hi){ const mi = (lo+hi)>>1; if(CUET[mi] <= t){ ci = mi; lo = mi+1 } else hi = mi-1 } }
+    const cue = CUELIST[ci], prev = CUELIST[Math.max(0, ci-1)];
 
-         But a head cannot teleport. Snapping to the fan on the instant asked for
-         1344% of the motor budget, because a jump is not a move. The travel
-         happens during the bar of darkness BEFORE the drop instead, which is what
-         a real designer does for exactly this reason: reposition while nobody can
-         see you, and arrive already pointing where the moment needs you. */
-      const fanPan = 0.5 + ((i / (nh - 1 || 1)) - 0.5) * 0.62, fanTilt = 0.30;
-      if(D2){
-        // pre runs 1 a bar out to 0 on the instant, so this is the approach
-        const w = D2.pre !== null ? ss(0, 1, 1 - D2.pre)
-                : D2.dt < BAR     ? 1
-                : ss(0, 1, 1 - (D2.dt - BAR) / BAR);      // and drift back after
-        pan  = lerp(pan,  fanPan,  w);
-        tilt = lerp(tilt, fanTilt, w);
-      }
-      /* the heads carry the saturated colour, and the two sides of the stage take
-         opposite ends of the pair -- which is the other half of taking sides */
+    HEADS.forEach((f, i) => {
+      const job = jobOf(f) || "lead";
+      const A0 = presetOf(prev, job, i, nh), B0 = presetOf(cue, job, i, nh);
+      const fan = (cue.kind === "drop" ? 0.035 : 0.09) * (i % Math.max(1, Math.ceil(nh/4)));
+      const dist = Math.max(Math.abs(B0.pan - A0.pan), Math.abs(B0.tilt - A0.tilt));
+      const fade = Math.max(HFADE[cue.kind] || 1.0, dist / (LIMP * 0.55));
+      const w = ss(0, 1, (t - cue.at - fan) / fade);
+      let pan = lerp(A0.pan, B0.pan, w), tilt = lerp(A0.tilt, B0.tilt, w);
+
+      /* the effect engine, phase fanned across the group. Both the outgoing and
+         incoming effects are crossfaded on the same w, so a chapter change does
+         not switch one on and another off in the same instant. */
+      const ph = (i / nh) * Math.PI * 2;
+      const put = (ef, k) => { if(!ef) return;
+        const v = Math.sin(2*Math.PI*(t - BAR0)/(ef.bars*BAR) + ph) * ef.size * k * (0.4 + 0.6*e);
+        if(ef.attr === "pan") pan += v; else tilt += v; };
+      put(HEFF[prev.kind], 1 - w);
+      put(HEFF[cue.kind], w);
+
       const side = (f.at && f.at[0] < MIDX) ? PAL.a : PAL.b;
       const col = hsl(side[0], 0.90, 0.52);
+      const D2 = dropAt(t);
       F.push({ id:f.id,
                level:+cl((0.28 + 0.62*e) * (0.5 + 0.5*env) * (D2 && D2.hit ? 1.6 : 1)
                          * sideGain(f, t), 0, 1).toFixed(4),
