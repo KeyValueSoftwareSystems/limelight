@@ -1,17 +1,14 @@
 {
  "map": "0.3",
  "song": {
-  "title": "Mizhiyoram (Lofi Mix)",
-  "artist": "Manjil Virinja Pookkal",
+  "title": "mizhiyoram.wav",
+  "artist": "?",
   "length": 123.6
  },
  "made_by": {
   "how": "model",
   "who": "listen/ear.py",
-  "when": "2026-09-06",
-  "source": "mizhiyoram",
-  "reproduce": "python3 listen/ear.py synth/out/mizhiyoram.wav",
-  "note": "35-130 Hz comb fit; octave accepted only when the added beats are between 0.45 and 1.25 of the beats they subdivide; phase refined on onset centroids; bar phase voted by crash, bass-change and structural novelty; segmentation window scales with the song length"
+  "note": "low-band comb fit, octave decided by added-beat support"
  },
  "grid": {
   "period": 0.714036,
@@ -247,7 +244,7 @@
    "name": "intro"
   },
   {
-   "at": 34.184461,
+   "at": 22.75989,
    "name": "verse"
   },
   {
@@ -255,7 +252,15 @@
    "name": "drop"
   },
   {
-   "at": 74.170461,
+   "at": 51.321318,
+   "name": "verse"
+  },
+  {
+   "at": 57.033604,
+   "name": "drop"
+  },
+  {
+   "at": 68.458176,
    "name": "verse"
   },
   {
@@ -270,6 +275,11 @@
  "moments": [
   {
    "at": 45.609033,
+   "kind": "drop",
+   "size": 0.95
+  },
+  {
+   "at": 57.033604,
    "kind": "drop",
    "size": 0.95
   }
@@ -466,15 +476,15 @@
     "repeat": 1,
     "arc": 0.0,
     "name": "intro",
-    "mean_energy": 0.2668
+    "mean_energy": 0.1786
    },
    {
-    "at": 34.184461,
+    "at": 22.75989,
     "id": "VER",
     "repeat": 1,
-    "arc": 0.256,
+    "arc": 0.163,
     "name": "verse",
-    "mean_energy": 0.4809
+    "mean_energy": 0.451
    },
    {
     "at": 45.609033,
@@ -482,15 +492,31 @@
     "repeat": 1,
     "arc": 0.349,
     "name": "drop",
-    "mean_energy": 0.6642
+    "mean_energy": 0.7669
    },
    {
-    "at": 74.170461,
+    "at": 51.321318,
     "id": "VER",
     "repeat": 2,
-    "arc": 0.581,
+    "arc": 0.395,
     "name": "verse",
-    "mean_energy": 0.5572
+    "mean_energy": 0.7279
+   },
+   {
+    "at": 57.033604,
+    "id": "DRO",
+    "repeat": 2,
+    "arc": 0.442,
+    "name": "drop",
+    "mean_energy": 0.802
+   },
+   {
+    "at": 68.458176,
+    "id": "VER",
+    "repeat": 3,
+    "arc": 0.535,
+    "name": "verse",
+    "mean_energy": 0.5014
    },
    {
     "at": 102.73189,
@@ -503,7 +529,7 @@
    {
     "at": 114.156461,
     "id": "VER",
-    "repeat": 3,
+    "repeat": 4,
     "arc": 0.907,
     "name": "verse",
     "mean_energy": 0.362
@@ -664,33 +690,9 @@
     "on_grid": false
    },
    {
-    "at": 0.993,
+    "at": 1.133,
     "of": "tom",
-    "strength": 0.213,
-    "on_grid": false
-   },
-   {
-    "at": 1.05,
-    "of": "tom",
-    "strength": 0.137,
-    "on_grid": false
-   },
-   {
-    "at": 1.107,
-    "of": "tom",
-    "strength": 0.121,
-    "on_grid": false
-   },
-   {
-    "at": 1.157,
-    "of": "tom",
-    "strength": 0.218,
-    "on_grid": false
-   },
-   {
-    "at": 1.21,
-    "of": "tom",
-    "strength": 0.16,
+    "strength": 0.142,
     "on_grid": false
    },
    {
@@ -700,33 +702,9 @@
     "on_grid": true
    },
    {
-    "at": 1.407,
-    "of": "tom",
-    "strength": 0.155,
-    "on_grid": false
-   },
-   {
-    "at": 1.46,
-    "of": "tom",
-    "strength": 0.188,
-    "on_grid": false
-   },
-   {
     "at": 1.64,
     "of": "tom",
     "strength": 0.139,
-    "on_grid": false
-   },
-   {
-    "at": 1.692,
-    "of": "tom",
-    "strength": 0.146,
-    "on_grid": false
-   },
-   {
-    "at": 1.802,
-    "of": "tom",
-    "strength": 0.129,
     "on_grid": false
    },
    {
@@ -736,33 +714,15 @@
     "on_grid": false
    },
    {
-    "at": 2.02,
-    "of": "tom",
-    "strength": 0.196,
-    "on_grid": true
-   },
-   {
     "at": 2.092,
     "of": "tom",
     "strength": 0.14,
     "on_grid": true
    },
    {
-    "at": 2.263,
-    "of": "tom",
-    "strength": 0.156,
-    "on_grid": false
-   },
-   {
     "at": 2.315,
     "of": "tom",
     "strength": 0.169,
-    "on_grid": false
-   },
-   {
-    "at": 2.365,
-    "of": "tom",
-    "strength": 0.128,
     "on_grid": false
    },
    {
@@ -772,27 +732,9 @@
     "on_grid": false
    },
    {
-    "at": 3.86,
-    "of": "tom",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
-    "at": 3.938,
-    "of": "tom",
-    "strength": 0.178,
-    "on_grid": false
-   },
-   {
     "at": 4.015,
     "of": "tom",
     "strength": 0.164,
-    "on_grid": false
-   },
-   {
-    "at": 4.075,
-    "of": "tom",
-    "strength": 0.199,
     "on_grid": false
    },
    {
@@ -802,33 +744,9 @@
     "on_grid": true
    },
    {
-    "at": 4.31,
-    "of": "tom",
-    "strength": 0.135,
-    "on_grid": false
-   },
-   {
-    "at": 4.365,
-    "of": "tom",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
     "at": 4.447,
     "of": "tom",
     "strength": 0.168,
-    "on_grid": false
-   },
-   {
-    "at": 4.503,
-    "of": "tom",
-    "strength": 0.184,
-    "on_grid": false
-   },
-   {
-    "at": 4.553,
-    "of": "tom",
-    "strength": 0.14,
     "on_grid": false
    },
    {
@@ -838,39 +756,15 @@
     "on_grid": false
    },
    {
-    "at": 4.853,
-    "of": "tom",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
     "at": 4.93,
     "of": "tom",
     "strength": 0.136,
     "on_grid": true
    },
    {
-    "at": 4.99,
-    "of": "tom",
-    "strength": 0.128,
-    "on_grid": false
-   },
-   {
-    "at": 5.072,
-    "of": "tom",
-    "strength": 0.146,
-    "on_grid": false
-   },
-   {
     "at": 5.117,
     "of": "tom",
     "strength": 0.153,
-    "on_grid": false
-   },
-   {
-    "at": 5.2,
-    "of": "tom",
-    "strength": 0.151,
     "on_grid": false
    },
    {
@@ -886,69 +780,21 @@
     "on_grid": false
    },
    {
-    "at": 6.688,
-    "of": "tom",
-    "strength": 0.281,
-    "on_grid": false
-   },
-   {
-    "at": 6.745,
-    "of": "tom",
-    "strength": 0.209,
-    "on_grid": false
-   },
-   {
     "at": 6.85,
     "of": "tom",
     "strength": 0.126,
     "on_grid": false
    },
    {
-    "at": 6.91,
+    "at": 7.027,
     "of": "tom",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
-    "at": 7.005,
-    "of": "tom",
-    "strength": 0.121,
+    "strength": 0.168,
     "on_grid": true
-   },
-   {
-    "at": 7.072,
-    "of": "tom",
-    "strength": 0.201,
-    "on_grid": true
-   },
-   {
-    "at": 7.13,
-    "of": "tom",
-    "strength": 0.133,
-    "on_grid": false
-   },
-   {
-    "at": 7.197,
-    "of": "tom",
-    "strength": 0.133,
-    "on_grid": false
    },
    {
     "at": 7.308,
     "of": "tom",
     "strength": 0.144,
-    "on_grid": false
-   },
-   {
-    "at": 7.365,
-    "of": "tom",
-    "strength": 0.162,
-    "on_grid": false
-   },
-   {
-    "at": 7.423,
-    "of": "tom",
-    "strength": 0.181,
     "on_grid": false
    },
    {
@@ -958,45 +804,15 @@
     "on_grid": false
    },
    {
-    "at": 7.548,
-    "of": "tom",
-    "strength": 0.217,
-    "on_grid": false
-   },
-   {
-    "at": 7.605,
-    "of": "tom",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
     "at": 7.692,
     "of": "tom",
     "strength": 0.135,
     "on_grid": false
    },
    {
-    "at": 7.76,
-    "of": "tom",
-    "strength": 0.126,
-    "on_grid": true
-   },
-   {
     "at": 7.923,
     "of": "tom",
     "strength": 0.123,
-    "on_grid": false
-   },
-   {
-    "at": 7.985,
-    "of": "tom",
-    "strength": 0.204,
-    "on_grid": false
-   },
-   {
-    "at": 8.043,
-    "of": "tom",
-    "strength": 0.158,
     "on_grid": false
    },
    {
@@ -1006,33 +822,15 @@
     "on_grid": false
    },
    {
-    "at": 8.225,
-    "of": "tom",
-    "strength": 0.137,
-    "on_grid": false
-   },
-   {
     "at": 9.502,
     "of": "tom",
     "strength": 0.12,
     "on_grid": false
    },
    {
-    "at": 9.555,
-    "of": "tom",
-    "strength": 0.17,
-    "on_grid": false
-   },
-   {
     "at": 9.703,
     "of": "tom",
     "strength": 0.132,
-    "on_grid": false
-   },
-   {
-    "at": 9.797,
-    "of": "tom",
-    "strength": 0.131,
     "on_grid": false
    },
    {
@@ -1060,33 +858,9 @@
     "on_grid": false
    },
    {
-    "at": 12.395,
-    "of": "tom",
-    "strength": 0.266,
-    "on_grid": false
-   },
-   {
-    "at": 12.445,
-    "of": "tom",
-    "strength": 0.162,
-    "on_grid": false
-   },
-   {
     "at": 12.588,
     "of": "tom",
     "strength": 0.151,
-    "on_grid": false
-   },
-   {
-    "at": 12.637,
-    "of": "tom",
-    "strength": 0.196,
-    "on_grid": false
-   },
-   {
-    "at": 12.69,
-    "of": "tom",
-    "strength": 0.129,
     "on_grid": false
    },
    {
@@ -1096,39 +870,15 @@
     "on_grid": true
    },
    {
-    "at": 12.857,
-    "of": "tom",
-    "strength": 0.14,
-    "on_grid": false
-   },
-   {
     "at": 13.07,
     "of": "tom",
     "strength": 0.179,
     "on_grid": false
    },
    {
-    "at": 13.148,
+    "at": 13.262,
     "of": "tom",
-    "strength": 0.13,
-    "on_grid": false
-   },
-   {
-    "at": 13.23,
-    "of": "tom",
-    "strength": 0.12,
-    "on_grid": false
-   },
-   {
-    "at": 13.287,
-    "of": "tom",
-    "strength": 0.13,
-    "on_grid": false
-   },
-   {
-    "at": 13.422,
-    "of": "tom",
-    "strength": 0.134,
+    "strength": 0.126,
     "on_grid": false
    },
    {
@@ -1138,21 +888,9 @@
     "on_grid": true
    },
    {
-    "at": 13.63,
-    "of": "tom",
-    "strength": 0.139,
-    "on_grid": false
-   },
-   {
     "at": 13.693,
     "of": "tom",
     "strength": 0.146,
-    "on_grid": false
-   },
-   {
-    "at": 13.742,
-    "of": "snare",
-    "strength": 0.176,
     "on_grid": false
    },
    {
@@ -1168,51 +906,15 @@
     "on_grid": false
    },
    {
-    "at": 15.422,
-    "of": "tom",
-    "strength": 0.12,
-    "on_grid": false
-   },
-   {
     "at": 15.473,
     "of": "tom",
     "strength": 0.122,
     "on_grid": false
    },
    {
-    "at": 15.527,
-    "of": "tom",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
-    "at": 15.588,
-    "of": "tom",
-    "strength": 0.173,
-    "on_grid": true
-   },
-   {
-    "at": 15.633,
-    "of": "tom",
-    "strength": 0.182,
-    "on_grid": true
-   },
-   {
     "at": 15.688,
     "of": "tom",
     "strength": 0.192,
-    "on_grid": false
-   },
-   {
-    "at": 15.748,
-    "of": "tom",
-    "strength": 0.151,
-    "on_grid": false
-   },
-   {
-    "at": 15.793,
-    "of": "tom",
-    "strength": 0.142,
     "on_grid": false
    },
    {
@@ -1222,33 +924,9 @@
     "on_grid": false
    },
    {
-    "at": 15.93,
-    "of": "tom",
-    "strength": 0.133,
-    "on_grid": false
-   },
-   {
-    "at": 15.992,
-    "of": "tom",
-    "strength": 0.173,
-    "on_grid": false
-   },
-   {
-    "at": 16.038,
-    "of": "tom",
-    "strength": 0.164,
-    "on_grid": false
-   },
-   {
-    "at": 16.13,
-    "of": "tom",
-    "strength": 0.143,
-    "on_grid": false
-   },
-   {
-    "at": 16.175,
-    "of": "tom",
-    "strength": 0.156,
+    "at": 16.06,
+    "of": "snare",
+    "strength": 0.137,
     "on_grid": false
    },
    {
@@ -1258,27 +936,9 @@
     "on_grid": false
    },
    {
-    "at": 16.36,
-    "of": "snare",
-    "strength": 0.18,
-    "on_grid": true
-   },
-   {
-    "at": 16.418,
-    "of": "tom",
-    "strength": 0.184,
-    "on_grid": false
-   },
-   {
     "at": 16.547,
     "of": "tom",
     "strength": 0.121,
-    "on_grid": false
-   },
-   {
-    "at": 16.66,
-    "of": "tom",
-    "strength": 0.12,
     "on_grid": false
    },
    {
@@ -1288,33 +948,9 @@
     "on_grid": false
    },
    {
-    "at": 18.135,
+    "at": 18.26,
     "of": "tom",
-    "strength": 0.337,
-    "on_grid": false
-   },
-   {
-    "at": 18.192,
-    "of": "tom",
-    "strength": 0.23,
-    "on_grid": false
-   },
-   {
-    "at": 18.25,
-    "of": "tom",
-    "strength": 0.13,
-    "on_grid": false
-   },
-   {
-    "at": 18.317,
-    "of": "tom",
-    "strength": 0.197,
-    "on_grid": false
-   },
-   {
-    "at": 18.395,
-    "of": "tom",
-    "strength": 0.127,
+    "strength": 0.177,
     "on_grid": false
    },
    {
@@ -1324,27 +960,9 @@
     "on_grid": true
    },
    {
-    "at": 18.532,
-    "of": "tom",
-    "strength": 0.194,
-    "on_grid": false
-   },
-   {
     "at": 18.698,
     "of": "tom",
     "strength": 0.156,
-    "on_grid": false
-   },
-   {
-    "at": 18.755,
-    "of": "tom",
-    "strength": 0.157,
-    "on_grid": false
-   },
-   {
-    "at": 18.812,
-    "of": "tom",
-    "strength": 0.198,
     "on_grid": false
    },
    {
@@ -1354,51 +972,15 @@
     "on_grid": false
    },
    {
-    "at": 18.995,
-    "of": "tom",
-    "strength": 0.169,
-    "on_grid": false
-   },
-   {
-    "at": 19.073,
-    "of": "tom",
-    "strength": 0.16,
-    "on_grid": false
-   },
-   {
     "at": 19.12,
     "of": "snare",
     "strength": 0.141,
     "on_grid": false
    },
    {
-    "at": 19.198,
-    "of": "tom",
-    "strength": 0.178,
-    "on_grid": true
-   },
-   {
-    "at": 19.275,
-    "of": "tom",
-    "strength": 0.165,
-    "on_grid": false
-   },
-   {
     "at": 19.4,
     "of": "tom",
     "strength": 0.126,
-    "on_grid": false
-   },
-   {
-    "at": 19.457,
-    "of": "tom",
-    "strength": 0.132,
-    "on_grid": false
-   },
-   {
-    "at": 19.51,
-    "of": "tom",
-    "strength": 0.159,
     "on_grid": false
    },
    {
@@ -1414,21 +996,9 @@
     "on_grid": false
    },
    {
-    "at": 20.983,
-    "of": "tom",
-    "strength": 0.133,
-    "on_grid": false
-   },
-   {
     "at": 21.113,
     "of": "tom",
     "strength": 0.164,
-    "on_grid": false
-   },
-   {
-    "at": 21.225,
-    "of": "tom",
-    "strength": 0.13,
     "on_grid": false
    },
    {
@@ -1456,21 +1026,9 @@
     "on_grid": false
    },
    {
-    "at": 22.34,
-    "of": "tom",
-    "strength": 0.174,
-    "on_grid": false
-   },
-   {
     "at": 23.085,
     "of": "tom",
     "strength": 0.126,
-    "on_grid": false
-   },
-   {
-    "at": 23.155,
-    "of": "tom",
-    "strength": 0.131,
     "on_grid": false
    },
    {
@@ -1486,39 +1044,9 @@
     "on_grid": false
    },
    {
-    "at": 23.843,
-    "of": "tom",
-    "strength": 0.173,
-    "on_grid": false
-   },
-   {
-    "at": 23.902,
-    "of": "tom",
-    "strength": 0.134,
-    "on_grid": false
-   },
-   {
     "at": 23.99,
     "of": "tom",
     "strength": 0.123,
-    "on_grid": false
-   },
-   {
-    "at": 24.035,
-    "of": "tom",
-    "strength": 0.237,
-    "on_grid": false
-   },
-   {
-    "at": 24.082,
-    "of": "tom",
-    "strength": 0.193,
-    "on_grid": false
-   },
-   {
-    "at": 24.135,
-    "of": "tom",
-    "strength": 0.129,
     "on_grid": false
    },
    {
@@ -1528,27 +1056,9 @@
     "on_grid": true
    },
    {
-    "at": 24.258,
-    "of": "tom",
-    "strength": 0.121,
-    "on_grid": false
-   },
-   {
     "at": 24.448,
     "of": "tom",
     "strength": 0.323,
-    "on_grid": false
-   },
-   {
-    "at": 24.5,
-    "of": "tom",
-    "strength": 0.288,
-    "on_grid": false
-   },
-   {
-    "at": 24.55,
-    "of": "tom",
-    "strength": 0.183,
     "on_grid": false
    },
    {
@@ -1558,51 +1068,15 @@
     "on_grid": false
    },
    {
-    "at": 24.742,
+    "at": 24.858,
     "of": "tom",
-    "strength": 0.204,
-    "on_grid": false
-   },
-   {
-    "at": 24.832,
-    "of": "tom",
-    "strength": 0.127,
-    "on_grid": false
-   },
-   {
-    "at": 24.88,
-    "of": "tom",
-    "strength": 0.15,
+    "strength": 0.203,
     "on_grid": true
-   },
-   {
-    "at": 24.935,
-    "of": "tom",
-    "strength": 0.182,
-    "on_grid": true
-   },
-   {
-    "at": 24.988,
-    "of": "tom",
-    "strength": 0.18,
-    "on_grid": false
-   },
-   {
-    "at": 25.032,
-    "of": "tom",
-    "strength": 0.137,
-    "on_grid": false
    },
    {
     "at": 25.133,
     "of": "tom",
     "strength": 0.12,
-    "on_grid": false
-   },
-   {
-    "at": 25.177,
-    "of": "tom",
-    "strength": 0.22,
     "on_grid": false
    },
    {
@@ -1612,39 +1086,15 @@
     "on_grid": false
    },
    {
-    "at": 25.415,
-    "of": "tom",
-    "strength": 0.138,
-    "on_grid": false
-   },
-   {
     "at": 25.552,
     "of": "tom",
     "strength": 0.26,
     "on_grid": false
    },
    {
-    "at": 25.608,
-    "of": "tom",
-    "strength": 0.149,
-    "on_grid": true
-   },
-   {
     "at": 25.745,
     "of": "snare",
     "strength": 0.134,
-    "on_grid": false
-   },
-   {
-    "at": 25.795,
-    "of": "tom",
-    "strength": 0.157,
-    "on_grid": false
-   },
-   {
-    "at": 25.848,
-    "of": "tom",
-    "strength": 0.133,
     "on_grid": false
    },
    {
@@ -1654,27 +1104,9 @@
     "on_grid": false
    },
    {
-    "at": 26.0,
-    "of": "snare",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
     "at": 26.637,
     "of": "tom",
     "strength": 0.195,
-    "on_grid": false
-   },
-   {
-    "at": 26.698,
-    "of": "tom",
-    "strength": 0.231,
-    "on_grid": false
-   },
-   {
-    "at": 26.773,
-    "of": "tom",
-    "strength": 0.169,
     "on_grid": false
    },
    {
@@ -1684,51 +1116,15 @@
     "on_grid": false
    },
    {
-    "at": 26.88,
-    "of": "tom",
-    "strength": 0.123,
-    "on_grid": false
-   },
-   {
-    "at": 26.94,
-    "of": "tom",
-    "strength": 0.191,
-    "on_grid": false
-   },
-   {
     "at": 27.062,
     "of": "tom",
     "strength": 0.186,
     "on_grid": true
    },
    {
-    "at": 27.117,
+    "at": 27.25,
     "of": "tom",
-    "strength": 0.145,
-    "on_grid": false
-   },
-   {
-    "at": 27.168,
-    "of": "tom",
-    "strength": 0.13,
-    "on_grid": false
-   },
-   {
-    "at": 27.227,
-    "of": "tom",
-    "strength": 0.148,
-    "on_grid": false
-   },
-   {
-    "at": 27.305,
-    "of": "tom",
-    "strength": 0.167,
-    "on_grid": false
-   },
-   {
-    "at": 27.37,
-    "of": "tom",
-    "strength": 0.255,
+    "strength": 0.179,
     "on_grid": false
    },
    {
@@ -1738,93 +1134,27 @@
     "on_grid": false
    },
    {
-    "at": 27.532,
-    "of": "tom",
-    "strength": 0.183,
-    "on_grid": false
-   },
-   {
-    "at": 27.582,
-    "of": "tom",
-    "strength": 0.243,
-    "on_grid": false
-   },
-   {
-    "at": 27.633,
-    "of": "tom",
-    "strength": 0.199,
-    "on_grid": false
-   },
-   {
     "at": 27.698,
     "of": "tom",
     "strength": 0.138,
     "on_grid": false
    },
    {
-    "at": 27.745,
-    "of": "tom",
-    "strength": 0.203,
-    "on_grid": true
-   },
-   {
-    "at": 27.79,
-    "of": "tom",
-    "strength": 0.192,
-    "on_grid": true
-   },
-   {
-    "at": 27.852,
-    "of": "tom",
-    "strength": 0.299,
+    "at": 27.885,
+    "of": "snare",
+    "strength": 0.125,
     "on_grid": false
    },
    {
-    "at": 27.935,
+    "at": 28.067,
     "of": "tom",
-    "strength": 0.191,
-    "on_grid": false
-   },
-   {
-    "at": 27.985,
-    "of": "tom",
-    "strength": 0.141,
-    "on_grid": false
-   },
-   {
-    "at": 28.035,
-    "of": "tom",
-    "strength": 0.205,
-    "on_grid": false
-   },
-   {
-    "at": 28.09,
-    "of": "tom",
-    "strength": 0.15,
-    "on_grid": false
-   },
-   {
-    "at": 28.135,
-    "of": "tom",
-    "strength": 0.182,
-    "on_grid": false
-   },
-   {
-    "at": 28.195,
-    "of": "tom",
-    "strength": 0.143,
+    "strength": 0.23,
     "on_grid": false
    },
    {
     "at": 28.258,
     "of": "tom",
     "strength": 0.185,
-    "on_grid": false
-   },
-   {
-    "at": 28.35,
-    "of": "tom",
-    "strength": 0.133,
     "on_grid": false
    },
    {
@@ -1840,57 +1170,15 @@
     "on_grid": false
    },
    {
-    "at": 28.78,
-    "of": "tom",
-    "strength": 0.127,
-    "on_grid": false
-   },
-   {
-    "at": 28.85,
-    "of": "tom",
-    "strength": 0.151,
-    "on_grid": false
-   },
-   {
     "at": 29.505,
     "of": "tom",
     "strength": 0.202,
     "on_grid": false
    },
    {
-    "at": 29.55,
-    "of": "tom",
-    "strength": 0.163,
-    "on_grid": false
-   },
-   {
-    "at": 29.602,
-    "of": "tom",
-    "strength": 0.238,
-    "on_grid": false
-   },
-   {
-    "at": 29.65,
-    "of": "tom",
-    "strength": 0.173,
-    "on_grid": false
-   },
-   {
-    "at": 29.695,
-    "of": "tom",
-    "strength": 0.13,
-    "on_grid": false
-   },
-   {
-    "at": 29.758,
-    "of": "tom",
-    "strength": 0.214,
-    "on_grid": false
-   },
-   {
-    "at": 29.815,
-    "of": "tom",
-    "strength": 0.163,
+    "at": 29.683,
+    "of": "snare",
+    "strength": 0.128,
     "on_grid": false
    },
    {
@@ -1900,39 +1188,9 @@
     "on_grid": true
    },
    {
-    "at": 29.918,
-    "of": "snare",
-    "strength": 0.126,
-    "on_grid": true
-   },
-   {
-    "at": 29.962,
-    "of": "tom",
-    "strength": 0.239,
-    "on_grid": false
-   },
-   {
-    "at": 30.01,
-    "of": "snare",
-    "strength": 0.267,
-    "on_grid": false
-   },
-   {
     "at": 30.055,
     "of": "tom",
     "strength": 0.159,
-    "on_grid": false
-   },
-   {
-    "at": 30.113,
-    "of": "tom",
-    "strength": 0.133,
-    "on_grid": false
-   },
-   {
-    "at": 30.183,
-    "of": "snare",
-    "strength": 0.136,
     "on_grid": false
    },
    {
@@ -1942,34 +1200,10 @@
     "on_grid": false
    },
    {
-    "at": 30.302,
-    "of": "tom",
-    "strength": 0.16,
-    "on_grid": false
-   },
-   {
-    "at": 30.365,
-    "of": "tom",
-    "strength": 0.154,
-    "on_grid": false
-   },
-   {
     "at": 30.425,
     "of": "tom",
     "strength": 0.167,
     "on_grid": false
-   },
-   {
-    "at": 30.523,
-    "of": "snare",
-    "strength": 0.135,
-    "on_grid": false
-   },
-   {
-    "at": 30.573,
-    "of": "snare",
-    "strength": 0.145,
-    "on_grid": true
    },
    {
     "at": 30.628,
@@ -1978,45 +1212,15 @@
     "on_grid": true
    },
    {
-    "at": 30.715,
-    "of": "tom",
-    "strength": 0.137,
-    "on_grid": false
-   },
-   {
-    "at": 30.765,
-    "of": "tom",
-    "strength": 0.187,
-    "on_grid": false
-   },
-   {
     "at": 30.848,
     "of": "tom",
     "strength": 0.242,
     "on_grid": false
    },
    {
-    "at": 30.898,
-    "of": "tom",
-    "strength": 0.137,
-    "on_grid": false
-   },
-   {
-    "at": 30.968,
-    "of": "tom",
-    "strength": 0.161,
-    "on_grid": false
-   },
-   {
     "at": 31.025,
     "of": "snare",
     "strength": 0.154,
-    "on_grid": false
-   },
-   {
-    "at": 31.12,
-    "of": "tom",
-    "strength": 0.139,
     "on_grid": false
    },
    {
@@ -2032,21 +1236,9 @@
     "on_grid": false
    },
    {
-    "at": 32.395,
-    "of": "tom",
-    "strength": 0.19,
-    "on_grid": false
-   },
-   {
     "at": 32.542,
     "of": "tom",
     "strength": 0.134,
-    "on_grid": false
-   },
-   {
-    "at": 32.62,
-    "of": "tom",
-    "strength": 0.126,
     "on_grid": false
    },
    {
@@ -2062,12 +1254,6 @@
     "on_grid": false
    },
    {
-    "at": 33.097,
-    "of": "tom",
-    "strength": 0.195,
-    "on_grid": false
-   },
-   {
     "at": 33.23,
     "of": "tom",
     "strength": 0.136,
@@ -2080,69 +1266,21 @@
     "on_grid": true
    },
    {
-    "at": 33.538,
-    "of": "tom",
-    "strength": 0.305,
-    "on_grid": false
-   },
-   {
-    "at": 33.587,
-    "of": "tom",
-    "strength": 0.213,
-    "on_grid": false
-   },
-   {
-    "at": 33.64,
+    "at": 33.663,
     "of": "snare",
-    "strength": 0.169,
+    "strength": 0.15,
     "on_grid": false
    },
    {
-    "at": 33.705,
-    "of": "tom",
-    "strength": 0.204,
-    "on_grid": false
-   },
-   {
-    "at": 33.77,
-    "of": "tom",
-    "strength": 0.145,
-    "on_grid": false
-   },
-   {
-    "at": 33.822,
+    "at": 33.865,
     "of": "snare",
-    "strength": 0.134,
-    "on_grid": false
-   },
-   {
-    "at": 33.88,
-    "of": "tom",
-    "strength": 0.153,
-    "on_grid": false
-   },
-   {
-    "at": 33.935,
-    "of": "snare",
-    "strength": 0.141,
-    "on_grid": false
-   },
-   {
-    "at": 33.998,
-    "of": "tom",
-    "strength": 0.153,
+    "strength": 0.179,
     "on_grid": false
    },
    {
     "at": 34.34,
     "of": "tom",
     "strength": 0.131,
-    "on_grid": false
-   },
-   {
-    "at": 34.438,
-    "of": "tom",
-    "strength": 0.363,
     "on_grid": false
    },
    {
@@ -2158,51 +1296,15 @@
     "on_grid": true
    },
    {
-    "at": 34.962,
-    "of": "snare",
-    "strength": 0.167,
-    "on_grid": false
-   },
-   {
     "at": 35.115,
     "of": "snare",
     "strength": 0.122,
     "on_grid": false
    },
    {
-    "at": 35.178,
-    "of": "snare",
-    "strength": 0.312,
-    "on_grid": false
-   },
-   {
-    "at": 35.227,
+    "at": 35.305,
     "of": "tom",
-    "strength": 0.431,
-    "on_grid": false
-   },
-   {
-    "at": 35.278,
-    "of": "tom",
-    "strength": 0.267,
-    "on_grid": false
-   },
-   {
-    "at": 35.322,
-    "of": "snare",
-    "strength": 0.161,
-    "on_grid": false
-   },
-   {
-    "at": 35.39,
-    "of": "snare",
-    "strength": 0.139,
-    "on_grid": false
-   },
-   {
-    "at": 35.447,
-    "of": "snare",
-    "strength": 0.131,
+    "strength": 0.209,
     "on_grid": false
    },
    {
@@ -2212,39 +1314,9 @@
     "on_grid": false
    },
    {
-    "at": 35.565,
+    "at": 35.695,
     "of": "snare",
-    "strength": 0.128,
-    "on_grid": true
-   },
-   {
-    "at": 35.617,
-    "of": "snare",
-    "strength": 0.197,
-    "on_grid": true
-   },
-   {
-    "at": 35.667,
-    "of": "snare",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
-    "at": 35.72,
-    "of": "snare",
-    "strength": 0.342,
-    "on_grid": false
-   },
-   {
-    "at": 35.77,
-    "of": "snare",
-    "strength": 0.166,
-    "on_grid": false
-   },
-   {
-    "at": 35.822,
-    "of": "snare",
-    "strength": 0.156,
+    "strength": 0.327,
     "on_grid": false
    },
    {
@@ -2254,39 +1326,9 @@
     "on_grid": false
    },
    {
-    "at": 35.928,
-    "of": "snare",
-    "strength": 0.42,
-    "on_grid": false
-   },
-   {
-    "at": 35.977,
-    "of": "snare",
-    "strength": 0.214,
-    "on_grid": false
-   },
-   {
     "at": 36.07,
     "of": "snare",
     "strength": 0.159,
-    "on_grid": false
-   },
-   {
-    "at": 36.13,
-    "of": "snare",
-    "strength": 0.187,
-    "on_grid": false
-   },
-   {
-    "at": 36.175,
-    "of": "snare",
-    "strength": 0.205,
-    "on_grid": false
-   },
-   {
-    "at": 36.225,
-    "of": "snare",
-    "strength": 0.146,
     "on_grid": false
    },
    {
@@ -2296,81 +1338,21 @@
     "on_grid": true
    },
    {
-    "at": 36.343,
-    "of": "snare",
-    "strength": 0.278,
-    "on_grid": true
-   },
-   {
-    "at": 36.388,
-    "of": "snare",
-    "strength": 0.319,
-    "on_grid": false
-   },
-   {
-    "at": 36.432,
-    "of": "snare",
-    "strength": 0.121,
-    "on_grid": false
-   },
-   {
     "at": 36.492,
     "of": "snare",
     "strength": 0.24,
     "on_grid": false
    },
    {
-    "at": 36.545,
+    "at": 36.678,
     "of": "snare",
-    "strength": 0.144,
+    "strength": 0.124,
     "on_grid": false
    },
    {
-    "at": 36.602,
-    "of": "tom",
-    "strength": 0.289,
-    "on_grid": false
-   },
-   {
-    "at": 36.657,
+    "at": 36.855,
     "of": "snare",
-    "strength": 0.27,
-    "on_grid": false
-   },
-   {
-    "at": 36.72,
-    "of": "tom",
-    "strength": 0.182,
-    "on_grid": false
-   },
-   {
-    "at": 36.778,
-    "of": "snare",
-    "strength": 0.142,
-    "on_grid": false
-   },
-   {
-    "at": 36.83,
-    "of": "snare",
-    "strength": 0.183,
-    "on_grid": false
-   },
-   {
-    "at": 36.875,
-    "of": "snare",
-    "strength": 0.202,
-    "on_grid": false
-   },
-   {
-    "at": 36.92,
-    "of": "snare",
-    "strength": 0.138,
-    "on_grid": false
-   },
-   {
-    "at": 36.987,
-    "of": "snare",
-    "strength": 0.373,
+    "strength": 0.185,
     "on_grid": false
    },
    {
@@ -2380,33 +1362,9 @@
     "on_grid": true
    },
    {
-    "at": 37.112,
+    "at": 37.248,
     "of": "snare",
-    "strength": 0.202,
-    "on_grid": false
-   },
-   {
-    "at": 37.17,
-    "of": "tom",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 37.222,
-    "of": "snare",
-    "strength": 0.146,
-    "on_grid": false
-   },
-   {
-    "at": 37.28,
-    "of": "snare",
-    "strength": 0.138,
-    "on_grid": false
-   },
-   {
-    "at": 37.333,
-    "of": "snare",
-    "strength": 0.156,
+    "strength": 0.161,
     "on_grid": false
    },
    {
@@ -2422,87 +1380,27 @@
     "on_grid": false
    },
    {
-    "at": 38.05,
-    "of": "snare",
-    "strength": 0.123,
-    "on_grid": false
-   },
-   {
-    "at": 38.095,
+    "at": 38.117,
     "of": "tom",
-    "strength": 0.17,
+    "strength": 0.129,
     "on_grid": false
    },
    {
-    "at": 38.145,
-    "of": "tom",
-    "strength": 0.161,
-    "on_grid": false
-   },
-   {
-    "at": 38.265,
-    "of": "tom",
-    "strength": 0.274,
-    "on_grid": false
-   },
-   {
-    "at": 38.315,
-    "of": "tom",
-    "strength": 0.126,
-    "on_grid": false
-   },
-   {
-    "at": 38.362,
-    "of": "tom",
-    "strength": 0.2,
-    "on_grid": false
-   },
-   {
-    "at": 38.413,
-    "of": "snare",
-    "strength": 0.148,
-    "on_grid": false
-   },
-   {
-    "at": 38.458,
+    "at": 38.297,
     "of": "snare",
     "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 38.49,
+    "of": "tom",
+    "strength": 0.378,
     "on_grid": true
    },
    {
-    "at": 38.517,
+    "at": 38.667,
     "of": "snare",
-    "strength": 0.155,
-    "on_grid": true
-   },
-   {
-    "at": 38.568,
-    "of": "snare",
-    "strength": 0.169,
-    "on_grid": false
-   },
-   {
-    "at": 38.635,
-    "of": "snare",
-    "strength": 0.141,
-    "on_grid": false
-   },
-   {
-    "at": 38.682,
-    "of": "tom",
-    "strength": 0.143,
-    "on_grid": false
-   },
-   {
-    "at": 38.735,
-    "of": "tom",
-    "strength": 0.143,
-    "on_grid": false
-   },
-   {
-    "at": 38.79,
-    "of": "snare",
-    "strength": 0.173,
+    "strength": 0.179,
     "on_grid": false
    },
    {
@@ -2512,63 +1410,15 @@
     "on_grid": false
    },
    {
-    "at": 38.922,
-    "of": "tom",
-    "strength": 0.147,
-    "on_grid": false
-   },
-   {
-    "at": 38.968,
-    "of": "snare",
-    "strength": 0.125,
-    "on_grid": false
-   },
-   {
-    "at": 39.013,
-    "of": "snare",
-    "strength": 0.203,
-    "on_grid": false
-   },
-   {
     "at": 39.06,
     "of": "tom",
     "strength": 0.267,
     "on_grid": false
    },
    {
-    "at": 39.117,
+    "at": 39.237,
     "of": "snare",
-    "strength": 0.172,
-    "on_grid": false
-   },
-   {
-    "at": 39.165,
-    "of": "snare",
-    "strength": 0.289,
-    "on_grid": true
-   },
-   {
-    "at": 39.215,
-    "of": "snare",
-    "strength": 0.182,
-    "on_grid": true
-   },
-   {
-    "at": 39.27,
-    "of": "snare",
-    "strength": 0.215,
-    "on_grid": false
-   },
-   {
-    "at": 39.315,
-    "of": "snare",
-    "strength": 0.137,
-    "on_grid": false
-   },
-   {
-    "at": 39.365,
-    "of": "snare",
-    "strength": 0.127,
+    "strength": 0.198,
     "on_grid": false
    },
    {
@@ -2578,39 +1428,15 @@
     "on_grid": false
    },
    {
-    "at": 39.498,
-    "of": "tom",
-    "strength": 0.146,
-    "on_grid": false
-   },
-   {
-    "at": 39.547,
-    "of": "tom",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
     "at": 39.9,
     "of": "tom",
     "strength": 0.197,
     "on_grid": true
    },
    {
-    "at": 39.95,
-    "of": "tom",
-    "strength": 0.196,
-    "on_grid": false
-   },
-   {
     "at": 40.142,
     "of": "tom",
     "strength": 0.124,
-    "on_grid": false
-   },
-   {
-    "at": 40.212,
-    "of": "tom",
-    "strength": 0.161,
     "on_grid": false
    },
    {
@@ -2620,34 +1446,10 @@
     "on_grid": false
    },
    {
-    "at": 40.38,
-    "of": "tom",
-    "strength": 0.157,
-    "on_grid": false
-   },
-   {
-    "at": 40.485,
+    "at": 40.513,
     "of": "snare",
-    "strength": 0.128,
+    "strength": 0.134,
     "on_grid": false
-   },
-   {
-    "at": 40.532,
-    "of": "tom",
-    "strength": 0.199,
-    "on_grid": false
-   },
-   {
-    "at": 40.597,
-    "of": "snare",
-    "strength": 0.166,
-    "on_grid": true
-   },
-   {
-    "at": 40.642,
-    "of": "tom",
-    "strength": 0.124,
-    "on_grid": true
    },
    {
     "at": 40.93,
@@ -2656,58 +1458,16 @@
     "on_grid": false
    },
    {
-    "at": 40.98,
+    "at": 41.117,
     "of": "tom",
-    "strength": 0.134,
+    "strength": 0.15,
     "on_grid": false
    },
    {
-    "at": 41.03,
+    "at": 41.315,
     "of": "tom",
-    "strength": 0.227,
-    "on_grid": false
-   },
-   {
-    "at": 41.078,
-    "of": "tom",
-    "strength": 0.143,
-    "on_grid": false
-   },
-   {
-    "at": 41.153,
-    "of": "tom",
-    "strength": 0.228,
-    "on_grid": false
-   },
-   {
-    "at": 41.2,
-    "of": "tom",
-    "strength": 0.262,
-    "on_grid": false
-   },
-   {
-    "at": 41.278,
-    "of": "tom",
-    "strength": 0.181,
+    "strength": 0.163,
     "on_grid": true
-   },
-   {
-    "at": 41.352,
-    "of": "snare",
-    "strength": 0.133,
-    "on_grid": true
-   },
-   {
-    "at": 41.398,
-    "of": "snare",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 41.462,
-    "of": "snare",
-    "strength": 0.139,
-    "on_grid": false
    },
    {
     "at": 41.538,
@@ -2716,33 +1476,9 @@
     "on_grid": false
    },
    {
-    "at": 41.593,
-    "of": "snare",
-    "strength": 0.165,
-    "on_grid": false
-   },
-   {
-    "at": 41.648,
+    "at": 41.735,
     "of": "tom",
-    "strength": 0.237,
-    "on_grid": false
-   },
-   {
-    "at": 41.7,
-    "of": "tom",
-    "strength": 0.125,
-    "on_grid": false
-   },
-   {
-    "at": 41.795,
-    "of": "tom",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 41.873,
-    "of": "tom",
-    "strength": 0.232,
+    "strength": 0.164,
     "on_grid": false
    },
    {
@@ -2752,21 +1488,9 @@
     "on_grid": false
    },
    {
-    "at": 42.028,
-    "of": "snare",
-    "strength": 0.128,
-    "on_grid": true
-   },
-   {
     "at": 42.123,
     "of": "tom",
     "strength": 0.125,
-    "on_grid": false
-   },
-   {
-    "at": 42.27,
-    "of": "tom",
-    "strength": 0.131,
     "on_grid": false
    },
    {
@@ -2776,21 +1500,9 @@
     "on_grid": false
    },
    {
-    "at": 42.395,
+    "at": 42.51,
     "of": "tom",
-    "strength": 0.177,
-    "on_grid": false
-   },
-   {
-    "at": 42.472,
-    "of": "tom",
-    "strength": 0.159,
-    "on_grid": false
-   },
-   {
-    "at": 42.53,
-    "of": "tom",
-    "strength": 0.16,
+    "strength": 0.131,
     "on_grid": false
    },
    {
@@ -2800,21 +1512,9 @@
     "on_grid": true
    },
    {
-    "at": 42.855,
-    "of": "tom",
-    "strength": 0.139,
-    "on_grid": false
-   },
-   {
     "at": 43.032,
     "of": "tom",
     "strength": 0.22,
-    "on_grid": false
-   },
-   {
-    "at": 43.145,
-    "of": "snare",
-    "strength": 0.163,
     "on_grid": false
    },
    {
@@ -2822,12 +1522,6 @@
     "of": "snare",
     "strength": 0.129,
     "on_grid": false
-   },
-   {
-    "at": 43.43,
-    "of": "snare",
-    "strength": 0.128,
-    "on_grid": true
    },
    {
     "at": 43.502,
@@ -2839,12 +1533,6 @@
     "at": 43.685,
     "of": "tom",
     "strength": 0.126,
-    "on_grid": false
-   },
-   {
-    "at": 43.795,
-    "of": "tom",
-    "strength": 0.208,
     "on_grid": false
    },
    {
@@ -2866,117 +1554,33 @@
     "on_grid": false
    },
    {
-    "at": 45.935,
-    "of": "snare",
-    "strength": 0.243,
-    "on_grid": false
-   },
-   {
     "at": 46.63,
     "of": "tom",
     "strength": 0.212,
     "on_grid": false
    },
    {
-    "at": 46.675,
+    "at": 46.807,
     "of": "kick",
-    "strength": 0.557,
+    "strength": 0.25,
     "on_grid": false
    },
    {
-    "at": 46.72,
-    "of": "kick",
-    "strength": 0.883,
-    "on_grid": false
-   },
-   {
-    "at": 46.77,
-    "of": "kick",
-    "strength": 0.453,
-    "on_grid": false
-   },
-   {
-    "at": 46.82,
-    "of": "kick",
-    "strength": 0.178,
-    "on_grid": false
-   },
-   {
-    "at": 46.867,
-    "of": "kick",
-    "strength": 0.306,
-    "on_grid": false
-   },
-   {
-    "at": 46.917,
+    "at": 46.985,
     "of": "tom",
-    "strength": 0.39,
+    "strength": 0.422,
     "on_grid": false
    },
    {
-    "at": 46.97,
+    "at": 47.165,
     "of": "tom",
-    "strength": 0.331,
+    "strength": 0.315,
     "on_grid": false
    },
    {
-    "at": 47.02,
-    "of": "tom",
-    "strength": 0.226,
-    "on_grid": true
-   },
-   {
-    "at": 47.072,
-    "of": "tom",
-    "strength": 0.305,
-    "on_grid": true
-   },
-   {
-    "at": 47.123,
-    "of": "tom",
-    "strength": 0.365,
-    "on_grid": false
-   },
-   {
-    "at": 47.175,
+    "at": 47.345,
     "of": "kick",
     "strength": 0.338,
-    "on_grid": false
-   },
-   {
-    "at": 47.227,
-    "of": "kick",
-    "strength": 0.354,
-    "on_grid": false
-   },
-   {
-    "at": 47.278,
-    "of": "kick",
-    "strength": 0.369,
-    "on_grid": false
-   },
-   {
-    "at": 47.33,
-    "of": "kick",
-    "strength": 0.401,
-    "on_grid": false
-   },
-   {
-    "at": 47.375,
-    "of": "kick",
-    "strength": 0.14,
-    "on_grid": false
-   },
-   {
-    "at": 47.43,
-    "of": "tom",
-    "strength": 0.161,
-    "on_grid": false
-   },
-   {
-    "at": 47.483,
-    "of": "kick",
-    "strength": 0.189,
     "on_grid": false
    },
    {
@@ -2986,57 +1590,15 @@
     "on_grid": false
    },
    {
-    "at": 47.585,
-    "of": "kick",
-    "strength": 0.295,
-    "on_grid": false
-   },
-   {
-    "at": 47.638,
-    "of": "kick",
-    "strength": 0.143,
-    "on_grid": false
-   },
-   {
-    "at": 47.703,
+    "at": 47.712,
     "of": "tom",
-    "strength": 0.297,
+    "strength": 0.239,
     "on_grid": true
-   },
-   {
-    "at": 47.755,
-    "of": "kick",
-    "strength": 0.807,
-    "on_grid": true
-   },
-   {
-    "at": 47.805,
-    "of": "kick",
-    "strength": 0.473,
-    "on_grid": false
-   },
-   {
-    "at": 47.86,
-    "of": "kick",
-    "strength": 0.222,
-    "on_grid": false
    },
    {
     "at": 47.917,
     "of": "kick",
     "strength": 0.203,
-    "on_grid": false
-   },
-   {
-    "at": 47.97,
-    "of": "kick",
-    "strength": 0.281,
-    "on_grid": false
-   },
-   {
-    "at": 48.023,
-    "of": "kick",
-    "strength": 0.13,
     "on_grid": false
    },
    {
@@ -3046,58 +1608,16 @@
     "on_grid": false
    },
    {
-    "at": 48.175,
+    "at": 48.305,
     "of": "kick",
-    "strength": 0.168,
+    "strength": 0.166,
     "on_grid": false
    },
    {
-    "at": 48.227,
+    "at": 48.51,
     "of": "kick",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
-    "at": 48.28,
-    "of": "kick",
-    "strength": 0.192,
-    "on_grid": false
-   },
-   {
-    "at": 48.345,
-    "of": "kick",
-    "strength": 0.175,
-    "on_grid": false
-   },
-   {
-    "at": 48.435,
-    "of": "kick",
-    "strength": 0.154,
+    "strength": 0.139,
     "on_grid": true
-   },
-   {
-    "at": 48.48,
-    "of": "kick",
-    "strength": 0.128,
-    "on_grid": true
-   },
-   {
-    "at": 48.535,
-    "of": "kick",
-    "strength": 0.187,
-    "on_grid": false
-   },
-   {
-    "at": 48.587,
-    "of": "kick",
-    "strength": 0.167,
-    "on_grid": false
-   },
-   {
-    "at": 48.64,
-    "of": "kick",
-    "strength": 0.15,
-    "on_grid": false
    },
    {
     "at": 48.693,
@@ -3106,58 +1626,16 @@
     "on_grid": false
    },
    {
-    "at": 48.74,
-    "of": "tom",
-    "strength": 0.151,
+    "at": 48.87,
+    "of": "kick",
+    "strength": 0.247,
     "on_grid": false
    },
    {
-    "at": 48.792,
-    "of": "kick",
-    "strength": 0.17,
+    "at": 49.047,
+    "of": "snare",
+    "strength": 0.23,
     "on_grid": false
-   },
-   {
-    "at": 48.845,
-    "of": "kick",
-    "strength": 0.207,
-    "on_grid": false
-   },
-   {
-    "at": 48.895,
-    "of": "kick",
-    "strength": 0.324,
-    "on_grid": false
-   },
-   {
-    "at": 48.972,
-    "of": "kick",
-    "strength": 0.262,
-    "on_grid": false
-   },
-   {
-    "at": 49.023,
-    "of": "kick",
-    "strength": 0.177,
-    "on_grid": false
-   },
-   {
-    "at": 49.075,
-    "of": "kick",
-    "strength": 0.278,
-    "on_grid": false
-   },
-   {
-    "at": 49.142,
-    "of": "kick",
-    "strength": 0.218,
-    "on_grid": true
-   },
-   {
-    "at": 49.195,
-    "of": "kick",
-    "strength": 0.192,
-    "on_grid": true
    },
    {
     "at": 49.245,
@@ -3166,105 +1644,27 @@
     "on_grid": false
    },
    {
-    "at": 49.295,
+    "at": 49.425,
     "of": "kick",
-    "strength": 0.162,
+    "strength": 0.156,
     "on_grid": false
    },
    {
-    "at": 49.347,
+    "at": 49.612,
     "of": "kick",
-    "strength": 0.259,
+    "strength": 0.157,
     "on_grid": false
    },
    {
-    "at": 49.395,
+    "at": 49.792,
     "of": "tom",
-    "strength": 0.145,
+    "strength": 0.163,
     "on_grid": false
    },
    {
-    "at": 49.447,
+    "at": 49.98,
     "of": "kick",
-    "strength": 0.129,
-    "on_grid": false
-   },
-   {
-    "at": 49.495,
-    "of": "tom",
-    "strength": 0.184,
-    "on_grid": false
-   },
-   {
-    "at": 49.555,
-    "of": "kick",
-    "strength": 0.318,
-    "on_grid": false
-   },
-   {
-    "at": 49.6,
-    "of": "kick",
-    "strength": 0.142,
-    "on_grid": false
-   },
-   {
-    "at": 49.653,
-    "of": "tom",
-    "strength": 0.239,
-    "on_grid": false
-   },
-   {
-    "at": 49.708,
-    "of": "kick",
-    "strength": 0.125,
-    "on_grid": false
-   },
-   {
-    "at": 49.752,
-    "of": "tom",
-    "strength": 0.297,
-    "on_grid": false
-   },
-   {
-    "at": 49.81,
-    "of": "kick",
-    "strength": 0.129,
-    "on_grid": false
-   },
-   {
-    "at": 49.855,
-    "of": "tom",
-    "strength": 0.377,
-    "on_grid": true
-   },
-   {
-    "at": 49.91,
-    "of": "kick",
-    "strength": 0.504,
-    "on_grid": true
-   },
-   {
-    "at": 49.962,
-    "of": "kick",
-    "strength": 0.247,
-    "on_grid": false
-   },
-   {
-    "at": 50.023,
-    "of": "kick",
-    "strength": 0.129,
-    "on_grid": false
-   },
-   {
-    "at": 50.068,
-    "of": "kick",
-    "strength": 0.144,
-    "on_grid": false
-   },
-   {
-    "at": 50.112,
-    "of": "tom",
-    "strength": 0.169,
+    "strength": 0.481,
     "on_grid": false
    },
    {
@@ -3274,87 +1674,21 @@
     "on_grid": false
    },
    {
-    "at": 50.212,
-    "of": "kick",
-    "strength": 0.221,
-    "on_grid": false
-   },
-   {
-    "at": 50.258,
-    "of": "kick",
-    "strength": 0.22,
-    "on_grid": false
-   },
-   {
-    "at": 50.303,
+    "at": 50.34,
     "of": "tom",
-    "strength": 0.295,
+    "strength": 0.144,
     "on_grid": false
    },
    {
-    "at": 50.347,
+    "at": 50.517,
     "of": "tom",
-    "strength": 0.168,
+    "strength": 0.146,
     "on_grid": false
    },
    {
-    "at": 50.403,
-    "of": "tom",
-    "strength": 0.424,
-    "on_grid": false
-   },
-   {
-    "at": 50.447,
+    "at": 50.697,
     "of": "kick",
-    "strength": 0.209,
-    "on_grid": false
-   },
-   {
-    "at": 50.495,
-    "of": "kick",
-    "strength": 0.134,
-    "on_grid": false
-   },
-   {
-    "at": 50.54,
-    "of": "kick",
-    "strength": 0.199,
-    "on_grid": false
-   },
-   {
-    "at": 50.59,
-    "of": "kick",
-    "strength": 0.252,
-    "on_grid": true
-   },
-   {
-    "at": 50.635,
-    "of": "kick",
-    "strength": 0.675,
-    "on_grid": true
-   },
-   {
-    "at": 50.682,
-    "of": "kick",
-    "strength": 0.274,
-    "on_grid": false
-   },
-   {
-    "at": 50.74,
-    "of": "kick",
-    "strength": 0.282,
-    "on_grid": false
-   },
-   {
-    "at": 50.788,
-    "of": "tom",
-    "strength": 0.513,
-    "on_grid": false
-   },
-   {
-    "at": 50.833,
-    "of": "tom",
-    "strength": 0.248,
+    "strength": 0.259,
     "on_grid": false
    },
    {
@@ -3364,135 +1698,33 @@
     "on_grid": false
    },
    {
-    "at": 50.925,
-    "of": "kick",
-    "strength": 0.324,
-    "on_grid": false
-   },
-   {
-    "at": 50.97,
-    "of": "tom",
-    "strength": 0.381,
-    "on_grid": false
-   },
-   {
-    "at": 51.015,
-    "of": "tom",
-    "strength": 0.244,
-    "on_grid": false
-   },
-   {
     "at": 51.062,
     "of": "kick",
     "strength": 0.342,
     "on_grid": false
    },
    {
-    "at": 51.108,
+    "at": 51.245,
     "of": "kick",
-    "strength": 0.249,
+    "strength": 0.365,
     "on_grid": false
    },
    {
-    "at": 51.167,
-    "of": "tom",
-    "strength": 0.334,
-    "on_grid": false
-   },
-   {
-    "at": 51.215,
+    "at": 51.428,
     "of": "kick",
-    "strength": 0.147,
+    "strength": 0.36,
     "on_grid": false
    },
    {
-    "at": 51.26,
+    "at": 51.617,
     "of": "kick",
-    "strength": 0.355,
+    "strength": 0.122,
     "on_grid": false
    },
    {
-    "at": 51.305,
+    "at": 51.795,
     "of": "kick",
-    "strength": 0.248,
-    "on_grid": true
-   },
-   {
-    "at": 51.35,
-    "of": "tom",
-    "strength": 0.181,
-    "on_grid": true
-   },
-   {
-    "at": 51.398,
-    "of": "kick",
-    "strength": 0.221,
-    "on_grid": false
-   },
-   {
-    "at": 51.443,
-    "of": "kick",
-    "strength": 0.305,
-    "on_grid": false
-   },
-   {
-    "at": 51.487,
-    "of": "tom",
-    "strength": 0.127,
-    "on_grid": false
-   },
-   {
-    "at": 51.535,
-    "of": "kick",
-    "strength": 0.169,
-    "on_grid": false
-   },
-   {
-    "at": 51.58,
-    "of": "kick",
-    "strength": 0.237,
-    "on_grid": false
-   },
-   {
-    "at": 51.627,
-    "of": "kick",
-    "strength": 0.575,
-    "on_grid": false
-   },
-   {
-    "at": 51.678,
-    "of": "tom",
-    "strength": 0.125,
-    "on_grid": false
-   },
-   {
-    "at": 51.725,
-    "of": "kick",
-    "strength": 0.204,
-    "on_grid": false
-   },
-   {
-    "at": 51.77,
-    "of": "kick",
-    "strength": 0.133,
-    "on_grid": false
-   },
-   {
-    "at": 51.818,
-    "of": "kick",
-    "strength": 0.456,
-    "on_grid": false
-   },
-   {
-    "at": 51.87,
-    "of": "kick",
-    "strength": 0.188,
-    "on_grid": false
-   },
-   {
-    "at": 51.932,
-    "of": "kick",
-    "strength": 0.179,
+    "strength": 0.262,
     "on_grid": false
    },
    {
@@ -3502,129 +1734,33 @@
     "on_grid": false
    },
    {
-    "at": 52.023,
+    "at": 52.163,
     "of": "kick",
-    "strength": 0.196,
+    "strength": 0.193,
+    "on_grid": false
+   },
+   {
+    "at": 52.35,
+    "of": "kick",
+    "strength": 0.602,
+    "on_grid": false
+   },
+   {
+    "at": 52.53,
+    "of": "kick",
+    "strength": 0.166,
+    "on_grid": false
+   },
+   {
+    "at": 52.712,
+    "of": "kick",
+    "strength": 0.334,
     "on_grid": true
    },
    {
-    "at": 52.085,
-    "of": "kick",
-    "strength": 0.427,
-    "on_grid": true
-   },
-   {
-    "at": 52.13,
-    "of": "kick",
-    "strength": 0.165,
-    "on_grid": false
-   },
-   {
-    "at": 52.175,
-    "of": "kick",
-    "strength": 0.175,
-    "on_grid": false
-   },
-   {
-    "at": 52.222,
-    "of": "kick",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 52.267,
-    "of": "kick",
-    "strength": 0.298,
-    "on_grid": false
-   },
-   {
-    "at": 52.33,
-    "of": "kick",
-    "strength": 0.217,
-    "on_grid": false
-   },
-   {
-    "at": 52.375,
-    "of": "kick",
-    "strength": 0.127,
-    "on_grid": false
-   },
-   {
-    "at": 52.42,
-    "of": "kick",
-    "strength": 0.431,
-    "on_grid": false
-   },
-   {
-    "at": 52.48,
-    "of": "kick",
-    "strength": 0.308,
-    "on_grid": false
-   },
-   {
-    "at": 52.525,
-    "of": "kick",
-    "strength": 0.289,
-    "on_grid": false
-   },
-   {
-    "at": 52.57,
-    "of": "kick",
-    "strength": 0.314,
-    "on_grid": false
-   },
-   {
-    "at": 52.627,
-    "of": "kick",
-    "strength": 0.168,
-    "on_grid": false
-   },
-   {
-    "at": 52.685,
-    "of": "kick",
-    "strength": 0.228,
-    "on_grid": false
-   },
-   {
-    "at": 52.73,
+    "at": 52.895,
     "of": "tom",
-    "strength": 0.155,
-    "on_grid": true
-   },
-   {
-    "at": 52.788,
-    "of": "kick",
-    "strength": 0.125,
-    "on_grid": true
-   },
-   {
-    "at": 52.84,
-    "of": "kick",
-    "strength": 0.382,
-    "on_grid": false
-   },
-   {
-    "at": 52.885,
-    "of": "kick",
-    "strength": 0.257,
-    "on_grid": false
-   },
-   {
-    "at": 52.932,
-    "of": "tom",
-    "strength": 0.151,
-    "on_grid": false
-   },
-   {
-    "at": 52.983,
-    "of": "kick",
-    "strength": 0.279,
-    "on_grid": false
-   },
-   {
-    "at": 53.032,
-    "of": "kick",
-    "strength": 0.229,
+    "strength": 0.185,
     "on_grid": false
    },
    {
@@ -3634,64 +1770,16 @@
     "on_grid": false
    },
    {
-    "at": 53.127,
+    "at": 53.263,
     "of": "kick",
-    "strength": 0.374,
+    "strength": 0.508,
     "on_grid": false
    },
    {
-    "at": 53.172,
-    "of": "tom",
-    "strength": 0.172,
-    "on_grid": false
-   },
-   {
-    "at": 53.222,
-    "of": "tom",
-    "strength": 0.315,
-    "on_grid": false
-   },
-   {
-    "at": 53.282,
+    "at": 53.44,
     "of": "kick",
-    "strength": 0.268,
-    "on_grid": false
-   },
-   {
-    "at": 53.328,
-    "of": "kick",
-    "strength": 0.177,
-    "on_grid": false
-   },
-   {
-    "at": 53.377,
-    "of": "kick",
-    "strength": 0.213,
-    "on_grid": false
-   },
-   {
-    "at": 53.422,
-    "of": "kick",
-    "strength": 0.66,
+    "strength": 0.465,
     "on_grid": true
-   },
-   {
-    "at": 53.47,
-    "of": "kick",
-    "strength": 0.531,
-    "on_grid": true
-   },
-   {
-    "at": 53.517,
-    "of": "kick",
-    "strength": 0.176,
-    "on_grid": false
-   },
-   {
-    "at": 53.575,
-    "of": "kick",
-    "strength": 0.51,
-    "on_grid": false
    },
    {
     "at": 53.635,
@@ -3700,39 +1788,9 @@
     "on_grid": false
    },
    {
-    "at": 53.685,
+    "at": 53.82,
     "of": "kick",
-    "strength": 0.179,
-    "on_grid": false
-   },
-   {
-    "at": 53.733,
-    "of": "kick",
-    "strength": 0.19,
-    "on_grid": false
-   },
-   {
-    "at": 53.782,
-    "of": "tom",
-    "strength": 0.15,
-    "on_grid": false
-   },
-   {
-    "at": 53.84,
-    "of": "kick",
-    "strength": 0.205,
-    "on_grid": false
-   },
-   {
-    "at": 53.895,
-    "of": "tom",
-    "strength": 0.254,
-    "on_grid": false
-   },
-   {
-    "at": 53.953,
-    "of": "tom",
-    "strength": 0.209,
+    "strength": 0.269,
     "on_grid": false
    },
    {
@@ -3742,87 +1800,21 @@
     "on_grid": false
    },
    {
-    "at": 54.06,
+    "at": 54.195,
     "of": "kick",
-    "strength": 0.222,
-    "on_grid": false
-   },
-   {
-    "at": 54.108,
-    "of": "kick",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 54.155,
-    "of": "kick",
-    "strength": 0.263,
+    "strength": 0.18,
     "on_grid": true
    },
    {
-    "at": 54.205,
-    "of": "kick",
-    "strength": 0.304,
-    "on_grid": true
-   },
-   {
-    "at": 54.252,
-    "of": "kick",
-    "strength": 0.125,
-    "on_grid": false
-   },
-   {
-    "at": 54.3,
-    "of": "kick",
-    "strength": 0.344,
-    "on_grid": false
-   },
-   {
-    "at": 54.347,
-    "of": "kick",
-    "strength": 0.302,
-    "on_grid": false
-   },
-   {
-    "at": 54.398,
-    "of": "kick",
-    "strength": 0.282,
-    "on_grid": false
-   },
-   {
-    "at": 54.443,
+    "at": 54.377,
     "of": "tom",
-    "strength": 0.182,
+    "strength": 0.387,
     "on_grid": false
    },
    {
-    "at": 54.492,
+    "at": 54.57,
     "of": "kick",
-    "strength": 0.206,
-    "on_grid": false
-   },
-   {
-    "at": 54.54,
-    "of": "kick",
-    "strength": 0.317,
-    "on_grid": false
-   },
-   {
-    "at": 54.587,
-    "of": "kick",
-    "strength": 0.212,
-    "on_grid": false
-   },
-   {
-    "at": 54.635,
-    "of": "kick",
-    "strength": 0.221,
-    "on_grid": false
-   },
-   {
-    "at": 54.705,
-    "of": "kick",
-    "strength": 0.256,
+    "strength": 0.272,
     "on_grid": false
    },
    {
@@ -3832,63 +1824,15 @@
     "on_grid": false
    },
    {
-    "at": 54.807,
-    "of": "tom",
-    "strength": 0.162,
-    "on_grid": false
-   },
-   {
-    "at": 54.858,
-    "of": "kick",
-    "strength": 0.271,
-    "on_grid": true
-   },
-   {
-    "at": 54.905,
-    "of": "kick",
-    "strength": 0.155,
-    "on_grid": true
-   },
-   {
-    "at": 54.953,
-    "of": "kick",
-    "strength": 0.238,
-    "on_grid": false
-   },
-   {
-    "at": 55.002,
-    "of": "kick",
-    "strength": 0.199,
-    "on_grid": false
-   },
-   {
-    "at": 55.05,
-    "of": "kick",
-    "strength": 0.214,
-    "on_grid": false
-   },
-   {
-    "at": 55.097,
-    "of": "kick",
-    "strength": 0.212,
-    "on_grid": false
-   },
-   {
-    "at": 55.145,
-    "of": "kick",
-    "strength": 0.203,
-    "on_grid": false
-   },
-   {
-    "at": 55.203,
-    "of": "kick",
-    "strength": 0.227,
-    "on_grid": false
-   },
-   {
-    "at": 55.252,
+    "at": 54.945,
     "of": "kick",
     "strength": 0.188,
+    "on_grid": false
+   },
+   {
+    "at": 55.138,
+    "of": "kick",
+    "strength": 0.126,
     "on_grid": false
    },
    {
@@ -3898,298 +1842,82 @@
     "on_grid": false
    },
    {
-    "at": 55.377,
+    "at": 55.502,
     "of": "kick",
-    "strength": 0.181,
+    "strength": 0.165,
     "on_grid": false
    },
    {
-    "at": 55.425,
+    "at": 55.693,
     "of": "kick",
-    "strength": 0.291,
+    "strength": 0.362,
     "on_grid": false
    },
    {
-    "at": 55.472,
+    "at": 55.875,
     "of": "kick",
-    "strength": 0.166,
+    "strength": 0.141,
     "on_grid": false
    },
    {
-    "at": 55.53,
-    "of": "kick",
-    "strength": 0.373,
-    "on_grid": false
-   },
-   {
-    "at": 55.578,
-    "of": "kick",
-    "strength": 0.235,
-    "on_grid": true
-   },
-   {
-    "at": 55.623,
-    "of": "kick",
-    "strength": 0.678,
-    "on_grid": true
-   },
-   {
-    "at": 55.675,
-    "of": "kick",
-    "strength": 0.303,
-    "on_grid": false
-   },
-   {
-    "at": 55.742,
-    "of": "kick",
-    "strength": 0.169,
-    "on_grid": false
-   },
-   {
-    "at": 55.79,
-    "of": "kick",
-    "strength": 0.158,
-    "on_grid": false
-   },
-   {
-    "at": 55.845,
-    "of": "kick",
-    "strength": 0.199,
-    "on_grid": false
-   },
-   {
-    "at": 55.892,
-    "of": "kick",
-    "strength": 0.296,
-    "on_grid": false
-   },
-   {
-    "at": 55.938,
+    "at": 56.055,
     "of": "tom",
-    "strength": 0.441,
+    "strength": 0.223,
     "on_grid": false
    },
    {
-    "at": 55.987,
+    "at": 56.235,
+    "of": "kick",
+    "strength": 0.131,
+    "on_grid": false
+   },
+   {
+    "at": 56.428,
+    "of": "kick",
+    "strength": 0.301,
+    "on_grid": false
+   },
+   {
+    "at": 56.605,
+    "of": "kick",
+    "strength": 0.146,
+    "on_grid": false
+   },
+   {
+    "at": 56.785,
     "of": "tom",
-    "strength": 0.466,
+    "strength": 0.294,
     "on_grid": false
    },
    {
-    "at": 56.04,
+    "at": 56.975,
     "of": "kick",
-    "strength": 0.318,
+    "strength": 0.316,
     "on_grid": false
    },
    {
-    "at": 56.09,
-    "of": "kick",
-    "strength": 0.227,
-    "on_grid": false
-   },
-   {
-    "at": 56.142,
-    "of": "kick",
-    "strength": 0.419,
-    "on_grid": false
-   },
-   {
-    "at": 56.193,
-    "of": "tom",
-    "strength": 0.151,
-    "on_grid": false
-   },
-   {
-    "at": 56.245,
-    "of": "kick",
-    "strength": 0.411,
-    "on_grid": false
-   },
-   {
-    "at": 56.297,
-    "of": "kick",
-    "strength": 0.539,
-    "on_grid": true
-   },
-   {
-    "at": 56.35,
-    "of": "kick",
-    "strength": 0.468,
-    "on_grid": true
-   },
-   {
-    "at": 56.407,
-    "of": "kick",
-    "strength": 0.333,
-    "on_grid": false
-   },
-   {
-    "at": 56.453,
-    "of": "kick",
-    "strength": 0.364,
-    "on_grid": false
-   },
-   {
-    "at": 56.502,
-    "of": "kick",
-    "strength": 0.166,
-    "on_grid": false
-   },
-   {
-    "at": 56.562,
-    "of": "tom",
-    "strength": 0.212,
-    "on_grid": false
-   },
-   {
-    "at": 56.615,
-    "of": "tom",
-    "strength": 0.166,
-    "on_grid": false
-   },
-   {
-    "at": 56.665,
-    "of": "kick",
-    "strength": 0.128,
-    "on_grid": false
-   },
-   {
-    "at": 56.718,
-    "of": "kick",
-    "strength": 0.15,
-    "on_grid": false
-   },
-   {
-    "at": 56.778,
-    "of": "kick",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
-    "at": 56.83,
-    "of": "kick",
-    "strength": 0.12,
-    "on_grid": false
-   },
-   {
-    "at": 56.88,
-    "of": "kick",
-    "strength": 0.198,
-    "on_grid": false
-   },
-   {
-    "at": 56.932,
-    "of": "kick",
-    "strength": 0.213,
-    "on_grid": false
-   },
-   {
-    "at": 56.983,
-    "of": "kick",
-    "strength": 0.231,
-    "on_grid": false
-   },
-   {
-    "at": 57.035,
-    "of": "kick",
-    "strength": 0.293,
-    "on_grid": true
-   },
-   {
-    "at": 57.085,
-    "of": "kick",
-    "strength": 0.263,
-    "on_grid": false
-   },
-   {
-    "at": 57.138,
-    "of": "kick",
-    "strength": 0.288,
-    "on_grid": false
-   },
-   {
-    "at": 57.188,
+    "at": 57.163,
     "of": "kick",
     "strength": 0.239,
     "on_grid": false
    },
    {
-    "at": 57.233,
+    "at": 57.343,
     "of": "kick",
-    "strength": 0.177,
+    "strength": 0.206,
     "on_grid": false
    },
    {
-    "at": 57.282,
-    "of": "kick",
-    "strength": 0.27,
-    "on_grid": false
-   },
-   {
-    "at": 57.335,
-    "of": "kick",
-    "strength": 0.287,
-    "on_grid": false
-   },
-   {
-    "at": 57.385,
+    "at": 57.523,
     "of": "snare",
-    "strength": 0.161,
-    "on_grid": false
-   },
-   {
-    "at": 57.43,
-    "of": "kick",
-    "strength": 0.143,
-    "on_grid": false
-   },
-   {
-    "at": 57.48,
-    "of": "kick",
-    "strength": 0.242,
-    "on_grid": false
-   },
-   {
-    "at": 57.53,
-    "of": "kick",
-    "strength": 0.17,
-    "on_grid": false
-   },
-   {
-    "at": 57.575,
-    "of": "kick",
-    "strength": 0.324,
-    "on_grid": false
-   },
-   {
-    "at": 57.625,
-    "of": "kick",
-    "strength": 0.41,
-    "on_grid": false
-   },
-   {
-    "at": 57.678,
-    "of": "kick",
-    "strength": 0.219,
-    "on_grid": false
-   },
-   {
-    "at": 57.727,
-    "of": "tom",
-    "strength": 0.405,
-    "on_grid": true
-   },
-   {
-    "at": 57.78,
-    "of": "kick",
     "strength": 0.306,
-    "on_grid": true
+    "on_grid": false
    },
    {
-    "at": 57.83,
-    "of": "tom",
-    "strength": 0.198,
-    "on_grid": false
+    "at": 57.703,
+    "of": "kick",
+    "strength": 0.205,
+    "on_grid": true
    },
    {
     "at": 57.883,
@@ -4198,63 +1926,15 @@
     "on_grid": false
    },
    {
-    "at": 57.935,
+    "at": 58.065,
     "of": "kick",
-    "strength": 0.209,
+    "strength": 0.844,
     "on_grid": false
    },
    {
-    "at": 57.985,
+    "at": 58.242,
     "of": "kick",
-    "strength": 0.298,
-    "on_grid": false
-   },
-   {
-    "at": 58.038,
-    "of": "kick",
-    "strength": 0.212,
-    "on_grid": false
-   },
-   {
-    "at": 58.083,
-    "of": "kick",
-    "strength": 0.518,
-    "on_grid": false
-   },
-   {
-    "at": 58.135,
-    "of": "kick",
-    "strength": 0.738,
-    "on_grid": false
-   },
-   {
-    "at": 58.19,
-    "of": "tom",
-    "strength": 0.128,
-    "on_grid": false
-   },
-   {
-    "at": 58.235,
-    "of": "snare",
-    "strength": 0.191,
-    "on_grid": false
-   },
-   {
-    "at": 58.29,
-    "of": "kick",
-    "strength": 0.383,
-    "on_grid": false
-   },
-   {
-    "at": 58.34,
-    "of": "tom",
-    "strength": 0.41,
-    "on_grid": false
-   },
-   {
-    "at": 58.385,
-    "of": "kick",
-    "strength": 0.261,
+    "strength": 0.217,
     "on_grid": false
    },
    {
@@ -4264,39 +1944,9 @@
     "on_grid": true
    },
    {
-    "at": 58.495,
+    "at": 58.625,
     "of": "kick",
-    "strength": 0.227,
-    "on_grid": true
-   },
-   {
-    "at": 58.547,
-    "of": "kick",
-    "strength": 0.355,
-    "on_grid": false
-   },
-   {
-    "at": 58.597,
-    "of": "kick",
-    "strength": 0.384,
-    "on_grid": false
-   },
-   {
-    "at": 58.65,
-    "of": "kick",
-    "strength": 0.248,
-    "on_grid": false
-   },
-   {
-    "at": 58.7,
-    "of": "snare",
-    "strength": 0.262,
-    "on_grid": false
-   },
-   {
-    "at": 58.752,
-    "of": "kick",
-    "strength": 0.271,
+    "strength": 0.29,
     "on_grid": false
    },
    {
@@ -4306,39 +1956,9 @@
     "on_grid": false
    },
    {
-    "at": 58.855,
-    "of": "kick",
-    "strength": 0.178,
-    "on_grid": false
-   },
-   {
-    "at": 58.905,
+    "at": 58.983,
     "of": "snare",
-    "strength": 0.272,
-    "on_grid": false
-   },
-   {
-    "at": 58.95,
-    "of": "snare",
-    "strength": 0.194,
-    "on_grid": false
-   },
-   {
-    "at": 59.0,
-    "of": "snare",
-    "strength": 0.235,
-    "on_grid": false
-   },
-   {
-    "at": 59.06,
-    "of": "snare",
-    "strength": 0.255,
-    "on_grid": false
-   },
-   {
-    "at": 59.11,
-    "of": "snare",
-    "strength": 0.256,
+    "strength": 0.288,
     "on_grid": false
    },
    {
@@ -4348,184 +1968,52 @@
     "on_grid": true
    },
    {
-    "at": 59.208,
+    "at": 59.34,
     "of": "kick",
-    "strength": 0.651,
-    "on_grid": true
+    "strength": 0.258,
+    "on_grid": false
    },
    {
-    "at": 59.267,
+    "at": 59.523,
     "of": "snare",
-    "strength": 0.4,
+    "strength": 0.251,
     "on_grid": false
    },
    {
-    "at": 59.325,
-    "of": "kick",
-    "strength": 0.198,
-    "on_grid": false
-   },
-   {
-    "at": 59.37,
+    "at": 59.712,
     "of": "snare",
-    "strength": 0.215,
+    "strength": 0.177,
     "on_grid": false
    },
    {
-    "at": 59.435,
-    "of": "kick",
-    "strength": 0.241,
-    "on_grid": false
-   },
-   {
-    "at": 59.483,
+    "at": 59.892,
     "of": "tom",
-    "strength": 0.172,
-    "on_grid": false
-   },
-   {
-    "at": 59.55,
-    "of": "kick",
-    "strength": 0.253,
-    "on_grid": false
-   },
-   {
-    "at": 59.617,
-    "of": "kick",
-    "strength": 0.174,
-    "on_grid": false
-   },
-   {
-    "at": 59.678,
-    "of": "kick",
-    "strength": 0.178,
-    "on_grid": false
-   },
-   {
-    "at": 59.73,
-    "of": "kick",
-    "strength": 0.139,
-    "on_grid": false
-   },
-   {
-    "at": 59.78,
-    "of": "kick",
-    "strength": 0.236,
-    "on_grid": false
-   },
-   {
-    "at": 59.833,
-    "of": "kick",
-    "strength": 0.222,
-    "on_grid": false
-   },
-   {
-    "at": 59.883,
-    "of": "kick",
-    "strength": 0.184,
+    "strength": 0.181,
     "on_grid": true
    },
    {
-    "at": 59.932,
-    "of": "kick",
-    "strength": 0.252,
-    "on_grid": true
-   },
-   {
-    "at": 59.985,
-    "of": "kick",
-    "strength": 0.206,
-    "on_grid": false
-   },
-   {
-    "at": 60.038,
-    "of": "kick",
-    "strength": 0.148,
-    "on_grid": false
-   },
-   {
-    "at": 60.087,
-    "of": "kick",
-    "strength": 0.194,
-    "on_grid": false
-   },
-   {
-    "at": 60.14,
-    "of": "kick",
-    "strength": 0.295,
-    "on_grid": false
-   },
-   {
-    "at": 60.193,
-    "of": "kick",
-    "strength": 0.188,
-    "on_grid": false
-   },
-   {
-    "at": 60.242,
-    "of": "kick",
-    "strength": 0.188,
-    "on_grid": false
-   },
-   {
-    "at": 60.292,
+    "at": 60.075,
     "of": "snare",
-    "strength": 0.289,
+    "strength": 0.17,
     "on_grid": false
    },
    {
-    "at": 60.345,
+    "at": 60.252,
+    "of": "snare",
+    "strength": 0.156,
+    "on_grid": false
+   },
+   {
+    "at": 60.435,
+    "of": "snare",
+    "strength": 0.14,
+    "on_grid": false
+   },
+   {
+    "at": 60.617,
     "of": "kick",
-    "strength": 0.217,
-    "on_grid": false
-   },
-   {
-    "at": 60.395,
-    "of": "tom",
-    "strength": 0.248,
-    "on_grid": false
-   },
-   {
-    "at": 60.447,
-    "of": "kick",
-    "strength": 0.203,
-    "on_grid": false
-   },
-   {
-    "at": 60.5,
-    "of": "kick",
-    "strength": 0.186,
-    "on_grid": false
-   },
-   {
-    "at": 60.55,
-    "of": "kick",
-    "strength": 0.13,
-    "on_grid": false
-   },
-   {
-    "at": 60.6,
-    "of": "kick",
-    "strength": 0.231,
+    "strength": 0.138,
     "on_grid": true
-   },
-   {
-    "at": 60.653,
-    "of": "kick",
-    "strength": 0.192,
-    "on_grid": true
-   },
-   {
-    "at": 60.705,
-    "of": "kick",
-    "strength": 0.12,
-    "on_grid": false
-   },
-   {
-    "at": 60.755,
-    "of": "kick",
-    "strength": 0.185,
-    "on_grid": false
    },
    {
     "at": 60.805,
@@ -4534,33 +2022,9 @@
     "on_grid": false
    },
    {
-    "at": 60.898,
+    "at": 60.985,
     "of": "kick",
-    "strength": 0.161,
-    "on_grid": false
-   },
-   {
-    "at": 60.975,
-    "of": "kick",
-    "strength": 0.411,
-    "on_grid": false
-   },
-   {
-    "at": 61.028,
-    "of": "kick",
-    "strength": 0.226,
-    "on_grid": false
-   },
-   {
-    "at": 61.078,
-    "of": "kick",
-    "strength": 0.217,
-    "on_grid": false
-   },
-   {
-    "at": 61.127,
-    "of": "tom",
-    "strength": 0.269,
+    "strength": 0.227,
     "on_grid": false
    },
    {
@@ -4570,81 +2034,21 @@
     "on_grid": false
    },
    {
-    "at": 61.242,
+    "at": 61.362,
     "of": "kick",
-    "strength": 0.238,
-    "on_grid": false
-   },
-   {
-    "at": 61.297,
-    "of": "kick",
-    "strength": 0.567,
+    "strength": 0.4,
     "on_grid": true
    },
    {
-    "at": 61.35,
-    "of": "kick",
-    "strength": 0.369,
-    "on_grid": true
-   },
-   {
-    "at": 61.407,
-    "of": "tom",
-    "strength": 0.261,
-    "on_grid": false
-   },
-   {
-    "at": 61.462,
-    "of": "kick",
-    "strength": 0.309,
-    "on_grid": false
-   },
-   {
-    "at": 61.51,
-    "of": "tom",
-    "strength": 0.298,
-    "on_grid": false
-   },
-   {
-    "at": 61.555,
+    "at": 61.54,
     "of": "snare",
-    "strength": 0.202,
+    "strength": 0.533,
     "on_grid": false
    },
    {
-    "at": 61.617,
+    "at": 61.73,
     "of": "kick",
-    "strength": 0.144,
-    "on_grid": false
-   },
-   {
-    "at": 61.663,
-    "of": "tom",
-    "strength": 0.366,
-    "on_grid": false
-   },
-   {
-    "at": 61.71,
-    "of": "kick",
-    "strength": 0.368,
-    "on_grid": false
-   },
-   {
-    "at": 61.755,
-    "of": "kick",
-    "strength": 0.352,
-    "on_grid": false
-   },
-   {
-    "at": 61.8,
-    "of": "kick",
-    "strength": 0.208,
-    "on_grid": false
-   },
-   {
-    "at": 61.852,
-    "of": "tom",
-    "strength": 0.183,
+    "strength": 0.291,
     "on_grid": false
    },
    {
@@ -4654,291 +2058,75 @@
     "on_grid": false
    },
    {
-    "at": 61.953,
+    "at": 62.09,
     "of": "kick",
-    "strength": 0.205,
+    "strength": 0.325,
     "on_grid": false
    },
    {
-    "at": 62.005,
-    "of": "kick",
-    "strength": 0.326,
-    "on_grid": true
-   },
-   {
-    "at": 62.053,
-    "of": "kick",
-    "strength": 0.506,
-    "on_grid": true
-   },
-   {
-    "at": 62.105,
-    "of": "kick",
-    "strength": 0.27,
-    "on_grid": false
-   },
-   {
-    "at": 62.17,
-    "of": "kick",
-    "strength": 0.406,
-    "on_grid": false
-   },
-   {
-    "at": 62.215,
-    "of": "kick",
-    "strength": 0.278,
-    "on_grid": false
-   },
-   {
-    "at": 62.26,
+    "at": 62.27,
     "of": "tom",
-    "strength": 0.283,
-    "on_grid": false
-   },
-   {
-    "at": 62.307,
-    "of": "tom",
-    "strength": 0.376,
-    "on_grid": false
-   },
-   {
-    "at": 62.352,
-    "of": "tom",
-    "strength": 0.344,
-    "on_grid": false
-   },
-   {
-    "at": 62.398,
-    "of": "tom",
-    "strength": 0.238,
-    "on_grid": false
-   },
-   {
-    "at": 62.445,
-    "of": "kick",
-    "strength": 0.228,
-    "on_grid": false
-   },
-   {
-    "at": 62.49,
-    "of": "kick",
-    "strength": 0.337,
-    "on_grid": false
-   },
-   {
-    "at": 62.535,
-    "of": "tom",
-    "strength": 0.275,
-    "on_grid": false
-   },
-   {
-    "at": 62.583,
-    "of": "kick",
-    "strength": 0.193,
-    "on_grid": false
-   },
-   {
-    "at": 62.627,
-    "of": "kick",
-    "strength": 0.342,
-    "on_grid": false
-   },
-   {
-    "at": 62.672,
-    "of": "kick",
-    "strength": 0.358,
-    "on_grid": false
-   },
-   {
-    "at": 62.718,
-    "of": "tom",
-    "strength": 0.13,
-    "on_grid": true
-   },
-   {
-    "at": 62.765,
-    "of": "kick",
-    "strength": 0.258,
-    "on_grid": true
-   },
-   {
-    "at": 62.81,
-    "of": "kick",
-    "strength": 0.236,
-    "on_grid": false
-   },
-   {
-    "at": 62.873,
-    "of": "kick",
-    "strength": 0.33,
-    "on_grid": false
-   },
-   {
-    "at": 62.917,
-    "of": "kick",
-    "strength": 0.321,
-    "on_grid": false
-   },
-   {
-    "at": 62.962,
-    "of": "kick",
-    "strength": 0.16,
-    "on_grid": false
-   },
-   {
-    "at": 63.01,
-    "of": "kick",
-    "strength": 0.321,
-    "on_grid": false
-   },
-   {
-    "at": 63.055,
-    "of": "kick",
-    "strength": 0.315,
-    "on_grid": false
-   },
-   {
-    "at": 63.102,
-    "of": "kick",
-    "strength": 0.148,
-    "on_grid": false
-   },
-   {
-    "at": 63.155,
-    "of": "tom",
-    "strength": 0.251,
-    "on_grid": false
-   },
-   {
-    "at": 63.2,
-    "of": "kick",
-    "strength": 0.23,
-    "on_grid": false
-   },
-   {
-    "at": 63.245,
-    "of": "tom",
-    "strength": 0.228,
-    "on_grid": false
-   },
-   {
-    "at": 63.3,
-    "of": "kick",
-    "strength": 0.332,
-    "on_grid": false
-   },
-   {
-    "at": 63.345,
-    "of": "kick",
-    "strength": 0.435,
-    "on_grid": false
-   },
-   {
-    "at": 63.392,
-    "of": "kick",
     "strength": 0.185,
     "on_grid": false
    },
    {
-    "at": 63.468,
+    "at": 62.46,
     "of": "kick",
-    "strength": 0.189,
-    "on_grid": true
-   },
-   {
-    "at": 63.513,
-    "of": "tom",
-    "strength": 0.328,
+    "strength": 0.187,
     "on_grid": false
    },
    {
-    "at": 63.56,
+    "at": 62.642,
     "of": "kick",
-    "strength": 0.218,
+    "strength": 0.262,
     "on_grid": false
    },
    {
-    "at": 63.605,
+    "at": 62.825,
     "of": "kick",
-    "strength": 0.18,
+    "strength": 0.181,
     "on_grid": false
    },
    {
-    "at": 63.65,
+    "at": 63.002,
     "of": "kick",
-    "strength": 0.133,
+    "strength": 0.159,
     "on_grid": false
    },
    {
-    "at": 63.697,
+    "at": 63.193,
     "of": "kick",
-    "strength": 0.157,
+    "strength": 0.477,
     "on_grid": false
    },
    {
-    "at": 63.742,
+    "at": 63.37,
     "of": "kick",
-    "strength": 0.27,
+    "strength": 0.12,
     "on_grid": false
    },
    {
-    "at": 63.79,
+    "at": 63.55,
     "of": "kick",
-    "strength": 0.259,
+    "strength": 0.171,
     "on_grid": false
    },
    {
-    "at": 63.837,
+    "at": 63.727,
     "of": "kick",
-    "strength": 0.889,
+    "strength": 0.232,
     "on_grid": false
    },
    {
-    "at": 63.888,
-    "of": "tom",
-    "strength": 0.23,
+    "at": 63.913,
+    "of": "kick",
+    "strength": 0.319,
     "on_grid": false
    },
    {
-    "at": 63.935,
+    "at": 64.097,
     "of": "kick",
-    "strength": 0.271,
-    "on_grid": false
-   },
-   {
-    "at": 63.983,
-    "of": "kick",
-    "strength": 0.289,
-    "on_grid": false
-   },
-   {
-    "at": 64.037,
-    "of": "kick",
-    "strength": 0.204,
-    "on_grid": false
-   },
-   {
-    "at": 64.082,
-    "of": "kick",
-    "strength": 0.157,
-    "on_grid": false
-   },
-   {
-    "at": 64.135,
-    "of": "kick",
-    "strength": 0.213,
-    "on_grid": true
-   },
-   {
-    "at": 64.18,
-    "of": "kick",
-    "strength": 0.125,
-    "on_grid": true
-   },
-   {
-    "at": 64.237,
-    "of": "kick",
-    "strength": 0.227,
+    "strength": 0.2,
     "on_grid": false
    },
    {
@@ -4948,129 +2136,33 @@
     "on_grid": false
    },
    {
-    "at": 64.332,
-    "of": "kick",
-    "strength": 0.187,
-    "on_grid": false
-   },
-   {
-    "at": 64.382,
-    "of": "kick",
-    "strength": 0.145,
-    "on_grid": false
-   },
-   {
-    "at": 64.43,
-    "of": "kick",
-    "strength": 0.366,
-    "on_grid": false
-   },
-   {
     "at": 64.48,
     "of": "kick",
     "strength": 0.163,
     "on_grid": false
    },
    {
-    "at": 64.525,
+    "at": 64.66,
     "of": "kick",
-    "strength": 0.236,
+    "strength": 0.153,
     "on_grid": false
    },
    {
-    "at": 64.575,
+    "at": 64.843,
     "of": "kick",
-    "strength": 0.15,
-    "on_grid": false
-   },
-   {
-    "at": 64.623,
-    "of": "kick",
-    "strength": 0.155,
-    "on_grid": false
-   },
-   {
-    "at": 64.672,
-    "of": "kick",
-    "strength": 0.38,
-    "on_grid": false
-   },
-   {
-    "at": 64.73,
-    "of": "kick",
-    "strength": 0.298,
-    "on_grid": false
-   },
-   {
-    "at": 64.778,
-    "of": "kick",
-    "strength": 0.122,
-    "on_grid": false
-   },
-   {
-    "at": 64.825,
-    "of": "kick",
-    "strength": 0.266,
-    "on_grid": false
-   },
-   {
-    "at": 64.875,
-    "of": "kick",
-    "strength": 0.353,
+    "strength": 0.16,
     "on_grid": true
    },
    {
-    "at": 64.92,
+    "at": 65.02,
     "of": "kick",
-    "strength": 0.536,
-    "on_grid": true
-   },
-   {
-    "at": 64.978,
-    "of": "kick",
-    "strength": 0.432,
+    "strength": 0.17,
     "on_grid": false
    },
    {
-    "at": 65.03,
+    "at": 65.203,
     "of": "kick",
-    "strength": 0.352,
-    "on_grid": false
-   },
-   {
-    "at": 65.075,
-    "of": "kick",
-    "strength": 0.18,
-    "on_grid": false
-   },
-   {
-    "at": 65.123,
-    "of": "kick",
-    "strength": 0.122,
-    "on_grid": false
-   },
-   {
-    "at": 65.172,
-    "of": "kick",
-    "strength": 0.286,
-    "on_grid": false
-   },
-   {
-    "at": 65.23,
-    "of": "kick",
-    "strength": 0.193,
-    "on_grid": false
-   },
-   {
-    "at": 65.287,
-    "of": "kick",
-    "strength": 0.274,
-    "on_grid": false
-   },
-   {
-    "at": 65.335,
-    "of": "kick",
-    "strength": 0.14,
+    "strength": 0.335,
     "on_grid": false
    },
    {
@@ -5080,177 +2172,45 @@
     "on_grid": false
    },
    {
-    "at": 65.43,
+    "at": 65.565,
     "of": "kick",
     "strength": 0.252,
-    "on_grid": false
-   },
-   {
-    "at": 65.478,
-    "of": "kick",
-    "strength": 0.188,
-    "on_grid": false
-   },
-   {
-    "at": 65.525,
-    "of": "kick",
-    "strength": 0.17,
-    "on_grid": false
-   },
-   {
-    "at": 65.575,
-    "of": "kick",
-    "strength": 0.232,
     "on_grid": true
    },
    {
-    "at": 65.623,
-    "of": "kick",
-    "strength": 0.331,
-    "on_grid": true
-   },
-   {
-    "at": 65.67,
+    "at": 65.748,
     "of": "tom",
-    "strength": 0.125,
+    "strength": 0.172,
     "on_grid": false
    },
    {
-    "at": 65.718,
+    "at": 65.93,
     "of": "kick",
-    "strength": 0.185,
+    "strength": 0.334,
     "on_grid": false
    },
    {
-    "at": 65.767,
-    "of": "tom",
-    "strength": 0.343,
-    "on_grid": false
-   },
-   {
-    "at": 65.815,
-    "of": "kick",
-    "strength": 0.36,
-    "on_grid": false
-   },
-   {
-    "at": 65.865,
-    "of": "kick",
-    "strength": 0.288,
-    "on_grid": false
-   },
-   {
-    "at": 65.92,
-    "of": "kick",
-    "strength": 0.225,
-    "on_grid": false
-   },
-   {
-    "at": 65.97,
-    "of": "kick",
-    "strength": 0.147,
-    "on_grid": false
-   },
-   {
-    "at": 66.017,
-    "of": "kick",
-    "strength": 0.156,
-    "on_grid": false
-   },
-   {
-    "at": 66.075,
-    "of": "kick",
-    "strength": 0.231,
-    "on_grid": false
-   },
-   {
-    "at": 66.123,
-    "of": "kick",
-    "strength": 0.149,
-    "on_grid": false
-   },
-   {
-    "at": 66.17,
-    "of": "kick",
-    "strength": 0.162,
-    "on_grid": false
-   },
-   {
-    "at": 66.218,
+    "at": 66.112,
     "of": "snare",
-    "strength": 0.129,
+    "strength": 0.173,
     "on_grid": false
    },
    {
-    "at": 66.267,
-    "of": "kick",
-    "strength": 0.238,
-    "on_grid": true
-   },
-   {
-    "at": 66.315,
-    "of": "kick",
-    "strength": 0.268,
-    "on_grid": true
-   },
-   {
-    "at": 66.362,
-    "of": "kick",
-    "strength": 0.22,
-    "on_grid": true
-   },
-   {
-    "at": 66.41,
-    "of": "kick",
-    "strength": 0.3,
-    "on_grid": false
-   },
-   {
-    "at": 66.46,
-    "of": "kick",
-    "strength": 0.208,
-    "on_grid": false
-   },
-   {
-    "at": 66.507,
-    "of": "kick",
-    "strength": 0.254,
-    "on_grid": false
-   },
-   {
-    "at": 66.555,
-    "of": "kick",
-    "strength": 0.201,
-    "on_grid": false
-   },
-   {
-    "at": 66.603,
-    "of": "kick",
-    "strength": 0.15,
-    "on_grid": false
-   },
-   {
-    "at": 66.653,
-    "of": "kick",
-    "strength": 0.199,
-    "on_grid": false
-   },
-   {
-    "at": 66.7,
-    "of": "kick",
-    "strength": 0.367,
-    "on_grid": false
-   },
-   {
-    "at": 66.748,
+    "at": 66.295,
     "of": "tom",
-    "strength": 0.189,
+    "strength": 0.153,
+    "on_grid": true
+   },
+   {
+    "at": 66.478,
+    "of": "kick",
+    "strength": 0.172,
     "on_grid": false
    },
    {
-    "at": 66.795,
-    "of": "tom",
-    "strength": 0.182,
+    "at": 66.662,
+    "of": "kick",
+    "strength": 0.277,
     "on_grid": false
    },
    {
@@ -5260,81 +2220,21 @@
     "on_grid": false
    },
    {
-    "at": 66.892,
+    "at": 67.025,
     "of": "kick",
-    "strength": 0.228,
-    "on_grid": false
-   },
-   {
-    "at": 66.95,
-    "of": "kick",
-    "strength": 0.127,
-    "on_grid": false
-   },
-   {
-    "at": 67.002,
-    "of": "kick",
-    "strength": 0.187,
+    "strength": 0.405,
     "on_grid": true
    },
    {
-    "at": 67.052,
+    "at": 67.21,
     "of": "kick",
-    "strength": 0.455,
-    "on_grid": true
-   },
-   {
-    "at": 67.105,
-    "of": "kick",
-    "strength": 0.151,
+    "strength": 0.139,
     "on_grid": false
    },
    {
-    "at": 67.172,
-    "of": "kick",
-    "strength": 0.178,
-    "on_grid": false
-   },
-   {
-    "at": 67.218,
+    "at": 67.39,
     "of": "tom",
-    "strength": 0.148,
-    "on_grid": false
-   },
-   {
-    "at": 67.263,
-    "of": "kick",
-    "strength": 0.292,
-    "on_grid": false
-   },
-   {
-    "at": 67.312,
-    "of": "tom",
-    "strength": 0.203,
-    "on_grid": false
-   },
-   {
-    "at": 67.365,
-    "of": "tom",
-    "strength": 0.397,
-    "on_grid": false
-   },
-   {
-    "at": 67.418,
-    "of": "kick",
-    "strength": 0.594,
-    "on_grid": false
-   },
-   {
-    "at": 67.468,
-    "of": "tom",
-    "strength": 0.306,
-    "on_grid": false
-   },
-   {
-    "at": 67.52,
-    "of": "kick",
-    "strength": 0.362,
+    "strength": 0.197,
     "on_grid": false
    },
    {
@@ -5344,106 +2244,28 @@
     "on_grid": false
    },
    {
-    "at": 67.623,
+    "at": 67.755,
     "of": "kick",
-    "strength": 0.401,
-    "on_grid": false
-   },
-   {
-    "at": 67.672,
-    "of": "tom",
-    "strength": 0.329,
-    "on_grid": false
-   },
-   {
-    "at": 67.72,
-    "of": "kick",
-    "strength": 0.353,
+    "strength": 0.472,
     "on_grid": true
    },
    {
-    "at": 67.765,
+    "at": 67.94,
     "of": "kick",
-    "strength": 0.515,
-    "on_grid": true
-   },
-   {
-    "at": 67.82,
-    "of": "kick",
-    "strength": 0.211,
+    "strength": 0.214,
     "on_grid": false
    },
    {
-    "at": 67.882,
+    "at": 68.12,
     "of": "kick",
-    "strength": 0.273,
+    "strength": 0.149,
     "on_grid": false
    },
    {
-    "at": 67.93,
+    "at": 68.3,
     "of": "kick",
-    "strength": 0.255,
+    "strength": 0.245,
     "on_grid": false
-   },
-   {
-    "at": 67.975,
-    "of": "kick",
-    "strength": 0.193,
-    "on_grid": false
-   },
-   {
-    "at": 68.025,
-    "of": "kick",
-    "strength": 0.358,
-    "on_grid": false
-   },
-   {
-    "at": 68.078,
-    "of": "kick",
-    "strength": 0.427,
-    "on_grid": false
-   },
-   {
-    "at": 68.127,
-    "of": "tom",
-    "strength": 0.198,
-    "on_grid": false
-   },
-   {
-    "at": 68.172,
-    "of": "kick",
-    "strength": 0.131,
-    "on_grid": false
-   },
-   {
-    "at": 68.222,
-    "of": "kick",
-    "strength": 0.141,
-    "on_grid": false
-   },
-   {
-    "at": 68.282,
-    "of": "kick",
-    "strength": 0.358,
-    "on_grid": false
-   },
-   {
-    "at": 68.335,
-    "of": "kick",
-    "strength": 0.183,
-    "on_grid": false
-   },
-   {
-    "at": 68.385,
-    "of": "kick",
-    "strength": 0.18,
-    "on_grid": false
-   },
-   {
-    "at": 68.438,
-    "of": "kick",
-    "strength": 0.241,
-    "on_grid": true
    },
    {
     "at": 68.49,
@@ -5452,117 +2274,33 @@
     "on_grid": true
    },
    {
-    "at": 68.54,
+    "at": 68.677,
     "of": "kick",
-    "strength": 0.279,
+    "strength": 0.13,
     "on_grid": false
    },
    {
-    "at": 68.593,
+    "at": 68.858,
     "of": "kick",
-    "strength": 0.293,
+    "strength": 0.253,
     "on_grid": false
    },
    {
-    "at": 68.642,
+    "at": 69.037,
     "of": "kick",
-    "strength": 0.171,
+    "strength": 0.365,
     "on_grid": false
    },
    {
-    "at": 68.695,
+    "at": 69.225,
     "of": "kick",
-    "strength": 0.147,
+    "strength": 0.299,
     "on_grid": false
    },
    {
-    "at": 68.745,
+    "at": 69.405,
     "of": "kick",
-    "strength": 0.171,
-    "on_grid": false
-   },
-   {
-    "at": 68.797,
-    "of": "kick",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 68.847,
-    "of": "kick",
-    "strength": 0.293,
-    "on_grid": false
-   },
-   {
-    "at": 68.9,
-    "of": "kick",
-    "strength": 0.133,
-    "on_grid": false
-   },
-   {
-    "at": 68.96,
-    "of": "kick",
-    "strength": 0.239,
-    "on_grid": false
-   },
-   {
-    "at": 69.01,
-    "of": "kick",
-    "strength": 0.16,
-    "on_grid": false
-   },
-   {
-    "at": 69.055,
-    "of": "kick",
-    "strength": 0.132,
-    "on_grid": false
-   },
-   {
-    "at": 69.105,
-    "of": "kick",
-    "strength": 0.372,
-    "on_grid": false
-   },
-   {
-    "at": 69.157,
-    "of": "kick",
-    "strength": 0.369,
-    "on_grid": true
-   },
-   {
-    "at": 69.207,
-    "of": "kick",
-    "strength": 0.22,
-    "on_grid": true
-   },
-   {
-    "at": 69.26,
-    "of": "kick",
-    "strength": 0.283,
-    "on_grid": false
-   },
-   {
-    "at": 69.31,
-    "of": "kick",
-    "strength": 0.14,
-    "on_grid": false
-   },
-   {
-    "at": 69.362,
-    "of": "kick",
-    "strength": 0.225,
-    "on_grid": false
-   },
-   {
-    "at": 69.415,
-    "of": "kick",
-    "strength": 0.174,
-    "on_grid": false
-   },
-   {
-    "at": 69.465,
-    "of": "kick",
-    "strength": 0.203,
+    "strength": 0.192,
     "on_grid": false
    },
    {
@@ -5578,39 +2316,15 @@
     "on_grid": false
    },
    {
-    "at": 72.74,
-    "of": "tom",
-    "strength": 0.155,
-    "on_grid": true
-   },
-   {
     "at": 72.817,
     "of": "tom",
     "strength": 0.151,
     "on_grid": false
    },
    {
-    "at": 72.875,
-    "of": "tom",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
     "at": 73.067,
     "of": "tom",
     "strength": 0.122,
-    "on_grid": false
-   },
-   {
-    "at": 73.125,
-    "of": "tom",
-    "strength": 0.144,
-    "on_grid": false
-   },
-   {
-    "at": 73.203,
-    "of": "tom",
-    "strength": 0.141,
     "on_grid": false
    },
    {
@@ -5626,27 +2340,9 @@
     "on_grid": true
    },
    {
-    "at": 73.547,
-    "of": "tom",
-    "strength": 0.184,
-    "on_grid": false
-   },
-   {
     "at": 73.625,
     "of": "tom",
     "strength": 0.125,
-    "on_grid": false
-   },
-   {
-    "at": 73.688,
-    "of": "tom",
-    "strength": 0.192,
-    "on_grid": false
-   },
-   {
-    "at": 73.745,
-    "of": "tom",
-    "strength": 0.179,
     "on_grid": false
    },
    {
@@ -5656,34 +2352,10 @@
     "on_grid": false
    },
    {
-    "at": 73.873,
-    "of": "tom",
-    "strength": 0.134,
-    "on_grid": false
-   },
-   {
-    "at": 73.957,
-    "of": "tom",
-    "strength": 0.132,
-    "on_grid": false
-   },
-   {
     "at": 74.05,
     "of": "tom",
     "strength": 0.132,
     "on_grid": false
-   },
-   {
-    "at": 74.127,
-    "of": "tom",
-    "strength": 0.125,
-    "on_grid": true
-   },
-   {
-    "at": 74.198,
-    "of": "tom",
-    "strength": 0.125,
-    "on_grid": true
    },
    {
     "at": 74.275,
@@ -5704,64 +2376,16 @@
     "on_grid": false
    },
    {
-    "at": 75.248,
+    "at": 75.38,
     "of": "kick",
-    "strength": 0.517,
+    "strength": 0.142,
     "on_grid": false
    },
    {
-    "at": 75.293,
-    "of": "kick",
-    "strength": 0.329,
-    "on_grid": false
-   },
-   {
-    "at": 75.338,
-    "of": "kick",
-    "strength": 0.444,
-    "on_grid": false
-   },
-   {
-    "at": 75.385,
-    "of": "kick",
-    "strength": 0.301,
-    "on_grid": false
-   },
-   {
-    "at": 75.433,
-    "of": "kick",
-    "strength": 0.2,
-    "on_grid": false
-   },
-   {
-    "at": 75.485,
-    "of": "kick",
-    "strength": 0.242,
-    "on_grid": false
-   },
-   {
-    "at": 75.535,
-    "of": "kick",
-    "strength": 0.248,
-    "on_grid": false
-   },
-   {
-    "at": 75.585,
+    "at": 75.56,
     "of": "tom",
-    "strength": 0.183,
+    "strength": 0.154,
     "on_grid": true
-   },
-   {
-    "at": 75.63,
-    "of": "kick",
-    "strength": 0.183,
-    "on_grid": true
-   },
-   {
-    "at": 75.68,
-    "of": "kick",
-    "strength": 0.25,
-    "on_grid": false
    },
    {
     "at": 75.74,
@@ -5770,76 +2394,22 @@
     "on_grid": false
    },
    {
-    "at": 75.793,
+    "at": 75.92,
     "of": "kick",
-    "strength": 0.201,
+    "strength": 0.129,
     "on_grid": false
    },
    {
-    "at": 75.845,
-    "of": "kick",
-    "strength": 0.162,
-    "on_grid": false
-   },
-   {
-    "at": 75.895,
-    "of": "kick",
-    "strength": 0.227,
-    "on_grid": false
-   },
-   {
-    "at": 75.945,
-    "of": "kick",
-    "strength": 0.165,
-    "on_grid": false
-   },
-   {
-    "at": 75.998,
-    "of": "kick",
-    "strength": 0.24,
-    "on_grid": false
-   },
-   {
-    "at": 76.075,
-    "of": "kick",
-    "strength": 0.132,
-    "on_grid": false
-   },
-   {
-    "at": 76.14,
+    "at": 76.115,
     "of": "tom",
-    "strength": 0.149,
+    "strength": 0.156,
     "on_grid": false
    },
    {
-    "at": 76.192,
+    "at": 76.297,
     "of": "kick",
-    "strength": 0.17,
-    "on_grid": false
-   },
-   {
-    "at": 76.255,
-    "of": "kick",
-    "strength": 0.137,
-    "on_grid": false
-   },
-   {
-    "at": 76.305,
-    "of": "kick",
-    "strength": 0.361,
+    "strength": 0.529,
     "on_grid": true
-   },
-   {
-    "at": 76.35,
-    "of": "kick",
-    "strength": 0.453,
-    "on_grid": true
-   },
-   {
-    "at": 76.415,
-    "of": "kick",
-    "strength": 0.398,
-    "on_grid": false
    },
    {
     "at": 76.483,
@@ -5848,429 +2418,117 @@
     "on_grid": false
    },
    {
-    "at": 76.54,
+    "at": 76.68,
     "of": "kick",
-    "strength": 0.232,
+    "strength": 0.167,
     "on_grid": false
    },
    {
-    "at": 76.59,
+    "at": 76.862,
     "of": "kick",
-    "strength": 0.271,
+    "strength": 0.153,
     "on_grid": false
    },
    {
-    "at": 76.655,
+    "at": 77.043,
     "of": "kick",
-    "strength": 0.15,
-    "on_grid": false
-   },
-   {
-    "at": 76.718,
-    "of": "kick",
-    "strength": 0.195,
-    "on_grid": false
-   },
-   {
-    "at": 76.77,
-    "of": "kick",
-    "strength": 0.172,
-    "on_grid": false
-   },
-   {
-    "at": 76.82,
-    "of": "kick",
-    "strength": 0.236,
-    "on_grid": false
-   },
-   {
-    "at": 76.873,
-    "of": "kick",
-    "strength": 0.179,
-    "on_grid": false
-   },
-   {
-    "at": 76.922,
-    "of": "kick",
-    "strength": 0.277,
-    "on_grid": false
-   },
-   {
-    "at": 76.975,
-    "of": "kick",
-    "strength": 0.285,
-    "on_grid": false
-   },
-   {
-    "at": 77.025,
-    "of": "kick",
-    "strength": 0.305,
+    "strength": 0.31,
     "on_grid": true
    },
    {
-    "at": 77.078,
+    "at": 77.222,
     "of": "kick",
-    "strength": 0.174,
+    "strength": 0.199,
     "on_grid": false
    },
    {
-    "at": 77.127,
+    "at": 77.4,
     "of": "kick",
-    "strength": 0.227,
+    "strength": 0.215,
     "on_grid": false
    },
    {
-    "at": 77.18,
+    "at": 77.58,
     "of": "kick",
-    "strength": 0.217,
+    "strength": 0.196,
     "on_grid": false
    },
    {
-    "at": 77.23,
-    "of": "kick",
-    "strength": 0.254,
-    "on_grid": false
-   },
-   {
-    "at": 77.282,
+    "at": 77.76,
     "of": "kick",
     "strength": 0.201,
-    "on_grid": false
-   },
-   {
-    "at": 77.332,
-    "of": "kick",
-    "strength": 0.191,
-    "on_grid": false
-   },
-   {
-    "at": 77.385,
-    "of": "kick",
-    "strength": 0.139,
-    "on_grid": false
-   },
-   {
-    "at": 77.435,
-    "of": "kick",
-    "strength": 0.182,
-    "on_grid": false
-   },
-   {
-    "at": 77.487,
-    "of": "kick",
-    "strength": 0.185,
-    "on_grid": false
-   },
-   {
-    "at": 77.54,
-    "of": "kick",
-    "strength": 0.175,
-    "on_grid": false
-   },
-   {
-    "at": 77.59,
-    "of": "kick",
-    "strength": 0.244,
-    "on_grid": false
-   },
-   {
-    "at": 77.642,
-    "of": "kick",
-    "strength": 0.234,
-    "on_grid": false
-   },
-   {
-    "at": 77.692,
-    "of": "kick",
-    "strength": 0.14,
     "on_grid": true
    },
    {
-    "at": 77.745,
-    "of": "kick",
-    "strength": 0.156,
-    "on_grid": true
-   },
-   {
-    "at": 77.795,
-    "of": "kick",
-    "strength": 0.162,
-    "on_grid": false
-   },
-   {
-    "at": 77.847,
-    "of": "kick",
-    "strength": 0.221,
-    "on_grid": false
-   },
-   {
-    "at": 77.897,
-    "of": "kick",
-    "strength": 0.162,
-    "on_grid": false
-   },
-   {
-    "at": 77.95,
-    "of": "kick",
-    "strength": 0.172,
-    "on_grid": false
-   },
-   {
-    "at": 78.002,
-    "of": "kick",
-    "strength": 0.132,
-    "on_grid": false
-   },
-   {
-    "at": 78.052,
-    "of": "kick",
-    "strength": 0.145,
-    "on_grid": false
-   },
-   {
-    "at": 78.105,
-    "of": "kick",
-    "strength": 0.278,
-    "on_grid": false
-   },
-   {
-    "at": 78.155,
-    "of": "kick",
-    "strength": 0.158,
-    "on_grid": false
-   },
-   {
-    "at": 78.225,
-    "of": "kick",
-    "strength": 0.152,
-    "on_grid": false
-   },
-   {
-    "at": 78.27,
+    "at": 77.94,
     "of": "kick",
     "strength": 0.126,
     "on_grid": false
    },
    {
-    "at": 78.323,
-    "of": "tom",
-    "strength": 0.35,
-    "on_grid": false
-   },
-   {
-    "at": 78.375,
+    "at": 78.118,
     "of": "kick",
-    "strength": 0.144,
+    "strength": 0.291,
     "on_grid": false
    },
    {
-    "at": 78.42,
-    "of": "tom",
-    "strength": 0.336,
+    "at": 78.3,
+    "of": "kick",
+    "strength": 0.199,
+    "on_grid": false
+   },
+   {
+    "at": 78.48,
+    "of": "kick",
+    "strength": 0.761,
     "on_grid": true
    },
    {
-    "at": 78.47,
+    "at": 78.668,
     "of": "kick",
-    "strength": 0.557,
+    "strength": 0.173,
+    "on_grid": false
+   },
+   {
+    "at": 78.845,
+    "of": "kick",
+    "strength": 0.134,
+    "on_grid": false
+   },
+   {
+    "at": 79.028,
+    "of": "kick",
+    "strength": 0.22,
+    "on_grid": false
+   },
+   {
+    "at": 79.207,
+    "of": "kick",
+    "strength": 0.552,
     "on_grid": true
    },
    {
-    "at": 78.52,
+    "at": 79.39,
     "of": "kick",
-    "strength": 0.336,
+    "strength": 0.19,
     "on_grid": false
    },
    {
-    "at": 78.573,
+    "at": 79.573,
     "of": "kick",
-    "strength": 0.269,
+    "strength": 0.267,
     "on_grid": false
    },
    {
-    "at": 78.625,
+    "at": 79.755,
     "of": "kick",
-    "strength": 0.212,
+    "strength": 0.258,
     "on_grid": false
    },
    {
-    "at": 78.675,
+    "at": 79.938,
     "of": "kick",
-    "strength": 0.263,
-    "on_grid": false
-   },
-   {
-    "at": 78.73,
-    "of": "kick",
-    "strength": 0.263,
-    "on_grid": false
-   },
-   {
-    "at": 78.775,
-    "of": "kick",
-    "strength": 0.284,
-    "on_grid": false
-   },
-   {
-    "at": 78.82,
-    "of": "tom",
-    "strength": 0.209,
-    "on_grid": false
-   },
-   {
-    "at": 78.868,
-    "of": "kick",
-    "strength": 0.183,
-    "on_grid": false
-   },
-   {
-    "at": 78.912,
-    "of": "kick",
-    "strength": 0.268,
-    "on_grid": false
-   },
-   {
-    "at": 78.957,
-    "of": "tom",
-    "strength": 0.303,
-    "on_grid": false
-   },
-   {
-    "at": 79.005,
-    "of": "kick",
-    "strength": 0.171,
-    "on_grid": false
-   },
-   {
-    "at": 79.05,
-    "of": "kick",
-    "strength": 0.389,
-    "on_grid": false
-   },
-   {
-    "at": 79.095,
-    "of": "kick",
-    "strength": 0.229,
-    "on_grid": false
-   },
-   {
-    "at": 79.142,
-    "of": "kick",
-    "strength": 0.152,
-    "on_grid": true
-   },
-   {
-    "at": 79.195,
-    "of": "kick",
-    "strength": 0.579,
-    "on_grid": true
-   },
-   {
-    "at": 79.248,
-    "of": "kick",
-    "strength": 0.293,
-    "on_grid": false
-   },
-   {
-    "at": 79.312,
-    "of": "kick",
-    "strength": 0.374,
-    "on_grid": false
-   },
-   {
-    "at": 79.358,
-    "of": "tom",
-    "strength": 0.236,
-    "on_grid": false
-   },
-   {
-    "at": 79.403,
-    "of": "tom",
-    "strength": 0.215,
-    "on_grid": false
-   },
-   {
-    "at": 79.45,
-    "of": "kick",
-    "strength": 0.299,
-    "on_grid": false
-   },
-   {
-    "at": 79.498,
-    "of": "kick",
-    "strength": 0.217,
-    "on_grid": false
-   },
-   {
-    "at": 79.555,
-    "of": "tom",
-    "strength": 0.14,
-    "on_grid": false
-   },
-   {
-    "at": 79.603,
-    "of": "kick",
-    "strength": 0.369,
-    "on_grid": false
-   },
-   {
-    "at": 79.647,
-    "of": "kick",
-    "strength": 0.321,
-    "on_grid": false
-   },
-   {
-    "at": 79.695,
-    "of": "kick",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 79.74,
-    "of": "kick",
-    "strength": 0.372,
-    "on_grid": false
-   },
-   {
-    "at": 79.785,
-    "of": "kick",
-    "strength": 0.27,
-    "on_grid": false
-   },
-   {
-    "at": 79.83,
-    "of": "tom",
-    "strength": 0.175,
-    "on_grid": false
-   },
-   {
-    "at": 79.877,
-    "of": "kick",
-    "strength": 0.32,
-    "on_grid": true
-   },
-   {
-    "at": 79.922,
-    "of": "kick",
-    "strength": 0.282,
-    "on_grid": true
-   },
-   {
-    "at": 79.97,
-    "of": "kick",
-    "strength": 0.145,
-    "on_grid": false
-   },
-   {
-    "at": 80.015,
-    "of": "kick",
-    "strength": 0.374,
-    "on_grid": false
-   },
-   {
-    "at": 80.06,
-    "of": "kick",
-    "strength": 0.304,
+    "strength": 0.338,
     "on_grid": false
    },
    {
@@ -6280,64 +2538,16 @@
     "on_grid": false
    },
    {
-    "at": 80.183,
-    "of": "kick",
-    "strength": 0.238,
-    "on_grid": false
-   },
-   {
-    "at": 80.228,
-    "of": "kick",
-    "strength": 0.141,
-    "on_grid": false
-   },
-   {
-    "at": 80.275,
-    "of": "kick",
-    "strength": 0.134,
-    "on_grid": false
-   },
-   {
     "at": 80.32,
     "of": "kick",
     "strength": 0.194,
     "on_grid": false
    },
    {
-    "at": 80.373,
+    "at": 80.502,
     "of": "kick",
-    "strength": 0.129,
+    "strength": 0.186,
     "on_grid": false
-   },
-   {
-    "at": 80.42,
-    "of": "kick",
-    "strength": 0.14,
-    "on_grid": false
-   },
-   {
-    "at": 80.465,
-    "of": "kick",
-    "strength": 0.146,
-    "on_grid": false
-   },
-   {
-    "at": 80.55,
-    "of": "kick",
-    "strength": 0.302,
-    "on_grid": true
-   },
-   {
-    "at": 80.595,
-    "of": "kick",
-    "strength": 0.319,
-    "on_grid": true
-   },
-   {
-    "at": 80.64,
-    "of": "kick",
-    "strength": 0.15,
-    "on_grid": true
    },
    {
     "at": 80.688,
@@ -6346,63 +2556,15 @@
     "on_grid": false
    },
    {
-    "at": 80.733,
+    "at": 80.87,
     "of": "kick",
-    "strength": 0.263,
+    "strength": 0.251,
     "on_grid": false
    },
    {
-    "at": 80.778,
+    "at": 81.05,
     "of": "kick",
-    "strength": 0.194,
-    "on_grid": false
-   },
-   {
-    "at": 80.84,
-    "of": "kick",
-    "strength": 0.168,
-    "on_grid": false
-   },
-   {
-    "at": 80.885,
-    "of": "kick",
-    "strength": 0.287,
-    "on_grid": false
-   },
-   {
-    "at": 80.933,
-    "of": "kick",
-    "strength": 0.123,
-    "on_grid": false
-   },
-   {
-    "at": 80.98,
-    "of": "kick",
-    "strength": 0.807,
-    "on_grid": false
-   },
-   {
-    "at": 81.032,
-    "of": "kick",
-    "strength": 0.392,
-    "on_grid": false
-   },
-   {
-    "at": 81.078,
-    "of": "kick",
-    "strength": 0.172,
-    "on_grid": false
-   },
-   {
-    "at": 81.127,
-    "of": "kick",
-    "strength": 0.281,
-    "on_grid": false
-   },
-   {
-    "at": 81.188,
-    "of": "kick",
-    "strength": 0.225,
+    "strength": 0.245,
     "on_grid": false
    },
    {
@@ -6412,63 +2574,15 @@
     "on_grid": false
    },
    {
-    "at": 81.315,
+    "at": 81.43,
     "of": "kick",
-    "strength": 0.249,
-    "on_grid": true
-   },
-   {
-    "at": 81.36,
-    "of": "kick",
-    "strength": 0.177,
-    "on_grid": true
-   },
-   {
-    "at": 81.41,
-    "of": "kick",
-    "strength": 0.225,
+    "strength": 0.289,
     "on_grid": false
    },
    {
-    "at": 81.457,
-    "of": "kick",
-    "strength": 0.252,
-    "on_grid": false
-   },
-   {
-    "at": 81.505,
-    "of": "tom",
-    "strength": 0.154,
-    "on_grid": false
-   },
-   {
-    "at": 81.555,
-    "of": "kick",
-    "strength": 0.159,
-    "on_grid": false
-   },
-   {
-    "at": 81.603,
-    "of": "kick",
-    "strength": 0.138,
-    "on_grid": false
-   },
-   {
-    "at": 81.65,
-    "of": "kick",
-    "strength": 0.387,
-    "on_grid": false
-   },
-   {
-    "at": 81.7,
+    "at": 81.612,
     "of": "kick",
     "strength": 0.197,
-    "on_grid": false
-   },
-   {
-    "at": 81.745,
-    "of": "kick",
-    "strength": 0.203,
     "on_grid": false
    },
    {
@@ -6478,40 +2592,10 @@
     "on_grid": false
    },
    {
-    "at": 81.853,
+    "at": 81.978,
     "of": "kick",
-    "strength": 0.405,
-    "on_grid": false
-   },
-   {
-    "at": 81.9,
-    "of": "kick",
-    "strength": 0.286,
-    "on_grid": false
-   },
-   {
-    "at": 81.948,
-    "of": "kick",
-    "strength": 0.273,
-    "on_grid": false
-   },
-   {
-    "at": 81.993,
-    "of": "tom",
-    "strength": 0.578,
+    "strength": 0.254,
     "on_grid": true
-   },
-   {
-    "at": 82.052,
-    "of": "kick",
-    "strength": 0.715,
-    "on_grid": true
-   },
-   {
-    "at": 82.108,
-    "of": "kick",
-    "strength": 0.435,
-    "on_grid": false
    },
    {
     "at": 82.172,
@@ -6520,195 +2604,51 @@
     "on_grid": false
    },
    {
-    "at": 82.218,
-    "of": "kick",
-    "strength": 0.154,
-    "on_grid": false
-   },
-   {
-    "at": 82.275,
-    "of": "kick",
-    "strength": 0.144,
-    "on_grid": false
-   },
-   {
-    "at": 82.323,
-    "of": "kick",
-    "strength": 0.149,
-    "on_grid": false
-   },
-   {
-    "at": 82.373,
-    "of": "kick",
-    "strength": 0.27,
-    "on_grid": false
-   },
-   {
-    "at": 82.43,
-    "of": "kick",
-    "strength": 0.301,
-    "on_grid": false
-   },
-   {
-    "at": 82.478,
-    "of": "kick",
-    "strength": 0.303,
-    "on_grid": false
-   },
-   {
-    "at": 82.525,
-    "of": "kick",
-    "strength": 0.228,
-    "on_grid": false
-   },
-   {
-    "at": 82.573,
-    "of": "kick",
-    "strength": 0.185,
-    "on_grid": false
-   },
-   {
-    "at": 82.623,
-    "of": "kick",
-    "strength": 0.285,
-    "on_grid": false
-   },
-   {
-    "at": 82.68,
-    "of": "kick",
-    "strength": 0.225,
-    "on_grid": false
-   },
-   {
-    "at": 82.728,
-    "of": "kick",
-    "strength": 0.174,
-    "on_grid": true
-   },
-   {
-    "at": 82.775,
-    "of": "kick",
-    "strength": 0.245,
-    "on_grid": true
-   },
-   {
-    "at": 82.823,
-    "of": "kick",
-    "strength": 0.183,
-    "on_grid": false
-   },
-   {
-    "at": 82.873,
+    "at": 82.353,
     "of": "kick",
     "strength": 0.26,
     "on_grid": false
    },
    {
-    "at": 82.92,
+    "at": 82.535,
     "of": "kick",
-    "strength": 0.136,
+    "strength": 0.206,
     "on_grid": false
    },
    {
-    "at": 82.968,
-    "of": "kick",
-    "strength": 0.386,
-    "on_grid": false
-   },
-   {
-    "at": 83.015,
-    "of": "kick",
-    "strength": 0.35,
-    "on_grid": false
-   },
-   {
-    "at": 83.062,
-    "of": "kick",
-    "strength": 0.174,
-    "on_grid": false
-   },
-   {
-    "at": 83.112,
-    "of": "kick",
-    "strength": 0.139,
-    "on_grid": false
-   },
-   {
-    "at": 83.16,
-    "of": "kick",
-    "strength": 0.207,
-    "on_grid": false
-   },
-   {
-    "at": 83.207,
-    "of": "kick",
-    "strength": 0.181,
-    "on_grid": false
-   },
-   {
-    "at": 83.255,
-    "of": "kick",
-    "strength": 0.195,
-    "on_grid": false
-   },
-   {
-    "at": 83.312,
-    "of": "kick",
-    "strength": 0.179,
-    "on_grid": false
-   },
-   {
-    "at": 83.373,
-    "of": "kick",
-    "strength": 0.155,
-    "on_grid": false
-   },
-   {
-    "at": 83.42,
-    "of": "kick",
-    "strength": 0.157,
-    "on_grid": true
-   },
-   {
-    "at": 83.468,
-    "of": "kick",
-    "strength": 0.302,
-    "on_grid": true
-   },
-   {
-    "at": 83.515,
+    "at": 82.718,
     "of": "kick",
     "strength": 0.204,
+    "on_grid": true
+   },
+   {
+    "at": 82.9,
+    "of": "kick",
+    "strength": 0.241,
     "on_grid": false
    },
    {
-    "at": 83.573,
+    "at": 83.082,
     "of": "kick",
-    "strength": 0.175,
+    "strength": 0.308,
     "on_grid": false
    },
    {
-    "at": 83.63,
+    "at": 83.275,
     "of": "kick",
-    "strength": 0.141,
+    "strength": 0.274,
     "on_grid": false
    },
    {
-    "at": 83.68,
+    "at": 83.457,
     "of": "kick",
-    "strength": 0.13,
-    "on_grid": false
+    "strength": 0.183,
+    "on_grid": true
    },
    {
-    "at": 83.728,
+    "at": 83.64,
     "of": "kick",
-    "strength": 0.122,
-    "on_grid": false
-   },
-   {
-    "at": 83.775,
-    "of": "kick",
-    "strength": 0.349,
+    "strength": 0.234,
     "on_grid": false
    },
    {
@@ -6718,64 +2658,16 @@
     "on_grid": false
    },
    {
-    "at": 83.88,
+    "at": 84.007,
     "of": "kick",
-    "strength": 0.133,
+    "strength": 0.206,
     "on_grid": false
    },
    {
-    "at": 83.93,
+    "at": 84.185,
     "of": "kick",
-    "strength": 0.218,
-    "on_grid": false
-   },
-   {
-    "at": 83.978,
-    "of": "kick",
-    "strength": 0.265,
-    "on_grid": false
-   },
-   {
-    "at": 84.025,
-    "of": "tom",
-    "strength": 0.217,
-    "on_grid": false
-   },
-   {
-    "at": 84.073,
-    "of": "kick",
-    "strength": 0.191,
-    "on_grid": false
-   },
-   {
-    "at": 84.123,
-    "of": "kick",
-    "strength": 0.201,
+    "strength": 0.272,
     "on_grid": true
-   },
-   {
-    "at": 84.168,
-    "of": "kick",
-    "strength": 0.181,
-    "on_grid": true
-   },
-   {
-    "at": 84.22,
-    "of": "kick",
-    "strength": 0.521,
-    "on_grid": false
-   },
-   {
-    "at": 84.265,
-    "of": "kick",
-    "strength": 0.43,
-    "on_grid": false
-   },
-   {
-    "at": 84.312,
-    "of": "kick",
-    "strength": 0.239,
-    "on_grid": false
    },
    {
     "at": 84.37,
@@ -6784,39 +2676,9 @@
     "on_grid": false
    },
    {
-    "at": 84.422,
+    "at": 84.55,
     "of": "kick",
-    "strength": 0.311,
-    "on_grid": false
-   },
-   {
-    "at": 84.472,
-    "of": "tom",
-    "strength": 0.289,
-    "on_grid": false
-   },
-   {
-    "at": 84.525,
-    "of": "tom",
-    "strength": 0.416,
-    "on_grid": false
-   },
-   {
-    "at": 84.578,
-    "of": "kick",
-    "strength": 0.21,
-    "on_grid": false
-   },
-   {
-    "at": 84.627,
-    "of": "kick",
-    "strength": 0.391,
-    "on_grid": false
-   },
-   {
-    "at": 84.68,
-    "of": "kick",
-    "strength": 0.222,
+    "strength": 0.213,
     "on_grid": false
    },
    {
@@ -6826,63 +2688,15 @@
     "on_grid": false
    },
    {
-    "at": 84.782,
+    "at": 84.91,
     "of": "kick",
-    "strength": 0.248,
-    "on_grid": false
-   },
-   {
-    "at": 84.835,
-    "of": "kick",
-    "strength": 0.268,
+    "strength": 0.441,
     "on_grid": true
    },
    {
-    "at": 84.882,
+    "at": 85.09,
     "of": "kick",
-    "strength": 0.39,
-    "on_grid": true
-   },
-   {
-    "at": 84.935,
-    "of": "kick",
-    "strength": 0.382,
-    "on_grid": false
-   },
-   {
-    "at": 84.98,
-    "of": "kick",
-    "strength": 0.394,
-    "on_grid": false
-   },
-   {
-    "at": 85.025,
-    "of": "kick",
-    "strength": 0.235,
-    "on_grid": false
-   },
-   {
-    "at": 85.075,
-    "of": "kick",
-    "strength": 0.18,
-    "on_grid": false
-   },
-   {
-    "at": 85.125,
-    "of": "kick",
-    "strength": 0.282,
-    "on_grid": false
-   },
-   {
-    "at": 85.17,
-    "of": "kick",
-    "strength": 0.141,
-    "on_grid": false
-   },
-   {
-    "at": 85.22,
-    "of": "kick",
-    "strength": 0.289,
+    "strength": 0.215,
     "on_grid": false
    },
    {
@@ -6892,165 +2706,45 @@
     "on_grid": false
    },
    {
-    "at": 85.33,
+    "at": 85.46,
     "of": "kick",
-    "strength": 0.131,
+    "strength": 0.353,
     "on_grid": false
    },
    {
-    "at": 85.382,
-    "of": "kick",
-    "strength": 0.122,
-    "on_grid": false
-   },
-   {
-    "at": 85.442,
-    "of": "kick",
-    "strength": 0.21,
-    "on_grid": false
-   },
-   {
-    "at": 85.495,
-    "of": "kick",
-    "strength": 0.279,
-    "on_grid": false
-   },
-   {
-    "at": 85.545,
-    "of": "kick",
-    "strength": 0.253,
-    "on_grid": false
-   },
-   {
-    "at": 85.597,
-    "of": "kick",
-    "strength": 0.232,
-    "on_grid": true
-   },
-   {
-    "at": 85.647,
-    "of": "kick",
-    "strength": 0.229,
-    "on_grid": false
-   },
-   {
-    "at": 85.7,
-    "of": "kick",
-    "strength": 0.387,
-    "on_grid": false
-   },
-   {
-    "at": 85.75,
-    "of": "tom",
-    "strength": 0.218,
-    "on_grid": false
-   },
-   {
-    "at": 85.795,
-    "of": "kick",
-    "strength": 0.129,
-    "on_grid": false
-   },
-   {
-    "at": 85.855,
-    "of": "kick",
-    "strength": 0.271,
-    "on_grid": false
-   },
-   {
-    "at": 85.905,
-    "of": "kick",
-    "strength": 0.232,
-    "on_grid": false
-   },
-   {
-    "at": 85.957,
-    "of": "kick",
-    "strength": 0.252,
-    "on_grid": false
-   },
-   {
-    "at": 86.007,
-    "of": "kick",
-    "strength": 0.259,
-    "on_grid": false
-   },
-   {
-    "at": 86.06,
-    "of": "kick",
-    "strength": 0.246,
-    "on_grid": false
-   },
-   {
-    "at": 86.11,
-    "of": "kick",
-    "strength": 0.123,
-    "on_grid": false
-   },
-   {
-    "at": 86.162,
-    "of": "kick",
-    "strength": 0.134,
-    "on_grid": false
-   },
-   {
-    "at": 86.215,
-    "of": "kick",
-    "strength": 0.145,
-    "on_grid": false
-   },
-   {
-    "at": 86.265,
-    "of": "kick",
-    "strength": 0.211,
-    "on_grid": true
-   },
-   {
-    "at": 86.317,
+    "at": 85.64,
     "of": "kick",
     "strength": 0.185,
     "on_grid": true
    },
    {
-    "at": 86.368,
+    "at": 85.82,
     "of": "kick",
-    "strength": 0.228,
+    "strength": 0.209,
     "on_grid": false
    },
    {
-    "at": 86.42,
+    "at": 86.0,
     "of": "kick",
-    "strength": 0.32,
+    "strength": 0.268,
     "on_grid": false
    },
    {
-    "at": 86.472,
+    "at": 86.18,
     "of": "kick",
-    "strength": 0.187,
+    "strength": 0.339,
     "on_grid": false
    },
    {
-    "at": 86.522,
+    "at": 86.36,
     "of": "kick",
-    "strength": 0.341,
+    "strength": 0.189,
     "on_grid": false
    },
    {
-    "at": 86.575,
+    "at": 86.54,
     "of": "kick",
-    "strength": 0.215,
-    "on_grid": false
-   },
-   {
-    "at": 86.625,
-    "of": "kick",
-    "strength": 0.26,
-    "on_grid": false
-   },
-   {
-    "at": 86.675,
-    "of": "kick",
-    "strength": 0.472,
+    "strength": 0.315,
     "on_grid": false
    },
    {
@@ -7060,63 +2754,15 @@
     "on_grid": false
    },
    {
-    "at": 86.765,
-    "of": "kick",
-    "strength": 0.267,
+    "at": 86.903,
+    "of": "tom",
+    "strength": 0.169,
     "on_grid": false
    },
    {
-    "at": 86.812,
+    "at": 87.082,
     "of": "kick",
-    "strength": 0.262,
-    "on_grid": false
-   },
-   {
-    "at": 86.862,
-    "of": "kick",
-    "strength": 0.141,
-    "on_grid": false
-   },
-   {
-    "at": 86.912,
-    "of": "kick",
-    "strength": 0.201,
-    "on_grid": false
-   },
-   {
-    "at": 86.963,
-    "of": "kick",
-    "strength": 0.142,
-    "on_grid": false
-   },
-   {
-    "at": 87.015,
-    "of": "kick",
-    "strength": 0.397,
-    "on_grid": true
-   },
-   {
-    "at": 87.065,
-    "of": "kick",
-    "strength": 0.184,
-    "on_grid": true
-   },
-   {
-    "at": 87.118,
-    "of": "kick",
-    "strength": 0.395,
-    "on_grid": false
-   },
-   {
-    "at": 87.17,
-    "of": "kick",
-    "strength": 0.178,
-    "on_grid": false
-   },
-   {
-    "at": 87.22,
-    "of": "kick",
-    "strength": 0.358,
+    "strength": 0.238,
     "on_grid": false
    },
    {
@@ -7126,99 +2772,27 @@
     "on_grid": false
    },
    {
-    "at": 87.323,
+    "at": 87.453,
     "of": "kick",
-    "strength": 0.216,
+    "strength": 0.239,
     "on_grid": false
    },
    {
-    "at": 87.39,
+    "at": 87.63,
     "of": "kick",
-    "strength": 0.145,
+    "strength": 0.161,
     "on_grid": false
    },
    {
-    "at": 87.44,
-    "of": "tom",
-    "strength": 0.16,
-    "on_grid": false
-   },
-   {
-    "at": 87.493,
-    "of": "tom",
-    "strength": 0.214,
-    "on_grid": false
-   },
-   {
-    "at": 87.543,
-    "of": "tom",
-    "strength": 0.207,
-    "on_grid": false
-   },
-   {
-    "at": 87.595,
-    "of": "tom",
-    "strength": 0.223,
-    "on_grid": false
-   },
-   {
-    "at": 87.645,
-    "of": "tom",
-    "strength": 0.185,
-    "on_grid": false
-   },
-   {
-    "at": 87.698,
+    "at": 87.823,
     "of": "kick",
-    "strength": 0.322,
-    "on_grid": true
-   },
-   {
-    "at": 87.755,
-    "of": "kick",
-    "strength": 0.844,
-    "on_grid": true
-   },
-   {
-    "at": 87.805,
-    "of": "kick",
-    "strength": 0.259,
+    "strength": 0.361,
     "on_grid": false
    },
    {
-    "at": 87.86,
-    "of": "kick",
-    "strength": 0.46,
-    "on_grid": false
-   },
-   {
-    "at": 87.91,
-    "of": "kick",
-    "strength": 0.32,
-    "on_grid": false
-   },
-   {
-    "at": 87.978,
-    "of": "tom",
-    "strength": 0.289,
-    "on_grid": false
-   },
-   {
-    "at": 88.03,
-    "of": "tom",
-    "strength": 0.227,
-    "on_grid": false
-   },
-   {
-    "at": 88.08,
-    "of": "tom",
-    "strength": 0.135,
-    "on_grid": false
-   },
-   {
-    "at": 88.132,
-    "of": "kick",
-    "strength": 0.148,
+    "at": 88.002,
+    "of": "snare",
+    "strength": 0.245,
     "on_grid": false
    },
    {
@@ -7228,99 +2802,27 @@
     "on_grid": false
    },
    {
-    "at": 88.25,
+    "at": 88.365,
     "of": "kick",
-    "strength": 0.134,
+    "strength": 0.147,
     "on_grid": false
    },
    {
-    "at": 88.3,
+    "at": 88.545,
     "of": "kick",
-    "strength": 0.262,
+    "strength": 0.156,
     "on_grid": false
    },
    {
-    "at": 88.35,
+    "at": 88.728,
+    "of": "kick",
+    "strength": 0.14,
+    "on_grid": false
+   },
+   {
+    "at": 88.905,
     "of": "kick",
     "strength": 0.176,
-    "on_grid": false
-   },
-   {
-    "at": 88.403,
-    "of": "kick",
-    "strength": 0.245,
-    "on_grid": true
-   },
-   {
-    "at": 88.455,
-    "of": "kick",
-    "strength": 0.216,
-    "on_grid": true
-   },
-   {
-    "at": 88.505,
-    "of": "kick",
-    "strength": 0.191,
-    "on_grid": false
-   },
-   {
-    "at": 88.555,
-    "of": "kick",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
-    "at": 88.608,
-    "of": "kick",
-    "strength": 0.175,
-    "on_grid": false
-   },
-   {
-    "at": 88.66,
-    "of": "kick",
-    "strength": 0.208,
-    "on_grid": false
-   },
-   {
-    "at": 88.71,
-    "of": "kick",
-    "strength": 0.283,
-    "on_grid": false
-   },
-   {
-    "at": 88.76,
-    "of": "kick",
-    "strength": 0.214,
-    "on_grid": false
-   },
-   {
-    "at": 88.812,
-    "of": "kick",
-    "strength": 0.339,
-    "on_grid": false
-   },
-   {
-    "at": 88.862,
-    "of": "kick",
-    "strength": 0.141,
-    "on_grid": false
-   },
-   {
-    "at": 88.915,
-    "of": "kick",
-    "strength": 0.312,
-    "on_grid": false
-   },
-   {
-    "at": 88.983,
-    "of": "kick",
-    "strength": 0.168,
-    "on_grid": false
-   },
-   {
-    "at": 89.032,
-    "of": "kick",
-    "strength": 0.166,
     "on_grid": false
    },
    {
@@ -7330,39 +2832,9 @@
     "on_grid": false
    },
    {
-    "at": 89.145,
+    "at": 89.275,
     "of": "kick",
-    "strength": 0.215,
-    "on_grid": true
-   },
-   {
-    "at": 89.198,
-    "of": "kick",
-    "strength": 0.188,
-    "on_grid": true
-   },
-   {
-    "at": 89.25,
-    "of": "kick",
-    "strength": 0.129,
-    "on_grid": false
-   },
-   {
-    "at": 89.3,
-    "of": "kick",
-    "strength": 0.214,
-    "on_grid": false
-   },
-   {
-    "at": 89.353,
-    "of": "kick",
-    "strength": 0.245,
-    "on_grid": false
-   },
-   {
-    "at": 89.403,
-    "of": "kick",
-    "strength": 0.21,
+    "strength": 0.202,
     "on_grid": false
    },
    {
@@ -7372,105 +2844,27 @@
     "on_grid": false
    },
    {
-    "at": 89.547,
+    "at": 89.675,
     "of": "kick",
-    "strength": 0.234,
+    "strength": 0.389,
     "on_grid": false
    },
    {
-    "at": 89.593,
-    "of": "tom",
-    "strength": 0.199,
-    "on_grid": false
-   },
-   {
-    "at": 89.645,
-    "of": "tom",
-    "strength": 0.135,
-    "on_grid": false
-   },
-   {
-    "at": 89.698,
-    "of": "tom",
-    "strength": 0.123,
-    "on_grid": false
-   },
-   {
-    "at": 89.752,
+    "at": 89.855,
     "of": "kick",
-    "strength": 0.355,
-    "on_grid": false
-   },
-   {
-    "at": 89.802,
-    "of": "kick",
-    "strength": 0.149,
-    "on_grid": false
-   },
-   {
-    "at": 89.85,
-    "of": "kick",
-    "strength": 0.507,
+    "strength": 0.291,
     "on_grid": true
    },
    {
-    "at": 89.897,
+    "at": 90.035,
     "of": "kick",
-    "strength": 0.319,
-    "on_grid": true
-   },
-   {
-    "at": 89.948,
-    "of": "kick",
-    "strength": 0.36,
+    "strength": 0.126,
     "on_grid": false
    },
    {
-    "at": 90.0,
+    "at": 90.22,
     "of": "kick",
-    "strength": 0.214,
-    "on_grid": false
-   },
-   {
-    "at": 90.05,
-    "of": "kick",
-    "strength": 0.157,
-    "on_grid": false
-   },
-   {
-    "at": 90.097,
-    "of": "kick",
-    "strength": 0.263,
-    "on_grid": false
-   },
-   {
-    "at": 90.142,
-    "of": "kick",
-    "strength": 0.258,
-    "on_grid": false
-   },
-   {
-    "at": 90.195,
-    "of": "kick",
-    "strength": 0.264,
-    "on_grid": false
-   },
-   {
-    "at": 90.24,
-    "of": "tom",
-    "strength": 0.206,
-    "on_grid": false
-   },
-   {
-    "at": 90.287,
-    "of": "kick",
-    "strength": 0.196,
-    "on_grid": false
-   },
-   {
-    "at": 90.347,
-    "of": "tom",
-    "strength": 0.289,
+    "strength": 0.383,
     "on_grid": false
    },
    {
@@ -7480,153 +2874,39 @@
     "on_grid": false
    },
    {
-    "at": 90.455,
+    "at": 90.582,
     "of": "kick",
-    "strength": 0.186,
-    "on_grid": false
-   },
-   {
-    "at": 90.5,
-    "of": "tom",
-    "strength": 0.224,
-    "on_grid": false
-   },
-   {
-    "at": 90.545,
-    "of": "tom",
-    "strength": 0.125,
+    "strength": 0.364,
     "on_grid": true
    },
    {
-    "at": 90.59,
+    "at": 90.763,
     "of": "kick",
-    "strength": 0.291,
+    "strength": 0.283,
+    "on_grid": false
+   },
+   {
+    "at": 90.94,
+    "of": "kick",
+    "strength": 0.207,
+    "on_grid": false
+   },
+   {
+    "at": 91.123,
+    "of": "kick",
+    "strength": 0.402,
+    "on_grid": false
+   },
+   {
+    "at": 91.305,
+    "of": "kick",
+    "strength": 0.307,
     "on_grid": true
-   },
-   {
-    "at": 90.635,
-    "of": "kick",
-    "strength": 0.623,
-    "on_grid": true
-   },
-   {
-    "at": 90.695,
-    "of": "kick",
-    "strength": 0.466,
-    "on_grid": false
-   },
-   {
-    "at": 90.74,
-    "of": "kick",
-    "strength": 0.367,
-    "on_grid": false
-   },
-   {
-    "at": 90.787,
-    "of": "kick",
-    "strength": 0.286,
-    "on_grid": false
-   },
-   {
-    "at": 90.832,
-    "of": "kick",
-    "strength": 0.465,
-    "on_grid": false
-   },
-   {
-    "at": 90.877,
-    "of": "tom",
-    "strength": 0.159,
-    "on_grid": false
-   },
-   {
-    "at": 90.925,
-    "of": "kick",
-    "strength": 0.504,
-    "on_grid": false
-   },
-   {
-    "at": 90.97,
-    "of": "kick",
-    "strength": 0.425,
-    "on_grid": false
-   },
-   {
-    "at": 91.015,
-    "of": "kick",
-    "strength": 0.224,
-    "on_grid": false
-   },
-   {
-    "at": 91.062,
-    "of": "kick",
-    "strength": 0.308,
-    "on_grid": false
-   },
-   {
-    "at": 91.108,
-    "of": "kick",
-    "strength": 0.292,
-    "on_grid": false
-   },
-   {
-    "at": 91.153,
-    "of": "kick",
-    "strength": 0.19,
-    "on_grid": false
-   },
-   {
-    "at": 91.2,
-    "of": "kick",
-    "strength": 0.282,
-    "on_grid": false
-   },
-   {
-    "at": 91.245,
-    "of": "kick",
-    "strength": 0.29,
-    "on_grid": false
-   },
-   {
-    "at": 91.29,
-    "of": "kick",
-    "strength": 0.342,
-    "on_grid": true
-   },
-   {
-    "at": 91.368,
-    "of": "kick",
-    "strength": 0.14,
-    "on_grid": false
-   },
-   {
-    "at": 91.412,
-    "of": "kick",
-    "strength": 0.196,
-    "on_grid": false
    },
    {
     "at": 91.49,
     "of": "kick",
     "strength": 0.12,
-    "on_grid": false
-   },
-   {
-    "at": 91.535,
-    "of": "kick",
-    "strength": 0.193,
-    "on_grid": false
-   },
-   {
-    "at": 91.58,
-    "of": "kick",
-    "strength": 0.233,
-    "on_grid": false
-   },
-   {
-    "at": 91.627,
-    "of": "kick",
-    "strength": 0.127,
     "on_grid": false
    },
    {
@@ -7636,111 +2916,27 @@
     "on_grid": false
    },
    {
-    "at": 91.718,
-    "of": "kick",
-    "strength": 0.247,
-    "on_grid": false
-   },
-   {
-    "at": 91.765,
-    "of": "kick",
-    "strength": 0.185,
-    "on_grid": false
-   },
-   {
-    "at": 91.81,
-    "of": "kick",
-    "strength": 0.297,
-    "on_grid": false
-   },
-   {
     "at": 91.855,
     "of": "kick",
     "strength": 0.284,
     "on_grid": false
    },
    {
-    "at": 91.918,
+    "at": 92.04,
     "of": "kick",
-    "strength": 0.226,
-    "on_grid": false
-   },
-   {
-    "at": 91.963,
-    "of": "kick",
-    "strength": 0.314,
-    "on_grid": false
-   },
-   {
-    "at": 92.007,
-    "of": "kick",
-    "strength": 0.252,
+    "strength": 0.19,
     "on_grid": true
    },
    {
-    "at": 92.055,
+    "at": 92.222,
     "of": "kick",
-    "strength": 0.156,
-    "on_grid": true
-   },
-   {
-    "at": 92.1,
-    "of": "kick",
-    "strength": 0.244,
+    "strength": 0.135,
     "on_grid": false
    },
    {
-    "at": 92.145,
+    "at": 92.41,
     "of": "kick",
-    "strength": 0.175,
-    "on_grid": false
-   },
-   {
-    "at": 92.192,
-    "of": "kick",
-    "strength": 0.161,
-    "on_grid": false
-   },
-   {
-    "at": 92.237,
-    "of": "kick",
-    "strength": 0.277,
-    "on_grid": false
-   },
-   {
-    "at": 92.282,
-    "of": "kick",
-    "strength": 0.259,
-    "on_grid": false
-   },
-   {
-    "at": 92.35,
-    "of": "kick",
-    "strength": 0.425,
-    "on_grid": false
-   },
-   {
-    "at": 92.397,
-    "of": "kick",
-    "strength": 0.41,
-    "on_grid": false
-   },
-   {
-    "at": 92.448,
-    "of": "kick",
-    "strength": 0.303,
-    "on_grid": false
-   },
-   {
-    "at": 92.5,
-    "of": "kick",
-    "strength": 0.345,
-    "on_grid": false
-   },
-   {
-    "at": 92.547,
-    "of": "tom",
-    "strength": 0.259,
+    "strength": 0.525,
     "on_grid": false
    },
    {
@@ -7750,153 +2946,39 @@
     "on_grid": false
    },
    {
-    "at": 92.685,
-    "of": "kick",
-    "strength": 0.155,
-    "on_grid": false
-   },
-   {
-    "at": 92.733,
-    "of": "kick",
-    "strength": 0.162,
-    "on_grid": true
-   },
-   {
     "at": 92.782,
     "of": "kick",
     "strength": 0.204,
     "on_grid": true
    },
    {
-    "at": 92.828,
+    "at": 92.963,
     "of": "kick",
-    "strength": 0.161,
+    "strength": 0.335,
     "on_grid": false
    },
    {
-    "at": 92.875,
+    "at": 93.145,
     "of": "tom",
-    "strength": 0.174,
+    "strength": 0.269,
     "on_grid": false
    },
    {
-    "at": 92.925,
+    "at": 93.33,
     "of": "kick",
-    "strength": 0.28,
+    "strength": 0.136,
     "on_grid": false
    },
    {
-    "at": 92.972,
-    "of": "tom",
-    "strength": 0.196,
+    "at": 93.517,
+    "of": "kick",
+    "strength": 0.206,
     "on_grid": false
    },
    {
-    "at": 93.02,
+    "at": 93.705,
     "of": "kick",
-    "strength": 0.324,
-    "on_grid": false
-   },
-   {
-    "at": 93.07,
-    "of": "kick",
-    "strength": 0.273,
-    "on_grid": false
-   },
-   {
-    "at": 93.115,
-    "of": "kick",
-    "strength": 0.2,
-    "on_grid": false
-   },
-   {
-    "at": 93.165,
-    "of": "tom",
-    "strength": 0.247,
-    "on_grid": false
-   },
-   {
-    "at": 93.213,
-    "of": "kick",
-    "strength": 0.224,
-    "on_grid": false
-   },
-   {
-    "at": 93.263,
-    "of": "kick",
-    "strength": 0.356,
-    "on_grid": false
-   },
-   {
-    "at": 93.31,
-    "of": "kick",
-    "strength": 0.166,
-    "on_grid": false
-   },
-   {
-    "at": 93.358,
-    "of": "kick",
-    "strength": 0.333,
-    "on_grid": false
-   },
-   {
-    "at": 93.405,
-    "of": "kick",
-    "strength": 0.268,
-    "on_grid": true
-   },
-   {
-    "at": 93.455,
-    "of": "kick",
-    "strength": 0.173,
-    "on_grid": true
-   },
-   {
-    "at": 93.505,
-    "of": "kick",
-    "strength": 0.422,
-    "on_grid": false
-   },
-   {
-    "at": 93.55,
-    "of": "kick",
-    "strength": 0.388,
-    "on_grid": false
-   },
-   {
-    "at": 93.6,
-    "of": "kick",
-    "strength": 0.359,
-    "on_grid": false
-   },
-   {
-    "at": 93.647,
-    "of": "kick",
-    "strength": 0.213,
-    "on_grid": false
-   },
-   {
-    "at": 93.692,
-    "of": "kick",
-    "strength": 0.128,
-    "on_grid": false
-   },
-   {
-    "at": 93.743,
-    "of": "kick",
-    "strength": 0.226,
-    "on_grid": false
-   },
-   {
-    "at": 93.79,
-    "of": "kick",
-    "strength": 0.201,
-    "on_grid": false
-   },
-   {
-    "at": 93.847,
-    "of": "kick",
-    "strength": 0.282,
+    "strength": 0.133,
     "on_grid": false
    },
    {
@@ -7906,87 +2988,21 @@
     "on_grid": false
    },
    {
-    "at": 93.94,
+    "at": 94.078,
     "of": "kick",
-    "strength": 0.15,
+    "strength": 0.352,
     "on_grid": false
    },
    {
-    "at": 93.993,
+    "at": 94.263,
     "of": "kick",
-    "strength": 0.26,
+    "strength": 0.263,
     "on_grid": false
    },
    {
-    "at": 94.04,
+    "at": 94.453,
     "of": "kick",
-    "strength": 0.375,
-    "on_grid": false
-   },
-   {
-    "at": 94.09,
-    "of": "kick",
-    "strength": 0.164,
-    "on_grid": false
-   },
-   {
-    "at": 94.135,
-    "of": "kick",
-    "strength": 0.171,
-    "on_grid": true
-   },
-   {
-    "at": 94.185,
-    "of": "kick",
-    "strength": 0.236,
-    "on_grid": true
-   },
-   {
-    "at": 94.233,
-    "of": "kick",
-    "strength": 0.26,
-    "on_grid": false
-   },
-   {
-    "at": 94.28,
-    "of": "kick",
-    "strength": 0.212,
-    "on_grid": false
-   },
-   {
-    "at": 94.328,
-    "of": "kick",
-    "strength": 0.121,
-    "on_grid": false
-   },
-   {
-    "at": 94.377,
-    "of": "kick",
-    "strength": 0.34,
-    "on_grid": false
-   },
-   {
-    "at": 94.425,
-    "of": "kick",
-    "strength": 0.266,
-    "on_grid": false
-   },
-   {
-    "at": 94.472,
-    "of": "kick",
-    "strength": 0.256,
-    "on_grid": false
-   },
-   {
-    "at": 94.53,
-    "of": "kick",
-    "strength": 0.238,
-    "on_grid": false
-   },
-   {
-    "at": 94.578,
-    "of": "kick",
-    "strength": 0.252,
+    "strength": 0.176,
     "on_grid": false
    },
    {
@@ -7996,87 +3012,21 @@
     "on_grid": false
    },
    {
-    "at": 94.685,
+    "at": 94.817,
     "of": "kick",
-    "strength": 0.182,
+    "strength": 0.141,
     "on_grid": false
    },
    {
-    "at": 94.733,
+    "at": 95.002,
     "of": "kick",
-    "strength": 0.135,
+    "strength": 0.124,
     "on_grid": false
    },
    {
-    "at": 94.78,
+    "at": 95.185,
     "of": "kick",
-    "strength": 0.23,
-    "on_grid": false
-   },
-   {
-    "at": 94.828,
-    "of": "kick",
-    "strength": 0.127,
-    "on_grid": true
-   },
-   {
-    "at": 94.877,
-    "of": "kick",
-    "strength": 0.142,
-    "on_grid": true
-   },
-   {
-    "at": 94.925,
-    "of": "kick",
-    "strength": 0.17,
-    "on_grid": true
-   },
-   {
-    "at": 94.972,
-    "of": "kick",
-    "strength": 0.206,
-    "on_grid": false
-   },
-   {
-    "at": 95.02,
-    "of": "kick",
-    "strength": 0.166,
-    "on_grid": false
-   },
-   {
-    "at": 95.067,
-    "of": "kick",
-    "strength": 0.139,
-    "on_grid": false
-   },
-   {
-    "at": 95.127,
-    "of": "kick",
-    "strength": 0.179,
-    "on_grid": false
-   },
-   {
-    "at": 95.175,
-    "of": "kick",
-    "strength": 0.173,
-    "on_grid": false
-   },
-   {
-    "at": 95.222,
-    "of": "kick",
-    "strength": 0.169,
-    "on_grid": false
-   },
-   {
-    "at": 95.27,
-    "of": "kick",
-    "strength": 0.351,
-    "on_grid": false
-   },
-   {
-    "at": 95.32,
-    "of": "kick",
-    "strength": 0.182,
+    "strength": 0.202,
     "on_grid": false
    },
    {
@@ -8086,195 +3036,51 @@
     "on_grid": false
    },
    {
-    "at": 95.415,
+    "at": 95.55,
     "of": "kick",
-    "strength": 0.247,
-    "on_grid": false
-   },
-   {
-    "at": 95.46,
-    "of": "tom",
-    "strength": 0.129,
-    "on_grid": false
-   },
-   {
-    "at": 95.513,
-    "of": "kick",
-    "strength": 0.298,
-    "on_grid": false
-   },
-   {
-    "at": 95.56,
-    "of": "kick",
-    "strength": 0.128,
+    "strength": 0.279,
     "on_grid": true
    },
    {
-    "at": 95.605,
-    "of": "kick",
-    "strength": 0.212,
-    "on_grid": true
-   },
-   {
-    "at": 95.65,
-    "of": "kick",
-    "strength": 0.355,
-    "on_grid": false
-   },
-   {
-    "at": 95.713,
-    "of": "kick",
-    "strength": 0.203,
-    "on_grid": false
-   },
-   {
-    "at": 95.763,
-    "of": "kick",
-    "strength": 0.211,
-    "on_grid": false
-   },
-   {
-    "at": 95.808,
-    "of": "kick",
-    "strength": 0.265,
-    "on_grid": false
-   },
-   {
-    "at": 95.858,
-    "of": "tom",
-    "strength": 0.159,
-    "on_grid": false
-   },
-   {
-    "at": 95.903,
-    "of": "kick",
-    "strength": 0.494,
-    "on_grid": false
-   },
-   {
-    "at": 95.953,
-    "of": "tom",
-    "strength": 0.258,
-    "on_grid": false
-   },
-   {
-    "at": 96.005,
-    "of": "kick",
-    "strength": 0.413,
-    "on_grid": false
-   },
-   {
-    "at": 96.065,
-    "of": "kick",
-    "strength": 0.249,
-    "on_grid": false
-   },
-   {
-    "at": 96.115,
-    "of": "kick",
-    "strength": 0.267,
-    "on_grid": false
-   },
-   {
-    "at": 96.168,
+    "at": 95.737,
     "of": "kick",
     "strength": 0.129,
     "on_grid": false
    },
    {
-    "at": 96.213,
+    "at": 95.92,
     "of": "kick",
-    "strength": 0.151,
+    "strength": 0.419,
     "on_grid": false
    },
    {
-    "at": 96.263,
+    "at": 96.097,
+    "of": "tom",
+    "strength": 0.12,
+    "on_grid": false
+   },
+   {
+    "at": 96.28,
     "of": "kick",
-    "strength": 0.339,
+    "strength": 0.358,
     "on_grid": true
    },
    {
-    "at": 96.317,
+    "at": 96.46,
     "of": "kick",
-    "strength": 0.199,
-    "on_grid": true
-   },
-   {
-    "at": 96.362,
-    "of": "kick",
-    "strength": 0.445,
+    "strength": 0.272,
     "on_grid": false
    },
    {
-    "at": 96.41,
+    "at": 96.64,
     "of": "kick",
-    "strength": 0.317,
+    "strength": 0.233,
     "on_grid": false
    },
    {
-    "at": 96.455,
+    "at": 96.823,
     "of": "kick",
-    "strength": 0.192,
-    "on_grid": false
-   },
-   {
-    "at": 96.502,
-    "of": "kick",
-    "strength": 0.166,
-    "on_grid": false
-   },
-   {
-    "at": 96.552,
-    "of": "tom",
-    "strength": 0.14,
-    "on_grid": false
-   },
-   {
-    "at": 96.597,
-    "of": "kick",
-    "strength": 0.157,
-    "on_grid": false
-   },
-   {
-    "at": 96.647,
-    "of": "tom",
-    "strength": 0.148,
-    "on_grid": false
-   },
-   {
-    "at": 96.692,
-    "of": "kick",
-    "strength": 0.179,
-    "on_grid": false
-   },
-   {
-    "at": 96.743,
-    "of": "kick",
-    "strength": 0.267,
-    "on_grid": false
-   },
-   {
-    "at": 96.795,
-    "of": "kick",
-    "strength": 0.179,
-    "on_grid": false
-   },
-   {
-    "at": 96.845,
-    "of": "kick",
-    "strength": 0.171,
-    "on_grid": false
-   },
-   {
-    "at": 96.897,
-    "of": "kick",
-    "strength": 0.253,
-    "on_grid": false
-   },
-   {
-    "at": 96.948,
-    "of": "kick",
-    "strength": 0.198,
+    "strength": 0.149,
     "on_grid": false
    },
    {
@@ -8284,123 +3090,33 @@
     "on_grid": true
    },
    {
-    "at": 97.078,
-    "of": "kick",
-    "strength": 0.297,
-    "on_grid": false
-   },
-   {
-    "at": 97.127,
-    "of": "kick",
-    "strength": 0.335,
-    "on_grid": false
-   },
-   {
     "at": 97.18,
     "of": "kick",
     "strength": 0.34,
     "on_grid": false
    },
    {
-    "at": 97.23,
+    "at": 97.36,
     "of": "kick",
-    "strength": 0.172,
+    "strength": 0.125,
     "on_grid": false
    },
    {
-    "at": 97.282,
+    "at": 97.54,
     "of": "kick",
-    "strength": 0.372,
+    "strength": 0.212,
     "on_grid": false
    },
    {
-    "at": 97.343,
+    "at": 97.72,
     "of": "kick",
-    "strength": 0.291,
-    "on_grid": false
-   },
-   {
-    "at": 97.395,
-    "of": "kick",
-    "strength": 0.15,
-    "on_grid": false
-   },
-   {
-    "at": 97.455,
-    "of": "kick",
-    "strength": 0.251,
-    "on_grid": false
-   },
-   {
-    "at": 97.505,
-    "of": "kick",
-    "strength": 0.295,
-    "on_grid": false
-   },
-   {
-    "at": 97.558,
-    "of": "kick",
-    "strength": 0.242,
-    "on_grid": false
-   },
-   {
-    "at": 97.608,
-    "of": "kick",
-    "strength": 0.242,
-    "on_grid": false
-   },
-   {
-    "at": 97.66,
-    "of": "kick",
-    "strength": 0.274,
-    "on_grid": false
-   },
-   {
-    "at": 97.713,
-    "of": "kick",
-    "strength": 0.148,
+    "strength": 0.21,
     "on_grid": true
    },
    {
-    "at": 97.763,
+    "at": 97.9,
     "of": "kick",
-    "strength": 0.185,
-    "on_grid": true
-   },
-   {
-    "at": 97.812,
-    "of": "kick",
-    "strength": 0.134,
-    "on_grid": false
-   },
-   {
-    "at": 97.858,
-    "of": "kick",
-    "strength": 0.153,
-    "on_grid": false
-   },
-   {
-    "at": 97.907,
-    "of": "kick",
-    "strength": 0.157,
-    "on_grid": false
-   },
-   {
-    "at": 97.953,
-    "of": "kick",
-    "strength": 0.132,
-    "on_grid": false
-   },
-   {
-    "at": 98.002,
-    "of": "kick",
-    "strength": 0.361,
-    "on_grid": false
-   },
-   {
-    "at": 98.055,
-    "of": "kick",
-    "strength": 0.195,
+    "strength": 0.314,
     "on_grid": false
    },
    {
@@ -8416,12 +3132,6 @@
     "on_grid": false
    },
    {
-    "at": 101.005,
-    "of": "tom",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
     "at": 101.29,
     "of": "tom",
     "strength": 0.136,
@@ -8434,51 +3144,15 @@
     "on_grid": false
    },
    {
-    "at": 101.677,
-    "of": "tom",
-    "strength": 0.148,
-    "on_grid": false
-   },
-   {
-    "at": 101.735,
-    "of": "tom",
-    "strength": 0.149,
-    "on_grid": false
-   },
-   {
     "at": 101.948,
     "of": "tom",
     "strength": 0.131,
     "on_grid": false
    },
    {
-    "at": 102.005,
+    "at": 102.125,
     "of": "tom",
-    "strength": 0.133,
-    "on_grid": true
-   },
-   {
-    "at": 102.067,
-    "of": "tom",
-    "strength": 0.144,
-    "on_grid": true
-   },
-   {
-    "at": 102.118,
-    "of": "tom",
-    "strength": 0.138,
-    "on_grid": false
-   },
-   {
-    "at": 102.203,
-    "of": "tom",
-    "strength": 0.129,
-    "on_grid": false
-   },
-   {
-    "at": 102.252,
-    "of": "tom",
-    "strength": 0.165,
+    "strength": 0.175,
     "on_grid": false
    },
    {
@@ -8488,21 +3162,9 @@
     "on_grid": false
    },
    {
-    "at": 102.43,
-    "of": "tom",
-    "strength": 0.153,
-    "on_grid": false
-   },
-   {
     "at": 102.487,
     "of": "tom",
     "strength": 0.129,
-    "on_grid": false
-   },
-   {
-    "at": 102.642,
-    "of": "tom",
-    "strength": 0.122,
     "on_grid": false
    },
    {
@@ -8512,33 +3174,9 @@
     "on_grid": true
    },
    {
-    "at": 102.797,
-    "of": "tom",
-    "strength": 0.128,
-    "on_grid": false
-   },
-   {
-    "at": 102.875,
-    "of": "tom",
-    "strength": 0.121,
-    "on_grid": false
-   },
-   {
     "at": 103.138,
     "of": "tom",
     "strength": 0.128,
-    "on_grid": false
-   },
-   {
-    "at": 103.213,
-    "of": "tom",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 103.263,
-    "of": "tom",
-    "strength": 0.174,
     "on_grid": false
    },
    {
@@ -8548,39 +3186,9 @@
     "on_grid": false
    },
    {
-    "at": 103.57,
+    "at": 103.705,
     "of": "snare",
-    "strength": 0.149,
-    "on_grid": false
-   },
-   {
-    "at": 103.62,
-    "of": "snare",
-    "strength": 0.122,
-    "on_grid": false
-   },
-   {
-    "at": 103.675,
-    "of": "tom",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 103.72,
-    "of": "tom",
-    "strength": 0.15,
-    "on_grid": false
-   },
-   {
-    "at": 103.775,
-    "of": "tom",
-    "strength": 0.281,
-    "on_grid": false
-   },
-   {
-    "at": 103.825,
-    "of": "tom",
-    "strength": 0.211,
+    "strength": 0.181,
     "on_grid": false
    },
    {
@@ -8590,34 +3198,10 @@
     "on_grid": false
    },
    {
-    "at": 103.965,
+    "at": 104.08,
     "of": "tom",
-    "strength": 0.235,
+    "strength": 0.347,
     "on_grid": false
-   },
-   {
-    "at": 104.022,
-    "of": "tom",
-    "strength": 0.318,
-    "on_grid": false
-   },
-   {
-    "at": 104.067,
-    "of": "tom",
-    "strength": 0.201,
-    "on_grid": false
-   },
-   {
-    "at": 104.13,
-    "of": "tom",
-    "strength": 0.127,
-    "on_grid": true
-   },
-   {
-    "at": 104.188,
-    "of": "tom",
-    "strength": 0.131,
-    "on_grid": true
    },
    {
     "at": 104.272,
@@ -8626,39 +3210,9 @@
     "on_grid": false
    },
    {
-    "at": 104.323,
-    "of": "snare",
-    "strength": 0.152,
-    "on_grid": false
-   },
-   {
-    "at": 104.38,
-    "of": "snare",
-    "strength": 0.139,
-    "on_grid": false
-   },
-   {
-    "at": 104.438,
+    "at": 104.472,
     "of": "tom",
-    "strength": 0.164,
-    "on_grid": false
-   },
-   {
-    "at": 104.498,
-    "of": "tom",
-    "strength": 0.419,
-    "on_grid": false
-   },
-   {
-    "at": 104.55,
-    "of": "snare",
-    "strength": 0.13,
-    "on_grid": false
-   },
-   {
-    "at": 104.608,
-    "of": "snare",
-    "strength": 0.165,
+    "strength": 0.273,
     "on_grid": false
    },
    {
@@ -8668,63 +3222,15 @@
     "on_grid": false
    },
    {
-    "at": 104.713,
-    "of": "snare",
-    "strength": 0.144,
-    "on_grid": false
-   },
-   {
-    "at": 104.77,
-    "of": "snare",
-    "strength": 0.197,
-    "on_grid": false
-   },
-   {
-    "at": 104.825,
+    "at": 104.85,
     "of": "tom",
-    "strength": 0.17,
+    "strength": 0.273,
     "on_grid": true
-   },
-   {
-    "at": 104.877,
-    "of": "tom",
-    "strength": 0.235,
-    "on_grid": true
-   },
-   {
-    "at": 104.925,
-    "of": "tom",
-    "strength": 0.153,
-    "on_grid": false
-   },
-   {
-    "at": 104.985,
-    "of": "tom",
-    "strength": 0.25,
-    "on_grid": false
    },
    {
     "at": 105.037,
     "of": "tom",
     "strength": 0.204,
-    "on_grid": false
-   },
-   {
-    "at": 105.09,
-    "of": "tom",
-    "strength": 0.129,
-    "on_grid": false
-   },
-   {
-    "at": 105.14,
-    "of": "tom",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 105.198,
-    "of": "tom",
-    "strength": 0.207,
     "on_grid": false
    },
    {
@@ -8740,57 +3246,15 @@
     "on_grid": false
    },
    {
-    "at": 105.498,
-    "of": "tom",
-    "strength": 0.127,
-    "on_grid": false
-   },
-   {
-    "at": 105.585,
-    "of": "snare",
-    "strength": 0.395,
-    "on_grid": true
-   },
-   {
     "at": 105.635,
     "of": "snare",
     "strength": 0.147,
     "on_grid": true
    },
    {
-    "at": 105.692,
-    "of": "snare",
-    "strength": 0.122,
-    "on_grid": false
-   },
-   {
-    "at": 105.77,
-    "of": "snare",
-    "strength": 0.194,
-    "on_grid": false
-   },
-   {
     "at": 105.825,
     "of": "snare",
     "strength": 0.135,
-    "on_grid": false
-   },
-   {
-    "at": 105.87,
-    "of": "snare",
-    "strength": 0.199,
-    "on_grid": false
-   },
-   {
-    "at": 105.945,
-    "of": "snare",
-    "strength": 0.168,
-    "on_grid": false
-   },
-   {
-    "at": 105.993,
-    "of": "snare",
-    "strength": 0.193,
     "on_grid": false
    },
    {
@@ -8806,52 +3270,16 @@
     "on_grid": false
    },
    {
-    "at": 106.567,
+    "at": 106.668,
     "of": "snare",
-    "strength": 0.431,
+    "strength": 0.188,
     "on_grid": false
    },
    {
-    "at": 106.653,
-    "of": "tom",
-    "strength": 0.224,
-    "on_grid": false
-   },
-   {
-    "at": 106.713,
+    "at": 106.855,
     "of": "snare",
-    "strength": 0.166,
+    "strength": 0.229,
     "on_grid": false
-   },
-   {
-    "at": 106.76,
-    "of": "snare",
-    "strength": 0.134,
-    "on_grid": false
-   },
-   {
-    "at": 106.817,
-    "of": "snare",
-    "strength": 0.175,
-    "on_grid": false
-   },
-   {
-    "at": 106.875,
-    "of": "snare",
-    "strength": 0.179,
-    "on_grid": false
-   },
-   {
-    "at": 106.922,
-    "of": "snare",
-    "strength": 0.223,
-    "on_grid": false
-   },
-   {
-    "at": 106.98,
-    "of": "snare",
-    "strength": 0.189,
-    "on_grid": true
    },
    {
     "at": 107.037,
@@ -8860,33 +3288,9 @@
     "on_grid": true
    },
    {
-    "at": 107.097,
-    "of": "tom",
-    "strength": 0.187,
-    "on_grid": false
-   },
-   {
-    "at": 107.205,
+    "at": 107.222,
     "of": "snare",
-    "strength": 0.138,
-    "on_grid": false
-   },
-   {
-    "at": 107.255,
-    "of": "snare",
-    "strength": 0.269,
-    "on_grid": false
-   },
-   {
-    "at": 107.308,
-    "of": "snare",
-    "strength": 0.151,
-    "on_grid": false
-   },
-   {
-    "at": 107.36,
-    "of": "snare",
-    "strength": 0.406,
+    "strength": 0.18,
     "on_grid": false
    },
    {
@@ -8896,75 +3300,21 @@
     "on_grid": false
    },
    {
-    "at": 107.457,
-    "of": "snare",
-    "strength": 0.161,
-    "on_grid": false
-   },
-   {
-    "at": 107.502,
+    "at": 107.588,
     "of": "tom",
-    "strength": 0.26,
+    "strength": 0.12,
     "on_grid": false
    },
    {
-    "at": 107.547,
-    "of": "snare",
-    "strength": 0.343,
-    "on_grid": false
-   },
-   {
-    "at": 107.608,
+    "at": 107.77,
     "of": "tom",
-    "strength": 0.342,
-    "on_grid": false
-   },
-   {
-    "at": 107.653,
-    "of": "tom",
-    "strength": 0.165,
-    "on_grid": false
-   },
-   {
-    "at": 107.707,
-    "of": "snare",
-    "strength": 0.184,
+    "strength": 0.167,
     "on_grid": true
-   },
-   {
-    "at": 107.76,
-    "of": "snare",
-    "strength": 0.137,
-    "on_grid": true
-   },
-   {
-    "at": 107.812,
-    "of": "tom",
-    "strength": 0.153,
-    "on_grid": false
-   },
-   {
-    "at": 107.875,
-    "of": "tom",
-    "strength": 0.125,
-    "on_grid": false
    },
    {
     "at": 107.953,
     "of": "tom",
     "strength": 0.189,
-    "on_grid": false
-   },
-   {
-    "at": 107.998,
-    "of": "tom",
-    "strength": 0.126,
-    "on_grid": false
-   },
-   {
-    "at": 108.058,
-    "of": "tom",
-    "strength": 0.167,
     "on_grid": false
    },
    {
@@ -8974,21 +3324,15 @@
     "on_grid": false
    },
    {
-    "at": 108.255,
-    "of": "tom",
-    "strength": 0.129,
-    "on_grid": false
-   },
-   {
     "at": 108.698,
     "of": "tom",
     "strength": 0.268,
     "on_grid": false
    },
    {
-    "at": 108.843,
-    "of": "tom",
-    "strength": 0.139,
+    "at": 108.88,
+    "of": "snare",
+    "strength": 0.123,
     "on_grid": false
    },
    {
@@ -8998,81 +3342,21 @@
     "on_grid": false
    },
    {
-    "at": 109.49,
-    "of": "snare",
-    "strength": 0.135,
-    "on_grid": false
-   },
-   {
-    "at": 109.545,
-    "of": "snare",
-    "strength": 0.184,
-    "on_grid": false
-   },
-   {
     "at": 109.593,
     "of": "snare",
     "strength": 0.197,
     "on_grid": false
    },
    {
-    "at": 109.642,
+    "at": 109.775,
     "of": "snare",
-    "strength": 0.127,
+    "strength": 0.13,
     "on_grid": false
    },
    {
-    "at": 109.69,
+    "at": 109.963,
     "of": "snare",
-    "strength": 0.168,
-    "on_grid": false
-   },
-   {
-    "at": 109.735,
-    "of": "snare",
-    "strength": 0.134,
-    "on_grid": false
-   },
-   {
-    "at": 109.785,
-    "of": "snare",
-    "strength": 0.217,
-    "on_grid": false
-   },
-   {
-    "at": 109.832,
-    "of": "snare",
-    "strength": 0.164,
-    "on_grid": true
-   },
-   {
-    "at": 109.877,
-    "of": "snare",
-    "strength": 0.249,
-    "on_grid": true
-   },
-   {
-    "at": 109.927,
-    "of": "snare",
-    "strength": 0.176,
-    "on_grid": false
-   },
-   {
-    "at": 109.983,
-    "of": "snare",
-    "strength": 0.157,
-    "on_grid": false
-   },
-   {
-    "at": 110.032,
-    "of": "snare",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
-    "at": 110.078,
-    "of": "snare",
-    "strength": 0.122,
+    "strength": 0.141,
     "on_grid": false
    },
    {
@@ -9082,75 +3366,21 @@
     "on_grid": false
    },
    {
-    "at": 110.245,
-    "of": "snare",
-    "strength": 0.228,
-    "on_grid": false
-   },
-   {
-    "at": 110.293,
-    "of": "snare",
-    "strength": 0.153,
-    "on_grid": false
-   },
-   {
     "at": 110.338,
     "of": "snare",
     "strength": 0.134,
     "on_grid": false
    },
    {
-    "at": 110.385,
+    "at": 110.522,
     "of": "snare",
-    "strength": 0.14,
+    "strength": 0.221,
     "on_grid": false
    },
    {
-    "at": 110.438,
-    "of": "snare",
-    "strength": 0.222,
-    "on_grid": false
-   },
-   {
-    "at": 110.487,
-    "of": "snare",
-    "strength": 0.147,
-    "on_grid": false
-   },
-   {
-    "at": 110.55,
-    "of": "snare",
-    "strength": 0.196,
-    "on_grid": true
-   },
-   {
-    "at": 110.618,
-    "of": "snare",
-    "strength": 0.164,
-    "on_grid": true
-   },
-   {
-    "at": 110.688,
-    "of": "snare",
-    "strength": 0.233,
-    "on_grid": false
-   },
-   {
-    "at": 110.745,
+    "at": 110.707,
     "of": "snare",
     "strength": 0.132,
-    "on_grid": false
-   },
-   {
-    "at": 110.81,
-    "of": "snare",
-    "strength": 0.172,
-    "on_grid": false
-   },
-   {
-    "at": 110.86,
-    "of": "snare",
-    "strength": 0.129,
     "on_grid": false
    },
    {
@@ -9160,34 +3390,10 @@
     "on_grid": false
    },
    {
-    "at": 110.998,
-    "of": "snare",
-    "strength": 0.172,
-    "on_grid": false
-   },
-   {
-    "at": 111.045,
-    "of": "snare",
-    "strength": 0.186,
-    "on_grid": false
-   },
-   {
     "at": 111.16,
     "of": "snare",
     "strength": 0.144,
     "on_grid": false
-   },
-   {
-    "at": 111.228,
-    "of": "snare",
-    "strength": 0.338,
-    "on_grid": false
-   },
-   {
-    "at": 111.28,
-    "of": "snare",
-    "strength": 0.141,
-    "on_grid": true
    },
    {
     "at": 111.362,
@@ -9196,33 +3402,15 @@
     "on_grid": false
    },
    {
-    "at": 111.442,
+    "at": 111.54,
     "of": "snare",
-    "strength": 0.135,
+    "strength": 0.18,
     "on_grid": false
    },
    {
-    "at": 111.517,
+    "at": 111.752,
     "of": "snare",
-    "strength": 0.3,
-    "on_grid": false
-   },
-   {
-    "at": 111.588,
-    "of": "snare",
-    "strength": 0.236,
-    "on_grid": false
-   },
-   {
-    "at": 111.71,
-    "of": "snare",
-    "strength": 0.129,
-    "on_grid": false
-   },
-   {
-    "at": 111.83,
-    "of": "snare",
-    "strength": 0.144,
+    "strength": 0.197,
     "on_grid": false
    },
    {
@@ -9232,21 +3420,9 @@
     "on_grid": false
    },
    {
-    "at": 112.045,
-    "of": "snare",
-    "strength": 0.214,
-    "on_grid": true
-   },
-   {
     "at": 112.155,
     "of": "snare",
     "strength": 0.153,
-    "on_grid": false
-   },
-   {
-    "at": 112.265,
-    "of": "snare",
-    "strength": 0.124,
     "on_grid": false
    },
    {
@@ -9256,39 +3432,9 @@
     "on_grid": false
    },
    {
-    "at": 112.382,
+    "at": 112.517,
     "of": "snare",
-    "strength": 0.185,
-    "on_grid": false
-   },
-   {
-    "at": 112.43,
-    "of": "snare",
-    "strength": 0.301,
-    "on_grid": false
-   },
-   {
-    "at": 112.48,
-    "of": "snare",
-    "strength": 0.169,
-    "on_grid": false
-   },
-   {
-    "at": 112.547,
-    "of": "snare",
-    "strength": 0.282,
-    "on_grid": false
-   },
-   {
-    "at": 112.593,
-    "of": "snare",
-    "strength": 0.123,
-    "on_grid": false
-   },
-   {
-    "at": 112.638,
-    "of": "snare",
-    "strength": 0.237,
+    "strength": 0.207,
     "on_grid": false
    },
    {
@@ -9298,39 +3444,9 @@
     "on_grid": true
    },
    {
-    "at": 112.75,
-    "of": "snare",
-    "strength": 0.252,
-    "on_grid": true
-   },
-   {
-    "at": 112.8,
-    "of": "snare",
-    "strength": 0.247,
-    "on_grid": false
-   },
-   {
     "at": 112.885,
     "of": "snare",
     "strength": 0.146,
-    "on_grid": false
-   },
-   {
-    "at": 112.933,
-    "of": "snare",
-    "strength": 0.212,
-    "on_grid": false
-   },
-   {
-    "at": 112.978,
-    "of": "snare",
-    "strength": 0.333,
-    "on_grid": false
-   },
-   {
-    "at": 113.025,
-    "of": "snare",
-    "strength": 0.142,
     "on_grid": false
    },
    {
@@ -9340,64 +3456,16 @@
     "on_grid": false
    },
    {
-    "at": 113.125,
+    "at": 113.25,
     "of": "snare",
-    "strength": 0.161,
+    "strength": 0.166,
     "on_grid": false
    },
    {
-    "at": 113.192,
-    "of": "snare",
-    "strength": 0.127,
-    "on_grid": false
-   },
-   {
-    "at": 113.243,
-    "of": "snare",
-    "strength": 0.219,
-    "on_grid": false
-   },
-   {
-    "at": 113.287,
-    "of": "snare",
-    "strength": 0.202,
-    "on_grid": false
-   },
-   {
-    "at": 113.347,
-    "of": "snare",
-    "strength": 0.346,
-    "on_grid": false
-   },
-   {
-    "at": 113.407,
-    "of": "snare",
-    "strength": 0.133,
+    "at": 113.44,
+    "of": "tom",
+    "strength": 0.171,
     "on_grid": true
-   },
-   {
-    "at": 113.457,
-    "of": "snare",
-    "strength": 0.21,
-    "on_grid": true
-   },
-   {
-    "at": 113.51,
-    "of": "snare",
-    "strength": 0.182,
-    "on_grid": false
-   },
-   {
-    "at": 113.56,
-    "of": "snare",
-    "strength": 0.146,
-    "on_grid": false
-   },
-   {
-    "at": 113.61,
-    "of": "snare",
-    "strength": 0.22,
-    "on_grid": false
    },
    {
     "at": 113.668,
@@ -9406,87 +3474,21 @@
     "on_grid": false
    },
    {
-    "at": 113.718,
+    "at": 113.865,
     "of": "tom",
-    "strength": 0.244,
+    "strength": 0.121,
     "on_grid": false
    },
    {
-    "at": 113.778,
-    "of": "snare",
-    "strength": 0.314,
-    "on_grid": false
-   },
-   {
-    "at": 113.828,
-    "of": "tom",
-    "strength": 0.185,
-    "on_grid": false
-   },
-   {
-    "at": 113.89,
-    "of": "tom",
-    "strength": 0.337,
-    "on_grid": false
-   },
-   {
-    "at": 113.935,
-    "of": "tom",
-    "strength": 0.208,
-    "on_grid": false
-   },
-   {
-    "at": 113.99,
-    "of": "snare",
-    "strength": 0.14,
-    "on_grid": false
-   },
-   {
-    "at": 114.035,
-    "of": "tom",
-    "strength": 0.26,
-    "on_grid": false
-   },
-   {
-    "at": 114.08,
+    "at": 114.043,
     "of": "kick",
-    "strength": 0.28,
+    "strength": 0.171,
     "on_grid": false
    },
    {
-    "at": 114.125,
-    "of": "tom",
-    "strength": 0.157,
-    "on_grid": true
-   },
-   {
-    "at": 114.172,
+    "at": 114.225,
     "of": "kick",
-    "strength": 0.142,
-    "on_grid": true
-   },
-   {
-    "at": 114.218,
-    "of": "kick",
-    "strength": 0.2,
-    "on_grid": false
-   },
-   {
-    "at": 114.263,
-    "of": "kick",
-    "strength": 0.168,
-    "on_grid": false
-   },
-   {
-    "at": 114.317,
-    "of": "kick",
-    "strength": 0.184,
-    "on_grid": false
-   },
-   {
-    "at": 114.362,
-    "of": "kick",
-    "strength": 0.159,
+    "strength": 0.156,
     "on_grid": false
    },
    {
@@ -9496,39 +3498,9 @@
     "on_grid": false
    },
    {
-    "at": 114.463,
+    "at": 114.6,
     "of": "kick",
-    "strength": 0.132,
-    "on_grid": false
-   },
-   {
-    "at": 114.507,
-    "of": "kick",
-    "strength": 0.198,
-    "on_grid": false
-   },
-   {
-    "at": 114.57,
-    "of": "kick",
-    "strength": 0.137,
-    "on_grid": false
-   },
-   {
-    "at": 114.615,
-    "of": "kick",
-    "strength": 0.285,
-    "on_grid": false
-   },
-   {
-    "at": 114.672,
-    "of": "snare",
-    "strength": 0.201,
-    "on_grid": false
-   },
-   {
-    "at": 114.725,
-    "of": "snare",
-    "strength": 0.141,
+    "strength": 0.359,
     "on_grid": false
    },
    {
@@ -9538,243 +3510,63 @@
     "on_grid": false
    },
    {
-    "at": 114.835,
-    "of": "tom",
-    "strength": 0.242,
-    "on_grid": true
-   },
-   {
-    "at": 114.882,
-    "of": "kick",
-    "strength": 0.218,
-    "on_grid": true
-   },
-   {
-    "at": 114.935,
-    "of": "kick",
-    "strength": 0.22,
-    "on_grid": false
-   },
-   {
-    "at": 114.99,
-    "of": "tom",
-    "strength": 0.149,
-    "on_grid": false
-   },
-   {
-    "at": 115.035,
-    "of": "tom",
-    "strength": 0.136,
-    "on_grid": false
-   },
-   {
-    "at": 115.088,
-    "of": "kick",
-    "strength": 0.142,
-    "on_grid": false
-   },
-   {
-    "at": 115.135,
-    "of": "kick",
-    "strength": 0.246,
-    "on_grid": false
-   },
-   {
-    "at": 115.183,
-    "of": "tom",
-    "strength": 0.275,
-    "on_grid": false
-   },
-   {
-    "at": 115.23,
-    "of": "kick",
-    "strength": 0.245,
-    "on_grid": false
-   },
-   {
-    "at": 115.278,
-    "of": "kick",
-    "strength": 0.152,
-    "on_grid": false
-   },
-   {
-    "at": 115.325,
-    "of": "kick",
-    "strength": 0.273,
-    "on_grid": false
-   },
-   {
-    "at": 115.375,
-    "of": "kick",
-    "strength": 0.149,
-    "on_grid": false
-   },
-   {
-    "at": 115.433,
-    "of": "kick",
-    "strength": 0.181,
-    "on_grid": false
-   },
-   {
-    "at": 115.487,
+    "at": 114.97,
     "of": "tom",
     "strength": 0.207,
     "on_grid": false
    },
    {
-    "at": 115.547,
+    "at": 115.153,
     "of": "kick",
-    "strength": 0.244,
-    "on_grid": true
-   },
-   {
-    "at": 115.595,
-    "of": "kick",
-    "strength": 0.176,
-    "on_grid": true
-   },
-   {
-    "at": 115.645,
-    "of": "kick",
-    "strength": 0.139,
+    "strength": 0.291,
     "on_grid": false
    },
    {
-    "at": 115.69,
+    "at": 115.345,
     "of": "kick",
-    "strength": 0.167,
+    "strength": 0.194,
     "on_grid": false
    },
    {
-    "at": 115.74,
+    "at": 115.53,
     "of": "kick",
-    "strength": 0.288,
+    "strength": 0.204,
     "on_grid": false
    },
    {
-    "at": 115.787,
-    "of": "kick",
-    "strength": 0.279,
-    "on_grid": false
-   },
-   {
-    "at": 115.835,
-    "of": "kick",
-    "strength": 0.145,
-    "on_grid": false
-   },
-   {
-    "at": 115.882,
-    "of": "kick",
-    "strength": 0.251,
-    "on_grid": false
-   },
-   {
-    "at": 115.933,
-    "of": "kick",
-    "strength": 0.311,
-    "on_grid": false
-   },
-   {
-    "at": 115.98,
-    "of": "kick",
-    "strength": 0.153,
-    "on_grid": false
-   },
-   {
-    "at": 116.037,
-    "of": "kick",
-    "strength": 0.159,
-    "on_grid": false
-   },
-   {
-    "at": 116.088,
+    "at": 115.71,
     "of": "kick",
     "strength": 0.297,
     "on_grid": false
    },
    {
-    "at": 116.132,
-    "of": "kick",
-    "strength": 0.188,
-    "on_grid": false
-   },
-   {
-    "at": 116.183,
-    "of": "kick",
-    "strength": 0.36,
-    "on_grid": false
-   },
-   {
-    "at": 116.23,
-    "of": "kick",
-    "strength": 0.186,
-    "on_grid": false
-   },
-   {
-    "at": 116.278,
-    "of": "kick",
-    "strength": 0.218,
-    "on_grid": true
-   },
-   {
-    "at": 116.325,
-    "of": "kick",
-    "strength": 0.235,
-    "on_grid": true
-   },
-   {
-    "at": 116.375,
-    "of": "kick",
-    "strength": 0.237,
-    "on_grid": false
-   },
-   {
-    "at": 116.422,
-    "of": "kick",
-    "strength": 0.166,
-    "on_grid": false
-   },
-   {
-    "at": 116.47,
+    "at": 115.892,
     "of": "tom",
-    "strength": 0.131,
+    "strength": 0.201,
     "on_grid": false
    },
    {
-    "at": 116.517,
+    "at": 116.075,
     "of": "kick",
-    "strength": 0.216,
+    "strength": 0.185,
     "on_grid": false
    },
    {
-    "at": 116.567,
+    "at": 116.257,
     "of": "kick",
-    "strength": 0.373,
-    "on_grid": false
+    "strength": 0.182,
+    "on_grid": true
    },
    {
-    "at": 116.615,
+    "at": 116.44,
     "of": "kick",
     "strength": 0.186,
     "on_grid": false
    },
    {
-    "at": 116.662,
+    "at": 116.625,
     "of": "kick",
-    "strength": 0.305,
-    "on_grid": false
-   },
-   {
-    "at": 116.71,
-    "of": "kick",
-    "strength": 0.257,
-    "on_grid": false
-   },
-   {
-    "at": 116.76,
-    "of": "kick",
-    "strength": 0.211,
+    "strength": 0.287,
     "on_grid": false
    },
    {
@@ -9784,63 +3576,15 @@
     "on_grid": false
    },
    {
-    "at": 116.865,
-    "of": "kick",
-    "strength": 0.163,
-    "on_grid": false
-   },
-   {
-    "at": 116.912,
-    "of": "kick",
-    "strength": 0.194,
-    "on_grid": false
-   },
-   {
-    "at": 116.96,
-    "of": "kick",
-    "strength": 0.174,
-    "on_grid": false
-   },
-   {
     "at": 117.007,
     "of": "kick",
     "strength": 0.162,
     "on_grid": true
    },
    {
-    "at": 117.058,
-    "of": "kick",
-    "strength": 0.157,
-    "on_grid": true
-   },
-   {
-    "at": 117.105,
-    "of": "kick",
-    "strength": 0.25,
-    "on_grid": false
-   },
-   {
-    "at": 117.153,
-    "of": "kick",
-    "strength": 0.198,
-    "on_grid": false
-   },
-   {
     "at": 117.2,
     "of": "kick",
     "strength": 0.131,
-    "on_grid": false
-   },
-   {
-    "at": 117.25,
-    "of": "kick",
-    "strength": 0.165,
-    "on_grid": false
-   },
-   {
-    "at": 117.297,
-    "of": "kick",
-    "strength": 0.213,
     "on_grid": false
    },
    {
@@ -9850,39 +3594,9 @@
     "on_grid": false
    },
    {
-    "at": 117.532,
+    "at": 117.67,
     "of": "kick",
-    "strength": 0.228,
-    "on_grid": false
-   },
-   {
-    "at": 117.585,
-    "of": "kick",
-    "strength": 0.163,
-    "on_grid": false
-   },
-   {
-    "at": 117.632,
-    "of": "tom",
-    "strength": 0.255,
-    "on_grid": false
-   },
-   {
-    "at": 117.688,
-    "of": "kick",
-    "strength": 0.129,
-    "on_grid": true
-   },
-   {
-    "at": 117.737,
-    "of": "kick",
-    "strength": 0.235,
-    "on_grid": true
-   },
-   {
-    "at": 117.797,
-    "of": "kick",
-    "strength": 0.307,
+    "strength": 0.122,
     "on_grid": false
    },
    {
@@ -9892,39 +3606,9 @@
     "on_grid": false
    },
    {
-    "at": 117.9,
+    "at": 118.03,
     "of": "kick",
-    "strength": 0.198,
-    "on_grid": false
-   },
-   {
-    "at": 117.953,
-    "of": "kick",
-    "strength": 0.205,
-    "on_grid": false
-   },
-   {
-    "at": 118.02,
-    "of": "kick",
-    "strength": 0.146,
-    "on_grid": false
-   },
-   {
-    "at": 118.07,
-    "of": "kick",
-    "strength": 0.188,
-    "on_grid": false
-   },
-   {
-    "at": 118.123,
-    "of": "kick",
-    "strength": 0.124,
-    "on_grid": false
-   },
-   {
-    "at": 118.183,
-    "of": "kick",
-    "strength": 0.213,
+    "strength": 0.133,
     "on_grid": false
    },
    {
@@ -9934,63 +3618,15 @@
     "on_grid": false
    },
    {
-    "at": 118.285,
+    "at": 118.415,
     "of": "kick",
-    "strength": 0.159,
-    "on_grid": false
-   },
-   {
-    "at": 118.338,
-    "of": "kick",
-    "strength": 0.226,
-    "on_grid": false
-   },
-   {
-    "at": 118.39,
-    "of": "kick",
-    "strength": 0.151,
-    "on_grid": false
-   },
-   {
-    "at": 118.44,
-    "of": "kick",
-    "strength": 0.122,
+    "strength": 0.26,
     "on_grid": true
-   },
-   {
-    "at": 118.493,
-    "of": "kick",
-    "strength": 0.201,
-    "on_grid": false
-   },
-   {
-    "at": 118.543,
-    "of": "kick",
-    "strength": 0.28,
-    "on_grid": false
    },
    {
     "at": 118.593,
     "of": "tom",
     "strength": 0.31,
-    "on_grid": false
-   },
-   {
-    "at": 118.638,
-    "of": "kick",
-    "strength": 0.19,
-    "on_grid": false
-   },
-   {
-    "at": 118.683,
-    "of": "tom",
-    "strength": 0.149,
-    "on_grid": false
-   },
-   {
-    "at": 118.735,
-    "of": "tom",
-    "strength": 0.27,
     "on_grid": false
    },
    {
@@ -10000,159 +3636,45 @@
     "on_grid": false
    },
    {
-    "at": 118.84,
-    "of": "tom",
-    "strength": 0.282,
-    "on_grid": false
-   },
-   {
-    "at": 118.892,
+    "at": 118.97,
     "of": "kick",
-    "strength": 0.143,
+    "strength": 0.228,
     "on_grid": false
    },
    {
-    "at": 118.953,
-    "of": "tom",
-    "strength": 0.157,
-    "on_grid": false
-   },
-   {
-    "at": 119.007,
-    "of": "kick",
-    "strength": 0.144,
-    "on_grid": false
-   },
-   {
-    "at": 119.055,
-    "of": "kick",
-    "strength": 0.233,
-    "on_grid": false
-   },
-   {
-    "at": 119.108,
-    "of": "kick",
-    "strength": 0.241,
-    "on_grid": true
-   },
-   {
-    "at": 119.16,
+    "at": 119.147,
     "of": "kick",
     "strength": 0.192,
     "on_grid": true
    },
    {
-    "at": 119.21,
+    "at": 119.328,
     "of": "kick",
-    "strength": 0.224,
+    "strength": 0.149,
     "on_grid": false
    },
    {
-    "at": 119.263,
+    "at": 119.507,
     "of": "kick",
-    "strength": 0.281,
+    "strength": 0.295,
     "on_grid": false
    },
    {
-    "at": 119.312,
+    "at": 119.688,
     "of": "kick",
-    "strength": 0.24,
+    "strength": 0.174,
     "on_grid": false
    },
    {
-    "at": 119.365,
+    "at": 119.868,
     "of": "kick",
-    "strength": 0.265,
-    "on_grid": false
-   },
-   {
-    "at": 119.415,
-    "of": "kick",
-    "strength": 0.156,
-    "on_grid": false
-   },
-   {
-    "at": 119.468,
-    "of": "kick",
-    "strength": 0.167,
-    "on_grid": false
-   },
-   {
-    "at": 119.52,
-    "of": "kick",
-    "strength": 0.216,
-    "on_grid": false
-   },
-   {
-    "at": 119.57,
-    "of": "kick",
-    "strength": 0.286,
-    "on_grid": false
-   },
-   {
-    "at": 119.623,
-    "of": "kick",
-    "strength": 0.147,
-    "on_grid": false
-   },
-   {
-    "at": 119.672,
-    "of": "kick",
-    "strength": 0.289,
-    "on_grid": false
-   },
-   {
-    "at": 119.725,
-    "of": "kick",
-    "strength": 0.239,
-    "on_grid": false
-   },
-   {
-    "at": 119.775,
-    "of": "kick",
-    "strength": 0.288,
-    "on_grid": false
-   },
-   {
-    "at": 119.843,
-    "of": "kick",
-    "strength": 0.15,
+    "strength": 0.18,
     "on_grid": true
    },
    {
-    "at": 119.892,
+    "at": 120.047,
     "of": "kick",
-    "strength": 0.207,
-    "on_grid": true
-   },
-   {
-    "at": 119.955,
-    "of": "kick",
-    "strength": 0.211,
-    "on_grid": false
-   },
-   {
-    "at": 120.007,
-    "of": "kick",
-    "strength": 0.166,
-    "on_grid": false
-   },
-   {
-    "at": 120.058,
-    "of": "kick",
-    "strength": 0.213,
-    "on_grid": false
-   },
-   {
-    "at": 120.108,
-    "of": "kick",
-    "strength": 0.143,
-    "on_grid": false
-   },
-   {
-    "at": 120.16,
-    "of": "kick",
-    "strength": 0.243,
+    "strength": 0.129,
     "on_grid": false
    },
    {
@@ -10162,27 +3684,9 @@
     "on_grid": false
    },
    {
-    "at": 120.415,
-    "of": "tom",
-    "strength": 0.176,
-    "on_grid": false
-   },
-   {
-    "at": 120.472,
-    "of": "tom",
-    "strength": 0.245,
-    "on_grid": false
-   },
-   {
     "at": 120.535,
     "of": "tom",
     "strength": 0.146,
-    "on_grid": true
-   },
-   {
-    "at": 120.588,
-    "of": "tom",
-    "strength": 0.174,
     "on_grid": true
    },
    {
@@ -10192,39 +3696,9 @@
     "on_grid": false
    },
    {
-    "at": 120.785,
-    "of": "tom",
-    "strength": 0.125,
-    "on_grid": false
-   },
-   {
-    "at": 120.83,
-    "of": "tom",
-    "strength": 0.123,
-    "on_grid": false
-   },
-   {
-    "at": 120.882,
-    "of": "tom",
-    "strength": 0.138,
-    "on_grid": false
-   },
-   {
     "at": 120.955,
     "of": "tom",
     "strength": 0.121,
-    "on_grid": false
-   },
-   {
-    "at": 121.032,
-    "of": "tom",
-    "strength": 0.137,
-    "on_grid": false
-   },
-   {
-    "at": 121.095,
-    "of": "tom",
-    "strength": 0.178,
     "on_grid": false
    },
    {
@@ -10234,45 +3708,15 @@
     "on_grid": false
    },
    {
-    "at": 121.23,
-    "of": "tom",
-    "strength": 0.171,
-    "on_grid": false
-   },
-   {
-    "at": 121.287,
-    "of": "tom",
-    "strength": 0.135,
-    "on_grid": true
-   },
-   {
     "at": 121.332,
     "of": "tom",
     "strength": 0.124,
     "on_grid": true
    },
    {
-    "at": 121.41,
+    "at": 121.52,
     "of": "tom",
-    "strength": 0.138,
-    "on_grid": false
-   },
-   {
-    "at": 121.5,
-    "of": "tom",
-    "strength": 0.131,
-    "on_grid": false
-   },
-   {
-    "at": 121.545,
-    "of": "tom",
-    "strength": 0.147,
-    "on_grid": false
-   },
-   {
-    "at": 121.655,
-    "of": "tom",
-    "strength": 0.158,
+    "strength": 0.146,
     "on_grid": false
    },
    {
@@ -10282,22 +3726,10 @@
     "on_grid": false
    },
    {
-    "at": 121.78,
-    "of": "tom",
-    "strength": 0.141,
-    "on_grid": false
-   },
-   {
     "at": 121.915,
     "of": "tom",
     "strength": 0.153,
     "on_grid": false
-   },
-   {
-    "at": 121.993,
-    "of": "tom",
-    "strength": 0.123,
-    "on_grid": true
    },
    {
     "at": 122.198,
@@ -10402,6 +3834,1074 @@
     0.3623,
     0.6083,
     0.0942
+   ]
+  },
+  "melody": {
+   "rate": "per_beat",
+   "unit": "0-1, where the pitched line sits between this song's own lowest and highest fifth-percentile centroid",
+   "how": "energy-weighted log-frequency centroid over 250-2000 Hz per beat",
+   "not": "not the note being sung -- this is where the pitched energy sits, and a chord moves it as surely as a melody does",
+   "at": [
+    0.625,
+    1.339,
+    2.053,
+    2.767,
+    3.481,
+    4.195,
+    4.909,
+    5.623,
+    6.337,
+    7.051,
+    7.765,
+    8.479,
+    9.193,
+    9.907,
+    10.621,
+    11.335,
+    12.049,
+    12.763,
+    13.477,
+    14.191,
+    14.905,
+    15.62,
+    16.334,
+    17.048,
+    17.762,
+    18.476,
+    19.19,
+    19.904,
+    20.618,
+    21.332,
+    22.046,
+    22.76,
+    23.474,
+    24.188,
+    24.902,
+    25.616,
+    26.33,
+    27.044,
+    27.758,
+    28.472,
+    29.186,
+    29.9,
+    30.614,
+    31.328,
+    32.042,
+    32.756,
+    33.47,
+    34.184,
+    34.898,
+    35.613,
+    36.327,
+    37.041,
+    37.755,
+    38.469,
+    39.183,
+    39.897,
+    40.611,
+    41.325,
+    42.039,
+    42.753,
+    43.467,
+    44.181,
+    44.895,
+    45.609,
+    46.323,
+    47.037,
+    47.751,
+    48.465,
+    49.179,
+    49.893,
+    50.607,
+    51.321,
+    52.035,
+    52.749,
+    53.463,
+    54.177,
+    54.891,
+    55.606,
+    56.32,
+    57.034,
+    57.748,
+    58.462,
+    59.176,
+    59.89,
+    60.604,
+    61.318,
+    62.032,
+    62.746,
+    63.46,
+    64.174,
+    64.888,
+    65.602,
+    66.316,
+    67.03,
+    67.744,
+    68.458,
+    69.172,
+    69.886,
+    70.6,
+    71.314,
+    72.028,
+    72.742,
+    73.456,
+    74.17,
+    74.884,
+    75.599,
+    76.313,
+    77.027,
+    77.741,
+    78.455,
+    79.169,
+    79.883,
+    80.597,
+    81.311,
+    82.025,
+    82.739,
+    83.453,
+    84.167,
+    84.881,
+    85.595,
+    86.309,
+    87.023,
+    87.737,
+    88.451,
+    89.165,
+    89.879,
+    90.593,
+    91.307,
+    92.021,
+    92.735,
+    93.449,
+    94.163,
+    94.877,
+    95.592,
+    96.306,
+    97.02,
+    97.734,
+    98.448,
+    99.162,
+    99.876,
+    100.59,
+    101.304,
+    102.018,
+    102.732,
+    103.446,
+    104.16,
+    104.874,
+    105.588,
+    106.302,
+    107.016,
+    107.73,
+    108.444,
+    109.158,
+    109.872,
+    110.586,
+    111.3,
+    112.014,
+    112.728,
+    113.442,
+    114.156,
+    114.87,
+    115.585,
+    116.299,
+    117.013,
+    117.727,
+    118.441,
+    119.155,
+    119.869,
+    120.583,
+    121.297,
+    122.011,
+    122.725,
+    123.439
+   ],
+   "value": [
+    0.33,
+    0.2574,
+    0.153,
+    0.3055,
+    0.0,
+    0.0211,
+    0.1247,
+    0.108,
+    0.0763,
+    0.1107,
+    0.1129,
+    0.1131,
+    0.1092,
+    0.0,
+    0.0,
+    0.0248,
+    0.093,
+    0.3983,
+    0.4332,
+    0.666,
+    0.2055,
+    0.216,
+    0.296,
+    0.2596,
+    0.1596,
+    0.2563,
+    0.3728,
+    0.5336,
+    0.3395,
+    0.0494,
+    0.0027,
+    0.2352,
+    0.4697,
+    0.5966,
+    0.2976,
+    0.865,
+    0.5132,
+    0.5467,
+    0.3041,
+    0.4901,
+    0.9537,
+    1.0,
+    0.8905,
+    0.8759,
+    0.479,
+    0.1543,
+    0.8548,
+    0.8211,
+    0.5036,
+    0.835,
+    0.6813,
+    0.6651,
+    0.6819,
+    0.4173,
+    0.3729,
+    0.9688,
+    0.6604,
+    0.554,
+    0.3442,
+    0.7771,
+    0.8348,
+    0.5785,
+    0.5204,
+    0.6675,
+    0.6835,
+    0.7077,
+    0.6807,
+    1.0,
+    0.9679,
+    0.7789,
+    0.8499,
+    1.0,
+    0.4633,
+    0.2443,
+    0.6452,
+    0.6709,
+    0.6813,
+    0.8692,
+    0.7193,
+    0.8927,
+    0.6504,
+    0.8006,
+    0.7712,
+    0.7313,
+    0.637,
+    0.5576,
+    0.5658,
+    0.9782,
+    0.6588,
+    0.524,
+    0.6722,
+    0.8011,
+    0.7155,
+    0.5016,
+    0.672,
+    0.5919,
+    0.8026,
+    0.5941,
+    0.147,
+    0.1769,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.6064,
+    0.7853,
+    0.9267,
+    1.0,
+    0.8012,
+    0.5927,
+    0.8403,
+    0.8951,
+    0.8417,
+    0.6499,
+    0.8704,
+    0.98,
+    0.7902,
+    0.6513,
+    0.7913,
+    0.854,
+    0.8119,
+    0.7647,
+    0.9552,
+    1.0,
+    0.8133,
+    0.549,
+    0.7999,
+    0.8556,
+    0.7426,
+    0.5536,
+    0.8284,
+    0.9456,
+    0.7639,
+    0.535,
+    0.741,
+    0.797,
+    0.9219,
+    0.6586,
+    0.2326,
+    0.0714,
+    0.0206,
+    0.0,
+    0.0,
+    0.3284,
+    0.3759,
+    0.7181,
+    0.5323,
+    1.0,
+    1.0,
+    0.6659,
+    0.3968,
+    0.6985,
+    0.7725,
+    0.9295,
+    0.9569,
+    1.0,
+    1.0,
+    0.8227,
+    0.6081,
+    0.7282,
+    0.4711,
+    0.1219,
+    0.1977,
+    0.3098,
+    0.1414,
+    0.655,
+    0.7118,
+    0.4833,
+    0.3742,
+    0.153,
+    0.338,
+    0.3106,
+    0.219
+   ]
+  },
+  "harmony": {
+   "rate": "per_beat",
+   "unit": "0-1, 1 = the chroma turned over completely from the beat before",
+   "how": "cosine distance between consecutive 12-bin chroma vectors",
+   "not": "not a chord name, and it cannot tell a chord change from a new instrument entering on different notes",
+   "at": [
+    0.625,
+    1.339,
+    2.053,
+    2.767,
+    3.481,
+    4.195,
+    4.909,
+    5.623,
+    6.337,
+    7.051,
+    7.765,
+    8.479,
+    9.193,
+    9.907,
+    10.621,
+    11.335,
+    12.049,
+    12.763,
+    13.477,
+    14.191,
+    14.905,
+    15.62,
+    16.334,
+    17.048,
+    17.762,
+    18.476,
+    19.19,
+    19.904,
+    20.618,
+    21.332,
+    22.046,
+    22.76,
+    23.474,
+    24.188,
+    24.902,
+    25.616,
+    26.33,
+    27.044,
+    27.758,
+    28.472,
+    29.186,
+    29.9,
+    30.614,
+    31.328,
+    32.042,
+    32.756,
+    33.47,
+    34.184,
+    34.898,
+    35.613,
+    36.327,
+    37.041,
+    37.755,
+    38.469,
+    39.183,
+    39.897,
+    40.611,
+    41.325,
+    42.039,
+    42.753,
+    43.467,
+    44.181,
+    44.895,
+    45.609,
+    46.323,
+    47.037,
+    47.751,
+    48.465,
+    49.179,
+    49.893,
+    50.607,
+    51.321,
+    52.035,
+    52.749,
+    53.463,
+    54.177,
+    54.891,
+    55.606,
+    56.32,
+    57.034,
+    57.748,
+    58.462,
+    59.176,
+    59.89,
+    60.604,
+    61.318,
+    62.032,
+    62.746,
+    63.46,
+    64.174,
+    64.888,
+    65.602,
+    66.316,
+    67.03,
+    67.744,
+    68.458,
+    69.172,
+    69.886,
+    70.6,
+    71.314,
+    72.028,
+    72.742,
+    73.456,
+    74.17,
+    74.884,
+    75.599,
+    76.313,
+    77.027,
+    77.741,
+    78.455,
+    79.169,
+    79.883,
+    80.597,
+    81.311,
+    82.025,
+    82.739,
+    83.453,
+    84.167,
+    84.881,
+    85.595,
+    86.309,
+    87.023,
+    87.737,
+    88.451,
+    89.165,
+    89.879,
+    90.593,
+    91.307,
+    92.021,
+    92.735,
+    93.449,
+    94.163,
+    94.877,
+    95.592,
+    96.306,
+    97.02,
+    97.734,
+    98.448,
+    99.162,
+    99.876,
+    100.59,
+    101.304,
+    102.018,
+    102.732,
+    103.446,
+    104.16,
+    104.874,
+    105.588,
+    106.302,
+    107.016,
+    107.73,
+    108.444,
+    109.158,
+    109.872,
+    110.586,
+    111.3,
+    112.014,
+    112.728,
+    113.442,
+    114.156,
+    114.87,
+    115.585,
+    116.299,
+    117.013,
+    117.727,
+    118.441,
+    119.155,
+    119.869,
+    120.583,
+    121.297,
+    122.011,
+    122.725,
+    123.439
+   ],
+   "value": [
+    0.0,
+    0.1152,
+    0.0095,
+    0.136,
+    0.1391,
+    0.0207,
+    0.0325,
+    0.0635,
+    0.3712,
+    0.0105,
+    0.0684,
+    0.0321,
+    0.3489,
+    0.013,
+    0.0253,
+    0.1064,
+    0.0871,
+    0.0204,
+    0.0602,
+    0.1576,
+    0.1498,
+    0.0713,
+    0.1343,
+    0.054,
+    0.3547,
+    0.0407,
+    0.1453,
+    0.0642,
+    0.2839,
+    0.0184,
+    0.0165,
+    0.7252,
+    0.3794,
+    0.0478,
+    0.0627,
+    0.2439,
+    0.7204,
+    0.3844,
+    0.089,
+    0.2533,
+    0.1013,
+    0.1467,
+    0.3278,
+    0.1762,
+    0.2077,
+    0.0292,
+    0.5823,
+    0.1314,
+    0.7809,
+    0.019,
+    0.0087,
+    0.0098,
+    0.3582,
+    0.2776,
+    0.0773,
+    0.3324,
+    0.5004,
+    0.0134,
+    0.1771,
+    0.1833,
+    0.4088,
+    0.1162,
+    0.4776,
+    0.8371,
+    0.6063,
+    0.1745,
+    0.0467,
+    0.2773,
+    0.6201,
+    0.3648,
+    0.1013,
+    0.1629,
+    0.0638,
+    0.0651,
+    0.4376,
+    0.08,
+    0.0658,
+    0.0728,
+    0.1898,
+    0.1349,
+    0.6012,
+    0.0288,
+    0.0227,
+    0.0251,
+    0.2651,
+    0.3816,
+    0.0711,
+    0.3215,
+    0.4064,
+    0.0238,
+    0.1089,
+    0.1599,
+    0.261,
+    0.0867,
+    0.1029,
+    0.0927,
+    0.1514,
+    0.0152,
+    0.4299,
+    0.2538,
+    0.2454,
+    0.2535,
+    0.3256,
+    0.3357,
+    0.0635,
+    0.0212,
+    0.0285,
+    0.1722,
+    0.0455,
+    0.0528,
+    0.0533,
+    0.0635,
+    0.0419,
+    0.011,
+    0.0229,
+    0.0818,
+    0.0854,
+    0.0239,
+    0.047,
+    0.0966,
+    0.0357,
+    0.0535,
+    0.0541,
+    0.2397,
+    0.0549,
+    0.1731,
+    0.0684,
+    0.1363,
+    0.0953,
+    0.0908,
+    0.0629,
+    0.1406,
+    0.0832,
+    0.1222,
+    0.0439,
+    0.0248,
+    0.093,
+    0.0807,
+    0.3923,
+    0.2371,
+    0.2415,
+    0.245,
+    0.3344,
+    0.3876,
+    0.4235,
+    0.7699,
+    0.1833,
+    0.5105,
+    0.5995,
+    0.3699,
+    0.2671,
+    0.6873,
+    0.6885,
+    1.0,
+    0.047,
+    0.8898,
+    0.3802,
+    0.4887,
+    0.0609,
+    0.3231,
+    0.1177,
+    0.5423,
+    0.0353,
+    0.0288,
+    0.1097,
+    0.2743,
+    0.3285,
+    0.046,
+    0.1742,
+    0.0106,
+    0.1612,
+    0.1269,
+    0.1606
+   ]
+  },
+  "voice": {
+   "rate": "per_beat",
+   "unit": "0-1, share of spectral energy carried in the melodic band",
+   "how": "250-2000 Hz energy over full-band energy",
+   "not": "NOT vocals. This cannot separate a voice from a lead synth or a string line, and it does not read lyrics",
+   "at": [
+    0.625,
+    1.339,
+    2.053,
+    2.767,
+    3.481,
+    4.195,
+    4.909,
+    5.623,
+    6.337,
+    7.051,
+    7.765,
+    8.479,
+    9.193,
+    9.907,
+    10.621,
+    11.335,
+    12.049,
+    12.763,
+    13.477,
+    14.191,
+    14.905,
+    15.62,
+    16.334,
+    17.048,
+    17.762,
+    18.476,
+    19.19,
+    19.904,
+    20.618,
+    21.332,
+    22.046,
+    22.76,
+    23.474,
+    24.188,
+    24.902,
+    25.616,
+    26.33,
+    27.044,
+    27.758,
+    28.472,
+    29.186,
+    29.9,
+    30.614,
+    31.328,
+    32.042,
+    32.756,
+    33.47,
+    34.184,
+    34.898,
+    35.613,
+    36.327,
+    37.041,
+    37.755,
+    38.469,
+    39.183,
+    39.897,
+    40.611,
+    41.325,
+    42.039,
+    42.753,
+    43.467,
+    44.181,
+    44.895,
+    45.609,
+    46.323,
+    47.037,
+    47.751,
+    48.465,
+    49.179,
+    49.893,
+    50.607,
+    51.321,
+    52.035,
+    52.749,
+    53.463,
+    54.177,
+    54.891,
+    55.606,
+    56.32,
+    57.034,
+    57.748,
+    58.462,
+    59.176,
+    59.89,
+    60.604,
+    61.318,
+    62.032,
+    62.746,
+    63.46,
+    64.174,
+    64.888,
+    65.602,
+    66.316,
+    67.03,
+    67.744,
+    68.458,
+    69.172,
+    69.886,
+    70.6,
+    71.314,
+    72.028,
+    72.742,
+    73.456,
+    74.17,
+    74.884,
+    75.599,
+    76.313,
+    77.027,
+    77.741,
+    78.455,
+    79.169,
+    79.883,
+    80.597,
+    81.311,
+    82.025,
+    82.739,
+    83.453,
+    84.167,
+    84.881,
+    85.595,
+    86.309,
+    87.023,
+    87.737,
+    88.451,
+    89.165,
+    89.879,
+    90.593,
+    91.307,
+    92.021,
+    92.735,
+    93.449,
+    94.163,
+    94.877,
+    95.592,
+    96.306,
+    97.02,
+    97.734,
+    98.448,
+    99.162,
+    99.876,
+    100.59,
+    101.304,
+    102.018,
+    102.732,
+    103.446,
+    104.16,
+    104.874,
+    105.588,
+    106.302,
+    107.016,
+    107.73,
+    108.444,
+    109.158,
+    109.872,
+    110.586,
+    111.3,
+    112.014,
+    112.728,
+    113.442,
+    114.156,
+    114.87,
+    115.585,
+    116.299,
+    117.013,
+    117.727,
+    118.441,
+    119.155,
+    119.869,
+    120.583,
+    121.297,
+    122.011,
+    122.725,
+    123.439
+   ],
+   "value": [
+    0.7092,
+    0.7023,
+    0.7847,
+    0.6775,
+    0.7629,
+    0.8086,
+    0.8095,
+    0.7264,
+    0.8134,
+    0.7959,
+    0.8361,
+    0.7578,
+    0.7566,
+    0.832,
+    0.8582,
+    0.7786,
+    0.7802,
+    0.7678,
+    0.8316,
+    0.7423,
+    0.787,
+    0.8391,
+    0.8423,
+    0.7533,
+    0.8197,
+    0.8245,
+    0.8575,
+    0.7941,
+    0.7884,
+    0.8354,
+    0.8653,
+    0.8193,
+    0.7836,
+    0.9116,
+    0.8904,
+    0.9126,
+    0.8528,
+    0.925,
+    0.9389,
+    0.6827,
+    0.8744,
+    0.9489,
+    0.8937,
+    0.8935,
+    0.8469,
+    0.7961,
+    0.9111,
+    0.9292,
+    0.8675,
+    0.9294,
+    0.8677,
+    0.9219,
+    0.9183,
+    0.8747,
+    0.8347,
+    0.8962,
+    0.8797,
+    0.9099,
+    0.8441,
+    0.8643,
+    0.98,
+    1.0,
+    0.7207,
+    0.7434,
+    0.4023,
+    0.5216,
+    0.3567,
+    0.5916,
+    0.6023,
+    0.5408,
+    0.5406,
+    0.4922,
+    0.3465,
+    0.4199,
+    0.45,
+    0.5214,
+    0.4118,
+    0.415,
+    0.4461,
+    0.5557,
+    0.4257,
+    0.6024,
+    0.4989,
+    0.5433,
+    0.4881,
+    0.5356,
+    0.4393,
+    0.5515,
+    0.458,
+    0.5234,
+    0.3148,
+    0.5473,
+    0.5398,
+    0.4446,
+    0.3481,
+    0.3877,
+    0.4577,
+    0.7061,
+    0.7682,
+    0.8208,
+    0.855,
+    0.5767,
+    0.6379,
+    0.7293,
+    0.328,
+    0.3773,
+    0.347,
+    0.3492,
+    0.3965,
+    0.4044,
+    0.3669,
+    0.4182,
+    0.3151,
+    0.4459,
+    0.3613,
+    0.3527,
+    0.4068,
+    0.3356,
+    0.3515,
+    0.3974,
+    0.3052,
+    0.4119,
+    0.3662,
+    0.3776,
+    0.4236,
+    0.4071,
+    0.3582,
+    0.4334,
+    0.3149,
+    0.4457,
+    0.3676,
+    0.374,
+    0.424,
+    0.3201,
+    0.3624,
+    0.425,
+    0.4958,
+    0.7193,
+    0.7407,
+    0.8798,
+    0.8208,
+    0.5831,
+    0.6519,
+    0.524,
+    0.7644,
+    0.8217,
+    0.8109,
+    0.8621,
+    0.9749,
+    0.9641,
+    0.8767,
+    0.9705,
+    0.9875,
+    0.9883,
+    0.9359,
+    0.9401,
+    0.9745,
+    0.9957,
+    0.8753,
+    0.6128,
+    0.5291,
+    0.4479,
+    0.3192,
+    0.3004,
+    0.3604,
+    0.5478,
+    0.4545,
+    0.6097,
+    0.7961,
+    0.7412,
+    0.7026,
+    0.7582,
+    0.5832
    ]
   }
  },

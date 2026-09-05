@@ -204,3 +204,32 @@ window.addEventListener('resize',()=>{fit();skyFit();render()});
   m.innerHTML=h})();
 const AUD=document.createElement('audio'); AUD.id='audio'; document.body.appendChild(AUD);
 fillDrawer(); fit(); skyFit(); mode(0); requestAnimationFrame(loop);
+
+(function(){
+  if(typeof SONG_SLUG!=='string'||!SONG_SLUG) return;
+  const a=document.getElementById('audio');
+  if(!a || typeof a.addEventListener!=='function') return;
+  const url='/api/audio?song='+encodeURIComponent(SONG_SLUG);
+  a.addEventListener('loadedmetadata',function(){
+    const pick=document.getElementById('picker'), hint=document.getElementById('pickhint');
+    if(!pick||document.getElementById('playnow')) return;
+    const b=document.createElement('button');
+    b.id='playnow'; b.textContent='Play';
+    b.onclick=function(){
+      const h=document.getElementById('hello'); if(h) h.classList.add('hide');
+      playing=true; const pb=document.getElementById('play');
+      if(pb) pb.innerHTML='&#10074;&#10074;';
+      a.play();
+    };
+    pick.parentNode.insertBefore(b,pick);
+    pick.style.display='none';
+    if(hint) hint.textContent='Playing the copy on this machine. Or choose another file.';
+    const alt=document.createElement('a');
+    alt.href='#'; alt.textContent='choose a different file';
+    alt.style.cssText='display:block;margin-top:10px;opacity:.6;font-size:13px';
+    alt.onclick=function(e){e.preventDefault();pick.style.display='';alt.remove()};
+    if(hint) hint.parentNode.insertBefore(alt,hint.nextSibling);
+  });
+  a.src=url;
+  const b2=document.getElementById('audio2'); if(b2) b2.src=url;
+})();

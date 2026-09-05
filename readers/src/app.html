@@ -95,6 +95,9 @@
   .link{color:var(--dim);font-size:var(--s1);text-decoration:none;border-bottom:1px solid var(--line);
     padding-bottom:1px}
   .link:hover{color:var(--ink)}
+  #playnow{font:600 17px system-ui;padding:13px 30px;border:0;border-radius:9px;
+    background:#f3f3f3;color:#111;cursor:pointer}
+  #playnow:hover{background:#fff}
   #drawer audio{width:100%;height:30px;margin-top:8px;filter:invert(.9) hue-rotate(180deg) saturate(.2)}
 </style>
 
@@ -131,14 +134,15 @@
 
 <div id="hello">
   <div class="in">
-    <h1>The Nights</h1>
+    <h1 id="songname">__SONGTITLE__</h1>
     <p>Everything this show does was measured from the recording. Choose your copy of the song and it will play in time with it.</p>
-    <label>Choose the audio<input type="file" accept="audio/*" onchange="pick(this)"></label>
-    <small>Nothing is uploaded. The file never leaves this machine.</small>
+    <label id="picker">Choose the audio<input type="file" accept="audio/*" onchange="pick(this)"></label>
+    <small id="pickhint">Nothing is uploaded. The file never leaves this machine.</small>
   </div>
 </div>
 
 <script>
+const SONG_SLUG = '__SONGSLUG__';
 const MAP = __MAP__;
 const MAP_FULL = __MAPFULL__;
 const LAYOUTS = __LAYOUTS__;

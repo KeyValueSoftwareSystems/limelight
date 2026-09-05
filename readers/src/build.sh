@@ -30,9 +30,13 @@ def default_map():
 LAY = layouts()
 SHELL = open("readers/src/app.html").read()
 
-def render(map_path, out_path):
+def pretty(slug):
+    return " ".join(w.capitalize() for w in slug.replace("-", " ").split())
+
+def render(map_path, out_path, slug=None):
     full = json.load(open(map_path))
-    s = SHELL
+    slug = slug or os.path.basename(out_path)[:-5]
+    s = SHELL.replace("__SONGSLUG__", slug).replace("__SONGTITLE__", pretty(slug))
     for k, v in (("__MAP__", compact(full)), ("__MAPFULL__", full), ("__LAYOUTS__", LAY)):
         s = s.replace(k, json.dumps(v, separators=(",", ":")))
     s = s.replace("__VECB64__", "")
@@ -52,10 +56,16 @@ if args:
     kb = render(args[0], args[1] if len(args) > 1 else "limelight.html")
     print(f"{args[1] if len(args)>1 else 'limelight.html'}  {kb} KB")
 else:
-    kb = render(default_map(), "limelight.html")
+    kb = render(default_map(), "limelight.html", "the-nights")
     print(f"limelight.html  {kb} KB  ({len(LAY)} rigs: {', '.join(sorted(LAY))})")
+    best = {}
     for p in sorted(glob.glob("maps/model/*.map.json")):
-        name = os.path.basename(p)[:-len(".map.json")].replace(".", "-")
-        out = os.path.join("shows", name + ".html")
-        print(f"  shows/{name}.html  {render(p, out)} KB")
+        stem = os.path.basename(p)[:-len(".map.json")]
+        slug, _, variant = stem.partition(".")
+        rank = {"full": 2}.get(variant, 1 if variant == "" else 0)
+        if rank >= best.get(slug, (-1, None))[0]:
+            best[slug] = (rank, p)
+    for slug in sorted(best):
+        out = os.path.join("shows", slug + ".html")
+        print(f"  shows/{slug}.html  {render(best[slug][1], out, slug)} KB")
 PY
