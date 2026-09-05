@@ -1,8 +1,8 @@
 {
- "when": "2026-09-05T21:36:58.360Z",
- "pass": 105,
- "fail": 16,
- "skip": 23,
+ "when": "2026-09-05T21:51:33.996Z",
+ "pass": 106,
+ "fail": 17,
+ "skip": 21,
  "rows": [
   {
    "slug": "levels",
@@ -81,18 +81,18 @@
    "n": 9,
    "name": "melody",
    "ok": false,
-   "na": true,
-   "v": 0,
-   "txt": "this song has no tune written down here"
+   "na": false,
+   "v": 44.99196288399621,
+   "txt": "the lit lamp follows the tune 0.45 out of 1.00, using 3 of 5 lamps"
   },
   {
    "slug": "levels",
    "n": 10,
    "name": "chords",
-   "ok": false,
-   "na": true,
-   "v": 0,
-   "txt": "this song has no chords written down here"
+   "ok": true,
+   "na": false,
+   "v": 93.54838709677419,
+   "txt": "29 of 31 colour changes land on a chord change"
   },
   {
    "slug": "levels",
@@ -100,8 +100,8 @@
    "name": "restraint",
    "ok": true,
    "na": false,
-   "v": 333.33333333333337,
-   "txt": "the picture changes 3.3 times a second, and a room can follow about 4"
+   "v": 313.3333333333333,
+   "txt": "the picture changes 3.1 times a second, and a room can follow about 4"
   },
   {
    "slug": "levels",
