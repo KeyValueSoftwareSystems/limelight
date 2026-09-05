@@ -148,7 +148,7 @@ function fillDrawer(){
   const venues=Object.keys(LAYOUTS);
   $('#drawer').innerHTML=
    '<h2>Venue</h2><div class="row"><span>rig</span><div class="seg" id="vseg">'
-   + venues.map((v,i)=>'<button class="'+(i===0?'on':'')+'" onclick="setVenue(\''+v+'\')">'
+   + venues.map((v,i)=>'<button class="'+(LAYOUTS[v]===LAYOUT?'on':'')+'" onclick="setVenue(\''+v+'\')">'
        +v+'</button>').join('') + '</div></div>'
    + '<div class="mono" id="vinfo"></div>'
    + '<h2>Look</h2>'

@@ -40,6 +40,8 @@ def render(map_path, out_path, slug=None):
     for k, v in (("__MAP__", compact(full)), ("__MAPFULL__", full), ("__LAYOUTS__", LAY)):
         s = s.replace(k, json.dumps(v, separators=(",", ":")))
     s = s.replace("__VECB64__", "")
+    s = s.replace("__ROOM__",
+                  ";(function(){\n" + open("synth/room.js").read() + "\n})();")
     for k, f in (("__RECIPE__", "recipe4.js"), ("__DRONES__", "drones.js"),
                  ("__RENDER__", "render_gl.js"), ("__SKY__", "sky.js"),
                  ("__SCORELANES__", "score_lanes.js"), ("__APP__", "appglue.js")):
