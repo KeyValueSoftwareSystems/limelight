@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "musicstate"
+version = "0.2.0"
+description = "Audio file -> layered MusicState -> MAP v0.3"
+requires-python = ">=3.10"
+# core deps (the --core path). Heavy backends live in sibling conda envs; see README.
+dependencies = ["numpy<2", "scipy", "soundfile", "librosa==0.10.2.post1", "jsonschema"]
+
+[project.optional-dependencies]
+deep = ["torch", "torchaudio", "demucs", "transformers", "nnAudio"]
+dev = ["pytest"]
+
+[project.scripts]
+musicstate = "musicstate.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+musicstate = ["schema/*.json"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

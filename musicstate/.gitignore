@@ -1,0 +1,14 @@
+# python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# build artifacts / outputs (never commit audio, embeddings, or generated maps)
+*.wav
+*.mp3
+*.flac
+*.vec.f16
+*.map.json
