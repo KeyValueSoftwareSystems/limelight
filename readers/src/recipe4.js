@@ -116,7 +116,7 @@ function escal(t){
   const s=sectionAt(t);
   const rep=s?(s.repeat||1):1, arc=s?(s.arc||0):(t/DUR);
   // a repeat is denser; and the show grows from start to finish
-  return {rep:1+0.42*(rep-1), arc:0.78+0.44*arc, id:s?s.id:'?'}}
+  return {rep:1+0.42*(rep-1), arc:0.54+0.78*arc, id:s?s.id:'?'}}
 
 /* ---- three more listeners the recipe can now hear ----
    pan      : the mix's own left-right balance drives the rig's balance
@@ -498,8 +498,8 @@ function buildGeo(){
 const ARRAY_MIN = 12;
 function arrayGate(G, t, e, L, n){
   if(!n || n <= ARRAY_MIN) return 1;
-  const ceil = {drop:0.72, build:0.62, verse:0.52, quiet:0.40, idle:0.34,
-                outro:0.40, spotlight:0.26, stop:0, flash:1}[L];
+  const ceil = {drop:0.46, build:0.40, verse:0.34, quiet:0.26, idle:0.22,
+                outro:0.26, spotlight:0.18, stop:0, flash:1}[L];
   const top = (ceil===undefined?0.52:ceil);
   const cov = (top<=0||top>=1) ? top : cl(0.10 + (top-0.10)*(0.18+0.82*e), 0.08, 1);
   if(cov >= 1) return 1;
