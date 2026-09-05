@@ -105,11 +105,11 @@ because once a guess is written down nobody can tell it apart from a measurement
 <script>
 const $=s=>document.querySelector(s);
 const LANES=[
+  ["listen","Listener","audio → map"],
   ["frames","Frames","map → light"],
   ["wire","Hardware","light → fixtures"],
   ["venues","Emulator & look","how it all appears"],
   ["songs","Songs","the demo material"],
-  ["listen","Listener","parked"],
 ];
 function num(v){return v===null||v===undefined?"—":v}
 function acts(k,d){
@@ -138,7 +138,7 @@ function card(k,title,sub,d){
   if(k==="frames"&&d.stale===true) flag='<span class="flag bad">stale — recipe changed after these</span>';
   if(k==="frames"&&d.stale===false) flag='<span class="flag good">current</span>';
   if(soon) flag='<span class="flag soon">not built yet</span>';
-  if(k==="listen") flag='<span class="flag soon">parked</span>';
+
   return `<div class="door${soon?" soon":""}">
     <p class="who">${d.owner}</p>
     <p class="what"><a href="${d.link}">${title}</a>${flag}</p>

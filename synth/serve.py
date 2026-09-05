@@ -308,11 +308,11 @@ def status():
                 passed, meanf = sc(by[who])
                 best = {"listener": who, "passed": passed, "of": len(by[who]),
                         "mean_beats_f": round(meanf, 3)}
-    out["listen"] = {"owner": "parked", "runs": runs, "best": best,
+    out["listen"] = {"owner": "Amal + Dheeraj", "runs": runs, "best": best,
                      "levels": levels_total,
-                     "job": "Hearing a song and writing its map. PARKED for the hackathon — we "
-                            "author the songs instead, so nothing is blocked on solving it. The "
-                            "ladder stays here because it is how we would prove it later.",
+                     "job": "Hearing a song and writing its map. Ten levels, each adding one new "
+                            "thing, all graded against maps we authored — so a disagreement is "
+                            "yours and there is nothing to argue about.",
                      "next": "python3 synth/loop.py --listener \"python3 listen/mine.py\"",
                      "link": "/listen"}
 
