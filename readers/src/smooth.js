@@ -72,8 +72,14 @@ console.log(`  frames with a jump > 0.15: ${bigOnes.length} of ${deltas.length} 
 const times=[...new Set(bigOnes.map(d=>Math.round(d[1]*2)/2))].sort((a,b)=>a-b);
 console.log(`  they occur at: ${times.join(', ') || 'nowhere'}`);
 console.log('\n=== HEAD MOTION vs the layout slew limits ===');
-console.log(`  pan  peak ${panMax.toFixed(4)} /s   limit ${lim.max_pan_per_s}   ${panMax<=lim.max_pan_per_s?'OK':'EXCEEDS'}   (at t=${panAt.toFixed(1)})`);
-console.log(`  tilt peak ${tiltMax.toFixed(4)} /s   limit ${lim.max_tilt_per_s}  ${tiltMax<=lim.max_tilt_per_s?'OK':'EXCEEDS'}   (at t=${tiltAt.toFixed(1)})`);
+function slew(name, peak, cap, at){
+  if(typeof cap !== 'number')
+    return console.log(`  ${name} peak ${peak.toFixed(4)} /s   this layout declares no limit` +
+      (peak > 0 ? '  -- it moves fixtures it does not budget for' : '  (nothing moves)'));
+  console.log(`  ${name} peak ${peak.toFixed(4)} /s   limit ${cap}   ${peak<=cap?'OK':'EXCEEDS'}   (at t=${at.toFixed(1)})`);
+}
+slew('pan ', panMax, lim.max_pan_per_s, panAt);
+slew('tilt', tiltMax, lim.max_tilt_per_s, tiltAt);
 console.log('\n=== heads are always moving (pan sampled every 2 s, 40-60 s) ===');
 let row=[]; for(let t=40;t<60;t+=2){const f=frame(t);
   row.push(f.fixtures.filter(o=>o.id.startsWith('head')).map(o=>o.pan.toFixed(2)).join('/'))}

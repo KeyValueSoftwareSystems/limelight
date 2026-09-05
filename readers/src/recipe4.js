@@ -35,7 +35,7 @@ const SONG_DRIVE = (function(){
   const bpm = 60/Math.max(0.05, PER);
   const ev = (MAP.accents && MAP.accents.events) || [];
   const rate = DUR>0 ? ev.length/DUR : 0;
-  return cl(0.5*ss(84,128,bpm) + 0.5*ss(3.4,7.0,rate));
+  return cl(Math.sqrt(ss(84,128,bpm) * ss(3.4,7.0,rate)));
 })();
 
 const bi=t=>{let lo=0,hi=BEATS.length-1,r=-1;while(lo<=hi){const m=(lo+hi)>>1;
@@ -344,7 +344,7 @@ const LIMT = (LAYOUT.limits&&LAYOUT.limits.max_tilt_per_s)||0.95;
 const SLEW_HEADROOM=0.68;
 const SLEW_CAP=Math.max(0.30,Math.min(1.0,0.60*(LIMP/0.85)*K.motion))*SLEW_HEADROOM;
 const LOOK_MOVE = {intro:2.1, quiet:2.0, idle:2.1, verse:1.45, break:1.7,
-                   build:1.0, drop:0.66, outro:2.1, spotlight:1.9, flash:0.66};
+                   build:1.15, drop:0.70, outro:2.1, spotlight:1.9, flash:0.70};
 const MOVE_XF = 3.0;
 const scaleOf = nm => { const m = LOOK_MOVE[nm]; return (m===undefined?1.25:m); };
 function moveScaleAt(t){
@@ -353,7 +353,9 @@ function moveScaleAt(t){
   const j = chIdx(t);
   let v = scaleOf(CH[j][1]);
   if(j > 0){
-    const w = ss(0, MOVE_XF, t - CH[j][0]);
+    const end = (j+1 < CH.length) ? CH[j+1][0] : DUR;
+    const xf = Math.min(MOVE_XF, Math.max(0.001, end - CH[j][0]));
+    const w = ss(0, xf, t - CH[j][0]);
     if(w < 1) v = lerp(scaleOf(CH[j-1][1]), v, w);
   }
   return v*drive;
@@ -366,8 +368,18 @@ const MPH = (function(){
     return n?s/n:p[1]});
   const ts=EN.map(p=>p[0]);
   const rs=sm.map((v,i)=>2*Math.PI/(movePeriod(v)*moveScaleAt(ts[i]))), cum=[0];
-  for(let i=0;i<ts.length-1;i++) cum.push(cum[i]+rs[i]*(ts[i+1]-ts[i]));
+  for(let i=0;i<ts.length-1;i++) cum.push(cum[i]+0.5*(rs[i]+rs[i+1])*(ts[i+1]-ts[i]));
   return {ts,rs,cum}})();
+function mphIndex(t){
+  let k=0,lo=0,hi=MPH.ts.length-1;
+  while(lo<=hi){const m=(lo+hi)>>1; if(MPH.ts[m]<=t){k=m;lo=m+1}else hi=m-1}
+  return k}
+function rateNow(t){
+  if(!MPH || !MPH.ts.length) return 2*Math.PI/movePeriod(0.5);
+  const k=mphIndex(t);
+  if(k+1>=MPH.rs.length) return MPH.rs[MPH.rs.length-1];
+  const T=MPH.ts[k+1]-MPH.ts[k];
+  return lerp(MPH.rs[k], MPH.rs[k+1], T>0?cl((t-MPH.ts[k])/T):0)}
 function motionPhase(t){
   // the rate must be the SEGMENT's constant rate, not en(t). Using the
   // continuously varying energy inside a segment makes the extrapolated phase
@@ -377,9 +389,10 @@ function motionPhase(t){
   // constant speed. A thinner map means a duller show, never a broken one -- pan
   // used to come out null here and take the whole renderer down with it.
   if(!MPH || !MPH.ts.length) return 2*Math.PI*t/movePeriod(0.5);
-  let k=0,lo=0,hi=MPH.ts.length-1;
-  while(lo<=hi){const m=(lo+hi)>>1; if(MPH.ts[m]<=t){k=m;lo=m+1}else hi=m-1}
-  return MPH.cum[k] + MPH.rs[k]*(t-MPH.ts[k])}
+  const k=mphIndex(t), dt=t-MPH.ts[k];
+  if(k+1>=MPH.rs.length) return MPH.cum[k] + MPH.rs[k]*dt;
+  const T=MPH.ts[k+1]-MPH.ts[k], f=T>0?cl(dt/T):0;
+  return MPH.cum[k] + MPH.rs[k]*dt + 0.5*(MPH.rs[k+1]-MPH.rs[k])*dt*f}
 const eMotionSlowNote=1;
 const segAt=t=>{let lo=0,hi=SEG.length-1,r=0;while(lo<=hi){const m=(lo+hi)>>1;
   if(SEG[m].from<=t){r=m;lo=m+1}else hi=m-1}return r};
@@ -865,12 +878,13 @@ function lookFrame(t,L){
      A depends on t only through eM, and eM is a 5-tap average of a piecewise
      linear curve, so |eM'| is bounded by EMAX -- computable once from the map.
      Solving for A gives a guaranteed bound rather than a hopeful one. */
-  const om=2*Math.PI/(movePeriod(eM)*moveScaleAt(t)), duty=Math.max(0.20,1-dw), S=1.5;
+  const om=rateNow(t), duty=Math.max(0.20,1-dw), S=1.5;
   const thp=om*S/duty;                              // peak phase rate
   const ampP=Math.max(0.02,(LIMP-DADE*EMAX)/thp);   // pan  budget, proven
   const ampT=Math.max(0.02,(LIMT-DADE*EMAX)/(2*thp));// tilt runs at 2x in the sway shape
-  const amp=Math.min(0.46, ampP)*(0.42+0.58*eM)*SLEW_CAP;
-  const tam=Math.min(0.30, ampT)*(0.34+0.66*eM)*SLEW_CAP;
+  const msc=Math.min(1, moveScaleAt(t));
+  const amp=Math.min(0.46*msc, ampP)*(0.42+0.58*eM)*SLEW_CAP;
+  const tam=Math.min(0.30*msc, ampT)*(0.34+0.66*eM)*SLEW_CAP;
   // No fast path for d==0. `return u` is NOT the d->0 limit of the branch below
   // (ss(m) != m), so crossing zero jumped the phase by ~0.6 rad and slewed the
   // heads at 9.8 units/s. Always ease -- which is what a real motor does anyway.

@@ -890,6 +890,24 @@ class H(http.server.BaseHTTPRequestHandler):
             if u.path == "/build":
                 return self._send(200, open(os.path.join(HERE, "build.html")).read(),
                                   "text/html; charset=utf-8")
+            if u.path in ("/shows", "/show"):
+                root = os.path.join(HERE, "..", "shows")
+                have = sorted(f[:-5] for f in os.listdir(root)) if os.path.isdir(root) else []
+                want = (q.get("song") or [""])[0]
+                if want and want in have:
+                    return self._send(200, open(os.path.join(root, want + ".html")).read(),
+                                      "text/html; charset=utf-8")
+                links = "".join(
+                    f'<li><a href="/show?song={h}">{h}</a></li>' for h in have
+                ) or "<li>nothing built yet — run readers/src/build.sh</li>"
+                return self._send(
+                    200,
+                    "<meta name=viewport content='width=device-width,initial-scale=1'>"
+                    "<style>body{background:#111;color:#eee;font:16px system-ui;padding:40px}"
+                    "a{color:#7cf}li{margin:8px 0}</style>"
+                    "<h1>Shows</h1><p>Pick a song, then choose your own copy of the audio "
+                    "in the page.</p><ul>" + links + "</ul>",
+                    "text/html; charset=utf-8")
             if u.path == "/api/learn":
                 # What was accepted, why, and the number that backed it. This is the
                 # output of the learning phase -- the show is a by-product.
