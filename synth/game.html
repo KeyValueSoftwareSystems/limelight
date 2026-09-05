@@ -1,0 +1,137 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Beat the human</title><style>
+:root{--bg:#0e1016;--surface:#171a23;--raise:#1e222d;--ink:#e6e9f1;--muted:#959bac;
+ --faint:#666c7e;--rule:#252935;--rule2:#373c4d;--tung:#f0a93c;--learn:#8f9aff;
+ --good:#69be86;--bad:#e88055}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);padding:26px 20px 60px;
+ font:15px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1080px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+h1{font:700 32px/1.05 ui-sans-serif,system-ui,sans-serif;letter-spacing:-.02em;margin:0}
+h1 span{color:var(--tung)}
+.sub{color:var(--muted);margin:6px 0 0;max-width:64ch;font-size:14.5px}
+#clock{font:700 42px/1 ui-monospace,monospace;font-variant-numeric:tabular-nums;
+ color:var(--tung);text-align:right}
+#clock small{display:block;font:400 10.5px/1 ui-monospace,monospace;letter-spacing:.12em;
+ text-transform:uppercase;color:var(--faint);margin-top:6px}
+h2{font:600 11.5px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;
+ color:var(--faint);margin:34px 0 10px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:16px 18px}
+.mono,select,button,td,th{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:9px 14px 9px 0;border-bottom:1px solid var(--rule);white-space:nowrap}
+th{color:var(--faint);font-size:10px;letter-spacing:.09em;text-transform:uppercase}
+td.n{font-variant-numeric:tabular-nums}
+tr.you td{color:var(--tung)}
+.bar{height:7px;background:var(--raise);border-radius:4px;overflow:hidden;min-width:110px}
+.bar i{display:block;height:100%;background:var(--tung)}
+select,button,a.go{background:var(--raise);color:var(--ink);border:1px solid var(--rule2);
+ border-radius:3px;padding:7px 12px;font-size:13px;cursor:pointer;text-decoration:none;
+ display:inline-block}
+button.primary{background:var(--tung);color:#20160a;border-color:var(--tung);font-weight:700}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.vs{color:var(--faint);font-family:ui-monospace,monospace;font-size:12px}
+.note{color:var(--muted);font-size:13.5px;margin:12px 0 0;max-width:80ch}
+.pill{display:inline-block;font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.07em;
+ text-transform:uppercase;padding:2px 7px;border-radius:2px;background:var(--raise);color:var(--muted)}
+.pill.hum{background:#3a2a12;color:var(--tung)}
+.pill.mod{background:#1f2338;color:var(--learn)}
+#verdicts div{font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);
+ padding:5px 0;border-bottom:1px solid var(--rule)}
+</style></head><body><div class="wrap">
+<div class="top">
+ <div>
+  <h1>Beat the <span>human</span></h1>
+  <p class="sub">Renjith maps <b id="songname">Levels</b> by ear. Amal and Dheeraj map it with code.
+   Two rooms, same song, same instant — where they differ, one of them is wrong about the music.</p>
+ </div>
+ <div id="clock">—<small>left</small></div>
+</div>
+
+<h2>The arena — <span id="songlabel">Levels</span></h2>
+<div class="card">
+ <div class="row">
+  <select id="a"></select><span class="vs">versus</span><select id="b"></select>
+  <a class="go" id="watch" href="#">Watch them side by side →</a>
+ </div>
+ <div class="row" style="margin-top:12px">
+  <span class="vs">Renjith's verdict:</span>
+  <button id="vA">left is closer</button>
+  <button id="vB">right is closer</button>
+  <button id="vT">cannot tell them apart</button>
+  <span id="vsaid" class="vs"></span>
+ </div>
+ <p class="note">There is no answer key for a real record, so the referee is an ear. That is not a
+  weakness of the setup — it is the honest situation, and the reason the two rooms exist at all.</p>
+</div>
+<h2>Verdicts so far</h2>
+<div class="card" id="verdicts"><div style="border:0;color:var(--faint)">none yet</div></div>
+
+<h2>The ladder — measured, no argument</h2>
+<div class="card">
+ <p class="note" style="margin:0 0 12px">Ten songs we wrote ourselves, so the right answer is
+  known exactly. This is where "better" is a fact rather than a judgement. Run
+  <span class="mono">python3 synth/loop.py --listener "python3 listen/yours.py"</span> and you
+  appear here.</p>
+ <table id="board"></table>
+</div>
+
+<h2>Maps handed in</h2>
+<div class="card"><table id="maps"></table></div>
+<p class="note">Drop yours at <span class="mono">synth/maps/&lt;song&gt;.&lt;yourname&gt;.map.json</span>
+ and it shows up here and in both dropdowns. Commit it — the history is the record of who improved
+ what.</p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let SONG="levels", CANDS={};
+function fmt(ms){ if(ms<0) return "00:00:00";
+ const s=Math.floor(ms/1000); return [s/3600|0,(s%3600)/60|0,s%60]
+   .map(v=>String(v|0).padStart(2,"0")).join(":") }
+async function load(){
+ const st=await (await fetch("/api/game")).json();
+ SONG=st.song||"levels";
+ $("songname").textContent=st.song_title||SONG;
+ $("songlabel").textContent=st.song_title||SONG;
+ if(st.deadline){ const end=new Date(st.deadline).getTime();
+   const tick=()=>{ $("clock").innerHTML=fmt(end-Date.now())+"<small>left</small>" };
+   tick(); clearInterval(window._t); window._t=setInterval(tick,1000); }
+ CANDS=st.candidates||{};
+ const opts=Object.entries(CANDS).map(([k,v])=>
+   `<option value="${k}">${k}${v.how?"  ("+v.how+")":""}</option>`).join("");
+ $("a").innerHTML=opts; $("b").innerHTML=opts;
+ const keys=Object.keys(CANDS);
+ if(keys.length>1){ $("a").value=keys[0]; $("b").value=keys[1] }
+ wire();
+ $("board").innerHTML="<thead><tr><th>who</th><th>levels passed</th><th></th>"
+  +"<th>mean beats F</th><th>last run</th></tr></thead><tbody>"
+  +(st.board.length?st.board.map(r=>`<tr class="${r.who.includes('baseline')?'':'you'}">
+      <td>${r.who}</td><td class="n">${r.passed} / ${r.of}</td>
+      <td><div class="bar"><i style="width:${(r.passed/Math.max(1,r.of)*100)|0}%"></i></div></td>
+      <td class="n">${r.mean_f}</td><td class="n" style="color:var(--faint)">${r.when}</td></tr>`).join("")
+    :'<tr><td colspan="5" style="color:var(--faint)">nobody has run the ladder yet</td></tr>')
+  +"</tbody>";
+ $("maps").innerHTML="<thead><tr><th>song</th><th>who</th><th>how</th><th>beats</th>"
+  +"<th>sections</th><th>moments</th></tr></thead><tbody>"
+  +(st.maps.length?st.maps.map(m=>`<tr><td>${m.song}</td><td>${m.who}</td>
+      <td><span class="pill ${m.how==="hand-written"?"hum":"mod"}">${m.how}</span></td>
+      <td class="n">${m.beats}</td><td class="n">${m.sections}</td><td class="n">${m.moments}</td></tr>`).join("")
+    :'<tr><td colspan="6" style="color:var(--faint)">none handed in yet</td></tr>')
+  +"</tbody>";
+ $("verdicts").innerHTML=(st.verdicts||[]).length
+  ? st.verdicts.slice().reverse().map(v=>`<div>${v.when.slice(11,16)}  ${v.a} vs ${v.b}  →  ${v.said}</div>`).join("")
+  : '<div style="border:0;color:var(--faint)">none yet</div>';
+}
+function wire(){
+ const upd=()=>{ $("watch").href=`/rooms?song=${SONG}&left=${$("a").value}&d=${$("b").value}` };
+ $("a").onchange=upd; $("b").onchange=upd; upd();
+}
+for(const [id,said] of [["vA","left"],["vB","right"],["vT","tie"]])
+ $(id).onclick=async()=>{
+   await fetch(`/api/verdict?song=${SONG}&a=${$("a").value}&b=${$("b").value}&said=${said}`,{method:"POST"});
+   $("vsaid").textContent="recorded"; setTimeout(()=>$("vsaid").textContent="",1600); load();
+ };
+load(); setInterval(load,20000);
+</script></body></html>

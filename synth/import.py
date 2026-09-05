@@ -21,10 +21,37 @@ What this measures from your audio (not guessed):
 
 Audio never enters git. Keep the wav in synth/incoming/, which is ignored.
 """
-import json, math, os, sys, wave
+import hashlib, json, math, os, sys, wave
+
+
+def _sha(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""): h.update(chunk)
+    return h.hexdigest()
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CANON = ("drums", "bass", "other", "vocals", "guitar", "piano")
+
+
+def to_wav(path):
+    """Accept an mp3 and convert it once, because nobody exports 16-bit wav by hand.
+
+    The conversion is deterministic and the .wav lands next to the source, so
+    everyone who starts from the same mp3 gets the same samples. That matters:
+    two rips of one track have different encoder padding, and mp3 decoding alone
+    shifted a whole map by 50 ms the last time we measured it."""
+    if path.lower().endswith(".wav"): return path
+    out = os.path.splitext(path)[0] + ".wav"
+    if os.path.exists(out) and os.path.getmtime(out) >= os.path.getmtime(path): return out
+    import subprocess
+    print(f"  converting {os.path.basename(path)} -> 16-bit wav ...")
+    r = subprocess.run(["ffmpeg", "-nostdin", "-y", "-i", path, "-ac", "1",
+                        "-ar", "44100", "-sample_fmt", "s16", out],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        raise SystemExit("ffmpeg failed:\n" + r.stderr[-500:])
+    return out
 
 
 def read_wav(path):
@@ -60,6 +87,7 @@ def build(spec, base):
     wav = os.path.join(base, spec["audio"])
     if not os.path.exists(wav):
         raise SystemExit(f"cannot find {wav}")
+    wav = to_wav(wav)
     buf, sr = read_wav(wav)
     dur = len(buf) / sr
 
@@ -134,19 +162,34 @@ def build(spec, base):
         moments.append({**m, "note": (m.get("note", "") + " (authored by hand)").strip()})
     moments.sort(key=lambda m: m["at"])
 
-    return {
+    return wav, {
         "map": "0.3",
         "song": {"title": spec["title"], "artist": spec.get("artist", "limelight"),
                  "length": round(dur, 3)},
         "level": {"n": spec.get("level"), "teaches": spec.get("teaches", "")},
         "made_by": {
-            "how": "synthetic",
-            "who": "synth/import.py",
-            "why": "Authored by the person who wrote the song. Tempo, bar one and the section "
-                   "list come from them because they set those values; energy is measured from "
-                   "their audio. Nothing here was detected.",
-            "warning": "AUTHORED. An answer key, not evidence about how music behaves in general.",
-            "audio_sha_note": "The audio is not in git. Keep it in synth/incoming/.",
+            # A map for a record somebody else made is HAND-WRITTEN, not synthetic.
+            # Synthetic means the times are causes -- audio was rendered from them.
+            # Here a person listened and typed what they heard, which is a weaker
+            # claim, and the two must never look the same in a file.
+            "how": "hand-written" if spec.get("real") else "synthetic",
+            "who": spec.get("by") or "synth/import.py",
+            "why": ("Heard by a person and typed in. Tempo, bar one and the section list are what "
+                    "they believe; energy is measured from the audio. Beliefs and measurements are "
+                    "mixed here, which is why this is not truth."
+                    if spec.get("real") else
+                    "Authored by the person who wrote the song. Tempo, bar one and the section "
+                    "list come from them because they set those values; energy is measured from "
+                    "their audio. Nothing here was detected."),
+            "warning": ("HAND-WRITTEN. One person's reading of a record, good enough to build "
+                        "against and not good enough to grade against. To promote any of it to "
+                        "truth, verify it with the audio playing and follow truth/PROTOCOL.md."
+                        if spec.get("real") else
+                        "AUTHORED. An answer key, not evidence about how music behaves in general."),
+            "audio": os.path.basename(spec["audio"]),
+            "audio_sha256": _sha(wav)[:16],
+            "audio_note": "Audio is not in git. Everyone must start from the SAME file — two rips "
+                          "of one track differ by tens of milliseconds.",
         },
         "grid": {"period": round(beat, 6), "phase": first, "bpm": bpm, "bar_phase": 0,
                  "locked": True, "how": "authored: the tempo the song was written at"},
@@ -168,15 +211,16 @@ def build(spec, base):
 
 
 TEMPLATE = {
-    "title": "Night Drive",
-    "level": 11,
-    "teaches": "one line: what this song makes harder than the last one",
-    "audio": "night-drive.wav",
+    "title": "Levels",
+    "artist": "Avicii",
+    "real": True,
+    "by": "your name — you heard this, you own it",
+    "audio": "levels.mp3",
     "stems_dir": "",
-    "bpm": 124,
-    "first_downbeat": 0.512,
+    "bpm": 126,
+    "first_downbeat": 0.0,
     "beats_per_bar": 4,
-    "key": "F minor",
+    "key": "C# minor",
     "sections": [
         {"name": "intro", "bars": 8,  "plays": ["other"]},
         {"name": "verse", "bars": 16, "plays": ["other", "bass", "drums"]},
@@ -203,18 +247,25 @@ def main(argv):
         return 0
     p = argv[1]
     spec = json.load(open(p))
-    m = build(spec, os.path.dirname(os.path.abspath(p)))
+    wav, m = build(spec, os.path.dirname(os.path.abspath(p)))
     slug = spec.get("slug") or os.path.basename(p).replace(".song.json", "")
-    out = os.path.join(HERE, "songs", slug + ".map.json")
+    who = (spec.get("by") or "").split()[0].lower().strip(",") or None
+    # A hand-written reading of a real record is a CANDIDATE, not the answer key.
+    # It goes in maps/ beside everyone else's so it can be played against them.
+    if spec.get("real") and who:
+        out = os.path.join(HERE, "maps", f"{slug}.{who}.map.json")
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+    else:
+        out = os.path.join(HERE, "songs", slug + ".map.json")
     json.dump(m, open(out, "w"), indent=1)
     import shutil
-    shutil.copyfile(os.path.join(os.path.dirname(os.path.abspath(p)), spec["audio"]),
-                    os.path.join(HERE, "out", slug + ".wav"))
+    shutil.copyfile(wav, os.path.join(HERE, "out", slug + ".wav"))
     print(f"  {m['song']['title']}   {m['song']['length']}s   {m['grid']['bpm']} bpm   "
           f"{len(m['downbeats'])} bars   {len(m['moments'])} moments")
     print(f"  stems: {m['stems']['how']}")
     print(f"  energy: min {min(e[1] for e in m['energy']):.2f} max {max(e[1] for e in m['energy']):.2f}")
-    print(f"  wrote synth/songs/{slug}.map.json")
+    print(f"  audio sha256 {m['made_by']['audio_sha256']}  <- everyone must match this")
+    print(f"  wrote {os.path.relpath(out, os.path.dirname(HERE))}")
     return 0
 
 if __name__ == "__main__":

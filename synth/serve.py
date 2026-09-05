@@ -223,6 +223,30 @@ def songs_index():
                         "so the left room is correct by construction. "
                         + (lvl.get("teaches", "")),
             }
+    # Real records have no authored answer -- only whatever maps people have made.
+    # Discovered from an audio file in out/ plus at least one candidate in maps/.
+    md = os.path.join(HERE, "maps")
+    if os.path.isdir(md):
+        for f in sorted(os.listdir(md)):
+            if not f.endswith(".map.json"): continue
+            slug = f.split(".")[0]
+            if slug in out: continue
+            wav = os.path.join(HERE, "out", slug + ".wav")
+            if not os.path.exists(wav): continue
+            first = os.path.join(md, f)
+            try: mm = json.load(open(first))
+            except Exception: continue
+            en = [e[1] for e in mm.get("energy", [])] or [1.0]
+            out[slug] = {
+                "label": f"{slug}  ·  {mm.get('song', {}).get('title', slug)}  (real, no answer key)",
+                "map": first, "wav": wav, "canonical": False, "left": "a candidate map",
+                "teaches": "", "thin": (max(en) - min(en)) < 0.12,
+                "span": round(max(en) - min(en), 3),
+                "note": "A real record, so there is NO answer key — every map here is somebody's "
+                        "reading of it. Pick two people in the dropdowns and watch them disagree; "
+                        "where the rooms differ, one of them is wrong about the music, and the "
+                        "only referee is an ear.",
+            }
     if os.path.exists(os.path.join(NIGHTS, "the-nights.map.json")):
         out["the-nights"] = {
             "label": "the-nights  ·  real record, NOT canonical",
@@ -269,6 +293,74 @@ def song(which=None):
             "songs": {k: {"label": v["label"], "canonical": v["canonical"],
                           "left": v["left"], "note": v["note"],
                           "thin": v.get("thin", False)} for k, v in idx.items()}}
+
+
+def game():
+    """Tonight's board. Everything read from disk; nothing typed in."""
+    idx = songs_index()
+    song = "levels" if "levels" in idx else (sorted(idx)[0] if idx else "")
+    cands = {}
+    for k, v in candidate_maps(song).items():
+        if k == "authored": continue
+        try:
+            m = json.load(open(v["path"]))
+            cands[k] = {"how": (m.get("made_by") or {}).get("how", "?")}
+        except Exception:
+            cands[k] = {"how": "unreadable"}
+
+    board = []
+    rp = os.path.join(HERE, "RESULTS.tsv")
+    if os.path.exists(rp):
+        lines = [l for l in open(rp).read().strip().split("\n") if l]
+        if len(lines) > 1:
+            head = lines[0].split("\t"); ix = {k: i for i, k in enumerate(head)}
+            rows = [r.split("\t") for r in lines[1:]]
+            rows = [r for r in rows if len(r) == len(head)]
+            by = {}
+            for r in rows:
+                who = r[ix["listener"]].split("/")[-1].replace(".py", "")
+                key = r[ix.get("level", ix.get("case", 3))]
+                by.setdefault(who, {})[key] = r
+            for who, d in by.items():
+                passed = sum(1 for r in d.values() if "pass" in ix and r[ix["pass"]] == "1")
+                mean = sum(float(r[ix["beats_f"]]) for r in d.values()) / max(1, len(d))
+                when = max(r[ix["when"]] for r in d.values())
+                board.append({"who": who, "passed": passed, "of": len(d),
+                              "mean_f": round(mean, 3), "when": when[11:16]})
+            board.sort(key=lambda r: (-r["passed"], -r["mean_f"]))
+
+    maps = []
+    md = os.path.join(HERE, "maps")
+    if os.path.isdir(md):
+        for f in sorted(os.listdir(md)):
+            if not f.endswith(".map.json"): continue
+            parts = f[:-9].split(".")
+            try: m = json.load(open(os.path.join(md, f)))
+            except Exception: continue
+            secs = m.get("sections")
+            maps.append({"song": parts[0], "who": ".".join(parts[1:]) or "?",
+                         "how": (m.get("made_by") or {}).get("how", "?"),
+                         "beats": len(m.get("beats", [])),
+                         "sections": len(secs.get("entries", []) if isinstance(secs, dict) else (secs or [])),
+                         "moments": len(m.get("moments", []))})
+
+    verdicts = []
+    vp = os.path.join(HERE, "VERDICTS.tsv")
+    if os.path.exists(vp):
+        for l in open(vp).read().strip().split("\n"):
+            c = l.split("\t")
+            if len(c) >= 5: verdicts.append({"when": c[0], "song": c[1], "a": c[2],
+                                             "b": c[3], "said": c[4]})
+
+    dl = None
+    dp = os.path.join(HERE, "DEADLINE")
+    if os.path.exists(dp): dl = open(dp).read().strip()
+    title = ""
+    if song in idx:
+        try: title = json.load(open(idx[song]["map"]))["song"]["title"]
+        except Exception: pass
+    return {"song": song, "song_title": title, "deadline": dl, "candidates": cands,
+            "board": board, "maps": maps, "verdicts": verdicts[-12:]}
 
 
 def status():
@@ -625,6 +717,10 @@ class H(http.server.BaseHTTPRequestHandler):
                 return self._send(200, open(os.path.join(HERE, "portal.html")).read(),
                                   "text/html; charset=utf-8")
             if u.path == "/listen": return self._send(200, PAGE, "text/html; charset=utf-8")
+            if u.path == "/game":
+                return self._send(200, open(os.path.join(HERE, "game.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path == "/api/game": return self._send(200, json.dumps(game()))
             if u.path == "/api/status": return self._send(200, json.dumps(status()))
             if u.path == "/api/listeners2": return self._send(200, json.dumps(listeners_available()))
             if u.path == "/api/job":
@@ -689,6 +785,12 @@ class H(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urllib.parse.urlparse(self.path); q = urllib.parse.parse_qs(u.query)
+        if u.path == "/api/verdict":
+            p = {k: v[0] for k, v in q.items()}
+            with open(os.path.join(HERE, "VERDICTS.tsv"), "a") as fh:
+                fh.write(f"{time.strftime('%Y-%m-%dT%H:%M:%S')}\t{p.get('song','')}\t"
+                         f"{p.get('a','')}\t{p.get('b','')}\t{p.get('said','')}\n")
+            return self._send(200, json.dumps({"ok": True}))
         if u.path != "/api/run":
             return self._send(404, json.dumps({"error": "no route"}))
         params = {k: v[0] for k, v in q.items()}
