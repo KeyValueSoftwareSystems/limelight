@@ -31,6 +31,13 @@ SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
 
+const SONG_DRIVE = (function(){
+  const bpm = 60/Math.max(0.05, PER);
+  const ev = (MAP.accents && MAP.accents.events) || [];
+  const rate = DUR>0 ? ev.length/DUR : 0;
+  return cl(0.5*ss(84,128,bpm) + 0.5*ss(3.4,7.0,rate));
+})();
+
 const bi=t=>{let lo=0,hi=BEATS.length-1,r=-1;while(lo<=hi){const m=(lo+hi)>>1;
   if(BEATS[m]<=t){r=m;lo=m+1}else hi=m-1}return r};
 const bph=t=>{const i=bi(t);return i<0?0:cl((t-BEATS[i])/PER)};
@@ -126,10 +133,67 @@ function escal(t){
    pan      : the mix's own left-right balance drives the rig's balance
    melody   : the smoothed pitch contour drifts the hue, so the light follows the tune
    brightness: timbre whitens the colour, because bright is not the same as loud   */
-const OBS=(()=>{const o=MAP.obs||{},n=MAP.observations||{},out={};
-  for(const k in o) if(k!=='at') out[k]={at:o.at||[],value:o[k]};
-  for(const k in n){const c=n[k]; if(c&&c.at&&c.value) out[k]={at:c.at,value:c.value};}
-  return out})();
+const OBS=(function(){
+  const out={}, num=v=>typeof v==='number'&&isFinite(v);
+  const put=(k,at,val)=>{ if(at&&val&&at.length&&val.length&&at.length===val.length) out[k]={at:at,value:val} };
+  function fill(vals){
+    const f=vals.slice(); let seen=null;
+    for(let i=0;i<f.length;i++){ if(num(f[i])) seen=f[i]; else f[i]=seen }
+    if(seen===null) return null;
+    let first=null; for(let i=0;i<f.length;i++) if(num(f[i])){first=f[i];break}
+    for(let i=0;i<f.length;i++) if(!num(f[i])) f[i]=first;
+    return f;
+  }
+  function norm(vals){
+    const f=fill(vals); if(!f) return null;
+    let lo=Infinity,hi=-Infinity; for(const v of f){ if(v<lo)lo=v; if(v>hi)hi=v }
+    return (hi>lo) ? f.map(v=>(v-lo)/(hi-lo)) : f.map(()=>0.5);
+  }
+  function gridFor(rate,n){
+    const bar=4*PER;
+    if((rate==='per_bar'||rate==='per_downbeat') && EN && EN.length===n) return EN.map(p=>p[0]);
+    const per = rate==='per_sixteenth'?PER/4 : rate==='per_eighth'?PER/2
+              : rate==='per_beat'?PER : (rate==='per_bar'||rate==='per_downbeat')?bar : PER;
+    const a=new Array(n); for(let i=0;i<n;i++) a[i]=PH+i*per; return a;
+  }
+  const legacy=MAP.obs||{};
+  for(const k in legacy) if(k!=='at') put(k, legacy.at||[], legacy[k]);
+  const n=MAP.observations||{};
+  for(const k in n){
+    const c=n[k]; if(!c||typeof c!=='object'||Array.isArray(c)) continue;
+    if(Array.isArray(c.at)&&Array.isArray(c.value)){ put(k,c.at,c.value); continue }
+    if(Array.isArray(c.notes)){ const v=norm(c.notes); if(v) put(k, gridFor(c.rate,v.length), v); continue }
+    if(c.mix){
+      if(Array.isArray(c.mix.pan)){ const v=fill(c.mix.pan); if(v) put('pan', gridFor(c.rate,v.length), v) }
+      if(Array.isArray(c.mix.width)){ const v=norm(c.mix.width); if(v) put('width', gridFor(c.rate,v.length), v) }
+    }
+    if(c.sources&&typeof c.sources==='object'){
+      let len=0;
+      for(const q in c.sources) if(Array.isArray(c.sources[q])) len=Math.max(len,c.sources[q].length);
+      if(!len) continue;
+      const acc=new Array(len).fill(0), cnt=new Array(len).fill(0);
+      for(const q in c.sources){ const arr=c.sources[q]; if(!Array.isArray(arr)) continue;
+        for(let i=0;i<arr.length;i++) if(num(arr[i])){ acc[i]+=arr[i]; cnt[i]++ } }
+      const v=norm(acc.map((x,i)=>cnt[i]?x/cnt[i]:null));
+      if(v) put(k==='brightness'?'brite':k, gridFor(c.rate,len), v);
+    }
+  }
+  return out;
+})();
+const CHORD_AT=(function(){
+  const c=(MAP.observations&&MAP.observations.chords&&MAP.observations.chords.events)||[];
+  return c.map(x=>x.at).filter(x=>typeof x==='number').sort((a,b)=>a-b);
+})();
+const WORDS=(function(){
+  const w=(MAP.observations&&MAP.observations.lyrics&&MAP.observations.lyrics.words)||[];
+  return w.filter(x=>x&&typeof x.at==='number').sort((a,b)=>a.at-b.at);
+})();
+function lastAtOrBefore(arr,t,key){
+  let lo=0,hi=arr.length-1,k=-1;
+  while(lo<=hi){const m=(lo+hi)>>1; const v=key?arr[m][key]:arr[m];
+    if(v<=t){k=m;lo=m+1}else hi=m-1}
+  return k;
+}
 function obsAt(k,t,dflt){
   const c=OBS[k]; if(!c) return dflt;
   const v=c.value, at=c.at;
@@ -142,6 +206,21 @@ const meloAt  =t=>obsAt('melody',t,0.5);
 const briteAt =t=>obsAt('brite',t,0.5);
 const meloDrift=t=>cl((meloAt(t)-0.5)*2,-1,1);
 const harmAt  =t=>obsAt('harmony',t,0);
+function chordTurn(t){
+  if(!CHORD_AT.length) return harmAt(t);
+  const k=lastAtOrBefore(CHORD_AT,t);
+  if(k<0) return 0;
+  return 1-ss(0,Math.max(0.15,PER),t-CHORD_AT[k]);
+}
+function sung(t){
+  if(!WORDS.length) return 0;
+  const k=lastAtOrBefore(WORDS,t,'at');
+  if(k<0) return 0;
+  const w=WORDS[k], to=(typeof w.to==='number'&&w.to>w.at)?w.to:w.at+0.22;
+  if(t>=to) return 0;
+  const d=to-w.at;
+  return cl(ss(0,Math.min(0.05,d*0.3),t-w.at)*(1-0.45*ss(0,d,t-w.at)));
+}
 const voxAt   =t=>obsAt('voice',t,0.5);
 
 const chIdx=t=>{let j=0;for(let i=0;i<CH.length;i++)if(CH[i][0]<=t)j=i;else break;return j};
@@ -264,13 +343,29 @@ const LIMT = (LAYOUT.limits&&LAYOUT.limits.max_tilt_per_s)||0.95;
    constant, honestly labelled, in place of an analysis that is not finished. */
 const SLEW_HEADROOM=0.68;
 const SLEW_CAP=Math.max(0.30,Math.min(1.0,0.60*(LIMP/0.85)*K.motion))*SLEW_HEADROOM;
+const LOOK_MOVE = {intro:2.1, quiet:2.0, idle:2.1, verse:1.45, break:1.7,
+                   build:1.0, drop:0.66, outro:2.1, spotlight:1.9, flash:0.66};
+const MOVE_XF = 3.0;
+const scaleOf = nm => { const m = LOOK_MOVE[nm]; return (m===undefined?1.25:m); };
+function moveScaleAt(t){
+  const drive = lerp(1.8, 1.0, SONG_DRIVE);
+  if(!CH.length) return 1.25*drive;
+  const j = chIdx(t);
+  let v = scaleOf(CH[j][1]);
+  if(j > 0){
+    const w = ss(0, MOVE_XF, t - CH[j][0]);
+    if(w < 1) v = lerp(scaleOf(CH[j-1][1]), v, w);
+  }
+  return v*drive;
+}
 const MPH = (function(){
   // the table is built from a 4-downbeat moving average, matching eMotion
   if(!EN || !EN.length) return null;      // a map may carry no energy at all
   const sm=EN.map((p,i)=>{let s=0,n=0;
     for(let k=-3;k<=1;k++){const j=i+k; if(j<0||j>=EN.length)continue; s+=EN[j][1]; n++}
     return n?s/n:p[1]});
-  const ts=EN.map(p=>p[0]), rs=sm.map(v=>rateAt(v)), cum=[0];
+  const ts=EN.map(p=>p[0]);
+  const rs=sm.map((v,i)=>2*Math.PI/(movePeriod(v)*moveScaleAt(ts[i]))), cum=[0];
   for(let i=0;i<ts.length-1;i++) cum.push(cum[i]+rs[i]*(ts[i+1]-ts[i]));
   return {ts,rs,cum}})();
 function motionPhase(t){
@@ -351,12 +446,6 @@ const ROLES = {
   build:['hot','lead'],  drop :['lead','hot'],  outro:['cool','deep'],
   quiet:['deep','cool'], spotlight:['lead','hot'],
 };
-const SONG_DRIVE = (function(){
-  const bpm = 60/Math.max(0.05, PER);
-  const ev = (MAP.accents && MAP.accents.events) || [];
-  const rate = DUR>0 ? ev.length/DUR : 0;
-  return cl(0.5*ss(84,128,bpm) + 0.5*ss(3.4,7.0,rate));
-})();
 const HOT_OK = SONG_DRIVE > 0.45;
 const STROBE_GAIN = ss(0.25, 0.60, SONG_DRIVE);
 const STROBE_HZ   = lerp(0.40, 1.0, SONG_DRIVE);
@@ -493,7 +582,7 @@ function fixColour(t,L,kind,xn,e){
   if(L==='stop')  return [0,0,0];
   if(L==='flash') return [255,252,244];
   const bri=briteAt(t), XFC=1.9, j=chIdx(t);
-  const dr=meloDrift(t), hm=harmAt(t), P=palAt(t);
+  const dr=meloDrift(t), hm=chordTurn(t), P=palAt(t);
   const pick=(roles)=>{
     let role, alt;
     if(kind==='up'){ role='deep'; alt=roles[1] }
@@ -776,7 +865,7 @@ function lookFrame(t,L){
      A depends on t only through eM, and eM is a 5-tap average of a piecewise
      linear curve, so |eM'| is bounded by EMAX -- computable once from the map.
      Solving for A gives a guaranteed bound rather than a hopeful one. */
-  const om=rateAt(eM), duty=Math.max(0.20,1-dw), S=1.5;
+  const om=2*Math.PI/(movePeriod(eM)*moveScaleAt(t)), duty=Math.max(0.20,1-dw), S=1.5;
   const thp=om*S/duty;                              // peak phase rate
   const ampP=Math.max(0.02,(LIMP-DADE*EMAX)/thp);   // pan  budget, proven
   const ampT=Math.max(0.02,(LIMT-DADE*EMAX)/(2*thp));// tilt runs at 2x in the sway shape
@@ -825,14 +914,14 @@ function lookFrame(t,L){
     else if(L==='flash'){lv=1}
     else if(L==='spotlight'){
       const near=Math.abs(G.xn-0.5);
-      const voc=Math.max(stem('vocals',t), voxAt(t));
+      const voc=Math.max(stem('vocals',t), voxAt(t), sung(t));
       lv = near<=CENTRE_PAIR ? (0.30+0.62*voc)*(1-0.5*near/Math.max(1e-6,CENTRE_PAIR)) : 0.0}
     else{
       const lead=(((bx%2)+2)%2===0)?G.outer:!G.outer;   // outer pair, then inner pair
       // a small positional term, so the four heads are never identical even
       // between accents -- in a real rig no two fixtures read the same
       const base=(0.11+0.26*e)*(0.86+0.28*sym(G.xn));
-      const lamp=(L==='drop'?0.30+0.44*e:0.18+0.36*e)*(0.84+0.28*voxAt(t));
+      const lamp=(L==='drop'?0.30+0.44*e:0.18+0.36*e)*(0.84+0.28*Math.max(voxAt(t),sung(t)));
       lv=base*EX.arc+lamp*A*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5);
       if(L==='build') lv*=lerp(0.25,1,layer(2));
       if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(t/(4*BAR))));
