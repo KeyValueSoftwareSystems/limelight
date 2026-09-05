@@ -1,0 +1,240 @@
+<title>Limelight · stage</title>
+<style>
+:root{--bg:#08090d;--pan:#12151d;--rule:#232838;--rule2:#333b4c;--ink:#e6e9f1;
+      --mut:#8f98ad;--faint:#666c7e;--tung:#f0a93c;--good:#54c98a;--bad:#e8705a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden;
+     display:flex;flex-direction:column;font:13px ui-sans-serif,system-ui,sans-serif}
+header{display:flex;gap:9px;align-items:center;padding:7px 11px;background:var(--pan);
+       border-bottom:1px solid var(--rule);flex:0 0 auto;flex-wrap:wrap}
+h1{font:600 12px ui-monospace,monospace;margin:0;letter-spacing:.08em;
+   text-transform:uppercase;color:var(--tung)}
+select,button{background:#1d222e;color:var(--ink);border:1px solid var(--rule2);
+  border-radius:4px;padding:4px 9px;font:12px ui-monospace,monospace;cursor:pointer}
+button.on{background:var(--tung);color:#20160a;border-color:var(--tung);font-weight:700}
+label{color:var(--faint);font:10px ui-monospace,monospace;letter-spacing:.08em;
+      text-transform:uppercase}
+#wrap{flex:1 1 0;position:relative;min-height:0}
+canvas{display:block}
+#hud{position:absolute;left:11px;bottom:11px;font:11px ui-monospace,monospace;
+     color:var(--mut);background:rgba(8,9,13,.72);padding:6px 9px;border-radius:4px;
+     border:1px solid var(--rule);pointer-events:none;line-height:1.6}
+#hud b{color:var(--tung)}
+footer{flex:0 0 auto;display:flex;gap:10px;align-items:center;padding:6px 11px;
+       background:var(--pan);border-top:1px solid var(--rule)}
+audio{height:32px;flex:1 1 auto}
+#err{position:absolute;inset:0;display:none;place-items:center;text-align:center;
+     padding:40px;font:14px ui-monospace,monospace;color:var(--bad);line-height:1.7}
+</style>
+
+<header>
+  <h1>stage</h1>
+  <select id="song"></select>
+  <label>rung</label><select id="rung"></select>
+  <button id="solo" title="run this rung on its own">solo</button>
+  <label>energy</label>
+  <select id="drive"><option>low</option><option selected>medium</option><option>high</option></select>
+  <label>colour</label>
+  <select id="pal"><option selected>garrix</option><option>garrix-red</option>
+    <option>sunset</option><option>ice</option><option>neon</option><option>amber</option>
+    <option>white</option></select>
+  <label>view</label>
+  <select id="cam"><option>audience</option><option>side</option><option>above</option></select>
+  <span style="flex:1"></span>
+  <span id="stat" style="color:var(--faint);font:11px ui-monospace,monospace"></span>
+</header>
+
+<div id="wrap"><div id="err"></div></div>
+<footer><audio id="aud" controls preload="auto"></audio></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const Q=new URLSearchParams(location.search);
+const fail=m=>{ $("err").style.display="grid"; $("err").innerHTML=m; };
+
+/* ---------------------------------------------------------------------------
+   A room, not a row of circles.
+
+   The 2D panel answered "what level is this lamp" and that is the wrong question
+   once the show has gestures in it. A drop is the darkness before it; a build is
+   the rig narrowing; the tune walking the row only reads if you can see the row
+   in space. None of those survive being drawn as five discs.
+
+   So: the actual room from the layout file -- six metres by five, 3.4 high -- with
+   the beams drawn as cones through haze, because a beam you can see in the air is
+   the entire reason a club rig has haze in it. Same reader as every other page,
+   so this cannot drift from what the checks measure.
+--------------------------------------------------------------------------- */
+if(typeof THREE==="undefined"){
+  fail("three.js did not load.<br><br>It comes from cdnjs, so this page needs "
+     + "the internet the first time.<br>Everything else in Limelight works offline.");
+}
+
+let RM=null, MAP=null, LAY=null, F=null, SONG="", RUNGS=[];
+let STEP=7, SOLO=false, DRIVE="medium", PAL="garrix";
+let scene, cam, renderer, fixtures=[], clock=0;
+const V=THREE?THREE.Vector3:null;
+
+function build(){
+  const W=$("wrap"), w=W.clientWidth, h=W.clientHeight;
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(2,devicePixelRatio));
+  renderer.setSize(w,h); W.appendChild(renderer.domElement);
+  scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x05060a, 0.055);
+  cam=new THREE.PerspectiveCamera(52, w/h, 0.1, 100);
+
+  const S=LAY.size_m||{w:6,d:5,h:3.4};
+  // floor, back wall, and just enough side wall to catch a beam
+  const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.95,metalness:0});
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(S.w*2,S.d*2), mat(0x0d0f15));
+  floor.rotation.x=-Math.PI/2; floor.position.set(S.w/2,0,S.d/2); scene.add(floor);
+  const back=new THREE.Mesh(new THREE.PlaneGeometry(S.w*1.6,S.h*1.6), mat(0x0b0d13));
+  back.position.set(S.w/2,S.h*0.8,S.d+0.05); back.rotation.y=Math.PI; scene.add(back);
+  scene.add(new THREE.AmbientLight(0x22262f, 0.5));
+
+  // the truss the pars hang on, so the row reads as a row
+  const truss=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,S.w+0.6,10),
+                             new THREE.MeshStandardMaterial({color:0x2a2f3c,roughness:.6,metalness:.7}));
+  truss.rotation.z=Math.PI/2; truss.position.set(S.w/2,3.05,4.6); scene.add(truss);
+
+  for(const f of (LAY.fixtures||[])){
+    if(f.kind==="fog") continue;
+    const at=f.at||[S.w/2,3,4.6];
+    const g=new THREE.Group(); g.position.set(at[0],at[1],at[2]); scene.add(g);
+    const body=new THREE.Mesh(
+      f.kind==="head" ? new THREE.SphereGeometry(0.11,16,12)
+                      : new THREE.CylinderGeometry(0.09,0.11,0.22,14),
+      new THREE.MeshStandardMaterial({color:0x1b1f29,roughness:.5,metalness:.6}));
+    if(f.kind!=="head") body.rotation.x=Math.PI/2;
+    g.add(body);
+    // three nested cones: wide and faint, then narrower, then a core. Real
+    // scattering falls off across the beam and one flat cone reads as plastic.
+    const deg=(f.beam_deg||24)*Math.PI/180, len=f.kind==="head"?7.5:5.4;
+    const cones=[[1.6,0.055],[1.0,0.13],[0.45,0.42]].map(([k,a])=>{
+      const r=Math.tan(deg/2)*len*k;
+      const m=new THREE.Mesh(new THREE.ConeGeometry(r,len,26,1,true),
+        new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,
+          blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+      m.geometry.translate(0,-len/2,0);      // apex at the lamp
+      m.userData.alpha=a; g.add(m); return m;
+    });
+    const lens=new THREE.Mesh(new THREE.SphereGeometry(0.075,14,10),
+      new THREE.MeshBasicMaterial({color:0x000000}));
+    lens.position.y=-0.02; g.add(lens);
+    // where the beam lands
+    const pool=new THREE.Mesh(new THREE.CircleGeometry(Math.tan(deg/2)*len*1.1,28),
+      new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,
+        blending:THREE.AdditiveBlending,depthWrite:false}));
+    pool.rotation.x=-Math.PI/2; pool.position.y=0.012; scene.add(pool);
+    fixtures.push({def:f,g,cones,lens,pool,len});
+  }
+  place();
+  addEventListener("resize",()=>{ const w=W.clientWidth,h=W.clientHeight;
+    renderer.setSize(w,h); cam.aspect=w/h; cam.updateProjectionMatrix(); place() });
+}
+
+function place(){
+  const S=LAY.size_m||{w:6,d:5,h:3.4}, mode=$("cam").value;
+  if(mode==="above"){ cam.position.set(S.w/2, 8.5, S.d/2+0.01); cam.lookAt(S.w/2,0,S.d/2) }
+  else if(mode==="side"){ cam.position.set(-3.4, 2.2, 1.6); cam.lookAt(S.w/2,1.4,S.d*0.7) }
+  else { cam.position.set(S.w/2, 1.62, -3.1); cam.lookAt(S.w/2, 1.5, S.d*0.8) }
+}
+
+/* aim: pars are fixed and rake down the floor; heads obey pan and tilt */
+function aim(fx, o){
+  const at=fx.def.at, S=LAY.size_m;
+  let target;
+  if(fx.def.kind==="head" && o && o.pan!==undefined){
+    const pan=(o.pan-0.5)*Math.PI*1.5, tilt=0.25+ (o.tilt!==undefined?o.tilt:0.5)*1.1;
+    target=new THREE.Vector3(at[0]+Math.sin(pan)*6, at[1]-Math.cos(tilt*0.9)*6,
+                             at[2]-Math.cos(pan)*4.0);
+  } else {
+    const i=fixtures.indexOf(fx), n=fixtures.filter(f=>f.def.kind==="par").length||1;
+    target=new THREE.Vector3(at[0]*0.82+S.w*0.09, 0, S.d*0.30);
+  }
+  const dir=target.clone().sub(new THREE.Vector3(...at)).normalize();
+  const q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,-1,0), dir);
+  fx.g.quaternion.copy(q);
+  const hit=new THREE.Vector3(...at).add(dir.clone().multiplyScalar(fx.len));
+  fx.pool.position.set(hit.x, 0.012, hit.z);
+}
+
+function render(t){
+  if(!F) return;
+  const fr=F(t);
+  const by={}; for(const o of fr.fixtures) by[o.id]=o;
+  let haze=0;
+  for(const o of fr.fixtures) if(/^fog/.test(o.id)) haze=Math.max(haze,o.level||0);
+  for(const fx of fixtures){
+    const o=by[fx.def.id]||{}, L=Math.max(0, Math.min(1, o.level||0));
+    const c=new THREE.Color((o.r!==undefined?o.r:255)/255,
+                            (o.g!==undefined?o.g:255)/255,
+                            (o.b!==undefined?o.b:255)/255);
+    aim(fx,o);
+    for(const m of fx.cones){
+      m.material.color.copy(c);
+      m.material.opacity = Math.pow(L,0.8) * m.userData.alpha * (0.45 + 0.55*Math.min(1,haze+0.5));
+    }
+    fx.lens.material.color.copy(c).multiplyScalar(Math.min(1, 0.15 + L));
+    fx.pool.material.color.copy(c);
+    fx.pool.material.opacity = L*0.22;
+  }
+  renderer.render(scene,cam);
+}
+
+function rebuild(){
+  if(!RM||!MAP||!LAY) return;
+  F=RM.mkReader(MAP, LAY, DRIVE, PAL, STEP, null, SOLO?STEP:0);
+  const r=RUNGS[STEP-1];
+  $("hud").innerHTML=`<b>${STEP}. ${r?r.name:""}</b>${SOLO?" · on its own":""}<br>`
+    +`${r?r.adds:""}<br><span style="color:var(--faint)">${LAY.fixtures.length} fixtures`
+    +` · ${DRIVE} · ${PAL}</span>`;
+}
+
+(async()=>{
+ try{
+  if(typeof THREE==="undefined") return;
+  const cr=await fetch("/static/checks.js");
+  if(!cr.ok) throw new Error("the server is out of date -- restart python3 synth/serve.py");
+  new Function(await cr.text()+"\n;window.RUNGS=RUNGS;")();
+  RUNGS=window.RUNGS;
+  const RECIPE=await (await fetch("/static/recipe_steps.js")).text();
+  const ROOMJS=await (await fetch("/static/room.js")).text();
+  RM=new Function("RECIPE",ROOMJS+"\n;return {mkReader,prep};")(RECIPE);
+  SONG=Q.get("song")||"levels";
+  const sg=await (await fetch("/api/song?song="+SONG)).json();
+  LAY=(sg.layouts||{}).small||(sg.layouts||{}).beat;
+  const G=await (await fetch("/api/maps?song="+SONG)).json();
+  SONG=G.song; MAP=G.maps.answer||Object.values(G.maps)[0];
+  $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>
+    `<option value="${k}"${k===SONG?" selected":""}>${v}</option>`).join("");
+  $("song").onchange=e=>location.href=`/stage?song=${e.target.value}`;
+  $("rung").innerHTML=RUNGS.map(r=>`<option value="${r.n}">${r.n}. ${r.name}</option>`).join("");
+  STEP=parseInt(Q.get("step")||"",10)||RUNGS.length;
+  $("rung").value=STEP;
+  $("rung").onchange=e=>{ STEP=+e.target.value; rebuild() };
+  $("solo").onclick=()=>{ SOLO=!SOLO; $("solo").classList.toggle("on",SOLO); rebuild() };
+  $("drive").onchange=e=>{ DRIVE=e.target.value; rebuild() };
+  $("pal").onchange=e=>{ PAL=e.target.value; rebuild() };
+  $("cam").onchange=()=>place();
+  const hud=document.createElement("div"); hud.id="hud"; $("wrap").appendChild(hud);
+  build(); rebuild();
+  $("aud").src=`/api/audio?song=${SONG}`;
+  const qt=parseFloat(Q.get("t")||"");
+  if(isFinite(qt)) $("aud").addEventListener("loadedmetadata",
+    ()=>{ $("aud").currentTime=qt },{once:true});
+  $("stat").textContent="ready";
+  /* ?at= freezes the stage on one instant with no audio, so a moment can be
+     linked, screenshotted or compared side by side. ?t= still seeks the player. */
+  const frozen=parseFloat(Q.get("at")||"");
+  if(isFinite(frozen)){
+    $("stat").textContent="frozen at "+frozen.toFixed(2)+"s";
+    (function loop(){ render(frozen); requestAnimationFrame(loop) })();
+  } else {
+    (function loop(){ render($("aud").currentTime); requestAnimationFrame(loop) })();
+  }
+ }catch(e){ fail("This page could not start.<br><br>"+String(e.message||e)) }
+})();
+</script>

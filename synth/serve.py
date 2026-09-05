@@ -884,6 +884,9 @@ class H(http.server.BaseHTTPRequestHandler):
             if u.path == "/analyse":
                 return self._send(200, open(os.path.join(HERE, "analyse.html")).read(),
                                   "text/html; charset=utf-8")
+            if u.path == "/stage":
+                return self._send(200, open(os.path.join(HERE, "stage.html")).read(),
+                                  "text/html; charset=utf-8")
             if u.path == "/build":
                 return self._send(200, open(os.path.join(HERE, "build.html")).read(),
                                   "text/html; charset=utf-8")
