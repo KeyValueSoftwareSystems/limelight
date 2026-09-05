@@ -148,7 +148,14 @@ const MAP = __MAP__;
 const MAP_FULL = __MAPFULL__;
 const LAYOUTS = __LAYOUTS__;
 const VEC_B64 = '__VECB64__';
-let LAYOUT = LAYOUTS[Object.keys(LAYOUTS)[0]];
+let LAYOUT = (function(){
+  const ks = Object.keys(LAYOUTS);
+  for(const k of ks) if(LAYOUTS[k] && LAYOUTS[k].default) return LAYOUTS[k];
+  let best = ks[0];
+  for(const k of ks)
+    if(((LAYOUTS[k]||{}).fixtures||[]).length > ((LAYOUTS[best]||{}).fixtures||[]).length) best = k;
+  return LAYOUTS[best];
+})();
 const $ = s => document.querySelector(s);
 let PER=MAP.period, PH=MAP.phase, DUR=MAP.dur, DBP=MAP.bar_phase;
 const BAR=4*PER;
@@ -159,6 +166,7 @@ let EN=MAP.energy;
 let STOP_REAL=true, ANT=true, HAZE=0.28, DRIFT=true, VIEW=0, QUAL=1, MODE=0;
 __RECIPE__
 __DRONES__
+__ROOM__
 __RENDER__
 __SKY__
 __SCORELANES__

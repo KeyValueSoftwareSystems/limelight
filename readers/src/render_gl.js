@@ -822,6 +822,7 @@ document.addEventListener('fullscreenchange',function(){setTimeout(function(){fi
 function setView(i){VIEW=i;[0,1,2,3].forEach(j=>{const b=$('#v'+j);if(b)b.classList.toggle('on',i===j)});
   CAM={...VIEWS[i]};
   if(typeof render==='function')render()}
+let ROOMJS=true;
 function drawRoom(f){
   if(RMODE==='gl'){
     try{drawRoomGL(f);GLSTRIKE=0}
@@ -834,7 +835,13 @@ function drawRoom(f){
         note('bloom off — postprocessing failed')}
       else if(GLSTRIKE>5) to2D('webgl render failed — 2D fallback')}
     return}
-  if(RMODE==='2d'){drawRoom2D(f);return}
+  if(RMODE==='2d'){
+    const LR=(typeof window!=='undefined')&&window.LimelightRoom;
+    if(ROOMJS&&LR&&LR.drawRoom){
+      try{ LR.drawRoom(cv,f,LAYOUT); window.__haze=hazeAt(f.t); return }
+      catch(err){ ROOMJS=false; console.error(err); note('room.js failed — built-in 2D') }
+    }
+    drawRoom2D(f);return}
   window.__haze=hazeAt(f.t)}          // still loading: the HUD keeps working
 
 /* ---------- choosing a renderer ---------- */
