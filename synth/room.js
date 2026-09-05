@@ -64,7 +64,19 @@ function drawRoom(cv, fr, layout){
   const floorY = Hpx * 0.80;
   const sy = v => floorY - (v/(size.h||3.4)) * (floorY - Hpx*0.06);
   const ppm = (W - 2*pad) / (size.w || 8);
-  const gk = Math.max(0.30, Math.min(1.4, ppm / 200));
+  const lamps = (layout.fixtures||[]).filter(f=>f.kind!=="fog");
+  let near = [];
+  for(let i=0;i<lamps.length;i++){
+    let best=Infinity;
+    for(let j=0;j<lamps.length;j++){ if(i===j) continue;
+      const dx=(lamps[i].at[0]-lamps[j].at[0])*ppm;
+      const dy=(lamps[i].at[1]-lamps[j].at[1])*ppm;
+      const d=Math.hypot(dx,dy); if(d>0.5 && d<best) best=d; }
+    if(isFinite(best)) near.push(best);
+  }
+  near.sort((a,b)=>a-b);
+  const spacing = near.length ? near[Math.floor(near.length/2)] : 60;
+  const gk = Math.max(0.50, Math.min(1.8, spacing / 43));
 
   const by = {}; for(const o of fr.fixtures) by[o.id] = o;
   const C = o => [o.r!==undefined?o.r:255, o.g!==undefined?o.g:255, o.b!==undefined?o.b:255];
@@ -134,7 +146,7 @@ function drawRoom(cv, fr, layout){
     const gl = g.createRadialGradient(px,py,0,px,py,16 + 26*L);
     gl.addColorStop(0, `rgba(${r},${gr},${b},${Math.min(0.95,0.85*L).toFixed(3)})`);
     gl.addColorStop(1, `rgba(${r},${gr},${b},0)`);
-    g.fillStyle = gl; g.beginPath(); g.arc(px,py,Math.max(2,(16+26*L)*gk),0,6.2832); g.fill();
+    g.fillStyle = gl; g.beginPath(); g.arc(px,py,Math.max(5,(18+34*L)*gk),0,6.2832); g.fill();
   }
   g.globalCompositeOperation = "source-over";
 
