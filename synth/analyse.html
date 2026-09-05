@@ -65,6 +65,8 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
   <select id="drive"><option>low</option><option selected>medium</option><option>high</option></select>
   <label for="palette">colour</label>
   <select id="palette"><option>sunset</option><option>ice</option><option>neon</option><option>amber</option></select>
+  <label for="rig">rig</label>
+  <select id="rig"></select>
   <button id="beatonly">beats only</button>
   <button id="tool-sec" class="on">sections</button>
   <button id="tool-mom">moments</button>
@@ -150,9 +152,22 @@ const mkRM=r=>new Function("RECIPE",
    Six things were moving at once, and only one of them was the beat, so a late
    look could not be traced to what was late. Here a beat that looks wrong is the
    grid, not the recipe. */
+let RIG = new URLSearchParams(location.search).get("rig")
+       || localStorage.getItem("limelight.rig") || "";
 const pickLayout=()=> BEATONLY
   ? (LAYOUTS.beat || LAYOUTS.small || Object.values(LAYOUTS)[0])
-  : (LAYOUTS.small || LAYOUTS.club || Object.values(LAYOUTS)[0]);
+  : (LAYOUTS[RIG] || LAYOUTS.small || LAYOUTS.club || Object.values(LAYOUTS)[0]);
+function fillRigs(){
+  const e=$("rig"); if(!e) return;
+  const names=Object.keys(LAYOUTS).sort((a,b)=>
+    (LAYOUTS[b].fixtures||[]).length-(LAYOUTS[a].fixtures||[]).length);
+  if(!LAYOUTS[RIG]) RIG = names.includes("festival") ? "festival" : (names[0]||"");
+  e.innerHTML = names.map(n=>`<option value="${n}"${n===RIG?" selected":""}>`
+    +`${n} · ${(LAYOUTS[n].fixtures||[]).length}</option>`).join("");
+  e.onchange = ev => { RIG = ev.target.value;
+    localStorage.setItem("limelight.rig", RIG);
+    LAY = pickLayout(); rebuildShow(); };
+}
 function setBeatOnly(on){
   BEATONLY=on; RM=mkRM(on?RECIPE_BEAT:RECIPE); LAY=pickLayout();
   const b=$("beatonly"); if(b){ b.classList.toggle("on",on);
@@ -657,6 +672,7 @@ function drawRoom(){
     localStorage.setItem("limelight.drive",DRIVE); rebuildShow() };
   $("viewtog").onclick=()=>{ VIEWMODE = VIEWMODE==="fixtures" ? "room" : "fixtures";
     $("viewtog").textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view" };
+  fillRigs(); LAY=pickLayout();
   $("palette").value=PALETTE;
   $("beatonly").onclick=()=>setBeatOnly(!BEATONLY);
   if(BEATONLY) setBeatOnly(true);

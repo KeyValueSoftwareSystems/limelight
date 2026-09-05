@@ -61,6 +61,8 @@ function drawRoom(cv, fr, layout){
   const sx = v => pad + (v/size.w) * (W - 2*pad);
   const floorY = Hpx * 0.80;
   const sy = v => floorY - (v/(size.h||3.4)) * (floorY - Hpx*0.06);
+  const ppm = (W - 2*pad) / (size.w || 8);
+  const gk = Math.max(0.30, Math.min(1.4, ppm / 200));
 
   const by = {}; for(const o of fr.fixtures) by[o.id] = o;
   const C = o => [o.r!==undefined?o.r:255, o.g!==undefined?o.g:255, o.b!==undefined?o.b:255];
@@ -130,7 +132,7 @@ function drawRoom(cv, fr, layout){
     const gl = g.createRadialGradient(px,py,0,px,py,16 + 26*L);
     gl.addColorStop(0, `rgba(${r},${gr},${b},${Math.min(0.95,0.85*L).toFixed(3)})`);
     gl.addColorStop(1, `rgba(${r},${gr},${b},0)`);
-    g.fillStyle = gl; g.beginPath(); g.arc(px,py,16+26*L,0,6.2832); g.fill();
+    g.fillStyle = gl; g.beginPath(); g.arc(px,py,Math.max(2,(16+26*L)*gk),0,6.2832); g.fill();
   }
   g.globalCompositeOperation = "source-over";
 
@@ -151,7 +153,7 @@ function drawRoom(cv, fr, layout){
     if(f.kind==="fog") continue;
     const o = by[f.id], px = sx(f.at[0]), py = sy(f.at[1]);
     g.fillStyle = lit(o) ? "#0c0e14" : "#151924";
-    g.beginPath(); g.arc(px,py,f.kind==="head"?4.6:3.6,0,6.2832); g.fill();
+    g.beginPath(); g.arc(px,py,Math.max(1.2,(f.kind==="head"?4.6:3.6)*Math.max(0.5,gk)),0,6.2832); g.fill();
   }
 }
 
@@ -213,16 +215,20 @@ function drawFixtures(cv, fr, layout){
   const haze = fogs.length ? Math.max(...fogs.map(o => o.level||0)) : 0;
 
   const n = fx.length || 1;
-  const gap = 10, pad = 12;
-  const tw = (W - pad*2 - gap*(n-1)) / n;
-  const th = Math.min(H - pad*2 - 26, tw * 1.35);
+  const pad = 12, gap = n > 60 ? 3 : (n > 24 ? 6 : 10);
+  const availW = Math.max(40, W - pad*2), availH = Math.max(40, H - pad*2 - 26);
+  const minTile = n > 120 ? 22 : (n > 60 ? 30 : 44);
+  const cols = Math.max(1, Math.min(n, Math.floor((availW + gap) / (minTile + gap))));
+  const rows = Math.max(1, Math.ceil(n / cols));
+  const tw = Math.max(6, (availW - gap*(cols-1)) / cols);
+  const th = Math.max(6, Math.min(tw * 1.35, (availH - gap*(rows-1)) / rows));
   const top = pad;
 
   fx.forEach((f, i) => {
     const o = by[f.id] || {};
     const L = o.level || 0;
     const r = o.r!==undefined?o.r:255, gg = o.g!==undefined?o.g:255, b = o.b!==undefined?o.b:255;
-    const x = pad + i*(tw+gap), y = top;
+    const x = pad + (i % cols)*(tw+gap), y = top + Math.floor(i / cols)*(th+gap);
 
     g.fillStyle = "#252b39"; g.strokeStyle = "#3c4457"; g.lineWidth = 1;
     g.beginPath(); g.roundRect(x, y, tw, th, 5); g.fill(); g.stroke();
@@ -230,7 +236,7 @@ function drawFixtures(cv, fr, layout){
     // the lens: colour at brightness, with a glow that scales with level
     const head = o.pan !== undefined;
     const cx = x + tw/2, cy = y + th*(head?0.30:0.40);
-    const rad = Math.min(tw, th)*(head?0.19:0.24);
+    const rad = Math.max(1, Math.min(tw, th)*(head?0.19:0.24));
     if(L > 0.01){
       const glow = g.createRadialGradient(cx,cy,0,cx,cy,rad*2.6);
       glow.addColorStop(0, `rgba(${r},${gg},${b},${(0.55*L).toFixed(3)})`);
