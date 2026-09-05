@@ -308,6 +308,10 @@ function hsl(h,s,l){
    his stages are mostly two colours and a blinder, not a rainbow. If a specific
    show is wanted these are the numbers to change. */
 const PROFILES = {
+  /* white only: colour removed from the picture entirely, so a problem with
+     timing, position or width can be judged without colour arguing with it. The
+     chords rung has nothing to say under this theme and its check says so. */
+  white:       { lead:[0,0,.60], hot:[0,0,.74], cool:[0,0,.48], deep:[0,0,.30] },
   garrix:      { lead:[214,.95,.52], hot:[356,.94,.50], cool:[188,.92,.48], deep:[230,.90,.28] },
   "garrix-red":{ lead:[356,.94,.50], hot:[  8,.96,.52], cool:[206,.94,.50], deep:[224,.88,.26] },
   sunset: { lead:[ 24,.90,.50], hot:[  6,.94,.48], cool:[196,.86,.44], deep:[240,.78,.34] },

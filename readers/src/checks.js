@@ -304,7 +304,15 @@ function makeChecks(C){
       const sig=[...new Set(f2)].sort((a,b)=>a-b).join(",");
       if(prev!==null && sig!==prev) swaps.push(t);
       prev=sig }
-    if(!swaps.length) return {v:0,ok:false,txt:"the colours never change here"};
+    if(!swaps.length){
+      /* under the white-only theme there is no colour to change, so this rung has
+         nothing to judge rather than something to fail */
+      let anyHue=false;
+      for(let t=A;t<Math.min(B2,A+30);t+=0.5)
+        if(F(t).fixtures.some(o=>(o.level||0)>0.25 && hue(o)>=0)){ anyHue=true; break }
+      if(!anyHue) return {v:0,ok:false,na:true,
+        txt:"the colour set is white only, so there is nothing here to judge"};
+      return {v:0,ok:false,txt:"the colours never change here"} }
     const near=swaps.filter(t=>ch.some(c=>Math.abs(c.at-t)<=0.25)).length;
     const s2=100*near/swaps.length;
     return {v:s2, ok:s2>=60,

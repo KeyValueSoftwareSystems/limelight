@@ -143,6 +143,10 @@ const DOWNSET  = new Set(DOWN.map(t => +t.toFixed(3)));
    his stages are mostly two colours and a blinder, not a rainbow. If a specific
    show is wanted these are the numbers to change. */
 const PROFILES = {
+  /* white only: colour removed from the picture entirely, so a problem with
+     timing, position or width can be judged without colour arguing with it. The
+     chords rung has nothing to say under this theme and its check says so. */
+  white:      { a:[0,0,.62], b:[0,0,.62] },
   garrix:     { a:[214,.95,.52], b:[356,.94,.50] },   // electric blue, red accent
   "garrix-red":{ a:[356,.94,.50], b:[206,.94,.50] },  // red base, blue accent
   sunset: { a:[ 24,.90,.50], b:[196,.86,.44] },

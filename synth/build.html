@@ -13,6 +13,7 @@ select,button{background:var(--raise);color:var(--ink);border:1px solid var(--ru
 button:disabled{opacity:.4;cursor:not-allowed}
 button.go{background:var(--good);color:#08210f;border-color:var(--good);font-weight:700}
 button.on{background:var(--tung);color:#20160a;border-color:var(--tung);font-weight:700}
+button.on{background:var(--tung);color:#20160a;border-color:var(--tung);font-weight:700}
 button.no{background:transparent;color:var(--bad);border-color:var(--rule2)}
 main{flex:1 1 0;display:flex;min-height:0}
 #ladder{flex:0 0 268px;background:var(--pan);border-right:1px solid var(--rule);overflow:auto;padding:8px}
@@ -61,10 +62,11 @@ input[type=text]{background:var(--raise);color:var(--ink);border:1px solid var(-
   <select id="song"></select>
   <select id="map"></select>
   <button id="solo" title="run this rung on its own, with nothing else moving">solo</button>
+  <button id="solo" title="run this rung on its own, with nothing else moving">solo</button>
   <label class="note">energy</label>
   <select id="drive"><option>low</option><option selected>medium</option><option>high</option></select>
   <label class="note">colour</label>
-  <select id="pal"><option selected>garrix</option><option>garrix-red</option><option>sunset</option><option>ice</option><option>neon</option><option>amber</option></select>
+  <select id="pal"><option>white</option><option selected>garrix</option><option>garrix-red</option><option>sunset</option><option>ice</option><option>neon</option><option>amber</option></select>
   <span style="flex:1"></span>
   <span id="stat" class="note"></span>
 </header>
@@ -145,7 +147,7 @@ let F=null;
 function rebuild(){
   if(!RM||!MAP) return;
   const lay = STEP>=11 ? LAY : LAYBEAT;
-  F = RM.mkReader(MAP, lay, "medium", PAL, STEP);
+  F = RM.mkReader(MAP, lay, DRIVE, PAL, STEP, KNOB, SOLO ? STEP : 0);
   CURLAY = lay;
   buildLight();
   drawLadder(); drawAll();
@@ -272,6 +274,13 @@ $("accept").onclick=()=>decide(true);
 $("reject").onclick=()=>decide(false);
 $("zoomin").onclick=()=>{ VIEW.span=Math.max(3,VIEW.span/1.6); drawAll() };
 $("zoomout").onclick=()=>{ VIEW.span=Math.min(dur(MAP),VIEW.span*1.6); drawAll() };
+SOLO = new URLSearchParams(location.search).get("solo")==="1";
+$("solo").classList.toggle("on",SOLO);
+$("solo").onclick=()=>{ SOLO=!SOLO; $("solo").classList.toggle("on",SOLO); rebuild() };
+$("drive").value=DRIVE;
+$("drive").onchange=e=>{ DRIVE=e.target.value;
+  localStorage.setItem("limelight.drive",DRIVE); rebuild() };
+$("pal").value=PAL;
 $("pal").onchange=e=>{ PAL=e.target.value; rebuild() };
 $("map").onchange=e=>{ MAPKEY=e.target.value; MAP=MAPS[MAPKEY]; rebuild() };
 $("song").onchange=e=>location.href=`/build?song=${e.target.value}`;
