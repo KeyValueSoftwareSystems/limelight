@@ -641,7 +641,7 @@
    "name": "drop"
   },
   {
-   "at": 180.493824,
+   "at": 165.493824,
    "name": "verse"
   },
   {
@@ -706,7 +706,7 @@
   {
    "at": 216.119,
    "kind": "stop",
-   "holds": 1.875
+   "holds": 3.75
   }
  ],
  "spans": [
@@ -1255,15 +1255,15 @@
     "repeat": 3,
     "arc": 0.61,
     "name": "drop",
-    "mean_energy": 0.7697
+    "mean_energy": 0.8052
    },
    {
-    "at": 180.493824,
+    "at": 165.493824,
     "id": "VER",
     "repeat": 2,
-    "arc": 0.814,
+    "arc": 0.746,
     "name": "verse",
-    "mean_energy": 0.6576
+    "mean_energy": 0.6906
    },
    {
     "at": 184.243824,

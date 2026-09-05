@@ -697,7 +697,7 @@
    "name": "verse"
   },
   {
-   "at": 101.473314,
+   "at": 97.723314,
    "name": "break"
   },
   {
@@ -762,13 +762,17 @@
    "kind": "quiet"
   },
   {
+   "at": 97.723314,
+   "kind": "quiet"
+  },
+  {
    "at": 99.598,
    "kind": "stop",
    "holds": 1.875
   },
   {
-   "at": 101.473314,
-   "kind": "quiet"
+   "at": 99.598314,
+   "kind": "spotlight"
   },
   {
    "at": 125.848314,
@@ -1414,15 +1418,15 @@
     "repeat": 3,
     "arc": 0.394,
     "name": "verse",
-    "mean_energy": 0.3444
+    "mean_energy": 0.5353
    },
    {
-    "at": 101.473314,
+    "at": 97.723314,
     "id": "BRE",
     "repeat": 4,
-    "arc": 0.425,
+    "arc": 0.409,
     "name": "break",
-    "mean_energy": 0.3938
+    "mean_energy": 0.3618
    },
    {
     "at": 125.848314,

@@ -521,7 +521,7 @@ STOP_MIN_BEATS = 2
 STOP_CURVE_FLOOR = 0.25
 STOP_CURVE_LOUD = 0.60
 STOP_CURVE_LOOKBACK = 3
-STOP_CURVE_TAIL_BARS = 2
+STOP_CURVE_TAIL_BARS = 1
 
 
 def stops_from_curve(curve, bar_seconds):
@@ -754,7 +754,7 @@ def merge_runs(bounds, labels, curve, n_bars):
             )
         ):
             j += 1
-        best = i if i == 0 else max(range(i, j + 1), key=jump)
+        best = i if i == 0 else max(range(i, j + 1), key=lambda k: abs(jump(k)))
         kept_bounds.append(bounds[best])
         kept_labels.append(labels[i])
         i = j + 1
