@@ -224,6 +224,8 @@ function drawFixtures(cv, fr, layout){
   const th = Math.max(6, Math.min(tw * 1.35, (availH - gap*(rows-1)) / rows));
   const top = pad;
 
+  const showText = tw >= 64 && th >= 56;
+  const showPad = tw >= 46 && th >= 42;
   fx.forEach((f, i) => {
     const o = by[f.id] || {};
     const L = o.level || 0;
@@ -272,12 +274,12 @@ function drawFixtures(cv, fr, layout){
       g.fillStyle = L>0.01 ? `rgb(${r},${gg},${b})` : "#39414f";
       g.beginPath(); g.arc(ax,ay,2.6,0,6.2832); g.fill();
     }
-    if(o.strobe > 0){
+    if(o.strobe > 0 && showText){
       g.fillStyle = "#f0a93c"; g.font = "600 10px ui-monospace,monospace";
       g.fillText(o.strobe.toFixed(1)+" Hz", x+8, y+16);
     }
 
-    // the numbers, because this view exists to be checked against
+    if(!showText) return;
     g.textAlign = "center";
     g.fillStyle = "#e6e9f1"; g.font = "600 12px ui-monospace,monospace";
     g.fillText(f.id, cx, y + th - 34);

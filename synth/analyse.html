@@ -144,7 +144,7 @@ let VIEW={t0:0, span:0}, FOLLOW=true, drag=null;
 let RECIPE="", RECIPE_BEAT="", ROOMJS="", LAYOUTS={}, BEATONLY=false, RM=null, LAY=null, F1=null, F2=null, rebuildTimer=null, scoreTimer=null;
 // fixtures by default: this panel is for checking the output is what you meant,
 // not for imagining what the room looks like
-let VIEWMODE="fixtures";
+let VIEWMODE = localStorage.getItem("limelight.view") || "";
 const mkRM=r=>new Function("RECIPE",
   ROOMJS+"\n;return {mkReader,prep,drawRoom,drawFixtures,frameDiff,pearson,totalLight};")(r);
 /* "beats only" throws the show away and leaves the one question underneath it:
@@ -166,7 +166,11 @@ function fillRigs(){
     +`${n} · ${(LAYOUTS[n].fixtures||[]).length}</option>`).join("");
   e.onchange = ev => { RIG = ev.target.value;
     localStorage.setItem("limelight.rig", RIG);
-    LAY = pickLayout(); rebuildShow(); };
+    LAY = pickLayout();
+    if((LAY&&LAY.fixtures||[]).length > 40 && VIEWMODE!=="room"){
+      VIEWMODE="room"; localStorage.setItem("limelight.view","room");
+      const b=$("viewtog"); if(b) b.textContent="fixture view"; }
+    rebuildShow(); };
 }
 function setBeatOnly(on){
   BEATONLY=on; RM=mkRM(on?RECIPE_BEAT:RECIPE); LAY=pickLayout();
@@ -671,8 +675,11 @@ function drawRoom(){
   $("drive").onchange=e=>{ DRIVE=e.target.value;
     localStorage.setItem("limelight.drive",DRIVE); rebuildShow() };
   $("viewtog").onclick=()=>{ VIEWMODE = VIEWMODE==="fixtures" ? "room" : "fixtures";
+    localStorage.setItem("limelight.view", VIEWMODE);
     $("viewtog").textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view" };
   fillRigs(); LAY=pickLayout();
+  if(!VIEWMODE) VIEWMODE = ((LAY&&LAY.fixtures||[]).length > 40) ? "room" : "fixtures";
+  { const b=$("viewtog"); if(b) b.textContent = VIEWMODE==="fixtures" ? "room view" : "fixture view"; }
   $("palette").value=PALETTE;
   $("beatonly").onclick=()=>setBeatOnly(!BEATONLY);
   if(BEATONLY) setBeatOnly(true);

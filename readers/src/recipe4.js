@@ -483,7 +483,8 @@ function arrayGate(G, t, e, L, n){
   const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(G.xn*1.5 + G.yn*0.7 - ph));
   const soft = 0.16 + 0.22*e;
   const edge = 1 - cov;
-  return cl((wave - edge + soft) / (soft*2), 0, 1);
+  const gate = cl((wave - edge + soft) / (soft*2), 0, 1);
+  return gate * cl(1/Math.max(0.12, cov), 1, 2.4);
 }
 let PARS=KIND('par'), UPS=KIND('uplight'), HEADS=KIND('head'),
     STROBES=KIND('strobe'), STRIPS=KIND('strip'), BLINDERS=KIND('blinder'),
