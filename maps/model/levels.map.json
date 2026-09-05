@@ -11,7 +11,7 @@
   "when": "2026-09-06",
   "source": "Levels (Radio Edit).mp3",
   "reproduce": "python3 listen/ear.py \"Levels (Radio Edit).mp3\"",
-  "note": "35-130 Hz comb fit, octave by added-beat support, phase refined on onset centroids; bar phase voted by crash, bass-change and structural novelty; drops snapped to the top of the ramp; builds derived from what leads into each drop; accents, stems and sections emitted so the recipe has something to work with"
+  "note": "35-130 Hz comb fit, octave by added-beat support, phase refined on onset centroids; bar phase voted by crash, bass-change and structural novelty; drops snapped to the top of the ramp; builds derived from what leads into each drop"
  },
  "grid": {
   "period": 0.46875,
@@ -696,6 +696,10 @@
    "name": "break"
   },
   {
+   "at": 125.848314,
+   "name": "break"
+  },
+  {
    "at": 146.473314,
    "name": "verse"
   },
@@ -746,6 +750,14 @@
   {
    "at": 101.473314,
    "kind": "quiet"
+  },
+  {
+   "at": 125.848314,
+   "kind": "quiet"
+  },
+  {
+   "at": 127.723314,
+   "kind": "spotlight"
   },
   {
    "at": 176.473314,
@@ -1363,7 +1375,15 @@
     "repeat": 3,
     "arc": 0.425,
     "name": "break",
-    "mean_energy": 0.4222
+    "mean_energy": 0.3938
+   },
+   {
+    "at": 125.848314,
+    "id": "BRE",
+    "repeat": 4,
+    "arc": 0.528,
+    "name": "break",
+    "mean_energy": 0.4557
    },
    {
     "at": 146.473314,
@@ -1376,7 +1396,7 @@
    {
     "at": 176.473314,
     "id": "BRE",
-    "repeat": 4,
+    "repeat": 5,
     "arc": 0.74,
     "name": "break",
     "mean_energy": 0.7027

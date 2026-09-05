@@ -11,7 +11,7 @@
   "when": "2026-09-06",
   "source": "The Nights.mp3",
   "reproduce": "python3 listen/ear.py \"The Nights.mp3\"",
-  "note": "35-130 Hz comb fit, octave by added-beat support, phase refined on onset centroids; bar phase voted by crash, bass-change and structural novelty; drops snapped to the top of the ramp; builds derived from what leads into each drop; accents, stems and sections emitted so the recipe has something to work with"
+  "note": "35-130 Hz comb fit, octave by added-beat support, phase refined on onset centroids; bar phase voted by crash, bass-change and structural novelty; drops snapped to the top of the ramp; builds derived from what leads into each drop"
  },
  "grid": {
   "period": 0.47619,
@@ -493,6 +493,10 @@
    "name": "intro"
   },
   {
+   "at": 4.590233,
+   "name": "verse"
+  },
+  {
    "at": 17.923566,
    "name": "drop"
   },
@@ -514,6 +518,10 @@
   },
   {
    "at": 80.780709,
+   "name": "break"
+  },
+  {
+   "at": 90.304518,
    "name": "verse"
   },
   {
@@ -521,11 +529,11 @@
    "name": "drop"
   },
   {
-   "at": 107.447375,
+   "at": 124.590233,
    "name": "verse"
   },
   {
-   "at": 130.304518,
+   "at": 128.399756,
    "name": "break"
   },
   {
@@ -557,12 +565,16 @@
    "size": 0.95
   },
   {
+   "at": 80.780709,
+   "kind": "quiet"
+  },
+  {
    "at": 94.114042,
    "kind": "drop",
    "size": 0.95
   },
   {
-   "at": 130.304518,
+   "at": 128.399756,
    "kind": "quiet"
   },
   {
@@ -977,7 +989,15 @@
     "repeat": 1,
     "arc": 0.0,
     "name": "intro",
-    "mean_energy": 0.5612
+    "mean_energy": 0.4964
+   },
+   {
+    "at": 4.590233,
+    "id": "VER",
+    "repeat": 1,
+    "arc": 0.022,
+    "name": "verse",
+    "mean_energy": 0.5797
    },
    {
     "at": 17.923566,
@@ -998,7 +1018,7 @@
    {
     "at": 48.399756,
     "id": "VER",
-    "repeat": 1,
+    "repeat": 2,
     "arc": 0.272,
     "name": "verse",
     "mean_energy": 0.7056
@@ -1021,11 +1041,19 @@
    },
    {
     "at": 80.780709,
-    "id": "VER",
-    "repeat": 2,
+    "id": "BRE",
+    "repeat": 3,
     "arc": 0.457,
+    "name": "break",
+    "mean_energy": 0.5434
+   },
+   {
+    "at": 90.304518,
+    "id": "VER",
+    "repeat": 3,
+    "arc": 0.511,
     "name": "verse",
-    "mean_energy": 0.5711
+    "mean_energy": 0.6403
    },
    {
     "at": 94.114042,
@@ -1033,23 +1061,23 @@
     "repeat": 3,
     "arc": 0.533,
     "name": "drop",
-    "mean_energy": 0.7353
+    "mean_energy": 0.6949
    },
    {
-    "at": 107.447375,
+    "at": 124.590233,
     "id": "VER",
-    "repeat": 3,
-    "arc": 0.609,
+    "repeat": 4,
+    "arc": 0.707,
     "name": "verse",
-    "mean_energy": 0.6697
+    "mean_energy": 0.6602
    },
    {
-    "at": 130.304518,
+    "at": 128.399756,
     "id": "BRE",
-    "repeat": 3,
-    "arc": 0.739,
+    "repeat": 4,
+    "arc": 0.728,
     "name": "break",
-    "mean_energy": 0.5527
+    "mean_energy": 0.5847
    },
    {
     "at": 139.828328,
@@ -1062,7 +1090,7 @@
    {
     "at": 168.399756,
     "id": "VER",
-    "repeat": 4,
+    "repeat": 5,
     "arc": 0.957,
     "name": "verse",
     "mean_energy": 0.3456
