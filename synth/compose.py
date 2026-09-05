@@ -17,7 +17,7 @@ the answer key, and it is the only reason a score means anything.
 Audio is never committed. It regenerates from this file, identically, on every
 machine -- 12 KB of code instead of 40 MB of wav.
 """
-import json, math, os, struct, sys, wave
+import json, math, os, struct, sys, wave, zlib
 
 SR = 32000
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -231,7 +231,7 @@ def build(spec):
     n = int(dur * SR) + SR
     tracks = {k: [0.0] * n for k in ("kick", "clap", "hat", "bass", "pad", "lead")}
 
-    rng = [spec["slug"].__hash__() & 0x7FFFFFFF or 12345]
+    rng = [zlib.crc32(spec["slug"].encode()) & 0x7FFFFFFF or 12345]
     def jitter():
         if hum <= 0: return 0.0
         rng[0] = (1103515245 * rng[0] + 12345) & 0x7FFFFFFF
@@ -262,10 +262,10 @@ def build(spec):
                 one = half or bassmode == "root"
                 step, cnt = (beat, BPB) if one else (beat / 2, 8)
                 for e in range(cnt):
-                    nb = notes[0] - 24
-                    if bassmode == "octave" and e % 2 == 1: nb += 12
-                    if bassmode == "walk": nb += [0, 0, 3, 5, 7, 5, 3, 2][e % 8]
-                    add(tracks["bass"], tone(midi(nb), step * 0.46, dec=0.10, kind="saw"),
+                    bn = notes[0] - 24
+                    if bassmode == "octave" and e % 2 == 1: bn += 12
+                    if bassmode == "walk": bn += [0, 0, 3, 5, 7, 5, 3, 2][e % 8]
+                    add(tracks["bass"], tone(midi(bn), step * 0.46, dec=0.10, kind="saw"),
                         t0 + e * step + jitter(), mix["bass"] * 0.55)
             if "kick" in mix:
                 hits = [0, 2] if half else list(range(BPB))
