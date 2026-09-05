@@ -14,6 +14,7 @@ DEC_HZ = 1000.0
 LOOKUP_S = 0.004
 BAR_CUE_FLOOR = 0.35
 ADDED_BEAT_SUPPORT_FLOOR = 0.45
+ADDED_BEAT_SUPPORT_CEIL = 1.25
 
 
 DECODE_SR = 32000
@@ -185,7 +186,11 @@ def fit_grid(fx, rate, dur):
 
     candidates.sort(key=lambda c: c[1])
     notes = []
-    chosen = next((c for c in candidates if c[4] >= ADDED_BEAT_SUPPORT_FLOOR), None)
+    chosen = next(
+        (c for c in candidates
+         if ADDED_BEAT_SUPPORT_FLOOR <= c[4] <= ADDED_BEAT_SUPPORT_CEIL),
+        None,
+    )
     if chosen is None:
         chosen = max(candidates, key=lambda c: c[3])
         notes.append("no grid had supported off-beats; fell back to strongest")
@@ -508,22 +513,68 @@ def bar_profile(profile, beats, downbeats):
     return rows
 
 
-def segment(rows, curve=None):
+SEG_LAG_BARS = 4
+
+
+def _block_mean(rows, lo, hi):
+    lo, hi = max(0, lo), min(len(rows), hi)
+    if hi <= lo:
+        return None
+    n = len(rows[0])
+    return [sum(rows[i][b] for i in range(lo, hi)) / (hi - lo) for b in range(n)]
+
+
+def wide_novelty(rows, lag):
+    out = [0.0] * len(rows)
+    for i in range(len(rows)):
+        before = _block_mean(rows, i - lag, i)
+        after = _block_mean(rows, i, i + lag)
+        if before is None or after is None:
+            continue
+        out[i] = sum(abs(after[b] - before[b]) for b in range(len(before)))
+    return out
+
+
+def _norm(v):
+    hi = max(v) if v else 0.0
+    return [x / hi for x in v] if hi > 1e-9 else list(v)
+
+
+def segment(rows, curve=None, tone=None):
     if len(rows) < MIN_SECTION_BARS * 2:
         return [0]
-    novelty = [0.0] * len(rows)
+    near = [0.0] * len(rows)
     for i in range(1, len(rows)):
-        novelty[i] = sum(abs(rows[i][b] - rows[i - 1][b]) for b in range(len(rows[i])))
+        near[i] = sum(abs(rows[i][b] - rows[i - 1][b]) for b in range(len(rows[i])))
+    lag = max(1, min(SEG_LAG_BARS, round(len(rows) / 32)))
+    wide = wide_novelty(rows, lag)
+    jump = [0.0] * len(rows)
     if curve:
         for i in range(1, min(len(rows), len(curve))):
-            novelty[i] += 2.0 * abs(curve[i][1] - curve[i - 1][1])
+            jump[i] = abs(curve[i][1] - curve[i - 1][1])
+    nt = [0.0] * len(rows)
+    if tone:
+        lag = SEG_LAG_BARS
+        for i in range(len(rows)):
+            lo, hi = max(0, i - lag), min(len(tone), i + lag)
+            if i - lo < 1 or hi - i < 1:
+                continue
+            before = sum(tone[lo:i]) / (i - lo)
+            after = sum(tone[i:hi]) / (hi - i)
+            nt[i] = abs(after - before)
+    nn, nw, nj, ntn = _norm(near), _norm(wide), _norm(jump), _norm(nt)
+    novelty = [0.6 * nn[i] + 1.0 * nw[i] + 0.7 * nj[i] for i in range(len(rows))]
     mean = sum(novelty) / len(novelty)
     spread = (sum((v - mean) ** 2 for v in novelty) / len(novelty)) ** 0.5
-    threshold = mean + 0.20 * spread
+    threshold = mean + 0.12 * spread
     last_usable = len(rows) - MIN_SECTION_BARS
-    bounds = [0]
+    proposed = set()
     for i in range(1, last_usable):
-        if novelty[i] >= threshold and i - bounds[-1] >= MIN_SECTION_BARS:
+        if novelty[i] >= threshold:
+            proposed.add(i)
+    bounds = [0]
+    for i in sorted(proposed):
+        if i - bounds[-1] >= MIN_SECTION_BARS:
             bounds.append(i)
     return bounds
 
@@ -931,15 +982,16 @@ def listen(path):
     curve = downbeat_energy(profile, beats, groups) if groups else []
     if curve:
         rows = bar_profile(profile, beats, groups)
-        bounds = segment(rows, curve)
-        labels = classify(rows, bounds, len(rows))
-        bounds, labels = merge_runs(bounds, labels, curve, len(rows))
-        bounds = snap_drops_to_plateau(bounds, labels, curve, len(rows))
         tonal = beat_tonality(samples, sr, beats, period)
         beat_index = {round(b, 3): i for i, b in enumerate(beats)}
         tonal_at_groups = [
             beat_index[round(g, 3)] for g in groups if round(g, 3) in beat_index
         ]
+        tone_bar = [tonal[i] for i in tonal_at_groups] if tonal else None
+        bounds = segment(rows, curve, tone_bar)
+        labels = classify(rows, bounds, len(rows))
+        bounds, labels = merge_runs(bounds, labels, curve, len(rows))
+        bounds = snap_drops_to_plateau(bounds, labels, curve, len(rows))
         moments = (
             moments_from_sections(bounds, labels, rows, groups, period * 4)
             + find_stops(profile, beats, period)

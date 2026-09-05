@@ -513,7 +513,7 @@ function buildGeo(){
   Object.keys(g).forEach(function(id){ g[id].kn = seen[g[id].kind] });
   return g}
 
-const ARRAY_MIN = 12;
+const ARRAY_MIN = 4;
 const DROPS_AT = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
 function actNo(t){ let k=0; for(const d of DROPS_AT){ if(d<=t+1e-9) k++; else break } return k }
 const DEPLOY = {
