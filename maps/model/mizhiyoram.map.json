@@ -1,0 +1,4917 @@
+{
+ "map": "0.3",
+ "song": {
+  "title": "mizhiyoram.wav",
+  "artist": "?",
+  "length": 123.6
+ },
+ "made_by": {
+  "how": "model",
+  "who": "listen/ear.py",
+  "note": "low-band comb fit, octave decided by added-beat support"
+ },
+ "grid": {
+  "period": 0.714036,
+  "phase": 0.624783,
+  "bpm": 84.029,
+  "bar_phase": 4,
+  "locked": true,
+  "how": "onset flux 35-130 Hz, comb search, octave-tested"
+ },
+ "beats": [
+  0.624783,
+  1.338818,
+  2.052854,
+  2.76689,
+  3.480926,
+  4.194961,
+  4.908997,
+  5.623033,
+  6.337068,
+  7.051104,
+  7.76514,
+  8.479176,
+  9.193211,
+  9.907247,
+  10.621283,
+  11.335318,
+  12.049354,
+  12.76339,
+  13.477426,
+  14.191461,
+  14.905497,
+  15.619533,
+  16.333568,
+  17.047604,
+  17.76164,
+  18.475676,
+  19.189711,
+  19.903747,
+  20.617783,
+  21.331818,
+  22.045854,
+  22.75989,
+  23.473926,
+  24.187961,
+  24.901997,
+  25.616033,
+  26.330068,
+  27.044104,
+  27.75814,
+  28.472176,
+  29.186211,
+  29.900247,
+  30.614283,
+  31.328318,
+  32.042354,
+  32.75639,
+  33.470426,
+  34.184461,
+  34.898497,
+  35.612533,
+  36.326568,
+  37.040604,
+  37.75464,
+  38.468676,
+  39.182711,
+  39.896747,
+  40.610783,
+  41.324818,
+  42.038854,
+  42.75289,
+  43.466926,
+  44.180961,
+  44.894997,
+  45.609033,
+  46.323068,
+  47.037104,
+  47.75114,
+  48.465176,
+  49.179211,
+  49.893247,
+  50.607283,
+  51.321318,
+  52.035354,
+  52.74939,
+  53.463426,
+  54.177461,
+  54.891497,
+  55.605533,
+  56.319568,
+  57.033604,
+  57.74764,
+  58.461676,
+  59.175711,
+  59.889747,
+  60.603783,
+  61.317818,
+  62.031854,
+  62.74589,
+  63.459926,
+  64.173961,
+  64.887997,
+  65.602033,
+  66.316068,
+  67.030104,
+  67.74414,
+  68.458176,
+  69.172211,
+  69.886247,
+  70.600283,
+  71.314318,
+  72.028354,
+  72.74239,
+  73.456426,
+  74.170461,
+  74.884497,
+  75.598533,
+  76.312568,
+  77.026604,
+  77.74064,
+  78.454676,
+  79.168711,
+  79.882747,
+  80.596783,
+  81.310818,
+  82.024854,
+  82.73889,
+  83.452926,
+  84.166961,
+  84.880997,
+  85.595033,
+  86.309068,
+  87.023104,
+  87.73714,
+  88.451176,
+  89.165211,
+  89.879247,
+  90.593283,
+  91.307318,
+  92.021354,
+  92.73539,
+  93.449426,
+  94.163461,
+  94.877497,
+  95.591533,
+  96.305568,
+  97.019604,
+  97.73364,
+  98.447676,
+  99.161711,
+  99.875747,
+  100.589783,
+  101.303818,
+  102.017854,
+  102.73189,
+  103.445926,
+  104.159961,
+  104.873997,
+  105.588033,
+  106.302068,
+  107.016104,
+  107.73014,
+  108.444176,
+  109.158211,
+  109.872247,
+  110.586283,
+  111.300318,
+  112.014354,
+  112.72839,
+  113.442426,
+  114.156461,
+  114.870497,
+  115.584533,
+  116.298568,
+  117.012604,
+  117.72664,
+  118.440676,
+  119.154711,
+  119.868747,
+  120.582783,
+  121.296818,
+  122.010854,
+  122.72489,
+  123.438926
+ ],
+ "downbeats": [
+  2.76689,
+  5.623033,
+  8.479176,
+  11.335318,
+  14.191461,
+  17.047604,
+  19.903747,
+  22.75989,
+  25.616033,
+  28.472176,
+  31.328318,
+  34.184461,
+  37.040604,
+  39.896747,
+  42.75289,
+  45.609033,
+  48.465176,
+  51.321318,
+  54.177461,
+  57.033604,
+  59.889747,
+  62.74589,
+  65.602033,
+  68.458176,
+  71.314318,
+  74.170461,
+  77.026604,
+  79.882747,
+  82.73889,
+  85.595033,
+  88.451176,
+  91.307318,
+  94.163461,
+  97.019604,
+  99.875747,
+  102.73189,
+  105.588033,
+  108.444176,
+  111.300318,
+  114.156461,
+  117.012604,
+  119.868747,
+  122.72489
+ ],
+ "chapters": [
+  {
+   "at": 0.0,
+   "name": "intro"
+  },
+  {
+   "at": 22.75989,
+   "name": "verse"
+  },
+  {
+   "at": 45.609033,
+   "name": "drop"
+  },
+  {
+   "at": 51.321318,
+   "name": "verse"
+  },
+  {
+   "at": 57.033604,
+   "name": "drop"
+  },
+  {
+   "at": 74.170461,
+   "name": "verse"
+  },
+  {
+   "at": 102.73189,
+   "name": "build"
+  },
+  {
+   "at": 114.156461,
+   "name": "verse"
+  }
+ ],
+ "moments": [
+  {
+   "at": 45.609033,
+   "kind": "drop",
+   "size": 0.95
+  },
+  {
+   "at": 57.033604,
+   "kind": "drop",
+   "size": 0.95
+  }
+ ],
+ "spans": [
+  {
+   "kind": "build",
+   "from": 102.73189,
+   "to": 114.156461,
+   "rise": "early"
+  }
+ ],
+ "energy": [
+  [
+   2.76689,
+   0.1862
+  ],
+  [
+   5.623033,
+   0.1693
+  ],
+  [
+   8.479176,
+   0.1647
+  ],
+  [
+   11.335318,
+   0.1836
+  ],
+  [
+   14.191461,
+   0.1974
+  ],
+  [
+   17.047604,
+   0.1794
+  ],
+  [
+   19.903747,
+   0.1696
+  ],
+  [
+   22.75989,
+   0.4389
+  ],
+  [
+   25.616033,
+   0.514
+  ],
+  [
+   28.472176,
+   0.3793
+  ],
+  [
+   31.328318,
+   0.3523
+  ],
+  [
+   34.184461,
+   0.6226
+  ],
+  [
+   37.040604,
+   0.5145
+  ],
+  [
+   39.896747,
+   0.428
+  ],
+  [
+   42.75289,
+   0.3587
+  ],
+  [
+   45.609033,
+   0.6889
+  ],
+  [
+   48.465176,
+   0.8448
+  ],
+  [
+   51.321318,
+   0.7271
+  ],
+  [
+   54.177461,
+   0.7287
+  ],
+  [
+   57.033604,
+   0.8694
+  ],
+  [
+   59.889747,
+   0.8017
+  ],
+  [
+   62.74589,
+   0.7847
+  ],
+  [
+   65.602033,
+   0.7524
+  ],
+  [
+   68.458176,
+   0.2682
+  ],
+  [
+   71.314318,
+   0.176
+  ],
+  [
+   74.170461,
+   0.5629
+  ],
+  [
+   77.026604,
+   0.6329
+  ],
+  [
+   79.882747,
+   0.6752
+  ],
+  [
+   82.73889,
+   0.6397
+  ],
+  [
+   85.595033,
+   0.6495
+  ],
+  [
+   88.451176,
+   0.6386
+  ],
+  [
+   91.307318,
+   0.679
+  ],
+  [
+   94.163461,
+   0.6454
+  ],
+  [
+   97.019604,
+   0.2739
+  ],
+  [
+   99.875747,
+   0.1753
+  ],
+  [
+   102.73189,
+   0.3528
+  ],
+  [
+   105.588033,
+   0.5212
+  ],
+  [
+   108.444176,
+   0.6361
+  ],
+  [
+   111.300318,
+   0.608
+  ],
+  [
+   114.156461,
+   0.6085
+  ],
+  [
+   117.012604,
+   0.5002
+  ],
+  [
+   119.868747,
+   0.2896
+  ],
+  [
+   122.72489,
+   0.0498
+  ]
+ ],
+ "sections": {
+  "note": "Which sections are the same section, so a reader can make the second one bigger than the first.",
+  "how": "boundaries from beat-synchronous band novelty, labelled by kick presence and energy rank; repeat counts occurrences of a label",
+  "entries": [
+   {
+    "at": 2.76689,
+    "id": "INT",
+    "repeat": 1,
+    "arc": 0.0,
+    "name": "intro",
+    "mean_energy": 0.1786
+   },
+   {
+    "at": 22.75989,
+    "id": "VER",
+    "repeat": 1,
+    "arc": 0.163,
+    "name": "verse",
+    "mean_energy": 0.451
+   },
+   {
+    "at": 45.609033,
+    "id": "DRO",
+    "repeat": 1,
+    "arc": 0.349,
+    "name": "drop",
+    "mean_energy": 0.7669
+   },
+   {
+    "at": 51.321318,
+    "id": "VER",
+    "repeat": 2,
+    "arc": 0.395,
+    "name": "verse",
+    "mean_energy": 0.7279
+   },
+   {
+    "at": 57.033604,
+    "id": "DRO",
+    "repeat": 2,
+    "arc": 0.442,
+    "name": "drop",
+    "mean_energy": 0.6087
+   },
+   {
+    "at": 74.170461,
+    "id": "VER",
+    "repeat": 3,
+    "arc": 0.581,
+    "name": "verse",
+    "mean_energy": 0.5572
+   },
+   {
+    "at": 102.73189,
+    "id": "BUI",
+    "repeat": 1,
+    "arc": 0.814,
+    "name": "build",
+    "mean_energy": 0.5295
+   },
+   {
+    "at": 114.156461,
+    "id": "VER",
+    "repeat": 4,
+    "arc": 0.907,
+    "name": "verse",
+    "mean_energy": 0.362
+   }
+  ]
+ },
+ "stems": {
+  "model": "band-energy proxy, not source separation",
+  "rate": "per_downbeat",
+  "note": "drums/bass/other estimated from 35-130, 130-400 and 400-1200 Hz. vocals and guitar are absent because this cannot separate them.",
+  "sources": {
+   "drums": [
+    0.066,
+    0.0684,
+    0.0571,
+    0.063,
+    0.075,
+    0.069,
+    0.0574,
+    0.2155,
+    0.2992,
+    0.4012,
+    0.2176,
+    0.3681,
+    0.2803,
+    0.2548,
+    0.2262,
+    0.6317,
+    0.7406,
+    0.8015,
+    0.7847,
+    0.7519,
+    0.7437,
+    0.7959,
+    0.7812,
+    0.2607,
+    0.057,
+    0.6235,
+    0.7544,
+    0.8006,
+    0.7895,
+    0.772,
+    0.7543,
+    0.7996,
+    0.7871,
+    0.2626,
+    0.0568,
+    0.1875,
+    0.5125,
+    0.5493,
+    0.4856,
+    0.5506,
+    0.4922,
+    0.1399,
+    0.0191
+   ],
+   "bass": [
+    0.3049,
+    0.2623,
+    0.2682,
+    0.2932,
+    0.31,
+    0.2696,
+    0.2702,
+    0.6548,
+    0.744,
+    0.4825,
+    0.5118,
+    0.7892,
+    0.688,
+    0.5873,
+    0.5161,
+    0.7476,
+    0.8521,
+    0.7857,
+    0.7323,
+    0.8441,
+    0.8096,
+    0.81,
+    0.7864,
+    0.316,
+    0.2978,
+    0.5988,
+    0.6304,
+    0.6828,
+    0.6334,
+    0.6466,
+    0.6307,
+    0.6838,
+    0.6344,
+    0.3031,
+    0.2968,
+    0.5014,
+    0.5784,
+    0.6909,
+    0.6169,
+    0.6965,
+    0.5424,
+    0.4214,
+    0.0815
+   ],
+   "other": [
+    0.1184,
+    0.1131,
+    0.1086,
+    0.1262,
+    0.1338,
+    0.1262,
+    0.1164,
+    0.3498,
+    0.4043,
+    0.2322,
+    0.261,
+    0.6394,
+    0.4926,
+    0.3643,
+    0.278,
+    0.3262,
+    0.419,
+    0.2481,
+    0.263,
+    0.5472,
+    0.4526,
+    0.3433,
+    0.3147,
+    0.1085,
+    0.1118,
+    0.1874,
+    0.1955,
+    0.2037,
+    0.182,
+    0.2066,
+    0.2118,
+    0.2236,
+    0.202,
+    0.123,
+    0.1114,
+    0.2976,
+    0.481,
+    0.6664,
+    0.6814,
+    0.3098,
+    0.229,
+    0.1735,
+    0.0329
+   ]
+  }
+ },
+ "accents": {
+  "of": "percussive hits",
+  "how": "peaks in summed band onset flux at 400 Hz, labelled by which band dominates, on_grid within 50 ms of a beat",
+  "note": "the band label is a guess at which drum; the time is measured",
+  "events": [
+   {
+    "at": 0.94,
+    "of": "tom",
+    "strength": 0.21,
+    "on_grid": false
+   },
+   {
+    "at": 1.133,
+    "of": "tom",
+    "strength": 0.142,
+    "on_grid": false
+   },
+   {
+    "at": 1.345,
+    "of": "tom",
+    "strength": 0.129,
+    "on_grid": true
+   },
+   {
+    "at": 1.64,
+    "of": "tom",
+    "strength": 0.139,
+    "on_grid": false
+   },
+   {
+    "at": 1.885,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 2.092,
+    "of": "tom",
+    "strength": 0.14,
+    "on_grid": true
+   },
+   {
+    "at": 2.315,
+    "of": "tom",
+    "strength": 0.169,
+    "on_grid": false
+   },
+   {
+    "at": 3.81,
+    "of": "tom",
+    "strength": 0.15,
+    "on_grid": false
+   },
+   {
+    "at": 4.015,
+    "of": "tom",
+    "strength": 0.164,
+    "on_grid": false
+   },
+   {
+    "at": 4.237,
+    "of": "tom",
+    "strength": 0.16,
+    "on_grid": true
+   },
+   {
+    "at": 4.447,
+    "of": "tom",
+    "strength": 0.168,
+    "on_grid": false
+   },
+   {
+    "at": 4.69,
+    "of": "tom",
+    "strength": 0.129,
+    "on_grid": false
+   },
+   {
+    "at": 4.93,
+    "of": "tom",
+    "strength": 0.136,
+    "on_grid": true
+   },
+   {
+    "at": 5.117,
+    "of": "tom",
+    "strength": 0.153,
+    "on_grid": false
+   },
+   {
+    "at": 5.475,
+    "of": "tom",
+    "strength": 0.132,
+    "on_grid": false
+   },
+   {
+    "at": 6.63,
+    "of": "tom",
+    "strength": 0.156,
+    "on_grid": false
+   },
+   {
+    "at": 6.85,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 7.027,
+    "of": "tom",
+    "strength": 0.168,
+    "on_grid": true
+   },
+   {
+    "at": 7.308,
+    "of": "tom",
+    "strength": 0.144,
+    "on_grid": false
+   },
+   {
+    "at": 7.49,
+    "of": "tom",
+    "strength": 0.143,
+    "on_grid": false
+   },
+   {
+    "at": 7.692,
+    "of": "tom",
+    "strength": 0.135,
+    "on_grid": false
+   },
+   {
+    "at": 7.923,
+    "of": "tom",
+    "strength": 0.123,
+    "on_grid": false
+   },
+   {
+    "at": 8.11,
+    "of": "tom",
+    "strength": 0.131,
+    "on_grid": false
+   },
+   {
+    "at": 9.502,
+    "of": "tom",
+    "strength": 0.12,
+    "on_grid": false
+   },
+   {
+    "at": 9.703,
+    "of": "tom",
+    "strength": 0.132,
+    "on_grid": false
+   },
+   {
+    "at": 9.96,
+    "of": "tom",
+    "strength": 0.148,
+    "on_grid": false
+   },
+   {
+    "at": 10.27,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 10.86,
+    "of": "tom",
+    "strength": 0.137,
+    "on_grid": false
+   },
+   {
+    "at": 12.345,
+    "of": "tom",
+    "strength": 0.131,
+    "on_grid": false
+   },
+   {
+    "at": 12.588,
+    "of": "tom",
+    "strength": 0.151,
+    "on_grid": false
+   },
+   {
+    "at": 12.785,
+    "of": "tom",
+    "strength": 0.13,
+    "on_grid": true
+   },
+   {
+    "at": 13.07,
+    "of": "tom",
+    "strength": 0.179,
+    "on_grid": false
+   },
+   {
+    "at": 13.262,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 13.495,
+    "of": "tom",
+    "strength": 0.182,
+    "on_grid": true
+   },
+   {
+    "at": 13.693,
+    "of": "tom",
+    "strength": 0.146,
+    "on_grid": false
+   },
+   {
+    "at": 14.148,
+    "of": "tom",
+    "strength": 0.121,
+    "on_grid": true
+   },
+   {
+    "at": 15.277,
+    "of": "tom",
+    "strength": 0.235,
+    "on_grid": false
+   },
+   {
+    "at": 15.473,
+    "of": "tom",
+    "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 15.688,
+    "of": "tom",
+    "strength": 0.192,
+    "on_grid": false
+   },
+   {
+    "at": 15.875,
+    "of": "tom",
+    "strength": 0.136,
+    "on_grid": false
+   },
+   {
+    "at": 16.06,
+    "of": "snare",
+    "strength": 0.137,
+    "on_grid": false
+   },
+   {
+    "at": 16.273,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 16.547,
+    "of": "tom",
+    "strength": 0.121,
+    "on_grid": false
+   },
+   {
+    "at": 18.078,
+    "of": "tom",
+    "strength": 0.144,
+    "on_grid": false
+   },
+   {
+    "at": 18.26,
+    "of": "tom",
+    "strength": 0.177,
+    "on_grid": false
+   },
+   {
+    "at": 18.455,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": true
+   },
+   {
+    "at": 18.698,
+    "of": "tom",
+    "strength": 0.156,
+    "on_grid": false
+   },
+   {
+    "at": 18.938,
+    "of": "snare",
+    "strength": 0.15,
+    "on_grid": false
+   },
+   {
+    "at": 19.12,
+    "of": "snare",
+    "strength": 0.141,
+    "on_grid": false
+   },
+   {
+    "at": 19.4,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 19.672,
+    "of": "tom",
+    "strength": 0.123,
+    "on_grid": false
+   },
+   {
+    "at": 20.933,
+    "of": "tom",
+    "strength": 0.178,
+    "on_grid": false
+   },
+   {
+    "at": 21.113,
+    "of": "tom",
+    "strength": 0.164,
+    "on_grid": false
+   },
+   {
+    "at": 21.405,
+    "of": "tom",
+    "strength": 0.155,
+    "on_grid": false
+   },
+   {
+    "at": 21.642,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 21.828,
+    "of": "tom",
+    "strength": 0.132,
+    "on_grid": false
+   },
+   {
+    "at": 22.288,
+    "of": "tom",
+    "strength": 0.134,
+    "on_grid": false
+   },
+   {
+    "at": 23.085,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 23.552,
+    "of": "tom",
+    "strength": 0.173,
+    "on_grid": false
+   },
+   {
+    "at": 23.793,
+    "of": "tom",
+    "strength": 0.15,
+    "on_grid": false
+   },
+   {
+    "at": 23.99,
+    "of": "tom",
+    "strength": 0.123,
+    "on_grid": false
+   },
+   {
+    "at": 24.2,
+    "of": "tom",
+    "strength": 0.169,
+    "on_grid": true
+   },
+   {
+    "at": 24.448,
+    "of": "tom",
+    "strength": 0.323,
+    "on_grid": false
+   },
+   {
+    "at": 24.68,
+    "of": "tom",
+    "strength": 0.13,
+    "on_grid": false
+   },
+   {
+    "at": 24.858,
+    "of": "tom",
+    "strength": 0.203,
+    "on_grid": true
+   },
+   {
+    "at": 25.133,
+    "of": "tom",
+    "strength": 0.12,
+    "on_grid": false
+   },
+   {
+    "at": 25.312,
+    "of": "tom",
+    "strength": 0.141,
+    "on_grid": false
+   },
+   {
+    "at": 25.552,
+    "of": "tom",
+    "strength": 0.26,
+    "on_grid": false
+   },
+   {
+    "at": 25.745,
+    "of": "snare",
+    "strength": 0.134,
+    "on_grid": false
+   },
+   {
+    "at": 25.94,
+    "of": "tom",
+    "strength": 0.145,
+    "on_grid": false
+   },
+   {
+    "at": 26.637,
+    "of": "tom",
+    "strength": 0.195,
+    "on_grid": false
+   },
+   {
+    "at": 26.835,
+    "of": "tom",
+    "strength": 0.31,
+    "on_grid": false
+   },
+   {
+    "at": 27.062,
+    "of": "tom",
+    "strength": 0.186,
+    "on_grid": true
+   },
+   {
+    "at": 27.25,
+    "of": "tom",
+    "strength": 0.179,
+    "on_grid": false
+   },
+   {
+    "at": 27.48,
+    "of": "tom",
+    "strength": 0.128,
+    "on_grid": false
+   },
+   {
+    "at": 27.698,
+    "of": "tom",
+    "strength": 0.138,
+    "on_grid": false
+   },
+   {
+    "at": 27.885,
+    "of": "snare",
+    "strength": 0.125,
+    "on_grid": false
+   },
+   {
+    "at": 28.067,
+    "of": "tom",
+    "strength": 0.23,
+    "on_grid": false
+   },
+   {
+    "at": 28.258,
+    "of": "tom",
+    "strength": 0.185,
+    "on_grid": false
+   },
+   {
+    "at": 28.46,
+    "of": "tom",
+    "strength": 0.124,
+    "on_grid": true
+   },
+   {
+    "at": 28.707,
+    "of": "tom",
+    "strength": 0.168,
+    "on_grid": false
+   },
+   {
+    "at": 29.505,
+    "of": "tom",
+    "strength": 0.202,
+    "on_grid": false
+   },
+   {
+    "at": 29.683,
+    "of": "snare",
+    "strength": 0.128,
+    "on_grid": false
+   },
+   {
+    "at": 29.863,
+    "of": "tom",
+    "strength": 0.155,
+    "on_grid": true
+   },
+   {
+    "at": 30.055,
+    "of": "tom",
+    "strength": 0.159,
+    "on_grid": false
+   },
+   {
+    "at": 30.24,
+    "of": "snare",
+    "strength": 0.222,
+    "on_grid": false
+   },
+   {
+    "at": 30.425,
+    "of": "tom",
+    "strength": 0.167,
+    "on_grid": false
+   },
+   {
+    "at": 30.628,
+    "of": "snare",
+    "strength": 0.12,
+    "on_grid": true
+   },
+   {
+    "at": 30.848,
+    "of": "tom",
+    "strength": 0.242,
+    "on_grid": false
+   },
+   {
+    "at": 31.025,
+    "of": "snare",
+    "strength": 0.154,
+    "on_grid": false
+   },
+   {
+    "at": 31.328,
+    "of": "tom",
+    "strength": 0.181,
+    "on_grid": true
+   },
+   {
+    "at": 32.345,
+    "of": "tom",
+    "strength": 0.169,
+    "on_grid": false
+   },
+   {
+    "at": 32.542,
+    "of": "tom",
+    "strength": 0.134,
+    "on_grid": false
+   },
+   {
+    "at": 32.8,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": true
+   },
+   {
+    "at": 33.047,
+    "of": "tom",
+    "strength": 0.15,
+    "on_grid": false
+   },
+   {
+    "at": 33.23,
+    "of": "tom",
+    "strength": 0.136,
+    "on_grid": false
+   },
+   {
+    "at": 33.475,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": true
+   },
+   {
+    "at": 33.663,
+    "of": "snare",
+    "strength": 0.15,
+    "on_grid": false
+   },
+   {
+    "at": 33.865,
+    "of": "snare",
+    "strength": 0.179,
+    "on_grid": false
+   },
+   {
+    "at": 34.34,
+    "of": "tom",
+    "strength": 0.131,
+    "on_grid": false
+   },
+   {
+    "at": 34.55,
+    "of": "snare",
+    "strength": 0.204,
+    "on_grid": false
+   },
+   {
+    "at": 34.88,
+    "of": "tom",
+    "strength": 0.12,
+    "on_grid": true
+   },
+   {
+    "at": 35.115,
+    "of": "snare",
+    "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 35.305,
+    "of": "tom",
+    "strength": 0.209,
+    "on_grid": false
+   },
+   {
+    "at": 35.508,
+    "of": "tom",
+    "strength": 0.357,
+    "on_grid": false
+   },
+   {
+    "at": 35.695,
+    "of": "snare",
+    "strength": 0.327,
+    "on_grid": false
+   },
+   {
+    "at": 35.875,
+    "of": "snare",
+    "strength": 0.258,
+    "on_grid": false
+   },
+   {
+    "at": 36.07,
+    "of": "snare",
+    "strength": 0.159,
+    "on_grid": false
+   },
+   {
+    "at": 36.292,
+    "of": "snare",
+    "strength": 0.268,
+    "on_grid": true
+   },
+   {
+    "at": 36.492,
+    "of": "snare",
+    "strength": 0.24,
+    "on_grid": false
+   },
+   {
+    "at": 36.678,
+    "of": "snare",
+    "strength": 0.124,
+    "on_grid": false
+   },
+   {
+    "at": 36.855,
+    "of": "snare",
+    "strength": 0.185,
+    "on_grid": false
+   },
+   {
+    "at": 37.068,
+    "of": "tom",
+    "strength": 0.128,
+    "on_grid": true
+   },
+   {
+    "at": 37.248,
+    "of": "snare",
+    "strength": 0.161,
+    "on_grid": false
+   },
+   {
+    "at": 37.428,
+    "of": "snare",
+    "strength": 0.131,
+    "on_grid": false
+   },
+   {
+    "at": 37.93,
+    "of": "snare",
+    "strength": 0.129,
+    "on_grid": false
+   },
+   {
+    "at": 38.117,
+    "of": "tom",
+    "strength": 0.129,
+    "on_grid": false
+   },
+   {
+    "at": 38.297,
+    "of": "snare",
+    "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 38.49,
+    "of": "tom",
+    "strength": 0.378,
+    "on_grid": true
+   },
+   {
+    "at": 38.667,
+    "of": "snare",
+    "strength": 0.179,
+    "on_grid": false
+   },
+   {
+    "at": 38.87,
+    "of": "tom",
+    "strength": 0.281,
+    "on_grid": false
+   },
+   {
+    "at": 39.06,
+    "of": "tom",
+    "strength": 0.267,
+    "on_grid": false
+   },
+   {
+    "at": 39.237,
+    "of": "snare",
+    "strength": 0.198,
+    "on_grid": false
+   },
+   {
+    "at": 39.417,
+    "of": "snare",
+    "strength": 0.268,
+    "on_grid": false
+   },
+   {
+    "at": 39.9,
+    "of": "tom",
+    "strength": 0.197,
+    "on_grid": true
+   },
+   {
+    "at": 40.142,
+    "of": "tom",
+    "strength": 0.124,
+    "on_grid": false
+   },
+   {
+    "at": 40.33,
+    "of": "tom",
+    "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 40.513,
+    "of": "snare",
+    "strength": 0.134,
+    "on_grid": false
+   },
+   {
+    "at": 40.93,
+    "of": "tom",
+    "strength": 0.226,
+    "on_grid": false
+   },
+   {
+    "at": 41.117,
+    "of": "tom",
+    "strength": 0.15,
+    "on_grid": false
+   },
+   {
+    "at": 41.315,
+    "of": "tom",
+    "strength": 0.163,
+    "on_grid": true
+   },
+   {
+    "at": 41.538,
+    "of": "snare",
+    "strength": 0.167,
+    "on_grid": false
+   },
+   {
+    "at": 41.735,
+    "of": "tom",
+    "strength": 0.164,
+    "on_grid": false
+   },
+   {
+    "at": 41.93,
+    "of": "tom",
+    "strength": 0.174,
+    "on_grid": false
+   },
+   {
+    "at": 42.123,
+    "of": "tom",
+    "strength": 0.125,
+    "on_grid": false
+   },
+   {
+    "at": 42.315,
+    "of": "tom",
+    "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 42.51,
+    "of": "tom",
+    "strength": 0.131,
+    "on_grid": false
+   },
+   {
+    "at": 42.708,
+    "of": "tom",
+    "strength": 0.136,
+    "on_grid": true
+   },
+   {
+    "at": 43.032,
+    "of": "tom",
+    "strength": 0.22,
+    "on_grid": false
+   },
+   {
+    "at": 43.267,
+    "of": "snare",
+    "strength": 0.129,
+    "on_grid": false
+   },
+   {
+    "at": 43.502,
+    "of": "tom",
+    "strength": 0.143,
+    "on_grid": true
+   },
+   {
+    "at": 43.685,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 44.157,
+    "of": "tom",
+    "strength": 0.143,
+    "on_grid": true
+   },
+   {
+    "at": 44.845,
+    "of": "tom",
+    "strength": 0.159,
+    "on_grid": true
+   },
+   {
+    "at": 45.845,
+    "of": "tom",
+    "strength": 0.131,
+    "on_grid": false
+   },
+   {
+    "at": 46.63,
+    "of": "tom",
+    "strength": 0.212,
+    "on_grid": false
+   },
+   {
+    "at": 46.807,
+    "of": "kick",
+    "strength": 0.25,
+    "on_grid": false
+   },
+   {
+    "at": 46.985,
+    "of": "tom",
+    "strength": 0.422,
+    "on_grid": false
+   },
+   {
+    "at": 47.165,
+    "of": "tom",
+    "strength": 0.315,
+    "on_grid": false
+   },
+   {
+    "at": 47.345,
+    "of": "kick",
+    "strength": 0.338,
+    "on_grid": false
+   },
+   {
+    "at": 47.532,
+    "of": "tom",
+    "strength": 0.159,
+    "on_grid": false
+   },
+   {
+    "at": 47.712,
+    "of": "tom",
+    "strength": 0.239,
+    "on_grid": true
+   },
+   {
+    "at": 47.917,
+    "of": "kick",
+    "strength": 0.203,
+    "on_grid": false
+   },
+   {
+    "at": 48.112,
+    "of": "tom",
+    "strength": 0.171,
+    "on_grid": false
+   },
+   {
+    "at": 48.305,
+    "of": "kick",
+    "strength": 0.166,
+    "on_grid": false
+   },
+   {
+    "at": 48.51,
+    "of": "kick",
+    "strength": 0.139,
+    "on_grid": true
+   },
+   {
+    "at": 48.693,
+    "of": "kick",
+    "strength": 0.137,
+    "on_grid": false
+   },
+   {
+    "at": 48.87,
+    "of": "kick",
+    "strength": 0.247,
+    "on_grid": false
+   },
+   {
+    "at": 49.047,
+    "of": "snare",
+    "strength": 0.23,
+    "on_grid": false
+   },
+   {
+    "at": 49.245,
+    "of": "kick",
+    "strength": 0.234,
+    "on_grid": false
+   },
+   {
+    "at": 49.425,
+    "of": "kick",
+    "strength": 0.156,
+    "on_grid": false
+   },
+   {
+    "at": 49.612,
+    "of": "kick",
+    "strength": 0.157,
+    "on_grid": false
+   },
+   {
+    "at": 49.792,
+    "of": "tom",
+    "strength": 0.163,
+    "on_grid": false
+   },
+   {
+    "at": 49.98,
+    "of": "kick",
+    "strength": 0.481,
+    "on_grid": false
+   },
+   {
+    "at": 50.16,
+    "of": "kick",
+    "strength": 0.206,
+    "on_grid": false
+   },
+   {
+    "at": 50.34,
+    "of": "tom",
+    "strength": 0.144,
+    "on_grid": false
+   },
+   {
+    "at": 50.517,
+    "of": "tom",
+    "strength": 0.146,
+    "on_grid": false
+   },
+   {
+    "at": 50.697,
+    "of": "kick",
+    "strength": 0.259,
+    "on_grid": false
+   },
+   {
+    "at": 50.88,
+    "of": "kick",
+    "strength": 0.211,
+    "on_grid": false
+   },
+   {
+    "at": 51.062,
+    "of": "kick",
+    "strength": 0.342,
+    "on_grid": false
+   },
+   {
+    "at": 51.245,
+    "of": "kick",
+    "strength": 0.365,
+    "on_grid": false
+   },
+   {
+    "at": 51.428,
+    "of": "kick",
+    "strength": 0.36,
+    "on_grid": false
+   },
+   {
+    "at": 51.617,
+    "of": "kick",
+    "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 51.795,
+    "of": "kick",
+    "strength": 0.262,
+    "on_grid": false
+   },
+   {
+    "at": 51.977,
+    "of": "kick",
+    "strength": 0.324,
+    "on_grid": false
+   },
+   {
+    "at": 52.163,
+    "of": "kick",
+    "strength": 0.193,
+    "on_grid": false
+   },
+   {
+    "at": 52.35,
+    "of": "kick",
+    "strength": 0.602,
+    "on_grid": false
+   },
+   {
+    "at": 52.53,
+    "of": "kick",
+    "strength": 0.166,
+    "on_grid": false
+   },
+   {
+    "at": 52.712,
+    "of": "kick",
+    "strength": 0.334,
+    "on_grid": true
+   },
+   {
+    "at": 52.895,
+    "of": "tom",
+    "strength": 0.185,
+    "on_grid": false
+   },
+   {
+    "at": 53.078,
+    "of": "kick",
+    "strength": 0.203,
+    "on_grid": false
+   },
+   {
+    "at": 53.263,
+    "of": "kick",
+    "strength": 0.508,
+    "on_grid": false
+   },
+   {
+    "at": 53.44,
+    "of": "kick",
+    "strength": 0.465,
+    "on_grid": true
+   },
+   {
+    "at": 53.635,
+    "of": "kick",
+    "strength": 0.13,
+    "on_grid": false
+   },
+   {
+    "at": 53.82,
+    "of": "kick",
+    "strength": 0.269,
+    "on_grid": false
+   },
+   {
+    "at": 54.013,
+    "of": "tom",
+    "strength": 0.236,
+    "on_grid": false
+   },
+   {
+    "at": 54.195,
+    "of": "kick",
+    "strength": 0.18,
+    "on_grid": true
+   },
+   {
+    "at": 54.377,
+    "of": "tom",
+    "strength": 0.387,
+    "on_grid": false
+   },
+   {
+    "at": 54.57,
+    "of": "kick",
+    "strength": 0.272,
+    "on_grid": false
+   },
+   {
+    "at": 54.763,
+    "of": "kick",
+    "strength": 0.316,
+    "on_grid": false
+   },
+   {
+    "at": 54.945,
+    "of": "kick",
+    "strength": 0.188,
+    "on_grid": false
+   },
+   {
+    "at": 55.138,
+    "of": "kick",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 55.32,
+    "of": "kick",
+    "strength": 0.133,
+    "on_grid": false
+   },
+   {
+    "at": 55.502,
+    "of": "kick",
+    "strength": 0.165,
+    "on_grid": false
+   },
+   {
+    "at": 55.693,
+    "of": "kick",
+    "strength": 0.362,
+    "on_grid": false
+   },
+   {
+    "at": 55.875,
+    "of": "kick",
+    "strength": 0.141,
+    "on_grid": false
+   },
+   {
+    "at": 56.055,
+    "of": "tom",
+    "strength": 0.223,
+    "on_grid": false
+   },
+   {
+    "at": 56.235,
+    "of": "kick",
+    "strength": 0.131,
+    "on_grid": false
+   },
+   {
+    "at": 56.428,
+    "of": "kick",
+    "strength": 0.301,
+    "on_grid": false
+   },
+   {
+    "at": 56.605,
+    "of": "kick",
+    "strength": 0.146,
+    "on_grid": false
+   },
+   {
+    "at": 56.785,
+    "of": "tom",
+    "strength": 0.294,
+    "on_grid": false
+   },
+   {
+    "at": 56.975,
+    "of": "kick",
+    "strength": 0.316,
+    "on_grid": false
+   },
+   {
+    "at": 57.163,
+    "of": "kick",
+    "strength": 0.239,
+    "on_grid": false
+   },
+   {
+    "at": 57.343,
+    "of": "kick",
+    "strength": 0.206,
+    "on_grid": false
+   },
+   {
+    "at": 57.523,
+    "of": "snare",
+    "strength": 0.306,
+    "on_grid": false
+   },
+   {
+    "at": 57.703,
+    "of": "kick",
+    "strength": 0.205,
+    "on_grid": true
+   },
+   {
+    "at": 57.883,
+    "of": "tom",
+    "strength": 0.231,
+    "on_grid": false
+   },
+   {
+    "at": 58.065,
+    "of": "kick",
+    "strength": 0.844,
+    "on_grid": false
+   },
+   {
+    "at": 58.242,
+    "of": "kick",
+    "strength": 0.217,
+    "on_grid": false
+   },
+   {
+    "at": 58.445,
+    "of": "kick",
+    "strength": 0.18,
+    "on_grid": true
+   },
+   {
+    "at": 58.625,
+    "of": "kick",
+    "strength": 0.29,
+    "on_grid": false
+   },
+   {
+    "at": 58.803,
+    "of": "snare",
+    "strength": 0.175,
+    "on_grid": false
+   },
+   {
+    "at": 58.983,
+    "of": "snare",
+    "strength": 0.288,
+    "on_grid": false
+   },
+   {
+    "at": 59.163,
+    "of": "kick",
+    "strength": 0.212,
+    "on_grid": true
+   },
+   {
+    "at": 59.34,
+    "of": "kick",
+    "strength": 0.258,
+    "on_grid": false
+   },
+   {
+    "at": 59.523,
+    "of": "snare",
+    "strength": 0.251,
+    "on_grid": false
+   },
+   {
+    "at": 59.712,
+    "of": "snare",
+    "strength": 0.177,
+    "on_grid": false
+   },
+   {
+    "at": 59.892,
+    "of": "tom",
+    "strength": 0.181,
+    "on_grid": true
+   },
+   {
+    "at": 60.075,
+    "of": "snare",
+    "strength": 0.17,
+    "on_grid": false
+   },
+   {
+    "at": 60.252,
+    "of": "snare",
+    "strength": 0.156,
+    "on_grid": false
+   },
+   {
+    "at": 60.435,
+    "of": "snare",
+    "strength": 0.14,
+    "on_grid": false
+   },
+   {
+    "at": 60.617,
+    "of": "kick",
+    "strength": 0.138,
+    "on_grid": true
+   },
+   {
+    "at": 60.805,
+    "of": "kick",
+    "strength": 0.154,
+    "on_grid": false
+   },
+   {
+    "at": 60.985,
+    "of": "kick",
+    "strength": 0.227,
+    "on_grid": false
+   },
+   {
+    "at": 61.18,
+    "of": "kick",
+    "strength": 0.322,
+    "on_grid": false
+   },
+   {
+    "at": 61.362,
+    "of": "kick",
+    "strength": 0.4,
+    "on_grid": true
+   },
+   {
+    "at": 61.54,
+    "of": "snare",
+    "strength": 0.533,
+    "on_grid": false
+   },
+   {
+    "at": 61.73,
+    "of": "kick",
+    "strength": 0.291,
+    "on_grid": false
+   },
+   {
+    "at": 61.907,
+    "of": "kick",
+    "strength": 0.264,
+    "on_grid": false
+   },
+   {
+    "at": 62.09,
+    "of": "kick",
+    "strength": 0.325,
+    "on_grid": false
+   },
+   {
+    "at": 62.27,
+    "of": "tom",
+    "strength": 0.185,
+    "on_grid": false
+   },
+   {
+    "at": 62.46,
+    "of": "kick",
+    "strength": 0.187,
+    "on_grid": false
+   },
+   {
+    "at": 62.642,
+    "of": "kick",
+    "strength": 0.262,
+    "on_grid": false
+   },
+   {
+    "at": 62.825,
+    "of": "kick",
+    "strength": 0.181,
+    "on_grid": false
+   },
+   {
+    "at": 63.002,
+    "of": "kick",
+    "strength": 0.159,
+    "on_grid": false
+   },
+   {
+    "at": 63.193,
+    "of": "kick",
+    "strength": 0.477,
+    "on_grid": false
+   },
+   {
+    "at": 63.37,
+    "of": "kick",
+    "strength": 0.12,
+    "on_grid": false
+   },
+   {
+    "at": 63.55,
+    "of": "kick",
+    "strength": 0.171,
+    "on_grid": false
+   },
+   {
+    "at": 63.727,
+    "of": "kick",
+    "strength": 0.232,
+    "on_grid": false
+   },
+   {
+    "at": 63.913,
+    "of": "kick",
+    "strength": 0.319,
+    "on_grid": false
+   },
+   {
+    "at": 64.097,
+    "of": "kick",
+    "strength": 0.2,
+    "on_grid": false
+   },
+   {
+    "at": 64.287,
+    "of": "snare",
+    "strength": 0.253,
+    "on_grid": false
+   },
+   {
+    "at": 64.48,
+    "of": "kick",
+    "strength": 0.163,
+    "on_grid": false
+   },
+   {
+    "at": 64.66,
+    "of": "kick",
+    "strength": 0.153,
+    "on_grid": false
+   },
+   {
+    "at": 64.843,
+    "of": "kick",
+    "strength": 0.16,
+    "on_grid": true
+   },
+   {
+    "at": 65.02,
+    "of": "kick",
+    "strength": 0.17,
+    "on_grid": false
+   },
+   {
+    "at": 65.203,
+    "of": "kick",
+    "strength": 0.335,
+    "on_grid": false
+   },
+   {
+    "at": 65.382,
+    "of": "kick",
+    "strength": 0.271,
+    "on_grid": false
+   },
+   {
+    "at": 65.565,
+    "of": "kick",
+    "strength": 0.252,
+    "on_grid": true
+   },
+   {
+    "at": 65.748,
+    "of": "tom",
+    "strength": 0.172,
+    "on_grid": false
+   },
+   {
+    "at": 65.93,
+    "of": "kick",
+    "strength": 0.334,
+    "on_grid": false
+   },
+   {
+    "at": 66.112,
+    "of": "snare",
+    "strength": 0.173,
+    "on_grid": false
+   },
+   {
+    "at": 66.295,
+    "of": "tom",
+    "strength": 0.153,
+    "on_grid": true
+   },
+   {
+    "at": 66.478,
+    "of": "kick",
+    "strength": 0.172,
+    "on_grid": false
+   },
+   {
+    "at": 66.662,
+    "of": "kick",
+    "strength": 0.277,
+    "on_grid": false
+   },
+   {
+    "at": 66.845,
+    "of": "kick",
+    "strength": 0.295,
+    "on_grid": false
+   },
+   {
+    "at": 67.025,
+    "of": "kick",
+    "strength": 0.405,
+    "on_grid": true
+   },
+   {
+    "at": 67.21,
+    "of": "kick",
+    "strength": 0.139,
+    "on_grid": false
+   },
+   {
+    "at": 67.39,
+    "of": "tom",
+    "strength": 0.197,
+    "on_grid": false
+   },
+   {
+    "at": 67.573,
+    "of": "kick",
+    "strength": 0.194,
+    "on_grid": false
+   },
+   {
+    "at": 67.755,
+    "of": "kick",
+    "strength": 0.472,
+    "on_grid": true
+   },
+   {
+    "at": 67.94,
+    "of": "kick",
+    "strength": 0.214,
+    "on_grid": false
+   },
+   {
+    "at": 68.12,
+    "of": "kick",
+    "strength": 0.149,
+    "on_grid": false
+   },
+   {
+    "at": 68.3,
+    "of": "kick",
+    "strength": 0.245,
+    "on_grid": false
+   },
+   {
+    "at": 68.49,
+    "of": "kick",
+    "strength": 0.156,
+    "on_grid": true
+   },
+   {
+    "at": 68.677,
+    "of": "kick",
+    "strength": 0.13,
+    "on_grid": false
+   },
+   {
+    "at": 68.858,
+    "of": "kick",
+    "strength": 0.253,
+    "on_grid": false
+   },
+   {
+    "at": 69.037,
+    "of": "kick",
+    "strength": 0.365,
+    "on_grid": false
+   },
+   {
+    "at": 69.225,
+    "of": "kick",
+    "strength": 0.299,
+    "on_grid": false
+   },
+   {
+    "at": 69.405,
+    "of": "kick",
+    "strength": 0.192,
+    "on_grid": false
+   },
+   {
+    "at": 72.382,
+    "of": "tom",
+    "strength": 0.121,
+    "on_grid": false
+   },
+   {
+    "at": 72.6,
+    "of": "tom",
+    "strength": 0.125,
+    "on_grid": false
+   },
+   {
+    "at": 72.817,
+    "of": "tom",
+    "strength": 0.151,
+    "on_grid": false
+   },
+   {
+    "at": 73.067,
+    "of": "tom",
+    "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 73.26,
+    "of": "tom",
+    "strength": 0.128,
+    "on_grid": false
+   },
+   {
+    "at": 73.448,
+    "of": "tom",
+    "strength": 0.149,
+    "on_grid": true
+   },
+   {
+    "at": 73.625,
+    "of": "tom",
+    "strength": 0.125,
+    "on_grid": false
+   },
+   {
+    "at": 73.823,
+    "of": "tom",
+    "strength": 0.14,
+    "on_grid": false
+   },
+   {
+    "at": 74.05,
+    "of": "tom",
+    "strength": 0.132,
+    "on_grid": false
+   },
+   {
+    "at": 74.275,
+    "of": "tom",
+    "strength": 0.127,
+    "on_grid": false
+   },
+   {
+    "at": 74.517,
+    "of": "tom",
+    "strength": 0.15,
+    "on_grid": false
+   },
+   {
+    "at": 75.203,
+    "of": "tom",
+    "strength": 0.183,
+    "on_grid": false
+   },
+   {
+    "at": 75.38,
+    "of": "kick",
+    "strength": 0.142,
+    "on_grid": false
+   },
+   {
+    "at": 75.56,
+    "of": "tom",
+    "strength": 0.154,
+    "on_grid": true
+   },
+   {
+    "at": 75.74,
+    "of": "kick",
+    "strength": 0.179,
+    "on_grid": false
+   },
+   {
+    "at": 75.92,
+    "of": "kick",
+    "strength": 0.129,
+    "on_grid": false
+   },
+   {
+    "at": 76.115,
+    "of": "tom",
+    "strength": 0.156,
+    "on_grid": false
+   },
+   {
+    "at": 76.297,
+    "of": "kick",
+    "strength": 0.529,
+    "on_grid": true
+   },
+   {
+    "at": 76.483,
+    "of": "kick",
+    "strength": 0.376,
+    "on_grid": false
+   },
+   {
+    "at": 76.68,
+    "of": "kick",
+    "strength": 0.167,
+    "on_grid": false
+   },
+   {
+    "at": 76.862,
+    "of": "kick",
+    "strength": 0.153,
+    "on_grid": false
+   },
+   {
+    "at": 77.043,
+    "of": "kick",
+    "strength": 0.31,
+    "on_grid": true
+   },
+   {
+    "at": 77.222,
+    "of": "kick",
+    "strength": 0.199,
+    "on_grid": false
+   },
+   {
+    "at": 77.4,
+    "of": "kick",
+    "strength": 0.215,
+    "on_grid": false
+   },
+   {
+    "at": 77.58,
+    "of": "kick",
+    "strength": 0.196,
+    "on_grid": false
+   },
+   {
+    "at": 77.76,
+    "of": "kick",
+    "strength": 0.201,
+    "on_grid": true
+   },
+   {
+    "at": 77.94,
+    "of": "kick",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 78.118,
+    "of": "kick",
+    "strength": 0.291,
+    "on_grid": false
+   },
+   {
+    "at": 78.3,
+    "of": "kick",
+    "strength": 0.199,
+    "on_grid": false
+   },
+   {
+    "at": 78.48,
+    "of": "kick",
+    "strength": 0.761,
+    "on_grid": true
+   },
+   {
+    "at": 78.668,
+    "of": "kick",
+    "strength": 0.173,
+    "on_grid": false
+   },
+   {
+    "at": 78.845,
+    "of": "kick",
+    "strength": 0.134,
+    "on_grid": false
+   },
+   {
+    "at": 79.028,
+    "of": "kick",
+    "strength": 0.22,
+    "on_grid": false
+   },
+   {
+    "at": 79.207,
+    "of": "kick",
+    "strength": 0.552,
+    "on_grid": true
+   },
+   {
+    "at": 79.39,
+    "of": "kick",
+    "strength": 0.19,
+    "on_grid": false
+   },
+   {
+    "at": 79.573,
+    "of": "kick",
+    "strength": 0.267,
+    "on_grid": false
+   },
+   {
+    "at": 79.755,
+    "of": "kick",
+    "strength": 0.258,
+    "on_grid": false
+   },
+   {
+    "at": 79.938,
+    "of": "kick",
+    "strength": 0.338,
+    "on_grid": false
+   },
+   {
+    "at": 80.138,
+    "of": "kick",
+    "strength": 0.22,
+    "on_grid": false
+   },
+   {
+    "at": 80.32,
+    "of": "kick",
+    "strength": 0.194,
+    "on_grid": false
+   },
+   {
+    "at": 80.502,
+    "of": "kick",
+    "strength": 0.186,
+    "on_grid": false
+   },
+   {
+    "at": 80.688,
+    "of": "kick",
+    "strength": 0.129,
+    "on_grid": false
+   },
+   {
+    "at": 80.87,
+    "of": "kick",
+    "strength": 0.251,
+    "on_grid": false
+   },
+   {
+    "at": 81.05,
+    "of": "kick",
+    "strength": 0.245,
+    "on_grid": false
+   },
+   {
+    "at": 81.245,
+    "of": "kick",
+    "strength": 0.146,
+    "on_grid": false
+   },
+   {
+    "at": 81.43,
+    "of": "kick",
+    "strength": 0.289,
+    "on_grid": false
+   },
+   {
+    "at": 81.612,
+    "of": "kick",
+    "strength": 0.197,
+    "on_grid": false
+   },
+   {
+    "at": 81.795,
+    "of": "kick",
+    "strength": 0.289,
+    "on_grid": false
+   },
+   {
+    "at": 81.978,
+    "of": "kick",
+    "strength": 0.254,
+    "on_grid": true
+   },
+   {
+    "at": 82.172,
+    "of": "kick",
+    "strength": 0.298,
+    "on_grid": false
+   },
+   {
+    "at": 82.353,
+    "of": "kick",
+    "strength": 0.26,
+    "on_grid": false
+   },
+   {
+    "at": 82.535,
+    "of": "kick",
+    "strength": 0.206,
+    "on_grid": false
+   },
+   {
+    "at": 82.718,
+    "of": "kick",
+    "strength": 0.204,
+    "on_grid": true
+   },
+   {
+    "at": 82.9,
+    "of": "kick",
+    "strength": 0.241,
+    "on_grid": false
+   },
+   {
+    "at": 83.082,
+    "of": "kick",
+    "strength": 0.308,
+    "on_grid": false
+   },
+   {
+    "at": 83.275,
+    "of": "kick",
+    "strength": 0.274,
+    "on_grid": false
+   },
+   {
+    "at": 83.457,
+    "of": "kick",
+    "strength": 0.183,
+    "on_grid": true
+   },
+   {
+    "at": 83.64,
+    "of": "kick",
+    "strength": 0.234,
+    "on_grid": false
+   },
+   {
+    "at": 83.823,
+    "of": "kick",
+    "strength": 0.304,
+    "on_grid": false
+   },
+   {
+    "at": 84.007,
+    "of": "kick",
+    "strength": 0.206,
+    "on_grid": false
+   },
+   {
+    "at": 84.185,
+    "of": "kick",
+    "strength": 0.272,
+    "on_grid": true
+   },
+   {
+    "at": 84.37,
+    "of": "tom",
+    "strength": 0.336,
+    "on_grid": false
+   },
+   {
+    "at": 84.55,
+    "of": "kick",
+    "strength": 0.213,
+    "on_grid": false
+   },
+   {
+    "at": 84.733,
+    "of": "kick",
+    "strength": 0.151,
+    "on_grid": false
+   },
+   {
+    "at": 84.91,
+    "of": "kick",
+    "strength": 0.441,
+    "on_grid": true
+   },
+   {
+    "at": 85.09,
+    "of": "kick",
+    "strength": 0.215,
+    "on_grid": false
+   },
+   {
+    "at": 85.28,
+    "of": "kick",
+    "strength": 0.168,
+    "on_grid": false
+   },
+   {
+    "at": 85.46,
+    "of": "kick",
+    "strength": 0.353,
+    "on_grid": false
+   },
+   {
+    "at": 85.64,
+    "of": "kick",
+    "strength": 0.185,
+    "on_grid": true
+   },
+   {
+    "at": 85.82,
+    "of": "kick",
+    "strength": 0.209,
+    "on_grid": false
+   },
+   {
+    "at": 86.0,
+    "of": "kick",
+    "strength": 0.268,
+    "on_grid": false
+   },
+   {
+    "at": 86.18,
+    "of": "kick",
+    "strength": 0.339,
+    "on_grid": false
+   },
+   {
+    "at": 86.36,
+    "of": "kick",
+    "strength": 0.189,
+    "on_grid": false
+   },
+   {
+    "at": 86.54,
+    "of": "kick",
+    "strength": 0.315,
+    "on_grid": false
+   },
+   {
+    "at": 86.72,
+    "of": "kick",
+    "strength": 0.755,
+    "on_grid": false
+   },
+   {
+    "at": 86.903,
+    "of": "tom",
+    "strength": 0.169,
+    "on_grid": false
+   },
+   {
+    "at": 87.082,
+    "of": "kick",
+    "strength": 0.238,
+    "on_grid": false
+   },
+   {
+    "at": 87.272,
+    "of": "kick",
+    "strength": 0.277,
+    "on_grid": false
+   },
+   {
+    "at": 87.453,
+    "of": "kick",
+    "strength": 0.239,
+    "on_grid": false
+   },
+   {
+    "at": 87.63,
+    "of": "kick",
+    "strength": 0.161,
+    "on_grid": false
+   },
+   {
+    "at": 87.823,
+    "of": "kick",
+    "strength": 0.361,
+    "on_grid": false
+   },
+   {
+    "at": 88.002,
+    "of": "snare",
+    "strength": 0.245,
+    "on_grid": false
+   },
+   {
+    "at": 88.185,
+    "of": "kick",
+    "strength": 0.193,
+    "on_grid": false
+   },
+   {
+    "at": 88.365,
+    "of": "kick",
+    "strength": 0.147,
+    "on_grid": false
+   },
+   {
+    "at": 88.545,
+    "of": "kick",
+    "strength": 0.156,
+    "on_grid": false
+   },
+   {
+    "at": 88.728,
+    "of": "kick",
+    "strength": 0.14,
+    "on_grid": false
+   },
+   {
+    "at": 88.905,
+    "of": "kick",
+    "strength": 0.176,
+    "on_grid": false
+   },
+   {
+    "at": 89.095,
+    "of": "kick",
+    "strength": 0.275,
+    "on_grid": false
+   },
+   {
+    "at": 89.275,
+    "of": "kick",
+    "strength": 0.202,
+    "on_grid": false
+   },
+   {
+    "at": 89.493,
+    "of": "kick",
+    "strength": 0.141,
+    "on_grid": false
+   },
+   {
+    "at": 89.675,
+    "of": "kick",
+    "strength": 0.389,
+    "on_grid": false
+   },
+   {
+    "at": 89.855,
+    "of": "kick",
+    "strength": 0.291,
+    "on_grid": true
+   },
+   {
+    "at": 90.035,
+    "of": "kick",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 90.22,
+    "of": "kick",
+    "strength": 0.383,
+    "on_grid": false
+   },
+   {
+    "at": 90.403,
+    "of": "kick",
+    "strength": 0.382,
+    "on_grid": false
+   },
+   {
+    "at": 90.582,
+    "of": "kick",
+    "strength": 0.364,
+    "on_grid": true
+   },
+   {
+    "at": 90.763,
+    "of": "kick",
+    "strength": 0.283,
+    "on_grid": false
+   },
+   {
+    "at": 90.94,
+    "of": "kick",
+    "strength": 0.207,
+    "on_grid": false
+   },
+   {
+    "at": 91.123,
+    "of": "kick",
+    "strength": 0.402,
+    "on_grid": false
+   },
+   {
+    "at": 91.305,
+    "of": "kick",
+    "strength": 0.307,
+    "on_grid": true
+   },
+   {
+    "at": 91.49,
+    "of": "kick",
+    "strength": 0.12,
+    "on_grid": false
+   },
+   {
+    "at": 91.672,
+    "of": "kick",
+    "strength": 0.203,
+    "on_grid": false
+   },
+   {
+    "at": 91.855,
+    "of": "kick",
+    "strength": 0.284,
+    "on_grid": false
+   },
+   {
+    "at": 92.04,
+    "of": "kick",
+    "strength": 0.19,
+    "on_grid": true
+   },
+   {
+    "at": 92.222,
+    "of": "kick",
+    "strength": 0.135,
+    "on_grid": false
+   },
+   {
+    "at": 92.41,
+    "of": "kick",
+    "strength": 0.525,
+    "on_grid": false
+   },
+   {
+    "at": 92.597,
+    "of": "kick",
+    "strength": 0.239,
+    "on_grid": false
+   },
+   {
+    "at": 92.782,
+    "of": "kick",
+    "strength": 0.204,
+    "on_grid": true
+   },
+   {
+    "at": 92.963,
+    "of": "kick",
+    "strength": 0.335,
+    "on_grid": false
+   },
+   {
+    "at": 93.145,
+    "of": "tom",
+    "strength": 0.269,
+    "on_grid": false
+   },
+   {
+    "at": 93.33,
+    "of": "kick",
+    "strength": 0.136,
+    "on_grid": false
+   },
+   {
+    "at": 93.517,
+    "of": "kick",
+    "strength": 0.206,
+    "on_grid": false
+   },
+   {
+    "at": 93.705,
+    "of": "kick",
+    "strength": 0.133,
+    "on_grid": false
+   },
+   {
+    "at": 93.895,
+    "of": "kick",
+    "strength": 0.294,
+    "on_grid": false
+   },
+   {
+    "at": 94.078,
+    "of": "kick",
+    "strength": 0.352,
+    "on_grid": false
+   },
+   {
+    "at": 94.263,
+    "of": "kick",
+    "strength": 0.263,
+    "on_grid": false
+   },
+   {
+    "at": 94.453,
+    "of": "kick",
+    "strength": 0.176,
+    "on_grid": false
+   },
+   {
+    "at": 94.635,
+    "of": "kick",
+    "strength": 0.121,
+    "on_grid": false
+   },
+   {
+    "at": 94.817,
+    "of": "kick",
+    "strength": 0.141,
+    "on_grid": false
+   },
+   {
+    "at": 95.002,
+    "of": "kick",
+    "strength": 0.124,
+    "on_grid": false
+   },
+   {
+    "at": 95.185,
+    "of": "kick",
+    "strength": 0.202,
+    "on_grid": false
+   },
+   {
+    "at": 95.365,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 95.55,
+    "of": "kick",
+    "strength": 0.279,
+    "on_grid": true
+   },
+   {
+    "at": 95.737,
+    "of": "kick",
+    "strength": 0.129,
+    "on_grid": false
+   },
+   {
+    "at": 95.92,
+    "of": "kick",
+    "strength": 0.419,
+    "on_grid": false
+   },
+   {
+    "at": 96.097,
+    "of": "tom",
+    "strength": 0.12,
+    "on_grid": false
+   },
+   {
+    "at": 96.28,
+    "of": "kick",
+    "strength": 0.358,
+    "on_grid": true
+   },
+   {
+    "at": 96.46,
+    "of": "kick",
+    "strength": 0.272,
+    "on_grid": false
+   },
+   {
+    "at": 96.64,
+    "of": "kick",
+    "strength": 0.233,
+    "on_grid": false
+   },
+   {
+    "at": 96.823,
+    "of": "kick",
+    "strength": 0.149,
+    "on_grid": false
+   },
+   {
+    "at": 97.0,
+    "of": "kick",
+    "strength": 0.215,
+    "on_grid": true
+   },
+   {
+    "at": 97.18,
+    "of": "kick",
+    "strength": 0.34,
+    "on_grid": false
+   },
+   {
+    "at": 97.36,
+    "of": "kick",
+    "strength": 0.125,
+    "on_grid": false
+   },
+   {
+    "at": 97.54,
+    "of": "kick",
+    "strength": 0.212,
+    "on_grid": false
+   },
+   {
+    "at": 97.72,
+    "of": "kick",
+    "strength": 0.21,
+    "on_grid": true
+   },
+   {
+    "at": 97.9,
+    "of": "kick",
+    "strength": 0.314,
+    "on_grid": false
+   },
+   {
+    "at": 99.858,
+    "of": "tom",
+    "strength": 0.122,
+    "on_grid": true
+   },
+   {
+    "at": 100.922,
+    "of": "tom",
+    "strength": 0.143,
+    "on_grid": false
+   },
+   {
+    "at": 101.29,
+    "of": "tom",
+    "strength": 0.136,
+    "on_grid": true
+   },
+   {
+    "at": 101.597,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 101.948,
+    "of": "tom",
+    "strength": 0.131,
+    "on_grid": false
+   },
+   {
+    "at": 102.125,
+    "of": "tom",
+    "strength": 0.175,
+    "on_grid": false
+   },
+   {
+    "at": 102.31,
+    "of": "tom",
+    "strength": 0.164,
+    "on_grid": false
+   },
+   {
+    "at": 102.487,
+    "of": "tom",
+    "strength": 0.129,
+    "on_grid": false
+   },
+   {
+    "at": 102.74,
+    "of": "tom",
+    "strength": 0.125,
+    "on_grid": true
+   },
+   {
+    "at": 103.138,
+    "of": "tom",
+    "strength": 0.128,
+    "on_grid": false
+   },
+   {
+    "at": 103.522,
+    "of": "tom",
+    "strength": 0.186,
+    "on_grid": false
+   },
+   {
+    "at": 103.705,
+    "of": "snare",
+    "strength": 0.181,
+    "on_grid": false
+   },
+   {
+    "at": 103.903,
+    "of": "tom",
+    "strength": 0.146,
+    "on_grid": false
+   },
+   {
+    "at": 104.08,
+    "of": "tom",
+    "strength": 0.347,
+    "on_grid": false
+   },
+   {
+    "at": 104.272,
+    "of": "tom",
+    "strength": 0.199,
+    "on_grid": false
+   },
+   {
+    "at": 104.472,
+    "of": "tom",
+    "strength": 0.273,
+    "on_grid": false
+   },
+   {
+    "at": 104.66,
+    "of": "snare",
+    "strength": 0.146,
+    "on_grid": false
+   },
+   {
+    "at": 104.85,
+    "of": "tom",
+    "strength": 0.273,
+    "on_grid": true
+   },
+   {
+    "at": 105.037,
+    "of": "tom",
+    "strength": 0.204,
+    "on_grid": false
+   },
+   {
+    "at": 105.26,
+    "of": "tom",
+    "strength": 0.147,
+    "on_grid": false
+   },
+   {
+    "at": 105.44,
+    "of": "tom",
+    "strength": 0.121,
+    "on_grid": false
+   },
+   {
+    "at": 105.635,
+    "of": "snare",
+    "strength": 0.147,
+    "on_grid": true
+   },
+   {
+    "at": 105.825,
+    "of": "snare",
+    "strength": 0.135,
+    "on_grid": false
+   },
+   {
+    "at": 106.125,
+    "of": "tom",
+    "strength": 0.144,
+    "on_grid": false
+   },
+   {
+    "at": 106.483,
+    "of": "snare",
+    "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 106.668,
+    "of": "snare",
+    "strength": 0.188,
+    "on_grid": false
+   },
+   {
+    "at": 106.855,
+    "of": "snare",
+    "strength": 0.229,
+    "on_grid": false
+   },
+   {
+    "at": 107.037,
+    "of": "snare",
+    "strength": 0.158,
+    "on_grid": true
+   },
+   {
+    "at": 107.222,
+    "of": "snare",
+    "strength": 0.18,
+    "on_grid": false
+   },
+   {
+    "at": 107.41,
+    "of": "snare",
+    "strength": 0.144,
+    "on_grid": false
+   },
+   {
+    "at": 107.588,
+    "of": "tom",
+    "strength": 0.12,
+    "on_grid": false
+   },
+   {
+    "at": 107.77,
+    "of": "tom",
+    "strength": 0.167,
+    "on_grid": true
+   },
+   {
+    "at": 107.953,
+    "of": "tom",
+    "strength": 0.189,
+    "on_grid": false
+   },
+   {
+    "at": 108.15,
+    "of": "tom",
+    "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 108.698,
+    "of": "tom",
+    "strength": 0.268,
+    "on_grid": false
+   },
+   {
+    "at": 108.88,
+    "of": "snare",
+    "strength": 0.123,
+    "on_grid": false
+   },
+   {
+    "at": 109.39,
+    "of": "snare",
+    "strength": 0.171,
+    "on_grid": false
+   },
+   {
+    "at": 109.593,
+    "of": "snare",
+    "strength": 0.197,
+    "on_grid": false
+   },
+   {
+    "at": 109.775,
+    "of": "snare",
+    "strength": 0.13,
+    "on_grid": false
+   },
+   {
+    "at": 109.963,
+    "of": "snare",
+    "strength": 0.141,
+    "on_grid": false
+   },
+   {
+    "at": 110.155,
+    "of": "snare",
+    "strength": 0.132,
+    "on_grid": false
+   },
+   {
+    "at": 110.338,
+    "of": "snare",
+    "strength": 0.134,
+    "on_grid": false
+   },
+   {
+    "at": 110.522,
+    "of": "snare",
+    "strength": 0.221,
+    "on_grid": false
+   },
+   {
+    "at": 110.707,
+    "of": "snare",
+    "strength": 0.132,
+    "on_grid": false
+   },
+   {
+    "at": 110.94,
+    "of": "snare",
+    "strength": 0.139,
+    "on_grid": false
+   },
+   {
+    "at": 111.16,
+    "of": "snare",
+    "strength": 0.144,
+    "on_grid": false
+   },
+   {
+    "at": 111.362,
+    "of": "snare",
+    "strength": 0.149,
+    "on_grid": false
+   },
+   {
+    "at": 111.54,
+    "of": "snare",
+    "strength": 0.18,
+    "on_grid": false
+   },
+   {
+    "at": 111.752,
+    "of": "snare",
+    "strength": 0.197,
+    "on_grid": false
+   },
+   {
+    "at": 111.96,
+    "of": "snare",
+    "strength": 0.183,
+    "on_grid": false
+   },
+   {
+    "at": 112.155,
+    "of": "snare",
+    "strength": 0.153,
+    "on_grid": false
+   },
+   {
+    "at": 112.335,
+    "of": "snare",
+    "strength": 0.14,
+    "on_grid": false
+   },
+   {
+    "at": 112.517,
+    "of": "snare",
+    "strength": 0.207,
+    "on_grid": false
+   },
+   {
+    "at": 112.695,
+    "of": "snare",
+    "strength": 0.203,
+    "on_grid": true
+   },
+   {
+    "at": 112.885,
+    "of": "snare",
+    "strength": 0.146,
+    "on_grid": false
+   },
+   {
+    "at": 113.073,
+    "of": "snare",
+    "strength": 0.133,
+    "on_grid": false
+   },
+   {
+    "at": 113.25,
+    "of": "snare",
+    "strength": 0.166,
+    "on_grid": false
+   },
+   {
+    "at": 113.44,
+    "of": "tom",
+    "strength": 0.171,
+    "on_grid": true
+   },
+   {
+    "at": 113.668,
+    "of": "snare",
+    "strength": 0.153,
+    "on_grid": false
+   },
+   {
+    "at": 113.865,
+    "of": "tom",
+    "strength": 0.121,
+    "on_grid": false
+   },
+   {
+    "at": 114.043,
+    "of": "kick",
+    "strength": 0.171,
+    "on_grid": false
+   },
+   {
+    "at": 114.225,
+    "of": "kick",
+    "strength": 0.156,
+    "on_grid": false
+   },
+   {
+    "at": 114.415,
+    "of": "tom",
+    "strength": 0.141,
+    "on_grid": false
+   },
+   {
+    "at": 114.6,
+    "of": "kick",
+    "strength": 0.359,
+    "on_grid": false
+   },
+   {
+    "at": 114.787,
+    "of": "kick",
+    "strength": 0.133,
+    "on_grid": false
+   },
+   {
+    "at": 114.97,
+    "of": "tom",
+    "strength": 0.207,
+    "on_grid": false
+   },
+   {
+    "at": 115.153,
+    "of": "kick",
+    "strength": 0.291,
+    "on_grid": false
+   },
+   {
+    "at": 115.345,
+    "of": "kick",
+    "strength": 0.194,
+    "on_grid": false
+   },
+   {
+    "at": 115.53,
+    "of": "kick",
+    "strength": 0.204,
+    "on_grid": false
+   },
+   {
+    "at": 115.71,
+    "of": "kick",
+    "strength": 0.297,
+    "on_grid": false
+   },
+   {
+    "at": 115.892,
+    "of": "tom",
+    "strength": 0.201,
+    "on_grid": false
+   },
+   {
+    "at": 116.075,
+    "of": "kick",
+    "strength": 0.185,
+    "on_grid": false
+   },
+   {
+    "at": 116.257,
+    "of": "kick",
+    "strength": 0.182,
+    "on_grid": true
+   },
+   {
+    "at": 116.44,
+    "of": "kick",
+    "strength": 0.186,
+    "on_grid": false
+   },
+   {
+    "at": 116.625,
+    "of": "kick",
+    "strength": 0.287,
+    "on_grid": false
+   },
+   {
+    "at": 116.815,
+    "of": "kick",
+    "strength": 0.133,
+    "on_grid": false
+   },
+   {
+    "at": 117.007,
+    "of": "kick",
+    "strength": 0.162,
+    "on_grid": true
+   },
+   {
+    "at": 117.2,
+    "of": "kick",
+    "strength": 0.131,
+    "on_grid": false
+   },
+   {
+    "at": 117.487,
+    "of": "tom",
+    "strength": 0.128,
+    "on_grid": false
+   },
+   {
+    "at": 117.67,
+    "of": "kick",
+    "strength": 0.122,
+    "on_grid": false
+   },
+   {
+    "at": 117.85,
+    "of": "kick",
+    "strength": 0.155,
+    "on_grid": false
+   },
+   {
+    "at": 118.03,
+    "of": "kick",
+    "strength": 0.133,
+    "on_grid": false
+   },
+   {
+    "at": 118.235,
+    "of": "kick",
+    "strength": 0.327,
+    "on_grid": false
+   },
+   {
+    "at": 118.415,
+    "of": "kick",
+    "strength": 0.26,
+    "on_grid": true
+   },
+   {
+    "at": 118.593,
+    "of": "tom",
+    "strength": 0.31,
+    "on_grid": false
+   },
+   {
+    "at": 118.785,
+    "of": "tom",
+    "strength": 0.124,
+    "on_grid": false
+   },
+   {
+    "at": 118.97,
+    "of": "kick",
+    "strength": 0.228,
+    "on_grid": false
+   },
+   {
+    "at": 119.147,
+    "of": "kick",
+    "strength": 0.192,
+    "on_grid": true
+   },
+   {
+    "at": 119.328,
+    "of": "kick",
+    "strength": 0.149,
+    "on_grid": false
+   },
+   {
+    "at": 119.507,
+    "of": "kick",
+    "strength": 0.295,
+    "on_grid": false
+   },
+   {
+    "at": 119.688,
+    "of": "kick",
+    "strength": 0.174,
+    "on_grid": false
+   },
+   {
+    "at": 119.868,
+    "of": "kick",
+    "strength": 0.18,
+    "on_grid": true
+   },
+   {
+    "at": 120.047,
+    "of": "kick",
+    "strength": 0.129,
+    "on_grid": false
+   },
+   {
+    "at": 120.358,
+    "of": "tom",
+    "strength": 0.158,
+    "on_grid": false
+   },
+   {
+    "at": 120.535,
+    "of": "tom",
+    "strength": 0.146,
+    "on_grid": true
+   },
+   {
+    "at": 120.713,
+    "of": "tom",
+    "strength": 0.126,
+    "on_grid": false
+   },
+   {
+    "at": 120.955,
+    "of": "tom",
+    "strength": 0.121,
+    "on_grid": false
+   },
+   {
+    "at": 121.147,
+    "of": "tom",
+    "strength": 0.186,
+    "on_grid": false
+   },
+   {
+    "at": 121.332,
+    "of": "tom",
+    "strength": 0.124,
+    "on_grid": true
+   },
+   {
+    "at": 121.52,
+    "of": "tom",
+    "strength": 0.146,
+    "on_grid": false
+   },
+   {
+    "at": 121.707,
+    "of": "tom",
+    "strength": 0.176,
+    "on_grid": false
+   },
+   {
+    "at": 121.915,
+    "of": "tom",
+    "strength": 0.153,
+    "on_grid": false
+   },
+   {
+    "at": 122.198,
+    "of": "tom",
+    "strength": 0.12,
+    "on_grid": false
+   }
+  ]
+ },
+ "observations": {
+  "tonality": {
+   "rate": "per_beat",
+   "unit": "0-1, 1 = strongly pitched and sustained",
+   "how": "1 - spectral flatness over 400-4000 Hz, 512-point window, normalised across the song",
+   "not": "not loudness -- this rises when a pitched instrument carries the music, which on a real record often happens as energy falls",
+   "at": [
+    2.76689,
+    5.623033,
+    8.479176,
+    11.335318,
+    14.191461,
+    17.047604,
+    19.903747,
+    22.75989,
+    25.616033,
+    28.472176,
+    31.328318,
+    34.184461,
+    37.040604,
+    39.896747,
+    42.75289,
+    45.609033,
+    48.465176,
+    51.321318,
+    54.177461,
+    57.033604,
+    59.889747,
+    62.74589,
+    65.602033,
+    68.458176,
+    71.314318,
+    74.170461,
+    77.026604,
+    79.882747,
+    82.73889,
+    85.595033,
+    88.451176,
+    91.307318,
+    94.163461,
+    97.019604,
+    99.875747,
+    102.73189,
+    105.588033,
+    108.444176,
+    111.300318,
+    114.156461,
+    117.012604,
+    119.868747,
+    122.72489
+   ],
+   "value": [
+    0.08,
+    0.3343,
+    0.4507,
+    0.3524,
+    0.2465,
+    0.4754,
+    0.4232,
+    0.6073,
+    0.654,
+    0.2876,
+    0.3595,
+    0.6347,
+    0.8165,
+    0.4081,
+    0.5758,
+    0.2949,
+    0.5285,
+    0.3892,
+    0.4142,
+    0.7141,
+    0.8429,
+    0.4181,
+    0.5919,
+    0.371,
+    0.0581,
+    0.5117,
+    0.4335,
+    0.5303,
+    0.3984,
+    0.5263,
+    0.5641,
+    0.7141,
+    0.5345,
+    0.73,
+    0.296,
+    0.0817,
+    0.5604,
+    0.8207,
+    0.8467,
+    0.5746,
+    0.3623,
+    0.6083,
+    0.0942
+   ]
+  },
+  "melody": {
+   "rate": "per_beat",
+   "unit": "0-1, where the pitched line sits between this song's own lowest and highest fifth-percentile centroid",
+   "how": "energy-weighted log-frequency centroid over 250-2000 Hz per beat",
+   "not": "not the note being sung -- this is where the pitched energy sits, and a chord moves it as surely as a melody does",
+   "at": [
+    0.625,
+    1.339,
+    2.053,
+    2.767,
+    3.481,
+    4.195,
+    4.909,
+    5.623,
+    6.337,
+    7.051,
+    7.765,
+    8.479,
+    9.193,
+    9.907,
+    10.621,
+    11.335,
+    12.049,
+    12.763,
+    13.477,
+    14.191,
+    14.905,
+    15.62,
+    16.334,
+    17.048,
+    17.762,
+    18.476,
+    19.19,
+    19.904,
+    20.618,
+    21.332,
+    22.046,
+    22.76,
+    23.474,
+    24.188,
+    24.902,
+    25.616,
+    26.33,
+    27.044,
+    27.758,
+    28.472,
+    29.186,
+    29.9,
+    30.614,
+    31.328,
+    32.042,
+    32.756,
+    33.47,
+    34.184,
+    34.898,
+    35.613,
+    36.327,
+    37.041,
+    37.755,
+    38.469,
+    39.183,
+    39.897,
+    40.611,
+    41.325,
+    42.039,
+    42.753,
+    43.467,
+    44.181,
+    44.895,
+    45.609,
+    46.323,
+    47.037,
+    47.751,
+    48.465,
+    49.179,
+    49.893,
+    50.607,
+    51.321,
+    52.035,
+    52.749,
+    53.463,
+    54.177,
+    54.891,
+    55.606,
+    56.32,
+    57.034,
+    57.748,
+    58.462,
+    59.176,
+    59.89,
+    60.604,
+    61.318,
+    62.032,
+    62.746,
+    63.46,
+    64.174,
+    64.888,
+    65.602,
+    66.316,
+    67.03,
+    67.744,
+    68.458,
+    69.172,
+    69.886,
+    70.6,
+    71.314,
+    72.028,
+    72.742,
+    73.456,
+    74.17,
+    74.884,
+    75.599,
+    76.313,
+    77.027,
+    77.741,
+    78.455,
+    79.169,
+    79.883,
+    80.597,
+    81.311,
+    82.025,
+    82.739,
+    83.453,
+    84.167,
+    84.881,
+    85.595,
+    86.309,
+    87.023,
+    87.737,
+    88.451,
+    89.165,
+    89.879,
+    90.593,
+    91.307,
+    92.021,
+    92.735,
+    93.449,
+    94.163,
+    94.877,
+    95.592,
+    96.306,
+    97.02,
+    97.734,
+    98.448,
+    99.162,
+    99.876,
+    100.59,
+    101.304,
+    102.018,
+    102.732,
+    103.446,
+    104.16,
+    104.874,
+    105.588,
+    106.302,
+    107.016,
+    107.73,
+    108.444,
+    109.158,
+    109.872,
+    110.586,
+    111.3,
+    112.014,
+    112.728,
+    113.442,
+    114.156,
+    114.87,
+    115.585,
+    116.299,
+    117.013,
+    117.727,
+    118.441,
+    119.155,
+    119.869,
+    120.583,
+    121.297,
+    122.011,
+    122.725,
+    123.439
+   ],
+   "value": [
+    0.33,
+    0.2574,
+    0.153,
+    0.3055,
+    0.0,
+    0.0211,
+    0.1247,
+    0.108,
+    0.0763,
+    0.1107,
+    0.1129,
+    0.1131,
+    0.1092,
+    0.0,
+    0.0,
+    0.0248,
+    0.093,
+    0.3983,
+    0.4332,
+    0.666,
+    0.2055,
+    0.216,
+    0.296,
+    0.2596,
+    0.1596,
+    0.2563,
+    0.3728,
+    0.5336,
+    0.3395,
+    0.0494,
+    0.0027,
+    0.2352,
+    0.4697,
+    0.5966,
+    0.2976,
+    0.865,
+    0.5132,
+    0.5467,
+    0.3041,
+    0.4901,
+    0.9537,
+    1.0,
+    0.8905,
+    0.8759,
+    0.479,
+    0.1543,
+    0.8548,
+    0.8211,
+    0.5036,
+    0.835,
+    0.6813,
+    0.6651,
+    0.6819,
+    0.4173,
+    0.3729,
+    0.9688,
+    0.6604,
+    0.554,
+    0.3442,
+    0.7771,
+    0.8348,
+    0.5785,
+    0.5204,
+    0.6675,
+    0.6835,
+    0.7077,
+    0.6807,
+    1.0,
+    0.9679,
+    0.7789,
+    0.8499,
+    1.0,
+    0.4633,
+    0.2443,
+    0.6452,
+    0.6709,
+    0.6813,
+    0.8692,
+    0.7193,
+    0.8927,
+    0.6504,
+    0.8006,
+    0.7712,
+    0.7313,
+    0.637,
+    0.5576,
+    0.5658,
+    0.9782,
+    0.6588,
+    0.524,
+    0.6722,
+    0.8011,
+    0.7155,
+    0.5016,
+    0.672,
+    0.5919,
+    0.8026,
+    0.5941,
+    0.147,
+    0.1769,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.6064,
+    0.7853,
+    0.9267,
+    1.0,
+    0.8012,
+    0.5927,
+    0.8403,
+    0.8951,
+    0.8417,
+    0.6499,
+    0.8704,
+    0.98,
+    0.7902,
+    0.6513,
+    0.7913,
+    0.854,
+    0.8119,
+    0.7647,
+    0.9552,
+    1.0,
+    0.8133,
+    0.549,
+    0.7999,
+    0.8556,
+    0.7426,
+    0.5536,
+    0.8284,
+    0.9456,
+    0.7639,
+    0.535,
+    0.741,
+    0.797,
+    0.9219,
+    0.6586,
+    0.2326,
+    0.0714,
+    0.0206,
+    0.0,
+    0.0,
+    0.3284,
+    0.3759,
+    0.7181,
+    0.5323,
+    1.0,
+    1.0,
+    0.6659,
+    0.3968,
+    0.6985,
+    0.7725,
+    0.9295,
+    0.9569,
+    1.0,
+    1.0,
+    0.8227,
+    0.6081,
+    0.7282,
+    0.4711,
+    0.1219,
+    0.1977,
+    0.3098,
+    0.1414,
+    0.655,
+    0.7118,
+    0.4833,
+    0.3742,
+    0.153,
+    0.338,
+    0.3106,
+    0.219
+   ]
+  },
+  "harmony": {
+   "rate": "per_beat",
+   "unit": "0-1, 1 = the chroma turned over completely from the beat before",
+   "how": "cosine distance between consecutive 12-bin chroma vectors",
+   "not": "not a chord name, and it cannot tell a chord change from a new instrument entering on different notes",
+   "at": [
+    0.625,
+    1.339,
+    2.053,
+    2.767,
+    3.481,
+    4.195,
+    4.909,
+    5.623,
+    6.337,
+    7.051,
+    7.765,
+    8.479,
+    9.193,
+    9.907,
+    10.621,
+    11.335,
+    12.049,
+    12.763,
+    13.477,
+    14.191,
+    14.905,
+    15.62,
+    16.334,
+    17.048,
+    17.762,
+    18.476,
+    19.19,
+    19.904,
+    20.618,
+    21.332,
+    22.046,
+    22.76,
+    23.474,
+    24.188,
+    24.902,
+    25.616,
+    26.33,
+    27.044,
+    27.758,
+    28.472,
+    29.186,
+    29.9,
+    30.614,
+    31.328,
+    32.042,
+    32.756,
+    33.47,
+    34.184,
+    34.898,
+    35.613,
+    36.327,
+    37.041,
+    37.755,
+    38.469,
+    39.183,
+    39.897,
+    40.611,
+    41.325,
+    42.039,
+    42.753,
+    43.467,
+    44.181,
+    44.895,
+    45.609,
+    46.323,
+    47.037,
+    47.751,
+    48.465,
+    49.179,
+    49.893,
+    50.607,
+    51.321,
+    52.035,
+    52.749,
+    53.463,
+    54.177,
+    54.891,
+    55.606,
+    56.32,
+    57.034,
+    57.748,
+    58.462,
+    59.176,
+    59.89,
+    60.604,
+    61.318,
+    62.032,
+    62.746,
+    63.46,
+    64.174,
+    64.888,
+    65.602,
+    66.316,
+    67.03,
+    67.744,
+    68.458,
+    69.172,
+    69.886,
+    70.6,
+    71.314,
+    72.028,
+    72.742,
+    73.456,
+    74.17,
+    74.884,
+    75.599,
+    76.313,
+    77.027,
+    77.741,
+    78.455,
+    79.169,
+    79.883,
+    80.597,
+    81.311,
+    82.025,
+    82.739,
+    83.453,
+    84.167,
+    84.881,
+    85.595,
+    86.309,
+    87.023,
+    87.737,
+    88.451,
+    89.165,
+    89.879,
+    90.593,
+    91.307,
+    92.021,
+    92.735,
+    93.449,
+    94.163,
+    94.877,
+    95.592,
+    96.306,
+    97.02,
+    97.734,
+    98.448,
+    99.162,
+    99.876,
+    100.59,
+    101.304,
+    102.018,
+    102.732,
+    103.446,
+    104.16,
+    104.874,
+    105.588,
+    106.302,
+    107.016,
+    107.73,
+    108.444,
+    109.158,
+    109.872,
+    110.586,
+    111.3,
+    112.014,
+    112.728,
+    113.442,
+    114.156,
+    114.87,
+    115.585,
+    116.299,
+    117.013,
+    117.727,
+    118.441,
+    119.155,
+    119.869,
+    120.583,
+    121.297,
+    122.011,
+    122.725,
+    123.439
+   ],
+   "value": [
+    0.0,
+    0.1152,
+    0.0095,
+    0.136,
+    0.1391,
+    0.0207,
+    0.0325,
+    0.0635,
+    0.3712,
+    0.0105,
+    0.0684,
+    0.0321,
+    0.3489,
+    0.013,
+    0.0253,
+    0.1064,
+    0.0871,
+    0.0204,
+    0.0602,
+    0.1576,
+    0.1498,
+    0.0713,
+    0.1343,
+    0.054,
+    0.3547,
+    0.0407,
+    0.1453,
+    0.0642,
+    0.2839,
+    0.0184,
+    0.0165,
+    0.7252,
+    0.3794,
+    0.0478,
+    0.0627,
+    0.2439,
+    0.7204,
+    0.3844,
+    0.089,
+    0.2533,
+    0.1013,
+    0.1467,
+    0.3278,
+    0.1762,
+    0.2077,
+    0.0292,
+    0.5823,
+    0.1314,
+    0.7809,
+    0.019,
+    0.0087,
+    0.0098,
+    0.3582,
+    0.2776,
+    0.0773,
+    0.3324,
+    0.5004,
+    0.0134,
+    0.1771,
+    0.1833,
+    0.4088,
+    0.1162,
+    0.4776,
+    0.8371,
+    0.6063,
+    0.1745,
+    0.0467,
+    0.2773,
+    0.6201,
+    0.3648,
+    0.1013,
+    0.1629,
+    0.0638,
+    0.0651,
+    0.4376,
+    0.08,
+    0.0658,
+    0.0728,
+    0.1898,
+    0.1349,
+    0.6012,
+    0.0288,
+    0.0227,
+    0.0251,
+    0.2651,
+    0.3816,
+    0.0711,
+    0.3215,
+    0.4064,
+    0.0238,
+    0.1089,
+    0.1599,
+    0.261,
+    0.0867,
+    0.1029,
+    0.0927,
+    0.1514,
+    0.0152,
+    0.4299,
+    0.2538,
+    0.2454,
+    0.2535,
+    0.3256,
+    0.3357,
+    0.0635,
+    0.0212,
+    0.0285,
+    0.1722,
+    0.0455,
+    0.0528,
+    0.0533,
+    0.0635,
+    0.0419,
+    0.011,
+    0.0229,
+    0.0818,
+    0.0854,
+    0.0239,
+    0.047,
+    0.0966,
+    0.0357,
+    0.0535,
+    0.0541,
+    0.2397,
+    0.0549,
+    0.1731,
+    0.0684,
+    0.1363,
+    0.0953,
+    0.0908,
+    0.0629,
+    0.1406,
+    0.0832,
+    0.1222,
+    0.0439,
+    0.0248,
+    0.093,
+    0.0807,
+    0.3923,
+    0.2371,
+    0.2415,
+    0.245,
+    0.3344,
+    0.3876,
+    0.4235,
+    0.7699,
+    0.1833,
+    0.5105,
+    0.5995,
+    0.3699,
+    0.2671,
+    0.6873,
+    0.6885,
+    1.0,
+    0.047,
+    0.8898,
+    0.3802,
+    0.4887,
+    0.0609,
+    0.3231,
+    0.1177,
+    0.5423,
+    0.0353,
+    0.0288,
+    0.1097,
+    0.2743,
+    0.3285,
+    0.046,
+    0.1742,
+    0.0106,
+    0.1612,
+    0.1269,
+    0.1606
+   ]
+  },
+  "voice": {
+   "rate": "per_beat",
+   "unit": "0-1, share of spectral energy carried in the melodic band",
+   "how": "250-2000 Hz energy over full-band energy",
+   "not": "NOT vocals. This cannot separate a voice from a lead synth or a string line, and it does not read lyrics",
+   "at": [
+    0.625,
+    1.339,
+    2.053,
+    2.767,
+    3.481,
+    4.195,
+    4.909,
+    5.623,
+    6.337,
+    7.051,
+    7.765,
+    8.479,
+    9.193,
+    9.907,
+    10.621,
+    11.335,
+    12.049,
+    12.763,
+    13.477,
+    14.191,
+    14.905,
+    15.62,
+    16.334,
+    17.048,
+    17.762,
+    18.476,
+    19.19,
+    19.904,
+    20.618,
+    21.332,
+    22.046,
+    22.76,
+    23.474,
+    24.188,
+    24.902,
+    25.616,
+    26.33,
+    27.044,
+    27.758,
+    28.472,
+    29.186,
+    29.9,
+    30.614,
+    31.328,
+    32.042,
+    32.756,
+    33.47,
+    34.184,
+    34.898,
+    35.613,
+    36.327,
+    37.041,
+    37.755,
+    38.469,
+    39.183,
+    39.897,
+    40.611,
+    41.325,
+    42.039,
+    42.753,
+    43.467,
+    44.181,
+    44.895,
+    45.609,
+    46.323,
+    47.037,
+    47.751,
+    48.465,
+    49.179,
+    49.893,
+    50.607,
+    51.321,
+    52.035,
+    52.749,
+    53.463,
+    54.177,
+    54.891,
+    55.606,
+    56.32,
+    57.034,
+    57.748,
+    58.462,
+    59.176,
+    59.89,
+    60.604,
+    61.318,
+    62.032,
+    62.746,
+    63.46,
+    64.174,
+    64.888,
+    65.602,
+    66.316,
+    67.03,
+    67.744,
+    68.458,
+    69.172,
+    69.886,
+    70.6,
+    71.314,
+    72.028,
+    72.742,
+    73.456,
+    74.17,
+    74.884,
+    75.599,
+    76.313,
+    77.027,
+    77.741,
+    78.455,
+    79.169,
+    79.883,
+    80.597,
+    81.311,
+    82.025,
+    82.739,
+    83.453,
+    84.167,
+    84.881,
+    85.595,
+    86.309,
+    87.023,
+    87.737,
+    88.451,
+    89.165,
+    89.879,
+    90.593,
+    91.307,
+    92.021,
+    92.735,
+    93.449,
+    94.163,
+    94.877,
+    95.592,
+    96.306,
+    97.02,
+    97.734,
+    98.448,
+    99.162,
+    99.876,
+    100.59,
+    101.304,
+    102.018,
+    102.732,
+    103.446,
+    104.16,
+    104.874,
+    105.588,
+    106.302,
+    107.016,
+    107.73,
+    108.444,
+    109.158,
+    109.872,
+    110.586,
+    111.3,
+    112.014,
+    112.728,
+    113.442,
+    114.156,
+    114.87,
+    115.585,
+    116.299,
+    117.013,
+    117.727,
+    118.441,
+    119.155,
+    119.869,
+    120.583,
+    121.297,
+    122.011,
+    122.725,
+    123.439
+   ],
+   "value": [
+    0.7092,
+    0.7023,
+    0.7847,
+    0.6775,
+    0.7629,
+    0.8086,
+    0.8095,
+    0.7264,
+    0.8134,
+    0.7959,
+    0.8361,
+    0.7578,
+    0.7566,
+    0.832,
+    0.8582,
+    0.7786,
+    0.7802,
+    0.7678,
+    0.8316,
+    0.7423,
+    0.787,
+    0.8391,
+    0.8423,
+    0.7533,
+    0.8197,
+    0.8245,
+    0.8575,
+    0.7941,
+    0.7884,
+    0.8354,
+    0.8653,
+    0.8193,
+    0.7836,
+    0.9116,
+    0.8904,
+    0.9126,
+    0.8528,
+    0.925,
+    0.9389,
+    0.6827,
+    0.8744,
+    0.9489,
+    0.8937,
+    0.8935,
+    0.8469,
+    0.7961,
+    0.9111,
+    0.9292,
+    0.8675,
+    0.9294,
+    0.8677,
+    0.9219,
+    0.9183,
+    0.8747,
+    0.8347,
+    0.8962,
+    0.8797,
+    0.9099,
+    0.8441,
+    0.8643,
+    0.98,
+    1.0,
+    0.7207,
+    0.7434,
+    0.4023,
+    0.5216,
+    0.3567,
+    0.5916,
+    0.6023,
+    0.5408,
+    0.5406,
+    0.4922,
+    0.3465,
+    0.4199,
+    0.45,
+    0.5214,
+    0.4118,
+    0.415,
+    0.4461,
+    0.5557,
+    0.4257,
+    0.6024,
+    0.4989,
+    0.5433,
+    0.4881,
+    0.5356,
+    0.4393,
+    0.5515,
+    0.458,
+    0.5234,
+    0.3148,
+    0.5473,
+    0.5398,
+    0.4446,
+    0.3481,
+    0.3877,
+    0.4577,
+    0.7061,
+    0.7682,
+    0.8208,
+    0.855,
+    0.5767,
+    0.6379,
+    0.7293,
+    0.328,
+    0.3773,
+    0.347,
+    0.3492,
+    0.3965,
+    0.4044,
+    0.3669,
+    0.4182,
+    0.3151,
+    0.4459,
+    0.3613,
+    0.3527,
+    0.4068,
+    0.3356,
+    0.3515,
+    0.3974,
+    0.3052,
+    0.4119,
+    0.3662,
+    0.3776,
+    0.4236,
+    0.4071,
+    0.3582,
+    0.4334,
+    0.3149,
+    0.4457,
+    0.3676,
+    0.374,
+    0.424,
+    0.3201,
+    0.3624,
+    0.425,
+    0.4958,
+    0.7193,
+    0.7407,
+    0.8798,
+    0.8208,
+    0.5831,
+    0.6519,
+    0.524,
+    0.7644,
+    0.8217,
+    0.8109,
+    0.8621,
+    0.9749,
+    0.9641,
+    0.8767,
+    0.9705,
+    0.9875,
+    0.9883,
+    0.9359,
+    0.9401,
+    0.9745,
+    0.9957,
+    0.8753,
+    0.6128,
+    0.5291,
+    0.4479,
+    0.3192,
+    0.3004,
+    0.3604,
+    0.5478,
+    0.4545,
+    0.6097,
+    0.7961,
+    0.7412,
+    0.7026,
+    0.7582,
+    0.5832
+   ]
+  }
+ },
+ "confidence": 0.908,
+ "confidence_by_field": {
+  "beats": 0.767,
+  "downbeats": 0.908,
+  "chapters": 0.45,
+  "moments": 0.5,
+  "spans": 0.4,
+  "energy": 0.7
+ }
+}

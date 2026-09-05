@@ -148,9 +148,9 @@ const $ = s => document.querySelector(s);
 let PER=MAP.period, PH=MAP.phase, DUR=MAP.dur, DBP=MAP.bar_phase;
 const BAR=4*PER;
 const BEATS=[]; for(let t=PH;t<DUR;t+=PER) BEATS.push(+t.toFixed(3));
-const CH=MAP.chapters.map(c=>c.slice()), SP=MAP.spans.map(s=>({kind:s[0],from:s[1],to:s[2],rise:s[3]}));
+let CH=MAP.chapters.map(c=>c.slice()), SP=MAP.spans.map(s=>({kind:s[0],from:s[1],to:s[2],rise:s[3]}));
 let MO=MAP.moments.map(m=>({at:m[0],kind:m[1],v:m[2]}));
-const EN=MAP.energy;
+let EN=MAP.energy;
 let STOP_REAL=true, ANT=true, HAZE=0.28, DRIFT=true, VIEW=0, QUAL=1, MODE=0;
 __RECIPE__
 __DRONES__

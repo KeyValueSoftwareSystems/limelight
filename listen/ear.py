@@ -215,6 +215,8 @@ def fit_grid(fx, rate, dur):
 TON_N = 512
 TON_RATE_HZ = 8000.0
 TON_LO_HZ, TON_HI_HZ = 400.0, 4000.0
+HIGH_LO_HZ, HIGH_HI_HZ = 1900.0, 3900.0
+MEL_LO_HZ, MEL_HI_HZ = 250.0, 2000.0
 TON_WINDOW = [0.5 - 0.5 * math.cos(2 * math.pi * i / (TON_N - 1)) for i in range(TON_N)]
 
 
@@ -250,23 +252,74 @@ def beat_tonality(samples, sr, beats, period):
     sig, rate = block_average_decimate(samples, sr, TON_RATE_HZ)
     k0 = max(1, int(TON_LO_HZ * TON_N / rate))
     k1 = min(TON_N // 2, int(TON_HI_HZ * TON_N / rate))
+    zero = [0.0] * len(beats)
     if k1 <= k0 + 1:
-        return [0.0] * len(beats)
-    flat = []
+        return zero, list(zero), list(zero), list(zero), list(zero)
+    mk0 = max(1, int(MEL_LO_HZ * TON_N / rate))
+    mk1 = min(TON_N // 2, int(MEL_HI_HZ * TON_N / rate))
+    hk0 = max(1, int(HIGH_LO_HZ * TON_N / rate))
+    hk1 = min(TON_N // 2, int(HIGH_HI_HZ * TON_N / rate))
+    freqs = [k * rate / TON_N for k in range(mk0, mk1)]
+    pcs = [int(round(12 * math.log(f / 440.0, 2))) % 12 for f in freqs]
+    lfs = [math.log(f, 2) for f in freqs]
+    flat, highs, cents, chromas, voiced = [], [], [], [], []
     for t in beats:
         i0 = int(t * rate)
         i1 = min(len(sig), i0 + max(TON_N, int(period * rate)))
-        acc, p = [], i0
+        acc, hacc, p = [], [], i0
+        chroma = [0.0] * 12
+        cnum = cden = total = 0.0
         while p + TON_N <= i1:
             spec = _fft([complex(sig[p + i] * TON_WINDOW[i], 0.0) for i in range(TON_N)])
             mag = [abs(spec[k]) + 1e-12 for k in range(k0, k1)]
             geo = math.exp(sum(math.log(v) for v in mag) / len(mag))
             arith = sum(mag) / len(mag)
             acc.append(geo / arith)
+            if hk1 > hk0:
+                hacc.append(sum(abs(spec[k]) for k in range(hk0, hk1)) / (hk1 - hk0))
+            for j, k in enumerate(range(mk0, mk1)):
+                v = abs(spec[k])
+                chroma[pcs[j]] += v
+                cnum += v * lfs[j]
+                cden += v
+            total += sum(abs(spec[k]) for k in range(1, TON_N // 2)) + 1e-12
             p += TON_N // 2
         flat.append(sum(acc) / len(acc) if acc else 1.0)
+        highs.append(sum(hacc) / len(hacc) if hacc else 0.0)
+        cents.append(cnum / cden if cden else 0.0)
+        norm = sum(chroma) or 1.0
+        chromas.append([v / norm for v in chroma])
+        voiced.append(cden / total if total else 0.0)
     lo, hi = min(flat), max(flat)
-    return [1.0 - ((v - lo) / (hi - lo + 1e-12)) for v in flat]
+    tone = [1.0 - ((v - lo) / (hi - lo + 1e-12)) for v in flat]
+    hmax = max(highs) or 1.0
+    heard = [c for c in cents if c > 0]
+    if heard:
+        ranked = sorted(heard)
+        mlo = ranked[int(len(ranked) * 0.05)]
+        mhi = ranked[int(len(ranked) * 0.95)]
+    else:
+        mlo = mhi = 0.0
+    melody = [
+        min(1.0, max(0.0, (c - mlo) / (mhi - mlo))) if c > 0 and mhi > mlo else 0.5
+        for c in cents
+    ]
+    harmony = [0.0]
+    for i in range(1, len(chromas)):
+        a, b = chromas[i - 1], chromas[i]
+        dot = sum(x * y for x, y in zip(a, b))
+        na = math.sqrt(sum(x * x for x in a)) or 1.0
+        nb = math.sqrt(sum(y * y for y in b)) or 1.0
+        harmony.append(max(0.0, 1.0 - dot / (na * nb)))
+    hpk = max(harmony) or 1.0
+    vmax = max(voiced) or 1.0
+    return (
+        tone,
+        [v / hmax for v in highs],
+        melody,
+        [v / hpk for v in harmony],
+        [v / vmax for v in voiced],
+    )
 
 
 SPOTLIGHT_TON = 0.80
@@ -465,6 +518,44 @@ STOP_ABSOLUTE = 0.22
 STOP_MIN_BEATS = 2
 
 
+STOP_CURVE_FLOOR = 0.25
+STOP_CURVE_LOUD = 0.60
+STOP_CURVE_LOOKBACK = 3
+STOP_CURVE_TAIL_BARS = 2
+
+
+def stops_from_curve(curve, bar_seconds):
+    if len(curve) < 8:
+        return []
+    values = sorted(v for _, v in curve)
+    median = values[len(values) // 2]
+    if median <= 1e-9:
+        return []
+    floor = median * STOP_CURVE_FLOOR
+    loud = median * STOP_CURVE_LOUD
+    out, i, last = [], 1, len(curve) - STOP_CURVE_TAIL_BARS
+    while i < last:
+        if curve[i][1] > floor:
+            i += 1
+            continue
+        back = [v for _, v in curve[max(0, i - STOP_CURVE_LOOKBACK) : i]]
+        if not back or max(back) < loud:
+            i += 1
+            continue
+        j = i
+        while j < last and curve[j][1] <= floor:
+            j += 1
+        out.append(
+            {
+                "at": round(curve[i][0], 3),
+                "kind": "stop",
+                "holds": round(max(1, j - i) * bar_seconds, 3),
+            }
+        )
+        i = j + 1
+    return out
+
+
 def find_stops(profile, beats, period):
     if not profile or len(beats) < STOP_LOOKBACK_BEATS + 4:
         return []
@@ -500,17 +591,17 @@ def find_stops(profile, beats, period):
 MIN_SECTION_BARS = 2
 
 
-def bar_profile(profile, beats, downbeats):
+def bar_profile(profile, beats, downbeats, extra=None):
     index = {round(b, 3): i for i, b in enumerate(beats)}
+    channels = list(profile) + ([extra] if extra else [])
     rows = []
     for d in downbeats:
         i = index.get(round(d, 3))
         if i is None:
             continue
-        rows.append(
-            [sum(band[i : i + 4]) / max(1, len(band[i : i + 4])) for band in profile]
-        )
+        rows.append([sum(c[i : i + 4]) / max(1, len(c[i : i + 4])) for c in channels])
     return rows
+
 
 
 SEG_LAG_BARS = 4
@@ -608,11 +699,11 @@ def classify(rows, bounds, n_bars):
     for k, st in enumerate(stats):
         if k == 0:
             labels.append("intro")
-        elif st["climbing"]:
+        elif st["climbing"] and st["overall"] < loud_gate:
             labels.append("build")
         elif st["low"] <= typical_low * 0.6:
             labels.append("break")
-        elif st["rising"]:
+        elif st["rising"] and st["overall"] < loud_gate:
             labels.append("build")
         elif st["overall"] >= loud_gate and st["low"] >= typical_low * 0.85:
             labels.append("drop")
@@ -628,6 +719,7 @@ DROP_SNAP_RISE = 0.05
 DROP_SNAP_MAX_BARS = 3
 MERGE_ENERGY_TOL = 0.15
 MERGE_MAX_BARS = 12
+MERGE_RISE_BARS = 2
 ALWAYS_MERGE = ("break", "verse", "outro", "intro")
 
 
@@ -642,7 +734,11 @@ def merge_runs(bounds, labels, curve, n_bars):
         b = bounds[i]
         if b <= 0 or b >= len(curve):
             return 0.0
-        return curve[b][1] - curve[b - 1][1]
+        after = [v for _, v in curve[b : b + MERGE_RISE_BARS]]
+        before = [v for _, v in curve[max(0, b - MERGE_RISE_BARS) : b]]
+        if not after or not before:
+            return curve[b][1] - curve[b - 1][1]
+        return sum(after) / len(after) - sum(before) / len(before)
 
     kept_bounds, kept_labels = [], []
     i = 0
@@ -852,7 +948,8 @@ def accents_from_bands(bands, rate, beats, period, dur):
     flux = [0.0] + [max(0.0, total[i] - total[i - 1]) for i in range(1, n)]
     peak = max(flux) or 1.0
     flux = [v / peak for v in flux]
-    gap = max(1, int(ACCENT_MIN_GAP_S * erate))
+    musical_gap = max(ACCENT_MIN_GAP_S, period / 4.0)
+    gap = max(1, int(musical_gap * erate))
     grid = sorted(beats)
     events, i = [], 1
     while i < n - 1:
@@ -981,8 +1078,10 @@ def listen(path):
 
     curve = downbeat_energy(profile, beats, groups) if groups else []
     if curve:
-        rows = bar_profile(profile, beats, groups)
-        tonal = beat_tonality(samples, sr, beats, period)
+        tonal, highband, melody, harmony, voiced = beat_tonality(
+            samples, sr, beats, period
+        )
+        rows = bar_profile(profile, beats, groups, highband)
         beat_index = {round(b, 3): i for i, b in enumerate(beats)}
         tonal_at_groups = [
             beat_index[round(g, 3)] for g in groups if round(g, 3) in beat_index
@@ -995,7 +1094,17 @@ def listen(path):
         moments = (
             moments_from_sections(bounds, labels, rows, groups, period * 4)
             + find_stops(profile, beats, period)
+            + stops_from_curve(curve, period * 4)
         )
+        seen = set()
+        deduped = []
+        for x in sorted(moments, key=lambda m: (m["at"], m["kind"])):
+            key = (x["kind"], round(x["at"] / max(1e-6, period * 2)))
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(x)
+        moments = deduped
         spans = builds_into_drops(curve, moments)
         if not spans:
             spans = spans_from_sections(bounds, labels, groups, curve, len(rows))
@@ -1011,7 +1120,8 @@ def listen(path):
         ]
     else:
         moments, spans = find_stops(profile, beats, period), []
-        tonal, tonal_at_groups = [], []
+        tonal, highband, tonal_at_groups = [], [], []
+        melody, harmony, voiced = [], [], []
         sections, stems, accents = [], {}, []
         chapters = [{"at": 0.0, "name": "intro"}]
     moments.sort(key=lambda x: x["at"])
@@ -1074,7 +1184,36 @@ def listen(path):
                        "the music, which on a real record often happens as energy falls",
                 "at": [t for t, _ in curve],
                 "value": [round(tonal[i], 4) for i in tonal_at_groups] if tonal else [],
-            }
+            },
+            "melody": {
+                "rate": "per_beat",
+                "unit": "0-1, where the pitched line sits between this song's own "
+                        "lowest and highest fifth-percentile centroid",
+                "how": f"energy-weighted log-frequency centroid over "
+                       f"{MEL_LO_HZ:.0f}-{MEL_HI_HZ:.0f} Hz per beat",
+                "not": "not the note being sung -- this is where the pitched energy "
+                       "sits, and a chord moves it as surely as a melody does",
+                "at": [round(b, 3) for b in beats],
+                "value": [round(v, 4) for v in melody],
+            },
+            "harmony": {
+                "rate": "per_beat",
+                "unit": "0-1, 1 = the chroma turned over completely from the beat before",
+                "how": "cosine distance between consecutive 12-bin chroma vectors",
+                "not": "not a chord name, and it cannot tell a chord change from a "
+                       "new instrument entering on different notes",
+                "at": [round(b, 3) for b in beats],
+                "value": [round(v, 4) for v in harmony],
+            },
+            "voice": {
+                "rate": "per_beat",
+                "unit": "0-1, share of spectral energy carried in the melodic band",
+                "how": f"{MEL_LO_HZ:.0f}-{MEL_HI_HZ:.0f} Hz energy over full-band energy",
+                "not": "NOT vocals. This cannot separate a voice from a lead synth or "
+                       "a string line, and it does not read lyrics",
+                "at": [round(b, 3) for b in beats],
+                "value": [round(v, 4) for v in voiced],
+            },
         },
         "confidence": round(min(0.95, max(0.05, cue)), 3),
         "confidence_by_field": {

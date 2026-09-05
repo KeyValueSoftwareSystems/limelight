@@ -16,8 +16,12 @@
   "max_pan_per_s": 1.05,
   "max_tilt_per_s": 1.15,
   "note": "Fraction of range per second. A fast head does about 0.5, so this budget is generous; the recipe derives its amplitude from it.",
-  "pyro_zones": [],
-  "co2_max_burst_s": 1.2
+  "pyro_zones": [
+   "deck_fx"
+  ],
+  "co2_max_burst_s": 1.2,
+  "pyro_interlock": "virtual: this rig is an emulator, no device can physically fire",
+  "pyro_min_gap_s": 20.0
  },
  "zones": [
   {
