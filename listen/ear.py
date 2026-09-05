@@ -291,15 +291,19 @@ def spotlights_from_tonality(tonal, beats, groups, curve):
     return [{"at": round(g, 6), "kind": "spotlight"} for _, g in picked]
 
 
+keep_rate = [0.0]
 BAR_BANDS = ((35.0, 130.0), (130.0, 400.0), (400.0, 1200.0), (1200.0, 1900.0))
 BAR_RATE_HZ = 4000.0
 
 
-def beat_band_profile(samples, sr, beats, period):
+def beat_band_profile(samples, sr, beats, period, keep=None):
     wide, wrate = block_average_decimate(samples, sr, BAR_RATE_HZ)
     profile = []
     for lo_hz, hi_hz in BAR_BANDS:
         band = bandpass(wide, wrate, lo_hz, hi_hz)
+        if keep is not None:
+            keep.append(band)
+            keep_rate[0] = wrate
         per_beat = []
         for bt in beats:
             i0 = int(bt * wrate)
@@ -693,6 +697,46 @@ BUILD_MIN_BARS = 4
 BUILD_MIN_RISE = 0.22
 
 
+BUILD_BACK_MAX_BARS = 16
+BUILD_BACK_MIN_BARS = 3
+
+
+def builds_into_drops(curve, moments):
+    if len(curve) < 4:
+        return []
+    times = [t for t, _ in curve]
+    spans = []
+    for m in moments:
+        if m["kind"] != "drop":
+            continue
+        idx = min(range(len(times)), key=lambda i: abs(times[i] - m["at"]))
+        if idx < BUILD_BACK_MIN_BARS:
+            continue
+        peak = curve[idx][1]
+        j = idx
+        while (
+            j - 1 >= 0
+            and idx - (j - 1) <= BUILD_BACK_MAX_BARS
+            and curve[j - 1][1] <= curve[j][1] + 0.03
+            and curve[j - 1][1] < peak
+        ):
+            j -= 1
+        if idx - j < BUILD_BACK_MIN_BARS:
+            continue
+        spans.append({
+            "kind": "build",
+            "from": round(times[j], 6),
+            "to": round(times[idx], 6),
+            "rise": rise_shape([v for _, v in curve[j : idx + 1]]),
+        })
+    out = []
+    for sp in sorted(spans, key=lambda s: s["from"]):
+        if out and sp["from"] < out[-1]["to"]:
+            continue
+        out.append(sp)
+    return out
+
+
 def find_builds(curve, dur):
     spans, i = [], 0
     while i < len(curve) - 1:
@@ -730,6 +774,102 @@ def name_chapters(curve, dur):
     if dur - chapters[-1]["at"] > 8.0 and len(chapters) > 1:
         chapters.append({"at": round(curve[-1][0], 6), "name": "outro"})
     return chapters
+
+
+ACCENT_ENV_HZ = 400.0
+ACCENT_MIN_GAP_S = 0.045
+ACCENT_ON_GRID_S = 0.05
+ACCENT_FLOOR = 0.12
+DRUM_OF = ("kick", "tom", "snare", "hat")
+
+
+def accents_from_bands(bands, rate, beats, period, dur):
+    if not bands:
+        return []
+    step = max(1, int(round(rate / ACCENT_ENV_HZ)))
+    envs = []
+    for band in bands:
+        envs.append([
+            max((abs(v) for v in band[i : i + step]), default=0.0)
+            for i in range(0, len(band) - step + 1, step)
+        ])
+    erate = rate / step
+    n = min(len(e) for e in envs)
+    total = [sum(e[i] for e in envs) for i in range(n)]
+    flux = [0.0] + [max(0.0, total[i] - total[i - 1]) for i in range(1, n)]
+    peak = max(flux) or 1.0
+    flux = [v / peak for v in flux]
+    gap = max(1, int(ACCENT_MIN_GAP_S * erate))
+    grid = sorted(beats)
+    events, i = [], 1
+    while i < n - 1:
+        if flux[i] < ACCENT_FLOOR or flux[i] < flux[i - 1] or flux[i] < flux[i + 1]:
+            i += 1
+            continue
+        t = i / erate
+        strengths = [envs[b][i] for b in range(len(envs))]
+        which = max(range(len(strengths)), key=lambda b: strengths[b])
+        lo = 0
+        hi = len(grid) - 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if grid[mid] < t:
+                lo = mid + 1
+            else:
+                hi = mid
+        near = min(
+            (abs(t - grid[j]) for j in (lo - 1, lo, lo + 1) if 0 <= j < len(grid)),
+            default=9.9,
+        )
+        events.append({
+            "at": round(t, 3),
+            "of": DRUM_OF[which] if which < len(DRUM_OF) else "hit",
+            "strength": round(min(1.0, flux[i]), 3),
+            "on_grid": near <= ACCENT_ON_GRID_S,
+        })
+        i += gap
+    return events
+
+
+def stems_from_profile(profile, beats, groups):
+    index = {round(b, 3): i for i, b in enumerate(beats)}
+    def run(fn):
+        out = []
+        for g in groups:
+            i = index.get(round(g, 3))
+            if i is None:
+                continue
+            out.append(round(fn(i), 4))
+        return out
+    def win(band, i):
+        seg = band[i : i + 4] or [0.0]
+        return sum(seg) / len(seg)
+    return {
+        "drums": run(lambda i: max(win(profile[0], i), win(profile[3], i))),
+        "bass": run(lambda i: win(profile[1], i)),
+        "other": run(lambda i: win(profile[2], i)),
+    }
+
+
+def sections_from(bounds, labels, groups, curve, n_bars):
+    entries = []
+    seen = {}
+    for k, b in enumerate(bounds):
+        if b >= len(groups):
+            continue
+        name = labels[k]
+        seen[name] = seen.get(name, 0) + 1
+        end = bounds[k + 1] if k + 1 < len(bounds) else n_bars
+        vals = [v for _, v in curve[b:end]] or [0.0]
+        entries.append({
+            "at": round(groups[b], 6),
+            "id": name[0].upper() + str(seen[name]) if False else name[:3].upper(),
+            "repeat": seen[name],
+            "arc": round(b / max(1, n_bars), 3),
+            "name": name,
+            "mean_energy": round(sum(vals) / len(vals), 4),
+        })
+    return entries
 
 
 def unpulsed_map(path, dur, why):
@@ -775,7 +915,8 @@ def listen(path):
     while t < dur:
         beats.append(round(t, 6))
         t += period
-    profile = beat_band_profile(samples, sr, beats, period)
+    band_signals = []
+    profile = beat_band_profile(samples, sr, beats, period, keep=band_signals)
     top, cue = bar_phase(profile)
     s_top, s_cue = bar_phase_from_structure(profile)
     if s_cue >= STRUCT_MIN_CUE and s_cue > cue:
@@ -801,9 +942,14 @@ def listen(path):
             moments_from_sections(bounds, labels, rows, groups, period * 4)
             + find_stops(profile, beats, period)
         )
-        spans = spans_from_sections(bounds, labels, groups, curve, len(rows))
+        spans = builds_into_drops(curve, moments)
+        if not spans:
+            spans = spans_from_sections(bounds, labels, groups, curve, len(rows))
         if not spans:
             spans = find_builds(curve, dur)
+        sections = sections_from(bounds, labels, groups, curve, len(rows))
+        stems = stems_from_profile(profile, beats, groups)
+        accents = accents_from_bands(band_signals, keep_rate[0], beats, period, dur)
         chapters = [
             {"at": round(groups[b], 6) if b else 0.0, "name": labels[i]}
             for i, b in enumerate(bounds)
@@ -812,6 +958,7 @@ def listen(path):
     else:
         moments, spans = find_stops(profile, beats, period), []
         tonal, tonal_at_groups = [], []
+        sections, stems, accents = [], {}, []
         chapters = [{"at": 0.0, "name": "intro"}]
     moments.sort(key=lambda x: x["at"])
 
@@ -841,6 +988,28 @@ def listen(path):
         "moments": moments,
         "spans": spans,
         "energy": curve,
+        "sections": {
+            "note": "Which sections are the same section, so a reader can make the "
+                    "second one bigger than the first.",
+            "how": "boundaries from beat-synchronous band novelty, labelled by kick "
+                   "presence and energy rank; repeat counts occurrences of a label",
+            "entries": sections,
+        },
+        "stems": {
+            "model": "band-energy proxy, not source separation",
+            "rate": "per_downbeat",
+            "note": "drums/bass/other estimated from 35-130, 130-400 and 400-1200 Hz. "
+                    "vocals and guitar are absent because this cannot separate them.",
+            "sources": stems,
+        },
+        "accents": {
+            "of": "percussive hits",
+            "how": f"peaks in summed band onset flux at {ACCENT_ENV_HZ:.0f} Hz, "
+                   f"labelled by which band dominates, on_grid within "
+                   f"{ACCENT_ON_GRID_S*1000:.0f} ms of a beat",
+            "note": "the band label is a guess at which drum; the time is measured",
+            "events": accents,
+        },
         "observations": {
             "tonality": {
                 "rate": "per_beat",

@@ -1,0 +1,3156 @@
+{
+ "layout": "0.2",
+ "room": "festival",
+ "note": "A main-stage rig. Built to give the recipe a canvas: a 12x6 par wall behind the band, two head trusses, side washes, a crowd-facing blinder row, a strobe bar, floor strips and ceiling lasers. Lasers sit at 10.5 m, well above the 3.0 m floor, and none of them scan the crowd.",
+ "size_m": {
+  "w": 34.0,
+  "d": 18.0,
+  "h": 13.0
+ },
+ "limits": {
+  "max_strobe_hz": 4.0,
+  "laser_zones": [
+   "ceiling"
+  ],
+  "laser_min_height_m": 3.0,
+  "max_pan_per_s": 1.05,
+  "max_tilt_per_s": 1.15,
+  "note": "Fast fixtures: 1.05 pan / 1.15 tilt as a fraction of range per second. The recipe derives its amplitude from this budget."
+ },
+ "zones": [
+  {
+   "name": "front_truss",
+   "fixtures": [
+    "head_front_1",
+    "head_front_2",
+    "head_front_3",
+    "head_front_4",
+    "head_front_5",
+    "head_front_6",
+    "head_front_7",
+    "head_front_8",
+    "head_front_9",
+    "head_front_10",
+    "head_front_11",
+    "head_front_12",
+    "head_front_13",
+    "head_front_14",
+    "head_front_15",
+    "head_front_16",
+    "head_front_17",
+    "head_front_18",
+    "head_front_19",
+    "head_front_20",
+    "head_front_21",
+    "head_front_22",
+    "head_front_23",
+    "head_front_24"
+   ]
+  },
+  {
+   "name": "mid_truss",
+   "fixtures": [
+    "head_mid_1",
+    "head_mid_2",
+    "head_mid_3",
+    "head_mid_4",
+    "head_mid_5",
+    "head_mid_6",
+    "head_mid_7",
+    "head_mid_8",
+    "head_mid_9",
+    "head_mid_10",
+    "head_mid_11",
+    "head_mid_12",
+    "head_mid_13",
+    "head_mid_14",
+    "head_mid_15",
+    "head_mid_16",
+    "head_mid_17",
+    "head_mid_18",
+    "head_mid_19",
+    "head_mid_20"
+   ]
+  },
+  {
+   "name": "back_wall",
+   "fixtures": [
+    "par_wall_1_1",
+    "par_wall_1_2",
+    "par_wall_1_3",
+    "par_wall_1_4",
+    "par_wall_1_5",
+    "par_wall_1_6",
+    "par_wall_1_7",
+    "par_wall_1_8",
+    "par_wall_1_9",
+    "par_wall_1_10",
+    "par_wall_1_11",
+    "par_wall_1_12",
+    "par_wall_2_1",
+    "par_wall_2_2",
+    "par_wall_2_3",
+    "par_wall_2_4",
+    "par_wall_2_5",
+    "par_wall_2_6",
+    "par_wall_2_7",
+    "par_wall_2_8",
+    "par_wall_2_9",
+    "par_wall_2_10",
+    "par_wall_2_11",
+    "par_wall_2_12",
+    "par_wall_3_1",
+    "par_wall_3_2",
+    "par_wall_3_3",
+    "par_wall_3_4",
+    "par_wall_3_5",
+    "par_wall_3_6",
+    "par_wall_3_7",
+    "par_wall_3_8",
+    "par_wall_3_9",
+    "par_wall_3_10",
+    "par_wall_3_11",
+    "par_wall_3_12",
+    "par_wall_4_1",
+    "par_wall_4_2",
+    "par_wall_4_3",
+    "par_wall_4_4",
+    "par_wall_4_5",
+    "par_wall_4_6",
+    "par_wall_4_7",
+    "par_wall_4_8",
+    "par_wall_4_9",
+    "par_wall_4_10",
+    "par_wall_4_11",
+    "par_wall_4_12",
+    "par_wall_5_1",
+    "par_wall_5_2",
+    "par_wall_5_3",
+    "par_wall_5_4",
+    "par_wall_5_5",
+    "par_wall_5_6",
+    "par_wall_5_7",
+    "par_wall_5_8",
+    "par_wall_5_9",
+    "par_wall_5_10",
+    "par_wall_5_11",
+    "par_wall_5_12",
+    "par_wall_6_1",
+    "par_wall_6_2",
+    "par_wall_6_3",
+    "par_wall_6_4",
+    "par_wall_6_5",
+    "par_wall_6_6",
+    "par_wall_6_7",
+    "par_wall_6_8",
+    "par_wall_6_9",
+    "par_wall_6_10",
+    "par_wall_6_11",
+    "par_wall_6_12"
+   ]
+  },
+  {
+   "name": "side_left",
+   "fixtures": [
+    "wash_l_1",
+    "wash_l_2",
+    "wash_l_3",
+    "wash_l_4",
+    "wash_l_5",
+    "wash_l_6",
+    "wash_l_7",
+    "wash_l_8",
+    "wash_l_9",
+    "wash_l_10",
+    "wash_l_11",
+    "wash_l_12",
+    "wash_l_13",
+    "wash_l_14"
+   ]
+  },
+  {
+   "name": "side_right",
+   "fixtures": [
+    "wash_r_1",
+    "wash_r_2",
+    "wash_r_3",
+    "wash_r_4",
+    "wash_r_5",
+    "wash_r_6",
+    "wash_r_7",
+    "wash_r_8",
+    "wash_r_9",
+    "wash_r_10",
+    "wash_r_11",
+    "wash_r_12",
+    "wash_r_13",
+    "wash_r_14"
+   ]
+  },
+  {
+   "name": "crowd_facing",
+   "fixtures": [
+    "blind_1",
+    "blind_2",
+    "blind_3",
+    "blind_4",
+    "blind_5",
+    "blind_6",
+    "blind_7",
+    "blind_8",
+    "blind_9",
+    "blind_10",
+    "blind_11",
+    "blind_12",
+    "blind_13",
+    "blind_14",
+    "blind_15",
+    "blind_16"
+   ]
+  },
+  {
+   "name": "strobe_bar",
+   "fixtures": [
+    "strobe_1",
+    "strobe_2",
+    "strobe_3",
+    "strobe_4",
+    "strobe_5",
+    "strobe_6",
+    "strobe_7",
+    "strobe_8",
+    "strobe_9",
+    "strobe_10",
+    "strobe_11",
+    "strobe_12",
+    "strobe_13",
+    "strobe_14",
+    "strobe_15",
+    "strobe_16"
+   ]
+  },
+  {
+   "name": "floor_edge",
+   "fixtures": [
+    "strip_1",
+    "strip_2",
+    "strip_3",
+    "strip_4",
+    "strip_5",
+    "strip_6",
+    "strip_7",
+    "strip_8",
+    "strip_9",
+    "strip_10"
+   ]
+  },
+  {
+   "name": "ceiling",
+   "fixtures": [
+    "laser_1",
+    "laser_2",
+    "laser_3",
+    "laser_4",
+    "laser_5",
+    "laser_6",
+    "laser_7",
+    "laser_8"
+   ]
+  },
+  {
+   "name": "haze",
+   "fixtures": [
+    "fog_1",
+    "fog_2",
+    "fog_3",
+    "fog_4",
+    "fog_5",
+    "fog_6"
+   ]
+  }
+ ],
+ "fixtures": [
+  {
+   "id": "head_front_1",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    2.0,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_2",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    3.3,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_3",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    4.61,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_4",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    5.91,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_5",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    7.22,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_6",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    8.52,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_7",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    9.83,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_8",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    11.13,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_9",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    12.43,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_10",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    13.74,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_11",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    15.04,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_12",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    16.35,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_13",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    17.65,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_14",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    18.96,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_15",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    20.26,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_16",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    21.57,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_17",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    22.87,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_18",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    24.17,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_19",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    25.48,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_20",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    26.78,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_21",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    28.09,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_22",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    29.39,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_23",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    30.7,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_front_24",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    32.0,
+    9.6,
+    3.2
+   ],
+   "zone": "front_truss"
+  },
+  {
+   "id": "head_mid_1",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    3.0,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_2",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    4.47,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_3",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    5.95,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_4",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    7.42,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_5",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    8.89,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_6",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    10.37,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_7",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    11.84,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_8",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    13.32,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_9",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    14.79,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_10",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    16.26,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_11",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    17.74,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_12",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    19.21,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_13",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    20.68,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_14",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    22.16,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_15",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    23.63,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_16",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    25.11,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_17",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    26.58,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_18",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    28.05,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_19",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    29.53,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "head_mid_20",
+   "kind": "head",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "at": [
+    31.0,
+    11.2,
+    8.0
+   ],
+   "zone": "mid_truss"
+  },
+  {
+   "id": "par_wall_1_1",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    3.0,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_2",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    5.55,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_3",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    8.09,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_4",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    10.64,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_5",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    13.18,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_6",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    15.73,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_7",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    18.27,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_8",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    20.82,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_9",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    23.36,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_10",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    25.91,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_11",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    28.45,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_1_12",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    31.0,
+    2.2,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_1",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    3.0,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_2",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    5.55,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_3",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    8.09,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_4",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    10.64,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_5",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    13.18,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_6",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    15.73,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_7",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    18.27,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_8",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    20.82,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_9",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    23.36,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_10",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    25.91,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_11",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    28.45,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_2_12",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    31.0,
+    3.9,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_1",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    3.0,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_2",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    5.55,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_3",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    8.09,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_4",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    10.64,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_5",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    13.18,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_6",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    15.73,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_7",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    18.27,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_8",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    20.82,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_9",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    23.36,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_10",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    25.91,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_11",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    28.45,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_3_12",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    31.0,
+    5.6,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_1",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    3.0,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_2",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    5.55,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_3",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    8.09,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_4",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    10.64,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_5",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    13.18,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_6",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    15.73,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_7",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    18.27,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_8",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    20.82,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_9",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    23.36,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_10",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    25.91,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_11",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    28.45,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_4_12",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    31.0,
+    7.3,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_1",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    3.0,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_2",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    5.55,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_3",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    8.09,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_4",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    10.64,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_5",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    13.18,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_6",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    15.73,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_7",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    18.27,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_8",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    20.82,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_9",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    23.36,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_10",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    25.91,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_11",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    28.45,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_5_12",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    31.0,
+    9.0,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_1",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    3.0,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_2",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    5.55,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_3",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    8.09,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_4",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    10.64,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_5",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    13.18,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_6",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    15.73,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_7",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    18.27,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_8",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    20.82,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_9",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    23.36,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_10",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    25.91,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_11",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    28.45,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "par_wall_6_12",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    31.0,
+    10.7,
+    13.5
+   ],
+   "zone": "back_wall"
+  },
+  {
+   "id": "wash_l_1",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    3.0,
+    5.0
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_1",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    3.0,
+    5.0
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_2",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    3.62,
+    5.5
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_2",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    3.62,
+    5.5
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_3",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    4.24,
+    6.0
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_3",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    4.24,
+    6.0
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_4",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    4.86,
+    6.5
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_4",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    4.86,
+    6.5
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_5",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    5.48,
+    7.0
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_5",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    5.48,
+    7.0
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_6",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    6.1,
+    7.5
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_6",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    6.1,
+    7.5
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_7",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    6.72,
+    8.0
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_7",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    6.72,
+    8.0
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_8",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    7.34,
+    8.5
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_8",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    7.34,
+    8.5
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_9",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    7.96,
+    9.0
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_9",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    7.96,
+    9.0
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_10",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    8.58,
+    9.5
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_10",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    8.58,
+    9.5
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_11",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    9.2,
+    10.0
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_11",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    9.2,
+    10.0
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_12",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    9.82,
+    10.5
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_12",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    9.82,
+    10.5
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_13",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    10.44,
+    11.0
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_13",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    10.44,
+    11.0
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "wash_l_14",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    1.2,
+    11.06,
+    11.5
+   ],
+   "zone": "side_left"
+  },
+  {
+   "id": "wash_r_14",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "at": [
+    32.8,
+    11.06,
+    11.5
+   ],
+   "zone": "side_right"
+  },
+  {
+   "id": "blind_1",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    2.5,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_2",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    4.43,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_3",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    6.37,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_4",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    8.3,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_5",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    10.23,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_6",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    12.17,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_7",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    14.1,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_8",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    16.03,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_9",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    17.97,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_10",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    19.9,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_11",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    21.83,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_12",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    23.77,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_13",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    25.7,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_14",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    27.63,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_15",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    29.57,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "blind_16",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    31.5,
+    8.2,
+    1.6
+   ],
+   "zone": "crowd_facing"
+  },
+  {
+   "id": "strobe_1",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    2.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_2",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    4.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_3",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    6.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_4",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    8.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_5",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    10.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_6",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    12.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_7",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    14.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_8",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    16.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_9",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    18.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_10",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    20.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_11",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    22.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_12",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    24.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_13",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    26.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_14",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    28.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_15",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    30.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strobe_16",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "at": [
+    32.0,
+    6.4,
+    4.6
+   ],
+   "zone": "strobe_bar"
+  },
+  {
+   "id": "strip_1",
+   "kind": "strip",
+   "can": [
+    "pixels"
+   ],
+   "at": [
+    2.0,
+    1.0,
+    12.6
+   ],
+   "pixels": 48,
+   "zone": "floor_edge"
+  },
+  {
+   "id": "strip_2",
+   "kind": "strip",
+   "can": [
+    "pixels"
+   ],
+   "at": [
+    5.33,
+    1.0,
+    12.6
+   ],
+   "pixels": 48,
+   "zone": "floor_edge"
+  },
+  {
+   "id": "strip_3",
+   "kind": "strip",
+   "can": [
+    "pixels"
+   ],
+   "at": [
+    8.67,
+    1.0,
+    12.6
+   ],
+   "pixels": 48,
+   "zone": "floor_edge"
+  },
+  {
+   "id": "strip_4",
+   "kind": "strip",
+   "can": [
+    "pixels"
+   ],
+   "at": [
+    12.0,
+    1.0,
+    12.6
+   ],
+   "pixels": 48,
+   "zone": "floor_edge"
+  },
+  {
+   "id": "strip_5",
+   "kind": "strip",
+   "can": [
+    "pixels"
+   ],
+   "at": [
+    15.33,
+    1.0,
+    12.6
+   ],
+   "pixels": 48,
+   "zone": "floor_edge"
+  },
+  {
+   "id": "strip_6",
+   "kind": "strip",
+   "can": [
+    "pixels"
+   ],
+   "at": [
+    18.67,
+    1.0,
+    12.6
+   ],
+   "pixels": 48,
+   "zone": "floor_edge"
+  },
+  {
+   "id": "strip_7",
+   "kind": "strip",
+   "can": [
+    "pixels"
+   ],
+   "at": [
+    22.0,
+    1.0,
+    12.6
+   ],
+   "pixels": 48,
+   "zone": "floor_edge"
+  },
+  {
+   "id": "strip_8",
+   "kind": "strip",
+   "can": [
+    "pixels"
+   ],
+   "at": [
+    25.33,
+    1.0,
+    12.6
+   ],
+   "pixels": 48,
+   "zone": "floor_edge"
+  },
+  {
+   "id": "strip_9",
+   "kind": "strip",
+   "can": [
+    "pixels"
+   ],
+   "at": [
+    28.67,
+    1.0,
+    12.6
+   ],
+   "pixels": 48,
+   "zone": "floor_edge"
+  },
+  {
+   "id": "strip_10",
+   "kind": "strip",
+   "can": [
+    "pixels"
+   ],
+   "at": [
+    32.0,
+    1.0,
+    12.6
+   ],
+   "pixels": 48,
+   "zone": "floor_edge"
+  },
+  {
+   "id": "laser_1",
+   "kind": "laser",
+   "can": [
+    "level",
+    "colour"
+   ],
+   "at": [
+    4.0,
+    10.5,
+    6.5
+   ],
+   "zone": "ceiling"
+  },
+  {
+   "id": "laser_2",
+   "kind": "laser",
+   "can": [
+    "level",
+    "colour"
+   ],
+   "at": [
+    7.71,
+    10.5,
+    6.5
+   ],
+   "zone": "ceiling"
+  },
+  {
+   "id": "laser_3",
+   "kind": "laser",
+   "can": [
+    "level",
+    "colour"
+   ],
+   "at": [
+    11.43,
+    10.5,
+    6.5
+   ],
+   "zone": "ceiling"
+  },
+  {
+   "id": "laser_4",
+   "kind": "laser",
+   "can": [
+    "level",
+    "colour"
+   ],
+   "at": [
+    15.14,
+    10.5,
+    6.5
+   ],
+   "zone": "ceiling"
+  },
+  {
+   "id": "laser_5",
+   "kind": "laser",
+   "can": [
+    "level",
+    "colour"
+   ],
+   "at": [
+    18.86,
+    10.5,
+    6.5
+   ],
+   "zone": "ceiling"
+  },
+  {
+   "id": "laser_6",
+   "kind": "laser",
+   "can": [
+    "level",
+    "colour"
+   ],
+   "at": [
+    22.57,
+    10.5,
+    6.5
+   ],
+   "zone": "ceiling"
+  },
+  {
+   "id": "laser_7",
+   "kind": "laser",
+   "can": [
+    "level",
+    "colour"
+   ],
+   "at": [
+    26.29,
+    10.5,
+    6.5
+   ],
+   "zone": "ceiling"
+  },
+  {
+   "id": "laser_8",
+   "kind": "laser",
+   "can": [
+    "level",
+    "colour"
+   ],
+   "at": [
+    30.0,
+    10.5,
+    6.5
+   ],
+   "zone": "ceiling"
+  },
+  {
+   "id": "fog_1",
+   "kind": "fog",
+   "can": [
+    "level"
+   ],
+   "at": [
+    4.0,
+    0.6,
+    9.0
+   ],
+   "zone": "haze"
+  },
+  {
+   "id": "fog_2",
+   "kind": "fog",
+   "can": [
+    "level"
+   ],
+   "at": [
+    9.2,
+    0.6,
+    9.0
+   ],
+   "zone": "haze"
+  },
+  {
+   "id": "fog_3",
+   "kind": "fog",
+   "can": [
+    "level"
+   ],
+   "at": [
+    14.4,
+    0.6,
+    9.0
+   ],
+   "zone": "haze"
+  },
+  {
+   "id": "fog_4",
+   "kind": "fog",
+   "can": [
+    "level"
+   ],
+   "at": [
+    19.6,
+    0.6,
+    9.0
+   ],
+   "zone": "haze"
+  },
+  {
+   "id": "fog_5",
+   "kind": "fog",
+   "can": [
+    "level"
+   ],
+   "at": [
+    24.8,
+    0.6,
+    9.0
+   ],
+   "zone": "haze"
+  },
+  {
+   "id": "fog_6",
+   "kind": "fog",
+   "can": [
+    "level"
+   ],
+   "at": [
+    30.0,
+    0.6,
+    9.0
+   ],
+   "zone": "haze"
+  }
+ ]
+}
