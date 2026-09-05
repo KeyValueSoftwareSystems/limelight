@@ -851,6 +851,20 @@ class H(http.server.BaseHTTPRequestHandler):
                 return self._send(200, open(os.path.join(HERE, "game.html")).read(),
                                   "text/html; charset=utf-8")
             if u.path == "/api/game": return self._send(200, json.dumps(game()))
+            if u.path == "/analyse":
+                return self._send(200, open(os.path.join(HERE, "analyse.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path == "/api/maps":
+                song = (q.get("song") or [""])[0]
+                idx = songs_index()
+                if song not in idx: song = sorted(idx)[0] if idx else ""
+                out = {}
+                for k, v in candidate_maps(song).items():
+                    try: out[k] = json.load(open(v["path"]))
+                    except Exception: pass
+                return self._send(200, json.dumps(
+                    {"song": song, "maps": out, "editable": (not READONLY),
+                     "songs": {k: v["label"] for k, v in idx.items()}}))
             if u.path == "/api/status": return self._send(200, json.dumps(status()))
             if u.path == "/api/listeners2": return self._send(200, json.dumps(listeners_available()))
             if u.path == "/api/job":
@@ -922,6 +936,33 @@ class H(http.server.BaseHTTPRequestHandler):
                 "This instance is read-only: it will score a map and record a verdict, but it "
                 "will not run jobs. Generating songs or rebuilding frames is a shell, and this "
                 "URL is shared. Do those locally."}))
+        if u.path == "/api/save_map":
+            # Writes the held-out answer. Never on a shared instance: the reference
+            # is the one file nobody but its author may change.
+            if READONLY:
+                return self._send(403, json.dumps({"error": "read-only instance"}))
+            try:
+                n = int(self.headers.get("Content-Length", 0))
+                m = json.loads(self.rfile.read(n).decode())
+            except Exception as e:
+                return self._send(400, json.dumps({"error": f"not JSON: {e}"}))
+            if not (m.get("grid") or {}).get("period"):
+                return self._send(400, json.dumps({"error": "no grid.period"}))
+            song = (q.get("song") or [""])[0]
+            where = (q.get("to") or ["truth"])[0]
+            if where == "truth":
+                d = os.path.join(HERE, "truth"); os.makedirs(d, exist_ok=True)
+                path = os.path.join(d, song + ".map.json")
+            else:
+                safe = "".join(c for c in where if c.isalnum() or c in "-_")[:32] or "dropped"
+                d = os.path.join(HERE, "maps", safe); os.makedirs(d, exist_ok=True)
+                path = os.path.join(d, song + ".map.json")
+            if os.path.exists(path):          # one step back, so an edit is undoable
+                import shutil
+                shutil.copyfile(path, path + ".bak")
+            json.dump(m, open(path, "w"), indent=1)
+            return self._send(200, json.dumps({"ok": True,
+                                               "path": os.path.relpath(path, ROOT)}))
         if u.path == "/api/score":
             # Upload a map, get a number. The answer never travels back -- a model
             # tuned until it reproduces a file has learned the file, not the music.
