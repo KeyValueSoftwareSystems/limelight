@@ -730,6 +730,50 @@ addEventListener("resize",()=>[...out.children].forEach(d=>{
 
 
 class H(http.server.BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"      # ranges need keep-alive to be useful
+    def _send_media(self, path, ctype):
+        """Serve a file with byte ranges.
+
+        Without this a browser cannot seek in audio at all -- it asks for a slice,
+        gets the whole 20 MB file back with a 200, and the scrub bar simply does
+        nothing. That is why jumping to a section was impossible."""
+        size = os.path.getsize(path)
+        rng = self.headers.get("Range")
+        start, end = 0, size - 1
+        partial = False
+        if rng and rng.startswith("bytes="):
+            a, _, b = rng[6:].partition("-")
+            try:
+                if a:
+                    start = int(a)
+                    if b: end = min(int(b), size - 1)
+                else:                                   # suffix range: last N bytes
+                    start = max(0, size - int(b))
+                partial = True
+            except ValueError:
+                partial = False
+        if start >= size:
+            self.send_response(416)
+            self.send_header("Content-Range", f"bytes */{size}")
+            self.end_headers(); return
+        length = end - start + 1
+        self.send_response(206 if partial else 200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Length", str(length))
+        if partial:
+            self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+        self.end_headers()
+        with open(path, "rb") as fh:
+            fh.seek(start)
+            left = length
+            while left > 0:
+                chunk = fh.read(min(1 << 16, left))
+                if not chunk: break
+                try: self.wfile.write(chunk)
+                except (BrokenPipeError, ConnectionResetError): return
+                left -= len(chunk)
+
     def _send(self, code, body, ctype="application/json"):
         if isinstance(body, str): body = body.encode()
         self.send_response(code)
@@ -788,8 +832,7 @@ class H(http.server.BaseHTTPRequestHandler):
                 if not os.path.exists(w) and w.endswith(".wav"):
                     subprocess.run([sys.executable, os.path.join(HERE, "compose.py")], cwd=ROOT)
                 if not os.path.exists(w): return self._send(404, json.dumps({"error": "no audio"}))
-                return self._send(200, open(w, "rb").read(),
-                                  "audio/wav" if w.endswith(".wav") else "audio/mpeg")
+                return self._send_media(w, "audio/wav" if w.endswith(".wav") else "audio/mpeg")
             if u.path == "/api/cases":      return self._send(200, json.dumps(cases()))
             if u.path == "/api/listeners":  return self._send(200, json.dumps(listeners()))
             if u.path == "/api/results":    return self._send(200, json.dumps(results()))
@@ -805,7 +848,7 @@ class H(http.server.BaseHTTPRequestHandler):
                 if not os.path.exists(p):
                     truth = json.load(open(os.path.join(HERE, "cases", cid + ".json")))
                     buf, sr = R.render(truth); R.write_wav(p, buf, sr)
-                return self._send(200, open(p, "rb").read(), "audio/wav")
+                return self._send_media(p, "audio/wav")
             self._send(404, json.dumps({"error": "no route"}))
         except Exception as e:
             self._send(500, json.dumps({"error": f"{type(e).__name__}: {e}"}))

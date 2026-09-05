@@ -83,7 +83,7 @@ what a map error <em>costs</em>, which is not something a beat-accuracy number c
 </div>
 
 <canvas id="div"></canvas>
-<div class="legend">divergence over the song · taller means the two rooms look less alike · click to jump</div>
+<div class="legend">← → seek 5s · shift+arrow 30s · space play · click the strip to jump · divergence over the song · taller means the two rooms look less alike · click to jump</div>
 <audio id="aud" controls preload="auto"></audio>
 <p class="note" id="why"></p>
 </div>
@@ -461,6 +461,23 @@ function rebuild(){
     else { playing=!playing; if(playing){t0=performance.now()} else {base=base+(performance.now()-t0)/1000}
            $("play").textContent=playing?"❚❚ Pause":"▶ Play" }
   };
+  // keyboard seeking: the strip is fiddly to aim at and a section is usually
+  // "about thirty seconds further on"
+  addEventListener("keydown",e=>{
+    if(e.target.tagName==="SELECT"||e.target.tagName==="INPUT") return;
+    const a=$("aud"), step=e.shiftKey?30:5;
+    let t = a.src ? a.currentTime : base;
+    if(e.key==="ArrowRight") t=Math.min(DUR-0.05,t+step);
+    else if(e.key==="ArrowLeft") t=Math.max(0,t-step);
+    else if(e.key==="Home") t=0;
+    else if(e.key===" "){ e.preventDefault(); $("play").click(); return }
+    else return;
+    e.preventDefault();
+    if(a.src) a.currentTime=t; else { base=t; t0=performance.now() }
+    $("stat").style.color="var(--muted)";
+    $("stat").textContent=`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,"0")}`
+      + `   ← → 5s · shift 30s · space play`;
+  });
   $("div").onclick=e=>{
     const r=e.target.getBoundingClientRect(), t=(e.clientX-r.left)/r.width*DUR;
     const a=$("aud"); if(a.src) a.currentTime=t; else { base=t; t0=performance.now() }
