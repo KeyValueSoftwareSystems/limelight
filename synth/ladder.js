@@ -96,7 +96,7 @@ for (const [slug, s] of Object.entries(songs())) {
   const W = wave(s.wav);
   process.stdout.write(`\n${slug}  (${s.kind})\n`);
   for (const r of RUNGS) {
-    const lay = r.n >= 8 ? LAY : LAYB;
+    const lay = r.n >= 11 ? LAY : LAYB;
     const F = RM.mkReader(map, lay, "medium", "garrix", r.n);
     const C = makeChecks({ MAP: map, LAY: lay, F, LIGHT: light(F, map), WAVE: W, HZ });
     let res; try { res = C.runCheck(r.n) } catch (e) { res = { ok: false, v: 0, txt: "threw: " + e.message } }

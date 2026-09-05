@@ -48,7 +48,28 @@ const RUNGS=[
   bad:"extra flashes at even spacing, which means it is guessing rather than listening",
   fix:"it is reacting to quiet hits like hi-hats. Raise the threshold.",
   check:"how many of all the flashes are still in time", pass:90},
- {n:8,name:"moving lamps", adds:"the two moving lamps come back",
+ {n:8,name:"instruments", adds:"how wide the rig is follows how full the song is",
+  q:"Does the rig get <b>wider</b> when more instruments play?",
+  look:"how many lamps are lit at once, as instruments come and go",
+  good:"one lamp for a solo voice, all five when the whole band is in",
+  bad:"the same number of lamps lit all the way through",
+  fix:"this song has no instrument breakdown yet. Run synth/enrich.py on it.",
+  check:"whether the number of lit lamps follows how full the song is", pass:50},
+ {n:9,name:"melody",     adds:"which lamp follows the pitch of the tune",
+  q:"Does the light <b>walk up the row</b> when the tune goes up?",
+  look:"which lamp is brightest, as the tune rises and falls",
+  good:"the bright lamp moves along the row with the tune, using the whole row",
+  bad:"the bright lamp moving on its own, ignoring the tune",
+  fix:"this song has no tune written down yet, so there is nothing to follow.",
+  check:"whether the lit lamp follows the pitch of the tune", pass:45},
+ {n:10,name:"chords",    adds:"the colour changes when the harmony changes",
+  q:"Does the colour change <b>on the chord</b>, and at no other time?",
+  look:"when the colours swap over, against where the chords change",
+  good:"colour swaps land on chord changes and nowhere else",
+  bad:"colour swapping on the beat, or drifting whenever it likes",
+  fix:"this song has no chords written down yet.",
+  check:"how many colour changes land on a chord change", pass:60},
+ {n:11,name:"moving lamps", adds:"the two moving lamps come back",
   q:"Do the moving lamps stay <b>within what a real motor can do</b>?",
   look:"the two moving lamps, and whether the movement looks achievable",
   good:"movement a real motor could follow",
@@ -201,7 +222,74 @@ function makeChecks(C){
       }
     const s=H.size;
     return {v:s, ok:s<=4, txt:`${s} different colours on stage, counting white as one`} }
+  /* Rungs 8 to 10 are CONSISTENCY checks, not the record-anchored kind that rungs
+     1 and 4 use. They ask whether the light agrees with what the map says about
+     the song; they cannot tell you the map is wrong about it. That is a real and
+     deliberate limit -- an independent version would need the separated instrument
+     audio, which we do not have. Stated here rather than hidden, because the whole
+     value of this file is that a green result means something. */
   if(n===8){
+    const I=(MAP.observations||{}).instruments;
+    if(!I||!I.density_per_bar) return {v:0,ok:false,txt:"this song has no instrument breakdown yet"};
+    const D=I.density_per_bar.filter(x=>x[0]>=A&&x[0]<=B2);
+    if(D.length<4) return {v:0,ok:false,txt:"not enough of the song here to tell"};
+    const xs=[],ys=[];
+    for(const [t,d] of D){ let n2=0,c=0;
+      for(let u=t;u<t+1.5;u+=0.05){ n2+=F(u).fixtures.filter(o=>(o.level||0)>0.15).length; c++ }
+      xs.push(d); ys.push(n2/Math.max(1,c)) }
+    const mx=xs.reduce((a,b)=>a+b,0)/xs.length, my=ys.reduce((a,b)=>a+b,0)/ys.length;
+    let sxy=0,sxx=0,syy=0;
+    for(let i=0;i<xs.length;i++){const a2=xs[i]-mx,b3=ys[i]-my; sxy+=a2*b3; sxx+=a2*a2; syy+=b3*b3}
+    if(syy<1e-9) return {v:0,ok:false,txt:"the same number of lamps is lit all the way through"};
+    const r=sxy/Math.sqrt(sxx*syy||1);
+    return {v:100*r, ok:r>=0.5,
+      txt:`the rig widens with the song, ${r.toFixed(2)} out of a possible 1.00`} }
+  if(n===9){
+    const M=(MAP.observations||{}).melody;
+    const N=((M&&M.notes)||[]).filter(e=>e&&e.length>=3&&isFinite(e[2])&&e[0]>=A&&e[0]<=B2);
+    if(N.length<12) return {v:0,ok:false,txt:"this song has no tune written down here"};
+    const xs=[],ys=[]; const seen=new Set();
+    for(const [t,,mid] of N){
+      const fr=F(t+0.02); let bi=-1,bv=0.15;
+      fr.fixtures.forEach((o,i)=>{ if((o.level||0)>bv){ bv=o.level; bi=i } });
+      if(bi<0) continue; seen.add(bi); xs.push(mid); ys.push(bi) }
+    if(xs.length<12) return {v:0,ok:false,txt:"the lamps are off while the tune plays here"};
+    const mx=xs.reduce((a,b)=>a+b,0)/xs.length, my=ys.reduce((a,b)=>a+b,0)/ys.length;
+    let sxy=0,sxx=0,syy=0;
+    for(let i=0;i<xs.length;i++){const a2=xs[i]-mx,b3=ys[i]-my; sxy+=a2*b3; sxx+=a2*a2; syy+=b3*b3}
+    if(syy<1e-9) return {v:0,ok:false,txt:"the same lamp stays lit whatever the tune does"};
+    const r=sxy/Math.sqrt(sxx*syy||1);
+    const nPar=LAY.fixtures.filter(f=>f.kind==="par").length;
+    return {v:100*r, ok:r>=0.45 && seen.size>=Math.min(4,nPar),
+      txt:`the lit lamp follows the tune ${r.toFixed(2)} out of 1.00, using ${seen.size} of ${nPar} lamps`} }
+  if(n===10){
+    const C2=((MAP.observations||{}).chords||{}).events||[];
+    const ch=C2.filter(c=>c.at>=A&&c.at<=B2);
+    if(ch.length<4) return {v:0,ok:false,txt:"this song has no chords written down here"};
+    const hue=o=>{const r=(o.r||0)/255,g=(o.g||0)/255,b=(o.b||0)/255;
+      const M2=Math.max(r,g,b),m2=Math.min(r,g,b),d=M2-m2;
+      if(d<0.06) return -1;
+      let h=M2===r?60*(((g-b)/d)%6):M2===g?60*((b-r)/d+2):60*((r-g)/d+4);
+      return Math.round(((h%360)+360)%360/15)};
+    /* white is excluded. The bar starts go white on purpose, so counting that as a
+       colour change made an intended gesture look like colour drifting -- the same
+       mistake as counting brightness as colour. What is being asked is whether the
+       COLOURS move when the harmony moves. */
+    const swaps=[]; let prev=null;
+    for(let t=A;t<B2;t+=0.05){
+      /* the SET of colours in use, not the per-lamp list: a lamp switching off
+         removed an entry and read as a colour change, which it is not */
+      const f2=F(t).fixtures.filter(o=>(o.level||0)>0.25).map(hue).filter(h=>h>=0);
+      if(!f2.length) continue;
+      const sig=[...new Set(f2)].sort((a,b)=>a-b).join(",");
+      if(prev!==null && sig!==prev) swaps.push(t);
+      prev=sig }
+    if(!swaps.length) return {v:0,ok:false,txt:"the colours never change here"};
+    const near=swaps.filter(t=>ch.some(c=>Math.abs(c.at-t)<=0.25)).length;
+    const s2=100*near/swaps.length;
+    return {v:s2, ok:s2>=60,
+      txt:`${near} of ${swaps.length} colour changes land on a chord change`} }
+  if(n===11){
     const L=(LAY.limits||{}), mp=L.max_pan_per_s||1.55, mt=L.max_tilt_per_s||1.7;
     let worst=0, prev=null;
     for(let t=A;t<Math.min(B2,A+60);t+=0.02){

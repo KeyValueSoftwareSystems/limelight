@@ -16,7 +16,23 @@
      5 sections    the rig gets bigger and smaller with the song
      6 colour      a profile, two colours at a time
      7 accents     the drum hits between the beats
-     8 heads       the two moving heads come back
+     8 instruments how WIDE the rig is follows how full the arrangement is
+     9 melody      WHICH lamp follows the pitch of the tune
+    10 chords      the colour changes when the harmony changes, and only then
+    11 heads       the two moving heads come back
+
+   Rungs 8 to 10 are what a lighting designer does with five lamps in a row, and
+   they are the reason the row exists. A row is an AXIS. Walking a pulse along it
+   is decoration -- it looks busy and means nothing, which is what rung 3 does and
+   why it was overdone. Mapping something that genuinely has an axis is different:
+   pitch is high or low, so a rising tune walks up the row and a falling one walks
+   down, and the rig is now telling you something you can hear.
+
+   The same discipline applies to the other two. How many lamps are lit says how
+   full the arrangement is, so a solo vocal gets one lamp and the full band gets
+   five -- the rig's width carries the song's width and nothing is lit for the
+   sake of being lit. Colour changes when the harmony changes and at no other
+   time, which is what stops colour being wallpaper.
 
    Each rung is judged by a check in build.html that can FAIL, not by whether it
    looks nice. Rungs are accepted one at a time and written to
@@ -24,7 +40,7 @@
    than a tuning session: the accepted settings are the starting point for a song
    nobody has mapped yet. */
 
-const STEP = (function(){ try { return Math.max(1, Math.min(8, +LADDER || 1)) } catch(e) { return 1 } })();
+const STEP = (function(){ try { return Math.max(1, Math.min(11, +LADDER || 1)) } catch(e) { return 1 } })();
 
 const DECAY    = Math.max(0.055, PER * 0.22);
 /* One number per rung, set on the page and written into the learning file, so the
@@ -126,6 +142,74 @@ const OFFGRID = (function(){
   }
   return out })();
 
+/* ---- what the map already knows and nothing was reading ------------------- */
+const OBS    = MAP.obs || {};
+const INSTR  = OBS.instruments || null;
+const CHORDS = (OBS.chords && OBS.chords.events) || [];
+const MELN   = (function(){
+  const n = (OBS.melody && OBS.melody.notes) || [], out = [];
+  for(const e of n) if(e && e.length >= 3 && isFinite(e[2])) out.push([e[0], e[2]]);
+  return out })();
+/* the tune's own range, from the middle 90% so one stray octave does not flatten
+   everything else into the same lamp */
+const MELRANGE = (function(){
+  if(MELN.length < 8) return null;
+  const v = MELN.map(x => x[1]).sort((a,b) => a-b);
+  const lo = v[Math.floor(v.length*0.05)], hi = v[Math.floor(v.length*0.95)];
+  return hi - lo > 2 ? {lo, hi} : null })();
+
+const lastAtOrBefore = (arr, t, key) => {
+  let lo = 0, hi = arr.length - 1, k = -1;
+  while(lo <= hi){ const mi = (lo+hi)>>1; if(key(arr[mi]) <= t){ k = mi; lo = mi+1 } else hi = mi-1 }
+  return k };
+
+/* rung 8: how many lamps are in play, from how full the arrangement is */
+function widthAt(t){
+  if(STEP < 8 || !INSTR || !INSTR.density_per_bar || !INSTR.density_per_bar.length) return NP;
+  const D = INSTR.density_per_bar;
+  const k = lastAtOrBefore(D, t, x => x[0]);
+  const d = k < 0 ? D[0][1] : D[k][1];
+  return Math.max(1, Math.min(NP, Math.round(1 + d * (NP - 1))));
+}
+/* rung 9: where along the row, from the pitch of the tune */
+function pitchPos(t){
+  if(STEP < 9 || !MELRANGE || !MELN.length) return null;
+  const k = lastAtOrBefore(MELN, t, x => x[0]);
+  if(k < 0) return null;
+  if(t - MELN[k][0] > 0.9) return null;            // the tune has stopped; no note to follow
+  return cl((MELN[k][1] - MELRANGE.lo) / (MELRANGE.hi - MELRANGE.lo), 0, 1);
+}
+/* rung 10: which of the two colours leads, changing only when the chord changes */
+function chordState(t){
+  if(STEP < 10 || !CHORDS.length) return null;
+  const k = lastAtOrBefore(CHORDS, t, x => x.at);
+  if(k < 0) return null;
+  const name = CHORDS[k].chord || "";
+  /* The root note moves the hue. Swapping which lamp holds which colour was a
+     positional change, not a colour one -- the palette never moved, so nothing on
+     stage told you the harmony had. A root maps to a small hue offset instead, so
+     a chord change is visible AS a colour change while staying inside the two
+     colours you picked. Twelve roots across 30 degrees: enough to see, not enough
+     to turn the rig into a rainbow. */
+  const ROOTS = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,
+                 "G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
+  const rm = name.match(/^([A-G][#b]?)/);
+  const root = rm ? (ROOTS[rm[1]] ?? 0) : 0;
+  return { i: k, root, shift: (root / 12 - 0.5) * 30,
+           minor: /m(?!aj)/.test(name.replace(/^[A-G][#b]?/, "")), at: CHORDS[k].at };
+}
+
+/* the starts of parts, and the drops: where white earns its place */
+const BIGT = (function(){
+  const out = CH.map(c => c[0]);
+  for(const m of MO) if(m.kind === "drop" || m.kind === "stop") out.push(m.at);
+  return out.sort((a,b) => a-b) })();
+function bigMoment(t){
+  if(STEP < 10) return true;                 // before the chords rung, every bar
+  for(const b of BIGT) if(Math.abs(b - t) < 0.25) return true;
+  return false;
+}
+
 function beatIndex(t){
   let lo=0, hi=BEATS.length-1, k=-1;
   while(lo<=hi){ const mi=(lo+hi)>>1; if(BEATS[mi]<=t){ k=mi; lo=mi+1 } else hi=mi-1 }
@@ -157,6 +241,19 @@ function frame(t){
     let d = 0; for(let j=k; j>=0 && !DOWNSET.has(+BEATS[j].toFixed(3)); j--) d++;
     lit = d % NP;
   }
+  /* rung 8: the arrangement decides how much of the row is in play at all, and
+     the window sits in the middle so a thin arrangement reads as a narrow rig
+     rather than a rig with holes in it */
+  const w = widthAt(t);
+  const half = (NP - w) / 2;
+  const inPlay = i => (STEP < 8) || (i >= Math.floor(half) && i < Math.floor(half) + w);
+  /* rung 9: the tune picks the lamp, replacing the mechanical walk -- that walk
+     was the thing Renjith called overdone, and it was: it moved for its own sake */
+  const pp = pitchPos(t);
+  if(pp !== null && !isDown){
+    const first = Math.floor(half), last = first + w - 1;
+    lit = Math.round(first + pp * (last - first));
+  }
 
   const F = [];
   PARS.forEach((f, i) => {
@@ -164,16 +261,36 @@ function frame(t){
        whole mix and not on whichever fixture the chase happens to be pointing at.
        Lighting the bed only on the selected par left four of five dark and the
        breathing had nowhere to show. The chase and the flash ride on top of it. */
-    const on = (lit === null || lit === i);
+    const on = (lit === null || lit === i) && inPlay(i);
     const bed = (STEP >= 4 && PUMPING) ? BED : 0;
     let lv = (bed + (1 - bed) * (on ? amp * env : 0)) * size * duck;
     if(STEP < 4) lv = on ? amp * env * size : 0;
     let col = WHITE;
     // ---- rung 5: colour ---------------------------------------------------
     if(STEP >= 6){
-      const c = (i % 2 === 0) ? PAL.a : PAL.b;
+      /* rung 10: the harmony decides which colour leads and when it changes. Before
+         that rung the two colours simply alternate along the row, which looks fine
+         and means nothing. */
+      const ch = chordState(t);
+      /* Once the tune decides WHICH lamp is lit, colour can no longer depend on
+         which lamp it is: alternating a and b along the row meant the colour
+         flickered every time the melody moved, so colour was reporting position
+         rather than harmony. From rung 10 the whole rig shares one colour at a
+         time and the chord is the only thing that changes it. Below that rung the
+         alternation stays, because there nothing else is using the row. */
+      const ch2 = chordState(t);
+      const c = ch2 ? (ch2.i % 2 === 0 ? PAL.a : PAL.b)
+                    : ((i % 2 === 0) ? PAL.a : PAL.b);
       const e = energyAt(t);
-      col = isDown ? WHITE : hsl(c[0], cl(c[1]*(0.86+0.20*e),0,1), cl(c[2]*(0.84+0.28*e),0,1));
+      let li = cl(c[2] * (0.84 + 0.28*e), 0, 1);
+      let hu = c[0];
+      if(ch){ hu += ch.shift; if(ch.minor) li *= 0.78 }   // a minor chord sits darker
+      /* White was landing on every bar start, which is both heavy-handed and, once
+         the chords rung arrived, actively hiding it: chord changes fall on bar
+         starts too, so the one moment the colour moved was the one moment the rig
+         went white. White is kept for the starts of PARTS of the song now -- an
+         accent worth having rather than a tick every two seconds. */
+      col = (isDown && bigMoment(t)) ? WHITE : hsl(hu, cl(c[1]*(0.86+0.20*e),0,1), li);
     }
     F.push({ id:f.id, level:+cl(lv,0,1).toFixed(4), r:col[0], g:col[1], b:col[2] });
   });
@@ -193,7 +310,7 @@ function frame(t){
   }
 
   // ---- rung 7: the heads --------------------------------------------------
-  if(STEP >= 8){
+  if(STEP >= 11){
     const e = energyAt(t), sweep = Math.sin(2*Math.PI * t / (BAR*2));
     HEADS.forEach((f, i) => {
       const s = i === 0 ? sweep : -sweep;
