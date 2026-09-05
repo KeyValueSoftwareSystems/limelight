@@ -146,7 +146,7 @@ function flashTimes(a,b){ return CHECKS ? CHECKS.flashTimes(a,b) : [] }
 let F=null;
 function rebuild(){
   if(!RM||!MAP) return;
-  const lay = STEP>=11 ? LAY : LAYBEAT;
+  const lay = STEP>=12 ? LAY : LAYBEAT;
   F = RM.mkReader(MAP, lay, DRIVE, PAL, STEP, KNOB, SOLO ? STEP : 0);
   CURLAY = lay;
   buildLight();
@@ -267,7 +267,7 @@ async function decide(ok){
   const j=await res.json();
   $("stat").textContent=j.error?j.error:`saved → ${j.path}`;
   $("why").value="";
-  if(ok && STEP<11) STEP++;
+  if(ok && STEP<12) STEP++;
   rebuild();
 }
 $("accept").onclick=()=>decide(true);
@@ -306,9 +306,9 @@ $("song").onchange=e=>location.href=`/build?song=${e.target.value}`;
   if(!LEARN.steps) LEARN={song:SONG,steps:[]};
   const done=LEARN.steps.filter(s=>s.accepted&&RUNGS.some(r=>r.name===s.name))
                         .map(s=>RUNGS.find(r=>r.name===s.name).n);
-  STEP=Math.min(11,(done.length?Math.max(...done):0)+1);
+  STEP=Math.min(12,(done.length?Math.max(...done):0)+1);
   const qs=parseInt(Q.get("step")||"",10);        // a rung is linkable
-  if(qs>=1&&qs<=11) STEP=qs;
+  if(qs>=1&&qs<=12) STEP=qs;
   $("aud").src=`/api/audio?song=${SONG}`;
   // ?t= opens on a moment, so a link can point at the drop rather than the intro
   const qt=parseFloat(Q.get("t")||"");

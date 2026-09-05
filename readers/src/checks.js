@@ -69,7 +69,14 @@ const RUNGS=[
   bad:"colour swapping on the beat, or drifting whenever it likes",
   fix:"this song has no chords written down yet.",
   check:"how many colour changes land on a chord change", pass:60},
- {n:11,name:"moving lamps", adds:"the two moving lamps come back",
+ {n:11,name:"restraint", adds:"one thing leads at a time, the rest hold back",
+  q:"Is the rig doing <b>one thing</b> at a time, or everything at once?",
+  look:"the whole rig, and whether you know where to look",
+  good:"one idea at a time -- the pulse, or the tune, or the rise -- the rest quiet",
+  bad:"everything moving at once, so there is nothing to watch",
+  fix:"this is applied last. If it still looks busy, a rung below it is too loud.",
+  check:"how many times a second the picture changes", pass:0, limit:400},
+ {n:12,name:"moving lamps", adds:"the two moving lamps come back",
   q:"Do the moving lamps stay <b>within what a real motor can do</b>?",
   look:"the two moving lamps, and whether the movement looks achievable",
   good:"movement a real motor could follow",
@@ -102,6 +109,13 @@ const RUNGS=[
 function makeChecks(C){
   const {MAP, LAY, F, LIGHT, WAVE, HZ} = C;
   const dur = m => (m.song && m.song.length) || 240;
+  /* one definition of "what colour is this", used by the colour, chords and
+     restraint checks -- three copies had already started to drift */
+  const HUE_ = o => { const r=(o.r||0)/255, g=(o.g||0)/255, b=(o.b||0)/255;
+    const M=Math.max(r,g,b), m2=Math.min(r,g,b), d=M-m2;
+    if(d<0.06) return -1;
+    let h = M===r ? 60*(((g-b)/d)%6) : M===g ? 60*((b-r)/d+2) : 60*((r-g)/d+4);
+    return Math.round(((h%360)+360)%360/15) };
   const RUNGS_ = RUNGS;
   function flashTimes(A,B){
   const out=[], v=LIGHT.v, mx=LIGHT.max||1;
@@ -286,11 +300,7 @@ function makeChecks(C){
     const C2=((MAP.observations||{}).chords||{}).events||[];
     const ch=C2.filter(c=>c.at>=A&&c.at<=B2);
     if(ch.length<4) return {v:0,ok:false,txt:"this song has no chords written down here", na:true};
-    const hue=o=>{const r=(o.r||0)/255,g=(o.g||0)/255,b=(o.b||0)/255;
-      const M2=Math.max(r,g,b),m2=Math.min(r,g,b),d=M2-m2;
-      if(d<0.06) return -1;
-      let h=M2===r?60*(((g-b)/d)%6):M2===g?60*((b-r)/d+2):60*((r-g)/d+4);
-      return Math.round(((h%360)+360)%360/15)};
+    const hue=HUE_;
     /* white is excluded. The bar starts go white on purpose, so counting that as a
        colour change made an intended gesture look like colour drifting -- the same
        mistake as counting brightness as colour. What is being asked is whether the
@@ -317,7 +327,30 @@ function makeChecks(C){
     const s2=100*near/swaps.length;
     return {v:s2, ok:s2>=60,
       txt:`${near} of ${swaps.length} colour changes land on a chord change`} }
+  /* Judged from the end of the room rather than from the map. A viewer can follow
+     two or three changes a second; past that a rig stops reading as a show and
+     starts reading as flicker. Brightness is counted in coarse steps so a smooth
+     fade is one change and not fifty. */
   if(n===11){
+    /* Quantising brightness counted a fading flash as a stream of changes, so even
+       one flash a beat scored as chaos. A viewer sees a fade as ONE event. What
+       the eye actually registers is a change of picture: which lamps are lit, and
+       what colour they are. A decay does not count until a lamp crosses out. */
+    const state=t=>{
+      const on=[], hues=new Set();
+      F(t).fixtures.forEach((o,i)=>{ if((o.level||0)>0.35){ on.push(i);
+        const h=HUE_(o); if(h>=0) hues.add(h) } });
+      return on.join(",")+"|"+[...hues].sort((a,b)=>a-b).join(",") };
+    let prev=null, changes=0, n2=0;
+    for(let t=A;t<Math.min(B2,A+45);t+=0.02){
+      const sig=state(t);
+      if(prev!==null && sig!==prev) changes++;
+      prev=sig; n2++ }
+    if(!n2) return {v:0,ok:false,na:true,txt:"nothing rendered here"};
+    const per=changes/(n2*0.02);
+    return {v:per*100, ok:per<=4,
+      txt:`the picture changes ${per.toFixed(1)} times a second, and a room can follow about 4`} }
+  if(n===12){
     const L=(LAY.limits||{}), mp=L.max_pan_per_s||1.55, mt=L.max_tilt_per_s||1.7;
     let worst=0, prev=null;
     for(let t=A;t<Math.min(B2,A+60);t+=0.02){

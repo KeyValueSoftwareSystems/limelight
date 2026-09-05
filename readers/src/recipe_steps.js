@@ -63,7 +63,7 @@ const E = ({
   high:   { lvl:1.16, bed:1.14, spread:0.80, flash:1.22 },
 }[DRIVE]) || { lvl:1, bed:1, spread:1, flash:1 };
 
-const STEP = (function(){ try { return Math.max(1, Math.min(11, +LADDER || 1)) } catch(e) { return 1 } })();
+const STEP = (function(){ try { return Math.max(1, Math.min(12, +LADDER || 1)) } catch(e) { return 1 } })();
 
 /* ---- one rung on its own -------------------------------------------------
    The ladder is cumulative, so rung 9 means rungs 1 to 9 all running at once.
@@ -297,6 +297,32 @@ function beatIndex(t){
   return k;
 }
 
+/* ---- one thing leads ------------------------------------------------------
+   Slowing each element down was necessary and not sufficient. With every rung on
+   there are ten gestures running at once, and ten slow gestures is still chaos:
+   the room cannot tell which of them to watch, so it watches none of them. That
+   is what Renjith means by overdoing the melody -- not that the melody is wrong,
+   but that it is competing.
+
+   A designer decides, moment by moment, what the audience is meant to be looking
+   at, and everything not carrying that idea recedes. The music picks the lead: a
+   drop wants the pulse, a quiet vocal section wants the tune, a build wants the
+   rise. Nothing is switched off, only pulled back -- a rig where elements vanish
+   looks broken rather than restrained. */
+function leadAt(t){
+  const e = energyAt(t);
+  for(const sp of SP) if(sp.kind === "build" && sp.from <= t && t < sp.to) return "rise";
+  if(e >= 0.62) return "beat";
+  if(MELRANGE && e < 0.45 && pitchPos(t) !== null) return "melody";
+  return "wash";
+}
+const RECEDE = {
+  beat:   { flash:1.00, spot:0.30, colour:0.85 },
+  melody: { flash:0.45, spot:1.00, colour:0.90 },
+  rise:   { flash:0.75, spot:0.45, colour:0.80 },
+  wash:   { flash:0.55, spot:0.70, colour:1.00 },
+};
+
 function frame(t){
   const k  = beatIndex(t);
   const bt = k < 0 ? -99 : BEATS[k];
@@ -326,6 +352,7 @@ function frame(t){
   /* rung 8: the arrangement decides how much of the row is in play at all, and
      the window sits in the middle so a thin arrangement reads as a narrow rig
      rather than a rig with holes in it */
+  const LEAD = use(11) ? RECEDE[leadAt(t)] : {flash:1, spot:1, colour:1};
   const w = widthAt(t);
   const half = (NP - w) / 2;
   const inPlay = i => (!use(8)) || (i >= Math.floor(half) && i < Math.floor(half) + w);
@@ -352,13 +379,13 @@ function frame(t){
     let share = on ? 1 : 0;
     if(spot !== null && inPlay(i)){
       const d2 = Math.abs(i - spot);
-      share = Math.max(share, d2 < 1.6 ? Math.pow(1 - d2/1.6, 1.6) : 0);
+      share = Math.max(share, (d2 < 1.6 ? Math.pow(1 - d2/1.6, 1.6) : 0) * LEAD.spot);
     }
     /* the wash respects the arrangement too. It did not, so a lamp that rung 8 had
        taken out of play still sat at bed level -- every lamp lit all the time, and
        soloing the instruments rung showed it at once. */
     const bedHere = inPlay(i) ? bed : 0;
-    let lv = (bedHere + (1 - bedHere) * share * amp * env) * size * duck;
+    let lv = (bedHere + (1 - bedHere) * share * amp * env * LEAD.flash) * size * duck;
     if(!use(4) && !SOLO_STEADY) lv = share * amp * env * size;
     lv *= E.lvl;
     let col = WHITE;
@@ -406,7 +433,7 @@ function frame(t){
   }
 
   // ---- rung 7: the heads --------------------------------------------------
-  if(use(11)){
+  if(use(12)){
     const e = energyAt(t), sweep = Math.sin(2*Math.PI * t / (BAR*2));
     HEADS.forEach((f, i) => {
       const s = i === 0 ? sweep : -sweep;
