@@ -72,7 +72,8 @@ if(typeof THREE==="undefined"){
 }
 
 let RM=null, MAP=null, LAY=null, F=null, SONG="", RUNGS=[];
-let STEP=7, SOLO=false, DRIVE="medium", PAL="garrix";
+let STEP=7, SOLO=false;
+let DRIVE=Q.get("energy")||"medium", PAL=Q.get("pal")||"garrix";
 let scene, cam, renderer, fixtures=[], clock=0;
 const V=THREE?THREE.Vector3:null;
 
@@ -267,7 +268,9 @@ function rebuild(){
   $("rung").value=STEP;
   $("rung").onchange=e=>{ STEP=+e.target.value; rebuild() };
   $("solo").onclick=()=>{ SOLO=!SOLO; $("solo").classList.toggle("on",SOLO); rebuild() };
+  $("drive").value=DRIVE;
   $("drive").onchange=e=>{ DRIVE=e.target.value; rebuild() };
+  $("pal").value=PAL;
   $("pal").onchange=e=>{ PAL=e.target.value; rebuild() };
   $("cam").onchange=()=>place();
   const hud=document.createElement("div"); hud.id="hud"; $("wrap").appendChild(hud);

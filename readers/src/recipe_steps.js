@@ -232,7 +232,11 @@ function widthAt(t){
   for(const [at, d] of D){ if(at >= t0 - PHRASE*BAR && at < t0 + HOLD.width*BAR){ sum += d; n++ } }
   if(!n){ const k = lastAtOrBefore(D, t, x => x[0]); sum = k<0?D[0][1]:D[k][1]; n = 1 }
   const d = sum / n;
-  const floor = d < 0.12 ? 1 : 3;                  // a real solo may have one lamp
+  /* Sized as a FRACTION of the rig, not as a count. Three lamps is most of a
+     five-par bar and a quarter of a twelve-par one, so the same number left nine
+     of twelve dark and the rig read as broken rather than restrained. */
+  const floor = d < 0.12 ? Math.max(1, Math.round(NP * 0.14))
+                         : Math.max(3, Math.round(NP * 0.45));
   return Math.max(floor, Math.min(NP, Math.round(1 + d * (NP - 1) * E.spread)));
 }
 /* rung 9: where along the row, from the pitch of the tune -- as the average of a
@@ -392,8 +396,10 @@ function frame(t){
      is the reason position has to be in the layout at all. */
   let lit = null;                                    // null = every par
   if(use(3) && k >= 0 && !isDown){
+    /* the chase steps in groups on a big rig, so a bar still crosses the whole
+       row in four beats rather than creeping one lamp at a time */
     let d = 0; for(let j=k; j>=0 && !DOWNSET.has(+BEATS[j].toFixed(3)); j--) d++;
-    lit = d % NP;
+    lit = Math.round((d % 4) / 3 * (NP - 1));
   }
   /* rung 8: the arrangement decides how much of the row is in play at all, and
      the window sits in the middle so a thin arrangement reads as a narrow rig
@@ -424,8 +430,11 @@ function frame(t){
        it, so the tune reads as movement along the row instead of a lamp race */
     let share = on ? 1 : 0;
     if(spot !== null && inPlay(i)){
+      /* the spot is a fraction of the row too: 1.6 lamps is a third of five and a
+         seventh of twelve, so on a big rig the tune lit a dot instead of a shape */
+      const SW = Math.max(1.6, NP / 5 * 1.6);
       const d2 = Math.abs(i - spot);
-      share = Math.max(share, (d2 < 1.6 ? Math.pow(1 - d2/1.6, 1.6) : 0) * LEAD.spot);
+      share = Math.max(share, (d2 < SW ? Math.pow(1 - d2/SW, 1.6) : 0) * LEAD.spot);
     }
     /* the wash respects the arrangement too. It did not, so a lamp that rung 8 had
        taken out of play still sat at bed level -- every lamp lit all the time, and

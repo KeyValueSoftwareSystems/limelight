@@ -35,7 +35,12 @@ def enrich(path):
             continue
         # "in" means clearly present, "out" means clearly gone; the gap between the
         # two thresholds stops a wobble near the line producing dozens of fake cues
-        on, off = 0.42 * hi, 0.26 * hi
+        # Reference the 90th percentile, not the peak. One loud bar was setting the
+        # bar for the whole song: Levels' drums have a spike that made 42% of peak a
+        # high threshold, so it reported drums playing 5% of a record they are on
+        # throughout, and the arrangement never looked full to the rig.
+        ref = sorted(s)[int(0.90 * (len(s) - 1))] or hi
+        on, off = 0.40 * ref, 0.25 * ref
         entries, exits, live = [], [], False
         for i, v in enumerate(s):
             if not live and v >= on:
@@ -73,14 +78,17 @@ def enrich(path):
     cues.sort(key=lambda c: c["at"])
 
     # how thick the arrangement is, which is not the same as how loud it is
+    # the same 90th-percentile reference as the per-instrument thresholds; using
+    # peak here was the reason a full arrangement never read as more than a third
+    ref = {k: (sorted(st[k][:n])[int(0.90 * (n - 1))] or max(st[k]) or 1) for k in st}
     density = [[round(at[i], 3),
-                round(sum(1 for k in st if st[k][i] >= 0.42 * (max(st[k]) or 1)) / len(st), 3)]
+                round(sum(1 for k in st if st[k][i] >= 0.40 * ref[k]) / len(st), 3)]
                for i in range(n)]
 
     m.setdefault("observations", {})["instruments"] = {
         "how": ("derived from stems.sources, which is htdemucs presence per bar. enters "
                 "and leaves use two thresholds, 42% and 26% of that stem's own peak, so a "
-                "level wobbling near one line does not produce a string of false cues. "
+                "percentile, so one loud bar cannot set the bar for the whole song. "
                 "No new listening was done and no stem audio was used -- every number "
                 "here is a function of the per-bar levels already in this file."),
         "rate": "per_downbeat",
