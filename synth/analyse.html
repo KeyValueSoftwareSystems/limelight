@@ -190,17 +190,26 @@ let WAVE=null;
    hear -- which is what Renjith has been unable to do, correctly, because nothing
    on this page ever showed the two together. */
 let LIGHT=null, LIGHT_HZ=50;
+let lightJob=0;
 function buildLight(){
+  const job = ++lightJob;
   if(!F1||!MINE){ LIGHT=null; return }
   const D=dur(MINE), n=Math.floor(D*LIGHT_HZ), out=new Float32Array(n);
-  for(let i=0;i<n;i++){
-    let s=0; const fr=F1(i/LIGHT_HZ);
-    for(const o of fr.fixtures) if("level" in o && !/^fog/.test(o.id)) s+=o.level;
-    out[i]=s;
-  }
-  let mx=0; for(const v of out) if(v>mx) mx=v;
-  LIGHT={v:out, hz:LIGHT_HZ, max:mx||1};
-  measureSync();
+  const reader=F1;
+  let i=0;
+  const slice=()=>{
+    if(job!==lightJob) return;
+    const t0=performance.now();
+    while(i<n && performance.now()-t0 < 12){
+      let s=0; const fr=reader(i/LIGHT_HZ);
+      for(const o of fr.fixtures) if("level" in o && !/^fog/.test(o.id)) s+=o.level;
+      out[i++]=s;
+    }
+    let mx=0; for(let k=0;k<i;k++) if(out[k]>mx) mx=out[k];
+    LIGHT={v:out, hz:LIGHT_HZ, max:mx||1, done:i>=n, upto:i};
+    if(i<n){ setTimeout(slice,0) } else { measureSync() }
+  };
+  setTimeout(slice,0);
 }
 /* The number, so it is not a matter of opinion: find each rise in emitted light
    and measure how far it sits from the nearest beat. */
@@ -491,26 +500,43 @@ function rebuildShow(){
     clearTimeout(scoreTimer); scoreTimer=setTimeout(rescore,60);
   }catch(e){ $("rmeta").textContent="reader failed: "+e.message }
 }
+let scoreJob=0;
 function rescore(){
   if(!F1||!F2||!RM){ $("lflash").textContent="—"; $("lbad").textContent="—";
     $("lnote").textContent=otherKey?"":"pick something in “against” to compare"; return }
   const D=dur(MINE), FD=0.06;
+  const job = ++scoreJob;
+  const a=F1, b=F2;
   const L1=[],L2=[];
-  for(let t=0;t<D;t+=FD){ L1.push(RM.totalLight(F1(t))); L2.push(RM.totalLight(F2(t))) }
-  const d1=[],d2=[];
-  for(let i=1;i<L1.length;i++){ d1.push(L1[i]-L1[i-1]); d2.push(L2[i]-L2[i-1]) }
-  const r=Math.max(0,RM.pearson(d1,d2))*100;
-  let bad=0;
-  for(let t=0;t<D;t+=0.5) if(RM.frameDiff(F1(t),F2(t))>0.06) bad+=0.5;
-  $("lflash").textContent=r.toFixed(1)+"%";
-  $("lflash").style.color = r>97?"var(--good)":r<60?"var(--bad)":"var(--tung)";
-  $("lbad").textContent=bad.toFixed(0)+"s / "+D.toFixed(0)+"s";
-  /* beats-only reads nothing from the map but the grid, so two maps that agree
-     on tempo and phase score 100% however far apart the rest of them is. Saying
-     so stops a meaningless perfect score being read as a real one. */
-  $("lnote").textContent = BEATONLY
-    ? "beats only: this compares the two grids and nothing else"
-    : "recalculated on every edit";
+  let t=0, bad=0, phase=0;
+  const finish=()=>{
+    const d1=[],d2=[];
+    for(let i=1;i<L1.length;i++){ d1.push(L1[i]-L1[i-1]); d2.push(L2[i]-L2[i-1]) }
+    const r=Math.max(0,RM.pearson(d1,d2))*100;
+    $("lflash").textContent=r.toFixed(1)+"%";
+    $("lflash").style.color = r>97?"var(--good)":r<60?"var(--bad)":"var(--tung)";
+    $("lbad").textContent=bad.toFixed(0)+"s / "+D.toFixed(0)+"s";
+    $("lnote").textContent = BEATONLY
+      ? "beats only: this compares the two grids and nothing else"
+      : "recalculated on every edit";
+  };
+  const step=()=>{
+    if(job!==scoreJob) return;
+    const t0=performance.now();
+    while(performance.now()-t0 < 12){
+      if(phase===0){
+        if(t>=D){ phase=1; t=0; continue }
+        L1.push(RM.totalLight(a(t))); L2.push(RM.totalLight(b(t))); t+=FD;
+      } else {
+        if(t>=D){ finish(); return }
+        if(RM.frameDiff(a(t),b(t))>0.06) bad+=0.5;
+        t+=0.5;
+      }
+    }
+    setTimeout(step,0);
+  };
+  $("lnote").textContent="comparing…";
+  setTimeout(step,0);
 }
 $("save").onclick=async()=>{
   const to = mineKey==="answer" ? "truth" : mineKey;
