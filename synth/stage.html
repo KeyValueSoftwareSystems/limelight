@@ -114,7 +114,9 @@ function build(){
   // the truss the pars hang on, so the row reads as a row
   const truss=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,S.w+0.6,10),
                              new THREE.MeshStandardMaterial({color:0x2a2f3c,roughness:.6,metalness:.7}));
-  truss.rotation.z=Math.PI/2; truss.position.set(S.w/2,3.05,4.6); scene.add(truss);
+  truss.rotation.z=Math.PI/2;
+  const parY=(LAY.fixtures.find(f=>f.kind==="par")||{at:[0,3,4.6]}).at;
+  truss.position.set(S.w/2, parY[1]+0.22, parY[2]); scene.add(truss);
 
   for(const f of (LAY.fixtures||[])){
     if(f.kind==="fog") continue;
@@ -126,16 +128,20 @@ function build(){
        with a yoke, which is most of what tells you which way a lamp is pointing. */
     const shell=new THREE.MeshStandardMaterial({color:0x39414f,roughness:.45,metalness:.75});
     const body=new THREE.Mesh(
-      f.kind==="head" ? new THREE.SphereGeometry(0.15,18,14)
-                      : new THREE.CylinderGeometry(0.135,0.155,0.34,18),
+      f.kind==="head"    ? new THREE.SphereGeometry(0.15,18,14)
+    : f.kind==="blinder" ? new THREE.BoxGeometry(0.42,0.30,0.16)
+                         : new THREE.CylinderGeometry(0.135,0.155,0.34,18),
       shell);
-    if(f.kind!=="head") body.rotation.x=Math.PI/2;
+    if(f.kind==="par") body.rotation.x=Math.PI/2;
     g.add(body);
     const yoke=new THREE.Mesh(new THREE.TorusGeometry(0.17,0.022,8,20), shell);
     yoke.rotation.y=Math.PI/2; g.add(yoke);
     // three nested cones: wide and faint, then narrower, then a core. Real
     // scattering falls off across the beam and one flat cone reads as plastic.
-    const deg=(f.beam_deg||24)*Math.PI/180, len=f.kind==="head"?7.5:5.4;
+    /* a blinder is a flood pointed at the crowd, not a beam: short, very wide,
+       and its whole job is the half second it is on */
+    const deg=(f.beam_deg||24)*Math.PI/180,
+          len=f.kind==="head"?11:f.kind==="blinder"?3.2:7.0;
     const cones=[[1.6,0.055],[1.0,0.13],[0.45,0.42]].map(([k,a])=>{
       const r=Math.tan(deg/2)*len*k;
       const m=new THREE.Mesh(new THREE.ConeGeometry(r,len,26,1,true),
@@ -168,9 +174,9 @@ function build(){
 
 function place(){
   const S=LAY.size_m||{w:6,d:5,h:3.4}, mode=$("cam").value;
-  if(mode==="above"){ cam.position.set(S.w/2, 8.5, S.d/2+0.01); cam.lookAt(S.w/2,0,S.d/2) }
-  else if(mode==="side"){ cam.position.set(-3.4, 2.2, 1.6); cam.lookAt(S.w/2,1.4,S.d*0.7) }
-  else { cam.position.set(S.w/2, 1.45, -2.4); cam.lookAt(S.w/2, 1.95, S.d*0.80) }
+  if(mode==="above"){ cam.position.set(S.w/2, S.h*2.6, S.d/2+0.01); cam.lookAt(S.w/2,0,S.d/2) }
+  else if(mode==="side"){ cam.position.set(-S.w*0.55, S.h*0.5, S.d*0.25); cam.lookAt(S.w/2,S.h*0.35,S.d*0.7) }
+  else { cam.position.set(S.w/2, 1.6, -S.d*0.42); cam.lookAt(S.w/2, S.h*0.52, S.d*0.80) }
 }
 
 /* aim: pars are fixed and rake down the floor; heads obey pan and tilt */
@@ -186,8 +192,12 @@ function aim(fx, o){
        you see the face of the lamp and the beam coming toward you. They were aimed
        at the floor just under the truss, which is why every lens was edge-on and
        invisible. The row also fans slightly outward, as a real rig is rigged. */
-    const mid=S.w/2, fan=(at[0]-mid)*0.55;
-    target=new THREE.Vector3(mid+fan, 0, -0.6);
+    if(fx.def.kind==="blinder"){
+      target=new THREE.Vector3(at[0], 1.5, -3.0);       // straight at the audience
+    } else {
+      const mid=S.w/2, fan=(at[0]-mid)*0.55;
+      target=new THREE.Vector3(mid+fan, 0, -0.6);
+    }
   }
   const dir=target.clone().sub(new THREE.Vector3(...at)).normalize();
   const q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,-1,0), dir);
@@ -215,7 +225,7 @@ function render(t){
     fx.lens.material.color.copy(c).multiplyScalar(Math.min(1, 0.20 + L));
     fx.halo.material.opacity = Math.min(0.95, L*0.85);
     fx.halo.material.color.copy(c);
-    const hs = 0.30 + 1.25*L;
+    const hs = (fx.def.kind==="blinder" ? 0.8 : 0.30) + (fx.def.kind==="blinder"?3.2:1.25)*L;
     fx.halo.scale.set(hs, hs, 1);
     fx.pool.material.color.copy(c);
     fx.pool.material.opacity = L*0.22;
@@ -244,7 +254,9 @@ function rebuild(){
   RM=new Function("RECIPE",ROOMJS+"\n;return {mkReader,prep};")(RECIPE);
   SONG=Q.get("song")||"levels";
   const sg=await (await fetch("/api/song?song="+SONG)).json();
-  LAY=(sg.layouts||{}).small||(sg.layouts||{}).beat;
+  const want=Q.get("rig");
+  LAY=(sg.layouts||{})[want] || (sg.layouts||{}).show
+      || (sg.layouts||{}).small || (sg.layouts||{}).beat;
   const G=await (await fetch("/api/maps?song="+SONG)).json();
   SONG=G.song; MAP=G.maps.answer||Object.values(G.maps)[0];
   $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>

@@ -163,6 +163,8 @@ function hsl(h,s,l){
   return [Math.round((r+m)*255),Math.round((g+m)*255),Math.round((b+m)*255)]}
 
 const cl=(v,a,b)=>v<a?a:v>b?b:v;
+const lerp=(a,b,w)=>a+(b-a)*w;
+const ss=(a,b,x)=>{ const t=cl((x-a)/((b-a)||1),0,1); return t*t*(3-2*t) };
 const chIdx=t=>{ let j=0; for(let i=0;i<CH.length;i++) if(CH[i][0]<=t) j=i; else break; return j };
 
 /* rung 4: the song's own energy curve, held between its samples rather than
@@ -486,15 +488,74 @@ function frame(t){
   }
 
   // ---- rung 7: the heads --------------------------------------------------
+  // ---- rung 14: the heads ------------------------------------------------
   if(use(14)){
-    const e = energyAt(t), sweep = Math.sin(2*Math.PI * t / (BAR*2));
+    /* They were sweeping one cycle every two bars, which is a head taking nearly
+       four seconds to get anywhere -- slow enough to read as a fault. A moving
+       head is fast; the thing that makes it look alive is short throws taken
+       quickly, not long ones taken slowly, and both cost the same motor.
+
+       So the frequency rises with the song and the AMPLITUDE is derived from the
+       motor budget rather than merely permitted by it: peak angular speed is
+       amplitude * 2*pi*frequency, so solving for amplitude at the budget means
+       the heads always move as fast as the fixture allows and can never be asked
+       to do more. Raise max_pan_per_s in the layout and they swing wider; lower
+       it and they tighten. The recipe never has to know what a real motor does. */
+    const e = energyAt(t);
+    const LIMP = (LAYOUT.limits && LAYOUT.limits.max_pan_per_s) || 1.55;
+    const LIMT = (LAYOUT.limits && LAYOUT.limits.max_tilt_per_s) || 1.7;
+    /* The frequency is FIXED, and that is not a style choice. Writing it as
+       sin(2*pi*f(t)*t) with f rising on energy jumps the phase every time energy
+       steps -- the head teleports, and the motor check reported 1782% of budget
+       for motion that looked smooth on a graph. A pure function has no phase to
+       accumulate, so the honest fix is a constant rate and let energy drive how
+       BRIGHT the heads are rather than how fast they move.
+       One sweep per bar, with the amplitude solved from the motor budget. */
+    const HF  = 1.0 / BAR;
+    const APAN = Math.min(0.36, (LIMP * 0.70) / (2 * Math.PI * HF));
+    const ATIL = Math.min(0.20, (LIMT * 0.55) / (2 * Math.PI * HF * 0.5));
+    const D2 = dropAt(t);
+    const nh = Math.max(1, HEADS.length);
     HEADS.forEach((f, i) => {
-      const s = i === 0 ? sweep : -sweep;
-      F.push({ id:f.id, level:+cl((0.30+0.55*e) * (0.55+0.45*env), 0, 1).toFixed(4),
-               pan:+(0.5 + 0.34*s).toFixed(4), tilt:+(0.42 + 0.16*s*e).toFixed(4),
-               r:PAL.b ? hsl(PAL.b[0],0.86,0.48)[0] : 255,
-               g:hsl(PAL.b[0],0.86,0.48)[1], b:hsl(PAL.b[0],0.86,0.48)[2] });
+      // fanned, and every other one mirrored, so the rig crosses rather than herds
+      const ph = (i / nh) * Math.PI * 2, dir = (i % 2 === 0) ? 1 : -1;
+      let pan  = 0.5 + dir * APAN * Math.sin(2*Math.PI*HF*t + ph);
+      let tilt = 0.44 + ATIL * Math.sin(Math.PI*HF*t + ph*0.5);
+      /* On the drop they stop chasing and open into a fixed fan -- the oldest
+         trick there is and still the one that reads from the back of a room.
+
+         But a head cannot teleport. Snapping to the fan on the instant asked for
+         1344% of the motor budget, because a jump is not a move. The travel
+         happens during the bar of darkness BEFORE the drop instead, which is what
+         a real designer does for exactly this reason: reposition while nobody can
+         see you, and arrive already pointing where the moment needs you. */
+      const fanPan = 0.5 + ((i / (nh - 1 || 1)) - 0.5) * 0.62, fanTilt = 0.30;
+      if(D2){
+        // pre runs 1 a bar out to 0 on the instant, so this is the approach
+        const w = D2.pre !== null ? ss(0, 1, 1 - D2.pre)
+                : D2.dt < BAR     ? 1
+                : ss(0, 1, 1 - (D2.dt - BAR) / BAR);      // and drift back after
+        pan  = lerp(pan,  fanPan,  w);
+        tilt = lerp(tilt, fanTilt, w);
+      }
+      const col = hsl(PAL.b[0], 0.88, 0.50);
+      F.push({ id:f.id,
+               level:+cl((0.28 + 0.62*e) * (0.5 + 0.5*env) * (D2 && D2.hit ? 1.6 : 1), 0, 1).toFixed(4),
+               pan:+cl(pan,0,1).toFixed(4), tilt:+cl(tilt,0,1).toFixed(4),
+               r:col[0], g:col[1], b:col[2] });
     });
+  }
+
+  // ---- blinders: they exist for one moment in a song, and it is the drop ----
+  for(const f of LAYOUT.fixtures){
+    if(f.kind !== "blinder") continue;
+    const D3 = dropAt(t);
+    let lv = 0;
+    if(D3){
+      if(D3.hit) lv = 1;
+      else if(D3.dt > 0 && D3.dt < BAR * 0.5) lv = Math.max(0, 1 - D3.dt / (BAR*0.5)) * 0.55;
+    }
+    F.push({ id:f.id, level:+lv.toFixed(4), r:255, g:246, b:228 });
   }
 
   return { t:+t.toFixed(3), look: SOLO ? "solo"+SOLO : "step"+STEP,
