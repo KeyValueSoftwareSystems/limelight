@@ -24,6 +24,10 @@ const K = ({
 }[DRIVE]) || { base:1, span:1, chase:1, accent:1, motion:1, strobe:1, haze:1 };
 
 const cl=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+CH = (CH && CH.length) ? CH : [[0, 'verse']];
+EN = EN || [];
+MO = MO || [];
+SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
 
@@ -421,7 +425,17 @@ function chaseAt(t, e, n){
 /* One lamp is on the hit, the one before it is still letting go. The envelope is
    measured against the gap to the NEXT hit rather than a fixed time, so a fill
    reads as a fill instead of five lamps all half-lit at once. */
-const MIRROR = (LAYOUT.fixtures||[]).filter(f=>f.kind==='par').length > 12;
+const MIRROR = (function(){
+  const fx=(LAYOUT.fixtures||[]).filter(f=>f.kind!=='fog');
+  if(fx.length<6) return false;
+  const xs=fx.map(f=>f.at[0]);
+  const lo=Math.min.apply(null,xs), hi=Math.max.apply(null,xs), mid=(lo+hi)/2;
+  let paired=0;
+  for(const f of fx){
+    const want=2*mid-f.at[0];
+    if(fx.some(g=>g!==f&&g.kind===f.kind&&Math.abs(g.at[0]-want)<0.35&&Math.abs(g.at[1]-f.at[1])<0.35)) paired++;
+  }
+  return paired/fx.length >= 0.7;})();
 const sym = xn => MIRROR ? Math.abs(xn-0.5)*2 : xn;
 const CENTRE_PAIR = (function(){
   const hs=(LAYOUT.fixtures||[]).filter(f=>f.kind==='head');
@@ -503,6 +517,8 @@ const ARRAY_MIN = 12;
 const DROPS_AT = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
 function actNo(t){ let k=0; for(const d of DROPS_AT){ if(d<=t+1e-9) k++; else break } return k }
 const DEPLOY = {
+  co2:     {arc:0.22, act:1},
+  confetti:{arc:0.80, act:2},
   par:     {arc:0.00, act:0},
   strip:   {arc:0.06, act:0},
   head:    {arc:0.12, act:0},
@@ -854,6 +870,27 @@ function lookFrame(t,L){
      pixels a frame, and more importantly a screen is not a light: it wants its
      own reader off the same map, the way the drone reader does. Recorded here so
      the gap is visible in the frame rather than only in a document. */
+  KIND('co2').forEach(function(id){
+    const G=GEO[id]; let lv=0;
+    if(L==='drop'){ const[d,sd]=since('drop',t,8);
+      const burst=Math.min((LAYOUT.limits||{}).co2_max_burst_s||1.2, BAR*0.6);
+      if(sd!==null && sd<burst) lv=(1-ss(0,burst,sd))*(0.6+0.4*(d&&d.v!==undefined?d.v:0.9)); }
+    F.push({id:id,level:+cl(lv*deployed('co2',t),0,1).toFixed(3)})});
+
+  KIND('confetti').forEach(function(id){
+    let lv=0;
+    const last=DROPS_AT.length?DROPS_AT[DROPS_AT.length-1]:null;
+    if(last!==null && t>=last && t-last<BAR*4) lv=1-ss(0,BAR*4,t-last);
+    F.push({id:id,level:+cl(lv,0,1).toFixed(3),
+            note:'once, on the last drop -- confetti fired twice is confetti nobody notices'})});
+
+  KIND('pyro').forEach(function(id){
+    const G=GEO[id], zones=((LAYOUT.limits||{}).pyro_zones)||[];
+    const armed = zones.indexOf(G.zone)>=0;
+    F.push({id:id,level:0,
+            held_back: armed ? 'armed zone but no operator interlock in this reader'
+                             : ('zone '+G.zone+' is not a declared pyro zone')})});
+
   VIDEO.forEach(function(id){
     F.push({id:id,level:0,
             held_back:'a screen is not a light; it needs a video reader, not a lighting field'})});
