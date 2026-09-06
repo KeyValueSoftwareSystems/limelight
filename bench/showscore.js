@@ -129,6 +129,45 @@ for(const song of SONGS){
     if(m>1e-6){ vsum+=d/m; vn++ }
   }
   const variety=vn?vsum/vn:0;
+  // movement rhythm: do heads MOVE in time and HOLD between?
+  const MFPS=50, MN=Math.floor(DUR*MFPS);
+  const heads=L.fixtures.filter(f=>f.kind==='head').map(f=>f.id);
+  const vel=[]; let pp=null;
+  for(let i=0;i<MN;i++){
+    const f=frame(i/MFPS); const cur={}; let v=0,c=0;
+    for(const o of f.fixtures){ if(heads.indexOf(o.id)<0||o.pan===undefined) continue;
+      cur[o.id]=o.pan; if(pp&&pp[o.id]!==undefined){ v+=Math.abs(o.pan-pp[o.id]); c++ } }
+    if(c) vel.push([i/MFPS, v/c*MFPS]);
+    pp=cur;
+  }
+  let holdFrac=0, onGrid=0, nPk=0;
+  if(vel.length){
+    const vs=vel.map(x=>x[1]).slice().sort((a,b)=>a-b);
+    const vmax=vs[Math.floor(vs.length*0.98)]||1e-6;
+    holdFrac=vel.filter(x=>x[1]<0.12*vmax).length/vel.length;
+    const SUB=[]; for(let k=0;;k++){const tt=PH+k*PER/2; if(tt>DUR)break; SUB.push(tt)}
+    for(let i=2;i<vel.length-2;i++){
+      if(vel[i][1]>vel[i-1][1]&&vel[i][1]>=vel[i+1][1]&&vel[i][1]>0.45*vmax){
+        nPk++; let best=1e9;
+        for(const sb of SUB){const d=Math.abs(sb-vel[i][0]); if(d<best)best=d; if(sb>vel[i][0]+0.3)break}
+        if(best<=0.055) onGrid++;
+      }
+    }
+  }
+  const moveRhythm = (nPk? onGrid/nPk : 0.5) * band(holdFrac, 0.15, 0.55);
+  // restraint: how much of the show runs with most of the rig switched on
+  const nBeam=L.fixtures.filter(f=>BEAMY(f.id)).length;
+  let crowded=0, sampled=0;
+  for(let i=0;i<N;i+=4){
+    const f=frame(i/FPS); let on=0;
+    for(const o of f.fixtures){ if(!BEAMY(o.id)) continue;
+      let v=o.level||0;
+      if(o.pixels&&o.pixels.length){let m=0;for(const q of o.pixels)m=Math.max(m,(q[0]+q[1]+q[2])/765);v=Math.max(v,m)}
+      if(v>0.15) on++ }
+    if(on/nBeam > 0.55) crowded++;
+    sampled++;
+  }
+  const crowdShare = sampled ? crowded/sampled : 0;
   const jr=jumps/N;
   const drive=SD_;
   const S={
@@ -145,14 +184,17 @@ for(const song of SONGS){
     beam:   zg.length ? mean(zg) : 0.5,
     strobe: (sn ? smus/sn : 1) * (1 - band(strobeShare, 0.06, 0.30)),
     variety: band(variety, 0.10, 0.55),
+    moverhy: moveRhythm,
+    spare:   1 - band(crowdShare, 0.04, 0.28),
   };
   const W={dark:1.6, range:1.4, midless:1.2, marked:1.4, onbeat:1.2, follow:1.3, calm:1.0, hue:0.8,
-           kill:1.5, build:1.5, beam:1.0, strobe:1.0, variety:1.6};
+           kill:1.5, build:1.5, beam:1.0, strobe:1.0, variety:1.6, moverhy:1.5, spare:1.4};
   let num=0,den=0; for(const k in S){num+=S[k]*W[k];den+=W[k]}
   out.push({song, total:num/den, S,
-    raw:{dark:dark,range:range,mid:mid,marked:marked/BEATS.length,
+    raw:{crowd:crowdShare,dark:dark,range:range,mid:mid,marked:marked/BEATS.length,
          onbeat:onb/Math.max(1,strong.length),r:r,jr:jr,green:green}});
 }
+function crowdShareOut(o){return o.raw.crowd||0}
 let g=0;
 console.log('  song            SCORE  dark blaze  mid  markd onbeat follow calm  hue');
 for(const o of out){
@@ -163,4 +205,4 @@ for(const o of out){
 console.log('  TOTAL           '+(g/out.length).toFixed(4));
 console.log('  raw: '+out.map(o=>o.song.slice(0,4)+' dk'+(100*o.raw.dark).toFixed(0)+' rg'+o.raw.range.toFixed(1)+
   ' mid'+(100*o.raw.mid).toFixed(0)+' mk'+(100*o.raw.marked).toFixed(0)+' ob'+(100*o.raw.onbeat).toFixed(0)+
-  ' r'+o.raw.r.toFixed(2)+' j'+(100*o.raw.jr).toFixed(1)).join(' | '));
+  ' r'+o.raw.r.toFixed(2)+' j'+(100*o.raw.jr).toFixed(1)+' mv'+(100*o.S.moverhy).toFixed(0)+' cr'+(100*crowdShareOut(o)).toFixed(0)).join(' | '));

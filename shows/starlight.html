@@ -196,6 +196,7 @@ MO = MO || [];
 SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
+const CYC_DROP = 0.5;
 const KILL_DEPTH=0.97;
 const KILL_BEATS=0.5;
 const CUT_DEPTH=0.00;
@@ -543,7 +544,7 @@ function moveScaleAt(t){
   }
   return v*drive;
 }
-const MOVE_STEPS=[0.0625,0.125,0.25,0.5,1];
+const MOVE_STEPS=[0.0625,0.125,0.25,0.5,1,2];
 function quantMove(r){
   let best=MOVE_STEPS[0], bd=Infinity;
   for(const v of MOVE_STEPS){ const d=Math.abs(Math.log(v/Math.max(1e-6,r))); if(d<bd){bd=d;best=v} }
@@ -935,7 +936,7 @@ function buildProg(t){
 }
 function gateBars(kind, tt){
   const L = primaryLook(tt), e = en(tt);
-  const cyc = {drop:0.25, build:0.5, verse:0.5, quiet:2, idle:2, outro:2, spotlight:2}[L];
+  const cyc = {drop:CYC_DROP, build:0.5, verse:0.5, quiet:2, idle:2, outro:2, spotlight:2}[L];
   const kmul = GATE_RATE[kind] === undefined ? 1 : GATE_RATE[kind];
   const bp = buildProg(tt);
   const accel = (bp >= 0) ? lerp(2.4, 0.30, bp*bp) : 1;
@@ -977,23 +978,32 @@ function gatePhase(kind, t){
 const PHRASE_BARS = 4;
 const QUIET_WASH = 0.22;
 const QUIET_UP = 0.14;
+const FLOOR_DROP = 0.45;
+const DROP_HOLD = 3;
+const DROP_FADE = 5;
+const DROP_SETTLE = 0.60;
 const CUE_XF = 0.35;
+const HOFF_SPREAD = 0.30;
+const HOFF_TRUSS = 0.50;
+const DWELL_LO = 0.70;
+const DWELL_HI = 0.55;
+const DWELL_CAP = 0.78;
 const BUILD_LO = 0.75;
 const BUILD_HI = 1.45;
 const LIFT_LO = 0.60;
 const LIFT_HI = 1.60;
 const BLOCKS = {
-  bed:       {par:0.30, head:0.12, wash:0.95, uplight:1.00, zoom:0.66, shape:0.00, chase:0.00, lift:0.55},
-  pulse:     {par:1.00, head:0.34, wash:0.55, uplight:0.75, zoom:0.52, shape:0.10, chase:0.25, lift:0.85},
-  chase:     {par:0.92, head:0.72, wash:0.30, uplight:0.42, zoom:0.40, shape:0.30, chase:1.00, lift:0.95},
-  fan:       {par:0.42, head:1.00, wash:0.62, uplight:0.55, zoom:0.26, shape:0.20, chase:0.00, lift:0.95},
-  cross:     {par:0.55, head:1.00, wash:0.40, uplight:0.45, zoom:0.16, shape:0.90, chase:0.30, lift:1.00},
-  ballyhoo:  {par:0.62, head:1.00, wash:0.52, uplight:0.50, zoom:0.22, shape:1.00, chase:0.55, lift:1.00},
-  flood:     {par:1.00, head:0.92, wash:1.00, uplight:1.00, zoom:0.92, shape:0.40, chase:0.10, lift:1.00},
-  silhouette:{par:0.06, head:0.85, wash:0.16, uplight:1.00, zoom:0.34, shape:0.00, chase:0.00, lift:0.70},
-  spot:      {par:0.06, head:0.28, wash:0.10, uplight:0.22, zoom:0.20, shape:0.00, chase:0.00, lift:0.45},
-  swell:     {par:0.40, head:0.66, wash:1.00, uplight:1.00, zoom:0.58, shape:0.15, chase:0.00, lift:0.90},
-  drift:     {par:0.22, head:0.80, wash:0.70, uplight:0.85, zoom:0.30, shape:0.55, chase:0.00, lift:0.80},
+  bed:       {par:0.30, head:0.12, wash:0.95, uplight:1.00, zoom:0.66, shape:0.00, chase:0.00, lift:0.55, spread:0.10},
+  pulse:     {par:1.00, head:0.34, wash:0.55, uplight:0.75, zoom:0.52, shape:0.10, chase:0.25, lift:0.85, spread:0.00},
+  chase:     {par:0.92, head:0.72, wash:0.30, uplight:0.42, zoom:0.40, shape:0.30, chase:1.00, lift:0.95, spread:0.55},
+  fan:       {par:0.42, head:1.00, wash:0.62, uplight:0.55, zoom:0.26, shape:0.20, chase:0.00, lift:0.95, spread:0.30},
+  cross:     {par:0.55, head:1.00, wash:0.40, uplight:0.45, zoom:0.16, shape:0.90, chase:0.30, lift:1.00, spread:0.60},
+  ballyhoo:  {par:0.62, head:1.00, wash:0.52, uplight:0.50, zoom:0.22, shape:1.00, chase:0.55, lift:1.00, spread:0.70},
+  flood:     {par:1.00, head:0.92, wash:1.00, uplight:1.00, zoom:0.92, shape:0.40, chase:0.10, lift:1.00, spread:0.05},
+  silhouette:{par:0.06, head:0.85, wash:0.16, uplight:1.00, zoom:0.34, shape:0.00, chase:0.00, lift:0.70, spread:0.15},
+  spot:      {par:0.06, head:0.28, wash:0.10, uplight:0.22, zoom:0.20, shape:0.00, chase:0.00, lift:0.45, spread:0.00},
+  swell:     {par:0.40, head:0.66, wash:1.00, uplight:1.00, zoom:0.58, shape:0.15, chase:0.00, lift:0.90, spread:0.20},
+  drift:     {par:0.22, head:0.80, wash:0.70, uplight:0.85, zoom:0.30, shape:0.55, chase:0.00, lift:0.80, spread:0.45},
 };
 const CUE_LIST = {
   intro:    ['bed','drift','swell','pulse'],
@@ -1040,15 +1050,15 @@ function arrayGate(G, t, e, L, n){
   const ceil = {drop:0.46, build:0.40, verse:0.34, quiet:0.26, idle:0.22,
                 outro:0.26, spotlight:0.18, stop:0, flash:1}[L];
   const bp = buildProg(t);
-  const top = (bp >= 0) ? lerp(0.16, 0.52, bp) : (ceil===undefined?0.52:ceil);
+  let top = (bp >= 0) ? lerp(0.16, 0.52, bp) : (ceil===undefined?0.52:ceil);
+  if(L === 'drop'){
+    const sd = since('drop', t, 1e9)[1];
+    if(sd !== null && sd > DROP_HOLD*BAR)
+      top *= lerp(1, DROP_SETTLE, ss(0, DROP_FADE*BAR, sd - DROP_HOLD*BAR));
+  }
   const cov = (top<=0||top>=1) ? top : cl(0.10 + (top-0.10)*(0.18+0.82*e), 0.08, 1);
   if(cov >= 1) return 1;
   if(cov <= 0) return 0;
-  const cyc = {drop:0.25, build:0.5, verse:0.5, quiet:2, idle:2, outro:2, spotlight:2}[L];
-  const kmul = GATE_RATE[G.kind] === undefined ? 1 : GATE_RATE[G.kind];
-  const accel = (bp >= 0) ? lerp(2.4, 0.30, bp*bp) : 1;
-  const drive = lerp(1.9, 1.0, SONG_DRIVE);
-  const bars = (cyc===undefined?1:cyc) * kmul * accel * drive * (1.7 - 0.9*e);
   const ph = gatePhase(G.kind, t);
   const fx = (n > ARRAY_MIN) ? Math.abs(G.xn - 0.5)*2 : G.xn;
   const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(fx*1.2 + G.yn*0.6 - ph));
@@ -1056,7 +1066,7 @@ function arrayGate(G, t, e, L, n){
   const edge = 1 - cov;
   const gate = cl((wave - edge + soft) / (soft*2), 0, 1);
   const fl0 = GATE_FLOOR[G.kind];
-  const lk = {drop:1.0, flash:1.0, build:0.60, verse:0.42, break:0.16,
+  const lk = {drop:FLOOR_DROP, flash:1.0, build:0.60, verse:0.42, break:0.16,
               quiet:0.10, idle:0.06, outro:0.14}[L];
   const fl = (fl0 === undefined) ? undefined
            : fl0 * (lk === undefined ? 0.5 : lk) * (0.30 + 0.70*e);
@@ -1232,7 +1242,7 @@ function lookFrame(t,L){
   const shape=ss(0.35,0.85,eM);           // sway ....... circle
   // dwell both ways: hold when calm, and SNAP-then-hold when hot. A head that
   // crosses its arc in a burst and waits reads far faster than one drifting.
-  const dw=cl(0.40*(1-eM)+0.26*ss(0.72,1.0,eM),0,0.56);
+  const dw=cl(DWELL_LO*(1-eM)+DWELL_HI*ss(0.72,1.0,eM),0,DWELL_CAP);
   // Amplitude is DERIVED from the fixture's slew budget instead of being checked
   // against it, so the recipe can never ask for more than the motor has.
   // peak velocity of A*sin(u) with a smoothstep dwell is A*omega*1.5/(1-dw).
@@ -1244,7 +1254,7 @@ function lookFrame(t,L){
      A depends on t only through eM, and eM is a 5-tap average of a piecewise
      linear curve, so |eM'| is bounded by EMAX -- computable once from the map.
      Solving for A gives a guaranteed bound rather than a hopeful one. */
-  const om=rateNow(t), duty=Math.max(0.20,1-dw), S=1.5;
+  const om=rateNow(t), duty=Math.max(1-DWELL_CAP,1-dw), S=1.5;
   const thp=om*S/duty;                              // peak phase rate
   const ampP=Math.max(0.02,(LIMP-DADE*EMAX)/thp);   // pan  budget, proven
   const ampT=Math.max(0.02,(LIMT-DADE*EMAX)/(2*thp));// tilt runs at 2x in the sway shape
@@ -1278,7 +1288,7 @@ function lookFrame(t,L){
     // heads on the upstage truss counter-rotate against the front truss, so the
     // beams cross over the floor instead of sweeping in parallel
     const back=G.z>3.0, mir=(G.left?1:-1)*(back?-1:1);
-    const hoff=G.xn*2*Math.PI*0.75+(back?Math.PI*0.5:0), fan=(G.xn-0.5)*2;
+    const hoff=G.xn*2*Math.PI*HOFF_SPREAD+(back?Math.PI*HOFF_TRUSS:0), fan=(G.xn-0.5)*2;
     const pSway=amp*Math.sin(u+hoff)*mir + fan*0.13;
     const pCirc=amp*Math.sin(u+hoff)*mir;
     const tSway=tam*Math.sin(2*u+hoff);
