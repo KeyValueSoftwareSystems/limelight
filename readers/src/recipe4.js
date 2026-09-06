@@ -57,6 +57,11 @@ const barIdx=t=>Math.floor((bi(t)-DBP)/4);
 const barPh=t=>cl((beatInBar(t)+bph(t))/4);
 const phrPh=t=>{const k=((bi(t)-DBP)%16+16)%16;return cl((k+bph(t))/16)};
 const mpos=t=>Math.max(0, barIdx(t)+barPh(t));
+function chProg(t){
+  if(!CH.length) return 0;
+  const j=chIdx(t), a=CH[j][0], b=(j+1<CH.length?CH[j+1][0]:DUR);
+  return (b>a) ? cl((t-a)/(b-a)) : 0;
+}
 
 /* energy: smoothstep between downbeat samples, so there is no slope kink */
 /* A reader must survive a map that does not carry a field -- rule 2 of the format,
@@ -509,8 +514,21 @@ const FINALE_AT = (function(){
   const last = DROP_TIMES[DROP_TIMES.length-1];
   return (last > DUR*0.55) ? last : Infinity;
 })();
+const PAL_STEPS = 3;
+const PAL_JOURNEY = (function(){
+  if(PROFILE !== 'auto') return null;
+  const out = [];
+  for(let i=0;i<PAL_STEPS;i++)
+    out.push(palFrom((AUTO.tonic >= 0 ? AUTO.tonic : 0) + i*2, AUTO.major, AUTO.sat, AUTO.lit));
+  return out;
+})();
 function palAt(t){
-  return (t + 1e-9 < FINALE_AT) ? PAL : FINALE_PAL;
+  if(t + 1e-9 >= FINALE_AT) return FINALE_PAL;
+  if(!PAL_JOURNEY) return PAL;
+  const sec = sectionAt(t);
+  const arc = sec && sec.arc !== undefined ? cl(sec.arc) : cl(t/Math.max(1,DUR));
+  const i = Math.min(PAL_STEPS-1, Math.floor(arc*PAL_STEPS));
+  return PAL_JOURNEY[i];
 }
 /* [primary, partner] per chapter. Warm carries the song, cool carries the room,
    deep carries the dark, and the build hands over to the drop by going hot. */
@@ -791,23 +809,63 @@ function gatePhase(kind, t){
   return T.cum[i] + T.rate[i]*cl(m-i);
 }
 const PHRASE_BARS = 4;
-const FAM_LOW = 0.55;
-const FAM_MID = 0.80;
-const FAMILY_TURN = [
-  {par:1.00,    head:FAM_LOW, wash:FAM_LOW, uplight:0.94},
-  {par:FAM_LOW, head:1.00,    wash:FAM_MID, uplight:FAM_LOW},
-  {par:FAM_MID, head:FAM_LOW, wash:1.00,    uplight:1.00},
-];
-function variantOf(n, rep){ const k = FAMILY_TURN.length; return ((n + rep) % k + k) % k }
-function emph(kind, t, L){
-  if(L === 'drop' || L === 'flash' || L === 'stop' || L === 'spotlight') return 1;
-  const w = FAMILY_TURN[0][kind];
-  if(w === undefined) return 1;
+const QUIET_WASH = 0.22;
+const QUIET_UP = 0.14;
+const CUE_XF = 0.35;
+const BUILD_LO = 0.75;
+const BUILD_HI = 1.45;
+const LIFT_LO = 0.60;
+const LIFT_HI = 1.60;
+const BLOCKS = {
+  bed:       {par:0.30, head:0.12, wash:0.95, uplight:1.00, zoom:0.66, shape:0.00, chase:0.00, lift:0.55},
+  pulse:     {par:1.00, head:0.34, wash:0.55, uplight:0.75, zoom:0.52, shape:0.10, chase:0.25, lift:0.85},
+  chase:     {par:0.92, head:0.72, wash:0.30, uplight:0.42, zoom:0.40, shape:0.30, chase:1.00, lift:0.95},
+  fan:       {par:0.42, head:1.00, wash:0.62, uplight:0.55, zoom:0.26, shape:0.20, chase:0.00, lift:0.95},
+  cross:     {par:0.55, head:1.00, wash:0.40, uplight:0.45, zoom:0.16, shape:0.90, chase:0.30, lift:1.00},
+  ballyhoo:  {par:0.62, head:1.00, wash:0.52, uplight:0.50, zoom:0.22, shape:1.00, chase:0.55, lift:1.00},
+  flood:     {par:1.00, head:0.92, wash:1.00, uplight:1.00, zoom:0.92, shape:0.40, chase:0.10, lift:1.00},
+  silhouette:{par:0.06, head:0.85, wash:0.16, uplight:1.00, zoom:0.34, shape:0.00, chase:0.00, lift:0.70},
+  spot:      {par:0.06, head:0.28, wash:0.10, uplight:0.22, zoom:0.20, shape:0.00, chase:0.00, lift:0.45},
+  swell:     {par:0.40, head:0.66, wash:1.00, uplight:1.00, zoom:0.58, shape:0.15, chase:0.00, lift:0.90},
+  drift:     {par:0.22, head:0.80, wash:0.70, uplight:0.85, zoom:0.30, shape:0.55, chase:0.00, lift:0.80},
+};
+const CUE_LIST = {
+  intro:    ['bed','drift','swell','pulse'],
+  verse:    ['pulse','chase','fan','pulse'],
+  break:    ['swell','drift','silhouette','swell'],
+  quiet:    ['swell','drift','spot','swell'],
+  build:    ['chase','chase','fan','cross'],
+  drop:     ['flood','ballyhoo','cross','flood'],
+  outro:    ['bed','silhouette','bed','spot'],
+  idle:     ['bed','bed','silhouette','bed'],
+  spotlight:['spot'], flash:['flood'], stop:['spot'],
+};
+function cueName(L, n, rep){
+  const list = CUE_LIST[L] || CUE_LIST.verse;
+  const k = list.length;
+  return list[((n + rep) % k + k) % k];
+}
+function cueAt(t, L){
   const sec = sectionAt(t), rep = sec ? (sec.repeat || 1) : 1;
   const m = mpos(t)/PHRASE_BARS, n = Math.floor(m);
-  const cur = FAMILY_TURN[variantOf(n, rep)][kind];
-  const prv = FAMILY_TURN[variantOf(n-1, rep)][kind];
-  return lerp(prv, cur, ss(0, 0.35, m - n));
+  const A = BLOCKS[cueName(L, n-1, rep)] || BLOCKS.pulse;
+  const B = BLOCKS[cueName(L, n, rep)] || BLOCKS.pulse;
+  const w = ss(0, CUE_XF, m - n);
+  const out = {};
+  for(const k in B) out[k] = lerp(A[k] === undefined ? B[k] : A[k], B[k], w);
+  return out;
+}
+const LIFT_MID = 0.75;
+function climbAt(t, L){
+  const bp = buildProg(t);
+  const p = bp >= 0 ? bp : (L === 'build' ? chProg(t) : -1);
+  return p < 0 ? 1 : lerp(BUILD_LO, BUILD_HI, p);
+}
+function emph(kind, t, L){
+  const c = cueAt(t, L);
+  const v = c[kind];
+  const lift = cl((c.lift === undefined ? LIFT_MID : c.lift)/LIFT_MID, LIFT_LO, LIFT_HI);
+  return (v === undefined ? 1 : v) * lift * climbAt(t, L);
 }
 function arrayGate(G, t, e, L, n){
   const dep = deployed(G.kind, t);
@@ -858,9 +916,7 @@ function rebuildGeo(){
 const zoomAt=(t,e,L)=>{
   const bp=buildProg(t);
   if(bp>=0) return cl(lerp(0.46,0.06,bp));
-  return cl(L==='drop'||L==='flash' ? 0.82+0.14*e
-          : L==='quiet'||L==='idle' ? 0.60
-          : 0.42+0.14*e);
+  return cl(cueAt(t,L).zoom);
 };
 const NPXof=id=>{const f=LAYOUT.fixtures.find(x=>x.id===id);return (f&&f.pixels)||24};
 
@@ -990,7 +1046,7 @@ function lookFrame(t,L){
     else if(L==='flash'){lv=0.85}
     else{
       const share=(i%2===0)?(1-upSwap):upSwap;
-      const bed=((L==='quiet'?0.016:0.070)+0.19*e*(L==='drop'?1.1:0.78))*(0.28+1.10*ss(0.12,0.86,stem('bass',t)));
+      const bed=((L==='quiet'?QUIET_UP:0.070)+0.19*e*(L==='drop'?1.1:0.78))*(0.28+1.10*ss(0.12,0.86,stem('bass',t)));
       lv=bed*(0.55+0.90*share)*(0.84+0.16*Math.sin(2*Math.PI*(mpos(t)/8)+sym(G.xn)*3.1));
       if(L==='build') lv*=lerp(0.35,1,layer(0));
       if(L==='spotlight') lv*=0.22;
@@ -1127,7 +1183,7 @@ function lookFrame(t,L){
     else if(L==='flash'){c=W_.slice();lv=0.90}
     else{
       const wave=0.72+0.28*Math.cos(2*Math.PI*(sym(G.xn)*1.5-bp4));
-      const base={drop:0.28,build:0.12,verse:0.15,quiet:0.036,idle:0.042,outro:0.05}[L]??0.10;
+      const base={drop:0.28,build:0.12,verse:0.15,quiet:QUIET_WASH,idle:0.042,outro:0.05}[L]??0.10;
       lv=(base+0.32*e*(L==='drop'?1:0.64))*wave*EX.arc;
       if(L==='build') lv*=lerp(0.30,1,layer(1));
       if(L==='spotlight') lv*=0.18;

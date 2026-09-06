@@ -109,6 +109,26 @@ for(const song of SONGS){
       if(near<0.06) smus++; break } }
   }
   const strobeShare=sf/Math.max(1,Math.floor(N/5));
+  // variety: does the look CHANGE from one phrase to the next, per family
+  const KINDS=['par','head','wash','uplight'];
+  const barSec=BAR, phraseSec=4*barSec;
+  const prof=[];
+  for(let t=PH;t<DUR-phraseSec;t+=phraseSec){
+    const acc={},cnt={};
+    for(let u=t;u<t+phraseSec;u+=barSec*0.5){
+      const f=frame(u);
+      for(const o of f.fixtures){ const k=KOF[o.id]; if(KINDS.indexOf(k)<0) continue;
+        acc[k]=(acc[k]||0)+(o.level||0); cnt[k]=(cnt[k]||0)+1 }
+    }
+    prof.push(KINDS.map(k=>cnt[k]?acc[k]/cnt[k]:0));
+  }
+  let vsum=0,vn=0;
+  for(let i=1;i<prof.length;i++){
+    let d=0,m=0;
+    for(let k=0;k<KINDS.length;k++){ d+=Math.abs(prof[i][k]-prof[i-1][k]); m+=Math.max(prof[i][k],prof[i-1][k]) }
+    if(m>1e-6){ vsum+=d/m; vn++ }
+  }
+  const variety=vn?vsum/vn:0;
   const jr=jumps/N;
   const drive=SD_;
   const S={
@@ -124,9 +144,10 @@ for(const song of SONGS){
     build:  bg.length ? mean(bg) : 0.5,
     beam:   zg.length ? mean(zg) : 0.5,
     strobe: (sn ? smus/sn : 1) * (1 - band(strobeShare, 0.06, 0.30)),
+    variety: band(variety, 0.10, 0.55),
   };
   const W={dark:1.6, range:1.4, midless:1.2, marked:1.4, onbeat:1.2, follow:1.3, calm:1.0, hue:0.8,
-           kill:1.5, build:1.5, beam:1.0, strobe:1.0};
+           kill:1.5, build:1.5, beam:1.0, strobe:1.0, variety:1.6};
   let num=0,den=0; for(const k in S){num+=S[k]*W[k];den+=W[k]}
   out.push({song, total:num/den, S,
     raw:{dark:dark,range:range,mid:mid,marked:marked/BEATS.length,
