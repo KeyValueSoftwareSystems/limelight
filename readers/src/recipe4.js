@@ -704,27 +704,20 @@ const ARRAY_MIN = 4;
 const DROPS_AT = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
 function actNo(t){ let k=0; for(const d of DROPS_AT){ if(d<=t+1e-9) k++; else break } return k }
 const DEPLOY = {
-  co2:     {arc:0.22, act:1},
-  confetti:{arc:0.80, act:2},
-  par:     {arc:0.00, act:0},
-  strip:   {arc:0.06, act:0},
-  head:    {arc:0.12, act:0},
-  wash:    {arc:0.30, act:1},
-  uplight: {arc:0.10, act:0},
-  laser:   {arc:0.45, act:2},
-  blinder: {arc:0.00, act:0},
-  strobe:  {arc:0.00, act:0},
-  fog:     {arc:0.00, act:0},
-  pyro:    {arc:0.55, act:2},
-  video:   {arc:0.00, act:0},
+  par:0, strip:0, head:0, uplight:0, blinder:0, strobe:0, fog:0, video:0,
+  wash:1, co2:1, laser:2, pyro:2, confetti:2,
 };
+const NDROPS = DROP_TIMES.length;
 function deployed(kind, t){
-  const d = DEPLOY[kind]; if(!d) return 1;
-  const arc = cl(t/Math.max(1,DUR));
-  if(actNo(t) < d.act) return 0;
-  if(arc >= d.arc + 0.10) return 1;
-  if(arc <= d.arc) return 0;
-  return ss(d.arc, d.arc+0.10, arc);
+  const want = DEPLOY[kind];
+  if(want === undefined || want <= 0) return 1;
+  const need = Math.min(want, Math.max(0, NDROPS - 1));
+  if(need <= 0) return 1;
+  const a = actNo(t);
+  if(a < need) return 0;
+  if(a > need) return 1;
+  const at = DROP_TIMES[need-1];
+  return (at === undefined) ? 1 : ss(0, 1, (t - at)/BAR);
 }
 
 const GATE_RATE  = {wash:3.2, uplight:3.2, strip:2.2, head:1.0, par:1.0};
@@ -774,6 +767,23 @@ function gatePhase(kind, t){
   const m = mpos(t);
   let i = Math.floor(m); if(i >= NBARS-1) i = NBARS-2; if(i < 0) i = 0;
   return T.cum[i] + T.rate[i]*cl(m-i);
+}
+const PHRASE_BARS = 4;
+const FAMILY_TURN = [
+  {par:1.00, head:0.46, wash:0.66, uplight:0.94},
+  {par:0.42, head:1.00, wash:0.62, uplight:0.82},
+  {par:0.64, head:0.58, wash:1.00, uplight:1.00},
+];
+function variantOf(n, rep){ const k = FAMILY_TURN.length; return ((n + rep) % k + k) % k }
+function emph(kind, t, L){
+  if(L === 'drop' || L === 'flash' || L === 'stop' || L === 'spotlight') return 1;
+  const w = FAMILY_TURN[0][kind];
+  if(w === undefined) return 1;
+  const sec = sectionAt(t), rep = sec ? (sec.repeat || 1) : 1;
+  const m = mpos(t)/PHRASE_BARS, n = Math.floor(m);
+  const cur = FAMILY_TURN[variantOf(n, rep)][kind];
+  const prv = FAMILY_TURN[variantOf(n-1, rep)][kind];
+  return lerp(prv, cur, ss(0, 0.35, m - n));
 }
 function arrayGate(G, t, e, L, n){
   const dep = deployed(G.kind, t);
@@ -924,10 +934,10 @@ function lookFrame(t,L){
         lv = lerp(lv, full * (floor + (1 - floor) * pulse), mix);
       }
       if(L==='build') lv*=lerp(0.30,1,layer(1));
-      if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(t/(4*BAR))+sym(G.xn)*2.2);
+      if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(mpos(t)/4)+sym(G.xn)*2.2);
       if(G.outer) lv*=1.10; else lv*=0.92;   // the outer pair carries the wash
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*arrayGate(G,t,e,L,PARS.length)).toFixed(3)})});
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*emph('par',t,L)*arrayGate(G,t,e,L,PARS.length)).toFixed(3)})});
 
   // 4 uplights on the back wall: a slow colour bed. Almost never pulses.
   const upSwap=ss(0.25,0.75,barPh(t));      // odds hand over to evens across the bar
@@ -939,11 +949,11 @@ function lookFrame(t,L){
     else{
       const share=(i%2===0)?(1-upSwap):upSwap;
       const bed=((L==='quiet'?0.016:0.070)+0.19*e*(L==='drop'?1.1:0.78))*(0.28+1.10*ss(0.12,0.86,stem('bass',t)));
-      lv=bed*(0.55+0.90*share)*(0.84+0.16*Math.sin(2*Math.PI*(t/(8*BAR))+sym(G.xn)*3.1));
+      lv=bed*(0.55+0.90*share)*(0.84+0.16*Math.sin(2*Math.PI*(mpos(t)/8)+sym(G.xn)*3.1));
       if(L==='build') lv*=lerp(0.35,1,layer(0));
       if(L==='spotlight') lv*=0.22;
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*arrayGate(G,t,e,L,UPS.length)).toFixed(3)})});
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*emph('uplight',t,L)*arrayGate(G,t,e,L,UPS.length)).toFixed(3)})});
 
   // 4 moving heads.
   //
@@ -995,7 +1005,7 @@ function lookFrame(t,L){
   // Real design alternates truss groups: front for a phrase, upstage for the next,
   // everything at the drop. Having all eight heads lit in every look is why a big
   // rig can read as flat -- contrast comes from what is OFF.
-  const alt=0.5+0.5*Math.cos(2*Math.PI*(t/(32*PER)));   // one cycle per two phrases
+  const alt=0.5+0.5*Math.cos(2*Math.PI*(mpos(t)/8));
   const bothTrusses=(L==='drop'||L==='flash')?1:0;
   HEADS.forEach(function(id,i){
     const G=GEO[id];
@@ -1030,12 +1040,12 @@ function lookFrame(t,L){
       const lamp=(L==='drop'?0.30+0.44*e:0.18+0.36*e)*(0.84+0.28*Math.max(voxAt(t),sung(t)));
       lv=base*EX.arc+lamp*A*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5);
       if(L==='build') lv*=lerp(0.25,1,layer(2));
-      if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(t/(4*BAR))));
-      if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(t/(8*BAR))+sym(G.xn)*4));
+      if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(mpos(t)/4)));
+      if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(mpos(t)/8)+sym(G.xn)*4));
       if(L==='drop'){const[d,s]=since('drop',t,8);
         if(s!==null&&s<BAR) hz=Math.min(CAP,(1.6+2.2*(d.v??0.9))*STROBE_HZ)}
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*gate*panBias(G.xn)*arrayGate(G,t,e,L,HEADS.length)).toFixed(3),
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*gate*emph('head',t,L)*panBias(G.xn)*arrayGate(G,t,e,L,HEADS.length)).toFixed(3),
             pan:+pan.toFixed(3),tilt:+tilt.toFixed(3),strobe:+hz.toFixed(3),
             zoom:+zoomAt(t,e,L).toFixed(3)})});
 
@@ -1082,7 +1092,7 @@ function lookFrame(t,L){
     }
     // slow counter-rotating tilt, so the backlight fans against the front beams
     const th2=motionPhase(t)*0.5+(G.z>29?Math.PI:0);
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*panBias(G.xn)*arrayGate(G,t,e,L,WASHES.length)).toFixed(3),
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*emph('wash',t,L)*panBias(G.xn)*arrayGate(G,t,e,L,WASHES.length)).toFixed(3),
             pan:+cl(0.5+0.16*Math.sin(th2+G.xn*3.1)).toFixed(3),
             tilt:+cl(0.34+0.12*Math.sin(th2*2)).toFixed(3),
             zoom:+cl(zW*1.15).toFixed(3)})});
@@ -1112,7 +1122,7 @@ function lookFrame(t,L){
       if(rem<=4*BAR) lv=Math.max(lv,0.70*ss(0,1,1-rem/(4*BAR))); }
     if(L==='flash') lv=Math.max(lv,0.9);
     lv*=0.30+0.70*BANG;
-    const fan = 0.55+0.45*Math.cos(2*Math.PI*(sym(G.xn)*2 - (t-PH)/(BAR*2)));
+    const fan = 0.55+0.45*Math.cos(2*Math.PI*(sym(G.xn)*2 - mpos(t)/2));
     const c = fixColour(t,L,'head',G.xn,e);
     F.push({id:id, level:+cl(lv*fan*dip*EX.arc*deployed('laser',t),0,1).toFixed(3),
             r:c[0], g:c[1], b:c[2], pattern:1, scan:0, aerial:true})});
@@ -1181,7 +1191,7 @@ function lookFrame(t,L){
          threshold. Strumming as light is fine MOVING texture, not an 8 Hz
          strobe. The pattern now travels slowly in space and the sixteenth only
          modulates its depth gently. */
-      const sxt=(bph(t)*4)%1, drift=(t/(2*BAR))%1;
+      const sxt=(bph(t)*4)%1, drift=(mpos(t)/2)%1;
       for(let i=0;i<N1;i++){
         let d=Math.abs(i-head); d=Math.min(d,N1-d);
         const sweep=Math.max(0,1-d/w)*(0.5+0.45*e)*g1*(0.45+0.65*stem('other',t));
