@@ -196,8 +196,10 @@ MO = MO || [];
 SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
-const CUT_DEPTH=0.92;
-const CUT_PHRASE=2;
+const KILL_DEPTH=0.97;
+const KILL_BEATS=0.5;
+const CUT_DEPTH=0.00;
+const CUT_PHRASE=99;
 const CUT_BARS=0.5;
 const CUT_RISE=0.03;
 
@@ -690,12 +692,13 @@ function rolesFor(name){
 }
 const MELODY_DEG = 9;
 const MEL_TILT = 0.055;
-function roleRGB(role,e,bri,pal,drift){
+function roleRGB(role,e,bri,pal,drift,white){
   const P = pal || PAL;
   const c = P[role] || P.lead;
   const d = (drift===undefined?0:drift) * MELODY_DEG;
-  return hsl(c[0] + d, cl(c[1]*(0.86+0.20*e),0,1),
-                       cl(c[2]*(0.84+0.28*e)*(0.94+0.12*bri),0,1));
+  const w = white===undefined?0:cl(white);
+  return hsl(c[0] + d, cl(c[1]*(0.86+0.20*e)*(1-0.92*w),0,1),
+                       cl(c[2]*(0.84+0.28*e)*(0.94+0.12*bri)*(1+0.55*w),0,1));
 }
 
 /* ---- the chase -------------------------------------------------------------
@@ -816,6 +819,8 @@ function fixColour(t,L,kind,xn,e){
   if(L==='stop')  return [0,0,0];
   if(L==='flash') return [255,252,244];
   const bri=briteAt(t), XFC=1.9, j=chIdx(t);
+  const bpw=buildProg(t);
+  const wh=bpw>=0 ? Math.pow(bpw,1.6)*0.90 : 0;
   const dr=meloDrift(t), hm=chordTurn(t), P=palAt(t);
   const pick=(roles)=>{
     let role, alt;
@@ -824,10 +829,10 @@ function fixColour(t,L,kind,xn,e){
     else { const fi = RIG_MIRRORED ? Math.round(Math.abs(xn-0.5)*2*(PARN-1)) : Math.round(xn*(PARN-1));
            role = (fi % 2 === 0) ? roles[0] : roles[1];
            alt  = (fi % 2 === 0) ? roles[1] : roles[0]; }
-    const base=roleRGB(role,e,bri,P,dr);
+    const base=roleRGB(role,e,bri,P,dr,wh);
     const w=0.38*hm;
     let c=base;
-    if(w>0.004){ const o=roleRGB(alt,e,bri,P,dr);
+    if(w>0.004){ const o=roleRGB(alt,e,bri,P,dr,wh);
       c=[base[0]+(o[0]-base[0])*w|0, base[1]+(o[1]-base[1])*w|0, base[2]+(o[2]-base[2])*w|0] }
     return kind==='up' ? [c[0]*0.74|0, c[1]*0.74|0, c[2]*0.74|0] : c;
   };
@@ -845,6 +850,19 @@ function fixColour(t,L,kind,xn,e){
 const sc=(c,g)=>[Math.round(cl(c[0]*g,0,255)),Math.round(cl(c[1]*g,0,255)),Math.round(cl(c[2]*g,0,255))];
 const W_=[255,252,246];
 const CAP=4.0;
+const BEAT_HZ = 1/Math.max(0.05, PER);
+function musicalHz(){
+  let best = BEAT_HZ/4;
+  for(const m of [0.25, 0.5, 1, 2, 4]){ const hz = BEAT_HZ*m; if(hz <= CAP + 1e-6) best = hz }
+  return best;
+}
+const STROBE_AT = (function(){
+  const ms = MO.filter(x=>x.kind==='drop').sort((a,b)=>a.at-b.at);
+  const keep = new Set(); let big = -1;
+  for(const m of ms){ const v = (m.v===undefined?0.9:m.v); if(v > big + 1e-6){ big = v; keep.add(m.at) } }
+  if(ms.length) keep.add(ms[ms.length-1].at);
+  return keep;
+})();
 
 /* ---- fixtures are individuals, addressed by where they are ----
    Indexing by i/n hardcodes this one rig. A designer thinks in positions and
@@ -939,8 +957,8 @@ function gatePhase(kind, t){
   return T.cum[i] + T.rate[i]*cl(m-i);
 }
 const PHRASE_BARS = 4;
-const FAM_LOW = 0.02;
-const FAM_MID = 0.55;
+const FAM_LOW = 0.55;
+const FAM_MID = 0.80;
 const FAMILY_TURN = [
   {par:1.00,    head:FAM_LOW, wash:FAM_LOW, uplight:0.94},
   {par:FAM_LOW, head:1.00,    wash:FAM_MID, uplight:FAM_LOW},
@@ -1003,10 +1021,13 @@ function rebuildGeo(){
    The same fixture is a beam or a wash depending on one number. Emitted 0-1 and
    mapped to each fixture's own range by the wiring layer, because the recipe
    must not know a fixture model. */
-const zoomAt=(t,e,L)=>cl(L==='drop'||L==='flash' ? 0.10+0.16*(1-e)
-                       : L==='build' ? 0.55-0.35*e
-                       : L==='quiet'||L==='idle' ? 0.86
-                       : 0.62-0.24*e);
+const zoomAt=(t,e,L)=>{
+  const bp=buildProg(t);
+  if(bp>=0) return cl(lerp(0.46,0.06,bp));
+  return cl(L==='drop'||L==='flash' ? 0.82+0.14*e
+          : L==='quiet'||L==='idle' ? 0.60
+          : 0.42+0.14*e);
+};
 const NPXof=id=>{const f=LAYOUT.fixtures.find(x=>x.id===id);return (f&&f.pixels)||24};
 
 /* ---- who plays what ----
@@ -1050,7 +1071,7 @@ function lookFrame(t,L){
   let dip=1;
   if(ANT){
     const[d,dt]=until('drop',t,PER*0.5);
-    if(d) dip=1-0.82*ss(0,1,1-dt/(PER*0.5));
+    if(d) dip=1-KILL_DEPTH*ss(0,1,1-dt/(PER*KILL_BEATS));
   }
   if(CUT_DEPTH>0){
     const m=mpos(t), into=m-Math.floor(m/CUT_PHRASE)*CUT_PHRASE;
@@ -1230,7 +1251,7 @@ function lookFrame(t,L){
       if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(mpos(t)/4)));
       if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(mpos(t)/8)+sym(G.xn)*4));
       if(L==='drop'){const[d,s]=since('drop',t,8);
-        if(s!==null&&s<BAR) hz=Math.min(CAP,(1.6+2.2*(d.v??0.9))*STROBE_HZ)}
+        if(s!==null&&s<BAR&&STROBE_AT.has(d.at)) hz=musicalHz()}
     }
     F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*gate*emph('head',t,L)*panBias(G.xn)*arrayGate(G,t,e,L,HEADS.length)).toFixed(3),
             pan:+pan.toFixed(3),tilt:+tilt.toFixed(3),strobe:+hz.toFixed(3),
@@ -1242,10 +1263,10 @@ function lookFrame(t,L){
     let lv=0,hz=0;
     if(L==='flash'){lv=1}
     else if(L==='drop'){const[d,s]=since('drop',t,8);
-      if(s!==null&&s<BAR){lv=(1-ss(BAR*0.6,BAR,s));hz=Math.min(CAP,(2+2*(d.v??0.9))*STROBE_HZ)}}
+      if(s!==null&&s<BAR&&STROBE_AT.has(d.at)){lv=(1-ss(BAR*0.6,BAR,s));hz=musicalHz()}}
     else if(L==='build'&&z){const rem=z.to-t;
       if(rem<=2*BAR){lv=ss(0,1,1-rem/(2*BAR))*((G.left===(((bx%2)+2)%2===0))?1:0.5)*Math.min(1,grow);
-        hz=Math.min(CAP,(1.5+2.5*e)*STROBE_HZ)}}
+        hz=musicalHz()}}
     F.push({id:id,level:+cl(lv*dip*STROBE_GAIN*deployed('strobe',t)).toFixed(3),strobe:+hz.toFixed(3)})});
 
   /* Blinders point AT the crowd. Used sparingly and only on the biggest hits --
@@ -1256,7 +1277,7 @@ function lookFrame(t,L){
     if(L==='flash'){ lv=1 }
     else if(L==='drop'){ const[d,sd]=since('drop',t,8);
       if(sd!==null&&sd<BAR){ lv=(1-ss(BAR*0.35,BAR,sd))*(0.75+0.25*(d.v??0.9));
-        hz=Math.min(CAP,(2.0+2.0*(d.v??0.9))*STROBE_HZ) } }
+        hz=musicalHz() } }
     else if(L==='build'&&z){ const rem=z.to-t;
       if(rem<=2*BAR) lv=0.55*ss(0,1,1-rem/(2*BAR))*(i===(((bx%2)+2)%2)?1:0.6) }
     F.push({id:id,level:+cl(lv*dip*Math.min(1,grow)*(0.25+0.75*BANG)*deployed('blinder',t)).toFixed(3),strobe:+hz.toFixed(3)})});

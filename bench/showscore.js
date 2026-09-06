@@ -16,12 +16,15 @@ function setup(song){
     ';global.frame=frame;global.en_=en;global.SD_=SONG_DRIVE;');
   return {M,L};
 }
+function cl01(x){return x<0?0:x>1?1:x}
 function band(x,lo,hi){ return x<lo?0:x>hi?1:(x-lo)/(hi-lo) }
 function peakAt(x,target,tol){ const d=Math.abs(x-target)/tol; return Math.max(0,1-d) }
 const out=[];
 for(const song of SONGS){
   for(const k in require.cache) delete require.cache[k];
   const {M,L}=setup(song);
+  const KOF={}; L.fixtures.forEach(f=>KOF[f.id]=f.kind);
+  const BEAMY=id=>{const k=KOF[id]; return k!=='fog'&&k!=='video'};
   const FPS=50,N=Math.floor(DUR*FPS);
   const tot=new Float64Array(N), act=new Float64Array(N);
   const hues={}; let hn=0, jumps=0, cmp=0;
@@ -31,7 +34,8 @@ for(const song of SONGS){
     for(const o of f.fixtures){
       let v=o.level||0;
       if(o.pixels&&o.pixels.length){let m=0;for(const q of o.pixels)m=Math.max(m,(q[0]+q[1]+q[2])/765);v=Math.max(v,m)}
-      s+=v;n++;cur[o.id]=v;
+      cur[o.id]=v;
+      if(BEAMY(o.id)){ s+=v; n++ }
       if(prev&&prev[o.id]!==undefined){const d=Math.abs(v-prev[o.id]); a+=d; if(d>mxd)mxd=d}
       if(o.r!==undefined&&v>0.18){
         const r=o.r,g=o.g,b=o.b,mx=Math.max(r,g,b),mn=Math.min(r,g,b);
@@ -67,10 +71,48 @@ for(const song of SONGS){
   const ze=z(rows.map(r=>r[0])), za=z(rows.map(r=>r[1]));
   let r=0; for(let i=0;i<ze.length;i++) r+=ze[i]*za[i]; r/=ze.length;
   const green=(hues.GREEN||0)/Math.max(1,hn);
+  // craft terms, from how designers describe the moves
+  const drops=MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
+  let killed=0;
+  for(const dt of drops){
+    const j=Math.round(dt*FPS);
+    let lo=1e9; for(let i=Math.max(0,j-Math.round(0.5*PER*FPS));i<j;i++) lo=Math.min(lo,tot[i]);
+    let ref=0,n2=0; for(let i=Math.max(0,j-Math.round(2*BAR*FPS));i<j-Math.round(0.5*PER*FPS);i++){ref+=tot[i];n2++}
+    ref=n2?ref/n2:1;
+    if(ref>1e-6 && lo < 0.18*ref) killed++;
+  }
+  // build gesture: saturation should fall and beams narrow across a build
+  let bg=[], zg=[];
+  for(const sp of SP){
+    if(sp.kind!=='build'||!(sp.to>sp.from+1)) continue;
+    const samp=k=>{
+      const t=sp.from+(sp.to-sp.from)*k, f=frame(t);
+      let sat=0,zc=0,zo=0,zn=0;
+      for(const o of f.fixtures){
+        if(o.r!==undefined&&(o.level||0)>0.15){const mx=Math.max(o.r,o.g,o.b),mn=Math.min(o.r,o.g,o.b);
+          if(mx>10){sat+=(mx-mn)/mx;zc++}}
+        if(o.zoom!==undefined){zo+=o.zoom;zn++}
+      }
+      return [zc?sat/zc:0, zn?zo/zn:0];
+    };
+    const a1=samp(0.12), b1=samp(0.92);
+    if(a1[0]>0.05) bg.push(cl01(1-(b1[0]/a1[0])));
+    if(a1[1]>0.02) zg.push(cl01((a1[1]-b1[1])/a1[1]));
+  }
+  const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+  // strobe discipline: rare, and at a musical rate
+  let sf=0, smus=0, sn=0;
+  for(let i=0;i<N;i+=5){
+    const f=frame(i/FPS);
+    for(const o of f.fixtures){ if(o.strobe>0.05){ sf++; sn++;
+      const ratio=o.strobe*PER; const near=Math.abs(ratio-Math.round(ratio*4)/4);
+      if(near<0.06) smus++; break } }
+  }
+  const strobeShare=sf/Math.max(1,Math.floor(N/5));
   const jr=jumps/N;
   const drive=SD_;
   const S={
-    dark:   peakAt(dark, 0.12, 0.12),
+    dark:   peakAt(dark, 0.20, 0.22),
     range:  band(range, 1.8, 4.2),
     midless:1-band(mid, 0.35, 0.75),
     marked: band(marked/BEATS.length, 0.30, 0.80),
@@ -78,8 +120,13 @@ for(const song of SONGS){
     follow: band(r, 0.45, 0.90),
     calm:   drive>0.45 ? peakAt(jr, 0.09, 0.09) : peakAt(jr, 0.02, 0.04),
     hue:    1-band(green, 0.005, 0.05),
+    kill:   drops.length ? killed/drops.length : 1,
+    build:  bg.length ? mean(bg) : 0.5,
+    beam:   zg.length ? mean(zg) : 0.5,
+    strobe: (sn ? smus/sn : 1) * (1 - band(strobeShare, 0.06, 0.30)),
   };
-  const W={dark:1.6, range:1.4, midless:1.2, marked:1.4, onbeat:1.2, follow:1.3, calm:1.0, hue:0.8};
+  const W={dark:1.6, range:1.4, midless:1.2, marked:1.4, onbeat:1.2, follow:1.3, calm:1.0, hue:0.8,
+           kill:1.5, build:1.5, beam:1.0, strobe:1.0};
   let num=0,den=0; for(const k in S){num+=S[k]*W[k];den+=W[k]}
   out.push({song, total:num/den, S,
     raw:{dark:dark,range:range,mid:mid,marked:marked/BEATS.length,
