@@ -4903,6 +4903,37 @@
     0.7582,
     0.5832
    ]
+  },
+  "chroma": {
+   "rate": "per_song",
+   "unit": "12 pitch classes, C first, summing to 1",
+   "how": "mean of the per-beat chroma over 250-2000 Hz",
+   "not": "not a chord and not a scale -- it is where this song puts its pitched energy across the twelve names",
+   "value": [
+    0.02993,
+    0.13381,
+    0.05669,
+    0.04964,
+    0.03371,
+    0.0807,
+    0.13192,
+    0.07695,
+    0.18947,
+    0.04126,
+    0.08048,
+    0.09544
+   ]
+  },
+  "key": {
+   "tonic": 10,
+   "tonic_name": "A#",
+   "mode": "major",
+   "estimate": "A# major",
+   "confidence": 0.631,
+   "relative": "G minor",
+   "relative_margin": 0.4723,
+   "how": "Krumhansl-Schmuckler: song-mean 12-bin chroma correlated against the 24 rotated key profiles, best match wins",
+   "not": "not a modulation-aware key. A song that changes key gets whichever key it spends most of its energy in. A key and its relative share all seven notes, so when those two score alike this cannot tell them apart and says so by dropping confidence rather than picking"
   }
  },
  "confidence": 0.908,

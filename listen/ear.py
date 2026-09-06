@@ -313,13 +313,78 @@ def beat_tonality(samples, sr, beats, period):
         harmony.append(max(0.0, 1.0 - dot / (na * nb)))
     hpk = max(harmony) or 1.0
     vmax = max(voiced) or 1.0
+    mean_chroma = [0.0] * 12
+    if chromas:
+        for row in chromas:
+            for i in range(12):
+                mean_chroma[i] += row[i]
+        span = sum(mean_chroma) or 1.0
+        mean_chroma = [v / span for v in mean_chroma]
     return (
         tone,
         [v / hmax for v in highs],
         melody,
         [v / hpk for v in harmony],
         [v / vmax for v in voiced],
+        mean_chroma,
     )
+
+
+KS_MAJOR = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88]
+KS_MINOR = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17]
+NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+
+def _corr(a, b):
+    n = len(a)
+    ma, mb = sum(a) / n, sum(b) / n
+    num = sum((a[i] - ma) * (b[i] - mb) for i in range(n))
+    da = math.sqrt(sum((x - ma) ** 2 for x in a))
+    db = math.sqrt(sum((x - mb) ** 2 for x in b))
+    return num / (da * db) if da > 1e-12 and db > 1e-12 else 0.0
+
+
+def estimate_key(chroma_a_based):
+    if not chroma_a_based or sum(chroma_a_based) <= 0:
+        return None
+    c = [chroma_a_based[(i - 9) % 12] for i in range(12)]
+    best = None
+    scores = []
+    for tonic in range(12):
+        rot = [c[(tonic + i) % 12] for i in range(12)]
+        for mode, prof in (("major", KS_MAJOR), ("minor", KS_MINOR)):
+            r = _corr(rot, prof)
+            scores.append(r)
+            if best is None or r > best[0]:
+                best = (r, tonic, mode)
+    if best is None:
+        return None
+    r, tonic, mode = best
+    ordered = sorted(scores, reverse=True)
+    margin = ordered[0] - ordered[1] if len(ordered) > 1 else 0.0
+    rel_tonic = (tonic - 3) % 12 if mode == "major" else (tonic + 3) % 12
+    rel_mode = "minor" if mode == "major" else "major"
+    rel_prof = KS_MINOR if rel_mode == "minor" else KS_MAJOR
+    rel_rot = [c[(rel_tonic + i) % 12] for i in range(12)]
+    rel_r = _corr(rel_rot, rel_prof)
+    rel_margin = r - rel_r
+    conf = 0.5 * r + 2.0 * margin
+    conf *= min(1.0, 0.25 + 5.0 * max(0.0, rel_margin))
+    return {
+        "tonic": tonic,
+        "tonic_name": NOTE_NAMES[tonic],
+        "mode": mode,
+        "estimate": NOTE_NAMES[tonic] + (" major" if mode == "major" else " minor"),
+        "confidence": round(max(0.0, min(1.0, conf)), 3),
+        "relative": NOTE_NAMES[rel_tonic] + (" minor" if rel_mode == "minor" else " major"),
+        "relative_margin": round(rel_margin, 4),
+        "how": "Krumhansl-Schmuckler: song-mean 12-bin chroma correlated against "
+               "the 24 rotated key profiles, best match wins",
+        "not": "not a modulation-aware key. A song that changes key gets whichever "
+               "key it spends most of its energy in. A key and its relative share "
+               "all seven notes, so when those two score alike this cannot tell "
+               "them apart and says so by dropping confidence rather than picking",
+    }
 
 
 SPOTLIGHT_TON = 0.80
@@ -1078,7 +1143,7 @@ def listen(path):
 
     curve = downbeat_energy(profile, beats, groups) if groups else []
     if curve:
-        tonal, highband, melody, harmony, voiced = beat_tonality(
+        tonal, highband, melody, harmony, voiced, chroma_mean = beat_tonality(
             samples, sr, beats, period
         )
         rows = bar_profile(profile, beats, groups, highband)
@@ -1121,7 +1186,7 @@ def listen(path):
     else:
         moments, spans = find_stops(profile, beats, period), []
         tonal, highband, tonal_at_groups = [], [], []
-        melody, harmony, voiced = [], [], []
+        melody, harmony, voiced, chroma_mean = [], [], [], []
         sections, stems, accents = [], {}, []
         chapters = [{"at": 0.0, "name": "intro"}]
     moments.sort(key=lambda x: x["at"])
@@ -1214,6 +1279,14 @@ def listen(path):
                 "at": [round(b, 3) for b in beats],
                 "value": [round(v, 4) for v in voiced],
             },
+            "chroma": {
+                "rate": "per_song",
+                "unit": "12 pitch classes, C first, summing to 1",
+                "how": f"mean of the per-beat chroma over {MEL_LO_HZ:.0f}-{MEL_HI_HZ:.0f} Hz",
+                "not": "not a chord and not a scale -- it is where this song puts its "
+                       "pitched energy across the twelve names",
+                "value": [round(v, 5) for v in chroma_mean],
+            },
         },
         "confidence": round(min(0.95, max(0.05, cue)), 3),
         "confidence_by_field": {
@@ -1225,6 +1298,9 @@ def listen(path):
             "energy": 0.7 if curve else 0.0,
         },
     }
+    key = estimate_key(chroma_mean) if chroma_mean else None
+    if key:
+        m["observations"]["key"] = key
     if grid_note:
         m["grid"]["octave_note"] = grid_note
     if not locked:

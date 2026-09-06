@@ -443,19 +443,72 @@ const PROFILES = {
   neon:   { lead:[316,.92,.52], hot:[ 42,.94,.54], cool:[172,.88,.46], deep:[272,.84,.38] },
   amber:  { lead:[ 34,.84,.52], hot:[ 16,.92,.50], cool:[ 44,.62,.50], deep:[ 26,.70,.32] },
 };
-const PROFILE = (function(){ try { return (COLOUR || "garrix") } catch(e) { return "garrix" } })();
-const PAL = PROFILES[PROFILE] || PROFILES.sunset;
+const NOTE_PC = {C:0,'C#':1,DB:1,D:2,'D#':3,EB:3,E:4,F:5,'F#':6,GB:6,G:7,
+                'G#':8,AB:8,A:9,'A#':10,BB:10,B:11};
+const KEYOBS = (MAP.observations && MAP.observations.key) || null;
+function keyFacts(){
+  const k = KEYOBS;
+  if(!k) return {tonic:-1, major:false, conf:0};
+  let tonic = (typeof k.tonic==='number') ? k.tonic : -1;
+  let major = (k.mode==='major');
+  const txt = (typeof k.estimate==='string') ? k.estimate.trim() : '';
+  if(tonic < 0 && txt){
+    const m = /^([A-Ga-g][#b]?)/.exec(txt);
+    if(m){ const key=m[1].toUpperCase().replace('B','B'); 
+           const pc = NOTE_PC[m[1].toUpperCase()]; if(pc!==undefined) tonic = pc }
+  }
+  if(!k.mode && /min/i.test(txt)) major = false;
+  if(!k.mode && /maj/i.test(txt)) major = true;
+  const conf = (typeof k.confidence==='number') ? cl(k.confidence) : 0.5;
+  return {tonic:tonic, major:major, conf:conf};
+}
+function obsMean(name, dflt){
+  const c = OBS[name];
+  if(!c || !c.value || !c.value.length) return dflt;
+  let s2=0,n2=0; for(const v of c.value){ if(typeof v==='number'&&isFinite(v)){s2+=v;n2++} }
+  return n2 ? s2/n2 : dflt;
+}
+const WARM_HUES = [352, 8, 24, 38];
+const COOL_HUES = [186, 196, 206, 214, 224, 236, 262, 286];
+function palFrom(tonic, major, sat, lit){
+  const t = (tonic >= 0) ? tonic : 0;
+  const ci = t % COOL_HUES.length;
+  const at = k => COOL_HUES[((ci + k) % COOL_HUES.length + COOL_HUES.length) % COOL_HUES.length];
+  const w = WARM_HUES[t % WARM_HUES.length];
+  const s2 = major ? sat*0.96 : sat;
+  const l2 = major ? lit*1.06 : lit;
+  return {
+    lead: [at(0),  s2,                  l2],
+    cool: [at(2),  s2*0.94,             l2*0.92],
+    deep: [at(5),  s2*0.92,             l2*0.54],
+    hot:  [w,      Math.min(1,s2*1.03), l2*0.96],
+  };
+}
+const AUTO = (function(){
+  const k = keyFacts();
+  const commit = ss(0.35, 0.75, k.conf);
+  const major = k.major && commit > 0.5;
+  const tone = obsMean('tonality', 0.5);
+  const sat = cl(0.80 + 0.16*tone, 0.62, 0.97);
+  const lit = cl(0.44 + 0.10*tone + (major?0.03:0), 0.34, 0.58);
+  return {pal: palFrom(k.tonic, major, sat, lit),
+          tonic: k.tonic, major: major, sat: sat, lit: lit};
+})();
+const PROFILE = (function(){ try { return (COLOUR || "auto") } catch(e) { return "auto" } })();
+const PAL = (PROFILE === 'auto') ? AUTO.pal : (PROFILES[PROFILE] || AUTO.pal);
 const DROP_TIMES = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
 const FINALE = {garrix:'garrix-red', 'garrix-red':'garrix', sunset:'neon',
                 neon:'ice', ice:'neon', amber:'sunset', white:'white'};
+const FINALE_PAL = (PROFILE === 'auto')
+  ? palFrom((AUTO.tonic >= 0 ? AUTO.tonic : 0) + 5, AUTO.major, AUTO.sat, AUTO.lit)
+  : (PROFILES[FINALE[PROFILE]] || PAL);
 const FINALE_AT = (function(){
   if(DROP_TIMES.length < 3) return Infinity;
   const last = DROP_TIMES[DROP_TIMES.length-1];
   return (last > DUR*0.55) ? last : Infinity;
 })();
 function palAt(t){
-  if(t + 1e-9 < FINALE_AT) return PAL;
-  return PROFILES[FINALE[PROFILE]] || PAL;
+  return (t + 1e-9 < FINALE_AT) ? PAL : FINALE_PAL;
 }
 /* [primary, partner] per chapter. Warm carries the song, cool carries the room,
    deep carries the dark, and the build hands over to the drop by going hot. */

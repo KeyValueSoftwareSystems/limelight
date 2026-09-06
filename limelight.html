@@ -609,19 +609,72 @@ const PROFILES = {
   neon:   { lead:[316,.92,.52], hot:[ 42,.94,.54], cool:[172,.88,.46], deep:[272,.84,.38] },
   amber:  { lead:[ 34,.84,.52], hot:[ 16,.92,.50], cool:[ 44,.62,.50], deep:[ 26,.70,.32] },
 };
-const PROFILE = (function(){ try { return (COLOUR || "garrix") } catch(e) { return "garrix" } })();
-const PAL = PROFILES[PROFILE] || PROFILES.sunset;
+const NOTE_PC = {C:0,'C#':1,DB:1,D:2,'D#':3,EB:3,E:4,F:5,'F#':6,GB:6,G:7,
+                'G#':8,AB:8,A:9,'A#':10,BB:10,B:11};
+const KEYOBS = (MAP.observations && MAP.observations.key) || null;
+function keyFacts(){
+  const k = KEYOBS;
+  if(!k) return {tonic:-1, major:false, conf:0};
+  let tonic = (typeof k.tonic==='number') ? k.tonic : -1;
+  let major = (k.mode==='major');
+  const txt = (typeof k.estimate==='string') ? k.estimate.trim() : '';
+  if(tonic < 0 && txt){
+    const m = /^([A-Ga-g][#b]?)/.exec(txt);
+    if(m){ const key=m[1].toUpperCase().replace('B','B'); 
+           const pc = NOTE_PC[m[1].toUpperCase()]; if(pc!==undefined) tonic = pc }
+  }
+  if(!k.mode && /min/i.test(txt)) major = false;
+  if(!k.mode && /maj/i.test(txt)) major = true;
+  const conf = (typeof k.confidence==='number') ? cl(k.confidence) : 0.5;
+  return {tonic:tonic, major:major, conf:conf};
+}
+function obsMean(name, dflt){
+  const c = OBS[name];
+  if(!c || !c.value || !c.value.length) return dflt;
+  let s2=0,n2=0; for(const v of c.value){ if(typeof v==='number'&&isFinite(v)){s2+=v;n2++} }
+  return n2 ? s2/n2 : dflt;
+}
+const WARM_HUES = [352, 8, 24, 38];
+const COOL_HUES = [186, 196, 206, 214, 224, 236, 262, 286];
+function palFrom(tonic, major, sat, lit){
+  const t = (tonic >= 0) ? tonic : 0;
+  const ci = t % COOL_HUES.length;
+  const at = k => COOL_HUES[((ci + k) % COOL_HUES.length + COOL_HUES.length) % COOL_HUES.length];
+  const w = WARM_HUES[t % WARM_HUES.length];
+  const s2 = major ? sat*0.96 : sat;
+  const l2 = major ? lit*1.06 : lit;
+  return {
+    lead: [at(0),  s2,                  l2],
+    cool: [at(2),  s2*0.94,             l2*0.92],
+    deep: [at(5),  s2*0.92,             l2*0.54],
+    hot:  [w,      Math.min(1,s2*1.03), l2*0.96],
+  };
+}
+const AUTO = (function(){
+  const k = keyFacts();
+  const commit = ss(0.35, 0.75, k.conf);
+  const major = k.major && commit > 0.5;
+  const tone = obsMean('tonality', 0.5);
+  const sat = cl(0.80 + 0.16*tone, 0.62, 0.97);
+  const lit = cl(0.44 + 0.10*tone + (major?0.03:0), 0.34, 0.58);
+  return {pal: palFrom(k.tonic, major, sat, lit),
+          tonic: k.tonic, major: major, sat: sat, lit: lit};
+})();
+const PROFILE = (function(){ try { return (COLOUR || "auto") } catch(e) { return "auto" } })();
+const PAL = (PROFILE === 'auto') ? AUTO.pal : (PROFILES[PROFILE] || AUTO.pal);
 const DROP_TIMES = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
 const FINALE = {garrix:'garrix-red', 'garrix-red':'garrix', sunset:'neon',
                 neon:'ice', ice:'neon', amber:'sunset', white:'white'};
+const FINALE_PAL = (PROFILE === 'auto')
+  ? palFrom((AUTO.tonic >= 0 ? AUTO.tonic : 0) + 5, AUTO.major, AUTO.sat, AUTO.lit)
+  : (PROFILES[FINALE[PROFILE]] || PAL);
 const FINALE_AT = (function(){
   if(DROP_TIMES.length < 3) return Infinity;
   const last = DROP_TIMES[DROP_TIMES.length-1];
   return (last > DUR*0.55) ? last : Infinity;
 })();
 function palAt(t){
-  if(t + 1e-9 < FINALE_AT) return PAL;
-  return PROFILES[FINALE[PROFILE]] || PAL;
+  return (t + 1e-9 < FINALE_AT) ? PAL : FINALE_PAL;
 }
 /* [primary, partner] per chapter. Warm carries the song, cool carries the room,
    deep carries the dark, and the build hands over to the drop by going hot. */
@@ -2812,7 +2865,7 @@ function drawSky(f){
     sx.fillStyle='rgba('+Math.round(255*k)+','+Math.round(255*k)+','+Math.round(255*k)+',1)';
     sx.fillRect(0,0,SW,SH);sx.globalCompositeOperation='source-over'}}
 
-const MF=MAP_FULL, SOBS=MAP_FULL.observations;
+const MF=MAP_FULL, SOBS=(MAP_FULL&&MAP_FULL.observations)||{};
 /* X() and W() were defined in the old score page's own scope and were lost in
    the extraction, which left every lane throwing and the Score tab blank. */
 const DOWNS = MAP_FULL.downbeats;
@@ -2886,13 +2939,14 @@ Object.keys(STEMC).forEach(k=>{
     g.strokeStyle=STEMC[k];g.lineWidth=1.2;g.beginPath();
     v.forEach((y,i)=>{const x=X(DOWNS[i]),yy=h-2-(h-5)*y;i?g.lineTo(x,yy):g.moveTo(x,yy)});
     g.stroke();
-    const e=SOBS.envelope.sources[k];
+    const ES=(SOBS.envelope&&SOBS.envelope.sources); if(!ES) return;
+    const e=ES[k];
     g.strokeStyle=gr(hexrgb(STEMC[k]),0.45);g.lineWidth=0.8;g.beginPath();
     e.forEach((db,i)=>{const x=X(BEATS[i]),yy=h-2-(h-5)*Math.max(0,(db+60)/60);
       i?g.lineTo(x,yy):g.moveTo(x,yy)});g.stroke()})});
 
 lane('notes','3,863, basic-pitch',150,(g,w,h)=>{
-  const S=SOBS.notes.sources; let lo=127,hi=0;
+  const S=(SOBS.notes&&SOBS.notes.sources); if(!S) return; let lo=127,hi=0;
   Object.values(S).forEach(a=>a.forEach(n=>{lo=Math.min(lo,n[2]);hi=Math.max(hi,n[2])}));
   const Y=p=>h-3-(h-6)*((p-lo)/Math.max(1,hi-lo));
   for(let p=lo;p<=hi;p++) if(p%12===6){g.fillStyle='rgba(255,255,255,.05)';
@@ -2913,22 +2967,24 @@ lane('accents','983 hits, 71% off-grid',34,(g,w,h)=>{
     g.fillRect(x,h-3-hh,a.on_grid?1.6:1,hh)})});
 
 lane('chords','per bar, F# major',22,(g,w,h)=>{
-  const E=SOBS.chords.events;
+  const E=(SOBS.chords&&SOBS.chords.events); if(!E||!E.length) return;
   E.forEach((c,i)=>{const a=X(c.at),b=i+1<E.length?X(E[i+1].at):X(DUR);
     g.fillStyle=i%2?'#12161d':'#151a22';g.fillRect(a,2,b-a-1,h-4);
     g.fillStyle='#c9a0ff';g.font='600 10px ui-monospace,Menlo,monospace';
     if(b-a>18)g.fillText(c.chord,a+3,h/2+4)})});
 
 lane('lyrics','243 words, Whisper',24,(g,w,h)=>{
-  SOBS.vocal_silence.spans.forEach(s=>{g.fillStyle='rgba(255,255,255,.04)';
+  const VS=(SOBS.vocal_silence&&SOBS.vocal_silence.spans)||[];
+  VS.forEach(s=>{g.fillStyle='rgba(255,255,255,.04)';
     g.fillRect(X(s.from),0,X(s.to)-X(s.from),h)});
   g.font='10px ui-sans-serif';g.fillStyle='#ffd166';
   let lastx=-99;
-  SOBS.lyrics.words.forEach(wd=>{const x=X(wd.at);
+  const WD=(SOBS.lyrics&&SOBS.lyrics.words); if(!WD) return;
+  WD.forEach(wd=>{const x=X(wd.at);
     if(x-lastx<7) return; g.fillText(wd.word,x,h-7); lastx=x+wd.word.length*5.2})});
 
 lane('stereo','width & pan',30,(g,w,h)=>{
-  const st=SOBS.stereo.mix;
+  const st=(SOBS.stereo&&SOBS.stereo.mix); if(!st||!st.width||!st.pan) return;
   g.strokeStyle='#5b8cff';g.lineWidth=1.2;g.beginPath();
   st.width.forEach((v,i)=>{const x=X(DOWNS[i]),y=h-2-(h-5)*v;i?g.lineTo(x,y):g.moveTo(x,y)});
   g.stroke();
@@ -2938,7 +2994,8 @@ lane('stereo','width & pan',30,(g,w,h)=>{
   g.strokeStyle='rgba(255,255,255,.12)';g.beginPath();g.moveTo(0,h/2);g.lineTo(w,h/2);g.stroke()});
 
 lane('brightness','centroid per stem',30,(g,w,h)=>{
-  Object.keys(STEMC).forEach(k=>{const v=SOBS.brightness.sources[k]; if(!v) return;
+  const BS=(SOBS.brightness&&SOBS.brightness.sources); if(!BS) return;
+  Object.keys(STEMC).forEach(k=>{const v=BS[k]; if(!v) return;
     g.strokeStyle=gr(hexrgb(STEMC[k]),0.55);g.lineWidth=1;g.beginPath();
     v.forEach((y,i)=>{const x=X(DOWNS[i]),yy=h-2-(h-5)*y;i?g.lineTo(x,yy):g.moveTo(x,yy)});
     g.stroke()})});
