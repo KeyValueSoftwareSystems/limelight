@@ -30,6 +30,10 @@ MO = MO || [];
 SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
+const CUT_DEPTH=0.92;
+const CUT_PHRASE=2;
+const CUT_BARS=0.5;
+const CUT_RISE=0.03;
 
 const SONG_DRIVE = (function(){
   const bpm = 60/Math.max(0.05, PER);
@@ -769,10 +773,12 @@ function gatePhase(kind, t){
   return T.cum[i] + T.rate[i]*cl(m-i);
 }
 const PHRASE_BARS = 4;
+const FAM_LOW = 0.02;
+const FAM_MID = 0.55;
 const FAMILY_TURN = [
-  {par:1.00, head:0.46, wash:0.66, uplight:0.94},
-  {par:0.42, head:1.00, wash:0.62, uplight:0.82},
-  {par:0.64, head:0.58, wash:1.00, uplight:1.00},
+  {par:1.00,    head:FAM_LOW, wash:FAM_LOW, uplight:0.94},
+  {par:FAM_LOW, head:1.00,    wash:FAM_MID, uplight:FAM_LOW},
+  {par:FAM_MID, head:FAM_LOW, wash:1.00,    uplight:1.00},
 ];
 function variantOf(n, rep){ const k = FAMILY_TURN.length; return ((n + rep) % k + k) % k }
 function emph(kind, t, L){
@@ -807,7 +813,11 @@ function arrayGate(G, t, e, L, n){
   const soft = 0.16 + 0.22*e;
   const edge = 1 - cov;
   const gate = cl((wave - edge + soft) / (soft*2), 0, 1);
-  const fl = GATE_FLOOR[G.kind];
+  const fl0 = GATE_FLOOR[G.kind];
+  const lk = {drop:1.0, flash:1.0, build:0.60, verse:0.42, break:0.16,
+              quiet:0.10, idle:0.06, outro:0.14}[L];
+  const fl = (fl0 === undefined) ? undefined
+           : fl0 * (lk === undefined ? 0.5 : lk) * (0.30 + 0.70*e);
   const held = (fl === undefined || L === 'stop' || L === 'spotlight')
              ? gate : fl + (1 - fl) * gate;
   return held * cl(1/Math.max(0.12, cov), 1, 2.4) * dep;
@@ -875,6 +885,17 @@ function lookFrame(t,L){
   if(ANT){
     const[d,dt]=until('drop',t,PER*0.5);
     if(d) dip=1-0.82*ss(0,1,1-dt/(PER*0.5));
+  }
+  if(CUT_DEPTH>0){
+    const m=mpos(t), into=m-Math.floor(m/CUT_PHRASE)*CUT_PHRASE;
+    const start=CUT_PHRASE-CUT_BARS;
+    if(into>=start){
+      const x=cl((into-start)/CUT_BARS);
+      const after=en(t+(CUT_BARS-(into-start))*BAR+BAR*0.5);
+      const before=en(t-BAR*0.5);
+      const earn=ss(0, CUT_RISE, after-before);
+      dip*=1-CUT_DEPTH*earn*Math.sin(Math.PI*x);
+    }
   }
   const z=spanAt(t);
   const prog=(L==='build'&&z)?cl((t-z.from)/(z.to-z.from)):1;
