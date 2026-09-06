@@ -50,6 +50,7 @@ const beatInBar=t=>{const i=bi(t);return i<0?0:((i-DBP)%4+4)%4};
 const barIdx=t=>Math.floor((bi(t)-DBP)/4);
 const barPh=t=>cl((beatInBar(t)+bph(t))/4);
 const phrPh=t=>{const k=((bi(t)-DBP)%16+16)%16;return cl((k+bph(t))/16)};
+const mpos=t=>Math.max(0, barIdx(t)+barPh(t));
 
 /* energy: smoothstep between downbeat samples, so there is no slope kink */
 /* A reader must survive a map that does not carry a field -- rule 2 of the format,
@@ -365,39 +366,34 @@ function moveScaleAt(t){
   }
   return v*drive;
 }
+const MOVE_STEPS=[0.0625,0.125,0.25,0.5,1];
+function quantMove(r){
+  let best=MOVE_STEPS[0], bd=Infinity;
+  for(const v of MOVE_STEPS){ const d=Math.abs(Math.log(v/Math.max(1e-6,r))); if(d<bd){bd=d;best=v} }
+  return best}
+const MBARS = Math.max(2, Math.ceil((DUR - PH)/BAR) + 3);
 const MPH = (function(){
-  // the table is built from a 4-downbeat moving average, matching eMotion
-  if(!EN || !EN.length) return null;      // a map may carry no energy at all
-  const sm=EN.map((p,i)=>{let s=0,n=0;
-    for(let k=-3;k<=1;k++){const j=i+k; if(j<0||j>=EN.length)continue; s+=EN[j][1]; n++}
-    return n?s/n:p[1]});
-  const ts=EN.map(p=>p[0]);
-  const rs=sm.map((v,i)=>2*Math.PI/(movePeriod(v)*moveScaleAt(ts[i]))), cum=[0];
-  for(let i=0;i<ts.length-1;i++) cum.push(cum[i]+0.5*(rs[i]+rs[i+1])*(ts[i+1]-ts[i]));
-  return {ts,rs,cum}})();
-function mphIndex(t){
-  let k=0,lo=0,hi=MPH.ts.length-1;
-  while(lo<=hi){const m=(lo+hi)>>1; if(MPH.ts[m]<=t){k=m;lo=m+1}else hi=m-1}
-  return k}
-function rateNow(t){
-  if(!MPH || !MPH.ts.length) return 2*Math.PI/movePeriod(0.5);
-  const k=mphIndex(t);
-  if(k+1>=MPH.rs.length) return MPH.rs[MPH.rs.length-1];
-  const T=MPH.ts[k+1]-MPH.ts[k];
-  return lerp(MPH.rs[k], MPH.rs[k+1], T>0?cl((t-MPH.ts[k])/T):0)}
+  const rate=new Array(MBARS), cum=new Array(MBARS+1); cum[0]=0;
+  const t0=PH+DBP*PER;
+  for(let b=0;b<MBARS;b++){
+    const tt=t0+b*BAR+BAR*0.5;
+    rate[b]=quantMove(BAR/(movePeriod(eMotion(tt))*moveScaleAt(tt)));
+    cum[b+1]=cum[b]+rate[b];
+  }
+  return {rate:rate,cum:cum}})();
+function moveSlot(t){
+  const m=mpos(t);
+  let i=Math.floor(m); if(i>=MBARS-1) i=MBARS-2; if(i<0) i=0;
+  return [i, cl(m-i)]}
+function boundRate(t){
+  const sl=moveSlot(t), i=sl[0], R=MPH.rate;
+  const a2=Math.max(R[i], i>0?R[i-1]:R[i]);
+  const b2=Math.max(R[i], i+1<MBARS?R[i+1]:R[i]);
+  return lerp(a2,b2,sl[1])}
 function motionPhase(t){
-  // the rate must be the SEGMENT's constant rate, not en(t). Using the
-  // continuously varying energy inside a segment makes the extrapolated phase
-  // disagree with the next segment's accumulated value -- a jump at every
-  // downbeat, which is what slewed the heads at 2.9 units/s.
-  // With no energy curve there is nothing to integrate, so the heads move at one
-  // constant speed. A thinner map means a duller show, never a broken one -- pan
-  // used to come out null here and take the whole renderer down with it.
-  if(!MPH || !MPH.ts.length) return 2*Math.PI*t/movePeriod(0.5);
-  const k=mphIndex(t), dt=t-MPH.ts[k];
-  if(k+1>=MPH.rs.length) return MPH.cum[k] + MPH.rs[k]*dt;
-  const T=MPH.ts[k+1]-MPH.ts[k], f=T>0?cl(dt/T):0;
-  return MPH.cum[k] + MPH.rs[k]*dt + 0.5*(MPH.rs[k+1]-MPH.rs[k])*dt*f}
+  const sl=moveSlot(t);
+  return 2*Math.PI*(MPH.cum[sl[0]] + MPH.rate[sl[0]]*sl[1])}
+function rateNow(t){ return 2*Math.PI*boundRate(t)/BAR }
 const eMotionSlowNote=1;
 const segAt=t=>{let lo=0,hi=SEG.length-1,r=0;while(lo<=hi){const m=(lo+hi)>>1;
   if(SEG[m].from<=t){r=m;lo=m+1}else hi=m-1}return r};
@@ -732,7 +728,7 @@ function deployed(kind, t){
 }
 
 const GATE_RATE  = {wash:3.2, uplight:3.2, strip:2.2, head:1.0, par:1.0};
-const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:0.12, par:0.14};
+const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:0.26, par:0.26};
 function buildProg(t){
   const sp = spanAt(t);
   if(!sp || sp.kind !== 'build' || !(sp.to > sp.from)) return -1;
@@ -747,28 +743,37 @@ function gateBars(kind, tt){
   const drive = lerp(1.9, 1.0, SONG_DRIVE);
   return (cyc===undefined?1:cyc) * kmul * accel * drive * (1.7 - 0.9*e);
 }
+const GATE_STEPS = [0.125, 0.25, 0.5, 1, 2, 4];
+function quantRate(r){
+  let best = GATE_STEPS[0], bd = Infinity;
+  for(const v of GATE_STEPS){
+    const d = Math.abs(Math.log(v/Math.max(1e-6, r)));
+    if(d < bd){ bd = d; best = v }
+  }
+  return best;
+}
+const NBARS = Math.max(2, Math.ceil((DUR - PH)/BAR) + 3);
 const GPH = (function(){
-  if(!EN || !EN.length) return null;
-  const ts = EN.map(p=>p[0]), out = {};
-  const kinds = {};
+  const kinds = {}, out = {};
   for(const f of (LAYOUT.fixtures||[])) kinds[f.kind] = 1;
+  const t0 = PH + DBP*PER;
   for(const kind in kinds){
-    const rs = ts.map(tt => 1/(BAR*Math.max(0.12, gateBars(kind, tt))));
-    const cum = [0];
-    for(let i=0;i<ts.length-1;i++) cum.push(cum[i] + 0.5*(rs[i]+rs[i+1])*(ts[i+1]-ts[i]));
-    out[kind] = {ts:ts, rs:rs, cum:cum};
+    const rate = new Array(NBARS), cum = new Array(NBARS+1);
+    cum[0] = 0;
+    for(let b=0;b<NBARS;b++){
+      rate[b] = quantRate(1/Math.max(0.12, gateBars(kind, t0 + b*BAR + BAR*0.5)));
+      cum[b+1] = cum[b] + rate[b];
+    }
+    out[kind] = {rate:rate, cum:cum};
   }
   return out;
 })();
 function gatePhase(kind, t){
   const T = GPH && GPH[kind];
-  if(!T) return (t-PH)/(BAR*Math.max(0.12, gateBars(kind, t)));
-  let k=0, lo=0, hi=T.ts.length-1;
-  while(lo<=hi){const m=(lo+hi)>>1; if(T.ts[m]<=t){k=m;lo=m+1}else hi=m-1}
-  const dt = t - T.ts[k];
-  if(k+1 >= T.rs.length) return T.cum[k] + T.rs[k]*dt;
-  const span = T.ts[k+1]-T.ts[k], f = span>0 ? cl(dt/span) : 0;
-  return T.cum[k] + T.rs[k]*dt + 0.5*(T.rs[k+1]-T.rs[k])*dt*f;
+  if(!T) return 0;
+  const m = mpos(t);
+  let i = Math.floor(m); if(i >= NBARS-1) i = NBARS-2; if(i < 0) i = 0;
+  return T.cum[i] + T.rate[i]*cl(m-i);
 }
 function arrayGate(G, t, e, L, n){
   const dep = deployed(G.kind, t);
