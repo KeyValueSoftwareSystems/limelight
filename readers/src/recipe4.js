@@ -31,6 +31,9 @@ SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
 const NOV_W = 0.35;
+const GATE_GROUPS = 0;
+const CYC_VERSE = 1.6;
+const CYC_BUILD = 0.5;
 const NOV_FROM = 0.45;
 const CYC_DROP = 0.5;
 const MOOD_W = 1.00;
@@ -864,7 +867,10 @@ function buildProg(t){
 }
 function gateBars(kind, tt){
   const L = primaryLook(tt), e = en(tt);
-  const cyc = {drop:CYC_DROP, build:0.5, verse:0.5, quiet:2, idle:2, outro:2, spotlight:2}[L];
+  const cq = cueAt(tt, L).rate;
+  const cyc = (cq === undefined)
+    ? {drop:CYC_DROP, build:CYC_BUILD, verse:CYC_VERSE, quiet:2, idle:2, outro:2, spotlight:2}[L]
+    : cq;
   const kmul = GATE_RATE[kind] === undefined ? 1 : GATE_RATE[kind];
   const bp = buildProg(tt);
   const accel = (bp >= 0) ? lerp(2.4, 0.30, bp*bp) : 1;
@@ -881,7 +887,8 @@ function quantRate(r){
   return best;
 }
 const NBARS = Math.max(2, Math.ceil((DUR - PH)/BAR) + 3);
-const GPH = (function(){
+let GPH_CACHE = null;
+function GPH_BUILD(){
   const kinds = {}, out = {};
   for(const f of (LAYOUT.fixtures||[])) kinds[f.kind] = 1;
   const t0 = PH + DBP*PER;
@@ -895,9 +902,11 @@ const GPH = (function(){
     out[kind] = {rate:rate, cum:cum};
   }
   return out;
-})();
+}
+function gph(){ if(!GPH_CACHE) GPH_CACHE = GPH_BUILD(); return GPH_CACHE }
 function gatePhase(kind, t){
-  const T = GPH && GPH[kind];
+  const G0 = gph();
+  const T = G0 && G0[kind];
   if(!T) return 0;
   const m = mpos(t);
   let i = Math.floor(m); if(i >= NBARS-1) i = NBARS-2; if(i < 0) i = 0;
@@ -921,25 +930,25 @@ const BUILD_HI = 1.45;
 const LIFT_LO = 0.60;
 const LIFT_HI = 1.60;
 const BLOCKS = {
-  bed:       {par:0.30, head:0.12, wash:0.95, uplight:1.00, zoom:0.66, shape:0.00, chase:0.00, lift:0.55, spread:0.10},
-  pulse:     {par:1.00, head:0.34, wash:0.55, uplight:0.75, zoom:0.52, shape:0.10, chase:0.25, lift:0.85, spread:0.00},
-  chase:     {par:0.92, head:0.72, wash:0.30, uplight:0.42, zoom:0.40, shape:0.30, chase:1.00, lift:0.95, spread:0.55},
-  fan:       {par:0.42, head:1.00, wash:0.62, uplight:0.55, zoom:0.26, shape:0.20, chase:0.00, lift:0.95, spread:0.30},
-  cross:     {par:0.55, head:1.00, wash:0.40, uplight:0.45, zoom:0.16, shape:0.90, chase:0.30, lift:1.00, spread:0.60},
-  ballyhoo:  {par:0.62, head:1.00, wash:0.52, uplight:0.50, zoom:0.22, shape:1.00, chase:0.55, lift:1.00, spread:0.70},
-  flood:     {par:1.00, head:0.92, wash:1.00, uplight:1.00, zoom:0.92, shape:0.40, chase:0.10, lift:1.00, spread:0.05},
-  silhouette:{par:0.06, head:0.85, wash:0.16, uplight:1.00, zoom:0.34, shape:0.00, chase:0.00, lift:0.70, spread:0.15},
-  spot:      {par:0.06, head:0.28, wash:0.10, uplight:0.22, zoom:0.20, shape:0.00, chase:0.00, lift:0.45, spread:0.00},
-  swell:     {par:0.40, head:0.66, wash:1.00, uplight:1.00, zoom:0.58, shape:0.15, chase:0.00, lift:0.90, spread:0.20},
-  drift:     {par:0.22, head:0.80, wash:0.70, uplight:0.85, zoom:0.30, shape:0.55, chase:0.00, lift:0.80, spread:0.45},
+  bed:       {par:0.30, head:0.12, wash:0.95, uplight:1.00, zoom:0.66, shape:0.00, chase:0.00, lift:0.55, spread:0.10, rate:4.00},
+  pulse:     {par:1.00, head:0.34, wash:0.55, uplight:0.75, zoom:0.52, shape:0.10, chase:0.25, lift:0.85, spread:0.00, rate:1.50},
+  chase:     {par:0.92, head:0.72, wash:0.30, uplight:0.42, zoom:0.40, shape:0.30, chase:1.00, lift:0.95, spread:0.55, rate:0.50},
+  fan:       {par:0.42, head:1.00, wash:0.62, uplight:0.55, zoom:0.26, shape:0.20, chase:0.00, lift:0.95, spread:0.30, rate:2.00},
+  cross:     {par:0.55, head:1.00, wash:0.40, uplight:0.45, zoom:0.16, shape:0.90, chase:0.30, lift:1.00, spread:0.60, rate:0.50},
+  ballyhoo:  {par:0.62, head:1.00, wash:0.52, uplight:0.50, zoom:0.22, shape:1.00, chase:0.55, lift:1.00, spread:0.70, rate:0.25},
+  flood:     {par:1.00, head:0.92, wash:1.00, uplight:1.00, zoom:0.92, shape:0.40, chase:0.10, lift:1.00, spread:0.05, rate:1.00},
+  silhouette:{par:0.06, head:0.85, wash:0.16, uplight:1.00, zoom:0.34, shape:0.00, chase:0.00, lift:0.70, spread:0.15, rate:4.00},
+  spot:      {par:0.06, head:0.28, wash:0.10, uplight:0.22, zoom:0.20, shape:0.00, chase:0.00, lift:0.45, spread:0.00, rate:4.00},
+  swell:     {par:0.40, head:0.66, wash:1.00, uplight:1.00, zoom:0.58, shape:0.15, chase:0.00, lift:0.90, spread:0.20, rate:4.00},
+  drift:     {par:0.22, head:0.80, wash:0.70, uplight:0.85, zoom:0.30, shape:0.55, chase:0.00, lift:0.80, spread:0.45, rate:2.00},
 };
 const CUE_LIST = {
   intro:    ['bed','drift','swell','pulse'],
-  verse:    ['pulse','chase','fan','pulse'],
+  verse:    ['pulse','fan','pulse','drift'],
   break:    ['swell','drift','silhouette','swell'],
   quiet:    ['swell','drift','spot','swell'],
   build:    ['chase','chase','fan','cross'],
-  drop:     ['flood','ballyhoo','cross','flood'],
+  drop:     ['flood','ballyhoo','cross','ballyhoo'],
   outro:    ['bed','silhouette','bed','spot'],
   idle:     ['bed','bed','silhouette','bed'],
   spotlight:['spot'], flash:['flood'], stop:['spot'],
@@ -1010,7 +1019,8 @@ function arrayGate(G, t, e, L, n){
   if(cov >= 1) return 1;
   if(cov <= 0) return 0;
   const ph = gatePhase(G.kind, t);
-  const fx = (n > ARRAY_MIN) ? Math.abs(G.xn - 0.5)*2 : G.xn;
+  const fx0 = (n > ARRAY_MIN) ? Math.abs(G.xn - 0.5)*2 : G.xn;
+  const fx = GATE_GROUPS > 0 ? Math.floor(fx0*GATE_GROUPS + 1e-6)/GATE_GROUPS : fx0;
   const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(fx*1.2 + G.yn*0.6 - ph));
   const soft = 0.16 + 0.22*e;
   const edge = 1 - cov;
