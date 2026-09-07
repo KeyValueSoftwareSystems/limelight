@@ -72,6 +72,24 @@ late. Select it and rung 1 must go red. If it passes, the check has gone
 circular — it is measuring the map against itself instead of against the audio,
 which is the single most common way a check in this project has been wrong.
 
+## Positions are in beats, not seconds
+
+Every timed entry carries `pos` -- beats from the grid origin. Beat 42.0 is beat
+42; 42.26 is a hit a sixteenth and a hair after it, and that hair is the groove.
+Seconds come back as `grid.phase + pos * grid.period`.
+
+Bar and beat are DERIVED from `pos` and `grid.bar_phase` and never stored, because
+a stored derived value is how two fields get to disagree about where a bar begins.
+That is not hypothetical: every map we have places its chapters on a different
+beat of the bar from the one its own bar_phase implies, and nothing could express
+that until positions were in beats.
+
+```bash
+python3 listen/beatpos.py levels --write
+```
+
+adds them, and reports whether your structural marks land on bar lines.
+
 ## Scoring a map in the browser
 
 Open `/score`, drop your `.map.json` on the page, put your name in, press the

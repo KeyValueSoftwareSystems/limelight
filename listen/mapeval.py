@@ -31,8 +31,8 @@ NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
 # what each field is worth. Timing dominates because everything downstream of a
 # wrong grid is wrong regardless of how good it is.
-WEIGHTS = {"grid": 3.0, "downbeats": 1.5, "sections": 1.5, "energy": 1.5,
-           "accents": 1.0, "chords": 1.0, "melody": 1.0, "pump": 0.5}
+WEIGHTS = {"grid": 3.0, "bars": 2.0, "downbeats": 1.5, "sections": 1.5,
+           "energy": 1.5, "accents": 1.0, "chords": 1.0, "melody": 1.0, "pump": 0.5}
 
 
 def load(path, target_sr=11025):
@@ -99,6 +99,42 @@ def ev_grid(m, B):
     if allm <= 0: return None, "silent recording"
     ratio = on / allm
     return min(1.0, max(0.0, (ratio - 1.0) / 0.8)), f"kick {ratio:.2f}x louder on the beats"
+
+
+def ev_bars(m, B):
+    """Do the structural marks land on bar lines?
+
+    This is an internal-consistency check and it is the only one here that is,
+    which is why it is worth having: seconds are addresses, so two fields can each
+    be self-consistent while disagreeing about where a bar begins. On Levels the
+    chapters sit on beat 0 of a bar and the drop kicks on beat 2, and nothing in
+    the file could express that contradiction until every entry carried a position
+    in beats. A chapter boundary that is not on a bar line is either wrong or the
+    bar phase is."""
+    g = m.get("grid") or {}
+    per, ph = g.get("period"), g.get("phase")
+    if not per:
+        return None, "no grid"
+    bp = g.get("bar_phase", 0)
+    marks = []
+    for key, field in (("chapters", "at"), ("moments", "at"), ("spans", "from")):
+        for r in (m.get(key) or []):
+            if isinstance(r, dict) and field in r:
+                marks.append((key, (r[field] - ph) / per))
+    if len(marks) < 4:
+        return None, "nothing structural to check"
+    def on_line(pos):
+        d = ((pos - bp) % 4 + 4) % 4
+        return min(d, 4 - d) < 0.06
+    on = sum(1 for _, p in marks if on_line(p))
+    frac = on / len(marks)
+    worst = {}
+    for k, p in marks:
+        if not on_line(p):
+            worst[k] = worst.get(k, 0) + 1
+    detail = ", ".join(f"{v} {k}" for k, v in sorted(worst.items())) or "all of them"
+    return frac, (f"{on} of {len(marks)} structural marks are on a bar line"
+                  + (f" -- off: {detail}" if worst else ""))
 
 
 def ev_downbeats(m, B):
@@ -284,7 +320,8 @@ def evaluate(slug, map_path=None, m=None):
         return {"error": "no audio for " + slug}
     out = {}
     for name, fn, args in (
-        ("grid", ev_grid, (m, B)), ("downbeats", ev_downbeats, (m, B)),
+        ("grid", ev_grid, (m, B)), ("bars", ev_bars, (m, B)),
+        ("downbeats", ev_downbeats, (m, B)),
         ("sections", ev_sections, (m, B)), ("energy", ev_energy, (m, B)),
         ("accents", ev_accents, (m, B)), ("pump", ev_pump, (m, B)),
         ("chords", ev_chords, (m, B, sig, sr)), ("melody", ev_melody, (m, B, sig, sr)),
