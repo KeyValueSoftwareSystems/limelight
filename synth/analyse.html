@@ -63,6 +63,8 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
   <a class="back" href="/">←</a>
   <label for="song">song</label><select id="song"></select>
   <label for="mine">editing</label><select id="mine"></select>
+  <button id="imp" title="open a map file from your machine in this editor">import…</button>
+  <input type="file" id="impf" accept=".json" style="display:none">
   <label for="other">against</label><select id="other"></select>
   <label for="drive">energy</label>
   <select id="drive"><option>low</option><option selected>medium</option><option>high</option></select>
@@ -1316,6 +1318,34 @@ tick();
   mineKey = keys.includes("answer")?"answer":keys[0];
   otherKey = keys.find(k=>k!==mineKey)||"";
   $("mine").value=mineKey; $("other").value=otherKey;
+  /* Import was missing entirely. /score would take a file and grade it, and this
+     editor would only open maps already on disk, so there was no way to look at
+     somebody's map -- see its sections, hear it against the audio, edit it -- from
+     a file they had sent you. It reads the file locally and never uploads it;
+     Save then writes it into maps/imported/ like any other. */
+  $("imp").onclick=()=>$("impf").click();
+  $("impf").onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const fr=new FileReader();
+    fr.onload=()=>{
+      let m; try{ m=JSON.parse(fr.result) }catch(err){
+        $("stat").style.color="#e88055";
+        $("stat").textContent="that file is not JSON: "+err.message; return }
+      if(!(m.grid||{}).period){
+        $("stat").style.color="#e88055";
+        $("stat").textContent="that JSON has no grid.period, so it is not a map"; return }
+      const key="imported";
+      G.maps[key]=m;
+      if(![...$("mine").options].some(o=>o.value===key))
+        for(const sel of ["mine","other"])
+          $(sel).insertAdjacentHTML("beforeend",`<option value="${key}">${key}</option>`);
+      mineKey=key; $("mine").value=key;
+      $("stat").style.color="var(--good)";
+      $("stat").textContent=`opened ${f.name} — ${(m.song||{}).title||"untitled"}`;
+      rebuildShow();
+    };
+    fr.readAsText(f);
+  };
   const load=()=>{ mineKey=$("mine").value; otherKey=$("other").value;
     MINE=JSON.parse(JSON.stringify(G.maps[mineKey]));
     OTHER=otherKey?G.maps[otherKey]:null;
