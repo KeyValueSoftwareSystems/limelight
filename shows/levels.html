@@ -343,7 +343,16 @@ const ACT=ACC.map(a=>a.at);
    thinned at a sixteenth so a real drum pattern survives intact. */
 const ACC_BY = (function(){
   const out = {};
-  const gap = Math.max(0.09, (typeof PER === 'number' ? PER : 0.5) * 0.24);
+  /* A sixteenth. That is the rate a drummer plays at, not a rate a light can
+     express: Starlight carries 552 kicks and 452 snares in 205 s, and with
+     0.26 s decays overlapping at four hits a beat the pars fluttered at 5.7
+     direction changes a second. Above about 4 Hz a level change stops reading as
+     a pulse and becomes a flutter.
+
+     This file already states the rule -- the map records every hit, the RECIPE
+     chooses which to react to -- and one hit per beat per instrument is what a
+     par can actually show. The full stream is untouched in the map. */
+  const gap = Math.max(0.09, (typeof PER === 'number' ? PER : 0.5) * 0.85);
   for(const a of ((MAP.accents && MAP.accents.events) || [])){
     if((a.strength === undefined ? 0.5 : a.strength) < 0.15) continue;
     (out[a.of] = out[a.of] || []).push({...a, at: snapT(a.at)});
@@ -974,12 +983,28 @@ function roleRGB(role,e,bri,pal,drift,white,sh){
    is nearly a bar, so a chase driven by it sits on one lamp and does nothing. The
    chase wants the whole hit list, quiet ones included, because a chase follows
    the pattern rather than punctuating it. */
+/* The steps a chase takes.
+
+   This kept every hit above 0.10 that was more than 90 ms from the last one,
+   merged across all eight instruments -- on Starlight that is up to eleven steps
+   a second. A chase is a narrow pulse crossing the rig, so a pulse moving at
+   5 Hz makes EVERY fixture it passes wobble at 5 Hz, and measured on one par the
+   chase gain reversed direction 10.6 times a second. That is the flicker: not
+   the accents, not the gate, the chase.
+
+   A chase steps on a musical subdivision. One step per beat is the classic
+   quarter-note sweep, it is legible from the back of a room, and it leaves each
+   fixture in the array changing a couple of times a second instead of five. The
+   weak hits go too -- a chase should follow what a drummer played hard, not
+   every ghost note the detector found. */
+const CHASE_MIN_STRENGTH = 0.22;
 const CHT = (function(){
   const src = ((MAP.accents && MAP.accents.events) || []).map(a=>({...a, at:snapT(a.at)}));
+  const step = Math.max(0.12, (typeof PER === 'number' ? PER : 0.5) * 0.85);
   const out = [];
   for(const a of src){
-    if(a.strength < 0.10) continue;
-    if(out.length && a.at - out[out.length-1].at < 0.09) continue;
+    if(a.strength < CHASE_MIN_STRENGTH) continue;
+    if(out.length && a.at - out[out.length-1].at < step) continue;
     out.push(a);
   }
   return out})();
@@ -1397,12 +1422,12 @@ const FAMILY_VOICE = {
   head:    t => cl(Math.max(stem('vocals',t), stem('other',t))
                   + 0.50*accentOf('vocals',t) + 0.45*phraseOnset(t)),
   wash:    t => cl(Math.max(stem('piano',t), stem('other',t))  + 0.42*accentOf('piano',t)),
-  strip:   t => cl(0.55*stem('guitar',t) + 0.80*accentOf('hat',t) + 0.75*accentOf('snare',t)),
+  strip:   t => cl(0.55*stem('guitar',t) + 0.28*accentOf('hat',t) + 0.75*accentOf('snare',t)),
   // the backbeat. Blinders on 2 and 4 is the oldest move in the trade, and
   // these three families previously had no instrument at all: instr() returned
   // a flat 1 for every blinder, strobe and screen in every rig.
   blinder: t => cl(0.20 + 0.95*accentOf('snare',t)),
-  strobe:  t => cl(0.15 + 0.90*accentOf('snare',t) + 0.45*accentOf('hat',t)),
+  strobe:  t => cl(0.15 + 0.90*accentOf('snare',t) + 0.22*accentOf('hat',t)),
   video:   t => cl(Math.max(stem('vocals',t), stem('other',t))),
 };
 function instr(kind, t){
@@ -1891,7 +1916,13 @@ function lookFrame(t,L){
          threshold. Strumming as light is fine MOVING texture, not an 8 Hz
          strobe. The pattern now travels slowly in space and the sixteenth only
          modulates its depth gently. */
-      const sxt=(bph(t)*4)%1, drift=(mpos(t)/2)%1;
+      /* sxt was a SAWTOOTH at a sixteenth: it ramps down and then jumps back
+         up 8.4 times a second, and a discontinuous jump at that rate is visible
+         flicker on a surface this size however small the depth. The note above
+         says the sixteenth should only modulate depth gently and the pattern
+         should travel in space -- half of that was done, this is the other
+         half. A smooth once-per-bar breath replaces it, and the travel stays. */
+      const sxt=0.5-0.5*Math.cos(2*Math.PI*mpos(t)), drift=(mpos(t)/2)%1;
       for(let i=0;i<N1;i++){
         let d=Math.abs(i-head); d=Math.min(d,N1-d);
         const sweep=Math.max(0,1-d/w)*(0.5+0.45*e)*g1*(0.45+0.65*stem('other',t));
@@ -1911,7 +1942,7 @@ function lookFrame(t,L){
       // of that order; an instant snap on a surface this large reads as a flash,
       // which is exactly the complaint.
       const back = bsb<0.045 ? ss(0,0.045,bsb) : 1-ss(0,1,cl((bsb-0.045)/1.20));
-      const g2=(amb*0.8+(0.14+0.46*e)*back+0.19*stab)*lerp(0.3,1,L==='build'?layer(3):1);
+      const g2=(amb*0.8+(0.14+0.46*e)*back+0.10*stab)*lerp(0.3,1,L==='build'?layer(3):1);
       for(let i=0;i<N2;i++){
         const mix=0.5+0.5*Math.sin(2*Math.PI*(i/N2*1.5-bp4));
         const col=[lerp(base[0],alt[0],mix),lerp(base[1],alt[1],mix),lerp(base[2],alt[2],mix)];
