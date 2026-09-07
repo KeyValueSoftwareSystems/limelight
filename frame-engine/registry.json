@@ -1,0 +1,21 @@
+{
+  "note": "Versioned frame recipes selectable in /analyse. See DESIGN.md. v0-prod points at the live readers/src/recipe4.js (never copied). This layer is temporary — when one 'main' recipe is agreed it becomes recipe4.js and the rest is deleted.",
+  "default": "v0-prod",
+  "engines": [
+    {
+      "id": "v0-prod",
+      "label": "Prod (recipe4)",
+      "recipe": "readers/src/recipe4.js",
+      "status": "default",
+      "notes": "the canonical recipe; owned and evolved on main"
+    },
+    {
+      "id": "v1-ours",
+      "label": "Ours (chapter-alias)",
+      "recipe": "frame-engine/v1-ours/recipe.js",
+      "status": "experimental",
+      "base": "recipe4 before prod's current rewrite",
+      "notes": "adds a foreign chapter-label normalizer (CH_ALIAS/chMap); see v1-ours/NOTES.md"
+    }
+  ]
+}

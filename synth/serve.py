@@ -1004,6 +1004,25 @@ class H(http.server.BaseHTTPRequestHandler):
             if u.path == "/static/recipe4.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "src", "recipe4.js")).read(),
                                   "text/plain; charset=utf-8")
+            # frame-engine: versioned frame recipes (see frame-engine/DESIGN.md)
+            if u.path == "/static/frame-engine/registry.json":
+                return self._send(200, open(os.path.join(ROOT, "frame-engine", "registry.json")).read(),
+                                  "application/json; charset=utf-8")
+            if u.path.startswith("/static/frame-engine/") and u.path.endswith("/recipe.js"):
+                eid = u.path[len("/static/frame-engine/"):-len("/recipe.js")]
+                try:
+                    reg = json.load(open(os.path.join(ROOT, "frame-engine", "registry.json")))
+                    ent = next((e for e in reg.get("engines", []) if e.get("id") == eid), None)
+                except Exception as e:  # noqa: BLE001
+                    return self._send(500, json.dumps({"error": "registry unreadable: %s" % e}))
+                if not ent:
+                    return self._send(404, json.dumps({"error": "unknown engine: %s" % eid}))
+                # only files named in the registry, resolved within the repo root
+                root = os.path.realpath(ROOT)
+                path = os.path.realpath(os.path.join(ROOT, ent.get("recipe", "")))
+                if not (path == root or path.startswith(root + os.sep)) or not os.path.isfile(path):
+                    return self._send(404, json.dumps({"error": "recipe missing for %s" % eid}))
+                return self._send(200, open(path).read(), "text/plain; charset=utf-8")
             if u.path == "/api/song":
                 return self._send(200, json.dumps(song((q.get("song") or [None])[0])))
             if u.path == "/api/audio":
