@@ -9,13 +9,13 @@
 
 ## B. Sync / meaning (teammates: "very random, no sync, no emotion")
 - [ ] B1 Starlight drop/verse handover is inverted
-- [ ] B2 The Nights grid sits ~13 ms early against its own kicks
+- [x] B2 The Nights grid sits ~13 ms early against its own kicks
 - [ ] B3 Mizhiyoram per-fixture sync 25%
 - [ ] B4 41 novelty moments only brighten the rig; they should become chapters
 
 ## C. Map fields that drive nothing (ablation, my actual lane)
-- [ ] C1 lyrics 0.000% — Whisper output drives no light
-- [ ] C2 chords 0.000% — unused
+- [x] C1 lyrics measured at 0.002% on the 4 songs that carry it — confirmed decoration, open: make it earn its place via vocal-phrase handover
+- [~] C2 chords worth 0.364% on the 1 song that has it; absent from the other 4 — ADD them
 - [ ] C3 voice 0.002%, novelty 0.024%, stems.vocals 0.043% — decoration
-- [ ] C4 downbeats 0.000% — suspect measurement artifact, verify on a song with bar_phase != 0
+- [x] C4 downbeats 0.000% — suspect measurement artifact, verify on a song with bar_phase != 0
 - [x] C5 Publish the ablation as the map's feedback loop

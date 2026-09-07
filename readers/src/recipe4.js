@@ -163,9 +163,31 @@ const ACC=(function(){
   for(const a of strong) if(!out.length||a.at-out[out.length-1].at>=0.30) out.push(a);
   return out})();
 const ACT=ACC.map(a=>a.at);
+/* Per-instrument accents are thinned per instrument, never against each other.
+
+   ACC above is a deliberately sparse stream -- the strong, well-separated hits
+   that a stab reads from -- and building the per-instrument index out of it was
+   a mistake with a very large blast radius. One global "keep one hit per 300 ms"
+   pass over eight merged instruments means whichever instrument is loudest in
+   each slot deletes the rest. Levels carries 633 kicks and 33 of them reached a
+   fixture; Don't Look Down carries 500 and 4 survived. The map had measured the
+   song correctly the whole time and the reader was discarding it.
+
+   A kick is not deleted by a guitar. Each instrument gets its own timeline,
+   thinned at a sixteenth so a real drum pattern survives intact. */
 const ACC_BY = (function(){
   const out = {};
-  for(const a of ACC){ (out[a.of] = out[a.of] || []).push(a) }
+  const gap = Math.max(0.09, (typeof PER === 'number' ? PER : 0.5) * 0.24);
+  for(const a of ((MAP.accents && MAP.accents.events) || [])){
+    if((a.strength === undefined ? 0.5 : a.strength) < 0.15) continue;
+    (out[a.of] = out[a.of] || []).push({...a, at: snapT(a.at)});
+  }
+  for(const k in out){
+    out[k].sort((x,y)=>x.at-y.at);
+    const keep=[];
+    for(const a of out[k]) if(!keep.length || a.at-keep[keep.length-1].at >= gap) keep.push(a);
+    out[k]=keep;
+  }
   return out;
 })();
 function accentOf(band, t){
@@ -989,18 +1011,36 @@ function cueAt(t, L){
   return out;
 }
 const INSTR_W = 1.00;
-const INSTR_LO = 0.12;
+const INSTR_LO = 0.30;
+/* The instrument voice ducks toward this floor between hits and reaches full on
+   one. It used to run 0.12..1.90, which is mostly above the ceiling: during a
+   drop the base level is already near 1.0, so `cl(lv*emph*gate)` clipped at 1.0
+   whether the kick was there or not, and the transient was thrown away at the
+   very last step. A rig punches because it drops between hits, not because it
+   goes past full -- a real dimmer has no headroom above full either. */
+const INSTR_HI = 1.00;
+/* A stem is a bed and an accent is a transient, so they add -- they do not
+   compete for a max. stem('drums') sits near 1.0 for the whole of a drop, and
+   under Math.max a kick could never rise above it. The hit has to punch through
+   the bed it is played over, which is what makes a rig look like it is hearing
+   the drummer rather than the mix. */
 const FAMILY_VOICE = {
-  par:     t => Math.max(accentOf('kick',t), stem('drums',t)),
-  uplight: t => stem('bass',t),
-  head:    t => Math.max(stem('vocals',t), stem('other',t)),
-  wash:    t => Math.max(stem('piano',t), stem('other',t)),
-  strip:   t => Math.max(stem('guitar',t), accentOf('snare',t)),
+  par:     t => cl(0.68*stem('drums',t)  + 0.92*accentOf('kick',t)),
+  uplight: t => cl(0.78*stem('bass',t)   + 0.55*accentOf('bass',t)),
+  head:    t => cl(Math.max(stem('vocals',t), stem('other',t)) + 0.50*accentOf('vocals',t)),
+  wash:    t => cl(Math.max(stem('piano',t), stem('other',t))  + 0.42*accentOf('piano',t)),
+  strip:   t => cl(0.55*stem('guitar',t) + 0.80*accentOf('hat',t) + 0.75*accentOf('snare',t)),
+  // the backbeat. Blinders on 2 and 4 is the oldest move in the trade, and
+  // these three families previously had no instrument at all: instr() returned
+  // a flat 1 for every blinder, strobe and screen in every rig.
+  blinder: t => cl(0.20 + 0.95*accentOf('snare',t)),
+  strobe:  t => cl(0.15 + 0.90*accentOf('snare',t) + 0.45*accentOf('hat',t)),
+  video:   t => cl(Math.max(stem('vocals',t), stem('other',t))),
 };
 function instr(kind, t){
   const f = FAMILY_VOICE[kind];
   if(!f || INSTR_W <= 0) return 1;
-  return lerp(1, INSTR_LO + (1.9-INSTR_LO)*cl(f(t)), INSTR_W);
+  return lerp(1, INSTR_LO + (INSTR_HI-INSTR_LO)*cl(f(t)), INSTR_W);
 }
 const LIFT_MID = 0.75;
 function climbAt(t, L){
