@@ -30,6 +30,7 @@ audio{height:32px;flex:1 1 auto}
 <header>
   <h1>stage</h1>
   <select id="song"></select>
+  <label>map</label><select id="map"></select>
   <label>rung</label><select id="rung"></select>
   <button id="solo" title="run this rung on its own">solo</button>
   <label>energy</label>
@@ -71,7 +72,7 @@ if(typeof THREE==="undefined"){
      + "the internet the first time.<br>Everything else in Limelight works offline.");
 }
 
-let RM=null, MAP=null, LAY=null, F=null, SONG="", RUNGS=[];
+let RM=null, MAP=null, LAY=null, F=null, SONG="", RUNGS=[], MAPKEY="";
 let STEP=7, SOLO=false;
 let DRIVE=Q.get("energy")||"medium", PAL=Q.get("pal")||"garrix";
 let scene, cam, renderer, fixtures=[], clock=0;
@@ -301,7 +302,7 @@ function place(){
 function aim(fx, o){
   const at=fx.def.at, S=LAY.size_m;
   let target;
-  if(fx.deROLE(f.kind)==="head" && o && o.pan!==undefined){
+  if(ROLE(fx.def.kind)==="head" && o && o.pan!==undefined){
     const pan=(o.pan-0.5)*Math.PI*1.5, tilt=0.25+ (o.tilt!==undefined?o.tilt:0.5)*1.1;
     target=new THREE.Vector3(at[0]+Math.sin(pan)*6, at[1]-Math.cos(tilt*0.9)*6,
                              at[2]-Math.cos(pan)*4.0);
@@ -310,7 +311,7 @@ function aim(fx, o){
        you see the face of the lamp and the beam coming toward you. They were aimed
        at the floor just under the truss, which is why every lens was edge-on and
        invisible. The row also fans slightly outward, as a real rig is rigged. */
-    if(fx.deROLE(f.kind)==="blinder" || fx.deROLE(f.kind)==="strobe"){
+    if(ROLE(fx.def.kind)==="blinder" || ROLE(fx.def.kind)==="strobe"){
       target=new THREE.Vector3(at[0], 1.5, -3.0);       // straight at the audience
     } else {
       const mid=S.w/2, fan=(at[0]-mid)*0.55;
@@ -369,7 +370,7 @@ function render(t){
     fx.lens.material.color.copy(c).multiplyScalar(Math.min(1, 0.20 + L));
     fx.halo.material.opacity = Math.min(0.95, L*0.85*(0.35+0.65*EXPO));
     fx.halo.material.color.copy(c);
-    const wide = fx.deROLE(f.kind)==="blinder" || fx.deROLE(f.kind)==="strobe";
+    const wide = ROLE(fx.def.kind)==="blinder" || ROLE(fx.def.kind)==="strobe";
     const hs = (wide ? 0.8 : 0.30) + (wide ? 3.2 : 1.25)*L;
     fx.halo.scale.set(hs, hs, 1);
     fx.pool.material.color.copy(c);
@@ -384,7 +385,7 @@ function rebuild(){
   const r=RUNGS[STEP-1];
   $("hud").innerHTML=`<b>${STEP}. ${r?r.name:""}</b>${SOLO?" · on its own":""}<br>`
     +`${r?r.adds:""}<br><span style="color:var(--faint)">${LAY.fixtures.length} fixtures`
-    +` · ${DRIVE} · ${PAL}</span>`;
+    +` · ${DRIVE} · ${PAL} · map ${MAPKEY||"?"}</span>`;
 }
 
 (async()=>{
@@ -403,7 +404,20 @@ function rebuild(){
   LAY=(sg.layouts||{})[want] || (sg.layouts||{}).mainstage || (sg.layouts||{}).show
       || (sg.layouts||{}).small || (sg.layouts||{}).beat;
   const G=await (await fetch("/api/maps?song="+SONG)).json();
-  SONG=G.song; MAP=G.maps.answer||Object.values(G.maps)[0];
+  SONG=G.song;
+  /* The stage always used the answer map, so there was no way to watch somebody
+     else's reading of a song actually light a rig -- which is the only way to see
+     what a map is worth. Best map wins by default, and the picker overrides. */
+  const rank=k=>["model","answer","dheeraj","amal"].indexOf(k);
+  const keys=Object.keys(G.maps).sort((a,b)=>{
+    const ra=rank(a), rb=rank(b);
+    return (ra<0?9:ra)-(rb<0?9:rb) || a.localeCompare(b) });
+  let MAPKEY=new URLSearchParams(location.search).get("map");
+  if(!MAPKEY||!G.maps[MAPKEY]) MAPKEY=keys[0];
+  MAP=G.maps[MAPKEY];
+  $("map").innerHTML=keys.map(k=>
+    `<option value="${k}"${k===MAPKEY?" selected":""}>${k}</option>`).join("");
+  $("map").onchange=e=>{ MAPKEY=e.target.value; MAP=G.maps[MAPKEY]; rebuild() };
   $("song").innerHTML=Object.entries(G.songs).map(([k,v])=>
     `<option value="${k}"${k===SONG?" selected":""}>${v}</option>`).join("");
   $("song").onchange=e=>location.href=`/stage?song=${e.target.value}`;

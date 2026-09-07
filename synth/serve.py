@@ -235,7 +235,22 @@ def candidate_maps(slug):
                 if f == slug + ".map.json": found.append((who, os.path.join(sub, f)))
                 elif f.startswith(slug + ".") and f.endswith(".map.json"):
                     found.append((f"{who}/{f[len(slug)+1:-9]}", os.path.join(sub, f)))
-        for f in sorted(os.listdir(d)):            # flat layout still works
+    # maps/model at the repo root is where the measured maps live, and neither page
+    # could see them -- so the editor and the stage were offering older copies while
+    # the best map for Levels sat outside the lookup. Same gap Amal hit in beatpos,
+    # pump and harmony, and the same three-line fix.
+    md = os.path.join(ROOT, "maps")
+    if os.path.isdir(md):
+        for who in sorted(os.listdir(md)):
+            sub = os.path.join(md, who)
+            if not os.path.isdir(sub): continue
+            for f in sorted(os.listdir(sub)):
+                if f == slug + ".map.json":
+                    found.append((who, os.path.join(sub, f)))
+                elif f.startswith(slug + ".") and f.endswith(".map.json"):
+                    found.append((f"{who}/{f[len(slug)+1:-9]}", os.path.join(sub, f)))
+    if os.path.isdir(d):
+      for f in sorted(os.listdir(d)):            # flat layout still works
             if f.startswith(slug + ".") and f.endswith(".map.json"):
                 found.append((f[len(slug) + 1:-9], os.path.join(d, f)))
     for who, path in found:

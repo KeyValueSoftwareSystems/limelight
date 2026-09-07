@@ -433,6 +433,11 @@ def maps_for(slug):
         if os.path.exists(p): found.append(p)
     for p in sorted(glob.glob(os.path.join(ROOT, "synth", "maps", "*", slug + ".map.json"))):
         found.append(p)
+    # maps/model is where the measured maps live, and this harness could not see
+    # them -- so the leaderboard has been ranking older copies. Amal hit the same
+    # gap in beatpos, pump and harmony: they all looked in truth and songs only.
+    for p in sorted(glob.glob(os.path.join(ROOT, "maps", "*", slug + ".map.json"))):
+        found.append(p)
     return found
 
 
