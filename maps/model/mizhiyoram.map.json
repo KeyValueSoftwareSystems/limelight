@@ -10128,227 +10128,566 @@
   },
   "chords": {
    "rate": "per_bar",
-   "how": "chroma over the separated bass+piano+guitar+other stems, with the root taken from observations.bass_notes and only the quality matched (maj, min, 7, m7, sus4)",
-   "not": "still an estimate. It is better than chroma over a full mix because a kick drum is not in these stems and because the root is measured rather than inferred, but nobody has checked it against an instrument",
-   "bars_named": 36,
+   "how": "ChordMini BTC large-vocabulary model (170 classes; ptnghia-j/ChordMini, MIT) on the mix, CQT 144 bins / 24 per octave, hop 2048 at 22.05 kHz. Per bar: the segment covering the downbeat. `segments` holds the model's own boundaries.",
+   "estimator": "ChordMini BTC large_voca",
+   "not": "checked against an instrument by anyone here. It is a model trained on human chord annotations, which is a different thing from a human, and 'N' bars carry no chord rather than a guess",
+   "bars_named": 43,
    "bars_total": 43,
-   "unknown": 7,
+   "segments": [
+    {
+     "from": 0.0,
+     "to": 0.929,
+     "chord": "N"
+    },
+    {
+     "from": 0.929,
+     "to": 3.808,
+     "chord": "D#m"
+    },
+    {
+     "from": 3.808,
+     "to": 6.594,
+     "chord": "Cm7"
+    },
+    {
+     "from": 6.594,
+     "to": 9.474,
+     "chord": "G#"
+    },
+    {
+     "from": 9.474,
+     "to": 12.539,
+     "chord": "A#"
+    },
+    {
+     "from": 12.539,
+     "to": 15.139,
+     "chord": "D#m"
+    },
+    {
+     "from": 15.139,
+     "to": 18.019,
+     "chord": "Cm7"
+    },
+    {
+     "from": 18.019,
+     "to": 20.805,
+     "chord": "G#"
+    },
+    {
+     "from": 20.805,
+     "to": 21.084,
+     "chord": "A#"
+    },
+    {
+     "from": 21.084,
+     "to": 22.384,
+     "chord": "A#sus4"
+    },
+    {
+     "from": 22.384,
+     "to": 23.499,
+     "chord": "A#"
+    },
+    {
+     "from": 23.499,
+     "to": 26.657,
+     "chord": "D#"
+    },
+    {
+     "from": 26.657,
+     "to": 29.443,
+     "chord": "Cm"
+    },
+    {
+     "from": 29.443,
+     "to": 32.322,
+     "chord": "G#"
+    },
+    {
+     "from": 32.322,
+     "to": 33.53,
+     "chord": "A#7"
+    },
+    {
+     "from": 33.53,
+     "to": 33.715,
+     "chord": "A#"
+    },
+    {
+     "from": 33.715,
+     "to": 38.081,
+     "chord": "D#"
+    },
+    {
+     "from": 38.081,
+     "to": 38.359,
+     "chord": "G#"
+    },
+    {
+     "from": 38.359,
+     "to": 39.195,
+     "chord": "G#7"
+    },
+    {
+     "from": 39.195,
+     "to": 40.867,
+     "chord": "Cm7"
+    },
+    {
+     "from": 40.867,
+     "to": 44.118,
+     "chord": "G#7"
+    },
+    {
+     "from": 44.118,
+     "to": 44.582,
+     "chord": "G#"
+    },
+    {
+     "from": 44.582,
+     "to": 45.047,
+     "chord": "D#"
+    },
+    {
+     "from": 45.047,
+     "to": 45.883,
+     "chord": "G#"
+    },
+    {
+     "from": 45.883,
+     "to": 49.691,
+     "chord": "D#"
+    },
+    {
+     "from": 49.691,
+     "to": 52.291,
+     "chord": "Cm7"
+    },
+    {
+     "from": 52.291,
+     "to": 52.384,
+     "chord": "Cm"
+    },
+    {
+     "from": 52.384,
+     "to": 55.449,
+     "chord": "G#"
+    },
+    {
+     "from": 55.449,
+     "to": 56.471,
+     "chord": "A#"
+    },
+    {
+     "from": 56.471,
+     "to": 61.208,
+     "chord": "D#"
+    },
+    {
+     "from": 61.208,
+     "to": 63.808,
+     "chord": "Cm7"
+    },
+    {
+     "from": 63.808,
+     "to": 66.595,
+     "chord": "G#7"
+    },
+    {
+     "from": 66.595,
+     "to": 66.873,
+     "chord": "G#"
+    },
+    {
+     "from": 66.873,
+     "to": 69.567,
+     "chord": "A#sus4"
+    },
+    {
+     "from": 69.567,
+     "to": 72.818,
+     "chord": "D#"
+    },
+    {
+     "from": 72.818,
+     "to": 75.14,
+     "chord": "G#"
+    },
+    {
+     "from": 75.14,
+     "to": 78.298,
+     "chord": "D#"
+    },
+    {
+     "from": 78.298,
+     "to": 80.991,
+     "chord": "Cm7"
+    },
+    {
+     "from": 80.991,
+     "to": 83.963,
+     "chord": "G#"
+    },
+    {
+     "from": 83.963,
+     "to": 86.657,
+     "chord": "A#sus4"
+    },
+    {
+     "from": 86.657,
+     "to": 89.722,
+     "chord": "D#"
+    },
+    {
+     "from": 89.722,
+     "to": 92.415,
+     "chord": "Cm7"
+    },
+    {
+     "from": 92.415,
+     "to": 95.48,
+     "chord": "G#"
+    },
+    {
+     "from": 95.48,
+     "to": 98.267,
+     "chord": "A#sus4"
+    },
+    {
+     "from": 98.267,
+     "to": 100.217,
+     "chord": "D#"
+    },
+    {
+     "from": 100.217,
+     "to": 100.31,
+     "chord": "A#sus4"
+    },
+    {
+     "from": 100.31,
+     "to": 106.533,
+     "chord": "D#"
+    },
+    {
+     "from": 106.533,
+     "to": 106.998,
+     "chord": "G#"
+    },
+    {
+     "from": 106.998,
+     "to": 109.412,
+     "chord": "Cm7"
+    },
+    {
+     "from": 109.412,
+     "to": 110.713,
+     "chord": "G#"
+    },
+    {
+     "from": 110.713,
+     "to": 112.013,
+     "chord": "G#6"
+    },
+    {
+     "from": 112.013,
+     "to": 112.385,
+     "chord": "A#7"
+    },
+    {
+     "from": 112.385,
+     "to": 113.964,
+     "chord": "A#"
+    },
+    {
+     "from": 113.964,
+     "to": 114.707,
+     "chord": "Cm7"
+    },
+    {
+     "from": 114.707,
+     "to": 115.45,
+     "chord": "G#7"
+    },
+    {
+     "from": 115.45,
+     "to": 117.4,
+     "chord": "G#"
+    },
+    {
+     "from": 117.4,
+     "to": 120.372,
+     "chord": "D#"
+    },
+    {
+     "from": 120.372,
+     "to": 122.787,
+     "chord": "D#m"
+    },
+    {
+     "from": 122.787,
+     "to": 123.53,
+     "chord": "N"
+    }
+   ],
    "events": [
     {
-     "at": 2.767,
-     "chord": "D#",
-     "confidence": 0.34,
-     "pos": 2.9898
-    },
-    {
-     "at": 5.623,
-     "chord": "G#",
-     "confidence": 0.899,
-     "pos": 6.9887
-    },
-    {
-     "at": 11.335,
+     "at": 2.774,
      "chord": "D#m",
-     "confidence": 0.554,
-     "pos": 14.9867
+     "confidence": 0.8,
+     "bass": "D#"
     },
     {
-     "at": 14.191,
-     "chord": "D#",
-     "confidence": 0.429,
-     "pos": 18.9857
-    },
-    {
-     "at": 17.048,
-     "chord": "Fm7",
-     "confidence": 0.691,
-     "pos": 22.9861
-    },
-    {
-     "at": 19.904,
-     "chord": "D#sus4",
-     "confidence": 0.483,
-     "pos": 26.9851
-    },
-    {
-     "at": 22.76,
-     "chord": "D#",
-     "confidence": 0.635,
-     "pos": 30.9841
-    },
-    {
-     "at": 25.616,
-     "chord": "D#",
-     "confidence": 0.177,
-     "pos": 34.9831
-    },
-    {
-     "at": 31.328,
-     "chord": "D#sus4",
-     "confidence": 0.449,
-     "pos": 42.9811
-    },
-    {
-     "at": 34.184,
-     "chord": "D#m",
-     "confidence": 0.596,
-     "pos": 46.9801
-    },
-    {
-     "at": 37.041,
-     "chord": "D#sus4",
-     "confidence": 0.255,
-     "pos": 50.9805
-    },
-    {
-     "at": 39.897,
-     "chord": "Fm7",
-     "confidence": 0.637,
-     "pos": 54.9795
-    },
-    {
-     "at": 42.753,
-     "chord": "A#sus4",
-     "confidence": 0.657,
-     "pos": 58.9785
-    },
-    {
-     "at": 48.465,
-     "chord": "D#7",
-     "confidence": 0.208,
-     "pos": 66.9765
-    },
-    {
-     "at": 51.321,
-     "chord": "Cm",
-     "confidence": 0.455,
-     "pos": 70.9755
-    },
-    {
-     "at": 57.034,
-     "chord": "A#sus4",
-     "confidence": 0.265,
-     "pos": 78.9749
-    },
-    {
-     "at": 59.89,
-     "chord": "D#7",
-     "confidence": 0.185,
-     "pos": 82.9739
-    },
-    {
-     "at": 62.746,
-     "chord": "Cm",
-     "confidence": 0.587,
-     "pos": 86.9729
-    },
-    {
-     "at": 68.458,
-     "chord": "A#sus4",
-     "confidence": 0.488,
-     "pos": 94.9709
-    },
-    {
-     "at": 74.17,
-     "chord": "D#sus4",
-     "confidence": 0.675,
-     "pos": 102.9689
-    },
-    {
-     "at": 77.027,
-     "chord": "D#",
-     "confidence": 0.595,
-     "pos": 106.9693
-    },
-    {
-     "at": 79.883,
+     "at": 5.631,
      "chord": "Cm7",
-     "confidence": 0.676,
-     "pos": 110.9683
+     "confidence": 0.8,
+     "bass": "G#"
     },
     {
-     "at": 82.739,
-     "chord": "G#m",
-     "confidence": 0.17,
-     "pos": 114.9673
-    },
-    {
-     "at": 85.595,
-     "chord": "A#sus4",
-     "confidence": 0.815,
-     "pos": 118.9663
-    },
-    {
-     "at": 88.451,
-     "chord": "D#",
-     "confidence": 0.68,
-     "pos": 122.9653
-    },
-    {
-     "at": 91.307,
-     "chord": "Cm7",
-     "confidence": 0.742,
-     "pos": 126.9643
-    },
-    {
-     "at": 94.163,
-     "chord": "G#m",
-     "confidence": 0.197,
-     "pos": 130.9633
-    },
-    {
-     "at": 97.02,
-     "chord": "A#sus4",
-     "confidence": 0.641,
-     "pos": 134.9637
-    },
-    {
-     "at": 99.876,
-     "chord": "A#sus4",
-     "confidence": 0.787,
-     "pos": 138.9627
-    },
-    {
-     "at": 102.732,
-     "chord": "D#sus4",
-     "confidence": 0.441,
-     "pos": 142.9617
-    },
-    {
-     "at": 105.588,
-     "chord": "Fm7",
-     "confidence": 0.661,
-     "pos": 146.9607
-    },
-    {
-     "at": 108.444,
-     "chord": "Fm7",
-     "confidence": 0.605,
-     "pos": 150.9597
-    },
-    {
-     "at": 111.3,
-     "chord": "A#sus4",
-     "confidence": 0.817,
-     "pos": 154.9587
-    },
-    {
-     "at": 114.156,
+     "at": 8.488,
      "chord": "G#",
-     "confidence": 0.418,
-     "pos": 158.9577
+     "confidence": 0.8,
+     "bass": "D#"
     },
     {
-     "at": 117.013,
-     "chord": "D#",
-     "confidence": 0.411,
-     "pos": 162.958
+     "at": 11.344,
+     "chord": "A#",
+     "confidence": 0.8,
+     "bass": "D#"
     },
     {
-     "at": 119.869,
+     "at": 14.201,
      "chord": "D#m",
-     "confidence": 0.571,
-     "pos": 166.957
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 17.058,
+     "chord": "Cm7",
+     "confidence": 0.8,
+     "bass": "F"
+    },
+    {
+     "at": 19.915,
+     "chord": "G#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 22.771,
+     "chord": "A#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 25.628,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 28.485,
+     "chord": "Cm",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 31.341,
+     "chord": "G#",
+     "confidence": 0.8,
+     "bass": "G#"
+    },
+    {
+     "at": 34.198,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 37.055,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 39.912,
+     "chord": "Cm7",
+     "confidence": 0.8,
+     "bass": "F"
+    },
+    {
+     "at": 42.768,
+     "chord": "G#7",
+     "confidence": 0.8,
+     "bass": "G#"
+    },
+    {
+     "at": 45.625,
+     "chord": "G#",
+     "confidence": 0.8,
+     "bass": "G"
+    },
+    {
+     "at": 48.482,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 51.338,
+     "chord": "Cm7",
+     "confidence": 0.8,
+     "bass": "C"
+    },
+    {
+     "at": 54.195,
+     "chord": "G#",
+     "confidence": 0.8,
+     "bass": "G#"
+    },
+    {
+     "at": 57.052,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "A#"
+    },
+    {
+     "at": 59.909,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 62.765,
+     "chord": "Cm7",
+     "confidence": 0.8,
+     "bass": "C"
+    },
+    {
+     "at": 65.622,
+     "chord": "G#7",
+     "confidence": 0.8,
+     "bass": "G#"
+    },
+    {
+     "at": 68.479,
+     "chord": "A#sus4",
+     "confidence": 0.8,
+     "bass": "A#"
+    },
+    {
+     "at": 71.335,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "F#"
+    },
+    {
+     "at": 74.192,
+     "chord": "G#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 77.049,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 79.906,
+     "chord": "Cm7",
+     "confidence": 0.8,
+     "bass": "C"
+    },
+    {
+     "at": 82.762,
+     "chord": "G#",
+     "confidence": 0.8,
+     "bass": "G#"
+    },
+    {
+     "at": 85.619,
+     "chord": "A#sus4",
+     "confidence": 0.8,
+     "bass": "A#"
+    },
+    {
+     "at": 88.476,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 91.332,
+     "chord": "Cm7",
+     "confidence": 0.8,
+     "bass": "C"
+    },
+    {
+     "at": 94.189,
+     "chord": "G#",
+     "confidence": 0.8,
+     "bass": "G#"
+    },
+    {
+     "at": 97.046,
+     "chord": "A#sus4",
+     "confidence": 0.8,
+     "bass": "A#"
+    },
+    {
+     "at": 99.903,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 102.759,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 105.616,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "F"
+    },
+    {
+     "at": 108.473,
+     "chord": "Cm7",
+     "confidence": 0.8,
+     "bass": "F"
+    },
+    {
+     "at": 111.329,
+     "chord": "G#6",
+     "confidence": 0.8,
+     "bass": "A#"
+    },
+    {
+     "at": 114.186,
+     "chord": "Cm7",
+     "confidence": 0.8,
+     "bass": "G#"
+    },
+    {
+     "at": 117.043,
+     "chord": "G#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 119.9,
+     "chord": "D#",
+     "confidence": 0.8,
+     "bass": "D#"
+    },
+    {
+     "at": 122.756,
+     "chord": "D#m",
+     "confidence": 0.8,
+     "bass": "D#"
     }
    ]
   },
@@ -11533,6 +11872,11 @@
     "new_how": "chroma over the separated bass+piano+guitar+other stems, with the root taken from observations.bass_notes and only the quality matched (maj, min, 7, m7, sus4)",
     "new_bars_named": 36,
     "why": "three estimates existed and the two full-mix ones agreed with each other on 11-31% of bars. The stem estimate reads only the stems that carry harmony, so no kick drum sits in its chroma, and its root is measured on the isolated bass rather than inferred. It agrees with that root on 61% of the bars it names, by construction."
+   },
+   "superseded_stem_estimate": {
+    "how": "chroma over the separated bass+piano+guitar+other stems, with the root taken from observations.bass_notes and only the quality matched (maj, min, 7, m7, sus4)",
+    "bars_named": 36,
+    "why": "a chord model trained on human annotations beat the stem-chroma estimate on the audio check on three of four songs and tied on the fourth, and its labels on Levels are the record's actual progression"
    }
   },
   "stereo": {
