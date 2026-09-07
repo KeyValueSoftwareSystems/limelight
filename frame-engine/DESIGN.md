@@ -1,0 +1,125 @@
+# frame-engine — versioned frame functions
+
+**Status:** design, 2026-09-07. Branch `frame-engine` off `origin/main`.
+
+## Why
+
+The frame function — `frame = f(map, layout, recipe, t)` (see
+`readers/lights/FRAME.md`) — is today a single canonical recipe,
+`readers/src/recipe4.js`, injected into the `mkReader` seam
+(`synth/room.js:8`). Prod (`origin/main`) owns and evolves that file.
+
+We have our own frame-function work (a chapter-label normalizer +
+accents-driven punctuation) built on an older recipe. Overwriting prod's
+`recipe4.js` with ours would (a) collide with 500+ lines the team just
+rewrote and (b) make one file mean two things. Instead we keep **prod's
+recipe untouched as the default** and register **our variant beside it**,
+so both can be selected and compared in `/analyse` until a single "main"
+recipe is agreed and ours is folded in (or dropped).
+
+This is deliberately a *temporary* version-management layer. It formalises
+the seam that already exists (`mkReader(map, layout, …) -> frame(t)`); it
+does **not** introduce a new frame contract. FRAME.md still governs.
+
+## The seam (unchanged)
+
+`mkReader(map, layout, drive, colour, …)` injects a recipe's source text and
+returns a pure `frame(t) -> {t, look, fixtures[]}`. A "frame-engine version"
+is simply *which recipe source* gets injected. Nothing about the frame shape,
+purity rule, or `wire(frame)` step changes.
+
+## On-disk layout
+
+```
+frame-engine/
+  DESIGN.md            this file
+  registry.json        the list of engine versions (the one source of truth for the picker)
+  v1-ours/
+    recipe.js          our variant (chapter-alias + accents punctuation)
+    NOTES.md           what it changes and what recipe base it forked from
+```
+
+`v0-prod` is **not** copied here — duplicating `recipe4.js` would violate
+"one writer per fact" (AGENTS.md #8). The registry points `v0-prod` straight
+at `readers/src/recipe4.js`, keeping prod the single source of truth.
+
+### registry.json
+
+```json
+{
+  "default": "v0-prod",
+  "engines": [
+    {"id": "v0-prod", "label": "Prod (recipe4)",
+     "recipe": "readers/src/recipe4.js", "status": "default",
+     "notes": "the canonical recipe; owned and evolved on main"},
+    {"id": "v1-ours", "label": "Ours (chapter-alias + accents)",
+     "recipe": "frame-engine/v1-ours/recipe.js", "status": "experimental",
+     "base": "recipe4 @ the fork point",
+     "notes": "normalizes foreign chapter labels; adds accents-driven head/chase punctuation"}
+  ]
+}
+```
+
+Adding a version = drop a folder + one registry entry. Promoting one to
+"main" later = the team makes it `recipe4.js` and deletes the rest of this
+folder. The layer is designed to disappear.
+
+## serve.py
+
+Two new static routes (beside the existing `/static/recipe4.js` at
+`serve.py:1004`), path-safe (resolve only within repo root, only files named
+in the registry — never arbitrary paths):
+
+- `GET /static/frame-engine/registry.json` -> the registry file.
+- `GET /static/frame-engine/<id>/recipe.js` -> the `recipe` file that `<id>`
+  names in the registry (404 for an unknown id). `v0-prod` therefore serves
+  the live `readers/src/recipe4.js` bytes.
+
+## /analyse changes (synth/analyse.html)
+
+1. **Engine picker.** On load, fetch `registry.json`, build an engine
+   `<select>` (persisted in `localStorage["limelight.engine"]`, default =
+   `registry.default`). The recipe fetch at `analyse.html:1262` changes from
+   the hardcoded `/static/recipe4.js` to `/static/frame-engine/<selected>/recipe.js`.
+   Changing the picker re-fetches, rebuilds `RM`/`F1`/`F2`, redraws. Unknown/
+   missing engine falls back to the default and surfaces a visible note (never
+   a blank page — AGENTS.md "surface the error").
+2. **3-way view toggle.** Replace the 2-way `VIEWMODE` (`room`/`fixtures`,
+   toggle at `:1325`) with three first-class, persisted modes:
+   - `stage3d` — our `createStage3D` WebGL stage (host `#room3dhost`).
+   - `room2d`  — `RM.drawRoom` front elevation (was only a no-WebGL fallback).
+   - `fixtures`— `RM.drawFixtures` per-fixture strip.
+   Dispatch in `drawRoom()` (`:1235`) selects the renderer; all three read the
+   same `F1(t)` frame + `LAY`. If WebGL is unavailable, `stage3d` degrades to
+   `room2d` with a note. Default stays "big rig -> stage3d, else fixtures".
+
+## What is carried, and what is left to prod
+
+Carried on this branch (SAFE — origin did not touch these since our base):
+`synth/analyse.html` (3D stage + the above), the musicstate `accents.py` /
+`pipeline` / `port` / `__init__` changes, and the enriched
+`synth/maps/dheeraj/*`. **Not** carried: our edits to `readers/src/recipe4.js`
+(they become `frame-engine/v1-ours/recipe.js`) and the golden frames
+(prod's stay authoritative — the default engine is prod, so they are unchanged).
+
+## Golden-frame safety
+
+The default engine is prod's `recipe4.js`, unchanged, so
+`readers/lights/pack/` golden frames are unaffected and are **not**
+regenerated by this change. `limelight-verify` must stay green with the
+default engine selected; `v1-ours` is experimental and not held to the
+golden frames.
+
+## Verification
+
+- `python3 validate.py synth/maps/dheeraj/*.map.json` — carried maps well-formed.
+- `limelight-verify` (repo's full check) green on the default engine.
+- Manual: `/analyse` loads, engine picker switches prod<->ours and redraws,
+  all three view modes render, reload remembers both selections.
+- musicstate: `PYTHONPATH=src python -m pytest` in `musicstate/` still passes
+  with the accents analyzer.
+
+## Landing
+
+Feature branch `frame-engine` off `origin/main` -> push -> PR for the owner to
+review and merge. No direct push to `main`.
