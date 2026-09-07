@@ -132,28 +132,31 @@ for(const song of SONGS){
   // movement rhythm: do heads MOVE in time and HOLD between?
   const MFPS=50, MN=Math.floor(DUR*MFPS);
   const heads=L.fixtures.filter(f=>f.kind==='head').map(f=>f.id);
-  const vel=[]; let pp=null;
+  const per={}; heads.forEach(h=>per[h]=[]);
+  let pp=null;
   for(let i=0;i<MN;i++){
-    const f=frame(i/MFPS); const cur={}; let v=0,c=0;
-    for(const o of f.fixtures){ if(heads.indexOf(o.id)<0||o.pan===undefined) continue;
-      cur[o.id]=o.pan; if(pp&&pp[o.id]!==undefined){ v+=Math.abs(o.pan-pp[o.id]); c++ } }
-    if(c) vel.push([i/MFPS, v/c*MFPS]);
+    const f=frame(i/MFPS); const cur={};
+    for(const o of f.fixtures){ if(per[o.id]===undefined||o.pan===undefined) continue;
+      cur[o.id]=o.pan;
+      if(pp&&pp[o.id]!==undefined) per[o.id].push([i/MFPS, Math.abs(o.pan-pp[o.id])*MFPS]); }
     pp=cur;
   }
-  let holdFrac=0, onGrid=0, nPk=0;
-  if(vel.length){
-    const vs=vel.map(x=>x[1]).slice().sort((a,b)=>a-b);
+  const SUB=[]; for(let k=0;;k++){const tt=PH+k*PER/2; if(tt>DUR)break; SUB.push(tt)}
+  function nearSub(x){let lo=0,hi=SUB.length-1,b=Infinity;
+    while(lo<=hi){const m=(lo+hi)>>1;const d=SUB[m]-x;if(Math.abs(d)<Math.abs(b))b=d;if(d<0)lo=m+1;else hi=m-1}return b}
+  let onGrid=0, nPk=0, holdN=0, holdT=0;
+  for(const h of heads){
+    const v=per[h]; if(!v||v.length<8) continue;
+    const vs=v.map(x=>x[1]).slice().sort((a,b)=>a-b);
     const vmax=vs[Math.floor(vs.length*0.98)]||1e-6;
-    holdFrac=vel.filter(x=>x[1]<0.12*vmax).length/vel.length;
-    const SUB=[]; for(let k=0;;k++){const tt=PH+k*PER/2; if(tt>DUR)break; SUB.push(tt)}
-    for(let i=2;i<vel.length-2;i++){
-      if(vel[i][1]>vel[i-1][1]&&vel[i][1]>=vel[i+1][1]&&vel[i][1]>0.45*vmax){
-        nPk++; let best=1e9;
-        for(const sb of SUB){const d=Math.abs(sb-vel[i][0]); if(d<best)best=d; if(sb>vel[i][0]+0.3)break}
-        if(best<=0.055) onGrid++;
+    for(const x of v){ holdT++; if(x[1] < 0.12*vmax) holdN++ }
+    for(let i=2;i<v.length-2;i++){
+      if(v[i][1]>v[i-1][1] && v[i][1]>=v[i+1][1] && v[i][1]>0.45*vmax){
+        nPk++; if(Math.abs(nearSub(v[i][0])) <= 0.055) onGrid++;
       }
     }
   }
+  const holdFrac = holdT ? holdN/holdT : 0;
   const moveRhythm = (nPk? onGrid/nPk : 0.5) * band(holdFrac, 0.15, 0.55);
   // restraint: how much of the show runs with most of the rig switched on
   const nBeam=L.fixtures.filter(f=>BEAMY(f.id)).length;

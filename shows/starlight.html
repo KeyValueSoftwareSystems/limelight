@@ -200,6 +200,8 @@ const CYC_DROP = 0.5;
 const LONG_LIFT = 1.60;
 const QUIET_GAIN = 2.4;
 const QUIET_COV = 0.26;
+const BED_HOLD = 1.00;
+const MOVE_LEAD = 0.50;
 const LONG_FROM = 6;
 const LONG_TO = 20;
 const KILL_DEPTH=0.97;
@@ -1017,11 +1019,11 @@ const DROP_HOLD = 3;
 const DROP_FADE = 5;
 const DROP_SETTLE = 0.60;
 const CUE_XF = 0.35;
-const HOFF_SPREAD = 0.30;
+const HOFF_SPREAD = 0.15;
 const HOFF_TRUSS = 0.50;
-const DWELL_LO = 0.70;
-const DWELL_HI = 0.55;
-const DWELL_CAP = 0.78;
+const DWELL_LO = 0.90;
+const DWELL_HI = 0.84;
+const DWELL_CAP = 0.94;
 const BUILD_LO = 0.75;
 const BUILD_HI = 1.45;
 const LIFT_LO = 0.60;
@@ -1091,7 +1093,14 @@ function emph(kind, t, L){
   const lift = cl((c.lift === undefined ? LIFT_MID : c.lift)/LIFT_MID, LIFT_LO, LIFT_HI);
   return (v === undefined ? 1 : v) * lift * climbAt(t, L) * instr(kind, t) * longLift(t, L);
 }
+const BED_LOOKS = {quiet:1, idle:1, outro:1};
+const BED_KINDS = {wash:1, uplight:1, strip:1};
 function arrayGate(G, t, e, L, n){
+  if(BED_LOOKS[L] && BED_KINDS[G.kind]){
+    const dep0 = deployed(G.kind, t);
+    if(dep0 <= 0) return 0;
+    return dep0 * BED_HOLD;
+  }
   const dep = deployed(G.kind, t);
   if(dep <= 0) return 0;
   if(!n || n <= ARRAY_MIN) return dep;
@@ -1316,7 +1325,7 @@ function lookFrame(t,L){
   // heads at 9.8 units/s. Always ease -- which is what a real motor does anyway.
   const dwell=(u,d)=>{const m=u-Math.floor(u), mv=Math.max(1e-6,1-d);
     return Math.floor(u)+(m<mv?ss(0,1,m/mv):1)};
-  const u=dwell(th/(2*Math.PI),dw)*2*Math.PI;
+  const u=dwell(th/(2*Math.PI) + (1-dw)*0.5*MOVE_LEAD, dw)*2*Math.PI;
   // A lamp can black out in one frame; a motor cannot reposition in 0.22 s. So
   // position deliberately ignores `stop` -- a real head holds its aim while its
   // lamp goes dark. Only `spotlight`, whose crossfade is 0.9 s, asks for stillness.
