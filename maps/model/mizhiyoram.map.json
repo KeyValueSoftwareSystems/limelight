@@ -12693,6 +12693,21 @@
     "reading": "every energy band and where the singer starts held notes put the weight of the bar on slots 2-3; the map's bar line is on the quiet half. Moving the bar line alone scores downbeats 1.00 and collapses bars to 0.00; moving the chapters with it drops sections 1.00 -> 0.62 because the audio genuinely changes where the chapters are now.",
     "conclusion": "two audio-based checks disagree by one beat about where the bar begins and no measurement here breaks the tie. Not rotated. This is what truth/PROTOCOL.md is for."
    }
+  },
+  "beat_tracker_check": {
+   "tracker": "beat_this (final0 checkpoint, minimal post-processing), CPU",
+   "how": "its beats and downbeats against this map's grid: which of OUR four bar slots its downbeats land on, and the median offset of our beats from its nearest beat",
+   "downbeat_on_our_slot_pct": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "beat_offset_ms": null,
+   "beats_matched_pct": 0,
+   "beat_phase_vs_ours": "+0.40 of a beat, spread 0.19, same period (0.720 vs 0.714)",
+   "reading": "it hears the BEAT half a beat from ours. Our kicks sit on our beats, so if the tracker is right the kick is syncopated and our grid is on the offbeat -- which would explain the bar energy on slots 2-3, downbeats scoring 0.00, and sections disagreeing with the energy. Leading hypothesis. Not applied: a half-beat move would put the grid off the kicks, which is what listen/mapeval.py grid measures, so the scorer and a human tracker disagree about what a beat IS on a syncopated record.",
+   "note_on_offset": "our beats run 29-45 ms EARLY against it on the three songs where the beat agrees. A human-trained tracker marks the onset; our grid sits at the kick's peak energy, which mapeval's grid check rewards. Two definitions of 'the beat' about 30 ms apart. Recorded, not applied."
   }
  },
  "confidence": 0.908,

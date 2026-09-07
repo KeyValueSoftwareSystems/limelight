@@ -38438,6 +38438,27 @@
    "not_evidence": "chord changes land on slot 0 100% of the time and that proves nothing -- chords are estimated PER BAR, at downbeat times, so the agreement is by construction. Grading a thing against its own output is the first mistake listed in this repo and it is easy to repeat.",
    "unresolved": "the loudest beat of a bar is not always the bar line, and vocal phrase starts disagree across songs (slot 3 on starlight, slot 1 on dont-look-down) because singers come in on a pickup. Nothing here settles it. A human with the audio does, under truth/PROTOCOL.md.",
    "related": "a teammate found drops two beats early on the-nights by ear, and a rotated copy of these downbeats scores higher than the true one on the harness -- both point at the same question."
+  },
+  "beat_tracker_check": {
+   "tracker": "beat_this (final0 checkpoint, minimal post-processing), CPU",
+   "how": "its beats and downbeats against this map's grid: which of OUR four bar slots its downbeats land on, and the median offset of our beats from its nearest beat",
+   "downbeat_on_our_slot_pct": [
+    29,
+    0,
+    71,
+    0
+   ],
+   "beat_offset_ms": -44.6,
+   "beats_matched_pct": 100,
+   "spacing_in_beats": {
+    "1": 5,
+    "2": 58,
+    "3": 1,
+    "4": 93,
+    "6": 1
+   },
+   "reading": "hears a two-beat hypermeter -- 58 half-bar gaps against 93 full bars -- so its bar line alternates between our slot 0 and slot 2. Ambiguous, not a contradiction.",
+   "note_on_offset": "our beats run 29-45 ms EARLY against it on the three songs where the beat agrees. A human-trained tracker marks the onset; our grid sits at the kick's peak energy, which mapeval's grid check rewards. Two definitions of 'the beat' about 30 ms apart. Recorded, not applied."
   }
  },
  "confidence": 0.95,
