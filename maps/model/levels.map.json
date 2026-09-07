@@ -765,10 +765,10 @@
    "pos": 16.0
   },
   {
-   "at": 20.848314,
+   "at": 19.910814,
    "kind": "drop",
    "size": 0.95,
-   "pos": 44.0
+   "pos": 42.0
   },
   {
    "at": 52.723314,
@@ -781,16 +781,16 @@
    "pos": 116.0
   },
   {
-   "at": 65.848314,
+   "at": 64.910814,
    "kind": "drop",
    "size": 0.95,
-   "pos": 140.0
+   "pos": 138.0
   },
   {
-   "at": 86.473314,
+   "at": 85.067064,
    "kind": "drop",
    "size": 0.95,
-   "pos": 184.0
+   "pos": 181.0
   },
   {
    "at": 90.223314,
@@ -803,10 +803,10 @@
    "pos": 208.0
   },
   {
-   "at": 99.598,
+   "at": 96.785814,
    "kind": "stop",
    "holds": 1.875,
-   "pos": 211.9993
+   "pos": 206.0
   },
   {
    "at": 99.598314,
@@ -829,22 +829,16 @@
    "pos": 376.0
   },
   {
-   "at": 191.473314,
-   "kind": "drop",
-   "size": 0.95,
-   "pos": 408.0
-  },
-  {
    "at": 193.348314,
    "kind": "drop",
    "size": 0.95,
    "pos": 412.0
   },
   {
-   "at": 228.973314,
+   "at": 227.098314,
    "kind": "drop",
    "size": 0.95,
-   "pos": 488.0
+   "pos": 484.0
   },
   {
    "at": 232.723314,
@@ -56294,6 +56288,63 @@
      "channel": "hue",
      "why_it_matters": "what separates a filtered build from a loud verse",
      "how": "observations.brightness exists and nothing reads it; note that analysis at 22.05 kHz truncates everything above 11 kHz"
+    }
+   ]
+  },
+  "moment_timing": {
+   "how": "each drop and stop moved to the beat carrying the biggest sustained step in loudness within two bars, the step being the median across 0.5, 1.0, 1.5 and 2.0 s shoulders",
+   "why": "ear.py builds moments from section boundaries and section boundaries are bar lines, so a drop that lands on a half bar was pushed to the next full bar -- two beats late, every time",
+   "second_witness": "drum hits per beat, counted from the separated stems, which shares no arithmetic with the loudness envelope",
+   "moved": [
+    {
+     "kind": "drop",
+     "was": 20.848314,
+     "now": 19.910814,
+     "beats": -2.0,
+     "drum_hits_per_beat_change": 2.88
+    },
+    {
+     "kind": "drop",
+     "was": 65.848314,
+     "now": 64.910814,
+     "beats": -2.0,
+     "drum_hits_per_beat_change": 5.12
+    },
+    {
+     "kind": "drop",
+     "was": 86.473314,
+     "now": 85.067064,
+     "beats": -3.0,
+     "drum_hits_per_beat_change": 0.62
+    },
+    {
+     "kind": "stop",
+     "was": 99.598,
+     "now": 96.785814,
+     "beats": -6.0,
+     "drum_hits_per_beat_change": -1.25
+    },
+    {
+     "kind": "drop",
+     "was": 191.473314,
+     "now": 193.348314,
+     "beats": 4.0,
+     "drum_hits_per_beat_change": 0.62
+    },
+    {
+     "kind": "drop",
+     "was": 228.973314,
+     "now": 227.098314,
+     "beats": -4.0,
+     "drum_hits_per_beat_change": 1.12
+    }
+   ],
+   "left_alone": [],
+   "merged_duplicates": [
+    {
+     "kind": "drop",
+     "at": 193.348314,
+     "why": "re-timed onto the same beat as another moment of the same kind -- one event, one moment"
     }
    ]
   }

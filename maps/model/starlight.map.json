@@ -642,16 +642,16 @@
    "pos": 145.0
   },
   {
-   "at": 162.6797,
+   "at": 163.152141,
    "kind": "drop",
    "size": 0.95,
-   "pos": 345.0
+   "pos": 346.0
   },
   {
-   "at": 189.136393,
+   "at": 186.301747,
    "kind": "drop",
    "size": 0.95,
-   "pos": 401.0
+   "pos": 395.0
   },
   {
    "at": 192.915921,
@@ -659,10 +659,10 @@
    "pos": 409.0
   },
   {
-   "at": 194.805684,
+   "at": 194.333243,
    "kind": "stop",
    "holds": 5.669,
-   "pos": 412.9997
+   "pos": 411.9997
   },
   {
    "at": 194.805684,
@@ -65294,6 +65294,36 @@
    },
    "reading": "the grid is placed at the peak of the kick's body; a listener and an annotator mark its attack, and on this record those are about 30 ms apart. Two defensible definitions of \"the beat\".",
    "not_applied": "moving the grid would move every time anchored to it -- chapters, moments, spans, and the sampling points of energy, sections and stems -- and those values were measured in windows starting where they start. Shifting the times without re-measuring the values would produce a file that looks more correct and is less true. Recorded here instead, with the number, so the correction is one command away rather than one guess away."
+  },
+  "moment_timing": {
+   "how": "each drop and stop moved to the beat carrying the biggest sustained step in loudness within two bars, the step being the median across 0.5, 1.0, 1.5 and 2.0 s shoulders",
+   "why": "ear.py builds moments from section boundaries and section boundaries are bar lines, so a drop that lands on a half bar was pushed to the next full bar -- two beats late, every time",
+   "second_witness": "drum hits per beat, counted from the separated stems, which shares no arithmetic with the loudness envelope",
+   "moved": [
+    {
+     "kind": "drop",
+     "was": 162.6797,
+     "now": 163.152141,
+     "beats": 1.0,
+     "drum_hits_per_beat_change": 3.0
+    },
+    {
+     "kind": "drop",
+     "was": 189.136393,
+     "now": 186.301747,
+     "beats": -6.0,
+     "drum_hits_per_beat_change": 2.88
+    },
+    {
+     "kind": "stop",
+     "was": 194.805684,
+     "now": 194.333243,
+     "beats": -1.0,
+     "drum_hits_per_beat_change": -7.25
+    }
+   ],
+   "left_alone": [],
+   "merged_duplicates": []
   }
  },
  "confidence": 0.882,

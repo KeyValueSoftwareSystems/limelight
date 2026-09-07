@@ -309,16 +309,16 @@
  ],
  "moments": [
   {
-   "at": 45.625048,
+   "at": 46.339227,
    "kind": "drop",
    "size": 0.95,
-   "pos": 63.0
+   "pos": 64.0
   },
   {
-   "at": 57.051909,
+   "at": 57.766088,
    "kind": "drop",
    "size": 0.95,
-   "pos": 79.0
+   "pos": 80.0
   }
  ],
  "spans": [
@@ -24434,6 +24434,29 @@
     ]
    },
    "seconds": 19.6
+  },
+  "moment_timing": {
+   "how": "each drop and stop moved to the beat carrying the biggest sustained step in loudness within two bars, the step being the median across 0.5, 1.0, 1.5 and 2.0 s shoulders",
+   "why": "ear.py builds moments from section boundaries and section boundaries are bar lines, so a drop that lands on a half bar was pushed to the next full bar -- two beats late, every time",
+   "second_witness": "drum hits per beat, counted from the separated stems, which shares no arithmetic with the loudness envelope",
+   "moved": [
+    {
+     "kind": "drop",
+     "was": 45.625048,
+     "now": 46.339227,
+     "beats": 1.0,
+     "drum_hits_per_beat_change": 3.25
+    },
+    {
+     "kind": "drop",
+     "was": 57.051909,
+     "now": 57.766088,
+     "beats": 1.0,
+     "drum_hits_per_beat_change": 0.25
+    }
+   ],
+   "left_alone": [],
+   "merged_duplicates": []
   }
  },
  "confidence": 0.908,

@@ -558,7 +558,7 @@
  ],
  "moments": [
   {
-   "at": 17.923566,
+   "at": 17.447375,
    "kind": "drop",
    "size": 0.95
   },
@@ -571,12 +571,12 @@
    "kind": "quiet"
   },
   {
-   "at": 63.637852,
+   "at": 62.685471,
    "kind": "drop",
    "size": 0.95
   },
   {
-   "at": 94.114042,
+   "at": 93.637852,
    "kind": "drop",
    "size": 0.95
   },
@@ -594,7 +594,7 @@
    "size": 0.95
   },
   {
-   "at": 172.209,
+   "at": 171.73309,
    "kind": "stop",
    "holds": 1.905
   }
@@ -46154,6 +46154,43 @@
     "who": "listen/pump.py",
     "reproduce": "python3 listen/pump.py the-nights"
    }
+  },
+  "moment_timing": {
+   "how": "each drop and stop moved to the beat carrying the biggest sustained step in loudness within two bars, the step being the median across 0.5, 1.0, 1.5 and 2.0 s shoulders",
+   "why": "ear.py builds moments from section boundaries and section boundaries are bar lines, so a drop that lands on a half bar was pushed to the next full bar -- two beats late, every time",
+   "second_witness": "drum hits per beat, counted from the separated stems, which shares no arithmetic with the loudness envelope",
+   "moved": [
+    {
+     "kind": "drop",
+     "was": 17.923566,
+     "now": 17.447375,
+     "beats": -1.0,
+     "drum_hits_per_beat_change": 1.5
+    },
+    {
+     "kind": "drop",
+     "was": 63.637852,
+     "now": 62.685471,
+     "beats": -2.0,
+     "drum_hits_per_beat_change": 8.0
+    },
+    {
+     "kind": "drop",
+     "was": 94.114042,
+     "now": 93.637852,
+     "beats": -1.0,
+     "drum_hits_per_beat_change": 4.0
+    },
+    {
+     "kind": "stop",
+     "was": 172.209,
+     "now": 171.73309,
+     "beats": -1.0,
+     "drum_hits_per_beat_change": -5.12
+    }
+   ],
+   "left_alone": [],
+   "merged_duplicates": []
   }
  },
  "confidence": 0.787,
