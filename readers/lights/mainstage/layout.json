@@ -1,1075 +1,2132 @@
 {
- "layout": "mainstage",
+ "layout": 0.3,
  "room": "mainstage",
- "note": "A festival mainstage: ground-support towers either side, a roof grid, a front truss of pars and heads hung under it, four rear lighting ladders carrying heads up their height, blinders across the front and an LED wall behind the whole thing. The ladders are the reason this reads as a festival rather than a club -- beams arriving from BEHIND and BELOW the performer are what a front truss alone can never do. Side screens, vertical LED battens up the tower edges, a horizontal batten framing the wall and six CO2 jets along the deck front, all from Renjith's reference photographs of that stage.",
+ "note": "Stadium. The same vocabulary in a much bigger room, so throws are long and the aerial work carries.",
  "size_m": {
-  "w": 18.0,
-  "d": 11.0,
-  "h": 9.5
+  "w": 22.0,
+  "d": 14.0,
+  "h": 11.0
  },
- "deck_m": 1.4,
  "limits": {
-  "max_strobe_hz": 10.0,
-  "max_pan_per_s": 1.9,
-  "max_tilt_per_s": 2.1,
-  "note": "Sharpy-class heads: 540 degrees of pan in about 1.4 s is 1.9 range/s.",
-  "strobe_note": "Ten hertz, and the recipe DERIVES its flash rate from this rather than being permitted by it. Real festival strobes reach 25 Hz, but sustained flashing above roughly three hertz is a photosensitivity risk, so the recipe is also limited to bursts under 1.2 s and fires only on a drop or the last bar of a build. Lower this number and the strobes slow down; there is no way to make them exceed it from the recipe, which is the whole reason the limit lives here and not there.",
-  "co2_max_burst_s": 1.4
+  "max_strobe_hz": 4.0,
+  "laser_zones": [
+   "ceiling"
+  ],
+  "laser_min_height_m": 3.0,
+  "no_audience_scan": true,
+  "max_pan_per_s": 1.05,
+  "max_tilt_per_s": 1.15,
+  "note": "Fraction of range per second. A fast head does about 0.5, so this budget is generous; the recipe derives its amplitude from it.",
+  "pyro_zones": [],
+  "co2_max_burst_s": 1.2,
+  "pyro_interlock": "virtual: this rig is an emulator, no device can physically fire",
+  "pyro_min_gap_s": 20.0
  },
  "zones": [
   {
-   "name": "front",
+   "name": "front_truss",
    "fixtures": [
-    "par_1",
-    "par_2",
-    "par_3",
-    "par_4",
-    "par_5",
-    "par_6",
-    "par_7",
-    "par_8",
-    "par_9",
-    "par_10",
-    "par_11",
-    "par_12",
-    "par_13",
-    "par_14",
-    "strobe_1",
-    "strobe_2",
-    "strobe_3",
-    "strobe_4",
-    "strobe_5",
-    "strobe_6",
-    "strobe_7",
-    "strobe_8",
-    "strobe_9",
-    "strobe_10",
-    "blind_1",
-    "blind_2",
-    "blind_3",
-    "blind_4",
-    "blind_5"
+    "beam_front_l1",
+    "beam_front_r1",
+    "beam_front_l2",
+    "beam_front_r2",
+    "beam_front_l3",
+    "beam_front_r3",
+    "beam_front_l4",
+    "beam_front_r4",
+    "spot_front_l1",
+    "spot_front_r1",
+    "spot_front_l2",
+    "spot_front_r2"
    ]
   },
   {
-   "name": "air",
+   "name": "mid_truss",
    "fixtures": [
-    "head_f1",
-    "head_f2",
-    "head_f3",
-    "head_f4",
-    "head_f5",
-    "head_f6",
-    "head_f7",
-    "head_f8",
-    "head_l1_1",
-    "head_l1_2",
-    "head_l1_3",
-    "head_l2_1",
-    "head_l2_2",
-    "head_l2_3",
-    "head_l3_1",
-    "head_l3_2",
-    "head_l3_3",
-    "head_l4_1",
-    "head_l4_2",
-    "head_l4_3"
+    "wash_mid_l1",
+    "wash_mid_r1",
+    "wash_mid_l2",
+    "wash_mid_r2",
+    "wash_mid_l3",
+    "wash_mid_r3",
+    "wash_mid_l4",
+    "wash_mid_r4"
    ]
   },
   {
-   "name": "back",
+   "name": "back_truss",
    "fixtures": [
-    "screen_1",
-    "screen_s1",
-    "screen_s2",
-    "strip_v1",
-    "strip_v2",
-    "strip_h1"
+    "beam_back_l1",
+    "beam_back_r1",
+    "beam_back_l2",
+    "beam_back_r2",
+    "beam_back_l3",
+    "beam_back_r3",
+    "beam_back_l4",
+    "beam_back_r4"
+   ]
+  },
+  {
+   "name": "upstage_wall",
+   "fixtures": [
+    "par_up_l1",
+    "par_up_r1",
+    "par_up_l2",
+    "par_up_r2",
+    "par_up_l3",
+    "par_up_r3",
+    "par_up_l4",
+    "par_up_r4",
+    "wall_1"
+   ]
+  },
+  {
+   "name": "towers",
+   "fixtures": [
+    "bar_tower_l1",
+    "bar_tower_r1",
+    "bar_tower_l2",
+    "bar_tower_r2",
+    "bar_tower_l1",
+    "bar_tower_r1",
+    "bar_tower_l2",
+    "bar_tower_r2",
+    "bar_tower_l1",
+    "bar_tower_r1",
+    "bar_tower_l2",
+    "bar_tower_r2",
+    "bar_tower_l1",
+    "bar_tower_r1",
+    "bar_tower_l2",
+    "bar_tower_r2"
+   ]
+  },
+  {
+   "name": "deck_edge",
+   "fixtures": [
+    "bar_deck_l1",
+    "bar_deck_r1",
+    "bar_deck_l2",
+    "bar_deck_r2"
+   ]
+  },
+  {
+   "name": "deck",
+   "fixtures": [
+    "beam_deck_l1",
+    "beam_deck_r1",
+    "beam_deck_l2",
+    "beam_deck_r2",
+    "beam_deck_l3",
+    "beam_deck_r3",
+    "beam_deck_l4",
+    "beam_deck_r4",
+    "up_deck_l1",
+    "up_deck_r1",
+    "up_deck_l2",
+    "up_deck_r2",
+    "up_deck_l3",
+    "up_deck_r3"
+   ]
+  },
+  {
+   "name": "audience",
+   "fixtures": [
+    "blind_l1",
+    "blind_r1",
+    "blind_l2",
+    "blind_r2",
+    "blind_l3",
+    "blind_r3"
+   ]
+  },
+  {
+   "name": "strobe_pods",
+   "fixtures": [
+    "strobe_l1",
+    "strobe_r1",
+    "strobe_l2",
+    "strobe_r2"
+   ]
+  },
+  {
+   "name": "wings",
+   "fixtures": [
+    "sky_l1",
+    "sky_r1"
+   ]
+  },
+  {
+   "name": "ceiling",
+   "fixtures": [
+    "laser_l1",
+    "laser_r1",
+    "laser_l2",
+    "laser_r2"
+   ]
+  },
+  {
+   "name": "deck_fx",
+   "fixtures": [
+    "co2_l1",
+    "co2_r1",
+    "co2_l2",
+    "co2_r2",
+    "pyro_l1",
+    "pyro_r1",
+    "pyro_l2",
+    "pyro_r2"
+   ]
+  },
+  {
+   "name": "overhead_fx",
+   "fixtures": [
+    "conf_l1",
+    "conf_r1"
+   ]
+  },
+  {
+   "name": "haze",
+   "fixtures": [
+    "haze_l1",
+    "haze_r1",
+    "haze_l2",
+    "haze_r2"
    ]
   }
  ],
  "fixtures": [
   {
-   "id": "par_1",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    2.2,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_2",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    3.25,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_3",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    4.29,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_4",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    5.34,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_5",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    6.38,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_6",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    7.43,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_7",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    8.48,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_8",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    9.52,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_9",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    10.57,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_10",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    11.62,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_11",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    12.66,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_12",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    13.71,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_13",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    14.75,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "par_14",
-   "kind": "par",
-   "can": [
-    "colour",
-    "level"
-   ],
-   "at": [
-    15.8,
-    7.6,
-    7.2
-   ],
-   "zone": "front",
-   "beam_deg": 12
-  },
-  {
-   "id": "strobe_1",
-   "kind": "strobe",
-   "can": [
-    "level"
-   ],
-   "at": [
-    2.6,
-    6.95,
-    7.2
-   ],
-   "beam_deg": 85,
-   "zone": "front"
-  },
-  {
-   "id": "strobe_2",
-   "kind": "strobe",
-   "can": [
-    "level"
-   ],
-   "at": [
-    4.02,
-    6.95,
-    7.2
-   ],
-   "beam_deg": 85,
-   "zone": "front"
-  },
-  {
-   "id": "strobe_3",
-   "kind": "strobe",
-   "can": [
-    "level"
-   ],
-   "at": [
-    5.44,
-    6.95,
-    7.2
-   ],
-   "beam_deg": 85,
-   "zone": "front"
-  },
-  {
-   "id": "strobe_4",
-   "kind": "strobe",
-   "can": [
-    "level"
-   ],
-   "at": [
-    6.87,
-    6.95,
-    7.2
-   ],
-   "beam_deg": 85,
-   "zone": "front"
-  },
-  {
-   "id": "strobe_5",
-   "kind": "strobe",
-   "can": [
-    "level"
-   ],
-   "at": [
-    8.29,
-    6.95,
-    7.2
-   ],
-   "beam_deg": 85,
-   "zone": "front"
-  },
-  {
-   "id": "strobe_6",
-   "kind": "strobe",
-   "can": [
-    "level"
-   ],
-   "at": [
-    9.71,
-    6.95,
-    7.2
-   ],
-   "beam_deg": 85,
-   "zone": "front"
-  },
-  {
-   "id": "strobe_7",
-   "kind": "strobe",
-   "can": [
-    "level"
-   ],
-   "at": [
-    11.13,
-    6.95,
-    7.2
-   ],
-   "beam_deg": 85,
-   "zone": "front"
-  },
-  {
-   "id": "strobe_8",
-   "kind": "strobe",
-   "can": [
-    "level"
-   ],
-   "at": [
-    12.56,
-    6.95,
-    7.2
-   ],
-   "beam_deg": 85,
-   "zone": "front"
-  },
-  {
-   "id": "strobe_9",
-   "kind": "strobe",
-   "can": [
-    "level"
-   ],
-   "at": [
-    13.98,
-    6.95,
-    7.2
-   ],
-   "beam_deg": 85,
-   "zone": "front"
-  },
-  {
-   "id": "strobe_10",
-   "kind": "strobe",
-   "can": [
-    "level"
-   ],
-   "at": [
-    15.4,
-    6.95,
-    7.2
-   ],
-   "beam_deg": 85,
-   "zone": "front"
-  },
-  {
-   "id": "head_f1",
-   "kind": "head",
+   "id": "beam_front_l1",
+   "kind": "beam",
    "can": [
     "colour",
     "level",
-    "pan",
-    "tilt"
+    "move",
+    "strobe"
    ],
+   "emits": "light",
    "at": [
-    2.8,
+    2.4,
+    9.9,
+    2.8
+   ],
+   "zone": "front_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Claypaky Sharpy"
+  },
+  {
+   "id": "beam_front_r1",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    19.6,
+    9.9,
+    2.8
+   ],
+   "zone": "front_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Claypaky Sharpy"
+  },
+  {
+   "id": "beam_front_l2",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    4.0,
+    9.9,
+    2.8
+   ],
+   "zone": "front_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Claypaky Sharpy"
+  },
+  {
+   "id": "beam_front_r2",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    18.0,
+    9.9,
+    2.8
+   ],
+   "zone": "front_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Claypaky Sharpy"
+  },
+  {
+   "id": "beam_front_l3",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    5.6,
+    9.9,
+    2.8
+   ],
+   "zone": "front_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Claypaky Sharpy"
+  },
+  {
+   "id": "beam_front_r3",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    16.4,
+    9.9,
+    2.8
+   ],
+   "zone": "front_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Claypaky Sharpy"
+  },
+  {
+   "id": "beam_front_l4",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
     7.2,
-    6.6
+    9.9,
+    2.8
    ],
-   "zone": "air",
-   "beam_deg": 8
+   "zone": "front_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Claypaky Sharpy"
   },
   {
-   "id": "head_f2",
-   "kind": "head",
+   "id": "beam_front_r4",
+   "kind": "beam",
    "can": [
     "colour",
     "level",
-    "pan",
-    "tilt"
+    "move",
+    "strobe"
    ],
-   "at": [
-    4.57,
-    7.2,
-    6.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_f3",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    6.34,
-    7.2,
-    6.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_f4",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    8.11,
-    7.2,
-    6.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_f5",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    9.89,
-    7.2,
-    6.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_f6",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    11.66,
-    7.2,
-    6.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_f7",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    13.43,
-    7.2,
-    6.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_f8",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    15.2,
-    7.2,
-    6.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_l1_1",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    3.2,
-    2.6,
-    9.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_l1_2",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    3.2,
-    4.4,
-    9.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_l1_3",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    3.2,
-    6.2,
-    9.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_l2_1",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    7.0,
-    2.6,
-    9.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_l2_2",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    7.0,
-    4.4,
-    9.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_l2_3",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    7.0,
-    6.2,
-    9.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_l3_1",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    11.0,
-    2.6,
-    9.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_l3_2",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    11.0,
-    4.4,
-    9.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_l3_3",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
-   "at": [
-    11.0,
-    6.2,
-    9.6
-   ],
-   "zone": "air",
-   "beam_deg": 8
-  },
-  {
-   "id": "head_l4_1",
-   "kind": "head",
-   "can": [
-    "colour",
-    "level",
-    "pan",
-    "tilt"
-   ],
+   "emits": "light",
    "at": [
     14.8,
-    2.6,
-    9.6
+    9.9,
+    2.8
    ],
-   "zone": "air",
-   "beam_deg": 8
+   "zone": "front_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Claypaky Sharpy"
   },
   {
-   "id": "head_l4_2",
-   "kind": "head",
+   "id": "spot_front_l1",
+   "kind": "spot",
    "can": [
     "colour",
     "level",
-    "pan",
-    "tilt"
+    "move",
+    "strobe"
    ],
+   "emits": "light",
    "at": [
-    14.8,
-    4.4,
-    9.6
+    3.2,
+    9.9,
+    2.8
    ],
-   "zone": "air",
-   "beam_deg": 8
+   "zone": "front_truss",
+   "beam_deg": 15.0,
+   "face": "down",
+   "model": "Robe BMFL Spot"
   },
   {
-   "id": "head_l4_3",
-   "kind": "head",
+   "id": "spot_front_r1",
+   "kind": "spot",
    "can": [
     "colour",
     "level",
-    "pan",
-    "tilt"
+    "move",
+    "strobe"
    ],
+   "emits": "light",
    "at": [
-    14.8,
-    6.2,
-    9.6
+    18.8,
+    9.9,
+    2.8
    ],
-   "zone": "air",
-   "beam_deg": 8
+   "zone": "front_truss",
+   "beam_deg": 15.0,
+   "face": "down",
+   "model": "Robe BMFL Spot"
   },
   {
-   "id": "blind_1",
-   "kind": "blinder",
+   "id": "spot_front_l2",
+   "kind": "spot",
    "can": [
     "colour",
-    "level"
+    "level",
+    "move",
+    "strobe"
    ],
+   "emits": "light",
    "at": [
-    3.4,
-    6.9,
-    6.9
+    6.4,
+    9.9,
+    2.8
    ],
-   "zone": "front",
-   "beam_deg": 70
+   "zone": "front_truss",
+   "beam_deg": 15.0,
+   "face": "down",
+   "model": "Robe BMFL Spot"
   },
   {
-   "id": "blind_2",
-   "kind": "blinder",
+   "id": "spot_front_r2",
+   "kind": "spot",
    "can": [
     "colour",
-    "level"
+    "level",
+    "move",
+    "strobe"
    ],
+   "emits": "light",
    "at": [
-    6.2,
-    6.9,
-    6.9
+    15.6,
+    9.9,
+    2.8
    ],
-   "zone": "front",
-   "beam_deg": 70
+   "zone": "front_truss",
+   "beam_deg": 15.0,
+   "face": "down",
+   "model": "Robe BMFL Spot"
   },
   {
-   "id": "blind_3",
-   "kind": "blinder",
+   "id": "wash_mid_l1",
+   "kind": "wash",
    "can": [
     "colour",
-    "level"
+    "level",
+    "move"
    ],
+   "emits": "light",
    "at": [
-    9.0,
-    6.9,
-    6.9
+    2.0,
+    10.45,
+    6.3
    ],
-   "zone": "front",
-   "beam_deg": 70
+   "zone": "mid_truss",
+   "beam_deg": 40.0,
+   "face": "down",
+   "model": "Martin MAC Aura XB"
   },
   {
-   "id": "blind_4",
-   "kind": "blinder",
+   "id": "wash_mid_r1",
+   "kind": "wash",
    "can": [
     "colour",
-    "level"
+    "level",
+    "move"
    ],
+   "emits": "light",
    "at": [
-    11.8,
-    6.9,
-    6.9
+    20.0,
+    10.45,
+    6.3
    ],
-   "zone": "front",
-   "beam_deg": 70
+   "zone": "mid_truss",
+   "beam_deg": 40.0,
+   "face": "down",
+   "model": "Martin MAC Aura XB"
   },
   {
-   "id": "blind_5",
-   "kind": "blinder",
+   "id": "wash_mid_l2",
+   "kind": "wash",
    "can": [
     "colour",
-    "level"
+    "level",
+    "move"
    ],
+   "emits": "light",
+   "at": [
+    3.8,
+    10.45,
+    6.3
+   ],
+   "zone": "mid_truss",
+   "beam_deg": 40.0,
+   "face": "down",
+   "model": "Martin MAC Aura XB"
+  },
+  {
+   "id": "wash_mid_r2",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level",
+    "move"
+   ],
+   "emits": "light",
+   "at": [
+    18.2,
+    10.45,
+    6.3
+   ],
+   "zone": "mid_truss",
+   "beam_deg": 40.0,
+   "face": "down",
+   "model": "Martin MAC Aura XB"
+  },
+  {
+   "id": "wash_mid_l3",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level",
+    "move"
+   ],
+   "emits": "light",
+   "at": [
+    5.6,
+    10.45,
+    6.3
+   ],
+   "zone": "mid_truss",
+   "beam_deg": 40.0,
+   "face": "down",
+   "model": "Martin MAC Aura XB"
+  },
+  {
+   "id": "wash_mid_r3",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level",
+    "move"
+   ],
+   "emits": "light",
+   "at": [
+    16.4,
+    10.45,
+    6.3
+   ],
+   "zone": "mid_truss",
+   "beam_deg": 40.0,
+   "face": "down",
+   "model": "Martin MAC Aura XB"
+  },
+  {
+   "id": "wash_mid_l4",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level",
+    "move"
+   ],
+   "emits": "light",
+   "at": [
+    7.4,
+    10.45,
+    6.3
+   ],
+   "zone": "mid_truss",
+   "beam_deg": 40.0,
+   "face": "down",
+   "model": "Martin MAC Aura XB"
+  },
+  {
+   "id": "wash_mid_r4",
+   "kind": "wash",
+   "can": [
+    "colour",
+    "level",
+    "move"
+   ],
+   "emits": "light",
    "at": [
     14.6,
-    6.9,
-    6.9
+    10.45,
+    6.3
    ],
-   "zone": "front",
-   "beam_deg": 70
+   "zone": "mid_truss",
+   "beam_deg": 40.0,
+   "face": "down",
+   "model": "Martin MAC Aura XB"
   },
   {
-   "id": "screen_1",
-   "kind": "screen",
+   "id": "beam_back_l1",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    2.4,
+    9.9,
+    10.08
+   ],
+   "zone": "back_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_back_r1",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    19.6,
+    9.9,
+    10.08
+   ],
+   "zone": "back_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_back_l2",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    4.2,
+    9.9,
+    10.08
+   ],
+   "zone": "back_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_back_r2",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    17.8,
+    9.9,
+    10.08
+   ],
+   "zone": "back_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_back_l3",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    6.0,
+    9.9,
+    10.08
+   ],
+   "zone": "back_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_back_r3",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    16.0,
+    9.9,
+    10.08
+   ],
+   "zone": "back_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_back_l4",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    7.6,
+    9.9,
+    10.08
+   ],
+   "zone": "back_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_back_r4",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    14.4,
+    9.9,
+    10.08
+   ],
+   "zone": "back_truss",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "par_up_l1",
+   "kind": "par",
    "can": [
     "colour",
     "level"
    ],
+   "emits": "light",
    "at": [
-    9.0,
-    4.5,
-    10.1
+    1.6,
+    4.62,
+    13.16
    ],
-   "zone": "back",
-   "size_m": {
-    "w": 12.4,
-    "h": 6.2
-   }
+   "zone": "upstage_wall",
+   "beam_deg": 25.0,
+   "face": "down",
+   "model": "PAR 64 / Sunstrip"
   },
   {
-   "id": "fog_1",
-   "kind": "fog",
+   "id": "par_up_r1",
+   "kind": "par",
    "can": [
     "colour",
     "level"
    ],
+   "emits": "light",
    "at": [
-    1.2,
-    1.7,
-    8.0
+    20.4,
+    4.62,
+    13.16
    ],
-   "zone": "floor"
+   "zone": "upstage_wall",
+   "beam_deg": 25.0,
+   "face": "down",
+   "model": "PAR 64 / Sunstrip"
   },
   {
-   "id": "fog_2",
-   "kind": "fog",
+   "id": "par_up_l2",
+   "kind": "par",
    "can": [
     "colour",
     "level"
    ],
+   "emits": "light",
    "at": [
-    16.8,
-    1.7,
-    8.0
+    3.2,
+    4.62,
+    13.16
    ],
-   "zone": "floor"
+   "zone": "upstage_wall",
+   "beam_deg": 25.0,
+   "face": "down",
+   "model": "PAR 64 / Sunstrip"
   },
   {
-   "id": "screen_s1",
-   "kind": "screen",
+   "id": "par_up_r2",
+   "kind": "par",
    "can": [
     "colour",
     "level"
    ],
+   "emits": "light",
    "at": [
-    2.6,
-    4.3,
-    9.9
+    18.8,
+    4.62,
+    13.16
    ],
-   "size_m": {
-    "w": 4.2,
-    "h": 5.4
-   },
-   "zone": "back"
+   "zone": "upstage_wall",
+   "beam_deg": 25.0,
+   "face": "down",
+   "model": "PAR 64 / Sunstrip"
   },
   {
-   "id": "screen_s2",
-   "kind": "screen",
+   "id": "par_up_l3",
+   "kind": "par",
    "can": [
     "colour",
     "level"
    ],
+   "emits": "light",
    "at": [
-    15.4,
-    4.3,
-    9.9
+    4.8,
+    4.62,
+    13.16
    ],
-   "size_m": {
-    "w": 4.2,
-    "h": 5.4
-   },
-   "zone": "back"
+   "zone": "upstage_wall",
+   "beam_deg": 25.0,
+   "face": "down",
+   "model": "PAR 64 / Sunstrip"
   },
   {
-   "id": "strip_v1",
-   "kind": "strip",
+   "id": "par_up_r3",
+   "kind": "par",
    "can": [
     "colour",
     "level"
    ],
+   "emits": "light",
    "at": [
-    0.75,
-    4.275,
-    9.2
+    17.2,
+    4.62,
+    13.16
    ],
-   "size_m": {
-    "w": 0.18,
-    "h": 6.84
-   },
-   "axis": "y",
-   "zone": "back"
+   "zone": "upstage_wall",
+   "beam_deg": 25.0,
+   "face": "down",
+   "model": "PAR 64 / Sunstrip"
   },
   {
-   "id": "strip_v2",
-   "kind": "strip",
+   "id": "par_up_l4",
+   "kind": "par",
    "can": [
     "colour",
     "level"
    ],
+   "emits": "light",
    "at": [
-    17.25,
-    4.275,
-    9.2
+    6.4,
+    4.62,
+    13.16
    ],
-   "size_m": {
-    "w": 0.18,
-    "h": 6.84
-   },
-   "axis": "y",
-   "zone": "back"
+   "zone": "upstage_wall",
+   "beam_deg": 25.0,
+   "face": "down",
+   "model": "PAR 64 / Sunstrip"
   },
   {
-   "id": "strip_h1",
-   "kind": "strip",
+   "id": "par_up_r4",
+   "kind": "par",
    "can": [
     "colour",
     "level"
    ],
+   "emits": "light",
    "at": [
-    9.0,
-    7.800000000000001,
-    9.85
+    15.6,
+    4.62,
+    13.16
    ],
-   "size_m": {
-    "w": 12.8,
-    "h": 0.18
-   },
-   "axis": "x",
-   "zone": "back"
+   "zone": "upstage_wall",
+   "beam_deg": 25.0,
+   "face": "down",
+   "model": "PAR 64 / Sunstrip"
   },
   {
-   "id": "co2_1",
-   "kind": "co2",
+   "id": "bar_tower_l1",
+   "kind": "bar",
    "can": [
-    "level"
+    "colour",
+    "level",
+    "pixels"
    ],
+   "emits": "light",
+   "at": [
+    1.0,
+    1.0,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_r1",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    21.0,
+    1.0,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_l2",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    2.5,
+    1.0,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_r2",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    19.5,
+    1.0,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_l1",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    1.0,
+    2.4,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_r1",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    21.0,
+    2.4,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_l2",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    2.5,
+    2.4,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_r2",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    19.5,
+    2.4,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_l1",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    1.0,
+    3.8,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_r1",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    21.0,
+    3.8,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_l2",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    2.5,
+    3.8,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_r2",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    19.5,
+    3.8,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_l1",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    1.0,
+    5.2,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_r1",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    21.0,
+    5.2,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_l2",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    2.5,
+    5.2,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_tower_r2",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    19.5,
+    5.2,
+    11.48
+   ],
+   "zone": "towers",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "v"
+  },
+  {
+   "id": "bar_deck_l1",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    4.0,
+    0.3,
+    12.6
+   ],
+   "zone": "deck_edge",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "h"
+  },
+  {
+   "id": "bar_deck_r1",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    18.0,
+    0.3,
+    12.6
+   ],
+   "zone": "deck_edge",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "h"
+  },
+  {
+   "id": "bar_deck_l2",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    6.0,
+    0.3,
+    12.6
+   ],
+   "zone": "deck_edge",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "h"
+  },
+  {
+   "id": "bar_deck_r2",
+   "kind": "bar",
+   "can": [
+    "colour",
+    "level",
+    "pixels"
+   ],
+   "emits": "light",
+   "at": [
+    16.0,
+    0.3,
+    12.6
+   ],
+   "zone": "deck_edge",
+   "beam_deg": 18.0,
+   "face": "cross",
+   "model": "GLP X4 Bar 20",
+   "pixels": 16,
+   "axis": "h"
+  },
+  {
+   "id": "beam_deck_l1",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
    "at": [
     3.0,
-    1.5,
-    6.0
+    0.4,
+    11.76
    ],
-   "zone": "floor"
+   "zone": "deck",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
   },
   {
-   "id": "co2_2",
+   "id": "beam_deck_r1",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    19.0,
+    0.4,
+    11.76
+   ],
+   "zone": "deck",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_deck_l2",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    4.6,
+    0.4,
+    11.76
+   ],
+   "zone": "deck",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_deck_r2",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    17.4,
+    0.4,
+    11.76
+   ],
+   "zone": "deck",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_deck_l3",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    6.2,
+    0.4,
+    11.76
+   ],
+   "zone": "deck",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_deck_r3",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    15.8,
+    0.4,
+    11.76
+   ],
+   "zone": "deck",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_deck_l4",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    7.6,
+    0.4,
+    11.76
+   ],
+   "zone": "deck",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "beam_deck_r4",
+   "kind": "beam",
+   "can": [
+    "colour",
+    "level",
+    "move",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    14.4,
+    0.4,
+    11.76
+   ],
+   "zone": "deck",
+   "beam_deg": 4.0,
+   "face": "up",
+   "model": "Robe MegaPointe"
+  },
+  {
+   "id": "up_deck_l1",
+   "kind": "uplight",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    2.2,
+    0.25,
+    12.32
+   ],
+   "zone": "deck",
+   "beam_deg": 30.0,
+   "face": "up",
+   "model": "Chauvet COLORdash"
+  },
+  {
+   "id": "up_deck_r1",
+   "kind": "uplight",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    19.8,
+    0.25,
+    12.32
+   ],
+   "zone": "deck",
+   "beam_deg": 30.0,
+   "face": "up",
+   "model": "Chauvet COLORdash"
+  },
+  {
+   "id": "up_deck_l2",
+   "kind": "uplight",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    5.0,
+    0.25,
+    12.32
+   ],
+   "zone": "deck",
+   "beam_deg": 30.0,
+   "face": "up",
+   "model": "Chauvet COLORdash"
+  },
+  {
+   "id": "up_deck_r2",
+   "kind": "uplight",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    17.0,
+    0.25,
+    12.32
+   ],
+   "zone": "deck",
+   "beam_deg": 30.0,
+   "face": "up",
+   "model": "Chauvet COLORdash"
+  },
+  {
+   "id": "up_deck_l3",
+   "kind": "uplight",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    7.4,
+    0.25,
+    12.32
+   ],
+   "zone": "deck",
+   "beam_deg": 30.0,
+   "face": "up",
+   "model": "Chauvet COLORdash"
+  },
+  {
+   "id": "up_deck_r3",
+   "kind": "uplight",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    14.6,
+    0.25,
+    12.32
+   ],
+   "zone": "deck",
+   "beam_deg": 30.0,
+   "face": "up",
+   "model": "Chauvet COLORdash"
+  },
+  {
+   "id": "blind_l1",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    2.8,
+    7.92,
+    1.4
+   ],
+   "zone": "audience",
+   "beam_deg": 70.0,
+   "face": "crowd",
+   "model": "Molefay 8-lite"
+  },
+  {
+   "id": "blind_r1",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    19.2,
+    7.92,
+    1.4
+   ],
+   "zone": "audience",
+   "beam_deg": 70.0,
+   "face": "crowd",
+   "model": "Molefay 8-lite"
+  },
+  {
+   "id": "blind_l2",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    5.2,
+    7.92,
+    1.4
+   ],
+   "zone": "audience",
+   "beam_deg": 70.0,
+   "face": "crowd",
+   "model": "Molefay 8-lite"
+  },
+  {
+   "id": "blind_r2",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    16.8,
+    7.92,
+    1.4
+   ],
+   "zone": "audience",
+   "beam_deg": 70.0,
+   "face": "crowd",
+   "model": "Molefay 8-lite"
+  },
+  {
+   "id": "blind_l3",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    7.6,
+    7.92,
+    1.4
+   ],
+   "zone": "audience",
+   "beam_deg": 70.0,
+   "face": "crowd",
+   "model": "Molefay 8-lite"
+  },
+  {
+   "id": "blind_r3",
+   "kind": "blinder",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    14.4,
+    7.92,
+    1.4
+   ],
+   "zone": "audience",
+   "beam_deg": 70.0,
+   "face": "crowd",
+   "model": "Molefay 8-lite"
+  },
+  {
+   "id": "strobe_l1",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    3.6,
+    6.6,
+    4.2
+   ],
+   "zone": "strobe_pods",
+   "beam_deg": 60.0,
+   "face": "crowd",
+   "model": "Atomic 3000"
+  },
+  {
+   "id": "strobe_r1",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    18.4,
+    6.6,
+    4.2
+   ],
+   "zone": "strobe_pods",
+   "beam_deg": 60.0,
+   "face": "crowd",
+   "model": "Atomic 3000"
+  },
+  {
+   "id": "strobe_l2",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    6.4,
+    6.6,
+    4.2
+   ],
+   "zone": "strobe_pods",
+   "beam_deg": 60.0,
+   "face": "crowd",
+   "model": "Atomic 3000"
+  },
+  {
+   "id": "strobe_r2",
+   "kind": "strobe",
+   "can": [
+    "level",
+    "strobe"
+   ],
+   "emits": "light",
+   "at": [
+    15.6,
+    6.6,
+    4.2
+   ],
+   "zone": "strobe_pods",
+   "beam_deg": 60.0,
+   "face": "crowd",
+   "model": "Atomic 3000"
+  },
+  {
+   "id": "sky_l1",
+   "kind": "sky",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    0.4,
+    3.3,
+    7.7
+   ],
+   "zone": "wings",
+   "beam_deg": 7.0,
+   "face": "up",
+   "model": "Syncrolite SX-5"
+  },
+  {
+   "id": "sky_r1",
+   "kind": "sky",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    21.6,
+    3.3,
+    7.7
+   ],
+   "zone": "wings",
+   "beam_deg": 7.0,
+   "face": "up",
+   "model": "Syncrolite SX-5"
+  },
+  {
+   "id": "wall_1",
+   "kind": "wall",
+   "can": [
+    "pixels"
+   ],
+   "emits": "media",
+   "at": [
+    11.0,
+    6.05,
+    13.58
+   ],
+   "zone": "upstage_wall",
+   "beam_deg": 0.0,
+   "face": "out",
+   "model": "ROE CB5 LED",
+   "size_m": [
+    15.84,
+    6.82
+   ],
+   "pixels": 48
+  },
+  {
+   "id": "laser_l1",
+   "kind": "laser",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    1.8,
+    8.8,
+    7.0
+   ],
+   "zone": "ceiling",
+   "beam_deg": 1.0,
+   "face": "up",
+   "model": "Kvant Atom"
+  },
+  {
+   "id": "laser_r1",
+   "kind": "laser",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    20.2,
+    8.8,
+    7.0
+   ],
+   "zone": "ceiling",
+   "beam_deg": 1.0,
+   "face": "up",
+   "model": "Kvant Atom"
+  },
+  {
+   "id": "laser_l2",
+   "kind": "laser",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    4.4,
+    8.8,
+    7.0
+   ],
+   "zone": "ceiling",
+   "beam_deg": 1.0,
+   "face": "up",
+   "model": "Kvant Atom"
+  },
+  {
+   "id": "laser_r2",
+   "kind": "laser",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    17.6,
+    8.8,
+    7.0
+   ],
+   "zone": "ceiling",
+   "beam_deg": 1.0,
+   "face": "up",
+   "model": "Kvant Atom"
+  },
+  {
+   "id": "co2_l1",
    "kind": "co2",
    "can": [
     "level"
    ],
+   "emits": "air",
    "at": [
-    5.4,
-    1.5,
-    6.0
+    3.4,
+    1.1,
+    2.24
    ],
-   "zone": "floor"
+   "zone": "deck_fx",
+   "beam_deg": 8.0,
+   "face": "up",
+   "model": "MagicFX CO2 Jet"
   },
   {
-   "id": "co2_3",
+   "id": "co2_r1",
    "kind": "co2",
    "can": [
     "level"
    ],
+   "emits": "air",
    "at": [
-    7.8,
-    1.5,
-    6.0
+    18.6,
+    1.1,
+    2.24
    ],
-   "zone": "floor"
+   "zone": "deck_fx",
+   "beam_deg": 8.0,
+   "face": "up",
+   "model": "MagicFX CO2 Jet"
   },
   {
-   "id": "co2_4",
+   "id": "co2_l2",
    "kind": "co2",
    "can": [
     "level"
    ],
+   "emits": "air",
    "at": [
-    10.2,
-    1.5,
-    6.0
+    5.8,
+    1.1,
+    2.24
    ],
-   "zone": "floor"
+   "zone": "deck_fx",
+   "beam_deg": 8.0,
+   "face": "up",
+   "model": "MagicFX CO2 Jet"
   },
   {
-   "id": "co2_5",
+   "id": "co2_r2",
    "kind": "co2",
    "can": [
     "level"
    ],
+   "emits": "air",
    "at": [
-    12.6,
-    1.5,
-    6.0
+    16.2,
+    1.1,
+    2.24
    ],
-   "zone": "floor"
+   "zone": "deck_fx",
+   "beam_deg": 8.0,
+   "face": "up",
+   "model": "MagicFX CO2 Jet"
   },
   {
-   "id": "co2_6",
-   "kind": "co2",
+   "id": "pyro_l1",
+   "kind": "pyro",
    "can": [
     "level"
    ],
+   "emits": "effect",
    "at": [
-    15.0,
-    1.5,
-    6.0
+    3.0,
+    0.8,
+    10.92
    ],
-   "zone": "floor"
+   "zone": "deck_fx",
+   "beam_deg": 6.0,
+   "face": "up",
+   "model": "Galaxis Gerb"
+  },
+  {
+   "id": "pyro_r1",
+   "kind": "pyro",
+   "can": [
+    "level"
+   ],
+   "emits": "effect",
+   "at": [
+    19.0,
+    0.8,
+    10.92
+   ],
+   "zone": "deck_fx",
+   "beam_deg": 6.0,
+   "face": "up",
+   "model": "Galaxis Gerb"
+  },
+  {
+   "id": "pyro_l2",
+   "kind": "pyro",
+   "can": [
+    "level"
+   ],
+   "emits": "effect",
+   "at": [
+    6.0,
+    0.8,
+    10.92
+   ],
+   "zone": "deck_fx",
+   "beam_deg": 6.0,
+   "face": "up",
+   "model": "Galaxis Gerb"
+  },
+  {
+   "id": "pyro_r2",
+   "kind": "pyro",
+   "can": [
+    "level"
+   ],
+   "emits": "effect",
+   "at": [
+    16.0,
+    0.8,
+    10.92
+   ],
+   "zone": "deck_fx",
+   "beam_deg": 6.0,
+   "face": "up",
+   "model": "Galaxis Gerb"
+  },
+  {
+   "id": "conf_l1",
+   "kind": "confetti",
+   "can": [
+    "level"
+   ],
+   "emits": "effect",
+   "at": [
+    4.2,
+    9.35,
+    2.52
+   ],
+   "zone": "overhead_fx",
+   "beam_deg": 90.0,
+   "face": "down",
+   "model": "MagicFX Stadium Shot"
+  },
+  {
+   "id": "conf_r1",
+   "kind": "confetti",
+   "can": [
+    "level"
+   ],
+   "emits": "effect",
+   "at": [
+    17.8,
+    9.35,
+    2.52
+   ],
+   "zone": "overhead_fx",
+   "beam_deg": 90.0,
+   "face": "down",
+   "model": "MagicFX Stadium Shot"
+  },
+  {
+   "id": "haze_l1",
+   "kind": "fog",
+   "can": [
+    "level"
+   ],
+   "emits": "air",
+   "at": [
+    1.4,
+    0.6,
+    8.4
+   ],
+   "zone": "haze",
+   "beam_deg": 0.0,
+   "face": "up",
+   "model": "MDG Atmosphere APS"
+  },
+  {
+   "id": "haze_r1",
+   "kind": "fog",
+   "can": [
+    "level"
+   ],
+   "emits": "air",
+   "at": [
+    20.6,
+    0.6,
+    8.4
+   ],
+   "zone": "haze",
+   "beam_deg": 0.0,
+   "face": "up",
+   "model": "MDG Atmosphere APS"
+  },
+  {
+   "id": "haze_l2",
+   "kind": "fog",
+   "can": [
+    "level"
+   ],
+   "emits": "air",
+   "at": [
+    6.0,
+    0.6,
+    8.4
+   ],
+   "zone": "haze",
+   "beam_deg": 0.0,
+   "face": "up",
+   "model": "MDG Atmosphere APS"
+  },
+  {
+   "id": "haze_r2",
+   "kind": "fog",
+   "can": [
+    "level"
+   ],
+   "emits": "air",
+   "at": [
+    16.0,
+    0.6,
+    8.4
+   ],
+   "zone": "haze",
+   "beam_deg": 0.0,
+   "face": "up",
+   "model": "MDG Atmosphere APS"
   }
  ]
 }

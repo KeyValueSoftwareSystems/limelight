@@ -23,6 +23,22 @@ const K = ({
   high:   { base:1.18, span:1.30, chase:1.45, accent:1.55, motion:1.45, strobe:1.60, haze:1.20 },
 }[DRIVE]) || { base:1, span:1, chase:1, accent:1, motion:1, strobe:1, haze:1 };
 
+/* ---- fixture families ----------------------------------------------------
+   A rig calls a light a Sharpy, a MegaPointe or a beam; the recipe only needs
+   to know it is a hard narrow mover. Layouts are written in real fixture names
+   and this table is the one place they meet the recipe, so a new layout adds a
+   row here rather than a branch everywhere. Legacy names map in too: a rig
+   written before the redesign still reads correctly (rule 7). */
+const FAMILY = {
+  beam:'head', spot:'head', head:'head', sky:'head',
+  wash:'wash', par:'par', bar:'strip', strip:'strip', uplight:'uplight',
+  blinder:'blinder', strobe:'strobe', wall:'video', video:'video',
+  laser:'laser', co2:'co2', pyro:'pyro', confetti:'confetti', fog:'fog',
+};
+const fam = f => FAMILY[f && f.kind] || (f && f.kind);
+const canMove = f => !((f.can||[]).indexOf('move') < 0);
+
+
 const cl=(x,a=0,b=1)=>x<a?a:x>b?b:x;
 CH = (CH && CH.length) ? CH : [[0, 'verse']];
 EN = EN || [];
@@ -734,19 +750,19 @@ function chaseAt(t, e, n){
    measured against the gap to the NEXT hit rather than a fixed time, so a fill
    reads as a fill instead of five lamps all half-lit at once. */
 const RIG_MIRRORED = (function(){
-  const fx=(LAYOUT.fixtures||[]).filter(f=>f.kind!=='fog');
+  const fx=(LAYOUT.fixtures||[]).filter(f=>fam(f)!=='fog');
   if(fx.length<6) return false;
   const xs=fx.map(f=>f.at[0]);
   const lo=Math.min.apply(null,xs), hi=Math.max.apply(null,xs), mid=(lo+hi)/2;
   let paired=0;
   for(const f of fx){
     const want=2*mid-f.at[0];
-    if(fx.some(g=>g!==f&&g.kind===f.kind&&Math.abs(g.at[0]-want)<0.35&&Math.abs(g.at[1]-f.at[1])<0.35)) paired++;
+    if(fx.some(g=>g!==f&&fam(g)===fam(f)&&Math.abs(g.at[0]-want)<0.35&&Math.abs(g.at[1]-f.at[1])<0.35)) paired++;
   }
   return paired/fx.length >= 0.7;})();
 const sym = xn => RIG_MIRRORED ? Math.abs(xn-0.5)*2 : xn;
 const CENTRE_PAIR = (function(){
-  const hs=(LAYOUT.fixtures||[]).filter(f=>f.kind==='head');
+  const hs=(LAYOUT.fixtures||[]).filter(f=>fam(f)==='head'&&canMove(f));
   if(hs.length<4) return 1;
   const xs=LAYOUT.fixtures.map(f=>f.at[0]);
   const lo=Math.min.apply(null,xs), sp=Math.max(0.001,Math.max.apply(null,xs)-lo);
@@ -767,7 +783,7 @@ function chaseGain(xn, c){
   return 0.0;
 }
 
-const PARN = Math.max(2, (LAYOUT.fixtures||[]).filter(f=>f.kind==='par').length);
+const PARN = Math.max(2, (LAYOUT.fixtures||[]).filter(f=>fam(f)==='par').length);
 
 function fixColour(t,L,kind,xn,e){
   if(L==='stop')  return [0,0,0];
@@ -824,7 +840,7 @@ const STROBE_AT = (function(){
    the entire reason layout and recipe are separate files. Everything below is
    derived from layout.json at load. */
 let GEO=buildGeo();
-const KIND=k=>LAYOUT.fixtures.filter(f=>f.kind===k).map(f=>f.id);
+const KIND=k=>LAYOUT.fixtures.filter(f=>fam(f)===k).map(f=>f.id);
 function buildGeo(){
   const xs=LAYOUT.fixtures.map(f=>f.at[0]);
   const lo=Math.min.apply(null,xs), hi=Math.max.apply(null,xs), sp=Math.max(0.001,hi-lo);
@@ -834,7 +850,7 @@ function buildGeo(){
   const g={};
   LAYOUT.fixtures.forEach(function(f,idx){
     const xn=(f.at[0]-lo)/sp;
-    const k=f.kind; seen[k]=(seen[k]||0);
+    const k=fam(f); seen[k]=(seen[k]||0);
     g[f.id]={xn:xn,yn:(f.at[1]-ylo)/ysp,x:f.at[0],y:f.at[1],z:f.at[2],kind:k,
              ki:seen[k]++, zone:f.zone||null,
              outer:(xn<0.26||xn>0.74), centre:(xn>=0.36&&xn<=0.64),
@@ -863,7 +879,7 @@ function deployed(kind, t){
 }
 
 const GATE_RATE  = {wash:3.2, uplight:3.2, strip:2.2, head:1.5, par:1.5};
-const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:1.5, par:1.5};
+const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:0.26, par:0.26};
 function buildProg(t){
   const sp = spanAt(t);
   if(!sp || sp.kind !== 'build' || !(sp.to > sp.from)) return -1;
@@ -894,7 +910,7 @@ const NBARS = Math.max(2, Math.ceil((DUR - PH)/BAR) + 3);
 let GPH_CACHE = null;
 function GPH_BUILD(){
   const kinds = {}, out = {};
-  for(const f of (LAYOUT.fixtures||[])) kinds[f.kind] = 1;
+  for(const f of (LAYOUT.fixtures||[])) kinds[fam(f)] = 1;
   const t0 = PH + DBP*PER;
   for(const kind in kinds){
     const rate = new Array(NBARS), cum = new Array(NBARS+1);
@@ -1479,10 +1495,10 @@ function lookFrame(t,L){
     if(t>=m.at-6.5 && t<m.at+1) burst=Math.max(burst,1-ss(m.at-6.5,m.at+1,t)*0.45);
   }
   const fg=+Math.min(1,(hazeBase+0.55*burst)*K.haze).toFixed(3);
-  for(const f of LAYOUT.fixtures) if(f.kind==='fog') F.push({id:f.id,level:fg});
+  for(const f of LAYOUT.fixtures) if(fam(f)==='fog') F.push({id:f.id,level:fg});
 
   const[r,s]=since('return',t,2*BAR);
-  if(r){const g=0.38+0.62*ss(0,1,cl(s/(2*BAR)));const FOGIDS=new Set(LAYOUT.fixtures.filter(f=>f.kind==='fog').map(f=>f.id));
+  if(r){const g=0.38+0.62*ss(0,1,cl(s/(2*BAR)));const FOGIDS=new Set(LAYOUT.fixtures.filter(f=>fam(f)==='fog').map(f=>f.id));
     F.forEach(o=>{if(FOGIDS.has(o.id))return;
     if('level'in o)o.level=+(o.level*g).toFixed(3);
     if(o.pixels)o.pixels=o.pixels.map(q=>sc(q,g))})}

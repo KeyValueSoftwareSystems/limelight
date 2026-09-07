@@ -58,99 +58,268 @@ function drawRoom(cv, fr, layout){
   if(!fr || !layout) return;
 
   const fx = layout.fixtures || [];
-  const size = layout.size_m || {w:8,h:3.4};
-  const pad = Math.max(18, W*0.045);
+  const size = layout.size_m || {w:8, h:3.4, d:6};
+  const pad = Math.max(14, W*0.030);
+  const floorY = Hpx * 0.82, topY = Hpx * 0.035;
   const sx = v => pad + (v/size.w) * (W - 2*pad);
-  const floorY = Hpx * 0.80;
-  const sy = v => floorY - (v/(size.h||3.4)) * (floorY - Hpx*0.06);
-  const ppm = (W - 2*pad) / (size.w || 8);
-  const lamps = (layout.fixtures||[]).filter(f=>f.kind!=="fog");
-  let near = [];
-  for(let i=0;i<lamps.length;i++){
-    let best=Infinity;
-    for(let j=0;j<lamps.length;j++){ if(i===j) continue;
-      const dx=(lamps[i].at[0]-lamps[j].at[0])*ppm;
-      const dy=(lamps[i].at[1]-lamps[j].at[1])*ppm;
-      const d=Math.hypot(dx,dy); if(d>0.5 && d<best) best=d; }
-    if(isFinite(best)) near.push(best);
-  }
-  near.sort((a,b)=>a-b);
-  const spacing = near.length ? near[Math.floor(near.length/2)] : 60;
-  const gk = Math.max(0.50, Math.min(1.8, spacing / 43));
+  const sy = v => floorY - (v/(size.h||3.4)) * (floorY - topY);
+
+  /* A rig calls a light a Sharpy; the renderer only needs to know it is a hard
+     narrow mover. Same table as the recipe, legacy names included. */
+  const FAM = {beam:"beam", spot:"spot", head:"spot", sky:"sky", wash:"wash",
+    par:"par", bar:"bar", strip:"bar", uplight:"uplight", blinder:"blinder",
+    strobe:"strobe", wall:"wall", video:"wall", laser:"laser", co2:"co2",
+    pyro:"pyro", confetti:"confetti", fog:"fog"};
+  const fam = f => FAM[f.kind] || f.kind;
+  const moves = f => (f.can||[]).indexOf("move") >= 0;
+
+  /* Stage depth. Everything used to be drawn flat, so three trusses at three
+     depths landed on one plane and the picture read as a wall of lamps rather
+     than a stage. A vanishing point costs nothing and buys the whole geometry. */
+  const VPX = W*0.5, VPY = floorY - (floorY - topY)*0.34;
+  const depth = f => size.d ? Math.min(1, Math.max(0, (f.at[2]||0)/size.d)) : 0;
+  const shrink = dz => 1/(1 + dz*0.62);
+  const floorAt = k => VPY + (floorY - VPY)*k;
 
   const by = {}; for(const o of fr.fixtures) by[o.id] = o;
   const C = o => [o.r!==undefined?o.r:255, o.g!==undefined?o.g:255, o.b!==undefined?o.b:255];
   const lit = o => o && (o.level||0) > 0.012;
+  const cl = (v,a,b) => v<a?a:v>b?b:v;
 
   // haze comes from the foggers, and everything airborne is scaled by it
   let haze = 0;
-  for(const f of fx) if(f.kind==="fog" && by[f.id]) haze = Math.max(haze, by[f.id].level||0);
+  for(const f of fx) if(fam(f)==="fog" && by[f.id]) haze = Math.max(haze, by[f.id].level||0);
   haze = 0.30 + 0.70*haze;                       // never quite zero: rooms are dusty
 
   // the air itself, thicker near the floor
-  const air = g.createLinearGradient(0, Hpx*0.05, 0, floorY);
+  const air = g.createLinearGradient(0, topY, 0, floorY);
   air.addColorStop(0, `rgba(120,140,190,${(0.010*haze).toFixed(4)})`);
   air.addColorStop(1, `rgba(120,140,190,${(0.055*haze).toFixed(4)})`);
   g.fillStyle = air; g.fillRect(0,0,W,floorY);
 
-  g.globalCompositeOperation = "lighter";
+  // ---- the upstage wall sits behind everything, so it is drawn first
+  g.globalCompositeOperation = "source-over";
   for(const f of fx){
-    const o = by[f.id];
-    if(!lit(o) || f.kind==="fog" || f.kind==="strip") continue;
-    const [r,gr,b] = C(o), L = o.level;
-    const px = sx(f.at[0]), py = sy(f.at[1]);
+    if(fam(f) !== "wall") continue;
+    const o = by[f.id]; if(!o) continue;
+    const k = shrink(depth(f));
+    const cx = VPX + (sx(f.at[0])-VPX)*k, cy = VPY + (sy(f.at[1])-VPY)*k;
+    const wm = (f.size_m && f.size_m[0]) || size.w*0.7, hm = (f.size_m && f.size_m[1]) || size.h*0.5;
+    const ww = (wm/size.w)*(W-2*pad)*k, hh = (hm/(size.h||3.4))*(floorY-topY)*k;
+    g.fillStyle = "#04050a"; g.fillRect(cx-ww/2, cy-hh/2, ww, hh);
+    const px = o.pixels && o.pixels.length ? o.pixels : null;
+    if(px){
+      const cols = Math.max(1, Math.round(Math.sqrt(px.length * (ww/Math.max(1,hh)))));
+      const rows = Math.ceil(px.length/cols), cw = ww/cols, ch = hh/rows;
+      for(let i=0;i<px.length;i++){
+        const q = px[i];
+        g.fillStyle = `rgb(${q[0]|0},${q[1]|0},${q[2]|0})`;
+        g.fillRect(cx-ww/2 + (i%cols)*cw, cy-hh/2 + ((i/cols)|0)*ch, cw+0.6, ch+0.6);
+      }
+    } else if(lit(o)){
+      const [r,gr,b] = C(o);
+      g.fillStyle = `rgba(${r},${gr},${b},${(0.85*o.level).toFixed(3)})`;
+      g.fillRect(cx-ww/2, cy-hh/2, ww, hh);
+    }
+  }
 
-    // where it points. A head sweeps across the room and down; a par hangs.
+  // ---- the bodies of the battens, opaque, before anything additive is laid
+  //      over them. An unlit cell then reads as a dark cell of a real fixture
+  //      rather than a hole punched in the middle of it.
+  for(const f of fx){
+    if(fam(f) !== "bar") continue;
+    const k = shrink(depth(f));
+    const cx = VPX + (sx(f.at[0])-VPX)*k, cy = VPY + (sy(f.at[1])-VPY)*k;
+    const vert = (f.axis || "v") === "v";
+    const len = (vert ? (floorY-topY)*0.155 : (W-2*pad)*0.075) * k;
+    g.fillStyle = "#12151f";
+    if(vert) g.fillRect(cx-2.6*k, cy-len/2, Math.max(2,5.2*k), len);
+    else     g.fillRect(cx-len/2, cy-2.6*k, len, Math.max(2,5.2*k));
+  }
+
+  g.globalCompositeOperation = "lighter";
+
+  // ---- pixel bars: a bar is a row of cells, not a cone
+  for(const f of fx){
+    if(fam(f) !== "bar") continue;
+    const o = by[f.id]; if(!o) continue;
+    const k = shrink(depth(f));
+    const cx = VPX + (sx(f.at[0])-VPX)*k, cy = VPY + (sy(f.at[1])-VPY)*k;
+    const n = Math.max(1, f.pixels || 12);
+    const vert = (f.axis || "v") === "v";
+    const len = (vert ? (floorY-topY)*0.155 : (W-2*pad)*0.075) * k;
+    const cellw = Math.max(1.6, (vert ? 5.0 : len/n) * k);
+    const px = o.pixels && o.pixels.length ? o.pixels : null;
+    for(let i=0;i<n;i++){
+      let r,gr,b,L;
+      if(px){ const q = px[Math.min(px.length-1, i)]; r=q[0]; gr=q[1]; b=q[2];
+              L = (r+gr+b)/765; }
+      else { const c = C(o); r=c[0]; gr=c[1]; b=c[2]; L = o.level||0; }
+      if(L <= 0.02) continue;
+      const u = (i+0.5)/n - 0.5;
+      const ex = cx + (vert ? 0 : u*len), ey = cy + (vert ? u*len : 0);
+      const cellh = Math.max(1.6, (vert ? len/n : 5.0*k));
+      g.fillStyle = `rgba(${r|0},${gr|0},${b|0},${Math.min(1,0.30+0.70*L).toFixed(3)})`;
+      g.fillRect(ex - cellw/2, ey - cellh/2, cellw, cellh);
+      const gl = g.createRadialGradient(ex,ey,0,ex,ey,Math.max(cellw,cellh)*2.6);
+      gl.addColorStop(0, `rgba(${r|0},${gr|0},${b|0},${(0.34*L).toFixed(3)})`);
+      gl.addColorStop(1, `rgba(${r|0},${gr|0},${b|0},0)`);
+      g.fillStyle = gl;
+      g.beginPath(); g.arc(ex,ey,Math.max(cellw,cellh)*2.6,0,6.2832); g.fill();
+    }
+  }
+
+  // ---- everything that throws light through air
+  for(const f of fx){
+    const F = fam(f);
+    if(F==="fog" || F==="bar" || F==="wall") continue;
+    const o = by[f.id];
+    if(!lit(o)) continue;
+    const [r,gr,b] = C(o), L = o.level;
+    const k = shrink(depth(f));
+    const px = VPX + (sx(f.at[0])-VPX)*k, py = VPY + (sy(f.at[1])-VPY)*k;
+    const fy = floorAt(k);
     const pan  = o.pan  !== undefined ? o.pan  : 0.5;
     const tilt = o.tilt !== undefined ? o.tilt : 0.62;
-    const reachY = floorY - py;
-    const tx = f.kind === "head"
-      ? px + (pan - 0.5) * (W - 2*pad) * 1.15
-      : px + (pan - 0.5) * (W - 2*pad) * 0.14;
-    // a par hangs and lights the floor; a head can aim short or long. Either way
-    // the beam has to REACH the floor or there is no pool, and the pool is the
-    // part that survives when the haze thins
-    const ty = f.kind === "head" ? py + reachY * (0.62 + 0.52*tilt) : floorY;
+    const face = f.face || "down";
 
-    const spread = Math.tan(((f.beam_deg || 22) * Math.PI/180) / 2);
+    // ---- audience-facing fixtures do not put a cone into the room; they glare
+    //      at the viewer. Drawing a blinder as a downward beam was why the rig
+    //      never read as a stage pointed at a crowd.
+    if(F==="blinder" || F==="strobe"){
+      const rad = (F==="strobe" ? 26 : 44) * k * (0.45 + 0.55*L);
+      const gl = g.createRadialGradient(px,py,0,px,py,rad);
+      gl.addColorStop(0,   `rgba(${r},${gr},${b},${Math.min(0.98,0.92*L).toFixed(3)})`);
+      gl.addColorStop(0.35,`rgba(${r},${gr},${b},${(0.34*L).toFixed(3)})`);
+      gl.addColorStop(1,   `rgba(${r},${gr},${b},0)`);
+      g.fillStyle = gl; g.beginPath(); g.arc(px,py,rad,0,6.2832); g.fill();
+      // spill toward the viewer, washing the crowd
+      const spill = g.createLinearGradient(px,py,px,Hpx);
+      spill.addColorStop(0, `rgba(${r},${gr},${b},${(0.085*L*haze).toFixed(3)})`);
+      spill.addColorStop(1, `rgba(${r},${gr},${b},0)`);
+      g.fillStyle = spill;
+      g.beginPath(); g.moveTo(px-rad*0.4,py); g.lineTo(px+rad*0.4,py);
+      g.lineTo(px+rad*1.7,Hpx); g.lineTo(px-rad*1.7,Hpx); g.closePath(); g.fill();
+      continue;
+    }
+
+    // ---- plumes and falls: CO2 and pyro rise, confetti falls
+    if(F==="co2" || F==="pyro" || F==="confetti"){
+      const rise = F==="confetti" ? -1 : 1;
+      const reach = (F==="pyro" ? 0.72 : F==="co2" ? 0.58 : 0.85) * (py - topY) * L;
+      const ty = py - rise*reach;
+      const wideTop = (F==="co2" ? 34 : F==="pyro" ? 14 : 60) * k;
+      const col = F==="co2" ? [235,240,255] : F==="pyro" ? [255,196,96] : [r,gr,b];
+      const grad = g.createLinearGradient(px,py,px,ty);
+      grad.addColorStop(0, `rgba(${col[0]},${col[1]},${col[2]},${(0.70*L).toFixed(3)})`);
+      grad.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
+      g.fillStyle = grad;
+      g.beginPath(); g.moveTo(px-4*k,py); g.lineTo(px+4*k,py);
+      g.lineTo(px+wideTop,ty); g.lineTo(px-wideTop,ty); g.closePath(); g.fill();
+      if(F==="confetti"){
+        for(let i=0;i<26;i++){
+          const u=((i*Math.PI*7.3)%1), v=((i*Math.PI*3.1)%1);
+          const fxp = px + (u-0.5)*wideTop*2, fyp = py + v*reach;
+          g.fillStyle = `rgba(${r},${gr},${b},${(0.75*L).toFixed(3)})`;
+          g.fillRect(fxp, fyp, 2.2*k, 3.4*k);
+        }
+      }
+      continue;
+    }
+
+    /* Which way it throws.
+
+       A moving head does not use its whole mechanical range on a show, and it
+       is never parked horizontal -- that aims it straight into the audience's
+       eyes. A head hung on a truss works from straight down to a little above
+       horizontal; a head standing on the deck works from straight up to well
+       off vertical. Mapping tilt 0.5 to dead horizontal instead put two dozen
+       beams flat across the room in a hairline and it read as scratches.
+
+       vert is +1 for straight up, -1 for straight down. */
+    const T = cl(tilt, 0, 1);
+    let vert;
+    if(moves(f))          vert = (face === "up") ? (1.00 - 0.55*T)    // deck: up
+                                                 : (-1.00 + 1.55*T);  // truss: down
+    else if(face==="up")    vert = 1;
+    else if(face==="cross") vert = 0.12;
+    else                    vert = -1;
+
+    /* The throw is a direction and a length, not an x from pan and a y from
+       tilt. Setting them independently let a nearly-level beam travel the
+       whole width of the room while barely rising. */
+    const span = (W - 2*pad) * k;
+    const swing = moves(f) ? 0.92 : (face==="cross" ? 0.9 : 0.12);
+    const ux = (pan - 0.5) * 2 * swing, uy = -vert;
+    const un = Math.hypot(ux, uy) || 1;
+    const reach = Math.max(py - topY, fy - py) * 1.30;
+    const tx = px + (ux/un) * reach * 1.45;
+    const ty = py + (uy/un) * reach;
+
+    const deg = f.beam_deg !== undefined ? f.beam_deg
+              : (F==="beam"?4 : F==="sky"?2.5 : F==="spot"?15 : F==="wash"?40 : F==="laser"?1 : 25);
+    const spread = Math.tan((deg*Math.PI/180)/2);
     const len = Math.hypot(tx-px, ty-py) || 1;
-    const half = Math.max(5, spread * len);
+    const hard = (F==="beam"||F==="sky"||F==="laser");
+    const half = Math.max(hard ? 1.1*k : 4*k, spread*len);
 
-    // three passes: wide and faint, mid, then a bright core
-    for(const [wf, af, lf] of [[1.00, 0.42, 1.00], [0.52, 0.58, 0.98], [0.18, 0.85, 0.95]]){
+    // a laser is a line, not a cone, and it is the one thing in the rig that
+    // does not soften with distance
+    if(F==="laser"){
+      const grad = g.createLinearGradient(px,py,tx,ty);
+      grad.addColorStop(0, `rgba(${r},${gr},${b},${Math.min(0.95,0.95*L).toFixed(3)})`);
+      grad.addColorStop(1, `rgba(${r},${gr},${b},${(0.30*L*haze).toFixed(3)})`);
+      g.strokeStyle = grad; g.lineWidth = Math.max(1, 1.4*k);
+      const cxm = px + (tx-px)*0.35;          // the fan leans, it does not fly
+      for(let i=-3;i<=3;i++){
+        g.beginPath(); g.moveTo(px,py);
+        g.lineTo(cxm + i*span*0.038, ty); g.stroke();
+      }
+      continue;
+    }
+
+    /* Three passes: wide and faint, mid, then a bright core. Real scattering
+       falls off across the cone and one flat gradient cannot show it. A hard
+       fixture gets a tighter, brighter core than a wash. */
+    const passes = hard ? [[1.00,0.34,1.00],[0.46,0.62,1.00],[0.14,0.95,1.00]]
+                        : [[1.00,0.42,1.00],[0.52,0.58,0.98],[0.18,0.85,0.95]];
+    for(const [wf, af, lf] of passes){
       const ex = px + (tx-px)*lf, ey = py + (ty-py)*lf, hw = half*wf;
       const grad = g.createLinearGradient(px,py,ex,ey);
-      const a0 = Math.min(0.92, af * (0.35 + 0.65*L) * haze);
+      const areaK = hard ? 1 : Math.min(1, 13/Math.max(5, deg));
+      const a0 = Math.min(0.95, af * (0.35 + 0.65*L) * haze * areaK);
       grad.addColorStop(0,    `rgba(${r},${gr},${b},${a0.toFixed(3)})`);
-      grad.addColorStop(0.55, `rgba(${r},${gr},${b},${(a0*0.45).toFixed(3)})`);
-      grad.addColorStop(1,    `rgba(${r},${gr},${b},0)`);
+      grad.addColorStop(0.55, `rgba(${r},${gr},${b},${(a0*(hard?0.72:0.45)).toFixed(3)})`);
+      grad.addColorStop(1,    `rgba(${r},${gr},${b},${hard?(a0*0.30).toFixed(3):0})`);
       g.fillStyle = grad;
       g.beginPath();
-      g.moveTo(px - 2.5, py); g.lineTo(px + 2.5, py);
-      g.lineTo(ex + hw, ey);  g.lineTo(ex - hw, ey);
+      g.moveTo(px - 2.5*k, py); g.lineTo(px + 2.5*k, py);
+      g.lineTo(ex + hw, ey);    g.lineTo(ex - hw, ey);
       g.closePath(); g.fill();
     }
 
-    // the pool on the floor survives with no haze at all
-    if(ty > floorY - reachY*0.25){
-      const pw = Math.max(14, half*1.7), ph = Math.max(6, half*0.40);
-      const pool = g.createRadialGradient(tx,floorY,0,tx,floorY,pw);
+    // the pool on the floor survives with no haze at all -- but only if the
+    // fixture is actually aimed down
+    if(vert < -0.15 && ty > fy - (fy-py)*0.30){
+      const pw = Math.max(12*k, half*1.7), ph = Math.max(5*k, half*0.40);
+      const pool = g.createRadialGradient(tx,fy,0,tx,fy,pw);
       pool.addColorStop(0,   `rgba(${r},${gr},${b},${(0.60*L).toFixed(3)})`);
       pool.addColorStop(0.5, `rgba(${r},${gr},${b},${(0.22*L).toFixed(3)})`);
       pool.addColorStop(1,   `rgba(${r},${gr},${b},0)`);
       g.fillStyle = pool;
-      g.beginPath(); g.ellipse(tx, floorY, pw, ph, 0, 0, 6.2832); g.fill();
+      g.beginPath(); g.ellipse(tx, fy, pw, ph, 0, 0, 6.2832); g.fill();
     }
 
     // the lens
-    const gl = g.createRadialGradient(px,py,0,px,py,(5 + 9*L)*gk);
+    const lr = Math.max(2.0, (4 + 8*L)*k);
+    const gl = g.createRadialGradient(px,py,0,px,py,lr);
     gl.addColorStop(0, `rgba(${r},${gr},${b},${Math.min(0.95,0.85*L).toFixed(3)})`);
     gl.addColorStop(1, `rgba(${r},${gr},${b},0)`);
-    g.fillStyle = gl; g.beginPath(); g.arc(px,py,Math.max(2.5,(5+9*L)*gk),0,6.2832); g.fill();
+    g.fillStyle = gl; g.beginPath(); g.arc(px,py,lr,0,6.2832); g.fill();
   }
   g.globalCompositeOperation = "source-over";
 
-  // floor, then a black crowd so brightness has something to read against
+  // the deck edge, then a black crowd so brightness has something to read against
   g.strokeStyle = "rgba(200,215,255,.13)"; g.lineWidth = 1;
   g.beginPath(); g.moveTo(0,floorY); g.lineTo(W,floorY); g.stroke();
   g.fillStyle = "#020306";
@@ -162,15 +331,24 @@ function drawRoom(cv, fr, layout){
     g.fill();
   }
 
-  // the bodies of the fixtures, so an unlit rig is still visible
+  // the bodies of the fixtures, so an unlit rig is still visible as a rig
   for(const f of fx){
-    if(f.kind==="fog") continue;
+    const F = fam(f);
+    if(F==="fog" || F==="wall") continue;
     const o = by[f.id];
     if(lit(o)) continue;
-    const px = sx(f.at[0]), py = sy(f.at[1]);
+    const k = shrink(depth(f));
+    const px = VPX + (sx(f.at[0])-VPX)*k, py = VPY + (sy(f.at[1])-VPY)*k;
     g.fillStyle = "#141824";
-    g.beginPath(); g.arc(px,py,Math.max(1.2,(f.kind==="head"?3.2:2.4)*Math.max(0.5,gk)),0,6.2832); g.fill();
+    if(F==="bar"){
+      const vert = (f.axis||"v")==="v";
+      const len = (vert ? (floorY-topY)*0.155 : (W-2*pad)*0.075) * k;
+      g.fillRect(px - (vert?2:len/2), py - (vert?len/2:2), vert?4:len, vert?len:4);
+    } else {
+      g.beginPath(); g.arc(px,py,Math.max(1.1,(F==="beam"||F==="spot"?3.0:2.2)*k),0,6.2832); g.fill();
+    }
   }
+
 }
 
 function frameDiff(a,b){

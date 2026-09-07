@@ -2,7 +2,7 @@ const fs=require('fs');
 eval(fs.readFileSync('/tmp/claude-1001/canvas.js','utf8'));
 const song=process.argv[2], times=process.argv.slice(3).map(Number);
 const M=JSON.parse(fs.readFileSync('/tmp/claude-1001/cmp_'+song+'.json','utf8'));
-const L=JSON.parse(fs.readFileSync('readers/lights/festival/layout.json','utf8'));
+const L=JSON.parse(fs.readFileSync('readers/lights/'+(process.env.RIG||'festival')+'/layout.json','utf8'));
 global.MAP=M;global.LAYOUT=L;global.ENERGY='medium';global.STOP_REAL=true;global.ANT=true;global.HAZE=0.28;global.DRIFT=true;
 global.PER=M.period;global.PH=M.phase;global.DUR=M.dur;global.DBP=M.bar_phase;global.BAR=4*M.period;global.BEATS=[];
 for(let t=M.phase;t<M.dur;t+=M.period)BEATS.push(+t.toFixed(4));
@@ -14,7 +14,7 @@ global.window={devicePixelRatio:1};
 (0,eval)(fs.readFileSync('readers/src/recipe4.js','utf8')+';global.frame=frame;global.PL=primaryLook;');
 (0,eval)(";(function(){"+fs.readFileSync('synth/room.js','utf8')+"\n})();");
 const RM=global.window.LimelightRoom;
-const W=480,H=270;
+const W=380,H=214;
 const cols=times.length, out=Buffer.alloc(W*cols*H*3);
 times.forEach((t,ti)=>{
   const C=mkCanvas(W,H); C.clientWidth=W; C.clientHeight=H;

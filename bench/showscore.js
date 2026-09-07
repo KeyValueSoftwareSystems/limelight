@@ -24,7 +24,9 @@ for(const song of SONGS){
   for(const k in require.cache) delete require.cache[k];
   const {M,L}=setup(song);
   const KOF={}; L.fixtures.forEach(f=>KOF[f.id]=f.kind);
-  const BEAMY=id=>{const k=KOF[id]; return k!=='fog'&&k!=='video'};
+  const EOF_={}; for(const f of L.fixtures) EOF_[f.id]=f.emits;
+  const BEAMY=id=>{const e=EOF_[id]; if(e!==undefined) return e==='light';
+    const k=KOF[id]; return k!=='fog'&&k!=='video'};
   const FPS=50,N=Math.floor(DUR*FPS);
   const tot=new Float64Array(N), act=new Float64Array(N);
   const hues={}; let hn=0, jumps=0, cmp=0;
@@ -131,7 +133,8 @@ for(const song of SONGS){
   const variety=vn?vsum/vn:0;
   // movement rhythm: do heads MOVE in time and HOLD between?
   const MFPS=50, MN=Math.floor(DUR*MFPS);
-  const heads=L.fixtures.filter(f=>f.kind==='head').map(f=>f.id);
+  const heads=L.fixtures.filter(f=>(f.can||[]).indexOf('move')>=0
+                                || f.kind==='head').map(f=>f.id);
   const per={}; heads.forEach(h=>per[h]=[]);
   let pp=null;
   for(let i=0;i<MN;i++){
