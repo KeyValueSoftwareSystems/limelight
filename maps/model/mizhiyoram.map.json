@@ -7871,6 +7871,54 @@
      "words": 2
     }
    ]
+  },
+  "structure_check": {
+   "between": "chapters and observations.novelty",
+   "how": "novelty local maxima at or above 60% of this song's biggest change, matched to chapter boundaries within two bars",
+   "chapters": 8,
+   "novelty_peaks": 11,
+   "chapters_matched": 7,
+   "median_gap_s": 0.0,
+   "novelty_peaks_with_no_chapter": 2,
+   "orphan_times": [
+    34.18,
+    119.87
+   ],
+   "not": "neither side is truth and this does not say which is wrong where they disagree. chapters are not edited from this: a model does not overwrite a measurement, and one fact keeps one writer. A median gap of 0.00 s is NOT precision: novelty is sampled per downbeat and chapters land on downbeats, so both are already on the same grid and an exact match is the only thing a hit can look like"
+  },
+  "phrase_grid": {
+   "from": "downbeats + observations.novelty",
+   "how": "every phrase length in [2, 4, 8, 16] bars and every offset scored against the novelty peaks; the best-supported one wins",
+   "not": "this is the FINEST boundary grid the music supports, not the phrase length a musician would name. A 2-bar grid contains every 4-bar mark, so support can only rise as the grid gets finer, and scoring against chance narrows that bias without removing it. Read it as: the song offers a boundary here this often. Four bars is the pop default and a default written down is indistinguishable from a measurement, which is why nothing is assumed and a grid beating chance by less than 0.35 is not written at all",
+   "bars": 2,
+   "offset_bars": 1,
+   "support": 0.923,
+   "expected_by_chance": 0.25,
+   "above_chance": 0.897,
+   "count": 21,
+   "at": [
+    5.623,
+    11.335,
+    17.048,
+    22.76,
+    28.472,
+    34.184,
+    39.897,
+    45.609,
+    51.321,
+    57.034,
+    62.746,
+    68.458,
+    74.17,
+    79.883,
+    85.595,
+    91.307,
+    97.02,
+    102.732,
+    108.444,
+    114.156,
+    119.869
+   ]
   }
  },
  "confidence": 0.908,

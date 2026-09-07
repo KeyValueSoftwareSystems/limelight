@@ -82,7 +82,97 @@ def phrases_from_lyrics(m):
     }
 
 
-DERIVED = (("phrases", phrases_from_lyrics),)
+PHRASE_BAR_CANDIDATES = (2, 4, 8, 16)
+
+
+def phrase_grid(m):
+    """Where the song turns over, measured rather than assumed.
+
+    chapters name a handful of sections -- 11 across 220 s on Don't Look Down --
+    but the novelty peaks in that same map sit 7.5 s apart, which at its tempo is
+    four bars. A show whose looks change only on chapter boundaries is holding
+    one look for thirty seconds through a song that turns over every eight, and
+    that is what "why is this showing up now?" feels like from the audience.
+
+    Four bars is the pop and dance default, and defaults are exactly what rule 2
+    forbids writing down as if measured. So every candidate length and every
+    offset is scored against the novelty peaks the map already carries, and the
+    winner is emitted with the fraction of peaks that support it. A grid nothing
+    supports is not written at all.
+    """
+    downs = m.get("downbeats") or []
+    if len(downs) < 8:
+        return None
+    nv = (m.get("observations") or {}).get("novelty") or {}
+    at, val = nv.get("at") or [], nv.get("value") or []
+    if len(at) < 6 or len(val) != len(at):
+        return None
+    top = max(val) or 1.0
+    peaks = [at[i] for i in range(1, len(val) - 1)
+             if val[i] >= val[i - 1] and val[i] > val[i + 1] and val[i] >= 0.55 * top]
+    if len(peaks) < 4:
+        return None
+
+    per = (m.get("grid") or {}).get("period") or 0.5
+    tol = per * 1.0                      # within a beat is the same boundary
+    best = None
+    for bars in PHRASE_BAR_CANDIDATES:
+        if len(downs) < bars * 2:
+            continue
+        for off in range(bars):
+            marks = downs[off::bars]
+            if len(marks) < 3:
+                continue
+            hit = 0
+            for x in peaks:
+                lo, hi = 0, len(marks) - 1
+                near = None
+                while lo <= hi:
+                    mid = (lo + hi) // 2
+                    d = marks[mid] - x
+                    if near is None or abs(d) < abs(near):
+                        near = d
+                    if d < 0: lo = mid + 1
+                    else:     hi = mid - 1
+                if near is not None and abs(near) <= tol:
+                    hit += 1
+            support = hit / len(peaks)
+            # A 2-bar grid has four times the marks of an 8-bar one, so it
+            # catches four times as many peaks by pure luck. Scoring raw support
+            # picks the shortest grid every time. What matters is how far above
+            # chance it is: with a tolerance of one beat either side, a random
+            # peak lands on a mark 2*tol/(bars*beats_per_bar*period) of the time.
+            chance = min(0.99, 2.0 * tol / (bars * 4 * per))
+            score = (support - chance) / (1.0 - chance)
+            if best is None or score > best[0]:
+                best = (score, bars, off, support, marks, chance)
+    if best is None or best[0] < 0.35:
+        return None
+    lift, bars, off, support, marks, chance = best
+    return {
+        "from": "downbeats + observations.novelty",
+        "how": ("every phrase length in %s bars and every offset scored against "
+                "the novelty peaks; the best-supported one wins" % (list(PHRASE_BAR_CANDIDATES),)),
+        "not": ("this is the FINEST boundary grid the music supports, not the "
+                "phrase length a musician would name. A 2-bar grid contains "
+                "every 4-bar mark, so support can only rise as the grid gets "
+                "finer, and scoring against chance narrows that bias without "
+                "removing it. Read it as: the song offers a boundary here this "
+                "often. Four bars is the pop default and a default written down "
+                "is indistinguishable from a measurement, which is why nothing "
+                "is assumed and a grid beating chance by less than 0.35 is not "
+                "written at all"),
+        "bars": bars,
+        "offset_bars": off,
+        "support": round(support, 3),
+        "expected_by_chance": round(chance, 3),
+        "above_chance": round(lift, 3),
+        "count": len(marks),
+        "at": [round(x, 3) for x in marks],
+    }
+
+
+DERIVED = (("phrases", phrases_from_lyrics), ("phrase_grid", phrase_grid))
 
 if __name__ == "__main__":
     paths = sys.argv[1:]
@@ -99,6 +189,13 @@ if __name__ == "__main__":
             if got is None:
                 wrote.append("%s not derivable" % name); continue
             obs[name] = got
-            wrote.append("%s %d (median %.2fs)" % (name, got["count"], got["median_s"]))
+            if "median_s" in got:
+                wrote.append("%s %d (median %.2fs)" % (name, got["count"], got["median_s"]))
+            elif "bars" in got:
+                wrote.append("%s %d bars, offset %d, support %.0f%% (%d marks)"
+                             % (name, got["bars"], got["offset_bars"],
+                                100 * got["support"], got["count"]))
+            else:
+                wrote.append("%s %d" % (name, got.get("count", 0)))
         json.dump(m, open(p, "w"), indent=1); open(p, "a").write("\n")
         print("  %-26s %s" % (os.path.basename(p), "; ".join(wrote)))

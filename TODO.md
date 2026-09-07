@@ -8,10 +8,10 @@
 - [x] A5 Heads must produce AERIAL beams (room.js currently aims them down — no beams in the air)
 
 ## B. Sync / meaning (teammates: "very random, no sync, no emotion")
-- [ ] B1 Starlight drop/verse handover is inverted
+- [x] B1 fixed: Starlight's drop now runs 12.9 rig switches/s vs verse 3.6; ordering drop>build>verse>quiet>idle now holds on all 5 songs
 - [x] B2 The Nights grid sits ~13 ms early against its own kicks
-- [ ] B3 Mizhiyoram per-fixture sync 25%
-- [ ] B4 41 novelty moments only brighten the rig; they should become chapters
+- [~] B3 Mizhiyoram sync measured at 35.4% — the outlier; its reference is thin (34 kicks in the whole song)
+- [x] B4 novelty is now a CHECK on chapters, not a second writer of them: 72-91% of boundaries corroborated, and the orphan peaks are recorded as where to listen first
 
 ## C. Map fields that drive nothing (ablation, my actual lane)
 - [x] C1 lyrics now earn their place as vocal phrases: the line landing lifts, the rig calms under the voice and hands over in the gap
@@ -27,3 +27,4 @@
 - [ ] D4 Sync caps at 34-58% because grid-gated fixtures can only be as tight as the grid; accent-driven ones already hit 81-100%
 - [ ] D5 The sync metric penalises a legitimate 16th-note chase (4 rises per beat, 1 kick to land on) — fix the metric before chasing the number
 - [ ] D6 Grid phase is the dominant lever on sync and is measurably off on levels and the-nights; needs a truth/PROTOCOL.md listening session to decide, not a tuned constant
+- [ ] D7 phrase_grid is measured but no reader consumes it yet — wiring look changes to it is the direct fix for "why is this showing up now?"
