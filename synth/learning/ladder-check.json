@@ -1,8 +1,8 @@
 {
- "when": "2026-09-07T09:04:15.917Z",
- "pass": 29,
- "fail": 3,
- "skip": 0,
+ "when": "2026-09-07T13:43:01.319Z",
+ "pass": 22,
+ "fail": 8,
+ "skip": 2,
  "rows": [
   {
    "slug": "levels",
@@ -17,10 +17,10 @@
    "slug": "levels",
    "n": 2,
    "name": "the bar",
-   "ok": true,
+   "ok": false,
    "na": false,
-   "v": 87.5,
-   "txt": "21 of 24 new parts start on a blue line"
+   "v": 79.16666666666667,
+   "txt": "19 of 24 new parts start on a blue line"
   },
   {
    "slug": "levels",
@@ -28,8 +28,8 @@
    "name": "position",
    "ok": true,
    "na": false,
-   "v": 77.12765957446808,
-   "txt": "the least-used lamp gets 77% of an even share"
+   "v": 90.42316258351893,
+   "txt": "the least-used lamp gets 90% of an even share"
   },
   {
    "slug": "levels",
@@ -37,8 +37,8 @@
    "name": "breathing",
    "ok": true,
    "na": false,
-   "v": 3.247353596537013,
-   "txt": "the song grows +0.1472 between beats, the light grows +0.032"
+   "v": 4.285917778668289,
+   "txt": "the song grows +0.1472 between beats, the light grows +0.043"
   },
   {
    "slug": "levels",
@@ -46,8 +46,8 @@
    "name": "loud and quiet",
    "ok": true,
    "na": false,
-   "v": 89.03262992780424,
-   "txt": "the light follows how loud the song is, 0.89 out of a possible 1.00"
+   "v": 93.51651552813888,
+   "txt": "the light follows how loud the song is, 0.94 out of a possible 1.00"
   },
   {
    "slug": "levels",
@@ -55,8 +55,8 @@
    "name": "the build",
    "ok": true,
    "na": false,
-   "v": 64.42652844721442,
-   "txt": "the rig climbs through the build, 0.64 out of a possible 1.00"
+   "v": 91.66721216502779,
+   "txt": "the rig climbs through the build, 0.92 out of a possible 1.00"
   },
   {
    "slug": "levels",
@@ -64,8 +64,8 @@
    "name": "the drop",
    "ok": true,
    "na": false,
-   "v": 15962.851707962258,
-   "txt": "the drop is 159.6 times brighter than the bar before it"
+   "v": 798.4376434574067,
+   "txt": "the drop is 8.0 times brighter than the bar before it"
   },
   {
    "slug": "levels",
@@ -73,8 +73,8 @@
    "name": "colour",
    "ok": true,
    "na": false,
-   "v": 3,
-   "txt": "3 different colours on stage, counting white as one"
+   "v": 4,
+   "txt": "4 different colours on stage, counting white as one"
   },
   {
    "slug": "levels",
@@ -82,8 +82,8 @@
    "name": "drum hits",
    "ok": true,
    "na": false,
-   "v": 100,
-   "txt": "100% of 217 flashes are in time"
+   "v": 97.67441860465117,
+   "txt": "98% of 43 flashes are in time"
   },
   {
    "slug": "levels",
@@ -91,35 +91,35 @@
    "name": "instruments",
    "ok": true,
    "na": false,
-   "v": 55.91234367120956,
-   "txt": "the rig widens with the song, 0.56 out of a possible 1.00"
+   "v": 68.52202795430415,
+   "txt": "the rig widens with the song, 0.69 out of a possible 1.00"
   },
   {
    "slug": "levels",
    "n": 11,
    "name": "melody",
-   "ok": true,
+   "ok": false,
    "na": false,
-   "v": 76.58212521762768,
-   "txt": "the lit lamp follows the tune 0.77 out of 1.00, using 5 of 5 lamps"
+   "v": 33.75096986600331,
+   "txt": "the lit lamp follows the tune 0.34 out of 1.00, using 13 of 14 lamps"
   },
   {
    "slug": "levels",
    "n": 12,
    "name": "chords",
-   "ok": true,
+   "ok": false,
    "na": false,
-   "v": 75,
-   "txt": "42 of 56 colour changes land on a chord change"
+   "v": 47.36842105263158,
+   "txt": "63 of 133 colour changes land on a chord change"
   },
   {
    "slug": "levels",
    "n": 13,
    "name": "restraint",
-   "ok": true,
+   "ok": false,
    "na": false,
-   "v": 337.77777777777777,
-   "txt": "the picture changes 3.4 times a second, and a room can follow about 4"
+   "v": 448.8888888888889,
+   "txt": "the picture changes 4.5 times a second, and a room can follow about 4"
   },
   {
    "slug": "levels",
@@ -127,17 +127,17 @@
    "name": "moving lamps",
    "ok": true,
    "na": false,
-   "v": 84.11764705882356,
-   "txt": "the fastest movement is 84% of what the rig allows"
+   "v": 0,
+   "txt": "the fastest movement is 0% of what the rig allows"
   },
   {
    "slug": "levels",
    "n": 15,
    "name": "taking sides",
-   "ok": true,
-   "na": false,
-   "v": 55.61134607162113,
-   "txt": "the groups behave 56% alike, and under 70% is different enough"
+   "ok": false,
+   "na": true,
+   "v": 0,
+   "txt": "this rig has only one group of lamps"
   },
   {
    "slug": "levels",
@@ -145,8 +145,8 @@
    "name": "light and dark",
    "ok": true,
    "na": false,
-   "v": 48.11729423525492,
-   "txt": "the rig goes out for 48% of the song, dimmest 0.00 of 5"
+   "v": 47.28423858713762,
+   "txt": "the rig goes out for 47% of the song, dimmest 0.00 of 48"
   },
   {
    "slug": "the-nights",
@@ -172,8 +172,8 @@
    "name": "position",
    "ok": true,
    "na": false,
-   "v": 77.02702702702703,
-   "txt": "the least-used lamp gets 77% of an even share"
+   "v": 90.37372593431483,
+   "txt": "the least-used lamp gets 90% of an even share"
   },
   {
    "slug": "the-nights",
@@ -181,7 +181,7 @@
    "name": "breathing",
    "ok": true,
    "na": false,
-   "v": -0.6741755874657404,
+   "v": 0,
    "txt": "this song does not do it, and the lamps do not either"
   },
   {
@@ -190,17 +190,17 @@
    "name": "loud and quiet",
    "ok": false,
    "na": false,
-   "v": 42.89398587582243,
+   "v": 43.431121682402335,
    "txt": "the light follows how loud the song is, 0.43 out of a possible 1.00"
   },
   {
    "slug": "the-nights",
    "n": 6,
    "name": "the build",
-   "ok": false,
+   "ok": true,
    "na": false,
-   "v": 10.002227767288812,
-   "txt": "the rig climbs through the build, 0.10 out of a possible 1.00"
+   "v": 66.48510369930597,
+   "txt": "the rig climbs through the build, 0.66 out of a possible 1.00"
   },
   {
    "slug": "the-nights",
@@ -208,8 +208,8 @@
    "name": "the drop",
    "ok": true,
    "na": false,
-   "v": 23408.5,
-   "txt": "the drop is 234.1 times brighter than the bar before it"
+   "v": 738.8486168354698,
+   "txt": "the drop is 7.4 times brighter than the bar before it"
   },
   {
    "slug": "the-nights",
@@ -217,8 +217,8 @@
    "name": "colour",
    "ok": true,
    "na": false,
-   "v": 3,
-   "txt": "3 different colours on stage, counting white as one"
+   "v": 4,
+   "txt": "4 different colours on stage, counting white as one"
   },
   {
    "slug": "the-nights",
@@ -226,17 +226,17 @@
    "name": "drum hits",
    "ok": true,
    "na": false,
-   "v": 93.93939393939394,
-   "txt": "94% of 264 flashes are in time"
+   "v": 98.94736842105263,
+   "txt": "99% of 95 flashes are in time"
   },
   {
    "slug": "the-nights",
    "n": 10,
    "name": "instruments",
-   "ok": true,
+   "ok": false,
    "na": false,
-   "v": 62.803019371464686,
-   "txt": "the rig widens with the song, 0.63 out of a possible 1.00"
+   "v": 34.76895002118485,
+   "txt": "the rig widens with the song, 0.35 out of a possible 1.00"
   },
   {
    "slug": "the-nights",
@@ -244,17 +244,17 @@
    "name": "melody",
    "ok": false,
    "na": false,
-   "v": 37.0886465322847,
-   "txt": "the lit lamp follows the tune 0.37 out of 1.00, using 5 of 5 lamps"
+   "v": -14.370086723736508,
+   "txt": "the lit lamp follows the tune -0.14 out of 1.00, using 4 of 14 lamps"
   },
   {
    "slug": "the-nights",
    "n": 12,
    "name": "chords",
-   "ok": true,
+   "ok": false,
    "na": false,
-   "v": 71.42857142857143,
-   "txt": "20 of 28 colour changes land on a chord change"
+   "v": 30.285714285714285,
+   "txt": "106 of 350 colour changes land on a chord change"
   },
   {
    "slug": "the-nights",
@@ -262,7 +262,7 @@
    "name": "restraint",
    "ok": true,
    "na": false,
-   "v": 180,
+   "v": 184.44444444444446,
    "txt": "the picture changes 1.8 times a second, and a room can follow about 4"
   },
   {
@@ -271,17 +271,17 @@
    "name": "moving lamps",
    "ok": true,
    "na": false,
-   "v": 56.45161290322586,
-   "txt": "the fastest movement is 56% of what the rig allows"
+   "v": 0,
+   "txt": "the fastest movement is 0% of what the rig allows"
   },
   {
    "slug": "the-nights",
    "n": 15,
    "name": "taking sides",
-   "ok": true,
-   "na": false,
-   "v": 25.424832736718834,
-   "txt": "the groups behave 25% alike, and under 70% is different enough"
+   "ok": false,
+   "na": true,
+   "v": 0,
+   "txt": "this rig has only one group of lamps"
   },
   {
    "slug": "the-nights",
@@ -289,8 +289,8 @@
    "name": "light and dark",
    "ok": true,
    "na": false,
-   "v": 57.680773075641454,
-   "txt": "the rig goes out for 58% of the song, dimmest 0.00 of 6"
+   "v": 32.62245918027324,
+   "txt": "the rig goes out for 33% of the song, dimmest 0.00 of 41"
   }
  ]
 }

@@ -134,8 +134,26 @@ function duckAt(t){
    both is most of why a rig renders as a computer graphic. */
 const WHITE    = [255, 238, 214];        // par white, warm
 const COLDW    = [232, 241, 255];        // strobe and blinder white, cold
-const PARS     = LAYOUT.fixtures.filter(f => f.kind === "par");
-const HEADS    = LAYOUT.fixtures.filter(f => f.kind === "head");
+/* Fixtures are read by ROLE, not by the exact word in the layout. A teammate
+   replaced the beat rig with 24 beams, 8 washes and 20 bars -- a better rig -- and
+   this recipe filtered on the literal string "par", found nothing, and crashed on
+   the first frame. A wash and an uplight do a par's job; a beam does a head's; a
+   bar is a strip. Naming a fixture is the layout's business and reading its job is
+   the recipe's, and those are not the same thing. */
+const ROLE = k =>
+    (k === "par" || k === "wash" || k === "uplight")        ? "par"
+  : (k === "head" || k === "beam" || k === "spot" || k === "sky") ? "head"
+  : (k === "strip" || k === "bar")                          ? "strip"
+  : (k === "screen" || k === "wall")                        ? "screen"
+  :  k;
+/* Left dark on purpose, not forgotten. A laser has a hard floor on beam height
+   and must never scan an audience; pyro and confetti fire once and cannot be
+   taken back. I have no safety model for any of the three, so this recipe does
+   not address them at all -- a fixture nobody is driving is safe, and a fixture
+   driven by a recipe that has not thought about it is not. Alnas owns these. */
+const NOT_DRIVEN = new Set(["laser", "pyro", "confetti"]);
+const PARS     = LAYOUT.fixtures.filter(f => ROLE(f.kind) === "par");
+const HEADS    = LAYOUT.fixtures.filter(f => ROLE(f.kind) === "head");
 const NP       = Math.max(1, PARS.length);
 const DOWNSET  = new Set(DOWN.map(t => +t.toFixed(3)));
 
@@ -508,7 +526,7 @@ function presetOf(cue, job, i, n){
    the front truss keeps it -- otherwise the sidechain has no surface to act on and
    the breathing rung is measuring a decaying flash. On a rig that HAS surfaces the
    pars stay percussive and the surfaces breathe. */
-const HAS_SURFACES = (LAYOUT.fixtures||[]).some(f => f.kind === "strip" || f.kind === "screen");
+const HAS_SURFACES = (LAYOUT.fixtures||[]).some(f => ROLE(f.kind) === "strip" || f.kind === "screen");
 const WASH_FLOOR = HAS_SURFACES ? 0 : 0.85;
 const LOOK = {
 /* wash says whether the front truss holds a level at all, and it is mostly 0.
@@ -757,7 +775,9 @@ function frame(t){
       const add = 0.55 * ae * cl(a.strength / 0.45, 0, 1) * (STEP >= 5 ? (0.34+0.66*energyAt(t)) : 1);
       if(add > 0.004){
         const p = Math.abs(Math.round(a.at * 1000)) % NP;   // deterministic, not random
-        F[p].level = +cl(F[p].level + add, 0, 1).toFixed(4);
+        // guarded, because NP is Math.max(1, ...) and a rig with no par-like
+        // fixtures at all would index past the end of the frame
+        if(F[p]) F[p].level = +cl(F[p].level + add, 0, 1).toFixed(4);
       }
     }
   }
@@ -820,7 +840,7 @@ function frame(t){
      and move slowly -- a batten flickering on the beat turns the stage frame into
      a fairground. They rise with the build and go white on the drop like the wall. */
   for(const f of LAYOUT.fixtures){
-    if(f.kind !== "strip") continue;
+    if(ROLE(f.kind) !== "strip") continue;
     const e = energyAt(t), Db = dropAt(t), Bb = buildAt(t), ch3 = chordState(t);
     let lv = (0.16 + 0.50 * e) * duckAt(t);     // the battens breathe, the pars punch
     if(Bb) lv *= 0.5 + 0.9 * Bb.shape;
@@ -835,11 +855,30 @@ function frame(t){
      at, and the layout caps the burst because a real one empties a cylinder. */
   const CO2MAX = (LAYOUT.limits && LAYOUT.limits.co2_max_burst_s) || 1.2;
   for(const f of LAYOUT.fixtures){
-    if(f.kind !== "co2") continue;
+    if(ROLE(f.kind) !== "co2") continue;
     const Dc = dropAt(t);
     let lv = 0;
     if(Dc && Dc.dt >= 0 && Dc.dt < CO2MAX) lv = 1 - Dc.dt / CO2MAX;
     F.push({ id:f.id, level:+cl(lv,0,1).toFixed(4), r:255, g:255, b:255 });
+  }
+
+  /* ---- haze -----------------------------------------------------------------
+     Not driven at all until now, which meant the renderer had nothing in the air
+     and every beam was invisible except where it landed. Haze IS the beam: a rig
+     in clean air is a set of bright lenses and some floor pools.
+
+     It rises with the song and gets a burst before a drop, because a machine takes
+     a few seconds to fill a room and the moment you need it is the one after. */
+  for(const f of LAYOUT.fixtures){
+    if(ROLE(f.kind) !== "fog") continue;
+    const e = energyAt(t);
+    let hz = 0.28 + 0.45 * e;
+    for(const mo of MO){
+      if(mo.kind !== "drop") continue;
+      const dt = mo.at - t;
+      if(dt > 0 && dt < BAR * 3) hz = Math.min(1, hz + 0.5 * (1 - dt / (BAR * 3)));
+    }
+    F.push({ id:f.id, level:+cl(hz, 0, 1).toFixed(3) });
   }
 
   /* ---- strobes: the impact fixture, and the only one with a real safety limit
@@ -855,7 +894,7 @@ function frame(t){
   const SHZ = Math.min(12, (LAYOUT.limits && LAYOUT.limits.max_strobe_hz) || 4);
   const SBURST = 1.2;
   for(const f of LAYOUT.fixtures){
-    if(f.kind !== "strobe") continue;
+    if(ROLE(f.kind) !== "strobe") continue;
     let on = 0, since = null;
     const D5 = dropAt(t), B3 = buildAt(t);
     if(D5 && D5.dt >= 0 && D5.dt < SBURST) since = D5.dt;
@@ -879,7 +918,7 @@ function frame(t){
      where the song is, and the lamps do the rhythm. A screen that flickers with
      the beat is a screen fighting the rig. */
   for(const f of LAYOUT.fixtures){
-    if(f.kind !== "screen") continue;
+    if(ROLE(f.kind) !== "screen") continue;
     /* The wall had one behaviour all song, which on a stage this size is the
        biggest surface in the building doing nothing. It has MODES now, chosen by
        the section: black in a break or a quiet part, a dim bed in an intro, solid
@@ -908,7 +947,7 @@ function frame(t){
 
   // ---- blinders: they exist for one moment in a song, and it is the drop ----
   for(const f of LAYOUT.fixtures){
-    if(f.kind !== "blinder") continue;
+    if(ROLE(f.kind) !== "blinder") continue;
     const D3 = dropAt(t);
     let lv = 0;
     if(D3){

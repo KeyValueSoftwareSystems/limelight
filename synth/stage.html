@@ -80,6 +80,15 @@ const V=THREE?THREE.Vector3:null;
 /* A Sprite with no texture is a square, which is what the halos were: five red
    blocks hanging behind the lamps. A glow needs a radial falloff, so one is drawn
    once into a canvas and shared by every fixture. */
+/* the renderer reads roles as well, for the same reason the recipe does: a layout
+   may call a fixture a beam, a wash or a bar and the drawing only cares what shape
+   of thing it is */
+const ROLE = k =>
+    (k === "par" || k === "wash" || k === "uplight")               ? "par"
+  : (k === "head" || k === "beam" || k === "spot" || k === "sky")   ? "head"
+  : (k === "strip" || k === "bar")                                 ? "strip"
+  : (k === "screen" || k === "wall")                               ? "screen"
+  :  k;
 function glowTexture(){
   const c=document.createElement("canvas"); c.width=c.height=128;
   const g=c.getContext("2d");
@@ -164,21 +173,21 @@ function build(){
     for(const x of lx){ truss3(x, S.h*0.42, 9.6, S.h*0.84, "y", 0.20);
       for(let k=1;k<5;k++) bar(x, S.h*0.84*k/5, 9.6, 0.4, "x"); }
     // and the front truss the pars hang from
-    const py=(LAY.fixtures.find(f=>f.kind==="par")||{at:[0,7,7]}).at;
+    const py=(LAY.fixtures.find(f=>ROLE(f.kind)==="par")||{at:[0,7,7]}).at;
     truss3(S.w/2, py[1]+0.34, py[2], S.w*0.92, "x", 0.24);
   } else {
     const back=new THREE.Mesh(new THREE.PlaneGeometry(S.w*1.6,S.h*1.6), mat(0x0b0d13));
     back.position.set(S.w/2,S.h*0.8,S.d+0.05); back.rotation.y=Math.PI; scene.add(back);
     const truss=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,S.w+0.6,10), steel);
     truss.rotation.z=Math.PI/2;
-    const parY=(LAY.fixtures.find(f=>f.kind==="par")||{at:[0,3,4.6]}).at;
+    const parY=(LAY.fixtures.find(f=>ROLE(f.kind)==="par")||{at:[0,3,4.6]}).at;
     truss.position.set(S.w/2, parY[1]+0.22, parY[2]); scene.add(truss);
   }
 
   for(const f of (LAY.fixtures||[])){
-    if(f.kind==="fog") continue;
+    if(ROLE(f.kind)==="fog") continue;
     /* battens are edges, not lamps: a thin emissive bar tracing the architecture */
-    if(f.kind==="strip"){
+    if(ROLE(f.kind)==="strip"){
       const sz=f.size_m||{w:0.2,h:3};
       const barM=new THREE.Mesh(new THREE.BoxGeometry(sz.w,sz.h,0.10),
         new THREE.MeshBasicMaterial({color:0x000000}));
@@ -192,7 +201,7 @@ function build(){
     }
     /* a CO2 jet is a plume, not a beam: it goes UP and it is the only thing on
        this stage that is not light */
-    if(f.kind==="co2"){
+    if(ROLE(f.kind)==="co2"){
       const plume=new THREE.Mesh(new THREE.ConeGeometry(0.55,5.0,16,1,true),
         new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,
           blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
@@ -201,7 +210,7 @@ function build(){
       fixtures.push({def:f,plume,jet:true});
       continue;
     }
-    if(f.kind==="screen"){
+    if(ROLE(f.kind)==="screen"){
       const sz=f.size_m||{w:10,h:5};
       const wall=new THREE.Mesh(new THREE.PlaneGeometry(sz.w,sz.h),
         new THREE.MeshBasicMaterial({color:0x000000}));
@@ -225,12 +234,12 @@ function build(){
        truss they hang in two rows and you can tell them apart at fifty metres by
        shape alone, which is most of why the truss reads as a truss. */
     const body=new THREE.Mesh(
-      f.kind==="head"    ? new THREE.SphereGeometry(0.15,18,14)
-    : f.kind==="blinder" ? new THREE.BoxGeometry(0.42,0.30,0.16)
-    : f.kind==="strobe"  ? new THREE.BoxGeometry(0.62,0.20,0.13)
+      ROLE(f.kind)==="head"    ? new THREE.SphereGeometry(0.15,18,14)
+    : ROLE(f.kind)==="blinder" ? new THREE.BoxGeometry(0.42,0.30,0.16)
+    : ROLE(f.kind)==="strobe"  ? new THREE.BoxGeometry(0.62,0.20,0.13)
                          : new THREE.CylinderGeometry(0.135,0.155,0.34,18),
       shell);
-    if(f.kind==="par") body.rotation.x=Math.PI/2;
+    if(ROLE(f.kind)==="par") body.rotation.x=Math.PI/2;
     g.add(body);
     const yoke=new THREE.Mesh(new THREE.TorusGeometry(0.17,0.022,8,20), shell);
     yoke.rotation.y=Math.PI/2; g.add(yoke);
@@ -242,9 +251,9 @@ function build(){
        and left every beam stopping in mid-air on an eighteen-metre stage. */
     const reach=Math.max(6, (S.d||5)*1.25);
     const deg=(f.beam_deg||24)*Math.PI/180,
-          len=f.kind==="head"    ? reach*1.35
-            : f.kind==="blinder" ? reach*0.42
-            : f.kind==="strobe"  ? reach*0.55      // a strobe throws wide and short
+          len=ROLE(f.kind)==="head"    ? reach*1.35
+            : ROLE(f.kind)==="blinder" ? reach*0.42
+            : ROLE(f.kind)==="strobe"  ? reach*0.55      // a strobe throws wide and short
                                  : reach;
     const cones=[[1.6,0.07],[1.0,0.17],[0.45,0.52]].map(([k,a])=>{
       const r=Math.tan(deg/2)*len*k;
@@ -255,11 +264,11 @@ function build(){
       m.userData.alpha=a; g.add(m); return m;
     });
     const lens=new THREE.Mesh(
-      f.kind==="strobe"  ? new THREE.PlaneGeometry(0.56,0.15)
-    : f.kind==="blinder" ? new THREE.PlaneGeometry(0.36,0.24)
+      ROLE(f.kind)==="strobe"  ? new THREE.PlaneGeometry(0.56,0.15)
+    : ROLE(f.kind)==="blinder" ? new THREE.PlaneGeometry(0.36,0.24)
                          : new THREE.CircleGeometry(0.125,20),
       new THREE.MeshBasicMaterial({color:0x0b0d12,side:THREE.DoubleSide}));
-    lens.rotation.x=-Math.PI/2; lens.position.y=f.kind==="strobe"?-0.11:-0.17; g.add(lens);
+    lens.rotation.x=-Math.PI/2; lens.position.y=ROLE(f.kind)==="strobe"?-0.11:-0.17; g.add(lens);
     /* the halo is what a lamp pointed at you actually looks like: a bloom around
        the lens that grows with output. Without it the brightest thing on stage was
        the middle of the beam rather than its source, which is backwards. */
@@ -292,7 +301,7 @@ function place(){
 function aim(fx, o){
   const at=fx.def.at, S=LAY.size_m;
   let target;
-  if(fx.def.kind==="head" && o && o.pan!==undefined){
+  if(fx.deROLE(f.kind)==="head" && o && o.pan!==undefined){
     const pan=(o.pan-0.5)*Math.PI*1.5, tilt=0.25+ (o.tilt!==undefined?o.tilt:0.5)*1.1;
     target=new THREE.Vector3(at[0]+Math.sin(pan)*6, at[1]-Math.cos(tilt*0.9)*6,
                              at[2]-Math.cos(pan)*4.0);
@@ -301,7 +310,7 @@ function aim(fx, o){
        you see the face of the lamp and the beam coming toward you. They were aimed
        at the floor just under the truss, which is why every lens was edge-on and
        invisible. The row also fans slightly outward, as a real rig is rigged. */
-    if(fx.def.kind==="blinder" || fx.def.kind==="strobe"){
+    if(fx.deROLE(f.kind)==="blinder" || fx.deROLE(f.kind)==="strobe"){
       target=new THREE.Vector3(at[0], 1.5, -3.0);       // straight at the audience
     } else {
       const mid=S.w/2, fan=(at[0]-mid)*0.55;
@@ -360,7 +369,7 @@ function render(t){
     fx.lens.material.color.copy(c).multiplyScalar(Math.min(1, 0.20 + L));
     fx.halo.material.opacity = Math.min(0.95, L*0.85*(0.35+0.65*EXPO));
     fx.halo.material.color.copy(c);
-    const wide = fx.def.kind==="blinder" || fx.def.kind==="strobe";
+    const wide = fx.deROLE(f.kind)==="blinder" || fx.deROLE(f.kind)==="strobe";
     const hs = (wide ? 0.8 : 0.30) + (wide ? 3.2 : 1.25)*L;
     fx.halo.scale.set(hs, hs, 1);
     fx.pool.material.color.copy(c);

@@ -134,11 +134,28 @@ const RUNGS=[
    that conflates missing data with failure produces a number nobody can act on.
    A rig that never changes colour, or leaves the lamps off while the tune plays,
    is NOT na: that is the show failing and it stays a failure. */
+/* Fixture kinds are read by ROLE here as well. A teammate replaced the rigs with
+   beams, washes and bars -- no fixture called "par" anywhere -- and three checks
+   that filtered on the literal word reported "nothing lit" and "13 of 0 lamps"
+   on a rig with 101 working fixtures. Naming is the layout's business; reading
+   the job is ours. */
+const ROLE = k =>
+    (k === "par" || k === "wash" || k === "uplight")               ? "par"
+  : (k === "head" || k === "beam" || k === "spot" || k === "sky")   ? "head"
+  : (k === "strip" || k === "bar")                                 ? "strip"
+  : (k === "screen" || k === "wall")                               ? "screen"
+  :  k;
 function makeChecks(C){
   const {MAP, LAY, F, LIGHT, WAVE, HZ} = C;
   const dur = m => (m.song && m.song.length) || 240;
   /* one definition of "what colour is this", used by the colour, chords and
      restraint checks -- three copies had already started to drift */
+  /* ids of the things that emit no visible beam, so a check can leave them out
+     of a light total. Built from the layout rather than guessed from id prefixes,
+     which broke the moment fog fixtures were named haze_l1. */
+  const NOLIGHT = new Set((C.LAY && C.LAY.fixtures || [])
+    .filter(f => ROLE(f.kind) === "fog" || ROLE(f.kind) === "co2")
+    .map(f => f.id));
   const HUE_ = o => { const r=(o.r||0)/255, g=(o.g||0)/255, b=(o.b||0)/255;
     const M=Math.max(r,g,b), m2=Math.min(r,g,b), d=M-m2;
     if(d<0.06) return -1;
@@ -213,7 +230,7 @@ function makeChecks(C){
      pump. Falls back to everything when a rig has no surfaces. */
   if(n===4){
     const P=(MAP.observations||{}).pump, B=MAP.beats||[];
-    const surf=(LAY.fixtures||[]).filter(f=>/^(strip|screen)/.test(f.kind||"")||/^(strip|screen)/.test(f.id));
+    const surf=(LAY.fixtures||[]).filter(f=>ROLE(f.kind)==="strip"||ROLE(f.kind)==="screen"||/^(strip|screen)/.test(f.id));
     const pickIds = surf.length ? new Set(surf.map(f=>f.id)) : null;
     const win=(lo,hi)=>{ const v=[];
       let used=0;
@@ -270,7 +287,7 @@ function makeChecks(C){
     return {v:100*r, ok:r>=3,
       txt:`the drop is ${r.toFixed(1)} times brighter than the bar before it`} }
   if(n===3){
-    const use=new Array(LAY.fixtures.filter(f=>f.kind==="par").length).fill(0);
+    const use=new Array(LAY.fixtures.filter(f=>ROLE(f.kind)==="par").length).fill(0);
     for(let t=A;t<Math.min(B2,A+90);t+=0.04){
       const fr=F(t); fr.fixtures.forEach((o,i)=>{ if(i<use.length && (o.level||0)>0.25) use[i]++ }) }
     const tot=use.reduce((a,b)=>a+b,0); if(!tot) return {v:0,ok:false,txt:"nothing lit here"};
@@ -368,7 +385,7 @@ function makeChecks(C){
     for(let i=0;i<xs.length;i++){const a2=xs[i]-mx,b3=ys[i]-my; sxy+=a2*b3; sxx+=a2*a2; syy+=b3*b3}
     if(syy<1e-9) return {v:0,ok:false,txt:"the same lamp stays lit whatever the tune does"};
     const r=sxy/Math.sqrt(sxx*syy||1);
-    const nPar=LAY.fixtures.filter(f=>f.kind==="par").length;
+    const nPar=LAY.fixtures.filter(f=>ROLE(f.kind)==="par").length;
     return {v:100*r, ok:r>=0.45 && seen.size>=Math.min(4,nPar),
       txt:`the lit lamp follows the tune ${r.toFixed(2)} out of 1.00, using ${seen.size} of ${nPar} lamps`} }
   if(n===12){
@@ -438,7 +455,7 @@ function makeChecks(C){
     /* Dark relative to THIS show's own peak, not to a per-fixture constant. A
        fixed threshold called a 55-fixture rig at a quarter brightness "out",
        which is dim, not dark, and made a reasonable show read as 69% black. */
-    const fx=(LAY.fixtures||[]).filter(f=>!/^fog|^co2/.test(f.id));
+    const fx=(LAY.fixtures||[]).filter(f=>!NOLIGHT.has(f.id));
     const tots=[];
     for(let t=A;t<Math.min(B2,A+150);t+=0.05){
       const by={}; for(const o of F(t).fixtures) by[o.id]=o;
@@ -466,13 +483,13 @@ function makeChecks(C){
     const fx=(LAY.fixtures||[]);
     const xs=fx.map(f=>(f.at||[0])[0]);
     const midx=(Math.min(...xs)+Math.max(...xs))/2;
-    const hz=fx.filter(f=>f.kind==="head").map(f=>(f.at||[0,0,0])[2]);
+    const hz=fx.filter(f=>ROLE(f.kind)==="head").map(f=>(f.at||[0,0,0])[2]);
     const backz=hz.length?(Math.min(...hz)+Math.max(...hz))/2:0;
     const groups={
-      pars:  f=>f.kind==="par",
-      left:  f=>f.kind==="head"&&(f.at||[0,0,0])[2]>=backz&&f.at[0]<midx,
-      right: f=>f.kind==="head"&&(f.at||[0,0,0])[2]>=backz&&f.at[0]>=midx,
-      front: f=>f.kind==="head"&&(f.at||[0,0,0])[2]<backz };
+      pars:  f=>ROLE(f.kind)==="par",
+      left:  f=>ROLE(f.kind)==="head"&&(f.at||[0,0,0])[2]>=backz&&f.at[0]<midx,
+      right: f=>ROLE(f.kind)==="head"&&(f.at||[0,0,0])[2]>=backz&&f.at[0]>=midx,
+      front: f=>ROLE(f.kind)==="head"&&(f.at||[0,0,0])[2]<backz };
     const names=Object.keys(groups).filter(k2=>fx.some(groups[k2]));
     if(names.length<2) return {v:0,ok:false,na:true,txt:"this rig has only one group of lamps"};
     const series={}; names.forEach(k2=>series[k2]=[]);
