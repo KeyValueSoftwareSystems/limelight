@@ -1,8 +1,26 @@
-const fs=require('fs');
+const fs=require('fs'), cp=require('child_process');
 const song=process.argv[2]||'levels', rig=process.argv[3]||'festival';
-const M=JSON.parse(fs.readFileSync('/tmp/claude-1001/cmp_'+song+'.json','utf8'));
+/* Compacted straight from maps/model, never from a cached copy: a tool reading
+   a stale snapshot of the thing it measures reports on a map that no longer
+   exists. */
+function mapPath(song){
+  const full='maps/model/'+song+'.full.map.json';
+  return fs.existsSync(full) ? full : 'maps/model/'+song+'.map.json';
+}
+function loadMap(song){
+  return JSON.parse(cp.execFileSync('python3',['-c',
+    'import sys,json;sys.path.insert(0,"readers/src");from compact import compact;'+
+    'print(json.dumps(compact(json.load(open(sys.argv[1])))))', mapPath(song)],
+    {maxBuffer:1<<28}).toString());
+}
+const M=loadMap(song);
 const L=JSON.parse(fs.readFileSync('readers/lights/'+rig+'/layout.json','utf8'));
 global.MAP=M;global.LAYOUT=L;global.ENERGY='medium';global.STOP_REAL=true;global.ANT=true;global.HAZE=0.28;global.DRIFT=true;
+/* SHIFT_MS moves the whole grid, so the cost of the map's grid offset can be
+   priced without committing a correction to the map itself. */
+const SHIFT=(Number(process.env.SHIFT_MS)||0)/1000;
+M.phase+=SHIFT; if(M.beats) M.beats=M.beats.map(b=>b+SHIFT);
+if(M.downbeats) M.downbeats=M.downbeats.map(b=>b+SHIFT);
 global.PER=M.period;global.PH=M.phase;global.DUR=M.dur;global.DBP=M.bar_phase;global.BAR=4*M.period;global.BEATS=[];
 for(let t=M.phase;t<M.dur;t+=M.period)BEATS.push(+t.toFixed(4));
 global.CH=M.chapters.map(c=>c.slice());
@@ -12,15 +30,35 @@ global.EN=M.energy;
 (0,eval)(fs.readFileSync('readers/src/recipe4.js','utf8')+';global.frame=frame;');
 const EV=(M.accents&&M.accents.events)||[];
 const of=b=>EV.filter(e=>e.of===b).map(e=>e.at).sort((a,b)=>a-b);
-// what each family is supposed to be answering
-const ASSIGNED={par:['kick','drums'],uplight:['bass'],head:['other','vocals'],
-                wash:['piano','other'],strip:['guitar','snare'],
-                blinder:['kick'],strobe:['kick'],laser:['kick'],
-                co2:['kick'],confetti:['kick'],pyro:['kick'],video:['other'],fog:[]};
+/* What each family is supposed to be answering.
+
+   This has to say the same thing as FAMILY_VOICE in recipe4.js -- if the two
+   disagree, this tool grades a fixture against an instrument it was never asked
+   to follow, and reports the recipe as out of sync when it is doing exactly what
+   it was told. Keyed by real fixture kind so the rig's own names work, with the
+   legacy names kept alongside. A kind with no entry is REPORTED, not silently
+   skipped: renaming the rig's heads to beams left beam, spot, sky, bar and wall
+   with no assignment at all and the gap was invisible. */
+const ASSIGNED={
+  // movers
+  beam:['other','vocals'], spot:['other','vocals'], head:['other','vocals'],
+  sky:['other','vocals'],
+  // colour beds
+  wash:['piano','other'], par:['kick','drums'], uplight:['bass'],
+  bar:['guitar','snare','hat'], strip:['guitar','snare','hat'],
+  // hitters
+  blinder:['snare'], strobe:['snare','hat'], laser:['kick'],
+  co2:['kick'], confetti:['kick'], pyro:['kick'],
+  // not light
+  wall:['vocals','other'], video:['vocals','other'], fog:[],
+};
+const KOF={};L.fixtures.forEach(f=>KOF[f.id]=f.kind);
+const unassigned=[...new Set(L.fixtures.map(f=>f.kind))].filter(k=>!(k in ASSIGNED));
+if(unassigned.length) console.log('  WARNING: no instrument assigned to: '+unassigned.join(', ')+
+  ' -- those fixtures are not being graded at all');
 const SIG={};
 for(const k in ASSIGNED){ const all=[]; for(const b of ASSIGNED[k]) all.push(...of(b));
   SIG[k]=all.sort((a,b)=>a-b) }
-const KOF={};L.fixtures.forEach(f=>KOF[f.id]=f.kind);
 const FPS=200,N=Math.floor(DUR*FPS);
 const lv={};L.fixtures.forEach(f=>lv[f.id]=new Float32Array(N));
 for(let i=0;i<N;i++){

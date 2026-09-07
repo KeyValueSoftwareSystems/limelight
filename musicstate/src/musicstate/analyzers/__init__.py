@@ -1,4 +1,5 @@
 """Swappable per-level analyzers. Each fills one level of the MusicState."""
+from .accents import AccentsAnalyzer
 from .allin1 import Allin1Analyzer
 from .base import Analyzer, AnalyzerResult
 from .chords import ChordsAnalyzer
@@ -15,6 +16,7 @@ __all__ = [
     "AnalyzerResult",
     "DspAnalyzer",
     "StructureAnalyzer",
+    "AccentsAnalyzer",
     "ChordsAnalyzer",
     "MelodyAnalyzer",
     "NoteTranscriptionAnalyzer",

@@ -1,7 +1,24 @@
 const fs=require('fs'), cp=require('child_process');
 const SONGS=['levels','the-nights','mizhiyoram','starlight','dont-look-down'];
+/* Compact straight from maps/model. This used to read a cached
+   /tmp/.../cmp_<song>.json written by hand earlier in the session, so every
+   number it printed described whatever the map looked like when that cache was
+   made -- chords, phrases and grid_check were all invisible to it. A scorer
+   reading a stale copy of the thing it is scoring is worse than no scorer. */
+function mapPath(song){
+  const full='maps/model/'+song+'.full.map.json';
+  return fs.existsSync(full) ? full : 'maps/model/'+song+'.map.json';
+}
+function loadMap(song){
+  const out=cp.execFileSync('python3',['-c',
+    'import sys,json;sys.path.insert(0,"readers/src");from compact import compact;'+
+    'print(json.dumps(compact(json.load(open(sys.argv[1])))))', mapPath(song)],
+    {maxBuffer:1<<28});
+  return JSON.parse(out.toString());
+}
+
 function setup(song){
-  const M=JSON.parse(fs.readFileSync('/tmp/claude-1001/cmp_'+song+'.json','utf8'));
+  const M=loadMap(song);
   const L=JSON.parse(fs.readFileSync('readers/lights/festival/layout.json','utf8'));
   global.MAP=M; global.LAYOUT=L; global.ENERGY='medium';
   global.STOP_REAL=true; global.ANT=true; global.HAZE=0.28; global.DRIFT=true;
@@ -24,7 +41,9 @@ for(const song of SONGS){
   for(const k in require.cache) delete require.cache[k];
   const {M,L}=setup(song);
   const KOF={}; L.fixtures.forEach(f=>KOF[f.id]=f.kind);
-  const BEAMY=id=>{const k=KOF[id]; return k!=='fog'&&k!=='video'};
+  const EOF_={}; for(const f of L.fixtures) EOF_[f.id]=f.emits;
+  const BEAMY=id=>{const e=EOF_[id]; if(e!==undefined) return e==='light';
+    const k=KOF[id]; return k!=='fog'&&k!=='video'};
   const FPS=50,N=Math.floor(DUR*FPS);
   const tot=new Float64Array(N), act=new Float64Array(N);
   const hues={}; let hn=0, jumps=0, cmp=0;
@@ -131,7 +150,8 @@ for(const song of SONGS){
   const variety=vn?vsum/vn:0;
   // movement rhythm: do heads MOVE in time and HOLD between?
   const MFPS=50, MN=Math.floor(DUR*MFPS);
-  const heads=L.fixtures.filter(f=>f.kind==='head').map(f=>f.id);
+  const heads=L.fixtures.filter(f=>(f.can||[]).indexOf('move')>=0
+                                || f.kind==='head').map(f=>f.id);
   const per={}; heads.forEach(h=>per[h]=[]);
   let pp=null;
   for(let i=0;i<MN;i++){
@@ -171,6 +191,31 @@ for(const song of SONGS){
     sampled++;
   }
   const crowdShare = sampled ? crowded/sampled : 0;
+  const IDS2=L.fixtures.filter(f=>BEAMY(f.id)).map(f=>f.id);
+  const SPB=8, nB=Math.floor((DUR-PH)/BAR)-1;
+  function bvec(b){
+    const v=[];
+    for(let k=0;k<SPB;k++){
+      const t=PH+DBP*PER+(b+k/SPB)*BAR;
+      if(t>=DUR) return null;
+      const f=frame(t), by={};
+      for(const o of f.fixtures){ let x=o.level||0;
+        if(o.pixels&&o.pixels.length){let m=0;for(const q of o.pixels)m=Math.max(m,(q[0]+q[1]+q[2])/765);x=Math.max(x,m)}
+        by[o.id]=x }
+      for(const id of IDS2) v.push(by[id]||0);
+    }
+    return v;
+  }
+  function cosv(a2,b2){let d=0,na=0,nb=0;
+    for(let i=0;i<a2.length;i++){d+=a2[i]*b2[i];na+=a2[i]*a2[i];nb+=b2[i]*b2[i]}
+    return (na>1e-9&&nb>1e-9)?d/Math.sqrt(na*nb):0}
+  const bv=[]; for(let b=0;b<nB;b++) bv.push(bvec(b));
+  let pin=[], pout=[];
+  for(let b=1;b<nB;b++){ if(!bv[b]||!bv[b-1]) continue;
+    const c=cosv(bv[b],bv[b-1]);
+    (Math.floor(b/4)===Math.floor((b-1)/4) ? pin : pout).push(c) }
+  const mn=a2=>a2.length?a2.reduce((x,y)=>x+y,0)/a2.length:0;
+  const figure = mn(pin) - mn(pout);
   const jr=jumps/N;
   const drive=SD_;
   const S={
@@ -189,9 +234,10 @@ for(const song of SONGS){
     variety: band(variety, 0.10, 0.55),
     moverhy: moveRhythm,
     spare:   1 - band(crowdShare, 0.04, 0.28),
+    figure:  band(figure, 0.0, 0.14),
   };
   const W={dark:1.6, range:1.4, midless:1.2, marked:1.4, onbeat:1.2, follow:1.3, calm:1.0, hue:0.8,
-           kill:1.5, build:1.5, beam:1.0, strobe:1.0, variety:1.6, moverhy:1.5, spare:1.4};
+           kill:1.5, build:1.5, beam:1.0, strobe:1.0, variety:1.6, moverhy:1.5, spare:1.4, figure:1.5};
   let num=0,den=0; for(const k in S){num+=S[k]*W[k];den+=W[k]}
   out.push({song, total:num/den, S,
     raw:{crowd:crowdShare,dark:dark,range:range,mid:mid,marked:marked/BEATS.length,
@@ -208,4 +254,4 @@ for(const o of out){
 console.log('  TOTAL           '+(g/out.length).toFixed(4));
 console.log('  raw: '+out.map(o=>o.song.slice(0,4)+' dk'+(100*o.raw.dark).toFixed(0)+' rg'+o.raw.range.toFixed(1)+
   ' mid'+(100*o.raw.mid).toFixed(0)+' mk'+(100*o.raw.marked).toFixed(0)+' ob'+(100*o.raw.onbeat).toFixed(0)+
-  ' r'+o.raw.r.toFixed(2)+' j'+(100*o.raw.jr).toFixed(1)+' mv'+(100*o.S.moverhy).toFixed(0)+' cr'+(100*crowdShareOut(o)).toFixed(0)).join(' | '));
+  ' r'+o.raw.r.toFixed(2)+' j'+(100*o.raw.jr).toFixed(1)+' mv'+(100*o.S.moverhy).toFixed(0)+' cr'+(100*crowdShareOut(o)).toFixed(0)+' fg'+(100*o.S.figure).toFixed(0)).join(' | '));

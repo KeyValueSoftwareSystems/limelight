@@ -254,7 +254,8 @@ def beat_tonality(samples, sr, beats, period):
     k1 = min(TON_N // 2, int(TON_HI_HZ * TON_N / rate))
     zero = [0.0] * len(beats)
     if k1 <= k0 + 1:
-        return zero, list(zero), list(zero), list(zero), list(zero)
+        return (zero, list(zero), list(zero), list(zero), list(zero),
+                [0.0] * 12, [])
     mk0 = max(1, int(MEL_LO_HZ * TON_N / rate))
     mk1 = min(TON_N // 2, int(MEL_HI_HZ * TON_N / rate))
     hk0 = max(1, int(HIGH_LO_HZ * TON_N / rate))
@@ -327,6 +328,7 @@ def beat_tonality(samples, sr, beats, period):
         [v / hpk for v in harmony],
         [v / vmax for v in voiced],
         mean_chroma,
+        chromas,
     )
 
 
@@ -342,6 +344,117 @@ def _corr(a, b):
     da = math.sqrt(sum((x - ma) ** 2 for x in a))
     db = math.sqrt(sum((x - mb) ** 2 for x in b))
     return num / (da * db) if da > 1e-12 and db > 1e-12 else 0.0
+
+CHORD_KINDS = (("", (0, 4, 7)), ("m", (0, 3, 7)), ("7", (0, 4, 7, 10)))
+CHORD_CONF_FLOOR = 0.34
+CHORD_MARGIN_FLOOR = 0.03
+CHORD_SMOOTH_BARS = 3
+
+
+def _chord_templates():
+    out = []
+    for suffix, ivs in CHORD_KINDS:
+        for root in range(12):
+            v = [0.0] * 12
+            for n, iv in enumerate(ivs):
+                # the seventh is real but weaker than the triad it hangs off
+                v[(root + iv) % 12] = 1.0 if n < 3 else 0.7
+            out.append((NOTE_NAMES[root] + suffix, root, v))
+    return out
+
+
+CHORD_TEMPLATES = _chord_templates()
+
+
+def estimate_chords(chroma_beats, beats, groups):
+    """One chord per bar, or nothing for that bar.
+
+    This is a weaker measurement than the one on the-nights, and the `how`
+    string says so: it reads the FULL MIX, where a kick drum and a cymbal both
+    land in the same twelve bins as the harmony. A separated bass+keys chroma is
+    the better instrument and this is what is available without one.
+
+    A bar whose best template does not clear the floor, or does not beat the
+    runner-up on a different root, gets no chord at all. An empty bar is a
+    legitimate answer; a guessed chord is indistinguishable from a measured one
+    once it is written down.
+    """
+    if not chroma_beats or not beats or len(groups) < 2:
+        return None
+    index = {round(b, 3): i for i, b in enumerate(beats)}
+    starts = [index[round(g, 3)] for g in groups if round(g, 3) in index]
+    if len(starts) < 2:
+        return None
+
+    picked = []
+    for n, i0 in enumerate(starts):
+        i1 = starts[n + 1] if n + 1 < len(starts) else len(chroma_beats)
+        rows = [chroma_beats[i] for i in range(i0, min(i1, len(chroma_beats)))]
+        if not rows:
+            picked.append(None)
+            continue
+        acc = [0.0] * 12
+        for row in rows:
+            for i in range(12):
+                acc[i] += row[i]
+        span = sum(acc) or 1.0
+        # chroma bins are A-based; the templates are written C-first
+        c = [acc[(i - 9) % 12] / span for i in range(12)]
+        best = second = None
+        for name, root, tmpl in CHORD_TEMPLATES:
+            r = _corr(c, tmpl)
+            if best is None or r > best[0]:
+                second, best = best, (r, name, root)
+            elif (second is None or r > second[0]) and root != best[2]:
+                second = (r, name, root)
+        margin = best[0] - (second[0] if second else 0.0)
+        if best[0] < CHORD_CONF_FLOOR or margin < CHORD_MARGIN_FLOOR:
+            picked.append(None)
+        else:
+            picked.append((best[1], best[0], margin))
+
+    # a chord lasts longer than a bar, so a single odd bar between two of the
+    # same chord is the analysis flickering rather than the band changing
+    smooth = list(picked)
+    half = CHORD_SMOOTH_BARS // 2
+    for i in range(len(picked)):
+        window = [picked[j][0] for j in range(max(0, i - half),
+                                              min(len(picked), i + half + 1))
+                  if picked[j]]
+        if not window:
+            continue
+        top = max(set(window), key=window.count)
+        if window.count(top) > len(window) / 2:
+            if picked[i] is None:
+                smooth[i] = None            # do not invent a bar that had none
+            elif picked[i][0] != top:
+                smooth[i] = (top, picked[i][1], picked[i][2])
+
+    events = []
+    for n, got in enumerate(smooth):
+        if not got or n >= len(starts):
+            continue
+        name, r, margin = got
+        events.append({
+            "at": round(beats[starts[n]], 3),
+            "chord": name,
+            "confidence": round(max(0.0, min(1.0, 0.55 * r + 3.0 * margin)), 3),
+        })
+    if not events:
+        return None
+    return {
+        "rate": "per_bar",
+        "how": ("chroma template match over 250-2000 Hz of the FULL MIX, 36 "
+                "templates (maj, min, dom7), mode-smoothed across 3 bars"),
+        "not": ("weaker than a chroma taken from separated bass and keys: on the "
+                "full mix a kick and a cymbal land in the same twelve bins as "
+                "the harmony. Bars with no confident match carry no chord "
+                "rather than a guess"),
+        "bars_named": len(events),
+        "bars_total": len(starts),
+        "events": events,
+    }
+
 
 
 def estimate_key(chroma_a_based):
@@ -1143,9 +1256,8 @@ def listen(path):
 
     curve = downbeat_energy(profile, beats, groups) if groups else []
     if curve:
-        tonal, highband, melody, harmony, voiced, chroma_mean = beat_tonality(
-            samples, sr, beats, period
-        )
+        (tonal, highband, melody, harmony, voiced, chroma_mean,
+         chroma_beats) = beat_tonality(samples, sr, beats, period)
         rows = bar_profile(profile, beats, groups, highband)
         beat_index = {round(b, 3): i for i, b in enumerate(beats)}
         tonal_at_groups = [
@@ -1187,6 +1299,7 @@ def listen(path):
         moments, spans = find_stops(profile, beats, period), []
         tonal, highband, tonal_at_groups = [], [], []
         melody, harmony, voiced, chroma_mean = [], [], [], []
+        chroma_beats = []
         sections, stems, accents = [], {}, []
         chapters = [{"at": 0.0, "name": "intro"}]
     moments.sort(key=lambda x: x["at"])
@@ -1301,6 +1414,9 @@ def listen(path):
     key = estimate_key(chroma_mean) if chroma_mean else None
     if key:
         m["observations"]["key"] = key
+    chords = estimate_chords(chroma_beats, beats, groups) if chroma_beats else None
+    if chords:
+        m["observations"]["chords"] = chords
     if grid_note:
         m["grid"]["octave_note"] = grid_note
     if not locked:
