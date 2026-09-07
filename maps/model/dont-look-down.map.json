@@ -48010,6 +48010,45 @@
     0.41
    ],
    "renamed_from": "observations.melody. It is a spectral centroid, not a note, and melody now carries the sung note like the-nights and listen/mapeval.py both expect"
+  },
+  "stem_latency": {
+   "ms": 25.0,
+   "of": "htdemucs_6s output against the mix it was separated from",
+   "how": "cross-correlation of the drums stem envelope against the source mix envelope, 4 kHz, +/-100 ms search, 20 s window",
+   "measured_on": [
+    "dont-look-down",
+    "levels",
+    "mizhiyoram",
+    "starlight"
+   ],
+   "why_it_matters": "Every field derived from a stem inherits it: accents, bass_notes, melody, brightness, envelope and the per-bar stem levels all come from audio that runs 25 ms behind the record. It is the same number on all four songs, so it is the separator and not the music.",
+   "already_applied_to": "accents, via accents.latency_correction_s of -35 ms, which is this 25 ms plus roughly 10 ms of onset-detector flux latency",
+   "not": "applied to bass_notes or melody. Compensating the sampling point there made both measurably worse against listen/mapeval.py, so the sign or the mechanism is not what I assumed and the correction is recorded rather than applied."
+  },
+  "downbeats_suspect": {
+   "what": "the beat this map calls the bar line is not the loudest beat of the bar. Slot 3 is, on all four songs we measured.",
+   "kick_band_by_slot": [
+    0.982,
+    0.94,
+    0.972,
+    1.0
+   ],
+   "high_band_by_slot": [
+    0.921,
+    1.0,
+    0.909,
+    0.966
+   ],
+   "vocal_phrase_starts_pct_by_slot": [
+    13,
+    53,
+    27,
+    7
+   ],
+   "how": "mean band energy at every beat, folded into four slots using this map's own grid.bar_phase, slot 0 being the claimed bar line",
+   "not_evidence": "chord changes land on slot 0 100% of the time and that proves nothing -- chords are estimated PER BAR, at downbeat times, so the agreement is by construction. Grading a thing against its own output is the first mistake listed in this repo and it is easy to repeat.",
+   "unresolved": "the loudest beat of a bar is not always the bar line, and vocal phrase starts disagree across songs (slot 3 on starlight, slot 1 on dont-look-down) because singers come in on a pickup. Nothing here settles it. A human with the audio does, under truth/PROTOCOL.md.",
+   "related": "a teammate found drops two beats early on the-nights by ear, and a rotated copy of these downbeats scores higher than the true one on the harness -- both point at the same question."
   }
  },
  "confidence": 0.92,

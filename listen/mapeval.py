@@ -23,6 +23,7 @@ a wrong answer, and conflating the two produces a leaderboard nobody can act on.
 Results append to synth/learning/mapeval.jsonl, one line per run, so a producer
 can see whether today's change actually helped.
 """
+import hashlib
 import sys, os, json, math, wave, array, datetime, glob
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -438,7 +439,20 @@ def maps_for(slug):
     # gap in beatpos, pump and harmony: they all looked in truth and songs only.
     for p in sorted(glob.glob(os.path.join(ROOT, "maps", "*", slug + ".map.json"))):
         found.append(p)
-    return found
+    # The same map in two places is one map. maps/model is scanned now as well as
+    # synth/maps/<person>/, and a copy kept in both scored twice and sat on the
+    # board as two rows claiming to be two maps. Dedupe on content, keeping the
+    # first path seen, so a duplicate is invisible rather than flattering.
+    seen, uniq = set(), []
+    for p in found:
+        try:
+            h = hashlib.md5(open(p, "rb").read()).hexdigest()
+        except OSError:
+            continue
+        if h in seen:
+            continue
+        seen.add(h); uniq.append(p)
+    return uniq
 
 
 def report(r):
