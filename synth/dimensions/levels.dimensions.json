@@ -12,14 +12,9 @@
  },
  "generated": {
   "by": "readers/lights/dimensions_json.py",
-  "when": "2026-09-07T22:44:27",
+  "when": "2026-09-07T23:27:33",
   "from_map": "synth/truth/levels.map.json",
   "note": "what the song asks for, how fast, and what a rig must supply. trust is honest: low means the field it came from is known to be unreliable and should not carry a gesture yet."
- },
- "dmx": {
-  "frame_hz": 44.0,
-  "frame_ms": 22.73,
-  "note": "nothing finer than one frame reaches a lamp"
  },
  "dimensions": [
   {
@@ -55,12 +50,9 @@
    "from": "observations.groove",
    "trust": "medium",
    "detail": {
-    "swing_ms": 32.2,
-    "dmx_frame_ms": 22.7,
-    "frames_wide": 1.41,
-    "expressible": true
+    "swing_ms": 32.2
    },
-   "note": "a swing narrower than one DMX frame cannot be sent down the wire"
+   "note": "how finely this must land. Whether a given output chain can carry it is a pre-flight question, not a property of the song"
   },
   {
    "key": "amount",
@@ -115,7 +107,8 @@
    "detail": {
     "notes": 909,
     "semitones_middle_90pc": 43.0,
-    "usable_rate_hz": 0.5333
+    "usable_rate_hz": 0.5333,
+    "usable_rate_is": "a limit of the VIEWER, not of any rig -- no room reads a spatial change four times a second"
    },
    "note": "a range this wide is not one melodic line -- the tracker is following different sources -- so do not build a spatial gesture on it yet"
   },

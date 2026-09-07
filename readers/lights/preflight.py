@@ -45,6 +45,8 @@ GESTURES = [
     dict(name="a surface that holds a colour", cap="pixels", n=1,
          sub="uplights washing the back wall, if any have colour"),
     dict(name="heads fan on the drop",  cap="move",   n=2, motor=True),
+    dict(name="hits landing where the groove puts them", cap="level", n=1, timing=True,
+         note="the wire decides this, not the lamps"),
     dict(name="CO2 jet",                kind="co2",   n=1,
          sub="nothing. it is a physical effect and no lamp substitutes for it"),
 ]
@@ -83,7 +85,24 @@ def head_move(lay, seconds):
     return lim * seconds
 
 
-def check(lay, g, bar_s):
+def check(lay, g, bar_s, dims=None):
+    if g.get("timing"):
+        # The output rate is a property of THIS rig's chain, so it belongs here and
+        # not in the dimensions. A layout may declare it; DMX512 at full universes
+        # is 44 Hz and that is the sane default.
+        hz = (lay.get("limits") or {}).get("output_hz", 44.0)
+        frame = 1000.0 / hz
+        sw = None
+        for d in (dims or []):
+            if d.get("key") == "groove":
+                sw = (d.get("detail") or {}).get("swing_ms")
+        if sw is None:
+            return "unknown", "this song states no groove"
+        if sw < frame:
+            return "no", (f"the groove is {sw:.0f} ms and one frame at {hz:.0f} Hz is "
+                          f"{frame:.0f} ms -- {sw/frame:.1f} frames, it cannot be sent")
+        return "yes", (f"the groove is {sw:.0f} ms against a {frame:.0f} ms frame, "
+                       f"{sw/frame:.1f} frames wide")
     if g.get("kind"):
         have = [f for f in lay["fixtures"] if f.get("kind") == g["kind"]]
         return ("yes" if len(have) >= g["n"] else "no"), f"{len(have)} {g['kind']}"
@@ -119,13 +138,15 @@ def main():
         print(f"no map for {slug}"); return
     m = json.load(open(mp))
     bar_s = m["grid"]["period"] * 4
+    dp = os.path.join(ROOT, "synth", "dimensions", slug + ".dimensions.json")
+    dims = json.load(open(dp))["dimensions"] if os.path.exists(dp) else []
     only = sys.argv[sys.argv.index("--rig") + 1] if "--rig" in sys.argv else None
 
     print(f"{slug}: {m['grid']['bpm']:.1f} bpm, one bar is {bar_s:.3f} s")
     print(f"the show wants {len(GESTURES)} gestures\n")
     for name, lay in layouts().items():
         if only and name != only: continue
-        res = [(g, *check(lay, g, bar_s)) for g in GESTURES]
+        res = [(g, *check(lay, g, bar_s, dims)) for g in GESTURES]
         yes = sum(1 for _, v, _ in res if v == "yes")
         print(f"{name}   {len(lay['fixtures'])} fixtures   {yes}/{len(res)} possible")
         for g, verdict, why in res:

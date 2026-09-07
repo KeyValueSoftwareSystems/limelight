@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
-"""Write a song's dimensions as JSON: the contract between a map and a rig.
+"""Write a song's dimensions as JSON: what the song asks for, and of no rig in particular.
+
+Three layers, and the boundary between them is what stops the whole thing rotting.
+
+  the MAP        what the song does.        mentions no rig and no viewer.
+  the DIMENSIONS what the song asks for.    mentions no rig. May mention a VIEWER,
+                                            because what a room can follow is true
+                                            of every room.
+  the PRE-FLIGHT what one rig can supply.   the ONLY place a layout appears.
+
+Renjith caught me breaking my own rule here. This file was carrying a DMX frame
+rate and calling a groove "expressible", which is a statement about a cable, not
+about a song. It is gone. The groove states its width in milliseconds and stops;
+whether 32 ms survives a 22.7 ms frame is a question for the pre-flight, and the
+answer changes with the output chain while the song does not.
 
 Whoever produces maps and whoever builds rigs need to agree on one short object,
 and this is it. Each dimension names what the song does, how fast it does it, what
@@ -18,9 +32,6 @@ import sys, os, json, math, statistics as st, datetime
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 OUT = os.path.join(ROOT, "synth", "dimensions")
-DMX_HZ = 44.0
-
-
 def build(slug):
     p = next((c for c in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
                           os.path.join(ROOT, "synth", "songs", slug + ".map.json"))
@@ -58,11 +69,9 @@ def build(slug):
         sw = (max(vals) - min(vals)) * per
         add("groove", "how far the sixteenths sit off the grid", None, "timing",
             "observations.groove", "medium",
-            {"swing_ms": round(sw * 1000, 1),
-             "dmx_frame_ms": round(1000 / DMX_HZ, 1),
-             "frames_wide": round(sw * DMX_HZ, 2),
-             "expressible": bool(sw * DMX_HZ >= 1.0)},
-            "a swing narrower than one DMX frame cannot be sent down the wire")
+            {"swing_ms": round(sw * 1000, 1)},
+            "how finely this must land. Whether a given output chain can carry it is "
+            "a pre-flight question, not a property of the song")
 
     en = [v for _, v in (d.get("energy") or [])]
     den = [v for _, v in (inst.get("density_per_bar") or [])]
@@ -104,7 +113,9 @@ def build(slug):
         add("pitch", "the tune rising and falling", len(mel) / dur, "position",
             "observations.melody", "low" if span > 24 else "medium",
             {"notes": len(mel), "semitones_middle_90pc": round(span, 1),
-             "usable_rate_hz": round(1 / bar, 4)},
+             "usable_rate_hz": round(1 / bar, 4),
+             "usable_rate_is": "a limit of the VIEWER, not of any rig -- no room "
+                               "reads a spatial change four times a second"},
             ("a range this wide is not one melodic line -- the tracker is following "
              "different sources -- so do not build a spatial gesture on it yet"
              if span > 24 else
@@ -161,8 +172,6 @@ def build(slug):
                      "trust is honest: low means the field it came from is known to "
                      "be unreliable and should not carry a gesture yet."),
         },
-        "dmx": {"frame_hz": DMX_HZ, "frame_ms": round(1000 / DMX_HZ, 2),
-                "note": "nothing finer than one frame reaches a lamp"},
         "dimensions": D,
         "not_measured": missing,
     }
