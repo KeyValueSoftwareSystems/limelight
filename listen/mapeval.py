@@ -234,16 +234,27 @@ def ev_accents(m, B):
     """
     ev = ((m.get("accents") or {}).get("events")) or []
     if len(ev) < 20: return None, "no accents", True
-    dt, low = B["dt"], B["low"]
-    raw = [max(0.0, low[i] - low[i - 1]) for i in range(1, len(low))]
-    if not raw: return None, "no onsets in the audio", True
-    # smoothed to a drum's length: at 5 ms resolution a hit is several hops wide,
-    # and demanding the exact hop be the maximum was too sharp to see anything
-    k = 3
-    on = [max(raw[max(0, i - k):i + k + 1]) for i in range(len(raw))]
+    dt = B["dt"]
+
+    # A third lesson, from measuring every band separately. The check read the
+    # LOW band for every claim, and a hi-hat, a vocal and a guitar do not put
+    # energy there -- so six of the eight instruments in the list were being
+    # graded against a signal they cannot appear in, and scored the same as a
+    # jittered control whether they were right or not. Each band is now checked
+    # against the band it actually lives in: kick and bass against the low band,
+    # everything else against the energy above 250 Hz. Falsified: jittering every
+    # time and swapping the band labels both make this WORSE, on every song.
+    def onset_of(series):
+        raw = [max(0.0, series[i] - series[i - 1]) for i in range(1, len(series))]
+        k = 3
+        return [max(raw[max(0, i - k):i + k + 1]) for i in range(len(raw))]
+    ON = {"low": onset_of(B["low"]), "high": onset_of(B["high"])}
+    if not ON["low"] or not ON["high"]: return None, "no onsets in the audio", True
+    LOWBANDS = {"kick", "bass"}
+    band_of = lambda e: "low" if (e.get("of") in LOWBANDS or e.get("of") is None) else "high"
     W = 12
 
-    def peaky(t):
+    def peaky(t, on):
         i = int(round(t / dt))
         if i < W or i >= len(on) - W: return 0.0
         w = max(on[i - W:i + W + 1])
@@ -251,24 +262,30 @@ def ev_accents(m, B):
 
     import random
     rng = random.Random(3)
-    real = sum(peaky(e["at"]) for e in ev) / len(ev)
-    ctrl = sum(peaky(e["at"] + rng.uniform(-0.09, 0.09)) for e in ev) / len(ev)
-    if ctrl <= 0: return None, "accents could not be checked", True
-
-    # the ceiling: the same number of claims, placed as well as this audio allows
-    order = sorted(range(W, len(on) - W), key=lambda i: -on[i])
-    picked, used = [], []
-    for i in order:
-        if any(abs(i - j) < W for j in used): continue
-        used.append(i); picked.append(i * dt)
-        if len(picked) >= len(ev): break
-    ideal = sum(peaky(t) for t in picked) / max(1, len(picked))
-
-    edge, ceiling = real / ctrl - 1.0, max(0.05, ideal / ctrl - 1.0)
-    frac = max(0.0, min(1.0, edge / ceiling))
-    return frac, (f"{real/ctrl:.2f}x better than a jittered copy of itself, against "
-                  f"{ideal/ctrl:.2f}x for the best placement this audio allows -- "
-                  f"{100*frac:.0f}% of the available signal"), False
+    groups = {}
+    for e in ev: groups.setdefault(band_of(e), []).append(e)
+    tot_frac, tot_n, parts = 0.0, 0, []
+    for name, sub in groups.items():
+        on = ON[name]
+        real = sum(peaky(e["at"], on) for e in sub) / len(sub)
+        ctrl = sum(peaky(e["at"] + rng.uniform(-0.09, 0.09), on) for e in sub) / len(sub)
+        if ctrl <= 0: continue
+        # the ceiling: the same number of claims, placed as well as this band allows
+        order = sorted(range(W, len(on) - W), key=lambda i: -on[i])
+        picked, used = [], []
+        for i in order:
+            if any(abs(i - j) < W for j in used): continue
+            used.append(i); picked.append(i * dt)
+            if len(picked) >= len(sub): break
+        ideal = sum(peaky(t, on) for t in picked) / max(1, len(picked))
+        edge, ceiling = real / ctrl - 1.0, max(0.05, ideal / ctrl - 1.0)
+        frac = max(0.0, min(1.0, edge / ceiling))
+        tot_frac += frac * len(sub); tot_n += len(sub)
+        parts.append(f"{name} {real/ctrl:.2f}x of {ideal/ctrl:.2f}x")
+    if not tot_n: return None, "accents could not be checked", True
+    frac = tot_frac / tot_n
+    return frac, (", ".join(parts) + f" -- {100*frac:.0f}% of the available signal, "
+                  f"each band against its own onsets"), False
 
 
 def ev_chords(m, B, sig, sr):
