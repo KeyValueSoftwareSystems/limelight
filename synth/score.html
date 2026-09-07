@@ -1,0 +1,158 @@
+<title>Limelight · score a map</title>
+<style>
+:root{--bg:#0f1117;--pan:#161a23;--rule:#252b39;--rule2:#333b4c;--ink:#e6e9f1;
+      --mut:#8f98ad;--faint:#666c7e;--tung:#f0a93c;--good:#54c98a;--bad:#e8705a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:15px/1.6 ui-sans-serif,system-ui,sans-serif;padding:26px 22px 60px;
+     max-width:900px;margin:0 auto}
+h1{font:600 15px ui-monospace,monospace;letter-spacing:.09em;text-transform:uppercase;
+   color:var(--tung);margin:0 0 4px}
+p.lede{color:var(--mut);margin:0 0 22px}
+#drop{border:2px dashed var(--rule2);border-radius:9px;padding:34px 20px;text-align:center;
+      color:var(--mut);cursor:pointer;background:var(--pan);transition:.15s}
+#drop:hover,#drop.over{border-color:var(--tung);color:var(--ink)}
+#drop b{color:var(--tung)}
+.row{display:flex;gap:10px;align-items:center;margin:14px 0}
+label{color:var(--faint);font:11px ui-monospace,monospace;letter-spacing:.08em;
+      text-transform:uppercase}
+select,input,button{background:#1d222e;color:var(--ink);border:1px solid var(--rule2);
+  border-radius:5px;padding:7px 11px;font:13px ui-monospace,monospace}
+button{cursor:pointer} button.go{background:var(--tung);color:#20160a;font-weight:700;border-color:var(--tung)}
+#out{margin-top:24px}
+.f{display:grid;grid-template-columns:120px 52px 1fr;gap:12px;align-items:center;
+   padding:7px 0;border-bottom:1px solid var(--rule)}
+.f .n{font:12px ui-monospace,monospace;color:var(--ink)}
+.f .v{font:13px ui-monospace,monospace;font-weight:700;text-align:right}
+.f .b{height:9px;background:#1b2029;border-radius:5px;overflow:hidden;position:relative}
+.f .b i{display:block;height:100%;background:var(--tung)}
+.f .s{grid-column:2 / 4;color:var(--mut);font-size:12.5px;margin-top:-2px}
+.f.na .n,.f.na .v{color:var(--faint)}
+.tot{display:flex;justify-content:space-between;align-items:baseline;
+     margin-top:16px;padding-top:14px;border-top:1px solid var(--rule2)}
+.tot b{font-size:34px;color:var(--tung);font-family:ui-monospace,monospace}
+.tot span{color:var(--mut);font-size:13px}
+table{border-collapse:collapse;width:100%;margin-top:10px;font:12.5px ui-monospace,monospace}
+th{text-align:left;color:var(--faint);font-weight:400;padding:5px 8px;border-bottom:1px solid var(--rule)}
+td{padding:5px 8px;border-bottom:1px solid var(--rule);color:var(--mut)}
+td.t{color:var(--tung);font-weight:700}
+h2{font:600 12px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;
+   color:var(--faint);margin:34px 0 0}
+#msg{margin-top:14px;color:var(--bad);font:13px ui-monospace,monospace}
+</style>
+
+<h1>score a map</h1>
+<p class="lede">Drop in a map file and it is measured against the recording, field by
+field. Nothing is compared against anyone else's map, and nothing is held back —
+every check reads the audio, so there is no answer key to leak.</p>
+
+<div id="drop">Drop a <b>.map.json</b> here, or click to choose one</div>
+<input type="file" id="file" accept=".json" style="display:none">
+
+<div class="row">
+  <label for="song">song</label><select id="song"></select>
+  <label for="who">your name</label><input id="who" size="12" placeholder="amal">
+  <button class="go" id="run" disabled>Score it</button>
+  <span id="picked" style="color:var(--faint);font-size:12px"></span>
+</div>
+<div id="msg"></div>
+<div id="out"></div>
+
+<h2>everyone, latest score per map</h2>
+<div id="board"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let MAP=null;
+
+const NICE={grid:"the beat", downbeats:"the bar", sections:"parts of the song",
+  energy:"loud and quiet", accents:"drum hits", chords:"chords",
+  melody:"the tune", pump:"the sidechain"};
+
+function show(r){
+  if(r.error){ $("msg").textContent=r.error; $("out").innerHTML=""; return }
+  $("msg").textContent="";
+  const order=["grid","downbeats","sections","energy","accents","chords","melody","pump"];
+  let h="";
+  for(const k of order){
+    const f=r.fields[k]; if(!f) continue;
+    const na=f.score===null;
+    h+=`<div class="f${na?" na":""}">
+      <div class="n">${NICE[k]||k}</div>
+      <div class="v">${na?"—":f.score.toFixed(2)}</div>
+      <div class="b"><i style="width:${na?0:Math.round(f.score*100)}%;
+        background:${na?"#333":f.score>0.66?"var(--good)":f.score>0.33?"var(--tung)":"var(--bad)"}"></i></div>
+      <div class="s">${f.said}</div></div>`;
+  }
+  h+=`<div class="tot"><span>accuracy ${r.accuracy.toFixed(2)} on ${r.measured} fields
+      &nbsp;·&nbsp; coverage ${Math.round(r.coverage*100)}%
+      ${r.grid_gate<1?`&nbsp;·&nbsp; <span style="color:var(--bad)">the beat is wrong,
+        so everything timed to it is wrong: score multiplied by ${r.grid_gate.toFixed(2)}</span>`:""}
+      </span><b>${r.total.toFixed(2)}</b></div>`;
+  $("out").innerHTML=h;
+  board();
+}
+
+async function board(){
+  const s=$("song").value;
+  const rows=await (await fetch("/api/mapeval_board?song="+encodeURIComponent(s))).json();
+  if(!rows.length){ $("board").innerHTML="<p style='color:var(--faint)'>nothing scored yet</p>"; return }
+  $("board").innerHTML="<table><tr><th>total</th><th>accuracy</th><th>coverage</th>"
+    +"<th>map</th><th>made by</th></tr>"
+    +rows.map(r=>`<tr><td class="t">${(r.total||0).toFixed(2)}</td>
+      <td>${(r.accuracy||0).toFixed(2)}</td><td>${Math.round((r.coverage||0)*100)}%</td>
+      <td>${r.map||""}</td><td>${r.made_by||"?"}</td></tr>`).join("")+"</table>";
+}
+
+function take(file){
+  const fr=new FileReader();
+  fr.onload=()=>{
+    try{ MAP=JSON.parse(fr.result) }catch(e){ $("msg").textContent="that is not JSON: "+e.message; return }
+    $("msg").textContent="";
+    const t=(MAP.song&&MAP.song.title)||file.name;
+    $("picked").textContent=`${file.name} — ${t}`;
+    $("run").disabled=false;
+    // guess the song from the file name or the title
+    const guess=[...$("song").options].find(o=>
+      file.name.toLowerCase().includes(o.value) ||
+      String(t).toLowerCase().includes(o.value.replace(/-/g," ")));
+    if(guess) $("song").value=guess.value;
+    board();
+  };
+  fr.readAsText(file);
+}
+
+$("drop").onclick=()=>$("file").click();
+$("file").onchange=e=>{ if(e.target.files[0]) take(e.target.files[0]) };
+["dragenter","dragover"].forEach(k=>$("drop").addEventListener(k,e=>{
+  e.preventDefault(); $("drop").classList.add("over") }));
+["dragleave","drop"].forEach(k=>$("drop").addEventListener(k,e=>{
+  e.preventDefault(); $("drop").classList.remove("over") }));
+$("drop").addEventListener("drop",e=>{ if(e.dataTransfer.files[0]) take(e.dataTransfer.files[0]) });
+$("song").onchange=board;
+
+$("run").onclick=async()=>{
+  if(!MAP) return;
+  $("run").disabled=true; $("run").textContent="scoring…"; $("msg").textContent="";
+  try{
+    const r=await fetch(`/api/mapeval?song=${encodeURIComponent($("song").value)}`
+      +`&who=${encodeURIComponent($("who").value)}`,
+      {method:"POST", body:JSON.stringify(MAP)});
+    show(await r.json());
+  }catch(e){ $("msg").textContent=String(e) }
+  $("run").disabled=false; $("run").textContent="Score it";
+};
+
+(async()=>{
+  const songs=await (await fetch("/api/mapeval_songs")).json();
+  /* the real songs first: nobody is scoring a map of 01-pulse, and defaulting to
+     it meant the board looked empty on arrival */
+  const keys=Object.keys(songs).sort((a,b)=>{
+    const rank=k=>["levels","the-nights"].indexOf(k);
+    return (rank(b)-rank(a)) || a.localeCompare(b) });
+  $("song").innerHTML=keys.map(k=>`<option value="${k}">${k}</option>`).join("");
+  const q=new URLSearchParams(location.search).get("song");
+  $("song").value=(q && songs[q]) ? q : (songs.levels ? "levels" : keys[0]);
+  board();
+})();
+</script>

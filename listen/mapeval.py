@@ -255,13 +255,33 @@ def ev_pump(m, B):
            f"claims {claimed:+.3f}, recording says {measured:+.3f}"
 
 
-def evaluate(slug, map_path):
+def audio_for(slug):
+    """Decoding and banding a four-minute song in pure Python takes most of a
+    minute, and every map for that song needs the same numbers. Cached to disk so
+    the second map is instant and a leaderboard is not a coffee break."""
     wav = os.path.join(ROOT, "synth", "out", slug + ".wav")
     if not os.path.exists(wav):
-        return {"error": "no audio for " + slug}
-    m = json.load(open(map_path))
+        return None, None, None
+    cache = os.path.join(ROOT, "synth", "out", slug + ".bands.json")
     sig, sr = load(wav)
+    if os.path.exists(cache) and os.path.getmtime(cache) > os.path.getmtime(wav):
+        try:
+            return sig, sr, json.load(open(cache))
+        except Exception:
+            pass
     B = bands(sig, sr)
+    try:
+        json.dump(B, open(cache, "w"))
+    except Exception:
+        pass
+    return sig, sr, B
+
+
+def evaluate(slug, map_path=None, m=None):
+    m = m if m is not None else json.load(open(map_path))
+    sig, sr, B = audio_for(slug)
+    if B is None:
+        return {"error": "no audio for " + slug}
     out = {}
     for name, fn, args in (
         ("grid", ev_grid, (m, B)), ("downbeats", ev_downbeats, (m, B)),
@@ -289,7 +309,8 @@ def evaluate(slug, map_path):
     g = out["grid"]["score"]
     gate = 1.0 if g is None else min(1.0, max(0.0, g / 0.45))
     total = accuracy * (0.55 + 0.45 * coverage) * gate
-    return {"song": slug, "map": os.path.relpath(map_path, ROOT),
+    return {"song": slug,
+            "map": os.path.relpath(map_path, ROOT) if map_path else "(uploaded)",
             "made_by": (m.get("made_by") or {}).get("who") or (m.get("made_by") or {}).get("how"),
             "total": round(total, 4), "accuracy": round(accuracy, 4),
             "coverage": round(coverage, 4), "grid_gate": round(gate, 4),

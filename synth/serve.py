@@ -908,6 +908,36 @@ class H(http.server.BaseHTTPRequestHandler):
                     "<h1>Shows</h1><p>Pick a song, then choose your own copy of the audio "
                     "in the page.</p><ul>" + links + "</ul>",
                     "text/html; charset=utf-8")
+            if u.path == "/score":
+                return self._send(200, open(os.path.join(HERE, "score.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path == "/api/mapeval_songs":
+                # only songs we have audio for can be scored, since every check
+                # measures the map against the recording
+                out = {}
+                for slug, sp in songs_index().items():
+                    if os.path.exists(sp["wav"]): out[slug] = slug
+                for slug in ("levels", "the-nights"):
+                    if os.path.exists(os.path.join(HERE, "out", slug + ".wav")):
+                        out[slug] = slug
+                return self._send(200, json.dumps(out))
+            if u.path == "/api/mapeval_board":
+                sl = (q.get("song") or [""])[0]
+                fp = os.path.join(HERE, "learning", "mapeval.jsonl")
+                best = {}
+                if os.path.exists(fp):
+                    for line in open(fp):
+                        try: r = json.loads(line)
+                        except Exception: continue
+                        if sl and r.get("song") != sl: continue
+                        k = r.get("map")
+                        if k not in best or r.get("when", "") > best[k].get("when", ""):
+                            best[k] = r
+                rows = sorted(best.values(), key=lambda r: -(r.get("total") or 0))
+                return self._send(200, json.dumps([
+                    {k: r.get(k) for k in ("map", "song", "made_by", "total",
+                                           "accuracy", "coverage", "when")}
+                    for r in rows[:30]]))
             if u.path == "/api/learn":
                 # What was accepted, why, and the number that backed it. This is the
                 # output of the learning phase -- the show is a by-product.
@@ -1045,6 +1075,39 @@ class H(http.server.BaseHTTPRequestHandler):
                 "This instance is read-only: it will score a map and record a verdict, but it "
                 "will not run jobs. Generating songs or rebuilding frames is a shell, and this "
                 "URL is shared. Do those locally."}))
+        if u.path == "/api/mapeval":
+            # Score an uploaded map against the recording. Nothing is held back:
+            # every check compares the map to the AUDIO, so there is no answer key
+            # to leak and no reason to keep the logic private. A check that could be
+            # gamed by reading it would be a check worth fixing, not hiding.
+            try:
+                n = int(self.headers.get("Content-Length", 0))
+                m = json.loads(self.rfile.read(n).decode())
+            except Exception as e:
+                return self._send(400, json.dumps({"error": f"not a JSON map: {e}"}))
+            sl = (q.get("song") or [""])[0]
+            if not sl:
+                return self._send(400, json.dumps({"error": "which song is this a map of?"}))
+            try:
+                lp = os.path.join(ROOT, "listen")
+                if lp not in sys.path: sys.path.insert(0, lp)
+                import mapeval, importlib
+                importlib.reload(mapeval)
+                r = mapeval.evaluate(sl, m=m)
+                who = "".join(c for c in (q.get("who") or [""])[0]
+                              if c.isalnum() or c in "-_")[:24]
+                if who and "error" not in r: r["map"] = f"uploaded/{who}/{sl}"
+                if "error" not in r:
+                    d = os.path.join(HERE, "learning"); os.makedirs(d, exist_ok=True)
+                    import datetime
+                    with open(os.path.join(d, "mapeval.jsonl"), "a") as fh:
+                        fh.write(json.dumps({"when": datetime.datetime.now()
+                                             .isoformat(timespec="seconds"), **r}) + "\n")
+                return self._send(200, json.dumps(r))
+            except Exception as e:
+                import traceback
+                return self._send(500, json.dumps({"error": str(e),
+                                                   "trace": traceback.format_exc()[-500:]}))
         if u.path == "/api/learn":
             try:
                 n = int(self.headers.get("Content-Length", 0))

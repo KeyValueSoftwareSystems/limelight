@@ -72,7 +72,22 @@ late. Select it and rung 1 must go red. If it passes, the check has gone
 circular — it is measuring the map against itself instead of against the audio,
 which is the single most common way a check in this project has been wrong.
 
-## Scoring a map you produced
+## Scoring a map in the browser
+
+Open `/score`, drop your `.map.json` on the page, put your name in, press the
+button. You get a bar per field, the sentence explaining each number, and where
+you sit against everyone else.
+
+Nothing is held back. Every check measures your map against the recording, so
+there is no answer key to leak and no reason to keep the logic private -- a check
+that could be gamed by reading it would be a check worth fixing rather than
+hiding. Read `listen/evals/` if you want to know exactly what each one does.
+
+There is one way to score well without doing the work: claim less. Put beats only
+where the drum is unmistakable and every beat you claim will be right. That is
+what the coverage number is for, and it is why the total uses both.
+
+## Scoring a map from the command line
 
 ```bash
 python3 listen/mapeval.py levels                     the answer map

@@ -40,3 +40,6 @@ synth/incoming/
 
 # the answer key. Never committed — this is the whole point of holding it out.
 synth/truth/
+
+# audio-derived analysis cache, never in the repo
+*.bands.json
