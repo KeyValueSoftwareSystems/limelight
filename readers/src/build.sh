@@ -60,14 +60,36 @@ if args:
 else:
     kb = render(default_map(), "limelight.html", "the-nights")
     print(f"limelight.html  {kb} KB  ({len(LAY)} rigs: {', '.join(sorted(LAY))})")
+    # One show per song, built from the BEST map anyone has for that song rather
+    # than from whatever maps/model happens to hold. The scorer already writes
+    # what each map is worth to synth/learning/mapeval.jsonl, so the ranking is
+    # read from there instead of being decided here -- one writer per fact, and
+    # a map that has never been scored still gets a show, ranked below one that
+    # has. The Nights was the case that made this necessary: the measured map
+    # in maps/model scores 0.70 and the one in maps/amal scores 0.85, and the
+    # stage was showing the lower of the two because of where the file sat.
+    scored = {}
+    board = "synth/learning/mapeval.jsonl"
+    if os.path.exists(board):
+        for line in open(board):
+            try: r = json.loads(line)
+            except Exception: continue
+            mp, tot = r.get("map"), r.get("total")
+            if mp and isinstance(tot, (int, float)):
+                scored[mp] = tot                      # last line wins: latest score
     best = {}
-    for p in sorted(glob.glob("maps/model/*.map.json")):
+    for p in sorted(glob.glob("maps/*/*.map.json")):
+        if os.sep + "sketch" + os.sep in p:           # guesses never drive a show
+            continue
         stem = os.path.basename(p)[:-len(".map.json")]
         slug, _, variant = stem.partition(".")
-        rank = {"full": 2}.get(variant, 1 if variant == "" else 0)
-        if rank >= best.get(slug, (-1, None))[0]:
+        tie = {"full": 2}.get(variant, 1 if variant == "" else 0)
+        rank = (scored.get(p, -1.0), tie)
+        if rank >= best.get(slug, ((-2.0, -1), None))[0]:
             best[slug] = (rank, p)
     for slug in sorted(best):
         out = os.path.join("shows", slug + ".html")
-        print(f"  shows/{slug}.html  {render(best[slug][1], out, slug)} KB")
+        (score, _), src = best[slug]
+        why = f"{src}  ({'scores %.2f' % score if score >= 0 else 'not scored yet'})"
+        print(f"  shows/{slug}.html  {render(src, out, slug)} KB   from {why}")
 PY
