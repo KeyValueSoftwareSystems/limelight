@@ -23,29 +23,30 @@ ROLE = lambda k: ("par" if k in ("par", "wash", "uplight")
                   else "screen" if k in ("screen", "wall")
                   else k)
 
-# Each gesture says what it needs. "kinds" is how many of a role, "cap" an
-# attribute, "limit" a physical demand computed against the layout's own numbers.
+# What each gesture NEEDS, expressed as a capability rather than a fixture name.
+# The layouts already declare capability -- level, colour, strobe, move, pixels --
+# on every one of their fixtures, and reasoning from that instead of from the kind
+# is the difference between a hand-written substitution and a derived one. The
+# small rig owns no fixture called a strobe, and its blinders declare `strobe`, so
+# the burst is possible there and nobody had to write down that blinders can flash.
 GESTURES = [
-    dict(name="flash on the beat",      need_role="par",  n=1),
-    dict(name="brighter on the bar",    need_role="par",  n=1),
-    dict(name="chase across the row",   need_role="par",  n=3,
-         note="fewer than three in a row and there is no row to cross"),
-    dict(name="wash that breathes",     need_any=[("strip", 1), ("screen", 1), ("par", 4)],
-         note="a sidechain needs a sustained surface to duck; four pars will stand in"),
-    dict(name="the build climbs",       need_role="par",  n=2),
-    dict(name="blackout before a drop", need_role="par",  n=1),
-    dict(name="everything white on it", need_role="par",  n=4,
-         note="the hit reads by area; four lamps is the floor"),
-    dict(name="strobe burst",           need_role="strobe", n=1,
-         sub="blinders, or every lamp white for two frames"),
-    dict(name="blinder hit",            need_role="blinder", n=1,
-         sub="pars at full white"),
-    dict(name="CO2 jet",                need_role="co2", n=1, sub="nothing -- it is a physical effect"),
-    dict(name="the tune walks the row", need_role="par", n=4,
-         note="pitch across three positions is a shrug"),
-    dict(name="colour on the harmony",  need_cap="colour", n=1),
-    dict(name="LED wall",               need_role="screen", n=1, sub="uplights washing the back wall"),
-    dict(name="heads fan on the drop",  need_role="head", n=2, motor=True),
+    dict(name="flash on the beat",      cap="level",  n=1),
+    dict(name="brighter on the bar",    cap="level",  n=1),
+    dict(name="chase across the row",   cap="level",  n=3, spread=True,
+         note="three lamps that are not spread across the room is not a row"),
+    dict(name="wash that breathes",     cap="level",  n=4,
+         note="a sidechain needs a sustained surface; four lamps will hold one"),
+    dict(name="the build climbs",       cap="level",  n=2),
+    dict(name="blackout before a drop", cap="level",  n=1),
+    dict(name="everything white on it", cap="level",  n=4),
+    dict(name="strobe burst",           cap="strobe", n=2),
+    dict(name="colour on the harmony",  cap="colour", n=2),
+    dict(name="the tune walks the row", cap="level",  n=4, spread=True),
+    dict(name="a surface that holds a colour", cap="pixels", n=1,
+         sub="uplights washing the back wall, if any have colour"),
+    dict(name="heads fan on the drop",  cap="move",   n=2, motor=True),
+    dict(name="CO2 jet",                kind="co2",   n=1,
+         sub="nothing. it is a physical effect and no lamp substitutes for it"),
 ]
 
 
@@ -58,12 +59,20 @@ def layouts():
     return out
 
 
-def count(lay, role):
-    return sum(1 for f in lay["fixtures"] if ROLE(f.get("kind")) == role)
+def having(lay, cap):
+    return [f for f in lay["fixtures"] if cap in (f.get("can") or [])]
 
 
-def with_cap(lay, cap):
-    return sum(1 for f in lay["fixtures"] if cap in (f.get("can") or []))
+def kinds_of(fixtures):
+    from collections import Counter
+    c = Counter(f.get("kind") for f in fixtures)
+    return ", ".join(f"{n} {k}" for k, n in c.most_common(3))
+
+
+def spread_of(fixtures):
+    """How far apart are they? Three lamps in the same corner are not a row."""
+    xs = [f["at"][0] for f in fixtures if f.get("at")]
+    return (max(xs) - min(xs)) if len(xs) > 1 else 0.0
 
 
 def head_move(lay, seconds):
@@ -75,30 +84,29 @@ def head_move(lay, seconds):
 
 
 def check(lay, g, bar_s):
-    if g.get("need_cap"):
-        have = with_cap(lay, g["need_cap"])
-        return ("yes" if have >= g["n"] else "no"), f"{have} fixtures can do {g['need_cap']}"
-    if g.get("need_any"):
-        for role, n in g["need_any"]:
-            if count(lay, role) >= n:
-                return "yes", f"{count(lay, role)} {role}"
-        wants = ", ".join(f"{n} {r}" for r, n in g["need_any"])
-        return "no", f"needs one of: {wants}"
-    role = g["need_role"]
-    have = count(lay, role)
-    if have < g["n"]:
-        return "no", f"{have} {role}, needs {g['n']}"
+    if g.get("kind"):
+        have = [f for f in lay["fixtures"] if f.get("kind") == g["kind"]]
+        return ("yes" if len(have) >= g["n"] else "no"), f"{len(have)} {g['kind']}"
+    have = having(lay, g["cap"])
+    if len(have) < g["n"]:
+        return "no", f"{len(have)} fixtures can {g['cap']}, needs {g['n']}"
+    if g.get("spread"):
+        w = spread_of(have)
+        room = (lay.get("size_m") or {}).get("w", 0)
+        if room and w < room * 0.35:
+            return "no", (f"{len(have)} can {g['cap']} but they span {w:.1f} m of a "
+                          f"{room:.1f} m room -- not a row")
     if g.get("motor"):
-        reach = head_move(lay, bar_s)
-        if reach is None:
-            return "unknown", f"{have} heads, but the layout states no max_pan_per_s"
-        widest = 0.62                      # the fan the show asks for, in range units
+        lim = (lay.get("limits") or {}).get("max_pan_per_s")
+        if not lim:
+            return "unknown", f"{len(have)} can move, but the layout states no max_pan_per_s"
+        reach, widest = lim * bar_s, 0.62
         if reach < widest:
-            return "no", (f"{have} heads, but they cover {reach:.2f} of range in a bar "
+            return "no", (f"{len(have)} can move but cover {reach:.2f} of range in a bar, "
                           f"and the fan is {widest:.2f} wide")
-        return "yes", (f"{have} heads; a bar gives {reach:.2f} of range and the fan needs "
-                       f"{widest:.2f}, so {reach/widest:.1f}x headroom")
-    return "yes", f"{have} {role}"
+        return "yes", (f"{len(have)} can move ({kinds_of(have)}); a bar gives {reach:.2f} "
+                       f"of range against {widest:.2f} needed, {reach/widest:.1f}x headroom")
+    return "yes", f"{len(have)} can {g['cap']} ({kinds_of(have)})"
 
 
 def main():
