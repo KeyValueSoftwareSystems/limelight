@@ -80,4 +80,8 @@ for(const k of Object.keys(byKind)){
     Object.keys(drivers).sort((a,b)=>drivers[b]-drivers[a]).map(d=>d+'x'+drivers[d]).join(' ').padEnd(30)+
     ' |r| '+mean.toFixed(2)+(weak?('   '+weak+' UNEXPLAINED'):''));
 }
-console.log('  fixtures following nothing (|r|<0.30): '+unexplained+' of '+rows.length);
+const EVENTY=['blinder','strobe','co2','confetti','pyro','laser','video','fog'];
+const cont2=rows.filter(r=>EVENTY.indexOf(r.kind)<0);
+const weakCont=cont2.filter(r=>Math.abs(r.r)<0.18).length;
+console.log('  continuous fixtures explained: '+(cont2.length-weakCont)+'/'+cont2.length+
+  '   event fixtures (not correlation-testable): '+(rows.length-cont2.length));

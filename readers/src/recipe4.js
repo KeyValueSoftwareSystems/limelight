@@ -885,6 +885,20 @@ function cueAt(t, L){
   for(const k in B) out[k] = lerp(A[k] === undefined ? B[k] : A[k], B[k], w);
   return out;
 }
+const INSTR_W = 1.00;
+const INSTR_LO = 0.12;
+const FAMILY_VOICE = {
+  par:     t => Math.max(accentOf('kick',t), stem('drums',t)),
+  uplight: t => stem('bass',t),
+  head:    t => Math.max(stem('vocals',t), stem('other',t)),
+  wash:    t => Math.max(stem('piano',t), stem('other',t)),
+  strip:   t => Math.max(stem('guitar',t), accentOf('snare',t)),
+};
+function instr(kind, t){
+  const f = FAMILY_VOICE[kind];
+  if(!f || INSTR_W <= 0) return 1;
+  return lerp(1, INSTR_LO + (1.9-INSTR_LO)*cl(f(t)), INSTR_W);
+}
 const LIFT_MID = 0.75;
 function climbAt(t, L){
   const bp = buildProg(t);
@@ -895,7 +909,7 @@ function emph(kind, t, L){
   const c = cueAt(t, L);
   const v = c[kind];
   const lift = cl((c.lift === undefined ? LIFT_MID : c.lift)/LIFT_MID, LIFT_LO, LIFT_HI);
-  return (v === undefined ? 1 : v) * lift * climbAt(t, L);
+  return (v === undefined ? 1 : v) * lift * climbAt(t, L) * instr(kind, t);
 }
 function arrayGate(G, t, e, L, n){
   const dep = deployed(G.kind, t);
