@@ -8,7 +8,17 @@
  "made_by": {
   "how": "model",
   "who": "listen/ear.py",
-  "note": "low-band comb fit, octave decided by added-beat support | stems and accents from htdemucs_6s separation, replacing the band-split estimate | mood, novelty and lyrics from MuQ-MuLan, MuQ-large and Whisper"
+  "note": "low-band comb fit, octave decided by added-beat support | stems and accents from htdemucs_6s separation, replacing the band-split estimate | mood, novelty and lyrics from MuQ-MuLan, MuQ-large and Whisper",
+  "upgrades": [
+   {
+    "by": "synth/upgrade_map.py",
+    "added": [
+     "vocal_silence",
+     "microtiming"
+    ],
+    "note": "Derived from numbers already in this file. Nothing was invented, and a field whose source was missing was skipped rather than guessed."
+   }
+  ]
  },
  "grid": {
   "period": 0.714036,
@@ -9956,7 +9966,8 @@
      "confidence": 0.474,
      "pos": 171.0001
     }
-   ]
+   ],
+   "disputed": "a second independent method agrees on 11% of bars -- see observations.chords_check"
   },
   "phrases": {
    "from": "observations.lyrics.words",
@@ -10148,6 +10159,1090 @@
     "3": -0.001
    },
    "hits": 1038
+  },
+  "instruments": {
+   "how": "derived from stems.sources, which is htdemucs presence per bar. enters and leaves use two thresholds, 42% and 26% of that stem's own peak, so a percentile, so one loud bar cannot set the bar for the whole song. No new listening was done and no stem audio was used -- every number here is a function of the per-bar levels already in this file.",
+   "rate": "per_downbeat",
+   "parts": {
+    "vocals": {
+     "enters": [
+      22.76,
+      102.732
+     ],
+     "leaves": [
+      71.314
+     ],
+     "share_of_song": 0.558,
+     "loudest_at": 111.3,
+     "level_per_bar": [
+      0.0018,
+      0.0018,
+      0.0018,
+      0.0018,
+      0.0018,
+      0.0018,
+      0.0018,
+      0.3515,
+      0.5495,
+      0.4883,
+      0.3887,
+      0.5514,
+      0.8298,
+      0.5919,
+      0.5012,
+      0.4048,
+      0.5163,
+      0.4523,
+      0.336,
+      0.4482,
+      0.6749,
+      0.5513,
+      0.4491,
+      0.2602,
+      0.0025,
+      0.0013,
+      0.0009,
+      0.0012,
+      0.0009,
+      0.0113,
+      0.0009,
+      0.0009,
+      0.0008,
+      0.0022,
+      0.0014,
+      0.2344,
+      0.6576,
+      0.5761,
+      1.0,
+      0.4967,
+      0.2648,
+      0.3392,
+      0.1568
+     ]
+    },
+    "drums": {
+     "enters": [
+      45.609,
+      74.17
+     ],
+     "leaves": [
+      71.314,
+      99.876
+     ],
+     "share_of_song": 0.419,
+     "loudest_at": 91.307,
+     "level_per_bar": [
+      0.0046,
+      0.0038,
+      0.0049,
+      0.0014,
+      0.0022,
+      0.0032,
+      0.0038,
+      0.0013,
+      0.0014,
+      0.0026,
+      0.0021,
+      0.0013,
+      0.0013,
+      0.0013,
+      0.0011,
+      0.5526,
+      0.5583,
+      0.9605,
+      0.5613,
+      0.9488,
+      0.5655,
+      0.9459,
+      0.5586,
+      0.7761,
+      0.0043,
+      0.5691,
+      0.5869,
+      0.991,
+      0.5653,
+      0.994,
+      0.6005,
+      1.0,
+      0.5658,
+      0.7584,
+      0.0035,
+      0.0023,
+      0.0013,
+      0.0015,
+      0.0014,
+      0.0013,
+      0.0033,
+      0.0013,
+      0.0029
+     ]
+    },
+    "bass": {
+     "enters": [
+      48.465,
+      77.027,
+      114.156
+     ],
+     "leaves": [
+      71.314,
+      99.876,
+      122.725
+     ],
+     "share_of_song": 0.442,
+     "loudest_at": 88.451,
+     "level_per_bar": [
+      0.0022,
+      0.0023,
+      0.0022,
+      0.0022,
+      0.002,
+      0.0023,
+      0.0023,
+      0.0022,
+      0.0019,
+      0.0021,
+      0.0022,
+      0.0023,
+      0.0022,
+      0.0021,
+      0.0018,
+      0.268,
+      0.982,
+      0.8177,
+      0.9759,
+      0.8396,
+      0.9758,
+      0.8216,
+      0.9656,
+      0.8133,
+      0.002,
+      0.2494,
+      0.9971,
+      0.83,
+      0.9862,
+      0.8392,
+      1.0,
+      0.8246,
+      0.9874,
+      0.8516,
+      0.0016,
+      0.0021,
+      0.0021,
+      0.0022,
+      0.0021,
+      0.6587,
+      0.9682,
+      0.803,
+      0.0023
+     ]
+    },
+    "guitar": {
+     "enters": [
+      31.328,
+      51.321,
+      62.746,
+      68.458,
+      99.876
+     ],
+     "leaves": [
+      39.897,
+      59.89,
+      65.602,
+      77.027,
+      108.444
+     ],
+     "share_of_song": 0.302,
+     "loudest_at": 102.732,
+     "level_per_bar": [
+      0.0163,
+      0.044,
+      0.0129,
+      0.0082,
+      0.0306,
+      0.0261,
+      0.008,
+      0.0144,
+      0.0438,
+      0.0892,
+      0.1383,
+      0.1803,
+      0.1275,
+      0.0109,
+      0.0104,
+      0.0215,
+      0.1144,
+      0.1772,
+      0.1601,
+      0.2067,
+      0.0054,
+      0.1513,
+      0.0026,
+      0.2948,
+      0.5619,
+      0.5758,
+      0.0069,
+      0.0053,
+      0.0026,
+      0.0096,
+      0.0057,
+      0.0068,
+      0.0317,
+      0.0367,
+      0.3789,
+      1.0,
+      0.4995,
+      0.0062,
+      0.0068,
+      0.0063,
+      0.0064,
+      0.0062,
+      0.0065
+     ]
+    },
+    "piano": {
+     "enters": [
+      2.767,
+      37.041,
+      51.321,
+      82.739,
+      117.013
+     ],
+     "leaves": [
+      34.184,
+      45.609,
+      68.458,
+      97.02,
+      122.725
+     ],
+     "share_of_song": 0.581,
+     "loudest_at": 17.048,
+     "level_per_bar": [
+      0.8441,
+      0.8121,
+      0.6789,
+      0.7938,
+      0.8852,
+      1.0,
+      0.888,
+      0.634,
+      0.4594,
+      0.43,
+      0.4743,
+      0.0134,
+      0.4466,
+      0.7391,
+      0.4467,
+      0.0101,
+      0.3017,
+      0.361,
+      0.4708,
+      0.2818,
+      0.437,
+      0.4108,
+      0.5895,
+      0.1796,
+      0.0076,
+      0.008,
+      0.2551,
+      0.0347,
+      0.3766,
+      0.4119,
+      0.6277,
+      0.583,
+      0.5567,
+      0.0161,
+      0.0064,
+      0.0085,
+      0.0737,
+      0.0371,
+      0.0996,
+      0.023,
+      0.3753,
+      0.3016,
+      0.0276
+     ]
+    },
+    "other": {
+     "enters": [
+      74.17,
+      105.588,
+      119.869
+     ],
+     "leaves": [
+      102.732,
+      114.156
+     ],
+     "share_of_song": 0.326,
+     "loudest_at": 97.02,
+     "level_per_bar": [
+      0.1096,
+      0.0748,
+      0.1537,
+      0.0982,
+      0.1653,
+      0.1022,
+      0.1849,
+      0.0419,
+      0.0111,
+      0.0099,
+      0.0086,
+      0.0164,
+      0.0087,
+      0.0084,
+      0.0068,
+      0.0061,
+      0.0148,
+      0.0023,
+      0.0029,
+      0.0035,
+      0.0039,
+      0.0037,
+      0.0035,
+      0.0053,
+      0.0073,
+      0.5904,
+      0.94,
+      0.8526,
+      0.7463,
+      0.5558,
+      0.853,
+      0.8067,
+      0.8446,
+      1.0,
+      0.3302,
+      0.0082,
+      0.523,
+      0.941,
+      0.3774,
+      0.0733,
+      0.1016,
+      0.379,
+      0.4615
+     ]
+    }
+   },
+   "lead_per_bar": [
+    [
+     2.767,
+     "piano",
+     0.844
+    ],
+    [
+     5.623,
+     "piano",
+     0.812
+    ],
+    [
+     8.479,
+     "piano",
+     0.679
+    ],
+    [
+     11.335,
+     "piano",
+     0.794
+    ],
+    [
+     14.191,
+     "piano",
+     0.885
+    ],
+    [
+     17.048,
+     "piano",
+     1.0
+    ],
+    [
+     19.904,
+     "piano",
+     0.888
+    ],
+    [
+     22.76,
+     "piano",
+     0.634
+    ],
+    [
+     25.616,
+     "vocals",
+     0.549
+    ],
+    [
+     28.472,
+     "vocals",
+     0.488
+    ],
+    [
+     31.328,
+     "piano",
+     0.474
+    ],
+    [
+     34.184,
+     "vocals",
+     0.551
+    ],
+    [
+     37.041,
+     "vocals",
+     0.83
+    ],
+    [
+     39.897,
+     "piano",
+     0.739
+    ],
+    [
+     42.753,
+     "vocals",
+     0.501
+    ],
+    [
+     45.609,
+     "vocals",
+     0.405
+    ],
+    [
+     48.465,
+     "bass",
+     0.982
+    ],
+    [
+     51.321,
+     "bass",
+     0.818
+    ],
+    [
+     54.177,
+     "bass",
+     0.976
+    ],
+    [
+     57.034,
+     "bass",
+     0.84
+    ],
+    [
+     59.89,
+     "bass",
+     0.976
+    ],
+    [
+     62.746,
+     "bass",
+     0.822
+    ],
+    [
+     65.602,
+     "bass",
+     0.966
+    ],
+    [
+     68.458,
+     "bass",
+     0.813
+    ],
+    [
+     71.314,
+     "guitar",
+     0.562
+    ],
+    [
+     74.17,
+     "other",
+     0.59
+    ],
+    [
+     77.027,
+     "bass",
+     0.997
+    ],
+    [
+     79.883,
+     "other",
+     0.853
+    ],
+    [
+     82.739,
+     "bass",
+     0.986
+    ],
+    [
+     85.595,
+     "bass",
+     0.839
+    ],
+    [
+     88.451,
+     "bass",
+     1.0
+    ],
+    [
+     91.307,
+     "bass",
+     0.825
+    ],
+    [
+     94.163,
+     "bass",
+     0.987
+    ],
+    [
+     97.02,
+     "other",
+     1.0
+    ],
+    [
+     99.876,
+     "guitar",
+     0.379
+    ],
+    [
+     102.732,
+     "guitar",
+     1.0
+    ],
+    [
+     105.588,
+     "vocals",
+     0.658
+    ],
+    [
+     108.444,
+     "other",
+     0.941
+    ],
+    [
+     111.3,
+     "vocals",
+     1.0
+    ],
+    [
+     114.156,
+     "bass",
+     0.659
+    ],
+    [
+     117.013,
+     "bass",
+     0.968
+    ],
+    [
+     119.869,
+     "bass",
+     0.803
+    ],
+    [
+     122.725,
+     "other",
+     0.462
+    ]
+   ],
+   "arrangement_cues": [
+    {
+     "at": 2.767,
+     "what": "piano",
+     "kind": "enters"
+    },
+    {
+     "at": 22.76,
+     "what": "vocals",
+     "kind": "enters"
+    },
+    {
+     "at": 31.328,
+     "what": "guitar",
+     "kind": "enters"
+    },
+    {
+     "at": 34.184,
+     "what": "piano",
+     "kind": "leaves"
+    },
+    {
+     "at": 37.041,
+     "what": "piano",
+     "kind": "enters"
+    },
+    {
+     "at": 39.897,
+     "what": "guitar",
+     "kind": "leaves"
+    },
+    {
+     "at": 45.609,
+     "what": "drums",
+     "kind": "enters"
+    },
+    {
+     "at": 45.609,
+     "what": "piano",
+     "kind": "leaves"
+    },
+    {
+     "at": 48.465,
+     "what": "bass",
+     "kind": "enters"
+    },
+    {
+     "at": 51.321,
+     "what": "guitar",
+     "kind": "enters"
+    },
+    {
+     "at": 51.321,
+     "what": "piano",
+     "kind": "enters"
+    },
+    {
+     "at": 59.89,
+     "what": "guitar",
+     "kind": "leaves"
+    },
+    {
+     "at": 62.746,
+     "what": "guitar",
+     "kind": "enters"
+    },
+    {
+     "at": 65.602,
+     "what": "guitar",
+     "kind": "leaves"
+    },
+    {
+     "at": 68.458,
+     "what": "guitar",
+     "kind": "enters"
+    },
+    {
+     "at": 68.458,
+     "what": "piano",
+     "kind": "leaves"
+    },
+    {
+     "at": 71.314,
+     "what": "vocals",
+     "kind": "leaves"
+    },
+    {
+     "at": 71.314,
+     "what": "drums",
+     "kind": "leaves"
+    },
+    {
+     "at": 71.314,
+     "what": "bass",
+     "kind": "leaves"
+    },
+    {
+     "at": 74.17,
+     "what": "drums",
+     "kind": "enters"
+    },
+    {
+     "at": 74.17,
+     "what": "other",
+     "kind": "enters"
+    },
+    {
+     "at": 77.027,
+     "what": "bass",
+     "kind": "enters"
+    },
+    {
+     "at": 77.027,
+     "what": "guitar",
+     "kind": "leaves"
+    },
+    {
+     "at": 82.739,
+     "what": "piano",
+     "kind": "enters"
+    },
+    {
+     "at": 97.02,
+     "what": "piano",
+     "kind": "leaves"
+    },
+    {
+     "at": 99.876,
+     "what": "drums",
+     "kind": "leaves"
+    },
+    {
+     "at": 99.876,
+     "what": "bass",
+     "kind": "leaves"
+    },
+    {
+     "at": 99.876,
+     "what": "guitar",
+     "kind": "enters"
+    },
+    {
+     "at": 102.732,
+     "what": "vocals",
+     "kind": "enters"
+    },
+    {
+     "at": 102.732,
+     "what": "other",
+     "kind": "leaves"
+    },
+    {
+     "at": 105.588,
+     "what": "other",
+     "kind": "enters"
+    },
+    {
+     "at": 108.444,
+     "what": "guitar",
+     "kind": "leaves"
+    },
+    {
+     "at": 114.156,
+     "what": "bass",
+     "kind": "enters"
+    },
+    {
+     "at": 114.156,
+     "what": "other",
+     "kind": "leaves"
+    },
+    {
+     "at": 117.013,
+     "what": "piano",
+     "kind": "enters"
+    },
+    {
+     "at": 119.869,
+     "what": "other",
+     "kind": "enters"
+    },
+    {
+     "at": 122.725,
+     "what": "bass",
+     "kind": "leaves"
+    },
+    {
+     "at": 122.725,
+     "what": "piano",
+     "kind": "leaves"
+    }
+   ],
+   "density_per_bar": [
+    [
+     2.767,
+     0.167
+    ],
+    [
+     5.623,
+     0.167
+    ],
+    [
+     8.479,
+     0.167
+    ],
+    [
+     11.335,
+     0.167
+    ],
+    [
+     14.191,
+     0.167
+    ],
+    [
+     17.048,
+     0.167
+    ],
+    [
+     19.904,
+     0.167
+    ],
+    [
+     22.76,
+     0.333
+    ],
+    [
+     25.616,
+     0.333
+    ],
+    [
+     28.472,
+     0.333
+    ],
+    [
+     31.328,
+     0.5
+    ],
+    [
+     34.184,
+     0.333
+    ],
+    [
+     37.041,
+     0.5
+    ],
+    [
+     39.897,
+     0.333
+    ],
+    [
+     42.753,
+     0.333
+    ],
+    [
+     45.609,
+     0.333
+    ],
+    [
+     48.465,
+     0.5
+    ],
+    [
+     51.321,
+     0.833
+    ],
+    [
+     54.177,
+     0.833
+    ],
+    [
+     57.034,
+     0.667
+    ],
+    [
+     59.89,
+     0.667
+    ],
+    [
+     62.746,
+     0.833
+    ],
+    [
+     65.602,
+     0.667
+    ],
+    [
+     68.458,
+     0.667
+    ],
+    [
+     71.314,
+     0.167
+    ],
+    [
+     74.17,
+     0.5
+    ],
+    [
+     77.027,
+     0.5
+    ],
+    [
+     79.883,
+     0.5
+    ],
+    [
+     82.739,
+     0.667
+    ],
+    [
+     85.595,
+     0.667
+    ],
+    [
+     88.451,
+     0.667
+    ],
+    [
+     91.307,
+     0.667
+    ],
+    [
+     94.163,
+     0.667
+    ],
+    [
+     97.02,
+     0.5
+    ],
+    [
+     99.876,
+     0.167
+    ],
+    [
+     102.732,
+     0.333
+    ],
+    [
+     105.588,
+     0.5
+    ],
+    [
+     108.444,
+     0.333
+    ],
+    [
+     111.3,
+     0.333
+    ],
+    [
+     114.156,
+     0.333
+    ],
+    [
+     117.013,
+     0.5
+    ],
+    [
+     119.869,
+     0.5
+    ],
+    [
+     122.725,
+     0.167
+    ]
+   ],
+   "made_by": {
+    "how": "model",
+    "who": "synth/enrich.py",
+    "reproduce": "python3 synth/enrich.py mizhiyoram.map.json"
+   }
+  },
+  "vocal_silence": {
+   "how": "stems.vocals below 0.12, runs of two seconds or more",
+   "spans": [
+    [
+     2.767,
+     19.904
+    ],
+    [
+     71.314,
+     99.876
+    ]
+   ],
+   "silent_seconds": 45.7,
+   "note": "Where the voice is absent. The cleanest structural signal in most records, and what lets a reader spotlight a singer who is actually singing."
+  },
+  "microtiming": {
+   "unit": "ms from the nearest 1/16 of a beat",
+   "quantisation": "1/16",
+   "median": -2.75,
+   "within_15ms_pct": 31.3,
+   "feel": "human",
+   "how": "deviation of each accent from the nearest sixteenth",
+   "note": "Measured against the grid the music is actually played on. Measuring against the nearest BEAT instead reports half a beat of scatter and calls it feel, which is an artifact of assigning subdivision hits to beats."
+  },
+  "chords_check": {
+   "between": "observations.chords and a second, independent chord estimate",
+   "how": "observations.chords is chroma template matching over 250-2000 Hz of the full mix (listen/ear.py). The second is per-semitone Goertzel energy C2-C7 folded to twelve classes, matched against maj/min/dom7 (listen/harmony.py). Different front ends, same audio.",
+   "bars_compared": 38,
+   "exact": 4,
+   "exact_pct": 10.5,
+   "same_root": 8,
+   "same_root_pct": 21.1,
+   "verdict": "DISPUTED. Two methods agree on the chord in 11% of bars and on even the root in 21%. That is not a small disagreement, and nothing here says which one is right. A reader should treat observations.chords as a weak signal until a human with an instrument settles it (truth/PROTOCOL.md)."
+  },
+  "stereo": {
+   "rate": "per_downbeat",
+   "width": "0=mono, 1=fully side",
+   "pan": "-1=left, +1=right",
+   "how": "mid/side on the STEREO source decoded straight from the release, not from synth/out which is mono 32 kHz and cannot carry this. width = |S|/(|M|+|S|) with M=(L+R)/2, S=(L-R)/2",
+   "not": "a stereo measurement of a mix, not of any instrument. A wide bar says the production opened up, not which part moved",
+   "source": "Mizhiyoram -  Manjil Virinja Pookkal  Lofi Mix  Prazz Mu6.mp3",
+   "mix": {
+    "width": [
+     0.5054,
+     0.487,
+     0.5129,
+     0.5149,
+     0.5116,
+     0.5022,
+     0.513,
+     0.2843,
+     0.2666,
+     0.3204,
+     0.3423,
+     0.2072,
+     0.2821,
+     0.308,
+     0.2495,
+     0.1597,
+     0.1653,
+     0.158,
+     0.1579,
+     0.1602,
+     0.1665,
+     0.1578,
+     0.1609,
+     0.2764,
+     0.5007,
+     0.2246,
+     0.1863,
+     0.1795,
+     0.171,
+     0.1792,
+     0.1829,
+     0.1721,
+     0.1696,
+     0.2703,
+     0.5008,
+     0.3698,
+     0.2774,
+     0.199,
+     0.2461,
+     0.2016,
+     0.1882,
+     0.3577,
+     0.5736
+    ],
+    "pan": [
+     0.367,
+     0.2543,
+     0.4516,
+     0.4366,
+     0.4077,
+     0.2989,
+     0.4383,
+     0.0999,
+     0.0805,
+     0.0743,
+     0.1225,
+     0.0938,
+     0.1123,
+     0.0827,
+     0.0588,
+     0.0197,
+     0.016,
+     0.0214,
+     0.0129,
+     0.022,
+     0.0167,
+     0.0177,
+     0.024,
+     0.0426,
+     0.6968,
+     0.0368,
+     0.0172,
+     0.0213,
+     0.0246,
+     0.0183,
+     0.017,
+     0.0174,
+     0.0168,
+     0.0189,
+     0.6938,
+     0.2397,
+     0.0653,
+     0.0278,
+     0.0551,
+     0.0575,
+     0.057,
+     0.1998,
+     -0.2785
+    ]
+   }
   }
  },
  "confidence": 0.908,
