@@ -123,20 +123,29 @@ def release(shape):
     return None
 
 
+try:
+    from mapio import map_path
+except ImportError:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from mapio import map_path
+
+
 def analyse(slug, write=False):
     wav = os.path.join(ROOT, "synth", "out", slug + ".wav")
-    mp = None
     # maps/model is where the measured maps actually live. These tools only
     # looked in synth/truth and synth/songs, so none of them had ever run on
     # levels, starlight, mizhiyoram or dont-look-down -- including pump.py,
-    # which finds the one production element the record is built on.
-    for cand in (os.path.join(ROOT, "maps", "model", slug + ".full.map.json"),
-                 os.path.join(ROOT, "maps", "model", slug + ".map.json"),
-                 os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
-                 os.path.join(ROOT, "synth", "songs", slug + ".map.json")):
-        if os.path.exists(cand):
-            mp = cand
-            break
+    # which finds the one production element the record is built on. The search
+    # itself now lives in mapio, because eight copies of it meant a writer could
+    # only ever write to one directory -- and this one wrote into somebody
+    # else's map when asked to work on a song they own.
+    mp = map_path(slug)
+    if not mp:
+        for cand in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
+                     os.path.join(ROOT, "synth", "songs", slug + ".map.json")):
+            if os.path.exists(cand):
+                mp = cand
+                break
     if not os.path.exists(wav) or not mp:
         return {"song": slug, "error": "no audio or no map"}
     m = json.load(open(mp))

@@ -45,11 +45,16 @@ def frames_for(x, sr, model, proc, dev):
     return H, H.shape[0] / (len(x) / sr)
 
 
+try:
+    from mapio import map_path
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import map_path
+
+
 def analyse(slug, write=False):
-    mp = None
-    for c in (os.path.join(ROOT, "maps", "model", slug + ".full.map.json"),
-              os.path.join(ROOT, "maps", "model", slug + ".map.json")):
-        if os.path.exists(c): mp = c; break
+    mp = map_path(slug)
     wav = os.path.join(ROOT, "synth", "out", slug + ".wav")
     if not mp or not os.path.exists(wav): return {"song": slug, "error": "no map or no audio"}
     m = json.load(open(mp)); beats = m.get("beats") or []

@@ -97,13 +97,12 @@ function show(r){
    instance -- a link to the answer would end the leaderboard in one click. */
 function link(r){
   const m=r.map||"";
-  let which=null;
-  if(m.startsWith("synth/truth/")) which="answer";
-  else if(m.startsWith("synth/songs/")) which="authored";
-  else { const mm=m.match(/^synth\/maps\/([^/]+)\//); if(mm) which=mm[1] }
-  if(!which) return m;
-  return `<a href="/api/map?song=${encodeURIComponent(r.song)}&which=${
-    encodeURIComponent(which)}" style="color:var(--tung)">${m}</a>`;
+  /* every map the board scored came off disk, so every row is a download --
+     addressed by the path the board itself printed rather than by a list of
+     folder names that goes stale the moment a folder is added. The server is
+     the one that refuses the held-out answer; the page does not need to know. */
+  if(!m || m==="(uploaded)") return m||"?";
+  return `<a href="/api/map?path=${encodeURIComponent(m)}" style="color:var(--tung)">${m}</a>`;
 }
 
 async function board(){
