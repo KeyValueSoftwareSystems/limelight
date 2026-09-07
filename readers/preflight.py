@@ -161,9 +161,9 @@ def dimensions_of(m, slug):
 
 
 def run(slug, only_reader=None, only_rig=None):
-    mp = next((c for c in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
-                           os.path.join(ROOT, "synth", "songs", slug + ".map.json"))
-               if os.path.exists(c)), None)
+    sys.path.insert(0, os.path.join(HERE, "lights"))
+    from dimensions_json import map_path      # one resolver, so the enricher and
+    mp = map_path(slug)                       # the pre-flight cannot disagree
     if not mp:
         print(f"no map for {slug}"); return
     m = json.load(open(mp))
@@ -174,7 +174,8 @@ def run(slug, only_reader=None, only_rig=None):
         return
     bar_s = m["grid"]["period"] * 4
     print(f"{slug}: {m['grid']['bpm']:.1f} bpm, one bar is {bar_s:.3f} s, "
-          f"{len(dims)} dimensions to carry   [from {where}]")
+          f"{len(dims)} dimensions to carry\n  map: {os.path.relpath(mp, ROOT)}"
+          f"   dimensions: {where}")
     if stale:
         print("  ! the map has changed since these dimensions were written.\n"
               f"  ! rerun: python3 readers/lights/dimensions_json.py {slug}")

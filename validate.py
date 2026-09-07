@@ -14,19 +14,29 @@ import json, sys, re
 # moved inside the map -- a merge is exactly the moment a reader's vocabulary
 # gets a free ride into the file it was being kept out of. Whole words only:
 # "party" is not a par and "arrangement_cues" is not a cue.
-LIGHTING = {"strobe", "fixture", "fixtures", "dmx", "blinder", "blinders", "lamp",
-            "lamps", "laser", "lasers", "universe", "cue", "cues", "gobo", "haze",
-            "par", "pars", "wash", "beam", "beams", "dimmer", "luminaire", "rig",
-            "pixel", "pixels", "cuelist", "patch"}
-WORD = re.compile(r"[a-z_]+")
+# Concrete and unambiguous only. "cue" was here and came straight back out:
+# arrangement_cues is a musical term for where a part enters, and a guard that
+# cries wolf on a real field is a guard people switch off. Splitting on
+# underscores is what surfaced it -- and is also what catches needs_fixture,
+# which a whole-token match had been reading as one harmless word.
+LIGHTING = {"strobe", "strobes", "fixture", "fixtures", "dmx", "artnet", "sacn",
+            "blinder", "blinders", "lamp", "lamps", "laser", "lasers", "gobo",
+            "gobos", "haze", "hazer", "par", "pars", "beam", "beams", "dimmer",
+            "dimmers", "luminaire", "rig", "rigs", "cuelist", "cuelists",
+            "universe", "universes", "pixel", "pixels", "lumen", "lumens"}
+WORD = re.compile(r"[a-z]+")
 
-# A field whose whole job is to explain something to a human. Prose is allowed to
-# say "this is not a property of any rig" -- that sentence is the rule being
-# stated, not the rule being broken. Everywhere else, a lighting word is data,
-# and data is where the leak would actually do damage.
-PROSE = {"note", "why", "caveat", "how", "why_it_matters", "as_reference",
-         "usable_rate_is", "comment", "description", "needs", "detail", "found",
-         "meaning", "warning", "limits_note", "energy_note"}
+# The leak that matters is a VOCABULARY leak -- a channel called "strobe", a kind
+# called "blinder", a key called needs_fixture. Those are always short tokens. A
+# sentence that happens to contain the word "rig" is prose, and prose has to be
+# able to name the thing it is telling you to keep out; Amal's map says "what a
+# rig does about that is the reader's business", which is the rule being stated
+# rather than broken. So: keys are always data, a value with a space in it is
+# prose, and a bare token is data. This beats maintaining a list of field names
+# forever, and it fails in the safe direction -- a lighting word smuggled in as
+# a value is caught however the field is named.
+def _is_prose(v):
+    return " " in v.strip()
 
 
 def lighting_words(m):
@@ -41,16 +51,16 @@ def lighting_words(m):
             if w in LIGHTING:
                 (warn if prose else err).append((path, w)); return
 
-    def walk(o, path="", prose=False):
+    def walk(o, path=""):
         if isinstance(o, dict):
             for k, v in o.items():
                 scan(k, path + "." + k, False)
-                walk(v, path + "." + k, k in PROSE)
+                walk(v, path + "." + k)
         elif isinstance(o, list):
             for i, v in enumerate(o):
-                walk(v, f"{path}[{i}]", prose)
+                walk(v, f"{path}[{i}]")
         elif isinstance(o, str):
-            scan(o, path, prose)
+            scan(o, path, _is_prose(o))
     walk(m)
     return err, warn
 

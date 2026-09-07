@@ -51,7 +51,14 @@ CHANNELS = ("intensity", "hue", "place", "extent", "time", "focus", "shock", "me
 
 
 def map_path(slug):
-    return next((c for c in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
+    """Best map first. maps/model is where the measured maps land and where the
+    best one currently lives, and it was invisible to four separate tools before
+    -- same missing directory each time -- so it goes at the front."""
+    if os.path.isabs(slug) or os.sep in slug:
+        return slug if os.path.exists(slug) else None
+    return next((c for c in (os.path.join(ROOT, "maps", "model", slug + ".map.json"),
+                             os.path.join(ROOT, "maps", "amal", slug + ".map.json"),
+                             os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
                              os.path.join(ROOT, "synth", "songs", slug + ".map.json"))
                  if os.path.exists(c)), None)
 
