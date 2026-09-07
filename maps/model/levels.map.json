@@ -30263,7 +30263,7 @@
     ]
    ],
    "note_events": 276,
-   "pyin_declined": "pyin voiced 4% of beats (21 of 506), under the 15% floor; the autocorrelation estimate stays"
+   "pyin_declined": "pyin voiced 4.2% of beats on the vocals stem and 3.6% on the `other` stem, where the lead riff lives. The riff is a polyphonic saw stab, not a monophonic line, so no monophonic tracker can claim it; the autocorrelation estimate on the vocal sample stays."
   },
   "harmony": {
    "rate": "per_beat",
@@ -37370,6 +37370,32 @@
     "how": "chroma over the separated bass+piano+guitar+other stems, with the root taken from observations.bass_notes and only the quality matched (maj, min, 7, m7, sus4)",
     "bars_named": 117,
     "why": "a chord model trained on human annotations beat the stem-chroma estimate on the audio check on three of four songs and tied on the fourth, and its labels on Levels are the record's actual progression"
+   },
+   "check_ceiling_test": {
+    "what": "the audio check itself, tested on ChordMini's Levels chords -- C#m, A, E, B, the record's actual progression -- against two deliberate corruptions",
+    "mean_energy_ratio": {
+     "check_as_is": {
+      "truth": 1.45,
+      "rotated_+5": 0.97,
+      "maj_min_swapped": 1.24
+     },
+     "whole_bar_goertzel": {
+      "truth": 1.34,
+      "rotated_+5": 1.05,
+      "maj_min_swapped": 1.11
+     },
+     "cqt_bar": {
+      "truth": 1.32,
+      "rotated_+5": 1.07,
+      "maj_min_swapped": 1.15
+     },
+     "harmonic_cqt_bar": {
+      "truth": 1.48,
+      "rotated_+5": 1.09,
+      "maj_min_swapped": 1.23
+     }
+    },
+    "reading": "the check separates the true chords from both corruptions, so it is not broken; it has a low ceiling on this record because a saturated synth mix smears the chroma. No variant tried beats it by more than noise. chords 0.37 here is the record, and the check was left alone rather than tuned to us."
    }
   },
   "stereo": {

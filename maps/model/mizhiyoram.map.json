@@ -12747,6 +12747,27 @@
     ],
     "reading": "every energy band and where the singer starts held notes put the weight of the bar on slots 2-3; the map's bar line is on the quiet half. Moving the bar line alone scores downbeats 1.00 and collapses bars to 0.00; moving the chapters with it drops sections 1.00 -> 0.62 because the audio genuinely changes where the chapters are now.",
     "conclusion": "two audio-based checks disagree by one beat about where the bar begins and no measurement here breaks the tie. Not rotated. This is what truth/PROTOCOL.md is for."
+   },
+   "beat_this_grid_trial": {
+    "what": "the whole grid replaced by beat_this's beats and downbeats (171 beats, 44 downbeats, period 0.720, bar_phase 1), structure remapped to its nearest beats, scored with listen/mapeval.py",
+    "current_grid": {
+     "total": 0.796,
+     "grid": 0.91,
+     "bars": 1.0,
+     "downbeats": 0.0,
+     "sections": 1.0,
+     "pump": 1.0
+    },
+    "beat_this_grid": {
+     "total": 0.101,
+     "grid": 0.08,
+     "bars": 0.0,
+     "downbeats": 1.0,
+     "sections": 1.0,
+     "pump": 0.67
+    },
+    "reading": "its bar line IS the bar accent the check hears -- downbeats 0.00 -> 1.00 -- and its beats sit half a beat from the kick, so grid 0.91 -> 0.08. mapeval defines the beat as where the kick is; a tracker trained on human tapping defines it as where people tap. On this syncopated record those are half a beat apart, and no grid satisfies both.",
+    "decision": "not applied. The map keeps the kick-aligned grid and carries this so a reader knows the bar line is disputed by a human-trained tracker."
    }
   },
   "beat_tracker_check": {
