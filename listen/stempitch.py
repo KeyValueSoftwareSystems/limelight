@@ -26,7 +26,8 @@ STEMS = "/tmp/claude-1001/stems/htdemucs_6s"
 # period and needs a low rate to make the lag search cheap; a sung note at
 # 900 Hz has a 1.1 ms period and needs a high one to resolve it at all.
 VOICES = {
-    "bass":   {"stem": "bass",   "sr": 2205, "lo": 38.0,  "hi": 420.0,  "field": "bass_notes"},
+    "bass":   {"stem": "bass",   "sr": 2205, "lo": 38.0,  "hi": 420.0,  "field": "bass_notes",
+               "hi_bass": 200.0},
     "melody": {"stem": "vocals", "sr": 8820, "lo": 80.0,  "hi": 1000.0, "field": "melody",
                "floor": 0.34, "lo_sung": 125.0},
 }
@@ -88,7 +89,7 @@ def goertzel(x, i0, n, f, sr):
     return math.sqrt(abs(s1 * s1 + s2 * s2 - k * s1 * s2))
 
 
-def fix_octave(x, i0, n, hz, sr, hi_hz, lo_sung=None):
+def fix_octave(x, i0, n, hz, sr, hi_hz, lo_sung=None, hi_bass=None):
     """Autocorrelation is honest about the PERIOD and careless about the OCTAVE:
     a sung E4 with a strong second harmonic reads as E3, and a bright E5 can read
     as E6. Measured on Levels, octave-2 notes passed an audio check 15% of the
@@ -105,6 +106,17 @@ def fix_octave(x, i0, n, hz, sr, hi_hz, lo_sung=None):
     Energy is read from the stem itself, same window, so this stays one
     measurement and not a vote between two."""
     def E(f): return goertzel(x, i0, n, f, sr)
+    if hi_bass:
+        # the mirror image for the bass: a fundamental above about G3 is not a
+        # bass note, it is a harmonic the estimator locked onto. Walk DOWN while
+        # the octave below carries comparable energy. Against the teammate's
+        # basic-pitch bass line (100% in octaves 1-2), ours had 25% in octave 4
+        # on Starlight.
+        steps = 0
+        while hz > hi_bass and hz / 2 >= 30 and steps < 3:
+            if E(hz / 2) > E(hz) * 0.9: hz /= 2
+            else: break
+            steps += 1
     if lo_sung:
         steps = 0
         while hz < lo_sung and hz * 2 <= hi_hz and steps < 4:
@@ -165,6 +177,7 @@ def analyse(slug, write=False):
         if len(seg) < win // 2:
             notes.append(None); clar.append(0.0); continue
         hz, c = f0(seg, SR)
+        if hz: hz = fix_octave(x, i0, win, hz, SR, HI_HZ * 1.05, hi_bass=VOICES["bass"]["hi_bass"])
         notes.append(name_of(hz)); clar.append(round(c, 3))
     voiced = sum(1 for v in notes if v)
     obs = {
