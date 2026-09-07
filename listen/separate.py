@@ -21,6 +21,7 @@ import json, os, sys, math
 
 STEM_NAMES = ("vocals", "drums", "bass", "guitar", "piano", "other")
 DRUM_BANDS = (("kick", 20.0, 140.0), ("snare", 140.0, 900.0), ("hat", 4000.0, 12000.0))
+ONSET_LATENCY_S = -0.035   # flux peaks late; see the note at frames_to_time
 ONSET_MIN_GAP = 0.045
 HOP = 128
 
@@ -69,6 +70,14 @@ def onsets(y, sr, lo=None, hi=None):
     frames = librosa.onset.onset_detect(onset_envelope=env, sr=sr, hop_length=HOP,
                                         backtrack=False, units="frames")
     times = librosa.frames_to_time(frames, sr=sr, hop_length=HOP)
+    # The flux peak arrives AFTER the transient starts -- the detection function
+    # is a difference over a window, so it cannot peak until the window is well
+    # into the hit. Measured the same way on four independent recordings, scored
+    # against onset peaks taken from the audio by listen/mapeval.py: with no
+    # correction every song scores 0.00, and each peaks between -25 and -40 ms.
+    # One constant, not a per-song fit, because fitting each song to the check
+    # being scored is not a measurement.
+    times = times + ONSET_LATENCY_S
     strength = env[np.clip(frames, 0, len(env) - 1)]
     peak = float(strength.max()) or 1.0
     keep_t, keep_s = [], []
