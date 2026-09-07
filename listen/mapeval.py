@@ -138,19 +138,39 @@ def ev_bars(m, B):
 
 
 def ev_downbeats(m, B):
-    """A bar line should be where the structure changes, not merely every fourth
-    beat. Scored on how much louder the low band is on downbeats than on the
-    other three."""
+    """Is the low band louder on bar lines than on the other beats?
+
+    metaeval says this check was BROKEN: corrupting the downbeats made its score
+    go UP by 0.14. The reason is genuine and worth keeping in view -- in
+    four-on-the-floor there IS no bar-line accent to find. Folding this record over
+    four beats gives 0.91, 0.96, 1.00, 0.94 in the top band and equally flat below:
+    every beat has a kick and there is no crash each bar. So the check was reading
+    noise, and shuffling the input could only move it by luck.
+
+    It now measures whether the signal EXISTS before scoring on it. If the four
+    beats of a bar are within a few per cent of each other, there is nothing here
+    to be right or wrong about and it returns nothing at all rather than a number.
+    """
     db = m.get("downbeats") or []
     beats = m.get("beats") or []
-    if len(db) < 4 or len(beats) < 16: return None, "no downbeats"
-    dset = set(round(x, 2) for x in db)
+    if len(db) < 4 or len(beats) < 16: return None, "no downbeats", True
     dt, low = B["dt"], B["low"]
+    # first: does this record distinguish the beats of a bar at all?
+    bp = (m.get("grid") or {}).get("bar_phase", 0)
+    slots = [[], [], [], []]
+    for i, t in enumerate(beats):
+        slots[(i - bp) % 4].append(_at(low, dt, t))
+    means = [sum(v) / len(v) if v else 0.0 for v in slots]
+    hi, lo = max(means), min(means)
+    if hi <= 0 or (hi - lo) / hi < 0.12:
+        return None, (f"this record has no bar-line accent to measure -- the four beats "
+                      f"of a bar sit within {100*(hi-lo)/max(1e-9,hi):.0f}% of each other"), True
+    dset = set(round(x, 2) for x in db)
     d = [_at(low, dt, t) for t in beats if round(t, 2) in dset]
     o = [_at(low, dt, t) for t in beats if round(t, 2) not in dset]
-    if not d or not o: return None, "downbeats do not line up with beats"
+    if not d or not o: return None, "downbeats do not line up with beats", True
     r = (sum(d) / len(d)) / max(1e-9, sum(o) / len(o))
-    return min(1.0, max(0.0, (r - 0.9) / 0.5)), f"bar lines {r:.2f}x the other beats"
+    return min(1.0, max(0.0, (r - 1.0) / 0.4)), f"bar lines {r:.2f}x the other beats", False
 
 
 def ev_sections(m, B):
@@ -192,15 +212,62 @@ def ev_energy(m, B):
 
 
 def ev_accents(m, B):
+    """Do the claimed hits sit on real onsets, and how close to the best possible?
+
+    Two lessons are baked into this one.
+
+    metaeval caught the first: the original asked whether onset energy was high
+    NEAR each claim, and in a mix with onsets every few hundred milliseconds almost
+    any time is near one. Jittering every accent by 90 ms made the score go UP by
+    0.25. So it asks whether the claim is at a local PEAK, and scores against its
+    own randomised copy -- a check that cannot beat a jittered version of its own
+    input is measuring nothing.
+
+    The second is the more useful one. Beating random is a floor, not a target, so
+    the score is calibrated against a CEILING computed from the audio: the same
+    number of claims placed on the strongest onsets the recording actually has. A
+    score of 1.0 then means "as good as anyone could do on this song" rather than
+    "past a threshold somebody chose". On Levels the ceiling is 1.53x and this map
+    reaches 1.15x, so it captures about a quarter of the signal that is there --
+    which is a far more actionable sentence than a bare 0.68.
+    """
     ev = ((m.get("accents") or {}).get("events")) or []
-    if len(ev) < 20: return None, "no accents"
-    dt, low, hi = B["dt"], B["low"], B["high"]
-    onset = [max(0.0, hi[i] - hi[i - 1]) for i in range(1, len(hi))]
-    mx = max(onset) or 1.0
-    hit = sum(_at(onset, dt, e["at"], 2) for e in ev) / len(ev) / mx
-    base = (sum(onset) / len(onset)) / mx
-    r = hit / max(1e-9, base)
-    return min(1.0, max(0.0, (r - 1.0) / 3.0)), f"onset {r:.1f}x stronger on the claimed hits"
+    if len(ev) < 20: return None, "no accents", True
+    dt, low = B["dt"], B["low"]
+    raw = [max(0.0, low[i] - low[i - 1]) for i in range(1, len(low))]
+    if not raw: return None, "no onsets in the audio", True
+    # smoothed to a drum's length: at 5 ms resolution a hit is several hops wide,
+    # and demanding the exact hop be the maximum was too sharp to see anything
+    k = 3
+    on = [max(raw[max(0, i - k):i + k + 1]) for i in range(len(raw))]
+    W = 12
+
+    def peaky(t):
+        i = int(round(t / dt))
+        if i < W or i >= len(on) - W: return 0.0
+        w = max(on[i - W:i + W + 1])
+        return on[i] / w if w > 0 else 0.0
+
+    import random
+    rng = random.Random(3)
+    real = sum(peaky(e["at"]) for e in ev) / len(ev)
+    ctrl = sum(peaky(e["at"] + rng.uniform(-0.09, 0.09)) for e in ev) / len(ev)
+    if ctrl <= 0: return None, "accents could not be checked", True
+
+    # the ceiling: the same number of claims, placed as well as this audio allows
+    order = sorted(range(W, len(on) - W), key=lambda i: -on[i])
+    picked, used = [], []
+    for i in order:
+        if any(abs(i - j) < W for j in used): continue
+        used.append(i); picked.append(i * dt)
+        if len(picked) >= len(ev): break
+    ideal = sum(peaky(t) for t in picked) / max(1, len(picked))
+
+    edge, ceiling = real / ctrl - 1.0, max(0.05, ideal / ctrl - 1.0)
+    frac = max(0.0, min(1.0, edge / ceiling))
+    return frac, (f"{real/ctrl:.2f}x better than a jittered copy of itself, against "
+                  f"{ideal/ctrl:.2f}x for the best placement this audio allows -- "
+                  f"{100*frac:.0f}% of the available signal"), False
 
 
 def ev_chords(m, B, sig, sr):
@@ -327,10 +394,13 @@ def evaluate(slug, map_path=None, m=None):
         ("chords", ev_chords, (m, B, sig, sr)), ("melody", ev_melody, (m, B, sig, sr)),
     ):
         try:
-            score, why = fn(*args)
+            r = fn(*args)
+            score, why = r[0], r[1]
+            na = r[2] if len(r) > 2 else (score is None)
         except Exception as e:
-            score, why = None, f"threw: {e}"
-        out[name] = {"score": None if score is None else round(score, 4), "said": why}
+            score, why, na = None, f"threw: {e}", False
+        out[name] = {"score": None if score is None else round(score, 4),
+                     "said": why, "na": bool(na)}
     scored = [(WEIGHTS[k], v["score"]) for k, v in out.items() if v["score"] is not None]
     accuracy = sum(w * v for w, v in scored) / sum(w for w, _ in scored) if scored else 0.0
     # Coverage, because a map that claims nothing was scoring above one that claims
