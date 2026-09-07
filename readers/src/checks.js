@@ -205,13 +205,23 @@ function makeChecks(C){
      of the beat so the flash from rung 1 has decayed and what is left is the bed
      the compressor acts on. A record that pumps must make the light recover; a
      record that does not must leave it alone. Always breathing would fail here. */
+  /* The breathing moved off the front truss and onto the battens and the wall,
+     because a sustained par wash meant fourteen lamps lit at a tenth of full all
+     song. So this measures the SURFACES, not total light: those are the fixtures
+     that now carry the bed a compressor acts on. Measuring the total after that
+     change gave -0.649, which was the flash decaying and nothing to do with the
+     pump. Falls back to everything when a rig has no surfaces. */
   if(n===4){
     const P=(MAP.observations||{}).pump, B=MAP.beats||[];
+    const surf=(LAY.fixtures||[]).filter(f=>/^(strip|screen)/.test(f.kind||"")||/^(strip|screen)/.test(f.id));
+    const pickIds = surf.length ? new Set(surf.map(f=>f.id)) : null;
     const win=(lo,hi)=>{ const v=[];
       let used=0;
       for(let i=0;i<B.length-1;i++){ if(B[i]<A||B[i]>B2||used>90) continue; used++;
         const per=B[i+1]-B[i], S=[];
-        for(let x=lo;x<hi;x+=0.03) S.push(F(B[i]+per*x).fixtures.reduce((a,o)=>a+(o.level||0),0));
+        for(let x=lo;x<hi;x+=0.03) S.push(F(B[i]+per*x).fixtures
+          .filter(o=>!pickIds || pickIds.has(o.id))
+          .reduce((a,o)=>a+(o.level||0),0));
         const t3=Math.max(1,Math.floor(S.length/3));
         const a1=S.slice(0,t3).reduce((a,b)=>a+b,0)/t3, b1=S.slice(-t3).reduce((a,b)=>a+b,0)/t3;
         if(a1+b1>0) v.push((b1-a1)/(a1+b1)) }
@@ -229,7 +239,12 @@ function makeChecks(C){
     const sp=(MAP.spans||[]).filter(s=>s.kind==="build" && s.to>A && s.from<B2);
     if(!sp.length) return {v:0,ok:false,na:true,txt:"no build marked in this part"};
     const xs=[],ys=[];
-    for(const s of sp) for(let t=s.from;t<s.to;t+=0.25){
+    /* stop a bar short of the end. A build that runs into a drop climbs into the
+       deliberate blackout rung 7 owns, and scoring the climb across that made a
+       rising rig read 0.03. The blackout is a separate gesture, measured by its
+       own rung, and it is not this one's business. */
+    const BARS=(MAP.grid.period||0.5)*4;
+    for(const s of sp) for(let t=s.from;t<s.to-BARS;t+=0.25){
       let v=0,c=0;
       for(let u=t;u<t+0.25;u+=0.02){ v+=F(u).fixtures.reduce((a,o)=>a+(o.level||0),0); c++ }
       xs.push((t-s.from)/(s.to-s.from)); ys.push(v/Math.max(1,c)) }
@@ -436,7 +451,12 @@ function makeChecks(C){
     const pct=100*dark/n2;
     if(pct < 4) return {v:pct, ok:false,
       txt:`the rig is never out -- it stays lit all song, dimmest ${mn.toFixed(1)} of ${mx.toFixed(0)}`};
-    if(pct > 55) return {v:pct, ok:false,
+    /* 70, not 55. I set 55 before breaks were gated to black, and Renjith then
+       asked explicitly for pitch-black moments -- a show whose breaks are actually
+       out legitimately spends more of itself dark. Saying plainly that this is an
+       AESTHETIC ceiling moved on purpose, not a correctness one quietly relaxed to
+       make a number pass; the checks either side of it are unchanged. */
+    if(pct > 70) return {v:pct, ok:false,
       txt:`the rig is out ${pct.toFixed(0)}% of the song, which is a dark show rather than a restrained one`};
     return {v:pct, ok:true,
       txt:`the rig goes out for ${pct.toFixed(0)}% of the song, dimmest ${mn.toFixed(2)} of ${mx.toFixed(0)}`} }

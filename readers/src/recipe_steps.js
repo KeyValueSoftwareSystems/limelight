@@ -504,15 +504,25 @@ function presetOf(cue, job, i, n){
    Sections also ESCALATE. The same look is thinner the first time you hear it and
    full by the third, because a show that spends everything in verse one has
    nothing left. */
+/* A rig with no battens and no wall has nowhere else to put the bed, so on those
+   the front truss keeps it -- otherwise the sidechain has no surface to act on and
+   the breathing rung is measuring a decaying flash. On a rig that HAS surfaces the
+   pars stay percussive and the surfaces breathe. */
+const HAS_SURFACES = (LAYOUT.fixtures||[]).some(f => f.kind === "strip" || f.kind === "screen");
+const WASH_FLOOR = HAS_SURFACES ? 0 : 0.85;
 const LOOK = {
-  intro:  {pars:0.30, heads:0.00, strips:0.55, screen:"dim",    floor:0.10},
-  verse:  {pars:0.80, heads:0.50, strips:0.65, screen:"colour", floor:0.55},
-  break:  {pars:0.20, heads:0.26, strips:0.30, screen:"black",  floor:0.10},
-  build:  {pars:1.00, heads:0.85, strips:1.00, screen:"pulse",  floor:0.60},
-  drop:   {pars:1.00, heads:1.00, strips:1.00, screen:"hot",    floor:1.00},
-  quiet:  {pars:0.12, heads:0.00, strips:0.22, screen:"black",  floor:0.05},
-  stop:   {pars:0.00, heads:0.00, strips:0.00, screen:"black",  floor:0.00},
-  outro:  {pars:0.35, heads:0.18, strips:0.45, screen:"dim",    floor:0.30},
+/* wash says whether the front truss holds a level at all, and it is mostly 0.
+   A Garrix front truss is a punctuation mark: it hits and it is gone. The only
+   places it sustains are a drop, where the room is meant to be flooded, and an
+   outro, where it is meant to be over. */
+  intro:  {pars:0.35, heads:0.00, strips:0.55, screen:"dim",    wash:0.00},
+  verse:  {pars:0.85, heads:0.55, strips:0.65, screen:"colour", wash:0.00},
+  break:  {pars:0.00, heads:0.30, strips:0.28, screen:"black",  wash:0.00},
+  build:  {pars:1.00, heads:0.85, strips:1.00, screen:"pulse",  wash:0.00},
+  drop:   {pars:1.00, heads:1.00, strips:1.00, screen:"hot",    wash:0.85},
+  quiet:  {pars:0.00, heads:0.00, strips:0.20, screen:"black",  wash:0.00},
+  stop:   {pars:0.00, heads:0.00, strips:0.00, screen:"black",  wash:0.00},
+  outro:  {pars:0.40, heads:0.20, strips:0.45, screen:"dim",    wash:0.35},
 };
 function sectionAt(t){
   const S = MAP.sections || [];
@@ -533,16 +543,21 @@ function lookAt(t){
   const B = buildAt(t);
   let pars = L0.pars, heads = L0.heads, strips = L0.strips;
   if(B){
-    pars   = 0.45 + 0.55 * ss(0.00, 0.30, B.x);
-    heads  = 0.10 + 0.90 * ss(0.25, 0.65, B.x);
-    strips = 0.20 + 0.80 * ss(0.45, 0.95, B.x);
+    /* Spread across the WHOLE build. These all finished by a third of the way in,
+       so the rig reached full early and then the beat-to-beat variation was the
+       only thing left moving -- a climb measured 0.04 because there was nothing
+       left to climb. Each group still joins at a different point, which is the
+       sequencing, but none of them tops out before the end. */
+    pars   = 0.32 + 0.68 * B.x;
+    heads  = 0.08 + 0.92 * ss(0.12, 0.92, B.x);
+    strips = 0.12 + 0.88 * ss(0.30, 1.00, B.x);
   }
   /* and a transition is an EVENT: a bump of near-black at every section start, so
      one part of the song ends rather than merely stopping */
   let bump = 1;
   if(CH.length){
     const at = CH[chIdx(t)][0], dt = t - at;
-    if(dt >= 0 && dt < 0.34) bump = 0.10 + 0.90 * ss(0, 1, dt / 0.34);
+    if(dt >= 0 && dt < 0.40) bump = ss(0, 1, dt / 0.40);          // to zero, and back
   }
   /* a quiet or stop moment overrides the chapter entirely: the room drops out and
      climbs back over two bars, which is the gesture the map already records and
@@ -551,12 +566,37 @@ function lookAt(t){
   for(const mo of MO){
     if(mo.kind !== "quiet" && mo.kind !== "stop") continue;
     const dt = t - mo.at;
-    if(dt >= 0 && dt < BAR * 2) qk = Math.min(qk, 0.25 + 0.75 * ss(0, 1, dt / (BAR * 2)));
+    /* out completely for the first half bar, then back over two */
+    if(dt >= 0 && dt < BAR * 2)
+      qk = Math.min(qk, dt < BAR * 0.5 ? 0 : ss(0, 1, (dt - BAR*0.5) / (BAR * 1.5)));
   }
 
-  return { pars:   pars   * grow * bump * qk,
-           heads:  heads  * grow * bump * qk,
-           strips: strips * grow * bump * qk,
+  /* Pitch black, not ten per cent. A bump that fades to a tenth is a dip; a bump
+     that goes to ZERO is a blackout, and only one of them makes the next thing
+     arrive. Same for a quiet moment and for the bar before a drop. */
+  /* A break is not a dim room, it is a BLACK room with something in it. The rig
+     goes out and comes back for a beat on each bar line -- one stab, then nothing,
+     which is the shape of the section and the reason the drop after it lands.
+     Dimming a break instead is what made the show feel like it was always on. */
+  let gate = 1;
+  if(/break|quiet/.test(name) && !B){
+    const k = beatIndex(t);
+    if(k >= 0){
+      const isD = DOWNSET.has(+BEATS[k].toFixed(3));
+      const age = t - BEATS[k];
+      gate = isD ? Math.exp(-age / 0.30) : 0;
+    } else gate = 0;
+  }
+
+  /* the bar before a drop takes EVERYTHING out, not just the front truss. That
+     bar is the loudest thing in the show and it is made entirely of silence. */
+  const Dp = dropAt(t);
+  const pre = (Dp && Dp.pre !== null) ? Math.pow(Dp.pre, 1.6) : 1;
+  return { pars:   pars   * grow * bump * qk * pre * gate,
+           heads:  heads  * grow * bump * qk * pre * Math.max(gate, 0.12),
+           strips: strips * grow * bump * qk * pre * Math.max(gate, 0.05),
+           wash:   Math.max(L0.wash || 0, WASH_FLOOR) * grow * bump * qk,
+           blackout: bump * qk * pre * Math.max(gate, 0.02),
            screen: B ? "pulse" : (L0.screen || "colour"),
            bump };
 }
@@ -606,7 +646,13 @@ function frame(t){
   /* rung 8: the arrangement decides how much of the row is in play at all, and
      the window sits in the middle so a thin arrangement reads as a narrow rig
      rather than a rig with holes in it */
-  const LK = use(16) ? lookAt(t) : {pars:1,heads:1,strips:1,screen:null,bump:1};
+  /* The fallback must name every field the look provides. It was missing wash, so
+     below rung 16 `LK.wash > 0` was false and the bed silently did not exist --
+     which is why the breathing rung read -0.649 and why two edits to fix it
+     changed nothing at all. A default object that is not the same shape as the
+     real one is a bug that hides. */
+  const LK = use(16) ? lookAt(t)
+           : {pars:1, heads:1, strips:1, wash:1, blackout:1, screen:null, bump:1};
   const LEAD = use(13) ? RECEDE[leadAt(t)] : {flash:1, spot:1, colour:1};
   const w = widthAt(t);
   const half = (NP - w) / 2;
@@ -642,14 +688,22 @@ function frame(t){
     /* the wash respects the arrangement too. It did not, so a lamp that rung 8 had
        taken out of play still sat at bed level -- every lamp lit all the time, and
        soloing the instruments rung showed it at once. */
-    const bedHere = inPlay(i) ? bed : 0;
+    /* The bed came off the front truss. It was added so the sidechain had
+       something to duck and it did that job, but it also meant fourteen pars sat
+       lit at a tenth of full for the entire song -- pointing down, never off,
+       never an event. A real front truss is PERCUSSIVE: it fires and it is gone.
+       The breathing moved to the battens and the wall, which are surfaces, and a
+       surface is what a compressor is actually visible on. The wash only returns
+       where the look asks for it, which is a drop and an outro. */
+    const bedHere = (inPlay(i) && LK.wash > 0) ? bed * LK.wash : 0;
     let lv = (bedHere + (1 - bedHere) * share * amp * env * LEAD.flash) * size * duck * sideGain(f, t) * LK.pars;
     const B = buildAt(t);
     if(B){ lv *= 0.55 + 0.75 * B.shape;                     // it climbs
            if(B.shape > 0.72 && (i === 0 || i === PARS.length-1)) lv *= 0.4 }  // and tightens
     const D = dropAt(t);
     if(D){
-      if(D.pre !== null) lv *= Math.max(0.06, Math.pow(D.pre, 1.8));  // fall away, then black
+      // all the way out. Six per cent is a dim rig; zero is a held breath.
+      if(D.pre !== null) lv *= Math.pow(D.pre, 2.2);
       else if(D.hit)     lv = 1;                                      // everything, white
       else               lv *= 0.85 + 0.35 * D.after;                 // and come back bigger
     }
@@ -768,7 +822,7 @@ function frame(t){
   for(const f of LAYOUT.fixtures){
     if(f.kind !== "strip") continue;
     const e = energyAt(t), Db = dropAt(t), Bb = buildAt(t), ch3 = chordState(t);
-    let lv = 0.16 + 0.50 * e;
+    let lv = (0.16 + 0.50 * e) * duckAt(t);     // the battens breathe, the pars punch
     if(Bb) lv *= 0.5 + 0.9 * Bb.shape;
     if(Db){ if(Db.pre !== null) lv *= Math.max(0.06, Db.pre); else if(Db.hit) lv = 1 }
     const cc = (Db && Db.hit) ? COLDW
@@ -841,10 +895,11 @@ function frame(t){
                                      * (0.45 + 0.55 * Math.exp(-beat / (PER * 0.30))); }
     else if(mode === "hot")   { lv = 0.72 + 0.28 * e; sat = 1.0; lig = 1.0 }
     else                      { lv = 0.16 + 0.42 * e; }
-    if(D4){
-      if(D4.pre !== null) lv *= Math.max(0.04, D4.pre);
-      else if(D4.hit)     lv = 1;
-    }
+    /* the wall obeys the blackouts too. It did not, so a transition or a quiet
+       moment took every lamp out and left the biggest surface in the building
+       still glowing -- which is not a blackout, it is a rig with a fault. */
+    lv *= (LK.blackout !== undefined ? LK.blackout : 1);
+    if(D4 && D4.hit) lv = 1;
     const base = PAL.a;
     const col = (D4 && D4.hit) ? WHITE
               : hsl(base[0] + (ch ? ch.shift : 0), cl(base[1]*sat,0,1), cl(base[2]*lig,0,1));

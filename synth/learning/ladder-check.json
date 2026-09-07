@@ -1,7 +1,7 @@
 {
- "when": "2026-09-05T23:44:35.381Z",
- "pass": 16,
- "fail": 0,
+ "when": "2026-09-07T09:04:15.917Z",
+ "pass": 29,
+ "fail": 3,
  "skip": 0,
  "rows": [
   {
@@ -55,8 +55,8 @@
    "name": "the build",
    "ok": true,
    "na": false,
-   "v": 65.4654720630343,
-   "txt": "the rig climbs through the build, 0.65 out of a possible 1.00"
+   "v": 64.42652844721442,
+   "txt": "the rig climbs through the build, 0.64 out of a possible 1.00"
   },
   {
    "slug": "levels",
@@ -64,8 +64,8 @@
    "name": "the drop",
    "ok": true,
    "na": false,
-   "v": 4418.055239675909,
-   "txt": "the drop is 44.2 times brighter than the bar before it"
+   "v": 15962.851707962258,
+   "txt": "the drop is 159.6 times brighter than the bar before it"
   },
   {
    "slug": "levels",
@@ -91,8 +91,8 @@
    "name": "instruments",
    "ok": true,
    "na": false,
-   "v": 57.756379602283225,
-   "txt": "the rig widens with the song, 0.58 out of a possible 1.00"
+   "v": 55.91234367120956,
+   "txt": "the rig widens with the song, 0.56 out of a possible 1.00"
   },
   {
    "slug": "levels",
@@ -100,8 +100,8 @@
    "name": "melody",
    "ok": true,
    "na": false,
-   "v": 76.61340065519234,
-   "txt": "the lit lamp follows the tune 0.77 out of 1.00, using 4 of 5 lamps"
+   "v": 76.58212521762768,
+   "txt": "the lit lamp follows the tune 0.77 out of 1.00, using 5 of 5 lamps"
   },
   {
    "slug": "levels",
@@ -136,7 +136,7 @@
    "name": "taking sides",
    "ok": true,
    "na": false,
-   "v": 55.5532187519204,
+   "v": 55.61134607162113,
    "txt": "the groups behave 56% alike, and under 70% is different enough"
   },
   {
@@ -145,8 +145,152 @@
    "name": "light and dark",
    "ok": true,
    "na": false,
-   "v": 43.585471509496834,
-   "txt": "the rig goes out for 44% of the song, dimmest 0.01 of 5"
+   "v": 48.11729423525492,
+   "txt": "the rig goes out for 48% of the song, dimmest 0.00 of 5"
+  },
+  {
+   "slug": "the-nights",
+   "n": 1,
+   "name": "beats",
+   "ok": true,
+   "na": false,
+   "v": 181.7949543947826,
+   "txt": "the drum is 1.82 times louder under the flashes than elsewhere"
+  },
+  {
+   "slug": "the-nights",
+   "n": 2,
+   "name": "the bar",
+   "ok": true,
+   "na": false,
+   "v": 87.5,
+   "txt": "14 of 16 new parts start on a blue line"
+  },
+  {
+   "slug": "the-nights",
+   "n": 3,
+   "name": "position",
+   "ok": true,
+   "na": false,
+   "v": 77.02702702702703,
+   "txt": "the least-used lamp gets 77% of an even share"
+  },
+  {
+   "slug": "the-nights",
+   "n": 4,
+   "name": "breathing",
+   "ok": true,
+   "na": false,
+   "v": -0.6741755874657404,
+   "txt": "this song does not do it, and the lamps do not either"
+  },
+  {
+   "slug": "the-nights",
+   "n": 5,
+   "name": "loud and quiet",
+   "ok": false,
+   "na": false,
+   "v": 42.89398587582243,
+   "txt": "the light follows how loud the song is, 0.43 out of a possible 1.00"
+  },
+  {
+   "slug": "the-nights",
+   "n": 6,
+   "name": "the build",
+   "ok": false,
+   "na": false,
+   "v": 10.002227767288812,
+   "txt": "the rig climbs through the build, 0.10 out of a possible 1.00"
+  },
+  {
+   "slug": "the-nights",
+   "n": 7,
+   "name": "the drop",
+   "ok": true,
+   "na": false,
+   "v": 23408.5,
+   "txt": "the drop is 234.1 times brighter than the bar before it"
+  },
+  {
+   "slug": "the-nights",
+   "n": 8,
+   "name": "colour",
+   "ok": true,
+   "na": false,
+   "v": 3,
+   "txt": "3 different colours on stage, counting white as one"
+  },
+  {
+   "slug": "the-nights",
+   "n": 9,
+   "name": "drum hits",
+   "ok": true,
+   "na": false,
+   "v": 93.93939393939394,
+   "txt": "94% of 264 flashes are in time"
+  },
+  {
+   "slug": "the-nights",
+   "n": 10,
+   "name": "instruments",
+   "ok": true,
+   "na": false,
+   "v": 62.803019371464686,
+   "txt": "the rig widens with the song, 0.63 out of a possible 1.00"
+  },
+  {
+   "slug": "the-nights",
+   "n": 11,
+   "name": "melody",
+   "ok": false,
+   "na": false,
+   "v": 37.0886465322847,
+   "txt": "the lit lamp follows the tune 0.37 out of 1.00, using 5 of 5 lamps"
+  },
+  {
+   "slug": "the-nights",
+   "n": 12,
+   "name": "chords",
+   "ok": true,
+   "na": false,
+   "v": 71.42857142857143,
+   "txt": "20 of 28 colour changes land on a chord change"
+  },
+  {
+   "slug": "the-nights",
+   "n": 13,
+   "name": "restraint",
+   "ok": true,
+   "na": false,
+   "v": 180,
+   "txt": "the picture changes 1.8 times a second, and a room can follow about 4"
+  },
+  {
+   "slug": "the-nights",
+   "n": 14,
+   "name": "moving lamps",
+   "ok": true,
+   "na": false,
+   "v": 56.45161290322586,
+   "txt": "the fastest movement is 56% of what the rig allows"
+  },
+  {
+   "slug": "the-nights",
+   "n": 15,
+   "name": "taking sides",
+   "ok": true,
+   "na": false,
+   "v": 25.424832736718834,
+   "txt": "the groups behave 25% alike, and under 70% is different enough"
+  },
+  {
+   "slug": "the-nights",
+   "n": 16,
+   "name": "light and dark",
+   "ok": true,
+   "na": false,
+   "v": 57.680773075641454,
+   "txt": "the rig goes out for 58% of the song, dimmest 0.00 of 6"
   }
  ]
 }
