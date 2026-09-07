@@ -196,7 +196,11 @@ MO = MO || [];
 SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
+const NOV_W = 0.35;
+const NOV_FROM = 0.45;
 const CYC_DROP = 0.5;
+const MOOD_W = 1.00;
+const WARM_AT = 0.55;
 const LONG_LIFT = 1.60;
 const QUIET_GAIN = 2.4;
 const QUIET_COV = 0.26;
@@ -655,6 +659,56 @@ const PROFILES = {
 };
 const NOTE_PC = {C:0,'C#':1,DB:1,D:2,'D#':3,EB:3,E:4,F:5,'F#':6,GB:6,G:7,
                 'G#':8,AB:8,A:9,'A#':10,BB:10,B:11};
+const MOODOBS = (MAP.observations && MAP.observations.mood) || null;
+const MOOD_IDX = (function(){
+  const out = {};
+  const terms = (MOODOBS && MOODOBS.terms) || [];
+  for(let i=0;i<terms.length;i++) out[terms[i]] = i;
+  return out;
+})();
+function moodAt(term, t){
+  if(!MOODOBS || !MOODOBS.at || !MOODOBS.value) return 0.5;
+  const i = MOOD_IDX[term];
+  if(i === undefined) return 0.5;
+  let k = -1;
+  for(let j=0;j<MOODOBS.at.length;j++){ if(MOODOBS.at[j] <= t + 1e-6) k = j; else break }
+  if(k < 0) k = 0;
+  const row = MOODOBS.value[k];
+  return (row && typeof row[i] === 'number') ? cl(row[i]) : 0.5;
+}
+const HAS_MOOD = !!(MOODOBS && MOODOBS.value && MOODOBS.value.length);
+const NOVOBS = (MAP.observations && MAP.observations.novelty) || null;
+const HAS_NOV = !!(NOVOBS && NOVOBS.value && NOVOBS.value.length);
+function novAt(t){
+  if(!HAS_NOV) return 0;
+  const at = NOVOBS.at, v = NOVOBS.value;
+  let k = -1;
+  for(let j=0;j<at.length;j++){ if(at[j] <= t + 1e-6) k = j; else break }
+  if(k < 0) return 0;
+  if(k+1 >= at.length || k+1 >= v.length) return cl(v[v.length-1]);
+  const span = at[k+1]-at[k];
+  return cl(lerp(v[k], v[k+1], span>0 ? ss(0,1,(t-at[k])/span) : 0));
+}
+function novaLift(t){
+  if(!HAS_NOV) return 1;
+  return 1 + NOV_W*ss(NOV_FROM, 1.0, novAt(t));
+}
+function warmthAt(t){
+  if(!HAS_MOOD) return 0.5;
+  return cl(0.5 + 0.5*(moodAt('warm',t) - moodAt('cold',t))
+                + 0.30*(moodAt('euphoric',t) + moodAt('triumphant',t))*0.5
+                - 0.30*(moodAt('dark',t) + moodAt('sad',t))*0.5);
+}
+function liftMoodAt(t){
+  if(!HAS_MOOD) return 1;
+  const up = (moodAt('driving',t) + moodAt('euphoric',t) + moodAt('triumphant',t))/3;
+  const down = (moodAt('calm',t) + moodAt('tender',t))/2;
+  return lerp(1, 0.55 + 0.95*cl(0.5 + 0.5*(up - down)), MOOD_W);
+}
+function tensionAt(t){
+  if(!HAS_MOOD) return 0;
+  return cl((moodAt('tense',t) + moodAt('dark',t))/2);
+}
 const KEYOBS = (MAP.observations && MAP.observations.key) || null;
 function keyFacts(){
   const k = KEYOBS;
@@ -720,10 +774,13 @@ const FINALE_AT = (function(){
 const PAL_STEPS = 3;
 const PAL_JOURNEY = (function(){
   if(PROFILE !== 'auto') return null;
-  const out = [];
-  for(let i=0;i<PAL_STEPS;i++)
-    out.push(palFrom((AUTO.tonic >= 0 ? AUTO.tonic : 0) + i*2, AUTO.major, AUTO.sat, AUTO.lit));
-  return out;
+  const cool = [], warm = [];
+  const tn = AUTO.tonic >= 0 ? AUTO.tonic : 0;
+  for(let i=0;i<PAL_STEPS;i++){
+    cool.push(palFrom(tn + i*2, false, AUTO.sat, AUTO.lit));
+    warm.push(palFrom(tn + i*2, true,  AUTO.sat, AUTO.lit));
+  }
+  return {cool:cool, warm:warm};
 })();
 function palAt(t){
   if(t + 1e-9 >= FINALE_AT) return FINALE_PAL;
@@ -731,7 +788,8 @@ function palAt(t){
   const sec = sectionAt(t);
   const arc = sec && sec.arc !== undefined ? cl(sec.arc) : cl(t/Math.max(1,DUR));
   const i = Math.min(PAL_STEPS-1, Math.floor(arc*PAL_STEPS));
-  return PAL_JOURNEY[i];
+  const lane = (HAS_MOOD && warmthAt(t) > WARM_AT) ? PAL_JOURNEY.warm : PAL_JOURNEY.cool;
+  return lane[i];
 }
 /* [primary, partner] per chapter. Warm carries the song, cool carries the room,
    deep carries the dark, and the build hands over to the drop by going hot. */
@@ -1091,7 +1149,7 @@ function emph(kind, t, L){
   const c = cueAt(t, L);
   const v = c[kind];
   const lift = cl((c.lift === undefined ? LIFT_MID : c.lift)/LIFT_MID, LIFT_LO, LIFT_HI);
-  return (v === undefined ? 1 : v) * lift * climbAt(t, L) * instr(kind, t) * longLift(t, L);
+  return (v === undefined ? 1 : v) * lift * climbAt(t, L) * instr(kind, t) * longLift(t, L) * liftMoodAt(t) * novaLift(t);
 }
 const BED_LOOKS = {quiet:1, idle:1, outro:1};
 const BED_KINDS = {wash:1, uplight:1, strip:1};
@@ -1151,7 +1209,7 @@ function rebuildGeo(){
 const zoomAt=(t,e,L)=>{
   const bp=buildProg(t);
   if(bp>=0) return cl(lerp(0.46,0.06,bp));
-  return cl(cueAt(t,L).zoom);
+  return cl(cueAt(t,L).zoom * lerp(1, 0.62, tensionAt(t)*MOOD_W));
 };
 const NPXof=id=>{const f=LAYOUT.fixtures.find(x=>x.id===id);return (f&&f.pixels)||24};
 
