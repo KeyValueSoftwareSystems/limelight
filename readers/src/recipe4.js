@@ -1052,9 +1052,8 @@ function lookFrame(t,L){
          that changes brightness over time now has to come from the music. */
       const wave=0.88+0.12*Math.cos(2*Math.PI*G.xn);
       const musical=(0.15+0.85*e)*(L==='drop'?1:0.72);
-      lv=((base*0.42 + 0.95*musical)*wave*EX.arc
-         + (0.16+0.52*e)*A*grow*K.accent*drumGate)
-;
+      lv=(base*0.42 + 0.95*musical)*wave*EX.arc
+         + (0.16+0.52*e)*A*grow*K.accent*drumGate;
       /* Layer the chase over the wash rather than replacing it: the wash keeps
          the room from going black between pulses, the chase supplies the
          movement. How much of each depends on how busy the music is -- a quiet

@@ -11,12 +11,18 @@ gets the voice.
 
 One writer per fact: whatever this emits replaces ear.py's estimate of the same
 field, and made_by.note records that it did.
+
+Onsets are NOT backtracked. librosa's backtrack walks each detection back to the
+preceding local minimum, which put every kick 36 ms early on Levels and 18 ms
+early on Starlight -- a bias in the detector, measured against a grid that did
+not come from it. Without it those become -15 ms and +1 ms.
 """
 import json, os, sys, math
 
 STEM_NAMES = ("vocals", "drums", "bass", "guitar", "piano", "other")
 DRUM_BANDS = (("kick", 20.0, 140.0), ("snare", 140.0, 900.0), ("hat", 4000.0, 12000.0))
 ONSET_MIN_GAP = 0.045
+HOP = 128
 
 
 def load(path, sr_target):
@@ -46,7 +52,7 @@ def onsets(y, sr, lo=None, hi=None):
     import librosa
     import numpy as np
     if lo is not None or hi is not None:
-        S = np.abs(librosa.stft(y, n_fft=2048, hop_length=256))
+        S = np.abs(librosa.stft(y, n_fft=2048, hop_length=HOP))
         freqs = librosa.fft_frequencies(sr=sr, n_fft=2048)
         keep = np.ones_like(freqs, dtype=bool)
         if lo is not None:
@@ -55,14 +61,14 @@ def onsets(y, sr, lo=None, hi=None):
             keep &= freqs <= hi
         if not keep.any():
             return [], []
-        env = librosa.onset.onset_strength(S=librosa.amplitude_to_db(S[keep], ref=np.max), sr=sr, hop_length=256)
+        env = librosa.onset.onset_strength(S=librosa.amplitude_to_db(S[keep], ref=np.max), sr=sr, hop_length=HOP)
     else:
-        env = librosa.onset.onset_strength(y=y, sr=sr, hop_length=256)
+        env = librosa.onset.onset_strength(y=y, sr=sr, hop_length=HOP)
     if env.size == 0 or float(env.max()) <= 0:
         return [], []
-    frames = librosa.onset.onset_detect(onset_envelope=env, sr=sr, hop_length=256,
-                                        backtrack=True, units="frames")
-    times = librosa.frames_to_time(frames, sr=sr, hop_length=256)
+    frames = librosa.onset.onset_detect(onset_envelope=env, sr=sr, hop_length=HOP,
+                                        backtrack=False, units="frames")
+    times = librosa.frames_to_time(frames, sr=sr, hop_length=HOP)
     strength = env[np.clip(frames, 0, len(env) - 1)]
     peak = float(strength.max()) or 1.0
     keep_t, keep_s = [], []
