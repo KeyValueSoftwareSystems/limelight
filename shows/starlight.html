@@ -565,7 +565,17 @@ function primaryLook(t){ if(stopAt(t))return'stop';
   if(since('quiet',t,8)[0])return'quiet';
   const z=spanAt(t); if(z&&z.kind==='build')return'build';
   if((z&&z.kind==='quiet')||['break','quiet'].includes(chAt(t)))return'quiet';
-  if(chAt(t)==='drop')return'drop'; if(chAt(t)==='verse')return'verse'; return'idle'}
+  if(chAt(t)==='drop')return'drop'; if(chAt(t)==='verse')return'verse';
+  /* A chapter NAMED build is a build. This only ever recognised a build from a
+     `spans` entry, so a map that puts it in `chapters` -- which is where the
+     listener puts it -- fell through to `idle`, the emptiest look there is.
+     Starlight carries 68 s of build chapters and no build span: 38% of that
+     song was rendered as nothing at all while the map said the tension was
+     rising. Same for outro, which has entries in every look table here and was
+     never returned. */
+  if(chAt(t)==='build')return'build';
+  if(chAt(t)==='outro')return'outro';
+  return'idle'}
 function buildSegs(){
   const c=new Set([0,DUR]);
   CH.forEach(x=>c.add(x[0])); SP.forEach(s=>{c.add(s.from);c.add(s.to)});
@@ -1212,28 +1222,67 @@ const DROP_SETTLE = 0.60;
 const CUE_XF = 0.06;
 const HOFF_SPREAD = 0.15;
 const HOFF_TRUSS = 0.50;
-/* A hard narrow beam is ON or OFF.
+/* ---- a beam is cast for a phrase, not decided every frame ------------------
 
-   Coverage works by dimming, which is right for a wash: at 20% it is a faint
-   glow taking up less of the picture. A 4-degree beam at 4% is not faint -- it
-   is still a full-length hard line drawn through the haze, just a dim one. So
-   "34% coverage" over thirty beams produced twenty visible lines instead of ten
-   beams lit and twenty dark, and twenty lines at different angles is noise. At
-   bar 4 of Starlight, a verse, 20 of 30 beams were up at 0.03-0.06.
+   Two wrong answers before this one.
 
-   Which fixtures this applies to comes from the layout's own beam_deg, so a rig
-   full of wide washes is unaffected and nothing here knows a fixture by name. */
+   First, coverage dimmed instead of switching. That is right for a wash -- at
+   20% it is a faint glow taking less of the picture -- and wrong for a
+   4-degree beam, which at 4% is still a full-length hard line through the haze.
+   A 34% ceiling over thirty beams gave twenty faint lines at twenty angles,
+   which is noise. At bar 4 of Starlight, a verse, 20 of 30 beams were up at
+   0.03-0.06.
+
+   So I put a threshold on the level, and made it worse: the level varies
+   continuously, so beams crossed the cut in both directions constantly and
+   popped in and out inside a tenth of a second. Two screenshots 0.1 s apart had
+   eight beams and then none. That is "they come out of nowhere and go out of
+   nowhere", and it was a hard gate on a moving signal.
+
+   A designer does not re-decide the beam set every frame. They cast a look: a
+   few beams come up, they STAY up for a phrase, they go away together. So
+   membership is a function of (fixture, which interval we are in) -- stable for
+   the whole interval by construction -- and the only thing that moves inside the
+   interval is a fade. A beam that is in both this interval and the next does not
+   dip between them, which is what makes it read as held rather than retriggered.
+
+   Still a pure lookup: no state, no memory, and t = 47 twice gives one answer. */
 const BEAM_HARD_DEG = 8.0;
-const BEAM_CUT = 0.16;
-const BEAM_MIN = 0.42;
-function beamKnee(deg, lv){
-  if(deg === undefined || deg > BEAM_HARD_DEG) return lv;
-  if(lv < BEAM_CUT) return 0;
-  return cl(BEAM_MIN + (1-BEAM_MIN)*(lv-BEAM_CUT)/(1-BEAM_CUT));
+const BEAM_HOLD_BARS = 2;      // a beam look lasts a phrase, not a frame
+const BEAM_FADE = 0.22;        // of the interval, at each end
+const BEAM_FLOOR = 0.55;       // a beam that is up is properly up
+/* How much of the beam rig a look asks for. A verse gets a few, an idle gets
+   none at all, a drop gets nearly all of them. */
+const BEAM_WANT = {drop:0.85, flash:1.00, build:0.52, verse:0.26, break:0.12,
+                   quiet:0.10, idle:0.00, outro:0.12, spotlight:0.06, stop:0.00};
+function beamPick(ki, i){
+  // deterministic, and mirrored pairs come up together so the rig stays symmetric
+  const p = Math.floor(ki/2);
+  let h = (Math.imul(p, 73856093) ^ Math.imul(i, 19349663)) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177) | 0;
+  h = h ^ (h >>> 16);
+  return ((h >>> 0) % 1024) / 1024;
 }
-const DWELL_LO = 0.35;
-const DWELL_HI = 0.22;
-const DWELL_CAP = 0.50;
+function beamEnv(ki, t, want){
+  if(!(want > 0)) return 0;
+  const m = mpos(t)/BEAM_HOLD_BARS, k = Math.floor(m), f = m - k;
+  const on = i => beamPick(ki, i) < want;
+  if(!on(k)) return 0;
+  const rise = on(k-1) ? 1 : ss(0, BEAM_FADE, f);
+  const fall = on(k+1) ? 1 : 1 - ss(0, BEAM_FADE, f - (1 - BEAM_FADE));
+  return cl(Math.min(rise, fall));
+}
+/* Dwell is the share of each interval a head spends HOLDING rather than
+   moving. At 0.35 it moved for two thirds of every interval, so the beam set
+   was stable while its geometry morphed the whole way through -- a lambda
+   opening into a vee, frame after frame. A real head crosses its arc in a burst
+   and then sits still, and sitting still is what makes the next move read as a
+   decision. The cost is amplitude: the analytic bound derives it from
+   om*S/duty, so a shorter move means a shorter throw, and that is the honest
+   trade rather than a fudge factor. */
+const DWELL_LO = 0.62;
+const DWELL_HI = 0.55;
+const DWELL_CAP = 0.72;
 const BUILD_LO = 0.75;
 const BUILD_HI = 1.45;
 const LIFT_LO = 0.60;
@@ -1526,7 +1575,18 @@ function lookFrame(t,L){
   // so the phase itself jumped at a mode change. A level can cut in one frame; a
   // motor cannot. So there are no modes: the character is driven by energy, which
   // is continuous, and only amplitudes and shapes vary.
-  const th=motionPhase(t);
+  /* A beam look is cast for BEAM_HOLD_BARS and the heads in it should hold
+     their aim for the same interval -- otherwise the set of beams is stable
+     while every one of them is sweeping to a new angle each frame, which is
+     what made every half second of the contact sheet a different geometry.
+
+     One full sweep per two intervals: out on this look, back on the next. mpos
+     is continuous so this has no steps in it, and the rate below is its exact
+     derivative and a constant, which is what keeps the analytic slew bound a
+     proof rather than a hope. An earlier attempt at this drove the rate off a
+     list of event times, which was discontinuous at the first event and slewed
+     the heads at 3.68/s against a 1.05 limit. */
+  const th=2*Math.PI*(mpos(t)/(2*BEAM_HOLD_BARS));
   const eM=eMotion(t);
   const shape=ss(0.35,0.85,eM);           // sway ....... circle
   // dwell both ways: hold when calm, and SNAP-then-hold when hot. A head that
@@ -1543,7 +1603,7 @@ function lookFrame(t,L){
      A depends on t only through eM, and eM is a 5-tap average of a piecewise
      linear curve, so |eM'| is bounded by EMAX -- computable once from the map.
      Solving for A gives a guaranteed bound rather than a hopeful one. */
-  const om=rateNow(t), duty=Math.max(1-DWELL_CAP,1-dw), S=1.5;
+  const om=Math.PI/Math.max(1e-6, BEAM_HOLD_BARS*BAR), duty=Math.max(1-DWELL_CAP,1-dw), S=1.5;
   const thp=om*S/duty;                              // peak phase rate
   const ampP=Math.max(0.02,(LIMP-DADE*EMAX)/thp);   // pan  budget, proven
   const ampT=Math.max(0.02,(LIMT-DADE*EMAX)/(2*thp));// tilt runs at 2x in the sway shape
@@ -1609,8 +1669,18 @@ function lookFrame(t,L){
       if(L==='drop'){const[d,s]=since('drop',t,8);
         if(s!==null&&s<BAR&&STROBE_AT.has(d.at)) hz=musicalHz()}
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+beamKnee(G.deg,
-              cl(lv*dip*gate*emph('head',t,L)*panBias(G.xn)*arrayGate(G,t,e,L,HEADS.length))).toFixed(3),
+    const lvl0 = cl(lv*dip*gate*emph('head',t,L)*panBias(G.xn)
+                    *arrayGate(G,t,e,L,HEADS.length));
+    /* Narrow fixtures take their on/off from the phrase-held beam look and use
+       the computed level only to shape how bright they are while up. Wide ones
+       are unaffected, and "narrow" comes from the layout's own beam_deg, so
+       nothing here knows a fixture by name. */
+    const narrow = (G.deg !== undefined && G.deg <= BEAM_HARD_DEG);
+    const lvlOut = narrow
+      ? beamEnv(G.ki, t, BEAM_WANT[L] === undefined ? 0.30 : BEAM_WANT[L])
+        * cl(BEAM_FLOOR + (1-BEAM_FLOOR)*lvl0*1.8)
+      : lvl0;
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+lvlOut.toFixed(3),
             pan:+pan.toFixed(3),tilt:+tilt.toFixed(3),strobe:+hz.toFixed(3),
             zoom:+zoomAt(t,e,L).toFixed(3)})});
 
