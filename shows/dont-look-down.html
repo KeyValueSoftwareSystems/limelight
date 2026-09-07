@@ -1159,10 +1159,30 @@ function deployed(kind, t){
 const PHRASE_CALM = 0.55;
 const GATE_RATE  = {wash:3.2, uplight:3.2, strip:2.2, head:1.5, par:1.5};
 const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:0.26, par:0.26};
+/* How far through a build we are, 0 at the bottom and 1 at the top.
+
+   This read the build SPAN and nothing else. A span is the final riser -- on
+   Starlight it is 5.7 s -- while the build CHAPTER is the section, and there it
+   is 49.1 s. So 43.4 seconds of that build returned -1: no ramp, no coverage
+   climb, no gate acceleration, just a flat hold at the look's ceiling. Watched
+   frame by frame it is 34 seconds of one unchanging picture, and by the time the
+   drop lands there is nowhere left to go.
+
+   Both fields are right and they mean different things. The chapter carries the
+   long climb up to BUILD_SPAN_FROM, and the span takes it the rest of the way in
+   the last few seconds -- which is a riser on top of a build, exactly what the
+   two fields describe. */
+const BUILD_SPAN_FROM = 0.62;
 function buildProg(t){
   const sp = spanAt(t);
-  if(!sp || sp.kind !== 'build' || !(sp.to > sp.from)) return -1;
-  return cl((t - sp.from) / (sp.to - sp.from));
+  if(sp && sp.kind === 'build' && sp.to > sp.from)
+    return cl(BUILD_SPAN_FROM + (1-BUILD_SPAN_FROM)*(t - sp.from)/(sp.to - sp.from));
+  const j = chIdx(t);
+  if(CH[j] && CH[j][1] === 'build'){
+    const a = CH[j][0], b = (j+1 < CH.length) ? CH[j+1][0] : DUR;
+    if(b > a) return cl(BUILD_SPAN_FROM * (t - a)/(b - a));
+  }
+  return -1;
 }
 function gateBars(kind, tt){
   const L = primaryLook(tt), e = en(tt);
@@ -1248,25 +1268,56 @@ const HOFF_TRUSS = 0.50;
 
    Still a pure lookup: no state, no memory, and t = 47 twice gives one answer. */
 const BEAM_HARD_DEG = 8.0;
-const BEAM_HOLD_BARS = 2;      // a beam look lasts a phrase, not a frame
+const BEAM_HOLD_BARS = 4;      // a beam look lasts a phrase, not a frame
 const BEAM_FADE = 0.22;        // of the interval, at each end
 const BEAM_FLOOR = 0.55;       // a beam that is up is properly up
 /* How much of the beam rig a look asks for. A verse gets a few, an idle gets
    none at all, a drop gets nearly all of them. */
 const BEAM_WANT = {drop:0.85, flash:1.00, build:0.52, verse:0.26, break:0.12,
                    quiet:0.10, idle:0.00, outro:0.12, spotlight:0.06, stop:0.00};
-function beamPick(ki, i){
-  // deterministic, and mirrored pairs come up together so the rig stays symmetric
-  const p = Math.floor(ki/2);
-  let h = (Math.imul(p, 73856093) ^ Math.imul(i, 19349663)) | 0;
-  h = Math.imul(h ^ (h >>> 13), 1274126177) | 0;
-  h = h ^ (h >>> 16);
-  return ((h >>> 0) % 1024) / 1024;
+/* How many beams a build asks for is the whole point of a build. Holding it at
+   a flat 0.52 for 49 seconds is why the section read as one picture even after
+   the ramp was fixed: the coverage and the gate rate climbed, and the number of
+   beams in the air did not. Few at the bottom, nearly all at the top. */
+const BEAM_BUILD_LO = 0.18, BEAM_BUILD_HI = 0.92;
+function beamWant(t, L){
+  const bp = buildProg(t);
+  if(L === 'build' && bp >= 0) return lerp(BEAM_BUILD_LO, BEAM_BUILD_HI, bp);
+  const w = BEAM_WANT[L];
+  return (w === undefined) ? 0.30 : w;
 }
-function beamEnv(ki, t, want){
+/* Which beams come up.
+
+   This was a HASH of (fixture, interval): a scattered arbitrary subset, redrawn
+   every two bars. I built the randomness in deliberately and it reads exactly
+   as randomness -- "they appear out of nowhere randomly and then go away" is a
+   fair description of a pseudo-random subset changing on a timer.
+
+   A designer never lights a random subset. They work in symmetric, contiguous
+   groups -- the inner four, the outer pair, every other one, the whole rig --
+   and they move BETWEEN neighbouring groups, so a change reads as a decision
+   rather than a reshuffle. Every group below is derived from where a fixture
+   hangs, so it holds on any rig and nothing knows a fixture by name. */
+const BEAM_SETS = [
+  {name:'centre', share:0.34, test: G => G.centre},
+  {name:'outer',  share:0.42, test: G => G.outer},
+  {name:'every2', share:0.50, test: G => (Math.floor(G.ki/2) % 2) === 0},
+  {name:'wide',   share:0.72, test: G => !G.centre},
+  {name:'all',    share:1.00, test: G => true},
+];
+function beamSet(want, i){
+  // the smallest group that covers what the look asks for, then cycle down
+  // through the groups below it. Alternating only two was why a long section
+  // still read as one picture: two shapes over forty seconds is one shape.
+  let k = 0;
+  while(k < BEAM_SETS.length-1 && BEAM_SETS[k].share < want*0.92) k++;
+  const lo = Math.max(0, k-2), n = k - lo + 1;
+  return BEAM_SETS[lo + (((i % n) + n) % n)];
+}
+function beamEnv(G, t, want){
   if(!(want > 0)) return 0;
   const m = mpos(t)/BEAM_HOLD_BARS, k = Math.floor(m), f = m - k;
-  const on = i => beamPick(ki, i) < want;
+  const on = i => beamSet(want, i).test(G);
   if(!on(k)) return 0;
   const rise = on(k-1) ? 1 : ss(0, BEAM_FADE, f);
   const fall = on(k+1) ? 1 : 1 - ss(0, BEAM_FADE, f - (1 - BEAM_FADE));
@@ -1638,10 +1689,24 @@ function lookFrame(t,L){
     // beams cross over the floor instead of sweeping in parallel
     const back=G.z>3.0, mir=(G.left?1:-1)*(back?-1:1);
     const hoff=G.xn*2*Math.PI*HOFF_SPREAD+(back?Math.PI*HOFF_TRUSS:0), fan=(G.xn-0.5)*2;
-    const pSway=amp*Math.sin(u+hoff)*mir + fan*0.13;
-    const pCirc=amp*Math.sin(u+hoff)*mir;
-    const tSway=tam*Math.sin(2*u+hoff);
-    const tCirc=tam*Math.cos(u+hoff);
+    /* `shape` is the cue library's most visible parameter -- it is what makes
+       pulse (0.10) different from fan (0.20), cross (0.90) and ballyhoo (1.00).
+       It was inert: pSway and pCirc were the SAME formula apart from a
+       fan*0.13 offset, so every block in the library produced one geometry.
+       Watched frame by frame, a 42-second verse cycling four different cue
+       blocks was 85 identical frames of the same V.
+
+       Two figures that actually look different:
+         fan   -- every head swings the same way, spread by where it hangs, so
+                  the beams stay parallel and comb across the room
+         cross -- neighbours counter-rotate, so the beams cut through each other
+       The rate is unchanged in both, so the slew bound above still holds: the
+       per-fixture sign and the phase offset are constants. */
+    const odd = (G.ki % 2) === 1;
+    const pSway = amp*mir*Math.sin(u) + fan*0.34;
+    const pCirc = amp*mir*(odd?-1:1)*Math.sin(u + hoff*2.0);
+    const tSway = tam*Math.sin(u*0.5 + hoff);
+    const tCirc = tam*(odd?-1:1)*Math.cos(u + hoff);
     let pan =cl(0.5 +(lerp(pSway,pCirc,shape))*still);
     // the upstage truss aims out over the crowd; the front truss aims down
     let tilt=cl((back?0.62:0.42)+(lerp(tSway,tCirc,shape))*still
@@ -1677,7 +1742,7 @@ function lookFrame(t,L){
        nothing here knows a fixture by name. */
     const narrow = (G.deg !== undefined && G.deg <= BEAM_HARD_DEG);
     const lvlOut = narrow
-      ? beamEnv(G.ki, t, BEAM_WANT[L] === undefined ? 0.30 : BEAM_WANT[L])
+      ? beamEnv(G, t, beamWant(t, L))
         * cl(BEAM_FLOOR + (1-BEAM_FLOOR)*lvl0*1.8)
       : lvl0;
     F.push({id:id,r:c[0],g:c[1],b:c[2],level:+lvlOut.toFixed(3),
