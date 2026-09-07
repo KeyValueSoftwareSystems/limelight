@@ -947,6 +947,7 @@ function buildGeo(){
     const xn=(f.at[0]-lo)/sp;
     const k=fam(f); seen[k]=(seen[k]||0);
     g[f.id]={xn:xn,yn:(f.at[1]-ylo)/ysp,x:f.at[0],y:f.at[1],z:f.at[2],kind:k,
+             deg:f.beam_deg,
              ki:seen[k]++, zone:f.zone||null,
              outer:(xn<0.26||xn>0.74), centre:(xn>=0.36&&xn<=0.64),
              left:xn<0.5, odd:idx%2===1}});
@@ -956,9 +957,15 @@ function buildGeo(){
 const ARRAY_MIN = 4;
 const DROPS_AT = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
 function actNo(t){ let k=0; for(const d of DROPS_AT){ if(d<=t+1e-9) k++; else break } return k }
+/* Which act a family first appears in, so a show grows instead of opening at
+   full. wash was 1 -- held back until after the first drop -- and on Starlight
+   the first drop is at 68.7 s, so the entire first minute had no soft light in
+   it at all and a quiet verse was lit by nothing but aerial beams. A wash is the
+   most basic fixture in any rig and the last thing to withhold; the escalation
+   belongs to the effects. */
 const DEPLOY = {
   par:0, strip:0, head:0, uplight:0, blinder:0, strobe:0, fog:0, video:0,
-  wash:1, co2:1, laser:2, pyro:2, confetti:2,
+  wash:0, co2:1, laser:2, pyro:2, confetti:2,
 };
 const NDROPS = DROP_TIMES.length;
 function deployed(kind, t){
@@ -1039,6 +1046,25 @@ const DROP_SETTLE = 0.60;
 const CUE_XF = 0.06;
 const HOFF_SPREAD = 0.15;
 const HOFF_TRUSS = 0.50;
+/* A hard narrow beam is ON or OFF.
+
+   Coverage works by dimming, which is right for a wash: at 20% it is a faint
+   glow taking up less of the picture. A 4-degree beam at 4% is not faint -- it
+   is still a full-length hard line drawn through the haze, just a dim one. So
+   "34% coverage" over thirty beams produced twenty visible lines instead of ten
+   beams lit and twenty dark, and twenty lines at different angles is noise. At
+   bar 4 of Starlight, a verse, 20 of 30 beams were up at 0.03-0.06.
+
+   Which fixtures this applies to comes from the layout's own beam_deg, so a rig
+   full of wide washes is unaffected and nothing here knows a fixture by name. */
+const BEAM_HARD_DEG = 8.0;
+const BEAM_CUT = 0.16;
+const BEAM_MIN = 0.42;
+function beamKnee(deg, lv){
+  if(deg === undefined || deg > BEAM_HARD_DEG) return lv;
+  if(lv < BEAM_CUT) return 0;
+  return cl(BEAM_MIN + (1-BEAM_MIN)*(lv-BEAM_CUT)/(1-BEAM_CUT));
+}
 const DWELL_LO = 0.35;
 const DWELL_HI = 0.22;
 const DWELL_CAP = 0.50;
@@ -1417,7 +1443,8 @@ function lookFrame(t,L){
       if(L==='drop'){const[d,s]=since('drop',t,8);
         if(s!==null&&s<BAR&&STROBE_AT.has(d.at)) hz=musicalHz()}
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*gate*emph('head',t,L)*panBias(G.xn)*arrayGate(G,t,e,L,HEADS.length)).toFixed(3),
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+beamKnee(G.deg,
+              cl(lv*dip*gate*emph('head',t,L)*panBias(G.xn)*arrayGate(G,t,e,L,HEADS.length))).toFixed(3),
             pan:+pan.toFixed(3),tilt:+tilt.toFixed(3),strobe:+hz.toFixed(3),
             zoom:+zoomAt(t,e,L).toFixed(3)})});
 
