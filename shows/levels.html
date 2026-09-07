@@ -1952,10 +1952,10 @@ function drawRoom(cv, fr, layout){
     }
 
     // the lens
-    const gl = g.createRadialGradient(px,py,0,px,py,16 + 26*L);
+    const gl = g.createRadialGradient(px,py,0,px,py,(5 + 9*L)*gk);
     gl.addColorStop(0, `rgba(${r},${gr},${b},${Math.min(0.95,0.85*L).toFixed(3)})`);
     gl.addColorStop(1, `rgba(${r},${gr},${b},0)`);
-    g.fillStyle = gl; g.beginPath(); g.arc(px,py,Math.max(5,(18+34*L)*gk),0,6.2832); g.fill();
+    g.fillStyle = gl; g.beginPath(); g.arc(px,py,Math.max(2.5,(5+9*L)*gk),0,6.2832); g.fill();
   }
   g.globalCompositeOperation = "source-over";
 
