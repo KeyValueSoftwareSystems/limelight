@@ -1,0 +1,68 @@
+{
+  "reader": "lights",
+  "what": "lamps in a room, driven over DMX512",
+  "default_output_hz": 44.0,
+  "note": "This file is the whole of what lighting knows about songs. A map never mentions a lamp and a dimensions file never mentions a capability; the join happens here, in the reader, which is the only layer allowed to know both. A second reader writes its own copy of this file and changes nothing upstream.",
+  "serves": {
+    "intensity": {
+      "via": ["level"],
+      "gestures": [
+        {"name": "flash on the beat", "cap": "level", "n": 1},
+        {"name": "brighter on the bar", "cap": "level", "n": 1},
+        {"name": "the build climbs", "cap": "level", "n": 2},
+        {"name": "blackout before a drop", "cap": "level", "n": 1},
+        {"name": "wash that breathes", "cap": "level", "n": 4,
+         "note": "a sidechain needs a sustained surface; four lamps will hold one"}
+      ]
+    },
+    "hue": {
+      "via": ["colour", "pixels"],
+      "gestures": [
+        {"name": "colour on the harmony", "cap": "colour", "n": 2},
+        {"name": "a surface that holds a colour", "cap": "pixels", "n": 1,
+         "sub": "uplights washing the back wall, if any have colour"}
+      ]
+    },
+    "place": {
+      "via": ["move", "pixels"],
+      "gestures": [
+        {"name": "heads fan on the drop", "cap": "move", "n": 2, "motor": true},
+        {"name": "the tune walks the row", "cap": "level", "n": 4, "spread": true}
+      ]
+    },
+    "extent": {
+      "via": ["level"],
+      "gestures": [
+        {"name": "chase across the row", "cap": "level", "n": 3, "spread": true,
+         "note": "three lamps that are not spread across the room is not a row"},
+        {"name": "everything white on it", "cap": "level", "n": 4}
+      ]
+    },
+    "time": {
+      "via": ["level"],
+      "gestures": [
+        {"name": "hits landing where the groove puts them", "cap": "level", "n": 1,
+         "timing": true, "note": "the wire decides this, not the lamps"}
+      ]
+    },
+    "focus": {
+      "via": ["level", "move"],
+      "gestures": [
+        {"name": "one thing brighter than the rest", "cap": "level", "n": 2, "spread": true}
+      ]
+    },
+    "shock": {
+      "via": ["strobe"],
+      "gestures": [
+        {"name": "strobe burst", "cap": "strobe", "n": 2},
+        {"name": "CO2 jet", "kind": "co2", "n": 1,
+         "sub": "nothing. it is a physical effect and no lamp substitutes for it"}
+      ]
+    },
+    "memory": {
+      "via": ["level"],
+      "note": "lighting can always repeat a look. Whether it SHOULD is a map question, not a rig question, so a rig never fails this one.",
+      "gestures": []
+    }
+  }
+}

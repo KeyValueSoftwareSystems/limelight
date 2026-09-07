@@ -1,0 +1,98 @@
+{
+  "reader": "haptics",
+  "what": "things that push on a body: shakers under the floor, packs on a chest",
+  "default_output_hz": 1000.0,
+  "note": "Written to falsify the claim that the dimensions file is reader-neutral. If a haptics rig can be pre-flighted against the same map and the same dimensions with no change to either, the claim holds. Where it cannot serve a channel it must say so plainly rather than substituting something.",
+  "serves": {
+    "intensity": {
+      "via": [
+        "level"
+      ],
+      "gestures": [
+        {
+          "name": "a push on the beat",
+          "cap": "level",
+          "n": 1
+        },
+        {
+          "name": "the build climbs",
+          "cap": "level",
+          "n": 2
+        },
+        {
+          "name": "silence before a drop",
+          "cap": "level",
+          "n": 1
+        }
+      ]
+    },
+    "extent": {
+      "via": [
+        "level"
+      ],
+      "gestures": [
+        {
+          "name": "more packs join in",
+          "cap": "level",
+          "n": 4
+        }
+      ]
+    },
+    "place": {
+      "via": [
+        "zone"
+      ],
+      "gestures": [
+        {
+          "name": "the hit travels across the pit",
+          "cap": "zone",
+          "n": 3,
+          "spread": true
+        }
+      ]
+    },
+    "time": {
+      "via": [
+        "transient"
+      ],
+      "gestures": [
+        {
+          "name": "hits landing where the groove puts them",
+          "cap": "transient",
+          "n": 1,
+          "timing": true,
+          "note": "an audio bus, not a DMX universe"
+        }
+      ]
+    },
+    "shock": {
+      "via": [
+        "transient"
+      ],
+      "gestures": [
+        {
+          "name": "a hard transient on the drop",
+          "cap": "transient",
+          "n": 4
+        }
+      ]
+    },
+    "hue": {
+      "via": [],
+      "gestures": [],
+      "cannot": "a body feels how much and where and when. It does not feel which colour."
+    },
+    "focus": {
+      "via": [],
+      "gestures": [],
+      "cannot": "you cannot point a shaker at the thing you want noticed"
+    },
+    "memory": {
+      "via": [
+        "level"
+      ],
+      "gestures": [],
+      "note": "same as any reader: a map question, not a rig question"
+    }
+  }
+}

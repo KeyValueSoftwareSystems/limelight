@@ -32,6 +32,24 @@ import sys, os, json, math, statistics as st, datetime
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 OUT = os.path.join(ROOT, "synth", "dimensions")
+
+# A dimension says which CHANNEL OF EXPRESSION the song is asking for. These eight
+# words are deliberately not lighting words. Lighting is the first reader, not the
+# only one, and a channel that only a lamp can serve would quietly make this file
+# a lighting file. Each reader keeps its own translation from a channel to the
+# things it owns -- see readers/<reader>/reader.json.
+#
+#   intensity  how much of it there is                lamp brightness / shaker amplitude
+#   hue        which flavour, independent of how much lamp colour / haptic texture
+#   place      where in space it belongs              beam angle / which motor fires
+#   extent     how much of the rig takes part         lamps lit / zones driven
+#   time       how precisely it has to land           the output rate decides
+#   focus      where the attention should go          the thing lit brightest
+#   shock      a discontinuity meant to be felt       strobe / a hard transient
+#   memory     whether this bar happened before       served by any channel; needs the map to say
+CHANNELS = ("intensity", "hue", "place", "extent", "time", "focus", "shock", "memory")
+
+
 def build(slug):
     p = next((c for c in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
                           os.path.join(ROOT, "synth", "songs", slug + ".map.json"))
@@ -46,18 +64,18 @@ def build(slug):
     D = []
 
     def add(key, what, rate, needs, frm, trust, detail=None, note=None):
-        e = {"key": key, "what": what, "needs": needs, "from": frm, "trust": trust}
+        e = {"key": key, "what": what, "channel": needs, "from": frm, "trust": trust}
         if rate is not None: e["rate_hz"] = round(rate, 4)
         if detail: e["detail"] = detail
         if note: e["note"] = note
         D.append(e)
 
-    add("pulse", "the beat", 1 / per, "level", "grid", "high",
+    add("pulse", "the beat", 1 / per, "intensity", "grid", "high",
         {"bpm": g.get("bpm"), "bar_seconds": round(bar, 4)})
 
     ev = (d.get("accents") or {}).get("events") or []
     off = sum(1 for e in ev if not e.get("on_grid"))
-    add("hits", "drum hits, including the ones off the beat", len(ev) / dur, "level",
+    add("hits", "drum hits, including the ones off the beat", len(ev) / dur, "intensity",
         "accents", "medium",
         {"count": len(ev), "off_grid": off,
          "off_grid_share": round(off / max(1, len(ev)), 3)},
@@ -67,7 +85,7 @@ def build(slug):
     vals = [v for v in (gr.get("by_sixteenth") or {}).values() if v is not None]
     if len(vals) > 1:
         sw = (max(vals) - min(vals)) * per
-        add("groove", "how far the sixteenths sit off the grid", None, "timing",
+        add("groove", "how far the sixteenths sit off the grid", None, "time",
             "observations.groove", "medium",
             {"swing_ms": round(sw * 1000, 1)},
             "how finely this must land. Whether a given output chain can carry it is "
@@ -77,7 +95,7 @@ def build(slug):
     den = [v for _, v in (inst.get("density_per_bar") or [])]
     if en:
         add("amount", "how much is going on: loudness and fullness together",
-            len(en) / dur, "count", "energy + observations.instruments", "high",
+            len(en) / dur, "extent", "energy + observations.instruments", "high",
             {"loud_min": round(min(en), 3), "loud_max": round(max(en), 3),
              "full_min": round(min(den), 3) if den else None,
              "full_max": round(max(den), 3) if den else None,
@@ -90,7 +108,7 @@ def build(slug):
                         for v in x])
         ze, zd = z(en[:n]), z(den[:n])
         div = sum(1 for a, b in zip(ze, zd) if abs(a - b) > 1.0)
-        add("balance", "bars where loudness and fullness disagree", div / dur, "count",
+        add("balance", "bars where loudness and fullness disagree", div / dur, "extent",
             "energy vs observations.instruments", "medium",
             {"bars_diverging": div, "of_bars": n},
             "a filter opening rather than instruments arriving; nothing reads this yet")
@@ -98,7 +116,7 @@ def build(slug):
     ch = (obs.get("chords") or {}).get("events") or []
     if ch:
         chg = sum(1 for i in range(1, len(ch)) if ch[i]["chord"] != ch[i - 1]["chord"])
-        add("harmony", "the chords moving", chg / dur, "colour",
+        add("harmony", "the chords moving", chg / dur, "hue",
             "observations.chords", "low",
             {"changes": chg, "distinct_chords": len({e["chord"] for e in ch}),
              "mean_confidence": round(sum(e.get("confidence", 0) for e in ch) / len(ch), 3)},
@@ -110,7 +128,7 @@ def build(slug):
         mids = [e[2] for e in mel]
         q = st.quantiles(mids, n=20)
         span = q[-1] - q[0]
-        add("pitch", "the tune rising and falling", len(mel) / dur, "position",
+        add("pitch", "the tune rising and falling", len(mel) / dur, "place",
             "observations.melody", "low" if span > 24 else "medium",
             {"notes": len(mel), "semitones_middle_90pc": round(span, 1),
              "usable_rate_hz": round(1 / bar, 4),
@@ -123,7 +141,7 @@ def build(slug):
 
     voc = parts.get("vocals") or {}
     if voc:
-        add("voice", "a human singing", None, "attention",
+        add("voice", "a human singing", None, "focus",
             "observations.instruments.parts.vocals", "medium",
             {"share_of_song": voc.get("share_of_song")},
             "on the-nights it correlates -0.53 with drum hits: when the voice is "
@@ -132,7 +150,7 @@ def build(slug):
     sp = [s for s in (d.get("spans") or []) if s.get("kind") == "build"]
     if sp:
         tot = sum(s["to"] - s["from"] for s in sp)
-        add("tension", "the song promising something", len(sp) / dur, "level+count",
+        add("tension", "the song promising something", len(sp) / dur, "intensity+extent",
             "spans", "high",
             {"builds": len(sp), "seconds": round(tot, 1),
              "share_of_song": round(tot / dur, 3),
@@ -140,21 +158,21 @@ def build(slug):
 
     mo = [m for m in (d.get("moments") or []) if m.get("kind") == "drop"]
     if mo:
-        add("impact", "drops", len(mo) / dur, "strobe", "moments", "high",
+        add("impact", "drops", len(mo) / dur, "shock", "moments", "high",
             {"drops": len(mo), "at": [round(m["at"], 3) for m in mo]})
 
     missing = [
         {"key": "novelty", "what": "whether a bar repeats something already heard",
-         "needs": "memory", "why_it_matters":
+         "channel": "memory", "why_it_matters":
          "a show should repeat where the song repeats and change where it changes, "
          "and nothing in the map says which is which. This is 'it feels repetitive'.",
          "how": "self-similarity between per-bar embeddings"},
         {"key": "width", "what": "the mix's own left-right image",
-         "needs": "spread", "why_it_matters":
+         "channel": "place", "why_it_matters":
          "a stereo field has a width and a rig has a width; matching them is free",
          "how": "listen/stereo.py exists but nothing writes this field yet"},
         {"key": "timbre", "what": "bright or dark, independent of loud or quiet",
-         "needs": "colour temperature", "why_it_matters":
+         "channel": "hue", "why_it_matters":
          "what separates a filtered build from a loud verse",
          "how": "observations.brightness exists and nothing reads it; note that "
                 "analysis at 22.05 kHz truncates everything above 11 kHz"},

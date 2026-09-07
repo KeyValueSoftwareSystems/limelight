@@ -1,0 +1,452 @@
+{
+  "room": "haptics",
+  "reader": "haptics",
+  "what": "shakers under the riser and vest packs in the pit",
+  "size_m": {
+    "w": 12.0,
+    "d": 8.0,
+    "h": 3.0
+  },
+  "limits": {
+    "output_hz": 1000.0,
+    "note": "a shaker is driven from an audio bus, not a DMX universe, so the frame is a millisecond rather than 23"
+  },
+  "fixtures": [
+    {
+      "id": "shaker1",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        -5.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker2",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        -4.090909090909091,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker3",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        -3.1818181818181817,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker4",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        -2.272727272727273,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker5",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        -1.3636363636363638,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker6",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        -0.45454545454545503,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker7",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        0.45454545454545414,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker8",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        1.3636363636363633,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker9",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        2.2727272727272725,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker10",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        3.1818181818181817,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker11",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        4.09090909090909,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "shaker12",
+      "kind": "shaker",
+      "can": [
+        "level",
+        "transient"
+      ],
+      "at": [
+        5.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "vest1",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        -4.0,
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "id": "vest2",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        -3.111111111111111,
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "id": "vest3",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        -2.2222222222222223,
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "id": "vest4",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        -1.3333333333333335,
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "id": "vest5",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        -0.44444444444444464,
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "id": "vest6",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        0.44444444444444464,
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "id": "vest7",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        1.333333333333333,
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "id": "vest8",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        2.2222222222222214,
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "id": "vest9",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        3.1111111111111107,
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "id": "vest10",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        4.0,
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "id": "vest11",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        -4.0,
+        0.0,
+        3.5
+      ]
+    },
+    {
+      "id": "vest12",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        -3.111111111111111,
+        0.0,
+        3.5
+      ]
+    },
+    {
+      "id": "vest13",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        -2.2222222222222223,
+        0.0,
+        3.5
+      ]
+    },
+    {
+      "id": "vest14",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        -1.3333333333333335,
+        0.0,
+        3.5
+      ]
+    },
+    {
+      "id": "vest15",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        -0.44444444444444464,
+        0.0,
+        3.5
+      ]
+    },
+    {
+      "id": "vest16",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        0.44444444444444464,
+        0.0,
+        3.5
+      ]
+    },
+    {
+      "id": "vest17",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        1.333333333333333,
+        0.0,
+        3.5
+      ]
+    },
+    {
+      "id": "vest18",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        2.2222222222222214,
+        0.0,
+        3.5
+      ]
+    },
+    {
+      "id": "vest19",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        3.1111111111111107,
+        0.0,
+        3.5
+      ]
+    },
+    {
+      "id": "vest20",
+      "kind": "vest",
+      "can": [
+        "level",
+        "transient",
+        "zone"
+      ],
+      "at": [
+        4.0,
+        0.0,
+        3.5
+      ]
+    }
+  ]
+}
