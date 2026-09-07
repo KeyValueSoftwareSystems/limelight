@@ -1205,7 +1205,7 @@ function lookFrame(t,L){
       // between accents -- in a real rig no two fixtures read the same
       const base=(0.11+0.26*e)*(0.86+0.28*sym(G.xn));
       const lamp=(L==='drop'?0.30+0.44*e:0.18+0.36*e)*(0.84+0.28*Math.max(voxAt(t),sung(t)));
-      lv=(base*EX.arc+lamp*A*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5))
+      lv=(base*EX.arc+lamp*accent(p,e)*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5))
 ;
       if(L==='build') lv*=lerp(0.25,1,layer(2));
       if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(mpos(t)/4)));

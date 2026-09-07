@@ -56,5 +56,12 @@ for(const k of Object.keys(byKind)){
     (100*B.h/B.r).toFixed(0).padStart(11)+'%'+med.toFixed(0).padStart(11)+' ms');
 }
 allLags.sort((a,b)=>a-b);
+const SUSTAIN=['wash','uplight','fog','video'];
+let ht=0,hh=0,hl=[];
+for(const k of Object.keys(byKind)){ if(SUSTAIN.indexOf(k)>=0) continue;
+  ht+=byKind[k].r; hh+=byKind[k].h; hl=hl.concat(byKind[k].lags) }
+hl.sort((a,b)=>a-b);
+console.log('  HITTERS          '+ht+'   '+(100*hh/ht).toFixed(1)+'% within 40ms   median '+
+  (hl[Math.floor(hl.length/2)]*1000).toFixed(0)+' ms   (beds excluded: they sustain, they do not hit)');
 console.log('  ALL              '+tot+'   '+(100*hit/tot).toFixed(1)+'% within 40ms   median '+
   (allLags[Math.floor(allLags.length/2)]*1000).toFixed(0)+' ms');
