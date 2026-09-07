@@ -32,7 +32,7 @@ NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
 # what each field is worth. Timing dominates because everything downstream of a
 # wrong grid is wrong regardless of how good it is.
-WEIGHTS = {"grid": 3.0, "bars": 2.0, "downbeats": 1.5, "sections": 1.5,
+WEIGHTS = {"grid": 3.0, "bars": 2.0, "moments": 2.0, "downbeats": 1.5, "sections": 1.5,
            "energy": 1.5, "accents": 1.0, "chords": 1.0, "melody": 1.0, "pump": 0.5}
 
 
@@ -247,6 +247,102 @@ def ev_downbeats(m, B):
     if not d or not o: return None, "downbeats do not line up with beats", True
     r = (sum(d) / len(d)) / max(1e-9, sum(o) / len(o))
     return min(1.0, max(0.0, (r - 1.0) / 0.4)), f"bar lines {r:.2f}x the other beats", False
+
+
+def ev_moments(m, B):
+    """Is the drop where the map says it is?
+
+    This check exists because of a specific, expensive miss on 8 Sept. Amal's map
+    scored 0.89 -- the best any map has scored -- and put the drop in Levels at
+    20.85. The recording puts it at 19.86, Renjith heard it "right after 19", and
+    the map that scores 0.66 puts it at 19.91. The 0.89 map rendered a visibly
+    worse show than the 0.66 map, and nothing in this scorer noticed, because
+    nothing in this scorer looked at moments at all.
+
+    A second is two beats at 128 bpm. On a light show that is not a small error:
+    the room goes bright while the record is still in the break, and then the
+    actual drop arrives to lights that are already up. It is the single most
+    visible thing a map can get wrong, and it was free.
+
+    Anchored to the recording, not to the map: find the biggest loudness step
+    near the claim and measure how far the claim sits from it, in BEATS rather
+    than seconds, because that is the unit the error is heard in.
+    """
+    mo = m.get("moments") or []
+    mo = mo.get("entries") if isinstance(mo, dict) else mo
+    per = (m.get("grid") or {}).get("period")
+    if not per or not mo:
+        return None, "no moments"
+    dt, rms, dur = B["dt"], B["rms"], m["song"]["length"]
+
+    # The window is not a free parameter, and picking it wrong reverses the
+    # verdict. In Levels the drop lands at 19.88 and the record then leaves a
+    # one-beat gap at 20.62 before resuming at 20.75. A quarter-second window
+    # finds that resume, because it is the sharpest INSTANTANEOUS step in the
+    # region -- and then calls a map that claims 20.85 accurate and a map that
+    # claims 19.91 nearly a second early. Exactly backwards.
+    #
+    # A drop is a SUSTAINED change, so the window has to be long enough to be
+    # about a section rather than a hit. Every shoulder from half a second up
+    # agrees on 19.6-19.9; only the very short one disagrees. Rather than pick
+    # one and hope, take the median across four, which is stable and says so.
+    SHOULDERS = (0.5, 1.0, 1.5, 2.0)
+
+    def step_at(t, sh):
+        W = max(1, int(sh / dt))
+        i = int(t / dt)
+        if i - W < 0 or i + W >= len(rms): return None
+        return sum(rms[i:i+W]) / W - sum(rms[i-W:i]) / W
+
+    # Only the kinds whose signature is unambiguous. A drop and a stop are steps
+    # and a step detector finds steps. A build is a ramp, a quiet is often a slow
+    # filter close, and scoring those with this instrument produced numbers I
+    # could not defend -- every map read badly on them, which usually means the
+    # check is wrong rather than that everyone is. They stay unscored and say so,
+    # rather than contributing noise dressed as evidence.
+    RISE = {"drop"}                              # a step up
+    FALL = {"stop"}                              # a step down
+    SEARCH = 2.5                                 # how far to look for the real one
+
+    scored, notes = [], []
+    for x in mo:
+        t = x.get("at", x.get("t"))
+        k = x.get("kind")
+        if t is None or k not in RISE | FALL: continue
+        want_up = k in RISE
+        votes, strengths = [], []
+        for sh in SHOULDERS:
+            best, bt = None, None
+            u = t - SEARCH
+            while u <= t + SEARCH:
+                v = step_at(u, sh)
+                if v is not None and (best is None or (v > best if want_up else v < best)):
+                    best, bt = v, u
+                u += dt
+            if bt is not None:
+                votes.append(bt); strengths.append(best)
+        if not votes: continue
+        votes.sort()
+        bt = votes[len(votes) // 2]              # median window, not a chosen one
+        best = sorted(strengths)[len(strengths) // 2]
+        # a claimed drop where nothing rises is not late, it is imagined
+        if (best <= 0) if want_up else (best >= 0):
+            scored.append(0.0); notes.append(f"{k}@{t:.2f} has no {'rise' if want_up else 'fall'}")
+            continue
+        err_beats = abs(t - bt) / per
+        scored.append(max(0.0, 1.0 - err_beats / 2.0))
+        if err_beats > 0.5:
+            notes.append(f"{k}@{t:.2f} is {err_beats:.1f} beats from the real one at {bt:.2f}")
+    if not scored:
+        return None, "no drops or stops to check"
+    sc = sum(scored) / len(scored)
+    good = sum(1 for x in scored if x > 0.75)
+    skipped = len([x for x in mo if x.get("kind") not in RISE | FALL])
+    why = (f"{good}/{len(scored)} drops and stops land within half a beat of the "
+           f"real thing")
+    if skipped: why += f" ({skipped} builds/quiets not checked -- ramps, not steps)"
+    if notes: why += " -- " + "; ".join(notes[:2])
+    return sc, why
 
 
 def ev_sections(m, B):
@@ -505,6 +601,7 @@ def evaluate(slug, map_path=None, m=None):
     for name, fn, args in (
         ("grid", ev_grid, (m, B)), ("bars", ev_bars, (m, B)),
         ("downbeats", ev_downbeats, (m, B)),
+        ("moments", ev_moments, (m, B)),
         ("sections", ev_sections, (m, B)), ("energy", ev_energy, (m, B)),
         ("accents", ev_accents, (m, B)), ("pump", ev_pump, (m, B)),
         ("chords", ev_chords, (m, B, sig, sr)), ("melody", ev_melody, (m, B, sig, sr)),

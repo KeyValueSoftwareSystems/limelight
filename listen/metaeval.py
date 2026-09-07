@@ -61,6 +61,16 @@ def corrupt(m, field, rng):
         b = m.get("beats") or []
         bp = (g.get("bar_phase", 0) + 1) % 4
         m["downbeats"] = [t for i, t in enumerate(b) if (i - bp) % 4 == 0]
+    elif field == "moments":
+        # Two beats late. Not an arbitrary number: it is the error we actually
+        # found on 8 Sept, when the best-scoring map put the drop in Levels at
+        # 20.85 against a real 19.88, because its detector locked onto the
+        # resume after the one-beat gap instead of the drop itself.
+        mo = m.get("moments") or []
+        mo = mo.get("entries") if isinstance(mo, dict) else mo
+        for x in (mo or []):
+            if "at" in x: x["at"] = max(0.0, x["at"] + 2 * per)
+            elif "t" in x: x["t"] = max(0.0, x["t"] + 2 * per)
     elif field == "sections":
         for c in m.get("chapters", []): c["at"] = max(0.0, c["at"] + 4 * per)
     elif field == "energy":
