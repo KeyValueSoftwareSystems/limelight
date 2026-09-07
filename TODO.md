@@ -15,7 +15,7 @@
 
 ## C. Map fields that drive nothing (ablation, my actual lane)
 - [x] C1 lyrics measured at 0.002% on the 4 songs that carry it — confirmed decoration, open: make it earn its place via vocal-phrase handover
-- [~] C2 chords worth 0.364% on the 1 song that has it; absent from the other 4 — ADD them
+- [x] C2 chords now measured for all 5 songs by ear.py, and colour follows chord identity
 - [ ] C3 voice 0.002%, novelty 0.024%, stems.vocals 0.043% — decoration
 - [x] C4 downbeats 0.000% — suspect measurement artifact, verify on a song with bar_phase != 0
 - [x] C5 Publish the ablation as the map's feedback loop

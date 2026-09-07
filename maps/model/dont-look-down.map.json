@@ -30943,6 +30943,550 @@
    "beats_paired": 268,
    "beats_total": 470,
    "note": "Negative means the grid fires before the drum. This is two measurements of one recording by different methods, not truth: the onset detector carries its own bias and nobody has verified either against a human ear. Recorded so a reader or a listening session can see it, never applied as a correction."
+  },
+  "chords": {
+   "rate": "per_bar",
+   "how": "chroma template match over 250-2000 Hz of the FULL MIX, 36 templates (maj, min, dom7), mode-smoothed across 3 bars",
+   "not": "weaker than a chroma taken from separated bass and keys: on the full mix a kick and a cymbal land in the same twelve bins as the harmony. Bars with no confident match carry no chord rather than a guess",
+   "bars_named": 107,
+   "bars_total": 118,
+   "events": [
+    {
+     "at": 0.494,
+     "chord": "A",
+     "confidence": 0.664
+    },
+    {
+     "at": 2.369,
+     "chord": "A",
+     "confidence": 0.813
+    },
+    {
+     "at": 4.244,
+     "chord": "A7",
+     "confidence": 0.663
+    },
+    {
+     "at": 6.119,
+     "chord": "E",
+     "confidence": 1.0
+    },
+    {
+     "at": 9.869,
+     "chord": "E",
+     "confidence": 1.0
+    },
+    {
+     "at": 11.744,
+     "chord": "C7",
+     "confidence": 0.495
+    },
+    {
+     "at": 13.619,
+     "chord": "Em",
+     "confidence": 0.851
+    },
+    {
+     "at": 15.494,
+     "chord": "Em",
+     "confidence": 0.449
+    },
+    {
+     "at": 17.369,
+     "chord": "Em",
+     "confidence": 0.582
+    },
+    {
+     "at": 21.119,
+     "chord": "Em",
+     "confidence": 0.583
+    },
+    {
+     "at": 22.994,
+     "chord": "Em",
+     "confidence": 0.908
+    },
+    {
+     "at": 24.869,
+     "chord": "Em",
+     "confidence": 0.617
+    },
+    {
+     "at": 26.744,
+     "chord": "D",
+     "confidence": 0.632
+    },
+    {
+     "at": 30.494,
+     "chord": "D",
+     "confidence": 0.594
+    },
+    {
+     "at": 32.369,
+     "chord": "Em",
+     "confidence": 1.0
+    },
+    {
+     "at": 34.244,
+     "chord": "Em",
+     "confidence": 0.567
+    },
+    {
+     "at": 36.119,
+     "chord": "Em",
+     "confidence": 0.936
+    },
+    {
+     "at": 37.994,
+     "chord": "Em",
+     "confidence": 0.81
+    },
+    {
+     "at": 39.869,
+     "chord": "Em",
+     "confidence": 0.667
+    },
+    {
+     "at": 41.744,
+     "chord": "G",
+     "confidence": 0.524
+    },
+    {
+     "at": 43.619,
+     "chord": "G",
+     "confidence": 0.816
+    },
+    {
+     "at": 45.494,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 47.369,
+     "chord": "C",
+     "confidence": 0.95
+    },
+    {
+     "at": 49.244,
+     "chord": "G",
+     "confidence": 0.873
+    },
+    {
+     "at": 51.119,
+     "chord": "D7",
+     "confidence": 0.414
+    },
+    {
+     "at": 52.994,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 54.869,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 56.744,
+     "chord": "C",
+     "confidence": 0.407
+    },
+    {
+     "at": 58.619,
+     "chord": "C",
+     "confidence": 0.433
+    },
+    {
+     "at": 62.369,
+     "chord": "C",
+     "confidence": 0.777
+    },
+    {
+     "at": 64.244,
+     "chord": "G",
+     "confidence": 1.0
+    },
+    {
+     "at": 66.119,
+     "chord": "G",
+     "confidence": 0.958
+    },
+    {
+     "at": 67.994,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 69.869,
+     "chord": "E",
+     "confidence": 1.0
+    },
+    {
+     "at": 71.744,
+     "chord": "Em",
+     "confidence": 0.706
+    },
+    {
+     "at": 73.619,
+     "chord": "G",
+     "confidence": 1.0
+    },
+    {
+     "at": 75.494,
+     "chord": "C",
+     "confidence": 0.603
+    },
+    {
+     "at": 77.369,
+     "chord": "Am",
+     "confidence": 0.617
+    },
+    {
+     "at": 81.119,
+     "chord": "G",
+     "confidence": 1.0
+    },
+    {
+     "at": 82.994,
+     "chord": "C",
+     "confidence": 0.717
+    },
+    {
+     "at": 84.869,
+     "chord": "C",
+     "confidence": 0.574
+    },
+    {
+     "at": 86.744,
+     "chord": "C",
+     "confidence": 0.616
+    },
+    {
+     "at": 88.619,
+     "chord": "Em",
+     "confidence": 1.0
+    },
+    {
+     "at": 90.494,
+     "chord": "Em",
+     "confidence": 0.659
+    },
+    {
+     "at": 92.369,
+     "chord": "Am",
+     "confidence": 0.692
+    },
+    {
+     "at": 94.244,
+     "chord": "C",
+     "confidence": 0.621
+    },
+    {
+     "at": 96.119,
+     "chord": "Em",
+     "confidence": 1.0
+    },
+    {
+     "at": 97.994,
+     "chord": "Em",
+     "confidence": 0.657
+    },
+    {
+     "at": 99.869,
+     "chord": "C",
+     "confidence": 0.641
+    },
+    {
+     "at": 101.744,
+     "chord": "C",
+     "confidence": 0.427
+    },
+    {
+     "at": 103.619,
+     "chord": "Am",
+     "confidence": 0.39
+    },
+    {
+     "at": 105.494,
+     "chord": "C7",
+     "confidence": 0.534
+    },
+    {
+     "at": 107.369,
+     "chord": "Em",
+     "confidence": 0.886
+    },
+    {
+     "at": 109.244,
+     "chord": "Em",
+     "confidence": 0.433
+    },
+    {
+     "at": 111.119,
+     "chord": "Em",
+     "confidence": 0.756
+    },
+    {
+     "at": 112.994,
+     "chord": "Em",
+     "confidence": 1.0
+    },
+    {
+     "at": 114.869,
+     "chord": "Em",
+     "confidence": 0.604
+    },
+    {
+     "at": 116.744,
+     "chord": "Em",
+     "confidence": 1.0
+    },
+    {
+     "at": 118.619,
+     "chord": "Em",
+     "confidence": 0.741
+    },
+    {
+     "at": 120.494,
+     "chord": "D",
+     "confidence": 0.922
+    },
+    {
+     "at": 122.369,
+     "chord": "A",
+     "confidence": 0.952
+    },
+    {
+     "at": 124.244,
+     "chord": "Dm",
+     "confidence": 1.0
+    },
+    {
+     "at": 126.119,
+     "chord": "Em",
+     "confidence": 0.822
+    },
+    {
+     "at": 127.994,
+     "chord": "Em",
+     "confidence": 1.0
+    },
+    {
+     "at": 129.869,
+     "chord": "Em",
+     "confidence": 0.821
+    },
+    {
+     "at": 133.619,
+     "chord": "Em",
+     "confidence": 0.558
+    },
+    {
+     "at": 135.494,
+     "chord": "G",
+     "confidence": 0.936
+    },
+    {
+     "at": 137.369,
+     "chord": "G",
+     "confidence": 0.847
+    },
+    {
+     "at": 139.244,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 141.119,
+     "chord": "C",
+     "confidence": 0.75
+    },
+    {
+     "at": 142.994,
+     "chord": "G",
+     "confidence": 0.782
+    },
+    {
+     "at": 144.869,
+     "chord": "G",
+     "confidence": 0.389
+    },
+    {
+     "at": 146.744,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 148.619,
+     "chord": "C",
+     "confidence": 0.955
+    },
+    {
+     "at": 150.494,
+     "chord": "G",
+     "confidence": 0.97
+    },
+    {
+     "at": 152.369,
+     "chord": "G",
+     "confidence": 0.422
+    },
+    {
+     "at": 154.244,
+     "chord": "G",
+     "confidence": 0.457
+    },
+    {
+     "at": 156.119,
+     "chord": "G",
+     "confidence": 0.734
+    },
+    {
+     "at": 157.994,
+     "chord": "G",
+     "confidence": 0.923
+    },
+    {
+     "at": 159.869,
+     "chord": "G",
+     "confidence": 0.7
+    },
+    {
+     "at": 161.744,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 163.619,
+     "chord": "E",
+     "confidence": 1.0
+    },
+    {
+     "at": 165.494,
+     "chord": "Em",
+     "confidence": 0.644
+    },
+    {
+     "at": 167.369,
+     "chord": "C",
+     "confidence": 0.925
+    },
+    {
+     "at": 169.244,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 171.119,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 172.994,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 174.869,
+     "chord": "C",
+     "confidence": 0.961
+    },
+    {
+     "at": 176.744,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 178.619,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 180.494,
+     "chord": "C",
+     "confidence": 0.756
+    },
+    {
+     "at": 182.369,
+     "chord": "C",
+     "confidence": 0.394
+    },
+    {
+     "at": 184.244,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 186.119,
+     "chord": "C",
+     "confidence": 0.576
+    },
+    {
+     "at": 187.994,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 191.744,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 193.619,
+     "chord": "C",
+     "confidence": 0.491
+    },
+    {
+     "at": 195.494,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 201.119,
+     "chord": "D7",
+     "confidence": 0.623
+    },
+    {
+     "at": 204.869,
+     "chord": "G",
+     "confidence": 0.991
+    },
+    {
+     "at": 208.619,
+     "chord": "C",
+     "confidence": 0.796
+    },
+    {
+     "at": 210.494,
+     "chord": "E",
+     "confidence": 1.0
+    },
+    {
+     "at": 212.369,
+     "chord": "E",
+     "confidence": 1.0
+    },
+    {
+     "at": 214.244,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 216.119,
+     "chord": "C",
+     "confidence": 1.0
+    },
+    {
+     "at": 217.994,
+     "chord": "Cm",
+     "confidence": 0.512
+    },
+    {
+     "at": 219.869,
+     "chord": "Cm",
+     "confidence": 0.522
+    }
+   ]
   }
  },
  "confidence": 0.92,

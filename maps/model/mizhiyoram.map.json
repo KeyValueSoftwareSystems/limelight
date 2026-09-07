@@ -7622,6 +7622,205 @@
    "beats_paired": 25,
    "beats_total": 173,
    "note": "Negative means the grid fires before the drum. This is two measurements of one recording by different methods, not truth: the onset detector carries its own bias and nobody has verified either against a human ear. Recorded so a reader or a listening session can see it, never applied as a correction."
+  },
+  "chords": {
+   "rate": "per_bar",
+   "how": "chroma template match over 250-2000 Hz of the FULL MIX, 36 templates (maj, min, dom7), mode-smoothed across 3 bars",
+   "not": "weaker than a chroma taken from separated bass and keys: on the full mix a kick and a cymbal land in the same twelve bins as the harmony. Bars with no confident match carry no chord rather than a guess",
+   "bars_named": 38,
+   "bars_total": 43,
+   "events": [
+    {
+     "at": 5.623,
+     "chord": "G#",
+     "confidence": 0.961
+    },
+    {
+     "at": 8.479,
+     "chord": "A#",
+     "confidence": 0.602
+    },
+    {
+     "at": 11.335,
+     "chord": "A#",
+     "confidence": 0.907
+    },
+    {
+     "at": 14.191,
+     "chord": "A#",
+     "confidence": 0.569
+    },
+    {
+     "at": 17.048,
+     "chord": "A#",
+     "confidence": 0.872
+    },
+    {
+     "at": 19.904,
+     "chord": "A#",
+     "confidence": 0.807
+    },
+    {
+     "at": 22.76,
+     "chord": "G7",
+     "confidence": 0.464
+    },
+    {
+     "at": 25.616,
+     "chord": "G7",
+     "confidence": 0.633
+    },
+    {
+     "at": 28.472,
+     "chord": "G7",
+     "confidence": 0.522
+    },
+    {
+     "at": 31.328,
+     "chord": "G7",
+     "confidence": 0.359
+    },
+    {
+     "at": 37.041,
+     "chord": "A#7",
+     "confidence": 1.0
+    },
+    {
+     "at": 39.897,
+     "chord": "Fm",
+     "confidence": 0.529
+    },
+    {
+     "at": 45.609,
+     "chord": "G7",
+     "confidence": 0.574
+    },
+    {
+     "at": 48.465,
+     "chord": "G7",
+     "confidence": 0.727
+    },
+    {
+     "at": 51.321,
+     "chord": "A#7",
+     "confidence": 0.772
+    },
+    {
+     "at": 54.177,
+     "chord": "A#",
+     "confidence": 1.0
+    },
+    {
+     "at": 59.89,
+     "chord": "A#7",
+     "confidence": 0.944
+    },
+    {
+     "at": 62.746,
+     "chord": "A#7",
+     "confidence": 0.438
+    },
+    {
+     "at": 65.602,
+     "chord": "A#7",
+     "confidence": 0.587
+    },
+    {
+     "at": 68.458,
+     "chord": "A#",
+     "confidence": 1.0
+    },
+    {
+     "at": 71.314,
+     "chord": "A#",
+     "confidence": 0.674
+    },
+    {
+     "at": 74.17,
+     "chord": "A#",
+     "confidence": 0.943
+    },
+    {
+     "at": 77.027,
+     "chord": "A#",
+     "confidence": 0.491
+    },
+    {
+     "at": 79.883,
+     "chord": "A#",
+     "confidence": 0.875
+    },
+    {
+     "at": 82.739,
+     "chord": "A#",
+     "confidence": 0.924
+    },
+    {
+     "at": 85.595,
+     "chord": "A#",
+     "confidence": 0.8
+    },
+    {
+     "at": 88.451,
+     "chord": "D#",
+     "confidence": 0.662
+    },
+    {
+     "at": 91.307,
+     "chord": "D#",
+     "confidence": 1.0
+    },
+    {
+     "at": 94.163,
+     "chord": "A#",
+     "confidence": 0.589
+    },
+    {
+     "at": 97.02,
+     "chord": "A#",
+     "confidence": 1.0
+    },
+    {
+     "at": 99.876,
+     "chord": "A#",
+     "confidence": 0.686
+    },
+    {
+     "at": 102.732,
+     "chord": "A#7",
+     "confidence": 0.837
+    },
+    {
+     "at": 105.588,
+     "chord": "G#",
+     "confidence": 0.806
+    },
+    {
+     "at": 108.444,
+     "chord": "G#",
+     "confidence": 0.583
+    },
+    {
+     "at": 111.3,
+     "chord": "A#",
+     "confidence": 1.0
+    },
+    {
+     "at": 114.156,
+     "chord": "Fm",
+     "confidence": 0.538
+    },
+    {
+     "at": 119.869,
+     "chord": "A#",
+     "confidence": 0.444
+    },
+    {
+     "at": 122.725,
+     "chord": "A#",
+     "confidence": 0.474
+    }
+   ]
   }
  },
  "confidence": 0.908,

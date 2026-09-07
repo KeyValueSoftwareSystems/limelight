@@ -453,6 +453,24 @@ const CHORD_AT=(function(){
   const c=(MAP.observations&&MAP.observations.chords&&MAP.observations.chords.events)||[];
   return c.map(x=>x.at).filter(x=>typeof x==='number').sort((a,b)=>a-b);
 })();
+/* The chord names, not just the times they change at. chordTurn() has always
+   known WHEN the harmony moved and never WHICH chord it moved to, so every
+   chord got the same colour lean and the palette could only ever look like a
+   timer. */
+const CHORD_EV=(function(){
+  const evs=(MAP.observations&&MAP.observations.chords&&MAP.observations.chords.events)||[];
+  const NAMES={C:0,'C#':1,D:2,'D#':3,E:4,F:5,'F#':6,G:7,'G#':8,A:9,'A#':10,B:11};
+  const out=[];
+  for(const e of evs){
+    if(!e || typeof e.at!=='number' || typeof e.chord!=='string') continue;
+    const m=e.chord.match(/^([A-G]#?)(.*)$/); if(!m) continue;
+    const root=NAMES[m[1]]; if(root===undefined) continue;
+    out.push({at:e.at, root:root,
+              minor:/^m/.test(m[2]),
+              conf:(typeof e.confidence==='number')?e.confidence:0.5});
+  }
+  return out.sort((a,b)=>a.at-b.at);
+})();
 const WORDS=(function(){
   const w=(MAP.observations&&MAP.observations.lyrics&&MAP.observations.lyrics.words)||[];
   return w.filter(x=>x&&typeof x.at==='number').sort((a,b)=>a.at-b.at);
@@ -850,13 +868,37 @@ function rolesFor(name){
 }
 const MELODY_DEG = MELODY_DEG_K;
 const MEL_TILT = 0.055;
-function roleRGB(role,e,bri,pal,drift,white){
+/* ---- colour follows the harmony -------------------------------------------
+
+   Which chord it is, expressed as a hue. The ordering is the circle of fifths,
+   not the chromatic scale: I, V and IV land on neighbouring hues and a distant
+   chord lands far away, which is how a progression actually feels. A chord the
+   analysis is unsure of moves the colour less, so a bad measurement fades out
+   instead of shouting. Minor goes a little deeper and a little more saturated,
+   which is the oldest colour convention in the trade. */
+const CHORD_DEG = 26;
+const CHORD_TONIC = (typeof AUTO !== 'undefined' && AUTO.tonic >= 0) ? AUTO.tonic : 0;
+function chordShade(t){
+  if(!CHORD_EV.length) return null;
+  const k = lastAtOrBefore(CHORD_EV, t, 'at');
+  if(k < 0) return null;
+  const c = CHORD_EV[k];
+  const deg = (((c.root - CHORD_TONIC) % 12) + 12) % 12;
+  const p = (deg * 7) % 12;
+  const signed = (p <= 6) ? p : p - 12;
+  const w = cl(c.conf / 0.80);
+  return {hue: CHORD_DEG * (signed / 6) * w,
+          sat: c.minor ? 1.04 : 0.98,
+          lit: c.minor ? 0.91 : 1.03};
+}
+function roleRGB(role,e,bri,pal,drift,white,sh){
   const P = pal || PAL;
   const c = P[role] || P.lead;
   const d = (drift===undefined?0:drift) * MELODY_DEG;
   const w = white===undefined?0:cl(white);
-  return hsl(c[0] + d, cl(c[1]*(0.86+0.20*e)*(1-0.92*w),0,1),
-                       cl(c[2]*(0.84+0.28*e)*(0.94+0.12*bri)*(1+0.55*w),0,1));
+  const H = sh ? sh.hue : 0, S = sh ? sh.sat : 1, L = sh ? sh.lit : 1;
+  return hsl(c[0] + d + H, cl(c[1]*S*(0.86+0.20*e)*(1-0.92*w),0,1),
+                           cl(c[2]*L*(0.84+0.28*e)*(0.94+0.12*bri)*(1+0.55*w),0,1));
 }
 
 /* ---- the chase -------------------------------------------------------------
@@ -979,7 +1021,7 @@ function fixColour(t,L,kind,xn,e){
   const bri=briteAt(t), XFC=1.9, j=chIdx(t);
   const bpw=buildProg(t);
   const wh=bpw>=0 ? Math.pow(bpw,1.6)*0.90 : 0;
-  const dr=meloDrift(t), hm=chordTurn(t), P=palAt(t);
+  const dr=meloDrift(t), hm=chordTurn(t), P=palAt(t), sh=chordShade(t);
   const pick=(roles)=>{
     let role, alt;
     if(kind==='up'){ role='deep'; alt=roles[1] }
@@ -987,10 +1029,10 @@ function fixColour(t,L,kind,xn,e){
     else { const fi = RIG_MIRRORED ? Math.round(Math.abs(xn-0.5)*2*(PARN-1)) : Math.round(xn*(PARN-1));
            role = (fi % 2 === 0) ? roles[0] : roles[1];
            alt  = (fi % 2 === 0) ? roles[1] : roles[0]; }
-    const base=roleRGB(role,e,bri,P,dr,wh);
+    const base=roleRGB(role,e,bri,P,dr,wh,sh);
     const w=CHORD_LEAN*hm;
     let c=base;
-    if(w>0.004){ const o=roleRGB(alt,e,bri,P,dr,wh);
+    if(w>0.004){ const o=roleRGB(alt,e,bri,P,dr,wh,sh);
       c=[base[0]+(o[0]-base[0])*w|0, base[1]+(o[1]-base[1])*w|0, base[2]+(o[2]-base[2])*w|0] }
     return kind==='up' ? [c[0]*0.74|0, c[1]*0.74|0, c[2]*0.74|0] : c;
   };
