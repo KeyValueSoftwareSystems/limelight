@@ -12733,5 +12733,48 @@
    "observations.chords.events.at": 36,
    "observations.melody.notes": 88
   }
+ },
+ "vectors": {
+  "model": "m-a-p/MERT-v1-95M",
+  "layer": "last_hidden_state",
+  "rate": "per_beat",
+  "rows": 173,
+  "dim": 768,
+  "dtype": "float16",
+  "layout": "row_major",
+  "file": "mizhiyoram.vec.f16",
+  "pooling": "mean of 75.0 Hz frames between consecutive beats, then L2-normalised",
+  "section_similarity": {
+   "B~G": 0.927,
+   "D~F": 0.903,
+   "C~E": 0.884,
+   "D~E": 0.884,
+   "B~E": 0.856,
+   "E~F": 0.85,
+   "B~C": 0.845,
+   "C~D": 0.843,
+   "C~H": 0.837,
+   "F~H": 0.836,
+   "A~B": 0.831,
+   "A~F": 0.831,
+   "D~H": 0.822,
+   "E~G": 0.821,
+   "B~H": 0.817,
+   "E~H": 0.813,
+   "C~F": 0.797,
+   "B~F": 0.783,
+   "C~G": 0.782,
+   "G~H": 0.756,
+   "B~D": 0.755,
+   "A~G": 0.75,
+   "A~H": 0.748,
+   "F~G": 0.744,
+   "A~D": 0.735,
+   "A~E": 0.709,
+   "A~C": 0.697,
+   "D~G": 0.677
+  },
+  "not": "a fact a human can check by ear. It is what a large model heard, for a small head to learn from. Also: this torch build renamed the weight-norm parametrisation, so the positional-conv weights of the checkpoint did not load and are randomly initialised; embeddings are slightly perturbed from the published model's. the-nights' vectors were made the same way.",
+  "device": "Quadro T1000"
  }
 }
