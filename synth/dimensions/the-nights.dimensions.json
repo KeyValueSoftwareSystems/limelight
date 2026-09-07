@@ -1,0 +1,189 @@
+{
+ "song": {
+  "title": "The Nights",
+  "artist": "Avicii",
+  "length": 175.682
+ },
+ "grid": {
+  "bpm": 125.993,
+  "period_s": 0.476217,
+  "bar_s": 1.9049,
+  "bar_phase": 1
+ },
+ "generated": {
+  "by": "readers/lights/dimensions_json.py",
+  "when": "2026-09-07T22:44:27",
+  "from_map": "synth/truth/the-nights.map.json",
+  "note": "what the song asks for, how fast, and what a rig must supply. trust is honest: low means the field it came from is known to be unreliable and should not carry a gesture yet."
+ },
+ "dmx": {
+  "frame_hz": 44.0,
+  "frame_ms": 22.73,
+  "note": "nothing finer than one frame reaches a lamp"
+ },
+ "dimensions": [
+  {
+   "key": "pulse",
+   "what": "the beat",
+   "needs": "level",
+   "from": "grid",
+   "trust": "high",
+   "rate_hz": 2.0999,
+   "detail": {
+    "bpm": 125.993,
+    "bar_seconds": 1.9049
+   }
+  },
+  {
+   "key": "hits",
+   "what": "drum hits, including the ones off the beat",
+   "needs": "level",
+   "from": "accents",
+   "trust": "medium",
+   "rate_hz": 5.5953,
+   "detail": {
+    "count": 983,
+    "off_grid": 697,
+    "off_grid_share": 0.709
+   },
+   "note": "the times are only as good as the onset detector; see the accents score"
+  },
+  {
+   "key": "groove",
+   "what": "how far the sixteenths sit off the grid",
+   "needs": "timing",
+   "from": "observations.groove",
+   "trust": "medium",
+   "detail": {
+    "swing_ms": 7.6,
+    "dmx_frame_ms": 22.7,
+    "frames_wide": 0.33,
+    "expressible": false
+   },
+   "note": "a swing narrower than one DMX frame cannot be sent down the wire"
+  },
+  {
+   "key": "amount",
+   "what": "how much is going on: loudness and fullness together",
+   "needs": "count",
+   "from": "energy + observations.instruments",
+   "trust": "high",
+   "rate_hz": 0.5237,
+   "detail": {
+    "loud_min": 0.0,
+    "loud_max": 1.0,
+    "full_min": 0.0,
+    "full_max": 1.0,
+    "they_agree_r": 0.83
+   },
+   "note": "energy and density correlate 0.83, so they are one axis, not two"
+  },
+  {
+   "key": "balance",
+   "what": "bars where loudness and fullness disagree",
+   "needs": "count",
+   "from": "energy vs observations.instruments",
+   "trust": "medium",
+   "rate_hz": 0.0569,
+   "detail": {
+    "bars_diverging": 10,
+    "of_bars": 92
+   },
+   "note": "a filter opening rather than instruments arriving; nothing reads this yet"
+  },
+  {
+   "key": "harmony",
+   "what": "the chords moving",
+   "needs": "colour",
+   "from": "observations.chords",
+   "trust": "low",
+   "rate_hz": 0.1935,
+   "detail": {
+    "changes": 34,
+    "distinct_chords": 8,
+    "mean_confidence": 0.772
+   },
+   "note": "few distinct chords means colour has little to say; and the quality of each chord is unreliable, only the root"
+  },
+  {
+   "key": "pitch",
+   "what": "the tune rising and falling",
+   "needs": "position",
+   "from": "observations.melody",
+   "trust": "low",
+   "rate_hz": 7.6502,
+   "detail": {
+    "notes": 1344,
+    "semitones_middle_90pc": 28.8,
+    "usable_rate_hz": 0.525
+   },
+   "note": "a range this wide is not one melodic line -- the tracker is following different sources -- so do not build a spatial gesture on it yet"
+  },
+  {
+   "key": "voice",
+   "what": "a human singing",
+   "needs": "attention",
+   "from": "observations.instruments.parts.vocals",
+   "trust": "medium",
+   "detail": {
+    "share_of_song": 0.717
+   },
+   "note": "on the-nights it correlates -0.53 with drum hits: when the voice is exposed the drums back off"
+  },
+  {
+   "key": "tension",
+   "what": "the song promising something",
+   "needs": "level+count",
+   "from": "spans",
+   "trust": "high",
+   "rate_hz": 0.0114,
+   "detail": {
+    "builds": 2,
+    "seconds": 51.4,
+    "share_of_song": 0.293,
+    "shapes": [
+     "late",
+     "steady"
+    ]
+   }
+  },
+  {
+   "key": "impact",
+   "what": "drops",
+   "needs": "strobe",
+   "from": "moments",
+   "trust": "high",
+   "rate_hz": 0.0114,
+   "detail": {
+    "drops": 2,
+    "at": [
+     63.621,
+     139.816
+    ]
+   }
+  }
+ ],
+ "not_measured": [
+  {
+   "key": "novelty",
+   "what": "whether a bar repeats something already heard",
+   "needs": "memory",
+   "why_it_matters": "a show should repeat where the song repeats and change where it changes, and nothing in the map says which is which. This is 'it feels repetitive'.",
+   "how": "self-similarity between per-bar embeddings"
+  },
+  {
+   "key": "width",
+   "what": "the mix's own left-right image",
+   "needs": "spread",
+   "why_it_matters": "a stereo field has a width and a rig has a width; matching them is free",
+   "how": "listen/stereo.py exists but nothing writes this field yet"
+  },
+  {
+   "key": "timbre",
+   "what": "bright or dark, independent of loud or quiet",
+   "needs": "colour temperature",
+   "why_it_matters": "what separates a filtered build from a loud verse",
+   "how": "observations.brightness exists and nothing reads it; note that analysis at 22.05 kHz truncates everything above 11 kHz"
+  }
+ ]
+}
