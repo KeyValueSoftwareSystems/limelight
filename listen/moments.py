@@ -103,7 +103,7 @@ def analyse(slug, write=False):
     env = envelope(wav)
     acc = [e["at"] for e in ((m.get("accents") or {}).get("events") or [])]
     per = m["grid"]["period"]
-    moved, notes = [], []
+    moved, notes, chapters_moved = [], [], []
     for x in mo:
         k = x.get("kind")
         if k not in RISE | FALL: continue
@@ -139,8 +139,31 @@ def analyse(slug, write=False):
                                         "does not agree there is an event here"})
             continue
         j = (max(allowed) if k in RISE else min(allowed))[1]
+
+        # A margin was tried here -- overturn the claim only if the winning step
+        # beats the claimed position by a tenth -- on the theory that two step
+        # detectors disagreeing by a beat is not evidence to move. It scored
+        # WORSE: it also blocked a drop in Levels that was three beats late,
+        # because the step it was snapped to is within a tenth of the real one.
+        # The margin protected wrong answers as readily as right ones, so the
+        # rule stays simple: the biggest step the drum witness allows.
         witness = density_step(acc, beats, j) if acc else None
         if j != i0:
+            # The chapter goes with it. Renjith found this from the stage and it is
+            # the half of the bug that actually matters there: the chapter is what
+            # drives the look, so a drop corrected on its own would have moved
+            # nothing anyone can see. A chapter sitting within a beat of the old
+            # moment is the same event under another name, and it moves too.
+            for c in (m.get("chapters") or []):
+                if abs(c["at"] - t) < per * 0.75:
+                    c["at"] = round(beats[j], 6)
+                    if "pos" in c: c["pos"] = round(c["pos"] + (beats[j] - t) / per, 4)
+                    chapters_moved.append({"name": c.get("name"), "was": round(t, 3),
+                                           "now": round(beats[j], 3)})
+            for e in ((m.get("sections") or {}).get("entries") or []):
+                if abs(e.get("at", -1) - t) < per * 0.75:
+                    e["at"] = round(beats[j], 6)
+                    if "pos" in e: e["pos"] = round(e["pos"] + (beats[j] - t) / per, 4)
             moved.append({"kind": k, "was": round(t, 6), "now": round(beats[j], 6),
                           "beats": round((beats[j] - t) / per, 2),
                           "drum_hits_per_beat_change": round(witness, 2) if witness is not None else None})
@@ -161,7 +184,7 @@ def analyse(slug, write=False):
         seen.add(key); keep.append(x)
     if dupes: m["moments"] = keep
 
-    if moved or notes or dupes:
+    if moved or notes or dupes or chapters_moved:
         m.setdefault("observations", {})["moment_timing"] = {
             "how": "each drop and stop moved to the beat carrying the biggest sustained "
                    "step in loudness within two bars, the step being the median across "
@@ -171,10 +194,12 @@ def analyse(slug, write=False):
                    "next full bar -- two beats late, every time",
             "second_witness": "drum hits per beat, counted from the separated stems, which "
                               "shares no arithmetic with the loudness envelope",
-            "moved": moved, "left_alone": notes, "merged_duplicates": dupes}
-    if write and (moved or notes or dupes):
+            "moved": moved, "chapters_moved_with_them": chapters_moved,
+            "left_alone": notes, "merged_duplicates": dupes}
+    if write and (moved or notes or dupes or chapters_moved):
         json.dump(m, open(p, "w"), indent=1, ensure_ascii=False); open(p, "a").write("\n")
-    return {"moved": moved, "left_alone": notes, "dupes": dupes, "path": p}
+    return {"moved": moved, "left_alone": notes, "dupes": dupes,
+            "chapters": chapters_moved, "path": p}
 
 
 if __name__ == "__main__":
@@ -182,7 +207,7 @@ if __name__ == "__main__":
     for slug in (args or ["levels", "starlight", "mizhiyoram", "dont-look-down"]):
         r = analyse(slug, write)
         if "error" in r: print("  %-16s %s" % (slug, r["error"])); continue
-        print("  %-16s %d moved, %d left alone, %d merged%s" % (slug, len(r["moved"]), len(r["left_alone"]), len(r["dupes"]),
+        print("  %-16s %d moved (%d chapters with them), %d left alone, %d merged%s" % (slug, len(r["moved"]), len(r["chapters"]), len(r["left_alone"]), len(r["dupes"]),
                                                      "  -> written" if write else ""))
         for x in r["moved"]:
             print("      %-5s %8.3f -> %8.3f  (%+.2f beats)" % (x["kind"], x["was"], x["now"], x["beats"]))

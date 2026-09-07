@@ -697,10 +697,10 @@
    "pos": 88.0
   },
   {
-   "at": 70.806324,
+   "at": 67.993824,
    "kind": "drop",
    "size": 0.95,
-   "pos": 151.0
+   "pos": 145.0
   },
   {
    "at": 105.493824,
@@ -85392,47 +85392,13 @@
    "moved": [
     {
      "kind": "drop",
-     "was": 41.743824,
-     "now": 41.275074,
-     "beats": -1.0,
-     "drum_hits_per_beat_change": 3.25
-    },
-    {
-     "kind": "drop",
-     "was": 73.618824,
-     "now": 70.806324,
+     "was": 70.806324,
+     "now": 67.993824,
      "beats": -6.0,
-     "drum_hits_per_beat_change": 0.12
-    },
-    {
-     "kind": "drop",
-     "was": 135.493824,
-     "now": 135.025074,
-     "beats": -1.0,
-     "drum_hits_per_beat_change": 3.62
-    },
-    {
-     "kind": "drop",
-     "was": 184.243824,
-     "now": 181.900074,
-     "beats": -5.0,
-     "drum_hits_per_beat_change": 4.5
-    },
-    {
-     "kind": "drop",
-     "was": 210.493824,
-     "now": 208.150074,
-     "beats": -5.0,
-     "drum_hits_per_beat_change": 0.12
-    },
-    {
-     "kind": "stop",
-     "was": 216.119,
-     "now": 214.243824,
-     "beats": -4.0,
-     "drum_hits_per_beat_change": -10.25
+     "drum_hits_per_beat_change": 1.62
     }
    ],
+   "chapters_moved_with_them": [],
    "left_alone": [],
    "merged_duplicates": []
   }
