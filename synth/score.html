@@ -93,6 +93,19 @@ function show(r){
   board();
 }
 
+/* a download for the maps that live on disk. The reference is refused on a shared
+   instance -- a link to the answer would end the leaderboard in one click. */
+function link(r){
+  const m=r.map||"";
+  let which=null;
+  if(m.startsWith("synth/truth/")) which="answer";
+  else if(m.startsWith("synth/songs/")) which="authored";
+  else { const mm=m.match(/^synth\/maps\/([^/]+)\//); if(mm) which=mm[1] }
+  if(!which) return m;
+  return `<a href="/api/map?song=${encodeURIComponent(r.song)}&which=${
+    encodeURIComponent(which)}" style="color:var(--tung)">${m}</a>`;
+}
+
 async function board(){
   const s=$("song").value;
   const rows=await (await fetch("/api/mapeval_board?song="+encodeURIComponent(s))).json();
@@ -101,7 +114,7 @@ async function board(){
     +"<th>map</th><th>made by</th></tr>"
     +rows.map(r=>`<tr><td class="t">${(r.total||0).toFixed(2)}</td>
       <td>${(r.accuracy||0).toFixed(2)}</td><td>${Math.round((r.coverage||0)*100)}%</td>
-      <td>${r.map||""}</td><td>${r.made_by||"?"}</td></tr>`).join("")+"</table>";
+      <td>${link(r)}</td><td>${r.made_by||"?"}</td></tr>`).join("")+"</table>";
 }
 
 function take(file){

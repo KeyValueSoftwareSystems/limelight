@@ -908,6 +908,36 @@ class H(http.server.BaseHTTPRequestHandler):
                     "<h1>Shows</h1><p>Pick a song, then choose your own copy of the audio "
                     "in the page.</p><ul>" + links + "</ul>",
                     "text/html; charset=utf-8")
+            if u.path == "/api/map":
+                # Hand back a map file as a download. The held-out answer is the one
+                # file nobody but its author may take a copy of -- the whole point of
+                # holding it out is that a model cannot be tuned to reproduce it, and
+                # a download link would end that in one click. So on a shared instance
+                # this serves anything EXCEPT the reference.
+                sl = (q.get("song") or [""])[0]
+                which = (q.get("which") or ["answer"])[0]
+                paths = {"answer": os.path.join(HERE, "truth", sl + ".map.json"),
+                         "authored": os.path.join(HERE, "songs", sl + ".map.json")}
+                if which not in paths:
+                    safe = "".join(c for c in which if c.isalnum() or c in "-_/")[:48]
+                    paths[which] = os.path.join(HERE, "maps", safe, sl + ".map.json")
+                fp = paths.get(which)
+                if which in ("answer", "authored") and READONLY:
+                    return self._send(403, json.dumps({
+                        "error": "the reference map is held out on a shared instance. "
+                                 "Ask Renjith if you genuinely need it -- and know that "
+                                 "having it makes your own score meaningless."}))
+                if not fp or not os.path.exists(fp):
+                    return self._send(404, json.dumps({"error": "no such map"}))
+                body = open(fp, "rb").read()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Disposition",
+                                 f'attachment; filename="{sl}.{which}.map.json"')
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
             if u.path == "/score":
                 return self._send(200, open(os.path.join(HERE, "score.html")).read(),
                                   "text/html; charset=utf-8")
