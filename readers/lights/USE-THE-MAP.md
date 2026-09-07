@@ -72,6 +72,32 @@ late. Select it and rung 1 must go red. If it passes, the check has gone
 circular — it is measuring the map against itself instead of against the audio,
 which is the single most common way a check in this project has been wrong.
 
+## Scoring a map you produced
+
+```bash
+python3 listen/mapeval.py levels                     the answer map
+python3 listen/mapeval.py levels --all               every map for that song, ranked
+python3 listen/mapeval.py levels --map path/to.json  your own output
+python3 listen/mapeval.py --every                    every song, every map
+```
+
+This scores the MAP, not the show, and no lights appear in it. Every field is
+measured against the recording -- is the kick loud where you say the beats are, do
+the notes of your chord carry energy at that bar, is your claimed pitch the
+loudest one there, does the sound change where you say a part begins. Nothing is
+compared against anybody else's map.
+
+Three numbers come out. **Accuracy** is how right the fields you claimed are.
+**Coverage** is how much of a map you filled in, because a file that claims
+nothing was outscoring one that claims everything, and silence should not be a way
+to win. And the **grid is a gate** rather than one field among eight: every other
+timestamp is expressed in the grid's frame, so a map that cannot find the beat has
+not described the song however well the rest reads. The deliberately-broken map
+scores 0.08 for exactly that reason.
+
+Results append to `synth/learning/mapeval.jsonl`, one line per run, so you can see
+whether today's change actually helped rather than trusting that it did.
+
 ## Hearing what the map claims
 
 ```bash
