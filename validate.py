@@ -25,6 +25,24 @@ def check(m):
     # A truth file may be PARTIAL. `null` is a legitimate answer and is worth more than a
     # guess, so a half-filled truth file is a valid artifact -- the bench scores per field
     # and simply scores less. A model, by contrast, has no excuse for a null.
+    # grid.bar_phase says which beat of the four the downbeat lands on. It is
+    # 0-indexed and it has to agree with this map's own downbeats, because every
+    # reader treats it as a beat offset. ear.py wrote it as top+1 and all four
+    # measured maps were a quarter note out; mizhiyoram carried the value 4,
+    # which is not a beat index in 4/4 at all, and this file passed it. A number
+    # that contradicts another number in the same map is worse than a missing
+    # one, because nothing downstream can tell.
+    g = m.get("grid") or {}
+    bp = g.get("bar_phase")
+    if bp is not None:
+        A(isinstance(bp, int) and 0 <= bp <= 3,
+          f"grid.bar_phase {bp!r}: must be an integer 0-3, the beat of the bar the downbeat sits on")
+        per, ph, downs = g.get("period"), g.get("phase"), m.get("downbeats") or []
+        if isinstance(bp, int) and per and ph is not None and downs:
+            got = round(round((downs[0] - ph) / per)) % 4
+            A(got == bp,
+              f"grid.bar_phase says {bp} but this map's first downbeat sits on beat {got}")
+
     is_truth = m["made_by"].get("how") == "truth"
     is_synth = m.get("made_by", {}).get("how") == "synthetic"
     blank = [k for k in ("beats", "downbeats", "chapters", "moments", "spans", "energy")

@@ -1320,7 +1320,12 @@ def listen(path):
             "period": round(period, 6),
             "phase": round(phase, 6),
             "bpm": round(60.0 / period, 3),
-            "bar_phase": (top + 1) if locked else None,
+            # 0-indexed: which beat of the four the downbeat falls on, the same
+            # convention `downbeats` itself uses. This was written as top+1, so
+            # every consumer that read it -- and they all treat it as a beat
+            # offset -- was a quarter note out, and mizhiyoram carried the value
+            # 4, which is not a beat index in 4/4 at all.
+            "bar_phase": top if locked else None,
             "locked": locked,
             "how": f"onset flux {KICK_LO_HZ:.0f}-{KICK_HI_HZ:.0f} Hz, comb search, octave-tested",
         },

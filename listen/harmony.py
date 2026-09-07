@@ -148,7 +148,13 @@ def melody(sig, sr, t0, t1, hop, lo_hz=200.0, hi_hz=1200.0, win_s=0.08):
 def run(slug, write=False, validate=False):
     wav = os.path.join(ROOT, "synth", "out", slug + ".wav")
     mp = None
-    for c in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
+    # maps/model is where the measured maps actually live. These tools only
+    # looked in synth/truth and synth/songs, so none of them had ever run on
+    # levels, starlight, mizhiyoram or dont-look-down -- including pump.py,
+    # which finds the one production element the record is built on.
+    for c in (os.path.join(ROOT, "maps", "model", slug + ".full.map.json"),
+              os.path.join(ROOT, "maps", "model", slug + ".map.json"),
+              os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
               os.path.join(ROOT, "synth", "songs", slug + ".map.json")):
         if os.path.exists(c):
             mp = c; break
