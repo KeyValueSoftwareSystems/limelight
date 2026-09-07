@@ -169,6 +169,28 @@ def analyse(slug, write=False):
                           "drum_hits_per_beat_change": round(witness, 2) if witness is not None else None})
             x["at"] = round(beats[j], 6)
             if "pos" in x: x["pos"] = round(x["pos"] + (beats[j] - t) / per, 4)
+    # A chapter left behind by an earlier run. The first version of this tool
+    # moved moments and not chapters, so on four songs the drop is now right and
+    # the chapter that names it is still on the bar line it was snapped to --
+    # which is the half of the fault that is actually visible, because the
+    # chapter drives the look. observations.moment_timing already records where
+    # each moment came from, so the catch-up needs no new measurement and is
+    # idempotent: run it twice and the second run finds nothing.
+    prev = ((m.get("observations") or {}).get("moment_timing") or {}).get("moved") or []
+    for rec in prev:
+        was, now = rec.get("was"), rec.get("now")
+        if was is None or now is None: continue
+        for c in (m.get("chapters") or []):
+            if abs(c["at"] - was) < per * 0.75 and abs(c["at"] - now) > 1e-6:
+                if "pos" in c: c["pos"] = round(c["pos"] + (now - c["at"]) / per, 4)
+                c["at"] = now
+                chapters_moved.append({"name": c.get("name"), "was": round(was, 3),
+                                       "now": round(now, 3), "catch_up": True})
+        for e in ((m.get("sections") or {}).get("entries") or []):
+            if abs(e.get("at", -1) - was) < per * 0.75 and abs(e["at"] - now) > 1e-6:
+                if "pos" in e: e["pos"] = round(e["pos"] + (now - e["at"]) / per, 4)
+                e["at"] = now
+
     # Two moments of one kind can be re-timed onto the same beat -- ear.py emitted
     # a pair of drops four beats apart around one event in Levels and both moved to
     # it. One event is one moment: keep the first and record that the other was a
@@ -196,6 +218,27 @@ def analyse(slug, write=False):
                               "shares no arithmetic with the loudness envelope",
             "moved": moved, "chapters_moved_with_them": chapters_moved,
             "left_alone": notes, "merged_duplicates": dupes}
+    # Moving a chapter can put it out of order, and validate.py is right to
+    # refuse that: a reader that binary-searches chapters would silently return
+    # the wrong section. Re-sort everything that moved.
+    if chapters_moved or moved:
+        # A chapter can land on one that is already there, the same way two
+        # moments can, and validate.py refuses chapters that are not strictly
+        # increasing -- rightly, since a reader binary-searching them would
+        # return the wrong section. One boundary, one chapter.
+        seen_ch, keep_ch = set(), []
+        for c in sorted(m.get("chapters") or [], key=lambda c: c["at"]):
+            key = round(c["at"], 3)
+            if key in seen_ch:
+                dupes.append({"chapter": c.get("name"), "at": c["at"],
+                              "why": "moved onto another chapter at the same beat"})
+                continue
+            seen_ch.add(key); keep_ch.append(c)
+        m["chapters"] = keep_ch
+        m["moments"] = sorted(m.get("moments") or [], key=lambda x: (x["at"], x.get("kind", "")))
+        if isinstance(m.get("sections"), dict) and m["sections"].get("entries"):
+            m["sections"]["entries"] = sorted(m["sections"]["entries"], key=lambda e: e.get("at", 0))
+
     if write and (moved or notes or dupes or chapters_moved):
         json.dump(m, open(p, "w"), indent=1, ensure_ascii=False); open(p, "a").write("\n")
     return {"moved": moved, "left_alone": notes, "dupes": dupes,

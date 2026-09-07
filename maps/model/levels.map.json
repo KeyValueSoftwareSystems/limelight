@@ -705,9 +705,9 @@
    "was": 65.848314
   },
   {
-   "at": 85.067064,
+   "at": 79.910814,
    "name": "drop",
-   "pos": 181.0
+   "pos": 170.0
   },
   {
    "at": 90.223314,
@@ -744,11 +744,6 @@
    "name": "drop",
    "pos": 412.0,
    "was": 191.473314
-  },
-  {
-   "at": 193.348314,
-   "name": "drop",
-   "pos": 412.0
   },
   {
    "at": 227.098314,
@@ -793,10 +788,10 @@
    "was": 65.848314
   },
   {
-   "at": 85.067064,
+   "at": 79.910814,
    "kind": "drop",
    "size": 0.95,
-   "pos": 181.0
+   "pos": 170.0
   },
   {
    "at": 90.223314,
@@ -804,15 +799,15 @@
    "pos": 192.0
   },
   {
-   "at": 97.723314,
-   "kind": "quiet",
-   "pos": 208.0
-  },
-  {
    "at": 96.785814,
    "kind": "stop",
    "holds": 1.875,
    "pos": 206.0
+  },
+  {
+   "at": 97.723314,
+   "kind": "quiet",
+   "pos": 208.0
   },
   {
    "at": 99.598314,
@@ -1458,13 +1453,13 @@
     "pos": 140.0
    },
    {
-    "at": 85.067064,
+    "at": 79.910814,
     "id": "DRO",
     "repeat": 3,
     "arc": 0.362,
     "name": "drop",
     "mean_energy": 0.723,
-    "pos": 181.0
+    "pos": 170.0
    },
    {
     "at": 90.223314,
@@ -56306,58 +56301,21 @@
    "moved": [
     {
      "kind": "drop",
-     "was": 86.473314,
-     "now": 85.067064,
+     "was": 81.317064,
+     "now": 79.910814,
      "beats": -3.0,
-     "drum_hits_per_beat_change": 0.62
-    },
-    {
-     "kind": "stop",
-     "was": 99.598,
-     "now": 96.785814,
-     "beats": -6.0,
-     "drum_hits_per_beat_change": -1.25
-    },
-    {
-     "kind": "drop",
-     "was": 192.4108,
-     "now": 193.348314,
-     "beats": 2.0,
-     "drum_hits_per_beat_change": 0.62
-    },
-    {
-     "kind": "drop",
-     "was": 228.0358,
-     "now": 227.098314,
-     "beats": -2.0,
-     "drum_hits_per_beat_change": 1.12
+     "drum_hits_per_beat_change": 1.0
     }
    ],
    "chapters_moved_with_them": [
     {
      "name": "drop",
-     "was": 86.473,
-     "now": 85.067
-    },
-    {
-     "name": "drop",
-     "was": 192.411,
-     "now": 193.348
-    },
-    {
-     "name": "drop",
-     "was": 228.036,
-     "now": 227.098
+     "was": 81.317,
+     "now": 79.911
     }
    ],
    "left_alone": [],
-   "merged_duplicates": [
-    {
-     "kind": "drop",
-     "at": 193.348314,
-     "why": "re-timed onto the same beat as another moment of the same kind -- one event, one moment"
-    }
-   ]
+   "merged_duplicates": []
   }
  },
  "confidence": 0.95,
