@@ -905,8 +905,8 @@ class H(http.server.BaseHTTPRequestHandler):
                     "<meta name=viewport content='width=device-width,initial-scale=1'>"
                     "<style>body{background:#111;color:#eee;font:16px system-ui;padding:40px}"
                     "a{color:#7cf}li{margin:8px 0}</style>"
-                    "<h1>Shows</h1><p>Pick a song, then choose your own copy of the audio "
-                    "in the page.</p><ul>" + links + "</ul>",
+                    "<h1>Shows</h1><p>The audio is served from synth/out/. Five songs, "
+                    "one page each.</p><ul>" + links + "</ul>",
                     "text/html; charset=utf-8")
             if u.path == "/api/map":
                 # Hand back a map file as a download. The held-out answer is the one
