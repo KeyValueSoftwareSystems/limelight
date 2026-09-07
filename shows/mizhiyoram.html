@@ -197,6 +197,10 @@ SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
 const NOV_W = 0.35;
+const AMP_CAP = 0.80;
+const HEADROOM_K = 0.90;
+const MELODY_DEG_K = 4;
+const CHORD_LEAN = 0.18;
 const GATE_GROUPS = 0;
 const CYC_VERSE = 1.6;
 const CYC_BUILD = 0.5;
@@ -568,7 +572,7 @@ const LIMT = (LAYOUT.limits&&LAYOUT.limits.max_tilt_per_s)||0.95;
 
    This is the same shape of admission as the original flat 0.60: a blunt
    constant, honestly labelled, in place of an analysis that is not finished. */
-const SLEW_HEADROOM=0.68;
+const SLEW_HEADROOM=HEADROOM_K;
 const SLEW_CAP=Math.max(0.30,Math.min(1.0,0.60*(LIMP/0.85)*K.motion))*SLEW_HEADROOM;
 const LOOK_MOVE = {intro:2.1, quiet:2.0, idle:2.1, verse:1.45, break:1.7,
                    build:1.15, drop:0.70, outro:2.1, spotlight:1.9, flash:0.70};
@@ -806,7 +810,7 @@ function rolesFor(name){
   if(HOT_OK) return r;
   return [r[0]==='hot'?'lead':r[0], r[1]==='hot'?'cool':r[1]];
 }
-const MELODY_DEG = 9;
+const MELODY_DEG = MELODY_DEG_K;
 const MEL_TILT = 0.055;
 function roleRGB(role,e,bri,pal,drift,white){
   const P = pal || PAL;
@@ -946,7 +950,7 @@ function fixColour(t,L,kind,xn,e){
            role = (fi % 2 === 0) ? roles[0] : roles[1];
            alt  = (fi % 2 === 0) ? roles[1] : roles[0]; }
     const base=roleRGB(role,e,bri,P,dr,wh);
-    const w=0.38*hm;
+    const w=CHORD_LEAN*hm;
     let c=base;
     if(w>0.004){ const o=roleRGB(alt,e,bri,P,dr,wh);
       c=[base[0]+(o[0]-base[0])*w|0, base[1]+(o[1]-base[1])*w|0, base[2]+(o[2]-base[2])*w|0] }
@@ -1024,8 +1028,8 @@ function deployed(kind, t){
   return (at === undefined) ? 1 : ss(0, 1, (t - at)/BAR);
 }
 
-const GATE_RATE  = {wash:3.2, uplight:3.2, strip:2.2, head:1.0, par:1.0};
-const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:0.26, par:0.26};
+const GATE_RATE  = {wash:3.2, uplight:3.2, strip:2.2, head:1.5, par:1.5};
+const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:1.5, par:1.5};
 function buildProg(t){
   const sp = spanAt(t);
   if(!sp || sp.kind !== 'build' || !(sp.to > sp.from)) return -1;
@@ -1088,9 +1092,9 @@ const DROP_SETTLE = 0.60;
 const CUE_XF = 0.06;
 const HOFF_SPREAD = 0.15;
 const HOFF_TRUSS = 0.50;
-const DWELL_LO = 0.90;
-const DWELL_HI = 0.84;
-const DWELL_CAP = 0.94;
+const DWELL_LO = 0.35;
+const DWELL_HI = 0.22;
+const DWELL_CAP = 0.50;
 const BUILD_LO = 0.75;
 const BUILD_HI = 1.45;
 const LIFT_LO = 0.60;
@@ -1386,8 +1390,8 @@ function lookFrame(t,L){
   const ampP=Math.max(0.02,(LIMP-DADE*EMAX)/thp);   // pan  budget, proven
   const ampT=Math.max(0.02,(LIMT-DADE*EMAX)/(2*thp));// tilt runs at 2x in the sway shape
   const msc=Math.min(1, moveScaleAt(t));
-  const amp=Math.min(0.46*msc, ampP)*(0.42+0.58*eM)*SLEW_CAP;
-  const tam=Math.min(0.30*msc, ampT)*(0.34+0.66*eM)*SLEW_CAP;
+  const amp=Math.min(AMP_CAP*msc, ampP)*(0.42+0.58*eM)*SLEW_CAP;
+  const tam=Math.min(AMP_CAP*0.65*msc, ampT)*(0.34+0.66*eM)*SLEW_CAP;
   // No fast path for d==0. `return u` is NOT the d->0 limit of the branch below
   // (ss(m) != m), so crossing zero jumped the phase by ~0.6 rad and slewed the
   // heads at 9.8 units/s. Always ease -- which is what a real motor does anyway.
