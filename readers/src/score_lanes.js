@@ -1,4 +1,4 @@
-const MF=MAP_FULL, SOBS=MAP_FULL.observations;
+const MF=MAP_FULL, SOBS=(MAP_FULL&&MAP_FULL.observations)||{};
 /* X() and W() were defined in the old score page's own scope and were lost in
    the extraction, which left every lane throwing and the Score tab blank. */
 const DOWNS = MAP_FULL.downbeats;
@@ -72,13 +72,14 @@ Object.keys(STEMC).forEach(k=>{
     g.strokeStyle=STEMC[k];g.lineWidth=1.2;g.beginPath();
     v.forEach((y,i)=>{const x=X(DOWNS[i]),yy=h-2-(h-5)*y;i?g.lineTo(x,yy):g.moveTo(x,yy)});
     g.stroke();
-    const e=SOBS.envelope.sources[k];
+    const ES=(SOBS.envelope&&SOBS.envelope.sources); if(!ES) return;
+    const e=ES[k];
     g.strokeStyle=gr(hexrgb(STEMC[k]),0.45);g.lineWidth=0.8;g.beginPath();
     e.forEach((db,i)=>{const x=X(BEATS[i]),yy=h-2-(h-5)*Math.max(0,(db+60)/60);
       i?g.lineTo(x,yy):g.moveTo(x,yy)});g.stroke()})});
 
 lane('notes','3,863, basic-pitch',150,(g,w,h)=>{
-  const S=SOBS.notes.sources; let lo=127,hi=0;
+  const S=(SOBS.notes&&SOBS.notes.sources); if(!S) return; let lo=127,hi=0;
   Object.values(S).forEach(a=>a.forEach(n=>{lo=Math.min(lo,n[2]);hi=Math.max(hi,n[2])}));
   const Y=p=>h-3-(h-6)*((p-lo)/Math.max(1,hi-lo));
   for(let p=lo;p<=hi;p++) if(p%12===6){g.fillStyle='rgba(255,255,255,.05)';
@@ -99,22 +100,24 @@ lane('accents','983 hits, 71% off-grid',34,(g,w,h)=>{
     g.fillRect(x,h-3-hh,a.on_grid?1.6:1,hh)})});
 
 lane('chords','per bar, F# major',22,(g,w,h)=>{
-  const E=SOBS.chords.events;
+  const E=(SOBS.chords&&SOBS.chords.events); if(!E||!E.length) return;
   E.forEach((c,i)=>{const a=X(c.at),b=i+1<E.length?X(E[i+1].at):X(DUR);
     g.fillStyle=i%2?'#12161d':'#151a22';g.fillRect(a,2,b-a-1,h-4);
     g.fillStyle='#c9a0ff';g.font='600 10px ui-monospace,Menlo,monospace';
     if(b-a>18)g.fillText(c.chord,a+3,h/2+4)})});
 
 lane('lyrics','243 words, Whisper',24,(g,w,h)=>{
-  SOBS.vocal_silence.spans.forEach(s=>{g.fillStyle='rgba(255,255,255,.04)';
+  const VS=(SOBS.vocal_silence&&SOBS.vocal_silence.spans)||[];
+  VS.forEach(s=>{g.fillStyle='rgba(255,255,255,.04)';
     g.fillRect(X(s.from),0,X(s.to)-X(s.from),h)});
   g.font='10px ui-sans-serif';g.fillStyle='#ffd166';
   let lastx=-99;
-  SOBS.lyrics.words.forEach(wd=>{const x=X(wd.at);
+  const WD=(SOBS.lyrics&&SOBS.lyrics.words); if(!WD) return;
+  WD.forEach(wd=>{const x=X(wd.at);
     if(x-lastx<7) return; g.fillText(wd.word,x,h-7); lastx=x+wd.word.length*5.2})});
 
 lane('stereo','width & pan',30,(g,w,h)=>{
-  const st=SOBS.stereo.mix;
+  const st=(SOBS.stereo&&SOBS.stereo.mix); if(!st||!st.width||!st.pan) return;
   g.strokeStyle='#5b8cff';g.lineWidth=1.2;g.beginPath();
   st.width.forEach((v,i)=>{const x=X(DOWNS[i]),y=h-2-(h-5)*v;i?g.lineTo(x,y):g.moveTo(x,y)});
   g.stroke();
@@ -124,7 +127,8 @@ lane('stereo','width & pan',30,(g,w,h)=>{
   g.strokeStyle='rgba(255,255,255,.12)';g.beginPath();g.moveTo(0,h/2);g.lineTo(w,h/2);g.stroke()});
 
 lane('brightness','centroid per stem',30,(g,w,h)=>{
-  Object.keys(STEMC).forEach(k=>{const v=SOBS.brightness.sources[k]; if(!v) return;
+  const BS=(SOBS.brightness&&SOBS.brightness.sources); if(!BS) return;
+  Object.keys(STEMC).forEach(k=>{const v=BS[k]; if(!v) return;
     g.strokeStyle=gr(hexrgb(STEMC[k]),0.55);g.lineWidth=1;g.beginPath();
     v.forEach((y,i)=>{const x=X(DOWNS[i]),yy=h-2-(h-5)*y;i?g.lineTo(x,yy):g.moveTo(x,yy)});
     g.stroke()})});

@@ -30,6 +30,20 @@ MO = MO || [];
 SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
+const CYC_DROP = 0.5;
+const LONG_LIFT = 1.60;
+const QUIET_GAIN = 2.4;
+const QUIET_COV = 0.26;
+const BED_HOLD = 1.00;
+const MOVE_LEAD = 0.50;
+const LONG_FROM = 6;
+const LONG_TO = 20;
+const KILL_DEPTH=0.97;
+const KILL_BEATS=0.5;
+const CUT_DEPTH=0.00;
+const CUT_PHRASE=99;
+const CUT_BARS=0.5;
+const CUT_RISE=0.03;
 
 const SONG_DRIVE = (function(){
   const bpm = 60/Math.max(0.05, PER);
@@ -37,6 +51,11 @@ const SONG_DRIVE = (function(){
   const rate = DUR>0 ? ev.length/DUR : 0;
   return cl(Math.sqrt(ss(84,128,bpm) * ss(3.4,7.0,rate)));
 })();
+const HOT_OK = SONG_DRIVE > 0.45;
+const STROBE_GAIN = ss(0.25, 0.60, SONG_DRIVE);
+const STROBE_HZ   = lerp(0.40, 1.0, SONG_DRIVE);
+const BANG = ss(0.25, 0.60, SONG_DRIVE);
+const SLOWXF = lerp(1.9, 1.0, SONG_DRIVE);
 
 const bi=t=>{let lo=0,hi=BEATS.length-1,r=-1;while(lo<=hi){const m=(lo+hi)>>1;
   if(BEATS[m]<=t){r=m;lo=m+1}else hi=m-1}return r};
@@ -45,6 +64,21 @@ const beatInBar=t=>{const i=bi(t);return i<0?0:((i-DBP)%4+4)%4};
 const barIdx=t=>Math.floor((bi(t)-DBP)/4);
 const barPh=t=>cl((beatInBar(t)+bph(t))/4);
 const phrPh=t=>{const k=((bi(t)-DBP)%16+16)%16;return cl((k+bph(t))/16)};
+const mpos=t=>Math.max(0, barIdx(t)+barPh(t));
+function chBars(t){
+  if(!CH.length) return 0;
+  const j=chIdx(t), a=CH[j][0], b=(j+1<CH.length?CH[j+1][0]:DUR);
+  return (b-a)/Math.max(1e-6, BAR);
+}
+function longLift(t, L){
+  if(L!=='quiet' && L!=='idle' && L!=='build') return 1;
+  return lerp(1, LONG_LIFT, ss(LONG_FROM, LONG_TO, chBars(t)));
+}
+function chProg(t){
+  if(!CH.length) return 0;
+  const j=chIdx(t), a=CH[j][0], b=(j+1<CH.length?CH[j+1][0]:DUR);
+  return (b>a) ? cl((t-a)/(b-a)) : 0;
+}
 
 /* energy: smoothstep between downbeat samples, so there is no slope kink */
 /* A reader must survive a map that does not carry a field -- rule 2 of the format,
@@ -102,6 +136,26 @@ const ACC=(function(){
   for(const a of strong) if(!out.length||a.at-out[out.length-1].at>=0.30) out.push(a);
   return out})();
 const ACT=ACC.map(a=>a.at);
+const ACC_BY = (function(){
+  const out = {};
+  for(const a of ACC){ (out[a.of] = out[a.of] || []).push(a) }
+  return out;
+})();
+function accentOf(band, t){
+  const arr = ACC_BY[band];
+  if(!arr || !arr.length) return 0;
+  let lo=0, hi=arr.length-1, i=-1;
+  while(lo<=hi){ const m=(lo+hi)>>1; if(arr[m].at<=t){i=m;lo=m+1} else hi=m-1 }
+  let best=0;
+  const at = 0.014 + 0.060*(1-SONG_DRIVE), dc = 0.26;
+  for(let j=i; j>=0 && j>i-4; j--){
+    const dt = t - arr[j].at;
+    if(dt < 0 || dt > 0.40) continue;
+    const env = dt<at ? ss(0,at,dt) : 1-ss(0,1,cl((dt-at)/dc));
+    best = Math.max(best, env*(arr[j].strength===undefined?0.5:arr[j].strength));
+  }
+  return cl(best);
+}
 function accentHit(t){
   // strongest hit inside a short window ending at t, with its own envelope
   let best=0;
@@ -109,7 +163,7 @@ function accentHit(t){
   while(lo<=hi){const mi=(lo+hi)>>1; if(ACT[mi]<=t){i=mi;lo=mi+1}else hi=mi-1}
   for(let j=i;j>=0&&j>i-6;j--){
     const dt=t-ACT[j]; if(dt<0||dt>0.34) continue;
-    const at=0.014, dc=0.26;
+    const at=0.014+0.060*(1-SONG_DRIVE), dc=0.26;
     const env=dt<at?ss(0,at,dt):1-ss(0,1,cl((dt-at)/dc));
     best=Math.max(best,env*ACC[j].strength);
   }
@@ -236,13 +290,13 @@ function until(k,t,w){let b=null;for(const m of MO)if(m.kind===k&&m.at>t&&m.at-t
 function accent(p,e){
   // 0.28 of a beat is ~133 ms at 126 bpm. Below about 100 ms a level change on a
   // large surface reads as a flash rather than a hit, which is the whole complaint.
-  const at=0.035, dc=0.20+0.30*(1-e);
+  const at=lerp(0.15,0.035,SONG_DRIVE), dc=0.20+0.30*(1-e);
   if(p<at) return ss(0,at,p);
   return 1-ss(0,1,cl((p-at)/dc))}
 
 /* ---- look segmentation, derived from the map, rebuilt only on a correction ---- */
 function primaryLook(t){ if(stopAt(t))return'stop';
-  const[d,s]=since('drop',t,8); if(d)return s<0.30?'flash':'drop';
+  const[d,s]=since('drop',t,8); if(d)return (s<0.30&&HOT_OK)?'flash':'drop';
   if(since('spotlight',t,4)[0])return'spotlight';
   if(since('quiet',t,8)[0])return'quiet';
   const z=spanAt(t); if(z&&z.kind==='build')return'build';
@@ -360,43 +414,38 @@ function moveScaleAt(t){
   }
   return v*drive;
 }
+const MOVE_STEPS=[0.0625,0.125,0.25,0.5,1,2];
+function quantMove(r){
+  let best=MOVE_STEPS[0], bd=Infinity;
+  for(const v of MOVE_STEPS){ const d=Math.abs(Math.log(v/Math.max(1e-6,r))); if(d<bd){bd=d;best=v} }
+  return best}
+const MBARS = Math.max(2, Math.ceil((DUR - PH)/BAR) + 3);
 const MPH = (function(){
-  // the table is built from a 4-downbeat moving average, matching eMotion
-  if(!EN || !EN.length) return null;      // a map may carry no energy at all
-  const sm=EN.map((p,i)=>{let s=0,n=0;
-    for(let k=-3;k<=1;k++){const j=i+k; if(j<0||j>=EN.length)continue; s+=EN[j][1]; n++}
-    return n?s/n:p[1]});
-  const ts=EN.map(p=>p[0]);
-  const rs=sm.map((v,i)=>2*Math.PI/(movePeriod(v)*moveScaleAt(ts[i]))), cum=[0];
-  for(let i=0;i<ts.length-1;i++) cum.push(cum[i]+0.5*(rs[i]+rs[i+1])*(ts[i+1]-ts[i]));
-  return {ts,rs,cum}})();
-function mphIndex(t){
-  let k=0,lo=0,hi=MPH.ts.length-1;
-  while(lo<=hi){const m=(lo+hi)>>1; if(MPH.ts[m]<=t){k=m;lo=m+1}else hi=m-1}
-  return k}
-function rateNow(t){
-  if(!MPH || !MPH.ts.length) return 2*Math.PI/movePeriod(0.5);
-  const k=mphIndex(t);
-  if(k+1>=MPH.rs.length) return MPH.rs[MPH.rs.length-1];
-  const T=MPH.ts[k+1]-MPH.ts[k];
-  return lerp(MPH.rs[k], MPH.rs[k+1], T>0?cl((t-MPH.ts[k])/T):0)}
+  const rate=new Array(MBARS), cum=new Array(MBARS+1); cum[0]=0;
+  const t0=PH+DBP*PER;
+  for(let b=0;b<MBARS;b++){
+    const tt=t0+b*BAR+BAR*0.5;
+    rate[b]=quantMove(BAR/(movePeriod(eMotion(tt))*moveScaleAt(tt)));
+    cum[b+1]=cum[b]+rate[b];
+  }
+  return {rate:rate,cum:cum}})();
+function moveSlot(t){
+  const m=mpos(t);
+  let i=Math.floor(m); if(i>=MBARS-1) i=MBARS-2; if(i<0) i=0;
+  return [i, cl(m-i)]}
+function boundRate(t){
+  const sl=moveSlot(t), i=sl[0], R=MPH.rate;
+  const a2=Math.max(R[i], i>0?R[i-1]:R[i]);
+  const b2=Math.max(R[i], i+1<MBARS?R[i+1]:R[i]);
+  return lerp(a2,b2,sl[1])}
 function motionPhase(t){
-  // the rate must be the SEGMENT's constant rate, not en(t). Using the
-  // continuously varying energy inside a segment makes the extrapolated phase
-  // disagree with the next segment's accumulated value -- a jump at every
-  // downbeat, which is what slewed the heads at 2.9 units/s.
-  // With no energy curve there is nothing to integrate, so the heads move at one
-  // constant speed. A thinner map means a duller show, never a broken one -- pan
-  // used to come out null here and take the whole renderer down with it.
-  if(!MPH || !MPH.ts.length) return 2*Math.PI*t/movePeriod(0.5);
-  const k=mphIndex(t), dt=t-MPH.ts[k];
-  if(k+1>=MPH.rs.length) return MPH.cum[k] + MPH.rs[k]*dt;
-  const T=MPH.ts[k+1]-MPH.ts[k], f=T>0?cl(dt/T):0;
-  return MPH.cum[k] + MPH.rs[k]*dt + 0.5*(MPH.rs[k+1]-MPH.rs[k])*dt*f}
+  const sl=moveSlot(t);
+  return 2*Math.PI*(MPH.cum[sl[0]] + MPH.rate[sl[0]]*sl[1])}
+function rateNow(t){ return 2*Math.PI*boundRate(t)/BAR }
 const eMotionSlowNote=1;
 const segAt=t=>{let lo=0,hi=SEG.length-1,r=0;while(lo<=hi){const m=(lo+hi)>>1;
   if(SEG[m].from<=t){r=m;lo=m+1}else hi=m-1}return r};
-const XF=to=>to==='flash'?0.03:to==='stop'?0.22:to==='drop'?0.30:1.10;
+const XF=to=>(to==='flash'?0.03:to==='stop'?0.22:to==='drop'?0.30:1.10)*SLOWXF;
 function lookWeights(t){const i=segAt(t),s=SEG[i],x=XF(s.look),d=t-s.from;
   if(i>0&&d<x){const w=ss(0,x,d);return[[SEG[i-1].look,1-w],[s.look,w]]}
   return[[s.look,1]]}
@@ -438,19 +487,85 @@ const PROFILES = {
   neon:   { lead:[316,.92,.52], hot:[ 42,.94,.54], cool:[172,.88,.46], deep:[272,.84,.38] },
   amber:  { lead:[ 34,.84,.52], hot:[ 16,.92,.50], cool:[ 44,.62,.50], deep:[ 26,.70,.32] },
 };
-const PROFILE = (function(){ try { return (COLOUR || "garrix") } catch(e) { return "garrix" } })();
-const PAL = PROFILES[PROFILE] || PROFILES.sunset;
+const NOTE_PC = {C:0,'C#':1,DB:1,D:2,'D#':3,EB:3,E:4,F:5,'F#':6,GB:6,G:7,
+                'G#':8,AB:8,A:9,'A#':10,BB:10,B:11};
+const KEYOBS = (MAP.observations && MAP.observations.key) || null;
+function keyFacts(){
+  const k = KEYOBS;
+  if(!k) return {tonic:-1, major:false, conf:0};
+  let tonic = (typeof k.tonic==='number') ? k.tonic : -1;
+  let major = (k.mode==='major');
+  const txt = (typeof k.estimate==='string') ? k.estimate.trim() : '';
+  if(tonic < 0 && txt){
+    const m = /^([A-Ga-g][#b]?)/.exec(txt);
+    if(m){ const key=m[1].toUpperCase().replace('B','B'); 
+           const pc = NOTE_PC[m[1].toUpperCase()]; if(pc!==undefined) tonic = pc }
+  }
+  if(!k.mode && /min/i.test(txt)) major = false;
+  if(!k.mode && /maj/i.test(txt)) major = true;
+  const conf = (typeof k.confidence==='number') ? cl(k.confidence) : 0.5;
+  return {tonic:tonic, major:major, conf:conf};
+}
+function obsMean(name, dflt){
+  const c = OBS[name];
+  if(!c || !c.value || !c.value.length) return dflt;
+  let s2=0,n2=0; for(const v of c.value){ if(typeof v==='number'&&isFinite(v)){s2+=v;n2++} }
+  return n2 ? s2/n2 : dflt;
+}
+const WARM_HUES = [352, 8, 24, 38];
+const COOL_HUES = [186, 196, 206, 214, 224, 236, 262, 286];
+function palFrom(tonic, major, sat, lit){
+  const t = (tonic >= 0) ? tonic : 0;
+  const ci = t % COOL_HUES.length;
+  const at = k => COOL_HUES[((ci + k) % COOL_HUES.length + COOL_HUES.length) % COOL_HUES.length];
+  const w = WARM_HUES[t % WARM_HUES.length];
+  const s2 = major ? sat*0.96 : sat;
+  const l2 = major ? lit*1.06 : lit;
+  return {
+    lead: [at(0),  s2,                  l2],
+    cool: [at(2),  s2*0.94,             l2*0.92],
+    deep: [at(5),  s2*0.92,             l2*0.54],
+    hot:  [w,      Math.min(1,s2*1.03), l2*0.96],
+  };
+}
+const AUTO = (function(){
+  const k = keyFacts();
+  const commit = ss(0.35, 0.75, k.conf);
+  const major = k.major && commit > 0.5;
+  const tone = obsMean('tonality', 0.5);
+  const sat = cl(0.80 + 0.16*tone, 0.62, 0.97);
+  const lit = cl(0.44 + 0.10*tone + (major?0.03:0), 0.34, 0.58);
+  return {pal: palFrom(k.tonic, major, sat, lit),
+          tonic: k.tonic, major: major, sat: sat, lit: lit};
+})();
+const PROFILE = (function(){ try { return (COLOUR || "auto") } catch(e) { return "auto" } })();
+const PAL = (PROFILE === 'auto') ? AUTO.pal : (PROFILES[PROFILE] || AUTO.pal);
 const DROP_TIMES = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
 const FINALE = {garrix:'garrix-red', 'garrix-red':'garrix', sunset:'neon',
                 neon:'ice', ice:'neon', amber:'sunset', white:'white'};
+const FINALE_PAL = (PROFILE === 'auto')
+  ? palFrom((AUTO.tonic >= 0 ? AUTO.tonic : 0) + 5, AUTO.major, AUTO.sat, AUTO.lit)
+  : (PROFILES[FINALE[PROFILE]] || PAL);
 const FINALE_AT = (function(){
   if(DROP_TIMES.length < 3) return Infinity;
   const last = DROP_TIMES[DROP_TIMES.length-1];
   return (last > DUR*0.55) ? last : Infinity;
 })();
+const PAL_STEPS = 3;
+const PAL_JOURNEY = (function(){
+  if(PROFILE !== 'auto') return null;
+  const out = [];
+  for(let i=0;i<PAL_STEPS;i++)
+    out.push(palFrom((AUTO.tonic >= 0 ? AUTO.tonic : 0) + i*2, AUTO.major, AUTO.sat, AUTO.lit));
+  return out;
+})();
 function palAt(t){
-  if(t + 1e-9 < FINALE_AT) return PAL;
-  return PROFILES[FINALE[PROFILE]] || PAL;
+  if(t + 1e-9 >= FINALE_AT) return FINALE_PAL;
+  if(!PAL_JOURNEY) return PAL;
+  const sec = sectionAt(t);
+  const arc = sec && sec.arc !== undefined ? cl(sec.arc) : cl(t/Math.max(1,DUR));
+  const i = Math.min(PAL_STEPS-1, Math.floor(arc*PAL_STEPS));
+  return PAL_JOURNEY[i];
 }
 /* [primary, partner] per chapter. Warm carries the song, cool carries the room,
    deep carries the dark, and the build hands over to the drop by going hot. */
@@ -459,9 +574,6 @@ const ROLES = {
   build:['hot','lead'],  drop :['lead','hot'],  outro:['cool','deep'],
   quiet:['deep','cool'], spotlight:['lead','hot'],
 };
-const HOT_OK = SONG_DRIVE > 0.45;
-const STROBE_GAIN = ss(0.25, 0.60, SONG_DRIVE);
-const STROBE_HZ   = lerp(0.40, 1.0, SONG_DRIVE);
 function rolesFor(name){
   const r = ROLES[name] || ROLES.verse;
   if(HOT_OK) return r;
@@ -469,12 +581,13 @@ function rolesFor(name){
 }
 const MELODY_DEG = 9;
 const MEL_TILT = 0.055;
-function roleRGB(role,e,bri,pal,drift){
+function roleRGB(role,e,bri,pal,drift,white){
   const P = pal || PAL;
   const c = P[role] || P.lead;
   const d = (drift===undefined?0:drift) * MELODY_DEG;
-  return hsl(c[0] + d, cl(c[1]*(0.86+0.20*e),0,1),
-                       cl(c[2]*(0.84+0.28*e)*(0.94+0.12*bri),0,1));
+  const w = white===undefined?0:cl(white);
+  return hsl(c[0] + d, cl(c[1]*(0.86+0.20*e)*(1-0.92*w),0,1),
+                       cl(c[2]*(0.84+0.28*e)*(0.94+0.12*bri)*(1+0.55*w),0,1));
 }
 
 /* ---- the chase -------------------------------------------------------------
@@ -595,6 +708,8 @@ function fixColour(t,L,kind,xn,e){
   if(L==='stop')  return [0,0,0];
   if(L==='flash') return [255,252,244];
   const bri=briteAt(t), XFC=1.9, j=chIdx(t);
+  const bpw=buildProg(t);
+  const wh=bpw>=0 ? Math.pow(bpw,1.6)*0.90 : 0;
   const dr=meloDrift(t), hm=chordTurn(t), P=palAt(t);
   const pick=(roles)=>{
     let role, alt;
@@ -603,10 +718,10 @@ function fixColour(t,L,kind,xn,e){
     else { const fi = RIG_MIRRORED ? Math.round(Math.abs(xn-0.5)*2*(PARN-1)) : Math.round(xn*(PARN-1));
            role = (fi % 2 === 0) ? roles[0] : roles[1];
            alt  = (fi % 2 === 0) ? roles[1] : roles[0]; }
-    const base=roleRGB(role,e,bri,P,dr);
+    const base=roleRGB(role,e,bri,P,dr,wh);
     const w=0.38*hm;
     let c=base;
-    if(w>0.004){ const o=roleRGB(alt,e,bri,P,dr);
+    if(w>0.004){ const o=roleRGB(alt,e,bri,P,dr,wh);
       c=[base[0]+(o[0]-base[0])*w|0, base[1]+(o[1]-base[1])*w|0, base[2]+(o[2]-base[2])*w|0] }
     return kind==='up' ? [c[0]*0.74|0, c[1]*0.74|0, c[2]*0.74|0] : c;
   };
@@ -624,6 +739,19 @@ function fixColour(t,L,kind,xn,e){
 const sc=(c,g)=>[Math.round(cl(c[0]*g,0,255)),Math.round(cl(c[1]*g,0,255)),Math.round(cl(c[2]*g,0,255))];
 const W_=[255,252,246];
 const CAP=4.0;
+const BEAT_HZ = 1/Math.max(0.05, PER);
+function musicalHz(){
+  let best = BEAT_HZ/4;
+  for(const m of [0.25, 0.5, 1, 2, 4]){ const hz = BEAT_HZ*m; if(hz <= CAP + 1e-6) best = hz }
+  return best;
+}
+const STROBE_AT = (function(){
+  const ms = MO.filter(x=>x.kind==='drop').sort((a,b)=>a.at-b.at);
+  const keep = new Set(); let big = -1;
+  for(const m of ms){ const v = (m.v===undefined?0.9:m.v); if(v > big + 1e-6){ big = v; keep.add(m.at) } }
+  if(ms.length) keep.add(ms[ms.length-1].at);
+  return keep;
+})();
 
 /* ---- fixtures are individuals, addressed by where they are ----
    Indexing by i/n hardcodes this one rig. A designer thinks in positions and
@@ -653,62 +781,191 @@ const ARRAY_MIN = 4;
 const DROPS_AT = MO.filter(x=>x.kind==='drop').map(x=>x.at).sort((a,b)=>a-b);
 function actNo(t){ let k=0; for(const d of DROPS_AT){ if(d<=t+1e-9) k++; else break } return k }
 const DEPLOY = {
-  co2:     {arc:0.22, act:1},
-  confetti:{arc:0.80, act:2},
-  par:     {arc:0.00, act:0},
-  strip:   {arc:0.06, act:0},
-  head:    {arc:0.12, act:0},
-  wash:    {arc:0.30, act:1},
-  uplight: {arc:0.10, act:0},
-  laser:   {arc:0.45, act:2},
-  blinder: {arc:0.00, act:0},
-  strobe:  {arc:0.00, act:0},
-  fog:     {arc:0.00, act:0},
-  pyro:    {arc:0.55, act:2},
-  video:   {arc:0.00, act:0},
+  par:0, strip:0, head:0, uplight:0, blinder:0, strobe:0, fog:0, video:0,
+  wash:1, co2:1, laser:2, pyro:2, confetti:2,
 };
+const NDROPS = DROP_TIMES.length;
 function deployed(kind, t){
-  const d = DEPLOY[kind]; if(!d) return 1;
-  const arc = cl(t/Math.max(1,DUR));
-  if(actNo(t) < d.act) return 0;
-  if(arc >= d.arc + 0.10) return 1;
-  if(arc <= d.arc) return 0;
-  return ss(d.arc, d.arc+0.10, arc);
+  const want = DEPLOY[kind];
+  if(want === undefined || want <= 0) return 1;
+  const need = Math.min(want, Math.max(0, NDROPS - 1));
+  if(need <= 0) return 1;
+  const a = actNo(t);
+  if(a < need) return 0;
+  if(a > need) return 1;
+  const at = DROP_TIMES[need-1];
+  return (at === undefined) ? 1 : ss(0, 1, (t - at)/BAR);
 }
 
 const GATE_RATE  = {wash:3.2, uplight:3.2, strip:2.2, head:1.0, par:1.0};
-const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:0.12, par:0.14};
+const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:0.26, par:0.26};
 function buildProg(t){
   const sp = spanAt(t);
   if(!sp || sp.kind !== 'build' || !(sp.to > sp.from)) return -1;
   return cl((t - sp.from) / (sp.to - sp.from));
 }
+function gateBars(kind, tt){
+  const L = primaryLook(tt), e = en(tt);
+  const cyc = {drop:CYC_DROP, build:0.5, verse:0.5, quiet:2, idle:2, outro:2, spotlight:2}[L];
+  const kmul = GATE_RATE[kind] === undefined ? 1 : GATE_RATE[kind];
+  const bp = buildProg(tt);
+  const accel = (bp >= 0) ? lerp(2.4, 0.30, bp*bp) : 1;
+  const drive = lerp(1.9, 1.0, SONG_DRIVE);
+  return (cyc===undefined?1:cyc) * kmul * accel * drive * (1.7 - 0.9*e);
+}
+const GATE_STEPS = [0.125, 0.25, 0.5, 1, 2, 4];
+function quantRate(r){
+  let best = GATE_STEPS[0], bd = Infinity;
+  for(const v of GATE_STEPS){
+    const d = Math.abs(Math.log(v/Math.max(1e-6, r)));
+    if(d < bd){ bd = d; best = v }
+  }
+  return best;
+}
+const NBARS = Math.max(2, Math.ceil((DUR - PH)/BAR) + 3);
+const GPH = (function(){
+  const kinds = {}, out = {};
+  for(const f of (LAYOUT.fixtures||[])) kinds[f.kind] = 1;
+  const t0 = PH + DBP*PER;
+  for(const kind in kinds){
+    const rate = new Array(NBARS), cum = new Array(NBARS+1);
+    cum[0] = 0;
+    for(let b=0;b<NBARS;b++){
+      rate[b] = quantRate(1/Math.max(0.12, gateBars(kind, t0 + b*BAR + BAR*0.5)));
+      cum[b+1] = cum[b] + rate[b];
+    }
+    out[kind] = {rate:rate, cum:cum};
+  }
+  return out;
+})();
+function gatePhase(kind, t){
+  const T = GPH && GPH[kind];
+  if(!T) return 0;
+  const m = mpos(t);
+  let i = Math.floor(m); if(i >= NBARS-1) i = NBARS-2; if(i < 0) i = 0;
+  return T.cum[i] + T.rate[i]*cl(m-i);
+}
+const PHRASE_BARS = 4;
+const QUIET_WASH = 0.22;
+const QUIET_UP = 0.14;
+const FLOOR_DROP = 0.45;
+const DROP_HOLD = 3;
+const DROP_FADE = 5;
+const DROP_SETTLE = 0.60;
+const CUE_XF = 0.35;
+const HOFF_SPREAD = 0.15;
+const HOFF_TRUSS = 0.50;
+const DWELL_LO = 0.90;
+const DWELL_HI = 0.84;
+const DWELL_CAP = 0.94;
+const BUILD_LO = 0.75;
+const BUILD_HI = 1.45;
+const LIFT_LO = 0.60;
+const LIFT_HI = 1.60;
+const BLOCKS = {
+  bed:       {par:0.30, head:0.12, wash:0.95, uplight:1.00, zoom:0.66, shape:0.00, chase:0.00, lift:0.55, spread:0.10},
+  pulse:     {par:1.00, head:0.34, wash:0.55, uplight:0.75, zoom:0.52, shape:0.10, chase:0.25, lift:0.85, spread:0.00},
+  chase:     {par:0.92, head:0.72, wash:0.30, uplight:0.42, zoom:0.40, shape:0.30, chase:1.00, lift:0.95, spread:0.55},
+  fan:       {par:0.42, head:1.00, wash:0.62, uplight:0.55, zoom:0.26, shape:0.20, chase:0.00, lift:0.95, spread:0.30},
+  cross:     {par:0.55, head:1.00, wash:0.40, uplight:0.45, zoom:0.16, shape:0.90, chase:0.30, lift:1.00, spread:0.60},
+  ballyhoo:  {par:0.62, head:1.00, wash:0.52, uplight:0.50, zoom:0.22, shape:1.00, chase:0.55, lift:1.00, spread:0.70},
+  flood:     {par:1.00, head:0.92, wash:1.00, uplight:1.00, zoom:0.92, shape:0.40, chase:0.10, lift:1.00, spread:0.05},
+  silhouette:{par:0.06, head:0.85, wash:0.16, uplight:1.00, zoom:0.34, shape:0.00, chase:0.00, lift:0.70, spread:0.15},
+  spot:      {par:0.06, head:0.28, wash:0.10, uplight:0.22, zoom:0.20, shape:0.00, chase:0.00, lift:0.45, spread:0.00},
+  swell:     {par:0.40, head:0.66, wash:1.00, uplight:1.00, zoom:0.58, shape:0.15, chase:0.00, lift:0.90, spread:0.20},
+  drift:     {par:0.22, head:0.80, wash:0.70, uplight:0.85, zoom:0.30, shape:0.55, chase:0.00, lift:0.80, spread:0.45},
+};
+const CUE_LIST = {
+  intro:    ['bed','drift','swell','pulse'],
+  verse:    ['pulse','chase','fan','pulse'],
+  break:    ['swell','drift','silhouette','swell'],
+  quiet:    ['swell','drift','spot','swell'],
+  build:    ['chase','chase','fan','cross'],
+  drop:     ['flood','ballyhoo','cross','flood'],
+  outro:    ['bed','silhouette','bed','spot'],
+  idle:     ['bed','bed','silhouette','bed'],
+  spotlight:['spot'], flash:['flood'], stop:['spot'],
+};
+function cueName(L, n, rep){
+  const list = CUE_LIST[L] || CUE_LIST.verse;
+  const k = list.length;
+  return list[((n + rep) % k + k) % k];
+}
+function cueAt(t, L){
+  const sec = sectionAt(t), rep = sec ? (sec.repeat || 1) : 1;
+  const m = mpos(t)/PHRASE_BARS, n = Math.floor(m);
+  const A = BLOCKS[cueName(L, n-1, rep)] || BLOCKS.pulse;
+  const B = BLOCKS[cueName(L, n, rep)] || BLOCKS.pulse;
+  const w = ss(0, CUE_XF, m - n);
+  const out = {};
+  for(const k in B) out[k] = lerp(A[k] === undefined ? B[k] : A[k], B[k], w);
+  return out;
+}
+const INSTR_W = 1.00;
+const INSTR_LO = 0.12;
+const FAMILY_VOICE = {
+  par:     t => Math.max(accentOf('kick',t), stem('drums',t)),
+  uplight: t => stem('bass',t),
+  head:    t => Math.max(stem('vocals',t), stem('other',t)),
+  wash:    t => Math.max(stem('piano',t), stem('other',t)),
+  strip:   t => Math.max(stem('guitar',t), accentOf('snare',t)),
+};
+function instr(kind, t){
+  const f = FAMILY_VOICE[kind];
+  if(!f || INSTR_W <= 0) return 1;
+  return lerp(1, INSTR_LO + (1.9-INSTR_LO)*cl(f(t)), INSTR_W);
+}
+const LIFT_MID = 0.75;
+function climbAt(t, L){
+  const bp = buildProg(t);
+  const p = bp >= 0 ? bp : (L === 'build' ? chProg(t) : -1);
+  return p < 0 ? 1 : lerp(BUILD_LO, BUILD_HI, p);
+}
+function emph(kind, t, L){
+  const c = cueAt(t, L);
+  const v = c[kind];
+  const lift = cl((c.lift === undefined ? LIFT_MID : c.lift)/LIFT_MID, LIFT_LO, LIFT_HI);
+  return (v === undefined ? 1 : v) * lift * climbAt(t, L) * instr(kind, t) * longLift(t, L);
+}
+const BED_LOOKS = {quiet:1, idle:1, outro:1};
+const BED_KINDS = {wash:1, uplight:1, strip:1};
 function arrayGate(G, t, e, L, n){
+  if(BED_LOOKS[L] && BED_KINDS[G.kind]){
+    const dep0 = deployed(G.kind, t);
+    if(dep0 <= 0) return 0;
+    return dep0 * BED_HOLD;
+  }
   const dep = deployed(G.kind, t);
   if(dep <= 0) return 0;
   if(!n || n <= ARRAY_MIN) return dep;
-  const ceil = {drop:0.46, build:0.40, verse:0.34, quiet:0.26, idle:0.22,
+  const ceil = {drop:0.46, build:0.40, verse:0.34, quiet:QUIET_COV, idle:0.22,
                 outro:0.26, spotlight:0.18, stop:0, flash:1}[L];
   const bp = buildProg(t);
-  const top = (bp >= 0) ? lerp(0.16, 0.52, bp) : (ceil===undefined?0.52:ceil);
+  let top = (bp >= 0) ? lerp(0.16, 0.52, bp) : (ceil===undefined?0.52:ceil);
+  if(L === 'drop'){
+    const sd = since('drop', t, 1e9)[1];
+    if(sd !== null && sd > DROP_HOLD*BAR)
+      top *= lerp(1, DROP_SETTLE, ss(0, DROP_FADE*BAR, sd - DROP_HOLD*BAR));
+  }
+  top = Math.min(1, top*longLift(t, L));
   const cov = (top<=0||top>=1) ? top : cl(0.10 + (top-0.10)*(0.18+0.82*e), 0.08, 1);
   if(cov >= 1) return 1;
   if(cov <= 0) return 0;
-  const cyc = {drop:0.25, build:0.5, verse:0.5, quiet:2, idle:2, outro:2, spotlight:2}[L];
-  const kmul = GATE_RATE[G.kind] === undefined ? 1 : GATE_RATE[G.kind];
-  const accel = (bp >= 0) ? lerp(2.4, 0.30, bp*bp) : 1;
-  const drive = lerp(1.9, 1.0, SONG_DRIVE);
-  const bars = (cyc===undefined?1:cyc) * kmul * accel * drive * (1.7 - 0.9*e);
-  const ph = (t - PH) / (BAR*Math.max(0.12, bars));
+  const ph = gatePhase(G.kind, t);
   const fx = (n > ARRAY_MIN) ? Math.abs(G.xn - 0.5)*2 : G.xn;
   const wave = 0.5 + 0.5*Math.cos(2*Math.PI*(fx*1.2 + G.yn*0.6 - ph));
   const soft = 0.16 + 0.22*e;
   const edge = 1 - cov;
   const gate = cl((wave - edge + soft) / (soft*2), 0, 1);
-  const fl = GATE_FLOOR[G.kind];
+  const fl0 = GATE_FLOOR[G.kind];
+  const lk = {drop:FLOOR_DROP, flash:1.0, build:0.60, verse:0.42, break:0.16,
+              quiet:0.10, idle:0.06, outro:0.14}[L];
+  const fl = (fl0 === undefined) ? undefined
+           : fl0 * (lk === undefined ? 0.5 : lk) * (0.30 + 0.70*e);
   const held = (fl === undefined || L === 'stop' || L === 'spotlight')
              ? gate : fl + (1 - fl) * gate;
-  return held * cl(1/Math.max(0.12, cov), 1, 2.4) * dep;
+  const soften = (L==='quiet'||L==='idle'||L==='outro'||L==='break') ? QUIET_GAIN : 2.4;
+  return held * cl(1/Math.max(0.12, cov), 1, soften) * dep;
 }
 let PARS=KIND('par'), UPS=KIND('uplight'), HEADS=KIND('head'),
     STROBES=KIND('strobe'), STRIPS=KIND('strip'), BLINDERS=KIND('blinder'),
@@ -725,10 +982,11 @@ function rebuildGeo(){
    The same fixture is a beam or a wash depending on one number. Emitted 0-1 and
    mapped to each fixture's own range by the wiring layer, because the recipe
    must not know a fixture model. */
-const zoomAt=(t,e,L)=>cl(L==='drop'||L==='flash' ? 0.10+0.16*(1-e)
-                       : L==='build' ? 0.55-0.35*e
-                       : L==='quiet'||L==='idle' ? 0.86
-                       : 0.62-0.24*e);
+const zoomAt=(t,e,L)=>{
+  const bp=buildProg(t);
+  if(bp>=0) return cl(lerp(0.46,0.06,bp));
+  return cl(cueAt(t,L).zoom);
+};
 const NPXof=id=>{const f=LAYOUT.fixtures.find(x=>x.id===id);return (f&&f.pixels)||24};
 
 /* ---- who plays what ----
@@ -772,7 +1030,18 @@ function lookFrame(t,L){
   let dip=1;
   if(ANT){
     const[d,dt]=until('drop',t,PER*0.5);
-    if(d) dip=1-0.82*ss(0,1,1-dt/(PER*0.5));
+    if(d) dip=1-KILL_DEPTH*ss(0,1,1-dt/(PER*KILL_BEATS));
+  }
+  if(CUT_DEPTH>0){
+    const m=mpos(t), into=m-Math.floor(m/CUT_PHRASE)*CUT_PHRASE;
+    const start=CUT_PHRASE-CUT_BARS;
+    if(into>=start){
+      const x=cl((into-start)/CUT_BARS);
+      const after=en(t+(CUT_BARS-(into-start))*BAR+BAR*0.5);
+      const before=en(t-BAR*0.5);
+      const earn=ss(0, CUT_RISE, after-before);
+      dip*=1-CUT_DEPTH*earn*Math.sin(Math.PI*x);
+    }
   }
   const z=spanAt(t);
   const prog=(L==='build'&&z)?cl((t-z.from)/(z.to-z.from)):1;
@@ -832,10 +1101,10 @@ function lookFrame(t,L){
         lv = lerp(lv, full * (floor + (1 - floor) * pulse), mix);
       }
       if(L==='build') lv*=lerp(0.30,1,layer(1));
-      if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(t/(4*BAR))+sym(G.xn)*2.2);
+      if(L==='quiet') lv*=0.78+0.22*Math.sin(2*Math.PI*(mpos(t)/4)+sym(G.xn)*2.2);
       if(G.outer) lv*=1.10; else lv*=0.92;   // the outer pair carries the wash
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*arrayGate(G,t,e,L,PARS.length)).toFixed(3)})});
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*emph('par',t,L)*arrayGate(G,t,e,L,PARS.length)).toFixed(3)})});
 
   // 4 uplights on the back wall: a slow colour bed. Almost never pulses.
   const upSwap=ss(0.25,0.75,barPh(t));      // odds hand over to evens across the bar
@@ -846,12 +1115,12 @@ function lookFrame(t,L){
     else if(L==='flash'){lv=0.85}
     else{
       const share=(i%2===0)?(1-upSwap):upSwap;
-      const bed=((L==='quiet'?0.016:0.070)+0.19*e*(L==='drop'?1.1:0.78))*(0.28+1.10*ss(0.12,0.86,stem('bass',t)));
-      lv=bed*(0.55+0.90*share)*(0.84+0.16*Math.sin(2*Math.PI*(t/(8*BAR))+sym(G.xn)*3.1));
+      const bed=((L==='quiet'?QUIET_UP:0.070)+0.19*e*(L==='drop'?1.1:0.78))*(0.28+1.10*ss(0.12,0.86,stem('bass',t)));
+      lv=bed*(0.55+0.90*share)*(0.84+0.16*Math.sin(2*Math.PI*(mpos(t)/8)+sym(G.xn)*3.1));
       if(L==='build') lv*=lerp(0.35,1,layer(0));
       if(L==='spotlight') lv*=0.22;
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*arrayGate(G,t,e,L,UPS.length)).toFixed(3)})});
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*emph('uplight',t,L)*arrayGate(G,t,e,L,UPS.length)).toFixed(3)})});
 
   // 4 moving heads.
   //
@@ -866,7 +1135,7 @@ function lookFrame(t,L){
   const shape=ss(0.35,0.85,eM);           // sway ....... circle
   // dwell both ways: hold when calm, and SNAP-then-hold when hot. A head that
   // crosses its arc in a burst and waits reads far faster than one drifting.
-  const dw=cl(0.40*(1-eM)+0.26*ss(0.72,1.0,eM),0,0.56);
+  const dw=cl(DWELL_LO*(1-eM)+DWELL_HI*ss(0.72,1.0,eM),0,DWELL_CAP);
   // Amplitude is DERIVED from the fixture's slew budget instead of being checked
   // against it, so the recipe can never ask for more than the motor has.
   // peak velocity of A*sin(u) with a smoothstep dwell is A*omega*1.5/(1-dw).
@@ -878,7 +1147,7 @@ function lookFrame(t,L){
      A depends on t only through eM, and eM is a 5-tap average of a piecewise
      linear curve, so |eM'| is bounded by EMAX -- computable once from the map.
      Solving for A gives a guaranteed bound rather than a hopeful one. */
-  const om=rateNow(t), duty=Math.max(0.20,1-dw), S=1.5;
+  const om=rateNow(t), duty=Math.max(1-DWELL_CAP,1-dw), S=1.5;
   const thp=om*S/duty;                              // peak phase rate
   const ampP=Math.max(0.02,(LIMP-DADE*EMAX)/thp);   // pan  budget, proven
   const ampT=Math.max(0.02,(LIMT-DADE*EMAX)/(2*thp));// tilt runs at 2x in the sway shape
@@ -890,7 +1159,7 @@ function lookFrame(t,L){
   // heads at 9.8 units/s. Always ease -- which is what a real motor does anyway.
   const dwell=(u,d)=>{const m=u-Math.floor(u), mv=Math.max(1e-6,1-d);
     return Math.floor(u)+(m<mv?ss(0,1,m/mv):1)};
-  const u=dwell(th/(2*Math.PI),dw)*2*Math.PI;
+  const u=dwell(th/(2*Math.PI) + (1-dw)*0.5*MOVE_LEAD, dw)*2*Math.PI;
   // A lamp can black out in one frame; a motor cannot reposition in 0.22 s. So
   // position deliberately ignores `stop` -- a real head holds its aim while its
   // lamp goes dark. Only `spotlight`, whose crossfade is 0.9 s, asks for stillness.
@@ -903,7 +1172,7 @@ function lookFrame(t,L){
   // Real design alternates truss groups: front for a phrase, upstage for the next,
   // everything at the drop. Having all eight heads lit in every look is why a big
   // rig can read as flat -- contrast comes from what is OFF.
-  const alt=0.5+0.5*Math.cos(2*Math.PI*(t/(32*PER)));   // one cycle per two phrases
+  const alt=0.5+0.5*Math.cos(2*Math.PI*(mpos(t)/8));
   const bothTrusses=(L==='drop'||L==='flash')?1:0;
   HEADS.forEach(function(id,i){
     const G=GEO[id];
@@ -912,7 +1181,7 @@ function lookFrame(t,L){
     // heads on the upstage truss counter-rotate against the front truss, so the
     // beams cross over the floor instead of sweeping in parallel
     const back=G.z>3.0, mir=(G.left?1:-1)*(back?-1:1);
-    const hoff=G.xn*2*Math.PI*0.75+(back?Math.PI*0.5:0), fan=(G.xn-0.5)*2;
+    const hoff=G.xn*2*Math.PI*HOFF_SPREAD+(back?Math.PI*HOFF_TRUSS:0), fan=(G.xn-0.5)*2;
     const pSway=amp*Math.sin(u+hoff)*mir + fan*0.13;
     const pCirc=amp*Math.sin(u+hoff)*mir;
     const tSway=tam*Math.sin(2*u+hoff);
@@ -936,14 +1205,15 @@ function lookFrame(t,L){
       // between accents -- in a real rig no two fixtures read the same
       const base=(0.11+0.26*e)*(0.86+0.28*sym(G.xn));
       const lamp=(L==='drop'?0.30+0.44*e:0.18+0.36*e)*(0.84+0.28*Math.max(voxAt(t),sung(t)));
-      lv=base*EX.arc+lamp*A*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5);
+      lv=(base*EX.arc+lamp*accent(p,e)*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5))
+;
       if(L==='build') lv*=lerp(0.25,1,layer(2));
-      if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(t/(4*BAR))));
-      if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(t/(8*BAR))+sym(G.xn)*4));
+      if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(mpos(t)/4)));
+      if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(mpos(t)/8)+sym(G.xn)*4));
       if(L==='drop'){const[d,s]=since('drop',t,8);
-        if(s!==null&&s<BAR) hz=Math.min(CAP,(1.6+2.2*(d.v??0.9))*STROBE_HZ)}
+        if(s!==null&&s<BAR&&STROBE_AT.has(d.at)) hz=musicalHz()}
     }
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*gate*panBias(G.xn)*arrayGate(G,t,e,L,HEADS.length)).toFixed(3),
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*gate*emph('head',t,L)*panBias(G.xn)*arrayGate(G,t,e,L,HEADS.length)).toFixed(3),
             pan:+pan.toFixed(3),tilt:+tilt.toFixed(3),strobe:+hz.toFixed(3),
             zoom:+zoomAt(t,e,L).toFixed(3)})});
 
@@ -953,10 +1223,10 @@ function lookFrame(t,L){
     let lv=0,hz=0;
     if(L==='flash'){lv=1}
     else if(L==='drop'){const[d,s]=since('drop',t,8);
-      if(s!==null&&s<BAR){lv=(1-ss(BAR*0.6,BAR,s));hz=Math.min(CAP,(2+2*(d.v??0.9))*STROBE_HZ)}}
+      if(s!==null&&s<BAR&&STROBE_AT.has(d.at)){lv=(1-ss(BAR*0.6,BAR,s));hz=musicalHz()}}
     else if(L==='build'&&z){const rem=z.to-t;
       if(rem<=2*BAR){lv=ss(0,1,1-rem/(2*BAR))*((G.left===(((bx%2)+2)%2===0))?1:0.5)*Math.min(1,grow);
-        hz=Math.min(CAP,(1.5+2.5*e)*STROBE_HZ)}}
+        hz=musicalHz()}}
     F.push({id:id,level:+cl(lv*dip*STROBE_GAIN*deployed('strobe',t)).toFixed(3),strobe:+hz.toFixed(3)})});
 
   /* Blinders point AT the crowd. Used sparingly and only on the biggest hits --
@@ -967,10 +1237,10 @@ function lookFrame(t,L){
     if(L==='flash'){ lv=1 }
     else if(L==='drop'){ const[d,sd]=since('drop',t,8);
       if(sd!==null&&sd<BAR){ lv=(1-ss(BAR*0.35,BAR,sd))*(0.75+0.25*(d.v??0.9));
-        hz=Math.min(CAP,(2.0+2.0*(d.v??0.9))*STROBE_HZ) } }
+        hz=musicalHz() } }
     else if(L==='build'&&z){ const rem=z.to-t;
       if(rem<=2*BAR) lv=0.55*ss(0,1,1-rem/(2*BAR))*(i===(((bx%2)+2)%2)?1:0.6) }
-    F.push({id:id,level:+cl(lv*dip*Math.min(1,grow)*deployed('blinder',t)).toFixed(3),strobe:+hz.toFixed(3)})});
+    F.push({id:id,level:+cl(lv*dip*Math.min(1,grow)*(0.25+0.75*BANG)*deployed('blinder',t)).toFixed(3),strobe:+hz.toFixed(3)})});
 
   /* 24 LED wash zoom on the mid and upstage trusses: the BACKLIGHT layer. They
      move slowly, sit wide, and carry the harmonic bed -- so they hold the room
@@ -983,14 +1253,14 @@ function lookFrame(t,L){
     else if(L==='flash'){c=W_.slice();lv=0.90}
     else{
       const wave=0.72+0.28*Math.cos(2*Math.PI*(sym(G.xn)*1.5-bp4));
-      const base={drop:0.28,build:0.12,verse:0.15,quiet:0.036,idle:0.042,outro:0.05}[L]??0.10;
+      const base={drop:0.28,build:0.12,verse:0.15,quiet:QUIET_WASH,idle:0.042,outro:0.05}[L]??0.10;
       lv=(base+0.32*e*(L==='drop'?1:0.64))*wave*EX.arc;
       if(L==='build') lv*=lerp(0.30,1,layer(1));
       if(L==='spotlight') lv*=0.18;
     }
     // slow counter-rotating tilt, so the backlight fans against the front beams
     const th2=motionPhase(t)*0.5+(G.z>29?Math.PI:0);
-    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*panBias(G.xn)*arrayGate(G,t,e,L,WASHES.length)).toFixed(3),
+    F.push({id:id,r:c[0],g:c[1],b:c[2],level:+cl(lv*dip*emph('wash',t,L)*panBias(G.xn)*arrayGate(G,t,e,L,WASHES.length)).toFixed(3),
             pan:+cl(0.5+0.16*Math.sin(th2+G.xn*3.1)).toFixed(3),
             tilt:+cl(0.34+0.12*Math.sin(th2*2)).toFixed(3),
             zoom:+cl(zW*1.15).toFixed(3)})});
@@ -1010,13 +1280,17 @@ function lookFrame(t,L){
                                  : ('mounted at '+G.y.toFixed(1)+' m, below the '+floorM+' m floor')});
       return }
     let lv=0;
-    if(L==='drop'){ const[d,sd]=since('drop',t,8);
-      lv = 0.55 + 0.45*(d&&d.v!==undefined?d.v:0.9);
-      if(sd!==null && sd<BAR*0.5) lv*=ss(0,1,sd/(BAR*0.5)); }
-    else if(L==='build'&&z){ const rem=z.to-t;
-      if(rem<=4*BAR) lv=0.70*ss(0,1,1-rem/(4*BAR)); }
-    else if(L==='flash'){ lv=0.9 }
-    const fan = 0.55+0.45*Math.cos(2*Math.PI*(sym(G.xn)*2 - (t-PH)/(BAR*2)));
+    const[dL,sdL]=since('drop',t,BAR*8);
+    if(dL && sdL!==null){
+      const rise=ss(0,1,sdL/(BAR*0.5));
+      const fall=1-ss(0,1,cl((sdL-BAR*3)/BAR));
+      lv=(0.55+0.45*(dL.v!==undefined?dL.v:0.9))*rise*fall;
+    }
+    if(L==='build'&&z){ const rem=z.to-t;
+      if(rem<=4*BAR) lv=Math.max(lv,0.70*ss(0,1,1-rem/(4*BAR))); }
+    if(L==='flash') lv=Math.max(lv,0.9);
+    lv*=0.30+0.70*BANG;
+    const fan = 0.55+0.45*Math.cos(2*Math.PI*(sym(G.xn)*2 - mpos(t)/2));
     const c = fixColour(t,L,'head',G.xn,e);
     F.push({id:id, level:+cl(lv*fan*dip*EX.arc*deployed('laser',t),0,1).toFixed(3),
             r:c[0], g:c[1], b:c[2], pattern:1, scan:0, aerial:true})});
@@ -1030,13 +1304,13 @@ function lookFrame(t,L){
     if(L==='drop'){ const[d,sd]=since('drop',t,8);
       const burst=Math.min((LAYOUT.limits||{}).co2_max_burst_s||1.2, BAR*0.6);
       if(sd!==null && sd<burst) lv=(1-ss(0,burst,sd))*(0.6+0.4*(d&&d.v!==undefined?d.v:0.9)); }
-    F.push({id:id,level:+cl(lv*deployed('co2',t),0,1).toFixed(3)})});
+    F.push({id:id,level:+cl(lv*BANG*deployed('co2',t),0,1).toFixed(3)})});
 
   KIND('confetti').forEach(function(id){
     let lv=0;
     const last=DROPS_AT.length?DROPS_AT[DROPS_AT.length-1]:null;
     if(last!==null && t>=last && t-last<BAR*4) lv=1-ss(0,BAR*4,t-last);
-    F.push({id:id,level:+cl(lv,0,1).toFixed(3),
+    F.push({id:id,level:+cl(lv*BANG,0,1).toFixed(3),
             note:'once, on the last drop -- confetti fired twice is confetti nobody notices'})});
 
   KIND('pyro').forEach(function(id){
@@ -1053,7 +1327,7 @@ function lookFrame(t,L){
     let lv=0;
     if(cue!==null){ const age=t-cue, dur=Math.min(1.6, BAR*0.7);
       if(age>=0 && age<dur) lv=(1-ss(0,dur,age)) }
-    F.push({id:id, level:+cl(lv*deployed('pyro',t),0,1).toFixed(3), armed:true,
+    F.push({id:id, level:+cl(lv*BANG*deployed('pyro',t),0,1).toFixed(3), armed:true,
             interlock:lim.pyro_interlock})});
 
   VIDEO.forEach(function(id){
@@ -1085,7 +1359,7 @@ function lookFrame(t,L){
          threshold. Strumming as light is fine MOVING texture, not an 8 Hz
          strobe. The pattern now travels slowly in space and the sixteenth only
          modulates its depth gently. */
-      const sxt=(bph(t)*4)%1, drift=(t/(2*BAR))%1;
+      const sxt=(bph(t)*4)%1, drift=(mpos(t)/2)%1;
       for(let i=0;i<N1;i++){
         let d=Math.abs(i-head); d=Math.min(d,N1-d);
         const sweep=Math.max(0,1-d/w)*(0.5+0.45*e)*g1*(0.45+0.65*stem('other',t));
