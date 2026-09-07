@@ -10,6 +10,70 @@ import os
 
 _KINDS = {"build", "drop", "stop", "quiet", "spotlight", "return"}
 
+# allin1's section vocabulary, sorted by what a lighting show does with it
+_DROP_LABELS = {"chorus", "drop", "hook", "refrain", "inst", "instrumental", "solo"}
+_QUIET_LABELS = {"break", "breakdown", "bridge", "intro", "outro", "quiet", "start", "end", "ambient"}
+
+
+def _mean_energy(energy, t0, t1):
+    vals = [v for (tt, v) in energy if t0 <= tt < t1]
+    if vals:
+        return sum(vals) / len(vals)
+    # fall back to the last sample at or before the midpoint
+    mid, last = (t0 + t1) / 2.0, (energy[0][1] if energy else 0.5)
+    for tt, vv in energy:
+        if tt <= mid:
+            last = vv
+        else:
+            break
+    return last
+
+
+def _snap_down(t, downbeats):
+    return min(downbeats, key=lambda d: abs(d - t)) if downbeats else t
+
+
+def _derive_moments(merged, energy, downbeats, period, length):
+    """drop/build/quiet moments from chapter energy + labels.
+
+    The section-delta heuristic in the structure analyzer misses tracks whose
+    energy does not step hard at a boundary (The Nights produced zero). Reading the
+    chapter labels allin1 already gives us, plus the energy of each chapter, puts a
+    drop on every chorus and a quiet on every break — which is what makes a show
+    escalate instead of sitting flat.
+    """
+    # needs a real, whole-song energy curve to read chapter dynamics from; a handful
+    # of samples cannot say which section is loud, so derive nothing and leave the
+    # explicit analyzer events to stand on their own.
+    if not merged or len(energy) < 8:
+        return []
+    for m in merged:
+        m["_e"] = _mean_energy(energy, m["at"], m["to"])
+    es = sorted(m["_e"] for m in merged)
+    lo, hi = es[len(es) // 4], es[max(0, 3 * len(es) // 4)]
+    span = max(1e-3, hi - lo)
+    bar = (period or 0.5) * 4
+    out = []
+    for i, m in enumerate(merged):
+        name = (m["name"] or "").lower()
+        e = m["_e"]
+        rise = e - (merged[i - 1]["_e"] if i > 0 else e)
+        is_drop = (name in _DROP_LABELS and e >= lo + 0.35 * span) or e >= lo + 0.65 * span
+        is_quiet = (name in _QUIET_LABELS and e <= lo + 0.4 * span) or e <= lo + 0.15 * span
+        if is_drop:
+            at = _snap_down(m["at"], downbeats)
+            out.append({"at": at, "kind": "drop",
+                        "confidence": round(min(1.0, 0.5 + max(0.0, rise) * 2), 3),
+                        "size": round(min(1.0, 0.6 + (e - lo) / span * 0.4), 3)})
+            b_at = _snap_down(max(0.0, at - 4 * bar), downbeats)
+            if b_at < at - bar:
+                out.append({"at": b_at, "kind": "build", "confidence": 0.5})
+        elif is_quiet and i > 0:
+            at = _snap_down(m["at"], downbeats)
+            out.append({"at": at, "kind": "quiet",
+                        "confidence": round(min(1.0, 0.5 + (lo - e) + 0.2), 3)})
+    return out
+
 
 def to_map(state: dict, vec_filename: str | None = None,
            ported_by: str = "musicstate.port") -> dict:
@@ -73,19 +137,37 @@ def to_map(state: dict, vec_filename: str | None = None,
         else:
             moments.append({"at": e["t"], "kind": kind, "confidence": conf})
 
-    # ---- spans: pair each build with the next drop ----
-    drops = [e for e in events if e.get("type") == "drop"]
+    # add label+energy derived moments, then thin so no two of a kind sit within a bar
+    period_for = period or (round(60.0 / bpm, 5) if bpm else 0.5)
+    moments.extend(_derive_moments(merged, state.get("energy") or [], downbeats, period_for, length))
+    moments.sort(key=lambda m: m["at"])
+    thinned: list[dict] = []
+    for mo in moments:
+        if (thinned and mo["kind"] == thinned[-1]["kind"]
+                and abs(mo["at"] - thinned[-1]["at"]) < period_for * 2):
+            if mo.get("confidence", 0) > thinned[-1].get("confidence", 0):
+                thinned[-1] = mo
+            continue
+        thinned.append(mo)
+    moments = thinned
+
+    # ---- spans: one build->drop per drop, kept non-overlapping ----
+    drop_ms = [m for m in moments if m["kind"] == "drop"]
+    build_ms = [m for m in moments if m["kind"] == "build"]
     spans = []
-    for e in events:
-        if e.get("type") != "build":
+    for d in drop_ms:
+        cands = [b for b in build_ms if b["at"] < d["at"]]
+        if not cands:
             continue
-        nxt = next((d for d in drops if d["t"] > e["t"]), None)
-        if not nxt:
+        frm = max(c["at"] for c in cands)
+        to = d["at"]
+        if spans and frm < spans[-1]["to"]:      # never overlap the previous build
+            frm = spans[-1]["to"]
+        if to - frm < period_for:
             continue
-        frm, to = e["t"], nxt["t"]
-        bars = round((to - frm) / period / 4, 1) if period else None
+        bars = round((to - frm) / period_for / 4, 1) if period_for else None
         spans.append({"kind": "build", "from": frm, "to": to, "rise": "steady",
-                      "bars": bars, "how": "derived: musicstate build event to the next drop event"})
+                      "bars": bars, "how": "derived: build moment to the next drop moment"})
 
     # ---- stems: list-of-dicts -> per-stem arrays + explicit guitar/piano zeros ----
     st = state.get("stems") or {}
@@ -173,6 +255,7 @@ def to_map(state: dict, vec_filename: str | None = None,
         "sections": sections,
         "spans": spans,
         "moments": moments,
+        "accents": state.get("accents"),
         "energy": state.get("energy") or [],
         "confidence": confidence,
         "confidence_by_field": cbf,
