@@ -931,6 +931,31 @@ class H(http.server.BaseHTTPRequestHandler):
                 # this serves anything EXCEPT the reference.
                 sl = (q.get("song") or [""])[0]
                 which = (q.get("which") or ["answer"])[0]
+                # A map is addressed by its path when the board gives one. The board
+                # scores every map on disk, and half of them live outside synth/ --
+                # maps/model/ holds the measured ones -- so a link built from a list
+                # of known folders silently stopped being a link for exactly the maps
+                # people most want to open. Renaming a folder must not break a page:
+                # take the path the board itself printed, and refuse anything that
+                # leaves the repo or is not a map.
+                rel = (q.get("path") or [""])[0]
+                if rel:
+                    fp = os.path.normpath(os.path.join(ROOT, rel))
+                    if (not fp.startswith(ROOT + os.sep) or not fp.endswith(".map.json")
+                            or not os.path.exists(fp)):
+                        return self._send(404, json.dumps({"error": "no such map"}))
+                    if READONLY and os.path.relpath(fp, ROOT).startswith("synth/truth"):
+                        return self._send(403, json.dumps({
+                            "error": "the reference map is held out on a shared instance."}))
+                    body = open(fp, "rb").read()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Content-Disposition",
+                                     'attachment; filename="%s"' % os.path.basename(fp))
+                    self.send_header("Content-Length", str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                    return
                 paths = {"answer": os.path.join(HERE, "truth", sl + ".map.json"),
                          "authored": os.path.join(HERE, "songs", sl + ".map.json")}
                 if which not in paths:

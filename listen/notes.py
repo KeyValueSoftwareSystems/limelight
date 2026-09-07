@@ -19,9 +19,12 @@ STEMS="/tmp/claude-1001/stems/htdemucs_6s"; ORDER=("vocals","other","guitar","pi
 ONSET,FRAME,MINLEN=0.55,0.35,70; LAT=0.025
 NAMES=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
 def name(mi): return "%s%d"%(NAMES[mi%12],mi//12-1)
-def map_path(slug):
-    for c in (os.path.join(ROOT,"maps","model",slug+".full.map.json"),os.path.join(ROOT,"maps","model",slug+".map.json")):
-        if os.path.exists(c): return c
+try:
+    from mapio import map_path
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import map_path
 def analyse(slug, write=False):
     from basic_pitch.inference import predict, Model
     from basic_pitch import ICASSP_2022_MODEL_PATH

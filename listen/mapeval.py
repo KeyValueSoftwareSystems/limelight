@@ -91,15 +91,84 @@ def _corr(xs, ys):
 
 def ev_grid(m, B):
     """Is the kick loud where the map says the beats are? The one check that
-    cannot be gamed by a self-consistent map."""
+    cannot be gamed by a self-consistent map.
+
+    The 0.8 this used to divide by was a constant, and it made the same
+    assumption the first version of ev_accents made: that every recording offers
+    the same amount of signal, so the same number means the same thing on all of
+    them. Measured on the five songs here, the best a rigid grid can do -- the
+    best PERIOD and the best PHASE, chosen with the answer in hand -- ranges from
+    1.42x on Don't Look Down to 1.93x on The Nights. A record with breakdowns has
+    no kick under half its beats and cannot reach 1.8 however right the grid is;
+    Levels caps at 1.56x, so a provably optimal grid scored 0.70 and had no way
+    to find out it was already finished.
+
+    So the ceiling is computed from the audio, the same way ev_accents computes
+    its own. Searched at the map's period and at half and double it, because an
+    octave error is the classic way to be confidently wrong about a tempo and it
+    must not be able to hide behind a ceiling built from its own mistake -- a
+    double-time grid is measured against what the true tempo could have scored,
+    and reads 0.14 rather than 1.00.
+
+    Falsified before being kept: half a beat late, jittered, at the wrong octave,
+    and 25 ms out all score LOWER than the map they were corrupted from, on every
+    song. metaeval.py agrees.
+    """
     beats = m.get("beats") or []
     if len(beats) < 8: return None, "no beats"
     dt, low = B["dt"], B["low"]
-    on = sum(_at(low, dt, t) for t in beats) / len(beats)
     allm = sum(low) / len(low)
     if allm <= 0: return None, "silent recording"
-    ratio = on / allm
-    return min(1.0, max(0.0, (ratio - 1.0) / 0.8)), f"kick {ratio:.2f}x louder on the beats"
+    ratio = (sum(_at(low, dt, t) for t in beats) / len(beats)) / allm
+
+    per = (m.get("grid") or {}).get("period") or (
+        (beats[-1] - beats[0]) / max(1, len(beats) - 1))
+    dur = len(low) * dt
+
+    def at_grid(p, ph):
+        n = int((dur - ph) / p)
+        if n < 8: return None
+        return sum(_at(low, dt, ph + i * p) for i in range(n)) / n / allm
+
+    ceiling = 0.0
+    for mult in (0.5, 1.0, 2.0):
+        p = per * mult
+        step, k = 0.004, 0
+        while k * step < p:
+            v = at_grid(p, k * step)
+            if v is not None and v > ceiling: ceiling = v
+            k += 1
+    # Half and double the claimed period are searched as well as the claimed one,
+    # so a map at the wrong octave is measured against what the right tempo could
+    # have scored rather than against a ceiling built from its own mistake.
+    if ceiling - 1.0 < 0.15:
+        return None, (f"this recording has no kick contrast to place a grid against -- "
+                      f"the best possible grid only reaches {ceiling:.2f}x")
+    frac = (ratio - 1.0) / (ceiling - 1.0)
+
+    # One thing loudness alone cannot see. A half-time grid -- every other beat --
+    # is loud on every beat it claims, because all of them are real beats; it
+    # gives itself away only in the gaps, where the beats it MISSED are just as
+    # loud as the ones it found. So measure the midpoints too. On the five songs
+    # here a correct grid leaves its midpoints carrying at most 71% of the beat's
+    # excess energy, and a half-time grid leaves them carrying 102-103%: the two
+    # do not overlap. This only fires in that unambiguous band, so a syncopated
+    # record with genuinely loud offbeats -- Don't Look Down sits at 71% -- is
+    # not punished for it.
+    #
+    # It is not a complete octave test and does not claim to be: on a record whose
+    # kicks alternate strong and weak, a half-time grid picks the strong ones and
+    # scores 50%, inside the honest band, and escapes. The old fixed scale caught
+    # that case no better -- it scored that same grid 1.00.
+    mid = at_grid(per, (m.get("grid") or {}).get("phase", beats[0]) + per / 2)
+    share = ((mid - 1.0) / (ratio - 1.0)) if (mid is not None and ratio > 1.0) else 0.0
+    guard = min(1.0, max(0.0, (1.0 - share) / 0.15))
+    note = "" if guard >= 0.999 else (
+        f", but the midpoints between them carry {100*share:.0f}% of the same excess -- "
+        f"this looks like every other beat of a faster grid")
+    return min(1.0, max(0.0, frac * guard)), (
+        f"kick {ratio:.2f}x louder on the beats, against {ceiling:.2f}x for the best grid "
+        f"this recording allows{note}")
 
 
 def ev_bars(m, B):
@@ -117,10 +186,16 @@ def ev_bars(m, B):
     if not per:
         return None, "no grid"
     bp = g.get("bar_phase", 0)
+    # A mark at or before the first beat is not checked. validate.py requires the
+    # first chapter to sit at 0.0 so that every t in the song is covered, and the
+    # grid does not start until its phase -- so that chapter is REQUIRED to be
+    # somewhere no bar line can be. It was being counted as a miss on every map
+    # that follows the rule, including the two here that do.
+    first = min(m.get("beats") or [ph]) - 1e-6
     marks = []
     for key, field in (("chapters", "at"), ("moments", "at"), ("spans", "from")):
         for r in (m.get(key) or []):
-            if isinstance(r, dict) and field in r:
+            if isinstance(r, dict) and field in r and r[field] > first:
                 marks.append((key, (r[field] - ph) / per))
     if len(marks) < 4:
         return None, "nothing structural to check"
@@ -189,7 +264,13 @@ def ev_sections(m, B):
         h1, h2 = f(hi, a0, a1), f(hi, b0, b1)
         return abs(r2 - r1) / max(1e-9, r1 + r2) + abs(h2 - h1) / max(1e-9, h1 + h2)
 
-    real = sum(change(t) for t in chs if 2 < t < dur - 2) / max(1, len(chs))
+    # Boundaries in the first and last two seconds are skipped because the change
+    # window would run off the end of the record -- but the sum was still being
+    # divided by ALL of them, so a map lost a fixed percentage for every boundary
+    # it declared at the edges. A map with a chapter at 0.0 (which validate.py
+    # requires) was scored as though that chapter had changed nothing.
+    inside = [t for t in chs if 2 < t < dur - 2]
+    real = sum(change(t) for t in inside) / max(1, len(inside))
     # against the same number of times chosen off the boundaries
     import random
     random.seed(7)
@@ -299,7 +380,7 @@ def ev_chords(m, B, sig, sr):
             s2, s1 = s1, s0
         return math.sqrt(abs(s1 * s1 + s2 * s2 - k * s1 * s2))
     win = int(0.30 * sr)
-    scores = []
+    scores, best = [], []
     for e in ch[::max(1, len(ch) // 40)]:
         root = e["chord"][0] + ("#" if len(e["chord"]) > 1 and e["chord"][1] == "#" else "")
         if root not in NOTES: continue
@@ -315,11 +396,28 @@ def ev_chords(m, B, sig, sr):
             pc[mi % 12] += goertzel(i0, win, f)
         tot = sum(pc)
         if tot <= 0: continue
-        got = sum(pc[p] for p in want) / tot
-        scores.append(got / (len(want) / 12.0))          # 1.0 means no better than flat
+        conc = lambda w: (sum(pc[q] for q in w) / tot) / 0.25
+        scores.append(conc(want))                        # 1.0 means no better than flat
+        # ...and the ceiling, for the same reason ev_accents has one: 1.2 was a
+        # constant chosen once, and it assumes every recording separates its
+        # chroma equally well. It does not. A saturated synth mix smears the
+        # twelve bins together, so on Levels the BEST-FITTING triad of the
+        # twenty-four -- an oracle allowed to pick per bar, with no obligation to
+        # be musically right -- carries only 1.57x its share, and a perfect chord
+        # sheet could not score above 0.47. On a cleanly recorded record the same
+        # oracle reaches well past 2.0. Scoring against what the audio allows says
+        # "as good as anyone could do here"; scoring against 1.2 says "as good as
+        # a different recording would have let you be".
+        best.append(max(conc({q, (q + t) % 12, (q + 7) % 12})
+                        for q in range(12) for t in (3, 4)))
     if not scores: return None, "chords could not be checked"
     r = sum(scores) / len(scores)
-    return min(1.0, max(0.0, (r - 1.0) / 1.2)), f"claimed notes carry {r:.2f}x their share of the energy"
+    ceiling = sum(best) / len(best)
+    if ceiling - 1.0 < 0.15:
+        return None, f"this recording does not separate its chroma -- the best-fitting triad only reaches {ceiling:.2f}x"
+    frac = (r - 1.0) / (ceiling - 1.0)
+    return min(1.0, max(0.0, frac)), (f"claimed notes carry {r:.2f}x their share of the energy, "
+                                      f"against {ceiling:.2f}x for the best-fitting triad on this recording")
 
 
 def ev_melody(m, B, sig, sr):

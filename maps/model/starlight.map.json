@@ -65284,6 +65284,16 @@
     ]
    },
    "seconds": 37.0
+  },
+  "grid_phase_witnesses": {
+   "what": "three methods that share no code and no input agree that this map's beats sit late",
+   "ms_late": {
+    "kick onsets in the separated drum stem, corrected for the 25 ms separator latency": -27,
+    "beat_this (neural, trained on human annotation)": -32.3,
+    "the phase that best separates beat from off-beat in the mix low band": -30
+   },
+   "reading": "the grid is placed at the peak of the kick's body; a listener and an annotator mark its attack, and on this record those are about 30 ms apart. Two defensible definitions of \"the beat\".",
+   "not_applied": "moving the grid would move every time anchored to it -- chapters, moments, spans, and the sampling points of energy, sections and stems -- and those values were measured in windows starting where they start. Shifting the times without re-measuring the values would produce a file that looks more correct and is less true. Recorded here instead, with the number, so the correction is one command away rather than one guess away."
   }
  },
  "confidence": 0.882,

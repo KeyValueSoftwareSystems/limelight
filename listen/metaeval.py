@@ -94,7 +94,21 @@ def scores_of(slug, m):
 
 def main():
     slug = sys.argv[1] if len(sys.argv) > 1 else "levels"
-    base = json.load(open(os.path.join(ROOT, "synth", "truth", slug + ".map.json")))
+    # synth/truth/ holds the synthetic songs, whose times are causes. The four
+    # real recordings have no such file and this tool refused to run on them at
+    # all -- which is backwards, because a check is most worth testing on the
+    # audio it will actually be used against. Fall back to the measured map: the
+    # point here is whether a check MOVES when its field is broken, and that does
+    # not need the base to be true.
+    for cand in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
+                 os.path.join(ROOT, "maps", "model", slug + ".map.json")):
+        if os.path.exists(cand):
+            base = json.load(open(cand))
+            print(f"base: {os.path.relpath(cand, ROOT)}")
+            break
+    else:
+        print(f"no map to corrupt for {slug}")
+        return 2
     fields = [f for f in mapeval.WEIGHTS]
     rng = random.Random(11)
 

@@ -39,9 +39,12 @@ def run(slug):
     shutil.rmtree(aud); shutil.rmtree(out)
     return segs
 
-def map_path(slug):
-    for c in (os.path.join(ROOT,"maps","model",slug+".full.map.json"),os.path.join(ROOT,"maps","model",slug+".map.json")):
-        if os.path.exists(c): return c
+try:
+    from mapio import map_path
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import map_path
 
 def analyse(slug, write=False):
     mp=map_path(slug)
