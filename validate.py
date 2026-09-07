@@ -7,7 +7,53 @@ Every check here exists because a downstream reader breaks without it. Passing
 this does not mean the map is *right* -- that is what the bench is for -- it
 means the map is *readable*. Exit 0 means Dheeraj's renderer will not crash.
 """
-import json, sys
+import json, sys, re
+
+# The governing constraint: a map says what a song does, so it may not name a
+# thing in a room. This became worth enforcing on 8 Sept, when the dimensions
+# moved inside the map -- a merge is exactly the moment a reader's vocabulary
+# gets a free ride into the file it was being kept out of. Whole words only:
+# "party" is not a par and "arrangement_cues" is not a cue.
+LIGHTING = {"strobe", "fixture", "fixtures", "dmx", "blinder", "blinders", "lamp",
+            "lamps", "laser", "lasers", "universe", "cue", "cues", "gobo", "haze",
+            "par", "pars", "wash", "beam", "beams", "dimmer", "luminaire", "rig",
+            "pixel", "pixels", "cuelist", "patch"}
+WORD = re.compile(r"[a-z_]+")
+
+# A field whose whole job is to explain something to a human. Prose is allowed to
+# say "this is not a property of any rig" -- that sentence is the rule being
+# stated, not the rule being broken. Everywhere else, a lighting word is data,
+# and data is where the leak would actually do damage.
+PROSE = {"note", "why", "caveat", "how", "why_it_matters", "as_reference",
+         "usable_rate_is", "comment", "description", "needs", "detail", "found",
+         "meaning", "warning", "limits_note", "energy_note"}
+
+
+def lighting_words(m):
+    """Returns (errors, warnings). A lighting word in a data position is an error:
+    it means a reader's vocabulary got into the file that exists to be reader
+    independent. The same word inside a note is a warning, because prose has to
+    be able to name the thing it is telling you to keep out."""
+    err, warn = [], []
+
+    def scan(text, path, prose):
+        for w in WORD.findall(text.lower()):
+            if w in LIGHTING:
+                (warn if prose else err).append((path, w)); return
+
+    def walk(o, path="", prose=False):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                scan(k, path + "." + k, False)
+                walk(v, path + "." + k, k in PROSE)
+        elif isinstance(o, list):
+            for i, v in enumerate(o):
+                walk(v, f"{path}[{i}]", prose)
+        elif isinstance(o, str):
+            scan(o, path, prose)
+    walk(m)
+    return err, warn
+
 
 KINDS = {"build", "drop", "stop", "quiet", "spotlight", "return"}
 RISES = {"steady", "late", "early", "stepped"}
@@ -17,6 +63,14 @@ def check(m):
     e, w = [], []
     A = lambda c, msg: None if c else e.append(msg)
     W = lambda c, msg: None if c else w.append(msg)
+
+    lw_err, lw_warn = lighting_words(m)
+    for path, word in lw_err:
+        A(False, f"lighting word {word!r} at {path} -- a map may not name a thing "
+                 f"in a room. Move it to the reader.")
+    for path, word in lw_warn:
+        W(False, f"lighting word {word!r} in prose at {path} -- fine if the sentence "
+                 f"is explaining the rule, wrong if it is describing the song.")
 
     for k in ("map", "song", "made_by", "beats", "downbeats", "chapters", "moments", "confidence"):
         A(k in m, f"missing required field: {k}")

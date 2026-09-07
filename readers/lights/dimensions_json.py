@@ -27,7 +27,7 @@ absent. A gap you can see is a job; a gap you cannot is a surprise.
 
     python3 readers/lights/dimensions_json.py levels the-nights
 """
-import sys, os, json, math, statistics as st, datetime
+import sys, os, json, math, statistics as st, datetime, hashlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -48,6 +48,12 @@ OUT = os.path.join(ROOT, "synth", "dimensions")
 #   shock      a discontinuity meant to be felt       strobe / a hard transient
 #   memory     whether this bar happened before       served by any channel; needs the map to say
 CHANNELS = ("intensity", "hue", "place", "extent", "time", "focus", "shock", "memory")
+
+
+def map_path(slug):
+    return next((c for c in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
+                             os.path.join(ROOT, "synth", "songs", slug + ".map.json"))
+                 if os.path.exists(c)), None)
 
 
 def build(slug):
@@ -195,16 +201,68 @@ def build(slug):
     }
 
 
+def body_hash(m):
+    """Everything in the map EXCEPT the dimensions we are about to write. If this
+    changes, the dimensions are stale and say so out loud, which is the whole
+    reason merging them into the map is safe."""
+    obs = m.get("observations") or {}
+    keep = {k: v for k, v in obs.items() if k != "dimensions"}
+    shadow = {k: v for k, v in m.items() if k != "observations"}
+    shadow["observations"] = keep
+    blob = json.dumps(shadow, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(blob).hexdigest()[:16]
+
+
+def merge_into_map(slug, r):
+    """Renjith's call, 8 Sept: carry the dimensions inside the score file for now
+    and split them out later. Two rules decide how to do that without regret.
+
+    Rule 3 says the interface tier is a one-way door and everything else goes in
+    observations.*, which is append-only and which a reader ignores when it does
+    not recognise it. So these land at observations.dimensions and NOT at the top
+    level -- no door is opened, and separating them later is lifting one subtree.
+
+    Rule 8 says one writer per fact. So the map becomes the writer and the
+    standalone synth/dimensions/<slug>.dimensions.json becomes a projection of
+    it, not a second source that can drift.
+
+    This is only safe because dimensions no longer contain a rig word or a
+    lighting word. Merged yesterday, the DMX frame rate would have gone through
+    the one-way door with them."""
+    p = map_path(slug)
+    if not p:
+        return None
+    m = json.load(open(p))
+    obs = m.setdefault("observations", {})
+    obs["dimensions"] = {
+        "how": "derived",
+        "by": "readers/lights/dimensions_json.py",
+        "when": r["generated"]["when"],
+        "of_map": body_hash(m),
+        "note": ("what the song asks for and how fast. Channels name a kind of "
+                 "expression, never a thing in a room and never a rate the room "
+                 "runs at, so this stays true when the venue changes. A reader "
+                 "that does not know this field ignores it."),
+        "entries": r["dimensions"],
+        "not_measured": r["not_measured"],
+    }
+    json.dump(m, open(p, "w"), indent=1)
+    return os.path.relpath(p, ROOT)
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     for slug in (sys.argv[1:] or ["levels"]):
         r = build(slug)
         if not r:
             print(f"{slug}: no map"); continue
+        into = merge_into_map(slug, r)
         fp = os.path.join(OUT, slug + ".dimensions.json")
+        r["generated"]["projection_of"] = into
         json.dump(r, open(fp, "w"), indent=1)
         hi = sum(1 for x in r["dimensions"] if x["trust"] == "high")
         lo = sum(1 for x in r["dimensions"] if x["trust"] == "low")
         print(f"{slug}: {len(r['dimensions'])} dimensions "
-              f"({hi} trusted, {lo} not yet), {len(r['not_measured'])} still missing"
-              f"  -> {os.path.relpath(fp, ROOT)}")
+              f"({hi} trusted, {lo} not yet), {len(r['not_measured'])} still missing")
+        print(f"        into {into} at observations.dimensions")
+        print(f"        projected to {os.path.relpath(fp, ROOT)}")

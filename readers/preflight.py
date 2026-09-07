@@ -135,18 +135,50 @@ def rate_note(dim, out_hz):
     return None
 
 
+def dimensions_of(m, slug):
+    """Renjith's call, 8 Sept: the dimensions ride inside the score file for now.
+    They live at observations.dimensions -- the append-only tier -- so a reader
+    that does not know them ignores them and no interface door was opened.
+
+    Read the map first, because that is the writer. The standalone file under
+    synth/dimensions/ is a projection kept for people who want to eyeball one,
+    and it is only used when a map predates the merge."""
+    obs = (m.get("observations") or {}).get("dimensions")
+    if obs and obs.get("entries"):
+        stale = False
+        try:
+            sys.path.insert(0, os.path.join(HERE, "lights"))
+            from dimensions_json import body_hash
+            stale = bool(obs.get("of_map")) and body_hash(m) != obs["of_map"]
+        except Exception:
+            pass
+        return obs["entries"], "the map, observations.dimensions", stale
+    dp = os.path.join(ROOT, "synth", "dimensions", slug + ".dimensions.json")
+    if os.path.exists(dp):
+        return json.load(open(dp))["dimensions"], "the standalone projection", False
+    return None, None, False
+
+
+
 def run(slug, only_reader=None, only_rig=None):
     mp = next((c for c in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
                            os.path.join(ROOT, "synth", "songs", slug + ".map.json"))
                if os.path.exists(c)), None)
-    dp = os.path.join(ROOT, "synth", "dimensions", slug + ".dimensions.json")
-    if not mp or not os.path.exists(dp):
-        print(f"need both a map and dimensions for {slug}"); return
+    if not mp:
+        print(f"no map for {slug}"); return
     m = json.load(open(mp))
-    dims = json.load(open(dp))["dimensions"]
+    dims, where, stale = dimensions_of(m, slug)
+    if dims is None:
+        print(f"{slug}: the map carries no dimensions, and no projection exists.\n"
+              f"  run: python3 readers/lights/dimensions_json.py {slug}")
+        return
     bar_s = m["grid"]["period"] * 4
     print(f"{slug}: {m['grid']['bpm']:.1f} bpm, one bar is {bar_s:.3f} s, "
-          f"{len(dims)} dimensions to carry\n")
+          f"{len(dims)} dimensions to carry   [from {where}]")
+    if stale:
+        print("  ! the map has changed since these dimensions were written.\n"
+              f"  ! rerun: python3 readers/lights/dimensions_json.py {slug}")
+    print()
 
     for rname, rd in readers().items():
         if only_reader and rname != only_reader: continue
