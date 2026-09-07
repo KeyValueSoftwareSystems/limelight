@@ -1,4 +1,4 @@
-const fs=require('fs');
+const fs=require('fs'), cp=require('child_process');
 eval(fs.readFileSync('/tmp/claude-1001/canvas.js','utf8'));
 /* Compact straight from maps/model. This used to read a cached
    /tmp/.../cmp_<song>.json written by hand earlier in the session, so every

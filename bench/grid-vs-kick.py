@@ -51,5 +51,8 @@ for n,nb,nk,mn,md,cov in rows:
     else:
         flag = "  <-- systematic" if abs(mn) > 12 else ""
         print("  %-16s %6d %6d %9.1f %9.1f %7.0f%%%s" % (n,nb,nk,mn,md,cov,flag))
-print("\n  negative = the grid fires BEFORE the drum. Scatter is the drummer;")
-print("  a mean away from zero is the map being early or late for every reader.")
+print("\n  d = kick - beat, so NEGATIVE means the kick lands before the beat the")
+print("  grid names and the grid is LATE by that much. Scatter is the drummer;")
+print("  a mean away from zero is the map being wrong for every reader.")
+print("  Both sides of this comparison use the same kick onsets, so agreement")
+print("  with bench/fixture-sync.js is guaranteed and proves nothing on its own.")

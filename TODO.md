@@ -19,3 +19,11 @@
 - [~] C3 voice 0.002%, novelty 0.024%, stems.vocals 0.043% — decoration
 - [x] C4 downbeats 0.000% — suspect measurement artifact, verify on a song with bar_phase != 0
 - [x] C5 Publish the ablation as the map's feedback loop
+
+## D. Found while measuring (this pass)
+- [x] D1 showscore + 5 other bench tools were reading a stale /tmp map cache — all now compact from maps/model
+- [x] D2 fixture-sync had no instrument assigned to beam/spot/sky/bar/wall after the rig rename — 5x more fixtures now graded, and an unassigned kind is reported instead of skipped
+- [x] D3 I wrote the grid-offset sign convention backwards into 5 maps; corrected
+- [ ] D4 Sync caps at 34-58% because grid-gated fixtures can only be as tight as the grid; accent-driven ones already hit 81-100%
+- [ ] D5 The sync metric penalises a legitimate 16th-note chase (4 rises per beat, 1 kick to land on) — fix the metric before chasing the number
+- [ ] D6 Grid phase is the dominant lever on sync and is measurably off on levels and the-nights; needs a truth/PROTOCOL.md listening session to decide, not a tuned constant

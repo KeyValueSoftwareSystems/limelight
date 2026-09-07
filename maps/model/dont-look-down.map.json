@@ -30942,7 +30942,8 @@
    "stdev_s": 0.0116,
    "beats_paired": 268,
    "beats_total": 470,
-   "note": "Negative means the grid fires before the drum. This is two measurements of one recording by different methods, not truth: the onset detector carries its own bias and nobody has verified either against a human ear. Recorded so a reader or a listening session can see it, never applied as a correction."
+   "note": "Negative means the kick lands BEFORE the beat the grid names, so the grid is LATE by that much; positive means the grid is early. This is two measurements of one recording by different methods, not truth: the onset detector carries its own bias and nobody has verified either against a human ear. Recorded so a reader or a listening session can see it, never applied as a correction.",
+   "priced": "moving the whole grid by -15 ms takes levels' hitters from 50.3% to 56.9% within 40 ms of their own instrument. Measured, not applied: it is the same kick onsets this offset was measured against, so it is not independent evidence"
   },
   "chords": {
    "rate": "per_bar",
