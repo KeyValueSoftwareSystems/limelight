@@ -120,6 +120,26 @@ const ACC=(function(){
   for(const a of strong) if(!out.length||a.at-out[out.length-1].at>=0.30) out.push(a);
   return out})();
 const ACT=ACC.map(a=>a.at);
+const ACC_BY = (function(){
+  const out = {};
+  for(const a of ACC){ (out[a.of] = out[a.of] || []).push(a) }
+  return out;
+})();
+function accentOf(band, t){
+  const arr = ACC_BY[band];
+  if(!arr || !arr.length) return 0;
+  let lo=0, hi=arr.length-1, i=-1;
+  while(lo<=hi){ const m=(lo+hi)>>1; if(arr[m].at<=t){i=m;lo=m+1} else hi=m-1 }
+  let best=0;
+  const at = 0.014 + 0.060*(1-SONG_DRIVE), dc = 0.26;
+  for(let j=i; j>=0 && j>i-4; j--){
+    const dt = t - arr[j].at;
+    if(dt < 0 || dt > 0.40) continue;
+    const env = dt<at ? ss(0,at,dt) : 1-ss(0,1,cl((dt-at)/dc));
+    best = Math.max(best, env*(arr[j].strength===undefined?0.5:arr[j].strength));
+  }
+  return cl(best);
+}
 function accentHit(t){
   // strongest hit inside a short window ending at t, with its own envelope
   let best=0;
@@ -1018,8 +1038,9 @@ function lookFrame(t,L){
          that changes brightness over time now has to come from the music. */
       const wave=0.88+0.12*Math.cos(2*Math.PI*G.xn);
       const musical=(0.15+0.85*e)*(L==='drop'?1:0.72);
-      lv=(base*0.42 + 0.95*musical)*wave*EX.arc
-         + (0.16+0.52*e)*A*grow*K.accent*drumGate;
+      lv=((base*0.42 + 0.95*musical)*wave*EX.arc
+         + (0.16+0.52*e)*A*grow*K.accent*drumGate)
+;
       /* Layer the chase over the wash rather than replacing it: the wash keeps
          the room from going black between pulses, the chase supplies the
          movement. How much of each depends on how busy the music is -- a quiet
@@ -1146,7 +1167,8 @@ function lookFrame(t,L){
       // between accents -- in a real rig no two fixtures read the same
       const base=(0.11+0.26*e)*(0.86+0.28*sym(G.xn));
       const lamp=(L==='drop'?0.30+0.44*e:0.18+0.36*e)*(0.84+0.28*Math.max(voxAt(t),sung(t)));
-      lv=base*EX.arc+lamp*A*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5);
+      lv=(base*EX.arc+lamp*A*(lead?1:0.28)*busy*grow+0.09*accentHit(t)*(lead?1:0.5))
+;
       if(L==='build') lv*=lerp(0.25,1,layer(2));
       if(L==='quiet') lv=base*0.75+0.045*(0.5+0.5*Math.sin(2*Math.PI*(mpos(t)/4)));
       if(L==='idle')  lv=0.04+0.03*(0.5+0.5*Math.sin(2*Math.PI*(mpos(t)/8)+sym(G.xn)*4));
