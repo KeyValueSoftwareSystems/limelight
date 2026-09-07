@@ -905,8 +905,8 @@ class H(http.server.BaseHTTPRequestHandler):
                     "<meta name=viewport content='width=device-width,initial-scale=1'>"
                     "<style>body{background:#111;color:#eee;font:16px system-ui;padding:40px}"
                     "a{color:#7cf}li{margin:8px 0}</style>"
-                    "<h1>Shows</h1><p>Pick a song, then choose your own copy of the audio "
-                    "in the page.</p><ul>" + links + "</ul>",
+                    "<h1>Shows</h1><p>The audio is served from synth/out/. Five songs, "
+                    "one page each.</p><ul>" + links + "</ul>",
                     "text/html; charset=utf-8")
             if u.path == "/api/map":
                 # Hand back a map file as a download. The held-out answer is the one
@@ -1087,8 +1087,26 @@ class H(http.server.BaseHTTPRequestHandler):
                 return self._send(200, json.dumps(song((q.get("song") or [None])[0])))
             if u.path == "/api/audio":
                 idx = songs_index()
-                sp = idx.get((q.get("song") or [None])[0]) or (idx and idx[sorted(idx)[0]])
-                if not sp: return self._send(404, json.dumps({"error": "unknown song"}))
+                want = (q.get("song") or [None])[0]
+                sp = idx.get(want)
+                # A show page may be a variant of a song -- levels-B, levels-C --
+                # so trim the suffix back to a slug the index actually knows.
+                base = want or ""
+                while sp is None and "-" in base:
+                    base = base.rsplit("-", 1)[0]
+                    sp = idx.get(base)
+                if not sp:
+                    # NEVER fall back to whatever sorts first. That is what this
+                    # line used to do, and it silently handed 01-pulse.wav -- a
+                    # synthetic click track -- to every variant page, so two
+                    # versions of the show were reviewed against a metronome and
+                    # the report came back "I can only hear beats". It was true.
+                    # Silent failures cost more than ugly ones.
+                    return self._send(404, json.dumps({
+                        "error": "no audio for song=%r" % (want,),
+                        "have": sorted(idx),
+                        "note": "a variant slug is trimmed back to its song "
+                                "(levels-C -> levels); this one matched nothing"}))
                 w = sp["wav"]
                 if not os.path.exists(w) and w.endswith(".wav"):
                     subprocess.run([sys.executable, os.path.join(HERE, "compose.py")], cwd=ROOT)
