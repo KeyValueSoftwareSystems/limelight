@@ -171,6 +171,31 @@ for(const song of SONGS){
     sampled++;
   }
   const crowdShare = sampled ? crowded/sampled : 0;
+  const IDS2=L.fixtures.filter(f=>BEAMY(f.id)).map(f=>f.id);
+  const SPB=8, nB=Math.floor((DUR-PH)/BAR)-1;
+  function bvec(b){
+    const v=[];
+    for(let k=0;k<SPB;k++){
+      const t=PH+DBP*PER+(b+k/SPB)*BAR;
+      if(t>=DUR) return null;
+      const f=frame(t), by={};
+      for(const o of f.fixtures){ let x=o.level||0;
+        if(o.pixels&&o.pixels.length){let m=0;for(const q of o.pixels)m=Math.max(m,(q[0]+q[1]+q[2])/765);x=Math.max(x,m)}
+        by[o.id]=x }
+      for(const id of IDS2) v.push(by[id]||0);
+    }
+    return v;
+  }
+  function cosv(a2,b2){let d=0,na=0,nb=0;
+    for(let i=0;i<a2.length;i++){d+=a2[i]*b2[i];na+=a2[i]*a2[i];nb+=b2[i]*b2[i]}
+    return (na>1e-9&&nb>1e-9)?d/Math.sqrt(na*nb):0}
+  const bv=[]; for(let b=0;b<nB;b++) bv.push(bvec(b));
+  let pin=[], pout=[];
+  for(let b=1;b<nB;b++){ if(!bv[b]||!bv[b-1]) continue;
+    const c=cosv(bv[b],bv[b-1]);
+    (Math.floor(b/4)===Math.floor((b-1)/4) ? pin : pout).push(c) }
+  const mn=a2=>a2.length?a2.reduce((x,y)=>x+y,0)/a2.length:0;
+  const figure = mn(pin) - mn(pout);
   const jr=jumps/N;
   const drive=SD_;
   const S={
@@ -189,9 +214,10 @@ for(const song of SONGS){
     variety: band(variety, 0.10, 0.55),
     moverhy: moveRhythm,
     spare:   1 - band(crowdShare, 0.04, 0.28),
+    figure:  band(figure, 0.0, 0.14),
   };
   const W={dark:1.6, range:1.4, midless:1.2, marked:1.4, onbeat:1.2, follow:1.3, calm:1.0, hue:0.8,
-           kill:1.5, build:1.5, beam:1.0, strobe:1.0, variety:1.6, moverhy:1.5, spare:1.4};
+           kill:1.5, build:1.5, beam:1.0, strobe:1.0, variety:1.6, moverhy:1.5, spare:1.4, figure:1.5};
   let num=0,den=0; for(const k in S){num+=S[k]*W[k];den+=W[k]}
   out.push({song, total:num/den, S,
     raw:{crowd:crowdShare,dark:dark,range:range,mid:mid,marked:marked/BEATS.length,
@@ -208,4 +234,4 @@ for(const o of out){
 console.log('  TOTAL           '+(g/out.length).toFixed(4));
 console.log('  raw: '+out.map(o=>o.song.slice(0,4)+' dk'+(100*o.raw.dark).toFixed(0)+' rg'+o.raw.range.toFixed(1)+
   ' mid'+(100*o.raw.mid).toFixed(0)+' mk'+(100*o.raw.marked).toFixed(0)+' ob'+(100*o.raw.onbeat).toFixed(0)+
-  ' r'+o.raw.r.toFixed(2)+' j'+(100*o.raw.jr).toFixed(1)+' mv'+(100*o.S.moverhy).toFixed(0)+' cr'+(100*crowdShareOut(o)).toFixed(0)).join(' | '));
+  ' r'+o.raw.r.toFixed(2)+' j'+(100*o.raw.jr).toFixed(1)+' mv'+(100*o.S.moverhy).toFixed(0)+' cr'+(100*crowdShareOut(o)).toFixed(0)+' fg'+(100*o.S.figure).toFixed(0)).join(' | '));
