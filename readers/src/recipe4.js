@@ -31,6 +31,11 @@ SP = SP || [];
 const ss=(a,b,x)=>{const t=cl((x-a)/(b-a));return t*t*(3-2*t)};
 const lerp=(a,b,f)=>a+(b-a)*f;
 const CYC_DROP = 0.5;
+const LONG_LIFT = 1.60;
+const QUIET_GAIN = 2.4;
+const QUIET_COV = 0.26;
+const LONG_FROM = 6;
+const LONG_TO = 20;
 const KILL_DEPTH=0.97;
 const KILL_BEATS=0.5;
 const CUT_DEPTH=0.00;
@@ -58,6 +63,15 @@ const barIdx=t=>Math.floor((bi(t)-DBP)/4);
 const barPh=t=>cl((beatInBar(t)+bph(t))/4);
 const phrPh=t=>{const k=((bi(t)-DBP)%16+16)%16;return cl((k+bph(t))/16)};
 const mpos=t=>Math.max(0, barIdx(t)+barPh(t));
+function chBars(t){
+  if(!CH.length) return 0;
+  const j=chIdx(t), a=CH[j][0], b=(j+1<CH.length?CH[j+1][0]:DUR);
+  return (b-a)/Math.max(1e-6, BAR);
+}
+function longLift(t, L){
+  if(L!=='quiet' && L!=='idle' && L!=='build') return 1;
+  return lerp(1, LONG_LIFT, ss(LONG_FROM, LONG_TO, chBars(t)));
+}
 function chProg(t){
   if(!CH.length) return 0;
   const j=chIdx(t), a=CH[j][0], b=(j+1<CH.length?CH[j+1][0]:DUR);
@@ -909,13 +923,13 @@ function emph(kind, t, L){
   const c = cueAt(t, L);
   const v = c[kind];
   const lift = cl((c.lift === undefined ? LIFT_MID : c.lift)/LIFT_MID, LIFT_LO, LIFT_HI);
-  return (v === undefined ? 1 : v) * lift * climbAt(t, L) * instr(kind, t);
+  return (v === undefined ? 1 : v) * lift * climbAt(t, L) * instr(kind, t) * longLift(t, L);
 }
 function arrayGate(G, t, e, L, n){
   const dep = deployed(G.kind, t);
   if(dep <= 0) return 0;
   if(!n || n <= ARRAY_MIN) return dep;
-  const ceil = {drop:0.46, build:0.40, verse:0.34, quiet:0.26, idle:0.22,
+  const ceil = {drop:0.46, build:0.40, verse:0.34, quiet:QUIET_COV, idle:0.22,
                 outro:0.26, spotlight:0.18, stop:0, flash:1}[L];
   const bp = buildProg(t);
   let top = (bp >= 0) ? lerp(0.16, 0.52, bp) : (ceil===undefined?0.52:ceil);
@@ -924,6 +938,7 @@ function arrayGate(G, t, e, L, n){
     if(sd !== null && sd > DROP_HOLD*BAR)
       top *= lerp(1, DROP_SETTLE, ss(0, DROP_FADE*BAR, sd - DROP_HOLD*BAR));
   }
+  top = Math.min(1, top*longLift(t, L));
   const cov = (top<=0||top>=1) ? top : cl(0.10 + (top-0.10)*(0.18+0.82*e), 0.08, 1);
   if(cov >= 1) return 1;
   if(cov <= 0) return 0;
@@ -940,7 +955,8 @@ function arrayGate(G, t, e, L, n){
            : fl0 * (lk === undefined ? 0.5 : lk) * (0.30 + 0.70*e);
   const held = (fl === undefined || L === 'stop' || L === 'spotlight')
              ? gate : fl + (1 - fl) * gate;
-  return held * cl(1/Math.max(0.12, cov), 1, 2.4) * dep;
+  const soften = (L==='quiet'||L==='idle'||L==='outro'||L==='break') ? QUIET_GAIN : 2.4;
+  return held * cl(1/Math.max(0.12, cov), 1, soften) * dep;
 }
 let PARS=KIND('par'), UPS=KIND('uplight'), HEADS=KIND('head'),
     STROBES=KIND('strobe'), STRIPS=KIND('strip'), BLINDERS=KIND('blinder'),
