@@ -471,7 +471,16 @@ if __name__ == "__main__":
             for p in maps_for(slug): rows.append(evaluate(slug, p))
         else:
             p = maps_for(slug)
-            rows.append(evaluate(slug, p[0]) if p else {"error": "no map for " + slug})
+            # Every map for the song, not just the first. maps_for() sorts, and
+            # synth/maps/_broken-half-beat sorts before every real author, so
+            # scoring only p[0] meant the deliberate falsification map SHADOWED
+            # every genuine map for levels -- the one song it exists for. The
+            # board had never scored a real levels map at all.
+            if not p:
+                rows.append({"error": "no map for " + slug})
+            else:
+                for one in p:
+                    rows.append(evaluate(slug, one))
     for r in rows: report(r)
     ok = [r for r in rows if "error" not in r]
     if len(ok) > 1:
