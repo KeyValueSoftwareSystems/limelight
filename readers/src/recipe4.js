@@ -309,6 +309,14 @@ const WORDS=(function(){
   const w=(MAP.observations&&MAP.observations.lyrics&&MAP.observations.lyrics.words)||[];
   return w.filter(x=>x&&typeof x.at==='number').sort((a,b)=>a.at-b.at);
 })();
+/* Vocal phrases: where the voice is, not what it says. observations.lyrics'
+   own note says the words are the unreliable half and the times are what to
+   trust, so nothing here reads a word. */
+const PHRASES=(function(){
+  const e=(MAP.observations&&MAP.observations.phrases&&MAP.observations.phrases.events)||[];
+  return e.filter(x=>x&&typeof x.at==='number'&&typeof x.to==='number'&&x.to>x.at)
+          .sort((a,b)=>a.at-b.at);
+})();
 function lastAtOrBefore(arr,t,key){
   let lo=0,hi=arr.length-1,k=-1;
   while(lo<=hi){const m=(lo+hi)>>1; const v=key?arr[m][key]:arr[m];
@@ -343,6 +351,29 @@ function sung(t){
   return cl(ss(0,Math.min(0.05,d*0.3),t-w.at)*(1-0.45*ss(0,d,t-w.at)));
 }
 const voxAt   =t=>obsAt('voice',t,0.5);
+/* 1 while a vocal line is running, 0 in the gap between lines. The gap is where
+   a designer changes a look, because that is where it does not cut the singer
+   off mid-sentence. */
+const PHRASE_EDGE = 0.18;
+function phraseHold(t){
+  if(!PHRASES.length) return 0;
+  const k=lastAtOrBefore(PHRASES,t,'at');
+  if(k<0) return 0;
+  const p=PHRASES[k];
+  if(t>=p.to) return 0;
+  const inn=ss(0,PHRASE_EDGE,t-p.at), out=1-ss(0,PHRASE_EDGE,t-(p.to-PHRASE_EDGE));
+  return cl(Math.min(inn,Math.max(0,out)));
+}
+// the line landing. One short envelope per phrase, not per word.
+const PHRASE_LAND = 0.55;
+function phraseOnset(t){
+  if(!PHRASES.length) return 0;
+  const k=lastAtOrBefore(PHRASES,t,'at');
+  if(k<0) return 0;
+  const dt=t-PHRASES[k].at;
+  if(dt<0||dt>PHRASE_LAND) return 0;
+  return cl(ss(0,0.05,dt)*(1-ss(0,1,dt/PHRASE_LAND)));
+}
 
 const chIdx=t=>{let j=0;for(let i=0;i<CH.length;i++)if(CH[i][0]<=t)j=i;else break;return j};
 const chAt=t=>CH[chIdx(t)][1];
@@ -942,6 +973,7 @@ function deployed(kind, t){
   return (at === undefined) ? 1 : ss(0, 1, (t - at)/BAR);
 }
 
+const PHRASE_CALM = 0.55;
 const GATE_RATE  = {wash:3.2, uplight:3.2, strip:2.2, head:1.5, par:1.5};
 const GATE_FLOOR = {wash:0.34, uplight:0.34, strip:0.18, head:0.26, par:0.26};
 function buildProg(t){
@@ -959,7 +991,8 @@ function gateBars(kind, tt){
   const bp = buildProg(tt);
   const accel = (bp >= 0) ? lerp(2.4, 0.30, bp*bp) : 1;
   const drive = lerp(1.9, 1.0, SONG_DRIVE);
-  return (cyc===undefined?1:cyc) * kmul * accel * drive * (1.7 - 0.9*e);
+  const calm = 1 + PHRASE_CALM*phraseHold(tt);
+  return (cyc===undefined?1:cyc) * kmul * accel * drive * calm * (1.7 - 0.9*e);
 }
 const GATE_STEPS = [0.125, 0.25, 0.5, 1, 2, 4];
 function quantRate(r){
@@ -1069,7 +1102,8 @@ const INSTR_HI = 1.00;
 const FAMILY_VOICE = {
   par:     t => cl(0.68*stem('drums',t)  + 0.92*accentOf('kick',t)),
   uplight: t => cl(0.78*stem('bass',t)   + 0.55*accentOf('bass',t)),
-  head:    t => cl(Math.max(stem('vocals',t), stem('other',t)) + 0.50*accentOf('vocals',t)),
+  head:    t => cl(Math.max(stem('vocals',t), stem('other',t))
+                  + 0.50*accentOf('vocals',t) + 0.45*phraseOnset(t)),
   wash:    t => cl(Math.max(stem('piano',t), stem('other',t))  + 0.42*accentOf('piano',t)),
   strip:   t => cl(0.55*stem('guitar',t) + 0.80*accentOf('hat',t) + 0.75*accentOf('snare',t)),
   // the backbeat. Blinders on 2 and 4 is the oldest move in the trade, and

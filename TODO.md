@@ -14,8 +14,8 @@
 - [ ] B4 41 novelty moments only brighten the rig; they should become chapters
 
 ## C. Map fields that drive nothing (ablation, my actual lane)
-- [x] C1 lyrics measured at 0.002% on the 4 songs that carry it — confirmed decoration, open: make it earn its place via vocal-phrase handover
+- [x] C1 lyrics now earn their place as vocal phrases: the line landing lifts, the rig calms under the voice and hands over in the gap
 - [x] C2 chords now measured for all 5 songs by ear.py, and colour follows chord identity
-- [ ] C3 voice 0.002%, novelty 0.024%, stems.vocals 0.043% — decoration
+- [~] C3 voice 0.002%, novelty 0.024%, stems.vocals 0.043% — decoration
 - [x] C4 downbeats 0.000% — suspect measurement artifact, verify on a song with bar_phase != 0
 - [x] C5 Publish the ablation as the map's feedback loop

@@ -7821,6 +7821,55 @@
      "confidence": 0.474
     }
    ]
+  },
+  "phrases": {
+   "from": "observations.lyrics.words",
+   "how": "runs of words separated by more than 0.57 s of silence (0.8 beats at this tempo, floored at 0.30 s)",
+   "not": "this is where the voice is, not what it says. The word text is the unreliable half of the source and none of it is used here",
+   "count": 8,
+   "median_s": 5.79,
+   "events": [
+    {
+     "at": 33.1,
+     "to": 39.44,
+     "words": 4
+    },
+    {
+     "at": 40.26,
+     "to": 45.26,
+     "words": 3
+    },
+    {
+     "at": 45.98,
+     "to": 54.98,
+     "words": 6
+    },
+    {
+     "at": 55.84,
+     "to": 62.12,
+     "words": 4
+    },
+    {
+     "at": 63.1,
+     "to": 68.5,
+     "words": 3
+    },
+    {
+     "at": 105.08,
+     "to": 107.8,
+     "words": 4
+    },
+    {
+     "at": 111.0,
+     "to": 117.18,
+     "words": 6
+    },
+    {
+     "at": 118.1,
+     "to": 121.66,
+     "words": 2
+    }
+   ]
   }
  },
  "confidence": 0.908,

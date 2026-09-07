@@ -1,7 +1,24 @@
 const fs=require('fs');
 eval(fs.readFileSync('/tmp/claude-1001/canvas.js','utf8'));
+/* Compact straight from maps/model. This used to read a cached
+   /tmp/.../cmp_<song>.json written by hand earlier in the session, so every
+   number it printed described whatever the map looked like when that cache was
+   made -- chords, phrases and grid_check were all invisible to it. A scorer
+   reading a stale copy of the thing it is scoring is worse than no scorer. */
+function mapPath(song){
+  const full='maps/model/'+song+'.full.map.json';
+  return fs.existsSync(full) ? full : 'maps/model/'+song+'.map.json';
+}
+function loadMap(song){
+  const out=cp.execFileSync('python3',['-c',
+    'import sys,json;sys.path.insert(0,"readers/src");from compact import compact;'+
+    'print(json.dumps(compact(json.load(open(sys.argv[1])))))', mapPath(song)],
+    {maxBuffer:1<<28});
+  return JSON.parse(out.toString());
+}
+
 const song=process.argv[2], times=process.argv.slice(3).map(Number);
-const M=JSON.parse(fs.readFileSync('/tmp/claude-1001/cmp_'+song+'.json','utf8'));
+const M=loadMap(song);
 const L=JSON.parse(fs.readFileSync('readers/lights/'+(process.env.RIG||'festival')+'/layout.json','utf8'));
 global.MAP=M;global.LAYOUT=L;global.ENERGY='medium';global.STOP_REAL=true;global.ANT=true;global.HAZE=0.28;global.DRIFT=true;
 global.PER=M.period;global.PH=M.phase;global.DUR=M.dur;global.DBP=M.bar_phase;global.BAR=4*M.period;global.BEATS=[];

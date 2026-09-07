@@ -1,6 +1,19 @@
-const fs=require('fs');
+const fs=require('fs'), cp=require('child_process');
 const song=process.argv[2]||'levels', rig=process.argv[3]||'festival';
-const M=JSON.parse(fs.readFileSync('/tmp/claude-1001/cmp_'+song+'.json','utf8'));
+/* Compacted straight from maps/model, never from a cached copy: a tool reading
+   a stale snapshot of the thing it measures reports on a map that no longer
+   exists. */
+function mapPath(song){
+  const full='maps/model/'+song+'.full.map.json';
+  return fs.existsSync(full) ? full : 'maps/model/'+song+'.map.json';
+}
+function loadMap(song){
+  return JSON.parse(cp.execFileSync('python3',['-c',
+    'import sys,json;sys.path.insert(0,"readers/src");from compact import compact;'+
+    'print(json.dumps(compact(json.load(open(sys.argv[1])))))', mapPath(song)],
+    {maxBuffer:1<<28}).toString());
+}
+const M=loadMap(song);
 const L=JSON.parse(fs.readFileSync('readers/lights/'+rig+'/layout.json','utf8'));
 global.MAP=M;global.LAYOUT=L;global.ENERGY='medium';global.STOP_REAL=true;global.ANT=true;global.HAZE=0.28;global.DRIFT=true;
 global.PER=M.period;global.PH=M.phase;global.DUR=M.dur;global.DBP=M.bar_phase;global.BAR=4*M.period;global.BEATS=[];

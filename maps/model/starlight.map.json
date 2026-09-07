@@ -24792,6 +24792,165 @@
      "confidence": 0.765
     }
    ]
+  },
+  "phrases": {
+   "from": "observations.lyrics.words",
+   "how": "runs of words separated by more than 0.38 s of silence (0.8 beats at this tempo, floored at 0.30 s)",
+   "not": "this is where the voice is, not what it says. The word text is the unreliable half of the source and none of it is used here",
+   "count": 30,
+   "median_s": 4.04,
+   "events": [
+    {
+     "at": 6.06,
+     "to": 8.64,
+     "words": 5
+    },
+    {
+     "at": 9.04,
+     "to": 12.34,
+     "words": 5
+    },
+    {
+     "at": 13.6,
+     "to": 16.04,
+     "words": 5
+    },
+    {
+     "at": 17.06,
+     "to": 18.88,
+     "words": 4
+    },
+    {
+     "at": 22.12,
+     "to": 28.42,
+     "words": 14
+    },
+    {
+     "at": 29.3,
+     "to": 33.48,
+     "words": 11
+    },
+    {
+     "at": 33.88,
+     "to": 36.74,
+     "words": 5
+    },
+    {
+     "at": 37.22,
+     "to": 41.16,
+     "words": 11
+    },
+    {
+     "at": 41.78,
+     "to": 49.02,
+     "words": 15
+    },
+    {
+     "at": 49.76,
+     "to": 63.8,
+     "words": 33
+    },
+    {
+     "at": 64.86,
+     "to": 68.74,
+     "words": 6
+    },
+    {
+     "at": 79.4,
+     "to": 85.14,
+     "words": 6
+    },
+    {
+     "at": 85.56,
+     "to": 88.2,
+     "words": 6
+    },
+    {
+     "at": 89.02,
+     "to": 91.84,
+     "words": 6
+    },
+    {
+     "at": 92.84,
+     "to": 99.02,
+     "words": 9
+    },
+    {
+     "at": 101.12,
+     "to": 107.72,
+     "words": 14
+    },
+    {
+     "at": 108.74,
+     "to": 112.88,
+     "words": 11
+    },
+    {
+     "at": 113.28,
+     "to": 115.96,
+     "words": 5
+    },
+    {
+     "at": 117.02,
+     "to": 124.5,
+     "words": 17
+    },
+    {
+     "at": 125.18,
+     "to": 128.4,
+     "words": 9
+    },
+    {
+     "at": 129.08,
+     "to": 134.46,
+     "words": 11
+    },
+    {
+     "at": 134.84,
+     "to": 136.32,
+     "words": 4
+    },
+    {
+     "at": 136.84,
+     "to": 143.16,
+     "words": 18
+    },
+    {
+     "at": 143.84,
+     "to": 148.1,
+     "words": 6
+    },
+    {
+     "at": 155.14,
+     "to": 158.28,
+     "words": 10
+    },
+    {
+     "at": 158.96,
+     "to": 163.62,
+     "words": 6
+    },
+    {
+     "at": 174.08,
+     "to": 182.76,
+     "words": 6
+    },
+    {
+     "at": 183.2,
+     "to": 183.94,
+     "words": 3
+    },
+    {
+     "at": 184.98,
+     "to": 185.13,
+     "words": 3
+    },
+    {
+     "at": 185.5,
+     "to": 193.48,
+     "words": 16
+    }
+   ]
   }
  },
  "confidence": 0.882,

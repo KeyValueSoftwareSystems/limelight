@@ -49998,6 +49998,115 @@
    "beats_paired": 238,
    "beats_total": 369,
    "note": "Negative means the grid fires before the drum. This is two measurements of one recording by different methods, not truth: the onset detector carries its own bias and nobody has verified either against a human ear. Recorded so a reader or a listening session can see it, never applied as a correction."
+  },
+  "phrases": {
+   "from": "observations.lyrics.words",
+   "how": "runs of words separated by more than 0.38 s of silence (0.8 beats at this tempo, floored at 0.30 s)",
+   "not": "this is where the voice is, not what it says. The word text is the unreliable half of the source and none of it is used here",
+   "count": 20,
+   "median_s": 3.29,
+   "events": [
+    {
+     "at": 2.44,
+     "to": 8.96,
+     "words": 17
+    },
+    {
+     "at": 9.62,
+     "to": 16.44,
+     "words": 21
+    },
+    {
+     "at": 17.08,
+     "to": 18.2,
+     "words": 4
+    },
+    {
+     "at": 18.68,
+     "to": 21.0,
+     "words": 9
+    },
+    {
+     "at": 21.4,
+     "to": 23.96,
+     "words": 10
+    },
+    {
+     "at": 24.56,
+     "to": 25.8,
+     "words": 4
+    },
+    {
+     "at": 26.26,
+     "to": 31.16,
+     "words": 14
+    },
+    {
+     "at": 31.8,
+     "to": 35.48,
+     "words": 9
+    },
+    {
+     "at": 36.08,
+     "to": 39.14,
+     "words": 7
+    },
+    {
+     "at": 40.0,
+     "to": 46.86,
+     "words": 17
+    },
+    {
+     "at": 47.26,
+     "to": 48.32,
+     "words": 4
+    },
+    {
+     "at": 76.88,
+     "to": 85.19,
+     "words": 13
+    },
+    {
+     "at": 85.62,
+     "to": 87.15,
+     "words": 13
+    },
+    {
+     "at": 96.88,
+     "to": 108.09,
+     "words": 13
+    },
+    {
+     "at": 108.44,
+     "to": 115.34,
+     "words": 20
+    },
+    {
+     "at": 116.08,
+     "to": 119.6,
+     "words": 10
+    },
+    {
+     "at": 120.0,
+     "to": 122.74,
+     "words": 7
+    },
+    {
+     "at": 123.42,
+     "to": 124.64,
+     "words": 4
+    },
+    {
+     "at": 134.66,
+     "to": 139.96,
+     "words": 11
+    },
+    {
+     "at": 168.42,
+     "to": 170.26,
+     "words": 4
+    }
+   ]
   }
  },
  "sections": {
