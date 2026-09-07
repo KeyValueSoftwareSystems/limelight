@@ -48010,6 +48010,20 @@
     0.41
    ],
    "renamed_from": "observations.melody. It is a spectral centroid, not a note, and melody now carries the sung note like the-nights and listen/mapeval.py both expect"
+  },
+  "stem_latency": {
+   "ms": 25.0,
+   "of": "htdemucs_6s output against the mix it was separated from",
+   "how": "cross-correlation of the drums stem envelope against the source mix envelope, 4 kHz, +/-100 ms search, 20 s window",
+   "measured_on": [
+    "dont-look-down",
+    "levels",
+    "mizhiyoram",
+    "starlight"
+   ],
+   "why_it_matters": "Every field derived from a stem inherits it: accents, bass_notes, melody, brightness, envelope and the per-bar stem levels all come from audio that runs 25 ms behind the record. It is the same number on all four songs, so it is the separator and not the music.",
+   "already_applied_to": "accents, via accents.latency_correction_s of -35 ms, which is this 25 ms plus roughly 10 ms of onset-detector flux latency",
+   "not": "applied to bass_notes or melody. Compensating the sampling point there made both measurably worse against listen/mapeval.py, so the sign or the mechanism is not what I assumed and the correction is recorded rather than applied."
   }
  },
  "confidence": 0.92,
