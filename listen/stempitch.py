@@ -22,6 +22,13 @@ import json, os, subprocess, sys, array, math
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 STEMS = "/tmp/claude-1001/stems/htdemucs_6s"
+# Two voices, two bands, two sample rates. A bass note at 41 Hz has a 24 ms
+# period and needs a low rate to make the lag search cheap; a sung note at
+# 900 Hz has a 1.1 ms period and needs a high one to resolve it at all.
+VOICES = {
+    "bass":   {"stem": "bass",   "sr": 2205, "lo": 38.0,  "hi": 420.0,  "field": "bass_notes"},
+    "melody": {"stem": "vocals", "sr": 8820, "lo": 80.0,  "hi": 1000.0, "field": "melody"},
+}
 SR = 2205
 LO_HZ, HI_HZ = 38.0, 420.0
 NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -44,15 +51,17 @@ def decode_mono(path, sr):
     return a
 
 
-def f0(win, sr):
-    """Normalised autocorrelation peak in the bass band. Returns (hz, clarity)."""
+def f0(win, sr, lo_hz=None, hi_hz=None):
+    """Normalised autocorrelation peak in a band. Returns (hz, clarity)."""
+    lo_hz = LO_HZ if lo_hz is None else lo_hz
+    hi_hz = HI_HZ if hi_hz is None else hi_hz
     n = len(win)
     mean = sum(win) / n
     x = [v - mean for v in win]
     e0 = sum(v * v for v in x)
     if e0 < 1e-6:
         return None, 0.0
-    lo = max(2, int(sr / HI_HZ)); hi = min(n - 2, int(sr / LO_HZ))
+    lo = max(2, int(sr / hi_hz)); hi = min(n - 2, int(sr / lo_hz))
     if hi <= lo:
         return None, 0.0
     best, blag = 0.0, 0
@@ -69,6 +78,16 @@ def f0(win, sr):
     if clarity < CLARITY_FLOOR:
         return None, clarity
     return sr / blag, clarity
+
+
+def name_to_midi(name):
+    if not name: return None
+    i = len(name)
+    while i and (name[i-1].isdigit() or name[i-1] == "-"): i -= 1
+    pc, octv = name[:i], name[i:]
+    if pc not in NAMES or not octv: return None
+    try: return NAMES.index(pc) + (int(octv) + 1) * 12
+    except ValueError: return None
 
 
 def name_of(hz):
@@ -140,3 +159,86 @@ if __name__ == "__main__":
               % (slug, r["voiced"], r["beats"],
                  " ".join("%s x%d" % t for t in r["top"]),
                  "  -> " + r["wrote"] if r["wrote"] else ""))
+
+
+def analyse_voice(slug, voice, write=False):
+    """The same machinery on a different stem and band. `melody` is the note the
+    VOICE is singing, which is what the scorer and the-nights both mean by the
+    word; our older observations.melody was a spectral centroid, a different fact
+    wearing the same name, and it moves to melody_centroid."""
+    V = VOICES[voice]
+    sp = stem_path(slug, V["stem"]); mp = map_path(slug)
+    if not sp or not mp:
+        return {"song": slug, "error": "no %s stem or no map" % V["stem"]}
+    m = json.load(open(mp))
+    beats = m.get("beats") or []
+    if len(beats) < 4:
+        return {"song": slug, "error": "no beats"}
+    sr = V["sr"]
+    x = decode_mono(sp, sr)
+    per = (m.get("grid") or {}).get("period") or 0.5
+    win = int(sr * min(0.26, per * 0.8))
+    notes, clar = [], []
+    for b in beats:
+        i0 = int(b * sr); seg = x[i0:i0 + win]
+        if len(seg) < win // 2:
+            notes.append(None); clar.append(0.0); continue
+        hz, c = f0(seg, sr, V["lo"], V["hi"])
+        notes.append(name_of(hz)); clar.append(round(c, 3))
+    voiced = sum(1 for v in notes if v)
+    obs = {
+        "rate": "per_beat",
+        "how": "autocorrelation f0 on the %g-%g Hz band of the separated %s stem"
+               % (V["lo"], V["hi"], V["stem"]),
+        "unvoiced": "null",
+        "not": ("the note the %s stem is carrying. It is monophonic by construction "
+                "and will take the loudest voice where there are several, and a "
+                "beat whose autocorrelation peak is below %.2f is null rather than "
+                "the nearest note" % (V["stem"], CLARITY_FLOOR)),
+        "voiced_beats": voiced, "total_beats": len(notes),
+        "clarity": clar, "notes": notes,
+    }
+    # Note EVENTS, not per-beat samples: consecutive beats on the same pitch are
+    # one held note. [start_s, duration_s, midi, name, amplitude] is the format
+    # the-nights uses and the one listen/mapeval.py reads, so a note here can be
+    # checked by anything in the repo.
+    events = []
+    i = 0
+    while i < len(notes):
+        if not notes[i]:
+            i += 1; continue
+        j = i
+        while j + 1 < len(notes) and notes[j + 1] == notes[i]:
+            j += 1
+        t0 = beats[i]
+        t1 = beats[j + 1] if j + 1 < len(beats) else beats[j] + per
+        mi = name_to_midi(notes[i])
+        amp = max(clar[i:j + 1]) if clar[i:j + 1] else 0.0
+        if mi is not None:
+            events.append([round(t0, 3), round(max(0.05, t1 - t0), 3), mi,
+                           notes[i], round(min(1.0, amp), 3)])
+        i = j + 1
+    obs["format"] = "[start_s, duration_s, midi, name, amplitude]"
+    obs["per_beat"] = obs.pop("notes")
+    obs["notes"] = events
+    obs["note_events"] = len(events)
+
+    if write:
+        o = m.setdefault("observations", {})
+        if voice == "melody":
+            old = o.get("melody")
+            # the centroid is a real measurement, it is just not what `melody`
+            # means to anyone else. Keep it, under a name that says what it is.
+            if isinstance(old, dict) and "notes" not in old:
+                old = dict(old)
+                old["renamed_from"] = ("observations.melody. It is a spectral "
+                                       "centroid, not a note, and melody now "
+                                       "carries the sung note like the-nights "
+                                       "and listen/mapeval.py both expect")
+                o["melody_centroid"] = old
+        o[V["field"]] = obs
+        json.dump(m, open(mp, "w"), indent=1); open(mp, "a").write("\n")
+    from collections import Counter
+    top = Counter(v[:-1] for v in notes if v).most_common(5)
+    return {"song": slug, "voiced": voiced, "beats": len(notes), "top": top,
+            "wrote": os.path.relpath(mp, ROOT) if write else None}

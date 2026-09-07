@@ -43,3 +43,9 @@ synth/truth/
 
 # audio-derived analysis cache, never in the repo
 *.bands.json
+
+# One append-only line per eval run, per machine. Committing it means a conflict
+# every time two people run the harness on the same day, and the file is not worth
+# one: every line is reproducible by running mapeval again, and its real purpose is
+# letting one person see whether their own change helped.
+synth/learning/mapeval.jsonl
