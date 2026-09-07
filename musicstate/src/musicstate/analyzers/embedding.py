@@ -74,14 +74,19 @@ class EmbeddingAnalyzer(Analyzer):
         contract = {"status": "ok", "model": MERT_MODEL, "rate": rate,
                     "rows": int(vecs.shape[0]), "dim": int(dim), "dtype": "float16", "file": None}
         out_stem = ctx.get("out_stem")
+        extra_ctx = {}
         if out_stem:
             path = f"{out_stem}.vec.f16"
             vecs.tofile(path)
             contract["file"] = os.path.basename(path)
+            extra_ctx["mert_embedding_path"] = path
+            extra_ctx["mert_dim"] = int(vecs.shape[1])
+            extra_ctx["n_beats"] = int(vecs.shape[0])
 
         return AnalyzerResult(
             status="ok",
             patch={"embedding": contract},
             confidence={"embedding": 0.9},
+            ctx=extra_ctx,
             notes=f"MERT beat-pooled, {vecs.shape[0]}x{dim} float16",
         )

@@ -3,6 +3,8 @@ from .accents import AccentsAnalyzer
 from .allin1 import Allin1Analyzer
 from .base import Analyzer, AnalyzerResult
 from .chords import ChordsAnalyzer
+from .clap import ClapAnalyzer
+from .combined import CombinedEmbeddingAnalyzer
 from .dsp import DspAnalyzer
 from .embedding import EmbeddingAnalyzer
 from .melody import MelodyAnalyzer
@@ -24,4 +26,6 @@ __all__ = [
     "StemsAnalyzer",
     "SemanticAnalyzer",
     "EmbeddingAnalyzer",
+    "ClapAnalyzer",
+    "CombinedEmbeddingAnalyzer",
 ]

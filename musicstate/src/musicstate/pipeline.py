@@ -18,6 +18,8 @@ from .analyzers import (
     Allin1Analyzer,
     Analyzer,
     ChordsAnalyzer,
+    ClapAnalyzer,
+    CombinedEmbeddingAnalyzer,
     DspAnalyzer,
     EmbeddingAnalyzer,
     MelodyAnalyzer,
@@ -48,6 +50,8 @@ def deep_analyzers() -> list[Analyzer]:
         StemsAnalyzer(),
         SemanticAnalyzer(),
         EmbeddingAnalyzer(),
+        ClapAnalyzer(),
+        CombinedEmbeddingAnalyzer(),
         NoteTranscriptionAnalyzer(),  # polyphonic notes via basic-pitch (onnx)
     ]
 

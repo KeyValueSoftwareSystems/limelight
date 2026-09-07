@@ -15,6 +15,7 @@ N_FFT = 2048
 
 # --- models ---
 MERT_MODEL = "m-a-p/MERT-v1-95M"
+CLAP_MODEL = "laion/clap-htsat-unfused"
 DEMUCS_MODEL = "htdemucs"
 ESSENTIA_EMBEDDING = "discogs-effnet-bs64-1.pb"
 
