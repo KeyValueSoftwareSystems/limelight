@@ -28,7 +28,8 @@ lane('sections','mine, by named features',30,(g,w,h)=>{
     if(b-a>70)g.fillText(s.name,a+4,h-5)})});
 
 lane('sections','learned, from the vectors',30,(g,w,h)=>{
-  const S=MF.segmentation_proposal.sections, C={A:'#2a3a5e',B:'#4a2f56',C:'#1d3a4a',
+  const SP=MF.segmentation_proposal; if(!SP||!SP.sections) return;
+  const S=SP.sections, C={A:'#2a3a5e',B:'#4a2f56',C:'#1d3a4a',
     D:'#5a3a1c',E:'#5e2436',F:'#243f2c',G:'#2a2f3a'};
   S.forEach(s=>{const a=X(s.at),b=X(s.to);
     g.fillStyle=C[s.id]||'#252a35';g.fillRect(a,3,Math.max(1,b-a-1),h-6);

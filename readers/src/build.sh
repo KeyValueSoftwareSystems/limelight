@@ -42,10 +42,14 @@ def render(map_path, out_path, slug=None):
     s = s.replace("__VECB64__", "")
     s = s.replace("__ROOM__",
                   ";(function(){\n" + open("synth/room.js").read() + "\n})();")
-    for k, f in (("__RECIPE__", "recipe4.js"), ("__DRONES__", "drones.js"),
+    want = os.environ.get("LIMELIGHT_RECIPE", "recipe4.js")
+    for k, f in (("__RECIPE__", want), ("__DRONES__", "drones.js"),
                  ("__RENDER__", "render_gl.js"), ("__SKY__", "sky.js"),
                  ("__SCORELANES__", "score_lanes.js"), ("__APP__", "appglue.js")):
-        s = s.replace(k, open("readers/src/" + f).read())
+        body = open("readers/src/" + f).read()
+        if k == "__RECIPE__" and f != "recipe4.js":
+            body = open("readers/src/recipe4.js").read() + "\n\n" + body
+        s = s.replace(k, body)
     left = sorted(set(re.findall(r"__[A-Z0-9]+__", s)))
     if left:
         raise SystemExit("unfilled placeholders: " + ", ".join(left))

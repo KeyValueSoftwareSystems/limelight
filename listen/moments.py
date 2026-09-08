@@ -103,7 +103,7 @@ def analyse(slug, write=False):
     env = envelope(wav)
     acc = [e["at"] for e in ((m.get("accents") or {}).get("events") or [])]
     per = m["grid"]["period"]
-    moved, notes, chapters_moved = [], [], []
+    moved, notes, chapters_moved, spans_moved = [], [], [], []
     # Always search from where the moment ORIGINALLY was, not from wherever a
     # previous run left it. Re-timing from an already-corrected time lets the
     # answer drift with each run: the search window travels with the moment, so
@@ -189,6 +189,17 @@ def analyse(slug, write=False):
                     if "pos" in c: c["pos"] = round(c["pos"] + (beats[j] - t) / per, 4)
                     chapters_moved.append({"name": c.get("name"), "was": round(t, 3),
                                            "now": round(beats[j], 3)})
+            for sp in (m.get("spans") or []):
+                if abs(sp.get("to", -1) - t) < per * 1.5:
+                    sp["to"] = round(beats[j], 6)
+                    if "pos_to" in sp: sp["pos_to"] = round(sp["pos_to"] + (beats[j] - t) / per, 4)
+                    spans_moved.append({"kind": sp.get("kind"), "edge": "to",
+                                        "was": round(t, 3), "now": round(beats[j], 3)})
+                if abs(sp.get("from", -1) - t) < per * 0.75:
+                    sp["from"] = round(beats[j], 6)
+                    if "pos_from" in sp: sp["pos_from"] = round(sp["pos_from"] + (beats[j] - t) / per, 4)
+                    spans_moved.append({"kind": sp.get("kind"), "edge": "from",
+                                        "was": round(t, 3), "now": round(beats[j], 3)})
             for e in ((m.get("sections") or {}).get("entries") or []):
                 if abs(e.get("at", -1) - t) < per * 0.75:
                     e["at"] = round(beats[j], 6)
@@ -235,7 +246,7 @@ def analyse(slug, write=False):
         seen.add(key); keep.append(x)
     if dupes: m["moments"] = keep
 
-    if moved or notes or dupes or chapters_moved:
+    if moved or notes or dupes or chapters_moved or spans_moved:
         m.setdefault("observations", {})["moment_timing"] = {
             "how": "each drop and stop moved to the beat carrying the biggest sustained "
                    "step in loudness within two bars, the step being the median across "
@@ -246,11 +257,17 @@ def analyse(slug, write=False):
             "second_witness": "drum hits per beat, counted from the separated stems, which "
                               "shares no arithmetic with the loudness envelope",
             "moved": moved, "chapters_moved_with_them": chapters_moved,
+            "spans_moved_with_them": spans_moved,
+            "why_spans_move": "a build ends at the thing it builds into. Moving a drop and "
+                              "leaving the span alone left Don't Look Down declaring a build "
+                              "until 41.74 s when the drop it leads to had moved to 41.23 -- "
+                              "a build that finishes after its own payoff. A reader ramping "
+                              "through that span was still ramping when the drop had gone.",
             "left_alone": notes, "merged_duplicates": dupes}
     # Moving a chapter can put it out of order, and validate.py is right to
     # refuse that: a reader that binary-searches chapters would silently return
     # the wrong section. Re-sort everything that moved.
-    if chapters_moved or moved:
+    if chapters_moved or moved or spans_moved:
         # A chapter can land on one that is already there, the same way two
         # moments can, and validate.py refuses chapters that are not strictly
         # increasing -- rightly, since a reader binary-searching them would
@@ -268,7 +285,7 @@ def analyse(slug, write=False):
         if isinstance(m.get("sections"), dict) and m["sections"].get("entries"):
             m["sections"]["entries"] = sorted(m["sections"]["entries"], key=lambda e: e.get("at", 0))
 
-    if write and (moved or notes or dupes or chapters_moved):
+    if write and (moved or notes or dupes or chapters_moved or spans_moved):
         json.dump(m, open(p, "w"), indent=1, ensure_ascii=False); open(p, "a").write("\n")
     return {"moved": moved, "left_alone": notes, "dupes": dupes,
             "chapters": chapters_moved, "path": p}
