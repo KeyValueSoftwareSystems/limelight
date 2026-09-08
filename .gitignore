@@ -38,5 +38,16 @@ synth/out/
 # songs you bring in: audio stays out of git, the map goes in
 synth/incoming/
 
+# MVR working area: downloaded fixture profiles (may be licence-restricted) and
+# generated rigs stay out of git; the generator and sender are committed
+readers/lights/mvr/gdtf/
+readers/lights/mvr/out/
+
+# native sim: vendored build deps (raylib, json.hpp), generated cache, binary
+readers/lights/sim/vendor/
+readers/lights/sim/cache/
+readers/lights/sim/sim
+readers/lights/sim/*.o
+
 # the answer key. Never committed — this is the whole point of holding it out.
 synth/truth/
