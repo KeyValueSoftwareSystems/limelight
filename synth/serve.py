@@ -883,6 +883,16 @@ class H(http.server.BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))
+        # Nothing here was ever sent with a cache header, so a browser was free
+        # to keep the leaderboard JSON and the pages that read it. That is the
+        # worst possible thing to cache in this repo: the board is where people
+        # look to see whether a change helped, and it was showing them an old
+        # answer with no way to tell. Every response here is computed fresh from
+        # files on disk and costs nothing to recompute, so none of it should ever
+        # be held. Media keeps its own path and its byte ranges.
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
         self.end_headers(); self.wfile.write(body)
 
     def do_GET(self):
