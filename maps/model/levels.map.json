@@ -27041,6 +27041,12 @@
    "why_not": "the only witness asking for it is the check itself. Measured against spectral-flux peaks in the MIX at 1 ms resolution -- a detector that shares nothing with the check's one-pole band envelope -- our claims already sit within a couple of milliseconds of the event: snare -2.0, kick -2.0, hat -1.0, guitar -3.0, other +1.0, bass -5.0, vocals +0.5, piano +5.0. Moving them 10 ms earlier would take them AWAY from the onsets to sit on the peak of a particular filter, which is a fact about mapeval and not about the record.",
    "what_would_change_my_mind": "an independent measurement of the physical attack agreeing that the claims are late. That was attempted against the raw waveform and the test was invalid -- these records have no silence before a hit, so the threshold crossing pinned at the search window edge on every song. A cleaner version would restrict to claims preceded by 100 ms below the 10th percentile of the low band.",
    "worth": "about 0.01 of total score, which is not a reason to write a time nobody measured"
+  },
+  "detector_alternatives_tested": {
+   "what": "replacing every accent with librosa onsets detected per stem -- superflux over a 138-band mel, and a median-aggregated spectral flux",
+   "result": "catastrophically worse on all five songs: 0.00-0.03 against 0.19-0.66 for the accents already in the file, with roughly half as many claims",
+   "reading": "not a selection problem, a timing one. The claims in this file sit within 2 ms of spectral-flux peaks measured on the MIX at 1 ms resolution; a detector whose frame times are the centre of a 1024-point window does not, and no single latency constant made it competitive. Recorded so the next person does not spend the afternoon on it.",
+   "still_open": "the accents check reads 0.19-0.66 because it asks whether each claim is the local maximum of a one-pole band envelope sampled every 5 ms. Our claims are on the onsets. Closing that gap means a better argument about what an accent IS, not a better detector."
   }
  },
  "observations": {
