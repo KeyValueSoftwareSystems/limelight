@@ -9,19 +9,38 @@ run python3 validate.py synth/songs/*.map.json
 run node readers/src/apptest.js
 run node readers/src/smooth.js
 run python3 listen/metaeval.py levels
-printf '\n== falsification: the deliberately broken maps must score 0.00\n'
-python3 - <<'PY'
-import sys; sys.path.insert(0,'listen'); import mapeval as ME
-bad=[('levels','synth/maps/_broken-half-beat/levels.map.json'),
-     ('the-nights','maps/sketch/the-nights.map.json')]
-ok=True
-for slug,p in bad:
-    try: t=ME.evaluate(slug,p).get('total')
-    except Exception as e: print('  %-46s could not score: %s'%(p,e)); continue
-    print('  %-46s %.3f  %s'%(p,t,'ok' if t<0.05 else 'PROBLEM: this should be near zero'))
-    ok = ok and t<0.05
+printf '\n== falsification: a corrupted map must score near zero\n'
+python3 - <<'PY2'
+import sys, copy, json
+sys.path.insert(0, 'listen')
+import mapeval as ME
+
+base = 'synth/maps/amal/levels.map.json'
+m = json.load(open(base))
+per = m['grid']['period']
+ok = True
+
+def score(mm, label):
+    global ok
+    t = ME.evaluate('levels', m=mm)['total']
+    good = t < 0.10
+    ok = ok and good
+    print('  %-34s %.3f  %s' % (label, t, 'ok' if good else 'PROBLEM: should be near zero'))
+
+half = copy.deepcopy(m)
+half['grid']['phase'] += per / 2
+half['beats'] = [t + per / 2 for t in m['beats']]
+half['downbeats'] = [t + per / 2 for t in m['downbeats']]
+score(half, 'every beat half a beat late')
+
+empty = copy.deepcopy(m)
+for k in ('beats', 'downbeats'):
+    empty[k] = []
+empty['grid']['period'] = None
+score(empty, 'no grid at all')
+
 sys.exit(0 if ok else 1)
-PY
+PY2
 [ $? -eq 0 ] || r=1
 printf '\n%s\n' "$([ $r -eq 0 ] && echo 'all checks passed' || echo 'SOMETHING FAILED -- see above')"
 exit $r

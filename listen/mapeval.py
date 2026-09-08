@@ -790,7 +790,17 @@ def evaluate(slug, map_path=None, m=None):
     # still totalled 0.48 because sections and energy use windows wide enough not
     # to notice. A map that cannot find the beat has not described the song.
     g = out["grid"]["score"]
-    gate = 1.0 if g is None else min(1.0, max(0.0, g / 0.45))
+    # An unscorable grid is not automatically a free pass, and it was: `gate =
+    # 1.0 if g is None` meant a map with no beats, no downbeats and no period
+    # scored 0.68, while a map that tried and got the phase wrong was gated to
+    # zero. Not trying beat trying. The na flag already separates the two cases
+    # -- "this recording cannot answer" from "the map is silent" -- so use it:
+    # a silent grid gates to nothing, and a recording with no kick contrast to
+    # measure against does not punish the map for its own nature.
+    if g is None:
+        gate = 1.0 if out["grid"]["na"] else 0.0
+    else:
+        gate = min(1.0, max(0.0, g / 0.45))
     total = accuracy * (0.55 + 0.45 * coverage) * gate
     audit = {}
     for name, fn in AUDIT.items():

@@ -118,7 +118,10 @@ def main():
     # audio it will actually be used against. Fall back to the measured map: the
     # point here is whether a check MOVES when its field is broken, and that does
     # not need the base to be true.
+    sys.path.insert(0, HERE)
+    from mapio import map_path as _mp
     for cand in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
+                 _mp(slug) or "",
                  os.path.join(ROOT, "maps", "model", slug + ".map.json")):
         if os.path.exists(cand):
             base = json.load(open(cand))
