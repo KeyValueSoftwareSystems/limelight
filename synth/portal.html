@@ -4,6 +4,10 @@
 :root{--bg:#0e1016;--surface:#171a23;--raise:#1e222d;--ink:#e6e9f1;--muted:#959bac;
  --faint:#666c7e;--rule:#252935;--rule2:#373c4d;--tung:#f0a93c;--learn:#8f9aff;
  --good:#69be86;--bad:#e88055}
+#navbar{display:flex;gap:20px;padding:10px 0 20px;border-bottom:1px solid var(--rule);margin-bottom:34px;
+ font:13px ui-monospace,monospace}
+#navbar a{color:var(--muted);text-decoration:none}
+#navbar a:hover{color:var(--tung)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);padding:34px 20px 60px;
  font:15px/1.6 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
@@ -61,6 +65,13 @@ code{font-family:ui-monospace,monospace;font-size:12.5px;background:var(--raise)
  border:1px solid var(--rule);border-radius:3px;padding:2px 6px;color:var(--ink)}
 .rule{color:var(--faint);font-size:13px;margin:26px 0 0;max-width:78ch}
 </style></head><body><div class="wrap">
+<nav id="navbar">
+  <a href="/">Portal</a>
+  <a href="/listen">Listener</a>
+  <a href="/rooms">Rooms</a>
+  <a href="/frames">Frames</a>
+  <a href="/dmx">Hardware</a>
+</nav>
 <h1>Lime<span>light</span></h1>
 <p class="lede">A file that says what a song does. Everything here reads that file. Pick your part —
 it is already running, and already missing you.</p>
