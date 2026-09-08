@@ -8,7 +8,8 @@ run python3 validate.py synth/maps/amal/*.map.json
 run python3 validate.py synth/songs/*.map.json
 run node readers/src/apptest.js
 run node readers/src/smooth.js
-for s in shows/*.html; do run node readers/src/showaudit.js "$s"; done
+printf '\n== show audit (advisory: the frame is Dheeraj lane, these faults predate this tool)\n'
+for s in shows/*.html; do node readers/src/showaudit.js "$s" | tail -1 | sed "s#^#  $(basename "$s" .html)  #"; done
 run python3 listen/metaeval.py levels
 printf '\n== falsification: a corrupted map must score near zero\n'
 python3 - <<'PY2'

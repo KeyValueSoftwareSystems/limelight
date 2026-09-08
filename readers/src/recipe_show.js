@@ -1,3 +1,13 @@
+/* An experiment, not the shipped recipe. It passes every absence-of-fault check
+   in showaudit.js and FAILS the variety ones: mean |correlation| between
+   fixtures 0.836 against recipe4's 0.378, and 10% distinct rig states against
+   59%. Half the rig moves as one block. It is brighter than recipe4, which is
+   why the fault checks liked it, and brightness is not interest.
+
+   Build it with LIMELIGHT_RECIPE=recipe_show.js. What is worth keeping from it
+   is the field wiring -- anticipation, surprise, lead, arc, tonality, harmony,
+   bass_notes, stereo -- and what is worth throwing away is the single global
+   base level that every family is multiplied by. */
 var __SHOW = (function () {
 const M = typeof MAP_FULL !== "undefined" && MAP_FULL ? MAP_FULL : MAP;
 const OB = M.observations || {};

@@ -245,6 +245,45 @@ for (const room of Object.keys(out.LAYOUTS)) {
         lowLaser++;
     }
   }
+  let meanCorr = 0, lockstep = 0, states = 0, repSpread = 1;
+  {
+    const S = 10, NS = Math.floor(DUR * S), V = [];
+    for (let i = 0; i < NS; i++) V.push(vec(out.frame(i / S)));
+    const nf = V[0].length, cols = [];
+    for (let j = 0; j < nf; j++) cols.push(V.map((r) => r[j]));
+    const cor = (a, b) => {
+      const n = a.length;
+      const ma = a.reduce((x, y) => x + y, 0) / n, mb = b.reduce((x, y) => x + y, 0) / n;
+      let sab = 0, saa = 0, sbb = 0;
+      for (let i = 0; i < n; i++) { const p = a[i] - ma, q = b[i] - mb; sab += p * q; saa += p * p; sbb += q * q }
+      return saa < 1e-9 || sbb < 1e-9 ? 0 : sab / Math.sqrt(saa * sbb);
+    };
+    let sum = 0, cnt = 0, high = 0;
+    for (let a = 0; a < nf; a++) for (let b = a + 1; b < nf; b++) {
+      const c = Math.abs(cor(cols[a], cols[b])); sum += c; cnt++; if (c > 0.9) high++;
+    }
+    meanCorr = cnt ? sum / cnt : 0;
+    lockstep = cnt ? high / cnt : 0;
+    states = new Set(V.map((r) => r.map((v) => Math.round(v * 4)).join(","))).size / NS;
+    const SECT = ((M.sections || {}).entries) || [];
+    const byId = {};
+    for (const sc of SECT) (byId[sc.id] = byId[sc.id] || []).push(sc);
+    const spreads = [];
+    for (const id in byId) {
+      const list = byId[id];
+      if (list.length < 2) continue;
+      const means = list.map((sc) => {
+        const a = Math.floor(sc.at * S), b = Math.min(NS, a + Math.floor(8 * BAR * S));
+        let t = 0, n = 0;
+        for (let i = a; i < b; i++) { t += V[i].reduce((x, y) => x + y, 0) / nf; n++ }
+        return n ? t / n : 0;
+      });
+      const mx = Math.max.apply(null, means), mn = Math.min.apply(null, means);
+      if (mx > 1e-6) spreads.push((mx - mn) / mx);
+    }
+    repSpread = spreads.length ? spreads.reduce((x, y) => x + y, 0) / spreads.length : 0;
+  }
+
   let nondet = 0, nondetWorst = 0;
   {
     const probes = [];
@@ -416,6 +455,24 @@ for (const room of Object.keys(out.LAYOUTS)) {
       "% of frames near black, " +
       (100 * blown).toFixed(1) +
       "% near full",
+  );
+  judge(
+    "the rig is not one big dimmer",
+    meanCorr <= 0.45 && lockstep <= 0.12,
+    "mean |correlation| between fixtures " + meanCorr.toFixed(3) +
+      ", " + (100 * lockstep).toFixed(0) + "% of pairs move together above 0.9",
+  );
+  judge(
+    "the rig has more than a few states",
+    states >= 0.35,
+    (100 * states).toFixed(0) + "% of sampled instants are a distinct rig state",
+  );
+  judge(
+    "a repeat is not a copy",
+    repSpread >= 0.15,
+    "the same named section differs by " + (100 * repSpread).toFixed(0) +
+      "% between its appearances",
+    true,
   );
   judge(
     "every fixture family used",
