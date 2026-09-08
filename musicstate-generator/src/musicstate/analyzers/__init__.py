@@ -6,6 +6,7 @@ from .chords import ChordsAnalyzer
 from .dsp import DspAnalyzer
 from .embedding import EmbeddingAnalyzer
 from .melody import MelodyAnalyzer
+from .moment_derive import MomentDeriveAnalyzer
 from .notes import NoteTranscriptionAnalyzer
 from .semantic import SemanticAnalyzer
 from .stems import StemsAnalyzer
@@ -16,6 +17,7 @@ __all__ = [
     "AnalyzerResult",
     "DspAnalyzer",
     "StructureAnalyzer",
+    "MomentDeriveAnalyzer",
     "AccentsAnalyzer",
     "ChordsAnalyzer",
     "MelodyAnalyzer",

@@ -13,6 +13,10 @@ SAMPLE_RATE = 22050
 HOP_LENGTH = 512
 N_FFT = 2048
 
+# --- moment derivation (allin1 label vocabulary, grouped by what a show does) ---
+DROP_LABELS = {"chorus", "drop", "hook", "refrain", "inst", "instrumental", "solo"}
+QUIET_LABELS = {"break", "breakdown", "bridge", "intro", "outro", "quiet", "start", "end", "ambient"}
+
 # --- models ---
 MERT_MODEL = "m-a-p/MERT-v1-95M"
 DEMUCS_MODEL = "htdemucs"
