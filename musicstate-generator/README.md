@@ -18,8 +18,15 @@ pip install -e .                 # exposes the `musicstate` command
 
 musicstate build song.mp3 -o song.map.json     # full stack
 musicstate build song.mp3 --core               # librosa only, no heavy models (~15s)
+musicstate build song.mp3 --versioned          # -> maps/generator-pipeline/song/vN.map.json
 musicstate build song.mp3 -v                    # verbose per-analyzer logs
 ```
+
+`--versioned` writes into `maps/generator-pipeline/<name>/`, auto-incrementing the
+version (`v1`, `v2`, …) so each build keeps the last — the highest `vN` in the folder
+is the newest. This is the one place the pipeline writes outside itself, and only when
+asked; the default (`-o PATH`, else `./<name>.map.json`) is unchanged, and an explicit
+`-o` always wins. The root is overridable via `LIMELIGHT_GENERATOR_MAPS`.
 
 The `notes` layer uses **basic-pitch** via its ONNX backend (`pip install
 'basic-pitch[onnx]' onnxruntime`, in the `deep` extra). basic-pitch pulls in
