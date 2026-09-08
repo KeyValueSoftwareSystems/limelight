@@ -151,3 +151,10 @@ def test_groove_from_accents():
     assert obs["groove"] is not None
     assert obs["groove"]["hits"] == 24
     assert "by_sixteenth" in obs["groove"]
+
+
+def test_bar_phase_decision_lifted_when_present():
+    from musicstate.port import to_map
+    obs = to_map({**STATE, "bar_phase_decision": {"to_phase": 2}})["observations"]
+    assert obs["bar_phase_decision"]["to_phase"] == 2
+    assert _m()["observations"]["bar_phase_decision"] is None   # null when unmeasured

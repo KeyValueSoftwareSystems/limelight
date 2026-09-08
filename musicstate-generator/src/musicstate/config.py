@@ -13,6 +13,10 @@ SAMPLE_RATE = 22050
 HOP_LENGTH = 512
 N_FFT = 2048
 
+# --- bar-line phase (kick band) ---
+BAR_PHASE_FMAX = 150.0      # Hz; the kick lives below this
+BAR_PHASE_MARGIN = 0.15     # ratio-units the kick phase must beat allin1's phase by to override
+
 # --- moment derivation (allin1 label vocabulary, grouped by what a show does) ---
 DROP_LABELS = {"chorus", "drop", "hook", "refrain", "inst", "instrumental", "solo"}
 QUIET_LABELS = {"break", "breakdown", "bridge", "intro", "outro", "quiet", "start", "end", "ambient"}

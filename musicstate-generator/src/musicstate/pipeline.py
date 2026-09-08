@@ -17,6 +17,7 @@ from .analyzers import (
     AccentsAnalyzer,
     Allin1Analyzer,
     Analyzer,
+    BarPhaseAnalyzer,
     ChordsAnalyzer,
     DspAnalyzer,
     EmbeddingAnalyzer,
@@ -34,7 +35,7 @@ log = logging.getLogger("musicstate.pipeline")
 
 def core_analyzers() -> list[Analyzer]:
     """The reliable core — librosa only, no model downloads, runs anywhere."""
-    return [DspAnalyzer(), StructureAnalyzer(), MomentDeriveAnalyzer(),
+    return [DspAnalyzer(), StructureAnalyzer(), BarPhaseAnalyzer(), MomentDeriveAnalyzer(),
             AccentsAnalyzer(), ChordsAnalyzer()]
 
 
