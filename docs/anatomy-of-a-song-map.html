@@ -441,7 +441,6 @@
     }
   }
 </style>
-
 <style>
 /* ---------- paper ---------- */
 @page { size: A4; margin: 14mm 13mm 16mm; }
@@ -1098,6 +1097,31 @@ html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       only evidence that the other four are not overfitted.
     </p>
   </section>
+  <section>
+    <div class="eyebrow"><span class="n">06b</span> the gap</div>
+    <h2>What a show needs that no check rewards</h2>
+    <p>Every field above is <strong>retrospective</strong> — it says what is true at a time, never what is coming. A reader asked for a frame at 18.0 s cannot know a drop is 1.9 s away without walking the moment list itself, so every reader reinvents anticipation and none of them agree. These six are not scored by anything.</p>
+    <div class="scroll"><table>
+      <thead><tr><th style="width:20%">Field</th><th style="width:26%">Levels says</th><th>Why it has to be in the file</th></tr></thead>
+      <tbody>
+        <tr><td class="k">anticipation</td><td class="v">0.5–2.5 bars of warning</td><td class="m">Per bar: how many bars to the next event and what kind, how far through a build we are. A ramp has to start <em>before</em> the thing it is ramping into.</td></tr>
+        <tr><td class="k">surprise</td><td class="v">peak at 137.1 s</td><td class="m">How far this bar departs from what the four before it predicted. A bar identical to its neighbours needs nothing however loud it is; a bar that breaks the pattern is the whole point. Not the same as novelty — novelty finds boundaries, this asks whether the bar was <em>predictable</em>, and they part company by the third repeat of a section.</td></tr>
+        <tr><td class="k">lead</td><td class="v">drums 38 bars, other 35, vocals 29</td><td class="m">Which stem is <em>carrying</em> the bar. The file said how loud each one is and never which to point at.</td></tr>
+        <tr><td class="k">arc</td><td class="v">peaks 18% in</td><td class="m">Where the record peaks, as a fraction of its length. Starlight and Don't Look Down peak at 90%. A show that spends everything on the first drop has nowhere left to go.</td></tr>
+        <tr><td class="k">meter</td><td class="v">4 beats / bar</td><td class="m"><code>beats_per_bar=4</code> was a <em>default argument</em> nothing had ever tested, and every downbeat and chapter in the repo rests on it. Now measured, from the lag at which the drum pattern repeats.</td></tr>
+        <tr><td class="k">tempo_stability</td><td class="v">−14.1 ms over 237 s</td><td class="m">The grid is one period and one phase, exact for a DAW and wrong for anything played by people. The kicks drift 0.008 BPM across the whole record, so the rigid grid is justified — and now there is a number instead of an assumption.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout">
+      <div class="h">Three wrong turns inside one field, kept in the file</div>
+      <p><code>stems.sources</code> is <em>normalised per stem</em>, so ranking those six series against each other is meaningless — each is scaled to 1.0 at its own loudest bar, and Starlight read as piano-led for 43 bars from a stem 20 dB down. Rescaling by each stem's true level fixed it. Then a median-based presence test cut the vocal hook out of Levels, because a chopped sample is silent most of the record and <strong>intermittent is not absent</strong>.</p>
+    </div>
+    <div class="callout">
+      <div class="h">And one thing left alone, because it is somebody else's door</div>
+      <p><code>spotlight</code> is one of the six legal moment kinds — a <strong>lighting word inside the tier whose entire purpose is to contain none</strong>. The validator errors on "beam" or "lamp" in a data position and hardcodes "spotlight" as legal. A drone reader cannot spotlight. The musical fact is that one voice is exposed; <em>spotlight</em> names the response to it.</p>
+    </div>
+  </section>
+
 
   <section>
     <div class="eyebrow"><span class="n">07</span> today</div>
