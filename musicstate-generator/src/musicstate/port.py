@@ -8,71 +8,66 @@ from __future__ import annotations
 
 import os
 
+from .segments import merge_sections
+
 _KINDS = {"build", "drop", "stop", "quiet", "spotlight", "return"}
 
-# allin1's section vocabulary, sorted by what a lighting show does with it
-_DROP_LABELS = {"chorus", "drop", "hook", "refrain", "inst", "instrumental", "solo"}
-_QUIET_LABELS = {"break", "breakdown", "bridge", "intro", "outro", "quiet", "start", "end", "ambient"}
+
+def _to_pos(t, phase, period):
+    return round((t - phase) / period, 4)
 
 
-def _mean_energy(energy, t0, t1):
-    vals = [v for (tt, v) in energy if t0 <= tt < t1]
-    if vals:
-        return sum(vals) / len(vals)
-    # fall back to the last sample at or before the midpoint
-    mid, last = (t0 + t1) / 2.0, (energy[0][1] if energy else 0.5)
-    for tt, vv in energy:
-        if tt <= mid:
-            last = vv
-        else:
-            break
-    return last
+def _annotate_positions(m, phase, period):
+    """pos = beats from the grid origin, on every timed entry. Pure (port only)."""
+    if not period:
+        return
+    p = lambda t: _to_pos(t, phase, period)  # noqa: E731
+    for c in m.get("chapters") or []:
+        c["pos"] = p(c["at"])
+    for x in m.get("moments") or []:
+        x["pos"] = p(x["at"])
+    for s in m.get("spans") or []:
+        if "from" in s:
+            s["pos_from"] = p(s["from"])
+        if "to" in s:
+            s["pos_to"] = p(s["to"])
+    for e in (m.get("sections") or {}).get("entries") or []:
+        e["pos"] = p(e["at"])
+        if "to" in e:
+            e["pos_to"] = p(e["to"])
+    for e in (m.get("accents") or {}).get("events") or []:
+        if "at" in e:
+            e["pos"] = p(e["at"])
+    ch = (m.get("observations") or {}).get("chords") or {}
+    for e in ch.get("events") or []:
+        if "at" in e:
+            e["pos"] = p(e["at"])
 
 
-def _snap_down(t, downbeats):
-    return min(downbeats, key=lambda d: abs(d - t)) if downbeats else t
-
-
-def _derive_moments(merged, energy, downbeats, period, length):
-    """drop/build/quiet moments from chapter energy + labels.
-
-    The section-delta heuristic in the structure analyzer misses tracks whose
-    energy does not step hard at a boundary (The Nights produced zero). Reading the
-    chapter labels allin1 already gives us, plus the energy of each chapter, puts a
-    drop on every chorus and a quiet on every break — which is what makes a show
-    escalate instead of sitting flat.
-    """
-    # needs a real, whole-song energy curve to read chapter dynamics from; a handful
-    # of samples cannot say which section is loud, so derive nothing and leave the
-    # explicit analyzer events to stand on their own.
-    if not merged or len(energy) < 8:
-        return []
-    for m in merged:
-        m["_e"] = _mean_energy(energy, m["at"], m["to"])
-    es = sorted(m["_e"] for m in merged)
-    lo, hi = es[len(es) // 4], es[max(0, 3 * len(es) // 4)]
-    span = max(1e-3, hi - lo)
-    bar = (period or 0.5) * 4
-    out = []
-    for i, m in enumerate(merged):
-        name = (m["name"] or "").lower()
-        e = m["_e"]
-        rise = e - (merged[i - 1]["_e"] if i > 0 else e)
-        is_drop = (name in _DROP_LABELS and e >= lo + 0.35 * span) or e >= lo + 0.65 * span
-        is_quiet = (name in _QUIET_LABELS and e <= lo + 0.4 * span) or e <= lo + 0.15 * span
-        if is_drop:
-            at = _snap_down(m["at"], downbeats)
-            out.append({"at": at, "kind": "drop",
-                        "confidence": round(min(1.0, 0.5 + max(0.0, rise) * 2), 3),
-                        "size": round(min(1.0, 0.6 + (e - lo) / span * 0.4), 3)})
-            b_at = _snap_down(max(0.0, at - 4 * bar), downbeats)
-            if b_at < at - bar:
-                out.append({"at": b_at, "kind": "build", "confidence": 0.5})
-        elif is_quiet and i > 0:
-            at = _snap_down(m["at"], downbeats)
-            out.append({"at": at, "kind": "quiet",
-                        "confidence": round(min(1.0, 0.5 + (lo - e) + 0.2), 3)})
-    return out
+def _groove(accent_events):
+    """Swing summary from per-hit deviation off the nearest sixteenth (listen/beatpos)."""
+    devs, byslot = [], {0: [], 1: [], 2: [], 3: []}
+    for e in accent_events or []:
+        if "pos" not in e:
+            continue
+        d = e["pos"] - round(e["pos"] * 4) / 4
+        e["off16"] = round(d, 4)
+        devs.append(d)
+        byslot[int(round(e["pos"] * 4)) % 4].append(d)
+    if len(devs) < 20:
+        return None
+    s = sorted(devs)
+    med = s[len(s) // 2]
+    spread = s[int(len(s) * 0.84)] - s[int(len(s) * 0.16)]
+    return {
+        "how": "deviation of each drum hit from the nearest sixteenth, in beats, kept per hit "
+               "as off16; a quantised record reads near zero, swing shows as a consistent bias "
+               "on the off-slots",
+        "median_beats": round(med, 4), "spread_beats": round(spread, 4),
+        "by_sixteenth": {str(k): (round(sum(v) / len(v), 4) if v else None)
+                         for k, v in byslot.items()},
+        "hits": len(devs),
+    }
 
 
 def to_map(state: dict, vec_filename: str | None = None,
@@ -98,13 +93,7 @@ def to_map(state: dict, vec_filename: str | None = None,
 
     # ---- chapters + sections: merge consecutive same-label runs ----
     secs = state.get("sections") or []
-    merged: list[dict] = []
-    for sec in secs:
-        name = sec.get("label")
-        if merged and merged[-1]["name"] == name:
-            merged[-1]["to"] = sec["t1"]
-        else:
-            merged.append({"at": sec["t0"], "to": sec["t1"], "name": name})
+    merged = merge_sections(secs)
 
     chapters = [{"at": round(m["at"], 2), "name": m["name"]} for m in merged]
 
@@ -121,7 +110,8 @@ def to_map(state: dict, vec_filename: str | None = None,
                 "entries": entries}
 
     # ---- moments (only the six kinds); a drop's confidence trails its size ----
-    events = state.get("events") or []
+    # MomentTimingAnalyzer publishes an authoritative re-timed list; prefer it.
+    events = state.get("events_retimed") or state.get("events") or []
     moments = []
     dropped = []
     for e in events:
@@ -132,14 +122,13 @@ def to_map(state: dict, vec_filename: str | None = None,
         conf = e.get("conf", 0.0)
         if kind == "drop":
             # a drop carries how sure we are (confidence) and how big it is (size)
-            moments.append({"at": e["t"], "kind": "drop",
-                            "confidence": conf, "size": round(conf + 0.2, 3)})
+            size = e.get("size", round(conf + 0.2, 3))
+            moments.append({"at": e["t"], "kind": "drop", "confidence": conf, "size": size})
         else:
             moments.append({"at": e["t"], "kind": kind, "confidence": conf})
 
-    # add label+energy derived moments, then thin so no two of a kind sit within a bar
+    # thin so no two of a kind sit within a bar (derivation now arrives as events)
     period_for = period or (round(60.0 / bpm, 5) if bpm else 0.5)
-    moments.extend(_derive_moments(merged, state.get("energy") or [], downbeats, period_for, length))
     moments.sort(key=lambda m: m["at"])
     thinned: list[dict] = []
     for mo in moments:
@@ -208,6 +197,8 @@ def to_map(state: dict, vec_filename: str | None = None,
         if sem.get("status") == "ok" else None,
         "frames": frames_obs,
         "key": {"estimate": keyest, "how": "musicstate", "confidence": cbf.get("key")},
+        "bar_phase_decision": state.get("bar_phase_decision"),
+        "moment_timing": state.get("moment_timing"),
         # harmony layers: the analyzers write the full block; the port only lifts it
         "chords": state.get("chords"),
         "melody": state.get("melody"),
@@ -243,7 +234,7 @@ def to_map(state: dict, vec_filename: str | None = None,
         ],
     }
 
-    return {
+    out = {
         "map": "0.3",
         "song": {"title": os.path.basename(src.get("path", "")), "artist": "?", "length": length},
         "made_by": made_by,
@@ -263,3 +254,8 @@ def to_map(state: dict, vec_filename: str | None = None,
         "observations": observations,
         "vectors": vectors,
     }
+    _annotate_positions(out, phase, period)
+    groove = _groove((out.get("accents") or {}).get("events") or [])
+    if groove:
+        out["observations"]["groove"] = groove
+    return out

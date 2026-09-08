@@ -79,7 +79,10 @@ class StructureAnalyzer(Analyzer):
             status="ok",
             patch=patch,
             confidence=conf,
-            ctx={"beats": patch["beats"], "downbeats": patch["downbeats"]},
+            ctx={"beats": patch["beats"], "downbeats": patch["downbeats"],
+                 "sections": patch["sections"], "energy": patch["energy"],
+                 "tempo_bpm": patch["meta_partial"]["tempo_bpm"],
+                 "events": patch["events"]},
             notes="; ".join(notes),
         )
 
