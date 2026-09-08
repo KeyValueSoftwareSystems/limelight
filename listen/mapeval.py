@@ -395,13 +395,27 @@ def ev_sections(m, B):
     # requires) was scored as though that chapter had changed nothing.
     inside = [t for t in chs if 2 < t < dur - 2]
     real = sum(change(t) for t in inside) / max(1, len(inside))
-    # against the same number of times chosen off the boundaries
+    # Against chance -- and chance needs more than one throw of the dice. This
+    # drew ONE set of random times with seed 7 and divided by its mean, so the
+    # verdict rode on that single draw. On Don't Look Down the draw came out low
+    # and the check then could not tell the real boundaries from invented ones at
+    # all: rolling every chapter forward 7, 30 or even 61 seconds still scored
+    # 1.00, and twenty random boundary sets scored up to 1.00 as well. The map was
+    # being credited for something the check was not measuring.
+    #
+    # 64 draws instead of one, seeded so the number is reproducible. Our own
+    # boundaries survive it -- against a 200-draw null they beat 100% of random
+    # sets on Levels and Starlight, 98.5% on Don't Look Down -- but two songs go
+    # DOWN, the-nights sections 1.00 -> 0.56 and mizhiyoram 1.00 -> 0.78, because
+    # that is what they were actually worth.
     import random
-    random.seed(7)
-    ctrl = [change(random.uniform(3, dur - 3)) for _ in chs]
-    c = sum(ctrl) / max(1, len(ctrl))
+    rng = random.Random(7)
+    draws = [sum(change(rng.uniform(3, dur - 3)) for _ in inside) / max(1, len(inside))
+             for _ in range(64)]
+    c = sum(draws) / len(draws)
     r = real / max(1e-9, c)
-    return min(1.0, max(0.0, (r - 0.8) / 1.0)), f"{r:.2f}x more change at a boundary than elsewhere"
+    return min(1.0, max(0.0, (r - 0.8) / 1.0)), (
+        f"{r:.2f}x more change at a boundary than at 64 sets of random times")
 
 
 def ev_energy(m, B):
