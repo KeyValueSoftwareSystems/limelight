@@ -118,7 +118,7 @@ def ev_grid(m, B):
     if len(beats) < 8: return None, "no beats"
     dt, low = B["dt"], B["low"]
     allm = sum(low) / len(low)
-    if allm <= 0: return None, "silent recording"
+    if allm <= 0: return None, "silent recording", True
     ratio = (sum(_at(low, dt, t) for t in beats) / len(beats)) / allm
 
     per = (m.get("grid") or {}).get("period") or (
@@ -143,7 +143,7 @@ def ev_grid(m, B):
     # have scored rather than against a ceiling built from its own mistake.
     if ceiling - 1.0 < 0.15:
         return None, (f"this recording has no kick contrast to place a grid against -- "
-                      f"the best possible grid only reaches {ceiling:.2f}x")
+                      f"the best possible grid only reaches {ceiling:.2f}x"), True
     frac = (ratio - 1.0) / (ceiling - 1.0)
 
     # One thing loudness alone cannot see. A half-time grid -- every other beat --
@@ -243,7 +243,7 @@ def ev_downbeats(m, B):
     """
     db = m.get("downbeats") or []
     beats = m.get("beats") or []
-    if len(db) < 4 or len(beats) < 16: return None, "no downbeats", True
+    if len(db) < 4 or len(beats) < 16: return None, "no downbeats", False
     dt, low = B["dt"], B["low"]
     # first: does this record distinguish the beats of a bar at all?
     bp = (m.get("grid") or {}).get("bar_phase", 0)
@@ -258,7 +258,7 @@ def ev_downbeats(m, B):
     dset = set(round(x, 2) for x in db)
     d = [_at(low, dt, t) for t in beats if round(t, 2) in dset]
     o = [_at(low, dt, t) for t in beats if round(t, 2) not in dset]
-    if not d or not o: return None, "downbeats do not line up with beats", True
+    if not d or not o: return None, "downbeats do not line up with beats", False
     r = (sum(d) / len(d)) / max(1e-9, sum(o) / len(o))
     return min(1.0, max(0.0, (r - 1.0) / 0.4)), f"bar lines {r:.2f}x the other beats", False
 
@@ -424,7 +424,7 @@ def ev_accents(m, B):
     which is a far more actionable sentence than a bare 0.68.
     """
     ev = ((m.get("accents") or {}).get("events")) or []
-    if len(ev) < 20: return None, "no accents", True
+    if len(ev) < 20: return None, "no accents", False
     dt = B["dt"]
 
     # A third lesson, from measuring every band separately. The check read the
@@ -520,11 +520,12 @@ def ev_chords(m, B, sig, sr):
         # a different recording would have let you be".
         best.append(max(conc({q, (q + t) % 12, (q + 7) % 12})
                         for q in range(12) for t in (3, 4)))
-    if not scores: return None, "chords could not be checked"
+    if not scores: return None, "chords could not be checked", True
     r = sum(scores) / len(scores)
     ceiling = sum(best) / len(best)
     if ceiling - 1.0 < 0.15:
-        return None, f"this recording does not separate its chroma -- the best-fitting triad only reaches {ceiling:.2f}x"
+        return None, (f"this recording does not separate its chroma -- the best-fitting "
+                      f"triad only reaches {ceiling:.2f}x"), True
     frac = (r - 1.0) / (ceiling - 1.0)
     return min(1.0, max(0.0, frac)), (f"claimed notes carry {r:.2f}x their share of the energy, "
                                       f"against {ceiling:.2f}x for the best-fitting triad on this recording")
@@ -556,7 +557,7 @@ def ev_melody(m, B, sig, sr):
         off = (goertzel(i0, win, f * 1.414) + goertzel(i0, win, f / 1.414)) / 2
         n += 1
         if here > off * 1.15: good += 1
-    if not n: return None, "melody could not be checked"
+    if not n: return None, "melody could not be checked", True
     r = good / n
     return min(1.0, max(0.0, (r - 0.4) / 0.5)), f"{100*r:.0f}% of claimed notes are the loudest pitch there"
 
@@ -576,7 +577,7 @@ def ev_pump(m, B):
         seg = hi[ja:jb]; third = max(1, len(seg) // 3)
         f = sum(seg[:third]) / third; l = sum(seg[-third:]) / third
         if f + l > 0: vals.append((l - f) / (l + f))
-    if not vals: return None, "pump could not be checked"
+    if not vals: return None, "pump could not be checked", True
     measured = sum(vals) / len(vals)
     claimed = p.get("depth", 0.0)
     err = abs(measured - claimed)
@@ -623,7 +624,13 @@ def evaluate(slug, map_path=None, m=None):
         try:
             r = fn(*args)
             score, why = r[0], r[1]
-            na = r[2] if len(r) > 2 else (score is None)
+            # Default FALSE. A check that returns no verdict is assumed to be
+            # reporting the map's silence, which costs coverage; a check that
+            # means "this recording cannot answer the question" has to say so
+            # explicitly by returning a third value. Defaulting the other way
+            # handed the beats-only map 75% coverage for nine fields it does not
+            # claim, which is exactly what coverage exists to prevent.
+            na = r[2] if len(r) > 2 else False
         except Exception as e:
             score, why, na = None, f"threw: {e}", False
         out[name] = {"score": None if score is None else round(score, 4),
@@ -633,8 +640,24 @@ def evaluate(slug, map_path=None, m=None):
     # Coverage, because a map that claims nothing was scoring above one that claims
     # everything: five fields at 0.72 beat eight fields at 0.65, so the richer and
     # more useful map came second. Silence should not be a way to win.
+    # Coverage asks what the map CLAIMS, not what this harness can grade.
+    #
+    # The na flag has been computed and displayed since the ceiling work and was
+    # never wired to anything. It marks the difference between "the map is silent
+    # here" and "this recording cannot answer this question" -- and only the first
+    # is the map's doing. Levels claims 127 downbeats; the check cannot grade them
+    # because a four-on-the-floor record has no bar-line accent, and five
+    # complementary features agree there is nothing there to measure: low band
+    # 0.97x, high band 0.89x, harmonic change 0.87x, hits per beat 1.09x, spectral
+    # balance 0.95x. Charging the map 10% of its total for that is charging it for
+    # the genre of the song.
+    #
+    # A field the map does not claim still costs, which is the whole point of
+    # coverage -- silence must not be a way to win. The beats-only map claims one
+    # field of ten and still reads 20%.
+    applicable = sum(WEIGHTS[k] for k, v in out.items() if not v["na"])
     coverage = (sum(WEIGHTS[k] for k, v in out.items() if v["score"] is not None)
-                / sum(WEIGHTS.values()))
+                / max(1e-9, applicable))
     # The grid is a GATE, not one weight among eight. Every other field's
     # timestamps are expressed in the grid's frame, so a wrong grid makes the rest
     # wrong however well it scores -- the half-beat-late map read 0.08 on grid and
