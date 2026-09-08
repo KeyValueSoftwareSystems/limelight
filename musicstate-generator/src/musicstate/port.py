@@ -110,7 +110,8 @@ def to_map(state: dict, vec_filename: str | None = None,
                 "entries": entries}
 
     # ---- moments (only the six kinds); a drop's confidence trails its size ----
-    events = state.get("events") or []
+    # MomentTimingAnalyzer publishes an authoritative re-timed list; prefer it.
+    events = state.get("events_retimed") or state.get("events") or []
     moments = []
     dropped = []
     for e in events:
@@ -197,6 +198,7 @@ def to_map(state: dict, vec_filename: str | None = None,
         "frames": frames_obs,
         "key": {"estimate": keyest, "how": "musicstate", "confidence": cbf.get("key")},
         "bar_phase_decision": state.get("bar_phase_decision"),
+        "moment_timing": state.get("moment_timing"),
         # harmony layers: the analyzers write the full block; the port only lifts it
         "chords": state.get("chords"),
         "melody": state.get("melody"),

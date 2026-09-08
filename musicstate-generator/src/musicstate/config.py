@@ -21,6 +21,12 @@ BAR_PHASE_MARGIN = 0.15     # ratio-units the kick phase must beat allin1's phas
 DROP_LABELS = {"chorus", "drop", "hook", "refrain", "inst", "instrumental", "solo"}
 QUIET_LABELS = {"break", "breakdown", "bridge", "intro", "outro", "quiet", "start", "end", "ambient"}
 
+# --- moment re-timing (drops/stops -> the loudness step) ---
+MOMENT_SEARCH_BEATS = 8            # two bars either side of the candidate
+MOMENT_SHOULDERS_S = (0.5, 1.0, 1.5, 2.0)
+MOMENT_HALF_BAR_OVERRIDE = 1.20    # an off-metre beat must beat the best on-metre step by this
+MOMENT_STEP_HOP_S = 0.005          # RMS envelope hop
+
 # --- models ---
 MERT_MODEL = "m-a-p/MERT-v1-95M"
 DEMUCS_MODEL = "htdemucs"

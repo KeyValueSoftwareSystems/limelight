@@ -158,3 +158,14 @@ def test_bar_phase_decision_lifted_when_present():
     obs = to_map({**STATE, "bar_phase_decision": {"to_phase": 2}})["observations"]
     assert obs["bar_phase_decision"]["to_phase"] == 2
     assert _m()["observations"]["bar_phase_decision"] is None   # null when unmeasured
+
+
+def test_events_retimed_preferred_over_events():
+    from musicstate.port import to_map
+    st = {**STATE,
+          "events": [{"t": 10.0, "type": "drop", "conf": 0.7}],
+          "events_retimed": [{"t": 11.5, "type": "drop", "conf": 0.7}]}
+    m = to_map(st)
+    drop = next(x for x in m["moments"] if x["kind"] == "drop")
+    assert drop["at"] == 11.5      # the re-timed position wins; no snap to a downbeat
+    assert to_map(st)["observations"]["moment_timing"] is None  # null unless the analyzer wrote it
