@@ -77,7 +77,7 @@ reach them, then their own plan.
 
 | # | Slice | listen source | Pipeline home | Effort |
 |---|---|---|---|---|
-| 1 | **Placement** — bar-line phase → drop/stop re-timing → `pos`/groove | `barphase.py`, `moments.py`, `beatpos.py` | 2 new L2 analyzers + pure `pos` step in `port.py` | M |
+| 1 | **Placement** — moment derivation → bar-line phase → drop/stop re-timing → `pos`/groove | `barphase.py`, `moments.py`, `beatpos.py` | 3 new L2 analyzers + pure `pos` step in `port.py` | M |
 | 2 | **Pump / sidechain** | `pump.py` | 1 new analyzer → `observations.pump` | M |
 | 3 | **Stereo** width/pan | `stereo.py` | 1 new analyzer (decodes the stereo source) → `observations.stereo` | M |
 
@@ -125,15 +125,24 @@ nearest downbeat, on a bar-line phase measured from the kick rather than assumed
 - *Moments are left untouched here* — they are re-timed independently in the next
   analyzer, so a phase shift never drags a measured drop off its step.
 - *Degrade:* no usable low-band evidence → keep the incoming phase, low confidence,
-  `status="not_computed"`. **When allin1 supplied downbeats**, treat them as a strong
-  prior: only shift if the low-band evidence beats allin1's phase by a configured
-  margin, and always record the decision. *(Open decision below.)*
+  `status="not_computed"`. **When allin1 supplied downbeats, they are a strong prior:**
+  BarPhase overrides the phase only if the low-band evidence beats allin1's phase by a
+  configured margin, and always records the decision. *(Decided 2026-09-08.)*
+
+**`analyzers/moment_derive.py :: MomentDeriveAnalyzer` (L2, runs after
+`BarPhaseAnalyzer`).** *(Relocated out of `port._derive_moments` — decided 2026-09-08.)*
+- *Input:* the merged `sections`/labels and per-section `energy` from structure/allin1.
+- *Algorithm:* the label/energy heuristics `port._derive_moments` used to run — a
+  chapter that names a drop, and an energy jump past a threshold, become candidate
+  `drop`/`quiet` events. Pure derivation on the section/beat grid; it invents no times
+  of its own.
+- *Output:* candidate `drop`/`stop`/`quiet` events, handed on for re-timing.
+- *Degrade:* no sections/energy → no candidates, `status="not_computed"`.
 
 **`analyzers/moment_timing.py :: MomentTimingAnalyzer` (L2, runs after
-`BarPhaseAnalyzer`).**
-- *Input:* the candidate `drop`/`stop` events (as `structure` + `port._derive_moments`
-  produce them), `beats`, `downbeats`/`bar_phase`, energy, audio; optionally the
-  accents (for the witness).
+`MomentDeriveAnalyzer`).**
+- *Input:* the candidate `drop`/`stop` events (from `MomentDeriveAnalyzer`), `beats`,
+  `downbeats`/`bar_phase`, energy, audio; optionally the accents (for the witness).
 - *Algorithm (from `moments.py`):* for each drop/stop, search ±8 beats around the
   candidate time and pick the beat carrying the biggest **sustained loudness step** —
   the *median* step across four shoulders (0.5/1.0/1.5/2.0 s) so a post-drop silence
@@ -150,16 +159,16 @@ nearest downbeat, on a bar-line phase measured from the kick rather than assumed
 
 ### `port.py` changes
 
-- **Stop snapping moments to downbeats.** `_snap_down` on drop/quiet times is removed
-  for events that `MomentTimingAnalyzer` has re-timed; port consumes the re-timed
-  `events` as-is.
+- **Moment derivation and snapping both leave `port`.** `_derive_moments` and
+  `_snap_down` are removed: `MomentDeriveAnalyzer` produces the candidates and
+  `MomentTimingAnalyzer` re-times them, so `port` only *reshapes* the finished `events`
+  into the six-kind `moments` door. `port` now measures nothing about moments — the
+  purity stretch the old `_derive_moments` represented is gone.
 - **Add the pure `pos` field (Approach B):** every timed map entry gains
   `pos = (t - phase) / period` (beats from grid origin), and bar/beat derive from
   `pos` + `bar_phase`. This is arithmetic on the finished grid — it stays in `port`.
 - **Add `observations.groove`:** per-hit `off16` (sixteenth-swing bias), lifted from
   the same grid math (append-only observation).
-- `_derive_moments` **stays** as the candidate generator (label/energy heuristics);
-  `MomentTimingAnalyzer` re-times its output. *(Open decision below.)*
 
 ### Schema & config
 
@@ -173,13 +182,13 @@ nearest downbeat, on a bar-line phase measured from the kick rather than assumed
 ### Data flow
 
 ```
-audio ─▶ dsp ─▶ structure ─▶ [allin1] ─▶ BarPhase ─▶ accents ─▶ chords ─▶ …
-                                            │ (downbeats/phase, decision)
-                                            ▼
-                                       MomentTiming ─▶ … ─▶ port
-                                            │ (re-timed drop/stop)      (pos, groove;
-                                            ▼                            no snap-down)
-                                     observations.moment_timing
+audio ─▶ dsp ─▶ structure ─▶ [allin1] ─▶ BarPhase ─▶ MomentDerive ─▶ MomentTiming ─▶ … ─▶ port
+                                            │              │               │          (pos, groove;
+                                     downbeats/phase   candidate drops   re-timed      no derive,
+                                     + decision        (label/energy)    drop/stop      no snap)
+                                                                             │
+                                                                             ▼
+                                                                  observations.moment_timing
 ```
 
 ### Testing
@@ -187,9 +196,11 @@ audio ─▶ dsp ─▶ structure ─▶ [allin1] ─▶ BarPhase ─▶ accents
 - **Unit (new):** the sustained-step detector on a synthetic RMS envelope with a
   known step (asserts it finds the step beat and rejects a silence-gap decoy); the
   bar-phase scorer on a synthetic low-band signal with a known kick phase.
-- **`test_port.py`:** assert re-timed moments are **not** snapped to the nearest
-  downbeat; assert `pos` and `observations.groove` are present and correct on a
-  hand-built state; six-kind filtering unchanged.
+- **`test_port.py`:** feed a hand-built state whose `events` are already the final
+  drop/stop times; assert `port` reshapes them into `moments` **without** deriving or
+  snapping (times preserved); assert `pos` and `observations.groove` are present and
+  correct; six-kind filtering unchanged. Add a unit test that `MomentDeriveAnalyzer`
+  turns a labelled-drop chapter and an energy jump into the expected candidates.
 - **`test_pipeline.py`:** the click-track build stays green; both new analyzers
   degrade cleanly on the click track (which has no drops), recorded as
   `not_computed`, schema still valid.
@@ -204,14 +215,16 @@ longer holds *for moment times* — the reference expectation must be **updated 
 corrected placement** (and the diff reviewed as evidence the change is right), not
 treated as a regression. This is expected and is the point of the slice.
 
-### Open decisions (flagged for confirmation at implementation)
+### Decisions (resolved 2026-09-08)
 
-1. **allin1 downbeats vs. BarPhase refine precedence** — treat allin1's phase as a
-   strong prior that BarPhase only overrides past a margin (proposed), or let BarPhase
-   always decide from the low band. Proposed: prior + margin, always record the decision.
-2. **`_derive_moments` location** — keep it in `port` as the candidate generator
-   (proposed, keeps the slice focused), or relocate moment *derivation* into an
-   analyzer too. Proposed: keep; revisit if it forces port to look impure.
+1. **allin1 downbeats vs. BarPhase precedence — allin1 is a strong prior.** When
+   allin1 supplied downbeats, BarPhase overrides the phase only if the low-band kick
+   evidence beats allin1's phase by a configured margin, and always records the
+   decision in `observations.bar_phase_decision`.
+2. **Moment derivation — relocated out of `port`.** A new `MomentDeriveAnalyzer`
+   produces the candidate drops/quiets from labels + energy; `port` no longer derives
+   or snaps moments and reshapes only. This widens Slice 1 by one analyzer and makes
+   `port` fully pure for moments.
 
 ## Slices 2–6 — roadmap (each gets its own design addendum + plan)
 
