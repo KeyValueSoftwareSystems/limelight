@@ -10,6 +10,63 @@ import os
 
 _KINDS = {"build", "drop", "stop", "quiet", "spotlight", "return"}
 
+
+def _to_pos(t, phase, period):
+    return round((t - phase) / period, 4)
+
+
+def _annotate_positions(m, phase, period):
+    """pos = beats from the grid origin, on every timed entry. Pure (port only)."""
+    if not period:
+        return
+    p = lambda t: _to_pos(t, phase, period)  # noqa: E731
+    for c in m.get("chapters") or []:
+        c["pos"] = p(c["at"])
+    for x in m.get("moments") or []:
+        x["pos"] = p(x["at"])
+    for s in m.get("spans") or []:
+        if "from" in s:
+            s["pos_from"] = p(s["from"])
+        if "to" in s:
+            s["pos_to"] = p(s["to"])
+    for e in (m.get("sections") or {}).get("entries") or []:
+        e["pos"] = p(e["at"])
+        if "to" in e:
+            e["pos_to"] = p(e["to"])
+    for e in (m.get("accents") or {}).get("events") or []:
+        if "at" in e:
+            e["pos"] = p(e["at"])
+    ch = (m.get("observations") or {}).get("chords") or {}
+    for e in ch.get("events") or []:
+        if "at" in e:
+            e["pos"] = p(e["at"])
+
+
+def _groove(accent_events):
+    """Swing summary from per-hit deviation off the nearest sixteenth (listen/beatpos)."""
+    devs, byslot = [], {0: [], 1: [], 2: [], 3: []}
+    for e in accent_events or []:
+        if "pos" not in e:
+            continue
+        d = e["pos"] - round(e["pos"] * 4) / 4
+        e["off16"] = round(d, 4)
+        devs.append(d)
+        byslot[int(round(e["pos"] * 4)) % 4].append(d)
+    if len(devs) < 20:
+        return None
+    s = sorted(devs)
+    med = s[len(s) // 2]
+    spread = s[int(len(s) * 0.84)] - s[int(len(s) * 0.16)]
+    return {
+        "how": "deviation of each drum hit from the nearest sixteenth, in beats, kept per hit "
+               "as off16; a quantised record reads near zero, swing shows as a consistent bias "
+               "on the off-slots",
+        "median_beats": round(med, 4), "spread_beats": round(spread, 4),
+        "by_sixteenth": {str(k): (round(sum(v) / len(v), 4) if v else None)
+                         for k, v in byslot.items()},
+        "hits": len(devs),
+    }
+
 # allin1's section vocabulary, sorted by what a lighting show does with it
 _DROP_LABELS = {"chorus", "drop", "hook", "refrain", "inst", "instrumental", "solo"}
 _QUIET_LABELS = {"break", "breakdown", "bridge", "intro", "outro", "quiet", "start", "end", "ambient"}
@@ -243,7 +300,7 @@ def to_map(state: dict, vec_filename: str | None = None,
         ],
     }
 
-    return {
+    out = {
         "map": "0.3",
         "song": {"title": os.path.basename(src.get("path", "")), "artist": "?", "length": length},
         "made_by": made_by,
@@ -263,3 +320,8 @@ def to_map(state: dict, vec_filename: str | None = None,
         "observations": observations,
         "vectors": vectors,
     }
+    _annotate_positions(out, phase, period)
+    groove = _groove((out.get("accents") or {}).get("events") or [])
+    if groove:
+        out["observations"]["groove"] = groove
+    return out
