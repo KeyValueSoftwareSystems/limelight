@@ -65,10 +65,16 @@ runif "$AUDIO" "$AUDIO" listen/attack.py "$SLUG" --write
 say "13 learned vectors  (MERT)"
 runif "$AUDIO" "$AUDIO" listen/vectors.py "$SLUG" --write
 
-say "14 fields derivable from what is already in the file"
+say "14 the two assumptions: how many beats in a bar, and does the tempo hold"
+python3 listen/meter.py "$SLUG" --write
+
+say "15 the forward-looking layer: what is coming, how expected it is, who is leading"
+python3 listen/expect.py "$SLUG" --write
+
+say "16 fields derivable from what is already in the file"
 python3 synth/upgrade_map.py "$MAP" || true
 rm -f "$MAP.bak"
 
-say "15 validate, then score"
+say "17 validate, then score"
 python3 validate.py "$MAP"
 python3 listen/mapeval.py "$SLUG"

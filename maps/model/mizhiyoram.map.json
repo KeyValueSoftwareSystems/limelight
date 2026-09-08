@@ -24668,6 +24668,807 @@
      "sections": 0.20656477294065057
     }
    ]
+  },
+  "meter": {
+   "beats_per_bar": 4,
+   "next_best": 2,
+   "margin_over_next_best": 0.0051,
+   "support_by_candidate": {
+    "2": 0.9118,
+    "3": 0.9031,
+    "4": 0.9169,
+    "5": 0.884,
+    "6": 0.899,
+    "7": 0.8764
+   },
+   "self_similarity_by_lag": {
+    "1": 0.9306,
+    "2": 0.9016,
+    "3": 0.9205,
+    "4": 0.9394,
+    "5": 0.908,
+    "6": 0.8944,
+    "7": 0.8957,
+    "8": 0.9077,
+    "9": 0.8942,
+    "10": 0.8749,
+    "11": 0.8751,
+    "12": 0.9036,
+    "13": 0.8748,
+    "14": 0.857,
+    "15": 0.869,
+    "16": 0.9086
+   },
+   "how": "hits per beat on kick, snare and hat as a 3-vector per beat; mean cosine similarity at every lag out to 16 beats; each candidate judged on itself and its multiples, since a bar of N peaks at N, 2N and 3N",
+   "why_recorded": "beats_per_bar=4 is a default argument in ear.py that nothing has ever checked, and every downbeat, chapter and bar-phase argument in this repo rests on it",
+   "not": "not the notated time signature. It is the period the DRUMS repeat on, which is what a reader needs and what ear.py assumes is four. A song whose drums and score disagree will read here as the drums."
+  },
+  "surprise": {
+   "rate": "per_downbeat",
+   "unit": "0-1, 1 = the biggest departure in this song",
+   "how": "each bar is described by how many hits it has on each instrument, its six stem levels and its energy. That vector is predicted from the mean of the 4 bars before it, and the surprise is the cosine distance between prediction and measurement.",
+   "why_it_exists": "nothing else in this file says how EXPECTED a moment is, and a performance is built on expectation rather than on level. A bar that sounds exactly like the four before it needs nothing from a reader however loud it is; a bar that breaks the pattern is the whole point.",
+   "not": "not novelty. novelty compares a bar to its neighbours in a learned embedding and finds boundaries. This asks whether the bar was PREDICTABLE from what came before, which is a different question and disagrees with novelty at the second and third repeat of a section -- by then it is no longer surprising.",
+   "biggest_departures_s": [
+    110.615,
+    104.902,
+    44.911,
+    102.045,
+    33.484,
+    116.329,
+    99.188,
+    113.472
+   ],
+   "at": [
+    2.06,
+    4.917,
+    7.774,
+    10.63,
+    13.487,
+    16.344,
+    19.2,
+    22.057,
+    24.914,
+    27.771,
+    30.627,
+    33.484,
+    36.341,
+    39.197,
+    42.054,
+    44.911,
+    47.768,
+    50.624,
+    53.481,
+    56.338,
+    59.194,
+    62.051,
+    64.908,
+    67.765,
+    70.621,
+    73.478,
+    76.335,
+    79.191,
+    82.048,
+    84.905,
+    87.762,
+    90.618,
+    93.475,
+    96.332,
+    99.188,
+    102.045,
+    104.902,
+    107.759,
+    110.615,
+    113.472,
+    116.329,
+    119.185,
+    122.042
+   ],
+   "value": [
+    null,
+    null,
+    null,
+    null,
+    0.0788,
+    0.0489,
+    0.0257,
+    0.5136,
+    0.5781,
+    0.6185,
+    0.541,
+    0.655,
+    0.14,
+    0.114,
+    0.142,
+    0.691,
+    0.3828,
+    0.2098,
+    0.1524,
+    0.1261,
+    0.0932,
+    0.4268,
+    0.1886,
+    0.2079,
+    0.3775,
+    0.5793,
+    0.5565,
+    0.4538,
+    0.1664,
+    0.0863,
+    0.1276,
+    0.059,
+    0.1067,
+    0.2399,
+    0.6426,
+    0.6718,
+    0.8508,
+    0.6387,
+    1.0,
+    0.6424,
+    0.6523,
+    0.1094,
+    0.211
+   ]
+  },
+  "anticipation": {
+   "rate": "per_downbeat",
+   "unit": "bars",
+   "how": "for every bar: how many bars to the next moment and what kind it is, how many since the last one, and whether this bar sits inside a declared rise and how far through it",
+   "why_it_exists": "every other field in this file is retrospective -- it says what IS at a time, never what is COMING. A reader asked for a frame at t=18 cannot know a drop is 1.9 s away without walking `moments` itself, so every reader reimplements anticipation and they will not agree. A show is mostly anticipation: the ramp has to start before the event.",
+   "derived_from": "moments and spans already in this file, so it adds no new measurement and cannot disagree with them",
+   "bars_of_warning_before_a_drop": [],
+   "entries": [
+    {
+     "at": 2.06,
+     "to_next": 15.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 4.917,
+     "to_next": 14.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 7.774,
+     "to_next": 13.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 10.63,
+     "to_next": 12.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 13.487,
+     "to_next": 11.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 16.344,
+     "to_next": 10.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 19.2,
+     "to_next": 9.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 22.057,
+     "to_next": 8.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 24.914,
+     "to_next": 7.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 27.771,
+     "to_next": 6.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 30.627,
+     "to_next": 5.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 33.484,
+     "to_next": 4.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 36.341,
+     "to_next": 3.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 39.197,
+     "to_next": 2.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 42.054,
+     "to_next": 1.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 44.911,
+     "to_next": 0.5,
+     "next_kind": "drop",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 47.768,
+     "to_next": 3.5,
+     "next_kind": "drop",
+     "since_prev": 0.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 50.624,
+     "to_next": 2.5,
+     "next_kind": "drop",
+     "since_prev": 1.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 53.481,
+     "to_next": 1.5,
+     "next_kind": "drop",
+     "since_prev": 2.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 56.338,
+     "to_next": 0.5,
+     "next_kind": "drop",
+     "since_prev": 3.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 59.194,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 0.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 62.051,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 1.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 64.908,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 2.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 67.765,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 3.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 70.621,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 4.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 73.478,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 5.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 76.335,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 6.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 79.191,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 7.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 82.048,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 8.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 84.905,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 9.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 87.762,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 10.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 90.618,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 11.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 93.475,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 12.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 96.332,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 13.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 99.188,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 14.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 102.045,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 15.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.0
+     }
+    },
+    {
+     "at": 104.902,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 16.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.25
+     }
+    },
+    {
+     "at": 107.759,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 17.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.5
+     }
+    },
+    {
+     "at": 110.615,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 18.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.75
+     }
+    },
+    {
+     "at": 113.472,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 19.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 116.329,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 20.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 119.185,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 21.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 122.042,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 22.5,
+     "prev_kind": "drop",
+     "inside": null
+    }
+   ]
+  },
+  "lead": {
+   "rate": "per_downbeat",
+   "how": "stems.sources is normalised per stem, so each series is first rescaled by that stem's true level from accents.stem_levels to make the six comparable. Then a bar's leader is the stem furthest above its OWN median, so a quiet instrument stepping forward counts and the drums do not win every bar for being loud.",
+   "why_it_exists": "the file says how loud each stem is per bar but never which one is CARRYING the song. That is what a reader needs to decide where to point, and it is the difference between a show that follows the music and one that only pulses with it.",
+   "the_trap_here": "ranking the normalised series directly is meaningless: every stem is scaled to 1.0 at its own loudest bar, so a guitar 43 dB down ties with the drums. Starlight read as piano-led for 43 bars that way, from a stem 20 dB below the mix. A median-based presence gate then cut the vocal hook out of Levels, because a chopped sample is silent most of the record and intermittent is not absent.",
+   "not": "not the melody and not a solo detector. It is which source is furthest above its own habit, which is usually but not always what a listener is following.",
+   "bars_led_by": {
+    "bass": 20,
+    "other": 10,
+    "vocals": 8,
+    "drums": 5
+   },
+   "excluded_as_not_present_db": {
+    "guitar": -20.2,
+    "piano": -20.0
+   },
+   "entries": [
+    {
+     "at": 2.06,
+     "of": "drums",
+     "above_its_own_normal": 1.211,
+     "margin_over_next": 0.094
+    },
+    {
+     "at": 4.917,
+     "of": "drums",
+     "above_its_own_normal": 1.0,
+     "margin_over_next": 0.0
+    },
+    {
+     "at": 7.774,
+     "of": "other",
+     "above_its_own_normal": 1.565,
+     "margin_over_next": 0.276
+    },
+    {
+     "at": 10.63,
+     "of": "other",
+     "above_its_own_normal": 1.0,
+     "margin_over_next": 0.043
+    },
+    {
+     "at": 13.487,
+     "of": "other",
+     "above_its_own_normal": 1.683,
+     "margin_over_next": 0.814
+    },
+    {
+     "at": 16.344,
+     "of": "other",
+     "above_its_own_normal": 1.041,
+     "margin_over_next": 0.041
+    },
+    {
+     "at": 19.2,
+     "of": "other",
+     "above_its_own_normal": 1.883,
+     "margin_over_next": 0.883
+    },
+    {
+     "at": 22.057,
+     "of": "vocals",
+     "above_its_own_normal": 1.327,
+     "margin_over_next": 0.371
+    },
+    {
+     "at": 24.914,
+     "of": "vocals",
+     "above_its_own_normal": 2.075,
+     "margin_over_next": 1.249
+    },
+    {
+     "at": 27.771,
+     "of": "vocals",
+     "above_its_own_normal": 1.844,
+     "margin_over_next": 0.931
+    },
+    {
+     "at": 30.627,
+     "of": "vocals",
+     "above_its_own_normal": 1.468,
+     "margin_over_next": 0.511
+    },
+    {
+     "at": 33.484,
+     "of": "vocals",
+     "above_its_own_normal": 2.082,
+     "margin_over_next": 1.082
+    },
+    {
+     "at": 36.341,
+     "of": "vocals",
+     "above_its_own_normal": 3.134,
+     "margin_over_next": 2.177
+    },
+    {
+     "at": 39.197,
+     "of": "vocals",
+     "above_its_own_normal": 2.235,
+     "margin_over_next": 1.322
+    },
+    {
+     "at": 42.054,
+     "of": "vocals",
+     "above_its_own_normal": 1.893,
+     "margin_over_next": 1.11
+    },
+    {
+     "at": 44.911,
+     "of": "drums",
+     "above_its_own_normal": 145.421,
+     "margin_over_next": 28.899
+    },
+    {
+     "at": 47.768,
+     "of": "bass",
+     "above_its_own_normal": 426.957,
+     "margin_over_next": 280.035
+    },
+    {
+     "at": 50.624,
+     "of": "bass",
+     "above_its_own_normal": 355.522,
+     "margin_over_next": 102.759
+    },
+    {
+     "at": 53.481,
+     "of": "bass",
+     "above_its_own_normal": 424.304,
+     "margin_over_next": 276.594
+    },
+    {
+     "at": 56.338,
+     "of": "bass",
+     "above_its_own_normal": 365.043,
+     "margin_over_next": 115.359
+    },
+    {
+     "at": 59.194,
+     "of": "bass",
+     "above_its_own_normal": 424.261,
+     "margin_over_next": 275.445
+    },
+    {
+     "at": 62.051,
+     "of": "bass",
+     "above_its_own_normal": 357.217,
+     "margin_over_next": 108.296
+    },
+    {
+     "at": 64.908,
+     "of": "bass",
+     "above_its_own_normal": 419.826,
+     "margin_over_next": 272.826
+    },
+    {
+     "at": 67.765,
+     "of": "bass",
+     "above_its_own_normal": 353.609,
+     "margin_over_next": 149.372
+    },
+    {
+     "at": 70.621,
+     "of": "drums",
+     "above_its_own_normal": 1.132,
+     "margin_over_next": 0.262
+    },
+    {
+     "at": 73.478,
+     "of": "drums",
+     "above_its_own_normal": 149.763,
+     "margin_over_next": 41.328
+    },
+    {
+     "at": 76.335,
+     "of": "bass",
+     "above_its_own_normal": 433.522,
+     "margin_over_next": 279.074
+    },
+    {
+     "at": 79.191,
+     "of": "bass",
+     "above_its_own_normal": 360.87,
+     "margin_over_next": 100.08
+    },
+    {
+     "at": 82.048,
+     "of": "bass",
+     "above_its_own_normal": 428.783,
+     "margin_over_next": 280.019
+    },
+    {
+     "at": 84.905,
+     "of": "bass",
+     "above_its_own_normal": 364.87,
+     "margin_over_next": 103.291
+    },
+    {
+     "at": 87.762,
+     "of": "bass",
+     "above_its_own_normal": 434.783,
+     "margin_over_next": 276.756
+    },
+    {
+     "at": 90.618,
+     "of": "bass",
+     "above_its_own_normal": 358.522,
+     "margin_over_next": 95.364
+    },
+    {
+     "at": 93.475,
+     "of": "bass",
+     "above_its_own_normal": 429.304,
+     "margin_over_next": 280.41
+    },
+    {
+     "at": 96.332,
+     "of": "bass",
+     "above_its_own_normal": 370.261,
+     "margin_over_next": 170.682
+    },
+    {
+     "at": 99.188,
+     "of": "other",
+     "above_its_own_normal": 3.363,
+     "margin_over_next": 2.441
+    },
+    {
+     "at": 102.045,
+     "of": "bass",
+     "above_its_own_normal": 0.913,
+     "margin_over_next": 0.028
+    },
+    {
+     "at": 104.902,
+     "of": "other",
+     "above_its_own_normal": 5.326,
+     "margin_over_next": 2.842
+    },
+    {
+     "at": 107.759,
+     "of": "other",
+     "above_its_own_normal": 9.582,
+     "margin_over_next": 7.407
+    },
+    {
+     "at": 110.615,
+     "of": "other",
+     "above_its_own_normal": 3.843,
+     "margin_over_next": 0.067
+    },
+    {
+     "at": 113.472,
+     "of": "bass",
+     "above_its_own_normal": 286.391,
+     "margin_over_next": 284.516
+    },
+    {
+     "at": 116.329,
+     "of": "bass",
+     "above_its_own_normal": 420.957,
+     "margin_over_next": 419.922
+    },
+    {
+     "at": 119.185,
+     "of": "bass",
+     "above_its_own_normal": 349.13,
+     "margin_over_next": 345.271
+    },
+    {
+     "at": 122.042,
+     "of": "other",
+     "above_its_own_normal": 4.7,
+     "margin_over_next": 3.7
+    }
+   ]
+  },
+  "arc": {
+   "rate": "per_song",
+   "how": "the energy curve already in this file, reduced to where it peaks and its mean over each fifth of the record",
+   "why_it_exists": "a reader can see the next bar but not the whole. Without knowing the climax is at 0.81 of the way through, it cannot hold anything back for it, and a show that spends everything in the first drop has nowhere left to go.",
+   "peak_at_s": 57.052,
+   "peak_at_fraction": 0.4616,
+   "quietest_at_s": 122.756,
+   "quietest_at_fraction": 0.9932,
+   "range": 0.8196,
+   "mean_by_fifth": [
+    0.2111,
+    0.5226,
+    0.6385,
+    0.5997,
+    0.4157
+   ]
   }
  },
  "confidence": 0.908,
