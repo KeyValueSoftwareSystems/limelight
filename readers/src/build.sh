@@ -19,10 +19,10 @@ def layouts():
     return found
 
 def default_map():
-    for p in ("the-nights.map.json", "maps/model/the-nights.map.json"):
+    for p in ("the-nights.map.json", "synth/maps/amal/the-nights.map.json"):
         if os.path.exists(p):
             return p
-    got = sorted(glob.glob("maps/model/*.map.json"))
+    got = sorted(glob.glob("synth/maps/*/*.map.json"))
     if not got:
         raise SystemExit("no map found")
     return got[0]

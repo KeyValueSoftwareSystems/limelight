@@ -1054,7 +1054,18 @@ class H(http.server.BaseHTTPRequestHandler):
                     if r_file and not k_file: by_sig[k] = r
                     elif r_file == k_file and r.get("when", "") > keep.get("when", ""):
                         by_sig[k] = r
-                rows = sorted(by_sig.values(), key=lambda r: -(r.get("total") or 0))
+                # A map that has been deleted should leave the board. The board
+                # reads the score history, not the disk, so a removed map sat
+                # there at its last score forever -- maps/model/the-nights kept
+                # showing 0.65 after the file was gone, which is a leaderboard
+                # listing a competitor that no longer exists.
+                def on_disk(r):
+                    mp = r.get("map") or ""
+                    if not mp or mp == "(uploaded)":
+                        return True
+                    return os.path.exists(os.path.join(ROOT, mp))
+                rows = sorted((r for r in by_sig.values() if on_disk(r)),
+                              key=lambda r: -(r.get("total") or 0))
                 return self._send(200, json.dumps([
                     {k: r.get(k) for k in ("map", "song", "made_by", "total",
                                            "accuracy", "coverage", "when")}

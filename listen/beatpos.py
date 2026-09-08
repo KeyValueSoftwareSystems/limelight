@@ -30,6 +30,13 @@ seconds still finds them.
 import sys, os, json
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+try:
+    from mapio import map_path
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import map_path
+
 ROOT = os.path.dirname(HERE)
 
 # every field that carries a time, and how to reach the number inside it
@@ -163,8 +170,7 @@ if __name__ == "__main__":
     # looked in synth/truth and synth/songs, so none of them had ever run on
     # levels, starlight, mizhiyoram or dont-look-down -- including pump.py,
     # which finds the one production element the record is built on.
-        for c in (os.path.join(ROOT, "maps", "model", slug + ".full.map.json"),
-                  os.path.join(ROOT, "maps", "model", slug + ".map.json"),
+        for c in ([map_path(slug)] if map_path(slug) else []) + (
                   os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
                   os.path.join(ROOT, "synth", "songs", slug + ".map.json")):
             if os.path.exists(c):

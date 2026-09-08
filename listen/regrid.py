@@ -31,6 +31,13 @@ except ImportError:
     _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
     from mapio import stems_dir
 STEMS = stems_dir()
+try:
+    from mapio import map_path
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import map_path
+
 SR = 2000
 KICK_LO, KICK_HI = 30.0, 140.0
 
@@ -76,10 +83,7 @@ def score_grid(env, sr, phase, period, n, dur):
 
 
 def map_path(slug):
-    for c in (os.path.join(ROOT, "maps", "model", slug + ".full.map.json"),
-              os.path.join(ROOT, "maps", "model", slug + ".map.json")):
-        if os.path.exists(c): return c
-    return None
+    return map_path(slug)
 
 
 TIMED = [("beats", None), ("downbeats", None)]

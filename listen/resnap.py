@@ -23,8 +23,8 @@ an edit so that Amal can read it, re-run it, or throw it away:
   - chapters move with their moment. The chapter is what drives the look, so a
     corrected moment with an uncorrected chapter changes nothing on the stage.
 
-    python3 listen/resnap.py maps/model/levels.map.json
-    python3 listen/resnap.py maps/model/levels.map.json --dry
+    python3 listen/resnap.py synth/maps/amal/levels.map.json
+    python3 listen/resnap.py synth/maps/amal/levels.map.json --dry
 """
 import sys, os, json, datetime
 
@@ -172,5 +172,5 @@ def run(path, dry=False):
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("-")]
     dry = "--dry" in sys.argv
-    total = sum(run(a, dry) for a in (args or ["maps/model/levels.map.json"]))
+    total = sum(run(a, dry) for a in (args or ["synth/maps/amal/levels.map.json"]))
     print(f"\n  {total} moment(s) {'would move' if dry else 'moved'}")

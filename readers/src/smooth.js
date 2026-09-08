@@ -3,9 +3,9 @@ const ROOT=path.resolve(__dirname,'../..');
 const mapArg=process.argv[2], rigArg=process.argv[3]||'festival';
 function findMap(){
   if(mapArg) return mapArg;
-  for(const p of ['maps/model/the-nights.map.json','the-nights.map.json'])
+  for(const p of ['synth/maps/amal/the-nights.map.json','the-nights.map.json'])
     if(fs.existsSync(path.join(ROOT,p))) return path.join(ROOT,p);
-  const d=path.join(ROOT,'maps/model');
+  const d=path.join(ROOT,'synth/maps/amal');
   const f=fs.existsSync(d)&&fs.readdirSync(d).filter(x=>x.endsWith('.map.json'))[0];
   if(!f) throw new Error('no map found; pass one as argv[2]');
   return path.join(d,f);

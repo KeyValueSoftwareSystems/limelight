@@ -32,6 +32,13 @@ except ImportError:
     _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
     from mapio import stems_dir
 STEMS = stems_dir()
+try:
+    from mapio import map_path
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import map_path
+
 ALL = ("vocals", "drums", "bass", "guitar", "piano", "other")
 SR = 11025
 N = 1024
@@ -81,8 +88,7 @@ def pct(vals, q):
 
 
 def map_path(slug):
-    for c in (os.path.join(ROOT, "maps", "model", slug + ".full.map.json"),
-              os.path.join(ROOT, "maps", "model", slug + ".map.json")):
+    for c in ([map_path(slug)] if map_path(slug) else []) + ([]):
         if os.path.exists(c): return c
     return None
 

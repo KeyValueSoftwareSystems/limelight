@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fields that follow from fields already measured. Stdlib, no audio.
 
-    python3 listen/derive.py maps/model/*.map.json
+    python3 listen/derive.py synth/maps/amal/*.map.json
 
 Everything here is a second look at a measurement that is already in the file,
 so it needs no recording and it cannot invent anything the map did not already

@@ -121,8 +121,7 @@ def main():
     sys.path.insert(0, HERE)
     from mapio import map_path as _mp
     for cand in (os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
-                 _mp(slug) or "",
-                 os.path.join(ROOT, "maps", "model", slug + ".map.json")):
+                 _mp(slug) or ""):
         if os.path.exists(cand):
             base = json.load(open(cand))
             print(f"base: {os.path.relpath(cand, ROOT)}")

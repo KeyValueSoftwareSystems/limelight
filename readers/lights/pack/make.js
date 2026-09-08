@@ -16,7 +16,7 @@ const FPS=20, R=v=>Math.round(v*1e4)/1e4;
 
 const CASES=[
   {name:'first-light', map:'synth/songs/first-light.map.json', how:'synthetic — canonical'},
-  {name:'the-nights', map:'maps/model/the-nights.map.json',   how:'model — real record, structure disputed'},
+  {name:'the-nights', map:'synth/maps/amal/the-nights.map.json',   how:'model — real record, structure disputed'},
   // opus and strobe were in the v0.2 pack and are dropped: they are sketches with
   // no grid field, so nothing can generate frames from them and the frames that
   // shipped for them cannot be reproduced from anything in this repo

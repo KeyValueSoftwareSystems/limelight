@@ -56,8 +56,7 @@ def map_path(slug):
     -- same missing directory each time -- so it goes at the front."""
     if os.path.isabs(slug) or os.sep in slug:
         return slug if os.path.exists(slug) else None
-    return next((c for c in (os.path.join(ROOT, "maps", "model", slug + ".map.json"),
-                             os.path.join(ROOT, "maps", "amal", slug + ".map.json"),
+    return next((c for c in (os.path.join(ROOT, "synth", "maps", "amal", slug + ".map.json"),
                              os.path.join(ROOT, "synth", "truth", slug + ".map.json"),
                              os.path.join(ROOT, "synth", "songs", slug + ".map.json"))
                  if os.path.exists(c)), None)
