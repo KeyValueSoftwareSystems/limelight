@@ -613,6 +613,104 @@ def ev_pump(m, B):
            f"claims {claimed:+.3f}, recording says {measured:+.3f}"
 
 
+# ---------------------------------------------------------------------------
+# AUDIT ONLY. These read the audio like every other check and they are NOT in
+# WEIGHTS, so they move nobody's total.
+#
+# Why not weighted, when an unscored field is a field nobody has to get right:
+# only Amal's maps carry these six fields, because they were added on 8 Sept.
+# Coverage divides by what a map COULD claim, so weighting them would raise one
+# author's score and lower everybody else's for not having invented them the
+# same afternoon. That is the board being rigged by whoever writes the checks.
+# Weight them when a second author's map carries them -- that is Renjith's call
+# and not the caller's.
+#
+# observations.anticipation is deliberately absent from this block. It is pure
+# arithmetic over `moments` and `spans`, both already scored, so checking it
+# would score those two a second time. Grading a thing against its own input is
+# the first mistake listed in AGENTS.md.
+
+
+def au_meter(m, B):
+    o = (m.get("observations") or {}).get("meter") or {}
+    claimed = o.get("beats_per_bar")
+    beats = m.get("beats") or []
+    if not claimed or len(beats) < 32: return None, "no meter claimed"
+    dt, low, high = B["dt"], B["low"], B["high"]
+    vecs = [[_at(low, dt, t), _at(high, dt, t)] for t in beats]
+    def cos(a, b):
+        na = math.sqrt(sum(x * x for x in a)); nb = math.sqrt(sum(x * x for x in b))
+        return None if (na < 1e-9 or nb < 1e-9) else sum(x * y for x, y in zip(a, b)) / (na * nb)
+    def support(n):
+        got = []
+        for lag in (n, 2 * n):
+            vals = [c for c in (cos(vecs[i], vecs[i + lag])
+                                for i in range(len(vecs) - lag)) if c is not None]
+            if vals: got.append(sum(vals) / len(vals))
+        return sum(got) / len(got) if got else 0.0
+    cands = {n: support(n) for n in (2, 3, 4, 5, 6, 7)}
+    best = max(cands, key=lambda n: cands[n])
+    mine, top = cands.get(claimed, 0.0), cands[best]
+    frac = 0.0 if top <= 0 else max(0.0, min(1.0, mine / top))
+    return frac, (f"claims {claimed} beats to the bar; the mix's own pattern supports "
+                  f"{best} best, and {claimed} reaches {100*frac:.0f}% of that")
+
+
+def au_tempo(m, B):
+    o = (m.get("observations") or {}).get("tempo_stability") or {}
+    if "rigid_grid_justified" not in o: return None, "no tempo claim"
+    beats = m.get("beats") or []
+    per = (m.get("grid") or {}).get("period")
+    if not per or len(beats) < 64: return None, "no grid"
+    dt, low = B["dt"], B["low"]
+    halves = []
+    for a, b in ((0, len(beats) // 2), (len(beats) // 2, len(beats))):
+        seg = beats[a:b]
+        best = None
+        for k in range(-30, 31):
+            off = k * 0.002
+            v = sum(_at(low, dt, t + off) for t in seg) / len(seg)
+            if best is None or v > best[0]: best = (v, off)
+        halves.append(best[1])
+    walk = halves[1] - halves[0]
+    # graded, not a threshold: at 8% of a period the first version failed Levels
+    # by half a millisecond, which is the check's resolution and not the music.
+    steadiness = max(0.0, min(1.0, 1.0 - abs(walk) / (per * 0.25)))
+    claimed_steady = bool(o["rigid_grid_justified"])
+    agrees = steadiness if claimed_steady else 1.0 - steadiness
+    return round(agrees, 4), (
+        f"claims the rigid grid {'holds' if o['rigid_grid_justified'] else 'does not hold'}; "
+        f"the best offset moves {1000*walk:+.0f} ms between the first and second half of the "
+        f"record, which is {100*steadiness:.0f}% steady on this measure")
+
+
+def au_arc(m, B):
+    o = (m.get("observations") or {}).get("arc") or {}
+    claimed = o.get("peak_at_s")
+    if claimed is None: return None, "no arc claimed"
+    dt, rms = B["dt"], B["rms"]
+    per = (m.get("grid") or {}).get("period") or 0.5
+    w = max(1, int(per * 4 / dt))
+    best, i = None, 0
+    while i + w < len(rms):
+        v = sum(rms[i:i + w]) / w
+        if best is None or v > best[0]: best = (v, i * dt)
+        i += max(1, w // 4)
+    if best is None: return None, "arc could not be checked"
+    lo, hi = o.get("peak_region_s") or [claimed, claimed]
+    off = 0.0 if lo - 1e-9 <= best[1] <= hi + 1e-9 else min(abs(best[1] - lo), abs(best[1] - hi))
+    bars = off / (per * 4)
+    frac = max(0.0, min(1.0, 1.0 - bars / 8.0))
+    inside = "inside" if off == 0.0 else f"{bars:.1f} bars outside"
+    return frac, (f"claims the peak at {claimed:.1f} s; the loudest bar in the recording is at "
+                  f"{best[1]:.1f} s, {inside} the declared peak region "
+                  f"{lo:.0f}-{hi:.0f} s. A map that declares a flat top is judged on the region, "
+                  f"not the argmax -- a single peak is not a measurement when the curve is level.")
+
+
+AUDIT = {"meter": au_meter, "tempo_stability": au_tempo, "arc": au_arc}
+
+
 def audio_for(slug):
     """Decoding and banding a four-minute song in pure Python takes most of a
     minute, and every map for that song needs the same numbers. Cached to disk so
@@ -694,7 +792,15 @@ def evaluate(slug, map_path=None, m=None):
     g = out["grid"]["score"]
     gate = 1.0 if g is None else min(1.0, max(0.0, g / 0.45))
     total = accuracy * (0.55 + 0.45 * coverage) * gate
+    audit = {}
+    for name, fn in AUDIT.items():
+        try:
+            sc, why = fn(m, B)
+        except Exception as e:
+            sc, why = None, f"threw: {e}"
+        audit[name] = {"score": None if sc is None else round(sc, 4), "said": why}
     return {"song": slug,
+            "audit": audit,
             "map": os.path.relpath(map_path, ROOT) if map_path else "(uploaded)",
             "made_by": (m.get("made_by") or {}).get("who") or (m.get("made_by") or {}).get("how"),
             "total": round(total, 4), "accuracy": round(accuracy, 4),
@@ -702,6 +808,16 @@ def evaluate(slug, map_path=None, m=None):
             "measured": len(scored),
             "not_claimed": [k for k, v in out.items() if v["score"] is None],
             "fields": out}
+
+
+def _report_audit(r):
+    au = r.get("audit") or {}
+    shown = {k: v for k, v in au.items() if v.get("score") is not None}
+    if shown:
+        print("   " + "-" * 66)
+        print("   audit only -- read from the audio, in no weight, moves no total")
+        for k, v in sorted(shown.items()):
+            print("   %-11s %.2f   %s" % (k, v["score"], v["said"][:150]))
 
 
 def maps_for(slug):
@@ -749,6 +865,7 @@ def report(r):
           + (f" (missing {', '.join(r['not_claimed'])})" if r["not_claimed"] else "")
           + (f" | GRID GATE {r['grid_gate']:.2f}" if r['grid_gate'] < 1 else ""))
     print(f"   {'TOTAL':11} {r['total']:.2f}")
+    _report_audit(r)
 
 
 if __name__ == "__main__":

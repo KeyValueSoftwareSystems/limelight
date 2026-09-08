@@ -1,4 +1,4 @@
-import sys, os, json, math, bisect
+import sys, os, json, math, bisect, wave, array
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mapio import map_path
@@ -250,7 +250,37 @@ def lead(m, bars):
     }
 
 
-def arc(m, bars, feats):
+def loudest_bar(slug, per):
+    wav = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                       "synth", "out", slug + ".wav")
+    if not os.path.exists(wav):
+        return None
+    with wave.open(wav, "rb") as w:
+        sr, n, ch = w.getframerate(), w.getnframes(), w.getnchannels()
+        raw = w.readframes(n)
+    a = array.array("h")
+    a.frombytes(raw[: len(raw) - (len(raw) % 2)])
+    if ch > 1:
+        a = a[::ch]
+    hop = max(1, int(sr * 0.05))
+    env = []
+    for i in range(0, len(a) - hop, hop):
+        acc = 0.0
+        for v in a[i : i + hop]:
+            acc += v * v
+        env.append(math.sqrt(acc / hop))
+    if not env:
+        return None
+    w_bars = max(1, int(per * 4 / 0.05))
+    best = None
+    for i in range(0, len(env) - w_bars, max(1, w_bars // 4)):
+        v = sum(env[i : i + w_bars]) / w_bars
+        if best is None or v > best[0]:
+            best = (v, i * 0.05)
+    return None if best is None else best[1]
+
+
+def arc(m, bars, feats, slug=None):
     en = m.get("energy") or []
     if len(en) < 8:
         return None
@@ -263,26 +293,77 @@ def arc(m, bars, feats):
         return None
     dur = (m.get("song") or {}).get("length") or vals[-1][0]
     peak_t, peak_v = max(vals, key=lambda p: p[1])
+    quiet_t, quiet_v = min(vals, key=lambda p: p[1])
+    rng = peak_v - quiet_v
+    thr = peak_v - 0.02 * max(rng, 1e-9)
+    pk_i = max(range(len(vals)), key=lambda i: vals[i][1])
+    lo_i = pk_i
+    while lo_i > 0 and vals[lo_i - 1][1] >= thr:
+        lo_i -= 1
+    hi_i = pk_i
+    while hi_i < len(vals) - 1 and vals[hi_i + 1][1] >= thr:
+        hi_i += 1
+    near = [vals[i][0] for i in range(lo_i, hi_i + 1)]
+    anywhere = sum(1 for _, v in vals if v >= thr)
+    flat = False
+    per_ = (m.get("grid") or {}).get("period") or 0.5
+    flat = anywhere > 4 and (max(near) - min(near)) > 8 * 4 * per_
     fifths = [[] for _ in range(5)]
     for t, v in vals:
         fifths[min(4, int(5 * t / max(1e-6, dur)))].append(v)
     shape = [round(sum(f) / len(f), 4) if f else None for f in fifths]
-    quiet_t, quiet_v = min(vals, key=lambda p: p[1])
     return {
         "rate": "per_song",
-        "how": "the energy curve already in this file, reduced to where it peaks and its mean "
-        "over each fifth of the record",
-        "why_it_exists": "a reader can see the next bar but not the whole. Without knowing the "
-        "climax is at 0.81 of the way through, it cannot hold anything back for "
-        "it, and a show that spends everything in the first drop has nowhere "
-        "left to go.",
+        "how": "the energy curve already in this file, reduced to where it peaks, how flat that "
+               "peak is, and its mean over each fifth of the record",
+        "why_it_exists": "a reader can see the next bar but not the whole. Without knowing where "
+                         "the climax sits it cannot hold anything back for it, and a show that "
+                         "spends everything on the first drop has nowhere left to go.",
         "peak_at_s": round(peak_t, 3),
         "peak_at_fraction": round(peak_t / max(1e-6, dur), 4),
+        "peak_is_well_defined": not flat,
+        "peak_region_s": [round(min(near), 3), round(max(near), 3)],
+        "bars_in_the_peak_region": len(near),
+        "bars_within_2pct_of_the_peak_anywhere": anywhere,
+        "peak_caveat": ("this record has no single loudest moment: %d sampled bars sit within 2%% "
+                        "of the maximum, and the run around the peak spans %.1f to %.1f s. A reader that treats "
+                        "peak_at_s as THE climax will be picking one of many. The first attempt "
+                        "at this field reported the bare argmax, and collecting every time near "
+                        "the peak instead of the contiguous span around it made the region span "
+                        "most of the record and the audit check vacuous. An audit check caught "
+                        "both -- "
+                        "on The Nights the argmax was 22 bars from the loudest bar in the "
+                        "recording, because the top of the curve is flat to within 0.5%%."
+                        % (anywhere, min(near), max(near))) if flat else
+                       "the maximum stands clear of the rest of the curve",
         "quietest_at_s": round(quiet_t, 3),
         "quietest_at_fraction": round(quiet_t / max(1e-6, dur), 4),
-        "range": round(peak_v - quiet_v, 4),
+        "range": round(rng, 4),
         "mean_by_fifth": shape,
+        **({} if slug is None else _peak_cross_check(m, slug, peak_t, near)),
     }
+
+
+def _peak_cross_check(m, slug, peak_t, near):
+    per = (m.get("grid") or {}).get("period") or 0.5
+    lb = loudest_bar(slug, per)
+    if lb is None:
+        return {}
+    lo, hi = min(near), max(near)
+    inside = lo - 1e-9 <= lb <= hi + 1e-9
+    off = 0.0 if inside else min(abs(lb - lo), abs(lb - hi))
+    return {"peak_vs_loudest_bar": {
+        "energy_curve_peaks_at_s": round(peak_t, 3),
+        "recording_is_loudest_at_s": round(lb, 3),
+        "bars_apart": round(off / (per * 4), 2),
+        "agrees": bool(inside),
+        "how": "the energy field in this map against a plain broadband RMS of the recording, "
+               "measured over one bar",
+        "not": "neither side is truth and this does not say which is wrong. energy comes from a "
+               "beat-synchronous band profile and RMS is broadband, so a bar that is loudest "
+               "overall need not be the biggest in the bands the curve weighs. Where they "
+               "disagree by more than a couple of bars, a reader deciding what to hold back for "
+               "the climax is being told two different things and should trust neither."}}
 
 
 def analyse(slug, write=False):
@@ -299,7 +380,7 @@ def analyse(slug, write=False):
         ("surprise", lambda: surprise(m, bars, feats)),
         ("anticipation", lambda: anticipation(m, bars)),
         ("lead", lambda: lead(m, bars)),
-        ("arc", lambda: arc(m, bars, feats)),
+        ("arc", lambda: arc(m, bars, feats, slug)),
     ):
         v = fn()
         if v:

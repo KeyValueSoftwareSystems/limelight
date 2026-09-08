@@ -4,7 +4,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 r=0
 run(){ printf '\n== %s\n' "$*"; "$@" || r=1; }
-run python3 validate.py maps/model/*.map.json maps/amal/*.map.json
+run python3 validate.py synth/maps/amal/*.map.json maps/model/*.map.json
 run python3 validate.py synth/songs/*.map.json
 run node readers/src/apptest.js
 run node readers/src/smooth.js

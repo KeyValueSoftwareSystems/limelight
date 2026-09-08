@@ -78,8 +78,9 @@ else:
             if mp and isinstance(tot, (int, float)):
                 scored[mp] = tot                      # last line wins: latest score
     best = {}
-    for p in sorted(glob.glob("maps/*/*.map.json")):
-        if os.sep + "sketch" + os.sep in p:           # guesses never drive a show
+    for p in sorted(glob.glob("maps/*/*.map.json")) + sorted(glob.glob("synth/maps/*/*.map.json")):
+        if (os.sep + "sketch" + os.sep in p
+                or os.sep + "_broken" in p):              # guesses and falsification maps never drive a show
             continue
         stem = os.path.basename(p)[:-len(".map.json")]
         slug, _, variant = stem.partition(".")

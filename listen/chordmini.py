@@ -68,7 +68,10 @@ def analyse(slug, write=False):
         # what the bass was doing in this bar, from bass_notes, for the reader
         i0=bisect.bisect_left(beats,d); i1=bisect.bisect_left(beats,d+4*m["grid"]["period"]-1e-3)
         roots=[bn[j][:-1] for j in range(i0,min(i1,len(bn))) if j<len(bn) and bn[j]]
-        e={"at":round(d,3),"chord":n,"confidence":0.8}
+        seg_end = b
+        bar_end = d + 4 * m["grid"]["period"]
+        covers = max(0.0, min(seg_end, bar_end) - d) / max(1e-9, bar_end - d)
+        e={"at":round(d,3),"chord":n,"covers":round(min(1.0,covers),3)}
         if roots: e["bass"]=collections.Counter(roots).most_common(1)[0][0]
         ev.append(e)
     obs={"rate":"per_bar",
@@ -76,6 +79,11 @@ def analyse(slug, write=False):
                 "mix, CQT 144 bins / 24 per octave, hop 2048 at 22.05 kHz. Per bar: the segment "
                 "covering the downbeat. `segments` holds the model's own boundaries."),
          "estimator":"ChordMini BTC large_voca",
+         "covers":("the share of the bar this chord actually occupies, from the model's own "
+                   "segment boundaries. It replaces a hardcoded confidence of 0.8 that was on "
+                   "every event in every map -- a number nobody measured, sitting in a field "
+                   "called confidence. This one is measured: a bar split between two chords "
+                   "reads below 1.0, and the label names only the chord at the downbeat."),
          "not":("checked against an instrument by anyone here. It is a model trained on human "
                 "chord annotations, which is a different thing from a human, and 'N' bars carry "
                 "no chord rather than a guess"),

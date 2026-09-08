@@ -2,8 +2,8 @@
 # Build a map for one song, from audio to the file on the board, in the order
 # the steps actually depend on each other.
 #
-#   bash tools/pipeline.sh levels                 # into maps/model/
-#   LIMELIGHT_MAPS=maps/amal bash tools/pipeline.sh the-nights
+#   bash tools/pipeline.sh levels                 # into synth/maps/amal/
+#   LIMELIGHT_MAPS=synth/maps/renjith bash tools/pipeline.sh the-nights
 #
 # Steps that need a heavier environment are skipped with a note rather than
 # failing the run, so a teammate with only stdlib still gets a usable map.
@@ -11,7 +11,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 SLUG="${1:?usage: bash tools/pipeline.sh <slug>}"
 WORK="${LIMELIGHT_WORK:-$PWD/work}"
-MAPS="${LIMELIGHT_MAPS:-maps/model}"
+MAPS="${LIMELIGHT_MAPS:-synth/maps/amal}"
 AUDIO="${LIMELIGHT_PY_AUDIO:-$WORK/audio/bin/python}"
 BP="${LIMELIGHT_PY_BASICPITCH:-$WORK/basicpitch/bin/python}"
 MAP="$MAPS/$SLUG.map.json"

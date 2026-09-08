@@ -8,6 +8,11 @@ pipeline could only ever write to one directory, so a map could not be built
 anywhere else. That is what made it impossible to run our own listener over The
 Nights without overwriting somebody else's file.
 
+Our maps live in synth/maps/amal, one folder per person alongside beats/ and
+dheeraj/, which is the layout the board and the editor already discover. They
+used to sit in maps/model, which is not a person, and the one map in there that
+belongs to somebody else got written over once because of it.
+
 LIMELIGHT_MAPS overrides the map search path, os.pathsep separated, first match
 wins. LIMELIGHT_WORK says where the big generated things live -- separated stems,
 cloned model repos, virtualenvs -- none of which belong in git. It defaults to
@@ -22,7 +27,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def map_dirs():
     env = os.environ.get("LIMELIGHT_MAPS")
     if not env:
-        return [os.path.join(ROOT, "maps", "model")]
+        return [os.path.join(ROOT, "synth", "maps", "amal")]
     return [d if os.path.isabs(d) else os.path.join(ROOT, d)
             for d in env.split(os.pathsep) if d]
 
