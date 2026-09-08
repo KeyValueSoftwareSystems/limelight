@@ -24,7 +24,13 @@ import json, math, os, subprocess, sys, array
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-STEMS = "/tmp/claude-1001/stems/htdemucs_6s"
+try:
+    from mapio import stems_dir
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import stems_dir
+STEMS = stems_dir()
 SR = 2000
 KICK_LO, KICK_HI = 30.0, 140.0
 

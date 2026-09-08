@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The sung melody by probabilistic YIN on the vocals stem. Needs the CUDA venv (librosa).
 
-    /tmp/claude-1001/venv/bin/python listen/pyin_melody.py starlight [--write]
+    $LIMELIGHT_PY_AUDIO listen/pyin_melody.py starlight [--write]
 
 pyin (Mauch & Dixon 2014) tracks f0 with a voicing PROBABILITY per frame, which
 is the thing plain autocorrelation lacks: it knows when nobody is singing. Fewer
@@ -18,7 +18,14 @@ import sys, os, json, math, subprocess, array, warnings; warnings.filterwarnings
 import numpy as np, librosa
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE); sys.path.insert(0,HERE)
 import stempitch
-STEMS="/tmp/claude-1001/stems/htdemucs_6s"; SR=16000; HOP=256; PROB=0.50; FALLBACK_VOICED=0.15
+try:
+    from mapio import stems_dir
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import stems_dir
+STEMS = stems_dir()
+SR=16000; HOP=256; PROB=0.50; FALLBACK_VOICED=0.15
 NAMES=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
 
 def decode(p,sr):

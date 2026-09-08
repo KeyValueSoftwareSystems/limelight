@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Note-level transcription per stem, with Spotify basic-pitch. Runs in the 3.11 venv.
 
-    /tmp/claude-1001/bp/bin/python listen/notes.py levels [--write]
+    $LIMELIGHT_PY_BASICPITCH listen/notes.py levels [--write]
 
 Polyphonic, per separated stem, the same settings the-nights used: onset 0.55,
 frame 0.35, minimum note 70 ms, ONNX backend on CPU. Format
@@ -15,7 +15,14 @@ are not transcribed: a kick is not a pitch.
 """
 import os, sys, json, subprocess, tempfile, math, time, warnings; warnings.filterwarnings("ignore")
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
-STEMS="/tmp/claude-1001/stems/htdemucs_6s"; ORDER=("vocals","other","guitar","piano","bass")
+try:
+    from mapio import stems_dir
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import stems_dir
+STEMS = stems_dir()
+ORDER=("vocals","other","guitar","piano","bass")
 ONSET,FRAME,MINLEN=0.55,0.35,70; LAT=0.025
 NAMES=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
 def name(mi): return "%s%d"%(NAMES[mi%12],mi//12-1)

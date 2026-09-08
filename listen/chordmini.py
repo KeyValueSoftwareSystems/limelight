@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Chords from ChordMini's BTC large-vocabulary model (170 classes). CUDA venv.
 
-    /tmp/claude-1001/venv/bin/python listen/chordmini.py levels [--write]
+    $LIMELIGHT_PY_AUDIO listen/chordmini.py levels [--write]
 
 A transformer chord recogniser trained on human chord annotations, run on the
 mix. On Levels it returns C#m, A, E, B -- the record's actual progression -- which
 no chroma method here managed, and it does so with sub-bar timing and a
 vocabulary that includes sevenths and suspensions.
 
-The repo is cloned to /tmp/claude-1001/chordmini (MIT, ptnghia-j/ChordMini) and
+The repo is cloned by tools/setup.sh (MIT, ptnghia-j/ChordMini) and
 run with OUR torch, not its pinned one: installing its requirements would replace
 the CUDA torch, which is the second trap in GPU.md. Two plotting libraries had to
 be added for its import chain; neither touches torch.
@@ -19,7 +19,12 @@ information a per-bar list throws away.
 """
 import os, sys, json, subprocess, bisect, collections, tempfile, shutil
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
-CM="/tmp/claude-1001/chordmini"; PY=sys.executable
+try:
+    from mapio import chordmini_dir
+except ImportError:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from mapio import chordmini_dir
+CM=chordmini_dir(); PY=sys.executable
 CKPT="checkpoints/btc_model_large_voca.pt"
 
 def norm(lab):

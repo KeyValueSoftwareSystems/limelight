@@ -21,7 +21,13 @@ import json, os, subprocess, sys, array, math
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-STEMS = "/tmp/claude-1001/stems/htdemucs_6s"
+try:
+    from mapio import stems_dir
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import stems_dir
+STEMS = stems_dir()
 # Two voices, two bands, two sample rates. A bass note at 41 Hz has a 24 ms
 # period and needs a low rate to make the lag search cheap; a sung note at
 # 900 Hz has a 1.1 ms period and needs a high one to resolve it at all.

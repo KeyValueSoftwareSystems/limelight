@@ -25,7 +25,13 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import ear
 
-STEMS = "/tmp/claude-1001/stems/htdemucs_6s"
+try:
+    from mapio import stems_dir
+except ImportError:
+    import sys as _s, os as _o
+    _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
+    from mapio import stems_dir
+STEMS = stems_dir()
 ALL = ("vocals", "drums", "bass", "guitar", "piano", "other")
 SR = 11025
 N = 1024

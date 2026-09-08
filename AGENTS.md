@@ -70,6 +70,14 @@ is the history; "when was the last beat" is a lookup, never a memory.
 | `truth/` | human listening records. **Never write a file here labelled `how: truth`** |
 | `bench/bench.py` | the scorer. Tolerances are fixed and moving one to make a number look better is the one form of cheating it cannot detect |
 
+## Running it from a fresh clone
+
+**[REPRODUCE.md](./REPRODUCE.md)** — the three environments and why they must be
+three, what is deliberately not in git, the order the pipeline runs in and what
+depends on what. `bash tools/setup.sh all`, then `bash tools/pipeline.sh <slug>`,
+then `bash tools/verify.sh`. Build a map for somebody else's song with
+`LIMELIGHT_MAPS=maps/<yourname>` so you never write over their file.
+
 ## Verify a change
 
 Run what your change can affect. All stdlib or node, no install.

@@ -8,7 +8,11 @@ pipeline could only ever write to one directory, so a map could not be built
 anywhere else. That is what made it impossible to run our own listener over The
 Nights without overwriting somebody else's file.
 
-LIMELIGHT_MAPS overrides the search path, os.pathsep separated, first match wins.
+LIMELIGHT_MAPS overrides the map search path, os.pathsep separated, first match
+wins. LIMELIGHT_WORK says where the big generated things live -- separated stems,
+cloned model repos, virtualenvs -- none of which belong in git. It defaults to
+`work/` in the repo, which is gitignored. Every tool that needs a stem asks here,
+so a teammate sets one variable rather than editing eight files.
 """
 import os
 
@@ -33,3 +37,27 @@ def map_path(slug, must_exist=True):
     if must_exist:
         return None
     return os.path.join(map_dirs()[0], slug + ".map.json")
+
+
+def work_dir():
+    """Where the big generated things live. Not in git, never in git."""
+    return os.environ.get("LIMELIGHT_WORK") or os.path.join(ROOT, "work")
+
+
+def stems_dir():
+    """The separator's output: <stems>/<slug>/{vocals,drums,bass,guitar,piano,other}.mp3"""
+    return os.environ.get("LIMELIGHT_STEMS") or os.path.join(
+        work_dir(), "stems", "htdemucs_6s")
+
+
+def stem_path(slug, stem):
+    """One stem, or None. Accepts either extension, because demucs can write both."""
+    for ext in (".mp3", ".wav"):
+        p = os.path.join(stems_dir(), slug, stem + ext)
+        if os.path.exists(p):
+            return p
+    return None
+
+
+def chordmini_dir():
+    return os.environ.get("LIMELIGHT_CHORDMINI") or os.path.join(work_dir(), "chordmini")

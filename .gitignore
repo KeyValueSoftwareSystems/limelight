@@ -49,3 +49,6 @@ synth/truth/
 # one: every line is reproducible by running mapeval again, and its real purpose is
 # letting one person see whether their own change helped.
 synth/learning/mapeval.jsonl
+
+# generated, large, and reproducible: stems, cloned model repos, virtualenvs
+work/

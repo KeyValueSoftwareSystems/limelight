@@ -37,6 +37,7 @@ import mapeval
 ANCHOR = {
     "grid":      ("recording", "kick energy under the claimed beats"),
     "bars":      ("map",       "the map's own marks against its own bar phase"),
+    "moments":   ("recording", "the loudness step nearest each claimed drop or stop"),
     "downbeats": ("recording", "low band on downbeats against the other beats"),
     "sections":  ("recording", "spectral change at boundaries, against a random control"),
     "energy":    ("recording", "loudness envelope"),
@@ -51,6 +52,13 @@ def corrupt(m, field, rng):
     """One deliberate, specific fault per field."""
     m = copy.deepcopy(m)
     g = m["grid"]; per, ph = g["period"], g["phase"]
+    if field == "moments":
+        # a drop in the wrong place: two beats late, which is the exact fault
+        # ev_moments was written for after the bar-line snap was found
+        for x in (m.get("moments") or []):
+            if x.get("kind") in ("drop", "stop"):
+                x["at"] = x["at"] + 2 * per
+        return m
     if field == "grid":
         g["phase"] = ph + per / 2
         m["beats"] = [t + per / 2 for t in m.get("beats", [])]

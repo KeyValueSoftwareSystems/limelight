@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The learned tier: one MERT embedding per beat. Needs the CUDA venv.
 
-    /tmp/claude-1001/venv/bin/python listen/vectors.py levels [--write]
+    $LIMELIGHT_PY_AUDIO listen/vectors.py levels [--write]
 
 m-a-p/MERT-v1-95M, last_hidden_state, 74.8 frames/s at 24 kHz. Pooled the way
 GPU.md says to: MEAN OF THE FRAMES BETWEEN CONSECUTIVE BEATS, then L2-normalised,
