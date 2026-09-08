@@ -127,3 +127,45 @@ def test_harmony_layers_null_when_unmeasured():
     bare = {k: v for k, v in STATE.items() if k not in ("chords", "melody", "notes")}
     obs = to_map(bare)["observations"]
     assert obs["chords"] is None and obs["melody"] is None and obs["notes"] is None
+
+
+def test_pos_added_to_timed_entries():
+    m = _m()
+    # period 0.5, phase 0.5 (first beat). chapter "chorus" at 5.0 -> pos (5.0-0.5)/0.5 = 9.0
+    ch = next(c for c in m["chapters"] if c["name"] == "chorus")
+    assert ch["pos"] == 9.0
+    drop = next(x for x in m["moments"] if x["kind"] == "drop")
+    assert drop["pos"] == round((drop["at"] - 0.5) / 0.5, 4)
+    assert m["spans"][0]["pos_from"] == round((m["spans"][0]["from"] - 0.5) / 0.5, 4)
+
+
+def test_groove_from_accents():
+    from musicstate.port import to_map
+    # 24 accents: 12 exactly on beats (off16 ~ 0), 12 a hair after the off-sixteenth
+    evs = []
+    for i in range(12):
+        evs.append({"at": 0.5 + i * 0.5, "strength": 0.6})            # on the beat
+        evs.append({"at": 0.5 + i * 0.5 + 0.125 + 0.025, "strength": 0.4})  # a hair late
+    state = {**STATE, "accents": {"rate": "onset", "events": evs}}
+    obs = to_map(state)["observations"]
+    assert obs["groove"] is not None
+    assert obs["groove"]["hits"] == 24
+    assert "by_sixteenth" in obs["groove"]
+
+
+def test_bar_phase_decision_lifted_when_present():
+    from musicstate.port import to_map
+    obs = to_map({**STATE, "bar_phase_decision": {"to_phase": 2}})["observations"]
+    assert obs["bar_phase_decision"]["to_phase"] == 2
+    assert _m()["observations"]["bar_phase_decision"] is None   # null when unmeasured
+
+
+def test_events_retimed_preferred_over_events():
+    from musicstate.port import to_map
+    st = {**STATE,
+          "events": [{"t": 10.0, "type": "drop", "conf": 0.7}],
+          "events_retimed": [{"t": 11.5, "type": "drop", "conf": 0.7}]}
+    m = to_map(st)
+    drop = next(x for x in m["moments"] if x["kind"] == "drop")
+    assert drop["at"] == 11.5      # the re-timed position wins; no snap to a downbeat
+    assert to_map(st)["observations"]["moment_timing"] is None  # null unless the analyzer wrote it
