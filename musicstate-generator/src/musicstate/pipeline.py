@@ -46,9 +46,12 @@ def deep_analyzers() -> list[Analyzer]:
         DspAnalyzer(),
         StructureAnalyzer(),
         Allin1Analyzer(),
+        BarPhaseAnalyzer(),      # kick-band downbeat phase (allin1 as strong prior)
+        MomentDeriveAnalyzer(),  # candidate drops/quiets from labels + energy
         AccentsAnalyzer(),       # discrete onsets on the (allin1) beat grid
         ChordsAnalyzer(),        # per-bar chords on the (allin1) beat grid
         MelodyAnalyzer(),        # pyin melody contour
+        MomentTimingAnalyzer(),  # re-time drops/stops to the measured loudness step
         StemsAnalyzer(),
         SemanticAnalyzer(),
         EmbeddingAnalyzer(),

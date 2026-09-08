@@ -69,6 +69,9 @@ class Allin1Analyzer(Analyzer):
             status="ok",
             patch=patch,
             confidence={"tempo": 0.85, "beats": 0.85, "downbeats": 0.8, "sections": 0.75},
-            ctx={"beats": beats, "downbeats": downbeats},
+            # supersede the L2 fields downstream analyzers read; leave `energy`/`events`
+            # to structure (allin1 produces neither), and flag the strong downbeat prior.
+            ctx={"beats": beats, "downbeats": downbeats, "sections": sections,
+                 "tempo_bpm": data.get("bpm"), "from_allin1": True},
             notes="allin1 (separate env) supersedes librosa L2 — labelled segments, real downbeats",
         )

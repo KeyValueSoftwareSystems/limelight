@@ -129,6 +129,9 @@
         "sources": {"type": "object"}
       }
     },
+    "events_retimed": {"type": "array", "items": {"type": "object"}},
+    "bar_phase_decision": {"type": ["object", "null"]},
+    "moment_timing": {"type": ["object", "null"]},
     "semantic": {"type": "object", "required": ["status"]},
     "embedding": {"type": "object", "required": ["status"]},
     "confidence_by_field": {"type": "object"},

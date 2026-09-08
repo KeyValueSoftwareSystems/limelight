@@ -57,3 +57,25 @@ def test_timing_recorded(click_state):
 def test_provenance_levels(click_state):
     levels = {a["level"] for a in click_state["provenance"]["analyzers"]}
     assert {"L1", "L2"} <= levels
+
+
+def test_placement_analyzers_present_and_degrade(click_state):
+    names = {a["name"]: a for a in click_state["provenance"]["analyzers"]}
+    for n in ("bar-phase", "moment-derive", "moment-timing"):
+        assert n in names, f"{n} not registered in core"
+    # a steady click has no drops: derive/timing must no-op cleanly, not fail
+    assert names["moment-derive"]["status"] in ("ok", "not_computed")
+    assert names["moment-timing"]["status"] == "not_computed"
+
+
+def test_schema_valid_with_new_keys(click_state):
+    jsonschema.validate(click_state, SCHEMA)          # bar-phase writes bar_phase_decision
+    assert "bar_phase_decision" in click_state
+
+
+def test_deep_order_respects_dependencies():
+    from musicstate.pipeline import deep_analyzers
+    names = [a.name for a in deep_analyzers()]
+    # allin1 -> bar-phase -> moment-derive; moment-timing after the accents it may witness
+    assert names.index("allin1") < names.index("bar-phase") < names.index("moment-derive")
+    assert names.index("librosa-accents") < names.index("moment-timing")
