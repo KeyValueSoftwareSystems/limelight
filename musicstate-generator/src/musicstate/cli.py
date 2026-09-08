@@ -10,11 +10,38 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 import time
+from pathlib import Path
 
+from .config import pipeline_maps_dir
 from .pipeline import build, core_analyzers, deep_analyzers, summarize, timing_report
 from .port import to_map
+
+
+def _next_versioned_path(base_dir, slug: str) -> Path:
+    """Next vN.map.json under <base_dir>/<slug>/ — one past the highest N present."""
+    song_dir = Path(base_dir) / slug
+    highest = 0
+    if song_dir.is_dir():
+        for f in song_dir.glob("v*.map.json"):
+            stem = f.name[1:-len(".map.json")]   # 'v12.map.json' -> '12'
+            if stem.isdigit():
+                highest = max(highest, int(stem))
+    return song_dir / f"v{highest + 1}.map.json"
+
+
+def _choose_out(out_arg, versioned: bool, slug: str, base_dir) -> tuple[str, bool]:
+    """Resolve the output path. Returns (path, versioned_ignored).
+
+    An explicit -o always wins; --versioned is then ignored (reported to the caller).
+    """
+    if out_arg:
+        return out_arg, bool(versioned)
+    if versioned:
+        return str(_next_versioned_path(base_dir, slug)), False
+    return f"{slug}.map.json", False
 
 
 def setup_logging(verbose: bool) -> None:
@@ -28,7 +55,10 @@ def setup_logging(verbose: bool) -> None:
 
 def _cmd_build(args) -> int:
     log = logging.getLogger("musicstate")
-    out = args.out or f"{_stem(args.audio)}.map.json"
+    out, versioned_ignored = _choose_out(args.out, args.versioned, _stem(args.audio), pipeline_maps_dir())
+    if versioned_ignored:
+        log.warning("-o given, so --versioned is ignored (writing to %s)", out)
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     map_stem = out[:-9] if out.endswith(".map.json") else out.rsplit(".", 1)[0]
     vec_name = _basename(map_stem) + ".vec.f16"
 
@@ -76,6 +106,9 @@ def main(argv=None) -> int:
     build_p = sub.add_parser("build", help="audio file → MAP v0.3 JSON")
     build_p.add_argument("audio", help="audio file (mp3/wav/flac/…)")
     build_p.add_argument("-o", "--out", help="output map path (default <name>.map.json)")
+    build_p.add_argument("--versioned", action="store_true",
+                         help="write into maps/generator-pipeline/<name>/vN.map.json, "
+                              "auto-incrementing N (ignored if -o is given)")
     build_p.add_argument("--core", action="store_true",
                          help="reliable core only (librosa); skip allin1/Demucs/Essentia/MERT")
     build_p.set_defaults(func=_cmd_build)

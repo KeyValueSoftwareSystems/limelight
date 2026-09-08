@@ -34,6 +34,16 @@ ESSENTIA_EMBEDDING = "discogs-effnet-bs64-1.pb"
 
 _REPO_MODELS = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "models", "essentia"))
 
+# where `--versioned` builds land: <repo-root>/maps/generator-pipeline (three levels up
+# from this file: musicstate/ -> src/ -> musicstate-generator/ -> repo root)
+_GENERATOR_MAPS = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "maps", "generator-pipeline"))
+
+
+def pipeline_maps_dir() -> str:
+    """Root for versioned generator-pipeline maps. Overridable for tests / relocation."""
+    return os.environ.get("LIMELIGHT_GENERATOR_MAPS", _GENERATOR_MAPS)
+
 
 def _sibling_env_python(env_name: str, override_var: str) -> str:
     """Path to a sibling conda env's python (…/envs/<env_name>/bin/python)."""
