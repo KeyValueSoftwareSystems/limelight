@@ -1,5 +1,11 @@
 # Reproducing this, from a fresh clone
 
+**Never seen this project?** Open **[docs/anatomy-of-a-song-map.html](docs/anatomy-of-a-song-map.html)**
+in any browser, or read the PDF beside it. No Claude Code, no server, no install
+— what the file is, what goes in it, how it is built and how it is graded, in
+tables. `bash tools/makepdf.sh` regenerates the PDF from that HTML.
+
+
 Nothing here needs my machine. Three commands get you a scored map; the rest of
 this file says what each environment is for and what is deliberately not in git.
 
