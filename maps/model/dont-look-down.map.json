@@ -691,7 +691,7 @@
    "pos": 13.0
   },
   {
-   "at": 40.806324,
+   "at": 41.275074,
    "kind": "drop",
    "size": 0.95,
    "pos": 87.0
@@ -713,7 +713,7 @@
    "pos": 229.0
   },
   {
-   "at": 134.556324,
+   "at": 135.025074,
    "kind": "drop",
    "size": 0.95,
    "pos": 287.0
@@ -725,7 +725,7 @@
    "pos": 389.0
   },
   {
-   "at": 207.681324,
+   "at": 208.150074,
    "kind": "drop",
    "size": 0.95,
    "pos": 443.0
@@ -85452,30 +85452,23 @@
     {
      "kind": "drop",
      "was": 41.275074,
-     "now": 40.806324,
-     "beats": -1.0,
-     "drum_hits_per_beat_change": 2.0
+     "now": 41.275074,
+     "beats": 0.0,
+     "drum_hits_per_beat_change": 3.25
     },
     {
      "kind": "drop",
      "was": 135.025074,
-     "now": 134.556324,
-     "beats": -1.0,
-     "drum_hits_per_beat_change": 2.38
-    },
-    {
-     "kind": "drop",
-     "was": 181.900074,
-     "now": 182.368824,
-     "beats": 1.0,
-     "drum_hits_per_beat_change": 3.75
+     "now": 135.025074,
+     "beats": 0.0,
+     "drum_hits_per_beat_change": 3.62
     },
     {
      "kind": "drop",
      "was": 208.150074,
-     "now": 207.681324,
-     "beats": -1.0,
-     "drum_hits_per_beat_change": 0.5
+     "now": 208.150074,
+     "beats": 0.0,
+     "drum_hits_per_beat_change": 0.12
     }
    ],
    "chapters_moved_with_them": [],

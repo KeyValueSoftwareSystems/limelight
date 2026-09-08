@@ -558,7 +558,7 @@
  ],
  "moments": [
   {
-   "at": 17.923566,
+   "at": 17.447375,
    "kind": "drop",
    "size": 0.95
   },
@@ -576,7 +576,7 @@
    "size": 0.95
   },
   {
-   "at": 94.114042,
+   "at": 93.637852,
    "kind": "drop",
    "size": 0.95
   },
@@ -46222,37 +46222,19 @@
     {
      "kind": "drop",
      "was": 17.447375,
-     "now": 17.923566,
-     "beats": 1.0,
-     "drum_hits_per_beat_change": 0.5
+     "now": 17.447375,
+     "beats": 0.0,
+     "drum_hits_per_beat_change": 1.38
     },
     {
      "kind": "drop",
      "was": 93.637852,
-     "now": 94.114042,
-     "beats": 1.0,
-     "drum_hits_per_beat_change": 3.38
-    },
-    {
-     "kind": "stop",
-     "was": 171.73309,
-     "now": 172.20928,
-     "beats": 1.0,
-     "drum_hits_per_beat_change": null
+     "now": 93.637852,
+     "beats": 0.0,
+     "drum_hits_per_beat_change": 3.88
     }
    ],
-   "chapters_moved_with_them": [
-    {
-     "name": "drop",
-     "was": 17.447,
-     "now": 17.924
-    },
-    {
-     "name": "drop",
-     "was": 93.638,
-     "now": 94.114
-    }
-   ],
+   "chapters_moved_with_them": [],
    "left_alone": [],
    "merged_duplicates": []
   }

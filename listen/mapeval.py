@@ -192,11 +192,24 @@ def ev_bars(m, B):
     # somewhere no bar line can be. It was being counted as a miss on every map
     # that follows the rule, including the two here that do.
     first = min(m.get("beats") or [ph]) - 1e-6
+    # A chapter that sits at exactly the same instant as a drop or a stop is
+    # NAMING that event, and a drop lands on a half bar. Correcting the drops in
+    # Levels to where the record puts them therefore moved three chapters onto
+    # half bars with them, and this check charged 0.09 for it -- the map paying
+    # for being right, one step removed. The allowance is not general: a chapter
+    # only inherits the half bar if a moment is there with it, so a boundary that
+    # has merely drifted is still caught. Falsified: rolling every chapter half a
+    # bar reads 0.27-0.61 on the five songs, against 0.80-1.00 as measured.
+    at_moment = set(round(x["at"], 3) for x in (m.get("moments") or [])
+                    if isinstance(x, dict) and x.get("kind") in ("drop", "stop")
+                    and "at" in x)
     marks = []
     for key, field in (("chapters", "at"), ("moments", "at"), ("spans", "from")):
         for r in (m.get(key) or []):
             if isinstance(r, dict) and field in r and r[field] > first:
-                marks.append((key, (r[field] - ph) / per))
+                half = key == "moments" or (key == "chapters"
+                                            and round(r[field], 3) in at_moment)
+                marks.append((key, (r[field] - ph) / per, half))
     if len(marks) < 4:
         return None, "nothing structural to check"
     def on_line(pos):
@@ -214,16 +227,17 @@ def ev_bars(m, B):
     def on_half(pos):
         d = ((pos - bp) % 2 + 2) % 2
         return min(d, 2 - d) < 0.06
-    ok = lambda key, p: on_half(p) if key == "moments" else on_line(p)
-    on = sum(1 for k, p in marks if ok(k, p))
+    ok = lambda half, p: on_half(p) if half else on_line(p)
+    on = sum(1 for k, p, half in marks if ok(half, p))
     frac = on / len(marks)
     worst = {}
-    for k, p in marks:
-        if not ok(k, p):
+    for k, p, half in marks:
+        if not ok(half, p):
             worst[k] = worst.get(k, 0) + 1
     detail = ", ".join(f"{v} {k}" for k, v in sorted(worst.items())) or "all of them"
     return frac, (f"{on} of {len(marks)} structural marks are on the bar grid "
-                  f"(chapters and spans on a bar line, moments on a half bar)"
+                  f"(spans and chapters on a bar line, moments and the chapters that "
+                  f"name them on a half bar)"
                   + (f" -- off: {detail}" if worst else ""))
 
 

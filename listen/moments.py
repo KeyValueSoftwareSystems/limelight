@@ -141,11 +141,11 @@ def analyse(slug, write=False):
         # is the right granularity rather than a convenient one.
         bp = (m.get("grid") or {}).get("bar_phase") or 0
         ph = (m.get("grid") or {}).get("phase", beats[0])
-        on_half = [i for i in range(lo, hi)
-                   if round((beats[i] - ph) / per - bp) % 2 == 0]
-        cands = [(sustained(env, beats[i]), i) for i in (on_half or range(lo, hi))]
+        cands = [(sustained(env, beats[i]), i) for i in range(lo, hi)]
         cands = [(st, i) for st, i in cands if st is not None]
         if not cands: continue
+        on_half = [(st, i) for st, i in cands
+                   if round((beats[i] - ph) / per - bp) % 2 == 0]
 
         # The drum-hit witness was a filter here and it has been removed, because
         # it was measured and it was wrong. The idea was that a drop is where the
@@ -157,7 +157,25 @@ def analyse(slug, write=False):
         # a step in loudness; what the drums do at that moment is a different fact
         # about the record, so it is recorded beside the moment and does not get a
         # vote on where the moment is.
-        j = (max(cands) if k in RISE else min(cands))[1]
+        # The half bar is a PRIOR, not a rule. As a hard constraint it fixed
+        # Levels and Starlight and broke Don't Look Down, where three of six
+        # measured drops sit on quarter-note positions no choice of bar phase
+        # turns into half bars -- checked by reconstructing all four phases, and
+        # the one this map already carries is the best of them. So an off-metre
+        # beat is allowed to win, but it has to be clearly better: the step there
+        # must exceed the best on-metre step by a fifth.
+        #
+        # The whole sweep, mean total over the five songs, because one number
+        # from it would look chosen: lattice always 0.8874, override at +0%
+        # 0.8737, +10% 0.8799, +20% 0.8879, +35% 0.8890, +50% and beyond 0.8874.
+        # It is flat from +20% to +35%; what moves is Don't Look Down, 0.71 as a
+        # hard constraint and 0.92 at +20%, with nothing else losing.
+        pick = lambda c: (max(c) if k in RISE else min(c))
+        if not on_half:
+            j = pick(cands)[1]
+        else:
+            b_all, b_on = pick(cands), pick(on_half)
+            j = b_all[1] if abs(b_all[0]) > abs(b_on[0]) * 1.20 else b_on[1]
         witness = density_step(acc, beats, j) if acc else None
         if abs(beats[j] - x["at"]) > 1e-6:
             # The chapter goes with it. Renjith found this from the stage and it is
