@@ -614,9 +614,9 @@
    "pos": 281.0
   },
   {
-   "at": 163.152141,
+   "at": 162.6797,
    "name": "drop",
-   "pos": 346.0
+   "pos": 345.0
   },
   {
    "at": 186.301747,
@@ -642,10 +642,10 @@
    "pos": 145.0
   },
   {
-   "at": 163.152141,
+   "at": 162.6797,
    "kind": "drop",
    "size": 0.95,
-   "pos": 346.0
+   "pos": 345.0
   },
   {
    "at": 186.301747,
@@ -659,10 +659,10 @@
    "pos": 409.0
   },
   {
-   "at": 194.333243,
+   "at": 193.860802,
    "kind": "stop",
    "holds": 5.669,
-   "pos": 411.9997
+   "pos": 410.9997
   },
   {
    "at": 194.805684,
@@ -1199,13 +1199,13 @@
     "pos": 281.0
    },
    {
-    "at": 163.152141,
+    "at": 162.6797,
     "id": "DRO",
     "repeat": 2,
     "arc": 0.789,
     "name": "drop",
     "mean_energy": 0.83,
-    "pos": 346.0
+    "pos": 345.0
    },
    {
     "at": 186.301747,
@@ -65312,19 +65312,27 @@
    "how": "each drop and stop moved to the beat carrying the biggest sustained step in loudness within two bars, the step being the median across 0.5, 1.0, 1.5 and 2.0 s shoulders",
    "why": "ear.py builds moments from section boundaries and section boundaries are bar lines, so a drop that lands on a half bar was pushed to the next full bar -- two beats late, every time",
    "second_witness": "drum hits per beat, counted from the separated stems, which shares no arithmetic with the loudness envelope",
-   "moved": [],
+   "moved": [
+    {
+     "kind": "drop",
+     "was": 163.152141,
+     "now": 162.6797,
+     "beats": -1.0,
+     "drum_hits_per_beat_change": 3.5
+    },
+    {
+     "kind": "stop",
+     "was": 194.333243,
+     "now": 193.860802,
+     "beats": -1.0,
+     "drum_hits_per_beat_change": -7.88
+    }
+   ],
    "chapters_moved_with_them": [
     {
      "name": "drop",
-     "was": 162.68,
-     "now": 163.152,
-     "catch_up": true
-    },
-    {
-     "name": "drop",
-     "was": 189.136,
-     "now": 186.302,
-     "catch_up": true
+     "was": 163.152,
+     "now": 162.68
     }
    ],
    "left_alone": [],

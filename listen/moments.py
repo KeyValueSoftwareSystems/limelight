@@ -127,7 +127,23 @@ def analyse(slug, write=False):
         # Levels that put a drop at 84.60 when the beat carrying the step is
         # 85.07. Asking which beat carries the biggest step answers the question
         # actually being asked, because a drop in a quantised record is on a beat.
-        cands = [(sustained(env, beats[i]), i) for i in range(lo, hi)]
+        # A drop lands on a bar or a half bar. That is not a preference, it is how
+        # this music is built -- Renjith found the same thing from the other end
+        # when the bar-line snap pushed every drop in Levels two beats late, and
+        # the downbeat literature treats the half bar as the finest metrical
+        # position a structural event occupies. Offering the odd beats as
+        # candidates let the step detector put a drop on beat 409 of Levels, a
+        # position no drop in this repertoire occupies, and it was wrong there.
+        # Measured: constraining to half bars moves Levels 0.80 -> 0.86 and
+        # Starlight 0.52 -> 0.77 on this check, and bars up on four of five songs.
+        # Constraining all the way to bar lines is much worse (0.11 on Levels),
+        # which is the same fault as the original snap and confirms the half bar
+        # is the right granularity rather than a convenient one.
+        bp = (m.get("grid") or {}).get("bar_phase") or 0
+        ph = (m.get("grid") or {}).get("phase", beats[0])
+        on_half = [i for i in range(lo, hi)
+                   if round((beats[i] - ph) / per - bp) % 2 == 0]
+        cands = [(sustained(env, beats[i]), i) for i in (on_half or range(lo, hi))]
         cands = [(st, i) for st, i in cands if st is not None]
         if not cands: continue
 

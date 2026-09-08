@@ -504,7 +504,7 @@
    "name": "verse"
   },
   {
-   "at": 17.447375,
+   "at": 17.923566,
    "name": "drop"
   },
   {
@@ -528,7 +528,7 @@
    "name": "verse"
   },
   {
-   "at": 93.637852,
+   "at": 94.114042,
    "name": "drop"
   },
   {
@@ -558,7 +558,7 @@
  ],
  "moments": [
   {
-   "at": 17.447375,
+   "at": 17.923566,
    "kind": "drop",
    "size": 0.95
   },
@@ -576,7 +576,7 @@
    "size": 0.95
   },
   {
-   "at": 93.637852,
+   "at": 94.114042,
    "kind": "drop",
    "size": 0.95
   },
@@ -594,7 +594,7 @@
    "size": 0.95
   },
   {
-   "at": 171.73309,
+   "at": 172.20928,
    "kind": "stop",
    "holds": 1.905
   }
@@ -1016,7 +1016,7 @@
     "mean_energy": 0.5797
    },
    {
-    "at": 17.447375,
+    "at": 17.923566,
     "id": "DRO",
     "repeat": 1,
     "arc": 0.098,
@@ -1064,7 +1064,7 @@
     "mean_energy": 0.5711
    },
    {
-    "at": 93.637852,
+    "at": 94.114042,
     "id": "DRO",
     "repeat": 3,
     "arc": 0.533,
@@ -46172,25 +46172,39 @@
    "how": "each drop and stop moved to the beat carrying the biggest sustained step in loudness within two bars, the step being the median across 0.5, 1.0, 1.5 and 2.0 s shoulders",
    "why": "ear.py builds moments from section boundaries and section boundaries are bar lines, so a drop that lands on a half bar was pushed to the next full bar -- two beats late, every time",
    "second_witness": "drum hits per beat, counted from the separated stems, which shares no arithmetic with the loudness envelope",
-   "moved": [],
+   "moved": [
+    {
+     "kind": "drop",
+     "was": 17.447375,
+     "now": 17.923566,
+     "beats": 1.0,
+     "drum_hits_per_beat_change": 0.5
+    },
+    {
+     "kind": "drop",
+     "was": 93.637852,
+     "now": 94.114042,
+     "beats": 1.0,
+     "drum_hits_per_beat_change": 3.38
+    },
+    {
+     "kind": "stop",
+     "was": 171.73309,
+     "now": 172.20928,
+     "beats": 1.0,
+     "drum_hits_per_beat_change": null
+    }
+   ],
    "chapters_moved_with_them": [
     {
      "name": "drop",
-     "was": 17.924,
-     "now": 17.447,
-     "catch_up": true
+     "was": 17.447,
+     "now": 17.924
     },
     {
      "name": "drop",
-     "was": 63.638,
-     "now": 62.685,
-     "catch_up": true
-    },
-    {
-     "name": "drop",
-     "was": 94.114,
-     "now": 93.638,
-     "catch_up": true
+     "was": 93.638,
+     "now": 94.114
     }
    ],
    "left_alone": [],

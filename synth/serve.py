@@ -1003,7 +1003,48 @@ class H(http.server.BaseHTTPRequestHandler):
                         k = r.get("map")
                         if k not in best or r.get("when", "") > best[k].get("when", ""):
                             best[k] = r
-                rows = sorted(best.values(), key=lambda r: -(r.get("total") or 0))
+                # An upload is the same map as the file it came from. Dropping a
+                # map into the page scores it as "(uploaded)", so the board showed
+                # it a second time, on its own row, with an identical score --
+                # which reads as two maps agreeing rather than one map counted
+                # twice. Where an uploaded row matches a file-backed row on the
+                # numbers, the file wins: it has a path somebody can open.
+                # An upload is a snapshot, not an entry. Dropping a map into the
+                # page scores it as "(uploaded)", and that row then sat on the
+                # board forever -- so after the file was improved the board showed
+                # the same author twice, the live map and a stale photograph of
+                # it, and the photograph looked like a rival. An upload is hidden
+                # once a file-backed row for the same author and song exists that
+                # is at least as new. It still appears immediately after scoring,
+                # which is what it is for.
+                have_file = {}
+                for r in best.values():
+                    if (r.get("map") or "").endswith(".map.json"):
+                        k = (r.get("song"), r.get("made_by"))
+                        if r.get("when", "") > have_file.get(k, ""):
+                            have_file[k] = r.get("when", "")
+                best = {k: r for k, r in best.items()
+                        if (r.get("map") or "").endswith(".map.json")
+                        or have_file.get((r.get("song"), r.get("made_by")), "") < r.get("when", "")}
+
+                def sig(r):
+                    return (r.get("song"), round(r.get("total") or 0, 4),
+                            round(r.get("accuracy") or 0, 4), round(r.get("coverage") or 0, 4),
+                            r.get("made_by"))
+                by_sig = {}
+                for r in best.values():
+                    k = sig(r)
+                    keep = by_sig.get(k)
+                    if keep is None:
+                        by_sig[k] = r
+                        continue
+                    # prefer the one that names a file on disk, then the newer
+                    r_file = (r.get("map") or "").endswith(".map.json")
+                    k_file = (keep.get("map") or "").endswith(".map.json")
+                    if r_file and not k_file: by_sig[k] = r
+                    elif r_file == k_file and r.get("when", "") > keep.get("when", ""):
+                        by_sig[k] = r
+                rows = sorted(by_sig.values(), key=lambda r: -(r.get("total") or 0))
                 return self._send(200, json.dumps([
                     {k: r.get(k) for k in ("map", "song", "made_by", "total",
                                            "accuracy", "coverage", "when")}
