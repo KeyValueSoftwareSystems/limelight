@@ -764,10 +764,10 @@
    "pos": 16.0
   },
   {
-   "at": 19.9108,
+   "at": 19.910814,
    "kind": "drop",
    "size": 0.95,
-   "pos": 42,
+   "pos": 40.0,
    "was": 20.848314
   },
   {
@@ -781,10 +781,10 @@
    "pos": 116.0
   },
   {
-   "at": 64.9108,
+   "at": 64.910814,
    "kind": "drop",
    "size": 0.95,
-   "pos": 138,
+   "pos": 136.0,
    "was": 65.848314
   },
   {
@@ -830,10 +830,10 @@
    "pos": 376.0
   },
   {
-   "at": 193.348314,
+   "at": 191.942064,
    "kind": "drop",
    "size": 0.95,
-   "pos": 412.0,
+   "pos": 413.0,
    "was": 191.473314
   },
   {
@@ -1417,13 +1417,13 @@
     "pos": 16.0
    },
    {
-    "at": 20.848314,
+    "at": 19.910814,
     "id": "DRO",
     "repeat": 1,
     "arc": 0.087,
     "name": "drop",
     "mean_energy": 0.8883,
-    "pos": 44.0
+    "pos": 42.0
    },
    {
     "at": 48.973314,
@@ -1444,13 +1444,13 @@
     "pos": 112.0
    },
    {
-    "at": 65.848314,
+    "at": 64.910814,
     "id": "DRO",
     "repeat": 2,
     "arc": 0.276,
     "name": "drop",
     "mean_energy": 0.8822,
-    "pos": 140.0
+    "pos": 138.0
    },
    {
     "at": 79.910814,
@@ -1516,13 +1516,13 @@
     "pos": 376.0
    },
    {
-    "at": 191.473314,
+    "at": 191.942064,
     "id": "DRO",
     "repeat": 4,
     "arc": 0.803,
     "name": "drop",
     "mean_energy": 0.6956,
-    "pos": 408.0
+    "pos": 409.0
    },
    {
     "at": 193.348314,
@@ -27034,6 +27034,13 @@
    },
    "reading": "every band is between 1.02x and 1.18x: better than random, far from sharp. The remaining error is detector jitter of +/-20-25 ms against a check that wants +/-5 ms, measured with two independent kick-onset detectors that disagree with each other by that much.",
    "not_pruned": "a per-band gate against each band's OWN stem was tried and contradicted this on the very bands in question (mizhiyoram kick 0.28x on its stem, 1.76x on the mix), so it is not trusted and nothing was removed."
+  },
+  "timing_offset_considered": {
+   "what": "a global -10 ms shift of every accent time raises listen/mapeval.py's accents check on all five songs (Levels 0.66 -> 0.79, and the same sign and size on the other four)",
+   "not_applied": "yes",
+   "why_not": "the only witness asking for it is the check itself. Measured against spectral-flux peaks in the MIX at 1 ms resolution -- a detector that shares nothing with the check's one-pole band envelope -- our claims already sit within a couple of milliseconds of the event: snare -2.0, kick -2.0, hat -1.0, guitar -3.0, other +1.0, bass -5.0, vocals +0.5, piano +5.0. Moving them 10 ms earlier would take them AWAY from the onsets to sit on the peak of a particular filter, which is a fact about mapeval and not about the record.",
+   "what_would_change_my_mind": "an independent measurement of the physical attack agreeing that the claims are late. That was attempted against the raw waveform and the test was invalid -- these records have no silence before a hit, so the threshold crossing pinned at the search window edge on every song. A cleaner version would restrict to claims preceded by 100 ms below the 10th percentile of the low band.",
+   "worth": "about 0.01 of total score, which is not a reason to write a time nobody measured"
   }
  },
  "observations": {
@@ -56301,19 +56308,13 @@
    "moved": [
     {
      "kind": "drop",
-     "was": 81.317064,
-     "now": 79.910814,
-     "beats": -3.0,
-     "drum_hits_per_beat_change": 1.0
+     "was": 191.473314,
+     "now": 191.942064,
+     "beats": 1.0,
+     "drum_hits_per_beat_change": -1.62
     }
    ],
-   "chapters_moved_with_them": [
-    {
-     "name": "drop",
-     "was": 81.317,
-     "now": 79.911
-    }
-   ],
+   "chapters_moved_with_them": [],
    "left_alone": [],
    "merged_duplicates": []
   }

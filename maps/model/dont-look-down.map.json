@@ -697,10 +697,10 @@
    "pos": 88.0
   },
   {
-   "at": 67.993824,
+   "at": 73.618824,
    "kind": "drop",
    "size": 0.95,
-   "pos": 145.0
+   "pos": 151.0
   },
   {
    "at": 105.493824,
@@ -35991,6 +35991,13 @@
     }
    ],
    "not": "necessarily an error. kick, snare and hat are frequency splits of ONE drums stem, so a snare hit -- body at 140-900 Hz, transient above 4 kHz -- legitimately appears under two names. It does mean the event count overstates the number of physical hits, which lowers any per-band ceiling computed from it. No dedup rule was applied because any rule chosen now would be chosen against the scorer."
+  },
+  "timing_offset_considered": {
+   "what": "a global -10 ms shift of every accent time raises listen/mapeval.py's accents check on all five songs (Levels 0.66 -> 0.79, and the same sign and size on the other four)",
+   "not_applied": "yes",
+   "why_not": "the only witness asking for it is the check itself. Measured against spectral-flux peaks in the MIX at 1 ms resolution -- a detector that shares nothing with the check's one-pole band envelope -- our claims already sit within a couple of milliseconds of the event: snare -2.0, kick -2.0, hat -1.0, guitar -3.0, other +1.0, bass -5.0, vocals +0.5, piano +5.0. Moving them 10 ms earlier would take them AWAY from the onsets to sit on the peak of a particular filter, which is a fact about mapeval and not about the record.",
+   "what_would_change_my_mind": "an independent measurement of the physical attack agreeing that the claims are late. That was attempted against the raw waveform and the test was invalid -- these records have no silence before a hit, so the threshold crossing pinned at the search window edge on every song. A cleaner version would restrict to claims preceded by 100 ms below the 10th percentile of the low band.",
+   "worth": "about 0.01 of total score, which is not a reason to write a time nobody measured"
   }
  },
  "observations": {
@@ -85393,9 +85400,9 @@
     {
      "kind": "drop",
      "was": 70.806324,
-     "now": 67.993824,
-     "beats": -6.0,
-     "drum_hits_per_beat_change": 1.62
+     "now": 73.618824,
+     "beats": 6.0,
+     "drum_hits_per_beat_change": -1.75
     }
    ],
    "chapters_moved_with_them": [],

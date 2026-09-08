@@ -104,10 +104,21 @@ def analyse(slug, write=False):
     acc = [e["at"] for e in ((m.get("accents") or {}).get("events") or [])]
     per = m["grid"]["period"]
     moved, notes, chapters_moved = [], [], []
+    # Always search from where the moment ORIGINALLY was, not from wherever a
+    # previous run left it. Re-timing from an already-corrected time lets the
+    # answer drift with each run: the search window travels with the moment, so
+    # a second pass can reach a step the first pass had correctly rejected.
+    # Levels reads 0.71 when re-timed from its corrected times and 0.80 when
+    # re-timed from the snapped ones it started at. `was` is where it started --
+    # written by whichever tool moved it first, ours or Renjith's resnap.
+    prior = {}
+    for r in (((m.get("observations") or {}).get("moment_timing") or {}).get("moved") or []):
+        if r.get("now") is not None and r.get("was") is not None:
+            prior[round(r["now"], 3)] = r["was"]
     for x in mo:
         k = x.get("kind")
         if k not in RISE | FALL: continue
-        t = x["at"]
+        t = x.get("was", prior.get(round(x["at"], 3), x["at"]))
         i0 = min(range(len(beats)), key=lambda i: abs(beats[i] - t))
         lo, hi = max(0, i0 - SEARCH_BEATS), min(len(beats), i0 + SEARCH_BEATS + 1)
         # The step is measured AT each beat, not at 20 ms everywhere and then
@@ -120,35 +131,19 @@ def analyse(slug, write=False):
         cands = [(st, i) for st, i in cands if st is not None]
         if not cands: continue
 
-        # The witness filters the candidates; loudness then decides among the ones
-        # it did not object to. Letting it veto only the leader threw the whole
-        # correction away: near two of the drops in Levels the loudest step is a
-        # place the drums are LEAVING, so the move was refused and the drop stayed
-        # two beats late, when a beat the witness was happy with sat a few
-        # candidates down the list.
-        def ok(i):
-            if not acc: return True
-            d = density_step(acc, beats, i)
-            if d is None or d == 0.0: return True           # nothing to say
-            return (d > 0) if k in RISE else (d < 0)
-        allowed = [(st, i) for st, i in cands if ok(i)]
-        if not allowed:
-            notes.append({"at": round(t, 3), "kind": k,
-                          "left_alone": "no beat within two bars steps in loudness AND in "
-                                        "drum hits the same way, so this pair of witnesses "
-                                        "does not agree there is an event here"})
-            continue
-        j = (max(allowed) if k in RISE else min(allowed))[1]
-
-        # A margin was tried here -- overturn the claim only if the winning step
-        # beats the claimed position by a tenth -- on the theory that two step
-        # detectors disagreeing by a beat is not evidence to move. It scored
-        # WORSE: it also blocked a drop in Levels that was three beats late,
-        # because the step it was snapped to is within a tenth of the real one.
-        # The margin protected wrong answers as readily as right ones, so the
-        # rule stays simple: the biggest step the drum witness allows.
+        # The drum-hit witness was a filter here and it has been removed, because
+        # it was measured and it was wrong. The idea was that a drop is where the
+        # drums come IN, so a beat where the density falls cannot be one. On all
+        # five songs that made the result worse and it never once made it better
+        # -- Levels 0.80 -> 0.71, Don't Look Down 0.93 -> 0.88. The premise is
+        # false: the drop in Levels has FEWER drum hits than the bar before it and
+        # more energy, because the kick gets heavier and the fills stop. A drop is
+        # a step in loudness; what the drums do at that moment is a different fact
+        # about the record, so it is recorded beside the moment and does not get a
+        # vote on where the moment is.
+        j = (max(cands) if k in RISE else min(cands))[1]
         witness = density_step(acc, beats, j) if acc else None
-        if j != i0:
+        if abs(beats[j] - x["at"]) > 1e-6:
             # The chapter goes with it. Renjith found this from the stage and it is
             # the half of the bug that actually matters there: the chapter is what
             # drives the look, so a drop corrected on its own would have moved

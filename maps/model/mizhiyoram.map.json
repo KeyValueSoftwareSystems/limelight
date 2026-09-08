@@ -24,7 +24,7 @@
   "period": 0.714179,
   "phase": 0.631783,
   "bpm": 84.029,
-  "bar_phase": 3,
+  "bar_phase": 2,
   "locked": true,
   "how": "onset flux 35-130 Hz, comb search, octave-tested",
   "bar_phase_note": "0-indexed beat of the bar the downbeat falls on. Was 4, which was 1-indexed and disagreed with this map's own downbeats by a quarter note.",
@@ -221,90 +221,90 @@
   123.470538
  ],
  "downbeats": [
-  2.774319,
-  5.631035,
-  8.48775,
-  11.344465,
-  14.20118,
-  17.057896,
-  19.914611,
-  22.771326,
-  25.628041,
-  28.484756,
-  31.341472,
-  34.198187,
-  37.054902,
-  39.911617,
-  42.768333,
-  45.625048,
-  48.481763,
-  51.338478,
-  54.195194,
-  57.051909,
-  59.908624,
-  62.765339,
-  65.622054,
-  68.47877,
-  71.335485,
-  74.1922,
-  77.048915,
-  79.905631,
-  82.762346,
-  85.619061,
-  88.475776,
-  91.332492,
-  94.189207,
-  97.045922,
-  99.902637,
-  102.759352,
-  105.616068,
-  108.472783,
-  111.329498,
-  114.186213,
-  117.042929,
-  119.899644,
-  122.756359
+  2.060141,
+  4.916856,
+  7.773571,
+  10.630286,
+  13.487002,
+  16.343717,
+  19.200432,
+  22.057147,
+  24.913862,
+  27.770578,
+  30.627293,
+  33.484008,
+  36.340723,
+  39.197439,
+  42.054154,
+  44.910869,
+  47.767584,
+  50.6243,
+  53.481015,
+  56.33773,
+  59.194445,
+  62.05116,
+  64.907876,
+  67.764591,
+  70.621306,
+  73.478021,
+  76.334737,
+  79.191452,
+  82.048167,
+  84.904882,
+  87.761597,
+  90.618313,
+  93.475028,
+  96.331743,
+  99.188458,
+  102.045174,
+  104.901889,
+  107.758604,
+  110.615319,
+  113.472035,
+  116.32875,
+  119.185465,
+  122.04218
  ],
  "chapters": [
   {
-   "at": -0.082396,
+   "at": -0.796575,
    "name": "intro",
-   "pos": -1.0
+   "pos": -2.0
   },
   {
-   "at": 22.771326,
+   "at": 22.057147,
    "name": "verse",
-   "pos": 31.0
+   "pos": 30.0
   },
   {
-   "at": 46.339227,
+   "at": 45.625048,
    "name": "drop",
-   "pos": 64.0
+   "pos": 63.0
   },
   {
-   "at": 51.338478,
+   "at": 50.624299,
    "name": "verse",
-   "pos": 71.0
+   "pos": 70.0
   },
   {
-   "at": 57.766088,
+   "at": 57.051909,
    "name": "drop",
-   "pos": 80.0
+   "pos": 79.0
   },
   {
-   "at": 68.47877,
+   "at": 67.764591,
    "name": "verse",
-   "pos": 95.0
+   "pos": 94.0
   },
   {
-   "at": 102.759352,
+   "at": 102.045173,
    "name": "build",
-   "pos": 143.0
+   "pos": 142.0
   },
   {
-   "at": 114.186213,
+   "at": 113.472034,
    "name": "verse",
-   "pos": 159.0
+   "pos": 158.0
   }
  ],
  "moments": [
@@ -324,8 +324,8 @@
  "spans": [
   {
    "kind": "build",
-   "from": 102.759352,
-   "to": 114.186213,
+   "from": 102.045173,
+   "to": 113.472034,
    "rise": "early",
    "pos_from": 143.0,
    "pos_to": 159.0
@@ -510,7 +510,7 @@
   "how": "boundaries from beat-synchronous band novelty, labelled by kick presence and energy rank; repeat counts occurrences of a label",
   "entries": [
    {
-    "at": 2.774319,
+    "at": 2.06014,
     "id": "INT",
     "repeat": 1,
     "arc": 0.0,
@@ -519,7 +519,7 @@
     "pos": 3.0
    },
    {
-    "at": 22.771326,
+    "at": 22.057147,
     "id": "VER",
     "repeat": 1,
     "arc": 0.163,
@@ -528,7 +528,7 @@
     "pos": 31.0
    },
    {
-    "at": 46.339227,
+    "at": 45.625048,
     "id": "DRO",
     "repeat": 1,
     "arc": 0.349,
@@ -537,7 +537,7 @@
     "pos": 64.0
    },
    {
-    "at": 51.338478,
+    "at": 50.624299,
     "id": "VER",
     "repeat": 2,
     "arc": 0.395,
@@ -546,7 +546,7 @@
     "pos": 71.0
    },
    {
-    "at": 57.766088,
+    "at": 57.051909,
     "id": "DRO",
     "repeat": 2,
     "arc": 0.442,
@@ -555,7 +555,7 @@
     "pos": 80.0
    },
    {
-    "at": 68.47877,
+    "at": 67.764591,
     "id": "VER",
     "repeat": 3,
     "arc": 0.535,
@@ -564,7 +564,7 @@
     "pos": 95.0
    },
    {
-    "at": 102.759352,
+    "at": 102.045173,
     "id": "BUI",
     "repeat": 1,
     "arc": 0.814,
@@ -573,7 +573,7 @@
     "pos": 143.0
    },
    {
-    "at": 114.186213,
+    "at": 113.472034,
     "id": "VER",
     "repeat": 4,
     "arc": 0.907,
@@ -8186,6 +8186,13 @@
    },
    "reading": "mizhiyoram hat 0.98x: 324 claims, 31% of the list, indistinguishable from noise -- a lofi record's hiss in the 4-12 kHz band read as hi-hats. mizhiyoram kick 1.76x is near-perfect placement.",
    "not_pruned": "a per-band gate against each band's OWN stem was tried and contradicted this on the very bands in question (mizhiyoram kick 0.28x on its stem, 1.76x on the mix), so it is not trusted and nothing was removed."
+  },
+  "timing_offset_considered": {
+   "what": "a global -10 ms shift of every accent time raises listen/mapeval.py's accents check on all five songs (Levels 0.66 -> 0.79, and the same sign and size on the other four)",
+   "not_applied": "yes",
+   "why_not": "the only witness asking for it is the check itself. Measured against spectral-flux peaks in the MIX at 1 ms resolution -- a detector that shares nothing with the check's one-pole band envelope -- our claims already sit within a couple of milliseconds of the event: snare -2.0, kick -2.0, hat -1.0, guitar -3.0, other +1.0, bass -5.0, vocals +0.5, piano +5.0. Moving them 10 ms earlier would take them AWAY from the onsets to sit on the peak of a particular filter, which is a fact about mapeval and not about the record.",
+   "what_would_change_my_mind": "an independent measurement of the physical attack agreeing that the claims are late. That was attempted against the raw waveform and the test was invalid -- these records have no silence before a hit, so the threshold crossing pinned at the search window edge on every song. A cleaner version would restrict to claims preceded by 100 ms below the 10th percentile of the low band.",
+   "worth": "about 0.01 of total score, which is not a reason to write a time nobody measured"
   }
  },
  "observations": {
@@ -24456,6 +24463,73 @@
    ],
    "left_alone": [],
    "merged_duplicates": []
+  },
+  "bar_phase_decision": {
+   "moved_by_beats": -1,
+   "from_phase": 3,
+   "to_phase": 2,
+   "decided_by": "the low band on bar lines against the other beats, measured on this recording -- bar lines 2.43x the other beats",
+   "why_not_the_old_one": "the previous phase put the bar line on the quietest beat of the four. The evidence for it was that the chapters agreed with it, and ear.py builds chapters AT the bar phase, so that agreement was arithmetic rather than evidence.",
+   "what_moved": "chapters, spans and section entries, which are derived from the bar line. Moments did not: they are measured from the recording by listen/moments.py and shifting them made them worse.",
+   "dissent": "harmonic change and bass note changes on this record favour a phase two beats away -- a half bar. The kick and the chord change disagree, as they do on Levels, and only an ear settles which one begins the bar.",
+   "all_four_phases": [
+    {
+     "shift": -3,
+     "phase": 0,
+     "bar_line_energy": "bar lines 0.43x the other beats",
+     "downbeats": 0.0,
+     "bars": 0.8,
+     "sections": 0.29504749861037216
+    },
+    {
+     "shift": -2,
+     "phase": 1,
+     "bar_line_energy": "bar lines 1.23x the other beats",
+     "downbeats": 0.5835410649770639,
+     "bars": 0.6,
+     "sections": 0.5549446640101077
+    },
+    {
+     "shift": -1,
+     "phase": 2,
+     "bar_line_energy": "bar lines 2.43x the other beats",
+     "downbeats": 1.0,
+     "bars": 0.8,
+     "sections": 1.0
+    },
+    {
+     "shift": 0,
+     "phase": 3,
+     "bar_line_energy": "bar lines 0.48x the other beats",
+     "downbeats": 0.0,
+     "bars": 0.6,
+     "sections": 1.0
+    },
+    {
+     "shift": 1,
+     "phase": 0,
+     "bar_line_energy": "bar lines 0.43x the other beats",
+     "downbeats": 0.0,
+     "bars": 0.8181818181818182,
+     "sections": 1.0
+    },
+    {
+     "shift": 2,
+     "phase": 1,
+     "bar_line_energy": "bar lines 1.23x the other beats",
+     "downbeats": 0.5835410649770639,
+     "bars": 0.6363636363636364,
+     "sections": 0.6803736498186679
+    },
+    {
+     "shift": 3,
+     "phase": 2,
+     "bar_line_energy": "bar lines 2.43x the other beats",
+     "downbeats": 1.0,
+     "bars": 0.8181818181818182,
+     "sections": 0.20656477294065057
+    }
+   ]
   }
  },
  "confidence": 0.908,
