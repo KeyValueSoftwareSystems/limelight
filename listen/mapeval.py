@@ -34,7 +34,8 @@ NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 # wrong grid is wrong regardless of how good it is.
 WEIGHTS = {"grid": 3.0, "bars": 2.0, "moments": 2.0, "downbeats": 1.5, "sections": 1.5,
            "energy": 1.5, "accents": 1.0, "chords": 1.0, "melody": 1.0, "stems": 1.0,
-           "meter": 1.0, "tempo_stability": 1.0, "pan": 1.0, "pump": 0.5}
+           "meter": 1.0, "tempo_stability": 1.0, "pan": 1.0, "identity": 1.0,
+           "pump": 0.5}
 
 
 def load(path, target_sr=11025):
@@ -1134,6 +1135,145 @@ def ev_spans(m, B):
                       "rises" if dr >= 0 else "falls", abs(dr)))
 
 
+def ev_identity(m, B):
+    """Bar 97 is claimed to be the same material as bar 33. Are the chords?
+
+    listen/identity.py decides this from MERT embeddings -- a learned model of
+    the audio, pooled per bar. This side reads the chord labels ChordMini
+    produced, turns each bar into the sequence of chord symbols sounding in it,
+    and asks whether the two bars carry the same sequence. A learned embedding
+    and a symbolic label from a different model, sharing the recording and no
+    code and no feature.
+
+    The control matters as much as the claim. Pop repeats its harmony
+    constantly, so two bars picked at random already agree fairly often, and
+    "the chords match" is not evidence on its own. Every claimed pairing is
+    compared against 32 pairings of the same bar with a random earlier one, and
+    only the excess counts.
+
+    Where they disagree is worth more than where they agree, and it is a real
+    case rather than a fault in either: a section repeated with the same chords
+    over a different arrangement looks identical here and different to MERT.
+    That is why this grades the excess over chance and not perfect agreement."""
+    o = (m.get("observations") or {}).get("identity") or {}
+    ents = o.get("entries") or []
+    if not ents:
+        return None, "no identity claimed"
+    segs = ((m.get("observations") or {}).get("chords") or {}).get("segments") or []
+    downs = m.get("downbeats") or []
+    if not segs or len(downs) < 8:
+        return None, "needs chords and bar lines to check identity against", True
+    bar = (downs[-1] - downs[0]) / max(1, len(downs) - 1)
+
+    def chords_in(k):
+        if k is None or k >= len(downs):
+            return None
+        a, b = downs[k], downs[k] + bar
+        got = []
+        for sg in segs:
+            f, t, c = sg.get("from"), sg.get("to"), sg.get("chord")
+            if f is None or t is None or c in (None, "N"):
+                continue
+            if t > a + 0.05 * bar and f < b - 0.05 * bar:
+                if not got or got[-1] != c:
+                    got.append(c)          # collapse a chord held across a split
+        return tuple(got) or None
+
+    cache = {}
+    def cin(k):
+        if k not in cache:
+            cache[k] = chords_in(k)
+        return cache[k]
+
+    import random as _rnd
+    rng = _rnd.Random(20260909)
+    hit = tot = 0
+    chit = ctot = 0
+    for e in ents:
+        k, j = e.get("bar"), e.get("same_as")
+        if j is None:
+            continue
+        a, b = cin(k), cin(j)
+        if a is None or b is None:
+            continue
+        tot += 1
+        hit += 1 if a == b else 0
+        for _ in range(32):
+            r = rng.randrange(0, max(1, k - 1))
+            c = cin(r)
+            if c is None:
+                continue
+            ctot += 1
+            chit += 1 if a == c else 0
+    if tot < 8:
+        return None, "only %d claimed repeats have chords on both sides" % tot, True
+    mine = hit / tot
+    base = (chit / ctot) if ctot else 0.0
+    lift = 0.0 if base >= 1.0 else (mine - base) / (1.0 - base)
+    return max(0.0, min(1.0, lift)), (
+        "%d of %d bars claimed to repeat an earlier bar carry the same chord sequence "
+        "(%.0f%%), against %.0f%% for the same bars paired with a random earlier one. "
+        "Harmony agrees %.0f%% of the way from chance to perfect -- and where the two "
+        "disagree, a passage repeated with the same chords over a different arrangement "
+        "is the case that separates them"
+        % (hit, tot, 100 * mine, 100 * base, 100 * lift))
+
+
+SURPRISE_MAX_LOUD_R = 0.50
+
+
+def ev_surprise(m, B):
+    """A guard, not a corroboration, and it carries no weight for that reason.
+
+    The brief says surprise must not be computed from loudness. The version
+    that was in these files predicted each bar from its hit counts, its six
+    stem LEVELS and its energy, and correlated -0.47, -0.52, -0.13, -0.52 and
+    -0.49 with the bar's own loudness: a quiet bar following loud ones was
+    being called surprising for being quiet. It is computed from L2-normalised
+    MERT rows now, where the scale is divided out before anything is compared,
+    and the correlation falls to -0.23 to -0.43.
+
+    Not to zero, and that is not a failure to report as one. A record doing
+    something new is often also doing something louder, so some correlation is
+    the truth. The threshold is 0.50, which is a real line rather than an
+    invented one: every version measured here passes it and the version it
+    replaced fails it.
+
+    There is no positive check. I looked for one -- whether surprise rises in
+    bars introducing a chord the previous four did not contain, harmony being
+    symbolic and from another model -- and the lift came out +0.09, -0.03,
+    -0.03, +0.05, +0.11. Three positive, two negative, none of them large. So
+    the field ships with a guard against the specific way it was wrong and no
+    evidence that it is right, which is worth stating plainly rather than
+    dressing a guard up as corroboration."""
+    o = (m.get("observations") or {}).get("surprise") or {}
+    at, val = o.get("at") or [], o.get("value") or []
+    downs = m.get("downbeats") or []
+    if not at or not val or len(downs) < 8:
+        return None, "no surprise series"
+    dt, rms = B["dt"], B["rms"]
+    bar = (downs[-1] - downs[0]) / max(1, len(downs) - 1)
+    xs, ys = [], []
+    for k, t in enumerate(at):
+        if k >= len(val) or val[k] is None:
+            continue
+        i0, i1 = int(t / dt), int((t + bar) / dt)
+        seg = rms[i0:min(i1, len(rms))]
+        if seg:
+            xs.append(val[k])
+            ys.append(sum(seg) / len(seg))
+    if len(xs) < 16:
+        return None, "too few bars to test the loudness coupling", True
+    r = _corr(xs, ys)
+    ok = abs(r) < SURPRISE_MAX_LOUD_R
+    score = max(0.0, 1.0 - abs(r) / SURPRISE_MAX_LOUD_R) if ok else 0.0
+    return score, ("correlates %+.2f with the bar's own loudness, against a %.2f ceiling -- "
+                   "%s. This is an upper bound and not a target; no positive check for this "
+                   "field survived, so it carries no weight"
+                   % (r, SURPRISE_MAX_LOUD_R,
+                      "within it" if ok else "REFUSED, this is a loudness curve in disguise"))
+
+
 def ev_pump(m, B):
     p = (m.get("observations") or {}).get("pump")
     if not p: return None, "no pump measurement"
@@ -1267,7 +1407,7 @@ def au_arc(m, B):
 # and carries weight, because a check worth running is worth counting.
 # au_tempo is replaced by ev_tempo above, which uses eight windows and a fitted
 # line rather than two halves, and carries weight.
-AUDIT = {"energy_peak": au_arc, "spans": ev_spans}
+AUDIT = {"energy_peak": au_arc, "spans": ev_spans, "surprise": ev_surprise}
 
 
 def audio_for(slug):
@@ -1305,7 +1445,7 @@ def evaluate(slug, map_path=None, m=None):
         ("sections", ev_sections, (m, B)), ("energy", ev_energy, (m, B)),
         ("accents", ev_accents, (m, B)), ("stems", ev_stems, (m, B)),
         ("meter", ev_meter, (m, B)), ("tempo_stability", ev_tempo, (m, B)),
-        ("pan", ev_pan, (m, B, slug)),
+        ("pan", ev_pan, (m, B, slug)), ("identity", ev_identity, (m, B)),
         ("pump", ev_pump, (m, B)),
         ("chords", ev_chords, (m, B, sig, sr)), ("melody", ev_melody, (m, B, sig, sr)),
     ):

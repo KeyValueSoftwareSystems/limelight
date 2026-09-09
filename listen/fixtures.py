@@ -268,6 +268,67 @@ def flipped_pan():
     return ok
 
 
+def broken_identity_and_surprise():
+    """rule 5's broken-file entries for the two fields built on the sidecar.
+
+    identity: point every claimed repeat at a random earlier bar. Still a
+    well-formed field, still says every bar repeats something, and the chords
+    stop agreeing.
+
+    surprise: put the loudness curve in it. That is exactly what the field used
+    to be, and the guard exists to refuse it."""
+    import json, copy, random
+    import mapeval as ME
+    from mapio import map_path
+
+    ok = True
+    print("== identity pointed at the wrong bars, surprise replaced by loudness")
+    for slug in ("levels", "starlight", "mizhiyoram", "dont-look-down", "the-nights"):
+        mp = map_path(slug)
+        sig, sr, cached = ME.audio_for(slug)
+        if not mp or sig is None:
+            continue
+        B = cached if cached is not None else ME.bands(sig, sr)
+        m = json.load(open(mp))
+
+        good = ME.ev_identity(m, B)[0]
+        if good is None:
+            print("   --   %-16s no identity claimed" % slug)
+        else:
+            bad_m = copy.deepcopy(m)
+            rng = random.Random(7)
+            for e in bad_m["observations"]["identity"]["entries"]:
+                if e.get("same_as") is not None and e["bar"] > 3:
+                    e["same_as"] = rng.randrange(0, e["bar"] - 1)
+            bad = ME.ev_identity(bad_m, B)[0] or 0.0
+            fine = good - bad >= 0.01 and bad <= 0.02
+            ok = ok and fine
+            print("   %s %-16s identity: as claimed %.2f, pointed at random bars %.2f"
+                  % ("ok  " if fine else "FAIL", slug, good, bad))
+
+        o = (m.get("observations") or {}).get("surprise") or {}
+        if not o.get("at"):
+            continue
+        downs = m["downbeats"]
+        bar = (downs[-1] - downs[0]) / max(1, len(downs) - 1)
+        dt, rms = B["dt"], B["rms"]
+        loud_m = copy.deepcopy(m)
+        vals = []
+        for t in o["at"]:
+            i0, i1 = int(t / dt), int((t + bar) / dt)
+            seg = rms[i0:min(i1, len(rms))]
+            vals.append(sum(seg) / len(seg) if seg else 0.0)
+        lo, hi = min(vals), max(vals)
+        loud_m["observations"]["surprise"]["value"] = [
+            round((v - lo) / max(1e-9, hi - lo), 4) for v in vals]
+        refused = ME.ev_surprise(loud_m, B)[0]
+        caught = refused is not None and refused <= 0.0
+        ok = ok and caught
+        print("   %s %-16s surprise: the loudness curve pasted in scores %.2f"
+              % ("ok  " if caught else "FAIL", slug, refused or 0.0))
+    return ok
+
+
 def run():
     import mapeval as ME
 
@@ -340,6 +401,8 @@ def run():
     ok = wrong_meter_and_tempo() and ok
     print()
     ok = flipped_pan() and ok
+    print()
+    ok = broken_identity_and_surprise() and ok
     return 0 if ok else 1
 
 

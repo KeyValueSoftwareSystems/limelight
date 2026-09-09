@@ -24842,109 +24842,99 @@
   "surprise": {
    "rate": "per_downbeat",
    "unit": "0-1, 1 = the biggest departure in this song",
-   "how": "each bar is described by how many hits it has on each instrument, its six stem levels and its energy. That vector is predicted from the mean of the 4 bars before it, and the surprise is the cosine distance between prediction and measurement.",
-   "why_it_exists": "nothing else in this file says how EXPECTED a moment is, and a performance is built on expectation rather than on level. A bar that sounds exactly like the four before it needs nothing from a reader however loud it is; a bar that breaks the pattern is the whole point.",
-   "not": "not novelty. novelty compares a bar to its neighbours in a learned embedding and finds boundaries. This asks whether the bar was PREDICTABLE from what came before, which is a different question and disagrees with novelty at the second and third repeat of a section -- by then it is no longer surprising.",
-   "biggest_departures_s": [
-    110.615,
-    104.902,
-    44.911,
-    102.045,
-    33.484,
-    116.329,
-    99.188,
-    113.472
-   ],
+   "how": "each bar's MERT row, pooled and L2-normalised, against the mean of the four bars before it; the surprise is the cosine distance. The rows are unit vectors, so the loudness of the bar is divided out before anything is compared.",
+   "why_it_exists": "a reader that only knows what is loud answers a drop and misses the moment a record does something it has not done before, which is often quiet.",
+   "not_from_loudness": "deliberately. The previous version of this field predicted a bar from its hit counts, its six stem LEVELS and its energy, and correlated -0.47 to -0.52 with the bar's own loudness across the five songs -- a quiet bar after loud ones was being called surprising for being quiet. mapeval now refuses this field if that correlation returns.",
+   "not": "not a claim that a listener is surprised. It is that a model trained on a lot of music did not see this bar coming from the four before it.",
+   "source": "mizhiyoram.mert-v1-95m-12af15fef9d0.per-beat.f16",
+   "model": "m-a-p/MERT-v1-95M",
+   "provenance": "measured",
+   "checked_against": "its own correlation with loudness, in mapeval.ev_surprise, which is an upper bound rather than a target",
    "at": [
-    2.06,
-    4.917,
-    7.774,
-    10.63,
-    13.487,
-    16.344,
-    19.2,
-    22.057,
-    24.914,
-    27.771,
-    30.627,
-    33.484,
-    36.341,
-    39.197,
-    42.054,
-    44.911,
-    47.768,
-    50.624,
-    53.481,
-    56.338,
-    59.194,
-    62.051,
-    64.908,
-    67.765,
-    70.621,
-    73.478,
-    76.335,
-    79.191,
-    82.048,
-    84.905,
-    87.762,
-    90.618,
-    93.475,
-    96.332,
-    99.188,
-    102.045,
-    104.902,
-    107.759,
-    110.615,
-    113.472,
-    116.329,
-    119.185,
-    122.042
+    13.487002,
+    16.343717,
+    19.200432,
+    22.057147,
+    24.913862,
+    27.770578,
+    30.627293,
+    33.484008,
+    36.340723,
+    39.197439,
+    42.054154,
+    44.910869,
+    47.767584,
+    50.6243,
+    53.481015,
+    56.33773,
+    59.194445,
+    62.05116,
+    64.907876,
+    67.764591,
+    70.621306,
+    73.478021,
+    76.334737,
+    79.191452,
+    82.048167,
+    84.904882,
+    87.761597,
+    90.618313,
+    93.475028,
+    96.331743,
+    99.188458,
+    102.045174,
+    104.901889,
+    107.758604,
+    110.615319,
+    113.472035,
+    116.32875,
+    119.185465,
+    122.04218
    ],
    "value": [
-    null,
-    null,
-    null,
-    null,
-    0.0788,
-    0.0489,
-    0.0257,
-    0.5136,
-    0.5781,
-    0.6185,
-    0.541,
-    0.655,
-    0.14,
-    0.114,
-    0.142,
-    0.691,
-    0.3828,
-    0.2098,
-    0.1524,
-    0.1261,
-    0.0932,
-    0.4268,
-    0.1886,
-    0.2079,
-    0.3775,
-    0.5793,
-    0.5565,
-    0.4538,
-    0.1664,
-    0.0863,
-    0.1276,
-    0.059,
-    0.1067,
-    0.2399,
-    0.6426,
-    0.6718,
-    0.8508,
-    0.6387,
+    0.2176,
+    0.0,
+    0.0906,
+    0.5191,
+    0.6402,
+    0.3171,
+    0.5091,
+    0.4472,
+    0.4234,
+    0.1946,
+    0.0815,
+    0.4984,
+    0.5965,
+    0.4693,
+    0.2394,
+    0.156,
+    0.3305,
+    0.1755,
+    0.0893,
+    0.6166,
+    0.8636,
+    0.3746,
+    0.3928,
+    0.3198,
+    0.1408,
+    0.0327,
+    0.158,
+    0.3254,
+    0.1078,
+    0.3498,
     1.0,
-    0.6424,
-    0.6523,
-    0.1094,
-    0.211
-   ]
+    0.6914,
+    0.5733,
+    0.5901,
+    0.7319,
+    0.6463,
+    0.8276,
+    0.3955,
+    0.6655
+   ],
+   "loudness_correlation": -0.33,
+   "loudness_ceiling": 0.5,
+   "no_positive_check": "no independent check for this field survived. Whether surprise rises in bars introducing a chord the previous four did not contain -- harmony being symbolic and from another model -- gave lifts of +0.09, -0.03, -0.03, +0.05, +0.11 across the five songs: three positive, two negative, none large. The field is a measurement with a guard against the way it used to be wrong, and no evidence that it is right."
   },
   "grid_crosscheck": {
    "what": "the bar line and the tempo octave, checked against harmony instead of drums",
@@ -30318,6 +30308,327 @@
     "flat": 1
    },
    "checked_against": "the energy composite of section 1a -- onset rate, high-band onset rate and band occupancy on the raw mix -- with randomly placed spans of the same durations as the control. Shares the recording and no feature."
+  },
+  "identity": {
+   "rate": "per_downbeat",
+   "unit": "the index of the earlier bar this one is the same material as, or null",
+   "how": "MERT rows pooled per bar and L2-normalised, then the nearest earlier bar by cosine. The bar must beat this song's own 97% pair similarity (0.854 here, against a median of 0.688), and sit at least 2 bars back so the previous bar does not count as a repeat.",
+   "threshold": 0.8544,
+   "median_pair_similarity": 0.688,
+   "why_not_a_fixed_threshold": "every bar of one song sits close to every other in this embedding. A fixed 0.55 matched 125 of Levels' 127 bars to something, which is not a measurement of anything.",
+   "why_it_exists": "sections says a passage is the second 'drop'. It does not say bar 97 is the same music as bar 33, which is what a reader needs to answer a repeat the way it answered the first time, or deliberately not.",
+   "not": "not a claim that the two bars are identical audio. It is that a model trained on a great deal of music puts them in the same place, which is closer to what a listener means by 'this bit again' than a waveform comparison would be.",
+   "source": "mizhiyoram.mert-v1-95m-12af15fef9d0.per-beat.f16",
+   "model": "m-a-p/MERT-v1-95M",
+   "revision": "12af15fef9d0ac838c3f475bfbbf26d2060dd4f5",
+   "provenance": "measured",
+   "reads_nothing_else": "not sections, not chapters, not energy. If this and sections disagree, both were arrived at independently.",
+   "checked_against": "chord-sequence repetition, in mapeval.ev_identity -- a symbolic label from a different model, sharing the recording and no code",
+   "bars_matched": 13,
+   "bars_new": 30,
+   "entries": [
+    {
+     "bar": 0,
+     "at": 2.060141,
+     "same_as": null,
+     "similarity": null,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 1,
+     "at": 4.916856,
+     "same_as": null,
+     "similarity": null,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 2,
+     "at": 7.773571,
+     "same_as": null,
+     "similarity": 0.8469,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 3,
+     "at": 10.630286,
+     "same_as": null,
+     "similarity": 0.8185,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 4,
+     "at": 13.487002,
+     "same_as": 0,
+     "same_as_at": 2.060141,
+     "similarity": 0.859
+    },
+    {
+     "bar": 5,
+     "at": 16.343717,
+     "same_as": 1,
+     "same_as_at": 4.916856,
+     "similarity": 0.9763
+    },
+    {
+     "bar": 6,
+     "at": 19.200432,
+     "same_as": 4,
+     "same_as_at": 13.487002,
+     "similarity": 0.9046
+    },
+    {
+     "bar": 7,
+     "at": 22.057147,
+     "same_as": null,
+     "similarity": 0.8136,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 8,
+     "at": 24.913862,
+     "same_as": null,
+     "similarity": 0.6667,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 9,
+     "at": 27.770578,
+     "same_as": null,
+     "similarity": 0.8,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 10,
+     "at": 30.627293,
+     "same_as": null,
+     "similarity": 0.788,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 11,
+     "at": 33.484008,
+     "same_as": null,
+     "similarity": 0.7556,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 12,
+     "at": 36.340723,
+     "same_as": null,
+     "similarity": 0.7311,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 13,
+     "at": 39.197439,
+     "same_as": null,
+     "similarity": 0.8213,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 14,
+     "at": 42.054154,
+     "same_as": 10,
+     "same_as_at": 30.627293,
+     "similarity": 0.9033
+    },
+    {
+     "bar": 15,
+     "at": 44.910869,
+     "same_as": null,
+     "similarity": 0.7729,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 16,
+     "at": 47.767584,
+     "same_as": null,
+     "similarity": 0.7734,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 17,
+     "at": 50.6243,
+     "same_as": null,
+     "similarity": 0.7241,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 18,
+     "at": 53.481015,
+     "same_as": null,
+     "similarity": 0.8377,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 19,
+     "at": 56.33773,
+     "same_as": 16,
+     "same_as_at": 47.767584,
+     "similarity": 0.8776
+    },
+    {
+     "bar": 20,
+     "at": 59.194445,
+     "same_as": null,
+     "similarity": 0.808,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 21,
+     "at": 62.05116,
+     "same_as": 19,
+     "same_as_at": 56.33773,
+     "similarity": 0.8544
+    },
+    {
+     "bar": 22,
+     "at": 64.907876,
+     "same_as": 19,
+     "same_as_at": 56.33773,
+     "similarity": 0.8677
+    },
+    {
+     "bar": 23,
+     "at": 67.764591,
+     "same_as": null,
+     "similarity": 0.7801,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 24,
+     "at": 70.621306,
+     "same_as": null,
+     "similarity": 0.7952,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 25,
+     "at": 73.478021,
+     "same_as": null,
+     "similarity": 0.8524,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 26,
+     "at": 76.334737,
+     "same_as": null,
+     "similarity": 0.8387,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 27,
+     "at": 79.191452,
+     "same_as": null,
+     "similarity": 0.8244,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 28,
+     "at": 82.048167,
+     "same_as": 26,
+     "same_as_at": 76.334737,
+     "similarity": 0.9149
+    },
+    {
+     "bar": 29,
+     "at": 84.904882,
+     "same_as": 26,
+     "same_as_at": 76.334737,
+     "similarity": 0.927
+    },
+    {
+     "bar": 30,
+     "at": 87.761597,
+     "same_as": 26,
+     "same_as_at": 76.334737,
+     "similarity": 0.8848
+    },
+    {
+     "bar": 31,
+     "at": 90.618313,
+     "same_as": null,
+     "similarity": 0.8232,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 32,
+     "at": 93.475028,
+     "same_as": 30,
+     "same_as_at": 87.761597,
+     "similarity": 0.8832
+    },
+    {
+     "bar": 33,
+     "at": 96.331743,
+     "same_as": null,
+     "similarity": 0.8089,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 34,
+     "at": 99.188458,
+     "same_as": 24,
+     "same_as_at": 70.621306,
+     "similarity": 0.9721
+    },
+    {
+     "bar": 35,
+     "at": 102.045174,
+     "same_as": null,
+     "similarity": 0.8421,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 36,
+     "at": 104.901889,
+     "same_as": 11,
+     "same_as_at": 33.484008,
+     "similarity": 0.8785
+    },
+    {
+     "bar": 37,
+     "at": 107.758604,
+     "same_as": null,
+     "similarity": 0.8015,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 38,
+     "at": 110.615319,
+     "same_as": null,
+     "similarity": 0.756,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 39,
+     "at": 113.472035,
+     "same_as": null,
+     "similarity": 0.8049,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 40,
+     "at": 116.32875,
+     "same_as": null,
+     "similarity": 0.8006,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 41,
+     "at": 119.185465,
+     "same_as": null,
+     "similarity": 0.8152,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    },
+    {
+     "bar": 42,
+     "at": 122.04218,
+     "same_as": null,
+     "similarity": 0.771,
+     "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
+    }
+   ]
   }
  },
  "confidence": 0.908,
