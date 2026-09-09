@@ -32,6 +32,17 @@ NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
 # what each field is worth. Timing dominates because everything downstream of a
 # wrong grid is wrong regardless of how good it is.
+def _scorer_fp():
+    """Which version of this scorer produced a number. Without it a trajectory
+    cannot tell a better map from a stricter grader, and we have already been
+    fooled by exactly that once."""
+    import hashlib, os as _os
+    h = hashlib.sha256()
+    _p = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "mapeval.py")
+    if _os.path.exists(_p): h.update(open(_p, "rb").read())
+    return h.hexdigest()[:12]
+
+
 WEIGHTS = {"grid": 3.0, "bars": 2.0, "moments": 2.0, "downbeats": 1.5, "sections": 1.5,
            "energy": 1.5, "accents": 1.0, "chords": 1.0, "melody": 1.0, "stems": 1.0,
            "meter": 1.0, "tempo_stability": 1.0, "pan": 1.0, "identity": 1.0,
@@ -1885,7 +1896,30 @@ def evaluate(slug, map_path=None, m=None):
         except Exception as e:
             sc, why = None, f"threw: {e}"
         audit[name] = {"score": None if sc is None else round(sc, 4), "said": why}
+    # Every number this returns should be reproducible by hand from what it
+    # returns. Shipping the weights and the formula alongside the result lets a
+    # page show the arithmetic instead of asserting the total, and stops these
+    # constants being retyped somewhere they can drift out of step with here.
     return {"song": slug,
+            "scorer": _scorer_fp(),
+            "weights": dict(WEIGHTS),
+            # applicable, not the sum of all weights. A field flagged `na` is one
+            # THIS RECORDING cannot answer -- Levels is four-on-the-floor so it has
+            # no bar-line accent to measure -- and charging the map for that is
+            # charging it for the genre of the song. A field the map is merely
+            # silent about still costs, which is the point of coverage.
+            "applicable_weight": round(applicable, 3),
+            "total_weight": round(sum(WEIGHTS.values()), 3),
+            "scored_weight": round(sum(w for w, _ in scored), 3),
+            "weighted_sum": round(sum(w * v for w, v in scored), 4),
+            "formula": {
+              "accuracy": "sum(weight x score) / sum(weight of scored fields)",
+              "coverage": "sum(weight of scored) / sum(weight of APPLICABLE fields)",
+              "gate":     "min(1, grid / 0.45)",
+              "total":    "accuracy x (0.55 + 0.45 x coverage) x gate",
+              "na":       "a field the RECORDING cannot answer is excluded from "
+                          "the coverage denominator; a field the MAP omits is not",
+            },
             "audit": audit,
             "map": os.path.relpath(map_path, ROOT) if map_path else "(uploaded)",
             "made_by": (m.get("made_by") or {}).get("who") or (m.get("made_by") or {}).get("how"),
