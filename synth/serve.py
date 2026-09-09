@@ -358,6 +358,32 @@ def artnet_discover(ms=2500, to=None):
     s2.close()
     return {"nodes": list(found.values())}
 
+def songs_without_audio():
+    """Slugs somebody has a score for, but whose audio is not on THIS machine.
+
+    synth/out/ is gitignored -- rule 1, no audio in git, ever -- so a fresh clone
+    has every map and no recording. songs_index() discovers a real song from its
+    wav, which meant those songs did not appear at all: no error, no empty row,
+    just a shorter dropdown. Alnas lost an evening to exactly that. Silent
+    failures cost more than ugly ones, so they are named now."""
+    have, want = set(), {}
+    od = os.path.join(HERE, "out")
+    if os.path.isdir(od):
+        for f in os.listdir(od):
+            if f.endswith(".wav"): have.add(f[:-4])
+    for base in (os.path.join(HERE, "maps"), os.path.join(HERE, "best"),
+                 os.path.join(ROOT, "maps")):
+        if not os.path.isdir(base): continue
+        for root, _d, files in os.walk(base):
+            for f in files:
+                if not f.endswith(".map.json"): continue
+                slug = f[:-9].split(".")[0]
+                if slug in have or slug in want: continue
+                try: t = json.load(open(os.path.join(root, f))).get("song", {}).get("title")
+                except Exception: t = None
+                want[slug] = t or slug
+    return want
+
 def songs_index():
     """Every song the ladder has, discovered from disk.
 
@@ -1205,7 +1231,8 @@ class H(http.server.BaseHTTPRequestHandler):
                     except Exception: pass
                 return self._send(200, json.dumps(
                     {"song": slug, "maps": out, "editable": (not READONLY),
-                     "songs": {k: v["label"] for k, v in songs.items()}}))
+                     "songs": {k: v["label"] for k, v in songs.items()},
+                     "no_audio": songs_without_audio()}))
             if u.path == "/api/status": return self._send(200, json.dumps(status()))
             if u.path == "/api/listeners2": return self._send(200, json.dumps(listeners_available()))
             if u.path == "/api/job":

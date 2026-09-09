@@ -246,7 +246,12 @@ async function boot(){
   YOURSKEY=RANK.find(k=>MAPS[k]&&k!=="best")||Object.keys(MAPS).find(k=>k!=="best"&&k!=="answer");
   if(!SRC||!MAPS[SRC]) SRC=MAPS["best"]?"best":YOURSKEY;
   $("song").innerHTML=Object.entries(G.songs||{}).map(([k,v])=>
-    `<option value="${k}"${k===SONG?" selected":""}>${esc(v)}</option>`).join("");
+    `<option value="${k}"${k===SONG?" selected":""}>${esc(v)}</option>`).join("")
+    +Object.entries(G.no_audio||{}).map(([k,v])=>
+      `<option disabled>${esc(v)} — no audio here</option>`).join("");
+  const na=Object.keys(G.no_audio||{});
+  if(na.length) say(`${na.length} song(s) have a score but no audio on this machine: `
+    +na.join(", ")+" — audio is never in git");
   aud.src="/api/audio?song="+SONG;
   WAVE=await (await fetch("/api/wave?song="+SONG)).json().catch(()=>null);
   BASE=await (await fetch("/api/layout?rig=three")).json();

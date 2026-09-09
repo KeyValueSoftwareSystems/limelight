@@ -74,6 +74,7 @@ input[type=range].big{width:100%;accent-color:var(--amb)}
   </div>
 
   <div id="status"><span class="dot" id="dot"></span><span id="stxt">starting&hellip;</span></div>
+  <p class="note" id="missing"></p>
 
   <canvas id="room"></canvas>
   <div id="chans"></div>
@@ -149,11 +150,28 @@ async function boot(){
   SONG=G.song; MAPS=G.maps;
   MAPKEY=MAPS["best"]?"best":Object.keys(MAPS).find(k=>k!=="answer");
   $("song").innerHTML=Object.entries(G.songs||{}).map(([k,v])=>
-    `<option value="${k}"${k===SONG?" selected":""}>${esc(v)}</option>`).join("");
+    `<option value="${k}"${k===SONG?" selected":""}>${esc(v)}</option>`).join("")
+    +Object.entries(G.no_audio||{}).map(([k,v])=>
+      `<option disabled>${esc(v)} — no audio on this machine</option>`).join("");
+  missingAudio(G.no_audio||{});
   aud.src="/api/audio?song="+SONG;
   window.RECIPE=await (await fetch("/static/recipe_gig.js")).text();
   loadMap(); patchUI(); chansUI(); walkUI(); wire(); loop(); poll();
   autoNode();                                  /* nobody should have to find the node */
+}
+function missingAudio(na){
+  const ks=Object.keys(na);
+  if(!ks.length){ $("missing").innerHTML=""; return }
+  $("missing").innerHTML=`<b class="warn">${ks.length} song${ks.length===1?"":"s"} here
+    ${ks.length===1?"has":"have"} a score but no recording on this machine:</b>
+    ${ks.map(k=>esc(k)).join(", ")}.
+    <br>Audio is never in git (rule 1), so a fresh clone has every map and no sound.
+    Two ways out: open this page from the machine that has the audio &mdash;
+    <span class="eq">HOST=0.0.0.0 python3 synth/serve.py</span> there, then browse to
+    <span class="eq">http://&lt;that-machine&gt;:8770/live</span> &mdash; or copy the file over:
+    <span class="eq">scp you@&lt;that-machine&gt;:limelight/synth/out/${esc(ks[0])}.wav synth/out/</span>.
+    The ten ladder songs are different: they are generated, so
+    <span class="eq">python3 synth/compose.py</span> rebuilds those from nothing.`;
 }
 function loadMap(){
   M=JSON.parse(JSON.stringify(MAPS[MAPKEY]));
