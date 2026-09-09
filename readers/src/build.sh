@@ -43,7 +43,7 @@ def render(map_path, out_path, slug=None):
     s = s.replace("__ROOM__",
                   ";(function(){\n" + open("synth/room.js").read() + "\n})();")
     want = os.environ.get("LIMELIGHT_RECIPE", "recipe4.js")
-    for k, f in (("__RECIPE__", want), ("__DRONES__", "drones.js"),
+    for k, f in (("__DERIVE__", "derive.js"), ("__RECIPE__", want), ("__DRONES__", "drones.js"),
                  ("__RENDER__", "render_gl.js"), ("__SKY__", "sky.js"),
                  ("__SCORELANES__", "score_lanes.js"), ("__APP__", "appglue.js")):
         body = open("readers/src/" + f).read()

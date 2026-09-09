@@ -72,7 +72,8 @@ def analyse(slug, write=False):
         v = seg.mean(0) if len(seg) else np.zeros(H.shape[1], np.float32)
         n = np.linalg.norm(v); rows.append(v / n if n > 0 else v)
     V = np.stack(rows).astype(np.float16)
-    # section similarity: mean cosine between the pooled rows of each pair of sections
+    # Reported to the terminal as a sanity read, NOT written to the map: it is a
+    # pure function of the sidecar and `sections`, so a reader can compute it.
     secs = m.get("sections"); ents = secs.get("entries") if isinstance(secs, dict) else (secs or [])
     sim = {}
     if ents and len(ents) >= 2:
@@ -89,7 +90,12 @@ def analyse(slug, write=False):
             for j in range(i + 1, len(pooled)):
                 sim["%s~%s" % (names[i], names[j])] = round(float(pooled[i] @ pooled[j]), 3)
         sim = dict(sorted(sim.items(), key=lambda kv: -kv[1]))
-    fname = slug + ".vec.f16"
+    # The name of the file and the integrity of the reference belong to
+    # listen/sidecar.py -- one writer per fact, and that fact is "which file,
+    # made by which revision, holding how many bytes". This writes the data and
+    # the things only it knows; sidecar.py names it and measures it.
+    import sidecar as SC
+    fname = SC.canonical(slug, NAME, SC.revision(NAME), "per_beat", "float16")
     if write:
         V.tofile(os.path.join(os.path.dirname(mp), fname))
         m["vectors"] = {
@@ -97,7 +103,6 @@ def analyse(slug, write=False):
             "rows": int(V.shape[0]), "dim": int(V.shape[1]), "dtype": "float16",
             "layout": "row_major", "file": fname,
             "pooling": "mean of %.1f Hz frames between consecutive beats, then L2-normalised" % fps,
-            "section_similarity": sim,
             "not": ("a fact a human can check by ear. It is what a large model heard, "
                     "for a small head to learn from. Also: this torch build renamed the "
                     "weight-norm parametrisation, so the positional-conv weights of the "
@@ -107,6 +112,7 @@ def analyse(slug, write=False):
             "device": torch.cuda.get_device_name(0) if dev == "cuda" else "cpu",
         }
         json.dump(m, open(mp, "w"), indent=1); open(mp, "a").write("\n")
+        SC.analyse(slug, write=True)          # adds bytes, sha256 and the checks
     return {"song": slug, "rows": int(V.shape[0]), "dim": int(V.shape[1]), "fps": round(fps, 1),
             "secs": round(time.time() - t0, 1), "top_sim": list(sim.items())[:3],
             "wrote": fname if write else None}

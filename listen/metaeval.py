@@ -40,10 +40,15 @@ ANCHOR = {
     "moments":   ("recording", "the loudness step nearest each claimed drop or stop"),
     "downbeats": ("recording", "low band on downbeats against the other beats"),
     "sections":  ("recording", "spectral change at boundaries, against a random control"),
-    "energy":    ("recording", "loudness envelope"),
+    "energy":    ("recording", "onset rate, high-band onset rate and band occupancy -- counts "
+                               "and percentiles, none of which move when the volume does; "
+                               "loudness is a lower-weighted secondary and only votes when "
+                               "the record's level actually varies"),
     "accents":   ("recording", "onset strength at the claimed hits"),
     "chords":    ("recording", "chroma energy of the claimed notes"),
     "melody":    ("recording", "pitch energy, against a tritone control"),
+    "stems":     ("recording", "the six claimed levels, summed as energy, against the mix's "
+                               "own loudness bar by bar"),
     "pump":      ("recording", "recomputed from the audio and compared"),
 }
 
@@ -51,6 +56,18 @@ ANCHOR = {
 def corrupt(m, field, rng):
     """One deliberate, specific fault per field."""
     m = copy.deepcopy(m)
+    if field == "stems":
+        # The fault that was actually in the file: each stem normalised by its
+        # own maximum, so a stem the separator invented sits near the top of
+        # its range for the whole song.
+        src = (m.get("stems") or {}).get("sources") or {}
+        for n, v in list(src.items()):
+            if not v:
+                continue
+            lo, hi = min(v), max(v)
+            src[n] = [round((x - lo) / max(1e-9, hi - lo), 4) for x in v]
+        (m.get("stems") or {}).pop("comparable", None)
+        return m
     g = m["grid"]; per, ph = g["period"], g["phase"]
     if field == "moments":
         # a drop in the wrong place: two beats late, which is the exact fault

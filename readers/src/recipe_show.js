@@ -95,11 +95,8 @@ const MELC = series(OB.melody_centroid);
   const BASSN = (OB.bass_notes && (OB.bass_notes.notes || OB.bass_notes.value)) || null;
   const INSTR = (OB.instruments && OB.instruments.entries) || null;
 
-const ANTIC = (OB.anticipation && OB.anticipation.entries) || [];
-const ANTIC_T = ANTIC.map((r) => r.at);
-const LEAD = (OB.lead && OB.lead.entries) || [];
-const LEAD_T = LEAD.map((r) => r.at);
-const ARC = OB.arc || null;
+const DER = DERIVE.make(MAP_FULL || MAP);   // the four derived fields, in one place
+const ARC = DER.arc;
 const PEAK_F = ARC
   ? ARC.peak_at_fraction != null
     ? ARC.peak_at_fraction
@@ -228,14 +225,11 @@ function phraseThrough(t) {
   return sat((within + inBar(t)) / L);
 }
 
-function anticAt(t) {
-  const i = idxAtOrBefore(ANTIC_T, t);
-  return i < 0 ? null : ANTIC[i];
-}
-function leadAt(t) {
-  const i = idxAtOrBefore(LEAD_T, t);
-  return i < 0 ? null : LEAD[i];
-}
+/* Both of these used to read a per-bar table out of the map. They ask the one
+   shared helper now, which computes the same answer from `moments` and `stems`
+   and cannot fall out of step with them. */
+function anticAt(t) { return DER.anticipationAt(t); }
+function leadAt(t) { return DER.leadAt(t); }
 function chordAt(t) {
   const i = idxAtOrBefore(CHORD_T, t);
   return i < 0 ? null : CHORDS[i];

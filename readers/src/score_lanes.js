@@ -65,13 +65,20 @@ const STEMC={vocals:'#ffd166',drums:'#ff5470',bass:'#06d6a0',other:'#5b8cff',
              guitar:'#c9a0ff',piano:'#ff9f7a'};
 Object.keys(STEMC).forEach(k=>{
   lane(k,'presence & envelope',26,(g,w,h)=>{
-    const v=MF.stems.sources[k];
+    // A stem the writer marked absent, or one the separator never emitted, is
+    // not drawn as a flat line at whatever its own noise floor normalises to.
+    const v=(((MF.stems||{}).sources)||{})[k];
+    if(!v||!v.length) return;
+    const DL=(typeof DERIVE!=='undefined')?DERIVE.make(MF):null;
+    const shown=(DL&&DL.stems_present.indexOf(k)<0)?null:v;
+    if(!shown) return;
     g.fillStyle=gr(hexrgb(STEMC[k]),0.18);
     g.beginPath();g.moveTo(0,h);
-    v.forEach((y,i)=>g.lineTo(X(DOWNS[i]),h-2-(h-5)*y));
+    const y01=i=>{const q=DL?DL.stem01(k,DOWNS[i]):null;return q===null?0:q};
+    shown.forEach((_,i)=>g.lineTo(X(DOWNS[i]),h-2-(h-5)*y01(i)));
     g.lineTo(X(DUR),h);g.closePath();g.fill();
     g.strokeStyle=STEMC[k];g.lineWidth=1.2;g.beginPath();
-    v.forEach((y,i)=>{const x=X(DOWNS[i]),yy=h-2-(h-5)*y;i?g.lineTo(x,yy):g.moveTo(x,yy)});
+    shown.forEach((_,i)=>{const x=X(DOWNS[i]),yy=h-2-(h-5)*y01(i);i?g.lineTo(x,yy):g.moveTo(x,yy)});
     g.stroke();
     const ES=(SOBS.envelope&&SOBS.envelope.sources); if(!ES) return;
     const e=ES[k];
@@ -131,7 +138,7 @@ lane('brightness','centroid per stem',30,(g,w,h)=>{
   const BS=(SOBS.brightness&&SOBS.brightness.sources); if(!BS) return;
   Object.keys(STEMC).forEach(k=>{const v=BS[k]; if(!v) return;
     g.strokeStyle=gr(hexrgb(STEMC[k]),0.55);g.lineWidth=1;g.beginPath();
-    v.forEach((y,i)=>{const x=X(DOWNS[i]),yy=h-2-(h-5)*y;i?g.lineTo(x,yy):g.moveTo(x,yy)});
+    shown.forEach((_,i)=>{const x=X(DOWNS[i]),yy=h-2-(h-5)*y01(i);i?g.lineTo(x,yy):g.moveTo(x,yy)});
     g.stroke()})});
 
 function hexrgb(hx){const n=parseInt(hx.slice(1),16);

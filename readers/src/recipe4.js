@@ -123,16 +123,21 @@ function en(t){if(!EN||EN.length===0)return 0.5;
    in them, which is the root of "it feels unnatural": the light pulsed when
    nothing was pulsing. These curves let the show track what is actually
    playing instead of one energy scalar. */
+/* stems.sources used to be normalised per stem. It is a level against the mix
+   now, in dB, so reading it raw as 0..1 would light the room from a decibel.
+   DERIVE.stem01 does the conversion, in one place, and abstains for a stem the
+   writer marked absent -- Levels' piano is separator noise 22 dB down and used
+   to sit at 0.7 all song. */
 const STEMS=(MAP.stems&&MAP.stems.sources)||{};
-const STT=(MAP.stems&&MAP.stems.at)||(EN||[]).map(p=>p[0]);
+const DER=(typeof DERIVE!=='undefined')?DERIVE.make(MAP_FULL||MAP):null;
 const STEM_FALLBACK={vocals:'other', guitar:'other', piano:'other', drums:'drums', bass:'bass'};
+const STEM_OK=(DER&&DER.stems_present&&DER.stems_present.length)?DER.stems_present:Object.keys(STEMS);
 function stem(k,t){
-  let v=STEMS[k];
-  if((!v||!v.length) && STEM_FALLBACK[k]) v=STEMS[STEM_FALLBACK[k]];
-  if(!v||!v.length) return 0.5;
-  let i=-1; for(let j=0;j<STT.length;j++) if(STT[j]<=t) i=j; else break;
-  if(i<0) return v[0]; if(i+1>=STT.length||i+1>=v.length) return v[v.length-1];
-  return lerp(v[i],v[i+1],ss(0,1,(t-STT[i])/(STT[i+1]-STT[i])))}
+  let name=(STEM_OK.indexOf(k)>=0)?k:(STEM_FALLBACK[k]||null);
+  if(name!==null && STEM_OK.indexOf(name)<0) name=null;
+  if(name===null||!DER) return 0.5;
+  const v=DER.stem01(name,t);
+  return (v===null||v===undefined)?0.5:v}
 
 /* ---- accents: individual drum hits, most of them off the grid ----
    71%% of the drum onsets in this song do not sit on a beat, so a reader working

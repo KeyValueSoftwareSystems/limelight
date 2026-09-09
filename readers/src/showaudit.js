@@ -1,5 +1,7 @@
 const fs = require("fs");
-const page = process.argv[2] || "/tmp/claude-1001/show_levels.html";
+// Default to a show that build.sh produces, so this runs from a fresh clone.
+// It used to point at a file in /tmp that one session happened to leave there.
+const page = process.argv[2] || "shows/levels.html";
 const FPS = 40;
 
 const html = fs.readFileSync(page, "utf8");
@@ -133,7 +135,7 @@ const DOWN =
     : BEATS.filter((_, i) => i % 4 === 0);
 const MOM = (M.moments || []).filter((x) => x && x.at != null);
 const SPANS = (M.spans || []).filter((s) => s && s.from != null);
-const ARC = OB.arc || {};
+const ARC = require("./derive.js").make(M).arc || {};
 const ONE_SHOT = { strobe: 1, co2: 1, pyro: 1, confetti: 1, laser: 1, blinder: 1 };
 const ACCT = (((M.accents || {}).events) || []).map((e) => e.at).sort((a, b) => a - b);
 function nearAccent(t) {

@@ -202,11 +202,11 @@ function useStructure(i){
   SEG=buildSegs(); render()}
 function dlScore(){const b=new Blob([JSON.stringify(MAP_FULL,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download='the-nights.map.json';a.click()}
+  a.download=SONG_SLUG+'.map.json';a.click()}
 function dlVec(){const r=atob(VEC_B64),u=new Uint8Array(r.length);
   for(let i=0;i<r.length;i++)u[i]=r.charCodeAt(i);
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([u]));
-  a.download='the-nights.vec.f16';a.click()}
+  a.download=((MAP_FULL.vectors||{}).file)||(SONG_SLUG+'.vec.f16');a.click()}
 
 /* ---- meta, top left: four lines, no chrome ---- */
 $('#meta').innerHTML='<div><b>'+SAFE.title+'</b></div>'

@@ -33,7 +33,8 @@ NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 # what each field is worth. Timing dominates because everything downstream of a
 # wrong grid is wrong regardless of how good it is.
 WEIGHTS = {"grid": 3.0, "bars": 2.0, "moments": 2.0, "downbeats": 1.5, "sections": 1.5,
-           "energy": 1.5, "accents": 1.0, "chords": 1.0, "melody": 1.0, "pump": 0.5}
+           "energy": 1.5, "accents": 1.0, "chords": 1.0, "melody": 1.0, "stems": 1.0,
+           "pump": 0.5}
 
 
 def load(path, target_sr=11025):
@@ -693,6 +694,73 @@ def ev_melody(m, B, sig, sr):
     return min(1.0, max(0.0, (r - 0.4) / 0.5)), f"{100*r:.0f}% of claimed notes are the loudest pitch there"
 
 
+def ev_stems(m, B):
+    """The claimed stem levels, against the recording they were separated from.
+
+    A separator is close to conservative: what it pulls apart still adds up to
+    what went in. So the six claimed levels have one constraint that does not
+    come from the separator at all -- summed as energy, bar by bar, they have to
+    follow the loudness of the mix, which this scorer measures itself from the
+    raw waveform in bands(). Nothing here touches demucs, and nothing here
+    touches listen/stemlevels.py: one side is six numbers in the map, the other
+    is a broadband envelope of the recording.
+
+    That is what makes it a check on the thing that was wrong. The old field was
+    each stem's RMS normalised by its own maximum, so a stem the separator
+    invented sat near the top of its range all song. Normalised series do not
+    sum to a mix, and they measurably do not: 0.68 mean against 0.92 for the
+    levels that replaced them, on the same five recordings.
+
+    What it cannot see, said plainly: bands() is a filtered envelope, not a
+    calibrated RMS, so an absolute reference is not available to compare
+    against. A constant offset between the two sides is divided out before the
+    fit, which means putting every stem 20 dB up scores exactly the same. This
+    check grades the shape and the levels RELATIVE to each other. The absolute
+    reference is not checked here and is not claimed to be."""
+    st = m.get("stems") or {}
+    src = st.get("sources") or {}
+    downs = m.get("downbeats") or []
+    if not src:
+        return None, "no stems"
+    if len(downs) < 8:
+        return None, "stems are per bar and this map declares no bar lines", True
+    dt, rms = B["dt"], B["rms"]
+    ref = math.sqrt(sum(v * v for v in rms) / max(1, len(rms)))
+    bar = (downs[-1] - downs[0]) / max(1, len(downs) - 1)
+    edges = list(downs) + [downs[-1] + bar]
+    is_db = st.get("comparable") is True
+    S, Mx = [], []
+    for i in range(len(edges) - 1):
+        i0, i1 = int(edges[i] / dt), int(edges[i + 1] / dt)
+        seg = rms[i0:min(i1, len(rms))]
+        if not seg:
+            continue
+        Mx.append((sum(v * v for v in seg) / len(seg)) / max(1e-18, ref * ref))
+        tot = 0.0
+        for v in src.values():
+            if i < len(v):
+                tot += 10 ** (v[i] / 10.0) if is_db else v[i] * v[i]
+        S.append(tot)
+    if len(S) < 8:
+        return None, "too few bars to compare"
+    r = _corr(S, Mx)
+    gmean = lambda a: math.exp(sum(math.log(max(1e-12, x)) for x in a) / len(a))
+    k = gmean(Mx) / max(1e-12, gmean(S))
+    wander = sum(abs(math.log10(max(1e-12, S[i] * k) / max(1e-12, Mx[i])))
+                 for i in range(len(S))) / len(S)
+    shape = max(0.0, r)
+    fit = max(0.0, 1.0 - wander / 0.30)
+    unit = "levels against the mix" if is_db else ("NORMALISED PER STEM, which cannot sum to a "
+                                                  "mix -- every series peaks at its own maximum")
+    absent = [n for n, L in (st.get("levels") or {}).items() if L.get("present") is False]
+    return (0.7 * shape + 0.3 * fit,
+            "%d stems summed as energy track the mix bar by bar at r=%+.2f, wandering %.2f "
+            "dex around a constant offset -- %s%s"
+            % (len(src), r, wander, unit,
+               ("; %s marked absent and excluded by the writer" % ", ".join(absent))
+               if absent else ""))
+
+
 def ev_pump(m, B):
     p = (m.get("observations") or {}).get("pump")
     if not p: return None, "no pump measurement"
@@ -788,9 +856,19 @@ def au_tempo(m, B):
 
 
 def au_arc(m, B):
-    o = (m.get("observations") or {}).get("arc") or {}
-    claimed = o.get("peak_at_s")
-    if claimed is None: return None, "no arc claimed"
+    """Where the map's energy curve peaks, against where the recording is loudest.
+
+    This used to read observations.arc, a field that was the argmax of `energy`
+    written back into the file. The field is gone -- a reader derives it -- so
+    the question is asked of `energy` directly, which is where it always
+    belonged: the audit was never about arc, it was about whether the curve
+    peaks in the right place."""
+    en = m.get("energy") or []
+    if len(en) < 3: return None, "no energy curve to find a peak in"
+    claimed = max(en, key=lambda p: p[1])[0]
+    top = max(v for _, v in en)
+    flat = [t for t, v in en if v >= top - 0.02]
+    o = {"peak_region_s": [min(flat), max(flat)]}
     dt, rms = B["dt"], B["rms"]
     per = (m.get("grid") or {}).get("period") or 0.5
     w = max(1, int(per * 4 / dt))
@@ -805,13 +883,13 @@ def au_arc(m, B):
     bars = off / (per * 4)
     frac = max(0.0, min(1.0, 1.0 - bars / 8.0))
     inside = "inside" if off == 0.0 else f"{bars:.1f} bars outside"
-    return frac, (f"claims the peak at {claimed:.1f} s; the loudest bar in the recording is at "
+    return frac, (f"the curve peaks at {claimed:.1f} s; the loudest bar in the recording is at "
                   f"{best[1]:.1f} s, {inside} the declared peak region "
                   f"{lo:.0f}-{hi:.0f} s. A map that declares a flat top is judged on the region, "
                   f"not the argmax -- a single peak is not a measurement when the curve is level.")
 
 
-AUDIT = {"meter": au_meter, "tempo_stability": au_tempo, "arc": au_arc}
+AUDIT = {"meter": au_meter, "tempo_stability": au_tempo, "energy_peak": au_arc}
 
 
 def audio_for(slug):
@@ -847,7 +925,8 @@ def evaluate(slug, map_path=None, m=None):
         ("downbeats", ev_downbeats, (m, B)),
         ("moments", ev_moments, (m, B)),
         ("sections", ev_sections, (m, B)), ("energy", ev_energy, (m, B)),
-        ("accents", ev_accents, (m, B)), ("pump", ev_pump, (m, B)),
+        ("accents", ev_accents, (m, B)), ("stems", ev_stems, (m, B)),
+        ("pump", ev_pump, (m, B)),
         ("chords", ev_chords, (m, B, sig, sr)), ("melody", ev_melody, (m, B, sig, sr)),
     ):
         try:

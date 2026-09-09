@@ -125,6 +125,48 @@ def broken_corrections():
     return ok
 
 
+def normalised_stems():
+    """The stems fixture rule 5 asks for: the exact fault that was in the file.
+
+    stems.sources was each stem's RMS divided by its own maximum. The check
+    added with the rewrite asks whether the six levels, summed as energy, follow
+    the mix's own loudness -- and a set of series each normalised to its own peak
+    cannot, because the quiet ones are inflated to the same height as the loud
+    ones. This asserts the broken form scores materially worse on every song we
+    have, not on average."""
+    import json, copy
+    import mapeval as ME
+    from mapio import map_path
+
+    ok = True
+    print("== stems normalised per stem, which is what the file used to hold")
+    for slug in ("levels", "starlight", "mizhiyoram", "dont-look-down", "the-nights"):
+        mp = map_path(slug)
+        if not mp:
+            continue
+        m = json.load(open(mp))
+        sig, sr, cached = ME.audio_for(slug)
+        if sig is None:
+            print("   --   %-16s no audio, skipped" % slug)
+            continue
+        B = cached if cached is not None else ME.bands(sig, sr)
+        good = ME.ev_stems(m, B)[0]
+        bad_m = copy.deepcopy(m)
+        src = bad_m["stems"]["sources"]
+        for n, v in src.items():
+            lo, hi = min(v), max(v)
+            src[n] = [round((x - lo) / max(1e-9, hi - lo), 4) for x in v]
+        bad_m["stems"].pop("comparable", None)
+        bad = ME.ev_stems(bad_m, B)[0]
+        good = 0.0 if good is None else good
+        bad = 0.0 if bad is None else bad
+        worse = good - bad >= 0.15
+        ok = ok and worse
+        print("   %s %-16s levels %.2f, normalised %.2f  (%.2f worse)"
+              % ("ok  " if worse else "FAIL", slug, good, bad, good - bad))
+    return ok
+
+
 def run():
     import mapeval as ME
 
@@ -191,6 +233,8 @@ def run():
     print("   rising: %s" % s_rise[1][:150])
     print()
     ok = broken_corrections() and ok
+    print()
+    ok = normalised_stems() and ok
     return 0 if ok else 1
 
 
