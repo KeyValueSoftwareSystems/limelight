@@ -6,6 +6,7 @@ from .base import Analyzer, AnalyzerResult
 from .chords import ChordsAnalyzer
 from .dsp import DspAnalyzer
 from .embedding import EmbeddingAnalyzer
+from .grid_refine import GridRefineAnalyzer
 from .melody import MelodyAnalyzer
 from .moment_derive import MomentDeriveAnalyzer
 from .moment_timing import MomentTimingAnalyzer
@@ -19,6 +20,7 @@ __all__ = [
     "AnalyzerResult",
     "DspAnalyzer",
     "StructureAnalyzer",
+    "GridRefineAnalyzer",
     "BarPhaseAnalyzer",
     "MomentDeriveAnalyzer",
     "MomentTimingAnalyzer",

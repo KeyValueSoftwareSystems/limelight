@@ -13,6 +13,11 @@ SAMPLE_RATE = 22050
 HOP_LENGTH = 512
 N_FFT = 2048
 
+# --- grid refine (rigid kick-locked clock) ---
+GRID_FMAX = 150.0                                   # Hz; the kick band the grid locks to
+GRID_PHASE_STEP = 0.004                             # s; phase search resolution
+GRID_PERIOD_TOL = (-0.003, -0.0015, 0.0, 0.0015, 0.003)  # fractional period window around the tempo
+
 # --- bar-line phase (kick band) ---
 BAR_PHASE_FMAX = 150.0      # Hz; the kick lives below this
 BAR_PHASE_MARGIN = 0.15     # ratio-units the kick phase must beat allin1's phase by to override
