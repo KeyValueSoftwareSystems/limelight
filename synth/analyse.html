@@ -116,7 +116,8 @@ audio{width:100%;height:34px;flex:0 0 auto;filter:invert(.92) hue-rotate(180deg)
       <button id="bigtog" style="background:var(--raise);color:var(--muted);
         border:1px solid var(--rule2);border-radius:3px;padding:2px 8px;font-size:10.5px;
         margin-left:5px;cursor:pointer;font-family:ui-monospace,monospace">full screen</button>
-      <span id="rmeta" style="margin-left:8px">—</span></span></div>
+      <span id="rmeta" style="margin-left:8px">—</span>
+      <span id="stagenote" style="margin-left:8px;color:#e88055"></span></span></div>
     <canvas id="room"></canvas><div id="room3dhost"></div></div>
   <div class="track" style="flex:0 0 250px;margin:0">
     <div class="thead"><b>vs <span id="vsname">—</span></b><span id="vstale"></span></div>
@@ -748,6 +749,9 @@ if(VIEWMODE==="room") VIEWMODE="stage3d";   // migrate the old 2-way value
 const VIEWS=["stage3d","room2d","fixtures"];
 const VIEWLABEL={stage3d:"3D stage",room2d:"2D room",fixtures:"fixtures"};
 function setView(v){ VIEWMODE=v; localStorage.setItem("limelight.view",v);
+  // re-selecting the 3D stage retries a build that failed earlier (a freed WebGL
+  // context, say), so a transient failure recovers without reloading the page
+  if(v==="stage3d" && !STAGE3D) STAGE3D_TRIED=false;
   const b=$("viewtog"); if(b) b.textContent=VIEWLABEL[v]||v; }
 const mkRM=r=>new Function("RECIPE",
   ROOMJS+"\n;return {mkReader,prep,drawRoom,drawFixtures,frameDiff,pearson,totalLight};")(r);
@@ -1231,13 +1235,32 @@ try{
   }
 }catch(e){}
 if(!isFinite(SYNC)) SYNC = SYNC_AUTO;
-let STAGE3D=null, STAGE3D_OK=true;
+// STAGE3D is the built stage, cached once it succeeds. STAGE3D_TRIED gates the
+// build to one attempt per selection so we don't call new WebGLRenderer() every
+// frame -- but selecting the 3D stage again (setView) clears it, so a failure
+// that has since cleared (e.g. a freed WebGL context) recovers without a reload.
+// A silent, permanent fall-back to 2D was the bug: the button said "3D stage"
+// while the 2D room drew, with nothing on the console or the screen to say why.
+let STAGE3D=null, STAGE3D_TRIED=false, STAGE3D_ERR="";
 function ensureStage(){
-  if(STAGE3D || !STAGE3D_OK) return STAGE3D;
-  try{ STAGE3D = window.createStage3D ? window.createStage3D($("room3dhost")) : null; }
-  catch(e){ STAGE3D=null; }
-  if(!STAGE3D) STAGE3D_OK=false;   // no WebGL — fall back to the 2D room
+  if(STAGE3D || STAGE3D_TRIED) return STAGE3D;
+  STAGE3D_TRIED=true;
+  try{
+    STAGE3D = window.createStage3D ? window.createStage3D($("room3dhost")) : null;
+    if(!STAGE3D) throw new Error(window.createStage3D ? "WebGL unavailable" : "3D stage script not loaded");
+    STAGE3D_ERR="";
+  }catch(e){
+    STAGE3D=null; STAGE3D_ERR = (e && e.message) || String(e);
+    console.warn("3D stage unavailable, showing 2D room:", e);   // surface, never swallow
+  }
   return STAGE3D;
+}
+// Surface the fall-back next to the view button, and clear it when 3D is live.
+// Only touches the DOM when the message changes, so it is safe to call per frame.
+let STAGE_NOTE="";
+function noteStage(msg){
+  if(msg===STAGE_NOTE) return; STAGE_NOTE=msg;
+  const n=$("stagenote"); if(n) n.textContent=msg;
 }
 // a crisp per-beat pulse (1 on the beat, decaying over ~160 ms) so the screen can
 // hit ON the beat, from the map's own beat clock
@@ -1260,10 +1283,12 @@ function drawRoom(){
     if(VIEWMODE==="stage3d"){
       const S=ensureStage();
       if(S){ host.style.display="block"; rc.style.display="none"; if(S.setSong) S.setSong(SONG);
-        S.resize(); S.draw(F1(t), LAY, {beat: beatPulse(t)}); return; }
-      // no WebGL — degrade to the 2D room elevation
-      host.style.display="none"; rc.style.display="block"; RM.drawRoom(rc, F1(t), LAY); return;
+        S.resize(); S.draw(F1(t), LAY, {beat: beatPulse(t)}); noteStage(""); return; }
+      // no WebGL — degrade to the 2D room elevation, and say so rather than fail silently
+      host.style.display="none"; rc.style.display="block"; RM.drawRoom(rc, F1(t), LAY);
+      noteStage("· 3D stage unavailable"+(STAGE3D_ERR?" ("+STAGE3D_ERR+")":"")+" — showing 2D room"); return;
     }
+    noteStage("");
     if(VIEWMODE==="room2d"){
       host.style.display="none"; rc.style.display="block"; RM.drawRoom(rc, F1(t), LAY); return;
     }
