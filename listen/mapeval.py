@@ -34,7 +34,7 @@ NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 # wrong grid is wrong regardless of how good it is.
 WEIGHTS = {"grid": 3.0, "bars": 2.0, "moments": 2.0, "downbeats": 1.5, "sections": 1.5,
            "energy": 1.5, "accents": 1.0, "chords": 1.0, "melody": 1.0, "stems": 1.0,
-           "meter": 1.0, "tempo_stability": 1.0, "pump": 0.5}
+           "meter": 1.0, "tempo_stability": 1.0, "pan": 1.0, "pump": 0.5}
 
 
 def load(path, target_sr=11025):
@@ -925,6 +925,108 @@ def ev_tempo(m, B):
                       if claims_rigid is False else ""))
 
 
+def stereo_for(slug):
+    """L and R of the release mix, for the one check that cannot be answered in
+    mono. synth/out/<slug>.wav is a mono 32 kHz downmix for four of the five
+    real songs; tools/setup.sh stereo writes <slug>.stereo.wav beside it at
+    16 kHz. Absent means the check says so and abstains -- it does not fall back
+    to the mono file and pretend."""
+    p = os.path.join(ROOT, "synth", "out", slug + ".stereo.wav")
+    if not os.path.exists(p):
+        return None, None, None
+    import wave, array
+    with wave.open(p, "rb") as w:
+        if w.getnchannels() != 2 or w.getsampwidth() != 2:
+            return None, None, None
+        sr = w.getframerate()
+        raw = w.readframes(w.getnframes())
+    a = array.array("h")
+    a.frombytes(raw)
+    return a[0::2], a[1::2], sr
+
+
+def ev_pan(m, B, slug=None):
+    """The claimed pan of each accent, against the release mix's own L-R.
+
+    listen/pan.py measures pan on six separated STEREO stems. This never opens
+    a stem: it reads the unseparated release and asks, at each claimed instant,
+    which side carries more energy. Same recording, no shared code and no
+    shared separator -- if demucs put a hat on the wrong side, the mix does not
+    agree with it.
+
+    The correlation is diluted by construction and that is not a defect: at the
+    instant a right-hand hat is struck, the mix also contains a centred kick and
+    a centred bass, so the mix's own L-R sits closer to the middle than the
+    stem's does. A hard-panned accent still moves it in the right direction, so
+    the check grades the correlation, never the magnitude.
+
+    Left/right is also the one claim in the whole file with a free falsification:
+    flipping every sign is still a perfectly well-formed pan field, and has to
+    score zero."""
+    o = (m.get("observations") or {}).get("pan") or {}
+    ents = o.get("entries") or []
+    if not ents:
+        return None, "no pan claimed"
+    if slug is None:
+        return None, "pan needs the stereo mix and no slug was given", True
+    L, R, sr = stereo_for(slug)
+    if L is None:
+        return None, ("no stereo source for this song -- synth/out/%s.stereo.wav is not there, "
+                      "and the mono downmix cannot answer where a hit sits between the "
+                      "speakers. Run tools/setup.sh stereo." % slug), True
+    win = int(0.040 * sr)
+    claimed, raw = [], []
+    for e in ents:
+        t, p = e.get("at"), e.get("pan")
+        if t is None or p is None:
+            continue
+        a = int(t * sr)
+        b = min(len(L), a + win)
+        if b <= a:
+            continue
+        el = er = 0.0
+        for i in range(a, b):
+            el += float(L[i]) * float(L[i])
+            er += float(R[i]) * float(R[i])
+        if el + er < 1e-6:
+            continue
+        claimed.append(p)
+        raw.append((er - el) / (er + el))
+    if len(claimed) < 30:
+        return None, "only %d accents could be placed in the stereo mix" % len(claimed), True
+    r = _corr(claimed, raw)
+    spread = max(claimed) - min(claimed)
+    if spread < 0.10:
+        return None, ("every claimed pan sits within %.2f of every other -- this mix is "
+                      "centred and there is nothing for the check to agree or disagree with"
+                      % spread), True
+
+    # The correlation a correct pan field can reach here is capped well below 1
+    # by the dilution above -- it comes out 0.20 to 0.36 on maps that are right.
+    # Grading it raw would take the same 0.7 off every map, which is a constant,
+    # and a constant is not a measurement. So it is graded the way ev_sections
+    # grades a boundary: against the same statistic computed on the same numbers
+    # in the wrong order. 32 shuffles give the correlation this many accents
+    # produce by arithmetic alone, and the claim has to stand clear of it.
+    import random as _rnd
+    rng = _rnd.Random(20260909)
+    null = []
+    for _ in range(32):
+        sh = claimed[:]
+        rng.shuffle(sh)
+        null.append(_corr(sh, raw))
+    mu = sum(null) / len(null)
+    sd = (sum((x - mu) ** 2 for x in null) / len(null)) ** 0.5
+    z = (r - mu) / sd if sd > 1e-9 else 0.0
+    score = max(0.0, min(1.0, z / 8.0))
+    return score, ("%d claimed pans correlate r=%+.2f with the release mix's own L-R at the "
+                   "same instants, claimed range %+.2f to %+.2f -- %.1f sd above the %+.2f "
+                   "the same numbers give shuffled. Diluted on purpose: the mix at a panned "
+                   "hit also holds a centred kick, so this grades whether the claim beats "
+                   "chance, never the size of the correlation."
+                   % (len(claimed), r, min(claimed), max(claimed), z, mu))
+
+
 def ev_pump(m, B):
     p = (m.get("observations") or {}).get("pump")
     if not p: return None, "no pump measurement"
@@ -1096,6 +1198,7 @@ def evaluate(slug, map_path=None, m=None):
         ("sections", ev_sections, (m, B)), ("energy", ev_energy, (m, B)),
         ("accents", ev_accents, (m, B)), ("stems", ev_stems, (m, B)),
         ("meter", ev_meter, (m, B)), ("tempo_stability", ev_tempo, (m, B)),
+        ("pan", ev_pan, (m, B, slug)),
         ("pump", ev_pump, (m, B)),
         ("chords", ev_chords, (m, B, sig, sr)), ("melody", ev_melody, (m, B, sig, sr)),
     ):

@@ -68,8 +68,44 @@ stems() {
   echo "stems: $WORK/stems/htdemucs_6s"
 }
 
+# Stereo. Four of the five real songs are a mono 32 kHz downmix in synth/out,
+# which cannot carry pan at all, so `pan` needs its own source: stereo stems
+# from the release file, and a low-rate stereo mix for the scorer's own side of
+# the check. Both are gitignored like every other piece of audio here.
+stereo() {
+  have audio || { echo "run 'bash tools/setup.sh audio' first"; return 1; }
+  mkdir -p "$WORK/stems-stereo"
+  shopt -s nullglob
+  for f in *.mp3 synth/incoming/*.mp3; do
+    slug=""
+    case "$f" in
+      *Levels*)     slug=levels;;
+      *Starlight*)  slug=starlight;;
+      *"Don't Look Down"*) slug=dont-look-down;;
+      *Mizhiyoram*) slug=mizhiyoram;;
+      *Nights*)     slug=the-nights;;
+      *) continue;;
+    esac
+    # the scorer's side: a small stereo wav it can read with the stdlib
+    out="synth/out/$slug.stereo.wav"
+    [ -f "$out" ] || ffmpeg -v error -y -i "$f" -ac 2 -ar 16000 "$out"
+    # the writer's side: stereo stems
+    if [ ! -d "$WORK/stems-stereo/htdemucs_6s/$slug" ]; then
+      cp "$f" "$WORK/$slug.src.mp3"
+      "$WORK/audio/bin/python" -m demucs -n htdemucs_6s --mp3 \
+          -o "$WORK/stems-stereo" "$WORK/$slug.src.mp3"
+      mv "$WORK/stems-stereo/htdemucs_6s/$slug.src" \
+         "$WORK/stems-stereo/htdemucs_6s/$slug" 2>/dev/null || true
+      rm -f "$WORK/$slug.src.mp3"
+    fi
+    echo "  stereo: $slug"
+  done
+  shopt -u nullglob
+}
+
 case "${1:-all}" in
   audio) audio;; basicpitch) basicpitch;; mir) mir;; chordmini) chordmini;; stems) stems;;
-  all) audio; basicpitch || true; mir || true; chordmini; stems;;
-  *) echo "usage: bash tools/setup.sh [audio|basicpitch|mir|chordmini|stems|all]"; exit 2;;
+  stereo) stereo;;
+  all) audio; basicpitch || true; mir || true; chordmini; stems; stereo || true;;
+  *) echo "usage: bash tools/setup.sh [audio|basicpitch|mir|chordmini|stems|stereo|all]"; exit 2;;
 esac

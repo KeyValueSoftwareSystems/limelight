@@ -225,6 +225,49 @@ def wrong_meter_and_tempo():
     return ok
 
 
+def flipped_pan():
+    """rule 5's broken-file entry for pan, and the cleanest one in the set:
+    negating every claimed pan leaves a perfectly well-formed field that says
+    the opposite thing. It has to score zero, and shuffling the claims has to
+    land at chance."""
+    import json, copy, random
+    import mapeval as ME
+    from mapio import map_path
+
+    ok = True
+    print("== a pan field with every side swapped")
+    for slug in ("levels", "starlight", "mizhiyoram", "dont-look-down", "the-nights"):
+        mp = map_path(slug)
+        sig, sr, cached = ME.audio_for(slug)
+        if not mp or sig is None:
+            continue
+        B = cached if cached is not None else ME.bands(sig, sr)
+        m = json.load(open(mp))
+        if not ((m.get("observations") or {}).get("pan") or {}).get("entries"):
+            print("   --   %-16s no pan claimed" % slug)
+            continue
+        good = ME.ev_pan(m, B, slug)[0]
+        flip = copy.deepcopy(m)
+        for e in flip["observations"]["pan"]["entries"]:
+            e["pan"] = -e["pan"]
+        bad = ME.ev_pan(flip, B, slug)[0]
+        shuf = copy.deepcopy(m)
+        ents = shuf["observations"]["pan"]["entries"]
+        vals = [e["pan"] for e in ents]
+        random.Random(5).shuffle(vals)
+        for e, v in zip(ents, vals):
+            e["pan"] = v
+        mid = ME.ev_pan(shuf, B, slug)[0]
+        good = 0.0 if good is None else good
+        bad = 0.0 if bad is None else bad
+        mid = 0.0 if mid is None else mid
+        fine = bad <= 0.05 and mid <= 0.30 and good >= 0.50
+        ok = ok and fine
+        print("   %s %-16s as claimed %.2f, sides swapped %.2f, shuffled %.2f"
+              % ("ok  " if fine else "FAIL", slug, good, bad, mid))
+    return ok
+
+
 def run():
     import mapeval as ME
 
@@ -295,6 +338,8 @@ def run():
     ok = normalised_stems() and ok
     print()
     ok = wrong_meter_and_tempo() and ok
+    print()
+    ok = flipped_pan() and ok
     return 0 if ok else 1
 
 
