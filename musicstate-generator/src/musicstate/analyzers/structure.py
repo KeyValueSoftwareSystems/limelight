@@ -135,10 +135,16 @@ class StructureAnalyzer(Analyzer):
         sections = [{"t0": round(a, 3), "t1": round(b, 3), "label": label(e),
                      "energy": round(e, 3), "conf": 0.5} for a, b, e in raw]
 
+        # energy is the bar's MEAN loudness, not the instantaneous value at the downbeat:
+        # a single hop is noisy, and "how loud is this section" is a window, not a point.
+        span = float(np.median(np.diff(downbeats))) if len(downbeats) > 1 else 2.0
         curve = []
         for t in downbeats:
-            idx = int(np.clip(np.searchsorted(t_rms, t), 0, len(rms) - 1))
-            curve.append([round(float(t), 3), round(float(rms[idx] / gmax), 3)])
+            a = int(np.clip(np.searchsorted(t_rms, t), 0, len(rms)))
+            b = int(np.clip(np.searchsorted(t_rms, t + span), 0, len(rms)))
+            if b <= a:
+                b = min(len(rms), a + 1)
+            curve.append([round(float(t), 3), round(float(rms[a:b].mean() / gmax), 3)])
         return sections, curve, 0.5
 
     def _events(self, sections):
