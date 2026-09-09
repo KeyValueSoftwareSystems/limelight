@@ -12,7 +12,7 @@ in listen/ and validated against that set -- the browser never gets to name a
 command to run, because an endpoint that executes an arbitrary string is a
 remote shell whichever interface it wears.
 """
-import http.server, importlib.util, io, json, os, socketserver, subprocess, sys, time, urllib.parse
+import glob, http.server, importlib.util, io, json, os, socketserver, subprocess, sys, time, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -223,6 +223,12 @@ def candidate_maps(slug):
     tp = truth_path(slug)
     if tp and not READONLY:
         out["answer"] = {"label": "the answer (yours, held out)", "path": tp}
+    # The promoted map. promote.py has been writing synth/best/ for days and no
+    # lookup scanned it, so the one map that passed the gates was the only one the
+    # UI could not offer. It is the slot everything else is measured against.
+    bp = os.path.join(HERE, "best", slug + ".map.json")
+    if os.path.exists(bp):
+        out["best"] = {"label": "the promoted best (passed the gates)", "path": bp}
     d = os.path.join(HERE, "maps")
     found = []
     if os.path.isdir(d):
@@ -263,6 +269,94 @@ def candidate_maps(slug):
         out[who] = {"label": f"{who}  ({how}, {when})", "path": path}
     return {k: v for k, v in out.items() if os.path.exists(v["path"])}
 
+
+# ---------------------------------------------------------------------------
+# Art-Net out. The browser renders frames; this holds the universe and re-sends
+# it on its OWN clock, so HTTP jitter never reaches a lamp. DMX wants a steady
+# refresh whether or not anything changed, and a receiver that stops hearing a
+# source holds its last look -- which is why the watchdog matters more than the
+# sender: if the page closes, crashes or the laptop sleeps, silence would leave
+# the rig lit. AGENTS rule 5 says a blackout must survive the engine crashing,
+# so silence blacks out here rather than freezing.
+DMX = {"slots": bytearray(512), "to": None, "universe": 0, "hz": 40.0,
+       "on": False, "sent": 0, "last": 0.0, "hold_s": 3.0, "err": None}
+_dmx_lock = __import__("threading").Lock()
+
+def artnet_packet(universe, slots, seq):
+    b = bytearray(b"Art-Net\0")
+    b += (0x5000).to_bytes(2, "little")          # OpDmx, little-endian
+    b += bytes([0, 14])                          # ProtVer 14, big-endian
+    b += bytes([seq & 0xff, 0])                  # sequence, physical
+    b += bytes([universe & 0xff, (universe >> 8) & 0x7f])   # SubUni, Net
+    n = len(slots)
+    if n < 2: n = 2
+    if n % 2: n += 1
+    b += n.to_bytes(2, "big")
+    d = bytearray(n)
+    m = min(n, len(slots)); d[:m] = slots[:m]
+    return bytes(b) + bytes(d)
+
+def _dmx_loop():
+    import socket, threading
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try: sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    except Exception: pass
+    seq = 0
+    while True:
+        with _dmx_lock:
+            on, to, uni, hz = DMX["on"], DMX["to"], DMX["universe"], DMX["hz"]
+            quiet = time.time() - DMX["last"]
+            if on and quiet > DMX["hold_s"] and any(DMX["slots"]):
+                DMX["slots"] = bytearray(512)     # the watchdog, not a feature
+                DMX["err"] = f"blacked out after {DMX['hold_s']:.0f}s with no frames"
+            payload = bytes(DMX["slots"])
+        if on and to:
+            seq = 1 if seq >= 255 else seq + 1
+            try:
+                sock.sendto(artnet_packet(uni, payload, seq), (to, 6454))
+                with _dmx_lock: DMX["sent"] += 1
+            except Exception as e:
+                with _dmx_lock: DMX["err"] = str(e)
+        time.sleep(1.0 / max(1.0, min(60.0, hz)))
+
+def artnet_discover(ms=2500, to=None):
+    """Send ArtPoll and collect replies. A node reports its own IP as 2.x.x.x by
+       Art-Net convention even when it lives on a normal subnet, so the address
+       the packet CAME FROM is the one to unicast at."""
+    import socket, struct
+    ID = b"Art-Net\0"
+    poll = bytearray(ID); poll += (0x2000).to_bytes(2, "little")
+    poll += bytes([0, 14, 0, 0])
+    s2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s2.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try: s2.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    except Exception: pass
+    found = {}
+    try:
+        s2.bind(("", 6454))
+    except Exception as e:
+        return {"error": "could not bind UDP 6454 — another Art-Net app "
+                         "(QLC+, a node tool) already has it: " + str(e), "nodes": []}
+    for d in ([to] if to else ["255.255.255.255", "2.255.255.255", "10.255.255.255"]):
+        try: s2.sendto(bytes(poll), (d, 6454))
+        except Exception: pass
+    s2.settimeout(0.4)
+    t_end = time.time() + ms / 1000.0
+    while time.time() < t_end:
+        try: m, rinfo = s2.recvfrom(2048)
+        except Exception: continue
+        if len(m) < 26 or m[:8] != ID: continue
+        if int.from_bytes(m[8:10], "little") != 0x2100: continue
+        def txt(a, b):
+            return m[a:b].split(b"\0")[0].decode("ascii", "replace").strip() if len(m) >= b else ""
+        ip = ".".join(str(x) for x in m[10:14])
+        found[(ip, rinfo[0])] = {
+            "reports": ip, "route": rinfo[0],
+            "net": m[18] if len(m) > 18 else None,
+            "subnet": m[19] if len(m) > 19 else None,
+            "short": txt(26, 44), "long": txt(44, 108), "report": txt(108, 172)}
+    s2.close()
+    return {"nodes": list(found.values())}
 
 def songs_index():
     """Every song the ladder has, discovered from disk.
@@ -898,7 +992,17 @@ class H(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         u = urllib.parse.urlparse(self.path); q = urllib.parse.parse_qs(u.query)
         try:
-            if u.path in ("/", "/index.html"):
+            # No home page. A directory of links is a symptom of having too many
+            # pages, not a thing anybody needs -- you land on the surface you work
+            # on. portal.html stays on disk and is reachable at /portal for the
+            # board, but nobody has to pass through it to get anywhere.
+            if u.path in ("/", "/deck"):
+                return self._send(200, open(os.path.join(HERE, "deck.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path in ("/index.html", "/work"):
+                return self._send(200, open(os.path.join(HERE, "work.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path == "/portal":
                 return self._send(200, open(os.path.join(HERE, "portal.html")).read(),
                                   "text/html; charset=utf-8")
             if u.path == "/listen": return self._send(200, PAGE, "text/html; charset=utf-8")
@@ -1083,14 +1187,25 @@ class H(http.server.BaseHTTPRequestHandler):
                 # local assignment here made every later call to it unbound
                 slug = (q.get("song") or [""])[0]
                 idx = songs_index()
-                if slug not in idx: slug = sorted(idx)[0] if idx else ""
+                # The ten generated ladder songs and the deliberately-broken maps are
+                # calibration, not work. Sitting in the same two dropdowns as the real
+                # records they made the platform read as a test harness, so they are
+                # hidden. ?all=1 brings them back, and a direct ?song= link to one still
+                # opens and still appears in the list.
+                allx = (q.get("all") or ["0"])[0] not in ("0", "", "false")
+                shown = idx if allx else ({k: v for k, v in idx.items()
+                                           if not v.get("canonical")} or idx)
+                if slug not in idx: slug = sorted(shown)[0] if shown else ""
+                songs = dict(shown)
+                if slug in idx: songs[slug] = idx[slug]
                 out = {}
                 for k, v in candidate_maps(slug).items():
+                    if not allx and k.startswith("_"): continue
                     try: out[k] = json.load(open(v["path"]))
                     except Exception: pass
                 return self._send(200, json.dumps(
                     {"song": slug, "maps": out, "editable": (not READONLY),
-                     "songs": {k: v["label"] for k, v in idx.items()}}))
+                     "songs": {k: v["label"] for k, v in songs.items()}}))
             if u.path == "/api/status": return self._send(200, json.dumps(status()))
             if u.path == "/api/listeners2": return self._send(200, json.dumps(listeners_available()))
             if u.path == "/api/job":
@@ -1109,9 +1224,181 @@ class H(http.server.BaseHTTPRequestHandler):
                 return self._send(200, open(os.path.join(ROOT, "readers", "lights",
                                                          "calibrate.js")).read(),
                                   "text/plain; charset=utf-8")
+            if u.path == "/static/nav.js":
+                return self._send(200, open(os.path.join(HERE, "nav.js")).read(),
+                                  "text/plain; charset=utf-8")
             if u.path == "/static/room.js":
                 return self._send(200, open(os.path.join(HERE, "room.js")).read(),
                                   "text/plain; charset=utf-8")
+            # Renjith's three-par bench, 9 Sept. The smallest rig that can carry
+            # meaning rather than just time, so that a failure is legible: three
+            # lamps, one named driver each, nothing layered.
+            if u.path == "/static/recipe_three.js":
+                return self._send(200, open(os.path.join(
+                    ROOT, "readers", "src", "recipe_three.js")).read(),
+                    "text/plain; charset=utf-8")
+            if u.path == "/static/recipe_gig.js":
+                return self._send(200, open(os.path.join(
+                    ROOT, "readers", "src", "recipe_gig.js")).read(),
+                    "text/plain; charset=utf-8")
+            # Drag a lamp, get the plan back. The whole point of the /layout page:
+            # geometry is an INPUT to what the rig can say, not a fixed assumption.
+            # The execution plan: what the rig does, section by section, before it
+            # runs. Distinct from /api/plan, which is the capability inventory.
+            if u.path == "/api/showplan":
+                sl = (q.get("song") or ["levels"])[0]
+                rg = "".join(c for c in (q.get("rig") or ["three"])[0]
+                             if c.isalnum() or c in "-_")[:32]
+                xs = [float(x) for x in (q.get("xs") or [""])[0].split(",") if x.strip()] or None
+                sys.path.insert(0, os.path.join(ROOT, "readers", "lights"))
+                import importlib, showplan as _sp
+                importlib.reload(_sp)
+                return self._send(200, json.dumps(_sp.compute(sl, rg, xs)))
+            # What actually exists, so the front door can show the state of the
+            # work rather than a list of links. Nothing here is hard-coded: it is
+            # read off disk, so a teammate's new map or rig appears without an edit.
+            # Every score ever run is already in synth/learning/mapeval.jsonl and
+            # nobody has ever looked at it. A single number tells a developer
+            # nothing about whether they are getting better; a trajectory does.
+            #
+            # The trap: a jump can be the MAP improving or the SCORER changing, and
+            # last night we watched a map "improve" by 0.12 when only the scorer had
+            # moved. So group by scorer fingerprint and mark where it changes --
+            # otherwise this view flatters everyone at once and teaches nothing.
+            if u.path == "/api/history":
+                fp = os.path.join(HERE, "learning", "mapeval.jsonl")
+                if not os.path.exists(fp):
+                    return self._send(200, json.dumps({"runs": [], "note": "no log yet"}))
+                song = (q.get("song") or [""])[0]
+                want = (q.get("map") or [""])[0]
+                rows = []
+                for line in open(fp):
+                    line = line.strip()
+                    if not line: continue
+                    try: r = json.loads(line)
+                    except Exception: continue
+                    if song and r.get("song") != song: continue
+                    if want and want not in str(r.get("map") or ""): continue
+                    fields = {k: (v or {}).get("score")
+                              for k, v in (r.get("fields") or {}).items()}
+                    rows.append({"map": r.get("map"), "song": r.get("song"),
+                                 "total": r.get("total"), "accuracy": r.get("accuracy"),
+                                 "coverage": r.get("coverage"), "when": r.get("when"),
+                                 "fields": fields,
+                                 "scorer": r.get("scorer") or r.get("scorer_fingerprint")})
+                # who has entries at all, so the page can offer them
+                everyone = sorted({str(r["map"]) for r in rows if r.get("map")})
+                return self._send(200, json.dumps({"runs": rows[-400:], "maps": everyone}))
+            if u.path == "/api/inventory":
+                inv = {"songs": [], "rigs": [], "recipes": [], "listeners": []}
+                out = os.path.join(HERE, "out")
+                best = os.path.join(HERE, "best")
+                for w in sorted(glob.glob(os.path.join(out, "*.wav"))):
+                    slug = os.path.basename(w)[:-4]
+                    if slug[0].isdigit():        # the synthetic fixtures
+                        continue
+                    maps = []
+                    for mp in sorted(glob.glob(os.path.join(HERE, "maps", "*",
+                                                            slug + ".map.json"))):
+                        who = os.path.basename(os.path.dirname(mp))
+                        if who.startswith("_"): continue
+                        try:
+                            mm = json.load(open(mp))
+                            by = mm.get("made_by") or {}
+                            maps.append({"who": who, "how": by.get("how"),
+                                         "by": by.get("who"),
+                                         "beats": len(mm.get("beats") or []),
+                                         "declared": bool(mm.get("declared"))})
+                        except Exception:
+                            pass
+                    why = os.path.join(best, slug + ".why.json")
+                    b = None
+                    if os.path.exists(why):
+                        try:
+                            h = json.load(open(why))
+                            if h: b = h[-1]
+                        except Exception: pass
+                    inv["songs"].append({"slug": slug, "maps": maps, "best": b})
+                for lp in sorted(glob.glob(os.path.join(ROOT, "readers", "lights",
+                                                        "*", "layout.json"))):
+                    try:
+                        L = json.load(open(lp))
+                        if not L.get("fixtures"): continue
+                        inv["rigs"].append({"name": L.get("room") or
+                                            os.path.basename(os.path.dirname(lp)),
+                                            "fixtures": len(L["fixtures"])})
+                    except Exception: pass
+                for rp in sorted(glob.glob(os.path.join(ROOT, "readers", "src",
+                                                        "recipe*.js"))):
+                    inv["recipes"].append(os.path.basename(rp))
+                for ln in ("ear.py", "baseline.py"):
+                    if os.path.exists(os.path.join(ROOT, "listen", ln)):
+                        inv["listeners"].append(ln)
+                return self._send(200, json.dumps(inv))
+            if u.path == "/api/why":
+                # Why this map is the promoted one. promote.py writes it; nothing read it.
+                sl = "".join(c for c in (q.get("song") or ["levels"])[0]
+                             if c.isalnum() or c in "-_")[:48]
+                fp = os.path.join(HERE, "best", sl + ".why.json")
+                if not os.path.exists(fp):
+                    return self._send(404, json.dumps({"error": "nothing promoted for " + sl}))
+                return self._send(200, open(fp).read())
+            if u.path in ("/live", "/tonight"):
+                return self._send(200, open(os.path.join(HERE, "live.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path == "/api/dmx/state":
+                with _dmx_lock:
+                    st = {"to": DMX["to"], "universe": DMX["universe"], "hz": DMX["hz"],
+                          "on": DMX["on"], "sent": DMX["sent"], "err": DMX["err"],
+                          "quiet_s": round(time.time() - DMX["last"], 2) if DMX["last"] else None,
+                          "lit": sum(1 for v in DMX["slots"] if v > 0),
+                          "slots": list(DMX["slots"][:64])}
+                return self._send(200, json.dumps(st))
+            if u.path == "/api/dmx/discover":
+                if READONLY:
+                    return self._send(403, json.dumps({"error": "read-only instance"}))
+                return self._send(200, json.dumps(artnet_discover(
+                    ms=int((q.get("ms") or ["2500"])[0]), to=(q.get("to") or [None])[0])))
+            if u.path == "/api/dimensions":
+                # What the score turned into, and how fast each thing moves. The file
+                # has carried `from`, `trust` and the working all along and no page
+                # ever showed it, so the step between the map and the allocation
+                # looked like magic.
+                sl = "".join(c for c in (q.get("song") or ["levels"])[0]
+                             if c.isalnum() or c in "-_")[:48]
+                fp = os.path.join(HERE, "dimensions", sl + ".dimensions.json")
+                if not os.path.exists(fp):
+                    return self._send(404, json.dumps(
+                        {"error": "no dimensions file for " + sl,
+                         "how": "python3 synth/dimensions.py " + sl}))
+                return self._send(200, open(fp).read())
+            if u.path == "/api/plan":
+                sl  = (q.get("song") or ["levels"])[0]
+                rg  = "".join(c for c in (q.get("rig") or ["three"])[0]
+                              if c.isalnum() or c in "-_")[:32]
+                num = lambda v: [float(x) for x in v.split(",") if x.strip()]
+                xs = num((q.get("xs") or [""])[0]) or None
+                zs = num((q.get("zs") or [""])[0]) or None
+                # The pre-flight has to run on the map the page is showing. It used
+                # to read a hard-coded amal/<slug>.map.json, so correcting a score in
+                # the editor changed nothing in the plan -- it was answering about a
+                # different file than the one on screen.
+                who = (q.get("who") or [""])[0]
+                mpth = (candidate_maps(sl).get(who) or {}).get("path") if who else None
+                sys.path.insert(0, os.path.join(ROOT, "readers", "lights"))
+                import importlib, plan as _plan
+                importlib.reload(_plan)
+                return self._send(200, json.dumps(_plan.compute(sl, rg, xs, zs, mpth)))
+            if u.path == "/editor":
+                return self._send(200, open(os.path.join(HERE, "editor.html")).read(),
+                                  "text/html; charset=utf-8")
+            if u.path == "/api/layout":
+                rig = "".join(c for c in (q.get("rig") or ["three"])[0]
+                              if c.isalnum() or c in "-_")[:32]
+                fp = os.path.join(ROOT, "readers", "lights", rig, "layout.json")
+                if not os.path.exists(fp):
+                    return self._send(404, json.dumps({"error": "no such rig"}))
+                return self._send(200, open(fp).read())
             if u.path == "/static/wire.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "lights", "wire.js")).read(),
                                   "text/plain; charset=utf-8")
@@ -1361,6 +1648,116 @@ class H(http.server.BaseHTTPRequestHandler):
                          f"{flag}\t{out['boundary_f'][-1] if out['boundary_f'] else ''}\t"
                          f"{out['moments_hit']}\t{out['moments_total']}\t{out['energy_r']}\n")
             return self._send(200, json.dumps(out))
+        # Generate a score on demand. ear.py is stdlib only and takes ~17 s on a
+        # four-minute record, ~1.5 s on a 20 s clip, so this is a real button and
+        # not a research pipeline.
+        if u.path == "/api/generate":
+            song = "".join(c for c in (q.get("song") or ["levels"])[0]
+                           if c.isalnum() or c in "-_")[:48]
+            wav = os.path.join(HERE, "out", song + ".wav")
+            if not os.path.exists(wav):
+                return self._send(404, json.dumps({"error": "no audio for " + song}))
+            # Which listener. baseline.py is committed as the floor to beat, so
+            # being able to pick it is how you see whether ear.py is earning its
+            # keep rather than taking it on trust.
+            LISTENERS = {"ear": "ear.py", "baseline": "baseline.py"}
+            which = (q.get("listener") or ["ear"])[0]
+            if which not in LISTENERS:
+                return self._send(400, json.dumps(
+                    {"error": "listener must be one of " + ", ".join(LISTENERS)}))
+            t0 = time.time()
+            try:
+                r = subprocess.run([sys.executable,
+                        os.path.join(ROOT, "listen", LISTENERS[which]), wav],
+                        capture_output=True, text=True, timeout=300)
+            except Exception as e:
+                return self._send(500, json.dumps({"error": str(e)}))
+            if r.returncode != 0:
+                return self._send(500, json.dumps({"error": r.stderr[-400:]}))
+            try:
+                m = json.loads(r.stdout)
+            except Exception as e:
+                return self._send(500, json.dumps({"error": f"listener wrote no map: {e}"}))
+            who = "fresh-" + which
+            d = os.path.join(HERE, "maps", who); os.makedirs(d, exist_ok=True)
+            json.dump(m, open(os.path.join(d, song + ".map.json"), "w"), indent=1)
+            return self._send(200, json.dumps(
+                {"ok": True, "who": who, "listener": which,
+                 "seconds": round(time.time()-t0, 2), "map": m}))
+
+        # Correct a score. Two corrections only, because they are the two that have
+        # actually been wrong: which beat is the "one", and drops that were snapped
+        # to a bar line when they belong on a half bar.
+        if u.path == "/api/fixmap":
+            song = "".join(c for c in (q.get("song") or [""])[0]
+                           if c.isalnum() or c in "-_")[:48]
+            who  = "".join(c for c in (q.get("who") or ["fresh"])[0]
+                           if c.isalnum() or c in "-_")[:32]
+            shift = int((q.get("shift") or ["0"])[0] or 0)
+            snap  = (q.get("resnap") or ["0"])[0] in ("1", "true")
+            fp = os.path.join(HERE, "maps", who, song + ".map.json")
+            if not os.path.exists(fp):
+                return self._send(404, json.dumps({"error": "no such map"}))
+            m = json.load(open(fp))
+            notes = []
+            if shift:
+                g = m.setdefault("grid", {})
+                was = g.get("bar_phase", 0) or 0
+                g["bar_phase"] = ((was + shift) % 4 + 4) % 4
+                b = m.get("beats") or []
+                if b:
+                    ph = g["bar_phase"]
+                    m["downbeats"] = [t for i, t in enumerate(b) if (i - ph) % 4 == 0]
+                notes.append(f"bar_phase {was} -> {g['bar_phase']}, "
+                             f"{len(m.get('downbeats') or [])} downbeats rebuilt")
+                json.dump(m, open(fp, "w"), indent=1)
+            if snap:
+                try:
+                    r = subprocess.run([sys.executable,
+                            os.path.join(ROOT, "listen", "resnap.py"), fp],
+                            capture_output=True, text=True, timeout=300)
+                    notes.append((r.stdout or r.stderr).strip().splitlines()[-1][:160])
+                    m = json.load(open(fp))
+                except Exception as e:
+                    notes.append("resnap failed: " + str(e))
+            return self._send(200, json.dumps({"ok": True, "notes": notes, "map": m}))
+
+        # Save an edited score. The provenance MUST change: the whole value of this
+        # file is that a later reader can tell a measurement from a human's opinion,
+        # and an editor that silently keeps `how: model` on a hand-moved drop
+        # launders a guess into evidence. Rule from AGENTS.md, enforced here.
+        if u.path == "/api/editmap":
+            try:
+                n = int(self.headers.get("Content-Length", 0))
+                body = json.loads(self.rfile.read(n).decode())
+            except Exception as e:
+                return self._send(400, json.dumps({"error": f"not JSON: {e}"}))
+            m = body.get("map") or {}
+            edits = body.get("edits") or []
+            if not (m.get("grid") or {}).get("period"):
+                return self._send(400, json.dumps({"error": "no grid.period"}))
+            song = "".join(c for c in (q.get("song") or ["unknown"])[0]
+                           if c.isalnum() or c in "-_")[:48]
+            who = "".join(c for c in (q.get("who") or ["edited"])[0]
+                          if c.isalnum() or c in "-_")[:32] or "edited"
+            by = m.setdefault("made_by", {})
+            was = by.get("how")
+            by["how"] = "hand-written"
+            by["who"] = (by.get("who") or "?") + " + hand edits"
+            by["edited"] = {
+                "when": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "was": was,
+                "why": ("a human moved things by ear. `how` drops to hand-written so no "
+                        "later reader mistakes these times for measurements."),
+                "edits": edits[-60:],
+            }
+            d = os.path.join(HERE, "maps", who); os.makedirs(d, exist_ok=True)
+            fp = os.path.join(d, song + ".map.json")
+            json.dump(m, open(fp, "w"), indent=1)
+            return self._send(200, json.dumps(
+                {"ok": True, "who": who, "was": was, "now": "hand-written",
+                 "path": os.path.relpath(fp, ROOT), "edits": len(edits)}))
+
         if u.path == "/api/upload_map":
             # A map somebody sent you, dropped straight in. It becomes a real file so
             # both the board and the rooms view see it -- keeping it only in one
@@ -1382,6 +1779,156 @@ class H(http.server.BaseHTTPRequestHandler):
             json.dump(m, open(path, "w"), indent=1)
             return self._send(200, json.dumps({"ok": True, "who": safe,
                                                "path": os.path.relpath(path, ROOT)}))
+        if u.path == "/api/layout":
+            # The rig was editable on screen and nowhere else -- you could drag a lamp,
+            # watch the pre-flight change, and lose it on reload. This writes it.
+            #
+            # Safety is NOT editable from a browser. AGENTS rule 5 puts strobe caps and
+            # the laser floor in the layout precisely so a recipe cannot argue with
+            # them; a UI that could delete them would be the same hole with a nicer
+            # front door. Positions, lamp count, room size and output rate are taken
+            # from the request. Every other key is carried over from the file.
+            if READONLY:
+                return self._send(403, json.dumps({"error": "read-only instance"}))
+            rig = "".join(c for c in (q.get("rig") or ["three"])[0]
+                          if c.isalnum() or c in "-_")[:32]
+            fp = os.path.join(ROOT, "readers", "lights", rig, "layout.json")
+            if not os.path.exists(fp):
+                return self._send(404, json.dumps({"error": "no such rig"}))
+            try:
+                n = int(self.headers.get("Content-Length", 0))
+                req = json.loads(self.rfile.read(n).decode())
+            except Exception as e:
+                return self._send(400, json.dumps({"error": f"not JSON: {e}"}))
+            lay = json.load(open(fp))
+            pars = [f for f in lay["fixtures"] if f.get("kind") == "par"]
+            other = [f for f in lay["fixtures"] if f.get("kind") != "par"]
+            want = req.get("pars")
+            if isinstance(want, list) and want:
+                if len(want) > 64:
+                    return self._send(400, json.dumps({"error": "at most 64 pars"}))
+                out = []
+                for i, w in enumerate(want):
+                    base = dict(pars[i]) if i < len(pars) else dict(pars[-1] if pars else {})
+                    at = list(base.get("at") or [0.0, 0.0, 0.0])
+                    try:
+                        at[0] = float(w[0]); at[2] = float(w[1])
+                    except Exception:
+                        return self._send(400, json.dumps({"error": "pars must be [x, z] pairs"}))
+                    base["at"] = [round(at[0], 3), at[1], round(at[2], 3)]
+                    base["id"] = base.get("id") if i < len(pars) else f"par{i+1}"
+                    out.append(base)
+                lay["fixtures"] = out + other
+            sz = req.get("size_m")
+            if isinstance(sz, dict):
+                for k in ("w", "d", "h"):
+                    if k in sz:
+                        try: lay.setdefault("size_m", {})[k] = round(float(sz[k]), 3)
+                        except Exception: pass
+            # The patch -- which absolute DMX channel each role sits on. Kept in the
+            # layout because it is a fact about the room, not about the song, and
+            # because a patch that lives in one browser tab is a patch you re-derive
+            # every evening.
+            pt = req.get("patches")
+            if isinstance(pt, dict):
+                for f in lay["fixtures"]:
+                    upd = pt.get(f.get("id"))
+                    if not isinstance(upd, dict): continue
+                    cur = dict(f.get("patch") or {})
+                    if "universe" in upd: cur["universe"] = max(0, min(32767, int(upd["universe"])))
+                    if "address" in upd:  cur["address"]  = max(1, min(512, int(upd["address"])))
+                    if "mode" in upd:     cur["mode"]     = str(upd["mode"])[:32]
+                    ch = upd.get("channels")
+                    if isinstance(ch, dict):
+                        cur["channels"] = {str(k)[:16]: max(0, min(512, int(v)))
+                                           for k, v in ch.items() if str(v).lstrip("-").isdigit()}
+                    f["patch"] = cur
+            if "output_hz" in req:
+                try:
+                    hz = float(req["output_hz"])
+                    if not (1.0 <= hz <= 120.0):
+                        return self._send(400, json.dumps(
+                            {"error": "output_hz must be between 1 and 120"}))
+                    lay.setdefault("limits", {})["output_hz"] = hz
+                except Exception:
+                    return self._send(400, json.dumps({"error": "output_hz must be a number"}))
+            json.dump(lay, open(fp, "w"), indent=1)
+            return self._send(200, json.dumps(
+                {"ok": True, "rig": rig, "pars": len([f for f in lay["fixtures"]
+                                                      if f.get("kind") == "par"]),
+                 "kept": sorted(k for k in (lay.get("limits") or {}) if k != "output_hz")}))
+
+        if u.path.startswith("/api/dmx/"):
+            if READONLY:
+                return self._send(403, json.dumps({"error": "read-only instance"}))
+            body = {}
+            try:
+                n = int(self.headers.get("Content-Length", 0))
+                if n: body = json.loads(self.rfile.read(n).decode())
+            except Exception as e:
+                return self._send(400, json.dumps({"error": f"not JSON: {e}"}))
+            what = u.path[len("/api/dmx/"):]
+            if what == "config":
+                with _dmx_lock:
+                    if "to" in body:
+                        t = str(body["to"] or "").strip()
+                        # an address, not a hostname -- this goes straight into sendto
+                        if t and not all(c.isdigit() or c == "." for c in t):
+                            return self._send(400, json.dumps({"error": "to must be an IPv4 address"}))
+                        DMX["to"] = t or None
+                    if "universe" in body:
+                        DMX["universe"] = max(0, min(32767, int(body["universe"])))
+                    if "hz" in body:
+                        DMX["hz"] = max(1.0, min(60.0, float(body["hz"])))
+                    if "on" in body:
+                        DMX["on"] = bool(body["on"])
+                        if DMX["on"]: DMX["last"] = time.time()
+                    DMX["err"] = None
+                    out = {"to": DMX["to"], "universe": DMX["universe"],
+                           "hz": DMX["hz"], "on": DMX["on"]}
+                return self._send(200, json.dumps({"ok": True, **out}))
+            if what == "slots":
+                # hex is the hot path: 40 posts a second of a 512-element JSON array is
+                # 80 KB/s of parsing for a rig that uses fourteen channels. The browser
+                # sends only the channels it drives and the rest are zeroed, which is
+                # also the correct DMX semantic -- a channel nobody claims is off.
+                hx = body.get("hex")
+                if isinstance(hx, str):
+                    try: raw = bytes.fromhex(hx)
+                    except Exception as e:
+                        return self._send(400, json.dumps({"error": f"bad hex: {e}"}))
+                    with _dmx_lock:
+                        b2 = bytearray(512)
+                        b2[:min(512, len(raw))] = raw[:512]
+                        DMX["slots"] = b2; DMX["last"] = time.time(); DMX["err"] = None
+                    return self._send(200, json.dumps({"ok": True, "n": len(raw)}))
+                v = body.get("slots")
+                if not isinstance(v, list):
+                    return self._send(400, json.dumps({"error": "slots must be a list or hex"}))
+                with _dmx_lock:
+                    b2 = bytearray(512)
+                    for i, x in enumerate(v[:512]):
+                        b2[i] = max(0, min(255, int(x)))
+                    DMX["slots"] = b2; DMX["last"] = time.time(); DMX["err"] = None
+                return self._send(200, json.dumps({"ok": True}))
+            if what == "channel":
+                try:
+                    ch = int(body["ch"]); val = max(0, min(255, int(body["v"])))
+                except Exception:
+                    return self._send(400, json.dumps({"error": "need ch (1-512) and v (0-255)"}))
+                if not (1 <= ch <= 512):
+                    return self._send(400, json.dumps({"error": "ch must be 1-512"}))
+                with _dmx_lock:
+                    if body.get("solo"): DMX["slots"] = bytearray(512)
+                    DMX["slots"][ch - 1] = val
+                    DMX["last"] = time.time(); DMX["err"] = None
+                return self._send(200, json.dumps({"ok": True, "ch": ch, "v": val}))
+            if what == "blackout":
+                with _dmx_lock:
+                    DMX["slots"] = bytearray(512); DMX["last"] = time.time()
+                return self._send(200, json.dumps({"ok": True}))
+            return self._send(404, json.dumps({"error": "no such dmx action: " + what}))
+
         if u.path == "/api/verdict":
             p = {k: v[0] for k, v in q.items()}
             with open(os.path.join(HERE, "VERDICTS.tsv"), "a") as fh:
@@ -1403,6 +1950,8 @@ if __name__ == "__main__":
     # must be set on the class BEFORE bind, not on the instance after it, or a
     # restart inside the TIME_WAIT window fails with "address already in use"
     HOST = os.environ.get("HOST", "127.0.0.1")
+    import threading
+    threading.Thread(target=_dmx_loop, daemon=True).start()
     socketserver.ThreadingTCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer((HOST, PORT), H) as srv:
         srv.daemon_threads = True

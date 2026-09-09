@@ -1,0 +1,451 @@
+<!-- Press play. Light comes out. Everything else is behind "setup".
+     This replaces QLC+ and OLA for our own use, so it has to be less work than
+     they are, not more: find the node itself, turn output on by itself, and put
+     one button and one panic button where your hand already is. -->
+<title>First Light</title>
+<style>
+:root{--bg:#0a0d13;--pan:#0f141d;--line:#1b2230;--line2:#263047;--ink:#e6e9f0;
+  --dim:#9aa3b8;--faint:#5c6478;--amb:#e8a33d;--ok:#5bb98c;--no:#e2705f}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 ui-sans-serif,system-ui,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:18px 16px 60px}
+button,select,input[type=text],input[type=number]{background:#182031;color:var(--ink);
+  border:1px solid var(--line2);border-radius:7px;padding:7px 12px;font:inherit;cursor:pointer}
+input[type=text],input[type=number]{cursor:text;font:12px ui-monospace,monospace}
+button:hover{border-color:#41506e}
+#play{font:600 17px ui-monospace,monospace;padding:14px 34px;border-color:var(--amb);
+  color:var(--amb);min-width:150px}
+#play.on{background:var(--amb);color:#171003;border-color:var(--amb)}
+#black{font:600 13px ui-monospace,monospace;padding:14px 20px;border-color:var(--no);
+  color:var(--no)}
+#black:hover{background:var(--no);color:#180605}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+#seek{flex:1;min-width:150px;accent-color:var(--amb);cursor:pointer}
+/* a select sizes itself to its longest option, and "levels · Levels (Radio Edit)
+   (real, answer held out)" is 46 characters -- long enough to push the panic
+   button onto its own row. Same bug, third page. */
+.bar select{max-width:210px}
+.clock{font:13px ui-monospace,monospace;color:var(--amb);min-width:92px;text-align:right}
+#status{display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  border:1px solid var(--line);border-radius:8px;background:var(--pan);
+  padding:9px 13px;font:12px ui-monospace,monospace;color:var(--dim);margin-bottom:14px}
+.dot{width:9px;height:9px;border-radius:99px;background:var(--faint);flex:0 0 auto}
+.dot.live{background:var(--ok);box-shadow:0 0 9px var(--ok)}
+.dot.bad{background:var(--no);box-shadow:0 0 9px var(--no)}
+.dot.wait{background:var(--amb)}
+#room{display:block;width:100%;height:230px;background:#05070b;
+  border:1px solid var(--line);border-radius:8px}
+#chans{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;margin-top:10px}
+#chans div{background:#0d121b;border:1px solid #161d2a;border-radius:3px;
+  font:10px/1.4 ui-monospace,monospace;color:#3d4557;text-align:center;padding:3px 0}
+#chans div b{display:block;font-weight:400;color:var(--faint);font-size:9px}
+#chans div.lit{border-color:var(--amb);color:var(--amb)}
+details{border:1px solid var(--line);border-radius:8px;background:var(--pan);margin-top:16px}
+summary{cursor:pointer;padding:10px 14px;font:11px ui-monospace,monospace;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+summary:hover{color:var(--amb)}
+.sec{padding:0 14px 14px}
+.rw{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:7px 0}
+.rw label{color:var(--faint);font:11px ui-monospace,monospace}
+.rw input[type=number]{width:74px} .rw input[type=text]{width:140px}
+table{border-collapse:collapse;width:100%;font:12px ui-monospace,monospace}
+th{text-align:left;color:var(--faint);font-weight:400;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;padding:5px 10px 5px 0;border-bottom:1px solid var(--line2)}
+td{padding:4px 10px 4px 0;border-bottom:1px solid #141a26;color:var(--dim)}
+td.k{color:var(--ink);white-space:nowrap} td.n{text-align:right;color:var(--amb)}
+.note{color:var(--faint);font-size:12px;line-height:1.55;margin:8px 0 0}
+.eq{font:11px ui-monospace,monospace;color:var(--faint);background:#0d121b;
+  border:1px solid var(--line2);border-radius:4px;padding:1px 6px}
+.up{color:var(--ok)} .down{color:var(--no)} .warn{color:var(--amb)}
+h1{font:600 13px ui-monospace,monospace;letter-spacing:.18em;color:var(--amb);margin:0 0 14px}
+a{color:#4aa8ff}
+input[type=range].big{width:100%;accent-color:var(--amb)}
+</style>
+
+<div class="wrap">
+  <h1>FIRST LIGHT<a href="/" style="float:right;font:11px ui-monospace,monospace">&larr; the deck</a></h1>
+
+  <div class="bar">
+    <button id="play">&#9654; play</button>
+    <select id="song"></select>
+    <input id="seek" type="range" min="0" max="1000" value="0">
+    <span class="clock" id="clock">0:00 / 0:00</span>
+    <button id="black">BLACKOUT</button>
+  </div>
+
+  <div id="status"><span class="dot" id="dot"></span><span id="stxt">starting&hellip;</span></div>
+
+  <canvas id="room"></canvas>
+  <div id="chans"></div>
+
+  <details id="setup"><summary>setup &mdash; only if something is wrong</summary>
+    <div class="sec">
+      <div class="rw">
+        <label>node</label><input id="ip" type="text" placeholder="192.168.1.35">
+        <label>universe</label><input id="uniN" type="number" value="0" min="0" max="32767">
+        <label>Hz</label><input id="hzN" type="number" value="40" min="1" max="60">
+        <button id="apply">apply</button>
+        <button id="disc">find nodes again</button>
+        <button id="test">flash the par</button>
+      </div>
+      <div id="nodes"></div>
+      <p class="note"><b>Art-Net universes start at 0.</b> sACN calls the same one 1, and a
+      node's own page may say either &mdash; if nothing lights, try 0 then 1 before suspecting
+      anything else. A node reports its address as <span class="eq">2.x.x.x</span> by convention
+      even when it lives on your normal subnet, and that reported address is usually
+      unroutable, so always send to the one it answered from. Wi-Fi drops broadcast; use a cable.</p>
+      <p class="note">The server holds the universe and re-sends it on its own clock, so a busy
+      browser cannot stutter a lamp. If frames stop arriving for three seconds it
+      <b>blacks out</b> rather than holding the last look &mdash; a rig left lit by a crashed
+      page is the one failure that is not allowed to be possible.</p>
+
+      <h3 style="font:11px ui-monospace,monospace;letter-spacing:.12em;color:var(--faint)">THE PATCH</h3>
+      <div id="patch"></div>
+      <div class="rw"><button id="savepatch">save the patch into the layout</button>
+        <span class="note" id="pmsg"></span></div>
+
+      <h3 style="font:11px ui-monospace,monospace;letter-spacing:.12em;color:var(--faint)">CHANNEL WALK
+        &mdash; for a fixture with no personality</h3>
+      <div class="rw">
+        <label>channel</label><input id="ch" type="number" value="1" min="1" max="512">
+        <button id="chdn">&minus;</button><button id="chup">+</button>
+        <label><input id="solo" type="checkbox" checked> solo</label>
+        <span class="eq" id="chv">0</span>
+        <input id="what" type="text" placeholder="what did it do?" style="width:230px">
+        <button id="record">record</button><button id="dump">copy as a draft</button>
+      </div>
+      <input id="slide" class="big" type="range" min="0" max="255" value="0">
+      <div id="walk"></div>
+      <p class="note">Find the <b>shutter</b> first and park it open. On most heads the dimmer
+      does nothing until the shutter is in its open band, so walking in numerical order makes
+      six good channels look dead. Sweep the shutter in steps of about 16 &mdash; it is banded
+      (closed, open, strobe slow to fast, random), not a fade.</p>
+    </div>
+  </details>
+
+  <details><summary>what is on the wire</summary>
+    <div class="sec"><div id="frame"></div></div>
+  </details>
+</div>
+
+<script src="/static/room.js"></script>
+<script>
+const $=i=>document.getElementById(i);
+const Q=new URLSearchParams(location.search);
+let SONG=Q.get("song")||"levels", MAPKEY=null, MAPS={}, M=null;
+let LAY=null, RD=null, DUR=1, WALK=[], BUSY=false, LASTPOST=0, OUT=false;
+let ST={}, NODEOK=false;
+const aud=new Audio(); aud.preload="auto";
+const esc=s=>String(s==null?"":s).replace(/</g,"&lt;");
+const ent=o=>Array.isArray(o)?o:((o||{}).entries||[]);
+const mmss=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+const ROLES={par:["dim","r","g","b"],
+             head:["pan","pan_fine","tilt","tilt_fine","dim","shutter","colour"]};
+let HIGH=16;                                  /* how many channels to show and send */
+
+async function boot(){
+  LAY=await (await fetch("/api/layout?rig=live")).json();
+  const G=await (await fetch("/api/maps?song="+SONG)).json();
+  SONG=G.song; MAPS=G.maps;
+  MAPKEY=MAPS["best"]?"best":Object.keys(MAPS).find(k=>k!=="answer");
+  $("song").innerHTML=Object.entries(G.songs||{}).map(([k,v])=>
+    `<option value="${k}"${k===SONG?" selected":""}>${esc(v)}</option>`).join("");
+  aud.src="/api/audio?song="+SONG;
+  window.RECIPE=await (await fetch("/static/recipe_gig.js")).text();
+  loadMap(); patchUI(); chansUI(); walkUI(); wire(); loop(); poll();
+  autoNode();                                  /* nobody should have to find the node */
+}
+function loadMap(){
+  M=JSON.parse(JSON.stringify(MAPS[MAPKEY]));
+  DUR=(M.song&&M.song.length)||180;
+  try{ const g=window.LimelightRoom; g.prep(M);
+    RD=g.mkReader(M,LAY,null,null,16,JSON.stringify({lead:0,env:"breathe"}),0) }
+  catch(e){ RD=null; setStatus("bad","the recipe threw: "+e.message) }
+  const d0=ent(M.moments).filter(m=>m.kind==="drop").map(m=>+m.at).sort((a,b)=>a-b)[0];
+  if(d0!==undefined) aud.currentTime=Math.max(0,d0-3);
+  HIGH=Math.max(8,Math.min(64,highestChannel()+2));
+}
+function highestChannel(){
+  let h=0;
+  for(const f of (LAY.fixtures||[]))
+    for(const v of Object.values((f.patch||{}).channels||{})) if(v>h) h=v;
+  return h;
+}
+
+/* ---------- finding the node, without being asked ---------- */
+async function autoNode(){
+  setStatus("wait","looking for an Art-Net node…");
+  let r; try{ r=await (await fetch("/api/dmx/discover?ms=2200")).json() }
+  catch(e){ r={error:e.message} }
+  const saved=localStorage.getItem("limelight.node");
+  let pick=null;
+  if(r&&r.nodes&&r.nodes.length){
+    showNodes(r);
+    /* prefer a real node over software: QLC+ and OLA answer polls too, and if
+       both are on the network the hardware is almost always what you meant. */
+    const hard=r.nodes.filter(n=>!/qlc|ola|resolume|madmapper/i.test(n.short+" "+n.long));
+    pick=(hard[0]||r.nodes[0]).route;
+  }
+  if(!pick&&saved) pick=saved;
+  if(!pick){
+    setStatus("bad","no node answered — open setup and type its address");
+    $("setup").open=true; return;
+  }
+  $("ip").value=pick;
+  localStorage.setItem("limelight.node",pick);
+  await enable(true);
+}
+async function enable(on){
+  const to=$("ip").value.trim();
+  if(on&&!to){ setStatus("bad","no node address"); return false }
+  let r; try{ r=await (await fetch("/api/dmx/config",{method:"POST",
+    body:JSON.stringify({to,universe:+$("uniN").value,hz:+$("hzN").value,on})})).json() }
+  catch(e){ r={error:e.message} }
+  if(r.error){ setStatus("bad",r.error); return false }
+  OUT=!!on; NODEOK=!!on;
+  return true;
+}
+function setStatus(kind,txt){
+  $("dot").className="dot"+(kind?" "+kind:"");
+  $("stxt").innerHTML=txt;
+}
+async function poll(){
+  try{ ST=await (await fetch("/api/dmx/state")).json() }catch(e){ ST={} }
+  if(ST.err) setStatus("bad",esc(ST.err));
+  else if(!ST.on) setStatus("", "output off");
+  else if(aud.paused) setStatus("wait",
+    `ready &mdash; ${esc(ST.to)} &middot; universe ${ST.universe} &middot; press play`);
+  else setStatus("live",
+    `<b class="up">LIVE</b> &rarr; ${esc(ST.to)} &middot; universe ${ST.universe}`
+    + ` &middot; ${ST.hz} Hz &middot; ${ST.lit} channels lit`);
+  setTimeout(poll,700);
+}
+
+/* ---------- frame -> the channels we drive ---------- */
+function slotsFor(f){
+  const out=new Uint8Array(HIGH);
+  const put=(ch,v)=>{if(ch>=1&&ch<=HIGH) out[ch-1]=Math.max(0,Math.min(255,Math.round(v)))};
+  const byId={}; for(const x of f.fixtures) byId[x.id]=x;
+  let room=0; for(const x of f.fixtures) room=Math.max(room,x.level);
+  for(const fx of (LAY.fixtures||[])){
+    const ch=((fx.patch||{}).channels)||{}, v=byId[fx.id];
+    if(fx.kind==="par"&&v){
+      /* r, g and b already carry the level -- the recipe multiplies colour by it
+         before the frame leaves. So a 3-channel par needs no dimmer, and one that
+         HAS a dimmer must be held open or nothing lights. */
+      if(ch.dim) put(ch.dim,255);
+      put(ch.r,v.r); put(ch.g,v.g); put(ch.b,v.b);
+    } else if(fx.kind==="head"){
+      if(ch.shutter) put(ch.shutter,255);
+      if(ch.dim) put(ch.dim,255*room);
+      if(ch.pan) put(ch.pan,128);
+      if(ch.tilt) put(ch.tilt,128);
+    }
+  }
+  return out;
+}
+const hex=u8=>Array.from(u8,b=>b.toString(16).padStart(2,"0")).join("");
+async function push(u8){
+  if(BUSY) return;                              /* never queue: a late frame is worse than none */
+  BUSY=true;
+  try{ await fetch("/api/dmx/slots",{method:"POST",body:JSON.stringify({hex:hex(u8)})}) }
+  catch(e){}
+  BUSY=false;
+}
+
+/* ---------- the room ---------- */
+function chansUI(){
+  $("chans").innerHTML=Array.from({length:HIGH},(_,i)=>
+    `<div><b>${i+1}</b>0</div>`).join("");
+}
+function drawRoom(f){
+  const c=$("room"); if(!c.clientWidth) return;
+  const w=c.clientWidth,h=c.clientHeight,x=c.getContext("2d");
+  c.width=w*devicePixelRatio;c.height=h*devicePixelRatio;
+  x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  x.fillStyle="#05070b";x.fillRect(0,0,w,h);
+  const all=(LAY.fixtures||[]); if(!all.length||!f) return;
+  const byId={}; for(const v of f.fixtures) byId[v.id]=v;
+  let room=0; for(const v of f.fixtures) room=Math.max(room,v.level);
+  const gap=w/(all.length+1);
+  all.forEach((fx,i)=>{
+    const v=byId[fx.id], lv=v?v.level:room;
+    const col=v?[v.r,v.g,v.b]:[255*lv,255*lv,255*lv].map(Math.round);
+    const cx=gap*(i+1),cy=h*0.46,rad=Math.min(gap*0.30,54);
+    if(lv>0.004){const gr=x.createRadialGradient(cx,cy,0,cx,cy,rad*3);
+      gr.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},${0.6*lv})`);
+      gr.addColorStop(1,"rgba(0,0,0,0)");
+      x.fillStyle=gr;x.beginPath();x.arc(cx,cy,rad*3,0,7);x.fill()}
+    x.beginPath();
+    if(fx.kind==="head"){x.moveTo(cx,cy-rad);x.lineTo(cx+rad*0.86,cy+rad*0.6);
+      x.lineTo(cx-rad*0.86,cy+rad*0.6);x.closePath()}
+    else x.arc(cx,cy,rad,0,7);
+    x.fillStyle=`rgb(${col[0]},${col[1]},${col[2]})`;x.fill();
+    x.strokeStyle=v?"#2a3346":"#4a3a20";x.lineWidth=2;x.stroke();
+    x.fillStyle="#7c849a";x.font="11px ui-monospace,monospace";x.textAlign="center";
+    x.fillText(fx.id+(v?"":"  (follows the room)"),cx,cy+rad+22);
+    x.fillText(lv.toFixed(3),cx,cy+rad+38);x.textAlign="left"});
+  x.fillStyle="#7c849a";x.font="12px ui-monospace,monospace";
+  x.fillText(f.look,8,20);
+}
+function loop(){
+  requestAnimationFrame(loop);
+  const t=aud.currentTime;
+  $("clock").textContent=`${mmss(t)} / ${mmss(DUR)}`;
+  if(!aud.seeking) $("seek").value=Math.round((t/(DUR||1))*1000);
+  if(!RD) return;
+  let f; try{ f=RD(t) }catch(e){ return }
+  drawRoom(f);
+  const u8=slotsFor(f);
+  const cells=$("chans").children;
+  for(let i=0;i<u8.length&&i<cells.length;i++){
+    cells[i].innerHTML=`<b>${i+1}</b>${u8[i]}`;
+    cells[i].classList.toggle("lit",u8[i]>0);
+  }
+  const now=performance.now();
+  if(OUT&&!aud.paused&&now-LASTPOST>24){ LASTPOST=now; push(u8) }
+  if(!aud.paused) $("frame").innerHTML=`<table>
+    <tr><th>fixture</th><th>level</th><th>rgb</th><th>channels</th></tr>
+    ${(LAY.fixtures||[]).map(fx=>{
+      const v=(f.fixtures||[]).find(y=>y.id===fx.id);
+      const ch=((fx.patch||{}).channels)||{};
+      return `<tr><td class="k">${esc(fx.id)}</td>
+        <td class="n">${v?v.level.toFixed(3):"follows"}</td>
+        <td class="n">${v?`${v.r},${v.g},${v.b}`:"&mdash;"}</td>
+        <td>${Object.entries(ch).filter(([,c])=>c>0)
+              .map(([r,c])=>`${r}&rarr;${c}`).join("  ")||"nothing patched"}</td></tr>`}).join("")}
+    </table><p class="note">look: <b>${esc(f.look)}</b> &middot;
+    palette chosen by ${esc((f.decided_by||{}).palette)}</p>`;
+}
+
+/* ---------- setup ---------- */
+function showNodes(r){
+  if(!r.nodes||!r.nodes.length){
+    $("nodes").innerHTML=`<p class="note down">Nothing answered.</p>
+      <p class="note">In this order: is it powered, with a link light? Are you on the
+      <b>same subnet</b> &mdash; many nodes ship as 2.0.0.x or 10.0.0.x while a laptop is
+      192.168.x.x, and they cannot see each other. On Wi-Fi? Use a cable. Some nodes never
+      answer a poll at all, so if you know the address just type it in.</p>`; return }
+  $("nodes").innerHTML=`<table>
+    <tr><th>send to this</th><th>it calls itself</th><th>name</th><th>net/sub</th></tr>
+    ${r.nodes.map(n=>`<tr>
+      <td class="k"><a href="#" data-ip="${esc(n.route)}">${esc(n.route)}</a></td>
+      <td class="${n.reports!==n.route?"warn":""}">${esc(n.reports)}</td>
+      <td>${esc(n.short)} ${esc(n.long)}</td>
+      <td class="n">${n.net}/${n.subnet}</td></tr>`).join("")}</table>`;
+  $("nodes").querySelectorAll("[data-ip]").forEach(el=>el.onclick=async e=>{
+    e.preventDefault(); $("ip").value=el.dataset.ip;
+    localStorage.setItem("limelight.node",el.dataset.ip); await enable(true)});
+}
+function patchUI(){
+  $("patch").innerHTML=(LAY.fixtures||[]).map(f=>{
+    const p=f.patch||{}, ch=p.channels||{}, roles=ROLES[f.kind]||["dim"];
+    return `<div class="rw"><label style="width:64px">${esc(f.id)}</label>
+      <label>address</label><input type="number" min="1" max="512"
+        data-addr="${esc(f.id)}" value="${p.address||1}">
+      <label>mode</label><input type="text" data-mode="${esc(f.id)}" value="${esc(p.mode||"?")}">
+      </div><div class="rw" style="margin-left:64px">${roles.map(r=>
+      `<label>${r}</label><input type="number" min="0" max="512" style="width:58px"
+        data-ch="${esc(f.id)}|${r}" value="${ch[r]!==undefined?ch[r]:0}">`).join("")}</div>`;
+  }).join("")+`<p class="note">0 means &ldquo;no such channel&rdquo;. Channels are
+    <b>absolute</b>: a par at address 1 in 3-channel reads 1, 2, 3.</p>`;
+  const fx=id=>(LAY.fixtures||[]).find(y=>y.id===id);
+  $("patch").querySelectorAll("[data-addr]").forEach(el=>el.onchange=()=>{
+    const f=fx(el.dataset.addr); if(f){f.patch=f.patch||{};f.patch.address=+el.value}});
+  $("patch").querySelectorAll("[data-mode]").forEach(el=>el.onchange=()=>{
+    const f=fx(el.dataset.mode); if(f){f.patch=f.patch||{};f.patch.mode=el.value}});
+  $("patch").querySelectorAll("[data-ch]").forEach(el=>el.onchange=()=>{
+    const [id,role]=el.dataset.ch.split("|"), f=fx(id); if(!f)return;
+    f.patch=f.patch||{}; f.patch.channels=f.patch.channels||{};
+    f.patch.channels[role]=+el.value; HIGH=Math.max(8,Math.min(64,highestChannel()+2));
+    chansUI()});
+}
+function walkUI(){
+  $("walk").innerHTML=WALK.length?`<table>
+    <tr><th>channel</th><th>at</th><th>what it did</th></tr>
+    ${WALK.map(w=>`<tr><td class="k">${w.ch}</td><td class="n">${w.v}</td>
+      <td>${esc(w.what)}</td></tr>`).join("")}</table>`:"";
+}
+async function setCh(){
+  const v=+$("slide").value; $("chv").textContent=v;
+  try{ await fetch("/api/dmx/channel",{method:"POST",
+    body:JSON.stringify({ch:+$("ch").value,v,solo:$("solo").checked})}) }catch(e){}
+}
+
+function wire(){
+  $("play").onclick=async()=>{
+    if(aud.paused){
+      if(!OUT) await enable(true);              /* play means play, not "configure first" */
+      aud.play(); $("play").innerHTML="&#10073;&#10073; pause"; $("play").classList.add("on");
+    } else {
+      aud.pause(); $("play").innerHTML="&#9654; play"; $("play").classList.remove("on");
+      fetch("/api/dmx/blackout",{method:"POST",body:"{}"});
+    }
+  };
+  $("black").onclick=async()=>{
+    aud.pause(); $("play").innerHTML="&#9654; play"; $("play").classList.remove("on");
+    OUT=false;
+    await fetch("/api/dmx/blackout",{method:"POST",body:"{}"});
+    await fetch("/api/dmx/config",{method:"POST",body:JSON.stringify({on:false})});
+    setStatus("","blacked out and output stopped — press play to go again");
+  };
+  $("seek").oninput=e=>{aud.currentTime=(+e.target.value/1000)*(DUR||1)};
+  $("song").onchange=e=>location.href="/live?song="+e.target.value;
+  $("apply").onclick=async()=>{
+    localStorage.setItem("limelight.node",$("ip").value.trim());
+    if(await enable(true)) setStatus("wait","applied — press play")};
+  $("disc").onclick=async()=>{
+    $("nodes").innerHTML=`<p class="note">polling for 2.2 s…</p>`;
+    let r; try{ r=await (await fetch("/api/dmx/discover?ms=2200")).json() }
+    catch(e){ r={error:e.message} }
+    if(r.error){$("nodes").innerHTML=`<p class="note down">${esc(r.error)}</p>`;return}
+    showNodes(r)};
+  $("test").onclick=async()=>{
+    /* the button you press when nothing lights: drive the par's own channels flat
+       out for a second, with no song and no recipe in the way */
+    if(!OUT) await enable(true);
+    const par=(LAY.fixtures||[]).find(f=>f.kind==="par")||{};
+    const ch=((par.patch||{}).channels)||{};
+    const u8=new Uint8Array(HIGH);
+    for(const k of ["dim","r","g","b"]) if(ch[k]>=1&&ch[k]<=HIGH) u8[ch[k]-1]=255;
+    setStatus("wait","flashing the par flat out for one second…");
+    const iv=setInterval(()=>push(u8),40);
+    setTimeout(()=>{clearInterval(iv);
+      fetch("/api/dmx/blackout",{method:"POST",body:"{}"});
+      setStatus("wait","if that did not light, the address, universe or mode is wrong")},1000)};
+  $("slide").oninput=setCh;
+  $("ch").onchange=()=>{$("slide").value=0;setCh()};
+  $("chup").onclick=()=>{$("ch").value=Math.min(512,+$("ch").value+1);$("ch").onchange()};
+  $("chdn").onclick=()=>{$("ch").value=Math.max(1,+$("ch").value-1);$("ch").onchange()};
+  $("record").onclick=()=>{WALK.push({ch:+$("ch").value,v:+$("slide").value,
+    what:$("what").value||"(nothing noted)"});$("what").value="";walkUI()};
+  $("dump").onclick=()=>{
+    const d={made:"channel walk on /live",when:new Date().toISOString(),
+      how:"hand-written",
+      note:"A DRAFT. Every line is what one person saw happen, so it is a hypothesis until "
+        +"somebody repeats it. Never label this measured.",
+      channels:WALK.map(w=>({channel:w.ch,seen_at:w.v,does:w.what}))};
+    const s=JSON.stringify(d,null,1);
+    navigator.clipboard.writeText(s).then(()=>setStatus("wait","personality draft copied"))
+      .catch(()=>setStatus("wait","clipboard refused — it is in the console"))
+      .finally(()=>console.log(s))};
+  $("savepatch").onclick=async()=>{
+    const patches={};
+    for(const f of (LAY.fixtures||[])) if(f.patch) patches[f.id]=f.patch;
+    let r; try{ r=await (await fetch("/api/layout?rig=live",{method:"POST",
+      body:JSON.stringify({patches})})).json() }catch(e){ r={error:e.message} }
+    $("pmsg").innerHTML=r.error?`<span class="down">${esc(r.error)}</span>`
+      :`<span class="up">saved into readers/lights/live/layout.json</span>`};
+  aud.addEventListener("pause",()=>{
+    $("play").innerHTML="&#9654; play";$("play").classList.remove("on")});
+  addEventListener("keydown",e=>{
+    if(/INPUT|SELECT/.test(e.target.tagName))return;
+    if(e.code==="Space"){e.preventDefault();$("play").click()}
+    if(e.key==="b"||e.key==="B"){$("black").click()}});
+  addEventListener("beforeunload",()=>{
+    /* the watchdog would catch this in three seconds; doing it here makes closing
+       the tab instant rather than nearly instant */
+    try{ navigator.sendBeacon("/api/dmx/blackout","{}") }catch(e){}});
+}
+boot().catch(e=>setStatus("bad","boot failed: "+e.message));
+</script>

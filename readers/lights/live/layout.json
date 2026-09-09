@@ -1,0 +1,113 @@
+{
+ "layout": 0.3,
+ "room": "live",
+ "note": "The first rig that is real. One par and one beam moving head, bought 10 Sept, driven over Art-Net through a node. Every number here is PROVISIONAL until Renjith sends the measured positions and Alnas finishes reading the personality off the fixtures -- the ones that were guessed are marked in `measured`. Zero photons ended here.",
+ "size_m": {
+  "w": 3.2,
+  "d": 2.4,
+  "h": 2.6
+ },
+ "measured": {
+  "positions": false,
+  "room": false,
+  "par_mode": "reported by eye, not read from the menu",
+  "head_mode": false,
+  "note": "Correct on /live and save. Nothing here is a measurement yet."
+ },
+ "limits": {
+  "max_strobe_hz": 4.0,
+  "output_hz": 40.0,
+  "laser_zones": [],
+  "laser_min_height_m": 3.0,
+  "no_audience_scan": true,
+  "pan_deg_per_s": 60.0,
+  "tilt_deg_per_s": 70.0,
+  "note": "The head can physically move much faster than these figures. They are the limits we CHOOSE, because a beam that snaps reads as a fault and a beam that arrives reads as a gesture. pan/tilt rates are guesses until smooth.js is run against the real head; they were never measurable before today."
+ },
+ "zones": [
+  {
+   "name": "floor",
+   "fixtures": [
+    "par_l"
+   ]
+  },
+  {
+   "name": "air",
+   "fixtures": [
+    "head_c"
+   ]
+  }
+ ],
+ "fixtures": [
+  {
+   "id": "par_l",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    -0.9,
+    0.35,
+    0.0
+   ],
+   "zone": "floor",
+   "beam_deg": 30.0,
+   "face": "up",
+   "model": "MAAK 007H \u2014 54-LED par (read off the case)",
+   "patch": {
+    "universe": 0,
+    "address": 1,
+    "mode": "rgb3",
+    "channels": {
+     "dim": 0,
+     "r": 1,
+     "g": 2,
+     "b": 3
+    }
+   },
+   "note": "Renjith says 3-channel. In 3-channel there is NO master dimmer -- level has to be carried inside r, g and b, which is what the frame already does (the recipe multiplies colour by level before it leaves). So dim is 0 here, meaning 'this fixture has no such channel'. If it turns out to have a dimmer and it is left at 0, nothing will light and it will look like our bug."
+  },
+  {
+   "id": "head_c",
+   "kind": "head",
+   "can": [
+    "level",
+    "place",
+    "focus",
+    "shock",
+    "hue"
+   ],
+   "emits": "light",
+   "at": [
+    0.9,
+    2.2,
+    0.0
+   ],
+   "zone": "air",
+   "beam_deg": 3.0,
+   "face": "down",
+   "model": "beam moving head, sharpy type (model unconfirmed)",
+   "pan_range_deg": 540.0,
+   "tilt_range_deg": 270.0,
+   "hue_kind": "wheel",
+   "hue_note": "A beam head of this type almost always has a COLOUR WHEEL, not RGB mixing -- discrete slots, not a continuum. Until the personality is read, treat hue as unavailable rather than guessing a continuous mix.",
+   "patch": {
+    "universe": 0,
+    "address": 11,
+    "mode": "unknown",
+    "channels": {
+     "pan": 11,
+     "pan_fine": 0,
+     "tilt": 12,
+     "tilt_fine": 0,
+     "dim": 0,
+     "shutter": 0,
+     "colour": 0
+    }
+   },
+   "note": "Its display read 002 in the photo. A 3-channel par at address 1 occupies 1-3, so a head starting at 2 OVERLAPS it and both fixtures fight. Moved to 11 here; the head's own menu must be changed to match. Channel meanings are guesses until the walk is done -- pan and tilt are the only ones that make it move, so they are the two worth guessing."
+  }
+ ]
+}

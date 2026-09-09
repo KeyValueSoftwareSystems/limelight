@@ -52,3 +52,11 @@ synth/learning/mapeval.jsonl
 
 # generated, large, and reproducible: stems, cloned model repos, virtualenvs
 work/
+
+# listener output and scratch scores -- regenerable in seconds from the audio,
+# and 1.6 MB of JSON that changes on every run is noise in a diff. The PROMOTED
+# map is committed (synth/best/) because that is the one everything is measured
+# against; the attempts that produced it are not.
+synth/maps/fresh*/
+synth/maps/_*/
+synth/maps/edited/
