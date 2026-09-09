@@ -92,12 +92,24 @@ UNMEASURED = {
         ],
         "the_likely_cause": "five songs, four of them 126-128 bpm dance records and one lofi "
                             "cover at 84. There is no corpus here to be relative to.",
-        "what_would_settle_it": "more songs. The resample swing falls roughly as one over the "
-                                "square root of the corpus size, so getting from 40 points to "
-                                "10 needs something like 80 songs -- an estimate from that "
-                                "scaling, not a measurement. The field is cheap to fill the "
-                                "moment a corpus exists: the writer is five lines and the "
-                                "check is the bootstrap already written here.",
+        "what_would_settle_it": "more songs, and they have to be REAL RECORDINGS. The "
+                                "resample swing falls roughly as one over the square root of "
+                                "the corpus size, so getting from 40 points to 10 needs "
+                                "something like 80 songs -- an estimate from that scaling, "
+                                "not a measurement. The field is cheap to fill the moment a "
+                                "corpus exists: the writer is five lines and the check is the "
+                                "bootstrap already written here.",
+        "do_not_do_this": "there is a synthesis pipeline in this repository -- synth/"
+                          "compose.py writes ten songs identically on every machine -- and "
+                          "the blocker here is corpus size, so filling this from generated "
+                          "music is the obvious shortcut. It is refused. A percentile over "
+                          "synthetic songs describes the distribution of the GENERATOR, not "
+                          "of music: it would say a record is busier than 80% of songs when "
+                          "it means busier than 80% of the things compose.py happens to "
+                          "write. It would look like progress and be the most misleading "
+                          "number in the file, because nothing about its shape would reveal "
+                          "where it came from. Synthetic truth can test what we can already "
+                          "name; it cannot stand in for a population.",
     },
     "weight": {
         "value": None,
@@ -105,36 +117,45 @@ UNMEASURED = {
                   "difference between the drop everybody has been waiting for and a drop in "
                   "a song nobody knows",
         "provenance": "unmeasured",
-        "why_null": "the check the brief asked for is the one that failed. Two crowd sources "
-                    "were queried and they cannot be made to agree on which record they are "
-                    "describing, so there is nothing to average and nothing to corroborate.",
+        "why_null": "still null, but the blocker moved. Last round two crowd sources could "
+                    "not agree on which record they were describing. The reason was in this "
+                    "file: song.title was a filename and song.artist was '?', so every lookup "
+                    "had to guess. The record is now named, and song.mbid and song.isrc exist "
+                    "and are null, waiting on one human confirmation.",
+        "what_changed": "listen/identify.py writes title and artist with provenance STATED, "
+                        "read off the release file, and proposes MusicBrainz candidates ranked "
+                        "by how close their length is to the length measured here -- the one "
+                        "piece of evidence this repository actually holds. It prints and does "
+                        "not write. A machine match a human rubber-stamps is the same wrong "
+                        "answer with an extra step, and title matching is precisely what "
+                        "failed.",
         "what_was_tried": [
             {"instrument": "MusicBrainz recording search, artist and title",
              "role": "crowd source one",
              "result": "130 matching recordings for Avicii's Levels, 14 for Don't Look Down, "
-                       "0 for Mizhiyoram, and two of the five queries timed out. Hit count is "
-                       "a measure of how often a track has been re-released, which is not "
-                       "what this field is asking"},
+                       "0 for Mizhiyoram, and two of five queries timed out. Hit count "
+                       "measures how often a track has been re-released, which is not what "
+                       "this field asks"},
             {"instrument": "Wikipedia REST summary, by title",
              "role": "crowd source two",
-             "result": "resolved 'Levels' to the article 'Level', a 29-character "
-                       "disambiguation stub, and 'Don't Look Down' to an unrelated page. "
-                       "Only The Nights resolved to the right record. A source that "
-                       "identifies the wrong entity is worse than no source, because the "
-                       "number it produces looks exactly like a real one"},
+             "result": "resolved 'Levels' to a 29-character disambiguation stub called "
+                       "'Level' and 'Don't Look Down' to an unrelated page. A source that "
+                       "identifies the wrong entity is worse than none, because the number it "
+                       "produces looks exactly like a real one"},
+            {"instrument": "listen/identify.py --propose, run 9 September 2026",
+             "role": "the unblock",
+             "result": "MusicBrainz answered 503 on every attempt that day, so no candidate "
+                       "list was produced. The tool is written and the query is right; the "
+                       "service was down. Run it again when it is up"},
         ],
-        "the_likely_cause": "neither source is keyed on anything this file holds. Matching by "
-                            "artist and title is ambiguous by construction, and one of these "
-                            "five is a lofi cover with no canonical release at all.",
-        "what_would_settle_it": "an identifier rather than a title -- an ISRC or a MusicBrainz "
-                                "recording MBID stored in `song`, resolved once by a human and "
-                                "then used to key every external lookup. That is a small piece "
-                                "of work and it is the whole blocker; everything after it is "
-                                "arithmetic.",
-        "and_a_caution": "this is the one field in the file whose source is outside the "
-                         "recording. Whatever fills it will be a claim about a population, "
-                         "measured at a moment, that changes without the song changing -- so "
-                         "it needs a date attached in a way none of the other fields do.",
+        "the_remaining_blocker": "one person confirming one identifier per song. Everything "
+                                 "after that is arithmetic, and the cross-source check the "
+                                 "brief asked for becomes possible because both sources are "
+                                 "finally keyed on the same entity.",
+        "and_a_caution": "this is the one field whose source is outside the recording. "
+                         "Whatever fills it is a claim about a population, measured at a "
+                         "moment, that changes without the song changing -- so it needs a "
+                         "date attached in a way none of the other fields do.",
     },
     "idiom": {
         "value": None,

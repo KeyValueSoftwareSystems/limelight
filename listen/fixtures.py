@@ -193,21 +193,31 @@ def wrong_meter_and_tempo():
         B = cached if cached is not None else ME.bands(sig, sr)
         m = json.load(open(mp))
 
-        good = ME.ev_meter(m, B)[0]
+        good = ME.ev_meter(m, B, slug)[0]
         if good is None:
-            print("   --   %-16s meter: harmony cannot answer on this record, so nothing to "
-                  "falsify" % slug)
+            print("   --   %-16s meter: neither harmony nor the sidecar can answer here"
+                  % slug)
         else:
             worst = 0.0
             for n in (3, 5, 7, 9):
                 mm = copy.deepcopy(m)
                 mm.setdefault("grid", {})["beats_per_bar"] = n
-                v = ME.ev_meter(mm, B)[0]
+                v = ME.ev_meter(mm, B, slug)[0]
                 worst = max(worst, 0.0 if v is None else v)
             good_enough = good - worst >= 0.30
             ok = ok and good_enough
             print("   %s %-16s meter: 4 beats scores %.2f, the best of 3/5/7/9 scores %.2f"
                   % ("ok  " if good_enough else "FAIL", slug, good, worst))
+
+            # The halving error is the bug this field exists for, and the
+            # harmonic side alone cannot see it. Claiming 2 has to cost.
+            half = copy.deepcopy(m)
+            half.setdefault("grid", {})["beats_per_bar"] = 2
+            hv = ME.ev_meter(half, B, slug)[0] or 0.0
+            caught = good - hv >= 0.30
+            ok = ok and caught
+            print("   %s %-16s meter: half the bar (2 beats) scores %.2f, %.2f below 4"
+                  % ("ok  " if caught else "FAIL", slug, hv, good - hv))
 
         per, ph = m["grid"]["period"], m["grid"]["phase"]
         base = ME.ev_tempo(m, B)[0]
@@ -261,7 +271,12 @@ def flipped_pan():
         good = 0.0 if good is None else good
         bad = 0.0 if bad is None else bad
         mid = 0.0 if mid is None else mid
-        fine = bad <= 0.05 and mid <= 0.30 and good >= 0.50
+        # The bar is no longer "beat a permutation". Per-hit sign agreement caps
+        # well below 1.0 because the mix at a panned hit also holds a centred
+        # kick, so what is asserted is that the claim is materially above
+        # chance, that swapping every side destroys it, and that shuffling the
+        # claims lands near chance.
+        fine = bad <= 0.05 and good >= 0.20 and good - mid >= 0.15
         ok = ok and fine
         print("   %s %-16s as claimed %.2f, sides swapped %.2f, shuffled %.2f"
               % ("ok  " if fine else "FAIL", slug, good, bad, mid))
@@ -293,7 +308,21 @@ def broken_identity_and_surprise():
 
         good = ME.ev_identity(m, B)[0]
         if good is None:
-            print("   --   %-16s no identity claimed" % slug)
+            # A declared inability is a legitimate outcome now: two non-harmonic
+            # cues agreeing against harmony returns no score. What still has to
+            # hold is that pointing the claims at random bars does not sneak a
+            # score out of it.
+            bad_m = copy.deepcopy(m)
+            rng = random.Random(7)
+            for e in bad_m["observations"]["identity"]["entries"]:
+                if e.get("same_as") is not None and e["bar"] > 3:
+                    e["same_as"] = rng.randrange(0, e["bar"] - 1)
+            bad = ME.ev_identity(bad_m, B)[0]
+            fine = bad is None or bad <= 0.05
+            ok = ok and fine
+            print("   %s %-16s identity: cannot answer; random bars score %s"
+                  % ("ok  " if fine else "FAIL", slug,
+                     "also nothing" if bad is None else "%.2f" % bad))
         else:
             bad_m = copy.deepcopy(m)
             rng = random.Random(7)
@@ -352,7 +381,10 @@ def moved_hook():
         bad_m = copy.deepcopy(m)
         rng = random.Random(4)
         dur = (m.get("song") or {}).get("length") or 200
-        hk = bad_m["observations"]["hook"]["hook"]
+        # Two shapes reach this field: a text-found hook nests the phrase under
+        # "hook", a rhythm-found one is the entry itself.
+        ho = bad_m["observations"]["hook"]
+        hk = ho["hook"] if isinstance(ho.get("hook"), dict) else ho
         hk["times"] = [round(rng.uniform(0, dur), 3) for _ in hk["times"]]
         bad = ME.ev_hook(bad_m, B)[0]
         bad = 0.0 if bad is None else bad

@@ -64,32 +64,115 @@ def energy_at(m, t):
     return best if best is not None else 0.5
 
 
+def rhythmic_hook(m):
+    """The hook found by its rhythm, for a vocal no transcriber can read.
+
+    Onsets on the separated vocal, quantised to eighths of a bar from each bar
+    line, and the figure whose quantised onset set recurs most -- occurrences at
+    least MIN_GAP_S apart, agreement by Jaccard, weighted by how many onsets the
+    figure holds and by the energy where it lands. Windows of one, two and four
+    bars are tried and the heaviest wins."""
+    downs = m.get("downbeats") or []
+    if len(downs) < 8:
+        return None
+    bar = (downs[-1] - downs[0]) / max(1, len(downs) - 1)
+    ons = sorted(e["at"] for e in (((m.get("accents") or {}).get("events")) or [])
+                 if e.get("of") == "vocals" and e.get("at") is not None)
+    if len(ons) < 24:
+        return None
+    best = None
+    for W in (1, 2, 4):
+        sigs = []
+        for k in range(len(downs) - W):
+            t0 = downs[k]
+            cells = frozenset(int(round(8 * (t - t0) / bar))
+                              for t in ons if t0 - 0.02 <= t < t0 + W * bar)
+            if len(cells) >= 3:
+                sigs.append((k, cells))
+        for k, sg in sigs:
+            grp = [k]
+            for k2, s2 in sigs:
+                if k2 <= k:
+                    continue
+                if downs[k2] - downs[grp[-1]] < MIN_GAP_S:
+                    continue
+                if len(sg & s2) / max(1, len(sg | s2)) >= 0.7:
+                    grp.append(k2)
+            if len(grp) < 2:
+                continue
+            es = [energy_at(m, downs[q]) for q in grp]
+            mean_e = sum(es) / len(es)
+            # count x onset DENSITY x energy. Multiplying by the raw onset count
+            # rewards long windows for holding more onsets, and picked a 4-bar
+            # figure occurring twice over a 1-bar figure occurring six times on
+            # mizhiyoram. A hook is short and frequent.
+            w = len(grp) * (len(sg) / W) * mean_e
+            if best is None or w > best["weight"]:
+                best = {"phrase": None, "times": [round(downs[q], 3) for q in grp],
+                        "count": len(grp), "span_bars": W,
+                        "span_s": round(W * bar, 3), "onsets_in_figure": len(sg),
+                        "mean_energy": round(mean_e, 4), "weight": round(w, 4)}
+    return best
+
+
 def analyse(slug, write=False):
     mp = map_path(slug)
     if not mp:
         return {"error": "no map"}
     ws = words_of(slug)
     if ws is None:
-        return {"error": "no transcript at %s -- run whisper on the vocal stem" % lyrics_dir()}
+        # No transcript at all is the same situation as an unusable one: fall
+        # through to the rhythmic search rather than refusing to answer.
+        ws = []
     m = json.load(open(mp))
     if len(ws) < 12:
-        m.setdefault("observations", {})["hook"] = {
-            "value": None,
-            "provenance": "unmeasured",
-            "why_null": "the transcriber returned %d usable words from this vocal. Whisper "
-                        "was run with automatic language detection and reported English; "
-                        "this recording is not in English, and a transcript of the wrong "
-                        "language cannot be searched for a repeated phrase." % len(ws),
-            "what_would_settle_it": "run the transcriber with the language given rather than "
-                                    "detected. The hook is audible and repeated in this song; "
-                                    "the tool was pointed at the wrong language, which is a "
-                                    "fixable mistake and not a property of the record.",
-            "model": "openai-whisper small, on the separated vocal stem",
-        }
+        # Transcription failed. The hook is still findable, because the check
+        # for a hook is rhythmic repetition and rhythm is language-independent:
+        # run that search as the WRITER and emit the figure as a time span with
+        # no text. What it costs is stated in the field -- rhythm found it, so
+        # rhythm cannot then corroborate it, and mapeval.ev_hook checks a
+        # rhythm-found hook against chord-sequence repetition instead.
+        r = rhythmic_hook(m)
+        if r is None:
+            m.setdefault("observations", {})["hook"] = {
+                "value": None,
+                "provenance": "unmeasured",
+                "why_null": "the transcriber returned %d usable words%s, and no vocal figure "
+                            "repeats often enough to stand in for a phrase."
+                            % (len(ws), "" if os.path.exists(
+                                os.path.join(lyrics_dir(), slug + ".json"))
+                               else " (there is no transcript for this song at all)"),
+                "model": "openai-whisper small, on the separated vocal stem",
+            }
+        else:
+            r.update({
+                "rate": "per_song",
+                "found_by": "rhythmic repetition",
+                "how": "the transcriber returned %d usable words on this recording, so the "
+                       "phrase was found by its rhythm instead: onsets on the separated vocal "
+                       "quantised to eighths of a bar, and the figure whose quantised onset "
+                       "set recurs most, weighted by how many onsets it holds and the energy "
+                       "where it lands" % len(ws),
+                "why_no_text": "Whisper reported English on a recording that is not in "
+                               "English and returned nothing usable; with Malayalam given "
+                               "explicitly it returned zero segments, and on the raw mix it "
+                               "returned invented text mixing Korean and Chinese glyphs. A "
+                               "hook read out of that would be a fabricated number, so the "
+                               "phrase is emitted as a time span with no words rather than "
+                               "with wrong ones.",
+                "costs": "rhythm found this, so rhythm cannot corroborate it. mapeval.ev_hook "
+                         "checks a rhythm-found hook against chord-sequence repetition, which "
+                         "shares neither the tool nor the feature family.",
+                "provenance": "measured",
+                "model": "onset detection on the separated vocal stem",
+            })
+            m.setdefault("observations", {})["hook"] = r
         if write:
             json.dump(m, open(mp, "w"), indent=1, ensure_ascii=False)
             open(mp, "a").write("\n")
-        return {"error": "only %d words transcribed -- written as a labelled null" % len(ws)}
+        return {"slug": slug, "rhythmic": r is not None,
+                "error": None if r else "no repeated vocal figure either",
+                "n": 0, "top": [], "wrote": write}
 
     seen = {}
     for n in range(MIN_WORDS, MAX_WORDS + 1):

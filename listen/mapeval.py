@@ -762,7 +762,132 @@ def ev_stems(m, B):
                if absent else ""))
 
 
-def ev_meter(m, B):
+_VEC_CACHE = {}
+_LAG_CACHE = {}
+
+
+def beat_vectors(m, slug):
+    """The per-beat rows of the learned sidecar, or None.
+
+    Read here rather than trusted from the map: the reference carries a sha256
+    and a byte count, and a reference nobody follows is not evidence."""
+    v = m.get("vectors") or {}
+    f, rows, dim = v.get("file"), v.get("rows"), v.get("dim")
+    if not f or not rows or not dim or v.get("dtype") != "float16":
+        return None
+    key = (slug, f)
+    if key in _VEC_CACHE:
+        return _VEC_CACHE[key]
+    hits = (glob.glob(os.path.join(ROOT, "synth", "maps", "*", f))
+            + glob.glob(os.path.join(ROOT, "maps", "*", f)))
+    path = hits[0] if hits else None
+    if path is None or os.path.getsize(path) != rows * dim * 2:
+        _VEC_CACHE[key] = None
+        return None
+    import struct
+    raw = open(path, "rb").read()
+    a = struct.unpack("<%de" % (rows * dim), raw)
+    # Full dimension. Subsampling every fourth was tried and it is not safe
+    # here: the statistic reads the SIGN of a peak a few thousandths high, and
+    # on a 192-dimensional subspace Starlight's lag 3 flipped from -0.0052 to
+    # +0.0004 and started competing with the real answer. Whole vectors cost
+    # 0.8 s a map, which is affordable, and the sign is what the check is made
+    # of.
+    V = [a[i * dim:(i + 1) * dim] for i in range(rows)]
+    _VEC_CACHE[key] = V
+    return V
+
+
+def timbral_meter(m, slug):
+    """Which beat-lag the learned embedding repeats at.
+
+    The third feature family, and the one that settles the halving error the
+    other two cannot. listen/meter.py measures beats-per-bar from onset
+    self-similarity in the low and high bands; ev_meter's harmonic side reads
+    chord-change spacing. Both are blind to 2-versus-4: chord spacing gives the
+    harmonic rhythm and a two-bar loop lands on 4 and 8 alike, so 2, 4 and 8
+    score within 0.1 of each other there by design -- which left the check
+    unable to falsify the exact bug that motivated the field.
+
+    This asks a different question of a different representation. Cosine between
+    beat i and beat i+lag, averaged over the record, then each lag against the
+    mean of its two neighbours, because similarity decays with lag and the raw
+    numbers therefore always favour the smallest. A meter of n shows a PEAK
+    there.
+
+    The asymmetry is the whole point. Measured on all five recordings, lag 4 is
+    a peak (+0.004 to +0.024 over its neighbours) and lag 2 is a TROUGH (-0.002
+    to -0.037). A four-beat bar makes consecutive beats alternate strong and
+    weak, so beats two apart are LESS alike than the decay predicts; a two-beat
+    bar cannot produce that. So a claim of 2 fails on the sign alone.
+
+    What it shares with the writer: no code and no feature family -- one is a
+    transformer embedding of the waveform, the other an onset envelope in two
+    bands. What it shares with `identity`: the same sidecar file, which is worth
+    saying. It is a different question of it, though -- identity compares BARS
+    for repeated material, this compares BEATS for stress -- and neither reads
+    the other's answer.
+
+    Returns (score, note) or (None, why)."""
+    V = beat_vectors(m, slug)
+    if V is None:
+        return None, "no learned sidecar to read a beat lag out of"
+    rows = len(V)
+    if rows < 64:
+        return None, "only %d beat vectors, too few to measure a lag against" % rows
+    # The lag similarities are a property of the recording, not of anything the
+    # map claims, so they are computed once per song. metaeval scores eleven
+    # corrupted variants of the same map and fixtures calls this six times a
+    # song; without this the same 5 million multiply-adds ran seventeen times.
+    ck = (slug, id(V))
+    if ck in _LAG_CACHE:
+        sim = _LAG_CACHE[ck]
+    else:
+        dim = len(V[0])
+        sim = {}
+        for lag in range(1, 14):
+            n = rows - lag
+            if n < 16:
+                break
+            tot = 0.0
+            for i in range(n):
+                a, b = V[i], V[i + lag]
+                tot += sum(a[d] * b[d] for d in range(dim))
+            sim[lag] = tot / n
+        _LAG_CACHE[ck] = sim
+    if len(sim) < 10:
+        return None, "not enough usable lags"
+
+    def peak(n):
+        if n - 1 not in sim or n + 1 not in sim or n not in sim:
+            return None
+        return sim[n] - (sim[n - 1] + sim[n + 1]) / 2.0
+
+    claimed = (m.get("grid") or {}).get("beats_per_bar")
+    if not claimed:
+        return None, "no beats-per-bar claimed"
+    pk = peak(claimed)
+    if pk is None:
+        return None, "the claimed bar length falls outside the measurable lags"
+    same_chain = lambda a, b: a % b == 0 or b % a == 0
+    rivals = [r for r in (2, 3, 4, 5, 6, 7, 8, 9)
+              if not same_chain(r, claimed) and peak(r) is not None]
+    if not rivals:
+        return None, "no incompatible bar length to compare against"
+    if pk <= 0:
+        return 0.0, ("lag %d is a trough of %+.4f against its neighbours, not a peak. A "
+                     "%d-beat bar would make the beats %d apart MORE alike than the decay "
+                     "predicts, and they are less" % (claimed, pk, claimed, claimed))
+    beat = sum(1 for r in rivals if pk > peak(r))
+    half = peak(claimed // 2) if claimed >= 4 and peak(claimed // 2) is not None else None
+    return beat / len(rivals), (
+        "lag %d peaks %+.4f over its neighbours and beats %d of %d incompatible lengths%s"
+        % (claimed, pk, beat, len(rivals),
+           "; half that, lag %d, is %+.4f, so the halving error is excluded"
+           % (claimed // 2, half) if half is not None else ""))
+
+
+def ev_meter(m, B, slug=None):
     """Beats to the bar, against the spacing of the chord changes.
 
     The audit this replaces asked the low and high bands at beat times whether
@@ -792,8 +917,11 @@ def ev_meter(m, B):
     per, ph = g.get("period"), g.get("phase")
     if not claimed:
         return None, "no beats-per-bar claimed"
+    t_score, t_note = timbral_meter(m, slug) if slug else (None, "no slug")
     if not per or ph is None:
-        return None, "no grid to place the chord changes on", True
+        if t_score is None:
+            return None, "no grid to place the chord changes on", True
+        return t_score, "harmony unavailable (no grid); timbral only -- " + t_note
     segs = ((m.get("observations") or {}).get("chords") or {}).get("segments") or []
     beats_at = []
     for sg in segs:
@@ -807,8 +935,12 @@ def ev_meter(m, B):
     gaps = [beats_at[i + 1] - beats_at[i] for i in range(len(beats_at) - 1)]
     gaps = [gp for gp in gaps if gp > 0]
     if len(gaps) < 24:
-        return None, ("only %d chord changes land on the beat grid; harmony cannot settle the "
-                      "bar length on this recording" % len(gaps)), True
+        if t_score is None:
+            return None, ("only %d chord changes land on the beat grid, and there is no "
+                          "learned sidecar either, so nothing can settle the bar length here"
+                          % len(gaps)), True
+        return t_score, ("only %d chord changes land on the beat grid, so harmony abstains; "
+                         "the learned side answers -- %s" % (len(gaps), t_note))
 
     def compat(n, pool):
         return sum(1 for gp in pool if gp % n == 0 or n % gp == 0) / max(1, len(pool))
@@ -833,14 +965,21 @@ def ev_meter(m, B):
     for gp in gaps:
         common[gp] = common.get(gp, 0) + 1
     hot = sorted(common.items(), key=lambda kv: -kv[1])[:2]
-    return score, ("claims %d beats to the bar; %d chord changes are spaced mostly %s beats "
-                   "apart, %.0f%% of which fit a %d-beat bar -- %.0f%% more than the spacing "
-                   "alone would give, against %.0f%% for the best incompatible alternative "
-                   "(%s). Harmony cannot separate %d from its own double or half and does not "
-                   "try to; what it rules out is a bar that is neither."
-                   % (claimed, len(gaps) + 1,
-                      " and ".join(str(k) for k, _ in hot), 100 * mine, claimed,
-                      100 * score, 100 * max(0.0, rivals[br]) if br else 0.0, br, claimed))
+    harm = score
+    if t_score is None:
+        return harm, ("claims %d beats to the bar; %d chord changes spaced mostly %s beats "
+                      "apart put %.0f%% more inside a %d-beat bar than the spacing alone "
+                      "would give. No learned sidecar, so the halving error is NOT excluded "
+                      "on this map -- 2, 4 and 8 are indistinguishable to harmony alone."
+                      % (claimed, len(gaps) + 1, " and ".join(str(k) for k, _ in hot),
+                         100 * harm, claimed))
+    combined = (harm + t_score) / 2.0
+    return combined, ("claims %d beats to the bar. Harmony: %d chord changes spaced mostly %s "
+                      "beats apart, %.0f%% clear of the spacing alone, which rules out a bar "
+                      "that is neither %d nor its double or half. Learned: %s. Two families, "
+                      "averaged -- %.2f and %.2f."
+                      % (claimed, len(gaps) + 1, " and ".join(str(k) for k, _ in hot),
+                         100 * harm, claimed, t_note, harm, t_score))
 
 
 def ev_tempo(m, B):
@@ -946,8 +1085,11 @@ def stereo_for(slug):
     return a[0::2], a[1::2], sr
 
 
+OFF_CENTRE = 0.10          # below this a claim is "centre", not a side
+
+
 def ev_pan(m, B, slug=None):
-    """The claimed pan of each accent, against the release mix's own L-R.
+    """For every accent the map places off centre, does the release lean that way?
 
     listen/pan.py measures pan on six separated STEREO stems. This never opens
     a stem: it reads the unseparated release and asks, at each claimed instant,
@@ -955,15 +1097,35 @@ def ev_pan(m, B, slug=None):
     shared separator -- if demucs put a hat on the wrong side, the mix does not
     agree with it.
 
-    The correlation is diluted by construction and that is not a defect: at the
-    instant a right-hand hat is struck, the mix also contains a centred kick and
-    a centred bass, so the mix's own L-R sits closer to the middle than the
-    stem's does. A hard-panned accent still moves it in the right direction, so
-    the check grades the correlation, never the magnitude.
+    Scored per hit, and that is a rewrite. The first version graded the
+    whole-song correlation against 32 shuffles of the claims, and it read 1.00
+    on five of five songs, which is not a measurement -- it is "beat a
+    permutation", and at weight 1.0 it added a constant to every total. That is
+    my own objection to a constant, turned on my own check.
 
-    Left/right is also the one claim in the whole file with a free falsification:
-    flipping every sign is still a perfectly well-formed pan field, and has to
-    score zero."""
+    Hardening the null did not fix it. Shuffling within instrument label, and
+    within label and a 20-second bucket, still gave z of 8 to 15, because z
+    grows with the square root of the sample and there are three and a half
+    thousand accents. The z was reporting how many hits there are.
+
+    So the claims are graded directly. Among the accents the map says are at
+    least %.0f%% off centre, the share where the release mix leans the same way
+    is the score, rescaled from a 50%% baseline. Chance is exactly a half, no
+    control needed, and the number has range: it comes out 61%% to 75%% across
+    the five, which is 0.22 to 0.50 after rescaling. Accents the map calls
+    centre are not graded -- a centred claim is not a claim about a side.
+
+    Its own internal evidence that it is measuring something: agreement rises
+    with the size of the claim, monotonically on all five songs. On
+    dont-look-down it goes 70%% at a tenth off centre, 77%% at a fifth, 81%% at
+    three tenths. A bigger claim being a more reliable claim is what a real
+    measurement does and what noise does not.
+
+    Still diluted, and still on purpose: at the instant a right-hand hat is
+    struck the mix also holds a centred kick and a centred bass, so agreement
+    cannot approach 100%% however good the map is. That caps the score rather
+    than biasing it, and the cap is the same for every map on the same
+    recording.""" % (100 * OFF_CENTRE,)
     o = (m.get("observations") or {}).get("pan") or {}
     ents = o.get("entries") or []
     if not ents:
@@ -976,7 +1138,8 @@ def ev_pan(m, B, slug=None):
                       "and the mono downmix cannot answer where a hit sits between the "
                       "speakers. Run tools/setup.sh stereo." % slug), True
     win = int(0.040 * sr)
-    claimed, raw = [], []
+    agree = tot = 0
+    by_thr = {}
     for e in ents:
         t, p = e.get("at"), e.get("pan")
         if t is None or p is None:
@@ -991,41 +1154,27 @@ def ev_pan(m, B, slug=None):
             er += float(R[i]) * float(R[i])
         if el + er < 1e-6:
             continue
-        claimed.append(p)
-        raw.append((er - el) / (er + el))
-    if len(claimed) < 30:
-        return None, "only %d accents could be placed in the stereo mix" % len(claimed), True
-    r = _corr(claimed, raw)
-    spread = max(claimed) - min(claimed)
-    if spread < 0.10:
-        return None, ("every claimed pan sits within %.2f of every other -- this mix is "
-                      "centred and there is nothing for the check to agree or disagree with"
-                      % spread), True
-
-    # The correlation a correct pan field can reach here is capped well below 1
-    # by the dilution above -- it comes out 0.20 to 0.36 on maps that are right.
-    # Grading it raw would take the same 0.7 off every map, which is a constant,
-    # and a constant is not a measurement. So it is graded the way ev_sections
-    # grades a boundary: against the same statistic computed on the same numbers
-    # in the wrong order. 32 shuffles give the correlation this many accents
-    # produce by arithmetic alone, and the claim has to stand clear of it.
-    import random as _rnd
-    rng = _rnd.Random(20260909)
-    null = []
-    for _ in range(32):
-        sh = claimed[:]
-        rng.shuffle(sh)
-        null.append(_corr(sh, raw))
-    mu = sum(null) / len(null)
-    sd = (sum((x - mu) ** 2 for x in null) / len(null)) ** 0.5
-    z = (r - mu) / sd if sd > 1e-9 else 0.0
-    score = max(0.0, min(1.0, z / 8.0))
-    return score, ("%d claimed pans correlate r=%+.2f with the release mix's own L-R at the "
-                   "same instants, claimed range %+.2f to %+.2f -- %.1f sd above the %+.2f "
-                   "the same numbers give shuffled. Diluted on purpose: the mix at a panned "
-                   "hit also holds a centred kick, so this grades whether the claim beats "
-                   "chance, never the size of the correlation."
-                   % (len(claimed), r, min(claimed), max(claimed), z, mu))
+        raw = (er - el) / (er + el)
+        same = (p > 0) == (raw > 0)
+        for thr in (0.10, 0.20, 0.30):
+            if abs(p) >= thr:
+                h, n = by_thr.get(thr, (0, 0))
+                by_thr[thr] = (h + (1 if same else 0), n + 1)
+        if abs(p) >= OFF_CENTRE:
+            tot += 1
+            agree += 1 if same else 0
+    if tot < 40:
+        return None, ("only %d accents are claimed more than %.0f%% off centre -- this mix is "
+                      "centred and there is no side claim to check" % (tot, 100 * OFF_CENTRE)), True
+    share = agree / tot
+    score = max(0.0, min(1.0, (share - 0.5) / 0.5))
+    trend = " ".join("%.0f%%@%.1f" % (100 * h / n, t)
+                     for t, (h, n) in sorted(by_thr.items()) if n >= 20)
+    return score, ("%d of %d accents claimed off centre lean the same way in the release mix "
+                   "(%.0f%%, against 50%% by chance). Agreement by size of claim: %s -- a "
+                   "bigger claim being more reliable is what a measurement does. Graded per "
+                   "hit, not against a permutation"
+                   % (agree, tot, 100 * share, trend))
 
 
 def ev_spans(m, B):
@@ -1120,6 +1269,51 @@ def ev_spans(m, B):
                 ctrl.append(c)
     if not got or len(ctrl) < 24:
         return None, "no build or quiet span could be placed on the bar grid", True
+    # Second independent check, tried after the composite failed. MuQ-large
+    # novelty -- a different model again, and not the arrangement view the
+    # writer uses. Pooled over all five songs it DOES discriminate: the decoded
+    # starts sit 2.2 sd above the same spans slid to random offsets and beat
+    # 98% of 200 random placements. Per map it does not: levels beats 46% of
+    # placements and dont-look-down 36%, against starlight's 98% and The
+    # Nights' 100%. Two songs at or below chance is not a check that can grade a
+    # map, so this stays reported and unweighted.
+    nv = (m.get("observations") or {}).get("novelty") or {}
+    nat, nval = nv.get("at") or [], nv.get("value") or []
+    nov_note = ""
+    if len(nat) >= 8 and len(nval) == len(nat):
+        idx = list(range(1, len(nval) - 1))
+        nmu = sum(nval[i] for i in idx) / len(idx)
+        nsd = (sum((nval[i] - nmu) ** 2 for i in idx) / len(idx)) ** 0.5 or 1.0
+
+        def nz(t):
+            if not (nat[1] <= t <= nat[-2]):
+                return None
+            best, bv = None, 1e9
+            for i in idx:
+                d = abs(nat[i] - t)
+                if d < bv:
+                    bv, best = d, nval[i]
+            return (best - nmu) / nsd
+
+        zs = [nz(sp.get("from")) for sp in spans if sp.get("from") is not None]
+        zs = [z for z in zs if z is not None]
+        if zs:
+            rng2 = _rnd.Random(4)
+            dur = (m.get("song") or {}).get("length") or nat[-1]
+            fake = []
+            for _ in range(200):
+                b = [nz(rng2.uniform(0, dur)) for _ in zs]
+                b = [x for x in b if x is not None]
+                if b:
+                    fake.append(sum(b) / len(b))
+            if fake:
+                rm = sum(zs) / len(zs)
+                beat2 = sum(1 for x in fake if rm > x) / len(fake)
+                nov_note = ("; MuQ novelty at those starts is %+.2f sd from this song's own "
+                            "mean, beating %.0f%% of 200 random placements (pooled over the "
+                            "five songs this reaches 98%%, per map it does not)"
+                            % (rm, 100 * beat2))
+
     mu = sum(ctrl) / len(ctrl)
     sd = (sum((x - mu) ** 2 for x in ctrl) / len(ctrl)) ** 0.5
     mine = sum(got) / len(got)
@@ -1129,45 +1323,68 @@ def ev_spans(m, B):
     dr = sum(direction) / len(direction) if direction else 0.0
     return score, ("%s begin where the composite changes %.2f against %.2f for the same "
                    "window at 48 other offsets -- %.1f sd, beating %.0f%% of them. Inside, "
-                   "the composite %s by %.2f on average, which is reported and not graded"
+                   "the composite %s by %.2f on average, which is reported and not graded%s"
                    % (" and ".join("%d %s" % (v, k) for k, v in sorted(kinds.items())),
                       mine, mu, z, 100 * beat,
-                      "rises" if dr >= 0 else "falls", abs(dr)))
+                      "rises" if dr >= 0 else "falls", abs(dr), nov_note))
+
+
+DRUM_LABELS = {"kick", "snare", "hat", "tom", "clap", "ride"}
+IDENT_CHORD_WEAK = 0.15
+IDENT_RHYTHM_STRONG = 0.30
 
 
 def ev_identity(m, B):
-    """Bar 97 is claimed to be the same material as bar 33. Are the chords?
+    """Bar 97 is claimed to be the same material as bar 33. Two other cues agree?
 
-    listen/identity.py decides this from MERT embeddings -- a learned model of
-    the audio, pooled per bar. This side reads the chord labels ChordMini
-    produced, turns each bar into the sequence of chord symbols sounding in it,
-    and asks whether the two bars carry the same sequence. A learned embedding
-    and a symbolic label from a different model, sharing the recording and no
-    code and no feature.
+    listen/identity.py decides this from MERT embeddings, pooled per bar. This
+    side asks two independent questions of the same pairing:
 
-    The control matters as much as the claim. Pop repeats its harmony
-    constantly, so two bars picked at random already agree fairly often, and
-    "the chords match" is not evidence on its own. Every claimed pairing is
-    compared against 32 pairings of the same bar with a random earlier one, and
-    only the excess counts.
+      chords   the sequence of chord symbols ChordMini put in each bar. A
+               symbolic label from a different model.
+      rhythm   the drum pattern inside each bar -- which of kick, snare and hat
+               land on which sixteenth -- from onset detection on the separated
+               drum stem, quantised.
 
-    Where they disagree is worth more than where they agree, and it is a real
-    case rather than a fault in either: a section repeated with the same chords
-    over a different arrangement looks identical here and different to MERT.
-    That is why this grades the excess over chance and not perfect agreement."""
+    Both are compared against 16 random earlier bars per claim, because pop
+    repeats both its harmony and its drum pattern constantly and agreement on
+    its own is not evidence.
+
+    The two are NOT equally independent, and the weighting says so. Chords come
+    from a harmonic model and a harmonic label; MERT has no notion of a chord
+    symbol. Rhythm comes from a different tool with no shared code, but MERT is
+    an embedding of the waveform and certainly encodes rhythmic content, so
+    rhythmic agreement is less surprising than harmonic agreement. Chords carry
+    0.6 of the score and rhythm 0.4.
+
+    The third cue exists to give this check a "cannot answer" state, which it
+    did not have. Starlight scored 0.02 and that number was ambiguous between
+    "the map is wrong" and "harmony cannot settle this here" -- chord repetition
+    is sufficient evidence of repeated material, never necessary, because a
+    record can restate a melody over new harmony. Measured, Starlight is the
+    second case: rhythm lifts +0.45 and chords +0.01, so two cues that share
+    nothing harmonic agree with each other and harmony is the outlier. When
+    that happens this returns no score and records the disagreement, rather
+    than publishing a 0.02 that reads as a failing map."""
     o = (m.get("observations") or {}).get("identity") or {}
     ents = o.get("entries") or []
     if not ents:
         return None, "no identity claimed"
     segs = ((m.get("observations") or {}).get("chords") or {}).get("segments") or []
     downs = m.get("downbeats") or []
-    if not segs or len(downs) < 8:
-        return None, "needs chords and bar lines to check identity against", True
+    if len(downs) < 8:
+        return None, "needs bar lines to check identity against", True
     bar = (downs[-1] - downs[0]) / max(1, len(downs) - 1)
+    drums = [(e["at"], e.get("of")) for e in (((m.get("accents") or {}).get("events")) or [])
+             if e.get("of") in DRUM_LABELS and e.get("at") is not None]
+
+    cc, pc = {}, {}
 
     def chords_in(k):
         if k is None or k >= len(downs):
             return None
+        if k in cc:
+            return cc[k]
         a, b = downs[k], downs[k] + bar
         got = []
         for sg in segs:
@@ -1176,47 +1393,256 @@ def ev_identity(m, B):
                 continue
             if t > a + 0.05 * bar and f < b - 0.05 * bar:
                 if not got or got[-1] != c:
-                    got.append(c)          # collapse a chord held across a split
-        return tuple(got) or None
+                    got.append(c)
+        cc[k] = tuple(got) or None
+        return cc[k]
 
-    cache = {}
-    def cin(k):
-        if k not in cache:
-            cache[k] = chords_in(k)
-        return cache[k]
+    def pattern_in(k):
+        if k is None or k >= len(downs):
+            return None
+        if k in pc:
+            return pc[k]
+        a, b = downs[k], downs[k] + bar
+        cells = set()
+        for t, of in drums:
+            if a - 0.02 <= t < b:
+                cells.add((of, int(round(16 * (t - a) / bar)) % 16))
+        pc[k] = frozenset(cells) or None
+        return pc[k]
+
+    def jaccard(x, y):
+        if not x or not y:
+            return None
+        return len(x & y) / len(x | y)
 
     import random as _rnd
     rng = _rnd.Random(20260909)
-    hit = tot = 0
-    chit = ctot = 0
+    ch_hit = ch_n = 0
+    ch_ctrl = ch_cn = 0
+    rh_hit = rh_n = 0
+    rh_ctrl = rh_cn = 0
     for e in ents:
         k, j = e.get("bar"), e.get("same_as")
         if j is None:
             continue
-        a, b = cin(k), cin(j)
-        if a is None or b is None:
-            continue
-        tot += 1
-        hit += 1 if a == b else 0
-        for _ in range(32):
-            r = rng.randrange(0, max(1, k - 1))
-            c = cin(r)
-            if c is None:
-                continue
-            ctot += 1
-            chit += 1 if a == c else 0
-    if tot < 8:
-        return None, "only %d claimed repeats have chords on both sides" % tot, True
-    mine = hit / tot
-    base = (chit / ctot) if ctot else 0.0
-    lift = 0.0 if base >= 1.0 else (mine - base) / (1.0 - base)
-    return max(0.0, min(1.0, lift)), (
-        "%d of %d bars claimed to repeat an earlier bar carry the same chord sequence "
-        "(%.0f%%), against %.0f%% for the same bars paired with a random earlier one. "
-        "Harmony agrees %.0f%% of the way from chance to perfect -- and where the two "
-        "disagree, a passage repeated with the same chords over a different arrangement "
-        "is the case that separates them"
-        % (hit, tot, 100 * mine, 100 * base, 100 * lift))
+        ca, cb = chords_in(k), chords_in(j)
+        if ca and cb:
+            ch_n += 1
+            ch_hit += 1 if ca == cb else 0
+            for _ in range(16):
+                r = rng.randrange(0, max(1, k - 1))
+                cr = chords_in(r)
+                if cr:
+                    ch_cn += 1
+                    ch_ctrl += 1 if ca == cr else 0
+        pa, pb = pattern_in(k), pattern_in(j)
+        if pa and pb:
+            rh_n += 1
+            rh_hit += 1 if jaccard(pa, pb) >= 0.5 else 0
+            for _ in range(16):
+                r = rng.randrange(0, max(1, k - 1))
+                pr = pattern_in(r)
+                if pr:
+                    rh_cn += 1
+                    rh_ctrl += 1 if jaccard(pa, pr) >= 0.5 else 0
+
+    def lift(hit, n, chit, cn):
+        if n < 8 or cn < 8:
+            return None, None, None
+        mine = hit / n
+        base = chit / cn
+        return (0.0 if base >= 1.0 else (mine - base) / (1.0 - base)), mine, base
+
+    ch_l, ch_m, ch_b = lift(ch_hit, ch_n, ch_ctrl, ch_cn)
+    rh_l, rh_m, rh_b = lift(rh_hit, rh_n, rh_ctrl, rh_cn)
+    if ch_l is None and rh_l is None:
+        return None, "neither chords nor drum patterns give enough pairs to check", True
+
+    if (ch_l is not None and rh_l is not None
+            and ch_l < IDENT_CHORD_WEAK and rh_l >= IDENT_RHYTHM_STRONG):
+        return None, (
+            "cannot answer. The drum pattern agrees with the claim (%.0f%% of %d pairs against "
+            "%.0f%% by chance, lift %+.2f) and harmony does not (%.0f%% of %d against %.0f%%, "
+            "lift %+.2f). Two cues sharing nothing harmonic agree and harmony is the outlier, "
+            "which is what a passage restated over different chords looks like -- chord "
+            "repetition is sufficient evidence of repeated material, never necessary. Scoring "
+            "this would publish a number that reads as a failing map"
+            % (100 * rh_m, rh_n, 100 * rh_b, rh_l, 100 * ch_m, ch_n, 100 * ch_b, ch_l)), True
+
+    parts, note = [], []
+    if ch_l is not None:
+        parts.append((0.6, max(0.0, min(1.0, ch_l))))
+        note.append("harmony %.0f%% of %d pairs against %.0f%% by chance (%+.2f)"
+                    % (100 * ch_m, ch_n, 100 * ch_b, ch_l))
+    if rh_l is not None:
+        parts.append((0.4, max(0.0, min(1.0, rh_l))))
+        note.append("drum pattern %.0f%% of %d against %.0f%% (%+.2f)"
+                    % (100 * rh_m, rh_n, 100 * rh_b, rh_l))
+    w = sum(p[0] for p in parts)
+    score = sum(p[0] * p[1] for p in parts) / w
+    return score, ("; ".join(note) + ". Harmony carries 0.6 and rhythm 0.4 -- MERT has no "
+                   "notion of a chord symbol, but it does encode rhythm, so rhythmic "
+                   "agreement is the weaker witness")
+
+
+
+
+def _permutation_percentile(stat, times, dur, win, seed=20260909, draws=200):
+    """The claim's statistic against the same number of occurrences placed at random.
+
+    The right null for this field, and the third one tried. Grading the raw
+    agreement said nothing, because melodic material repeats constantly. A
+    standard error on the pair count overstated the evidence, because pairs
+    drawn from five occurrences are not five independent comparisons. Placing
+    the same NUMBER of occurrences at random and recomputing the whole
+    statistic keeps the pair structure and inherits the song's own
+    repetitiveness, so what is left is whether these particular times are
+    special.
+
+    Returns (percentile_beaten, real, null_mean, n_draws) or None."""
+    import random as _r
+    real = stat(times)
+    if real is None:
+        return None
+    rng = _r.Random(seed)
+    null = []
+    for _ in range(draws):
+        v = stat([rng.uniform(0, max(1.0, dur - win)) for _ in times])
+        if v is not None:
+            null.append(v)
+    if len(null) < 20:
+        return None
+    beat = sum(1 for x in null if real > x) / len(null)
+    return beat, real, sum(null) / len(null), len(null)
+
+
+def ev_hook(m, B):
+    """The claimed hook recurs. Does it recur in a way its writer could not see?
+
+    Two writers reach this field and they need different checks, because a
+    check that uses the writer's own evidence is not a check.
+
+    A hook found in TEXT -- phrases repeating in the Whisper transcript of the
+    separated vocal -- is checked on RHYTHM: is the phrase sung the same way
+    each time? Onsets from the start of the phrase, quantised. Words from a
+    speech model, timing from a pitch tracker.
+
+    Rhythm rather than pitch contour, which is a correction made after
+    measuring. basic-pitch's octave errors flip interval signs -- the first
+    three notes of The Nights read A#3, A#4, A#3 -- and contour gave lifts of
+    +0.27, +0.09 and +0.04, with The Nights' hook agreeing LESS than random
+    windows. Onset times survive an octave error untouched.
+
+    A hook found by RHYTHM -- the fallback for a vocal no transcriber can read,
+    see listen/hook.py -- cannot be checked on rhythm at all: that is the
+    writer. It is checked on chord-sequence overlap instead, which shares
+    neither the tool nor the feature family with an onset detector. The field
+    records which writer found it and this reads that rather than guessing.
+
+    Both paths are scored by placing the same number of occurrences at random
+    two hundred times and asking what share of those placements the claim beats
+    -- see _permutation_percentile for why that is the only null here with the
+    right shape. Chance is a half and the score is rescaled from it.
+
+    The shared input on both paths is the separated vocal. That is stated, not
+    hidden: this is two models of different kinds reading one recording."""
+    o = (m.get("observations") or {}).get("hook") or {}
+    hk = o.get("hook") if isinstance(o.get("hook"), dict) else o
+    times = (hk or {}).get("times") or []
+    if not hk or len(times) < 2:
+        return None, "no hook claimed"
+    by_rhythm = (o.get("found_by") or hk.get("found_by") or "").startswith("rhythm")
+    downs = m.get("downbeats") or []
+    if len(downs) < 8:
+        return None, "needs bar lines", True
+    win = hk.get("span_s") or max(1.0, 0.45 * (hk.get("words") or 4))
+    dur = (m.get("song") or {}).get("length") or downs[-1]
+
+    if by_rhythm:
+        segs = ((m.get("observations") or {}).get("chords") or {}).get("segments") or []
+        if not segs:
+            return None, ("this hook was found by its rhythm, so rhythm cannot corroborate "
+                          "it, and there are no chords to check it against instead"), True
+
+        def chords_at(t0):
+            got = set()
+            for sg in segs:
+                f, t, c = sg.get("from"), sg.get("to"), sg.get("chord")
+                if f is None or t is None or c in (None, "N"):
+                    continue
+                if t > t0 + 0.05 * win and f < t0 + 0.95 * win:
+                    got.add(c)
+            return frozenset(got) or None
+
+        # Set overlap, not an exact sequence. The six occurrences of
+        # mizhiyoram's figure read G#/A#7, D#/G#/G#7, G#/A#, D#/Cm7,
+        # G#7/G#/A#sus4 and D#/G#/Cm7 -- G# is in five of six and no two
+        # sequences are identical, so exact matching scored 0% and measured
+        # only the strictness of the comparison.
+        def stat(ts):
+            cs = [chords_at(t) for t in ts]
+            cs = [c for c in cs if c]
+            vals = []
+            for i in range(len(cs)):
+                for j in range(i + 1, len(cs)):
+                    vals.append(len(cs[i] & cs[j]) / len(cs[i] | cs[j]))
+            return (sum(vals) / len(vals)) if vals else None
+
+        r = _permutation_percentile(stat, times, dur, win)
+        if r is None:
+            return None, ("found by rhythm, so checked on harmony -- and there are not enough "
+                          "chords at these times, or at random times, to build a null from"), True
+        beat, real, nmu, nn = r
+        score = max(0.0, min(1.0, (beat - 0.5) / 0.5))
+        return score, ("found by rhythm, so checked on harmony instead: the %d occurrences "
+                       "share %.2f of their chords pairwise against %.2f for the same number "
+                       "of occurrences placed at random, beating %.0f%% of %d placements. "
+                       "Rhythm found it and therefore cannot corroborate it"
+                       % (len(times), real, nmu, 100 * beat, nn))
+
+    # --- text-found hook: check on rhythm ---
+    notes = ((m.get("observations") or {}).get("melody") or {}).get("notes") or []
+    onsets = [n[0] for n in notes]
+    # Vocal ONSETS were tried here as a denser source, to rescue the songs where
+    # the melody transcription is too sparse for a window to hold three notes.
+    # They make it worse: onsets on the same stem are ten times denser, a
+    # 2-second window then holds a dozen, and the exact quantised tuple stops
+    # matching. Starlight went from 0.58 to 0.009 -- below its own control.
+    # Sparser, phrase-shaped melody notes are the right instrument, and where
+    # there are not enough this abstains rather than reaching for noise.
+    if len(onsets) < 24:
+        return None, "no vocal timing dense enough to compare the hook against", True
+
+    def grab(t0):
+        g = sorted(t for t in onsets if t0 - 0.10 <= t < t0 + win)
+        return g if len(g) >= 3 else None
+
+    def rhythm(g):
+        return tuple(round((t - g[0]) / 0.125) for t in g[:12])
+
+    def stat(ts):
+        cs = [rhythm(g) for g in (grab(t) for t in ts) if g]
+        vals = []
+        for i in range(len(cs)):
+            for j in range(i + 1, len(cs)):
+                a, b2 = cs[i], cs[j]
+                k = min(len(a), len(b2))
+                if k >= 2:
+                    vals.append(sum(1 for q in range(k) if a[q] == b2[q]) / k)
+        return (sum(vals) / len(vals)) if vals else None
+
+    r = _permutation_percentile(stat, times, dur, win)
+    if r is None:
+        return None, ("the hook's occurrences, or random windows of the same length, carry "
+                      "too few notes to compare"), True
+    beat, real, nmu, nn = r
+    score = max(0.0, min(1.0, (beat - 0.5) / 0.5))
+    return score, ("%r recurs %d times; its rhythm agrees %.0f%% between occurrences against "
+                   "%.0f%% for the same number of occurrences placed at random, beating %.0f%% "
+                   "of %d placements. Words from a speech model, timing from a pitch tracker, "
+                   "both on the same separated vocal"
+                   % (hk.get("phrase"), hk.get("count"), 100 * real, 100 * nmu,
+                      100 * beat, nn))
 
 
 SURPRISE_MAX_LOUD_R = 0.50
@@ -1274,91 +1700,6 @@ def ev_surprise(m, B):
                       "within it" if ok else "REFUSED, this is a loudness curve in disguise"))
 
 
-def ev_hook(m, B):
-    """The claimed hook recurs as words. Does it recur as a TUNE?
-
-    listen/hook.py finds phrases that repeat in the Whisper transcript of the
-    separated vocal and weights them by the energy where they land. This side
-    never reads a word: it takes the melody notes -- a polyphonic pitch tracker
-    on the same stem -- and asks whether the phrase is sung the same way each
-    time.
-
-    The shared input is the separated vocal, stated rather than hidden: this is
-    two models of different kinds reading one recording, not two recordings. A
-    speech model transcribing words and a pitch tracker following notes fail in
-    unrelated ways, and the case this catches is real -- a phrase that recurs as
-    text without recurring as a tune is a phrase somebody says twice.
-
-    It compares RHYTHM, not pitch contour, and that is a correction. Contour was
-    the obvious choice and it does not work here: basic-pitch on a vocal stem
-    produces octave errors -- the first three notes of The Nights read A#3, A#4,
-    A#3 -- so interval signs flip on transcription noise. Measured, contour gave
-    lifts of +0.27, +0.09 and +0.04 and on The Nights the hook agreed LESS than
-    random windows did. Onset times from the start of the phrase survive an
-    octave error untouched, and give +0.13, +0.33 and +0.16 on the same three
-    songs.
-
-    Control: the same comparison between windows of the same length at random
-    times, because melodic material repeats constantly in pop."""
-    o = (m.get("observations") or {}).get("hook") or {}
-    hk = o.get("hook") or {}
-    times = hk.get("times") or []
-    if not hk or len(times) < 2:
-        return None, "no hook claimed"
-    notes = ((m.get("observations") or {}).get("melody") or {}).get("notes") or []
-    if len(notes) < 24:
-        return None, "no melody to compare the hook against", True
-    win = max(1.0, 0.45 * (hk.get("words") or 4))
-
-    def grab(t0):
-        g = sorted([n for n in notes if t0 - 0.10 <= n[0] < t0 + win], key=lambda n: n[0])
-        return g if len(g) >= 3 else None
-
-    def rhythm(g):
-        t0 = g[0][0]
-        return tuple(round((n[0] - t0) / 0.125) for n in g[:12])
-
-    def agree(a, b):
-        if not a or not b:
-            return None
-        k = min(len(a), len(b))
-        return sum(1 for i in range(k) if a[i] == b[i]) / k if k >= 2 else None
-
-    cs = [rhythm(g) for g in (grab(t) for t in times) if g]
-    mine = []
-    for i in range(len(cs)):
-        for j in range(i + 1, len(cs)):
-            v = agree(cs[i], cs[j])
-            if v is not None:
-                mine.append(v)
-    if not mine:
-        return None, "the hook's occurrences carry too few notes to compare", True
-
-    import random as _rnd
-    rng = _rnd.Random(20260909)
-    dur = (m.get("song") or {}).get("length") or notes[-1][0]
-    ctrl = []
-    for _ in range(400):
-        a = grab(rng.uniform(0, max(1.0, dur - win)))
-        b = grab(rng.uniform(0, max(1.0, dur - win)))
-        if a and b:
-            v = agree(rhythm(a), rhythm(b))
-            if v is not None:
-                ctrl.append(v)
-    if len(ctrl) < 10:
-        return None, ("only %d random windows in this song carry enough notes to build a "
-                      "control from" % len(ctrl)), True
-    mv = sum(mine) / len(mine)
-    cv = sum(ctrl) / len(ctrl)
-    lift = 0.0 if cv >= 1.0 else (mv - cv) / (1.0 - cv)
-    return max(0.0, min(1.0, lift)), (
-        "%r recurs %d times; its rhythm agrees %.0f%% between occurrences against %.0f%% for "
-        "windows of the same length at %d random times -- %.0f%% of the way from chance to "
-        "identical. Words from a speech model, rhythm from a pitch tracker, both on the same "
-        "separated vocal, and rhythm rather than pitch because octave errors flip a contour"
-        % (hk.get("phrase"), hk.get("count"), 100 * mv, 100 * cv, len(ctrl), 100 * lift))
-
-
 def ev_pump(m, B):
     p = (m.get("observations") or {}).get("pump")
     if not p: return None, "no pump measurement"
@@ -1398,59 +1739,6 @@ def ev_pump(m, B):
 # arithmetic over `moments` and `spans`, both already scored, so checking it
 # would score those two a second time. Grading a thing against its own input is
 # the first mistake listed in AGENTS.md.
-
-
-def au_meter(m, B):
-    o = (m.get("observations") or {}).get("meter") or {}
-    claimed = o.get("beats_per_bar")
-    beats = m.get("beats") or []
-    if not claimed or len(beats) < 32: return None, "no meter claimed"
-    dt, low, high = B["dt"], B["low"], B["high"]
-    vecs = [[_at(low, dt, t), _at(high, dt, t)] for t in beats]
-    def cos(a, b):
-        na = math.sqrt(sum(x * x for x in a)); nb = math.sqrt(sum(x * x for x in b))
-        return None if (na < 1e-9 or nb < 1e-9) else sum(x * y for x, y in zip(a, b)) / (na * nb)
-    def support(n):
-        got = []
-        for lag in (n, 2 * n):
-            vals = [c for c in (cos(vecs[i], vecs[i + lag])
-                                for i in range(len(vecs) - lag)) if c is not None]
-            if vals: got.append(sum(vals) / len(vals))
-        return sum(got) / len(got) if got else 0.0
-    cands = {n: support(n) for n in (2, 3, 4, 5, 6, 7)}
-    best = max(cands, key=lambda n: cands[n])
-    mine, top = cands.get(claimed, 0.0), cands[best]
-    frac = 0.0 if top <= 0 else max(0.0, min(1.0, mine / top))
-    return frac, (f"claims {claimed} beats to the bar; the mix's own pattern supports "
-                  f"{best} best, and {claimed} reaches {100*frac:.0f}% of that")
-
-
-def au_tempo(m, B):
-    o = (m.get("observations") or {}).get("tempo_stability") or {}
-    if "rigid_grid_justified" not in o: return None, "no tempo claim"
-    beats = m.get("beats") or []
-    per = (m.get("grid") or {}).get("period")
-    if not per or len(beats) < 64: return None, "no grid"
-    dt, low = B["dt"], B["low"]
-    halves = []
-    for a, b in ((0, len(beats) // 2), (len(beats) // 2, len(beats))):
-        seg = beats[a:b]
-        best = None
-        for k in range(-30, 31):
-            off = k * 0.002
-            v = sum(_at(low, dt, t + off) for t in seg) / len(seg)
-            if best is None or v > best[0]: best = (v, off)
-        halves.append(best[1])
-    walk = halves[1] - halves[0]
-    # graded, not a threshold: at 8% of a period the first version failed Levels
-    # by half a millisecond, which is the check's resolution and not the music.
-    steadiness = max(0.0, min(1.0, 1.0 - abs(walk) / (per * 0.25)))
-    claimed_steady = bool(o["rigid_grid_justified"])
-    agrees = steadiness if claimed_steady else 1.0 - steadiness
-    return round(agrees, 4), (
-        f"claims the rigid grid {'holds' if o['rigid_grid_justified'] else 'does not hold'}; "
-        f"the best offset moves {1000*walk:+.0f} ms between the first and second half of the "
-        f"record, which is {100*steadiness:.0f}% steady on this measure")
 
 
 def au_arc(m, B):
@@ -1529,7 +1817,7 @@ def evaluate(slug, map_path=None, m=None):
         ("moments", ev_moments, (m, B)),
         ("sections", ev_sections, (m, B)), ("energy", ev_energy, (m, B)),
         ("accents", ev_accents, (m, B)), ("stems", ev_stems, (m, B)),
-        ("meter", ev_meter, (m, B)), ("tempo_stability", ev_tempo, (m, B)),
+        ("meter", ev_meter, (m, B, slug)), ("tempo_stability", ev_tempo, (m, B)),
         ("pan", ev_pan, (m, B, slug)), ("identity", ev_identity, (m, B)),
         ("hook", ev_hook, (m, B)),
         ("pump", ev_pump, (m, B)),

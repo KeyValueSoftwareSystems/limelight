@@ -49,6 +49,15 @@ ANCHOR = {
     "melody":    ("recording", "pitch energy, against a tritone control"),
     "stems":     ("recording", "the six claimed levels, summed as energy, against the mix's "
                                "own loudness bar by bar"),
+    "meter":     ("recording", "chord-change spacing, and the beat lag a learned embedding "
+                               "repeats at -- two families, neither percussive"),
+    "tempo_stability": ("recording", "kick energy under the claimed beats, in eight windows "
+                                     "with a line fitted through them"),
+    "pan":       ("recording", "which side the unseparated release leans at each claimed hit"),
+    "identity":  ("recording", "chord-sequence repetition and drum-pattern repetition between "
+                               "the two bars claimed to be the same material"),
+    "hook":      ("recording", "whether the phrase is sung to the same rhythm each time, or "
+                               "for a rhythm-found hook, over the same chords"),
     "pump":      ("recording", "recomputed from the audio and compared"),
 }
 
@@ -56,6 +65,41 @@ ANCHOR = {
 def corrupt(m, field, rng):
     """One deliberate, specific fault per field."""
     m = copy.deepcopy(m)
+    if field == "meter":
+        # halve the bar. This is the error the field exists to catch and the
+        # harmonic side alone cannot see it.
+        g0 = m.setdefault("grid", {})
+        g0["beats_per_bar"] = max(2, (g0.get("beats_per_bar") or 4) // 2)
+        return m
+    if field == "tempo_stability":
+        # 0.05% fast: 120 ms of accumulated slip over four minutes, which
+        # ev_grid barely notices.
+        g0 = m.setdefault("grid", {})
+        per0 = g0.get("period")
+        if per0:
+            p2 = per0 * 1.0005
+            ph0 = g0.get("phase", 0.0)
+            g0["period"] = p2
+            m["beats"] = [ph0 + i * p2 for i in range(len(m.get("beats") or []))]
+        return m
+    if field == "pan":
+        for e in (((m.get("observations") or {}).get("pan") or {}).get("entries") or []):
+            if e.get("pan") is not None:
+                e["pan"] = -e["pan"]
+        return m
+    if field == "identity":
+        ents = ((m.get("observations") or {}).get("identity") or {}).get("entries") or []
+        for e in ents:
+            if e.get("same_as") is not None and (e.get("bar") or 0) > 3:
+                e["same_as"] = rng.randrange(0, e["bar"] - 1)
+        return m
+    if field == "hook":
+        ho = (m.get("observations") or {}).get("hook") or {}
+        hk = ho.get("hook") if isinstance(ho.get("hook"), dict) else ho
+        if isinstance(hk, dict) and hk.get("times"):
+            dur0 = (m.get("song") or {}).get("length") or 200
+            hk["times"] = [round(rng.uniform(0, dur0), 3) for _ in hk["times"]]
+        return m
     if field == "stems":
         # The fault that was actually in the file: each stem normalised by its
         # own maximum, so a stem the separator invented sits near the top of
