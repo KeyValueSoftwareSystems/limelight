@@ -70,6 +70,15 @@ def _sibling_env_python(env_name: str, override_var: str) -> str:
     return "python"
 
 
+_STEMS_CACHE = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "work", "stems_cache"))
+
+
+def stems_cache_dir() -> str:
+    """Where separated stem waveforms are cached, so demucs runs once per song."""
+    return os.environ.get("LIMELIGHT_STEMS_CACHE", _STEMS_CACHE)
+
+
 def essentia_python() -> str:
     return _sibling_env_python("limelight-ess", "LIMELIGHT_ESS_PY")
 
