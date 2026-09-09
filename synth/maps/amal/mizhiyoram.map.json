@@ -30717,9 +30717,14 @@
   "hook": {
    "value": null,
    "provenance": "unmeasured",
-   "why_null": "the transcriber returned 0 usable words from this vocal. Whisper was run with automatic language detection and reported English; this recording is not in English, and a transcript of the wrong language cannot be searched for a repeated phrase.",
-   "what_would_settle_it": "run the transcriber with the language given rather than detected. The hook is audible and repeated in this song; the tool was pointed at the wrong language, which is a fixable mistake and not a property of the record.",
-   "model": "openai-whisper small, on the separated vocal stem"
+   "why_null": "whisper-small returns nothing usable from this recording. On the separated vocal it produced zero segments both with automatic language detection (which reported English) and with Malayalam given explicitly. On the raw mix with Malayalam given it produced 15 segments and 40 words, and the words are hallucinated -- the transcript mixes Korean and Chinese glyphs into invented English phrases. A hook found in that would be a fabricated number that looks exactly like a measured one, so it is not written.",
+   "what_was_tried": [
+    "separated vocal, language auto-detected: detected English, 0 segments",
+    "separated vocal, language=ml: 0 segments",
+    "raw mix, language=ml: 15 segments, 40 words, and the text is not Malayalam or anything else"
+   ],
+   "what_would_settle_it": "a larger Whisper checkpoint, or a transcriber trained for Malayalam. The hook is audible and repeated in this song -- a listener finds it in one pass -- so this is a tooling gap and not a property of the record. It is also a case where `restraint`'s route applies: a human could state it through listen/corrections.py today.",
+   "model": "openai-whisper small, on the separated vocal stem and on the raw mix"
   }
  },
  "confidence": 0.908,
@@ -30793,6 +30798,15 @@
     "why": "the claimed bar line carried 0.48x the low-band energy of the other beats -- the bar began where the kick was quietest, and the evidence for it was that chapters agreed with it, which is arithmetic because ear.py builds chapters AT the bar phase",
     "who": "amal@trypencil.com via listen/barphase.py",
     "id": "41634399972f"
+   },
+   {
+    "at": "2026-09-09T16:44:30",
+    "field": "observations.hook",
+    "was": "null -- 'the transcriber was pointed at the wrong language, which is fixable'",
+    "now": "null -- whisper-small hallucinates on this recording even with Malayalam given",
+    "why": "I wrote the first reason before testing it. Giving the language explicitly still returns zero segments from the vocal stem, and the raw mix returns 40 words of invented text mixing Korean and Chinese glyphs. The reason I published was a guess about my own tooling",
+    "who": "amal@trypencil.com",
+    "id": "5d96d5fbf102"
    }
   ]
  }
