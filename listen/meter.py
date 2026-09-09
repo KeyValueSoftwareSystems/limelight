@@ -193,6 +193,26 @@ def analyse(slug, write=False):
         out["tempo_stability"] = ts
     if not out:
         return {"error": "nothing measurable"}
+    if "meter" in out:
+        # grid.beats_per_bar is interface tier because a reader breaks without
+        # it: readers/src/derive.js has to lay out bar lines to answer anything
+        # in bars, and with the number only in observations it was assuming 4.
+        # The evidence and the provenance stay in observations.meter; the grid
+        # carries the one number a reader needs.
+        n = out["meter"].get("beats_per_bar")
+        if n:
+            m.setdefault("grid", {})["beats_per_bar"] = n
+        out["meter"]["provenance"] = "measured"
+        out["meter"]["measured_how"] = (
+            "self-similarity of the drum pattern at each candidate lag, judged on the lag and "
+            "its double. This is a PERCUSSIVE measurement, so it must not be checked against "
+            "another percussive one -- mapeval's ev_meter checks it against the spacing of the "
+            "chord changes instead, which comes from a harmonic model sharing no code with "
+            "this path.")
+        out["meter"]["margin_is_thin"] = (
+            abs(out["meter"].get("margin_over_next_best") or 0.0) < 0.05)
+    if "tempo_stability" in out:
+        out["tempo_stability"]["provenance"] = "measured"
     m.setdefault("observations", {}).update(out)
     if write:
         json.dump(m, open(p, "w"), indent=1, ensure_ascii=False)

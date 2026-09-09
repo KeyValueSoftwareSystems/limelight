@@ -27,7 +27,8 @@
   "bar_phase": 1,
   "locked": true,
   "how": "onset flux 35-130 Hz, comb search, octave-tested",
-  "octave_note": "octave corrected to half (added-beat support 0.97)"
+  "octave_note": "octave corrected to half (added-beat support 0.97)",
+  "beats_per_bar": 4
  },
  "beats": [
   0.304518,
@@ -46533,7 +46534,10 @@
    },
    "how": "hits per beat on kick, snare and hat as a 3-vector per beat; mean cosine similarity at every lag out to 16 beats; each candidate judged on itself and its multiples, since a bar of N peaks at N, 2N and 3N",
    "why_recorded": "beats_per_bar=4 is a default argument in ear.py that nothing has ever checked, and every downbeat, chapter and bar-phase argument in this repo rests on it",
-   "not": "not the notated time signature. It is the period the DRUMS repeat on, which is what a reader needs and what ear.py assumes is four. A song whose drums and score disagree will read here as the drums."
+   "not": "not the notated time signature. It is the period the DRUMS repeat on, which is what a reader needs and what ear.py assumes is four. A song whose drums and score disagree will read here as the drums.",
+   "provenance": "measured",
+   "measured_how": "self-similarity of the drum pattern at each candidate lag, judged on the lag and its double. This is a PERCUSSIVE measurement, so it must not be checked against another percussive one -- mapeval's ev_meter checks it against the spacing of the chord changes instead, which comes from a harmonic model sharing no code with this path.",
+   "margin_is_thin": true
   },
   "tempo_stability": {
    "claimed_period_s": 0.47619,
@@ -46555,7 +46559,8 @@
    "implied_tempo_error_bpm": 0.0016,
    "rigid_grid_justified": true,
    "verdict": "machine-steady: the kicks do not walk away from the grid over the whole record, so one period and one phase describe it exactly",
-   "why_recorded": "ear.py fills the song with phase + i * period, which is exact for a record made in a DAW and wrong for anything played by people. Nothing in this file said which kind of recording it was."
+   "why_recorded": "ear.py fills the song with phase + i * period, which is exact for a record made in a DAW and wrong for anything played by people. Nothing in this file said which kind of recording it was.",
+   "provenance": "measured"
   },
   "surprise": {
    "rate": "per_downbeat",

@@ -167,6 +167,64 @@ def normalised_stems():
     return ok
 
 
+def wrong_meter_and_tempo():
+    """rule 5's broken-file entries for meter and tempo_stability.
+
+    meter: claim a bar length harmony contradicts. 3, 5, 7 and 9 all put chord
+    changes in mid-bar over and over on records whose changes sit on 2s, 4s and
+    8s. Not 2 or 8 -- harmony genuinely cannot tell a bar from its double or
+    half, this check says so in its docstring, and asserting otherwise here
+    would be asserting something false.
+
+    tempo_stability: nudge the period by 0.05%. That is 120 ms of accumulated
+    slip across a four-minute record, which ev_grid barely notices (0.93 on
+    Levels) and this check has to."""
+    import json, copy
+    import mapeval as ME
+    from mapio import map_path
+
+    ok = True
+    print("== a bar length harmony contradicts, and a tempo 0.05% out")
+    for slug in ("levels", "starlight", "mizhiyoram", "dont-look-down", "the-nights"):
+        mp = map_path(slug)
+        sig, sr, cached = ME.audio_for(slug)
+        if not mp or sig is None:
+            continue
+        B = cached if cached is not None else ME.bands(sig, sr)
+        m = json.load(open(mp))
+
+        good = ME.ev_meter(m, B)[0]
+        if good is None:
+            print("   --   %-16s meter: harmony cannot answer on this record, so nothing to "
+                  "falsify" % slug)
+        else:
+            worst = 0.0
+            for n in (3, 5, 7, 9):
+                mm = copy.deepcopy(m)
+                mm.setdefault("grid", {})["beats_per_bar"] = n
+                v = ME.ev_meter(mm, B)[0]
+                worst = max(worst, 0.0 if v is None else v)
+            good_enough = good - worst >= 0.30
+            ok = ok and good_enough
+            print("   %s %-16s meter: 4 beats scores %.2f, the best of 3/5/7/9 scores %.2f"
+                  % ("ok  " if good_enough else "FAIL", slug, good, worst))
+
+        per, ph = m["grid"]["period"], m["grid"]["phase"]
+        base = ME.ev_tempo(m, B)[0]
+        mm = copy.deepcopy(m)
+        p2 = per * 1.0005
+        mm["grid"]["period"] = p2
+        mm["beats"] = [ph + i * p2 for i in range(len(m["beats"]))]
+        off = ME.ev_tempo(mm, B)[0]
+        base = 0.0 if base is None else base
+        off = 0.0 if off is None else off
+        caught = base - off >= 0.15
+        ok = ok and caught
+        print("   %s %-16s tempo: as claimed %.2f, 0.05%% fast %.2f  (%.2f worse)"
+              % ("ok  " if caught else "FAIL", slug, base, off, base - off))
+    return ok
+
+
 def run():
     import mapeval as ME
 
@@ -235,6 +293,8 @@ def run():
     ok = broken_corrections() and ok
     print()
     ok = normalised_stems() and ok
+    print()
+    ok = wrong_meter_and_tempo() and ok
     return 0 if ok else 1
 
 

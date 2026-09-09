@@ -49,7 +49,8 @@
    "result": "the best rigid grid scores 1.736x on the check's own kick-energy feature. This map's grid scores 1.739x. It is the optimum, to within the resolution of the search.",
    "why_the_check_says_0.73": "its ceiling is allowed to come from half tempo, and a 42 bpm grid on this record reads 2.00x because the kicks alternate strong and weak and a sparser grid keeps only the strong ones. A grid that skips half the beats is louder per beat and worse at saying where the pulse is.",
    "tried_and_reverted": "restricting the ceiling to octaves whose beat/off-beat contrast is at least the claimed grid's. It lifted this to 0.99 and then FAILED falsification: a deliberately double-time grid scored 1.00, because a map at the wrong octave can have high contrast at its own octave and so exclude the true one from its own ceiling. Reverted. A hole that lets a real error through is worse than a ceiling that flatters nobody."
-  }
+  },
+  "beats_per_bar": 4
  },
  "beats": [
   0.631783,
@@ -24833,7 +24834,10 @@
    },
    "how": "hits per beat on kick, snare and hat as a 3-vector per beat; mean cosine similarity at every lag out to 16 beats; each candidate judged on itself and its multiples, since a bar of N peaks at N, 2N and 3N",
    "why_recorded": "beats_per_bar=4 is a default argument in ear.py that nothing has ever checked, and every downbeat, chapter and bar-phase argument in this repo rests on it",
-   "not": "not the notated time signature. It is the period the DRUMS repeat on, which is what a reader needs and what ear.py assumes is four. A song whose drums and score disagree will read here as the drums."
+   "not": "not the notated time signature. It is the period the DRUMS repeat on, which is what a reader needs and what ear.py assumes is four. A song whose drums and score disagree will read here as the drums.",
+   "provenance": "measured",
+   "measured_how": "self-similarity of the drum pattern at each candidate lag, judged on the lag and its double. This is a PERCUSSIVE measurement, so it must not be checked against another percussive one -- mapeval's ev_meter checks it against the spacing of the chord changes instead, which comes from a harmonic model sharing no code with this path.",
+   "margin_is_thin": true
   },
   "surprise": {
    "rate": "per_downbeat",

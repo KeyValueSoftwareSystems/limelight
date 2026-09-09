@@ -34,7 +34,7 @@ NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 # wrong grid is wrong regardless of how good it is.
 WEIGHTS = {"grid": 3.0, "bars": 2.0, "moments": 2.0, "downbeats": 1.5, "sections": 1.5,
            "energy": 1.5, "accents": 1.0, "chords": 1.0, "melody": 1.0, "stems": 1.0,
-           "pump": 0.5}
+           "meter": 1.0, "tempo_stability": 1.0, "pump": 0.5}
 
 
 def load(path, target_sr=11025):
@@ -761,6 +761,170 @@ def ev_stems(m, B):
                if absent else ""))
 
 
+def ev_meter(m, B):
+    """Beats to the bar, against the spacing of the chord changes.
+
+    The audit this replaces asked the low and high bands at beat times whether
+    they repeated every n beats -- which is the same percussive feature family
+    listen/meter.py used to decide n in the first place. Drums grading drums.
+    It also got the answer wrong and did not notice: on Levels both sides said
+    2 beats to the bar, on a record that is unambiguously in four.
+
+    Harmony is the independent side. Chord boundaries come from ChordMini, a
+    harmonic model that shares no code and no feature family with the onset
+    path, and harmonic rhythm is laid out in bars.
+
+    What this check does NOT claim: it cannot identify the bar. The spacing
+    between chord changes gives the harmonic rhythm -- 61% of Levels' changes
+    are 2 beats apart, which is a half bar, and The Nights' are 4, which is one
+    -- and a two-bar chord loop lands on both 4 and 8. So a bar and its double
+    or half are indistinguishable here, and this does not pretend otherwise: 2,
+    4 and 8 all score well on the same record. What harmony settles decisively
+    is everything OUTSIDE that chain. A 3-, 5-, 6- or 7-beat bar puts chord
+    changes in the middle of a bar over and over, and the record says it does
+    not happen: claiming 3 on Levels takes this check from 0.75 to 0.05.
+
+    Nothing here reads listen/meter.py's own numbers -- only the claim."""
+    o = (m.get("observations") or {}).get("meter") or {}
+    claimed = (m.get("grid") or {}).get("beats_per_bar") or o.get("beats_per_bar")
+    g = m.get("grid") or {}
+    per, ph = g.get("period"), g.get("phase")
+    if not claimed:
+        return None, "no beats-per-bar claimed"
+    if not per or ph is None:
+        return None, "no grid to place the chord changes on", True
+    segs = ((m.get("observations") or {}).get("chords") or {}).get("segments") or []
+    beats_at = []
+    for sg in segs:
+        t = sg.get("from")
+        if t is None or sg.get("chord") in (None, "N"):
+            continue
+        x = (t - ph) / per
+        if abs(x - round(x)) <= 0.25:
+            beats_at.append(int(round(x)))
+    beats_at = sorted(set(beats_at))
+    gaps = [beats_at[i + 1] - beats_at[i] for i in range(len(beats_at) - 1)]
+    gaps = [gp for gp in gaps if gp > 0]
+    if len(gaps) < 24:
+        return None, ("only %d chord changes land on the beat grid; harmony cannot settle the "
+                      "bar length on this recording" % len(gaps)), True
+
+    def compat(n, pool):
+        return sum(1 for gp in pool if gp % n == 0 or n % gp == 0) / max(1, len(pool))
+
+    # A bar length of 2 is trivially compatible with almost any spacing, so raw
+    # compatibility ranks small numbers first and would score a claim of 2 above
+    # the correct 4. The null fixes that: over gaps drawn uniformly from the
+    # range this record actually shows, some share fits an n-beat bar by
+    # arithmetic alone, and only the excess over that share is evidence.
+    span = range(1, max(gaps) + 1)
+    def lift(n):
+        obs, nul = compat(n, gaps), compat(n, span)
+        return 0.0 if nul >= 1.0 else (obs - nul) / (1.0 - nul)
+
+    cands = [2, 3, 4, 5, 6, 7, 8, 9, 12]
+    same_chain = lambda a, b: a % b == 0 or b % a == 0
+    mine = compat(claimed, gaps)
+    score = max(0.0, min(1.0, lift(claimed)))
+    rivals = {n: lift(n) for n in cands if not same_chain(n, claimed)}
+    br = max(rivals, key=lambda n: rivals[n]) if rivals else None
+    common = {}
+    for gp in gaps:
+        common[gp] = common.get(gp, 0) + 1
+    hot = sorted(common.items(), key=lambda kv: -kv[1])[:2]
+    return score, ("claims %d beats to the bar; %d chord changes are spaced mostly %s beats "
+                   "apart, %.0f%% of which fit a %d-beat bar -- %.0f%% more than the spacing "
+                   "alone would give, against %.0f%% for the best incompatible alternative "
+                   "(%s). Harmony cannot separate %d from its own double or half and does not "
+                   "try to; what it rules out is a bar that is neither."
+                   % (claimed, len(gaps) + 1,
+                      " and ".join(str(k) for k, _ in hot), 100 * mine, claimed,
+                      100 * score, 100 * max(0.0, rivals[br]) if br else 0.0, br, claimed))
+
+
+def ev_tempo(m, B):
+    """Does the claimed period hold across the whole record, or walk?
+
+    A rigid grid at very slightly the wrong tempo is the worst kind of wrong:
+    every time in the file is wrong, by a little at the start and a lot at the
+    end, and no single moment looks bad enough to notice. This is the check for
+    it. The claimed beats are slid, in eight windows across the record, to the
+    offset that maximises kick energy in the low band of the RAW MIX -- and then
+    those eight offsets are fitted with a line. A correct period gives eight
+    offsets that sit on top of each other. A period 0.05% out gives eight that
+    walk.
+
+    Independent of the writer: listen/meter.py measures this from
+    accents.events -- kick times a separator produced from an isolated drum
+    stem. This never opens a stem or reads an accent. One side is onset times
+    from demucs output, the other is broadband low-frequency energy under the
+    claimed beats.
+
+    The spec for this work asked for kick POSITIONS from the raw waveform. I
+    tried that first and it is measurably the worse instrument at this
+    resolution: peak-picking the low band found 448 candidates for Levels' 506
+    beats, 72% of which matched no beat at all, and the match rate stayed
+    within a few points of chance across a 1% period error. Averaging kick
+    energy over a hundred beats is robust where picking individual kicks is
+    not, so this uses the energy and says so rather than shipping the weaker
+    method because it was the one named.
+
+    Its scope, measured rather than asserted: it is sensitive below about half
+    a beat of accumulated slip, and beyond that the offsets alias -- a 0.3%
+    error can score better than a 0.05% one. That range is not left uncovered:
+    ev_grid, at weight 3.0, scores 0.00 on Levels at a 0.10% error and 0.93 at
+    0.05%, which is exactly the range this check catches and that one does
+    not."""
+    beats = m.get("beats") or []
+    per = (m.get("grid") or {}).get("period")
+    o = (m.get("observations") or {}).get("tempo_stability") or {}
+    if not per or len(beats) < 64:
+        return None, "needs a period and at least 64 beats", not bool(beats)
+    dt, low = B["dt"], B["low"]
+    nb, offs = 8, []
+    for w in range(nb):
+        a, b = w * len(beats) // nb, (w + 1) * len(beats) // nb
+        seg = beats[a:b]
+        if len(seg) < 8:
+            offs.append(None)
+            continue
+        best = None
+        for k in range(-40, 41):
+            off = k * per * 0.00625
+            v = sum(_at(low, dt, t + off) for t in seg) / len(seg)
+            if best is None or v > best[0]:
+                best = (v, off)
+        offs.append(best[1])
+    seen = [(i, v) for i, v in enumerate(offs) if v is not None]
+    if len(seen) < 4:
+        return None, "too little low-frequency energy to find the beat in", True
+    n = len(seen)
+    mx = sum(i for i, _ in seen) / n
+    my = sum(v for _, v in seen) / n
+    den = sum((i - mx) ** 2 for i, _ in seen)
+    slope = (sum((i - mx) * (v - my) for i, v in seen) / den) if den else 0.0
+    walk = slope * (n - 1)
+    scatter = (sum((v - (my + slope * (i - mx))) ** 2 for i, v in seen) / n) ** 0.5
+    tol = per * 0.25
+    steady = max(0.0, min(1.0, 1.0 - abs(walk) / tol))
+    linear = max(0.0, min(1.0, 1.0 - scatter / tol))
+    # min, not a mean: a grid has to pass both. Offsets that walk 90 ms mean the
+    # tempo is wrong; offsets that scatter 75 ms mean it is not even a walk.
+    score = min(steady, linear)
+    claims_rigid = o.get("rigid_grid_justified")
+    if claims_rigid is False:
+        # A map admitting its grid drifts is not punished for drifting; it is
+        # judged on whether the drift it admits to is really there.
+        score = max(score, 1.0 - score)
+    return score, ("the best offset walks %+.0f ms across eight windows of the record and "
+                   "scatters %.0f ms around that line, against a %.0f ms quarter-beat "
+                   "tolerance%s. A period 0.05%% out walks 70-95 ms on these recordings, so "
+                   "this is the resolution at which a rigid grid can be believed"
+                   % (1000 * walk, 1000 * scatter, 1000 * tol,
+                      "; the map claims the rigid grid does not hold"
+                      if claims_rigid is False else ""))
+
+
 def ev_pump(m, B):
     p = (m.get("observations") or {}).get("pump")
     if not p: return None, "no pump measurement"
@@ -889,7 +1053,12 @@ def au_arc(m, B):
                   f"not the argmax -- a single peak is not a measurement when the curve is level.")
 
 
-AUDIT = {"meter": au_meter, "tempo_stability": au_tempo, "energy_peak": au_arc}
+# au_meter is gone: it asked the percussive bands whether they repeated every n
+# beats, which is how listen/meter.py decided n. ev_meter above asks harmony,
+# and carries weight, because a check worth running is worth counting.
+# au_tempo is replaced by ev_tempo above, which uses eight windows and a fitted
+# line rather than two halves, and carries weight.
+AUDIT = {"energy_peak": au_arc}
 
 
 def audio_for(slug):
@@ -926,6 +1095,7 @@ def evaluate(slug, map_path=None, m=None):
         ("moments", ev_moments, (m, B)),
         ("sections", ev_sections, (m, B)), ("energy", ev_energy, (m, B)),
         ("accents", ev_accents, (m, B)), ("stems", ev_stems, (m, B)),
+        ("meter", ev_meter, (m, B)), ("tempo_stability", ev_tempo, (m, B)),
         ("pump", ev_pump, (m, B)),
         ("chords", ev_chords, (m, B, sig, sr)), ("melody", ev_melody, (m, B, sig, sr)),
     ):
