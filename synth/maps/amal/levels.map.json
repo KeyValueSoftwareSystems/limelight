@@ -58880,48 +58880,127 @@
   "not": "a fact a human can check by ear. It is what a large model heard, for a small head to learn from. Also: this torch build renamed the weight-norm parametrisation, so the positional-conv weights of the checkpoint did not load and are randomly initialised; embeddings are slightly perturbed from the published model's. the-nights' vectors were made the same way.",
   "device": "Quadro T1000"
  },
- "corrections": [
-  {
-   "by": "listen/resnap.py",
-   "when": "2026-09-08T00:50:57",
-   "what": "drops and stops were snapped to 4-beat bar lines; in this song they land on half bars, so the snap overshot by two beats",
-   "anchored_to": "the recording -- median loudness step across 0.5/1.0/1.5/2.0 s windows",
-   "moved": [
-    {
-     "kind": "drop",
-     "was": 20.848314,
-     "now": 19.9108,
-     "measured_at": 19.86,
-     "beats_moved": -2.0
-    },
-    {
-     "kind": "drop",
-     "was": 65.848314,
-     "now": 64.9108,
-     "measured_at": 64.86,
-     "beats_moved": -2.0
-    },
-    {
-     "kind": "drop",
-     "was": 191.473314,
-     "now": 192.4108,
-     "measured_at": 192.351,
-     "beats_moved": 2.0
-    },
-    {
-     "kind": "drop",
-     "was": 228.973314,
-     "now": 228.0358,
-     "measured_at": 227.975,
-     "beats_moved": -2.0
-    }
+ "corrections": {
+  "note": "Every change a human made to this file: when, which field, what it said, what it says now, and why. Not a description of the song -- a record of where we described it wrongly. It is the only field here that cannot be derived from anything else, and the only one that makes restraint, weight and latent reachable: those three need examples of human judgment overriding a measurement, and this is where those examples accumulate. Append-only. A correction is testimony, not measurement, so there is nothing to check it against -- the schema is validated strictly instead, and an entry is never rewritten or removed.",
+  "schema": {
+   "required": [
+    "at",
+    "field",
+    "was",
+    "now",
+    "why",
+    "who"
    ],
-   "not_touched": "builds and quiets, which this instrument cannot measure",
-   "declined": [
-    "drop@86.47 would move 4.0 beats -- larger than the 2-beat snap this corrects, left alone",
-    "stop@99.60 would move 6.0 beats -- larger than the 2-beat snap this corrects, left alone",
-    "drop@193.35 would land on another moment already at 192.41, left alone"
+   "optional": [
+    "t",
+    "id",
+    "confidence_after"
    ]
-  }
- ]
+  },
+  "entries": [
+   {
+    "at": "2026-09-08T00:50:57",
+    "field": "moments.drop",
+    "was": 20.848314,
+    "now": 19.9108,
+    "why": "drops and stops were snapped to 4-beat bar lines; in this song they land on half bars, so the snap overshot by two beats",
+    "who": "listen/resnap.py",
+    "t": 19.911,
+    "id": "536f39f3d919"
+   },
+   {
+    "at": "2026-09-08T00:50:57",
+    "field": "moments.drop",
+    "was": 65.848314,
+    "now": 64.9108,
+    "why": "drops and stops were snapped to 4-beat bar lines; in this song they land on half bars, so the snap overshot by two beats",
+    "who": "listen/resnap.py",
+    "t": 64.911,
+    "id": "34c699f081a9"
+   },
+   {
+    "at": "2026-09-08T00:50:57",
+    "field": "moments.drop",
+    "was": 191.473314,
+    "now": 192.4108,
+    "why": "drops and stops were snapped to 4-beat bar lines; in this song they land on half bars, so the snap overshot by two beats",
+    "who": "listen/resnap.py",
+    "t": 192.411,
+    "id": "ab6e02a1f005"
+   },
+   {
+    "at": "2026-09-08T00:50:57",
+    "field": "moments.drop",
+    "was": 228.973314,
+    "now": 228.0358,
+    "why": "drops and stops were snapped to 4-beat bar lines; in this song they land on half bars, so the snap overshot by two beats",
+    "who": "listen/resnap.py",
+    "t": 228.036,
+    "id": "bc8c1e94607e"
+   },
+   {
+    "at": "2026-09-09T14:23:32",
+    "field": "grid.bar_phase",
+    "was": "0, unchallenged",
+    "now": "0, confidence 0.45",
+    "why": "harmony puts the bar line on phase 2 and the drum pattern on phase 0; neither was picked and confidence was lowered instead",
+    "who": "amal@trypencil.com via listen/crosscheck.py",
+    "id": "ea586b76d080"
+   },
+   {
+    "at": "2026-09-09T14:23:33",
+    "field": "observations.chords.confidence",
+    "was": "0.8 on every event",
+    "now": "removed, replaced by covers",
+    "why": "0.8 was hardcoded on every chord in every map -- a number nobody measured, sitting in a field called confidence",
+    "who": "amal@trypencil.com",
+    "id": "ad6a8b18cb5e"
+   }
+  ],
+  "imported_verbatim": [
+   {
+    "by": "listen/resnap.py",
+    "when": "2026-09-08T00:50:57",
+    "what": "drops and stops were snapped to 4-beat bar lines; in this song they land on half bars, so the snap overshot by two beats",
+    "anchored_to": "the recording -- median loudness step across 0.5/1.0/1.5/2.0 s windows",
+    "moved": [
+     {
+      "kind": "drop",
+      "was": 20.848314,
+      "now": 19.9108,
+      "measured_at": 19.86,
+      "beats_moved": -2.0
+     },
+     {
+      "kind": "drop",
+      "was": 65.848314,
+      "now": 64.9108,
+      "measured_at": 64.86,
+      "beats_moved": -2.0
+     },
+     {
+      "kind": "drop",
+      "was": 191.473314,
+      "now": 192.4108,
+      "measured_at": 192.351,
+      "beats_moved": 2.0
+     },
+     {
+      "kind": "drop",
+      "was": 228.973314,
+      "now": 228.0358,
+      "measured_at": 227.975,
+      "beats_moved": -2.0
+     }
+    ],
+    "not_touched": "builds and quiets, which this instrument cannot measure",
+    "declined": [
+     "drop@86.47 would move 4.0 beats -- larger than the 2-beat snap this corrects, left alone",
+     "stop@99.60 would move 6.0 beats -- larger than the 2-beat snap this corrects, left alone",
+     "drop@193.35 would land on another moment already at 192.41, left alone"
+    ]
+   }
+  ],
+  "imported_note": "these came from an earlier writer with a different shape (listen/resnap.py). They are reshaped into entries above and kept here untouched, because a correction is testimony and reshaping it is not the same as replacing it."
+ }
 }

@@ -87741,5 +87741,24 @@
   },
   "not": "a fact a human can check by ear. It is what a large model heard, for a small head to learn from. Also: this torch build renamed the weight-norm parametrisation, so the positional-conv weights of the checkpoint did not load and are randomly initialised; embeddings are slightly perturbed from the published model's. the-nights' vectors were made the same way.",
   "device": "Quadro T1000"
+ },
+ "corrections": {
+  "note": "Every change a human made to this file: when, which field, what it said, what it says now, and why. Not a description of the song -- a record of where we described it wrongly. It is the only field here that cannot be derived from anything else, and the only one that makes restraint, weight and latent reachable: those three need examples of human judgment overriding a measurement, and this is where those examples accumulate. Append-only. A correction is testimony, not measurement, so there is nothing to check it against -- the schema is validated strictly instead, and an entry is never rewritten or removed.",
+  "schema": {
+   "required": [
+    "at",
+    "field",
+    "was",
+    "now",
+    "why",
+    "who"
+   ],
+   "optional": [
+    "t",
+    "id",
+    "confidence_after"
+   ]
+  },
+  "entries": []
  }
 }

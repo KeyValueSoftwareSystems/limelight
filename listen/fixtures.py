@@ -88,6 +88,43 @@ def sweep_map(rising, slug):
     }
 
 
+def broken_corrections():
+    # rule 5 asks every field for a broken-file entry that must fail. A correction is
+    # testimony, so there is no measurement to corrupt -- the strict schema is the whole
+    # check, and this is the file that has to be refused by it.
+    import corrections as CO
+
+    cases = [
+        ("a reason nobody wrote",
+         [{"at": "x", "field": "grid", "was": 1, "now": 2, "why": "   ", "who": "me"}]),
+        ("the same correction twice",
+         [{"at": "x", "field": "grid", "was": 1, "now": 2, "why": "ok", "who": "me"},
+          {"at": "x", "field": "grid", "was": 1, "now": 2, "why": "ok", "who": "me"}]),
+        ("no who",
+         [{"at": "x", "field": "grid", "was": 1, "now": 2, "why": "ok"}]),
+        ("no was, so nothing to learn from",
+         [{"at": "x", "field": "grid", "now": 2, "why": "ok", "who": "me"}]),
+        ("a key the schema never agreed to",
+         [{"at": "x", "field": "grid", "was": 1, "now": 2, "why": "ok", "who": "me",
+           "cue": "strobe"}]),
+        ("not an object at all", ["moved the drop"]),
+    ]
+    good = [{"at": "x", "field": "grid", "was": 1, "now": 2, "why": "ok", "who": "me"}]
+
+    ok = True
+    print("== a corrections log that must be refused")
+    for name, entries in cases:
+        errs = CO.validate(entries)
+        ok = ok and bool(errs)
+        print("   %s %-34s %s" % ("ok  " if errs else "FAIL", name,
+                                  errs[0] if errs else "ACCEPTED -- the schema is not strict"))
+    errs = CO.validate(good)
+    ok = ok and not errs
+    print("   %s %-34s %s" % ("ok  " if not errs else "FAIL", "a well-formed one is accepted",
+                              "; ".join(errs) if errs else "no complaints"))
+    return ok
+
+
 def run():
     import mapeval as ME
 
@@ -152,6 +189,8 @@ def run():
     print("   loudness correlation here is r=%+.2f on a %.1f%% range, which is why "
           "correlation alone cannot be trusted" % (r_loud, 100 * flatness))
     print("   rising: %s" % s_rise[1][:150])
+    print()
+    ok = broken_corrections() and ok
     return 0 if ok else 1
 
 
