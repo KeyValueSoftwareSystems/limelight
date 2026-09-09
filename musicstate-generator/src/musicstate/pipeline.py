@@ -21,10 +21,12 @@ from .analyzers import (
     ChordsAnalyzer,
     DspAnalyzer,
     EmbeddingAnalyzer,
+    GridRefineAnalyzer,
     MelodyAnalyzer,
     MomentDeriveAnalyzer,
     MomentTimingAnalyzer,
     NoteTranscriptionAnalyzer,
+    PumpAnalyzer,
     SemanticAnalyzer,
     StemsAnalyzer,
     StructureAnalyzer,
@@ -36,8 +38,9 @@ log = logging.getLogger("musicstate.pipeline")
 
 def core_analyzers() -> list[Analyzer]:
     """The reliable core — librosa only, no model downloads, runs anywhere."""
-    return [DspAnalyzer(), StructureAnalyzer(), BarPhaseAnalyzer(), MomentDeriveAnalyzer(),
-            AccentsAnalyzer(), MomentTimingAnalyzer(), ChordsAnalyzer()]
+    return [DspAnalyzer(), StructureAnalyzer(), GridRefineAnalyzer(), BarPhaseAnalyzer(),
+            MomentDeriveAnalyzer(), AccentsAnalyzer(), MomentTimingAnalyzer(), PumpAnalyzer(),
+            ChordsAnalyzer()]
 
 
 def deep_analyzers() -> list[Analyzer]:
@@ -46,12 +49,14 @@ def deep_analyzers() -> list[Analyzer]:
         DspAnalyzer(),
         StructureAnalyzer(),
         Allin1Analyzer(),
+        GridRefineAnalyzer(),    # rigid clock phase-locked to the kick
         BarPhaseAnalyzer(),      # kick-band downbeat phase (allin1 as strong prior)
         MomentDeriveAnalyzer(),  # candidate drops/quiets from labels + energy
         AccentsAnalyzer(),       # discrete onsets on the (allin1) beat grid
         ChordsAnalyzer(),        # per-bar chords on the (allin1) beat grid
         MelodyAnalyzer(),        # pyin melody contour
         MomentTimingAnalyzer(),  # re-time drops/stops to the measured loudness step
+        PumpAnalyzer(),          # sidechain duck-and-swell
         StemsAnalyzer(),
         SemanticAnalyzer(),
         EmbeddingAnalyzer(),
