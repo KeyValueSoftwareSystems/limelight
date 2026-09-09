@@ -131,12 +131,24 @@ def test_harmony_layers_null_when_unmeasured():
 
 def test_pos_added_to_timed_entries():
     m = _m()
-    # period 0.5, phase 0.5 (first beat). chapter "chorus" at 5.0 -> pos (5.0-0.5)/0.5 = 9.0
-    ch = next(c for c in m["chapters"] if c["name"] == "chorus")
-    assert ch["pos"] == 9.0
+    # moments are grid-aligned but not bar-snapped; pos = (at - phase) / period
     drop = next(x for x in m["moments"] if x["kind"] == "drop")
     assert drop["pos"] == round((drop["at"] - 0.5) / 0.5, 4)
+    # chapters are snapped to the bar grid; pos stays consistent with the snapped at
+    ch = next(c for c in m["chapters"] if c["name"] == "chorus")
+    assert ch["pos"] == round((ch["at"] - 0.5) / 0.5, 4)
     assert m["spans"][0]["pos_from"] == round((m["spans"][0]["from"] - 0.5) / 0.5, 4)
+
+
+def test_chapters_snapped_to_bar_lines():
+    m = _m()
+    per, ph, bp = m["grid"]["period"], m["grid"]["phase"], m["grid"]["bar_phase"]
+    bar, base = 4 * per, ph + bp * per
+    for c in m["chapters"]:
+        if c["at"] <= ph:
+            continue                     # the 0.0 intro anchor is exempt
+        off = abs((c["at"] - base) % bar)
+        assert min(off, bar - off) < 1e-3, f"chapter {c['at']} not on a bar line"
 
 
 def test_groove_from_accents():

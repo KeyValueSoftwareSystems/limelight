@@ -44,6 +44,61 @@ def _annotate_positions(m, phase, period):
             e["pos"] = p(e["at"])
 
 
+def _snap_structure_to_grid(m, phase, period, bar_phase):
+    """Pull chapters / section entries / span starts onto the bar grid.
+
+    Sections begin on bar lines in this music, but the boundaries come from a
+    segmenter at arbitrary seconds, so after the grid is locked to the kick they no
+    longer line up. Snapping them to the nearest bar line is what the winning maps
+    do (ev_bars checks exactly this). A boundary that *names* a drop/stop rides to
+    that moment's half-bar instead, and moments themselves are already grid-aligned
+    by MomentTimingAnalyzer, so they are left alone. Pure — grid math only.
+    """
+    if not period:
+        return
+    bar = 4.0 * period
+    base = phase + bar_phase * period
+    first = phase                       # marks at/before the first beat are exempt
+    def bar_line(t):
+        return round(base + round((t - base) / bar) * bar, 6)
+    drop_stop = [round(x["at"], 6) for x in (m.get("moments") or [])
+                 if isinstance(x, dict) and x.get("kind") in ("drop", "stop")]
+    def boundary(t):
+        if t <= first + 1e-9:
+            return round(t, 6)          # the intro anchor (chapter at 0.0) stays put
+        for d in drop_stop:
+            if abs(d - t) < period * 0.75:
+                return d                # a boundary that names a drop rides to its half bar
+        return bar_line(t)
+    for c in m.get("chapters") or []:
+        c["at"] = boundary(c["at"])
+    for e in (m.get("sections") or {}).get("entries") or []:
+        e["at"] = boundary(e["at"])
+        if "to" in e and e["to"] > first:
+            e["to"] = bar_line(e["to"])
+    for s in m.get("spans") or []:
+        if "from" in s and s["from"] > first:
+            s["from"] = bar_line(s["from"])
+    # build/quiet/spotlight/return moments come from the segmenter at section times;
+    # snap them to the half-bar grid. drop/stop are owned by MomentTimingAnalyzer,
+    # which measured them against the recording, so those are left exactly as placed.
+    half = 2.0 * period
+    for x in m.get("moments") or []:
+        if isinstance(x, dict) and x.get("kind") not in ("drop", "stop") and x.get("at", 0) > first:
+            x["at"] = round(base + round((x["at"] - base) / half) * half, 6)
+    # keep chapters strictly increasing (validate.py requires it): a collision after
+    # snapping means two boundaries fell on one bar line -- one bar line, one chapter.
+    chs = sorted(m.get("chapters") or [], key=lambda c: c["at"])
+    seen, uniq = set(), []
+    for c in chs:
+        key = round(c["at"], 3)
+        if key in seen:
+            continue
+        seen.add(key)
+        uniq.append(c)
+    m["chapters"] = uniq
+
+
 def _groove(accent_events):
     """Swing summary from per-hit deviation off the nearest sixteenth (listen/beatpos)."""
     devs, byslot = [], {0: [], 1: [], 2: [], 3: []}
@@ -254,6 +309,7 @@ def to_map(state: dict, vec_filename: str | None = None,
         "observations": observations,
         "vectors": vectors,
     }
+    _snap_structure_to_grid(out, phase, period, bar_phase)
     _annotate_positions(out, phase, period)
     groove = _groove((out.get("accents") or {}).get("events") or [])
     if groove:
