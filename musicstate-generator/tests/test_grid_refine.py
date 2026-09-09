@@ -45,6 +45,17 @@ def test_grid_refine_locks_to_kick_and_is_rigid():
     assert res.patch["downbeats"][0] == b[0]       # downbeats seeded on phase 0
 
 
+def test_corrects_a_half_time_tracker():
+    # true kicks at 128 bpm, but the tracker reports HALF that (64 bpm, every other kick)
+    y, sr, period, phase = _kick_track(bpm=128.0, secs=12.0, phase=0.223)
+    dur = len(y) / sr
+    half = [round(phase + i * period * 2, 3) for i in range(int((dur - 0.3) / (period * 2)))]
+    res = GridRefineAnalyzer().analyze(y, sr, {"beats": half, "tempo_bpm": 64.0, "duration_s": dur})
+    b = res.patch["beats"]
+    gap = round(b[1] - b[0], 4)
+    assert abs(gap - period) < 1e-3, f"expected the true {period:.4f}s period, got {gap}"
+
+
 def test_no_beats_is_not_computed():
     y, sr, _, _ = _kick_track()
     res = GridRefineAnalyzer().analyze(y, sr, {"beats": [], "tempo_bpm": 128.0, "duration_s": 8.0})

@@ -24,6 +24,7 @@ PUMP_PRESENT = 0.10       # depth at/above which a pump is called present
 GRID_FMAX = 150.0                                   # Hz; the kick band the grid locks to
 GRID_PHASE_STEP = 0.004                             # s; phase search resolution
 GRID_PERIOD_TOL = (-0.003, -0.0015, 0.0, 0.0015, 0.003)  # fractional period window around the tempo
+GRID_OCTAVES = (0.5, 1.0, 2.0)                      # search half/true/double: trackers make octave errors
 
 # --- bar-line phase (kick band) ---
 BAR_PHASE_FMAX = 150.0      # Hz; the kick lives below this

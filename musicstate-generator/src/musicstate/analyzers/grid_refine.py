@@ -18,7 +18,8 @@ from __future__ import annotations
 import librosa
 import numpy as np
 
-from ..config import GRID_FMAX, GRID_PERIOD_TOL, GRID_PHASE_STEP, HOP_LENGTH, N_FFT
+from ..config import (GRID_FMAX, GRID_OCTAVES, GRID_PERIOD_TOL, GRID_PHASE_STEP,
+                      HOP_LENGTH, N_FFT)
 from .base import Analyzer, AnalyzerResult
 
 
@@ -31,10 +32,17 @@ def _kick_series(audio, sr, hop=HOP_LENGTH, fmax=GRID_FMAX):
 
 
 def _grid_energy(series, hop_s, phase, period, dur):
-    """Mean kick energy at the points of a rigid grid over [0, dur]."""
+    """Mean kick energy at the points of a rigid grid over [0, dur].
+
+    Averages over however many points fall in the song (>=1); returns 0.0 for an
+    empty grid. It must NOT sentinel a short grid to a negative value: this is used
+    for midpoint energy too, and a negative sentinel there would hide the loud
+    skipped kicks that reveal a half-time grid. Beat-count eligibility is enforced
+    by the caller instead.
+    """
     n = int((dur - phase) / period)
-    if n < 8:
-        return -1.0
+    if n < 1:
+        return 0.0
     idx = np.clip(np.round((phase + np.arange(n) * period) / hop_s).astype(int), 0, len(series) - 1)
     return float(series[idx].mean())
 
@@ -56,17 +64,25 @@ class GridRefineAnalyzer(Analyzer):
         series, hop_s = _kick_series(audio, sample_rate, self.hop_length)
         p0 = 60.0 / bpm
 
-        # search a small period window around the tracker's tempo, and phase across
-        # one period, maximising kick energy on the resulting rigid grid.
-        best = (-1.0, p0, 0.0)
-        periods = [p0 * (1.0 + d) for d in GRID_PERIOD_TOL]
-        for period in periods:
-            phase = 0.0
-            while phase < period:
-                e = _grid_energy(series, hop_s, phase, period, dur)
-                if e > best[0]:
-                    best = (e, period, phase)
-                phase += GRID_PHASE_STEP
+        # Search half / true / double the tracker's tempo (trackers make octave errors),
+        # each across a small period window and every phase. Score a grid by how much its
+        # beats stand out from their own MIDPOINTS: a correct grid has loud beats and quiet
+        # midpoints; a half-time grid has the skipped kicks sitting just as loud on the
+        # midpoints. Maximising (beat energy - midpoint energy) locks both the octave and
+        # the phase, and is exactly what the scorer's octave guard checks.
+        best = (-1e18, p0, 0.0)
+        for mult in GRID_OCTAVES:
+            for period in [p0 * mult * (1.0 + d) for d in GRID_PERIOD_TOL]:
+                if int(dur / period) < 8:       # too few beats to be a real grid
+                    continue
+                half = period / 2.0
+                phase = 0.0
+                while phase < period:
+                    score = (_grid_energy(series, hop_s, phase, period, dur)
+                             - _grid_energy(series, hop_s, phase + half, period, dur))
+                    if score > best[0]:
+                        best = (score, period, phase)
+                    phase += GRID_PHASE_STEP
         _, period, phase = best
 
         n = int((dur - phase) / period) + 1
