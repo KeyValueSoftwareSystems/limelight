@@ -1,0 +1,582 @@
+<!doctype html><html><head><meta charset="utf-8"><title>score editor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#07090e;--pan:#0f131b;--line:#222a3a;--ink:#e9ebf3;--dim:#7c849a;
+      --faint:#59617a;--amb:#e8a33d;--ok:#5bb98c;--no:#e2705f;--beam:#4aa8ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:13.5px/1.5 ui-sans-serif,system-ui,-apple-system,sans-serif}
+.bar{background:var(--pan);border-bottom:1px solid var(--line);padding:8px 12px;
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:8}
+button,select,input[type=text],input[type=number]{background:#1a2130;color:var(--ink);
+  border:1px solid var(--line);border-radius:5px;padding:5px 9px;font:inherit;cursor:pointer}
+input[type=text],input[type=number]{cursor:text;font:12px ui-monospace,monospace}
+button:hover{border-color:#3c4761}
+button.on{background:var(--amb);color:#181103;border-color:var(--amb);font-weight:600}
+button.go{border-color:var(--amb);color:var(--amb)}
+.tag{font:11px ui-monospace,monospace;color:var(--dim)}
+#tl{display:block;width:100%;height:392px;background:#05070b;cursor:crosshair}
+/* Read-only on purpose. The rig belongs to the room and the score belongs to the
+   song; editing both here would invite fixing a score to suit a rig, which is the
+   one thing the map format exists to prevent. Shown so an edit can be judged by
+   eye immediately -- change the "one", watch the lamps land differently. */
+#rig{display:block;width:100%;height:66px;background:#080b11;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+#panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:0;
+  border-top:1px solid var(--line)}
+.card{padding:11px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.card h3{font:600 10px ui-monospace,monospace;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--amb);margin:0 0 7px}
+.card .note{color:var(--faint);font-size:11px;line-height:1.45;margin:6px 0 0}
+.rw{display:flex;gap:6px;align-items:center;margin:4px 0;flex-wrap:wrap}
+.rw label{font:11px ui-monospace,monospace;color:var(--dim);min-width:74px}
+#grade{font:12px ui-monospace,monospace;color:var(--dim)}
+#grade b{color:var(--ink)}
+#saved{padding:0 12px;font:12px ui-monospace,monospace;color:var(--ok);line-height:1.7}
+#saved:empty{padding:0}
+#saved a{color:var(--amb)}
+#hint{padding:6px 12px;background:#0b0e15;border-top:1px solid var(--line);
+  font:11px ui-monospace,monospace;color:var(--faint)}
+#d_work{border-top:1px solid var(--line);background:#0a0d14}
+#d_work summary{cursor:pointer;padding:8px 12px;font:600 10px ui-monospace,monospace;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--amb);list-style:none}
+#d_work summary::-webkit-details-marker{display:none}
+#work{padding:0 12px 12px}
+#work table{border-collapse:collapse;width:100%;font:11.5px ui-monospace,monospace}
+#work td{padding:3px 10px 3px 0;vertical-align:top;border-bottom:1px solid #141a24}
+#work td.k{color:var(--ink);width:88px} #work td.n{text-align:right;width:64px;color:var(--amb)}
+#work td.wk i{color:var(--faint);font-style:normal}
+#work tr:last-child td{border-bottom:0;padding-top:6px}
+#work tr:last-child td.k,#work tr:last-child td.n{color:#fff;font-weight:600}
+#work td.wk{color:var(--dim);line-height:1.45}
+#room{display:block;width:100%;height:150px;background:#05070b;border:1px solid var(--line);
+  border-radius:4px;cursor:grab;margin-bottom:6px}
+#invar{color:var(--faint)} #invar.proved{color:var(--ok)}
+</style></head><body>
+
+<div class="bar">
+  <button id="play">play</button>
+  <span class="tag" id="clock">0.00</span>
+  <select id="song"></select><select id="mapsel"></select>
+  <span class="tag">zoom</span>
+  <input id="zoom" type="range" min="1.5" max="24" step="0.5" value="6" style="width:110px">
+  <button id="grade0" class="go">grade it</button>
+  <span id="grade">not graded</span>
+  <input id="who" type="text" value="edited" size="8" title="save under this name">
+  <button id="save" class="go">save</button>
+  <span class="tag" id="msg"></span>
+</div>
+<div id="saved"></div>
+
+<canvas id="tl"></canvas>
+<canvas id="rig" height="66" title="the current rig, reacting to the score you are editing"></canvas>
+<div id="hint"><span id="hintx">beats lane: drag&nbsp;=&nbsp;slide the ruler, shift-drag&nbsp;=&nbsp;stretch tempo</span></div>
+
+<details id="d_work"><summary>how the grade was calculated &mdash; every number, every weight</summary>
+  <div id="work"><span class="tag">press grade it</span></div></details>
+
+<div id="panel">
+  <div class="card" style="grid-column:span 2"><h3>the rig &mdash; drag a lamp</h3>
+    <canvas id="room"></canvas>
+    <div class="rw"><button id="addpar">+ par</button><button id="delpar">&minus; par</button>
+      <button id="reset">reset to default</button>
+      <span class="tag" id="rigstate"></span></div>
+    <div class="rw"><span class="tag" id="invar">the grade cannot move when you drag a lamp &mdash; press grade it and watch</span></div>
+  </div>
+  <div class="card"><h3>the ruler</h3>
+    <div class="rw"><label>tempo</label><input id="bpm" type="number" step="0.01" style="width:92px">
+      <span class="tag">bpm</span></div>
+    <div class="rw"><label>first beat</label><input id="phase" type="number" step="0.001" style="width:92px">
+      <span class="tag">s</span></div>
+    <div class="rw"><label>meter</label><select id="meter">
+      <option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option></select>
+      <span class="tag">beats to a bar</span></div></div>
+
+  <div class="card"><h3>which beat is the &ldquo;one&rdquo;</h3>
+    <div class="rw"><button id="ph0">0</button><button id="ph1">1</button>
+      <button id="ph2">2</button><button id="ph3">3</button>
+      <span class="tag" id="phnow"></span></div></div>
+
+  <div class="card"><h3>phrase</h3>
+    <div class="rw"><label>bars</label><select id="phrase">
+      <option>2</option><option>4</option><option selected>8</option><option>16</option></select></div></div>
+
+  <div class="card"><h3>groove</h3>
+    <div class="rw"><label>swing</label><input id="groove" type="number" step="1" style="width:80px">
+      <span class="tag">ms off the grid</span></div></div>
+
+  <div class="card"><h3>the anchor</h3>
+    <div class="rw"><button id="anchor">anchor at the playhead</button></div>
+    <div class="rw"><span class="tag" id="anchornow">none</span></div></div>
+
+  <div class="card"><h3>section identity</h3>
+    <div class="rw"><span class="tag" id="idnow">click a chapter, then press 1&ndash;9</span></div></div>
+
+  <div class="card"><h3>confidence</h3>
+    <div id="conf"></div></div>
+
+  <div class="card"><h3>provenance</h3>
+    <div class="rw"><span class="tag" id="prov"></span></div></div>
+</div>
+
+<script src="/static/room.js"></script>
+<script>
+const $=i=>document.getElementById(i);
+const Q=new URLSearchParams(location.search);
+let SONG=Q.get("song")||"levels", MAPKEY=Q.get("map")||null, MAPS={}, M=null;
+let WAVE=null, DUR=1, VIEW=6, T0=0, EDITS=[], SELCH=-1, drag=null;
+let RD=null, LAY=null, BASE=null;
+let P=[], ROOM={w:3.2,d:2.0}, rdrag=-1, LAYEDITS=0, GRADE0=null;
+const KINDS=["build","drop","stop","quiet","spotlight","return"];
+const aud=new Audio(); aud.preload="auto";
+const say=t=>$("msg").textContent=t;
+const ent=o=>Array.isArray(o)?o:((o||{}).entries||[]);
+const note=(what)=>{EDITS.push({when:new Date().toISOString(),what});say(what)};
+
+/* --- the ruler is a formula, so beats are derived, never stored by hand ------ */
+function per(){return M.grid.period}
+function meter(){return M.grid.beats_per_bar||4}
+function regrid(){
+  const p=per(), ph=M.grid.phase, out=[];
+  for(let t=ph;t<DUR;t+=p) out.push(+t.toFixed(4));
+  M.beats=out;
+  const bp=M.grid.bar_phase||0, m=meter();
+  M.downbeats=out.filter((_,i)=>((i-bp)%m+m)%m===0);
+}
+async function boot(){
+  const G=await (await fetch("/api/maps?song="+SONG)).json();
+  SONG=G.song; MAPS=G.maps;
+  const keys=Object.keys(MAPS).sort();
+  const RANK=["amal","model","edited","truth"];
+  if(!MAPKEY||!MAPS[MAPKEY]) MAPKEY=RANK.find(k=>MAPS[k])||keys[0];
+  $("song").innerHTML=Object.entries(G.songs||{}).map(([k,v])=>
+    `<option value="${k}"${k===SONG?" selected":""}>${v}</option>`).join("");
+  $("mapsel").innerHTML=keys.map(k=>`<option${k===MAPKEY?" selected":""}>${k}</option>`).join("");
+  aud.src="/api/audio?song="+SONG;
+  WAVE=await (await fetch("/api/wave?song="+SONG)).json();
+  BASE=await (await fetch("/api/layout?rig=three")).json();
+  LAY=JSON.parse(JSON.stringify(BASE));
+  ROOM={w:(LAY.size_m||{}).w||3.2,d:(LAY.size_m||{}).d||2.0};
+  P=LAY.fixtures.filter(f=>f.kind==="par").map(f=>[f.at[0],f.at[2]]);
+  window.RECIPE=await (await fetch("/static/recipe_gig.js")).text();
+  load(); wire(); relay(); loop();
+}
+function load(){
+  M=JSON.parse(JSON.stringify(MAPS[MAPKEY]));
+  DUR=(M.song&&M.song.length)||180;
+  M.grid.beats_per_bar=M.grid.beats_per_bar||4;
+  if(!M.beats||!M.beats.length) regrid();
+  EDITS=[]; refresh(); T0=Math.max(0,(ent(M.moments).find(x=>x.kind==="drop")||{at:8}).at-2);
+}
+function relay(){
+  LAY.fixtures = P.map((q,i)=>({id:"par_"+"lcrdefghi"[i], kind:"par",
+    can:["colour","level"], emits:"light", at:[q[0],0.35,q[1]], zone:"floor",
+    beam_deg:30, face:"up"}));
+  const xs=P.map(q=>q[0]);
+  const span=P.length>1?Math.max(...xs)-Math.min(...xs):0;
+  const row=span>=ROOM.w*0.35&&P.length>=3;
+  $("rigstate").textContent=P.length+" pars · span "+span.toFixed(2)+" m · "+(row?"a row":"clustered");
+  reread(); drawRoom();
+}
+function setPars(k){
+  const w=ROOM.w*0.78; P=[];
+  for(let i=0;i<k;i++) P.push([k===1?0:(-w/2+w*i/(k-1)),0]);
+  LAYEDITS++; relay();
+}
+function rpx(x,z){const c=$("room"),w=c.clientWidth,h=c.clientHeight,m=22;
+  return [m+((x+ROOM.w/2)/ROOM.w)*(w-2*m), m+((z+0.4)/(ROOM.d+0.8))*(h-2*m)]}
+function rmm(px,py){const c=$("room"),w=c.clientWidth,h=c.clientHeight,m=22;
+  return [((px-m)/(w-2*m))*ROOM.w-ROOM.w/2,((py-m)/(h-2*m))*(ROOM.d+0.8)-0.4]}
+function drawRoom(){
+  const c=$("room"); if(!c||!c.clientWidth) return;
+  const w=c.clientWidth,h=c.clientHeight,x=c.getContext("2d");
+  c.width=w*devicePixelRatio;c.height=h*devicePixelRatio;
+  x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  x.fillStyle="#05070b";x.fillRect(0,0,w,h);
+  x.strokeStyle="#18202e";x.lineWidth=1;
+  for(let m2=-ROOM.w/2;m2<=ROOM.w/2+.01;m2+=0.5){
+    const a=rpx(m2,-0.4),b=rpx(m2,ROOM.d+0.4);
+    x.globalAlpha=Math.abs(m2%1)<.01?1:.4;
+    x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke()}
+  x.globalAlpha=1;
+  const xs=P.map(q=>q[0]);
+  if(P.length>1){const span=Math.max(...xs)-Math.min(...xs);
+    const row=span>=ROOM.w*0.35&&P.length>=3;
+    const a=rpx(Math.min(...xs),ROOM.d+0.18),b=rpx(Math.max(...xs),ROOM.d+0.18);
+    x.strokeStyle=row?"#5bb98c":"#e2705f";x.lineWidth=2;
+    x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke()}
+  P.forEach((q,i)=>{const pp=rpx(q[0],q[1]),px2=pp[0],py2=pp[1];
+    const gr=x.createRadialGradient(px2,py2,0,px2,py2,26);
+    gr.addColorStop(0,"rgba(232,163,61,.30)");gr.addColorStop(1,"rgba(0,0,0,0)");
+    x.fillStyle=gr;x.beginPath();x.arc(px2,py2,26,0,7);x.fill();
+    x.beginPath();x.arc(px2,py2,9,0,7);x.fillStyle=rdrag===i?"#f5c274":"#e8a33d";x.fill();
+    x.strokeStyle="#06080c";x.lineWidth=2;x.stroke();
+    x.fillStyle="#0a0c12";x.font="600 9px ui-monospace,monospace";x.textAlign="center";
+    x.fillText("LCRDEFGHI"[i],px2,py2+3);x.textAlign="left"});
+}
+function reread(){
+  if(!M||!LAY||!window.LimelightRoom) return;
+  try{ const g=window.LimelightRoom; g.prep(M);
+       RD=g.mkReader(M,LAY,null,null,16,JSON.stringify({lead:0,env:"breathe"}),0); }
+  catch(e){ RD=null; }
+}
+function drawRig(t){
+  const c=$("rig"); if(!c.clientWidth) return;
+  const w=c.clientWidth,h=66,x=c.getContext("2d");
+  c.width=w*devicePixelRatio;c.height=h*devicePixelRatio;
+  x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  x.fillStyle="#080b11";x.fillRect(0,0,w,h);
+  x.fillStyle="#59617a";x.font="9px ui-monospace,monospace";
+  x.fillText("THE RIG  (read only \u2014 the room, not the song)",4,11);
+  if(!RD) return;
+  let f; try{ f=RD(t) }catch(e){ return }
+  const n=f.fixtures.length, gap=w/(n+1), rad=Math.min(gap*0.30,20);
+  f.fixtures.forEach((fx,i)=>{
+    const cx=gap*(i+1), cy=h*0.58, lv=fx.level;
+    if(lv>0.004){const gr=x.createRadialGradient(cx,cy,0,cx,cy,rad*2.6);
+      gr.addColorStop(0,`rgba(${fx.r},${fx.g},${fx.b},${0.55*lv})`);
+      gr.addColorStop(1,"rgba(0,0,0,0)");
+      x.fillStyle=gr;x.beginPath();x.arc(cx,cy,rad*2.6,0,7);x.fill()}
+    x.beginPath();x.arc(cx,cy,rad,0,7);
+    x.fillStyle=`rgb(${fx.r},${fx.g},${fx.b})`;x.fill();
+    x.strokeStyle="#2b3span";x.strokeStyle="#2b3446";x.lineWidth=1.5;x.stroke()});
+  x.fillStyle="#7c849a";x.font="10px ui-monospace,monospace";
+  x.fillText(f.look,4,h-4);
+}
+function refresh(){
+  reread();
+  $("bpm").value=(M.grid.bpm||0).toFixed(2);
+  $("phase").value=(M.grid.phase||0).toFixed(3);
+  $("meter").value=String(meter());
+  $("phrase").value=String((M.grid.phrase_bars)||8);
+  $("groove").value=Math.round(((M.observations||{}).groove||{}).swing_ms||0);
+  const bp=M.grid.bar_phase||0;
+  [0,1,2,3].forEach(i=>$("ph"+i).classList.toggle("on",i===bp));
+  $("phnow").textContent=`phase ${bp} · ${(M.downbeats||[]).length} downbeats`;
+  const a=(M.grid.anchor_s);
+  $("anchornow").textContent=a===undefined?"none":`${a.toFixed(3)} s — verified by ear`;
+  const by=M.made_by||{};
+  $("prov").textContent=`${by.how||"?"} · ${by.who||"?"} · ${EDITS.length} edits pending`;
+  const cf=M.confidence_by_field||{};
+  $("conf").innerHTML=Object.keys(cf).length
+    ? Object.entries(cf).slice(0,6).map(([k,v])=>
+      `<div class="rw"><label>${k}</label><input type="range" min="0" max="1" step="0.05"
+        value="${v}" data-cf="${k}" style="width:96px"><span class="tag">${(+v).toFixed(2)}</span></div>`).join("")
+    : `<span class="tag">this map declares none</span>`;
+  $("conf").querySelectorAll("[data-cf]").forEach(el=>el.oninput=e=>{
+    M.confidence_by_field[e.target.dataset.cf]=+e.target.value;
+    e.target.nextElementSibling.textContent=(+e.target.value).toFixed(2);
+    note(`confidence ${e.target.dataset.cf} -> ${(+e.target.value).toFixed(2)}`);});
+}
+/* --- geometry ---------------------------------------------------------------- */
+const LANES=[["audio",70],["beats",56],["chapters",62],["moments",60],["energy",84]];
+function laneY(k){let y=26;for(const [n,h] of LANES){if(n===k)return[y,h];y+=h+10}return[y,40]}
+const px=t=>((t-T0)/VIEW)*$("tl").clientWidth;
+const tm=x=>T0+(x/$("tl").clientWidth)*VIEW;
+function snap(t,div){const p=per()*div, ph=M.grid.phase;
+  return +(ph+Math.round((t-ph)/p)*p).toFixed(4)}
+/* --- draw -------------------------------------------------------------------- */
+function draw(){
+  const c=$("tl"),w=c.clientWidth,h=c.clientHeight,x=c.getContext("2d");
+  c.width=w*devicePixelRatio;c.height=h*devicePixelRatio;
+  x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  x.fillStyle="#05070b";x.fillRect(0,0,w,h);
+  x.font="9px ui-monospace,monospace";
+  for(const [n,hh] of LANES){const [y]=laneY(n);
+    x.fillStyle="#59617a";x.fillText(n.toUpperCase(),4,y-5);
+    x.strokeStyle="#151b26";x.beginPath();x.moveTo(0,y+hh);x.lineTo(w,y+hh);x.stroke()}
+  // audio
+  if(WAVE){const [y,hh]=laneY("audio"),lo=WAVE.low||[],dt=WAVE.dt||0.005;
+    let mx=0.02;for(let i=Math.max(0,(T0/dt)|0);i<Math.min(lo.length,((T0+VIEW)/dt)|0);i++)if(lo[i]>mx)mx=lo[i];
+    x.beginPath();x.moveTo(0,y+hh);
+    for(let i=Math.max(0,(T0/dt)|0);i<Math.min(lo.length,((T0+VIEW)/dt)|0);i++)
+      x.lineTo(px(i*dt),y+hh-(lo[i]/mx)*hh);
+    x.lineTo(w,y+hh);x.closePath();
+    x.fillStyle="rgba(120,150,210,.26)";x.fill();
+    x.strokeStyle="rgba(150,180,235,.65)";x.lineWidth=1;x.stroke()}
+  // beats + bars
+  {const [y,hh]=laneY("beats"),bp=M.grid.bar_phase||0,m=meter();
+   (M.beats||[]).forEach((bt,i)=>{if(bt<T0-.2||bt>T0+VIEW+.2)return;
+     const one=((i-bp)%m+m)%m===0;
+     x.beginPath();x.moveTo(px(bt),y+(one?2:hh*0.42));x.lineTo(px(bt),y+hh);
+     x.strokeStyle=one?"rgba(235,240,255,.9)":"rgba(140,150,175,.32)";
+     x.lineWidth=one?2:1;x.stroke();
+     if(one){x.fillStyle="rgba(235,240,255,.9)";x.fillText("1",px(bt)+3,y+11)}});
+   const a=M.grid.anchor_s;
+   if(a!==undefined&&a>=T0&&a<=T0+VIEW){x.strokeStyle="#5bb98c";x.lineWidth=2;
+     x.beginPath();x.moveTo(px(a),y);x.lineTo(px(a),y+hh);x.stroke();
+     x.fillStyle="#5bb98c";x.fillText("anchor",px(a)+4,y+hh-3)}}
+  // chapters
+  {const [y,hh]=laneY("chapters"),ch=ent(M.chapters);
+   ch.forEach((c2,i)=>{const t0=c2.at??c2.t, t1=(i+1<ch.length?(ch[i+1].at??ch[i+1].t):DUR);
+     if(t1<T0||t0>T0+VIEW)return;
+     const x0=Math.max(-2,px(t0)),x1=Math.min(w+2,px(t1));
+     x.fillStyle=i===SELCH?"rgba(232,163,61,.22)":"rgba(74,168,255,.13)";
+     x.fillRect(x0,y+6,Math.max(2,x1-x0),hh-12);
+     x.strokeStyle=i===SELCH?"#e8a33d":"#3a6ea8";x.lineWidth=1;
+     x.strokeRect(x0,y+6,Math.max(2,x1-x0),hh-12);
+     x.fillStyle="#cfd6e6";x.font="10px ui-monospace,monospace";
+     x.fillText((c2.name||"part")+(c2.same!==undefined?" #"+c2.same:""),x0+5,y+21);
+     x.strokeStyle="#e8a33d";x.lineWidth=3;
+     x.beginPath();x.moveTo(px(t0),y+6);x.lineTo(px(t0),y+hh-6);x.stroke()})}
+  // moments
+  {const [y,hh]=laneY("moments");
+   ent(M.moments).forEach(mm=>{const t=mm.at??mm.t;if(t<T0||t>T0+VIEW)return;
+     const cx=px(t),cy=y+hh/2;
+     x.beginPath();x.moveTo(cx,cy-9);x.lineTo(cx+8,cy);x.lineTo(cx,cy+9);x.lineTo(cx-8,cy);
+     x.closePath();
+     x.fillStyle=mm.kind==="drop"?"#e8a33d":mm.kind==="stop"?"#e2705f":"#4aa8ff";x.fill();
+     x.fillStyle="#cfd6e6";x.font="10px ui-monospace,monospace";
+     x.fillText(mm.kind,cx+11,cy+3)})}
+  // energy
+  {const [y,hh]=laneY("energy"),en=M.energy||[];
+   const g=i=>Array.isArray(en[i])?en[i]:[en[i].at,en[i].v];
+   x.beginPath();let first=true;
+   for(let i=0;i<en.length;i++){const [t,v]=g(i);if(t<T0-1||t>T0+VIEW+1)continue;
+     const X=px(t),Y=y+hh-v*hh;if(first){x.moveTo(X,Y);first=false}else x.lineTo(X,Y)}
+   x.strokeStyle="#5bb98c";x.lineWidth=1.5;x.stroke();
+   for(let i=0;i<en.length;i++){const [t,v]=g(i);if(t<T0||t>T0+VIEW)continue;
+     x.beginPath();x.arc(px(t),y+hh-v*hh,3.5,0,7);x.fillStyle="#5bb98c";x.fill()}}
+  // playhead
+  const t=aud.currentTime;
+  if(t>=T0&&t<=T0+VIEW){x.strokeStyle="rgba(255,255,255,.7)";x.lineWidth=1;
+    x.beginPath();x.moveTo(px(t),18);x.lineTo(px(t),h);x.stroke()}
+  x.fillStyle="#59617a";x.font="10px ui-monospace,monospace";
+  x.fillText(`${T0.toFixed(1)} s  →  ${(T0+VIEW).toFixed(1)} s`,4,12);
+}
+/* --- interaction ------------------------------------------------------------- */
+function hitTest(mx,my){
+  for(const [n,hh] of LANES){const [y]=laneY(n);
+    if(my>=y&&my<=y+hh){
+      const t=tm(mx);
+      if(n==="beats")   return {lane:"beats",t0:t,phase0:M.grid.phase,bpm0:M.grid.bpm};
+      if(n==="chapters"){const ch=ent(M.chapters);
+        let best=-1,bd=1e9;
+        ch.forEach((c2,i)=>{const d=Math.abs(px(c2.at??c2.t)-mx);if(d<bd){bd=d;best=i}});
+        if(bd<10&&best>0) return {lane:"chedge",i:best};
+        let sel=-1; ch.forEach((c2,i)=>{if((c2.at??c2.t)<=t) sel=i});
+        SELCH=sel; return {lane:"chpick"}}
+      if(n==="moments"){const mo=ent(M.moments);
+        let best=-1,bd=1e9;
+        mo.forEach((mm,i)=>{const d=Math.abs(px(mm.at??mm.t)-mx);if(d<bd){bd=d;best=i}});
+        if(bd<12) return {lane:"moment",i:best,moved:false};
+        return null}
+      if(n==="energy"){const en=M.energy||[];
+        let best=-1,bd=1e9;
+        for(let i=0;i<en.length;i++){const t2=Array.isArray(en[i])?en[i][0]:en[i].at;
+          const d=Math.abs(px(t2)-mx);if(d<bd){bd=d;best=i}}
+        if(bd<12) return {lane:"energy",i:best};
+        return null}
+      return null}}
+  return null;
+}
+function wire(){
+  const c=$("tl");
+  c.addEventListener("pointerdown",e=>{
+    const r=c.getBoundingClientRect();
+    drag=hitTest(e.clientX-r.left,e.clientY-r.top);
+    if(drag){drag.shift=e.shiftKey;drag.x0=e.clientX-r.left;c.setPointerCapture(e.pointerId)}
+    draw();
+  });
+  c.addEventListener("pointermove",e=>{
+    if(!drag)return;
+    const r=c.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    const dt=(mx-drag.x0)/c.clientWidth*VIEW;
+    if(drag.lane==="beats"){
+      if(drag.shift){                                  /* stretch: pivot on the anchor */
+        const piv=M.grid.anchor_s!==undefined?M.grid.anchor_s:drag.phase0;
+        const span=Math.max(0.5,drag.t0-piv);
+        const k=Math.max(0.5,Math.min(2,(span+dt)/span));
+        M.grid.bpm=+(drag.bpm0/k).toFixed(3);
+        M.grid.period=+(60/M.grid.bpm).toFixed(6);
+        M.grid.phase=+(piv-(piv-drag.phase0)*k).toFixed(4);
+      }else{                                            /* nudge: slide the whole ruler */
+        M.grid.phase=+(drag.phase0+dt).toFixed(4);
+      }
+      regrid(); drag.moved=true;
+    } else if(drag.lane==="chedge"){
+      const ch=ent(M.chapters); const t=snap(tm(mx),meter());
+      const lo=(ch[drag.i-1].at??ch[drag.i-1].t)+per();
+      const hi=drag.i+1<ch.length?(ch[drag.i+1].at??ch[drag.i+1].t)-per():DUR;
+      const v=Math.max(lo,Math.min(hi,t));
+      if("at" in ch[drag.i]) ch[drag.i].at=v; else ch[drag.i].t=v;
+      drag.moved=true;
+    } else if(drag.lane==="moment"){
+      const mo=ent(M.moments); const t=snap(tm(mx),meter()/2);
+      if("at" in mo[drag.i]) mo[drag.i].at=t; else mo[drag.i].t=t;
+      drag.moved=true;
+    } else if(drag.lane==="energy"){
+      const en=M.energy; const [y,hh]=laneY("energy");
+      const v=Math.max(0,Math.min(1,(y+hh-my)/hh));
+      if(Array.isArray(en[drag.i])) en[drag.i][1]=+v.toFixed(3); else en[drag.i].v=+v.toFixed(3);
+      drag.moved=true;
+    }
+    draw();
+  });
+  c.addEventListener("pointerup",()=>{
+    if(drag&&drag.moved){
+      if(drag.lane==="beats") note(drag.shift
+        ? `tempo -> ${M.grid.bpm} bpm` : `grid slid to first beat ${M.grid.phase.toFixed(4)} s`);
+      if(drag.lane==="chedge") note(`chapter boundary moved, snapped to a bar`);
+      if(drag.lane==="moment") note(`moment moved, snapped to a half bar`);
+      if(drag.lane==="energy") note(`energy point edited`);
+      refresh();
+    } else if(drag&&drag.lane==="moment"){            /* a click cycles the kind */
+      const mo=ent(M.moments), k=mo[drag.i].kind;
+      mo[drag.i].kind=KINDS[(KINDS.indexOf(k)+1)%KINDS.length];
+      note(`moment kind -> ${mo[drag.i].kind}`); refresh();
+    }
+    drag=null; draw();
+  });
+  c.addEventListener("wheel",e=>{e.preventDefault();
+    T0=Math.max(0,Math.min(DUR-VIEW,T0+e.deltaY*0.004*VIEW));draw()},{passive:false});
+  $("zoom").oninput=e=>{VIEW=+e.target.value;draw()};
+  $("play").onclick=()=>{if(aud.paused){aud.play();$("play").textContent="pause"}
+                         else{aud.pause();$("play").textContent="play"}};
+  $("song").onchange=e=>location.href="/editor?song="+e.target.value;
+  $("mapsel").onchange=e=>{MAPKEY=e.target.value;load();draw()};
+  $("bpm").onchange=e=>{M.grid.bpm=+e.target.value;M.grid.period=+(60/M.grid.bpm).toFixed(6);
+    regrid();note(`tempo -> ${M.grid.bpm} bpm`);refresh();draw()};
+  $("phase").onchange=e=>{M.grid.phase=+e.target.value;regrid();
+    note(`first beat -> ${M.grid.phase} s`);refresh();draw()};
+  $("meter").onchange=e=>{M.grid.beats_per_bar=+e.target.value;regrid();
+    note(`meter -> ${e.target.value} beats to a bar`);refresh();draw()};
+  $("phrase").onchange=e=>{M.grid.phrase_bars=+e.target.value;
+    note(`phrase -> ${e.target.value} bars`);refresh()};
+  $("groove").onchange=e=>{const o=M.observations=M.observations||{};
+    o.groove=o.groove||{};o.groove.swing_ms=+e.target.value;
+    note(`groove -> ${e.target.value} ms`);refresh()};
+  [0,1,2,3].forEach(i=>$("ph"+i).onclick=()=>{M.grid.bar_phase=i;regrid();
+    note(`the "one" -> phase ${i}`);refresh();draw()});
+  $("anchor").onclick=()=>{
+    const b=(M.beats||[]).reduce((a,t)=>Math.abs(t-aud.currentTime)<Math.abs(a-aud.currentTime)?t:a,
+      (M.beats||[0])[0]);
+    M.grid.anchor_s=+b.toFixed(4);note(`anchor set at ${M.grid.anchor_s} s`);refresh();draw()};
+  addEventListener("keydown",e=>{
+    if(/INPUT|SELECT/.test(e.target.tagName))return;
+    if(e.code==="Space"){e.preventDefault();$("play").click();return}
+    if(SELCH>=0&&/^[1-9]$/.test(e.key)){
+      const ch=ent(M.chapters);ch[SELCH].same=+e.key;
+      note(`${ch[SELCH].name} at ${(ch[SELCH].at??ch[SELCH].t).toFixed(1)} s marked as #${e.key}`);
+      $("idnow").textContent=`${ch[SELCH].name} -> group ${e.key}`;refresh();draw()}
+  });
+  $("grade0").onclick=async()=>{
+    $("grade").textContent="grading…";
+    try{const r=await (await fetch(`/api/mapeval?song=${SONG}`,
+      {method:"POST",body:JSON.stringify(M)})).json();
+      if(r.error){$("grade").textContent="error: "+r.error;return}
+      $("grade").innerHTML=`<b>${r.total.toFixed(3)}</b>`;
+      /* Show the working, not the verdict. Every check in mapeval already writes
+         its own arithmetic into `said` -- "3/4 drops land within half a beat",
+         "kick 1.91x louder on the beats against 1.95x for the best grid this
+         recording allows". That string is the derivation; it was just never
+         shown. A number you cannot audit is an opinion with decimals. */
+      const f=r.fields||{}, W=r.weights||{}, F=r.formula||{};
+      /* Show the arithmetic, with every input beside it. A total nobody can
+         reproduce by hand is an opinion with three decimal places. The weights
+         and formulas come from the scorer itself, so they cannot drift from
+         what actually ran. */
+      let wsum=0, wscored=0, weighted=0, wna=0;
+      const lines = Object.keys(W).map(k=>{
+        const w=W[k], fl=f[k]||{}, v=fl.score, na=!!fl.na;
+        wsum+=w;
+        if(na) wna+=w;
+        if(v!==undefined && v!==null){ wscored+=w; weighted+=w*v; }
+        const has = v!==undefined && v!==null;
+        return `<tr><td class="k">${k}</td>
+          <td class="n">${has?v.toFixed(3):"&mdash;"}</td>
+          <td class="n">&times;${w.toFixed(1)}</td>
+          <td class="n">${has?(w*v).toFixed(3):(na?"not askable":"not claimed")}</td>
+          <td class="wk">${(fl.said||"").replace(/</g,"&lt;")}</td></tr>`;
+      }).join("");
+      /* Coverage divides by the APPLICABLE weight, not the total. A field this
+         recording cannot answer is not the map's fault; a field the map omits is.
+         Getting this wrong made my first version of this table disagree with the
+         scorer by 0.04, which is exactly the kind of thing a visible derivation
+         catches and a printed number hides. */
+      const appl = (r.applicable_weight!==undefined) ? r.applicable_weight : (wsum-wna);
+      const acc=wscored?weighted/wscored:0, cov=appl?wscored/appl:0;
+      $("work").innerHTML=
+        `<table>
+          <tr><td class="k">field</td><td class="n">score</td><td class="n">weight</td>
+              <td class="n">contributes</td><td class="wk">how that score was measured</td></tr>
+          ${lines}
+          <tr><td class="k">&nbsp;</td><td colspan="4"></td></tr>
+          <tr><td class="k">accuracy</td><td class="n">${acc.toFixed(3)}</td><td colspan="3" class="wk">
+            ${weighted.toFixed(3)} &divide; ${wscored.toFixed(1)} &nbsp;&nbsp; <i>${F.accuracy||""}</i></td></tr>
+          <tr><td class="k">coverage</td><td class="n">${cov.toFixed(3)}</td><td colspan="3" class="wk">
+            ${wscored.toFixed(1)} &divide; ${appl.toFixed(1)} claimed, of ${wsum.toFixed(1)} total
+            ${wna>0?`&mdash; ${wna.toFixed(1)} excluded as not askable of this recording`:""}
+            &nbsp;&nbsp; <i>${F.coverage||""}</i></td></tr>
+          ${wna>0?`<tr><td class="k">&nbsp;</td><td colspan="4" class="wk"><i>${F.na||""}</i></td></tr>`:""}
+          <tr><td class="k">grid gate</td><td class="n">${r.grid_gate.toFixed(3)}</td><td colspan="3" class="wk">
+            min(1, ${(f.grid&&f.grid.score!=null?f.grid.score:0).toFixed(3)} &divide; 0.45)
+            &nbsp;&nbsp; <i>${F.gate||""}</i> &mdash; a wrong grid collapses everything</td></tr>
+          <tr><td class="k">TOTAL</td><td class="n">${r.total.toFixed(3)}</td><td colspan="3" class="wk">
+            ${acc.toFixed(3)} &times; (0.55 + 0.45 &times; ${cov.toFixed(3)}) &times; ${r.grid_gate.toFixed(3)}
+            = <b>${(acc*(0.55+0.45*cov)*r.grid_gate).toFixed(3)}</b>
+            &nbsp;&nbsp; <i>${F.total||""}</i></td></tr>
+        </table>`;
+      $("d_work").open=true;
+      /* The demonstration. The grade is a property of the SCORE. Drag lamps, add
+         lamps, cluster them -- this number cannot move, because the map does not
+         know a rig exists. Watching it hold still teaches the boundary better
+         than a paragraph about it ever will. */
+      if(GRADE0===null){ GRADE0={t:r.total,edits:LAYEDITS}; }
+      else if(LAYEDITS>GRADE0.edits){
+        const same=Math.abs(r.total-GRADE0.t)<1e-9;
+        $("invar").className=same?"proved":"";
+        $("invar").textContent=same
+          ? (LAYEDITS-GRADE0.edits)+" rig changes since the last grade and the score is identical ("
+            +r.total.toFixed(3)+") — the map does not know a rig exists"
+          : "the score moved from "+GRADE0.t.toFixed(3)+" to "+r.total.toFixed(3)
+            +" after a rig change — that should be impossible, tell me";
+        GRADE0={t:r.total,edits:LAYEDITS};
+      }
+    }catch(e){$("grade").textContent="error: "+e.message}};
+  $("save").onclick=async()=>{
+    try{const r=await (await fetch(`/api/editmap?song=${SONG}&who=${encodeURIComponent($("who").value)}`,
+      {method:"POST",body:JSON.stringify({map:M,edits:EDITS})})).json();
+      if(r.error){say("save failed: "+r.error);return}
+      /* Saving used to be a dead end: the file landed on disk and nothing said
+         what to do with it. The answer is that it becomes a score like any other
+         -- it appears in the dropdown on every page -- so say that, and give the
+         one link that proves it. */
+      $("saved").innerHTML =
+        `saved as <b>${r.who}</b> &mdash; provenance dropped ${r.was} &rarr; ${r.now}, `
+        + `${r.edits} edits recorded<br>`
+        + `<a href="/studio?song=${SONG}&map=${r.who}">open it in studio</a> &middot; `
+        + `<a href="/score?song=${SONG}">grade it against the others</a> &middot; `
+        + `it is now in the score dropdown on every page`;
+      say("");
+      MAPKEY=r.who;const G=await (await fetch("/api/maps?song="+SONG)).json();MAPS=G.maps;
+      $("mapsel").innerHTML=Object.keys(MAPS).sort().map(k=>
+        `<option${k===MAPKEY?" selected":""}>${k}</option>`).join("");
+      refresh();
+    }catch(e){say("save failed: "+e.message)}};
+  const rc=$("room");
+  rc.addEventListener("pointerdown",e=>{const r=rc.getBoundingClientRect();
+    const mx=e.clientX-r.left,my=e.clientY-r.top;
+    for(let i=0;i<P.length;i++){const pp=rpx(P[i][0],P[i][1]);
+      if((mx-pp[0])**2+(my-pp[1])**2<16*16){rdrag=i;rc.setPointerCapture(e.pointerId);break}}});
+  rc.addEventListener("pointermove",e=>{if(rdrag<0)return;
+    const r=rc.getBoundingClientRect();
+    const mm=rmm(e.clientX-r.left,e.clientY-r.top);
+    P[rdrag]=[Math.max(-ROOM.w/2,Math.min(ROOM.w/2,mm[0])),Math.max(0,Math.min(ROOM.d,mm[1]))];
+    relay()});
+  rc.addEventListener("pointerup",()=>{if(rdrag>=0){rdrag=-1;LAYEDITS++;relay()}});
+  $("addpar").onclick=()=>setPars(Math.min(9,P.length+1));
+  $("delpar").onclick=()=>setPars(Math.max(1,P.length-1));
+  $("reset").onclick=()=>{LAY=JSON.parse(JSON.stringify(BASE));
+    P=LAY.fixtures.filter(f=>f.kind==="par").map(f=>[f.at[0],f.at[2]]);
+    LAYEDITS=0;relay();say("rig reset to the default three")};
+  addEventListener("resize",()=>{draw();drawRoom()});
+}
+function loop(){requestAnimationFrame(loop);
+  $("clock").textContent=aud.currentTime.toFixed(2);
+  if(!aud.paused){const t=aud.currentTime;
+    if(t<T0||t>T0+VIEW*0.9) T0=Math.max(0,t-VIEW*0.25)}
+  if(M){ draw(); drawRig(aud.currentTime) }}
+boot().catch(e=>say("boot failed: "+e.message));
+</script>
+</body></html>

@@ -1,0 +1,84 @@
+{
+ "layout": 0.3,
+ "room": "three",
+ "note": "Three pars on the floor and nothing else. Renjith's rig, 9 Sept: if a song cannot communicate its meaning through three lamps, no number of fixtures will fix that -- it will only hide it. A 101-fixture rig can carry a bad map on spectacle. This one cannot carry anything. Every failure here is legible, because a frame is three numbers.",
+ "size_m": {
+  "w": 3.2,
+  "d": 2.0,
+  "h": 2.4
+ },
+ "limits": {
+  "max_strobe_hz": 4.0,
+  "output_hz": 44.0,
+  "laser_zones": [],
+  "laser_min_height_m": 3.0,
+  "no_audience_scan": true,
+  "note": "No movers, so no pan/tilt budget. A par that cannot move has to say everything with level and colour, which is the point of this rig."
+ },
+ "zones": [
+  {
+   "name": "floor",
+   "fixtures": [
+    "par_l",
+    "par_c",
+    "par_r"
+   ]
+  }
+ ],
+ "fixtures": [
+  {
+   "id": "par_l",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    -1.2,
+    0.35,
+    0.0
+   ],
+   "zone": "floor",
+   "beam_deg": 30.0,
+   "face": "up",
+   "model": "PAR 64 RGB"
+  },
+  {
+   "id": "par_c",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    0.0,
+    0.35,
+    0.0
+   ],
+   "zone": "floor",
+   "beam_deg": 30.0,
+   "face": "up",
+   "model": "PAR 64 RGB"
+  },
+  {
+   "id": "par_r",
+   "kind": "par",
+   "can": [
+    "colour",
+    "level"
+   ],
+   "emits": "light",
+   "at": [
+    1.2,
+    0.35,
+    0.0
+   ],
+   "zone": "floor",
+   "beam_deg": 30.0,
+   "face": "up",
+   "model": "PAR 64 RGB"
+  }
+ ]
+}

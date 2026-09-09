@@ -11,7 +11,13 @@ function mkReader(map, layout, drive, colour, ladder, knob, solo){
                       "DOWN","PUMP","STOP_REAL","ANT","ENERGY","COLOUR","LADDER","KNOB","SOLORUNG", RECIPE + "\n;return frame;")(
     g.MAP, layout, g.CH, g.SP, g.MO, g.EN, g.BEATS, g.PER, g.PH, g.DUR, g.BAR, g.DBP, g.DOWN, g.PUMP, true, true,
     drive || "medium", colour || "sunset", ladder || 1,
-    (knob===undefined||knob===null) ? null : +knob, solo || 0);
+    /* KNOB was numeric-only, and `+knob` turned any structured value into NaN --
+       which made recipe_three's per-lamp assignment and recipe_gig's lead
+       control silently fall back to their defaults while LOOKING like they
+       worked. Strings now pass through untouched; recipe_steps.js does its own
+       `+KNOB`, so numeric callers are unaffected. */
+    (knob===undefined||knob===null) ? null
+      : (typeof knob === "string" ? knob : +knob), solo || 0);
 }
 function prep(m){
   const PER=m.grid.period, PH=m.grid.phase, D=m.song.length;
@@ -22,7 +28,10 @@ function prep(m){
      that does not still gets the formula. */
   const BEATS = (m.beats && m.beats.length) ? m.beats.slice().sort((a,b)=>a-b)
               : (()=>{ const b=[]; for(let t=PH;t<D;t+=PER) b.push(+t.toFixed(3)); return b })();
-  return {MAP:{accents:m.accents,obs:m.observations,sections:(m.sections&&m.sections.entries)||[],stems:m.stems},
+  return {MAP:{accents:m.accents,obs:m.observations,sections:(m.sections&&m.sections.entries)||[],stems:m.stems,
+    /* the DECLARED tier: what a human with authority over the work says
+       about it. Outranks measurement, stays visibly different from it. */
+    declared:m.declared||null},
     CH:(m.chapters||[]).map(c=>[c.at,c.name]),
     SP:(m.spans||[]).map(s=>({kind:s.kind,from:s.from,to:s.to,rise:s.rise})),
     MO:(m.moments||[]).map(x=>({at:x.at,kind:x.kind,v:x.size!==undefined?x.size:x.holds})),
