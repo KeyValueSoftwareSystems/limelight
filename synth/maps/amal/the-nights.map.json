@@ -603,27 +603,27 @@
  "spans": [
   {
    "kind": "build",
-   "from": 8.399756,
+   "from": 0.780709,
    "to": 17.447375,
-   "rise": "steady"
+   "bars": 8,
+   "rise": "early",
+   "rise_margin": 0.323
   },
   {
    "kind": "build",
-   "from": 56.018804,
-   "to": 63.637852,
-   "rise": "late"
-  },
-  {
-   "kind": "build",
-   "from": 80.780709,
+   "from": 63.637852,
    "to": 93.637852,
-   "rise": "late"
+   "bars": 16,
+   "rise": "early",
+   "rise_margin": 0.357
   },
   {
    "kind": "build",
-   "from": 132.20928,
+   "from": 107.447375,
    "to": 139.828328,
-   "rise": "late"
+   "bars": 17,
+   "rise": "late",
+   "rise_margin": 0.967
   }
  ],
  "energy": [
@@ -59514,6 +59514,26 @@
    ],
    "the_likely_cause": "a post-onset window in dense music contains everything else that is playing. Isolating a decay needs the gaps, and a limited master has no gaps.",
    "what_would_settle_it": "measure the tail on the separated drum stem, where the gaps between hits are real gaps, and correct for the ducking depth already in observations.pump. Both are available and neither was tried"
+  },
+  "spans_decode": {
+   "how": "semi-Markov Viterbi over four-bar boundaries. States flat, build, quiet; duration prior cheapest at 8 and 16 bars, refused below 4 and above 32; transition costs make build->build expensive and build->flat free.",
+   "features": "how many stems are within 12 dB of their own 90th percentile (a count), the share of bar energy held by anything that is not drums or bass, the drums' own share, and chord changes per bar. None of these is the energy curve, and two of them cannot move when the volume does.",
+   "not": "not derived from anything in this file a reader could read. The old spans were a greedy walk over `energy` and by rule 3 had no business being written down at all.",
+   "provenance": "measured",
+   "boundaries": "four-bar multiples, applied inside the decode rather than snapped afterwards",
+   "stems_used": [
+    "vocals",
+    "other",
+    "drums",
+    "bass",
+    "guitar"
+   ],
+   "segments": {
+    "build": 3,
+    "quiet": 0,
+    "flat": 3
+   },
+   "checked_against": "the energy composite of section 1a -- onset rate, high-band onset rate and band occupancy on the raw mix -- with randomly placed spans of the same durations as the control. Shares the recording and no feature."
   }
  },
  "confidence": 0.787,

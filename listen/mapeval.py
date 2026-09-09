@@ -1027,6 +1027,113 @@ def ev_pan(m, B, slug=None):
                    % (len(claimed), r, min(claimed), max(claimed), z, mu))
 
 
+def ev_spans(m, B):
+    """Do the claimed spans mark a real change of regime in the recording?
+
+    Graded against the energy composite from section 1a -- onset rate,
+    high-band onset rate and band occupancy, counts and percentiles, measured
+    here from the raw waveform. listen/spans.py decodes from separated per-bar
+    stem levels, the share of the bar held by non-rhythm stems, and chord
+    changes per bar. The two sides share the recording and not one feature.
+
+    It does NOT ask whether a build's energy rises, and that is a correction to
+    what I set out to write. Measured, it frequently falls: across The Nights'
+    build into the drop at 93.6 s the composite goes 0.42, 0.31, 0.15, 0.10,
+    0.09, 0.13 and then the drop lands. In this genre a build is a drop-OUT --
+    the drums leave, one layer is held, and the release is the drop. Grading
+    "did it rise" scored the correct spans at 0.00 on three of five songs and
+    would have been read as the map being wrong.
+
+    What it asks instead is the question a segment has to answer: is the START
+    of this span a boundary the recording agrees with? The composite inside the
+    span is compared with the composite in the equal-length window immediately
+    before it, and the contrast has to beat the same measurement made at 48
+    other offsets in the same song. The start is used and not the end, on
+    purpose: a build's end is a drop, `moments` already checks drops at weight
+    2.0, and grading the end here would be grading that field twice.
+
+    The direction inside the span is reported rather than graded, because it is
+    information and not a verdict.
+
+    This carries NO WEIGHT, and that is a deliberate revert rather than an
+    oversight. Measured, it does not discriminate: on dont-look-down the
+    decoded spans score 0.359 and the same spans slid to random offsets score
+    0.366. Rule 6 of the brief says a scorer change that does not make a broken
+    file worse gets reverted, no exceptions including my own, so it sits in
+    AUDIT where the number is visible and moves no total. The composite is not
+    at fault -- its per-bar autocorrelation is +0.56 to +0.87, so it is a smooth
+    curve and not noise. The two views of the arrangement simply disagree about
+    where a segment begins, and that disagreement is the result.
+
+    The decode still shipped, on criteria `moments` can settle: 11 of 11
+    decoded builds end within three quarters of a bar of a measured drop
+    (against 11 of 12 before), none contains a drop (against one), and 11 start
+    on a four-bar line (against four)."""
+    spans = m.get("spans") or []
+    downs = m.get("downbeats") or []
+    if not spans:
+        return None, "no spans"
+    if len(downs) < 16:
+        return None, "spans are laid out in bars and this map declares too few", True
+    bar = (downs[-1] - downs[0]) / max(1, len(downs) - 1)
+    audio_end = B["dt"] * len(B["rms"])
+    downs = [d for d in downs if d + bar <= audio_end]
+    if len(downs) < 12:
+        return None, "too few whole bars inside the recording to compose a curve", True
+    comp = energy_composite(B, [(d, d + bar) for d in downs])
+    if comp is None:
+        return None, "the recording is too short to compose an energy curve for", True
+    n = len(comp)
+
+    def contrast(i, w):
+        """How different the w bars from i are from the w bars before them."""
+        if i - w < 0 or i + w > n or w < 2:
+            return None
+        before = comp[i - w:i]
+        inside = comp[i:i + w]
+        return abs(sum(inside) / len(inside) - sum(before) / len(before))
+
+    import random as _rnd
+    rng = _rnd.Random(20260909)
+    got, ctrl, kinds, direction = [], [], {}, []
+    for sp in spans:
+        a_t, b_t, kind = sp.get("from"), sp.get("to"), sp.get("kind")
+        if a_t is None or b_t is None or kind not in ("build", "quiet"):
+            continue
+        i = min(range(n), key=lambda k: abs(downs[k] - a_t))
+        j = min(range(n), key=lambda k: abs(downs[k] - b_t))
+        w = max(2, min(j - i, 16))
+        v = contrast(i, w)
+        if v is None:
+            continue
+        kinds[kind] = kinds.get(kind, 0) + 1
+        got.append(v)
+        seg = comp[i:min(j, n)]
+        if len(seg) >= 4:
+            h = len(seg) // 2
+            direction.append(sum(seg[h:]) / len(seg[h:]) - sum(seg[:h]) / len(seg[:h]))
+        for _ in range(48):
+            k = rng.randrange(w, max(w + 1, n - w))
+            c = contrast(k, w)
+            if c is not None:
+                ctrl.append(c)
+    if not got or len(ctrl) < 24:
+        return None, "no build or quiet span could be placed on the bar grid", True
+    mu = sum(ctrl) / len(ctrl)
+    sd = (sum((x - mu) ** 2 for x in ctrl) / len(ctrl)) ** 0.5
+    mine = sum(got) / len(got)
+    z = (mine - mu) / sd if sd > 1e-9 else 0.0
+    score = max(0.0, min(1.0, z / 1.5))
+    beat = sum(1 for c in ctrl if mine > c) / len(ctrl)
+    dr = sum(direction) / len(direction) if direction else 0.0
+    return score, ("%s begin where the composite changes %.2f against %.2f for the same "
+                   "window at 48 other offsets -- %.1f sd, beating %.0f%% of them. Inside, "
+                   "the composite %s by %.2f on average, which is reported and not graded"
+                   % (" and ".join("%d %s" % (v, k) for k, v in sorted(kinds.items())),
+                      mine, mu, z, 100 * beat,
+                      "rises" if dr >= 0 else "falls", abs(dr)))
+
+
 def ev_pump(m, B):
     p = (m.get("observations") or {}).get("pump")
     if not p: return None, "no pump measurement"
@@ -1160,7 +1267,7 @@ def au_arc(m, B):
 # and carries weight, because a check worth running is worth counting.
 # au_tempo is replaced by ev_tempo above, which uses eight windows and a fitted
 # line rather than two halves, and carries weight.
-AUDIT = {"energy_peak": au_arc}
+AUDIT = {"energy_peak": au_arc, "spans": ev_spans}
 
 
 def audio_for(slug):
