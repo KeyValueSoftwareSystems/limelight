@@ -11,6 +11,7 @@ from .melody import MelodyAnalyzer
 from .moment_derive import MomentDeriveAnalyzer
 from .moment_timing import MomentTimingAnalyzer
 from .notes import NoteTranscriptionAnalyzer
+from .pump import PumpAnalyzer
 from .semantic import SemanticAnalyzer
 from .stems import StemsAnalyzer
 from .structure import StructureAnalyzer
@@ -24,6 +25,7 @@ __all__ = [
     "BarPhaseAnalyzer",
     "MomentDeriveAnalyzer",
     "MomentTimingAnalyzer",
+    "PumpAnalyzer",
     "AccentsAnalyzer",
     "ChordsAnalyzer",
     "MelodyAnalyzer",

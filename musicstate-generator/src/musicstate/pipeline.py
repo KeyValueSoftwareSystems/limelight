@@ -26,6 +26,7 @@ from .analyzers import (
     MomentDeriveAnalyzer,
     MomentTimingAnalyzer,
     NoteTranscriptionAnalyzer,
+    PumpAnalyzer,
     SemanticAnalyzer,
     StemsAnalyzer,
     StructureAnalyzer,
@@ -38,7 +39,8 @@ log = logging.getLogger("musicstate.pipeline")
 def core_analyzers() -> list[Analyzer]:
     """The reliable core — librosa only, no model downloads, runs anywhere."""
     return [DspAnalyzer(), StructureAnalyzer(), GridRefineAnalyzer(), BarPhaseAnalyzer(),
-            MomentDeriveAnalyzer(), AccentsAnalyzer(), MomentTimingAnalyzer(), ChordsAnalyzer()]
+            MomentDeriveAnalyzer(), AccentsAnalyzer(), MomentTimingAnalyzer(), PumpAnalyzer(),
+            ChordsAnalyzer()]
 
 
 def deep_analyzers() -> list[Analyzer]:
@@ -54,6 +56,7 @@ def deep_analyzers() -> list[Analyzer]:
         ChordsAnalyzer(),        # per-bar chords on the (allin1) beat grid
         MelodyAnalyzer(),        # pyin melody contour
         MomentTimingAnalyzer(),  # re-time drops/stops to the measured loudness step
+        PumpAnalyzer(),          # sidechain duck-and-swell
         StemsAnalyzer(),
         SemanticAnalyzer(),
         EmbeddingAnalyzer(),

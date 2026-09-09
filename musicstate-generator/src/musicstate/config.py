@@ -13,6 +13,13 @@ SAMPLE_RATE = 22050
 HOP_LENGTH = 512
 N_FFT = 2048
 
+# --- pump (sidechain duck-and-swell) ---
+PUMP_HP_HZ = 250.0        # Hz; envelope above this excludes the kick body
+PUMP_LO = 0.18            # window start, as a fraction of the beat (past the kick attack)
+PUMP_HI = 0.72            # window end (before the next kick)
+PUMP_BINS = 24            # phase bins across one beat for the folded shape
+PUMP_PRESENT = 0.10       # depth at/above which a pump is called present
+
 # --- grid refine (rigid kick-locked clock) ---
 GRID_FMAX = 150.0                                   # Hz; the kick band the grid locks to
 GRID_PHASE_STEP = 0.004                             # s; phase search resolution

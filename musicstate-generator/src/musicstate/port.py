@@ -281,6 +281,7 @@ def to_map(state: dict, vec_filename: str | None = None,
         "key": {"estimate": keyest, "how": "musicstate", "confidence": cbf.get("key")},
         "bar_phase_decision": state.get("bar_phase_decision"),
         "moment_timing": state.get("moment_timing"),
+        "pump": state.get("pump"),
         # harmony layers: the analyzers write the full block; the port only lifts it
         "chords": state.get("chords"),
         "melody": _melody_to_list(state.get("melody")),
