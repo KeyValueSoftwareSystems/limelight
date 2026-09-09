@@ -418,17 +418,120 @@ def ev_sections(m, B):
         f"{r:.2f}x more change at a boundary than at 64 sets of random times")
 
 
+def _norm01(xs):
+    lo, hi = min(xs), max(xs)
+    return [0.5] * len(xs) if hi - lo < 1e-12 else [(x - lo) / (hi - lo) for x in xs]
+
+
+def energy_composite(B, spans):
+    """How much is going on, measured so that turning the volume knob cannot move it.
+
+    ev_energy used to correlate the map's energy against the recording's RMS. But
+    energy is WRITTEN by averaging ear.py's per-band profile, which is a loudness
+    quantity, so both sides of that comparison were the same thing and a map that
+    literally shipped an RMS curve would have scored near 1.00.
+
+    Three components, every one a COUNT or a PERCENTILE, so multiplying the whole
+    record by a constant leaves all three unchanged:
+
+      onset rate       onset peaks per second across the mix
+      high onset rate  the same above 250 Hz, so a hat pattern registers even
+                       under a loud bass
+      occupancy        how many of the two measured bands sit above their own
+                       median for this song
+
+    What is NOT in here, and why it took a measurement to find out: spectral
+    brightness as a SHARE of the spectrum. It reads backwards on this
+    repertoire -- correlating -0.25 to -0.84 with energy -- because when a drop
+    lands the kick and bass dominate and the high band's proportion falls even
+    as its absolute activity rises. Averaging it in alongside the good component
+    dragged energy from 0.8 to 0.2 across all five songs. High-frequency
+    ACTIVITY is the signal; high-frequency SHARE is spectral tilt, which is a
+    fact about the mix engineer.
+
+    The spec for this work suggested the map's own `stems` for a third
+    component. It is computed from the audio instead: grading one field of a map
+    against another field of the same map lets a file be self-consistently wrong
+    and still score well, which is the same circularity in a different costume.
+    """
+    dt, low, rms, high = B["dt"], B["low"], B["rms"], B["high"]
+
+    def onset_fn(series):
+        o = [max(0.0, series[i] - series[i - 1]) for i in range(1, len(series))]
+        pos = sorted(x for x in o if x > 0)
+        return o, (pos[int(0.80 * len(pos))] if pos else 0.0)
+
+    o_all, t_all = onset_fn(rms)
+    o_hi, t_hi = onset_fn(high)
+    med_low = sorted(low)[len(low) // 2] if low else 0.0
+    med_high = sorted(high)[len(high) // 2] if high else 0.0
+    rate, hrate, occ = [], [], []
+    for a, b in spans:
+        i0, i1 = int(a / dt), int(b / dt)
+        if i1 <= i0 or i1 > len(rms):
+            return None
+        span_s = max(1e-9, b - a)
+        rate.append(sum(1 for i in range(max(1, i0), min(i1, len(o_all)))
+                        if o_all[i] > t_all and o_all[i] >= o_all[i - 1]) / span_s)
+        hrate.append(sum(1 for i in range(max(1, i0), min(i1, len(o_hi)))
+                         if o_hi[i] > t_hi and o_hi[i] >= o_hi[i - 1]) / span_s)
+        sl, sh = low[i0:i1], high[i0:i1]
+        occ.append(((sum(sl) / len(sl) > med_low) + (sum(sh) / len(sh) > med_high)) / 2.0)
+    nr, nh = _norm01(rate), _norm01(hrate)
+    return [(nr[i] + nh[i] + occ[i]) / 3.0 for i in range(len(occ))]
+
+
 def ev_energy(m, B):
     en = m.get("energy") or []
     if len(en) < 8: return None, "no energy curve"
+    rows = [(r[0], r[1]) if isinstance(r, (list, tuple)) else (r.get("at"), r.get("value"))
+            for r in en]
+    rows = [(t, v) for t, v in rows if t is not None and v is not None]
+    if len(rows) < 8: return None, "no energy curve"
+    per = (m.get("grid") or {}).get("period") or 0.5
+    win = per * 4
     dt, rms = B["dt"], B["rms"]
-    xs, ys = [], []
-    for t, v in en:
-        i0, i1 = int(t / dt), int((t + 1.8) / dt)
-        if i1 >= len(rms): continue
-        xs.append(v); ys.append(sum(rms[i0:i1]) / max(1, i1 - i0))
-    r = _corr(xs, ys)
-    return min(1.0, max(0.0, r)), f"r={r:.2f} against how loud the record is"
+    spans, claimed = [], []
+    for t, v in rows:
+        if int((t + win) / dt) >= len(rms): continue
+        spans.append((t, t + win)); claimed.append(v)
+    if len(claimed) < 8: return None, "energy curve runs past the recording"
+
+    comp = energy_composite(B, spans)
+    loud = [sum(rms[int(a / dt):int(b / dt)]) / max(1, int((b - a) / dt)) for a, b in spans]
+    r_loud = _corr(claimed, loud)
+    if comp is None:
+        return max(0.0, min(1.0, r_loud)), (f"r={r_loud:.2f} against loudness only -- the "
+                                            f"composite could not be measured")
+
+    r_comp = _corr(claimed, comp)
+    cn, kn = _norm01(comp), _norm01(claimed)
+    mae = sum(abs(a - b) for a, b in zip(cn, kn)) / len(cn)
+    # Correlation is scale-blind: a curve with the right shape and the wrong range
+    # scores the same as one that is right. MAE is the half that notices.
+    shape = max(0.0, min(1.0, r_comp))
+    fit = max(0.0, 1.0 - mae / 0.25)
+    primary = 0.6 * shape + 0.4 * fit
+    # Loudness only gets a vote where loudness carries information. On the
+    # filter-sweep fixture the record varies 1.9% in level and the true energy
+    # curve still correlates r=-0.80 with it, because correlation is scale-blind
+    # and any monotone drift lines up with any monotone curve. Letting that vote
+    # took 0.22 off a map that was right.
+    ln = _norm01(loud)
+    loud_range = max(loud) - min(loud)
+    loud_rel = loud_range / max(1e-9, sum(loud) / len(loud))
+    if loud_rel < 0.15:
+        return min(1.0, max(0.0, primary)), (
+            f"r={r_comp:.2f} mae={mae:.2f} against onset rate, high-band onset rate and "
+            f"band occupancy -- all counts or percentiles, none of which move when the volume "
+            f"does. This recording's level "
+            f"only varies {100*loud_rel:.0f}%, so loudness was given no vote")
+    secondary = max(0.0, min(1.0, r_loud))
+    score = 0.78 * primary + 0.22 * secondary
+    return min(1.0, max(0.0, score)), (
+        f"r={r_comp:.2f} mae={mae:.2f} against onset rate, high-band onset rate and "
+        f"band occupancy -- all counts or percentiles; loudness r={r_loud:.2f} "
+        f"carries the remaining 22%")
 
 
 def ev_accents(m, B):

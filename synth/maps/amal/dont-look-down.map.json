@@ -87611,6 +87611,42 @@
     "how": "the energy field in this map against a plain broadband RMS of the recording, measured over one bar",
     "not": "neither side is truth and this does not say which is wrong. energy comes from a beat-synchronous band profile and RMS is broadband, so a bar that is loudest overall need not be the biggest in the bands the curve weighs. Where they disagree by more than a couple of bars, a reader deciding what to hold back for the climax is being told two different things and should trust neither."
    }
+  },
+  "grid_crosscheck": {
+   "what": "the bar line and the tempo octave, checked against harmony instead of drums",
+   "why": "grid.bar_phase comes from where the drum pattern repeats and listen/meter.py confirms beats-per-bar from the same drum pattern, which is drums grading drums. Chord boundaries come from ChordMini, a harmonic model that shares no code and no feature family with the percussive path, and a chord change lands on a bar line far more often than not.",
+   "bar_phase_claimed": 1,
+   "bar_phase_from_harmony": {
+    "phase": 1,
+    "share": 0.755,
+    "runner_up": 2,
+    "runner_up_share": 0.17,
+    "margin": 0.585,
+    "on_grid": 53,
+    "off_grid": 80,
+    "votes": {
+     "0": 2,
+     "1": 40,
+     "2": 9,
+     "3": 2
+    }
+   },
+   "tempo_octave_from_harmony": {
+    "n": 130,
+    "on_whole_beats": 46,
+    "on_half_beats": 35,
+    "on_even_beats": 51,
+    "verdict": "harmonic rhythm is split between whole and half beats -- the octave is not settled by harmony on this record",
+    "octave_consistent": false
+   },
+   "agree": true,
+   "not": "this does not pick a winner. A disagreement means the bar line is not settled, and the honest response is to say so in confidence rather than to choose silently between two methods that each have a case.",
+   "confidence_downbeats": {
+    "was": 0.92,
+    "now": 0.92,
+    "why": "harmony and the drums agree, so confidence is left where the writer put it"
+   },
+   "octave_flag": "the tempo octave is not corroborated by harmony. A confidently wrong tempo makes every time in this file wrong at once, so it is flagged here rather than left silent."
   }
  },
  "confidence": 0.92,

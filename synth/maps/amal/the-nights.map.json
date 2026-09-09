@@ -47996,6 +47996,41 @@
     "how": "the energy field in this map against a plain broadband RMS of the recording, measured over one bar",
     "not": "neither side is truth and this does not say which is wrong. energy comes from a beat-synchronous band profile and RMS is broadband, so a bar that is loudest overall need not be the biggest in the bands the curve weighs. Where they disagree by more than a couple of bars, a reader deciding what to hold back for the climax is being told two different things and should trust neither."
    }
+  },
+  "grid_crosscheck": {
+   "what": "the bar line and the tempo octave, checked against harmony instead of drums",
+   "why": "grid.bar_phase comes from where the drum pattern repeats and listen/meter.py confirms beats-per-bar from the same drum pattern, which is drums grading drums. Chord boundaries come from ChordMini, a harmonic model that shares no code and no feature family with the percussive path, and a chord change lands on a bar line far more often than not.",
+   "bar_phase_claimed": 1,
+   "bar_phase_from_harmony": {
+    "phase": 1,
+    "share": 0.823,
+    "runner_up": 3,
+    "runner_up_share": 0.113,
+    "margin": 0.71,
+    "on_grid": 62,
+    "off_grid": 31,
+    "votes": {
+     "0": 3,
+     "1": 51,
+     "2": 1,
+     "3": 7
+    }
+   },
+   "tempo_octave_from_harmony": {
+    "n": 93,
+    "on_whole_beats": 46,
+    "on_half_beats": 10,
+    "on_even_beats": 66,
+    "verdict": "harmonic rhythm sits on whole beats, consistent with the claimed tempo",
+    "octave_consistent": true
+   },
+   "agree": true,
+   "not": "this does not pick a winner. A disagreement means the bar line is not settled, and the honest response is to say so in confidence rather than to choose silently between two methods that each have a case.",
+   "confidence_downbeats": {
+    "was": 0.787,
+    "now": 0.787,
+    "why": "harmony and the drums agree, so confidence is left where the writer put it"
+   }
   }
  },
  "confidence": 0.787,

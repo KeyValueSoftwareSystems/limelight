@@ -58652,12 +58652,47 @@
     "how": "the energy field in this map against a plain broadband RMS of the recording, measured over one bar",
     "not": "neither side is truth and this does not say which is wrong. energy comes from a beat-synchronous band profile and RMS is broadband, so a bar that is loudest overall need not be the biggest in the bands the curve weighs. Where they disagree by more than a couple of bars, a reader deciding what to hold back for the climax is being told two different things and should trust neither."
    }
+  },
+  "grid_crosscheck": {
+   "what": "the bar line and the tempo octave, checked against harmony instead of drums",
+   "why": "grid.bar_phase comes from where the drum pattern repeats and listen/meter.py confirms beats-per-bar from the same drum pattern, which is drums grading drums. Chord boundaries come from ChordMini, a harmonic model that shares no code and no feature family with the percussive path, and a chord change lands on a bar line far more often than not.",
+   "bar_phase_claimed": 0,
+   "bar_phase_from_harmony": {
+    "phase": 2,
+    "share": 0.525,
+    "runner_up": 0,
+    "runner_up_share": 0.433,
+    "margin": 0.092,
+    "on_grid": 120,
+    "off_grid": 100,
+    "votes": {
+     "0": 52,
+     "1": 1,
+     "2": 63,
+     "3": 4
+    }
+   },
+   "tempo_octave_from_harmony": {
+    "n": 215,
+    "on_whole_beats": 86,
+    "on_half_beats": 40,
+    "on_even_beats": 145,
+    "verdict": "harmonic rhythm sits on whole beats, consistent with the claimed tempo",
+    "octave_consistent": true
+   },
+   "agree": false,
+   "not": "this does not pick a winner. A disagreement means the bar line is not settled, and the honest response is to say so in confidence rather than to choose silently between two methods that each have a case.",
+   "confidence_downbeats": {
+    "was": 0.95,
+    "now": 0.45,
+    "why": "harmony puts the bar line on phase 2 and this file claims 0"
+   }
   }
  },
  "confidence": 0.95,
  "confidence_by_field": {
   "beats": 0.95,
-  "downbeats": 0.95,
+  "downbeats": 0.45,
   "chapters": 0.45,
   "moments": 0.5,
   "spans": 0.4,

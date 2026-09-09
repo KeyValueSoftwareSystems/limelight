@@ -9,8 +9,10 @@ run python3 validate.py synth/songs/*.map.json
 run node readers/src/apptest.js
 run node readers/src/smooth.js
 printf '\n== show audit (advisory: the frame is Dheeraj lane, these faults predate this tool)\n'
-for s in shows/*.html; do node readers/src/showaudit.js "$s" | tail -1 | sed "s#^#  $(basename "$s" .html)  #"; done
+node readers/src/showaudit.js shows/levels.html | tail -1 | sed 's#^#  levels  #'
+printf '  (the other four: node readers/src/showaudit.js shows/<slug>.html)\n'
 run python3 listen/metaeval.py levels
+run python3 listen/fixtures.py
 printf '\n== falsification: a corrupted map must score near zero\n'
 python3 - <<'PY2'
 import sys, copy, json

@@ -1,0 +1,159 @@
+import sys, os, json, math, wave, array, struct
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+SR = 32000
+BPM = 120.0
+PER = 60.0 / BPM
+BARS = 16
+DUR = BARS * 4 * PER
+
+
+def _write_wav(path, samples):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    a = array.array("h", (max(-32768, min(32767, int(v * 32767))) for v in samples))
+    with wave.open(path, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(SR)
+        w.writeframes(a.tobytes())
+
+
+def filter_sweep(path):
+    n = int(DUR * SR)
+    out = [0.0] * n
+    for b in range(BARS):
+        t0 = b * 4 * PER
+        harmonics = 2 + int(22 * b / max(1, BARS - 1))
+        i0, i1 = int(t0 * SR), min(n, int((t0 + 4 * PER) * SR))
+        seg = [0.0] * (i1 - i0)
+        for k in range(1, harmonics + 1):
+            f = 110.0 * k
+            if f > SR * 0.45:
+                break
+            amp = 1.0 / k
+            for i in range(len(seg)):
+                seg[i] += amp * math.sin(2 * math.pi * f * (i / SR))
+        for beat in range(4):
+            bi = int(beat * PER * SR)
+            for i in range(bi, min(len(seg), bi + int(0.05 * SR))):
+                x = (i - bi) / (0.05 * SR)
+                seg[i] += (
+                    1.4
+                    * math.exp(-9 * x)
+                    * math.sin(2 * math.pi * 58.0 * (i - bi) / SR)
+                )
+        rms = math.sqrt(sum(v * v for v in seg) / max(1, len(seg))) or 1e-9
+        g = 0.22 / rms
+        for i in range(len(seg)):
+            out[i0 + i] = seg[i] * g
+    _write_wav(path, out)
+    return {"bars": BARS, "period": PER}
+
+
+def sweep_map(rising, slug):
+    beats = [round(i * PER, 6) for i in range(BARS * 4)]
+    downs = beats[0::4]
+    energy = []
+    for b, d in enumerate(downs):
+        f = b / max(1, len(downs) - 1)
+        energy.append([round(d, 6), round(0.08 + 0.84 * f, 4) if rising else 0.5])
+    return {
+        "map": "0.3",
+        "song": {"title": slug + ".wav", "artist": "?", "length": round(DUR, 3)},
+        "made_by": {
+            "how": "synthetic",
+            "who": "listen/fixtures.py",
+            "note": "the times here are CAUSES: the audio was rendered from this file. "
+            "Constant RMS per bar, a filter opening from 2 to 24 harmonics "
+            "across the record. Loudness does not move; how much is going on "
+            "does.",
+        },
+        "grid": {
+            "period": round(PER, 6),
+            "phase": 0.0,
+            "bpm": BPM,
+            "bar_phase": 0,
+            "locked": True,
+            "how": "authored",
+        },
+        "beats": beats,
+        "downbeats": downs,
+        "chapters": [{"at": 0.0, "name": "intro"}],
+        "moments": [],
+        "spans": [],
+        "energy": energy,
+        "confidence": 0.9,
+    }
+
+
+def run():
+    import mapeval as ME
+
+    wav = os.path.join(ROOT, "synth", "out", "_fx-filter-sweep.wav")
+    filter_sweep(wav)
+    B = ME.bands(*ME.load(wav))
+
+    rise = sweep_map(True, "_fx-filter-sweep")
+    flat = sweep_map(False, "_fx-filter-sweep")
+
+    dt, rms = B["dt"], B["rms"]
+    per_bar = []
+    for b in range(BARS):
+        i0, i1 = int(b * 4 * PER / dt), int((b + 1) * 4 * PER / dt)
+        seg = rms[i0 : min(i1, len(rms))]
+        per_bar.append(sum(seg) / max(1, len(seg)))
+    lo, hi = min(per_bar), max(per_bar)
+    flatness = (hi - lo) / max(1e-9, hi)
+
+    s_rise = ME.ev_energy(rise, B)
+    s_flat = ME.ev_energy(flat, B)
+    r_loud = ME._corr([v for _, v in rise["energy"]], per_bar)
+
+    def spearman(a, b):
+        ra = sorted(range(len(a)), key=lambda i: a[i])
+        rb = sorted(range(len(b)), key=lambda i: b[i])
+        pa, pb = [0] * len(a), [0] * len(b)
+        for r, i in enumerate(ra):
+            pa[i] = r
+        for r, i in enumerate(rb):
+            pb[i] = r
+        return ME._corr(pa, pb)
+
+    spans = [(d, d + 4 * PER) for d, _ in rise["energy"]]
+    comp = ME.energy_composite(B, spans)
+    claimed = [v for _, v in rise["energy"]]
+    rho = spearman(claimed, comp) if comp else 0.0
+
+    ok = True
+
+    def say(name, good, detail):
+        nonlocal ok
+        ok = ok and good
+        print("   %s %-34s %s" % ("ok  " if good else "FAIL", name, detail))
+
+    print("== filter opens, volume stays flat")
+    say("the fixture really is flat", flatness < 0.12,
+        "loudest bar is %.1f%% above the quietest, so loudness carries no information here"
+        % (100 * flatness))
+    say("the composite follows the filter", rho >= 0.90,
+        "rank correlation %+.2f between the authored curve and the composite" % rho)
+    say("a rising energy curve is credited", s_rise[0] is not None and s_rise[0] >= 0.50,
+        "rising curve scores %.2f" % (s_rise[0] or 0))
+    say("a flat energy curve is not", s_flat[0] is not None and s_rise[0] - s_flat[0] >= 0.20,
+        "flat curve scores %.2f, %.2f below the rising one"
+        % (s_flat[0] or 0, (s_rise[0] or 0) - (s_flat[0] or 0)))
+    # Deliberately NOT asserting anything about r_loud. The first version of this
+    # test demanded |r| < 0.5 against loudness and failed at -0.80 -- on a record
+    # whose level varies 1.9%. Correlation is scale-blind, so a meaningless drift
+    # lines up with any monotone curve. The range check above is the honest form
+    # of the same question, and the scorer now gates the loudness vote on it.
+    print("   loudness correlation here is r=%+.2f on a %.1f%% range, which is why "
+          "correlation alone cannot be trusted" % (r_loud, 100 * flatness))
+    print("   rising: %s" % s_rise[1][:150])
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    sys.exit(run())
