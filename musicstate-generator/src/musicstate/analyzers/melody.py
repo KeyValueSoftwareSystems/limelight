@@ -38,6 +38,51 @@ class MelodyAnalyzer(Analyzer):
         self.hop_length = hop_length
 
     def analyze(self, audio, sample_rate, ctx):
+        vocals = (ctx.get("stems_audio") or {}).get("vocals")
+        if vocals is not None:
+            return self._from_vocals(vocals, sample_rate)
+        return self._from_mix(audio, sample_rate, ctx)
+
+    def _from_vocals(self, vocals, sample_rate):
+        """Pitch-track the isolated vocals stem into discrete note events. On the mix
+        the dominant pitch is rarely the vocal; on the stem it is."""
+        hop = 256
+        f0, voiced, _ = librosa.pyin(
+            np.ascontiguousarray(vocals), sr=sample_rate, hop_length=hop,
+            frame_length=2048, fmin=110.0, fmax=1000.0)
+        times = librosa.times_like(f0, sr=sample_rate, hop_length=hop)
+
+        def midi_of(hz):
+            return int(round(69 + 12 * np.log2(hz / 440.0)))
+
+        notes, i, n = [], 0, len(f0)
+        while i < n:
+            if not voiced[i] or not np.isfinite(f0[i]) or f0[i] <= 0:
+                i += 1
+                continue
+            m = midi_of(f0[i])
+            j = i
+            while (j < n and voiced[j] and np.isfinite(f0[j]) and f0[j] > 0
+                   and midi_of(f0[j]) == m):
+                j += 1
+            dur = float(times[min(j, n - 1)] - times[i])
+            if dur >= 0.05:
+                notes.append([round(float(times[i]), 3), round(dur, 3), m,
+                              _NOTES[m % 12] + str(m // 12 - 1)])
+            i = j
+
+        return AnalyzerResult(
+            status="ok" if len(notes) >= 20 else "not_computed",
+            patch={"melody": {
+                "rate": "per_note", "of": "vocals",
+                "how": "pyin f0 on the isolated vocals stem, notes segmented by semitone",
+                "unit": "[start_s, dur_s, midi, name]", "notes": notes,
+            }},
+            confidence={"melody": 0.75},
+            notes=f"{len(notes)} vocal notes",
+        )
+
+    def _from_mix(self, audio, sample_rate, ctx):
         hop = self.hop_length
         hop_s = float(ctx.get("hop_s", hop / sample_rate))
         duration = float(ctx.get("duration_s", len(audio) / sample_rate))

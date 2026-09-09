@@ -29,8 +29,11 @@ STATE = {
         {"t": 26.0, "type": "wobble", "conf": 0.9},  # not one of the six -> dropped
     ],
     "stems": {"model": "htdemucs", "names": ["drums", "vocals"], "rate": "per_downbeat",
-              "per_downbeat": [{"t": 0.5, "drums": 0.2, "vocals": 0.1},
-                               {"t": 2.0, "drums": 0.4, "vocals": 0.6}],
+              "comparable": True,
+              "unit": "dB of the stem's RMS over one bar, against the mix's whole-song RMS",
+              "sources": {"drums": [-24.0, -22.0], "vocals": [-30.0, -28.0]},
+              "at": [0.5, 2.0],
+              "levels": {"drums": {"present": True}, "vocals": {"present": True}},
               "vocal_present_fraction": 0.5},
     "chords": {"rate": "per_bar", "how": "chroma templates",
                "events": [{"at": 0.5, "chord": "Am", "confidence": 0.8}]},
@@ -89,10 +92,13 @@ def test_confidence_is_mean_of_fields():
     assert _m()["confidence"] == 0.7  # mean(0.8, 0.6)
 
 
-def test_stems_reshape_with_guitar_piano_zeros():
+def test_stems_reshape_comparable_db_with_guitar_piano_absent():
     s = _m()["stems"]
+    assert s["comparable"] is True
     assert set(s["sources"]) == {"drums", "vocals", "guitar", "piano"}
-    assert s["sources"]["guitar"] == [0.0, 0.0] and s["sources"]["piano"] == [0.0, 0.0]
+    # dB levels pass through; guitar/piano are marked absent at a floor, not 0 dB
+    assert s["sources"]["drums"] == [-24.0, -22.0]
+    assert s["sources"]["guitar"] == [-120.0, -120.0] and s["sources"]["piano"] == [-120.0, -120.0]
     assert s["at"] == [0.5, 2.0]
 
 
