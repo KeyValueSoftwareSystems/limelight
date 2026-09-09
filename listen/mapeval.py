@@ -35,7 +35,7 @@ NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 WEIGHTS = {"grid": 3.0, "bars": 2.0, "moments": 2.0, "downbeats": 1.5, "sections": 1.5,
            "energy": 1.5, "accents": 1.0, "chords": 1.0, "melody": 1.0, "stems": 1.0,
            "meter": 1.0, "tempo_stability": 1.0, "pan": 1.0, "identity": 1.0,
-           "pump": 0.5}
+           "hook": 1.0, "pump": 0.5}
 
 
 def load(path, target_sr=11025):
@@ -1274,6 +1274,91 @@ def ev_surprise(m, B):
                       "within it" if ok else "REFUSED, this is a loudness curve in disguise"))
 
 
+def ev_hook(m, B):
+    """The claimed hook recurs as words. Does it recur as a TUNE?
+
+    listen/hook.py finds phrases that repeat in the Whisper transcript of the
+    separated vocal and weights them by the energy where they land. This side
+    never reads a word: it takes the melody notes -- a polyphonic pitch tracker
+    on the same stem -- and asks whether the phrase is sung the same way each
+    time.
+
+    The shared input is the separated vocal, stated rather than hidden: this is
+    two models of different kinds reading one recording, not two recordings. A
+    speech model transcribing words and a pitch tracker following notes fail in
+    unrelated ways, and the case this catches is real -- a phrase that recurs as
+    text without recurring as a tune is a phrase somebody says twice.
+
+    It compares RHYTHM, not pitch contour, and that is a correction. Contour was
+    the obvious choice and it does not work here: basic-pitch on a vocal stem
+    produces octave errors -- the first three notes of The Nights read A#3, A#4,
+    A#3 -- so interval signs flip on transcription noise. Measured, contour gave
+    lifts of +0.27, +0.09 and +0.04 and on The Nights the hook agreed LESS than
+    random windows did. Onset times from the start of the phrase survive an
+    octave error untouched, and give +0.13, +0.33 and +0.16 on the same three
+    songs.
+
+    Control: the same comparison between windows of the same length at random
+    times, because melodic material repeats constantly in pop."""
+    o = (m.get("observations") or {}).get("hook") or {}
+    hk = o.get("hook") or {}
+    times = hk.get("times") or []
+    if not hk or len(times) < 2:
+        return None, "no hook claimed"
+    notes = ((m.get("observations") or {}).get("melody") or {}).get("notes") or []
+    if len(notes) < 24:
+        return None, "no melody to compare the hook against", True
+    win = max(1.0, 0.45 * (hk.get("words") or 4))
+
+    def grab(t0):
+        g = sorted([n for n in notes if t0 - 0.10 <= n[0] < t0 + win], key=lambda n: n[0])
+        return g if len(g) >= 3 else None
+
+    def rhythm(g):
+        t0 = g[0][0]
+        return tuple(round((n[0] - t0) / 0.125) for n in g[:12])
+
+    def agree(a, b):
+        if not a or not b:
+            return None
+        k = min(len(a), len(b))
+        return sum(1 for i in range(k) if a[i] == b[i]) / k if k >= 2 else None
+
+    cs = [rhythm(g) for g in (grab(t) for t in times) if g]
+    mine = []
+    for i in range(len(cs)):
+        for j in range(i + 1, len(cs)):
+            v = agree(cs[i], cs[j])
+            if v is not None:
+                mine.append(v)
+    if not mine:
+        return None, "the hook's occurrences carry too few notes to compare", True
+
+    import random as _rnd
+    rng = _rnd.Random(20260909)
+    dur = (m.get("song") or {}).get("length") or notes[-1][0]
+    ctrl = []
+    for _ in range(400):
+        a = grab(rng.uniform(0, max(1.0, dur - win)))
+        b = grab(rng.uniform(0, max(1.0, dur - win)))
+        if a and b:
+            v = agree(rhythm(a), rhythm(b))
+            if v is not None:
+                ctrl.append(v)
+    if len(ctrl) < 10:
+        return None, ("only %d random windows in this song carry enough notes to build a "
+                      "control from" % len(ctrl)), True
+    mv = sum(mine) / len(mine)
+    cv = sum(ctrl) / len(ctrl)
+    lift = 0.0 if cv >= 1.0 else (mv - cv) / (1.0 - cv)
+    return max(0.0, min(1.0, lift)), (
+        "%r recurs %d times; its rhythm agrees %.0f%% between occurrences against %.0f%% for "
+        "windows of the same length at %d random times -- %.0f%% of the way from chance to "
+        "identical. Words from a speech model, rhythm from a pitch tracker, both on the same "
+        "separated vocal, and rhythm rather than pitch because octave errors flip a contour"
+        % (hk.get("phrase"), hk.get("count"), 100 * mv, 100 * cv, len(ctrl), 100 * lift))
+
+
 def ev_pump(m, B):
     p = (m.get("observations") or {}).get("pump")
     if not p: return None, "no pump measurement"
@@ -1446,6 +1531,7 @@ def evaluate(slug, map_path=None, m=None):
         ("accents", ev_accents, (m, B)), ("stems", ev_stems, (m, B)),
         ("meter", ev_meter, (m, B)), ("tempo_stability", ev_tempo, (m, B)),
         ("pan", ev_pan, (m, B, slug)), ("identity", ev_identity, (m, B)),
+        ("hook", ev_hook, (m, B)),
         ("pump", ev_pump, (m, B)),
         ("chords", ev_chords, (m, B, sig, sr)), ("melody", ev_melody, (m, B, sig, sr)),
     ):

@@ -30629,6 +30629,97 @@
      "why": "nothing earlier reaches 0.854, this song's own 97% pair similarity; this bar is new material"
     }
    ]
+  },
+  "percentile": {
+   "value": null,
+   "wanted": "where this song sits against other songs -- busier than 80% of them, slower than 60% -- so a reader can tell a restrained record from a relentless one without being told what normal is",
+   "provenance": "unmeasured",
+   "why_null": "the corpus is five songs. A percentile over five is quantised to 20-point steps before anything else goes wrong, and the check the brief asked for -- rank stability across a corpus split -- fails outright.",
+   "what_was_tried": [
+    {
+     "instrument": "percentile of five per-song scalars (bpm, accents per second, mean energy, energy range, drops per minute) over the five-song corpus, with the corpus resampled 200 times",
+     "role": "writer and check together",
+     "result": "every one of the five features moves 40 percentile points between the 10th and 90th resample. A number that swings 40 points is not a fact about the song, it is a fact about which four songs happened to be in the corpus"
+    }
+   ],
+   "the_likely_cause": "five songs, four of them 126-128 bpm dance records and one lofi cover at 84. There is no corpus here to be relative to.",
+   "what_would_settle_it": "more songs. The resample swing falls roughly as one over the square root of the corpus size, so getting from 40 points to 10 needs something like 80 songs -- an estimate from that scaling, not a measurement. The field is cheap to fill the moment a corpus exists: the writer is five lines and the check is the bootstrap already written here."
+  },
+  "weight": {
+   "value": null,
+   "wanted": "how much this record MEANS to the people who will be in the room -- the difference between the drop everybody has been waiting for and a drop in a song nobody knows",
+   "provenance": "unmeasured",
+   "why_null": "the check the brief asked for is the one that failed. Two crowd sources were queried and they cannot be made to agree on which record they are describing, so there is nothing to average and nothing to corroborate.",
+   "what_was_tried": [
+    {
+     "instrument": "MusicBrainz recording search, artist and title",
+     "role": "crowd source one",
+     "result": "130 matching recordings for Avicii's Levels, 14 for Don't Look Down, 0 for Mizhiyoram, and two of the five queries timed out. Hit count is a measure of how often a track has been re-released, which is not what this field is asking"
+    },
+    {
+     "instrument": "Wikipedia REST summary, by title",
+     "role": "crowd source two",
+     "result": "resolved 'Levels' to the article 'Level', a 29-character disambiguation stub, and 'Don't Look Down' to an unrelated page. Only The Nights resolved to the right record. A source that identifies the wrong entity is worse than no source, because the number it produces looks exactly like a real one"
+    }
+   ],
+   "the_likely_cause": "neither source is keyed on anything this file holds. Matching by artist and title is ambiguous by construction, and one of these five is a lofi cover with no canonical release at all.",
+   "what_would_settle_it": "an identifier rather than a title -- an ISRC or a MusicBrainz recording MBID stored in `song`, resolved once by a human and then used to key every external lookup. That is a small piece of work and it is the whole blocker; everything after it is arithmetic.",
+   "and_a_caution": "this is the one field in the file whose source is outside the recording. Whatever fills it will be a claim about a population, measured at a moment, that changes without the song changing -- so it needs a date attached in a way none of the other fields do."
+  },
+  "idiom": {
+   "value": null,
+   "wanted": "which conventions this record is working inside, so a reader can know that a bar of silence before a drop is a genre convention being honoured rather than the song stopping",
+   "provenance": "unmeasured",
+   "why_null": "no check exists that is not circular. Every candidate compares the record against a model or a corpus that would have to encode the same conventions to judge them, and with five songs there is no corpus to encode them from.",
+   "what_was_tried": [
+    {
+     "instrument": "the MuLan mood embedding already in observations.mood",
+     "role": "considered and refused",
+     "result": "it produces genre-like labels, but grading them means comparing a model's genre labels against a model's genre labels. That is the circular verification this whole piece of work exists to remove, and adding it back for a field nobody has asked a reader to use would be the worst trade in the file"
+    }
+   ],
+   "the_likely_cause": "an idiom is a fact about a body of music, and this repository has five songs, four of which are the same idiom.",
+   "what_would_settle_it": "a corpus with labelled idioms and a held-out split, which is the same blocker as `percentile` and would be solved by the same corpus"
+  },
+  "restraint": {
+   "value": null,
+   "provenance_allowed": [
+    "stated"
+   ],
+   "wanted": "where the record is deliberately holding back -- not quiet, HELD. A reader that cannot tell the two apart spends everything in the first minute",
+   "provenance": "unmeasured",
+   "why_null": "the brief allows this field STATED provenance only, and nobody has stated it. That is not a gap to be filled by a measurement; a measurement here would be the wrong kind of answer and this field refuses one by design.",
+   "how_it_gets_filled": "a human listens and says so, through listen/corrections.py, which is why that tool was built first. The entry carries who said it and why, and provenance stays 'stated' -- it never becomes 'measured' by being written down.",
+   "what_was_tried": [
+    {
+     "instrument": "low energy with high harmonic activity -- quiet bars that are still doing something",
+     "role": "candidate writer, refused",
+     "result": "not tried against the audio, and deliberately. It would produce a number with provenance 'measured' for a field the brief says may only be 'stated', and a measured-looking number is exactly what makes a human judgment impossible to find later"
+    }
+   ],
+   "what_would_settle_it": "one person, one pass through one song, and an entry in the corrections log. It is the cheapest unsolved field here and the only one that needs no code at all"
+  },
+  "latent": {
+   "value": null,
+   "empty": true,
+   "wanted": "room for what a learned head finds that nobody has named yet",
+   "provenance": "unmeasured",
+   "why_null": "empty on purpose, and labelled empty on purpose. The brief says ship it empty; the reason it is worth shipping empty is that an empty labelled field tells a reader the slot exists and is unclaimed, where an absent field tells it nothing. Anything put here now would be one of the measurements already in this file wearing a name that promises more.",
+   "what_was_tried": [
+    {
+     "instrument": "nothing",
+     "role": "-",
+     "result": "no attempt was made, which is the correct amount of attempt. There is no head trained yet, and the vectors it would be trained from are in the sidecar and already referenced"
+    }
+   ],
+   "what_would_settle_it": "a trained head, and the one thing to get right when it arrives is that whatever it emits goes here under a name that does not claim to be a musical fact until somebody has checked it against one"
+  },
+  "hook": {
+   "value": null,
+   "provenance": "unmeasured",
+   "why_null": "the transcriber returned 0 usable words from this vocal. Whisper was run with automatic language detection and reported English; this recording is not in English, and a transcript of the wrong language cannot be searched for a repeated phrase.",
+   "what_would_settle_it": "run the transcriber with the language given rather than detected. The hook is audible and repeated in this song; the tool was pointed at the wrong language, which is a fixable mistake and not a property of the record.",
+   "model": "openai-whisper small, on the separated vocal stem"
   }
  },
  "confidence": 0.908,

@@ -329,6 +329,40 @@ def broken_identity_and_surprise():
     return ok
 
 
+def moved_hook():
+    """rule 5's broken-file entry for hook: the same phrase, claimed at times it
+    does not occur. Still a well-formed field naming a real line of the song."""
+    import json, copy, random
+    import mapeval as ME
+    from mapio import map_path
+
+    ok = True
+    print("== a hook claimed at times it does not land on")
+    for slug in ("levels", "starlight", "mizhiyoram", "dont-look-down", "the-nights"):
+        mp = map_path(slug)
+        sig, sr, cached = ME.audio_for(slug)
+        if not mp or sig is None:
+            continue
+        B = cached if cached is not None else ME.bands(sig, sr)
+        m = json.load(open(mp))
+        good = ME.ev_hook(m, B)[0]
+        if good is None:
+            print("   --   %-16s no hook this check can reach" % slug)
+            continue
+        bad_m = copy.deepcopy(m)
+        rng = random.Random(4)
+        dur = (m.get("song") or {}).get("length") or 200
+        hk = bad_m["observations"]["hook"]["hook"]
+        hk["times"] = [round(rng.uniform(0, dur), 3) for _ in hk["times"]]
+        bad = ME.ev_hook(bad_m, B)[0]
+        bad = 0.0 if bad is None else bad
+        fine = good - bad >= 0.15
+        ok = ok and fine
+        print("   %s %-16s as claimed %.2f, times randomised %.2f"
+              % ("ok  " if fine else "FAIL", slug, good, bad))
+    return ok
+
+
 def run():
     import mapeval as ME
 
@@ -403,6 +437,8 @@ def run():
     ok = flipped_pan() and ok
     print()
     ok = broken_identity_and_surprise() and ok
+    print()
+    ok = moved_hook() and ok
     return 0 if ok else 1
 
 
