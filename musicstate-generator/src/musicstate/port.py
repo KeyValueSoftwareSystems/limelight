@@ -167,8 +167,14 @@ def to_map(state: dict, vec_filename: str | None = None,
     period = round(60.0 / bpm, 5) if bpm else None
     phase = beats[0] if beats else 0.0
     bar_phase = beats.index(downbeats[0]) if (downbeats and downbeats[0] in beats) else 0
+    ts = str(meta.get("time_signature") or "4/4")
+    try:
+        beats_per_bar = int(ts.split("/")[0])
+    except (ValueError, IndexError):
+        beats_per_bar = 4
     grid = {
         "period": period, "phase": phase, "bpm": bpm, "bar_phase": bar_phase,
+        "beats_per_bar": beats_per_bar,
         "locked": False, "how": "allin1 beat tracking",
         "note": "beats start at the first tracked beat, not at t=0",
     }
