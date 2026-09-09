@@ -6,11 +6,38 @@ test against a reference map. It measures nothing; it only reshapes.
 """
 from __future__ import annotations
 
+import math
 import os
 
 from .segments import merge_sections
 
 _KINDS = {"build", "drop", "stop", "quiet", "spotlight", "return"}
+_NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+
+def _melody_to_list(mel):
+    """MAP melody notes are lists [start_s, name, midi]; the pyin contour arrives as
+    dicts {at, hz, note}. Convert voiced samples (unvoiced hz=None score nothing and
+    are dropped) so downstream readers and the scorer can index the pitch. Pure."""
+    if not isinstance(mel, dict):
+        return mel
+    notes = mel.get("notes")
+    if not isinstance(notes, list) or not notes or isinstance(notes[0], list):
+        return mel                       # absent or already in list form
+    out = []
+    for n in notes:
+        if not isinstance(n, dict):
+            continue
+        hz, at = n.get("hz"), n.get("at")
+        if hz is None or at is None or hz <= 0:
+            continue
+        midi = int(round(69 + 12 * math.log2(hz / 440.0)))
+        name = n.get("note") or f"{_NOTE_NAMES[midi % 12]}{midi // 12 - 1}"
+        out.append([round(at, 3), name, midi])
+    m2 = dict(mel)
+    m2["notes"] = out
+    m2["unit"] = "[start_s, name, midi]"
+    return m2
 
 
 def _to_pos(t, phase, period):
@@ -256,7 +283,7 @@ def to_map(state: dict, vec_filename: str | None = None,
         "moment_timing": state.get("moment_timing"),
         # harmony layers: the analyzers write the full block; the port only lifts it
         "chords": state.get("chords"),
-        "melody": state.get("melody"),
+        "melody": _melody_to_list(state.get("melody")),
         "notes": state.get("notes"),
     }
 

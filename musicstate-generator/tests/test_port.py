@@ -118,7 +118,8 @@ def test_harmony_layers_lifted_into_observations():
     obs = _m()["observations"]
     assert obs["chords"]["rate"] == "per_bar"
     assert obs["chords"]["events"][0]["chord"] == "Am"
-    assert obs["melody"]["notes"][0]["note"] == "A4"
+    # melody is converted to list form [start_s, name, midi]; 440 Hz -> A4 / midi 69
+    assert obs["melody"]["notes"][0] == [0.5, "A4", 69]
     assert obs["notes"]["sources"]["mix"][0][2] == 69  # midi A4
 
 
