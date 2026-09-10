@@ -1,3 +1,25 @@
+> **SUPERSEDED, and kept because it is the brief this lane was built from.**
+>
+> The engineering spec is now
+> [`docs/superpowers/specs/2026-09-10-music-intelligence-video-reader-design.md`](docs/superpowers/specs/2026-09-10-music-intelligence-video-reader-design.md).
+> Read that one. It was written after building the thing, so where the two
+> disagree it has the measurements.
+>
+> What this document got right: the circularity discipline, no LLM-written
+> measurements, HOLD as a real decision, events/spans over a fixed grid,
+> provenance reaching the output, uncertainty surviving into creative reasoning.
+> None of that is revised.
+>
+> What it got wrong: it proposes an architecture the repo already had (see
+> `readers/lights/FRAME.md` line 3); its "Universal Creative IR" is a third
+> artifact nobody consumes and was refused; its §36 evaluation plan is circular
+> in exactly the way its own §3 warns against; its §11 replaces four taste knobs
+> with twenty; and its §42 ordering puts a written audit before the vertical
+> slice that actually found the bugs. Its numbers (0.807 mean, identity 0.02)
+> were already stale when it was written.
+
+---
+
 # MUSIC INTELLIGENCE → CREATIVE MEDIA
 ## Engineering Specification / Context Brief for Claude Code
 
