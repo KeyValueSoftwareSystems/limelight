@@ -16,6 +16,7 @@ const DERIVE = require(path.join(ROOT, "readers", "src", "derive.js"));
 const POLICIES = {
   naive: require("./policy_naive.js"),
   rules: require("./policy_rules.js"),
+  random: require("./policy_random.js"),
   llm:   require("./policy_llm.js")
 };
 
@@ -58,7 +59,7 @@ function main() {
 
   const ctx = {
     map: map, brief: brief, index: index, seed: seed, length_s: length,
-    derive: DERIVE.make(map), slug: slug,
+    derive: DERIVE.make(map), slug: slug, briefId: briefId,
     intent: arg("intent", null)
   };
   const r = policy.run(ctx);

@@ -6,8 +6,13 @@ Read this before touching anything. Then read the `AGENTS.md` in the directory y
 
 **A file that says what a song does.** One file per recording, holding where the beats fall, where
 the bars begin, where the voice leaves and the drums take the room. A *reader* turns that file into
-an art form — lighting is one, a drone show is another. The file is the product. The light show is
-evidence it works.
+an art form — lighting is one, a drone show is another, a video edit is a third. The file is the
+product. The shows are evidence it works.
+
+Three readers is the point, not a milestone. One reader cannot tell you whether the map is universal
+or whether it is a lighting format with a neutral name; the second and third can, because they break
+on different things. The video reader is the strictest test so far: it needed a way to rank moments,
+and the disciplined answer turned out to be that the map should not carry one.
 
 The consequence that governs every decision: **the map must never contain a lighting word.** No
 fixtures, no colours, no cues, no "strobe". The moment it does, it becomes a lighting file and the
@@ -66,6 +71,9 @@ is the history; "when was the last beat" is a lookup, never a memory.
 | `readers/lights/` | the lighting reader: `FRAME.md` is the contract, `wire.js` is frame → DMX, `calibrate.js` commissions a rig |
 | `readers/lights/pack/` | golden frames, **generated** by `make.js`, never hand-kept |
 | `readers/drones/` | the second reader. Its existence is the proof the map is not a lighting format |
+| `readers/video/` | the third reader: map + brief + footage → an edit. `IR.md` is its contract |
+| `assets/` | source clips. Licences and measurements are committed; no video is |
+| `briefs/` | taste as data. A policy that produces the same edit for two briefs is broken |
 | `maps/model/` | measured maps. `maps/sketch/` holds guesses and is never mixed in |
 | `truth/` | human listening records. **Never write a file here labelled `how: truth`** |
 | `bench/bench.py` | the scorer. Tolerances are fixed and moving one to make a number look better is the one form of cheating it cannot detect |

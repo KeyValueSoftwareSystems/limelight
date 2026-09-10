@@ -21,6 +21,19 @@ segment is scaled to COVER the output frame and centre-cropped, then forced to
 the brief's frame rate. Cover-and-crop rather than letterbox because a brief that
 asks for 9:16 wants a full frame, and because black bars would be a creative
 decision this file is not allowed to make.
+
+FRAME-EXACT, and this was a real bug rather than a precaution. Segments were cut
+with `-t <seconds>`, which rounds UP to a whole frame. Rounding the same
+direction 38 times in a row put the last cut of a 237-second edit 717 ms late,
+and the naive edit -- with more shots -- ended up seconds out. An edit whose
+whole claim is that cuts land with the music was quietly sliding away from it,
+and the alignment scores measured that slide rather than the policy.
+
+So boundaries are quantised to the output frame grid ONCE, up front, and each
+segment is rendered with an exact frame COUNT: shot i gets
+round(end*fps) - round(start*fps) frames. The counts sum to the quantised total
+by construction, so there is nothing left to accumulate. `--verify` re-measures
+the finished file and fails if any boundary moved.
 """
 import argparse, json, os, subprocess, sys, tempfile, shutil
 from concurrent.futures import ThreadPoolExecutor
@@ -68,21 +81,47 @@ def check(ir, index):
 
 
 def segment(job):
-    i, e, clip, fmt, tmp = job
+    i, e, clip, fmt, tmp, nframes = job
     w, h, fps = fmt["width"], fmt["height"], fmt["fps"]
     out = os.path.join(tmp, f"seg{i:05d}.mp4")
     src = os.path.join(ROOT, "assets", clip["file"])
+    # Pull the in-point back if the clip does not have nframes left after it.
+    # A shot sitting at the very end of its source has no spare frames to give,
+    # the rate conversion comes up one or two short, and the whole edit ends up
+    # adrift -- which is what the 160 ms refusal was. The chooser centres the
+    # in-point in whatever slack the shot has, so moving earlier is always
+    # available and never runs off the front.
+    need = nframes / fps + 1.0 / fps
+    in_s = min(e["in_s"], max(0.0, clip["duration_s"] - need))
     vf = (f"scale={w}:{h}:force_original_aspect_ratio=increase,"
           f"crop={w}:{h},fps={fps},setsar=1")
+    # -frames:v, never -t. An exact count cannot round, so nothing accumulates.
+    # A little extra is decoded (-t with a margin) so the filter has enough
+    # input to produce that many frames after the rate conversion.
     r = subprocess.run(
-        ["ffmpeg", "-v", "error", "-y", "-ss", f"{e['in_s']:.3f}",
-         "-t", f"{e['end'] - e['start']:.3f}", "-i", src,
-         "-vf", vf, "-an", "-c:v", "libx264", "-preset", "veryfast",
+        ["ffmpeg", "-v", "error", "-y", "-ss", f"{in_s:.3f}",
+         "-t", f"{nframes / fps + 0.5:.3f}", "-i", src,
+         "-vf", vf, "-frames:v", str(nframes), "-an",
+         "-c:v", "libx264", "-preset", "veryfast",
          "-crf", "20", "-pix_fmt", "yuv420p", out],
         capture_output=True, text=True)
     if r.returncode != 0 or not os.path.exists(out):
         return i, None, r.stderr.strip()[:200]
+    got = frames_in(out)
+    if got != nframes:
+        return i, None, f"asked for {nframes} frames, got {got}"
     return i, out, None
+
+
+def frames_in(path):
+    r = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-count_frames",
+         "-show_entries", "stream=nb_read_frames", "-of", "csv=p=0", path],
+        capture_output=True, text=True)
+    try:
+        return int(r.stdout.strip().split(",")[0])
+    except (ValueError, IndexError):
+        return -1
 
 
 def main():
@@ -91,6 +130,11 @@ def main():
     ap.add_argument("--out")
     ap.add_argument("--jobs", type=int, default=6)
     ap.add_argument("--no-audio", action="store_true")
+    ap.add_argument("--preview", action="store_true",
+                    help="half dimensions. For bench comparisons, where the "
+                         "measurement is frame-to-frame change and resolution "
+                         "does not enter into it -- and where four full-size "
+                         "renders is 600 MB of a nearly full disk.")
     a = ap.parse_args()
 
     ir = json.load(open(a.ir))
@@ -106,11 +150,27 @@ def main():
 
     out = a.out or os.path.splitext(os.path.splitext(a.ir)[0])[0] + ".mp4"
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
-    fmt = ir["format"]
+    fmt = dict(ir["format"])
+    if a.preview:
+        fmt["width"] = fmt["width"] // 2 // 2 * 2
+        fmt["height"] = fmt["height"] // 2 // 2 * 2
     tmp = tempfile.mkdtemp(prefix="limelight-edit-")
     try:
-        jobs = [(i, e, index[e["clip_id"]], fmt, tmp)
-                for i, e in enumerate(ir["timeline"])]
+        # Quantise every boundary to the output frame grid once, then hand each
+        # segment an exact frame count. Boundary i sits at frame round(t*fps),
+        # so the counts sum to the total and no rounding survives to the next
+        # shot.
+        fps = fmt["fps"]
+        bounds = [round(e["start"] * fps) for e in ir["timeline"]]
+        bounds.append(round(ir["timeline"][-1]["end"] * fps))
+        jobs = []
+        for i, e in enumerate(ir["timeline"]):
+            n = bounds[i + 1] - bounds[i]
+            if n < 1:
+                print(f"[{i}] rounds to {n} frames at {fps} fps -- shot is "
+                      f"shorter than one frame", file=sys.stderr)
+                return 1
+            jobs.append((i, e, index[e["clip_id"]], fmt, tmp, n))
         segs = [None] * len(jobs)
         with ThreadPoolExecutor(max_workers=a.jobs) as ex:
             for i, p, err in ex.map(segment, jobs):
@@ -132,11 +192,17 @@ def main():
 
         audio = None if a.no_audio else release_path(ir["song"]["slug"])
         if audio:
+            # No -t here. The video is already exactly as long as the quantised
+            # timeline, and passing the song length in seconds re-truncated it
+            # to a non-integer frame count -- 5929 frames rendered, 5925 kept,
+            # a 160 ms shortfall that the drift gate correctly refused. The
+            # video defines the length; the audio is padded so -shortest can
+            # never trim picture that the timeline asked for.
             r = subprocess.run(
                 ["ffmpeg", "-v", "error", "-y", "-i", silent, "-i", audio,
                  "-map", "0:v:0", "-map", "1:a:0", "-c:v", "copy",
-                 "-c:a", "aac", "-b:a", "192k",
-                 "-t", f"{ir['song']['length_s']:.3f}", "-shortest", out],
+                 "-af", "apad", "-c:a", "aac", "-b:a", "192k",
+                 "-shortest", out],
                 capture_output=True, text=True)
             if r.returncode != 0:
                 print("mux failed: " + r.stderr[:300], file=sys.stderr)
@@ -147,7 +213,15 @@ def main():
                 print(f"note: no release audio found for "
                       f"{ir['song']['slug']} -- video is silent", file=sys.stderr)
         mb = os.path.getsize(out) / 1e6
-        print(f"{len(segs)} shots, {mb:.1f} MB -> {out}", file=sys.stderr)
+        total = frames_in(out)
+        want_total = bounds[-1] - bounds[0]
+        drift = (total - want_total) / fps
+        if abs(drift) > 1.0 / fps:
+            print(f"REFUSED: rendered {total} frames, the timeline asks for "
+                  f"{want_total} ({drift*1000:+.0f} ms adrift)", file=sys.stderr)
+            return 1
+        print(f"{len(segs)} shots, {mb:.1f} MB, {total} frames "
+              f"({drift*1000:+.0f} ms vs the timeline) -> {out}", file=sys.stderr)
         return 0
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

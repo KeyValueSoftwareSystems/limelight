@@ -131,12 +131,19 @@ const ASSETS = (function () {
   // Split any stretch longer than `cap`, preferring a real musical candidate
   // inside it and falling back to the grid. Returns the new edge list plus the
   // times that were forced, so the caller can label them honestly.
+  // `cap` may be a number or a function of the stretch's start time, so that a
+  // deliberate HOLD can be exempt from the brief's max_shot_s while still
+  // obeying the footage limit. A hold is an explicit decision not to cut;
+  // max_shot_s is a default about ordinary shots. Letting the default override
+  // the decision is how a model's 29-second hold came back as four cuts.
   function capSlots(edges, cap, declined, snapTo) {
+    const capAt = typeof cap === "function" ? cap : function () { return cap; };
     const out = [edges[0]], forced = [];
     for (let i = 1; i < edges.length; i++) {
       let a = out[out.length - 1];
       const b = edges[i];
-      while (b - a > cap) {
+      while (b - a > capAt(a)) {
+        const cap = capAt(a);
         const inner = (declined || [])
           .filter(function (c) { return c.t > a + cap * 0.35 && c.t < Math.min(b, a + cap); })
           .sort(function (x, y) { return y.strength - x.strength; })[0];
