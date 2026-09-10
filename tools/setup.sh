@@ -103,9 +103,36 @@ stereo() {
   shopt -u nullglob
 }
 
+# A fourth environment, for one field on one song. MOSS-Music reads a vocal
+# whisper-small cannot: on mizhiyoram it returned zero segments from the stem
+# and invented Korean and Chinese glyphs from the mix. It is separate because
+# it pins transformers 4.57.1 while the audio env pins 4.44.2, and CPU-only
+# because 18.1 GB of bf16 will not fit a 4 GB card.
+#
+# It is used for LYRICS ONLY. The same model also does chord, key and tempo
+# reasoning and structural analysis, and taking any of those would put one
+# model on both sides of a check in listen/mapeval.py.
+moss() {
+  have moss && { echo "moss env exists"; return; }
+  python3 -m venv "$WORK/moss"
+  "$WORK/moss/bin/pip" -q install --upgrade pip
+  "$WORK/moss/bin/pip" -q install --index-url https://download.pytorch.org/whl/cpu torch torchaudio
+  "$WORK/moss/bin/pip" -q install "transformers==4.57.1" accelerate safetensors \
+      soundfile librosa tiktoken einops scipy tqdm
+  [ -d "$WORK/MOSS-Music/.git" ] || git clone -q --depth 1 \
+      https://github.com/OpenMOSS/MOSS-Music "$WORK/MOSS-Music"
+  echo "moss env: $WORK/moss"
+  echo "  weights (18.1 GB) are NOT downloaded automatically:"
+  echo "    \"$WORK/moss/bin/python\" -c \"from huggingface_hub import snapshot_download as d; \\"
+  echo "      d('OpenMOSS-Team/MOSS-Music-8B-Instruct', local_dir='$WORK/moss-weights')\""
+  echo "  the transcript it produced is committed at"
+  echo "    listen/transcripts/mizhiyoram.moss-music-8b-instruct.txt"
+  echo "  so the map is reproducible without a 35-minute CPU run."
+}
+
 case "${1:-all}" in
   audio) audio;; basicpitch) basicpitch;; mir) mir;; chordmini) chordmini;; stems) stems;;
-  stereo) stereo;;
+  stereo) stereo;; moss) moss;;
   all) audio; basicpitch || true; mir || true; chordmini; stems; stereo || true;;
-  *) echo "usage: bash tools/setup.sh [audio|basicpitch|mir|chordmini|stems|stereo|all]"; exit 2;;
+  *) echo "usage: bash tools/setup.sh [audio|basicpitch|mir|chordmini|stems|stereo|moss|all]"; exit 2;;
 esac

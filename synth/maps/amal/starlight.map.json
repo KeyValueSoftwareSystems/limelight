@@ -84791,11 +84791,11 @@
     "count": 10,
     "words": 6,
     "mean_energy": 0.6573,
-    "weight": 39.4398
+    "weight": 6.5733
    },
    "runners_up": [
     {
-     "phrase": "style i want you lead the way down",
+     "phrase": "style i want",
      "times": [
       38.26,
       60.94,
@@ -84805,12 +84805,12 @@
       185.36
      ],
      "count": 6,
-     "words": 8,
+     "words": 3,
      "mean_energy": 0.6633,
-     "weight": 31.836
+     "weight": 3.9795
     },
     {
-     "phrase": "i want you lead the way down this",
+     "phrase": "i want you",
      "times": [
       38.58,
       61.3,
@@ -84820,12 +84820,12 @@
       186.0
      ],
      "count": 6,
-     "words": 8,
+     "words": 3,
      "mean_energy": 0.6633,
-     "weight": 31.836
+     "weight": 3.9795
     },
     {
-     "phrase": "want you lead the way down this river",
+     "phrase": "want you lead",
      "times": [
       38.86,
       61.56,
@@ -84835,27 +84835,28 @@
       186.28
      ],
      "count": 6,
-     "words": 8,
+     "words": 3,
      "mean_energy": 0.6633,
-     "weight": 31.836
+     "weight": 3.9795
     },
     {
-     "phrase": "you lead the way down this river keep",
+     "phrase": "style i want you",
      "times": [
-      39.06,
-      61.74,
-      118.44,
-      141.1,
-      156.22,
-      186.46
+      38.26,
+      60.94,
+      117.66,
+      140.32,
+      154.94,
+      185.36
      ],
      "count": 6,
-     "words": 8,
-     "mean_energy": 0.6118,
-     "weight": 29.364
+     "words": 4,
+     "mean_energy": 0.6633,
+     "weight": 3.9795
     }
    ],
-   "candidates_considered": 466
+   "candidates_considered": 466,
+   "how_chosen": "how often it comes round, weighted by the energy where it lands, then grown to the longest phrase that still recurs that often"
   }
  },
  "confidence": 0.882,

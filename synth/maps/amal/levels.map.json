@@ -75796,10 +75796,11 @@
     "count": 2,
     "words": 3,
     "mean_energy": 0.3841,
-    "weight": 2.3043
+    "weight": 0.7681
    },
    "runners_up": [],
-   "candidates_considered": 1
+   "candidates_considered": 1,
+   "how_chosen": "how often it comes round, weighted by the energy where it lands, then grown to the longest phrase that still recurs that often"
   }
  },
  "confidence": 0.95,
@@ -75947,6 +75948,15 @@
     "why": "every series touched 1.0 at its own loudest bar, so the piano stem -- separator noise 22 dB down, moving 1.4 dB across the whole song -- read louder than the drums for most of the record",
     "who": "amal@trypencil.com",
     "id": "82700a255f5d"
+   },
+   {
+    "at": "2026-09-10T13:15:50",
+    "field": "listen/hook.py:token",
+    "was": "re.findall(r'[a-z0-9]+') taking the first match",
+    "now": "whitespace tokens minus punctuation, any script",
+    "why": "the tokeniser was ASCII-only, so a correct Malayalam transcript read as zero words and fell through to the rhythmic fallback. Widening to backslash-w was no better: Python's backslash-w follows str.isalnum(), false for the combining vowel signs Malayalam is written with, so every word split into single consonants",
+    "who": "amal@trypencil.com",
+    "id": "a26c24735e97"
    }
   ],
   "imported_verbatim": [

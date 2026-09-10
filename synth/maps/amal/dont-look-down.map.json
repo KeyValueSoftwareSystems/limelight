@@ -111415,65 +111415,78 @@
    "provenance": "measured",
    "checked_against": "melodic contour repetition in mapeval.ev_hook. Same separated vocal on both sides -- a shared input, said rather than hidden -- but one side is a speech model reading words and the other a pitch tracker reading notes.",
    "hook": {
-    "phrase": "oh oh oh oh oh oh oh oh",
+    "phrase": "dont look down",
     "times": [
-     89.72,
-     93.86,
-     166.54
+     40.48,
+     47.56,
+     62.92,
+     134.12,
+     141.34,
+     156.64,
+     180.54
     ],
-    "count": 3,
-    "words": 8,
-    "mean_energy": 0.8062,
-    "weight": 19.3488
+    "count": 7,
+    "words": 3,
+    "mean_energy": 0.6671,
+    "weight": 4.6697
    },
    "runners_up": [
     {
-     "phrase": "this high will never hit the",
+     "phrase": "oh oh oh",
      "times": [
-      44.22,
-      138.04,
-      160.84
+      89.72,
+      93.86,
+      97.96,
+      166.54,
+      170.88
      ],
-     "count": 3,
-     "words": 6,
-     "mean_energy": 0.7999,
-     "weight": 14.3988
+     "count": 5,
+     "words": 3,
+     "mean_energy": 0.8137,
+     "weight": 4.0686
     },
     {
-     "phrase": "high will never hit the ground don't look",
+     "phrase": "oh oh oh oh",
      "times": [
-      45.06,
-      138.82
+      89.72,
+      93.86,
+      97.96,
+      166.54,
+      170.88
      ],
-     "count": 2,
-     "words": 8,
-     "mean_energy": 0.8828,
-     "weight": 14.1248
+     "count": 5,
+     "words": 4,
+     "mean_energy": 0.8137,
+     "weight": 4.0686
     },
     {
-     "phrase": "will never hit the ground don't look down",
-     "times": [
-      45.58,
-      139.34
-     ],
-     "count": 2,
-     "words": 8,
-     "mean_energy": 0.8828,
-     "weight": 14.1248
-    },
-    {
-     "phrase": "never hit the ground don't look down see",
+     "phrase": "never hit the",
      "times": [
       45.86,
-      139.6
+      68.46,
+      139.6,
+      162.14
      ],
-     "count": 2,
-     "words": 8,
-     "mean_energy": 0.8828,
-     "weight": 14.1248
+     "count": 4,
+     "words": 3,
+     "mean_energy": 0.8593,
+     "weight": 3.4372
+    },
+    {
+     "phrase": "high will never",
+     "times": [
+      45.06,
+      138.82,
+      161.38
+     ],
+     "count": 3,
+     "words": 3,
+     "mean_energy": 0.8881,
+     "weight": 2.6642
     }
    ],
-   "candidates_considered": 150
+   "candidates_considered": 150,
+   "how_chosen": "how often it comes round, weighted by the energy where it lands, then grown to the longest phrase that still recurs that often"
   }
  },
  "confidence": 0.92,
@@ -111536,6 +111549,16 @@
     "confidence_after"
    ]
   },
-  "entries": []
+  "entries": [
+   {
+    "at": "2026-09-10T13:15:50",
+    "field": "observations.hook",
+    "was": "'oh oh oh oh oh oh oh oh' x3, chosen by count x words x energy",
+    "now": "'dont look down' x7, chosen by count x energy then grown",
+    "why": "multiplying by word count preferred a long phrase occurring rarely over the short one occurring often, and picked eight 'oh's over the title line",
+    "who": "amal@trypencil.com",
+    "id": "9babbd1074d9"
+   }
+  ]
  }
 }

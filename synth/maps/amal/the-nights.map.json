@@ -60305,55 +60305,60 @@
     "count": 6,
     "words": 4,
     "mean_energy": 0.629,
-    "weight": 15.0964
+    "weight": 3.7741
    },
    "runners_up": [
     {
-     "phrase": "he told me son don't let it slip",
+     "phrase": "when i was",
      "times": [
-      18.22,
-      94.86
+      41.42,
+      97.24,
+      117.62
      ],
-     "count": 2,
-     "words": 8,
-     "mean_energy": 0.7636,
-     "weight": 12.2176
+     "count": 3,
+     "words": 3,
+     "mean_energy": 0.7109,
+     "weight": 2.1328
     },
     {
-     "phrase": "told me son don't let it slip away",
+     "phrase": "i was just",
      "times": [
-      18.76,
-      94.96
+      41.68,
+      97.82,
+      117.88
      ],
-     "count": 2,
-     "words": 8,
-     "mean_energy": 0.7636,
-     "weight": 12.2176
+     "count": 3,
+     "words": 3,
+     "mean_energy": 0.7109,
+     "weight": 2.1328
     },
     {
-     "phrase": "i heard him say when you get older",
+     "phrase": "when i was just",
      "times": [
-      22.92,
-      99.06
+      41.42,
+      97.24,
+      117.62
      ],
-     "count": 2,
-     "words": 8,
-     "mean_energy": 0.7351,
-     "weight": 11.7616
+     "count": 3,
+     "words": 4,
+     "mean_energy": 0.7109,
+     "weight": 2.1328
     },
     {
-     "phrase": "live a life you will remember my father",
+     "phrase": "i was just a",
      "times": [
-      36.38,
-      112.58
+      41.68,
+      97.82,
+      117.88
      ],
-     "count": 2,
-     "words": 8,
-     "mean_energy": 0.716,
-     "weight": 11.4552
+     "count": 3,
+     "words": 4,
+     "mean_energy": 0.7109,
+     "weight": 2.1328
     }
    ],
-   "candidates_considered": 201
+   "candidates_considered": 201,
+   "how_chosen": "how often it comes round, weighted by the energy where it lands, then grown to the longest phrase that still recurs that often"
   }
  },
  "confidence": 0.787,

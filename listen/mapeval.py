@@ -1569,11 +1569,17 @@ def ev_hook(m, B):
     win = hk.get("span_s") or max(1.0, 0.45 * (hk.get("words") or 4))
     dur = (m.get("song") or {}).get("length") or downs[-1]
 
-    if by_rhythm:
-        segs = ((m.get("observations") or {}).get("chords") or {}).get("segments") or []
+    segs = ((m.get("observations") or {}).get("chords") or {}).get("segments") or []
+
+    def harmony_check(why):
+        """Do the occurrences share chords more than random placements do?
+
+        Independent of BOTH writers -- a chord label knows nothing about words
+        and nothing about onset times -- so it serves the rhythm-found hook,
+        where rhythm is the writer, and the text-found hook on a song whose
+        melody transcription is too sparse to carry a rhythm statistic."""
         if not segs:
-            return None, ("this hook was found by its rhythm, so rhythm cannot corroborate "
-                          "it, and there are no chords to check it against instead"), True
+            return None, why + ", and there are no chords to check it against instead", True
 
         def chords_at(t0):
             got = set()
@@ -1601,15 +1607,18 @@ def ev_hook(m, B):
 
         r = _permutation_percentile(stat, times, dur, win)
         if r is None:
-            return None, ("found by rhythm, so checked on harmony -- and there are not enough "
-                          "chords at these times, or at random times, to build a null from"), True
+            return None, (why + ", and there are not enough chords at these times, or at "
+                                "random times, to build a null from"), True
         beat, real, nmu, nn = r
         score = max(0.0, min(1.0, (beat - 0.5) / 0.5))
-        return score, ("found by rhythm, so checked on harmony instead: the %d occurrences "
-                       "share %.2f of their chords pairwise against %.2f for the same number "
-                       "of occurrences placed at random, beating %.0f%% of %d placements. "
-                       "Rhythm found it and therefore cannot corroborate it"
+        return score, (why + ": the %d occurrences share %.2f of their chords pairwise "
+                       "against %.2f for the same number of occurrences placed at random, "
+                       "beating %.0f%% of %d placements"
                        % (len(times), real, nmu, 100 * beat, nn))
+
+    if by_rhythm:
+        return harmony_check("found by rhythm, so rhythm cannot corroborate it and harmony "
+                             "is asked instead")
 
     # --- text-found hook: check on rhythm ---
     notes = ((m.get("observations") or {}).get("melody") or {}).get("notes") or []
@@ -1622,7 +1631,9 @@ def ev_hook(m, B):
     # Sparser, phrase-shaped melody notes are the right instrument, and where
     # there are not enough this abstains rather than reaching for noise.
     if len(onsets) < 24:
-        return None, "no vocal timing dense enough to compare the hook against", True
+        return harmony_check("the melody transcription on this song is too sparse to carry a "
+                             "rhythm statistic, so harmony is asked instead -- a chord label "
+                             "knows nothing about the words either")
 
     def grab(t0):
         g = sorted(t for t in onsets if t0 - 0.10 <= t < t0 + win)
@@ -1644,8 +1655,9 @@ def ev_hook(m, B):
 
     r = _permutation_percentile(stat, times, dur, win)
     if r is None:
-        return None, ("the hook's occurrences, or random windows of the same length, carry "
-                      "too few notes to compare"), True
+        return harmony_check("the hook's occurrences, or random windows of the same length, "
+                             "carry too few notes for a rhythm statistic, so harmony is asked "
+                             "instead")
     beat, real, nmu, nn = r
     score = max(0.0, min(1.0, (beat - 0.5) / 0.5))
     return score, ("%r recurs %d times; its rhythm agrees %.0f%% between occurrences against "

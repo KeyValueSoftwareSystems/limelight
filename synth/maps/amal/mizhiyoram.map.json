@@ -30726,28 +30726,83 @@
    "what_would_settle_it": "a trained head, and the one thing to get right when it arrives is that whatever it emits goes here under a name that does not claim to be a musical fact until somebody has checked it against one"
   },
   "hook": {
-   "phrase": null,
-   "times": [
-    30.627,
-    36.341,
-    53.481,
-    59.194,
-    64.908,
-    104.902
-   ],
-   "count": 6,
-   "span_bars": 1,
-   "span_s": 2.857,
-   "onsets_in_figure": 7,
-   "mean_energy": 0.6118,
-   "weight": 25.6956,
    "rate": "per_song",
-   "found_by": "rhythmic repetition",
-   "how": "the transcriber returned 0 usable words on this recording, so the phrase was found by its rhythm instead: onsets on the separated vocal quantised to eighths of a bar, and the figure whose quantised onset set recurs most, weighted by how many onsets it holds and the energy where it lands",
-   "why_no_text": "Whisper reported English on a recording that is not in English and returned nothing usable; with Malayalam given explicitly it returned zero segments, and on the raw mix it returned invented text mixing Korean and Chinese glyphs. A hook read out of that would be a fabricated number, so the phrase is emitted as a time span with no words rather than with wrong ones.",
-   "costs": "rhythm found this, so rhythm cannot corroborate it. mapeval.ev_hook checks a rhythm-found hook against chord-sequence repetition, which shares neither the tool nor the feature family.",
+   "how": "phrases of 3 to 8 words that recur at least 4 s apart in the Whisper transcript of the separated vocal, weighted by count, length and the energy where they land",
+   "why_it_exists": "sections says where the chorus is. It does not say which four seconds of it the room already knows, and the hook usually lands outside the chorus too.",
+   "not": "not the most frequent phrase. A line repeated three times in the intro is not the hook and the same line over the drop is, which is what the energy weight is for.",
+   "model": "OpenMOSS-Team/MOSS-Music-8B-Instruct (lyrics only)",
    "provenance": "measured",
-   "model": "onset detection on the separated vocal stem"
+   "checked_against": "melodic contour repetition in mapeval.ev_hook. Same separated vocal on both sides -- a shared input, said rather than hidden -- but one side is a speech model reading words and the other a pitch tracker reading notes.",
+   "hook": {
+    "phrase": "പരയോണി ഇലം പൂവിൻ",
+    "times": [
+     39.85,
+     62.52,
+     113.45
+    ],
+    "count": 3,
+    "words": 3,
+    "mean_energy": 0.6071,
+    "weight": 1.8212
+   },
+   "runners_up": [
+    {
+     "phrase": "മണ്ണിൽ വീഴിഞ്ഞ പൂവിൻ",
+     "times": [
+      36.33,
+      58.72
+     ],
+     "count": 2,
+     "words": 3,
+     "mean_energy": 0.6581,
+     "weight": 1.3162
+    },
+    {
+     "phrase": "വീഴിഞ്ഞ പൂവിൻ പരയോണി",
+     "times": [
+      37.503,
+      59.987
+     ],
+     "count": 2,
+     "words": 3,
+     "mean_energy": 0.6581,
+     "weight": 1.3162
+    },
+    {
+     "phrase": "മണ്ണിൽ വീഴിഞ്ഞ പൂവിൻ പരയോണി",
+     "times": [
+      36.33,
+      58.72
+     ],
+     "count": 2,
+     "words": 4,
+     "mean_energy": 0.6581,
+     "weight": 1.3162
+    },
+    {
+     "phrase": "വീഴിഞ്ഞ പൂവിൻ പരയോണി ഇലം",
+     "times": [
+      37.503,
+      59.987
+     ],
+     "count": 2,
+     "words": 4,
+     "mean_energy": 0.6581,
+     "weight": 1.3162
+    }
+   ],
+   "candidates_considered": 10,
+   "how_chosen": "how often it comes round, weighted by the energy where it lands, then grown to the longest phrase that still recurs that often",
+   "transcript": "listen/transcripts/mizhiyoram.moss-music-8b-instruct.txt",
+   "why_this_model": "whisper-small cannot read this recording: zero segments from the separated vocal with the language auto-detected and with Malayalam given explicitly, and on the raw mix 40 words of invented text mixing Korean and Chinese glyphs. That was a tooling gap, not a property of the record, and this field was null for it.",
+   "used_for": "lyrics only. MOSS-Music also does chord, key and tempo reasoning and structural analysis, and none of it is taken. Every check in the scorer rests on its two sides having no common ancestor; one model supplying two sides is that model grading itself.",
+   "word_times": "interpolated evenly inside each line. The model was asked for a time per LINE, so a word time here is a position within a measured line, not a measured word.",
+   "orthography_unverified": "the transcript is phonetically close to the record but not correct Malayalam spelling -- it reads 'മീരിയോരം' where the song is 'മിഴിയോരം'. The TIMES are what this field is used for and they are corroborated: the first sung word here is 23.02 s and basic-pitch, a different model on a separated stem, puts the first vocal note at 23.49 s. The WORDS have not been checked by anyone who reads Malayalam, and until they are, treat the phrase as a label for a repeated passage rather than as a quotation.",
+   "timestamp_corroboration": {
+    "moss_first_sung_word_s": 23.02,
+    "basic_pitch_first_vocal_note_s": 23.49,
+    "note": "neither model was told the other's answer"
+   }
   }
  },
  "confidence": 0.908,
@@ -30830,6 +30885,15 @@
     "why": "I wrote the first reason before testing it. Giving the language explicitly still returns zero segments from the vocal stem, and the raw mix returns 40 words of invented text mixing Korean and Chinese glyphs. The reason I published was a guess about my own tooling",
     "who": "amal@trypencil.com",
     "id": "5d96d5fbf102"
+   },
+   {
+    "at": "2026-09-10T13:15:50",
+    "field": "observations.hook",
+    "was": "null -- whisper-small hallucinates on this recording",
+    "now": "measured -- 'പരയോണി ഇലം പൂവിൻ' at 39.9, 62.5 and 113.5 s, from MOSS-Music-8B-Instruct",
+    "why": "the null was correct about whisper and wrong to stop there. A music model whose lyrics ASR is built for backing tracks reads this vocal, and the field was reachable all along",
+    "who": "amal@trypencil.com",
+    "id": "e7df316dd0d1"
    }
   ]
  }

@@ -21,14 +21,31 @@ here rather than hidden -- but one is a speech model reading words and the
 other is a polyphonic pitch tracker reading notes, and a phrase that recurs as
 TEXT without recurring as CONTOUR is a phrase, not a hook.
 """
-import sys, os, json, re, math
+import sys, os, json, re, math, unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mapio import map_path, work_dir
 
 MIN_WORDS, MAX_WORDS = 3, 8
 MIN_GAP_S = 4.0
-WORD = re.compile(r"[a-z0-9']+")
+PUNCT_CATS = ("P", "S", "Z", "C")
+
+
+def token(raw):
+    r"""One transcript word, normalised, in any script.
+
+    This was re.findall(r"[a-z0-9']+") taking the first match. On Latin text
+    that is the word; on Malayalam it matched nothing at all, so a correct
+    transcript looked like zero words and fell through to the rhythmic
+    fallback. Widening it to \w does not fix it either: Python's \w follows
+    str.isalnum(), which is False for the combining vowel signs Malayalam is
+    written with, so every word split into single consonants.
+
+    Splitting on whitespace and dropping punctuation and symbols keeps letters
+    and their marks together, which is what a word is in every script here."""
+    out = "".join(c for c in raw.strip().lower()
+                  if not unicodedata.category(c).startswith(PUNCT_CATS))
+    return out or None
 
 
 def lyrics_dir():
@@ -44,10 +61,10 @@ def words_of(slug):
     for seg in d.get("segments") or []:
         for w in seg.get("words") or []:
             t = w.get("start")
-            k = WORD.findall((w.get("word") or "").lower())
+            k = token(w.get("word") or "")
             if t is None or not k:
                 continue
-            out.append((float(t), k[0]))
+            out.append((float(t), k))
     out.sort()
     return out
 
@@ -180,7 +197,7 @@ def analyse(slug, write=False):
             phrase = " ".join(w for _, w in ws[i:i + n])
             seen.setdefault(phrase, []).append(ws[i][0])
 
-    cands = []
+    cands = {}
     for phrase, times in seen.items():
         keep = []
         for t in sorted(times):
@@ -190,23 +207,44 @@ def analyse(slug, write=False):
             continue
         es = [energy_at(m, t) for t in keep]
         mean_e = sum(es) / len(es)
-        nwords = len(phrase.split())
-        cands.append({
+        cands[phrase] = {
             "phrase": phrase,
             "times": [round(t, 3) for t in keep],
             "count": len(keep),
-            "words": nwords,
+            "words": len(phrase.split()),
             "mean_energy": round(mean_e, 4),
-            "weight": round(len(keep) * nwords * mean_e, 4),
-        })
+            "weight": round(len(keep) * mean_e, 4),
+        }
     if not cands:
         return {"error": "no phrase of %d-%d words repeats more than %.0f s apart"
                          % (MIN_WORDS, MAX_WORDS, MIN_GAP_S)}
-    cands.sort(key=lambda c: -c["weight"])
-    # drop candidates that are a sub-phrase of a better one at the same times
-    top, used = [], []
-    for c in cands:
-        # a sub-phrase of something already kept is the same hook, said shorter
+
+    # How often it comes round, weighted by the energy where it lands -- a line
+    # repeated three times in the intro is not the hook and the same line over
+    # the drop is. Length is NOT a factor, and it used to be: multiplying by
+    # word count preferred a six-word couplet occurring twice over the
+    # three-word line occurring three times, and on dont-look-down it chose
+    # "oh oh oh oh oh oh oh oh" over "dont look down".
+    best = max(cands.values(), key=lambda c: (c["weight"], c["words"]))
+
+    # Then grow it. Dropping length entirely leaves near-identical phrases
+    # competing on a rounding-level energy difference, and The Nights then
+    # chose "father told me" over "my father told me" -- one word shorter,
+    # which shifts every occurrence time and destroys the alignment the check
+    # reads. The hook is the LONGEST phrase that recurs this often.
+    grown = True
+    while grown:
+        grown = False
+        for phrase, c in cands.items():
+            if (c["count"] == best["count"] and c["words"] > best["words"]
+                    and best["phrase"] in phrase):
+                best, grown = c, True
+                break
+
+    top = [best]
+    for c in sorted(cands.values(), key=lambda c: -c["weight"]):
+        if c["phrase"] in best["phrase"] or best["phrase"] in c["phrase"]:
+            continue
         if any(c["phrase"] in t["phrase"] for t in top):
             continue
         top.append(c)
@@ -233,6 +271,8 @@ def analyse(slug, write=False):
         "hook": top[0],
         "runners_up": top[1:],
         "candidates_considered": len(cands),
+        "how_chosen": "how often it comes round, weighted by the energy where it lands, then "
+                      "grown to the longest phrase that still recurs that often",
     }
     if write:
         json.dump(m, open(mp, "w"), indent=1, ensure_ascii=False)
