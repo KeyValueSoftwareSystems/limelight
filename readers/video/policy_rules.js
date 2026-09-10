@@ -79,16 +79,25 @@ function candidates(map, dur, derive) {
   return Array.from(seen.values()).sort(function (a, b) { return a.t - b.t; });
 }
 
-function snap(t, beats) {
+function snap(t, beats, hard) {
   if (!beats || !beats.length) return t;
   let best = beats[0], bd = Math.abs(t - beats[0]);
   for (const b of beats) {
     const d = Math.abs(t - b);
     if (d < bd) { bd = d; best = b; }
   }
-  // Only snap if the grid is genuinely nearby. Dragging a cut half a second to
-  // reach a beat would move it off the thing it was chosen for.
-  return bd <= 0.12 ? best : t;
+  // A cut chosen FOR a musical moment only snaps if the grid is genuinely
+  // nearby -- dragging it half a second to reach a beat would move it off the
+  // thing it was chosen for.
+  //
+  // A cut forced by a length cap is different, and `hard` is that case. It was
+  // not chosen for anything; it exists because the brief will not tolerate a
+  // longer shot. Leaving it at an arbitrary instant costs alignment for no
+  // reason, and it was costing a lot: half of these landed off-grid, they are
+  // 17 of the rules policy's 37 cuts, and the policy scored BELOW its own null
+  // on the share of cuts landing on an onset. A cut with no musical reason has
+  // no reason to be off the beat either.
+  return (hard || bd <= 0.12) ? best : t;
 }
 
 function run(ctx) {
@@ -161,9 +170,10 @@ function run(ctx) {
   const cap = Math.min(maxS, footageCap);
   const capBoundBy = maxS <= footageCap ? "brief-max-shot" : "footage-limit";
   const snapper = function (t) { return snap(t, beats); };
+  const snapHard = function (t) { return snap(t, beats, true); };
   let edges = [0].concat(chosen.map(function (c) { return snapper(c.t); }));
   edges.push(dur);
-  const capped = ASSETS.capSlots(edges, cap, declined, snapper);
+  const capped = ASSETS.capSlots(edges, cap, declined, snapHard);
   edges = capped.edges;
   const forced = new Set(capped.forced.map(function (t) { return t.toFixed(3); }));
 

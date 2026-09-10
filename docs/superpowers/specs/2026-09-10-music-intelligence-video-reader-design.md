@@ -202,7 +202,34 @@ rendered with an exact frame **count**, and the compiler **refuses its own
 output** if the total drifts by more than one frame. It caught itself twice
 while this was being fixed.
 
-### 5.4 Two dead metrics, kept as warnings
+### 5.4 The ruler was bent twice, and both bends flattered nobody
+
+**A 92 ms lag in the onset detector.** `flux[i]` is the change between two
+overlapping 80 ms windows, and a click first disturbs a window that *starts*
+before the click. Labelling the peak `i/RATE` reported every onset about 90 ms
+early. With no correction, cuts placed exactly on beats scored a hit rate of
+**0.000**, and every policy — including the beat-cut baseline — came out below
+its own null. I first guessed the sign from the window arithmetic and got it
+backwards; the value is now measured by `--selftest`, which renders clicks at
+times the file chose. 48 of 48 matched, median error −2 ms.
+
+**The full spectrum is the wrong band for dance music.** On Levels, flux at the
+exact instant of a beat sits at the 7th percentile of the song, while 40 ms
+either side sits near the 50th — the flux is at a local *minimum* on the beat.
+That is sidechain compression: the mix ducks on the kick and swells after it, so
+positive flux peaks land *between* beats.
+
+The map already knew. `observations.pump`, written by `listen/pump.py` from the
+envelope above 250 Hz and sharing no code with the scorer, measures the release
+at 0.39 of a beat — **182 ms** after the kick at 128 bpm. Measuring beats
+against flux peaks put the best offset at **+100 to +140 ms**. Two unrelated
+methods, the same displacement.
+
+So the gate reads the **low band**, where the kick lives and the pump does not
+reach. Not a tuned choice: the pump is applied to everything above the kick by
+construction.
+
+### 5.5 Two dead metrics, kept as warnings
 
 - Correlating the whole visual-change curve against onset strength: motion
   *inside* shots swamps the cuts, every edit scored |r| < 0.04, the ranking was
@@ -214,7 +241,7 @@ while this was being fixed.
 Replaced by a hit rate at a fixed tolerance, with a refractory period on peak
 picking so peaks can be no denser than one beat at 200 bpm.
 
-### 5.5 Roughly half the "intelligent" cuts have no musical reason
+### 5.6 Roughly half the "intelligent" cuts have no musical reason
 
 Because the IR records *why* each cut exists, this is visible rather than
 flattering. For `premium-restraint` on Levels, 17 of 37 cuts came from
@@ -251,12 +278,39 @@ ND is excluded by construction.
 | the system can deliberately do nothing | **shown** — holds are emitted, and honoured |
 | every creative action is traceable | **shown** — `because` on every entry |
 | the compiler is deterministic and exact | **shown** — 0 ms drift, refuses otherwise |
-| the intelligent edit beats a null | **NOT SHOWN** — see §5 and `bench/cutscore.py` |
-| the intelligent edit is better | **unsupported** — no human verdict recorded yet |
+| the edits are synchronised to the music | **shown** — see the table below |
+| the intelligent edit is *better* | **unsupported** — no human verdict recorded yet |
 
-The last two rows are the honest state of the work. `bench/verdict.py` exists
-and nobody has run it. Until somebody does, the correct sentence is "no verdict
-has been recorded", not "the intelligent edit is better".
+### Measured, Levels / premium-restraint, low band
+
+All four edits use the same song, the same 90 clips, the same brief and the same
+chooser. `hit` is the share of cuts landing within 80 ms of a kick onset; the
+null rotates each edit's own cut times, preserving count and spacing.
+
+| policy | hit | null | z | energy@cut | null | z |
+|---|---|---|---|---|---|---|
+| naive  | 0.585 | 0.267 | 1.71 | 35.8% | 51.1% | −1.19 |
+| rules  | 0.568 | 0.263 | 1.51 | **56.9%** | 51.0% | **+0.42** |
+| llm    | 0.524 | 0.268 | 1.19 | 41.4% | 51.4% | −0.64 |
+| random | 0.277 | 0.261 | 0.22 | 42.7% | 50.0% | −0.95 |
+
+Read it in this order:
+
+1. **The null validates the apparatus.** `random` scores 54th percentile against
+   its own null — indistinguishable, which is exactly what a null must do. If it
+   had scored well, nothing else in the table would mean anything.
+2. **All three music-aware policies hit the kick about twice as often as
+   random** (0.52–0.59 against 0.28). That is a real synchronisation result and
+   it is measured on the finished mp4.
+3. **`naive` hits most often and cuts worst.** It lands on the kick 58.5% of the
+   time and at the 35.8th percentile of kick energy — below its own null. It
+   cuts on beats whether or not anything is happening on them, which is the
+   entire argument of this lane, now with a number.
+4. **`rules` is the only policy whose cuts land at above-null energy** (+0.42).
+   Synchronised *and* selective.
+
+None of that says the edit is good. `bench/verdict.py` exists and nobody has run
+it. Until somebody does, the correct sentence is "no verdict has been recorded".
 
 ---
 

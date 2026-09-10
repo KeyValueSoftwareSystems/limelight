@@ -145,9 +145,42 @@ corpus() {
   echo "  then: python3 listen/percentile.py --corpus $dst --write"
 }
 
+vision() {
+  # The video lane. Small on purpose: opencv + numpy and one 230 kB detector.
+  say "vision: opencv (shot boundaries, optical flow, faces)"
+  python3 -m venv "$WORK/vision"
+  "$WORK/vision/bin/pip" -q install --upgrade pip
+  "$WORK/vision/bin/pip" -q install opencv-python-headless numpy
+  mkdir -p "$WORK/vision/models"
+  # YuNet. OpenCV 5 dropped the Haar cascades this was first written against;
+  # YuNet is the replacement and is a better detector, but it is a different
+  # one, so face counts from the two are not comparable.
+  if [ ! -s "$WORK/vision/models/yunet.onnx" ]; then
+    curl -sL -o "$WORK/vision/models/yunet.onnx" \
+      "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
+  fi
+  "$WORK/vision/bin/python" -c "import cv2,numpy;print('  cv2',cv2.__version__)"
+}
+
+clips() {
+  say "clips: 90 CC-licensed stock clips + the generated answer-sheet set"
+  python3 assets/fetch.py --n 90 --quality 720
+  "$WORK/vision/bin/python" assets/make-clips.py
+  "$WORK/vision/bin/python" assets/index.py --stock --generated
+}
+
+heldout() {
+  say "heldout: full-length CC recordings nobody here has tuned against"
+  python3 tools/mkheldout.py --n 12
+  python3 tools/heldout_maps.py
+}
+
 case "${1:-all}" in
   audio) audio;; basicpitch) basicpitch;; mir) mir;; chordmini) chordmini;; stems) stems;;
   stereo) stereo;; moss) moss;; corpus) corpus;;
-  all) audio; basicpitch || true; mir || true; chordmini; stems; stereo || true;;
-  *) echo "usage: bash tools/setup.sh [audio|basicpitch|mir|chordmini|stems|stereo|moss|corpus|all]"; exit 2;;
+  vision) vision;; clips) clips;; heldout) heldout;;
+  video) vision; clips;;
+  all) audio; basicpitch || true; mir || true; chordmini; stems; stereo || true;
+       vision || true; clips || true;;
+  *) echo "usage: bash tools/setup.sh [audio|basicpitch|mir|chordmini|stems|stereo|moss|corpus|vision|clips|heldout|video|all]"; exit 2;;
 esac

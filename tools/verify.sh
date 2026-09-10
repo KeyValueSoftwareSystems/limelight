@@ -15,6 +15,20 @@ node readers/src/showaudit.js shows/levels.html | tail -1 | sed 's#^#  levels  #
 printf '  (the other four: node readers/src/showaudit.js shows/<slug>.html)\n'
 run python3 listen/metaeval.py levels
 run python3 listen/fixtures.py
+
+# The video lane. index.py needs work/vision (opencv); the rest is stdlib+node.
+VIS="${LIMELIGHT_PY_VISION:-work/vision/bin/python}"
+if [ -x "$VIS" ]; then
+  run "$VIS" assets/index.py --check
+  run "$VIS" bench/cutscore.py --selftest
+  run "$VIS" bench/cutscore.py --brief-swap levels
+else
+  printf '\n== video lane checks skipped: no %s -- bash tools/setup.sh vision\n' "$VIS"
+fi
+printf '\n== salience (advisory: this check FAILS to discriminate, by design it carries no weight)\n'
+python3 bench/salience-check.py 2>/dev/null | tail -3 | sed 's#^#  #'
+printf '\n== video verdicts (a person, blind -- the authority nothing here replaces)\n'
+python3 bench/verdict.py show | head -3 | sed 's#^#  #' 
 printf '\n== falsification: a corrupted map must score near zero\n'
 python3 - <<'PY2'
 import sys, copy, json

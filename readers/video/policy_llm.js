@@ -31,14 +31,18 @@ function run(ctx) {
   const minS = B.min_shot_s || 0.5, maxS = B.max_shot_s || 8.0;
   const beats = map.beats || [];
 
-  function snap(t) {
-    let best = t, bd = 0.12;
+  function snap(t, hard) {
+    let best = t, bd = hard ? Infinity : 0.12;
     for (const b of beats) {
       const d = Math.abs(t - b);
       if (d < bd) { bd = d; best = b; }
     }
     return best;
   }
+  // Cuts the model asked for snap only if a beat is close. Cuts forced by a cap
+  // snap unconditionally -- they were chosen for nothing, so there is nothing
+  // for the grid to pull them away from.
+  const snapHard = function (t) { return snap(t, true); };
 
   // The model chose indices; the times come from the candidate list, which was
   // measured. Nothing here reads a number the model typed.
@@ -72,7 +76,7 @@ function run(ctx) {
   }
   let edges = [0].concat(chosen.map(function (c) { return c.t; }));
   edges.push(dur);
-  const capped = ASSETS.capSlots(edges, capAt, [], snap);
+  const capped = ASSETS.capSlots(edges, capAt, [], snapHard);
   edges = capped.edges;
   const forced = new Set(capped.forced.map(function (t) { return t.toFixed(3); }));
 
