@@ -71,46 +71,12 @@ UNMEASURED = {
                                 "envelope against the harmonic stems', which is not the same "
                                 "as HPSS on the mix and was not tried",
     },
-    "percentile": {
-        "value": None,
-        "wanted": "where this song sits against other songs -- busier than 80% of them, "
-                  "slower than 60% -- so a reader can tell a restrained record from a "
-                  "relentless one without being told what normal is",
-        "provenance": "unmeasured",
-        "why_null": "the corpus is five songs. A percentile over five is quantised to "
-                    "20-point steps before anything else goes wrong, and the check the brief "
-                    "asked for -- rank stability across a corpus split -- fails outright.",
-        "what_was_tried": [
-            {"instrument": "percentile of five per-song scalars (bpm, accents per second, "
-                           "mean energy, energy range, drops per minute) over the five-song "
-                           "corpus, with the corpus resampled 200 times",
-             "role": "writer and check together",
-             "result": "every one of the five features moves 40 percentile points between "
-                       "the 10th and 90th resample. A number that swings 40 points is not a "
-                       "fact about the song, it is a fact about which four songs happened to "
-                       "be in the corpus"},
-        ],
-        "the_likely_cause": "five songs, four of them 126-128 bpm dance records and one lofi "
-                            "cover at 84. There is no corpus here to be relative to.",
-        "what_would_settle_it": "more songs, and they have to be REAL RECORDINGS. The "
-                                "resample swing falls roughly as one over the square root of "
-                                "the corpus size, so getting from 40 points to 10 needs "
-                                "something like 80 songs -- an estimate from that scaling, "
-                                "not a measurement. The field is cheap to fill the moment a "
-                                "corpus exists: the writer is five lines and the check is the "
-                                "bootstrap already written here.",
-        "do_not_do_this": "there is a synthesis pipeline in this repository -- synth/"
-                          "compose.py writes ten songs identically on every machine -- and "
-                          "the blocker here is corpus size, so filling this from generated "
-                          "music is the obvious shortcut. It is refused. A percentile over "
-                          "synthetic songs describes the distribution of the GENERATOR, not "
-                          "of music: it would say a record is busier than 80% of songs when "
-                          "it means busier than 80% of the things compose.py happens to "
-                          "write. It would look like progress and be the most misleading "
-                          "number in the file, because nothing about its shape would reveal "
-                          "where it came from. Synthetic truth can test what we can already "
-                          "name; it cannot stand in for a population.",
-    },
+    # percentile is no longer here. It was null for two rounds on the grounds
+    # that five songs cannot support one -- true, and not the whole truth: I
+    # wrote "more songs are needed" without checking whether free corpora of
+    # real recordings exist. They do. listen/percentile.py measures it against
+    # 500 Creative Commons tracks from the Free Music Archive, and the field
+    # carries its own two gates.
     "weight": {
         "value": None,
         "wanted": "how much this record MEANS to the people who will be in the room -- the "

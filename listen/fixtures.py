@@ -395,6 +395,64 @@ def moved_hook():
     return ok
 
 
+def percentile_gates():
+    """percentile is corpus-relative, so the scorer cannot check it -- the
+    corpus is not in the map and not in git. Two things CAN be checked here.
+
+    That the feature values written into the map are reproducible from the
+    recording: a percentile is only as good as the number being ranked.
+
+    And that the range gate refuses a feature that does not vary. A count of
+    onsets per second got as far as a written percentile once, reading 18.0 to
+    20.0 across 200 real recordings because its threshold was the 80th
+    percentile of its own window. The gate exists so that cannot ship."""
+    import json
+    from mapio import map_path
+    try:
+        import percentile as PC
+    except Exception as e:
+        print("== percentile gates\n   --   cannot import listen/percentile.py: %s" % e)
+        return True
+
+    ok = True
+    print("== percentile: the numbers being ranked, and the gate that refuses a constant")
+    for slug in ("levels", "mizhiyoram", "the-nights"):
+        mp = map_path(slug)
+        if not mp:
+            continue
+        o = (json.load(open(mp)).get("observations") or {}).get("percentile") or {}
+        feats = o.get("features") or {}
+        if not feats:
+            print("   --   %-16s no percentile claimed" % slug)
+            continue
+        got = PC.song_features(slug)
+        if got is None:
+            print("   --   %-16s no audio" % slug)
+            continue
+        mine = got[0]
+        worst, name = 0.0, ""
+        for k, v in feats.items():
+            if k in mine and v.get("value") is not None:
+                d = abs(mine[k] - v["value"]) / max(1e-9, abs(v["value"]))
+                if d > worst:
+                    worst, name = d, k
+        good = worst < 0.02
+        ok = ok and good
+        print("   %s %-16s %d features recompute from the audio, worst drift %.3f%% (%s)"
+              % ("ok  " if good else "FAIL", slug, len(feats), 100 * worst, name or "-"))
+
+    # a feature with no range must be refused, whatever its percentile says
+    flat = [{"x": 1.0 + 0.001 * (i % 3)} for i in range(200)]
+    sv = sorted(c["x"] for c in flat)
+    q = lambda f: sv[int(f * (len(sv) - 1))]
+    spread = (q(0.9) - q(0.1)) / max(1e-9, abs(q(0.5)))
+    refused = spread < PC.MIN_SPREAD
+    ok = ok and refused
+    print("   %s %-16s a feature spanning %.3f of its median is refused by the range gate"
+          % ("ok  " if refused else "FAIL", "constant feature", spread))
+    return ok
+
+
 def run():
     import mapeval as ME
 
@@ -471,6 +529,8 @@ def run():
     ok = broken_identity_and_surprise() and ok
     print()
     ok = moved_hook() and ok
+    print()
+    ok = percentile_gates() and ok
     return 0 if ok else 1
 
 

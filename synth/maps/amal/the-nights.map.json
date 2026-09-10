@@ -60195,20 +60195,49 @@
    ]
   },
   "percentile": {
-   "value": null,
-   "wanted": "where this song sits against other songs -- busier than 80% of them, slower than 60% -- so a reader can tell a restrained record from a relentless one without being told what normal is",
-   "provenance": "unmeasured",
-   "why_null": "the corpus is five songs. A percentile over five is quantised to 20-point steps before anything else goes wrong, and the check the brief asked for -- rank stability across a corpus split -- fails outright.",
-   "what_was_tried": [
-    {
-     "instrument": "percentile of five per-song scalars (bpm, accents per second, mean energy, energy range, drops per minute) over the five-song corpus, with the corpus resampled 200 times",
-     "role": "writer and check together",
-     "result": "every one of the five features moves 40 percentile points between the 10th and 90th resample. A number that swings 40 points is not a fact about the song, it is a fact about which four songs happened to be in the corpus"
+   "rate": "per_song",
+   "unit": "0-100, the share of corpus tracks this record is above",
+   "corpus": {
+    "n": 500,
+    "source": "FMA-small (Free Music Archive), Creative Commons, real recordings",
+    "excerpt_seconds": 30.0
+   },
+   "how": "texture features on every whole 30-second window of this record, median across windows, against the same features on the first 30 seconds of each corpus track",
+   "windows_measured": 5,
+   "provenance": "measured",
+   "not_from_synthetic_audio": "there is a generator in this repository and it was not used. A percentile over generated music describes the distribution of the generator, and nothing about the number's shape would reveal that.",
+   "texture_only": "all four features are counts or ratios measured inside half a minute. Arrangement features -- drops per minute, whole-song energy range -- are absent because a 30-second excerpt cannot answer them, and they stay null until the corpus is full-length tracks.",
+   "checked_by": "two gates. A feature must VARY across the corpus -- (p90-p10)/median at least 0.15 -- and its percentile must survive 200 resamples of the corpus without swinging more than 12 points. A feature failing either is written null with the number that failed it.",
+   "features": {
+    "onset_concentration": {
+     "value": 0.4952,
+     "percentile": 41.4,
+     "resample_swing_points": 5.6,
+     "corpus_spread": 0.299,
+     "stable": true
+    },
+    "high_onset_concentration": {
+     "value": 0.477,
+     "percentile": 22.0,
+     "resample_swing_points": 4.6,
+     "corpus_spread": 0.286,
+     "stable": true
+    },
+    "brightness": {
+     "value": 0.445,
+     "percentile": 59.8,
+     "resample_swing_points": 5.8,
+     "corpus_spread": 0.678,
+     "stable": true
+    },
+    "level_swing_db": {
+     "value": 5.7987,
+     "percentile": 5.2,
+     "resample_swing_points": 2.6,
+     "corpus_spread": 1.248,
+     "stable": true
     }
-   ],
-   "the_likely_cause": "five songs, four of them 126-128 bpm dance records and one lofi cover at 84. There is no corpus here to be relative to.",
-   "what_would_settle_it": "more songs, and they have to be REAL RECORDINGS. The resample swing falls roughly as one over the square root of the corpus size, so getting from 40 points to 10 needs something like 80 songs -- an estimate from that scaling, not a measurement. The field is cheap to fill the moment a corpus exists: the writer is five lines and the check is the bootstrap already written here.",
-   "do_not_do_this": "there is a synthesis pipeline in this repository -- synth/compose.py writes ten songs identically on every machine -- and the blocker here is corpus size, so filling this from generated music is the obvious shortcut. It is refused. A percentile over synthetic songs describes the distribution of the GENERATOR, not of music: it would say a record is busier than 80% of songs when it means busier than 80% of the things compose.py happens to write. It would look like progress and be the most misleading number in the file, because nothing about its shape would reveal where it came from. Synthetic truth can test what we can already name; it cannot stand in for a population."
+   }
   },
   "weight": {
    "value": null,

@@ -41,6 +41,7 @@ WINDOW = 30.0
 MAX_SWING = 12.0        # percentile points between the 10th and 90th resample
 DRAWS = 200
 MIN_CORPUS = 60
+MIN_SPREAD = 0.15       # (p90-p10)/median across the corpus, before any percentile
 
 
 def features(B, t0, t1):
@@ -53,21 +54,31 @@ def features(B, t0, t1):
         return None
     span = max(1e-9, t1 - t0)
 
-    def rate(series):
-        o = [max(0.0, series[i] - series[i - 1]) for i in range(1, len(series))]
-        pos = sorted(x for x in o if x > 0)
-        if not pos:
+    def concentration(series):
+        """What share of the onset energy arrives in the busiest tenth of the
+        frames. Sparse music concentrates its flux into a few hits; dense music
+        spreads it. A shape statistic, so it cannot move when the volume does.
+
+        This replaces an onsets-per-second count that was measuring its own
+        threshold: the count used the 80th percentile OF THE SAME WINDOW, so
+        roughly a fifth of frames cleared it by construction and the answer came
+        out 18.0 to 20.0 across 200 real recordings -- a spread of 0.10 against
+        the median. Percentiles built on it would have ranked songs on rounding
+        noise."""
+        o = sorted((max(0.0, series[i] - series[i - 1]) for i in range(1, len(series))),
+                   reverse=True)
+        tot = sum(o)
+        if tot <= 0:
             return 0.0
-        thr = pos[int(0.80 * (len(pos) - 1))]
-        return sum(1 for i in range(1, len(o))
-                   if o[i] > thr and o[i] >= o[i - 1]) / span
+        top = max(1, len(o) // 10)
+        return sum(o[:top]) / tot
 
     a = sorted(rms)
     p10, p90 = a[int(0.10 * (len(a) - 1))], a[int(0.90 * (len(a) - 1))]
     tot = sum(low) + sum(high)
     return {
-        "onsets_per_second": rate(rms),
-        "high_onsets_per_second": rate(high),
+        "onset_concentration": concentration(rms),
+        "high_onset_concentration": concentration(high),
         "brightness": (sum(high) / tot) if tot > 0 else 0.0,
         "level_swing_db": 20 * math.log10(max(1e-9, p90) / max(1e-9, p10)),
     }
@@ -138,6 +149,23 @@ def analyse(slug, corpus, write=False):
         vals = [c[k] for c in corpus if k in c]
         if len(vals) < MIN_CORPUS:
             continue
+        # First gate: does this feature vary across real music at all? An
+        # onsets-per-second count got this far once and it read 18.0 to 20.0
+        # across 200 recordings, because its threshold was the 80th percentile
+        # of its own window. A percentile over a constant ranks rounding noise,
+        # and it looks exactly like a percentile over something real.
+        sv = sorted(vals)
+        q = lambda f: sv[int(f * (len(sv) - 1))]
+        spread = (q(0.9) - q(0.1)) / max(1e-9, abs(q(0.5)))
+        if spread < MIN_SPREAD:
+            out[k] = {"value": round(mine[k], 4), "percentile": None,
+                      "corpus_spread": round(spread, 3),
+                      "why_null": "this feature does not vary across the corpus -- p10 %.3f, "
+                                  "p90 %.3f, a spread of %.2f against the median. It is "
+                                  "measuring its own definition, not the music."
+                                  % (q(0.1), q(0.9), spread)}
+            dropped += 1
+            continue
         p = pct(vals, mine[k])
         lo, hi = stability(vals, mine[k], rng)
         swing = hi - lo
@@ -146,6 +174,7 @@ def analyse(slug, corpus, write=False):
             "value": round(mine[k], 4),
             "percentile": round(p, 1) if stable else None,
             "resample_swing_points": round(swing, 1),
+            "corpus_spread": round(spread, 3),
             "stable": stable,
         }
         if not stable:
@@ -176,8 +205,11 @@ def analyse(slug, corpus, write=False):
                         "Arrangement features -- drops per minute, whole-song energy range -- "
                         "are absent because a 30-second excerpt cannot answer them, and they "
                         "stay null until the corpus is full-length tracks.",
-        "checked_by": "resampling the corpus %d times; a feature whose percentile swings more "
-                      "than %.0f points is written null with the swing recorded" % (DRAWS, MAX_SWING),
+        "checked_by": "two gates. A feature must VARY across the corpus -- (p90-p10)/median at "
+                      "least %.2f -- and its percentile must survive %d resamples of the "
+                      "corpus without swinging more than %.0f points. A feature failing "
+                      "either is written null with the number that failed it."
+                      % (MIN_SPREAD, DRAWS, MAX_SWING),
         "features": out,
     }
     if write:

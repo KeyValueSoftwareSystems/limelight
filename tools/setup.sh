@@ -130,9 +130,24 @@ moss() {
   echo "  so the map is reproducible without a 35-minute CPU run."
 }
 
+# The corpus `percentile` is measured against: real recordings, never the
+# generator in synth/. FMA-small is 8000 Creative Commons tracks as 30-second
+# excerpts; 500 of them, converted to the same 32 kHz mono WAV that synth/out
+# holds, is enough for the stability gate to pass with a 3-6 point swing.
+corpus() {
+  local zip="$WORK/fma_small.zip" dst="$WORK/corpus"
+  if [ -d "$dst" ] && [ "$(ls -1 "$dst"/*.wav 2>/dev/null | wc -l)" -ge 200 ]; then
+    echo "corpus exists: $(ls -1 "$dst"/*.wav | wc -l) tracks"; return
+  fi
+  mkdir -p "$dst"
+  [ -f "$zip" ] || curl -sSL -C - -o "$zip" https://os.unil.cloud.switch.ch/fma/fma_small.zip
+  python3 tools/mkcorpus.py "$zip" "$dst"
+  echo "  then: python3 listen/percentile.py --corpus $dst --write"
+}
+
 case "${1:-all}" in
   audio) audio;; basicpitch) basicpitch;; mir) mir;; chordmini) chordmini;; stems) stems;;
-  stereo) stereo;; moss) moss;;
+  stereo) stereo;; moss) moss;; corpus) corpus;;
   all) audio; basicpitch || true; mir || true; chordmini; stems; stereo || true;;
-  *) echo "usage: bash tools/setup.sh [audio|basicpitch|mir|chordmini|stems|stereo|moss|all]"; exit 2;;
+  *) echo "usage: bash tools/setup.sh [audio|basicpitch|mir|chordmini|stems|stereo|moss|corpus|all]"; exit 2;;
 esac
