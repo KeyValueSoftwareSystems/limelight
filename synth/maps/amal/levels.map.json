@@ -75801,6 +75801,18 @@
    "runners_up": [],
    "candidates_considered": 1,
    "how_chosen": "how often it comes round, weighted by the energy where it lands, then grown to the longest phrase that still recurs that often"
+  },
+  "accents_diagnosis": {
+   "what": "why accents captures 31-79% of the available onset signal, measured rather than guessed",
+   "provenance": "measured",
+   "the_shortfall_is_the_low_band": "levels reaches 1.53x of a 1.54x ceiling in the high band -- essentially perfect -- and 1.09x of 1.38x in the low. starlight 1.19/1.29 high against 1.04/1.35 low, dont-look-down 1.26/1.29 against 1.10/1.34. The kick and bass side is where it is lost, on three of five.",
+   "not_timing": "shifting only the low-band claims from -30 to +30 ms moves the score by at most 0.02 and peaks at 0 to +10 ms. There is no residual offset worth correcting, and chasing that 0.02 would be tuning to the check.",
+   "strength_is_real_after_all": "a first pass correlated `strength` against the MIX's low band and got +0.30, +0.26, -0.04, which reads as a meaningless number. That was the wrong comparison: strength is measured on a STEM and a BAND. Against its own stem and band it is +0.77, +0.70, +0.81 for kick, snare and hat on levels, and +0.55 to +0.81 across the songs. It is a real measurement.",
+   "bass_strength_is_weak": "the exception. bass strength correlates only +0.19, +0.43, +0.22 with its own stem's onset envelope, which is musically expected -- a bass note has no sharp transient for an onset detector to measure. Treat bass `strength` as weakly meaningful; the TIME is measured, the loudness ranking is not.",
+   "a_quarter_of_kicks_are_better_explained_by_the_bass_stem": "the detector runs on the drums stem's 20-140 Hz band, where bass bleeds. Comparing onset energy in the drums stem against the bass stem at each claimed kick: 24% of levels' kicks, 18% of starlight's, 26% of dont-look-down's and 8% of The Nights' are stronger in bass. They are NOT relabelled, because a kick and a bass note usually land together on purpose and the bass being louder does not prove there is no kick. Recorded rather than acted on.",
+   "the_implausible_number": "only 31% of levels' 633 claimed kicks land within 60 ms of a beat, on a record whose kick is on every beat, and it claims 1.25 kicks per beat against 506 beats. starlight is 41%. That is a detection problem, not a labelling or timing one.",
+   "partial_explanation": "in the mix's low band a kick coinciding with a bass note reads 1.30x and 1.28x stronger on levels and starlight, but 1.08x and 0.94x on dont-look-down and The Nights. So the ceiling is built partly from coincidences a separated claim cannot match -- partly, on two of four songs, which is not enough to call the check wrong.",
+   "what_would_settle_it": "a purpose-built automatic drum transcription model rather than band-limited spectral flux. ADTOF (MZehren/ADTOF) is a CRNN trained on 359 hours of annotated real drumming with pretrained weights; a January 2026 arXiv result (2601.09520) beats it with released code. Either is a larger job than a spectral-flux tweak and neither was tried here."
   }
  },
  "confidence": 0.95,
