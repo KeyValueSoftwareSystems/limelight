@@ -41,14 +41,15 @@ function run(ctx) {
   const edges = ASSETS.capSlots([0].concat(cuts, [dur]), cap, [], null).edges;
   const timeline = [];
   const used = new Map();
-  let prev = null;
+  let prev = null, prevKin = null;
   for (let i = 0; i < edges.length - 1; i++) {
     const start = edges[i], end = edges[i + 1];
     const want = end - start;
-    const s = ASSETS.choose(pool, want, used, prev, brief, seed);
+    const s = ASSETS.choose(pool, want, used, prev, brief, seed, prevKin, false);
     if (!s) continue;
     used.set(s.clip_id, (used.get(s.clip_id) || 0) + 1);
     prev = s.clip_id;
+    prevKin = s.source_category;
     timeline.push({
       start: +start.toFixed(3), end: +end.toFixed(3),
       clip_id: s.clip_id, shot: s.shot,

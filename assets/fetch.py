@@ -29,8 +29,23 @@ index measures the clips; it does not trust the label on the box.
 import argparse, json, os, re, sys, hashlib, subprocess, urllib.request, urllib.error, random
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CLIPS = os.path.join(HERE, "stock", "clips")
-CATALOGUE = os.path.join(HERE, "stock", "CATALOGUE.json")
+
+
+def paths_for(setname):
+    """Where a named clip set lives.
+
+    Sets exist because coherence turned out to matter more than anything the
+    editing policy does. The first set was 90 clips drawn across ten unrelated
+    categories, and 92% of its cuts changed subject entirely -- snow, then a
+    flower, then a server room. A human watched three edits of it and rejected
+    all three as "random clips pieced together without any emotion", which was
+    correct and is recorded in truth/video-verdicts.json.
+    """
+    if not setname or setname == "default":
+        return (os.path.join(HERE, "stock", "clips"),
+                os.path.join(HERE, "stock", "CATALOGUE.json"))
+    base = os.path.join(HERE, "stock", setname)
+    return os.path.join(base, "clips"), os.path.join(base, "CATALOGUE.json")
 UA = "Mozilla/5.0 (X11; Linux x86_64) limelight-assets/1.0"
 
 SOURCE = {
@@ -124,9 +139,12 @@ def main():
     ap.add_argument("--category", action="append", default=[])
     ap.add_argument("--pages", type=int, default=2)
     ap.add_argument("--catalogue-only", action="store_true")
+    ap.add_argument("--set", dest="setname", default="default",
+                    help="name a coherent clip set, e.g. night-city")
     ap.add_argument("--seed", type=int, default=20260910)
     a = ap.parse_args()
 
+    CLIPS, CATALOGUE = paths_for(a.setname)
     os.makedirs(CLIPS, exist_ok=True)
     cats = a.category or categories()
     print(f"{len(cats)} categories", file=sys.stderr)
@@ -178,6 +196,7 @@ def main():
         entries.append({
             "clip_id": f"mixkit-{i}",
             "file": os.path.relpath(dst, HERE),
+            "set": a.setname,
             "source": SOURCE["name"],
             "source_url": url,
             "source_page": f"{SOURCE['listing']}{by_id[i]}/",
@@ -197,6 +216,7 @@ def main():
                  "reproducible from a fresh clone."),
         "made_by": {"how": "fetched", "who": "assets/fetch.py"},
         "source": SOURCE,
+        "set": a.setname,
         "quality": a.quality,
         "seed": a.seed,
         "clips": sorted(entries, key=lambda e: e["clip_id"]),

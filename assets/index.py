@@ -281,10 +281,12 @@ def index_clip(path, clip_id, meta=None):
     }
 
 
-def load_targets(stock, generated, incoming):
+def load_targets(stock, generated, incoming, setname="default"):
     out = []
     if stock:
-        cp = os.path.join(HERE, "stock", "CATALOGUE.json")
+        cp = (os.path.join(HERE, "stock", "CATALOGUE.json")
+              if setname in (None, "default")
+              else os.path.join(HERE, "stock", setname, "CATALOGUE.json"))
         if os.path.exists(cp):
             for c in json.load(open(cp))["clips"]:
                 out.append((os.path.join(HERE, c["file"]), c["clip_id"], c))
@@ -385,11 +387,16 @@ def main():
     ap.add_argument("--generated", action="store_true")
     ap.add_argument("--incoming", action="store_true")
     ap.add_argument("--check", action="store_true")
-    ap.add_argument("--out", default=os.path.join(HERE, "INDEX.json"))
+    ap.add_argument("--set", dest="setname", default="default",
+                    help="a named clip set, e.g. night-city")
+    ap.add_argument("--out")
     a = ap.parse_args()
+    if not a.out:
+        a.out = (os.path.join(HERE, "INDEX.json") if a.setname in (None, "default")
+                 else os.path.join(HERE, "stock", a.setname, "INDEX.json"))
     if a.check:
         return check()
-    targets = load_targets(a.stock, a.generated, a.incoming)
+    targets = load_targets(a.stock, a.generated, a.incoming, a.setname)
     if not targets:
         print("nothing to index -- pass --stock, --generated or --incoming",
               file=sys.stderr)
@@ -406,7 +413,10 @@ def main():
             print(f"  [{i}/{len(targets)}]", file=sys.stderr)
     doc = {
         "note": ("Every clip as measurements rather than filenames. The policy "
-                 "chooses over this; it never sees a category name."),
+                 "chooses over these; `source_category` is the one exception "
+                 "and is the source's opinion, used only to tell whether two "
+                 "shots belong to the same world."),
+        "set": a.setname,
         "made_by": {"how": "model", "who": "assets/index.py"},
         "graded_against": ("assets/generated/TRUTH.json, whose clips were "
                            "rendered from their answers. Stock footage has no "

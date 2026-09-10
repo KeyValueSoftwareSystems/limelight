@@ -200,7 +200,15 @@ function run(ctx) {
   const pool = pool0;
   const used = new Map();
   const timeline = [];
-  let prev = null;
+  let prev = null, prevKin = null;
+  // Where the picture is ALLOWED to change world: a named section beginning.
+  // Everywhere else the chooser holds the world it is in, so a run of shots
+  // reads as one place. This is the map earning its keep for video -- chapters
+  // were already there and the first version of this ignored them.
+  const chapterAt = (map.chapters || []).map(function (c) { return c.at; });
+  function isBoundary(t) {
+    return chapterAt.some(function (c) { return Math.abs(c - t) < 0.75; });
+  }
   // Repeated music can get repeated picture. `identity` says which bar repeats
   // which earlier bar; when a section repeats, the policy is allowed to reach
   // back for the clip it used the first time.
@@ -230,11 +238,13 @@ function run(ctx) {
         }
       }
     }
-    if (!s) s = ASSETS.choose(pool, want, used, prev, brief, seed);
+    if (!s) s = ASSETS.choose(pool, want, used, prev, brief, seed,
+                              prevKin, isBoundary(start));
     if (!s) continue;
     used.set(s.clip_id, (used.get(s.clip_id) || 0) + 1);
     prev = s.clip_id;
     placedAt.push({ t: start, clip_id: s.clip_id, shot: s.shot });
+    prevKin = s.source_category;
     timeline.push({
       start: +start.toFixed(3), end: +end.toFixed(3),
       clip_id: s.clip_id, shot: s.shot,

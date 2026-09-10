@@ -49,13 +49,14 @@ function run(ctx) {
 
   const timeline = [];
   const used = new Map();
-  let prev = null;
+  let prev = null, prevKin = null;
   for (let i = 0; i < edges.length - 1; i++) {
     const start = edges[i], end = edges[i + 1];
     const s = ASSETS.choose(pool, end - start, used, prev, brief, seed + i);
     if (!s) continue;
     used.set(s.clip_id, (used.get(s.clip_id) || 0) + 1);
     prev = s.clip_id;
+    prevKin = s.source_category;
     timeline.push({
       start: start, end: end, clip_id: s.clip_id, shot: s.shot,
       in_s: ASSETS.inPoint(s, end - start),

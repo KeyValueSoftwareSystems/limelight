@@ -44,8 +44,18 @@ sys.path.insert(0, os.path.join(ROOT, "listen"))
 from mapio import release_path
 
 
-def load_index():
-    p = os.path.join(ROOT, "assets", "INDEX.json")
+def load_index(ir=None):
+    """The index the IR was built from, not whichever one is default.
+
+    The IR records its own index path for exactly this reason: an edit built
+    from the night-city set cannot be compiled against the default one, and
+    failing loudly on a missing clip_id is better than rendering something
+    plausible from the wrong footage.
+    """
+    rel = ((ir or {}).get("made_by") or {}).get("index") or "assets/INDEX.json"
+    p = os.path.join(ROOT, rel)
+    if not os.path.exists(p):
+        p = os.path.join(ROOT, "assets", "INDEX.json")
     d = json.load(open(p))
     return {c["clip_id"]: c for c in d["clips"]}
 
@@ -138,7 +148,7 @@ def main():
     a = ap.parse_args()
 
     ir = json.load(open(a.ir))
-    index = load_index()
+    index = load_index(ir)
     bad = check(ir, index)
     if bad:
         print(f"REFUSED: {a.ir}", file=sys.stderr)
@@ -191,6 +201,10 @@ def main():
             return 1
 
         audio = None if a.no_audio else release_path(ir["song"]["slug"])
+        # An excerpt takes its audio from the same instant of the song, or the
+        # picture is cut to music nobody is hearing.
+        win = (ir.get("song") or {}).get("window") or {}
+        seek = ["-ss", f"{win['from']:.3f}"] if win.get("from") else []
         if audio:
             # No -t here. The video is already exactly as long as the quantised
             # timeline, and passing the song length in seconds re-truncated it
@@ -199,7 +213,8 @@ def main():
             # video defines the length; the audio is padded so -shortest can
             # never trim picture that the timeline asked for.
             r = subprocess.run(
-                ["ffmpeg", "-v", "error", "-y", "-i", silent, "-i", audio,
+                ["ffmpeg", "-v", "error", "-y", "-i", silent] + seek +
+                ["-i", audio,
                  "-map", "0:v:0", "-map", "1:a:0", "-c:v", "copy",
                  "-af", "apad", "-c:a", "aac", "-b:a", "192k",
                  "-shortest", out],

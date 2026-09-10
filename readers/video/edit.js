@@ -48,8 +48,13 @@ function main() {
   const map = JSON.parse(fs.readFileSync(mp, "utf8"));
   const brief = JSON.parse(fs.readFileSync(
     path.join(ROOT, "briefs", briefId + ".json"), "utf8"));
-  const index = JSON.parse(fs.readFileSync(
-    path.join(ROOT, "assets", "INDEX.json"), "utf8"));
+  // A named clip set, or the default. Coherence lives here: a set is clips
+  // from one world, and the chooser can only hold a world if it was given one.
+  const setname = arg("set", null);
+  const indexPath = arg("index", null) ||
+    (setname ? path.join(ROOT, "assets", "stock", setname, "INDEX.json")
+             : path.join(ROOT, "assets", "INDEX.json"));
+  const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
   const policy = POLICIES[policyId];
   if (!policy) { console.error("unknown policy " + policyId); process.exit(2); }
 
@@ -70,7 +75,7 @@ function main() {
       how: "policy", who: "readers/video/policy_" + policy.id + ".js",
       label: policy.label, brief: briefId,
       map: path.relative(ROOT, mp), seed: seed,
-      index: "assets/INDEX.json"
+      index: path.relative(ROOT, indexPath)
     },
     song: { slug: slug, length_s: +length.toFixed(3) },
     format: brief.format,
@@ -78,6 +83,75 @@ function main() {
     holds: r.holds,
     budget: r.budget
   };
+  // A window, for short form. The policy has ALREADY reasoned over the whole
+  // song -- that is the argument of this project and it is not weakened here.
+  // What changes is only how much of the result is exported. A four-minute
+  // montage is not something anybody watches; a person asked whether they would
+  // watch one on Instagram and the honest answer was no, and length was the
+  // first reason of four.
+  let from = arg("from", null) === null ? null : parseFloat(arg("from"));
+  let to = arg("to", null) === null ? null : parseFloat(arg("to"));
+
+  // --window <seconds> lets the MAP choose the excerpt instead of a person.
+  // Slide a window over the candidate moments, take the one carrying the most
+  // total strength, and start it on a downbeat so the excerpt begins where a
+  // bar does. Picking it by ear would work too, and would be one more thing
+  // tuned to one song by somebody who had already heard it.
+  const wantWin = arg("window", null) === null ? null : parseFloat(arg("window"));
+  if (wantWin && from === null && to === null) {
+    const RULES = POLICIES.rules;
+    const cands = RULES.candidates(map, length, ctx.derive);
+    const downs = (map.downbeats && map.downbeats.length)
+      ? map.downbeats : (map.beats || []);
+    let bestStart = 0, bestScore = -1;
+    for (const d of downs) {
+      if (d + wantWin > length) break;
+      let sc = 0;
+      for (const c of cands) {
+        if (c.t >= d && c.t < d + wantWin) sc += c.strength;
+      }
+      // A small pull toward starting just before something big, so the excerpt
+      // opens on a rise rather than in the middle of one.
+      const lead = cands.find(function (c) {
+        return c.t > d && c.t < d + 6 && c.strength >= 0.8;
+      });
+      if (lead) sc += 0.5;
+      if (sc > bestScore) { bestScore = sc; bestStart = d; }
+    }
+    from = bestStart;
+    to = Math.min(length, bestStart + wantWin);
+    console.error(`window: ${from.toFixed(2)}s -> ${to.toFixed(2)}s ` +
+                  `(strength ${bestScore.toFixed(2)}, chosen from the map)`);
+  }
+  if (from !== null || to !== null) {
+    const a = from === null ? 0 : from;
+    const b = to === null ? length : to;
+    const kept = [];
+    for (const e of ir.timeline) {
+      if (e.end <= a + 1e-6 || e.start >= b - 1e-6) continue;
+      const s0 = Math.max(e.start, a), e0 = Math.min(e.end, b);
+      if (e0 - s0 < 0.12) continue;
+      kept.push(Object.assign({}, e, {
+        start: +(s0 - a).toFixed(3),
+        end: +(e0 - a).toFixed(3),
+        // The in-point moves with the trim so the same frames are shown.
+        in_s: +(e.in_s + (s0 - e.start)).toFixed(3)
+      }));
+    }
+    ir.timeline = kept;
+    ir.holds = (ir.holds || [])
+      .filter(function (h) { return h.end > a && h.start < b; })
+      .map(function (h) {
+        return Object.assign({}, h, {
+          start: +(Math.max(h.start, a) - a).toFixed(3),
+          end: +(Math.min(h.end, b) - a).toFixed(3)
+        });
+      });
+    ir.song.length_s = +(b - a).toFixed(3);
+    ir.song.window = { from: +a.toFixed(3), to: +b.toFixed(3),
+      note: "the policy reasoned over the whole song; this is an excerpt of the result" };
+  }
+
   const out = arg("out");
   const text = JSON.stringify(ir, null, 1) + "\n";
   if (out) {

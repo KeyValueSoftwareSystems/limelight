@@ -59,6 +59,11 @@ const ASSETS = (function () {
         out.push(Object.assign({}, s, {
           clip_id: c.clip_id, shot: i,
           clip_duration: c.duration_s,
+          // The source's category. Not a measurement and not trusted as one --
+          // it is the only signal available about whether two shots belong to
+          // the same world, and it is the source's opinion. A real subject
+          // model would replace it.
+          source_category: c.source_category || null,
           fit: fit(s, brief)
         }));
       });
@@ -68,15 +73,29 @@ const ASSETS = (function () {
 
   // Pick a shot for a slot of `want` seconds.
   //
-  // The caller passes what it has already used, because reuse is a property of
-  // the edit and not of the footage. `avoid` is the clip most recently on
-  // screen: cutting from a clip to itself reads as a jump cut, which is a real
-  // effect and not one anybody asked for here.
-  function choose(pool, want, used, avoid, brief, seed) {
+  // `avoid` is the clip most recently on screen and `kin` is the world it came
+  // from -- the source's own category, which is the only thing here that knows
+  // two shots belong together.
+  //
+  // THIS FUNCTION USED TO OPTIMISE FOR INCOHERENCE, and it is worth stating
+  // plainly because the effect was severe and invisible in every number the
+  // scorer produced. It refused to reuse the previous clip and it scored unused
+  // clips higher, so across a 38-shot edit it selected 38 different clips and
+  // changed subject on 92% of cuts: snow, then a flower, then a server room.
+  // Timing was fine. A person watched three edits built this way and rejected
+  // all three -- "random clips pieced together without any emotion" -- and was
+  // right. Optimising for variety IS optimising for incoherence.
+  //
+  // Now the default pull is the other way: staying in the same world is
+  // rewarded, and `allowKin` lets the caller relax that at a structural
+  // boundary, where a change of subject is the point rather than an accident.
+  function choose(pool, want, used, avoid, brief, seed, kin, allowKin) {
     const maxReuse = (brief.callbacks && brief.callbacks.max_reuses_per_clip) || 2;
     let best = null, bestScore = -1;
     for (let i = 0; i < pool.length; i++) {
       const s = pool[i];
+      // Cutting from a clip straight back to itself reads as a jump cut, which
+      // is a real effect and not one anybody asked for here.
       if (s.clip_id === avoid) continue;
       const times = used.get(s.clip_id) || 0;
       if (times >= maxReuse) continue;
@@ -91,11 +110,17 @@ const ASSETS = (function () {
       // for a 1-second slot -- that is how a whole edit ends up inside one
       // clip.
       const room = Math.min(1, have / Math.max(0.2, want));
+      // Mild, so that a shot is not reused three times in a row, but nowhere
+      // near strong enough to drive the edit. It used to be a headline term.
       const fresh = 1 / (1 + times);
-      // Deterministic tie-break. Not randomness: the same seed and the same
-      // inputs must give the same edit, or nothing here is reproducible.
+      // Continuity. Same world as the outgoing shot is what makes a sequence
+      // read as one place rather than a slideshow. At a structural boundary the
+      // caller passes allowKin and this term is dropped, so the picture changes
+      // where the music does.
+      const same = (kin && s.source_category === kin) ? 1 : 0;
+      const cont = allowKin ? 0 : same;
       const jitter = ((Math.imul(hash(s.clip_id + ":" + s.shot), seed || 1) >>> 8) % 1000) / 1e5;
-      const score = s.fit * 0.6 + room * 0.25 + fresh * 0.15 + jitter;
+      const score = s.fit * 0.40 + cont * 0.35 + room * 0.18 + fresh * 0.07 + jitter;
       if (score > bestScore) { bestScore = score; best = s; }
     }
     return best;

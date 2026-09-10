@@ -1,0 +1,26 @@
+{
+ "note": "Human verdicts on blind A/B/C comparisons between video policies. `how: truth` here means a person watched the files and typed the answer -- nothing in this file was produced by a model.",
+ "protocol": "bench/verdict.py, letters sealed until record",
+ "verdicts": [
+  {
+   "at": "2026-09-11T00:44:45",
+   "token": "203f",
+   "slug": "levels",
+   "brief": "premium-restraint",
+   "who": "amal",
+   "how": "truth",
+   "blind": true,
+   "rejected_all": true,
+   "best_letter": null,
+   "worst_letter": null,
+   "best_policy": null,
+   "worst_policy": null,
+   "note": "All three rejected. Not emotional -- random clips pieced together with no feeling. The cutting is timed but the pictures have no relationship to each other or to the music's mood.",
+   "mapping": {
+    "A": "naive",
+    "B": "llm",
+    "C": "rules"
+   }
+  }
+ ]
+}

@@ -102,6 +102,11 @@ def cmd_record(a):
         return 1
     sealed = json.load(open(sealed_p))
     mapping = sealed["mapping"]
+    if a.reject_all:
+        a.best = a.worst = None
+    elif not a.best:
+        print("--best is required unless --reject-all", file=sys.stderr)
+        return 1
     for L in (a.best, a.worst):
         if L and L not in mapping:
             print(f"{L} is not one of {sorted(mapping)}", file=sys.stderr)
@@ -114,6 +119,7 @@ def cmd_record(a):
         "who": a.who,
         "how": "truth",
         "blind": True,
+        "rejected_all": bool(a.reject_all),
         "best_letter": a.best, "worst_letter": a.worst,
         "best_policy": mapping.get(a.best), "worst_policy": mapping.get(a.worst),
         "note": a.note or "",
@@ -132,8 +138,11 @@ def cmd_record(a):
     with open(VERDICTS, "w") as f:
         json.dump(doc, f, indent=1)
         f.write("\n")
-    print(f"recorded: best={a.best} ({mapping.get(a.best)}), "
-          f"worst={a.worst} ({mapping.get(a.worst)})")
+    if a.reject_all:
+        print("recorded: ALL REJECTED -- no policy produced an acceptable edit")
+    else:
+        print(f"recorded: best={a.best} ({mapping.get(a.best)}), "
+              f"worst={a.worst} ({mapping.get(a.worst)})")
     print(f"-> {os.path.relpath(VERDICTS, ROOT)}")
     print()
     print("full mapping: " + ", ".join(f"{k}={v}" for k, v in sorted(mapping.items())))
@@ -150,11 +159,15 @@ def cmd_show(a):
     print(f"{len(vs)} verdict(s)")
     tally = {}
     for v in vs:
-        print(f"  {v['at']}  {v['slug']}/{v['brief']}  best={v['best_policy']}"
-              f"  worst={v['worst_policy']}  ({v['who']})")
+        if v.get("rejected_all"):
+            print(f"  {v['at']}  {v['slug']}/{v['brief']}  ALL REJECTED  ({v['who']})")
+        else:
+            print(f"  {v['at']}  {v['slug']}/{v['brief']}  best={v['best_policy']}"
+                  f"  worst={v['worst_policy']}  ({v['who']})")
         if v.get("note"):
             print(f"      \"{v['note']}\"")
-        tally[v["best_policy"]] = tally.get(v["best_policy"], 0) + 1
+        if v.get("best_policy"):
+            tally[v["best_policy"]] = tally.get(v["best_policy"], 0) + 1
     if tally:
         print()
         print("preferred: " + ", ".join(f"{k} x{v}" for k, v in
@@ -176,7 +189,11 @@ def main():
     n.set_defaults(fn=cmd_new)
     r = sub.add_parser("record")
     r.add_argument("--token", required=True)
-    r.add_argument("--best", required=True)
+    r.add_argument("--reject-all", action="store_true",
+                   help="None of them are acceptable. A more important verdict "
+                        "than a ranking, and the tool could not express it "
+                        "until a person needed to.")
+    r.add_argument("--best")
     r.add_argument("--worst")
     r.add_argument("--who", required=True)
     r.add_argument("--note")
