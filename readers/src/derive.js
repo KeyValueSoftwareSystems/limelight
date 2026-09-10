@@ -262,9 +262,139 @@ var DERIVE = (function () {
       return best;
     }
 
+    /* ---------------- salience ----------------
+       How much the music CHANGES at t, on a 0-1 scale, ranked within this song.
+
+       This was very nearly written into the map as observations.salience, and
+       it should not be: everything it needs -- per-bar `energy`, per-bar
+       `observations.novelty`, per-bar per-stem levels -- is already in the file,
+       so a reader can compute it with arithmetic. Rule 3. A fifth field joining
+       anticipation, remaining, arc and lead in here is the right outcome, not a
+       consolation: the map stays the smaller thing, and there is no second copy
+       of this number to disagree with the first.
+
+       It deliberately does NOT read `moments[].kind`. The kinds come from
+       listen/moments.py, a different writer with different features, which is
+       what lets "does salience rank drops above quiets?" be an independent
+       check rather than a restatement. Feed kind in here and that check dies.
+
+       Three ingredients, each ranked within the song so that a quiet record and
+       a loud one are on the same scale:
+         step     how far the mean energy of the next two bars sits from the
+                  previous two -- absolute, because a drop OUT is as much of an
+                  event as a drop in, which is the whole build-as-drop-out
+                  finding this repo already paid for
+         novel    MuQ's own cosine distance at the nearest downbeat
+         churn    how many stems cross their presence threshold across the
+                  boundary
+
+       NOT a claim about importance to a listener. Nothing here has been checked
+       against a person. It is a ranking of measured change, and the name is the
+       most optimistic thing about it.
+
+       UNCORROBORATED, and that word is load-bearing. bench/salience-check.py
+       tests this against ChordMini's harmony -- the one witness available that
+       shares no code or feature family with energy, MuQ or the separator -- and
+       it does not discriminate: 0 of 4 songs clear the 95th percentile against
+       rotated copies of their own series, and on Levels the lift is strongly
+       negative. That is the genre rather than the field. EDM sustains one chord
+       under the drop, so the bars where harmony does NOT move are the loudest
+       bars, and harmonic change comes out anti-correlated with energy change.
+       The test's premise, that a chorus changes chord and gets louder, is true
+       of songwriter pop and false here.
+
+       So this is a well-motivated writer with no discriminating check. Under
+       rule 5 as amended it ships, its check carries zero weight, and everything
+       downstream records that it leaned on this -- policy_rules writes
+       salience_is on every cut for exactly that reason. Do not promote it to
+       the map, and do not cite the policy's output as evidence for it.       */
+    var novel = (m.observations && m.observations.novelty) || null;
+    var novelAt = (novel && Array.isArray(novel.at)) ? novel.at : null;
+    var novelVal = (novel && Array.isArray(novel.value)) ? novel.value : null;
+
+    function rankIn(sorted, v) {           /* share of the song at or below v */
+      if (!sorted.length || v === null) return null;
+      var lo = 0, hi = sorted.length;
+      while (lo < hi) { var mid = (lo + hi) >> 1;
+        if (sorted[mid] <= v) lo = mid + 1; else hi = mid; }
+      return lo / sorted.length;
+    }
+
+    function energyMean(from, to) {        /* mean of energy rows in [from,to) */
+      var s2 = 0, n2 = 0;
+      for (var i2 = 0; i2 < energy.length; i2++) {
+        var row = energy[i2];
+        var at = Array.isArray(row) ? row[0] : row.at;
+        var v = Array.isArray(row) ? row[1] : row.value;
+        if (at >= from && at < to) { s2 += v; n2 += 1; }
+      }
+      return n2 ? s2 / n2 : null;
+    }
+
+    function rawStep(t) {
+      if (!barLen) return null;
+      var w = barLen * 2;
+      var a = energyMean(t - w, t), b = energyMean(t, t + w);
+      return (a === null || b === null) ? null : Math.abs(b - a);
+    }
+    function rawNovel(t) {
+      if (!novelAt || !novelVal) return null;
+      var i2 = idx(novelAt, t);
+      if (i2 < 0) return null;
+      var j = (i2 + 1 < novelAt.length &&
+               Math.abs(novelAt[i2 + 1] - t) < Math.abs(novelAt[i2] - t)) ? i2 + 1 : i2;
+      return novelVal[j] === undefined ? null : novelVal[j];
+    }
+    function rawChurn(t) {
+      if (!present.length || !barLen || !bars.length) return null;
+      var bi = idx(bars, t);
+      if (bi < 1 || bi + 1 >= bars.length) return null;
+      var n2 = 0;
+      for (var i2 = 0; i2 < present.length; i2++) {
+        var nm = present[i2];
+        var before = stem01(nm, bars[bi - 1]), after = stem01(nm, bars[bi + 1]);
+        if (before === null || after === null) continue;
+        if ((before >= 0.25) !== (after >= 0.25)) n2 += 1;
+      }
+      return n2 / present.length;
+    }
+
+    /* Rank tables, built once from the bar lines, so a value at t can be
+       placed against the rest of the song rather than against a constant. */
+    var stepSorted = [], novelSorted = [], churnSorted = [];
+    for (var bi2 = 0; bi2 < bars.length; bi2++) {
+      var t2 = bars[bi2];
+      var a2 = rawStep(t2); if (a2 !== null) stepSorted.push(a2);
+      var b2 = rawNovel(t2); if (b2 !== null) novelSorted.push(b2);
+      var c2 = rawChurn(t2); if (c2 !== null) churnSorted.push(c2);
+    }
+    stepSorted.sort(function (x, y) { return x - y; });
+    novelSorted.sort(function (x, y) { return x - y; });
+    churnSorted.sort(function (x, y) { return x - y; });
+
+    function salienceAt(t) {
+      var parts = [], why = {};
+      var st = rankIn(stepSorted, rawStep(t));
+      var nv = rankIn(novelSorted, rawNovel(t));
+      var ch = rankIn(churnSorted, rawChurn(t));
+      if (st !== null) { parts.push(st * 0.45); why.energy_step = +st.toFixed(3); }
+      if (nv !== null) { parts.push(nv * 0.35); why.novelty = +nv.toFixed(3); }
+      if (ch !== null) { parts.push(ch * 0.20); why.stem_churn = +ch.toFixed(3); }
+      if (!parts.length) return null;
+      /* Renormalise by the weight actually available, so a map missing MuQ
+         novelty gets a smaller-evidence answer rather than a smaller number. */
+      var wsum = (st !== null ? 0.45 : 0) + (nv !== null ? 0.35 : 0) +
+                 (ch !== null ? 0.20 : 0);
+      var v = 0;
+      for (var i3 = 0; i3 < parts.length; i3++) v += parts[i3];
+      return { value: +(v / wsum).toFixed(4), from: why,
+               evidence: Object.keys(why).length };
+    }
+
     return {
       bars: bars, bar_length: barLen,
       stemDb: stemDb, stem01: stem01, stem_is_db: IS_DB,
+      salienceAt: salienceAt,
       anticipationAt: anticipationAt,
       remainingAt: remainingAt,
       arc: ARC,

@@ -34,18 +34,7 @@ UA = {"User-Agent": "limelight-map/0.3 (research; amal@trypencil.com)"}
 
 # The release file each map was built from, and what a person reading that
 # filename would say the record is. Stated, not measured.
-RELEASES = {
-    "levels": ("Avicii - Levels (Radio Edit).mp3", "Avicii", "Levels (Radio Edit)"),
-    "starlight": ("Martin Garrix, DubVision feat. Shaun Farrugia - Starlight "
-                  "(Keep Me Afloat) [Official Video].mp3",
-                  "Martin Garrix, DubVision feat. Shaun Farrugia",
-                  "Starlight (Keep Me Afloat)"),
-    "dont-look-down": ("Martin Garrix feat. Usher - Don't Look Down (Lyric Video).mp3",
-                       "Martin Garrix feat. Usher", "Don't Look Down"),
-    "mizhiyoram": ("Mizhiyoram -  Manjil Virinja Pookkal  Lofi Mix  Prazz Mu6.mp3",
-                   "Prazz Mu6", "Mizhiyoram (Manjil Virinja Pookkal, Lofi Mix)"),
-    "the-nights": ("The Nights.mp3", "Avicii", "The Nights"),
-}
+from mapio import RELEASES
 
 NOTE = (
     "an identifier a human confirmed, or null. Everything outside this recording -- how well "

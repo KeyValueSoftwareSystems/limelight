@@ -60,3 +60,11 @@ work/
 synth/maps/fresh*/
 synth/maps/_*/
 synth/maps/edited/
+
+# Video assets: rule 1 applies to footage for the same reason it applies to
+# audio, and the Mixkit licence forbids redistributing clips as stock anyway.
+# assets/stock/CATALOGUE.json is committed and is enough to fetch the set again.
+assets/stock/clips/
+assets/incoming/
+assets/generated/*.mp4
+renders/

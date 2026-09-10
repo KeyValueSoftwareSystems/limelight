@@ -1,0 +1,129 @@
+{
+ "note": "The answer sheet. These clips were RENDERED FROM these numbers, so the numbers are causes, not measurements -- the same standing as made_by.how = synthetic in a map.",
+ "made_by": {
+  "how": "synthetic",
+  "who": "assets/make-clips.py"
+ },
+ "cannot_prove": "Nothing here has compression noise, grain, handheld drift, rolling shutter or depth of field. A detector that passes here and fails on stock footage is not contradicting itself.",
+ "clips": [
+  {
+   "clip_id": "gen-still-dark",
+   "file": "generated/still-dark.mp4",
+   "duration_s": 6.0,
+   "width": 640,
+   "height": 360,
+   "fps": 25,
+   "cuts_s": [],
+   "shots": 1,
+   "subject_px_per_s": 0.0,
+   "camera_px_per_s": 0.0,
+   "shot_bg_luma": [
+    0.2137
+   ]
+  },
+  {
+   "clip_id": "gen-still-bright",
+   "file": "generated/still-bright.mp4",
+   "duration_s": 6.0,
+   "width": 640,
+   "height": 360,
+   "fps": 25,
+   "cuts_s": [],
+   "shots": 1,
+   "subject_px_per_s": 0.0,
+   "camera_px_per_s": 0.0,
+   "shot_bg_luma": [
+    0.9789
+   ]
+  },
+  {
+   "clip_id": "gen-subject-slow",
+   "file": "generated/subject-slow.mp4",
+   "duration_s": 6.0,
+   "width": 640,
+   "height": 360,
+   "fps": 25,
+   "cuts_s": [],
+   "shots": 1,
+   "subject_px_per_s": 30.0,
+   "camera_px_per_s": 0.0,
+   "shot_bg_luma": [
+    0.3049
+   ]
+  },
+  {
+   "clip_id": "gen-subject-fast",
+   "file": "generated/subject-fast.mp4",
+   "duration_s": 6.0,
+   "width": 640,
+   "height": 360,
+   "fps": 25,
+   "cuts_s": [],
+   "shots": 1,
+   "subject_px_per_s": 260.0,
+   "camera_px_per_s": 0.0,
+   "shot_bg_luma": [
+    0.3049
+   ]
+  },
+  {
+   "clip_id": "gen-camera-pan",
+   "file": "generated/camera-pan.mp4",
+   "duration_s": 6.0,
+   "width": 640,
+   "height": 360,
+   "fps": 25,
+   "cuts_s": [],
+   "shots": 1,
+   "subject_px_per_s": 0.0,
+   "camera_px_per_s": 180.0,
+   "shot_bg_luma": [
+    0.2997
+   ]
+  },
+  {
+   "clip_id": "gen-two-cuts",
+   "file": "generated/two-cuts.mp4",
+   "duration_s": 9.0,
+   "width": 640,
+   "height": 360,
+   "fps": 25,
+   "cuts_s": [
+    3.0,
+    6.0
+   ],
+   "shots": 3,
+   "subject_px_per_s": 60.0,
+   "camera_px_per_s": 0.0,
+   "shot_bg_luma": [
+    0.2538,
+    0.4743,
+    0.4501
+   ]
+  },
+  {
+   "clip_id": "gen-four-cuts-fast",
+   "file": "generated/four-cuts-fast.mp4",
+   "duration_s": 8.0,
+   "width": 640,
+   "height": 360,
+   "fps": 25,
+   "cuts_s": [
+    1.6,
+    3.2,
+    4.8,
+    6.4
+   ],
+   "shots": 5,
+   "subject_px_per_s": 120.0,
+   "camera_px_per_s": 0.0,
+   "shot_bg_luma": [
+    0.2294,
+    0.3483,
+    0.4027,
+    0.5873,
+    0.4045
+   ]
+  }
+ ]
+}

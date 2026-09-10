@@ -25,24 +25,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 SR = 22050
 
-SOURCES = {
-    "levels": "Avicii - Levels (Radio Edit).mp3",
-    "starlight": "Martin Garrix, DubVision feat. Shaun Farrugia - Starlight (Keep Me Afloat) [Official Video].mp3",
-    "dont-look-down": "Martin Garrix feat. Usher - Don't Look Down (Lyric Video).mp3",
-    "mizhiyoram": "Mizhiyoram -  Manjil Virinja Pookkal  Lofi Mix  Prazz Mu6.mp3",
-    "the-nights": "The Nights.mp3",
-}
-
-
-def find_source(slug):
-    named = SOURCES.get(slug)
-    if named and os.path.exists(os.path.join(ROOT, named)):
-        return os.path.join(ROOT, named)
-    for ext in (".wav", ".mp3", ".flac", ".m4a"):
-        p = os.path.join(ROOT, "synth", "incoming", slug + ext)
-        if os.path.exists(p):
-            return p
-    return None
+# The release each map was built from now lives in mapio.RELEASES, because this
+# file and listen/identify.py each used to carry their own copy of the same five
+# names -- and a held-out track fetched into synth/incoming was visible to
+# neither. find_source stays as a name so nothing else in this file moves.
+from mapio import release_path as find_source
 
 
 def decode_stereo(path):
