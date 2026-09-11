@@ -71,3 +71,11 @@ assets/incoming/
 assets/generated/*.mp4
 renders/
 renders/blind/
+
+# Which footage a brief means, and what its subject is. Derived by CLIP from
+# the brief's words and the set's SEMANTIC.json, cached because it costs a
+# model pass. Not committed: it is keyed by brief AND set, so it goes stale the
+# moment either changes, and a stale cache that nobody can see is the same trap
+# as an INDEX.json naming clips that are not on disk. edit.js rebuilds it on a
+# miss.
+assets/stock/.matched.json
