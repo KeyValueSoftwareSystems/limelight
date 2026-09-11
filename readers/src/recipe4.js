@@ -17,11 +17,25 @@
    allowed: how deep the darks go, how much the chase runs, how far the heads
    travel, how sharply the room answers a drum hit. */
 const DRIVE = (function(){ try { return (ENERGY || "medium") } catch(e) { return "medium" } })();
-const K = ({
+const K = Object.assign({}, {
   low:    { base:0.72, span:0.80, chase:0.45, accent:0.55, motion:0.55, strobe:0.35, haze:0.75 },
   medium: { base:1.00, span:1.00, chase:1.00, accent:1.00, motion:1.00, strobe:1.00, haze:1.00 },
   high:   { base:1.18, span:1.30, chase:1.45, accent:1.55, motion:1.45, strobe:1.60, haze:1.20 },
-}[DRIVE]) || { base:1, span:1, chase:1, accent:1, motion:1, strobe:1, haze:1 };
+}[DRIVE] || {}, {}) || { base:1, span:1, chase:1, accent:1, motion:1, strobe:1, haze:1 };
+/* A recipe written in the SHARED vocabulary wins over the one knob.
+   readers/recipe.js holds the words -- pace, look, motion, effects -- that the
+   video reader and the drone reader also read, and expands them into exactly
+   this shape. The host sets RECIPE_K when it has one. ENERGY stays because an
+   operator at 2am wants one knob, not four words, and because every existing
+   host and every bench still passes it.
+
+   Four words are strictly more than three levels: "fast and restrained" -- a
+   room that changes often without being hit -- could not be asked for at all
+   through low/medium/high. Nothing here can raise a limit; AGENTS.md rule 5
+   still puts every cap in the layout. */
+try { if (typeof RECIPE_K !== "undefined" && RECIPE_K) {
+  for (const _k in RECIPE_K) if (typeof RECIPE_K[_k] === "number") K[_k] = RECIPE_K[_k];
+} } catch (e) {}
 
 /* ---- fixture families ----------------------------------------------------
    A rig calls a light a Sharpy, a MegaPointe or a beam; the recipe only needs

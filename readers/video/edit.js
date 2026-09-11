@@ -61,7 +61,38 @@ function main() {
     path.join(ROOT, "briefs", briefId + ".json"), "utf8"));
   // A named clip set, or the default. Coherence lives here: a set is clips
   // from one world, and the chooser can only hold a world if it was given one.
-  const setname = arg("set", null);
+  // `--set product` is the name of a folder, and asking the writer of a
+  // three-line brief to know it is the same leak as asking them for
+  // cuts_per_minute. `auto`, or saying nothing at all, asks assets/match.py
+  // which pile of footage the brief's own words mean. The answer is cached per
+  // brief because it costs a CLIP text pass, and it cannot change unless the
+  // brief or the footage does.
+  let setname = arg("set", null);
+  if (setname === "auto" || setname === null) {
+    const cacheP = path.join(ROOT, "assets", "stock", ".matched.json");
+    let cache = {};
+    try { cache = JSON.parse(fs.readFileSync(cacheP, "utf8")); } catch (e) {}
+    if (cache[briefId]) {
+      setname = cache[briefId];
+    } else if (arg("set", null) === "auto") {
+      const py = ["work/audio/bin/python", "work/moss/bin/python", "python3"]
+        .map(function (x) { return path.join(ROOT, x); })
+        .find(function (x) { return fs.existsSync(x); }) || "python3";
+      const r = require("child_process").spawnSync(
+        py, [path.join(ROOT, "assets", "match.py"), "--brief", briefId, "--quiet"],
+        { cwd: ROOT, encoding: "utf8" });
+      const pick = (r.stdout || "").trim().split("\n").pop();
+      if (r.status === 0 && pick) {
+        setname = pick;
+        cache[briefId] = pick;
+        try { fs.writeFileSync(cacheP, JSON.stringify(cache, null, 1) + "\n"); } catch (e) {}
+        console.error("set: " + pick + " (matched from the brief's own words)");
+      } else {
+        console.error("set: could not match, falling back to the default index");
+        setname = null;
+      }
+    }
+  }
   const indexPath = arg("index", null) ||
     (setname ? path.join(ROOT, "assets", "stock", setname, "INDEX.json")
              : path.join(ROOT, "assets", "INDEX.json"));

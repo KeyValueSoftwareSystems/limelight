@@ -474,6 +474,19 @@ def main():
         "sample": {"width": SAMPLE_W, "height": SAMPLE_H, "fps": SAMPLE_FPS},
         "clips": out,
     }
+    # An index that names a file nobody has is a promise the renderer cannot
+    # keep. night-city listed 55 clips with 13 on disk, and the only symptom was
+    # a render dying on "no frames" halfway through a batch -- the index looked
+    # healthy, the pool looked rich, and the policy happily planned around
+    # footage that was not there.
+    missing = [c["file"] for c in out
+               if not os.path.exists(os.path.join(HERE, c["file"]))]
+    if missing:
+        print(f"REFUSING to write {a.out}: {len(missing)} of {len(out)} clips "
+              f"are not on disk, starting with {missing[0]}.\n"
+              f"An index is a claim about files that exist. Fetch them, or "
+              f"re-index only what is here.", file=sys.stderr)
+        return 2
     with open(a.out, "w") as f:
         json.dump(doc, f, indent=1)
         f.write("\n")

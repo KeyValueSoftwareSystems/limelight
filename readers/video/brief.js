@@ -12,6 +12,13 @@
 // it is just no longer compulsory.
 "use strict";
 
+// The WORDS come from readers/recipe.js, which the lighting and drone readers
+// read too. The numbers below stay here, because pixels of camera motion mean
+// nothing to a fixture -- but if the two files ever disagree about which words
+// exist, a person who learned the vocabulary on one reader is wrong on the
+// next, silently. So it is checked at load, once, and loudly.
+const RECIPE = require("../recipe.js");
+
 const PACE = {
   slow:     { cuts_per_minute:  8, min_shot_s: 2.4, max_shot_s: 12.0, salience_floor: 0.60 },
   measured: { cuts_per_minute: 16, min_shot_s: 1.4, max_shot_s:  6.0, salience_floor: 0.38 },
@@ -46,6 +53,20 @@ const FORMAT = {
   "16:9": { width:1920, height:1080, fps:25 },
   "1:1":  { width:1080, height:1080, fps:30 },
 };
+
+(function checkVocabulary() {
+  const mine = { pace: PACE, look: LOOK, motion: MOTION, effects: EFFECTS };
+  for (const axis of Object.keys(RECIPE.AXES)) {
+    const shared = RECIPE.AXES[axis].words.slice().sort();
+    const here = Object.keys(mine[axis] || {}).sort();
+    if (shared.join("|") !== here.join("|")) {
+      throw new Error(
+        "recipe vocabulary drift on `" + axis + "`: readers/recipe.js says [" +
+        shared.join(", ") + "] and readers/video/brief.js says [" + here.join(", ") +
+        "]. One vocabulary, three readers -- add the word to both or to neither.");
+    }
+  }
+})();
 
 function expand(b) {
   const out = Object.assign({}, b);
