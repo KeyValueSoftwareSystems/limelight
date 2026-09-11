@@ -358,6 +358,86 @@ def artnet_discover(ms=2500, to=None):
     s2.close()
     return {"nodes": list(found.values())}
 
+def read_window(m, slug, from_bar, bars):
+    """One window of a song, in musical position.
+
+    Every number an application acts on is a bar and a beat. The only seconds
+    in here live in `grid`, and they are there so the client library can do the
+    conversion at its own edge -- which is the whole reason a tempo change
+    costs nothing: the client changes one mapping and everything below is
+    still true."""
+    g = m["grid"]
+    bpb = g.get("beats_per_bar", 4) or 4
+    beat_s = g["period"]
+    bar_s = beat_s * bpb
+    phase = g.get("phase", 0.0)
+
+    def to_pos(t):
+        b = (t - phase) / bar_s
+        bar = int(b) + 1
+        beat = (b - int(b)) * bpb + 1
+        return {"bar": bar, "beat": round(beat, 3)}
+
+    def to_sec(bar, beat=1.0):
+        return phase + (bar - 1) * bar_s + (beat - 1) * beat_s
+
+    t0, t1 = to_sec(from_bar), to_sec(from_bar + bars)
+    dur = (m.get("song") or {}).get("length") or t1
+
+    ent = lambda o: o if isinstance(o, list) else ((o or {}).get("entries") or [])
+
+    # pulse -- the grid itself, not a list of times. A reader can generate every
+    # beat in the window from three numbers, so sending them is wasted bytes.
+    bp = g.get("bar_phase", 0)
+    pulse = {"kind": "grid", "every": {"beats": 1}, "beats_per_bar": bpb,
+             "accent_on_beats": [1 + bp] if bp < bpb else [1]}
+
+    # amount -- the energy curve, sampled at bar lines and left sparse. The
+    # client interpolates; that is why one payload serves 4 Hz and 44 Hz.
+    en = m.get("energy") or []
+    pts = []
+    for i in range(bars + 1):
+        t = to_sec(from_bar + i)
+        if t > dur: break
+        v = None
+        for e in en:
+            et, ev = (e[0], e[1]) if isinstance(e, list) else (e.get("at"), e.get("v"))
+            if et is None: continue
+            if et <= t: v = ev
+            else: break
+        if v is not None:
+            pts.append([{"bar": from_bar + i, "beat": 1}, round(float(v), 4)])
+    amount = {"kind": "curve", "shape": "swell", "points": pts} if pts else None
+
+    moments = [{"at": to_pos(mo.get("at", mo.get("t"))), "kind": mo.get("kind"),
+                "field": "impact" if mo.get("kind") == "drop" else "structure"}
+               for mo in ent(m.get("moments"))
+               if mo.get("at", mo.get("t")) is not None
+               and t0 <= mo.get("at", mo.get("t")) < t1]
+
+    ch = ent(m.get("chapters"))
+    spans = []
+    for i, c in enumerate(ch):
+        a0 = c.get("at", c.get("t"))
+        if a0 is None: continue
+        a1 = (ch[i + 1].get("at", ch[i + 1].get("t")) if i + 1 < len(ch) else dur)
+        if a1 <= t0 or a0 >= t1: continue
+        spans.append({"from": to_pos(max(a0, t0)), "to": to_pos(min(a1, t1)),
+                      "name": c.get("name"), "same_as": c.get("same")})
+
+    return {
+        "song": slug,
+        "window": {"from": {"bar": from_bar, "beat": 1},
+                   "to": {"bar": from_bar + bars, "beat": 1}},
+        "grid": {"bpm": g["bpm"], "beats_per_bar": bpb,
+                 "beat_seconds": round(beat_s, 6), "bar_seconds": round(bar_s, 6),
+                 "first_beat_s": round(phase, 4)},
+        "fields": {k: v for k, v in (("pulse", pulse), ("amount", amount)) if v},
+        "moments": moments,
+        "spans": spans,
+    }
+
+
 def songs_without_audio():
     """Slugs somebody has a score for, but whose audio is not on THIS machine.
 
@@ -1386,6 +1466,38 @@ class H(http.server.BaseHTTPRequestHandler):
                     return self._send(403, json.dumps({"error": "read-only instance"}))
                 return self._send(200, json.dumps(artnet_discover(
                     ms=int((q.get("ms") or ["2500"])[0]), to=(q.get("to") or [None])[0])))
+            if u.path == "/api/v1/plan":
+                # readers/preflight.py does the arithmetic; this only serves it.
+                sl = "".join(c for c in (q.get("song") or ["levels"])[0]
+                             if c.isalnum() or c in "-_")[:48]
+                rdr = "".join(c for c in (q.get("reader") or ["lights"])[0]
+                              if c.isalnum() or c in "-_")[:32]
+                rg = (q.get("rig") or [None])[0]
+                if rg: rg = "".join(c for c in rg if c.isalnum() or c in "-_")[:32]
+                sys.path.insert(0, os.path.join(ROOT, "readers"))
+                import importlib, preflight as _pf
+                importlib.reload(_pf)
+                return self._send(200, json.dumps(_pf.plan(sl, rdr, rg)))
+
+            if u.path == "/api/v1/read":
+                # A window of the song, anchored in bars and beats. Never seconds,
+                # except inside `grid`, which is the one declared bridge between
+                # musical position and this recording's clock.
+                sl = "".join(c for c in (q.get("song") or ["levels"])[0]
+                             if c.isalnum() or c in "-_")[:48]
+                try:
+                    from_bar = int((q.get("from_bar") or ["1"])[0])
+                    bars = max(1, min(64, int((q.get("bars") or ["8"])[0])))
+                except Exception:
+                    return self._send(400, json.dumps({"error": "from_bar and bars must be whole numbers"}))
+                sys.path.insert(0, os.path.join(ROOT, "readers", "lights"))
+                from dimensions_json import map_path
+                mp = map_path(sl)
+                if not mp:
+                    return self._send(404, json.dumps({"error": "no map for " + sl}))
+                m = json.load(open(mp))
+                return self._send(200, json.dumps(read_window(m, sl, from_bar, bars)))
+
             if u.path == "/api/dimensions":
                 # What the score turned into, and how fast each thing moves. The file
                 # has carried `from`, `trust` and the working all along and no page
@@ -1426,6 +1538,15 @@ class H(http.server.BaseHTTPRequestHandler):
                 if not os.path.exists(fp):
                     return self._send(404, json.dumps({"error": "no such rig"}))
                 return self._send(200, open(fp).read())
+            if u.path == "/static/session.js":
+                return self._send(200, open(os.path.join(ROOT, "readers", "src", "session.js")).read(),
+                                  "application/javascript")
+            if u.path == "/static/lightmap.js":
+                return self._send(200, open(os.path.join(ROOT, "readers", "lights", "mapping.js")).read(),
+                                  "application/javascript")
+            if u.path in ("/rig", "/protocol"):
+                return self._send(200, open(os.path.join(HERE, "rig.html")).read(),
+                                  "text/html; charset=utf-8")
             if u.path == "/static/wire.js":
                 return self._send(200, open(os.path.join(ROOT, "readers", "lights", "wire.js")).read(),
                                   "text/plain; charset=utf-8")

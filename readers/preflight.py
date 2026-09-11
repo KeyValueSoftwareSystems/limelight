@@ -205,6 +205,103 @@ def run(slug, only_reader=None, only_rig=None):
             print()
 
 
+def plan(slug, reader="lights", rig=None):
+    """The same answer run() prints, as a document an application can hold.
+
+    run() writes for a person standing at a rig. This writes for software that
+    has to decide what to do about it, and it deliberately calls the same
+    helpers -- if the two ever disagree, that is the bug, not a difference of
+    opinion.
+
+    The one thing added here is the outcome, which run() leaves implicit across
+    a verdict and a rate note. Three outcomes, because two were never enough:
+    a field FITS, or it is SMOOTHED down to what the room can actually read, or
+    it is UNPAYABLE. A curve may be smoothed; a moment may not, because you
+    either land the drop or you do not.
+
+    The identifier is a hash of what went in -- the map, the dimensions, the
+    reader and the rig -- so two identical rigs produce the same plan, nothing
+    here holds a session, and a plan a client already has keeps working when
+    the network does not."""
+    import hashlib
+    sys.path.insert(0, os.path.join(HERE, "lights"))
+    from dimensions_json import map_path
+    mp = map_path(slug)
+    if not mp:
+        return {"error": f"no map for {slug}"}
+    m = json.load(open(mp))
+    dims, where, stale = dimensions_of(m, slug)
+    if dims is None:
+        return {"error": f"{slug} carries no dimensions",
+                "how": f"python3 readers/lights/dimensions_json.py {slug}"}
+    rds = readers()
+    rd = rds.get(reader)
+    if rd is None:
+        return {"error": f"no reader {reader}", "known": sorted(rds)}
+    lays = layouts_for(rd)
+    if rig is None:
+        rig = sorted(lays)[0] if lays else None
+    lay = lays.get(rig)
+    if lay is None:
+        return {"error": f"{reader} has no rig {rig}", "known": sorted(lays)}
+
+    g = m["grid"]
+    bar_s = g["period"] * 4
+    out_hz = (lay.get("limits") or {}).get(
+        "output_hz", rd.get("default_output_hz", 44.0))
+
+    fields = []
+    for d in dims:
+        chs = d["channel"].split("+")
+        vs = [channel_verdict(rd, lay, c, d, bar_s, out_hz) for c in chs]
+        verdict = ("no" if any(v[0] == "no" for v in vs)
+                   else "unknown" if any(v[0] == "unknown" for v in vs) else "yes")
+        why = next((v[1] for v in vs if v[0] == verdict), "")
+        rn = rate_note(d, out_hz)
+        rate = d.get("rate_hz")
+        usable = (d.get("detail") or {}).get("usable_rate_hz")
+        kind = "moment" if not rate else "curve"
+
+        every_nth = None
+        if verdict == "no" or (rn and "impossible" in rn):
+            outcome = "unpayable"
+        elif rn and usable and rate:
+            # A moment cannot be thinned -- you either land the drop or you do
+            # not -- so a rate it cannot meet is a refusal, not a compromise.
+            if kind == "moment":
+                outcome = "unpayable"
+            else:
+                outcome = "smoothed"
+                every_nth = max(2, round(rate / usable))
+        else:
+            outcome = "fits"
+
+        fields.append({
+            "key": d["key"], "channel": d["channel"], "kind": kind,
+            "rate_hz": rate, "readable_rate_hz": usable,
+            "outcome": outcome, "every_nth": every_nth,
+            "verdict": verdict, "why": why, "rate_note": rn,
+            "trust": d.get("trust"), "from": d.get("from"),
+        })
+
+    seed = "|".join([slug, reader, rig,
+                     hashlib.sha256(open(mp, "rb").read()).hexdigest()[:16],
+                     json.dumps([f["key"] for f in fields], sort_keys=True)])
+    pid = "pl_" + hashlib.sha256(seed.encode()).hexdigest()[:6]
+
+    return {
+        "plan": pid, "song": slug, "reader": reader, "rig": rig,
+        "map": os.path.relpath(mp, ROOT), "dimensions_from": where, "stale": stale,
+        "grid": {"bpm": g["bpm"], "beats_per_bar": g.get("beats_per_bar", 4),
+                 "beat_seconds": g["period"], "bar_seconds": bar_s,
+                 "first_beat_s": g.get("phase", 0.0)},
+        "output_hz": out_hz, "units": len(lay["fixtures"]),
+        "carried": sum(1 for f in fields if f["outcome"] != "unpayable"),
+        "of": len(fields),
+        "fields": fields,
+    }
+
+
 def main():
     a = sys.argv[1:]
     slug = a[0] if a and not a[0].startswith("-") else "levels"

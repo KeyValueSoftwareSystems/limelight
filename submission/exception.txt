@@ -1,0 +1,7 @@
+Our demonstration uses lighting hardware, so it is worth being explicit that the product does not depend on any.
+
+What we sell is software: a file that describes a song, and readers that consume it. The lights belong to the customer and already exist. DMX and Art-Net are open standards that an inexpensive node and a fifty-thousand-pound console both speak, and the consumer tier uses smart bulbs people already own. We manufacture nothing, hold no stock, and need no specialised infrastructure to deliver to a customer.
+
+We bought two fixtures for one reason: to prove the last link of the chain works on real hardware rather than in our own emulator, because grading our own output against our own renderer proves nothing. It was a few hundred pounds, once, for the whole team.
+
+If it helps to test the claim - the same file already drives a second reader that is not lighting at all, and no part of the pipeline needs anything beyond a laptop.

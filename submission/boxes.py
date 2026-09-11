@@ -1,0 +1,74 @@
+BOXES = {}
+
+BOXES["01 Opportunity"] = """You know when the chorus is coming back. No software does.
+
+That sounds like a small gap. It decides everything. Anything that responds to music works from loudness, so it finds out about a moment when the audience does. It cannot build up to something it does not know is coming. That is not a bug anybody could fix. It is what live means.
+
+The odd part is the repetition. The same song is analysed millions of times a day, live and badly, and thrown away each time. Done once in advance it takes seventeen seconds on a laptop, it sees the whole song before deciding anything, and it can be corrected. Agents cannot hear either.
+
+People pay a lot for this layer. Spotify bought The Echo Nest in 2014 for a reported $100m and closed the API. Gracenote, which only named tracks, sold three times over, most recently for about $560m. Shazam went to Apple for about $400m. Every buyer closed it."""
+
+BOXES["02 Idea"] = """A music intelligence layer that writes down what a song does, so software can respond to its shape rather than merely its volume.
+
+Think of where NVIDIA sits: one substrate, and other people build video games, mining rigs and AI training on it. We write one score per song. The applications are lighting software, wedding experiences, video editing, video games, a cradle that rocks to a lullaby, agents that need to know what is playing. We will not build most of them.
+
+A score says which sections come back, where the singing stops and the drums take over, where a build starts and lands. Nothing about lights in it, or any other output. Describe only the music and anything can use it.
+
+How software talks to the hub is open, and does three things. It says what is playing. It lets an application state what it needs and what it wants people to feel, and hands back only that. And it keeps the application in step as the song plays.
+
+We have written two readers: lights on real fixtures, and drone choreography, which proves the format is not secretly about lighting.
+
+The library improves because corrections are shared: somebody fixes a beat that is wrong, and the song is right for everyone after them."""
+
+BOXES["03 Target User"] = """The people who pay us first run Indian weddings. A premium wedding costs tens of lakhs. The vendor already owns the rig, and then either hires somebody to run it or falls back on a preset that looks like the last twenty weddings. The couple wants the opposite: their songs, their photographs, and the room taking its colours out of those photographs, on the most expensive day of their lives.
+
+It has to be self-serve or it is not a product. They fill in a form, we generate the show, the vendor approves it. One vendor gets a season out of one subscription.
+
+Then small venues: our first is a hostel in Munnar, where the host has programmable lights, nobody to run them, and wants this. Then DJs, because a DJ will fix a beat that is wrong and a hostel owner never will. That is how the library gets built.
+
+Other people's applications come later. They are the unlock, not the market."""
+
+BOXES["04 Validation & Competition"] = """Nobody offers this openly, because the good version was bought and shut. That is the opportunity and the warning.
+
+In lighting the competition is real. SoundSwitch, owned by inMusic, pre-analyses tracks and writes lighting from them, and it is good. Every fixture has a sound-active mode. But each makes one kind of output, keeps its analysis to itself, and lets the customer decide nothing.
+
+We would not defend the algorithm; finding beats is commodity work. We would defend the library of corrected songs and how many applications speak to the hub.
+
+For evidence, the hostel host has the lights, nobody to run them, and wants it. A sound and light professional we know is keen and is how we reach more venues. Wedding vendors already pay for this outcome. And we have built it: seventeen seconds to score a record, real fixtures running from it.
+
+What could kill it is that people might not be able to tell. If a room cannot feel the difference between lights that build to a moment and lights that react to one, we have made something clever and useless. The hostel is where we test it."""
+
+BOXES["05 Go-to-Market & Revenue"] = """We reach the first customers through the people who install lights into venues, DJ communities, and word of mouth between wedding vendors.
+
+The hub is what people pay for. Wedding vendors pay per event or per season, venues pay monthly, and we are confident about that because they already pay for the same result. Later, companies putting music-aware features into their own products pay for access, which is the best margin, though we have not tested it.
+
+Keeping the interaction open is what makes the rest possible. Every application somebody else builds makes a score worth more, and every score makes building one more worthwhile. That is the part we cannot do alone.
+
+For KeyValue the shape is Docker Hub. The runtime was open; the registry became the thing nobody could do without. Engineering hours sell once. A layer keeps earning."""
+
+BOXES["06 Feasibility"] = """At KeyCode, one score file driving more than one reader. Lights performing a real record on real fixtures already works, with the editor we use to fix a score by ear. The wedding designer and the agent interface are being built now; on the day we will say what runs and what does not.
+
+This does not become a proven business in ninety days, and saying it would be the least believable thing here. Ninety days can settle two things: whether the interface survives somebody who did not write it, and whether the library improves, which shows as fewer corrections per song and more songs corrected per person. If neither moves, we have written good software that does not compound, and month three is a better time to learn that than year two.
+
+Risks. A wrong tempo makes everything after it wrong, so we check every field against the recording rather than our own output. Which photograph lands on the chorus is taste, so the couple marks favourites. And somebody who already holds a catalogue could copy us.
+
+No capital, factory, regulator, private data or long sales cycle. It runs on an ordinary laptop, and any hardware in a demonstration is the customer's."""
+
+BOXES["Exception note"] = """This is infrastructure and it does not fit a ninety-day profile. We would rather say that than make the idea smaller so that it does.
+
+The bet is that whoever owns the layer which lets software read music is well placed in whatever gets built on it. The evidence is not a forecast: this layer keeps getting bought, by Spotify, by Sony and Nielsen, by Apple, and closed every time. Ours stays open at the interface, which nobody has tried.
+
+No hardware dependency. The lights belong to the customer and the standards are open. We bought a par and a moving head once, to test against real equipment rather than our own simulator, which proves nothing.
+
+Held to in ninety days: one venue live, one application built by somebody outside the team, and a library that measurably improves."""
+
+import io
+tot = 0
+for k, v in BOXES.items():
+    tot += len(v)
+    print(f"{'OK ' if len(v) <= 2000 else 'OVER'} {len(v):5}/2000   {k}")
+print(f"\ntotal {tot} characters (was 8779, target ~6145)")
+out = ["LIMELIGHT - KeyCode 2026 idea submission", ""]
+for k, v in BOXES.items():
+    out.append(f"{k}\n\n{v}\n\n")
+io.open("SUBMISSION.txt", "w", encoding="utf-8").write("\n".join(out))

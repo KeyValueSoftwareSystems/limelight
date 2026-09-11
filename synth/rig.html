@@ -1,0 +1,224 @@
+<!-- A lighting application built only on the protocol.
+     It never opens a map. It asks for a plan, asks for a window of the song in
+     bars and beats, and applies readers/lights/mapping.js. Everything on the
+     left of this page came over the wire; everything on the right is ours. -->
+<title>Rig on the protocol</title>
+<style>
+:root{--bg:#0a0d13;--pan:#0f141d;--line:#1b2230;--line2:#263047;--ink:#e6e9f0;
+  --dim:#9aa3b8;--faint:#5c6478;--amb:#e8a33d;--ok:#5bb98c;--no:#e2705f;--blu:#6fa8dc}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.55 ui-sans-serif,system-ui,sans-serif;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding:16px 18px 70px}
+h1{font:600 13px ui-monospace,monospace;letter-spacing:.18em;color:var(--amb);margin:0 0 14px}
+button,select,input[type=text],input[type=number]{background:#182031;color:var(--ink);
+  border:1px solid var(--line2);border-radius:6px;padding:6px 11px;font:inherit;cursor:pointer}
+button:hover{border-color:#41506e} button.go{border-color:var(--amb);color:var(--amb)}
+button.on{background:var(--amb);color:#171003;font-weight:600}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px}
+.bar select{max-width:190px}
+#seek{flex:1;min-width:160px;accent-color:var(--amb)}
+.clock{font:12px ui-monospace,monospace;color:var(--amb);min-width:120px;text-align:right;
+  font-variant-numeric:tabular-nums}
+canvas{display:block;width:100%;height:130px;background:#05070b;border:1px solid var(--line);
+  border-radius:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:6px;background:var(--pan);padding:12px 14px}
+.card h2{font:600 10px ui-monospace,monospace;letter-spacing:.13em;text-transform:uppercase;
+  margin:0 0 10px}
+.card.wire h2{color:var(--blu)} .card.mine h2{color:var(--amb)}
+table{border-collapse:collapse;width:100%;font:12px ui-monospace,monospace}
+td{padding:3px 8px 3px 0;border-bottom:1px solid #141a26;color:var(--dim);vertical-align:top}
+td.k{color:var(--ink);white-space:nowrap} td.n{text-align:right;color:var(--amb);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.note{color:var(--faint);font-size:12px;line-height:1.5;margin:9px 0 0}
+.pill{font:10px ui-monospace,monospace;border-radius:99px;padding:1px 7px;border:1px solid}
+.fits{color:var(--ok);border-color:var(--ok)} .smoothed{color:var(--amb);border-color:var(--amb)}
+.unpayable{color:var(--no);border-color:var(--no)}
+#msg{font:11.5px ui-monospace,monospace;color:var(--amb)}
+.hdr{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin:0 0 8px}
+.hdr .id{font:12px ui-monospace,monospace;color:var(--faint)}
+</style>
+
+<div class="wrap">
+<h1>RIG ON THE PROTOCOL</h1>
+
+<div class="bar">
+  <button id="play" class="go">play</button>
+  <select id="song"></select>
+  <select id="rig"></select>
+  <input id="seek" type="range" min="0" max="1000" value="0">
+  <span class="clock" id="clock">0.0 s · bar 1</span>
+  <label style="color:var(--faint);font:11px ui-monospace,monospace">tempo</label>
+  <input id="rate" type="range" min="0.6" max="2" step="0.05" value="1" style="width:96px">
+  <span class="clock" id="ratev" style="min-width:46px">×1.00</span>
+  <button id="dmx">send DMX</button>
+  <span id="msg"></span>
+</div>
+
+<canvas id="lamps"></canvas>
+
+<div class="two">
+  <div class="card wire">
+    <h2>what came over the wire</h2>
+    <div class="hdr"><span class="id" id="planid">—</span><span class="id" id="carried"></span></div>
+    <div id="plan"></div>
+    <div id="read" style="margin-top:10px"></div>
+    <p class="note">Nothing here mentions a lamp. The window is bars and beats; the only
+    seconds are in <b>grid</b>, which is what the library uses to convert on this machine.</p>
+  </div>
+
+  <div class="card mine">
+    <h2>what our mapping did with it</h2>
+    <div id="mapped"></div>
+    <p class="note">All of it comes from <b>readers/lights/mapping.js</b>, which is 73 lines.
+    The old recipe that read the map directly is 487. The difference is everything the
+    session now does for us: the grid, the interpolation, the clock, and knowing which
+    fields this rig can carry at all.</p>
+  </div>
+</div>
+</div>
+
+<script src="/static/session.js"></script>
+<script src="/static/lightmap.js"></script>
+<script>
+const $=i=>document.getElementById(i);
+const Q=new URLSearchParams(location.search);
+let SONG=Q.get("song")||"levels", RIG=Q.get("rig")||"three";
+let PLAN=null, WIN=null, S=null, RIGDEF={pars:[]}, DUR=1, SENDING=false, BUSY=false;
+const aud=new Audio(); aud.preload="auto";
+const esc=s=>String(s==null?"":s).replace(/</g,"&lt;");
+const say=t=>$("msg").textContent=t;
+
+async function boot(){
+  const G=await (await fetch("/api/maps?song="+SONG)).json();
+  SONG=G.song;
+  $("song").innerHTML=Object.entries(G.songs||{}).map(([k,v])=>
+    `<option value="${k}"${k===SONG?" selected":""}>${esc(v)}</option>`).join("");
+  aud.src="/api/audio?song="+SONG;
+  await loadPlan();
+  wire(); loop();
+}
+
+async function loadPlan(){
+  PLAN=await (await fetch(`/api/v1/plan?song=${SONG}&reader=lights&rig=${RIG}`)).json();
+  if(PLAN.error){ say(PLAN.error); return }
+  DUR=180;
+  const lay=await (await fetch("/api/layout?rig="+RIG)).json().catch(()=>null);
+  RIGDEF={pars:((lay&&lay.fixtures)||[]).filter(f=>f.kind==="par"||f.kind==="head")};
+  if(!RIGDEF.pars.length) RIGDEF={pars:Array.from({length:Math.max(1,PLAN.units)},()=>({}))};
+  $("rig").innerHTML=["three","live","small","beat","club","festival"].map(r=>
+    `<option${r===RIG?" selected":""}>${r}</option>`).join("");
+  $("planid").textContent=PLAN.plan+"  ·  "+PLAN.rig+"  ·  "+PLAN.units+" units";
+  $("carried").innerHTML=`<span class="pill ${PLAN.carried===PLAN.of?"fits":"smoothed"}">`
+    +`${PLAN.carried} of ${PLAN.of} carried</span>`;
+  $("plan").innerHTML=`<table>${(PLAN.fields||[]).map(f=>
+    `<tr><td class="k">${esc(f.key)}</td><td class="k" style="color:var(--faint)">${esc(f.channel)}</td>
+     <td class="n">${f.rate_hz?f.rate_hz.toFixed(2)+"/s":"one-off"}</td>
+     <td style="text-align:right"><span class="pill ${f.outcome}">${f.outcome}</span></td></tr>`).join("")}</table>`;
+  await fetchWindow(1);
+}
+
+async function fetchWindow(fromBar){
+  const w=await (await fetch(`/api/v1/read?song=${SONG}&from_bar=${fromBar}&bars=8`)).json();
+  if(w.error){ say(w.error); return }
+  WIN=w;
+  S=window.LimelightSession.Session(PLAN,WIN);
+  S.rate(+$("rate").value);
+  DUR=Math.max(DUR, S.secondsAt(w.window.to.bar,1));
+}
+
+/* ---- the whole render loop. Three lines of protocol, one line of ours. ---- */
+function loop(){
+  requestAnimationFrame(loop);
+  if(!S) return;
+  const t=aud.currentTime;
+  const pos=S.posAt(t);
+
+  /* when the playhead leaves the window we hold, fetch the next one */
+  if(WIN && pos.bar>=WIN.window.to.bar && !BUSY){
+    BUSY=true; fetchWindow(WIN.window.to.bar).finally(()=>BUSY=false);
+  }
+  if(WIN && pos.bar<WIN.window.from.bar && !BUSY){
+    BUSY=true; fetchWindow(Math.max(1,pos.bar)).finally(()=>BUSY=false);
+  }
+
+  const read=S.at(t);                                   /* the protocol */
+  const frame=window.LimelightLights.lightsFrame(read, RIGDEF);   /* ours */
+
+  draw(frame, read);
+  $("clock").textContent=`${t.toFixed(1)} s · bar ${pos.bar} beat ${Math.floor(pos.beat)}`;
+  if(!aud.seeking) $("seek").value=Math.round((t/(DUR||1))*1000);
+
+  $("read").innerHTML=`<table>
+    <tr><td class="k">position</td><td class="n">bar ${pos.bar} beat ${pos.beat.toFixed(2)}</td></tr>
+    <tr><td class="k">amount</td><td class="n">${read.amount==null?"—":read.amount.toFixed(3)}</td></tr>
+    <tr><td class="k">pulse phase</td><td class="n">${read.pulse?read.pulse.phase.toFixed(3):"—"}</td></tr>
+    <tr><td class="k">next beat in</td><td class="n">${read.pulse?read.pulse.to_next_beat_s.toFixed(3)+" s":"—"}</td></tr>
+    <tr><td class="k">section</td><td class="n">${read.span?esc(read.span.name):"—"}</td></tr></table>`;
+
+  const lit=frame.filter(f=>f.level>0.02).length;
+  $("mapped").innerHTML=`<table>
+    <tr><td class="k">lamps lit</td><td class="n">${lit} of ${frame.length}</td></tr>
+    <tr><td class="k">brightest</td><td class="n">${Math.max(...frame.map(f=>f.level)).toFixed(3)}</td></tr>
+    ${frame.slice(0,6).map((f,i)=>`<tr><td class="k">par ${i+1}</td>
+      <td class="n">${f.level.toFixed(3)}${f.white?"  white":""}</td></tr>`).join("")}</table>`;
+
+  if(SENDING && !aud.paused) push(frame);
+}
+
+function draw(frame, read){
+  const c=$("lamps"),w=c.clientWidth,h=130,x=c.getContext("2d");
+  c.width=w*devicePixelRatio;c.height=h*devicePixelRatio;
+  x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  x.fillStyle="#05070b";x.fillRect(0,0,w,h);
+  const n=frame.length,gap=w/(n+1),rad=Math.min(gap*0.30,32);
+  frame.forEach((f,i)=>{
+    const cx=gap*(i+1),cy=h*0.48,lv=f.level;
+    const col=f.white?[255,255,255]:[255,Math.round(150+70*lv),Math.round(70+40*lv)];
+    if(lv>0.01){const gr=x.createRadialGradient(cx,cy,0,cx,cy,rad*2.8);
+      gr.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},${0.6*lv})`);
+      gr.addColorStop(1,"rgba(0,0,0,0)");
+      x.fillStyle=gr;x.beginPath();x.arc(cx,cy,rad*2.8,0,7);x.fill()}
+    x.beginPath();x.arc(cx,cy,rad,0,7);
+    x.fillStyle=`rgb(${Math.round(col[0]*lv)},${Math.round(col[1]*lv)},${Math.round(col[2]*lv)})`;
+    x.fill();x.strokeStyle="#2a3346";x.lineWidth=1.5;x.stroke()});
+  x.fillStyle="#7c849a";x.font="11px ui-monospace,monospace";
+  x.fillText(read.span?read.span.name:"",8,18);
+}
+
+const hex=a=>a.map(b=>b.toString(16).padStart(2,"0")).join("");
+async function push(frame){
+  if(BUSY) return;
+  const u8=[];
+  for(const f of frame){
+    const v=Math.max(0,Math.min(255,Math.round(255*f.level)));
+    const c=f.white?[v,v,v]:[v,Math.round(v*0.69),Math.round(v*0.36)];
+    u8.push(c[0],c[1],c[2]);
+  }
+  try{ await fetch("/api/dmx/slots",{method:"POST",body:JSON.stringify({hex:hex(u8)})}) }catch(e){}
+}
+
+function wire(){
+  $("play").onclick=()=>{if(aud.paused){aud.play();$("play").textContent="pause";$("play").classList.add("on")}
+    else{aud.pause();$("play").textContent="play";$("play").classList.remove("on")}};
+  $("seek").oninput=e=>{aud.currentTime=(+e.target.value/1000)*(DUR||1)};
+  $("song").onchange=e=>location.href=`/rig?song=${e.target.value}&rig=${RIG}`;
+  $("rig").onchange=e=>location.href=`/rig?song=${SONG}&rig=${e.target.value}`;
+  $("rate").oninput=e=>{const r=+e.target.value;$("ratev").textContent="×"+r.toFixed(2);
+    if(S) S.rate(r); aud.playbackRate=r;};
+  $("dmx").onclick=async()=>{
+    if(!SENDING){
+      const st=await (await fetch("/api/dmx/state")).json();
+      if(!st.to){ say("no node — set one on /live first"); return }
+      await fetch("/api/dmx/config",{method:"POST",body:JSON.stringify({on:true})});
+      SENDING=true;$("dmx").classList.add("on");$("dmx").textContent="stop DMX";say("sending");
+    } else {
+      SENDING=false;$("dmx").classList.remove("on");$("dmx").textContent="send DMX";
+      await fetch("/api/dmx/blackout",{method:"POST",body:"{}"});say("");
+    }};
+  addEventListener("keydown",e=>{if(/INPUT|SELECT/.test(e.target.tagName))return;
+    if(e.code==="Space"){e.preventDefault();$("play").click()}});
+}
+boot().catch(e=>say("boot failed: "+e.message));
+</script>
