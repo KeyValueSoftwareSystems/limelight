@@ -71,6 +71,10 @@ def main():
     ap.add_argument("--brief", required=True)
     ap.add_argument("--top", type=int, default=3)
     ap.add_argument("--quiet", action="store_true", help="print only the winning set")
+    ap.add_argument("--for-set", default=None,
+                    help="take the subject from THIS set instead of the winner. "
+                         "A named --set still has a subject; only the choice of "
+                         "pile was already made.")
     a = ap.parse_args()
 
     bp = os.path.join(ROOT, "briefs", a.brief + ".json")
@@ -112,8 +116,26 @@ def main():
         scored.append((score, setn, n, p, pm))
     scored.sort(reverse=True)
 
+    # The single vocabulary word the brief is most about. This is the film's
+    # SUBJECT, and a film that never arrives at its subject is a montage --
+    # which is what this lane kept producing. Emitted so the policy can ask, of
+    # every shot, how much of the subject is in it, using cosines the semantic
+    # index already stores.
+    # NOT simply the vocabulary word nearest the brief's sentence. Text-to-text
+    # similarity is weak -- "A phone ad" comes out nearest "a machine", which is
+    # true and useless. The subject is what the brief wants AND the chosen
+    # footage actually has, which is the same quantity the evidence line prints
+    # and the only one with a shot behind it.
+    pick_row = scored[0]
+    if a.for_set:
+        for row in scored:
+            if row[1] == a.for_set: pick_row = row; break
+    _, winner, _, wp, wpm = pick_row
+    _cands = [((wp[w] - wpm) * want[w], w) for w in wp if want[w] > 0 and wp[w] > wpm]
+    subject = sorted(_cands)[-1][1] if _cands else max(zip(sim, vocab))[1]
     if a.quiet:
-        print(scored[0][1]); return 0
+        print(json.dumps({"set": pick_row[1], "subject": subject}))
+        return 0
 
     print(f"brief {a.brief!r} says: {words}")
     print(f"\nwhat it is asking for (vocabulary the brief leans toward):")
@@ -128,7 +150,8 @@ def main():
         pos = [((p[w] - pm) * want[w], w) for w in p if want[w] > 0 and p[w] > pm]
         best = sorted(pos)[-1][1] if pos else "nothing it asks for"
         print(f"{setn:12s} {n:6d} {score:10.5f}   {best}")
-    print(f"\n-> {scored[0][1]}")
+    print(f"\nthe film's subject: {subject!r}")
+    print(f"-> {scored[0][1]}")
     return 0
 
 

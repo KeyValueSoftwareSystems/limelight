@@ -43,6 +43,78 @@ const AXES = {
              means: "how much is done ON TOP of the basic change" },
 };
 
+// STORY is the one axis that is not a level, because a film is not one value --
+// it is a shape over its own length. Everything else in this file answers "how
+// much"; this answers "how much, WHEN".
+//
+// It exists because the video reader had no notion of a film going anywhere.
+// Every shot was chosen by the same local fit -- right brightness, right mood,
+// same world as the last one -- at every point in the piece, so the result was
+// a montage that landed on the beat. A person asked to rank six of them could
+// not, and was right not to.
+//
+// The numbers are measured, not invented. The 5C spot, which is the reference
+// this lane keeps being judged against, runs its first half at 1.96 s and 391
+// px/s of subject motion and its last half at 2.88 s and 177 -- 47% longer and
+// 55% stiller. A film decelerates into its payoff. `settles` is that shape.
+//
+// `energy` here is what the PICTURE should be doing, 0..1, as a function of how
+// far through the piece we are. A reader turns it into whatever it has: the
+// video reader prefers shots whose measured motion matches it, the lighting
+// reader can push the room, the drones can slow the sky.
+const STORY = {
+  flat:    { at: [1.00, 1.00, 1.00, 1.00, 1.00],
+             means: "no shape. every moment is the same moment" },
+  settles: { at: [1.00, 0.92, 0.74, 0.45, 0.18],
+             means: "busy, then it calms into the thing it was for" },
+  builds:  { at: [0.22, 0.42, 0.66, 0.88, 1.00],
+             means: "quiet, then it arrives" },
+  swells:  { at: [0.35, 0.75, 1.00, 0.70, 0.30],
+             means: "arrives in the middle and lets go" },
+};
+
+// WHERE THE SUBJECT IS. The other half of story, and the half that makes a
+// montage a film.
+//
+// An ad has a thing it is about. It does not show that thing uniformly from the
+// first frame to the last: it opens on something else, arrives, and ends on it.
+// The video reader had no notion of a subject at all -- every shot was chosen by
+// the same local fit, so the product appeared at random and the piece had
+// nothing to resolve. Asked to rank six of those, a person correctly said they
+// could not be judged.
+//
+// 0 means "this shot need not contain the subject", 1 means "it should".
+const ARRIVAL = {
+  late:    { at: [0.15, 0.30, 0.55, 0.85, 1.00],
+             means: "open elsewhere, arrive at it, end on it" },
+  early:   { at: [1.00, 0.85, 0.55, 0.35, 0.25],
+             means: "state it immediately, then explore around it" },
+  present: { at: [0.80, 0.80, 0.80, 0.80, 0.80],
+             means: "it is in almost every shot" },
+  absent:  { at: [0.00, 0.00, 0.00, 0.00, 0.00],
+             means: "no subject. a mood piece" },
+};
+
+function curveAt(c, p) {
+  if (!(p >= 0)) p = 0;
+  if (p > 1) p = 1;
+  const x = p * (c.length - 1), i = Math.min(c.length - 2, Math.floor(x));
+  return c[i] + (c[i + 1] - c[i]) * (x - i);
+}
+
+function arrivalAt(name, p) {
+  return curveAt((ARRIVAL[name] || ARRIVAL.late).at, p);
+}
+
+// The wanted picture energy at position p (0..1 through the piece).
+function storyAt(name, p) {
+  const c = (STORY[name] || STORY.flat).at;
+  if (!(p >= 0)) p = 0;
+  if (p > 1) p = 1;
+  const x = p * (c.length - 1), i = Math.min(c.length - 2, Math.floor(x));
+  return c[i] + (c[i + 1] - c[i]) * (x - i);
+}
+
 function level(axis, word) {
   const a = AXES[axis];
   if (!a) return null;
@@ -119,6 +191,8 @@ function forDrones(recipe) {
   };
 }
 
-module.exports = { AXES: AXES, level: level, word: word,
+module.exports = { AXES: AXES, STORY: STORY, storyAt: storyAt,
+                   ARRIVAL: ARRIVAL, arrivalAt: arrivalAt,
+                   level: level, word: word,
                    normalise: normalise, ENERGY_AS: ENERGY_AS,
                    forLights: forLights, forDrones: forDrones };

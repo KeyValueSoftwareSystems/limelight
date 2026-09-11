@@ -67,27 +67,42 @@ function main() {
   // which pile of footage the brief's own words mean. The answer is cached per
   // brief because it costs a CLIP text pass, and it cannot change unless the
   // brief or the footage does.
-  let setname = arg("set", null);
-  if (setname === "auto" || setname === null) {
+  let setname = arg("set", null), matchedSubject = null;
+  {
     const cacheP = path.join(ROOT, "assets", "stock", ".matched.json");
     let cache = {};
     try { cache = JSON.parse(fs.readFileSync(cacheP, "utf8")); } catch (e) {}
-    if (cache[briefId]) {
-      setname = cache[briefId];
-    } else if (arg("set", null) === "auto") {
+    const ckey = briefId + "@" + (setname || "auto");
+    if (cache[ckey]) {
+      const c = cache[ckey];
+      setname = typeof c === "string" ? c : c.set;
+      matchedSubject = typeof c === "string" ? null : c.subject;
+    } else if (true) {
       const py = ["work/audio/bin/python", "work/moss/bin/python", "python3"]
         .map(function (x) { return path.join(ROOT, x); })
         .find(function (x) { return fs.existsSync(x); }) || "python3";
-      const r = require("child_process").spawnSync(
-        py, [path.join(ROOT, "assets", "match.py"), "--brief", briefId, "--quiet"],
+      // A named --set still has a subject. Only the choice of pile was already
+      // made, and the film still has to be ABOUT something or it is a montage.
+      // Resolving the subject only on `--set auto` meant every blind candidate
+      // run, which names its set, silently had no subject at all -- and
+      // `arrival: early` and `arrival: late` rendered byte-identical files.
+      const margs = [path.join(ROOT, "assets", "match.py"), "--brief", briefId, "--quiet"];
+      if (setname && setname !== "auto") margs.push("--for-set", setname);
+      const r = require("child_process").spawnSync(py, margs,
         { cwd: ROOT, encoding: "utf8" });
-      const pick = (r.stdout || "").trim().split("\n").pop();
+      let pick = null, subject = null;
+      try {
+        const j = JSON.parse((r.stdout || "").trim().split("\n").pop());
+        pick = j.set; subject = j.subject;
+      } catch (e) { pick = (r.stdout || "").trim().split("\n").pop(); }
       if (r.status === 0 && pick) {
-        setname = pick;
-        cache[briefId] = pick;
+        if (!setname || setname === "auto") setname = pick;
+        cache[ckey] = { set: pick, subject: subject };
         try { fs.writeFileSync(cacheP, JSON.stringify(cache, null, 1) + "\n"); } catch (e) {}
+        matchedSubject = subject;
         console.error("set: " + pick + " (matched from the brief's own words)");
-      } else {
+        if (subject) console.error("subject: " + subject);
+      } else if (!setname || setname === "auto") {
         console.error("set: could not match, falling back to the default index");
         setname = null;
       }
@@ -101,6 +116,14 @@ function main() {
   // inference picks words, so it has to happen while words are still the
   // currency. A brief that names a thing keeps it; silence gets an answer
   // measured from this song and this footage rather than a constant.
+  // The subject the matcher named, unless the writer named one. It is a
+  // measurement about the footage, not a word the writer should have to know.
+  // Only when the writer named nothing. A brief that already lists its subject
+  // has said what the film is about, and the matcher's single word must not
+  // quietly replace it -- that is the same rule as every other inference here,
+  // and skipping it changed all three held-out edits.
+  if (written.subject_word === undefined && !written.subject && matchedSubject)
+    written.subject_word = matchedSubject;
   const inferred = INFER.infer(written, map, index, BRIEF);
   // Words in, numbers out. An explicit key always beats the preset it came from.
   const brief = BRIEF.expand(written);
@@ -247,6 +270,7 @@ function main() {
     // made a policy that was recording its reasons look like one that was not.
     footage_cuts: r.footage_cuts || [],
     shots_too_short: r.shots_too_short || [],
+    unfilled_slots: r.unfilled_slots || [],
     budget: r.budget
   };
 

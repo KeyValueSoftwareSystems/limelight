@@ -33,6 +33,52 @@ const ASSETS = (function () {
                       "brightness", "contrast", "saturation", "faces"];
 
   // 1.0 is a shot squarely inside every preference; 0.0 is hopeless.
+  // How much this shot is DOING, on the same 0..1 scale the story curve uses.
+  // Motion is the bulk of it because that is what reads as a busy picture; the
+  // shot's own length matters too, because a long take is a calm one whatever
+  // is moving inside it. Both are measurements already in the index, so no new
+  // pass over the video and nothing invented.
+  //
+  // The scale is set by the pool, not by a constant: 600 px/s is frantic in a
+  // product film and ordinary in a chase, and a fixed number would silently
+  // mean different things to different sets.
+  function pictureEnergy(shot, scale) {
+    const m = shot.subject_motion_px_s;
+    const c = shot.camera_motion_px_s;
+    const mv = (m === null || m === undefined) ? (c || 0) : m;
+    const e = Math.min(1, mv / Math.max(1, scale || 400));
+    const long = Math.min(1, (shot.duration || 1) / 4.0);
+    return Math.max(0, Math.min(1, 0.75 * e + 0.25 * (1 - long)));
+  }
+
+  // Every shot's standing in the pool on "how much of the subject is in it",
+  // as a 0..1 rank. Ranked, not thresholded: CLIP's absolute cosines all sit
+  // near 0.25 and a threshold on them selected 320 shots out of 320 once.
+  function subjectRanking(pool, semIdx, word) {
+    const out = new Map();
+    if (!semIdx || !word) return out;
+    const rows = [];
+    for (const s of pool) {
+      const k = s.clip_id + "#" + s.shot;
+      const r = semIdx.get(k);
+      const c = r && r.content ? r.content[word] : undefined;
+      if (c !== undefined) rows.push([c, k]);
+    }
+    rows.sort(function (a, b) { return a[0] - b[0]; });
+    rows.forEach(function (r, i) {
+      out.set(r[1], rows.length < 2 ? 0.5 : i / (rows.length - 1)); });
+    return out;
+  }
+
+  function energyScale(pool) {
+    const v = pool.map(function (x) {
+      const m = x.subject_motion_px_s;
+      return (m === null || m === undefined) ? (x.camera_motion_px_s || 0) : m;
+    }).filter(function (x) { return x > 0; }).sort(function (a, b) { return a - b; });
+    if (!v.length) return 400;
+    return Math.max(60, v[Math.floor(v.length * 0.9)]);
+  }
+
   function fit(shot, brief) {
     const prefs = (brief && brief.prefers) || {};
     let penalty = 0, n = 0;
@@ -292,14 +338,21 @@ const ASSETS = (function () {
   // on faces; at impact 0 it does not lean at all, so ordinary bars still get
   // continuity rather than spectacle.
   function choose(pool, want, used, avoid, brief, seed, kin, allowKin, impact,
-                  sectionMood, semIdx, prevWord) {
+                  sectionMood, semIdx, prevWord, storyWant, escale,
+                  subjectWant, subjWord, subjRank) {
     const imp = Math.max(0, Math.min(1, impact || 0));
     // Normalised against the pool, so "a lot of movement" means a lot for this
     // footage rather than a number carried over from other footage.
     let maxSub = 0;
     for (const s of pool) if ((s.subject_motion_px_s || 0) > maxSub) maxSub = s.subject_motion_px_s || 0;
     const maxReuse = (brief.callbacks && brief.callbacks.max_reuses_per_clip) || 2;
-    let best = null, bestScore = -1;
+    // -Infinity, not -1. Every term added here since has been a PENALTY, and
+    // two of them together (story -0.55, arrival -0.65) can put every candidate
+    // in the pool below a floor of -1. `choose` then returns null, the policy
+    // does `if (!s) continue`, and the slot is silently dropped -- which is how
+    // adding a story curve turned a 14-shot held-out edit into a 13-shot one
+    // with different cut times and no error anywhere.
+    let best = null, bestScore = -Infinity;
     for (let i = 0; i < pool.length; i++) {
       const s = pool[i];
       // Cutting from a TAKE straight back to itself reads as a jump cut. Two
@@ -367,8 +420,35 @@ const ASSETS = (function () {
       const base = s.fit * 0.42 + cont * 0.32 + room * 0.14 + fresh * 0.12;
       const varietyPenalty = sameWord * (brief.subject_variety === undefined
         ? 0.14 : brief.subject_variety);
+      // WHERE IN THE FILM WE ARE. Every other term here is local -- does this
+      // shot suit the brief, the mood, the shot before it. None of them knows
+      // the piece is going anywhere, which is why the output was a montage that
+      // landed on the beat rather than something with a shape. `storyWant` is
+      // the picture energy the recipe asks for at this position; a shot that
+      // does the wrong amount for this point in the film is penalised however
+      // well it fits everything else.
+      let storyTerm = 0;
+      if (storyWant !== null && storyWant !== undefined) {
+        const e = pictureEnergy(s, escale);
+        storyTerm = -0.55 * Math.abs(e - storyWant);
+      }
+      // How much of the film's SUBJECT is in this shot, against how much the
+      // recipe wants here. The cosine is already in the semantic index -- this
+      // reads a measurement, it does not make one. Without it the product
+      // appears at random and the piece has nothing to resolve.
+      let arriveTerm = 0;
+      if (subjectWant !== null && subjectWant !== undefined && subjWord && semIdx) {
+        const row = semIdx.get(s.clip_id + "#" + s.shot);
+        const cos = row && row.content ? row.content[subjWord] : undefined;
+        if (cos !== undefined) {
+          // Absolute CLIP cosines sit in a narrow band and mean nothing alone,
+          // so they are ranked within the pool rather than thresholded.
+          const rank = subjRank ? (subjRank.get(s.clip_id + "#" + s.shot) || 0.5) : 0.5;
+          arriveTerm = -0.65 * Math.abs(rank - subjectWant);
+        }
+      }
       const score = (1 - mw) * ((1 - 0.45 * imp) * base + 0.45 * imp * alive)
-                    + moodTerm - varietyPenalty + jitter;
+                    + moodTerm - varietyPenalty + storyTerm + arriveTerm + jitter;
       if (score > bestScore) { bestScore = score; best = s; }
     }
     return best;
@@ -503,6 +583,8 @@ const ASSETS = (function () {
            hash: hash, longest: longest, capSlots: capSlots, cohere: cohere,
            subjectFit: subjectFit, semanticIndex: semanticIndex,
            selectBySubject: selectBySubject, moodFit: moodFit, moodAt: moodAt,
+           pictureEnergy: pictureEnergy, energyScale: energyScale,
+           subjectRanking: subjectRanking,
            nextInOrder: nextInOrder,
            PREFERABLE: PREFERABLE };
 })();

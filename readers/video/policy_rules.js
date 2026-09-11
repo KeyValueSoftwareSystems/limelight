@@ -23,6 +23,8 @@
 // cut lands with the music rather than 30 ms behind it.
 "use strict";
 
+const RECIPE = require("../recipe.js");
+
 // The grid step the edit is quantised to. Median, not mean: one missing
 // downbeat in a five-minute song doubles the mean and halves nothing.
 function medianGap(ts) {
@@ -385,7 +387,7 @@ function run(ctx) {
   const pool = pool0;
   const used = new Map();
   const timeline = [];
-  const footageCut = [], skippedShort = [];
+  const footageCut = [], skippedShort = [], unfilled = [];
   let prev = null, prevKin = null, prevWord = null;
   // Where the picture is ALLOWED to change world: a named section beginning.
   // Everywhere else the chooser holds the world it is in, so a run of shots
@@ -393,6 +395,27 @@ function run(ctx) {
   // were already there and the first version of this ignored them.
   const chapterAt = (map.chapters || []).map(function (c) { return c.at; });
   const semIdx = ASSETS.semanticIndex(ctx.sem);
+  // The shape of the piece. Positions are measured against the WINDOW that will
+  // actually be seen when there is one -- a film's ending is the end of the
+  // film, not the end of the recording it was cut from.
+  const story = brief.story || null;
+  const escale = ASSETS.energyScale(pool0);
+  const winFrom = (ctx.window && ctx.window.from) || 0;
+  const winTo = (ctx.window && ctx.window.to) || dur;
+  // The film's subject, and where every shot stands on containing it.
+  const arrival = brief.arrival || (brief.subject_word ? "late" : null);
+  const subjWord = brief.subject_word || null;
+  const subjRank = ASSETS.subjectRanking(pool0, semIdx, subjWord);
+  const arriveAt = function (t) {
+    if (!arrival || !subjWord) return null;
+    const p = (t - winFrom) / Math.max(0.001, winTo - winFrom);
+    return RECIPE.arrivalAt(arrival, Math.max(0, Math.min(1, p)));
+  };
+  const wantAt = function (t) {
+    if (!story) return null;
+    const p = (t - winFrom) / Math.max(0.001, winTo - winFrom);
+    return RECIPE.storyAt(story, Math.max(0, Math.min(1, p)));
+  };
   function isBoundary(t) {
     return chapterAt.some(function (c) { return Math.abs(c - t) < 0.75; });
   }
@@ -489,8 +512,19 @@ function run(ctx) {
       s = ASSETS.choose(pool, want, used, prev, brief, seed,
                         prevKin, isBoundary(start),
                         cand ? cand.strength : 0,
-                        ASSETS.moodAt(map, start), semIdx, prevWord);
-    if (!s) continue;
+                        ASSETS.moodAt(map, start), semIdx, prevWord,
+                        wantAt(start), escale,
+                        arriveAt(start), subjWord, subjRank);
+    if (!s) {
+      // A slot with nothing to put in it. Legitimate -- every clip long enough
+      // may have hit the brief's reuse cap -- but it silently shortened the
+      // film, and the only symptom was a shot count that did not match the cut
+      // count. Say so.
+      unfilled.push({ at: +start.toFixed(3), wanted_s: +want.toFixed(3),
+        why: "no shot in the pool is long enough and still under the brief's " +
+             "reuse cap at this point in the edit" });
+      continue;
+    }
     if (splitAt !== null) {
       edges.splice(i + 1, 0, splitAt);
       end = splitAt; want = end - start;
@@ -549,6 +583,7 @@ function run(ctx) {
     holds: holds,
     footage_cuts: footageCut,
     shots_too_short: skippedShort,
+    unfilled_slots: unfilled,
     budget: {
       allowed: allowed, spent: spent,
       candidates_available: cands.length,

@@ -109,6 +109,10 @@ function expand(b) {
   if (out.mood_weight === undefined) out.mood_weight = 0.0;
   // Look-clustering is superseded by subject words and is off unless asked for.
   if (out.coherence === undefined) out.coherence = { radius: 0.90, min_shots: 100000 };
+  // `story` is a shape, not a level, so it passes through as the word it is.
+  if (b.story !== undefined) out.story = b.story;
+  if (b.arrival !== undefined) out.arrival = b.arrival;
+  if (b.subject_word !== undefined) out.subject_word = b.subject_word;
   return out;
 }
 

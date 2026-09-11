@@ -142,6 +142,36 @@ function infer(brief, map, index, tables) {
     }
   }
 
+  // The shape of the piece. An ad decelerates into its payoff -- the 5C spot
+  // runs its first half at 391 px/s of subject motion and its last at 177 --
+  // and nothing in this system knew that, so every output was a montage that
+  // landed on the beat. `settles` is the measured default. It is only a default
+  // in the sense that every other inference here is: the writer can say
+  // `builds` or `swells` or `flat` and be obeyed.
+  if (brief.story === undefined) {
+    brief.story = "settles";
+    notes.story = {
+      chose: "settles",
+      because: "a film decelerates into the thing it was for. Measured on the " +
+               "reference this lane is judged against: first half 1.96 s shots " +
+               "at 391 px/s, last half 2.88 s at 177 -- 47% longer, 55% stiller",
+      from: ["assets/stock/apple5c/INDEX.json"]
+    };
+  }
+
+  // Where the subject shows up. A film about a thing ends on that thing; that
+  // is not a style, it is what makes it a film about a thing rather than a
+  // montage that happens to contain one.
+  if (brief.arrival === undefined && brief.subject_word) {
+    brief.arrival = "late";
+    notes.arrival = {
+      chose: "late",
+      because: "the film is about " + JSON.stringify(brief.subject_word) +
+               ", so it opens elsewhere, arrives at it, and ends on it",
+      from: ["assets/match.py", "SEMANTIC.json"]
+    };
+  }
+
   // Shape. Not a taste at all: delivering a 9:16 reel cut from 16:9 footage
   // means throwing away two thirds of every frame, and the writer of a one-line
   // brief never said they wanted that. The footage's own shape is the answer
