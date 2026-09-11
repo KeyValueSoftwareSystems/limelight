@@ -95,6 +95,38 @@ const scratch = () => fs.mkdtempSync(path.join(os.tmpdir(), "limelight-"));
     ok("and the error names the override", /LIMELIGHT_REMOTE/.test(r.err));
   }
 
+  /* ---- limelight pull ----------------------------------------------------- */
+  {
+    fake.files.clear();
+    fake.files.set("levels.score", SCORE);
+    fake.files.set("The Nights.score", Buffer.from("n"));
+    const dir = scratch();
+
+    let r = await run(["pull"], fake.url, dir);
+    ok("pull with no name prints usage and exits 1", r.code === 1 && /usage/.test(r.err), r.err);
+
+    r = await run(["pull", "levels.score"], fake.url, dir);
+    ok("pull writes the file into the current directory",
+       r.code === 0 && fs.readFileSync(path.join(dir, "levels.score")).equals(SCORE), r.err);
+    ok("and says where it came from",
+       r.out.trim() === `pulled levels.score ← ${fake.url}/levels.score (${SCORE.length} bytes)`, r.out);
+
+    r = await run(["pull", "some/dir/levels.score"], fake.url, dir);
+    ok("pull strips any directory part from the name", r.code === 0, r.err);
+
+    r = await run(["pull", "The Nights.score"], fake.url, dir);
+    ok("pull handles a name with a space", r.code === 0 && fs.existsSync(path.join(dir, "The Nights.score")), r.err);
+
+    r = await run(["pull", "nope.score"], fake.url, dir);
+    ok("pull of a missing name exits 1", r.code === 1, r.err);
+    ok("and lists what the server does have",
+       /levels\.score/.test(r.err) && /The Nights\.score/.test(r.err), r.err);
+    ok("and writes nothing locally", !fs.existsSync(path.join(dir, "nope.score")));
+
+    r = await run(["pull", "levels.score"], "http://127.0.0.1:9/score", dir);
+    ok("pull from an unreachable remote exits 2", r.code === 2 && /cannot reach/.test(r.err), r.err);
+  }
+
   await fake.close();
 
   for (const [pass, name, detail] of out)
