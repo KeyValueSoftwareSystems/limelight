@@ -385,7 +385,10 @@ def main():
          "-c:v", "libx264", "-preset", "medium", "-crf", "19",
          "-pix_fmt", "yuv420p", tmp], stdin=subprocess.PIPE)
 
-    stats = {"zoom_min": 9, "zoom_max": 0, "frames": 0, "fx": {}}
+    # `fx` counts OCCURRENCES, not frames. Counting frames once reported
+    # "blink: 6" for a single quarter-second blink, which reads as six slams.
+    stats = {"zoom_min": 9, "zoom_max": 0, "frames": 0, "fx": {}, "fx_frames": 0,
+             "fx_seen": set()}
     for i, e in enumerate(ir["timeline"]):
         n = bounds[i + 1] - bounds[i]
         clip = index.get(e["clip_id"])
@@ -439,7 +442,11 @@ def main():
             stats["zoom_max"] = max(stats["zoom_max"], v["zoom"])
             stats["frames"] += 1
             if fx:
-                stats["fx"][fx["effect"]] = stats["fx"].get(fx["effect"], 0) + 1
+                stats["fx_frames"] += 1
+                key = (fx["effect"], round(fx.get("at", 0.0), 2))
+                if key not in stats["fx_seen"]:
+                    stats["fx_seen"].add(key)
+                    stats["fx"][fx["effect"]] = stats["fx"].get(fx["effect"], 0) + 1
     enc.stdin.close()
     if enc.wait() != 0:
         print("encode failed", file=sys.stderr)
@@ -460,7 +467,7 @@ def main():
     else:
         os.replace(tmp, out)
 
-    quiet = stats["frames"] - sum(stats["fx"].values())
+    quiet = stats["frames"] - stats["fx_frames"]
     print(f"{stats['frames']} frames ({stats['frames']/fps:.1f}s), "
           f"zoom {stats['zoom_min']:.3f}-{stats['zoom_max']:.3f}, "
           f"{os.path.getsize(out)/1e6:.1f} MB -> {out}", file=sys.stderr)

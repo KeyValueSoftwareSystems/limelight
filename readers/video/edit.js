@@ -204,6 +204,17 @@ function main() {
         in_s: +(e.in_s + (s0 - e.start)).toFixed(3)
       }));
     }
+    // Trimming to the window can clip the last entry to a stub. The policy
+    // already folds runts, but it folds them in SONG time, before this cut --
+    // which is why a 0.33 s tail survived a stated minimum of 0.55 s.
+    const minShot = ((brief.budgets || {}).min_shot_s) || 0.5;
+    if (kept.length > 1) {
+      const last = kept[kept.length - 1];
+      if (last.end - last.start < minShot) {
+        kept[kept.length - 2].end = last.end;
+        kept.pop();
+      }
+    }
     ir.timeline = kept;
     ir.holds = (ir.holds || [])
       .filter(function (h) { return h.end > a && h.start < b; })

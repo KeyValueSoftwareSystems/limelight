@@ -61,6 +61,19 @@ WHAT IS MEASURED, AND WHAT EACH ONE IS NOT
                    where the detail is, which is usually but not always the
                    subject. NOT a subject detector.
 
+  motion_curve     How much the picture changes across the shot, 16 numbers,
+                   normalised to the shot's own peak.
+                   This exists because the cut times come from the MUSIC and the
+                   entry point did not come from anywhere: it was the centre of
+                   whatever slack the shot had. Re-cutting a finished
+                   advertisement made the cost obvious -- its shots were built to
+                   be cut at a particular frame of a movement, and entering one
+                   at its midpoint lands in the middle of a gesture. With a curve
+                   the entry can be chosen so the shot ARRIVES quiet and then
+                   does something, which is what makes a cut feel placed.
+                   NOT a claim about what is moving. It is frame difference, so a
+                   light flicker and a hand crossing the lens read the same.
+
   look             A 4x3 grid of mean RGB, 36 numbers, from the middle frame.
                    What the shot LOOKS like: how dark, how warm, where the light
                    sits in frame.
@@ -254,8 +267,15 @@ def measure_shot(frames, fps, scale_x):
             cell = mid[gy * mid.shape[0] // gh:(gy + 1) * mid.shape[0] // gh,
                        gx * mid.shape[1] // gw:(gx + 1) * mid.shape[1] // gw]
             look += [round(float(cell[..., c].mean()) / 255.0, 4) for c in range(3)]
+    # The shape of the movement across the shot, for choosing an entry point.
+    curve = []
+    if n >= 3:
+        bins = np.array_split(d, min(16, len(d)))
+        peak = max(1e-6, float(max(b.mean() for b in bins)))
+        curve = [round(float(b.mean() / peak), 3) for b in bins]
     return {
         "motion": round(motion, 5),
+        "motion_curve": curve,
         "look": look,
         "camera_motion_px_s": None if cam_px_s is None else round(cam_px_s, 2),
         "subject_motion_px_s": None if sub_px_s is None else round(sub_px_s, 2),

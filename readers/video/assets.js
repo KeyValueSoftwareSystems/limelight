@@ -376,30 +376,47 @@ const ASSETS = (function () {
     return h >>> 0;
   }
 
-  // Where inside the chosen shot to start, so that a `want`-second slot fits.
-  // Centred, because the middle of a shot is usually the part worth showing --
-  // the head has the previous cut's motion in it and the tail is often a
-  // camera settling.
-  function inPoint(shot, want) {
+  // Where inside the chosen shot to start.
+  //
+  // This used to be the centre of whatever slack the shot had, which is a
+  // defensible default and is not a decision. Re-cutting a finished
+  // advertisement made the cost plain: its shots were built to be cut at a
+  // particular frame of a movement, and entering one at its midpoint lands in
+  // the middle of a gesture -- the picture is already halfway through doing
+  // something when you arrive, and finishes before you leave.
+  //
+  // With a motion curve there is a better question: across the offsets this
+  // shot allows, which one gives a window that ARRIVES relatively quiet and
+  // then does something? That is what makes a cut feel placed rather than
+  // merely timed. Falls back to centred when the shot has no curve.
+  function inPoint(shot, want, opts) {
     const slack = Math.max(0, shot.duration - want);
-    return +(shot.start + slack / 2).toFixed(3);
+    const centred = +(shot.start + slack / 2).toFixed(3);
+    const curve = shot.motion_curve;
+    if (!curve || curve.length < 4 || slack < 0.12) return centred;
+
+    const n = curve.length;
+    const at = function (tt) {                    // curve value at a time offset
+      const k = Math.max(0, Math.min(n - 1, Math.floor(tt / shot.duration * n)));
+      return curve[k];
+    };
+    const span = Math.max(0.05, want);
+    let best = centred, bestScore = -1e9;
+    const steps = 12;
+    for (let i = 0; i <= steps; i++) {
+      const off = slack * (i / steps);
+      let sum = 0, m = 0;
+      for (let t2 = 0; t2 < span; t2 += span / 6) { sum += at(off + t2); m++; }
+      const mean = m ? sum / m : 0;
+      const rise = at(off + span * 0.85) - at(off + span * 0.15);
+      const calmEntry = 1 - at(off);
+      // Active, rising, and not already mid-gesture on the first frame.
+      const score = mean * 0.5 + rise * 0.35 + calmEntry * 0.15;
+      if (score > bestScore) { bestScore = score; best = +(shot.start + off).toFixed(3); }
+    }
+    return best;
   }
 
-  // Keep only the shots that LOOK like each other.
-  //
-  // Coherence was first attempted with the source's category name and that was
-  // not good enough: "street" held a neon alley at night and a desert highway
-  // at sunset, "city" held green hills. Cut together the result read as random
-  // to a viewer even though the label said otherwise.
-  //
-  // `look` is 36 numbers of measured appearance per shot. This finds the
-  // densest cluster -- the shot with the most neighbours inside `radius`, then
-  // everything inside that radius -- and returns it. Not k-means: there is no k
-  // worth guessing here, and the question is not "what groups exist" but "what
-  // is the biggest group that looks like itself".
-  //
-  // Returns the whole pool unchanged if nothing was measured, because a pool
-  // filtered on a field nobody wrote would be filtered on nothing.
   function cohere(pool, radius, minKeep) {
     const withLook = pool.filter(function (s) {
       return Array.isArray(s.look) && s.look.length >= 12;

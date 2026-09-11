@@ -22,6 +22,20 @@
 // Beats are used for one thing only: snapping a chosen cut to the grid, so a
 // cut lands with the music rather than 30 ms behind it.
 "use strict";
+
+// The grid step the edit is quantised to. Median, not mean: one missing
+// downbeat in a five-minute song doubles the mean and halves nothing.
+function medianGap(ts) {
+  if (!ts || ts.length < 4) return 0;
+  const g = [];
+  for (let i = 1; i < ts.length; i++) {
+    const d = ts[i] - ts[i - 1];
+    if (d > 0.2 && d < 6) g.push(d);
+  }
+  if (!g.length) return 0;
+  g.sort(function (a, b) { return a - b; });
+  return g[Math.floor(g.length / 2)];
+}
 const ASSETS = require("./assets.js");
 
 // How much a candidate of each kind is worth before salience is considered.
@@ -229,8 +243,23 @@ function run(ctx) {
   // all -- it is an accident of what was downloaded. Labelling both
   // "footage-limit" would let a brief's own decision masquerade as an external
   // constraint, which is the kind of thing that is impossible to spot later.
-  const cap = Math.min(maxS, footageCap);
-  const capBoundBy = maxS <= footageCap ? "brief-max-shot" : "footage-limit";
+  // A ceiling that admits only ONE step of the grid is not a ceiling, it is a
+  // quantiser. `fast` says max_shot_s 2.6; this song's bar is 1.905 s; so every
+  // shot came out 0.95 or 1.91 and nothing else -- stdev 0.43 against the human
+  // editor's 1.45 on the same footage. The brief's pacing should still bind,
+  // but the grid needs somewhere to go, so the ceiling rounds up to two bars
+  // when a single bar is all it would otherwise allow.
+  const bar = medianGap(map.downbeats || []);
+  let ceiling = maxS, ceilingNote = null;
+  if (bar > 0 && maxS < 2 * bar) {
+    ceiling = +(2 * bar).toFixed(3);
+    ceilingNote = "brief max_shot_s " + maxS + "s admits one " + bar.toFixed(3) +
+      "s bar and no more; raised to two bars so shot length can vary";
+  }
+  const cap = Math.min(ceiling, footageCap);
+  const capBoundBy = ceiling <= footageCap
+    ? (ceilingNote ? "brief-max-shot-raised-to-bar" : "brief-max-shot")
+    : "footage-limit";
   const snapper = function (t) { return snap(t, beats); };
   const snapHard = function (t) { return snap(t, beats, true); };
   let edges = [0].concat(chosen.map(function (c) { return snapper(c.t); }));
@@ -354,6 +383,18 @@ function run(ctx) {
     });
   }
 
+  // A runt at the end is leftover, not a decision. The brief states a minimum
+  // shot length; anything under it is folded into the shot before. Half the
+  // minimum was the first threshold and it let a 0.33 s tail through against a
+  // stated floor of 0.55.
+  if (timeline.length > 1) {
+    const last = timeline[timeline.length - 1];
+    if (last.end - last.start < minS) {
+      timeline[timeline.length - 2].end = last.end;
+      timeline.pop();
+    }
+  }
+
   const spent = Math.max(0, timeline.length - 1);
   return {
     timeline: timeline,
@@ -364,6 +405,7 @@ function run(ctx) {
       declined: declined.length,
       forced_without_musical_reason: capped.forced.length,
       forced_by: capBoundBy,
+      ceiling_note: ceilingNote,
       why_underspent: spent < allowed
         ? "no further candidate cleared salience_floor " + floor
         : null
