@@ -36,7 +36,8 @@ const freePort = () => new Promise(r => { const s = net.createServer(); s.listen
 /* start serve.py on a free port with a temp hub root; `files` reads and writes
    that root's score/ folder directly, which is what the assertions look at */
 async function startHub() {
-  const port = await freePort(), root = scratch();
+  /* a root that does not exist yet, as on a fresh clone: the server must create it */
+  const port = await freePort(), root = path.join(scratch(), "files");
   const proc = spawn("python3", [path.join(REPO, "serve.py")],
     { env: { ...process.env, PORT: String(port), HOST: "127.0.0.1", HUB_ROOT: root }, stdio: ["ignore", "pipe", "pipe"] });
   let stderr = ""; proc.stderr.on("data", d => stderr += d);
@@ -161,6 +162,7 @@ async function startHub() {
 
   /* ---- the hub itself: page and API ---------------------------------------- */
   {
+    ok("the server created a root that did not exist", fs.statSync(fake.root).isDirectory());
     let r = await fetch(fake.origin + "/hub/");
     ok("GET /hub/ is the page", r.status === 200 && /text\/html/.test(r.headers.get("content-type")) && /HUB/.test(await r.text()));
     r = await fetch(fake.origin + "/hub", { redirect: "manual" });

@@ -22,6 +22,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.environ.get("HUB_ROOT", os.path.join(HERE, "files")))
 PAGE = os.path.join(HERE, "hub.html")
 PREFIX = "/hub"
+os.makedirs(ROOT, exist_ok=True)   # a fresh clone has no hub/files/ yet; without this, /hub/ is a 404
 
 
 def resolve(urlpath):
