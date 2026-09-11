@@ -274,7 +274,9 @@ const ASSETS = (function () {
   // and becomes "advance through the film". The music still decides WHEN to
   // cut and for how long -- which is the part worth automating -- and the order
   // the editor chose is left alone.
-  function nextInOrder(pool, used, want, brief) {
+  // The order nextInOrder walks, as a list, so a caller can ask WHERE in it a
+  // given moment of the source film sits.
+  function orderedPool(pool, brief) {
     const ordered = pool.slice().sort(function (a, b) {
       if (a.clip_id !== b.clip_id) return a.clip_id < b.clip_id ? -1 : 1;
       if (a.shot !== b.shot) return a.shot - b.shot;
@@ -294,7 +296,24 @@ const ASSETS = (function () {
       if (br && (x.brightness < br[0] - 0.02 || x.brightness > br[1] + 0.02)) return false;
       return x.fit >= 0.30;
     });
-    const list = keep.length >= 3 ? keep : ordered;
+    return keep.length >= 3 ? keep : ordered;
+  }
+
+  // Where in that order the film is at source time `t`. A music video and its
+  // song are the same piece of time: shot 57 belongs at 2:03 because that is
+  // when it was cut to. Starting the cursor at zero while the music is at 2:03
+  // plays the opening of the film underneath the climax of the song, which is
+  // exactly what it sounds like -- no build, no arrival, nothing landing.
+  function orderIndexAt(pool, brief, t) {
+    const list = orderedPool(pool, brief);
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].end > t) return i;
+    }
+    return 0;
+  }
+
+  function nextInOrder(pool, used, want, brief) {
+    const list = orderedPool(pool, brief);
     if (!list.length) return null;
     const n = used.get("__cursor__") || 0;
     // Strictly the next shot. `want` is read by the caller, not here: a slot
@@ -597,6 +616,7 @@ const ASSETS = (function () {
            selectBySubject: selectBySubject, moodFit: moodFit, moodAt: moodAt,
            pictureEnergy: pictureEnergy, energyScale: energyScale,
            subjectRanking: subjectRanking,
+           orderedPool: orderedPool, orderIndexAt: orderIndexAt,
            nextInOrder: nextInOrder,
            PREFERABLE: PREFERABLE };
 })();

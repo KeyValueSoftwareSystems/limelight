@@ -398,6 +398,35 @@ function run(ctx) {
   // The shape of the piece. Positions are measured against the WINDOW that will
   // actually be seen when there is one -- a film's ending is the end of the
   // film, not the end of the recording it was cut from.
+  // If the footage IS this song's own film, start the walk where the film
+  // itself is at that moment of the music.
+  //
+  // A music video and its song are one piece of time -- shot 57 was cut to sit
+  // at 2:03. preserve_order starts the cursor at zero, so a window at 2:03
+  // played the film's opening shots under the song's climax: no build, no
+  // arrival, nothing landing where the record puts it. The footage carried the
+  // arrangement all along and we were throwing it away.
+  //
+  // Only claimed when it is checkable: one clip, and its running time within 2%
+  // of the recording's. Anything else is a pile of stock that happens to be in
+  // a folder, and its shot 57 means nothing.
+  let alignedTo = null;
+  if (brief.preserve_order) {
+    const ids = new Set(pool0.map(function (x) { return x.clip_id; }));
+    const cd = pool0.length ? pool0[0].clip_duration : null;
+    if (ids.size === 1 && cd && dur && Math.abs(cd - dur) / dur < 0.02) {
+      const at = (ctx.window && ctx.window.from) || 0;
+      const i = ASSETS.orderIndexAt(pool0, brief, at);
+      used.set("__cursor__", i);
+      alignedTo = { source_is_the_song_s: +cd.toFixed(2),
+                    started_at_shot: pool0.length ? ASSETS.orderedPool(pool0, brief)[i].shot : null,
+                    at_s: +at.toFixed(2),
+                    why: "this film runs the length of the recording, so its own " +
+                         "cutting already sits against this music; the walk begins " +
+                         "where the film is, not at its first frame" };
+    }
+  }
+
   const story = brief.story || null;
   const escale = ASSETS.energyScale(pool0);
   const winFrom = (ctx.window && ctx.window.from) || 0;
@@ -581,6 +610,7 @@ function run(ctx) {
   return {
     timeline: timeline,
     holds: holds,
+    aligned_to_source: alignedTo,
     footage_cuts: footageCut,
     shots_too_short: skippedShort,
     unfilled_slots: unfilled,

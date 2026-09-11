@@ -72,10 +72,21 @@ function main() {
     const cacheP = path.join(ROOT, "assets", "stock", ".matched.json");
     let cache = {};
     try { cache = JSON.parse(fs.readFileSync(cacheP, "utf8")); } catch (e) {}
+    // An explicitly named --set is never replaced. The matcher is asked here
+    // for the SUBJECT, which a named set still needs; the choice of pile was
+    // already made by whoever typed it.
+    //
+    // This overwrote it. apple5c has no SEMANTIC.json, so the matcher could not
+    // find it, fell back to its best-scoring set, and cached `fivec` under the
+    // key `recut-5c@apple5c`. Every run after that silently cut the Apple
+    // re-cut from a different pile of footage than the one named on the command
+    // line, and said nothing.
+    const named = arg("set", null);
+    const explicit = !!named && named !== "auto";
     const ckey = briefId + "@" + (setname || "auto");
     if (cache[ckey]) {
       const c = cache[ckey];
-      setname = typeof c === "string" ? c : c.set;
+      if (!explicit) setname = typeof c === "string" ? c : c.set;
       matchedSubject = typeof c === "string" ? null : c.subject;
     } else if (true) {
       const py = ["work/audio/bin/python", "work/moss/bin/python", "python3"]
@@ -96,13 +107,13 @@ function main() {
         pick = j.set; subject = j.subject;
       } catch (e) { pick = (r.stdout || "").trim().split("\n").pop(); }
       if (r.status === 0 && pick) {
-        if (!setname || setname === "auto") setname = pick;
+        if (!explicit) setname = pick;
         cache[ckey] = { set: pick, subject: subject };
         try { fs.writeFileSync(cacheP, JSON.stringify(cache, null, 1) + "\n"); } catch (e) {}
         matchedSubject = subject;
         console.error("set: " + pick + " (matched from the brief's own words)");
         if (subject) console.error("subject: " + subject);
-      } else if (!setname || setname === "auto") {
+      } else if (!explicit) {
         console.error("set: could not match, falling back to the default index");
         setname = null;
       }
@@ -161,7 +172,28 @@ function main() {
   // total strength, and start it on a downbeat so the excerpt begins where a
   // bar does. Picking it by ear would work too, and would be one more thing
   // tuned to one song by somebody who had already heard it.
-  const wantWin = arg("window", null) === null ? null : parseFloat(arg("window"));
+  // `--window auto`, and how long a film SHOULD be.
+  //
+  // Every excerpt this lane has produced was some length a person typed. 26
+  // seconds, for the 5C re-cut, because I picked 268 as an endpoint and never
+  // went back -- and it was actively wrong: that film holds 30.6 s of usable
+  // material, so a 26 s edit was never the constraint anybody thought it was.
+  //
+  // With the order preserved there is a defensible answer. The film is as long
+  // as its footage lasts once through. Past that it must repeat, and repetition
+  // is the thing that reads as a mistake. So `auto` asks the footage, and the
+  // map still chooses WHERE that span sits in the song.
+  let wantWin = arg("window", null) === null ? null : parseFloat(arg("window"));
+  if (arg("window", null) === "auto" || (wantWin !== null && !isFinite(wantWin))) {
+    const floorS = ((brief.budgets || {}).min_shot_s) || 0.5;
+    const usable = (index.clips || []).reduce(function (acc, c) {
+      return acc.concat((c.shots || []).filter(function (sh) {
+        return sh.end - sh.start >= floorS; })); }, []);
+    const material = usable.reduce(function (t, sh) { return t + (sh.end - sh.start); }, 0);
+    wantWin = Math.max(6, Math.min(length, +material.toFixed(2)));
+    console.error("window: " + wantWin.toFixed(1) + "s, the length of the footage " +
+                  "once through (" + usable.length + " usable shots)");
+  }
   // --arc frames a BUILD AND THE DROP IT LEADS INTO, rather than the busiest
   // window. Density is not shape: taking the thirty seconds with the most going
   // on guarantees thirty flat seconds, which is what "no build-up and eventual
@@ -268,6 +300,7 @@ function main() {
     // Why the edit has the shape it has when the footage, not the music,
     // decided. Dropped silently by the first version of this assembly, which
     // made a policy that was recording its reasons look like one that was not.
+    aligned_to_source: r.aligned_to_source || null,
     footage_cuts: r.footage_cuts || [],
     shots_too_short: r.shots_too_short || [],
     unfilled_slots: r.unfilled_slots || [],
