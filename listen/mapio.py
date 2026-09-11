@@ -78,20 +78,37 @@ def chordmini_dir():
 # the moment held-out songs arrived: a track fetched into synth/incoming was
 # invisible to one tool and visible to the other.
 #
-# The registry below is still a list of names, because a file called
-# "The Nights.mp3" cannot be derived from the slug "the-nights" by any rule
-# worth trusting. What changed is that there is one of it, and that anything
-# not in it is discovered from disk instead of being unsupported.
+# The registry below used to be a list of release filenames, because a file
+# called "The Nights.mp3" cannot be derived from the slug "the-nights" by any
+# rule worth trusting. Those files now sit in synth/incoming under their slug,
+# so the walk finds them and the names are only there to be readable -- what the
+# registry still earns its place for is artist and title, which no rule can
+# derive and which the maps cite as `title_provenance: stated`.
 
 RELEASES = {
-    "levels":         ("Avicii - Levels (Radio Edit).mp3", "Avicii", "Levels (Radio Edit)"),
-    "starlight":      ("Martin Garrix, DubVision feat. Shaun Farrugia - Starlight (Keep Me Afloat) [Official Video].mp3",
+    # The path is now `synth/incoming/<slug>.<ext>` for all of these, so the
+    # first column is no longer load-bearing -- release_path finds them by the
+    # walk below whatever they are called. What this registry is FOR is the
+    # second and third columns: an artist and a title a person read off a
+    # release, which cannot be derived from a slug by any rule and which the
+    # maps record as `title_provenance: stated`.
+    "levels":         ("synth/incoming/levels.mp3", "Avicii", "Levels (Radio Edit)"),
+    "starlight":      ("synth/incoming/starlight.mp3",
                        "Martin Garrix, DubVision feat. Shaun Farrugia", "Starlight (Keep Me Afloat)"),
-    "dont-look-down": ("Martin Garrix feat. Usher - Don't Look Down (Lyric Video).mp3",
+    "dont-look-down": ("synth/incoming/dont-look-down.mp3",
                        "Martin Garrix feat. Usher", "Don't Look Down"),
-    "mizhiyoram":     ("Mizhiyoram -  Manjil Virinja Pookkal  Lofi Mix  Prazz Mu6.mp3",
+    "mizhiyoram":     ("synth/incoming/mizhiyoram.mp3",
                        "Prazz Mu6", "Mizhiyoram (Manjil Virinja Pookkal Lofi Mix)"),
-    "the-nights":     ("The Nights.mp3", "Avicii", "The Nights"),
+    "the-nights":     ("synth/incoming/the-nights.mp3", "Avicii", "The Nights"),
+    "where-are-u-now": ("synth/incoming/where-are-u-now.mp3",
+                       "Skrillex and Diplo with Justin Bieber", "Where Are U Now (Kaskade Remix)"),
+    # Chosen to break the reader in three different places, not because anyone
+    # likes them: 174 bpm so `frantic` is reachable at all, a sparse slow record
+    # so holding still can be tested, and one with a single obvious build and
+    # drop so a payoff in the wrong place is visible to anybody.
+    "afterglow":      ("synth/incoming/afterglow.mp3", "Wilkinson", "Afterglow"),
+    "holocene":       ("synth/incoming/holocene.mp3", "Bon Iver", "Holocene"),
+    "language":       ("synth/incoming/language.mp3", "Porter Robinson", "Language"),
 }
 
 AUDIO_EXT = (".wav", ".mp3", ".flac", ".m4a", ".ogg", ".opus")
