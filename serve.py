@@ -94,7 +94,7 @@ if __name__ == "__main__":
     with socketserver.ThreadingTCPServer((HOST, PORT), H) as srv:
         srv.daemon_threads = True
         shown = lan_ip() if HOST == "0.0.0.0" else HOST
-        print(f"  protocol on http://{shown}:{PORT}")
-        print(f"  hub      on http://{shown}:{PORT}/hub/   (files in {hub.ROOT})")
-        print(f"  from another machine:  export LIMELIGHT_REMOTE=http://{shown}:{PORT}/hub/score")
+        print(f"  protocol on http://{shown}:{PORT}", flush=True)
+        print(f"  hub      on http://{shown}:{PORT}/hub/   (files in {hub.ROOT})", flush=True)
+        print(f"  from another machine:  export LIMELIGHT_REMOTE=http://{shown}:{PORT}/hub/score", flush=True)
         srv.serve_forever()
