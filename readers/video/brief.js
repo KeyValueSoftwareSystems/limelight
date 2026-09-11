@@ -40,12 +40,38 @@ const MOTION = {
   kinetic: { camera_motion_px_s:[40,500], subject_motion_px_s:[60,600] },
 };
 
+// What the MOTION word does to the rendered picture, as opposed to which
+// footage it selects. These were never connected: `motion` chose shots by their
+// measured camera movement and then the renderer added a Ken Burns push on top
+// at a constant 0.10 -- the maximum -- whatever the brief said. Every output
+// this lane has ever produced had the same zoom on every shot for no reason
+// anybody asked for, and it was the first thing anyone watching complained
+// about, twice.
+//
+// `still` means still. Not "still footage, gently zoomed".
+const MOTION_RENDER = {
+  still:   { shot_push: 0.000, shot_drift: 0.000, breath: 0.015, shake: 0.000 },
+  calm:    { shot_push: 0.018, shot_drift: 0.003, breath: 0.030, shake: 0.003 },
+  moving:  { shot_push: 0.045, shot_drift: 0.008, breath: 0.050, shake: 0.007 },
+  kinetic: { shot_push: 0.090, shot_drift: 0.012, breath: 0.075, shake: 0.010 },
+};
+
 // How much the picture is allowed to do on top of the cutting.
+// `drop_punch` and `build_push` were gated by NOTHING -- not the effects
+// budget, not the arc, not the hush that is supposed to buy a calm passage. A
+// brief asking for `effects: none` and `motion: still` still zoomed to 1.248 on
+// every drop, because those two terms answered to no word in the vocabulary.
+// That is the zoom nobody asked for, and it survived two rounds of being told
+// to remove it.
 const EFFECTS = {
-  none:       { effects_per_minute:  0 },
-  restrained: { effects_per_minute:  4 },
-  punchy:     { effects_per_minute:  9 },
-  loud:       { effects_per_minute: 16 },
+  none:       { effects_per_minute:  0, drop_punch: 0.00, build_push: 0.00,
+                punch: 0.000, flash: 0.00, drop_flash: 0.00 },
+  restrained: { effects_per_minute:  4, drop_punch: 0.06, build_push: 0.02,
+                punch: 0.030, flash: 0.06, drop_flash: 0.10 },
+  punchy:     { effects_per_minute:  9, drop_punch: 0.16, build_push: 0.06,
+                punch: 0.060, flash: 0.11, drop_flash: 0.20 },
+  loud:       { effects_per_minute: 16, drop_punch: 0.26, build_push: 0.09,
+                punch: 0.090, flash: 0.16, drop_flash: 0.30 },
 };
 
 const FORMAT = {
@@ -86,7 +112,9 @@ function expand(b) {
   out.prefers = Object.assign({}, look, motion, b.prefers || {});
 
   const fx = EFFECTS[b.effects] || EFFECTS.restrained;
-  out.effects = Object.assign({}, fx, typeof b.effects === "object" ? b.effects : {});
+  const mr = MOTION_RENDER[b.motion] || MOTION_RENDER.calm;
+  out.effects = Object.assign({}, fx, mr,
+                              typeof b.effects === "object" ? b.effects : {});
 
   // Sensible defaults for everything a brief should not have to mention.
   if (out.restraint === undefined) {
