@@ -250,6 +250,34 @@ function run(ctx) {
   };
   function clampHeat(x) { return Math.max(0.55, Math.min(1.6, x)); }
 
+  // The energy curve is sampled once a downbeat, so it cannot see a moment
+  // shorter than a bar. Where Are U Now drops its kick for 0.65 s and slams
+  // back 1.4 s later, and to `heat` that whole stretch is one loud plateau --
+  // so the edit cut fast THROUGH the silence and then slowed down for the slam,
+  // which is the opposite of what the record does.
+  //
+  // `moments` is the interface tier and it carries those instants exactly. A
+  // stop says hold; a drop says go. This multiplies the energy reading rather
+  // than replacing it, so a quiet passage with a drop in it still reads quieter
+  // than a loud one.
+  const stops = (map.moments || []).filter(function (m2) {
+    return m2.kind === "stop" || m2.kind === "quiet"; });
+  const hits = (map.moments || []).filter(function (m2) {
+    return m2.kind === "drop" || m2.kind === "return"; });
+  const shape = function (t) {
+    let k = 1;
+    for (const st of stops) {
+      const holds = st.holds || 1.0;
+      if (t >= st.at - 0.15 && t <= st.at + holds) { k *= 0.45; break; }
+    }
+    for (const hh of hits) {
+      // The flurry belongs AFTER the hit, not before it: the cuts answer the
+      // slam, they do not predict it.
+      if (t >= hh.at - 0.15 && t <= hh.at + 2.4) { k *= 1.9; break; }
+    }
+    return k;
+  };
+
   const RATE_WIN_S = 20.0;
   const perWin = Math.max(1, Math.round(perMin * RATE_WIN_S / 60));
   const localFull = function (t) {
@@ -395,7 +423,7 @@ function run(ctx) {
       // a film spent on the drop runs out sooner, which is what an editor does
       // when they decide where the material belongs.
       const roomFull = Math.min(sh.duration - 0.02, capAt(t));
-      const h = heat(t);
+      const h = clampHeat(heat(t) * shape(t));
       const room = h > 1
         // The exponent decides how hard the flurry hits, and I chose it by
         // watching the output: 2 gave two quick cuts, 3 gave an uneven mix, 4

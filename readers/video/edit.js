@@ -229,19 +229,52 @@ function main() {
   const arcAt = arcArg === "off" ? null
               : parseFloat(arcArg === null || arcArg === "" ? "0.68" : arcArg);
   if (wantWin && arcAt !== null && from === null && to === null) {
-    const builds = (map.spans || []).filter(function (sp) { return sp.kind === "build"; });
-    const drops = (map.moments || []).filter(function (m2) {
-      return m2.kind === "drop" || m2.kind === "stop";
-    });
+    // Two shapes count as an arc, not one.
+    //
+    // A BUILD running into a drop is the obvious one and was the only one this
+    // looked for. But a STOP running into a drop -- the floor falling out and
+    // slamming back -- is the same shape and often the stronger moment; it is
+    // what a person listening picked out of this record unprompted. The map
+    // holds both and only one was readable, so the best thing in the song was
+    // invisible to the thing choosing where to point the camera.
+    //
+    // Scored by the CONTRAST the map measured across the payoff, not by how
+    // long the lead-in is. Length favoured builds by construction -- a 7.6 s
+    // build beat a 1.4 s dropout on lead alone, whatever either one sounded
+    // like.
+    const en = (map.energy || []).map(function (e) {
+      return Array.isArray(e) ? [e[0], e[1]] : [e.at, e.v]; })
+      .sort(function (a, b) { return a[0] - b[0]; });
+    const enAt = function (t) {
+      if (!en.length) return 0;
+      let lo = 0, hi = en.length - 1;
+      if (t <= en[0][0]) return en[0][1];
+      if (t >= en[hi][0]) return en[hi][1];
+      while (hi - lo > 1) { const m2 = (lo + hi) >> 1; if (en[m2][0] <= t) lo = m2; else hi = m2; }
+      return en[lo][1];
+    };
+    const moments = (map.moments || []).slice().sort(function (a, b) { return a.at - b.at; });
+    const payoffs = moments.filter(function (m2) {
+      return m2.kind === "drop" || m2.kind === "return"; });
+    const arcs = [];
+    for (const sp of (map.spans || [])) {
+      if (sp.kind !== "build") continue;
+      const d = payoffs.find(function (m2) {
+        return m2.at >= sp.to - 0.5 && m2.at <= sp.to + 2.0; });
+      if (d) arcs.push({ b: { from: sp.from, to: sp.to }, d: d, kind: "build" });
+    }
+    for (const st of moments) {
+      if (st.kind !== "stop" && st.kind !== "quiet") continue;
+      const d = payoffs.find(function (m2) {
+        return m2.at > st.at && m2.at - st.at <= 6.0; });
+      if (d) arcs.push({ b: { from: st.at, to: d.at }, d: d, kind: st.kind });
+    }
     let best = null, bestScore = -1;
-    for (const b of builds) {
-      const d = drops.find(function (m2) {
-        return m2.at >= b.to - 0.5 && m2.at <= b.to + 2.0;
-      });
-      if (!d) continue;
-      const lead = Math.min(b.to - b.from, wantWin * arcAt);
-      const score = lead * (d.size || 0.8);
-      if (score > bestScore) { bestScore = score; best = { b: b, d: d }; }
+    for (const a2 of arcs) {
+      const before = enAt(a2.b.from - 0.2), after = enAt(a2.d.at + 1.2);
+      const contrast = Math.max(0, after - before);
+      const score = (a2.d.size || 0.8) * (0.35 + contrast);
+      if (score > bestScore) { bestScore = score; best = a2; }
     }
     if (best) {
       const downs2 = (map.downbeats && map.downbeats.length)
