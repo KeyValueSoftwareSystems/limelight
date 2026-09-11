@@ -135,15 +135,46 @@ def luma(f):
     return (0.299 * f[..., 0] + 0.587 * f[..., 1] + 0.114 * f[..., 2]) / 255.0
 
 
-def boundaries(sig, fps):
+def frame_deltas(frames, block=96):
+    """Mean absolute change between consecutive frames, a block at a time.
+
+    Identical to |diff(sig)|.mean(axis=1), where `sig` was the luma and the
+    normalised RGB laid side by side -- but `sig` is never built. That matrix is
+    n x 230400, and `frames.reshape(n, -1) / 255.0` promotes uint8 to float64,
+    so a six-minute clip asks for 5.9 GB in one allocation. Unconstrained that
+    takes the machine down; under a memory cap it fails outright. Either way a
+    clip over about four minutes could not be indexed, and nothing said so --
+    the symptom was a dead laptop.
+
+    The matrix was only ever collapsed to one number per frame. Nothing needed
+    it to exist, so it does not.
+    """
+    n = len(frames)
+    if n < 2:
+        return np.zeros(0)
+    cols = frames.shape[1] * frames.shape[2] * 4      # luma columns + RGB columns
+    out = np.empty(n - 1, dtype=np.float64)
+    for a in range(0, n - 1, block):
+        b = min(n, a + block + 1)
+        blk = frames[a:b].astype(np.float32)
+        dl = np.abs(np.diff(luma(blk), axis=0)).reshape(b - a - 1, -1).sum(axis=1)
+        dr = np.abs(np.diff(blk, axis=0)).reshape(b - a - 1, -1).sum(axis=1) / 255.0
+        out[a:a + (b - a - 1)] = (dl + dr) / cols
+    return out
+
+
+def boundaries(d, fps):
     """Cut times, and separately the soft changes that were seen but not called.
+
+    `d` is one number per frame from frame_deltas. It used to take the whole
+    signature matrix and collapse it here, which is what made indexing a long
+    clip impossible.
 
     The distance is compared against a rolling median of its neighbours, so a
     clip that is busy everywhere needs a bigger jump to count than a still one.
     A single global threshold was tried first and called 41 cuts in a 15-second
     stock clip of rippling water.
     """
-    d = np.abs(np.diff(sig, axis=0)).mean(axis=1)
     if len(d) < 3:
         return [], [], d
     win = max(5, int(fps * 2) | 1)
@@ -295,10 +326,7 @@ def index_clip(path, clip_id, meta=None):
     if frames is None:
         return None
     fps = SAMPLE_FPS
-    sig = np.concatenate([
-        luma(frames).reshape(len(frames), -1),
-        frames.reshape(len(frames), -1) / 255.0], axis=1)
-    hard, soft, _d = boundaries(sig, fps)
+    hard, soft, _d = boundaries(frame_deltas(frames), fps)
     dur = len(frames) / fps
     edges = [0.0] + hard + [dur]
     shots = []
