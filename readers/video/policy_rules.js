@@ -41,8 +41,26 @@ const KIND_WEIGHT = {
   bar: 0.20
 };
 
+// How much a candidate is worth more at the END of a build than at its start.
+const BUILD_LIFT = 1.9;
+
 function candidates(map, dur, derive) {
   const out = [];
+  // How far through a build we are, 0 outside one.
+  //
+  // A build is the one place where the right number of cuts CHANGES across the
+  // span: tension rises, so the picture should tighten with it. Without this a
+  // build reads as dead air -- energy is low, so nothing cleared the floor and
+  // a 20-second build came out as two shots. Accelerating into a drop is not a
+  // trick, it is what the span means.
+  const builds = (map.spans || []).filter(function (s) { return s.kind === "build"; });
+  function buildProgress(t) {
+    for (const b of builds) {
+      if (b.from === undefined || b.to === undefined || b.to <= b.from) continue;
+      if (t >= b.from && t < b.to) return (t - b.from) / (b.to - b.from);
+    }
+    return 0;
+  }
   function push(t, kind, ref) {
     if (!(t > 0.05) || t >= dur - 0.05) return;
     // Salience comes from derive.js, not from the map: everything it needs is
@@ -54,11 +72,18 @@ function candidates(map, dur, derive) {
     // The kind and the measurement are both evidence and neither is authority.
     // Blending them keeps a drop a drop even where the arithmetic is unexcited,
     // and lets a strong measured change promote a mere phrase boundary.
+    const base = s ? (0.5 * kw + 0.5 * s.value) : kw;
+    // Tighten toward the end of a build. Quadratic, so the last quarter of the
+    // span is where the cutting really gathers, which is where a listener feels
+    // it gathering.
+    const bp = buildProgress(t);
+    const lift = bp > 0 ? 1 + BUILD_LIFT * bp * bp : 1;
     out.push({
       t: t, kind: kind, ref: ref,
-      strength: s ? +(0.5 * kw + 0.5 * s.value).toFixed(4) : kw,
+      strength: +(base * lift).toFixed(4),
       strength_is: s ? "kind+salience(uncorroborated)" : "kind_only",
-      salience: s ? s.value : null
+      salience: s ? s.value : null,
+      build_progress: bp > 0 ? +bp.toFixed(3) : null
     });
   }
   (map.moments || []).forEach(function (m, i) {
@@ -114,6 +139,12 @@ function snap(t, beats, hard) {
 
 function run(ctx) {
   const { map, brief, index, seed, derive } = ctx;
+  // Slots outside the exported window still exist -- they shape the arc, the
+  // holds and the budget -- but they do not consume footage.
+  const win = ctx.window || null;
+  function exported(a, b) {
+    return !win || (b > win.from + 1e-6 && a < win.to - 1e-6);
+  }
   const dur = ctx.length_s;
   const B = brief.budgets || {};
   const R = brief.restraint || {};
@@ -235,6 +266,7 @@ function run(ctx) {
     const start = edges[i], end = edges[i + 1];
     const want = end - start;
     if (want < 0.15) continue;
+    if (!exported(start, end)) continue;
     const cand = chosen.find(function (c) { return Math.abs(snap(c.t, beats) - start) < 1e-6; });
 
     let s = null, why = null;
@@ -260,9 +292,11 @@ function run(ctx) {
       }
     }
     if (!s) s = ASSETS.choose(pool, want, used, prev, brief, seed,
-                              prevKin, isBoundary(start));
+                              prevKin, isBoundary(start),
+                              cand ? cand.strength : 0);
     if (!s) continue;
-    used.set(s.clip_id, (used.get(s.clip_id) || 0) + 1);
+    used.set(s.clip_id + "#" + s.shot + "#" + (s.moment || 0),
+             (used.get(s.clip_id + "#" + s.shot + "#" + (s.moment || 0)) || 0) + 1);
     prev = s.clip_id;
     placedAt.push({ t: start, clip_id: s.clip_id, shot: s.shot });
     prevKin = s.source_category;

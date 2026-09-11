@@ -190,21 +190,28 @@ class Motion:
             drift_x = p["shot_drift"] * math.sin(2 * math.pi * (0.12 * k + 0.25 * (shot.get("i", 0) % 4)))
             drift_y = p["shot_drift"] * 0.5 * math.cos(2 * math.pi * (0.09 * k))
 
+        # The same formula everywhere is why the effects read as "the same
+        # throughout". A build should be doing LESS at its start than at its
+        # end, and the section after a drop should be spending what the build
+        # saved. `arc` is that envelope: it rises across a build span, peaks
+        # through a drop's decay, and otherwise sits at a floor.
+        arc = p["arc_floor"] + (1 - p["arc_floor"]) * max(build * build, drop)
         zoom = (1.0
-                + p["breath"] * pump * (0.35 + 0.65 * e)
-                + p["punch"] * acc * (0.3 + 0.7 * e)
+                + p["breath"] * pump * (0.35 + 0.65 * e) * arc
+                + p["punch"] * acc * (0.3 + 0.7 * e) * arc
                 + p["drop_punch"] * drop
                 + p["build_push"] * build
-                + push)
-        gain = 1.0 + p["flash"] * acc + p["drop_flash"] * drop
+                + push * (0.6 + 0.4 * arc))
+        gain = 1.0 + p["flash"] * acc * arc + p["drop_flash"] * drop
         # A shove on the hardest hits, so an accent is felt and not only seen.
-        shove = p["shake"] * acc * acc * (0.3 + 0.7 * e)
+        shove = p["shake"] * acc * acc * (0.3 + 0.7 * e) * arc
         ang = 2.399963 * (int(t * 7.0) % 17)          # deterministic direction
         return {
             "zoom": zoom, "gain": gain,
             "dx": drift_x + shove * math.cos(ang),
             "dy": drift_y + shove * math.sin(ang),
-            "energy": e, "pump": pump, "accent": acc, "drop": drop, "build": build,
+            "energy": e, "pump": pump, "accent": acc, "drop": drop,
+            "build": build, "arc": arc,
         }
 
 
@@ -227,4 +234,10 @@ DEFAULTS = {
     "accent_refractory": 0.09,
     "accent_decay": 0.085,  # seconds
     "drop_decay": 0.40,
+    # How much of the motion is present OUTSIDE a build or a drop. Below 1 the
+    # picture is calmer in the ordinary bars, which is what makes the loud ones
+    # feel loud. At 1.0 every second gets the same treatment and the result
+    # reads as one effect applied evenly, which is the note this was written to
+    # answer.
+    "arc_floor": 0.38,
 }

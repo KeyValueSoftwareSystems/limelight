@@ -51,11 +51,37 @@ const ASSETS = (function () {
   }
 
   // Every shot of every clip, flattened, with its fit already computed.
-  function shots(index, brief) {
+  //
+  // A long shot is cut into several MOMENTS. A 20-second take holds five
+  // different four-second pictures, and treating it as one choice is why an
+  // edit built from 13 clips kept returning to the same few images -- "the same
+  // clips again and again". The measurements are the shot's; what differs is
+  // where in it we enter, which is exactly what an editor is choosing when they
+  // pick a moment out of a take.
+  function shots(index, brief, sliceLen) {
     const out = [];
+    const SL = sliceLen || 4.5;
     for (const c of index.clips || []) {
       (c.shots || []).forEach(function (s, i) {
         if (s.duration < 0.35) return;
+        const n = Math.max(1, Math.floor(s.duration / SL));
+        if (n > 1) {
+          const w = s.duration / n;
+          for (let k = 0; k < n; k++) {
+            out.push(Object.assign({}, s, {
+              clip_id: c.clip_id, shot: i,
+              moment: k, moments_in_shot: n,
+              start: +(s.start + k * w).toFixed(3),
+              end: +(s.start + (k + 1) * w).toFixed(3),
+              duration: +w.toFixed(3),
+              clip_duration: c.duration_s,
+              source_category: c.source_category || null,
+              look: s.look || null,
+              fit: fit(s, brief)
+            }));
+          }
+          return;
+        }
         out.push(Object.assign({}, s, {
           clip_id: c.clip_id, shot: i,
           clip_duration: c.duration_s,
@@ -90,7 +116,21 @@ const ASSETS = (function () {
   // Now the default pull is the other way: staying in the same world is
   // rewarded, and `allowKin` lets the caller relax that at a structural
   // boundary, where a change of subject is the point rather than an accident.
-  function choose(pool, want, used, avoid, brief, seed, kin, allowKin) {
+  // `impact` is how big the moment being cut TO is, 0 to 1.
+  //
+  // Without it every cut is chosen the same way, and the climax gets whatever
+  // happened to fit -- on one render the two tightest shots in the piece, the
+  // 0.94 s pair landing exactly on the drop, were a static drum cymbal. A
+  // drop deserves the most alive picture available, not a picture that merely
+  // suits the brief's ranges. At impact 1 the choice leans hard on movement and
+  // on faces; at impact 0 it does not lean at all, so ordinary bars still get
+  // continuity rather than spectacle.
+  function choose(pool, want, used, avoid, brief, seed, kin, allowKin, impact) {
+    const imp = Math.max(0, Math.min(1, impact || 0));
+    // Normalised against the pool, so "a lot of movement" means a lot for this
+    // footage rather than a number carried over from other footage.
+    let maxSub = 0;
+    for (const s of pool) if ((s.subject_motion_px_s || 0) > maxSub) maxSub = s.subject_motion_px_s || 0;
     const maxReuse = (brief.callbacks && brief.callbacks.max_reuses_per_clip) || 2;
     let best = null, bestScore = -1;
     for (let i = 0; i < pool.length; i++) {
@@ -98,7 +138,10 @@ const ASSETS = (function () {
       // Cutting from a clip straight back to itself reads as a jump cut, which
       // is a real effect and not one anybody asked for here.
       if (s.clip_id === avoid) continue;
-      const times = used.get(s.clip_id) || 0;
+      // Reuse is counted per MOMENT, not per clip, so returning to a different
+      // part of the same take is free while replaying the same picture is not.
+      const key = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);
+      const times = used.get(key) || 0;
       if (times >= maxReuse) continue;
       // Can this shot supply the requested duration? Shots that cannot are
       // only considered when nothing else is left, and the caller is expected
@@ -120,8 +163,14 @@ const ASSETS = (function () {
       // where the music does.
       const same = (kin && s.source_category === kin) ? 1 : 0;
       const cont = allowKin ? 0 : same;
-      const jitter = ((Math.imul(hash(s.clip_id + ":" + s.shot), seed || 1) >>> 8) % 1000) / 1e5;
-      const score = s.fit * 0.46 + cont * 0.36 + room * 0.15 + fresh * 0.03 + jitter;
+      const jitter = ((Math.imul(hash(s.clip_id + ":" + s.shot + ":" + (s.moment || 0)),
+                                 seed || 1) >>> 8) % 1000) / 1e5;
+      // How striking this shot is, on its own terms: movement, a face, colour.
+      const sub = maxSub > 0 ? Math.min(1, (s.subject_motion_px_s || 0) / maxSub) : 0;
+      const face = s.faces ? 1 : 0;
+      const alive = 0.55 * sub + 0.25 * face + 0.20 * Math.min(1, (s.saturation || 0) / 0.7);
+      const score = (1 - 0.45 * imp) * (s.fit * 0.42 + cont * 0.32 + room * 0.14 + fresh * 0.12)
+                    + 0.45 * imp * alive + jitter;
       if (score > bestScore) { bestScore = score; best = s; }
     }
     return best;

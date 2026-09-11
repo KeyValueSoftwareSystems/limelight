@@ -17,6 +17,7 @@ const POLICIES = {
   naive: require("./policy_naive.js"),
   rules: require("./policy_rules.js"),
   random: require("./policy_random.js"),
+  flat:   require("./policy_flat.js"),
   llm:   require("./policy_llm.js")
 };
 
@@ -65,24 +66,10 @@ function main() {
   const ctx = {
     map: map, brief: brief, index: index, seed: seed, length_s: length,
     derive: DERIVE.make(map), slug: slug, briefId: briefId,
-    intent: arg("intent", null)
+    intent: arg("intent", null),
+    flatShots: arg("shots", null)
   };
-  const r = policy.run(ctx);
 
-  const ir = {
-    ir: "0.1",
-    made_by: {
-      how: "policy", who: "readers/video/policy_" + policy.id + ".js",
-      label: policy.label, brief: briefId,
-      map: path.relative(ROOT, mp), seed: seed,
-      index: path.relative(ROOT, indexPath)
-    },
-    song: { slug: slug, length_s: +length.toFixed(3) },
-    format: brief.format,
-    timeline: r.timeline,
-    holds: r.holds,
-    budget: r.budget
-  };
   // A window, for short form. The policy has ALREADY reasoned over the whole
   // song -- that is the argument of this project and it is not weakened here.
   // What changes is only how much of the result is exported. A four-minute
@@ -98,6 +85,46 @@ function main() {
   // bar does. Picking it by ear would work too, and would be one more thing
   // tuned to one song by somebody who had already heard it.
   const wantWin = arg("window", null) === null ? null : parseFloat(arg("window"));
+  // --arc frames a BUILD AND THE DROP IT LEADS INTO, rather than the busiest
+  // window. Density is not shape: taking the thirty seconds with the most going
+  // on guarantees thirty flat seconds, which is what "no build-up and eventual
+  // climax" describes. A build span and the drop at its end is an arc the map
+  // already found; this only frames it, putting the drop `arcAt` of the way
+  // through so there is payoff left after it.
+  const arcAt = arg("arc", null) === null ? null : parseFloat(arg("arc") || "0.68");
+  if (wantWin && arcAt !== null && from === null && to === null) {
+    const builds = (map.spans || []).filter(function (sp) { return sp.kind === "build"; });
+    const drops = (map.moments || []).filter(function (m2) {
+      return m2.kind === "drop" || m2.kind === "stop";
+    });
+    let best = null, bestScore = -1;
+    for (const b of builds) {
+      const d = drops.find(function (m2) {
+        return m2.at >= b.to - 0.5 && m2.at <= b.to + 2.0;
+      });
+      if (!d) continue;
+      const lead = Math.min(b.to - b.from, wantWin * arcAt);
+      const score = lead * (d.size || 0.8);
+      if (score > bestScore) { bestScore = score; best = { b: b, d: d }; }
+    }
+    if (best) {
+      const downs2 = (map.downbeats && map.downbeats.length)
+        ? map.downbeats : (map.beats || []);
+      let st = Math.max(0, Math.min(best.d.at - wantWin * arcAt, length - wantWin));
+      if (downs2.length) {
+        st = downs2.reduce(function (a, c) {
+          return Math.abs(c - st) < Math.abs(a - st) ? c : a;
+        }, downs2[0]);
+      }
+      from = st;
+      to = Math.min(length, st + wantWin);
+      console.error(`arc: build ${best.b.from.toFixed(1)}-${best.b.to.toFixed(1)} ` +
+                    `into ${best.d.kind}@${best.d.at.toFixed(2)}; window ` +
+                    `${from.toFixed(2)}-${to.toFixed(2)}, drop at ` +
+                    `${(100 * (best.d.at - from) / (to - from)).toFixed(0)}% through`);
+    }
+  }
+
   if (wantWin && from === null && to === null) {
     const RULES = POLICIES.rules;
     const cands = RULES.candidates(map, length, ctx.derive);
@@ -123,6 +150,36 @@ function main() {
     console.error(`window: ${from.toFixed(2)}s -> ${to.toFixed(2)}s ` +
                   `(strength ${bestScore.toFixed(2)}, chosen from the map)`);
   }
+
+  // The window is known BEFORE the policy runs.
+  //
+  // It still decides WHERE to cut across the whole song -- that is the
+  // look-ahead this project argues for and it is untouched. What changed is
+  // footage ALLOCATION. Rationing 13 clips over 109 shots of a four-minute
+  // song and then exporting thirty seconds meant the strongest shot in the set
+  // had already been spent seven times and was over its reuse cap by the time
+  // the climax arrived, so the drop got the weakest picture available. Footage
+  // now goes to the slots that will actually be seen.
+  if (from !== null || to !== null) {
+    ctx.window = { from: from === null ? 0 : from, to: to === null ? length : to };
+  }
+  const r = policy.run(ctx);
+
+  const ir = {
+    ir: "0.1",
+    made_by: {
+      how: "policy", who: "readers/video/policy_" + policy.id + ".js",
+      label: policy.label, brief: briefId,
+      map: path.relative(ROOT, mp), seed: seed,
+      index: path.relative(ROOT, indexPath)
+    },
+    song: { slug: slug, length_s: +length.toFixed(3) },
+    format: brief.format,
+    timeline: r.timeline,
+    holds: r.holds,
+    budget: r.budget
+  };
+
   if (from !== null || to !== null) {
     const a = from === null ? 0 : from;
     const b = to === null ? length : to;
