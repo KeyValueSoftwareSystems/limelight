@@ -58,6 +58,46 @@ last: note the next beat, pause, seek backwards, change the tempo, and the beat
 is still the same bar and beat while the milliseconds have moved. If any
 musical position moves, the design is wrong.
 
+## Sections, in layers
+
+A song is several structures at once, and flattening them into one list loses
+the part that matters. So sections come in named layers, and layers overlap.
+
+| layer | kind | what it holds |
+|---|---|---|
+| `form` | partition | intro, verse, break, drop. Exactly one covers any bar. `id` and `repeat` say which are the same thing coming back. |
+| `energy` | sparse | builds. Crosses form boundaries on purpose. |
+| `presence` | sparse | which instrument is in. Overlapping by nature. |
+| `silence` | sparse | where the voice is absent. |
+| `phrase` | rule | hypermeter, derived from `every_bars`, never stored. |
+
+The test that shows why this is not over-engineering: on Levels the build runs
+bars 78 to 86, and the verse starts at 79. One flat list cannot hold both.
+
+`sectionsAt(position)` returns every layer at once — a single span for a
+partition, an array for anything sparse, because overlap is the point.
+
+`until(layer)` is the one an application actually wants: how many bars and how
+many of *your* milliseconds until the thing you are inside ends. That is what
+lets a reader build toward a change instead of reacting to one.
+
+Boundaries also arrive through `next()`, so anything with lead time is told a
+section ends in 900 ms rather than discovering it once it already has.
+
+### One writer per fact
+
+`instruments.parts.vocals` and `vocal_silence` both answer "is the voice
+there", by different methods, and they disagree — at bar 78 the first says
+present and the second says silent. The silence measurement keeps the fact and
+vocals is dropped from the presence layer. Two lanes computing the same number
+will eventually disagree, and then both are suspect.
+
+### Not a lighting word
+
+There is no `blackout` in the score, and there will not be one. The musical
+fact is `silence`. A lighting reader may black out there; a game may do nothing
+at all; and the score must not assume either.
+
 ## Known and deliberate
 
 The pickup before bar 1 is bar 0 beat 4. That is correct and it reads as

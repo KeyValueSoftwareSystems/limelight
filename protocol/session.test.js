@@ -15,6 +15,8 @@ const advance = s => { t += s; };
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);
 const near = (a, b, eps) => Math.abs(a - b) <= (eps === undefined ? 1e-6 : eps);
+const bpb = score.grid.beats_per_bar;
+const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
 
 /* ---- the grid ----------------------------------------------------------- */
 {
@@ -106,6 +108,83 @@ const near = (a, b, eps) => Math.abs(a - b) <= (eps === undefined ? 1e-6 : eps);
      `bar ${before.bar} beat ${before.beat}  ->  bar ${after.bar} beat ${after.beat}`);
   ok("and only the milliseconds moved",
      before.in_ms !== after.in_ms, `${before.in_ms} ms -> ${after.in_ms} ms`);
+}
+
+/* ---- sections, in layers ------------------------------------------------ */
+{
+  const s = Session(score, { now: clock });
+  const L = score.layers || {};
+  ok("the score carries more than one layer", Object.keys(L).length >= 4,
+     Object.keys(L).join(", "));
+
+  /* a partition covers every bar exactly once */
+  let multi = 0, none = 0;
+  for (let bar = 4; bar < 120; bar++) {
+    const hit = (L.form.spans || []).filter(sp =>
+      bar >= sp.from.bar && bar < sp.to.bar);
+    if (hit.length > 1) multi++;
+    if (hit.length === 0) none++;
+  }
+  ok("form is a partition -- never two at once", multi === 0, multi + " overlaps");
+  ok("form is a partition -- never a gap", none === 0, none + " uncovered bars");
+
+  /* the whole point of layers: something that crosses a form boundary */
+  const build = (L.energy.spans || [])[0];
+  const crossed = (L.form.spans || []).filter(sp =>
+    at(sp.from) > at(build.from) && at(sp.from) < at(build.to));
+  ok("a build crosses a form boundary, which is why layers exist",
+     crossed.length >= 1,
+     `build bar ${build.from.bar}-${build.to.bar} crosses ` +
+     crossed.map(c => c.name + " at " + c.from.bar).join(", "));
+
+  /* several layers answer at once, and that is not a bug */
+  const at78 = s.sectionsAt({ bar: 78, beat: 1 });
+  ok("at bar 78, four layers have something to say",
+     !!at78.form && at78.energy.length > 0 && at78.presence.length > 0 && !!at78.phrase,
+     `form ${at78.form.name} · energy ${at78.energy.map(x=>x.name)} · ` +
+     `presence ${at78.presence.map(x=>x.name)} · phrase ${at78.phrase.index}`);
+
+  /* rule 8: the voice has one writer */
+  const vocalInPresence = (L.presence.spans || []).some(sp => sp.name === "vocals");
+  ok("the voice is not described by two layers at once", !vocalInPresence);
+
+  /* phrase is derived, not stored */
+  ok("phrase is a rule rather than a list", L.phrase.kind === "rule");
+  const p1 = s.sectionsAt({ bar: L.phrase.from_bar, beat: 1 }).phrase;
+  const p2 = s.sectionsAt({ bar: L.phrase.from_bar + L.phrase.every_bars, beat: 1 }).phrase;
+  ok("consecutive phrases are consecutive", p2.index === p1.index + 1,
+     p1.index + " -> " + p2.index);
+}
+
+/* ---- until(): building toward a change rather than reacting to one ------- */
+{
+  const s = Session(score, { now: clock });
+  const form = (score.layers.form.spans || []).find(sp => sp.to.bar - sp.from.bar >= 4);
+  s.seek(s.secondsAt(form.from.bar, 1)); s.play();
+
+  const u = s.until("form");
+  ok("until() says which section ends and when", u && u.name === form.name,
+     u && `${u.name} in ${u.in_ms} ms`);
+  ok("and how many bars that is",
+     near(u.bars, form.to.bar - form.from.bar, 1e-6), u && u.bars + " bars");
+
+  s.rate(2);
+  const u2 = s.until("form");
+  ok("the bars do not change with tempo", near(u2.bars, u.bars, 1e-6));
+  ok("the milliseconds halve", near(u2.in_ms, Math.round(u.in_ms / 2), 1),
+     `${u.in_ms} -> ${u2.in_ms}`);
+}
+
+/* ---- boundaries arrive in next(), with lead time ------------------------ */
+{
+  const s = Session(score, { now: clock });
+  const form = score.layers.form.spans[3];
+  s.seek(s.secondsAt(form.to.bar, 1) - 1.0); s.play();
+  const up = s.next(2000).filter(e => e.layer);
+  ok("a section boundary shows up before it happens", up.length > 0,
+     up.map(e => e.what + " +" + e.in_ms + "ms").join("  "));
+  ok("and it is announced early enough to act on",
+     up.every(e => e.in_ms >= 0 && e.in_ms <= 2000));
 }
 
 for (const [pass, name, detail] of out)

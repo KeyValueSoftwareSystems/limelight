@@ -74,6 +74,56 @@ function Session(score, opts) {
   const index = t => (t - first) / beatSec;
   const fromIndex = i => ({ bar: Math.floor(i / bpb) + 1, beat: (mod(i, bpb)) + 1 });
 
+  /* ---- sections, in layers ------------------------------------------------
+     A song is several structures at once, and flattening them into one list
+     loses the part that matters. `form` is a partition, so exactly one span
+     covers any bar. `energy` and `presence` are sparse and freely overlap it
+     and each other -- a build crosses a section boundary because that is what
+     a build does, and the drums and the voice are both present for most of a
+     record. `phrase` is a rule rather than a list, for the same reason beats
+     are a rule. */
+  const layers = (score && score.layers) || {};
+  const at_ = q => (q.bar - 1) * bpb + ((q.beat || 1) - 1);   /* beats, one line */
+  const covers = (sp, x) => x >= at_(sp.from) && x < at_(sp.to);
+
+  function sectionsAt(pos) {
+    const x = at_(pos), found = {};
+    for (const name of Object.keys(layers)) {
+      const L = layers[name];
+      if (L.kind === "rule") {
+        const n = L.every_bars || 8, from = L.from_bar || 1;
+        /* Before the anchor there is no phrase to be in -- the intro is a
+           pickup, not phrase zero. Say nothing rather than a number. */
+        if (pos.bar < from) { found[name] = null; continue; }
+        const i = Math.floor((pos.bar - from) / n);
+        found[name] = { index: i + 1,
+          from: { bar: from + i * n, beat: 1 },
+          to: { bar: from + (i + 1) * n, beat: 1 },
+          through: +((((pos.bar - from) % n) + (pos.beat - 1) / bpb) / n).toFixed(4) };
+        continue;
+      }
+      const hit = (L.spans || []).filter(sp => covers(sp, x));
+      /* a partition can only be in one place at a time; everything else is a
+         list, because overlap is the point of having layers at all */
+      found[name] = L.kind === "partition" ? (hit[0] || null) : hit;
+    }
+    return found;
+  }
+
+  /* How long the thing you are inside has left, in the caller's milliseconds.
+     This is what lets an application build toward a change rather than react
+     to one, which is the whole reason any of this is worth doing. */
+  function until(layer, pos) {
+    const q = pos || positionAt(seconds());
+    const f = sectionsAt(q)[layer];
+    const sp = Array.isArray(f) ? f[0] : f;
+    if (!sp || !sp.to) return null;
+    const leftBeats = at_(sp.to) - at_(q);
+    return { name: sp.name || null, ends_at: sp.to,
+             bars: +(leftBeats / bpb).toFixed(3),
+             in_ms: Math.round(leftBeats * beatSec / rate * 1000) };
+  }
+
   /* ---- the two questions a container actually asks ----------------------- */
   function now() {
     const t = seconds();
@@ -84,6 +134,7 @@ function Session(score, opts) {
       position: positionAt(t),
       phase: +within.toFixed(4),
       to_next_beat_ms: Math.round((1 - within) * beatSec / rate * 1000),
+      sections: sectionsAt(positionAt(t)),
     };
   }
 
@@ -102,7 +153,28 @@ function Session(score, opts) {
         in_ms: Math.round((secondsAt(p.bar, p.beat) - t) / rate * 1000),
       });
     }
-    return out;
+
+    const p0 = positionAt(t), p1 = positionAt(t + songAhead);
+    const ms = q => Math.round((secondsAt(q.bar, q.beat) - t) / rate * 1000);
+    const inside = q => at_(q) >= at_(p0) && at_(q) < at_(p1);
+
+    /* Boundaries matter as much as beats. Anything with lead time needs to know
+       a section ends in 900 ms, not to discover it once it already has. */
+    for (const name of Object.keys(layers)) {
+      const L = layers[name];
+      if (L.kind === "rule") continue;
+      for (const sp of (L.spans || [])) {
+        if (inside(sp.from)) out.push({ what: name + " starts", layer: name,
+          name: sp.name || null, bar: sp.from.bar, beat: sp.from.beat, in_ms: ms(sp.from) });
+        if (inside(sp.to)) out.push({ what: name + " ends", layer: name,
+          name: sp.name || null, bar: sp.to.bar, beat: sp.to.beat, in_ms: ms(sp.to) });
+      }
+    }
+    for (const mo of (score.moments || [])) {
+      if (inside(mo.at)) out.push({ what: mo.kind, layer: "moment",
+        name: mo.kind, bar: mo.at.bar, beat: mo.at.beat, in_ms: ms(mo.at) });
+    }
+    return out.sort((x, y) => x.in_ms - y.in_ms);
   }
 
   /* ---- transport. None of this is the score's business. ------------------ */
@@ -115,6 +187,7 @@ function Session(score, opts) {
   function setRate(r) { if (!songTime) { held = seconds(); since = wall(); } rate = r; return api; }
 
   const api = { now, next, play, pause, seek, positionAt, secondsAt,
+                sectionsAt, until, layers,
                 rate: r => (r === undefined ? rate : setRate(r)),
                 seconds, score };
   return api;

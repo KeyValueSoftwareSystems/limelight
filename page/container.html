@@ -70,6 +70,22 @@ td.b{text-align:right;color:var(--blu);font-variant-numeric:tabular-nums;white-s
     milliseconds. This is the only place the two clocks meet.</p>
   </div>
 </div>
+
+<div class="card" style="margin-top:16px">
+  <h2 style="color:var(--ok)">where you are — several structures at once</h2>
+  <div id="layers"></div>
+  <p class="note">A song is not one list of sections. <b>form</b> is a partition,
+  so exactly one covers any bar. <b>energy</b> and <b>presence</b> are sparse and
+  overlap it freely — a build crosses a section boundary because that is what a
+  build does. <b>phrase</b> is derived from a rule, not stored.</p>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2 style="color:var(--blu)">what is coming</h2>
+  <div id="upcoming"></div>
+  <p class="note">Boundaries matter as much as beats. Anything with lead time
+  needs to know a section ends in 900 ms, not to discover it once it already has.</p>
+</div>
 </div>
 
 <script src="/protocol/session.js"></script>
@@ -85,6 +101,10 @@ async function boot(){
   /* The audio element owns the clock. The session reads it rather than running
      a second one beside it. */
   S=window.LimelightSession.Session(SCORE,{songTime:()=>aud.currentTime});
+  /* Open somewhere the song is doing something, so the first look shows what
+     this is rather than an empty grid. The second drop, a few bars in. */
+  const d=(SCORE.moments||[]).filter(m=>m.kind==="drop")[1];
+  if(d) aud.currentTime=Math.max(0,S.secondsAt(d.at.bar,d.at.beat)-3);
   $("bpm").innerHTML=SCORE.grid.bpm.toFixed(1)+"<small>bpm on the record</small>";
   wire(); loop();
 }
@@ -131,6 +151,28 @@ function loop(){
       || `<tr><td class="k">nothing in the next 2 s</td><td class="b">—</td></tr>`}
     <tr><td class="k">phase through this beat</td><td class="b">${n.phase.toFixed(3)}</td></tr>
     </table>`;
+
+  /* the layers, and how long each has left */
+  const LN={form:"form",energy:"energy",presence:"presence",silence:"silence",phrase:"phrase"};
+  $("layers").innerHTML=`<table>${Object.keys(n.sections).map(k=>{
+    const v=n.sections[k];
+    let what="&mdash;", u=null;
+    if(Array.isArray(v)) what = v.length ? v.map(x=>x.name).join(" + ") : "&mdash;";
+    else if(v) what = v.name ? (v.name + (v.repeat?` <span style="color:var(--faint)">#${v.repeat}</span>`:"")) 
+                             : `phrase ${v.index}`;
+    try{ u=S.until(k) }catch(e){}
+    return `<tr><td class="k" style="width:96px">${LN[k]||k}</td>
+      <td style="color:var(--ink)">${what}</td>
+      <td class="n">${u?`${u.bars} bars`:""}</td>
+      <td class="n">${u?`${u.in_ms} ms`:""}</td></tr>`}).join("")}</table>`;
+
+  const ev=S.next(8000).filter(e=>e.layer);
+  $("upcoming").innerHTML=ev.length?`<table>${ev.slice(0,7).map(e=>
+    `<tr><td class="k">${e.what}</td>
+     <td style="color:var(--ink)">${e.name&&e.name!==e.what?e.name:""}</td>
+     <td class="b">bar ${e.bar} beat ${e.beat}</td>
+     <td class="n">+${e.in_ms} ms</td></tr>`).join("")}</table>`
+    :`<table><tr><td class="k">nothing in the next 8 s</td></tr></table>`;
 
   $("clockcard").innerHTML=`<table>
     ${up.slice(0,5).map(b=>`<tr><td class="k">${b.accent?"the one":"beat"}</td>
