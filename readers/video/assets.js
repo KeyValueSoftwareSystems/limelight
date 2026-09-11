@@ -64,6 +64,7 @@ const ASSETS = (function () {
           // the same world, and it is the source's opinion. A real subject
           // model would replace it.
           source_category: c.source_category || null,
+          look: s.look || null,
           fit: fit(s, brief)
         }));
       });
@@ -120,7 +121,7 @@ const ASSETS = (function () {
       const same = (kin && s.source_category === kin) ? 1 : 0;
       const cont = allowKin ? 0 : same;
       const jitter = ((Math.imul(hash(s.clip_id + ":" + s.shot), seed || 1) >>> 8) % 1000) / 1e5;
-      const score = s.fit * 0.40 + cont * 0.35 + room * 0.18 + fresh * 0.07 + jitter;
+      const score = s.fit * 0.46 + cont * 0.36 + room * 0.15 + fresh * 0.03 + jitter;
       if (score > bestScore) { bestScore = score; best = s; }
     }
     return best;
@@ -142,6 +143,55 @@ const ASSETS = (function () {
   function inPoint(shot, want) {
     const slack = Math.max(0, shot.duration - want);
     return +(shot.start + slack / 2).toFixed(3);
+  }
+
+  // Keep only the shots that LOOK like each other.
+  //
+  // Coherence was first attempted with the source's category name and that was
+  // not good enough: "street" held a neon alley at night and a desert highway
+  // at sunset, "city" held green hills. Cut together the result read as random
+  // to a viewer even though the label said otherwise.
+  //
+  // `look` is 36 numbers of measured appearance per shot. This finds the
+  // densest cluster -- the shot with the most neighbours inside `radius`, then
+  // everything inside that radius -- and returns it. Not k-means: there is no k
+  // worth guessing here, and the question is not "what groups exist" but "what
+  // is the biggest group that looks like itself".
+  //
+  // Returns the whole pool unchanged if nothing was measured, because a pool
+  // filtered on a field nobody wrote would be filtered on nothing.
+  function cohere(pool, radius, minKeep) {
+    const withLook = pool.filter(function (s) {
+      return Array.isArray(s.look) && s.look.length >= 12;
+    });
+    if (withLook.length < (minKeep || 8)) return pool;
+    function dist(a, b) {
+      let d = 0;
+      for (let i = 0; i < a.look.length; i++) {
+        const x = a.look[i] - b.look[i];
+        d += x * x;
+      }
+      return Math.sqrt(d / a.look.length);
+    }
+    // Which cluster, not just the biggest one. Density alone picked "dark
+    // things" -- a tape deck, three star fields and a train all measure dark
+    // and share nothing else. Weighting by how well the members suit the brief
+    // lets a brief that wants people and movement land on the cluster of
+    // people moving rather than on the cluster of night sky.
+    const r = radius || 0.16;
+    let best = null, bestScore = -1;
+    for (const c of withLook) {
+      let n = 0, fitSum = 0;
+      for (const o of withLook) {
+        if (dist(c, o) <= r) { n++; fitSum += o.fit; }
+      }
+      if (n < 4) continue;
+      const score = n * (fitSum / n) * (fitSum / n);
+      if (score > bestScore) { bestScore = score; best = c; }
+    }
+    if (!best) return pool;
+    const kept = withLook.filter(function (s) { return dist(best, s) <= r; });
+    return kept.length >= (minKeep || 8) ? kept : pool;
   }
 
   // The longest slot the footage can fill without repeating itself inside one
@@ -186,7 +236,7 @@ const ASSETS = (function () {
   }
 
   return { fit: fit, shots: shots, choose: choose, inPoint: inPoint,
-           hash: hash, longest: longest, capSlots: capSlots,
+           hash: hash, longest: longest, capSlots: capSlots, cohere: cohere,
            PREFERABLE: PREFERABLE };
 })();
 if (typeof module !== "undefined" && module.exports) module.exports = ASSETS;

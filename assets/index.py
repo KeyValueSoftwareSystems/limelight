@@ -61,6 +61,20 @@ WHAT IS MEASURED, AND WHAT EACH ONE IS NOT
                    where the detail is, which is usually but not always the
                    subject. NOT a subject detector.
 
+  look             A 4x3 grid of mean RGB, 36 numbers, from the middle frame.
+                   What the shot LOOKS like: how dark, how warm, where the light
+                   sits in frame.
+                   This exists because continuity was first keyed to the
+                   source's category name, and a category name is not an
+                   appearance. "street" contained a neon alley at night AND a
+                   desert highway at sunset; "city" contained green hills. Cut
+                   together they read as random, which is exactly what a person
+                   said about the result. A label is somebody's opinion about a
+                   clip; this is a measurement of it.
+                   NOT semantics. It cannot tell a red car from a red sunset,
+                   and two shots with the same look may share nothing else. It
+                   is a floor under coherence, not an understanding of it.
+
   faces            Faces per frame from YuNet, a small DNN detector.
                    NOT a person detector -- a back turned to camera is zero and
                    so is a figure too small or too side-on. Recorded because
@@ -232,8 +246,17 @@ def measure_shot(frames, fps, scale_x):
     seen = [faces_in(frames[i]) for i in idx] if n else []
     seen = [x for x in seen if x is not None]
     nf = max(seen) if seen else None
+    mid = frames[n // 2]
+    gh, gw = 3, 4
+    look = []
+    for gy in range(gh):
+        for gx in range(gw):
+            cell = mid[gy * mid.shape[0] // gh:(gy + 1) * mid.shape[0] // gh,
+                       gx * mid.shape[1] // gw:(gx + 1) * mid.shape[1] // gw]
+            look += [round(float(cell[..., c].mean()) / 255.0, 4) for c in range(3)]
     return {
         "motion": round(motion, 5),
+        "look": look,
         "camera_motion_px_s": None if cam_px_s is None else round(cam_px_s, 2),
         "subject_motion_px_s": None if sub_px_s is None else round(sub_px_s, 2),
         "moving_share": None if share is None else round(share, 4),

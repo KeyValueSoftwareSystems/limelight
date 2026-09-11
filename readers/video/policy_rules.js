@@ -30,7 +30,15 @@ const ASSETS = require("./assets.js");
 const KIND_WEIGHT = {
   drop: 1.00, stop: 0.92, build: 0.72, return: 0.70,
   spotlight: 0.62, quiet: 0.55,
-  chapter: 0.66, span_start: 0.58, span_end: 0.54, phrase: 0.34
+  chapter: 0.66, span_start: 0.58, span_end: 0.54, phrase: 0.34,
+  // A bar line is a real musical boundary and the weakest one worth naming.
+  // It is here because the candidate set otherwise stopped at the phrase grid,
+  // which on Levels is two bars -- 3.75 s at 128 bpm -- so no brief could ask
+  // for a shot shorter than that however large its budget. A vertical reel
+  // legitimately cuts at bar rate. It is weighted far below a phrase so that a
+  // restrained brief never reaches it, which is what keeps this from quietly
+  // turning back into a beat-cutter.
+  bar: 0.20
 };
 
 function candidates(map, dur, derive) {
@@ -65,9 +73,13 @@ function candidates(map, dur, derive) {
     push(s.to, "span_end", "spans[" + i + "]:" + s.kind);
   });
   const pg = map.observations && map.observations.phrase_grid;
-  if (pg && Array.isArray(pg.at)) {
-    pg.at.forEach(function (t, i) { push(t, "phrase", "phrase_grid.at[" + i + "]"); });
-  }
+  const phraseAt = (pg && Array.isArray(pg.at)) ? pg.at : [];
+  phraseAt.forEach(function (t, i) { push(t, "phrase", "phrase_grid.at[" + i + "]"); });
+  // Bar lines that are not already phrase boundaries.
+  (map.downbeats || []).forEach(function (t, i) {
+    if (phraseAt.some(function (p) { return Math.abs(p - t) < 0.05; })) return;
+    push(t, "bar", "downbeats[" + i + "]");
+  });
   // One candidate per instant: a drop that is also a chapter start is one
   // opportunity, not two, and must not be counted twice against the budget.
   const seen = new Map();
@@ -159,7 +171,9 @@ function run(ctx) {
   // all, and any cut it forces is labelled `footage-limit` so that nobody
   // later reads it as the system having found something in the music.
   const beats = map.beats || [];
-  const pool0 = ASSETS.shots(index, brief);
+  const pool0 = ASSETS.cohere(ASSETS.shots(index, brief),
+                              (brief.coherence || {}).radius,
+                              (brief.coherence || {}).min_shots);
   const footageCap = Math.max(1.0, ASSETS.longest(pool0) - 0.05);
   // WHICH cap binds changes what the resulting cut MEANS, so it is recorded.
   // The brief's max_shot_s is a creative instruction: this job does not want a
@@ -228,7 +242,14 @@ function run(ctx) {
       const back = repeatOf(map, start, derive);
       if (back !== null) {
         const earlier = placedAt.find(function (p) { return Math.abs(p.t - back) < 1.2; });
-        if (earlier) {
+        // A callback must not be to the shot that is already on screen. Coming
+        // back to an image when the music comes back around is the point;
+        // cutting from a clip to itself is a jump cut nobody asked for, and the
+        // callback path was bypassing the check that prevents it everywhere
+        // else.
+        if (earlier && earlier.clip_id === prev) {
+          // fall through to an ordinary choice
+        } else if (earlier) {
           s = pool.find(function (x) {
             return x.clip_id === earlier.clip_id && x.shot === earlier.shot;
           });

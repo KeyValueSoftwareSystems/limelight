@@ -2,16 +2,58 @@
  "id": "reel-nightlife",
  "name": "Vertical nightlife reel",
  "note": "Short-form vertical. Fast but not frantic: a cut roughly every 1.5-2.5s, and holds through the loudest bars so the drop has somewhere to land. Written after a person watched a four-minute 16:9 montage and said they would not watch it on Instagram -- length and orientation were two of the four reasons.",
- "format": {"width": 1080, "height": 1920, "fps": 30},
- "budgets": {"cuts_per_minute": 28, "min_shot_s": 0.8, "max_shot_s": 4.0},
- "restraint": {"allow_no_change": true, "min_rest_s": 3.0, "hold_before_major_s": 2.0, "preserve_headroom": true},
- "prefers": {
-  "camera_motion_px_s": [10, 300],
-  "subject_motion_px_s": [40, 450],
-  "brightness": [0.10, 0.60],
-  "contrast": [0.10, 0.45],
-  "saturation": [0.20, 0.90]
+ "format": {
+  "width": 1080,
+  "height": 1920,
+  "fps": 30
  },
- "salience_floor": 0.35,
- "callbacks": {"repeat_visual_on_repeated_music": true, "max_reuses_per_clip": 3}
+ "budgets": {
+  "cuts_per_minute": 28,
+  "min_shot_s": 0.8,
+  "max_shot_s": 4.0
+ },
+ "restraint": {
+  "allow_no_change": true,
+  "min_rest_s": 3.0,
+  "hold_before_major_s": 2.0,
+  "preserve_headroom": true
+ },
+ "prefers": {
+  "camera_motion_px_s": [
+   10,
+   300
+  ],
+  "subject_motion_px_s": [
+   40,
+   450
+  ],
+  "brightness": [
+   0.1,
+   0.6
+  ],
+  "contrast": [
+   0.1,
+   0.45
+  ],
+  "saturation": [
+   0.2,
+   0.9
+  ],
+  "faces": [
+   1,
+   8
+  ]
+ },
+ "salience_floor": 0.3,
+ "callbacks": {
+  "repeat_visual_on_repeated_music": true,
+  "max_reuses_per_clip": 6,
+  "note": "Six, not three. With weak stock footage, FEWER distinct clips reads as more coherent, not less: a reel built from four shots of one subject looks composed, and the same reel built from eleven unrelated shots looks like a screensaver. Returning to a shot is how an edit says 'this is the same place'."
+ },
+ "coherence": {
+  "radius": 0.6,
+  "min_shots": 40,
+  "note": "Effectively off for a curated set. Clustering exists to find one world inside a mixed pool; when the pool IS one world it can only discard material. min_shots above the pool size makes cohere() return it whole."
+ },
+ "salience_floor_note": "Bars enter the candidate set at 0.20 and are blended with measured salience, so only the LOUD bars clear 0.30. The edit cuts at bar rate where the music is intense and holds where it is not -- which is the behaviour, not a threshold chosen to produce a number."
 }
