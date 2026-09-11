@@ -423,3 +423,58 @@ the one intended. Treat it as a detector of gross error, not as a judge.
 7. **A human verdict on the current work.** `truth/video-verdicts.json` holds
    one entry: all three of the first generation rejected. Nothing since has been
    formally judged, so no claim in §8 is backed by a recorded verdict.
+
+---
+
+## Addendum, 2026-09-11: the recipe becomes an interface
+
+The spec above describes the brief as taste-as-data and stops there. Two things
+were learned by using it, and they change the shape of the product rather than
+its internals.
+
+### The recipe is shared, not the video reader's
+
+The map is one file three readers turn into three art forms; the recipe had not
+followed. Video had grown `pace / look / motion / effects`, lighting had grown
+`ENERGY: low | medium | high`, drones a third thing. `readers/recipe.js` now
+holds the vocabulary once — each axis places its words on 0..1, and each reader
+turns that position into its own units. The same sentence is a cut rate, a chase
+rate and a formation rate.
+
+Four words beat one knob: *"fast and restrained"* — a room that changes often
+without being hit — could not be asked for at all through `low/medium/high`, and
+it is an ordinary thing to want. `ENERGY` survives as a shorthand that fills the
+axes nobody named, because an operator at 2am wants one knob.
+
+Drift between the two word lists is a load-time error.
+
+### Silence is a question, not a default
+
+This is the part worth carrying forward. A brief may be one line:
+
+```json
+{ "name": "A phone ad" }
+```
+
+Everything unsaid is **decided from the material and recorded with its reason**:
+pace from the bar rate the grid hands over for free, effects from how many
+moments the song actually has, look and motion and format from what the footage
+can supply, and the footage pool itself from the brief's own words matched
+against `SEMANTIC.json`.
+
+`PACE.measured` when nobody wrote a pace was a default, and a default is the
+system declining to think. The rule that makes this safe rather than magic:
+**an explicit word always wins, and every inference says what it was measured
+from** — an inferred pace that cannot explain itself is indistinguishable later
+from one somebody typed at random.
+
+### What this cost, and the rule it produced
+
+The `effects` word was inert for its whole life: `render.py` falls back to its
+own defaults when `made_by.motion` is absent, and `edit.js` never wrote it, so
+`none` and `loud` rendered byte-identical files. Nothing said so.
+
+The rule: **a knob that cannot be shown to change the output is not a knob.**
+`bench/verdict.py variants` hashes every render before sealing a blind
+comparison and refuses to ask a human to rank two identical files — because that
+ranking would have been written down as `how: truth`.
