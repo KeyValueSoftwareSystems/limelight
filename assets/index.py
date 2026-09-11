@@ -414,11 +414,18 @@ def main():
                     help="a named clip set, e.g. night-city")
     ap.add_argument("--out")
     a = ap.parse_args()
+    a.out_explicit = a.out is not None
     if not a.out:
         a.out = (os.path.join(HERE, "INDEX.json") if a.setname in (None, "default")
                  else os.path.join(HERE, "stock", a.setname, "INDEX.json"))
     if a.check:
         return check()
+    if a.generated and a.stock and not a.out_explicit:
+        print("refusing to write a production index containing the generated "
+              "fixtures: they are the answer sheet, and CLIP reads a coloured "
+              "disc on noise as 'an ocean wave'. Use --check to grade against "
+              "them, or --out to name a separate file.", file=sys.stderr)
+        return 2
     targets = load_targets(a.stock, a.generated, a.incoming, a.setname)
     if not targets:
         print("nothing to index -- pass --stock, --generated or --incoming",

@@ -1,0 +1,23 @@
+{
+ "id": "reel-wildwater",
+ "name": "Wild water, vertical",
+ "note": "The first brief that names its SUBJECT rather than only its texture. `subject` is matched against CLIP's reading of each shot, so the footage pool is chosen by the brief instead of by a person with a contact sheet. Run it against the uncurated pool and it should find the water and leave the server rooms behind.",
+ "format": {"width": 1080, "height": 1920, "fps": 30},
+ "subject": ["a waterfall", "an ocean wave", "a river",
+             "an aerial view of a coastline", "a sandy beach"],
+ "subject_tolerance": 0.055,
+ "subject_min_shots": 10,
+ "budgets": {"cuts_per_minute": 26, "min_shot_s": 0.9, "max_shot_s": 5.0},
+ "restraint": {"allow_no_change": true, "min_rest_s": 3.0, "hold_before_major_s": 2.0, "preserve_headroom": true},
+ "prefers": {
+  "camera_motion_px_s": [5, 300],
+  "subject_motion_px_s": [10, 500],
+  "brightness": [0.15, 0.85],
+  "contrast": [0.06, 0.50],
+  "saturation": [0.10, 0.95]
+ },
+ "coherence": {"radius": 0.90, "min_shots": 500,
+  "note": "Off. Subject selection supersedes look clustering: a word is a better handle on a world than a colour histogram."},
+ "salience_floor": 0.30,
+ "callbacks": {"repeat_visual_on_repeated_music": true, "max_reuses_per_clip": 2}
+}

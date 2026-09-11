@@ -58,9 +58,12 @@ function run(ctx) {
   }
   chosen.sort(function (a, b) { return a.t - b.t; });
 
-  const pool = ASSETS.cohere(ASSETS.shots(index, brief),
-                             (brief.coherence || {}).radius,
-                             (brief.coherence || {}).min_shots);
+  const pool = ASSETS.selectBySubject(
+    ASSETS.cohere(ASSETS.shots(index, brief),
+                  (brief.coherence || {}).radius,
+                  (brief.coherence || {}).min_shots),
+    brief, ctx.sem, (brief.subject_tolerance || undefined),
+    (brief.subject_min_shots || undefined));
   const footageCap = Math.max(1.0, ASSETS.longest(pool) - 0.05);
   const cap = Math.min(maxS, footageCap);
   const capBoundBy = maxS <= footageCap ? "brief-max-shot" : "footage-limit";

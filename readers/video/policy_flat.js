@@ -28,7 +28,14 @@ function run(ctx) {
   const shots = Math.max(2, parseInt(ctx.flatShots || "13", 10));
   const every = span / shots;
 
-  const pool = ASSETS.shots(index, brief);
+  // The SAME pool the intelligent policy gets, including the brief's subject
+  // selection. Without this the control was drawing from assets/generated --
+  // the synthetic answer-sheet clips of a disc moving over noise, which sort
+  // first by clip_id -- and a comparison against test-harness footage measures
+  // nothing at all.
+  const pool = ASSETS.selectBySubject(
+    ASSETS.shots(index, brief), brief, ctx.sem,
+    undefined, brief.subject_min_shots || undefined);
   // Catalogue order. No fit, no continuity, no climax -- there is nothing to be
   // climactic about without a map.
   const ordered = pool.slice().sort(function (a, b) {

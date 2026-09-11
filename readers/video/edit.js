@@ -56,6 +56,11 @@ function main() {
     (setname ? path.join(ROOT, "assets", "stock", setname, "INDEX.json")
              : path.join(ROOT, "assets", "INDEX.json"));
   const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
+  // Semantic rows, if the set has them. Optional on purpose: a set without
+  // them still works, it just cannot be selected by subject.
+  const semPath = indexPath.replace(/INDEX\.json$/, "SEMANTIC.json");
+  const sem = fs.existsSync(semPath)
+    ? JSON.parse(fs.readFileSync(semPath, "utf8")) : null;
   const policy = POLICIES[policyId];
   if (!policy) { console.error("unknown policy " + policyId); process.exit(2); }
 
@@ -67,7 +72,8 @@ function main() {
     map: map, brief: brief, index: index, seed: seed, length_s: length,
     derive: DERIVE.make(map), slug: slug, briefId: briefId,
     intent: arg("intent", null),
-    flatShots: arg("shots", null)
+    flatShots: arg("shots", null),
+    sem: sem
   };
 
   // A window, for short form. The policy has ALREADY reasoned over the whole
@@ -171,7 +177,8 @@ function main() {
       how: "policy", who: "readers/video/policy_" + policy.id + ".js",
       label: policy.label, brief: briefId,
       map: path.relative(ROOT, mp), seed: seed,
-      index: path.relative(ROOT, indexPath)
+      index: path.relative(ROOT, indexPath),
+      semantic: sem ? path.relative(ROOT, semPath) : null
     },
     song: { slug: slug, length_s: +length.toFixed(3) },
     format: brief.format,

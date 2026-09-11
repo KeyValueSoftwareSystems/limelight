@@ -50,6 +50,76 @@ const ASSETS = (function () {
     return 1 / (1 + penalty / n);
   }
 
+  // How well a shot matches the subject the BRIEF asked for, in words.
+  //
+  // This is what replaces a person choosing clips off a contact sheet. Three
+  // sets in this repo say `how: curated` because no measurement here could tell
+  // a coastline from a car park -- brightness, motion and a look vector
+  // separate bright from dark and still from moving and nothing else. CLIP can
+  // name the footage, and a brief can name what it wants, so the choice becomes
+  // a comparison between two lists of words.
+  //
+  // Returns null when there is no semantic data or the brief names no subject,
+  // and callers treat null as "no opinion" rather than as zero.
+  function subjectFit(shot, brief, sem) {
+    const want = brief && brief.subject;
+    if (!want || !want.length || !sem) return null;
+    const row = sem.get(shot.clip_id + "#" + shot.shot);
+    if (!row || !row.content) return null;
+    let best = -1;
+    for (const w of want) {
+      const v = row.content[w];
+      if (v !== undefined && v > best) best = v;
+    }
+    return best < 0 ? null : best;
+  }
+
+  // Semantic rows keyed for lookup, or null if the set has none.
+  function semanticIndex(sem) {
+    if (!sem || !sem.shots) return null;
+    const m = new Map();
+    for (const r of sem.shots) m.set(r.clip_id + "#" + r.shot, r);
+    return m;
+  }
+
+  // Keep the shots that are OF what the brief asked for.
+  //
+  // The criterion is ARGMAX, not a threshold. CLIP's absolute cosines all sit
+  // around 0.25 and carry no meaning on their own -- a first version kept
+  // everything within 0.055 of the best score and selected 320 shots out of
+  // 320, which is the mistake its own comment warned about. What does carry
+  // meaning is which word wins: a shot whose best match across the whole
+  // vocabulary is "a waterfall" is a shot of a waterfall, and one whose best
+  // match is "a server rack" is not, whatever the numbers are.
+  //
+  // `subject_also_ranked` widens it by rank rather than by score when argmax
+  // alone leaves too few: the best N by affinity, which is still a comparison
+  // between shots rather than against a constant.
+  function selectBySubject(pool, brief, sem, _tol, minKeep) {
+    const idx = semanticIndex(sem);
+    const want = brief && brief.subject;
+    if (!idx || !want || !want.length) return pool;
+    const need = minKeep || 8;
+    const wanted = new Set(want);
+
+    const primary = [], ranked = [];
+    for (const s of pool) {
+      const row = idx.get(s.clip_id + "#" + s.shot);
+      if (!row || !row.content) continue;
+      const top = (row.content_top && row.content_top[0]) ||
+        Object.keys(row.content).reduce(function (a, b) {
+          return row.content[b] > row.content[a] ? b : a;
+        });
+      const f = subjectFit(s, brief, idx);
+      if (f !== null) ranked.push([f, s]);
+      if (wanted.has(top)) primary.push(s);
+    }
+    if (primary.length >= need) return primary;
+    if (ranked.length < need) return pool;
+    ranked.sort(function (a, b) { return b[0] - a[0]; });
+    return ranked.slice(0, need).map(function (x) { return x[1]; });
+  }
+
   // Every shot of every clip, flattened, with its fit already computed.
   //
   // A long shot is cut into several MOMENTS. A 20-second take holds five
@@ -293,6 +363,8 @@ const ASSETS = (function () {
 
   return { fit: fit, shots: shots, choose: choose, inPoint: inPoint,
            hash: hash, longest: longest, capSlots: capSlots, cohere: cohere,
+           subjectFit: subjectFit, semanticIndex: semanticIndex,
+           selectBySubject: selectBySubject,
            PREFERABLE: PREFERABLE };
 })();
 if (typeof module !== "undefined" && module.exports) module.exports = ASSETS;

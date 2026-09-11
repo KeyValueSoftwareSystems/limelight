@@ -17,9 +17,12 @@ function run(ctx) {
   const { map, brief, index, seed } = ctx;
   const beats = (map.beats || []).slice();
   const dur = ctx.length_s;
-  const pool = ASSETS.cohere(ASSETS.shots(index, brief),
-                             (brief.coherence || {}).radius,
-                             (brief.coherence || {}).min_shots);
+  const pool = ASSETS.selectBySubject(
+    ASSETS.cohere(ASSETS.shots(index, brief),
+                  (brief.coherence || {}).radius,
+                  (brief.coherence || {}).min_shots),
+    brief, ctx.sem, (brief.subject_tolerance || undefined),
+    (brief.subject_min_shots || undefined));
 
   // Choose the beat multiple that lands nearest the brief's cut budget, so the
   // baseline is spending the same attention as the policy it is compared with.

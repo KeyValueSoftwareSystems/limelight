@@ -202,9 +202,12 @@ function run(ctx) {
   // all, and any cut it forces is labelled `footage-limit` so that nobody
   // later reads it as the system having found something in the music.
   const beats = map.beats || [];
-  const pool0 = ASSETS.cohere(ASSETS.shots(index, brief),
-                              (brief.coherence || {}).radius,
-                              (brief.coherence || {}).min_shots);
+  const pool0 = ASSETS.selectBySubject(
+    ASSETS.cohere(ASSETS.shots(index, brief),
+                  (brief.coherence || {}).radius,
+                  (brief.coherence || {}).min_shots),
+    brief, ctx.sem, (brief.subject_tolerance || undefined),
+    (brief.subject_min_shots || undefined));
   const footageCap = Math.max(1.0, ASSETS.longest(pool0) - 0.05);
   // WHICH cap binds changes what the resulting cut MEANS, so it is recorded.
   // The brief's max_shot_s is a creative instruction: this job does not want a

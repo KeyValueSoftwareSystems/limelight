@@ -26,9 +26,12 @@ function mulberry(seed) {
 function run(ctx) {
   const { map, brief, index, seed } = ctx;
   const dur = ctx.length_s;
-  const pool = ASSETS.cohere(ASSETS.shots(index, brief),
-                             (brief.coherence || {}).radius,
-                             (brief.coherence || {}).min_shots);
+  const pool = ASSETS.selectBySubject(
+    ASSETS.cohere(ASSETS.shots(index, brief),
+                  (brief.coherence || {}).radius,
+                  (brief.coherence || {}).min_shots),
+    brief, ctx.sem, (brief.subject_tolerance || undefined),
+    (brief.subject_min_shots || undefined));
   const B = brief.budgets || {};
   const perMin = B.cuts_per_minute || 20;
   const minS = B.min_shot_s || 0.5;
