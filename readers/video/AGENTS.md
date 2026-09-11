@@ -68,3 +68,32 @@ writing **it does not clear it convincingly**.
 person watching unlabelled files. Until somebody has run it, "the intelligent
 edit is better" is an unsupported claim, and the honest form of the sentence is
 "no verdict has been recorded".
+
+## The recipe is shared, and the words are checked
+
+`readers/recipe.js` holds the vocabulary — pace, look, motion, effects — that
+this reader, the lighting reader and the drone reader all read. Each axis puts
+its words on 0..1 and each reader turns that into its own units. Add a word
+there and `brief.js` throws at load until it is added here too; that check
+exists because a person who learns the vocabulary on one reader must not be
+wrong on the next.
+
+`infer.js` fills what the brief did not say, from this song and this footage,
+and records why in `ir.inferred`. An explicit word always wins. A default is not
+a decision — `PACE.measured` when nobody wrote a pace was the system declining
+to think.
+
+## Already known to be wrong here, do not redo
+
+- **`made_by.motion` left unwritten.** `render.py` falls back to its own
+  DEFAULTS when it is absent, and it was always absent, so every brief rendered
+  at `effects_per_minute` 7 whatever it asked for. `effects: none` and
+  `effects: loud` produced byte-identical files. The effects word was inert from
+  the day it was written and nothing said so.
+- **Asking a human to rank two identical files.** Three of the first six blind
+  candidates shared an md5. `bench/verdict.py variants` now refuses to seal a
+  run containing duplicates, because a ranking collected over them would have
+  been recorded as a human verdict and believed.
+- **A word can saturate.** 4 effects/min and 9 effects/min are the same film on
+  a song with 22 moments — the material ran out, not the brief. That is not a
+  bug; presenting it as a choice is.

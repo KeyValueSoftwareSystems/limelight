@@ -37,6 +37,87 @@ def token_for(slug, brief, policies):
                         ).hexdigest()[:4]
 
 
+def cmd_variants(a):
+    """Rank N briefs that differ on ONE word each.
+
+    The A/B/C above compares POLICIES -- different ways of deciding, same
+    taste. This compares TASTE: same policy, same song, same footage, and one
+    word of the recipe changed. "Which do you prefer" is only answerable if
+    exactly one thing moved, which is why the ad-* briefs are generated from a
+    base with a single substitution rather than written by hand.
+
+    Still blind, for the same reason: a person who can see that D is the one
+    with the effects turned up is not ranking the film any more.
+    """
+    names = [x.strip() for x in a.variants.split(",") if x.strip()]
+    if len(names) < 2 or len(names) > len(LETTERS):
+        print(f"give 2..{len(LETTERS)} briefs", file=sys.stderr); return 1
+    token = hashlib.sha1(("|".join([a.slug] + sorted(names))).encode()).hexdigest()[:4]
+    d = os.path.join(BLIND, token)
+    os.makedirs(d, exist_ok=True)
+
+    order = names[:]
+    random.Random(int(token, 16)).shuffle(order)
+
+    py = os.path.join(ROOT, "work", "vision", "bin", "python")
+    if not os.path.exists(py):
+        py = sys.executable
+
+    mapping = {}
+    for i, brief in enumerate(order):
+        ir = os.path.join(d, f".{brief}.ir.json")
+        cmd = ["node", os.path.join(ROOT, "readers", "video", "edit.js"),
+               "--slug", a.slug, "--brief", brief, "--policy", a.policy,
+               "--out", ir]
+        if a.set: cmd += ["--set", a.set]
+        if a.window: cmd += ["--window", str(a.window)]
+        r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+        if r.returncode != 0:
+            print(f"edit failed for {brief}: {r.stderr[-400:]}", file=sys.stderr); return 1
+        out = os.path.join(d, LETTERS[i] + ".mp4")
+        r = subprocess.run([py, os.path.join(ROOT, "readers", "video", "render.py"),
+                            ir, "--out", out], cwd=ROOT, capture_output=True, text=True)
+        if r.returncode != 0:
+            print(f"render failed for {brief}: {r.stderr[-400:]}", file=sys.stderr); return 1
+        mapping[LETTERS[i]] = brief
+        print(f"  {LETTERS[i]}.mp4  ok")
+
+    # Refuse to ask for a preference between two identical files. Three of the
+    # first six candidates shared an md5, because the effects word never
+    # reached the renderer -- and a ranking collected over that would have been
+    # recorded as a human verdict and believed. A word that cannot change the
+    # output is a word the writer should be told saturated, not one to quietly
+    # put on screen twice.
+    import hashlib as _h
+    seen = {}
+    for L, brief in mapping.items():
+        h = _h.md5(open(os.path.join(d, L + ".mp4"), "rb").read()).hexdigest()
+        if h in seen:
+            print(f"\nREFUSING to seal: {brief} and {seen[h]} rendered byte-identical "
+                  f"files.\nThe word that differs between them made no difference to "
+                  f"this song -- either it is inert, or the material saturates it "
+                  f"(a 20 s window with 2 moments cannot tell 4 effects/min from 9).\n"
+                  f"Pick axes that actually move, or say so and drop one.",
+                  file=sys.stderr)
+            return 1
+        seen[h] = brief
+
+    with open(os.path.join(d, ".sealed.json"), "w") as f:
+        json.dump({"slug": a.slug, "brief": "|".join(sorted(names)),
+                   "kind": "variants", "policy": a.policy, "mapping": mapping,
+                   "sealed_at": datetime.datetime.now().isoformat(timespec="seconds")},
+                  f, indent=1)
+
+    print(f"\ntoken {token}")
+    print(f"watch: {d}")
+    print("\nSame song, same footage, same policy. One word of the recipe differs")
+    print("between them. Rank them best to worst -- and say what you are ranking")
+    print("ON, because that is the part no measurement can supply.")
+    print(f"\n  python3 bench/verdict.py record --token {token} \\")
+    print(f"      --rank <letters, best first> --who <name> --note '...'")
+    return 0
+
+
 def cmd_new(a):
     policies = a.policy or ["naive", "random", "rules"]
     token = token_for(a.slug, a.brief, policies)
@@ -112,9 +193,22 @@ def cmd_record(a):
             print(f"{L} is not one of {sorted(mapping)}", file=sys.stderr)
             return 1
 
+    rank = None
+    if getattr(a, "rank", None):
+        rank = [c for c in a.rank.upper() if c in LETTERS]
+        bad = [c for c in rank if c not in mapping]
+        if bad:
+            print(f"{bad} not among {sorted(mapping)}", file=sys.stderr); return 1
+        if len(set(rank)) != len(mapping):
+            print(f"rank every one of {sorted(mapping)}, best first", file=sys.stderr); return 1
+        a.best, a.worst = rank[0], rank[-1]
+
     rec = {
         "at": datetime.datetime.now().isoformat(timespec="seconds"),
         "token": a.token,
+        "kind": sealed.get("kind", "policies"),
+        "rank_letters": rank,
+        "rank": [mapping[c] for c in rank] if rank else None,
         "slug": sealed["slug"], "brief": sealed["brief"],
         "who": a.who,
         "how": "truth",
@@ -187,12 +281,22 @@ def main():
     n.add_argument("--preview", action="store_true")
     n.add_argument("--force", action="store_true")
     n.set_defaults(fn=cmd_new)
+    v = sub.add_parser("variants")
+    v.add_argument("--slug", required=True)
+    v.add_argument("--variants", required=True,
+                   help="comma-separated brief ids differing in one word each")
+    v.add_argument("--policy", default="rules")
+    v.add_argument("--set", default=None)
+    v.add_argument("--window", type=float, default=None)
+    v.set_defaults(fn=cmd_variants)
+
     r = sub.add_parser("record")
     r.add_argument("--token", required=True)
     r.add_argument("--reject-all", action="store_true",
                    help="None of them are acceptable. A more important verdict "
                         "than a ranking, and the tool could not express it "
                         "until a person needed to.")
+    r.add_argument("--rank", help="every letter, best first, e.g. DBACEF")
     r.add_argument("--best")
     r.add_argument("--worst")
     r.add_argument("--who", required=True)

@@ -226,7 +226,15 @@ function main() {
       label: policy.label, brief: briefId,
       map: path.relative(ROOT, mp), seed: seed,
       index: path.relative(ROOT, indexPath),
-      semantic: sem ? path.relative(ROOT, semPath) : null
+      semantic: sem ? path.relative(ROOT, semPath) : null,
+      // The render side of the recipe. render.py reads made_by.motion and
+      // falls back to its own DEFAULTS when it is absent -- and it was ALWAYS
+      // absent, so every brief rendered at effects_per_minute 7 whatever it
+      // asked for. `effects: none` and `effects: loud` produced byte-identical
+      // files, which is how three of six blind candidates came out with the
+      // same md5. The effects word has been inert since it was written.
+      motion: Object.assign({}, (brief.effects || {}),
+                            (brief.render || {}))
     },
     song: { slug: slug, length_s: +length.toFixed(3) },
     // What the writer did not say, and what the system decided instead.
