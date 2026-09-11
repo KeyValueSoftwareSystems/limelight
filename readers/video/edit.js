@@ -13,6 +13,7 @@ const fs = require("fs"), path = require("path");
 const ROOT = path.resolve(__dirname, "..", "..");
 const DERIVE = require(path.join(ROOT, "readers", "src", "derive.js"));
 const BRIEF = require("./brief.js");
+const INFER = require("./infer.js");
 
 const POLICIES = {
   naive: require("./policy_naive.js"),
@@ -56,9 +57,8 @@ function main() {
   const mp = mapPath(slug);
   if (!mp) { console.error("no map for " + slug); process.exit(2); }
   const map = JSON.parse(fs.readFileSync(mp, "utf8"));
-  // Words in, numbers out. An explicit key always beats the preset it came from.
-  const brief = BRIEF.expand(JSON.parse(fs.readFileSync(
-    path.join(ROOT, "briefs", briefId + ".json"), "utf8")));
+  const written = JSON.parse(fs.readFileSync(
+    path.join(ROOT, "briefs", briefId + ".json"), "utf8"));
   // A named clip set, or the default. Coherence lives here: a set is clips
   // from one world, and the chooser can only hold a world if it was given one.
   const setname = arg("set", null);
@@ -66,6 +66,13 @@ function main() {
     (setname ? path.join(ROOT, "assets", "stock", setname, "INDEX.json")
              : path.join(ROOT, "assets", "INDEX.json"));
   const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
+  // Decide what the brief left unsaid, BEFORE the words become numbers -- the
+  // inference picks words, so it has to happen while words are still the
+  // currency. A brief that names a thing keeps it; silence gets an answer
+  // measured from this song and this footage rather than a constant.
+  const inferred = INFER.infer(written, map, index, BRIEF);
+  // Words in, numbers out. An explicit key always beats the preset it came from.
+  const brief = BRIEF.expand(written);
   // Semantic rows, if the set has them. Optional on purpose: a set without
   // them still works, it just cannot be selected by subject.
   const semPath = indexPath.replace(/INDEX\.json$/, "SEMANTIC.json");
@@ -191,6 +198,8 @@ function main() {
       semantic: sem ? path.relative(ROOT, semPath) : null
     },
     song: { slug: slug, length_s: +length.toFixed(3) },
+    // What the writer did not say, and what the system decided instead.
+    inferred: inferred,
     format: brief.format,
     timeline: r.timeline,
     holds: r.holds,
