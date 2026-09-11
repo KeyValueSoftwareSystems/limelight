@@ -99,6 +99,61 @@ def transform(frame, dw, dh, w, h, zoom, gain, dx=0.0, dy=0.0):
     return out
 
 
+class Card:
+    """The end card: who made this and what it is called.
+
+    The thing that turns a montage into a piece of content. Everything this lane
+    produced before had nothing to say -- a person watched one and said "not an
+    ad, not content, nothing", and they were right: the IR could express a cut
+    and could not express a claim.
+
+    A card is not a caption. It dims the picture, holds, and states the subject.
+    It is the only element here allowed to take the screen away from the
+    footage, which is why there is exactly one and it is at the end.
+    """
+
+    def __init__(self, spec, dur):
+        self.spec = spec or None
+        self.dur = dur
+        if self.spec:
+            self.start = max(0.0, dur - float(spec.get("hold", 3.2)))
+
+    def draw(self, img, t, w, h, font):
+        if not self.spec or t < self.start or not font:
+            return img
+        from PIL import Image, ImageDraw, ImageFont
+        age = t - self.start
+        span = self.dur - self.start
+        # Dim in over the first third, hold, and never fade back out: the card
+        # is where the video ends, not a thing that passes through.
+        k = min(1.0, age / max(0.2, span * 0.33))
+        pil = Image.fromarray(img).convert("RGBA")
+        veil = Image.new("RGBA", pil.size, (0, 0, 0, int(215 * k)))
+        pil = Image.alpha_composite(pil, veil).convert("RGB")
+        d = ImageDraw.Draw(pil)
+        lines = self.spec.get("lines", [])
+        sizes = [self.spec.get("size_main", 0.062), self.spec.get("size_sub", 0.036)]
+        total = 0
+        drawn = []
+        for i, ln in enumerate(lines):
+            f = ImageFont.truetype(font, max(10, int(h * sizes[min(i, 1)])))
+            margin = int(w * 0.10)
+            bb = d.textbbox((0, 0), ln, font=f)
+            size = max(10, int(h * sizes[min(i, 1)]))
+            while bb[2] - bb[0] > w - 2 * margin and size > 10:
+                size = int(size * 0.94)
+                f = ImageFont.truetype(font, size)
+                bb = d.textbbox((0, 0), ln, font=f)
+            drawn.append((ln, f, bb[2] - bb[0], bb[3] - bb[1]))
+            total += (bb[3] - bb[1]) + int(h * 0.022)
+        y = int(h * 0.5 - total / 2)
+        a = int(255 * k)
+        for ln, f, tw, th in drawn:
+            d.text(((w - tw) // 2, y), ln, font=f, fill=(255, 255, 255, a))
+            y += th + int(h * 0.022)
+        return np.asarray(pil)
+
+
 class Copy:
     """Text, anchored to the music rather than to a stopwatch."""
 
@@ -217,7 +272,10 @@ def main():
         params.update(json.loads(a.motion))
     mo = Motion(m, params)
 
-    copy = Copy(json.load(open(a.copy)) if a.copy else None, mo, t0)
+    copy_spec = json.load(open(a.copy)) if a.copy else None
+    copy = Copy(copy_spec, mo, t0)
+    card = Card((copy_spec or {}).get("end_card"),
+                ir["timeline"][-1]["end"] if ir["timeline"] else 0.0)
 
     out = a.out or os.path.splitext(os.path.splitext(a.ir)[0])[0] + ".mp4"
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
@@ -252,6 +310,7 @@ def main():
             img = transform(frames[k], dw, dh, w, h, v["zoom"], v["gain"],
                             v.get("dx", 0.0), v.get("dy", 0.0))
             img = copy.draw(img, t_local, w, h)
+            img = card.draw(img, t_local, w, h, copy.font)
             enc.stdin.write(img.tobytes())
             stats["zoom_min"] = min(stats["zoom_min"], v["zoom"])
             stats["zoom_max"] = max(stats["zoom_max"], v["zoom"])

@@ -8,7 +8,16 @@
  "made_by": {
   "how": "model",
   "who": "listen/ear.py",
-  "note": "low-band comb fit, octave decided by added-beat support"
+  "note": "low-band comb fit, octave decided by added-beat support",
+  "upgrades": [
+   {
+    "by": "synth/upgrade_map.py",
+    "added": [
+     "microtiming"
+    ],
+    "note": "Derived from numbers already in this file. Nothing was invented, and a field whose source was missing was skipped rather than guessed."
+   }
+  ]
  },
  "grid": {
   "period": 0.5,
@@ -17,7 +26,8 @@
   "bar_phase": 0,
   "locked": true,
   "how": "onset flux 35-130 Hz, comb search, octave-tested",
-  "octave_note": "octave corrected to half (added-beat support 0.81)"
+  "octave_note": "octave corrected to half (added-beat support 0.81)",
+  "beats_per_bar": 3
  },
  "beats": [
   0.018163,
@@ -819,7 +829,7 @@
    "name": "verse"
   },
   {
-   "at": 82.018163,
+   "at": 81.018163,
    "name": "drop"
   },
   {
@@ -827,7 +837,7 @@
    "name": "verse"
   },
   {
-   "at": 100.018163,
+   "at": 101.018163,
    "name": "drop"
   },
   {
@@ -835,7 +845,7 @@
    "name": "verse"
   },
   {
-   "at": 132.018163,
+   "at": 133.518163,
    "name": "drop"
   },
   {
@@ -877,17 +887,17 @@
    "kind": "quiet"
   },
   {
-   "at": 82.018163,
+   "at": 81.018163,
    "kind": "drop",
    "size": 0.95
   },
   {
-   "at": 100.018163,
+   "at": 101.018163,
    "kind": "drop",
    "size": 0.95
   },
   {
-   "at": 132.018163,
+   "at": 133.518163,
    "kind": "drop",
    "size": 0.95
   },
@@ -913,19 +923,19 @@
   {
    "kind": "build",
    "from": 74.018163,
-   "to": 82.018163,
+   "to": 81.018163,
    "rise": "late"
   },
   {
    "kind": "build",
    "from": 90.018163,
-   "to": 100.018163,
+   "to": 101.018163,
    "rise": "steady"
   },
   {
    "kind": "build",
    "from": 122.018163,
-   "to": 132.018163,
+   "to": 133.518163,
    "rise": "late"
   },
   {
@@ -1602,7 +1612,7 @@
     "mean_energy": 0.6707
    },
    {
-    "at": 82.018163,
+    "at": 81.018163,
     "id": "DRO",
     "repeat": 1,
     "arc": 0.265,
@@ -1618,7 +1628,7 @@
     "mean_energy": 0.7136
    },
    {
-    "at": 100.018163,
+    "at": 101.018163,
     "id": "DRO",
     "repeat": 2,
     "arc": 0.323,
@@ -1634,7 +1644,7 @@
     "mean_energy": 0.6795
    },
    {
-    "at": 132.018163,
+    "at": 133.518163,
     "id": "DRO",
     "repeat": 3,
     "arc": 0.426,
@@ -17283,6 +17293,2281 @@
      "confidence": 0.476
     }
    ]
+  },
+  "moment_timing": {
+   "how": "each drop and stop moved to the beat carrying the biggest sustained step in loudness within two bars, the step being the median across 0.5, 1.0, 1.5 and 2.0 s shoulders",
+   "why": "ear.py builds moments from section boundaries and section boundaries are bar lines, so a drop that lands on a half bar was pushed to the next full bar -- two beats late, every time",
+   "second_witness": "drum hits per beat, counted from the separated stems, which shares no arithmetic with the loudness envelope",
+   "moved": [
+    {
+     "kind": "drop",
+     "was": 82.018163,
+     "now": 81.018163,
+     "beats": -2.0,
+     "drum_hits_per_beat_change": 0.0
+    },
+    {
+     "kind": "drop",
+     "was": 100.018163,
+     "now": 101.018163,
+     "beats": 2.0,
+     "drum_hits_per_beat_change": -0.12
+    },
+    {
+     "kind": "drop",
+     "was": 132.018163,
+     "now": 133.518163,
+     "beats": 3.0,
+     "drum_hits_per_beat_change": 0.12
+    }
+   ],
+   "chapters_moved_with_them": [
+    {
+     "name": "drop",
+     "was": 82.018,
+     "now": 81.018
+    },
+    {
+     "name": "drop",
+     "was": 100.018,
+     "now": 101.018
+    },
+    {
+     "name": "drop",
+     "was": 132.018,
+     "now": 133.518
+    }
+   ],
+   "spans_moved_with_them": [
+    {
+     "kind": "build",
+     "edge": "to",
+     "was": 82.018,
+     "now": 81.018
+    },
+    {
+     "kind": "build",
+     "edge": "to",
+     "was": 100.018,
+     "now": 101.018
+    },
+    {
+     "kind": "build",
+     "edge": "to",
+     "was": 132.018,
+     "now": 133.518
+    }
+   ],
+   "why_spans_move": "a build ends at the thing it builds into. Moving a drop and leaving the span alone left Don't Look Down declaring a build until 41.74 s when the drop it leads to had moved to 41.23 -- a build that finishes after its own payoff. A reader ramping through that span was still ramping when the drop had gone.",
+   "left_alone": [],
+   "merged_duplicates": []
+  },
+  "pump": {
+   "how": "envelope above 250 Hz so the kick body is excluded, measured from 18% to 72% of each beat so neither the kick's attack nor the next one is in the window. Music without sidechain DECAYS between hits; music with it RISES, because the compressor is letting go. The sign of that slope is the whole test. Calibrated on records that cannot pump: the synthetic ladder is additive synthesis with no compressor in it, and comes out negative.",
+   "rate": "per_beat_phase",
+   "bins": 24,
+   "present": false,
+   "depth": 0.0745,
+   "beats_measured": 614,
+   "release_at_beat_fraction": 0.471,
+   "shape": [
+    0.9228,
+    0.5958,
+    0.4707,
+    0.4252,
+    0.3879,
+    0.362,
+    0.487,
+    0.4648,
+    0.3839,
+    0.3418,
+    0.3342,
+    0.6495,
+    0.7577,
+    0.5757,
+    0.4749,
+    0.4349,
+    0.4003,
+    0.4187,
+    0.4297,
+    0.4741,
+    0.4819,
+    0.408,
+    0.3815,
+    1.0
+   ],
+   "per_chapter": [
+    [
+     0.0,
+     0.3741,
+     true
+    ],
+    [
+     10.018,
+     0.1807,
+     true
+    ],
+    [
+     18.018,
+     0.1711,
+     true
+    ],
+    [
+     56.018,
+     0.1257,
+     true
+    ],
+    [
+     68.018,
+     0.0616,
+     false
+    ],
+    [
+     81.018,
+     0.0302,
+     false
+    ],
+    [
+     86.018,
+     0.0105,
+     false
+    ],
+    [
+     104.018,
+     0.0481,
+     false
+    ],
+    [
+     136.018,
+     0.0518,
+     false
+    ],
+    [
+     196.018,
+     0.0712,
+     false
+    ],
+    [
+     204.018,
+     0.0397,
+     false
+    ],
+    [
+     236.018,
+     0.0367,
+     false
+    ],
+    [
+     258.018,
+     0.0438,
+     false
+    ],
+    [
+     262.018,
+     0.0649,
+     false
+    ],
+    [
+     290.018,
+     -0.0181,
+     false
+    ],
+    [
+     298.018,
+     -0.0189,
+     false
+    ]
+   ],
+   "made_by": {
+    "how": "model",
+    "who": "listen/pump.py",
+    "reproduce": "python3 listen/pump.py thomas-park--06-riding-at-night"
+   }
+  },
+  "stereo": {
+   "rate": "per_downbeat",
+   "width": "0=mono, 1=fully side",
+   "pan": "-1=left, +1=right",
+   "how": "mid/side on the STEREO source decoded straight from the release, not from synth/out which is mono 32 kHz and cannot carry this. width = |S|/(|M|+|S|) with M=(L+R)/2, S=(L-R)/2",
+   "not": "a stereo measurement of a mix, not of any instrument. A wide bar says the production opened up, not which part moved",
+   "source": "thomas-park--06-riding-at-night.mp3",
+   "mix": {
+    "width": [
+     0.0,
+     0.0,
+     0.0362,
+     0.1746,
+     0.2042,
+     0.1714,
+     0.2212,
+     0.1535,
+     0.2206,
+     0.2622,
+     0.2706,
+     0.2498,
+     0.2432,
+     0.2406,
+     0.2327,
+     0.2181,
+     0.2593,
+     0.256,
+     0.267,
+     0.3302,
+     0.2867,
+     0.2755,
+     0.3536,
+     0.312,
+     0.3109,
+     0.3238,
+     0.3525,
+     0.294,
+     0.3015,
+     0.273,
+     0.3125,
+     0.2403,
+     0.3378,
+     0.3457,
+     0.2941,
+     0.3081,
+     0.2761,
+     0.2855,
+     0.2608,
+     0.2902,
+     0.3547,
+     0.3903,
+     0.3338,
+     0.3465,
+     0.3123,
+     0.3107,
+     0.3383,
+     0.3324,
+     0.3264,
+     0.3599,
+     0.3307,
+     0.3562,
+     0.3228,
+     0.3191,
+     0.3019,
+     0.2924,
+     0.2917,
+     0.3237,
+     0.304,
+     0.3204,
+     0.3172,
+     0.3152,
+     0.3424,
+     0.3291,
+     0.2997,
+     0.332,
+     0.3442,
+     0.386,
+     0.3482,
+     0.3276,
+     0.3127,
+     0.288,
+     0.2934,
+     0.324,
+     0.2973,
+     0.3132,
+     0.3293,
+     0.3448,
+     0.3142,
+     0.321,
+     0.3276,
+     0.3195,
+     0.3021,
+     0.3466,
+     0.301,
+     0.3132,
+     0.2913,
+     0.3018,
+     0.3017,
+     0.3404,
+     0.3001,
+     0.3174,
+     0.3373,
+     0.3518,
+     0.3328,
+     0.3068,
+     0.2847,
+     0.3005,
+     0.3463,
+     0.3462,
+     0.2941,
+     0.3151,
+     0.3535,
+     0.3527,
+     0.3522,
+     0.3734,
+     0.3194,
+     0.3373,
+     0.3321,
+     0.3396,
+     0.3389,
+     0.3318,
+     0.3072,
+     0.3281,
+     0.2918,
+     0.3062,
+     0.2814,
+     0.3043,
+     0.323,
+     0.3349,
+     0.3364,
+     0.3305,
+     0.2983,
+     0.3192,
+     0.3364,
+     0.3463,
+     0.3421,
+     0.3313,
+     0.3436,
+     0.4036,
+     0.3361,
+     0.3197,
+     0.3112,
+     0.306,
+     0.2868,
+     0.2689,
+     0.2708,
+     0.3025,
+     0.2768,
+     0.2974,
+     0.2793,
+     0.2701,
+     0.2633,
+     0.2843,
+     0.2691,
+     0.4964,
+     0.4522,
+     0.4543,
+     0.4899,
+     0.5512,
+     0.4834,
+     0.5378,
+     0.5567,
+     0.5281,
+     0.5832
+    ],
+    "pan": [
+     0.0,
+     0.0,
+     0.0005,
+     -0.0227,
+     -0.0018,
+     -0.0046,
+     -0.0055,
+     0.0001,
+     0.0129,
+     -0.0209,
+     0.0261,
+     0.0247,
+     0.0835,
+     0.024,
+     0.0552,
+     0.0627,
+     0.0734,
+     -0.0219,
+     0.0349,
+     0.0286,
+     0.0566,
+     -0.0138,
+     -0.1328,
+     -0.0704,
+     0.0335,
+     -0.0103,
+     -0.0152,
+     -0.0327,
+     -0.0207,
+     -0.0056,
+     0.0209,
+     -0.0009,
+     0.0676,
+     0.0008,
+     0.0211,
+     0.0042,
+     0.0017,
+     0.0054,
+     0.0353,
+     0.0275,
+     -0.0298,
+     -0.0786,
+     -0.0012,
+     0.0271,
+     -0.0561,
+     -0.0144,
+     -0.0642,
+     -0.0674,
+     -0.0058,
+     -0.005,
+     0.0199,
+     0.0228,
+     0.0046,
+     0.0107,
+     0.0089,
+     0.0381,
+     0.0135,
+     -0.0061,
+     0.0112,
+     0.0085,
+     -0.0373,
+     -0.0198,
+     -0.0488,
+     -0.0914,
+     0.0017,
+     -0.0388,
+     -0.0163,
+     -0.0268,
+     -0.0366,
+     -0.0264,
+     0.0109,
+     0.0316,
+     -0.0064,
+     -0.0166,
+     0.0093,
+     0.0249,
+     0.0202,
+     0.0212,
+     0.0266,
+     0.0214,
+     0.0509,
+     0.0077,
+     0.0345,
+     0.0106,
+     0.0008,
+     -0.0158,
+     0.0236,
+     0.02,
+     0.0136,
+     -0.0084,
+     0.0042,
+     -0.0076,
+     -0.0157,
+     0.0224,
+     0.0352,
+     0.0447,
+     0.0071,
+     -0.012,
+     -0.0957,
+     -0.088,
+     -0.0203,
+     0.0247,
+     0.0524,
+     0.0413,
+     -0.0331,
+     -0.1054,
+     -0.0017,
+     0.0258,
+     -0.0392,
+     0.0045,
+     -0.0606,
+     -0.0884,
+     -0.0167,
+     -0.0523,
+     -0.0046,
+     0.0019,
+     0.0132,
+     0.0175,
+     0.0455,
+     0.0385,
+     -0.0123,
+     -0.0148,
+     0.0039,
+     0.015,
+     -0.0118,
+     0.0167,
+     -0.0409,
+     -0.0627,
+     0.008,
+     -0.114,
+     -0.0405,
+     -0.0052,
+     -0.0227,
+     0.0109,
+     0.0373,
+     0.0266,
+     0.0091,
+     -0.0161,
+     0.0038,
+     0.0081,
+     -0.0093,
+     0.0083,
+     0.0317,
+     0.0162,
+     0.0037,
+     -0.129,
+     -0.2093,
+     -0.2804,
+     -0.0267,
+     -0.0393,
+     0.0876,
+     0.0768,
+     -0.0437,
+     -0.2255,
+     -0.0389
+    ]
+   }
+  },
+  "notes": {
+   "how": "Spotify basic-pitch (ICASSP 2022) via the ONNX backend, polyphonic, per stem, onset 0.55 / frame 0.35 / min 70 ms; start times moved 25 ms earlier to take out the separator's measured latency (observations.stem_latency)",
+   "format": "[start_s, duration_s, midi, name, amplitude]",
+   "note": "a model's transcription of a separated stem, not a score. Amplitude is the model's, not dB. Drums are not here because a kick is not a pitch.",
+   "sources": {},
+   "seconds": 0.0
+  },
+  "meter": {
+   "beats_per_bar": 3,
+   "next_best": 5,
+   "margin_over_next_best": 0.0004,
+   "support_by_candidate": {
+    "2": 0.9785,
+    "3": 0.9798,
+    "4": 0.9787,
+    "5": 0.9794,
+    "6": 0.9784,
+    "7": 0.9792
+   },
+   "self_similarity_by_lag": {
+    "1": 0.978,
+    "2": 0.9789,
+    "3": 0.9808,
+    "4": 0.9785,
+    "5": 0.9792,
+    "6": 0.978,
+    "7": 0.9802,
+    "8": 0.9788,
+    "9": 0.9805,
+    "10": 0.9789,
+    "11": 0.978,
+    "12": 0.9787,
+    "13": 0.9789,
+    "14": 0.9782,
+    "15": 0.98,
+    "16": 0.9784
+   },
+   "how": "hits per beat on kick, snare and hat as a 3-vector per beat; mean cosine similarity at every lag out to 16 beats; each candidate judged on itself and its multiples, since a bar of N peaks at N, 2N and 3N",
+   "why_recorded": "beats_per_bar=4 is a default argument in ear.py that nothing has ever checked, and every downbeat, chapter and bar-phase argument in this repo rests on it",
+   "not": "not the notated time signature. It is the period the DRUMS repeat on, which is what a reader needs and what ear.py assumes is four. A song whose drums and score disagree will read here as the drums.",
+   "provenance": "measured",
+   "measured_how": "self-similarity of the drum pattern at each candidate lag, judged on the lag and its double. This is a PERCUSSIVE measurement, so it must not be checked against another percussive one -- mapeval's ev_meter checks it against the spacing of the chord changes instead, which comes from a harmonic model sharing no code with this path.",
+   "margin_is_thin": true
+  },
+  "tempo_stability": {
+   "claimed_period_s": 0.5,
+   "claimed_bpm": 120.0,
+   "how": "the signed offset between every kick and its nearest grid beat, median per eighth of the song, then a straight line through those medians. A rigid grid at the wrong tempo cannot stay level: the kicks walk away from it. Fitting a period per window was tried first and is the wrong instrument -- 64 beats against a 2 percent range read 1.85 percent of drift on two records made in a DAW, which was the estimator's own resolution, not the music.",
+   "kicks_used": 537,
+   "median_offset_ms_by_eighth": [
+    -6.2,
+    -3.2,
+    -5.2,
+    6.8,
+    -0.2,
+    13.8,
+    -0.2,
+    3.8
+   ],
+   "drift_ms_per_eighth": 1.61,
+   "total_drift_ms": 11.2,
+   "implied_tempo_error_bpm": -0.0044,
+   "rigid_grid_justified": true,
+   "verdict": "machine-steady: the kicks do not walk away from the grid over the whole record, so one period and one phase describe it exactly",
+   "why_recorded": "ear.py fills the song with phase + i * period, which is exact for a record made in a DAW and wrong for anything played by people. Nothing in this file said which kind of recording it was.",
+   "provenance": "measured"
+  },
+  "surprise": {
+   "rate": "per_downbeat",
+   "unit": "0-1, 1 = the biggest departure in this song",
+   "how": "each bar is described by how many hits it has on each instrument, its six stem levels and its energy. That vector is predicted from the mean of the 4 bars before it, and the surprise is the cosine distance between prediction and measurement.",
+   "why_it_exists": "nothing else in this file says how EXPECTED a moment is, and a performance is built on expectation rather than on level. A bar that sounds exactly like the four before it needs nothing from a reader however loud it is; a bar that breaks the pattern is the whole point.",
+   "not": "not novelty. novelty compares a bar to its neighbours in a learned embedding and finds boundaries. This asks whether the bar was PREDICTABLE from what came before, which is a different question and disagrees with novelty at the second and third repeat of a section -- by then it is no longer surprising.",
+   "biggest_departures_s": [
+    290.018,
+    292.018,
+    294.018,
+    296.018,
+    8.018,
+    12.018,
+    298.018,
+    260.018
+   ],
+   "at": [
+    0.018,
+    2.018,
+    4.018,
+    6.018,
+    8.018,
+    10.018,
+    12.018,
+    14.018,
+    16.018,
+    18.018,
+    20.018,
+    22.018,
+    24.018,
+    26.018,
+    28.018,
+    30.018,
+    32.018,
+    34.018,
+    36.018,
+    38.018,
+    40.018,
+    42.018,
+    44.018,
+    46.018,
+    48.018,
+    50.018,
+    52.018,
+    54.018,
+    56.018,
+    58.018,
+    60.018,
+    62.018,
+    64.018,
+    66.018,
+    68.018,
+    70.018,
+    72.018,
+    74.018,
+    76.018,
+    78.018,
+    80.018,
+    82.018,
+    84.018,
+    86.018,
+    88.018,
+    90.018,
+    92.018,
+    94.018,
+    96.018,
+    98.018,
+    100.018,
+    102.018,
+    104.018,
+    106.018,
+    108.018,
+    110.018,
+    112.018,
+    114.018,
+    116.018,
+    118.018,
+    120.018,
+    122.018,
+    124.018,
+    126.018,
+    128.018,
+    130.018,
+    132.018,
+    134.018,
+    136.018,
+    138.018,
+    140.018,
+    142.018,
+    144.018,
+    146.018,
+    148.018,
+    150.018,
+    152.018,
+    154.018,
+    156.018,
+    158.018,
+    160.018,
+    162.018,
+    164.018,
+    166.018,
+    168.018,
+    170.018,
+    172.018,
+    174.018,
+    176.018,
+    178.018,
+    180.018,
+    182.018,
+    184.018,
+    186.018,
+    188.018,
+    190.018,
+    192.018,
+    194.018,
+    196.018,
+    198.018,
+    200.018,
+    202.018,
+    204.018,
+    206.018,
+    208.018,
+    210.018,
+    212.018,
+    214.018,
+    216.018,
+    218.018,
+    220.018,
+    222.018,
+    224.018,
+    226.018,
+    228.018,
+    230.018,
+    232.018,
+    234.018,
+    236.018,
+    238.018,
+    240.018,
+    242.018,
+    244.018,
+    246.018,
+    248.018,
+    250.018,
+    252.018,
+    254.018,
+    256.018,
+    258.018,
+    260.018,
+    262.018,
+    264.018,
+    266.018,
+    268.018,
+    270.018,
+    272.018,
+    274.018,
+    276.018,
+    278.018,
+    280.018,
+    282.018,
+    284.018,
+    286.018,
+    288.018,
+    290.018,
+    292.018,
+    294.018,
+    296.018,
+    298.018,
+    300.018,
+    302.018,
+    304.018,
+    306.018,
+    308.018
+   ],
+   "value": [
+    null,
+    null,
+    null,
+    null,
+    0.6297,
+    0.0328,
+    0.0826,
+    0.0297,
+    0.0032,
+    0.0082,
+    0.0011,
+    0.0009,
+    0.001,
+    0.0017,
+    0.0001,
+    0.0005,
+    0.016,
+    0.0021,
+    0.0019,
+    0.0009,
+    0.0025,
+    0.0004,
+    0.0021,
+    0.0001,
+    0.0073,
+    0.0008,
+    0.0008,
+    0.0009,
+    0.0007,
+    0.0007,
+    0.0007,
+    0.0001,
+    0.0002,
+    0.0007,
+    0.017,
+    0.0005,
+    0.0294,
+    0.0016,
+    0.0014,
+    0.0008,
+    0.0133,
+    0.0039,
+    0.0506,
+    0.0066,
+    0.0061,
+    0.0043,
+    0.0026,
+    0.0009,
+    0.0068,
+    0.0015,
+    0.0068,
+    0.0003,
+    0.0022,
+    0.008,
+    0.0004,
+    0.0014,
+    0.009,
+    0.0006,
+    0.0013,
+    0.0023,
+    0.0145,
+    0.0028,
+    0.0009,
+    0.0022,
+    0.0012,
+    0.0001,
+    0.0029,
+    0.0008,
+    0.0118,
+    0.0008,
+    0.0037,
+    0.0016,
+    0.0008,
+    0.0021,
+    0.001,
+    0.0018,
+    0.0004,
+    0.0007,
+    0.0007,
+    0.0012,
+    0.0023,
+    0.0003,
+    0.0017,
+    0.0001,
+    0.0001,
+    0.001,
+    0.0048,
+    0.0003,
+    0.0043,
+    0.0013,
+    0.0009,
+    0.0007,
+    0.0002,
+    0.0088,
+    0.0019,
+    0.002,
+    0.0007,
+    0.0009,
+    0.0542,
+    0.0008,
+    0.0007,
+    0.0057,
+    0.0007,
+    0.0055,
+    0.0004,
+    0.0017,
+    0.0269,
+    0.0027,
+    0.012,
+    0.0053,
+    0.0033,
+    0.0006,
+    0.0064,
+    0.0001,
+    0.036,
+    0.0031,
+    0.0007,
+    0.0057,
+    0.0041,
+    0.0169,
+    0.0033,
+    0.0006,
+    0.0006,
+    0.0006,
+    0.0014,
+    0.0015,
+    0.0415,
+    0.0002,
+    0.0305,
+    0.004,
+    0.0646,
+    0.0131,
+    0.0094,
+    0.0067,
+    0.0138,
+    0.0061,
+    0.0125,
+    0.0019,
+    0.0053,
+    0.0029,
+    0.0013,
+    0.0023,
+    0.0009,
+    0.0062,
+    0.0266,
+    1.0,
+    0.9564,
+    0.9134,
+    0.6774,
+    0.0722,
+    0.0638,
+    0.0396,
+    0.0007,
+    0.0005,
+    0.0011
+   ]
+  },
+  "anticipation": {
+   "rate": "per_downbeat",
+   "unit": "bars",
+   "how": "for every bar: how many bars to the next moment and what kind it is, how many since the last one, and whether this bar sits inside a declared rise and how far through it",
+   "why_it_exists": "every other field in this file is retrospective -- it says what IS at a time, never what is COMING. A reader asked for a frame at t=18 cannot know a drop is 1.9 s away without walking `moments` itself, so every reader reimplements anticipation and they will not agree. A show is mostly anticipation: the ramp has to start before the event.",
+   "derived_from": "moments and spans already in this file, so it adds no new measurement and cannot disagree with them",
+   "bars_of_warning_before_a_drop": [
+    0.5,
+    0.75,
+    1.0,
+    1.5,
+    1.75,
+    2.0
+   ],
+   "entries": [
+    {
+     "at": 0.018,
+     "to_next": 5.0,
+     "next_kind": "quiet",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 2.018,
+     "to_next": 4.0,
+     "next_kind": "quiet",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 4.018,
+     "to_next": 3.0,
+     "next_kind": "quiet",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 6.018,
+     "to_next": 2.0,
+     "next_kind": "quiet",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 8.018,
+     "to_next": 1.0,
+     "next_kind": "quiet",
+     "since_prev": null,
+     "prev_kind": null,
+     "inside": null
+    },
+    {
+     "at": 10.018,
+     "to_next": 35.5,
+     "next_kind": "drop",
+     "since_prev": 0.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 12.018,
+     "to_next": 34.5,
+     "next_kind": "drop",
+     "since_prev": 1.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 14.018,
+     "to_next": 33.5,
+     "next_kind": "drop",
+     "since_prev": 2.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 16.018,
+     "to_next": 32.5,
+     "next_kind": "drop",
+     "since_prev": 3.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 18.018,
+     "to_next": 31.5,
+     "next_kind": "drop",
+     "since_prev": 4.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 20.018,
+     "to_next": 30.5,
+     "next_kind": "drop",
+     "since_prev": 5.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 22.018,
+     "to_next": 29.5,
+     "next_kind": "drop",
+     "since_prev": 6.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 24.018,
+     "to_next": 28.5,
+     "next_kind": "drop",
+     "since_prev": 7.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 26.018,
+     "to_next": 27.5,
+     "next_kind": "drop",
+     "since_prev": 8.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 28.018,
+     "to_next": 26.5,
+     "next_kind": "drop",
+     "since_prev": 9.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 30.018,
+     "to_next": 25.5,
+     "next_kind": "drop",
+     "since_prev": 10.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 32.018,
+     "to_next": 24.5,
+     "next_kind": "drop",
+     "since_prev": 11.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 34.018,
+     "to_next": 23.5,
+     "next_kind": "drop",
+     "since_prev": 12.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 36.018,
+     "to_next": 22.5,
+     "next_kind": "drop",
+     "since_prev": 13.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 38.018,
+     "to_next": 21.5,
+     "next_kind": "drop",
+     "since_prev": 14.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 40.018,
+     "to_next": 20.5,
+     "next_kind": "drop",
+     "since_prev": 15.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 42.018,
+     "to_next": 19.5,
+     "next_kind": "drop",
+     "since_prev": 16.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 44.018,
+     "to_next": 18.5,
+     "next_kind": "drop",
+     "since_prev": 17.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 46.018,
+     "to_next": 17.5,
+     "next_kind": "drop",
+     "since_prev": 18.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 48.018,
+     "to_next": 16.5,
+     "next_kind": "drop",
+     "since_prev": 19.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 50.018,
+     "to_next": 15.5,
+     "next_kind": "drop",
+     "since_prev": 20.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 52.018,
+     "to_next": 14.5,
+     "next_kind": "drop",
+     "since_prev": 21.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 54.018,
+     "to_next": 13.5,
+     "next_kind": "drop",
+     "since_prev": 22.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 56.018,
+     "to_next": 12.5,
+     "next_kind": "drop",
+     "since_prev": 23.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 58.018,
+     "to_next": 11.5,
+     "next_kind": "drop",
+     "since_prev": 24.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 60.018,
+     "to_next": 10.5,
+     "next_kind": "drop",
+     "since_prev": 25.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 62.018,
+     "to_next": 9.5,
+     "next_kind": "drop",
+     "since_prev": 26.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 64.018,
+     "to_next": 8.5,
+     "next_kind": "drop",
+     "since_prev": 27.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 66.018,
+     "to_next": 7.5,
+     "next_kind": "drop",
+     "since_prev": 28.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 68.018,
+     "to_next": 6.5,
+     "next_kind": "drop",
+     "since_prev": 29.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 70.018,
+     "to_next": 5.5,
+     "next_kind": "drop",
+     "since_prev": 30.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 72.018,
+     "to_next": 4.5,
+     "next_kind": "drop",
+     "since_prev": 31.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 74.018,
+     "to_next": 3.5,
+     "next_kind": "drop",
+     "since_prev": 32.0,
+     "prev_kind": "quiet",
+     "inside": {
+      "kind": "build",
+      "through": 0.0
+     }
+    },
+    {
+     "at": 76.018,
+     "to_next": 2.5,
+     "next_kind": "drop",
+     "since_prev": 33.0,
+     "prev_kind": "quiet",
+     "inside": {
+      "kind": "build",
+      "through": 0.286
+     }
+    },
+    {
+     "at": 78.018,
+     "to_next": 1.5,
+     "next_kind": "drop",
+     "since_prev": 34.0,
+     "prev_kind": "quiet",
+     "inside": {
+      "kind": "build",
+      "through": 0.571
+     }
+    },
+    {
+     "at": 80.018,
+     "to_next": 0.5,
+     "next_kind": "drop",
+     "since_prev": 35.0,
+     "prev_kind": "quiet",
+     "inside": {
+      "kind": "build",
+      "through": 0.857
+     }
+    },
+    {
+     "at": 82.018,
+     "to_next": 9.5,
+     "next_kind": "drop",
+     "since_prev": 0.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 84.018,
+     "to_next": 8.5,
+     "next_kind": "drop",
+     "since_prev": 1.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 86.018,
+     "to_next": 7.5,
+     "next_kind": "drop",
+     "since_prev": 2.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 88.018,
+     "to_next": 6.5,
+     "next_kind": "drop",
+     "since_prev": 3.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 90.018,
+     "to_next": 5.5,
+     "next_kind": "drop",
+     "since_prev": 4.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.0
+     }
+    },
+    {
+     "at": 92.018,
+     "to_next": 4.5,
+     "next_kind": "drop",
+     "since_prev": 5.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.182
+     }
+    },
+    {
+     "at": 94.018,
+     "to_next": 3.5,
+     "next_kind": "drop",
+     "since_prev": 6.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.364
+     }
+    },
+    {
+     "at": 96.018,
+     "to_next": 2.5,
+     "next_kind": "drop",
+     "since_prev": 7.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.545
+     }
+    },
+    {
+     "at": 98.018,
+     "to_next": 1.5,
+     "next_kind": "drop",
+     "since_prev": 8.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.727
+     }
+    },
+    {
+     "at": 100.018,
+     "to_next": 0.5,
+     "next_kind": "drop",
+     "since_prev": 9.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.909
+     }
+    },
+    {
+     "at": 102.018,
+     "to_next": 15.75,
+     "next_kind": "drop",
+     "since_prev": 0.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 104.018,
+     "to_next": 14.75,
+     "next_kind": "drop",
+     "since_prev": 1.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 106.018,
+     "to_next": 13.75,
+     "next_kind": "drop",
+     "since_prev": 2.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 108.018,
+     "to_next": 12.75,
+     "next_kind": "drop",
+     "since_prev": 3.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 110.018,
+     "to_next": 11.75,
+     "next_kind": "drop",
+     "since_prev": 4.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 112.018,
+     "to_next": 10.75,
+     "next_kind": "drop",
+     "since_prev": 5.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 114.018,
+     "to_next": 9.75,
+     "next_kind": "drop",
+     "since_prev": 6.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 116.018,
+     "to_next": 8.75,
+     "next_kind": "drop",
+     "since_prev": 7.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 118.018,
+     "to_next": 7.75,
+     "next_kind": "drop",
+     "since_prev": 8.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 120.018,
+     "to_next": 6.75,
+     "next_kind": "drop",
+     "since_prev": 9.5,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 122.018,
+     "to_next": 5.75,
+     "next_kind": "drop",
+     "since_prev": 10.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.0
+     }
+    },
+    {
+     "at": 124.018,
+     "to_next": 4.75,
+     "next_kind": "drop",
+     "since_prev": 11.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.174
+     }
+    },
+    {
+     "at": 126.018,
+     "to_next": 3.75,
+     "next_kind": "drop",
+     "since_prev": 12.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.348
+     }
+    },
+    {
+     "at": 128.018,
+     "to_next": 2.75,
+     "next_kind": "drop",
+     "since_prev": 13.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.522
+     }
+    },
+    {
+     "at": 130.018,
+     "to_next": 1.75,
+     "next_kind": "drop",
+     "since_prev": 14.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.696
+     }
+    },
+    {
+     "at": 132.018,
+     "to_next": 0.75,
+     "next_kind": "drop",
+     "since_prev": 15.5,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.87
+     }
+    },
+    {
+     "at": 134.018,
+     "to_next": 62.0,
+     "next_kind": "drop",
+     "since_prev": 0.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 136.018,
+     "to_next": 61.0,
+     "next_kind": "drop",
+     "since_prev": 1.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 138.018,
+     "to_next": 60.0,
+     "next_kind": "drop",
+     "since_prev": 2.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 140.018,
+     "to_next": 59.0,
+     "next_kind": "drop",
+     "since_prev": 3.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 142.018,
+     "to_next": 58.0,
+     "next_kind": "drop",
+     "since_prev": 4.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 144.018,
+     "to_next": 57.0,
+     "next_kind": "drop",
+     "since_prev": 5.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 146.018,
+     "to_next": 56.0,
+     "next_kind": "drop",
+     "since_prev": 6.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 148.018,
+     "to_next": 55.0,
+     "next_kind": "drop",
+     "since_prev": 7.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 150.018,
+     "to_next": 54.0,
+     "next_kind": "drop",
+     "since_prev": 8.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 152.018,
+     "to_next": 53.0,
+     "next_kind": "drop",
+     "since_prev": 9.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 154.018,
+     "to_next": 52.0,
+     "next_kind": "drop",
+     "since_prev": 10.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 156.018,
+     "to_next": 51.0,
+     "next_kind": "drop",
+     "since_prev": 11.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 158.018,
+     "to_next": 50.0,
+     "next_kind": "drop",
+     "since_prev": 12.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 160.018,
+     "to_next": 49.0,
+     "next_kind": "drop",
+     "since_prev": 13.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 162.018,
+     "to_next": 48.0,
+     "next_kind": "drop",
+     "since_prev": 14.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 164.018,
+     "to_next": 47.0,
+     "next_kind": "drop",
+     "since_prev": 15.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 166.018,
+     "to_next": 46.0,
+     "next_kind": "drop",
+     "since_prev": 16.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 168.018,
+     "to_next": 45.0,
+     "next_kind": "drop",
+     "since_prev": 17.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 170.018,
+     "to_next": 44.0,
+     "next_kind": "drop",
+     "since_prev": 18.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 172.018,
+     "to_next": 43.0,
+     "next_kind": "drop",
+     "since_prev": 19.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 174.018,
+     "to_next": 42.0,
+     "next_kind": "drop",
+     "since_prev": 20.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 176.018,
+     "to_next": 41.0,
+     "next_kind": "drop",
+     "since_prev": 21.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 178.018,
+     "to_next": 40.0,
+     "next_kind": "drop",
+     "since_prev": 22.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 180.018,
+     "to_next": 39.0,
+     "next_kind": "drop",
+     "since_prev": 23.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 182.018,
+     "to_next": 38.0,
+     "next_kind": "drop",
+     "since_prev": 24.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 184.018,
+     "to_next": 37.0,
+     "next_kind": "drop",
+     "since_prev": 25.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 186.018,
+     "to_next": 36.0,
+     "next_kind": "drop",
+     "since_prev": 26.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 188.018,
+     "to_next": 35.0,
+     "next_kind": "drop",
+     "since_prev": 27.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 190.018,
+     "to_next": 34.0,
+     "next_kind": "drop",
+     "since_prev": 28.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 192.018,
+     "to_next": 33.0,
+     "next_kind": "drop",
+     "since_prev": 29.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 194.018,
+     "to_next": 32.0,
+     "next_kind": "drop",
+     "since_prev": 30.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 196.018,
+     "to_next": 31.0,
+     "next_kind": "drop",
+     "since_prev": 31.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 198.018,
+     "to_next": 30.0,
+     "next_kind": "drop",
+     "since_prev": 32.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 200.018,
+     "to_next": 29.0,
+     "next_kind": "drop",
+     "since_prev": 33.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 202.018,
+     "to_next": 28.0,
+     "next_kind": "drop",
+     "since_prev": 34.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 204.018,
+     "to_next": 27.0,
+     "next_kind": "drop",
+     "since_prev": 35.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 206.018,
+     "to_next": 26.0,
+     "next_kind": "drop",
+     "since_prev": 36.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 208.018,
+     "to_next": 25.0,
+     "next_kind": "drop",
+     "since_prev": 37.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 210.018,
+     "to_next": 24.0,
+     "next_kind": "drop",
+     "since_prev": 38.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 212.018,
+     "to_next": 23.0,
+     "next_kind": "drop",
+     "since_prev": 39.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 214.018,
+     "to_next": 22.0,
+     "next_kind": "drop",
+     "since_prev": 40.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 216.018,
+     "to_next": 21.0,
+     "next_kind": "drop",
+     "since_prev": 41.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 218.018,
+     "to_next": 20.0,
+     "next_kind": "drop",
+     "since_prev": 42.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 220.018,
+     "to_next": 19.0,
+     "next_kind": "drop",
+     "since_prev": 43.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 222.018,
+     "to_next": 18.0,
+     "next_kind": "drop",
+     "since_prev": 44.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 224.018,
+     "to_next": 17.0,
+     "next_kind": "drop",
+     "since_prev": 45.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 226.018,
+     "to_next": 16.0,
+     "next_kind": "drop",
+     "since_prev": 46.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 228.018,
+     "to_next": 15.0,
+     "next_kind": "drop",
+     "since_prev": 47.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 230.018,
+     "to_next": 14.0,
+     "next_kind": "drop",
+     "since_prev": 48.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 232.018,
+     "to_next": 13.0,
+     "next_kind": "drop",
+     "since_prev": 49.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 234.018,
+     "to_next": 12.0,
+     "next_kind": "drop",
+     "since_prev": 50.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 236.018,
+     "to_next": 11.0,
+     "next_kind": "drop",
+     "since_prev": 51.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 238.018,
+     "to_next": 10.0,
+     "next_kind": "drop",
+     "since_prev": 52.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 240.018,
+     "to_next": 9.0,
+     "next_kind": "drop",
+     "since_prev": 53.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 242.018,
+     "to_next": 8.0,
+     "next_kind": "drop",
+     "since_prev": 54.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 244.018,
+     "to_next": 7.0,
+     "next_kind": "drop",
+     "since_prev": 55.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 246.018,
+     "to_next": 6.0,
+     "next_kind": "drop",
+     "since_prev": 56.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 248.018,
+     "to_next": 5.0,
+     "next_kind": "drop",
+     "since_prev": 57.25,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 250.018,
+     "to_next": 4.0,
+     "next_kind": "drop",
+     "since_prev": 58.25,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.0
+     }
+    },
+    {
+     "at": 252.018,
+     "to_next": 3.0,
+     "next_kind": "drop",
+     "since_prev": 59.25,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.25
+     }
+    },
+    {
+     "at": 254.018,
+     "to_next": 2.0,
+     "next_kind": "drop",
+     "since_prev": 60.25,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.5
+     }
+    },
+    {
+     "at": 256.018,
+     "to_next": 1.0,
+     "next_kind": "drop",
+     "since_prev": 61.25,
+     "prev_kind": "drop",
+     "inside": {
+      "kind": "build",
+      "through": 0.75
+     }
+    },
+    {
+     "at": 258.018,
+     "to_next": 16.0,
+     "next_kind": "quiet",
+     "since_prev": 0.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 260.018,
+     "to_next": 15.0,
+     "next_kind": "quiet",
+     "since_prev": 1.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 262.018,
+     "to_next": 14.0,
+     "next_kind": "quiet",
+     "since_prev": 2.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 264.018,
+     "to_next": 13.0,
+     "next_kind": "quiet",
+     "since_prev": 3.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 266.018,
+     "to_next": 12.0,
+     "next_kind": "quiet",
+     "since_prev": 4.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 268.018,
+     "to_next": 11.0,
+     "next_kind": "quiet",
+     "since_prev": 5.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 270.018,
+     "to_next": 10.0,
+     "next_kind": "quiet",
+     "since_prev": 6.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 272.018,
+     "to_next": 9.0,
+     "next_kind": "quiet",
+     "since_prev": 7.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 274.018,
+     "to_next": 8.0,
+     "next_kind": "quiet",
+     "since_prev": 8.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 276.018,
+     "to_next": 7.0,
+     "next_kind": "quiet",
+     "since_prev": 9.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 278.018,
+     "to_next": 6.0,
+     "next_kind": "quiet",
+     "since_prev": 10.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 280.018,
+     "to_next": 5.0,
+     "next_kind": "quiet",
+     "since_prev": 11.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 282.018,
+     "to_next": 4.0,
+     "next_kind": "quiet",
+     "since_prev": 12.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 284.018,
+     "to_next": 3.0,
+     "next_kind": "quiet",
+     "since_prev": 13.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 286.018,
+     "to_next": 2.0,
+     "next_kind": "quiet",
+     "since_prev": 14.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 288.018,
+     "to_next": 1.0,
+     "next_kind": "quiet",
+     "since_prev": 15.0,
+     "prev_kind": "drop",
+     "inside": null
+    },
+    {
+     "at": 290.018,
+     "to_next": 1.0,
+     "next_kind": "spotlight",
+     "since_prev": 0.0,
+     "prev_kind": "quiet",
+     "inside": null
+    },
+    {
+     "at": 292.018,
+     "to_next": 3.0,
+     "next_kind": "return",
+     "since_prev": 0.0,
+     "prev_kind": "spotlight",
+     "inside": null
+    },
+    {
+     "at": 294.018,
+     "to_next": 2.0,
+     "next_kind": "return",
+     "since_prev": 1.0,
+     "prev_kind": "spotlight",
+     "inside": null
+    },
+    {
+     "at": 296.018,
+     "to_next": 1.0,
+     "next_kind": "return",
+     "since_prev": 2.0,
+     "prev_kind": "spotlight",
+     "inside": null
+    },
+    {
+     "at": 298.018,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 0.0,
+     "prev_kind": "return",
+     "inside": null
+    },
+    {
+     "at": 300.018,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 1.0,
+     "prev_kind": "return",
+     "inside": null
+    },
+    {
+     "at": 302.018,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 2.0,
+     "prev_kind": "return",
+     "inside": null
+    },
+    {
+     "at": 304.018,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 3.0,
+     "prev_kind": "return",
+     "inside": null
+    },
+    {
+     "at": 306.018,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 4.0,
+     "prev_kind": "return",
+     "inside": null
+    },
+    {
+     "at": 308.018,
+     "to_next": null,
+     "next_kind": null,
+     "since_prev": 5.0,
+     "prev_kind": "return",
+     "inside": null
+    }
+   ]
+  },
+  "lead": {
+   "unavailable": "stems.sources is normalised per stem, so the six series cannot be compared with each other. Rescaling needs each stem's true level, which lives in accents.stem_levels and is not in this file yet -- run listen/attack.py, which measures it.",
+   "why_it_matters": "ranking the normalised series directly makes a silent stem win: a guitar 43 dB below the mix is still scaled to 1.0 at its own loudest bar, and Starlight read as piano-led for 43 bars on that artefact."
+  },
+  "arc": {
+   "rate": "per_song",
+   "how": "the energy curve already in this file, reduced to where it peaks, how flat that peak is, and its mean over each fifth of the record",
+   "why_it_exists": "a reader can see the next bar but not the whole. Without knowing where the climax sits it cannot hold anything back for it, and a show that spends everything on the first drop has nowhere left to go.",
+   "peak_at_s": 258.018,
+   "peak_at_fraction": 0.8345,
+   "peak_is_well_defined": true,
+   "peak_region_s": [
+    258.018,
+    258.018
+   ],
+   "bars_in_the_peak_region": 1,
+   "bars_within_2pct_of_the_peak_anywhere": 4,
+   "peak_caveat": "the maximum stands clear of the rest of the curve",
+   "quietest_at_s": 0.018,
+   "quietest_at_fraction": 0.0001,
+   "range": 0.8485,
+   "mean_by_fifth": [
+    0.4164,
+    0.6852,
+    0.7044,
+    0.7085,
+    0.4986
+   ],
+   "peak_vs_loudest_bar": {
+    "energy_curve_peaks_at_s": 258.018,
+    "recording_is_loudest_at_s": 133.0,
+    "bars_apart": 62.51,
+    "agrees": false,
+    "how": "the energy field in this map against a plain broadband RMS of the recording, measured over one bar",
+    "not": "neither side is truth and this does not say which is wrong. energy comes from a beat-synchronous band profile and RMS is broadband, so a bar that is loudest overall need not be the biggest in the bands the curve weighs. Where they disagree by more than a couple of bars, a reader deciding what to hold back for the climax is being told two different things and should trust neither."
+   }
+  },
+  "microtiming": {
+   "unit": "ms from the nearest 1/16 of a beat",
+   "quantisation": "1/16",
+   "median": 9.84,
+   "within_15ms_pct": 47.0,
+   "feel": "human",
+   "how": "deviation of each accent from the nearest sixteenth",
+   "note": "Measured against the grid the music is actually played on. Measuring against the nearest BEAT instead reports half a beat of scatter and calls it feel, which is an artifact of assigning subdivision hits to beats."
   }
  },
  "confidence": 0.95,
@@ -17293,5 +19578,25 @@
   "moments": 0.5,
   "spans": 0.4,
   "energy": 0.7
+ },
+ "vectors": {
+  "model": "m-a-p/MERT-v1-95M",
+  "revision": "12af15fef9d0ac838c3f475bfbbf26d2060dd4f5",
+  "revision_provenance": "measured -- the commit this machine's huggingface cache holds for that model",
+  "layer": "last_hidden_state",
+  "rate": "per_beat",
+  "rows": 619,
+  "dim": 768,
+  "dtype": "float16",
+  "layout": "row_major",
+  "file": "thomas-park--06-riding-at-night.mert-v1-95m-12af15fef9d0.per-beat.f16",
+  "bytes": 950784,
+  "sha256": "efe2d717327022a74d8a62033a1d2b8b9247bd6f61ff6bf374f781a279614173",
+  "provenance": "measured -- rows, bytes and sha256 read off the file on disk",
+  "pooling": "mean of 75.0 Hz frames between consecutive beats, then L2-normalised",
+  "not": "a fact a human can check by ear. It is what a large model heard, for a small head to learn from. Also: this torch build renamed the weight-norm parametrisation, so the positional-conv weights of the checkpoint did not load and are randomly initialised; embeddings are slightly perturbed from the published model's. the-nights' vectors were made the same way.",
+  "device": "Quadro T1000",
+  "note": "a reference, not the data. The vectors are in the file named here, beside this map. The name carries the model and the revision that produced it so a different checkpoint cannot overwrite it, and the sha256 and byte count are measured from the file on disk so a reference that has gone stale can be caught instead of trusted.",
+  "how_to_read": "numpy.fromfile(file, dtype='<f2').reshape(rows, dim); row i is beat i of `beats`, L2-normalised, so a dot product between two rows is a cosine"
  }
 }

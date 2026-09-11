@@ -1,0 +1,64 @@
+{
+ "id": "promo-night",
+ "name": "Track release promo, night",
+ "note": "A release promo for a real record: night, road, sky. The first brief in this repo with a SUBJECT in the ordinary sense -- it is about something, and it ends by saying what. Everything before it was a montage that could not state its own claim.",
+ "format": {
+  "width": 1080,
+  "height": 1920,
+  "fps": 30
+ },
+ "subject": [
+  "a starry sky",
+  "a road",
+  "a city street at night",
+  "a sunset sky",
+  "a car"
+ ],
+ "subject_min_shots": 12,
+ "subject_variety": 0.16,
+ "mood_weight": 0.0,
+ "budgets": {
+  "cuts_per_minute": 22,
+  "min_shot_s": 1.0,
+  "max_shot_s": 6.0
+ },
+ "restraint": {
+  "allow_no_change": true,
+  "min_rest_s": 4.0,
+  "hold_before_major_s": 2.5,
+  "preserve_headroom": true
+ },
+ "prefers": {
+  "camera_motion_px_s": [
+   0,
+   260
+  ],
+  "subject_motion_px_s": [
+   0,
+   400
+  ],
+  "brightness": [
+   0.05,
+   0.6
+  ],
+  "contrast": [
+   0.05,
+   0.45
+  ],
+  "saturation": [
+   0.05,
+   0.9
+  ]
+ },
+ "coherence": {
+  "radius": 0.9,
+  "min_shots": 500,
+  "note": "Off; subject selection supersedes it."
+ },
+ "salience_floor": 0.32,
+ "callbacks": {
+  "repeat_visual_on_repeated_music": true,
+  "max_reuses_per_clip": 2
+ },
+ "mood_weight_note": "Zero because this track has no observations.mood: MuQ is not installed in work/audio, so listen/deep.py failed and no mood or novelty was measured. A non-zero weight here would name an influence that is not acting. The mood bridge is demonstrated on dont-look-down, which has the field."
+}
