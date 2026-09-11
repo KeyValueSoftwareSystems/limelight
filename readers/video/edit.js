@@ -275,8 +275,33 @@ function main() {
   };
 
   if (from !== null || to !== null) {
-    const a = from === null ? 0 : from;
+    let a = from === null ? 0 : from;
     const b = to === null ? length : to;
+    // An excerpt begins where a cut begins.
+    //
+    // A window start lands wherever it lands, which is almost never on one of
+    // the policy's edges, so the opening slot arrives as a fragment of whatever
+    // shot was already running. On Holocene that was 0.81 s in front of a film
+    // whose other shots run five and seven seconds -- against a brief asking
+    // for 2.4 s minimum -- and it was the first thing a person watching it
+    // said was wrong.
+    //
+    // The fold below cannot always rescue it: absorbing a fragment needs
+    // footage before the next shot's in-point or after the first one's end, and
+    // on Holocene neither existed. So do not make the fragment. Move the start
+    // to the cut, and the audio moves with it, because render.py takes its
+    // offset from this same window.
+    if (from !== null) {
+      const floorS = ((brief.budgets || {}).min_shot_s) || 0.5;
+      const head = r.timeline.find(function (e) { return e.end > a && e.start <= a; });
+      if (head && head.end - a < floorS && head.end < b) {
+        ir.window_moved = { from: +a.toFixed(3), to: +head.end.toFixed(3),
+          why: "starting here would have opened on a " +
+               (head.end - a).toFixed(2) + "s fragment of a shot already "
+               + "running, under the brief's " + floorS + "s minimum" };
+        a = head.end;
+      }
+    }
     const kept = [];
     for (const e of ir.timeline) {
       if (e.end <= a + 1e-6 || e.start >= b - 1e-6) continue;
@@ -293,6 +318,46 @@ function main() {
     // already folds runts, but it folds them in SONG time, before this cut --
     // which is why a 0.33 s tail survived a stated minimum of 0.55 s.
     const minShot = ((brief.budgets || {}).min_shot_s) || 0.5;
+    // The FIRST entry, for the same reason as the last and with the same fix.
+    // Trimming to a window clips the opening slot to wherever the window
+    // starts, which has nothing to do with where the music wants a cut. On
+    // Holocene it produced a 0.81 s flash in front of a film whose other shots
+    // run five and seven seconds, against a brief asking for a 2.4 s minimum --
+    // and that flash was the first thing a person watching it noticed.
+    //
+    // Absorb it into the shot after, which means that shot must start earlier
+    // in its own source. Only if the footage goes back that far; otherwise the
+    // runt is kept and says why, because an opening that jumps is better than
+    // one that splices in a cut from somewhere else.
+    if (kept.length > 1) {
+      const first = kept[0], second = kept[1];
+      if (first.end - first.start < minShot) {
+        // Two ways to absorb it, and the footage decides which. Pull the
+        // SECOND shot back to the window edge, which needs frames before its
+        // in-point; or let the FIRST shot run over the second, which needs
+        // frames after its own. Trying only the first way left the flash in
+        // place on Holocene for want of 0.35 s.
+        const shB = shotBounds(index, second.clip_id, second.shot);
+        const back = second.in_s - (second.start - first.start);
+        const shA = shotBounds(index, first.clip_id, first.shot);
+        const need = first.in_s + (second.end - first.start);
+        if (!shB || back >= shB.start - 1e-6) {
+          second.start = first.start;
+          second.in_s = +back.toFixed(3);
+          kept.shift();
+        } else if (!shA || need <= shA.end + 1e-6) {
+          first.end = second.end;
+          kept.splice(1, 1);
+        } else {
+          ir.runt_kept_head = { at: first.start,
+            is_s: +(first.end - first.start).toFixed(3),
+            why: "neither neighbour has the footage: pulling the next shot back " +
+                 "needs " + (shB.start - back).toFixed(2) + "s before its in-point, " +
+                 "and running the first one on needs " + (need - shA.end).toFixed(2) +
+                 "s past the end of its shot" };
+        }
+      }
+    }
     if (kept.length > 1) {
       const last = kept[kept.length - 1];
       const prev2 = kept[kept.length - 2];

@@ -21,6 +21,51 @@
     "B": "llm",
     "C": "rules"
    }
+  },
+  {
+   "at": "2026-09-11T19:51:16",
+   "who": "amal",
+   "how": "truth",
+   "blind": false,
+   "blind_note": "NOT blind -- the files were named after their songs and the person knew which was which. Recorded anyway because it is the first human verdict this lane has, and a ranking with a reason attached is worth more than a missing one. Treat the ordering as weaker evidence than a sealed run.",
+   "ranked": [
+    {
+     "file": "renders/LANGUAGE.mp4",
+     "song": "language",
+     "set": "language-film",
+     "verdict": "amazing",
+     "place": 1
+    },
+    {
+     "file": "renders/HOLOCENE.mp4",
+     "song": "holocene",
+     "set": "wild-slow",
+     "verdict": "good, but something wrong at the beginning",
+     "place": 2
+    },
+    {
+     "file": "renders/AFTERGLOW.mp4",
+     "song": "afterglow",
+     "set": "city-night",
+     "verdict": "meh -- random clips with no meaning",
+     "place": 3
+    }
+   ],
+   "what_separates_them": "The winner is the only one cut from the song's OWN music video. The other two drew on stock libraries. That is the obvious confound and it has to be tested before anything else is concluded: afterglow-film exists and has 75 shots, so the same song can be cut from its own footage and compared."
+  },
+  {
+   "at": "2026-09-11T19:54:42",
+   "who": "amal",
+   "how": "truth",
+   "blind": false,
+   "revises": "the verdict above, after watching again",
+   "said": [
+    "LANGUAGE is not the best -- it still has random clips for no reason, but it has some flow and some clips make sense.",
+    "HOLOCENE is good but something is wrong at the beginning.",
+    "AFTERGLOW is meh: random clips with no meaning."
+   ],
+   "what_this_separates": "Flow and shot SELECTION are different problems and only one of them is working. Every verdict praises or forgives the cutting and complains about what is on screen. So the pacing, the story curve and the cut placement are landing; the choice of which shot to show is not.",
+   "measured_cause": "The system's entire understanding of what a shot contains is its nearest match among 37 fixed phrases, and the match is close to arbitrary. Median top cosine 0.23-0.27, which is what CLIP returns for ANY caption against ANY image, and the median margin over the runner-up is 0.008-0.012. The winning word beats the second by about one percent of the score. A city-night pool is labelled 'a road in daylight' four times out of sixteen."
   }
  ]
 }
