@@ -929,6 +929,13 @@
  ],
  "moments": [
   {
+   "at": 29.570713,
+   "kind": "stop",
+   "holds": 1.04,
+   "size": 0.952,
+   "found_by": "low-band dropout"
+  },
+  {
    "at": 53.380237,
    "kind": "quiet"
   },
@@ -964,6 +971,13 @@
    "size": 0.95
   },
   {
+   "at": 143.856427,
+   "kind": "stop",
+   "holds": 0.65,
+   "size": 0.93,
+   "found_by": "low-band dropout"
+  },
+  {
    "at": 145.284999,
    "kind": "drop",
    "size": 0.95
@@ -989,6 +1003,20 @@
   {
    "at": 203.856427,
    "kind": "spotlight"
+  },
+  {
+   "at": 240.046903,
+   "kind": "stop",
+   "holds": 1.895,
+   "size": 0.814,
+   "found_by": "low-band dropout"
+  },
+  {
+   "at": 256.23738,
+   "kind": "stop",
+   "holds": 0.651,
+   "size": 0.924,
+   "found_by": "low-band dropout"
   },
   {
    "at": 257.665951,
@@ -19177,7 +19205,60 @@
    ],
    "why_spans_move": "a build ends at the thing it builds into. Moving a drop and leaving the span alone left Don't Look Down declaring a build until 41.74 s when the drop it leads to had moved to 41.23 -- a build that finishes after its own payoff. A reader ramping through that span was still ramping when the drop had gone.",
    "left_alone": [],
-   "merged_duplicates": []
+   "merged_duplicates": [],
+   "stops_found": {
+    "how": "low band 35-130 Hz, the band grid.how already names, under 0.3 of its own neighbourhood median for at least 0.45 s, start snapped to the nearest beat",
+    "why": "ear.py derives moments from section boundaries, so a stop inside a section cannot become a moment however plainly the record performs it. The broadband envelope cannot see these either -- the kick leaves and the pads stay, so the level barely moves.",
+    "added": [
+     {
+      "at": 29.570713,
+      "from": 29.717,
+      "to": 30.611,
+      "depth": 0.952
+     },
+     {
+      "at": 143.856427,
+      "from": 143.994,
+      "to": 144.506,
+      "depth": 0.93
+     },
+     {
+      "at": 240.046903,
+      "from": 239.974,
+      "to": 241.942,
+      "depth": 0.814
+     },
+     {
+      "at": 256.23738,
+      "from": 256.376,
+      "to": 256.888,
+      "depth": 0.924
+     }
+    ],
+    "declined": [
+     {
+      "at": null,
+      "from": 95.389,
+      "to": 96.278,
+      "depth": 0.896,
+      "declined": "a quiet at 95.28 is inside the dropout"
+     },
+     {
+      "at": null,
+      "from": 177.497,
+      "to": 178.667,
+      "depth": 0.875,
+      "declined": "a stop at 176.71 is the same dropout, already recorded"
+     },
+     {
+      "at": null,
+      "from": 303.053,
+      "to": 306.664,
+      "depth": 1.0,
+      "declined": "a stop at 302.90 is inside the dropout"
+     }
+    ]
+   }
   },
   "pump": {
    "how": "envelope above 250 Hz so the kick body is excluded, measured from 18% to 72% of each beat so neither the kick's attack nor the next one is in the window. Music without sidechain DECAYS between hits; music with it RISES, because the compressor is letting go. The sign of that slope is the whole test. Calibrated on records that cannot pump: the synthetic ladder is additive synthesis with no compressor in it, and comes out negative.",

@@ -60,6 +60,162 @@ def envelope(path):
     return out
 
 
+def low_envelope(path, cut_hz=130.0, hp_hz=35.0, poles=3):
+    """Envelope of the kick's own band, at the same hop as `envelope`.
+
+    WHY A SECOND ENVELOPE. The broadband one cannot see the thing that matters
+    most in dance music: the beat dropping out while the pads keep playing. At
+    255.99 in Where Are U Now the kick falls to 4% of its level and the
+    broadband envelope barely moves, because the mid and high bands hold up.
+    Every "the floor just disappeared" moment in the record is invisible to a
+    full-spectrum measurement.
+
+    Decimate first, then filter. A kick lives under 130 Hz, so averaging blocks
+    of `dec` samples is both the anti-alias filter and the speed: it turns six
+    million samples into a hundred and fifty thousand before any per-sample
+    Python runs. The one-pole pair that follows is not a sharp filter and does
+    not need to be -- the question is whether the low end is THERE, not its
+    exact shape.
+    """
+    with wave.open(path, "rb") as w:
+        sr, n, ch = w.getframerate(), w.getnframes(), w.getnchannels()
+        raw = w.readframes(n)
+    a = array.array("h"); a.frombytes(raw[:len(raw) - (len(raw) % 2)])
+    if ch > 1: a = a[::ch]
+    dec = max(1, int(sr / 525.0))
+    dsr = sr / dec
+    d = [0.0] * (len(a) // dec)
+    for i in range(len(d)):
+        acc = 0
+        for v in a[i * dec:(i + 1) * dec]: acc += v
+        d[i] = acc / dec
+    def onepole(x, hz):
+        k = math.exp(-2 * math.pi * hz / dsr); y = 0.0; out = [0.0] * len(x)
+        for i, v in enumerate(x):
+            y = k * y + (1 - k) * v; out[i] = y
+        return out
+    # Cascade the poles. ONE pole at 130 Hz is 6 dB/octave, which still passes
+    # a quarter of what sits at 260 Hz -- enough sustained mid leaks through
+    # that the kick leaving does not show as a fall, and the detector missed the
+    # 0.53 s dropout at 256.08 that a person picked out as the best moment in
+    # the record. Three poles put the same neighbour 18 dB down.
+    lp = d
+    for _ in range(poles): lp = onepole(lp, cut_hz)
+    base = lp
+    for _ in range(poles): base = onepole(base, hp_hz)   # below 35 Hz is not a kick
+    band = [lp[i] - base[i] for i in range(len(lp))]
+    # Return the hop actually used. int(525 * 0.005) truncates 2.625 to 2, so
+    # assuming HOP_S here put a dropout at 404 s in a 306 s song -- every time
+    # was 31% too large and nothing in the output looked wrong.
+    hop = max(1, int(round(dsr * HOP_S)))
+    dt = hop / dsr
+    out = []
+    for i in range(0, len(band) - hop, hop):
+        acc = 0.0
+        for v in band[i:i + hop]: acc += v * v
+        out.append(math.sqrt(acc / hop))
+    return out, dt
+
+
+def local_median(env, dt, half_s=4.0):
+    """Median level around each point, so a quiet passage is not read as a stop.
+
+    Coarse grid on purpose: a true median over a 8-second window at every 5 ms
+    hop is 60,000 sorts. Half-second means, then a median of those, answers the
+    same question -- is this quiet FOR HERE -- at a thousandth of the cost."""
+    step_n = max(1, int(round(0.5 / dt)))
+    c = [sum(env[i:i + step_n]) / step_n
+         for i in range(0, max(1, len(env) - step_n), step_n)]
+    k = int(half_s / 0.5)
+    med = []
+    for i in range(len(c)):
+        w = sorted(c[max(0, i - k):i + k + 1])
+        med.append(w[len(w) // 2] if w else 0.0)
+    out = []
+    for i in range(len(env)):
+        j = min(len(med) - 1, i // step_n)
+        out.append(med[j] if med else 0.0)
+    return out
+
+
+STOP_RATIO = 0.30      # the low band, against the median of its own neighbourhood
+STOP_MIN_S = 0.45      # shorter than this is a gap between kicks, not a stop
+STOP_NEAR_S = 1.5      # a stop or quiet this close is the SAME event, redetected
+SAME_EVENT_PAD_S = 0.25   # any moment inside the dropout itself is that dropout
+
+
+def find_stops(wav, beats, existing, period):
+    """Stops the section-boundary pass could not see, because they happen INSIDE
+    a section.
+
+    ear.py builds moments out of section boundaries. That is why the map had one
+    moment in the twenty-six seconds a person picked out as the best part of the
+    record: the breakdown at 255.5, the kick vanishing at 256.1 and the build
+    back into the drop all happen inside one verse, so none of them could ever
+    become a moment, however plainly the record performs them.
+
+    A stop is not inferred here, it is measured: the low band falls under
+    STOP_RATIO of its own neighbourhood median and stays there for at least
+    STOP_MIN_S. The start is snapped to the nearest beat, for the same reason
+    the re-timing pass snaps -- a moment that is not on a beat is not a moment
+    anybody can light."""
+    env, dt = low_envelope(wav)
+    if not env: return [], []
+    span = max(1, int(round(period / dt)))
+    sm, run = [], 0.0
+    for i, v in enumerate(env):
+        run += v
+        if i >= span: run -= env[i - span]
+        sm.append(run / min(i + 1, span))
+    med = local_median(sm, dt)
+    found, declined, i, n = [], [], 0, len(sm)
+    while i < n:
+        if med[i] > 0 and sm[i] / med[i] < STOP_RATIO:
+            j = i
+            while j < n and med[j] > 0 and sm[j] / med[j] < STOP_RATIO: j += 1
+            a, b = i * dt, j * dt
+            if b - a >= STOP_MIN_S:
+                # Two different tests, because "is this already recorded" and
+                # "is this next to something else" are different questions. A
+                # stop or a quiet within STOP_NEAR_S is this same dropout found
+                # twice and must not be duplicated. A DROP just after the
+                # dropout ends is not a duplicate at all -- it is what the
+                # dropout was for, and cutting on both is the entire point. The
+                # first version declined the 256.38 stop because a drop sat
+                # 1.29 s later, which deleted the very event this pass exists
+                # to find.
+                owner = None
+                for x in existing:
+                    t_ = x["at"]; k_ = x.get("kind")
+                    if a - SAME_EVENT_PAD_S <= t_ <= b + SAME_EVENT_PAD_S:
+                        owner = (x, "inside the dropout"); break
+                    if k_ in ("stop", "quiet") and abs(t_ - a) < STOP_NEAR_S:
+                        owner = (x, "the same dropout, already recorded"); break
+                depth = 1.0 - min(sm[i:j]) / (max(1e-9, med[i]))
+                rec = {"at": None, "from": round(a, 3), "to": round(b, 3),
+                       "depth": round(min(1.0, max(0.0, depth)), 3)}
+                if owner:
+                    rec["declined"] = ("a " + owner[0].get("kind", "?") + " at " +
+                                       format(owner[0]["at"], ".2f") + " is " + owner[1])
+                    declined.append(rec)
+                elif beats:
+                    # Snap to the nearest beat, but never past the middle of the
+                    # dropout. The held-out Toyota track put a beat 1.07 s into
+                    # a 1.14 s silence, and "nearest" declared the stop with
+                    # 0.07 s left to hold -- a moment marking the end of the
+                    # event it names. A moment is an onset, so when the nearest
+                    # beat is in the second half, the one before it is the beat
+                    # the event actually starts on.
+                    mid = a + (b - a) / 2.0
+                    cand = [t for t in beats if t <= mid] or beats
+                    rec["at"] = round(min(cand, key=lambda t: abs(t - a)), 6)
+                    found.append(rec)
+            i = j
+        else:
+            i += 1
+    return found, declined
+
+
 def step(env, t, sh):
     """Loudness after minus loudness before, over a shoulder of sh seconds."""
     W = max(1, int(sh / HOP_S)); i = int(t / HOP_S)
@@ -118,6 +274,14 @@ def analyse(slug, write=False):
     for x in mo:
         k = x.get("kind")
         if k not in RISE | FALL: continue
+        # A moment this file FOUND is not a moment this file needs to correct.
+        # The re-timer exists because ear.py derives moments from section
+        # boundaries and section boundaries are bar lines; a stop measured
+        # directly from the low band was never snapped to anything, so there is
+        # no snap to undo. Running the broadband step detector over it moved the
+        # 256.24 stop to 255.28 -- a coarser method overwriting a finer one,
+        # which is rule 8 with the two writers one function apart.
+        if x.get("found_by"): continue
         t = x.get("was", prior.get(round(x["at"], 3), x["at"]))
         i0 = min(range(len(beats)), key=lambda i: abs(beats[i] - t))
         lo, hi = max(0, i0 - SEARCH_BEATS), min(len(beats), i0 + SEARCH_BEATS + 1)
@@ -267,7 +431,35 @@ def analyse(slug, write=False):
     # Moving a chapter can put it out of order, and validate.py is right to
     # refuse that: a reader that binary-searches chapters would silently return
     # the wrong section. Re-sort everything that moved.
-    if chapters_moved or moved or spans_moved:
+    # Finding, as distinct from re-timing. Everything above moves a moment that
+    # ear.py already wrote; this adds the ones it could not write, because they
+    # do not sit on a section boundary. Recorded separately so the two are never
+    # confused: `moved` is a correction, `found` is new evidence.
+    found, declined_stops = find_stops(wav, beats, mo, per)
+    for r in found:
+        # `holds` is required and validate.py is right to require it: a reader
+        # that blacks out for a stop needs to know when to come back. The two
+        # stops already in this map say 1.905 -- one bar, because that is what a
+        # section-boundary pass can offer. This one is measured, so it says what
+        # was measured.
+        m["moments"].append({"at": r["at"], "kind": "stop",
+                             "holds": round(r["to"] - r["at"], 3),
+                             "size": r["depth"], "found_by": "low-band dropout"})
+    if found or declined_stops:
+        obs = m.setdefault("observations", {}).setdefault("moment_timing", {})
+        obs["stops_found"] = {
+            "how": ("low band 35-130 Hz, the band grid.how already names, under " + str(STOP_RATIO) + " of its own "
+                    "neighbourhood median for at least " + str(STOP_MIN_S) + " s, "
+                    "start snapped to the nearest beat"),
+            "why": ("ear.py derives moments from section boundaries, so a stop "
+                    "inside a section cannot become a moment however plainly the "
+                    "record performs it. The broadband envelope cannot see these "
+                    "either -- the kick leaves and the pads stay, so the level "
+                    "barely moves."),
+            "added": found, "declined": declined_stops}
+        m["moments"] = sorted(m["moments"], key=lambda x: (x["at"], x.get("kind", "")))
+
+    if chapters_moved or moved or spans_moved or found:
         # A chapter can land on one that is already there, the same way two
         # moments can, and validate.py refuses chapters that are not strictly
         # increasing -- rightly, since a reader binary-searching them would
@@ -285,10 +477,11 @@ def analyse(slug, write=False):
         if isinstance(m.get("sections"), dict) and m["sections"].get("entries"):
             m["sections"]["entries"] = sorted(m["sections"]["entries"], key=lambda e: e.get("at", 0))
 
-    if write and (moved or notes or dupes or chapters_moved or spans_moved):
+    if write and (moved or notes or dupes or chapters_moved or spans_moved or found):
         json.dump(m, open(p, "w"), indent=1, ensure_ascii=False); open(p, "a").write("\n")
     return {"moved": moved, "left_alone": notes, "dupes": dupes,
-            "chapters": chapters_moved, "path": p}
+            "chapters": chapters_moved, "found": found,
+            "declined": declined_stops, "path": p}
 
 
 if __name__ == "__main__":
