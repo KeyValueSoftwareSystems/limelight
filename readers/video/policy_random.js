@@ -64,7 +64,7 @@ function run(ctx) {
       used.set(mk, (used.get(mk) || 0) + 1);
       used.set(s.clip_id, (used.get(s.clip_id) || 0) + 1);
     })();
-    prev = s.clip_id;
+    prev = s.clip_id + "#" + s.shot;
     prevKin = s.source_category;
     timeline.push({
       start: start, end: end, clip_id: s.clip_id, shot: s.shot,

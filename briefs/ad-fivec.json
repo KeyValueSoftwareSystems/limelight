@@ -1,0 +1,73 @@
+{
+ "id": "ad-fivec",
+ "name": "Phone ad \u2014 colour-block grammar (spec)",
+ "note": "Modelled on the iPhone 5C campaign: flat saturated colour, the product in hand, and hard fast cuts snapping between the two. Bright and graphic, the opposite of the black-and-slow product film. A SPEC piece \u2014 no Apple footage, logo or typeface.",
+ "not_official": "Concept work from Creative Commons stock. Never to be presented as an Apple advertisement.",
+ "format": {
+  "width": 1080,
+  "height": 1920,
+  "fps": 30
+ },
+ "subject": [
+  "a smartphone held in a hand",
+  "a face lit by a screen",
+  "someone taking a photograph",
+  "a glowing screen in the dark",
+  "a macro close-up of a surface",
+  "a studio product shot on black"
+ ],
+ "subject_min_shots": 12,
+ "subject_variety": 0.34,
+ "subject_variety_note": "Raised from 0.10. With it low the chooser simply never left the phone: 20 product shots and 0 colour blocks, because the phone clips also fit the brightness and saturation ranges best. The grammar is product/colour/product -- alternation is the form, not a side effect.",
+ "mood_weight": 0.0,
+ "budgets": {
+  "cuts_per_minute": 40,
+  "min_shot_s": 0.5,
+  "max_shot_s": 2.2
+ },
+ "budgets_note": "Fast. The 5C spots cut about every half-bar and never hold. max_shot_s of 2.2 is the ceiling that keeps it snapping.",
+ "restraint": {
+  "allow_no_change": true,
+  "min_rest_s": 1.5,
+  "hold_before_major_s": 1.0,
+  "preserve_headroom": true
+ },
+ "prefers": {
+  "camera_motion_px_s": [
+   0,
+   200
+  ],
+  "subject_motion_px_s": [
+   0,
+   350
+  ],
+  "brightness": [
+   0.25,
+   0.95
+  ],
+  "contrast": [
+   0.08,
+   0.55
+  ],
+  "saturation": [
+   0.25,
+   1.0
+  ]
+ },
+ "prefers_note": "Bright and saturated -- the inverse of every range in ad-iphone18pro.json, which is the point of keeping taste in a file.",
+ "coherence": {
+  "radius": 0.9,
+  "min_shots": 500,
+  "note": "Off; subject selection supersedes it."
+ },
+ "salience_floor": 0.12,
+ "effects": {
+  "effects_per_minute": 9.0
+ },
+ "callbacks": {
+  "repeat_visual_on_repeated_music": true,
+  "max_reuses_per_clip": 3
+ },
+ "subject_note": "The colour fields land under \"a macro close-up of a surface\" -- without that phrase the brief asked only for phones and the grammar lost half its alphabet: 12 product shots and 0 colour blocks.",
+ "salience_floor_note": "Low enough to reach half-bar cuts, which is what makes this grammar snap."
+}

@@ -1,6 +1,7 @@
-# never commit music
+# never commit music and video assets
 songs/**/audio.*
 *.mp3
+*.mp4
 *.wav
 *.flac
 *.m4a

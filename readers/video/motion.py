@@ -199,6 +199,12 @@ class Motion:
         "quiet":     ("still", 0.00),   # deliberately nothing
     }
 
+    # A second response, used where the FIRST one has already been spent on the
+    # same kind. Product films punctuate with black -- a few frames of nothing
+    # between two ideas -- and repeating the identical slam on every drop is how
+    # "only that effect" happened in the first place.
+    KIND_ALT = {"drop": "blink", "stop": "blink", "return": "bloom"}
+
     def _plan_effects(self):
         """Which moments get an effect, decided once, from the map alone.
 
@@ -222,6 +228,13 @@ class Motion:
                           "strength": strength})
         cands.sort(key=lambda c: -c["strength"])
         granted = [c for c in cands if c["effect"] != "still"][:allowed]
+        # Alternate within a kind, so three drops are not three identical slams.
+        seen = {}
+        for c in granted:
+            n = seen.get(c["kind"], 0)
+            seen[c["kind"]] = n + 1
+            if n % 2 == 1 and c["kind"] in self.KIND_ALT:
+                c["effect"] = self.KIND_ALT[c["kind"]]
         granted.sort(key=lambda c: c["at"])
         self.effects = granted
         self.quiets = [m["at"] for m in self.moments if m.get("kind") == "quiet"]
@@ -358,9 +371,9 @@ DEFAULTS = {
     "quiet_len": 3.0,          # how long a `quiet` moment keeps the picture still
     "effect_len": {            # how long each effect runs
         "punch": 0.55, "freeze": 0.42, "trails": 1.60,
-        "whip": 0.34, "bloom": 1.20,
+        "whip": 0.34, "bloom": 1.20, "blink": 0.22,
     },
     # Per-effect strength, so a brief can turn any of them down or off.
     "fx_punch": 1.00, "fx_freeze": 1.00, "fx_trails": 1.00,
-    "fx_whip": 1.00, "fx_bloom": 1.00, "fx_rgb": 0.55,
+    "fx_whip": 1.00, "fx_bloom": 1.00, "fx_rgb": 0.55, "fx_blink": 1.00,
 }

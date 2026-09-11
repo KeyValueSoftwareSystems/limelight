@@ -254,9 +254,15 @@ const ASSETS = (function () {
     let best = null, bestScore = -1;
     for (let i = 0; i < pool.length; i++) {
       const s = pool[i];
-      // Cutting from a clip straight back to itself reads as a jump cut, which
-      // is a real effect and not one anybody asked for here.
-      if (s.clip_id === avoid) continue;
+      // Cutting from a TAKE straight back to itself reads as a jump cut. Two
+      // different shots of the same source file are not that -- they are what
+      // every edit is made of.
+      //
+      // This compared clip_id, which is the source FILE. Handed a pool that is
+      // one file containing fifteen shots -- an existing advertisement, to be
+      // re-cut -- every candidate after the first looked like "the clip already
+      // on screen" and the policy could place exactly one shot.
+      if (avoid && (s.clip_id + "#" + s.shot) === avoid) continue;
       // TWO counters, because one was not enough.
       //
       // Reuse was counted per MOMENT, so a clip cut into six moments could

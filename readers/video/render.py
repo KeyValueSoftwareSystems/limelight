@@ -140,6 +140,18 @@ def apply_effect(frames, k, fx, w, h, params):
         kern[ln // 2, :] = 1.0 / ln
         return cv2.filter2D(frames[k], -1, kern)
 
+    if name == "blink":
+        # A few frames of black, then back. The oldest punctuation in product
+        # film: it separates two ideas without moving anything, and it costs no
+        # attention because there is nothing to look at.
+        amt = params.get("fx_blink", 1.0) * st
+        # Down fast, up slower, so it reads as a beat rather than a dropout.
+        env = (1.0 - thr / 0.35) if thr < 0.35 else max(0.0, 1.0 - (thr - 0.35) / 0.65)
+        k2 = max(0.0, min(1.0, env)) * amt
+        if k2 <= 0.02:
+            return frames[k]
+        return (frames[k].astype(np.float32) * (1.0 - 0.94 * k2)).astype(np.uint8)
+
     if name == "punch":
         # Chromatic split on the hardest instant only, decaying fast. Any
         # longer and it reads as a broken display rather than an impact.

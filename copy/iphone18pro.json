@@ -1,0 +1,16 @@
+{
+ "note": "Copy from Apple's September 2026 announcement, checked against post-event reporting rather than the pre-event rumour roundups -- an ad carrying a wrong spec is misinformation with somebody else's name on it. Lines land on downbeats. One idea at a time, which is the whole discipline of the form.",
+ "sources": ["https://www.popsci.com/gear/apple-event-announcements-fall-2026-iphone-duo-apple-watch-12-iphone-18/"],
+ "lines": [
+  {"text": "Some light", "at": "downbeat:8", "hold": 1.9, "size": 0.052, "y": 0.46},
+  {"text": "is not enough light.", "at": "downbeat:12", "hold": 2.2, "size": 0.052, "y": 0.46},
+  {"text": "Variable aperture.", "at": "downbeat:22", "hold": 2.4, "size": 0.060, "y": 0.46},
+  {"text": "48MP Dual Fusion", "at": "downbeat:30", "hold": 2.2, "size": 0.046, "y": 0.50}
+ ],
+ "end_card": {
+  "hold": 3.6,
+  "size_main": 0.060,
+  "size_sub": 0.030,
+  "lines": ["iPhone 18 Pro", "A20 Pro  ·  36-hour video", "concept film  ·  not an Apple advertisement"]
+ }
+}

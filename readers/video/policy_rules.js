@@ -31,6 +31,13 @@ const KIND_WEIGHT = {
   drop: 1.00, stop: 0.92, build: 0.72, return: 0.70,
   spotlight: 0.62, quiet: 0.55,
   chapter: 0.66, span_start: 0.58, span_end: 0.54, phrase: 0.34,
+  // Half a bar. The finest division this will offer, and it exists because a
+  // colour-block phone ad cuts twice a bar and the candidate set stopped at
+  // one: with bars as the floor, every shot in a 22-second cut came out at
+  // exactly 1.88 s. Weighted below a bar so only a brief that explicitly drops
+  // its floor can reach it -- which is what keeps this from turning back into a
+  // beat-cutter by default.
+  half_bar: 0.13,
   // A bar line is a real musical boundary and the weakest one worth naming.
   // It is here because the candidate set otherwise stopped at the phrase grid,
   // which on Levels is two bars -- 3.75 s at 128 bpm -- so no brief could ask
@@ -101,10 +108,17 @@ function candidates(map, dur, derive) {
   const phraseAt = (pg && Array.isArray(pg.at)) ? pg.at : [];
   phraseAt.forEach(function (t, i) { push(t, "phrase", "phrase_grid.at[" + i + "]"); });
   // Bar lines that are not already phrase boundaries.
-  (map.downbeats || []).forEach(function (t, i) {
+  const downs = map.downbeats || [];
+  downs.forEach(function (t, i) {
     if (phraseAt.some(function (p) { return Math.abs(p - t) < 0.05; })) return;
     push(t, "bar", "downbeats[" + i + "]");
   });
+  // And the midpoint between consecutive bars.
+  for (let i = 0; i + 1 < downs.length; i++) {
+    const mid = (downs[i] + downs[i + 1]) / 2;
+    if (phraseAt.some(function (p) { return Math.abs(p - mid) < 0.05; })) continue;
+    push(mid, "half_bar", "downbeats[" + i + "]+half");
+  }
   // One candidate per instant: a drop that is also a chapter start is one
   // opportunity, not two, and must not be counted twice against the budget.
   const seen = new Map();
@@ -305,7 +319,7 @@ function run(ctx) {
       used.set(mk, (used.get(mk) || 0) + 1);
       used.set(s.clip_id, (used.get(s.clip_id) || 0) + 1);
     })();
-    prev = s.clip_id;
+    prev = s.clip_id + "#" + s.shot;
     placedAt.push({ t: start, clip_id: s.clip_id, shot: s.shot });
     prevKin = s.source_category;
     (function () {

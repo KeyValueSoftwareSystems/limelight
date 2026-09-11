@@ -75,6 +75,13 @@ CONTENT = [
     "a neon sign at night", "city lights seen from above at night",
     "a starry night sky", "a sunset sky", "a sunrise",
     "a dark room lit by one lamp", "a bright overcast sky",
+    # product-film grammar: the things a camera ad is made of
+    "a smartphone held in a hand", "a close-up of a camera lens",
+    "hands typing on a keyboard", "a face lit by a screen",
+    "out-of-focus bokeh lights", "a macro close-up of a surface",
+    "smoke or mist in a dark room", "a reflection in glass",
+    "a glowing screen in the dark", "a studio product shot on black",
+    "someone taking a photograph",
 ]
 
 

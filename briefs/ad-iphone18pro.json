@@ -1,0 +1,30 @@
+{
+ "id": "ad-iphone18pro",
+ "name": "iPhone 18 Pro — variable aperture (spec ad)",
+ "note": "A SPEC AD. Not made by or for Apple, and it contains no Apple footage, no Apple logo and not their typeface, none of which are licensable here. The product claims are from Apple's September 2026 announcement. What this exercises is the grammar of a product film: black, tight, slow, punctuated -- and one idea at a time.",
+ "not_official": "This is a concept piece built from Creative Commons stock. It must never be presented as an Apple advertisement.",
+ "format": {"width": 1080, "height": 1920, "fps": 30},
+ "subject": ["a smartphone held in a hand", "a close-up of a camera lens",
+             "out-of-focus bokeh lights", "a glowing screen in the dark",
+             "a face lit by a screen", "a macro close-up of a surface",
+             "someone taking a photograph", "a studio product shot on black",
+             "a reflection in glass", "smoke or mist in a dark room"],
+ "subject_min_shots": 14,
+ "subject_variety": 0.20,
+ "mood_weight": 0.0,
+ "budgets": {"cuts_per_minute": 19, "min_shot_s": 1.1, "max_shot_s": 5.5},
+ "restraint": {"allow_no_change": true, "min_rest_s": 4.5, "hold_before_major_s": 3.0, "preserve_headroom": true},
+ "prefers": {
+  "camera_motion_px_s": [0, 120],
+  "subject_motion_px_s": [0, 220],
+  "brightness": [0.03, 0.45],
+  "contrast": [0.08, 0.50],
+  "saturation": [0.0, 0.55]
+ },
+ "prefers_note": "Dark and desaturated, and camera motion held low. Product film is slow and black; a brief written for a nightclub would pick the opposite of everything here.",
+ "coherence": {"radius": 0.90, "min_shots": 500, "note": "Off; subject selection supersedes it."},
+ "salience_floor": 0.40,
+ "effects": {"effects_per_minute": 5.0},
+ "effects_note": "Fewer than the reel brief. A product film punctuates; it does not decorate.",
+ "callbacks": {"repeat_visual_on_repeated_music": true, "max_reuses_per_clip": 2}
+}
