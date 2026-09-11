@@ -381,7 +381,30 @@ function run(ctx) {
     let t = wStart, k = 0;
     while (t < wEnd - minS && k < orderOf.length) {
       const sh = orderOf[k]; k++;
-      const room = Math.min(sh.duration - 0.02, capAt(t));
+      // Spend shots where the record is loud.
+      //
+      // Taking the LATEST beat every shot can reach maximises coverage and
+      // makes a flurry impossible: one slot is one shot, so twelve shots over
+      // twenty-one seconds cannot cut faster than 1.75 s anywhere, including
+      // through a drop. The song has sudden cuts in it and the edit could not
+      // answer them at any setting.
+      //
+      // `heat` already says where the record is loud. Where it is, take less of
+      // each shot -- cut sooner, spend the film faster, arrive with a flurry.
+      // Where it is quiet, take all of it. The cost is honest and is the point:
+      // a film spent on the drop runs out sooner, which is what an editor does
+      // when they decide where the material belongs.
+      const roomFull = Math.min(sh.duration - 0.02, capAt(t));
+      const h = heat(t);
+      const room = h > 1
+        // The exponent decides how hard the flurry hits, and I chose it by
+        // watching the output: 2 gave two quick cuts, 3 gave an uneven mix, 4
+        // gives four half-bars in a row through the drop. That is tuning and it
+        // is written down as tuning. It costs coverage -- 20.0 s to 18.1 s on
+        // the 5C ad -- because shots spent on the drop are not available later,
+        // which is the trade an editor makes on purpose.
+        ? Math.max(minS, roomFull * Math.max(0.28, 1 / Math.pow(h, 4)))
+        : roomFull;
       const lo = t + minS, hi = t + room;
       if (hi <= lo) { continue; }
       // The strongest musical candidate the shot can reach. Nearest-to-the-end
