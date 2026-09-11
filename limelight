@@ -25,7 +25,9 @@ const usage = () => { throw new Exit(1, USAGE); };
 
 async function push(remote, file) {
   if (!file) usage();
-  if (!file.endsWith(".score")) throw new Exit(1, `${file}: a score file ends in .score`);
+  /* extension check parked for now: any file goes up under its basename.
+     Re-enable by uncommenting the line below. */
+  // if (!file.endsWith(".score")) throw new Exit(1, `${file}: a score file ends in .score`);
   if (!fs.existsSync(file) || !fs.statSync(file).isFile()) throw new Exit(1, `${file}: no such file`);
   const bytes = fs.readFileSync(file);
   const name = path.basename(file);

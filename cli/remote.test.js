@@ -74,8 +74,8 @@ const scratch = () => fs.mkdtempSync(path.join(os.tmpdir(), "limelight-"));
     ok("push with no file prints usage and exits 1", r.code === 1 && /usage/.test(r.err), r.err);
 
     r = await run(["push", "notes.txt"], fake.url, dir);
-    ok("push refuses a file that is not .score", r.code === 1 && /\.score/.test(r.err), r.err);
-    ok("and sends nothing", !fake.files.has("notes.txt"));
+    ok("push accepts any extension while the .score check is parked", r.code === 0, r.err);
+    ok("and it lands under its basename", fake.files.has("notes.txt") && fake.files.get("notes.txt").toString() === "hello");
 
     r = await run(["push", "missing.score"], fake.url, dir);
     ok("push refuses a file that does not exist", r.code === 1 && /no such file/.test(r.err), r.err);
