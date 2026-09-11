@@ -2,19 +2,62 @@
  "id": "reel-earth",
  "name": "Cinematic landscape, vertical",
  "note": "Aerial and water. Wide ranges on purpose: this footage is bright, slow and smooth, and a brief written for a nightclub would reject all of it. Cuts on bars where the music is loud, long holds where it is not.",
- "format": {"width": 1080, "height": 1920, "fps": 30},
- "budgets": {"cuts_per_minute": 26, "min_shot_s": 0.9, "max_shot_s": 5.0},
- "restraint": {"allow_no_change": true, "min_rest_s": 3.0, "hold_before_major_s": 2.0, "preserve_headroom": true},
- "prefers": {
-  "camera_motion_px_s": [5, 260],
-  "subject_motion_px_s": [10, 400],
-  "brightness": [0.20, 0.80],
-  "contrast": [0.08, 0.45],
-  "saturation": [0.15, 0.95]
+ "format": {
+  "width": 1080,
+  "height": 1920,
+  "fps": 30
  },
- "coherence": {"radius": 0.60, "min_shots": 60,
-  "note": "Effectively off: the set is already curated to one world, so clustering could only discard material."},
- "salience_floor": 0.30,
- "callbacks": {"repeat_visual_on_repeated_music": true, "max_reuses_per_clip": 2,
-  "note": "Two, not six. With 36 clips there is no need to repeat, and repetition was a complaint."}
+ "budgets": {
+  "cuts_per_minute": 20,
+  "min_shot_s": 1.2,
+  "max_shot_s": 6.0
+ },
+ "restraint": {
+  "allow_no_change": true,
+  "min_rest_s": 3.0,
+  "hold_before_major_s": 2.0,
+  "preserve_headroom": true
+ },
+ "prefers": {
+  "camera_motion_px_s": [
+   5,
+   260
+  ],
+  "subject_motion_px_s": [
+   10,
+   400
+  ],
+  "brightness": [
+   0.2,
+   0.8
+  ],
+  "contrast": [
+   0.08,
+   0.45
+  ],
+  "saturation": [
+   0.15,
+   0.95
+  ]
+ },
+ "coherence": {
+  "radius": 0.6,
+  "min_shots": 60,
+  "note": "Effectively off: the set is already curated to one world, so clustering could only discard material."
+ },
+ "salience_floor": 0.36,
+ "callbacks": {
+  "repeat_visual_on_repeated_music": true,
+  "max_reuses_per_clip": 2,
+  "note": "Two, not six. With 36 clips there is no need to repeat, and repetition was a complaint."
+ },
+ "subject": [
+  "a mountain range",
+  "a forest",
+  "a field of grass",
+  "a sunset sky",
+  "a river"
+ ],
+ "mood_weight": 0.25,
+ "subject_note": "Every brief names its world. Without one they all draw from the same pool, and two briefs differing only in pacing produced 94% the same cuts AND 95% the same shots -- which bench/cutscore.py --brief-swap caught."
 }

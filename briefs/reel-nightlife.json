@@ -8,9 +8,9 @@
   "fps": 30
  },
  "budgets": {
-  "cuts_per_minute": 28,
-  "min_shot_s": 0.8,
-  "max_shot_s": 4.0
+  "cuts_per_minute": 34,
+  "min_shot_s": 0.7,
+  "max_shot_s": 3.0
  },
  "restraint": {
   "allow_no_change": true,
@@ -44,7 +44,7 @@
    8
   ]
  },
- "salience_floor": 0.3,
+ "salience_floor": 0.26,
  "callbacks": {
   "repeat_visual_on_repeated_music": true,
   "max_reuses_per_clip": 6,
@@ -55,5 +55,13 @@
   "min_shots": 40,
   "note": "Effectively off for a curated set. Clustering exists to find one world inside a mixed pool; when the pool IS one world it can only discard material. min_shots above the pool size makes cohere() return it whole."
  },
- "salience_floor_note": "Bars enter the candidate set at 0.20 and are blended with measured salience, so only the LOUD bars clear 0.30. The edit cuts at bar rate where the music is intense and holds where it is not -- which is the behaviour, not a threshold chosen to produce a number."
+ "salience_floor_note": "Bars enter the candidate set at 0.20 and are blended with measured salience, so only the LOUD bars clear 0.30. The edit cuts at bar rate where the music is intense and holds where it is not -- which is the behaviour, not a threshold chosen to produce a number.",
+ "subject": [
+  "a nightclub crowd",
+  "a person dancing",
+  "a musical instrument",
+  "a city street at night"
+ ],
+ "mood_weight": 0.25,
+ "subject_note": "Every brief names its world. Without one they all draw from the same pool, and two briefs differing only in pacing produced 94% the same cuts AND 95% the same shots -- which bench/cutscore.py --brief-swap caught."
 }

@@ -2,16 +2,55 @@
  "id": "reel-aggressive",
  "name": "High-energy vertical reel",
  "note": "Social vertical. Short shots, strong motion, bright and saturated. Still not a cut on every beat -- the budget is large, not infinite, and it is spent where the song is loudest.",
- "format": {"width": 1080, "height": 1920, "fps": 30},
- "budgets": {"cuts_per_minute": 34, "min_shot_s": 0.45, "max_shot_s": 3.0},
- "restraint": {"allow_no_change": true, "min_rest_s": 2.0, "hold_before_major_s": 1.5, "preserve_headroom": true},
- "prefers": {
-  "camera_motion_px_s": [40, 400],
-  "subject_motion_px_s": [60, 500],
-  "brightness": [0.35, 0.85],
-  "contrast": [0.15, 0.50],
-  "saturation": [0.30, 1.0]
+ "format": {
+  "width": 1080,
+  "height": 1920,
+  "fps": 30
  },
- "salience_floor": 0.25,
- "callbacks": {"repeat_visual_on_repeated_music": false, "max_reuses_per_clip": 4}
+ "budgets": {
+  "cuts_per_minute": 44,
+  "min_shot_s": 0.45,
+  "max_shot_s": 2.2
+ },
+ "restraint": {
+  "allow_no_change": true,
+  "min_rest_s": 2.0,
+  "hold_before_major_s": 1.5,
+  "preserve_headroom": true
+ },
+ "prefers": {
+  "camera_motion_px_s": [
+   40,
+   400
+  ],
+  "subject_motion_px_s": [
+   60,
+   500
+  ],
+  "brightness": [
+   0.35,
+   0.85
+  ],
+  "contrast": [
+   0.15,
+   0.5
+  ],
+  "saturation": [
+   0.3,
+   1.0
+  ]
+ },
+ "salience_floor": 0.18,
+ "callbacks": {
+  "repeat_visual_on_repeated_music": false,
+  "max_reuses_per_clip": 4
+ },
+ "subject": [
+  "a person dancing",
+  "a nightclub crowd",
+  "a car",
+  "a city street at night",
+  "a machine"
+ ],
+ "subject_note": "Every brief names its world. Without one they all draw from the same pool, and two briefs differing only in pacing produced 94% the same cuts AND 95% the same shots -- which bench/cutscore.py --brief-swap caught."
 }

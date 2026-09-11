@@ -2,17 +2,57 @@
  "id": "observational",
  "name": "Observational documentary",
  "note": "People, held. Prefers faces and long takes, tolerates a dull frame, and would rather stay too long than cut early. Deliberately contradicts premium-restraint on saturation and faces so that a policy ignoring the brief is visible.",
- "format": {"width": 1920, "height": 1080, "fps": 25},
- "budgets": {"cuts_per_minute": 6, "min_shot_s": 3.0, "max_shot_s": 14.0},
- "restraint": {"allow_no_change": true, "min_rest_s": 10.0, "hold_before_major_s": 0.0, "preserve_headroom": false},
- "prefers": {
-  "camera_motion_px_s": [0, 40],
-  "subject_motion_px_s": [10, 200],
-  "brightness": [0.15, 0.75],
-  "contrast": [0.05, 0.45],
-  "saturation": [0.05, 0.65],
-  "faces": [1, 6]
+ "format": {
+  "width": 1920,
+  "height": 1080,
+  "fps": 25
  },
- "salience_floor": 0.7,
- "callbacks": {"repeat_visual_on_repeated_music": false, "max_reuses_per_clip": 1}
+ "budgets": {
+  "cuts_per_minute": 6,
+  "min_shot_s": 3.0,
+  "max_shot_s": 14.0
+ },
+ "restraint": {
+  "allow_no_change": true,
+  "min_rest_s": 10.0,
+  "hold_before_major_s": 0.0,
+  "preserve_headroom": false
+ },
+ "prefers": {
+  "camera_motion_px_s": [
+   0,
+   40
+  ],
+  "subject_motion_px_s": [
+   10,
+   200
+  ],
+  "brightness": [
+   0.15,
+   0.75
+  ],
+  "contrast": [
+   0.05,
+   0.45
+  ],
+  "saturation": [
+   0.05,
+   0.65
+  ],
+  "faces": [
+   1,
+   6
+  ]
+ },
+ "salience_floor": 0.72,
+ "callbacks": {
+  "repeat_visual_on_repeated_music": false,
+  "max_reuses_per_clip": 1
+ },
+ "subject": [
+  "a face",
+  "a person dancing",
+  "a city street at night"
+ ],
+ "subject_note": "Every brief names its world. Without one they all draw from the same pool, and two briefs differing only in pacing produced 94% the same cuts AND 95% the same shots -- which bench/cutscore.py --brief-swap caught."
 }

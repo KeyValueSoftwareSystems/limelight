@@ -477,30 +477,42 @@ def brief_swap(slug, policy="rules", maps=None):
             print(f"  {b}: failed -- {r.stderr.strip()[:150]}")
             continue
         ir = json.loads(r.stdout)
-        cuts[b] = [e["start"] for e in ir["timeline"][1:]]
+        cuts[b] = ([e["start"] for e in ir["timeline"][1:]],
+                   [e["clip_id"] + "#" + str(e["shot"]) for e in ir["timeline"]])
 
     print(f"BRIEF SWAP -- {slug}, policy={policy}")
-    for b, c in cuts.items():
-        print(f"  {b:22} {len(c):4} cuts")
+    for b, (c, sh) in cuts.items():
+        print(f"  {b:22} {len(c):4} cuts, {len(set(sh)):3} distinct shots")
     print()
+    # TWO axes, because a brief can differ in WHEN it cuts, in WHAT it shows, or
+    # in both. Comparing only cut times failed a pair of briefs that share a
+    # budget and a salience floor -- so they cut at the same instants -- while
+    # selecting completely different footage through `subject`. Cut times depend
+    # on the map and the budget; footage depends on the brief's subject. A brief
+    # that changes only one of them is still being read.
     names = list(cuts)
     worst = 0.0
-    print(f"  {'pair':46} {'shared cuts':>12}")
+    print(f"  {'pair':46} {'same cuts':>10} {'same shots':>11}")
     for i in range(len(names)):
         for j in range(i + 1, len(names)):
-            a, b = cuts[names[i]], cuts[names[j]]
+            (a, sa), (b, sb) = cuts[names[i]], cuts[names[j]]
             if not a or not b:
                 continue
             shared = sum(1 for t in a if any(abs(t - u) < 0.05 for u in b))
-            frac = shared / max(1, min(len(a), len(b)))
-            worst = max(worst, frac)
-            print(f"  {names[i][:21]:22} vs {names[j][:21]:22} {frac:11.1%}")
+            fcut = shared / max(1, min(len(a), len(b)))
+            inter = len(set(sa) & set(sb))
+            fshot = inter / max(1, min(len(set(sa)), len(set(sb))))
+            both = min(fcut, fshot)
+            worst = max(worst, both)
+            print(f"  {names[i][:21]:22} vs {names[j][:21]:22} "
+                  f"{fcut:9.0%} {fshot:10.0%}")
     print()
     if worst > 0.9:
-        print(f"FAIL: two briefs share {worst:.0%} of their cuts. One is not being read.")
+        print(f"FAIL: two briefs agree on {worst:.0%} of BOTH their cuts and their")
+        print("shots. One of them is not being read at all.")
         return 1
-    print(f"Most similar pair shares {worst:.0%} of its cuts. The briefs are")
-    print("reaching the policy.")
+    print(f"The most similar pair still differs: the closest agreement on both")
+    print(f"axes at once is {worst:.0%}. The briefs are reaching the policy.")
     return 0
 
 

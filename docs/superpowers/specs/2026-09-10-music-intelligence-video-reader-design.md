@@ -314,7 +314,91 @@ it. Until somebody does, the correct sentence is "no verdict has been recorded".
 
 ---
 
-## 8. Open problems
+## 8. Second round: from a shot sequencer to a compositor
+
+Everything above was true and was not enough. Three edits built from §4 were
+shown to a person who rejected all three: *"random clips pieced together without
+any emotion"*, and later *"all you did was put a few clips together and nothing
+else. Not an ad, not content, nothing."* Both were correct. What follows is what
+changed, and it is mostly a list of things that were wrong.
+
+### 8.1 The IR could not express content
+
+`start`, `end`, `clip_id`, `in_s`, `because`. No text, no grade, no transform,
+no effect — so `compile.py` could only put clips in an order, and between one
+cut and the next nothing happened. The briefs were worse: every field named how
+it should LOOK (`brightness`, `saturation`, `min_shot_s`) and not one said what
+it should MEAN. An ad brief with no message is not an ad brief.
+
+`readers/video/render.py` composes instead of concatenating, and
+`readers/video/motion.py` is the rule this repo already lived by, applied to
+picture:
+
+```
+zoom = 1 + breath·pump(t)·energy(t) + punch·accent(t) + drop_punch·drop(t)
+```
+
+The lighting reader has always said *brightness = f(position in the beat)*. This
+is *scale = f(position in the beat)*, and it is driven by measurements: the
+record's own 24-bin sidechain envelope, and a 90 ms impulse on each of the 472
+accents that clear a threshold, thinned from 3,520. At a drop the frame goes
+0.92 → 1.16 and brightness 1.00 → 1.33 within two frames.
+
+**The bet, so it can be judged:** this will not out-taste an editor. It can work
+at a density and precision nobody would pay a person for.
+
+### 8.2 Coherence is semantic, and three fixes were needed
+
+1. **Category labels do not describe appearance.** "street" held a neon alley
+   and a desert highway at sunset; "city" held green hills.
+2. **A 36-number look vector does not describe meaning.** Clustering on it
+   picked "dark things": a tape deck, three star fields and a train.
+3. **So a person curated three sets by eye**, and every catalogue says
+   `how: curated` because that is not a result.
+
+`assets/semantic.py` ends it. CLIP embeds one frame per shot and scores it
+against two vocabularies: the map's own mood terms, and a content list. A brief
+now carries `subject`, in words. From the same uncurated 90-clip pool, three
+contradictory briefs select three worlds — water 115 shots, club 68, forest 93.
+
+**The bridge, precisely** (the loose version was written twice before being
+checked): `observations.mood` is MuQ-MuLan, a joint music/text model; CLIP is a
+joint image/text model. They do **not** share an embedding space and their
+vectors are not comparable. They share the ten **words**. The path is
+music → mood word → image, joined in English. Weaker claim, true one.
+
+Continuity and variety turned out to be different axes: continuity is about the
+**world** (water, night, city), variety about what is **in** it. One term was
+doing both, and matching section mood then put nine sandy beaches in thirteen
+shots — coherent and monotonous.
+
+### 8.3 Four measurement errors, all mine, all found by measuring
+
+| what | the error | how it was caught |
+|---|---|---|
+| onset time | flux labelled with the earlier window's start — every onset ~90 ms early | clicks rendered at authored times; 48/48 matched after correction |
+| onset band | full-spectrum flux is displaced by sidechain; peaks land *between* beats | the map's own `pump` says the release is at 0.39 of a beat = 182 ms |
+| onset statistic | **flux** said downbeats sat at the 26.6th percentile of kick energy — reads as a broken grid | measured as **level**, downbeats in the drop sit at the **97.6th** |
+| the pool | fixtures in the production index; CLIP calls a disc on noise "an ocean wave" | the control edit was drawn from `assets/generated` |
+
+The third is the one to remember. Three hypotheses died before it: that the
+metric punished cuts inside a quiet build (refuted by splitting by section),
+that the lag was miscalibrated for a band-passed signal (refuted by a synthetic
+kick), and that the map's downbeats were wrong (refuted above). **Flux finds an
+onset; level says whether the kick is there.**
+
+### 8.4 What the gate can and cannot say
+
+It cannot rank the A/B. On the corrected statistic the two edits are identical
+after the drop (91.8 vs 91.9) and differ only inside the build, where the
+bar-aligned edit cuts at 16.1% against a 36.2% baseline — because a riser
+**resets on the bar**, so a bar-aligned cut lands at its quietest instant by
+construction. That is correct editing being marked down.
+
+Two of this gate's measures turned out to be asking a different question than
+the one intended. Treat it as a detector of gross error, not as a judge.
+
+## 9. Open problems
 
 1. **A witness for salience** independent of loudness and meaningful across
    genres. Untried: vocal phrase entries from Whisper; a human marking where
@@ -330,3 +414,12 @@ it. Until somebody does, the correct sentence is "no verdict has been recorded".
 5. **Whether the LLM policy helps at all.** It produces visibly different and
    more interesting intent — long holds through both drops — and that is an
    observation about the text it wrote, not evidence about the edit.
+6. **There is still no message.** Every output so far is a montage: it now picks
+   its own footage, follows the song's shape, and moves every frame — and it is
+   *about* nothing. `briefs/*.json` describe texture and pacing; none of them
+   carry a subject, a claim, or a call to action, and the IR cannot render text,
+   a grade or an end card. This is the largest remaining gap between "a
+   well-cut montage" and "an ad", and it is the one input the map cannot supply.
+7. **A human verdict on the current work.** `truth/video-verdicts.json` holds
+   one entry: all three of the first generation rejected. Nothing since has been
+   formally judged, so no claim in §8 is backed by a recorded verdict.
