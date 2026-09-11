@@ -254,6 +254,7 @@ function run(ctx) {
   // reads as one place. This is the map earning its keep for video -- chapters
   // were already there and the first version of this ignored them.
   const chapterAt = (map.chapters || []).map(function (c) { return c.at; });
+  const semIdx = ASSETS.semanticIndex(ctx.sem);
   function isBoundary(t) {
     return chapterAt.some(function (c) { return Math.abs(c - t) < 0.75; });
   }
@@ -296,7 +297,8 @@ function run(ctx) {
     }
     if (!s) s = ASSETS.choose(pool, want, used, prev, brief, seed,
                               prevKin, isBoundary(start),
-                              cand ? cand.strength : 0);
+                              cand ? cand.strength : 0,
+                              ASSETS.moodAt(map, start), semIdx);
     if (!s) continue;
     (function () {
       const mk = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);

@@ -120,6 +120,54 @@ const ASSETS = (function () {
     return ranked.slice(0, need).map(function (x) { return x[1]; });
   }
 
+  // How much a shot FEELS like the music does at this moment.
+  //
+  // The map's observations.mood gives a value per term per section, from
+  // MuQ-MuLan. assets/semantic.py gives a distribution over the SAME terms per
+  // shot, from CLIP. Neither model has seen the other and they do not share a
+  // space; what they share is the ten words. So a match here means MuLan calls
+  // this passage cold and CLIP calls this picture cold -- an agreement between
+  // two strangers about a word, which is a real signal and a weak one, and is
+  // weighted accordingly by the brief.
+  //
+  // Cosine, after centring both vectors. Without centring every shot scores
+  // high against every section, because both distributions are dominated by
+  // whichever terms are generally large.
+  function moodFit(shot, sectionMood, semIdx) {
+    if (!sectionMood || !semIdx) return null;
+    const row = semIdx.get(shot.clip_id + "#" + shot.shot);
+    if (!row || !row.mood) return null;
+    const terms = Object.keys(sectionMood);
+    if (terms.length < 3) return null;
+    const a = [], b = [];
+    for (const t of terms) {
+      if (row.mood[t] === undefined) continue;
+      a.push(sectionMood[t]); b.push(row.mood[t]);
+    }
+    if (a.length < 3) return null;
+    const ma = a.reduce(function (x, y) { return x + y; }, 0) / a.length;
+    const mb = b.reduce(function (x, y) { return x + y; }, 0) / b.length;
+    let dot = 0, na = 0, nb = 0;
+    for (let i = 0; i < a.length; i++) {
+      const x = a[i] - ma, y = b[i] - mb;
+      dot += x * y; na += x * x; nb += y * y;
+    }
+    if (na < 1e-9 || nb < 1e-9) return null;
+    return dot / Math.sqrt(na * nb);              // -1 to 1
+  }
+
+  // The map's mood at an instant: the section it falls in.
+  function moodAt(map, t) {
+    const mo = (map.observations || {}).mood;
+    if (!mo || !Array.isArray(mo.at) || !Array.isArray(mo.value) || !mo.terms) return null;
+    let i = -1;
+    for (let k = 0; k < mo.at.length; k++) if (mo.at[k] <= t + 1e-9) i = k;
+    if (i < 0 || !mo.value[i]) return null;
+    const out = {};
+    mo.terms.forEach(function (w, k) { out[w] = mo.value[i][k]; });
+    return out;
+  }
+
   // Every shot of every clip, flattened, with its fit already computed.
   //
   // A long shot is cut into several MOMENTS. A 20-second take holds five
@@ -195,7 +243,8 @@ const ASSETS = (function () {
   // suits the brief's ranges. At impact 1 the choice leans hard on movement and
   // on faces; at impact 0 it does not lean at all, so ordinary bars still get
   // continuity rather than spectacle.
-  function choose(pool, want, used, avoid, brief, seed, kin, allowKin, impact) {
+  function choose(pool, want, used, avoid, brief, seed, kin, allowKin, impact,
+                  sectionMood, semIdx) {
     const imp = Math.max(0, Math.min(1, impact || 0));
     // Normalised against the pool, so "a lot of movement" means a lot for this
     // footage rather than a number carried over from other footage.
@@ -246,8 +295,14 @@ const ASSETS = (function () {
       const sub = maxSub > 0 ? Math.min(1, (s.subject_motion_px_s || 0) / maxSub) : 0;
       const face = s.faces ? 1 : 0;
       const alive = 0.55 * sub + 0.25 * face + 0.20 * Math.min(1, (s.saturation || 0) / 0.7);
-      const score = (1 - 0.45 * imp) * (s.fit * 0.42 + cont * 0.32 + room * 0.14 + fresh * 0.12)
-                    + 0.45 * imp * alive + jitter;
+      // Does this picture feel like this passage sounds? null when either side
+      // has no opinion, and null is neutral rather than zero.
+      const mf = moodFit(s, sectionMood, semIdx);
+      const mw = (brief.mood_weight === undefined) ? 0.0 : brief.mood_weight;
+      const moodTerm = (mf === null) ? 0 : mw * (mf + 1) / 2;
+      const base = s.fit * 0.42 + cont * 0.32 + room * 0.14 + fresh * 0.12;
+      const score = (1 - mw) * ((1 - 0.45 * imp) * base + 0.45 * imp * alive)
+                    + moodTerm + jitter;
       if (score > bestScore) { bestScore = score; best = s; }
     }
     return best;
@@ -364,7 +419,7 @@ const ASSETS = (function () {
   return { fit: fit, shots: shots, choose: choose, inPoint: inPoint,
            hash: hash, longest: longest, capSlots: capSlots, cohere: cohere,
            subjectFit: subjectFit, semanticIndex: semanticIndex,
-           selectBySubject: selectBySubject,
+           selectBySubject: selectBySubject, moodFit: moodFit, moodAt: moodAt,
            PREFERABLE: PREFERABLE };
 })();
 if (typeof module !== "undefined" && module.exports) module.exports = ASSETS;
