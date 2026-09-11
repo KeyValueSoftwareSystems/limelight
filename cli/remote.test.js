@@ -1,31 +1,63 @@
-/* Both commands against a fake dufs, run the way a person runs them: as a
-   child process, with LIMELIGHT_REMOTE pointed at the fake. So the messages
-   and exit codes are what is tested, not only the module. The shared server on
-   the LAN is never touched from here. */
+/* Both commands against the real server, run the way a person runs them: as a
+   child process, with LIMELIGHT_REMOTE pointed at a serve.py started here on a
+   free port with a temporary HUB_ROOT. So the messages, the exit codes and the
+   server itself are what is tested, not a stand-in. Nothing here touches the
+   hub anybody is actually using. */
 "use strict";
-const fs = require("fs"), os = require("os"), path = require("path");
-const { execFile } = require("child_process");
-const { fakeDufs } = require("./fake-dufs.js");
+const fs = require("fs"), os = require("os"), path = require("path"), net = require("net"), http = require("http");
+const { execFile, spawn } = require("child_process");
 const { openRemote, NotFound, Unreachable } = require("./remote.js");
 
-const CLI = path.join(__dirname, "..", "limelight");
-const SCORE = fs.readFileSync(path.join(__dirname, "..", "protocol", "score.levels.json"));
+const REPO = path.join(__dirname, "..");
+const CLI = path.join(REPO, "limelight");
+const SCORE = fs.readFileSync(path.join(REPO, "protocol", "score.levels.json"));
 
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);
 
 /* run the CLI in a scratch directory against a given remote URL. Async, and it
-   has to be: the fake server lives in this process, so a blocking spawnSync
-   would starve it of the event loop and the child would wait forever. */
+   has to be: a blocking spawnSync would starve this process's event loop, and
+   anything waiting on it (the readiness poll, the server's own output) with it. */
 function run(args, remote, cwd) {
   return new Promise(resolve => execFile(process.execPath, [CLI, ...args],
     { cwd, env: { ...process.env, LIMELIGHT_REMOTE: remote }, encoding: "utf8" },
     (e, out, err) => resolve({ code: e ? e.code : 0, out, err })));
 }
 const scratch = () => fs.mkdtempSync(path.join(os.tmpdir(), "limelight-"));
+/* fetch() collapses %2e%2e to .. before sending, so a traversal probe has to go
+   out raw, exactly as typed, for the server to be the thing under test */
+const raw = (origin, method, p, body) => new Promise((resolve, reject) => {
+  const u = new URL(origin);
+  const req = http.request({ host: u.hostname, port: u.port, method, path: p }, res => { res.resume(); res.on("end", () => resolve(res.statusCode)); });
+  req.on("error", reject); req.end(body);
+});
+const freePort = () => new Promise(r => { const s = net.createServer(); s.listen(0, "127.0.0.1", () => { const p = s.address().port; s.close(() => r(p)); }); });
+
+/* start serve.py on a free port with a temp hub root; `files` reads and writes
+   that root's score/ folder directly, which is what the assertions look at */
+async function startHub() {
+  const port = await freePort(), root = scratch();
+  const proc = spawn("python3", [path.join(REPO, "serve.py")],
+    { env: { ...process.env, PORT: String(port), HOST: "127.0.0.1", HUB_ROOT: root }, stdio: ["ignore", "pipe", "pipe"] });
+  let stderr = ""; proc.stderr.on("data", d => stderr += d);
+  const origin = `http://127.0.0.1:${port}`;
+  for (let i = 0; i < 100; i++) {                     /* up to ~5 s to come up */
+    try { await fetch(origin + "/hub/?json"); break; } catch (e) { await new Promise(r => setTimeout(r, 50)); }
+    if (i === 99) throw new Error("serve.py never answered\n" + stderr);
+  }
+  const score = path.join(root, "score");
+  const files = {
+    clear: () => fs.rmSync(score, { recursive: true, force: true }),
+    has: n => fs.existsSync(path.join(score, n)),
+    get: n => fs.readFileSync(path.join(score, n)),
+    set: (n, b) => { fs.mkdirSync(score, { recursive: true }); fs.writeFileSync(path.join(score, n), b); },
+  };
+  return { origin, url: origin + "/hub/score", root, score, files,
+           close: () => new Promise(r => { proc.on("exit", r); proc.kill(); }) };
+}
 
 (async () => {
-  const fake = await fakeDufs();
+  const fake = await startHub();
 
   /* ---- the backend on its own ------------------------------------------- */
   {
@@ -36,8 +68,8 @@ const scratch = () => fs.mkdtempSync(path.join(os.tmpdir(), "limelight-"));
     ok("getting a missing file throws NotFound", threw instanceof NotFound);
 
     await r.put("levels.score", SCORE);
-    ok("put creates the folder first", fake.log.some(l => l.startsWith("MKCOL /score")), fake.log.join(" | "));
-    ok("put uploads with PUT to /score/<name>", fake.log.includes("PUT /score/levels.score"));
+    ok("put creates the folder first", fs.statSync(fake.score).isDirectory());
+    ok("put lands the file under score/<name>", fake.files.has("levels.score"));
     ok("the bytes arrived intact", fake.files.get("levels.score").equals(SCORE));
     ok("size reports what the server holds", (await r.size("levels.score")) === SCORE.length);
     ok("list now shows it", JSON.stringify(await r.list()) === JSON.stringify(["levels.score"]));
@@ -48,8 +80,8 @@ const scratch = () => fs.mkdtempSync(path.join(os.tmpdir(), "limelight-"));
 
     const name = "The Nights.score";
     await r.put(name, Buffer.from("n"));
-    ok("names are URL-encoded per segment like the web UI", fake.log.includes("PUT /score/The%20Nights.score"));
-    ok("and decoded on the server", fake.files.has(name));
+    ok("a name with a space round-trips through URL encoding", fake.files.has(name));
+    ok("and comes back under the same name", JSON.stringify(await r.list()) === JSON.stringify(["levels.score", name]), JSON.stringify(await r.list()));
 
     const dead = openRemote("http://127.0.0.1:9/score");
     let un = null; try { await dead.list(); } catch (e) { un = e; }
@@ -125,6 +157,30 @@ const scratch = () => fs.mkdtempSync(path.join(os.tmpdir(), "limelight-"));
 
     r = await run(["pull", "levels.score"], "http://127.0.0.1:9/score", dir);
     ok("pull from an unreachable remote exits 2", r.code === 2 && /cannot reach/.test(r.err), r.err);
+  }
+
+  /* ---- the hub itself: page and API ---------------------------------------- */
+  {
+    let r = await fetch(fake.origin + "/hub/");
+    ok("GET /hub/ is the page", r.status === 200 && /text\/html/.test(r.headers.get("content-type")) && /HUB/.test(await r.text()));
+    r = await fetch(fake.origin + "/hub", { redirect: "manual" });
+    ok("GET /hub redirects to /hub/", r.status === 301 && r.headers.get("location") === "/hub/", String(r.status));
+    r = await fetch(fake.origin + "/hub/?json");
+    const data = await r.json();
+    ok("GET /hub/?json lists the root with score/ as a Dir",
+       r.status === 200 && data.paths.some(p => p.name === "score" && p.path_type === "Dir"), JSON.stringify(data.paths));
+    r = await fetch(fake.origin + "/hub/score", { method: "MKCOL" });
+    ok("MKCOL on an existing folder is 405 like dufs", r.status === 405, String(r.status));
+    let code = await raw(fake.origin, "GET", "/hub/%2e%2e/serve.py");
+    ok("a path that leaves the hub is refused", code === 403, String(code));
+    code = await raw(fake.origin, "PUT", "/hub/%2e%2e/escaped.txt", "x");
+    ok("and so is writing there", code === 403, String(code));
+    ok("nothing was written outside the root", !fs.existsSync(path.join(fake.root, "..", "escaped.txt")));
+    r = await fetch(fake.origin + "/hub/score/", { method: "PUT", body: "x" });
+    ok("PUT onto a folder is refused", r.status === 405, String(r.status));
+    r = await fetch(fake.origin + "/protocol/session.js", { method: "PUT", body: "x" });
+    ok("PUT outside /hub is refused by serve.py", r.status === 405, String(r.status));
+    ok("and the file is untouched", !/^x$/.test(fs.readFileSync(path.join(REPO, "protocol", "session.js"), "utf8")));
   }
 
   await fake.close();

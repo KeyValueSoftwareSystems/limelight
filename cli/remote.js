@@ -1,8 +1,8 @@
 /* The seam between the commands and wherever scores live.
    ---------------------------------------------------------------------------
    openRemote(url) looks at the scheme and hands back { list, put, get, size }.
-   Today the only backend is dufs -- the file server on the LAN -- and it makes
-   exactly the requests the dufs web UI makes, observed with Playwright:
+   Today the only backend speaks the dufs dialect, which is what our own hub
+   (hub/hub.py, at /hub on serve.py) speaks, and what a real dufs speaks too:
 
      GET  <base>/?json          list the folder     -> { paths: [{ name, path_type, size }] }
      MKCOL <base>               create the folder   -> 201, or 405 when it already exists
@@ -14,7 +14,7 @@
    switch. The commands never learn which one they are talking to. */
 "use strict";
 
-const DEFAULT_REMOTE = "http://192.168.1.42:5000/score";
+const DEFAULT_REMOTE = "http://127.0.0.1:8770/hub/score";   /* our own hub; serve.py prints the LAN form */
 
 class RemoteError extends Error {}
 class NotFound extends RemoteError {}
