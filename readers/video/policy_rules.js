@@ -248,7 +248,7 @@ function run(ctx) {
   const pool = pool0;
   const used = new Map();
   const timeline = [];
-  let prev = null, prevKin = null;
+  let prev = null, prevKin = null, prevWord = null;
   // Where the picture is ALLOWED to change world: a named section beginning.
   // Everywhere else the chooser holds the world it is in, so a run of shots
   // reads as one place. This is the map earning its keep for video -- chapters
@@ -298,7 +298,7 @@ function run(ctx) {
     if (!s) s = ASSETS.choose(pool, want, used, prev, brief, seed,
                               prevKin, isBoundary(start),
                               cand ? cand.strength : 0,
-                              ASSETS.moodAt(map, start), semIdx);
+                              ASSETS.moodAt(map, start), semIdx, prevWord);
     if (!s) continue;
     (function () {
       const mk = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);
@@ -308,6 +308,10 @@ function run(ctx) {
     prev = s.clip_id;
     placedAt.push({ t: start, clip_id: s.clip_id, shot: s.shot });
     prevKin = s.source_category;
+    (function () {
+      const r0 = semIdx && semIdx.get(s.clip_id + "#" + s.shot);
+      prevWord = (r0 && r0.content_top) ? r0.content_top[0] : null;
+    })();
     timeline.push({
       start: +start.toFixed(3), end: +end.toFixed(3),
       clip_id: s.clip_id, shot: s.shot,

@@ -244,7 +244,7 @@ const ASSETS = (function () {
   // on faces; at impact 0 it does not lean at all, so ordinary bars still get
   // continuity rather than spectacle.
   function choose(pool, want, used, avoid, brief, seed, kin, allowKin, impact,
-                  sectionMood, semIdx) {
+                  sectionMood, semIdx, prevWord) {
     const imp = Math.max(0, Math.min(1, impact || 0));
     // Normalised against the pool, so "a lot of movement" means a lot for this
     // footage rather than a number carried over from other footage.
@@ -297,12 +297,24 @@ const ASSETS = (function () {
       const alive = 0.55 * sub + 0.25 * face + 0.20 * Math.min(1, (s.saturation || 0) / 0.7);
       // Does this picture feel like this passage sounds? null when either side
       // has no opinion, and null is neutral rather than zero.
+      // Same world, different subject. Continuity is about the WORLD -- water,
+      // night, city -- and variety is about what is IN it. Without this,
+      // matching the section's mood picked whichever content family best fits
+      // "tender and euphoric" and put nine sandy beaches in thirteen shots:
+      // coherent, and monotonous.
+      let sameWord = 0;
+      if (prevWord && semIdx) {
+        const r0 = semIdx.get(s.clip_id + "#" + s.shot);
+        if (r0 && r0.content_top && r0.content_top[0] === prevWord) sameWord = 1;
+      }
       const mf = moodFit(s, sectionMood, semIdx);
       const mw = (brief.mood_weight === undefined) ? 0.0 : brief.mood_weight;
       const moodTerm = (mf === null) ? 0 : mw * (mf + 1) / 2;
       const base = s.fit * 0.42 + cont * 0.32 + room * 0.14 + fresh * 0.12;
+      const varietyPenalty = sameWord * (brief.subject_variety === undefined
+        ? 0.14 : brief.subject_variety);
       const score = (1 - mw) * ((1 - 0.45 * imp) * base + 0.45 * imp * alive)
-                    + moodTerm + jitter;
+                    + moodTerm - varietyPenalty + jitter;
       if (score > bestScore) { bestScore = score; best = s; }
     }
     return best;
