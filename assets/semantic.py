@@ -55,11 +55,27 @@ def mood_vocab(slug="dont-look-down"):
     terms = ((m.get("observations") or {}).get("mood") or {}).get("terms")
     return list(terms) if terms else []
 
-CONTENT = ["a waterfall", "an ocean wave", "a forest", "a mountain range",
-           "a sandy beach", "a city street at night", "a nightclub crowd",
-           "a person dancing", "a face", "a road", "a sunset sky",
-           "a river", "a field of grass", "an aerial view of a coastline",
-           "a car", "a musical instrument", "a starry sky", "a machine"]
+# The vocabulary has to be able to say WHEN as well as WHAT.
+#
+# The first version held "a road" and nothing else, so a promo for a track
+# called Riding At Night opened on a daytime road under blue sky: the word
+# matched noon and midnight equally well and the selector had no way to prefer
+# one. Time of day and light are half of what a shot looks like, and a brief
+# that cannot ask for them cannot get them.
+CONTENT = [
+    # what
+    "a waterfall", "an ocean wave", "a forest", "a mountain range",
+    "a sandy beach", "a person dancing", "a face", "a river",
+    "a field of grass", "an aerial view of a coastline", "a musical instrument",
+    "a machine", "a nightclub crowd",
+    # what, and when
+    "a road at night with headlights", "a road in daylight",
+    "a city street at night", "a city in daylight",
+    "car tail lights on a dark highway", "driving at night through a tunnel",
+    "a neon sign at night", "city lights seen from above at night",
+    "a starry night sky", "a sunset sky", "a sunrise",
+    "a dark room lit by one lamp", "a bright overcast sky",
+]
 
 
 def paths_for(setname):

@@ -8,13 +8,14 @@
   "fps": 30
  },
  "subject": [
-  "a starry sky",
-  "a road",
+  "car tail lights on a dark highway",
+  "a road at night with headlights",
+  "driving at night through a tunnel",
+  "city lights seen from above at night",
   "a city street at night",
-  "a sunset sky",
-  "a car"
+  "a starry night sky"
  ],
- "subject_min_shots": 12,
+ "subject_min_shots": 10,
  "subject_variety": 0.16,
  "mood_weight": 0.0,
  "budgets": {
@@ -60,5 +61,6 @@
   "repeat_visual_on_repeated_music": true,
   "max_reuses_per_clip": 2
  },
- "mood_weight_note": "Zero because this track has no observations.mood: MuQ is not installed in work/audio, so listen/deep.py failed and no mood or novelty was measured. A non-zero weight here would name an influence that is not acting. The mood bridge is demonstrated on dont-look-down, which has the field."
+ "mood_weight_note": "Zero because this track has no observations.mood: MuQ is not installed in work/audio, so listen/deep.py failed and no mood or novelty was measured. A non-zero weight here would name an influence that is not acting. The mood bridge is demonstrated on dont-look-down, which has the field.",
+ "subject_note": "Night, named as night. The previous version asked for \"a road\" and got a road at noon, because the vocabulary could not express time of day. It can now, and the pool was refetched from night/drive/highway/traffic so the words have something to match."
 }
