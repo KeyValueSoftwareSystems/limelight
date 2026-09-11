@@ -26,3 +26,16 @@ models/
 
 __pycache__/
 *.pyc
+
+# Source material and the environments that read it. 22 GB between them on this
+# machine: 3.4 GB of footage, 391 MB of renders, 18 GB of Python environments.
+#
+# The footage is the video reader's material, the way a layout is the lighting
+# reader's. It is also, mostly, somebody else's -- the licences permit use and
+# forbid redistributing the assets as stock, which is exactly what committing
+# them would be. A catalogue naming each clip, its source and its sha256 is
+# enough to fetch the identical set again, the same way the generator ships
+# instead of the recording.
+assets/
+renders/
+work/
