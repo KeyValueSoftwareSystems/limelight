@@ -1,24 +1,17 @@
 {
- "id": "recut-5c",
- "name": "Re-cut of the 5C spot to new music",
- "note": "The test: take the 15 shots our detector found in Apple's own advertisement and re-cut them to a different track, then compare against the edit Apple's own editors made from the same material. No subject selection -- the pool is 15 shots and all of them are wanted. INTERNAL ONLY: the footage is Apple's and the music is a commercial master.",
- "not_official": "Evaluation only. Nothing built from this may be published.",
- "format": {"width": 1280, "height": 720, "fps": 24},
- "format_note": "The source's own geometry, so nothing is cropped away and the comparison is like for like.",
- "mood_weight": 0.0,
- "budgets": {"cuts_per_minute": 34, "min_shot_s": 0.55, "max_shot_s": 2.6},
- "restraint": {"allow_no_change": true, "min_rest_s": 1.6, "hold_before_major_s": 1.2, "preserve_headroom": true},
- "prefers": {
-  "brightness": [0.45, 0.98],
-  "contrast": [0.03, 0.45],
-  "saturation": [0.05, 0.80],
-  "camera_motion_px_s": [0, 160],
-  "subject_motion_px_s": [0, 260]
+ "name": "Re-cut of the 5C spot",
+ "note": "Apple's own advertisement, re-cut to different music. Internal evaluation only \u2014 their footage, a commercial master; nothing built from this may be published.",
+ "format": {
+  "width": 1280,
+  "height": 720,
+  "fps": 24
  },
- "prefers_note": "Bright, because the spot lives on white. The brightness floor of 0.45 also drops the black frames the detector found at either end of the source.",
- "coherence": {"radius": 0.90, "min_shots": 500, "note": "Off. Fifteen shots from one film are already one world."},
- "salience_floor": 0.14,
- "effects": {"effects_per_minute": 8.0},
- "callbacks": {"repeat_visual_on_repeated_music": true, "max_reuses_per_clip": 40},
- "callbacks_note": "There is only one clip -- reuse is counted per MOMENT, so this cap has to be high enough to let all 15 shots be used, several times each."
+ "pace": "fast",
+ "look": "bright",
+ "motion": "calm",
+ "effects": "punchy",
+ "max_reuses_per_clip": 40,
+ "format_note": "The source's own geometry, so the comparison against Apple's cut is like for like. A named format ('16:9') would upscale and resample.",
+ "preserve_order": true,
+ "preserve_order_note": "Re-TIME, do not re-order. The source is a finished film whose shot order carries the argument -- plastic becomes a shell becomes a phone, red to green to yellow to blue. Choosing shots by fit shuffled that and the result was not close to the original. The music still decides when to cut and for how long; the editor keeps the order."
 }

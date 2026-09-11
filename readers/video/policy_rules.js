@@ -288,7 +288,9 @@ function run(ctx) {
     const cand = chosen.find(function (c) { return Math.abs(snap(c.t, beats) - start) < 1e-6; });
 
     let s = null, why = null;
-    if (callback) {
+    // A callback reaches BACK to an earlier picture, which is exactly the thing
+    // preserve_order exists to forbid.
+    if (callback && !brief.preserve_order) {
       const back = repeatOf(map, start, derive);
       if (back !== null) {
         const earlier = placedAt.find(function (p) { return Math.abs(p.t - back) < 1.2; });
@@ -309,10 +311,12 @@ function run(ctx) {
         }
       }
     }
-    if (!s) s = ASSETS.choose(pool, want, used, prev, brief, seed,
-                              prevKin, isBoundary(start),
-                              cand ? cand.strength : 0,
-                              ASSETS.moodAt(map, start), semIdx, prevWord);
+    if (!s) s = brief.preserve_order
+      ? ASSETS.nextInOrder(pool, used, want, brief)
+      : ASSETS.choose(pool, want, used, prev, brief, seed,
+                      prevKin, isBoundary(start),
+                      cand ? cand.strength : 0,
+                      ASSETS.moodAt(map, start), semIdx, prevWord);
     if (!s) continue;
     (function () {
       const mk = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);

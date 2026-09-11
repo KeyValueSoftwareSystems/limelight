@@ -12,6 +12,7 @@
 const fs = require("fs"), path = require("path");
 const ROOT = path.resolve(__dirname, "..", "..");
 const DERIVE = require(path.join(ROOT, "readers", "src", "derive.js"));
+const BRIEF = require("./brief.js");
 
 const POLICIES = {
   naive: require("./policy_naive.js"),
@@ -47,8 +48,9 @@ function main() {
   const mp = mapPath(slug);
   if (!mp) { console.error("no map for " + slug); process.exit(2); }
   const map = JSON.parse(fs.readFileSync(mp, "utf8"));
-  const brief = JSON.parse(fs.readFileSync(
-    path.join(ROOT, "briefs", briefId + ".json"), "utf8"));
+  // Words in, numbers out. An explicit key always beats the preset it came from.
+  const brief = BRIEF.expand(JSON.parse(fs.readFileSync(
+    path.join(ROOT, "briefs", briefId + ".json"), "utf8")));
   // A named clip set, or the default. Coherence lives here: a set is clips
   // from one world, and the chooser can only hold a world if it was given one.
   const setname = arg("set", null);

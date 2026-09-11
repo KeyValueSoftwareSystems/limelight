@@ -55,8 +55,10 @@ function run(ctx) {
     const end = i === shots - 1 ? win.to : win.from + (i + 1) * every;
     const want = end - start;
     // impact 0 and no mood: both are musical judgements and it has none.
-    const s = ASSETS.choose(pool, want, used, prev, brief, seed + i,
-                            prevKin, false, 0, null, null, null);
+    const s = brief.preserve_order
+      ? ASSETS.nextInOrder(pool, used, want, brief)
+      : ASSETS.choose(pool, want, used, prev, brief, seed + i,
+                      prevKin, false, 0, null, null, null);
     if (!s) continue;
     (function () {
       const mk = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);

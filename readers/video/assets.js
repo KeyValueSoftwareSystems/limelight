@@ -216,6 +216,47 @@ const ASSETS = (function () {
     return out;
   }
 
+  // Pick the NEXT shot in the source's own order.
+  //
+  // A finished film is not inventory. The 5C spot walks liquid plastic into a
+  // shell into the phone, and red into green into yellow into blue; re-cutting
+  // it by fit and continuity reordered those shots 9, 3, 12, 13, 8, 1, ... and
+  // threw the whole argument away. Against the original the result was not
+  // close, and the reason was never the timing.
+  //
+  // So when a brief says `preserve_order`, the job stops being "choose a shot"
+  // and becomes "advance through the film". The music still decides WHEN to
+  // cut and for how long -- which is the part worth automating -- and the order
+  // the editor chose is left alone.
+  function nextInOrder(pool, used, want, brief) {
+    const ordered = pool.slice().sort(function (a, b) {
+      if (a.clip_id !== b.clip_id) return a.clip_id < b.clip_id ? -1 : 1;
+      if (a.shot !== b.shot) return a.shot - b.shot;
+      return (a.moment || 0) - (b.moment || 0);
+    });
+    // Order is preserved, but a shot the brief plainly does not want is still
+    // skipped. The 5C source begins and ends on black -- the detector finds
+    // those as shots 0 and 14 at brightness 0.00 -- and marching through them in
+    // order opens the film on a black frame.
+    //
+    // `fit` is the wrong test for this: a black shot violates one preference out
+    // of five, so its fit is still 0.85. Brightness is checked directly, because
+    // "outside the range the brief asked for" is the actual complaint.
+    const br = ((brief || {}).prefers || {}).brightness;
+    const keep = ordered.filter(function (x) {
+      if (x.brightness === null || x.brightness === undefined) return true;
+      if (br && (x.brightness < br[0] - 0.02 || x.brightness > br[1] + 0.02)) return false;
+      return x.fit >= 0.30;
+    });
+    const list = keep.length >= 3 ? keep : ordered;
+    if (!list.length) return null;
+    const n = used.get("__cursor__") || 0;
+    // Wrap, so a short film can carry a longer cut without running out.
+    const s = list[n % list.length];
+    used.set("__cursor__", n + 1);
+    return s;
+  }
+
   // Pick a shot for a slot of `want` seconds.
   //
   // `avoid` is the clip most recently on screen and `kin` is the world it came
@@ -438,6 +479,7 @@ const ASSETS = (function () {
            hash: hash, longest: longest, capSlots: capSlots, cohere: cohere,
            subjectFit: subjectFit, semanticIndex: semanticIndex,
            selectBySubject: selectBySubject, moodFit: moodFit, moodAt: moodAt,
+           nextInOrder: nextInOrder,
            PREFERABLE: PREFERABLE };
 })();
 if (typeof module !== "undefined" && module.exports) module.exports = ASSETS;
