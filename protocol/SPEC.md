@@ -17,6 +17,27 @@ the instant the tempo moves — every entry has to be recomputed and re-sent.
 Three numbers derive every beat in the recording and none of them change when
 somebody plays the record faster.
 
+## Beats and downbeats are written out too
+
+They are derived from the grid, and they are also listed, because a score
+travelling through a registry as a file should be readable without implementing
+the derivation first.
+
+```json
+"beats":     { "derived_from": "grid", "as": "[bar, beat]", "count": 506,
+               "list": [[1,1],[1,2],[1,3],[1,4],[2,1], …] },
+"downbeats": { "derived_from": "grid", "as": "[bar, beat]", "count": 127,
+               "list": [[1,1],[2,1],[3,1], …] }
+```
+
+`[bar, beat]` and never seconds. Listing them costs bytes; listing them in
+seconds would cost correctness, because a list of seconds is wrong the moment
+somebody moves the tempo. As musical positions the list survives a tempo change
+exactly as the grid does, which is checked by a test.
+
+**The grid stays authoritative.** If the list and the grid ever disagree, the
+list is what is wrong, and a test compares all 506 entries on every run.
+
 ## The two clocks
 
 Keeping these apart is the whole design.

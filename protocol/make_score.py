@@ -39,6 +39,7 @@ def main(src, out=None):
         return {"bar": bar, "beat": round(frac * bpb + 1, 3)}
 
     ent = lambda o: o if isinstance(o, list) else ((o or {}).get("entries") or [])
+    length = (m.get("song") or {}).get("length") or 0
 
     layers = {}
 
@@ -75,7 +76,6 @@ def main(src, out=None):
     ob = m.get("observations") or {}
     parts = ((ob.get("instruments") or {}).get("parts") or {})
     pres = []
-    length = (m.get("song") or {}).get("length") or 0
     # Rule 8, one writer per fact. `instruments.parts.vocals` and
     # `vocal_silence` both answer "is the voice there", by different methods --
     # a hysteresis on stem level against a sustained-quiet run -- and they
@@ -115,6 +115,17 @@ def main(src, out=None):
                                 "section rather than on bar one, because the "
                                 "intro is usually a pickup."}
 
+    # beats and downbeats -- derived from the grid, and also written out, because
+    # a score travelling through a registry as a file should be readable without
+    # implementing the derivation first. They are [bar, beat] pairs and never
+    # seconds: listing them costs bytes, listing them in seconds would cost
+    # correctness, because a list of seconds is wrong the moment the tempo moves.
+    # The grid stays authoritative -- if these ever disagree with it, these are
+    # the ones that are wrong.
+    n_beats = int((length - phase) / beat_s) + 1 if length else 0
+    beats = [[i // bpb + 1, i % bpb + 1] for i in range(max(0, n_beats))]
+    downbeats = [b for b in beats if b[1] == 1]
+
     # energy -- measured once a bar, so it ships as one number per bar rather
     # than as 127 objects each repeating a position it could have derived.
     # Same reasoning as the grid: a rule and a start, not a list of coordinates.
@@ -138,6 +149,10 @@ def main(src, out=None):
                  "length_s": (m.get("song") or {}).get("length")},
         "grid": {"bpm": g["bpm"], "first_beat_s": round(phase, 4),
                  "beats_per_bar": bpb},
+        "beats": {"derived_from": "grid", "as": "[bar, beat]",
+                  "count": len(beats), "list": beats},
+        "downbeats": {"derived_from": "grid", "as": "[bar, beat]",
+                      "count": len(downbeats), "list": downbeats},
         "layers": layers,
         "energy": energy,
         "moments": moments,

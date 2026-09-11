@@ -110,6 +110,51 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
      before.in_ms !== after.in_ms, `${before.in_ms} ms -> ${after.in_ms} ms`);
 }
 
+/* ---- beats and downbeats are written out, and must agree with the grid --- */
+{
+  const s = Session(score, { now: clock });
+  const B = score.beats, D = score.downbeats;
+  ok("beats are listed as [bar, beat], never as seconds",
+     Array.isArray(B.list[0]) && B.list[0].length === 2,
+     JSON.stringify(B.list[0]));
+  ok("no second appears anywhere in the beat list",
+     B.list.every(b => Number.isInteger(b[0]) && Number.isInteger(b[1])));
+
+  /* the list is a convenience; the grid is the authority. If these two ever
+     disagree the list is what is wrong, so check it every run. */
+  let drift = 0;
+  B.list.forEach((b, i) => {
+    if (b[0] !== Math.floor(i / bpb) + 1 || b[1] !== (i % bpb) + 1) drift++;
+  });
+  ok("every listed beat is where the grid puts it", drift === 0, drift + " disagree");
+
+  ok("downbeats are the beat ones", D.list.every(b => b[1] === 1));
+  ok("there is one downbeat per bar",
+     D.count === new Set(B.list.map(b => b[0])).size,
+     `${D.count} downbeats, ${new Set(B.list.map(b => b[0])).size} bars`);
+
+  /* and the whole point: the list survives a tempo change untouched */
+  const before = JSON.stringify(B.list.slice(0, 8));
+  s.rate(1.7);
+  ok("the beat list does not change when the tempo does",
+     JSON.stringify(score.beats.list.slice(0, 8)) === before);
+}
+
+/* ---- energy ------------------------------------------------------------- */
+{
+  const s = Session(score, { now: clock });
+  const E = score.energy;
+  ok("energy is one number per bar, not a list of coordinates",
+     E.per === "bar" && typeof E.values[0] === "number", E.values.length + " values");
+  ok("energy reads at a bar line exactly as stored",
+     near(s.energyAt({ bar: E.from_bar, beat: 1 }), E.values[0], 1e-9));
+  const mid = s.energyAt({ bar: E.from_bar, beat: 1 + bpb / 2 });
+  ok("and interpolates between bars on the client",
+     mid > Math.min(E.values[0], E.values[1]) - 1e-9 &&
+     mid < Math.max(E.values[0], E.values[1]) + 1e-9,
+     `${E.values[0]} .. ${mid} .. ${E.values[1]}`);
+}
+
 /* ---- sections, in layers ------------------------------------------------ */
 {
   const s = Session(score, { now: clock });
