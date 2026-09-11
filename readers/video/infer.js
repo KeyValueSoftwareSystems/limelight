@@ -30,6 +30,13 @@ function nearest(table, key, target) {
   return best;
 }
 
+function pct(xs, q) {
+  const v = xs.filter(function (x) { return typeof x === "number" && isFinite(x); })
+              .sort(function (a, b) { return a - b; });
+  if (!v.length) return null;
+  return v[Math.min(v.length - 1, Math.floor(q * (v.length - 1)))];
+}
+
 function median(xs) {
   const v = xs.filter(function (x) { return typeof x === "number" && isFinite(x); })
               .sort(function (a, b) { return a - b; });
@@ -52,6 +59,35 @@ function barsPerMinute(map) {
   return null;
 }
 
+// How finely this record divides its bar, from the drums alone.
+//
+// Bar rate by itself is a metronome reading: it says a 126 bpm dance track and
+// a 126 bpm ballad want the same cutting, which is false. What separates them
+// is how much the kit is doing.
+//
+// Drums only. Counting every accent made a lofi track read as busier than a
+// festival record, because lofi is full of hi-hats and hats are not a reason to
+// cut. The `of` labels are the map's own guess at which drum -- it says so --
+// so this is a hint taken as a hint: if a map has no drum-labelled accents at
+// all, this returns null and the caller falls back to the grid rather than
+// reading 0 as "sparse". `synth/maps/model/levels` is exactly that map, and
+// treating its silence as sparseness would be inventing a measurement.
+const DRUM = { kick: 1, snare: 1, tom: 1 };
+
+function drumsPerBar(map) {
+  const db = map.downbeats || [];
+  const ev = ((map.accents || {}).events) || [];
+  if (db.length < 8 || !ev.length) return null;
+  let n = 0, labelled = 0;
+  for (const a of ev) {
+    if (a.of === undefined || a.of === null) continue;
+    labelled += 1;
+    if (DRUM[a.of]) n += 1;
+  }
+  if (!labelled || n < 8) return null;
+  return n / (db.length - 1);
+}
+
 function momentsPerMinute(map) {
   const mo = map.moments || [];
   // The map says `length`; the IR says `length_s`. Reading only one of them is
@@ -69,15 +105,30 @@ function infer(brief, map, index, tables) {
   if (brief.pace === undefined) {
     const bpm = barsPerMinute(map);
     if (bpm) {
-      const p = nearest(tables.PACE, "cuts_per_minute", bpm);
+      // The grid says how often a bar comes round. The drums say whether this
+      // record supports cutting faster than that. Anchored at 8 hits a bar --
+      // two to a beat, the eighth-note texture most produced music sits on --
+      // so the number means something musical rather than something fitted to
+      // whatever songs happened to be on this disk. Square root because the
+      // difference between 4 and 8 hits a bar matters far more than between 16
+      // and 20.
+      const dpb = drumsPerBar(map);
+      const sub = dpb === null ? 1
+        : Math.max(0.6, Math.min(1.5, Math.sqrt(dpb / 8)));
+      const target = bpm * sub;
+      const p = nearest(tables.PACE, "cuts_per_minute", target);
       brief.pace = p.name;
       notes.pace = {
         chose: p.name,
-        because: "this song offers " + bpm.toFixed(1) + " bars a minute and a " +
-                 "cut a bar is the rate the grid hands over for nothing; " +
-                 p.name + " asks for " + p.at + " a minute, the nearest of the " +
-                 Object.keys(tables.PACE).length + " the vocabulary has",
-        from: ["grid.bpm", "grid.beats_per_bar"]
+        because: dpb === null
+          ? "this song offers " + bpm.toFixed(1) + " bars a minute and its " +
+            "accents carry no drum labels, so the grid decides alone; " +
+            p.name + " asks for " + p.at
+          : "this song offers " + bpm.toFixed(1) + " bars a minute and its kit " +
+            "plays " + dpb.toFixed(1) + " hits a bar against the eighth-note " +
+            "anchor of 8, so it supports " + target.toFixed(1) + " cuts a " +
+            "minute; " + p.name + " asks for " + p.at,
+        from: dpb === null ? ["grid.bpm"] : ["grid.bpm", "accents.events"]
       };
     }
   }
@@ -123,7 +174,14 @@ function infer(brief, map, index, tables) {
   }
 
   if (brief.motion === undefined && shots.length) {
-    const m = median(shots.map(function (s) { return s.camera_motion_px_s; }));
+    // The 75th percentile, not the median.
+    //
+    // A pool is mostly ordinary shots with a tail of moving ones, so its median
+    // sits near the bottom of its own range and EVERY pool answered `still` --
+    // a thermometer in a room that is always the same temperature. The question
+    // is not "what does a typical shot do", it is "what movement can this pile
+    // supply", and that is a property of the tail.
+    const m = pct(shots.map(function (s) { return s.camera_motion_px_s; }), 0.75);
     if (m !== null) {
       let pick = null;
       for (const name of Object.keys(tables.MOTION)) {
@@ -135,8 +193,9 @@ function infer(brief, map, index, tables) {
       brief.motion = pick.name;
       notes.motion = {
         chose: pick.name,
-        because: "the footage moves at a median of " + m.toFixed(0) +
-                 " px/s of camera motion",
+        because: "a quarter of this footage moves at " + m.toFixed(0) +
+                 " px/s of camera motion or more, which is what the pile can " +
+                 "supply when the edit asks for movement",
         from: ["assets INDEX camera_motion_px_s"]
       };
     }
