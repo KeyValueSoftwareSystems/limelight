@@ -251,7 +251,14 @@ const ASSETS = (function () {
     const list = keep.length >= 3 ? keep : ordered;
     if (!list.length) return null;
     const n = used.get("__cursor__") || 0;
-    // Wrap, so a short film can carry a longer cut without running out.
+    // Strictly the next shot. `want` is read by the caller, not here: a slot
+    // the next shot cannot fill is a cut that has to come earlier, and only the
+    // policy may decide when a cut happens. An earlier version scanned forward for one long
+    // enough to fill the slot, which stopped the compiler running past a shot
+    // end but produced the order 1, 12, 12, 13, 1, 2 -- it jumped to the only
+    // two long shots in the film and back, which is precisely the re-ordering
+    // preserve_order exists to forbid. A slot the next shot cannot fill is the
+    // POLICY's problem to solve, by cutting earlier, and it solves it there.
     const s = list[n % list.length];
     used.set("__cursor__", n + 1);
     return s;

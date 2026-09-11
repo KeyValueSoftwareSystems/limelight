@@ -55,10 +55,23 @@ function run(ctx) {
     const end = i === shots - 1 ? win.to : win.from + (i + 1) * every;
     const want = end - start;
     // impact 0 and no mood: both are musical judgements and it has none.
-    const s = brief.preserve_order
-      ? ASSETS.nextInOrder(pool, used, want, brief)
-      : ASSETS.choose(pool, want, used, prev, brief, seed + i,
-                      prevKin, false, 0, null, null, null);
+    // A shot that cannot fill the slot is skipped here too. This is NOT a
+    // musical judgement and giving it to the control is not a handicap on the
+    // intelligent edit -- it is the same footage constraint both sides face.
+    // Without it the control runs past the end of a shot and the ORIGINAL
+    // editor's cuts get spliced into it, which would hand the A/B a difference
+    // that has nothing to do with reading the music.
+    let s = null;
+    if (brief.preserve_order) {
+      for (let tries = 0; tries < pool.length; tries++) {
+        const c2 = ASSETS.nextInOrder(pool, used, want, brief);
+        if (!c2) break;
+        if (c2.duration + 0.02 >= want) { s = c2; break; }
+      }
+    } else {
+      s = ASSETS.choose(pool, want, used, prev, brief, seed + i,
+                        prevKin, false, 0, null, null, null);
+    }
     if (!s) continue;
     (function () {
       const mk = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);

@@ -291,6 +291,7 @@ function run(ctx) {
   const pool = pool0;
   const used = new Map();
   const timeline = [];
+  const footageCut = [], skippedShort = [];
   let prev = null, prevKin = null, prevWord = null;
   // Where the picture is ALLOWED to change world: a named section beginning.
   // Everywhere else the chooser holds the world it is in, so a run of shots
@@ -310,8 +311,9 @@ function run(ctx) {
   function forcedHere(t) { return forced.has(Number(t).toFixed(3)); }
 
   for (let i = 0; i < edges.length - 1; i++) {
-    const start = edges[i], end = edges[i + 1];
-    const want = end - start;
+    const start = edges[i];
+    let end = edges[i + 1];
+    let want = end - start;
     if (want < 0.15) continue;
     if (!exported(start, end)) continue;
     const cand = chosen.find(function (c) { return Math.abs(snap(c.t, beats) - start) < 1e-6; });
@@ -340,13 +342,65 @@ function run(ctx) {
         }
       }
     }
-    if (!s) s = brief.preserve_order
-      ? ASSETS.nextInOrder(pool, used, want, brief)
-      : ASSETS.choose(pool, want, used, prev, brief, seed,
-                      prevKin, isBoundary(start),
-                      cand ? cand.strength : 0,
-                      ASSETS.moodAt(map, start), semIdx, prevWord);
+    // Where the slot is cut short because the film's next shot cannot hold it.
+    let splitAt = null;
+    if (!s && brief.preserve_order) {
+      // A slot the next shot cannot fill has to become a shorter slot, and the
+      // cut that ends it must still be a musical one. Look for the strongest
+      // candidate the budget declined inside the room the shot actually has.
+      const roomFor = function (sh) {
+        if (sh.duration + 0.02 >= want) return { ok: true, at: null };
+        const room = start + sh.duration - 0.02;
+        const here = declined.filter(function (c) {
+          return c.t > start + minS && c.t <= room; });
+        here.sort(function (a, b) { return (b.strength || 0) - (a.strength || 0); });
+        // Snapping MOVES the point, and it can move it back outside the room --
+        // a candidate at room-0.02 snapped forward to the next beat is past the
+        // end of the shot again. Every test below is against `room`, not just
+        // against the slot, which is what 11 surviving overruns in the
+        // full-length edit were.
+        const legal = function (x) {
+          return x !== null && x - start >= minS && x <= room + 1e-6 && x < end; };
+        let at = here.length ? snapHard(here[0].t) : null;
+        if (!legal(at)) {
+          at = null;
+          for (const c of here) { const h = snapHard(c.t); if (legal(h)) { at = h; break; } }
+        }
+        if (!legal(at)) { const h = snapHard(room); at = legal(h) ? h : null; }
+        if (!legal(at)) at = null;
+        return at === null ? { ok: false, at: null }
+                           : { ok: true, at: at, ref: here.length ? here[0].ref : null };
+      };
+      // Try the shot the film is up to. If it can neither fill the slot nor be
+      // cut short legally -- a 0.80 s shot against a 0.95 s slot whose only
+      // interior beat sits under the brief's 0.55 s minimum -- it is not a
+      // candidate for this slot at all, and taking it anyway is what put 21
+      // uninvited source cuts in the full-length edit. Move on. This skips only
+      // shots too short to be cut into, so the order still reads forwards.
+      for (let tries = 0; tries < pool.length; tries++) {
+        const c2 = ASSETS.nextInOrder(pool, used, want, brief);
+        if (!c2) break;
+        const r = roomFor(c2);
+        if (r.ok) { s = c2; splitAt = r.at; if (r.at !== null) footageCut.push({
+            at: +r.at.toFixed(3), shot_is_s: +c2.duration.toFixed(3),
+            slot_wanted_s: +want.toFixed(3),
+            on: r.ref || "no declined candidate in range; snapped to the beat",
+            why: "the film's next shot is shorter than the music's slot" }); break; }
+        skippedShort.push({ at: +start.toFixed(3), shot: c2.shot,
+          shot_is_s: +c2.duration.toFixed(3), slot_wanted_s: +want.toFixed(3),
+          why: "too short to fill the slot and too short to cut inside it" });
+      }
+    }
+    if (!s && !brief.preserve_order)
+      s = ASSETS.choose(pool, want, used, prev, brief, seed,
+                        prevKin, isBoundary(start),
+                        cand ? cand.strength : 0,
+                        ASSETS.moodAt(map, start), semIdx, prevWord);
     if (!s) continue;
+    if (splitAt !== null) {
+      edges.splice(i + 1, 0, splitAt);
+      end = splitAt; want = end - start;
+    }
     (function () {
       const mk = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);
       used.set(mk, (used.get(mk) || 0) + 1);
@@ -399,6 +453,8 @@ function run(ctx) {
   return {
     timeline: timeline,
     holds: holds,
+    footage_cuts: footageCut,
+    shots_too_short: skippedShort,
     budget: {
       allowed: allowed, spent: spent,
       candidates_available: cands.length,

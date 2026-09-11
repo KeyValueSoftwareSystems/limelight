@@ -38,6 +38,14 @@ function mapPath(slug) {
   return null;
 }
 
+// Where a shot ends in its source file. The policy works in pool entries; the
+// trim works in IR entries, which carry only clip_id and a shot number.
+function shotBounds(index, clipId, shot) {
+  const c = (index.clips || []).find(function (x) { return x.clip_id === clipId; });
+  if (!c || !c.shots || shot < 0 || shot >= c.shots.length) return null;
+  return c.shots[shot];
+}
+
 function main() {
   const slug = arg("slug");
   const briefId = arg("brief", "premium-restraint");
@@ -186,6 +194,11 @@ function main() {
     format: brief.format,
     timeline: r.timeline,
     holds: r.holds,
+    // Why the edit has the shape it has when the footage, not the music,
+    // decided. Dropped silently by the first version of this assembly, which
+    // made a policy that was recording its reasons look like one that was not.
+    footage_cuts: r.footage_cuts || [],
+    shots_too_short: r.shots_too_short || [],
     budget: r.budget
   };
 
@@ -210,9 +223,23 @@ function main() {
     const minShot = ((brief.budgets || {}).min_shot_s) || 0.5;
     if (kept.length > 1) {
       const last = kept[kept.length - 1];
+      const prev2 = kept[kept.length - 2];
       if (last.end - last.start < minShot) {
-        kept[kept.length - 2].end = last.end;
-        kept.pop();
+        // Folding GROWS the shot before it, and a shot cannot be grown past the
+        // footage behind it. The first version of this fold just moved the end,
+        // which pushed the previous shot 0.23 s beyond its source shot and put
+        // one of the original editor's cuts inside it -- the runt was gone and
+        // an uninvited cut had taken its place.
+        const sh = shotBounds(index, prev2.clip_id, prev2.shot);
+        const grown = prev2.in_s + (last.end - prev2.start);
+        if (!sh || grown <= sh.end + 1e-6) {
+          prev2.end = last.end;
+          kept.pop();
+        } else {
+          ir.runt_kept = { at: last.start, is_s: +(last.end - last.start).toFixed(3),
+            why: "folding it into the shot before would run that shot " +
+                 (grown - sh.end).toFixed(2) + "s past the end of its source" };
+        }
       }
     }
     ir.timeline = kept;

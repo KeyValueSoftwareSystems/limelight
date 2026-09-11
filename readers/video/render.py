@@ -396,6 +396,23 @@ def main():
             print(f"[{i}] unknown clip {e['clip_id']}", file=sys.stderr)
             return 1
         src = os.path.join(ROOT, "assets", clip["file"])
+        # decode_shot takes a duration from a FILE; it has no idea where the
+        # shot it is named after ends. Running past that end splices the source
+        # editor's own cuts into the middle of our held shot, at instants the
+        # music never chose, and the result reads as an edit that is out of
+        # sync. Nothing announced it -- the frames decode fine. Surface it.
+        shots = clip.get("shots") or []
+        if 0 <= e.get("shot", -1) < len(shots):
+            sh = shots[e["shot"]]
+            over = (e["in_s"] + n / fps) - sh["end"]
+            if over > 1.0 / fps:
+                print(f"[{i}] shot {e['shot']} of {e['clip_id']} is "
+                      f"{sh['end'] - sh['start']:.2f}s and the slot wants "
+                      f"{n / fps:.2f}s from {e['in_s']:.2f}s -- that runs "
+                      f"{over:.2f}s past the end of the shot and would splice "
+                      f"in {sum(1 for q in shots if sh['end'] <= q['start'] < e['in_s'] + n / fps)} "
+                      f"source cut(s) the music did not choose", file=sys.stderr)
+                return 1
         frames, dw, dh = decode_shot(src, e["in_s"], n, fps, w, h)
         if frames is None:
             print(f"[{i}] no frames from {src}", file=sys.stderr)
