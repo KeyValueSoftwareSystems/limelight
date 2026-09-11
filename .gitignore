@@ -1,0 +1,28 @@
+# Rule 1: no audio in git, ever. The generator ships; the recording does not.
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.aac
+synth/out/
+synth/incoming/
+
+# The held-out answers. The whole point of holding a reference out is that a
+# model cannot be tuned to reproduce a file, which stops being true the moment
+# the file is in the repository everyone clones.
+synth/truth/
+
+# Measured maps, run logs and vectors -- regenerable, and large.
+synth/maps/
+synth/learning/
+*.f16
+*.npy
+
+# Model weights never live here.
+models/
+*.pt
+*.pth
+*.safetensors
+
+__pycache__/
+*.pyc

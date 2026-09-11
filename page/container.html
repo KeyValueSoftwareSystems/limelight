@@ -1,0 +1,167 @@
+<!-- A music container on the protocol. It plays a record and asks two questions:
+     where am I in the song, and which beats are coming. Nothing else yet. -->
+<title>Container</title>
+<style>
+:root{--bg:#0a0d13;--pan:#0f141d;--line:#1b2230;--line2:#263047;--ink:#e6e9f0;
+  --dim:#9aa3b8;--faint:#5c6478;--amb:#e8a33d;--ok:#5bb98c;--blu:#6fa8dc}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.55 ui-sans-serif,system-ui,sans-serif;margin:0}
+.wrap{max-width:920px;margin:0 auto;padding:18px 18px 70px}
+h1{font:600 12px ui-monospace,monospace;letter-spacing:.18em;color:var(--amb);margin:0 0 16px}
+button,input[type=number]{background:#182031;color:var(--ink);border:1px solid var(--line2);
+  border-radius:6px;padding:7px 13px;font:inherit;cursor:pointer}
+button:hover{border-color:#41506e} button.on{background:var(--amb);color:#171003;font-weight:600}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px}
+#seek{flex:1;min-width:180px;accent-color:var(--amb)}
+#rate{width:130px;accent-color:var(--amb)}
+.mono{font:12px ui-monospace,monospace;font-variant-numeric:tabular-nums}
+#beat{display:block;width:100%;height:96px;background:#05070b;border:1px solid var(--line);
+  border-radius:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:780px){.two{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:6px;background:var(--pan);padding:13px 15px}
+.card h2{font:600 10px ui-monospace,monospace;letter-spacing:.13em;text-transform:uppercase;margin:0 0 11px}
+.card.musical h2{color:var(--blu)} .card.clock h2{color:var(--amb)}
+table{border-collapse:collapse;width:100%;font:12px ui-monospace,monospace}
+td{padding:4px 8px 4px 0;border-bottom:1px solid #141a26;color:var(--dim)}
+td.k{color:var(--ink);white-space:nowrap}
+td.n{text-align:right;color:var(--amb);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.b{text-align:right;color:var(--blu);font-variant-numeric:tabular-nums;white-space:nowrap}
+.note{color:var(--faint);font-size:12px;line-height:1.5;margin:10px 0 0}
+#msg{font:11.5px ui-monospace,monospace;color:var(--amb)}
+.big{font:600 30px/1 ui-monospace,monospace;color:var(--ink);font-variant-numeric:tabular-nums}
+.big small{display:block;font:400 10px/1 ui-monospace,monospace;color:var(--faint);
+  letter-spacing:.1em;text-transform:uppercase;margin-top:7px}
+.row{display:flex;gap:26px;align-items:flex-end;flex-wrap:wrap;margin:0 0 12px}
+</style>
+
+<div class="wrap">
+<h1>CONTAINER</h1>
+
+<div class="bar">
+  <button id="play">play</button>
+  <input id="seek" type="range" min="0" max="1000" value="0">
+  <span class="mono" id="clock" style="min-width:78px;text-align:right">0.00 s</span>
+  <label class="mono" style="color:var(--faint)">tempo</label>
+  <input id="rate" type="range" min="0.5" max="2" step="0.05" value="1">
+  <span class="mono" id="ratev" style="min-width:44px">&times;1.00</span>
+  <span id="msg"></span>
+</div>
+
+<canvas id="beat"></canvas>
+
+<div class="row" style="margin-top:14px">
+  <div class="big" id="pos">1.1<small>bar . beat</small></div>
+  <div class="big" id="nextms">—<small>next beat in</small></div>
+  <div class="big" id="bpm">—<small>bpm on the record</small></div>
+</div>
+
+<div class="two">
+  <div class="card musical">
+    <h2>what the score says — never moves</h2>
+    <div id="musical"></div>
+    <p class="note">Derived from three numbers, not from a list of beat times.
+    Change the tempo and every value in this column stays exactly as it is.</p>
+  </div>
+  <div class="card clock">
+    <h2>what your clock says — moves with the tempo</h2>
+    <div id="clockcard"></div>
+    <p class="note">The same beats, converted into this container's own
+    milliseconds. This is the only place the two clocks meet.</p>
+  </div>
+</div>
+</div>
+
+<script src="/protocol/session.js"></script>
+<script>
+const $=i=>document.getElementById(i);
+const aud=new Audio(); aud.preload="auto";
+let S=null, SCORE=null, DUR=1, lastBeat=-1, flash=0;
+
+async function boot(){
+  SCORE=await (await fetch("/protocol/score.levels.json")).json();
+  DUR=(SCORE.song&&SCORE.song.length_s)||180;
+  aud.src="/synth/out/"+SCORE.score+".wav";
+  /* The audio element owns the clock. The session reads it rather than running
+     a second one beside it. */
+  S=window.LimelightSession.Session(SCORE,{songTime:()=>aud.currentTime});
+  $("bpm").innerHTML=SCORE.grid.bpm.toFixed(1)+"<small>bpm on the record</small>";
+  wire(); loop();
+}
+
+function wire(){
+  $("play").onclick=()=>{
+    if(aud.paused){aud.play().catch(e=>$("msg").textContent=e.message);
+      S.play();$("play").textContent="pause";$("play").classList.add("on")}
+    else{aud.pause();S.pause();$("play").textContent="play";$("play").classList.remove("on")}};
+  $("seek").oninput=e=>{aud.currentTime=(+e.target.value/1000)*DUR;};
+  $("rate").oninput=e=>{const r=+e.target.value;
+    $("ratev").innerHTML="&times;"+r.toFixed(2);
+    aud.playbackRate=r;      /* the container speeds up its own audio ... */
+    S.rate(r);               /* ... and tells the session, for the conversion */
+  };
+  addEventListener("keydown",e=>{if(/INPUT/.test(e.target.tagName))return;
+    if(e.code==="Space"){e.preventDefault();$("play").click()}});
+}
+
+function loop(){
+  requestAnimationFrame(loop);
+  if(!S) return;
+  const n=S.now();                       /* where am I */
+  const up=S.next(2000);                 /* what is coming */
+
+  $("clock").textContent=n.seconds.toFixed(2)+" s";
+  /* The pickup before bar 1 is really bar 0 beat 4, which is correct and reads
+     as broken. Say what it is instead. */
+  $("pos").innerHTML=n.position.before_first_beat
+    ? `&mdash;<small>before the first beat</small>`
+    : `${n.position.bar}.${Math.floor(n.position.beat)}<small>bar . beat</small>`;
+  $("nextms").innerHTML=`${n.to_next_beat_ms}<small>next beat in (ms)</small>`;
+  if(!aud.seeking) $("seek").value=Math.round((n.seconds/DUR)*1000);
+
+  /* flash on the beat, so you can check it against your own ear */
+  const idx=Math.floor((n.seconds-SCORE.grid.first_beat_s)/(60/SCORE.grid.bpm));
+  if(idx!==lastBeat){ lastBeat=idx; flash=1; }
+  flash=Math.max(0,flash-0.055);
+  drawBeat(n,flash);
+
+  $("musical").innerHTML=`<table>
+    ${up.slice(0,5).map(b=>`<tr><td class="k">${b.accent?"the one":"beat"}</td>
+      <td class="b">bar ${b.bar} beat ${b.beat}</td></tr>`).join("")
+      || `<tr><td class="k">nothing in the next 2 s</td><td class="b">—</td></tr>`}
+    <tr><td class="k">phase through this beat</td><td class="b">${n.phase.toFixed(3)}</td></tr>
+    </table>`;
+
+  $("clockcard").innerHTML=`<table>
+    ${up.slice(0,5).map(b=>`<tr><td class="k">${b.accent?"the one":"beat"}</td>
+      <td class="n">+${b.in_ms} ms</td></tr>`).join("")
+      || `<tr><td class="k">nothing in the next 2 s</td><td class="n">—</td></tr>`}
+    <tr><td class="k">playing at</td><td class="n">&times;${n.rate.toFixed(2)}</td></tr>
+    </table>`;
+}
+
+function drawBeat(n,f){
+  const c=$("beat"),w=c.clientWidth,h=96,x=c.getContext("2d");
+  c.width=w*devicePixelRatio;c.height=h*devicePixelRatio;
+  x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  x.fillStyle="#05070b";x.fillRect(0,0,w,h);
+  const bpb=SCORE.grid.beats_per_bar;
+  const beat=n.position.before_first_beat ? 0 : Math.floor(n.position.beat);
+  const gap=w/(bpb+1), rad=Math.min(gap*0.22,26);
+  for(let i=1;i<=bpb;i++){
+    const cx=gap*i+gap*0.5, cy=h/2, on=(i===beat);
+    const lv=on?(0.35+0.65*f):0.10;
+    if(on&&lv>0.2){const gr=x.createRadialGradient(cx,cy,0,cx,cy,rad*2.6);
+      gr.addColorStop(0,`rgba(232,163,61,${0.55*lv})`);gr.addColorStop(1,"rgba(0,0,0,0)");
+      x.fillStyle=gr;x.beginPath();x.arc(cx,cy,rad*2.6,0,7);x.fill()}
+    x.beginPath();x.arc(cx,cy,rad,0,7);
+    const v=Math.round(255*lv);
+    x.fillStyle=i===1?`rgb(${v},${Math.round(v*0.95)},${Math.round(v*0.9)})`
+                     :`rgb(${v},${Math.round(v*0.69)},${Math.round(v*0.36)})`;
+    x.fill();x.strokeStyle="#2a3346";x.lineWidth=1.5;x.stroke();
+    x.fillStyle="#59617a";x.font="10px ui-monospace,monospace";x.textAlign="center";
+    x.fillText(i===1?"1 · the one":String(i),cx,h-10);x.textAlign="left";
+  }
+}
+boot().catch(e=>$("msg").textContent="boot failed: "+e.message);
+</script>

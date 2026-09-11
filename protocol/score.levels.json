@@ -1,0 +1,17 @@
+{
+  "score": "levels",
+  "version": 1,
+  "song": { "title": "Levels (Radio Edit)", "length_s": 237.145 },
+
+  "grid": {
+    "bpm": 128.0,
+    "first_beat_s": 0.2233,
+    "beats_per_bar": 4
+  },
+
+  "made_by": {
+    "how": "model",
+    "who": "ear.py",
+    "note": "Three numbers, not a list of beat times. A list would have to be re-sent every time the tempo changed; these three never change, because they are facts about the recording rather than about anybody's clock."
+  }
+}
