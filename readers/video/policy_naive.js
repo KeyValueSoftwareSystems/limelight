@@ -49,8 +49,11 @@ function run(ctx) {
     const want = end - start;
     const s = ASSETS.choose(pool, want, used, prev, brief, seed, prevKin, false);
     if (!s) continue;
-    used.set(s.clip_id + "#" + s.shot + "#" + (s.moment || 0),
-             (used.get(s.clip_id + "#" + s.shot + "#" + (s.moment || 0)) || 0) + 1);
+    (function () {
+      const mk = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);
+      used.set(mk, (used.get(mk) || 0) + 1);
+      used.set(s.clip_id, (used.get(s.clip_id) || 0) + 1);
+    })();
     prev = s.clip_id;
     prevKin = s.source_category;
     timeline.push({

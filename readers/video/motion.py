@@ -55,7 +55,16 @@ class Motion:
             self.pump = [(v - mean) / rng for v in shape]
         else:
             self.pump = None
+        # Scale the breathing by the MEASURED depth, against the deepest pump
+        # this repo has measured (Levels, 0.147). listen/pump.py reports
+        # present=False on Don't Look Down at 0.065, and without this the
+        # normalised shape would drive full-amplitude breathing from a curve the
+        # measurement says is not really there -- an effect asserting something
+        # the map denies.
         self.pump_depth = float(pump.get("depth") or 0.0)
+        self.pump_scale = min(1.0, self.pump_depth / 0.147) if self.pump else 0.0
+        if pump.get("present") is False:
+            self.pump_scale *= 0.5
 
         self.energy = m.get("energy") or []
         self.e_at = [e[0] if isinstance(e, list) else e["at"] for e in self.energy]
@@ -197,7 +206,7 @@ class Motion:
         # through a drop's decay, and otherwise sits at a floor.
         arc = p["arc_floor"] + (1 - p["arc_floor"]) * max(build * build, drop)
         zoom = (1.0
-                + p["breath"] * pump * (0.35 + 0.65 * e) * arc
+                + p["breath"] * self.pump_scale * pump * (0.35 + 0.65 * e) * arc
                 + p["punch"] * acc * (0.3 + 0.7 * e) * arc
                 + p["drop_punch"] * drop
                 + p["build_push"] * build

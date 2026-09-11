@@ -138,11 +138,18 @@ const ASSETS = (function () {
       // Cutting from a clip straight back to itself reads as a jump cut, which
       // is a real effect and not one anybody asked for here.
       if (s.clip_id === avoid) continue;
-      // Reuse is counted per MOMENT, not per clip, so returning to a different
-      // part of the same take is free while replaying the same picture is not.
-      const key = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);
-      const times = used.get(key) || 0;
-      if (times >= maxReuse) continue;
+      // TWO counters, because one was not enough.
+      //
+      // Reuse was counted per MOMENT, so a clip cut into six moments could
+      // appear six times and never reach its per-clip cap. With 36 clips
+      // available an edit came out using four, alternating two of them -- the
+      // exact repetition this was supposed to prevent. The per-moment count
+      // stops the same picture coming back; the per-clip count stops the same
+      // SOURCE dominating, and it is the one a brief is talking about.
+      const mkey = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);
+      if ((used.get(mkey) || 0) >= 1) continue;
+      if ((used.get(s.clip_id) || 0) >= maxReuse) continue;
+      const times = used.get(s.clip_id) || 0;
       // Can this shot supply the requested duration? Shots that cannot are
       // only considered when nothing else is left, and the caller is expected
       // to have capped `want` to what the footage can actually deliver -- a

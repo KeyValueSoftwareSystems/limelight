@@ -56,8 +56,11 @@ function run(ctx) {
     const start = edges[i], end = edges[i + 1];
     const s = ASSETS.choose(pool, end - start, used, prev, brief, seed + i);
     if (!s) continue;
-    used.set(s.clip_id + "#" + s.shot + "#" + (s.moment || 0),
-             (used.get(s.clip_id + "#" + s.shot + "#" + (s.moment || 0)) || 0) + 1);
+    (function () {
+      const mk = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);
+      used.set(mk, (used.get(mk) || 0) + 1);
+      used.set(s.clip_id, (used.get(s.clip_id) || 0) + 1);
+    })();
     prev = s.clip_id;
     prevKin = s.source_category;
     timeline.push({
