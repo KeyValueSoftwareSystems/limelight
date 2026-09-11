@@ -124,6 +124,17 @@ function Session(score, opts) {
              in_ms: Math.round(leftBeats * beatSec / rate * 1000) };
   }
 
+  /* ---- energy: one number per bar, interpolated here ---------------------- */
+  const EN = score && score.energy;
+  function energyAt(pos) {
+    if (!EN || !EN.values || !EN.values.length) return null;
+    const x = (pos.bar - (EN.from_bar || 1)) + (pos.beat - 1) / bpb;
+    if (x <= 0) return EN.values[0];
+    if (x >= EN.values.length - 1) return EN.values[EN.values.length - 1];
+    const i = Math.floor(x), u = x - i;
+    return +(EN.values[i] + (EN.values[i + 1] - EN.values[i]) * u).toFixed(4);
+  }
+
   /* ---- the two questions a container actually asks ----------------------- */
   function now() {
     const t = seconds();
@@ -134,6 +145,7 @@ function Session(score, opts) {
       position: positionAt(t),
       phase: +within.toFixed(4),
       to_next_beat_ms: Math.round((1 - within) * beatSec / rate * 1000),
+      energy: energyAt(positionAt(t)),
       sections: sectionsAt(positionAt(t)),
     };
   }
@@ -187,7 +199,7 @@ function Session(score, opts) {
   function setRate(r) { if (!songTime) { held = seconds(); since = wall(); } rate = r; return api; }
 
   const api = { now, next, play, pause, seek, positionAt, secondsAt,
-                sectionsAt, until, layers,
+                sectionsAt, until, layers, energyAt,
                 rate: r => (r === undefined ? rate : setRate(r)),
                 seconds, score };
   return api;

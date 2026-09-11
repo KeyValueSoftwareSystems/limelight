@@ -55,20 +55,20 @@ def main(src, out=None):
                                   "which of these are the same thing coming back.",
                           "spans": form}
 
-    # energy -- sparse, and the layer that proves overlap is real. A build does
+    # build -- sparse, and the layer that proves overlap is real. A build does
     # not respect a section boundary and never has.
-    energy = []
+    builds = []
     for s in ent(m.get("spans")):
         a, b = s.get("from"), s.get("to")
         if a is None or b is None: continue
         e = {"from": pos(a), "to": pos(b), "name": s.get("kind")}
         if s.get("rise"): e["rise"] = s["rise"]
-        energy.append(e)
-    if energy:
-        layers["energy"] = {"kind": "sparse",
+        builds.append(e)
+    if builds:
+        layers["build"] = {"kind": "sparse",
                             "note": "builds and the like. Crosses form boundaries "
                                     "on purpose -- that is what a build does.",
-                            "spans": energy}
+                            "spans": builds}
 
     # presence -- who is playing. Built from the enters/leaves the stem
     # separation reported, paired in order.
@@ -115,6 +115,18 @@ def main(src, out=None):
                                 "section rather than on bar one, because the "
                                 "intro is usually a pickup."}
 
+    # energy -- measured once a bar, so it ships as one number per bar rather
+    # than as 127 objects each repeating a position it could have derived.
+    # Same reasoning as the grid: a rule and a start, not a list of coordinates.
+    en = m.get("energy") or []
+    energy = None
+    if en:
+        first = pos(en[0][0] if isinstance(en[0], list) else en[0]["at"])
+        vals = [round(float(e[1] if isinstance(e, list) else e["v"]), 4) for e in en]
+        energy = {"per": "bar", "from_bar": first["bar"], "values": vals,
+                  "note": "one number per bar, 0 to 1. Sample between bars by "
+                          "interpolating; the client does that, not the wire."}
+
     moments = [{"at": pos(x.get("at", x.get("t"))), "kind": x.get("kind")}
                for x in ent(m.get("moments")) if x.get("at", x.get("t")) is not None]
 
@@ -127,6 +139,7 @@ def main(src, out=None):
         "grid": {"bpm": g["bpm"], "first_beat_s": round(phase, 4),
                  "beats_per_bar": bpb},
         "layers": layers,
+        "energy": energy,
         "moments": moments,
         "made_by": {"how": "projected", "from": os.path.relpath(src),
                     "source_how": src_by.get("how"), "source_who": src_by.get("who"),

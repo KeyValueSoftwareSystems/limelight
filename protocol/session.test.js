@@ -129,7 +129,7 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
   ok("form is a partition -- never a gap", none === 0, none + " uncovered bars");
 
   /* the whole point of layers: something that crosses a form boundary */
-  const build = (L.energy.spans || [])[0];
+  const build = (L.build.spans || [])[0];
   const crossed = (L.form.spans || []).filter(sp =>
     at(sp.from) > at(build.from) && at(sp.from) < at(build.to));
   ok("a build crosses a form boundary, which is why layers exist",
@@ -140,8 +140,8 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
   /* several layers answer at once, and that is not a bug */
   const at78 = s.sectionsAt({ bar: 78, beat: 1 });
   ok("at bar 78, four layers have something to say",
-     !!at78.form && at78.energy.length > 0 && at78.presence.length > 0 && !!at78.phrase,
-     `form ${at78.form.name} · energy ${at78.energy.map(x=>x.name)} · ` +
+     !!at78.form && at78.build.length > 0 && at78.presence.length > 0 && !!at78.phrase,
+     `form ${at78.form.name} · energy ${at78.build.map(x=>x.name)} · ` +
      `presence ${at78.presence.map(x=>x.name)} · phrase ${at78.phrase.index}`);
 
   /* rule 8: the voice has one writer */
