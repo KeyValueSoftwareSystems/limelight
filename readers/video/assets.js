@@ -324,6 +324,12 @@ const ASSETS = (function () {
     // two long shots in the film and back, which is precisely the re-ordering
     // preserve_order exists to forbid. A slot the next shot cannot fill is the
     // POLICY's problem to solve, by cutting earlier, and it solves it there.
+    // preserve_order means the film plays once. Wrapping is right for a pile of
+    // stock -- there is always another clip -- and catastrophic for a finished
+    // film: the ad plays through and then starts again, which is the first
+    // thing anybody watching it says. Past the last shot there is no next shot,
+    // and the caller records an unfilled slot rather than looping.
+    if (brief && brief.preserve_order && n >= list.length) return null;
     const s = list[n % list.length];
     used.set("__cursor__", n + 1);
     return s;

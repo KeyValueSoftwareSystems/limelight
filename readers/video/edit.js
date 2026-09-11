@@ -301,6 +301,7 @@ function main() {
     // decided. Dropped silently by the first version of this assembly, which
     // made a policy that was recording its reasons look like one that was not.
     aligned_to_source: r.aligned_to_source || null,
+    film_ends_at: r.film_ends_at || null,
     footage_cuts: r.footage_cuts || [],
     shots_too_short: r.shots_too_short || [],
     unfilled_slots: r.unfilled_slots || [],
@@ -421,8 +422,25 @@ function main() {
           end: +(Math.min(h.end, b) - a).toFixed(3)
         });
       });
-    ir.song.length_s = +(b - a).toFixed(3);
-    ir.song.window = { from: +a.toFixed(3), to: +b.toFixed(3),
+    // An edit is as long as its last picture. With preserve_order the film can
+    // run out before the window does -- it did here, at 19.05 s of a 30.64 s
+    // window -- and declaring the longer number left eleven seconds of music
+    // with nothing under it. Shortening is always safe; the audio is cut from
+    // this same window, so both ends move together.
+    if (ir.timeline.length) {
+      const last = ir.timeline[ir.timeline.length - 1].end;
+      if (last < (b - a) - 0.02) {
+        ir.film_ran_out = { covers_s: +last.toFixed(3),
+          window_was_s: +(b - a).toFixed(3),
+          why: "the footage ran out before the window did, so the edit ends " +
+               "with the film instead of holding on nothing" };
+      }
+    }
+    ir.song.length_s = ir.timeline.length
+      ? +Math.min(b - a, ir.timeline[ir.timeline.length - 1].end).toFixed(3)
+      : +(b - a).toFixed(3);
+    ir.song.window = { from: +a.toFixed(3),
+      to: +(a + ir.song.length_s).toFixed(3),
       note: "the policy reasoned over the whole song; this is an excerpt of the result" };
   }
 

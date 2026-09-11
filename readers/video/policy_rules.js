@@ -216,12 +216,46 @@ function run(ctx) {
   // So the rate is enforced where it is felt: inside a sliding window, never
   // more than the brief's rate allows. Rank still decides WHICH candidates win,
   // so the strongest moments are still the ones that get the cuts.
+  // How loud the record is HERE, against its own middle. The map has measured
+  // this all along and the pacing never read it.
+  //
+  // "During the peak, nothing happens before and after." That is a uniform cut
+  // rate: the same density over a build, a drop and the silence after it, so
+  // nothing arrives because nothing was withheld. The same defect shows in the
+  // 5C re-cut as a shot-length stdev of 0.54 against the human editor's 1.45 --
+  // they hold one shot for 6.56 s and we never pass 2.86 s.
+  //
+  // `heat` is 1.0 where the song is at its median energy, lower where it is
+  // quiet, higher where it is loud. Two things follow it: how many cuts a
+  // stretch may have, and how long one shot may run. Quiet passages get fewer
+  // cuts AND permission to hold; loud ones get more cuts and shorter holds.
+  const enPts = (map.energy || []).filter(function (e) {
+    return Array.isArray(e) ? e.length > 1 : (e && e.at !== undefined); })
+    .map(function (e) { return Array.isArray(e) ? [e[0], e[1]] : [e.at, e.v]; })
+    .sort(function (a, b) { return a[0] - b[0]; });
+  const enMed = (function () {
+    if (!enPts.length) return null;
+    const v = enPts.map(function (e) { return e[1]; }).slice().sort(function (a, b) { return a - b; });
+    return v[Math.floor(v.length / 2)] || null;
+  })();
+  const heat = function (t) {
+    if (!enPts.length || !enMed) return 1;
+    let lo = 0, hi = enPts.length - 1;
+    if (t <= enPts[0][0]) return clampHeat(enPts[0][1] / enMed);
+    if (t >= enPts[hi][0]) return clampHeat(enPts[hi][1] / enMed);
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (enPts[m][0] <= t) lo = m; else hi = m; }
+    const a = enPts[lo], b = enPts[hi];
+    const f = (t - a[0]) / Math.max(1e-6, b[0] - a[0]);
+    return clampHeat((a[1] + (b[1] - a[1]) * f) / enMed);
+  };
+  function clampHeat(x) { return Math.max(0.55, Math.min(1.6, x)); }
+
   const RATE_WIN_S = 20.0;
   const perWin = Math.max(1, Math.round(perMin * RATE_WIN_S / 60));
   const localFull = function (t) {
     let n = 0;
     for (const x of chosen) if (Math.abs(x.t - t) <= RATE_WIN_S / 2) n++;
-    return n >= perWin;
+    return n >= Math.max(1, Math.round(perWin * heat(t)));
   };
   for (const c of ranked) {
     if (chosen.length >= allowed) { declined.push(c); continue; }
@@ -284,12 +318,22 @@ function run(ctx) {
       "s bar and no more; raised to two bars so shot length can vary";
   }
   const cap = Math.min(ceiling, footageCap);
+  // A ceiling that FALLS where the record is loud makes more cuts, not better
+  // ones: at heat 1.6 it came out under a second, capSlots forced extra edges
+  // to satisfy it, and the 5C re-cut went from 19 shots to 23 with a 0.16 s
+  // sliver in it. So this only ever LOOSENS -- a quiet stretch may hold past
+  // the brief's nominal maximum, and a loud one is left alone.
+  const capAt = function (t) {
+    const h = heat(t);
+    if (h >= 1) return cap;
+    return Math.min(footageCap, cap * (1 + (1 - h) * 1.6));
+  };
   const capBoundBy = ceiling <= footageCap
     ? (ceilingNote ? "brief-max-shot-raised-to-bar" : "brief-max-shot")
     : "footage-limit";
   const snapper = function (t) { return snap(t, beats); };
   const snapHard = function (t) { return snap(t, beats, true); };
-  let edges, capped;
+  let edges, capped, filmEnds = null;
   if (brief.preserve_order) {
     // When the order is the film's, the LENGTHS are the film's too.
     //
@@ -304,12 +348,11 @@ function run(ctx) {
     // that length decides the instant. Nothing is split because nothing was
     // ever asked to stretch, every cut is still on a musical event, and the
     // film is used once through before it repeats.
-    const orderOf = [], scratch = new Map();
-    for (let q = 0; q < pool0.length; q++) {
-      const c2 = ASSETS.nextInOrder(pool0, scratch, 0.5, brief);
-      if (!c2) break;
-      orderOf.push(c2);
-    }
+    // The film ONCE. Building this by calling nextInOrder pool.length times was
+    // the loop hiding in plain sight: nextInOrder wraps, so the list came back
+    // with the whole ad in it twice, and "do not wrap" then walked a list that
+    // had already wrapped. orderedPool is the sequence itself.
+    const orderOf = ASSETS.orderedPool(pool0, brief);
     const all = cands.slice().sort(function (a, b) { return a.t - b.t; });
     const best_fallback = function (lo, hi) {
       let b = null, bs = -1;
@@ -322,11 +365,23 @@ function run(ctx) {
       // not a musical instant, and returning it put one cut 172 ms off the grid.
       return b === null ? snapHard(hi) : b;
     };
-    edges = [0];
-    let t = 0, k = 0;
-    while (t < dur - minS && orderOf.length) {
-      const sh = orderOf[k % orderOf.length]; k++;
-      const room = Math.min(sh.duration - 0.02, cap);
+    // Start where the excerpt starts, and STOP WHEN THE FILM RUNS OUT.
+    //
+    // nextInOrder wraps, which is right for a pile of stock and catastrophic
+    // for a finished film: 20 cuts from 14 usable shots means the ad plays
+    // through and then plays again. That loop is visible and it is the first
+    // thing anybody watching says about it.
+    //
+    // Walking from 0 was the other half. The window is chosen for the music,
+    // so a walk that began at the song's first second had already spent the
+    // film before the excerpt started, and then wrapped into it.
+    const wStart = (ctx.window && ctx.window.from) || 0;
+    const wEnd = (ctx.window && ctx.window.to) || dur;
+    edges = [wStart];
+    let t = wStart, k = 0;
+    while (t < wEnd - minS && k < orderOf.length) {
+      const sh = orderOf[k]; k++;
+      const room = Math.min(sh.duration - 0.02, capAt(t));
       const lo = t + minS, hi = t + room;
       if (hi <= lo) { continue; }
       // The strongest musical candidate the shot can reach. Nearest-to-the-end
@@ -340,26 +395,46 @@ function run(ctx) {
       // Here the shot's length is the proposal and the music's job is to place
       // the cut near it, so the last musical instant the shot can reach wins
       // and strength only breaks ties within half a second of it.
+      // Lateness is not a tie-break, it is the rule. The shot proposes its own
+      // length and the music only says exactly where near that the cut falls,
+      // so the search is confined to the last beat the shot can reach -- not to
+      // half a second, where a strong early candidate simply won.
+      //
+      // With the weak version the 5C re-cut made 25 cuts from 14 shots and went
+      // through the whole ad twice in thirty seconds. You cannot show fourteen
+      // shots in twenty-five cuts without repeating, and repetition is the thing
+      // that reads as a mistake.
       const late = snapHard(hi);
+      const beat = (beats.length > 1) ? (beats[1] - beats[0]) : 0.5;
       const at = (late >= lo && late <= hi) ? (function () {
         let b = late, bs = -1;
+        // Only a candidate landing ON the last reachable beat competes; nothing
+        // earlier does. Softening this to "within half a second" was the same
+        // as not having it -- one beat IS half a second here, so a strong early
+        // candidate always won and the 5C re-cut still made 25 cuts from 14
+        // shots. The shot's length is the proposal; the music chooses which of
+        // the instants AT that length to use, not whether to honour it.
         for (const c of all) {
           const x = snapHard(c.t);
-          if (x < late - 0.5 || x > hi || x < lo) continue;
-          const sc = (c.strength || 0) + (x >= late - 0.01 ? 0.25 : 0);
-          if (sc > bs) { bs = sc; b = x; }
+          if (Math.abs(x - late) > 1e-6) continue;
+          if ((c.strength || 0) > bs) { bs = c.strength || 0; b = x; }
         }
         return b;
       })() : (best_fallback(lo, hi));
       if (at <= t + 0.01 || at > dur) break;
       edges.push(at); t = at;
     }
+    // The film is as long as the film. If it ran out before the window did,
+    // the edit ends there rather than starting over.
+    const ran_out = edges[edges.length - 1] < wEnd - minS;
+    if (edges[0] > 0) edges.unshift(0);
     if (edges[edges.length - 1] < dur) edges.push(dur);
+    filmEnds = ran_out ? +edges[edges.length - 2].toFixed(3) : null;
     capped = { edges: edges, forced: [] };
   } else {
     edges = [0].concat(chosen.map(function (c) { return snapper(c.t); }));
     edges.push(dur);
-    capped = ASSETS.capSlots(edges, cap, declined, snapHard);
+    capped = ASSETS.capSlots(edges, capAt, declined, snapHard);
   }
   edges = capped.edges;
   const forced = new Set(capped.forced.map(function (t) { return t.toFixed(3); }));
@@ -611,6 +686,7 @@ function run(ctx) {
     timeline: timeline,
     holds: holds,
     aligned_to_source: alignedTo,
+    film_ends_at: filmEnds,
     footage_cuts: footageCut,
     shots_too_short: skippedShort,
     unfilled_slots: unfilled,
