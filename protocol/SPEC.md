@@ -38,6 +38,35 @@ exactly as the grid does, which is checked by a test.
 **The grid stays authoritative.** If the list and the grid ever disagree, the
 list is what is wrong, and a test compares all 506 entries on every run.
 
+## The request
+
+A consumer asks for the fields it wants, and optionally a window.
+
+```json
+{ "score": "levels", "version": 2,
+  "fields": ["grid", "downbeats", "sections", "energy"],
+  "window": { "from_bar": 33, "bars": 8 },
+  "asked_by": "lights" }
+```
+
+Four rules the responder keeps, checked by `node protocol/respond.test.js`.
+
+**`grid` always comes back**, asked for or not, because every position in every
+other field is meaningless without it.
+
+**A field nobody asked for is not sent.** Wanting 127 downbeats should not mean
+receiving 506 beats to get at them. That request above is 175 bytes in and 726
+bytes back, against 19 KB for the whole song.
+
+**The response says which version it gave.** A consumer that asked for `levels`
+and got v2 yesterday and v3 today has no way to know last night's show is not
+the one it would render now. A score is immutable once published; a correction
+is a new version.
+
+**A window clips, it does not renumber.** Bar 33 is still called bar 33. And a
+section that starts before the window still comes back, because a consumer
+asking for eight bars needs to know it is sitting inside a sixteen-bar drop.
+
 ## The two clocks
 
 Keeping these apart is the whole design.
