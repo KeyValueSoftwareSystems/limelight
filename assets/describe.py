@@ -115,13 +115,24 @@ def main():
             i = int(k)
             if i not in sh:
                 print(f"no shot {i} in {a.setname}", file=sys.stderr); return 1
+            d = {"says": v} if isinstance(v, str) else v
             rows.append({"clip_id": sh[i]["clip_id"], "shot": i,
-                         "duration": sh[i]["duration"], "says": v})
+                         "duration": sh[i]["duration"], "says": d.get("says"),
+                         "role": d.get("role"), "subject": d.get("subject")})
         doc = {"note": ("What a model saw in each shot, in its own words. Not a "
                         "score against a fixed vocabulary -- there was no "
                         "vocabulary. Written at index time and committed, so the "
                         "edit path never calls a model."),
                "set": a.setname,
+               "subject": ("How much of the film's SUBJECT is in each shot, 0 to 1, "
+                           "authored by the model that looked at them. This "
+                           "replaces a CLIP cosine against 37 fixed phrases whose "
+                           "winner beat the runner-up by about one percent."),
+               "roles": ("What a shot is FOR, which is not the same as what is in "
+                         "it. `hold` marks the ones a film is built toward -- a "
+                         "reveal, an end card -- and a reader must not spend them "
+                         "in a flurry however loud the music is there. `skip` is "
+                         "leader and tail. Absent means ordinary."),
                "made_by": {"how": "model", "who": a.by,
                            "saw": "one frame from the middle of each shot",
                            "note": ("A reading, not a measurement and not a "

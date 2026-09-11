@@ -21527,6 +21527,60 @@
    "feel": "human",
    "how": "deviation of each accent from the nearest sixteenth",
    "note": "Measured against the grid the music is actually played on. Measuring against the nearest BEAT instead reports half a beat of scatter and calls it feel, which is an artifact of assigning subdivision hits to beats."
+  },
+  "prehush": {
+   "how": "deepest broadband level in the 1.5 s before each drop or return, over the song's median level, at 20 ms resolution",
+   "why": "the energy curve is sampled once a downbeat and cannot see a hole shorter than a bar. Contrast and accent-rate both score what happens AFTER a payoff; this is the silence before it, which is the part a listener reacts to.",
+   "events": [
+    {
+     "at": 145.285,
+     "kind": "drop",
+     "quietest_before": 0.0041,
+     "looked_back_s": 1.5
+    },
+    {
+     "at": 257.666,
+     "kind": "drop",
+     "quietest_before": 0.0063,
+     "looked_back_s": 1.5
+    },
+    {
+     "at": 170.047,
+     "kind": "drop",
+     "quietest_before": 0.0658,
+     "looked_back_s": 1.5
+    },
+    {
+     "at": 114.333,
+     "kind": "drop",
+     "quietest_before": 0.0686,
+     "looked_back_s": 1.5
+    },
+    {
+     "at": 300.999,
+     "kind": "return",
+     "quietest_before": 0.1792,
+     "looked_back_s": 1.5
+    },
+    {
+     "at": 72.428,
+     "kind": "drop",
+     "quietest_before": 0.2261,
+     "looked_back_s": 1.5
+    },
+    {
+     "at": 88.618,
+     "kind": "drop",
+     "quietest_before": 0.3953,
+     "looked_back_s": 1.5
+    },
+    {
+     "at": 269.571,
+     "kind": "drop",
+     "quietest_before": 0.5324,
+     "looked_back_s": 1.5
+    }
+   ]
   }
  },
  "confidence": 0.95,

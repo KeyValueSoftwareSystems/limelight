@@ -1,6 +1,8 @@
 {
  "note": "What a model saw in each shot, in its own words. Not a score against a fixed vocabulary -- there was no vocabulary. Written at index time and committed, so the edit path never calls a model.",
  "set": "apple5c",
+ "subject": "How much of the film's SUBJECT is in each shot, 0 to 1, authored by the model that looked at them. This replaces a CLIP cosine against 37 fixed phrases whose winner beat the runner-up by about one percent.",
+ "roles": "What a shot is FOR, which is not the same as what is in it. `hold` marks the ones a film is built toward -- a reveal, an end card -- and a reader must not spend them in a flurry however loud the music is there. `skip` is leader and tail. Absent means ordinary.",
  "made_by": {
   "how": "model",
   "who": "claude-opus-5 (Claude Code, at index time)",
@@ -12,91 +14,121 @@
    "clip_id": "apple-5c",
    "shot": 0,
    "duration": 0.4,
-   "says": "black leader, nothing on screen"
+   "says": "black leader, nothing on screen",
+   "role": "skip",
+   "subject": 0.0
   },
   {
    "clip_id": "apple-5c",
    "shot": 1,
    "duration": 2.56,
-   "says": "a thin ribbon of glossy red plastic curling through empty white space, macro, a shell beginning to form"
+   "says": "a thin ribbon of glossy red plastic curling through empty white space, macro, a shell beginning to form",
+   "role": null,
+   "subject": 0.05
   },
   {
    "clip_id": "apple-5c",
    "shot": 2,
    "duration": 1.6,
-   "says": "glossy red plastic folding over itself against white, abstract, no phone recognisable yet"
+   "says": "glossy red plastic folding over itself against white, abstract, no phone recognisable yet",
+   "role": null,
+   "subject": 0.05
   },
   {
    "clip_id": "apple-5c",
    "shot": 3,
    "duration": 2.48,
-   "says": "red plastic shapes twisting close to camera on white, the shell mid-formation"
+   "says": "red plastic shapes twisting close to camera on white, the shell mid-formation",
+   "role": null,
+   "subject": 0.05
   },
   {
    "clip_id": "apple-5c",
    "shot": 4,
    "duration": 1.68,
-   "says": "macro along the edge of a bright green phone, volume buttons and mute switch in shallow focus on white"
+   "says": "macro along the edge of a bright green phone, volume buttons and mute switch in shallow focus on white",
+   "role": null,
+   "subject": 0.7
   },
   {
    "clip_id": "apple-5c",
    "shot": 5,
    "duration": 1.6,
-   "says": "macro on the back of a green phone, camera lens and flash, white background"
+   "says": "macro on the back of a green phone, camera lens and flash, white background",
+   "role": null,
+   "subject": 0.75
   },
   {
    "clip_id": "apple-5c",
    "shot": 6,
    "duration": 1.68,
-   "says": "bright green plastic unfurling in soft folds against white, the green shell forming"
+   "says": "bright green plastic unfurling in soft folds against white, the green shell forming",
+   "role": null,
+   "subject": 0.05
   },
   {
    "clip_id": "apple-5c",
    "shot": 7,
    "duration": 1.6,
-   "says": "macro along the edge of a yellow phone, side button and speaker holes, white background"
+   "says": "macro along the edge of a yellow phone, side button and speaker holes, white background",
+   "role": null,
+   "subject": 0.7
   },
   {
    "clip_id": "apple-5c",
    "shot": 8,
    "duration": 2.48,
-   "says": "yellow plastic curving to a point against white, the yellow shell forming"
+   "says": "yellow plastic curving to a point against white, the yellow shell forming",
+   "role": null,
+   "subject": 0.05
   },
   {
    "clip_id": "apple-5c",
    "shot": 9,
    "duration": 1.68,
-   "says": "macro on a blue phone, the dark circular camera cutout filling frame, white background"
+   "says": "macro on a blue phone, the dark circular camera cutout filling frame, white background",
+   "role": null,
+   "subject": 0.8
   },
   {
    "clip_id": "apple-5c",
    "shot": 10,
    "duration": 1.6,
-   "says": "a whole blue phone seen from behind at an angle, Apple logo visible, floating on white"
+   "says": "a whole blue phone seen from behind at an angle, Apple logo visible, floating on white",
+   "role": null,
+   "subject": 0.95
   },
   {
    "clip_id": "apple-5c",
    "shot": 11,
    "duration": 0.8,
-   "says": "macro on the top corner of a blue phone, camera and flash, white background"
+   "says": "macro on the top corner of a blue phone, camera and flash, white background",
+   "role": null,
+   "subject": 0.8
   },
   {
    "clip_id": "apple-5c",
    "shot": 12,
    "duration": 6.56,
-   "says": "the payoff: five finished phones standing in a row together, green white blue pink yellow, full product shot on white"
+   "says": "the payoff: five finished phones standing in a row together, green white blue pink yellow, full product shot on white",
+   "role": "hold",
+   "subject": 1.0
   },
   {
    "clip_id": "apple-5c",
    "shot": 13,
    "duration": 3.76,
-   "says": "the end card, a single Apple logo centred on white with small text beneath"
+   "says": "the end card, a single Apple logo centred on white with small text beneath",
+   "role": "hold",
+   "subject": 0.3
   },
   {
    "clip_id": "apple-5c",
    "shot": 14,
    "duration": 0.56,
-   "says": "black, the film has ended"
+   "says": "black, the film has ended",
+   "role": "skip",
+   "subject": 0.0
   }
  ]
 }

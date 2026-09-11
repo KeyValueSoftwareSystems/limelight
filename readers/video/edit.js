@@ -123,6 +123,13 @@ function main() {
     (setname ? path.join(ROOT, "assets", "stock", setname, "INDEX.json")
              : path.join(ROOT, "assets", "INDEX.json"));
   const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
+  // What a model saw in this footage, if anything has looked at it. Written at
+  // index time and committed; nothing calls a model here.
+  let described = null;
+  try {
+    described = JSON.parse(fs.readFileSync(
+      path.join(path.dirname(indexPath), "DESCRIBED.json"), "utf8"));
+  } catch (e) {}
   // Decide what the brief left unsaid, BEFORE the words become numbers -- the
   // inference picks words, so it has to happen while words are still the
   // currency. A brief that names a thing keeps it; silence gets an answer
@@ -151,6 +158,7 @@ function main() {
   if (!length) { console.error("map has no length"); process.exit(2); }
 
   const ctx = {
+    described: described,
     map: map, brief: brief, index: index, seed: seed, length_s: length,
     derive: DERIVE.make(map), slug: slug, briefId: briefId,
     intent: arg("intent", null),
@@ -225,6 +233,26 @@ function main() {
   //
   // `--arc off` still gets the old behaviour, and a song with no build running
   // into a drop falls through to density on its own.
+  // A CHOICE beats a score.
+  //
+  // Which twenty seconds of a record to build a film around is taste, and every
+  // formula tried for it has disagreed with a listener: total candidate
+  // strength picked a plateau, energy contrast and accent rate both picked a
+  // drop whose silence is ten times shallower than the one a person went to
+  // twice. When a model has read the measurements and written down a window
+  // with its reasoning, that file wins. It is committed and reviewable, so
+  // nothing is called while an edit runs.
+  if (from === null && to === null) {
+    try {
+      const ch = JSON.parse(fs.readFileSync(
+        path.join(ROOT, "choices", slug + ".json"), "utf8"));
+      if (ch && ch.window && typeof ch.window.from === "number") {
+        from = ch.window.from; to = ch.window.to;
+        console.error("window: " + from.toFixed(2) + "-" + to.toFixed(2) +
+                      "s, chosen in choices/" + slug + ".json");
+      }
+    } catch (e) {}
+  }
   const arcArg = arg("arc", null);
   const arcAt = arcArg === "off" ? null
               : parseFloat(arcArg === null || arcArg === "" ? "0.68" : arcArg);
@@ -269,11 +297,27 @@ function main() {
         return m2.at > st.at && m2.at - st.at <= 6.0; });
       if (d) arcs.push({ b: { from: st.at, to: d.at }, d: d, kind: st.kind });
     }
+    // How close to nothing it gets BEFORE the payoff, which is the part a
+    // listener reacts to and the part nothing here was measuring. Energy
+    // contrast and accent rate both score what happens after, and both ranked
+    // the drop at 114.33 first -- while the hole before it is 0.069 of the
+    // song's median against 0.006 before the drop at 257.67, ten times
+    // shallower. A person asked which moment was worth building a film around
+    // picked the deeper one, twice, and the arithmetic had no way to agree.
+    //
+    // listen/prehush.py measures it at 20 ms and writes it to observations,
+    // because the energy curve is sampled once a downbeat and a 0.65 s hole
+    // disappears into its neighbours. Absent, this falls back to contrast alone.
+    const hush = {};
+    for (const e of (((map.observations || {}).prehush || {}).events || []))
+      hush[e.at.toFixed(2)] = e.quietest_before;
     let best = null, bestScore = -1;
     for (const a2 of arcs) {
       const before = enAt(a2.b.from - 0.2), after = enAt(a2.d.at + 1.2);
       const contrast = Math.max(0, after - before);
-      const score = (a2.d.size || 0.8) * (0.35 + contrast);
+      const q = hush[a2.d.at.toFixed(2)];
+      const depth = (q === undefined) ? 1 : 1 / (0.05 + Math.max(0, q));
+      const score = (a2.d.size || 0.8) * (0.35 + contrast) * depth;
       if (score > bestScore) { bestScore = score; best = a2; }
     }
     if (best) {

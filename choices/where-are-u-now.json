@@ -1,0 +1,44 @@
+{
+ "note": "Which part of the recording to build a film around. Chosen by a model reading the measurements, not by a formula ranking them. Committed, so the edit path never calls anything -- the same standing as assets/stock/*/DESCRIBED.json and readers/video/policy_llm.js's intent.json.",
+ "slug": "where-are-u-now",
+ "made_by": {
+  "how": "model",
+  "who": "claude-opus-5 (Claude Code, at author time)",
+  "read": [
+   "observations.prehush",
+   "moments",
+   "spans",
+   "energy",
+   "the footage's reachable length",
+   "four candidate framings, built and measured"
+  ]
+ },
+ "window": {
+  "from": 252.0,
+  "to": 267.0,
+  "why": "The record has two moments where it falls to near silence and slams back: 145.28 (hush 0.004, lead-in stop at 143.86) and 257.67 (hush 0.006, lead-in stop at 256.24). They are the same phenomenon and within noise of each other on depth, so depth does not decide it. 257.67 does, for two reasons a formula did not have: it sits in the record's last section where the arrangement is fullest, so the slam lands into more; and a person listening picked this moment out unprompted, twice, which in this repo is the authority and not a tiebreak.",
+  "framed": "Framed so the film's own ending fits, not so the drop sits at a pretty fraction. Four framings were built and measured: at 248.6 and 250.5 the payoff is clipped at the window edge and the end card never arrives; at 253.5 the drop is barely in and neither held shot is reached. 252.0-267.0 is the only one that reaches BOTH shots the ad was built toward -- the five-phone reveal and the logo card. The drop falls at 39%, earlier than a music video would want, which is correct for an ad: the product needs the room at the end, not the middle."
+ },
+ "considered": [
+  {
+   "at": 145.28,
+   "hush": 0.004,
+   "verdict": "the deepest hole in the record; a defensible second choice"
+  },
+  {
+   "at": 257.67,
+   "hush": 0.006,
+   "verdict": "chosen"
+  },
+  {
+   "at": 114.33,
+   "hush": 0.069,
+   "verdict": "what energy-contrast and accent-rate both ranked first, and a hole ten times shallower"
+  },
+  {
+   "at": 170.05,
+   "hush": 0.066,
+   "verdict": "a build whose payoff barely changes the level"
+  }
+ ]
+}

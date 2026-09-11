@@ -54,8 +54,21 @@ const ASSETS = (function () {
   // Every shot's standing in the pool on "how much of the subject is in it",
   // as a 0..1 rank. Ranked, not thresholded: CLIP's absolute cosines all sit
   // near 0.25 and a threshold on them selected 320 shots out of 320 once.
-  function subjectRanking(pool, semIdx, word) {
+  function subjectRanking(pool, semIdx, word, described) {
     const out = new Map();
+    // A reading beats a cosine. When something has LOOKED at the footage and
+    // said how much of the film's subject is in each shot, that is the answer;
+    // CLIP scored against 37 phrases it was never given a reason to prefer, and
+    // its winner beat the runner-up by about one percent. The cosine path stays
+    // for pools nobody has described yet, and is a fallback, not a peer.
+    if (described && described.shots) {
+      const have = described.shots.filter(function (r) {
+        return typeof r.subject === "number"; });
+      if (have.length >= 3) {
+        for (const r of have) out.set(r.clip_id + "#" + r.shot, r.subject);
+        return out;
+      }
+    }
     if (!semIdx || !word) return out;
     const rows = [];
     for (const s of pool) {
@@ -222,12 +235,21 @@ const ASSETS = (function () {
   // clips again and again". The measurements are the shot's; what differs is
   // where in it we enter, which is exactly what an editor is choosing when they
   // pick a moment out of a take.
-  function shots(index, brief, sliceLen) {
+  function shots(index, brief, sliceLen, described) {
+    // Leader and tail. A film that opens and closes on black has two shots that
+    // are not footage, and every pool-wide statistic -- median brightness,
+    // motion, the count of usable shots -- has been computed over them. They
+    // are excluded when something has looked at the footage and said so.
+    const skip = new Set();
+    if (described && described.shots)
+      for (const r of described.shots)
+        if (r.role === "skip") skip.add(r.clip_id + "#" + r.shot);
     const out = [];
     const SL = sliceLen || 4.5;
     for (const c of index.clips || []) {
       (c.shots || []).forEach(function (s, i) {
         if (s.duration < 0.35) return;
+        if (skip.has(c.clip_id + "#" + i)) return;
         const n = Math.max(1, Math.floor(s.duration / SL));
         if (n > 1) {
           const w = s.duration / n;

@@ -320,7 +320,7 @@ function run(ctx) {
   // later reads it as the system having found something in the music.
   const beats = map.beats || [];
   const pool0 = ASSETS.selectBySubject(
-    ASSETS.cohere(ASSETS.shots(index, brief),
+    ASSETS.cohere(ASSETS.shots(index, brief, undefined, ctx.described),
                   (brief.coherence || {}).radius,
                   (brief.coherence || {}).min_shots),
     brief, ctx.sem, (brief.subject_tolerance || undefined),
@@ -361,6 +361,22 @@ function run(ctx) {
     : "footage-limit";
   const snapper = function (t) { return snap(t, beats); };
   const snapHard = function (t) { return snap(t, beats, true); };
+  // What a shot is FOR, from whatever looked at the footage. A reveal and an
+  // end card are the shots a film is built toward, and "cut fast where the
+  // record is loud" spends them in a flurry precisely because the loudest part
+  // of a record is usually where the reveal sits. The 5C edit gave 0.95 s each
+  // to the five-phone lineup and the logo card; the editor who made the ad held
+  // them 6.56 s and 3.76 s.
+  const roleOf = (function () {
+    const m2 = new Map();
+    const d = ctx.described;
+    if (d && d.shots) for (const r of d.shots)
+      if (r.role) m2.set(r.clip_id + "#" + r.shot, r.role);
+    return m2;
+  })();
+  const roleFor = function (sh) {
+    return sh ? (roleOf.get(sh.clip_id + "#" + sh.shot) || null) : null; };
+
   let edges, capped, filmEnds = null;
   if (brief.preserve_order) {
     // When the order is the film's, the LENGTHS are the film's too.
@@ -422,8 +438,16 @@ function run(ctx) {
       // Where it is quiet, take all of it. The cost is honest and is the point:
       // a film spent on the drop runs out sooner, which is what an editor does
       // when they decide where the material belongs.
-      const roomFull = Math.min(sh.duration - 0.02, capAt(t));
-      const h = clampHeat(heat(t) * shape(t));
+      // A held shot may run its own length. The brief's ceiling exists to stop
+      // an arbitrary clip dominating; the shot a film was built toward is the
+      // one place that is not a risk, and clipping the 5C lineup to 3.81 s
+      // throws away the reveal the whole ad is for.
+      const roomFull = roleFor(sh) === "hold"
+        ? sh.duration - 0.02
+        : Math.min(sh.duration - 0.02, capAt(t));
+      // A shot the film is built toward is never shortened by loudness.
+      const held = roleFor(sh) === "hold";
+      const h = held ? 1 : clampHeat(heat(t) * shape(t));
       const room = h > 1
         // The exponent decides how hard the flurry hits, and I chose it by
         // watching the output: 2 gave two quick cuts, 3 gave an uneven mix, 4
@@ -560,9 +584,9 @@ function run(ctx) {
   // The film's subject, and where every shot stands on containing it.
   const arrival = brief.arrival || (brief.subject_word ? "late" : null);
   const subjWord = brief.subject_word || null;
-  const subjRank = ASSETS.subjectRanking(pool0, semIdx, subjWord);
+  const subjRank = ASSETS.subjectRanking(pool0, semIdx, subjWord, ctx.described);
   const arriveAt = function (t) {
-    if (!arrival || !subjWord) return null;
+    if (!arrival || (!subjWord && !hasDescribed)) return null;
     const p = (t - winFrom) / Math.max(0.001, winTo - winFrom);
     return RECIPE.arrivalAt(arrival, Math.max(0, Math.min(1, p)));
   };

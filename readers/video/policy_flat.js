@@ -34,7 +34,7 @@ function run(ctx) {
   // first by clip_id -- and a comparison against test-harness footage measures
   // nothing at all.
   const pool = ASSETS.selectBySubject(
-    ASSETS.shots(index, brief), brief, ctx.sem,
+    ASSETS.shots(index, brief, undefined, ctx.described), brief, ctx.sem,
     undefined, brief.subject_min_shots || undefined);
   // The SAME chooser the intelligent policy uses.
   //
@@ -55,6 +55,22 @@ function run(ctx) {
   // next one's start, and the compiler allocates frames across the gap -- so a
   // 1.58 s slot was rendered as 1.75 s and ran past the end of its shot. A
   // timeline has to be contiguous whatever decides its lengths.
+  // The control gets the descriptions too.
+  //
+  // It already used them to skip leader and tail; it did not use them to HOLD.
+  // So the intelligent edit was ending on a 2.86 s reveal and the control was
+  // chopping the same shot at its timer, and the difference between the two
+  // included "one of them can see". That is not the comparison this exists to
+  // make. The A/B has exactly one variable -- whether the policy knows where it
+  // is in the song -- and every other tool goes to both sides.
+  const roleOf = (function () {
+    const m = new Map();
+    const d = ctx.described;
+    if (d && d.shots) for (const r of d.shots)
+      if (r.role) m.set(r.clip_id + "#" + r.shot, r.role);
+    return m;
+  })();
+
   let cursor = win.from;
   for (let i = 0; i < shots; i++) {
     const start = cursor;
@@ -83,7 +99,14 @@ function run(ctx) {
       const c2 = ASSETS.nextInOrder(pool, used, want, brief);
       if (c2) {
         s = c2;
-        if (c2.duration + 0.02 < want) want = Math.max(0.2, c2.duration - 0.02);
+        // A shot the film is built toward runs its own length here as well.
+        // The timer still decides everything else, which is the whole
+        // difference being tested.
+        if (roleOf.get(c2.clip_id + "#" + c2.shot) === "hold") {
+          want = Math.min(Math.max(want, c2.duration - 0.02), win.to - start);
+        } else if (c2.duration + 0.02 < want) {
+          want = Math.max(0.2, c2.duration - 0.02);
+        }
       }
     } else {
       s = ASSETS.choose(pool, want, used, prev, brief, seed + i,
