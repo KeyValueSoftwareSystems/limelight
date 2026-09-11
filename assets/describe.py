@@ -90,10 +90,52 @@ def sheet(setname, out_dir, per=12, width=320):
     return made, sh
 
 
+def effect_reach(setname, samples=6):
+    """How much each effect actually changes THIS footage.
+
+    The effect vocabulary is keyed to the moment kind and has never looked at
+    the picture. On the 5C ad -- macro product shots on white, mean brightness
+    220/255 -- `punch` changes nothing at all, `whip` and `trails` change one or
+    two levels out of 255, and `blink` changes 159, which is a near-blackout.
+    So a drop got either nothing or a sledgehammer, and neither was a decision
+    anybody made.
+
+    This measures it, so the choice of what a set may use can be made against
+    what will actually read on it."""
+    import numpy as np
+    sys.path.insert(0, os.path.join(ROOT, "readers", "video"))
+    import render as R
+    sh = [s for s in shots_of(setname) if s["duration"] >= 0.8]
+    if not sh:
+        return {}
+    step = max(1, len(sh) // samples)
+    picks = sh[::step][:samples]
+    names = ["blink", "bloom", "freeze", "trails", "whip", "punch"]
+    acc = {n: [] for n in names}
+    bright = []
+    for s in picks:
+        src = os.path.join(HERE, s["file"])
+        mid = s["start"] + (s["end"] - s["start"]) / 2
+        frames, _, _ = R.decode_shot(src, mid, 24, 24, 1280, 720)
+        if frames is None or len(frames) < 14:
+            continue
+        base = frames[12].astype(np.float32)
+        bright.append(float(base.mean()))
+        for n in names:
+            fx = {"effect": n, "through": 0.5, "strength": 1.0, "_k0": 0}
+            out = R.apply_effect(frames, 12, fx, 1280, 720, R.DEFAULTS)
+            acc[n].append(float(np.abs(out.astype(np.float32) - base).mean()))
+    return {"mean_brightness": round(sum(bright) / max(1, len(bright)), 1),
+            "sampled_shots": len(bright),
+            "changes_by": {n: round(sum(v) / len(v), 2) for n, v in acc.items() if v}}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--set", dest="setname", required=True)
     ap.add_argument("--sheet", action="store_true")
+    ap.add_argument("--effects", action="store_true",
+                    help="measure what each effect does to this footage")
     ap.add_argument("--out-dir", default=None)
     ap.add_argument("--write", help="JSON of {shot: caption} to commit")
     ap.add_argument("--by", default="claude-opus-5 (Claude Code, at index time)")
@@ -105,6 +147,11 @@ def main():
         print(f"{len(sh)} shots -> {len(pages)} sheet(s)")
         for p in pages:
             print("  " + p)
+        return 0
+
+    if a.effects:
+        r = effect_reach(a.setname)
+        print(json.dumps(r, indent=1))
         return 0
 
     if a.write:

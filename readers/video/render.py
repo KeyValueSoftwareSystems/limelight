@@ -364,7 +364,19 @@ def main():
         params.update(brief_p)
     if a.motion:
         params.update(json.loads(a.motion))
-    mo = Motion(m, params)
+    # What this footage can actually carry. The effect vocabulary is keyed to
+    # the moment kind and never looked at the picture: on macro product shots
+    # against white, `punch` changes the frame by 0.0 out of 255 and `blink` by
+    # 137, so a drop got either nothing or a near-blackout and neither was a
+    # decision. When something has measured this set and chosen, that wins.
+    fx_rule = None
+    try:
+        _rel = ((ir.get("made_by") or {}).get("index")) or ""
+        _d = os.path.join(ROOT, os.path.dirname(_rel), "DESCRIBED.json")
+        fx_rule = (json.load(open(_d)) or {}).get("effects")
+    except Exception:
+        pass
+    mo = Motion(m, params, fx_rule)
 
     copy_spec = json.load(open(a.copy)) if a.copy else None
     copy = Copy(copy_spec, mo, t0)

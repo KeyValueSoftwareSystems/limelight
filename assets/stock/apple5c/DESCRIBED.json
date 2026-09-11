@@ -130,5 +130,31 @@
    "role": "skip",
    "subject": 0.0
   }
- ]
+ ],
+ "effects": {
+  "note": "Which effects may be used on THIS footage, chosen by the model that measured them against it. The vocabulary is keyed to the moment kind and has never looked at the picture, so a drop got either nothing or a sledgehammer depending on which branch of the table it hit.",
+  "measured": {
+   "mean_brightness": 189.4,
+   "sampled_shots": 6,
+   "mean_change_out_of_255": {
+    "blink": 137.33,
+    "freeze": 17.53,
+    "bloom": 16.92,
+    "trails": 4.93,
+    "whip": 0.4,
+    "punch": 0.0
+   }
+  },
+  "allow": [
+   "freeze",
+   "bloom"
+  ],
+  "forbid": [
+   "blink",
+   "punch",
+   "whip",
+   "trails"
+  ],
+  "why": "This is macro product photography on near-white: mean brightness 189 of 255. Light has nowhere to go upward, so bloom is mild and blink -- which darkens -- is enormous: 137 of 255 is most of the way to black and reads as the picture breaking, which is the note this project was given about pointless flashing two days ago. Geometric effects fail the other way: the subject is centred, slow and against a flat field, so whip (0.4) and trails (4.9) are invisible and punch is exactly zero. That leaves freeze and bloom, which are the two that a person would actually notice without being hit."
+ }
 }

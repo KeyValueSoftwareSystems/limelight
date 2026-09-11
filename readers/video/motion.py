@@ -36,7 +36,7 @@ import bisect, math
 
 
 class Motion:
-    def __init__(self, m, params=None):
+    def __init__(self, m, params=None, fx_rule=None):
         p = dict(DEFAULTS)
         p.update(params or {})
         self.p = p
@@ -98,6 +98,7 @@ class Motion:
         self.drops = [x["at"] for x in self.moments if x["kind"] in ("drop", "stop")]
         self.spans = m.get("spans") or []
         self.dur = (m.get("song") or {}).get("length") or 0.0
+        self.fx_rule = fx_rule or {}
         self._plan_effects()
 
     # ---- primitives -------------------------------------------------------
@@ -227,6 +228,17 @@ class Motion:
             cands.append({"at": m["at"], "kind": kind, "effect": eff,
                           "strength": strength})
         cands.sort(key=lambda c: -c["strength"])
+        # What this footage can carry, if anything has measured it. An effect
+        # that changes the picture by 0.0 out of 255 is not restraint and one
+        # that changes it by 137 is not punctuation; neither was chosen.
+        forbid = set(self.fx_rule.get("forbid") or [])
+        allow = set(self.fx_rule.get("allow") or [])
+        if forbid or allow:
+            for c in cands:
+                if c["effect"] in forbid or (allow and c["effect"] not in allow):
+                    alt = [a for a in (allow or []) if a not in forbid]
+                    c["effect"] = alt[0] if alt else "still"
+                    c["swapped_for_this_footage"] = True
         granted = [c for c in cands if c["effect"] != "still"][:allowed]
         # Alternate within a kind, so three drops are not three identical slams.
         seen = {}
@@ -234,7 +246,10 @@ class Motion:
             n = seen.get(c["kind"], 0)
             seen[c["kind"]] = n + 1
             if n % 2 == 1 and c["kind"] in self.KIND_ALT:
-                c["effect"] = self.KIND_ALT[c["kind"]]
+                alt = self.KIND_ALT[c["kind"]]
+                if alt not in (self.fx_rule.get("forbid") or []) and \
+                   (not self.fx_rule.get("allow") or alt in self.fx_rule["allow"]):
+                    c["effect"] = alt
         granted.sort(key=lambda c: c["at"])
         self.effects = granted
         self.quiets = [m["at"] for m in self.moments if m.get("kind") == "quiet"]
