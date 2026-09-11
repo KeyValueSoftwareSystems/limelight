@@ -255,6 +255,37 @@ def cut_alignment(cuts, peaks, dur):
     }
 
 
+def low_level(path, sr=22050, fc=130.0, rate=RATE):
+    """Peak level below `fc` per hop. LEVEL, not flux.
+
+    Flux is right for FINDING an onset and wrong for asking "is the kick here".
+    On four-on-the-floor at 128 bpm the low band is loud almost continuously, so
+    the rise at each kick is small and noisy, and measuring it said Levels'
+    downbeats sat at the 26.6th percentile of kick energy while random instants
+    sat at 47.2 -- which reads as a broken grid and is not one. Measured as
+    level with the same filter the scorer uses, the downbeats inside the first
+    drop sit at the 97.6th percentile. The grid was exact; the statistic was
+    wrong. Three hypotheses died before this one: that the metric punished cuts
+    inside a quiet build, that the onset lag was miscalibrated for a band-passed
+    signal, and finally that the map was wrong.
+    """
+    r = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-ac", "1",
+                        "-ar", str(sr), "-f", "f32le", "-"],
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    a = np.frombuffer(r.stdout, np.float32)
+    if a.size < sr:
+        return None
+    # One-pole low pass, as an exponential moving average over a strided view.
+    al = float(np.exp(-2 * np.pi * fc / sr))
+    n = 1 + int(-6.0 / np.log(al))          # effective impulse length
+    n = min(n, 512)
+    w = (1 - al) * al ** np.arange(n, dtype=np.float64)
+    y = np.convolve(a, w[::-1].astype(np.float32), mode="same")
+    hop = max(1, int(sr / rate))
+    m = len(y) // hop
+    return np.abs(y[:m * hop]).reshape(m, hop).max(axis=1)
+
+
 def cut_energy(cuts, a, dur):
     """How eventful the music is AT each cut, as a percentile of the whole song.
 
@@ -272,7 +303,8 @@ def cut_energy(cuts, a, dur):
     """
     if not cuts or a is None or len(a) < 10:
         return None
-    t = np.arange(len(a)) / RATE + ONSET_TIME_OFFSET_S
+    # Level is sampled where it happens; only flux carries the analysis lag.
+    t = np.arange(len(a)) / RATE
     order = np.sort(a)
 
     def pct_at(times):
@@ -329,8 +361,11 @@ def score(path):
         "duration_s": round(dur, 1),
         "cut_align": cut_alignment(cuts, onset_peaks(lo), dur),
         "cut_align_full": cut_alignment(cuts, onset_peaks(a), dur),
-        "cut_energy": cut_energy(cuts, lo, dur),
-        "cut_energy_full": cut_energy(cuts, a, dur),
+        # energy@cut is measured as LEVEL, which is the right question for
+        # "was the kick here". The flux version is kept beside it because it is
+        # the one that misled me.
+        "cut_energy": cut_energy(cuts, low_level(path), dur),
+        "cut_energy_full": cut_energy(cuts, lo, dur),
         "curve_align": align(v, a),
         **restraint(v, cuts, dur),
     }
@@ -511,6 +546,10 @@ def main():
               f"{ce.get('percentile_of_song', nan):9.1f}% {ce.get('z', nan):5.2f} | "
               f"{caf.get('hit_rate', nan):9.3f} "
               f"{cef.get('percentile_of_song', nan):8.1f}%")
+    print()
+    print("energy@cut is LOW-BAND LEVEL; the right-hand pair is flux, kept only")
+    print("because flux is the statistic that misled me into thinking the grid")
+    print("was broken. Flux finds an onset; level says whether the kick is there.")
     print()
     print("The LOW BAND is the one to read. Full-spectrum flux is displaced by")
     print("sidechain compression -- the mix ducks on the kick and swells after")
