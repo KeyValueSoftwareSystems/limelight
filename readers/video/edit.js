@@ -189,10 +189,23 @@ function main() {
     const usable = (index.clips || []).reduce(function (acc, c) {
       return acc.concat((c.shots || []).filter(function (sh) {
         return sh.end - sh.start >= floorS; })); }, []);
-    const material = usable.reduce(function (t, sh) { return t + (sh.end - sh.start); }, 0);
+    // What the film COVERS when cut, not how much material it holds.
+    //
+    // A shot is held for a whole number of beats, so a 1.60 s shot on a 0.476 s
+    // beat gives 1.43 s and the rest is never seen. Summing raw durations said
+    // 30.6 s for the 5C ad when the cut film actually covers about 19 s, so the
+    // arc framed a window a third longer than the footage could fill -- and the
+    // drop it was framing fell outside the end. The climax was cut off by an
+    // arithmetic error about length.
+    const per = ((map.grid || {}).period) || 0.5;
+    const ceilS = ((brief.budgets || {}).max_shot_s) || 6;
+    const material = usable.reduce(function (t, sh) {
+      const room = Math.min(sh.end - sh.start - 0.02, ceilS);
+      return t + Math.max(0, Math.floor(room / per) * per);
+    }, 0);
     wantWin = Math.max(6, Math.min(length, +material.toFixed(2)));
-    console.error("window: " + wantWin.toFixed(1) + "s, the length of the footage " +
-                  "once through (" + usable.length + " usable shots)");
+    console.error("window: " + wantWin.toFixed(1) + "s, what " + usable.length +
+                  " shots cover once cut to this grid");
   }
   // --arc frames a BUILD AND THE DROP IT LEADS INTO, rather than the busiest
   // window. Density is not shape: taking the thirty seconds with the most going
@@ -200,7 +213,21 @@ function main() {
   // climax" describes. A build span and the drop at its end is an arc the map
   // already found; this only frames it, putting the drop `arcAt` of the way
   // through so there is payoff left after it.
-  const arcAt = arg("arc", null) === null ? null : parseFloat(arg("arc") || "0.68");
+  // Shape by default, density only when the song offers no shape.
+  //
+  // This was opt-in, and the flat windows it exists to prevent are what a
+  // person watching has now objected to twice. On Where Are U Now the density
+  // picker chose 169.6 s -- four tenths of a second before the drop that ends
+  // the build at 163.9-170.0. It threw away the entire six-second build and
+  // opened just as the payoff finished, which is exactly "no build-up, no
+  // climax". Framing that same build puts the window at 93.4-124.0 with the
+  // drop 68% through.
+  //
+  // `--arc off` still gets the old behaviour, and a song with no build running
+  // into a drop falls through to density on its own.
+  const arcArg = arg("arc", null);
+  const arcAt = arcArg === "off" ? null
+              : parseFloat(arcArg === null || arcArg === "" ? "0.68" : arcArg);
   if (wantWin && arcAt !== null && from === null && to === null) {
     const builds = (map.spans || []).filter(function (sp) { return sp.kind === "build"; });
     const drops = (map.moments || []).filter(function (m2) {

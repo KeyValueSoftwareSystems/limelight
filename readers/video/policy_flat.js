@@ -50,10 +50,17 @@ function run(ctx) {
   const timeline = [];
   const used = new Map();
   let prev = null, prevKin = null;
+  // The timer walks, it does not index. Computing each start as `from + i*every`
+  // while a slot could be SHORTENED left a gap between one shot's end and the
+  // next one's start, and the compiler allocates frames across the gap -- so a
+  // 1.58 s slot was rendered as 1.75 s and ran past the end of its shot. A
+  // timeline has to be contiguous whatever decides its lengths.
+  let cursor = win.from;
   for (let i = 0; i < shots; i++) {
-    const start = win.from + i * every;
-    const end = i === shots - 1 ? win.to : win.from + (i + 1) * every;
-    const want = end - start;
+    const start = cursor;
+    const end = i === shots - 1 ? win.to : Math.min(win.to, start + every);
+    let want = end - start;
+    if (want <= 0.05) break;
     // impact 0 and no mood: both are musical judgements and it has none.
     // A shot that cannot fill the slot is skipped here too. This is NOT a
     // musical judgement and giving it to the control is not a handicap on the
@@ -61,12 +68,22 @@ function run(ctx) {
     // Without it the control runs past the end of a shot and the ORIGINAL
     // editor's cuts get spliced into it, which would hand the A/B a difference
     // that has nothing to do with reading the music.
+    // The control takes the next shot and, if it is too short for its slot,
+    // SHORTENS THE SLOT -- it does not go looking for a better one.
+    //
+    // Rejecting a short shot burned it from the cursor, and once the film
+    // stopped wrapping that starved the control to 5 shots against the
+    // intelligent edit's 12. An A/B decided by which side ran out of footage
+    // measures nothing about reading the music. Shortening is the same
+    // mechanical concession the other policy gets from the footage; the timer
+    // still decides where the cuts WANT to be, which is the whole difference
+    // being tested.
     let s = null;
     if (brief.preserve_order) {
-      for (let tries = 0; tries < pool.length; tries++) {
-        const c2 = ASSETS.nextInOrder(pool, used, want, brief);
-        if (!c2) break;
-        if (c2.duration + 0.02 >= want) { s = c2; break; }
+      const c2 = ASSETS.nextInOrder(pool, used, want, brief);
+      if (c2) {
+        s = c2;
+        if (c2.duration + 0.02 < want) want = Math.max(0.2, c2.duration - 0.02);
       }
     } else {
       s = ASSETS.choose(pool, want, used, prev, brief, seed + i,
@@ -80,8 +97,9 @@ function run(ctx) {
     })();
     prev = s.clip_id + "#" + s.shot;
     prevKin = s.source_category;
+    cursor = start + want;
     timeline.push({
-      start: +start.toFixed(3), end: +end.toFixed(3),
+      start: +start.toFixed(3), end: +(start + want).toFixed(3),
       clip_id: s.clip_id, shot: s.shot,
       in_s: ASSETS.inPoint(s, Math.min(want, s.duration)),
       because: { rule: "timer", salience: null,
