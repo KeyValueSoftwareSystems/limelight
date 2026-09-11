@@ -346,6 +346,11 @@ const ASSETS = (function () {
     let maxSub = 0;
     for (const s of pool) if ((s.subject_motion_px_s || 0) > maxSub) maxSub = s.subject_motion_px_s || 0;
     const maxReuse = (brief.callbacks && brief.callbacks.max_reuses_per_clip) || 2;
+    const distinctClips = (function () {
+      const c = new Set();
+      for (const x of pool) c.add(x.clip_id);
+      return c.size;
+    })();
     // -Infinity, not -1. Every term added here since has been a PENALTY, and
     // two of them together (story -0.55, arrival -0.65) can put every candidate
     // in the pool below a floor of -1. `choose` then returns null, the policy
@@ -374,7 +379,14 @@ const ASSETS = (function () {
       // SOURCE dominating, and it is the one a brief is talking about.
       const mkey = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);
       if ((used.get(mkey) || 0) >= 1) continue;
-      if ((used.get(s.clip_id) || 0) >= maxReuse) continue;
+      // The per-clip cap is a DIVERSITY control: it stops one clip dominating
+      // a pool of many. When the pool is a single film -- a music video cut
+      // into eighty shots -- it stops meaning that and starts meaning "this
+      // film may be two shots long". language-film placed 2 shots and left 17
+      // slots empty for exactly this reason. The shot-level counter below
+      // still prevents showing the same shot twice, which is the thing anyone
+      // actually notices.
+      if (distinctClips > 1 && (used.get(s.clip_id) || 0) >= maxReuse) continue;
       const times = used.get(s.clip_id) || 0;
       // Can this shot supply the requested duration? Shots that cannot are
       // only considered when nothing else is left, and the caller is expected
