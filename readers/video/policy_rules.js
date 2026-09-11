@@ -202,8 +202,33 @@ function run(ctx) {
   const ranked = cands.slice().sort(function (a, b) { return b.strength - a.strength; });
   const chosen = [];
   const declined = [];
+  // `cuts_per_minute` is a RATE, and a global budget does not enforce a rate.
+  // Ranking the whole song and taking the top N spends the budget wherever the
+  // candidates are densest: this brief asked for 34 cuts a minute and the
+  // passage at 4:02 got 51, because that stretch offers a strong half-bar
+  // everywhere and the budget had no reason to say no. Locally that is a
+  // different edit from the one the brief describes -- and against a 15-shot
+  // film it means wrapping through the whole ad twice, so the same phone comes
+  // back three times in twenty-six seconds. Repetition reads as a mistake.
+  //
+  // So the rate is enforced where it is felt: inside a sliding window, never
+  // more than the brief's rate allows. Rank still decides WHICH candidates win,
+  // so the strongest moments are still the ones that get the cuts.
+  const RATE_WIN_S = 20.0;
+  const perWin = Math.max(1, Math.round(perMin * RATE_WIN_S / 60));
+  const localFull = function (t) {
+    let n = 0;
+    for (const x of chosen) if (Math.abs(x.t - t) <= RATE_WIN_S / 2) n++;
+    return n >= perWin;
+  };
   for (const c of ranked) {
     if (chosen.length >= allowed) { declined.push(c); continue; }
+    if (localFull(c.t)) {
+      declined.push(Object.assign({}, c, {
+        over_rate: "the brief's " + perMin + " cuts/min is already spent in the " +
+                   RATE_WIN_S + "s around this" }));
+      continue;
+    }
     const held = R.allow_no_change === false ? null : inHoldWindow(c.t);
     if (held && c.strength < 0.8) {
       // Deliberately declined: cutting here would spend the contrast that the
@@ -262,9 +287,78 @@ function run(ctx) {
     : "footage-limit";
   const snapper = function (t) { return snap(t, beats); };
   const snapHard = function (t) { return snap(t, beats, true); };
-  let edges = [0].concat(chosen.map(function (c) { return snapper(c.t); }));
-  edges.push(dur);
-  const capped = ASSETS.capSlots(edges, cap, declined, snapHard);
+  let edges, capped;
+  if (brief.preserve_order) {
+    // When the order is the film's, the LENGTHS are the film's too.
+    //
+    // Ranking the music and then forcing the footage to fit produced 22 cuts
+    // where the brief asked for 15: every slot longer than the shot it landed
+    // on had to be split, so the music was asked for one cut and the edit
+    // performed two. Against a 15-shot film that wraps through the whole ad
+    // twice and the same phone comes back three times in twenty-six seconds.
+    //
+    // Inverted: walk the film, and for each shot ask the music where to cut.
+    // The shot proposes a length -- its own -- and the strongest candidate near
+    // that length decides the instant. Nothing is split because nothing was
+    // ever asked to stretch, every cut is still on a musical event, and the
+    // film is used once through before it repeats.
+    const orderOf = [], scratch = new Map();
+    for (let q = 0; q < pool0.length; q++) {
+      const c2 = ASSETS.nextInOrder(pool0, scratch, 0.5, brief);
+      if (!c2) break;
+      orderOf.push(c2);
+    }
+    const all = cands.slice().sort(function (a, b) { return a.t - b.t; });
+    const best_fallback = function (lo, hi) {
+      let b = null, bs = -1;
+      for (const c of all) {
+        const x = snapHard(c.t);
+        if (x < lo || x > hi) continue;
+        if ((c.strength || 0) > bs) { bs = c.strength || 0; b = x; }
+      }
+      // Never hand back a raw time. `hi` is where the SHOT runs out, which is
+      // not a musical instant, and returning it put one cut 172 ms off the grid.
+      return b === null ? snapHard(hi) : b;
+    };
+    edges = [0];
+    let t = 0, k = 0;
+    while (t < dur - minS && orderOf.length) {
+      const sh = orderOf[k % orderOf.length]; k++;
+      const room = Math.min(sh.duration - 0.02, cap);
+      const lo = t + minS, hi = t + room;
+      if (hi <= lo) { continue; }
+      // The strongest musical candidate the shot can reach. Nearest-to-the-end
+      // is the tie-break, so a shot is used for as much of itself as the music
+      // allows rather than cut early on a marginally stronger beat.
+      // LATEST first, strength second -- the opposite of everywhere else in
+      // this file, and deliberately so. A 1.60 s shot against a grid of
+      // 0.48 / 0.95 / 1.43 / 1.91 can only reach 1.43; scoring by strength took
+      // the half bar at 0.95 and threw away two fifths of the shot, which is
+      // why the edit kept coming out at 0.95 no matter what the film offered.
+      // Here the shot's length is the proposal and the music's job is to place
+      // the cut near it, so the last musical instant the shot can reach wins
+      // and strength only breaks ties within half a second of it.
+      const late = snapHard(hi);
+      const at = (late >= lo && late <= hi) ? (function () {
+        let b = late, bs = -1;
+        for (const c of all) {
+          const x = snapHard(c.t);
+          if (x < late - 0.5 || x > hi || x < lo) continue;
+          const sc = (c.strength || 0) + (x >= late - 0.01 ? 0.25 : 0);
+          if (sc > bs) { bs = sc; b = x; }
+        }
+        return b;
+      })() : (best_fallback(lo, hi));
+      if (at <= t + 0.01 || at > dur) break;
+      edges.push(at); t = at;
+    }
+    if (edges[edges.length - 1] < dur) edges.push(dur);
+    capped = { edges: edges, forced: [] };
+  } else {
+    edges = [0].concat(chosen.map(function (c) { return snapper(c.t); }));
+    edges.push(dur);
+    capped = ASSETS.capSlots(edges, cap, declined, snapHard);
+  }
   edges = capped.edges;
   const forced = new Set(capped.forced.map(function (t) { return t.toFixed(3); }));
 
