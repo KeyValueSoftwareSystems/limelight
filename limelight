@@ -1,0 +1,54 @@
+#!/usr/bin/env node
+/* limelight -- the command.
+   ---------------------------------------------------------------------------
+     limelight push <path/to/file.score>   upload to the shared score folder
+     limelight pull <name.score>           download into the current directory
+
+   The folder is LIMELIGHT_REMOTE, a URL; the scheme picks the backend in
+   cli/remote.js. This file only knows about argv, files on disk, and what to
+   say. Exit codes: 0 done, 1 usage or bad input or not on the server,
+   2 the remote could not be reached or refused. */
+"use strict";
+const fs = require("fs"), path = require("path");
+const { openRemote, DEFAULT_REMOTE, NotFound, RemoteError } = require("./cli/remote.js");
+
+const REMOTE = process.env.LIMELIGHT_REMOTE || DEFAULT_REMOTE;
+const USAGE = `usage:
+  limelight push <path/to/file.score>   upload to the shared score folder (overwrites)
+  limelight pull <name.score>           download into the current directory
+
+remote: ${REMOTE}   (override with LIMELIGHT_REMOTE=<url>)`;
+
+/* a deliberate exit with a message: thrown, so every path out goes through main */
+class Exit extends Error { constructor(code, msg) { super(msg); this.code = code; } }
+const usage = () => { throw new Exit(1, USAGE); };
+
+async function push(remote, file) {
+  if (!file) usage();
+  if (!file.endsWith(".score")) throw new Exit(1, `${file}: a score file ends in .score`);
+  if (!fs.existsSync(file) || !fs.statSync(file).isFile()) throw new Exit(1, `${file}: no such file`);
+  const bytes = fs.readFileSync(file);
+  const name = path.basename(file);
+  await remote.put(name, bytes);
+  /* a truncated upload that reports success is the expensive kind of failure */
+  const held = await remote.size(name);
+  if (held !== bytes.length)
+    throw new Exit(2, `uploaded ${bytes.length} bytes but the server holds ${held === null ? "nothing" : held} — push again`);
+  console.log(`pushed ${name} → ${remote.url(name)} (${bytes.length} bytes)`);
+}
+
+const COMMANDS = { push };
+
+async function main(argv) {
+  const [cmd, arg] = argv;
+  if (!COMMANDS[cmd]) usage();
+  const remote = openRemote(REMOTE);
+  await COMMANDS[cmd](remote, arg);
+}
+
+main(process.argv.slice(2)).catch(e => {
+  if (e instanceof Exit) { console.error(e.message); process.exit(e.code); }
+  if (e instanceof RemoteError) { console.error(e.message); process.exit(2); }
+  console.error(e && e.stack || e);            /* a bug: show all of it, never a blank */
+  process.exit(2);
+});
