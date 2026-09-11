@@ -144,6 +144,45 @@ def added_beat_support(fx, rate, period, phase, dur, half_width):
     return (sum(odd) / len(odd)) / mean_even if mean_even > 1e-12 else 0.0
 
 
+def midpoint_support(fx, rate, period, phase, dur, half_width):
+    """Energy halfway between the grid points, over energy on them.
+
+    The other half of the octave question, and the half nothing here asked.
+    `added_beat_support` catches a grid that is too FAST -- alternate points
+    land on nothing, so odd/even falls. It cannot see a grid that is too SLOW,
+    because every point of a half-tempo grid lands on a real beat and odd/even
+    stays healthy. What gives that away is the midpoints: they sit on the beats
+    the grid skipped, so they are as strong as the grid itself.
+
+    Together the two ratios separate all three candidates, and both are internal
+    to the grid being tested -- neither can be won by placing more points or
+    fewer, which is how every test written against the whole signal fools
+    itself."""
+    on, between, t = [], [], phase
+    while t < dur:
+        on.append(flux_near(fx, int(t * rate), half_width))
+        mid = t + period / 2.0
+        if mid < dur:
+            between.append(flux_near(fx, int(mid * rate), half_width))
+        t += period
+    if not on or not between:
+        return 0.0
+    mean_on = sum(on) / len(on)
+    return (sum(between) / len(between)) / mean_on if mean_on > 1e-12 else 0.0
+
+
+def octave_fit(alt, mid):
+    """How much this grid looks like the beat rather than half or double it.
+
+    correct    alternate points on beats (alt high), midpoints off-beat (mid low)
+    too fast   alternate points on nothing (alt low)
+    too slow   midpoints on the beats it skipped (mid high)
+    """
+    a = max(0.0, min(1.0, alt / 0.75))
+    b = max(0.0, min(1.0, 1.0 - (mid - 0.45) / 0.45))
+    return a * b
+
+
 def best_phase_for_period(fx, rate, period, dur, half_width, divisions=64):
     best_score, best_phase = -1.0, 0.0
     steps = max(8, int(period * rate))
@@ -182,21 +221,26 @@ def fit_grid(fx, rate, dur):
             continue
         phase, score = best_phase_for_period(fx, rate, period, dur, half_width)
         support = added_beat_support(fx, rate, period, phase, dur, half_width)
-        candidates.append((name, period, phase, score, support))
+        mid = midpoint_support(fx, rate, period, phase, dur, half_width)
+        candidates.append((name, period, phase, score, support, mid,
+                           octave_fit(support, mid)))
 
-    candidates.sort(key=lambda c: c[1])
     notes = []
-    chosen = next(
-        (c for c in candidates
-         if ADDED_BEAT_SUPPORT_FLOOR <= c[4] <= ADDED_BEAT_SUPPORT_CEIL),
-        None,
-    )
-    if chosen is None:
-        chosen = max(candidates, key=lambda c: c[3])
-        notes.append("no grid had supported off-beats; fell back to strongest")
-    name, period, phase, score, support = chosen
+    # Compare the three EXPLICITLY on both ratios, rather than taking the first
+    # one whose odd/even lands in a band.
+    #
+    # The old rule sorted by period ascending -- fastest first -- and took the
+    # first candidate inside a hard band on one ratio. So it preferred the
+    # fastest grid that squeaked through, and it had no test at all for a grid
+    # that is too slow. Holocene came out at 148 bpm for a ~74 bpm record and
+    # Afterglow at 87 for ~174: wrong in both directions, from a test that could
+    # only see one of them.
+    chosen = max(candidates, key=lambda c: (c[6], c[3]))
+    name, period, phase, score, support, mid, fit = chosen
+    for c in candidates:
+        notes.append(f"{c[0]} {60.0 / c[1]:.1f}bpm: alt {c[4]:.2f} mid {c[5]:.2f} fit {c[6]:.2f}")
     if name != "as-fit":
-        notes.append(f"octave corrected to {name} (added-beat support {support:.2f})")
+        notes.append(f"octave corrected to {name}: alt {support:.2f}, mid {mid:.2f}, fit {fit:.2f}")
 
     for dp in [d / 20000.0 for d in range(-200, 201, 5)]:
         trial_period = period + dp
