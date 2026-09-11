@@ -212,6 +212,10 @@ def to_map(state: dict, vec_filename: str | None = None,
         "chords": state.get("chords"),
         "melody": state.get("melody"),
         "notes": state.get("notes"),
+        # MuQ-MuLan zero-shot mood (per-section, text-audio aligned)
+        "mood": state.get("muqmulan_mood"),
+        # MuQ frame-level novelty (per-beat cosine distance)
+        "novelty": state.get("novelty"),
     }
 
     # ---- learned tier ----
@@ -230,7 +234,8 @@ def to_map(state: dict, vec_filename: str | None = None,
         "who": prov.get("tool", "musicstate"),
         "why": "Ported from musicstate. Beats, downbeats and labelled sections come from allin1; "
                "energy and the frame stream from librosa; per-stem presence from htdemucs; "
-               "mood and danceability from Essentia; embeddings from MERT.",
+               "semantic tags from Essentia; embeddings and novelty from MuQ; "
+               "mood and moment candidates from MuQ-MuLan zero-shot alignment.",
         "ported_by": ported_by,
         "analyzers": prov.get("analyzers", []),
         "port_notes": [

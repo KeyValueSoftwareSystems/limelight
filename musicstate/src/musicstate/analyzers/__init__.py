@@ -6,6 +6,7 @@ from .chords import ChordsAnalyzer
 from .dsp import DspAnalyzer
 from .embedding import EmbeddingAnalyzer
 from .melody import MelodyAnalyzer
+from .muqmulan import MuQMuLanAnalyzer
 from .notes import NoteTranscriptionAnalyzer
 from .semantic import SemanticAnalyzer
 from .stems import StemsAnalyzer
@@ -24,4 +25,5 @@ __all__ = [
     "StemsAnalyzer",
     "SemanticAnalyzer",
     "EmbeddingAnalyzer",
+    "MuQMuLanAnalyzer",
 ]

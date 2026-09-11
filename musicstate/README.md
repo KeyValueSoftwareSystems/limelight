@@ -49,7 +49,8 @@ src/musicstate/
     allin1.py         L2  labelled segments + downbeats (allin1, separate env)
     stems.py          L2  per-stem presence (Demucs)
     semantic.py       L3  mood/danceability/voice/genre (Essentia, separate env)
-    embedding.py      L4  per-beat MERT embeddings
+    embedding.py      L4  per-beat MuQ embeddings + novelty curve
+    muqmulan.py       L4  zero-shot moments + mood via MuQ-MuLan text-audio alignment
     notes.py          L4  polyphonic note events (basic-pitch, ONNX backend)
     workers/          the scripts run inside the sibling envs
   schema/             the MusicState JSON schema
@@ -85,7 +86,9 @@ valid map.
 | `observations.chords` | per-bar chord (maj/min/dom7 templates on chroma, median-smoothed); core |
 | `observations.melody` | per-sixteenth pyin f0 contour, unvoiced=null; deep |
 | `observations.notes` | polyphonic note events via basic-pitch (ONNX backend); deep |
-| `vectors` | MERT per-beat embeddings (out-of-line file) |
+| `observations.mood` | MuQ-MuLan per-section mood (text-audio zero-shot alignment) |
+| `observations.novelty` | MuQ per-beat novelty (cosine distance between bar-wide frame windows) |
+| `vectors` | MuQ per-beat embeddings (out-of-line file, replaces MERT) |
 | `confidence` | mean of `confidence_by_field` |
 
 Verified byte-for-byte against the reference `levels.dheeraj.map.json`
@@ -97,7 +100,7 @@ The heavy backends conflict, so each has its own conda env, reached by subproces
 
 | env | holds |
 |---|---|
-| `limelight-ms` | librosa, torch, Demucs, MERT — runs the pipeline & CLI |
+| `limelight-ms` | librosa, torch, Demucs, MuQ/MuQ-MuLan — runs the pipeline & CLI |
 | `limelight-ess` | essentia-tensorflow (L3) |
 | `limelight-allin1` | torch 2.6 + natten + allin1 + madmom (L2 labelled structure) |
 

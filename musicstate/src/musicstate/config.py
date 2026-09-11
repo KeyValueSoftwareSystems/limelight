@@ -14,7 +14,9 @@ HOP_LENGTH = 512
 N_FFT = 2048
 
 # --- models ---
-MERT_MODEL = "m-a-p/MERT-v1-95M"
+MUQ_MODEL = "OpenMuQ/MuQ-large-msd-iter"
+MUQMULAN_MODEL = "OpenMuQ/MuQ-MuLan-large"
+MUQ_SR = 24000
 DEMUCS_MODEL = "htdemucs"
 ESSENTIA_EMBEDDING = "discogs-effnet-bs64-1.pb"
 

@@ -21,6 +21,7 @@ from .analyzers import (
     DspAnalyzer,
     EmbeddingAnalyzer,
     MelodyAnalyzer,
+    MuQMuLanAnalyzer,
     NoteTranscriptionAnalyzer,
     SemanticAnalyzer,
     StemsAnalyzer,
@@ -47,7 +48,8 @@ def deep_analyzers() -> list[Analyzer]:
         MelodyAnalyzer(),        # pyin melody contour
         StemsAnalyzer(),
         SemanticAnalyzer(),
-        EmbeddingAnalyzer(),
+        EmbeddingAnalyzer(),     # MuQ per-beat vectors + novelty (replaces MERT)
+        MuQMuLanAnalyzer(),      # zero-shot moments + mood via text-audio alignment
         NoteTranscriptionAnalyzer(),  # polyphonic notes via basic-pitch (onnx)
     ]
 
