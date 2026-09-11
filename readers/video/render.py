@@ -80,6 +80,82 @@ def decode_shot(src, in_s, nframes, fps, w, h):
     return a, dw, dh
 
 
+def apply_effect(frames, k, fx, w, h, params):
+    """One of the named effects, as a function of the shot's own frames and k.
+
+    PURE in (frames, k, fx). `trails` and `freeze` need neighbouring frames, and
+    they take them from the decoded shot rather than from whatever the renderer
+    emitted last -- so any frame can still be rendered on its own, and asking
+    for frame 400 twice gives identical pixels. That is the same constraint the
+    lighting reader lives under and it is worth the small extra cost.
+
+    Returns the frame to draw. Geometry (zoom, offset, gain) is applied after.
+    """
+    if not fx:
+        return frames[k]
+    name, thr, st = fx["effect"], fx["through"], fx["strength"]
+    n = len(frames)
+
+    if name == "freeze":
+        # The picture stops. On a `stop` moment the music does the same thing,
+        # and holding a frame is the only effect that says so.
+        hold = int(fx.get("_k0", k))
+        return frames[min(max(0, hold), n - 1)]
+
+    if name == "trails":
+        # An echo that tightens: the further through the build, the shorter the
+        # tail, so the picture gathers rather than smears evenly.
+        amt = params.get("fx_trails", 1.0) * st * (1.0 - 0.6 * thr)
+        if amt <= 0.01:
+            return frames[k]
+        lag1 = max(0, k - int(4 + 6 * (1 - thr)))
+        lag2 = max(0, k - int(9 + 12 * (1 - thr)))
+        a = frames[k].astype(np.float32)
+        a = (a * (1 - 0.45 * amt)
+             + frames[lag1].astype(np.float32) * (0.30 * amt)
+             + frames[lag2].astype(np.float32) * (0.15 * amt))
+        return np.clip(a, 0, 255).astype(np.uint8)
+
+    if name == "bloom":
+        # Light spreads and nothing moves. For a spotlight, where the music
+        # opens up rather than hits.
+        amt = params.get("fx_bloom", 1.0) * st * math.sin(math.pi * min(1.0, thr)) ** 0.6
+        if amt <= 0.01:
+            return frames[k]
+        f = frames[k]
+        small = cv2.resize(f, (f.shape[1] // 6, f.shape[0] // 6))
+        blur = cv2.GaussianBlur(small, (0, 0), 6)
+        blur = cv2.resize(blur, (f.shape[1], f.shape[0]))
+        hi = np.clip(blur.astype(np.float32) - 120, 0, None) * (1.6 * amt)
+        return np.clip(f.astype(np.float32) + hi, 0, 255).astype(np.uint8)
+
+    if name == "whip":
+        # A fast directional throw, for a return: the picture is thrown back to
+        # where it came from.
+        amt = params.get("fx_whip", 1.0) * st * (1.0 - thr) ** 1.5
+        if amt <= 0.02:
+            return frames[k]
+        ln = max(3, int(38 * amt) | 1)
+        kern = np.zeros((ln, ln), np.float32)
+        kern[ln // 2, :] = 1.0 / ln
+        return cv2.filter2D(frames[k], -1, kern)
+
+    if name == "punch":
+        # Chromatic split on the hardest instant only, decaying fast. Any
+        # longer and it reads as a broken display rather than an impact.
+        amt = params.get("fx_rgb", 0.55) * st * max(0.0, 1.0 - thr * 3.0)
+        if amt <= 0.02:
+            return frames[k]
+        f = frames[k]
+        off = max(1, int(9 * amt))
+        out = f.copy()
+        out[:, off:, 0] = f[:, :-off, 0]
+        out[:, :-off, 2] = f[:, off:, 2]
+        return out
+
+    return frames[k]
+
+
 def transform(frame, dw, dh, w, h, zoom, gain, dx=0.0, dy=0.0):
     """Crop scaled by `zoom` and offset by (dx, dy), then gain.
 
@@ -252,6 +328,12 @@ def main():
     ap.add_argument("--copy")
     ap.add_argument("--no-audio", action="store_true")
     ap.add_argument("--motion", help="JSON overriding motion params")
+    ap.add_argument("--generic-motion", action="store_true",
+                    help="A Ken Burns push on every shot, at constant amplitude, "
+                         "with no reference to the music. What a competent editor "
+                         "or a basic auto-editor does without a map -- and the "
+                         "fair thing to give the control, which previously got no "
+                         "motion at all.")
     a = ap.parse_args()
 
     ir = json.load(open(a.ir))
@@ -291,7 +373,7 @@ def main():
          "-c:v", "libx264", "-preset", "medium", "-crf", "19",
          "-pix_fmt", "yuv420p", tmp], stdin=subprocess.PIPE)
 
-    stats = {"zoom_min": 9, "zoom_max": 0, "frames": 0}
+    stats = {"zoom_min": 9, "zoom_max": 0, "frames": 0, "fx": {}}
     for i, e in enumerate(ir["timeline"]):
         n = bounds[i + 1] - bounds[i]
         clip = index.get(e["clip_id"])
@@ -305,9 +387,38 @@ def main():
             return 1
         for k in range(n):
             t_local = (bounds[i] + k) / fps
-            v = mo.at(t0 + t_local,
+            tabs = t0 + t_local
+            if a.generic_motion:
+                # No map is consulted. A slow push across each shot, alternating
+                # direction, plus a gentle constant breath -- the same moves,
+                # applied evenly, because evenly is all you can do without
+                # knowing where you are.
+                kk = (bounds[i + 1] - bounds[i])
+                prog = k / max(1, kk - 1)
+                sgn = 1.0 if i % 2 == 0 else -1.0
+                v = {"zoom": 1.0 + 0.06 * sgn * (prog - 0.5) * 2.0
+                              + 0.012 * math.sin(2 * math.pi * t_local * 0.9),
+                     "gain": 1.0, "dx": 0.004 * math.sin(2 * math.pi * prog),
+                     "dy": 0.0}
+                fx = None
+                src = frames[k]
+                img = transform(src, dw, dh, w, h, v["zoom"], v["gain"],
+                                v["dx"], v["dy"])
+                img = copy.draw(img, t_local, w, h)
+                img = card.draw(img, t_local, w, h, copy.font)
+                enc.stdin.write(img.tobytes())
+                stats["zoom_min"] = min(stats["zoom_min"], v["zoom"])
+                stats["zoom_max"] = max(stats["zoom_max"], v["zoom"])
+                stats["frames"] += 1
+                continue
+            v = mo.at(tabs,
                       {"i": i, "start": bounds[i] / fps, "end": bounds[i + 1] / fps})
-            img = transform(frames[k], dw, dh, w, h, v["zoom"], v["gain"],
+            fx = mo.effect_at(tabs)
+            if fx and fx["effect"] == "freeze":
+                # The frame the freeze started on, in this shot's own indexing.
+                fx["_k0"] = int(round((fx["at"] - t0 - bounds[i] / fps) * fps))
+            src = apply_effect(frames, k, fx, w, h, params)
+            img = transform(src, dw, dh, w, h, v["zoom"], v["gain"],
                             v.get("dx", 0.0), v.get("dy", 0.0))
             img = copy.draw(img, t_local, w, h)
             img = card.draw(img, t_local, w, h, copy.font)
@@ -315,6 +426,8 @@ def main():
             stats["zoom_min"] = min(stats["zoom_min"], v["zoom"])
             stats["zoom_max"] = max(stats["zoom_max"], v["zoom"])
             stats["frames"] += 1
+            if fx:
+                stats["fx"][fx["effect"]] = stats["fx"].get(fx["effect"], 0) + 1
     enc.stdin.close()
     if enc.wait() != 0:
         print("encode failed", file=sys.stderr)
@@ -335,9 +448,13 @@ def main():
     else:
         os.replace(tmp, out)
 
+    quiet = stats["frames"] - sum(stats["fx"].values())
     print(f"{stats['frames']} frames ({stats['frames']/fps:.1f}s), "
           f"zoom {stats['zoom_min']:.3f}-{stats['zoom_max']:.3f}, "
           f"{os.path.getsize(out)/1e6:.1f} MB -> {out}", file=sys.stderr)
+    print(f"  effects: {stats['fx'] or 'none'}; "
+          f"{100*quiet/max(1,stats['frames']):.0f}% of frames carry no effect "
+          f"at all, which is the point", file=sys.stderr)
     return 0
 
 

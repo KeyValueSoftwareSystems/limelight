@@ -97,6 +97,8 @@ class Motion:
         self.moments = sorted(m.get("moments") or [], key=lambda x: x["at"])
         self.drops = [x["at"] for x in self.moments if x["kind"] in ("drop", "stop")]
         self.spans = m.get("spans") or []
+        self.dur = (m.get("song") or {}).get("length") or 0.0
+        self._plan_effects()
 
     # ---- primitives -------------------------------------------------------
     def beat_phase(self, t):
@@ -168,6 +170,100 @@ class Motion:
                 return (t - a) / (b - a)
         return 0.0
 
+    # ---- which effect, and whether any ------------------------------------
+    #
+    # ONE effect fired on every accent, everywhere, for the whole video. A
+    # person watching it put it exactly: "boom boom effects for no reason
+    # throughout, and only that effect". Both halves of that are faults.
+    #
+    # ONLY THAT EFFECT: the map names six kinds of moment -- build, drop, stop,
+    # quiet, spotlight, return -- and five of them were being answered with the
+    # same zoom punch. A stop is not a drop. The interface tier already carries
+    # the distinction; nothing was reading it.
+    #
+    # FOR NO REASON: there was no budget. Cuts have one -- a fixed amount of
+    # attention, spent on the strongest moments, with the rest declined -- and
+    # effects had none, so every accent got one and none of them meant anything.
+    # Effects are budgeted the same way now, and the budget is smaller than the
+    # number of candidates ON PURPOSE. What is declined is what makes the rest
+    # land.
+    #
+    # And `still` windows: stretches where the answer is nothing at all.
+
+    KIND_EFFECT = {
+        "drop":      ("punch", 1.00),   # scale slam + flash
+        "stop":      ("freeze", 0.95),  # the picture stops with the music
+        "build":     ("trails", 0.70),  # echo that tightens toward the top
+        "return":    ("whip", 0.65),    # a fast directional throw
+        "spotlight": ("bloom", 0.60),   # light blooms, nothing moves
+        "quiet":     ("still", 0.00),   # deliberately nothing
+    }
+
+    def _plan_effects(self):
+        """Which moments get an effect, decided once, from the map alone.
+
+        Ranked by kind weight times measured salience, then cut to the budget.
+        Everything below the line is left alone, and `quiet` is never given an
+        effect at all -- its entry exists so that a quiet moment SUPPRESSES the
+        ambient motion rather than merely failing to add to it.
+        """
+        p = self.p
+        dur = self.dur or 1.0
+        allowed = max(0, int(round(p["effects_per_minute"] * dur / 60.0)))
+        cands = []
+        for m in self.moments:
+            kind = m.get("kind")
+            eff, w = self.KIND_EFFECT.get(kind, (None, 0))
+            if not eff:
+                continue
+            size = m.get("size")
+            strength = w * (0.6 + 0.4 * (size if isinstance(size, (int, float)) else 0.6))
+            cands.append({"at": m["at"], "kind": kind, "effect": eff,
+                          "strength": strength})
+        cands.sort(key=lambda c: -c["strength"])
+        granted = [c for c in cands if c["effect"] != "still"][:allowed]
+        granted.sort(key=lambda c: c["at"])
+        self.effects = granted
+        self.quiets = [m["at"] for m in self.moments if m.get("kind") == "quiet"]
+        self.declined = len(cands) - len(granted)
+
+    def effect_at(self, t):
+        """The active effect and how far through it we are, or None.
+
+        None is a real answer and the common one: most instants have no effect,
+        which is the point.
+        """
+        best = None
+        for e in getattr(self, "effects", []):
+            span = self.p["effect_len"].get(e["effect"], 0.5)
+            dt = t - e["at"]
+            if 0 <= dt < span:
+                k = dt / span
+                if best is None or k < best["through"]:
+                    best = {"effect": e["effect"], "through": k,
+                            "strength": e["strength"], "at": e["at"],
+                            "kind": e["kind"]}
+        return best
+
+    def stillness(self, t):
+        """1 where the picture should be left alone, 0 where it is free.
+
+        Rises inside a `quiet` moment's shadow and just before a granted effect,
+        so that the loud thing arrives out of calm instead of out of more noise.
+        """
+        p = self.p
+        s = 0.0
+        for q in getattr(self, "quiets", []):
+            dt = t - q
+            if 0 <= dt < p["quiet_len"]:
+                s = max(s, 1.0 - dt / p["quiet_len"])
+        for e in getattr(self, "effects", []):
+            lead = p["hush_before"]
+            dt = e["at"] - t
+            if 0 < dt <= lead:
+                s = max(s, 0.85 * (1.0 - dt / lead))
+        return s
+
     # ---- what the renderer asks for ---------------------------------------
     def at(self, t, shot=None):
         """Every per-frame value, as one dict. Pure in (map, params, t, shot).
@@ -205,6 +301,10 @@ class Motion:
         # saved. `arc` is that envelope: it rises across a build span, peaks
         # through a drop's decay, and otherwise sits at a floor.
         arc = p["arc_floor"] + (1 - p["arc_floor"]) * max(build * build, drop)
+        # Stillness overrides the arc. Without this the "ambient" motion never
+        # reaches zero and there is no such thing as a calm passage.
+        hush = self.stillness(t)
+        arc *= (1.0 - hush)
         zoom = (1.0
                 + p["breath"] * self.pump_scale * pump * (0.35 + 0.65 * e) * arc
                 + p["punch"] * acc * (0.3 + 0.7 * e) * arc
@@ -248,5 +348,19 @@ DEFAULTS = {
     # feel loud. At 1.0 every second gets the same treatment and the result
     # reads as one effect applied evenly, which is the note this was written to
     # answer.
-    "arc_floor": 0.38,
+    # Ambient motion outside a build or a drop. Lower than it was: the constant
+    # low-level movement is what read as "boom boom throughout".
+    "arc_floor": 0.22,
+
+    # Effects are budgeted like cuts, and the budget is deliberately small.
+    "effects_per_minute": 7.0,
+    "hush_before": 1.6,        # seconds of calm bought before a granted effect
+    "quiet_len": 3.0,          # how long a `quiet` moment keeps the picture still
+    "effect_len": {            # how long each effect runs
+        "punch": 0.55, "freeze": 0.42, "trails": 1.60,
+        "whip": 0.34, "bloom": 1.20,
+    },
+    # Per-effect strength, so a brief can turn any of them down or off.
+    "fx_punch": 1.00, "fx_freeze": 1.00, "fx_trails": 1.00,
+    "fx_whip": 1.00, "fx_bloom": 1.00, "fx_rgb": 0.55,
 }

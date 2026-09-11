@@ -36,20 +36,35 @@ function run(ctx) {
   const pool = ASSETS.selectBySubject(
     ASSETS.shots(index, brief), brief, ctx.sem,
     undefined, brief.subject_min_shots || undefined);
-  // Catalogue order. No fit, no continuity, no climax -- there is nothing to be
-  // climactic about without a map.
-  const ordered = pool.slice().sort(function (a, b) {
-    return a.clip_id === b.clip_id ? a.shot - b.shot
-                                   : (a.clip_id < b.clip_id ? -1 : 1);
-  });
-
+  // The SAME chooser the intelligent policy uses.
+  //
+  // This was catalogue order -- alphabetical by clip_id, no fit, no continuity,
+  // no variety -- and that was an unfair fight. Fit scoring, continuity and the
+  // subject-variety penalty come from the BRIEF and the clip index; none of
+  // them needs a map. Withholding them was handicapping the control with tools
+  // it should have had, which proves nothing except that a crippled baseline
+  // loses.
+  //
+  // The one thing it does not get is knowledge of WHERE IT IS IN THE SONG. It
+  // cuts on a timer. That difference, and nothing else, is what the A/B is for.
   const timeline = [];
+  const used = new Map();
+  let prev = null, prevKin = null;
   for (let i = 0; i < shots; i++) {
     const start = win.from + i * every;
     const end = i === shots - 1 ? win.to : win.from + (i + 1) * every;
-    const s = ordered[i % ordered.length];
-    if (!s) continue;
     const want = end - start;
+    // impact 0 and no mood: both are musical judgements and it has none.
+    const s = ASSETS.choose(pool, want, used, prev, brief, seed + i,
+                            prevKin, false, 0, null, null, null);
+    if (!s) continue;
+    (function () {
+      const mk = s.clip_id + "#" + s.shot + "#" + (s.moment || 0);
+      used.set(mk, (used.get(mk) || 0) + 1);
+      used.set(s.clip_id, (used.get(s.clip_id) || 0) + 1);
+    })();
+    prev = s.clip_id;
+    prevKin = s.source_category;
     timeline.push({
       start: +start.toFixed(3), end: +end.toFixed(3),
       clip_id: s.clip_id, shot: s.shot,
