@@ -8,9 +8,15 @@
   const BLOCK_Y = 0;
 
   const COLORS = { red: 0xff2d55, blue: 0x2ec5ff };
+  const BASE_FOV = 70, BASE_CAM_Z = 9;
   let renderer, scene, camera, mount, raycaster;
   let blocks = new Map();   // key -> { mesh, note }
   let saberMeshes = [];
+
+  // music-reactive background state
+  let stars = null, gridHelper = null;
+  let music = { energy: 0.4, phase: 0 };
+  let pulseVal = 0, punchVal = 0, lastStep = 0;
 
   function init(mountEl) {
     mount = mountEl;
@@ -33,10 +39,11 @@
     const key = new THREE.DirectionalLight(0xffffff, 0.8);
     key.position.set(0, 8, 10); scene.add(key);
 
-    // neon lane floor
-    const grid = new THREE.GridHelper(120, 60, 0x2ec5ff, 0x1b2740);
-    grid.position.z = FAR_Z / 2; grid.position.y = -2;
-    scene.add(grid);
+    // neon lane floor — brightness pulses on the beat
+    gridHelper = new THREE.GridHelper(120, 60, 0x2ec5ff, 0x1b2740);
+    gridHelper.position.z = FAR_Z / 2; gridHelper.position.y = -2;
+    gridHelper.material.transparent = true;
+    scene.add(gridHelper);
 
     // strike line
     const lineGeo = new THREE.PlaneGeometry(9, 0.12);
@@ -44,6 +51,71 @@
     const line = new THREE.Mesh(lineGeo, lineMat);
     line.position.set(0, BLOCK_Y - 1.2, STRIKE_Z); line.rotation.x = -Math.PI / 2.2;
     scene.add(line);
+
+    makeStars();
+    music = { energy: 0.4, phase: 0 }; pulseVal = 0; punchVal = 0;
+    lastStep = performance.now();
+  }
+
+  // A starfield streaming toward the camera down the lane — the depth illusion.
+  function makeStars() {
+    const N = 500;
+    const pos = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 26;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 15;
+      pos[i * 3 + 2] = FAR_Z + Math.random() * (BASE_CAM_Z - FAR_Z);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    stars = new THREE.Points(g, new THREE.PointsMaterial({
+      color: 0x9fd8ff, size: 0.18, transparent: true, opacity: 0.7, depthWrite: false }));
+    scene.add(stars);
+  }
+
+  // ---- music input --------------------------------------------------------
+  function setMusic(m) {
+    if (!m) return;
+    if (typeof m.energy === "number") music.energy = Math.max(0, Math.min(1, m.energy));
+    if (typeof m.phase === "number") music.phase = m.phase;
+  }
+  // Called once per beat; a downbeat kicks the camera as well as the grid.
+  function pulse(isDownbeat) {
+    pulseVal = isDownbeat ? 1 : 0.6;
+    if (isDownbeat) punchVal = 1;
+  }
+
+  // Advance the reactive background one frame (called once per frame from update).
+  function stepBackground() {
+    const t = performance.now();
+    let dt = (t - lastStep) / 1000; lastStep = t;
+    if (dt > 0.1) dt = 0.1;                 // absorb a stall rather than teleport
+
+    if (stars) {
+      const arr = stars.geometry.attributes.position.array;
+      const speed = (7 + music.energy * 45) * dt;   // faster when the music is bigger
+      const nearZ = BASE_CAM_Z + 2;
+      for (let i = 0; i < arr.length; i += 3) {
+        arr[i + 2] += speed;
+        if (arr[i + 2] > nearZ) {           // recycle to the far end
+          arr[i + 2] = FAR_Z;
+          arr[i] = (Math.random() - 0.5) * 26;
+          arr[i + 1] = (Math.random() - 0.5) * 15;
+        }
+      }
+      stars.geometry.attributes.position.needsUpdate = true;
+      stars.material.opacity = 0.45 + music.energy * 0.5;
+    }
+
+    pulseVal = Math.max(0, pulseVal - dt * 3.2);
+    if (gridHelper) gridHelper.material.opacity = 0.28 + pulseVal * 0.6;
+
+    punchVal = Math.max(0, punchVal - dt * 4.0);
+    if (camera) {
+      camera.fov = BASE_FOV + punchVal * 7;
+      camera.position.z = BASE_CAM_Z - punchVal * 0.5;
+      camera.updateProjectionMatrix();
+    }
   }
 
   // an arrow texture drawn once per direction, cached
@@ -110,6 +182,7 @@
   }
 
   function update(progressOf) {
+    stepBackground();                        // advance the reactive background once/frame
     blocks.forEach((b, key) => {
       const p = progressOf(key);
       if (p == null) return;
@@ -208,9 +281,10 @@
   function dispose() {
     clear();
     if (renderer) { renderer.dispose(); if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement); }
-    renderer = scene = camera = null; saberMeshes = [];
+    renderer = scene = camera = null; saberMeshes = []; stars = null; gridHelper = null;
   }
 
   window.Scene3D = { init, resize, spawnBlock, update, sliceBlock, missBlock,
-                     setSabers, pickBlocks, planePoint, clear, dispose, LANE_X: LANE_X };
+                     setSabers, setMusic, pulse, pickBlocks, planePoint,
+                     clear, dispose, LANE_X: LANE_X };
 })();

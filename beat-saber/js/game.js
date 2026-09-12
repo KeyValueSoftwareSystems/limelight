@@ -12,7 +12,7 @@
   let audio, clock, session, input, raf = 0, running = false;
   let notes = new Map();            // key -> note (live)
   let spawned = new Set();
-  let hud = {}, playfield, stats, difficulty, latency_ms, onEnd;
+  let hud = {}, playfield, stats, difficulty, latency_ms, onEnd, lastBeatKey = -1;
 
   function $(id) { return document.getElementById(id); }
 
@@ -41,7 +41,7 @@
     await input.start();
 
     stats = { hits: 0, misses: 0, score: 0, combo: 0, maxCombo: 0, energy: 55 };
-    notes = new Map(); spawned = new Set();
+    notes = new Map(); spawned = new Set(); lastBeatKey = -1;
     playfield.classList.add("is-playing");
     window.Scene3D.resize();
     renderHud();
@@ -72,6 +72,17 @@
     if (!running) return;
     raf = requestAnimationFrame(loop);
     const nowSec = clock.position();
+
+    // feed the reactive background: energy + a pulse on each beat (kick on the one)
+    const now = session.now();
+    window.Scene3D.setMusic({ energy: now.energy, phase: now.phase });
+    if (!now.position.before_first_beat) {
+      const bk = now.position.bar * 100 + Math.floor(now.position.beat);
+      if (bk !== lastBeatKey) {
+        lastBeatKey = bk;
+        window.Scene3D.pulse(Math.floor(now.position.beat) === 1);
+      }
+    }
 
     // spawn from the window; backlog-aware
     const ctx = { difficulty: difficulty, secondsAt: (b, be) => session.secondsAt(b, be) };
