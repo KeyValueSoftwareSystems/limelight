@@ -309,6 +309,20 @@ of them likes is worth a gentler one.
 
 null means only we heard it. That is not the same as wrong.
 
+`noisy` is how much of a bar is noise rather than pitch -- distortion, cymbals,
+breath -- measured as spectral flatness. `held` is how much of the bar the sound
+keeps ringing instead of hitting and stopping: the share of the bar spent above
+half the bar's own peak. A bar of staccato stabs and a bar of one held chord can
+carry the same energy and the same brightness and read completely differently,
+and nothing in the score could tell them apart.
+
+Both were checked against every curve already in the score before they were
+added, on eight songs. `held` never exceeds 0.71 correlation with an existing
+curve and `noisy` reaches 0.88 only on Levels, against air, sitting between 0.21
+and 0.60 elsewhere. A third candidate, the depth of the valleys between hits,
+was dropped: it tracked `held` at 0.93 on Strobe and 0.88 on Experience, which
+is one measurement wearing two names.
+
 `sections[].mood` is where a section sits on a handful of opposed axes -- calm
 against aggressive, happy against sad, warm against cold -- read by MuQ-MuLan,
 which was trained to place music and text in one space. The number is not a

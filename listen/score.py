@@ -32,6 +32,7 @@ from stems import NAMES as STEM_NAMES
 from stems import envelopes, per_bar, per_tick
 from voice import clean as clean_voice, made_by as voice_made_by
 from texture import air, bands, duck, pace, sides
+from grain import held, noisy
 
 
 CACHE = Path("work/heard")
@@ -282,6 +283,8 @@ def read(path, slug):
         **{k: [round(float(x), 3) for x in v]
            for k, v in bands(stereo, edges_now).items()},
         "air": [round(float(x), 3) for x in air(path, edges_now)],
+        "noisy": [round(float(x), 3) for x in noisy(path, edges_now)],
+        "held": [round(float(x), 3) for x in held(env, edges_now)],
         "pump": [round(float(x), 3) for x in duck(env, g, edges_now)],
         "pace": [round(float(x), 3) for x in pace(flux_now, g, edges_now)],
         **{k: [round(x, 3) for x in lanes[k]] for k in STEM_NAMES},

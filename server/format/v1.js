@@ -7,7 +7,7 @@
 
 export const KNOWN = [
   'song', 'grid', 'beats', 'downbeats', 'sections', 'energy', 'ticks', 'groove', 'melody_phrases',
-  'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor',
+  'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor', 'noisy', 'held',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
   'tension', 'releases', 'melody', 'signals', 'made_by',
@@ -16,7 +16,7 @@ export const KNOWN = [
 const STEM_NAMES = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
 const STEM_FOUR  = ['drums', 'bass', 'vocals', 'other'];
 const CURVE_NAMES = ['energy', 'brightness', 'width', 'air', 'pump', 'pace',
-                     'weight', 'floor'];
+                     'weight', 'floor', 'noisy', 'held'];
 
 /**
  * @param {object} raw  Parsed score file from disk.
@@ -173,6 +173,8 @@ export function format(raw) {
      and still be a third low end, which is a bar that feels like something. */
   if (Array.isArray(bars.weight)) out.weight = bars.weight;
   if (Array.isArray(bars.floor)) out.floor = bars.floor;
+  if (Array.isArray(bars.noisy)) out.noisy = bars.noisy;
+  if (Array.isArray(bars.held)) out.held = bars.held;
 
   // ---- curves (selectable per-bar arrays with metadata) ----
   const curveEntries = {};

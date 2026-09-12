@@ -43,7 +43,7 @@ section{margin:0 0 24px}
 canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;background:#06090e}
 #zoom{height:110px;cursor:pointer}
 #tune{height:140px;cursor:pointer}
-#curves{height:394px;cursor:pointer}
+#curves{cursor:pointer}
 #beat{height:150px;cursor:default}
 #lanes{height:104px;cursor:pointer;border-radius:0 0 8px 8px;border-top:none}
 #map{position:relative;height:124px;border:1px solid var(--line);border-bottom:none;
@@ -673,6 +673,7 @@ function fit(c, h) {
   const r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
   c.width = Math.max(1, Math.round(r.width * dpr));
   c.height = Math.round(h * dpr);
+  c.style.height = h + "px";
   const g = c.getContext("2d");
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, r.width, h);
@@ -913,6 +914,8 @@ const CURVES = [
   ["width",      "Width",      "#9fd18b", "how far the sound spreads either side of the middle"],
   ["weight",     "Weight",     "#c97f4a", "how much of the sound sits below 120 Hz \u2014 how heavy it is"],
   ["floor",      "Floor",      "#8a6bd1", "below 60 Hz, the part you feel in your chest rather than hear"],
+  ["noisy",      "Noise",      "#d98e8e", "how much is noise \u2014 distortion, cymbals, breath \u2014 rather than clear notes"],
+  ["held",       "Sustain",    "#7fa8d4", "how much of the bar the sound keeps ringing instead of hitting and stopping"],
 ];
 
 function curves() {
@@ -1163,7 +1166,12 @@ function moodWords(m) {
     : "";
 }
 
+function modelRan() {
+  return (SCORE.parts || []).some(p => p.also_heard != null);
+}
+
 function edgeWords(p) {
+  if (!modelRan()) return "";
   if (p.also_heard == null) return ` <span class="dim">· only our own detectors heard this boundary</span>`;
   return ` <span style="color:var(--ok)">· a second model heard this boundary too (${p.also_heard})</span>`;
 }
