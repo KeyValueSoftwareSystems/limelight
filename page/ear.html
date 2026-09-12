@@ -170,11 +170,12 @@ function draw() {
     el.style.left = `${(t0/total)*100}%`;
     el.style.width = `${((t1-t0)/total)*100}%`;
     const c = HUE[p.repeats_as];
+    const odd = tuneOdd(p);
     el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness??.5)*100)}%"></div>
       <div class="tag" style="color:${c}">${p.role ? p.role.toUpperCase() : p.repeats_as}</div>
-      <div class="sung${(p.sung || p.played) ? "" : " quiet"}"
+      <div class="sung${odd ? "" : " quiet"}"
         title="${partTune(p)} \u00b7 click to hear the tune itself"
-        >${partTune(p, true)}</div>`;
+        >${odd}</div>`;
     el.onclick = ev => {
       const r = map.getBoundingClientRect();
       play(((ev.clientX - r.left) / r.width) * total);
@@ -286,6 +287,16 @@ function tuneWords(s, short, who) {
              : span < 20 ? "over an octave and a half"
              : "over two octaves";
   return short ? how[0] : `${how[1]}, ${wide}`;
+}
+
+function tuneOdd(p) {
+  const s = (p.sung && p.sung.notes ? p.sung : p.played);
+  if (!s || !s.notes) return "";
+  const hook = (SCORE.moments || []).find(m =>
+    m.is === "hook" && m.bar >= p.from_bar && m.bar <= p.to_bar);
+  if (hook) return hook.again_of != null ? "the tune returns" : "the hook";
+  if (s.on_one_note) return "one note";
+  return "";
 }
 
 function partTune(p, short) {
