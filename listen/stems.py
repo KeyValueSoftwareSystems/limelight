@@ -44,11 +44,14 @@ def envelopes(path, slug):
     return out
 
 
-def per_bar(env, first_s, bar_s, bars):
-    spans = []
-    if first_s > 0.2:
-        spans.append((0.0, first_s))
-    spans += [(first_s + b * bar_s, first_s + (b + 1) * bar_s) for b in range(bars)]
+def per_bar(env, first_s, bar_s, bars, edges=None):
+    if edges is not None:
+        spans = [(edges[i], edges[i + 1]) for i in range(len(edges) - 1)]
+    else:
+        spans = []
+        if first_s > 0.2:
+            spans.append((0.0, first_s))
+        spans += [(first_s + b * bar_s, first_s + (b + 1) * bar_s) for b in range(bars)]
     out = {}
     for name, v in env.items():
         rows = []

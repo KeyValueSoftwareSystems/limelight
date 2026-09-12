@@ -281,3 +281,19 @@ def show(slug, g, r, second_opinion=None):
         print(f"    parts          {r['parts']}   {', '.join(r['kinds'])}", file=w)
     if "events" in r:
         print(f"    events         {r['events']}   {', '.join(r['event_kinds'])}", file=w)
+
+
+def at_beat(g, n):
+    t = g.get("tempo") or [{"from_beat": 0, "at_s": g["first_beat_s"], "bpm": g["bpm"]}]
+    k = 0
+    while k + 1 < len(t) and t[k + 1]["from_beat"] <= n:
+        k += 1
+    return t[k]["at_s"] + (n - t[k]["from_beat"]) * (60.0 / t[k]["bpm"])
+
+
+def bar_edges(g):
+    per = g["beats_per_bar"]
+    out = [at_beat(g, i * per) for i in range(g["bars"] + 1)]
+    if g["first_beat_s"] > 0.2:
+        out = [0.0] + out
+    return out

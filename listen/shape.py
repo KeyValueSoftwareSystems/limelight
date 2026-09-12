@@ -255,7 +255,15 @@ def shape(path, edges, lanes=None, least=4):
     if lanes is not None:
         rows = np.asarray(lanes, dtype=float)
         held = [c for c in switches(rows[:4, :n]) if 0 < c < n]
-        turns = [c for c in (steps(rows[4, :n]) if rows.shape[0] > 4 else []) if 0 < c < n]
+        level = list(steps(rows[4, :n])) if rows.shape[0] > 4 else []
+        # A verse can change without any instrument arriving or leaving and
+        # without the level moving: the singing turns over and the rhythm gets
+        # busier, and nothing else does anything. Every boundary the segmenter
+        # missed inside nebulakal's 28-bar "verse" was one of those, so the
+        # busyness and the vocal level get a vote of their own.
+        busy = list(steps(rows[5, :n])) if rows.shape[0] > 5 else []
+        sung = list(steps(rows[2, :n]))
+        turns = [c for c in level + busy + sung if 0 < c < n]
     cuts = agree(heard, held, turns)
     cuts = sorted(set(cuts + [n]))
     spans = [[cuts[i], cuts[i + 1], 0] for i in range(len(cuts) - 1)]

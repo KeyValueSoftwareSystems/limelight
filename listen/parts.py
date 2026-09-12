@@ -5,11 +5,12 @@ import numpy as np
 warnings.filterwarnings("ignore")
 
 
-def features(path, first_s, bar_s, bars, sr=22050):
-    edges = first_s + np.arange(bars + 1) * bar_s
-    if first_s > 0.2:
-        edges = np.concatenate([[0.0], edges])
-    return features_at(path, edges, sr)
+def features(path, first_s, bar_s, bars, sr=22050, edges=None):
+    if edges is None:
+        edges = first_s + np.arange(bars + 1) * bar_s
+        if first_s > 0.2:
+            edges = np.concatenate([[0.0], edges])
+    return features_at(path, np.asarray(edges, dtype=float), sr)
 
 
 def features_at(path, edges, sr=22050):

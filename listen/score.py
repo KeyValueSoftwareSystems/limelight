@@ -8,7 +8,7 @@ import numpy as np
 warnings.filterwarnings("ignore")
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from grid import grid, show
+from grid import grid, bar_edges, show
 from form import on_phrase
 from shape import shape
 from call import call
@@ -231,6 +231,11 @@ def read(path, slug):
     g["sure"] = agreed(times, second_opinion(path, slug))
     report["grid_sure"] = g["sure"]
     bar_s = (60.0 / g["bpm"]) * g["beats_per_bar"]
+    # Bars are cut where the tempo map says they fall, not every bar_s seconds.
+    # Raga of Revenge runs at 89 for its first eighteen seconds: slicing it at
+    # one tempo put every bar from 8 onward 4.1s adrift, and the sections found
+    # on those bars inherited the error. Amal heard it before any test did.
+    cuts = bar_edges(g)
     env = envelopes(path, slug)
     sung, tune = clean_voice(path, slug)
     if sung is not None:
@@ -239,7 +244,7 @@ def read(path, slug):
         lane[:keep] = sung[:keep]
         env["vocals"] = lane
         report["voice_from"] = "roformer"
-    lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"])
+    lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"], edges=cuts)
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
     busy, bright = curves(path, g)
     pickup = 1 if g["first_beat_s"] > 0.2 else 0
@@ -266,10 +271,10 @@ def read(path, slug):
     beats, pull, gone = pulse(path, g, times, positions, np.load(CACHE / f"{slug}.flux.npy"),
                               env, report)
     flux = np.load(CACHE / f"{slug}.flux.npy")
-    edges = ([0.0] if pickup else []) + [
-        g["first_beat_s"] + i * bar_s for i in range(g["bars"] + 1)]
+    edges = list(cuts)
     rows = np.asarray([score_bars[k] for k in STEM_NAMES] +
-                      [[x if x is not None else 0.0 for x in score_bars["intensity"]]],
+                      [[x if x is not None else 0.0 for x in score_bars["intensity"]],
+                       [x if x is not None else 0.0 for x in score_bars["pace"]]],
                      dtype=float)
     found_spans, how, chroma = shape(path, edges, rows)
     report["sections_from"] = how
