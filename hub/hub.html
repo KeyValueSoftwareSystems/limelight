@@ -1,11 +1,21 @@
 <!-- The hub page: the shared folder, in a browser. List, upload, download, new
      folder. Every request it makes is one the CLI makes too; nothing here is
      special to the page. Styles live in /page/ui.css, shared with the other pages. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hub</title>
 <link rel="stylesheet" href="/page/ui.css">
-
+</head>
+<body>
 <header class="top">
-  <a class="brand" href="/hub/">Limelight</a>
+  <a class="brand" href="/">Limelight</a>
+  <nav class="nav">
+    <a href="/">Home</a>
+    <a class="here" href="/hub/score/">Hub</a>
+  </nav>
   <span class="remote" id="remote"></span>
 </header>
 
@@ -16,20 +26,32 @@
   <div class="actions">
     <label class="btn primary" for="file">Upload files</label>
     <input type="file" id="file" multiple>
+    <label class="btn" for="mp3">Generate from MP3</label>
+    <input type="file" id="mp3" accept=".mp3,audio/mpeg" multiple>
     <button id="mkdir">New folder</button>
     <button id="reload" class="quiet">Refresh</button>
+    <input type="search" id="q" class="filter" placeholder="Filter by name" autocomplete="off" spellcheck="false">
   </div>
 </div>
 <p class="msg" id="msg"></p>
+<div class="jobs" id="jobs" hidden></div>
 
 <div class="panel">
-<table class="list">
-  <thead><tr><th>Name</th><th>Updated</th><th class="r">Size</th><th>Version</th><th>Metadata</th><th>Profiles</th></tr></thead>
+<table class="list files">
+  <colgroup>
+    <col class="c-name">
+    <col class="c-updated">
+    <col class="c-size">
+    <col class="c-version">
+    <col class="c-meta">
+    <col class="c-personalities">
+  </colgroup>
+  <thead><tr><th>Name</th><th>Updated</th><th>Size</th><th>Version</th><th>Metadata</th><th>Personalitys</th></tr></thead>
   <tbody id="rows"></tbody>
 </table>
 </div>
 <p class="note">Everything here is shared with everyone on this network. Pull a file with
-<code>limelight pull &lt;name&gt;</code>. Open a score for its versions, metadata and profiles.
+<code>limelight pull &lt;name&gt;</code>. Open a score for its versions, metadata and personalitys.
 Nothing is deleted from this page; fix a mistake by uploading over it.</p>
 </main>
 
@@ -41,7 +63,11 @@ const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(
 const err = m => { $("msg").textContent = m; if (m) console.error(m); };
 
 const human = n => n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : (n / 1048576).toFixed(2) + " MB";
-const when = ms => { const d = new Date(ms); return d.toISOString().slice(0, 16).replace("T", " "); };
+const when = ms => {
+  const d = new Date(ms);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" });
+};
 
 $("remote").textContent = "LIMELIGHT_REMOTE=" + location.origin + "/hub/score";
 
@@ -57,36 +83,51 @@ function crumbs() {
   document.title = parts.length ? parts[parts.length - 1] + " — Hub" : "Hub";
 }
 
+let PATHS = [];
+
+function render() {
+  const q = ($("q").value || "").trim().toLowerCase();
+  const paths = q ? PATHS.filter(p => p.name.toLowerCase().includes(q)) : PATHS;
+  const rows = [];
+  const cell = (l, v, cls) => `<td data-l="${l}"${cls ? ` class="${cls}"` : ""}>${v}</td>`;
+  if (base !== "/hub/" && !q) rows.push(`<tr><td class="n"><a class="dir" href="..">..</a></td><td></td><td></td><td></td><td></td><td></td></tr>`);
+  for (const p of paths) {
+    const dir = p.path_type === "Dir";
+    const score = !dir && /\.score$/.test(p.name);
+    const a = dir   ? `<a class="dir" href="${base}${enc(p.name)}/">${esc(p.name)}</a>`
+            : score ? `<a href="${base}${enc(p.name)}?page">${esc(p.name)}</a>`
+                    : `<a href="${base}${enc(p.name)}" download>${esc(p.name)}</a>`;
+    const dl = score && p.version ? ` <a class="btn small dl" href="${base}${enc(p.name)}" download>Download</a>` : "";
+    const prof = score ? (p.personalities ? `${p.personalities} personality${p.personalities === 1 ? "" : "s"}` : `<span class="dim">none</span>`) : "";
+    const meta = score ? (p.has_metadata ? "yes" : `<span class="dim">none</span>`) : "";
+    const ver = score ? (p.version ? `<span class="badge">v${p.version}</span>` : `<span class="dim">no versions</span>`) : "";
+    rows.push(`<tr>${cell("", a + dl, "n" + (score ? " name-score" : ""))}${cell("updated", when(p.mtime))}` +
+      `${cell("size", dir ? "" : human(p.size))}${cell("version", ver)}${cell("metadata", meta)}${cell("personalities", prof)}</tr>`);
+  }
+  if (paths.length || (base !== "/hub/" && !q && rows.length)) {
+    $("rows").innerHTML = rows.join("");
+    return;
+  }
+  $("rows").innerHTML = q
+    ? `<tr><td colspan="6" class="empty">No names match “${esc(q)}”.</td></tr>`
+    : `<tr><td colspan="6" class="empty">Nothing here yet. Upload a file, or push one with <code>limelight push</code>.</td></tr>`;
+}
+
 async function load() {
   err("");
   let r;
   try { r = await fetch(base + "?json"); } catch (e) { return err("The server did not answer: " + e.message); }
   if (!r.ok) return err(`${r.status} ${r.statusText} listing ${base}`);
   const data = await r.json();
-  const rows = [];
-  const cell = (l, v, cls) => `<td data-l="${l}"${cls ? ` class="${cls}"` : ""}>${v}</td>`;
-  if (base !== "/hub/") rows.push(`<tr><td class="n"><a class="dir" href="..">..</a></td><td></td><td></td><td></td><td></td><td></td></tr>`);
-  for (const p of data.paths) {
-    const dir = p.path_type === "Dir";
-    const score = !dir && /\.score$/.test(p.name);
-    const a = dir   ? `<a class="dir" href="${base}${enc(p.name)}/">${esc(p.name)}</a>`
-            : score ? `<a href="${base}${enc(p.name)}?page">${esc(p.name)}</a>`
-                    : `<a href="${base}${enc(p.name)}" download>${esc(p.name)}</a>`;
-    const dl = score && p.version ? ` <a class="btn quiet small" href="${base}${enc(p.name)}" download>Download</a>` : "";
-    const prof = score ? (p.profiles ? `${p.profiles} profile${p.profiles === 1 ? "" : "s"}` : `<span class="dim">none</span>`) : "";
-    const meta = score ? (p.has_metadata ? "yes" : `<span class="dim">none</span>`) : "";
-    const ver = score ? (p.version ? `<span class="badge">v${p.version}</span>` : `<span class="dim">no versions</span>`) : "";
-    rows.push(`<tr>${cell("", a + dl, "n" + (score ? " name-score" : ""))}${cell("updated", when(p.mtime))}` +
-      `${cell("size", dir ? "" : human(p.size), "r")}${cell("version", ver)}${cell("metadata", meta)}${cell("profiles", prof)}</tr>`);
-  }
-  $("rows").innerHTML = rows.join("") || `<tr><td colspan="6" class="empty">Nothing here yet. Upload a file, or push one with <code>limelight push</code>.</td></tr>`;
+  PATHS = data.paths || [];
+  render();
 }
 
 $("file").addEventListener("change", async e => {
   err("");
   for (const f of e.target.files) {
     const tr = document.createElement("tr"); tr.className = "up";
-    tr.innerHTML = `<td class="n">${esc(f.name)}</td><td>Uploading…</td><td class="r">${human(f.size)}</td><td></td><td></td><td></td>`;
+    tr.innerHTML = `<td class="n">${esc(f.name)}</td><td>Uploading…</td><td>${human(f.size)}</td><td></td><td></td><td></td>`;
     $("rows").prepend(tr);
     try {
       const r = await fetch(base + enc(f.name), { method: "PUT", body: f });
@@ -96,6 +137,75 @@ $("file").addEventListener("change", async e => {
   }
   e.target.value = "";
   load();
+});
+
+const STATUS_LABEL = {
+  queued: "Queued",
+  generating: "Generating score…",
+  storing: "Storing…",
+  done: "Done",
+  error: "Failed",
+};
+const ACTIVE = new Set(["queued", "generating", "storing"]);
+let pollTimer = null;
+let seenDone = new Set();
+
+function renderJobs(jobs) {
+  const box = $("jobs");
+  const show = jobs.filter(j => ACTIVE.has(j.status) || (j.status === "error" && Date.now() / 1000 - j.updated < 60)
+    || (j.status === "done" && Date.now() / 1000 - j.updated < 8));
+  if (!show.length) { box.hidden = true; box.innerHTML = ""; return; }
+  box.hidden = false;
+  box.innerHTML = show.map(j => {
+    const label = STATUS_LABEL[j.status] || j.status;
+    const detail = j.status === "error" ? (j.error || "failed")
+                : j.status === "done" ? `${j.score_name} v${j.version}`
+                : j.score_name;
+    const cls = j.status === "error" ? "job f" : j.status === "done" ? "job s" : "job";
+    return `<div class="${cls}"><span class="job-name">${esc(j.name)}</span> — ${esc(label)}${detail ? `: ${esc(detail)}` : ""}</div>`;
+  }).join("");
+}
+
+async function pollJobs() {
+  let r;
+  try { r = await fetch(base + "?jobs"); } catch (e) { return; }
+  if (!r.ok) return;
+  const data = await r.json();
+  const jobs = data.jobs || [];
+  renderJobs(jobs);
+  let refreshed = false;
+  for (const j of jobs) {
+    if (j.status === "done" && j.id && !seenDone.has(j.id)) {
+      seenDone.add(j.id);
+      refreshed = true;
+    }
+  }
+  if (refreshed) load();
+  const busy = jobs.some(j => ACTIVE.has(j.status));
+  if (!busy && pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+function startPoll() {
+  if (pollTimer) return;
+  pollJobs();
+  pollTimer = setInterval(pollJobs, 1000);
+}
+
+$("mp3").addEventListener("change", async e => {
+  err("");
+  const files = [...e.target.files];
+  e.target.value = "";
+  for (const f of files) {
+    if (!/\.mp3$/i.test(f.name)) { err(`${f.name} is not an mp3`); continue; }
+    try {
+      const up = await fetch(base + enc(f.name), { method: "PUT", body: f });
+      if (!up.ok) { err(`Upload failed: ${up.status} ${await up.text()}`); continue; }
+      const g = await fetch(base + enc(f.name) + "?generate", { method: "POST" });
+      const body = await g.text();
+      if (!g.ok) { err(body || `${g.status} ${g.statusText}`); continue; }
+    } catch (ex) { err(ex.message); continue; }
+  }
+  startPoll();
 });
 
 $("mkdir").addEventListener("click", async () => {
@@ -109,5 +219,10 @@ $("mkdir").addEventListener("click", async () => {
 });
 
 $("reload").addEventListener("click", load);
+$("q").addEventListener("input", render);
 crumbs(); load();
+startPoll();
 </script>
+
+</body>
+</html>

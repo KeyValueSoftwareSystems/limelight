@@ -11,7 +11,17 @@
 const fs = require("fs"), path = require("path"), os = require("os"), { execFileSync } = require("child_process");
 const { Session } = require("./session.js");
 
-const scorePath = process.argv[2] || path.join(__dirname, "..", "scores", "levels.score");
+/* The built score when the pipeline has run here, else the committed fixture.
+   Scores are built rather than committed, so a bare path into scores/ makes the
+   suite unrunnable on a fresh clone -- which is how four suites stopped running
+   without anything reporting a fault. */
+function scoreFile() {
+  const built = path.join(__dirname, "..", "scores", "levels.score");
+  return fs.existsSync(built) ? built : path.join(__dirname, "levels.score");
+}
+
+
+const scorePath = process.argv[2] || scoreFile();
 const score = JSON.parse(fs.readFileSync(scorePath, "utf8"));
 
 /* the awkward places, not a tidy sweep: a tidy sweep never lands on a boundary */

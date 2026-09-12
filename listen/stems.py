@@ -24,7 +24,8 @@ def envelopes(path, slug):
     made = work / MODEL / Path(path).stem
     if not (made / "vocals.wav").exists():
         subprocess.run([sys.executable, "-m", "demucs", "-n", MODEL,
-                        "-o", str(work), path], check=True)
+                        "-o", str(work), path], check=True,
+                       stdout=sys.stderr)
 
     import soundfile as sf
 

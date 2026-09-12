@@ -2,6 +2,16 @@
 const fs = require("fs");
 const path = require("path");
 
+/* The built score when the pipeline has run here, else the committed fixture.
+   Scores are built rather than committed, so a bare path into scores/ makes the
+   suite unrunnable on a fresh clone -- which is how four suites stopped running
+   without anything reporting a fault. */
+function scoreFile() {
+  const built = path.join(__dirname, "..", "..", "scores", "levels.score");
+  return fs.existsSync(built) ? built : path.join(__dirname, "..", "..", "protocol", "levels.score");
+}
+
+
 /* The arranger wants sections with bar/beat edges and a per-bar energy curve.
    The pipeline emits parts and bars.intensity. One place converts, so the
    reader and its tests read the same shape from the same committed score. */
@@ -41,7 +51,7 @@ function shape(raw) {
 function load(file) {
   /* Default to the live score. A copy kept beside the protocol went stale
      the first time the pipeline changed, and the reader read the stale one. */
-  const at = file || path.join(__dirname, "..", "..", "scores", "levels.score");
+  const at = file || scoreFile();
   return shape(JSON.parse(fs.readFileSync(at, "utf8")));
 }
 

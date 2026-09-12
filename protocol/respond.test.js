@@ -2,6 +2,11 @@
    the things it has to keep true whoever writes it. */
 "use strict";
 const { respond } = require("./respond.js");
+const fs_ = require("fs"), path_ = require("path");
+function scoreFile() {
+  const built = path_.join(__dirname, "..", "scores", "levels.score");
+  return fs_.existsSync(built) ? built : path_.join(__dirname, "levels.score");
+}
 const out = [];
 const ok = (n, c, d) => out.push([!!c, n, d || ""]);
 
@@ -56,7 +61,7 @@ const ok = (n, c, d) => out.push([!!c, n, d || ""]);
      asked for or not. A temporary score file beside the others, removed after. */
   const fs = require("fs"), path = require("path");
   const tmp = path.join(__dirname, "withprofile.score");
-  const base = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "scores", "levels.score"), "utf8"));
+  const base = JSON.parse(fs_.readFileSync(scoreFile(), "utf8"));
   const profile = { user: "muzammil", colours: [{ name: "red", hex: "#ff0000" }] };
   fs.writeFileSync(tmp, JSON.stringify({ ...base, score: "withprofile", profile }));
   try {

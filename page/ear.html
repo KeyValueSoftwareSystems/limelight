@@ -1,4 +1,5 @@
 <title>What the score heard</title>
+<link rel="stylesheet" href="/page/ui.css">
 <style>
 :root{--bg:#0b0e14;--pan:#111722;--line:#1d2533;--line2:#2b3648;--ink:#e8ebf2;
   --dim:#98a2b8;--faint:#626c82;--amb:#e8a33d;--ok:#5bb98c;--bad:#e0655f;--vio:#c8a2ff}
@@ -98,6 +99,14 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 #broke{background:#2a0e0c;border:1px solid var(--bad);color:#ffd9d6;border-radius:8px;
   padding:10px 13px;margin:0 0 12px;font:12.5px ui-monospace,monospace;white-space:pre-wrap}
 </style>
+
+<header class="top">
+  <a class="brand" href="/">Limelight</a>
+  <nav class="nav">
+    <a class="here" href="/">Home</a>
+    <a href="/hub/score/">Hub</a>
+  </nav>
+</header>
 
 <div class="wrap">
 
@@ -380,7 +389,7 @@ function playingWords(list) {
 async function library() {
   const list = await (await fetch("/library.json")).json();
   $("song").innerHTML = list.map(x =>
-    `<option value="${x.slug}" data-a="${x.audio}">${x.slug}</option>`).join("");
+    `<option value="${x.slug}" data-a="${x.audio || ""}" data-score="${x.score || ""}">${x.slug}</option>`).join("");
   const args = new URLSearchParams(location.search);
   const pick = list.find(x => x.slug === args.get("song")) || list[0];
   if (pick) {
@@ -391,17 +400,19 @@ async function library() {
       history.replaceState(null, "", url);
     }
     load(pick.slug, pick.audio, +args.get("at") || 0,
-         +args.get("from") || 0, +args.get("to") || 0);
+         +args.get("from") || 0, +args.get("to") || 0, pick.score);
   }
 }
 
-async function load(s, url, at, from, to) {
+async function load(s, url, at, from, to, scoreUrl) {
   slug = s;
-  SCORE = await (await fetch(`/scores/${s}.score`)).json();
+  /* A song can arrive from the hub as easily as from the folder beside this
+     page, so the caller may name where its score lives. */
+  SCORE = await (await fetch(scoreUrl || `/scores/${s}.score`)).json();
   BAR = (60 / SCORE.grid.bpm) * SCORE.grid.beats_per_bar;
   FIRSTBAR = SCORE.grid.first_beat_s > 0.2 ? 0 : 1;
-  aud.src = url; aud.load();
-  $("play").disabled = false;
+  if (url) { aud.src = url; aud.load(); $("play").disabled = false; }
+  else { aud.removeAttribute("src"); $("play").disabled = true; }
   const g = SCORE.grid;
   const many = (SCORE.moments || []).length;
   $("facts").textContent = `${Math.round(g.bpm)} beats a minute · ${g.bars} bars`
@@ -1253,7 +1264,8 @@ $("song").onchange = e => {
   url.searchParams.set("song", e.target.value);
   url.searchParams.delete("at");
   history.replaceState(null, "", url);
-  load(e.target.value, e.target.selectedOptions[0].dataset.a);
+  const o = e.target.selectedOptions[0];
+  load(e.target.value, o.dataset.a, 0, 0, 0, o.dataset.score);
 };
 for (const id of ["map", "subs", "chords", "lanes", "tune", "curves"]) zoomable($(id));
 zoomable($("zoom"), f => aud.currentTime - Math.min(WINDOW, viewSpan())/2 + f * Math.min(WINDOW, viewSpan()));

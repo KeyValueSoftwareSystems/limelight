@@ -8,9 +8,24 @@
   const BLOCK_Y = 0;
 
   const COLORS = { red: 0xff2d55, blue: 0x2ec5ff };
+  const BASE_FOV = 70, BASE_CAM_Z = 9;
   let renderer, scene, camera, mount, raycaster;
   let blocks = new Map();   // key -> { mesh, note }
   let saberMeshes = [];
+
+  // music-reactive background state
+  let stars = null, gridHelper = null, tunnelRings = [], tunnelMat = null;
+  let music = { energy: 0.4, phase: 0 };
+  let pulseVal = 0, punchVal = 0, lastStep = 0;
+
+  // tunnel: nested SQUARE frames built from thick beams (a real corridor of
+  // glowing gates), each turned a little more than the last so they spiral.
+  const TUN_COUNT = 24, TUN_DZ = 3.4, TUN_NEAR = BASE_CAM_Z + 4;
+  const TUN_SPAN = TUN_COUNT * TUN_DZ, TUN_RX = 8, TUN_RY = 5.6, TUN_ROT_STEP = 0.40;
+  const TUN_BEAM = 0.42, TUN_DEPTH = 0.7;              // beam thickness / z-depth
+  // indigo tunnel so the cyan/red note blocks stand out against it
+  const TUN_BASE = new THREE.Color(0x6a4bff), TUN_FLASH = new THREE.Color(0xb9a8ff), TUN_DOWN = new THREE.Color(0xff2d55);
+  let tunnelSpin = 0;
 
   function init(mountEl) {
     mount = mountEl;
@@ -33,10 +48,11 @@
     const key = new THREE.DirectionalLight(0xffffff, 0.8);
     key.position.set(0, 8, 10); scene.add(key);
 
-    // neon lane floor
-    const grid = new THREE.GridHelper(120, 60, 0x2ec5ff, 0x1b2740);
-    grid.position.z = FAR_Z / 2; grid.position.y = -2;
-    scene.add(grid);
+    // neon lane floor — brightness pulses on the beat
+    gridHelper = new THREE.GridHelper(120, 60, 0x2ec5ff, 0x1b2740);
+    gridHelper.position.z = FAR_Z / 2; gridHelper.position.y = -2;
+    gridHelper.material.transparent = true;
+    scene.add(gridHelper);
 
     // strike line
     const lineGeo = new THREE.PlaneGeometry(9, 0.12);
@@ -44,6 +60,118 @@
     const line = new THREE.Mesh(lineGeo, lineMat);
     line.position.set(0, BLOCK_Y - 1.2, STRIKE_Z); line.rotation.x = -Math.PI / 2.2;
     scene.add(line);
+
+    makeStars();
+    makeTunnel();
+    music = { energy: 0.4, phase: 0 }; pulseVal = 0; punchVal = 0; tunnelSpin = 0;
+    lastStep = performance.now();
+  }
+
+  // A tunnel of thick square frames receding down the lane. Each frame is four
+  // box beams (a real 3D gate) sharing one glowing material; frames scroll toward
+  // the camera, each turned a little more than the one behind it so they spiral.
+  // Beats brighten + swell them; downbeats flash red.
+  function makeTunnel() {
+    // dark structure with a blue neon glow; emissive is animated on the beat
+    tunnelMat = new THREE.MeshStandardMaterial({
+      color: 0x0c0a2e, emissive: 0x6a4bff, emissiveIntensity: 0.7,
+      metalness: 0.4, roughness: 0.45 });
+    const t = TUN_BEAM, d = TUN_DEPTH, rx = TUN_RX, ry = TUN_RY;
+    // one geometry per orientation, reused across all frames
+    const horiz = new THREE.BoxGeometry(2 * rx + t, t, d);
+    const vert = new THREE.BoxGeometry(t, 2 * ry + t, d);
+    for (let i = 0; i < TUN_COUNT; i++) {
+      const g = new THREE.Group();
+      const top = new THREE.Mesh(horiz, tunnelMat); top.position.y = ry;
+      const bot = new THREE.Mesh(horiz, tunnelMat); bot.position.y = -ry;
+      const lft = new THREE.Mesh(vert, tunnelMat); lft.position.x = -rx;
+      const rgt = new THREE.Mesh(vert, tunnelMat); rgt.position.x = rx;
+      g.add(top, bot, lft, rgt);
+      g.position.set(0, 0, TUN_NEAR - (i + 1) * TUN_DZ);
+      g.userData.baseRot = i * TUN_ROT_STEP;         // the spiral
+      g.rotation.z = g.userData.baseRot;
+      scene.add(g);
+      tunnelRings.push(g);
+    }
+  }
+
+  // A starfield streaming toward the camera down the lane — the depth illusion.
+  function makeStars() {
+    const N = 500;
+    const pos = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 26;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 15;
+      pos[i * 3 + 2] = FAR_Z + Math.random() * (BASE_CAM_Z - FAR_Z);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    stars = new THREE.Points(g, new THREE.PointsMaterial({
+      color: 0x9fd8ff, size: 0.18, transparent: true, opacity: 0.7, depthWrite: false }));
+    scene.add(stars);
+  }
+
+  // ---- music input --------------------------------------------------------
+  function setMusic(m) {
+    if (!m) return;
+    if (typeof m.energy === "number") music.energy = Math.max(0, Math.min(1, m.energy));
+    if (typeof m.phase === "number") music.phase = m.phase;
+  }
+  // Called once per beat; a downbeat kicks the camera as well as the grid.
+  function pulse(isDownbeat) {
+    pulseVal = isDownbeat ? 1 : 0.6;
+    if (isDownbeat) punchVal = 1;
+  }
+
+  // Advance the reactive background one frame (called once per frame from update).
+  function stepBackground() {
+    const t = performance.now();
+    let dt = (t - lastStep) / 1000; lastStep = t;
+    if (dt > 0.1) dt = 0.1;                 // absorb a stall rather than teleport
+
+    if (stars) {
+      const arr = stars.geometry.attributes.position.array;
+      const speed = (7 + music.energy * 45) * dt;   // faster when the music is bigger
+      const nearZ = BASE_CAM_Z + 2;
+      for (let i = 0; i < arr.length; i += 3) {
+        arr[i + 2] += speed;
+        if (arr[i + 2] > nearZ) {           // recycle to the far end
+          arr[i + 2] = FAR_Z;
+          arr[i] = (Math.random() - 0.5) * 26;
+          arr[i + 1] = (Math.random() - 0.5) * 15;
+        }
+      }
+      stars.geometry.attributes.position.needsUpdate = true;
+      stars.material.opacity = 0.45 + music.energy * 0.5;
+    }
+
+    pulseVal = Math.max(0, pulseVal - dt * 3.2);
+    if (gridHelper) gridHelper.material.opacity = 0.28 + pulseVal * 0.6;
+
+    if (tunnelRings.length) {
+      const speed = (7 + music.energy * 45) * dt;         // fly with the starfield
+      tunnelSpin += dt * (0.12 + music.energy * 0.35);    // whole spiral turns, faster when loud
+      const bump = 1 + pulseVal * 0.10;                   // frames swell on the beat
+      if (tunnelMat) {
+        const em = TUN_BASE.clone().lerp(TUN_FLASH, pulseVal * 0.6);
+        if (punchVal > 0) em.lerp(TUN_DOWN, punchVal * 0.55);  // downbeat flash
+        tunnelMat.emissive.copy(em);
+        tunnelMat.emissiveIntensity = 0.5 + pulseVal * 1.8 + music.energy * 0.5;
+      }
+      for (const ring of tunnelRings) {
+        ring.position.z += speed;
+        if (ring.position.z > TUN_NEAR) ring.position.z -= TUN_SPAN;   // wrap to the far end
+        ring.rotation.z = ring.userData.baseRot + tunnelSpin;
+        ring.scale.setScalar(bump);                       // uniform swell keeps beam proportions
+      }
+    }
+
+    punchVal = Math.max(0, punchVal - dt * 4.0);
+    if (camera) {
+      camera.fov = BASE_FOV + punchVal * 7;
+      camera.position.z = BASE_CAM_Z - punchVal * 0.5;
+      camera.updateProjectionMatrix();
+    }
   }
 
   // an arrow texture drawn once per direction, cached
@@ -110,6 +238,7 @@
   }
 
   function update(progressOf) {
+    stepBackground();                        // advance the reactive background once/frame
     blocks.forEach((b, key) => {
       const p = progressOf(key);
       if (p == null) return;
@@ -208,9 +337,10 @@
   function dispose() {
     clear();
     if (renderer) { renderer.dispose(); if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement); }
-    renderer = scene = camera = null; saberMeshes = [];
+    renderer = scene = camera = null; saberMeshes = []; stars = null; gridHelper = null; tunnelRings = []; tunnelMat = null;
   }
 
   window.Scene3D = { init, resize, spawnBlock, update, sliceBlock, missBlock,
-                     setSabers, pickBlocks, planePoint, clear, dispose, LANE_X: LANE_X };
+                     setSabers, setMusic, pulse, pickBlocks, planePoint,
+                     clear, dispose, LANE_X: LANE_X };
 })();

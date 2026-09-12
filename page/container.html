@@ -94,24 +94,26 @@ const $=i=>document.getElementById(i);
 const aud=new Audio(); aud.preload="auto";
 let S=null, SCORE=null, DUR=1, lastBeat=-1, flash=0;
 
-/* ?score=<name>&profile=<user> loads that score from the hub with the user's
-   profile embedded; without them the local score file, as before. */
+/* ?score=<name>&personality=<user> loads that score from the hub with that
+   artist's personality embedded; without them the local score file, as before.
+   ?personality= is the old spelling and still works. */
 const QS=new URLSearchParams(location.search);
-const WANT={score:QS.get("score"),profile:QS.get("profile")};
-let PROF=null;                                   /* [[r,g,b], ...] from the profile's colours, or null */
+const WANT={score:QS.get("score"),person:QS.get("personality")||QS.get("personality")};
+let PROF=null;                                   /* [[r,g,b], ...] from the personality's colours, or null */
 const hexRGB=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 
 async function boot(){
-  const src=(WANT.score&&WANT.profile)
-    ? `/hub/score/${encodeURIComponent(WANT.score)}.score?profile=${encodeURIComponent(WANT.profile)}`
+  const src=(WANT.score&&WANT.person)
+    ? `/hub/score/${encodeURIComponent(WANT.score)}.score?personality=${encodeURIComponent(WANT.person)}`
     : "/protocol/score.levels.json";
   let r;
   try{ r=await fetch(src); }catch(e){ $("msg").textContent=`cannot load ${src}: ${e.message}`; return; }
-  if(!r.ok){ $("msg").textContent=`cannot load ${WANT.score||"levels"}${WANT.profile?" with profile "+WANT.profile:""}: ${r.status} ${(await r.text()).split("\n")[0]}`; return; }
+  if(!r.ok){ $("msg").textContent=`cannot load ${WANT.score||"levels"}${WANT.person?" with personality "+WANT.person:""}: ${r.status} ${(await r.text()).split("\n")[0]}`; return; }
   SCORE=await r.json();
-  if(SCORE.profile&&Array.isArray(SCORE.profile.colours)&&SCORE.profile.colours.length){
-    PROF=SCORE.profile.colours.map(c=>hexRGB(c.hex));
-    $("msg").textContent=`profile ${SCORE.profile.user} · ${SCORE.profile.colours.map(c=>c.name).join(", ")}`;
+  const PERSON=SCORE.personality||SCORE.personality;
+  if(PERSON&&Array.isArray(PERSON.colours)&&PERSON.colours.length){
+    PROF=PERSON.colours.map(c=>hexRGB(c.hex));
+    $("msg").textContent=`${PERSON.user} · ${PERSON.colours.map(c=>c.name).join(", ")}`;
   }
   DUR=(SCORE.song&&SCORE.song.length_s)||180;
   aud.src="/synth/out/"+SCORE.score+".wav";

@@ -31,6 +31,7 @@
           <button class="btn btn--primary" data-nav="songs">
             <span class="btn__icon">&#9654;</span> Play
           </button>
+          <button class="btn" data-nav="add"><span class="btn__icon">&#43;</span> Add Song</button>
           <button class="btn" data-nav="howto">How to Play</button>
           <button class="btn" data-nav="settings">Settings</button>
         </nav>
@@ -209,6 +210,13 @@
             <span class="setting__label">Webcam Sabers (experimental)</span>
             <input type="checkbox" class="toggle" id="set-webcam" />
           </label>
+          <div class="setting">
+            <span class="setting__label">Webcam Calibration</span>
+            <div class="setting__controls">
+              <button class="btn btn--ghost" id="cal-flip">Flip &#8596;</button>
+              <button class="btn" id="cal-webcam">Calibrate</button>
+            </div>
+          </div>
           <label class="setting setting--toggle">
             <span class="setting__label">Reduce Motion</span>
             <input type="checkbox" class="toggle" />
@@ -217,14 +225,48 @@
       </div>
     </section>
 
+    <!-- ========================= ADD SONG ========================= -->
+    <section class="screen screen--add" id="screen-add">
+      <div class="panel">
+        <header class="topbar">
+          <button class="btn btn--ghost" data-nav="menu">&#8592; Back</button>
+          <h2 class="topbar__title">Add a Song</h2>
+          <div class="topbar__spacer"></div>
+        </header>
+        <div class="addsong">
+          <p class="addsong__lead">Pick an <strong>MP3</strong>. It's sent to the Limelight hub, scored into a beatmap, and added to the game automatically.</p>
+          <label class="addsong__drop" id="add-drop">
+            <input type="file" id="add-file" accept="audio/mpeg,.mp3" hidden />
+            <span class="addsong__icon">&#9835;</span>
+            <span class="addsong__pick" id="add-pick">Choose an MP3&hellip;</span>
+          </label>
+          <button class="btn btn--primary btn--block" id="add-upload" disabled>Upload &amp; Score</button>
+          <div class="addsong__status" id="add-status" hidden>
+            <div class="addsong__spinner" id="add-spinner"></div>
+            <span class="addsong__statustext" id="add-statustext">&mdash;</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- webcam calibration overlay -->
+    <div class="cal-overlay" id="cal-overlay" hidden>
+      <div class="cal-overlay__box">
+        <p class="cal-overlay__msg" id="cal-msg">Starting camera&hellip;</p>
+        <div class="cal-overlay__count" id="cal-count"></div>
+        <p class="cal-overlay__hint">Move your hand around the whole area you want to play in &mdash; corners included.</p>
+        <button class="btn btn--ghost cal-overlay__cancel" id="cal-cancel">Cancel</button>
+      </div>
+    </div>
+
   </main>
 
   <!-- rendering + protocol clients (session & clock served by serve.py).
        If opened without the Limelight server, the protocol scripts 404 and
        the game falls back to the mock song list. -->
   <script src="vendor/three.min.js"></script>
-  <script src="/protocol/session.js"></script>
-  <script src="/protocol/clock.js"></script>
+  <script src="vendor/session.js"></script>
+  <script src="vendor/clock.js"></script>
   <script src="js/limelight.js"></script>
   <script src="js/mapper.js"></script>
   <script src="js/judge.js"></script>

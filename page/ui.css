@@ -1,4 +1,4 @@
-/* Shared styles for hub pages (/hub/, score details). Container keeps its own. */
+/* Shared styles for hub pages (/hub/, score details) and the Verify home header. */
 :root {
   --bg: #0a0d13;
   --pan: #0f141d;
@@ -14,11 +14,16 @@
 }
 
 * { box-sizing: border-box; }
-body {
+html, body {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
   background: var(--bg);
   color: var(--ink);
   font: 13px/1.55 ui-sans-serif, system-ui, sans-serif;
-  margin: 0;
+}
+body {
+  min-height: 100vh;
 }
 
 .top {
@@ -28,6 +33,9 @@ body {
   padding: 12px 18px;
   border-bottom: 1px solid var(--line);
   background: var(--pan);
+  position: sticky;
+  top: 0;
+  z-index: 40;
 }
 .brand {
   font: 600 12px ui-monospace, monospace;
@@ -37,6 +45,18 @@ body {
   text-decoration: none;
 }
 .brand:hover { text-decoration: underline; }
+.nav {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.nav a {
+  font: 12px ui-monospace, monospace;
+  color: var(--dim);
+  text-decoration: none;
+}
+.nav a:hover { color: var(--ink); text-decoration: underline; }
+.nav a.here { color: var(--ink); }
 .remote {
   margin-left: auto;
   font: 11px ui-monospace, monospace;
@@ -47,7 +67,7 @@ body {
   max-width: 55%;
 }
 
-.page { max-width: 960px; margin: 0 auto; padding: 18px 18px 70px; }
+.page { max-width: none; width: 100%; margin: 0; padding: 18px 28px 70px; box-sizing: border-box; }
 .crumb {
   margin: 0 0 10px;
   font: 12px ui-monospace, monospace;
@@ -62,6 +82,12 @@ body {
   gap: 12px 14px;
   align-items: center;
   margin: 0 0 14px;
+  padding: 10px 0;
+  position: sticky;
+  top: 45px;
+  z-index: 30;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
 }
 .title {
   font: 600 22px ui-monospace, monospace;
@@ -69,6 +95,23 @@ body {
   margin: 0;
 }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.actions .filter {
+  margin-left: auto;
+  min-width: 12rem;
+  max-width: 20rem;
+  flex: 1 1 12rem;
+  background: #05070b;
+  color: var(--ink);
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font: 12px ui-monospace, monospace;
+}
+.actions .filter:focus {
+  outline: none;
+  border-color: #41506e;
+}
+.actions .filter::placeholder { color: var(--faint); }
 .msg {
   font: 11.5px ui-monospace, monospace;
   color: var(--bad);
@@ -78,12 +121,28 @@ body {
 }
 .msg.ok { color: var(--ok); }
 
+.jobs {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  background: var(--pan);
+  font: 12px ui-monospace, monospace;
+}
+.jobs .job { color: var(--dim); margin: 2px 0; }
+.jobs .job.s { color: var(--ok); }
+.jobs .job.f { color: var(--bad); }
+.jobs .job-name { color: var(--ink); }
+
 .panel {
   background: var(--pan);
   border: 1px solid var(--line);
   border-radius: 6px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
+/* Profiles form opens a colour menu that must escape the panel edge. */
+.panel.pop { overflow: visible; }
 .panel .inner { padding: 14px 15px; }
 .cols {
   display: grid;
@@ -167,6 +226,11 @@ table.list th {
   padding: 9px 12px;
   border-bottom: 1px solid var(--line2);
 }
+table.list th.r,
+table.list td.r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 table.list td {
   padding: 7px 12px;
   border-bottom: 1px solid #141a26;
@@ -174,7 +238,37 @@ table.list td {
   white-space: nowrap;
 }
 table.list td.n { color: var(--ink); }
-table.list td.r { text-align: right; }
+
+/* Hub file list: Name ~1/3, remaining columns share the rest. */
+table.list.files { table-layout: fixed; }
+table.list.files .c-name { width: 33%; }
+table.list.files .c-updated { width: 18%; }
+table.list.files .c-size { width: 12%; }
+table.list.files .c-version { width: 12%; }
+table.list.files .c-meta { width: 12%; }
+table.list.files .c-profiles { width: 13%; }
+table.list.files th:not(:first-child),
+table.list.files td:not(:first-child) {
+  text-align: center;
+}
+table.list.files td.n {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+table.list.files td.n .btn {
+  margin-left: 8px;
+  vertical-align: middle;
+}
+table.list.files td.n .btn.dl {
+  background: #1e2a40;
+  border-color: #3a4d6e;
+  color: var(--ink);
+  font-weight: 600;
+}
+table.list.files td.n .btn.dl:hover {
+  border-color: var(--amb);
+  color: var(--amb);
+}
 table.list td.actions { white-space: nowrap; }
 table.list td.actions .btn,
 table.list td.actions button {
@@ -198,17 +292,49 @@ table.list.compact td { padding: 5px 8px; }
 .note { color: var(--faint); font-size: 12px; margin: 10px 0 0; }
 .note code { color: var(--dim); }
 
-tr.edit td {
+tr.edit td,
+tr.view td {
   background: #0b1018;
   padding: 12px;
   white-space: normal;
+}
+.viewbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 10px;
+  flex-wrap: wrap;
+}
+.viewbar .label {
+  font: 600 12px ui-monospace, monospace;
+  color: var(--ink);
+}
+.viewbar .hint {
+  font: 11.5px ui-monospace, monospace;
+  color: var(--amb);
+  flex: 1;
+}
+pre.json-view {
+  margin: 0;
+  padding: 12px 14px;
+  background: #05070b;
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  color: var(--dim);
+  font: 12px/1.5 ui-monospace, monospace;
+  max-height: min(70vh, 640px);
+  overflow: auto;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 .fields {
   display: grid;
   grid-template-columns: 1fr 2fr auto auto;
   gap: 6px 10px;
   align-items: center;
-  max-width: 720px;
+  max-width: none;
+  width: 100%;
 }
 .fields .h {
   font: 600 10px ui-monospace, monospace;

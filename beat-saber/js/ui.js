@@ -40,7 +40,7 @@ async function initLibrary() {
     try {
       const lib = await window.Limelight.fetchLibrary();
       if (lib.length) {
-        songs = lib.map((s, i) => ({ ...s, icon: ICONS[i % ICONS.length], playable: !!s.score }));
+        songs = lib.map((s, i) => ({ ...s, icon: ICONS[i % ICONS.length], playable: !!s.audio }));
         renderSongs(); selectSong(0);
         return;
       }
@@ -51,8 +51,8 @@ async function initLibrary() {
   songs = MOCK_SONGS.slice();
   renderSongs(); selectSong(0);
   if (el) el.insertAdjacentHTML("afterbegin",
-    `<li class="songlist__note">Limelight server not detected &mdash; showing demo list. ` +
-    `Run <code>python3 serve.py</code> and open <code>/beat-saber/</code> to play real tracks.</li>`);
+    `<li class="songlist__note">Hub unreachable &mdash; showing demo list. ` +
+    `Start the game with <code>python3 beat-saber/server.py</code> (it talks to the hub).</li>`);
 }
 
 // ---- Song list rendering --------------------------------------------------
@@ -105,6 +105,159 @@ document.getElementById("difficulty").addEventListener("click", (e) => {
   document.querySelectorAll(".diff").forEach((d) => d.classList.remove("is-selected"));
   pill.classList.add("is-selected");
   difficulty = pill.textContent.trim();
+});
+
+// ---- Webcam calibration ---------------------------------------------------
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const calBtn = document.getElementById("cal-webcam");
+if (calBtn) calBtn.addEventListener("click", runWebcamCalibration);
+
+const flipBtn = document.getElementById("cal-flip");
+if (flipBtn) flipBtn.addEventListener("click", () => {
+  // Toggle the stored horizontal flip so a saber that moves the wrong way can be
+  // corrected. A throwaway source instance just reads/writes the saved value.
+  try {
+    const src = window.SaberSources.create("webcam", document.body);
+    const cur = src.getCalibration();
+    src.setFlip(!cur.flipX, cur.flipY);
+    flipBtn.classList.toggle("btn--primary");
+  } catch (e) { /* webcam module unavailable */ }
+});
+
+// A cancellable calibration session so the modal is never a trap: Cancel, a
+// click on the backdrop, or Esc always closes it and releases the camera.
+let calSession = null;
+
+function closeCalOverlay() { document.getElementById("cal-overlay").hidden = true; }
+function cancelCalibration() {
+  if (calSession) {
+    calSession.cancelled = true;
+    try { if (calSession.src) calSession.src.stop(); } catch (e) {}
+    calSession = null;
+  }
+  closeCalOverlay();
+}
+const calCancelBtn = document.getElementById("cal-cancel");
+if (calCancelBtn) calCancelBtn.addEventListener("click", cancelCalibration);
+const calOverlayEl = document.getElementById("cal-overlay");
+if (calOverlayEl) calOverlayEl.addEventListener("click", (e) => {
+  if (e.target.id === "cal-overlay") cancelCalibration();   // click outside the box
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && calOverlayEl && !calOverlayEl.hidden) cancelCalibration();
+});
+
+async function runWebcamCalibration() {
+  if (!window.SaberSources || !window.SaberSources.has("webcam")) return;
+  if (calSession) return;                       // already running
+  const overlay = document.getElementById("cal-overlay");
+  const msg = document.getElementById("cal-msg");
+  const count = document.getElementById("cal-count");
+  const session = { src: null, cancelled: false };
+  calSession = session;
+  overlay.hidden = false; count.textContent = "";
+  msg.textContent = "Starting camera… first load can take a few seconds";
+
+  const src = window.SaberSources.create("webcam", document.body);
+  session.src = src;
+  try {
+    await Promise.race([
+      src.start(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 25000)),
+    ]);
+  } catch (err) {
+    if (session.cancelled) return;             // user already closed it
+    console.warn("calibration: camera unavailable", err);
+    try { src.stop(); } catch (e) {}
+    msg.textContent = "Camera unavailable — check permissions.";
+    count.textContent = "";
+    await wait(2500);
+    if (calSession === session) { calSession = null; closeCalOverlay(); }
+    return;
+  }
+  if (session.cancelled) { try { src.stop(); } catch (e) {} return; }
+
+  const SECS = 6;
+  msg.textContent = "Sweep your hand around the play area";
+  const done = src.calibrate(SECS * 1000);
+  for (let s = SECS; s > 0 && !session.cancelled; s--) { count.textContent = s; await wait(1000); }
+  if (session.cancelled) return;
+  const res = await done;
+  if (session.cancelled) return;
+  count.textContent = "";
+  msg.textContent = res.ok ? "Calibration saved ✓" : "Not enough movement — try again.";
+  try { src.stop(); } catch (e) {}
+  await wait(1400);
+  if (calSession === session) { calSession = null; closeCalOverlay(); }
+}
+
+// ---- Add a song (upload -> hub scoring pipeline -> library) ----------------
+const addFile = document.getElementById("add-file");
+const addPick = document.getElementById("add-pick");
+const addDrop = document.getElementById("add-drop");
+const addUpload = document.getElementById("add-upload");
+const addStatus = document.getElementById("add-status");
+const addStatusText = document.getElementById("add-statustext");
+let chosenFile = null;
+
+const STATUS_LABEL = {
+  queued: "Queued for scoring…",
+  generating: "Scoring the track… (this can take a few minutes)",
+  storing: "Saving the beatmap…",
+  done: "Added ✓  it's in your library",
+  error: "Scoring failed",
+};
+
+if (addFile) addFile.addEventListener("change", () => {
+  chosenFile = addFile.files[0] || null;
+  addPick.textContent = chosenFile ? chosenFile.name : "Choose an MP3…";
+  addDrop.classList.toggle("has-file", !!chosenFile);
+  addUpload.disabled = !chosenFile;
+});
+
+function setAddStatus(text, state) {
+  addStatus.hidden = false;
+  addStatus.classList.remove("is-done", "is-error");
+  if (state) addStatus.classList.add(state);
+  addStatusText.textContent = text;
+}
+
+if (addUpload) addUpload.addEventListener("click", async () => {
+  if (!chosenFile || !window.Limelight) return;
+  addUpload.disabled = true;
+  setAddStatus("Uploading to the hub…", null);
+  let res;
+  try {
+    res = await window.Limelight.addSong(chosenFile);
+  } catch (err) {
+    setAddStatus(String(err.message || err), "is-error");
+    addUpload.disabled = false;
+    return;
+  }
+  // poll the hub's generation queue for this score
+  const scoreName = res.score_name;
+  const t0 = Date.now();
+  while (Date.now() - t0 < 15 * 60 * 1000) {
+    const job = (await window.Limelight.jobs()).find((j) => j.score_name === scoreName);
+    const st = job ? job.status : "queued";
+    if (st === "done") {
+      setAddStatus(STATUS_LABEL.done, "is-done");
+      await initLibrary();                     // refresh the select list
+      await wait(1200);
+      showScreen("songs");
+      return;
+    }
+    if (st === "error") {
+      setAddStatus((job && job.error) ? "Scoring failed: " + job.error : STATUS_LABEL.error, "is-error");
+      addUpload.disabled = false;
+      return;
+    }
+    setAddStatus(STATUS_LABEL[st] || "Working…", null);
+    await wait(3000);
+  }
+  setAddStatus("Still scoring on the hub — it'll appear in the library when ready.", null);
+  addUpload.disabled = false;
 });
 
 // ---- Game lifecycle -------------------------------------------------------

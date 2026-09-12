@@ -9,8 +9,15 @@ const { Session } = require("./session.js");
 /* Read live from scores/, never from a copy beside this file: a committed
    sample goes stale the first time the pipeline changes. */
 const { adapt } = require("./respond.js");
-const score = adapt(JSON.parse(require("fs").readFileSync(
-  __dirname + "/../scores/levels.score", "utf8")));
+const fs_ = require("fs"), path_ = require("path");
+/* The built score when the pipeline has run on this machine, and the committed
+   fixture otherwise. A bare path into scores/ makes the suite unrunnable on a
+   fresh clone, which is how four suites stopped running with nothing red. */
+function scoreFile() {
+  const built = path_.join(__dirname, "..", "scores", "levels.score");
+  return fs_.existsSync(built) ? built : path_.join(__dirname, "levels.score");
+}
+const score = adapt(JSON.parse(fs_.readFileSync(scoreFile(), "utf8")));
 /* Every timing expectation comes from the score's own grid. Hardcoding 128.0
    and 0.2233 pinned this suite to a fixture that no longer exists. */
 const BEAT_S = 60 / score.grid.bpm;

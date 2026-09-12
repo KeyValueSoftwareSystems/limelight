@@ -10,7 +10,7 @@ export const KNOWN = [
   'brightness', 'width', 'air', 'pump', 'pace',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
-  'tension', 'releases', 'melody', 'made_by',
+  'tension', 'releases', 'melody', 'signals', 'made_by',
 ];
 
 const STEM_NAMES = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
@@ -143,6 +143,7 @@ export function format(raw) {
   if (raw.phrases) out.phrases = raw.phrases;
   /* The melody layer, the two lines behind it, and the honesty fields. */
   if (raw.melody) out.melody = raw.melody;
+  if (raw.signals) out.signals = raw.signals;
   if (raw.voice) out.voice = raw.voice;
   if (raw.lead) out.lead = raw.lead;
   if (raw.tension) out.tension = { per: 'beat', values: raw.tension };
@@ -190,7 +191,15 @@ export function format(raw) {
 
   // ---- moments (pass through with all fields; fallback from events) ----
   if (raw.moments) {
-    out.moments = raw.moments;
+    /* A moment says where it is as `at: {bar, beat}`, whichever source it came
+       from. The pipeline writes bar and beat flat and the events fallback nests
+       them, so the same field arrived in two shapes depending on the branch --
+       and a consumer reading m.at worked on one score and threw on the next. */
+    out.moments = raw.moments.map(mo => {
+      if (mo.at) return mo;
+      const { bar, beat, ...rest } = mo;
+      return { at: { bar, beat }, ...rest };
+    });
   } else if (Array.isArray(raw.events)) {
     out.moments = raw.events.map(event => {
       const m = { at: { bar: event.bar, beat: event.beat } };
@@ -331,8 +340,11 @@ export function format(raw) {
   if (raw.loudness) out.loudness = raw.loudness;
   if (raw.feel)     out.feel     = raw.feel;
 
-  /* consumer layer: present when the score was pulled / loaded with a profile */
-  if (raw.profile) out.profile = raw.profile;
+  /* the artist's layer: present when the score was pulled with a personality.
+     `profile` was the old name and still goes out beside it, so a reader
+     written before the rename keeps working. */
+  const person = raw.personality || raw.profile;
+  if (person) { out.personality = person; out.profile = person; }
 
   // ---- tension ----
   if (Array.isArray(raw.tension)) {
