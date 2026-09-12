@@ -1,8 +1,10 @@
 "use strict";
 /* Enumeration -- the taste gate. A pure function of the LAYOUT:
-     enumerate(layout) -> { sequences, matrix, report }
-   Sequences that are both POSSIBLE and LAND WELL on this rig, a suitability matrix
-   M[seq][context] = fit(seq,layout) x affinity(seq,context), and a readable report.
+     enumerate(layout) -> { sequences, fit, affinity, matrix, report }
+   Sequences that are both POSSIBLE and LAND WELL on this rig; affinity is the
+   per-family table (family -> sequence -> fact -> 0..1) each sequence declared,
+   matrix is the form table (fit x affinity.form) kept for the report and older
+   callers, and report is a readable summary of both.
    Computed once per layout and cached; the arranger reuses it across every score.
 
    Sequences key off the device DRIVERS' declared capabilities (never fixture ids),
@@ -210,10 +212,12 @@ function validateSequence(seq, layout) {
   return validateAffinity(affinityOf(seq));
 }
 
-/* enumerate(layout, { palette }) -> { sequences, matrix, report }
+/* enumerate(layout, { palette }) -> { sequences, fit, affinity, matrix, report }
    The heuristic BASE vocabulary (computed fit x affinity) is always present and
    deterministic; an optional PALETTE (validated, pre-scored, e.g. LLM-generated)
-   is merged on top. The matrix is the arranger's contract either way. */
+   is merged on top. affinity is keyed family -> sequence -> fact; matrix is the
+   form table (fit x affinity.form) kept for the report and older callers, and
+   remains the arranger's contract either way. */
 function enumerate(layout, options) {
   options = options || {};
   const g = groupsOf(layout);
