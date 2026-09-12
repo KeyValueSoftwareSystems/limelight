@@ -261,6 +261,23 @@ is still most of the bars.
 be. On a programmed record it is near zero everywhere, which is itself worth
 knowing; on a played one it is where the performance disagreed with the model.
 
+`grid.sure` is how far two independent beat trackers agree about this song.
+The pipeline runs madmom's DBN and Beat This!, which share no code and no
+training data, and scores how many beats land within 70ms of each other and
+whether both chose the same metrical level. It is the one confidence in the
+file that nobody had to label by ear, and it is worth reading before acting
+boldly: Entharo Mahanu scores 0.21 because the two models disagree by exactly
+a factor of two about what the beat is, and the honest report of that is a low
+number rather than a confident pick. Songs written to a click score 0.87 to
+1.00.
+
+`parts[].sure` is the silhouette of the clustering that decides `repeats_as` --
+how cleanly a section sits inside the group it was assigned to, rather than how
+likely its label is to be correct.
+
+Neither is a probability. Both are measurements of agreement, which is a
+different and more honest thing than a guess dressed as one.
+
 `grid.tempo` says where the tempo was measured to change. It is not a
 confidence: a segment boundary means the beats really did move, not that the
 fitter was unsure. Uncertainty is what `holds_from_s` is for.

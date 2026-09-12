@@ -46,6 +46,37 @@ def track(path, slug):
     return out[:, 0], out[:, 1], out[:, 0][out[:, 1] == 1]
 
 
+def second_opinion(path, slug):
+    at = CACHE / f"{slug}.beatthis.npy"
+    if at.exists():
+        return np.load(at)[:, 0]
+    try:
+        from beat_this.inference import File2Beats
+    except Exception:
+        return None
+    beats, _ = File2Beats(device="cpu", dbn=False)(path)
+    beats = np.asarray(beats, dtype=float)
+    at.parent.mkdir(parents=True, exist_ok=True)
+    np.save(at, np.stack([beats, np.zeros(len(beats))], axis=1))
+    return beats
+
+
+def agreed(mine, theirs, tol=0.070):
+    # Two beat trackers that share no code and no training data. Where they
+    # agree the grid is worth trusting; where they disagree by an octave one of
+    # them is counting a different pulse and the score cannot say which. This
+    # is the only confidence in the file nobody had to label by ear.
+    if theirs is None or len(mine) < 4 or len(theirs) < 4:
+        return None
+    hit = sum(1 for t in mine if np.min(np.abs(theirs - t)) <= tol) / len(mine)
+    a, b = float(np.median(np.diff(mine))), float(np.median(np.diff(theirs)))
+    if not b:
+        return None
+    off = abs(a / b - 1.0)
+    same = max(0.0, min(1.0, 1.0 - off / 0.10))
+    return round(hit * (0.4 + 0.6 * same), 3)
+
+
 WANT = ["rhythm.bpm", "tonal.key_edma.key", "tonal.key_edma.scale", "tonal.key_edma.strength",
         "tonal.tuning_frequency", "tonal.chords_key", "tonal.chords_scale",
         "tonal.chords_strength.mean", "tonal.chords_changes_rate",
@@ -196,6 +227,8 @@ def read(path, slug):
             g["bars"] = int((length_s - g["first_beat_s"]) //
                             (60.0 / g["bpm"] * g["beats_per_bar"])) + 1
             report["moved_by_ear"] = shift
+    g["sure"] = agreed(times, second_opinion(path, slug))
+    report["grid_sure"] = g["sure"]
     bar_s = (60.0 / g["bpm"]) * g["beats_per_bar"]
     env = envelopes(path, slug)
     sung, tune = clean_voice(path, slug)
