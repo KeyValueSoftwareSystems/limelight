@@ -14,7 +14,7 @@ button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c
 .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px}
 .mono{font:12px ui-monospace,monospace;font-variant-numeric:tabular-nums}
 #seek{flex:1;min-width:200px;accent-color:var(--ok);cursor:pointer}
-#map{position:relative;height:120px;border:1px solid var(--line);border-radius:6px;
+#map{position:relative;height:150px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;overflow:hidden}
 .part{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:flex-end;
   cursor:pointer;overflow:hidden;box-shadow:inset -1px 0 0 rgba(5,7,11,.9)}
@@ -25,12 +25,14 @@ button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c
   color:#8fbf9f;text-shadow:0 1px 3px #000;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis}
 .part .sung.quiet{color:#4a5260}
+.part .sung{cursor:pointer}
+.part .sung:hover{filter:brightness(1.5);text-decoration:underline}
 .part.here{outline:2px solid var(--ok);outline-offset:-2px}
 .part{border-left:1px solid #39445c}
 .part:first-of-type{border-left:none}
-.beat{position:absolute;top:4px;width:2px;height:34px;z-index:4;border-radius:1px;cursor:pointer}
+.beat{position:absolute;top:4px;width:2px;height:30px;z-index:4;border-radius:1px;cursor:pointer}
 .beat:hover{filter:brightness(1.6)}
-.beatname{position:absolute;left:2px;top:35px;font:8px ui-monospace,monospace;white-space:nowrap;
+.beatname{position:absolute;left:2px;top:32px;font:8px ui-monospace,monospace;white-space:nowrap;
           color:inherit;opacity:.9;text-shadow:0 1px 2px #000}
 #key{display:flex;flex-wrap:wrap;gap:9px;margin:4px 0 0;font:9px ui-monospace,monospace;color:#5c6478}
 #key b{font-weight:400}
@@ -40,7 +42,7 @@ button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c
 #head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:3}
 #zoom{width:100%;height:86px;cursor:pointer;margin:0 0 6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
-#tune{width:100%;height:78px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
+#tune{width:100%;height:86px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
 #lanes{width:100%;height:104px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
@@ -170,13 +172,16 @@ function draw() {
     const c = HUE[p.repeats_as];
     el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness??.5)*100)}%"></div>
       <div class="tag" style="color:${c}">${p.role ? p.role.toUpperCase() : p.repeats_as}</div>
-      ${p.sung
-        ? `<div class="sung">\u266a ${Math.round(p.sung.low)}\u2013${Math.round(p.sung.high)}${
-            p.sung.on_one_note ? " chant" : ""} \u00b7 ${p.sung.notes}n</div>`
-        : `<div class="sung quiet">\u266a \u2014</div>`}`;
+      <div class="sung${p.sung ? "" : " quiet"}"
+        title="${tuneWords(p.sung)} \u00b7 click to hear this section"
+        >\u266a ${tuneWords(p.sung, true)}</div>`;
     el.onclick = ev => {
       const r = map.getBoundingClientRect();
       play(((ev.clientX - r.left) / r.width) * total);
+    };
+    el.querySelector(".sung").onclick = ev => {
+      ev.stopPropagation();
+      play(t0, Math.min(t1, t0 + 14));
     };
     map.appendChild(el);
   }
@@ -198,7 +203,7 @@ function draw() {
     let lane = 0;
     while (shelf[lane] != null && shelf[lane] > left) lane++;
     shelf[lane] = left + wide + 0.6;
-    el.innerHTML = `<span class="beatname" style="top:${35 + lane*10}px">${words}</span>`;
+    el.innerHTML = `<span class="beatname" style="top:${32 + (lane % 5)*11}px">${words}</span>`;
     el.onclick = ev => { ev.stopPropagation(); hearMoment(m); };
     map.appendChild(el);
   }
@@ -246,6 +251,20 @@ function momentTime(m) {
 function momentSpan(m) {
   const beat = 60 / SCORE.grid.bpm;
   return (m.for_beats ? m.for_beats * beat : 0);
+}
+
+function tuneWords(s, short) {
+  if (!s || !s.notes) return short ? "\u2014" : "nothing sung here";
+  if (s.on_one_note) return short ? "one note" : "sung on one repeated note";
+  const how = s.moves < 1.2 ? ["small moves", "moves only a step at a time"]
+            : s.moves < 2.5 ? ["steps", "moves in small steps"]
+            : ["leaps", "leaps between notes"];
+  const span = s.high - s.low;
+  const wide = span < 5 ? "in a narrow band"
+             : span < 12 ? "inside one octave"
+             : span < 20 ? "over an octave and a half"
+             : "over two octaves";
+  return short ? how[0] : `${how[1]}, ${wide}`;
 }
 
 function momentWords(m) {
@@ -424,9 +443,9 @@ function click(when, down) {
 
 function tune() {
   const c = $("tune"), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
-  c.width = Math.round(r.width*dpr); c.height = Math.round(78*dpr);
+  c.width = Math.round(r.width*dpr); c.height = Math.round(86*dpr);
   const g = c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
-  g.clearRect(0,0,r.width,78);
+  g.clearRect(0,0,r.width,86);
   g.fillStyle = "#5c6478"; g.font = "600 9px ui-monospace,monospace";
   g.fillText("MELODY", 6, 12);
   const notes = SCORE.melody || [];
@@ -438,14 +457,15 @@ function tune() {
   const v = SCORE.voice || {}, total = SCORE.song.length_s;
   const lo = Math.floor((v.low ?? 48) - 1), hi = Math.ceil((v.high ?? 74) + 1);
   const span = Math.max(8, hi - lo), beat = 60 / SCORE.grid.bpm;
-  const top = 18, foot = 70, tall = foot - top;
+  const top = 20, foot = 74, tall = foot - top;
   const Y = p => foot - ((p - lo)/span)*tall;
   for (let p = Math.ceil(lo/12)*12; p <= hi; p += 12) {
     g.strokeStyle = "#1a212e"; g.lineWidth = 1;
-    g.beginPath(); g.moveTo(58, Y(p)); g.lineTo(r.width-4, Y(p)); g.stroke();
-    g.fillStyle = "#39414f"; g.font = "7px ui-monospace,monospace";
-    g.fillText("C" + (Math.round(p/12) - 1), 46, Y(p)+2.5);
+    g.beginPath(); g.moveTo(88, Y(p)); g.lineTo(r.width-4, Y(p)); g.stroke();
   }
+  g.fillStyle = "#2c3340"; g.font = "7px ui-monospace,monospace";
+  g.fillText("higher", 92, top + 6);
+  g.fillText("lower", 92, foot + 4);
   const hooked = new Set();
   for (const m of SCORE.moments || []) {
     if (m.is !== "hook" || !m.for_beats) continue;
@@ -454,8 +474,8 @@ function tune() {
   }
   for (const n of notes) {
     const t = barTime(n.bar) + (n.beat - 1)*beat;
-    const x = 58 + (t/total)*(r.width-63);
-    const w = Math.max(1.5, ((n.held_beats*beat)/total)*(r.width-63));
+    const x = 88 + (t/total)*(r.width-93);
+    const w = Math.max(1.5, ((n.held_beats*beat)/total)*(r.width-93));
     const hot = hooked.has(n.bar);
     g.fillStyle = hot ? "#c8a2ff" : (STEM.vocals || "#5bb98c");
     g.globalAlpha = hot ? 1 : 0.7;
@@ -463,12 +483,17 @@ function tune() {
   }
   g.globalAlpha = 1;
   g.fillStyle = "#5c6478"; g.font = "8px ui-monospace,monospace";
-  g.fillText(`${notes.length} notes`, 6, 24);
-  g.fillText(`${lo}-${hi}`, 6, 34);
-  if (v.sure != null) g.fillText(`sure ${v.sure}`, 6, 44);
-  if (v.octave_fixes) g.fillText(`${v.octave_fixes} oct fix`, 6, 54);
+  g.fillText("one mark =", 6, 26);
+  g.fillText("one sung note", 6, 37);
   g.fillStyle = "#c8a2ff";
-  g.fillText("purple = hook", 6, 66);
+  g.fillText("purple = the", 6, 52);
+  g.fillText("tune repeats", 6, 63);
+  g.fillStyle = "#39414f";
+  g.fillText(`${notes.length} notes`, 6, 74);
+  if (v.sure != null && v.sure < 0.5) {
+    g.fillStyle = "#e0655f";
+    g.fillText("pitch reading unreliable here", 96, 12);
+  }
 }
 
 function lanes() {
@@ -545,9 +570,8 @@ function sections() {
     row.innerHTML = `<span class="when">${mmss(t0)}</span>
       <span class="what"><b style="color:${HUE[p.repeats_as]}">${p.role ?? p.repeats_as}</b>
         &nbsp;${p.feels}
-        <span class="dim">· bars ${p.from_bar}–${p.to_bar} · ${(p.playing||[]).join(" ") || "nothing"}${
-          p.sung ? ` · voice ${p.sung.low}–${p.sung.high}, moves ${p.sung.moves}${
-            p.sung.on_one_note ? ", chanted" : ""}` : ""}</span></span>
+        <span class="dim">· bars ${p.from_bar}–${p.to_bar} · ${(p.playing||[]).join(" ") || "nothing"}
+        · <span style="color:#8fbf9f">${tuneWords(p.sung)}</span></span></span>
       <button data-from="${t0}" data-to="${t1}">hear it</button>
       <button class="yes" data-v="yes">right</button>
       <button class="no" data-v="no">wrong</button>

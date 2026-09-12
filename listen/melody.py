@@ -178,6 +178,8 @@ def sung(notes, spans, g, pickup, chanted=5):
                 most = max(most, run)
             else:
                 run = 1
+        seat = float(np.median(pitch))
+        share = sum(1 for x in pitch if abs(x - seat) < 1.0) / len(pitch)
         out.append(
             {
                 "notes": len(mine),
@@ -186,7 +188,7 @@ def sung(notes, spans, g, pickup, chanted=5):
                 "moves": round(float(np.mean(np.abs(np.diff(pitch)))), 2)
                 if len(pitch) > 1
                 else 0.0,
-                "on_one_note": most >= chanted,
+                "on_one_note": most >= chanted and share >= 0.5,
             }
         )
     return out
