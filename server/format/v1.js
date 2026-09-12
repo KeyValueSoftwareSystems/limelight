@@ -52,14 +52,22 @@ export function format(raw) {
   // ---- grid (with holds_from / holds_to) ----
   if (raw.grid) {
     out.grid = { ...raw.grid };
-    if (raw.grid.holds_from_s != null) {
-      const i = (raw.grid.holds_from_s - firstBeatS) / beatSec;
-      out.grid.holds_from = { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(i % bpb) + 1 };
-    }
-    if (raw.grid.holds_to_s != null) {
-      const i = (raw.grid.holds_to_s - firstBeatS) / beatSec;
-      out.grid.holds_to = { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(i % bpb) + 1 };
-    }
+    /* A song may change tempo, so the beat a second falls on is a walk along
+       grid.tempo, not one division. Dividing by a single beatSec put holds_from
+       in the wrong bar on every song whose tempo moves. */
+    const map = (raw.grid.tempo && raw.grid.tempo.length)
+      ? raw.grid.tempo : [{ from_beat: 0, at_s: firstBeatS, bpm }];
+    const beatOf = t => {
+      let k = 0;
+      while (k + 1 < map.length && map[k + 1].at_s <= t) k++;
+      return map[k].from_beat + (t - map[k].at_s) / (60 / map[k].bpm);
+    };
+    const place = t => {
+      const i = beatOf(t);
+      return { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(((i % bpb) + bpb) % bpb) + 1 };
+    };
+    if (raw.grid.holds_from_s != null) out.grid.holds_from = place(raw.grid.holds_from_s);
+    if (raw.grid.holds_to_s != null) out.grid.holds_to = place(raw.grid.holds_to_s);
   }
 
   // ---- beats (two formats: protocol {list} or pipeline [{t, weight, sure}]) ----

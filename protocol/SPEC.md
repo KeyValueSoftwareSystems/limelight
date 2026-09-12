@@ -6,16 +6,41 @@ else sits on top of it.
 
 ## The score
 
-Three numbers, and never a list of beat times.
+A rule for deriving beats, and never a list of beat times.
 
 ```json
-{ "grid": { "bpm": 128.0, "first_beat_s": 0.2233, "beats_per_bar": 4 } }
+{ "grid": { "bpm": 128.0, "first_beat_s": 0.2233, "beats_per_bar": 4,
+            "tempo": [ { "from_beat": 0, "at_s": 0.2233, "bpm": 128.0 } ] } }
 ```
 
 A list of beat times in seconds is what everyone builds first, and it is wrong
-the instant the tempo moves — every entry has to be recomputed and re-sent.
-Three numbers derive every beat in the recording and none of them change when
-somebody plays the record faster.
+the instant anything is edited — every entry has to be recomputed and re-sent.
+A rule derives every beat in the recording and none of it changes when somebody
+plays the record faster.
+
+`bpm` and `first_beat_s` alone were that rule until they met a song that
+changes tempo. Raga of Revenge opens at about 90 and settles at 120 after
+twenty seconds; fitting one tempo to it put the opening sections a bar and a
+half out, and nine of twenty-one songs had some span the single figure could
+not describe. So the rule is `tempo`: a list of constant-tempo segments, each
+saying that from beat `from_beat` onward — which lands at second `at_s` — the
+tempo is `bpm`. Beat 0 is bar 1 beat 1; a pickup before it counts backwards
+into bar 0 at the first segment's tempo.
+
+```
+secondsAt(bar, beat):
+    n   = (bar - 1) * beats_per_bar + (beat - 1)
+    seg = the last entry whose from_beat <= n
+    return seg.at_s + (n - seg.from_beat) * 60 / seg.bpm
+```
+
+A song whose tempo never moves is a map of length one, and that reproduces the
+old two-number arithmetic exactly — so there is one code path, not two.
+
+`bpm` and `first_beat_s` remain, and remain correct, as the song's dominant
+tempo and its first downbeat. A reader that only understands those two keeps
+working and is exactly as right as it was before. A reader that walks `tempo`
+is right on the songs that change. `tempo` is always present.
 
 ## Beats and downbeats are written out too
 
@@ -235,6 +260,10 @@ is still most of the bars.
 `beats[].off_ms` is how far each beat sits from where the grid says it should
 be. On a programmed record it is near zero everywhere, which is itself worth
 knowing; on a played one it is where the performance disagreed with the model.
+
+`grid.tempo` says where the tempo was measured to change. It is not a
+confidence: a segment boundary means the beats really did move, not that the
+fitter was unsure. Uncertainty is what `holds_from_s` is for.
 
 `grid.holds_from_s` and `holds_to_s` are always present now, and
 `holds_measured` says whether that span was measured or is simply the whole

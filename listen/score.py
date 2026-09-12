@@ -95,13 +95,57 @@ def per_bar_loud(loud, times, g):
     return [round(x / peak, 3) if x is not None else None for x in out]
 
 
-def sections(spans, voices, busy, pickup, report=None):
+def alike(spans, chroma, voices):
+    import sklearn.cluster
+    import sklearn.metrics
+
+    rows = []
+    for a, b, *_ in spans:
+        hi = max(b, a + 1)
+        h = chroma[:, a:hi].mean(axis=1)
+        h = h / (np.linalg.norm(h) + 1e-9)
+        if voices is not None and voices.shape[1] >= hi:
+            v = voices[:, a:hi].mean(axis=1)
+            v = v / (np.linalg.norm(v) + 1e-9)
+            rows.append(np.concatenate([h, v * 0.5]))
+        else:
+            rows.append(h)
+    x = np.vstack(rows)
+    if len(x) < 4:
+        return [chr(65 + i) for i in range(len(x))], [0.0] * len(x)
+    best, pick, apart = -2.0, list(range(len(x))), None
+    for k in range(2, min(7, len(x))):
+        got = sklearn.cluster.AgglomerativeClustering(
+            n_clusters=k, linkage="average").fit_predict(x)
+        if len(set(got)) < 2:
+            continue
+        s = float(sklearn.metrics.silhouette_score(x, got))
+        if s > best:
+            best, pick = s, list(got)
+            apart = sklearn.metrics.silhouette_samples(x, got)
+    order, out = {}, []
+    for lab in pick:
+        if lab not in order:
+            order[lab] = chr(65 + len(order))
+        out.append(order[lab])
+    sure = ([round(max(0.0, float(v)), 3) for v in apart] if apart is not None
+            else [0.0] * len(x))
+    return out, sure
+
+
+def sections(spans, voices, busy, pickup, report=None, chroma=None):
     from parts import how_much, word_for
 
     v = busy[0] if busy.ndim > 1 else busy
     peak = float(np.percentile(v, 98)) or 1.0
+    # Which sections are the same section coming back. This was written in
+    # parts.py and never ran: this function shadows that one, so every score
+    # ever made carried repeats_as: null and nothing could say that a chorus
+    # was a chorus it had already heard.
+    same, apart = (alike(spans, chroma, voices) if chroma is not None
+                   else ([None] * len(spans), [None] * len(spans)))
     out, had = [], {}
-    for a, b, role in spans:
+    for n, (a, b, role) in enumerate(spans):
         part = v[a:b] if b > a else v[a:a + 1]
         rel = float(part.mean() / peak)
         third = max(1, len(part) // 3)
@@ -111,6 +155,8 @@ def sections(spans, voices, busy, pickup, report=None):
             "from_bar": a + 1 - pickup,
             "to_bar": b - pickup,
             "role": role,
+            "repeats_as": same[n],
+            "sure": apart[n],
             "feels": word_for(rel, rise, has, had),
             "fullness": round(rel, 3),
             "rise": round(rise, 3),
@@ -140,7 +186,13 @@ def read(path, slug):
         fix = json.loads(said.read_text())
         shift = int(fix.get("downbeat_shift_beats", 0))
         if shift:
-            g["first_beat_s"] = round(g["first_beat_s"] + shift * 60.0 / g["bpm"], 4)
+            step = shift * 60.0 / g["bpm"]
+            g["first_beat_s"] = round(g["first_beat_s"] + step, 4)
+            # The tempo map is anchored in seconds too, so a correction by ear
+            # has to move it as well or the map and first_beat_s disagree by
+            # exactly the shift -- which is every cue one beat out.
+            for seg in g.get("tempo") or []:
+                seg["at_s"] = round(seg["at_s"] + step, 4)
             g["bars"] = int((length_s - g["first_beat_s"]) //
                             (60.0 / g["bpm"] * g["beats_per_bar"])) + 1
             report["moved_by_ear"] = shift
@@ -192,7 +244,7 @@ def read(path, slug):
                         firm=how.get("firm"), tell=grid_says)
     told = call([(a, b, m) for a, b, m in snapped], score_bars)
     shaped = sections([(s["from"], s["to"], s["role"]) for s in told],
-                      voices, busy, pickup, report)
+                      voices, busy, pickup, report, chroma)
     merged, kept = [], []
     for part, said in zip(shaped, told):
         if (merged and merged[-1]["role"] == part["role"] == "bridge"

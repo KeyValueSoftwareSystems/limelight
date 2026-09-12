@@ -1,4 +1,4 @@
-<title>Does this match what I hear?</title>
+<title>What the score heard</title>
 <style>
 :root{--bg:#0b0e14;--pan:#111722;--line:#1d2533;--line2:#2b3648;--ink:#e8ebf2;
   --dim:#98a2b8;--faint:#626c82;--amb:#e8a33d;--ok:#5bb98c;--bad:#e0655f;--vio:#c8a2ff}
@@ -72,7 +72,6 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 .row .what b{color:var(--ink)}
 .row .what .role{font-weight:700;text-transform:capitalize}
 .row button{padding:4px 10px;font-size:12px}
-.row .said{font:13px ui-monospace,monospace;color:var(--ok);min-width:14px}
 .inside{flex-basis:100%;margin:4px 0 0;display:flex;flex-wrap:wrap;gap:5px;align-items:flex-start}
 .tag{font:9.5px ui-monospace,monospace;color:var(--faint);text-transform:uppercase;
   letter-spacing:.09em;min-width:74px;padding-top:4px;flex:0 0 auto}
@@ -97,19 +96,13 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 </div>
 
 <p class="note" style="margin-top:-4px">Everything on this page is something the computer <b>claims</b> about
-  this song. Click any label, block or chip to hear that exact spot. Then say whether it was right.</p>
+  this song. Click any label, block or chip to hear that exact spot and judge it with your ears.</p>
 
 <section>
   <div class="lead">
     <div class="col">
       <div class="when" id="nowtime">0:00</div>
       <div class="big" id="nowrole">&mdash;</div>
-      <div class="ask" style="margin-top:9px">
-        <span>Does this match what you hear?</span>
-        <button class="yes" id="liveyes" data-v="yes">Right</button>
-        <button class="no" id="liveno" data-v="no">Wrong</button>
-        <span class="said" id="livesaid"></span>
-      </div>
     </div>
     <div class="col">
       <dl>
@@ -338,7 +331,6 @@ async function load(s, url, at) {
     BASE = saved.downbeat_shift_beats || 0;
   } catch (e) { BASE = 0; }
   SHIFT = BASE;
-  $("livesaid").textContent = "";
   if (at) aud.currentTime = at;
   draw();
 }
@@ -703,21 +695,6 @@ function firstIndex() {
   return ((best % SCORE.grid.beats_per_bar) + SCORE.grid.beats_per_bar) % SCORE.grid.beats_per_bar;
 }
 
-function verdict(body) {
-  return fetch("/verdict", { method:"POST", body: JSON.stringify({ slug, ...body }) });
-}
-
-function judged(row, kind, payload) {
-  row.querySelectorAll("[data-v]").forEach(b => {
-    b.onclick = async () => {
-      row.querySelectorAll("[data-v]").forEach(o => o.classList.remove("on"));
-      b.classList.add("on");
-      await verdict({ asked: kind, says: b.dataset.v, ...payload });
-      row.querySelector(".said").textContent = b.dataset.v === "yes" ? "✓" : "✗";
-    };
-  });
-}
-
 function sections() {
   const box = $("sections"); box.innerHTML = "";
   const total = SCORE.song.length_s;
@@ -732,9 +709,7 @@ function sections() {
         · bars ${p.from_bar}–${p.to_bar}</span>
         <span style="color:#8fbf9f">· ${esc(partTune(p))}</span></span>
       <button data-from="${t0}" data-to="${t1}">Hear it</button>
-      <button class="yes" data-v="yes">Right</button>
-      <button class="no" data-v="no">Wrong</button>
-      <span class="said"></span>`;
+      `;
 
     const mine = (SCORE.phrases || [])
       .filter(q => q.from_bar >= p.from_bar && q.to_bar <= p.to_bar);
@@ -775,7 +750,6 @@ function sections() {
     box.appendChild(row);
     row.querySelector("[data-from]").onclick = e =>
       play(+e.target.dataset.from, Math.min(+e.target.dataset.to, +e.target.dataset.from + 12));
-    judged(row, "section", { bar: p.from_bar, role: p.role, feels: p.feels });
   }
 }
 
@@ -814,11 +788,7 @@ function tick() {
     $("nowtime").textContent = `${mmss(t)} · bar ${Math.max(0, bar)} of ${SCORE.grid.bars}`;
     if (at >= 0) {
       const p = SCORE.parts[at];
-      if (at !== LIVE) {
-        LIVE = at;
-        $("livesaid").textContent = "";
-        document.querySelectorAll("#liveyes,#liveno").forEach(b => b.classList.remove("on"));
-      }
+      LIVE = at;
       const b = SCORE.bars || {}, idx = Math.max(0, bar - FIRSTBAR);
       const on = LANES.filter(n => Array.isArray(b[n]) && b[n][idx] > 0.12);
       $("nowrole").innerHTML = `<span style="color:${HUE[p.repeats_as]}">${esc(cap(p.role ?? p.repeats_as))}</span>`
@@ -900,15 +870,6 @@ $("tune").onclick = e => {
   const total = SCORE.song.length_s;
   const at = ((px - 14) / Math.max(1, r.width - 20)) * total;
   play(Math.max(0, Math.min(total - 0.1, at)), null);
-};
-$("liveyes").onclick = $("liveno").onclick = async e => {
-  if (LIVE < 0) return;
-  const p = SCORE.parts[LIVE];
-  document.querySelectorAll("#liveyes,#liveno").forEach(o => o.classList.remove("on"));
-  e.target.classList.add("on");
-  await verdict({ asked:"section", says:e.target.dataset.v, bar:p.from_bar,
-                  role:p.role, feels:p.feels });
-  $("livesaid").textContent = e.target.dataset.v === "yes" ? "✓ saved" : "✗ saved";
 };
 aud.onseeked = () => sent = aud.currentTime;
 $("song").onchange = e => {
