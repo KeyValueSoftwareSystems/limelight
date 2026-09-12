@@ -425,6 +425,22 @@ def leading(found, spans, pickup, g_per=4, look=2):
     return list(best.values())
 
 
+def carries(found, spans, pickup, per=4,
+            kinds=("hook", "pause", "highlight", "fill")):
+    edges = [a for a, _, _ in spans[1:]]
+    for m in found:
+        if m["is"] not in kinds or "into_bar" in m or "back_at" in m:
+            continue
+        reach = m.get("for_beats")
+        if not reach:
+            continue
+        at = bar_at(m["bar"], pickup)
+        past = [e for e in edges if at < e < at + reach / per]
+        if past:
+            m["into_bar"] = int(min(past) - pickup + 1)
+    return found
+
+
 def weigh(found, bars, edges, inner, pickup, look=2):
     loud = lift(bars["intensity"])
     seen = {}
@@ -445,7 +461,7 @@ def weigh(found, bars, edges, inner, pickup, look=2):
             if 0 < e - m["bar"] <= look:
                 leads = 0.85 if m["is"] in ("fill", "transition", "rise",
                                             "accent", "highlight",
-                                            "pause") else 0.45
+                                            "pause", "hook") else 0.45
                 break
         edge = max(starts, leads)
         m["weight"] = round(float(np.clip(
@@ -468,10 +484,17 @@ def pick(found, edges, bars, room=8, strong=0.70):
                   or w >= strong)
         if not earned:
             continue
-        held = best.get(m["bar"])
-        if held is None or m.get("weight", 0.0) > held.get("weight", 0.0):
-            best[m["bar"]] = m
-    keep = sorted(best.values(), key=lambda m: -m.get("weight", 0.0))[:most]
+        best.setdefault(m["bar"], []).append(m)
+    keep = []
+    for here in best.values():
+        here.sort(key=lambda m: -m.get("weight", 0.0))
+        take = here[:1]
+        for m in here[1:]:
+            if len(take) < 2 and ("back_at" in m or "into_bar" in m) \
+                    and ("back_at" in take[0] or "into_bar" in take[0]):
+                take.append(m)
+        keep += take
+    keep = sorted(keep, key=lambda m: -m.get("weight", 0.0))[:most]
     return sorted(keep, key=lambda m: (m["bar"], m["beat"]))
 
 

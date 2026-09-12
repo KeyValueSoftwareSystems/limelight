@@ -14,7 +14,9 @@ from shape import shape
 from call import call
 from parts import curves, parts
 from pulse import pulse
-from moments import moments, pick, weigh
+from melody import chants, fix as octaves, line as tune_line
+from melody import score as melody_of, sung as sung_in, voice as voice_of
+from moments import carries, moments, pick, weigh
 from phrase import phrases as sub_phrases
 from harmony import changes as chord_changes
 from harmony import chords as find_chords
@@ -219,8 +221,18 @@ def read(path, slug):
     inner = sub_phrases(
         [(t["from"], t["to"], t["role"], t["nth"]) for t in told],
         score_bars, told_now, every, origin, pickup)
+    heard = tune_line(tune, sung)
+    heard, slipped = octaves(heard)
+    told_now += chants(heard, g, pickup)
+    carries(told_now, [(a, b, m) for a, b, m in snapped], pickup,
+            g["beats_per_bar"])
+    told_now.sort(key=lambda m: (m["bar"], m["beat"], m["is"]))
     weigh(told_now, score_bars, edges_at,
           {q["from_bar"] for q in inner}, pickup)
+    for part, tune_of in zip(shaped, sung_in(
+            heard, [(p["from_bar"], p["to_bar"]) for p in shaped], g, pickup)):
+        if tune_of is not None:
+            part["sung"] = tune_of
     staged = pick(told_now, edges_at, g["bars"])
     if report is not None:
         report["phrases"] = len(inner)
@@ -261,6 +273,8 @@ def read(path, slug):
         "phrases": inner,
         "moments": staged,
         "signals": told_now,
+        "voice": voice_of(heard, slipped),
+        "melody": melody_of(heard, g, pickup),
     }
 
 

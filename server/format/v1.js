@@ -62,6 +62,8 @@ export function format(raw) {
   }
 
   if (raw.phrases) out.phrases = raw.phrases;
+  if (raw.melody) out.melody = raw.melody;
+  if (raw.voice) out.voice = raw.voice;
 
   for (const lane of ['width', 'air', 'pump', 'pace']) {
     if (Array.isArray(raw.bars?.[lane])) out[lane] = raw.bars[lane];
