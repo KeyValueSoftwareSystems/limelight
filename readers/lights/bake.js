@@ -101,9 +101,13 @@ if (lightsOut) {
   process.exit(0);
 }
 
+/* Default beside the repo, not into one person's scratchpad. The previous
+   default was an absolute path that existed on exactly one laptop, so anybody
+   else who ran this wrote into a directory that was not there. */
 const out = opt("--out", path.join(
-  process.env.SCRATCH || "/tmp/claude-1001/-home-alnas-Documents-Code-KeyCode-2026/49a4d46d-ce2c-4667-a443-9aef992651b0/scratchpad",
+  process.env.SCRATCH || path.join(__dirname, "..", "..", "work", "shows"),
   (score.score || "song") + ".frames.json"));
+fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, JSON.stringify({
   score: score.score, seed, fps, from, to: +to.toFixed(3), count: ticks.length, duration, beats, downbeats, phases,
   fixtures: (layout.fixtures || []).map(f => ({ id: f.id, type: f.type, address: f.address, universe: f.universe })),
