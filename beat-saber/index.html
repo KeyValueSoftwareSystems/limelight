@@ -166,7 +166,7 @@
         <div class="howto">
           <div class="howto__row">
             <span class="howto__icon howto__icon--red">&#9552;</span>
-            <p>Move your <strong>mouse</strong> to swing the two sabers &mdash; one <span class="txt-red">red</span>, one <span class="txt-blue">blue</span>.</p>
+            <p><strong>Left mouse button</strong> swings the <span class="txt-blue">blue</span> saber, <strong>right button</strong> the <span class="txt-red">red</span>. Move the mouse to aim; swing in the arrow's direction.</p>
           </div>
           <div class="howto__row">
             <span class="howto__icon">&#9632;</span>
@@ -196,6 +196,10 @@
           <label class="setting">
             <span class="setting__label">Saber Sensitivity</span>
             <input type="range" min="0" max="100" value="60" class="slider" />
+          </label>
+          <label class="setting">
+            <span class="setting__label">Input Latency (ms)</span>
+            <input type="range" min="0" max="200" value="0" step="5" class="slider" id="set-latency" />
           </label>
           <label class="setting setting--toggle">
             <span class="setting__label">Screen Glow</span>
