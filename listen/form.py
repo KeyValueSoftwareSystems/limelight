@@ -45,7 +45,7 @@ def anchor(spans, pickup, reach=2, firm=None):
                 if (bar - origin) % step == 0:
                     hit += step
                     break
-        if hit > score:
+        if hit >= score:
             best, score = origin, hit
     return best
 
