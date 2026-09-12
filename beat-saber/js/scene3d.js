@@ -23,7 +23,8 @@
   const TUN_COUNT = 24, TUN_DZ = 3.4, TUN_NEAR = BASE_CAM_Z + 4;
   const TUN_SPAN = TUN_COUNT * TUN_DZ, TUN_RX = 8, TUN_RY = 5.6, TUN_ROT_STEP = 0.40;
   const TUN_BEAM = 0.42, TUN_DEPTH = 0.7;              // beam thickness / z-depth
-  const TUN_BASE = new THREE.Color(0x2ec5ff), TUN_FLASH = new THREE.Color(0xffffff), TUN_DOWN = new THREE.Color(0xff2d55);
+  // indigo tunnel so the cyan/red note blocks stand out against it
+  const TUN_BASE = new THREE.Color(0x6a4bff), TUN_FLASH = new THREE.Color(0xb9a8ff), TUN_DOWN = new THREE.Color(0xff2d55);
   let tunnelSpin = 0;
 
   function init(mountEl) {
@@ -73,7 +74,7 @@
   function makeTunnel() {
     // dark structure with a blue neon glow; emissive is animated on the beat
     tunnelMat = new THREE.MeshStandardMaterial({
-      color: 0x081625, emissive: 0x2ec5ff, emissiveIntensity: 0.7,
+      color: 0x0c0a2e, emissive: 0x6a4bff, emissiveIntensity: 0.7,
       metalness: 0.4, roughness: 0.45 });
     const t = TUN_BEAM, d = TUN_DEPTH, rx = TUN_RX, ry = TUN_RY;
     // one geometry per orientation, reused across all frames
