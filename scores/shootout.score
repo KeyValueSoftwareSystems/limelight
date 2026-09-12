@@ -927,7 +927,10 @@
           "is": "some",
           "level": 0.29
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": false
     },
     {
       "from_bar": 5,
@@ -959,7 +962,10 @@
           "is": "some",
           "level": 0.251
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 37,
@@ -988,7 +994,10 @@
           "is": "full",
           "level": 1.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "C",
+      "returns": false
     },
     {
       "from_bar": 41,
@@ -1019,12 +1028,15 @@
           "is": "some",
           "level": 0.143
         }
-      }
+      },
+      "nth": 1,
+      "like": "D",
+      "returns": false
     },
     {
       "from_bar": 49,
       "to_bar": 52,
-      "role": "breakdown 2",
+      "role": "breakdown",
       "feels": "drums out",
       "fullness": 0.406,
       "rise": 0.025,
@@ -1048,12 +1060,15 @@
           "is": "full",
           "level": 1.0
         }
-      }
+      },
+      "nth": 2,
+      "like": "E",
+      "returns": true
     },
     {
       "from_bar": 53,
       "to_bar": 80,
-      "role": "drop 2",
+      "role": "drop",
       "feels": "drums in",
       "fullness": 0.686,
       "rise": -0.077,
@@ -1080,12 +1095,15 @@
           "is": "full",
           "level": 0.529
         }
-      }
+      },
+      "nth": 2,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 81,
       "to_bar": 84,
-      "role": "bridge 2",
+      "role": "bridge",
       "feels": "steady",
       "fullness": 0.505,
       "rise": -0.005,
@@ -1110,12 +1128,15 @@
           "is": "some",
           "level": 0.268
         }
-      }
+      },
+      "nth": 2,
+      "like": "F",
+      "returns": false
     },
     {
       "from_bar": 85,
       "to_bar": 100,
-      "role": "drop 3",
+      "role": "drop",
       "feels": "voice in",
       "fullness": 0.788,
       "rise": 0.065,
@@ -1142,7 +1163,10 @@
           "is": "full",
           "level": 0.425
         }
-      }
+      },
+      "nth": 3,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 101,
@@ -1171,7 +1195,10 @@
           "is": "full",
           "level": 1.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "E",
+      "returns": true
     }
   ],
   "beats": [

@@ -43,8 +43,11 @@ export function format(raw) {
     out.sections = raw.parts.map(part => ({
       from:     { bar: part.from_bar, beat: 1 },
       to:       { bar: part.to_bar + 1, beat: 1 },
-      name:     part.feels,
-      repeat:   part.repeats_as,
+      name:     part.role,
+      nth:      part.nth,
+      repeat:   part.returns ? part.like : undefined,
+      like:     part.like,
+      feels:    part.feels,
       playing:  part.playing,
       fullness: part.fullness,
       rise:     part.rise,

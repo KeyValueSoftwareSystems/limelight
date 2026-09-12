@@ -1057,7 +1057,10 @@
           "is": "some",
           "level": 0.383
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": false
     },
     {
       "from_bar": 4,
@@ -1087,7 +1090,10 @@
           "is": "full",
           "level": 0.928
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": false
     },
     {
       "from_bar": 12,
@@ -1117,12 +1123,15 @@
           "is": "some",
           "level": 0.122
         }
-      }
+      },
+      "nth": 1,
+      "like": "C",
+      "returns": false
     },
     {
       "from_bar": 16,
       "to_bar": 23,
-      "role": "verse 2",
+      "role": "verse",
       "feels": "voice, no drums",
       "fullness": 0.672,
       "rise": 0.072,
@@ -1148,7 +1157,10 @@
           "is": "full",
           "level": 0.579
         }
-      }
+      },
+      "nth": 2,
+      "like": "D",
+      "returns": false
     },
     {
       "from_bar": 24,
@@ -1179,12 +1191,15 @@
           "is": "full",
           "level": 0.794
         }
-      }
+      },
+      "nth": 1,
+      "like": "E",
+      "returns": true
     },
     {
       "from_bar": 60,
       "to_bar": 63,
-      "role": "breakdown 2",
+      "role": "breakdown",
       "feels": "voice out",
       "fullness": 0.507,
       "rise": 0.314,
@@ -1209,12 +1224,15 @@
           "is": "full",
           "level": 0.53
         }
-      }
+      },
+      "nth": 2,
+      "like": "F",
+      "returns": false
     },
     {
       "from_bar": 64,
       "to_bar": 75,
-      "role": "chorus 2",
+      "role": "chorus",
       "feels": "drums in",
       "fullness": 0.855,
       "rise": -0.012,
@@ -1241,12 +1259,15 @@
           "is": "full",
           "level": 0.538
         }
-      }
+      },
+      "nth": 2,
+      "like": "E",
+      "returns": true
     },
     {
       "from_bar": 76,
       "to_bar": 83,
-      "role": "verse 3",
+      "role": "verse",
       "feels": "drums out",
       "fullness": 0.582,
       "rise": 0.161,
@@ -1271,12 +1292,15 @@
           "is": "some",
           "level": 0.149
         }
-      }
+      },
+      "nth": 3,
+      "like": "G",
+      "returns": false
     },
     {
       "from_bar": 84,
       "to_bar": 87,
-      "role": "verse 4",
+      "role": "verse",
       "feels": "voice, no drums",
       "fullness": 0.866,
       "rise": -0.051,
@@ -1302,7 +1326,10 @@
           "is": "full",
           "level": 0.649
         }
-      }
+      },
+      "nth": 4,
+      "like": "H",
+      "returns": false
     },
     {
       "from_bar": 88,
@@ -1333,12 +1360,15 @@
           "is": "full",
           "level": 0.829
         }
-      }
+      },
+      "nth": 1,
+      "like": "I",
+      "returns": false
     },
     {
       "from_bar": 100,
       "to_bar": 115,
-      "role": "chorus 3",
+      "role": "chorus",
       "feels": "voice, no drums",
       "fullness": 0.93,
       "rise": 0.026,
@@ -1364,7 +1394,10 @@
           "is": "full",
           "level": 0.775
         }
-      }
+      },
+      "nth": 3,
+      "like": "E",
+      "returns": true
     },
     {
       "from_bar": 116,
@@ -1394,7 +1427,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "J",
+      "returns": false
     }
   ],
   "beats": [

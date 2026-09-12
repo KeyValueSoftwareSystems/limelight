@@ -612,7 +612,10 @@
           "is": "some",
           "level": 0.256
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": false
     },
     {
       "from_bar": 16,
@@ -643,7 +646,10 @@
           "is": "some",
           "level": 0.37
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 24,
@@ -675,7 +681,10 @@
           "is": "full",
           "level": 0.924
         }
-      }
+      },
+      "nth": 1,
+      "like": "C",
+      "returns": false
     },
     {
       "from_bar": 56,
@@ -705,7 +714,10 @@
           "is": "some",
           "level": 0.346
         }
-      }
+      },
+      "nth": 1,
+      "like": "D",
+      "returns": false
     },
     {
       "from_bar": 60,
@@ -734,7 +746,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": true
     }
   ],
   "beats": [

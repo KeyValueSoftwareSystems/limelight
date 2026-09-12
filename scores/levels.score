@@ -1079,7 +1079,10 @@
           "is": "full",
           "level": 0.792
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": true
     },
     {
       "from_bar": 9,
@@ -1110,7 +1113,10 @@
           "is": "some",
           "level": 0.252
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 25,
@@ -1139,12 +1145,15 @@
           "is": "full",
           "level": 0.858
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": true
     },
     {
       "from_bar": 33,
       "to_bar": 44,
-      "role": "drop 2",
+      "role": "drop",
       "feels": "drums in",
       "fullness": 0.8,
       "rise": 0.074,
@@ -1170,12 +1179,15 @@
           "is": "some",
           "level": 0.385
         }
-      }
+      },
+      "nth": 2,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 45,
       "to_bar": 48,
-      "role": "breakdown 2",
+      "role": "breakdown",
       "feels": "half a kit",
       "fullness": 0.943,
       "rise": 0.09,
@@ -1200,7 +1212,10 @@
           "is": "full",
           "level": 1.0
         }
-      }
+      },
+      "nth": 2,
+      "like": "A",
+      "returns": true
     },
     {
       "from_bar": 49,
@@ -1230,12 +1245,15 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "C",
+      "returns": false
     },
     {
       "from_bar": 69,
       "to_bar": 76,
-      "role": "breakdown 3",
+      "role": "breakdown",
       "feels": "voice, no drums",
       "fullness": 0.56,
       "rise": 0.058,
@@ -1260,12 +1278,15 @@
           "is": "full",
           "level": 0.478
         }
-      }
+      },
+      "nth": 3,
+      "like": "D",
+      "returns": false
     },
     {
       "from_bar": 77,
       "to_bar": 84,
-      "role": "breakdown 4",
+      "role": "breakdown",
       "feels": "half a kit",
       "fullness": 0.702,
       "rise": 0.256,
@@ -1291,12 +1312,15 @@
           "is": "full",
           "level": 0.881
         }
-      }
+      },
+      "nth": 4,
+      "like": "E",
+      "returns": false
     },
     {
       "from_bar": 85,
       "to_bar": 92,
-      "role": "breakdown 5",
+      "role": "breakdown",
       "feels": "drums out",
       "fullness": 0.529,
       "rise": 0.304,
@@ -1320,12 +1344,15 @@
           "is": "full",
           "level": 0.681
         }
-      }
+      },
+      "nth": 5,
+      "like": "F",
+      "returns": false
     },
     {
       "from_bar": 93,
       "to_bar": 100,
-      "role": "breakdown 6",
+      "role": "breakdown",
       "feels": "no drums",
       "fullness": 0.837,
       "rise": 0.184,
@@ -1350,12 +1377,15 @@
           "is": "full",
           "level": 1.0
         }
-      }
+      },
+      "nth": 6,
+      "like": "A",
+      "returns": true
     },
     {
       "from_bar": 101,
       "to_bar": 120,
-      "role": "drop 3",
+      "role": "drop",
       "feels": "drums in",
       "fullness": 0.795,
       "rise": -0.015,
@@ -1381,7 +1411,10 @@
           "is": "full",
           "level": 0.433
         }
-      }
+      },
+      "nth": 3,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 121,
@@ -1412,7 +1445,10 @@
           "is": "some",
           "level": 0.165
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": true
     }
   ],
   "beats": [

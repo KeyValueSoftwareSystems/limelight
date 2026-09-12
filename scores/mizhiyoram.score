@@ -425,7 +425,10 @@
           "is": "full",
           "level": 0.546
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": true
     },
     {
       "from_bar": 8,
@@ -455,12 +458,15 @@
           "is": "some",
           "level": 0.309
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": false
     },
     {
       "from_bar": 12,
       "to_bar": 15,
-      "role": "verse 2",
+      "role": "verse",
       "feels": "voice, no drums",
       "fullness": 0.658,
       "rise": 0.107,
@@ -485,7 +491,10 @@
           "is": "some",
           "level": 0.384
         }
-      }
+      },
+      "nth": 2,
+      "like": "C",
+      "returns": false
     },
     {
       "from_bar": 16,
@@ -517,7 +526,10 @@
           "is": "full",
           "level": 0.505
         }
-      }
+      },
+      "nth": 1,
+      "like": "D",
+      "returns": false
     },
     {
       "from_bar": 32,
@@ -547,7 +559,10 @@
           "is": "full",
           "level": 0.483
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": true
     }
   ],
   "beats": [

@@ -164,6 +164,10 @@ def read(path, slug):
     told = call([(a, b, m) for a, b, m in snapped], score_bars)
     shaped = sections([(s["from"], s["to"], s["role"]) for s in told],
                       voices, busy, pickup, report)
+    for part, said in zip(shaped, told):
+        part["nth"] = said["nth"]
+        part["like"] = said["like"]
+        part["returns"] = said["returns"]
     show(slug, g, report, {"essentia hears": f["rhythm.bpm"]})
 
     return {

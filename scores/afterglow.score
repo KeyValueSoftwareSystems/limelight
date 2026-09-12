@@ -1080,7 +1080,10 @@
           "is": "some",
           "level": 0.342
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": true
     },
     {
       "from_bar": 16,
@@ -1111,7 +1114,10 @@
           "is": "some",
           "level": 0.225
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 24,
@@ -1143,7 +1149,10 @@
           "is": "full",
           "level": 0.5
         }
-      }
+      },
+      "nth": 1,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 56,
@@ -1173,12 +1182,15 @@
           "is": "full",
           "level": 0.442
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": true
     },
     {
       "from_bar": 72,
       "to_bar": 79,
-      "role": "verse 2",
+      "role": "verse",
       "feels": "half a kit",
       "fullness": 0.623,
       "rise": 0.093,
@@ -1204,12 +1216,15 @@
           "is": "some",
           "level": 0.245
         }
-      }
+      },
+      "nth": 2,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 80,
       "to_bar": 111,
-      "role": "chorus 2",
+      "role": "chorus",
       "feels": "drums in",
       "fullness": 0.938,
       "rise": -0.037,
@@ -1236,12 +1251,15 @@
           "is": "full",
           "level": 0.604
         }
-      }
+      },
+      "nth": 2,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 112,
       "to_bar": 119,
-      "role": "verse 3",
+      "role": "verse",
       "feels": "drums out",
       "fullness": 0.572,
       "rise": 0.048,
@@ -1266,7 +1284,10 @@
           "is": "full",
           "level": 1.0
         }
-      }
+      },
+      "nth": 3,
+      "like": "A",
+      "returns": true
     },
     {
       "from_bar": 120,
@@ -1293,7 +1314,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "D",
+      "returns": false
     }
   ],
   "beats": [

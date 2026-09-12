@@ -953,7 +953,10 @@
           "is": "none",
           "level": 0.086
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": false
     },
     {
       "from_bar": 13,
@@ -984,7 +987,10 @@
           "is": "some",
           "level": 0.28
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 21,
@@ -1015,7 +1021,10 @@
           "is": "full",
           "level": 0.989
         }
-      }
+      },
+      "nth": 1,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 37,
@@ -1047,12 +1056,15 @@
           "is": "full",
           "level": 0.708
         }
-      }
+      },
+      "nth": 1,
+      "like": "D",
+      "returns": true
     },
     {
       "from_bar": 45,
       "to_bar": 60,
-      "role": "verse 2",
+      "role": "verse",
       "feels": "drums out",
       "fullness": 0.458,
       "rise": 0.314,
@@ -1078,12 +1090,15 @@
           "is": "some",
           "level": 0.263
         }
-      }
+      },
+      "nth": 2,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 61,
       "to_bar": 72,
-      "role": "verse 3",
+      "role": "verse",
       "feels": "voice, no drums",
       "fullness": 0.832,
       "rise": -0.002,
@@ -1109,12 +1124,15 @@
           "is": "full",
           "level": 0.935
         }
-      }
+      },
+      "nth": 3,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 73,
       "to_bar": 80,
-      "role": "verse 4",
+      "role": "verse",
       "feels": "voice, no drums",
       "fullness": 0.62,
       "rise": 0.032,
@@ -1140,12 +1158,15 @@
           "is": "some",
           "level": 0.254
         }
-      }
+      },
+      "nth": 4,
+      "like": "E",
+      "returns": false
     },
     {
       "from_bar": 81,
       "to_bar": 84,
-      "role": "pre-chorus 2",
+      "role": "pre-chorus",
       "feels": "half a kit",
       "fullness": 0.742,
       "rise": 0.135,
@@ -1172,12 +1193,15 @@
           "is": "full",
           "level": 0.755
         }
-      }
+      },
+      "nth": 2,
+      "like": "F",
+      "returns": false
     },
     {
       "from_bar": 85,
       "to_bar": 100,
-      "role": "chorus 2",
+      "role": "chorus",
       "feels": "drums in",
       "fullness": 0.943,
       "rise": 0.103,
@@ -1204,7 +1228,10 @@
           "is": "full",
           "level": 0.549
         }
-      }
+      },
+      "nth": 2,
+      "like": "D",
+      "returns": true
     },
     {
       "from_bar": 101,
@@ -1231,7 +1258,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "G",
+      "returns": false
     }
   ],
   "beats": [

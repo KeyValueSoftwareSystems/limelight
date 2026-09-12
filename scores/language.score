@@ -991,7 +991,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": false
     },
     {
       "from_bar": 9,
@@ -1021,7 +1024,10 @@
           "is": "some",
           "level": 0.137
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": false
     },
     {
       "from_bar": 17,
@@ -1053,12 +1059,15 @@
           "is": "full",
           "level": 0.866
         }
-      }
+      },
+      "nth": 1,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 57,
       "to_bar": 60,
-      "role": "solo 2",
+      "role": "solo",
       "feels": "drums out",
       "fullness": 0.631,
       "rise": -0.14,
@@ -1083,7 +1092,10 @@
           "is": "full",
           "level": 0.728
         }
-      }
+      },
+      "nth": 2,
+      "like": "D",
+      "returns": true
     },
     {
       "from_bar": 61,
@@ -1114,12 +1126,15 @@
           "is": "some",
           "level": 0.168
         }
-      }
+      },
+      "nth": 1,
+      "like": "E",
+      "returns": false
     },
     {
       "from_bar": 77,
       "to_bar": 104,
-      "role": "solo 3",
+      "role": "solo",
       "feels": "drums in",
       "fullness": 0.851,
       "rise": 0.072,
@@ -1145,12 +1160,15 @@
           "is": "full",
           "level": 0.939
         }
-      }
+      },
+      "nth": 3,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 105,
       "to_bar": 108,
-      "role": "breakdown 2",
+      "role": "breakdown",
       "feels": "drums out",
       "fullness": 0.53,
       "rise": -0.492,
@@ -1175,7 +1193,10 @@
           "is": "full",
           "level": 0.722
         }
-      }
+      },
+      "nth": 2,
+      "like": "D",
+      "returns": true
     },
     {
       "from_bar": 109,
@@ -1202,7 +1223,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "F",
+      "returns": false
     }
   ],
   "beats": [

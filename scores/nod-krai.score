@@ -977,7 +977,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": false
     },
     {
       "from_bar": 12,
@@ -1007,12 +1010,15 @@
           "is": "some",
           "level": 0.247
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": false
     },
     {
       "from_bar": 24,
       "to_bar": 35,
-      "role": "breakdown 2",
+      "role": "breakdown",
       "feels": "drums in",
       "fullness": 0.616,
       "rise": 0.051,
@@ -1039,12 +1045,15 @@
           "is": "full",
           "level": 0.503
         }
-      }
+      },
+      "nth": 2,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 36,
       "to_bar": 63,
-      "role": "breakdown 3",
+      "role": "breakdown",
       "feels": "drums out",
       "fullness": 0.601,
       "rise": 0.126,
@@ -1069,12 +1078,15 @@
           "is": "full",
           "level": 0.602
         }
-      }
+      },
+      "nth": 3,
+      "like": "D",
+      "returns": true
     },
     {
       "from_bar": 64,
       "to_bar": 67,
-      "role": "breakdown 4",
+      "role": "breakdown",
       "feels": "drums in",
       "fullness": 0.759,
       "rise": 0.038,
@@ -1101,7 +1113,10 @@
           "is": "full",
           "level": 0.82
         }
-      }
+      },
+      "nth": 4,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 68,
@@ -1133,7 +1148,10 @@
           "is": "full",
           "level": 0.747
         }
-      }
+      },
+      "nth": 1,
+      "like": "D",
+      "returns": true
     },
     {
       "from_bar": 88,
@@ -1165,7 +1183,10 @@
           "is": "full",
           "level": 1.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "E",
+      "returns": false
     },
     {
       "from_bar": 108,
@@ -1195,7 +1216,10 @@
           "is": "full",
           "level": 0.446
         }
-      }
+      },
+      "nth": 1,
+      "like": "F",
+      "returns": false
     }
   ],
   "beats": [

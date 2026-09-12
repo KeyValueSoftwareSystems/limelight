@@ -1376,7 +1376,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": false
     },
     {
       "from_bar": 8,
@@ -1407,7 +1410,10 @@
           "is": "some",
           "level": 0.12
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 16,
@@ -1437,12 +1443,15 @@
           "is": "some",
           "level": 0.298
         }
-      }
+      },
+      "nth": 1,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 36,
       "to_bar": 51,
-      "role": "verse 2",
+      "role": "verse",
       "feels": "drums in",
       "fullness": 0.753,
       "rise": 0.026,
@@ -1468,7 +1477,10 @@
           "is": "full",
           "level": 0.479
         }
-      }
+      },
+      "nth": 2,
+      "like": "D",
+      "returns": true
     },
     {
       "from_bar": 52,
@@ -1499,12 +1511,15 @@
           "is": "full",
           "level": 0.865
         }
-      }
+      },
+      "nth": 1,
+      "like": "E",
+      "returns": false
     },
     {
       "from_bar": 60,
       "to_bar": 83,
-      "role": "interlude 2",
+      "role": "interlude",
       "feels": "drums in",
       "fullness": 0.806,
       "rise": 0.12,
@@ -1530,12 +1545,15 @@
           "is": "full",
           "level": 0.772
         }
-      }
+      },
+      "nth": 2,
+      "like": "F",
+      "returns": true
     },
     {
       "from_bar": 84,
       "to_bar": 91,
-      "role": "breakdown 2",
+      "role": "breakdown",
       "feels": "thinning",
       "fullness": 0.778,
       "rise": -0.213,
@@ -1561,12 +1579,15 @@
           "is": "full",
           "level": 1.0
         }
-      }
+      },
+      "nth": 2,
+      "like": "D",
+      "returns": true
     },
     {
       "from_bar": 92,
       "to_bar": 123,
-      "role": "verse 3",
+      "role": "verse",
       "feels": "half a kit",
       "fullness": 0.544,
       "rise": 0.41,
@@ -1592,7 +1613,10 @@
           "is": "some",
           "level": 0.362
         }
-      }
+      },
+      "nth": 3,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 124,
@@ -1623,12 +1647,15 @@
           "is": "full",
           "level": 0.872
         }
-      }
+      },
+      "nth": 1,
+      "like": "F",
+      "returns": true
     },
     {
       "from_bar": 144,
       "to_bar": 155,
-      "role": "drop 2",
+      "role": "drop",
       "feels": "thinning",
       "fullness": 0.552,
       "rise": -0.149,
@@ -1653,7 +1680,10 @@
           "is": "full",
           "level": 0.868
         }
-      }
+      },
+      "nth": 2,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 156,
@@ -1683,7 +1713,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "G",
+      "returns": false
     }
   ],
   "beats": [

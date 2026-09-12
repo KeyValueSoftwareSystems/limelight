@@ -1311,7 +1311,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "A",
+      "returns": false
     },
     {
       "from_bar": 9,
@@ -1342,7 +1345,10 @@
           "is": "some",
           "level": 0.319
         }
-      }
+      },
+      "nth": 1,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 17,
@@ -1372,7 +1378,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 25,
@@ -1402,12 +1411,15 @@
           "is": "some",
           "level": 0.326
         }
-      }
+      },
+      "nth": 1,
+      "like": "D",
+      "returns": false
     },
     {
       "from_bar": 29,
       "to_bar": 36,
-      "role": "build 2",
+      "role": "build",
       "feels": "drums in",
       "fullness": 0.608,
       "rise": 0.017,
@@ -1434,12 +1446,15 @@
           "is": "some",
           "level": 0.338
         }
-      }
+      },
+      "nth": 2,
+      "like": "E",
+      "returns": true
     },
     {
       "from_bar": 37,
       "to_bar": 44,
-      "role": "drop 2",
+      "role": "drop",
       "feels": "voice out",
       "fullness": 0.677,
       "rise": 0.123,
@@ -1466,7 +1481,10 @@
           "is": "some",
           "level": 0.183
         }
-      }
+      },
+      "nth": 2,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 45,
@@ -1498,12 +1516,15 @@
           "is": "full",
           "level": 0.808
         }
-      }
+      },
+      "nth": 1,
+      "like": "E",
+      "returns": true
     },
     {
       "from_bar": 57,
       "to_bar": 72,
-      "role": "drop 3",
+      "role": "drop",
       "feels": "voice out",
       "fullness": 0.591,
       "rise": 0.151,
@@ -1529,12 +1550,15 @@
           "is": "some",
           "level": 0.262
         }
-      }
+      },
+      "nth": 3,
+      "like": "C",
+      "returns": true
     },
     {
       "from_bar": 73,
       "to_bar": 80,
-      "role": "verse 2",
+      "role": "verse",
       "feels": "voice in",
       "fullness": 0.539,
       "rise": -0.002,
@@ -1560,12 +1584,15 @@
           "is": "some",
           "level": 0.312
         }
-      }
+      },
+      "nth": 2,
+      "like": "F",
+      "returns": false
     },
     {
       "from_bar": 81,
       "to_bar": 92,
-      "role": "verse 3",
+      "role": "verse",
       "feels": "steady",
       "fullness": 0.804,
       "rise": 0.101,
@@ -1592,12 +1619,15 @@
           "is": "some",
           "level": 0.384
         }
-      }
+      },
+      "nth": 3,
+      "like": "E",
+      "returns": true
     },
     {
       "from_bar": 93,
       "to_bar": 112,
-      "role": "verse 4",
+      "role": "verse",
       "feels": "drums out",
       "fullness": 0.809,
       "rise": 0.224,
@@ -1623,12 +1653,15 @@
           "is": "full",
           "level": 0.727
         }
-      }
+      },
+      "nth": 4,
+      "like": "B",
+      "returns": true
     },
     {
       "from_bar": 113,
       "to_bar": 140,
-      "role": "verse 5",
+      "role": "verse",
       "feels": "drums in",
       "fullness": 0.949,
       "rise": 0.034,
@@ -1655,7 +1688,10 @@
           "is": "full",
           "level": 0.87
         }
-      }
+      },
+      "nth": 5,
+      "like": "E",
+      "returns": true
     },
     {
       "from_bar": 141,
@@ -1686,7 +1722,10 @@
           "is": "full",
           "level": 0.677
         }
-      }
+      },
+      "nth": 1,
+      "like": "G",
+      "returns": false
     },
     {
       "from_bar": 149,
@@ -1713,7 +1752,10 @@
           "is": "none",
           "level": 0.0
         }
-      }
+      },
+      "nth": 1,
+      "like": "H",
+      "returns": false
     }
   ],
   "beats": [
