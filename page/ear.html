@@ -1141,6 +1141,33 @@ function firstIndex() {
   return ((best % SCORE.grid.beats_per_bar) + SCORE.grid.beats_per_bar) % SCORE.grid.beats_per_bar;
 }
 
+const MOODWORD = {
+  bright_vs_dark:             ["brighter", "darker"],
+  calm_vs_aggressive:         ["calmer", "more aggressive"],
+  happy_vs_sad:               ["happier", "sadder"],
+  warm_vs_cold:               ["warmer", "colder"],
+  spacious_vs_claustrophobic: ["more open", "more closed-in"],
+  triumphant_vs_mournful:     ["more triumphant", "more mournful"],
+  tense_vs_relaxed:           ["tenser", "more relaxed"],
+};
+
+function moodWords(m) {
+  if (!m) return "";
+  const said = Object.entries(m)
+    .filter(([k, v]) => MOODWORD[k] && Math.abs(v) >= 0.15)
+    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+    .slice(0, 2)
+    .map(([k, v]) => (Math.abs(v) >= 0.32 ? "much " : "") + MOODWORD[k][v > 0 ? 0 : 1]);
+  return said.length
+    ? ` <b style="color:var(--amb)">· ${said.join(" and ")} than the rest of this song</b>`
+    : "";
+}
+
+function edgeWords(p) {
+  if (p.also_heard == null) return ` <span class="dim">· only our own detectors heard this boundary</span>`;
+  return ` <span style="color:var(--ok)">· a second model heard this boundary too (${p.also_heard})</span>`;
+}
+
 function sections() {
   const box = $("sections"); box.innerHTML = "";
   const total = SCORE.song.length_s;
@@ -1155,7 +1182,7 @@ function sections() {
         · bars ${p.from_bar}–${p.to_bar}</span>
         <span style="color:#8fbf9f">· ${esc(partTune(p))}</span>${p.trades
           ? ` <b style="color:var(--vio)">· trades back and forth every ${p.trades.every_bars} bars</b>`
-          : ""}</span>
+          : ""}${moodWords(p.mood)}${edgeWords(p)}</span>
       <button data-from="${t0}" data-to="${t1}">Hear it</button>
       `;
 

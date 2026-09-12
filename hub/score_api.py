@@ -18,7 +18,7 @@ KNOWN = [
     "presence", "moments",
     "phrases", "layers", "chords", "key", "loudness", "feel",
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
-    "tension", "releases", "melody", "signals", "made_by",
+    "tension", "releases", "melody", "signals", "made_by", "mood_axes",
 ]
 
 _STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
@@ -139,6 +139,7 @@ def format_v1(raw):
                 "sure": p.get("sure"),
                 "trades": p.get("trades"),
                 "also_heard": p.get("also_heard"),
+                "mood": p.get("mood"),
                 "stems": p.get("stems"),
             }
             for p in raw["parts"]
@@ -169,7 +170,7 @@ def format_v1(raw):
     # These three were carried by the JS formatter and not this one, which is
     # the same drift in the other direction.
     for whole in ("groove", "ticks", "melody_phrases",
-                  "phrase_grid", "scales", "presence"):
+                  "phrase_grid", "scales", "presence", "mood_axes"):
         if raw.get(whole) is not None:
             out[whole] = raw[whole]
 

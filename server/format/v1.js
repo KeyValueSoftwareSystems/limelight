@@ -128,6 +128,7 @@ export function format(raw) {
       also_heard: part.also_heard,
       sure:       part.sure,
       trades:     part.trades,
+      mood:       part.mood,
     }));
   }
 
@@ -138,6 +139,7 @@ export function format(raw) {
      throws the pattern away, and the pattern is what a light follows. */
   if (raw.groove) out.groove = raw.groove;
   if (Array.isArray(raw.melody_phrases)) out.melody_phrases = raw.melody_phrases;
+  if (raw.mood_axes) out.mood_axes = raw.mood_axes;
 
   // ---- energy (backward compat) ----
   if (raw.energy) {

@@ -309,6 +309,35 @@ of them likes is worth a gentler one.
 
 null means only we heard it. That is not the same as wrong.
 
+`sections[].mood` is where a section sits on a handful of opposed axes -- calm
+against aggressive, happy against sad, warm against cold -- read by MuQ-MuLan,
+which was trained to place music and text in one space. The number is not a
+score against the word. It is the section's position within this song: zero is
+the song's own average, and the range runs to roughly plus or minus a half. So
+-0.4 on `calm_vs_aggressive` means one of the more aggressive stretches of this
+particular song, not an aggressive piece of music. The raw similarity carries
+an arbitrary offset -- every section of The Nights reads "bright" against
+"dark" -- and only the differences between sections survive it.
+
+`mood_axes` says which axes were worth keeping and by how much. Every axis is
+measured before it ships: each section is split in half and read twice, which
+gives a noise floor, and that floor is compared against how much whole sections
+differ from one another. The number in `mood_axes` is that ratio. Below 1.0 a
+section differs from itself more than it differs from other sections, and the
+axis is measuring nothing. Anything under 1.3 is dropped from the score rather
+than shipped as decoration.
+
+The bar is applied per song, because the reliability is per song and not per
+axis. bright/dark scores 0.86 on The Nights and 1.64 on Levels. calm/aggressive
+scores 2.49 on The Nights and 0.95 on Levels. Raga of Revenge reads warm/cold
+at 5.49. Holocene, which holds one mood for four minutes, clears the bar on
+almost nothing and so carries almost no mood -- which is the correct answer for
+that song, and the reason the gate exists.
+
+Unlike `also_heard`, where two independent methods vote on the same boundary,
+this is one model's opinion with no second method to check it against. The
+split-half ratio says the opinion is stable. It does not say it is right.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

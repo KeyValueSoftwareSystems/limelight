@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cycle import cycle
 from groove import groove
 from heard import agrees, edges as model_edges
+from mood import moods
 from grid import grid, bar_edges, show
 from form import on_phrase
 from shape import shape
@@ -333,6 +334,15 @@ def read(path, slug):
         part["like"] = said["like"]
         part["returns"] = said["returns"]
 
+    mood_sure = {}
+    felt = CACHE / f"{slug}.mood.json"
+    if felt.exists():
+        rows, mood_sure = moods(json.loads(felt.read_text()), shaped, pickup)
+        if rows:
+            for part, row in zip(shaped, rows):
+                part["mood"] = row
+        report["mood_axes"] = len(mood_sure)
+
     peak = [t for t in told if t["role"] in ("drop", "chorus")]
     anchor = peak[0]["mark"] if peak else (told[0]["mark"] if told else 0)
     origin = grid_says.get("origin", 1)
@@ -432,6 +442,7 @@ def read(path, slug):
         "groove": swing,
         "melody": tune_notes,
         "melody_phrases": phrases_of(tune_notes, g, g["beats_per_bar"]),
+        "mood_axes": mood_sure or None,
     }
 
 
