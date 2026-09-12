@@ -54,99 +54,136 @@
   .countdown { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font: 700 160px system-ui; color: #fff; background: rgba(0,0,0,.6); z-index: 10; }
   .countdown.go { color: var(--ok); }
   .offsetwide { accent-color: var(--play); }
+  /* clean layout: a primary deck, a compact preview strip, and advanced tucked away */
+  .deck { display: flex; gap: 14px; align-items: center; margin: 4px 0 12px; }
+  .deck .time { flex: 0 0 auto; }
+  .preview { display: flex; gap: 18px; align-items: center; margin: 12px 0 4px; }
+  .preview .swatch { width: 64px; height: 64px; border-radius: 10px; padding-bottom: 4px; }
+  .preview .swatch span { font-size: 10px; }
+  details.advanced { margin-top: 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+  details.advanced > summary { cursor: pointer; padding: 12px 16px; color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; list-style: none; user-select: none; }
+  details.advanced > summary::-webkit-details-marker { display: none; }
+  details.advanced > summary::before { content: "\25B8  "; }
+  details.advanced[open] > summary::before { content: "\25BE  "; }
+  details.advanced > .grid { padding: 0 16px 16px; margin-top: 0; }
+  details.advanced .card { border: none; background: none; padding: 6px 0; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Limelight show</h1>
-  <select id="track"></select>
+  <h1>Lime<span style="color:var(--accent)">light</span></h1>
+  <select id="track" title="Show to play"></select>
   <button id="reload" title="Rescan folders">↻</button>
-  <span class="meta" id="trackmeta"></span>
   <span style="flex:1"></span>
-  <select id="hubscore" title="Scores on the hub"></select>
-  <input type="number" id="seed" value="3" min="0" step="1" style="width:64px" title="seed (different show)">
-  <button id="import" title="Fetch from the hub, format, bake, and load">⤓ Import</button>
-  <span class="meta" id="importmsg"></span>
-  <select id="style"><option value="pulse">pulse</option><option value="bands">bands</option><option value="concert">concert</option></select>
-  <button id="analyze">Re-analyze</button>
-  <span class="meta" id="analyzing"></span>
+  <span class="pill" id="netpill">output off</span>
+  <span class="pill" id="audiopill">audio —</span>
+  <span class="pill" id="phasepill">—</span>
 </header>
 
 <main>
-  <section class="transport">
+  <!-- primary: one clear play control, the clock, and a safety -->
+  <section class="deck">
+    <button class="primary" id="play">▶ Play</button>
+    <div class="time"><span id="pos">0:00.00</span><small id="dur">/ 0:00</small></div>
+    <span class="meta" id="trackmeta"></span>
+    <span style="flex:1"></span>
+    <button class="danger" id="blackout" title="kill all output now">Blackout</button>
+  </section>
+
+  <canvas id="timeline" height="96" title="click to seek"></canvas>
+
+  <!-- what the rig is doing right now -->
+  <div class="preview">
     <div class="swatch" id="swatch"><span id="rgb">0 · 0 · 0</span></div>
-    <div class="controls">
-      <div class="row">
-        <button class="primary" id="play">▶ Play</button>
-        <button id="countdown" title="3-2-1 then play: press play on your music at GO">⏱ 3·2·1 Go</button>
-        <button id="stop">■ Stop</button>
-        <button class="danger" id="blackout">Blackout</button>
-        <span class="pill" id="netpill">output off</span>
-        <span class="pill" id="audiopill">audio —</span>
-        <span class="pill" id="phasepill">—</span>
-      </div>
-      <div class="row">
-        <span class="meta">sync nudge (lights):</span>
-        <button data-nudgesec="-1">−1 s</button><button data-nudgesec="-0.25">−¼ s</button>
-        <button data-nudgesec="0.25">+¼ s</button><button data-nudgesec="1">+1 s</button>
-        <span class="meta">→ earlier / later than the music. Fine offset in ms below.</span>
-      </div>
-      <div class="time"><span id="pos">0:00.00</span><small id="dur">/ 0:00</small><small>beat <span id="beatno">–</span> · bar <span id="barno">–</span> · frame <span id="frame">–</span></small></div>
-      <div class="meta">Keys: <kbd>K</kbd> play/pause · <kbd>G</kbd> 3·2·1 go · <kbd>Space</kbd> tap · <kbd>←</kbd>/<kbd>→</kbd> offset ±10 ms (<kbd>Shift</kbd> ±40) · <kbd>,</kbd>/<kbd>.</kbd> nudge ∓¼ s · <kbd>J</kbd>/<kbd>L</kbd> seek ∓5 s · click the timeline to seek</div>
-      <div class="row" id="rigrow" hidden>
-        <div class="fx" data-fx="1"><div class="fxsw"></div><span>PAR 1</span></div>
-        <div class="fx" data-fx="8"><div class="fxsw"></div><span>PAR 8</span></div>
-        <div class="fx head" data-fx="head"><div class="fxsw"></div><span id="headinfo">HEAD</span></div>
-        <div class="fx" data-fx="15"><div class="fxsw"></div><span>PAR 15</span></div>
-        <div class="fx" data-fx="22"><div class="fxsw"></div><span>PAR 22</span></div>
-      </div>
+    <div class="row" id="rigrow" hidden>
+      <div class="fx" data-fx="1"><div class="fxsw"></div><span>PAR 1</span></div>
+      <div class="fx" data-fx="8"><div class="fxsw"></div><span>PAR 8</span></div>
+      <div class="fx head" data-fx="head"><div class="fxsw"></div><span id="headinfo">HEAD</span></div>
+      <div class="fx" data-fx="15"><div class="fxsw"></div><span>PAR 15</span></div>
+      <div class="fx" data-fx="22"><div class="fxsw"></div><span>PAR 22</span></div>
     </div>
+    <span style="flex:1"></span>
+    <span class="meta">beat <span id="beatno">–</span> · bar <span id="barno">–</span> · frame <span id="frame">–</span></span>
+  </div>
+
+  <!-- sync: one control, coarse and fine together -->
+  <section class="card">
+    <h2>Sync — lights vs sound</h2>
+    <div class="row">
+      <button data-nudge="-40">−40</button><button data-nudge="-10">−10</button>
+      <span class="big" id="offsetval">0 ms</span>
+      <button data-nudge="10">+10</button><button data-nudge="40">+40</button>
+      <button id="offsetzero" title="reset to 0">reset</button>
+      <span style="flex:1"></span>
+      <span class="meta">coarse</span>
+      <button data-nudgesec="-1">−1 s</button><button data-nudgesec="-0.25">−¼ s</button>
+      <button data-nudgesec="0.25">+¼ s</button><button data-nudgesec="1">+1 s</button>
+    </div>
+    <input type="range" id="offset" min="-3000" max="3000" step="5" value="0">
+    <p class="hint">Positive moves the lights <b>later</b>; if they lag the music, go negative. The server is the player — closing this page pauses the show within 3 s. Keys: <kbd>K</kbd> play · <kbd>←</kbd>/<kbd>→</kbd> ±10 ms · <kbd>J</kbd>/<kbd>L</kbd> seek ±5 s.</p>
   </section>
 
-  <canvas id="timeline" height="96"></canvas>
-
-  <section class="grid">
-    <div class="card">
-      <h2>Delay (light vs sound)</h2>
-      <div class="row">
-        <button data-nudge="-40">−40</button><button data-nudge="-10">−10</button>
-        <span class="big" id="offsetval">0 ms</span>
-        <button data-nudge="10">+10</button><button data-nudge="40">+40</button>
-        <button id="offsetzero" title="reset to 0">0</button>
+  <!-- everything else, out of the way until needed -->
+  <details class="advanced">
+    <summary>Settings &amp; tools</summary>
+    <div class="grid">
+      <div class="card">
+        <h2>Load a show from the hub</h2>
+        <div class="row">
+          <select id="hubscore" title="Scores on the hub"></select>
+          <input type="number" id="seed" value="3" min="0" step="1" style="width:64px" title="seed (different show)">
+          <button id="import" title="Fetch from the hub, bake, and load">⤓ Import</button>
+        </div>
+        <span class="meta" id="importmsg"></span>
       </div>
-      <input type="range" id="offset" min="-3000" max="3000" step="5" value="0">
-      <p class="hint">Closing this page pauses the show within 3 s (the server is the player; the page is its only remote). Positive moves the lights <b>later</b>. If the lights run <em>ahead</em> of the music, go positive; if they <em>lag</em>, go negative. Use the ±1 s / ±¼ s nudges above for coarse sync, this for fine. Applies instantly; the server starts at its configured default (−240 ms).</p>
-    </div>
 
-    <div class="card">
-      <h2>Tap calibration</h2>
-      <div class="row">
-        <label class="chk"><input type="radio" name="tapmode" value="sound" checked> tap to the <b>sound</b></label>
-        <label class="chk"><input type="radio" name="tapmode" value="light"> tap to the <b>light</b></label>
-        <span style="flex:1"></span>
-        <button id="tapreset">Reset</button>
+      <div class="card">
+        <h2>Output</h2>
+        <div class="row"><label class="chk"><input type="checkbox" id="net"> send to PAR</label><span style="flex:1"></span><span class="mono" id="gainval">gain 1.00</span></div>
+        <input type="range" id="gain" min="0" max="1" step="0.05" value="1">
+        <div class="row" style="margin-top:8px">
+          <button id="stop">■ Stop</button>
+          <button id="countdown" title="3-2-1 then play: press play on your music at GO">⏱ 3·2·1 Go</button>
+        </div>
       </div>
-      <table class="taps">
-        <tr><th></th><th>taps</th><th>median vs beat</th><th>spread</th></tr>
-        <tr><td>sound</td><td id="ts_n">0</td><td id="ts_med" class="mono">—</td><td id="ts_sd" class="mono">—</td></tr>
-        <tr><td>light</td><td id="tl_n">0</td><td id="tl_med" class="mono">—</td><td id="tl_sd" class="mono">—</td></tr>
-      </table>
-      <p id="suggest" class="hint"></p>
-      <div class="row" style="margin-top:8px"><button id="apply" disabled>Apply suggestion</button></div>
-    </div>
 
-    <div class="card">
-      <h2>Output</h2>
-      <div class="row"><label class="chk"><input type="checkbox" id="net"> send to PAR</label><span style="flex:1"></span><span class="mono" id="gainval">gain 1.00</span></div>
-      <input type="range" id="gain" min="0" max="1" step="0.05" value="1">
-      <div class="kv" style="margin-top:10px">
-        <b>server</b><span id="srv" class="mono">—</span>
-        <b>stream</b><span id="streaminfo" class="mono">—</span>
-        <b>sections</b><span id="sections" class="mono">—</span>
-        <b>last analyze</b><span id="alog" class="mono" style="white-space:pre-wrap;font-size:12px">—</span>
+      <div class="card">
+        <h2>Tap calibration</h2>
+        <div class="row">
+          <label class="chk"><input type="radio" name="tapmode" value="sound" checked> tap the <b>sound</b></label>
+          <label class="chk"><input type="radio" name="tapmode" value="light"> tap the <b>light</b></label>
+          <span style="flex:1"></span>
+          <button id="tapreset">Reset</button>
+        </div>
+        <table class="taps">
+          <tr><th></th><th>taps</th><th>median vs beat</th><th>spread</th></tr>
+          <tr><td>sound</td><td id="ts_n">0</td><td id="ts_med" class="mono">—</td><td id="ts_sd" class="mono">—</td></tr>
+          <tr><td>light</td><td id="tl_n">0</td><td id="tl_med" class="mono">—</td><td id="tl_sd" class="mono">—</td></tr>
+        </table>
+        <p id="suggest" class="hint"></p>
+        <div class="row" style="margin-top:8px"><button id="apply" disabled>Apply suggestion</button></div>
+      </div>
+
+      <div class="card">
+        <h2>Re-analyze</h2>
+        <div class="row">
+          <select id="style"><option value="pulse">pulse</option><option value="bands">bands</option><option value="concert">concert</option></select>
+          <button id="analyze">Re-analyze</button>
+          <span class="meta" id="analyzing"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Status</h2>
+        <div class="kv">
+          <b>server</b><span id="srv" class="mono">—</span>
+          <b>stream</b><span id="streaminfo" class="mono">—</span>
+          <b>sections</b><span id="sections" class="mono">—</span>
+          <b>last analyze</b><span id="alog" class="mono" style="white-space:pre-wrap;font-size:12px">—</span>
+        </div>
       </div>
     </div>
-  </section>
+  </details>
 </main>
 
 <script>
