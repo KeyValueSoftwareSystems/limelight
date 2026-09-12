@@ -1,104 +1,164 @@
-<title>Verify</title>
+<title>Does this match what I hear?</title>
 <style>
-:root{--bg:#0a0d13;--pan:#0f141d;--line:#1b2230;--line2:#263047;--ink:#e6e9f0;
-  --dim:#9aa3b8;--faint:#5c6478;--amb:#e8a33d;--ok:#5bb98c;--bad:#e0655f;--blu:#6fa8dc}
+:root{--bg:#0b0e14;--pan:#111722;--line:#1d2533;--line2:#2b3648;--ink:#e8ebf2;
+  --dim:#98a2b8;--faint:#626c82;--amb:#e8a33d;--ok:#5bb98c;--bad:#e0655f;--vio:#c8a2ff}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.55 ui-sans-serif,system-ui,sans-serif;margin:0}
-.wrap{max-width:none;margin:0;padding:14px 20px 80px}
-button,select{background:#182031;color:var(--ink);border:1px solid var(--line2);
+body{background:var(--bg);color:var(--ink);font:13.5px/1.6 ui-sans-serif,system-ui,sans-serif;margin:0}
+.wrap{padding:0 20px 90px;max-width:1700px;margin:0 auto}
+button,select{background:#1a2233;color:var(--ink);border:1px solid var(--line2);
   border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
-button:hover{border-color:#41506e}
-button.on{background:var(--amb);color:#171003;font-weight:600}
-button.yes{border-color:#2f5f4a} button.yes.on{background:var(--ok);color:#05140d;border-color:var(--ok)}
-button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c;border-color:var(--bad)}
-.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px}
-.mono{font:12px ui-monospace,monospace;font-variant-numeric:tabular-nums}
-#seek{flex:1;min-width:200px;accent-color:var(--ok);cursor:pointer}
-#map{position:relative;height:150px;border:1px solid var(--line);border-radius:6px;
-  background:#05070b;overflow:hidden}
-.part{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:flex-end;
-  cursor:pointer;overflow:hidden;box-shadow:inset -1px 0 0 rgba(5,7,11,.9)}
-.part .fill{position:absolute;left:0;right:0;bottom:0;opacity:.30}
-.part .tag{position:relative;padding:6px 5px 0;font:600 10px ui-monospace,monospace;
-  text-shadow:0 1px 3px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.part .sung{position:relative;padding:1px 5px 5px;font:9px ui-monospace,monospace;
-  color:#8fbf9f;text-shadow:0 1px 3px #000;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis}
-.part .sung.quiet{color:#4a5260}
-.part .sung{cursor:pointer}
-.part .sung:hover{filter:brightness(1.5);text-decoration:underline}
-.part.here{outline:2px solid var(--ok);outline-offset:-2px}
-.part{border-left:1px solid #39445c}
+button:hover{border-color:#46587a}
+button:focus-visible,select:focus-visible{outline:2px solid var(--amb);outline-offset:1px}
+button.on{background:var(--amb);color:#180f02;font-weight:600;border-color:var(--amb)}
+button.yes{border-color:#2f5f4a}
+button.yes.on{background:var(--ok);color:#05140d;border-color:var(--ok)}
+button.no{border-color:#6b3330}
+button.no.on{background:var(--bad);color:#2a0e0c;border-color:var(--bad)}
+.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:11px 0 10px;margin-bottom:14px}
+#seek{flex:1;min-width:220px;accent-color:var(--ok);cursor:pointer}
+.mono{font:12.5px ui-monospace,monospace;font-variant-numeric:tabular-nums}
+#play{min-width:84px;font-weight:600}
+h2{font:600 14px system-ui;margin:0 0 3px;letter-spacing:.01em}
+.note{color:var(--dim);font-size:12.5px;margin:0 0 8px;max-width:98ch}
+.note b{color:var(--ink);font-weight:600}
+section{margin:0 0 24px}
+.lead{background:var(--pan);border:1px solid var(--line);border-radius:9px;padding:13px 15px;
+  display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.lead .big{font:600 19px system-ui;letter-spacing:.01em}
+.lead .when{font:12.5px ui-monospace,monospace;color:var(--amb)}
+.lead dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 12px;align-items:baseline}
+.lead dt{color:var(--faint);font-size:11px;text-transform:uppercase;letter-spacing:.07em}
+.lead dd{margin:0;color:var(--dim)}
+.lead dd b{color:var(--ink);font-weight:600}
+.lead .col{flex:1;min-width:290px}
+.lead .ask{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.lead .ask span{color:var(--faint);font-size:12px}
+canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;background:#06090e}
+#zoom{height:110px;cursor:pointer}
+#tune{height:140px;cursor:pointer}
+#lanes{height:104px;cursor:pointer;border-radius:0 0 8px 8px;border-top:none}
+#map{position:relative;height:124px;border:1px solid var(--line);border-bottom:none;
+  border-radius:8px 8px 0 0;background:#06090e;overflow:hidden;cursor:pointer}
+#subs{position:relative;height:22px;border-left:1px solid var(--line);
+  border-right:1px solid var(--line);background:#0d121a;overflow:hidden;cursor:pointer}
+#dots{position:absolute;left:0;right:0;top:0;height:22px;background:#0a1019;
+  border-bottom:1px solid #1a2230;z-index:1}
+#dots span{position:absolute;left:7px;top:4px;font:9px ui-monospace,monospace;color:#4d5768;
+  letter-spacing:.09em}
+.part{position:absolute;top:22px;bottom:0;overflow:hidden;box-shadow:inset -1px 0 0 rgba(6,9,14,.9);
+  border-left:1px solid #3b4761}
 .part:first-of-type{border-left:none}
-.beat{position:absolute;top:4px;width:2px;height:30px;z-index:4;border-radius:1px;cursor:pointer}
-.beat:hover{filter:brightness(1.6)}
-.beatname{position:absolute;left:2px;top:32px;font:8px ui-monospace,monospace;white-space:nowrap;
-          color:inherit;opacity:.9;text-shadow:0 1px 2px #000}
-#key{display:flex;flex-wrap:wrap;gap:9px;margin:4px 0 0;font:9px ui-monospace,monospace;color:#5c6478}
-#key b{font-weight:400}
-#key i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:3px;
-       vertical-align:-1px;font-style:normal}
-#marks{width:100%;height:112px;display:block;margin-top:6px}
-#head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:3}
-#zoom{width:100%;height:86px;cursor:pointer;margin:0 0 6px;border:1px solid var(--line);border-radius:6px;
-  background:#05070b;display:block}
-#tune{width:100%;height:92px;cursor:pointer;margin-top:6px;border:1px solid var(--line);border-radius:6px;
-  background:#05070b;display:block}
-#lanes{width:100%;height:104px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
-  background:#05070b;display:block}
-#now{font:600 15px ui-monospace,monospace;margin:12px 0 4px}
-#now small{font:400 12px ui-monospace,monospace;color:var(--faint);margin-left:10px}
-h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
-.row{display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid #141a26;flex-wrap:wrap}
-.row .when{font:12px ui-monospace,monospace;color:var(--amb);min-width:58px;
-  font-variant-numeric:tabular-nums}
-.row .what{flex:1;min-width:200px;color:var(--dim)}
+.part .fill{position:absolute;left:0;right:0;bottom:0;opacity:.30}
+.part .tag{position:absolute;left:0;right:0;bottom:4px;padding:0 5px;
+  font:600 10px ui-monospace,monospace;text-shadow:0 1px 3px #000;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.part.here{outline:2px solid var(--ok);outline-offset:-2px}
+.beat{position:absolute;top:5px;height:12px;min-width:3px;z-index:4;border-radius:2px;cursor:pointer}
+.beat:hover{filter:brightness(1.8);transform:scaleY(1.4)}
+.sub{position:absolute;top:0;bottom:0;border-left:1px solid #2c3340;font:9.5px ui-monospace,monospace;
+  padding:2px 0 0 4px;overflow:hidden;white-space:nowrap;cursor:pointer}
+.sub:hover{filter:brightness(1.55)}
+#head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:6}
+.legend{display:flex;flex-wrap:wrap;gap:5px 15px;margin:7px 0 0;font-size:11.5px;color:var(--faint)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;
+  vertical-align:0;font-style:normal}
+.legend em{font-style:normal;color:var(--dim)}
+.row{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #161d2a;
+  flex-wrap:wrap}
+.row:hover{background:#0e141e}
+.row .when{font:12.5px ui-monospace,monospace;color:var(--amb);min-width:52px}
+.row .what{flex:1;min-width:260px;color:var(--dim)}
 .row .what b{color:var(--ink)}
-.row button{padding:4px 9px;font-size:12px}
-.row .said{font:12px ui-monospace,monospace;color:var(--ok);min-width:16px}
+.row .what .role{font-weight:700;text-transform:capitalize}
+.row button{padding:4px 10px;font-size:12px}
+.row .said{font:13px ui-monospace,monospace;color:var(--ok);min-width:14px}
+.inside{flex-basis:100%;margin:4px 0 0;display:flex;flex-wrap:wrap;gap:5px;align-items:flex-start}
+.tag{font:9.5px ui-monospace,monospace;color:var(--faint);text-transform:uppercase;
+  letter-spacing:.09em;min-width:74px;padding-top:4px;flex:0 0 auto}
+.chip{font-size:11.5px;border:1px solid;border-radius:4px;padding:2px 7px;cursor:pointer;
+  background:#0d121a}
+.chip:hover{filter:brightness(1.45)}
+.chip b{opacity:.55;font-weight:400;font-family:ui-monospace,monospace;font-size:10.5px}
 .dim{color:var(--faint)}
-#subs{position:relative;height:26px;margin-top:3px;border:1px solid var(--edge);border-radius:4px;overflow:hidden;background:#14181f}
-.sub{position:absolute;top:0;bottom:0;border-left:1px solid #2c3340;font:9px ui-monospace,monospace;
-     color:#9fb0c9;padding:3px 0 0 4px;overflow:hidden;white-space:nowrap}
-.sub b{font-weight:600}
-.subchip{font:10px ui-monospace,monospace;border:1px solid #3a4152;border-radius:3px;padding:1px 5px;color:#9fb0c9;cursor:pointer}
-.subchip:hover{background:#1c212b}
-.sub{cursor:pointer}
-.sub:hover{filter:brightness(1.5)}
-.inside{flex-basis:100%;margin:5px 0 2px 0;display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start}
-.chip{font:10px ui-monospace,monospace;border:1px solid;border-radius:3px;padding:1px 5px;opacity:.85}
-.tag{font:9px ui-monospace,monospace;color:#5c6478;text-transform:uppercase;letter-spacing:.08em;
-     min-width:64px;display:inline-block;padding-top:2px;flex:0 0 auto}
-.chip b{opacity:.6;font-weight:400}
-.row{flex-wrap:wrap}
+.warn{color:var(--bad)}
 </style>
 
 <div class="wrap">
-<div class="bar">
-  <select id="song"></select>
-  <button id="play" disabled>play</button>
-  <input id="seek" type="range" min="0" max="10000" value="0">
-  <span class="mono" id="clock" style="min-width:92px;text-align:right">0:00</span>
-  <button id="clicker">click: off</button>
-  <button id="only">beats only</button>
-  <span class="mono dim">downbeat</span>
-  <span id="phase"></span>
+
+<div class="top">
+  <select id="song" title="pick a song"></select>
+  <button id="play" disabled>&#9654; Play</button>
+  <input id="seek" type="range" min="0" max="10000" value="0" title="drag to move through the song">
+  <span class="mono" id="clock" style="min-width:96px;text-align:right">0:00</span>
+  <button id="clicker" title="a tick on every beat, so you can hear whether the computer's beat matches the song">Metronome: off</button>
+  <button id="muter" title="silence the song and leave only the metronome">Music: on</button>
   <span class="mono dim" id="facts"></span>
 </div>
 
-<canvas id="zoom"></canvas>
+<p class="note" style="margin-top:-4px">Everything on this page is something the computer <b>claims</b> about
+  this song. Click any label, block or chip to hear that exact spot. Then say whether it was right.</p>
 
-<div id="map"><div id="head"></div></div>
-<div id="key"></div>
-<div id="subs"></div>
-<canvas id="tune"></canvas>
-<canvas id="lanes"></canvas>
-<canvas id="marks"></canvas>
+<section>
+  <div class="lead">
+    <div class="col">
+      <div class="when" id="nowtime">0:00</div>
+      <div class="big" id="nowrole">&mdash;</div>
+      <div class="ask" style="margin-top:9px">
+        <span>Does this match what you hear?</span>
+        <button class="yes" id="liveyes" data-v="yes">Right</button>
+        <button class="no" id="liveno" data-v="no">Wrong</button>
+        <span class="said" id="livesaid"></span>
+      </div>
+    </div>
+    <div class="col">
+      <dl>
+        <dt>Playing</dt><dd id="nowplay">&mdash;</dd>
+        <dt>Doing</dt><dd id="nowdoing">&mdash;</dd>
+        <dt>Right now</dt><dd id="nowmoment">&mdash;</dd>
+      </dl>
+    </div>
+  </div>
+</section>
 
-<div id="now">—</div>
+<section>
+  <h2>The next few seconds</h2>
+  <p class="note">The <b style="color:#e0655f">red line</b> is where you are now; the song slides left past it.
+    Tall white ticks start a bar, small amber ticks are the beats in between &mdash; turn the metronome on and
+    they should land with the music. Each boxed label is something the computer expects to happen there:
+    <b>click a label to replay just that</b>, click anywhere else to jump, scroll to step one beat.</p>
+  <canvas id="zoom"></canvas>
+</section>
 
-<h2>Sections, their subsections, and the moments inside</h2>
-<div id="sections"></div>
+<section>
+  <h2>The whole song</h2>
+  <p class="note">The narrow top strip holds the <b>notable moments</b> &mdash; hover one to read it, click to
+    hear it. Below it are the <b>sections</b>, each drawn as tall as it sounds full. The thin band under the
+    section names says what the music is <b>doing</b>. The four rows at the bottom are how loud each
+    instrument is, bar by bar. <b>Click anywhere to jump there.</b></p>
+  <div id="map"><div id="dots"><span>MOMENTS</span></div><div id="head"></div></div>
+  <div id="subs"></div>
+  <canvas id="lanes"></canvas>
+  <div class="legend" id="legend"></div>
+</section>
+
+<section>
+  <h2>The tune</h2>
+  <p class="note">The computer followed the pitch of the singing and of the lead instrument and wrote down
+    every note. Below, <b>each mark is one note</b>: further right is later in the song, higher up is a higher
+    note, and the faint line joins notes that follow each other, so you can see the tune rise and fall.
+    This is how it knows when a tune comes back later &mdash; which is what the lighting reader uses to repeat
+    a look. <b>Click a shaded stretch to hear a tune that repeats</b>, or click anywhere to jump there.</p>
+  <canvas id="tune"></canvas>
+  <div class="legend" id="tunekey"></div>
+</section>
+
+<section>
+  <h2>Every section, in order</h2>
+  <p class="note">One row per section. <b>Hear it</b> plays the first few seconds. The chips under each row
+    are the smaller claims inside it &mdash; click any chip to hear only that part.</p>
+  <div id="sections"></div>
+</section>
 
 </div>
 
@@ -109,26 +169,159 @@ const aud = new Audio(); aud.preload = "auto";
 let SCORE = null, slug = null, stopAt = null, BAR = 1, FIRSTBAR = 1, dragging = false;
 let SHIFT = 0, BASE = 0;
 const WHEEL = ["#6fa8dc","#e8a33d","#5bb98c","#b98cd6","#d68c8c","#8cd6cf","#d6c98c","#a0a8bb"];
-const STEM = { drums:"#e0655f", bass:"#b98cd6", vocals:"#5bb98c", other:"#6fa8dc" };
+const STEM = {drums:"#e0655f", bass:"#b98cd6", vocals:"#5bb98c", other:"#6fa8dc"};
 const LANES = ["drums","bass","vocals","other"];
+const LANEWORD = {drums:"Drums", bass:"Bass", vocals:"Voice", other:"Chords"};
 let HUE = {};
 
 const mmss = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
 const beatLen = () => 60 / SCORE.grid.bpm;
 const firstBeat = () => SCORE.grid.first_beat_s + (SHIFT - BASE) * beatLen();
 const barTime = b => b <= 0 ? 0 : firstBeat() + (b - 1) * BAR;
-const evTime = e => barTime(e.bar) + (e.beat - 1) * (60 / SCORE.grid.bpm);
+const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const KIND = {entrance:"#5bb98c", exit:"#e0655f", fill:"#e8a33d", accent:"#f2c14e",
+  pause:"#8b93a6", rise:"#6fa8dc", release:"#d16bd1", change:"#7ad4c8",
+  hook:"#f28c8c", highlight:"#c8a2ff", transition:"#9fb0c9"};
+
+const PART = {drums:["the drums", 1], bass:["the bass", 0], voice:["the voice", 0],
+  vocals:["the voice", 0], chords:["the chords", 1], other:["the chords", 1]};
+
+const CHANGED = {harmony:"the chords change", texture:"the texture changes",
+  rhythm:"the rhythm changes", "opens up":"the sound opens up",
+  brightness:"the tone gets brighter"};
+
+const HIGH = {"voice at full reach":"the singer reaches their highest note",
+  "voice sustained":"one long held vocal note", "a vocal run":"a fast run of vocal notes"};
+
+const DOING = {intensifying:"#e0655f", easing:"#6fa8dc", expanding:"#5bb98c",
+  thinning:"#c98fd1", peaking:"#f2c14e", suspending:"#c8a2ff",
+  resolving:"#7ad4c8", establishing:"#9fd18b", closing:"#8b93a6"};
+
+const DOINGWORD = {establishing:["open", "the song is setting itself up"],
+  expanding:["more", "more instruments come in"],
+  thinning:["fewer", "instruments drop away"],
+  intensifying:["harder", "it is getting harder and louder"],
+  easing:["easing", "it is backing off"],
+  peaking:["peak", "it is as big as this song gets"],
+  suspending:["held", "it is being held back, mostly quiet"],
+  resolving:["payoff", "the tension pays off here"],
+  closing:["ending", "it is winding down to the end"]};
+
+const FEELS = {"no drums":"no drums", "drums in":"the drums come in",
+  "drums out":"the drums are gone", "voice in":"the singing starts",
+  "voice out":"no singing", "voice, no drums":"singing, no drums",
+  "half a kit":"only part of the drum kit", "full":"everything playing",
+  "steady":"steady", "building":"building", "thinning":"thinning out"};
+
+function listed(items) {
+  if (items.length < 3) return items.join(" and ");
+  return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
+}
+
+function saysWords(s) {
+  if (!s) return "";
+  if (s === "bare") return "almost nothing playing";
+  if (s === "a bar out, then back") return "one bar out of step, then back";
+  const io = s.match(/^(.*) in, (.*) out$/);
+  if (io) return listed(io[1].split(" and ")) + " in, " + listed(io[2].split(" and ")) + " out";
+  const m = s.match(/^(.*) (join|drop out|holding)$/);
+  if (!m) return s;
+  const items = m[1].split(" and ");
+  const many = items.length > 1 || /^(drums|chords)$/.test(items[0]);
+  const verb = m[2] === "join" ? (many ? "come in" : "comes in")
+             : m[2] === "drop out" ? (many ? "drop out" : "drops out")
+             : (many ? "keep going" : "keeps going");
+  return listed(items) + " " + verb;
+}
+
+const noun = w => (PART[w] || [w, 0])[0];
+const agree = (w, one, many) => (PART[w] || [w, 0])[1] ? many : one;
+
+function momentWords(m) {
+  const w = m.what || "";
+  const into = m.into_bar != null ? ` — lands on bar ${m.into_bar}` : "";
+  const back = m.back_at != null ? ` — back at bar ${m.back_at}` : "";
+  switch (m.is) {
+    case "entrance": return cap(noun(w)) + agree(w, " comes in", " come in");
+    case "exit": return cap(noun(w)) + agree(w, " drops out", " drop out");
+    case "pause":
+      if (w === "everything") return "Everything stops" + back;
+      if (w.startsWith("everything but "))
+        return "Everything stops except " + noun(w.slice(15)) + back;
+      return cap(noun(w)) + agree(w, " stops", " stop") + " for a moment" + back;
+    case "fill": return "A drum fill" + into;
+    case "accent": return "One big hit from the whole band";
+    case "rise": return (w === "a sweep" ? "A sweep builds" : cap(w) + " builds") + into;
+    case "release": return "The drop — the tension lets go" + into;
+    case "change": return cap(CHANGED[w] || `the ${w} changes`);
+    case "hook": return hookWords(m);
+    case "highlight": return cap(HIGH[w] || w);
+    case "transition": return handover(w) + into;
+  }
+  return cap(w || m.is);
+}
+
+function hookWords(m) {
+  const w = m.what || "";
+  let g = w.match(/^the (riff|tune) from bar (\d+)$/);
+  if (g) return `The same ${g[1]} again — first heard at bar ${g[2]}`;
+  if (w === "the riff") return "The main riff";
+  g = w.match(/^(\d+) (sung|played) on one note$/);
+  if (g) return `${g[1]} notes ${g[2]} on a single pitch`;
+  return cap(w || "a hook");
+}
+
+function handover(w) {
+  if (w === "a sweep") return "A sweep carries into the next section";
+  if (w === "everything") return "Everything cuts, into the next section";
+  if (w === "brightness") return "The tone shifts into the next section";
+  return cap(noun(w)) + agree(w, " hands", " hand") + " over into the next section";
+}
+
+function shortMoment(m) {
+  const t = momentWords(m);
+  return t.length > 44 ? t.slice(0, 42).replace(/[ ,—]+$/, "") + "…" : t;
+}
+
+function tuneWords(s, who) {
+  const verb = who === "lead" ? "played on an instrument" : "sung";
+  if (!s || !s.notes) return "nothing " + verb + " here";
+  if (s.on_one_note) return `the tune sits on one repeated note, ${verb}`;
+  const how = s.moves < 1.2 ? "moves one step at a time"
+            : s.moves < 2.5 ? "moves in small steps"
+            : "leaps between notes";
+  const span = s.high - s.low;
+  const wide = span < 5 ? "inside a narrow range"
+             : span < 12 ? "inside about one octave"
+             : span < 20 ? "across an octave and a half"
+             : "across two octaves";
+  return `the tune ${how}, ${wide}, ${verb}`;
+}
+
+function partTune(p) {
+  if (p.sung && p.sung.notes) return tuneWords(p.sung, "voice");
+  if (p.played && p.played.notes) return tuneWords(p.played, "lead");
+  return "no tune the computer could follow here";
+}
+
+function playingWords(list) {
+  const w = (list || []).map(n => (LANEWORD[n] || n).toLowerCase());
+  return w.length ? listed(w) : "nothing";
+}
 
 async function library() {
   const list = await (await fetch("/library.json")).json();
   $("song").innerHTML = list.map(x =>
     `<option value="${x.slug}" data-a="${x.audio}">${x.slug}</option>`).join("");
-  const want = new URLSearchParams(location.search).get("song");
-  const pick = list.find(x => x.slug === want) || list[0];
-  if (pick) { $("song").value = pick.slug; load(pick.slug, pick.audio); }
+  const args = new URLSearchParams(location.search);
+  const pick = list.find(x => x.slug === args.get("song")) || list[0];
+  if (pick) { $("song").value = pick.slug; load(pick.slug, pick.audio, +args.get("at") || 0); }
 }
 
-async function load(s, url) {
+async function load(s, url, at) {
   slug = s;
   SCORE = await (await fetch(`/scores/${s}.score`)).json();
   BAR = (60 / SCORE.grid.bpm) * SCORE.grid.beats_per_bar;
@@ -136,15 +329,17 @@ async function load(s, url) {
   aud.src = url; aud.load();
   $("play").disabled = false;
   const g = SCORE.grid;
-  $("facts").textContent = `${g.bpm} bpm · ${g.bars} bars`
-    + (g.holds_from_s != null ? ` · grid holds from ${mmss(g.holds_from_s)}` : "");
+  const many = (SCORE.moments || []).length;
+  $("facts").textContent = `${Math.round(g.bpm)} beats a minute · ${g.bars} bars`
+    + ` · ${many} notable moment${many === 1 ? "" : "s"}`;
   BASE = 0;
   try {
     const saved = await (await fetch(`/downbeat/${s}`)).json();
     BASE = saved.downbeat_shift_beats || 0;
   } catch (e) { BASE = 0; }
   SHIFT = BASE;
-  phaseButtons();
+  $("livesaid").textContent = "";
+  if (at) aud.currentTime = at;
   draw();
 }
 
@@ -152,6 +347,14 @@ function play(from, until) {
   stopAt = until ?? null;
   aud.currentTime = Math.max(0, from);
   aud.play();
+}
+
+function momentTime(m) { return barTime(m.bar) + (m.beat - 1) * beatLen(); }
+function momentSpan(m) { return m.for_beats ? m.for_beats * beatLen() : 0; }
+
+function hearMoment(m) {
+  const t = momentTime(m);
+  play(Math.max(0, t - 0.8), t + Math.max(momentSpan(m), 1.6) + 0.8);
 }
 
 function draw() {
@@ -163,6 +366,7 @@ function draw() {
   const map = $("map");
   [...map.querySelectorAll(".part,.unmetered,.beat")].forEach(x => x.remove());
   const total = SCORE.song.length_s;
+
   for (const p of SCORE.parts || []) {
     const t0 = barTime(p.from_bar), t1 = Math.min(total, barTime(p.to_bar + 1));
     const el = document.createElement("div");
@@ -170,33 +374,24 @@ function draw() {
     el.style.left = `${(t0/total)*100}%`;
     el.style.width = `${((t1-t0)/total)*100}%`;
     const c = HUE[p.repeats_as];
+    el.title = `${cap(p.role || p.repeats_as)} · ${mmss(t0)} – ${mmss(t1)} · `
+             + `${FEELS[p.feels] || p.feels} · click to hear it`;
     el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness??.5)*100)}%"></div>
-      <div class="tag" style="color:${c}">${p.role ? p.role.toUpperCase() : p.repeats_as}</div>`;
-    el.onclick = ev => {
-      const r = map.getBoundingClientRect();
-      play(((ev.clientX - r.left) / r.width) * total);
-    };
+      <div class="tag" style="color:${c}">${esc((p.role || p.repeats_as).toUpperCase())}</div>`;
     map.appendChild(el);
   }
-  const shelf = [];
+
   for (const m of SCORE.moments || []) {
     const t = momentTime(m);
     if (t < 0 || t > total) continue;
     const el = document.createElement("div");
     el.className = "beat";
-    const left = (t/total)*100;
-    el.style.left = `${left}%`;
+    el.style.left = `${(t/total)*100}%`;
     const len = momentSpan(m);
-    if (len > 0) el.style.width = `${Math.max(0.15, (len/total)*100)}%`;
+    if (len > 0) el.style.width = `${Math.max(0.2, (len/total)*100)}%`;
     el.style.background = KIND[m.is] || "#8b93a6";
-    el.style.opacity = 0.45 + 0.55 * (m.weight ?? 0);
-    const words = momentWords(m);
-    el.title = `bar ${m.bar}.${m.beat} · ${words} · weight ${m.weight}`;
-    const wide = (words.length * 5.4 / (map.clientWidth || 1200)) * 100;
-    let lane = 0;
-    while (shelf[lane] != null && shelf[lane] > left) lane++;
-    shelf[lane] = left + wide + 0.6;
-    el.innerHTML = `<span class="beatname" style="top:${32 + (lane % 5)*11}px">${words}</span>`;
+    el.style.opacity = 0.55 + 0.45 * (m.weight ?? 0);
+    el.title = `${mmss(t)} · bar ${m.bar} · ${momentWords(m)} · click to hear it`;
     el.onclick = ev => { ev.stopPropagation(); hearMoment(m); };
     map.appendChild(el);
   }
@@ -206,9 +401,9 @@ function draw() {
     if (w <= 0) return;
     const sh = document.createElement("div");
     sh.className = "unmetered";
-    sh.title = "the tempo we fitted does not hold here — these bar positions are "
-             + "extrapolated, not measured";
-    sh.style.cssText = `position:absolute;top:0;bottom:0;z-index:2;pointer-events:none;
+    sh.title = "the computer could not measure a steady beat here, so these bar "
+             + "positions are guessed";
+    sh.style.cssText = `position:absolute;top:22px;bottom:0;z-index:2;pointer-events:none;
       left:${(l/total)*100}%;width:${(w/total)*100}%;
       background:repeating-linear-gradient(135deg,
       rgba(224,101,95,.13) 0 7px,transparent 7px 14px);border-${side}:1px dashed rgba(224,101,95,.6)`;
@@ -216,182 +411,92 @@ function draw() {
   };
   if (from != null && from > 0) hatch(0, from, "right");
   if (upto != null && upto < total) hatch(upto, total - upto, "left");
-  if (from != null || upto != null) {
-    const off = ((from || 0) + Math.max(0, total - (upto ?? total))) / total;
-    const note = document.createElement("div");
-    note.className = "unmetered";
-    note.style.cssText = `position:absolute;right:6px;top:4px;z-index:5;pointer-events:none;
-      font:9px ui-monospace,monospace;color:#e0655f;opacity:.85`;
-    note.textContent = `striped: bars extrapolated, tempo not steady (${Math.round(off*100)}% of song)`;
-    map.appendChild(note);
-  }
 
-  $("key").innerHTML =
-    `<span>click any moment to hear it:</span>` +
-    Object.entries(KIND).map(([k, c]) =>
-      `<b><i style="background:${c}"></i>${k}</b>`).join("");
-  lanes(); tune(); marks(); subs(); sections();
+  let stripe = 0;
+  if (from != null || upto != null)
+    stripe = Math.round(100 * ((from || 0) + Math.max(0, total - (upto ?? total))) / total);
+
+  const used = new Set((SCORE.phrases || []).map(q => q.doing));
+  $("legend").innerHTML =
+    `<span class="dim">Instruments:</span>`
+    + LANES.map(k => `<span><i style="background:${STEM[k]}"></i>${LANEWORD[k]}</span>`).join("")
+    + `<span class="dim" style="flex-basis:100%;margin-top:3px">What the band under the sections means:</span>`
+    + Object.entries(DOINGWORD).filter(([k]) => used.has(k)).map(([k, v]) =>
+        `<span><i style="background:${DOING[k]}"></i><em>${v[0]}</em> — ${v[1]}</span>`).join("")
+    + (stripe > 0 ? `<span class="warn" style="flex-basis:100%;margin-top:3px">Striped = the computer `
+                  + `could not measure a steady beat there, so those bar positions are guessed `
+                  + `(${stripe}% of the song)</span>` : "");
+
+  $("tunekey").innerHTML =
+    `<span><i style="background:${STEM.vocals}"></i>a note that was sung</span>`
+    + `<span><i style="background:${STEM.other}"></i>a note played by the lead instrument</span>`
+    + `<span><i style="background:#c8a2ff"></i>a tune you have already heard, coming back</span>`
+    + `<span class="dim">higher up the strip = higher note</span>`;
+
+  lanes(); tune(); subs(); sections();
 }
-
-const KIND = {entrance:"#5bb98c", exit:"#e0655f", fill:"#e8a33d", accent:"#f2c14e",
-  pause:"#8b93a6", rise:"#6fa8dc", release:"#d16bd1", change:"#7ad4c8",
-  hook:"#f28c8c", highlight:"#c8a2ff", transition:"#9fb0c9"};
-
-function momentTime(m) {
-  return barTime(m.bar) + (m.beat - 1) * (60 / SCORE.grid.bpm);
-}
-
-function momentSpan(m) {
-  const beat = 60 / SCORE.grid.bpm;
-  return (m.for_beats ? m.for_beats * beat : 0);
-}
-
-function hearTune(from_bar, to_bar) {
-  const beat = 60 / SCORE.grid.bpm;
-  const hook = (SCORE.moments || []).find(m =>
-    m.is === "hook" && m.bar >= from_bar && m.bar <= to_bar);
-  if (hook) { hearMoment(hook); return; }
-  const mine = (SCORE.melody || []).filter(n =>
-    n.bar >= from_bar && n.bar <= to_bar);
-  if (!mine.length) { play(barTime(from_bar), barTime(from_bar) + 8); return; }
-  let seat = 0, most = 0;
-  for (let i = 0; i < mine.length; i++) {
-    const upto = barTime(mine[i].bar) + 10;
-    let k = i;
-    while (k < mine.length && barTime(mine[k].bar) < upto) k++;
-    if (k - i > most) { most = k - i; seat = i; }
-  }
-  const t = barTime(mine[seat].bar) + (mine[seat].beat - 1)*beat;
-  play(Math.max(0, t - 0.3), t + 10);
-}
-
-function tuneWords(s, short, who) {
-  const verb = who === "lead" ? "played" : "sung";
-  if (!s || !s.notes) return short ? "\u2014" : "nothing " + verb + " here";
-  if (s.on_one_note)
-    return short ? "one note" : verb + " on one repeated note";
-  const how = s.moves < 1.2 ? ["small moves", "moves only a step at a time"]
-            : s.moves < 2.5 ? ["steps", "moves in small steps"]
-            : ["leaps", "leaps between notes"];
-  const span = s.high - s.low;
-  const wide = span < 5 ? "in a narrow band"
-             : span < 12 ? "inside one octave"
-             : span < 20 ? "over an octave and a half"
-             : "over two octaves";
-  return short ? how[0] : `${how[1]}, ${wide}`;
-}
-
-function tuneOdd(p) {
-  const s = (p.sung && p.sung.notes ? p.sung : p.played);
-  if (!s || !s.notes) return "";
-  const hook = (SCORE.moments || []).find(m =>
-    m.is === "hook" && m.bar >= p.from_bar && m.bar <= p.to_bar);
-  if (hook) return hook.again_of != null ? "the tune returns" : "the hook";
-  if (s.on_one_note) return "one note";
-  return "";
-}
-
-function partTune(p, short) {
-  if (p.sung && p.sung.notes)
-    return (short ? "sings: " : "voice ") + tuneWords(p.sung, short, "voice");
-  if (p.played && p.played.notes)
-    return (short ? "plays: " : "lead ") + tuneWords(p.played, short, "lead");
-  return short ? "\u2014" : "nothing sung or played here";
-}
-
-function momentWords(m) {
-  const pay = m.back_at != null ? ` → back at ${m.back_at}`
-            : m.into_bar != null ? ` → into ${m.into_bar}` : "";
-  return `${m.is} ${m.what}${pay}`;
-}
-
-function hearMoment(m) {
-  const t = momentTime(m);
-  play(Math.max(0, t - 0.4), t + Math.max(momentSpan(m), 1.6) + 0.6);
-}
-
-const ZHIT = [];
-const THIT = [];
-
-const DOING = {intensifying:"#e0655f", easing:"#6fa8dc", expanding:"#5bb98c",
-  thinning:"#c98fd1", peaking:"#f2c14e", sustaining:"#7f8b9e",
-  suspending:"#c8a2ff", resolving:"#7ad4c8", establishing:"#9fd18b",
-  developing:"#e8a33d", transitioning:"#f28c8c", closing:"#8b93a6"};
 
 function subs() {
   const box = $("subs"); box.innerHTML = "";
   if (!SCORE || !SCORE.phrases) return;
   const total = SCORE.song.length_s;
+  const px = box.clientWidth || 1200;
   for (const q of SCORE.phrases) {
     const t0 = barTime(q.from_bar), t1 = Math.min(total, barTime(q.to_bar + 1));
     const el = document.createElement("div");
     el.className = "sub";
     el.style.left = (100 * t0 / total) + "%";
     el.style.width = (100 * (t1 - t0) / total) + "%";
-    const word = q.doing || "";
-    el.style.background = (DOING[q.doing] || "#39414f") + (word ? "22" : "11");
-    el.style.color = DOING[q.doing] || "#59616f";
-    el.title = `bars ${q.from_bar}-${q.to_bar} · ${word || "nothing it can name"}` +
-      (q.also && q.also.length ? " (" + q.also.join(", ") + ")" : "") + ` · ${q.says}`;
-    el.innerHTML = word ? `<b>${word}</b>` : "";
-    el.onclick = () => play(t0, t1);
+    const pair = DOINGWORD[q.doing];
+    el.style.background = (DOING[q.doing] || "#39414f") + (pair ? "26" : "10");
+    el.style.color = DOING[q.doing] || "#4e5768";
+    el.title = `bars ${q.from_bar}–${q.to_bar} · `
+      + (pair ? pair[1] : "nothing it is sure enough to name")
+      + ` · ${saysWords(q.says)} · click to hear it`;
+    const room = ((t1 - t0) / total) * px;
+    el.textContent = pair && room >= pair[0].length * 5.9 + 9 ? pair[0] : "";
     box.appendChild(el);
   }
 }
 
-function marks() {
-  const c = $("marks"), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
-  if (c.width !== Math.round(r.width*dpr)) {
-    c.width = Math.round(r.width*dpr); c.height = Math.round(112*dpr);
-  }
-  const g = c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
-  g.clearRect(0,0,r.width,112);
-  const all = (SCORE && (SCORE.signals || SCORE.moments)) || null;
-  if (!all) return;
-  const total = (SCORE.song && SCORE.song.length_s) || aud.duration || 1;
-  const rows = Object.keys(KIND);
-  const lane = 9;
-  g.font = "8px ui-monospace,monospace";
-  rows.forEach((k, i) => {
-    const y = 8 + i*lane;
-    g.fillStyle = "#232833"; g.fillRect(64, y, r.width-70, lane-2);
-    g.fillStyle = KIND[k]; g.globalAlpha = .8;
-    g.fillText(k, 6, y + lane - 3); g.globalAlpha = 1;
-  });
-  for (const m of all) {
-    const i = rows.indexOf(m.is);
-    if (i < 0) continue;
-    const x = 64 + (momentTime(m)/total)*(r.width-70);
-    const w = Math.max(2, (momentSpan(m)/total)*(r.width-70));
-    g.globalAlpha = .3 + .7*(m.sure || 0);
-    g.fillStyle = KIND[m.is];
-    g.fillRect(x, 8 + i*lane, w, lane-2);
-  }
-  g.globalAlpha = 1;
+const WINDOW = 8.0;
+const ZHIT = [];
+const THIT = [];
+
+function fit(c, h) {
+  const r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  c.width = Math.max(1, Math.round(r.width * dpr));
+  c.height = Math.round(h * dpr);
+  const g = c.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, r.width, h);
+  return [g, r.width];
 }
 
-const WINDOW = 8.0;
-
 function zoom() {
-  const c = $("zoom"), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
-  if (c.width !== Math.round(r.width*dpr)) {
-    c.width = Math.round(r.width*dpr); c.height = Math.round(92*dpr);
-  }
-  const g = c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
-  g.clearRect(0,0,r.width,92);
+  const [g, W] = fit($("zoom"), 110);
   if (!SCORE) return;
   const t = aud.currentTime, a = t - WINDOW/2, b = t + WINDOW/2;
-  const X = s => ((s - a)/WINDOW)*r.width;
+  const X = s => ((s - a)/WINDOW)*W;
+  const total = SCORE.song.length_s;
 
   for (const p of SCORE.parts || []) {
-    const t0 = barTime(p.from_bar);
-    if (t0 < a || t0 > b) continue;
-    g.fillStyle = "rgba(91,185,140,.14)";
-    g.fillRect(X(t0), 0, r.width, 86);
-    g.strokeStyle = "#5bb98c"; g.lineWidth = 2;
-    g.beginPath(); g.moveTo(X(t0), 0); g.lineTo(X(t0), 86); g.stroke();
-    g.fillStyle = "#5bb98c"; g.font = "600 10px ui-monospace,monospace";
-    g.fillText((p.role ?? p.repeats_as).toUpperCase(), X(t0)+5, 12);
+    const t0 = barTime(p.from_bar), t1 = Math.min(total, barTime(p.to_bar + 1));
+    if (t1 < a || t0 > b) continue;
+    const x0 = Math.max(0, X(t0)), x1 = Math.min(W, X(t1));
+    const c = HUE[p.repeats_as] || "#6fa8dc";
+    g.fillStyle = c + "16";
+    g.fillRect(x0, 0, x1 - x0, 110);
+    g.fillStyle = c; g.font = "600 10px ui-monospace,monospace";
+    if (X(t0) >= 0) {
+      g.strokeStyle = c; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(X(t0), 0); g.lineTo(X(t0), 110); g.stroke();
+      g.fillText((p.role ?? p.repeats_as).toUpperCase() + " starts here", X(t0) + 6, 13);
+    } else if (x1 - x0 > 96) {
+      g.globalAlpha = .7;
+      g.fillText("still in " + (p.role ?? p.repeats_as).toUpperCase(), x0 + 6, 13);
+      g.globalAlpha = 1;
+    }
   }
 
   const per = SCORE.grid.beats_per_bar;
@@ -401,13 +506,13 @@ function zoom() {
     const down = ((i - (SHIFT - BASE)) % per + per) % per === firstIndex();
     g.strokeStyle = down ? "#ffffff" : "#e8a33d";
     g.lineWidth = down ? 2 : 1;
-    g.globalAlpha = down ? 1 : .55;
-    g.beginPath(); g.moveTo(x, down ? 22 : 40); g.lineTo(x, 60); g.stroke();
+    g.globalAlpha = down ? 1 : .5;
+    g.beginPath(); g.moveTo(x, down ? 22 : 36); g.lineTo(x, 54); g.stroke();
     g.globalAlpha = 1;
     if (down) {
       const n = Math.round((bt.t - firstBeat())/BAR) + 1;
-      g.fillStyle = "#8b93a6"; g.font = "10px ui-monospace,monospace";
-      g.fillText(n, x+3, 82);
+      g.fillStyle = "#7b8599"; g.font = "10px ui-monospace,monospace";
+      g.fillText("bar " + n, x + 4, 106);
     }
   });
 
@@ -415,93 +520,85 @@ function zoom() {
     const q0 = barTime(q.from_bar), q1 = barTime(q.to_bar + 1);
     if (q1 < a || q0 > b) continue;
     const hue = DOING[q.doing] || "#39414f";
-    const x0 = Math.max(0, X(q0)), x1 = Math.min(r.width, X(q1));
-    g.fillStyle = hue + (q.doing ? "18" : "0c");
-    g.fillRect(x0, 62, x1 - x0, 10);
+    const x0 = Math.max(0, X(q0)), x1 = Math.min(W, X(q1));
+    const pair = DOINGWORD[q.doing];
+    g.fillStyle = hue + (pair ? "22" : "0c");
+    g.fillRect(x0, 56, x1 - x0, 13);
     g.strokeStyle = hue; g.lineWidth = 1;
-    g.beginPath(); g.moveTo(x0, 62); g.lineTo(x0, 72); g.stroke();
-    g.fillStyle = hue; g.font = "8px ui-monospace,monospace";
-    if (q.doing && x1 - x0 > 46) g.fillText(q.doing, x0 + 3, 70);
+    g.beginPath(); g.moveTo(x0, 56); g.lineTo(x0, 69); g.stroke();
+    g.fillStyle = hue; g.font = "9.5px ui-monospace,monospace";
+    if (pair && x1 - x0 > g.measureText(pair[1]).width + 10) g.fillText(pair[1], x0 + 4, 66);
+    else if (pair && x1 - x0 > 46) g.fillText(pair[0], x0 + 4, 66);
   }
 
   ZHIT.length = 0;
   const shelf = [];
-  g.font = "9px ui-monospace,monospace";
+  g.font = "10px ui-monospace,monospace";
   for (const m of SCORE.moments || []) {
     const mt = momentTime(m), len = momentSpan(m);
     if (mt + len < a || mt > b) continue;
     const x = X(mt);
     const hue = KIND[m.is] || "#8b93a6";
     g.fillStyle = hue;
-    g.globalAlpha = .45 + .55*(m.weight ?? m.sure ?? 0);
+    g.globalAlpha = .55 + .45*(m.weight ?? m.sure ?? 0);
     let x1 = x;
     if (len > 0) {
       x1 = X(mt + len);
-      g.fillRect(x, 27, Math.max(3, x1 - x), 6);
+      g.fillRect(x, 26, Math.max(3, x1 - x), 6);
       g.globalAlpha = 1;
-      g.fillRect(x, 24, 2, 12);
+      g.fillRect(x, 23, 2, 12);
     } else {
-      g.beginPath(); g.arc(x, 30, 3.5, 0, 6.284); g.fill();
+      g.beginPath(); g.arc(x, 29, 3.5, 0, 6.284); g.fill();
     }
     g.globalAlpha = 1;
-    const words = momentWords(m);
+    const words = shortMoment(m);
     const tw = g.measureText(words).width;
     let lane = 0;
     while (shelf[lane] != null && shelf[lane] > x) lane++;
-    shelf[lane] = x + tw + 12;
-    const ly = 46 + lane*10;
-    g.fillStyle = "rgba(5,7,11,.82)";
-    g.fillRect(x + 1, ly - 8, tw + 6, 10);
+    shelf[lane] = x + tw + 14;
+    const ly = 88 - lane*13;
+    g.strokeStyle = hue; g.globalAlpha = .45; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(x, 33); g.lineTo(x, ly - 9); g.stroke();
+    g.globalAlpha = 1;
+    g.fillStyle = "rgba(6,9,14,.92)";
+    g.fillRect(x + 1, ly - 9, tw + 8, 12);
+    g.strokeStyle = hue; g.globalAlpha = .6; g.lineWidth = 1;
+    g.strokeRect(x + 1.5, ly - 8.5, tw + 7, 11);
+    g.globalAlpha = 1;
     g.fillStyle = hue;
-    g.fillText(words, x + 4, ly);
-    ZHIT.push({x0: Math.min(x, x1) - 5, x1: Math.max(x1, x + tw + 8),
-               y0: 22, y1: ly + 3, m});
+    g.fillText(words, x + 5, ly);
+    ZHIT.push({x0: Math.min(x, x1) - 5, x1: Math.max(x1, x + tw + 10),
+               y0: ly - 10, y1: ly + 4, m});
   }
 
-  g.strokeStyle = "#e0655f"; g.lineWidth = 1;
-  g.beginPath(); g.moveTo(r.width/2, 0); g.lineTo(r.width/2, 86); g.stroke();
-  g.fillStyle = "#5c6478"; g.font = "600 9px ui-monospace,monospace";
-  g.fillText("BEATS · white = downbeat · green = section starts · band = subsection · red = now", 7, 96-86+9);
-}
-
-let ctx = null, clicking = false, sent = -1;
-function click(when, down) {
-  const o = ctx.createOscillator(), amp = ctx.createGain();
-  o.frequency.value = down ? 900 : 1800;
-  amp.gain.setValueAtTime(down ? .5 : .25, when);
-  amp.gain.exponentialRampToValueAtTime(.0001, when + .05);
-  o.connect(amp).connect(ctx.destination);
-  o.start(when); o.stop(when + .06);
+  g.strokeStyle = "#e0655f"; g.lineWidth = 1.5;
+  g.beginPath(); g.moveTo(W/2, 0); g.lineTo(W/2, 110); g.stroke();
 }
 
 function tune() {
-  const c = $("tune"), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
-  c.width = Math.round(r.width*dpr); c.height = Math.round(86*dpr);
-  const g = c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
-  g.clearRect(0,0,r.width,86);
-  g.fillStyle = "#5c6478"; g.font = "600 9px ui-monospace,monospace";
-  g.fillText("MELODY", 6, 12);
+  const [g, W] = fit($("tune"), 140);
   const notes = SCORE.melody || [];
   if (!notes.length) {
-    g.font = "8px ui-monospace,monospace";
-    g.fillText("no vocal pitch", 6, 24);
+    g.fillStyle = "#7b8599"; g.font = "12.5px system-ui";
+    g.fillText("The computer could not follow a tune in this song.", 14, 30);
     return;
   }
-  const v = SCORE.voice || {}, w = SCORE.lead || {};
+  const v = SCORE.voice || {};
   const total = SCORE.song.length_s;
   const seen = notes.map(n => n.pitch);
   const lo = Math.floor(Math.min(...seen) - 1);
   const hi = Math.ceil(Math.max(...seen) + 1);
-  const span = Math.max(8, hi - lo), beat = 60 / SCORE.grid.bpm;
-  const top = 30, foot = 78, tall = foot - top;
+  const span = Math.max(8, hi - lo), beat = beatLen();
+  const L = 14, top = 36, foot = 122, tall = foot - top;
   const Y = p => foot - ((p - lo)/span)*tall;
+  const X = s => L + (s/total)*(W - L - 6);
+  const at = n => X(barTime(n.bar) + (n.beat - 1)*beat);
+
   for (let p = Math.ceil(lo/12)*12; p <= hi; p += 12) {
-    g.strokeStyle = "#1a212e"; g.lineWidth = 1;
-    g.beginPath(); g.moveTo(88, Y(p)); g.lineTo(r.width-4, Y(p)); g.stroke();
+    g.strokeStyle = "#161d29"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(L, Y(p)); g.lineTo(W-6, Y(p)); g.stroke();
   }
-  g.fillStyle = "#2c3340"; g.font = "7px ui-monospace,monospace";
-  g.fillText("higher", 92, top + 6);
-  g.fillText("lower", 92, foot + 4);
+
   THIT.length = 0;
   const hooked = new Set();
   for (const m of SCORE.moments || []) {
@@ -509,77 +606,91 @@ function tune() {
     const upto = m.bar + m.for_beats/SCORE.grid.beats_per_bar;
     for (let b = m.bar; b <= upto; b++) hooked.add(b);
     const a = barTime(m.bar) + (m.beat - 1)*beat;
-    THIT.push({x0: 88 + (a/total)*(r.width-93),
-               x1: 88 + ((a + m.for_beats*beat)/total)*(r.width-93), m});
+    THIT.push({x0: X(a), x1: X(a + m.for_beats*beat), m});
   }
+  for (const h of THIT) {
+    g.fillStyle = "rgba(200,162,255,.13)";
+    g.fillRect(h.x0, top - 5, Math.max(3, h.x1 - h.x0), tall + 10);
+  }
+
+  for (const src of ["voice", "lead"]) {
+    const mine = notes.filter(n => (n.from === "lead") === (src === "lead"));
+    if (mine.length < 2) continue;
+    g.strokeStyle = src === "lead" ? STEM.other : STEM.vocals;
+    g.globalAlpha = .25; g.lineWidth = 1;
+    g.beginPath();
+    let open = false;
+    for (let i = 0; i < mine.length; i++) {
+      const x = at(mine[i]), y = Y(mine[i].pitch);
+      const near = i > 0 && barTime(mine[i].bar) - barTime(mine[i-1].bar) <= BAR;
+      if (near && open) g.lineTo(x, y);
+      else { g.moveTo(x, y); open = true; }
+    }
+    g.stroke();
+    g.globalAlpha = 1;
+  }
+
   for (const n of notes) {
-    const t = barTime(n.bar) + (n.beat - 1)*beat;
-    const x = 88 + (t/total)*(r.width-93);
-    const w = Math.max(1.5, ((n.held_beats*beat)/total)*(r.width-93));
+    const x = at(n);
+    const w = Math.max(2, ((n.held_beats*beat)/total)*(W - L - 6));
     const hot = hooked.has(n.bar);
-    g.fillStyle = hot ? "#c8a2ff"
-               : n.from === "lead" ? (STEM.other || "#6fa8dc")
-               : (STEM.vocals || "#5bb98c");
-    g.globalAlpha = hot ? 1 : (n.from === "lead" ? 0.55 : 0.75);
-    g.fillRect(x, Y(n.pitch) - 1.6, w, 3.2);
+    g.fillStyle = hot ? "#c8a2ff" : n.from === "lead" ? STEM.other : STEM.vocals;
+    g.globalAlpha = hot ? 1 : (n.from === "lead" ? 0.7 : 0.9);
+    g.fillRect(x, Y(n.pitch) - 1.7, w, 3.4);
   }
   g.globalAlpha = 1;
+
   const shelf = [];
-  g.font = "9px ui-monospace,monospace";
+  g.font = "10px ui-monospace,monospace";
   for (const h of THIT) {
     const m = h.m;
-    const words = m.again_of != null ? `tune from bar ${m.again_of}`
+    const words = m.again_of != null ? `same tune as bar ${m.again_of}`
                 : m.notes ? `${m.notes} notes on one pitch`
-                : m.what || "a hook";
+                : "the main tune";
     const tw = g.measureText(words).width;
     let lane = 0;
     while (shelf[lane] != null && shelf[lane] > h.x0) lane++;
-    shelf[lane] = h.x0 + tw + 10;
-    const ly = 12 + (lane % 2) * 9;
-    g.strokeStyle = "#c8a2ff"; g.globalAlpha = .3; g.lineWidth = 1;
-    g.beginPath(); g.moveTo(h.x0, ly + 2); g.lineTo(h.x0, top); g.stroke();
+    shelf[lane] = h.x0 + tw + 12;
+    const ly = 14 + (lane % 2) * 12;
+    g.strokeStyle = "#c8a2ff"; g.globalAlpha = .35; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(h.x0, ly + 3); g.lineTo(h.x0, top - 5); g.stroke();
     g.globalAlpha = 1;
     g.fillStyle = "#c8a2ff";
-    g.fillText(words, h.x0 + 3, ly);
+    g.fillText(words, h.x0 + 4, ly);
   }
-  g.font = "8px ui-monospace,monospace";
-  g.fillStyle = STEM.vocals || "#5bb98c";
-  g.fillText("green = voice", 6, 26);
-  g.fillStyle = STEM.other || "#6fa8dc";
-  g.fillText("blue = instrument", 6, 37);
-  g.fillStyle = "#c8a2ff";
-  g.fillText("purple = repeats", 6, 48);
-  g.fillStyle = "#39414f";
-  g.fillText("one mark = one note", 6, 62);
-  g.fillText(`${notes.length} notes`, 6, 74);
+
+  g.fillStyle = "#4a5364"; g.font = "9.5px ui-monospace,monospace";
+  g.fillText(`${notes.length} notes in all`, L, 134);
   if (v.sure != null && v.sure < 0.5) {
     g.fillStyle = "#e0655f";
-    g.fillText("pitch reading unreliable here", 96, 12);
+    g.fillText("the pitch reading is unreliable in this song — treat the tune with suspicion",
+               L + 110, 134);
   }
 }
 
 function lanes() {
-  const c = $("lanes"), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
-  c.width = Math.round(r.width*dpr); c.height = Math.round(104*dpr);
-  const g = c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
-  g.clearRect(0,0,r.width,104);
+  const [g, W] = fit($("lanes"), 104);
   const b = SCORE.bars || {};
   const names = LANES.filter(n => Array.isArray(b[n]));
   if (!names.length) return;
   const total = SCORE.song.length_s, h = 104 / names.length;
   names.forEach((n, row) => {
     const y = row*h, v = b[n];
+    if (row) {
+      g.strokeStyle = "#131a26"; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+    }
     g.fillStyle = STEM[n];
     for (let i = 0; i < v.length; i++) {
       if (v[i] == null) continue;
-      const x = (barTime(i+FIRSTBAR)/total)*r.width;
-      const w = Math.max(1, (BAR/total)*r.width - 0.4);
-      const bh = Math.max(0.5, v[i]*(h-8));
+      const x = (barTime(i+FIRSTBAR)/total)*W;
+      const w = Math.max(1, (BAR/total)*W - 0.4);
+      const bh = Math.max(0.5, v[i]*(h-12));
       g.globalAlpha = 0.30 + 0.6*v[i];
       g.fillRect(x, y+h-3-bh, w, bh);
     }
-    g.globalAlpha = .8; g.font = "600 9px ui-monospace,monospace";
-    g.fillText(n.toUpperCase(), 6, y+11); g.globalAlpha = 1;
+    g.globalAlpha = .85; g.font = "600 9.5px ui-monospace,monospace";
+    g.fillText(LANEWORD[n].toUpperCase(), 7, y+12); g.globalAlpha = 1;
   });
 }
 
@@ -590,21 +701,6 @@ function firstIndex() {
     if (d < gap) { gap = d; best = i; }
   });
   return ((best % SCORE.grid.beats_per_bar) + SCORE.grid.beats_per_bar) % SCORE.grid.beats_per_bar;
-}
-
-function phaseButtons() {
-  const box = $("phase");
-  box.innerHTML = [-2,-1,0,1,2,3].map(k =>
-    `<button data-k="${k}" class="${k===SHIFT?'on':''}" style="padding:4px 8px">${k>0?"+":""}${k}</button>`).join(" ")
-    + ` <button id="savephase" style="padding:4px 9px">save</button>`;
-  box.querySelectorAll("[data-k]").forEach(b => b.onclick = () => {
-    SHIFT = +b.dataset.k; phaseButtons(); draw();
-  });
-  $("savephase").onclick = async () => {
-    await fetch("/downbeat", { method:"POST", body: JSON.stringify({ slug, shift: SHIFT }) });
-    $("savephase").textContent = "saved";
-    setTimeout(() => $("savephase").textContent = "save", 1200);
-  };
 }
 
 function verdict(body) {
@@ -630,30 +726,36 @@ function sections() {
     const row = document.createElement("div");
     row.className = "row";
     row.innerHTML = `<span class="when">${mmss(t0)}</span>
-      <span class="what"><b style="color:${HUE[p.repeats_as]}">${p.role ?? p.repeats_as}</b>
-        &nbsp;${p.feels}
-        <span class="dim">· bars ${p.from_bar}–${p.to_bar} · ${(p.playing||[]).join(" ") || "nothing"}
-        · <span style="color:#8fbf9f">${partTune(p)}</span></span></span>
-      <button data-from="${t0}" data-to="${t1}">hear it</button>
-      <button class="yes" data-v="yes">right</button>
-      <button class="no" data-v="no">wrong</button>
+      <span class="what"><b class="role" style="color:${HUE[p.repeats_as]}">${esc(p.role ?? p.repeats_as)}</b>
+        &nbsp;<b>${esc(FEELS[p.feels] || p.feels)}</b>
+        <span class="dim">· ${playingWords(p.playing)} playing
+        · bars ${p.from_bar}–${p.to_bar}</span>
+        <span style="color:#8fbf9f">· ${esc(partTune(p))}</span></span>
+      <button data-from="${t0}" data-to="${t1}">Hear it</button>
+      <button class="yes" data-v="yes">Right</button>
+      <button class="no" data-v="no">Wrong</button>
       <span class="said"></span>`;
+
     const mine = (SCORE.phrases || [])
       .filter(q => q.from_bar >= p.from_bar && q.to_bar <= p.to_bar);
     if (mine.length) {
       const band = document.createElement("div");
       band.className = "inside";
-      band.innerHTML = `<span class="tag">does</span>` + mine.map(q =>
-        `<span class="subchip" data-b0="${q.from_bar}" data-b1="${q.to_bar}"
-           style="border-color:${DOING[q.doing]||'#2b313c'};color:${DOING[q.doing]||'#59616f'}"
-           title="click to hear bars ${q.from_bar}-${q.to_bar}"><b>${q.from_bar}-${q.to_bar}</b> ${q.doing || ""}${
-             q.also && q.also.length ? " · " + q.also.join(" ") : ""} — ${q.says}</span>`).join("");
-      band.querySelectorAll(".subchip").forEach(el => {
-        el.onclick = () => play(barTime(+el.dataset.b0),
-                                barTime(+el.dataset.b1 + 1));
+      band.innerHTML = `<span class="tag">doing</span>` + mine.map(q => {
+        const pair = DOINGWORD[q.doing];
+        const hue = DOING[q.doing] || "#2b313c";
+        const said = esc(saysWords(q.says));
+        return `<span class="chip" data-b0="${q.from_bar}" data-b1="${q.to_bar}"
+           style="border-color:${hue};color:${pair ? hue : "#5a6274"}"
+           title="click to hear bars ${q.from_bar}–${q.to_bar}"><b>bars ${q.from_bar}–${q.to_bar}</b> ${
+             pair ? esc(pair[1]) + " · " + said : said}</span>`;
+      }).join("");
+      band.querySelectorAll(".chip").forEach(el => {
+        el.onclick = () => play(barTime(+el.dataset.b0), barTime(+el.dataset.b1 + 1));
       });
       row.appendChild(band);
     }
+
     const inside = (SCORE.moments || [])
       .filter(m => m.bar >= p.from_bar && m.bar <= p.to_bar)
       .sort((a,b) => a.bar - b.bar || a.beat - b.beat);
@@ -662,15 +764,14 @@ function sections() {
       strip.className = "inside";
       strip.innerHTML = `<span class="tag">moments</span>` + inside.map(m =>
         `<span class="chip" style="border-color:${KIND[m.is]||'#3a4152'};color:${KIND[m.is]||'#8b93a6'}"
-           title="bar ${m.bar} beat ${m.beat} · confidence ${m.sure} · weight ${m.weight ?? "-"}">
-           <b>${m.bar}.${m.beat}</b> ${momentWords(m)}${
-             m.for_beats ? ` <i style="opacity:.6;font-style:normal">${m.for_beats}b</i>` : ""}</span>`).join("");
+           title="bar ${m.bar}, beat ${m.beat} · click to hear it"><b>bar ${m.bar}</b> ${
+             esc(momentWords(m))}</span>`).join("");
       strip.querySelectorAll(".chip").forEach((el, i) => {
-        el.style.cursor = "pointer";
         el.onclick = () => hearMoment(inside[i]);
       });
       row.appendChild(strip);
     }
+
     box.appendChild(row);
     row.querySelector("[data-from]").onclick = e =>
       play(+e.target.dataset.from, Math.min(+e.target.dataset.to, +e.target.dataset.from + 12));
@@ -678,6 +779,17 @@ function sections() {
   }
 }
 
+let ctx = null, clicking = false, sent = -1;
+function click(when, down) {
+  const o = ctx.createOscillator(), amp = ctx.createGain();
+  o.frequency.value = down ? 900 : 1800;
+  amp.gain.setValueAtTime(down ? .5 : .25, when);
+  amp.gain.exponentialRampToValueAtTime(.0001, when + .05);
+  o.connect(amp).connect(ctx.destination);
+  o.start(when); o.stop(when + .06);
+}
+
+let LIVE = -1;
 function tick() {
   if (SCORE) {
     const t = aud.currentTime, total = SCORE.song.length_s;
@@ -699,44 +811,85 @@ function tick() {
     let at = -1;
     (SCORE.parts||[]).forEach((p,i) => { if (bar >= p.from_bar && bar <= p.to_bar) at = i; });
     document.querySelectorAll(".part").forEach((n,i) => n.classList.toggle("here", i === at));
+    $("nowtime").textContent = `${mmss(t)} · bar ${Math.max(0, bar)} of ${SCORE.grid.bars}`;
     if (at >= 0) {
       const p = SCORE.parts[at];
+      if (at !== LIVE) {
+        LIVE = at;
+        $("livesaid").textContent = "";
+        document.querySelectorAll("#liveyes,#liveno").forEach(b => b.classList.remove("on"));
+      }
       const b = SCORE.bars || {}, idx = Math.max(0, bar - FIRSTBAR);
-      const now = LANES.filter(n => Array.isArray(b[n]) && b[n][idx] > 0.12)
-        .map(n => `<span style="color:${STEM[n]}">${n}</span>`).join(" ");
-      const beat = (60/SCORE.grid.bpm);
-      const here = (SCORE.moments||[]).filter(m => Math.abs(momentTime(m) - t) < beat*0.75)
-        .sort((x,y) => (y.sure||0)-(x.sure||0)).slice(0,3)
-        .map(m => `<span style="color:${KIND[m.is]||'#8b93a6'}">${momentWords(m)}</span>`).join(" · ");
-      $("now").innerHTML = `<span style="color:${HUE[p.repeats_as]}">${p.role ?? p.repeats_as}</span>
-        · ${p.feels}<small>bar ${Math.max(0,bar)} · ${now || "nothing"}</small>`
-        + (here ? `<div style="margin-top:5px;font-size:12px">${here}</div>` : "");
+      const on = LANES.filter(n => Array.isArray(b[n]) && b[n][idx] > 0.12);
+      $("nowrole").innerHTML = `<span style="color:${HUE[p.repeats_as]}">${esc(cap(p.role ?? p.repeats_as))}</span>`
+        + ` <span style="color:var(--dim);font-weight:400;font-size:15px">— ${esc(FEELS[p.feels] || p.feels)}</span>`;
+      $("nowplay").innerHTML = on.length
+        ? on.map(n => `<b style="color:${STEM[n]}">${LANEWORD[n]}</b>`).join(", ")
+        : `<span class="dim">nothing</span>`;
+      const q = (SCORE.phrases || []).find(x => bar >= x.from_bar && bar <= x.to_bar);
+      const pair = q && DOINGWORD[q.doing];
+      $("nowdoing").innerHTML = q
+        ? (pair ? `<b style="color:${DOING[q.doing]}">${cap(pair[1])}</b> · ` : "")
+          + `<span class="dim">${esc(saysWords(q.says))}</span>`
+        : `<span class="dim">—</span>`;
+      const here = (SCORE.moments||[]).filter(m => {
+        const mt = momentTime(m);
+        return t >= mt - beatLen()*0.75 && t <= mt + Math.max(momentSpan(m), beatLen()*0.75);
+      }).sort((x,y) => (y.weight||0)-(x.weight||0)).slice(0,2);
+      $("nowmoment").innerHTML = here.length
+        ? here.map(m => `<b style="color:${KIND[m.is]||'#8b93a6'}">${esc(momentWords(m))}</b>`).join(" · ")
+        : `<span class="dim">nothing the computer calls notable</span>`;
     }
   }
   requestAnimationFrame(tick);
 }
 
 $("play").onclick = () => { stopAt = null; aud.paused ? aud.play() : aud.pause(); };
-aud.onplay = () => $("play").textContent = "pause";
-aud.onpause = () => $("play").textContent = "play";
+aud.onplay = () => $("play").innerHTML = "&#10073;&#10073; Pause";
+aud.onpause = () => $("play").innerHTML = "&#9654; Play";
 $("seek").oninput = e => { dragging = true; stopAt = null;
   if (SCORE) aud.currentTime = (e.target.value/10000)*SCORE.song.length_s; };
 $("seek").onchange = () => dragging = false;
-$("only").onclick = e => {
-  const on = !e.target.classList.contains("on");
-  e.target.classList.toggle("on", on);
-  aud.volume = on ? 0 : 1;
-  if (on && !clicking) $("clicker").click();
+$("muter").onclick = e => {
+  const off = !e.target.classList.contains("on");
+  e.target.classList.toggle("on", off);
+  e.target.textContent = off ? "Music: off" : "Music: on";
+  aud.volume = off ? 0 : 1;
+  if (off && !clicking) $("clicker").click();
 };
+$("clicker").onclick = e => {
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+  ctx.resume();
+  clicking = !clicking; sent = aud.currentTime;
+  e.target.classList.toggle("on", clicking);
+  e.target.textContent = "Metronome: " + (clicking ? "on" : "off");
+};
+const jump = e => {
+  if (!SCORE) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  stopAt = null;
+  aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05,
+    ((e.clientX - r.left)/r.width) * SCORE.song.length_s));
+};
+$("map").onclick = jump;
+$("subs").onclick = jump;
+$("lanes").onclick = jump;
 $("zoom").onclick = e => {
   if (!SCORE) return;
   const r = e.target.getBoundingClientRect();
   const px = e.clientX - r.left, py = e.clientY - r.top;
   const hit = ZHIT.find(h => px >= h.x0 && px <= h.x1 && py >= h.y0 && py <= h.y1);
   if (hit) { hearMoment(hit.m); return; }
-  const at = aud.currentTime - WINDOW/2 + ((e.clientX - r.left)/r.width) * WINDOW;
+  const at = aud.currentTime - WINDOW/2 + (px/r.width) * WINDOW;
   stopAt = null;
   aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05, at));
+};
+$("zoom").onwheel = e => {
+  if (!SCORE) return;
+  e.preventDefault();
+  stopAt = null;
+  aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05,
+    aud.currentTime + beatLen() * (e.deltaY > 0 ? 1 : -1)));
 };
 $("tune").onclick = e => {
   if (!SCORE) return;
@@ -745,26 +898,24 @@ $("tune").onclick = e => {
   const hit = THIT.find(h => px >= h.x0 - 3 && px <= h.x1 + 3);
   if (hit) { hearMoment(hit.m); return; }
   const total = SCORE.song.length_s;
-  const at = ((px - 88) / Math.max(1, r.width - 93)) * total;
+  const at = ((px - 14) / Math.max(1, r.width - 20)) * total;
   play(Math.max(0, Math.min(total - 0.1, at)), null);
 };
-$("zoom").onwheel = e => {
-  if (!SCORE) return;
-  e.preventDefault();
-  stopAt = null;
-  const step = (60 / SCORE.grid.bpm) * (e.deltaY > 0 ? 1 : -1);
-  aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05, aud.currentTime + step));
-};
-$("clicker").onclick = e => {
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-  ctx.resume();
-  clicking = !clicking; sent = aud.currentTime;
-  e.target.classList.toggle("on", clicking);
-  e.target.textContent = "click: " + (clicking ? "on" : "off");
+$("liveyes").onclick = $("liveno").onclick = async e => {
+  if (LIVE < 0) return;
+  const p = SCORE.parts[LIVE];
+  document.querySelectorAll("#liveyes,#liveno").forEach(o => o.classList.remove("on"));
+  e.target.classList.add("on");
+  await verdict({ asked:"section", says:e.target.dataset.v, bar:p.from_bar,
+                  role:p.role, feels:p.feels });
+  $("livesaid").textContent = e.target.dataset.v === "yes" ? "✓ saved" : "✗ saved";
 };
 aud.onseeked = () => sent = aud.currentTime;
-$("song").onchange = e => { aud.pause(); load(e.target.value, e.target.selectedOptions[0].dataset.a); };
-addEventListener("resize", () => { if (SCORE) { lanes(); tune(); zoom(); } });
+$("song").onchange = e => {
+  aud.pause(); LIVE = -1;
+  load(e.target.value, e.target.selectedOptions[0].dataset.a);
+};
+addEventListener("resize", () => { if (SCORE) { lanes(); tune(); zoom(); subs(); } });
 
 library();
 tick();
