@@ -13,7 +13,7 @@ def lift(x):
     return np.clip(x / top, 0.0, 1.5)
 
 
-def cut(a, b, every, origin, least=3):
+def cut(a, b, every, origin, least=3, firm=()):
     edges = [a]
     step = max(2, int(every))
     first = a + ((origin - a) % step)
@@ -24,7 +24,12 @@ def cut(a, b, every, origin, least=3):
         if at - edges[-1] >= least:
             edges.append(at)
         at += step
+    for f in sorted(firm):
+        if a + least <= f <= b - least and all(abs(f - e) >= least for e in edges):
+            edges.append(f)
+    edges = sorted(set(edges))
     edges.append(b)
+    edges = sorted(set(edges))
     out = []
     for i in range(len(edges) - 1):
         if edges[i + 1] - edges[i] >= least:
@@ -62,6 +67,23 @@ def doing(now, was, ceiling, mid, opens, last, tail, here):
     return head, also[:2], round(float(order[0][1]), 3)
 
 
+def lasts(lane, m, pickup, least=3):
+    want = {"drums": "drums", "bass": "bass", "voice": "vocals",
+            "chords": "other"}.get(m.get("what"), m.get("what"))
+    v = lane.get(want)
+    if v is None:
+        return False
+    at = m["bar"] - 1 + pickup
+    after = v[at:at + least]
+    before = v[max(0, at - least):at]
+    if len(after) < least or not len(before):
+        return False
+    on = m["is"] == "entrance"
+    held = (after > SURE).all() if on else (after < SURE).all()
+    was = (before < SURE).all() if on else (before > SURE).all()
+    return bool(held and was)
+
+
 def says(was, now, notes):
     came = [SAY.get(k, k) for k in now if k not in (was or [])]
     left = [SAY.get(k, k) for k in (was or []) if k not in now]
@@ -90,7 +112,10 @@ def phrases(spans, bars, moments, every, origin, pickup):
         if not len(piece):
             continue
         ceiling = float(piece.max()) or 1.0
-        cuts = cut(a, b, every, origin - 1 + pickup)
+        firm = [m["bar"] - 1 + pickup for m in moments
+                if m["is"] in ("entrance", "exit") and m.get("sure", 0) >= 0.7
+                and lasts(lane, m, pickup, 3)]
+        cuts = cut(a, b, every, origin - 1 + pickup, firm=firm)
         for seat, (lo, hi) in enumerate(cuts):
             bit = loud[lo:hi]
             if not len(bit):

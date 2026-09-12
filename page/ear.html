@@ -39,6 +39,14 @@ h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
 .row button{padding:4px 9px;font-size:12px}
 .row .said{font:12px ui-monospace,monospace;color:var(--ok);min-width:16px}
 .dim{color:var(--faint)}
+#subs{position:relative;height:26px;margin-top:3px;border:1px solid var(--edge);border-radius:4px;overflow:hidden;background:#14181f}
+.sub{position:absolute;top:0;bottom:0;border-left:1px solid #2c3340;font:9px ui-monospace,monospace;
+     color:#9fb0c9;padding:3px 0 0 4px;overflow:hidden;white-space:nowrap}
+.sub b{font-weight:600}
+.subchip{font:10px ui-monospace,monospace;border:1px solid #3a4152;border-radius:3px;padding:1px 5px;color:#9fb0c9;cursor:pointer}
+.subchip:hover{background:#1c212b}
+.sub{cursor:pointer}
+.sub:hover{filter:brightness(1.5)}
 .inside{flex-basis:100%;margin:6px 0 2px 76px;display:flex;flex-wrap:wrap;gap:4px}
 .chip{font:10px ui-monospace,monospace;border:1px solid;border-radius:3px;padding:1px 5px;opacity:.85}
 .chip b{opacity:.6;font-weight:400}
@@ -61,12 +69,13 @@ h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
 <canvas id="zoom"></canvas>
 
 <div id="map"><div id="head"></div></div>
+<div id="subs"></div>
 <canvas id="lanes"></canvas>
 <canvas id="marks"></canvas>
 
 <div id="now">—</div>
 
-<h2>Sections, and the moments inside each one</h2>
+<h2>Sections, their subsections, and the moments inside</h2>
 <div id="sections"></div>
 
 </div>
@@ -92,7 +101,9 @@ async function library() {
   const list = await (await fetch("/library.json")).json();
   $("song").innerHTML = list.map(x =>
     `<option value="${x.slug}" data-a="${x.audio}">${x.slug}</option>`).join("");
-  if (list.length) load(list[0].slug, list[0].audio);
+  const want = new URLSearchParams(location.search).get("song");
+  const pick = list.find(x => x.slug === want) || list[0];
+  if (pick) { $("song").value = pick.slug; load(pick.slug, pick.audio); }
 }
 
 async function load(s, url) {
@@ -154,7 +165,7 @@ function draw() {
       rgba(224,101,95,.13) 0 7px,transparent 7px 14px);border-right:1px dashed rgba(224,101,95,.6)`;
     map.appendChild(sh);
   }
-  lanes(); marks(); sections();
+  lanes(); marks(); subs(); sections();
 }
 
 const KIND = {entrance:"#5bb98c", exit:"#e0655f", fill:"#e8a33d", accent:"#f2c14e",
@@ -163,6 +174,31 @@ const KIND = {entrance:"#5bb98c", exit:"#e0655f", fill:"#e8a33d", accent:"#f2c14
 
 function momentTime(m) {
   return barTime(m.bar) + (m.beat - 1) * (60 / SCORE.grid.bpm);
+}
+
+const DOING = {intensifying:"#e0655f", easing:"#6fa8dc", expanding:"#5bb98c",
+  thinning:"#c98fd1", peaking:"#f2c14e", sustaining:"#7f8b9e",
+  suspending:"#c8a2ff", resolving:"#7ad4c8", establishing:"#9fd18b",
+  developing:"#e8a33d", transitioning:"#f28c8c", closing:"#8b93a6"};
+
+function subs() {
+  const box = $("subs"); box.innerHTML = "";
+  if (!SCORE || !SCORE.phrases) return;
+  const total = SCORE.song.length_s;
+  for (const q of SCORE.phrases) {
+    const t0 = barTime(q.from_bar), t1 = Math.min(total, barTime(q.to_bar + 1));
+    const el = document.createElement("div");
+    el.className = "sub";
+    el.style.left = (100 * t0 / total) + "%";
+    el.style.width = (100 * (t1 - t0) / total) + "%";
+    el.style.background = (DOING[q.doing] || "#7f8b9e") + "22";
+    el.style.color = DOING[q.doing] || "#9fb0c9";
+    el.title = `bars ${q.from_bar}-${q.to_bar} · ${q.doing}` +
+      (q.also && q.also.length ? " (" + q.also.join(", ") + ")" : "") + ` · ${q.says}`;
+    el.innerHTML = `<b>${q.doing}</b>`;
+    el.onclick = () => play(t0, t1);
+    box.appendChild(el);
+  }
 }
 
 function marks() {
@@ -226,7 +262,7 @@ function zoom() {
     g.strokeStyle = down ? "#ffffff" : "#e8a33d";
     g.lineWidth = down ? 2 : 1;
     g.globalAlpha = down ? 1 : .55;
-    g.beginPath(); g.moveTo(x, down ? 22 : 40); g.lineTo(x, 72); g.stroke();
+    g.beginPath(); g.moveTo(x, down ? 22 : 40); g.lineTo(x, 60); g.stroke();
     g.globalAlpha = 1;
     if (down) {
       const n = Math.round((bt.t - firstBeat())/BAR) + 1;
@@ -234,6 +270,19 @@ function zoom() {
       g.fillText(n, x+3, 82);
     }
   });
+
+  for (const q of SCORE.phrases || []) {
+    const q0 = barTime(q.from_bar), q1 = barTime(q.to_bar + 1);
+    if (q1 < a || q0 > b) continue;
+    const hue = DOING[q.doing] || "#7f8b9e";
+    const x0 = Math.max(0, X(q0)), x1 = Math.min(r.width, X(q1));
+    g.fillStyle = hue + "18";
+    g.fillRect(x0, 62, x1 - x0, 10);
+    g.strokeStyle = hue; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(x0, 62); g.lineTo(x0, 72); g.stroke();
+    g.fillStyle = hue; g.font = "8px ui-monospace,monospace";
+    if (x1 - x0 > 46) g.fillText(q.doing, x0 + 3, 70);
+  }
 
   const rows = Object.keys(KIND);
   for (const m of SCORE.moments || []) {
@@ -254,7 +303,7 @@ function zoom() {
   g.strokeStyle = "#e0655f"; g.lineWidth = 1;
   g.beginPath(); g.moveTo(r.width/2, 0); g.lineTo(r.width/2, 86); g.stroke();
   g.fillStyle = "#5c6478"; g.font = "600 9px ui-monospace,monospace";
-  g.fillText("BEATS · white = downbeat · green = section starts · red = now", 7, 96-86+9);
+  g.fillText("BEATS · white = downbeat · green = section starts · band = subsection · red = now", 7, 96-86+9);
 }
 
 let ctx = null, clicking = false, sent = -1;
@@ -346,6 +395,22 @@ function sections() {
       <button class="yes" data-v="yes">right</button>
       <button class="no" data-v="no">wrong</button>
       <span class="said"></span>`;
+    const mine = (SCORE.phrases || [])
+      .filter(q => q.from_bar >= p.from_bar && q.to_bar <= p.to_bar);
+    if (mine.length) {
+      const band = document.createElement("div");
+      band.className = "inside";
+      band.innerHTML = mine.map(q =>
+        `<span class="subchip" data-b0="${q.from_bar}" data-b1="${q.to_bar}"
+           style="border-color:${DOING[q.doing]||'#3a4152'};color:${DOING[q.doing]||'#9fb0c9'}"
+           title="click to hear bars ${q.from_bar}-${q.to_bar}"><b>${q.from_bar}-${q.to_bar}</b> ${q.doing}${
+             q.also && q.also.length ? " · " + q.also.join(" ") : ""} — ${q.says}</span>`).join("");
+      band.querySelectorAll(".subchip").forEach(el => {
+        el.onclick = () => play(barTime(+el.dataset.b0),
+                                barTime(+el.dataset.b1 + 1));
+      });
+      row.appendChild(band);
+    }
     const inside = (SCORE.moments || [])
       .filter(m => m.bar >= p.from_bar && m.bar <= p.to_bar)
       .sort((a,b) => a.bar - b.bar || a.beat - b.beat);
