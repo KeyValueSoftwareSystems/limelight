@@ -34,21 +34,78 @@ const KNOWN = ["grid", "beats", "downbeats", "sections", "energy", "moments",
                "feel", "chords", "brightness", "width", "air", "pump",
                "pace", "drums", "bass", "vocals", "other"];
 
+/* The pipeline writes parts and bars.intensity; the protocol says sections and
+   energy. server/format/v1.js does the same mapping for the HTTP path, which is
+   ESM and cannot be required from here. */
+function adapt(s) {
+  if (Array.isArray(s.sections)) return s;
+  const out = { ...s };
+  if (Array.isArray(s.parts)) {
+    out.sections = s.parts.map(p => ({
+      from: { bar: p.from_bar, beat: 1 },
+      to: { bar: p.to_bar + 1, beat: 1 },
+      name: p.role, nth: p.nth, repeat: p.like, playing: p.playing,
+      stems: p.stems,
+    }));
+  }
+  /* The pipeline lists beats as objects with a time; the protocol lists them as
+     [bar, beat] pairs. Bars advance on the detected downbeat rather than on a
+     count, so a pickup bar stays a pickup bar. */
+  if (Array.isArray(s.beats) && s.grid) {
+    const fb = (s.grid.first_bar !== undefined && s.grid.first_bar !== null)
+             ? s.grid.first_bar : 1;
+    let bar = fb, beat = 0;
+    const pairs = s.beats.map(b => {
+      if (b.downbeat) { if (beat) bar += 1; beat = 1; } else { beat += 1; }
+      return [bar, beat];
+    });
+    out.beats = { derived_from: "grid", as: "[bar, beat]",
+                  count: pairs.length, list: pairs };
+    const down = pairs.filter(p => p[1] === 1);
+    out.downbeats = { derived_from: "grid", as: "[bar, beat]",
+                      count: down.length, list: down };
+  }
+  /* form is a partition of the song; subsection partitions each section. Other
+     things -- a hook carrying into the next section -- cross those boundaries,
+     which is the whole reason these are layers and not one list. */
+  if (out.sections) {
+    out.layers = {
+      form: { kind: "partition", spans: out.sections },
+      ...(Array.isArray(s.phrases) ? { subsection: { kind: "partition",
+        spans: s.phrases.map(q => ({
+          from: { bar: q.from_bar, beat: 1 },
+          to: { bar: q.to_bar + 1, beat: 1 },
+          name: q.doing, says: q.says })) } } : {}),
+    };
+  }
+  if (Array.isArray(s.bars && s.bars.intensity)) {
+    out.energy = { per: "bar",
+                   from_bar: s.grid && s.grid.first_bar !== undefined
+                           ? s.grid.first_bar : 1,
+                   values: s.bars.intensity };
+  }
+  return out;
+}
+
 function respond(req) {
   const name = String(req.score || "").replace(/[^A-Za-z0-9_-]/g, "");
   /* The repo settled on <name>.score while this was reading score.<name>.json,
      and nothing that read it was updated, so the suite broke on a rename rather
      than on a change of meaning. Both names are accepted; the new one wins. */
-  const candidates = [path.join(__dirname, `${name}.score`),
-                      path.join(__dirname, `score.${name}.json`)];
-  const file = candidates.find(f => name && fs.existsSync(f));
+  /* Scores are read live from scores/, never from a copy kept beside this file.
+     A committed sample goes stale the first time the pipeline changes, and then
+     the protocol is tested against something nothing produces any more. */
+  const dir = process.env.LIMELIGHT_SCORES
+            || path.join(__dirname, "..", "scores");
+  const file = name && fs.existsSync(path.join(dir, `${name}.score`))
+             ? path.join(dir, `${name}.score`) : null;
   if (!file) {
     return { error: `no score for ${req.score}`,
-             have: fs.readdirSync(__dirname)
+             have: (fs.existsSync(dir) ? fs.readdirSync(dir) : [])
                      .filter(f => f.endsWith(".score"))
                      .map(f => f.slice(0, -6)) };
   }
-  const s = JSON.parse(fs.readFileSync(file, "utf8"));
+  const s = adapt(JSON.parse(fs.readFileSync(file, "utf8")));
 
   if (req.version !== undefined && req.version !== s.version) {
     return { error: `asked for ${name}@${req.version}, have ${name}@${s.version}`,
@@ -78,8 +135,8 @@ function respond(req) {
     out[k] = { derived_from: "grid", as: "[bar, beat]", count: list.length, list };
   }
 
-  if (want.has("sections") && s.layers && s.layers.form) {
-    out.sections = s.layers.form.spans
+  if (want.has("sections") && Array.isArray(s.sections)) {
+    out.sections = s.sections
       .filter(sp => !w || spanTouches(sp))
       .map(sp => ({ from: sp.from, to: sp.to, name: sp.name, repeat: sp.repeat }));
   }
@@ -104,7 +161,7 @@ function respond(req) {
   return out;
 }
 
-module.exports = { respond, KNOWN };
+module.exports = { respond, adapt, KNOWN };
 
 if (require.main === module) {
   const f = process.argv[2] || path.join(__dirname, "request.example.json");

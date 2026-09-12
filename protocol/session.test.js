@@ -6,7 +6,11 @@
    the tempo, and check the beat has not moved. */
 "use strict";
 const { Session } = require("./session.js");
-const score = JSON.parse(require("fs").readFileSync(__dirname + "/levels.score", "utf8"));
+/* Read live from scores/, never from a copy beside this file: a committed
+   sample goes stale the first time the pipeline changes. */
+const { adapt } = require("./respond.js");
+const score = adapt(JSON.parse(require("fs").readFileSync(
+  __dirname + "/../scores/levels.score", "utf8")));
 
 let t = 1000;                                   /* wall seconds, ours to move */
 const clock = () => t;
@@ -173,14 +177,18 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
   ok("form is a partition -- never two at once", multi === 0, multi + " overlaps");
   ok("form is a partition -- never a gap", none === 0, none + " uncovered bars");
 
-  /* the whole point of layers: something that crosses a form boundary */
-  const build = (L.build.spans || [])[0];
-  const crossed = (L.form.spans || []).filter(sp =>
-    at(sp.from) > at(build.from) && at(sp.from) < at(build.to));
-  ok("a build crosses a form boundary, which is why layers exist",
-     crossed.length >= 1,
-     `build bar ${build.from.bar}-${build.to.bar} crosses ` +
-     crossed.map(c => c.name + " at " + c.from.bar).join(", "));
+  /* the whole point of layers: something that crosses a form boundary. The
+     pipeline has no build layer; it has moments that carry into the next
+     section, which is the same claim about the same shape. */
+  const per = score.grid.beats_per_bar || 4;
+  const edges = (L.form.spans || []).map(sp => sp.from.bar);
+  const carries = (score.moments || []).filter(m => {
+    const end = m.back_at != null ? m.back_at
+              : m.for_beats ? m.bar + m.for_beats / per : null;
+    return end != null && edges.some(e => m.bar < e && e < end);
+  });
+  ok("a moment can cross a form boundary", carries.length > 0,
+     carries.length + " of " + (score.moments || []).length);
 
   /* several layers answer at once, and that is not a bug */
   const at78 = s.sectionsAt({ bar: 78, beat: 1 });

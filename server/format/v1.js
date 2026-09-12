@@ -65,6 +65,9 @@ export function format(raw) {
   if (raw.melody) out.melody = raw.melody;
   if (raw.voice) out.voice = raw.voice;
   if (raw.lead) out.lead = raw.lead;
+  if (raw.tension) out.tension = { per: 'beat', values: raw.tension };
+  if (raw.releases) out.releases = raw.releases;
+  if (raw.phrase_grid) out.phrase_grid = raw.phrase_grid;
   if (raw.scales) out.scales = raw.scales;
   if (raw.made_by) out.made_by = raw.made_by;
   if (raw.chord_changes) out.chord_changes = raw.chord_changes;
@@ -89,14 +92,7 @@ export function format(raw) {
     }));
   }
 
-  if (raw.layers) {
-    out.layers = raw.layers;
-  } else if (raw.bars) {
-    const lanes = {};
-    for (const stem of STEMS)
-      if (Array.isArray(raw.bars[stem])) lanes[stem] = raw.bars[stem];
-    if (Object.keys(lanes).length) out.layers = lanes;
-  }
+  if (raw.layers) out.layers = raw.layers;
 
   if (Array.isArray(raw.bars?.chord)) {
     out.chords = raw.bars.chord.map((name, i) => ({

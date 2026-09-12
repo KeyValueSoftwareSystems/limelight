@@ -77,18 +77,21 @@ function Session(score, opts) {
   function positionAt(t) {
     const i = snap((t - first) / beatSec);
     return {
-      bar: firstBar + Math.floor(i / bpb),
+      bar: 1 + Math.floor(i / bpb),
       beat: +(mod(i, bpb) + 1).toFixed(4),
       before_first_beat: t < first,
     };
   }
   /* the song second a given bar and beat lands on */
   function secondsAt(bar, beat) {
-    return first + (bar - firstBar) * barSec + ((beat || 1) - 1) * beatSec;
+    /* Bar 1 begins on the first downbeat, always. When first_bar is 0 that bar
+       is a pickup sitting BEFORE the downbeat, not on it -- anchoring on
+       first_bar put every section a whole bar late in the baked show. */
+    return first + (bar - 1) * barSec + ((beat || 1) - 1) * beatSec;
   }
   /* beats laid on one line, so "which beat is this" is one division */
   const index = t => snap((t - first) / beatSec);
-  const fromIndex = i => ({ bar: firstBar + Math.floor(i / bpb), beat: (mod(i, bpb)) + 1 });
+  const fromIndex = i => ({ bar: 1 + Math.floor(i / bpb), beat: (mod(i, bpb)) + 1 });
 
   /* ---- sections, in layers ------------------------------------------------
      A song is several structures at once, and flattening them into one list
@@ -107,7 +110,19 @@ function Session(score, opts) {
      Bar numbering is the dangerous half: theirs starts at 0, ours at 1, and an
      off-by-one bar is a show that lights a beat early all night. */
   function adapt(sc) {
-    if (!sc || sc.layers || !sc.parts) return sc;          /* already our shape */
+    if (!sc) return sc;
+    /* Moments and layers are independent facts. Treating "has layers" as proof
+       that moments were already mapped left mo.at undefined downstream. */
+    if (Array.isArray(sc.moments) && sc.moments.length && !sc.moments[0].at) {
+      sc = Object.assign({}, sc, { moments: sc.moments.map(m => ({
+        at: { bar: m.bar, beat: m.beat }, kind: m.is, what: m.what,
+        weight: m.weight, sure: m.sure,
+        ...(m.for_beats ? { for_beats: m.for_beats } : {}),
+        ...(m.back_at != null ? { back_at: m.back_at } : {}),
+        ...(m.into_bar != null ? { into_bar: m.into_bar } : {}) })) });
+    }
+    if (!sc.parts) return sc;
+    if (sc.layers && sc.layers.form) return sc;
     const out = Object.assign({}, sc);
     out.layers = {
       form: { kind: "partition",
@@ -144,11 +159,11 @@ function Session(score, opts) {
     const g = sc.grid, n = g.beats_per_bar || 4, barS = (60 / g.bpm) * n;
     const fb = (g.first_bar !== undefined && g.first_bar !== null) ? g.first_bar : 1;
     const b = (t - g.first_beat_s) / barS;
-    return { bar: fb + Math.floor(b), beat: +(((b % 1) + 1) % 1 * n + 1).toFixed(3) };
+    return { bar: 1 + Math.floor(b), beat: +(((b % 1) + 1) % 1 * n + 1).toFixed(3) };
   }
   score = adapt(score);
   const layers = (score && score.layers) || {};
-  const at_ = q => (q.bar - firstBar) * bpb + ((q.beat || 1) - 1);  /* beats, one line */
+  const at_ = q => (q.bar - 1) * bpb + ((q.beat || 1) - 1);  /* beats, one line */
   const covers = (sp, x) => x >= at_(sp.from) && x < at_(sp.to);
 
   function sectionsAt(pos) {

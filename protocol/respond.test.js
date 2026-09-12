@@ -30,13 +30,15 @@ const ok = (n, c, d) => out.push([!!c, n, d || ""]);
      `from ${r.energy.from_bar}, ${r.energy.values.length} values`);
 }
 {
+  /* 36 sits inside the drop that starts at 33, so a section really does begin
+     before the window. Asking from 33 tested nothing: it is a section start. */
   const r = respond({ score: "levels", fields: ["sections"],
-                      window: { from_bar: 33, bars: 8 } });
+                      window: { from_bar: 36, bars: 8 } });
   const names = r.sections.map(s => `${s.name} ${s.from.bar}-${s.to.bar}`);
   ok("a section that starts before the window still comes back",
-     r.sections.some(s => s.from.bar < 33), names.join(", "));
-  ok("because a consumer asking for 8 bars needs to know it is inside a 16-bar drop",
-     r.sections.some(s => s.to.bar > 41));
+     r.sections.some(s => s.from.bar < 36), names.join(", "));
+  ok("because a consumer asking for 8 bars needs to know it is inside a longer drop",
+     r.sections.some(s => s.to.bar > 44));
 }
 {
   const r = respond({ score: "levels", version: 99, fields: ["grid"] });

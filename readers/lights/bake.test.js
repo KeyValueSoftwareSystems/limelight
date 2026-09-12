@@ -39,14 +39,20 @@ const phaseOf = name => baked.phases.find(p => (p.phase || "").length >= 0 &&
 const intro = baked.phases[0], drop = baked.phases[1];
 
 /* The score says the drop is at bar 9; on a first_bar=0 score that is
-   secondsAt(9) = first_beat_s + 9 bars, NOT secondsAt(10). */
-ok("intro phase starts at the score's bar 0", near(intro.start, S.secondsAt(0, 1)),
-   `baked ${intro.start} want ${S.secondsAt(0, 1).toFixed(3)}`);
+   bar 9 = first_beat_s + 8 bars, because bar 1 is the first downbeat. */
+/* Derived from the grid, never from session.secondsAt: comparing bake against
+   the same function bake calls moved both together and hid a whole-bar lag
+   for as long as it existed. Bar 1 begins on the first downbeat; bar 0 is
+   the pickup before it. */
+const oneBar = (60 / SCORE.grid.bpm) * SCORE.grid.beats_per_bar;
+const wantAt = b => SCORE.grid.first_beat_s + (b - 1) * oneBar;
+ok("intro phase starts at the score's bar 0", near(intro.start, wantAt(0)),
+   `baked ${intro.start} want ${wantAt(0).toFixed(3)}`);
 ok("drop phase starts at the score's bar 9 (not a bar late)",
-   near(drop.start, S.secondsAt(9, 1)),
-   `baked ${drop.start} want ${S.secondsAt(9, 1).toFixed(3)} (bug bakes ${S.secondsAt(10, 1).toFixed(3)})`);
+   near(drop.start, wantAt(9)),
+   `baked ${drop.start} want ${wantAt(9).toFixed(3)} (bug baked ${wantAt(10).toFixed(3)})`);
 ok("drop is not baked a whole bar late",
-   !near(drop.start, S.secondsAt(10, 1), 0.02),
+   !near(drop.start, wantAt(10), 0.02),
    `baked ${drop.start}`);
 
 /* And a frame sampled inside the drop must actually carry the drop's bar. */
@@ -77,8 +83,8 @@ fs.writeFileSync(rawFile, JSON.stringify(RAW));
 execFileSync("node", [path.join(__dirname, "bake.js"), rawFile, "1", "--out", rawOut], { stdio: "pipe" });
 const rawBaked = JSON.parse(fs.readFileSync(rawOut, "utf8"));
 ok("raw hub score bakes the drop at the same time as the formatted one",
-   near(rawBaked.phases[1].start, S.secondsAt(9, 1)),
-   `raw ${rawBaked.phases[1].start} want ${S.secondsAt(9, 1).toFixed(3)}`);
+   near(rawBaked.phases[1].start, wantAt(9)),
+   `raw ${rawBaked.phases[1].start} want ${wantAt(9).toFixed(3)}`);
 ok("raw and formatted scores bake the same phase starts",
    JSON.stringify(rawBaked.phases.map(p => p.start)) === JSON.stringify(baked.phases.map(p => p.start)),
    `raw ${JSON.stringify(rawBaked.phases.map(p => p.start))}`);

@@ -39,7 +39,9 @@ function shape(raw) {
 }
 
 function load(file) {
-  const at = file || path.join(__dirname, "..", "..", "protocol", "levels.score");
+  /* Default to the live score. A copy kept beside the protocol went stale
+     the first time the pipeline changed, and the reader read the stale one. */
+  const at = file || path.join(__dirname, "..", "..", "scores", "levels.score");
   return shape(JSON.parse(fs.readFileSync(at, "utf8")));
 }
 

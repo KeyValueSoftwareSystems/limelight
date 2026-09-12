@@ -10,7 +10,7 @@ const { openRemote, NotFound, Unreachable } = require("./remote.js");
 
 const REPO = path.join(__dirname, "..");
 const CLI = path.join(REPO, "limelight");
-const SCORE = fs.readFileSync(path.join(REPO, "protocol", "levels.score"));
+const SCORE = fs.readFileSync(path.join(REPO, "scores", "levels.score"));
 
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);
