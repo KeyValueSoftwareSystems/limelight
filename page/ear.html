@@ -36,6 +36,8 @@ button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c
 #head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:3}
 #zoom{width:100%;height:86px;cursor:pointer;margin:0 0 6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
+#tune{width:100%;height:78px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
+  background:#05070b;display:block}
 #lanes{width:100%;height:104px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
 #now{font:600 15px ui-monospace,monospace;margin:12px 0 4px}
@@ -83,6 +85,7 @@ h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
 <div id="map"><div id="head"></div></div>
 <div id="key"></div>
 <div id="subs"></div>
+<canvas id="tune"></canvas>
 <canvas id="lanes"></canvas>
 <canvas id="marks"></canvas>
 
@@ -221,7 +224,7 @@ function draw() {
     `<span>click any moment to hear it:</span>` +
     Object.entries(KIND).map(([k, c]) =>
       `<b><i style="background:${c}"></i>${k}</b>`).join("");
-  lanes(); marks(); subs(); sections();
+  lanes(); tune(); marks(); subs(); sections();
 }
 
 const KIND = {entrance:"#5bb98c", exit:"#e0655f", fill:"#e8a33d", accent:"#f2c14e",
@@ -411,6 +414,55 @@ function click(when, down) {
   o.start(when); o.stop(when + .06);
 }
 
+function tune() {
+  const c = $("tune"), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  c.width = Math.round(r.width*dpr); c.height = Math.round(78*dpr);
+  const g = c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,r.width,78);
+  g.fillStyle = "#5c6478"; g.font = "600 9px ui-monospace,monospace";
+  g.fillText("MELODY", 6, 12);
+  const notes = SCORE.melody || [];
+  if (!notes.length) {
+    g.font = "8px ui-monospace,monospace";
+    g.fillText("no vocal pitch", 6, 24);
+    return;
+  }
+  const v = SCORE.voice || {}, total = SCORE.song.length_s;
+  const lo = Math.floor((v.low ?? 48) - 1), hi = Math.ceil((v.high ?? 74) + 1);
+  const span = Math.max(8, hi - lo), beat = 60 / SCORE.grid.bpm;
+  const top = 18, foot = 70, tall = foot - top;
+  const Y = p => foot - ((p - lo)/span)*tall;
+  for (let p = Math.ceil(lo/12)*12; p <= hi; p += 12) {
+    g.strokeStyle = "#1a212e"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(58, Y(p)); g.lineTo(r.width-4, Y(p)); g.stroke();
+    g.fillStyle = "#39414f"; g.font = "7px ui-monospace,monospace";
+    g.fillText("C" + (Math.round(p/12) - 1), 46, Y(p)+2.5);
+  }
+  const hooked = new Set();
+  for (const m of SCORE.moments || []) {
+    if (m.is !== "hook" || !m.for_beats) continue;
+    const upto = m.bar + m.for_beats/SCORE.grid.beats_per_bar;
+    for (let b = m.bar; b <= upto; b++) hooked.add(b);
+  }
+  for (const n of notes) {
+    const t = barTime(n.bar) + (n.beat - 1)*beat;
+    const x = 58 + (t/total)*(r.width-63);
+    const w = Math.max(1.5, ((n.held_beats*beat)/total)*(r.width-63));
+    const hot = hooked.has(n.bar);
+    g.fillStyle = hot ? "#c8a2ff" : (STEM.vocals || "#5bb98c");
+    g.globalAlpha = hot ? 1 : 0.7;
+    g.fillRect(x, Y(n.pitch) - 1.6, w, 3.2);
+  }
+  g.globalAlpha = 1;
+  g.fillStyle = "#5c6478"; g.font = "8px ui-monospace,monospace";
+  g.fillText(`${notes.length} notes`, 6, 24);
+  g.fillText(`${lo}-${hi}`, 6, 34);
+  if (v.sure != null) g.fillText(`sure ${v.sure}`, 6, 44);
+  if (v.octave_fixes) g.fillText(`${v.octave_fixes} oct fix`, 6, 54);
+  g.fillStyle = "#c8a2ff";
+  g.fillText("purple = hook", 6, 66);
+}
+
 function lanes() {
   const c = $("lanes"), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
   c.width = Math.round(r.width*dpr); c.height = Math.round(104*dpr);
@@ -485,7 +537,9 @@ function sections() {
     row.innerHTML = `<span class="when">${mmss(t0)}</span>
       <span class="what"><b style="color:${HUE[p.repeats_as]}">${p.role ?? p.repeats_as}</b>
         &nbsp;${p.feels}
-        <span class="dim">· bars ${p.from_bar}–${p.to_bar} · ${(p.playing||[]).join(" ") || "nothing"}</span></span>
+        <span class="dim">· bars ${p.from_bar}–${p.to_bar} · ${(p.playing||[]).join(" ") || "nothing"}${
+          p.sung ? ` · voice ${p.sung.low}–${p.sung.high}, moves ${p.sung.moves}${
+            p.sung.on_one_note ? ", chanted" : ""}` : ""}</span></span>
       <button data-from="${t0}" data-to="${t1}">hear it</button>
       <button class="yes" data-v="yes">right</button>
       <button class="no" data-v="no">wrong</button>
@@ -606,7 +660,7 @@ $("clicker").onclick = e => {
 };
 aud.onseeked = () => sent = aud.currentTime;
 $("song").onchange = e => { aud.pause(); load(e.target.value, e.target.selectedOptions[0].dataset.a); };
-addEventListener("resize", () => { if (SCORE) { lanes(); zoom(); } });
+addEventListener("resize", () => { if (SCORE) { lanes(); tune(); zoom(); } });
 
 library();
 tick();
