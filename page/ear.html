@@ -383,7 +383,15 @@ async function library() {
     `<option value="${x.slug}" data-a="${x.audio}">${x.slug}</option>`).join("");
   const args = new URLSearchParams(location.search);
   const pick = list.find(x => x.slug === args.get("song")) || list[0];
-  if (pick) { $("song").value = pick.slug; load(pick.slug, pick.audio, +args.get("at") || 0); }
+  if (pick) {
+    $("song").value = pick.slug;
+    if (args.get("song") !== pick.slug) {
+      const url = new URL(location.href);
+      url.searchParams.set("song", pick.slug);
+      history.replaceState(null, "", url);
+    }
+    load(pick.slug, pick.audio, +args.get("at") || 0);
+  }
 }
 
 async function load(s, url, at) {
@@ -1233,6 +1241,12 @@ $("tune").onclick = e => {
 aud.onseeked = () => sent = aud.currentTime;
 $("song").onchange = e => {
   aud.pause(); LIVE = -1;
+  /* Put the song in the address bar so a refresh comes back to it, and so a
+     link to what you are looking at is just the address. */
+  const url = new URL(location.href);
+  url.searchParams.set("song", e.target.value);
+  url.searchParams.delete("at");
+  history.replaceState(null, "", url);
   load(e.target.value, e.target.selectedOptions[0].dataset.a);
 };
 for (const id of ["map", "subs", "chords", "lanes", "tune", "curves"]) zoomable($(id));
