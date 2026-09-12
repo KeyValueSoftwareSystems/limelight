@@ -22,7 +22,11 @@ KNOWN = [
 _STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
 _STEM_FOUR  = ["drums", "bass", "vocals", "other"]
 _CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace"]
-_ALWAYS = ["score", "version", "window", "grid"]
+# profile rides with the score when present, asked for or not: it is how one
+# user's application treats this score, and a consumer that forgot to ask for it
+# should still get it. Muzammil added this; the move into hub/ dropped it, and
+# only his own test noticed.
+_ALWAYS = ["score", "version", "window", "grid", "profile"]
 
 
 def _or(v, d):
@@ -320,6 +324,10 @@ def format_v1(raw):
     if raw.get("made_by"):
         out["made_by"] = raw["made_by"]
 
+    # ---- profile: the consumer's layer, embedded by the hub on pull ----
+    if raw.get("profile"):
+        out["profile"] = raw["profile"]
+
     return out
 
 
@@ -454,7 +462,10 @@ def handle(body, fetch_score):
     """Process a score protocol request.
 
     body        -- the parsed JSON request body
-    fetch_score -- callable(name) -> parsed score dict
+    fetch_score -- callable(name, profile=None) -> parsed score dict.
+                   `profile` is how one user's application treats this score;
+                   the hub embeds it when asked, or raises when it is missing.
+                   A fetcher that takes only a name still works.
     """
     if not body or not isinstance(body.get("score"), str) or not body["score"]:
         raise ValueError('"score" field is required and must be a non-empty string')
@@ -466,7 +477,18 @@ def handle(body, fetch_score):
         if any(not isinstance(f, str) for f in fields):
             raise ValueError('every entry in "fields" must be a string')
 
-    raw = fetch_score(body["score"])
+    profile = body.get("profile")
+    if profile is not None:
+        if not isinstance(profile, str) or not profile:
+            raise ValueError('"profile" must be a non-empty string')
+
+    try:
+        raw = fetch_score(body["score"], profile)
+    except TypeError:
+        # a fetcher that predates profiles takes the name alone
+        if profile is not None:
+            raise
+        raw = fetch_score(body["score"])
 
     if body.get("version") is not None and body["version"] != raw.get("version"):
         return {
