@@ -166,6 +166,28 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
      JSON.stringify(enumerate(RIG, { palette }).matrix) === JSON.stringify(enumerate(RIG, { palette }).matrix));
 }
 
+
+/* ---- the real layout: a flat line, 50 cm apart, head in the middle --------------
+   Since 2026-09-13 the pars stand in a straight line facing the same way, not on an
+   arc. Positions are metres in the AUDIENCE frame (+x is the audience's right): from
+   behind the rig the right-most lamp is @1, so @1 is at the audience's left. */
+{
+  const { groupsOf } = require("./preflight.js");
+  const L = require("./arc4-head.layout.json");
+  const g = groupsOf(L);
+  const xs = Object.fromEntries(L.fixtures.map(f => [f.id, f.at[0]]));
+  ok("the layout states its frame of reference", L.frame === "audience", String(L.frame));
+  ok("the layout says the lamps are a line, not an arc", L.geometry === "line", String(L.geometry));
+  ok("@1 .. @22 run left to right from the audience, 0.5 m apart",
+     xs.par_1 === -1 && xs.par_8 === -0.5 && xs.par_15 === 0.5 && xs.par_22 === 1, JSON.stringify(xs));
+  ok("the head sits in the middle of the line", xs.head === 0);
+  ok("the ordered group follows the line", g.arc.map(f => f.id).join(",") === "par_1,par_8,par_15,par_22", g.arc.map(f => f.id).join(","));
+  ok("inner is the pair beside the head, outer the ends",
+     g.inner.map(f => f.id).sort().join(",") === "par_15,par_8" && g.outer.map(f => f.id).sort().join(",") === "par_1,par_22");
+  ok("the line spans two metres", Math.abs(g.span - 2) < 1e-9, String(g.span));
+  ok("every lamp faces the same way (no per-lamp angle)", L.fixtures.filter(f => f.type === "par7").every(f => !f.angle_deg));
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;
