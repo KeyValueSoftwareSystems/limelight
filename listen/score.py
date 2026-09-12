@@ -90,6 +90,16 @@ def read(path, slug):
 
     report = {"first_beat_heard": float(times[0]), "first_position": int(positions[0])}
     g = grid(times, downs, length_s, report)
+
+    said = Path("truth") / f"{slug}.grid.json"
+    if said.exists():
+        fix = json.loads(said.read_text())
+        shift = int(fix.get("downbeat_shift_beats", 0))
+        if shift:
+            g["first_beat_s"] = round(g["first_beat_s"] + shift * 60.0 / g["bpm"], 4)
+            g["bars"] = int((length_s - g["first_beat_s"]) //
+                            (60.0 / g["bpm"] * g["beats_per_bar"])) + 1
+            report["moved_by_ear"] = shift
     bar_s = (60.0 / g["bpm"]) * g["beats_per_bar"]
     env = envelopes(path, slug)
     lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"])

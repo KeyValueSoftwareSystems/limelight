@@ -85,7 +85,7 @@ def grid(times, downs, length_s, report=None):
         report["fitted_from_s"] = round(float(times[lo]), 3)
         report["fitted_to_s"] = round(float(times[min(hi, len(times) - 1)]), 3)
         report["fitted_share"] = round((hi - lo) / len(times), 3)
-    floor_at = float(times[lo])
+    floor_at = float(times[0])
     times = times[lo:hi]
     idx, period, offset, resid = solve(times)
     bpb, agreement, first_down, apart = meter(times, idx, downs)
@@ -153,6 +153,9 @@ def show(slug, g, r, second_opinion=None):
           f"{r['loose']}/{r['beats']} beats over 70 ms", file=w)
     print(f"    drift          {r['bpm_early']:.2f} -> {r['bpm_late']:.2f} bpm "
           f"({r['drift_pct']:.2f}% across the song)", file=w)
+    if "moved_by_ear" in r:
+        print(f"    by ear         downbeat moved {r['moved_by_ear']:+d} beat"
+              f"{'s' if abs(r['moved_by_ear']) != 1 else ''} (truth/)", file=w)
     if "fitted_share" in r:
         print(f"    fitted to     {r['fitted_share'] * 100:.0f}% of the beats, "
               f"{r['fitted_from_s']:.1f}s to {r['fitted_to_s']:.1f}s "
