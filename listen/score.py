@@ -14,7 +14,7 @@ from shape import shape
 from call import call
 from parts import curves, parts
 from pulse import pulse
-from moments import moments, weigh
+from moments import moments, pick, weigh
 from phrase import phrases as sub_phrases
 from harmony import changes as chord_changes
 from harmony import chords as find_chords
@@ -221,8 +221,10 @@ def read(path, slug):
         score_bars, told_now, every, origin, pickup)
     weigh(told_now, score_bars, edges_at,
           {q["from_bar"] for q in inner}, pickup)
+    staged = pick(told_now, edges_at, g["bars"])
     if report is not None:
         report["phrases"] = len(inner)
+        report["staged"] = len(staged)
 
     return {
         "score": slug,
@@ -257,7 +259,8 @@ def read(path, slug):
         "releases": gone,
         "phrase_grid": phrase_rule,
         "phrases": inner,
-        "moments": told_now,
+        "moments": staged,
+        "signals": told_now,
     }
 
 

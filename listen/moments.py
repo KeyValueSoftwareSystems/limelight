@@ -409,7 +409,7 @@ def leading(found, spans, pickup, g_per=4, look=2):
             continue
         at = bar_at(m["bar"], pickup)
         for e in edges:
-            if 0 <= e - at <= look:
+            if 0 < e - at <= look:
                 reach = m.get("for_beats")
                 if reach is None:
                     reach = int(m.get("for_bars", 1)) * g_per
@@ -454,6 +454,25 @@ def weigh(found, bars, edges, inner, pickup, look=2):
             + 0.20 * edge
             + 0.15 * m.get("sure", 0.0), 0.0, 1.0)), 3)
     return found
+
+
+def pick(found, edges, bars, room=8, strong=0.70):
+    if not found:
+        return []
+    most = max(4, int(bars) // room)
+    best = {}
+    for m in found:
+        w = m.get("weight", 0.0)
+        pays = "back_at" in m or "into_bar" in m
+        earned = ((pays and w >= 0.35) or (m["bar"] in edges and w >= 0.55)
+                  or w >= strong)
+        if not earned:
+            continue
+        held = best.get(m["bar"])
+        if held is None or m.get("weight", 0.0) > held.get("weight", 0.0):
+            best[m["bar"]] = m
+    keep = sorted(best.values(), key=lambda m: -m.get("weight", 0.0))[:most]
+    return sorted(keep, key=lambda m: (m["bar"], m["beat"]))
 
 
 def moments(g, lanes, busy, bright, loud, chord, sure, spans, anchor,

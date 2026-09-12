@@ -24,7 +24,8 @@ button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c
 .part.here{outline:2px solid var(--ok);outline-offset:-2px}
 .part{border-left:1px solid #39445c}
 .part:first-of-type{border-left:none}
-.beat{position:absolute;top:4px;width:2px;height:34px;z-index:4;pointer-events:none;border-radius:1px}
+.beat{position:absolute;top:4px;width:2px;height:34px;z-index:4;border-radius:1px;cursor:pointer}
+.beat:hover{filter:brightness(1.6)}
 .beatname{position:absolute;left:2px;top:35px;font:8px ui-monospace,monospace;white-space:nowrap;
           color:inherit;opacity:.9;text-shadow:0 1px 2px #000}
 #key{display:flex;flex-wrap:wrap;gap:9px;margin:4px 0 0;font:9px ui-monospace,monospace;color:#5c6478}
@@ -168,20 +169,26 @@ function draw() {
     };
     map.appendChild(el);
   }
+  const shelf = [];
   for (const m of SCORE.moments || []) {
-    if ((m.weight ?? 0) < 0.55) continue;
-    const t = barTime(m.bar) + (m.beat - 1) * (60 / SCORE.grid.bpm);
+    const t = momentTime(m);
     if (t < 0 || t > total) continue;
     const el = document.createElement("div");
     el.className = "beat";
-    el.style.left = `${(t/total)*100}%`;
+    const left = (t/total)*100;
+    el.style.left = `${left}%`;
     const len = momentSpan(m);
     if (len > 0) el.style.width = `${Math.max(0.15, (len/total)*100)}%`;
     el.style.background = KIND[m.is] || "#8b93a6";
-    el.style.opacity = 0.35 + 0.65 * (m.weight ?? 0);
-    el.title = `bar ${m.bar}.${m.beat} · ${m.is} ${m.what} · weight ${m.weight}`;
-    const wide = len > 0 && (len/total)*100 > 2.2;
-    if (wide) el.innerHTML = `<span class="beatname">${m.is}</span>`;
+    el.style.opacity = 0.45 + 0.55 * (m.weight ?? 0);
+    const words = momentWords(m);
+    el.title = `bar ${m.bar}.${m.beat} · ${words} · weight ${m.weight}`;
+    const wide = (words.length * 5.4 / (map.clientWidth || 1200)) * 100;
+    let lane = 0;
+    while (shelf[lane] != null && shelf[lane] > left) lane++;
+    shelf[lane] = left + wide + 0.6;
+    el.innerHTML = `<span class="beatname" style="top:${35 + lane*10}px">${words}</span>`;
+    el.onclick = ev => { ev.stopPropagation(); hearMoment(m); };
     map.appendChild(el);
   }
 
@@ -211,7 +218,7 @@ function draw() {
   }
 
   $("key").innerHTML =
-    `<span>moments in the map (weight ≥ 0.55):</span>` +
+    `<span>click any moment to hear it:</span>` +
     Object.entries(KIND).map(([k, c]) =>
       `<b><i style="background:${c}"></i>${k}</b>`).join("");
   lanes(); marks(); subs(); sections();
@@ -229,6 +236,19 @@ function momentSpan(m) {
   const beat = 60 / SCORE.grid.bpm;
   return (m.for_beats ? m.for_beats * beat : 0);
 }
+
+function momentWords(m) {
+  const pay = m.back_at != null ? ` → back at ${m.back_at}`
+            : m.into_bar != null ? ` → into ${m.into_bar}` : "";
+  return `${m.is} ${m.what}${pay}`;
+}
+
+function hearMoment(m) {
+  const t = momentTime(m);
+  play(Math.max(0, t - 0.4), t + Math.max(momentSpan(m), 1.6) + 0.6);
+}
+
+const ZHIT = [];
 
 const DOING = {intensifying:"#e0655f", easing:"#6fa8dc", expanding:"#5bb98c",
   thinning:"#c98fd1", peaking:"#f2c14e", sustaining:"#7f8b9e",
@@ -262,7 +282,8 @@ function marks() {
   }
   const g = c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
   g.clearRect(0,0,r.width,112);
-  if (!SCORE || !SCORE.moments) return;
+  const all = (SCORE && (SCORE.signals || SCORE.moments)) || null;
+  if (!all) return;
   const total = (SCORE.song && SCORE.song.length_s) || aud.duration || 1;
   const rows = Object.keys(KIND);
   const lane = 9;
@@ -273,7 +294,7 @@ function marks() {
     g.fillStyle = KIND[k]; g.globalAlpha = .8;
     g.fillText(k, 6, y + lane - 3); g.globalAlpha = 1;
   });
-  for (const m of SCORE.moments) {
+  for (const m of all) {
     const i = rows.indexOf(m.is);
     if (i < 0) continue;
     const x = 64 + (momentTime(m)/total)*(r.width-70);
@@ -339,17 +360,19 @@ function zoom() {
     if (x1 - x0 > 46) g.fillText(q.doing, x0 + 3, 70);
   }
 
-  const rows = Object.keys(KIND);
+  ZHIT.length = 0;
+  const shelf = [];
+  g.font = "9px ui-monospace,monospace";
   for (const m of SCORE.moments || []) {
-    const mt = momentTime(m);
-    if (mt < a || mt > b) continue;
+    const mt = momentTime(m), len = momentSpan(m);
+    if (mt + len < a || mt > b) continue;
     const x = X(mt);
-    const row = Math.max(0, rows.indexOf(m.is));
-    const len = momentSpan(m);
-    g.fillStyle = KIND[m.is] || "#8b93a6";
-    g.globalAlpha = .35 + .65*(m.sure || 0);
+    const hue = KIND[m.is] || "#8b93a6";
+    g.fillStyle = hue;
+    g.globalAlpha = .45 + .55*(m.weight ?? m.sure ?? 0);
+    let x1 = x;
     if (len > 0) {
-      const x1 = X(mt + len);
+      x1 = X(mt + len);
       g.fillRect(x, 27, Math.max(3, x1 - x), 6);
       g.globalAlpha = 1;
       g.fillRect(x, 24, 2, 12);
@@ -357,10 +380,18 @@ function zoom() {
       g.beginPath(); g.arc(x, 30, 3.5, 0, 6.284); g.fill();
     }
     g.globalAlpha = 1;
-    if ((m.sure || 0) >= 0.40) {
-      g.font = "9px ui-monospace,monospace";
-      g.fillText(`${m.is} ${m.what}`, x+6, 14 + (row % 5)*9);
-    }
+    const words = momentWords(m);
+    const tw = g.measureText(words).width;
+    let lane = 0;
+    while (shelf[lane] != null && shelf[lane] > x) lane++;
+    shelf[lane] = x + tw + 12;
+    const ly = 46 + lane*10;
+    g.fillStyle = "rgba(5,7,11,.82)";
+    g.fillRect(x + 1, ly - 8, tw + 6, 10);
+    g.fillStyle = hue;
+    g.fillText(words, x + 4, ly);
+    ZHIT.push({x0: Math.min(x, x1) - 5, x1: Math.max(x1, x + tw + 8),
+               y0: 22, y1: ly + 3, m});
   }
 
   g.strokeStyle = "#e0655f"; g.lineWidth = 1;
@@ -483,8 +514,12 @@ function sections() {
       strip.innerHTML = `<span class="tag">moments</span>` + inside.map(m =>
         `<span class="chip" style="border-color:${KIND[m.is]||'#3a4152'};color:${KIND[m.is]||'#8b93a6'}"
            title="bar ${m.bar} beat ${m.beat} · confidence ${m.sure} · weight ${m.weight ?? "-"}">
-           <b>${m.bar}.${m.beat}</b> ${m.is} ${m.what}${
+           <b>${m.bar}.${m.beat}</b> ${momentWords(m)}${
              m.for_beats ? ` <i style="opacity:.6;font-style:normal">${m.for_beats}b</i>` : ""}</span>`).join("");
+      strip.querySelectorAll(".chip").forEach((el, i) => {
+        el.style.cursor = "pointer";
+        el.onclick = () => hearMoment(inside[i]);
+      });
       row.appendChild(strip);
     }
     box.appendChild(row);
@@ -523,7 +558,7 @@ function tick() {
       const beat = (60/SCORE.grid.bpm);
       const here = (SCORE.moments||[]).filter(m => Math.abs(momentTime(m) - t) < beat*0.75)
         .sort((x,y) => (y.sure||0)-(x.sure||0)).slice(0,3)
-        .map(m => `<span style="color:${KIND[m.is]||'#8b93a6'}">${m.is} ${m.what}</span>`).join(" · ");
+        .map(m => `<span style="color:${KIND[m.is]||'#8b93a6'}">${momentWords(m)}</span>`).join(" · ");
       $("now").innerHTML = `<span style="color:${HUE[p.repeats_as]}">${p.role ?? p.repeats_as}</span>
         · ${p.feels}<small>bar ${Math.max(0,bar)} · ${now || "nothing"}</small>`
         + (here ? `<div style="margin-top:5px;font-size:12px">${here}</div>` : "");
@@ -547,6 +582,9 @@ $("only").onclick = e => {
 $("zoom").onclick = e => {
   if (!SCORE) return;
   const r = e.target.getBoundingClientRect();
+  const px = e.clientX - r.left, py = e.clientY - r.top;
+  const hit = ZHIT.find(h => px >= h.x0 && px <= h.x1 && py >= h.y0 && py <= h.y1);
+  if (hit) { hearMoment(hit.m); return; }
   const at = aud.currentTime - WINDOW/2 + ((e.clientX - r.left)/r.width) * WINDOW;
   stopAt = null;
   aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05, at));
