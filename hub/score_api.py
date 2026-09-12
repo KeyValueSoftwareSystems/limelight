@@ -173,14 +173,29 @@ def format_v1(raw):
                         "from_bar": first_bar, "lanes": stem_lanes}
 
     # ---- moments ----
+    # A moment says where it is as `at: {bar, beat}`, whichever source it came
+    # from. The pipeline writes bar and beat flat at the top of the object and
+    # the events fallback nested them, so the same field arrived in two shapes
+    # depending on which branch fired -- and a consumer reading m["at"] worked
+    # on one score and raised on the next.
+    _M_KEYS = ("is", "what", "sure", "weight", "strength",
+               "for_beats", "for_bars", "then", "after", "leaves")
     if raw.get("moments"):
-        out["moments"] = raw["moments"]
+        out["moments"] = []
+        for mo in raw["moments"]:
+            if mo.get("at"):
+                out["moments"].append(mo)
+                continue
+            m = {"at": {"bar": mo.get("bar"), "beat": mo.get("beat")}}
+            for k, v in mo.items():
+                if k not in ("bar", "beat") and v is not None:
+                    m[k] = v
+            out["moments"].append(m)
     elif isinstance(raw.get("events"), list):
         out["moments"] = []
         for ev in raw["events"]:
             m = {"at": {"bar": ev.get("bar"), "beat": ev.get("beat")}}
-            for k in ("is", "what", "sure", "weight", "strength",
-                      "for_beats", "for_bars", "then", "after", "leaves"):
+            for k in _M_KEYS:
                 if ev.get(k) is not None:
                     m[k] = ev[k]
             out["moments"].append(m)

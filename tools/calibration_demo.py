@@ -125,14 +125,29 @@ def stand_in():
     }
 
 
+def _default_score():
+    """The built score if the pipeline has run here, else the committed fixture."""
+    for rel in (("..", "scores", "levels.score"), ("..", "protocol", "levels.score")):
+        at = os.path.join(HERE, *rel)
+        if os.path.isfile(at):
+            return at
+    return None
+
+
 def main(argv):
-    if argv:
-        raw = json.load(open(argv[0]))
+    at = argv[0] if argv else _default_score()
+    if at:
+        raw = json.load(open(at))
         REQUEST["score"] = raw.get("score", REQUEST["score"])
         made_up = False
     else:
         raw = stand_in()
         made_up = True
+    if not raw.get("profile"):
+        # the consumer's own layer; the hub embeds it on pull
+        raw["profile"] = {"user": "alnas",
+                          "colours": [{"name": "magenta", "hex": "#ff00ff"},
+                                      {"name": "cyan", "hex": "#00ffff"}]}
 
     resp = S.handle(REQUEST, lambda name, profile=None: raw)
 
@@ -209,8 +224,11 @@ def reading(r):
         say(f"\n4. The map, and what repeats.  {len(secs)} sections.")
         for s in secs:
             rep = f"  <- same material as {s['repeat']}" if s.get("repeat") else ""
+            full = s.get("fullness")
+            rise = s.get("rise")
             say(f"     bar {s['from']['bar']:>3}-{s['to']['bar'] - 1:<3} {str(s.get('name')):<10}"
-                f" full {s.get('fullness')}  rise {s.get('rise')}{rep}")
+                f" full {full if full is None else round(full, 2):<5}"
+                f" rise {rise if rise is None else round(rise, 2):<6}{rep}")
         say("   Light a returning section the way you lit it before. Recognition is")
         say("   most of what makes a show feel composed instead of generated.")
 
@@ -226,9 +244,11 @@ def reading(r):
     sub = ((r.get("layers") or {}).get("subsection") or {}).get("spans") or []
     if sub:
         say(f"\n6. What happens inside a section.  {len(sub)} subsections.")
-        for p in sub:
-            say(f"     bar {p['from']['bar']:>3}-{p['to']['bar'] - 1:<3} {p.get('doing'):<14}"
-                f" \"{p.get('says')}\"")
+        for p in sub[:8]:
+            say(f"     bar {p['from']['bar']:>3}-{p['to']['bar'] - 1:<3} "
+                f"{str(p.get('doing') or '-'):<14} \"{p.get('says') or ''}\"")
+        if len(sub) > 8:
+            say(f"     ... {len(sub) - 8} more")
         say("   Hold the section's look and push it where the music pushes.")
 
     ten = r.get("tension") or {}

@@ -169,7 +169,15 @@ export function format(raw) {
 
   // ---- moments (pass through with all fields; fallback from events) ----
   if (raw.moments) {
-    out.moments = raw.moments;
+    /* A moment says where it is as `at: {bar, beat}`, whichever source it came
+       from. The pipeline writes bar and beat flat and the events fallback nests
+       them, so the same field arrived in two shapes depending on the branch --
+       and a consumer reading m.at worked on one score and threw on the next. */
+    out.moments = raw.moments.map(mo => {
+      if (mo.at) return mo;
+      const { bar, beat, ...rest } = mo;
+      return { at: { bar, beat }, ...rest };
+    });
   } else if (Array.isArray(raw.events)) {
     out.moments = raw.events.map(event => {
       const m = { at: { bar: event.bar, beat: event.beat } };
