@@ -57,14 +57,43 @@ def drift(times, idx):
     return out[0], out[1]
 
 
+def steady(times, window=16, tol=0.015, least=0.45):
+    if len(times) < window * 3:
+        return 0, len(times)
+    bpm = 60.0 / np.diff(times)
+    local = np.array([np.median(bpm[max(0, i - window):i + window]) for i in range(len(bpm))])
+    mid = float(np.median(local))
+    ok = np.abs(local - mid) / mid < tol
+    best, run, start = (0, 0), 0, 0
+    for i in range(len(ok) + 1):
+        if i < len(ok) and ok[i]:
+            if run == 0:
+                start = i
+            run += 1
+        else:
+            if run > best[1] - best[0]:
+                best = (start, i + 1)
+            run = 0
+    if best[1] - best[0] < least * len(times):
+        return 0, len(times)
+    return best
+
+
 def grid(times, downs, length_s, report=None):
+    lo, hi = steady(times)
+    if report is not None and (lo, hi) != (0, len(times)):
+        report["fitted_from_s"] = round(float(times[lo]), 3)
+        report["fitted_to_s"] = round(float(times[min(hi, len(times) - 1)]), 3)
+        report["fitted_share"] = round((hi - lo) / len(times), 3)
+    floor_at = float(times[lo])
+    times = times[lo:hi]
     idx, period, offset, resid = solve(times)
     bpb, agreement, first_down, apart = meter(times, idx, downs)
     bpb = bpb or 4
 
     bar = period * bpb
     found = offset + period * first_down if first_down is not None else offset
-    floor = max(0.0, times[0] - period / 2)
+    floor = max(0.0, floor_at - period / 2)
     first = found
     while first - bar >= floor:
         first -= bar
@@ -93,12 +122,16 @@ def grid(times, downs, length_s, report=None):
             drift_pct=round(abs(early - late) / bpm * 100, 3),
         )
 
-    return {
+    out = {
         "bpm": round(bpm, 3),
         "first_beat_s": round(first, 4),
         "beats_per_bar": bpb,
         "bars": int((length_s - first) // bar) + 1,
     }
+    if report is not None and "fitted_share" in report:
+        out["holds_from_s"] = report["fitted_from_s"]
+        out["holds_to_s"] = report["fitted_to_s"]
+    return out
 
 
 def show(slug, g, r, second_opinion=None):
@@ -120,6 +153,10 @@ def show(slug, g, r, second_opinion=None):
           f"{r['loose']}/{r['beats']} beats over 70 ms", file=w)
     print(f"    drift          {r['bpm_early']:.2f} -> {r['bpm_late']:.2f} bpm "
           f"({r['drift_pct']:.2f}% across the song)", file=w)
+    if "fitted_share" in r:
+        print(f"    fitted to     {r['fitted_share'] * 100:.0f}% of the beats, "
+              f"{r['fitted_from_s']:.1f}s to {r['fitted_to_s']:.1f}s "
+              f"(the rest is not on this grid)", file=w)
     if "parts" in r:
         print(f"    parts          {r['parts']}   {', '.join(r['kinds'])}", file=w)
     if "events" in r:

@@ -9,8 +9,9 @@
  * The filter (called after this) strips fields the consumer did not ask for.
  */
 
-export const KNOWN = ['grid', 'beats', 'downbeats', 'sections', 'energy', 'moments',
-                      'layers', 'chords', 'key', 'loudness'];
+export const KNOWN = ['song', 'grid', 'beats', 'downbeats', 'sections', 'energy',
+                      'brightness', 'moments', 'layers', 'chords', 'key', 'loudness',
+                      'feel'];
 
 const STEMS = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
 
@@ -23,6 +24,8 @@ export function format(raw) {
 
   out.score   = raw.score;
   out.version = raw.version;
+
+  if (raw.song) out.song = raw.song;
 
   if (raw.grid) out.grid = raw.grid;
 
@@ -38,11 +41,14 @@ export function format(raw) {
     }));
   } else if (Array.isArray(raw.parts)) {
     out.sections = raw.parts.map(part => ({
-      from:   { bar: part.from_bar, beat: 1 },
-      to:     { bar: part.to_bar + 1, beat: 1 },
-      name:   part.feels,
-      repeat: part.repeats_as,
-      playing: part.playing,
+      from:     { bar: part.from_bar, beat: 1 },
+      to:       { bar: part.to_bar + 1, beat: 1 },
+      name:     part.feels,
+      repeat:   part.repeats_as,
+      playing:  part.playing,
+      fullness: part.fullness,
+      rise:     part.rise,
+      stems:    part.stems,
     }));
   }
 
@@ -60,6 +66,9 @@ export function format(raw) {
       is:       event.is,
       strength: event.strength,
       ...(event.for_bars ? { for_bars: event.for_bars } : {}),
+      ...(event.then     ? { then:     event.then     } : {}),
+      ...(event.after    ? { after:    event.after    } : {}),
+      ...(event.leaves   ? { leaves:   event.leaves   } : {}),
     }));
   }
 
@@ -80,8 +89,22 @@ export function format(raw) {
     })).filter(c => c.name);
   }
 
-  if (raw.key)      out.key      = raw.key;
+  if (Array.isArray(raw.bars?.brightness)) out.brightness = raw.bars.brightness;
+
+  if (raw.key || raw.chords) {
+    out.key = { ...(raw.key ?? {}) };
+    if (raw.chords) {
+      out.key.chords_say = {
+        root:       raw.chords.root,
+        scale:      raw.chords.scale,
+        confidence: raw.chords.confidence,
+      };
+      out.key.changes_per_beat = raw.chords.changes_per_beat;
+    }
+  }
+
   if (raw.loudness) out.loudness = raw.loudness;
+  if (raw.feel)     out.feel     = raw.feel;
 
   return out;
 }

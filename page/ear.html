@@ -151,6 +151,7 @@ async function load(s, url) {
 function draw() {
   colourGroups();
   const map = $("map");
+  [...map.querySelectorAll(".unmetered")].forEach(n => n.remove());
   [...map.querySelectorAll(".part")].forEach(n => n.remove());
   const parts = SCORE.parts || [];
   const total = SCORE.song.length_s;
@@ -173,6 +174,17 @@ function draw() {
       aud.play();
     };
     map.appendChild(el);
+  }
+  const holds = SCORE.grid.holds_from_s;
+  if (holds != null) {
+    const shade = document.createElement("div");
+    shade.className = "unmetered";
+    shade.style.cssText = `position:absolute;top:0;bottom:0;left:0;z-index:4;pointer-events:none;
+      width:${(holds / SCORE.song.length_s) * 100}%;
+      background:repeating-linear-gradient(135deg,rgba(224,101,95,.13) 0 7px,transparent 7px 14px);
+      border-right:1px dashed rgba(224,101,95,.6)`;
+    shade.title = `no steady tempo before ${mmss(holds)} — bars here are not reliable`;
+    $("map").appendChild(shade);
   }
   spark();
   lanes();

@@ -4,7 +4,7 @@ ON = 0.15
 SURE = 0.45
 OFF = 0.10
 HOLD = 2
-NAMES = ("drums", "bass", "vocals", "guitar", "piano", "other")
+NAMES = ("drums", "bass", "vocals", "other")
 
 
 SAY = {"drums": "drums", "bass": "bass", "vocals": "voice",

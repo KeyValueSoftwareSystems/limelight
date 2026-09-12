@@ -8,8 +8,8 @@ import numpy as np
 warnings.filterwarnings("ignore")
 
 CACHE = Path("work/heard")
-MODEL = "htdemucs_6s"
-NAMES = ("drums", "bass", "vocals", "guitar", "piano", "other")
+MODEL = "htdemucs"
+NAMES = ("drums", "bass", "vocals", "other")
 RATE = 100
 
 

@@ -180,7 +180,7 @@ def split(v):
     return mid
 
 
-NAMES = ("drums", "bass", "vocals", "guitar", "piano", "other")
+NAMES = ("drums", "bass", "vocals", "other")
 
 
 SURE = 0.45
