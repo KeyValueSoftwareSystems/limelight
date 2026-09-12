@@ -55,10 +55,21 @@ function renderPar(gesture, ph, groups, p) {
 
   if (gesture.pattern === "inner_outer_alternation" || keys.some(x => x.target)) {
     const onInner = (((ph.globalBeat % 2) + 2) % 2) === 0;
-    const inC = colourOf(keys.find(x => x.target === "inner"), keys);
-    const outC = colourOf(keys.find(x => x.target === "outer"), keys);
-    for (const id of (groups.inner || [])) out[id] = { colour: inC, level: (downbeat || onInner) ? on : flo };
-    for (const id of (groups.outer || [])) out[id] = { colour: outC, level: (downbeat || !onInner) ? on : flo };
+    // pick the colour-bearing key for each side: a target often has two keys
+    // (one carries the colour, the other just drops the level to 0), and taking
+    // the first would miss the colour -- e.g. outer red instead of blue.
+    const colourKey = t => keys.find(x => x.target === t && x.intent && x.intent.colour);
+    const inC = colourOf(colourKey("inner"), keys);
+    const outC = colourOf(colourKey("outer"), keys);
+    // call-and-response: the active pair is HELD bright for its beat, the other sits
+    // at the floor, and they trade each beat. (It used to spike on the hit-envelope
+    // and dip to the floor between beats, so both pairs looked dim at once and the
+    // alternation never read; it also forced both on for the downbeat.)
+    // The off pair goes fully dark, not to the floor: at 12% dim red reads as off
+    // but dim blue is still visibly on, so the floor made the trade look lopsided.
+    const activeLvl = +((p.peak != null ? p.peak : 1) * (p.intensity != null ? p.intensity : 1)).toFixed(3);
+    for (const id of (groups.inner || [])) out[id] = { colour: inC, level: onInner ? activeLvl : 0 };
+    for (const id of (groups.outer || [])) out[id] = { colour: outC, level: onInner ? 0 : activeLvl };
     return out;
   }
   if (gesture.group === "arc" && (gesture.stagger > 0 || gesture.direction)) {
@@ -136,6 +147,76 @@ function compose(intents) {
   return r;
 }
 
+/* ---- colour: harmony tints the gesture's colour toward the bar's chord ------ */
+function rgb2hsv(c) {
+  const r = c[0], g = c[1], b = c[2], mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  let h = 0;
+  if (d > 1e-9) {
+    if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4;
+    h /= 6; if (h < 0) h += 1;
+  }
+  return [h, mx > 0 ? d / mx : 0, mx];
+}
+function hsv2rgb(h, s, v) {
+  const i = Math.floor(h * 6), f = h * 6 - i, p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
+  const k = ((i % 6) + 6) % 6;
+  const c = k === 0 ? [v, t, p] : k === 1 ? [q, v, p] : k === 2 ? [p, v, t] : k === 3 ? [p, q, v] : k === 4 ? [t, p, v] : [v, p, q];
+  return c.map(x => +Math.max(0, Math.min(1, x)).toFixed(3));
+}
+/* rotate a saturated colour's hue toward the chord's; give a whitish one a cast.
+   amount 0 leaves the colour exactly as the gesture drew it. */
+function tint(colour, hue, amount, minor) {
+  if (!Array.isArray(colour) || colour.length < 3 || hue === null || hue === undefined || !(amount > 0)) return colour;
+  let [h, sat, v] = rgb2hsv(colour);
+  if (minor) v *= 0.85;
+  if (sat < 0.25) {                                 /* white-ish: a pastel cast */
+    const target = hsv2rgb(hue, 1, v);
+    return colour.map((c, i) => +(c * (1 - 0.5 * amount) + target[i] * 0.5 * amount).toFixed(3));
+  }
+  let d = hue - h; if (d > 0.5) d -= 1; if (d < -0.5) d += 1;
+  h = ((h + d * amount) % 1 + 1) % 1;
+  return hsv2rgb(h, sat, v);
+}
+
+/* ---- per-bar modulation from the plan's texture lanes and harmony ------------
+   Everything here is neutral (a no-op) when the plan carries no lanes/harmony, so
+   a plain plan renders exactly as before. A null bar reads as the neutral middle. */
+function modulationAt(plan, bar) {
+  const m = { gain: 1, floorK: 1, motion: 0, outerK: 1, whiten: 0, headK: 1, strobeK: 1,
+              drumsOut: false, hue: null, minor: null, sure: 0 };
+  const read = (blk, k, dflt) => {
+    const v = blk && blk[k];
+    if (!Array.isArray(v) || !v.length) return dflt;
+    let i = Math.round(bar) - (blk.from_bar || 0);
+    i = Math.max(0, Math.min(v.length - 1, i));
+    const x = v[i];
+    return (x === null || x === undefined) ? dflt : x;
+  };
+  const L = plan.lanes;
+  if (L) {
+    const width = read(L, "width", 0.5), pace = read(L, "pace", 0.5), pump = read(L, "pump", 0.5),
+          bright = read(L, "brightness", 0.5), air = read(L, "air", 0.5), density = read(L, "density", 0.5),
+          drums = read(L, "drums", null), vocals = read(L, "vocals", null);
+    m.outerK = 0.55 + 0.45 * width;                 /* narrow image -> the arc closes to the inner pair */
+    m.motion += 0.5 * (pace - 0.5);                 /* busy bars move the head faster */
+    m.floorK = 1 - 0.5 * (pump - 0.5);              /* a deeper duck -> a lower floor -> a harder hit */
+    m.whiten += Math.max(0, 0.3 * (bright - 0.5));  /* a bright bar whitens the colour */
+    m.gain *= (0.9 + 0.2 * bright) * (0.9 + 0.2 * density);
+    m.headK *= 0.9 + 0.2 * air;                     /* an open sound opens the head */
+    m.strobeK *= 0.7 + 0.6 * air;
+    if (drums !== null) m.drumsOut = drums < 0.3;   /* no drums, no strobe accent */
+    if (vocals !== null && vocals >= 0.3) { m.headK *= 1.15; m.motion -= 0.15; }   /* the head listens */
+  }
+  const H = plan.harmony;
+  if (H) {
+    m.hue = read(H, "hue", null);
+    m.minor = read(H, "minor", null);
+    const sure = read(H, "sure", null);
+    m.sure = typeof sure === "number" ? sure : (m.hue !== null ? 0.8 : 0);
+  }
+  return m;
+}
+
 function frame(position, plan, ctx) {
   const layout = ctx.layout, library = ctx.library || {};
   const bpb = (plan.grid && plan.grid.beats_per_bar) || ctx.bpb || 4;
@@ -156,16 +237,45 @@ function frame(position, plan, ctx) {
   const isHead = f => f.type === "head13" || f.type === "head";
   const all = (make) => ({ position, fixtures: (layout.fixtures || []).map(f => ({ id: f.id, type: f.type, intent: make(f) })) });
 
-  /* contrast overrides take the whole rig for their beat */
-  if (active.some(a => a.type === "white_blast"))
-    return all(f => isHead(f) ? { colour: "white", level: 1, prism: true, pan: 0.5, tilt: 0.5 } : { colour: [1, 1, 1], level: 1 });
-  if (active.some(a => a.type === "blackout"))
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  const top = type => active.filter(a => a.type === type).sort((x, y) => (y.priority || 0) - (x.priority || 0))[0] || null;
+  const strengthOf = a => (a && a.params && typeof a.params.strength === "number") ? clamp01(a.params.strength) : 1;
+
+  /* contrast overrides take the whole rig for their beat, scaled by the moment's weight */
+  const blast = top("white_blast");
+  if (blast) {
+    const sf = strengthOf(blast), lvl = +(0.5 + 0.5 * sf).toFixed(3);
+    return all(f => isHead(f)
+      ? { colour: "white", level: lvl, ...(sf >= 0.7 ? { prism: true } : {}), pan: 0.5, tilt: 0.5 }
+      : { colour: [1, 1, 1], level: lvl });
+  }
+  if (top("blackout"))
     return all(() => ({ level: 0 }));
+
+  /* the bar's texture + harmony, and the span modifiers riding on the base */
+  const mod = modulationAt(plan, ph.bar);
+  const mods = active.filter(a => a.type === "modulate");
+  const gainMod = mods.reduce((g, a) => g * (a.params && a.params.gain != null ? a.params.gain : 1), 1);
+  const motionMod = mods.reduce((t, a) => t + (a.params && a.params.motion != null ? a.params.motion : 0), 0) + mod.motion;
+  const hook = top("hook"), pause = top("pause");
+  const hookK = hook ? 1 + 0.3 * strengthOf(hook) : 1;
+  const pauseK = pause ? 1 - 0.85 * strengthOf(pause) : 1;        /* a hush, not a blackout */
+  const pauseHeadK = pause ? 1 - 0.7 * strengthOf(pause) : 1;
 
   const perFixture = {};   // id -> [intent, ...] in priority order
   for (const a of active) {
-    if (a.type) continue;                         // fx markers handled above
-    const rendered = renderAssignment(a, library[a.seq_id], ph, groups);
+    if (a.type) continue;                         // fx markers and modifiers handled elsewhere
+    const p = a.params || {};
+    let tuned = p;
+    if (a.layer === "head") {
+      tuned = { ...p, motion: pause ? 0.3 : clamp01((p.motion != null ? p.motion : 0.5) + motionMod),
+                headDim: (p.headDim != null ? p.headDim : 1) * mod.headK * pauseHeadK };
+    } else {
+      const peak = p.peak != null ? p.peak : 1, floor = p.floor != null ? p.floor : 0;
+      tuned = { ...p, floor: +Math.min(peak, floor * mod.floorK).toFixed(3) };
+    }
+    /* a carved base piece keeps its section's origin so a scripted compound does not restart */
+    const rendered = renderAssignment({ ...a, params: tuned, from: a.origin || a.from }, library[a.seq_id], ph, groups);
     for (const id of Object.keys(rendered)) (perFixture[id] = perFixture[id] || []).push(rendered[id]);
   }
 
@@ -175,19 +285,32 @@ function frame(position, plan, ctx) {
   }));
 
   /* overlapping aspects that ride on a distinct attribute of the base look:
-     drums -> a strobe pop on the downbeat; build -> whiten the PAR colour. */
-  const accent = active.find(a => a.type === "accent_strobe");
-  const whiten = active.find(a => a.type === "whiten");
-  if (accent || whiten) for (const fx of fixtures) {
-    if (fx.type !== "par7") continue;
-    if (whiten && Array.isArray(fx.intent.colour)) {
-      const a = whiten.params.amount || 0.3;
-      fx.intent.colour = fx.intent.colour.map(c => +(c + (1 - c) * a).toFixed(3));
+     drums -> a strobe pop on the downbeat (quiet while the drums are out);
+     build/bright -> whiten the PAR colour; harmony -> tint it; width -> close the
+     arc; subsections/hook/pause -> level; hook -> the head's prism. */
+  const accent = top("accent_strobe"), whiten = top("whiten");
+  const whitenAmt = clamp01((whiten ? (whiten.params.amount || 0.3) : 0) + mod.whiten);
+  const outer = new Set(groups.outer || []);
+  const tintAmt = clamp01(0.6 * mod.sure);
+  for (const fx of fixtures) {
+    if (isHead(fx)) {
+      if (fx.intent.level != null) fx.intent.level = +clamp01(fx.intent.level).toFixed(3);
+      if (hook && strengthOf(hook) >= 0.5 && fx.intent.level > 0) fx.intent.prism = true;
+      continue;
     }
-    if (accent && ph.beatInBar === 0 && ph.phaseInBeat < 0.22)
-      fx.intent.strobe = +(accent.params.strength || 0.8).toFixed(2);
+    if (fx.type !== "par7") continue;
+    if (Array.isArray(fx.intent.colour)) {
+      fx.intent.colour = tint(fx.intent.colour, mod.hue, tintAmt, mod.minor === true);
+      if (whitenAmt > 0) fx.intent.colour = fx.intent.colour.map(c => +(c + (1 - c) * whitenAmt).toFixed(3));
+    }
+    if (fx.intent.level != null) {
+      const k = mod.gain * gainMod * hookK * pauseK * (outer.has(fx.id) ? mod.outerK : 1);
+      fx.intent.level = +clamp01(fx.intent.level * k).toFixed(3);
+    }
+    if (accent && !pause && !mod.drumsOut && ph.beatInBar === 0 && ph.phaseInBeat < 0.22)
+      fx.intent.strobe = +clamp01((accent.params.strength || 0.8) * mod.strobeK).toFixed(2);
   }
   return { position, fixtures };
 }
 
-module.exports = { frame, resolveGroups, renderPar, renderHead, parLevel, hitEnv, compose };
+module.exports = { frame, resolveGroups, renderPar, renderHead, parLevel, hitEnv, compose, tint, modulationAt };
