@@ -209,6 +209,13 @@
             <span class="setting__label">Webcam Sabers (experimental)</span>
             <input type="checkbox" class="toggle" id="set-webcam" />
           </label>
+          <div class="setting">
+            <span class="setting__label">Webcam Calibration</span>
+            <div class="setting__controls">
+              <button class="btn btn--ghost" id="cal-flip">Flip &#8596;</button>
+              <button class="btn" id="cal-webcam">Calibrate</button>
+            </div>
+          </div>
           <label class="setting setting--toggle">
             <span class="setting__label">Reduce Motion</span>
             <input type="checkbox" class="toggle" />
@@ -216,6 +223,15 @@
         </div>
       </div>
     </section>
+
+    <!-- webcam calibration overlay -->
+    <div class="cal-overlay" id="cal-overlay" hidden>
+      <div class="cal-overlay__box">
+        <p class="cal-overlay__msg" id="cal-msg">Starting camera&hellip;</p>
+        <div class="cal-overlay__count" id="cal-count"></div>
+        <p class="cal-overlay__hint">Move your hand around the whole area you want to play in &mdash; corners included.</p>
+      </div>
+    </div>
 
   </main>
 

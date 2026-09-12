@@ -107,6 +107,59 @@ document.getElementById("difficulty").addEventListener("click", (e) => {
   difficulty = pill.textContent.trim();
 });
 
+// ---- Webcam calibration ---------------------------------------------------
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const calBtn = document.getElementById("cal-webcam");
+if (calBtn) calBtn.addEventListener("click", runWebcamCalibration);
+
+const flipBtn = document.getElementById("cal-flip");
+if (flipBtn) flipBtn.addEventListener("click", () => {
+  // Toggle the stored horizontal flip so a saber that moves the wrong way can be
+  // corrected. A throwaway source instance just reads/writes the saved value.
+  try {
+    const src = window.SaberSources.create("webcam", document.body);
+    const cur = src.getCalibration();
+    src.setFlip(!cur.flipX, cur.flipY);
+    flipBtn.classList.toggle("btn--primary");
+  } catch (e) { /* webcam module unavailable */ }
+});
+
+async function runWebcamCalibration() {
+  if (!window.SaberSources || !window.SaberSources.has("webcam")) return;
+  const overlay = document.getElementById("cal-overlay");
+  const msg = document.getElementById("cal-msg");
+  const count = document.getElementById("cal-count");
+  overlay.hidden = false; msg.textContent = "Starting camera…"; count.textContent = "";
+
+  msg.textContent = "Starting camera… first load can take a few seconds";
+  const src = window.SaberSources.create("webcam", document.body);
+  try {
+    // Never hang: the first MediaPipe load is slow, but a missing camera or an
+    // unanswered permission prompt must still surface as an error.
+    await Promise.race([
+      src.start(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 25000)),
+    ]);
+  } catch (err) {
+    console.warn("calibration: camera unavailable", err);
+    try { src.stop(); } catch (e) {}
+    msg.textContent = "Camera unavailable — check permissions.";
+    count.textContent = "";
+    await wait(2500); overlay.hidden = true; return;
+  }
+
+  const SECS = 6;
+  msg.textContent = "Sweep your hand around the play area";
+  const done = src.calibrate(SECS * 1000);
+  for (let s = SECS; s > 0; s--) { count.textContent = s; await wait(1000); }
+  const res = await done;
+  count.textContent = "";
+  msg.textContent = res.ok ? "Calibration saved ✓" : "Not enough movement — try again.";
+  try { src.stop(); } catch (e) {}
+  await wait(1400); overlay.hidden = true;
+}
+
 // ---- Game lifecycle -------------------------------------------------------
 document.getElementById("btn-start").addEventListener("click", startGame);
 document.getElementById("btn-retry").addEventListener("click", startGame);
