@@ -66,6 +66,11 @@ function Session(score, opts) {
 
   /* ---- the score clock: pure, and rate cannot reach it ------------------- */
   const mod = (x, m) => ((x % m) + m) % m;   /* music has no negative beat */
+  /* Bar 0 and beat 0 are real values, and `x || d` silently turns both into d.
+     That is the same one-bar error as grid.first_bar, wearing a different hat:
+     a 0-based score's energy read a whole bar late, and a phrase grid anchored
+     at bar 0 snapped to bar 1. Default on absence, never on falsiness. */
+  const or_ = (v, d) => (v === undefined || v === null) ? d : v;
 
   /* Snap a beat count that is a hair off a boundary back onto it. Bar 61 of a
      127.999 bpm song comes back out of `secondsAt` as 60.99999999999999, and a
@@ -84,7 +89,7 @@ function Session(score, opts) {
   }
   /* the song second a given bar and beat lands on */
   function secondsAt(bar, beat) {
-    return first + (bar - firstBar) * barSec + ((beat || 1) - 1) * beatSec;
+    return first + (bar - firstBar) * barSec + (or_(beat, 1) - 1) * beatSec;
   }
   /* beats laid on one line, so "which beat is this" is one division */
   const index = t => snap((t - first) / beatSec);
@@ -139,7 +144,7 @@ function Session(score, opts) {
   }
   score = adapt(score);
   const layers = (score && score.layers) || {};
-  const at_ = q => (q.bar - firstBar) * bpb + ((q.beat || 1) - 1);  /* beats, one line */
+  const at_ = q => (q.bar - firstBar) * bpb + (or_(q.beat, 1) - 1);  /* beats, one line */
   const covers = (sp, x) => x >= at_(sp.from) && x < at_(sp.to);
 
   function sectionsAt(pos) {
@@ -147,7 +152,7 @@ function Session(score, opts) {
     for (const name of Object.keys(layers)) {
       const L = layers[name];
       if (L.kind === "rule") {
-        const n = L.every_bars || 8, from = L.from_bar || 1;
+        const n = or_(L.every_bars, 8), from = or_(L.from_bar, 1);
         /* Before the anchor there is no phrase to be in -- the intro is a
            pickup, not phrase zero. Say nothing rather than a number. */
         if (pos.bar < from) { found[name] = null; continue; }
@@ -184,7 +189,7 @@ function Session(score, opts) {
   const EN = score && score.energy;
   function energyAt(pos) {
     if (!EN || !EN.values || !EN.values.length) return null;
-    const x = (pos.bar - (EN.from_bar || 1)) + (pos.beat - 1) / bpb;
+    const x = (pos.bar - or_(EN.from_bar, 1)) + (pos.beat - 1) / bpb;
     if (x <= 0) return EN.values[0];
     if (x >= EN.values.length - 1) return EN.values[EN.values.length - 1];
     const i = Math.floor(x), u = x - i;
