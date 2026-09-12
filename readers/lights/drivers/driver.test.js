@@ -102,6 +102,8 @@ const HEAD = {
   ok("spin overrides the wheel slot with a continuous-spin value",
      d.render({ colour: [1, 0, 0], spin: true })[7] === 150,
      "wheel " + d.render({ colour: [1, 0, 0], spin: true })[7]);
+  ok("a colour given as a name string maps to that wheel slot",
+     d.render({ colour: "green" })[7] === 68, "wheel " + d.render({ colour: "green" })[7]);
 }
 
 /* ---- park: a safe, non-all-zero pose ------------------------------------ */

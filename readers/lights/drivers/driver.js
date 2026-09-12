@@ -48,9 +48,11 @@ function Driver(profile) {
        name. The wheel is discrete, so this is a snap, not a mix. */
     if (has("colour_wheel") && profile.colour_wheel) {
       let slot = null;
-      if (intent.colourName)
-        slot = profile.colour_wheel.find(s => s.name === intent.colourName) || null;
-      if (!slot && intent.colour) slot = nearestSlot(profile.colour_wheel, intent.colour);
+      /* a colour may arrive as a wheel-slot NAME (string, from head gestures) or as
+         an rgb triple to snap to the nearest slot */
+      const name = intent.colourName || (typeof intent.colour === "string" ? intent.colour : null);
+      if (name) slot = profile.colour_wheel.find(s => s.name === name) || null;
+      if (!slot && Array.isArray(intent.colour)) slot = nearestSlot(profile.colour_wheel, intent.colour);
       if (slot) f[first("colour_wheel")] = slot.value;
     }
     if (brightness === "master" && intent.level != null && has("master"))
