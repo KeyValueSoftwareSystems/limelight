@@ -46,6 +46,11 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 #lanes{height:104px;cursor:pointer;border-radius:0 0 8px 8px;border-top:none}
 #map{position:relative;height:124px;border:1px solid var(--line);border-bottom:none;
   border-radius:8px 8px 0 0;background:#06090e;overflow:hidden;cursor:pointer}
+#chords{position:relative;height:20px;border-left:1px solid var(--line);
+  border-right:1px solid var(--line);background:#0b1016;overflow:hidden;cursor:pointer}
+.chd{position:absolute;top:0;bottom:0;border-left:1px solid #2a3140;font:9.5px ui-monospace,monospace;
+  color:#8fb8d6;padding:2px 0 0 4px;overflow:hidden;white-space:nowrap;cursor:pointer}
+.chd:hover{background:#16202b}
 #subs{position:relative;height:22px;border-left:1px solid var(--line);
   border-right:1px solid var(--line);background:#0d121a;overflow:hidden;cursor:pointer}
 #dots{position:absolute;left:0;right:0;top:0;height:22px;background:#0a1019;
@@ -66,6 +71,9 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
   padding:2px 0 0 4px;overflow:hidden;white-space:nowrap;cursor:pointer}
 .sub:hover{filter:brightness(1.55)}
 #head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:6}
+.holder{position:relative}
+.pline{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;
+  z-index:6;opacity:.85;display:none}
 .legend{display:flex;flex-wrap:wrap;gap:5px 15px;margin:7px 0 0;font-size:11.5px;color:var(--faint)}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;
   vertical-align:0;font-style:normal}
@@ -150,8 +158,9 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
     section names says what the music is <b>doing</b>. The four rows at the bottom are how loud each
     instrument is, bar by bar. <b>Click anywhere to jump there.</b></p>
   <div id="map"><div id="dots"><span>MOMENTS</span></div><div id="head"></div></div>
-  <div id="subs"></div>
-  <canvas id="lanes"></canvas>
+  <div class="holder"><div id="subs"></div><div class="pline" data-for="subs"></div></div>
+  <div class="holder"><div id="chords"></div><div class="pline" data-for="chords"></div></div>
+  <div class="holder"><canvas id="lanes"></canvas><div class="pline" data-for="lanes"></div></div>
   <div class="legend" id="legend"></div>
 </section>
 
@@ -160,7 +169,7 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
   <p class="note">Six things the computer measures every bar that the rows above do not show.
     The number on the right of each row is its value where you are now.
     <b>Click anywhere to jump there.</b></p>
-  <canvas id="curves"></canvas>
+  <div class="holder"><canvas id="curves"></canvas><div class="pline" data-for="curves"></div></div>
   <div class="legend" id="curvekey"></div>
 </section>
 
@@ -171,8 +180,14 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
     note, and the faint line joins notes that follow each other, so you can see the tune rise and fall.
     This is how it knows when a tune comes back later &mdash; which is what the lighting reader uses to repeat
     a look. <b>Click a shaded stretch to hear a tune that repeats</b>, or click anywhere to jump there.</p>
-  <canvas id="tune"></canvas>
+  <div class="holder"><canvas id="tune"></canvas><div class="pline" data-for="tune"></div></div>
   <div class="legend" id="tunekey"></div>
+</section>
+
+<section>
+  <h2>What the computer will admit about this score</h2>
+  <p class="note">Facts about the whole song, and how far it trusts its own reading.</p>
+  <div class="lead" id="owned"></div>
 </section>
 
 <section>
@@ -215,7 +230,7 @@ function setView(a, b) {
   VIEW.a = Math.max(0, lo); VIEW.b = Math.min(total, hi);
   $("viewing").textContent = (VIEW.b - VIEW.a >= total - 0.01)
     ? "whole song" : `${mmss(VIEW.a)} \u2013 ${mmss(VIEW.b)}`;
-  if (SCORE) { place(); lanes(); tune(); curves(); subs(); }
+  if (SCORE) { place(); lanes(); tune(); curves(); subs(); chordRow(); }
 }
 
 function zoomAt(t, by) { setView(t - (t - VIEW.a) * by, t + (VIEW.b - t) * by); }
@@ -475,6 +490,32 @@ function draw() {
                   + `could not measure a steady beat there, so those bar positions are guessed `
                   + `(${stripe}% of the song)</span>` : "");
 
+  const k = SCORE.key || {}, L = SCORE.loudness || {}, made = SCORE.made_by || {};
+  const f = SCORE.feel || {}, pg = SCORE.phrase_grid || {};
+  const pc = v => v == null ? "\u2014" : `${Math.round(v * 100)}%`;
+  const sure = SCORE.grid.sure;
+  const trust = sure == null ? "not measured"
+    : sure >= 0.85 ? "two beat trackers agree closely"
+    : sure >= 0.6 ? "two beat trackers mostly agree"
+    : "two beat trackers disagree \u2014 treat every bar here with suspicion";
+  $("owned").innerHTML =
+    `<div class="col"><dl>
+      <dt>Key</dt><dd>${k.root ? `<b>${esc(k.root)} ${esc(k.scale || "")}</b>, ${pc(k.confidence)} sure`
+        + (k.tuned_to_hz ? ` <span class="dim">\u00b7 tuned to ${k.tuned_to_hz} Hz</span>` : "") : "\u2014"}</dd>
+      <dt>Loudness</dt><dd>${L.integrated_lufs != null
+        ? `${L.integrated_lufs} LUFS <span class="dim">\u00b7 ${L.range_lu} LU between quiet and loud</span>` : "\u2014"}</dd>
+      <dt>Feel</dt><dd>${f.onsets_per_second != null
+        ? `${f.onsets_per_second.toFixed(1)} hits a second <span class="dim">\u00b7 danceability ${f.danceability}</span>` : "\u2014"}</dd>
+    </dl></div>
+    <div class="col"><dl>
+      <dt>The beat</dt><dd>${sure == null ? "<span class='dim'>not measured</span>"
+        : `<b style="color:${sure < 0.6 ? "var(--bad)" : "var(--ok)"}">${pc(sure)}</b> \u00b7 ${trust}`}</dd>
+      <dt>Phrases</dt><dd>every ${pg.every_bars ?? "?"} bars from bar ${pg.from_bar ?? "?"}
+        <span class="dim">\u00b7 ${pg.boundaries_on_grid ? "sections land on that grid" : "sections do not all land on that grid"}</span></dd>
+      <dt>Heard by</dt><dd class="dim">voice: ${esc(made.voice_from || "?")} \u00b7 lead: ${esc(made.lead_from || "?")}
+        \u00b7 tune: ${esc(made.melody_from || "?")}</dd>
+    </dl></div>`;
+
   $("curvekey").innerHTML = CURVES.map(([k, n, hue, why]) =>
     `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}</span>`).join("");
 
@@ -490,15 +531,16 @@ function draw() {
     + `<b style="color:var(--ink)">phrase of the tune</b> starts and ends &mdash; click one to hear just `
     + `that phrase. A &#8634; marks a phrase whose shape repeats an earlier one.</span>`;
 
-  lanes(); tune(); curves(); subs(); sections(); place();
+  lanes(); tune(); curves(); subs(); chordRow(); sections(); place();
 }
 
 /* Absolutely-positioned rows are laid out here rather than where they are
    built, so a zoom moves them without rebuilding the DOM. */
 function place() {
-  for (const el of document.querySelectorAll("#map .part,#map .beat,#subs .sub")) {
+  for (const el of document.querySelectorAll("#map .part,#map .beat,#subs .sub,#chords .chd")) {
     const t0 = +el.dataset.t0, t1 = +el.dataset.t1;
     const l = pct(t0), w = Math.max(el.classList.contains("beat") ? 0.25 : 0, pct(t1) - l);
+    if (el.classList.contains("chd")) el.style.width = `${w}%`;
     const off = l > 100 || pct(t1) < 0;
     el.style.display = off ? "none" : "";
     el.style.left = `${l}%`;
@@ -509,6 +551,25 @@ function place() {
     sh.style.left = `${pct(t0)}%`;
     sh.style.width = `${pct(t1) - pct(t0)}%`;
   }
+}
+
+function chordRow() {
+  const box = $("chords"); box.innerHTML = "";
+  const list = SCORE.chord_changes || [];
+  if (!list.length) return;
+  const total = SCORE.song.length_s, px = box.clientWidth || 1200;
+  list.forEach((c, i) => {
+    const t0 = barTime(c.bar);
+    const t1 = i + 1 < list.length ? barTime(list[i + 1].bar) : total;
+    const el = document.createElement("div");
+    el.className = "chd";
+    el.dataset.t0 = t0; el.dataset.t1 = t1;
+    el.style.opacity = 0.45 + 0.55 * (c.sure ?? 0.5);
+    el.title = `bar ${c.bar} · ${c.chord} · the computer is ${Math.round((c.sure ?? 0) * 100)}% sure`
+             + ` · click to hear it`;
+    el.textContent = c.chord;
+    box.appendChild(el);
+  });
 }
 
 function subs() {
@@ -949,6 +1010,18 @@ function tick() {
     const t = aud.currentTime, total = SCORE.song.length_s;
     $("clock").textContent = `${mmss(t)} / ${mmss(total)}`;
     if (!dragging) $("seek").value = Math.round((t/total)*10000);
+    /* One playhead per view, each with its own left inset, because the tune
+       and the curves reserve room down the side for their labels and a bare
+       percentage would sit a few pixels off the music on those two. */
+    for (const el of document.querySelectorAll(".pline")) {
+      const who = el.dataset.for;
+      const box = $(who);
+      const L = who === "curves" ? 78 : who === "tune" ? 14 : 0;
+      const R = who === "curves" ? 46 : who === "tune" ? 6 : 0;
+      const f = frac(t), w = box.clientWidth || 1;
+      el.style.display = (f < 0 || f > 1) ? "none" : "block";
+      el.style.left = `${L + f * (w - L - R)}px`;
+    }
     const hp = pct(t);
     $("head").style.display = (hp < 0 || hp > 100) ? "none" : "";
     $("head").style.left = `${hp}%`;
@@ -1030,6 +1103,7 @@ const jump = e => {
 };
 $("map").onclick = jump;
 $("subs").onclick = jump;
+$("chords").onclick = jump;
 $("lanes").onclick = jump;
 $("curves").onclick = jump;
 $("zoom").onclick = e => {
@@ -1122,7 +1196,7 @@ $("song").onchange = e => {
   aud.pause(); LIVE = -1;
   load(e.target.value, e.target.selectedOptions[0].dataset.a);
 };
-for (const id of ["map", "subs", "lanes", "tune", "curves"]) zoomable($(id));
+for (const id of ["map", "subs", "chords", "lanes", "tune", "curves"]) zoomable($(id));
 zoomable($("zoom"), f => aud.currentTime - Math.min(WINDOW, viewSpan())/2 + f * Math.min(WINDOW, viewSpan()));
 
 addEventListener("resize", () => { if (SCORE) { lanes(); tune(); curves(); zoom(); subs(); place(); } });

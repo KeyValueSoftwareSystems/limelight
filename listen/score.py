@@ -25,7 +25,7 @@ from harmony import changes as chord_changes
 from harmony import chords as find_chords
 from harmony import per_bar as chords_per_bar
 from stems import NAMES as STEM_NAMES
-from stems import envelopes, per_bar
+from stems import envelopes, per_bar, per_tick
 from voice import clean as clean_voice, made_by as voice_made_by
 from texture import sides, air, duck, pace
 
@@ -245,6 +245,7 @@ def read(path, slug):
         env["vocals"] = lane
         report["voice_from"] = "roformer"
     lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"], edges=cuts)
+    ticks = per_tick(env, cuts)
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
     busy, bright = curves(path, g)
     pickup = 1 if g["first_beat_s"] > 0.2 else 0
@@ -393,6 +394,8 @@ def read(path, slug):
         "signals": told_now,
         "voice": voice_of(heard, slipped),
         "lead": voice_of(riff, strayed) if riff else None,
+        "ticks": {"per_bar": g["beats_per_bar"] * 4, "of": "the loudest moment in each sixteenth",
+                  **{k: v for k, v in ticks.items()}},
         "melody": tune_notes,
         "melody_phrases": phrases_of(tune_notes, g, g["beats_per_bar"]),
     }
