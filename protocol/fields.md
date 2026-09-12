@@ -101,13 +101,88 @@ and get back `{ curves: { brightness: { per: "bar", from_bar: 0, values: [...] }
 | `pace` | how many events per bar | busy-ness, independent of loudness: a quiet fast passage is not a quiet slow one |
 
 The four stem lanes — `drums`, `bass`, `vocals`, `other` — are also per-bar
-levels, but they answer a different question and belong in Group F as a layer
-rather than as curves.
+numbers, but they are a large enough subject on their own that they have a
+section below.
 
 Note for the implementation: these arrays contain nulls where a bar could not be
 measured, and the nulls must survive.
 
 ---
+
+## Group C2 — the stems, which are worth a section of their own
+
+Every song is separated into drums, bass, vocals and other before anything else
+is measured. Four of the most useful facts in the score come out of that, and
+one of the nastiest traps does too.
+
+### What is already in the file
+
+`bars.drums`, `bars.bass`, `bars.vocals`, `bars.other` are one level per bar per
+stem. `parts[].playing` is the list of stems that are in for a section, and
+`parts[].stems` gives each one a state — `none`, `some` or `full` — and a level.
+
+### The trap, which has to be stated in the response
+
+**These levels are not absolute and cannot be compared across stems or across
+songs.** Each lane is divided by its own loudest bar in that song, so
+`bars.drums` at 0.8 means "eighty per cent of this song's loudest drum bar". It
+does not mean the drums are at eighty per cent, and it does not tell you whether
+the drums are louder than the bass.
+
+Worse, `parts[].stems[].level` is normalised a second, different way — as a
+share of the tenth-to-ninetieth percentile range of the same lane. So two fields
+that look like the same measurement on the same stem are on two different
+scales.
+
+Whatever we do here, the response must say which scale a number is on. My
+preference is to send it as a stated field rather than a convention somebody has
+to remember:
+
+```json
+{ "stems": { "normalised": "per-stem-peak-within-song",
+             "from_bar": 0,
+             "lanes": { "drums": [...], "bass": [...] } } }
+```
+
+A reader that wants to ask "are the drums louder than the bass" cannot answer it
+from what we have, and should be told that rather than left to infer a wrong
+answer from numbers that look comparable.
+
+### New fields worth adding
+
+**`stems`** — the four per-bar lanes, requested by name like the curves, with
+the normalisation stated. This is the field most readers actually want.
+
+**`layers.presence`** — the `none` / `some` / `full` states turned into spans,
+so a consumer can ask "is the voice in right now" and "when does it come back"
+rather than scanning an array. This is the single most requested thing that
+currently cannot be expressed, and it is already measured per section.
+
+**`melody`** — this one is genuinely new. The pipeline already runs a pitch
+tracker over the separated vocal, at a hundred readings a second between 65 and
+1200 Hz, and caches the result. It is used only to notice held notes, and then
+thrown away. That is the vocal line: the tune. Published as a contour against
+musical position it would let a reader follow the melody rather than the volume,
+which is a different and much better-looking thing. It should carry its own
+confidence, and null wherever there is no voice.
+
+**`made_by.voice_from`** — provenance, and not a nicety. The vocal lane is
+produced by a better separator when it is available on the machine, and by the
+general one when it is not, so vocal quality varies from song to song in a way
+nothing records in the file. A reader leaning hard on the vocal lane deserves to
+know which one it got.
+
+### What we cannot offer, and should not pretend to
+
+The separated stem audio is deleted as soon as the level envelope has been taken
+from it. Only the envelope survives. So the protocol cannot offer stem playback,
+muting or remixing without re-running the separation, and we should not design
+anything that assumes it can.
+
+There is also a resolution question worth putting to Amal. The envelopes are
+measured at a hundred readings a second and the score keeps one number per bar,
+which throws away almost all of it. A per-beat version would cost little and
+would matter to anything reacting inside a bar — which is most things.
 
 ## Group D — harmony over time
 
@@ -242,7 +317,10 @@ consumer is asking for. This is the mapping, so nobody has to guess.
 | `releases` | `releases` | `at_s` to position; keep `size` |
 | `moments` | `moments` | `is`, `what`, `sure`, `weight`, `for_beats` all pass through |
 | `layers.subsection` | `phrases` | `from_bar`/`to_bar` to `from`/`to` positions |
-| `layers.presence` | `parts[].stems`, `bars.drums/bass/vocals/other` | spans from the per-bar lanes |
+| `stems` | `bars.drums/bass/vocals/other` | wrap with `from_bar`; state the normalisation |
+| `layers.presence` | `parts[].stems` (`is`: none/some/full) | states to spans |
+| `melody` | not in the score; cached as `<slug>.pitch.npy` | publish as a contour with confidence |
+| `made_by.voice_from` | pipeline report, not currently written out | pass through |
 | `layers.phrase` | `phrase_grid` | none; emit resolved |
 | `sections` | `parts` | add `rise`, `playing`, `stems` to what is already sent |
 
@@ -255,7 +333,9 @@ If this is more than fits in one version, the order I would take it in:
 
 1. **`weight` on moments**, plus `is` and `what`. Cheapest change, largest
    effect, and it unblocks every reader from having to treat all moments alike.
-2. **`layers.subsection`**. The biggest genuinely new thing in the score.
+2. **`layers.subsection`** and **`layers.presence`**. The biggest genuinely
+   new things in the score, and presence answers the question readers ask most
+   often and cannot currently phrase.
 3. **`tension` and `releases` as positions.** Both measured, both discarded,
    both needed by anything that wants to anticipate rather than react.
 4. **`grid.holds_from` / `holds_to`.** Small, and it is the difference between
