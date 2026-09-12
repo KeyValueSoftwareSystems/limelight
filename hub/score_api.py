@@ -16,7 +16,7 @@ KNOWN = [
     "brightness", "width", "air", "pump", "pace", "moments",
     "phrases", "layers", "chords", "key", "loudness", "feel",
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
-    "tension", "releases", "melody", "made_by",
+    "tension", "releases", "melody", "signals", "made_by",
 ]
 
 _STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
@@ -338,9 +338,16 @@ def format_v1(raw):
                 "size": r.get("size"),
             })
 
-    # ---- melody (guard) ----
+    # ---- melody: the notes of the lead line and the voice ----
     if raw.get("melody"):
         out["melody"] = raw["melody"]
+    for k in ("lead", "voice"):
+        if raw.get(k):
+            out[k] = raw[k]
+
+    # ---- signals: changes the pipeline noticed that are not moments ----
+    if raw.get("signals"):
+        out["signals"] = raw["signals"]
 
     # ---- made_by ----
     if raw.get("made_by"):
@@ -445,6 +452,15 @@ def apply_window(out, w, grid):
     # releases
     if out.get("releases"):
         out["releases"] = [r for r in out["releases"] if in_win(r["at"]["bar"])]
+
+    # melody — a list of notes, each at its own bar and beat
+    if isinstance(out.get("melody"), list):
+        out["melody"] = [n for n in out["melody"] if in_win(n.get("bar", 0))]
+
+    # signals — same shape as moments, flat or nested
+    if isinstance(out.get("signals"), list):
+        out["signals"] = [g for g in out["signals"]
+                          if in_win((g.get("at") or g).get("bar", 0))]
 
     # layers — subsection and presence spans
     if out.get("layers"):

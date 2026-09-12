@@ -10,7 +10,7 @@ export const KNOWN = [
   'brightness', 'width', 'air', 'pump', 'pace',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
-  'tension', 'releases', 'melody', 'made_by',
+  'tension', 'releases', 'melody', 'signals', 'made_by',
 ];
 
 const STEM_NAMES = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
@@ -122,6 +122,7 @@ export function format(raw) {
   if (raw.phrases) out.phrases = raw.phrases;
   /* The melody layer, the two lines behind it, and the honesty fields. */
   if (raw.melody) out.melody = raw.melody;
+  if (raw.signals) out.signals = raw.signals;
   if (raw.voice) out.voice = raw.voice;
   if (raw.lead) out.lead = raw.lead;
   if (raw.tension) out.tension = { per: 'beat', values: raw.tension };
