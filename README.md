@@ -47,7 +47,20 @@ export LIMELIGHT_REMOTE=http://<host>:8770/hub/score    # from another machine; 
 ```
 
 A pull of a name that is not there prints the names that are. `push` checks
-the server holds exactly the bytes it sent. `node cli/remote.test.js` starts a
-private serve.py on a free port and runs both commands and the hub API against
-it. The hub speaks the same requests as a dufs server, so `LIMELIGHT_REMOTE`
-can point at one of those instead.
+the server holds exactly the bytes it sent.
+
+**Versions.** Every `.score` keeps every version it was uploaded as. `push` of
+an existing name makes the next version and says so; the page shows a `vN`
+badge and a *versions* list with a download for each; `./limelight pull
+levels.score@2` fetches version 2, and plain `pull` is the latest. Other file
+types simply overwrite.
+
+**Author metadata.** Each version can carry a JSON object, added or edited from
+the page's *metadata* button. It is stored beside the version and folded into
+every download of that version under `author_metadata`; the uploaded bytes are
+never rewritten. `?raw` on the file URL skips the merge.
+
+`node cli/remote.test.js` starts a private serve.py on a free port and runs
+both commands, the hub API, versions and metadata against it. The hub speaks
+the same requests as a dufs server, so `LIMELIGHT_REMOTE` can point at one of
+those instead (without versions).
