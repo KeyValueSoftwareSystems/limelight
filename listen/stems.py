@@ -68,7 +68,7 @@ def present(v, floor=0.12):
     return bool(np.median(v) > floor)
 
 
-def per_tick(env, edges, per=4):
+def per_tick(env, edges, per=16):
     # One value per sixteenth instead of one per bar. A bar at 128bpm is 1.875s,
     # so a kick at two hits a second sits above what a per-bar lane can even
     # represent -- the wobble it shows there is aliasing, not the drum. A light

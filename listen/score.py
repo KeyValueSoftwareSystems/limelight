@@ -245,7 +245,7 @@ def read(path, slug):
         env["vocals"] = lane
         report["voice_from"] = "roformer"
     lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"], edges=cuts)
-    ticks = per_tick(env, cuts)
+    ticks = per_tick(env, cuts, per=g["beats_per_bar"] * 4)
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
     busy, bright = curves(path, g)
     pickup = 1 if g["first_beat_s"] > 0.2 else 0
