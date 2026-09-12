@@ -93,6 +93,44 @@ async function startHub() {
     ok("an unknown scheme is refused up front", scheme && /s3:/.test(scheme.message), scheme && scheme.message);
   }
 
+  /* ---- versions: every .score keeps its history ----------------------------- */
+  {
+    fake.files.clear();
+    const url = fake.url + "/v.score";
+    const v1 = Buffer.from('{"score":"v","version":1,"grid":{"bpm":100}}');
+    const v2 = Buffer.from('{"score":"v","version":2,"grid":{"bpm":110}}');
+    const v3 = Buffer.from('{"score":"v","version":3,"grid":{"bpm":120}}');
+    const put = (u, body) => fetch(u, { method: "PUT", body });
+    const json = async r => JSON.parse(await r.text());
+
+    let r = await put(url, v1);
+    ok("the first upload is version 1", r.status === 201 && (await json(r)).version === 1);
+    ok("uploads of new bytes are versions 2 and 3",
+       (await json(await put(url, v2))).version === 2 && (await json(await put(url, v3))).version === 3);
+    const hist = await json(await fetch(url + "?versions"));
+    ok("?versions lists three, latest 3",
+       hist.latest === 3 && hist.versions.map(v => v.version).join(",") === "1,2,3", JSON.stringify(hist));
+    ok("each version knows its size", hist.versions[0].size === v1.length);
+    ok("a plain GET is the latest", Buffer.from(await (await fetch(url)).arrayBuffer()).equals(v3));
+    ok("?v=1 is the first", Buffer.from(await (await fetch(url + "?v=1")).arrayBuffer()).equals(v1));
+    r = await fetch(url + "?v=7");
+    ok("a version that does not exist is 404 and says so", r.status === 404 && /no version 7/.test(await r.text()));
+    ok("identical bytes again are still a new version", (await json(await put(url, v3))).version === 4);
+    ok("the top-level file is a copy of the latest", fake.files.get("v.score").equals(v3));
+
+    const listing = await json(await fetch(fake.url + "/?json"));
+    ok(".versions is hidden from the listing", !listing.paths.some(p => p.name === ".versions"), JSON.stringify(listing.paths.map(p => p.name)));
+    const row = listing.paths.find(p => p.name === "v.score");
+    ok("the row carries its version and metadata flag", row && row.version === 4 && row.has_metadata === false, JSON.stringify(row));
+    r = await fetch(fake.url + "/.versions/v.score/1.score");
+    ok(".versions cannot be addressed by URL", r.status === 403, String(r.status));
+
+    await put(fake.url + "/notes.txt", "one"); await put(fake.url + "/notes.txt", "two");
+    ok("a .txt still overwrites", fake.files.get("notes.txt").toString() === "two");
+    r = await fetch(fake.url + "/notes.txt?versions");
+    ok("and is not a versioned file", r.status === 400, String(r.status));
+  }
+
   /* ---- limelight push ----------------------------------------------------- */
   {
     fake.files.clear();
