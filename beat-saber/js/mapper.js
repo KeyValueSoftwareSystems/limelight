@@ -7,9 +7,16 @@
                       "up-left", "up-right", "down-left", "down-right"];
 
   // A stable 32-bit hash of a beat's musical position.
+  // A well-mixed 32-bit hash (MurmurHash3 finalizer). A plain multiplicative
+  // hash leaves the LOW bits unmixed, so `h % 4` / `h % 8` collapse back to a
+  // trivial index cycle (blocks marched 1-2-3-0 down the lanes every bar). The
+  // avalanche below spreads entropy into every bit, so lane/dir/colour vary.
   function hash(bar, beat) {
-    let h = ((bar * 4 + beat) >>> 0) * 2654435761;
-    return (h >>> 0);
+    let h = (bar * 4 + beat) | 0;
+    h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
+    return h >>> 0;
   }
 
   function keeps(difficulty, accent) {
