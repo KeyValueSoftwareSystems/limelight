@@ -63,7 +63,7 @@ def seat(at, g, pickup):
     return int(step // per + 1 - pickup), int(step % per + 1)
 
 
-def score(notes, g, pickup):
+def score(notes, g, pickup, played="voice"):
     beat_s = 60.0 / g["bpm"]
     out = []
     for at, pitch, held in notes:
@@ -74,12 +74,14 @@ def score(notes, g, pickup):
                 "beat": beat,
                 "pitch": round(pitch, 1),
                 "held_beats": round(held / beat_s, 2),
+                "from": played,
             }
         )
     return out
 
 
-def chants(notes, g, pickup, least=5, same=1.0, near=0.18, gap=0.45):
+def chants(notes, g, pickup, least=5, same=1.0, near=0.18, gap=0.45,
+           played="sung"):
     runs, run = [], 1
     for k in range(1, len(notes) + 1):
         joins = (
@@ -105,17 +107,19 @@ def chants(notes, g, pickup, least=5, same=1.0, near=0.18, gap=0.45):
                 "bar": bar,
                 "beat": beat,
                 "is": "hook",
-                "what": f"{len(group)} sung on one note",
+                "what": f"{len(group)} {played} on one note",
                 "sure": round(float(min(1.0, len(group) / 10.0)), 3),
                 "for_beats": int(round((upto - at) / beat_s)),
                 "pitch": round(float(np.median([x[1] for x in group])), 1),
                 "notes": len(group),
+                "from": "voice" if played == "sung" else "lead",
             }
         )
     return out
 
 
-def echoes(notes, g, pickup, least=6, slack=1.0, sway=0.45, apart=4, moves=3):
+def echoes(notes, g, pickup, least=6, slack=1.0, sway=0.45, apart=4,
+           moves=3, played="tune"):
     if len(notes) < least + apart:
         return []
     pitch = np.asarray([x[1] for x in notes], dtype=float)
@@ -149,10 +153,11 @@ def echoes(notes, g, pickup, least=6, slack=1.0, sway=0.45, apart=4, moves=3):
         was, bar = seat(notes[i][0], g, pickup), seat(notes[j][0], g, pickup)
         upto = notes[j + k][0] + notes[j + k][2]
         out.append({"bar": bar[0], "beat": bar[1], "is": "hook",
-                    "what": f"the tune from bar {was[0]}",
+                    "what": f"the {played} from bar {was[0]}",
                     "sure": round(float(min(1.0, (k + 1) / 10.0)), 3),
                     "for_beats": int(round((upto - notes[j][0]) / beat_s)),
-                    "again_of": int(was[0]), "notes": int(k + 1)})
+                    "again_of": int(was[0]), "notes": int(k + 1),
+                    "from": "voice" if played == "tune" else "lead"})
     return out
 
 

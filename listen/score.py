@@ -14,6 +14,7 @@ from shape import shape
 from call import call
 from parts import curves, parts
 from pulse import pulse
+from lead import hear as lead_line
 from melody import chants, echoes, fix as octaves, line as tune_line
 from melody import score as melody_of, sung as sung_in, voice as voice_of
 from moments import carries, moments, pick, weigh
@@ -225,15 +226,23 @@ def read(path, slug):
     heard, slipped = octaves(heard)
     told_now += chants(heard, g, pickup)
     told_now += echoes(heard, g, pickup)
+    riff_f0, riff_env = lead_line(path, slug)
+    riff = tune_line(riff_f0, riff_env) if riff_f0 is not None else []
+    riff, strayed = octaves(riff)
+    told_now += chants(riff, g, pickup, least=10, played="played")
+    told_now += echoes(riff, g, pickup, played="riff")
     carries(told_now, [(a, b, m) for a, b, m in snapped], pickup,
             g["beats_per_bar"])
     told_now.sort(key=lambda m: (m["bar"], m["beat"], m["is"]))
     weigh(told_now, score_bars, edges_at,
           {q["from_bar"] for q in inner}, pickup)
-    for part, tune_of in zip(shaped, sung_in(
-            heard, [(p["from_bar"], p["to_bar"]) for p in shaped], g, pickup)):
+    seats = [(p["from_bar"], p["to_bar"]) for p in shaped]
+    for part, tune_of in zip(shaped, sung_in(heard, seats, g, pickup)):
         if tune_of is not None:
             part["sung"] = tune_of
+    for part, riff_of in zip(shaped, sung_in(riff, seats, g, pickup)):
+        if riff_of is not None:
+            part["played"] = riff_of
     staged = pick(told_now, edges_at, g["bars"])
     if report is not None:
         report["phrases"] = len(inner)
@@ -275,7 +284,10 @@ def read(path, slug):
         "moments": staged,
         "signals": told_now,
         "voice": voice_of(heard, slipped),
-        "melody": melody_of(heard, g, pickup),
+        "lead": voice_of(riff, strayed) if riff else None,
+        "melody": sorted(melody_of(heard, g, pickup)
+                         + melody_of(riff, g, pickup, "lead"),
+                         key=lambda n: (n["bar"], n["beat"])),
     }
 
 

@@ -172,9 +172,9 @@ function draw() {
     const c = HUE[p.repeats_as];
     el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness??.5)*100)}%"></div>
       <div class="tag" style="color:${c}">${p.role ? p.role.toUpperCase() : p.repeats_as}</div>
-      <div class="sung${p.sung ? "" : " quiet"}"
-        title="${tuneWords(p.sung)} \u00b7 click to hear the tune itself"
-        >\u266a ${tuneWords(p.sung, true)}</div>`;
+      <div class="sung${(p.sung || p.played) ? "" : " quiet"}"
+        title="${partTune(p)} \u00b7 click to hear the tune itself"
+        >${partTune(p, true)}</div>`;
     el.onclick = ev => {
       const r = map.getBoundingClientRect();
       play(((ev.clientX - r.left) / r.width) * total);
@@ -272,9 +272,11 @@ function hearTune(from_bar, to_bar) {
   play(Math.max(0, t - 0.3), t + 10);
 }
 
-function tuneWords(s, short) {
-  if (!s || !s.notes) return short ? "\u2014" : "nothing sung here";
-  if (s.on_one_note) return short ? "one note" : "sung on one repeated note";
+function tuneWords(s, short, who) {
+  const verb = who === "lead" ? "played" : "sung";
+  if (!s || !s.notes) return short ? "\u2014" : "nothing " + verb + " here";
+  if (s.on_one_note)
+    return short ? "one note" : verb + " on one repeated note";
   const how = s.moves < 1.2 ? ["small moves", "moves only a step at a time"]
             : s.moves < 2.5 ? ["steps", "moves in small steps"]
             : ["leaps", "leaps between notes"];
@@ -284,6 +286,14 @@ function tuneWords(s, short) {
              : span < 20 ? "over an octave and a half"
              : "over two octaves";
   return short ? how[0] : `${how[1]}, ${wide}`;
+}
+
+function partTune(p, short) {
+  if (p.sung && p.sung.notes)
+    return (short ? "sings: " : "voice ") + tuneWords(p.sung, short, "voice");
+  if (p.played && p.played.notes)
+    return (short ? "plays: " : "lead ") + tuneWords(p.played, short, "lead");
+  return short ? "\u2014" : "nothing sung or played here";
 }
 
 function momentWords(m) {
@@ -474,8 +484,11 @@ function tune() {
     g.fillText("no vocal pitch", 6, 24);
     return;
   }
-  const v = SCORE.voice || {}, total = SCORE.song.length_s;
-  const lo = Math.floor((v.low ?? 48) - 1), hi = Math.ceil((v.high ?? 74) + 1);
+  const v = SCORE.voice || {}, w = SCORE.lead || {};
+  const total = SCORE.song.length_s;
+  const seen = notes.map(n => n.pitch);
+  const lo = Math.floor(Math.min(...seen) - 1);
+  const hi = Math.ceil(Math.max(...seen) + 1);
   const span = Math.max(8, hi - lo), beat = 60 / SCORE.grid.bpm;
   const top = 20, foot = 74, tall = foot - top;
   const Y = p => foot - ((p - lo)/span)*tall;
@@ -501,18 +514,22 @@ function tune() {
     const x = 88 + (t/total)*(r.width-93);
     const w = Math.max(1.5, ((n.held_beats*beat)/total)*(r.width-93));
     const hot = hooked.has(n.bar);
-    g.fillStyle = hot ? "#c8a2ff" : (STEM.vocals || "#5bb98c");
-    g.globalAlpha = hot ? 1 : 0.7;
+    g.fillStyle = hot ? "#c8a2ff"
+               : n.from === "lead" ? (STEM.other || "#6fa8dc")
+               : (STEM.vocals || "#5bb98c");
+    g.globalAlpha = hot ? 1 : (n.from === "lead" ? 0.55 : 0.75);
     g.fillRect(x, Y(n.pitch) - 1.6, w, 3.2);
   }
   g.globalAlpha = 1;
-  g.fillStyle = "#5c6478"; g.font = "8px ui-monospace,monospace";
-  g.fillText("one mark =", 6, 26);
-  g.fillText("one sung note", 6, 37);
+  g.font = "8px ui-monospace,monospace";
+  g.fillStyle = STEM.vocals || "#5bb98c";
+  g.fillText("green = voice", 6, 26);
+  g.fillStyle = STEM.other || "#6fa8dc";
+  g.fillText("blue = instrument", 6, 37);
   g.fillStyle = "#c8a2ff";
-  g.fillText("purple = the", 6, 52);
-  g.fillText("tune repeats", 6, 63);
+  g.fillText("purple = repeats", 6, 48);
   g.fillStyle = "#39414f";
+  g.fillText("one mark = one note", 6, 62);
   g.fillText(`${notes.length} notes`, 6, 74);
   if (v.sure != null && v.sure < 0.5) {
     g.fillStyle = "#e0655f";
@@ -595,7 +612,7 @@ function sections() {
       <span class="what"><b style="color:${HUE[p.repeats_as]}">${p.role ?? p.repeats_as}</b>
         &nbsp;${p.feels}
         <span class="dim">· bars ${p.from_bar}–${p.to_bar} · ${(p.playing||[]).join(" ") || "nothing"}
-        · <span style="color:#8fbf9f">${tuneWords(p.sung)}</span></span></span>
+        · <span style="color:#8fbf9f">${partTune(p)}</span></span></span>
       <button data-from="${t0}" data-to="${t1}">hear it</button>
       <button class="yes" data-v="yes">right</button>
       <button class="no" data-v="no">wrong</button>
