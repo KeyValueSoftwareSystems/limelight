@@ -318,8 +318,11 @@ export function format(raw) {
   if (raw.loudness) out.loudness = raw.loudness;
   if (raw.feel)     out.feel     = raw.feel;
 
-  /* consumer layer: present when the score was pulled / loaded with a profile */
-  if (raw.profile) out.profile = raw.profile;
+  /* the artist's layer: present when the score was pulled with a personality.
+     `profile` was the old name and still goes out beside it, so a reader
+     written before the rename keeps working. */
+  const person = raw.personality || raw.profile;
+  if (person) { out.personality = person; out.profile = person; }
 
   // ---- tension ----
   if (Array.isArray(raw.tension)) {

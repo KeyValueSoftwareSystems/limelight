@@ -197,7 +197,7 @@ async function startHub(extraEnv = {}) {
     ok("and ?versions says it is not mergeable", (await (await fetch(odd + "?versions")).json()).versions[0].mergeable === false);
   }
 
-  /* ---- profiles: how one user's application treats this score --------------- */
+  /* ---- personalities: how the artist wants this song to look ---------------- */
   {
     fake.files.clear();
     const url = fake.url + "/p.score";
@@ -208,60 +208,71 @@ async function startHub(extraEnv = {}) {
     await put(url, v1);
     await put(url + "?meta&v=1", { author: { value: "renjith", enforced: true } });
 
-    let info = await json(await fetch(url + "?profiles"));
-    ok("a score starts with the palette and no profiles",
-       info.colours.length === 3 && info.colours.map(c => c.name).join(",") === "red,green,blue"
-       && info.colours[0].hex === "#ff0000" && info.profiles.length === 0, JSON.stringify(info));
+    let info = await json(await fetch(url + "?personalities"));
+    ok("a score starts with the palette and no personalities",
+       info.colours.length === 7 && info.colours.map(c => c.name).join(",") === "red,green,blue,yellow,cyan,magenta,white"
+       && info.colours[0].hex === "#ff0000" && info.personalities.length === 0, JSON.stringify(info));
 
-    let r = await put(url + "?profile=muzammil", { colours: ["red", "blue"] });
-    ok("a profile with two colours is accepted", r.status === 204, `${r.status} ${await text(r)}`);
-    info = await json(await fetch(url + "?profiles"));
+    let r = await put(url + "?personality=sarath", { colours: ["magenta", "cyan"] });
+    ok("a personality with two colours is accepted", r.status === 204, `${r.status} ${await text(r)}`);
+    info = await json(await fetch(url + "?personalities"));
     ok("and listed with each colour resolved to a hex, in the order given",
-       JSON.stringify(info.profiles) === JSON.stringify([{ user: "muzammil", colours: [{ name: "red", hex: "#ff0000" }, { name: "blue", hex: "#0000ff" }] }]), JSON.stringify(info.profiles));
+       JSON.stringify(info.personalities) === JSON.stringify([{ user: "sarath", colours: [{ name: "magenta", hex: "#ff00ff" }, { name: "cyan", hex: "#00ffff" }] }]), JSON.stringify(info.personalities));
 
-    await put(url + "?profile=alnas", { colours: ["green"] });
-    info = await json(await fetch(url + "?profiles"));
-    ok("two profiles, sorted by user", info.profiles.map(p => p.user).join(",") === "alnas,muzammil");
+    await put(url + "?personality=alnas", { colours: ["green"] });
+    info = await json(await fetch(url + "?personalities"));
+    ok("two personalities, sorted by user", info.personalities.map(p => p.user).join(",") === "alnas,sarath");
     const row = (await json(await fetch(fake.url + "/?json"))).paths.find(p => p.name === "p.score");
-    ok("the listing row counts them", row.profiles === 2, JSON.stringify(row));
+    ok("the listing row counts them", row.personalities === 2, JSON.stringify(row));
 
-    r = await put(url + "?profile=muzammil", { colours: ["blue"] });
-    info = await json(await fetch(url + "?profiles"));
-    ok("saving the same user again replaces the profile",
-       r.status === 204 && info.profiles.length === 2 && info.profiles.find(p => p.user === "muzammil").colours.map(c => c.hex).join() === "#0000ff");
+    r = await put(url + "?personality=sarath", { colours: ["blue"] });
+    info = await json(await fetch(url + "?personalities"));
+    ok("saving the same user again replaces the personality",
+       r.status === 204 && info.personalities.length === 2 && info.personalities.find(p => p.user === "sarath").colours.map(c => c.hex).join() === "#0000ff");
+
+    /* the old spelling still answers, so nothing written last week breaks */
+    const old = await json(await fetch(url + "?profiles"));
+    ok("?profiles still answers, under the new key",
+       old.personalities.length === 2, JSON.stringify(Object.keys(old)));
+    r = await put(url + "?profile=sarath", { colours: ["red"] });
+    ok("?profile= still saves", r.status === 204, `${r.status}`);
+    info = await json(await fetch(url + "?personalities"));
+    ok("and it is the same personality it wrote to",
+       info.personalities.find(p => p.user === "sarath").colours[0].name === "red");
+    await put(url + "?personality=sarath", { colours: ["blue"] });
 
     const refused = [
-      [url + "?profile=muzammil", { colours: ["purple"] }, /purple.*one of: red, green, blue/],
-      [url + "?profile=muzammil", {}, /colours is missing/],
-      [url + "?profile=muzammil", { colours: [] }, /at least one/],
-      [url + "?profile=muzammil", { colours: "red" }, /must be a list/],
-      [url + "?profile=muzammil", { colours: ["red", "red"] }, /repeated/],
-      [url + "?profile=muzammil", "[1]", /object/],
-      [url + "?profile=bad%20name!", { colours: ["red"] }, /letters, digits/],
-      [url + "?profile=" + "a".repeat(41), { colours: ["red"] }, /letters, digits/],
+      [url + "?personality=sarath", { colours: ["purple"] }, /purple.*one of: red, green, blue/],
+      [url + "?personality=sarath", {}, /colours is missing/],
+      [url + "?personality=sarath", { colours: [] }, /at least one/],
+      [url + "?personality=sarath", { colours: "red" }, /must be a list/],
+      [url + "?personality=sarath", { colours: ["red", "red"] }, /repeated/],
+      [url + "?personality=sarath", "[1]", /object/],
+      [url + "?personality=bad%20name!", { colours: ["red"] }, /letters, digits/],
+      [url + "?personality=" + "a".repeat(41), { colours: ["red"] }, /letters, digits/],
     ];
     for (const [u, body, why] of refused) {
       r = await put(u, body);
       const t = await text(r);
-      ok(`refused: ${decodeURIComponent(u.split("?profile=")[1])} ${typeof body === "string" ? body : JSON.stringify(body)}`, r.status === 400 && why.test(t), `${r.status} ${t}`);
+      ok(`refused: ${decodeURIComponent(u.split("?personality=")[1])} ${typeof body === "string" ? body : JSON.stringify(body)}`, r.status === 400 && why.test(t), `${r.status} ${t}`);
     }
-    info = await json(await fetch(url + "?profiles"));
-    ok("and nothing changed", info.profiles.length === 2 && info.profiles.find(p => p.user === "muzammil").colours[0].name === "blue");
+    info = await json(await fetch(url + "?personalities"));
+    ok("and nothing changed", info.personalities.length === 2 && info.personalities.find(p => p.user === "sarath").colours[0].name === "blue");
 
-    const dl = await json(await fetch(url + "?v=1&profile=muzammil"));
-    ok("a download with a profile embeds it",
-       dl.profile && dl.profile.user === "muzammil" && dl.profile.colours[0].hex === "#0000ff", JSON.stringify(dl.profile));
+    const dl = await json(await fetch(url + "?v=1&personality=sarath"));
+    ok("a download with a personality embeds it",
+       dl.personality && dl.personality.user === "sarath" && dl.personality.colours[0].hex === "#0000ff", JSON.stringify(dl.personality));
     ok("after the author's keys, which are kept", dl["x-author"] === "renjith" && dl.grid.bpm === 100 && JSON.stringify(dl["x-enforced"]) === '["x-author"]');
-    const latest = await json(await fetch(url + "?profile=alnas"));
-    ok("without v it is the latest with that profile", latest.profile.user === "alnas" && latest.version === 1);
+    const latest = await json(await fetch(url + "?personality=alnas"));
+    ok("without v it is the latest with that personality", latest.personality.user === "alnas" && latest.version === 1);
 
-    r = await fetch(url + "?profile=nobody");
+    r = await fetch(url + "?personality=nobody");
     let t = await text(r);
-    ok("a missing profile is 404 and lists the users", r.status === 404 && /no profile nobody/.test(t) && /alnas, muzammil/.test(t), `${r.status} ${t}`);
-    r = await fetch(url + "?v=1&profile=nobody");
+    ok("a missing personality is 404 and lists the users", r.status === 404 && /no personality nobody/.test(t) && /alnas, sarath/.test(t), `${r.status} ${t}`);
+    r = await fetch(url + "?v=1&personality=nobody");
     ok("with a version too", r.status === 404);
-    r = await fetch(url + "?raw&profile=muzammil");
-    ok("raw and profile contradict", r.status === 400 && /contradict/.test(await text(r)));
+    r = await fetch(url + "?raw&personality=sarath");
+    ok("raw and personality contradict", r.status === 400 && /contradict/.test(await text(r)));
 
     const odd = fake.url + "/oddp.score";
     await put(odd, "not json"); await put(odd + "?profile=muzammil", { colours: ["red"] });
@@ -297,22 +308,31 @@ async function startHub(extraEnv = {}) {
       try { return { raw: t, body: JSON.parse(t) }; } catch (e) { return { raw: t, body: null }; }
     };
 
-    let r = await load({ score: "loadme", fields: ["beats"], profile: "muzammil" });
+    let r = await load({ score: "loadme", fields: ["beats"], personality: "muzammil" });
     let got = await jsonOrText(r);
-    ok("POST /hub/score with profile embeds it in the response",
-       r.status === 200 && got.body && got.body.profile && got.body.profile.user === "muzammil"
-       && got.body.profile.colours.map(c => c.hex).join() === "#ff0000,#0000ff",
+    ok("POST /hub/score with a personality embeds it in the response",
+       r.status === 200 && got.body && got.body.personality && got.body.personality.user === "muzammil"
+       && got.body.personality.colours.map(c => c.hex).join() === "#ff0000,#0000ff",
        `${r.status} ${got.raw}`);
+    ok("and under the old key as well, so nothing breaks mid-week",
+       got.body && got.body.profile && got.body.profile.user === "muzammil");
+
+    r = await load({ score: "loadme", fields: ["beats"], profile: "muzammil" });
+    got = await jsonOrText(r);
+    ok("asking with the old key still works",
+       r.status === 200 && got.body && got.body.personality
+       && got.body.personality.user === "muzammil", `${r.status} ${got.raw}`);
 
     r = await load({ score: "loadme", fields: ["beats"] });
     got = await jsonOrText(r);
-    ok("POST /hub/score without profile has no profile key",
-       r.status === 200 && got.body && !("profile" in got.body), `${r.status} ${got.raw}`);
+    ok("without one, neither key is sent",
+       r.status === 200 && got.body && !("personality" in got.body) && !("profile" in got.body),
+       `${r.status} ${got.raw}`);
 
-    r = await load({ score: "loadme", fields: ["beats"], profile: "nobody" });
+    r = await load({ score: "loadme", fields: ["beats"], personality: "nobody" });
     got = await jsonOrText(r);
-    ok("POST /hub/score missing profile is 400 and lists users",
-       r.status === 400 && got.body && /no profile nobody/.test(got.body.error || "") && /muzammil/.test(got.body.error || ""),
+    ok("a missing personality is 400 and lists the users",
+       r.status === 400 && got.body && /no personality nobody/.test(got.body.error || "") && /muzammil/.test(got.body.error || ""),
        `${r.status} ${got.raw}`);
   }
 
@@ -397,20 +417,23 @@ async function startHub(extraEnv = {}) {
     r = await run(["pull", "lv.score@9"], fake.url, dir);
     ok("pull of a missing version exits 1 and lists the versions", r.code === 1 && /versions: 1, 2/.test(r.err), r.err);
 
-    /* profiles from the command line */
-    await fetch(vurl + "?profile=muzammil", { method: "PUT", body: JSON.stringify({ colours: ["red", "blue"] }) });
-    r = await run(["pull", "lv.score", "--profile=muzammil"], fake.url, dir);
+    /* personalities from the command line */
+    await fetch(vurl + "?personality=sarath", { method: "PUT", body: JSON.stringify({ colours: ["magenta", "cyan"] }) });
+    r = await run(["pull", "lv.score", "--personality=sarath"], fake.url, dir);
     let pulled = JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"));
-    ok("pull --profile=user embeds the profile", r.code === 0 && pulled.profile && pulled.profile.colours.map(c => c.hex).join() === "#ff0000,#0000ff", r.err);
-    ok("and the message names it", /profile muzammil\)$/.test(r.out.trim()), r.out);
-    r = await run(["pull", "lv.score@1", "--profile", "muzammil"], fake.url, dir);
+    ok("pull --personality=user embeds it", r.code === 0 && pulled.personality && pulled.personality.colours.map(c => c.hex).join() === "#ff00ff,#00ffff", r.err);
+    ok("and the message names it", /personality sarath\)$/.test(r.out.trim()), r.out);
+    r = await run(["pull", "lv.score@1", "--personality", "sarath"], fake.url, dir);
     pulled = JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"));
-    ok("the space form works, with a version", r.code === 0 && pulled.version === 1 && pulled.profile.user === "muzammil", r.err);
-    r = await run(["pull", "lv.score", "--profile=nobody"], fake.url, dir);
-    ok("a missing profile exits 1 and lists the profiles", r.code === 1 && /no profile nobody/.test(r.err) && /profiles: muzammil/.test(r.err), r.err);
+    ok("the space form works, with a version", r.code === 0 && pulled.version === 1 && pulled.personality.user === "sarath", r.err);
+    r = await run(["pull", "lv.score", "--personality=nobody"], fake.url, dir);
+    ok("a missing personality exits 1 and lists them", r.code === 1 && /no personality nobody/.test(r.err) && /personalities: sarath/.test(r.err), r.err);
     r = await run(["pull", "lv.score"], fake.url, dir);
     pulled = JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"));
-    ok("no flag, no profile in the file", r.code === 0 && !("profile" in pulled), r.err);
+    ok("no flag, nothing embedded", r.code === 0 && !("personality" in pulled), r.err);
+    r = await run(["pull", "lv.score", "--profile=sarath"], fake.url, dir);
+    pulled = JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"));
+    ok("--profile still works, and writes the new key", r.code === 0 && pulled.personality && pulled.personality.user === "sarath", r.err);
     r = await run(["pull", "lv.score", "--colour=red"], fake.url, dir);
     ok("an unknown option is refused", r.code === 1 && /unknown option --colour/.test(r.err), r.err);
   }

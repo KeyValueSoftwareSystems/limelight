@@ -18,9 +18,10 @@ curl can use it:
     GET   ...?meta[&v=N]          the metadata object, {} when none
     PUT   ...?meta[&v=N]          store metadata fields { name: { value, enforced } } -> 204, else 400
     GET   ...?page                the score's own page: versions, downloads, metadata fields
-    GET   ...?profiles            -> { colours: [{name,hex}], profiles: [{user, colours:[{name,hex}]}] }
-    PUT   ...?profile=<user>      body {"colours": ["red","blue"]}; create or replace -> 204, else 400
-    GET   ...?profile=<user>[&v=N] download with "profile": {user, colours:[{name,hex}]} embedded
+    GET   ...?personalities        -> { colours: [{name,hex}], personalities: [{user, colours:[{name,hex}]}] }
+    PUT   ...?personality=<user>   body {"colours": ["red","blue"]}; create or replace -> 204, else 400
+    GET   ...?personality=<user>[&v=N] download with "personality": {user, colours:[...]} embedded
+                                  (?profiles and ?profile= still answer: the old spelling)
 
     MP3 → score (hub/generate.py), after the file has been PUT:
     POST  /hub/<dir>/<name>.mp3?generate   start a background job -> 202 {"job": {...}}
@@ -30,8 +31,8 @@ curl can use it:
     GET   /hub/audio/<name>.mp3            playback bytes (Range supported); audio/ is not listed
 
     Protocol load (hub/score_api.py):
-    POST  /hub/score                       body {"score","fields"?, "profile"?, ...}
-                                           -> protocol response; profile embeds when asked
+    POST  /hub/score                       body {"score","fields"?, "personality"?, ...}
+                                           -> protocol response; the personality embeds when asked
 
 No delete and no auth, on purpose: a shared folder on a LAN where the only way
 to correct a mistake is to overwrite it is a folder nobody can empty by accident.
@@ -44,7 +45,7 @@ scores/mp3s/.versions and any score/*.mp3 siblings are moved into place.
 """
 import json, os, urllib.parse
 from . import versions as V
-from . import profiles as P
+from . import personality as P
 from . import generate as G
 from . import migrate
 
@@ -139,7 +140,7 @@ def _listing(urlpath, path):
             n = V.latest(full)
             row["version"] = n
             row["has_metadata"] = bool(n) and V.get_meta(full, n) is not None
-            row["profiles"] = len(P.all_of(full))
+            row["personalities"] = len(P.all_of(full))
         entries.append(row)
     return json.dumps({"href": urlpath, "kind": "Index", "allow_upload": True,
                        "allow_delete": False, "paths": entries})
@@ -191,12 +192,13 @@ def _send_file(h, path, head):
 
 
 def _versioned_get(h, path, query, head):
-    """GET/HEAD on a .score that has a history: ?versions, ?profiles, ?meta, ?v, ?raw, ?profile."""
+    """GET/HEAD on a .score with history: ?versions, ?personalities, ?meta, ?v, ?raw, ?personality."""
     name = os.path.basename(path)
     if "versions" in query:
         return _json(h, 200, V.history(path), head)
-    if "profiles" in query:
-        return _json(h, 200, {"name": name, "colours": P.colours(), "profiles": P.all_of(path)}, head)
+    if _wants_list(query):
+        return _json(h, 200, {"name": name, "colours": P.colours(),
+                              "personalities": P.all_of(path)}, head)
     v = query.get("v", [""])[0]
     try:
         n = V.resolve_version(path, v)
@@ -204,23 +206,43 @@ def _versioned_get(h, path, query, head):
         return _send(h, 404, f"no version {v or 'latest'} of {name}", head_only=head)
     if "meta" in query:
         return _json(h, 200, V.get_meta(path, n) or {}, head)
-    user = query.get("profile", [None])[0]
+    user = _who(query)
     if user is None:
         return _send(h, 200, V.read(path, n, raw="raw" in query), "application/octet-stream", head)
-    # a download with a profile: the version, the author's keys, then the profile
+    # a download with a personality: the version, the author's keys, then the artist's
     if "raw" in query:
-        return _send(h, 400, "raw and profile contradict", head_only=head)
-    profile = P.get(path, user)
-    if profile is None:
+        return _send(h, 400, "raw and personality contradict", head_only=head)
+    person = P.get(path, user)
+    if person is None:
         users = [p["user"] for p in P.all_of(path)]
-        return _send(h, 404, f"no profile {user} for {name}\nprofiles: {', '.join(users) if users else 'none yet'}", head_only=head)
+        return _send(h, 404, f"no personality {user} for {name}\n"
+                             f"personalities: {', '.join(users) if users else 'none yet'}",
+                     head_only=head)
     obj = V.parse_object(V.read(path, n))
     if obj is None:
-        return _send(h, 409, "not a JSON object, cannot embed a profile", head_only=head)
-    return _send(h, 200, V.dump(P.embed(obj, profile)), "application/octet-stream", head)
+        return _send(h, 409, "not a JSON object, cannot embed a personality", head_only=head)
+    return _send(h, 200, V.dump(P.embed(obj, person)), "application/octet-stream", head)
 
 
-VERSION_QUERIES = ("v", "raw", "versions", "meta", "page", "profiles", "profile")
+def _who(query):
+    """The user whose personality was asked for, under either spelling.
+
+    `?profile=` was the name until the artist's layer was called a personality.
+    Accepting both means nobody's saved link or half-finished script breaks on a
+    word change; only `?personality=` is documented from here.
+    """
+    for key in ("personality", "profile"):
+        if key in query:
+            return query.get(key, [None])[0]
+    return None
+
+
+def _wants_list(query):
+    return "personalities" in query or "profiles" in query
+
+
+VERSION_QUERIES = ("v", "raw", "versions", "meta", "page",
+                   "personalities", "personality", "profiles", "profile")
 
 
 def handle(h, method):
@@ -245,7 +267,7 @@ def handle(h, method):
             except ValueError:
                 return _send(h, 400, "not json")
 
-            def fetch(name, profile=None):
+            def fetch(name, person=None):
                 base = name if name.endswith(".score") else name + ".score"
                 fpath = os.path.join(score_dir(), os.path.basename(base))
                 if not os.path.isfile(fpath):
@@ -256,19 +278,19 @@ def handle(h, method):
                 else:
                     with open(fpath, "rb") as f:
                         raw = f.read()
-                if profile is None:
+                if person is None:
                     return json.loads(raw)
-                prof = P.get(fpath, profile)
-                if prof is None:
+                got = P.get(fpath, person)
+                if got is None:
                     users = [p["user"] for p in P.all_of(fpath)]
                     raise ValueError(
-                        f"no profile {profile} for {os.path.basename(fpath)}\n"
-                        f"profiles: {', '.join(users) if users else 'none yet'}"
+                        f"no personality {person} for {os.path.basename(fpath)}\n"
+                        f"personalities: {', '.join(users) if users else 'none yet'}"
                     )
                 obj = V.parse_object(raw)
                 if obj is None:
-                    raise ValueError("not a JSON object, cannot embed a profile")
-                return P.embed(obj, prof)
+                    raise ValueError("not a JSON object, cannot embed a personality")
+                return P.embed(obj, got)
 
             try:
                 result = score_api.handle(body, fetch)
@@ -322,9 +344,9 @@ def handle(h, method):
             os.replace(tmp, path)
             return _send(h, 201, "created")
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        if versioned and "profile" in query:
+        if versioned and _who(query) is not None:
             try:
-                P.put(path, query["profile"][0], body)
+                P.put(path, _who(query), body)
             except ValueError as e:
                 return _send(h, 400, str(e))
             return _send(h, 204)
@@ -371,8 +393,9 @@ def handle(h, method):
         if "page" in query:                       # the score's own page, versions or not
             with open(SCORE_PAGE, "rb") as f:
                 return _send(h, 200, f.read(), "text/html; charset=utf-8", head)
-        if "profiles" in query:                   # answers even before the first version
-            return _json(h, 200, {"name": os.path.basename(path), "colours": P.colours(), "profiles": P.all_of(path)}, head)
+        if _wants_list(query):                    # answers even before the first version
+            return _json(h, 200, {"name": os.path.basename(path), "colours": P.colours(),
+                                  "personalities": P.all_of(path)}, head)
         if versioned and V.numbers(path):
             return _versioned_get(h, path, query, head)
         # mp3 may be requested under /hub/score/… or /hub/audio/… — always serve from audio/.

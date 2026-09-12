@@ -22,11 +22,11 @@ KNOWN = [
 _STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
 _STEM_FOUR  = ["drums", "bass", "vocals", "other"]
 _CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace"]
-# profile rides with the score when present, asked for or not: it is how one
-# user's application treats this score, and a consumer that forgot to ask for it
-# should still get it. Muzammil added this; the move into hub/ dropped it, and
-# only his own test noticed.
-_ALWAYS = ["score", "version", "window", "grid", "profile"]
+# The personality rides with the score when present, asked for or not: it is how
+# the artist wants this song to look, and a consumer that forgot to ask should
+# still get it. `profile` was the old name and is still sent alongside, so a
+# reader written last week keeps working.
+_ALWAYS = ["score", "version", "window", "grid", "personality", "profile"]
 
 
 def _or(v, d):
@@ -346,9 +346,11 @@ def format_v1(raw):
     if raw.get("made_by"):
         out["made_by"] = raw["made_by"]
 
-    # ---- profile: the consumer's layer, embedded by the hub on pull ----
-    if raw.get("profile"):
-        out["profile"] = raw["profile"]
+    # ---- personality: the artist's layer, embedded by the hub on pull ----
+    person = raw.get("personality") or raw.get("profile")
+    if person:
+        out["personality"] = person
+        out["profile"] = person        # the old name, until everyone has moved
 
     return out
 
@@ -484,9 +486,9 @@ def handle(body, fetch_score):
     """Process a score protocol request.
 
     body        -- the parsed JSON request body
-    fetch_score -- callable(name, profile=None) -> parsed score dict.
-                   `profile` is how one user's application treats this score;
-                   the hub embeds it when asked, or raises when it is missing.
+    fetch_score -- callable(name, personality=None) -> parsed score dict.
+                   `personality` is how the artist wants this song to look; the
+                   hub embeds it when asked, or raises when it is missing.
                    A fetcher that takes only a name still works.
     """
     if not body or not isinstance(body.get("score"), str) or not body["score"]:
@@ -499,16 +501,20 @@ def handle(body, fetch_score):
         if any(not isinstance(f, str) for f in fields):
             raise ValueError('every entry in "fields" must be a string')
 
-    profile = body.get("profile")
-    if profile is not None:
-        if not isinstance(profile, str) or not profile:
-            raise ValueError('"profile" must be a non-empty string')
+    # either spelling on the way in; `profile` was the name until this layer was
+    # called a personality, and a request written last week still has to work
+    person = body.get("personality")
+    if person is None:
+        person = body.get("profile")
+    if person is not None:
+        if not isinstance(person, str) or not person:
+            raise ValueError('"personality" must be a non-empty string')
 
     try:
-        raw = fetch_score(body["score"], profile)
+        raw = fetch_score(body["score"], person)
     except TypeError:
-        # a fetcher that predates profiles takes the name alone
-        if profile is not None:
+        # a fetcher that predates this takes the name alone
+        if person is not None:
             raise
         raw = fetch_score(body["score"])
 

@@ -11,8 +11,8 @@
      HEAD <base>/<name>         content-length, to check an upload landed whole
      GET  <base>/<name>?v=N     one version of a .score (our hub only)
      GET  <base>/<name>?versions its history
-     GET  <base>/<name>?profile=U one version with user U's profile embedded (our hub only)
-     GET  <base>/<name>?profiles the profiles and the palette
+     GET  <base>/<name>?personality=U one version with that user's personality embedded
+     GET  <base>/<name>?personalities the personalities saved for it, and the palette
 
    Cloud storage later is another function here and one more case in the
    switch. The commands never learn which one they are talking to. */
@@ -80,10 +80,10 @@ function dufs(base) {
     try { return JSON.parse(text); } catch (e) { return null; }
   }
 
-  async function get(name, version, profile) {
+  async function get(name, version, personality) {
     const q = [];
     if (version) q.push(`v=${version}`);
-    if (profile) q.push(`profile=${encodeURIComponent(profile)}`);
+    if (personality) q.push(`personality=${encodeURIComponent(personality)}`);
     const url = fileUrl(name) + (q.length ? "?" + q.join("&") : "");
     const res = await call("GET", url);
     if (res.status === 404) {
@@ -103,9 +103,10 @@ function dufs(base) {
     return res.json();
   }
 
-  /* the profiles of a .score: { colours: [{ name, hex }], profiles: [{ user, colour: { name, hex } }] } */
-  async function profiles(name) {
-    const url = fileUrl(name) + "?profiles";
+  /* the personalities saved for a .score, and the palette they are chosen from:
+     { colours: [{ name, hex }], personalities: [{ user, colours: [{ name, hex }] }] } */
+  async function personalities(name) {
+    const url = fileUrl(name) + "?personalities";
     const res = await call("GET", url);
     if (res.status === 404) throw new NotFound(`${name} is not on ${base}`);
     if (!res.ok) await fail("GET", url, res);
@@ -121,7 +122,9 @@ function dufs(base) {
     return Number.isFinite(n) ? n : null;
   }
 
-  return { base, url: fileUrl, list, put, get, size, versions, profiles };
+  /* `profiles` is the old name for `personalities`, kept so nothing breaks mid-week */
+  return { base, url: fileUrl, list, put, get, size, versions,
+           personalities, profiles: personalities };
 }
 
 module.exports = { openRemote, DEFAULT_REMOTE, RemoteError, NotFound, Unreachable };

@@ -52,7 +52,8 @@ def _merge_version_dir(src_dir, dest_dir, conflicts, name):
     for entry in os.listdir(src_dir):
         s = os.path.join(src_dir, entry)
         d = os.path.join(dest_dir, entry)
-        if entry == "profiles" and os.path.isdir(s):
+        # "profiles" is the old name for "personalities"; both are merged per-user
+        if entry in ("personalities", "profiles") and os.path.isdir(s):
             os.makedirs(d, exist_ok=True)
             for user in os.listdir(s):
                 us, ud = os.path.join(s, user), os.path.join(d, user)
@@ -63,7 +64,7 @@ def _merge_version_dir(src_dir, dest_dir, conflicts, name):
                 elif os.path.isfile(us):
                     park = ud + ".root-bak"
                     os.replace(us, park)
-                    conflicts.append(f"{name}/profiles/{user}: kept score/; root → {os.path.basename(park)}")
+                    conflicts.append(f"{name}/{entry}/{user}: kept score/; root → {os.path.basename(park)}")
             try:
                 os.rmdir(s)
             except OSError:

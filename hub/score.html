@@ -1,5 +1,5 @@
 <!-- One score: its versions, a download for each, a new version from here, the
-     metadata fields on any version, and the profiles of the people who use it.
+     metadata fields on any version, and the personalitys of the people who use it.
      Every request this page makes is one the CLI or curl could make; nothing
      here is page-only. Styles live in /page/ui.css. -->
 <!DOCTYPE html>
@@ -48,9 +48,9 @@
 
 <aside>
   <div class="panel pop"><div class="inner">
-  <h2>Profiles <span class="count" id="pcount">0</span></h2>
+  <h2>Personalitys <span class="count" id="pcount">0</span></h2>
   <table class="list compact" id="ptable">
-    <tbody id="profiles"></tbody>
+    <tbody id="personalities"></tbody>
   </table>
   <div class="pform">
     <div class="row"><input type="text" id="puser" placeholder="User name" maxlength="40" aria-label="User name"></div>
@@ -64,7 +64,7 @@
         <div class="msel-menu" id="pcolours-menu" role="listbox" aria-multiselectable="true" hidden></div>
       </div>
     </div>
-    <div class="row"><button id="psave" class="primary">Save profile</button><span class="msg ok" id="pmsg"></span></div>
+    <div class="row"><button id="psave" class="primary">Save personality</button><span class="msg ok" id="pmsg"></span></div>
   </div>
   </div></div>
   <p class="note" id="phint"></p>
@@ -252,7 +252,7 @@ document.addEventListener("keydown", e => {
   if (open) open.remove();
 });
 
-/* ---- profiles: how one user's application treats this score ----------------- */
+/* ---- personalities: how one user's application treats this score ----------------- */
 let USERS = new Set();
 let COLOURS = []; /* [{name, hex}, ...] from the palette */
 const pmsg = (m, bad) => { $("pmsg").textContent = m; $("pmsg").className = bad ? "msg" : "msg ok"; };
@@ -288,9 +288,9 @@ function toggleColourMenu(force) {
   $("pcolours-btn").setAttribute("aria-expanded", open ? "true" : "false");
 }
 
-async function loadProfiles() {
-  const r = await fetch(file + "?profiles");
-  if (!r.ok) return err(`${r.status} ${r.statusText} listing profiles`);
+async function loadPersonalitys() {
+  const r = await fetch(file + "?personalities");
+  if (!r.ok) return err(`${r.status} ${r.statusText} listing personalitys`);
   const data = await r.json();
   const selected = chosen();
   COLOURS = data.colours || [];
@@ -298,16 +298,16 @@ async function loadProfiles() {
   menu.innerHTML = COLOURS.map(c =>
     `<label class="msel-opt"><input type="checkbox" value="${esc(c.name)}"${selected.includes(c.name) ? " checked" : ""}>` +
     `<span class="swatch" style="background:${c.hex}"></span>${esc(c.name)}</label>`).join("");
-  USERS = new Set(data.profiles.map(p => p.user));
-  $("pcount").textContent = data.profiles.length;
-  $("profiles").innerHTML = data.profiles.map(p =>
+  USERS = new Set(data.personalities.map(p => p.user));
+  $("pcount").textContent = data.personalities.length;
+  $("personalities").innerHTML = data.personalities.map(p =>
     `<tr><td class="n">${esc(p.user)}</td>` +
     `<td class="swatches" title="${p.colours.map(c => c.name).join(", ")}">${p.colours.map(c => `<span class="swatch" style="background:${c.hex}"></span>`).join("")}</td>` +
     `<td class="r"><button class="small quiet pedit" data-user="${esc(p.user)}" data-colours="${p.colours.map(c => c.name).join(",")}">Edit</button></td></tr>`).join("")
-    || `<tr><td colspan="3" class="empty">No profiles yet.</td></tr>`;
-  $("phint").innerHTML = data.profiles.length
-    ? `A profile is how one person's application treats this score. Pull with one: <code>limelight pull ${esc(name)} --profile=${esc(data.profiles[0].user)}</code>`
-    : "A profile is how one person's application treats this score. Add yours, then pull with <code>--profile=&lt;user&gt;</code>.";
+    || `<tr><td colspan="3" class="empty">No personalitys yet.</td></tr>`;
+  $("phint").innerHTML = data.personalities.length
+    ? `A personality is how one person's application treats this score. Pull with one: <code>limelight pull ${esc(name)} --personality=${esc(data.personalities[0].user)}</code>`
+    : "A personality is how one person's application treats this score. Add yours, then pull with <code>--personality=&lt;user&gt;</code>.";
   renderPicks();
 }
 
@@ -324,15 +324,15 @@ $("psave").addEventListener("click", async () => {
   if (!/^[A-Za-z0-9_-]{1,40}$/.test(user)) return pmsg("User name: 1-40 letters, digits, _ or -", true);
   if (!colours.length) return pmsg("Pick at least one colour.", true);
   const existed = USERS.has(user);
-  const r = await fetch(`${file}?profile=${encodeURIComponent(user)}`, { method: "PUT", body: JSON.stringify({ colours }) });
+  const r = await fetch(`${file}?personality=${encodeURIComponent(user)}`, { method: "PUT", body: JSON.stringify({ colours }) });
   if (!r.ok) return pmsg(`${r.status}: ${await r.text()}`, true);
   pmsg(`${existed ? "Replaced" : "Added"} ${user}: ${colours.join(", ")}`);
   $("puser").value = ""; setChosen([]);
   closeColourMenu();
-  loadProfiles();
+  loadPersonalitys();
 });
 
-$("profiles").addEventListener("click", e => {
+$("personalities").addEventListener("click", e => {
   const b = e.target.closest("button.pedit");
   if (!b) return;
   $("puser").value = b.dataset.user;
@@ -340,7 +340,7 @@ $("profiles").addEventListener("click", e => {
   $("puser").focus();
 });
 
-crumbs(); load(); loadProfiles();
+crumbs(); load(); loadPersonalitys();
 </script>
 
 </body>

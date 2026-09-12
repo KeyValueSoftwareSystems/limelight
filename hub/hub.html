@@ -44,14 +44,14 @@
     <col class="c-size">
     <col class="c-version">
     <col class="c-meta">
-    <col class="c-profiles">
+    <col class="c-personalities">
   </colgroup>
-  <thead><tr><th>Name</th><th>Updated</th><th>Size</th><th>Version</th><th>Metadata</th><th>Profiles</th></tr></thead>
+  <thead><tr><th>Name</th><th>Updated</th><th>Size</th><th>Version</th><th>Metadata</th><th>Personalitys</th></tr></thead>
   <tbody id="rows"></tbody>
 </table>
 </div>
 <p class="note">Everything here is shared with everyone on this network. Pull a file with
-<code>limelight pull &lt;name&gt;</code>. Open a score for its versions, metadata and profiles.
+<code>limelight pull &lt;name&gt;</code>. Open a score for its versions, metadata and personalitys.
 Nothing is deleted from this page; fix a mistake by uploading over it.</p>
 </main>
 
@@ -98,11 +98,11 @@ function render() {
             : score ? `<a href="${base}${enc(p.name)}?page">${esc(p.name)}</a>`
                     : `<a href="${base}${enc(p.name)}" download>${esc(p.name)}</a>`;
     const dl = score && p.version ? ` <a class="btn small dl" href="${base}${enc(p.name)}" download>Download</a>` : "";
-    const prof = score ? (p.profiles ? `${p.profiles} profile${p.profiles === 1 ? "" : "s"}` : `<span class="dim">none</span>`) : "";
+    const prof = score ? (p.personalities ? `${p.personalities} personality${p.personalities === 1 ? "" : "s"}` : `<span class="dim">none</span>`) : "";
     const meta = score ? (p.has_metadata ? "yes" : `<span class="dim">none</span>`) : "";
     const ver = score ? (p.version ? `<span class="badge">v${p.version}</span>` : `<span class="dim">no versions</span>`) : "";
     rows.push(`<tr>${cell("", a + dl, "n" + (score ? " name-score" : ""))}${cell("updated", when(p.mtime))}` +
-      `${cell("size", dir ? "" : human(p.size))}${cell("version", ver)}${cell("metadata", meta)}${cell("profiles", prof)}</tr>`);
+      `${cell("size", dir ? "" : human(p.size))}${cell("version", ver)}${cell("metadata", meta)}${cell("personalities", prof)}</tr>`);
   }
   if (paths.length || (base !== "/hub/" && !q && rows.length)) {
     $("rows").innerHTML = rows.join("");

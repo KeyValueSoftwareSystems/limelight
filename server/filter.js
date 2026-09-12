@@ -15,7 +15,7 @@
  *   plus the always-present envelope.
  */
 export function filter(formatted, { fields, known } = {}) {
-  const ALWAYS = ['score', 'version', 'window', 'grid', 'profile'];
+  const ALWAYS = ['score', 'version', 'window', 'grid', 'personality', 'profile'];
 
   if (!fields || fields.length === 0) {
     return formatted;
