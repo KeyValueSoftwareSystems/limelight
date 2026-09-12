@@ -152,7 +152,7 @@ def read(path, slug):
         "releases": gone,
         "events": events(g, lanes, busy, bright,
                          np.load(CACHE / f"{slug}.flux.npy"),
-                         pickup, report, env) + chord_changes(chord, pickup),
+                         pickup, report, env),
     }
 
 

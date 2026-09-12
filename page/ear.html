@@ -21,7 +21,7 @@ button.on{background:var(--amb);color:#171003;font-weight:600}
   justify-content:flex-end;cursor:pointer;overflow:hidden;
   box-shadow:inset -1px 0 0 rgba(5,7,11,.9)}
 .part .fill{position:absolute;left:0;right:0;bottom:0;opacity:.30}
-.part .tag{position:relative;padding:7px 8px;font:600 11px ui-monospace,monospace;
+.part .tag{position:relative;padding:7px 5px;font:600 10px ui-monospace,monospace;
   text-shadow:0 1px 3px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .part .tag em{display:block;font:400 10px ui-monospace,monospace;opacity:.75;font-style:normal;
   color:var(--ink);overflow:hidden;text-overflow:ellipsis}
@@ -31,6 +31,8 @@ button.on{background:var(--amb);color:#171003;font-weight:600}
 .ev{position:absolute;top:0;width:2px;height:14px;z-index:3;pointer-events:none}
 #spark{position:absolute;left:0;right:0;top:0;height:150px;pointer-events:none;z-index:2;
   width:100%;display:block}
+#tense{width:100%;height:52px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
+  background:#05070b;display:block}
 #harm{width:100%;height:34px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
 #lanes{width:100%;height:168px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
@@ -71,6 +73,7 @@ inside is how big each bar is.</p>
 <div id="map"><canvas id="spark"></canvas><div id="head"></div></div>
 <canvas id="lanes"></canvas>
 <canvas id="harm"></canvas>
+<canvas id="tense"></canvas>
 
 <div class="now">
   <div class="big" id="whereis">—</div>
@@ -95,7 +98,13 @@ inside is how big each bar is.</p>
 
 <h2>Things that happen inside the sections</h2>
 <p class="lead">Each of these is a claim about one moment, addressed in bars and beats. Play four
-seconds around it and say whether it happened.</p>
+seconds around it and say whether it happened. The score keeps everything it finds; this slider
+hides the weak ones so the list stays judgeable.</p>
+<div class="bar" style="margin-bottom:6px">
+  <label class="mono" style="color:var(--faint)">only show above</label>
+  <input id="evmin" type="range" min="0" max="100" value="55" style="width:190px;accent-color:var(--amb)">
+  <span class="mono" id="evminv" style="min-width:130px"></span>
+</div>
 <div class="cuts" id="evs"></div>
 
 <h2>Does the song actually change at these moments?</h2>
@@ -164,7 +173,8 @@ function draw() {
     el.innerHTML = `<div class="fill" style="background:${HUE[p.repeats_as]};
                       height:${Math.round(p.fullness * 100)}%"></div>
                     <div class="tag" style="color:${HUE[p.repeats_as]}">
-                      ${p.repeats_as}<em>${p.feels}</em></div>`;
+                      ${p.role ? p.role.toUpperCase() : p.repeats_as}
+                      <em>${p.feels}</em></div>`;
     el.style.setProperty("--hue", HUE[p.repeats_as]);
     el.title = `${p.feels} — bars ${p.from_bar}–${p.to_bar} — ${mmss(t0)} to ${mmss(t1)}`;
     el.onclick = ev => {
@@ -189,8 +199,43 @@ function draw() {
   spark();
   lanes();
   harm();
+  tense();
   cuts();
   evs();
+}
+
+function tense() {
+  const c = $("tense"), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  c.width = Math.round(r.width * dpr); c.height = Math.round(52 * dpr);
+  const g = c.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, r.width, 52);
+  const v = SCORE.tension || [], beats = SCORE.beats || [];
+  if (!v.length || !beats.length) {
+    g.fillStyle = "#5c6478"; g.font = "11px ui-monospace,monospace";
+    g.fillText("no tension measured yet", 9, 30);
+    return;
+  }
+  const total = SCORE.song.length_s;
+  g.strokeStyle = "#e8a33d"; g.lineWidth = 1.4;
+  g.beginPath();
+  for (let i = 0; i < v.length && i < beats.length; i++) {
+    const x = (beats[i].t / total) * r.width, y = 48 - v[i] * 40;
+    i ? g.lineTo(x, y) : g.moveTo(x, y);
+  }
+  g.stroke();
+  for (const rel of (SCORE.releases || []).filter(x => x.size >= 0.45)) {
+    const x = (rel.at_s / total) * r.width;
+    g.strokeStyle = "#e0655f"; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x, 4); g.lineTo(x, 50); g.stroke();
+    if (rel.lead_beats > 0 && beats[rel.beat_index - rel.lead_beats]) {
+      const x0 = (beats[rel.beat_index - rel.lead_beats].t / total) * r.width;
+      g.strokeStyle = "rgba(224,101,95,.45)"; g.lineWidth = 3;
+      g.beginPath(); g.moveTo(x0, 50); g.lineTo(x, 50); g.stroke();
+    }
+  }
+  g.fillStyle = "#5c6478"; g.font = "600 9px ui-monospace,monospace";
+  g.fillText("TENSION  ·  red = release, bar beneath = warning", 7, 12);
 }
 
 function harm() {
@@ -242,7 +287,10 @@ function evTime(e) {
 function evs() {
   const map = $("map");
   [...map.querySelectorAll(".ev")].forEach(n => n.remove());
-  const list = SCORE.events || [];
+  const floor = (+$("evmin").value) / 100;
+  const all = SCORE.events || [];
+  const list = all.filter(e => (e.strength ?? 0.5) >= floor);
+  $("evminv").textContent = `${list.length} of ${all.length}`;
   const total = SCORE.song.length_s;
   for (const e of list) {
     const m = document.createElement("div");
@@ -258,10 +306,12 @@ function evs() {
     const t = evTime(e);
     const row = document.createElement("div");
     row.className = "cut";
-    const span = e.for_bars ? ` <span style="opacity:.6">for ${e.for_bars} bars</span>` : "";
+    const span = e.for_bars
+      ? ` <span style="opacity:.6">for ${e.for_bars} bar${e.for_bars === 1 ? "" : "s"}</span>` : "";
     row.innerHTML = `<span class="when">${mmss(t)}</span>
       <span class="what"><b style="color:${evColour(e.is)}">${e.is}</b>${span}
-        &nbsp;&middot;&nbsp; bar ${e.bar} beat ${e.beat}</span>
+        &nbsp;&middot;&nbsp; bar ${e.bar} beat ${e.beat}
+        <span style="opacity:.35">${(e.strength ?? 0).toFixed(2)}</span></span>
       <button data-t="${t}">hear it</button>
       <button data-v="yes" data-bar="${e.bar}" data-kind="${e.is}">happened</button>
       <button data-v="no" data-bar="${e.bar}" data-kind="${e.is}">did not</button>
@@ -427,8 +477,10 @@ function tick() {
     document.querySelectorAll(".part").forEach((n, i) => n.classList.toggle("here", i === at));
     if (at >= 0) {
       const p = parts[at];
-      $("whereis").innerHTML = `part <span style="color:${HUE[p.repeats_as]}">${p.repeats_as}</span>
-        &nbsp;&middot;&nbsp; ${p.feels}`;
+      $("whereis").innerHTML =
+        (p.role ? `<span style="color:${HUE[p.repeats_as]}">${p.role}</span> &nbsp;&middot;&nbsp; ` : "")
+        + `${p.feels}`
+        + (p.role ? `<span style="opacity:.4"> &nbsp;${p.repeats_as}</span>` : "");
       const b = SCORE.bars || {};
       const idx = Math.max(0, bar - FIRSTBAR);
       const now = [];
@@ -462,8 +514,9 @@ addEventListener("keydown", e => {
 });
 aud.onplay = () => { $("play").textContent = "pause"; };
 aud.onpause = () => { $("play").textContent = "play"; };
+$("evmin").oninput = () => { if (SCORE) evs(); };
 $("song").onchange = e => { aud.pause(); load(e.target.value, e.target.selectedOptions[0].dataset.a); };
-addEventListener("resize", () => { if (SCORE) { spark(); lanes(); harm(); } });
+addEventListener("resize", () => { if (SCORE) { spark(); lanes(); harm(); tense(); } });
 
 let TAPS = { changes_s: [], complete_up_to_s: 0 };
 

@@ -148,24 +148,32 @@ def returns(breaks, lanes, onsets, grid, look=4):
     return out
 
 
-def swells(lanes, pickup, least=3, gain=0.22, slack=0.04):
+def swells(lanes, pickup, span=8, least=4, gain=0.30):
     out = []
     for name in NAMES:
         v = np.asarray(lanes[name], dtype=float)
-        for sign, word in ((1, "swells"), (-1, "fades")):
-            i = 0
-            while i < len(v) - least:
-                j = i
-                while j + 1 < len(v) and sign * (v[j + 1] - v[j]) >= -slack:
-                    j += 1
-                rise = sign * (v[j] - v[i])
-                if j - i >= least and rise > gain and max(v[i], v[j]) > ON:
-                    out.append({"bar": at(i, pickup), "beat": 1,
-                                "is": f"{SAY[name]} {word}",
-                                "for_bars": int(j - i + 1),
-                                "strength": round(float(min(1.0, rise * 1.5)), 3)})
-                    i = j
+        i = max(1, pickup)
+        while i < len(v) - least:
+            best = None
+            for width in range(least, span + 1):
+                j = i + width
+                if j >= len(v):
+                    break
+                move = v[j] - v[i]
+                steps = np.diff(v[i:j + 1])
+                same = float((steps > 0).mean() if move > 0 else (steps < 0).mean())
+                if abs(move) > gain and same > 0.6 and max(v[i], v[j]) > ON:
+                    if best is None or abs(move) > abs(best[1]):
+                        best = (j, move, same)
+            if best is None:
                 i += 1
+                continue
+            j, move, _ = best
+            out.append({"bar": at(i, pickup), "beat": 1,
+                        "is": f"{SAY[name]} {'swells' if move > 0 else 'fades'}",
+                        "for_bars": int(j - i),
+                        "strength": round(float(min(1.0, abs(move) * 1.5)), 3)})
+            i = j
     return out
 
 
