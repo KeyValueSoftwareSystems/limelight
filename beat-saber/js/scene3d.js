@@ -14,14 +14,15 @@
   let saberMeshes = [];
 
   // music-reactive background state
-  let stars = null, gridHelper = null, tunnelRings = [];
+  let stars = null, gridHelper = null, tunnelRings = [], tunnelMat = null;
   let music = { energy: 0.4, phase: 0 };
   let pulseVal = 0, punchVal = 0, lastStep = 0;
 
-  // tunnel geometry constants — nested SQUARE frames, each turned a little more
-  // than the last so the edges spiral into a diamond/square corridor.
-  const TUN_COUNT = 22, TUN_DZ = 3.6, TUN_NEAR = BASE_CAM_Z + 4;
-  const TUN_SPAN = TUN_COUNT * TUN_DZ, TUN_RX = 9, TUN_RY = 6.5, TUN_ROT_STEP = 0.40;
+  // tunnel: nested SQUARE frames built from thick beams (a real corridor of
+  // glowing gates), each turned a little more than the last so they spiral.
+  const TUN_COUNT = 24, TUN_DZ = 3.4, TUN_NEAR = BASE_CAM_Z + 4;
+  const TUN_SPAN = TUN_COUNT * TUN_DZ, TUN_RX = 8, TUN_RY = 5.6, TUN_ROT_STEP = 0.40;
+  const TUN_BEAM = 0.42, TUN_DEPTH = 0.7;              // beam thickness / z-depth
   const TUN_BASE = new THREE.Color(0x2ec5ff), TUN_FLASH = new THREE.Color(0xffffff), TUN_DOWN = new THREE.Color(0xff2d55);
   let tunnelSpin = 0;
 
@@ -65,25 +66,31 @@
     lastStep = performance.now();
   }
 
-  // A tunnel of square frames receding down the lane. Frames scroll toward the
-  // camera (fly-through) and each is turned a little more than the one behind it,
-  // so their edges spiral into diamonds/squares. Beats brighten + expand them;
-  // downbeats flash them red.
+  // A tunnel of thick square frames receding down the lane. Each frame is four
+  // box beams (a real 3D gate) sharing one glowing material; frames scroll toward
+  // the camera, each turned a little more than the one behind it so they spiral.
+  // Beats brighten + swell them; downbeats flash red.
   function makeTunnel() {
-    const corners = [
-      new THREE.Vector3(1, 1, 0), new THREE.Vector3(-1, 1, 0),
-      new THREE.Vector3(-1, -1, 0), new THREE.Vector3(1, -1, 0),
-    ];
-    const geo = new THREE.BufferGeometry().setFromPoints(corners);  // closed by LineLoop
+    // dark structure with a blue neon glow; emissive is animated on the beat
+    tunnelMat = new THREE.MeshStandardMaterial({
+      color: 0x081625, emissive: 0x2ec5ff, emissiveIntensity: 0.7,
+      metalness: 0.4, roughness: 0.45 });
+    const t = TUN_BEAM, d = TUN_DEPTH, rx = TUN_RX, ry = TUN_RY;
+    // one geometry per orientation, reused across all frames
+    const horiz = new THREE.BoxGeometry(2 * rx + t, t, d);
+    const vert = new THREE.BoxGeometry(t, 2 * ry + t, d);
     for (let i = 0; i < TUN_COUNT; i++) {
-      const mat = new THREE.LineBasicMaterial({ color: 0x2ec5ff, transparent: true, opacity: 0.28 });
-      const ring = new THREE.LineLoop(geo, mat);
-      ring.position.set(0, 0, TUN_NEAR - (i + 1) * TUN_DZ);
-      ring.scale.set(TUN_RX, TUN_RY, 1);
-      ring.userData.baseRot = i * TUN_ROT_STEP;      // the spiral: each frame turned more
-      ring.rotation.z = ring.userData.baseRot;
-      scene.add(ring);
-      tunnelRings.push(ring);
+      const g = new THREE.Group();
+      const top = new THREE.Mesh(horiz, tunnelMat); top.position.y = ry;
+      const bot = new THREE.Mesh(horiz, tunnelMat); bot.position.y = -ry;
+      const lft = new THREE.Mesh(vert, tunnelMat); lft.position.x = -rx;
+      const rgt = new THREE.Mesh(vert, tunnelMat); rgt.position.x = rx;
+      g.add(top, bot, lft, rgt);
+      g.position.set(0, 0, TUN_NEAR - (i + 1) * TUN_DZ);
+      g.userData.baseRot = i * TUN_ROT_STEP;         // the spiral
+      g.rotation.z = g.userData.baseRot;
+      scene.add(g);
+      tunnelRings.push(g);
     }
   }
 
@@ -143,17 +150,18 @@
     if (tunnelRings.length) {
       const speed = (7 + music.energy * 45) * dt;         // fly with the starfield
       tunnelSpin += dt * (0.12 + music.energy * 0.35);    // whole spiral turns, faster when loud
-      const bump = 1 + pulseVal * 0.14;                   // frames swell on the beat
-      const op = Math.min(1, 0.24 + pulseVal * 0.55 + music.energy * 0.14);
-      const col = TUN_BASE.clone().lerp(TUN_FLASH, pulseVal * 0.7);
-      if (punchVal > 0) col.lerp(TUN_DOWN, punchVal * 0.5);  // downbeat flash
+      const bump = 1 + pulseVal * 0.10;                   // frames swell on the beat
+      if (tunnelMat) {
+        const em = TUN_BASE.clone().lerp(TUN_FLASH, pulseVal * 0.6);
+        if (punchVal > 0) em.lerp(TUN_DOWN, punchVal * 0.55);  // downbeat flash
+        tunnelMat.emissive.copy(em);
+        tunnelMat.emissiveIntensity = 0.5 + pulseVal * 1.8 + music.energy * 0.5;
+      }
       for (const ring of tunnelRings) {
         ring.position.z += speed;
         if (ring.position.z > TUN_NEAR) ring.position.z -= TUN_SPAN;   // wrap to the far end
         ring.rotation.z = ring.userData.baseRot + tunnelSpin;
-        ring.scale.set(TUN_RX * bump, TUN_RY * bump, 1);
-        ring.material.opacity = op;
-        ring.material.color.copy(col);
+        ring.scale.setScalar(bump);                       // uniform swell keeps beam proportions
       }
     }
 
@@ -328,7 +336,7 @@
   function dispose() {
     clear();
     if (renderer) { renderer.dispose(); if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement); }
-    renderer = scene = camera = null; saberMeshes = []; stars = null; gridHelper = null; tunnelRings = [];
+    renderer = scene = camera = null; saberMeshes = []; stars = null; gridHelper = null; tunnelRings = []; tunnelMat = null;
   }
 
   window.Scene3D = { init, resize, spawnBlock, update, sliceBlock, missBlock,
