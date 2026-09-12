@@ -5,6 +5,7 @@ LANES = ("drums", "bass", "vocals", "other")
 SAY = {"drums": "drums", "bass": "bass", "vocals": "voice", "other": "chords"}
 BIG = {"entrance", "exit", "release", "accent", "fill", "pause", "hook"}
 KEEP = 0.35
+CLEAR = 0.55
 
 
 def lift(x):
@@ -39,10 +40,9 @@ def cut(a, b, every, origin, least=3, firm=()):
     return out or [(a, b)]
 
 
-def doing(now, was, ceiling, mid, opens, last, tail, here):
+def doing(now, was, ceiling, mid, tail):
     wide, gone = now["adds"], now["drops"]
-    rise, air, energy = now["rise"], now["air"], now["energy"]
-    moved = wide + gone
+    rise, energy = now["rise"], now["energy"]
     drive = now["drive"]
     score = {
         "intensifying": min(1.0, max(0.0, drive) / 0.28),
@@ -51,19 +51,14 @@ def doing(now, was, ceiling, mid, opens, last, tail, here):
         "thinning": min(1.0, gone / 2.0) * 0.95,
         "peaking": (0.95 * min(1.0, energy / max(ceiling, 1e-6))
                     if energy >= ceiling * 0.85 and abs(rise) < 0.18 else 0.0),
-        "sustaining": (max(0.0, 1.0 - abs(drive) / 0.20) * 0.70
-                       if energy > mid * 0.5 and moved == 0 else 0.0),
         "establishing": 0.85 if was is None else 0.0,
-        "developing": 0.55 if now["turns"] and abs(drive) < 0.15 else 0.0,
         "suspending": (min(1.0, now["quiet_share"] / 0.30) * 0.9
                        if now["quiet_share"] > 0.12 else 0.0),
         "resolving": 0.8 if now["releases"] else 0.0,
-        "transitioning": (0.75 if last and moved and (drive > 0.08 or air > 0.12)
-                          else 0.0),
         "closing": 0.95 if tail and (energy < mid * 0.6 or rise < -0.15) else 0.0,
     }
     order = sorted(score.items(), key=lambda kv: -kv[1])
-    head = order[0][0] if order[0][1] > 0 else "sustaining"
+    head = order[0][0] if order[0][1] >= CLEAR else None
     also = [k for k, v in order[1:] if v >= KEEP and v > 0]
     return head, also[:2], round(float(order[0][1]), 3)
 
@@ -107,13 +102,14 @@ def phrases(spans, bars, moments, every, origin, pickup):
     step = lift(bars.get("pace") or bars["intensity"])
     lane = {k: lift(bars[k]) for k in LANES}
     song_mid = float(np.median(loud))
+    song_top = float(loud.max()) or 1.0
 
     raw, was = [], None
     for si, (a, b, role, nth) in enumerate(spans):
         piece = loud[a:b]
         if not len(piece):
             continue
-        ceiling = float(piece.max()) or 1.0
+        ceiling = song_top
         firm = [m["bar"] - 1 + pickup for m in moments
                 if m["is"] in ("entrance", "exit") and m.get("sure", 0) >= 0.7
                 and lasts(lane, m, pickup, 3)]
@@ -154,9 +150,8 @@ def phrases(spans, bars, moments, every, origin, pickup):
                 "releases": any(m["is"] == "release" for m in inside),
                 "fills": any(m["is"] in ("fill", "rise") for m in inside),
             }
-            head, also, sure = doing(
-                now, was, ceiling, song_mid, None,
-                seat == len(cuts) - 1, si == len(spans) - 1, None)
+            head, also, sure = doing(now, was, ceiling, song_mid,
+                                     si == len(spans) - 1)
             raw.append({
                 "from_bar": lo + 1 - pickup, "to_bar": hi - pickup,
                 "in": role, "in_nth": nth,

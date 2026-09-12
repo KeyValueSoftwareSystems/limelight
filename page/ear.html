@@ -265,11 +265,12 @@ function subs() {
     el.className = "sub";
     el.style.left = (100 * t0 / total) + "%";
     el.style.width = (100 * (t1 - t0) / total) + "%";
-    el.style.background = (DOING[q.doing] || "#7f8b9e") + "22";
-    el.style.color = DOING[q.doing] || "#9fb0c9";
-    el.title = `bars ${q.from_bar}-${q.to_bar} · ${q.doing}` +
+    const word = q.doing || "";
+    el.style.background = (DOING[q.doing] || "#39414f") + (word ? "22" : "11");
+    el.style.color = DOING[q.doing] || "#59616f";
+    el.title = `bars ${q.from_bar}-${q.to_bar} · ${word || "nothing it can name"}` +
       (q.also && q.also.length ? " (" + q.also.join(", ") + ")" : "") + ` · ${q.says}`;
-    el.innerHTML = `<b>${q.doing}</b>`;
+    el.innerHTML = word ? `<b>${word}</b>` : "";
     el.onclick = () => play(t0, t1);
     box.appendChild(el);
   }
@@ -350,14 +351,14 @@ function zoom() {
   for (const q of SCORE.phrases || []) {
     const q0 = barTime(q.from_bar), q1 = barTime(q.to_bar + 1);
     if (q1 < a || q0 > b) continue;
-    const hue = DOING[q.doing] || "#7f8b9e";
+    const hue = DOING[q.doing] || "#39414f";
     const x0 = Math.max(0, X(q0)), x1 = Math.min(r.width, X(q1));
-    g.fillStyle = hue + "18";
+    g.fillStyle = hue + (q.doing ? "18" : "0c");
     g.fillRect(x0, 62, x1 - x0, 10);
     g.strokeStyle = hue; g.lineWidth = 1;
     g.beginPath(); g.moveTo(x0, 62); g.lineTo(x0, 72); g.stroke();
     g.fillStyle = hue; g.font = "8px ui-monospace,monospace";
-    if (x1 - x0 > 46) g.fillText(q.doing, x0 + 3, 70);
+    if (q.doing && x1 - x0 > 46) g.fillText(q.doing, x0 + 3, 70);
   }
 
   ZHIT.length = 0;
@@ -496,8 +497,8 @@ function sections() {
       band.className = "inside";
       band.innerHTML = `<span class="tag">does</span>` + mine.map(q =>
         `<span class="subchip" data-b0="${q.from_bar}" data-b1="${q.to_bar}"
-           style="border-color:${DOING[q.doing]||'#3a4152'};color:${DOING[q.doing]||'#9fb0c9'}"
-           title="click to hear bars ${q.from_bar}-${q.to_bar}"><b>${q.from_bar}-${q.to_bar}</b> ${q.doing}${
+           style="border-color:${DOING[q.doing]||'#2b313c'};color:${DOING[q.doing]||'#59616f'}"
+           title="click to hear bars ${q.from_bar}-${q.to_bar}"><b>${q.from_bar}-${q.to_bar}</b> ${q.doing || ""}${
              q.also && q.also.length ? " · " + q.also.join(" ") : ""} — ${q.says}</span>`).join("");
       band.querySelectorAll(".subchip").forEach(el => {
         el.onclick = () => play(barTime(+el.dataset.b0),
