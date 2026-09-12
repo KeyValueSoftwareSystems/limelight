@@ -147,10 +147,14 @@ class Transport:
                 if self.playing:
                     self.playing = False
                     self.anchor_pos = self.duration
-                    self._dark()
                     self.index, self.rgb = len(self.frames) - 1, [0, 0, 0]
                     if self.audio is not None:
                         self.audio.stop()
+                # end-of-song: keep the head PARKED, never go silent. (success-limelight's
+                # transport had a bug here -- it stopped sending the park after the last
+                # frame, so the head ran its auto-program; hold the park every tick.)
+                if self.park is not None and self.net:
+                    self.sender.send(self.park)
                 return
             vals = self._scaled(self.frames[i])
             self.index, self.rgb = i, [int(v) for v in vals[:3]]
