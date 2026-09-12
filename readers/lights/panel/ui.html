@@ -228,8 +228,14 @@
         const o = document.createElement('option'); o.value = ''; o.textContent = '(hub unreachable)'; sel.appendChild(o);
         $('importmsg').textContent = r.log || 'hub unreachable'; return;
       }
-      for (const s of scores) { const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); }
-      if (prev && scores.includes(prev)) sel.value = prev;
+      for (const s of scores) {
+        // scores are {name, version, mtime}; show the store version so it's clear which revision imports
+        const o = document.createElement('option');
+        o.value = s.name;
+        o.textContent = s.version != null ? `${s.name}  ·  v${s.version}` : s.name;
+        sel.appendChild(o);
+      }
+      if (prev && scores.some(s => s.name === prev)) sel.value = prev;
     } catch (e) { $('importmsg').textContent = 'hub unreachable'; }
   }
   $('import').addEventListener('click', async () => {
@@ -241,7 +247,8 @@
       const meta = await api('/api/import', { name, seed });
       await loadTracks();
       $('track').value = meta.name; await loadTrack(meta.name);
-      $('importmsg').textContent = `imported ${name}`;
+      const vtag = meta.hub_version != null ? ` v${meta.hub_version}` : '';
+      $('importmsg').textContent = `imported ${name}${vtag} (seed ${seed})`;
     } catch (e) { $('importmsg').textContent = 'import failed (see server)'; }
     finally { $('import').disabled = false; }
   });
