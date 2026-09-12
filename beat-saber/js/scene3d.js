@@ -154,7 +154,7 @@
       // Hilt sits at a "hand" near a bottom corner (left hand left, right right),
       // slightly toward the camera. The blade aims UP to the cursor on the block
       // plane, so it naturally tilts to its side, rises, and its tip meets blocks.
-      const side = s.hand === "left" ? -1 : 1;
+      const side = s.hand === "left" ? -1 : s.hand === "right" ? 1 : 0;
       const hand = new THREE.Vector3(side * 2.6, -2.6, STRIKE_Z + 3.0);
       // Tip is exactly under the mouse pointer (same ray used for picking), so the
       // sharp point the player aims with is the point that meets the block.

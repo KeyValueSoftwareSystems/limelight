@@ -17,7 +17,9 @@
 
     const dt_ms = (nowSec + latency_ms / 1000 - note.hitSec) * 1000;
     if (Math.abs(dt_ms) > window_ms) return { hit: false, reason: "timing", dt_ms: dt_ms };
-    if (swing.color !== note.color) return { hit: false, reason: "color", dt_ms: dt_ms };
+    if (opts.require_color !== false && swing.color !== note.color) {
+      return { hit: false, reason: "color", dt_ms: dt_ms };
+    }
 
     if (opts.require_direction !== false) {
       const v = DIR_VEC[note.direction] || [0, 1];

@@ -115,7 +115,7 @@
         if (!note) continue;
         if (progressOf(key) < 0.5) continue;     // must be near the strike line to reach
         const r = window.Judge.judge(note, s, nowSec,
-          { latency_ms: latency_ms, require_direction: false });
+          { latency_ms: latency_ms, require_direction: false, require_color: false });
         if (r.hit) hit(key);
       }
     }
