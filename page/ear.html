@@ -42,7 +42,7 @@ button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c
 #head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:3}
 #zoom{width:100%;height:86px;cursor:pointer;margin:0 0 6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
-#tune{width:100%;height:86px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
+#tune{width:100%;height:86px;cursor:pointer;margin-top:6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
 #lanes{width:100%;height:104px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
@@ -173,7 +173,7 @@ function draw() {
     el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness??.5)*100)}%"></div>
       <div class="tag" style="color:${c}">${p.role ? p.role.toUpperCase() : p.repeats_as}</div>
       <div class="sung${p.sung ? "" : " quiet"}"
-        title="${tuneWords(p.sung)} \u00b7 click to hear this section"
+        title="${tuneWords(p.sung)} \u00b7 click to hear the tune itself"
         >\u266a ${tuneWords(p.sung, true)}</div>`;
     el.onclick = ev => {
       const r = map.getBoundingClientRect();
@@ -181,7 +181,7 @@ function draw() {
     };
     el.querySelector(".sung").onclick = ev => {
       ev.stopPropagation();
-      play(t0, Math.min(t1, t0 + 14));
+      hearTune(p.from_bar, p.to_bar);
     };
     map.appendChild(el);
   }
@@ -253,6 +253,25 @@ function momentSpan(m) {
   return (m.for_beats ? m.for_beats * beat : 0);
 }
 
+function hearTune(from_bar, to_bar) {
+  const beat = 60 / SCORE.grid.bpm;
+  const hook = (SCORE.moments || []).find(m =>
+    m.is === "hook" && m.bar >= from_bar && m.bar <= to_bar);
+  if (hook) { hearMoment(hook); return; }
+  const mine = (SCORE.melody || []).filter(n =>
+    n.bar >= from_bar && n.bar <= to_bar);
+  if (!mine.length) { play(barTime(from_bar), barTime(from_bar) + 8); return; }
+  let seat = 0, most = 0;
+  for (let i = 0; i < mine.length; i++) {
+    const upto = barTime(mine[i].bar) + 10;
+    let k = i;
+    while (k < mine.length && barTime(mine[k].bar) < upto) k++;
+    if (k - i > most) { most = k - i; seat = i; }
+  }
+  const t = barTime(mine[seat].bar) + (mine[seat].beat - 1)*beat;
+  play(Math.max(0, t - 0.3), t + 10);
+}
+
 function tuneWords(s, short) {
   if (!s || !s.notes) return short ? "\u2014" : "nothing sung here";
   if (s.on_one_note) return short ? "one note" : "sung on one repeated note";
@@ -279,6 +298,7 @@ function hearMoment(m) {
 }
 
 const ZHIT = [];
+const THIT = [];
 
 const DOING = {intensifying:"#e0655f", easing:"#6fa8dc", expanding:"#5bb98c",
   thinning:"#c98fd1", peaking:"#f2c14e", sustaining:"#7f8b9e",
@@ -466,11 +486,15 @@ function tune() {
   g.fillStyle = "#2c3340"; g.font = "7px ui-monospace,monospace";
   g.fillText("higher", 92, top + 6);
   g.fillText("lower", 92, foot + 4);
+  THIT.length = 0;
   const hooked = new Set();
   for (const m of SCORE.moments || []) {
     if (m.is !== "hook" || !m.for_beats) continue;
     const upto = m.bar + m.for_beats/SCORE.grid.beats_per_bar;
     for (let b = m.bar; b <= upto; b++) hooked.add(b);
+    const a = barTime(m.bar) + (m.beat - 1)*beat;
+    THIT.push({x0: 88 + (a/total)*(r.width-93),
+               x1: 88 + ((a + m.for_beats*beat)/total)*(r.width-93), m});
   }
   for (const n of notes) {
     const t = barTime(n.bar) + (n.beat - 1)*beat;
@@ -675,6 +699,16 @@ $("zoom").onclick = e => {
   const at = aud.currentTime - WINDOW/2 + ((e.clientX - r.left)/r.width) * WINDOW;
   stopAt = null;
   aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05, at));
+};
+$("tune").onclick = e => {
+  if (!SCORE) return;
+  const r = e.target.getBoundingClientRect();
+  const px = e.clientX - r.left;
+  const hit = THIT.find(h => px >= h.x0 - 3 && px <= h.x1 + 3);
+  if (hit) { hearMoment(hit.m); return; }
+  const total = SCORE.song.length_s;
+  const at = ((px - 88) / Math.max(1, r.width - 93)) * total;
+  play(Math.max(0, Math.min(total - 0.1, at)), null);
 };
 $("zoom").onwheel = e => {
   if (!SCORE) return;
