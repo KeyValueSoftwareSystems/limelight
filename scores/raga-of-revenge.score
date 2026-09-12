@@ -6,11 +6,13 @@
   },
   "grid": {
     "bpm": 119.982,
-    "first_beat_s": 1.248,
+    "first_beat_s": 1.7481,
     "beats_per_bar": 4,
-    "bars": 66,
+    "bars": 65,
     "holds_from_s": 37.25,
-    "holds_to_s": 127.61
+    "holds_to_s": 127.61,
+    "first_bar": 0,
+    "last_bar": 64
   },
   "key": {
     "root": "D",
@@ -35,383 +37,378 @@
   },
   "bars": {
     "intensity": [
-      0.025,
-      0.123,
-      0.098,
-      0.132,
-      0.063,
-      0.208,
-      0.173,
-      0.175,
-      0.166,
-      0.635,
-      0.231,
-      0.225,
-      0.183,
-      0.202,
-      0.198,
-      0.258,
-      0.166,
-      0.263,
-      0.247,
-      0.192,
-      0.204,
-      0.414,
-      0.365,
-      0.387,
-      0.116,
-      0.805,
-      0.659,
-      0.752,
-      0.566,
-      0.778,
-      0.63,
-      0.876,
-      0.194,
-      0.757,
-      0.849,
-      0.821,
-      0.801,
+      0.027,
+      0.136,
+      0.108,
+      0.146,
+      0.07,
+      0.229,
+      0.191,
+      0.193,
+      0.462,
+      0.342,
+      0.23,
+      0.251,
+      0.19,
+      0.265,
+      0.211,
+      0.325,
+      0.219,
+      0.238,
+      0.273,
+      0.212,
+      0.34,
+      0.374,
+      0.395,
+      0.404,
+      0.369,
+      0.69,
+      0.774,
+      0.72,
+      0.684,
+      0.754,
+      0.761,
+      0.814,
+      0.18,
+      0.8,
       1.0,
-      0.712,
-      0.975,
-      0.239,
-      0.651,
-      0.776,
-      0.894,
-      0.641,
+      0.817,
+      0.978,
+      0.95,
+      0.845,
+      0.958,
+      0.41,
       0.748,
-      0.867,
-      0.811,
-      0.82,
-      0.764,
-      0.836,
-      0.827,
-      0.71,
-      0.709,
-      0.87,
-      0.117,
-      0.022,
-      0.307,
-      0.1,
-      0.372,
-      0.244,
-      0.213,
-      0.198,
-      0.102,
-      0.004,
+      0.952,
+      0.907,
+      0.648,
+      0.975,
+      0.914,
+      0.94,
+      0.759,
+      0.954,
+      0.936,
+      0.758,
+      0.875,
+      0.814,
+      0.745,
+      0.054,
+      0.143,
+      0.2,
+      0.101,
+      0.509,
+      0.236,
+      0.2,
+      0.249,
+      0.036,
       null,
       null
     ],
     "drums": [
-      0.002,
-      0.413,
-      0.07,
-      0.007,
-      0.015,
-      0.428,
-      0.1,
+      0.01,
+      0.458,
+      0.022,
+      0.009,
+      0.023,
+      0.475,
+      0.047,
       0.004,
-      0.004,
-      0.478,
-      0.223,
-      0.105,
-      0.113,
-      0.583,
-      0.161,
-      0.211,
-      0.02,
-      0.444,
-      0.184,
-      0.2,
-      0.265,
-      0.566,
-      0.55,
-      0.601,
-      0.042,
-      0.695,
-      0.702,
-      0.75,
-      0.75,
-      0.822,
-      0.693,
-      0.689,
-      0.353,
-      0.87,
-      0.899,
-      0.87,
-      0.875,
-      0.945,
-      0.886,
-      0.989,
-      0.328,
-      0.993,
-      0.831,
-      0.827,
-      0.8,
+      0.029,
+      0.501,
+      0.193,
+      0.095,
+      0.177,
+      0.575,
+      0.162,
+      0.162,
+      0.035,
+      0.475,
+      0.139,
+      0.205,
+      0.272,
+      0.599,
+      0.531,
+      0.602,
+      0.045,
+      0.84,
+      0.727,
+      0.73,
+      0.774,
+      0.812,
+      0.696,
+      0.675,
+      0.281,
+      0.992,
+      0.92,
+      0.871,
+      0.889,
+      0.937,
+      0.919,
       1.0,
-      0.866,
-      0.94,
-      0.864,
-      0.849,
-      0.779,
-      0.943,
-      0.835,
-      0.965,
-      0.804,
-      0.497,
-      0.028,
+      0.312,
+      0.979,
+      0.883,
+      0.762,
+      0.889,
+      0.925,
+      0.934,
+      0.895,
+      0.9,
+      0.811,
+      0.823,
+      0.913,
+      0.914,
+      0.904,
+      0.837,
+      0.292,
+      0.009,
       0.006,
-      0.017,
-      0.494,
-      0.113,
-      0.016,
+      0.032,
+      0.547,
+      0.057,
+      0.007,
       0.005,
       0.014,
-      0.003,
       0.003,
       0.003
     ],
     "bass": [
-      0.004,
-      0.185,
-      0.256,
-      0.393,
-      0.116,
-      0.259,
-      0.444,
-      0.366,
+      0.008,
+      0.238,
+      0.34,
+      0.268,
+      0.108,
+      0.354,
+      0.399,
+      0.356,
+      0.552,
+      0.299,
+      0.295,
+      0.305,
+      0.326,
+      0.191,
+      0.159,
+      0.342,
+      0.161,
+      0.518,
+      0.925,
+      0.962,
+      0.781,
+      0.525,
+      0.62,
+      0.6,
+      0.026,
       0.459,
-      0.434,
-      0.274,
-      0.311,
-      0.351,
-      0.185,
-      0.187,
-      0.267,
-      0.249,
+      0.412,
+      0.176,
+      0.166,
+      0.371,
+      0.328,
       0.384,
-      0.9,
+      0.263,
+      0.494,
+      0.446,
+      0.403,
+      0.341,
+      0.52,
+      0.279,
+      0.261,
+      0.179,
+      0.541,
+      0.676,
+      0.895,
+      0.697,
+      0.85,
+      0.761,
+      0.742,
+      0.864,
+      0.856,
+      0.497,
+      0.438,
+      0.309,
+      0.252,
+      0.332,
+      0.008,
+      0.004,
+      0.11,
+      0.105,
+      0.727,
+      0.957,
       1.0,
-      0.851,
-      0.505,
-      0.607,
-      0.638,
-      0.141,
-      0.383,
-      0.43,
-      0.22,
-      0.158,
-      0.343,
-      0.344,
-      0.352,
-      0.29,
-      0.532,
-      0.372,
-      0.491,
-      0.302,
-      0.572,
-      0.276,
-      0.285,
-      0.216,
-      0.369,
-      0.717,
-      0.812,
-      0.815,
-      0.778,
-      0.831,
-      0.728,
-      0.844,
-      0.914,
-      0.566,
-      0.451,
-      0.343,
-      0.278,
-      0.347,
-      0.055,
-      0.004,
-      0.109,
-      0.104,
-      0.509,
-      0.982,
-      0.984,
-      0.846,
-      0.079,
-      0.004,
+      0.659,
+      0.007,
       0.004,
       0.004
     ],
     "vocals": [
-      0.408,
-      0.522,
-      0.48,
-      0.669,
-      0.357,
-      0.344,
-      0.707,
-      0.497,
-      0.44,
-      0.737,
-      0.365,
-      0.514,
-      0.947,
-      0.42,
-      0.879,
+      0.404,
+      0.521,
+      0.556,
+      0.683,
+      0.2,
+      0.476,
+      0.689,
+      0.477,
+      0.475,
+      0.796,
+      0.23,
+      0.705,
+      0.771,
+      0.605,
+      0.874,
       1.0,
-      0.555,
-      0.108,
+      0.424,
+      0.035,
       0.005,
       0.003,
       0.003,
       0.003,
       0.003,
-      0.004,
-      0.414,
-      0.532,
-      0.393,
-      0.636,
-      0.333,
-      0.756,
-      0.799,
+      0.008,
+      0.61,
+      0.412,
+      0.489,
+      0.478,
+      0.473,
+      0.811,
+      0.768,
+      0.674,
+      0.664,
+      0.684,
+      0.585,
+      0.874,
+      0.782,
+      0.856,
+      0.848,
+      0.724,
+      0.727,
+      0.499,
+      0.422,
+      0.467,
+      0.464,
+      0.621,
+      0.58,
+      0.597,
+      0.792,
+      0.651,
+      0.55,
+      0.581,
+      0.662,
       0.692,
-      0.612,
-      0.695,
-      0.582,
-      0.844,
-      0.741,
-      0.895,
-      0.843,
-      0.758,
-      0.659,
-      0.618,
-      0.4,
-      0.466,
-      0.443,
-      0.576,
-      0.589,
-      0.564,
-      0.731,
-      0.744,
-      0.556,
-      0.571,
-      0.606,
-      0.717,
-      0.707,
-      0.377,
-      0.195,
-      0.556,
-      0.078,
-      0.29,
-      0.139,
-      0.007,
-      0.469,
-      0.79,
-      0.083,
-      0.004,
-      0.002
+      0.719,
+      0.236,
+      0.28,
+      0.529,
+      0.05,
+      0.355,
+      0.051,
+      0.01,
+      0.734,
+      0.581,
+      0.034,
+      0.003
     ],
     "other": [
-      0.005,
-      0.181,
-      0.513,
-      0.434,
-      0.4,
-      0.364,
-      0.442,
-      0.559,
-      0.542,
+      0.007,
+      0.335,
+      0.47,
+      0.39,
+      0.401,
+      0.37,
+      0.474,
+      0.54,
+      0.56,
+      0.459,
       0.527,
-      0.516,
-      0.483,
-      0.351,
-      0.458,
-      0.382,
-      0.516,
-      0.374,
-      0.485,
-      0.303,
-      0.34,
-      0.499,
-      0.79,
-      0.86,
-      0.946,
-      0.475,
-      0.792,
-      0.964,
-      0.823,
-      0.816,
-      0.907,
-      0.878,
-      0.947,
-      0.472,
-      0.774,
-      0.988,
-      0.806,
-      0.811,
-      0.91,
-      1.0,
-      0.913,
-      0.497,
-      0.864,
-      0.87,
-      0.947,
-      0.902,
-      0.877,
-      0.971,
-      0.829,
-      0.791,
-      0.966,
-      0.895,
-      0.999,
-      0.946,
-      0.911,
-      0.984,
-      0.512,
-      0.095,
-      0.641,
-      0.631,
-      0.49,
-      0.291,
-      0.33,
-      0.336,
+      0.464,
+      0.339,
+      0.478,
+      0.364,
+      0.634,
       0.181,
-      0.004,
+      0.555,
+      0.308,
+      0.371,
+      0.518,
+      0.835,
+      0.855,
+      0.963,
+      0.362,
+      0.866,
+      0.92,
+      0.814,
+      0.824,
+      0.903,
+      0.85,
+      0.956,
+      0.359,
+      0.879,
+      0.945,
+      0.786,
+      0.836,
+      0.907,
+      0.972,
+      0.928,
+      0.358,
+      0.949,
+      0.888,
+      0.923,
+      0.897,
+      0.874,
+      0.961,
+      0.781,
+      0.811,
+      0.949,
+      0.902,
+      1.0,
+      0.918,
+      0.913,
+      0.988,
+      0.284,
+      0.045,
+      0.772,
+      0.663,
+      0.378,
+      0.303,
+      0.308,
+      0.387,
+      0.052,
       0.004,
       0.004
     ],
     "brightness": [
-      0.567,
-      0.766,
-      0.859,
-      0.61,
-      0.353,
-      0.926,
-      0.629,
-      0.452,
-      0.953,
-      0.842,
-      0.871,
-      0.898,
-      0.794,
+      0.645,
+      0.826,
       0.897,
-      0.941,
-      0.522,
-      0.425,
-      0.408,
-      0.539,
-      0.713,
-      0.844,
-      0.867,
-      0.891,
-      0.664,
-      1.0,
+      0.451,
+      0.469,
+      0.926,
+      0.532,
+      0.575,
+      0.963,
+      0.793,
+      0.916,
+      0.88,
+      0.809,
+      0.903,
+      0.956,
+      0.35,
+      0.433,
+      0.443,
+      0.586,
+      0.767,
+      0.834,
+      0.877,
+      0.901,
+      0.686,
+      0.999,
       0.994,
-      0.997,
-      0.983,
+      0.991,
+      0.989,
       1.0,
       1.0,
       0.999,
-      0.902,
+      0.901,
       1.0,
       0.998,
       1.0,
@@ -419,11 +416,11 @@
       1.0,
       1.0,
       1.0,
-      0.922,
+      0.923,
       1.0,
       0.997,
       0.998,
-      0.996,
+      0.997,
       1.0,
       1.0,
       0.998,
@@ -434,22 +431,21 @@
       1.0,
       1.0,
       1.0,
-      0.601,
-      0.128,
-      0.642,
-      0.68,
-      0.752,
-      0.477,
-      0.453,
-      0.666,
-      0.838,
-      0.071,
-      0.0,
+      0.345,
+      0.26,
+      0.626,
+      0.745,
+      0.715,
+      0.44,
+      0.456,
+      0.812,
+      0.654,
+      0.002,
       0.0,
       0.0
     ],
     "chord": [
-      "C",
+      "Am",
       "Dm",
       "Dm",
       "Dm",
@@ -462,21 +458,21 @@
       "Bb",
       "Am",
       "Am",
-      "Am",
+      "Dm",
       "Dm",
       "Dm",
       "A",
-      "Dm",
-      "D",
-      "D",
-      "Dm",
-      "Dm",
-      "Dm",
-      "Dm",
-      "Dm",
-      "Dm",
-      "Dm",
       "Am",
+      "D",
+      "D",
+      "Dm",
+      "Dm",
+      "Dm",
+      "Dm",
+      "Dm",
+      "D",
+      "Dm",
+      "Bb",
       "Bb",
       "C",
       "C",
@@ -499,7 +495,7 @@
       "Dm",
       "Dm",
       "Dm",
-      "Bb",
+      "Gm",
       "C",
       "C",
       "Dm",
@@ -511,90 +507,88 @@
       "Dm",
       "Am",
       "Am",
-      "Am",
+      "Dm",
       "D",
       "D",
-      "D",
-      null
+      "D"
     ],
     "chord_sure": [
-      0.569,
-      0.799,
-      0.857,
-      0.789,
-      0.77,
-      0.791,
+      0.628,
+      0.834,
+      0.813,
+      0.817,
+      0.748,
+      0.796,
       0.587,
-      0.744,
-      0.818,
+      0.773,
+      0.794,
       0.625,
-      0.789,
-      0.695,
-      0.666,
-      0.726,
-      0.636,
-      0.517,
-      0.674,
-      0.719,
-      0.632,
-      0.573,
-      0.788,
-      0.808,
-      0.772,
-      0.786,
-      0.735,
-      0.815,
-      0.702,
-      0.525,
+      0.819,
+      0.668,
       0.697,
-      0.701,
-      0.758,
-      0.753,
-      0.733,
-      0.849,
-      0.718,
-      0.607,
-      0.576,
+      0.675,
       0.598,
-      0.719,
+      0.519,
+      0.682,
+      0.631,
+      0.624,
+      0.564,
+      0.805,
+      0.788,
+      0.782,
+      0.767,
+      0.775,
+      0.839,
+      0.702,
+      0.583,
+      0.683,
+      0.717,
+      0.749,
+      0.758,
+      0.72,
+      0.832,
+      0.686,
+      0.623,
+      0.576,
+      0.618,
+      0.726,
       0.64,
       0.739,
-      0.817,
-      0.82,
-      0.622,
-      0.704,
-      0.81,
-      0.837,
-      0.774,
-      0.679,
-      0.774,
-      0.779,
+      0.818,
+      0.806,
+      0.64,
+      0.715,
+      0.819,
+      0.831,
+      0.747,
+      0.697,
+      0.773,
+      0.748,
+      0.766,
+      0.696,
+      0.793,
+      0.78,
       0.742,
+      0.685,
+      0.677,
       0.737,
-      0.751,
-      0.789,
+      0.776,
+      0.675,
+      0.689,
       0.752,
-      0.688,
-      0.665,
-      0.709,
-      0.801,
-      0.666,
-      0.686,
-      0.718,
-      0.867,
-      0.903,
-      0.894,
-      0.0
+      0.878,
+      0.9,
+      0.893
     ]
   },
   "parts": [
     {
       "from_bar": 0,
-      "to_bar": 16,
+      "to_bar": 15,
       "role": "intro",
       "feels": "half a kit",
-      "fullness": 0.589,
-      "rise": 0.107,
+      "fullness": 0.602,
+      "rise": 0.143,
       "playing": [
         "drums",
         "bass",
@@ -604,29 +598,29 @@
       "stems": {
         "drums": {
           "is": "some",
-          "level": 0.109
+          "level": 0.131
         },
         "bass": {
           "is": "some",
-          "level": 0.23
+          "level": 0.301
         },
         "vocals": {
           "is": "full",
-          "level": 0.646
+          "level": 0.727
         },
         "other": {
           "is": "some",
-          "level": 0.276
+          "level": 0.256
         }
       }
     },
     {
-      "from_bar": 17,
-      "to_bar": 24,
-      "role": "full",
-      "feels": "half a kit",
-      "fullness": 0.539,
-      "rise": 0.331,
+      "from_bar": 16,
+      "to_bar": 23,
+      "role": "pre-chorus",
+      "feels": "drums in",
+      "fullness": 0.502,
+      "rise": 0.246,
       "playing": [
         "drums",
         "bass",
@@ -634,16 +628,78 @@
       ],
       "stems": {
         "drums": {
-          "is": "some",
-          "level": 0.383
+          "is": "full",
+          "level": 0.401
         },
         "bass": {
           "is": "full",
-          "level": 0.704
+          "level": 0.692
         },
         "vocals": {
           "is": "none",
           "level": 0.0
+        },
+        "other": {
+          "is": "some",
+          "level": 0.37
+        }
+      }
+    },
+    {
+      "from_bar": 24,
+      "to_bar": 55,
+      "role": "chorus",
+      "feels": "voice in",
+      "fullness": 0.888,
+      "rise": -0.043,
+      "playing": [
+        "drums",
+        "bass",
+        "vocals",
+        "other"
+      ],
+      "stems": {
+        "drums": {
+          "is": "full",
+          "level": 0.954
+        },
+        "bass": {
+          "is": "full",
+          "level": 0.435
+        },
+        "vocals": {
+          "is": "full",
+          "level": 0.799
+        },
+        "other": {
+          "is": "full",
+          "level": 0.924
+        }
+      }
+    },
+    {
+      "from_bar": 56,
+      "to_bar": 59,
+      "role": "breakdown",
+      "feels": "drums out",
+      "fullness": 0.432,
+      "rise": -0.185,
+      "playing": [
+        "vocals",
+        "other"
+      ],
+      "stems": {
+        "drums": {
+          "is": "none",
+          "level": 0.013
+        },
+        "bass": {
+          "is": "none",
+          "level": 0.054
+        },
+        "vocals": {
+          "is": "some",
+          "level": 0.393
         },
         "other": {
           "is": "some",
@@ -652,161 +708,31 @@
       }
     },
     {
-      "from_bar": 25,
-      "to_bar": 32,
-      "role": "breakdown",
-      "feels": "drums in",
-      "fullness": 0.871,
-      "rise": -0.115,
-      "playing": [
-        "drums",
-        "bass",
-        "vocals",
-        "other"
-      ],
-      "stems": {
-        "drums": {
-          "is": "full",
-          "level": 0.761
-        },
-        "bass": {
-          "is": "some",
-          "level": 0.333
-        },
-        "vocals": {
-          "is": "full",
-          "level": 0.785
-        },
-        "other": {
-          "is": "full",
-          "level": 0.854
-        }
-      }
-    },
-    {
-      "from_bar": 33,
-      "to_bar": 36,
-      "role": "anthem",
-      "feels": "full",
-      "fullness": 0.957,
-      "rise": 0.095,
-      "playing": [
-        "drums",
-        "bass",
-        "vocals",
-        "other"
-      ],
-      "stems": {
-        "drums": {
-          "is": "full",
-          "level": 0.953
-        },
-        "bass": {
-          "is": "full",
-          "level": 0.449
-        },
-        "vocals": {
-          "is": "full",
-          "level": 0.904
-        },
-        "other": {
-          "is": "full",
-          "level": 0.794
-        }
-      }
-    },
-    {
-      "from_bar": 37,
-      "to_bar": 40,
-      "role": "breakdown",
-      "feels": "full",
-      "fullness": 0.907,
-      "rise": -0.05,
-      "playing": [
-        "drums",
-        "bass",
-        "vocals",
-        "other"
-      ],
-      "stems": {
-        "drums": {
-          "is": "full",
-          "level": 1.0
-        },
-        "bass": {
-          "is": "some",
-          "level": 0.248
-        },
-        "vocals": {
-          "is": "full",
-          "level": 1.0
-        },
-        "other": {
-          "is": "full",
-          "level": 0.94
-        }
-      }
-    },
-    {
-      "from_bar": 41,
-      "to_bar": 48,
-      "role": "build",
-      "feels": "full",
-      "fullness": 0.951,
-      "rise": 0.045,
-      "playing": [
-        "drums",
-        "bass",
-        "vocals",
-        "other"
-      ],
-      "stems": {
-        "drums": {
-          "is": "full",
-          "level": 0.945
-        },
-        "bass": {
-          "is": "full",
-          "level": 0.934
-        },
-        "vocals": {
-          "is": "full",
-          "level": 0.717
-        },
-        "other": {
-          "is": "full",
-          "level": 0.887
-        }
-      }
-    },
-    {
-      "from_bar": 49,
-      "to_bar": 66,
+      "from_bar": 60,
+      "to_bar": 65,
       "role": "outro",
-      "feels": "drums out",
-      "fullness": 0.484,
-      "rise": -0.731,
+      "feels": "no drums",
+      "fullness": 0.219,
+      "rise": -0.483,
       "playing": [
-        "bass",
-        "vocals",
-        "other"
+        "bass"
       ],
       "stems": {
         "drums": {
           "is": "none",
-          "level": 0.072
+          "level": 0.0
         },
         "bass": {
           "is": "some",
-          "level": 0.289
+          "level": 0.34
         },
         "vocals": {
-          "is": "full",
-          "level": 0.53
+          "is": "none",
+          "level": 0.042
         },
         "other": {
-          "is": "some",
-          "level": 0.359
+          "is": "none",
+          "level": 0.0
         }
       }
     }
@@ -816,7 +742,7 @@
       "t": 0.37,
       "downbeat": false,
       "weight": 0.003,
-      "sure": 0.011
+      "sure": 0.012
     },
     {
       "t": 1.03,
@@ -1002,7 +928,7 @@
       "t": 20.27,
       "downbeat": false,
       "weight": 0.233,
-      "sure": 0.423
+      "sure": 0.424
     },
     {
       "t": 20.79,
@@ -1062,7 +988,7 @@
       "t": 25.29,
       "downbeat": false,
       "weight": 0.218,
-      "sure": 0.346
+      "sure": 0.347
     },
     {
       "t": 25.78,
@@ -1122,7 +1048,7 @@
       "t": 30.29,
       "downbeat": false,
       "weight": 0.251,
-      "sure": 0.349
+      "sure": 0.35
     },
     {
       "t": 30.8,
@@ -1182,7 +1108,7 @@
       "t": 35.25,
       "downbeat": false,
       "weight": 0.404,
-      "sure": 0.488
+      "sure": 0.487
     },
     {
       "t": 35.76,
@@ -1218,7 +1144,7 @@
       "t": 38.25,
       "downbeat": false,
       "weight": 0.594,
-      "sure": 0.972
+      "sure": 0.971
     },
     {
       "t": 38.77,
@@ -1248,7 +1174,7 @@
       "t": 40.76,
       "downbeat": false,
       "weight": 0.302,
-      "sure": 0.951
+      "sure": 0.952
     },
     {
       "t": 41.26,
@@ -1278,7 +1204,7 @@
       "t": 43.26,
       "downbeat": false,
       "weight": 0.358,
-      "sure": 0.954
+      "sure": 0.955
     },
     {
       "t": 43.76,
@@ -1308,7 +1234,7 @@
       "t": 45.76,
       "downbeat": true,
       "weight": 0.591,
-      "sure": 0.957
+      "sure": 0.958
     },
     {
       "t": 46.26,
@@ -1338,7 +1264,7 @@
       "t": 48.24,
       "downbeat": false,
       "weight": 0.003,
-      "sure": 0.88
+      "sure": 0.879
     },
     {
       "t": 48.76,
@@ -1368,7 +1294,7 @@
       "t": 50.76,
       "downbeat": false,
       "weight": 0.739,
-      "sure": 0.963
+      "sure": 0.964
     },
     {
       "t": 51.26,
@@ -1398,7 +1324,7 @@
       "t": 53.25,
       "downbeat": false,
       "weight": 0.501,
-      "sure": 0.954
+      "sure": 0.953
     },
     {
       "t": 53.76,
@@ -1428,7 +1354,7 @@
       "t": 55.76,
       "downbeat": true,
       "weight": 0.73,
-      "sure": 0.969
+      "sure": 0.97
     },
     {
       "t": 56.26,
@@ -1458,7 +1384,7 @@
       "t": 58.26,
       "downbeat": false,
       "weight": 0.534,
-      "sure": 0.972
+      "sure": 0.973
     },
     {
       "t": 58.76,
@@ -1488,7 +1414,7 @@
       "t": 60.75,
       "downbeat": false,
       "weight": 0.683,
-      "sure": 0.945
+      "sure": 0.944
     },
     {
       "t": 61.24,
@@ -1518,7 +1444,7 @@
       "t": 63.26,
       "downbeat": false,
       "weight": 0.349,
-      "sure": 0.978
+      "sure": 0.979
     },
     {
       "t": 63.76,
@@ -1548,7 +1474,7 @@
       "t": 65.76,
       "downbeat": true,
       "weight": 0.819,
-      "sure": 0.981
+      "sure": 0.982
     },
     {
       "t": 66.26,
@@ -1578,7 +1504,7 @@
       "t": 68.26,
       "downbeat": false,
       "weight": 0.669,
-      "sure": 0.984
+      "sure": 0.985
     },
     {
       "t": 68.76,
@@ -1608,7 +1534,7 @@
       "t": 70.76,
       "downbeat": false,
       "weight": 0.87,
-      "sure": 0.987
+      "sure": 0.988
     },
     {
       "t": 71.26,
@@ -1638,7 +1564,7 @@
       "t": 73.25,
       "downbeat": false,
       "weight": 0.385,
-      "sure": 0.93
+      "sure": 0.929
     },
     {
       "t": 73.75,
@@ -1668,7 +1594,7 @@
       "t": 75.76,
       "downbeat": true,
       "weight": 0.942,
-      "sure": 0.993
+      "sure": 0.994
     },
     {
       "t": 76.26,
@@ -1698,7 +1624,7 @@
       "t": 78.26,
       "downbeat": false,
       "weight": 0.575,
-      "sure": 0.996
+      "sure": 0.997
     },
     {
       "t": 78.76,
@@ -1728,7 +1654,7 @@
       "t": 80.76,
       "downbeat": false,
       "weight": 0.157,
-      "sure": 0.999
+      "sure": 1.0
     },
     {
       "t": 81.27,
@@ -1758,7 +1684,7 @@
       "t": 83.26,
       "downbeat": false,
       "weight": 0.684,
-      "sure": 0.998
+      "sure": 0.997
     },
     {
       "t": 83.76,
@@ -1788,7 +1714,7 @@
       "t": 85.76,
       "downbeat": true,
       "weight": 1.0,
-      "sure": 0.995
+      "sure": 0.994
     },
     {
       "t": 86.26,
@@ -1818,7 +1744,7 @@
       "t": 88.26,
       "downbeat": false,
       "weight": 0.323,
-      "sure": 0.992
+      "sure": 0.991
     },
     {
       "t": 88.76,
@@ -1848,7 +1774,7 @@
       "t": 90.76,
       "downbeat": false,
       "weight": 1.0,
-      "sure": 0.989
+      "sure": 0.988
     },
     {
       "t": 91.26,
@@ -1878,7 +1804,7 @@
       "t": 93.26,
       "downbeat": false,
       "weight": 0.828,
-      "sure": 0.986
+      "sure": 0.985
     },
     {
       "t": 93.76,
@@ -1908,7 +1834,7 @@
       "t": 95.76,
       "downbeat": true,
       "weight": 0.792,
-      "sure": 0.983
+      "sure": 0.982
     },
     {
       "t": 96.26,
@@ -1938,7 +1864,7 @@
       "t": 98.26,
       "downbeat": false,
       "weight": 0.808,
-      "sure": 0.98
+      "sure": 0.979
     },
     {
       "t": 98.76,
@@ -1968,7 +1894,7 @@
       "t": 100.76,
       "downbeat": false,
       "weight": 1.0,
-      "sure": 0.977
+      "sure": 0.976
     },
     {
       "t": 101.25,
@@ -1998,7 +1924,7 @@
       "t": 103.26,
       "downbeat": false,
       "weight": 0.376,
-      "sure": 0.974
+      "sure": 0.973
     },
     {
       "t": 103.76,
@@ -2028,7 +1954,7 @@
       "t": 105.76,
       "downbeat": true,
       "weight": 0.718,
-      "sure": 0.971
+      "sure": 0.97
     },
     {
       "t": 106.26,
@@ -2058,7 +1984,7 @@
       "t": 108.26,
       "downbeat": false,
       "weight": 0.408,
-      "sure": 0.968
+      "sure": 0.967
     },
     {
       "t": 108.76,
@@ -2088,7 +2014,7 @@
       "t": 110.76,
       "downbeat": false,
       "weight": 0.071,
-      "sure": 0.965
+      "sure": 0.964
     },
     {
       "t": 111.24,
@@ -2118,7 +2044,7 @@
       "t": 113.26,
       "downbeat": false,
       "weight": 0.003,
-      "sure": 0.962
+      "sure": 0.961
     },
     {
       "t": 113.75,
@@ -2148,7 +2074,7 @@
       "t": 115.79,
       "downbeat": true,
       "weight": 0.228,
-      "sure": 0.801
+      "sure": 0.802
     },
     {
       "t": 116.29,
@@ -2178,7 +2104,7 @@
       "t": 118.28,
       "downbeat": false,
       "weight": 0.641,
-      "sure": 0.884
+      "sure": 0.885
     },
     {
       "t": 118.78,
@@ -2208,7 +2134,7 @@
       "t": 120.8,
       "downbeat": false,
       "weight": 0.469,
-      "sure": 0.727
+      "sure": 0.728
     },
     {
       "t": 121.29,
@@ -2238,7 +2164,7 @@
       "t": 123.28,
       "downbeat": false,
       "weight": 0.558,
-      "sure": 0.89
+      "sure": 0.891
     },
     {
       "t": 123.77,
@@ -2268,7 +2194,7 @@
       "t": 125.75,
       "downbeat": true,
       "weight": 0.023,
-      "sure": 0.867
+      "sure": 0.866
     },
     {
       "t": 126.25,
@@ -2603,7 +2529,7 @@
   "events": [
     {
       "bar": 0,
-      "beat": 3,
+      "beat": 2,
       "is": "song starts",
       "strength": 1.0
     },
@@ -2611,15 +2537,15 @@
       "bar": 1,
       "beat": 1,
       "is": "drums fades",
-      "for_bars": 7,
-      "strength": 0.614,
+      "for_bars": 6,
+      "strength": 0.682,
       "then": "nothing changes"
     },
     {
       "bar": 1,
       "beat": 1,
       "is": "chords in",
-      "strength": 0.382
+      "strength": 0.399
     },
     {
       "bar": 1,
@@ -2628,214 +2554,265 @@
       "strength": 0.238
     },
     {
-      "bar": 3,
+      "bar": 4,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 7,
-      "strength": 0.457,
-      "then": "other grows after"
+      "is": "voice swells",
+      "for_bars": 8,
+      "strength": 0.857,
+      "then": "bass grows after"
     },
     {
       "bar": 4,
       "beat": 1,
-      "is": "bass pause",
+      "is": "voice pause",
       "for_bars": 1,
-      "strength": 0.705,
-      "then": "other grows after"
+      "strength": 0.708,
+      "then": "bass grows after"
     },
     {
       "bar": 4,
       "beat": 1,
       "is": "bass swells",
       "for_bars": 4,
-      "strength": 0.514,
-      "then": "other grows after"
+      "strength": 0.666,
+      "then": "bass grows after"
     },
     {
       "bar": 4,
       "beat": 1,
-      "is": "voice pause",
-      "for_bars": 2,
-      "strength": 0.467,
-      "then": "other grows after"
+      "is": "bass pause",
+      "for_bars": 1,
+      "strength": 0.599,
+      "then": "bass grows after"
     },
     {
       "bar": 5,
-      "beat": 2,
+      "beat": 1,
       "is": "bass back, bigger",
       "after": "bass pause",
       "strength": 1.0
     },
     {
-      "bar": 6,
+      "bar": 5,
       "beat": 1,
       "is": "voice back, bigger",
       "after": "voice pause",
       "strength": 1.0
     },
     {
+      "bar": 7,
+      "beat": 1,
+      "is": "drums swells",
+      "for_bars": 6,
+      "strength": 0.858,
+      "then": "other grows after"
+    },
+    {
+      "bar": 8,
+      "beat": 1,
+      "is": "bass fades",
+      "for_bars": 6,
+      "strength": 0.589,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 8,
+      "beat": 1,
+      "is": "chords fades",
+      "for_bars": 8,
+      "strength": 0.568,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 9,
+      "beat": 1,
+      "is": "bass pause",
+      "for_bars": 2,
+      "strength": 0.458,
+      "then": "bass thins after"
+    },
+    {
       "bar": 9,
       "beat": 1,
       "is": "drums in",
-      "strength": 0.23
-    },
-    {
-      "bar": 10,
-      "beat": 1,
-      "is": "voice swells",
-      "for_bars": 5,
-      "strength": 0.953,
-      "then": "bass thins after"
-    },
-    {
-      "bar": 10,
-      "beat": 1,
-      "is": "bass swells",
-      "for_bars": 8,
-      "strength": 0.939,
-      "then": "bass thins after"
+      "strength": 0.242
     },
     {
       "bar": 10,
       "beat": 1,
       "is": "voice pause",
       "for_bars": 1,
-      "strength": 0.506,
+      "strength": 0.712,
       "then": "bass thins after"
     },
     {
       "bar": 11,
       "beat": 1,
       "is": "drums pause",
-      "for_bars": 2,
-      "strength": 0.53,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 11,
-      "beat": 1,
-      "is": "drums swells",
-      "for_bars": 6,
+      "for_bars": 1,
       "strength": 0.508,
       "then": "vocals grows after"
     },
     {
       "bar": 11,
       "beat": 1,
+      "is": "bass back, bigger",
+      "after": "bass pause",
+      "strength": 0.235
+    },
+    {
+      "bar": 11,
+      "beat": 1,
       "is": "voice back",
       "after": "voice pause",
-      "strength": 0.233
+      "strength": 0.05
     },
     {
-      "bar": 13,
+      "bar": 12,
       "beat": 1,
-      "is": "voice pause",
-      "for_bars": 1,
-      "strength": 0.557,
-      "then": "bass thins after"
-    },
-    {
-      "bar": 13,
-      "beat": 1,
-      "is": "chords swells",
+      "is": "voice fades",
       "for_bars": 8,
-      "strength": 0.498,
-      "then": "bass thins after"
+      "strength": 1.0,
+      "then": "vocals grows after"
     },
     {
-      "bar": 13,
+      "bar": 12,
       "beat": 1,
-      "is": "bass pause",
-      "for_bars": 2,
-      "strength": 0.473,
-      "then": "bass thins after"
-    },
-    {
-      "bar": 13,
-      "beat": 2,
-      "is": "drums back",
+      "is": "drums back, bigger",
       "after": "drums pause",
-      "strength": 0.016
+      "strength": 0.649
     },
     {
       "bar": 14,
       "beat": 1,
-      "is": "voice back",
-      "after": "voice pause",
-      "strength": 0.382
-    },
-    {
-      "bar": 15,
-      "beat": 1,
-      "is": "voice fades",
-      "for_bars": 6,
+      "is": "bass swells",
+      "for_bars": 5,
       "strength": 1.0,
       "then": "vocals thins after"
     },
     {
-      "bar": 15,
-      "beat": 2,
-      "is": "bass back",
-      "after": "bass pause",
-      "strength": 0.544
+      "bar": 14,
+      "beat": 1,
+      "is": "drums swells",
+      "for_bars": 7,
+      "strength": 0.655,
+      "then": "vocals thins after"
     },
     {
-      "bar": 16,
+      "bar": 15,
       "beat": 1,
       "is": "only drums + bass + voice + chords left",
-      "for_bars": 3,
+      "for_bars": 1,
       "leaves": [
         "drums",
         "bass",
         "vocals",
         "other"
       ],
-      "strength": 0.938,
+      "strength": 0.947,
       "then": "vocals thins after"
+    },
+    {
+      "bar": 16,
+      "beat": 1,
+      "is": "chords swells",
+      "for_bars": 7,
+      "strength": 1.0,
+      "then": "vocals thins after"
+    },
+    {
+      "bar": 16,
+      "beat": 1,
+      "is": "all back",
+      "after": "only drums + bass + voice + chords left",
+      "strength": 0.967
     },
     {
       "bar": 16,
       "beat": 1,
       "is": "drums pause",
       "for_bars": 1,
-      "strength": 0.907,
+      "strength": 0.786,
+      "then": "vocals thins after"
+    },
+    {
+      "bar": 16,
+      "beat": 1,
+      "is": "chords pause",
+      "for_bars": 1,
+      "strength": 0.714,
+      "then": "vocals thins after"
+    },
+    {
+      "bar": 16,
+      "beat": 1,
+      "is": "bass pause",
+      "for_bars": 1,
+      "strength": 0.528,
       "then": "vocals thins after"
     },
     {
       "bar": 17,
-      "beat": 2,
-      "is": "drums back",
-      "after": "drums pause",
-      "strength": 0.776
-    },
-    {
-      "bar": 18,
       "beat": 1,
-      "is": "drums swells",
-      "for_bars": 8,
-      "strength": 0.776,
+      "is": "only drums + bass + chords left",
+      "for_bars": 2,
+      "leaves": [
+        "drums",
+        "bass",
+        "other"
+      ],
+      "strength": 0.954,
       "then": "vocals thins after"
     },
     {
-      "bar": 18,
+      "bar": 17,
+      "beat": 1,
+      "is": "drums back",
+      "after": "drums pause",
+      "strength": 0.813
+    },
+    {
+      "bar": 17,
+      "beat": 1,
+      "is": "bass back",
+      "after": "bass pause",
+      "strength": 0.813
+    },
+    {
+      "bar": 17,
+      "beat": 1,
+      "is": "chords back",
+      "after": "chords pause",
+      "strength": 0.813
+    },
+    {
+      "bar": 17,
       "beat": 1,
       "is": "lead out",
-      "strength": 0.635
+      "strength": 0.726
     },
     {
       "bar": 18,
       "beat": 1,
       "is": "drums pause",
       "for_bars": 2,
-      "strength": 0.584,
+      "strength": 0.707,
       "then": "vocals thins after"
     },
     {
       "bar": 19,
       "beat": 1,
-      "is": "all back",
-      "after": "only drums + bass + voice + chords left",
-      "strength": 0.027
+      "is": "bass fades",
+      "for_bars": 5,
+      "strength": 1.0,
+      "then": "other grows after"
+    },
+    {
+      "bar": 19,
+      "beat": 1,
+      "is": "all back, bigger",
+      "after": "only drums + bass + chords left",
+      "strength": 0.555
     },
     {
       "bar": 20,
@@ -2845,19 +2822,19 @@
       "strength": 1.0
     },
     {
-      "bar": 21,
+      "bar": 22,
       "beat": 1,
       "is": "voice swells",
-      "for_bars": 8,
-      "strength": 1.0,
-      "then": "other grows after"
+      "for_bars": 4,
+      "strength": 0.73,
+      "then": "bass thins after"
     },
     {
       "bar": 24,
       "beat": 1,
-      "is": "drums pause",
-      "for_bars": 1,
-      "strength": 0.93,
+      "is": "drums swells",
+      "for_bars": 5,
+      "strength": 1.0,
       "then": "vocals grows after"
     },
     {
@@ -2865,7 +2842,23 @@
       "beat": 1,
       "is": "bass pause",
       "for_bars": 1,
-      "strength": 0.779,
+      "strength": 0.957,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 24,
+      "beat": 1,
+      "is": "drums pause",
+      "for_bars": 1,
+      "strength": 0.925,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 24,
+      "beat": 1,
+      "is": "chords swells",
+      "for_bars": 7,
+      "strength": 0.891,
       "then": "vocals grows after"
     },
     {
@@ -2873,14 +2866,14 @@
       "beat": 1,
       "is": "chords pause",
       "for_bars": 1,
-      "strength": 0.498,
+      "strength": 0.624,
       "then": "vocals grows after"
     },
     {
       "bar": 24,
       "beat": 1,
       "is": "voice in",
-      "strength": 0.494
+      "strength": 0.497
     },
     {
       "bar": 25,
@@ -2904,43 +2897,11 @@
       "strength": 1.0
     },
     {
-      "bar": 26,
-      "beat": 1,
-      "is": "chords fades",
-      "for_bars": 6,
-      "strength": 0.738,
-      "then": "vocals grows after"
-    },
-    {
       "bar": 27,
       "beat": 1,
       "is": "bass pause",
       "for_bars": 2,
-      "strength": 0.487,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 27,
-      "beat": 1,
-      "is": "bass swells",
-      "for_bars": 6,
-      "strength": 0.467,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 28,
-      "beat": 1,
-      "is": "drums fades",
-      "for_bars": 4,
-      "strength": 0.596,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 28,
-      "beat": 1,
-      "is": "voice pause",
-      "for_bars": 1,
-      "strength": 0.476,
+      "strength": 0.574,
       "then": "vocals grows after"
     },
     {
@@ -2951,26 +2912,11 @@
       "strength": 1.0
     },
     {
-      "bar": 29,
-      "beat": 1,
-      "is": "voice back, bigger",
-      "after": "voice pause",
-      "strength": 1.0
-    },
-    {
-      "bar": 32,
-      "beat": 1,
-      "is": "drums swells",
-      "for_bars": 7,
-      "strength": 0.954,
-      "then": "drums grows after"
-    },
-    {
       "bar": 32,
       "beat": 1,
       "is": "chords swells",
       "for_bars": 6,
-      "strength": 0.792,
+      "strength": 0.918,
       "then": "drums grows after"
     },
     {
@@ -2978,7 +2924,7 @@
       "beat": 1,
       "is": "chords pause",
       "for_bars": 1,
-      "strength": 0.502,
+      "strength": 0.624,
       "then": "drums grows after"
     },
     {
@@ -2986,7 +2932,7 @@
       "beat": 1,
       "is": "drums pause",
       "for_bars": 1,
-      "strength": 0.488,
+      "strength": 0.584,
       "then": "drums grows after"
     },
     {
@@ -2994,21 +2940,21 @@
       "beat": 1,
       "is": "drums back, bigger",
       "after": "drums pause",
-      "strength": 0.878
+      "strength": 0.947
     },
     {
       "bar": 33,
       "beat": 1,
       "is": "chords back, bigger",
       "after": "chords pause",
-      "strength": 0.878
+      "strength": 0.947
     },
     {
-      "bar": 34,
+      "bar": 33,
       "beat": 1,
-      "is": "bass swells",
-      "for_bars": 8,
-      "strength": 0.518,
+      "is": "bass fades",
+      "for_bars": 7,
+      "strength": 0.472,
       "then": "drums grows after"
     },
     {
@@ -3016,102 +2962,95 @@
       "beat": 1,
       "is": "voice fades",
       "for_bars": 7,
-      "strength": 0.666,
+      "strength": 0.678,
       "then": "drums grows after"
     },
     {
       "bar": 40,
       "beat": 1,
-      "is": "chords swells",
+      "is": "bass swells",
+      "for_bars": 8,
+      "strength": 1.0,
+      "then": "bass grows after"
+    },
+    {
+      "bar": 40,
+      "beat": 1,
+      "is": "drums swells",
       "for_bars": 6,
-      "strength": 0.711,
-      "then": "vocals thins after"
+      "strength": 0.933,
+      "then": "bass grows after"
     },
     {
       "bar": 40,
       "beat": 1,
       "is": "drums pause",
       "for_bars": 1,
-      "strength": 0.668,
-      "then": "vocals thins after"
+      "strength": 0.688,
+      "then": "bass grows after"
     },
     {
       "bar": 40,
       "beat": 1,
       "is": "chords pause",
       "for_bars": 1,
-      "strength": 0.455,
-      "then": "vocals thins after"
+      "strength": 0.615,
+      "then": "bass grows after"
     },
     {
       "bar": 41,
       "beat": 1,
       "is": "drums back",
       "after": "drums pause",
-      "strength": 0.244
+      "strength": 0.126
     },
     {
       "bar": 41,
       "beat": 1,
       "is": "chords back",
       "after": "chords pause",
-      "strength": 0.244
+      "strength": 0.126
     },
     {
       "bar": 42,
       "beat": 1,
       "is": "voice swells",
-      "for_bars": 7,
-      "strength": 0.516,
+      "for_bars": 6,
+      "strength": 0.556,
       "then": "bass grows after"
     },
     {
-      "bar": 44,
-      "beat": 1,
-      "is": "bass fades",
-      "for_bars": 8,
-      "strength": 0.708,
-      "then": "bass grows after"
-    },
-    {
-      "bar": 47,
+      "bar": 48,
       "beat": 1,
       "is": "drums fades",
       "for_bars": 8,
-      "strength": 0.663,
-      "then": "vocals grows after"
+      "strength": 1.0,
+      "then": "bass thins after"
     },
     {
-      "bar": 47,
+      "bar": 48,
+      "beat": 1,
+      "is": "bass fades",
+      "for_bars": 8,
+      "strength": 1.0,
+      "then": "bass thins after"
+    },
+    {
+      "bar": 48,
       "beat": 1,
       "is": "chords fades",
       "for_bars": 8,
-      "strength": 0.476,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 52,
-      "beat": 1,
-      "is": "voice fades",
-      "for_bars": 6,
-      "strength": 0.792,
+      "strength": 1.0,
       "then": "bass thins after"
     },
     {
-      "bar": 52,
+      "bar": 54,
       "beat": 1,
-      "is": "bass fades",
-      "for_bars": 4,
-      "strength": 0.508,
-      "then": "bass thins after"
-    },
-    {
-      "bar": 55,
-      "beat": 1,
-      "is": "only drums + voice + chords left",
-      "for_bars": 1,
+      "is": "only drums + bass + voice + chords left",
+      "for_bars": 2,
       "leaves": [
         "drums",
+        "bass",
         "vocals",
         "other"
       ],
@@ -3121,25 +3060,9 @@
     {
       "bar": 55,
       "beat": 1,
-      "is": "drums fades",
-      "for_bars": 7,
-      "strength": 0.739,
-      "then": "drums thins after"
-    },
-    {
-      "bar": 55,
-      "beat": 1,
-      "is": "chords fades",
-      "for_bars": 8,
-      "strength": 0.496,
-      "then": "drums thins after"
-    },
-    {
-      "bar": 55,
-      "beat": 1,
       "is": "chords pause",
       "for_bars": 2,
-      "strength": 0.48,
+      "strength": 0.712,
       "then": "drums thins after"
     },
     {
@@ -3147,14 +3070,14 @@
       "beat": 1,
       "is": "voice pause",
       "for_bars": 2,
-      "strength": 0.467,
+      "strength": 0.672,
       "then": "drums thins after"
     },
     {
       "bar": 55,
       "beat": 1,
       "is": "bass out",
-      "strength": 0.355
+      "strength": 0.332
     },
     {
       "bar": 56,
@@ -3168,14 +3091,14 @@
       "bar": 56,
       "beat": 1,
       "is": "all back",
-      "after": "only drums + voice + chords left",
+      "after": "only drums + bass + voice + chords left",
       "strength": 1.0
     },
     {
       "bar": 56,
       "beat": 1,
       "is": "drums out",
-      "strength": 0.776
+      "strength": 0.737
     },
     {
       "bar": 57,
@@ -3191,24 +3114,48 @@
     },
     {
       "bar": 57,
-      "beat": 2,
+      "beat": 1,
+      "is": "chords fades",
+      "for_bars": 8,
+      "strength": 1.0,
+      "then": "bass grows after"
+    },
+    {
+      "bar": 57,
+      "beat": 1,
       "is": "voice back",
       "after": "voice pause",
       "strength": 1.0
     },
     {
       "bar": 57,
-      "beat": 2,
+      "beat": 1,
       "is": "chords back",
       "after": "chords pause",
       "strength": 1.0
     },
     {
+      "bar": 57,
+      "beat": 1,
+      "is": "voice fades",
+      "for_bars": 8,
+      "strength": 0.789,
+      "then": "bass grows after"
+    },
+    {
       "bar": 58,
-      "beat": 2,
+      "beat": 1,
       "is": "all back",
       "after": "only voice + chords left",
-      "strength": 1.0
+      "strength": 0.932
+    },
+    {
+      "bar": 58,
+      "beat": 1,
+      "is": "voice pause",
+      "for_bars": 1,
+      "strength": 0.905,
+      "then": "bass grows after"
     },
     {
       "bar": 59,
@@ -3221,28 +3168,49 @@
         "vocals",
         "other"
       ],
-      "strength": 0.937,
+      "strength": 0.951,
       "then": "bass grows after"
     },
     {
       "bar": 59,
       "beat": 1,
       "is": "bass in",
-      "strength": 0.83
+      "strength": 0.836
+    },
+    {
+      "bar": 59,
+      "beat": 1,
+      "is": "drums fades",
+      "for_bars": 6,
+      "strength": 0.816,
+      "then": "bass grows after"
+    },
+    {
+      "bar": 59,
+      "beat": 1,
+      "is": "voice back, bigger",
+      "after": "voice pause",
+      "strength": 0.777
     },
     {
       "bar": 60,
       "beat": 1,
       "is": "voice pause",
       "for_bars": 2,
-      "strength": 0.521,
-      "then": "bass grows after"
+      "strength": 0.858,
+      "then": "other thins after"
+    },
+    {
+      "bar": 60,
+      "beat": 1,
+      "is": "lead out",
+      "strength": 0.304
     },
     {
       "bar": 61,
       "beat": 1,
       "is": "bass fades",
-      "for_bars": 5,
+      "for_bars": 4,
       "strength": 1.0,
       "then": "other thins after"
     },
@@ -3251,40 +3219,38 @@
       "beat": 1,
       "is": "all back, bigger",
       "after": "only drums + bass + voice + chords left",
-      "strength": 0.186
+      "strength": 0.289
     },
     {
       "bar": 62,
       "beat": 1,
+      "is": "lead in",
+      "strength": 0.338
+    },
+    {
+      "bar": 62,
+      "beat": 2,
       "is": "voice back",
       "after": "voice pause",
       "strength": 1.0
     },
     {
-      "bar": 62,
+      "bar": 63,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 4,
-      "strength": 0.7,
-      "then": "bass thins after"
+      "is": "bass out",
+      "strength": 0.836
     },
     {
       "bar": 63,
       "beat": 1,
-      "is": "bass out",
-      "strength": 0.83
+      "is": "chords out",
+      "strength": 0.344
     },
     {
       "bar": 64,
       "beat": 1,
       "is": "lead out",
-      "strength": 0.351
-    },
-    {
-      "bar": 64,
-      "beat": 1,
-      "is": "chords out",
-      "strength": 0.285
+      "strength": 0.344
     }
   ]
 }

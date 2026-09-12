@@ -92,20 +92,20 @@ def read(bars, onsets_per_bar=None, pickup=0):
             else np.full(n, 6.0))
 
     told = [None] * n
-    hot = low >= NEAR_MAX
+    hot = loud >= NEAR_MAX
     runs = blocks(hot)
 
     earned = set()
     for a, b in runs:
         lead = [i for i in range(max(0, a - 8), a)
                 if loud[i] > LOUD and low[i] < LIGHT]
-        quiet = any(low[i] < DEEP * 0.5 for i in range(max(0, a - 2), min(b, a + 2)))
+        quiet = any(loud[i] < DEEP * 0.5 for i in range(max(0, a - 2), min(b, a + 2)))
         if len(lead) >= 2 or quiet:
             earned.add(a)
         for i in range(a, b):
             told[i] = "drop" if a in earned else "full"
         for i in range(a, b):
-            if low[i] < DEEP * 0.5:
+            if loud[i] < DEEP * 0.5:
                 told[i] = "gap"
 
     if runs:
@@ -138,15 +138,9 @@ def read(bars, onsets_per_bar=None, pickup=0):
         for i in range(first, n):
             if told[i] is not None:
                 continue
-            told[i] = "anthem" if low[i] > MID else "breakdown"
+            told[i] = "anthem" if loud[i] > MID else "breakdown"
         for i in range(last, n):
             told[i] = "outro"
-
-        for a, b in runs:
-            if b - a > 12:
-                for i in range(a + 8, b):
-                    if told[i] in ("drop", "full"):
-                        told[i] = "anthem"
     else:
         for i in range(n):
             told[i] = "intro" if loud[i] < ALIVE else "verse"

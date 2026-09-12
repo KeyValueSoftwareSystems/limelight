@@ -8,7 +8,9 @@
     "bpm": 125.996,
     "first_beat_s": 2.6536,
     "beats_per_bar": 4,
-    "bars": 91
+    "bars": 91,
+    "first_bar": 0,
+    "last_bar": 90
   },
   "key": {
     "root": "F#",
@@ -788,11 +790,11 @@
   "parts": [
     {
       "from_bar": 0,
-      "to_bar": 8,
+      "to_bar": 7,
       "role": "intro",
       "feels": "half a kit",
-      "fullness": 0.674,
-      "rise": -0.037,
+      "fullness": 0.661,
+      "rise": -0.076,
       "playing": [
         "drums",
         "vocals",
@@ -801,7 +803,7 @@
       "stems": {
         "drums": {
           "is": "some",
-          "level": 0.137
+          "level": 0.129
         },
         "bass": {
           "is": "none",
@@ -809,21 +811,21 @@
         },
         "vocals": {
           "is": "full",
-          "level": 0.932
+          "level": 0.94
         },
         "other": {
           "is": "some",
-          "level": 0.254
+          "level": 0.226
         }
       }
     },
     {
-      "from_bar": 9,
-      "to_bar": 16,
-      "role": "build",
+      "from_bar": 8,
+      "to_bar": 15,
+      "role": "chorus",
       "feels": "drums in",
-      "fullness": 0.776,
-      "rise": -0.048,
+      "fullness": 0.783,
+      "rise": 0.003,
       "playing": [
         "drums",
         "bass",
@@ -845,61 +847,92 @@
         },
         "other": {
           "is": "some",
-          "level": 0.293
+          "level": 0.362
         }
       }
     },
     {
-      "from_bar": 17,
-      "to_bar": 28,
-      "role": "anthem",
-      "feels": "half a kit",
-      "fullness": 0.77,
-      "rise": 0.007,
+      "from_bar": 16,
+      "to_bar": 23,
+      "role": "verse",
+      "feels": "drums out",
+      "fullness": 0.772,
+      "rise": 0.157,
       "playing": [
-        "drums",
         "bass",
         "vocals",
         "other"
       ],
       "stems": {
         "drums": {
-          "is": "some",
-          "level": 0.103
+          "is": "none",
+          "level": 0.001
         },
         "bass": {
           "is": "some",
-          "level": 0.315
+          "level": 0.303
         },
         "vocals": {
           "is": "full",
-          "level": 0.892
+          "level": 0.929
         },
         "other": {
           "is": "full",
-          "level": 0.606
+          "level": 0.553
         }
       }
     },
     {
-      "from_bar": 29,
-      "to_bar": 32,
+      "from_bar": 24,
+      "to_bar": 31,
       "role": "breakdown",
       "feels": "half a kit",
-      "fullness": 0.832,
-      "rise": 0.146,
+      "fullness": 0.77,
+      "rise": 0.027,
       "playing": [
         "drums",
+        "bass",
         "other"
       ],
       "stems": {
         "drums": {
           "is": "some",
-          "level": 0.158
+          "level": 0.135
         },
         "bass": {
+          "is": "some",
+          "level": 0.118
+        },
+        "vocals": {
           "is": "none",
-          "level": 0.01
+          "level": 0.025
+        },
+        "other": {
+          "is": "full",
+          "level": 1.0
+        }
+      }
+    },
+    {
+      "from_bar": 32,
+      "to_bar": 39,
+      "role": "solo",
+      "feels": "drums in",
+      "fullness": 0.798,
+      "rise": -0.101,
+      "playing": [
+        "drums",
+        "bass",
+        "other"
+      ],
+      "stems": {
+        "drums": {
+          "is": "full",
+          "level": 0.872
+        },
+        "bass": {
+          "is": "full",
+          "level": 1.0
         },
         "vocals": {
           "is": "none",
@@ -907,48 +940,17 @@
         },
         "other": {
           "is": "full",
-          "level": 1.0
+          "level": 0.632
         }
       }
     },
     {
-      "from_bar": 33,
-      "to_bar": 40,
-      "role": "drop",
-      "feels": "drums in",
-      "fullness": 0.776,
-      "rise": 0.032,
-      "playing": [
-        "drums",
-        "bass",
-        "other"
-      ],
-      "stems": {
-        "drums": {
-          "is": "full",
-          "level": 0.862
-        },
-        "bass": {
-          "is": "full",
-          "level": 1.0
-        },
-        "vocals": {
-          "is": "none",
-          "level": 0.016
-        },
-        "other": {
-          "is": "full",
-          "level": 0.639
-        }
-      }
-    },
-    {
-      "from_bar": 41,
-      "to_bar": 48,
-      "role": "breakdown",
+      "from_bar": 40,
+      "to_bar": 47,
+      "role": "verse 2",
       "feels": "half a kit",
-      "fullness": 0.766,
-      "rise": 0.078,
+      "fullness": 0.758,
+      "rise": 0.032,
       "playing": [
         "drums",
         "vocals",
@@ -957,7 +959,7 @@
       "stems": {
         "drums": {
           "is": "some",
-          "level": 0.116
+          "level": 0.114
         },
         "bass": {
           "is": "none",
@@ -974,12 +976,12 @@
       }
     },
     {
-      "from_bar": 49,
-      "to_bar": 56,
-      "role": "build",
+      "from_bar": 48,
+      "to_bar": 55,
+      "role": "chorus 2",
       "feels": "drums in",
-      "fullness": 0.81,
-      "rise": -0.067,
+      "fullness": 0.816,
+      "rise": -0.038,
       "playing": [
         "drums",
         "bass",
@@ -1006,12 +1008,72 @@
       }
     },
     {
-      "from_bar": 57,
-      "to_bar": 80,
-      "role": "anthem",
-      "feels": "half a kit",
-      "fullness": 0.853,
-      "rise": 0.139,
+      "from_bar": 56,
+      "to_bar": 63,
+      "role": "verse 3",
+      "feels": "drums out",
+      "fullness": 0.784,
+      "rise": 0.089,
+      "playing": [
+        "vocals",
+        "other"
+      ],
+      "stems": {
+        "drums": {
+          "is": "none",
+          "level": 0.0
+        },
+        "bass": {
+          "is": "none",
+          "level": 0.077
+        },
+        "vocals": {
+          "is": "full",
+          "level": 0.87
+        },
+        "other": {
+          "is": "full",
+          "level": 0.654
+        }
+      }
+    },
+    {
+      "from_bar": 64,
+      "to_bar": 71,
+      "role": "breakdown 2",
+      "feels": "voice out",
+      "fullness": 0.813,
+      "rise": 0.143,
+      "playing": [
+        "vocals",
+        "other"
+      ],
+      "stems": {
+        "drums": {
+          "is": "none",
+          "level": 0.073
+        },
+        "bass": {
+          "is": "none",
+          "level": 0.004
+        },
+        "vocals": {
+          "is": "some",
+          "level": 0.352
+        },
+        "other": {
+          "is": "full",
+          "level": 0.912
+        }
+      }
+    },
+    {
+      "from_bar": 72,
+      "to_bar": 79,
+      "role": "bridge",
+      "feels": "drums in",
+      "fullness": 0.93,
+      "rise": -0.156,
       "playing": [
         "drums",
         "bass",
@@ -1020,30 +1082,30 @@
       ],
       "stems": {
         "drums": {
-          "is": "some",
-          "level": 0.221
+          "is": "full",
+          "level": 0.991
         },
         "bass": {
-          "is": "some",
-          "level": 0.179
+          "is": "full",
+          "level": 0.406
         },
         "vocals": {
-          "is": "full",
-          "level": 0.54
+          "is": "some",
+          "level": 0.277
         },
         "other": {
           "is": "full",
-          "level": 0.633
+          "level": 0.492
         }
       }
     },
     {
-      "from_bar": 81,
-      "to_bar": 88,
-      "role": "drop 2",
-      "feels": "drums in",
-      "fullness": 0.802,
-      "rise": -0.274,
+      "from_bar": 80,
+      "to_bar": 87,
+      "role": "interlude",
+      "feels": "full",
+      "fullness": 0.881,
+      "rise": -0.148,
       "playing": [
         "drums",
         "bass",
@@ -1060,37 +1122,38 @@
           "level": 0.853
         },
         "vocals": {
-          "is": "full",
-          "level": 0.446
+          "is": "some",
+          "level": 0.263
         },
         "other": {
-          "is": "some",
-          "level": 0.395
+          "is": "full",
+          "level": 0.457
         }
       }
     },
     {
-      "from_bar": 89,
+      "from_bar": 88,
       "to_bar": 91,
       "role": "outro",
       "feels": "half a kit",
-      "fullness": 0.024,
-      "rise": -0.072,
+      "fullness": 0.117,
+      "rise": -0.398,
       "playing": [
-        "drums"
+        "drums",
+        "bass"
       ],
       "stems": {
         "drums": {
           "is": "some",
-          "level": 0.103
+          "level": 0.184
         },
         "bass": {
-          "is": "none",
-          "level": 0.0
+          "is": "some",
+          "level": 0.122
         },
         "vocals": {
           "is": "none",
-          "level": 0.013
+          "level": 0.034
         },
         "other": {
           "is": "none",

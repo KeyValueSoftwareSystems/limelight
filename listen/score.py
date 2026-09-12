@@ -9,7 +9,9 @@ warnings.filterwarnings("ignore")
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from grid import grid, show
-from form import read as form_read
+from form import on_phrase
+from shape import shape
+from call import call
 from parts import curves, parts
 from pulse import pulse
 from events import events
@@ -137,6 +139,8 @@ def read(path, slug):
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
     busy, bright = curves(path, g)
     pickup = 1 if g["first_beat_s"] > 0.2 else 0
+    g["first_bar"] = 0 if pickup else 1
+    g["last_bar"] = g["bars"] - pickup
     found, held = find_chords(path, slug)
     chord, chord_sure = chords_per_bar(found, held, g["first_beat_s"], bar_s, g["bars"], pickup)
     score_bars = {
@@ -151,9 +155,15 @@ def read(path, slug):
     flux = np.load(CACHE / f"{slug}.flux.npy")
     edges = ([0.0] if pickup else []) + [
         g["first_beat_s"] + i * bar_s for i in range(g["bars"] + 1)]
-    hits = [int(((flux >= edges[i]) & (flux < edges[i + 1])).sum())
-            for i in range(len(edges) - 1)]
-    shaped = sections(form_read(score_bars, hits, pickup), voices, busy, pickup, report)
+    rows = np.asarray([score_bars[k] for k in STEM_NAMES] +
+                      [[x if x is not None else 0.0 for x in score_bars["intensity"]]],
+                     dtype=float)
+    found_spans, how = shape(path, edges, rows)
+    report["sections_from"] = how
+    snapped = on_phrase([list(s) for s in found_spans], pickup)
+    told = call([(a, b, m) for a, b, m in snapped], score_bars)
+    shaped = sections([(s["from"], s["to"], s["role"]) for s in told],
+                      voices, busy, pickup, report)
     show(slug, g, report, {"essentia hears": f["rhythm.bpm"]})
 
     return {
