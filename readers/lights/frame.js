@@ -173,6 +173,20 @@ function frame(position, plan, ctx) {
     id: f.id, type: f.type,
     intent: perFixture[f.id] ? compose(perFixture[f.id]) : { level: 0 },
   }));
+
+  /* overlapping aspects that ride on a distinct attribute of the base look:
+     drums -> a strobe pop on the downbeat; build -> whiten the PAR colour. */
+  const accent = active.find(a => a.type === "accent_strobe");
+  const whiten = active.find(a => a.type === "whiten");
+  if (accent || whiten) for (const fx of fixtures) {
+    if (fx.type !== "par7") continue;
+    if (whiten && Array.isArray(fx.intent.colour)) {
+      const a = whiten.params.amount || 0.3;
+      fx.intent.colour = fx.intent.colour.map(c => +(c + (1 - c) * a).toFixed(3));
+    }
+    if (accent && ph.beatInBar === 0 && ph.phaseInBeat < 0.22)
+      fx.intent.strobe = +(accent.params.strength || 0.8).toFixed(2);
+  }
   return { position, fixtures };
 }
 

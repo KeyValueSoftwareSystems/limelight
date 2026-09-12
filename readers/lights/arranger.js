@@ -150,6 +150,20 @@ function plan(score, enumResult, seed) {
       occupies: occOf(head.id), section: sec.name,
     });
 
+    /* extra musical aspects, overlapping on their own fixture attribute so they
+       never fight the base look (the user's "one sequence per aspect" idea):
+         drums  -> strobe accents on downbeats (PAR strobe)
+         build  -> whitening the PARs toward white (PAR colour) */
+    const stems = sec.stems || {};
+    const drums = (stems.drums && stems.drums.level) || (e >= 0.5 ? e : 0);
+    if (drums > 0.35 && ["break", "build", "drop", "final_drop"].includes(context))
+      assignments.push({ from: sec.from, to: sec.to, context, layer: "accent", priority: 2,
+        type: "accent_strobe", params: { strength: clamp01(drums) }, occupies: ["pars:strobe"], section: sec.name });
+    const rise = partRise(sec, score) || 0;
+    if (context === "build" || rise > 0.08)
+      assignments.push({ from: sec.from, to: sec.to, context, layer: "whiten", priority: 3,
+        type: "whiten", params: { amount: clamp01(0.3 + rise) }, occupies: [], section: sec.name });
+
     /* contrast at a drop: the last beat before it is black, its first beat blasts white */
     if (context === "drop" || context === "final_drop") {
       const f = atBeat(sec.from);
