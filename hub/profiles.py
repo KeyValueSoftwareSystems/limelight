@@ -12,8 +12,7 @@ palette change reaches every profile at once. Nothing here knows about HTTP.
 """
 import json, os, re
 
-PALETTE = [("red", "#ff0000"), ("green", "#00ff00"), ("blue", "#0000ff"), ("yellow", "#ffff00"),
-           ("cyan", "#00ffff"), ("magenta", "#ff00ff"), ("white", "#ffffff")]
+PALETTE = [("red", "#ff0000"), ("green", "#00ff00"), ("blue", "#0000ff")]
 HEX = dict(PALETTE)
 USER = re.compile(r"^[A-Za-z0-9_-]{1,40}$")
 USER_RULE = "user name must be 1-40 characters of letters, digits, _ or -"

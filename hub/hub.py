@@ -29,6 +29,10 @@ curl can use it:
     GET   /hub/<dir>/?jobs                 -> { jobs: [{id, name, status, version, error, ...}] }
     GET   /hub/audio/<name>.mp3            playback bytes (Range supported); audio/ is not listed
 
+    Protocol load (hub/score_api.py):
+    POST  /hub/score                       body {"score","fields"?, "profile"?, ...}
+                                           -> protocol response; profile embeds when asked
+
 No delete and no auth, on purpose: a shared folder on a LAN where the only way
 to correct a mistake is to overwrite it is a folder nobody can empty by accident.
 
@@ -228,6 +232,55 @@ def handle(h, method):
     versioned = path != ROOT and V.is_versioned(path)
 
     if method == "POST":
+        post_path = urllib.parse.urlparse(h.path).path
+        # Protocol load: POST /hub/score with a JSON body {score, fields?, profile?, ...}.
+        # Must run before the ?generate gate, which otherwise rejects every other POST.
+        if post_path == PREFIX + "/" + SCORE and "generate" not in query:
+            from . import score_api
+            body_bytes = _read_body(h)
+            if body_bytes is None:
+                return _send(h, 411, "Content-Length required")
+            try:
+                body = json.loads(body_bytes)
+            except ValueError:
+                return _send(h, 400, "not json")
+
+            def fetch(name, profile=None):
+                base = name if name.endswith(".score") else name + ".score"
+                fpath = os.path.join(score_dir(), os.path.basename(base))
+                if not os.path.isfile(fpath):
+                    raise FileNotFoundError(f"no score: {name}")
+                if V.is_versioned(fpath) and V.numbers(fpath):
+                    n = V.resolve_version(fpath, "")
+                    raw = V.read(fpath, n)
+                else:
+                    with open(fpath, "rb") as f:
+                        raw = f.read()
+                if profile is None:
+                    return json.loads(raw)
+                prof = P.get(fpath, profile)
+                if prof is None:
+                    users = [p["user"] for p in P.all_of(fpath)]
+                    raise ValueError(
+                        f"no profile {profile} for {os.path.basename(fpath)}\n"
+                        f"profiles: {', '.join(users) if users else 'none yet'}"
+                    )
+                obj = V.parse_object(raw)
+                if obj is None:
+                    raise ValueError("not a JSON object, cannot embed a profile")
+                return P.embed(obj, prof)
+
+            try:
+                result = score_api.handle(body, fetch)
+                code = 200 if "error" not in result or "note" in result else 400
+                return _json(h, code, result)
+            except FileNotFoundError as e:
+                return _json(h, 404, {"error": str(e)})
+            except ValueError as e:
+                return _json(h, 400, {"error": str(e)})
+            except Exception as e:
+                return _json(h, 500, {"error": str(e)})
+
         if "generate" not in query:
             return _send(h, 405, "POST is only for ?generate")
         if os.path.isdir(path) or path == ROOT:
@@ -333,37 +386,5 @@ def handle(h, method):
                 return _json(h, 200, V.history(path), head)      # a .score uploaded before versioning existed
             return _send_file(h, path, head)
         return _send(h, 404, "no " + parsed.path, head_only=head)
-
-    if method == "POST":
-        p = urllib.parse.urlparse(h.path).path
-        if p == PREFIX + "/score":
-            from . import score_api
-            body_bytes = _read_body(h)
-            if body_bytes is None:
-                return _send(h, 411, "Content-Length required")
-            try:
-                body = json.loads(body_bytes)
-            except ValueError:
-                return _send(h, 400, "not json")
-
-            def fetch(name):
-                fpath = os.path.join(ROOT, name + ".score")
-                if not os.path.isfile(fpath):
-                    raise FileNotFoundError(f"no score: {name}")
-                if V.is_versioned(fpath) and V.numbers(fpath):
-                    n = V.resolve_version(fpath, "")
-                    return json.loads(V.read(fpath, n))
-                return json.loads(open(fpath, "rb").read())
-
-            try:
-                result = score_api.handle(body, fetch)
-                code = 200 if "error" not in result or "note" in result else 400
-                return _json(h, code, result)
-            except FileNotFoundError as e:
-                return _json(h, 404, {"error": str(e)})
-            except ValueError as e:
-                return _json(h, 400, {"error": str(e)})
-            except Exception as e:
-                return _json(h, 500, {"error": str(e)})
 
     return _send(h, 405, method + " is not something the hub does")

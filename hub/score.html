@@ -47,7 +47,7 @@
 </section>
 
 <aside>
-  <div class="panel"><div class="inner">
+  <div class="panel pop"><div class="inner">
   <h2>Profiles <span class="count" id="pcount">0</span></h2>
   <table class="list compact" id="ptable">
     <tbody id="profiles"></tbody>
@@ -292,13 +292,12 @@ async function loadProfiles() {
   const r = await fetch(file + "?profiles");
   if (!r.ok) return err(`${r.status} ${r.statusText} listing profiles`);
   const data = await r.json();
+  const selected = chosen();
   COLOURS = data.colours || [];
   const menu = $("pcolours-menu");
-  if (!menu.children.length) {
-    menu.innerHTML = COLOURS.map(c =>
-      `<label class="msel-opt"><input type="checkbox" value="${esc(c.name)}">` +
-      `<span class="swatch" style="background:${c.hex}"></span>${esc(c.name)}</label>`).join("");
-  }
+  menu.innerHTML = COLOURS.map(c =>
+    `<label class="msel-opt"><input type="checkbox" value="${esc(c.name)}"${selected.includes(c.name) ? " checked" : ""}>` +
+    `<span class="swatch" style="background:${c.hex}"></span>${esc(c.name)}</label>`).join("");
   USERS = new Set(data.profiles.map(p => p.user));
   $("pcount").textContent = data.profiles.length;
   $("profiles").innerHTML = data.profiles.map(p =>

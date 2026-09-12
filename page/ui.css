@@ -141,6 +141,8 @@ body {
   overflow-x: auto;
   overflow-y: hidden;
 }
+/* Profiles form opens a colour menu that must escape the panel edge. */
+.panel.pop { overflow: visible; }
 .panel .inner { padding: 14px 15px; }
 .cols {
   display: grid;

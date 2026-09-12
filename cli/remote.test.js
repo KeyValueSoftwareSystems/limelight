@@ -210,7 +210,8 @@ async function startHub(extraEnv = {}) {
 
     let info = await json(await fetch(url + "?profiles"));
     ok("a score starts with the palette and no profiles",
-       info.colours.length === 7 && info.colours[0].name === "red" && info.colours[0].hex === "#ff0000" && info.profiles.length === 0, JSON.stringify(info));
+       info.colours.length === 3 && info.colours.map(c => c.name).join(",") === "red,green,blue"
+       && info.colours[0].hex === "#ff0000" && info.profiles.length === 0, JSON.stringify(info));
 
     let r = await put(url + "?profile=muzammil", { colours: ["red", "blue"] });
     ok("a profile with two colours is accepted", r.status === 204, `${r.status} ${await text(r)}`);
@@ -224,10 +225,10 @@ async function startHub(extraEnv = {}) {
     const row = (await json(await fetch(fake.url + "/?json"))).paths.find(p => p.name === "p.score");
     ok("the listing row counts them", row.profiles === 2, JSON.stringify(row));
 
-    r = await put(url + "?profile=muzammil", { colours: ["cyan"] });
+    r = await put(url + "?profile=muzammil", { colours: ["blue"] });
     info = await json(await fetch(url + "?profiles"));
     ok("saving the same user again replaces the profile",
-       r.status === 204 && info.profiles.length === 2 && info.profiles.find(p => p.user === "muzammil").colours.map(c => c.hex).join() === "#00ffff");
+       r.status === 204 && info.profiles.length === 2 && info.profiles.find(p => p.user === "muzammil").colours.map(c => c.hex).join() === "#0000ff");
 
     const refused = [
       [url + "?profile=muzammil", { colours: ["purple"] }, /purple.*one of: red, green, blue/],
@@ -245,11 +246,11 @@ async function startHub(extraEnv = {}) {
       ok(`refused: ${decodeURIComponent(u.split("?profile=")[1])} ${typeof body === "string" ? body : JSON.stringify(body)}`, r.status === 400 && why.test(t), `${r.status} ${t}`);
     }
     info = await json(await fetch(url + "?profiles"));
-    ok("and nothing changed", info.profiles.length === 2 && info.profiles.find(p => p.user === "muzammil").colours[0].name === "cyan");
+    ok("and nothing changed", info.profiles.length === 2 && info.profiles.find(p => p.user === "muzammil").colours[0].name === "blue");
 
     const dl = await json(await fetch(url + "?v=1&profile=muzammil"));
     ok("a download with a profile embeds it",
-       dl.profile && dl.profile.user === "muzammil" && dl.profile.colours[0].hex === "#00ffff", JSON.stringify(dl.profile));
+       dl.profile && dl.profile.user === "muzammil" && dl.profile.colours[0].hex === "#0000ff", JSON.stringify(dl.profile));
     ok("after the author's keys, which are kept", dl["x-author"] === "renjith" && dl.grid.bpm === 100 && JSON.stringify(dl["x-enforced"]) === '["x-author"]');
     const latest = await json(await fetch(url + "?profile=alnas"));
     ok("without v it is the latest with that profile", latest.profile.user === "alnas" && latest.version === 1);
@@ -272,6 +273,47 @@ async function startHub(extraEnv = {}) {
     await put(fake.url + "/notes.txt", "x");
     r = await fetch(fake.url + "/notes.txt?profiles");
     ok("only .score files have profiles", r.status === 400, String(r.status));
+  }
+
+  /* ---- POST /hub/score: protocol load, with an optional profile ------------ */
+  {
+    fake.files.clear();
+    const url = fake.url + "/loadme.score";
+    const score = {
+      score: "loadme", version: 1,
+      grid: { bpm: 100, beats_per_bar: 4, first_beat_s: 0 },
+      beats: { list: [[1, 1]], count: 1, derived_from: "grid", as: "[bar, beat]" },
+    };
+    await fetch(url, { method: "PUT", body: Buffer.from(JSON.stringify(score)) });
+    await fetch(url + "?profile=muzammil", { method: "PUT", body: JSON.stringify({ colours: ["red", "blue"] }) });
+
+    const load = payload => fetch(fake.origin + "/hub/score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const jsonOrText = async r => {
+      const t = await r.text();
+      try { return { raw: t, body: JSON.parse(t) }; } catch (e) { return { raw: t, body: null }; }
+    };
+
+    let r = await load({ score: "loadme", fields: ["beats"], profile: "muzammil" });
+    let got = await jsonOrText(r);
+    ok("POST /hub/score with profile embeds it in the response",
+       r.status === 200 && got.body && got.body.profile && got.body.profile.user === "muzammil"
+       && got.body.profile.colours.map(c => c.hex).join() === "#ff0000,#0000ff",
+       `${r.status} ${got.raw}`);
+
+    r = await load({ score: "loadme", fields: ["beats"] });
+    got = await jsonOrText(r);
+    ok("POST /hub/score without profile has no profile key",
+       r.status === 200 && got.body && !("profile" in got.body), `${r.status} ${got.raw}`);
+
+    r = await load({ score: "loadme", fields: ["beats"], profile: "nobody" });
+    got = await jsonOrText(r);
+    ok("POST /hub/score missing profile is 400 and lists users",
+       r.status === 400 && got.body && /no profile nobody/.test(got.body.error || "") && /muzammil/.test(got.body.error || ""),
+       `${r.status} ${got.raw}`);
   }
 
   /* ---- limelight push ----------------------------------------------------- */
@@ -356,10 +398,10 @@ async function startHub(extraEnv = {}) {
     ok("pull of a missing version exits 1 and lists the versions", r.code === 1 && /versions: 1, 2/.test(r.err), r.err);
 
     /* profiles from the command line */
-    await fetch(vurl + "?profile=muzammil", { method: "PUT", body: JSON.stringify({ colours: ["cyan", "white"] }) });
+    await fetch(vurl + "?profile=muzammil", { method: "PUT", body: JSON.stringify({ colours: ["red", "blue"] }) });
     r = await run(["pull", "lv.score", "--profile=muzammil"], fake.url, dir);
     let pulled = JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"));
-    ok("pull --profile=user embeds the profile", r.code === 0 && pulled.profile && pulled.profile.colours.map(c => c.hex).join() === "#00ffff,#ffffff", r.err);
+    ok("pull --profile=user embeds the profile", r.code === 0 && pulled.profile && pulled.profile.colours.map(c => c.hex).join() === "#ff0000,#0000ff", r.err);
     ok("and the message names it", /profile muzammil\)$/.test(r.out.trim()), r.out);
     r = await run(["pull", "lv.score@1", "--profile", "muzammil"], fake.url, dir);
     pulled = JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"));
