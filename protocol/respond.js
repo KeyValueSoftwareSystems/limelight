@@ -32,12 +32,17 @@ const KNOWN = ["grid", "beats", "downbeats", "sections", "energy", "moments", "l
 
 function respond(req) {
   const name = String(req.score || "").replace(/[^A-Za-z0-9_-]/g, "");
-  const file = path.join(__dirname, `score.${name}.json`);
-  if (!name || !fs.existsSync(file)) {
+  /* The repo settled on <name>.score while this was reading score.<name>.json,
+     and nothing that read it was updated, so the suite broke on a rename rather
+     than on a change of meaning. Both names are accepted; the new one wins. */
+  const candidates = [path.join(__dirname, `${name}.score`),
+                      path.join(__dirname, `score.${name}.json`)];
+  const file = candidates.find(f => name && fs.existsSync(f));
+  if (!file) {
     return { error: `no score for ${req.score}`,
              have: fs.readdirSync(__dirname)
-                     .filter(f => f.startsWith("score."))
-                     .map(f => f.slice(6, -5)) };
+                     .filter(f => f.endsWith(".score"))
+                     .map(f => f.slice(0, -6)) };
   }
   const s = JSON.parse(fs.readFileSync(file, "utf8"));
 
