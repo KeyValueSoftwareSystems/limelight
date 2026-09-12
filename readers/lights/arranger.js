@@ -203,7 +203,10 @@ function factsBlock(score, sections, contexts, lanes, harmony, subs, moments, bp
     const v = { form: contexts[si] };
     const B = (bar - 1) * bpb;
     const sub = subs.find(su => atBeat(su.from) <= B && B < atBeat(su.to));
-    v.doing = (sub && sub.doing && FACTS.doing.includes(sub.doing)) ? sub.doing : "holding";
+    /* a score that cannot speak to what the music is doing (no subsection layer at
+       all) stays silent on it, like presence/texture/harmony -- never a manufactured
+       "holding" that would fold a phantom fact into every cell's affinity */
+    if (subs.length) v.doing = (sub && sub.doing && FACTS.doing.includes(sub.doing)) ? sub.doing : "holding";
     if (drums || bass || vocals) {
       v.presence = [];
       for (const [name, r] of [["drums", drums], ["bass", bass], ["vocals", vocals]]) {
@@ -251,7 +254,7 @@ function majorityVector(vectors, i0, i1, form, doing) {
   };
   const top = c => Object.keys(c).sort((a, b) => c[b] - c[a] || (a < b ? -1 : 1))[0];
   if (doing) v.doing = doing;
-  else { const c = count(x => (x.doing ? [x.doing] : [])); v.doing = span.length ? top(c) : "holding"; }
+  else if (span.some(x => x.doing)) { const c = count(x => (x.doing ? [x.doing] : [])); v.doing = top(c); }
   if (span.some(x => x.presence)) {
     const c = count(x => x.presence);
     v.presence = [];
@@ -265,7 +268,7 @@ function majorityVector(vectors, i0, i1, form, doing) {
     v.texture = Object.keys(c).filter(f => c[f] * 2 > span.length).sort();
   }
   if (span.some(x => x.harmony)) {
-    const c = count(x => x.harmony.filter(f => f !== "changing"));
+    const c = count(x => (x.harmony || []).filter(f => f !== "changing"));
     v.harmony = (c.minor || 0) >= (c.major || 0) && (c.minor || c.major) ? ["minor"] : (c.major ? ["major"] : []);
   }
   return v;
@@ -401,7 +404,7 @@ function plan(scoreIn, enumResult, seed) {
     const secFrom = atBeat(sec.from), secTo = atBeat(sec.to);
     const idx = bar => (facts ? bar - facts.from_bar : -1);
     const vectors = facts ? facts.vectors : [];
-    const sectionVector = facts ? majorityVector(vectors, idx(sec.from.bar), idx(sec.to.bar), context) : { form: context, doing: "holding" };
+    const sectionVector = facts ? majorityVector(vectors, idx(sec.from.bar), idx(sec.to.bar), context) : { form: context };
 
     /* the PARs: a look + the phase's contrast (floor/peak/mode) */
     const par = pickFor(sectionVector, "par");
@@ -417,12 +420,15 @@ function plan(scoreIn, enumResult, seed) {
     inside.forEach((su, j) => {
       const cls = classify(su);
       const isFirst = j === 0 || su.f === secFrom;
-      const wantsOwn = par && !isFirst && inside.length > 1 && ((su.doing && su.doing !== "holding") || su.has_break);
+      /* an unknown word (not in the vocabulary) is not "doing something" -- it is
+         silence on this fact, the same as a bar with no subsection at all */
+      const doing = FACTS.doing.includes(su.doing) ? su.doing : "holding";
+      const wantsOwn = par && !isFirst && inside.length > 1 && (doing !== "holding" || su.has_break);
       if (wantsOwn) {
         /* the subsection's own vector: its word for doing, the facts its bars agree on */
         const subVector = facts
-          ? majorityVector(vectors, idx(barOf(su.f)), idx(barOf(su.t)), context, su.doing || "holding")
-          : { form: context, doing: su.doing || "holding" };
+          ? majorityVector(vectors, idx(barOf(su.f)), idx(barOf(su.t)), context, doing)
+          : { form: context, doing };
         let pick = pickFor(subVector, "par", [par.id, lastVar]);
         if (!pick) pick = pickFor(sectionVector, "par", [par.id, lastVar]);
         if (pick) {

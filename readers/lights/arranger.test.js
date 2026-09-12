@@ -267,8 +267,8 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   ok("a null lane bar says nothing in that band", !F.vectors[19].texture.some(t => t === "dull" || t === "bright"));
   /* a bare score: form only, so picks cannot move */
   const bare = plan(SCORE, EN, 42);
-  ok("a score without the richer fields gives form-and-holding vectors only",
-     bare.facts.vectors.every(v => v === null || (v.form && v.doing === "holding" && v.presence === undefined && v.texture === undefined && v.harmony === undefined && v.moment === undefined)));
+  ok("a score without the richer fields (no subsection layer at all) stays silent on every family but form",
+     bare.facts.vectors.every(v => v === null || Object.keys(v).join(",") === "form"));
   ok("facts are identical for the raw score and its format_v1 view",
      JSON.stringify(plan(format(require("./fixtures/mini_raw.js").RAW()), EN, 42).facts) === JSON.stringify(F));
 }
@@ -288,6 +288,14 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   ok("harmony keeps the majority mode and never 'changing'", JSON.stringify(m.harmony) === JSON.stringify(["minor"]));
   ok("a doing override is honoured (a subsection's own word)", majorityVector(vs, 0, 3, "drop", "peaking").doing === "peaking");
   ok("a moment never belongs to a span vector", m.moment === undefined);
+  /* Task 7 review, item 3: a span mixing a vector that carries harmony with one
+     that doesn't must not throw, and still yields the majority mode */
+  const vsMixed = [{ form: "drop", harmony: ["minor"] }, { form: "drop" }, { form: "drop", harmony: ["minor"] }];
+  let mixed;
+  try { mixed = majorityVector(vsMixed, 0, 3, "drop"); } catch (e) { mixed = e; }
+  ok("a span mixing a vector with harmony and one without does not throw",
+     !(mixed instanceof Error), mixed instanceof Error ? mixed.message : "");
+  ok("...and yields the majority mode", !(mixed instanceof Error) && JSON.stringify(mixed.harmony) === JSON.stringify(["minor"]));
 
   const p = plan(MINI, EN, 42);
   const base = p.assignments.find(a => a.layer === "par" && a.seq_id && a.from.bar === 4 && !a.variation);
@@ -298,7 +306,8 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   ok("variations no longer step a context (no vcontext)", p.assignments.every(a => a.vcontext === undefined));
   const head = p.assignments.find(a => a.layer === "head" && a.from.bar === 4);
   ok("the head look carries the section vector too", head && head.facts && head.facts.form === "final_drop");
-  ok("a plain score's looks carry form-and-holding vectors", plan(SCORE, EN, 42).assignments.filter(a => a.seq_id).every(a => a.facts && a.facts.form && a.facts.doing === "holding"));
+  ok("a plain score's looks carry form-only vectors (no subsection layer, so no doing)",
+     plan(SCORE, EN, 42).assignments.filter(a => a.seq_id).every(a => a.facts && Object.keys(a.facts).join(",") === "form"));
   ok("no clashes with vector picks", clashes(p) === 0, `${clashes(p)}`);
   ok("the rich plan is still deterministic", JSON.stringify(plan(MINI, EN, 42)) === JSON.stringify(p));
 
@@ -307,6 +316,28 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   MINI2.phrases[1].doing = "grooving";
   ok("a doing word outside the vocabulary falls back to holding",
      plan(MINI2, EN, 42).facts.vectors[4].doing === "holding", plan(MINI2, EN, 42).facts.vectors[4].doing);
+
+  /* Task 7 review, Finding 1: a bare score's picks must not move against the
+     form-string path -- "doing" is a fact family only when the score has a
+     subsection layer at all; a score that cannot speak to it stays silent. */
+  const EN0 = { sequences: EN.sequences, matrix: EN.matrix };   /* an old-shape cache: view scores form-only */
+  const picksOf = pl => pl.assignments.filter(a => a.seq_id).map(a => a.layer + ":" + a.seq_id).join(",");
+  for (const seed of [1, 42])
+    ok(`a score without richer fields draws exactly the picks the form string gave (seed ${seed})`,
+       picksOf(plan(SCORE, EN0, seed)) === picksOf(plan(SCORE, EN, seed)),
+       `${picksOf(plan(SCORE, EN0, seed))}\n     ${picksOf(plan(SCORE, EN, seed))}`);
+
+  /* Task 7 review, Finding 2: an unknown doing word must not reach wantsOwn/subVector
+     unfiltered -- it is silence ("holding"), not a fact worth its own look or a
+     published vocabulary violation. */
+  const MINI3 = require("./fixtures/mini_raw.js").RAW();
+  MINI3.phrases[3].doing = "grooving";   /* bars 12-15 */
+  const p3 = plan(MINI3, EN, 42);
+  ok("an unknown doing word never surfaces in a variation's facts",
+     !p3.assignments.some(a => a.facts && a.facts.doing === "grooving"));
+  const vari3 = p3.assignments.find(a => a.layer === "par" && a.variation && a.from.bar === 12);
+  ok("a variation drawn at that subsection's bars carries 'holding', not the unknown word",
+     !vari3 || vari3.facts.doing === "holding", vari3 && vari3.facts.doing);
 }
 
 for (const [pass, name, detail] of out)
