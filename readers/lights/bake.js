@@ -89,7 +89,7 @@ if (lightsOut) {
   fs.writeFileSync(lightsOut, JSON.stringify({
     rig: "arc4-head", style: "limelight", fps, duration, tempo: score.grid.bpm,
     source: (score.score || "song") + ".wav", wav: (score.score || "song") + ".wav",
-    beats, downbeats, sections: phases.map(x => x.start), phases, moments, looks, frames,
+    beats, downbeats, sections: phases.map(x => x.start), phases, moments, looks, facts: p.facts || null, frames,
   }));
   console.log(`baked ${frames.length} lights frames (41ch @ ${fps}fps, seed ${seed}) -> ${lightsOut}`);
   process.exit(0);
@@ -103,7 +103,7 @@ const out = opt("--out", path.join(
   (score.score || "song") + ".frames.json"));
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, JSON.stringify({
-  score: score.score, seed, fps, from, to: +to.toFixed(3), count: ticks.length, duration, beats, downbeats, phases, moments, looks,
+  score: score.score, seed, fps, from, to: +to.toFixed(3), count: ticks.length, duration, beats, downbeats, phases, moments, looks, facts: p.facts || null,
   fixtures: (layout.fixtures || []).map(f => ({ id: f.id, type: f.type, address: f.address, universe: f.universe })),
   ticks,
 }));

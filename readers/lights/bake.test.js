@@ -78,6 +78,7 @@ const RAW = {
       stems: { drums: { is: "full", level: 0.94 }, bass: { is: "full", level: 0.9 } } },
   ],
   bars: { intensity: SCORE.energy.values },
+  moments: SCORE.moments,
 };
 const rawFile = path.join(tmp, "raw.score");
 const rawOut = path.join(tmp, "raw.frames.json");
@@ -129,6 +130,15 @@ ok("a look's start matches its section's bar on the wall clock",
   const before = dark[0], on = L.frames[k + 3];
   ok("on the heavy entrance the head moves toward the wall centre",
      Math.abs(on[28] - 169) <= Math.abs(before[28] - 169) && Math.abs(on[30] - 40) <= Math.abs(before[30] - 40), `pan ${before[28]}->${on[28]} tilt ${before[30]}->${on[30]}`);
+}
+
+/* the timeline carries the per-bar facts the picks were made with */
+{
+  const F = baked.facts;
+  ok("the baked timeline carries facts anchored like the plan", F && F.from_bar === 0 && F.vectors.length === 17, F && `${F.from_bar} x ${F.vectors.length}`);
+  /* the fixture's only high-energy section is also its last, so its context is final_drop */
+  ok("a bar in the drop says so", F.vectors[9].form === "final_drop" && F.vectors[9].moment.includes("entrance") && F.vectors[9].moment.includes("heavy"), JSON.stringify(F.vectors[9]));
+  ok("the raw hub score bakes the same facts", JSON.stringify(rawBaked.facts) === JSON.stringify(F));
 }
 
 fs.rmSync(tmp, { recursive: true, force: true });
