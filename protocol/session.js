@@ -27,6 +27,7 @@
 "use strict";
 
 function Session(score, opts) {
+  /* adapt() may replace this with our shape, so it is not const */
   const g = (score && score.grid) || {};
   const bpm = g.bpm, bpb = g.beats_per_bar || 4, first = g.first_beat_s || 0;
   if (!bpm) throw new Error("a score needs grid.bpm");
@@ -82,6 +83,39 @@ function Session(score, opts) {
      a build does, and the drums and the voice are both present for most of a
      record. `phrase` is a rule rather than a list, for the same reason beats
      are a rule. */
+  /* Two score shapes exist in this repo and a reader should not care which it
+     was handed. The pipeline writes `parts`, `bars.intensity` and 0-based bar
+     numbers; this file was written against `layers`, `energy` and 1-based ones.
+     Rather than keep two formats in step -- which is how the two scores for
+     Levels ended up 9.89 beats apart without anything failing -- the pipeline's
+     shape is read directly and adapted here, once, at the edge.
+     Bar numbering is the dangerous half: theirs starts at 0, ours at 1, and an
+     off-by-one bar is a show that lights a beat early all night. */
+  function adapt(sc) {
+    if (!sc || sc.layers || !sc.parts) return sc;          /* already our shape */
+    const B = +1;                                          /* their bar 0 is our bar 1 */
+    const out = Object.assign({}, sc);
+    out.layers = {
+      form: { kind: "partition",
+        note: "from `parts`; role is the section name, bars shifted from 0-based",
+        spans: sc.parts.map(p => ({
+          from: { bar: p.from_bar + B, beat: 1 },
+          to:   { bar: p.to_bar + B + 1, beat: 1 },   /* to_bar is inclusive */
+          name: p.role, feels: p.feels, fullness: p.fullness })) },
+    };
+    const inten = (sc.bars && sc.bars.intensity) || null;
+    if (inten) out.energy = { per: "bar", from_bar: 1, values: inten,
+                              note: "from `bars.intensity`" };
+    if (sc.releases) out.moments = sc.releases.map(r => ({
+      at: positionOf(sc, r.at_s), kind: "drop", size: r.size }));
+    return out;
+  }
+  function positionOf(sc, t) {
+    const g = sc.grid, n = g.beats_per_bar || 4, barS = (60 / g.bpm) * n;
+    const b = (t - g.first_beat_s) / barS;
+    return { bar: Math.floor(b) + 1, beat: +(((b % 1) + 1) % 1 * n + 1).toFixed(3) };
+  }
+  score = adapt(score);
   const layers = (score && score.layers) || {};
   const at_ = q => (q.bar - 1) * bpb + ((q.beat || 1) - 1);   /* beats, one line */
   const covers = (sp, x) => x >= at_(sp.from) && x < at_(sp.to);

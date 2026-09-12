@@ -3170,6 +3170,7 @@
   "from": "synth/truth/levels.map.json",
   "source_how": "model",
   "source_who": "merge of amal and dheeraj",
-  "by": "protocol/make_score.py"
+  "by": "protocol/make_score.py",
+  "note": "TEST FIXTURE, not a source of truth. The pipeline's score in scores/ is the one a consumer should read; this exists so the protocol tests have a file carrying every layer, including the ones the pipeline does not emit yet (build, presence, silence). Do not serve this to an application."
  }
 }

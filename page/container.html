@@ -95,7 +95,7 @@ const aud=new Audio(); aud.preload="auto";
 let S=null, SCORE=null, DUR=1, lastBeat=-1, flash=0;
 
 async function boot(){
-  SCORE=await (await fetch("/protocol/levels.score")).json();
+  SCORE=await (await fetch("/scores/levels.score")).json();
   DUR=(SCORE.song&&SCORE.song.length_s)||180;
   aud.src="/synth/out/"+SCORE.score+".wav";
   /* The audio element owns the clock. The session reads it rather than running
