@@ -39,6 +39,10 @@ h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
 .row button{padding:4px 9px;font-size:12px}
 .row .said{font:12px ui-monospace,monospace;color:var(--ok);min-width:16px}
 .dim{color:var(--faint)}
+.inside{flex-basis:100%;margin:6px 0 2px 76px;display:flex;flex-wrap:wrap;gap:4px}
+.chip{font:10px ui-monospace,monospace;border:1px solid;border-radius:3px;padding:1px 5px;opacity:.85}
+.chip b{opacity:.6;font-weight:400}
+.row{flex-wrap:wrap}
 </style>
 
 <div class="wrap">
@@ -62,7 +66,7 @@ h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
 
 <div id="now">—</div>
 
-<h2>Sections — is each one what the score calls it?</h2>
+<h2>Sections, and the moments inside each one</h2>
 <div id="sections"></div>
 
 </div>
@@ -339,6 +343,18 @@ function sections() {
       <button class="yes" data-v="yes">right</button>
       <button class="no" data-v="no">wrong</button>
       <span class="said"></span>`;
+    const inside = (SCORE.moments || [])
+      .filter(m => m.bar >= p.from_bar && m.bar <= p.to_bar)
+      .sort((a,b) => a.bar - b.bar || a.beat - b.beat);
+    if (inside.length) {
+      const strip = document.createElement("div");
+      strip.className = "inside";
+      strip.innerHTML = inside.map(m =>
+        `<span class="chip" style="border-color:${KIND[m.is]||'#3a4152'};color:${KIND[m.is]||'#8b93a6'}"
+           title="bar ${m.bar} beat ${m.beat} · confidence ${m.sure}">
+           <b>${m.bar}.${m.beat}</b> ${m.is} ${m.what}</span>`).join("");
+      row.appendChild(strip);
+    }
     box.appendChild(row);
     row.querySelector("[data-from]").onclick = e =>
       play(+e.target.dataset.from, Math.min(+e.target.dataset.to, +e.target.dataset.from + 12));
