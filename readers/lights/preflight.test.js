@@ -276,12 +276,14 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
   ok("the order of facts in a family does not matter",
      JSON.stringify(v.candidates({ form: "drop", presence: ["drums:in", "bass:in"] })) === JSON.stringify(v.candidates({ form: "drop", presence: ["bass:in", "drums:in"] })));
   ok("candidates stay sorted by score", v.candidates({ form: "drop", doing: "easing" }).every((c, i, a) => i === 0 || a[i - 1].score >= c.score));
-  ok("a base sequence's cell still carries its fit", v.candidates({ form: "drop", doing: "peaking" }).find(c => c.id === "pair_call_response").score <= e.fit.pair_call_response);
+  const base = v.candidates({ form: "drop", doing: "peaking" }).find(c => c.id === "pair_call_response");
+  ok("a base sequence's cell still carries its fit", base && base.score <= e.fit.pair_call_response);
   /* an older cache: sequences + matrix, no affinity -> form only, richer facts ignored */
   const old = view({ sequences: e.sequences, matrix: e.matrix });
   ok("an old cache without affinity scores form only", JSON.stringify(old.candidates({ form: "drop", doing: "peaking" })) === JSON.stringify(old.candidates("drop")));
   ok("the cached result scores identically after a JSON round trip",
      JSON.stringify(view(JSON.parse(JSON.stringify(e))).candidates({ form: "drop", doing: "easing", presence: ["drums:in"] })) === JSON.stringify(v.candidates({ form: "drop", doing: "easing", presence: ["drums:in"] })));
+  ok("an out-of-vocabulary form yields no candidates", v.candidates({ form: "chorus" }).length === 0);
 }
 
 for (const [pass, name, detail] of out)

@@ -49,7 +49,10 @@ function cellFor(affinity, fitK, vector) {
     const facts = fam === "form" ? [v.form] : (v[fam] || []);
     for (const f of facts) {
       let a = table[f];
-      if (a === undefined) a = table._default !== undefined ? table._default : 0.5;
+      if (a === undefined) {
+        if (fam === "form") return 0;                        /* a form the table doesn't name is a veto, not a shrug */
+        a = table._default !== undefined ? table._default : 0.5;
+      }
       if (!(a > 0)) return 0;                                /* a veto */
       logs += Math.log(Math.min(1, a)); n++;
     }

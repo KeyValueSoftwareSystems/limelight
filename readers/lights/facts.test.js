@@ -50,6 +50,9 @@ const near = (a, b, e) => Math.abs(a - b) <= (e === undefined ? 1e-4 : e);
   ok("the mean is order-independent", cellFor(P, 1, { form: "drop", presence: ["drums:in", "bass:in"] }) === cellFor(P, 1, { form: "drop", presence: ["bass:in", "drums:in"] }));
   ok("no form, no cell", cellFor(A, 1, { doing: "easing" }) === 0 && cellFor({ doing: { easing: 1 } }, 1, "drop") === 0);
   ok("cells are rounded to four decimals", String(cellFor(A, 1, { form: "drop", doing: "easing" })).replace("0.", "").length <= 4);
+  ok("an out-of-vocabulary form is a veto, not a shrug",
+     cellFor({ form: { drop: 0.8 }, doing: { peaking: 0.9 } }, 1, { form: "chorus" }) === 0);
+  ok("_default does not apply to form", cellFor({ form: { drop: 0.8, _default: 0.5 } }, 1, "intro") === 0);
 }
 
 for (const [pass, name, detail] of out)
