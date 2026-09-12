@@ -188,6 +188,27 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
   ok("every lamp faces the same way (no per-lamp angle)", L.fixtures.filter(f => f.type === "par7").every(f => !f.angle_deg));
 }
 
+/* ---- affinity: per-family, from the fact vocabulary ------------------------ */
+{
+  const { validateAffinity } = require("./preflight.js");
+  const base = { id: "aff_ok", kind: "individual", boldness: "accent",
+    requires: { groups: ["all_pars"], caps: ["colour", "level"] }, occupies: ["pars:colour", "pars:level"],
+    gesture: { group: "all_pars", keys: [{ at: 0, intent: { colour: [1, 0, 0] } }] } };
+  const form = { intro: 0, verse: 0.5, break: 0.4, build: 0.6, drop: 0.9, outro: 0, silence: 0, final_drop: 0.9 };
+  ok("a legacy suitability row still validates", validateSequence({ ...base, suitability: form }, RIG).ok);
+  ok("a family-shaped affinity validates", validateSequence({ ...base, affinity: { form, doing: { peaking: 0.9, easing: 0.2, _default: 0.5 }, presence: { "drums:in": 0.8 } } }, RIG).ok,
+     JSON.stringify(validateSequence({ ...base, affinity: { form, doing: { peaking: 0.9 } } }, RIG)));
+  const unknownFact = validateSequence({ ...base, affinity: { form, doing: { grooving: 0.5 } } }, RIG);
+  ok("an unknown fact is rejected and the message names it, its family and the allowed words",
+     !unknownFact.ok && /grooving/.test(unknownFact.reason) && /doing/.test(unknownFact.reason) && /peaking/.test(unknownFact.reason), unknownFact.reason);
+  const unknownFamily = validateSequence({ ...base, affinity: { form, mood: { happy: 1 } } }, RIG);
+  ok("an unknown family is rejected", !unknownFamily.ok && /mood/.test(unknownFamily.reason), unknownFamily.reason);
+  ok("an affinity value above 1 is rejected", !validateSequence({ ...base, affinity: { form, texture: { busy: 1.2 } } }, RIG).ok);
+  ok("an affinity without form is rejected", !validateSequence({ ...base, affinity: { doing: { peaking: 1 } } }, RIG).ok);
+  ok("neither affinity nor suitability is rejected", !validateSequence(base, RIG).ok);
+  ok("validateAffinity is exported for generate.py's retry loop", validateAffinity({ form }).ok && !validateAffinity({ form, doing: { nope: 1 } }).ok);
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

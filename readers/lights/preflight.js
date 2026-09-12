@@ -8,6 +8,7 @@
    Sequences key off the device DRIVERS' declared capabilities (never fixture ids),
    so a richer rig auto-enables the sequences its fixtures support. */
 const drivers = require("./drivers/index.js");
+const { FACTS, FAMILIES, toVector, cellFor } = require("./facts.js");
 
 const capsOf = fixture => drivers.forType(fixture.type).can;
 
@@ -38,7 +39,7 @@ const clamp01 = v => Math.max(0, Math.min(1, v));
 /* The contexts are the situations the protocol can report -- form types, plus a
    curated conjunction column for the final-drop situation. Rig-independent: a new
    rig adds sequence ROWS, never context COLUMNS. */
-const CONTEXTS = ["intro", "verse", "break", "build", "drop", "outro", "silence", "final_drop"];
+const CONTEXTS = FACTS.form;
 const FIT_FLOOR = 0.35;   // a cell (fit x affinity) below this scores 0 but is reported
 
 /* ---- the sequence vocabulary (rig-independent; pruned per layout) --------
@@ -149,6 +150,33 @@ function layoutFacts(layout) {
   return { g, caps, groups };
 }
 
+/* per-family affinity: { form: {ctx: 0..1}, doing?: {fact: 0..1, _default?}, ... }.
+   Facts come from facts.js's vocabulary; the message names the offending word and
+   the allowed ones, because generate.py feeds it back to the model. */
+function validateAffinity(aff) {
+  const bad = reason => ({ ok: false, reason });
+  if (!aff || typeof aff !== "object") return bad("missing affinity");
+  if (!aff.form || typeof aff.form !== "object") return bad("affinity.form missing");
+  for (const fam of Object.keys(aff)) {
+    if (!FACTS[fam]) return bad("unknown affinity family `" + fam + "`; allowed: " + FAMILIES.join(", "));
+    const table = aff[fam];
+    if (!table || typeof table !== "object") return bad("affinity." + fam + " is not an object");
+    for (const f of Object.keys(table)) {
+      if (f !== "_default" && !FACTS[fam].includes(f))
+        return bad("unknown fact `" + f + "` in family `" + fam + "`; allowed: " + FACTS[fam].join(", "));
+      const x = table[f];
+      if (typeof x !== "number" || x < 0 || x > 1) return bad("bad affinity for " + fam + "." + f);
+    }
+  }
+  for (const ctx of CONTEXTS) {
+    const v = aff.form[ctx];
+    if (typeof v !== "number" || v < 0 || v > 1) return bad("bad suitability for " + ctx);
+  }
+  return { ok: true };
+}
+/* a sequence's affinity, whichever way it was written */
+const affinityOf = seq => seq.affinity || (seq.suitability ? { form: seq.suitability } : null);
+
 /* Validate an externally-supplied (e.g. LLM-generated) sequence against this rig.
    This is the gate that keeps a generated palette grounded and safe: it can only
    use capabilities and groups the rig actually has, dangerous types need limits,
@@ -170,12 +198,7 @@ function validateSequence(seq, layout) {
   if (!Array.isArray(occ)) return bad("occupies not an array");
   if (seq.kind === "combination" && new Set(occ).size !== occ.length)
     return bad("combination self-conflict");
-  const su = seq.suitability || {};
-  for (const ctx of CONTEXTS) {
-    const v = su[ctx];
-    if (typeof v !== "number" || v < 0 || v > 1) return bad("bad suitability for " + ctx);
-  }
-  return { ok: true };
+  return validateAffinity(affinityOf(seq));
 }
 
 /* enumerate(layout, { palette }) -> { sequences, matrix, report }
@@ -257,8 +280,8 @@ function view(result) {
   };
 }
 
-module.exports = { enumerate, view, validateSequence, layoutFacts, groupsOf,
-                   VOCABULARY, CONTEXTS, FIT_FLOOR, BUDGETS };
+module.exports = { enumerate, view, validateSequence, validateAffinity, affinityOf, layoutFacts, groupsOf,
+                   VOCABULARY, CONTEXTS, FIT_FLOOR, BUDGETS, FACTS };
 
 /* ---- CLI: enumerate a layout, print the taste report, cache the matrix ---
      node readers/lights/preflight.js [readers/lights/arc4-head.layout.json]      */
