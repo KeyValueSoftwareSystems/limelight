@@ -14,7 +14,7 @@ from shape import shape
 from call import call
 from parts import curves, parts
 from pulse import pulse
-from melody import chants, fix as octaves, line as tune_line
+from melody import chants, echoes, fix as octaves, line as tune_line
 from melody import score as melody_of, sung as sung_in, voice as voice_of
 from moments import carries, moments, pick, weigh
 from phrase import phrases as sub_phrases
@@ -224,6 +224,7 @@ def read(path, slug):
     heard = tune_line(tune, sung)
     heard, slipped = octaves(heard)
     told_now += chants(heard, g, pickup)
+    told_now += echoes(heard, g, pickup)
     carries(told_now, [(a, b, m) for a, b, m in snapped], pickup,
             g["beats_per_bar"])
     told_now.sort(key=lambda m: (m["bar"], m["beat"], m["is"]))

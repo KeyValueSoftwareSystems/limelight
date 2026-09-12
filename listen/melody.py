@@ -115,6 +115,47 @@ def chants(notes, g, pickup, least=5, same=1.0, near=0.18, gap=0.45):
     return out
 
 
+def echoes(notes, g, pickup, least=6, slack=1.0, sway=0.45, apart=4, moves=3):
+    if len(notes) < least + apart:
+        return []
+    pitch = np.asarray([x[1] for x in notes], dtype=float)
+    beat_s = 60.0 / g["bpm"]
+    held = np.asarray([x[2] / beat_s for x in notes], dtype=float)
+    step = np.diff(pitch)
+    n = len(step)
+    out = []
+    used = np.zeros(len(notes), dtype=bool)
+    for i in range(n - least + 1):
+        if used[i]:
+            continue
+        best = None
+        for j in range(i + apart, n - least + 1):
+            k = 0
+            while (i + k < n and j + k < n and j + k > i + least - 1
+                   and abs(step[i + k] - step[j + k]) <= slack
+                   and abs(held[i + k] - held[j + k]) <= sway):
+                k += 1
+            if k >= least and (best is None or k > best[1]):
+                best = (j, k)
+        if best is None:
+            continue
+        j, k = best
+        if sum(1 for x in step[i:i + k] if abs(x) >= 1.0) < moves:
+            continue
+        if used[i:i + k + 1].any() or used[j:j + k + 1].any():
+            continue
+        used[i:i + k + 1] = True
+        used[j:j + k + 1] = True
+        was, bar = seat(notes[i][0], g, pickup), seat(notes[j][0], g, pickup)
+        upto = notes[j + k][0] + notes[j + k][2]
+        out.append({"bar": bar[0], "beat": bar[1], "is": "hook",
+                    "what": f"the tune from bar {was[0]}",
+                    "sure": round(float(min(1.0, (k + 1) / 10.0)), 3),
+                    "for_beats": int(round((upto - notes[j][0]) / beat_s)),
+                    "again_of": int(was[0]), "notes": int(k + 1)})
+    return out
+
+
 def sung(notes, spans, g, pickup, chanted=5):
     beat_s = 60.0 / g["bpm"]
     per = g["beats_per_bar"]
