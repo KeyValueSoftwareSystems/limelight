@@ -1,0 +1,70 @@
+{
+ "layout": "0.4",
+ "rig": "arc4-head",
+ "note": "generated from rig.py; positions in metres on a 150cm-radius arc",
+ "fixtures": [
+  {
+   "id": "par_1",
+   "type": "par7",
+   "angle_deg": -32.5,
+   "at": [
+    -0.806,
+    0.0,
+    0.0
+   ],
+   "universe": 0,
+   "address": 1
+  },
+  {
+   "id": "par_8",
+   "type": "par7",
+   "angle_deg": -17.0,
+   "at": [
+    -0.439,
+    0.0,
+    0.0
+   ],
+   "universe": 0,
+   "address": 8
+  },
+  {
+   "id": "par_15",
+   "type": "par7",
+   "angle_deg": 17.0,
+   "at": [
+    0.439,
+    0.0,
+    0.0
+   ],
+   "universe": 0,
+   "address": 15
+  },
+  {
+   "id": "par_22",
+   "type": "par7",
+   "angle_deg": 32.5,
+   "at": [
+    0.806,
+    0.0,
+    0.0
+   ],
+   "universe": 0,
+   "address": 22
+  },
+  {
+   "id": "head",
+   "type": "head13",
+   "at": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "universe": 0,
+   "address": 29
+  }
+ ],
+ "limits": {
+  "max_pan_per_frame": 7,
+  "max_tilt_per_frame": 7
+ }
+}

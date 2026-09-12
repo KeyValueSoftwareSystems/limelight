@@ -1,0 +1,273 @@
+{
+ "sequences": [
+  {
+   "id": "pair_call_response",
+   "kind": "individual",
+   "boldness": "accent",
+   "fit": 1,
+   "occupies": [
+    "pars:colour",
+    "pars:level"
+   ]
+  },
+  {
+   "id": "travelling_pulse",
+   "kind": "individual",
+   "boldness": "accent",
+   "fit": 0.7,
+   "occupies": [
+    "pars:colour",
+    "pars:level"
+   ]
+  },
+  {
+   "id": "strobe_pops",
+   "kind": "individual",
+   "boldness": "accent",
+   "fit": 0.8,
+   "occupies": [
+    "pars:strobe"
+   ]
+  },
+  {
+   "id": "head_sweep",
+   "kind": "individual",
+   "boldness": "hero",
+   "fit": 0.9,
+   "occupies": [
+    "head:move"
+   ]
+  },
+  {
+   "id": "breathe",
+   "kind": "individual",
+   "boldness": "ambient",
+   "fit": 0.8,
+   "occupies": [
+    "pars:level"
+   ]
+  },
+  {
+   "id": "build_ramp",
+   "kind": "compound",
+   "boldness": "accent",
+   "fit": 0.9,
+   "occupies": [
+    "pars:colour",
+    "pars:level",
+    "pars:strobe"
+   ]
+  },
+  {
+   "id": "drop_combo_A",
+   "kind": "combination",
+   "boldness": "hero",
+   "fit": 0.8,
+   "occupies": [
+    "pars:colour",
+    "pars:level",
+    "head:move",
+    "pars:strobe"
+   ],
+   "parts": [
+    "pair_call_response",
+    "head_sweep",
+    "strobe_pops"
+   ]
+  }
+ ],
+ "matrix": {
+  "pair_call_response": {
+   "intro": 0,
+   "verse": 0.5,
+   "break": 0.4,
+   "build": 0.6,
+   "drop": 0.9,
+   "outro": 0,
+   "silence": 0,
+   "final_drop": 0.95
+  },
+  "travelling_pulse": {
+   "intro": 0,
+   "verse": 0.49,
+   "break": 0,
+   "build": 0.35,
+   "drop": 0.35,
+   "outro": 0,
+   "silence": 0,
+   "final_drop": 0
+  },
+  "strobe_pops": {
+   "intro": 0,
+   "verse": 0,
+   "break": 0,
+   "build": 0.56,
+   "drop": 0.64,
+   "outro": 0,
+   "silence": 0,
+   "final_drop": 0.68
+  },
+  "head_sweep": {
+   "intro": 0,
+   "verse": 0.36,
+   "break": 0,
+   "build": 0.63,
+   "drop": 0.81,
+   "outro": 0,
+   "silence": 0,
+   "final_drop": 0.81
+  },
+  "breathe": {
+   "intro": 0.68,
+   "verse": 0,
+   "break": 0.4,
+   "build": 0,
+   "drop": 0,
+   "outro": 0.68,
+   "silence": 0.44,
+   "final_drop": 0
+  },
+  "build_ramp": {
+   "intro": 0,
+   "verse": 0,
+   "break": 0,
+   "build": 0.81,
+   "drop": 0,
+   "outro": 0,
+   "silence": 0,
+   "final_drop": 0
+  },
+  "drop_combo_A": {
+   "intro": 0,
+   "verse": 0,
+   "break": 0,
+   "build": 0,
+   "drop": 0.76,
+   "outro": 0,
+   "silence": 0,
+   "final_drop": 0.8
+  }
+ },
+ "report": {
+  "rig": "arc4-head",
+  "can_do": [
+   "pair_call_response",
+   "travelling_pulse",
+   "strobe_pops",
+   "head_sweep",
+   "breathe",
+   "build_ramp",
+   "drop_combo_A"
+  ],
+  "impossible": [
+   "laser_sweep"
+  ],
+  "weak": [],
+  "strongest": {
+   "intro": [
+    {
+     "id": "breathe",
+     "score": 0.68
+    }
+   ],
+   "verse": [
+    {
+     "id": "pair_call_response",
+     "score": 0.5
+    },
+    {
+     "id": "travelling_pulse",
+     "score": 0.49
+    },
+    {
+     "id": "head_sweep",
+     "score": 0.36
+    }
+   ],
+   "break": [
+    {
+     "id": "pair_call_response",
+     "score": 0.4
+    },
+    {
+     "id": "breathe",
+     "score": 0.4
+    }
+   ],
+   "build": [
+    {
+     "id": "build_ramp",
+     "score": 0.81
+    },
+    {
+     "id": "head_sweep",
+     "score": 0.63
+    },
+    {
+     "id": "pair_call_response",
+     "score": 0.6
+    },
+    {
+     "id": "strobe_pops",
+     "score": 0.56
+    },
+    {
+     "id": "travelling_pulse",
+     "score": 0.35
+    }
+   ],
+   "drop": [
+    {
+     "id": "pair_call_response",
+     "score": 0.9
+    },
+    {
+     "id": "head_sweep",
+     "score": 0.81
+    },
+    {
+     "id": "drop_combo_A",
+     "score": 0.76
+    },
+    {
+     "id": "strobe_pops",
+     "score": 0.64
+    },
+    {
+     "id": "travelling_pulse",
+     "score": 0.35
+    }
+   ],
+   "outro": [
+    {
+     "id": "breathe",
+     "score": 0.68
+    }
+   ],
+   "silence": [
+    {
+     "id": "breathe",
+     "score": 0.44
+    }
+   ],
+   "final_drop": [
+    {
+     "id": "pair_call_response",
+     "score": 0.95
+    },
+    {
+     "id": "head_sweep",
+     "score": 0.81
+    },
+    {
+     "id": "drop_combo_A",
+     "score": 0.8
+    },
+    {
+     "id": "strobe_pops",
+     "score": 0.68
+    }
+   ]
+  }
+ }
+}
