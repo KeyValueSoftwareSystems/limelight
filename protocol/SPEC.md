@@ -297,6 +297,18 @@ closely enough to look redundant, and the places it does not are the point:
 bar 50 of Levels is 0.04 loud and 0.30 heavy, a bar that measures as nearly
 silent and still has a third of its energy under 120 Hz.
 
+`sections[].also_heard` is a second opinion on the boundary from MuQ, a model
+trained on a hundred and sixty thousand hours that shares no code, no features
+and no assumptions with the detectors in shape.py. It is not merged into
+`sure`: two numbers that disagree are worth more than one average that hides
+it. On Nebulakal the model is nearly certain about boundaries we rated
+middling -- bars 73 and 94 come back 0.99 and 0.95 against our 0.49 and 0.44 --
+and it declines to back bars 110 and 146, which are also our two weakest. A
+boundary both methods like is worth committing a look to. A boundary only one
+of them likes is worth a gentler one.
+
+null means only we heard it. That is not the same as wrong.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

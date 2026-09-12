@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from cycle import cycle
 from groove import groove
+from heard import agrees, edges as model_edges
 from grid import grid, bar_edges, show
 from form import on_phrase
 from shape import shape
@@ -303,6 +304,20 @@ def read(path, slug):
     told = call([(a, b, m) for a, b, m in snapped], score_bars)
     shaped = sections([(s["from"], s["to"], s["role"]) for s in told],
                       voices, busy, pickup, report, chroma)
+    # A second opinion on the boundaries from a model that shares no code and
+    # no training data with the detectors above. Recorded per section rather
+    # than merged into them: where both heard a boundary that is worth knowing,
+    # and where only one did that is worth knowing too.
+    seen = CACHE / f"{slug}.muq.npy"
+    if seen.exists():
+        found = model_edges(np.load(seen), g, g["bars"])
+        told_bars = [x["from_bar"] + pickup for x in shaped]
+        near = agrees(told_bars, found)
+        for part in shaped:
+            lift = near.get(part["from_bar"] + pickup)
+            part["also_heard"] = round(float(lift), 3) if lift else None
+        report["model_edges"] = len(found)
+        report["model_agreed"] = len(near)
     merged, kept = [], []
     for part, said in zip(shaped, told):
         if (merged and merged[-1]["role"] == part["role"] == "bridge"

@@ -123,6 +123,9 @@ export function format(raw) {
          way; one that knows a verse turns over every eight bars can swap on
          the cycle instead of holding one look for thirty-one bars. */
       repeats_as: part.repeats_as,
+      /* Whether a model that shares nothing with our detectors heard this
+         boundary too. Null means only we did, which is not the same as wrong. */
+      also_heard: part.also_heard,
       sure:       part.sure,
       trades:     part.trades,
     }));

@@ -130,6 +130,15 @@ def format_v1(raw):
                 "playing": p.get("playing"),
                 "fullness": p.get("fullness"),
                 "rise": p.get("rise"),
+                # Which section this repeats, how cleanly it sits in that
+                # group, whether it trades back and forth inside itself, and
+                # whether a model that shares nothing with our detectors heard
+                # the same boundary. The JS formatter carried these and this
+                # one did not.
+                "repeats_as": p.get("repeats_as"),
+                "sure": p.get("sure"),
+                "trades": p.get("trades"),
+                "also_heard": p.get("also_heard"),
                 "stems": p.get("stems"),
             }
             for p in raw["parts"]

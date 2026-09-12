@@ -42,6 +42,26 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
        ? `only js: ${onlyJs.join(", ") || "-"} | only py: ${onlyPy.join(", ") || "-"}`
        : `${a.size} fields on both sides`);
 
+  /* Comparing only the top level missed that the Python formatter carried no
+     section fields at all -- repeats_as, sure and trades were JS-only and the
+     test said both sides agreed. A protocol is not just its outermost keys. */
+  const keysOf = list => {
+    const k = new Set();
+    for (const row of (list || []).slice(0, 40))
+      for (const [n, v] of Object.entries(row)) if (v != null) k.add(n);
+    return k;
+  };
+  for (const part of ["sections", "moments", "melody_phrases"]) {
+    const ja = keysOf(js[part]), pb = keysOf(py[part]);
+    const gapJs = [...ja].filter(k => !pb.has(k));
+    const gapPy = [...pb].filter(k => !ja.has(k));
+    ok(`every field inside ${part} is on both sides`,
+       gapJs.length === 0 && gapPy.length === 0,
+       gapJs.length || gapPy.length
+         ? `only js: ${gapJs.join(", ") || "-"} | only py: ${gapPy.join(", ") || "-"}`
+         : `${ja.size} fields`);
+  }
+
   for (const want of ["ticks", "groove", "melody_phrases", "weight", "floor"]) {
     ok(`${want} reaches a reader from both`, a.has(want) && b.has(want),
        `js ${a.has(want) ? "yes" : "NO"}, py ${b.has(want) ? "yes" : "NO"}`);
