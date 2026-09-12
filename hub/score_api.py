@@ -13,7 +13,9 @@ import math
 
 KNOWN = [
     "song", "grid", "beats", "downbeats", "sections", "energy",
-    "brightness", "width", "air", "pump", "pace", "moments",
+    "brightness", "width", "air", "pump", "pace", "weight", "floor",
+    "groove", "ticks", "melody_phrases", "phrase_grid", "scales",
+    "presence", "moments",
     "phrases", "layers", "chords", "key", "loudness", "feel",
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
     "tension", "releases", "melody", "signals", "made_by",
@@ -21,7 +23,8 @@ KNOWN = [
 
 _STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
 _STEM_FOUR  = ["drums", "bass", "vocals", "other"]
-_CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace"]
+_CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace",
+                "weight", "floor"]
 # The personality rides with the score when present, asked for or not: it is how
 # the artist wants this song to look, and a consumer that forgot to ask should
 # still get it. `profile` was the old name and is still sent alongside, so a
@@ -149,6 +152,17 @@ def format_v1(raw):
             out[lane] = bars[lane]
     if isinstance(bars.get("brightness"), list):
         out["brightness"] = bars["brightness"]
+    # air and brightness are both the top of the spectrum; nothing measured the
+    # bottom, which is most of what a drop feels like.
+    for band in ("weight", "floor"):
+        if isinstance(bars.get(band), list):
+            out[band] = bars[band]
+    # These three were carried by the JS formatter and not this one, which is
+    # the same drift in the other direction.
+    for whole in ("groove", "ticks", "melody_phrases",
+                  "phrase_grid", "scales", "presence"):
+        if raw.get(whole) is not None:
+            out[whole] = raw[whole]
 
     # ---- curves ----
     curve_entries = {}

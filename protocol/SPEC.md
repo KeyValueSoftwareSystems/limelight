@@ -281,6 +281,22 @@ turnovers of the music.
 whether it was sung or played, and `same_as` naming an earlier line it repeats
 the shape of.
 
+`groove` is what the rhythm *is*, which nothing else here says. Per stem, the
+strength of the hits at each sixteenth across a bar, plus `same_bar_to_bar` for
+how much the pattern holds from one bar to the next. `pace` counts events and
+throws the arrangement of them away: fourteen bars of Levels sit within 0.05 of
+"one event a beat" and they do not sound alike. Levels' kick reads
+`x...x...x...x...` and its bass `..x.......x...x.`; Nebulakal's kick is
+`X.........X.xx..`, which is not four-on-the-floor at all. A reader that wants
+to punch on the pattern rather than on the beat needs this.
+
+`weight` and `floor` are the bottom of the spectrum -- the share below 120 Hz
+and below 60. `air` and `brightness` are both the top, and nothing measured the
+bottom, which is most of what a drop feels like. `weight` tracks loudness
+closely enough to look redundant, and the places it does not are the point:
+bar 50 of Levels is 0.04 loud and 0.30 heavy, a bar that measures as nearly
+silent and still has a third of its energy under 120 Hz.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

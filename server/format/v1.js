@@ -7,7 +7,7 @@
 
 export const KNOWN = [
   'song', 'grid', 'beats', 'downbeats', 'sections', 'energy', 'ticks', 'groove', 'melody_phrases',
-  'brightness', 'width', 'air', 'pump', 'pace',
+  'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
   'tension', 'releases', 'melody', 'signals', 'made_by',
@@ -15,7 +15,8 @@ export const KNOWN = [
 
 const STEM_NAMES = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
 const STEM_FOUR  = ['drums', 'bass', 'vocals', 'other'];
-const CURVE_NAMES = ['energy', 'brightness', 'width', 'air', 'pump', 'pace'];
+const CURVE_NAMES = ['energy', 'brightness', 'width', 'air', 'pump', 'pace',
+                     'weight', 'floor'];
 
 /**
  * @param {object} raw  Parsed score file from disk.
@@ -162,6 +163,11 @@ export function format(raw) {
     if (Array.isArray(bars[lane])) out[lane] = bars[lane];
   }
   if (Array.isArray(bars.brightness)) out.brightness = bars.brightness;
+  /* air and brightness are both the top of the spectrum. weight is the share
+     below 120 Hz and floor below 60 -- a bar can read near silent on energy
+     and still be a third low end, which is a bar that feels like something. */
+  if (Array.isArray(bars.weight)) out.weight = bars.weight;
+  if (Array.isArray(bars.floor)) out.floor = bars.floor;
 
   // ---- curves (selectable per-bar arrays with metadata) ----
   const curveEntries = {};
