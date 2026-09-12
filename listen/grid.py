@@ -118,10 +118,16 @@ def pieces(times, window=12, tol=0.035, least=10):
 LEVELS = (1.0 / 3, 0.5, 1.0, 2.0, 3.0)
 
 
-def fold(runs, tol=0.04):
-    if len(runs) < 2:
+def fold(runs, lead=None, tol=0.04):
+    # The reference has to be the same period the rest of the grid is built
+    # from. Folding against the longest segment instead let a song whose longest
+    # stretch was tracked an octave low pull the whole map down with it: apex
+    # came out with bpm 151.35 beside a tempo map ending at 76.002, and bars
+    # counted from the map covered 110s of a 207s song.
+    if not runs:
         return runs
-    lead = max(runs, key=lambda r: r["beats"])["period"]
+    if lead is None:
+        lead = max(runs, key=lambda r: r["beats"])["period"]
     for r in runs:
         ratio = r["period"] / lead
         near = min(LEVELS, key=lambda L: abs(ratio - L) / L)
@@ -220,7 +226,7 @@ def grid(times, downs, length_s, report=None):
             drift_pct=round(abs(early - late) / bpm * 100, 3),
         )
 
-    runs = fold(tempos(whole, pieces(whole)))
+    runs = fold(tempos(whole, pieces(whole)), period)
     tempo = ladder(runs, first)
     out = {
         "bpm": round(bpm, 3),

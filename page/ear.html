@@ -42,6 +42,7 @@ section{margin:0 0 24px}
 canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;background:#06090e}
 #zoom{height:110px;cursor:pointer}
 #tune{height:140px;cursor:pointer}
+#curves{height:190px;cursor:pointer}
 #lanes{height:104px;cursor:pointer;border-radius:0 0 8px 8px;border-top:none}
 #map{position:relative;height:124px;border:1px solid var(--line);border-bottom:none;
   border-radius:8px 8px 0 0;background:#06090e;overflow:hidden;cursor:pointer}
@@ -155,6 +156,15 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 </section>
 
 <section>
+  <h2>How the sound itself changes</h2>
+  <p class="note">Six things the computer measures every bar that the rows above do not show.
+    The number on the right of each row is its value where you are now.
+    <b>Click anywhere to jump there.</b></p>
+  <canvas id="curves"></canvas>
+  <div class="legend" id="curvekey"></div>
+</section>
+
+<section>
   <h2>The tune</h2>
   <p class="note">The computer followed the pitch of the singing and of the lead instrument and wrote down
     every note. Below, <b>each mark is one note</b>: further right is later in the song, higher up is a higher
@@ -205,7 +215,7 @@ function setView(a, b) {
   VIEW.a = Math.max(0, lo); VIEW.b = Math.min(total, hi);
   $("viewing").textContent = (VIEW.b - VIEW.a >= total - 0.01)
     ? "whole song" : `${mmss(VIEW.a)} \u2013 ${mmss(VIEW.b)}`;
-  if (SCORE) { place(); lanes(); tune(); subs(); }
+  if (SCORE) { place(); lanes(); tune(); curves(); subs(); }
 }
 
 function zoomAt(t, by) { setView(t - (t - VIEW.a) * by, t + (VIEW.b - t) * by); }
@@ -461,6 +471,9 @@ function draw() {
                   + `could not measure a steady beat there, so those bar positions are guessed `
                   + `(${stripe}% of the song)</span>` : "");
 
+  $("curvekey").innerHTML = CURVES.map(([k, n, hue, why]) =>
+    `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}</span>`).join("");
+
   $("tunekey").innerHTML =
     `<span><i style="background:${STEM.vocals}"></i>a note that was sung</span>`
     + `<span><i style="background:${STEM.other}"></i>a note played by the lead instrument</span>`
@@ -470,7 +483,7 @@ function draw() {
     + `<b style="color:var(--ink)">phrase of the tune</b> starts and ends &mdash; click one to hear just `
     + `that phrase. A &#8634; marks a phrase whose shape repeats an earlier one.</span>`;
 
-  lanes(); tune(); subs(); sections(); place();
+  lanes(); tune(); curves(); subs(); sections(); place();
 }
 
 /* Absolutely-positioned rows are laid out here rather than where they are
@@ -753,6 +766,55 @@ function tune() {
   }
 }
 
+const CURVES = [
+  ["intensity",  "Loudness",   "#e8a33d", "how loud this bar is"],
+  ["pace",       "Busyness",   "#7ad4c8", "notes and hits per beat, 1.0 is ordinary"],
+  ["brightness", "Brightness", "#f2c14e", "how much of the sound is treble"],
+  ["air",        "Air",        "#8fd6ff", "the very top, above 6 kHz \u2014 cymbals, breath, sparkle"],
+  ["pump",       "Pump",       "#d16bd1", "how hard the track ducks on every beat"],
+  ["width",      "Width",      "#9fd18b", "how far the sound spreads either side of the middle"],
+];
+
+function curves() {
+  const [g, W] = fit($("curves"), 190);
+  const b = SCORE.bars || {};
+  const mine = CURVES.filter(c => Array.isArray(b[c[0]]));
+  if (!mine.length) return;
+  const h = 190 / mine.length, L = 78;
+  const bar = Math.max(0, Math.floor((aud.currentTime - SCORE.grid.first_beat_s)/BAR) + 1 - FIRSTBAR);
+  mine.forEach(([key, name, hue, why], row) => {
+    const v = b[key], y0 = row*h;
+    const got = v.filter(x => x != null);
+    const top = Math.max(1e-6, Math.max(...got));
+    if (row) {
+      g.strokeStyle = "#131a26"; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(0, y0); g.lineTo(W, y0); g.stroke();
+    }
+    g.strokeStyle = hue; g.lineWidth = 1.4; g.globalAlpha = .95;
+    g.beginPath();
+    let open = false;
+    for (let i = 0; i < v.length; i++) {
+      if (v[i] == null) { open = false; continue; }
+      const t = barTime(i + FIRSTBAR);
+      if (t + BAR < VIEW.a || t > VIEW.b) { open = false; continue; }
+      const x = L + frac(t) * (W - L - 46);
+      const y = y0 + h - 6 - (v[i]/top) * (h - 14);
+      open ? g.lineTo(x, y) : g.moveTo(x, y);
+      open = true;
+    }
+    g.stroke();
+    g.globalAlpha = 1;
+    g.fillStyle = hue; g.font = "600 10px ui-monospace,monospace";
+    g.fillText(name.toUpperCase(), 7, y0 + 13);
+    g.fillStyle = "#4a5364"; g.font = "8px ui-monospace,monospace";
+    g.fillText(top.toFixed(2), 7, y0 + h - 5);
+    const now = v[bar];
+    g.fillStyle = now == null ? "#3a4152" : hue;
+    g.font = "600 12px ui-monospace,monospace";
+    g.fillText(now == null ? "\u2014" : now.toFixed(2), W - 40, y0 + h/2 + 4);
+  });
+}
+
 function lanes() {
   const [g, W] = fit($("lanes"), 104);
   const b = SCORE.bars || {};
@@ -867,6 +929,7 @@ function tick() {
     const hp = pct(t);
     $("head").style.display = (hp < 0 || hp > 100) ? "none" : "";
     $("head").style.left = `${hp}%`;
+    if (SCORE.bars) curves();
     if (VIEW.follow && !aud.paused) {
       const w = viewSpan();
       if (t < VIEW.a + w*0.15 || t > VIEW.b - w*0.15) setView(t - w/2, t + w/2);
@@ -945,6 +1008,7 @@ const jump = e => {
 $("map").onclick = jump;
 $("subs").onclick = jump;
 $("lanes").onclick = jump;
+$("curves").onclick = jump;
 $("zoom").onclick = e => {
   if (!SCORE) return;
   const r = e.target.getBoundingClientRect();
@@ -1035,10 +1099,10 @@ $("song").onchange = e => {
   aud.pause(); LIVE = -1;
   load(e.target.value, e.target.selectedOptions[0].dataset.a);
 };
-for (const id of ["map", "subs", "lanes", "tune"]) zoomable($(id));
+for (const id of ["map", "subs", "lanes", "tune", "curves"]) zoomable($(id));
 zoomable($("zoom"), f => aud.currentTime - Math.min(WINDOW, viewSpan())/2 + f * Math.min(WINDOW, viewSpan()));
 
-addEventListener("resize", () => { if (SCORE) { lanes(); tune(); zoom(); subs(); place(); } });
+addEventListener("resize", () => { if (SCORE) { lanes(); tune(); curves(); zoom(); subs(); place(); } });
 
 /* A page that fails silently is worse than one that fails loudly: the first
    screenshot of this rewrite looked merely empty, which reads as "no data". */
