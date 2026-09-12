@@ -90,8 +90,13 @@
   function removeWith(key, scaleTo, fade) {
     const b = blocks.get(key); if (!b) return;
     blocks.delete(key);
+    const owner = scene;              // the scene this mesh belongs to
     const start = performance.now();
     (function anim() {
+      if (!scene || scene !== owner) { // scene was disposed/replaced mid-animation
+        try { owner.remove(b.mesh); b.mesh.geometry.dispose(); b.mesh.material.dispose(); } catch (e) {}
+        return;
+      }
       const t = Math.min(1, (performance.now() - start) / 180);
       b.mesh.scale.setScalar(1 + (scaleTo - 1) * t);
       b.mesh.material.opacity = 1 - t; b.mesh.material.transparent = true;
