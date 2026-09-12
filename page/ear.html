@@ -22,6 +22,7 @@ button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c
 .part .tag{position:relative;padding:6px 5px;font:600 10px ui-monospace,monospace;
   text-shadow:0 1px 3px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .part.here{outline:2px solid var(--ok);outline-offset:-2px}
+#marks{width:100%;height:112px;display:block;margin-top:6px}
 #head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:3}
 #zoom{width:100%;height:86px;cursor:pointer;margin:0 0 6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
@@ -57,6 +58,7 @@ h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
 
 <div id="map"><div id="head"></div></div>
 <canvas id="lanes"></canvas>
+<canvas id="marks"></canvas>
 
 <div id="now">—</div>
 
@@ -148,7 +150,44 @@ function draw() {
       rgba(224,101,95,.13) 0 7px,transparent 7px 14px);border-right:1px dashed rgba(224,101,95,.6)`;
     map.appendChild(sh);
   }
-  lanes(); sections();
+  lanes(); marks(); sections();
+}
+
+const KIND = {entrance:"#5bb98c", exit:"#e0655f", fill:"#e8a33d", accent:"#f2c14e",
+  pause:"#8b93a6", rise:"#6fa8dc", release:"#d16bd1", change:"#7ad4c8",
+  hook:"#f28c8c", highlight:"#c8a2ff", transition:"#9fb0c9"};
+
+function momentTime(m) {
+  return barTime(m.bar) + (m.beat - 1) * (60 / SCORE.grid.bpm);
+}
+
+function marks() {
+  const c = $("marks"), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  if (c.width !== Math.round(r.width*dpr)) {
+    c.width = Math.round(r.width*dpr); c.height = Math.round(112*dpr);
+  }
+  const g = c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,r.width,112);
+  if (!SCORE || !SCORE.moments) return;
+  const total = (SCORE.song && SCORE.song.length_s) || aud.duration || 1;
+  const rows = Object.keys(KIND);
+  const lane = 9;
+  g.font = "8px ui-monospace,monospace";
+  rows.forEach((k, i) => {
+    const y = 8 + i*lane;
+    g.fillStyle = "#232833"; g.fillRect(64, y, r.width-70, lane-2);
+    g.fillStyle = KIND[k]; g.globalAlpha = .8;
+    g.fillText(k, 6, y + lane - 3); g.globalAlpha = 1;
+  });
+  for (const m of SCORE.moments) {
+    const i = rows.indexOf(m.is);
+    if (i < 0) continue;
+    const x = 64 + (momentTime(m)/total)*(r.width-70);
+    g.globalAlpha = .3 + .7*(m.sure || 0);
+    g.fillStyle = KIND[m.is];
+    g.fillRect(x, 8 + i*lane, 2, lane-2);
+  }
+  g.globalAlpha = 1;
 }
 
 const WINDOW = 8.0;
@@ -190,6 +229,19 @@ function zoom() {
       g.fillStyle = "#8b93a6"; g.font = "10px ui-monospace,monospace";
       g.fillText(n, x+3, 82);
     }
+  });
+
+  const near = (SCORE.moments || [])
+    .filter(m => { const mt = momentTime(m); return mt >= a && mt <= b; })
+    .sort((x,y) => (y.sure||0)-(x.sure||0)).slice(0, 4);
+  near.forEach((m, i) => {
+    const x = X(momentTime(m));
+    g.fillStyle = KIND[m.is] || "#8b93a6";
+    g.globalAlpha = .35 + .65*(m.sure || 0);
+    g.beginPath(); g.arc(x, 30, 3.5, 0, 6.284); g.fill();
+    g.globalAlpha = 1;
+    g.font = "9px ui-monospace,monospace";
+    g.fillText(`${m.is} ${m.what}`, x+6, 18 + i*9);
   });
 
   g.strokeStyle = "#e0655f"; g.lineWidth = 1;
@@ -320,8 +372,13 @@ function tick() {
       const b = SCORE.bars || {}, idx = Math.max(0, bar - FIRSTBAR);
       const now = LANES.filter(n => Array.isArray(b[n]) && b[n][idx] > 0.12)
         .map(n => `<span style="color:${STEM[n]}">${n}</span>`).join(" ");
+      const beat = (60/SCORE.grid.bpm);
+      const here = (SCORE.moments||[]).filter(m => Math.abs(momentTime(m) - t) < beat*0.75)
+        .sort((x,y) => (y.sure||0)-(x.sure||0)).slice(0,3)
+        .map(m => `<span style="color:${KIND[m.is]||'#8b93a6'}">${m.is} ${m.what}</span>`).join(" · ");
       $("now").innerHTML = `<span style="color:${HUE[p.repeats_as]}">${p.role ?? p.repeats_as}</span>
-        · ${p.feels}<small>bar ${Math.max(0,bar)} · ${now || "nothing"}</small>`;
+        · ${p.feels}<small>bar ${Math.max(0,bar)} · ${now || "nothing"}</small>`
+        + (here ? `<div style="margin-top:5px;font-size:12px">${here}</div>` : "");
     }
   }
   requestAnimationFrame(tick);
