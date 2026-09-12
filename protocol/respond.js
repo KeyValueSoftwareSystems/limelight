@@ -52,9 +52,9 @@ function adapt(s) {
      [bar, beat] pairs. Bars advance on the detected downbeat rather than on a
      count, so a pickup bar stays a pickup bar. */
   if (Array.isArray(s.beats) && s.grid) {
-    const fb = (s.grid.first_bar !== undefined && s.grid.first_bar !== null)
-             ? s.grid.first_bar : 1;
-    let bar = fb, beat = 0;
+    /* Bar 1 is the first downbeat, matching session.js. Numbering from
+       grid.first_bar put a pickup score's beats a bar out. */
+    let bar = 0, beat = 0;
     const pairs = s.beats.map(b => {
       if (b.downbeat) { if (beat) bar += 1; beat = 1; } else { beat += 1; }
       return [bar, beat];
@@ -76,6 +76,25 @@ function adapt(s) {
           from: { bar: q.from_bar, beat: 1 },
           to: { bar: q.to_bar + 1, beat: 1 },
           name: q.doing, says: q.says })) } } : {}),
+      /* presence crosses form boundaries -- a voice runs through a section
+         change -- which is why it is a layer and not a column of the section. */
+      /* One writer per fact: the voice has its own layer, so presence covers
+         the instruments and nothing describes the voice twice. */
+      ...(s.presence ? { presence: { kind: "sparse",
+        spans: Object.keys(s.presence).filter(k => k !== "vocals").flatMap(stem =>
+          s.presence[stem].filter(sp => sp.is !== "out").map(sp => ({
+            from: { bar: sp.from_bar, beat: 1 },
+            to: { bar: sp.to_bar + 1, beat: 1 },
+            name: stem, is: sp.is }))) } } : {}),
+      ...(s.presence && s.presence.vocals ? { voice: { kind: "sparse",
+        spans: s.presence.vocals.filter(sp => sp.is !== "out").map(sp => ({
+          from: { bar: sp.from_bar, beat: 1 },
+          to: { bar: sp.to_bar + 1, beat: 1 },
+          name: "voice", is: sp.is })) } } : {}),
+      ...(s.phrase_grid ? { phrase: { kind: "rule",
+        every_bars: s.phrase_grid.every_bars,
+        from_bar: s.phrase_grid.from_bar,
+        on_grid: s.phrase_grid.boundaries_on_grid } } : {}),
     };
   }
   if (Array.isArray(s.bars && s.bars.intensity)) {
