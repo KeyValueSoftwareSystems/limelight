@@ -84,7 +84,22 @@ function contextsFor(sections, energyAt, score) {
   });
 }
 
-/* ---- the plan ---------------------------------------------------------- */
+/* ---- per-phase dynamics (from the Arc Rig Playbook) ---------------------
+   floor/peak = PAR contrast (dark floor, full peak: the same peak feels harder
+   from a lower floor); mode = how the level moves; head = the head's dimmer floor;
+   motion = how hard the head moves (0 slow breath .. 1 room-wide, fast). */
+const DYN = {
+  intro:      { floor: 0.25, peak: 0.55, mode: "breathe", head: 0.45, motion: 0.30 },
+  verse:      { floor: 0.28, peak: 1.00, mode: "hit",     head: 0.70, motion: 0.55 },
+  break:      { floor: 0.12, peak: 1.00, mode: "hit",     head: 0.50, motion: 0.70 },
+  build:      { floor: 0.18, peak: 1.00, mode: "hit",     head: 0.75, motion: 0.85 },
+  drop:       { floor: 0.55, peak: 1.00, mode: "hit",     head: 0.90, motion: 1.00 },
+  final_drop: { floor: 0.60, peak: 1.00, mode: "hit",     head: 1.00, motion: 1.00 },
+  outro:      { floor: 0.05, peak: 0.40, mode: "breathe", head: 0.40, motion: 0.30 },
+  silence:    { floor: 0.08, peak: 0.35, mode: "breathe", head: 0.35, motion: 0.30 },
+};
+
+/* ---- the plan: a PAR look AND a head look for EVERY section -------------- */
 function plan(score, enumResult, seed) {
   const rng = mulberry32((seed || 0) >>> 0);
   const V = view(enumResult);
@@ -94,41 +109,69 @@ function plan(score, enumResult, seed) {
 
   const bpb = (score.grid && score.grid.beats_per_bar) || 4;
   const atBeat = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
-  const beatsOverlap = (a, b) => a[0] < b[1] && b[0] < a[1];
+  const fromBeat = B => ({ bar: Math.floor(B / bpb) + 1, beat: (((B % bpb) + bpb) % bpb) + 1 });
   const occOf = id => { const s = V.seq(id); return (s && s.occupies) || []; };
 
-  const assignments = [], placed = [];
+  /* classify a candidate by which fixtures it drives */
+  const groupOf = id => {
+    const o = occOf(id);
+    const par = o.some(t => t.startsWith("pars:") || t.startsWith("all_pars"));
+    const head = o.some(t => t.startsWith("head:"));
+    return par && head ? "combo" : par ? "par" : head ? "head" : "other";
+  };
+  const pickFor = (ctx, grp) => {
+    const all = V.candidates(ctx);
+    const same = all.filter(c => groupOf(c.id) === grp);
+    return pickWeighted(same.length ? same : all, rng);
+  };
+
+  const assignments = [];
   sections.forEach((sec, i) => {
     const context = contexts[i];
-    let cands = V.candidates(context);
-    if (!cands.length) cands = V.candidates("verse");   // safe fallback
-    const pick = pickWeighted(cands, rng);
-    const rate = +(0.75 + 0.5 * rng()).toFixed(2);      // the sequence's own time-scale
-    const hue = +rng().toFixed(3);                       // a seeded colour rotation hint
-    if (!pick) return;
-
-    /* overlap conflict-avoidance: if this section overlaps ones already placed,
-       don't let two concurrent sequences claim the same fixture-attribute. Keep the
-       seeded pick unless it clashes; then take the best non-clashing candidate. */
-    const span = [atBeat(sec.from), atBeat(sec.to)];
-    const activeOcc = placed.filter(p => beatsOverlap(p.span, span)).flatMap(p => p.occ);
-    let chosen = pick;
-    if (occOf(pick.id).some(t => activeOcc.includes(t))) {
-      const alt = cands.find(c => !occOf(c.id).some(t => activeOcc.includes(t)));
-      if (alt) chosen = alt;
-    }
-    const occ = occOf(chosen.id);
-    const clash = occ.some(t => activeOcc.includes(t));   // true only if no clean option existed
-
+    const dyn = DYN[context] || DYN.verse;
     const e = sectionEnergyMean(sec, energyAt);
-    const intensity = context === "final_drop" ? 1.0 : +Math.min(0.95, 0.35 + 0.6 * e).toFixed(3);
-    placed.push({ span, occ });
-    assignments.push({
-      from: sec.from, to: sec.to, seq_id: chosen.id, context,
-      layer: "section", priority: i, clash,
-      params: { intensity, rate, hue },
-      occupies: occ, section: sec.name, repeat: sec.repeat,
+    const boldness = context === "final_drop" ? 1 : clamp01(0.6 + 0.4 * e);
+    const rate = +(0.85 + 0.3 * rng()).toFixed(2);
+    const hue = +rng().toFixed(3);
+
+    /* the PARs: a look + the phase's contrast (floor/peak/mode) */
+    const par = pickFor(context, "par");
+    if (par) assignments.push({
+      from: sec.from, to: sec.to, seq_id: par.id, context, layer: "par", priority: 0,
+      params: { rate, hue, floor: dyn.floor, peak: dyn.peak, mode: dyn.mode, intensity: boldness },
+      occupies: occOf(par.id), section: sec.name,
     });
+
+    /* the head: always moving/lit, its own colour voice, speed by phase */
+    const head = pickFor(context, "head");
+    if (head) assignments.push({
+      from: sec.from, to: sec.to, seq_id: head.id, context, layer: "head", priority: 1,
+      params: { rate, hue, headDim: dyn.head, motion: dyn.motion, intensity: dyn.head },
+      occupies: occOf(head.id), section: sec.name,
+    });
+
+    /* extra musical aspects, overlapping on their own fixture attribute so they
+       never fight the base look (the user's "one sequence per aspect" idea):
+         drums  -> strobe accents on downbeats (PAR strobe)
+         build  -> whitening the PARs toward white (PAR colour) */
+    const stems = sec.stems || {};
+    const drums = (stems.drums && stems.drums.level) || (e >= 0.5 ? e : 0);
+    if (drums > 0.35 && ["break", "build", "drop", "final_drop"].includes(context))
+      assignments.push({ from: sec.from, to: sec.to, context, layer: "accent", priority: 2,
+        type: "accent_strobe", params: { strength: clamp01(drums) }, occupies: ["pars:strobe"], section: sec.name });
+    const rise = partRise(sec, score) || 0;
+    if (context === "build" || rise > 0.08)
+      assignments.push({ from: sec.from, to: sec.to, context, layer: "whiten", priority: 3,
+        type: "whiten", params: { amount: clamp01(0.3 + rise) }, occupies: [], section: sec.name });
+
+    /* contrast at a drop: the last beat before it is black, its first beat blasts white */
+    if (context === "drop" || context === "final_drop") {
+      const f = atBeat(sec.from);
+      assignments.push({ from: fromBeat(f - 1), to: sec.from, context, layer: "fx",
+        priority: 9, type: "blackout", params: {}, occupies: [], section: sec.name });
+      assignments.push({ from: sec.from, to: fromBeat(f + 1), context, layer: "fx",
+        priority: 9, type: "white_blast", params: {}, occupies: [], section: sec.name });
+    }
   });
 
   return { seed: (seed || 0) >>> 0, grid: score.grid, contexts, assignments };

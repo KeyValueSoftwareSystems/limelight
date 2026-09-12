@@ -29,88 +29,99 @@ const scaleLevel = (intent, k) => {
   return o;
 };
 
-/* one individual gesture -> { fixtureId: intent }, at musical phase `ph` */
-function renderIndividual(gesture, ph, groups, k) {
-  const out = {};
-  const keys = gesture.keys || [];
-  const target = groups[gesture.group] || [];
+/* the hard-hit envelope: a spike on the beat, a short hold, a fast fall -- the move
+   the playbook says makes a 40fps stream feel like a hit rather than a flicker. */
+const hitEnv = x => (x < 0.08 ? 1 : Math.max(0, 1 - (x - 0.08) / 0.30));
 
-  /* the moving head: any head gesture (move, colour, gobo, prism, spin). Merge the
-     keys' intents, animate pan across the bar if it has a range, and carry every
-     head attribute through -- never drop gobo/prism/spin. */
-  if (gesture.group === "head") {
-    const merged = {};
-    for (const x of keys) Object.assign(merged, x.intent || {});
-    const pans = keys.map(x => x.intent && x.intent.pan).filter(v => v != null);
-    const intent = {};
-    for (const kk of ["colour", "gobo", "prism", "spin", "tilt"]) if (merged[kk] != null) intent[kk] = merged[kk];
-    if (intent.colour === "spin") { intent.spin = true; delete intent.colour; }   // a spin, not a slot
-    if (pans.length > 1) { const tri = Math.abs(((ph.phaseInBar * 2) % 2) - 1);
-      intent.pan = +(Math.min(...pans) + (Math.max(...pans) - Math.min(...pans)) * tri).toFixed(3); }
-    else if (pans.length === 1) intent.pan = pans[0];
-    intent.level = +((merged.level != null ? merged.level : 1) * k).toFixed(3);
-    for (const id of (groups.head || [])) out[id] = { ...intent };
-    return out;
-  }
+/* the PAR level for this instant, from the phase dynamics: contrast between a floor
+   and a peak, shaped either as a per-beat hit or a per-bar breath. */
+function parLevel(p, ph) {
+  const floor = p.floor != null ? p.floor : 0, peak = p.peak != null ? p.peak : 1;
+  const k = p.intensity != null ? p.intensity : 1;
+  const shape = p.mode === "breathe"
+    ? 0.5 + 0.5 * Math.sin(2 * Math.PI * ph.phaseInBar)
+    : hitEnv(ph.phaseInBeat);
+  return +((floor + (peak - floor) * shape) * k).toFixed(3);
+}
+const floorLevel = p => +((p.floor != null ? p.floor : 0) * (p.intensity != null ? p.intensity : 1)).toFixed(3);
+const colourOf = (k, keys) => (k && k.intent && k.intent.colour) ||
+  (keys[0] && keys[0].intent && keys[0].intent.colour) || [1, 1, 1];
 
-  /* inner/outer alternation: swap which pair is lit each beat */
+/* render a PAR gesture: the gesture chooses WHICH pars + their colour; the phase
+   dynamics choose the LEVEL. Off pars sit at the floor (never fully dark mid-drop). */
+function renderPar(gesture, ph, groups, p) {
+  const out = {}, keys = gesture.keys || [];
+  const on = parLevel(p, ph), flo = floorLevel(p), downbeat = ph.beatInBar === 0;
+
   if (gesture.pattern === "inner_outer_alternation" || keys.some(x => x.target)) {
-    const onInner = (((ph.globalBeat % 2) + 2) % 2) === 0;   // positive modulo (bars may be 0-based)
-    const litOf = t => keys.find(x => x.target === t && x.intent && x.intent.level > 0);
-    const inK = litOf("inner"), outK = litOf("outer");
-    for (const id of (groups.inner || [])) out[id] = onInner && inK ? scaleLevel(inK.intent, k) : { level: 0 };
-    for (const id of (groups.outer || [])) out[id] = !onInner && outK ? scaleLevel(outK.intent, k) : { level: 0 };
+    const onInner = (((ph.globalBeat % 2) + 2) % 2) === 0;
+    const inC = colourOf(keys.find(x => x.target === "inner"), keys);
+    const outC = colourOf(keys.find(x => x.target === "outer"), keys);
+    for (const id of (groups.inner || [])) out[id] = { colour: inC, level: (downbeat || onInner) ? on : flo };
+    for (const id of (groups.outer || [])) out[id] = { colour: outC, level: (downbeat || !onInner) ? on : flo };
     return out;
   }
-  /* chase: one lamp of the arc per beat, walking left->right (or right->left) */
   if (gesture.group === "arc" && (gesture.stagger > 0 || gesture.direction)) {
     const arc = groups.arc || [];
-    if (arc.length) {
-      let step = ((ph.globalBeat % arc.length) + arc.length) % arc.length;   // positive modulo
-      if (gesture.direction === "R2L") step = arc.length - 1 - step;
-      const onK = keys[0] || { intent: { level: 1, colour: [1, 1, 1] } };
-      arc.forEach((id, i) => { out[id] = i === step ? scaleLevel(onK.intent, k) : { level: 0 }; });
-    }
+    let step = ((ph.globalBeat % (arc.length || 1)) + (arc.length || 1)) % (arc.length || 1);
+    if (gesture.direction === "R2L") step = arc.length - 1 - step;
+    const c = colourOf(keys[0], keys);
+    arc.forEach((id, i) => { out[id] = { colour: c, level: i === step ? on : flo }; });
     return out;
   }
-  /* strobe */
-  if (keys.some(x => x.intent && x.intent.strobe > 0)) {
-    const s = keys.find(x => x.intent && x.intent.strobe > 0).intent;
-    for (const id of target) out[id] = { strobe: s.strobe, level: +((s.level != null ? s.level : 1) * k).toFixed(3), colour: s.colour };
-    return out;
-  }
-  /* hold (one key) or pulse (level breathes across the bar between key levels) */
-  const first = keys[0] ? keys[0].intent : { level: 0 };
-  let level = first.level != null ? first.level : 0.5;
-  if (keys.length > 1 && gesture.repeat !== "hold") {
-    const ls = keys.map(x => x.intent && x.intent.level).filter(v => v != null);
-    if (ls.length) { const lo = Math.min(...ls), hi = Math.max(...ls);
-      level = lo + (hi - lo) * (0.5 + 0.5 * Math.sin(2 * Math.PI * ph.phaseInBar)); }
-  }
-  for (const id of target) out[id] = { colour: first.colour, level: +(level * k).toFixed(3) };
+  const c = colourOf(keys[0], keys);
+  for (const id of (groups[gesture.group] || groups.all_pars || [])) out[id] = { colour: c, level: on };
   return out;
 }
 
-/* an assignment (individual | compound | combination) -> { fixtureId: intent } */
+/* render a HEAD gesture: always moving (motion IS energy). Continuous multi-bar
+   pan sweep whose speed rises with the phase; a tilt kick on the beat when lively;
+   dimmer pulses subtly with the beat; colour/gobo/prism/spin carried from the gesture. */
+function renderHead(gesture, ph, groups, p) {
+  const out = {}, keys = gesture.keys || [], merged = {};
+  for (const x of keys) Object.assign(merged, x.intent || {});
+  const intent = {};
+  for (const kk of ["colour", "gobo", "prism", "spin"]) if (merged[kk] != null) intent[kk] = merged[kk];
+  if (intent.colour === "spin") { intent.spin = true; delete intent.colour; }
+
+  const motion = p.motion != null ? p.motion : 0.5;
+  const barPos = (ph.globalBeat + ph.phaseInBeat) / ph.bpb;
+  const cycles = 0.5 + 1.5 * motion;                          // pan sweeps per bar
+  const pans = keys.map(x => x.intent && x.intent.pan).filter(v => v != null);
+  const pmin = pans.length ? Math.min(...pans) : 0.12, pmax = pans.length ? Math.max(...pans) : 0.88;
+  intent.pan = +(((pmin + pmax) / 2) + ((pmax - pmin) / 2) * Math.sin(2 * Math.PI * cycles * barPos)).toFixed(3);
+  const tilts = keys.map(x => x.intent && x.intent.tilt).filter(v => v != null);
+  let tilt = tilts.length ? tilts[0] : 0.5;
+  if (motion > 0.6) tilt = tilt + 0.12 * hitEnv(ph.phaseInBeat);       // tilt kick
+  intent.tilt = +Math.max(0, Math.min(1, tilt)).toFixed(3);
+  const dim = (p.headDim != null ? p.headDim : 1) * (0.85 + 0.15 * hitEnv(ph.phaseInBeat));
+  intent.level = +dim.toFixed(3);
+  for (const id of (groups.head || [])) out[id] = { ...intent };
+  return out;
+}
+
+/* an assignment -> { fixtureId: intent }, dispatched by its layer (par vs head) */
 function renderAssignment(a, seq, ph, groups) {
-  const k = a.params && a.params.intensity != null ? a.params.intensity : 1;
-  if (!seq || !seq.gesture) {   // base sequence with no gesture: a plain hold
-    const out = {}; for (const id of (groups.all_pars || [])) out[id] = { colour: [1, 1, 1], level: +(0.5 * k).toFixed(3) };
-    return out;
+  const p = a.params || {}, isHead = a.layer === "head";
+  if (!seq || !seq.gesture) {
+    if (isHead) return renderHead({ group: "head", keys: [{ intent: { colour: "white" } }] }, ph, groups, p);
+    return renderPar({ group: "all_pars", keys: [{ intent: { colour: [1, 1, 1] } }] }, ph, groups, p);
   }
-  const gesture = seq.gesture;
-  if (seq.kind === "compound" && Array.isArray(gesture.steps)) {
-    const barInSec = ph.bar - a.from.bar;                 // which scripted step are we in
-    const step = gesture.steps.find(s => barInSec >= s.from && barInSec < s.to) ||
-                 gesture.steps[gesture.steps.length - 1];
-    return renderIndividual(step.gesture || step, ph, groups, k);
-  }
-  if (seq.kind === "combination" && Array.isArray(gesture.parts)) {
+  let g = seq.gesture;
+  if (seq.kind === "compound" && Array.isArray(g.steps)) {
+    const barInSec = ph.bar - a.from.bar;
+    const step = g.steps.find(s => barInSec >= s.from && barInSec < s.to) || g.steps[g.steps.length - 1];
+    g = step.gesture || step;
+  } else if (seq.kind === "combination" && Array.isArray(g.parts)) {
     const out = {};
-    for (const part of gesture.parts) Object.assign(out, renderIndividual(part.gesture || part, ph, groups, k));
+    for (const part of g.parts) {
+      const pg = part.gesture || part;
+      if (isHead && pg.group === "head") Object.assign(out, renderHead(pg, ph, groups, p));
+      else if (!isHead && pg.group !== "head") Object.assign(out, renderPar(pg, ph, groups, p));
+    }
     return out;
   }
-  return renderIndividual(gesture, ph, groups, k);
+  return (isHead || g.group === "head") ? renderHead(g, ph, groups, p) : renderPar(g, ph, groups, p);
 }
 
 /* compose several intents on one fixture: higher priority wins colour/motion,
@@ -142,8 +153,18 @@ function frame(position, plan, ctx) {
     .filter(a => at(a.from) <= here && here < at(a.to))
     .sort((x, y) => (x.priority || 0) - (y.priority || 0));
 
+  const isHead = f => f.type === "head13" || f.type === "head";
+  const all = (make) => ({ position, fixtures: (layout.fixtures || []).map(f => ({ id: f.id, type: f.type, intent: make(f) })) });
+
+  /* contrast overrides take the whole rig for their beat */
+  if (active.some(a => a.type === "white_blast"))
+    return all(f => isHead(f) ? { colour: "white", level: 1, prism: true, pan: 0.5, tilt: 0.5 } : { colour: [1, 1, 1], level: 1 });
+  if (active.some(a => a.type === "blackout"))
+    return all(() => ({ level: 0 }));
+
   const perFixture = {};   // id -> [intent, ...] in priority order
   for (const a of active) {
+    if (a.type) continue;                         // fx markers handled above
     const rendered = renderAssignment(a, library[a.seq_id], ph, groups);
     for (const id of Object.keys(rendered)) (perFixture[id] = perFixture[id] || []).push(rendered[id]);
   }
@@ -152,7 +173,21 @@ function frame(position, plan, ctx) {
     id: f.id, type: f.type,
     intent: perFixture[f.id] ? compose(perFixture[f.id]) : { level: 0 },
   }));
+
+  /* overlapping aspects that ride on a distinct attribute of the base look:
+     drums -> a strobe pop on the downbeat; build -> whiten the PAR colour. */
+  const accent = active.find(a => a.type === "accent_strobe");
+  const whiten = active.find(a => a.type === "whiten");
+  if (accent || whiten) for (const fx of fixtures) {
+    if (fx.type !== "par7") continue;
+    if (whiten && Array.isArray(fx.intent.colour)) {
+      const a = whiten.params.amount || 0.3;
+      fx.intent.colour = fx.intent.colour.map(c => +(c + (1 - c) * a).toFixed(3));
+    }
+    if (accent && ph.beatInBar === 0 && ph.phaseInBeat < 0.22)
+      fx.intent.strobe = +(accent.params.strength || 0.8).toFixed(2);
+  }
   return { position, fixtures };
 }
 
-module.exports = { frame, resolveGroups, renderIndividual, compose };
+module.exports = { frame, resolveGroups, renderPar, renderHead, parLevel, hitEnv, compose };
