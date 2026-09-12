@@ -63,6 +63,13 @@ as `128` or `true` becomes a number or boolean), and one `x-enforced` list
 naming the enforced keys when there are any. The uploaded bytes are never
 rewritten; `?raw` on the file URL skips the merge.
 
+**Profiles.** The consumer's layer. On a score's page anyone can add a profile:
+a user name and, for now, one or more colours from a fixed palette. `./limelight pull
+levels.score --profile=muzammil` pulls the score with that profile embedded
+under `profile`; without the flag nothing is embedded. The responder returns
+`profile` in every response when it is there, and the container shows it:
+open `/?score=levels&profile=muzammil` and the beats take those colours in turn.
+
 `node cli/remote.test.js` starts a private serve.py on a free port and runs
 both commands, the hub API, versions and metadata against it. The hub speaks
 the same requests as a dufs server, so `LIMELIGHT_REMOTE` can point at one of

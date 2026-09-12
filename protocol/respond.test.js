@@ -49,6 +49,25 @@ const ok = (n, c, d) => out.push([!!c, n, d || ""]);
      (r.have || []).join(", "));
 }
 
+{
+  /* a score pulled with --profile carries one; the response must carry it too,
+     asked for or not. A temporary score file beside the others, removed after. */
+  const fs = require("fs"), path = require("path");
+  const tmp = path.join(__dirname, "score.withprofile.json");
+  const base = JSON.parse(fs.readFileSync(path.join(__dirname, "score.levels.json"), "utf8"));
+  const profile = { user: "muzammil", colours: [{ name: "red", hex: "#ff0000" }] };
+  fs.writeFileSync(tmp, JSON.stringify({ ...base, score: "withprofile", profile }));
+  try {
+    const r = respond({ score: "withprofile", fields: ["grid"] });
+    ok("a score with a profile answers with it, asked for or not",
+       r.profile && r.profile.user === "muzammil" && r.profile.colours[0].hex === "#ff0000", JSON.stringify(r.profile));
+    const plain = respond({ score: "levels", fields: ["grid"] });
+    ok("a score without one answers without", !("profile" in plain));
+  } finally {
+    fs.unlinkSync(tmp);
+  }
+}
+
 for (const [p, n, d] of out) console.log(`  ${p ? "pass" : "FAIL"}  ${n}${d ? "   " + d : ""}`);
 const bad = out.filter(r => !r[0]).length;
 console.log(bad ? `\n${bad} FAILED` : `\nall ${out.length} checks pass`);

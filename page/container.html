@@ -36,9 +36,7 @@ td.b{text-align:right;color:var(--blu);font-variant-numeric:tabular-nums;white-s
 </style>
 
 <div class="wrap">
-<h1>CONTAINER <a href="/lights" style="float:right;font:600 11px ui-monospace,monospace;
-  letter-spacing:.14em;color:var(--blu);text-decoration:none;border:1px solid var(--line2);
-  border-radius:6px;padding:5px 11px">SHOW CONTROL (LIGHTS) &rarr;</a></h1>
+<h1>CONTAINER</h1>
 
 <div class="bar">
   <button id="play">play</button>
@@ -96,8 +94,25 @@ const $=i=>document.getElementById(i);
 const aud=new Audio(); aud.preload="auto";
 let S=null, SCORE=null, DUR=1, lastBeat=-1, flash=0;
 
+/* ?score=<name>&profile=<user> loads that score from the hub with the user's
+   profile embedded; without them the local score file, as before. */
+const QS=new URLSearchParams(location.search);
+const WANT={score:QS.get("score"),profile:QS.get("profile")};
+let PROF=null;                                   /* [[r,g,b], ...] from the profile's colours, or null */
+const hexRGB=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+
 async function boot(){
-  SCORE=await (await fetch("/scores/levels.score")).json();
+  const src=(WANT.score&&WANT.profile)
+    ? `/hub/score/${encodeURIComponent(WANT.score)}.score?profile=${encodeURIComponent(WANT.profile)}`
+    : "/protocol/score.levels.json";
+  let r;
+  try{ r=await fetch(src); }catch(e){ $("msg").textContent=`cannot load ${src}: ${e.message}`; return; }
+  if(!r.ok){ $("msg").textContent=`cannot load ${WANT.score||"levels"}${WANT.profile?" with profile "+WANT.profile:""}: ${r.status} ${(await r.text()).split("\n")[0]}`; return; }
+  SCORE=await r.json();
+  if(SCORE.profile&&Array.isArray(SCORE.profile.colours)&&SCORE.profile.colours.length){
+    PROF=SCORE.profile.colours.map(c=>hexRGB(c.hex));
+    $("msg").textContent=`profile ${SCORE.profile.user} · ${SCORE.profile.colours.map(c=>c.name).join(", ")}`;
+  }
   DUR=(SCORE.song&&SCORE.song.length_s)||180;
   aud.src="/synth/out/"+SCORE.score+".wav";
   /* The audio element owns the clock. The session reads it rather than running
@@ -195,12 +210,14 @@ function drawBeat(n,f){
   for(let i=1;i<=bpb;i++){
     const cx=gap*i+gap*0.5, cy=h/2, on=(i===beat);
     const lv=on?(0.35+0.65*f):0.10;
+    const P=PROF?PROF[(i-1)%PROF.length]:null;    /* each beat in the bar takes the next colour */
     if(on&&lv>0.2){const gr=x.createRadialGradient(cx,cy,0,cx,cy,rad*2.6);
-      gr.addColorStop(0,`rgba(232,163,61,${0.55*lv})`);gr.addColorStop(1,"rgba(0,0,0,0)");
+      gr.addColorStop(0,P?`rgba(${P[0]},${P[1]},${P[2]},${0.55*lv})`:`rgba(232,163,61,${0.55*lv})`);gr.addColorStop(1,"rgba(0,0,0,0)");
       x.fillStyle=gr;x.beginPath();x.arc(cx,cy,rad*2.6,0,7);x.fill()}
     x.beginPath();x.arc(cx,cy,rad,0,7);
     const v=Math.round(255*lv);
-    x.fillStyle=i===1?`rgb(${v},${Math.round(v*0.95)},${Math.round(v*0.9)})`
+    x.fillStyle=P?`rgb(${Math.round(P[0]*lv)},${Math.round(P[1]*lv)},${Math.round(P[2]*lv)})`
+               :i===1?`rgb(${v},${Math.round(v*0.95)},${Math.round(v*0.9)})`
                      :`rgb(${v},${Math.round(v*0.69)},${Math.round(v*0.36)})`;
     x.fill();x.strokeStyle="#2a3346";x.lineWidth=1.5;x.stroke();
     x.fillStyle="#59617a";x.font="10px ui-monospace,monospace";x.textAlign="center";

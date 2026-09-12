@@ -11,6 +11,8 @@
      HEAD <base>/<name>         content-length, to check an upload landed whole
      GET  <base>/<name>?v=N     one version of a .score (our hub only)
      GET  <base>/<name>?versions its history
+     GET  <base>/<name>?profile=U one version with user U's profile embedded (our hub only)
+     GET  <base>/<name>?profiles the profiles and the palette
 
    Cloud storage later is another function here and one more case in the
    switch. The commands never learn which one they are talking to. */
@@ -78,10 +80,16 @@ function dufs(base) {
     try { return JSON.parse(text); } catch (e) { return null; }
   }
 
-  async function get(name, version) {
-    const url = fileUrl(name) + (version ? `?v=${version}` : "");
+  async function get(name, version, profile) {
+    const q = [];
+    if (version) q.push(`v=${version}`);
+    if (profile) q.push(`profile=${encodeURIComponent(profile)}`);
+    const url = fileUrl(name) + (q.length ? "?" + q.join("&") : "");
     const res = await call("GET", url);
-    if (res.status === 404) throw new NotFound(version ? `no version ${version} of ${name} on ${base}` : `${name} is not on ${base}`);
+    if (res.status === 404) {
+      const why = (await res.text().catch(() => "")).trim();
+      throw new NotFound(why || `${name} is not on ${base}`);
+    }
     if (!res.ok) await fail("GET", url, res);
     return Buffer.from(await res.arrayBuffer());
   }
@@ -89,6 +97,15 @@ function dufs(base) {
   /* the history of a .score: { latest, versions: [{ version, size, mtime, has_metadata, mergeable }] } */
   async function versions(name) {
     const url = fileUrl(name) + "?versions";
+    const res = await call("GET", url);
+    if (res.status === 404) throw new NotFound(`${name} is not on ${base}`);
+    if (!res.ok) await fail("GET", url, res);
+    return res.json();
+  }
+
+  /* the profiles of a .score: { colours: [{ name, hex }], profiles: [{ user, colour: { name, hex } }] } */
+  async function profiles(name) {
+    const url = fileUrl(name) + "?profiles";
     const res = await call("GET", url);
     if (res.status === 404) throw new NotFound(`${name} is not on ${base}`);
     if (!res.ok) await fail("GET", url, res);
@@ -104,7 +121,7 @@ function dufs(base) {
     return Number.isFinite(n) ? n : null;
   }
 
-  return { base, url: fileUrl, list, put, get, size, versions };
+  return { base, url: fileUrl, list, put, get, size, versions, profiles };
 }
 
 module.exports = { openRemote, DEFAULT_REMOTE, RemoteError, NotFound, Unreachable };

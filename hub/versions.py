@@ -34,7 +34,7 @@ def _write(path, data):
     os.replace(tmp, path)
 
 
-def _dump(obj):
+def dump(obj):
     # The formatting of protocol/score.levels.json.
     return json.dumps(obj, indent=1, ensure_ascii=False).encode("utf-8")
 
@@ -136,7 +136,7 @@ def set_meta(path, n, data):
     except ValueError as e:
         raise ValueError(f"metadata is not JSON: {e}")
     fields = validate_meta(obj)
-    _write(meta_path(path, n), _dump(fields))
+    _write(meta_path(path, n), dump(fields))
     return fields
 
 
@@ -167,7 +167,7 @@ def read(path, n, raw=False):
     obj = parse_object(data)
     if obj is None:
         return data
-    return _dump(merge(obj, fields))
+    return dump(merge(obj, fields))
 
 
 def history(path):

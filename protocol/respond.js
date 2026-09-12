@@ -23,6 +23,10 @@
    4. A window clips, it does not re-anchor. Bar 33 is still called bar 33 in a
       window that starts there, because renumbering is how you lose the ability
       to compare two windows of the same song.
+
+   5. A score that carries a `profile` -- pulled with `limelight pull --profile`
+      -- gets it back in every response, asked for or not. The consumer who
+      pulled with a profile meant it to apply to everything they render.
 */
 "use strict";
 const fs = require("fs"), path = require("path");
@@ -32,17 +36,12 @@ const KNOWN = ["grid", "beats", "downbeats", "sections", "energy", "moments", "l
 
 function respond(req) {
   const name = String(req.score || "").replace(/[^A-Za-z0-9_-]/g, "");
-  /* The repo settled on <name>.score while this was reading score.<name>.json,
-     and nothing that read it was updated, so the suite broke on a rename rather
-     than on a change of meaning. Both names are accepted; the new one wins. */
-  const candidates = [path.join(__dirname, `${name}.score`),
-                      path.join(__dirname, `score.${name}.json`)];
-  const file = candidates.find(f => name && fs.existsSync(f));
-  if (!file) {
+  const file = path.join(__dirname, `score.${name}.json`);
+  if (!name || !fs.existsSync(file)) {
     return { error: `no score for ${req.score}`,
              have: fs.readdirSync(__dirname)
-                     .filter(f => f.endsWith(".score"))
-                     .map(f => f.slice(0, -6)) };
+                     .filter(f => f.startsWith("score."))
+                     .map(f => f.slice(6, -5)) };
   }
   const s = JSON.parse(fs.readFileSync(file, "utf8"));
 
@@ -96,6 +95,7 @@ function respond(req) {
   }
   if (want.has("layers") && s.layers) out.layers = s.layers;
 
+  if (s.profile) out.profile = s.profile;
   if (unknown.length) out.ignored = { fields: unknown, known: KNOWN };
   return out;
 }
