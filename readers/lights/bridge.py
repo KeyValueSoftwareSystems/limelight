@@ -37,6 +37,8 @@ def main():
     ap.add_argument("--full", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--gateway", default="2.0.0.100")
+    ap.add_argument("--audio")                 # a .wav to pw-play in sync with the lights
+    ap.add_argument("--offset-ms", type=int, default=0)   # >0 lights lead, <0 audio leads
     args = ap.parse_args()
     gain = 1.0 if args.full else args.gain
 
@@ -117,12 +119,21 @@ def main():
         return
 
     # ---- live: sole sender. park, play, park. ------------------------------
+    import subprocess
     sender = artnet_sender(rig, args.gateway)
     park = rig.park_frame(width=512 if hasattr(rig, "FRAME_LEN") else 512)
+    audio = None
+    off = args.offset_ms / 1000.0            # >0 lights lead (audio starts later), <0 audio leads
     try:
         for _ in range(int(fps * 0.5)):      # 0.5s of park before we move
             sender.send(park); time.sleep(1 / fps)
+        if args.audio and off < 0:           # audio leads: start it, wait, then lights
+            audio = subprocess.Popen(["pw-play", args.audio], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            time.sleep(-off)
         t0 = time.perf_counter()
+        if args.audio and off >= 0:          # together / lights lead
+            if off: time.sleep(off)
+            audio = subprocess.Popen(["pw-play", args.audio], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         for i, tk in enumerate(ticks):
             f = safe(build(tk["fixtures"]))
             try:
@@ -136,6 +147,9 @@ def main():
     except KeyboardInterrupt:
         print("\ninterrupted")
     finally:
+        if audio:
+            try: audio.terminate()
+            except Exception: pass
         for _ in range(int(fps * 0.5)):      # park + blackout on the way out
             try: sender.send(rig.park_frame(width=512))
             except OSError: pass
