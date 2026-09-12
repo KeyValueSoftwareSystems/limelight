@@ -122,7 +122,7 @@ function plan(score, enumResult, seed) {
     });
   });
 
-  return { seed: (seed || 0) >>> 0, contexts, assignments };
+  return { seed: (seed || 0) >>> 0, grid: score.grid, contexts, assignments };
 }
 
 module.exports = { plan, contextsFor, sectionEnergyMean, energyReader };
