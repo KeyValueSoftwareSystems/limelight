@@ -12,6 +12,7 @@ from cycle import cycle
 from groove import groove
 from heard import agrees, edges as model_edges
 from mood import moods
+from words import words as lyrics
 from grid import grid, bar_edges, show
 from form import on_phrase
 from shape import shape
@@ -352,6 +353,16 @@ def read(path, slug):
     every = grid_says.get("every", 4)
     phrase_rule = {"every_bars": every, "from_bar": origin,
                    "boundaries_on_grid": grid_says.get("on_grid", True)}
+
+    sung = None
+    heard_words = CACHE / f"{slug}.words.json"
+    if heard_words.exists():
+        twice = CACHE / f"{slug}.words2.json"
+        sung = lyrics(json.loads(heard_words.read_text()), g, g["bars"], origin, 2,
+                      again=(json.loads(twice.read_text()).get("said")
+                             if twice.exists() else None))
+        if sung:
+            report["words"] = len(sung["words"])
     show(slug, g, report, {"essentia hears": f["rhythm.bpm"]})
 
     told_now = moments(g, lanes, busy.ravel() if busy.ndim > 1 else busy,
@@ -446,6 +457,7 @@ def read(path, slug):
         "melody": tune_notes,
         "melody_phrases": phrases_of(tune_notes, g, g["beats_per_bar"]),
         "mood_axes": mood_sure or None,
+        "lyrics": sung,
     }
 
 

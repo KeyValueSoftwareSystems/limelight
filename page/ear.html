@@ -149,6 +149,7 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
         <dt>Playing</dt><dd id="nowplay">&mdash;</dd>
         <dt>Doing</dt><dd id="nowdoing">&mdash;</dd>
         <dt>Right now</dt><dd id="nowmoment">&mdash;</dd>
+        <dt>Singing</dt><dd id="nowsung">&mdash;</dd>
       </dl>
     </div>
   </div>
@@ -207,6 +208,16 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
     a look. <b>Click a shaded stretch to hear a tune that repeats</b>, or click anywhere to jump there.</p>
   <div class="holder"><canvas id="tune"></canvas><div class="pline" data-for="tune"></div></div>
   <div class="legend" id="tunekey"></div>
+</section>
+
+<section id="lyricbox" hidden>
+  <h2>The words</h2>
+  <p class="note">The computer listened to the singing and wrote down every word with the moment it
+    was sung, then <b>listened a second time in differently placed chunks</b> and kept score of which
+    words both passes produced. The number on the left is how much of that line both passes agreed on.
+    <b>Lines below 0.6 are marked</b> &mdash; those are usually where the voice is buried under the
+    production, and the computer is guessing. <b>Click a line to hear it.</b></p>
+  <div class="lead" id="sung"></div>
 </section>
 
 <section>
@@ -601,7 +612,7 @@ function draw() {
     + `the tune are shaded; chord repeats are listed with the moments, not here.</span>`
 ;
 
-  lanes(); tune(); curves(); beatGrid(); subs(); chordRow(); sections(); place();
+  lanes(); tune(); curves(); beatGrid(); subs(); chordRow(); sections(); sungWords(); place();
 }
 
 /* Absolutely-positioned rows are laid out here rather than where they are
@@ -1176,6 +1187,41 @@ function edgeWords(p) {
   return ` <span style="color:var(--ok)">· a second model heard this boundary too (${p.also_heard})</span>`;
 }
 
+function sungWords() {
+  const box = $("sung"), sec = $("lyricbox");
+  const got = SCORE.lyrics;
+  box.innerHTML = "";
+  if (!got || !(got.lines || []).length) { sec.hidden = true; return; }
+  sec.hidden = false;
+  for (const r of got.lines) {
+    const weak = r.sure != null && r.sure < 0.6;
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<span class="when">${mmss(r.at_s)}</span>
+      <span class="what">${r.sure != null
+          ? `<b style="color:${weak ? "var(--bad)" : "var(--ok)"}">${r.sure.toFixed(2)}</b>&nbsp;` : ""
+        }<span style="color:${weak ? "var(--faint)" : "var(--ink)"}">${esc(r.text)}</span>
+        <span class="dim">· bars ${r.from_bar}\u2013${r.to_bar}${
+          weak ? " · the voice is buried here, treat these words as a guess" : ""}</span></span>
+      <button data-from="${r.at_s}" data-to="${r.to_s + 0.4}">Hear it</button>`;
+    row.querySelector("[data-from]").onclick = e =>
+      play(+e.target.dataset.from, Math.min(+e.target.dataset.to, +e.target.dataset.from + 14));
+    box.appendChild(row);
+  }
+}
+
+function nowSinging(t) {
+  const got = SCORE.lyrics;
+  if (!got || !(got.lines || []).length) return `<span class="dim">\u2014</span>`;
+  const line = got.lines.find(r => t >= r.at_s - 0.2 && t <= r.to_s + 0.4);
+  if (!line) return `<span class="dim">nothing</span>`;
+  const now = (got.words || []).find(w => t >= w.at_s - 0.05 && t <= w.to_s + 0.15);
+  const weak = line.sure != null && line.sure < 0.6;
+  const said = line.text.split(" ").map(w =>
+    now && w === now.text ? `<b style="color:var(--amb)">${esc(w)}</b>` : esc(w)).join(" ");
+  return said + (weak ? ` <span class="dim">· unsure</span>` : "");
+}
+
 function sections() {
   const box = $("sections"); box.innerHTML = "";
   const total = SCORE.song.length_s;
@@ -1303,6 +1349,7 @@ function tick() {
         : `<span class="dim">nothing</span>`;
       const q = (SCORE.phrases || []).find(x => bar >= x.from_bar && bar <= x.to_bar);
       const pair = q && DOINGWORD[q.doing];
+      $("nowsung").innerHTML = nowSinging(t);
       $("nowmoment").dataset.trades = p.trades ? p.trades.every_bars : "";
       $("nowdoing").innerHTML = q
         ? (pair ? `<b style="color:${DOING[q.doing]}">${cap(pair[1])}</b> · ` : "")

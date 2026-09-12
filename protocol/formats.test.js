@@ -67,6 +67,53 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
        `js ${a.has(want) ? "yes" : "NO"}, py ${b.has(want) ? "yes" : "NO"}`);
   }
 
+  /* The checks above only compare fields the source score happens to carry, so a
+     field neither formatter forwards reads as agreement. Every new field went in
+     that blind spot at least once. This plants the fields in the score and makes
+     both sides prove they carry them out again. */
+  const planted = JSON.parse(JSON.stringify(raw));
+  planted.mood_axes = { calm_vs_aggressive: 2.49, warm_vs_cold: 1.51 };
+  for (const part of planted.parts || [])
+    part.mood = { calm_vs_aggressive: -0.31, warm_vs_cold: 0.12 };
+  planted.lyrics = {
+    language: "English", sung_in: "phrases of the song's own grid",
+    checked_twice: true, sure: 0.82,
+    words: [{ text: "Once", at_s: 2.88, to_s: 3.1, bar: 1, heard_twice: true }],
+    lines: [{ at_s: 2.88, to_s: 6.1, from_bar: 1, to_bar: 2, text: "Once", sure: 1 }],
+  };
+  planted.bars = Object.assign({}, planted.bars, {
+    noisy: (planted.bars.intensity || []).map(() => 0.4),
+    held: (planted.bars.intensity || []).map(() => 0.6),
+  });
+
+  const js2 = fn(planted);
+  const py2 = JSON.parse(execFileSync(
+    path.join(root, "work", "allin1", "bin", "python"),
+    ["-c", `
+import json, sys
+sys.path.insert(0, ${JSON.stringify(path.join(root, "hub"))})
+from score_api import format_v1
+print(json.dumps(format_v1(json.load(sys.stdin))))
+`], { encoding: "utf8", input: JSON.stringify(planted), maxBuffer: 1 << 28 }));
+
+  for (const want of ["mood_axes", "lyrics", "noisy", "held"]) {
+    ok(`${want} survives both formatters when the score has it`,
+       js2[want] != null && py2[want] != null,
+       `js ${js2[want] != null ? "yes" : "NO"}, py ${py2[want] != null ? "yes" : "NO"}`);
+  }
+  const jsMood = (js2.sections || [])[0] || {}, pyMood = (py2.sections || [])[0] || {};
+  ok("a section carries mood through both formatters",
+     jsMood.mood != null && pyMood.mood != null,
+     `js ${jsMood.mood != null ? "yes" : "NO"}, py ${pyMood.mood != null ? "yes" : "NO"}`);
+  ok("both formatters agree on the planted score's fields too",
+     JSON.stringify(Object.keys(js2).filter(k => js2[k] != null).sort())
+       === JSON.stringify(Object.keys(py2).filter(k => py2[k] != null).sort()),
+     `js ${Object.keys(js2).length}, py ${Object.keys(py2).length}`);
+  ok("a lyric line keeps its agreement score",
+     (js2.lyrics || {}).lines && js2.lyrics.lines[0].sure === 1
+       && (py2.lyrics || {}).lines && py2.lyrics.lines[0].sure === 1,
+     "sure survives both");
+
   const bad = out.filter(r => !r[0]).length;
   for (const [p, n, d] of out) if (!p) console.log(`  FAIL  ${n}   ${d}`);
   console.log(bad ? `\n${bad} of ${out.length} FAILED` : `\nall ${out.length} checks pass`);

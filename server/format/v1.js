@@ -10,7 +10,7 @@ export const KNOWN = [
   'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor', 'noisy', 'held',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
-  'tension', 'releases', 'melody', 'signals', 'made_by',
+  'tension', 'releases', 'melody', 'signals', 'made_by', 'mood_axes', 'lyrics',
 ];
 
 const STEM_NAMES = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
@@ -140,6 +140,7 @@ export function format(raw) {
   if (raw.groove) out.groove = raw.groove;
   if (Array.isArray(raw.melody_phrases)) out.melody_phrases = raw.melody_phrases;
   if (raw.mood_axes) out.mood_axes = raw.mood_axes;
+  if (raw.lyrics) out.lyrics = raw.lyrics;
 
   // ---- energy (backward compat) ----
   if (raw.energy) {

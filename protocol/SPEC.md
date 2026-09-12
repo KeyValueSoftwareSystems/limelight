@@ -309,6 +309,26 @@ of them likes is worth a gentler one.
 
 null means only we heard it. That is not the same as wrong.
 
+`lyrics` is what the singer is singing and when. `lyrics.words` is every word
+with the second it starts and ends and the bar it falls in; `lyrics.lines`
+groups those words into the song's own phrases, breaking at the quietest moment
+within a beat of each phrase boundary rather than at a fixed word count, because
+sung lines start on a pickup before the bar line and the median gap between two
+sung words is zero -- singers do not leave silence between lines.
+
+`lines[].sure` is the part of the line that two passes agreed on. The song is
+transcribed twice with differently placed chunk boundaries, and a word counts as
+confirmed when both passes produce the same word within 1.2 seconds. This is the
+same rule as `grid.sure` and `also_heard`: one method's opinion is not evidence.
+It matters here more than anywhere else, because a transcriber is fluent and
+confident when it is wrong -- on The Nights it returns "when the thunderclap
+starts pinging down" for "when thunderclouds start pouring down", in exactly the
+register it uses for the lines it gets right. A line under 0.6 is usually one
+where the voice is buried under the production.
+
+`lyrics.checked_twice` is false when only one pass was run, and then no `sure`
+is present anywhere. Absent `sure` means unmeasured, never confirmed.
+
 `noisy` is how much of a bar is noise rather than pitch -- distortion, cymbals,
 breath -- measured as spectral flatness. `held` is how much of the bar the sound
 keeps ringing instead of hitting and stopping: the share of the bar spent above
