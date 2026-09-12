@@ -1,0 +1,47 @@
+{
+ "type": "par7",
+ "footprint": 7,
+ "brightness": "colour",
+ "can": [
+  "colour",
+  "level",
+  "strobe"
+ ],
+ "channels": [
+  {
+   "role": "master",
+   "default": 255
+  },
+  {
+   "role": "colour.r",
+   "default": 0
+  },
+  {
+   "role": "colour.g",
+   "default": 0
+  },
+  {
+   "role": "colour.b",
+   "default": 0
+  },
+  {
+   "role": "strobe",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  }
+ ],
+ "strobe": {
+  "max_hz": 25
+ },
+ "park": {
+  "level": 0
+ },
+ "note": "generated from rig.py; brightness scales the colour channels, master held full"
+}

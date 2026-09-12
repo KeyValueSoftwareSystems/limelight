@@ -1,0 +1,161 @@
+{
+ "type": "head13",
+ "footprint": 13,
+ "brightness": "master",
+ "can": [
+  "colour",
+  "level",
+  "move",
+  "strobe",
+  "gobo",
+  "prism"
+ ],
+ "channels": [
+  {
+   "role": "pan",
+   "default": 0
+  },
+  {
+   "role": "pan_fine",
+   "default": 0
+  },
+  {
+   "role": "tilt",
+   "default": 0
+  },
+  {
+   "role": "tilt_fine",
+   "default": 0
+  },
+  {
+   "role": "speed",
+   "default": 0
+  },
+  {
+   "role": "master",
+   "default": 0
+  },
+  {
+   "role": "strobe",
+   "default": 0
+  },
+  {
+   "role": "colour_wheel",
+   "default": 0
+  },
+  {
+   "role": "gobo",
+   "default": 0
+  },
+  {
+   "role": "prism",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  }
+ ],
+ "colour_wheel": [
+  {
+   "name": "white",
+   "value": 4,
+   "rgb": [
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "name": "red",
+   "value": 20,
+   "rgb": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "yellow",
+   "value": 36,
+   "rgb": [
+    1.0,
+    0.85,
+    0.0
+   ]
+  },
+  {
+   "name": "blue",
+   "value": 52,
+   "rgb": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "name": "green",
+   "value": 68,
+   "rgb": [
+    0.0,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "name": "pink",
+   "value": 84,
+   "rgb": [
+    1.0,
+    0.0,
+    0.55
+   ]
+  },
+  {
+   "name": "orange",
+   "value": 100,
+   "rgb": [
+    1.0,
+    0.3,
+    0.0
+   ]
+  },
+  {
+   "name": "light blue",
+   "value": 116,
+   "rgb": [
+    0.0,
+    0.6,
+    1.0
+   ]
+  }
+ ],
+ "spin_min": 150,
+ "gobo": {
+  "open": 0,
+  "flower": 80
+ },
+ "prism": {
+  "off": 0,
+  "six": 100
+ },
+ "park": {
+  "pan": 0.6627450980392157,
+  "tilt": 0.4980392156862745,
+  "level": 0,
+  "speed": 0.7843137254901961
+ },
+ "limits": {
+  "max_pan_per_frame": 7,
+  "max_tilt_per_frame": 7
+ },
+ "note": "generated from rig.py; the real-rig bridge parks via rig.park_frame()"
+}
