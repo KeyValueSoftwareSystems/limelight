@@ -124,6 +124,14 @@ def call(spans, bars):
             else:
                 name[i] = "bridge"
 
+    named = {}
+    for i, s in enumerate(got):
+        if name[i] in ("verse", "chorus", peak):
+            named.setdefault(s["mark"], name[i])
+    for i, s in enumerate(got):
+        if name[i] in ("interlude", "developing") and s["mark"] in named:
+            name[i] = named[s["mark"]]
+
     for i in range(n - 1, 0, -1):
         if name[i] == "bridge" and name[i - 1] == "bridge":
             name[i] = "bridge"

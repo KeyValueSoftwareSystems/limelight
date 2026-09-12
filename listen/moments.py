@@ -399,7 +399,14 @@ def weigh(found, bars, edges, inner, pickup, look=2):
         moved = (abs(float(after.mean()) - float(before.mean()))
                  if len(before) and len(after) else 0.0)
         rare = 1.0 - (seen.get(m["is"], 1) - 1) / max(most - 1, 1)
-        edge = 1.0 if m["bar"] in edges else (0.55 if m["bar"] in inner else 0.0)
+        starts = 1.0 if m["bar"] in edges else (0.55 if m["bar"] in inner else 0.0)
+        leads = 0.0
+        for e in edges:
+            if 0 < e - m["bar"] <= look:
+                leads = 0.85 if m["is"] in ("fill", "transition", "rise",
+                                            "accent", "highlight") else 0.45
+                break
+        edge = max(starts, leads)
         m["weight"] = round(float(np.clip(
             0.40 * min(1.0, moved / 0.45)
             + 0.25 * rare
