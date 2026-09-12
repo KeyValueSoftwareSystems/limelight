@@ -186,16 +186,38 @@ class State:
         return True
 
     # ----- hub import -----------------------------------------------------
+    def hub_list(self):
+        """Raw hub listing for .score files: name (no extension), store version, mtime.
+        The store `version` counts edits, so it tells you which revision you'd pull."""
+        with urllib.request.urlopen(HUB + "/hub/?json", timeout=8) as r:
+            doc = json.load(r)
+        out = []
+        for p in doc.get("paths", []):
+            n = str(p.get("name", ""))
+            if not n.endswith(".score"):
+                continue
+            out.append({"name": n[:-len(".score")],
+                        "version": p.get("version"),
+                        "mtime": p.get("mtime")})
+        return sorted(out, key=lambda d: d["name"])
+
     def hub_tracks(self):
-        """Score names on the hub (the .score files), for the import dropdown."""
+        """Score entries on the hub (name + version + mtime) for the import dropdown."""
         try:
-            with urllib.request.urlopen(HUB + "/hub/?json", timeout=8) as r:
-                doc = json.load(r)
-            return sorted(p["name"][:-len(".score")] for p in doc.get("paths", [])
-                          if str(p.get("name", "")).endswith(".score"))
+            return self.hub_list()
         except Exception as e:  # noqa: BLE001
             self.import_log = f"hub unreachable: {e}"
             return []
+
+    def hub_version(self, name):
+        """The store version the hub currently holds for `name`, or None if unknown."""
+        try:
+            for e in self.hub_list():
+                if e["name"] == name:
+                    return e["version"]
+        except Exception:  # noqa: BLE001
+            pass
+        return None
 
     def import_score(self, name, seed=3):
         """Pull a score from the hub, format it (server/handler.js), bake a .lights.json
@@ -206,6 +228,7 @@ class State:
             self.import_log = "no score name"; return None
         self.importing = name
         try:
+            ver = self.hub_version(name)   # which revision the hub holds right now
             scores = os.path.join(HERE, "scores"); os.makedirs(scores, exist_ok=True)
             raw = os.path.join(scores, name + ".score")
             with urllib.request.urlopen(HUB + "/hub/" + name + ".score", timeout=20) as r:
@@ -234,8 +257,12 @@ class State:
                 except OSError:
                     pass
                 break
-            self.import_log = f"imported {name} (seed {seed})"
-            return self.load(name + ".lights.json", force=True)
+            vtag = f"v{ver}" if ver is not None else "v?"
+            self.import_log = f"imported {name} {vtag} (seed {seed})"
+            meta = self.load(name + ".lights.json", force=True)
+            if meta is not None:
+                meta["hub_version"] = ver
+            return meta
         except Exception as e:  # noqa: BLE001
             self.import_log = f"import failed: {e}"; return None
         finally:

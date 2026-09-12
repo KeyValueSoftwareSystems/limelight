@@ -93,6 +93,12 @@ class H(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _redirect(self, to):
+        self.send_response(302)
+        self.send_header("Location", to)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
     def _hub(self):
         p = urllib.parse.urlparse(self.path).path
         if p == hub.PREFIX or p.startswith(hub.PREFIX + "/"):
@@ -106,6 +112,12 @@ class H(http.server.BaseHTTPRequestHandler):
             return self._file("page/ear.html")
         if p == "/container":
             return self._file("page/container.html")
+        if p in ("/lights", "/lights/"):
+            # The show-control panel (readers/lights/panel) runs as its own service
+            # on this machine -- it must, because it drives DMX out this host's NIC.
+            # The portal just hands you there, so the lighting app is reachable from
+            # the portal, not only by knowing its port. PANEL_URL overrides the target.
+            return self._redirect(os.environ.get("PANEL_URL", f"http://{lan_ip()}:8766/"))
         if p == "/library.json":
             out = []
             for f in sorted(glob.glob(os.path.join(ROOT, "scores", "*.score"))):
