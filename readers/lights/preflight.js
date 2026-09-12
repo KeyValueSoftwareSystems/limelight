@@ -56,37 +56,45 @@ const VOCABULARY = [
                       Math.max(g.inner.length, g.outer.length);
       return clamp01(0.5 * balance + 0.5 * Math.min(n, 4) / 4);
     },
-    affinity: { intro: 0, verse: 0.5, break: 0.4, build: 0.6, drop: 0.9, outro: 0,
-                silence: 0, final_drop: 0.95 } },
+    affinity: { form: { intro: 0, verse: 0.5, break: 0.4, build: 0.6, drop: 0.9, outro: 0, silence: 0, final_drop: 0.95 },
+                doing: { peaking: 0.9, intensifying: 0.8, expanding: 0.8, holding: 0.6, easing: 0.4, thinning: 0.2, _default: 0.5 },
+                presence: { "drums:in": 0.9, "drums:out": 0.3 },
+                texture: { busy: 0.8, narrow: 0.7, sparse: 0.4 } } },
 
   { id: "travelling_pulse", kind: "individual", boldness: "accent",
     occupies: ["pars:colour", "pars:level"],
     requires: g => g.pars.length >= 3,
     /* a chase reads better the more lamps it walks across; on only 4 it is modest */
     fit: g => (g.pars.length >= 3 ? clamp01(0.3 + 0.1 * g.pars.length) : 0),
-    affinity: { intro: 0, verse: 0.7, break: 0.4, build: 0.5, drop: 0.5, outro: 0,
-                silence: 0, final_drop: 0.4 } },
+    affinity: { form: { intro: 0, verse: 0.7, break: 0.4, build: 0.5, drop: 0.5, outro: 0, silence: 0, final_drop: 0.4 },
+                doing: { establishing: 0.7, easing: 0.7, holding: 0.7, developing: 0.7, peaking: 0.4, _default: 0.5 },
+                texture: { wide: 0.8, sparse: 0.6 } } },
 
   { id: "strobe_pops", kind: "individual", boldness: "accent",
     occupies: ["pars:strobe"],
     requires: g => g.strobers.length >= 1,
     fit: g => (g.strobers.length >= 1 ? 0.8 : 0),
-    affinity: { intro: 0, verse: 0.2, break: 0.4, build: 0.7, drop: 0.8, outro: 0,
-                silence: 0, final_drop: 0.85 } },
+    affinity: { form: { intro: 0, verse: 0.2, break: 0.4, build: 0.7, drop: 0.8, outro: 0, silence: 0, final_drop: 0.85 },
+                doing: { peaking: 1, intensifying: 0.9, expanding: 0.7, easing: 0.2, thinning: 0, suspending: 0, _default: 0.4 },
+                presence: { "drums:in": 0.9, "drums:out": 0 },
+                texture: { busy: 0.9, sparse: 0.2 } } },
 
   { id: "head_sweep", kind: "individual", boldness: "hero",
     occupies: ["head:move"],
     requires: g => g.movers.length >= 1,
     fit: g => (g.movers.length >= 1 ? 0.9 : 0),
-    affinity: { intro: 0, verse: 0.4, break: 0.3, build: 0.7, drop: 0.9, outro: 0,
-                silence: 0, final_drop: 0.9 } },
+    affinity: { form: { intro: 0, verse: 0.4, break: 0.3, build: 0.7, drop: 0.9, outro: 0, silence: 0, final_drop: 0.9 },
+                texture: { wide: 0.8 },
+                presence: { "vocals:in": 0.5 } } },
 
   { id: "breathe", kind: "individual", boldness: "ambient",
     occupies: ["pars:level"],
     requires: g => g.pars.length >= 1,
     fit: g => (g.pars.length >= 1 ? 0.8 : 0),
-    affinity: { intro: 0.85, verse: 0.2, break: 0.5, build: 0, drop: 0, outro: 0.85,
-                silence: 0.55, final_drop: 0 } },
+    affinity: { form: { intro: 0.85, verse: 0.2, break: 0.5, build: 0, drop: 0, outro: 0.85, silence: 0.55, final_drop: 0 },
+                doing: { establishing: 0.9, suspending: 0.9, thinning: 0.9, closing: 0.9, easing: 0.8, peaking: 0.1, intensifying: 0.2, _default: 0.5 },
+                presence: { "drums:out": 0.9, "drums:in": 0.4 },
+                texture: { sparse: 0.8, busy: 0.2 } } },
 
   /* compound: a scripted arc within one span -- whitening into accelerating pops,
      ending dark before the drop. */
@@ -95,8 +103,8 @@ const VOCABULARY = [
     occupies: ["pars:colour", "pars:level", "pars:strobe"],
     requires: g => g.pars.length >= 2 && g.strobers.length >= 1,
     fit: g => clamp01(0.5 + 0.1 * g.pars.length),
-    affinity: { intro: 0, verse: 0, break: 0.2, build: 0.9, drop: 0.3, outro: 0,
-                silence: 0, final_drop: 0.3 } },
+    affinity: { form: { intro: 0, verse: 0, break: 0.2, build: 0.9, drop: 0.3, outro: 0, silence: 0, final_drop: 0.3 },
+                doing: { intensifying: 1, expanding: 0.8, peaking: 0.7, easing: 0.2, thinning: 0.1, _default: 0.4 } } },
 
   /* combination: several sequences layered concurrently, pre-vetted for taste. Its
      parts must not claim the same fixture-attribute (checked at enumeration). */
@@ -106,8 +114,10 @@ const VOCABULARY = [
       g.movers.length >= 1 && g.strobers.length >= 1,
     fit: g => Math.min(seqFit("pair_call_response", g), seqFit("head_sweep", g),
                        seqFit("strobe_pops", g)),
-    affinity: { intro: 0, verse: 0, break: 0, build: 0.3, drop: 0.95, outro: 0,
-                silence: 0, final_drop: 1.0 } },
+    affinity: { form: { intro: 0, verse: 0, break: 0, build: 0.3, drop: 0.95, outro: 0, silence: 0, final_drop: 1.0 },
+                doing: { peaking: 1, expanding: 0.9, intensifying: 0.8, holding: 0.7, easing: 0.3, _default: 0.5 },
+                presence: { "drums:in": 1, "drums:out": 0.1 },
+                texture: { busy: 0.9 } } },
 
   /* A dangerous device type: only enumerated if the layout also carries the enforced
      safety limits for it. A gesture with no enforced limit is never offered. */
@@ -116,8 +126,7 @@ const VOCABULARY = [
     requires: (g, layout) => g.lasers.length >= 1 &&
       !!(layout.limits && layout.limits.laser_zones),
     fit: g => (g.lasers.length >= 1 ? 0.85 : 0),
-    affinity: { intro: 0, verse: 0.2, break: 0.2, build: 0.6, drop: 0.9, outro: 0,
-                silence: 0, final_drop: 0.95 } },
+    affinity: { form: { intro: 0, verse: 0.2, break: 0.2, build: 0.6, drop: 0.9, outro: 0, silence: 0, final_drop: 0.95 } } },
 ];
 
 const byIdVocab = id => VOCABULARY.find(v => v.id === id);
@@ -213,16 +222,19 @@ function enumerate(layout, options) {
   const keptBase = VOCABULARY.filter(s => s.requires(g, layout) &&
     !(s.kind === "combination" && comboConflicts(s)));
 
-  const matrix = {};
+  const matrix = {}, fit = {};
+  const affinity = {};
+  for (const fam of FAMILIES) affinity[fam] = {};
+  const store = (id, aff) => { for (const fam of Object.keys(aff)) affinity[fam][id] = { ...aff[fam] }; };
   const sequences = [];
 
   for (const s of keptBase) {
-    const f = s.fit ? s.fit(g) : 0;
+    const f = +(s.fit ? s.fit(g) : 0).toFixed(4);
     const row = {};
-    for (const ctx of CONTEXTS) row[ctx] = gate(f * ((s.affinity && s.affinity[ctx]) || 0));
-    matrix[s.id] = row;
+    for (const ctx of CONTEXTS) row[ctx] = gate(f * ((s.affinity.form && s.affinity.form[ctx]) || 0));
+    matrix[s.id] = row; fit[s.id] = f; store(s.id, s.affinity);
     sequences.push({ id: s.id, kind: s.kind, boldness: s.boldness, source: "base",
-      fit: +f.toFixed(4), occupies: s.kind === "combination" ? comboOccupies(s) : (s.occupies || []),
+      fit: f, occupies: s.kind === "combination" ? comboOccupies(s) : (s.occupies || []),
       ...(s.parts ? { parts: s.parts.map(p => p.seq) } : {}) });
   }
 
@@ -231,12 +243,13 @@ function enumerate(layout, options) {
     if (matrix[seq && seq.id]) { dup++; continue; }
     const v = validateSequence(seq, layout);
     if (!v.ok) { rejected++; continue; }
+    const aff = affinityOf(seq);
     const row = {};
-    for (const ctx of CONTEXTS) row[ctx] = gate(affinityOf(seq).form[ctx]);
-    matrix[seq.id] = row;
+    for (const ctx of CONTEXTS) row[ctx] = gate(aff.form[ctx]);
+    const f = +Math.max(...CONTEXTS.map(c => aff.form[c])).toFixed(4);
+    matrix[seq.id] = row; fit[seq.id] = f; store(seq.id, aff);
     sequences.push({ id: seq.id, kind: seq.kind, boldness: seq.boldness, source: "llm",
-      fit: +Math.max(...CONTEXTS.map(c => affinityOf(seq).form[c])).toFixed(4),
-      occupies: seq.occupies || [],
+      fit: f, occupies: seq.occupies || [],
       ...(Array.isArray(seq.parts) ? { parts: seq.parts.map(p => p && p.seq).filter(Boolean) } : {}) });
   }
 
@@ -247,12 +260,25 @@ function enumerate(layout, options) {
     strongest[ctx] = sequences.map(s => ({ id: s.id, score: matrix[s.id][ctx] }))
       .filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
   }
+  /* per fact, the sequences that most want it (their affinity, weighted by fit for
+     base sequences) -- so taste stays inspectable per family */
+  const strongest_by_fact = {};
+  for (const fam of FAMILIES) {
+    if (fam === "form") continue;
+    strongest_by_fact[fam] = {};
+    for (const fact of FACTS[fam]) {
+      strongest_by_fact[fam][fact] = sequences
+        .map(s => ({ id: s.id, score: affinity[fam][s.id] && affinity[fam][s.id][fact] != null
+          ? +((s.source === "base" ? fit[s.id] : 1) * affinity[fam][s.id][fact]).toFixed(4) : 0 }))
+        .filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
+    }
+  }
   const report = { rig: layout.rig || null, can_do: sequences.map(s => s.id),
-    impossible, weak, strongest,
+    impossible, weak, strongest, strongest_by_fact,
     sources: { base: keptBase.length, llm: sequences.length - keptBase.length },
     rejected, dup };
 
-  return { sequences, matrix, report };
+  return { sequences, fit, affinity, matrix, report };
 }
 
 /* ---- boldness budgets per context: a taste guardrail independent of the seed,
@@ -309,6 +335,14 @@ if (require.main === module) {
   for (const ctx of CONTEXTS) {
     const top = (r.strongest[ctx] || []).map(x => `${x.id} (${x.score})`).join(", ");
     console.log("  " + ctx.padEnd(12) + (top || "—"));
+  }
+  console.log("STRONGEST BY FACT:");
+  for (const fam of Object.keys(r.strongest_by_fact || {})) {
+    const line = Object.keys(r.strongest_by_fact[fam])
+      .filter(f => r.strongest_by_fact[fam][f].length)
+      .map(f => f + ": " + r.strongest_by_fact[fam][f].slice(0, 2).map(x => x.id).join("/"))
+      .join("   ");
+    if (line) console.log("  " + fam.padEnd(9) + line);
   }
   console.log(`\n-> ${out}`);
 }

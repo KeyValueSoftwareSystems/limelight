@@ -230,6 +230,29 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
      e && JSON.stringify(e.matrix.x_aff));
 }
 
+/* ---- enumerate: per-family affinity in the result, form table kept ----------- */
+{
+  const legacy = { id: "x_legacy", kind: "individual", boldness: "ambient",
+    requires: { groups: ["all_pars"], caps: ["colour", "level"] }, occupies: ["pars:colour", "pars:level"],
+    gesture: { group: "all_pars", keys: [{ at: 0, intent: { colour: [0, 0, 1] } }] },
+    suitability: { intro: 0.9, verse: 0.3, break: 0.4, build: 0.1, drop: 0, outro: 0.9, silence: 0.8, final_drop: 0 } };
+  const rich = { ...legacy, id: "x_rich", suitability: undefined,
+    affinity: { form: legacy.suitability, doing: { establishing: 0.9, peaking: 0 }, presence: { "drums:out": 0.9, "drums:in": 0.3 } } };
+  delete rich.suitability;
+  const e = enumerate(RIG, { palette: [legacy, rich] });
+  ok("the result carries an affinity block keyed family -> sequence -> fact",
+     e.affinity && e.affinity.form && e.affinity.form.x_legacy && e.affinity.form.x_legacy.intro === 0.9, JSON.stringify(Object.keys(e.affinity || {})));
+  ok("a legacy suitability row becomes affinity.form", e.affinity.form.x_legacy.drop === 0);
+  ok("a rich sequence's other families are stored", e.affinity.doing.x_rich.establishing === 0.9 && e.affinity.presence.x_rich["drums:out"] === 0.9);
+  ok("a sequence that does not mention a family is absent from that family's table", e.affinity.doing.x_legacy === undefined);
+  ok("the base vocabulary carries fact anchors beyond form",
+     e.affinity.doing.pair_call_response && e.affinity.doing.pair_call_response.peaking > 0.5 && e.affinity.presence.breathe && e.affinity.presence.breathe["drums:out"] > 0.5);
+  ok("the form table is still there for the report and old callers", e.matrix.x_legacy.intro === 0.9 && e.matrix.pair_call_response.drop > 0);
+  ok("fit is stored per sequence", e.fit && e.fit.x_legacy === 0.9 && e.fit.pair_call_response === e.sequences.find(s => s.id === "pair_call_response").fit);
+  ok("the report ranks the strongest sequences per fact", Array.isArray(e.report.strongest_by_fact.doing.peaking) && e.report.strongest_by_fact.doing.peaking[0].id, JSON.stringify(e.report.strongest_by_fact.doing.peaking));
+  ok("the cache round-trips through JSON", JSON.stringify(JSON.parse(JSON.stringify(e)).affinity) === JSON.stringify(e.affinity));
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;
