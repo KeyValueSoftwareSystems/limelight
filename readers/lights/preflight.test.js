@@ -253,6 +253,37 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
   ok("the cache round-trips through JSON", JSON.stringify(JSON.parse(JSON.stringify(e)).affinity) === JSON.stringify(e.affinity));
 }
 
+/* ---- view: candidates take a vector; a form string is a form-only vector --------- */
+{
+  const veto = { id: "x_veto", kind: "individual", boldness: "accent",
+    requires: { groups: ["all_pars"], caps: ["colour", "level"] }, occupies: ["pars:colour", "pars:level"],
+    gesture: { group: "all_pars", keys: [{ at: 0, intent: { colour: [1, 0, 0] } }] },
+    affinity: { form: { intro: 0, verse: 0.5, break: 0.5, build: 0.6, drop: 0.8, outro: 0, silence: 0, final_drop: 0.8 },
+                doing: { peaking: 0, easing: 0.9 }, presence: { "drums:in": 0.9, "bass:in": 0.6 } } };
+  const e = enumerate(RIG, { palette: [veto] });
+  const v = view(e);
+  ok("view exposes the fact vocabulary", v.facts && v.facts.doing.includes("peaking"));
+  ok("a form-only vector gives exactly the form string's candidates",
+     JSON.stringify(v.candidates({ form: "drop" })) === JSON.stringify(v.candidates("drop")));
+  ok("a form-only vector's scores equal the stored form table",
+     v.candidates("drop").every(c => c.score === e.matrix[c.id].drop));
+  const ids = ctx => v.candidates(ctx).map(c => c.id);
+  ok("a vetoed fact removes the sequence", ids("drop").includes("x_veto") && !ids({ form: "drop", doing: "peaking" }).includes("x_veto"));
+  const easing = v.candidates({ form: "drop", doing: "easing" }).find(c => c.id === "x_veto");
+  ok("a matched fact joins the geometric mean", easing && Math.abs(easing.score - Math.sqrt(0.8 * 0.9)) < 1e-3, easing && String(easing.score));
+  const neutral = v.candidates({ form: "drop", texture: ["busy"] }).find(c => c.id === "x_veto");
+  ok("an unmentioned family leaves the score alone", neutral && neutral.score === 0.8, neutral && String(neutral.score));
+  ok("the order of facts in a family does not matter",
+     JSON.stringify(v.candidates({ form: "drop", presence: ["drums:in", "bass:in"] })) === JSON.stringify(v.candidates({ form: "drop", presence: ["bass:in", "drums:in"] })));
+  ok("candidates stay sorted by score", v.candidates({ form: "drop", doing: "easing" }).every((c, i, a) => i === 0 || a[i - 1].score >= c.score));
+  ok("a base sequence's cell still carries its fit", v.candidates({ form: "drop", doing: "peaking" }).find(c => c.id === "pair_call_response").score <= e.fit.pair_call_response);
+  /* an older cache: sequences + matrix, no affinity -> form only, richer facts ignored */
+  const old = view({ sequences: e.sequences, matrix: e.matrix });
+  ok("an old cache without affinity scores form only", JSON.stringify(old.candidates({ form: "drop", doing: "peaking" })) === JSON.stringify(old.candidates("drop")));
+  ok("the cached result scores identically after a JSON round trip",
+     JSON.stringify(view(JSON.parse(JSON.stringify(e))).candidates({ form: "drop", doing: "easing", presence: ["drums:in"] })) === JSON.stringify(v.candidates({ form: "drop", doing: "easing", presence: ["drums:in"] })));
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

@@ -295,18 +295,35 @@ const BUDGETS = {
 };
 const DEFAULT_BUDGET = { hero: 1, accent: 2, ambient: 1 };
 
-/* The arranger's read-only view over a (possibly cached) enumeration result:
-   which sequences suit a context, how many of each boldness it may use, and the
-   sequence summaries. Works on plain JSON, so it runs over <layout>.matrix.json. */
+/* The arranger's read-only view over a (possibly cached) enumeration result. A
+   context may be a form name or a fact VECTOR (facts.js); the cell is computed on
+   the fly from the per-family affinity (fit x geomean; a 0 vetoes). A cache that
+   predates affinity scores form only from its matrix. */
 function view(result) {
-  const M = result.matrix || {};
-  const byId = Object.fromEntries((result.sequences || []).map(s => [s.id, s]));
+  const M = result.matrix || {}, A = result.affinity || null, F = result.fit || {};
+  const sequences = result.sequences || [];
+  const byId = Object.fromEntries(sequences.map(s => [s.id, s]));
+  const gate = v => (v >= FIT_FLOOR ? +v.toFixed(4) : 0);
+  const affOf = id => {
+    if (!A) return null;
+    const out = {};
+    for (const fam of FAMILIES) if (A[fam] && A[fam][id]) out[fam] = A[fam][id];
+    return out.form ? out : null;
+  };
+  const fitK = s => (s.source === "llm" ? 1 : (F[s.id] != null ? F[s.id] : (s.fit != null ? s.fit : 1)));
+  const score = (s, ctx) => {
+    const v = toVector(ctx);
+    const aff = affOf(s.id);
+    if (!aff) return (M[s.id] || {})[v.form] || 0;       /* an older cache: form only */
+    return gate(cellFor(aff, fitK(s), v));
+  };
   return {
-    candidates: ctx => (result.sequences || [])
-      .map(s => ({ id: s.id, score: (M[s.id] || {})[ctx] || 0, boldness: s.boldness }))
+    candidates: ctx => sequences
+      .map(s => ({ id: s.id, score: score(s, ctx), boldness: s.boldness }))
       .filter(c => c.score > 0).sort((a, b) => b.score - a.score),
-    budget: ctx => BUDGETS[ctx] || DEFAULT_BUDGET,
+    budget: ctx => BUDGETS[toVector(ctx).form] || DEFAULT_BUDGET,
     seq: id => byId[id] || null,
+    facts: FACTS,
   };
 }
 
