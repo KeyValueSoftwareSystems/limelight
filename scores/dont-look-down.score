@@ -988,42 +988,11 @@
   "parts": [
     {
       "from_bar": 0,
-      "to_bar": 4,
-      "repeats_as": "voice + chords",
+      "to_bar": 19,
       "role": "intro",
-      "feels": "no drums",
-      "fullness": 0.688,
-      "rise": 0.126,
-      "playing": [
-        "other"
-      ],
-      "stems": {
-        "drums": {
-          "is": "none",
-          "level": 0.0
-        },
-        "bass": {
-          "is": "none",
-          "level": 0.003
-        },
-        "vocals": {
-          "is": "none",
-          "level": 0.0
-        },
-        "other": {
-          "is": "full",
-          "level": 1.0
-        }
-      }
-    },
-    {
-      "from_bar": 5,
-      "to_bar": 20,
-      "repeats_as": "voice + chords",
-      "role": "build",
       "feels": "voice in",
-      "fullness": 0.756,
-      "rise": 0.019,
+      "fullness": 0.769,
+      "rise": 0.057,
       "playing": [
         "bass",
         "vocals",
@@ -1036,26 +1005,25 @@
         },
         "bass": {
           "is": "some",
-          "level": 0.202
+          "level": 0.158
         },
         "vocals": {
           "is": "full",
-          "level": 0.863
+          "level": 0.824
         },
         "other": {
           "is": "full",
-          "level": 0.448
+          "level": 0.565
         }
       }
     },
     {
-      "from_bar": 21,
-      "to_bar": 36,
-      "repeats_as": "voice + beat",
-      "role": "drop",
+      "from_bar": 20,
+      "to_bar": 27,
+      "role": "full",
       "feels": "voice, no drums",
-      "fullness": 0.819,
-      "rise": 0.067,
+      "fullness": 0.82,
+      "rise": 0.039,
       "playing": [
         "bass",
         "vocals",
@@ -1064,7 +1032,7 @@
       "stems": {
         "drums": {
           "is": "none",
-          "level": 0.094
+          "level": 0.003
         },
         "bass": {
           "is": "full",
@@ -1072,22 +1040,21 @@
         },
         "vocals": {
           "is": "full",
-          "level": 0.798
+          "level": 0.881
         },
         "other": {
           "is": "some",
-          "level": 0.235
+          "level": 0.248
         }
       }
     },
     {
-      "from_bar": 37,
-      "to_bar": 52,
-      "repeats_as": "voice + beat",
+      "from_bar": 28,
+      "to_bar": 55,
       "role": "anthem",
       "feels": "drums in",
-      "fullness": 0.853,
-      "rise": -0.014,
+      "fullness": 0.865,
+      "rise": -0.067,
       "playing": [
         "drums",
         "bass",
@@ -1097,30 +1064,29 @@
       "stems": {
         "drums": {
           "is": "full",
-          "level": 1.0
+          "level": 0.984
         },
         "bass": {
           "is": "full",
-          "level": 0.648
+          "level": 0.685
         },
         "vocals": {
           "is": "full",
-          "level": 0.419
+          "level": 0.535
         },
         "other": {
           "is": "full",
-          "level": 0.626
+          "level": 0.48
         }
       }
     },
     {
-      "from_bar": 53,
-      "to_bar": 72,
-      "repeats_as": "voice + chords",
-      "role": "build",
+      "from_bar": 56,
+      "to_bar": 71,
+      "role": "breakdown",
       "feels": "drums out",
-      "fullness": 0.721,
-      "rise": 0.108,
+      "fullness": 0.758,
+      "rise": 0.06,
       "playing": [
         "vocals",
         "other"
@@ -1136,22 +1102,21 @@
         },
         "vocals": {
           "is": "full",
-          "level": 0.846
+          "level": 0.89
         },
         "other": {
           "is": "full",
-          "level": 0.468
+          "level": 0.436
         }
       }
     },
     {
-      "from_bar": 73,
-      "to_bar": 88,
-      "repeats_as": "voice + beat",
-      "role": "drop 2",
+      "from_bar": 72,
+      "to_bar": 79,
+      "role": "drop",
       "feels": "half a kit",
-      "fullness": 0.866,
-      "rise": 0.027,
+      "fullness": 0.902,
+      "rise": 0.044,
       "playing": [
         "drums",
         "bass",
@@ -1161,30 +1126,29 @@
       "stems": {
         "drums": {
           "is": "some",
-          "level": 0.232
+          "level": 0.235
         },
         "bass": {
           "is": "full",
-          "level": 0.964
+          "level": 0.966
         },
         "vocals": {
           "is": "full",
-          "level": 0.886
+          "level": 0.844
         },
         "other": {
           "is": "some",
-          "level": 0.233
+          "level": 0.241
         }
       }
     },
     {
-      "from_bar": 89,
-      "to_bar": 96,
-      "repeats_as": "voice + beat",
-      "role": "drop 3",
+      "from_bar": 80,
+      "to_bar": 95,
+      "role": "anthem",
       "feels": "half a kit",
-      "fullness": 0.733,
-      "rise": 0.176,
+      "fullness": 0.831,
+      "rise": -0.172,
       "playing": [
         "drums",
         "bass",
@@ -1194,112 +1158,51 @@
       "stems": {
         "drums": {
           "is": "some",
-          "level": 0.22
+          "level": 0.226
         },
         "bass": {
           "is": "full",
-          "level": 0.789
+          "level": 0.898
         },
         "vocals": {
           "is": "full",
-          "level": 0.417
+          "level": 0.607
         },
         "other": {
-          "is": "full",
-          "level": 0.463
+          "is": "some",
+          "level": 0.352
         }
       }
     },
     {
-      "from_bar": 97,
-      "to_bar": 104,
-      "repeats_as": "voice + beat",
-      "role": "breakdown",
-      "feels": "drums in",
-      "fullness": 0.877,
-      "rise": 0.137,
-      "playing": [
-        "drums",
-        "bass",
-        "other"
-      ],
-      "stems": {
-        "drums": {
-          "is": "full",
-          "level": 0.998
-        },
-        "bass": {
-          "is": "full",
-          "level": 0.592
-        },
-        "vocals": {
-          "is": "none",
-          "level": 0.006
-        },
-        "other": {
-          "is": "full",
-          "level": 1.0
-        }
-      }
-    },
-    {
-      "from_bar": 105,
-      "to_bar": 112,
-      "repeats_as": "voice + beat",
-      "role": "breakdown",
-      "feels": "voice in",
-      "fullness": 0.848,
-      "rise": -0.304,
-      "playing": [
-        "drums",
-        "bass",
-        "vocals",
-        "other"
-      ],
-      "stems": {
-        "drums": {
-          "is": "full",
-          "level": 0.985
-        },
-        "bass": {
-          "is": "full",
-          "level": 0.661
-        },
-        "vocals": {
-          "is": "full",
-          "level": 0.815
-        },
-        "other": {
-          "is": "full",
-          "level": 0.524
-        }
-      }
-    },
-    {
-      "from_bar": 113,
+      "from_bar": 96,
       "to_bar": 116,
-      "repeats_as": "quiet",
       "role": "outro",
-      "feels": "drums out",
-      "fullness": 0.021,
-      "rise": -0.079,
-      "playing": [],
+      "feels": "drums in",
+      "fullness": 0.736,
+      "rise": -0.547,
+      "playing": [
+        "drums",
+        "bass",
+        "vocals",
+        "other"
+      ],
       "stems": {
         "drums": {
-          "is": "none",
-          "level": 0.0
+          "is": "full",
+          "level": 0.984
         },
         "bass": {
-          "is": "none",
-          "level": 0.0
+          "is": "full",
+          "level": 0.595
         },
         "vocals": {
-          "is": "none",
-          "level": 0.0
+          "is": "some",
+          "level": 0.121
         },
         "other": {
-          "is": "none",
-          "level": 0.0
+          "is": "full",
+          "level": 0.578
         }
       }
     }
@@ -4584,32 +4487,8 @@
     {
       "bar": 0,
       "beat": 1,
-      "is": "voice swells",
-      "for_bars": 6,
-      "strength": 1.0,
-      "then": "nothing changes"
-    },
-    {
-      "bar": 0,
-      "beat": 1,
-      "is": "chords swells",
-      "for_bars": 4,
-      "strength": 1.0,
-      "then": "nothing changes"
-    },
-    {
-      "bar": 0,
-      "beat": 1,
       "is": "song starts",
       "strength": 1.0
-    },
-    {
-      "bar": 0,
-      "beat": 1,
-      "is": "drums swells",
-      "for_bars": 36,
-      "strength": 0.627,
-      "then": "nothing changes"
     },
     {
       "bar": 1,
@@ -4621,8 +4500,16 @@
     {
       "bar": 1,
       "beat": 1,
+      "is": "voice swells",
+      "for_bars": 6,
+      "strength": 1.0,
+      "then": "nothing changes"
+    },
+    {
+      "bar": 1,
+      "beat": 1,
       "is": "chords fades",
-      "for_bars": 7,
+      "for_bars": 6,
       "strength": 0.814,
       "then": "nothing changes"
     },
@@ -4672,14 +4559,6 @@
     {
       "bar": 8,
       "beat": 1,
-      "is": "voice swells",
-      "for_bars": 4,
-      "strength": 0.663,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 8,
-      "beat": 1,
       "is": "voice pause",
       "for_bars": 1,
       "strength": 0.542,
@@ -4688,17 +4567,17 @@
     {
       "bar": 8,
       "beat": 1,
+      "is": "voice swells",
+      "for_bars": 5,
+      "strength": 0.523,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 8,
+      "beat": 1,
       "is": "all back, bigger",
       "after": "only bass + voice + chords left",
       "strength": 0.333
-    },
-    {
-      "bar": 9,
-      "beat": 1,
-      "is": "bass swells",
-      "for_bars": 4,
-      "strength": 0.559,
-      "then": "bass grows after"
     },
     {
       "bar": 9,
@@ -4723,17 +4602,9 @@
       "bar": 12,
       "beat": 1,
       "is": "bass fades",
-      "for_bars": 6,
+      "for_bars": 5,
       "strength": 0.45,
       "then": "bass grows after"
-    },
-    {
-      "bar": 16,
-      "beat": 1,
-      "is": "bass swells",
-      "for_bars": 8,
-      "strength": 1.0,
-      "then": "vocals grows after"
     },
     {
       "bar": 16,
@@ -4750,6 +4621,14 @@
       "strength": 0.265
     },
     {
+      "bar": 17,
+      "beat": 1,
+      "is": "bass swells",
+      "for_bars": 6,
+      "strength": 1.0,
+      "then": "bass grows after"
+    },
+    {
       "bar": 18,
       "beat": 1,
       "is": "bass back, bigger",
@@ -4763,11 +4642,35 @@
       "strength": 0.424
     },
     {
+      "bar": 23,
+      "beat": 1,
+      "is": "bass fades",
+      "for_bars": 6,
+      "strength": 0.481,
+      "then": "bass grows after"
+    },
+    {
+      "bar": 25,
+      "beat": 1,
+      "is": "voice fades",
+      "for_bars": 7,
+      "strength": 0.592,
+      "then": "other grows after"
+    },
+    {
+      "bar": 26,
+      "beat": 1,
+      "is": "drums swells",
+      "for_bars": 8,
+      "strength": 0.5,
+      "then": "other grows after"
+    },
+    {
       "bar": 28,
       "beat": 1,
       "is": "chords fades",
-      "for_bars": 6,
-      "strength": 0.568,
+      "for_bars": 7,
+      "strength": 0.629,
       "then": "drums grows after"
     },
     {
@@ -4775,6 +4678,30 @@
       "beat": 1,
       "is": "drums in",
       "strength": 0.189
+    },
+    {
+      "bar": 31,
+      "beat": 1,
+      "is": "bass fades",
+      "for_bars": 6,
+      "strength": 0.78,
+      "then": "drums grows after"
+    },
+    {
+      "bar": 33,
+      "beat": 1,
+      "is": "voice fades",
+      "for_bars": 6,
+      "strength": 1.0,
+      "then": "other thins after"
+    },
+    {
+      "bar": 34,
+      "beat": 1,
+      "is": "drums swells",
+      "for_bars": 4,
+      "strength": 0.992,
+      "then": "drums grows after"
     },
     {
       "bar": 34,
@@ -4787,17 +4714,9 @@
     {
       "bar": 35,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 9,
-      "strength": 0.878,
-      "then": "drums grows after"
-    },
-    {
-      "bar": 35,
-      "beat": 1,
       "is": "chords swells",
-      "for_bars": 7,
-      "strength": 0.622,
+      "for_bars": 4,
+      "strength": 0.659,
       "then": "drums grows after"
     },
     {
@@ -4808,14 +4727,6 @@
       "strength": 0.451
     },
     {
-      "bar": 36,
-      "beat": 1,
-      "is": "drums swells",
-      "for_bars": 9,
-      "strength": 1.0,
-      "then": "drums grows after"
-    },
-    {
       "bar": 37,
       "beat": 1,
       "is": "bass pause",
@@ -4824,27 +4735,11 @@
       "then": "drums grows after"
     },
     {
-      "bar": 37,
-      "beat": 1,
-      "is": "bass swells",
-      "for_bars": 6,
-      "strength": 0.334,
-      "then": "drums grows after"
-    },
-    {
       "bar": 38,
       "beat": 1,
       "is": "drums fades",
-      "for_bars": 8,
+      "for_bars": 7,
       "strength": 1.0,
-      "then": "drums grows after"
-    },
-    {
-      "bar": 38,
-      "beat": 1,
-      "is": "voice swells",
-      "for_bars": 11,
-      "strength": 0.626,
       "then": "drums grows after"
     },
     {
@@ -4861,34 +4756,34 @@
       "strength": 0.549
     },
     {
-      "bar": 42,
+      "bar": 39,
       "beat": 1,
       "is": "bass fades",
-      "for_bars": 4,
-      "strength": 0.888,
-      "then": "vocals grows after"
+      "for_bars": 6,
+      "strength": 0.758,
+      "then": "drums grows after"
     },
     {
-      "bar": 43,
+      "bar": 39,
+      "beat": 1,
+      "is": "voice swells",
+      "for_bars": 7,
+      "strength": 0.675,
+      "then": "drums grows after"
+    },
+    {
+      "bar": 39,
       "beat": 1,
       "is": "chords fades",
-      "for_bars": 4,
-      "strength": 0.485,
-      "then": "vocals grows after"
+      "for_bars": 7,
+      "strength": 0.487,
+      "then": "drums grows after"
     },
     {
       "bar": 44,
       "beat": 1,
       "is": "lead in",
       "strength": 0.357
-    },
-    {
-      "bar": 45,
-      "beat": 1,
-      "is": "drums swells",
-      "for_bars": 9,
-      "strength": 1.0,
-      "then": "vocals grows after"
     },
     {
       "bar": 45,
@@ -4910,8 +4805,16 @@
       "bar": 46,
       "beat": 1,
       "is": "drums fades",
-      "for_bars": 25,
+      "for_bars": 8,
       "strength": 1.0,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 46,
+      "beat": 1,
+      "is": "bass fades",
+      "for_bars": 8,
+      "strength": 0.94,
       "then": "vocals grows after"
     },
     {
@@ -4929,12 +4832,12 @@
       "strength": 0.395
     },
     {
-      "bar": 51,
+      "bar": 49,
       "beat": 1,
-      "is": "bass fades",
-      "for_bars": 19,
-      "strength": 0.843,
-      "then": "drums thins after"
+      "is": "voice swells",
+      "for_bars": 8,
+      "strength": 0.755,
+      "then": "drums grows after"
     },
     {
       "bar": 53,
@@ -4953,25 +4856,9 @@
     {
       "bar": 53,
       "beat": 1,
-      "is": "voice swells",
-      "for_bars": 5,
-      "strength": 0.993,
-      "then": "drums thins after"
-    },
-    {
-      "bar": 53,
-      "beat": 1,
       "is": "voice pause",
       "for_bars": 1,
       "strength": 0.65,
-      "then": "drums thins after"
-    },
-    {
-      "bar": 54,
-      "beat": 1,
-      "is": "bass swells",
-      "for_bars": 20,
-      "strength": 1.0,
       "then": "drums thins after"
     },
     {
@@ -4997,6 +4884,14 @@
     {
       "bar": 54,
       "beat": 1,
+      "is": "chords swells",
+      "for_bars": 5,
+      "strength": 0.639,
+      "then": "drums thins after"
+    },
+    {
+      "bar": 54,
+      "beat": 1,
       "is": "chords pause",
       "for_bars": 1,
       "strength": 0.638,
@@ -5007,14 +4902,6 @@
       "beat": 1,
       "is": "bass out",
       "strength": 0.529
-    },
-    {
-      "bar": 54,
-      "beat": 1,
-      "is": "drums swells",
-      "for_bars": 39,
-      "strength": 0.453,
-      "then": "drums thins after"
     },
     {
       "bar": 55,
@@ -5039,8 +4926,8 @@
       "bar": 58,
       "beat": 1,
       "is": "voice swells",
-      "for_bars": 4,
-      "strength": 0.587,
+      "for_bars": 7,
+      "strength": 0.525,
       "then": "vocals grows after"
     },
     {
@@ -5085,6 +4972,14 @@
       "strength": 0.149
     },
     {
+      "bar": 63,
+      "beat": 1,
+      "is": "bass swells",
+      "for_bars": 8,
+      "strength": 1.0,
+      "then": "nothing changes"
+    },
+    {
       "bar": 68,
       "beat": 1,
       "is": "only voice + chords left",
@@ -5112,55 +5007,63 @@
     {
       "bar": 71,
       "beat": 1,
+      "is": "bass swells",
+      "for_bars": 6,
+      "strength": 0.479,
+      "then": "bass grows after"
+    },
+    {
+      "bar": 71,
+      "beat": 1,
       "is": "drums in",
       "strength": 0.225
     },
     {
-      "bar": 83,
+      "bar": 77,
       "beat": 1,
-      "is": "bass swells",
-      "for_bars": 4,
-      "strength": 0.499,
-      "then": "vocals grows after"
+      "is": "bass fades",
+      "for_bars": 6,
+      "strength": 0.494,
+      "then": "other grows after"
+    },
+    {
+      "bar": 81,
+      "beat": 1,
+      "is": "voice fades",
+      "for_bars": 8,
+      "strength": 0.454,
+      "then": "nothing changes"
     },
     {
       "bar": 85,
       "beat": 1,
       "is": "bass fades",
-      "for_bars": 5,
-      "strength": 0.471,
+      "for_bars": 7,
+      "strength": 0.622,
       "then": "nothing changes"
     },
     {
-      "bar": 85,
+      "bar": 89,
       "beat": 1,
-      "is": "chords swells",
-      "for_bars": 5,
-      "strength": 0.404,
-      "then": "nothing changes"
-    },
-    {
-      "bar": 86,
-      "beat": 1,
-      "is": "voice fades",
+      "is": "chords fades",
       "for_bars": 6,
-      "strength": 1.0,
+      "strength": 0.872,
       "then": "vocals thins after"
     },
     {
-      "bar": 90,
+      "bar": 89,
       "beat": 1,
-      "is": "bass fades",
-      "for_bars": 4,
-      "strength": 0.431,
+      "is": "voice fades",
+      "for_bars": 8,
+      "strength": 0.585,
       "then": "vocals thins after"
     },
     {
       "bar": 91,
       "beat": 1,
-      "is": "chords fades",
-      "for_bars": 5,
-      "strength": 0.831,
+      "is": "drums swells",
+      "for_bars": 6,
+      "strength": 1.0,
       "then": "bass thins after"
     },
     {
@@ -5180,16 +5083,8 @@
     {
       "bar": 95,
       "beat": 1,
-      "is": "drums swells",
-      "for_bars": 8,
-      "strength": 1.0,
-      "then": "drums grows after"
-    },
-    {
-      "bar": 95,
-      "beat": 1,
       "is": "chords swells",
-      "for_bars": 5,
+      "for_bars": 4,
       "strength": 1.0,
       "then": "drums grows after"
     },
@@ -5220,33 +5115,9 @@
     {
       "bar": 95,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 8,
-      "strength": 0.698,
-      "then": "drums grows after"
-    },
-    {
-      "bar": 95,
-      "beat": 1,
-      "is": "bass swells",
-      "for_bars": 4,
-      "strength": 0.66,
-      "then": "drums grows after"
-    },
-    {
-      "bar": 95,
-      "beat": 1,
       "is": "all back, bigger",
       "after": "only drums + bass + voice + chords left",
       "strength": 0.483
-    },
-    {
-      "bar": 96,
-      "beat": 1,
-      "is": "drums fades",
-      "for_bars": 8,
-      "strength": 1.0,
-      "then": "drums grows after"
     },
     {
       "bar": 96,
@@ -5272,8 +5143,8 @@
     {
       "bar": 97,
       "beat": 1,
-      "is": "voice swells",
-      "for_bars": 8,
+      "is": "drums fades",
+      "for_bars": 6,
       "strength": 1.0,
       "then": "drums grows after"
     },
@@ -5284,28 +5155,12 @@
       "strength": 0.301
     },
     {
-      "bar": 98,
-      "beat": 1,
-      "is": "bass fades",
-      "for_bars": 6,
-      "strength": 0.413,
-      "then": "drums grows after"
-    },
-    {
-      "bar": 101,
+      "bar": 99,
       "beat": 1,
       "is": "chords fades",
-      "for_bars": 4,
-      "strength": 0.436,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 103,
-      "beat": 1,
-      "is": "drums swells",
-      "for_bars": 5,
-      "strength": 1.0,
-      "then": "vocals grows after"
+      "for_bars": 7,
+      "strength": 0.517,
+      "then": "other grows after"
     },
     {
       "bar": 103,
@@ -5329,11 +5184,35 @@
       "strength": 1.0
     },
     {
-      "bar": 109,
+      "bar": 104,
+      "beat": 1,
+      "is": "voice fades",
+      "for_bars": 5,
+      "strength": 0.53,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 105,
       "beat": 1,
       "is": "drums fades",
       "for_bars": 8,
       "strength": 1.0,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 107,
+      "beat": 1,
+      "is": "chords fades",
+      "for_bars": 8,
+      "strength": 0.844,
+      "then": "drums grows after"
+    },
+    {
+      "bar": 109,
+      "beat": 1,
+      "is": "voice fades",
+      "for_bars": 6,
+      "strength": 0.627,
       "then": "vocals thins after"
     },
     {
@@ -5350,30 +5229,6 @@
       "is": "voice back",
       "after": "voice pause",
       "strength": 1.0
-    },
-    {
-      "bar": 110,
-      "beat": 1,
-      "is": "voice fades",
-      "for_bars": 7,
-      "strength": 0.981,
-      "then": "drums thins after"
-    },
-    {
-      "bar": 112,
-      "beat": 1,
-      "is": "bass fades",
-      "for_bars": 5,
-      "strength": 0.948,
-      "then": "drums thins after"
-    },
-    {
-      "bar": 112,
-      "beat": 1,
-      "is": "chords fades",
-      "for_bars": 5,
-      "strength": 0.948,
-      "then": "drums thins after"
     },
     {
       "bar": 113,
@@ -5398,492 +5253,6 @@
       "beat": 1,
       "is": "chords out",
       "strength": 0.442
-    },
-    {
-      "bar": 2,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 3,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 4,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 7,
-      "beat": 1,
-      "is": "chord to Em",
-      "strength": 0.4
-    },
-    {
-      "bar": 8,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 11,
-      "beat": 1,
-      "is": "chord to Em",
-      "strength": 0.4
-    },
-    {
-      "bar": 12,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 13,
-      "beat": 1,
-      "is": "chord to D",
-      "strength": 0.4
-    },
-    {
-      "bar": 14,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 15,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 16,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 17,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 19,
-      "beat": 1,
-      "is": "chord to Em",
-      "strength": 0.4
-    },
-    {
-      "bar": 20,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 21,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 22,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 23,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 24,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 25,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 26,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 28,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 30,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 31,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 32,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 33,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 34,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 35,
-      "beat": 1,
-      "is": "chord to Fm",
-      "strength": 0.4
-    },
-    {
-      "bar": 37,
-      "beat": 1,
-      "is": "chord to Em",
-      "strength": 0.4
-    },
-    {
-      "bar": 38,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 40,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 41,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 42,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 43,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 44,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 45,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 51,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 52,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 53,
-      "beat": 1,
-      "is": "chord to Fm",
-      "strength": 0.4
-    },
-    {
-      "bar": 54,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 57,
-      "beat": 1,
-      "is": "chord to Em",
-      "strength": 0.4
-    },
-    {
-      "bar": 58,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 59,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 61,
-      "beat": 1,
-      "is": "chord to Em",
-      "strength": 0.4
-    },
-    {
-      "bar": 62,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 63,
-      "beat": 1,
-      "is": "chord to D",
-      "strength": 0.4
-    },
-    {
-      "bar": 64,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 65,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 66,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 67,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 69,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 70,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 71,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 72,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 73,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 74,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 75,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 76,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 77,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 78,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 79,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 80,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 81,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 82,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 83,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 84,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 85,
-      "beat": 1,
-      "is": "chord to Fm",
-      "strength": 0.4
-    },
-    {
-      "bar": 87,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 89,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 90,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 93,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 94,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 95,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 98,
-      "beat": 1,
-      "is": "chord to Fm",
-      "strength": 0.4
-    },
-    {
-      "bar": 99,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 104,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 105,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 107,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 108,
-      "beat": 1,
-      "is": "chord to G",
-      "strength": 0.4
-    },
-    {
-      "bar": 109,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 110,
-      "beat": 1,
-      "is": "chord to Fm",
-      "strength": 0.4
-    },
-    {
-      "bar": 113,
-      "beat": 1,
-      "is": "chord to Cm",
-      "strength": 0.4
     }
   ]
 }

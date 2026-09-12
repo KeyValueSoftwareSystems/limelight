@@ -32,11 +32,30 @@ def blocks(hot, join=2, least=4):
     return runs
 
 
+def anchor(spans, pickup, reach=2):
+    best, score = 1, -1
+    for origin in (0, 1):
+        hit = 0
+        for a, _, _ in spans:
+            bar = a - pickup + 1
+            if bar < origin:
+                continue
+            for step in (16, 8, 4):
+                if (bar - origin) % step == 0:
+                    hit += step
+                    break
+        if hit > score:
+            best, score = origin, hit
+    return best
+
+
 def on_phrase(spans, pickup, reach=2, least=4):
+    origin = anchor(spans, pickup, reach)
+
     def snap(bar):
         for step in (16, 8, 4):
-            near = 1 + round((bar - 1) / step) * step
-            if abs(near - bar) <= reach and near >= 1:
+            near = origin + round((bar - origin) / step) * step
+            if abs(near - bar) <= reach and near >= origin:
                 return near, step
         return bar, 0
 
@@ -47,7 +66,7 @@ def on_phrase(spans, pickup, reach=2, least=4):
             moved.append([a, b, role, 0])
             continue
         near, step = snap(bar)
-        moved.append([near - 1 + pickup, b, role, step])
+        moved.append([max(0, near - 1 + pickup), b, role, step])
 
     out = []
     for i, (a, b, role, step) in enumerate(moved):
@@ -91,10 +110,14 @@ def read(bars, onsets_per_bar=None, pickup=0):
 
     if runs:
         first = runs[0][0]
+        inside = set()
+        for a, b in runs:
+            inside.update(range(a, b))
         for a, b in runs:
             back = 0
             i = a - 1
-            while i >= 0 and back < 8 and told[i] is None and loud[i] > LOUD and low[i] < LIGHT:
+            while (i >= 0 and back < 8 and told[i] is None and i not in inside
+                   and loud[i] > LOUD and low[i] < LIGHT):
                 told[i] = "build"
                 back += 1
                 i -= 1
@@ -142,6 +165,13 @@ def read(bars, onsets_per_bar=None, pickup=0):
 
     spans = on_phrase(spans, pickup)
     spans = [list(s) for s in spans]
+    joined = []
+    for s in spans:
+        if joined and joined[-1][2] == s[2]:
+            joined[-1][1] = s[1]
+        else:
+            joined.append(s)
+    spans = joined
     for word in ("drop", "full"):
         seen = 0
         for s in spans:
