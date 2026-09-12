@@ -248,6 +248,31 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   ok("format_v1 and raw still plan identically with pace", JSON.stringify(plan(M2, EN, 42)) === JSON.stringify(plan(format(JSON.parse(JSON.stringify(M2))), EN, 42)));
 }
 
+/* ---- facts: one context vector per bar, from the score alone ------------------ */
+{
+  const p = plan(MINI, EN, 42);
+  const F = p.facts;
+  ok("the plan carries facts anchored at the first bar", F && F.from_bar === 0 && Array.isArray(F.vectors) && F.vectors.length === 20, F && `${F.from_bar} x ${F.vectors.length}`);
+  const v4 = F.vectors[4], v9 = F.vectors[9], v0 = F.vectors[0];
+  ok("form comes from the section's context", v0.form === "intro" && v4.form === "final_drop" && F.vectors[16].form === "outro");
+  ok("doing comes from the subsection covering the bar", v4.doing === "expanding" && F.vectors[8].doing === "easing" && F.vectors[12].doing === "peaking");
+  ok("presence reads the stem lanes against the 0.3 threshold",
+     v4.presence.includes("drums:in") && v4.presence.includes("bass:in") && v4.presence.includes("vocals:out") && v9.presence.includes("drums:out"), JSON.stringify(v9.presence));
+  ok("texture bands read the normalised lanes (drop bars are narrow, busy, bright)",
+     ["narrow", "busy", "bright"].every(t => v4.texture.includes(t)), JSON.stringify(v4.texture));
+  ok("harmony reads minor/major and marks a change (Am->Am at bar 1 does not change; Am->C at bar 5 does)",
+     v4.harmony.includes("minor") && F.vectors[5].harmony.includes("major") && F.vectors[5].harmony.includes("changing") && !F.vectors[1].harmony.includes("changing"), JSON.stringify([F.vectors[1].harmony, F.vectors[5].harmony]));
+  ok("a moment lands on its bar with its weight band", v4.moment && v4.moment.includes("entrance") && v4.moment.includes("heavy") && F.vectors[8].moment.includes("pause") && F.vectors[8].moment.includes("firm"), JSON.stringify([v4.moment, F.vectors[8].moment]));
+  ok("bars with no moment carry no moment family", F.vectors[1].moment === undefined);
+  ok("a null lane bar says nothing in that band", !F.vectors[19].texture.some(t => t === "dull" || t === "bright"));
+  /* a bare score: form only, so picks cannot move */
+  const bare = plan(SCORE, EN, 42);
+  ok("a score without the richer fields gives form-and-holding vectors only",
+     bare.facts.vectors.every(v => v === null || (v.form && v.doing === "holding" && v.presence === undefined && v.texture === undefined && v.harmony === undefined && v.moment === undefined)));
+  ok("facts are identical for the raw score and its format_v1 view",
+     JSON.stringify(plan(format(require("./fixtures/mini_raw.js").RAW()), EN, 42).facts) === JSON.stringify(F));
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

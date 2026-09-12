@@ -154,6 +154,7 @@ function lanesBlock(score) {
     const c01 = v => (typeof v === "number" ? +clamp01(v).toFixed(4) : null);
     if (lanes.drums) out.drums = lanes.drums.map(c01);
     if (lanes.vocals) out.vocals = lanes.vocals.map(c01);
+    if (lanes.bass) out.bass = lanes.bass.map(c01);
   }
   return out;
 }
@@ -178,6 +179,63 @@ function harmonyBlock(score) {
     if (k) key = { hue: Mu.hueOfChord(top), minor: k.minor };
   }
   return { from_bar: H.from_bar, hue, minor, sure: H.confidence, key };
+}
+
+/* ---- one context vector per bar (spec: "The context vector") -----------------
+   Everything here is a fact the score states, read through musical.js so both
+   score shapes agree: form from the section, doing from the subsection, presence
+   from the stem lanes (0.3 of the stem's own peak), texture bands from the
+   per-song normalised lanes (below 0.33 / above 0.67), harmony from the chords,
+   and the moment landing on the bar with its weight band. A family the score
+   cannot speak to is absent, so the matrix treats it as neutral. */
+const PRESENCE_IN = 0.3, BAND_LO = 0.33, BAND_HI = 0.67;
+const weightBand = w => (w >= 0.75 ? "heavy" : w >= 0.5 ? "firm" : "light");
+function factsBlock(score, sections, contexts, lanes, harmony, subs, moments, bpb) {
+  if (!sections.length) return null;
+  const from_bar = Math.min(Mu.firstBarOf(score), ...sections.map(s => s.from.bar));
+  const to_bar = Math.max(...sections.map(s => s.to.bar));
+  const atBeat = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
+  const rd = (blk, k) => (blk && Array.isArray(blk[k]) ? Mu.perBar(blk.from_bar, blk[k]) : null);
+  const drums = rd(lanes, "drums"), bass = rd(lanes, "bass"), vocals = rd(lanes, "vocals");
+  const width = rd(lanes, "width"), pace = rd(lanes, "pace"), bright = rd(lanes, "brightness");
+  const minor = rd(harmony, "minor"), hue = rd(harmony, "hue");
+  const band = (v, lo, hi) => (typeof v !== "number" ? null : v < BAND_LO ? lo : v > BAND_HI ? hi : null);
+  const vectors = [];
+  for (let bar = from_bar; bar < to_bar; bar++) {
+    const si = sections.findIndex(s => s.from.bar <= bar && bar < s.to.bar);
+    if (si < 0) { vectors.push(null); continue; }
+    const v = { form: contexts[si] };
+    const B = (bar - 1) * bpb;
+    const sub = subs.find(su => atBeat(su.from) <= B && B < atBeat(su.to));
+    v.doing = (sub && sub.doing) ? sub.doing : "holding";
+    if (drums || bass || vocals) {
+      v.presence = [];
+      for (const [name, r] of [["drums", drums], ["bass", bass], ["vocals", vocals]]) {
+        if (!r) continue;
+        const x = r(bar);
+        if (typeof x === "number") v.presence.push(name + (x >= PRESENCE_IN ? ":in" : ":out"));
+      }
+    }
+    if (width || pace || bright) {
+      v.texture = [band(width && width(bar), "narrow", "wide"), band(pace && pace(bar), "sparse", "busy"),
+                   band(bright && bright(bar), "dull", "bright")].filter(Boolean);
+    }
+    if (minor || hue) {
+      v.harmony = [];
+      const m = minor && minor(bar);
+      if (m === true) v.harmony.push("minor"); else if (m === false) v.harmony.push("major");
+      const h0 = hue && bar > from_bar ? hue(bar - 1) : null, h1 = hue && hue(bar);
+      if (h0 !== null && h1 !== null && h0 !== h1) v.harmony.push("changing");
+    }
+    const here = moments.filter(m => m.bar === bar && typeof m.kind === "string");
+    if (here.length) {
+      const kinds = [...new Set(here.map(m => m.kind))];
+      const w = Math.max(...here.map(m => (typeof m.weight === "number" ? m.weight : 0.5)));
+      v.moment = [...kinds, weightBand(w)];
+    }
+    vectors.push(v);
+  }
+  return { from_bar, vectors };
 }
 
 /* ---- pace -> how fast the PAR patterns run -------------------------------------
@@ -263,6 +321,7 @@ function plan(scoreIn, enumResult, seed) {
   const lanes = lanesBlock(score);
   const harmony = harmonyBlock(score);
   const keyHue = harmony && harmony.key ? harmony.key.hue : null;
+  const facts = factsBlock(score, sections, contexts, lanes, harmony, subs, moments, bpb);
 
   /* the subsections inside a section, clipped to it, at least a bar long */
   const subsIn = sec => {
@@ -429,6 +488,7 @@ function plan(scoreIn, enumResult, seed) {
   }
 
   const out = { seed: (seed || 0) >>> 0, grid: score.grid, contexts, assignments };
+  if (facts) out.facts = facts;
   if (lanes) out.lanes = lanes;
   if (harmony) out.harmony = harmony;
   return out;
@@ -450,7 +510,7 @@ function clashes(p) {
   return n;
 }
 
-module.exports = { plan, contextsFor, sectionEnergyMean, energyReader, clashes, carve };
+module.exports = { plan, contextsFor, sectionEnergyMean, energyReader, clashes, carve, factsBlock };
 
 /* ---- CLI: plan a score and print the show, section by section ------------
      node readers/lights/arranger.js [score file] [seed]   */
