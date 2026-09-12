@@ -1,67 +1,66 @@
-<!-- One score: its versions, a download for each, a new version from here, and
-     the metadata fields on any version. Every request this page makes is one
-     the CLI or curl could make; nothing here is page-only. -->
+<!-- One score: its versions, a download for each, a new version from here, the
+     metadata fields on any version, and the profiles of the people who use it.
+     Every request this page makes is one the CLI or curl could make; nothing
+     here is page-only. Styles live in /page/ui.css. -->
 <title>Score</title>
-<style>
-:root{--bg:#0a0d13;--pan:#0f141d;--line:#1b2230;--line2:#263047;--ink:#e6e9f0;
-  --dim:#9aa3b8;--faint:#5c6478;--amb:#e8a33d;--ok:#5bb98c;--blu:#6fa8dc;--bad:#e06c6c}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.55 ui-sans-serif,system-ui,sans-serif;margin:0}
-.wrap{max-width:920px;margin:0 auto;padding:18px 18px 70px}
-h1{font:600 12px ui-monospace,monospace;letter-spacing:.18em;color:var(--amb);margin:0 0 16px}
-h1 a{color:var(--amb);text-decoration:none} h1 a:hover{text-decoration:underline}
-.head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:0 0 16px}
-.name{font:600 22px ui-monospace,monospace;color:var(--ink)}
-.badge{display:inline-block;font:600 10px ui-monospace,monospace;letter-spacing:.08em;color:var(--amb);
-  border:1px solid var(--line2);border-radius:4px;padding:1px 5px;vertical-align:2px}
-button,label.btn,a.btn{background:#182031;color:var(--ink);border:1px solid var(--line2);
-  border-radius:6px;padding:7px 13px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
-button:hover,label.btn:hover,a.btn:hover{border-color:#41506e}
-button.small{padding:3px 9px;font:11px ui-monospace,monospace;margin-left:8px}
-button.x{padding:3px 8px;font:11px ui-monospace,monospace;color:var(--bad)}
-input[type=file]{display:none}
-#msg{font:11.5px ui-monospace,monospace;color:var(--bad);white-space:pre-wrap;flex:1;min-width:200px}
-table{border-collapse:collapse;width:100%;font:12px ui-monospace,monospace;background:var(--pan);
-  border:1px solid var(--line);border-radius:6px}
-th{font:600 10px ui-monospace,monospace;letter-spacing:.13em;text-transform:uppercase;color:var(--blu);
-  text-align:left;padding:9px 12px;border-bottom:1px solid var(--line2)}
-td{padding:7px 12px;border-bottom:1px solid #141a26;color:var(--dim);white-space:nowrap}
-td.n{color:var(--ink)} td.r{text-align:right} td a{color:var(--blu);text-decoration:none} td a:hover{text-decoration:underline}
-td .meta-on{color:var(--ok)} td .meta-off{color:var(--faint)}
-tr.edit td{background:#0b1018;padding:12px;white-space:normal}
-.fields{display:grid;grid-template-columns:1fr 2fr auto auto;gap:6px 10px;align-items:center;max-width:720px}
-.fields .h{font:600 10px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
-.fields input[type=text]{background:#05070b;color:var(--ink);border:1px solid var(--line2);border-radius:5px;
-  padding:6px 8px;font:12px ui-monospace,monospace;width:100%}
-.fields label{color:var(--dim);font-size:11px;display:flex;gap:5px;align-items:center;white-space:nowrap}
-.fields input[type=checkbox]{accent-color:var(--amb)}
-.editbar{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
-.editbar .err{color:var(--bad);font:11.5px ui-monospace,monospace;white-space:pre-wrap;flex:1}
-.editbar .warn{color:var(--amb);font:11.5px ui-monospace,monospace;flex-basis:100%}
-.empty{padding:26px 12px;color:var(--faint);text-align:center}
-.note{color:var(--faint);font-size:12px;margin:10px 0 0}
-</style>
+<link rel="stylesheet" href="/page/ui.css">
 
-<div class="wrap">
-<h1 id="crumb">HUB</h1>
+<header class="top">
+  <a class="brand" href="/hub/">Limelight</a>
+  <span class="remote" id="remote"></span>
+</header>
 
-<div class="head">
-  <span class="name" id="name"></span>
-  <span class="badge" id="latest">—</span>
-  <a class="btn" id="dl" href="" download>download latest</a>
-  <label class="btn" for="file">upload new version</label>
-  <input type="file" id="file">
-  <span id="msg"></span>
+<main class="page">
+<p class="crumb" id="crumb">Hub</p>
+<div class="hero">
+  <h1 class="title" id="name"></h1>
+  <span class="badge latest" id="latest">—</span>
+  <div class="actions">
+    <a class="btn primary" id="dl" href="" download>Download latest</a>
+    <label class="btn" for="file">Upload new version</label>
+    <input type="file" id="file">
+  </div>
 </div>
+<p class="msg" id="msg"></p>
 
-<table>
-  <thead><tr><th>version</th><th>uploaded</th><th>size</th><th>metadata</th><th></th></tr></thead>
-  <tbody id="rows"></tbody>
-</table>
-<p class="note">A download folds the fields of that version into the file as
-<span style="color:var(--dim)">x-&lt;name&gt;</span> keys at the root, and lists the enforced ones under
-<span style="color:var(--dim)">x-enforced</span>. The uploaded bytes are never rewritten.</p>
+<div class="cols">
+<section>
+  <div class="panel">
+  <table class="list">
+    <thead><tr><th>Version</th><th>Uploaded</th><th class="r">Size</th><th>Metadata</th><th class="r"></th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  </div>
+  <p class="note">A download folds that version's metadata into the file as <code>x-&lt;name&gt;</code>
+  keys at the root and lists the enforced ones under <code>x-enforced</code>. The uploaded bytes are
+  never rewritten. Pull a version with <code>limelight pull <span id="pullname"></span>@N</code>.</p>
+</section>
+
+<aside>
+  <div class="panel"><div class="inner">
+  <h2>Profiles <span class="count" id="pcount">0</span></h2>
+  <table class="list compact" id="ptable">
+    <tbody id="profiles"></tbody>
+  </table>
+  <div class="pform">
+    <div class="row"><input type="text" id="puser" placeholder="User name" maxlength="40" aria-label="User name"></div>
+    <div class="kv">
+      <span class="k" id="pcolours-label">Colour</span>
+      <div class="msel" id="pcolours">
+        <button type="button" class="msel-btn" id="pcolours-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pcolours-label pcolours-btn">
+          <span class="msel-picks" id="pcolours-picks"><span class="placeholder">Select colours…</span></span>
+          <span class="caret" aria-hidden="true">▼</span>
+        </button>
+        <div class="msel-menu" id="pcolours-menu" role="listbox" aria-multiselectable="true" hidden></div>
+      </div>
+    </div>
+    <div class="row"><button id="psave" class="primary">Save profile</button><span class="msg ok" id="pmsg"></span></div>
+  </div>
+  </div></div>
+  <p class="note" id="phint"></p>
+</aside>
 </div>
+</main>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -72,18 +71,20 @@ const err = m => { $("msg").textContent = m; if (m) console.error(m); };
 const human = n => n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : (n / 1048576).toFixed(2) + " MB";
 const when = ms => new Date(ms).toISOString().slice(0, 16).replace("T", " ");
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+$("remote").textContent = "LIMELIGHT_REMOTE=" + location.origin + "/hub/score";
 
 function crumbs() {
   const parts = file.replace(/^\/hub\/?/, "").split("/").filter(Boolean);
-  let html = `<a href="/hub/">HUB</a>`, href = "/hub/";
+  let html = `<a href="/hub/">Hub</a>`, href = "/hub/";
   parts.forEach((p, i) => {
-    if (i < parts.length - 1) { href += enc(p) + "/"; html += ` / <a href="${href}">${esc(p.toUpperCase())}</a>`; }
+    if (i < parts.length - 1) { href += enc(p) + "/"; html += ` / <a href="${href}">${esc(p)}</a>`; }
     else html += ` / ${esc(p)}`;
   });
   $("crumb").innerHTML = html;
   $("name").textContent = name;
+  $("pullname").textContent = name;
   $("dl").href = file;
-  document.title = name;
+  document.title = name + " — Hub";
 }
 
 let HIST = null;
@@ -94,25 +95,25 @@ async function load() {
   if (r.status === 404) { HIST = { latest: null, versions: [] }; }
   else if (!r.ok) return err(`${r.status} ${r.statusText} listing versions`);
   else HIST = await r.json();
-  $("latest").textContent = HIST.latest ? "v" + HIST.latest : "no versions yet";
+  $("latest").textContent = HIST.latest ? "v" + HIST.latest + " is the latest" : "no versions yet";
   $("dl").hidden = !HIST.latest;
   const rows = [];
   for (const v of [...HIST.versions].reverse()) {
-    const meta = v.fields ? `<span class="meta-on">${v.fields} field${v.fields === 1 ? "" : "s"} · ${v.enforced} enforced</span>`
-                          : `<span class="meta-off">no metadata</span>`;
-    rows.push(`<tr data-version="${v.version}"><td class="n">v${v.version}${v.version === HIST.latest ? ' <span class="badge">latest</span>' : ""}</td>` +
-      `<td>${when(v.mtime)}</td><td>${human(v.size)}</td><td>${meta}</td>` +
-      `<td class="r"><a href="${file}?v=${v.version}" download>download</a>` +
-      `<button class="small edit" data-version="${v.version}" data-mergeable="${v.mergeable}">${v.fields ? "edit" : "add"} metadata</button></td></tr>`);
+    const meta = v.fields ? `${v.fields} field${v.fields === 1 ? "" : "s"}${v.enforced ? `, ${v.enforced} enforced` : ""}`
+                          : `<span class="dim">none</span>`;
+    rows.push(`<tr data-version="${v.version}"><td class="n">v${v.version}${v.version === HIST.latest ? ' <span class="badge latest">latest</span>' : ""}</td>` +
+      `<td data-l="uploaded">${when(v.mtime)}</td><td class="r" data-l="size">${human(v.size)}</td><td data-l="metadata">${meta}</td>` +
+      `<td class="r actions"><a class="btn quiet" href="${file}?v=${v.version}" download>Download v${v.version}</a> ` +
+      `<button type="button" class="edit" data-version="${v.version}" data-mergeable="${v.mergeable}">${v.fields ? "Edit" : "Add"} metadata</button></td></tr>`);
   }
-  $("rows").innerHTML = rows.join("") || `<tr><td colspan="5" class="empty">no versions yet — upload one above, or <span style="color:var(--dim)">limelight push</span> it</td></tr>`;
+  $("rows").innerHTML = rows.join("") || `<tr><td colspan="5" class="empty">No versions yet. Upload one above, or push it with <code>limelight push</code>.</td></tr>`;
 }
 
 $("file").addEventListener("change", async e => {
   const f = e.target.files[0]; if (!f) return;
   err("");
   const r = await fetch(file, { method: "PUT", body: f });
-  if (!r.ok) return err(`${r.status} ${r.statusText} uploading: ${await r.text()}`);
+  if (!r.ok) return err(`Upload failed: ${r.status} ${r.statusText}. ${await r.text()}`);
   e.target.value = "";
   load();
 });
@@ -130,21 +131,28 @@ function fieldRow(key, value, enforced) {
   return `<input type="text" class="k" placeholder="name" value="${esc(key)}">` +
          `<input type="text" class="v" placeholder="value" value="${esc(value)}">` +
          `<label><input type="checkbox" class="e" ${enforced ? "checked" : ""}> enforce</label>` +
-         `<button class="x" title="remove this field">remove</button>`;
+         `<button class="x quiet small danger" title="Remove this field">Remove</button>`;
 }
 
 async function openEditor(version, mergeable) {
   document.querySelectorAll("tr.edit").forEach(tr => tr.remove());
   const verRow = document.querySelector(`tr[data-version="${version}"]`);
-  const r = await fetch(`${file}?meta&v=${version}`);
-  const current = r.ok ? await r.json() : {};
+  if (!verRow) return err(`Cannot find version row v${version}`);
+  let current = {};
+  try {
+    const r = await fetch(`${file}?meta&v=${version}`);
+    if (r.ok) current = await r.json();
+    else if (r.status !== 404) return err(`${r.status} ${r.statusText} loading metadata for v${version}`);
+  } catch (e) {
+    return err("cannot reach the server: " + e.message);
+  }
   const tr = document.createElement("tr");
   tr.className = "edit";
   const rows = Object.entries(current).map(([k, e]) => fieldRow(k, shown(e.value), e.enforced)).join("");
   tr.innerHTML = `<td colspan="5"><div class="fields"><span class="h">name</span><span class="h">value</span><span></span><span></span>${rows}</div>` +
-    `<div class="editbar"><button class="add">add field</button><button class="save">save</button><button class="cancel">cancel</button>` +
+    `<div class="editbar"><button type="button" class="save primary">Save metadata</button><button type="button" class="add">Add field</button><button type="button" class="cancel quiet">Cancel</button>` +
     `<span class="err"></span>` +
-    `${mergeable === "false" ? '<span class="warn">this file is not a JSON object, so fields are stored but will not be folded into downloads</span>' : ""}</div></td>`;
+    `${mergeable === "false" ? '<span class="warn">This file is not a JSON object, so fields are stored but cannot be folded into downloads.</span>' : ""}</div></td>`;
   verRow.after(tr);
   const grid = tr.querySelector(".fields"), msg = tr.querySelector(".err");
   const addRow = () => { grid.insertAdjacentHTML("beforeend", fieldRow("", "", false)); [...grid.querySelectorAll(".k")].pop().focus(); };
@@ -152,10 +160,11 @@ async function openEditor(version, mergeable) {
   tr.querySelector(".add").onclick = addRow;
   tr.querySelector(".cancel").onclick = () => tr.remove();
   grid.addEventListener("click", e => {
-    if (!e.target.classList.contains("x")) return;
+    const x = e.target.closest("button.x");
+    if (!x) return;
     /* a row is four cells: key, value, label, remove */
     const cells = [...grid.children].slice(4);
-    const i = cells.indexOf(e.target), start = i - (i % 4);
+    const i = cells.indexOf(x), start = i - (i % 4);
     cells.slice(start, start + 4).forEach(c => c.remove());
   });
   tr.querySelector(".save").onclick = async () => {
@@ -164,9 +173,9 @@ async function openEditor(version, mergeable) {
     for (let i = 0; i < ks.length; i++) {
       const k = ks[i].value, v = vs[i].value;
       if (k === "" && v === "") continue;
-      if (k.trim() === "") { msg.textContent = `row ${i + 1}: a value needs a name`; return; }
-      if (k !== k.trim()) { msg.textContent = `"${k}": remove the spaces around the name`; return; }
-      if (k in out) { msg.textContent = `"${k}" is listed twice`; return; }
+      if (k.trim() === "") { msg.textContent = `Row ${i + 1} has a value but no name.`; return; }
+      if (k !== k.trim()) { msg.textContent = `Remove the spaces around "${k}".`; return; }
+      if (k in out) { msg.textContent = `"${k}" is listed twice.`; return; }
       out[k] = { value: typed(v), enforced: es[i].checked };
     }
     const res = await fetch(`${file}?meta&v=${version}`, { method: "PUT", body: JSON.stringify(out) });
@@ -178,8 +187,99 @@ async function openEditor(version, mergeable) {
 
 $("rows").addEventListener("click", e => {
   const b = e.target.closest("button.edit");
-  if (b) openEditor(b.dataset.version, b.dataset.mergeable);
+  if (!b) return;
+  e.preventDefault();
+  openEditor(b.dataset.version, b.dataset.mergeable).catch(ex => err(ex.message || String(ex)));
 });
 
-crumbs(); load();
+/* ---- profiles: how one user's application treats this score ----------------- */
+let USERS = new Set();
+let COLOURS = []; /* [{name, hex}, ...] from the palette */
+const pmsg = (m, bad) => { $("pmsg").textContent = m; $("pmsg").className = bad ? "msg" : "msg ok"; };
+
+function chosen() {
+  return [...$("pcolours-menu").querySelectorAll("input:checked")].map(i => i.value);
+}
+function setChosen(names) {
+  $("pcolours-menu").querySelectorAll("input").forEach(i => { i.checked = names.includes(i.value); });
+  renderPicks();
+}
+function renderPicks() {
+  const picks = $("pcolours-picks");
+  const selected = chosen();
+  if (!selected.length) {
+    picks.innerHTML = `<span class="placeholder">Select colours…</span>`;
+    return;
+  }
+  picks.innerHTML = selected.map(name => {
+    const c = COLOURS.find(x => x.name === name);
+    const hex = c ? c.hex : "#666";
+    return `<span class="pick"><span class="swatch" style="background:${hex}"></span>${esc(name)}</span>`;
+  }).join("");
+}
+function closeColourMenu() {
+  $("pcolours-menu").hidden = true;
+  $("pcolours-btn").setAttribute("aria-expanded", "false");
+}
+function toggleColourMenu(force) {
+  const menu = $("pcolours-menu");
+  const open = force === undefined ? menu.hidden : force;
+  menu.hidden = !open;
+  $("pcolours-btn").setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+async function loadProfiles() {
+  const r = await fetch(file + "?profiles");
+  if (!r.ok) return err(`${r.status} ${r.statusText} listing profiles`);
+  const data = await r.json();
+  COLOURS = data.colours || [];
+  const menu = $("pcolours-menu");
+  if (!menu.children.length) {
+    menu.innerHTML = COLOURS.map(c =>
+      `<label class="msel-opt"><input type="checkbox" value="${esc(c.name)}">` +
+      `<span class="swatch" style="background:${c.hex}"></span>${esc(c.name)}</label>`).join("");
+  }
+  USERS = new Set(data.profiles.map(p => p.user));
+  $("pcount").textContent = data.profiles.length;
+  $("profiles").innerHTML = data.profiles.map(p =>
+    `<tr><td class="n">${esc(p.user)}</td>` +
+    `<td class="swatches" title="${p.colours.map(c => c.name).join(", ")}">${p.colours.map(c => `<span class="swatch" style="background:${c.hex}"></span>`).join("")}</td>` +
+    `<td class="r"><button class="small quiet pedit" data-user="${esc(p.user)}" data-colours="${p.colours.map(c => c.name).join(",")}">Edit</button></td></tr>`).join("")
+    || `<tr><td colspan="3" class="empty">No profiles yet.</td></tr>`;
+  $("phint").innerHTML = data.profiles.length
+    ? `A profile is how one person's application treats this score. Pull with one: <code>limelight pull ${esc(name)} --profile=${esc(data.profiles[0].user)}</code>`
+    : "A profile is how one person's application treats this score. Add yours, then pull with <code>--profile=&lt;user&gt;</code>.";
+  renderPicks();
+}
+
+$("pcolours-btn").addEventListener("click", e => {
+  e.stopPropagation();
+  toggleColourMenu();
+});
+$("pcolours-menu").addEventListener("click", e => e.stopPropagation());
+$("pcolours-menu").addEventListener("change", renderPicks);
+document.addEventListener("click", () => closeColourMenu());
+
+$("psave").addEventListener("click", async () => {
+  const user = $("puser").value.trim(), colours = chosen();
+  if (!/^[A-Za-z0-9_-]{1,40}$/.test(user)) return pmsg("User name: 1-40 letters, digits, _ or -", true);
+  if (!colours.length) return pmsg("Pick at least one colour.", true);
+  const existed = USERS.has(user);
+  const r = await fetch(`${file}?profile=${encodeURIComponent(user)}`, { method: "PUT", body: JSON.stringify({ colours }) });
+  if (!r.ok) return pmsg(`${r.status}: ${await r.text()}`, true);
+  pmsg(`${existed ? "Replaced" : "Added"} ${user}: ${colours.join(", ")}`);
+  $("puser").value = ""; setChosen([]);
+  closeColourMenu();
+  loadProfiles();
+});
+
+$("profiles").addEventListener("click", e => {
+  const b = e.target.closest("button.pedit");
+  if (!b) return;
+  $("puser").value = b.dataset.user;
+  setChosen(b.dataset.colours ? b.dataset.colours.split(",") : []);
+  $("puser").focus();
+});
+
+crumbs(); load(); loadProfiles();
 </script>

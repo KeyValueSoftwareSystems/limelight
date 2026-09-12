@@ -18,6 +18,9 @@ curl can use it:
     GET   ...?meta[&v=N]          the metadata object, {} when none
     PUT   ...?meta[&v=N]          store metadata fields { name: { value, enforced } } -> 204, else 400
     GET   ...?page                the score's own page: versions, downloads, metadata fields
+    GET   ...?profiles            -> { colours: [{name,hex}], profiles: [{user, colours:[{name,hex}]}] }
+    PUT   ...?profile=<user>      body {"colours": ["red","blue"]}; create or replace -> 204, else 400
+    GET   ...?profile=<user>[&v=N] download with "profile": {user, colours:[{name,hex}]} embedded
 
 No delete and no auth, on purpose: a shared folder on a LAN where the only way
 to correct a mistake is to overwrite it is a folder nobody can empty by accident.
@@ -26,6 +29,7 @@ Files live in hub/files/ (gitignored) or wherever HUB_ROOT points.
 """
 import json, os, urllib.parse
 from . import versions as V
+from . import profiles as P
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.environ.get("HUB_ROOT", os.path.join(HERE, "files")))
@@ -96,6 +100,7 @@ def _listing(urlpath, path):
             n = V.latest(full)
             row["version"] = n
             row["has_metadata"] = bool(n) and V.get_meta(full, n) is not None
+            row["profiles"] = len(P.all_of(full))
         entries.append(row)
     return json.dumps({"href": urlpath, "kind": "Index", "allow_upload": True,
                        "allow_delete": False, "paths": entries})
@@ -118,20 +123,36 @@ def _send_file(h, path, head):
 
 
 def _versioned_get(h, path, query, head):
-    """GET/HEAD on a .score that has a history: ?versions, ?meta, ?v, ?raw."""
+    """GET/HEAD on a .score that has a history: ?versions, ?profiles, ?meta, ?v, ?raw, ?profile."""
+    name = os.path.basename(path)
     if "versions" in query:
         return _json(h, 200, V.history(path), head)
+    if "profiles" in query:
+        return _json(h, 200, {"name": name, "colours": P.colours(), "profiles": P.all_of(path)}, head)
     v = query.get("v", [""])[0]
     try:
         n = V.resolve_version(path, v)
     except KeyError:
-        return _send(h, 404, f"no version {v or 'latest'} of {os.path.basename(path)}", head_only=head)
+        return _send(h, 404, f"no version {v or 'latest'} of {name}", head_only=head)
     if "meta" in query:
         return _json(h, 200, V.get_meta(path, n) or {}, head)
-    return _send(h, 200, V.read(path, n, raw="raw" in query), "application/octet-stream", head)
+    user = query.get("profile", [None])[0]
+    if user is None:
+        return _send(h, 200, V.read(path, n, raw="raw" in query), "application/octet-stream", head)
+    # a download with a profile: the version, the author's keys, then the profile
+    if "raw" in query:
+        return _send(h, 400, "raw and profile contradict", head_only=head)
+    profile = P.get(path, user)
+    if profile is None:
+        users = [p["user"] for p in P.all_of(path)]
+        return _send(h, 404, f"no profile {user} for {name}\nprofiles: {', '.join(users) if users else 'none yet'}", head_only=head)
+    obj = V.parse_object(V.read(path, n))
+    if obj is None:
+        return _send(h, 409, "not a JSON object, cannot embed a profile", head_only=head)
+    return _send(h, 200, V.dump(P.embed(obj, profile)), "application/octet-stream", head)
 
 
-VERSION_QUERIES = ("v", "raw", "versions", "meta", "page")
+VERSION_QUERIES = ("v", "raw", "versions", "meta", "page", "profiles", "profile")
 
 
 def handle(h, method):
@@ -155,6 +176,12 @@ def handle(h, method):
         if body is None:
             return _send(h, 411, "Content-Length required, and the body must be complete")
         os.makedirs(os.path.dirname(path), exist_ok=True)
+        if versioned and "profile" in query:
+            try:
+                P.put(path, query["profile"][0], body)
+            except ValueError as e:
+                return _send(h, 400, str(e))
+            return _send(h, 204)
         if versioned and "meta" in query:
             v = query.get("v", [""])[0]
             try:
@@ -190,6 +217,8 @@ def handle(h, method):
         if "page" in query:                       # the score's own page, versions or not
             with open(SCORE_PAGE, "rb") as f:
                 return _send(h, 200, f.read(), "text/html; charset=utf-8", head)
+        if "profiles" in query:                   # answers even before the first version
+            return _json(h, 200, {"name": os.path.basename(path), "colours": P.colours(), "profiles": P.all_of(path)}, head)
         if versioned and V.numbers(path):
             return _versioned_get(h, path, query, head)
         if os.path.isfile(path):
@@ -197,5 +226,37 @@ def handle(h, method):
                 return _json(h, 200, V.history(path), head)      # a .score uploaded before versioning existed
             return _send_file(h, path, head)
         return _send(h, 404, "no " + parsed.path, head_only=head)
+
+    if method == "POST":
+        p = urllib.parse.urlparse(h.path).path
+        if p == PREFIX + "/score":
+            from . import score_api
+            body_bytes = _read_body(h)
+            if body_bytes is None:
+                return _send(h, 411, "Content-Length required")
+            try:
+                body = json.loads(body_bytes)
+            except ValueError:
+                return _send(h, 400, "not json")
+
+            def fetch(name):
+                fpath = os.path.join(ROOT, name + ".score")
+                if not os.path.isfile(fpath):
+                    raise FileNotFoundError(f"no score: {name}")
+                if V.is_versioned(fpath) and V.numbers(fpath):
+                    n = V.resolve_version(fpath, "")
+                    return json.loads(V.read(fpath, n))
+                return json.loads(open(fpath, "rb").read())
+
+            try:
+                result = score_api.handle(body, fetch)
+                code = 200 if "error" not in result or "note" in result else 400
+                return _json(h, code, result)
+            except FileNotFoundError as e:
+                return _json(h, 404, {"error": str(e)})
+            except ValueError as e:
+                return _json(h, 400, {"error": str(e)})
+            except Exception as e:
+                return _json(h, 500, {"error": str(e)})
 
     return _send(h, 405, method + " is not something the hub does")

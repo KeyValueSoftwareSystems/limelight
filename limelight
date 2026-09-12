@@ -14,9 +14,9 @@ const { openRemote, DEFAULT_REMOTE, NotFound, RemoteError } = require("./cli/rem
 
 const REMOTE = process.env.LIMELIGHT_REMOTE || DEFAULT_REMOTE;
 const USAGE = `usage:
-  limelight push <path/to/file.score>   upload to the shared score folder (a .score becomes a new version)
-  limelight pull <name.score>           download the latest into the current directory
-  limelight pull <name.score>@<N>       download version N
+  limelight push <path/to/file.score>              upload to the shared score folder (a .score becomes a new version)
+  limelight pull <name.score>[@N] [--profile=<user>]  download the latest, or version N, into the current directory;
+                                                   with a profile, the file carries how that user's application treats it
 
 remote: ${REMOTE}   (override with LIMELIGHT_REMOTE=<url>)`;
 
@@ -47,14 +47,24 @@ function parseTarget(arg) {
   return m ? { name: path.basename(m[1]), version: m[2] } : { name: path.basename(arg), version: null };
 }
 
-async function pull(remote, arg) {
+async function pull(remote, arg, flags) {
   if (!arg) usage();
   const { name, version } = parseTarget(arg);   /* a name, never a path */
+  const profile = flags.profile || null;
   let bytes;
   try {
-    bytes = await remote.get(name, version);
+    bytes = await remote.get(name, version, profile);
   } catch (e) {
     if (!(e instanceof NotFound)) throw e;
+    if (profile) {
+      /* the score may exist and only the profile be missing: say which profiles there are */
+      let info = null;
+      try { info = await remote.profiles(name); } catch (e2) { if (!(e2 instanceof NotFound)) throw e2; }
+      if (info && !info.profiles.some(p => p.user === profile)) {
+        const users = info.profiles.map(p => p.user);
+        throw new Exit(1, `${name} has no profile ${profile}\n${users.length ? "profiles: " + users.join(", ") : "no profiles yet"}`);
+      }
+    }
     if (version) {
       /* the file may exist and only the version be missing: say which versions there are */
       let hist = null;
@@ -69,16 +79,35 @@ async function pull(remote, arg) {
   }
   fs.writeFileSync(path.join(process.cwd(), name), bytes);
   const tag = version ? `@${version}` : "";
-  console.log(`pulled ${name}${tag} ← ${remote.url(name)}${version ? `?v=${version}` : ""} (${bytes.length} bytes)`);
+  const q = [version && `v=${version}`, profile && `profile=${profile}`].filter(Boolean).join("&");
+  const note = profile ? `, profile ${profile}` : "";
+  console.log(`pulled ${name}${tag} ← ${remote.url(name)}${q ? "?" + q : ""} (${bytes.length} bytes${note})`);
 }
 
 const COMMANDS = { push, pull };
+const OPTIONS = ["profile"];
+
+/* --profile=x and --profile x both work; anything else starting with -- is refused */
+function parseArgs(argv) {
+  const flags = {}, rest = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (!a.startsWith("--")) { rest.push(a); continue; }
+    const eq = a.indexOf("=");
+    const key = eq === -1 ? a.slice(2) : a.slice(2, eq);
+    if (!OPTIONS.includes(key)) throw new Exit(1, `unknown option --${key}\n\n${USAGE}`);
+    flags[key] = eq === -1 ? argv[++i] : a.slice(eq + 1);
+    if (flags[key] === undefined) throw new Exit(1, `--${key} needs a value`);
+  }
+  return { flags, rest };
+}
 
 async function main(argv) {
-  const [cmd, arg] = argv;
+  const { flags, rest } = parseArgs(argv);
+  const [cmd, arg] = rest;
   if (!COMMANDS[cmd]) usage();
   const remote = openRemote(REMOTE);
-  await COMMANDS[cmd](remote, arg);
+  await COMMANDS[cmd](remote, arg, flags);
 }
 
 main(process.argv.slice(2)).catch(e => {

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beat Saber</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Animated neon backdrop shared across screens -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--red" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--blue" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <main id="app">
+
+    <!-- ========================= MAIN MENU ========================= -->
+    <section class="screen screen--menu is-active" id="screen-menu">
+      <div class="menu">
+        <h1 class="logo">
+          <span class="logo__beat">BEAT</span>
+          <span class="logo__saber">SABER</span>
+        </h1>
+        <p class="logo__tagline">// slash to the rhythm</p>
+
+        <nav class="menu__nav">
+          <button class="btn btn--primary" data-nav="songs">
+            <span class="btn__icon">&#9654;</span> Play
+          </button>
+          <button class="btn" data-nav="howto">How to Play</button>
+          <button class="btn" data-nav="settings">Settings</button>
+        </nav>
+
+        <footer class="menu__footer">
+          <span class="pill pill--red"></span>
+          <span class="pill pill--blue"></span>
+          <span class="menu__version">v0.1 &middot; browser edition</span>
+        </footer>
+      </div>
+    </section>
+
+    <!-- ========================= SONG SELECT ========================= -->
+    <section class="screen screen--songs" id="screen-songs">
+      <header class="topbar">
+        <button class="btn btn--ghost" data-nav="menu">&#8592; Back</button>
+        <h2 class="topbar__title">Select Track</h2>
+        <div class="topbar__spacer"></div>
+      </header>
+
+      <div class="songs">
+        <ul class="songlist" id="songlist"><!-- populated by ui.js --></ul>
+
+        <aside class="preview" id="preview">
+          <div class="preview__cover">
+            <div class="preview__cover-inner" id="preview-cover">&#9835;</div>
+          </div>
+          <h3 class="preview__title" id="preview-title">&mdash;</h3>
+          <p class="preview__artist" id="preview-artist">&mdash;</p>
+
+          <div class="preview__meta">
+            <div class="meta-chip"><span class="meta-chip__k">BPM</span><span class="meta-chip__v" id="preview-bpm">&mdash;</span></div>
+            <div class="meta-chip"><span class="meta-chip__k">Length</span><span class="meta-chip__v" id="preview-length">&mdash;</span></div>
+            <div class="meta-chip"><span class="meta-chip__k">High Score</span><span class="meta-chip__v" id="preview-hiscore">&mdash;</span></div>
+          </div>
+
+          <div class="difficulty" id="difficulty">
+            <span class="difficulty__label">Difficulty</span>
+            <div class="difficulty__pills">
+              <button class="diff diff--easy is-selected">Easy</button>
+              <button class="diff diff--normal">Normal</button>
+              <button class="diff diff--hard">Hard</button>
+              <button class="diff diff--expert">Expert</button>
+            </div>
+          </div>
+
+          <button class="btn btn--primary btn--block" id="btn-start">
+            <span class="btn__icon">&#9654;</span> Start
+          </button>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ========================= IN-GAME HUD ========================= -->
+    <section class="screen screen--game" id="screen-game">
+      <!-- This box is where the Three.js canvas renders in a later session.
+           For now, DOM blocks fly down it, spawned from real Limelight beats. -->
+      <div class="playfield">
+        <div class="playfield__placeholder">
+          <div class="playfield__tunnel"></div>
+          <p class="playfield__note">3D playfield &mdash; Three.js renders here later</p>
+          <!-- sample blocks (shown only before play, hidden once a song runs) -->
+          <div class="block block--red block--sample"  style="--x:-16%; --s:.45; top:30%"></div>
+          <div class="block block--blue block--sample" style="--x:30%;  --s:.7;  top:62%"></div>
+          <div class="block block--red block--sample"  style="--x:-34%; --s:.95; top:70%"></div>
+        </div>
+
+        <!-- live beat-driven blocks mount here -->
+        <div class="spawn" id="spawn"></div>
+        <div class="cursor-saber" id="cursor-saber" aria-hidden="true"></div>
+        <div class="playfield__hint" id="playfield-hint">Move &amp; swipe the mouse through the blocks</div>
+
+        <!-- HUD overlay -->
+        <div class="hud">
+          <div class="hud__top">
+            <div class="hud__combo">
+              <span class="hud__combo-num" id="hud-combo">128</span>
+              <span class="hud__combo-label">COMBO</span>
+            </div>
+            <div class="hud__score">
+              <span class="hud__score-label">SCORE</span>
+              <span class="hud__score-num" id="hud-score">742,900</span>
+            </div>
+          </div>
+
+          <div class="hud__acc">
+            <span class="hud__acc-num" id="hud-acc">96.4%</span>
+            <span class="hud__acc-rank" id="hud-rank">A</span>
+          </div>
+
+          <div class="hud__health">
+            <div class="hud__health-bar"><div class="hud__health-fill" id="hud-health" style="width:78%"></div></div>
+            <span class="hud__health-label">ENERGY</span>
+          </div>
+
+          <div class="hud__sabers">
+            <span class="saber saber--red">&#9552;</span>
+            <span class="saber saber--blue">&#9552;</span>
+          </div>
+
+          <button class="btn btn--ghost hud__quit" id="btn-end">End &#8594;</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= RESULTS ========================= -->
+    <section class="screen screen--results" id="screen-results">
+      <div class="results">
+        <p class="results__cleared">TRACK CLEARED</p>
+        <div class="results__rank" id="results-rank">S</div>
+
+        <div class="results__stats">
+          <div class="stat"><span class="stat__v" id="res-score">742,900</span><span class="stat__k">Score</span></div>
+          <div class="stat"><span class="stat__v" id="res-acc">96.4%</span><span class="stat__k">Accuracy</span></div>
+          <div class="stat"><span class="stat__v" id="res-combo">128</span><span class="stat__k">Max Combo</span></div>
+        </div>
+
+        <div class="results__actions">
+          <button class="btn" id="btn-retry"><span class="btn__icon">&#8635;</span> Retry</button>
+          <button class="btn btn--primary" id="btn-menu" data-nav="menu">Menu</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= HOW TO PLAY (modal-ish screen) ========================= -->
+    <section class="screen screen--howto" id="screen-howto">
+      <div class="panel">
+        <header class="topbar">
+          <button class="btn btn--ghost" data-nav="menu">&#8592; Back</button>
+          <h2 class="topbar__title">How to Play</h2>
+          <div class="topbar__spacer"></div>
+        </header>
+        <div class="howto">
+          <div class="howto__row">
+            <span class="howto__icon howto__icon--red">&#9552;</span>
+            <p>Move your <strong>mouse</strong> to guide the saber &mdash; its sharp tip is your pointer. Slash through the blocks as they reach the line.</p>
+          </div>
+          <div class="howto__row">
+            <span class="howto__icon">&#9632;</span>
+            <p>Slash each block with the <strong>matching color</strong> in the arrow's direction.</p>
+          </div>
+          <div class="howto__row">
+            <span class="howto__icon">&#9889;</span>
+            <p>Chain hits to build your <strong>combo</strong> and multiply your score. Miss and your energy drops.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= SETTINGS ========================= -->
+    <section class="screen screen--settings" id="screen-settings">
+      <div class="panel">
+        <header class="topbar">
+          <button class="btn btn--ghost" data-nav="menu">&#8592; Back</button>
+          <h2 class="topbar__title">Settings</h2>
+          <div class="topbar__spacer"></div>
+        </header>
+        <div class="settings">
+          <label class="setting">
+            <span class="setting__label">Master Volume</span>
+            <input type="range" min="0" max="100" value="80" class="slider" />
+          </label>
+          <label class="setting">
+            <span class="setting__label">Saber Sensitivity</span>
+            <input type="range" min="0" max="100" value="60" class="slider" />
+          </label>
+          <label class="setting">
+            <span class="setting__label">Input Latency (ms)</span>
+            <input type="range" min="0" max="200" value="0" step="5" class="slider" id="set-latency" />
+          </label>
+          <label class="setting setting--toggle">
+            <span class="setting__label">Screen Glow</span>
+            <input type="checkbox" checked class="toggle" />
+          </label>
+          <label class="setting setting--toggle">
+            <span class="setting__label">Webcam Sabers (experimental)</span>
+            <input type="checkbox" class="toggle" id="set-webcam" />
+          </label>
+          <label class="setting setting--toggle">
+            <span class="setting__label">Reduce Motion</span>
+            <input type="checkbox" class="toggle" />
+          </label>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- rendering + protocol clients (session & clock served by serve.py).
+       If opened without the Limelight server, the protocol scripts 404 and
+       the game falls back to the mock song list. -->
+  <script src="vendor/three.min.js"></script>
+  <script src="/protocol/session.js"></script>
+  <script src="/protocol/clock.js"></script>
+  <script src="js/limelight.js"></script>
+  <script src="js/mapper.js"></script>
+  <script src="js/judge.js"></script>
+  <script src="js/scene3d.js"></script>
+  <script src="js/input/saber-source.js"></script>
+  <script src="js/input/mouse-source.js"></script>
+  <script src="js/input/webcam-source.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

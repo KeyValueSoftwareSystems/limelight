@@ -1,105 +1,97 @@
 <!-- The hub page: the shared folder, in a browser. List, upload, download, new
      folder. Every request it makes is one the CLI makes too; nothing here is
-     special to the page. -->
+     special to the page. Styles live in /page/ui.css, shared with the other pages. -->
 <title>Hub</title>
-<style>
-:root{--bg:#0a0d13;--pan:#0f141d;--line:#1b2230;--line2:#263047;--ink:#e6e9f0;
-  --dim:#9aa3b8;--faint:#5c6478;--amb:#e8a33d;--ok:#5bb98c;--blu:#6fa8dc;--bad:#e06c6c}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.55 ui-sans-serif,system-ui,sans-serif;margin:0}
-.wrap{max-width:920px;margin:0 auto;padding:18px 18px 70px}
-h1{font:600 12px ui-monospace,monospace;letter-spacing:.18em;color:var(--amb);margin:0 0 16px}
-h1 a{color:var(--amb);text-decoration:none} h1 a:hover{text-decoration:underline}
-.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px}
-button,label.btn{background:#182031;color:var(--ink);border:1px solid var(--line2);
-  border-radius:6px;padding:7px 13px;font:inherit;cursor:pointer}
-button:hover,label.btn:hover{border-color:#41506e}
-input[type=file]{display:none}
-.mono{font:12px ui-monospace,monospace;font-variant-numeric:tabular-nums}
-#msg{font:11.5px ui-monospace,monospace;color:var(--bad);white-space:pre-wrap;flex:1;min-width:200px}
-table{border-collapse:collapse;width:100%;font:12px ui-monospace,monospace;background:var(--pan);
-  border:1px solid var(--line);border-radius:6px}
-th{font:600 10px ui-monospace,monospace;letter-spacing:.13em;text-transform:uppercase;color:var(--blu);
-  text-align:left;padding:9px 12px;border-bottom:1px solid var(--line2)}
-td{padding:7px 12px;border-bottom:1px solid #141a26;color:var(--dim);white-space:nowrap}
-td.n{color:var(--ink)} td.r{text-align:right;color:var(--amb);font-variant-numeric:tabular-nums}
-td a{color:var(--ink);text-decoration:none} td a:hover{text-decoration:underline}
-td a.dir{color:var(--blu)} td a.dir::after{content:"/"}
-tr.up td{color:var(--faint)} tr.up td.s{color:var(--ok)} tr.up td.f{color:var(--bad)}
-.note{color:var(--faint);font-size:12px;margin:10px 0 0}
-.empty{padding:26px 12px;color:var(--faint);text-align:center}
-.badge{display:inline-block;font:600 10px ui-monospace,monospace;letter-spacing:.08em;color:var(--amb);
-  border:1px solid var(--line2);border-radius:4px;padding:1px 5px;margin-left:8px;vertical-align:1px}
-button.small{padding:3px 9px;font:11px ui-monospace,monospace;margin-left:8px}
-td a.dl{color:var(--dim);font-size:11px;margin-left:10px}
-</style>
+<link rel="stylesheet" href="/page/ui.css">
 
-<div class="wrap">
-<h1 id="crumb">HUB</h1>
+<header class="top">
+  <a class="brand" href="/hub/">Limelight</a>
+  <span class="remote" id="remote"></span>
+</header>
 
-<div class="bar">
-  <label class="btn" for="file">upload files</label>
-  <input type="file" id="file" multiple>
-  <button id="mkdir">new folder</button>
-  <button id="reload">refresh</button>
-  <span id="msg"></span>
+<main class="page">
+<p class="crumb" id="crumb">Hub</p>
+<div class="hero">
+  <h1 class="title" id="title">Hub</h1>
+  <div class="actions">
+    <label class="btn primary" for="file">Upload files</label>
+    <input type="file" id="file" multiple>
+    <button id="mkdir">New folder</button>
+    <button id="reload" class="quiet">Refresh</button>
+  </div>
 </div>
+<p class="msg" id="msg"></p>
 
-<table>
-  <thead><tr><th>name</th><th>modified</th><th style="text-align:right">size</th></tr></thead>
+<div class="panel">
+<table class="list">
+  <thead><tr><th>Name</th><th>Updated</th><th class="r">Size</th><th>Version</th><th>Metadata</th><th>Profiles</th></tr></thead>
   <tbody id="rows"></tbody>
 </table>
-<p class="note">Anything you upload here everyone on this network can pull with
-<span class="mono">limelight pull &lt;name&gt;</span>. Click a score for its versions and
-metadata. Nothing can be deleted from the page; a mistake is fixed by uploading over it.</p>
 </div>
+<p class="note">Everything here is shared with everyone on this network. Pull a file with
+<code>limelight pull &lt;name&gt;</code>. Open a score for its versions, metadata and profiles.
+Nothing is deleted from this page; fix a mistake by uploading over it.</p>
+</main>
 
 <script>
 const $ = id => document.getElementById(id);
 const base = location.pathname.endsWith("/") ? location.pathname : location.pathname + "/";
 const enc = s => s.split("/").map(encodeURIComponent).join("/");
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 const err = m => { $("msg").textContent = m; if (m) console.error(m); };
 
 const human = n => n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : (n / 1048576).toFixed(2) + " MB";
 const when = ms => { const d = new Date(ms); return d.toISOString().slice(0, 16).replace("T", " "); };
 
+$("remote").textContent = "LIMELIGHT_REMOTE=" + location.origin + "/hub/score";
+
 function crumbs() {
   const parts = base.replace(/^\/hub\/?/, "").split("/").filter(Boolean);
-  let html = `<a href="/hub/">HUB</a>`, href = "/hub/";
-  for (const p of parts) { href += enc(p) + "/"; html += ` / <a href="${href}">${p.toUpperCase()}</a>`; }
+  let html = `<a href="/hub/">Hub</a>`, href = "/hub/";
+  parts.forEach((p, i) => {
+    href += enc(p) + "/";
+    html += i < parts.length - 1 ? ` / <a href="${href}">${esc(p)}</a>` : ` / ${esc(p)}`;
+  });
   $("crumb").innerHTML = html;
+  $("title").textContent = parts.length ? parts[parts.length - 1] : "Hub";
+  document.title = parts.length ? parts[parts.length - 1] + " — Hub" : "Hub";
 }
 
 async function load() {
   err("");
   let r;
-  try { r = await fetch(base + "?json"); } catch (e) { return err("cannot reach the server: " + e.message); }
+  try { r = await fetch(base + "?json"); } catch (e) { return err("The server did not answer: " + e.message); }
   if (!r.ok) return err(`${r.status} ${r.statusText} listing ${base}`);
   const data = await r.json();
   const rows = [];
-  if (base !== "/hub/") rows.push(`<tr><td class="n"><a class="dir" href="..">..</a></td><td></td><td></td></tr>`);
+  const cell = (l, v, cls) => `<td data-l="${l}"${cls ? ` class="${cls}"` : ""}>${v}</td>`;
+  if (base !== "/hub/") rows.push(`<tr><td class="n"><a class="dir" href="..">..</a></td><td></td><td></td><td></td><td></td><td></td></tr>`);
   for (const p of data.paths) {
     const dir = p.path_type === "Dir";
     const score = !dir && /\.score$/.test(p.name);
-    const a = dir   ? `<a class="dir" href="${base}${enc(p.name)}/">${p.name}</a>`
-            : score ? `<a href="${base}${enc(p.name)}?page">${p.name}</a>`
-                    : `<a href="${base}${enc(p.name)}" download>${p.name}</a>`;
-    const extra = score && p.version ? `<span class="badge">v${p.version}</span><a class="dl" href="${base}${enc(p.name)}" download>download</a>` : "";
-    rows.push(`<tr><td class="n">${a}${extra}</td><td>${when(p.mtime)}</td><td class="r">${dir ? "" : human(p.size)}</td></tr>`);
+    const a = dir   ? `<a class="dir" href="${base}${enc(p.name)}/">${esc(p.name)}</a>`
+            : score ? `<a href="${base}${enc(p.name)}?page">${esc(p.name)}</a>`
+                    : `<a href="${base}${enc(p.name)}" download>${esc(p.name)}</a>`;
+    const dl = score && p.version ? ` <a class="btn quiet small" href="${base}${enc(p.name)}" download>Download</a>` : "";
+    const prof = score ? (p.profiles ? `${p.profiles} profile${p.profiles === 1 ? "" : "s"}` : `<span class="dim">none</span>`) : "";
+    const meta = score ? (p.has_metadata ? "yes" : `<span class="dim">none</span>`) : "";
+    const ver = score ? (p.version ? `<span class="badge">v${p.version}</span>` : `<span class="dim">no versions</span>`) : "";
+    rows.push(`<tr>${cell("", a + dl, "n" + (score ? " name-score" : ""))}${cell("updated", when(p.mtime))}` +
+      `${cell("size", dir ? "" : human(p.size), "r")}${cell("version", ver)}${cell("metadata", meta)}${cell("profiles", prof)}</tr>`);
   }
-  $("rows").innerHTML = rows.join("") || `<tr><td colspan="3" class="empty">empty — upload something</td></tr>`;
+  $("rows").innerHTML = rows.join("") || `<tr><td colspan="6" class="empty">Nothing here yet. Upload a file, or push one with <code>limelight push</code>.</td></tr>`;
 }
 
 $("file").addEventListener("change", async e => {
   err("");
   for (const f of e.target.files) {
     const tr = document.createElement("tr"); tr.className = "up";
-    tr.innerHTML = `<td class="n">${f.name}</td><td>uploading…</td><td class="r">${human(f.size)}</td>`;
+    tr.innerHTML = `<td class="n">${esc(f.name)}</td><td>Uploading…</td><td class="r">${human(f.size)}</td><td></td><td></td><td></td>`;
     $("rows").prepend(tr);
     try {
       const r = await fetch(base + enc(f.name), { method: "PUT", body: f });
       if (!r.ok) { tr.children[1].textContent = `${r.status} ${r.statusText}`; tr.children[1].className = "f"; continue; }
-      tr.children[1].textContent = "done"; tr.children[1].className = "s";
+      tr.children[1].textContent = "Uploaded"; tr.children[1].className = "s";
     } catch (ex) { tr.children[1].textContent = ex.message; tr.children[1].className = "f"; }
   }
   e.target.value = "";
@@ -109,7 +101,7 @@ $("file").addEventListener("change", async e => {
 $("mkdir").addEventListener("click", async () => {
   const name = prompt("Folder name");
   if (!name) return;
-  if (name.includes("/")) return err("a folder name cannot contain /");
+  if (name.includes("/")) return err("A folder name cannot contain /");
   const r = await fetch(base + enc(name), { method: "MKCOL" });
   if (r.status === 405) return err(`${name} already exists`);
   if (!r.ok) return err(`${r.status} ${r.statusText} creating ${name}`);

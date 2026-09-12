@@ -373,8 +373,26 @@ def make_handler(state: State):
             body = self._body()
             tr = state.transport
             if path == "/api/load":
+                try:
+                    req = urllib.request.Request(
+                        HUB + "/hub/score",
+                        data=json.dumps(body).encode(),
+                        headers={"Content-Type": "application/json"},
+                        method="POST",
+                    )
+                    with urllib.request.urlopen(req, timeout=20) as r:
+                        result = json.loads(r.read())
+                    code = 200 if "error" not in result or "note" in result else 400
+                    return self._json(result, code)
+                except Exception as e:
+                    return self._json({"error": str(e)}, 500)
+            if path == "/api/show":
+                # Load a baked show's frames into the transport for playback.
+                # (/api/load returns the hub's protocol view; this is the play path.
+                # Bakes are produced by /api/import from a hub score.)
                 meta = state.load(body.get("name", ""), force=bool(body.get("force")))
-                return self._json(meta, 200) if meta else self._json({"error": "track not found"}, 404)
+                return self._json(meta, 200) if meta else \
+                    self._json({"error": "show not baked yet — import it from the hub first"}, 404)
             if path == "/api/import":
                 meta = state.import_score(body.get("name", ""), int(body.get("seed", 3)))
                 return self._json(meta, 200) if meta else self._json({"error": state.import_log}, 500)
@@ -418,8 +436,8 @@ def make_handler(state: State):
 
 def make_server(host, port, dirs, sender, fps=40, audio_factory=None, watchdog_s=3.0, offset_ms=0.0):
     if audio_factory is None:
-        from audio_out import AudioPlayer
-        audio_factory = AudioPlayer
+        from audio_out import make_audio   # SoundDeviceOutput if available, else pw-play
+        audio_factory = make_audio
     transport = Transport(sender, fps=fps, park=park_frame())
     transport.set_offset_ms(offset_ms)
     state = State(dirs, transport, audio_factory)

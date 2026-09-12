@@ -261,6 +261,36 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
      up.every(e => e.in_ms >= 0 && e.in_ms <= 2000));
 }
 
+/* ---- bar zero is a number, not an absence -------------------------------
+   `x || 1` reads bar 0 as "missing" and substitutes 1, which is the same
+   one-bar error grid.first_bar was introduced to kill. It was live in two
+   places: a 0-based score read its energy a whole bar late, and a phrase grid
+   anchored at bar 0 snapped to bar 1. Levels is 0-based, so this was the demo
+   song. */
+{
+  const zero = {
+    grid: { bpm: 120, beats_per_bar: 4, first_beat_s: 0, first_bar: 0 },
+    parts: [{ from_bar: 0, to_bar: 15, role: "intro", nth: 1 }],
+    bars: { intensity: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7,
+                        0.8, 0.9, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5] },
+  };
+  const s = Session(zero, { now: clock });
+  const wrong = [0, 1, 2, 3, 4, 5].filter(
+    b => Math.abs(s.energyAt({ bar: b, beat: 1 }) - zero.bars.intensity[b]) > 1e-9);
+  ok("a 0-based score reads its own energy, not the bar before it", wrong.length === 0,
+     wrong.length ? "bars " + wrong.join(",") + " off by one"
+                  : "bars 0-5 match the score");
+
+  const phrased = Session(Object.assign({}, zero, {
+    layers: { phrase: { kind: "rule", every_bars: 8, from_bar: 0 } } }), { now: clock });
+  const ph = phrased.sectionsAt({ bar: 0, beat: 1 }).phrase;
+  ok("a phrase grid anchored at bar 0 starts at bar 0", ph && ph.from.bar === 0,
+     ph ? `starts bar ${ph.from.bar}` : "no phrase");
+  const ph8 = phrased.sectionsAt({ bar: 8, beat: 1 }).phrase;
+  ok("and its second phrase starts at bar 8", ph8 && ph8.index === 2 && ph8.from.bar === 8,
+     ph8 ? `phrase ${ph8.index} at bar ${ph8.from.bar}` : "no phrase");
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

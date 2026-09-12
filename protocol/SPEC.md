@@ -148,6 +148,23 @@ There is no `blackout` in the score, and there will not be one. The musical
 fact is `silence`. A lighting reader may black out there; a game may do nothing
 at all; and the score must not assume either.
 
+## Profile
+
+A score can carry how one user's application treats it. The hub stores a
+profile per user beside the score's versions, and `limelight pull <score>
+--profile=<user>` embeds it:
+
+```json
+"profile": { "user": "muzammil", "colours": [{ "name": "red", "hex": "#ff0000" }, { "name": "blue", "hex": "#0000ff" }] }
+```
+
+For now a profile is one or more colours from a fixed palette, in the user's
+order; more keys come later.
+The responder returns `profile` in every response when the score has one,
+asked for or not, for the same reason it always returns `grid`. Without the
+flag, no `profile` key exists anywhere. The author's metadata (`x-` keys) and
+the profile are independent layers.
+
 ## Known and deliberate
 
 The pickup before bar 1 is bar 0 beat 4. That is correct and it reads as

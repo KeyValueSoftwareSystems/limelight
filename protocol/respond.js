@@ -23,16 +23,20 @@
    4. A window clips, it does not re-anchor. Bar 33 is still called bar 33 in a
       window that starts there, because renumbering is how you lose the ability
       to compare two windows of the same song.
+
+   5. A score that carries a `profile` -- pulled with `limelight pull --profile`
+      -- gets it back in every response, asked for or not. The consumer who
+      pulled with a profile meant it to apply to everything they render.
 */
 "use strict";
 const fs = require("fs"), path = require("path");
 
 const ALWAYS = ["grid"];
 const KNOWN = ["grid", "beats", "downbeats", "sections", "energy", "moments",
-               "layers", "melody", "voice", "lead", "scales", "made_by",
-               "chord_changes", "presence", "phrases", "key", "loudness",
-               "feel", "chords", "brightness", "width", "air", "pump",
-               "pace", "drums", "bass", "vocals", "other"];
+               "layers", "song", "brightness", "width", "air", "pump", "pace",
+               "phrases", "chords", "key", "loudness", "feel", "curves", "stems",
+               "harmony", "chord_changes", "chord_summary", "tension", "releases",
+               "melody", "made_by", "voice", "lead", "scales", "presence"];
 
 /* The pipeline writes parts and bars.intensity; the protocol says sections and
    energy. server/format/v1.js does the same mapping for the HTTP path, which is
@@ -116,8 +120,11 @@ function respond(req) {
      the protocol is tested against something nothing produces any more. */
   const dir = process.env.LIMELIGHT_SCORES
             || path.join(__dirname, "..", "scores");
-  const file = name && fs.existsSync(path.join(dir, `${name}.score`))
-             ? path.join(dir, `${name}.score`) : null;
+  /* scores/ is the live source; __dirname lets a test write one beside this
+     file without reaching into the pipeline's output directory. */
+  const tries = [path.join(dir, `${name}.score`),
+                 path.join(__dirname, `${name}.score`)];
+  const file = name ? (tries.find(f => fs.existsSync(f)) || null) : null;
   if (!file) {
     return { error: `no score for ${req.score}`,
              have: (fs.existsSync(dir) ? fs.readdirSync(dir) : [])
@@ -176,6 +183,7 @@ function respond(req) {
   }
   if (want.has("layers") && s.layers) out.layers = s.layers;
 
+  if (s.profile) out.profile = s.profile;
   if (unknown.length) out.ignored = { fields: unknown, known: KNOWN };
   return out;
 }

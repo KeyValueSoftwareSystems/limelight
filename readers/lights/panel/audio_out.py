@@ -7,6 +7,7 @@ Pause = kill the process; resume = start a new one at the paused position. Start
 latency is a constant few tens of ms, which the UI's offset setting absorbs.
 """
 import os
+import sys
 import tempfile
 import shutil
 import struct
@@ -106,3 +107,26 @@ class AudioPlayer:
                         pass
             self._spawned = [p for p in self._spawned if p.poll() is None]
             self.cleanup()
+
+
+def make_audio(path: str):
+    """The audio backend the panel should use for a WAV.
+
+    Prefer protocol/clock.py's SoundDeviceOutput when the `sounddevice` library is
+    installed: it reports how much sound has actually reached the speaker, which lets
+    the transport run a MeasuredClock and stops the show guessing where the song is.
+    Fall back to pw-play (AudioPlayer), which cannot report a position -- the reason
+    the panel needed a hand-tuned offset that changed every run.
+    """
+    import importlib.util
+    if importlib.util.find_spec("sounddevice") is not None:
+        proto = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "..", "..", "..", "protocol")
+        if proto not in sys.path:
+            sys.path.insert(0, proto)
+        try:
+            from clock import SoundDeviceOutput
+            return SoundDeviceOutput(path)
+        except Exception:  # noqa: BLE001 - any import/construction trouble -> fall back
+            pass
+    return AudioPlayer(path)

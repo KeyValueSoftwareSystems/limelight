@@ -23,6 +23,9 @@ export function createHandler({ store }) {
    * @param {string[]|undefined} req.fields   Fields to include (default: all KNOWN).
    * @param {object|undefined}   req.window   { from_bar, bars } — clip to a bar range.
    * @param {string|undefined}   req.format   Response format version (default "v1").
+   * @param {string[]|undefined} req.curves   Curve names to keep (default: all).
+   * @param {string[]|undefined} req.stems    Stem names to keep (default: all).
+   * @param {object|undefined}   req.moments  { min_weight } — filter moments.
    * @returns {Promise<object>} The filtered, formatted, optionally windowed score.
    */
   async function handle(req) {
@@ -56,6 +59,28 @@ export function createHandler({ store }) {
 
     let formatted = fmt(raw);
 
+    // selective curves
+    if (req.curves && formatted.curves) {
+      const want = new Set(req.curves);
+      for (const k of Object.keys(formatted.curves)) {
+        if (!want.has(k)) delete formatted.curves[k];
+      }
+    }
+
+    // selective stems
+    if (req.stems && formatted.stems?.lanes) {
+      const want = new Set(req.stems);
+      for (const k of Object.keys(formatted.stems.lanes)) {
+        if (!want.has(k)) delete formatted.stems.lanes[k];
+      }
+    }
+
+    // moments min_weight filter
+    if (req.moments?.min_weight != null && formatted.moments) {
+      const min = req.moments.min_weight;
+      formatted.moments = formatted.moments.filter(m => (m.weight ?? 1) >= min);
+    }
+
     const w = req.window || null;
     formatted.window = w ? { from_bar: w.from_bar, bars: w.bars } : 'whole song';
 
@@ -80,9 +105,22 @@ function applyWindow(out, w, grid) {
   const inWin      = bar => bar >= lo && bar < hi;
   const spanTouches = sp => sp.to.bar > lo && sp.from.bar < hi;
 
+  // helper: slice a { from_bar, values } per-bar array
+  function slicePerBar(obj) {
+    if (!obj || !Array.isArray(obj.values)) return obj;
+    const start = Math.max(0, lo - (obj.from_bar ?? 0));
+    const end   = Math.max(start, hi - (obj.from_bar ?? 0));
+    return { ...obj, from_bar: (obj.from_bar ?? 0) + start, values: obj.values.slice(start, end) };
+  }
+
+  // beats — handle both protocol format and pipeline format
   if (out.beats) {
-    const list = out.beats.list.filter(b => inWin(b[0]));
-    out.beats = { derived_from: 'grid', as: '[bar, beat]', count: list.length, list };
+    if (out.beats.list) {
+      const list = out.beats.list.filter(b => inWin(b[0]));
+      out.beats = { derived_from: 'grid', as: '[bar, beat]', count: list.length, list };
+    } else if (Array.isArray(out.beats)) {
+      out.beats = out.beats.filter(b => inWin(b.bar));
+    }
   }
 
   if (out.downbeats) {
@@ -94,16 +132,78 @@ function applyWindow(out, w, grid) {
     out.sections = out.sections.filter(sp => spanTouches(sp));
   }
 
-  if (out.energy) {
-    const E     = out.energy;
-    const start = Math.max(0, lo - E.from_bar);
-    const end   = Math.max(start, hi - E.from_bar);
-    out.energy  = { per: E.per, from_bar: E.from_bar + start,
-                    values: E.values.slice(start, end) };
+  if (out.energy && typeof out.energy === 'object' && out.energy.values) {
+    out.energy = slicePerBar(out.energy);
   }
 
   if (out.moments) {
     out.moments = out.moments.filter(m => inWin(m.at.bar));
+  }
+
+  // curves
+  if (out.curves) {
+    for (const k of Object.keys(out.curves)) {
+      out.curves[k] = slicePerBar(out.curves[k]);
+    }
+  }
+
+  // stems
+  if (out.stems?.lanes) {
+    const fromBar = out.stems.from_bar ?? 0;
+    const start = Math.max(0, lo - fromBar);
+    const end   = Math.max(start, hi - fromBar);
+    const sliced = {};
+    for (const [k, v] of Object.entries(out.stems.lanes)) {
+      sliced[k] = Array.isArray(v) ? v.slice(start, end) : v;
+    }
+    out.stems = { ...out.stems, from_bar: fromBar + start, lanes: sliced };
+  }
+
+  // harmony
+  if (out.harmony) {
+    const fromBar = out.harmony.from_bar ?? 0;
+    const start = Math.max(0, lo - fromBar);
+    const end   = Math.max(start, hi - fromBar);
+    out.harmony = {
+      from_bar:   fromBar + start,
+      chords:     out.harmony.chords.slice(start, end),
+      confidence: out.harmony.confidence.slice(start, end),
+    };
+  }
+
+  // chord_changes
+  if (out.chord_changes) {
+    out.chord_changes = out.chord_changes.filter(c => inWin(c.at.bar));
+  }
+
+  // tension (per-beat: bpb values per bar)
+  if (out.tension && Array.isArray(out.tension.values)) {
+    const fromBar = out.tension.from_bar ?? 0;
+    const startBeat = Math.max(0, (lo - fromBar) * bpb);
+    const endBeat   = Math.max(startBeat, (hi - fromBar) * bpb);
+    out.tension = {
+      ...out.tension,
+      from_bar:  lo,
+      from_beat: 1,
+      values:    out.tension.values.slice(startBeat, endBeat),
+    };
+  }
+
+  // releases
+  if (out.releases) {
+    out.releases = out.releases.filter(r => inWin(r.at.bar));
+  }
+
+  // layers — subsection and presence spans
+  if (out.layers) {
+    for (const name of ['subsection', 'presence']) {
+      if (out.layers[name]?.spans) {
+        out.layers[name] = {
+          ...out.layers[name],
+          spans: out.layers[name].spans.filter(sp => spanTouches(sp)),
+        };
+      }
+    }
   }
 
   return out;

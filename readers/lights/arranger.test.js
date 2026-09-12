@@ -1,7 +1,7 @@
 /* Arranger tests -- a PAR look AND a head look for every section, with per-phase
    dynamics + drop-boundary blackout/blast. Pure in (score, seed). Plain node idiom. */
 "use strict";
-const { plan } = require("./arranger.js");
+const { plan, energyReader } = require("./arranger.js");
 const { enumerate } = require("./preflight.js");
 
 const out = [];
@@ -81,6 +81,14 @@ const SCORE = {
      p.assignments.filter(a => a.layer === "head").length === LEVELS.sections.length);
   const fd = p.assignments.find(a => a.layer === "par" && a.context === "final_drop");
   ok("levels: the final drop's PAR look is boldest", fd && fd.params.intensity === 1);
+}
+
+/* ---- energy anchored at bar 0 is read at bar 0, not a bar late ----------- */
+{
+  // {from_bar: 0, values} -- the shape that made `from_bar || 1` misread bar 0.
+  const er = energyReader({ energy: { per: "bar", from_bar: 0, values: [0.1, 0.2, 0.3] } });
+  ok("0-based energy reads bar 1 as values[1] (not a bar late)", er(1) === 0.2, `${er(1)}`);
+  ok("0-based energy reads bar 2 as values[2]", er(2) === 0.3, `${er(2)}`);
 }
 
 for (const [pass, name, detail] of out)

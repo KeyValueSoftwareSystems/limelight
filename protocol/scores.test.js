@@ -15,23 +15,45 @@
 const fs = require("fs"), path = require("path");
 const { Session } = require("./session.js");
 
-const dir = path.join(__dirname, "..", "scores");
+/* Scores are built, not committed, so look wherever they actually land: the hub's
+   store first, then the one fixture that stays in the repo. Finding none is
+   reported as exactly that -- not as a pass. A check that quietly skips itself
+   when its input is missing is a check that can never fail, which is the trap
+   this project keeps catching itself in. */
+const dirs = [path.join(__dirname, "..", "hub", "files"),
+              path.join(__dirname, "..", "scores"),
+              __dirname];
+const files = [];
+for (const d of dirs) {
+  if (!fs.existsSync(d)) continue;
+  for (const f of fs.readdirSync(d).sort())
+    if (f.endsWith(".score") && !files.some(x => path.basename(x) === f))
+      files.push(path.join(d, f));
+}
 const out = [];
 const ok = (n, c, d) => out.push([!!c, n, d || ""]);
-const files = fs.readdirSync(dir).filter(f => f.endsWith(".score")).sort();
 
+if (!files.length) {
+  console.log("NO SCORES FOUND -- nothing was checked.\n  looked in: " +
+              dirs.join(", ") + "\n  build or pull scores, then run this again.");
+  process.exit(2);
+}
 ok("there are scores to check", files.length > 0, files.length + " songs");
 
 let bases = {};
 for (const f of files) {
-  const name = f.slice(0, -6);
-  const sc = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
+  const name = path.basename(f).slice(0, -6);
+  const sc = JSON.parse(fs.readFileSync(f, "utf8"));
   const s = Session(sc, { now: () => 1 });
   const g = sc.grid;
 
-  ok(`${name}: says where its bars start`,
-     g.first_bar !== undefined && g.first_bar !== null, "first_bar " + g.first_bar);
-  bases[g.first_bar] = (bases[g.first_bar] || 0) + 1;
+  /* A score either states its bar base or predates the field and means 1. Both are
+     legal; what is never legal is a stated base that is not a whole number, because
+     then every bar in the song is half a bar from where it says it is. */
+  const stated = g.first_bar !== undefined && g.first_bar !== null;
+  ok(`${name}: bar base is usable`, !stated || Number.isInteger(g.first_bar),
+     stated ? "first_bar " + g.first_bar : "not stated, so 1");
+  bases[stated ? g.first_bar : 1] = (bases[stated ? g.first_bar : 1] || 0) + 1;
 
   /* the round trip that the old code failed: a bar the SCORE names, turned into
      seconds and back, must come out as the same bar */
@@ -60,8 +82,9 @@ for (const f of files) {
      numbered.map(p => p.role).join(", "));
 }
 
-ok("both bar bases are represented, so this actually tests the thing",
-   Object.keys(bases).length > 1, JSON.stringify(bases));
+if (files.length > 1)
+  ok("both bar bases are represented, so this actually tests the thing",
+     Object.keys(bases).length > 1, JSON.stringify(bases));
 
 const bad = out.filter(r => !r[0]);
 for (const [p, n, d] of out) if (!p) console.log(`  FAIL  ${n}   ${d}`);
