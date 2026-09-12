@@ -12,18 +12,18 @@
    hand its currentTime to the session as songTime. Nothing here recomputes
    a beat — the grid (bpm, first_beat_s, beats_per_bar) derives them all.
 
-   Everything is fetched from serve.py on the same origin:
-       /library.json                  list of playable songs {slug, audio}
-       /hub/score/<slug>.score        the score (JSON, latest from hub)
-       <audio path>                   the recording, served with byte ranges
-       /protocol/session.js           the protocol client (loaded in index.html)
+   Everything is fetched from the game's own server (beat-saber/server.py),
+   which talks to the hub so the page needs no CORS from it:
+       GET  /api/library          playable songs on the hub (score + audio)
+       GET  /api/score/<slug>     the score (JSON), proxied from the hub
+       POST /api/add?name=<file>  upload an mp3 -> hub, then start scoring
+       GET  /api/jobs             MP3->score generation progress
+   Audio plays straight from the hub URL each library entry carries.
    ============================================================ */
 (function () {
   "use strict";
 
-  // Same origin as serve.py. When the game is opened at /beat-saber/, these
-  // absolute paths resolve against the Limelight server that served it.
-  const BASE = "";
+  const BASE = "";   // same origin as beat-saber/server.py
 
   async function getJSON(path) {
     const res = await fetch(BASE + path, { cache: "no-store" });
@@ -31,40 +31,36 @@
     return res.json();
   }
 
-  /* The song list for the select screen. Each library entry is {slug, audio};
-     we enrich it with a few fields the UI wants (name, bpm, length) by reading
-     the score's grid + song block. Cheap here — one real song — and it keeps the
-     select screen honest: every number shown is a number the score actually holds. */
+  /* Playable songs, already enriched (name/artist/bpm/length/audio) by the
+     server from each score's grid + song block, so the select screen shows real
+     numbers without the client fetching every score up front. */
   async function fetchLibrary() {
-    const list = await getJSON("/library.json");
-    const out = [];
-    for (const entry of list) {
-      try {
-        const score = await loadScore(entry);
-        out.push({
-          slug: entry.slug,
-          audio: entry.audio,
-          name: describeName(score, entry.slug),
-          artist: (score.song && score.song.artist) || "—",
-          bpm: Math.round((score.grid && score.grid.bpm) || 0),
-          length: formatLength(songLengthSeconds(score)),
-          score, // cached so Start needn't refetch
-        });
-      } catch (err) {
-        // A score that won't parse shouldn't sink the whole list.
-        out.push({ slug: entry.slug, audio: entry.audio, name: entry.slug,
-                   artist: "—", bpm: 0, length: "—", score: null, error: String(err) });
-      }
-    }
-    return out;
+    const data = await getJSON("/api/library");
+    return (data.songs || []).map((s) => ({
+      slug: s.slug, audio: s.audio, name: s.name || s.slug,
+      artist: s.artist || "—", bpm: s.bpm || 0, length: s.length || "—",
+      score: null,   // loaded on Start
+    }));
   }
 
   async function loadScore(entryOrSlug) {
-    if (typeof entryOrSlug === "string")
-      return getJSON(`/hub/score/${encodeURIComponent(entryOrSlug)}.score`);
-    const url = entryOrSlug.score
-      || `/hub/score/${encodeURIComponent(entryOrSlug.slug)}.score`;
-    return getJSON(url);
+    const slug = typeof entryOrSlug === "string" ? entryOrSlug : entryOrSlug.slug;
+    return getJSON(`/api/score/${encodeURIComponent(slug)}`);
+  }
+
+  /* Upload an mp3 through our server to the hub and kick off scoring. */
+  async function addSong(file) {
+    const res = await fetch(`/api/add?name=${encodeURIComponent(file.name)}`, {
+      method: "POST", body: file,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `add -> ${res.status}`);
+    return data;   // { slug, score_name, job }
+  }
+
+  async function jobs() {
+    try { return (await getJSON("/api/jobs")).jobs || []; }
+    catch (e) { return []; }
   }
 
   /* Build the protocol session for a loaded score, reading the audio element's
@@ -111,5 +107,5 @@
     return String(slug).replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
-  window.Limelight = { BASE, fetchLibrary, loadScore, makeClock, makeSession };
+  window.Limelight = { BASE, fetchLibrary, loadScore, addSong, jobs, makeClock, makeSession };
 })();

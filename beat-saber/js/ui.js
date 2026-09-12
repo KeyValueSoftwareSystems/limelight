@@ -40,7 +40,7 @@ async function initLibrary() {
     try {
       const lib = await window.Limelight.fetchLibrary();
       if (lib.length) {
-        songs = lib.map((s, i) => ({ ...s, icon: ICONS[i % ICONS.length], playable: !!s.score }));
+        songs = lib.map((s, i) => ({ ...s, icon: ICONS[i % ICONS.length], playable: !!s.audio }));
         renderSongs(); selectSong(0);
         return;
       }
@@ -51,8 +51,8 @@ async function initLibrary() {
   songs = MOCK_SONGS.slice();
   renderSongs(); selectSong(0);
   if (el) el.insertAdjacentHTML("afterbegin",
-    `<li class="songlist__note">Limelight server not detected &mdash; showing demo list. ` +
-    `Run <code>python3 serve.py</code> and open <code>/beat-saber/</code> to play real tracks.</li>`);
+    `<li class="songlist__note">Hub unreachable &mdash; showing demo list. ` +
+    `Start the game with <code>python3 beat-saber/server.py</code> (it talks to the hub).</li>`);
 }
 
 // ---- Song list rendering --------------------------------------------------
@@ -191,6 +191,74 @@ async function runWebcamCalibration() {
   await wait(1400);
   if (calSession === session) { calSession = null; closeCalOverlay(); }
 }
+
+// ---- Add a song (upload -> hub scoring pipeline -> library) ----------------
+const addFile = document.getElementById("add-file");
+const addPick = document.getElementById("add-pick");
+const addDrop = document.getElementById("add-drop");
+const addUpload = document.getElementById("add-upload");
+const addStatus = document.getElementById("add-status");
+const addStatusText = document.getElementById("add-statustext");
+let chosenFile = null;
+
+const STATUS_LABEL = {
+  queued: "Queued for scoring…",
+  generating: "Scoring the track… (this can take a few minutes)",
+  storing: "Saving the beatmap…",
+  done: "Added ✓  it's in your library",
+  error: "Scoring failed",
+};
+
+if (addFile) addFile.addEventListener("change", () => {
+  chosenFile = addFile.files[0] || null;
+  addPick.textContent = chosenFile ? chosenFile.name : "Choose an MP3…";
+  addDrop.classList.toggle("has-file", !!chosenFile);
+  addUpload.disabled = !chosenFile;
+});
+
+function setAddStatus(text, state) {
+  addStatus.hidden = false;
+  addStatus.classList.remove("is-done", "is-error");
+  if (state) addStatus.classList.add(state);
+  addStatusText.textContent = text;
+}
+
+if (addUpload) addUpload.addEventListener("click", async () => {
+  if (!chosenFile || !window.Limelight) return;
+  addUpload.disabled = true;
+  setAddStatus("Uploading to the hub…", null);
+  let res;
+  try {
+    res = await window.Limelight.addSong(chosenFile);
+  } catch (err) {
+    setAddStatus(String(err.message || err), "is-error");
+    addUpload.disabled = false;
+    return;
+  }
+  // poll the hub's generation queue for this score
+  const scoreName = res.score_name;
+  const t0 = Date.now();
+  while (Date.now() - t0 < 15 * 60 * 1000) {
+    const job = (await window.Limelight.jobs()).find((j) => j.score_name === scoreName);
+    const st = job ? job.status : "queued";
+    if (st === "done") {
+      setAddStatus(STATUS_LABEL.done, "is-done");
+      await initLibrary();                     // refresh the select list
+      await wait(1200);
+      showScreen("songs");
+      return;
+    }
+    if (st === "error") {
+      setAddStatus((job && job.error) ? "Scoring failed: " + job.error : STATUS_LABEL.error, "is-error");
+      addUpload.disabled = false;
+      return;
+    }
+    setAddStatus(STATUS_LABEL[st] || "Working…", null);
+    await wait(3000);
+  }
+  setAddStatus("Still scoring on the hub — it'll appear in the library when ready.", null);
+  addUpload.disabled = false;
+});
 
 // ---- Game lifecycle -------------------------------------------------------
 document.getElementById("btn-start").addEventListener("click", startGame);
