@@ -58,11 +58,15 @@
 </head>
 <body>
 <header>
-  <h1>PAR show</h1>
+  <h1>Limelight show</h1>
   <select id="track"></select>
   <button id="reload" title="Rescan folders">↻</button>
   <span class="meta" id="trackmeta"></span>
   <span style="flex:1"></span>
+  <select id="hubscore" title="Scores on the hub"></select>
+  <input type="number" id="seed" value="3" min="0" step="1" style="width:64px" title="seed (different show)">
+  <button id="import" title="Fetch from the hub, format, bake, and load">⤓ Import</button>
+  <span class="meta" id="importmsg"></span>
   <select id="style"><option value="pulse">pulse</option><option value="bands">bands</option><option value="concert">concert</option></select>
   <button id="analyze">Re-analyze</button>
   <span class="meta" id="analyzing"></span>
@@ -213,6 +217,29 @@
   }
   $('track').addEventListener('change', e => loadTrack(e.target.value));
   $('reload').addEventListener('click', loadTracks);
+
+  // ---------------- import from the hub ----------------
+  async function loadHub() {
+    try {
+      const { scores } = await api('/api/hub');
+      const sel = $('hubscore'); const prev = sel.value;
+      sel.innerHTML = '';
+      for (const s of scores || []) { const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); }
+      if (prev) sel.value = prev;
+    } catch (e) {}
+  }
+  $('import').addEventListener('click', async () => {
+    const name = $('hubscore').value; if (!name) return;
+    const seed = +($('seed').value || 3);
+    $('import').disabled = true; $('importmsg').textContent = `importing ${name}…`;
+    try {
+      const meta = await api('/api/import', { name, seed });
+      await loadTracks();
+      $('track').value = meta.name; await loadTrack(meta.name);
+      $('importmsg').textContent = `imported ${name}`;
+    } catch (e) { $('importmsg').textContent = 'import failed (see server)'; }
+    finally { $('import').disabled = false; }
+  });
 
   // ---------------- transport ----------------
   const cmd = async (path, body = {}) => { try { applyStatus(await api(path, body)); } catch (e) {} };
@@ -409,6 +436,7 @@
   (async () => {
     $('suggest').innerHTML = TAP_HELP;
     await loadTracks();
+    loadHub();
     try { const st = await api('/api/status'); applyOffset(st.offset_ms, false); } catch (e) { applyOffset(offset); }
     await poll();
     animate();
