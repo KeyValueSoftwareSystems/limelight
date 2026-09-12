@@ -1,14 +1,16 @@
 import numpy as np
 
+from grid import at_beat
+
 RATE = 25.0
 
 
 def per_bar(emb, g, bars):
-    bar_s = (60.0 / g["bpm"]) * g["beats_per_bar"]
+    per = g["beats_per_bar"]
     rows = []
     for i in range(bars):
-        t0 = g["first_beat_s"] + i * bar_s
-        a, b = int(t0 * RATE), int((t0 + bar_s) * RATE)
+        t0, t1 = at_beat(g, i * per), at_beat(g, (i + 1) * per)
+        a, b = int(t0 * RATE), int(t1 * RATE)
         if b > emb.shape[0] or b <= a:
             break
         rows.append(emb[a:b].mean(axis=0))
