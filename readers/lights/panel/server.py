@@ -373,8 +373,21 @@ def make_handler(state: State):
             body = self._body()
             tr = state.transport
             if path == "/api/load":
-                meta = state.load(body.get("name", ""), force=bool(body.get("force")))
-                return self._json(meta, 200) if meta else self._json({"error": "track not found"}, 404)
+                from score_api import handle as score_handle
+
+                def fetch_from_hub(name):
+                    url = HUB + "/hub/" + name + ".score"
+                    with urllib.request.urlopen(url, timeout=20) as r:
+                        return json.loads(r.read())
+
+                try:
+                    result = score_handle(body, fetch_from_hub)
+                    code = 200 if "error" not in result or "note" in result else 400
+                    return self._json(result, code)
+                except ValueError as e:
+                    return self._json({"error": str(e)}, 400)
+                except Exception as e:
+                    return self._json({"error": str(e)}, 500)
             if path == "/api/import":
                 meta = state.import_score(body.get("name", ""), int(body.get("seed", 3)))
                 return self._json(meta, 200) if meta else self._json({"error": state.import_log}, 500)
