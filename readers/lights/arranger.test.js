@@ -283,6 +283,14 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   ];
   const m = majorityVector(vs, 0, 3, "drop");
   ok("the majority doing wins", m.doing === "expanding", m.doing);
+  /* final review, Finding 1: a plurality is not a majority. A span whose bars do
+     three (or four) things in turn is not doing one of them -- it stays silent on
+     the family rather than letting an alphabetical tie-break reweight the draw. */
+  const vsTie = [
+    { form: "drop", doing: "expanding" }, { form: "drop", doing: "easing" }, { form: "drop", doing: "peaking" },
+  ];
+  const tie = majorityVector(vsTie, 0, 3, "drop");
+  ok("a span with no majority doing stays silent on the family", !("doing" in tie), JSON.stringify(tie));
   ok("presence is decided per stem by majority", m.presence.includes("drums:in") && m.presence.includes("bass:out") && m.presence.length === 2, JSON.stringify(m.presence));
   ok("a texture band needs more than half the bars", m.texture.includes("busy") && !m.texture.includes("narrow") && !m.texture.includes("sparse"), JSON.stringify(m.texture));
   ok("harmony keeps the majority mode and never 'changing'", JSON.stringify(m.harmony) === JSON.stringify(["minor"]));
@@ -299,13 +307,18 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
 
   const p = plan(MINI, EN, 42);
   const base = p.assignments.find(a => a.layer === "par" && a.seq_id && a.from.bar === 4 && !a.variation);
-  /* MINI's one high-energy section is also its last, so its context is final_drop */
-  ok("a base look carries the vector it was chosen with", base && base.facts && base.facts.form === "final_drop" && base.facts.doing && Array.isArray(base.facts.presence), JSON.stringify(base && base.facts));
+  /* MINI's one high-energy section is also its last, so its context is final_drop.
+     Its bars 4-15 do expanding/easing/peaking four bars each -- a three-way tie, so
+     the section vector says nothing about doing and the pick rests on the rest. */
+  ok("a base look carries the vector it was chosen with",
+     base && base.facts && base.facts.form === "final_drop" && !("doing" in base.facts) && Array.isArray(base.facts.presence),
+     JSON.stringify(base && base.facts));
   const vari = p.assignments.find(a => a.layer === "par" && a.variation && a.from.bar === 8);
   ok("a variation carries its own subsection's vector", vari && vari.facts.doing === "easing" && vari.facts.form === "final_drop", JSON.stringify(vari && vari.facts));
   ok("variations no longer step a context (no vcontext)", p.assignments.every(a => a.vcontext === undefined));
   const head = p.assignments.find(a => a.layer === "head" && a.from.bar === 4);
-  ok("the head look carries the section vector too", head && head.facts && head.facts.form === "final_drop");
+  ok("the head look carries the section vector too",
+     head && head.facts && head.facts.form === "final_drop" && !("doing" in head.facts), JSON.stringify(head && head.facts));
   ok("a plain score's looks carry form-only vectors (no subsection layer, so no doing)",
      plan(SCORE, EN, 42).assignments.filter(a => a.seq_id).every(a => a.facts && Object.keys(a.facts).join(",") === "form"));
   ok("no clashes with vector picks", clashes(p) === 0, `${clashes(p)}`);

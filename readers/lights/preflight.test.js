@@ -4,7 +4,7 @@
    fits each musical situation, plus a human-readable report. Sequences key off the
    device drivers' declared capabilities, never fixture ids. */
 "use strict";
-const { enumerate, view, validateSequence, VOCABULARY } = require("./preflight.js");
+const { enumerate, view, validateSequence, validateAffinity, VOCABULARY } = require("./preflight.js");
 
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);
@@ -284,6 +284,16 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
   ok("the cached result scores identically after a JSON round trip",
      JSON.stringify(view(JSON.parse(JSON.stringify(e))).candidates({ form: "drop", doing: "easing", presence: ["drums:in"] })) === JSON.stringify(v.candidates({ form: "drop", doing: "easing", presence: ["drums:in"] })));
   ok("an out-of-vocabulary form yields no candidates", v.candidates({ form: "chorus" }).length === 0);
+}
+
+/* ---- the base vocabulary's own affinity tables are held to the same rule -------- */
+{
+  /* a mistyped fact would silently score _default/0.5 and a mistyped family would
+     throw inside enumerate; the anchors are hand-written, so check them here */
+  for (const s of VOCABULARY) {
+    const r = validateAffinity(s.affinity);
+    ok(`base affinity is well formed: ${s.id}`, r.ok, r.ok ? "" : JSON.stringify(r));
+  }
 }
 
 for (const [pass, name, detail] of out)

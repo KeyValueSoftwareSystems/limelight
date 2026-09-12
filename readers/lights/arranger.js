@@ -239,10 +239,12 @@ function factsBlock(score, sections, contexts, lanes, harmony, subs, moments, bp
   return { from_bar, vectors };
 }
 
-/* the vector a SPAN of bars agrees on: form as given; doing by majority (or the
-   caller's word, a subsection's own); each stem's presence by majority; a texture
-   band only when more than half the bars carry it; harmony's mode by majority and
-   never "changing" (that is a bar fact). Moments never belong to a span. */
+/* the vector a SPAN of bars agrees on: form as given; doing by STRICT majority (or
+   the caller's word, a subsection's own) -- a span whose bars do four things in turn
+   is not doing one of them, so it stays silent on the family and the draw is decided
+   by the facts that do hold; each stem's presence by majority; a texture band only
+   when more than half the bars carry it; harmony's mode by majority and never
+   "changing" (that is a bar fact). Moments never belong to a span. */
 function majorityVector(vectors, i0, i1, form, doing) {
   const span = [];
   for (let i = Math.max(0, i0); i < Math.min(vectors.length, i1); i++) if (vectors[i]) span.push(vectors[i]);
@@ -254,7 +256,11 @@ function majorityVector(vectors, i0, i1, form, doing) {
   };
   const top = c => Object.keys(c).sort((a, b) => c[b] - c[a] || (a < b ? -1 : 1))[0];
   if (doing) v.doing = doing;
-  else if (span.some(x => x.doing)) { const c = count(x => (x.doing ? [x.doing] : [])); v.doing = top(c); }
+  else if (span.some(x => x.doing)) {
+    const c = count(x => (x.doing ? [x.doing] : []));
+    const w = top(c);
+    if (c[w] * 2 > span.length) v.doing = w;                /* no majority word: the family stays silent */
+  }
   if (span.some(x => x.presence)) {
     const c = count(x => x.presence);
     v.presence = [];

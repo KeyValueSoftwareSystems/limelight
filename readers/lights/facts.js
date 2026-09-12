@@ -42,6 +42,7 @@ function toVector(ctx) {
 function cellFor(affinity, fitK, vector) {
   const v = toVector(vector);
   if (!v.form) return 0;
+  if (!affinity || !affinity.form) return 0;                  /* no form table: nothing to stand on */
   let logs = 0, n = 0;
   for (const fam of FAMILIES) {
     const table = affinity && affinity[fam];
@@ -57,7 +58,8 @@ function cellFor(affinity, fitK, vector) {
       logs += Math.log(Math.min(1, a)); n++;
     }
   }
-  if (!n) return 0;                                         /* no form table: nothing to stand on */
+  if (!n) return 0;                                         /* belt and braces: a form table always
+                                                               scores the form fact above, so n > 0 */
   return +(fitK * Math.exp(logs / n)).toFixed(4);
 }
 

@@ -49,6 +49,9 @@ const near = (a, b, e) => Math.abs(a - b) <= (e === undefined ? 1e-4 : e);
   ok("several facts of one family each join the mean", near(cellFor(P, 1, { form: "drop", presence: ["drums:in", "bass:in"] }), Math.pow(0.8 * 0.9 * 0.6, 1 / 3)));
   ok("the mean is order-independent", cellFor(P, 1, { form: "drop", presence: ["drums:in", "bass:in"] }) === cellFor(P, 1, { form: "drop", presence: ["bass:in", "drums:in"] }));
   ok("no form, no cell", cellFor(A, 1, { doing: "easing" }) === 0 && cellFor({ doing: { easing: 1 } }, 1, "drop") === 0);
+  ok("no form table, no cell -- however rich the vector",
+     cellFor({ doing: { easing: 1 } }, 1, { form: "drop", doing: "easing" }) === 0,
+     `${cellFor({ doing: { easing: 1 } }, 1, { form: "drop", doing: "easing" })}`);
   ok("cells are rounded to four decimals", String(cellFor(A, 1, { form: "drop", doing: "easing" })).replace("0.", "").length <= 4);
   ok("an out-of-vocabulary form is a veto, not a shrug",
      cellFor({ form: { drop: 0.8 }, doing: { peaking: 0.9 } }, 1, { form: "chorus" }) === 0);
