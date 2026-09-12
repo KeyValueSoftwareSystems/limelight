@@ -44,6 +44,7 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 #zoom{height:110px;cursor:pointer}
 #tune{height:140px;cursor:pointer}
 #curves{height:394px;cursor:pointer}
+#beat{height:150px;cursor:default}
 #lanes{height:104px;cursor:pointer;border-radius:0 0 8px 8px;border-top:none}
 #map{position:relative;height:124px;border:1px solid var(--line);border-bottom:none;
   border-radius:8px 8px 0 0;background:#06090e;overflow:hidden;cursor:pointer}
@@ -185,6 +186,16 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
     <b>Click anywhere to jump there.</b></p>
   <div class="holder"><canvas id="curves"></canvas><div class="pline" data-for="curves"></div></div>
   <div class="legend" id="curvekey"></div>
+</section>
+
+<section>
+  <h2>The rhythm</h2>
+  <p class="note">Where the hits actually land inside one bar &mdash; the pattern, not how many.
+    Each column is a sixteenth, left to right across a bar; a filled block is a hit there.
+    <b>This is the thing you hum back</b>, and it is the only row on this page that says what the
+    rhythm <i>is</i> rather than how much of it there is.</p>
+  <canvas id="beat"></canvas>
+  <div class="legend" id="beatkey"></div>
 </section>
 
 <section>
@@ -560,6 +571,12 @@ function draw() {
         \u00b7 tune: ${esc(made.melody_from || "?")}</dd>
     </dl></div>`;
 
+  $("beatkey").innerHTML =
+    `<span class="dim">Numbers along the top are the four beats of the bar. `
+    + `A taller block is a stronger hit. The figure on the right is how much the pattern `
+    + `stays the same from one bar to the next &mdash; a locked loop scores high, a part that `
+    + `keeps changing scores low.</span>`;
+
   $("curvekey").innerHTML = CURVES.map(([k, n, hue, why]) =>
     `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}</span>`).join("")
     + (Array.isArray(SCORE.tension)
@@ -584,7 +601,7 @@ function draw() {
     + `the tune are shaded; chord repeats are listed with the moments, not here.</span>`
 ;
 
-  lanes(); tune(); curves(); subs(); chordRow(); sections(); place();
+  lanes(); tune(); curves(); beatGrid(); subs(); chordRow(); sections(); place();
 }
 
 /* Absolutely-positioned rows are laid out here rather than where they are
@@ -894,6 +911,8 @@ const CURVES = [
   ["air",        "Air",        "#8fd6ff", "the very top, above 6 kHz \u2014 cymbals, breath, sparkle"],
   ["pump",       "Pump",       "#d16bd1", "how hard the track ducks on every beat"],
   ["width",      "Width",      "#9fd18b", "how far the sound spreads either side of the middle"],
+  ["weight",     "Weight",     "#c97f4a", "how much of the sound sits below 120 Hz \u2014 how heavy it is"],
+  ["floor",      "Floor",      "#8a6bd1", "below 60 Hz, the part you feel in your chest rather than hear"],
 ];
 
 function curves() {
@@ -1004,6 +1023,47 @@ function curves() {
   g.fillStyle = now == null ? "#3a4152" : "#e0655f";
   g.font = "600 12px ui-monospace,monospace";
   g.fillText(now == null ? "\u2014" : now.toFixed(2), W - 40, y0 + hh/2 + 4);
+}
+
+function beatGrid() {
+  const gr = SCORE.groove || {};
+  const names = LANES.filter(n => gr[n] && gr[n].strength);
+  const [g, W] = fit($("beat"), 150);
+  if (!names.length) {
+    g.fillStyle = "#7b8599"; g.font = "12.5px system-ui";
+    g.fillText("No rhythm pattern in this score yet.", 14, 28);
+    return;
+  }
+  const per = gr[names[0]].per_bar || 16;
+  const L = 78, R = 150, cell = Math.min(34, (W - L - R) / per), h = 150 / names.length;
+  names.forEach((n, row) => {
+    const y = row * h, d = gr[n];
+    g.fillStyle = STEM[n]; g.font = "600 10px ui-monospace,monospace";
+    g.fillText(LANEWORD[n].toUpperCase(), 7, y + h / 2 + 3);
+    for (let i = 0; i < per; i++) {
+      const v = d.strength[i] ?? 0;
+      const x = L + i * cell;
+      const beat = i % 4 === 0;
+      g.fillStyle = beat ? "#1a2230" : "#12181f";
+      g.fillRect(x + 1, y + 6, cell - 2, h - 14);
+      if (v > 0.05) {
+        g.fillStyle = STEM[n];
+        g.globalAlpha = Math.min(1, 0.15 + v * 1.2);
+        const tall = Math.max(3, v * (h - 16));
+        g.fillRect(x + 1, y + h - 8 - tall, cell - 2, tall);
+        g.globalAlpha = 1;
+      }
+      if (row === 0) {
+        g.fillStyle = beat ? "#7b8599" : "#39414f";
+        g.font = "8px ui-monospace,monospace";
+        if (beat) g.fillText(String(i / 4 + 1), x + cell / 2 - 2, 8);
+      }
+    }
+    const same = d.same_bar_to_bar;
+    g.fillStyle = "#4a5364"; g.font = "9.5px ui-monospace,monospace";
+    g.fillText(same == null ? "" : `${Math.round(same * 100)}% the same each bar`,
+               L + per * cell + 10, y + h / 2 + 3);
+  });
 }
 
 function lanes() {
@@ -1374,7 +1434,7 @@ $("song").onchange = e => {
 for (const id of ["map", "subs", "chords", "lanes", "tune", "curves"]) zoomable($(id));
 zoomable($("zoom"), f => aud.currentTime - Math.min(WINDOW, viewSpan())/2 + f * Math.min(WINDOW, viewSpan()));
 
-addEventListener("resize", () => { if (SCORE) { lanes(); tune(); curves(); zoom(); subs(); place(); } });
+addEventListener("resize", () => { if (SCORE) { lanes(); tune(); curves(); beatGrid(); zoom(); subs(); place(); } });
 
 /* A page that fails silently is worse than one that fails loudly: the first
    screenshot of this rewrite looked merely empty, which reads as "no data". */

@@ -6,7 +6,7 @@
  */
 
 export const KNOWN = [
-  'song', 'grid', 'beats', 'downbeats', 'sections', 'energy', 'ticks', 'melody_phrases',
+  'song', 'grid', 'beats', 'downbeats', 'sections', 'energy', 'ticks', 'groove', 'melody_phrases',
   'brightness', 'width', 'air', 'pump', 'pace',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
@@ -130,6 +130,9 @@ export function format(raw) {
   /* The fast lane. Everything else in this file is per bar or per section, and
      a light that pulses on the beat cannot be driven from either. */
   if (raw.ticks) out.ticks = raw.ticks;
+  /* Where the hits fall inside the bar, per stem. pace counts events and
+     throws the pattern away, and the pattern is what a light follows. */
+  if (raw.groove) out.groove = raw.groove;
   if (Array.isArray(raw.melody_phrases)) out.melody_phrases = raw.melody_phrases;
 
   // ---- energy (backward compat) ----

@@ -3,6 +3,14 @@ import numpy as np
 STEMS = ("drums", "bass", "vocals", "other")
 
 SCALES = {
+    "weight": {
+        "kind": "per_song",
+        "means": "share of the sound below 120 Hz -- how heavy it is",
+    },
+    "floor": {
+        "kind": "per_song",
+        "means": "share below 60 Hz -- the part you feel rather than hear",
+    },
     "width": {
         "kind": "absolute",
         "runs": [0.0, 2.0],

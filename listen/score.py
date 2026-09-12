@@ -9,6 +9,7 @@ warnings.filterwarnings("ignore")
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from cycle import cycle
+from groove import groove
 from grid import grid, bar_edges, show
 from form import on_phrase
 from shape import shape
@@ -28,7 +29,7 @@ from harmony import per_bar as chords_per_bar
 from stems import NAMES as STEM_NAMES
 from stems import envelopes, per_bar, per_tick
 from voice import clean as clean_voice, made_by as voice_made_by
-from texture import sides, air, duck, pace
+from texture import air, bands, duck, pace, sides
 
 
 CACHE = Path("work/heard")
@@ -260,6 +261,7 @@ def read(path, slug):
         report["voice_from"] = "roformer"
     lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"], edges=cuts)
     ticks = per_tick(env, cuts, per=g["beats_per_bar"] * 4)
+    swing = groove(env, cuts, per=g["beats_per_bar"] * 4)
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
     busy, bright = curves(path, g)
     pickup = 1 if g["first_beat_s"] > 0.2 else 0
@@ -275,6 +277,8 @@ def read(path, slug):
     score_bars = {
         "intensity": per_bar_loud(loud, times, g),
         "width": [round(float(x), 3) for x in sides(stereo, edges_now)],
+        **{k: [round(float(x), 3) for x in v]
+           for k, v in bands(stereo, edges_now).items()},
         "air": [round(float(x), 3) for x in air(path, edges_now)],
         "pump": [round(float(x), 3) for x in duck(env, g, edges_now)],
         "pace": [round(float(x), 3) for x in pace(flux_now, g, edges_now)],
@@ -410,6 +414,7 @@ def read(path, slug):
         "lead": voice_of(riff, strayed) if riff else None,
         "ticks": {"per_bar": g["beats_per_bar"] * 4, "of": "the loudest moment in each sixteenth",
                   **{k: v for k, v in ticks.items()}},
+        "groove": swing,
         "melody": tune_notes,
         "melody_phrases": phrases_of(tune_notes, g, g["beats_per_bar"]),
     }
