@@ -131,6 +131,56 @@ async function startHub() {
     ok("and is not a versioned file", r.status === 400, String(r.status));
   }
 
+  /* ---- author metadata: added to a version, folded into its download -------- */
+  {
+    fake.files.clear();
+    const url = fake.url + "/m.score";
+    const v1 = Buffer.from('{"score":"m","version":1,"grid":{"bpm":100}}');
+    const v2 = Buffer.from('{"score":"m","version":2,"grid":{"bpm":110}}');
+    const put = (u, body) => fetch(u, { method: "PUT", body });
+    const text = async r => await r.text();
+    await put(url, v1); await put(url, v2);
+    const meta = { author: "renjith", verified_bars: [1, 33], note: "downbeats checked by ear" };
+
+    let r = await put(url + "?meta&v=1", JSON.stringify(meta));
+    ok("metadata on a version is accepted", r.status === 204, String(r.status) + " " + await text(r));
+    ok("and reads back", JSON.stringify(await (await fetch(url + "?meta&v=1")).json()) === JSON.stringify(meta));
+    ok("a version without metadata reads back {}", (await text(await fetch(url + "?meta&v=2"))).trim() === "{}");
+
+    const merged = JSON.parse(await text(await fetch(url + "?v=1")));
+    ok("the download of that version carries author_metadata",
+       JSON.stringify(merged.author_metadata) === JSON.stringify(meta) && merged.grid.bpm === 100, JSON.stringify(merged));
+    ok("?raw is the uploaded bytes exactly", Buffer.from(await (await fetch(url + "?v=1&raw")).arrayBuffer()).equals(v1));
+    ok("a version without metadata downloads byte-identical", Buffer.from(await (await fetch(url + "?v=2")).arrayBuffer()).equals(v2));
+
+    r = await put(url + "?meta", JSON.stringify({ latest: true }));
+    ok("?meta with no v means the latest", r.status === 204 && (await (await fetch(url + "?meta&v=2")).json()).latest === true);
+    const plain = await fetch(url);
+    const body = await text(plain);
+    ok("a plain GET of the latest now carries author_metadata", JSON.parse(body).author_metadata.latest === true);
+    const head = await fetch(url, { method: "HEAD" });
+    ok("and HEAD reports the merged length", Number(head.headers.get("content-length")) === Buffer.byteLength(body), head.headers.get("content-length") + " vs " + Buffer.byteLength(body));
+
+    r = await put(url + "?meta&v=1", "[1,2]");
+    ok("metadata that is not an object is refused", r.status === 400 && /object/.test(await text(r)));
+    r = await put(url + "?meta&v=1", "not json");
+    ok("metadata that is not JSON is refused with the parser's reason", r.status === 400 && /not JSON/.test(await text(r)));
+    ok("and the earlier metadata is untouched", (await (await fetch(url + "?meta&v=1")).json()).author === "renjith");
+    r = await put(url + "?meta&v=9", "{}");
+    ok("metadata on a missing version is 404", r.status === 404);
+
+    const hist = await (await fetch(url + "?versions")).json();
+    ok("?versions shows which versions have metadata", hist.versions.map(v => v.has_metadata).join(",") === "true,true");
+    const row = (await (await fetch(fake.url + "/?json")).json()).paths.find(p => p.name === "m.score");
+    ok("the listing row says the latest has metadata", row.has_metadata === true, JSON.stringify(row));
+
+    const odd = fake.url + "/odd.score";
+    await put(odd, "this is not json at all");
+    await put(odd + "?meta&v=1", JSON.stringify({ a: 1 }));
+    ok("a .score that is not JSON downloads unchanged even with metadata", (await text(await fetch(odd))) === "this is not json at all");
+    ok("and ?versions says it is not mergeable", (await (await fetch(odd + "?versions")).json()).versions[0].mergeable === false);
+  }
+
   /* ---- limelight push ----------------------------------------------------- */
   {
     fake.files.clear();
