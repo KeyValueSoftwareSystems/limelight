@@ -56,6 +56,33 @@ const tick = baked.ticks.find(k => k.t >= midDrop);
 ok("a frame inside the drop reports a bar within the drop section",
    tick && tick.bar >= 9 && tick.bar < 17, tick ? `bar ${tick.bar} @ ${tick.t}s` : "no tick");
 
+/* And baking the RAW hub score (parts, no sections) must place the drop at the
+   same wall time -- the reader consumes the hub score directly, no formatter. */
+const RAW = {
+  score: "baketest", version: 0,
+  grid: SCORE.grid,
+  parts: [
+    { from_bar: 0, to_bar: 8, role: "intro", nth: 1, like: "A", returns: true,
+      feels: "no drums", fullness: 0.68, rise: -0.02, playing: ["other"],
+      stems: { drums: { is: "none", level: 0.01 }, other: { is: "full", level: 0.8 } } },
+    { from_bar: 9, to_bar: 16, role: "drop", nth: 1, like: "B", returns: true,
+      feels: "drums in", fullness: 0.74, rise: 0.09, playing: ["drums", "bass"],
+      stems: { drums: { is: "full", level: 0.94 }, bass: { is: "full", level: 0.9 } } },
+  ],
+  bars: { intensity: SCORE.energy.values },
+};
+const rawFile = path.join(tmp, "raw.score");
+const rawOut = path.join(tmp, "raw.frames.json");
+fs.writeFileSync(rawFile, JSON.stringify(RAW));
+execFileSync("node", [path.join(__dirname, "bake.js"), rawFile, "1", "--out", rawOut], { stdio: "pipe" });
+const rawBaked = JSON.parse(fs.readFileSync(rawOut, "utf8"));
+ok("raw hub score bakes the drop at the same time as the formatted one",
+   near(rawBaked.phases[1].start, S.secondsAt(9, 1)),
+   `raw ${rawBaked.phases[1].start} want ${S.secondsAt(9, 1).toFixed(3)}`);
+ok("raw and formatted scores bake the same phase starts",
+   JSON.stringify(rawBaked.phases.map(p => p.start)) === JSON.stringify(baked.phases.map(p => p.start)),
+   `raw ${JSON.stringify(rawBaked.phases.map(p => p.start))}`);
+
 fs.rmSync(tmp, { recursive: true, force: true });
 
 let bad = 0;

@@ -24,9 +24,12 @@ rig. `--gain`, `--offset-ms`, `--gateway`, `--universe` are as in the original.
 - **bake.js `--lights`** renders a score into the other agent's `.lights.json` frame
   format (41-ch DMX @ 40fps) via our drivers (same channel truth as `rig.py`), with
   gamma 1.6 and pan/tilt slew-limiting, plus the beat/section/phase timeline.
-- **Import** (`⤓` in the header): pick a hub score → the server fetches it
-  (`/hub/<name>.score`), formats it (`server/handler.js` via `format_score.mjs`),
-  bakes it (`bake.js --lights`), symlinks local audio if we have it, and loads it —
-  all from the page.
+- **Import** (`⤓` in the header): pick a hub score → the server fetches the hub's
+  raw score (`/hub/<name>.score` — the pipeline's music intelligence: parts, bars,
+  releases) and bakes it directly (`bake.js --lights`, which reads it through
+  `readers/lights/fromscore.js`), symlinks local audio if we have it, and loads it —
+  all from the page. There is one protocol interpreter, not a parallel formatter.
+  The dropdown shows each score's hub version (e.g. `levels · v8`) so it is clear
+  which revision imports.
 
 Scan dirs are scanned for `*.lights.json`; imported shows land in the first one.

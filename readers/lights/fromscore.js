@@ -19,14 +19,19 @@ function shape(raw) {
 
   const parts = raw.parts || [];
   return {
-    ...raw,
+    ...raw,   // keep grid (with first_bar), beats, parts (arranger.riseOf reads them), ...
     sections: parts.map(p => ({
       from: { bar: p.from_bar, beat: 1 },
-      to: { bar: p.to_bar + 1, beat: 1 },
+      to: { bar: p.to_bar + 1, beat: 1 },   // to_bar is inclusive; sections are half-open
       name: p.role,
+      nth: p.nth,                            // tells repeated drops apart
       repeat: p.returns ? p.like : undefined,
+      like: p.like,
       feels: p.feels,
+      playing: p.playing,
+      fullness: p.fullness,
       rise: p.rise,
+      stems: p.stems,                        // the arranger drives drum accents off these
     })),
     energy: Array.isArray(raw.energy) ? raw.energy
       : (raw.bars && raw.bars.intensity) || [],
