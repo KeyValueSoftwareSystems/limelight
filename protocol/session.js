@@ -34,6 +34,14 @@ function Session(score, opts) {
 
   const beatSec = 60 / bpm;              /* song seconds per beat -- never scaled */
   const barSec = beatSec * bpb;
+  /* Which number the first bar carries. Some songs open on a pickup and start
+     at 0; others start at 1. Nothing used to say which, so this library assumed
+     1 and shifted anything that said otherwise -- which is a one-bar error on
+     four songs in seventeen, and a one-bar error is a show that lights a beat
+     early all night without explaining itself. The score states it now, so we
+     read it and renumber nothing: bar 33 here is bar 33 in the score, in the
+     pipeline, and in any conversation about the song. */
+  const firstBar = (g.first_bar !== undefined && g.first_bar !== null) ? g.first_bar : 1;
 
   /* An injectable clock, so the tests can run without waiting for real time
      and a browser can hand us an audio element's own clock instead. */
@@ -59,21 +67,28 @@ function Session(score, opts) {
   /* ---- the score clock: pure, and rate cannot reach it ------------------- */
   const mod = (x, m) => ((x % m) + m) % m;   /* music has no negative beat */
 
+  /* Snap a beat count that is a hair off a boundary back onto it. Bar 61 of a
+     127.999 bpm song comes back out of `secondsAt` as 60.99999999999999, and a
+     bare Math.floor then answers bar 60 -- a whole bar early, for a song that
+     was never wrong. The tolerance is 1e-9 of a beat, under a microsecond, so
+     it can only ever absorb arithmetic error and never a real measurement. */
+  const snap = x => Math.abs(x - Math.round(x)) < 1e-9 ? Math.round(x) : x;
+
   function positionAt(t) {
-    const b = (t - first) / barSec;
+    const i = snap((t - first) / beatSec);
     return {
-      bar: Math.floor(b) + 1,
-      beat: +(mod(b, 1) * bpb + 1).toFixed(4),
+      bar: firstBar + Math.floor(i / bpb),
+      beat: +(mod(i, bpb) + 1).toFixed(4),
       before_first_beat: t < first,
     };
   }
   /* the song second a given bar and beat lands on */
   function secondsAt(bar, beat) {
-    return first + (bar - 1) * barSec + ((beat || 1) - 1) * beatSec;
+    return first + (bar - firstBar) * barSec + ((beat || 1) - 1) * beatSec;
   }
   /* beats laid on one line, so "which beat is this" is one division */
-  const index = t => (t - first) / beatSec;
-  const fromIndex = i => ({ bar: Math.floor(i / bpb) + 1, beat: (mod(i, bpb)) + 1 });
+  const index = t => snap((t - first) / beatSec);
+  const fromIndex = i => ({ bar: firstBar + Math.floor(i / bpb), beat: (mod(i, bpb)) + 1 });
 
   /* ---- sections, in layers ------------------------------------------------
      A song is several structures at once, and flattening them into one list
@@ -93,31 +108,38 @@ function Session(score, opts) {
      off-by-one bar is a show that lights a beat early all night. */
   function adapt(sc) {
     if (!sc || sc.layers || !sc.parts) return sc;          /* already our shape */
-    const B = +1;                                          /* their bar 0 is our bar 1 */
     const out = Object.assign({}, sc);
     out.layers = {
       form: { kind: "partition",
-        note: "from `parts`; role is the section name, bars shifted from 0-based",
+        note: "from `parts`. Bars are not renumbered -- grid.first_bar says where "
+              + "they start. `to_bar` is inclusive, so the half-open end is +1.",
         spans: sc.parts.map(p => ({
-          from: { bar: p.from_bar + B, beat: 1 },
-          to:   { bar: p.to_bar + B + 1, beat: 1 },   /* to_bar is inclusive */
-          name: p.role, feels: p.feels, fullness: p.fullness })) },
+          from: { bar: p.from_bar, beat: 1 },
+          to:   { bar: p.to_bar + 1, beat: 1 },
+          /* role is the bare word now and `nth` carries the occurrence. Matching
+             on the role string used to miss every drop after the first, because
+             the string was "drop 2". Keep them apart. */
+          name: p.role, nth: p.nth, like: p.like, returns: p.returns,
+          feels: p.feels, fullness: p.fullness })) },
     };
     const inten = (sc.bars && sc.bars.intensity) || null;
-    if (inten) out.energy = { per: "bar", from_bar: 1, values: inten,
-                              note: "from `bars.intensity`" };
+    if (inten) out.energy = { per: "bar",
+                              from_bar: (sc.grid && sc.grid.first_bar !== undefined)
+                                        ? sc.grid.first_bar : 1,
+                              values: inten, note: "from `bars.intensity`" };
     if (sc.releases) out.moments = sc.releases.map(r => ({
       at: positionOf(sc, r.at_s), kind: "drop", size: r.size }));
     return out;
   }
   function positionOf(sc, t) {
     const g = sc.grid, n = g.beats_per_bar || 4, barS = (60 / g.bpm) * n;
+    const fb = (g.first_bar !== undefined && g.first_bar !== null) ? g.first_bar : 1;
     const b = (t - g.first_beat_s) / barS;
-    return { bar: Math.floor(b) + 1, beat: +(((b % 1) + 1) % 1 * n + 1).toFixed(3) };
+    return { bar: fb + Math.floor(b), beat: +(((b % 1) + 1) % 1 * n + 1).toFixed(3) };
   }
   score = adapt(score);
   const layers = (score && score.layers) || {};
-  const at_ = q => (q.bar - 1) * bpb + ((q.beat || 1) - 1);   /* beats, one line */
+  const at_ = q => (q.bar - firstBar) * bpb + ((q.beat || 1) - 1);  /* beats, one line */
   const covers = (sp, x) => x >= at_(sp.from) && x < at_(sp.to);
 
   function sectionsAt(pos) {
