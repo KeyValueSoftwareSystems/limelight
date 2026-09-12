@@ -1,17 +1,34 @@
 #!/usr/bin/env python3
 """The smallest server that can host the protocol.
 
-Serves the score, the library, the page, and the audio. Nothing else, because
-nothing else exists yet -- and because every time this file has grown past
-"hand back a file" it has become the place decisions hide.
+Serves the score, the library, the page, and the audio -- and hands anything
+under /hub to hub/hub.py, the shared folder. Nothing else, because every time
+this file has grown past "hand back a file" it has become the place decisions
+hide.
 
-    python3 serve.py            then open http://127.0.0.1:8770/
+    python3 serve.py            then open http://<this machine>:8770/
+
+It binds every interface so the hub is reachable across the network; set
+HOST=127.0.0.1 to keep it to this machine.
 """
-import http.server, os, socketserver, sys, urllib.parse
+import http.server, os, socket, socketserver, sys, urllib.parse
+from hub import hub
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PORT = int(os.environ.get("PORT", "8770"))
-HOST = os.environ.get("HOST", "127.0.0.1")
+HOST = os.environ.get("HOST", "0.0.0.0")
+
+
+def lan_ip():
+    """The address other machines on this network reach us at. No packet is sent."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("10.255.255.255", 1))
+        return s.getsockname()[0]
+    except OSError:
+        return "127.0.0.1"
+    finally:
+        s.close()
 
 TYPES = {".html": "text/html; charset=utf-8", ".js": "application/javascript",
          ".json": "application/json", ".wav": "audio/wav", ".css": "text/css"}
@@ -52,16 +69,32 @@ class H(http.server.BaseHTTPRequestHandler):
             f.seek(start)
             self.wfile.write(f.read(end - start + 1))
 
+    def _hub(self):
+        p = urllib.parse.urlparse(self.path).path
+        if p == hub.PREFIX or p.startswith(hub.PREFIX + "/"):
+            hub.handle(self, self.command); return True
+        return False
+
     def do_GET(self):
+        if self._hub(): return
         p = urllib.parse.urlparse(self.path).path
         if p in ("/", "/index.html"):
             return self._file("page/container.html")
         self._file(p)
+
+    def _hub_only(self):
+        if not self._hub():
+            self.send_error(405, self.command + " only under /hub")
+
+    do_HEAD = do_PUT = do_MKCOL = _hub_only
 
 
 if __name__ == "__main__":
     socketserver.ThreadingTCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer((HOST, PORT), H) as srv:
         srv.daemon_threads = True
-        print(f"  protocol on http://{HOST}:{PORT}")
+        shown = lan_ip() if HOST == "0.0.0.0" else HOST
+        print(f"  protocol on http://{shown}:{PORT}", flush=True)
+        print(f"  hub      on http://{shown}:{PORT}/hub/   (files in {hub.ROOT})", flush=True)
+        print(f"  from another machine:  export LIMELIGHT_REMOTE=http://{shown}:{PORT}/hub/score", flush=True)
         srv.serve_forever()
