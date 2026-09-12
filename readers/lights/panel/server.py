@@ -220,14 +220,20 @@ class State:
                     return None
             for cand in (os.path.join(REPO, "synth", "out", name + ".wav"),
                          os.path.join(EXPER, name + ".cache.wav"), os.path.join(EXPER, name + ".mp3")):
-                if os.path.isfile(cand):
-                    link = os.path.join(self.dirs[0], name + ".wav")
-                    try:
-                        if os.path.islink(link) or os.path.exists(link): os.remove(link)
-                        os.symlink(cand, link)
-                    except OSError:
-                        pass
-                    break
+                if not os.path.isfile(cand):
+                    continue
+                link = os.path.join(self.dirs[0], name + ".wav")
+                if os.path.abspath(cand) == os.path.abspath(link):
+                    break                      # audio already in place -- never touch a real file
+                try:
+                    if os.path.islink(link):
+                        os.remove(link)        # replace a prior symlink only
+                    elif os.path.exists(link):
+                        break                  # a real file is already there; leave it
+                    os.symlink(cand, link)
+                except OSError:
+                    pass
+                break
             self.import_log = f"imported {name} (seed {seed})"
             return self.load(name + ".lights.json", force=True)
         except Exception as e:  # noqa: BLE001
