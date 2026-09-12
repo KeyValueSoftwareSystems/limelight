@@ -14,8 +14,9 @@ const { openRemote, DEFAULT_REMOTE, NotFound, RemoteError } = require("./cli/rem
 
 const REMOTE = process.env.LIMELIGHT_REMOTE || DEFAULT_REMOTE;
 const USAGE = `usage:
-  limelight push <path/to/file.score>   upload to the shared score folder (overwrites)
-  limelight pull <name.score>           download into the current directory
+  limelight push <path/to/file.score>   upload to the shared score folder (a .score becomes a new version)
+  limelight pull <name.score>           download the latest into the current directory
+  limelight pull <name.score>@<N>       download version N
 
 remote: ${REMOTE}   (override with LIMELIGHT_REMOTE=<url>)`;
 
@@ -31,22 +32,35 @@ async function push(remote, file) {
   if (!fs.existsSync(file) || !fs.statSync(file).isFile()) throw new Exit(1, `${file}: no such file`);
   const bytes = fs.readFileSync(file);
   const name = path.basename(file);
-  await remote.put(name, bytes);
+  const reply = await remote.put(name, bytes);
   /* a truncated upload that reports success is the expensive kind of failure */
   const held = await remote.size(name);
   if (held !== bytes.length)
     throw new Exit(2, `uploaded ${bytes.length} bytes but the server holds ${held === null ? "nothing" : held} — push again`);
-  console.log(`pushed ${name} → ${remote.url(name)} (${bytes.length} bytes)`);
+  const version = reply && reply.version ? `, v${reply.version}` : "";
+  console.log(`pushed ${name} → ${remote.url(name)} (${bytes.length} bytes${version})`);
+}
+
+/* "levels.score@2" -> { name: "levels.score", version: "2" }; no @digits -> latest */
+function parseTarget(arg) {
+  const m = /^(.+)@(\d+)$/.exec(arg);
+  return m ? { name: path.basename(m[1]), version: m[2] } : { name: path.basename(arg), version: null };
 }
 
 async function pull(remote, arg) {
   if (!arg) usage();
-  const name = path.basename(arg);            /* a name, never a path */
+  const { name, version } = parseTarget(arg);   /* a name, never a path */
   let bytes;
   try {
-    bytes = await remote.get(name);
+    bytes = await remote.get(name, version);
   } catch (e) {
     if (!(e instanceof NotFound)) throw e;
+    if (version) {
+      /* the file may exist and only the version be missing: say which versions there are */
+      let hist = null;
+      try { hist = await remote.versions(name); } catch (e2) { if (!(e2 instanceof NotFound)) throw e2; }
+      if (hist) throw new Exit(1, `${name} has no version ${version}\nversions: ${hist.versions.map(v => v.version).join(", ")}`);
+    }
     /* the miss is the listing: say what is there instead */
     const names = await remote.list();
     const have = names.length ? `on the server:\n${names.map(n => "  " + n).join("\n")}`
@@ -54,7 +68,8 @@ async function pull(remote, arg) {
     throw new Exit(1, `${name} is not on ${remote.base}\n${have}`);
   }
   fs.writeFileSync(path.join(process.cwd(), name), bytes);
-  console.log(`pulled ${name} ← ${remote.url(name)} (${bytes.length} bytes)`);
+  const tag = version ? `@${version}` : "";
+  console.log(`pulled ${name}${tag} ← ${remote.url(name)}${version ? `?v=${version}` : ""} (${bytes.length} bytes)`);
 }
 
 const COMMANDS = { push, pull };

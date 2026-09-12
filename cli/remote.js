@@ -9,6 +9,8 @@
      PUT  <base>/<name>         upload, raw bytes    -> 201 (overwrites)
      GET  <base>/<name>         download
      HEAD <base>/<name>         content-length, to check an upload landed whole
+     GET  <base>/<name>?v=N     one version of a .score (our hub only)
+     GET  <base>/<name>?versions its history
 
    Cloud storage later is another function here and one more case in the
    switch. The commands never learn which one they are talking to. */
@@ -71,14 +73,26 @@ function dufs(base) {
     const url = fileUrl(name);
     const res = await call("PUT", url, bytes);
     if (!res.ok) await fail("PUT", url, res);
+    /* our hub answers {"name","version"}; a dufs answers text. Either is fine. */
+    const text = await res.text().catch(() => "");
+    try { return JSON.parse(text); } catch (e) { return null; }
   }
 
-  async function get(name) {
-    const url = fileUrl(name);
+  async function get(name, version) {
+    const url = fileUrl(name) + (version ? `?v=${version}` : "");
+    const res = await call("GET", url);
+    if (res.status === 404) throw new NotFound(version ? `no version ${version} of ${name} on ${base}` : `${name} is not on ${base}`);
+    if (!res.ok) await fail("GET", url, res);
+    return Buffer.from(await res.arrayBuffer());
+  }
+
+  /* the history of a .score: { latest, versions: [{ version, size, mtime, has_metadata, mergeable }] } */
+  async function versions(name) {
+    const url = fileUrl(name) + "?versions";
     const res = await call("GET", url);
     if (res.status === 404) throw new NotFound(`${name} is not on ${base}`);
     if (!res.ok) await fail("GET", url, res);
-    return Buffer.from(await res.arrayBuffer());
+    return res.json();
   }
 
   async function size(name) {
@@ -90,7 +104,7 @@ function dufs(base) {
     return Number.isFinite(n) ? n : null;
   }
 
-  return { base, url: fileUrl, list, put, get, size };
+  return { base, url: fileUrl, list, put, get, size, versions };
 }
 
 module.exports = { openRemote, DEFAULT_REMOTE, RemoteError, NotFound, Unreachable };

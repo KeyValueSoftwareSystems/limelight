@@ -203,8 +203,8 @@ async function startHub() {
 
     r = await run(["push", "levels.score"], fake.url, dir);
     ok("push uploads a .score", r.code === 0 && fake.files.get("levels.score").equals(SCORE), r.err);
-    ok("and says where it went and how big",
-       r.out.trim() === `pushed levels.score → ${fake.url}/levels.score (${SCORE.length} bytes)`, r.out);
+    ok("and says where it went, how big, and which version",
+       r.out.trim() === `pushed levels.score → ${fake.url}/levels.score (${SCORE.length} bytes, v1)`, r.out);
 
     fs.writeFileSync(path.join(dir, "levels.score"), "{}");
     r = await run(["push", path.join(dir, "levels.score")], fake.url, dir);
@@ -246,6 +246,21 @@ async function startHub() {
 
     r = await run(["pull", "levels.score"], "http://127.0.0.1:9/score", dir);
     ok("pull from an unreachable remote exits 2", r.code === 2 && /cannot reach/.test(r.err), r.err);
+
+    /* versions from the command line */
+    const vurl = fake.url + "/lv.score";
+    const a = Buffer.from('{"score":"lv","version":1}'), b = Buffer.from('{"score":"lv","version":2}');
+    await fetch(vurl, { method: "PUT", body: a }); await fetch(vurl, { method: "PUT", body: b });
+    await fetch(vurl + "?meta&v=2", { method: "PUT", body: JSON.stringify({ who: "me" }) });
+
+    r = await run(["pull", "lv.score@1"], fake.url, dir);
+    ok("pull name@1 writes version 1", r.code === 0 && fs.readFileSync(path.join(dir, "lv.score")).equals(a), r.err);
+    ok("and says which version", /lv\.score@1 ←/.test(r.out), r.out);
+    r = await run(["pull", "lv.score"], fake.url, dir);
+    ok("pull without @ is the latest, merged",
+       r.code === 0 && JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8")).author_metadata.who === "me", r.err);
+    r = await run(["pull", "lv.score@9"], fake.url, dir);
+    ok("pull of a missing version exits 1 and lists the versions", r.code === 1 && /versions: 1, 2/.test(r.err), r.err);
   }
 
   /* ---- the hub itself: page and API ---------------------------------------- */
