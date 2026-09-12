@@ -14,7 +14,7 @@ from shape import shape
 from call import call
 from parts import curves, parts
 from pulse import pulse
-from events import events
+from moments import moments
 from harmony import changes as chord_changes
 from harmony import chords as find_chords
 from harmony import per_bar as chords_per_bar
@@ -158,9 +158,11 @@ def read(path, slug):
     rows = np.asarray([score_bars[k] for k in STEM_NAMES] +
                       [[x if x is not None else 0.0 for x in score_bars["intensity"]]],
                      dtype=float)
-    found_spans, how = shape(path, edges, rows)
+    found_spans, how, chroma = shape(path, edges, rows)
     report["sections_from"] = how
-    snapped = on_phrase([list(s) for s in found_spans], pickup, firm=how.get("firm"))
+    grid_says = {}
+    snapped = on_phrase([list(s) for s in found_spans], pickup,
+                        firm=how.get("firm"), tell=grid_says)
     told = call([(a, b, m) for a, b, m in snapped], score_bars)
     shaped = sections([(s["from"], s["to"], s["role"]) for s in told],
                       voices, busy, pickup, report)
@@ -168,6 +170,14 @@ def read(path, slug):
         part["nth"] = said["nth"]
         part["like"] = said["like"]
         part["returns"] = said["returns"]
+
+    peak = [t for t in told if t["role"] in ("drop", "chorus")]
+    anchor = peak[0]["mark"] if peak else (told[0]["mark"] if told else 0)
+    starts = [t["from"] - pickup + 1 for t in told[1:]]
+    origin = grid_says.get("origin", 1)
+    every = 8 if starts and all((x - origin) % 8 == 0 for x in starts) else 4
+    phrases = {"every_bars": every, "from_bar": origin,
+               "boundaries_on_grid": grid_says.get("on_grid", True)}
     show(slug, g, report, {"essentia hears": f["rhythm.bpm"]})
 
     return {
@@ -201,9 +211,12 @@ def read(path, slug):
         "beats": beats,
         "tension": pull,
         "releases": gone,
-        "events": events(g, lanes, busy, bright,
-                         np.load(CACHE / f"{slug}.flux.npy"),
-                         pickup, report, env),
+        "phrases": phrases,
+        "moments": moments(g, lanes, busy.ravel() if busy.ndim > 1 else busy,
+                           bright.ravel(), score_bars["intensity"],
+                           score_bars["chord"], score_bars["chord_sure"],
+                           [(a, b, m) for a, b, m in snapped], anchor,
+                           chroma, env, gone, pickup, report),
     }
 
 

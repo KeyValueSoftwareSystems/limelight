@@ -50,7 +50,7 @@ def anchor(spans, pickup, reach=2, firm=None):
     return best
 
 
-def on_phrase(spans, pickup, reach=2, least=4, firm=None):
+def on_phrase(spans, pickup, reach=2, least=4, firm=None, tell=None):
     origin = anchor(spans, pickup, reach, firm)
 
     def snap(bar):
@@ -63,6 +63,9 @@ def on_phrase(spans, pickup, reach=2, least=4, firm=None):
     pinned = sorted(firm or ())
     fits = sum(1 for f in pinned if (f - pickup + 1 - origin) % 4 == 0)
     holds = not pinned or fits >= len(pinned) * 0.5
+    if tell is not None:
+        tell["origin"] = origin
+        tell["on_grid"] = bool(holds)
 
     moved = []
     for a, b, role in spans:

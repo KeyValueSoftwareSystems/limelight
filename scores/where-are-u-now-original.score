@@ -5440,901 +5440,822 @@
       "size": 0.795
     }
   ],
-  "events": [
+  "phrases": {
+    "every_bars": 4,
+    "from_bar": 1,
+    "boundaries_on_grid": false
+  },
+  "moments": [
     {
-      "bar": 1,
+      "bar": 0,
       "beat": 1,
-      "is": "riser",
-      "for_bars": 4,
-      "strength": 1.0
+      "is": "rise",
+      "what": "brightness",
+      "sure": 0.932,
+      "for_bars": 8
+    },
+    {
+      "bar": 0,
+      "beat": 1,
+      "is": "rise",
+      "what": "voice",
+      "sure": 0.6,
+      "for_bars": 6
     },
     {
       "bar": 1,
       "beat": 1,
-      "is": "voice swells",
-      "for_bars": 4,
-      "strength": 0.843,
-      "then": "nothing changes"
-    },
-    {
-      "bar": 3,
-      "beat": 1,
-      "is": "lead in",
-      "strength": 0.433
+      "is": "rise",
+      "what": "chords",
+      "sure": 0.308,
+      "for_bars": 8
     },
     {
       "bar": 4,
       "beat": 1,
-      "is": "song starts",
-      "strength": 1.0
+      "is": "change",
+      "what": "texture",
+      "sure": 1.0
     },
     {
       "bar": 5,
       "beat": 1,
-      "is": "chords in",
-      "strength": 0.234
+      "is": "entrance",
+      "what": "chords",
+      "sure": 0.325
     },
     {
-      "bar": 13,
+      "bar": 12,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 7,
-      "strength": 0.455,
-      "then": "nothing changes"
+      "is": "hook",
+      "what": "the riff",
+      "sure": 0.297
     },
     {
-      "bar": 18,
+      "bar": 16,
       "beat": 1,
-      "is": "voice pause",
-      "for_bars": 1,
-      "strength": 0.464,
-      "then": "vocals grows after"
+      "is": "hook",
+      "what": "the riff",
+      "sure": 0.794
     },
     {
-      "bar": 19,
+      "bar": 20,
       "beat": 1,
-      "is": "voice back, bigger",
-      "after": "voice pause",
-      "strength": 0.431
+      "is": "accent",
+      "what": "the band",
+      "sure": 0.745
     },
     {
-      "bar": 21,
+      "bar": 20,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 5,
-      "strength": 0.879,
-      "then": "vocals grows after"
+      "is": "hook",
+      "what": "the riff",
+      "sure": 0.829
     },
     {
-      "bar": 26,
+      "bar": 24,
       "beat": 1,
-      "is": "voice swells",
-      "for_bars": 7,
-      "strength": 0.896,
-      "then": "vocals thins after"
+      "is": "change",
+      "what": "harmony",
+      "sure": 0.648
     },
     {
       "bar": 30,
       "beat": 1,
-      "is": "voice pause",
-      "for_bars": 1,
-      "strength": 0.58,
-      "then": "nothing changes"
+      "is": "pause",
+      "what": "voice",
+      "sure": 0.58,
+      "for_bars": 1
+    },
+    {
+      "bar": 30,
+      "beat": 1,
+      "is": "rise",
+      "what": "voice",
+      "sure": 0.741,
+      "for_bars": 4
     },
     {
       "bar": 31,
-      "beat": 1,
-      "is": "voice back",
-      "after": "voice pause",
-      "strength": 0.148
+      "beat": 3,
+      "is": "accent",
+      "what": "the band",
+      "sure": 0.545
     },
     {
-      "bar": 33,
+      "bar": 32,
       "beat": 1,
-      "is": "bass swells",
-      "for_bars": 8,
-      "strength": 1.0,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 33,
-      "beat": 1,
-      "is": "voice fades",
-      "for_bars": 8,
-      "strength": 1.0,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 33,
-      "beat": 1,
-      "is": "chords swells",
-      "for_bars": 8,
-      "strength": 0.493,
-      "then": "vocals grows after"
+      "is": "hook",
+      "what": "the riff",
+      "sure": 0.812
     },
     {
       "bar": 34,
       "beat": 1,
-      "is": "voice pause",
-      "for_bars": 1,
-      "strength": 0.582,
-      "then": "vocals grows after"
+      "is": "pause",
+      "what": "voice",
+      "sure": 0.582,
+      "for_bars": 1
     },
     {
-      "bar": 35,
+      "bar": 34,
       "beat": 1,
-      "is": "voice back, bigger",
-      "after": "voice pause",
-      "strength": 0.547
+      "is": "rise",
+      "what": "voice",
+      "sure": 0.53,
+      "for_bars": 4
+    },
+    {
+      "bar": 36,
+      "beat": 1,
+      "is": "rise",
+      "what": "bass",
+      "sure": 0.831,
+      "for_bars": 8
     },
     {
       "bar": 37,
       "beat": 1,
-      "is": "riser",
-      "for_bars": 4,
-      "strength": 1.0
+      "is": "rise",
+      "what": "brightness",
+      "sure": 0.482,
+      "for_bars": 6
     },
     {
       "bar": 38,
       "beat": 1,
-      "is": "voice pause",
-      "for_bars": 1,
-      "strength": 0.825,
-      "then": "vocals thins after"
+      "is": "pause",
+      "what": "voice",
+      "sure": 0.825,
+      "for_bars": 1
+    },
+    {
+      "bar": 38,
+      "beat": 1,
+      "is": "rise",
+      "what": "everything",
+      "sure": 0.948,
+      "for_bars": 4
     },
     {
       "bar": 39,
       "beat": 1,
-      "is": "voice back, bigger",
-      "after": "voice pause",
-      "strength": 1.0
+      "is": "change",
+      "what": "harmony",
+      "sure": 0.713
     },
     {
       "bar": 39,
       "beat": 1,
-      "is": "chords pause",
-      "for_bars": 2,
-      "strength": 0.722,
-      "then": "bass grows after"
+      "is": "pause",
+      "what": "chords",
+      "sure": 0.722,
+      "for_bars": 2
+    },
+    {
+      "bar": 39,
+      "beat": 1,
+      "is": "rise",
+      "what": "chords",
+      "sure": 0.852,
+      "for_bars": 5
+    },
+    {
+      "bar": 39,
+      "beat": 1,
+      "is": "transition",
+      "what": "chords",
+      "sure": 0.852,
+      "into_bar": 41
     },
     {
       "bar": 40,
       "beat": 1,
-      "is": "bass in",
-      "strength": 0.764
+      "is": "entrance",
+      "what": "bass",
+      "sure": 0.707
     },
     {
       "bar": 40,
       "beat": 1,
-      "is": "drums in",
-      "strength": 0.666
+      "is": "entrance",
+      "what": "drums",
+      "sure": 0.685
+    },
+    {
+      "bar": 40,
+      "beat": 3,
+      "is": "release",
+      "what": "tension",
+      "sure": 0.5,
+      "after_beats": 0
     },
     {
       "bar": 41,
       "beat": 1,
-      "is": "chords back, bigger",
-      "after": "chords pause",
-      "strength": 1.0
+      "is": "exit",
+      "what": "voice",
+      "sure": 0.69
     },
     {
       "bar": 41,
-      "beat": 1,
-      "is": "voice swells",
-      "for_bars": 7,
-      "strength": 0.639,
-      "then": "bass grows after"
-    },
-    {
-      "bar": 41,
-      "beat": 1,
-      "is": "lead out",
-      "strength": 0.503
+      "beat": 2,
+      "is": "accent",
+      "what": "the band",
+      "sure": 0.568
     },
     {
       "bar": 43,
       "beat": 1,
-      "is": "chords fades",
-      "for_bars": 4,
-      "strength": 0.663,
-      "then": "bass grows after"
+      "is": "change",
+      "what": "harmony",
+      "sure": 0.684
     },
     {
       "bar": 45,
       "beat": 1,
-      "is": "drums fades",
-      "for_bars": 7,
-      "strength": 0.502,
-      "then": "vocals grows after"
+      "is": "rise",
+      "what": "voice",
+      "sure": 0.44,
+      "for_bars": 4
+    },
+    {
+      "bar": 46,
+      "beat": 1,
+      "is": "rise",
+      "what": "chords",
+      "sure": 0.384,
+      "for_bars": 6
     },
     {
       "bar": 47,
       "beat": 1,
-      "is": "chords swells",
-      "for_bars": 4,
-      "strength": 0.675,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 47,
-      "beat": 1,
-      "is": "lead in",
-      "strength": 0.252
-    },
-    {
-      "bar": 48,
-      "beat": 1,
-      "is": "bass fades",
-      "for_bars": 8,
-      "strength": 0.935,
-      "then": "other grows after"
-    },
-    {
-      "bar": 48,
-      "beat": 1,
-      "is": "voice fades",
-      "for_bars": 5,
-      "strength": 0.641,
-      "then": "other grows after"
+      "is": "entrance",
+      "what": "voice",
+      "sure": 0.852
     },
     {
       "bar": 50,
       "beat": 1,
-      "is": "lead out",
-      "strength": 0.252
-    },
-    {
-      "bar": 51,
-      "beat": 1,
-      "is": "chords fades",
-      "for_bars": 5,
-      "strength": 0.778,
-      "then": "vocals thins after"
-    },
-    {
-      "bar": 53,
-      "beat": 1,
-      "is": "drums fades",
-      "for_bars": 7,
-      "strength": 0.667,
-      "then": "bass thins after"
+      "is": "exit",
+      "what": "voice",
+      "sure": 0.334
     },
     {
       "bar": 55,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 4,
-      "strength": 0.752,
-      "then": "bass thins after"
+      "is": "entrance",
+      "what": "voice",
+      "sure": 1.0
     },
     {
       "bar": 55,
       "beat": 1,
-      "is": "bass pause",
-      "for_bars": 2,
-      "strength": 0.566,
-      "then": "bass thins after"
+      "is": "pause",
+      "what": "bass",
+      "sure": 0.566,
+      "for_bars": 2
     },
     {
       "bar": 55,
       "beat": 1,
-      "is": "drums pause",
-      "for_bars": 1,
-      "strength": 0.511,
-      "then": "bass thins after"
+      "is": "rise",
+      "what": "everything",
+      "sure": 0.621,
+      "for_bars": 7
     },
     {
       "bar": 55,
       "beat": 1,
-      "is": "lead in",
-      "strength": 0.213
+      "is": "rise",
+      "what": "chords",
+      "sure": 0.558,
+      "for_bars": 5
     },
     {
       "bar": 56,
-      "beat": 1,
-      "is": "drums back",
-      "after": "drums pause",
-      "strength": 1.0
-    },
-    {
-      "bar": 56,
-      "beat": 1,
-      "is": "chords swells",
-      "for_bars": 4,
-      "strength": 0.807,
-      "then": "other grows after"
+      "beat": 3,
+      "is": "release",
+      "what": "tension",
+      "sure": 0.5,
+      "after_beats": 6
     },
     {
       "bar": 57,
       "beat": 1,
-      "is": "bass back",
-      "after": "bass pause",
-      "strength": 0.513
-    },
-    {
-      "bar": 57,
-      "beat": 1,
-      "is": "lead out",
-      "strength": 0.201
+      "is": "exit",
+      "what": "voice",
+      "sure": 0.51
     },
     {
       "bar": 59,
       "beat": 1,
-      "is": "voice swells",
-      "for_bars": 4,
-      "strength": 0.917,
-      "then": "bass grows after"
+      "is": "change",
+      "what": "harmony",
+      "sure": 0.689
     },
     {
-      "bar": 60,
+      "bar": 61,
       "beat": 1,
-      "is": "chords fades",
-      "for_bars": 4,
-      "strength": 0.846,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 63,
-      "beat": 1,
-      "is": "voice fades",
-      "for_bars": 6,
-      "strength": 0.913,
-      "then": "vocals grows after"
+      "is": "rise",
+      "what": "voice",
+      "sure": 0.603,
+      "for_bars": 4
     },
     {
       "bar": 63,
       "beat": 1,
-      "is": "chords pause",
-      "for_bars": 1,
-      "strength": 0.469,
-      "then": "vocals grows after"
+      "is": "entrance",
+      "what": "voice",
+      "sure": 1.0
     },
     {
       "bar": 63,
       "beat": 1,
-      "is": "lead in",
-      "strength": 0.353
-    },
-    {
-      "bar": 64,
-      "beat": 1,
-      "is": "chords swells",
-      "for_bars": 6,
-      "strength": 0.945,
-      "then": "other grows after"
-    },
-    {
-      "bar": 64,
-      "beat": 1,
-      "is": "chords back, bigger",
-      "after": "chords pause",
-      "strength": 0.941
-    },
-    {
-      "bar": 65,
-      "beat": 1,
-      "is": "drums fades",
-      "for_bars": 8,
-      "strength": 0.775,
-      "then": "other grows after"
+      "is": "rise",
+      "what": "chords",
+      "sure": 0.69,
+      "for_bars": 8
     },
     {
       "bar": 66,
       "beat": 1,
-      "is": "lead out",
-      "strength": 0.367
-    },
-    {
-      "bar": 67,
-      "beat": 1,
-      "is": "bass fades",
-      "for_bars": 6,
-      "strength": 1.0,
-      "then": "other grows after"
+      "is": "exit",
+      "what": "voice",
+      "sure": 0.406
     },
     {
       "bar": 69,
       "beat": 1,
-      "is": "voice swells",
-      "for_bars": 6,
-      "strength": 1.0,
-      "then": "bass thins after"
-    },
-    {
-      "bar": 70,
-      "beat": 1,
-      "is": "chords fades",
-      "for_bars": 4,
-      "strength": 1.0,
-      "then": "bass thins after"
+      "is": "rise",
+      "what": "voice",
+      "sure": 0.763,
+      "for_bars": 7
     },
     {
       "bar": 72,
       "beat": 1,
-      "is": "only drums + voice + chords left",
-      "for_bars": 2,
-      "leaves": [
-        "drums",
-        "vocals",
-        "other"
-      ],
-      "strength": 0.967,
-      "then": "bass thins after"
+      "is": "change",
+      "what": "rhythm",
+      "sure": 0.962
     },
     {
       "bar": 72,
       "beat": 1,
-      "is": "bass out",
-      "strength": 0.835
+      "is": "entrance",
+      "what": "voice",
+      "sure": 0.322
     },
     {
       "bar": 72,
       "beat": 1,
-      "is": "lead in",
-      "strength": 0.417
+      "is": "exit",
+      "what": "bass",
+      "sure": 1.0
     },
     {
       "bar": 73,
-      "beat": 1,
-      "is": "chords pause",
-      "for_bars": 2,
-      "strength": 0.968,
-      "then": "other thins after"
+      "beat": 2,
+      "is": "accent",
+      "what": "the band",
+      "sure": 0.848
     },
     {
       "bar": 74,
       "beat": 1,
-      "is": "all back",
-      "after": "only drums + voice + chords left",
-      "strength": 1.0
-    },
-    {
-      "bar": 74,
-      "beat": 1,
-      "is": "drums out",
-      "strength": 0.486
-    },
-    {
-      "bar": 74,
-      "beat": 1,
-      "is": "drums swells",
-      "for_bars": 8,
-      "strength": 0.454,
-      "then": "drums thins after"
-    },
-    {
-      "bar": 75,
-      "beat": 1,
-      "is": "chords back",
-      "after": "chords pause",
-      "strength": 1.0
-    },
-    {
-      "bar": 76,
-      "beat": 1,
-      "is": "only voice + chords left",
-      "for_bars": 2,
-      "leaves": [
-        "vocals",
-        "other"
-      ],
-      "strength": 0.931,
-      "then": "drums thins after"
-    },
-    {
-      "bar": 77,
-      "beat": 1,
-      "is": "voice swells",
-      "for_bars": 6,
-      "strength": 0.744,
-      "then": "vocals grows after"
+      "is": "exit",
+      "what": "drums",
+      "sure": 0.5
     },
     {
       "bar": 78,
       "beat": 1,
-      "is": "all back",
-      "after": "only voice + chords left",
-      "strength": 0.04
+      "is": "hook",
+      "what": "the riff",
+      "sure": 0.761
+    },
+    {
+      "bar": 79,
+      "beat": 1,
+      "is": "rise",
+      "what": "drums",
+      "sure": 0.676,
+      "for_bars": 6
     },
     {
       "bar": 82,
       "beat": 1,
-      "is": "drums in",
-      "strength": 0.422
+      "is": "entrance",
+      "what": "drums",
+      "sure": 0.808
+    },
+    {
+      "bar": 83,
+      "beat": 2,
+      "is": "accent",
+      "what": "the band",
+      "sure": 0.841
+    },
+    {
+      "bar": 83,
+      "beat": 4,
+      "is": "release",
+      "what": "tension",
+      "sure": 0.5,
+      "after_beats": 8
+    },
+    {
+      "bar": 84,
+      "beat": 1,
+      "is": "rise",
+      "what": "voice",
+      "sure": 0.464,
+      "for_bars": 4
+    },
+    {
+      "bar": 84,
+      "beat": 1,
+      "is": "transition",
+      "what": "voice",
+      "sure": 0.464,
+      "into_bar": 84
+    },
+    {
+      "bar": 85,
+      "beat": 4,
+      "is": "release",
+      "what": "tension",
+      "sure": 0.5,
+      "after_beats": 16
     },
     {
       "bar": 86,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 6,
-      "strength": 0.9,
-      "then": "drums grows after"
+      "is": "change",
+      "what": "harmony",
+      "sure": 0.741
+    },
+    {
+      "bar": 88,
+      "beat": 1,
+      "is": "rise",
+      "what": "chords",
+      "sure": 0.335,
+      "for_bars": 4
+    },
+    {
+      "bar": 89,
+      "beat": 4,
+      "is": "release",
+      "what": "tension",
+      "sure": 0.5,
+      "after_beats": 14
+    },
+    {
+      "bar": 90,
+      "beat": 3,
+      "is": "fill",
+      "what": "drums",
+      "sure": 1.0
+    },
+    {
+      "bar": 90,
+      "beat": 3,
+      "is": "transition",
+      "what": "drums",
+      "sure": 1.0,
+      "into_bar": 91
     },
     {
       "bar": 91,
       "beat": 1,
-      "is": "drums swells",
-      "for_bars": 8,
-      "strength": 0.79,
-      "then": "vocals thins after"
+      "is": "pause",
+      "what": "drums",
+      "sure": 0.723,
+      "for_bars": 1
     },
     {
-      "bar": 91,
+      "bar": 94,
       "beat": 1,
-      "is": "drums pause",
-      "for_bars": 2,
-      "strength": 0.723,
-      "then": "vocals thins after"
+      "is": "rise",
+      "what": "everything",
+      "sure": 0.554,
+      "for_bars": 8
     },
     {
-      "bar": 91,
-      "beat": 1,
-      "is": "voice pause",
-      "for_bars": 2,
-      "strength": 0.528,
-      "then": "vocals thins after"
-    },
-    {
-      "bar": 93,
-      "beat": 1,
-      "is": "drums back",
-      "after": "drums pause",
-      "strength": 0.345
-    },
-    {
-      "bar": 93,
-      "beat": 1,
-      "is": "voice back",
-      "after": "voice pause",
-      "strength": 0.345
+      "bar": 94,
+      "beat": 3,
+      "is": "highlight",
+      "what": "a held note",
+      "sure": 0.38,
+      "for_beats": 2.65
     },
     {
       "bar": 96,
       "beat": 1,
-      "is": "bass in",
-      "strength": 0.138
+      "is": "rise",
+      "what": "drums",
+      "sure": 0.632,
+      "for_bars": 8
     },
     {
-      "bar": 97,
-      "beat": 1,
-      "is": "voice fades",
-      "for_bars": 7,
-      "strength": 0.86,
-      "then": "drums grows after"
+      "bar": 98,
+      "beat": 3,
+      "is": "release",
+      "what": "tension",
+      "sure": 0.5,
+      "after_beats": 0
     },
     {
-      "bar": 97,
+      "bar": 100,
       "beat": 1,
-      "is": "chords fades",
-      "for_bars": 8,
-      "strength": 0.549,
-      "then": "drums grows after"
+      "is": "change",
+      "what": "harmony",
+      "sure": 0.623
     },
     {
-      "bar": 101,
+      "bar": 103,
       "beat": 1,
-      "is": "bass out",
-      "strength": 0.13
+      "is": "rise",
+      "what": "bass",
+      "sure": 0.905,
+      "for_bars": 8
     },
     {
-      "bar": 102,
+      "bar": 103,
       "beat": 1,
-      "is": "bass swells",
-      "for_bars": 8,
-      "strength": 1.0,
-      "then": "vocals thins after"
+      "is": "rise",
+      "what": "brightness",
+      "sure": 0.378,
+      "for_bars": 4
     },
     {
       "bar": 104,
       "beat": 1,
-      "is": "voice pause",
-      "for_bars": 1,
-      "strength": 0.595,
-      "then": "vocals thins after"
+      "is": "pause",
+      "what": "voice",
+      "sure": 0.595,
+      "for_bars": 1
     },
     {
       "bar": 105,
       "beat": 1,
-      "is": "drums swells",
-      "for_bars": 4,
-      "strength": 1.0,
-      "then": "bass grows after"
+      "is": "change",
+      "what": "harmony",
+      "sure": 0.671
     },
     {
       "bar": 105,
       "beat": 1,
-      "is": "chords swells",
-      "for_bars": 6,
-      "strength": 1.0,
-      "then": "bass grows after"
+      "is": "pause",
+      "what": "drums",
+      "sure": 0.99,
+      "for_bars": 1
     },
     {
       "bar": 105,
       "beat": 1,
-      "is": "drums pause",
-      "for_bars": 1,
-      "strength": 0.99,
-      "then": "bass grows after"
+      "is": "pause",
+      "what": "chords",
+      "sure": 0.916,
+      "for_bars": 1
     },
     {
       "bar": 105,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 5,
-      "strength": 0.968,
-      "then": "bass grows after"
+      "is": "rise",
+      "what": "drums",
+      "sure": 0.919,
+      "for_bars": 5
     },
     {
       "bar": 105,
       "beat": 1,
-      "is": "chords pause",
-      "for_bars": 1,
-      "strength": 0.916,
-      "then": "bass grows after"
+      "is": "rise",
+      "what": "everything",
+      "sure": 0.813,
+      "for_bars": 5
     },
     {
       "bar": 105,
       "beat": 1,
-      "is": "voice back",
-      "after": "voice pause",
-      "strength": 0.859
+      "is": "transition",
+      "what": "drums",
+      "sure": 0.99,
+      "into_bar": 107
     },
     {
       "bar": 106,
       "beat": 1,
-      "is": "bass in",
-      "strength": 0.799
+      "is": "entrance",
+      "what": "bass",
+      "sure": 0.983
     },
     {
       "bar": 106,
       "beat": 1,
-      "is": "lead out",
-      "strength": 0.579
-    },
-    {
-      "bar": 106,
-      "beat": 3,
-      "is": "drums back, bigger",
-      "after": "drums pause",
-      "strength": 0.933
+      "is": "exit",
+      "what": "voice",
+      "sure": 1.0
     },
     {
       "bar": 106,
       "beat": 3,
-      "is": "chords back, bigger",
-      "after": "chords pause",
-      "strength": 0.933
+      "is": "release",
+      "what": "tension",
+      "sure": 0.5,
+      "after_beats": 6
     },
     {
-      "bar": 110,
+      "bar": 107,
       "beat": 1,
-      "is": "voice swells",
-      "for_bars": 4,
-      "strength": 0.914,
-      "then": "vocals grows after"
+      "is": "accent",
+      "what": "the band",
+      "sure": 0.511
+    },
+    {
+      "bar": 109,
+      "beat": 1,
+      "is": "change",
+      "what": "harmony",
+      "sure": 0.698
+    },
+    {
+      "bar": 111,
+      "beat": 1,
+      "is": "rise",
+      "what": "voice",
+      "sure": 0.627,
+      "for_bars": 4
     },
     {
       "bar": 113,
       "beat": 1,
-      "is": "chords swells",
-      "for_bars": 4,
-      "strength": 0.764,
-      "then": "vocals grows after"
+      "is": "entrance",
+      "what": "voice",
+      "sure": 1.0
     },
     {
       "bar": 113,
       "beat": 1,
-      "is": "drums fades",
-      "for_bars": 8,
-      "strength": 0.69,
-      "then": "vocals grows after"
+      "is": "rise",
+      "what": "chords",
+      "sure": 0.539,
+      "for_bars": 5
     },
     {
-      "bar": 113,
+      "bar": 115,
       "beat": 1,
-      "is": "lead in",
-      "strength": 0.327
-    },
-    {
-      "bar": 114,
-      "beat": 1,
-      "is": "voice fades",
-      "for_bars": 5,
-      "strength": 0.915,
-      "then": "other grows after"
+      "is": "fill",
+      "what": "drums",
+      "sure": 0.583
     },
     {
       "bar": 116,
       "beat": 1,
-      "is": "lead out",
-      "strength": 0.327
-    },
-    {
-      "bar": 117,
-      "beat": 1,
-      "is": "chords fades",
-      "for_bars": 4,
-      "strength": 0.493,
-      "then": "bass thins after"
+      "is": "exit",
+      "what": "voice",
+      "sure": 0.365
     },
     {
       "bar": 121,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 4,
-      "strength": 0.915,
-      "then": "bass thins after"
+      "is": "change",
+      "what": "harmony",
+      "sure": 0.724
     },
     {
       "bar": 121,
       "beat": 1,
-      "is": "bass swells",
-      "for_bars": 8,
-      "strength": 0.878,
-      "then": "bass thins after"
+      "is": "entrance",
+      "what": "voice",
+      "sure": 1.0
     },
     {
       "bar": 121,
       "beat": 1,
-      "is": "drums pause",
-      "for_bars": 1,
-      "strength": 0.762,
-      "then": "bass thins after"
+      "is": "pause",
+      "what": "drums",
+      "sure": 0.762,
+      "for_bars": 1
     },
     {
       "bar": 121,
       "beat": 1,
-      "is": "bass pause",
-      "for_bars": 2,
-      "strength": 0.735,
-      "then": "bass thins after"
+      "is": "pause",
+      "what": "bass",
+      "sure": 0.735,
+      "for_bars": 1
     },
     {
       "bar": 121,
       "beat": 1,
-      "is": "chords swells",
-      "for_bars": 4,
-      "strength": 0.537,
-      "then": "bass thins after"
+      "is": "rise",
+      "what": "everything",
+      "sure": 0.701,
+      "for_bars": 5
     },
     {
       "bar": 121,
       "beat": 1,
-      "is": "lead in",
-      "strength": 0.227
+      "is": "rise",
+      "what": "drums",
+      "sure": 0.681,
+      "for_bars": 6
     },
     {
       "bar": 122,
       "beat": 3,
-      "is": "drums back",
-      "after": "drums pause",
-      "strength": 0.249
+      "is": "release",
+      "what": "tension",
+      "sure": 0.5,
+      "after_beats": 9
     },
     {
       "bar": 123,
       "beat": 1,
-      "is": "lead out",
-      "strength": 0.23
-    },
-    {
-      "bar": 123,
-      "beat": 1,
-      "is": "bass back",
-      "after": "bass pause",
-      "strength": 0.107
+      "is": "exit",
+      "what": "voice",
+      "sure": 0.591
     },
     {
       "bar": 125,
       "beat": 1,
-      "is": "voice swells",
-      "for_bars": 4,
-      "strength": 1.0,
-      "then": "bass grows after"
+      "is": "change",
+      "what": "harmony",
+      "sure": 0.697
     },
     {
-      "bar": 125,
+      "bar": 127,
       "beat": 1,
-      "is": "chords fades",
-      "for_bars": 4,
-      "strength": 0.729,
-      "then": "bass grows after"
+      "is": "fill",
+      "what": "drums",
+      "sure": 0.625
     },
     {
-      "bar": 129,
+      "bar": 127,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 5,
-      "strength": 1.0,
-      "then": "vocals grows after"
-    },
-    {
-      "bar": 129,
-      "beat": 1,
-      "is": "chords swells",
-      "for_bars": 5,
-      "strength": 0.792,
-      "then": "vocals grows after"
+      "is": "rise",
+      "what": "voice",
+      "sure": 0.525,
+      "for_bars": 4
     },
     {
       "bar": 129,
       "beat": 1,
-      "is": "lead in",
-      "strength": 0.336
+      "is": "entrance",
+      "what": "voice",
+      "sure": 1.0
     },
     {
-      "bar": 130,
+      "bar": 129,
       "beat": 1,
-      "is": "drums fades",
-      "for_bars": 8,
-      "strength": 0.808,
-      "then": "other grows after"
+      "is": "rise",
+      "what": "chords",
+      "sure": 0.559,
+      "for_bars": 6
     },
     {
       "bar": 131,
       "beat": 1,
-      "is": "lead out",
-      "strength": 0.354
+      "is": "exit",
+      "what": "voice",
+      "sure": 1.0
     },
     {
-      "bar": 132,
+      "bar": 136,
       "beat": 1,
-      "is": "bass fades",
-      "for_bars": 8,
-      "strength": 1.0,
-      "then": "vocals thins after"
-    },
-    {
-      "bar": 134,
-      "beat": 1,
-      "is": "chords fades",
-      "for_bars": 8,
-      "strength": 1.0,
-      "then": "bass thins after"
-    },
-    {
-      "bar": 134,
-      "beat": 1,
-      "is": "voice swells",
-      "for_bars": 4,
-      "strength": 0.944,
-      "then": "bass thins after"
+      "is": "change",
+      "what": "texture",
+      "sure": 1.0
     },
     {
       "bar": 137,
       "beat": 1,
-      "is": "lead in",
-      "strength": 0.412
+      "is": "entrance",
+      "what": "voice",
+      "sure": 1.0
     },
     {
       "bar": 138,
       "beat": 1,
-      "is": "voice fades",
-      "for_bars": 8,
-      "strength": 0.948,
-      "then": "bass thins after"
-    },
-    {
-      "bar": 138,
-      "beat": 1,
-      "is": "bass out",
-      "strength": 0.749
-    },
-    {
-      "bar": 138,
-      "beat": 1,
-      "is": "drums out",
-      "strength": 0.534
-    },
-    {
-      "bar": 139,
-      "beat": 1,
-      "is": "chords out",
-      "strength": 0.517
+      "is": "exit",
+      "what": "bass",
+      "sure": 0.452
     },
     {
       "bar": 140,
       "beat": 1,
-      "is": "lead out",
-      "strength": 0.424
+      "is": "change",
+      "what": "rhythm",
+      "sure": 0.658
+    },
+    {
+      "bar": 140,
+      "beat": 1,
+      "is": "exit",
+      "what": "voice",
+      "sure": 0.352
     }
   ]
 }

@@ -10,7 +10,7 @@
  */
 
 export const KNOWN = ['song', 'grid', 'beats', 'downbeats', 'sections', 'energy',
-                      'brightness', 'moments', 'layers', 'chords', 'key', 'loudness',
+                      'brightness', 'moments', 'phrases', 'layers', 'chords', 'key', 'loudness',
                       'feel'];
 
 const STEMS = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
@@ -60,6 +60,8 @@ export function format(raw) {
   } else if (Array.isArray(raw.bars?.intensity)) {
     out.energy = raw.bars.intensity;
   }
+
+  if (raw.phrases) out.phrases = raw.phrases;
 
   if (raw.moments) {
     out.moments = raw.moments;
