@@ -47,8 +47,10 @@ h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
 .subchip:hover{background:#1c212b}
 .sub{cursor:pointer}
 .sub:hover{filter:brightness(1.5)}
-.inside{flex-basis:100%;margin:6px 0 2px 76px;display:flex;flex-wrap:wrap;gap:4px}
+.inside{flex-basis:100%;margin:6px 0 2px 8px;display:flex;flex-wrap:wrap;gap:4px}
 .chip{font:10px ui-monospace,monospace;border:1px solid;border-radius:3px;padding:1px 5px;opacity:.85}
+.tag{font:9px ui-monospace,monospace;color:#5c6478;text-transform:uppercase;letter-spacing:.08em;
+     min-width:58px;display:inline-block;padding-top:2px}
 .chip b{opacity:.6;font-weight:400}
 .row{flex-wrap:wrap}
 </style>
@@ -400,7 +402,7 @@ function sections() {
     if (mine.length) {
       const band = document.createElement("div");
       band.className = "inside";
-      band.innerHTML = mine.map(q =>
+      band.innerHTML = `<span class="tag">does</span>` + mine.map(q =>
         `<span class="subchip" data-b0="${q.from_bar}" data-b1="${q.to_bar}"
            style="border-color:${DOING[q.doing]||'#3a4152'};color:${DOING[q.doing]||'#9fb0c9'}"
            title="click to hear bars ${q.from_bar}-${q.to_bar}"><b>${q.from_bar}-${q.to_bar}</b> ${q.doing}${
@@ -417,7 +419,7 @@ function sections() {
     if (inside.length) {
       const strip = document.createElement("div");
       strip.className = "inside";
-      strip.innerHTML = inside.map(m =>
+      strip.innerHTML = `<span class="tag">moments</span>` + inside.map(m =>
         `<span class="chip" style="border-color:${KIND[m.is]||'#3a4152'};color:${KIND[m.is]||'#8b93a6'}"
            title="bar ${m.bar} beat ${m.beat} · confidence ${m.sure}">
            <b>${m.bar}.${m.beat}</b> ${m.is} ${m.what}</span>`).join("");
