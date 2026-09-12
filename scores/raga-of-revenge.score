@@ -1,0 +1,140 @@
+{
+  "score": "raga-of-revenge",
+  "version": 0,
+  "song": {
+    "length_s": 131.286
+  },
+  "grid": {
+    "bpm": 118.77,
+    "first_beat_s": 0.8638,
+    "beats_per_bar": 4,
+    "bars": 65
+  },
+  "key": {
+    "root": "D",
+    "scale": "minor",
+    "confidence": 0.699,
+    "tuned_to_hz": 434.2
+  },
+  "chords": {
+    "root": "D",
+    "scale": "minor",
+    "confidence": 0.529,
+    "changes_per_beat": 0.0382
+  },
+  "loudness": {
+    "integrated_lufs": -11.49,
+    "range_lu": 6.89,
+    "dynamic_complexity": 4.52
+  },
+  "feel": {
+    "danceability": 0.975,
+    "onsets_per_second": 3.557
+  },
+  "bars": {
+    "intensity": [
+      0.106,
+      0.1,
+      0.156,
+      0.093,
+      0.171,
+      0.221,
+      0.208,
+      0.137,
+      0.581,
+      0.256,
+      0.248,
+      0.202,
+      0.223,
+      0.218,
+      0.285,
+      0.183,
+      0.31,
+      0.256,
+      0.227,
+      0.206,
+      0.5,
+      0.395,
+      0.462,
+      0.128,
+      0.802,
+      0.774,
+      0.72,
+      0.684,
+      0.754,
+      0.761,
+      0.814,
+      0.18,
+      0.8,
+      1.0,
+      0.817,
+      0.968,
+      0.967,
+      0.845,
+      0.958,
+      0.212,
+      0.8,
+      0.857,
+      0.987,
+      0.729,
+      0.975,
+      0.914,
+      0.94,
+      0.759,
+      0.954,
+      0.936,
+      0.758,
+      0.875,
+      0.814,
+      0.745,
+      0.054,
+      0.143,
+      0.193,
+      0.291,
+      0.358,
+      0.23,
+      0.191,
+      0.244,
+      0.036,
+      null,
+      null
+    ]
+  },
+  "parts": [
+    {
+      "from_bar": 1,
+      "to_bar": 1,
+      "repeats_as": "B",
+      "feels": "quiet",
+      "level": 0.177
+    },
+    {
+      "from_bar": 2,
+      "to_bar": 16,
+      "repeats_as": "C",
+      "feels": "building",
+      "level": 0.511
+    },
+    {
+      "from_bar": 17,
+      "to_bar": 27,
+      "repeats_as": "B",
+      "feels": "building",
+      "level": 0.667
+    },
+    {
+      "from_bar": 28,
+      "to_bar": 55,
+      "repeats_as": "A",
+      "feels": "full",
+      "level": 1.0
+    },
+    {
+      "from_bar": 56,
+      "to_bar": 66,
+      "repeats_as": "B",
+      "feels": "steady",
+      "level": 0.367
+    }
+  ]
+}

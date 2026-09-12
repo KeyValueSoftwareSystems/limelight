@@ -7,14 +7,30 @@ nothing else exists yet -- and because every time this file has grown past
 
     python3 serve.py            then open http://127.0.0.1:8770/
 """
-import http.server, os, socketserver, sys, urllib.parse
+import datetime, glob, http.server, json, os, socketserver, sys, urllib.parse
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PORT = int(os.environ.get("PORT", "8770"))
 HOST = os.environ.get("HOST", "127.0.0.1")
 
 TYPES = {".html": "text/html; charset=utf-8", ".js": "application/javascript",
-         ".json": "application/json", ".wav": "audio/wav", ".css": "text/css"}
+         ".json": "application/json", ".wav": "audio/wav", ".css": "text/css",
+         ".mp3": "audio/mpeg", ".score": "application/json"}
+
+
+def read_verdicts():
+    at = os.path.join(ROOT, "truth", "ear.jsonl")
+    if not os.path.isfile(at):
+        return {}
+    out = {}
+    with open(at) as f:
+        for line in f:
+            try:
+                v = json.loads(line)
+            except ValueError:
+                continue
+            out.setdefault(v.get("slug"), []).append(v)
+    return out
 
 
 class H(http.server.BaseHTTPRequestHandler):
@@ -52,11 +68,82 @@ class H(http.server.BaseHTTPRequestHandler):
             f.seek(start)
             self.wfile.write(f.read(end - start + 1))
 
+    def _json(self, obj, code=200):
+        body = json.dumps(obj).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
         p = urllib.parse.urlparse(self.path).path
         if p in ("/", "/index.html"):
+            return self._file("page/ear.html")
+        if p == "/container":
             return self._file("page/container.html")
+        if p == "/library.json":
+            out = []
+            for f in sorted(glob.glob(os.path.join(ROOT, "scores", "*.score"))):
+                slug = os.path.splitext(os.path.basename(f))[0]
+                for ext in (".mp3", ".wav"):
+                    audio = os.path.join(ROOT, "synth", "incoming", slug + ext)
+                    if os.path.isfile(audio):
+                        out.append({"slug": slug, "audio": f"/synth/incoming/{slug}{ext}"})
+                        break
+            return self._json(out)
+        if p == "/verdicts.json":
+            return self._json(read_verdicts())
+        if p.startswith("/taps/"):
+            at = os.path.join(ROOT, "truth", p[6:] + ".taps.json")
+            if not os.path.isfile(at):
+                return self._json({"changes_s": [], "complete_up_to_s": 0.0})
+            return self._json(json.loads(open(at).read()))
         self._file(p)
+
+    def do_POST(self):
+        p = urllib.parse.urlparse(self.path).path
+        if p == "/tap":
+            n = int(self.headers.get("Content-Length") or 0)
+            try:
+                v = json.loads(self.rfile.read(n) or b"{}")
+            except ValueError:
+                return self.send_error(400, "not json")
+            slug = v.get("slug", "unknown")
+            at = os.path.join(ROOT, "truth", f"{slug}.taps.json")
+            os.makedirs(os.path.dirname(at), exist_ok=True)
+            doc = {"song": slug, "how": "truth", "who": "tapped at the page",
+                   "complete_up_to_s": 0.0, "changes_s": []}
+            if os.path.isfile(at):
+                try:
+                    doc = json.loads(open(at).read())
+                except ValueError:
+                    pass
+            if v.get("clear"):
+                doc["changes_s"] = []
+                doc["complete_up_to_s"] = 0.0
+            elif v.get("done") is not None:
+                doc["complete_up_to_s"] = round(float(v["done"]), 2)
+            else:
+                t = round(float(v.get("at_s", 0)), 2)
+                if all(abs(t - x) > 0.4 for x in doc["changes_s"]):
+                    doc["changes_s"].append(t)
+                    doc["changes_s"].sort()
+            with open(at, "w") as f:
+                f.write(json.dumps(doc, indent=2) + "\n")
+            return self._json(doc)
+        if p != "/verdict":
+            return self.send_error(404, "no " + p)
+        n = int(self.headers.get("Content-Length") or 0)
+        try:
+            v = json.loads(self.rfile.read(n) or b"{}")
+        except ValueError:
+            return self.send_error(400, "not json")
+        v["at"] = datetime.datetime.now().isoformat(timespec="seconds")
+        os.makedirs(os.path.join(ROOT, "truth"), exist_ok=True)
+        with open(os.path.join(ROOT, "truth", "ear.jsonl"), "a") as f:
+            f.write(json.dumps(v) + "\n")
+        self._json(read_verdicts())
 
 
 if __name__ == "__main__":

@@ -1,0 +1,18 @@
+{
+  "song": "levels",
+  "how": "truth",
+  "who": "amal, listening at the page, 2026-09-12",
+  "covers": "only what was said out loud. absence here means not yet judged, not correct.",
+
+  "boundaries_said_right": [19.9, 127.4],
+  "boundaries_said_missing": [34.9],
+  "boundaries_not_yet_judged": "everything after 133s -- said only that many things there are incorrect",
+
+  "labels_said_right": [
+    {"at_s": 132.4, "said": "voice with no drums"}
+  ],
+  "labels_said_wrong": [
+    {"at_s": 49.9, "we_said": "drums stop", "why_wrong": "the drums do stop but the pulse continues, so the phrase overclaims"},
+    {"at_s": 169.8, "we_said": "no drums", "why_wrong": "drums are there, not at full strength"}
+  ]
+}

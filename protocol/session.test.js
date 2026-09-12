@@ -6,7 +6,7 @@
    the tempo, and check the beat has not moved. */
 "use strict";
 const { Session } = require("./session.js");
-const score = require("./score.levels.json");
+const score = JSON.parse(require("fs").readFileSync(__dirname + "/levels.score", "utf8"));
 
 let t = 1000;                                   /* wall seconds, ours to move */
 const clock = () => t;

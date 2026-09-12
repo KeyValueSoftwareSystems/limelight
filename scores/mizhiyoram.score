@@ -1,0 +1,90 @@
+{
+  "score": "mizhiyoram",
+  "version": 0,
+  "song": {
+    "length_s": 123.6
+  },
+  "grid": {
+    "bpm": 84.181,
+    "first_beat_s": 3.845,
+    "beats_per_bar": 4,
+    "bars": 43
+  },
+  "key": {
+    "root": "Ab",
+    "scale": "major",
+    "confidence": 0.715,
+    "tuned_to_hz": 434.2
+  },
+  "chords": {
+    "root": "Eb",
+    "scale": "major",
+    "confidence": 0.467,
+    "changes_per_beat": 0.0454
+  },
+  "loudness": {
+    "integrated_lufs": -21.69,
+    "range_lu": 12.7,
+    "dynamic_complexity": 5.32
+  },
+  "feel": {
+    "danceability": 1.054,
+    "onsets_per_second": 3.098
+  },
+  "bars": {
+    "intensity": [
+      0.022,
+      0.013,
+      0.021,
+      0.017,
+      0.024,
+      0.014,
+      0.06,
+      0.121,
+      0.04,
+      0.085,
+      0.15,
+      0.147,
+      0.153,
+      0.054,
+      0.035,
+      0.947,
+      0.225,
+      0.919,
+      0.207,
+      1.0,
+      0.238,
+      0.897,
+      0.176,
+      0.039,
+      0.018,
+      0.897,
+      0.151,
+      0.9,
+      0.151,
+      0.775,
+      0.159,
+      0.887,
+      0.147,
+      0.042,
+      0.018,
+      0.11,
+      0.175,
+      0.217,
+      0.133,
+      0.177,
+      0.191,
+      0.02,
+      null
+    ]
+  },
+  "parts": [
+    {
+      "from_bar": 1,
+      "to_bar": 44,
+      "repeats_as": "C",
+      "feels": "full",
+      "level": 1.0
+    }
+  ]
+}

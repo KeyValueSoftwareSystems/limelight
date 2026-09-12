@@ -1,0 +1,151 @@
+{
+  "score": "killers-from-the-northside",
+  "version": 0,
+  "song": {
+    "length_s": 187.571
+  },
+  "grid": {
+    "bpm": 95.998,
+    "first_beat_s": 0.0312,
+    "beats_per_bar": 4,
+    "bars": 76
+  },
+  "key": {
+    "root": "B",
+    "scale": "minor",
+    "confidence": 0.589,
+    "tuned_to_hz": 434.2
+  },
+  "chords": {
+    "root": "F#",
+    "scale": "minor",
+    "confidence": 0.495,
+    "changes_per_beat": 0.0634
+  },
+  "loudness": {
+    "integrated_lufs": -9.75,
+    "range_lu": 10.29,
+    "dynamic_complexity": 4.65
+  },
+  "feel": {
+    "danceability": 1.206,
+    "onsets_per_second": 4.968
+  },
+  "bars": {
+    "intensity": [
+      0.029,
+      0.044,
+      0.04,
+      0.046,
+      0.052,
+      0.109,
+      0.218,
+      0.485,
+      0.916,
+      0.909,
+      0.94,
+      0.968,
+      0.838,
+      1.0,
+      0.967,
+      0.781,
+      0.908,
+      0.958,
+      0.971,
+      0.943,
+      0.833,
+      0.932,
+      0.954,
+      0.775,
+      0.938,
+      0.936,
+      0.936,
+      0.946,
+      0.841,
+      0.893,
+      0.955,
+      0.807,
+      0.928,
+      0.881,
+      0.947,
+      0.946,
+      0.771,
+      0.959,
+      0.969,
+      0.824,
+      0.038,
+      0.031,
+      0.037,
+      0.053,
+      0.067,
+      0.453,
+      0.863,
+      0.889,
+      0.889,
+      0.96,
+      0.904,
+      0.941,
+      0.897,
+      0.857,
+      0.956,
+      0.781,
+      0.798,
+      0.932,
+      0.968,
+      0.951,
+      0.776,
+      0.806,
+      0.893,
+      0.844,
+      0.064,
+      0.05,
+      0.072,
+      0.062,
+      0.038,
+      0.027,
+      0.009,
+      0.004,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "parts": [
+    {
+      "from_bar": 1,
+      "to_bar": 5,
+      "repeats_as": "A",
+      "feels": "quiet",
+      "level": 0.21
+    },
+    {
+      "from_bar": 6,
+      "to_bar": 48,
+      "repeats_as": "B",
+      "feels": "full",
+      "level": 0.881
+    },
+    {
+      "from_bar": 49,
+      "to_bar": 66,
+      "repeats_as": "B",
+      "feels": "full",
+      "level": 1.0
+    },
+    {
+      "from_bar": 67,
+      "to_bar": 73,
+      "repeats_as": "A",
+      "feels": "quiet",
+      "level": 0.194
+    },
+    {
+      "from_bar": 74,
+      "to_bar": 77,
+      "repeats_as": "C",
+      "feels": "quiet",
+      "level": 0.002
+    }
+  ]
+}
