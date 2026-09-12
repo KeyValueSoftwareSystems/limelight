@@ -125,39 +125,71 @@ if (flipBtn) flipBtn.addEventListener("click", () => {
   } catch (e) { /* webcam module unavailable */ }
 });
 
+// A cancellable calibration session so the modal is never a trap: Cancel, a
+// click on the backdrop, or Esc always closes it and releases the camera.
+let calSession = null;
+
+function closeCalOverlay() { document.getElementById("cal-overlay").hidden = true; }
+function cancelCalibration() {
+  if (calSession) {
+    calSession.cancelled = true;
+    try { if (calSession.src) calSession.src.stop(); } catch (e) {}
+    calSession = null;
+  }
+  closeCalOverlay();
+}
+const calCancelBtn = document.getElementById("cal-cancel");
+if (calCancelBtn) calCancelBtn.addEventListener("click", cancelCalibration);
+const calOverlayEl = document.getElementById("cal-overlay");
+if (calOverlayEl) calOverlayEl.addEventListener("click", (e) => {
+  if (e.target.id === "cal-overlay") cancelCalibration();   // click outside the box
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && calOverlayEl && !calOverlayEl.hidden) cancelCalibration();
+});
+
 async function runWebcamCalibration() {
   if (!window.SaberSources || !window.SaberSources.has("webcam")) return;
+  if (calSession) return;                       // already running
   const overlay = document.getElementById("cal-overlay");
   const msg = document.getElementById("cal-msg");
   const count = document.getElementById("cal-count");
-  overlay.hidden = false; msg.textContent = "Starting camera…"; count.textContent = "";
-
+  const session = { src: null, cancelled: false };
+  calSession = session;
+  overlay.hidden = false; count.textContent = "";
   msg.textContent = "Starting camera… first load can take a few seconds";
+
   const src = window.SaberSources.create("webcam", document.body);
+  session.src = src;
   try {
-    // Never hang: the first MediaPipe load is slow, but a missing camera or an
-    // unanswered permission prompt must still surface as an error.
     await Promise.race([
       src.start(),
       new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 25000)),
     ]);
   } catch (err) {
+    if (session.cancelled) return;             // user already closed it
     console.warn("calibration: camera unavailable", err);
     try { src.stop(); } catch (e) {}
     msg.textContent = "Camera unavailable — check permissions.";
     count.textContent = "";
-    await wait(2500); overlay.hidden = true; return;
+    await wait(2500);
+    if (calSession === session) { calSession = null; closeCalOverlay(); }
+    return;
   }
+  if (session.cancelled) { try { src.stop(); } catch (e) {} return; }
 
   const SECS = 6;
   msg.textContent = "Sweep your hand around the play area";
   const done = src.calibrate(SECS * 1000);
-  for (let s = SECS; s > 0; s--) { count.textContent = s; await wait(1000); }
+  for (let s = SECS; s > 0 && !session.cancelled; s--) { count.textContent = s; await wait(1000); }
+  if (session.cancelled) return;
   const res = await done;
+  if (session.cancelled) return;
   count.textContent = "";
   msg.textContent = res.ok ? "Calibration saved ✓" : "Not enough movement — try again.";
   try { src.stop(); } catch (e) {}
-  await wait(1400); overlay.hidden = true;
+  await wait(1400);
+  if (calSession === session) { calSession = null; closeCalOverlay(); }
 }
 
 // ---- Game lifecycle -------------------------------------------------------
