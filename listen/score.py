@@ -160,7 +160,7 @@ def read(path, slug):
                      dtype=float)
     found_spans, how = shape(path, edges, rows)
     report["sections_from"] = how
-    snapped = on_phrase([list(s) for s in found_spans], pickup)
+    snapped = on_phrase([list(s) for s in found_spans], pickup, firm=how.get("firm"))
     told = call([(a, b, m) for a, b, m in snapped], score_bars)
     shaped = sections([(s["from"], s["to"], s["role"]) for s in told],
                       voices, busy, pickup, report)

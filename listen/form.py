@@ -32,11 +32,12 @@ def blocks(hot, join=2, least=4):
     return runs
 
 
-def anchor(spans, pickup, reach=2):
+def anchor(spans, pickup, reach=2, firm=None):
     best, score = 1, -1
+    heard = list(firm) if firm else [a for a, _, _ in spans]
     for origin in (0, 1):
         hit = 0
-        for a, _, _ in spans:
+        for a in heard:
             bar = a - pickup + 1
             if bar < origin:
                 continue
@@ -49,8 +50,8 @@ def anchor(spans, pickup, reach=2):
     return best
 
 
-def on_phrase(spans, pickup, reach=2, least=4):
-    origin = anchor(spans, pickup, reach)
+def on_phrase(spans, pickup, reach=2, least=4, firm=None):
+    origin = anchor(spans, pickup, reach, firm)
 
     def snap(bar):
         for step in (16, 8, 4):

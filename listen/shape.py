@@ -286,4 +286,5 @@ def shape(path, edges, lanes=None, least=4):
             joined[-1][1] = b_
         else:
             joined.append([a_, b_, c_])
-    return [tuple(s) for s in joined], {"sweeps": tries, "sections": len(joined)}
+    return [tuple(s) for s in joined], {"sweeps": tries, "sections": len(joined),
+                                        "firm": sorted(set(list(held) + list(turns)))}
