@@ -197,58 +197,37 @@
       if (!meta || meta.name !== sel.value) await loadTrack(sel.value);
     }
   }
-  // Derive beat times in seconds from the grid so the timeline and tap
-  // calibration work in wall-clock time (the protocol answers in musical
-  // position; the UI needs seconds for drawing).
-  function beatTimesFromGrid(grid, count) {
-    if (!grid || !grid.bpm) return [];
-    const beatSec = 60 / grid.bpm;
-    return Array.from({ length: count }, (_, i) => grid.first_beat_s + i * beatSec);
-  }
 
   async function loadTrack(name) {
     if (loading) return;
     loading = true;
     try {
-      const raw = await api('/api/load', { score: name });
-      const grid = raw.grid || {};
-      const bpb = grid.beats_per_bar || 4;
-      const beatCount = raw.beats ? raw.beats.count : 0;
-      const allBeats = beatTimesFromGrid(grid, beatCount);
-      const downbeatCount = raw.downbeats ? raw.downbeats.count : 0;
-      const barSec = bpb * (60 / (grid.bpm || 120));
-      const allDownbeats = Array.from({ length: downbeatCount }, (_, i) => grid.first_beat_s + i * barSec);
-      const duration = (raw.song && raw.song.length_s) || 0;
-
-      // Section start times in seconds (for the timeline)
-      const sectionTimes = (raw.sections || []).map(s => {
-        const bar = (s.from && s.from.bar) || 0;
-        const beat = (s.from && s.from.beat) || 1;
-        return grid.first_beat_s + ((bar - (grid.first_bar != null ? grid.first_bar : 1)) * bpb + (beat - 1)) * (60 / grid.bpm);
-      });
-
+      // /api/show loads the baked show's frames into the transport (the play path)
+      // and returns the baked timeline -- beats/downbeats/sections already in seconds,
+      // so what you see on the timeline is exactly what plays.
+      const m = await api('/api/show', { name });
       meta = {
-        name: name,
-        score: raw.score,
-        version: raw.version || 0,
-        grid: grid,
-        duration: duration,
-        beats: allBeats,
-        downbeats: allDownbeats,
-        sections: sectionTimes,
-        rawSections: raw.sections || [],
-        energy: raw.energy,
-        moments: raw.moments,
-        song: raw.song,
-        tempo: grid.bpm,
-        phases: [],
+        name: m.name,
+        title: m.title,
+        version: m.version || 0,
+        fps: m.fps,
+        duration: m.duration || 0,
+        beats: m.beats || [],           // seconds
+        downbeats: m.downbeats || [],   // seconds
+        sections: m.sections || [],     // seconds (phase starts)
+        rawSections: m.sections || [],
+        phases: m.phases || [],
+        tempo: m.tempo,
+        source: m.source,
+        style: m.style,
+        audio_url: m.audio_url,
       };
       version = meta.version;
       store('track', name);
     } finally { loading = false; }
     $('dur').textContent = '/ ' + fmt(meta.duration, false);
-    $('trackmeta').textContent = `${meta.tempo ? meta.tempo.toFixed(1) + ' BPM' : ''} · ${meta.beats.length} beats`;
-    $('streaminfo').textContent = `${meta.beats.length} beats · ${meta.rawSections.length} sections`;
+    $('trackmeta').textContent = `${meta.source || ''} · ${meta.tempo ? meta.tempo.toFixed(1) + ' BPM' : ''} · ${meta.beats.length} beats${meta.fps ? ' · ' + meta.fps + ' fps' : ''}`;
+    $('streaminfo').textContent = `${meta.beats.length} beats · ${meta.phases.length} sections`;
     $('sections').textContent = meta.sections.map(fmt).join('  ');
     taps = { sound: [], light: [] }; renderTaps();
     draw();

@@ -399,6 +399,13 @@ def make_handler(state: State):
                     return self._json({"error": str(e)}, 400)
                 except Exception as e:
                     return self._json({"error": str(e)}, 500)
+            if path == "/api/show":
+                # Load a baked show's frames into the transport for playback.
+                # (/api/load returns the hub's protocol view; this is the play path.
+                # Bakes are produced by /api/import from a hub score.)
+                meta = state.load(body.get("name", ""), force=bool(body.get("force")))
+                return self._json(meta, 200) if meta else \
+                    self._json({"error": "show not baked yet — import it from the hub first"}, 404)
             if path == "/api/import":
                 meta = state.import_score(body.get("name", ""), int(body.get("seed", 3)))
                 return self._json(meta, 200) if meta else self._json({"error": state.import_log}, 500)
