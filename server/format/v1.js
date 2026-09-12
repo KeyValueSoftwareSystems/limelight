@@ -39,7 +39,12 @@ export function format(raw) {
   // ---- song ----
   if (raw.song) {
     out.song = { ...raw.song };
-    if (out.song.bars === undefined && out.song.length_s && bpm) {
+    /* The grid counted the bars; deriving from the length is only a fallback.
+       Preferring the derivation gave song.bars 127 while grid.bars said 124 for
+       the same song -- two fields that both mean "how many bars", disagreeing. */
+    if (out.song.bars === undefined && grid.bars !== undefined && grid.bars !== null) {
+      out.song.bars = grid.bars;
+    } else if (out.song.bars === undefined && out.song.length_s && bpm) {
       out.song.bars = Math.ceil((out.song.length_s - firstBeatS) / barSec);
     }
   }

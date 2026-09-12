@@ -55,8 +55,15 @@ def format_v1(raw):
     # ---- song ----
     if raw.get("song"):
         out["song"] = dict(raw["song"])
-        if out["song"].get("bars") is None and out["song"].get("length_s") and bpm:
-            out["song"]["bars"] = math.ceil((out["song"]["length_s"] - first_beat_s) / bar_sec)
+        # The grid counted the bars; deriving them from the length is only a
+        # fallback. Preferring the derivation gave song.bars 127 while grid.bars
+        # said 124 for the same song -- two fields that both mean "how many
+        # bars", disagreeing, with nothing to say which to believe.
+        if out["song"].get("bars") is None:
+            if grid.get("bars") is not None:
+                out["song"]["bars"] = grid["bars"]
+            elif out["song"].get("length_s") and bpm:
+                out["song"]["bars"] = math.ceil((out["song"]["length_s"] - first_beat_s) / bar_sec)
 
     # ---- grid (with holds_from / holds_to) ----
     if raw.get("grid"):
