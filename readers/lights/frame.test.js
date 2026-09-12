@@ -1,5 +1,5 @@
-/* frame.js tests -- the beat-locked gesture interpreter + overlap composition.
-   Plain node idiom. frame(position, plan, {layout, library}) is pure in position. */
+/* frame.js tests -- dynamics-driven PAR hits, a lively head, and the contrast
+   overrides. Pure in position. Plain node idiom. */
 "use strict";
 const { frame } = require("./frame.js");
 
@@ -11,83 +11,65 @@ const RIG = { rig: "arc4-head", fixtures: [
   { id: "par_1", type: "par7", angle_deg: -32.5 }, { id: "par_8", type: "par7", angle_deg: -17 },
   { id: "par_15", type: "par7", angle_deg: 17 }, { id: "par_22", type: "par7", angle_deg: 32.5 },
   { id: "head", type: "head13" } ] };
-// inner = par_8, par_15 (+-17); outer = par_1, par_22 (+-32.5)
-
 const LIB = {
   hold_x: { id: "hold_x", kind: "individual", gesture: {
-    group: "all_pars", keys: [{ at: 0, intent: { colour: [1, 0.85, 0.65], level: 0.4 } }], repeat: "hold" } },
-  alt_x: { id: "alt_x", kind: "individual", gesture: {
-    pattern: "inner_outer_alternation", group: "all_pars", keys: [
-      { at: 0, target: "inner", intent: { level: 0.9, colour: [1, 0, 0] } },
-      { at: 0, target: "outer", intent: { level: 0 } },
-      { at: 1, target: "inner", intent: { level: 0 } },
-      { at: 1, target: "outer", intent: { level: 0.9, colour: [0, 0, 1] } }], repeat: "loop" } },
+    group: "all_pars", keys: [{ intent: { colour: [1, 0, 0] } }] } },
   head_x: { id: "head_x", kind: "individual", gesture: {
-    group: "head", keys: [{ at: 0, intent: { pan: 0.1, tilt: 0.5, level: 0.9, colour: "white" } },
-      { at: 2, intent: { pan: 0.9 } }, { at: 4, intent: { pan: 0.1 } }], repeat: "loop" } },
-  combo_x: { id: "combo_x", kind: "combination", gesture: { parts: [
-    { gesture: { pattern: "inner_outer_alternation", group: "all_pars", keys: [
-      { at: 0, target: "inner", intent: { level: 0.9, colour: [1, 0, 0] } },
-      { at: 0, target: "outer", intent: { level: 0 } }] } },
-    { gesture: { group: "head", keys: [{ at: 0, intent: { pan: 0.3, tilt: 0.5, level: 0.9, colour: "white" } }] } } ] } },
-  hold_dim: { id: "hold_dim", kind: "individual", gesture: {
-    group: "all_pars", keys: [{ at: 0, intent: { colour: [0, 0, 1], level: 0.3 } }], repeat: "hold" } },
-  hold_bright: { id: "hold_bright", kind: "individual", gesture: {
-    group: "all_pars", keys: [{ at: 0, intent: { colour: [1, 0, 0], level: 0.9 } }], repeat: "hold" } },
+    group: "head", keys: [{ intent: { colour: "white", tilt: 0.5 } }] } },
 };
 const CTX = { layout: RIG, library: LIB };
-const span = (seq_id, priority, intensity) =>
-  ({ from: { bar: 1, beat: 1 }, to: { bar: 5, beat: 1 }, seq_id, priority, params: { intensity } });
-const lvl = (F, id) => F.fixtures.find(f => f.id === id).intent.level;
+const g = (F, id) => F.fixtures.find(f => f.id === id).intent;
+const par = (params) => ({ grid: { beats_per_bar: 4 },
+  assignments: [{ from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "hold_x", layer: "par", priority: 0, params }] });
 
-/* ---- hold, coverage, intensity, dark, determinism ----------------------- */
+/* ---- the hard hit: spike on the beat, floor between -------------------- */
 {
-  const plan = { grid: { beats_per_bar: 4 }, assignments: [span("hold_x", 0, 0.8)] };
+  const plan = par({ floor: 0.55, peak: 1, mode: "hit", intensity: 1 });
+  const onBeat = g(frame({ bar: 1, beat: 1 }, plan, CTX), "par_1");
+  const between = g(frame({ bar: 1, beat: 1.5 }, plan, CTX), "par_1");
+  ok("a hit spikes to the peak on the beat", near(onBeat.level, 1.0, 0.02), "on " + onBeat.level);
+  ok("and falls to the floor between beats", near(between.level, 0.55, 0.02), "between " + between.level);
+  ok("colour comes from the gesture", JSON.stringify(onBeat.colour) === JSON.stringify([1, 0, 0]));
+}
+
+/* ---- contrast: a low floor makes the same peak hit harder ------------- */
+{
+  const hi = g(frame({ bar: 1, beat: 1.5 }, par({ floor: 0.12, peak: 1, mode: "hit", intensity: 1 }), CTX), "par_1");
+  ok("a breakdown floor (0.12) sits far below a drop floor (0.55)", near(hi.level, 0.12, 0.02), "floor " + hi.level);
+}
+
+/* ---- the head is always alive and moving ------------------------------ */
+{
+  const plan = { grid: { beats_per_bar: 4 }, assignments: [
+    { from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "head_x", layer: "head", priority: 1, params: { headDim: 0.9, motion: 0.5 } }] };
+  const h1 = g(frame({ bar: 1, beat: 1 }, plan, CTX), "head");
+  const h2 = g(frame({ bar: 1, beat: 2 }, plan, CTX), "head");
+  ok("the head is lit and aimed", h1.level > 0 && h1.pan != null, JSON.stringify(h1));
+  ok("the head pan moves over time", h1.pan !== h2.pan, `${h1.pan} vs ${h2.pan}`);
+}
+
+/* ---- whole rig alive: par AND head together --------------------------- */
+{
+  const plan = { grid: { beats_per_bar: 4 }, assignments: [
+    { from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "hold_x", layer: "par", priority: 0, params: { floor: 0.55, peak: 1, mode: "hit", intensity: 1 } },
+    { from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "head_x", layer: "head", priority: 1, params: { headDim: 0.9, motion: 0.8 } }] };
   const F = frame({ bar: 1, beat: 1 }, plan, CTX);
-  ok("frame has an entry for every fixture", F.fixtures.length === 5);
-  const par1 = F.fixtures.find(f => f.id === "par_1").intent;
-  ok("a hold renders its colour on the group", Array.isArray(par1.colour) && par1.level > 0);
-  ok("intensity scales the level", near(par1.level, 0.4 * 0.8, 1e-3), "level " + par1.level);
-  ok("an untargeted fixture is dark", lvl(F, "head") === 0);
-  ok("frame is deterministic",
-     JSON.stringify(frame({ bar: 1, beat: 1 }, plan, CTX)) === JSON.stringify(F));
+  ok("pars and head are both lit at once", g(F, "par_1").level > 0 && g(F, "head").level > 0);
 }
 
-/* ---- inner/outer alternation swaps by beat ------------------------------ */
+/* ---- contrast overrides: blackout and white blast --------------------- */
 {
-  const plan = { grid: { beats_per_bar: 4 }, assignments: [span("alt_x", 0, 1)] };
-  const b1 = frame({ bar: 1, beat: 1 }, plan, CTX);   // globalBeat 0 (even) -> inner
-  const b2 = frame({ bar: 1, beat: 2 }, plan, CTX);   // globalBeat 1 (odd)  -> outer
-  ok("alternation lights the inner pair on the downbeat",
-     lvl(b1, "par_8") > 0 && lvl(b1, "par_1") === 0, `in ${lvl(b1, "par_8")} out ${lvl(b1, "par_1")}`);
-  ok("and the outer pair on the next beat",
-     lvl(b2, "par_1") > 0 && lvl(b2, "par_8") === 0, `in ${lvl(b2, "par_8")} out ${lvl(b2, "par_1")}`);
-}
-
-/* ---- head movement animates across the bar ------------------------------ */
-{
-  const plan = { grid: { beats_per_bar: 4 }, assignments: [span("head_x", 0, 1)] };
-  const p1 = frame({ bar: 1, beat: 1 }, plan, CTX).fixtures.find(f => f.id === "head").intent;
-  const p3 = frame({ bar: 1, beat: 3 }, plan, CTX).fixtures.find(f => f.id === "head").intent;
-  ok("the head is lit and aimed", p1.level > 0 && p1.pan != null);
-  ok("the head pan moves across the bar", p1.pan !== p3.pan, `${p1.pan} vs ${p3.pan}`);
-}
-
-/* ---- a combination lights several groups at once ------------------------ */
-{
-  const plan = { grid: { beats_per_bar: 4 }, assignments: [span("combo_x", 0, 1)] };
-  const F = frame({ bar: 1, beat: 1 }, plan, CTX);
-  ok("a combination lights both the pars and the head",
-     lvl(F, "head") > 0 && lvl(F, "par_8") > 0, `head ${lvl(F, "head")} inner ${lvl(F, "par_8")}`);
-}
-
-/* ---- overlapping assignments compose ------------------------------------ */
-{
-  const plan = { grid: { beats_per_bar: 4 }, assignments: [span("hold_dim", 0, 1), span("hold_bright", 1, 1)] };
-  const par1 = frame({ bar: 1, beat: 1 }, plan, CTX).fixtures.find(f => f.id === "par_1").intent;
-  ok("overlap composes level as the max", near(par1.level, 0.9, 1e-3), "level " + par1.level);
-  ok("and the higher-priority colour wins",
-     JSON.stringify(par1.colour) === JSON.stringify([1, 0, 0]), JSON.stringify(par1.colour));
+  const plan = { grid: { beats_per_bar: 4 }, assignments: [
+    { from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "hold_x", layer: "par", priority: 0, params: { floor: 0.6, peak: 1, mode: "hit", intensity: 1 } },
+    { from: { bar: 2, beat: 1 }, to: { bar: 2, beat: 2 }, type: "blackout", priority: 9 },
+    { from: { bar: 3, beat: 1 }, to: { bar: 3, beat: 2 }, type: "white_blast", priority: 9 }] };
+  const blk = frame({ bar: 2, beat: 1 }, plan, CTX);
+  ok("blackout takes the whole rig dark", blk.fixtures.every(f => f.intent.level === 0));
+  const blast = frame({ bar: 3, beat: 1 }, plan, CTX);
+  ok("white blast fires every fixture full", blast.fixtures.every(f => f.intent.level === 1));
+  ok("blast pars are white", JSON.stringify(g(blast, "par_1").colour) === JSON.stringify([1, 1, 1]));
+  ok("frame stays deterministic",
+     JSON.stringify(frame({ bar: 2, beat: 1 }, plan, CTX)) === JSON.stringify(blk));
 }
 
 for (const [pass, name, detail] of out)

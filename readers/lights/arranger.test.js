@@ -1,8 +1,5 @@
-/* Arranger tests -- the seeded, arc-aware plan, over the REAL score format
-   (flat sections named by feel + a per-bar energy curve). Plain node idiom.
-   plan(score, enumResult, seed) is a pure function of (score, seed): it derives a
-   lighting context per section (from energy + arc), looks up the enumeration matrix,
-   and draws sequences with a seeded PRNG. No time, no rate, no LLM. */
+/* Arranger tests -- a PAR look AND a head look for every section, with per-phase
+   dynamics + drop-boundary blackout/blast. Pure in (score, seed). Plain node idiom. */
 "use strict";
 const { plan } = require("./arranger.js");
 const { enumerate } = require("./preflight.js");
@@ -10,73 +7,66 @@ const { enumerate } = require("./preflight.js");
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);
 
-const RIG = {
-  rig: "arc4-head",
-  fixtures: [
-    { id: "par_1", type: "par7", angle_deg: -32.5 }, { id: "par_8", type: "par7", angle_deg: -17 },
-    { id: "par_15", type: "par7", angle_deg: 17 }, { id: "par_22", type: "par7", angle_deg: 32.5 },
-    { id: "head", type: "head13" },
-  ],
-};
-const EN = enumerate(RIG);   // base-only matrix is enough for arranger logic
+const RIG = { rig: "arc4-head", fixtures: [
+  { id: "par_1", type: "par7", angle_deg: -32.5 }, { id: "par_8", type: "par7", angle_deg: -17 },
+  { id: "par_15", type: "par7", angle_deg: 17 }, { id: "par_22", type: "par7", angle_deg: 32.5 },
+  { id: "head", type: "head13" } ] };
+const EN = enumerate(RIG);
 
-/* a synthetic score in the ENDPOINT format: low intro, a drop, a dip, a rising
-   build, a final (highest) drop, a low outro. */
 const SCORE = {
   grid: { bpm: 120, first_beat_s: 0, beats_per_bar: 4, bars: 24 },
   sections: [
-    { from: { bar: 1, beat: 1 }, to: { bar: 5, beat: 1 }, name: "steady", repeat: "A" },
-    { from: { bar: 5, beat: 1 }, to: { bar: 9, beat: 1 }, name: "building", repeat: "B" },
-    { from: { bar: 9, beat: 1 }, to: { bar: 13, beat: 1 }, name: "thinning out", repeat: "A" },
-    { from: { bar: 13, beat: 1 }, to: { bar: 17, beat: 1 }, name: "building", repeat: "A" },
-    { from: { bar: 17, beat: 1 }, to: { bar: 21, beat: 1 }, name: "steady", repeat: "B" },
-    { from: { bar: 21, beat: 1 }, to: { bar: 25, beat: 1 }, name: "thinning out", repeat: "A" },
+    { from: { bar: 1, beat: 1 }, to: { bar: 5, beat: 1 }, name: "steady" },
+    { from: { bar: 5, beat: 1 }, to: { bar: 9, beat: 1 }, name: "building" },
+    { from: { bar: 9, beat: 1 }, to: { bar: 13, beat: 1 }, name: "thinning out" },
+    { from: { bar: 13, beat: 1 }, to: { bar: 17, beat: 1 }, name: "building" },
+    { from: { bar: 17, beat: 1 }, to: { bar: 21, beat: 1 }, name: "steady" },
+    { from: { bar: 21, beat: 1 }, to: { bar: 25, beat: 1 }, name: "thinning out" },
   ],
   energy: { per: "bar", from_bar: 1, values: [
     0.05, 0.06, 0.05, 0.07, 0.9, 0.85, 0.92, 0.88, 0.15, 0.12, 0.14, 0.13,
     0.4, 0.45, 0.5, 0.55, 0.95, 0.9, 0.97, 0.93, 0.2, 0.1, 0.08, 0.05] },
-  parts: [
-    { from_bar: 1, to_bar: 4, feels: "steady", rise: 0 },
-    { from_bar: 5, to_bar: 8, feels: "building", rise: 0.1 },
-    { from_bar: 9, to_bar: 12, feels: "thinning out", rise: -0.1 },
-    { from_bar: 13, to_bar: 16, feels: "building", rise: 0.2 },
-    { from_bar: 17, to_bar: 20, feels: "steady", rise: 0.05 },
-    { from_bar: 21, to_bar: 24, feels: "thinning out", rise: -0.15 }],
+  parts: [{ from_bar: 13, to_bar: 16, feels: "building", rise: 0.2 }],
 };
 
-/* ---- cycle 1: coverage, validity, context-fit, determinism -------------- */
+/* ---- the whole rig is alive: a PAR look AND a head look per section ------ */
 {
   const p = plan(SCORE, EN, 42);
-  ok("every section gets an assignment",
-     p.assignments.length === SCORE.sections.length, `${p.assignments.length}`);
-  ok("every assignment names a sequence in the matrix",
-     p.assignments.every(a => EN.matrix[a.seq_id]));
-  ok("every assignment's sequence suits its derived context (score > 0)",
-     p.assignments.every(a => EN.matrix[a.seq_id][a.context] > 0),
-     p.assignments.map(a => `${a.section}->${a.context}:${a.seq_id}`).join("  "));
+  const par = p.assignments.filter(a => a.layer === "par");
+  const head = p.assignments.filter(a => a.layer === "head");
+  ok("every section gets a PAR look", par.length === SCORE.sections.length, `${par.length}`);
+  ok("every section gets a HEAD look", head.length === SCORE.sections.length, `${head.length}`);
+  ok("every look names a sequence in the matrix",
+     [...par, ...head].every(a => EN.matrix[a.seq_id]));
+  ok("PAR looks carry phase dynamics (floor/peak/mode)",
+     par.every(a => a.params.floor != null && a.params.peak != null && a.params.mode));
   ok("same (score, seed) yields an identical plan",
      JSON.stringify(plan(SCORE, EN, 42)) === JSON.stringify(plan(SCORE, EN, 42)));
 }
 
-/* ---- cycle 2: the arc -- the final drop is the boldest ------------------- */
+/* ---- arc + contrast: final drop boldest, drops get blackout + blast ------ */
 {
   const p = plan(SCORE, EN, 42);
-  const fd = p.assignments.find(a => a.context === "final_drop");
-  ok("the last high-energy section is mapped to final_drop", !!fd,
-     p.assignments.map(a => a.context).join(", "));
-  ok("the final drop has the maximum intensity of any section",
-     fd && Math.max(...p.assignments.map(a => a.params.intensity)) === fd.params.intensity,
-     fd && `final ${fd.params.intensity} vs max ${Math.max(...p.assignments.map(a => a.params.intensity))}`);
-  ok("the first low section reads as intro, the last as outro",
-     p.assignments[0].context === "intro" && p.assignments[p.assignments.length - 1].context === "outro",
-     `${p.assignments[0].context} .. ${p.assignments[p.assignments.length - 1].context}`);
+  ok("contexts run intro .. final_drop .. outro",
+     p.contexts[0] === "intro" && p.contexts.includes("final_drop") &&
+     p.contexts[p.contexts.length - 1] === "outro", p.contexts.join(", "));
+  const fd = p.assignments.find(a => a.layer === "par" && a.context === "final_drop");
+  ok("the final drop's PAR look is boldest (intensity 1)", fd && fd.params.intensity === 1,
+     fd && String(fd.params.intensity));
+  ok("drops get a pre-drop blackout and a white blast",
+     p.assignments.some(a => a.type === "blackout") && p.assignments.some(a => a.type === "white_blast"));
+  const drop = p.assignments.find(a => a.layer === "par" && a.context === "drop");
+  ok("a drop keeps a high floor (never dark between hits)", drop && drop.params.floor >= 0.5,
+     drop && String(drop.params.floor));
+  const intro = p.assignments.find(a => a.layer === "par" && a.context === "intro");
+  ok("an intro breathes from a low floor", intro && intro.params.mode === "breathe" && intro.params.floor < 0.3);
 }
 
-/* ---- cycle 3: a different seed gives a different show -------------------- */
+/* ---- a different seed gives a different show ----------------------------- */
 {
-  const a = plan(SCORE, EN, 1).assignments.map(x => x.seq_id).join(",");
-  const b = plan(SCORE, EN, 999).assignments.map(x => x.seq_id).join(",");
-  ok("a different seed changes the sequence choices", a !== b, `${a}\n     ${b}`);
+  const a = plan(SCORE, EN, 1).assignments.filter(x => x.layer === "par").map(x => x.seq_id).join(",");
+  const b = plan(SCORE, EN, 999).assignments.filter(x => x.layer === "par").map(x => x.seq_id).join(",");
+  ok("a different seed changes the PAR choices", a !== b, `${a}\n     ${b}`);
 }
 
 /* ---- the real levels score (smoke) -------------------------------------- */
@@ -86,42 +76,11 @@ const SCORE = {
   const palette = require("./arc4-head.palette.json");
   const FULL = enumerate(layout, { palette });
   const p = plan(LEVELS, FULL, 7);
-  ok("plans every section of the real levels score",
-     p.assignments.length === LEVELS.sections.length, `${p.assignments.length}/${LEVELS.sections.length}`);
-  const fd = p.assignments.find(a => a.context === "final_drop");
-  ok("levels: the final drop is the boldest section",
-     fd && Math.max(...p.assignments.map(a => a.params.intensity)) === fd.params.intensity);
-}
-
-/* ---- cycle 4: overlapping sections -> concurrent, conflict-avoided ------- */
-{
-  const at = p => (p.bar - 1) * 4 + ((p.beat || 1) - 1);
-  const overlap = (a, b) => at(a.from) < at(b.to) && at(b.from) < at(a.to);
-  const OVERLAP = {
-    grid: { bpm: 120, first_beat_s: 0, beats_per_bar: 4, bars: 12 },
-    sections: [
-      { from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, name: "steady", repeat: "A" },
-      { from: { bar: 5, beat: 1 }, to: { bar: 9, beat: 1 }, name: "building", repeat: "B" },
-    ],
-    energy: { per: "bar", from_bar: 1, values: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.5, 0.5, 0.5, 0.5] },
-  };
-  let sawConcurrent = false, safe = true, cleanSeeds = 0;
-  for (let s = 0; s < 8; s++) {
-    const A = plan(OVERLAP, EN, s).assignments;
-    let clean = true;
-    for (let i = 0; i < A.length; i++) for (let j = i + 1; j < A.length; j++) {
-      if (overlap(A[i], A[j])) {
-        sawConcurrent = true;
-        const share = A[i].occupies.some(t => A[j].occupies.includes(t));
-        if (share) { clean = false; if (!(A[i].clash || A[j].clash)) safe = false; }
-      }
-    }
-    if (clean) cleanSeeds++;
-  }
-  ok("overlapping sections produce concurrent assignments", sawConcurrent);
-  ok("concurrent assignments never silently double-claim a fixture-attribute", safe);
-  ok("conflict-avoidance yields a clean overlap for at least one seed", cleanSeeds > 0,
-     `${cleanSeeds}/8 seeds clean`);
+  ok("levels: every section has a PAR and a HEAD look",
+     p.assignments.filter(a => a.layer === "par").length === LEVELS.sections.length &&
+     p.assignments.filter(a => a.layer === "head").length === LEVELS.sections.length);
+  const fd = p.assignments.find(a => a.layer === "par" && a.context === "final_drop");
+  ok("levels: the final drop's PAR look is boldest", fd && fd.params.intensity === 1);
 }
 
 for (const [pass, name, detail] of out)
