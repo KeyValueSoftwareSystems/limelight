@@ -236,7 +236,7 @@ def again(chroma, spans, anchor, pickup, alike=0.90):
     return out
 
 
-def held(env, g, pickup, least=0.7):
+def held(env, g, pickup, tune=None, least=0.7):
     v = np.asarray(env.get("vocals", []), dtype=float)
     if len(v) < RATE:
         return []
@@ -245,9 +245,24 @@ def held(env, g, pickup, least=0.7):
     pad = 7
     smooth = np.array([np.median(v[max(0, i - pad):i + pad + 1])
                        for i in range(len(v))])
+    note = None
+    if tune is not None and len(tune):
+        keep = min(len(tune), len(smooth))
+        note = 69 + 12 * np.log2(
+            np.maximum(np.asarray(tune, float)[:keep], 1e-6) / 440.0)
+        smooth = smooth[:keep]
+        v = v[:keep]
     beat_s = 60.0 / g["bpm"]
     per = g["beats_per_bar"]
     floor = 0.40
+    reach = None
+    if note is not None:
+        loud_now = smooth >= floor
+        if loud_now.any():
+            heard = note[loud_now]
+            heard = heard[np.isfinite(heard)]
+            if len(heard):
+                reach = float(np.percentile(heard, 90))
     out, i = [], 0
     while i < len(smooth):
         if smooth[i] < floor:
@@ -260,11 +275,28 @@ def held(env, g, pickup, least=0.7):
         if span_s >= least:
             piece = smooth[i:j]
             slope = float(np.abs(np.diff(piece)).mean()) if len(piece) > 1 else 1.0
-            if slope < 0.02:
+            steady = slope < 0.02
+            word, sure = "voice sustained", min(1.0, span_s / 2.5)
+            if note is not None and j <= len(note):
+                turn = note[i:j]
+                turn = turn[np.isfinite(turn)]
+                if len(turn) > 4:
+                    spread = float(np.percentile(turn, 90) - np.percentile(turn, 10))
+                    if spread < 1.0 and steady:
+                        word = "a held note"
+                        sure = min(1.0, span_s / 2.0)
+                    elif spread > 7.0:
+                        word = "a vocal run"
+                        sure = min(1.0, spread / 14.0)
+                    if reach is not None and len(turn):
+                        if float(np.percentile(turn, 90)) >= reach - 0.5 and span_s >= 0.5:
+                            word = "voice at full reach"
+                            sure = max(sure, 0.7)
+            if steady or word != "voice sustained":
                 idx = max(0, int(np.floor(
                     (i / RATE - g["first_beat_s"]) / beat_s)))
                 out.append(say(idx // per + 1, idx % per + 1, "highlight",
-                               "voice sustained", min(1.0, span_s / 2.5),
+                               word, sure,
                                for_beats=round(span_s / beat_s, 2)))
         i = j
     return thin(out, 2)
@@ -338,7 +370,7 @@ def leading(found, spans, pickup, look=2):
 
 def moments(g, lanes, busy, bright, loud, chord, sure, spans, anchor,
             chroma, env, gone, pickup, air=None, pace=None, width=None,
-            report=None):
+            tune=None, report=None):
     found = []
     found += comings(lanes, pickup)
     found += pauses(lanes, pickup)
@@ -349,7 +381,7 @@ def moments(g, lanes, busy, bright, loud, chord, sure, spans, anchor,
     found += accents
     found += turns(chord, sure, bright, busy, pickup)
     found += again(chroma, spans, anchor, pickup)
-    found += held(env, g, pickup)
+    found += held(env, g, pickup, tune)
     if air is not None:
         found += sweeps(air, pickup)
     if pace is not None:

@@ -235,18 +235,21 @@ function zoom() {
     }
   });
 
-  const near = (SCORE.moments || [])
-    .filter(m => { const mt = momentTime(m); return mt >= a && mt <= b; })
-    .sort((x,y) => (y.sure||0)-(x.sure||0)).slice(0, 4);
-  near.forEach((m, i) => {
-    const x = X(momentTime(m));
+  const rows = Object.keys(KIND);
+  for (const m of SCORE.moments || []) {
+    const mt = momentTime(m);
+    if (mt < a || mt > b) continue;
+    const x = X(mt);
+    const row = Math.max(0, rows.indexOf(m.is));
     g.fillStyle = KIND[m.is] || "#8b93a6";
     g.globalAlpha = .35 + .65*(m.sure || 0);
     g.beginPath(); g.arc(x, 30, 3.5, 0, 6.284); g.fill();
     g.globalAlpha = 1;
-    g.font = "9px ui-monospace,monospace";
-    g.fillText(`${m.is} ${m.what}`, x+6, 18 + i*9);
-  });
+    if ((m.sure || 0) >= 0.40) {
+      g.font = "9px ui-monospace,monospace";
+      g.fillText(`${m.is} ${m.what}`, x+6, 14 + (row % 5)*9);
+    }
+  }
 
   g.strokeStyle = "#e0655f"; g.lineWidth = 1;
   g.beginPath(); g.moveTo(r.width/2, 0); g.lineTo(r.width/2, 86); g.stroke();

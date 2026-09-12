@@ -15,6 +15,7 @@ from call import call
 from parts import curves, parts
 from pulse import pulse
 from moments import moments
+from phrase import phrases as sub_phrases
 from harmony import changes as chord_changes
 from harmony import chords as find_chords
 from harmony import per_bar as chords_per_bar
@@ -137,7 +138,7 @@ def read(path, slug):
             report["moved_by_ear"] = shift
     bar_s = (60.0 / g["bpm"]) * g["beats_per_bar"]
     env = envelopes(path, slug)
-    sung = clean_voice(path, slug)
+    sung, tune = clean_voice(path, slug)
     if sung is not None:
         keep = min(len(sung), len(env["vocals"]))
         lane = np.zeros_like(env["vocals"])
@@ -194,9 +195,22 @@ def read(path, slug):
     starts = [t["from"] - pickup + 1 for t in told[1:]]
     origin = grid_says.get("origin", 1)
     every = 8 if starts and all((x - origin) % 8 == 0 for x in starts) else 4
-    phrases = {"every_bars": every, "from_bar": origin,
-               "boundaries_on_grid": grid_says.get("on_grid", True)}
+    phrase_rule = {"every_bars": every, "from_bar": origin,
+                   "boundaries_on_grid": grid_says.get("on_grid", True)}
     show(slug, g, report, {"essentia hears": f["rhythm.bpm"]})
+
+    told_now = moments(g, lanes, busy.ravel() if busy.ndim > 1 else busy,
+                       bright.ravel(), score_bars["intensity"],
+                       score_bars["chord"], score_bars["chord_sure"],
+                       [(a, b, m) for a, b, m in snapped], anchor,
+                       chroma, env, gone, pickup,
+                       air=score_bars["air"], pace=score_bars["pace"],
+                       width=score_bars["width"], tune=tune, report=report)
+    inner = sub_phrases(
+        [(t["from"], t["to"], t["role"], t["nth"]) for t in told],
+        score_bars, told_now, every, origin, pickup)
+    if report is not None:
+        report["phrases"] = len(inner)
 
     return {
         "score": slug,
@@ -229,14 +243,9 @@ def read(path, slug):
         "beats": beats,
         "tension": pull,
         "releases": gone,
-        "phrases": phrases,
-        "moments": moments(g, lanes, busy.ravel() if busy.ndim > 1 else busy,
-                           bright.ravel(), score_bars["intensity"],
-                           score_bars["chord"], score_bars["chord_sure"],
-                           [(a, b, m) for a, b, m in snapped], anchor,
-                           chroma, env, gone, pickup,
-                           air=score_bars["air"], pace=score_bars["pace"],
-                           width=score_bars["width"], report=report),
+        "phrase_grid": phrase_rule,
+        "phrases": inner,
+        "moments": told_now,
     }
 
 

@@ -59,11 +59,12 @@ def tension(bright, busy, stems, times):
     return np.clip(0.45 * held + 0.55 * climb, 0, 1)
 
 
-def releases(times, hits, pull, bpb, least=0.30):
-    out = []
-    for i in range(4, len(times)):
-        before = float(hits[max(0, i - 4):i].mean())
-        if hits[i] - before < least or hits[i] < 0.55:
+def releases(times, hits, pull, bpb, least=0.35):
+    found = []
+    for i in range(8, len(times)):
+        before = float(hits[max(0, i - 8):i].mean())
+        jump = float(hits[i] - before)
+        if jump < least or hits[i] < 0.70:
             continue
         back = pull[max(0, i - 16):i]
         lead = 0
@@ -72,12 +73,15 @@ def releases(times, hits, pull, bpb, least=0.30):
             j = int(np.argmin(back[:m + 1]))
             if float(back[m] - back[j]) > 0.08:
                 lead = len(back) - j
-        if out and i - out[-1]["beat_index"] < bpb * 2:
-            continue
-        out.append({"beat_index": int(i), "at_s": round(float(times[i]), 3),
-                    "lead_beats": int(lead),
-                    "size": round(float(min(1.0, hits[i] - before)), 3)})
-    return out
+        found.append({"beat_index": int(i), "at_s": round(float(times[i]), 3),
+                      "lead_beats": int(lead),
+                      "size": round(float(min(1.0, jump)), 3)})
+
+    out = []
+    for r in sorted(found, key=lambda x: -x["size"]):
+        if all(abs(r["beat_index"] - o["beat_index"]) >= bpb * 4 for o in out):
+            out.append(r)
+    return sorted(out, key=lambda x: x["beat_index"])
 
 
 def pulse(path, grid, times, positions, onsets, stems, report=None):
