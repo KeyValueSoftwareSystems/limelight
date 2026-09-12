@@ -1065,7 +1065,7 @@
     {
       "from_bar": 4,
       "to_bar": 11,
-      "role": "breakdown",
+      "role": "interlude",
       "feels": "no drums",
       "fullness": 0.825,
       "rise": -0.155,
@@ -1199,7 +1199,7 @@
     {
       "from_bar": 60,
       "to_bar": 63,
-      "role": "breakdown",
+      "role": "pre-chorus",
       "feels": "voice out",
       "fullness": 0.507,
       "rise": 0.314,
@@ -1225,7 +1225,7 @@
           "level": 0.53
         }
       },
-      "nth": 2,
+      "nth": 1,
       "like": "F",
       "returns": false
     },
@@ -1361,7 +1361,7 @@
           "level": 0.829
         }
       },
-      "nth": 1,
+      "nth": 2,
       "like": "I",
       "returns": false
     },

@@ -1419,7 +1419,7 @@
     {
       "from_bar": 30,
       "to_bar": 36,
-      "role": "verse",
+      "role": "build",
       "feels": "drums in",
       "fullness": 0.612,
       "rise": 0.011,
@@ -1489,7 +1489,7 @@
     {
       "from_bar": 46,
       "to_bar": 57,
-      "role": "solo",
+      "role": "post-chorus",
       "feels": "voice in",
       "fullness": 0.794,
       "rise": -0.008,
@@ -1585,7 +1585,7 @@
           "level": 0.303
         }
       },
-      "nth": 3,
+      "nth": 2,
       "like": "F",
       "returns": false
     },
@@ -1620,7 +1620,7 @@
           "level": 0.411
         }
       },
-      "nth": 4,
+      "nth": 3,
       "like": "E",
       "returns": true
     },
@@ -1654,7 +1654,7 @@
           "level": 0.735
         }
       },
-      "nth": 5,
+      "nth": 4,
       "like": "B",
       "returns": true
     },
@@ -1689,7 +1689,7 @@
           "level": 0.87
         }
       },
-      "nth": 6,
+      "nth": 5,
       "like": "E",
       "returns": true
     },

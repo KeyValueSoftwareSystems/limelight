@@ -77,35 +77,50 @@ def call(spans, bars):
         name[-1] = "outro"
 
     for i in range(n - 1):
-        if name[i] is None and name[i + 1] == peak and got[i]["rise"] > CLIMB:
-            name[i] = lead
+        if name[i] is None and name[i + 1] == peak:
+            if got[i]["rise"] > CLIMB or got[i]["climb"] > CLIMB:
+                name[i] = lead
 
-    if sings:
-        for i in range(1, n):
-            if (name[i] is None and name[i - 1] == peak and seen[got[i]["mark"]] >= 2
-                    and got[i]["loud"] > strong * 0.75):
-                name[i] = "post-chorus"
+    for i in range(1, n):
+        if (name[i] is None and name[i - 1] == peak
+                and got[i]["mark"] != anchor
+                and got[i]["loud"] >= strong * 0.60):
+            name[i] = "post-chorus"
 
     for i, s in enumerate(got):
         if name[i] is None and s["vocals"] > SURE:
             name[i] = "verse"
 
     for i, s in enumerate(got):
-        if name[i] is None and s["loud"] < strong * 0.55 and s["wide"] < broad:
-            name[i] = "breakdown"
-
-    for i, s in enumerate(got):
-        if name[i] is None and s["vocals"] < SURE and s["other"] > SURE \
-                and s["other"] > s["drums"] and s["loud"] >= mid:
+        if (name[i] is None and s["vocals"] < SURE
+                and s["loud"] >= max(mid, strong * 0.45)
+                and s["other"] > SURE and s["other"] > s["drums"]):
             name[i] = "solo"
 
     for i, s in enumerate(got):
-        if name[i] is None and seen[s["mark"]] == 1 and 0.15 < (i / n) < 0.85:
+        if name[i] is None and s["loud"] < strong * 0.55 and s["wide"] < broad:
+            came = got[i - 1] if i > 0 else None
+            if came is not None and (came["wide"] > s["wide"]
+                                     or came["loud"] > s["loud"] * 1.5):
+                name[i] = "breakdown"
+
+    for i, s in enumerate(got):
+        if (name[i] is None and seen[s["mark"]] == 1
+                and 0.15 < (i / n) < 0.85 and s["bars"] > 8):
             name[i] = "bridge"
 
     for i, s in enumerate(got):
+        if name[i] is None and s["bars"] <= 8 and 0 < i < n - 1:
+            name[i] = "interlude"
+
+    for i, s in enumerate(got):
         if name[i] is None:
-            name[i] = "breakdown" if s["loud"] < mid else "interlude"
+            if s["vocals"] > SURE * 0.6:
+                name[i] = "verse"
+            elif s["loud"] < mid:
+                name[i] = "breakdown"
+            else:
+                name[i] = "bridge"
 
     letters = {}
     for s in got:

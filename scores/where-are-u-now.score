@@ -1351,7 +1351,7 @@
     {
       "from_bar": 0,
       "to_bar": 7,
-      "role": "interlude",
+      "role": "bridge",
       "feels": "drums in",
       "fullness": 0.486,
       "rise": 0.103,
@@ -1519,7 +1519,7 @@
     {
       "from_bar": 60,
       "to_bar": 83,
-      "role": "interlude",
+      "role": "bridge",
       "feels": "drums in",
       "fullness": 0.806,
       "rise": 0.12,
@@ -1553,7 +1553,7 @@
     {
       "from_bar": 84,
       "to_bar": 91,
-      "role": "breakdown",
+      "role": "interlude",
       "feels": "thinning",
       "fullness": 0.778,
       "rise": -0.213,
@@ -1580,7 +1580,7 @@
           "level": 1.0
         }
       },
-      "nth": 2,
+      "nth": 1,
       "like": "D",
       "returns": true
     },
