@@ -32,26 +32,35 @@ def blocks(hot, join=2, least=4):
     return runs
 
 
+def grid(spans, pickup, firm=None, steps=(4, 8, 16), least=3, lift=2.0):
+    heard = sorted(set(firm)) if firm else [a for a, _, _ in spans]
+    n = len(heard) or 1
+
+    def told(start, step):
+        hit = sum(1 for a in heard
+                  if a - pickup + 1 - start >= 0
+                  and (a - pickup + 1 - start) % step == 0)
+        return hit, hit / n * step
+
+    origin, gain = 1, -1.0
+    for step in steps:
+        for start in (1, 0):
+            _, over = told(start, step)
+            if over > gain:
+                origin, gain = start, over
+    for step in steps:
+        hit, over = told(origin, step)
+        if hit >= least and over >= lift:
+            return origin, step, True
+    return origin, steps[0], False
+
+
 def anchor(spans, pickup, reach=2, firm=None):
-    best, score = 1, -1
-    heard = list(firm) if firm else [a for a, _, _ in spans]
-    for origin in (0, 1):
-        hit = 0
-        for a in heard:
-            bar = a - pickup + 1
-            if bar < origin:
-                continue
-            for step in (16, 8, 4):
-                if (bar - origin) % step == 0:
-                    hit += step
-                    break
-        if hit >= score:
-            best, score = origin, hit
-    return best
+    return grid(spans, pickup, firm)[0]
 
 
 def on_phrase(spans, pickup, reach=2, least=4, firm=None, tell=None):
-    origin = anchor(spans, pickup, reach, firm)
+    origin, every, holds = grid(spans, pickup, firm)
 
     def snap(bar):
         for step in (16, 8, 4):
@@ -61,10 +70,11 @@ def on_phrase(spans, pickup, reach=2, least=4, firm=None, tell=None):
         return bar, 0
 
     pinned = sorted(firm or ())
-    fits = sum(1 for f in pinned if (f - pickup + 1 - origin) % 4 == 0)
-    holds = not pinned or fits >= len(pinned) * 0.5
+    if not pinned:
+        holds = True
     if tell is not None:
         tell["origin"] = origin
+        tell["every"] = every
         tell["on_grid"] = bool(holds)
 
     moved = []

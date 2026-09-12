@@ -103,6 +103,45 @@ def pauses(lanes, pickup, per=4, deep=0.45, most=2):
     return out
 
 
+def blackouts(lanes, pickup, per=4, look=4, deep=0.45, back=0.85, most=8,
+              quiet=0.05, fewest=2):
+    parts = {n: lift(lanes[n]) for n in NAMES}
+    band = sum(parts[n] for n in NAMES)
+    out, i = [], look
+    while i < len(band) - 1:
+        was = float(np.median(band[i - look:i]))
+        if was <= 0 or band[i] >= was * deep:
+            i += 1
+            continue
+        j = i
+        while j < len(band) and band[j] < was * deep:
+            j += 1
+        if j >= len(band) or j - i > most or band[j] < was * back:
+            i = max(j, i + 1)
+            continue
+        stayed, went = [], []
+        for name in NAMES:
+            v = parts[name]
+            near = float(np.median(v[i - look:i]))
+            if near < quiet:
+                continue
+            kept = float(np.max(v[i:j]))
+            (stayed if kept >= near * deep else went).append(SAY[name])
+        if len(went) < fewest:
+            i = max(j, i + 1)
+            continue
+        gone = len(went) / float(len(went) + len(stayed))
+        rose = min(1.0, band[j] / (was or 1.0))
+        word = "everything" if not stayed else "everything but " + \
+            " and ".join(stayed)
+        out.append(say(i - pickup + 1, 1, "pause", word,
+                       0.55 * gone + 0.45 * rose,
+                       for_beats=int((j - i) * per),
+                       back_at=int(j - pickup + 1), still=stayed))
+        i = j
+    return out
+
+
 def climbs(lanes, bright, loud, pickup, per=4, span=8, least=4, gain=0.25):
     out = []
     lines = {SAY[n]: lift(lanes[n]) for n in NAMES}
@@ -118,8 +157,9 @@ def climbs(lanes, bright, loud, pickup, per=4, span=8, least=4, gain=0.25):
                 if rose > best:
                     best, at = rose, w
             half = v[i + at // 2] - v[i] if at >= 2 else 0.0
+            jump = float(np.max(np.diff(v[i:i + at]))) if at >= 2 else best
             if (best >= gain and float(np.min(np.diff(v[i:i + at]))) > -gain / 2
-                    and half >= best * 0.25):
+                    and half >= best * 0.25 and jump <= best * 0.70):
                 bar = i - pickup + 1
                 if best > wins.get(bar, (0.0, None))[0]:
                     wins[bar] = (best, say(bar, 1, "rise", what, best,
@@ -404,7 +444,8 @@ def weigh(found, bars, edges, inner, pickup, look=2):
         for e in edges:
             if 0 < e - m["bar"] <= look:
                 leads = 0.85 if m["is"] in ("fill", "transition", "rise",
-                                            "accent", "highlight") else 0.45
+                                            "accent", "highlight",
+                                            "pause") else 0.45
                 break
         edge = max(starts, leads)
         m["weight"] = round(float(np.clip(
@@ -435,6 +476,13 @@ def moments(g, lanes, busy, bright, loud, chord, sure, spans, anchor,
         found += paces(pace, pickup)
     if width is not None:
         found += opens(width, pickup)
+    night = blackouts(lanes, pickup, g["beats_per_bar"])
+    holes = set()
+    for m in night:
+        holes.update(range(m["bar"], m["back_at"]))
+    found = [m for m in found
+             if not (m["is"] in ("pause", "rise") and m["bar"] in holes)]
+    found += night
     found += leading(found, spans, pickup, g["beats_per_bar"])
 
     floors = {"entrance": 0.30, "exit": 0.30, "rise": 0.30,

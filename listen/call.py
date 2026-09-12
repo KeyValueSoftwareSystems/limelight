@@ -92,15 +92,16 @@ def call(spans, bars):
             name[i] = "verse"
 
     for i, s in enumerate(got):
-        if (name[i] is None and seen[s["mark"]] == 1
-                and 0.15 < (i / n) < 0.85 and s["bars"] >= 4):
-            name[i] = "bridge"
-
-    for i, s in enumerate(got):
         if (name[i] is None and s["vocals"] < SURE
                 and s["loud"] >= max(mid, strong * 0.45)
                 and s["other"] > SURE and s["other"] > s["drums"]):
             name[i] = "solo"
+
+    for i, s in enumerate(got):
+        if (name[i] is None and seen[s["mark"]] == 1
+                and 0.15 < (i / n) < 0.85 and 4 <= s["bars"] <= 16
+                and s["loud"] >= strong * 0.35 and s["wide"] >= broad - 1):
+            name[i] = "bridge"
 
     for i, s in enumerate(got):
         if name[i] is None and s["loud"] < strong * 0.55 and s["wide"] < broad:
@@ -108,8 +109,6 @@ def call(spans, bars):
             if came is not None and (came["wide"] > s["wide"]
                                      or came["loud"] > s["loud"] * 1.5):
                 name[i] = "breakdown"
-
-
 
     for i, s in enumerate(got):
         if name[i] is None and s["bars"] <= 8 and 0 < i < n - 1:
@@ -126,15 +125,12 @@ def call(spans, bars):
 
     named = {}
     for i, s in enumerate(got):
-        if name[i] in ("verse", "chorus", peak):
+        if name[i] not in ("interlude", "developing", "bridge",
+                           "intro", "outro"):
             named.setdefault(s["mark"], name[i])
     for i, s in enumerate(got):
         if name[i] in ("interlude", "developing") and s["mark"] in named:
             name[i] = named[s["mark"]]
-
-    for i in range(n - 1, 0, -1):
-        if name[i] == "bridge" and name[i - 1] == "bridge":
-            name[i] = "bridge"
 
     letters = {}
     for s in got:

@@ -185,16 +185,15 @@ def read(path, slug):
     told = call([(a, b, m) for a, b, m in snapped], score_bars)
     shaped = sections([(s["from"], s["to"], s["role"]) for s in told],
                       voices, busy, pickup, report)
-    merged = []
-    for part in shaped:
-        if merged and merged[-1]["role"] == part["role"] == "bridge":
+    merged, kept = [], []
+    for part, said in zip(shaped, told):
+        if (merged and merged[-1]["role"] == part["role"] == "bridge"
+                and part["to_bar"] - merged[-1]["from_bar"] + 1 <= 16):
             merged[-1]["to_bar"] = part["to_bar"]
             continue
         merged.append(part)
-    if len(merged) != len(shaped):
-        told = [t for t, keep in zip(told, [True] * len(told))]
-        shaped = merged
-        told = told[:len(shaped)] if len(told) > len(shaped) else told
+        kept.append(said)
+    shaped, told = merged, kept
 
     for part, said in zip(shaped, told):
         part["nth"] = said["nth"]
@@ -203,9 +202,8 @@ def read(path, slug):
 
     peak = [t for t in told if t["role"] in ("drop", "chorus")]
     anchor = peak[0]["mark"] if peak else (told[0]["mark"] if told else 0)
-    starts = [t["from"] - pickup + 1 for t in told[1:]]
     origin = grid_says.get("origin", 1)
-    every = 8 if starts and all((x - origin) % 8 == 0 for x in starts) else 4
+    every = grid_says.get("every", 4)
     phrase_rule = {"every_bars": every, "from_bar": origin,
                    "boundaries_on_grid": grid_says.get("on_grid", True)}
     show(slug, g, report, {"essentia hears": f["rhythm.bpm"]})

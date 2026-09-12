@@ -25,6 +25,12 @@ button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c
 .part{border-left:1px solid #39445c}
 .part:first-of-type{border-left:none}
 .beat{position:absolute;top:4px;width:2px;height:34px;z-index:4;pointer-events:none;border-radius:1px}
+.beatname{position:absolute;left:2px;top:35px;font:8px ui-monospace,monospace;white-space:nowrap;
+          color:inherit;opacity:.9;text-shadow:0 1px 2px #000}
+#key{display:flex;flex-wrap:wrap;gap:9px;margin:4px 0 0;font:9px ui-monospace,monospace;color:#5c6478}
+#key b{font-weight:400}
+#key i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:3px;
+       vertical-align:-1px;font-style:normal}
 #marks{width:100%;height:112px;display:block;margin-top:6px}
 #head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:3}
 #zoom{width:100%;height:86px;cursor:pointer;margin:0 0 6px;border:1px solid var(--line);border-radius:6px;
@@ -74,6 +80,7 @@ h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
 <canvas id="zoom"></canvas>
 
 <div id="map"><div id="head"></div></div>
+<div id="key"></div>
 <div id="subs"></div>
 <canvas id="lanes"></canvas>
 <canvas id="marks"></canvas>
@@ -173,6 +180,8 @@ function draw() {
     el.style.background = KIND[m.is] || "#8b93a6";
     el.style.opacity = 0.35 + 0.65 * (m.weight ?? 0);
     el.title = `bar ${m.bar}.${m.beat} · ${m.is} ${m.what} · weight ${m.weight}`;
+    const wide = len > 0 && (len/total)*100 > 2.2;
+    if (wide) el.innerHTML = `<span class="beatname">${m.is}</span>`;
     map.appendChild(el);
   }
 
@@ -201,6 +210,10 @@ function draw() {
     map.appendChild(note);
   }
 
+  $("key").innerHTML =
+    `<span>moments in the map (weight ≥ 0.55):</span>` +
+    Object.entries(KIND).map(([k, c]) =>
+      `<b><i style="background:${c}"></i>${k}</b>`).join("");
   lanes(); marks(); subs(); sections();
 }
 
