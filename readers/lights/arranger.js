@@ -26,6 +26,7 @@
 const { view } = require("./preflight.js");
 const { shape } = require("./fromscore.js");
 const Mu = require("./musical.js");
+const { FACTS } = require("./facts.js");
 
 const clamp01 = v => Math.max(0, Math.min(1, v));
 
@@ -124,11 +125,6 @@ const DYN = {
 const LIFT = new Set(["peaking", "intensifying", "expanding"]);
 const EASE = new Set(["easing", "thinning", "suspending", "resolving", "closing"]);
 const classify = sub => LIFT.has(sub.doing) ? "lift" : EASE.has(sub.doing) ? "ease" : "hold";
-/* a step along the energy ladder of contexts, for a variation's matrix column */
-const CALMER = { final_drop: "drop", drop: "break", build: "verse", verse: "break",
-                 break: "intro", intro: "silence", outro: "silence", silence: "silence" };
-const BOLDER = { silence: "intro", intro: "verse", outro: "verse", break: "verse",
-                 verse: "build", build: "drop", drop: "final_drop", final_drop: "final_drop" };
 
 /* the per-bar texture + presence lanes, normalised per song, anchored once */
 function lanesBlock(score) {
@@ -207,7 +203,7 @@ function factsBlock(score, sections, contexts, lanes, harmony, subs, moments, bp
     const v = { form: contexts[si] };
     const B = (bar - 1) * bpb;
     const sub = subs.find(su => atBeat(su.from) <= B && B < atBeat(su.to));
-    v.doing = (sub && sub.doing) ? sub.doing : "holding";
+    v.doing = (sub && sub.doing && FACTS.doing.includes(sub.doing)) ? sub.doing : "holding";
     if (drums || bass || vocals) {
       v.presence = [];
       for (const [name, r] of [["drums", drums], ["bass", bass], ["vocals", vocals]]) {
@@ -229,13 +225,50 @@ function factsBlock(score, sections, contexts, lanes, harmony, subs, moments, bp
     }
     const here = moments.filter(m => m.bar === bar && typeof m.kind === "string");
     if (here.length) {
-      const kinds = [...new Set(here.map(m => m.kind))];
-      const w = Math.max(...here.map(m => (typeof m.weight === "number" ? m.weight : 0.5)));
-      v.moment = [...kinds, weightBand(w)];
+      const kinds = [...new Set(here.map(m => m.kind))].filter(k => FACTS.moment.includes(k));
+      if (kinds.length) {
+        const w = Math.max(...here.map(m => (typeof m.weight === "number" ? m.weight : 0.5)));
+        v.moment = [...kinds, weightBand(w)];
+      }
     }
     vectors.push(v);
   }
   return { from_bar, vectors };
+}
+
+/* the vector a SPAN of bars agrees on: form as given; doing by majority (or the
+   caller's word, a subsection's own); each stem's presence by majority; a texture
+   band only when more than half the bars carry it; harmony's mode by majority and
+   never "changing" (that is a bar fact). Moments never belong to a span. */
+function majorityVector(vectors, i0, i1, form, doing) {
+  const span = [];
+  for (let i = Math.max(0, i0); i < Math.min(vectors.length, i1); i++) if (vectors[i]) span.push(vectors[i]);
+  const v = { form };
+  const count = (pick) => {
+    const c = {};
+    for (const x of span) for (const f of (pick(x) || [])) c[f] = (c[f] || 0) + 1;
+    return c;
+  };
+  const top = c => Object.keys(c).sort((a, b) => c[b] - c[a] || (a < b ? -1 : 1))[0];
+  if (doing) v.doing = doing;
+  else { const c = count(x => (x.doing ? [x.doing] : [])); v.doing = span.length ? top(c) : "holding"; }
+  if (span.some(x => x.presence)) {
+    const c = count(x => x.presence);
+    v.presence = [];
+    for (const stem of ["drums", "bass", "vocals"]) {
+      const a = c[stem + ":in"] || 0, b = c[stem + ":out"] || 0;
+      if (a || b) v.presence.push(stem + (a >= b ? ":in" : ":out"));
+    }
+  }
+  if (span.some(x => x.texture)) {
+    const c = count(x => x.texture);
+    v.texture = Object.keys(c).filter(f => c[f] * 2 > span.length).sort();
+  }
+  if (span.some(x => x.harmony)) {
+    const c = count(x => x.harmony.filter(f => f !== "changing"));
+    v.harmony = (c.minor || 0) >= (c.major || 0) && (c.minor || c.major) ? ["minor"] : (c.major ? ["major"] : []);
+  }
+  return v;
 }
 
 /* ---- pace -> how fast the PAR patterns run -------------------------------------
@@ -298,8 +331,8 @@ function plan(scoreIn, enumResult, seed) {
   /* a PAR look must drive the pars' level (a strobe-only accent is not a look --
      carving the base around it would leave colour/level unowned) */
   const isLook = id => occOf(id).some(t => t === "pars:level" || t.startsWith("all_pars"));
-  const pickFor = (ctx, grp, exclude) => {
-    const all = V.candidates(ctx);
+  const pickFor = (vector, grp, exclude) => {
+    const all = V.candidates(vector);
     const same = all.filter(c => groupOf(c.id) === grp && (grp !== "par" || isLook(c.id)));
     const pool = (same.length ? same : all).filter(c => !(exclude || []).includes(c.id));
     return pickWeighted(pool, rng);
@@ -366,9 +399,12 @@ function plan(scoreIn, enumResult, seed) {
     const drawnHue = +rng().toFixed(3);
     const hue = keyHue !== null ? keyHue : drawnHue;
     const secFrom = atBeat(sec.from), secTo = atBeat(sec.to);
+    const idx = bar => (facts ? bar - facts.from_bar : -1);
+    const vectors = facts ? facts.vectors : [];
+    const sectionVector = facts ? majorityVector(vectors, idx(sec.from.bar), idx(sec.to.bar), context) : { form: context, doing: "holding" };
 
     /* the PARs: a look + the phase's contrast (floor/peak/mode) */
-    const par = pickFor(context, "par");
+    const par = pickFor(sectionVector, "par");
     const parParams = { rate, hue, floor: dyn.floor, peak: dyn.peak, mode: dyn.mode, intensity: boldness };
 
     const inside = subsIn(sec);
@@ -381,16 +417,19 @@ function plan(scoreIn, enumResult, seed) {
     inside.forEach((su, j) => {
       const cls = classify(su);
       const isFirst = j === 0 || su.f === secFrom;
-      const wantsOwn = par && !isFirst && inside.length > 1 && (cls !== "hold" || su.has_break);
+      const wantsOwn = par && !isFirst && inside.length > 1 && ((su.doing && su.doing !== "holding") || su.has_break);
       if (wantsOwn) {
-        const vctx = cls === "ease" ? CALMER[context] : cls === "lift" ? BOLDER[context] : context;
-        let pick = pickFor(vctx, "par", [par.id, lastVar]);
-        if (!pick && vctx !== context) pick = pickFor(context, "par", [par.id, lastVar]);
+        /* the subsection's own vector: its word for doing, the facts its bars agree on */
+        const subVector = facts
+          ? majorityVector(vectors, idx(barOf(su.f)), idx(barOf(su.t)), context, su.doing || "holding")
+          : { form: context, doing: su.doing || "holding" };
+        let pick = pickFor(subVector, "par", [par.id, lastVar]);
+        if (!pick) pick = pickFor(sectionVector, "par", [par.id, lastVar]);
         if (pick) {
           const vp = { ...parParams };
           if (cls === "lift") { vp.floor = +clamp01(dyn.floor + 0.05).toFixed(3); vp.intensity = +clamp01(boldness * 1.1).toFixed(3); }
           if (cls === "ease") { vp.floor = +clamp01(dyn.floor - 0.15).toFixed(3); vp.intensity = +clamp01(boldness * 0.9).toFixed(3); }
-          variations.push({ from: fromBeat(su.f), to: fromBeat(su.t), seq_id: pick.id, context, vcontext: vctx,
+          variations.push({ from: fromBeat(su.f), to: fromBeat(su.t), seq_id: pick.id, context, facts: subVector,
             layer: "par", priority: 0, variation: true, doing: su.doing || null, params: vp,
             occupies: occFor(pick.id, "par"), section: sec.name, f: su.f, t: su.t });
           lastVar = pick.id;
@@ -413,18 +452,18 @@ function plan(scoreIn, enumResult, seed) {
       pieces.forEach((pc, k) => assignments.push({
         from: fromBeat(pc[0]), to: fromBeat(pc[1]), seq_id: par.id, context, layer: "par", priority: 0,
         ...(pieces.length > 1 ? { piece: k, origin: sec.from } : {}),   /* so a scripted compound keeps its clock */
-        params: parParams, occupies: occFor(par.id, "par"), section: sec.name,
+        params: parParams, facts: sectionVector, occupies: occFor(par.id, "par"), section: sec.name,
       }));
       for (const v of variations) { const { f, t, ...a } = v; assignments.push(a); }
     }
 
     /* the head: always moving/lit, its own colour voice, speed by phase -- one
        continuous look per section, so the hero element reads as continuity */
-    const head = pickFor(context, "head");
+    const head = pickFor(sectionVector, "head");
     if (head) assignments.push({
       from: sec.from, to: sec.to, seq_id: head.id, context, layer: "head", priority: 1,
       params: { rate, hue, headDim: dyn.head, motion: dyn.motion, intensity: dyn.head },
-      occupies: occFor(head.id, "head"), section: sec.name,
+      facts: sectionVector, occupies: occFor(head.id, "head"), section: sec.name,
     });
 
     /* extra musical aspects, overlapping on their own fixture attribute so they
@@ -510,7 +549,7 @@ function clashes(p) {
   return n;
 }
 
-module.exports = { plan, contextsFor, sectionEnergyMean, energyReader, clashes, carve, factsBlock };
+module.exports = { plan, contextsFor, sectionEnergyMean, energyReader, clashes, carve, factsBlock, majorityVector };
 
 /* ---- CLI: plan a score and print the show, section by section ------------
      node readers/lights/arranger.js [score file] [seed]   */
@@ -527,11 +566,11 @@ if (require.main === module) {
   const p = plan(score, en, seed);
   console.log(`\n${score.score || "song"} — plan @ seed ${seed}   (${p.assignments.length} assignments over ${score.sections.length} sections, ${en.sequences.length}-sequence palette)`);
   const pos = q => q.bar + (q.beat && q.beat !== 1 ? "." + q.beat : "");
+  const vec = f => f ? "[" + [f.form, f.doing, (f.presence || []).join("+"), (f.texture || []).join("+"), (f.harmony || []).join("+")].filter(Boolean).join("|") + "]" : "";
   for (const a of p.assignments)
     console.log("  " + (pos(a.from) + "-" + pos(a.to)).padEnd(11) +
-      "  " + String(a.section || "").padEnd(11) + " " + String(a.context || "").padEnd(11) +
-      " " + a.layer.padEnd(9) + " -> " + String(a.seq_id || a.type).padEnd(28) +
-      (a.variation ? " [" + a.doing + "]" : a.moment ? " [" + a.moment + (a.what ? ": " + a.what : "") + "]" : "") +
-      " " + JSON.stringify(a.params || {}));
+      "  " + String(a.section || "").padEnd(11) + " " + a.layer.padEnd(9) + " -> " + String(a.seq_id || a.type).padEnd(28) +
+      (a.variation ? " [var " + a.doing + "]" : a.moment ? " [" + a.moment + (a.what ? ": " + a.what : "") + "]" : "") +
+      " " + vec(a.facts));
   console.log(`  (${clashes(p)} clashes; ${p.lanes ? "lanes " + Object.keys(p.lanes).filter(k => k !== "from_bar").join("/") : "no lanes"}; ${p.harmony ? "harmony from key hue " + (p.harmony.key && p.harmony.key.hue) : "no harmony"})`);
 }

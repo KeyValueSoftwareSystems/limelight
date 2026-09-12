@@ -273,6 +273,42 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
      JSON.stringify(plan(format(require("./fixtures/mini_raw.js").RAW()), EN, 42).facts) === JSON.stringify(F));
 }
 
+/* ---- picks are made with vectors and say so ---------------------------------- */
+{
+  const { majorityVector } = require("./arranger.js");
+  const vs = [
+    { form: "drop", doing: "expanding", presence: ["drums:in", "bass:in"], texture: ["busy"], harmony: ["minor"] },
+    { form: "drop", doing: "expanding", presence: ["drums:in", "bass:out"], texture: ["busy", "narrow"], harmony: ["major", "changing"] },
+    { form: "drop", doing: "easing", presence: ["drums:out", "bass:out"], texture: ["sparse"], harmony: ["minor"] },
+  ];
+  const m = majorityVector(vs, 0, 3, "drop");
+  ok("the majority doing wins", m.doing === "expanding", m.doing);
+  ok("presence is decided per stem by majority", m.presence.includes("drums:in") && m.presence.includes("bass:out") && m.presence.length === 2, JSON.stringify(m.presence));
+  ok("a texture band needs more than half the bars", m.texture.includes("busy") && !m.texture.includes("narrow") && !m.texture.includes("sparse"), JSON.stringify(m.texture));
+  ok("harmony keeps the majority mode and never 'changing'", JSON.stringify(m.harmony) === JSON.stringify(["minor"]));
+  ok("a doing override is honoured (a subsection's own word)", majorityVector(vs, 0, 3, "drop", "peaking").doing === "peaking");
+  ok("a moment never belongs to a span vector", m.moment === undefined);
+
+  const p = plan(MINI, EN, 42);
+  const base = p.assignments.find(a => a.layer === "par" && a.seq_id && a.from.bar === 4 && !a.variation);
+  /* MINI's one high-energy section is also its last, so its context is final_drop */
+  ok("a base look carries the vector it was chosen with", base && base.facts && base.facts.form === "final_drop" && base.facts.doing && Array.isArray(base.facts.presence), JSON.stringify(base && base.facts));
+  const vari = p.assignments.find(a => a.layer === "par" && a.variation && a.from.bar === 8);
+  ok("a variation carries its own subsection's vector", vari && vari.facts.doing === "easing" && vari.facts.form === "final_drop", JSON.stringify(vari && vari.facts));
+  ok("variations no longer step a context (no vcontext)", p.assignments.every(a => a.vcontext === undefined));
+  const head = p.assignments.find(a => a.layer === "head" && a.from.bar === 4);
+  ok("the head look carries the section vector too", head && head.facts && head.facts.form === "final_drop");
+  ok("a plain score's looks carry form-and-holding vectors", plan(SCORE, EN, 42).assignments.filter(a => a.seq_id).every(a => a.facts && a.facts.form && a.facts.doing === "holding"));
+  ok("no clashes with vector picks", clashes(p) === 0, `${clashes(p)}`);
+  ok("the rich plan is still deterministic", JSON.stringify(plan(MINI, EN, 42)) === JSON.stringify(p));
+
+  /* facts read from the score must be vocabulary words (Task 6 review) */
+  const MINI2 = require("./fixtures/mini_raw.js").RAW();
+  MINI2.phrases[1].doing = "grooving";
+  ok("a doing word outside the vocabulary falls back to holding",
+     plan(MINI2, EN, 42).facts.vectors[4].doing === "holding", plan(MINI2, EN, 42).facts.vectors[4].doing);
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;
