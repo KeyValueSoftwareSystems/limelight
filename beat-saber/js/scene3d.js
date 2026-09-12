@@ -8,12 +8,13 @@
   const BLOCK_Y = 0;
 
   const COLORS = { red: 0xff2d55, blue: 0x2ec5ff };
-  let renderer, scene, camera, mount;
+  let renderer, scene, camera, mount, raycaster;
   let blocks = new Map();   // key -> { mesh, note }
   let saberMeshes = [];
 
   function init(mountEl) {
     mount = mountEl;
+    raycaster = new THREE.Raycaster();
     scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x05060c, 30, 65);
 
@@ -73,8 +74,39 @@
     const arrow = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.0), arrowMat);
     arrow.position.z = 0.72; mesh.add(arrow);
     mesh.position.set(LANE_X[note.lane], BLOCK_Y, FAR_Z);
+    mesh.userData.key = note.key;               // so a raycast hit maps back to the note
     scene.add(mesh);
     blocks.set(note.key, { mesh: mesh, note: note });
+  }
+
+  // ---- pointer picking: the mouse is a sharp point cast into the scene -------
+  // Normalized playfield coords (0..1) -> the world point where the cursor ray
+  // crosses the block plane (z = STRIKE_Z). This is where the saber tip is drawn
+  // and, via a ray, which block the pointer is actually over.
+  function ndcFrom(nx, ny) { return new THREE.Vector2(nx * 2 - 1, -(ny * 2 - 1)); }
+
+  function planePoint(nx, ny) {
+    if (!camera) return null;
+    raycaster.setFromCamera(ndcFrom(nx, ny), camera);
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -STRIKE_Z);
+    const pt = new THREE.Vector3();
+    return raycaster.ray.intersectPlane(plane, pt) ? pt : null;
+  }
+
+  // Which block keys the pointer is currently over, nearest first.
+  function pickBlocks(nx, ny) {
+    if (!camera) return [];
+    raycaster.setFromCamera(ndcFrom(nx, ny), camera);
+    const meshes = [];
+    blocks.forEach((b) => meshes.push(b.mesh));
+    const hits = raycaster.intersectObjects(meshes, true);
+    const keys = [];
+    for (const h of hits) {
+      let o = h.object;
+      while (o && o.userData.key == null && o.parent) o = o.parent;  // arrow child -> block
+      if (o && o.userData.key != null && keys.indexOf(o.userData.key) === -1) keys.push(o.userData.key);
+    }
+    return keys;
   }
 
   function update(progressOf) {
@@ -109,20 +141,61 @@
   function missBlock(key) { removeWith(key, 0.6, true); }
 
   function setSabers(sabers) {
-    while (saberMeshes.length < sabers.length) {
-      const m = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.08, 0.08, 3, 8),
-        new THREE.MeshBasicMaterial({ color: 0xffffff }));
-      m.rotation.x = Math.PI / 2; scene.add(m); saberMeshes.push(m);
-    }
-    saberMeshes.forEach((m, i) => {
+    while (saberMeshes.length < sabers.length) saberMeshes.push(makeSaber());
+    const UP = new THREE.Vector3(0, 1, 0);
+    saberMeshes.forEach((g, i) => {
       const s = sabers[i];
-      m.visible = !!s;
+      g.visible = !!s;
       if (!s) return;
-      m.material.color.setHex(COLORS[s.color] || 0xffffff);
-      m.position.set((s.tip.x - 0.5) * 9, (0.5 - s.tip.y) * 5, STRIKE_Z + 1.2);
-      m.material.opacity = s.active ? 1 : 0.4; m.material.transparent = true;
+      const blade = g.userData.blade, glow = g.userData.glow, hilt = g.userData.hilt;
+      const col = COLORS[s.color] || 0xffffff;
+      blade.material.color.setHex(col); glow.material.color.setHex(col);
+
+      // Hilt sits at a "hand" near a bottom corner (left hand left, right right),
+      // slightly toward the camera. The blade aims UP to the cursor on the block
+      // plane, so it naturally tilts to its side, rises, and its tip meets blocks.
+      const side = s.hand === "left" ? -1 : 1;
+      const hand = new THREE.Vector3(side * 2.6, -2.6, STRIKE_Z + 3.0);
+      // Tip is exactly under the mouse pointer (same ray used for picking), so the
+      // sharp point the player aims with is the point that meets the block.
+      const tipPt = planePoint(s.tip.x, s.tip.y) ||
+                    new THREE.Vector3((s.tip.x - 0.5) * 9, (0.5 - s.tip.y) * 5, STRIKE_Z);
+
+      const dir = new THREE.Vector3().subVectors(tipPt, hand);
+      const len = Math.max(dir.length(), 0.001);
+      const mid = new THREE.Vector3().addVectors(hand, tipPt).multiplyScalar(0.5);
+      const q = new THREE.Quaternion().setFromUnitVectors(UP, dir.clone().normalize());
+
+      blade.position.copy(mid); blade.quaternion.copy(q); blade.scale.set(1, len, 1);
+      glow.position.copy(mid);  glow.quaternion.copy(q);  glow.scale.set(1, len, 1);
+      hilt.position.copy(hand); hilt.quaternion.copy(q);
+
+      const on = s.active ? 1 : 0.6;
+      blade.material.opacity = on; glow.material.opacity = on * 0.3;
     });
+    render();   // paint the sabers this frame (update() rendered before this)
+  }
+
+  // A saber: a bright unit-height blade (scaled to length per frame) with a soft
+  // glow sheath and a dark hilt. Built along +Y so a quaternion can aim it from
+  // the hand up to the cursor.
+  function makeSaber() {
+    const g = new THREE.Group();
+    const blade = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.11, 0.07, 1, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true }));
+    g.add(blade);
+    const glow = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.26, 0.16, 1, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3, depthWrite: false }));
+    g.add(glow);
+    const hilt = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.17, 0.17, 0.85, 10),
+      new THREE.MeshStandardMaterial({ color: 0x2a3140, metalness: 0.8, roughness: 0.3 }));
+    g.add(hilt);
+    g.userData.blade = blade; g.userData.glow = glow; g.userData.hilt = hilt;
+    scene.add(g);
+    return g;
   }
 
   function render() { if (renderer) renderer.render(scene, camera); }
@@ -139,5 +212,5 @@
   }
 
   window.Scene3D = { init, resize, spawnBlock, update, sliceBlock, missBlock,
-                     setSabers, clear, dispose, LANE_X: LANE_X };
+                     setSabers, pickBlocks, planePoint, clear, dispose, LANE_X: LANE_X };
 })();

@@ -19,11 +19,13 @@
     if (Math.abs(dt_ms) > window_ms) return { hit: false, reason: "timing", dt_ms: dt_ms };
     if (swing.color !== note.color) return { hit: false, reason: "color", dt_ms: dt_ms };
 
-    const v = DIR_VEC[note.direction] || [0, 1];
-    const sp = Math.hypot(swing.vel.x, swing.vel.y) || 1;
-    const sx = swing.vel.x / sp, sy = swing.vel.y / sp;
-    const dot = v[0] * sx + v[1] * sy;
-    if (dot < tol) return { hit: false, reason: "direction", dt_ms: dt_ms };
+    if (opts.require_direction !== false) {
+      const v = DIR_VEC[note.direction] || [0, 1];
+      const sp = Math.hypot(swing.vel.x, swing.vel.y) || 1;
+      const sx = swing.vel.x / sp, sy = swing.vel.y / sp;
+      const dot = v[0] * sx + v[1] * sy;
+      if (dot < tol) return { hit: false, reason: "direction", dt_ms: dt_ms };
+    }
 
     const a = Math.abs(dt_ms);
     const grade = a < 60 ? "perfect" : a < 120 ? "good" : "ok";

@@ -106,15 +106,18 @@
 
   function judgeSwings(sabers, nowSec) {
     for (const s of sabers) {
-      if (!s.active) continue;
-      const speed = Math.hypot(s.vel.x, s.vel.y);
-      if (speed < 0.012) continue;               // not a real swing this frame
-      notes.forEach((note, key) => {
-        const p = progressOf(key);
-        if (p < 0.6) return;                      // only judge near the strike line
-        const r = window.Judge.judge(note, s, nowSec, { latency_ms: latency_ms });
+      if (!s.active) continue;                   // that saber's button must be held
+      // The mouse is a sharp point: only blocks the pointer is actually over can
+      // be touched. Raycast through the cursor and cut what it lands on.
+      const keys = window.Scene3D.pickBlocks(s.tip.x, s.tip.y);
+      for (const key of keys) {
+        const note = notes.get(key);
+        if (!note) continue;
+        if (progressOf(key) < 0.5) continue;     // must be near the strike line to reach
+        const r = window.Judge.judge(note, s, nowSec,
+          { latency_ms: latency_ms, require_direction: false });
         if (r.hit) hit(key);
-      });
+      }
     }
   }
 
