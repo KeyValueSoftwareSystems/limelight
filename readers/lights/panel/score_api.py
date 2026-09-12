@@ -17,7 +17,8 @@ KNOWN = [
 ]
 
 _STEMS = ["drums", "bass", "vocals", "guitar", "piano", "other"]
-_ALWAYS = ["score", "version", "window", "grid"]
+# profile rides with the score when present — asked for or not (protocol rule 5)
+_ALWAYS = ["score", "version", "window", "grid", "profile"]
 
 
 # ---------------------------------------------------------------------------
@@ -143,6 +144,10 @@ def format_v1(raw):
     if raw.get("feel"):
         out["feel"] = raw["feel"]
 
+    # consumer layer: colours (etc.) embedded by hub pull / ?profile=
+    if raw.get("profile"):
+        out["profile"] = raw["profile"]
+
     return out
 
 
@@ -219,7 +224,9 @@ def handle(body, fetch_score):
     """Process a score protocol request.
 
     body        -- the parsed JSON request body
-    fetch_score -- callable(name) -> parsed score dict
+    fetch_score -- callable(name, profile=None) -> parsed score dict
+                   (profile is how one user's application treats the score;
+                   the hub embeds it when asked, or raises if it is missing)
     """
     if not body or not isinstance(body.get("score"), str) or not body["score"]:
         raise ValueError('"score" field is required and must be a non-empty string')
@@ -231,7 +238,12 @@ def handle(body, fetch_score):
         if any(not isinstance(f, str) for f in fields):
             raise ValueError('every entry in "fields" must be a string')
 
-    raw = fetch_score(body["score"])
+    profile = body.get("profile")
+    if profile is not None:
+        if not isinstance(profile, str) or not profile:
+            raise ValueError('"profile" must be a non-empty string')
+
+    raw = fetch_score(body["score"], profile)
 
     if body.get("version") is not None and body["version"] != raw.get("version"):
         return {

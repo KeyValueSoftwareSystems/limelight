@@ -115,5 +115,8 @@ export function format(raw) {
   if (raw.loudness) out.loudness = raw.loudness;
   if (raw.feel)     out.feel     = raw.feel;
 
+  /* consumer layer: present when the score was pulled / loaded with a profile */
+  if (raw.profile) out.profile = raw.profile;
+
   return out;
 }

@@ -54,3 +54,4 @@ work/sep-test/
 *.score.json
 # except the fixture cli/remote.test.js reads to check bytes survive a round trip.
 !protocol/levels.score
+/docs
