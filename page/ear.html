@@ -43,7 +43,7 @@ section{margin:0 0 24px}
 canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;background:#06090e}
 #zoom{height:110px;cursor:pointer}
 #tune{height:140px;cursor:pointer}
-#curves{height:190px;cursor:pointer}
+#curves{height:394px;cursor:pointer}
 #lanes{height:104px;cursor:pointer;border-radius:0 0 8px 8px;border-top:none}
 #map{position:relative;height:124px;border:1px solid var(--line);border-bottom:none;
   border-radius:8px 8px 0 0;background:#06090e;overflow:hidden;cursor:pointer}
@@ -68,6 +68,8 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 .part.here{outline:2px solid var(--ok);outline-offset:-2px}
 .beat{position:absolute;top:5px;height:12px;min-width:3px;z-index:4;border-radius:2px;cursor:pointer}
 .beat:hover{filter:brightness(1.8);transform:scaleY(1.4)}
+.beat.gone{top:17px;height:4px;opacity:.3;border-radius:1px}
+.beat.gone:hover{opacity:.9}
 .sub{position:absolute;top:0;bottom:0;border-left:1px solid #2c3340;font:9.5px ui-monospace,monospace;
   padding:2px 0 0 4px;overflow:hidden;white-space:nowrap;cursor:pointer}
 .sub:hover{filter:brightness(1.55)}
@@ -165,7 +167,8 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
   <p class="note">The narrow top strip holds the <b>notable moments</b> &mdash; hover one to read it, click to
     hear it. Below it are the <b>sections</b>, each drawn as tall as it sounds full. The thin band under the
     section names says what the music is <b>doing</b>. The four rows at the bottom are how loud each
-    instrument is, bar by bar. <b>Click anywhere to jump there.</b></p>
+    instrument is, bar by bar. <b>Click anywhere to jump there.</b>
+    <span id="dropped" class="dim"></span></p>
   <div id="map"><div id="dots"><span>MOMENTS</span></div><div id="head"></div></div>
   <div class="holder"><div id="subs"></div><div class="pline" data-for="subs"></div></div>
   <div class="holder"><div id="chords"></div><div class="pline" data-for="chords"></div></div>
@@ -465,6 +468,24 @@ function draw() {
     map.appendChild(el);
   }
 
+  /* Everything the detectors proposed, including what the culling threw away.
+     Levels keeps eight moments out of seventy-eight signals, and the seventy
+     were invisible -- so "did it miss this" could not be answered by looking. */
+  const kept = new Set((SCORE.moments || []).map(m => `${m.bar}.${m.beat}.${m.is}`));
+  for (const g of SCORE.signals || []) {
+    if (kept.has(`${g.bar}.${g.beat}.${g.is}`)) continue;
+    const t = momentTime(g);
+    if (t < 0 || t > total) continue;
+    const el = document.createElement("div");
+    el.className = "beat gone";
+    el.dataset.t0 = t; el.dataset.t1 = t;
+    el.style.background = KIND[g.is] || "#8b93a6";
+    el.title = `${mmss(t)} · bar ${g.bar} · ${momentWords(g)} · considered and dropped`
+             + ` (weight ${g.weight ?? "-"}, sure ${g.sure ?? "-"})`;
+    el.onclick = ev => { ev.stopPropagation(); hearMoment(g); };
+    map.appendChild(el);
+  }
+
   for (const m of SCORE.moments || []) {
     const t = momentTime(m);
     if (t < 0 || t > total) continue;
@@ -538,19 +559,28 @@ function draw() {
     </dl></div>`;
 
   $("curvekey").innerHTML = CURVES.map(([k, n, hue, why]) =>
-    `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}</span>`).join("");
+    `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}</span>`).join("")
+    + (Array.isArray(SCORE.tension)
+       ? `<span><i style="background:#e0655f"></i><b style="color:var(--dim)">Tension</b> &mdash; how much `
+         + `the music is winding up. One reading a beat, so it is the only row here fast enough to show a `
+         + `build happening; the amber marks are where it breaks.</span>` : "");
+
+  const shown = (SCORE.moments || []).length, all = (SCORE.signals || []).length;
+  $("dropped").textContent = all > shown
+    ? `The detectors proposed ${all} moments and kept ${shown}; the ${all - shown} dropped ones `
+      + `are the faint ticks under the strip, so you can see what it decided against.`
+    : "";
 
   $("tunekey").innerHTML =
     `<span><i style="background:${STEM.vocals}"></i>a note that was sung</span>`
     + `<span><i style="background:${STEM.other}"></i>a note played by the lead instrument</span>`
     + `<span><i style="background:#c8a2ff"></i>a tune you have already heard, coming back</span>`
-    + `<span class="warn" style="flex-basis:100%">Only stretches the computer found by following the `
-    + `tune are shaded here. Claims about the chords repeating are listed with the moments instead, `
-    + `because they are not about the melody.</span>`
-    + `<span class="dim">higher up the strip = higher note</span>`
-    + `<span style="flex-basis:100%;margin-top:3px">The line of ticks under the notes is where each `
-    + `<b style="color:var(--ink)">phrase of the tune</b> starts and ends &mdash; click one to hear just `
-    + `that phrase. A &#8634; marks a phrase whose shape repeats an earlier one.</span>`;
+    + `<span class="dim">higher up = higher note</span>`
+    + `<span class="dim" style="flex-basis:100%">The ticks under the notes are the `
+    + `<b style="color:var(--ink)">phrases of the tune</b> &mdash; click one to hear it, `
+    + `&#8634; marks one whose shape repeats an earlier phrase. Only stretches found by following `
+    + `the tune are shaded; chord repeats are listed with the moments, not here.</span>`
+;
 
   lanes(); tune(); curves(); subs(); chordRow(); sections(); place();
 }
@@ -775,11 +805,11 @@ function tune() {
     g.lineWidth = 1;
     g.beginPath();
     g.moveTo(x0, foot + 6); g.lineTo(x1, foot + 6); g.stroke();
-    g.beginPath(); g.moveTo(x0, foot + 3); g.lineTo(x0, foot + 9); g.stroke();
-    if (q.same_as != null && x1 - x0 > 26) {
+    g.beginPath(); g.moveTo(x0, foot + 2); g.lineTo(x0, foot + 10); g.stroke();
+    if (q.same_as != null && x1 - x0 > 14) {
       g.fillStyle = voice ? STEM.vocals : STEM.other;
-      g.globalAlpha = 0.9; g.font = "8.5px ui-monospace,monospace";
-      g.fillText("\u21ba", (x0 + x1) / 2 - 3, foot + 4);
+      g.globalAlpha = 1; g.font = "600 10px ui-monospace,monospace";
+      g.fillText("\u21ba", (x0 + x1) / 2 - 3, foot + 15);
     }
     g.globalAlpha = 1;
   });
@@ -865,16 +895,28 @@ const CURVES = [
 ];
 
 function curves() {
-  const [g, W] = fit($("curves"), 190);
+  const tense = Array.isArray(SCORE.tension) ? SCORE.tension : null;
+  const rows = CURVES.filter(c => Array.isArray((SCORE.bars || {})[c[0]]));
+  /* Six rows in 190px left eighteen pixels of drawing height each, so a change
+     from 0.09 to 0.79 -- the whole distance between a breakdown and a drop --
+     came out as twelve pixels of wobble. The data was never flat; there was
+     nowhere to draw it. */
+  const ROW = 58;
+  const [g, W] = fit($("curves"), rows.length * ROW + (tense ? 46 : 0));
   const b = SCORE.bars || {};
-  const mine = CURVES.filter(c => Array.isArray(b[c[0]]));
+  const mine = rows;
   if (!mine.length) return;
-  const h = 190 / mine.length, L = 78;
+  const h = ROW, L = 78;
   const bar = Math.max(0, Math.floor((aud.currentTime - SCORE.grid.first_beat_s)/BAR) + 1 - FIRSTBAR);
   mine.forEach(([key, name, hue, why], row) => {
     const v = b[key], y0 = row*h;
     const got = v.filter(x => x != null);
-    const top = Math.max(1e-6, Math.max(...got));
+    /* Scaled to what this lane actually does, not to its maximum: width lives
+       between 0.26 and 0.83 and spent half its height drawing the empty space
+       under 0.26. */
+    const hi = Math.max(...got), lo = Math.min(...got);
+    const reach = Math.max(1e-6, hi - lo);
+    const at = x => (x - lo) / reach;
     if (row) {
       g.strokeStyle = "#131a26"; g.lineWidth = 1;
       g.beginPath(); g.moveTo(0, y0); g.lineTo(W, y0); g.stroke();
@@ -893,7 +935,7 @@ function curves() {
         const t = barTime(i + FIRSTBAR);
         if (t + BAR < VIEW.a || t > VIEW.b) { open = false; continue; }
         const x = L + frac(t) * (W - L - 46);
-        const y = y0 + h - 6 - (val/top) * (h - 14);
+        const y = y0 + h - 8 - at(val) * (h - 20);
         open ? g.lineTo(x, y) : g.moveTo(x, y);
         open = true;
       }
@@ -912,12 +954,54 @@ function curves() {
     g.fillStyle = hue; g.font = "600 10px ui-monospace,monospace";
     g.fillText(name.toUpperCase(), 7, y0 + 13);
     g.fillStyle = "#4a5364"; g.font = "8px ui-monospace,monospace";
-    g.fillText(top.toFixed(2), 7, y0 + h - 5);
+    g.fillText(hi.toFixed(2), 7, y0 + 24);
+    g.fillText(lo.toFixed(2), 7, y0 + h - 6);
     const now = v[bar];
     g.fillStyle = now == null ? "#3a4152" : hue;
     g.font = "600 12px ui-monospace,monospace";
     g.fillText(now == null ? "\u2014" : now.toFixed(2), W - 40, y0 + h/2 + 4);
   });
+
+  /* tension runs per beat, not per bar, so it is the one curve here that can
+     show a build happening rather than a bar having happened. The releases are
+     where it breaks -- the drops -- and they are what a rig waits for. */
+  if (!tense) return;
+  const y0 = rows.length * ROW, hh = 46, per = SCORE.grid.beats_per_bar;
+  g.strokeStyle = "#131a26"; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(0, y0); g.lineTo(W, y0); g.stroke();
+  const beat = beatLen();
+  const tAt = i => barTime(1) + i * beat;
+  g.strokeStyle = "#e0655f"; g.lineWidth = 1.5;
+  g.beginPath();
+  let open = false;
+  for (let i = 0; i < tense.length; i++) {
+    const t = tAt(i);
+    if (t < VIEW.a - beat || t > VIEW.b + beat) { open = false; continue; }
+    const x = L + frac(t) * (W - L - 46);
+    const y = y0 + hh - 8 - (tense[i] || 0) * (hh - 20);
+    open ? g.lineTo(x, y) : g.moveTo(x, y);
+    open = true;
+  }
+  g.stroke();
+  for (const r of SCORE.releases || []) {
+    const t = barTime(r.bar) + ((r.beat || 1) - 1) * beat;
+    if (t < VIEW.a || t > VIEW.b) continue;
+    const x = L + frac(t) * (W - L - 46);
+    g.strokeStyle = "#f2c14e"; g.lineWidth = 1.5; g.globalAlpha = .9;
+    g.beginPath(); g.moveTo(x, y0 + 3); g.lineTo(x, y0 + hh - 3); g.stroke();
+    g.fillStyle = "#f2c14e"; g.font = "8.5px ui-monospace,monospace";
+    g.fillText("drop", x + 3, y0 + 11);
+    g.globalAlpha = 1;
+  }
+  g.fillStyle = "#e0655f"; g.font = "600 10px ui-monospace,monospace";
+  g.fillText("TENSION", 7, y0 + 13);
+  g.fillStyle = "#4a5364"; g.font = "8px ui-monospace,monospace";
+  g.fillText("per beat", 7, y0 + hh - 5);
+  const bi = Math.max(0, Math.round((aud.currentTime - barTime(1)) / beat));
+  const now = tense[bi];
+  g.fillStyle = now == null ? "#3a4152" : "#e0655f";
+  g.font = "600 12px ui-monospace,monospace";
+  g.fillText(now == null ? "\u2014" : now.toFixed(2), W - 40, y0 + hh/2 + 4);
 }
 
 function lanes() {
