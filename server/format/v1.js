@@ -9,7 +9,10 @@
  * The filter (called after this) strips fields the consumer did not ask for.
  */
 
-export const KNOWN = ['grid', 'beats', 'downbeats', 'sections', 'energy', 'moments', 'layers'];
+export const KNOWN = ['grid', 'beats', 'downbeats', 'sections', 'energy', 'moments',
+                      'layers', 'chords', 'key', 'loudness'];
+
+const STEMS = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
 
 /**
  * @param {object} raw  Parsed score file from disk.
@@ -33,11 +36,52 @@ export function format(raw) {
       name:   span.name,
       repeat: span.repeat,
     }));
+  } else if (Array.isArray(raw.parts)) {
+    out.sections = raw.parts.map(part => ({
+      from:   { bar: part.from_bar, beat: 1 },
+      to:     { bar: part.to_bar + 1, beat: 1 },
+      name:   part.feels,
+      repeat: part.repeats_as,
+      playing: part.playing,
+    }));
   }
 
-  if (raw.energy)  out.energy  = raw.energy;
-  if (raw.moments) out.moments = raw.moments;
-  if (raw.layers)  out.layers  = raw.layers;
+  if (raw.energy) {
+    out.energy = raw.energy;
+  } else if (Array.isArray(raw.bars?.intensity)) {
+    out.energy = raw.bars.intensity;
+  }
+
+  if (raw.moments) {
+    out.moments = raw.moments;
+  } else if (Array.isArray(raw.events)) {
+    out.moments = raw.events.map(event => ({
+      at:       { bar: event.bar, beat: event.beat },
+      is:       event.is,
+      strength: event.strength,
+      ...(event.for_bars ? { for_bars: event.for_bars } : {}),
+    }));
+  }
+
+  if (raw.layers) {
+    out.layers = raw.layers;
+  } else if (raw.bars) {
+    const lanes = {};
+    for (const stem of STEMS)
+      if (Array.isArray(raw.bars[stem])) lanes[stem] = raw.bars[stem];
+    if (Object.keys(lanes).length) out.layers = lanes;
+  }
+
+  if (Array.isArray(raw.bars?.chord)) {
+    out.chords = raw.bars.chord.map((name, i) => ({
+      bar:  i + (raw.grid?.first_beat_s > 0.2 ? 0 : 1),
+      name,
+      sure: raw.bars.chord_sure?.[i],
+    })).filter(c => c.name);
+  }
+
+  if (raw.key)      out.key      = raw.key;
+  if (raw.loudness) out.loudness = raw.loudness;
 
   return out;
 }

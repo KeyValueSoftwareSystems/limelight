@@ -139,29 +139,27 @@ def word_for(rel, rise, has, had):
     voice = "full" if vlevel >= SURE else "none"
     wasvoice = "full" if wlevel >= SURE else "none"
     if beat == "none" and was != "none":
-        return "drums stop"
+        return "drums out"
     if beat == "full" and was != "full":
-        return "drums come in"
-    if beat == "some" and was == "none":
-        return "drums easing in"
+        return "drums in"
     if beat == "some":
         return "half a kit"
     if voice != "none" and wasvoice == "none":
-        return "the voice comes in"
+        return "voice in"
     if voice == "none" and wasvoice != "none":
-        return "the voice leaves"
+        return "voice out"
     if beat == "none" and voice != "none":
         return "voice, no drums"
     if beat == "none":
         return "no drums"
     if rel > 0.85:
-        return "everything at once"
+        return "full"
     if rise > 0.12:
         return "building"
     if rise < -0.12:
-        return "thinning out"
+        return "thinning"
     if rel < 0.45:
-        return "stripped back"
+        return "sparse"
     return "steady"
 
 
@@ -182,7 +180,7 @@ def split(v):
     return mid
 
 
-NAMES = ("drums", "bass", "vocals", "other")
+NAMES = ("drums", "bass", "vocals", "guitar", "piano", "other")
 
 
 SURE = 0.45
@@ -254,20 +252,20 @@ def call_it(levels):
     v = levels.get("vocals", 0) >= SURE
     o = levels.get("other", 0) > 0.15
     if d and v:
-        return "voice over the beat"
+        return "voice + beat"
     if d and b:
-        return "the beat"
+        return "beat"
     if d:
-        return "drums alone"
+        return "drums"
     if v and o:
-        return "voice over chords"
+        return "voice + chords"
     if v:
-        return "voice alone"
+        return "voice"
     if b and o:
-        return "bass and chords"
+        return "bass + chords"
     if o:
-        return "chords alone"
-    return "almost nothing"
+        return "chords"
+    return "quiet"
 
 
 def name_groups(shaped, voices):

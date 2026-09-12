@@ -110,6 +110,10 @@ class H(http.server.BaseHTTPRequestHandler):
             out = []
             for f in sorted(glob.glob(os.path.join(ROOT, "scores", "*.score"))):
                 slug = os.path.splitext(os.path.basename(f))[0]
+                exact = os.path.join(ROOT, "work", "wav", slug + ".wav")
+                if os.path.isfile(exact):
+                    out.append({"slug": slug, "audio": f"/work/wav/{slug}.wav"})
+                    continue
                 for ext in (".mp3", ".wav"):
                     audio = os.path.join(ROOT, "synth", "incoming", slug + ext)
                     if os.path.isfile(audio):

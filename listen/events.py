@@ -4,7 +4,11 @@ ON = 0.15
 SURE = 0.45
 OFF = 0.10
 HOLD = 2
-NAMES = ("drums", "bass", "vocals", "other")
+NAMES = ("drums", "bass", "vocals", "guitar", "piano", "other")
+
+
+SAY = {"drums": "drums", "bass": "bass", "vocals": "voice",
+       "guitar": "guitar", "piano": "piano", "other": "chords"}
 
 
 def at(bar, pickup):
@@ -37,7 +41,7 @@ def layers(lanes, pickup):
         for i in range(1, len(on)):
             v = np.asarray(lanes[name], dtype=float)
             weak = name == "vocals" and v[i:i + 4].mean() < SURE
-            label = "a lead line" if weak else name
+            label = "lead" if weak else SAY[name]
             if on[i] and not on[i - 1]:
                 out.append({"bar": at(i, pickup), "beat": 1, "is": f"{label} in",
                             "strength": round(float(min(1.0, v[i:i + 4].mean())), 3)})
@@ -62,7 +66,8 @@ def dips(lanes, pickup, most=2, deep=0.55):
             run = j - i
             if 1 <= run <= most and v[j] > ON and v[j] >= deep * v[i - 1]:
                 out.append({"bar": at(i, pickup), "beat": 1,
-                            "is": f"{name} drop out for a moment", "for_bars": int(run),
+                            "is": f"{SAY[name]} pause",
+                            "for_bars": int(run),
                             "strength": round(float(1.0 - v[i] / (v[i - 1] or 1)), 3)})
                 i = j
             i += 1
@@ -89,11 +94,11 @@ def silences(busy, lanes, pickup):
                     if i < len(lane) and lane[i:j].mean() > ON:
                         left.append(name)
                 if not left:
-                    what = "everything stops"
+                    what = "all stops"
                 elif len(left) == 1:
-                    what = f"everything drops but the {left[0]}"
+                    what = f"only {SAY[left[0]]} left"
                 else:
-                    what = "everything drops but the " + " and ".join(left)
+                    what = "only " + " + ".join(SAY[x] for x in left) + " left"
                 out.append({"bar": at(i, pickup), "beat": 1, "is": what,
                             "for_bars": int(j - i), "leaves": left,
                             "strength": round(float(1.0 - (v[i:j].mean() - floor) /
@@ -102,6 +107,15 @@ def silences(busy, lanes, pickup):
         else:
             i += 1
     return out
+
+
+def subject_of(what):
+    if what.startswith("all stops") or what.startswith("only "):
+        return "all"
+    for name in NAMES:
+        if what.startswith(SAY[name]):
+            return SAY[name]
+    return "it"
 
 
 def returns(breaks, lanes, onsets, grid, look=4):
@@ -126,10 +140,32 @@ def returns(breaks, lanes, onsets, grid, look=4):
             if b["bar"] - lo < 2 or hi - back < 2:
                 continue
             busier += float(v[back:hi].mean() - v[lo:b["bar"]].mean())
+        who = subject_of(b["is"])
         out.append({"bar": max(0, int(bar)), "beat": int(beat),
-                    "is": "it lifts" if busier > 0.05 else "it comes back",
+                    "is": f"{who} back, bigger" if busier > 0.05 else f"{who} back",
                     "after": b["is"],
                     "strength": round(float(min(1.0, abs(busier) * 3)), 3)})
+    return out
+
+
+def swells(lanes, pickup, least=3, gain=0.22, slack=0.04):
+    out = []
+    for name in NAMES:
+        v = np.asarray(lanes[name], dtype=float)
+        for sign, word in ((1, "swells"), (-1, "fades")):
+            i = 0
+            while i < len(v) - least:
+                j = i
+                while j + 1 < len(v) and sign * (v[j + 1] - v[j]) >= -slack:
+                    j += 1
+                rise = sign * (v[j] - v[i])
+                if j - i >= least and rise > gain and max(v[i], v[j]) > ON:
+                    out.append({"bar": at(i, pickup), "beat": 1,
+                                "is": f"{SAY[name]} {word}",
+                                "for_bars": int(j - i + 1),
+                                "strength": round(float(min(1.0, rise * 1.5)), 3)})
+                    i = j
+                i += 1
     return out
 
 
@@ -147,7 +183,8 @@ def risers(bright, lanes, pickup, least=3):
         while j + 1 < n and v[j + 1] > v[j] + 0.004 and drums[j] <= GATE:
             j += 1
         if j - i >= least and v[j] - v[i] > 0.06:
-            out.append({"bar": at(i, pickup), "beat": 1, "is": "a riser",
+            out.append({"bar": at(i, pickup), "beat": 1,
+                        "is": "riser",
                         "for_bars": int(j - i + 1),
                         "strength": round(float(min(1.0, (v[j] - v[i]) * 4)), 3)})
             i = j
@@ -173,7 +210,8 @@ def begins(env, grid, rate=100, hold=0.5):
     k = round((best - grid["first_beat_s"]) / period)
     bar = k // grid["beats_per_bar"] + 1
     beat = k % grid["beats_per_bar"] + 1
-    return [{"bar": max(0, int(bar)), "beat": int(beat), "is": "it begins", "strength": 1.0}]
+    return [{"bar": max(0, int(bar)), "beat": int(beat),
+             "is": "song starts", "strength": 1.0}]
 
 
 def leads_to(lanes, bar, look=4):
@@ -194,7 +232,7 @@ def leads_to(lanes, bar, look=4):
 def events(grid, lanes, busy, bright, onsets, pickup, report=None, env=None):
     quiet = silences(busy, lanes, pickup)
     broken = quiet + dips(lanes, pickup)
-    out = layers(lanes, pickup) + broken + risers(bright, lanes, pickup)
+    out = layers(lanes, pickup) + broken + risers(bright, lanes, pickup) + swells(lanes, pickup)
     out += returns(broken, lanes, onsets, grid)
     if env is not None:
         out += begins(env, grid)

@@ -11,6 +11,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from grid import grid, show
 from parts import curves, parts
 from events import events
+from harmony import changes as chord_changes
+from harmony import chords as find_chords
+from harmony import per_bar as chords_per_bar
+from stems import NAMES as STEM_NAMES
 from stems import envelopes, per_bar
 
 
@@ -89,8 +93,11 @@ def read(path, slug):
     bar_s = (60.0 / g["bpm"]) * g["beats_per_bar"]
     env = envelopes(path, slug)
     lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"])
-    voices = np.vstack([lanes[k] for k in ("drums", "bass", "vocals", "other")])
+    voices = np.vstack([lanes[k] for k in STEM_NAMES])
     busy, bright = curves(path, g)
+    pickup = 1 if g["first_beat_s"] > 0.2 else 0
+    found, held = find_chords(path, slug)
+    chord, chord_sure = chords_per_bar(found, held, g["first_beat_s"], bar_s, g["bars"], pickup)
     show(slug, g, report, {"essentia hears": f["rhythm.bpm"]})
 
     return {
@@ -121,15 +128,15 @@ def read(path, slug):
         },
         "bars": {
             "intensity": per_bar_loud(loud, times, g),
-            "drums": [round(x, 3) for x in lanes["drums"]],
-            "bass": [round(x, 3) for x in lanes["bass"]],
-            "vocals": [round(x, 3) for x in lanes["vocals"]],
-            "other": [round(x, 3) for x in lanes["other"]],
+            **{k: [round(x, 3) for x in lanes[k]] for k in STEM_NAMES},
+            "brightness": [round(float(x), 3) for x in bright.ravel()],
+            "chord": chord,
+            "chord_sure": chord_sure,
         },
         "parts": parts(path, g, report, voices),
         "events": events(g, lanes, busy, bright,
                          np.load(CACHE / f"{slug}.flux.npy"),
-                         1 if g["first_beat_s"] > 0.2 else 0, report, env),
+                         pickup, report, env) + chord_changes(chord, pickup),
     }
 
 

@@ -8,21 +8,22 @@ import numpy as np
 warnings.filterwarnings("ignore")
 
 CACHE = Path("work/heard")
-NAMES = ("drums", "bass", "vocals", "other")
+MODEL = "htdemucs_6s"
+NAMES = ("drums", "bass", "vocals", "guitar", "piano", "other")
 RATE = 100
 
 
 def envelopes(path, slug):
-    at = CACHE / f"{slug}.stems.npz"
+    at = CACHE / f"{slug}.{MODEL}.npz"
     if at.exists():
         z = np.load(at)
         return {k: z[k] for k in NAMES}
 
     work = Path("work/stems") / slug
     work.mkdir(parents=True, exist_ok=True)
-    made = work / "htdemucs" / Path(path).stem
+    made = work / MODEL / Path(path).stem
     if not (made / "vocals.wav").exists():
-        subprocess.run([sys.executable, "-m", "demucs", "-n", "htdemucs",
+        subprocess.run([sys.executable, "-m", "demucs", "-n", MODEL,
                         "-o", str(work), path], check=True)
 
     import soundfile as sf
