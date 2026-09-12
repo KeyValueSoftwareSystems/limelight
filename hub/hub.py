@@ -227,4 +227,36 @@ def handle(h, method):
             return _send_file(h, path, head)
         return _send(h, 404, "no " + parsed.path, head_only=head)
 
+    if method == "POST":
+        p = urllib.parse.urlparse(h.path).path
+        if p == PREFIX + "/score":
+            from . import score_api
+            body_bytes = _read_body(h)
+            if body_bytes is None:
+                return _send(h, 411, "Content-Length required")
+            try:
+                body = json.loads(body_bytes)
+            except ValueError:
+                return _send(h, 400, "not json")
+
+            def fetch(name):
+                fpath = os.path.join(ROOT, name + ".score")
+                if not os.path.isfile(fpath):
+                    raise FileNotFoundError(f"no score: {name}")
+                if V.is_versioned(fpath) and V.numbers(fpath):
+                    n = V.resolve_version(fpath, "")
+                    return json.loads(V.read(fpath, n))
+                return json.loads(open(fpath, "rb").read())
+
+            try:
+                result = score_api.handle(body, fetch)
+                code = 200 if "error" not in result or "note" in result else 400
+                return _json(h, code, result)
+            except FileNotFoundError as e:
+                return _json(h, 404, {"error": str(e)})
+            except ValueError as e:
+                return _json(h, 400, {"error": str(e)})
+            except Exception as e:
+                return _json(h, 500, {"error": str(e)})
+
     return _send(h, 405, method + " is not something the hub does")

@@ -1,19 +1,21 @@
 /**
  * v1 response formatter — aligned with protocol/respond.js.
  *
- * Known fields: grid, beats, downbeats, sections, energy, moments, layers.
- * `sections` is derived from `layers.form.spans`.
- * `layers` passes through the raw layers object.
- *
  * The formatter builds the full response with all available fields.
  * The filter (called after this) strips fields the consumer did not ask for.
  */
 
-export const KNOWN = ['song', 'grid', 'beats', 'downbeats', 'sections', 'energy',
-                      'brightness', 'width', 'air', 'pump', 'pace', 'moments', 'phrases', 'layers', 'chords', 'key', 'loudness',
-                      'feel'];
+export const KNOWN = [
+  'song', 'grid', 'beats', 'downbeats', 'sections', 'energy',
+  'brightness', 'width', 'air', 'pump', 'pace',
+  'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
+  'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
+  'tension', 'releases', 'melody', 'made_by',
+];
 
-const STEMS = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
+const STEM_NAMES = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
+const STEM_FOUR  = ['drums', 'bass', 'vocals', 'other'];
+const CURVE_NAMES = ['energy', 'brightness', 'width', 'air', 'pump', 'pace'];
 
 /**
  * @param {object} raw  Parsed score file from disk.
@@ -21,23 +23,72 @@ const STEMS = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
  */
 export function format(raw) {
   const out = {};
+  const grid = raw.grid || {};
+  const bpm  = grid.bpm || 120;
+  const bpb  = grid.beats_per_bar || 4;
+  const firstBeatS = grid.first_beat_s || 0;
+  const beatSec = 60 / bpm;
+  const barSec  = beatSec * bpb;
+  const firstBar = (grid.first_bar !== undefined && grid.first_bar !== null)
+    ? grid.first_bar
+    : (firstBeatS > 0.2 ? 0 : 1);
 
   out.score   = raw.score;
   out.version = raw.version;
 
-  if (raw.song) out.song = raw.song;
+  // ---- song ----
+  if (raw.song) {
+    out.song = { ...raw.song };
+    if (out.song.bars === undefined && out.song.length_s && bpm) {
+      out.song.bars = Math.ceil((out.song.length_s - firstBeatS) / barSec);
+    }
+  }
 
-  if (raw.grid) out.grid = raw.grid;
+  // ---- grid (with holds_from / holds_to) ----
+  if (raw.grid) {
+    out.grid = { ...raw.grid };
+    if (raw.grid.holds_from_s != null) {
+      const i = (raw.grid.holds_from_s - firstBeatS) / beatSec;
+      out.grid.holds_from = { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(i % bpb) + 1 };
+    }
+    if (raw.grid.holds_to_s != null) {
+      const i = (raw.grid.holds_to_s - firstBeatS) / beatSec;
+      out.grid.holds_to = { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(i % bpb) + 1 };
+    }
+  }
 
-  if (raw.beats)     out.beats     = raw.beats;
+  // ---- beats (two formats: protocol {list} or pipeline [{t, weight, sure}]) ----
+  if (raw.beats) {
+    if (raw.beats.list) {
+      out.beats = raw.beats;
+    } else if (Array.isArray(raw.beats)) {
+      out.beats = raw.beats.map((b, idx) => {
+        const bar  = firstBar + Math.floor(idx / bpb);
+        const beat = (idx % bpb) + 1;
+        const expectedT = firstBeatS + idx * beatSec;
+        const entry = { bar, beat };
+        if (b.weight !== undefined) entry.weight = b.weight;
+        if (b.sure   !== undefined) entry.sure   = b.sure;
+        if (b.t      !== undefined) entry.off_ms  = Math.round((b.t - expectedT) * 1000);
+        if (b.downbeat !== undefined) entry.downbeat = b.downbeat;
+        return entry;
+      });
+    }
+  }
   if (raw.downbeats) out.downbeats = raw.downbeats;
 
+  // ---- sections (layers.form.spans or parts) ----
   if (raw.layers?.form?.spans) {
     out.sections = raw.layers.form.spans.map(span => ({
       from:   span.from,
       to:     span.to,
       name:   span.name,
       repeat: span.repeat,
+      ...(span.rise     !== undefined ? { rise: span.rise }         : {}),
+      ...(span.playing  !== undefined ? { playing: span.playing }   : {}),
+      ...(span.stems    !== undefined ? { stems: span.stems }       : {}),
+      ...(span.fullness !== undefined ? { fullness: span.fullness } : {}),
+      ...(span.feels    !== undefined ? { feels: span.feels }       : {}),
     }));
   } else if (Array.isArray(raw.parts)) {
     out.sections = raw.parts.map(part => ({
@@ -55,51 +106,171 @@ export function format(raw) {
     }));
   }
 
+  // ---- energy (backward compat) ----
   if (raw.energy) {
     out.energy = raw.energy;
   } else if (Array.isArray(raw.bars?.intensity)) {
-    out.energy = raw.bars.intensity;
+    out.energy = { per: 'bar', from_bar: firstBar, values: raw.bars.intensity };
   }
 
+  // ---- bare per-bar lanes (backward compat) ----
   if (raw.phrases) out.phrases = raw.phrases;
-
+  const bars = raw.bars || {};
   for (const lane of ['width', 'air', 'pump', 'pace']) {
-    if (Array.isArray(raw.bars?.[lane])) out[lane] = raw.bars[lane];
+    if (Array.isArray(bars[lane])) out[lane] = bars[lane];
+  }
+  if (Array.isArray(bars.brightness)) out.brightness = bars.brightness;
+
+  // ---- curves (selectable per-bar arrays with metadata) ----
+  const curveEntries = {};
+  for (const name of CURVE_NAMES) {
+    let src;
+    if (name === 'energy') {
+      src = raw.energy?.values || bars.intensity;
+    } else {
+      src = bars[name];
+    }
+    if (Array.isArray(src)) {
+      curveEntries[name] = {
+        per: 'bar',
+        from_bar: (name === 'energy' && raw.energy?.from_bar != null)
+          ? raw.energy.from_bar : firstBar,
+        values: src,
+      };
+    }
+  }
+  if (Object.keys(curveEntries).length) out.curves = curveEntries;
+
+  // ---- stems (per-bar, with normalisation stated) ----
+  const stemLanes = {};
+  for (const s of STEM_FOUR) {
+    if (Array.isArray(bars[s])) stemLanes[s] = bars[s];
+  }
+  if (Object.keys(stemLanes).length) {
+    out.stems = { normalised: 'per-stem-peak-within-song', from_bar: firstBar, lanes: stemLanes };
   }
 
+  // ---- moments (pass through with all fields; fallback from events) ----
   if (raw.moments) {
     out.moments = raw.moments;
   } else if (Array.isArray(raw.events)) {
-    out.moments = raw.events.map(event => ({
-      at:       { bar: event.bar, beat: event.beat },
-      is:       event.is,
-      strength: event.strength,
-      ...(event.for_bars ? { for_bars: event.for_bars } : {}),
-      ...(event.then     ? { then:     event.then     } : {}),
-      ...(event.after    ? { after:    event.after    } : {}),
-      ...(event.leaves   ? { leaves:   event.leaves   } : {}),
-    }));
+    out.moments = raw.events.map(event => {
+      const m = { at: { bar: event.bar, beat: event.beat } };
+      if (event.is       !== undefined) m.is       = event.is;
+      if (event.what     !== undefined) m.what     = event.what;
+      if (event.sure     !== undefined) m.sure     = event.sure;
+      if (event.weight   !== undefined) m.weight   = event.weight;
+      if (event.strength !== undefined) m.strength = event.strength;
+      if (event.for_beats !== undefined) m.for_beats = event.for_beats;
+      if (event.for_bars !== undefined) m.for_bars = event.for_bars;
+      if (event.then     !== undefined) m.then     = event.then;
+      if (event.after    !== undefined) m.after    = event.after;
+      if (event.leaves   !== undefined) m.leaves   = event.leaves;
+      return m;
+    });
   }
 
+  // ---- layers ----
   if (raw.layers) {
-    out.layers = raw.layers;
-  } else if (raw.bars) {
+    out.layers = { ...raw.layers };
+  } else if (bars) {
     const lanes = {};
-    for (const stem of STEMS)
-      if (Array.isArray(raw.bars[stem])) lanes[stem] = raw.bars[stem];
+    for (const stem of STEM_NAMES)
+      if (Array.isArray(bars[stem])) lanes[stem] = bars[stem];
     if (Object.keys(lanes).length) out.layers = lanes;
   }
+  if (!out.layers) out.layers = {};
 
-  if (Array.isArray(raw.bars?.chord)) {
-    out.chords = raw.bars.chord.map((name, i) => ({
-      bar:  i + (raw.grid?.first_beat_s > 0.2 ? 0 : 1),
+  // layers.subsection (from phrases)
+  if (!out.layers.subsection && Array.isArray(raw.phrases)) {
+    out.layers.subsection = {
+      kind: 'sparse',
+      spans: raw.phrases.map(p => ({
+        from:      { bar: p.from_bar, beat: 1 },
+        to:        { bar: p.to_bar + 1, beat: 1 },
+        in:        p.in,
+        in_nth:    p.in_nth,
+        doing:     p.doing,
+        also:      p.also,
+        says:      p.says,
+        energy:    p.energy,
+        rise:      p.rise,
+        playing:   p.playing,
+        has_break: p.has_break,
+      })),
+    };
+  }
+
+  // layers.presence (from parts[].stems)
+  if (!out.layers.presence && Array.isArray(raw.parts)) {
+    const presSpans = [];
+    for (const part of raw.parts) {
+      if (!part.stems) continue;
+      for (const [stem, info] of Object.entries(part.stems)) {
+        const state = typeof info === 'string' ? info : info?.is;
+        if (state && state !== 'none') {
+          presSpans.push({
+            from:  { bar: part.from_bar, beat: 1 },
+            to:    { bar: part.to_bar + 1, beat: 1 },
+            stem,
+            state,
+          });
+        }
+      }
+    }
+    if (presSpans.length) {
+      out.layers.presence = { kind: 'sparse', spans: presSpans };
+    }
+  }
+
+  // layers.phrase (from phrase_grid)
+  if (!out.layers.phrase && raw.phrase_grid) {
+    out.layers.phrase = {
+      kind: 'rule',
+      every_bars:          raw.phrase_grid.every_bars,
+      from_bar:            raw.phrase_grid.from_bar,
+      boundaries_on_grid:  raw.phrase_grid.boundaries_on_grid,
+    };
+  }
+
+  if (!Object.keys(out.layers).length) delete out.layers;
+
+  // ---- harmony ----
+  if (Array.isArray(bars.chord)) {
+    out.harmony = {
+      from_bar:    firstBar,
+      chords:      bars.chord,
+      confidence:  bars.chord_sure || [],
+    };
+  }
+
+  // ---- chord_changes (derived) ----
+  if (Array.isArray(bars.chord)) {
+    const changes = [];
+    let prev = null;
+    bars.chord.forEach((name, i) => {
+      if (name && name !== prev) {
+        changes.push({
+          at:         { bar: i + firstBar, beat: 1 },
+          to:         name,
+          confidence: bars.chord_sure?.[i] ?? null,
+        });
+        prev = name;
+      }
+    });
+    out.chord_changes = changes;
+  }
+
+  // ---- chords (backward compat) ----
+  if (Array.isArray(bars.chord)) {
+    out.chords = bars.chord.map((name, i) => ({
+      bar:  i + firstBar,
       name,
-      sure: raw.bars.chord_sure?.[i],
+      sure: bars.chord_sure?.[i],
     })).filter(c => c.name);
   }
 
-  if (Array.isArray(raw.bars?.brightness)) out.brightness = raw.bars.brightness;
-
+  // ---- key ----
   if (raw.key || raw.chords) {
     out.key = { ...(raw.key ?? {}) };
     if (raw.chords) {
@@ -112,11 +283,43 @@ export function format(raw) {
     }
   }
 
+  // ---- chord_summary ----
+  if (raw.chords) {
+    out.chord_summary = {
+      root:             raw.chords.root,
+      scale:            raw.chords.scale,
+      confidence:       raw.chords.confidence,
+      changes_per_beat: raw.chords.changes_per_beat,
+    };
+  }
+
   if (raw.loudness) out.loudness = raw.loudness;
   if (raw.feel)     out.feel     = raw.feel;
 
   /* consumer layer: present when the score was pulled / loaded with a profile */
   if (raw.profile) out.profile = raw.profile;
+
+  // ---- tension ----
+  if (Array.isArray(raw.tension)) {
+    out.tension = { per: 'beat', from_bar: firstBar, from_beat: 1, values: raw.tension };
+  }
+
+  // ---- releases (seconds to positions) ----
+  if (Array.isArray(raw.releases)) {
+    out.releases = raw.releases.map(r => {
+      const i = (r.at_s - firstBeatS) / beatSec;
+      return {
+        at:   { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(i % bpb) + 1 },
+        size: r.size,
+      };
+    });
+  }
+
+  // ---- melody (guard for future pipeline output) ----
+  if (raw.melody) out.melody = raw.melody;
+
+  // ---- made_by ----
+  if (raw.made_by) out.made_by = raw.made_by;
 
   return out;
 }

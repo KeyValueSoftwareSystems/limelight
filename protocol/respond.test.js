@@ -53,8 +53,8 @@ const ok = (n, c, d) => out.push([!!c, n, d || ""]);
   /* a score pulled with --profile carries one; the response must carry it too,
      asked for or not. A temporary score file beside the others, removed after. */
   const fs = require("fs"), path = require("path");
-  const tmp = path.join(__dirname, "score.withprofile.json");
-  const base = JSON.parse(fs.readFileSync(path.join(__dirname, "score.levels.json"), "utf8"));
+  const tmp = path.join(__dirname, "withprofile.score");
+  const base = JSON.parse(fs.readFileSync(path.join(__dirname, "levels.score"), "utf8"));
   const profile = { user: "muzammil", colours: [{ name: "red", hex: "#ff0000" }] };
   fs.writeFileSync(tmp, JSON.stringify({ ...base, score: "withprofile", profile }));
   try {

@@ -373,30 +373,17 @@ def make_handler(state: State):
             body = self._body()
             tr = state.transport
             if path == "/api/load":
-                from score_api import handle as score_handle
-                from urllib.parse import quote
-                from urllib.error import HTTPError, URLError
-
-                def fetch_from_hub(name, profile=None):
-                    url = HUB + "/hub/" + name + ".score"
-                    if profile:
-                        url += "?profile=" + quote(profile)
-                    try:
-                        with urllib.request.urlopen(url, timeout=20) as r:
-                            return json.loads(r.read())
-                    except HTTPError as e:
-                        detail = e.read().decode("utf-8", "replace").strip()
-                        # missing score / missing profile: surface hub's text
-                        raise ValueError(detail or f"hub returned {e.code}") from e
-                    except URLError as e:
-                        raise ValueError(f"cannot reach hub: {e.reason}") from e
-
                 try:
-                    result = score_handle(body, fetch_from_hub)
+                    req = urllib.request.Request(
+                        HUB + "/hub/score",
+                        data=json.dumps(body).encode(),
+                        headers={"Content-Type": "application/json"},
+                        method="POST",
+                    )
+                    with urllib.request.urlopen(req, timeout=20) as r:
+                        result = json.loads(r.read())
                     code = 200 if "error" not in result or "note" in result else 400
                     return self._json(result, code)
-                except ValueError as e:
-                    return self._json({"error": str(e)}, 400)
                 except Exception as e:
                     return self._json({"error": str(e)}, 500)
             if path == "/api/show":
