@@ -38,8 +38,17 @@ const pickWeighted = (cands, rng) => {
 
 /* ---- reading the score ------------------------------------------------- */
 function energyReader(score) {
-  const E = score.energy || {};
-  const from = E.from_bar || 1, vals = E.values || [];
+  /* two shapes in the wild: {per, from_bar, values} (levels) and a bare per-bar
+     array (raga). For a bare array, anchor it to the first section's bar. */
+  let from, vals;
+  if (Array.isArray(score.energy)) {
+    vals = score.energy;
+    from = (score.sections && score.sections.length)
+      ? Math.min(...score.sections.map(s => s.from.bar)) : 1;
+  } else {
+    const E = score.energy || {};
+    from = E.from_bar || 1; vals = E.values || [];
+  }
   return bar => {
     const i = Math.round(bar) - from;
     if (i <= 0) return vals[0] || 0;

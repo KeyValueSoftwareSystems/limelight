@@ -33,11 +33,19 @@ const S = Session(score, { now: () => 0 });
 const dur = S.secondsAt((score.grid.bars || 120) + 1, 1);
 const from = +opt("--from", 0), to = +opt("--to", dur);
 
+/* session.js numbers the first bar as 1; a score may number it 0 (raga). Shift the
+   clock's bar into the score's numbering so section boundaries land at the right
+   wall time. */
+const barBase = (score.sections && score.sections.length)
+  ? Math.min(...score.sections.map(s => s.from.bar)) : 1;
+const shift = 1 - barBase;
+
 const ticks = [];
 for (let t = from; t < to; t += 1 / fps) {
   const pos = S.positionAt(t);
-  const F = frame({ bar: pos.bar, beat: pos.beat }, p, { layout, library });
-  ticks.push({ t: +t.toFixed(3), bar: pos.bar, beat: +pos.beat.toFixed(3), fixtures: F.fixtures });
+  const bar = pos.bar - shift;
+  const F = frame({ bar, beat: pos.beat }, p, { layout, library });
+  ticks.push({ t: +t.toFixed(3), bar, beat: +pos.beat.toFixed(3), fixtures: F.fixtures });
 }
 
 const out = opt("--out", path.join(

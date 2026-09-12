@@ -55,7 +55,7 @@ function renderIndividual(gesture, ph, groups, k) {
 
   /* inner/outer alternation: swap which pair is lit each beat */
   if (gesture.pattern === "inner_outer_alternation" || keys.some(x => x.target)) {
-    const onInner = ph.globalBeat % 2 === 0;
+    const onInner = (((ph.globalBeat % 2) + 2) % 2) === 0;   // positive modulo (bars may be 0-based)
     const litOf = t => keys.find(x => x.target === t && x.intent && x.intent.level > 0);
     const inK = litOf("inner"), outK = litOf("outer");
     for (const id of (groups.inner || [])) out[id] = onInner && inK ? scaleLevel(inK.intent, k) : { level: 0 };
@@ -66,7 +66,7 @@ function renderIndividual(gesture, ph, groups, k) {
   if (gesture.group === "arc" && (gesture.stagger > 0 || gesture.direction)) {
     const arc = groups.arc || [];
     if (arc.length) {
-      let step = ph.globalBeat % arc.length;
+      let step = ((ph.globalBeat % arc.length) + arc.length) % arc.length;   // positive modulo
       if (gesture.direction === "R2L") step = arc.length - 1 - step;
       const onK = keys[0] || { intent: { level: 1, colour: [1, 1, 1] } };
       arc.forEach((id, i) => { out[id] = i === step ? scaleLevel(onK.intent, k) : { level: 0 }; });
