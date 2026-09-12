@@ -221,15 +221,20 @@
   // ---------------- import from the hub ----------------
   async function loadHub() {
     try {
-      const { scores } = await api('/api/hub');
+      const r = await api('/api/hub'); const scores = r.scores || [];
       const sel = $('hubscore'); const prev = sel.value;
       sel.innerHTML = '';
-      for (const s of scores || []) { const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); }
-      if (prev) sel.value = prev;
-    } catch (e) {}
+      if (!scores.length) {
+        const o = document.createElement('option'); o.value = ''; o.textContent = '(hub unreachable)'; sel.appendChild(o);
+        $('importmsg').textContent = r.log || 'hub unreachable'; return;
+      }
+      for (const s of scores) { const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); }
+      if (prev && scores.includes(prev)) sel.value = prev;
+    } catch (e) { $('importmsg').textContent = 'hub unreachable'; }
   }
   $('import').addEventListener('click', async () => {
-    const name = $('hubscore').value; if (!name) return;
+    const name = $('hubscore').value;
+    if (!name) { $('importmsg').textContent = 'no hub score — is the hub (192.168.1.38) on?'; loadHub(); return; }
     const seed = +($('seed').value || 3);
     $('import').disabled = true; $('importmsg').textContent = `importing ${name}…`;
     try {
