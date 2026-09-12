@@ -120,11 +120,22 @@ async function startGame() {
   if (!song || song.playable === false || !window.Game) return;
   const latEl = document.getElementById("set-latency");
   const latency_ms = latEl ? Number(latEl.value) : 0;
+  const camEl = document.getElementById("set-webcam");
+  const useWebcam = camEl && camEl.checked && window.SaberSources && window.SaberSources.has("webcam");
+  const inputName = useWebcam ? "webcam" : "mouse";
   showScreen("game");
   try {
-    await window.Game.start(song, { difficulty, inputName: "mouse", latency_ms, onEnd: showResults });
+    await window.Game.start(song, { difficulty, inputName, latency_ms, onEnd: showResults });
   } catch (err) {
-    console.error("could not start:", err);
+    if (inputName === "webcam") {                    // tracking failed: fall back to mouse
+      console.warn("webcam unavailable, falling back to mouse:", err);
+      try {
+        await window.Game.start(song, { difficulty, inputName: "mouse", latency_ms, onEnd: showResults });
+        return;
+      } catch (err2) { console.error("mouse fallback failed:", err2); }
+    } else {
+      console.error("could not start:", err);
+    }
     showResults(null);
   }
 }
