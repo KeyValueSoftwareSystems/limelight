@@ -108,6 +108,7 @@ def climbs(lanes, bright, loud, pickup, span=8, least=4, gain=0.25):
     lines = {SAY[n]: lift(lanes[n]) for n in NAMES}
     lines["brightness"] = lift(bright)
     lines["everything"] = lift(loud)
+    wins = {}
     for what, v in lines.items():
         i = 0
         while i < len(v) - least:
@@ -119,11 +120,14 @@ def climbs(lanes, bright, loud, pickup, span=8, least=4, gain=0.25):
             half = v[i + at // 2] - v[i] if at >= 2 else 0.0
             if (best >= gain and float(np.min(np.diff(v[i:i + at]))) > -gain / 2
                     and half >= best * 0.25):
-                out.append(say(i - pickup + 1, 1, "rise", what,
-                               best, for_bars=int(at)))
+                bar = i - pickup + 1
+                if best > wins.get(bar, (0.0, None))[0]:
+                    wins[bar] = (best, say(bar, 1, "rise", what, best,
+                                           for_bars=int(at)))
                 i += at
             else:
                 i += 1
+    out = [m for _, m in wins.values()]
     return out
 
 
@@ -266,6 +270,52 @@ def held(env, g, pickup, least=0.7):
     return thin(out, 2)
 
 
+def sweeps(air, pickup, span=8, least=3, gain=0.30):
+    v = lift(air)
+    out, i = [], 0
+    while i < len(v) - least:
+        best, at = 0.0, 0
+        for w in range(least, min(span, len(v) - i) + 1):
+            rose = float(v[i + w - 1] - v[i])
+            if rose > best:
+                best, at = rose, w
+        if best >= gain and v[i + at // 2] - v[i] >= best * 0.25:
+            out.append(say(i - pickup + 1, 1, "rise", "a sweep",
+                           best, for_bars=int(at)))
+            i += at
+        else:
+            i += 1
+    return thin(out, 4)
+
+
+def paces(pace, pickup, span=4, apart=0.5):
+    v = np.asarray(pace, dtype=float)
+    out = []
+    for i in range(span, len(v) - span):
+        before = float(np.median(v[i - span:i]))
+        after = float(np.median(v[i:i + span]))
+        if before > 0 and abs(after - before) / before >= apart:
+            word = "double time" if after > before else "half time"
+            out.append(say(i - pickup + 1, 1, "change", word,
+                           min(1.0, abs(after - before) / (before * 2))))
+    return thin(out, 8)
+
+
+def opens(width, pickup, span=4, apart=0.25):
+    v = np.asarray(width, dtype=float)
+    top = float(np.percentile(v, 98)) or 1.0
+    v = v / top
+    out = []
+    for i in range(span, len(v) - span):
+        before = float(np.median(v[i - span:i]))
+        after = float(np.median(v[i:i + span]))
+        if abs(after - before) >= apart:
+            word = "opens up" if after > before else "narrows"
+            out.append(say(i - pickup + 1, 1, "change", word,
+                           min(1.0, abs(after - before) / 0.5)))
+    return thin(out, 8)
+
+
 def leading(found, spans, pickup, look=2):
     edges = [a for a, _, _ in spans[1:]]
     out = []
@@ -287,7 +337,8 @@ def leading(found, spans, pickup, look=2):
 
 
 def moments(g, lanes, busy, bright, loud, chord, sure, spans, anchor,
-            chroma, env, gone, pickup, report=None):
+            chroma, env, gone, pickup, air=None, pace=None, width=None,
+            report=None):
     found = []
     found += comings(lanes, pickup)
     found += pauses(lanes, pickup)
@@ -299,6 +350,12 @@ def moments(g, lanes, busy, bright, loud, chord, sure, spans, anchor,
     found += turns(chord, sure, bright, busy, pickup)
     found += again(chroma, spans, anchor, pickup)
     found += held(env, g, pickup)
+    if air is not None:
+        found += sweeps(air, pickup)
+    if pace is not None:
+        found += paces(pace, pickup)
+    if width is not None:
+        found += opens(width, pickup)
     found += leading(found, spans, pickup)
 
     floors = {"entrance": 0.30, "exit": 0.30, "rise": 0.30,

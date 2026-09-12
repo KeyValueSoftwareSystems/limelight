@@ -21,6 +21,7 @@ from harmony import per_bar as chords_per_bar
 from stems import NAMES as STEM_NAMES
 from stems import envelopes, per_bar
 from voice import clean as clean_voice
+from texture import sides, air, duck, pace
 
 
 CACHE = Path("work/heard")
@@ -151,8 +152,17 @@ def read(path, slug):
     g["last_bar"] = g["bars"] - pickup
     found, held = find_chords(path, slug)
     chord, chord_sure = chords_per_bar(found, held, g["first_beat_s"], bar_s, g["bars"], pickup)
+    stereo = Path("synth/incoming") / f"{slug}.mp3"
+    stereo = str(stereo) if stereo.exists() else path
+    edges_now = ([0.0] if pickup else []) + [
+        g["first_beat_s"] + i * bar_s for i in range(g["bars"] + 1)]
+    flux_now = np.load(CACHE / f"{slug}.flux.npy")
     score_bars = {
         "intensity": per_bar_loud(loud, times, g),
+        "width": [round(float(x), 3) for x in sides(stereo, edges_now)],
+        "air": [round(float(x), 3) for x in air(path, edges_now)],
+        "pump": [round(float(x), 3) for x in duck(env, g, edges_now)],
+        "pace": [round(float(x), 3) for x in pace(flux_now, g, edges_now)],
         **{k: [round(x, 3) for x in lanes[k]] for k in STEM_NAMES},
         "brightness": [round(float(x), 3) for x in bright.ravel()],
         "chord": chord,
@@ -224,7 +234,9 @@ def read(path, slug):
                            bright.ravel(), score_bars["intensity"],
                            score_bars["chord"], score_bars["chord_sure"],
                            [(a, b, m) for a, b, m in snapped], anchor,
-                           chroma, env, gone, pickup, report),
+                           chroma, env, gone, pickup,
+                           air=score_bars["air"], pace=score_bars["pace"],
+                           width=score_bars["width"], report=report),
     }
 
 
