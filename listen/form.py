@@ -60,12 +60,22 @@ def on_phrase(spans, pickup, reach=2, least=4, firm=None):
                 return near, step
         return bar, 0
 
+    pinned = sorted(firm or ())
+    fits = sum(1 for f in pinned if (f - pickup + 1 - origin) % 4 == 0)
+    holds = not pinned or fits >= len(pinned) * 0.5
+
     moved = []
     for a, b, role in spans:
         bar = a - pickup + 1
         if bar < 1:
             moved.append([a, b, role, 0])
             continue
+        if not holds:
+            close = [f for f in pinned if abs(f - a) <= 2]
+            if close:
+                at = min(close, key=lambda f: (abs(f - a), f))
+                moved.append([max(0, at), b, role, 0])
+                continue
         near, step = snap(bar)
         moved.append([max(0, near - 1 + pickup), b, role, step])
 
