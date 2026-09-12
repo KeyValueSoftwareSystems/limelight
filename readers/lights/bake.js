@@ -33,12 +33,15 @@ const S = Session(score, { now: () => 0 });
 const dur = S.secondsAt((score.grid.bars || 120) + 1, 1);
 const from = +opt("--from", 0), to = +opt("--to", dur);
 
-/* session.js numbers the first bar as 1; a score may number it 0 (raga). Shift the
-   clock's bar into the score's numbering so section boundaries land at the right
-   wall time. */
+/* session.js reads grid.first_bar and already numbers bars in the score's own
+   scheme, so a score that declares it needs no shift here. Applying one on top
+   put every section a bar late -- on levels the first drop moved from 21.735s
+   to 23.609s. Scores that predate grid.first_bar still get the old correction. */
 const barBase = (score.sections && score.sections.length)
   ? Math.min(...score.sections.map(s => s.from.bar)) : 1;
-const shift = 1 - barBase;
+const told = score.grid && score.grid.first_bar !== undefined
+  && score.grid.first_bar !== null;
+const shift = (told && score.grid.first_bar === barBase) ? 0 : 1 - barBase;
 
 const ticks = [];
 for (let t = from; t < to; t += 1 / fps) {
