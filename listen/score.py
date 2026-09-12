@@ -185,6 +185,17 @@ def read(path, slug):
     told = call([(a, b, m) for a, b, m in snapped], score_bars)
     shaped = sections([(s["from"], s["to"], s["role"]) for s in told],
                       voices, busy, pickup, report)
+    merged = []
+    for part in shaped:
+        if merged and merged[-1]["role"] == part["role"] == "bridge":
+            merged[-1]["to_bar"] = part["to_bar"]
+            continue
+        merged.append(part)
+    if len(merged) != len(shaped):
+        told = [t for t, keep in zip(told, [True] * len(told))]
+        shaped = merged
+        told = told[:len(shaped)] if len(told) > len(shaped) else told
+
     for part, said in zip(shaped, told):
         part["nth"] = said["nth"]
         part["like"] = said["like"]

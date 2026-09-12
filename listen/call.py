@@ -88,8 +88,13 @@ def call(spans, bars):
             name[i] = "post-chorus"
 
     for i, s in enumerate(got):
-        if name[i] is None and s["vocals"] > SURE:
+        if name[i] is None and s["vocals"] > SURE and seen[s["mark"]] >= 2:
             name[i] = "verse"
+
+    for i, s in enumerate(got):
+        if (name[i] is None and seen[s["mark"]] == 1
+                and 0.15 < (i / n) < 0.85 and s["bars"] >= 4):
+            name[i] = "bridge"
 
     for i, s in enumerate(got):
         if (name[i] is None and s["vocals"] < SURE
@@ -104,10 +109,7 @@ def call(spans, bars):
                                      or came["loud"] > s["loud"] * 1.5):
                 name[i] = "breakdown"
 
-    for i, s in enumerate(got):
-        if (name[i] is None and seen[s["mark"]] == 1
-                and 0.15 < (i / n) < 0.85 and s["bars"] > 8):
-            name[i] = "bridge"
+
 
     for i, s in enumerate(got):
         if name[i] is None and s["bars"] <= 8 and 0 < i < n - 1:
@@ -121,6 +123,10 @@ def call(spans, bars):
                 name[i] = "breakdown"
             else:
                 name[i] = "bridge"
+
+    for i in range(n - 1, 0, -1):
+        if name[i] == "bridge" and name[i - 1] == "bridge":
+            name[i] = "bridge"
 
     letters = {}
     for s in got:

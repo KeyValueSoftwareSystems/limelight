@@ -82,7 +82,7 @@ def comings(lanes, pickup):
     return out
 
 
-def pauses(lanes, pickup, deep=0.45, most=2):
+def pauses(lanes, pickup, per=4, deep=0.45, most=2):
     out = []
     for name in NAMES:
         v = lift(lanes[name])
@@ -96,14 +96,14 @@ def pauses(lanes, pickup, deep=0.45, most=2):
                 if j - i <= most and j < len(v):
                     drop = 1.0 - float(v[i] / (v[i - 1] or 1.0))
                     out.append(say(i - pickup + 1, 1, "pause", SAY[name],
-                                   drop, for_bars=int(j - i)))
+                                   drop, for_beats=int((j - i) * per)))
                 i = j
             else:
                 i += 1
     return out
 
 
-def climbs(lanes, bright, loud, pickup, span=8, least=4, gain=0.25):
+def climbs(lanes, bright, loud, pickup, per=4, span=8, least=4, gain=0.25):
     out = []
     lines = {SAY[n]: lift(lanes[n]) for n in NAMES}
     lines["brightness"] = lift(bright)
@@ -123,7 +123,7 @@ def climbs(lanes, bright, loud, pickup, span=8, least=4, gain=0.25):
                 bar = i - pickup + 1
                 if best > wins.get(bar, (0.0, None))[0]:
                     wins[bar] = (best, say(bar, 1, "rise", what, best,
-                                           for_bars=int(at)))
+                                           for_beats=int(at * per)))
                 i += at
             else:
                 i += 1
@@ -177,8 +177,13 @@ def hits(env, g, pickup, sharp=2.2):
         bar, beat = i // per + 1, i % per + 1
         if alive[i] > floor and busy[i] > 0 and count[i] > busy[i] * 2.2 \
                 and count[i] >= 4:
+            run = 1
+            while (i + run < n and busy[i + run] > 0
+                   and count[i + run] > busy[i + run] * 1.6):
+                run += 1
             fills.append(say(bar, beat, "fill", "drums",
-                             min(1.0, count[i] / (busy[i] * 4.0))))
+                             min(1.0, count[i] / (busy[i] * 4.0)),
+                             for_beats=int(run)))
         elif power[i] > near[i] * sharp and busy[i] <= 4:
             accents.append(say(bar, beat, "accent", "the band",
                                min(1.0, power[i] / (near[i] * sharp * 2))))
@@ -207,7 +212,7 @@ def turns(chord, sure, bright, busy, pickup, hold=2):
     return thin(out, 4)
 
 
-def again(chroma, spans, anchor, pickup, alike=0.90):
+def again(chroma, spans, anchor, pickup, per=4, alike=0.90):
     if chroma is None or not len(spans):
         return []
     seat = [i for i, (a, b, m) in enumerate(spans) if m == anchor]
@@ -230,9 +235,17 @@ def again(chroma, spans, anchor, pickup, alike=0.90):
         v = v / (np.linalg.norm(v) or 1.0)
         near = float(np.dot(face, v))
         if near >= alike:
+            run = 1
+            while i + run < chroma.shape[1] and (i + run) not in inside:
+                nxt = chroma[:, i + run]
+                nxt = nxt / (np.linalg.norm(nxt) or 1.0)
+                if float(np.dot(face, nxt)) < alike - 0.04:
+                    break
+                run += 1
             out.append(say(i - pickup + 1, 1, "hook", "the riff",
-                           (near - alike) / (1 - alike)))
-            last = i
+                           (near - alike) / (1 - alike),
+                           for_beats=int(run * per)))
+            last = i + run - 1
     return out
 
 
@@ -302,7 +315,7 @@ def held(env, g, pickup, tune=None, least=0.7):
     return thin(out, 2)
 
 
-def sweeps(air, pickup, span=8, least=3, gain=0.30):
+def sweeps(air, pickup, per=4, span=8, least=3, gain=0.30):
     v = lift(air)
     out, i = [], 0
     while i < len(v) - least:
@@ -313,7 +326,7 @@ def sweeps(air, pickup, span=8, least=3, gain=0.30):
                 best, at = rose, w
         if best >= gain and v[i + at // 2] - v[i] >= best * 0.25:
             out.append(say(i - pickup + 1, 1, "rise", "a sweep",
-                           best, for_bars=int(at)))
+                           best, for_beats=int(at * per)))
             i += at
         else:
             i += 1
@@ -348,7 +361,7 @@ def opens(width, pickup, span=4, apart=0.25):
     return thin(out, 8)
 
 
-def leading(found, spans, pickup, look=2):
+def leading(found, spans, pickup, g_per=4, look=2):
     edges = [a for a, _, _ in spans[1:]]
     out = []
     for m in found:
@@ -357,8 +370,12 @@ def leading(found, spans, pickup, look=2):
         at = bar_at(m["bar"], pickup)
         for e in edges:
             if 0 <= e - at <= look:
+                reach = m.get("for_beats")
+                if reach is None:
+                    reach = int(m.get("for_bars", 1)) * g_per
                 out.append(say(m["bar"], m["beat"], "transition", m["what"],
-                               m["sure"], into_bar=int(e - pickup + 1)))
+                               m["sure"], for_beats=int(reach),
+                               into_bar=int(e - pickup + 1)))
                 break
     best = {}
     for m in out:
@@ -396,22 +413,22 @@ def moments(g, lanes, busy, bright, loud, chord, sure, spans, anchor,
             tune=None, report=None):
     found = []
     found += comings(lanes, pickup)
-    found += pauses(lanes, pickup)
-    found += climbs(lanes, bright, loud, pickup)
+    found += pauses(lanes, pickup, g["beats_per_bar"])
+    found += climbs(lanes, bright, loud, pickup, g["beats_per_bar"])
     found += arrivals(None, g, gone, pickup)
     fills, accents = hits(env, g, pickup)
     found += fills
     found += accents
     found += turns(chord, sure, bright, busy, pickup)
-    found += again(chroma, spans, anchor, pickup)
+    found += again(chroma, spans, anchor, pickup, g["beats_per_bar"])
     found += held(env, g, pickup, tune)
     if air is not None:
-        found += sweeps(air, pickup)
+        found += sweeps(air, pickup, g["beats_per_bar"])
     if pace is not None:
         found += paces(pace, pickup)
     if width is not None:
         found += opens(width, pickup)
-    found += leading(found, spans, pickup)
+    found += leading(found, spans, pickup, g["beats_per_bar"])
 
     floors = {"entrance": 0.30, "exit": 0.30, "rise": 0.30,
               "change": 0.30, "hook": 0.20, "fill": 0.35}
