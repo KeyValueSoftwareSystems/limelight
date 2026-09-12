@@ -22,21 +22,54 @@ curl can use it:
     PUT   ...?profile=<user>      body {"colours": ["red","blue"]}; create or replace -> 204, else 400
     GET   ...?profile=<user>[&v=N] download with "profile": {user, colours:[{name,hex}]} embedded
 
+    MP3 → score (hub/generate.py), after the file has been PUT:
+    POST  /hub/<dir>/<name>.mp3?generate   start a background job -> 202 {"job": {...}}
+                                           mp3 is stored under audio/; score under score/
+                                           same score already in flight -> 409
+    GET   /hub/<dir>/?jobs                 -> { jobs: [{id, name, status, version, error, ...}] }
+    GET   /hub/audio/<name>.mp3            playback bytes (Range supported); audio/ is not listed
+
 No delete and no auth, on purpose: a shared folder on a LAN where the only way
 to correct a mistake is to overwrite it is a folder nobody can empty by accident.
 
-Files live in hub/files/ (gitignored) or wherever HUB_ROOT points.
+Files live in hub/files/ (gitignored) or wherever HUB_ROOT points. Songs
+(canonical) live under hub/files/score/ — latest .score and .versions/ —
+matching LIMELIGHT_REMOTE=…/hub/score. Playback mp3s live under
+hub/files/audio/ (not listed in the hub UI). On load, leftover root-level
+scores/mp3s/.versions and any score/*.mp3 siblings are moved into place.
 """
 import json, os, urllib.parse
 from . import versions as V
 from . import profiles as P
+from . import generate as G
+from . import migrate
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.environ.get("HUB_ROOT", os.path.join(HERE, "files")))
 PAGE = os.path.join(HERE, "hub.html")
 SCORE_PAGE = os.path.join(HERE, "score.html")
 PREFIX = "/hub"
+SCORE = "score"
+AUDIO = "audio"
 os.makedirs(ROOT, exist_ok=True)   # a fresh clone has no hub/files/ yet; without this, /hub/ is a 404
+migrate.run(ROOT)                  # root songs → score/, mp3s → audio/ (idempotent)
+
+
+def score_dir():
+    return os.path.join(ROOT, SCORE)
+
+
+def audio_dir():
+    return os.path.join(ROOT, AUDIO)
+
+
+def is_mp3_name(name):
+    return bool(name) and name.lower().endswith(".mp3")
+
+
+def mp3_disk_path(name):
+    """Canonical on-disk path for an mp3 (basename only under audio/)."""
+    return os.path.join(audio_dir(), os.path.basename(name))
 
 
 def resolve(urlpath):
@@ -86,7 +119,9 @@ def _read_body(h):
 
 def _listing(urlpath, path):
     entries = []
-    names = [n for n in os.listdir(path) if n != V.VDIR]
+    # audio/ is playback-only; .mp3 never appears beside scores in the UI.
+    names = [n for n in os.listdir(path)
+             if n != V.VDIR and n != AUDIO and not n.lower().endswith(".mp3")]
     for name in sorted(names, key=lambda n: (not os.path.isdir(os.path.join(path, n)), n.lower())):
         full = os.path.join(path, name)
         st = os.stat(full)
@@ -106,20 +141,49 @@ def _listing(urlpath, path):
                        "allow_delete": False, "paths": entries})
 
 
+TYPES = {
+    ".mp3": "audio/mpeg",
+    ".wav": "audio/wav",
+    ".score": "application/json",
+}
+
+
 def _send_file(h, path, head):
+    """Serve a hub file. Audio needs byte ranges or the browser cannot seek."""
     size = os.path.getsize(path)
-    h.send_response(200)
-    h.send_header("Content-Type", "application/octet-stream")
-    h.send_header("Content-Length", str(size))
+    ctype = TYPES.get(os.path.splitext(path)[1].lower(), "application/octet-stream")
+    rng = h.headers.get("Range")
+    start, end, code = 0, max(size - 1, 0), 200
+    if size and rng and rng.startswith("bytes="):
+        a, _, b = rng[6:].partition("-")
+        try:
+            start = int(a) if a else 0
+            end = int(b) if b else size - 1
+            code = 206
+        except ValueError:
+            pass
+        start = max(0, min(start, size - 1))
+        end = max(start, min(end, size - 1))
+    length = size if not size else (end - start + 1)
+    h.send_response(code if size else 200)
+    h.send_header("Content-Type", ctype)
+    h.send_header("Content-Length", str(length))
+    h.send_header("Accept-Ranges", "bytes")
+    if code == 206 and size:
+        h.send_header("Content-Range", f"bytes {start}-{end}/{size}")
     h.send_header("Cache-Control", "no-store")
     h.end_headers()
-    if not head:
-        with open(path, "rb") as f:
-            while True:
-                chunk = f.read(1 << 20)
-                if not chunk:
-                    break
-                h.wfile.write(chunk)
+    if head or not length:
+        return
+    with open(path, "rb") as f:
+        f.seek(start)
+        left = length
+        while left > 0:
+            chunk = f.read(min(left, 1 << 20))
+            if not chunk:
+                break
+            h.wfile.write(chunk)
+            left -= len(chunk)
 
 
 def _versioned_get(h, path, query, head):
@@ -163,9 +227,28 @@ def handle(h, method):
     query = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
     versioned = path != ROOT and V.is_versioned(path)
 
+    if method == "POST":
+        if "generate" not in query:
+            return _send(h, 405, "POST is only for ?generate")
+        if os.path.isdir(path) or path == ROOT:
+            return _send(h, 405, "POST ?generate needs an .mp3 path")
+        name = os.path.basename(path)
+        if not is_mp3_name(name):
+            return _send(h, 400, "only .mp3 files can be generated from")
+        try:
+            job = G.enqueue(score_dir(), mp3_disk_path(name))
+        except G.Conflict as e:
+            return _send(h, 409, str(e))
+        except ValueError as e:
+            return _send(h, 400, str(e))
+        return _json(h, 202, {"job": job})
+
     if method == "MKCOL":
         if os.path.exists(path):
             return _send(h, 405, "already exists")
+        # Do not create browsable folders named like the audio store.
+        if os.path.basename(path) == AUDIO and os.path.dirname(path) == ROOT:
+            return _send(h, 405, "audio is reserved for playback files")
         os.makedirs(path)
         return _send(h, 201, "created")
 
@@ -175,6 +258,16 @@ def handle(h, method):
         body = _read_body(h)
         if body is None:
             return _send(h, 411, "Content-Length required, and the body must be complete")
+        name = os.path.basename(path)
+        # All mp3 uploads land in audio/, regardless of the URL folder.
+        if is_mp3_name(name):
+            path = mp3_disk_path(name)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            tmp = path + ".uploading"
+            with open(tmp, "wb") as f:
+                f.write(body)
+            os.replace(tmp, path)
+            return _send(h, 201, "created")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         if versioned and "profile" in query:
             try:
@@ -204,9 +297,17 @@ def handle(h, method):
 
     if method in ("GET", "HEAD"):
         head = method == "HEAD"
+        # audio/ is not a browsable folder — only individual mp3 GETs.
+        if path == audio_dir() or (os.path.isdir(path) and os.path.basename(path) == AUDIO
+                                   and os.path.dirname(path) == ROOT):
+            if "json" in query:
+                return _send(h, 200, _listing(parsed.path, path), "application/json", head)
+            return _send(h, 404, "audio files are not listed", head_only=head)
         if os.path.isdir(path):
             if "json" in query:
                 return _send(h, 200, _listing(parsed.path, path), "application/json", head)
+            if "jobs" in query:
+                return _json(h, 200, G.snapshot(path), head)
             if not parsed.path.endswith("/"):
                 return _send(h, 301, "", head_only=True, extra=[("Location", parsed.path + "/")])
             with open(PAGE, "rb") as f:
@@ -221,6 +322,12 @@ def handle(h, method):
             return _json(h, 200, {"name": os.path.basename(path), "colours": P.colours(), "profiles": P.all_of(path)}, head)
         if versioned and V.numbers(path):
             return _versioned_get(h, path, query, head)
+        # mp3 may be requested under /hub/score/… or /hub/audio/… — always serve from audio/.
+        if is_mp3_name(os.path.basename(path)):
+            disk = mp3_disk_path(os.path.basename(path))
+            if os.path.isfile(disk):
+                return _send_file(h, disk, head)
+            return _send(h, 404, "no " + parsed.path, head_only=head)
         if os.path.isfile(path):
             if "versions" in query:
                 return _json(h, 200, V.history(path), head)      # a .score uploaded before versioning existed

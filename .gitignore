@@ -27,6 +27,11 @@ models/
 __pycache__/
 *.pyc
 node_modules/
+.venv/
+
+# Static ffmpeg/ffprobe binaries (downloaded locally; not committed).
+tools/bin/ffmpeg
+tools/bin/ffprobe
 
 # Source material and the environments that read it. 22 GB between them on this
 # machine: 3.4 GB of footage, 391 MB of renders, 18 GB of Python environments.
@@ -55,3 +60,5 @@ work/sep-test/
 # except the fixture cli/remote.test.js reads to check bytes survive a round trip.
 !protocol/levels.score
 /docs
+.venv
+/tools

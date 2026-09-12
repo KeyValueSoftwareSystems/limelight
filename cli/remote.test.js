@@ -10,7 +10,7 @@ const { openRemote, NotFound, Unreachable } = require("./remote.js");
 
 const REPO = path.join(__dirname, "..");
 const CLI = path.join(REPO, "limelight");
-const SCORE = fs.readFileSync(path.join(REPO, "scores", "levels.score"));
+const SCORE = fs.readFileSync(path.join(REPO, "protocol", "levels.score"));
 
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);
@@ -35,11 +35,12 @@ const freePort = () => new Promise(r => { const s = net.createServer(); s.listen
 
 /* start serve.py on a free port with a temp hub root; `files` reads and writes
    that root's score/ folder directly, which is what the assertions look at */
-async function startHub() {
+async function startHub(extraEnv = {}) {
   /* a root that does not exist yet, as on a fresh clone: the server must create it */
   const port = await freePort(), root = path.join(scratch(), "files");
   const proc = spawn("python3", [path.join(REPO, "serve.py")],
-    { env: { ...process.env, PORT: String(port), HOST: "127.0.0.1", HUB_ROOT: root }, stdio: ["ignore", "pipe", "pipe"] });
+    { env: { ...process.env, PORT: String(port), HOST: "127.0.0.1", HUB_ROOT: root,
+             LIMELIGHT_SCORE_BUILDER: "stub", ...extraEnv }, stdio: ["ignore", "pipe", "pipe"] });
   let stderr = ""; proc.stderr.on("data", d => stderr += d);
   const origin = `http://127.0.0.1:${port}`;
   for (let i = 0; i < 100; i++) {                     /* up to ~5 s to come up */
@@ -405,6 +406,170 @@ async function startHub() {
     const rowLatest = (await (await fetch(fake.url + "/?json")).json()).paths.find(p => p.name === "levels.score");
     /* this file was written straight to disk by the pull block, so it has no history: version is null, and the keys are still there */
     ok("the listing row still carries version and has_metadata", rowLatest && "version" in rowLatest && "has_metadata" in rowLatest, JSON.stringify(rowLatest));
+
+    fake.files.clear();
+    const libScore = Buffer.from('{"score":"lib","version":1,"grid":{"bpm":100,"beats_per_bar":4,"bars":8,"first_beat_s":0},"song":{"length_s":10}}');
+    await fetch(fake.url + "/lib.score", { method: "PUT", body: libScore });
+    await fetch(fake.url + "/lib.mp3", { method: "PUT", body: Buffer.from("fake-mp3") });
+    let lib = await (await fetch(fake.origin + "/library.json")).json();
+    ok("/library.json lists hub score latest",
+       lib.some(x => x.slug === "lib" && x.audio === "/hub/audio/lib.mp3"
+         && x.score === "/hub/score/lib.score"), JSON.stringify(lib));
+    ok("mp3 is not listed beside scores",
+       !(await (await fetch(fake.url + "/?json")).json()).paths.some(p => /\.mp3$/i.test(p.name)));
+    ok("audio/ folder is hidden from hub root listing",
+       !(await (await fetch(fake.origin + "/hub/?json")).json()).paths.some(p => p.name === "audio"));
+    await fetch(fake.origin + "/hub/rooty.score", {
+      method: "PUT", body: Buffer.from('{"score":"rooty","version":1,"grid":{"bpm":90}}') });
+    lib = await (await fetch(fake.origin + "/library.json")).json();
+    ok("/library.json ignores scores left at hub root (canonical is score/)",
+       !lib.some(x => x.slug === "rooty"), JSON.stringify(lib));
+    const home = await fetch(fake.origin + "/");
+    const homeHtml = await home.text();
+    ok("home page links to hub", home.status === 200 && /href="\/hub\/score\/"/.test(homeHtml), String(home.status));
+    const hubPage = await (await fetch(fake.origin + "/hub/")).text();
+    ok("hub page links home", /href="\/"/.test(hubPage) && />Home</.test(hubPage));
+    const hubScore = await (await fetch(fake.origin + "/hub/score/lib.score")).json();
+    ok("home can load score from hub path", hubScore.score === "lib" && hubScore.grid.bpm === 100);
+  }
+
+  /* ---- migrate root songs into score/, mp3s into audio/ ------------------ */
+  {
+    const port = await freePort(), root = path.join(scratch(), "files");
+    fs.mkdirSync(root, { recursive: true });
+    const body = Buffer.from('{"score":"old","version":1,"grid":{"bpm":88}}');
+    fs.writeFileSync(path.join(root, "old.score"), body);
+    fs.writeFileSync(path.join(root, "old.mp3"), Buffer.from("audio-bytes"));
+    fs.mkdirSync(path.join(root, ".versions", "old.score"), { recursive: true });
+    fs.writeFileSync(path.join(root, ".versions", "old.score", "1.score"), body);
+    fs.writeFileSync(path.join(root, ".versions", "old.score", "1.meta.json"),
+      Buffer.from('{"author":{"value":"renjith","enforced":true}}'));
+    const proc = spawn("python3", [path.join(REPO, "serve.py")],
+      { env: { ...process.env, PORT: String(port), HOST: "127.0.0.1", HUB_ROOT: root,
+               LIMELIGHT_SCORE_BUILDER: "stub" }, stdio: ["ignore", "pipe", "pipe"] });
+    let stderr = ""; proc.stderr.on("data", d => stderr += d);
+    const origin = `http://127.0.0.1:${port}`;
+    for (let i = 0; i < 100; i++) {
+      try { await fetch(origin + "/hub/?json"); break; } catch (e) { await new Promise(r => setTimeout(r, 50)); }
+      if (i === 99) throw new Error("migrate serve.py never answered\n" + stderr);
+    }
+    try {
+      ok("migrate moved the score into score/",
+         fs.existsSync(path.join(root, "score", "old.score")) && !fs.existsSync(path.join(root, "old.score")));
+      ok("migrate moved the mp3 into audio/",
+         fs.existsSync(path.join(root, "audio", "old.mp3")) && !fs.existsSync(path.join(root, "old.mp3"))
+           && !fs.existsSync(path.join(root, "score", "old.mp3")));
+      ok("migrate moved .versions under score/",
+         fs.existsSync(path.join(root, "score", ".versions", "old.score", "1.score"))
+           && !fs.existsSync(path.join(root, ".versions")));
+      const lib = await (await fetch(origin + "/library.json")).json();
+      const row = lib.find(x => x.slug === "old");
+      ok("/library.json lists the migrated song under /hub/score/ with /hub/audio/",
+         row && row.score === "/hub/score/old.score" && row.audio === "/hub/audio/old.mp3", JSON.stringify(row));
+      const got = await (await fetch(origin + "/hub/score/old.score?v=1&raw")).arrayBuffer();
+      ok("migrated version 1 is still downloadable", Buffer.from(got).equals(body));
+    } finally {
+      await new Promise(r => { proc.on("exit", r); proc.kill(); });
+    }
+  }
+
+  /* ---- generate score from mp3 ------------------------------------------ */
+  {
+    fake.files.clear();
+    const put = (u, body) => fetch(u, { method: "PUT", body });
+    const text = async r => await r.text();
+    const json = async r => JSON.parse(await r.text());
+    const waitDone = async (url, scoreName, { minVersion = 1, afterId = null, ms = 5000 } = {}) => {
+      const t0 = Date.now();
+      while (Date.now() - t0 < ms) {
+        const info = await json(await fetch(url + "/?jobs"));
+        const job = (info.jobs || []).find(j => j.score_name === scoreName
+          && (j.status === "done" || j.status === "error")
+          && (j.version == null || j.version >= minVersion)
+          && (!afterId || j.id !== afterId));
+        if (job) return job;
+        await new Promise(r => setTimeout(r, 50));
+      }
+      return null;
+    };
+
+    let r = await put(fake.url + "/song.mp3", Buffer.from("not-really-mp3"));
+    ok("an mp3 upload is accepted", r.status === 201, `${r.status} ${await text(r)}`);
+    ok("mp3 landed under audio/, not score/",
+       fs.existsSync(path.join(fake.root, "audio", "song.mp3"))
+         && !fs.existsSync(path.join(fake.score, "song.mp3")));
+    r = await fetch(fake.url + "/song.mp3?generate", { method: "POST" });
+    let body = await json(r);
+    ok("POST ?generate returns 202 with a job", r.status === 202 && body.job && body.job.score_name === "song.score"
+       && body.job.status === "queued", JSON.stringify(body));
+
+    let job = await waitDone(fake.url, "song.score", { minVersion: 1 });
+    ok("the stub builder finishes", job && job.status === "done" && job.version === 1, JSON.stringify(job));
+    let listing = await json(await fetch(fake.url + "/?json"));
+    let row = listing.paths.find(p => p.name === "song.score");
+    ok("the listing shows the new score at v1", row && row.version === 1, JSON.stringify(row));
+    ok("and the mp3 is not listed in score/", !listing.paths.some(p => p.name === "song.mp3"));
+
+    const libAfter = await json(await fetch(fake.origin + "/library.json"));
+    const songLib = libAfter.find(x => x.slug === "song");
+    ok("/library.json pairs the hub mp3 with the generated score",
+       songLib && songLib.audio === "/hub/audio/song.mp3" && songLib.score === "/hub/score/song.score",
+       JSON.stringify(songLib));
+    r = await fetch(fake.origin + "/hub/audio/song.mp3", { headers: { Range: "bytes=0-1" } });
+    ok("hub mp3 answers Range with 206 and audio/mpeg",
+       r.status === 206 && /audio\/mpeg/.test(r.headers.get("content-type") || "")
+         && r.headers.get("content-range") === "bytes 0-1/14"
+         && Buffer.from(await r.arrayBuffer()).equals(Buffer.from("no")),
+       `${r.status} ${r.headers.get("content-type")} ${r.headers.get("content-range")}`);
+    r = await fetch(fake.url + "/song.mp3", { headers: { Range: "bytes=0-1" } });
+    ok("GET /hub/score/song.mp3 still serves from audio/",
+       r.status === 206 && Buffer.from(await r.arrayBuffer()).equals(Buffer.from("no")));
+
+    const firstId = job.id;
+    r = await fetch(fake.url + "/song.mp3?generate", { method: "POST" });
+    body = await json(r);
+    ok("generating again is accepted", r.status === 202, JSON.stringify(body));
+    job = await waitDone(fake.url, "song.score", { minVersion: 2, afterId: firstId });
+    ok("a second generate bumps the version", job && job.status === "done" && job.version === 2, JSON.stringify(job));
+    row = (await json(await fetch(fake.url + "/?json"))).paths.find(p => p.name === "song.score");
+    ok("the listing shows v2", row && row.version === 2, JSON.stringify(row));
+
+    r = await fetch(fake.url + "/notes.txt?generate", { method: "POST" });
+    ok("POST ?generate on a non-mp3 is 400", r.status === 400 && /mp3/i.test(await text(r)), String(r.status));
+    r = await fetch(fake.url + "/missing.mp3?generate", { method: "POST" });
+    ok("POST ?generate without a prior upload is 400", r.status === 400, String(r.status));
+  }
+
+  /* ---- generate: same score in flight is 409; different names queue ------ */
+  {
+    const slow = await startHub({ LIMELIGHT_SCORE_BUILDER_DELAY_MS: "400" });
+    try {
+      const json = async r => JSON.parse(await r.text());
+      const text = async r => await r.text();
+      await fetch(slow.url + "/a.mp3", { method: "PUT", body: Buffer.from("a") });
+      await fetch(slow.url + "/b.mp3", { method: "PUT", body: Buffer.from("b") });
+      let r = await fetch(slow.url + "/a.mp3?generate", { method: "POST" });
+      ok("slow generate starts", r.status === 202, await text(r));
+      r = await fetch(slow.url + "/a.mp3?generate", { method: "POST" });
+      ok("a second generate for the same score while in flight is 409",
+         r.status === 409 && /already/i.test(await text(r)), String(r.status));
+      r = await fetch(slow.url + "/b.mp3?generate", { method: "POST" });
+      const body = await json(r);
+      ok("a different mp3 is queued", r.status === 202 && body.job.status === "queued", JSON.stringify(body));
+      const wait = async name => {
+        for (let i = 0; i < 80; i++) {
+          const info = await json(await fetch(slow.url + "/?jobs"));
+          const job = (info.jobs || []).find(j => j.score_name === name);
+          if (job && job.status === "done") return job;
+          await new Promise(x => setTimeout(x, 50));
+        }
+        return null;
+      };
+      const a = await wait("a.score"), b = await wait("b.score");
+      ok("both queued jobs complete", a && a.version === 1 && b && b.version === 1, JSON.stringify({ a, b }));
+    } finally {
+      await slow.close();
+    }
   }
 
   await fake.close();

@@ -13,10 +13,10 @@
    a beat — the grid (bpm, first_beat_s, beats_per_bar) derives them all.
 
    Everything is fetched from serve.py on the same origin:
-       /library.json            list of playable songs {slug, audio}
-       /scores/<slug>.score     the score (JSON)
-       <audio path>             the recording, served with byte ranges
-       /protocol/session.js     the protocol client (loaded in index.html)
+       /library.json                  list of playable songs {slug, audio}
+       /hub/score/<slug>.score        the score (JSON, latest from hub)
+       <audio path>                   the recording, served with byte ranges
+       /protocol/session.js           the protocol client (loaded in index.html)
    ============================================================ */
 (function () {
   "use strict";
@@ -40,7 +40,7 @@
     const out = [];
     for (const entry of list) {
       try {
-        const score = await loadScore(entry.slug);
+        const score = await loadScore(entry);
         out.push({
           slug: entry.slug,
           audio: entry.audio,
@@ -59,8 +59,12 @@
     return out;
   }
 
-  async function loadScore(slug) {
-    return getJSON(`/scores/${slug}.score`);
+  async function loadScore(entryOrSlug) {
+    if (typeof entryOrSlug === "string")
+      return getJSON(`/hub/score/${encodeURIComponent(entryOrSlug)}.score`);
+    const url = entryOrSlug.score
+      || `/hub/score/${encodeURIComponent(entryOrSlug.slug)}.score`;
+    return getJSON(url);
   }
 
   /* Build the protocol session for a loaded score, reading the audio element's
