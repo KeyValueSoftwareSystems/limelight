@@ -132,42 +132,102 @@ const comboConflicts = s => {
   return new Set(toks).size !== toks.length;
 };
 
-function enumerate(layout) {
+/* dangerous capabilities may only be enumerated if the layout carries their limits */
+const DANGEROUS = { laser: "laser_zones", pyro: "pyro_zones" };
+
+/* which capabilities and named groups this layout actually has */
+function layoutFacts(layout) {
   const g = groupsOf(layout);
-  /* feasible, and (for combinations) internally conflict-free */
-  const kept = VOCABULARY.filter(s => s.requires(g, layout) &&
+  const caps = new Set(g.fx.flatMap(f => f.can));
+  const groups = new Set();
+  if (g.inner.length) groups.add("inner");
+  if (g.outer.length) groups.add("outer");
+  if (g.pars.length) { groups.add("all_pars"); groups.add("arc"); }
+  if (g.movers.length) { groups.add("head"); groups.add("movers"); }
+  if (g.strobers.length) groups.add("strobers");
+  if (g.lasers.length) groups.add("lasers");
+  return { g, caps, groups };
+}
+
+/* Validate an externally-supplied (e.g. LLM-generated) sequence against this rig.
+   This is the gate that keeps a generated palette grounded and safe: it can only
+   use capabilities and groups the rig actually has, dangerous types need limits,
+   combinations must be conflict-free, and every suitability score is a 0..1 number. */
+function validateSequence(seq, layout) {
+  const { caps, groups } = layoutFacts(layout);
+  const bad = reason => ({ ok: false, reason });
+  if (!seq || typeof seq.id !== "string" || !seq.id) return bad("missing id");
+  if (!["individual", "compound", "combination"].includes(seq.kind)) return bad("bad kind");
+  if (!["ambient", "accent", "hero"].includes(seq.boldness)) return bad("bad boldness");
+  const req = seq.requires || {};
+  for (const c of (req.caps || [])) {
+    if (!caps.has(c)) return bad("needs absent capability: " + c);
+    if (DANGEROUS[c] && !(layout.limits && layout.limits[DANGEROUS[c]]))
+      return bad("dangerous capability without limits: " + c);
+  }
+  for (const gr of (req.groups || [])) if (!groups.has(gr)) return bad("needs absent group: " + gr);
+  const occ = seq.occupies || [];
+  if (!Array.isArray(occ)) return bad("occupies not an array");
+  if (seq.kind === "combination" && new Set(occ).size !== occ.length)
+    return bad("combination self-conflict");
+  const su = seq.suitability || {};
+  for (const ctx of CONTEXTS) {
+    const v = su[ctx];
+    if (typeof v !== "number" || v < 0 || v > 1) return bad("bad suitability for " + ctx);
+  }
+  return { ok: true };
+}
+
+/* enumerate(layout, { palette }) -> { sequences, matrix, report }
+   The heuristic BASE vocabulary (computed fit x affinity) is always present and
+   deterministic; an optional PALETTE (validated, pre-scored, e.g. LLM-generated)
+   is merged on top. The matrix is the arranger's contract either way. */
+function enumerate(layout, options) {
+  options = options || {};
+  const g = groupsOf(layout);
+  const gate = v => (v >= FIT_FLOOR ? +v.toFixed(4) : 0);
+
+  const keptBase = VOCABULARY.filter(s => s.requires(g, layout) &&
     !(s.kind === "combination" && comboConflicts(s)));
 
   const matrix = {};
-  for (const s of kept) {
+  const sequences = [];
+
+  for (const s of keptBase) {
     const f = s.fit ? s.fit(g) : 0;
     const row = {};
-    for (const ctx of CONTEXTS) {
-      const a = (s.affinity && s.affinity[ctx]) || 0;
-      const cell = f * a;
-      row[ctx] = cell >= FIT_FLOOR ? +cell.toFixed(4) : 0;
-    }
+    for (const ctx of CONTEXTS) row[ctx] = gate(f * ((s.affinity && s.affinity[ctx]) || 0));
     matrix[s.id] = row;
+    sequences.push({ id: s.id, kind: s.kind, boldness: s.boldness, source: "base",
+      fit: +f.toFixed(4), occupies: s.kind === "combination" ? comboOccupies(s) : (s.occupies || []),
+      ...(s.parts ? { parts: s.parts.map(p => p.seq) } : {}) });
   }
 
-  const sequences = kept.map(s => ({
-    id: s.id, kind: s.kind, boldness: s.boldness,
-    fit: +((s.fit ? s.fit(g) : 0).toFixed(4)),
-    occupies: s.kind === "combination" ? comboOccupies(s) : (s.occupies || []),
-    ...(s.parts ? { parts: s.parts.map(p => p.seq) } : {}),
-  }));
+  let rejected = 0, dup = 0;
+  for (const seq of (options.palette || [])) {
+    if (matrix[seq && seq.id]) { dup++; continue; }
+    const v = validateSequence(seq, layout);
+    if (!v.ok) { rejected++; continue; }
+    const row = {};
+    for (const ctx of CONTEXTS) row[ctx] = gate(seq.suitability[ctx]);
+    matrix[seq.id] = row;
+    sequences.push({ id: seq.id, kind: seq.kind, boldness: seq.boldness, source: "llm",
+      fit: +Math.max(...CONTEXTS.map(c => seq.suitability[c])).toFixed(4),
+      occupies: seq.occupies || [],
+      ...(Array.isArray(seq.parts) ? { parts: seq.parts.map(p => p && p.seq).filter(Boolean) } : {}) });
+  }
 
-  /* the report: what this rig can do, what it can't, and the strongest choice per
-     context -- a legible taste artifact the operator can veto before a frame runs. */
-  const impossible = VOCABULARY.filter(s => !kept.includes(s)).map(s => s.id);
-  const weak = kept.filter(s => CONTEXTS.every(c => matrix[s.id][c] === 0)).map(s => s.id);
+  const impossible = VOCABULARY.filter(s => !keptBase.includes(s)).map(s => s.id);
+  const weak = sequences.filter(s => CONTEXTS.every(c => matrix[s.id][c] === 0)).map(s => s.id);
   const strongest = {};
   for (const ctx of CONTEXTS) {
-    strongest[ctx] = kept.map(s => ({ id: s.id, score: matrix[s.id][ctx] }))
+    strongest[ctx] = sequences.map(s => ({ id: s.id, score: matrix[s.id][ctx] }))
       .filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
   }
   const report = { rig: layout.rig || null, can_do: sequences.map(s => s.id),
-                   impossible, weak, strongest };
+    impossible, weak, strongest,
+    sources: { base: keptBase.length, llm: sequences.length - keptBase.length },
+    rejected, dup };
 
   return { sequences, matrix, report };
 }
@@ -197,7 +257,8 @@ function view(result) {
   };
 }
 
-module.exports = { enumerate, view, groupsOf, VOCABULARY, CONTEXTS, FIT_FLOOR, BUDGETS };
+module.exports = { enumerate, view, validateSequence, layoutFacts, groupsOf,
+                   VOCABULARY, CONTEXTS, FIT_FLOOR, BUDGETS };
 
 /* ---- CLI: enumerate a layout, print the taste report, cache the matrix ---
      node readers/lights/preflight.js [readers/lights/arc4-head.layout.json]      */
@@ -205,14 +266,19 @@ if (require.main === module) {
   const fs = require("fs"), path = require("path");
   const file = process.argv[2] || path.join(__dirname, "arc4-head.layout.json");
   const layout = JSON.parse(fs.readFileSync(file, "utf8"));
-  const result = enumerate(layout);
-
   const base = path.basename(file).replace(/\.layout\.json$|\.json$/, "");
+
+  /* load the (LLM-generated) palette cache if present, else base-only */
+  let palette = [];
+  try { palette = JSON.parse(fs.readFileSync(path.join(path.dirname(file), base + ".palette.json"), "utf8")); }
+  catch (e) { /* no palette yet -- heuristic base only */ }
+
+  const result = enumerate(layout, { palette });
   const out = path.join(path.dirname(file), base + ".matrix.json");
   fs.writeFileSync(out, JSON.stringify(result, null, 1));
 
   const r = result.report;
-  console.log(`\nRIG: ${r.rig}   (${result.sequences.length} sequences enumerated)`);
+  console.log(`\nRIG: ${r.rig}   (${result.sequences.length} sequences: ${r.sources.base} base + ${r.sources.llm} llm; ${r.rejected} rejected, ${r.dup} dup)`);
   console.log("CAN DO:          " + r.can_do.join(" · "));
   if (r.weak.length) console.log("WEAK (low weight): " + r.weak.join(" · "));
   console.log("IMPOSSIBLE HERE: " + (r.impossible.join(" · ") || "—"));

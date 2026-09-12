@@ -4,7 +4,7 @@
    fits each musical situation, plus a human-readable report. Sequences key off the
    device drivers' declared capabilities, never fixture ids. */
 "use strict";
-const { enumerate, view, VOCABULARY } = require("./preflight.js");
+const { enumerate, view, validateSequence, VOCABULARY } = require("./preflight.js");
 
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);
@@ -120,6 +120,50 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
   ok("every enumerated combination is conflict-free (no two parts claim one fixture-attr)",
      combos.length > 0 && combos.every(c => new Set(c.occupies).size === c.occupies.length),
      combos.map(c => `${c.id}[${(c.occupies || []).join(",")}]`).join(" ; "));
+}
+
+/* ---- LLM palette: validation grounds it to what the rig can do ---------- */
+{
+  const good = { id: "x_wash", kind: "individual", boldness: "ambient",
+    requires: { groups: ["all_pars"], caps: ["colour", "level"] },
+    occupies: ["pars:colour", "pars:level"],
+    suitability: { intro: 0.8, verse: 0.3, break: 0.5, build: 0, drop: 0, outro: 0.8, silence: 0.5, final_drop: 0 } };
+  ok("a grounded palette sequence validates", validateSequence(good, RIG).ok,
+     JSON.stringify(validateSequence(good, RIG)));
+
+  const needsPixels = { ...good, id: "x_pix", requires: { groups: ["all_pars"], caps: ["pixels"] } };
+  ok("a sequence needing an absent capability is rejected", !validateSequence(needsPixels, RIG).ok);
+
+  const badCombo = { id: "x_c", kind: "combination", boldness: "hero",
+    requires: { groups: ["all_pars", "head"], caps: ["colour", "move"] },
+    occupies: ["pars:colour", "pars:colour"],
+    suitability: { intro: 0, verse: 0, break: 0, build: 0.3, drop: 1, outro: 0, silence: 0, final_drop: 1 } };
+  ok("a combination with duplicate occupies is rejected", !validateSequence(badCombo, RIG).ok);
+
+  const badScore = { ...good, id: "x_s", suitability: { ...good.suitability, drop: 1.5 } };
+  ok("out-of-range suitability is rejected", !validateSequence(badScore, RIG).ok);
+}
+
+/* ---- LLM palette: merged with the heuristic base, invalid dropped -------- */
+{
+  const good = { id: "x_wash", kind: "individual", boldness: "ambient",
+    requires: { groups: ["all_pars"], caps: ["colour", "level"] },
+    occupies: ["pars:colour", "pars:level"],
+    suitability: { intro: 0.8, verse: 0.3, break: 0.5, build: 0, drop: 0, outro: 0.8, silence: 0.5, final_drop: 0 } };
+  const needsPixels = { ...good, id: "x_pix", requires: { groups: ["all_pars"], caps: ["pixels"] } };
+  const palette = [good, { ...good, id: "x_wash2" }, needsPixels];
+
+  const e = enumerate(RIG, { palette });
+  const ids = e.sequences.map(s => s.id);
+  ok("valid palette sequences are merged in", ids.includes("x_wash") && ids.includes("x_wash2"),
+     ids.join(", "));
+  ok("invalid palette sequences are dropped", !ids.includes("x_pix"));
+  ok("palette suitability drives the matrix",
+     e.matrix["x_wash"].intro > 0 && e.matrix["x_wash"].drop === 0,
+     `intro ${e.matrix["x_wash"].intro} drop ${e.matrix["x_wash"].drop}`);
+  ok("the heuristic base survives alongside the palette", ids.includes("pair_call_response"));
+  ok("enumerate with a palette is deterministic",
+     JSON.stringify(enumerate(RIG, { palette }).matrix) === JSON.stringify(enumerate(RIG, { palette }).matrix));
 }
 
 for (const [pass, name, detail] of out)
