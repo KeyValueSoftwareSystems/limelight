@@ -390,11 +390,12 @@ async function library() {
       url.searchParams.set("song", pick.slug);
       history.replaceState(null, "", url);
     }
-    load(pick.slug, pick.audio, +args.get("at") || 0);
+    load(pick.slug, pick.audio, +args.get("at") || 0,
+         +args.get("from") || 0, +args.get("to") || 0);
   }
 }
 
-async function load(s, url, at) {
+async function load(s, url, at, from, to) {
   slug = s;
   SCORE = await (await fetch(`/scores/${s}.score`)).json();
   BAR = (60 / SCORE.grid.bpm) * SCORE.grid.beats_per_bar;
@@ -412,7 +413,7 @@ async function load(s, url, at) {
   } catch (e) { BASE = 0; }
   SHIFT = BASE;
   if (at) aud.currentTime = at;
-  setView(0, SCORE.song.length_s);
+  setView(from && to ? from : 0, from && to ? to : SCORE.song.length_s);
   draw();
 }
 
@@ -995,7 +996,9 @@ function sections() {
         &nbsp;<b>${esc(FEELS[p.feels] || p.feels)}</b>
         <span class="dim">· ${playingWords(p.playing)} playing
         · bars ${p.from_bar}–${p.to_bar}</span>
-        <span style="color:#8fbf9f">· ${esc(partTune(p))}</span></span>
+        <span style="color:#8fbf9f">· ${esc(partTune(p))}</span>${p.trades
+          ? ` <b style="color:var(--vio)">· trades back and forth every ${p.trades.every_bars} bars</b>`
+          : ""}</span>
       <button data-from="${t0}" data-to="${t1}">Hear it</button>
       `;
 
@@ -1105,6 +1108,7 @@ function tick() {
         : `<span class="dim">nothing</span>`;
       const q = (SCORE.phrases || []).find(x => bar >= x.from_bar && bar <= x.to_bar);
       const pair = q && DOINGWORD[q.doing];
+      $("nowmoment").dataset.trades = p.trades ? p.trades.every_bars : "";
       $("nowdoing").innerHTML = q
         ? (pair ? `<b style="color:${DOING[q.doing]}">${cap(pair[1])}</b> · ` : "")
           + `<span class="dim">${esc(saysWords(q.says))}</span>`
@@ -1116,6 +1120,8 @@ function tick() {
       $("nowmoment").innerHTML = here.length
         ? here.map(m => `<b style="color:${KIND[m.is]||'#8b93a6'}">${esc(momentWords(m))}</b>`).join(" · ")
         : `<span class="dim">nothing the computer calls notable</span>`;
+      if (p.trades) $("nowmoment").innerHTML +=
+        ` <span style="color:var(--vio)">· this part trades back and forth every ${p.trades.every_bars} bars</span>`;
     }
   }
   requestAnimationFrame(tick);

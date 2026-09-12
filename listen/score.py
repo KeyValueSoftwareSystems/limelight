@@ -8,6 +8,7 @@ import numpy as np
 warnings.filterwarnings("ignore")
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from cycle import cycle
 from grid import grid, bar_edges, show
 from form import on_phrase
 from shape import shape
@@ -165,6 +166,18 @@ def alike(spans, chroma, voices):
     return out, sure
 
 
+def turning(voices, a, b, busy):
+    if voices is None or b - a < 8:
+        return None
+    lanes = {}
+    for i, name in enumerate(STEM_NAMES):
+        if i < voices.shape[0]:
+            lanes[name] = voices[i][a:b].tolist()
+    v = busy[0] if busy.ndim > 1 else busy
+    lanes["busy"] = v[a:b].tolist()
+    return cycle(lanes)
+
+
 def sections(spans, voices, busy, pickup, report=None, chroma=None):
     from parts import how_much, word_for
 
@@ -189,6 +202,7 @@ def sections(spans, voices, busy, pickup, report=None, chroma=None):
             "role": role,
             "repeats_as": same[n],
             "sure": apart[n],
+            "trades": turning(voices, a, b, busy),
             "feels": word_for(rel, rise, has, had),
             "fullness": round(rel, 3),
             "rise": round(rise, 3),
