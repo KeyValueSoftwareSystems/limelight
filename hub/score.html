@@ -1,0 +1,185 @@
+<!-- One score: its versions, a download for each, a new version from here, and
+     the metadata fields on any version. Every request this page makes is one
+     the CLI or curl could make; nothing here is page-only. -->
+<title>Score</title>
+<style>
+:root{--bg:#0a0d13;--pan:#0f141d;--line:#1b2230;--line2:#263047;--ink:#e6e9f0;
+  --dim:#9aa3b8;--faint:#5c6478;--amb:#e8a33d;--ok:#5bb98c;--blu:#6fa8dc;--bad:#e06c6c}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.55 ui-sans-serif,system-ui,sans-serif;margin:0}
+.wrap{max-width:920px;margin:0 auto;padding:18px 18px 70px}
+h1{font:600 12px ui-monospace,monospace;letter-spacing:.18em;color:var(--amb);margin:0 0 16px}
+h1 a{color:var(--amb);text-decoration:none} h1 a:hover{text-decoration:underline}
+.head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:0 0 16px}
+.name{font:600 22px ui-monospace,monospace;color:var(--ink)}
+.badge{display:inline-block;font:600 10px ui-monospace,monospace;letter-spacing:.08em;color:var(--amb);
+  border:1px solid var(--line2);border-radius:4px;padding:1px 5px;vertical-align:2px}
+button,label.btn,a.btn{background:#182031;color:var(--ink);border:1px solid var(--line2);
+  border-radius:6px;padding:7px 13px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,label.btn:hover,a.btn:hover{border-color:#41506e}
+button.small{padding:3px 9px;font:11px ui-monospace,monospace;margin-left:8px}
+button.x{padding:3px 8px;font:11px ui-monospace,monospace;color:var(--bad)}
+input[type=file]{display:none}
+#msg{font:11.5px ui-monospace,monospace;color:var(--bad);white-space:pre-wrap;flex:1;min-width:200px}
+table{border-collapse:collapse;width:100%;font:12px ui-monospace,monospace;background:var(--pan);
+  border:1px solid var(--line);border-radius:6px}
+th{font:600 10px ui-monospace,monospace;letter-spacing:.13em;text-transform:uppercase;color:var(--blu);
+  text-align:left;padding:9px 12px;border-bottom:1px solid var(--line2)}
+td{padding:7px 12px;border-bottom:1px solid #141a26;color:var(--dim);white-space:nowrap}
+td.n{color:var(--ink)} td.r{text-align:right} td a{color:var(--blu);text-decoration:none} td a:hover{text-decoration:underline}
+td .meta-on{color:var(--ok)} td .meta-off{color:var(--faint)}
+tr.edit td{background:#0b1018;padding:12px;white-space:normal}
+.fields{display:grid;grid-template-columns:1fr 2fr auto auto;gap:6px 10px;align-items:center;max-width:720px}
+.fields .h{font:600 10px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.fields input[type=text]{background:#05070b;color:var(--ink);border:1px solid var(--line2);border-radius:5px;
+  padding:6px 8px;font:12px ui-monospace,monospace;width:100%}
+.fields label{color:var(--dim);font-size:11px;display:flex;gap:5px;align-items:center;white-space:nowrap}
+.fields input[type=checkbox]{accent-color:var(--amb)}
+.editbar{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.editbar .err{color:var(--bad);font:11.5px ui-monospace,monospace;white-space:pre-wrap;flex:1}
+.editbar .warn{color:var(--amb);font:11.5px ui-monospace,monospace;flex-basis:100%}
+.empty{padding:26px 12px;color:var(--faint);text-align:center}
+.note{color:var(--faint);font-size:12px;margin:10px 0 0}
+</style>
+
+<div class="wrap">
+<h1 id="crumb">HUB</h1>
+
+<div class="head">
+  <span class="name" id="name"></span>
+  <span class="badge" id="latest">—</span>
+  <a class="btn" id="dl" href="" download>download latest</a>
+  <label class="btn" for="file">upload new version</label>
+  <input type="file" id="file">
+  <span id="msg"></span>
+</div>
+
+<table>
+  <thead><tr><th>version</th><th>uploaded</th><th>size</th><th>metadata</th><th></th></tr></thead>
+  <tbody id="rows"></tbody>
+</table>
+<p class="note">A download folds the fields of that version into the file as
+<span style="color:var(--dim)">x-&lt;name&gt;</span> keys at the root, and lists the enforced ones under
+<span style="color:var(--dim)">x-enforced</span>. The uploaded bytes are never rewritten.</p>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const file = location.pathname;                                  /* /hub/score/levels.score */
+const name = decodeURIComponent(file.slice(file.lastIndexOf("/") + 1));
+const enc = s => s.split("/").map(encodeURIComponent).join("/");
+const err = m => { $("msg").textContent = m; if (m) console.error(m); };
+const human = n => n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : (n / 1048576).toFixed(2) + " MB";
+const when = ms => new Date(ms).toISOString().slice(0, 16).replace("T", " ");
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+
+function crumbs() {
+  const parts = file.replace(/^\/hub\/?/, "").split("/").filter(Boolean);
+  let html = `<a href="/hub/">HUB</a>`, href = "/hub/";
+  parts.forEach((p, i) => {
+    if (i < parts.length - 1) { href += enc(p) + "/"; html += ` / <a href="${href}">${esc(p.toUpperCase())}</a>`; }
+    else html += ` / ${esc(p)}`;
+  });
+  $("crumb").innerHTML = html;
+  $("name").textContent = name;
+  $("dl").href = file;
+  document.title = name;
+}
+
+let HIST = null;
+async function load() {
+  err("");
+  let r;
+  try { r = await fetch(file + "?versions"); } catch (e) { return err("cannot reach the server: " + e.message); }
+  if (r.status === 404) { HIST = { latest: null, versions: [] }; }
+  else if (!r.ok) return err(`${r.status} ${r.statusText} listing versions`);
+  else HIST = await r.json();
+  $("latest").textContent = HIST.latest ? "v" + HIST.latest : "no versions yet";
+  $("dl").hidden = !HIST.latest;
+  const rows = [];
+  for (const v of [...HIST.versions].reverse()) {
+    const meta = v.fields ? `<span class="meta-on">${v.fields} field${v.fields === 1 ? "" : "s"} · ${v.enforced} enforced</span>`
+                          : `<span class="meta-off">no metadata</span>`;
+    rows.push(`<tr data-version="${v.version}"><td class="n">v${v.version}${v.version === HIST.latest ? ' <span class="badge">latest</span>' : ""}</td>` +
+      `<td>${when(v.mtime)}</td><td>${human(v.size)}</td><td>${meta}</td>` +
+      `<td class="r"><a href="${file}?v=${v.version}" download>download</a>` +
+      `<button class="small edit" data-version="${v.version}" data-mergeable="${v.mergeable}">${v.fields ? "edit" : "add"} metadata</button></td></tr>`);
+  }
+  $("rows").innerHTML = rows.join("") || `<tr><td colspan="5" class="empty">no versions yet — upload one above, or <span style="color:var(--dim)">limelight push</span> it</td></tr>`;
+}
+
+$("file").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  err("");
+  const r = await fetch(file, { method: "PUT", body: f });
+  if (!r.ok) return err(`${r.status} ${r.statusText} uploading: ${await r.text()}`);
+  e.target.value = "";
+  load();
+});
+
+/* ---- the field editor ------------------------------------------------------ */
+function typed(text) {
+  /* a JSON number, true, false or null becomes that scalar; anything else is the string as typed */
+  const t = text.trim();
+  try { const v = JSON.parse(t); if (v === null || typeof v === "number" || typeof v === "boolean") return v; } catch (e) {}
+  return text;
+}
+const shown = v => typeof v === "string" ? v : JSON.stringify(v);
+
+function fieldRow(key, value, enforced) {
+  return `<input type="text" class="k" placeholder="name" value="${esc(key)}">` +
+         `<input type="text" class="v" placeholder="value" value="${esc(value)}">` +
+         `<label><input type="checkbox" class="e" ${enforced ? "checked" : ""}> enforce</label>` +
+         `<button class="x" title="remove this field">remove</button>`;
+}
+
+async function openEditor(version, mergeable) {
+  document.querySelectorAll("tr.edit").forEach(tr => tr.remove());
+  const verRow = document.querySelector(`tr[data-version="${version}"]`);
+  const r = await fetch(`${file}?meta&v=${version}`);
+  const current = r.ok ? await r.json() : {};
+  const tr = document.createElement("tr");
+  tr.className = "edit";
+  const rows = Object.entries(current).map(([k, e]) => fieldRow(k, shown(e.value), e.enforced)).join("");
+  tr.innerHTML = `<td colspan="5"><div class="fields"><span class="h">name</span><span class="h">value</span><span></span><span></span>${rows}</div>` +
+    `<div class="editbar"><button class="add">add field</button><button class="save">save</button><button class="cancel">cancel</button>` +
+    `<span class="err"></span>` +
+    `${mergeable === "false" ? '<span class="warn">this file is not a JSON object, so fields are stored but will not be folded into downloads</span>' : ""}</div></td>`;
+  verRow.after(tr);
+  const grid = tr.querySelector(".fields"), msg = tr.querySelector(".err");
+  const addRow = () => { grid.insertAdjacentHTML("beforeend", fieldRow("", "", false)); [...grid.querySelectorAll(".k")].pop().focus(); };
+  if (!rows) addRow();
+  tr.querySelector(".add").onclick = addRow;
+  tr.querySelector(".cancel").onclick = () => tr.remove();
+  grid.addEventListener("click", e => {
+    if (!e.target.classList.contains("x")) return;
+    /* a row is four cells: key, value, label, remove */
+    const cells = [...grid.children].slice(4);
+    const i = cells.indexOf(e.target), start = i - (i % 4);
+    cells.slice(start, start + 4).forEach(c => c.remove());
+  });
+  tr.querySelector(".save").onclick = async () => {
+    const ks = [...grid.querySelectorAll(".k")], vs = [...grid.querySelectorAll(".v")], es = [...grid.querySelectorAll(".e")];
+    const out = {};
+    for (let i = 0; i < ks.length; i++) {
+      const k = ks[i].value, v = vs[i].value;
+      if (k === "" && v === "") continue;
+      if (k.trim() === "") { msg.textContent = `row ${i + 1}: a value needs a name`; return; }
+      if (k !== k.trim()) { msg.textContent = `"${k}": remove the spaces around the name`; return; }
+      if (k in out) { msg.textContent = `"${k}" is listed twice`; return; }
+      out[k] = { value: typed(v), enforced: es[i].checked };
+    }
+    const res = await fetch(`${file}?meta&v=${version}`, { method: "PUT", body: JSON.stringify(out) });
+    if (!res.ok) { msg.textContent = `${res.status} ${res.statusText}: ${await res.text()}`; return; }
+    tr.remove();
+    await load();
+  };
+}
+
+$("rows").addEventListener("click", e => {
+  const b = e.target.closest("button.edit");
+  if (b) openEditor(b.dataset.version, b.dataset.mergeable);
+});
+
+crumbs(); load();
+</script>

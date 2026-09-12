@@ -16,7 +16,8 @@ curl can use it:
     GET   ...?versions            -> { latest, versions: [{ version, size, mtime, has_metadata, mergeable }] }
     GET   ...?v=N[&raw]           version N; raw skips the metadata merge
     GET   ...?meta[&v=N]          the metadata object, {} when none
-    PUT   ...?meta[&v=N]          store metadata; body must be a JSON object -> 204, else 400
+    PUT   ...?meta[&v=N]          store metadata fields { name: { value, enforced } } -> 204, else 400
+    GET   ...?page                the score's own page: versions, downloads, metadata fields
 
 No delete and no auth, on purpose: a shared folder on a LAN where the only way
 to correct a mistake is to overwrite it is a folder nobody can empty by accident.
@@ -29,6 +30,7 @@ from . import versions as V
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.environ.get("HUB_ROOT", os.path.join(HERE, "files")))
 PAGE = os.path.join(HERE, "hub.html")
+SCORE_PAGE = os.path.join(HERE, "score.html")
 PREFIX = "/hub"
 os.makedirs(ROOT, exist_ok=True)   # a fresh clone has no hub/files/ yet; without this, /hub/ is a 404
 
@@ -129,7 +131,7 @@ def _versioned_get(h, path, query, head):
     return _send(h, 200, V.read(path, n, raw="raw" in query), "application/octet-stream", head)
 
 
-VERSION_QUERIES = ("v", "raw", "versions", "meta")
+VERSION_QUERIES = ("v", "raw", "versions", "meta", "page")
 
 
 def handle(h, method):
@@ -185,6 +187,9 @@ def handle(h, method):
         asks_versions = any(q in query for q in VERSION_QUERIES)
         if asks_versions and not versioned:
             return _send(h, 400, "not a versioned file: only .score files keep versions", head_only=head)
+        if "page" in query:                       # the score's own page, versions or not
+            with open(SCORE_PAGE, "rb") as f:
+                return _send(h, 200, f.read(), "text/html; charset=utf-8", head)
         if versioned and V.numbers(path):
             return _versioned_get(h, path, query, head)
         if os.path.isfile(path):

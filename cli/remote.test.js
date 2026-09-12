@@ -301,6 +301,16 @@ async function startHub() {
     r = await fetch(fake.origin + "/protocol/session.js", { method: "PUT", body: "x" });
     ok("PUT outside /hub is refused by serve.py", r.status === 405, String(r.status));
     ok("and the file is untouched", !/^x$/.test(fs.readFileSync(path.join(REPO, "protocol", "session.js"), "utf8")));
+
+    r = await fetch(fake.url + "/levels.score?page");
+    ok("a .score answers ?page with HTML", r.status === 200 && /text\/html/.test(r.headers.get("content-type")) && /versions/.test(await r.text()), String(r.status));
+    r = await fetch(fake.url + "/never-uploaded.score?page");
+    ok("even a .score with no versions yet answers ?page", r.status === 200, String(r.status));
+    r = await fetch(fake.url + "/notes.txt?page");
+    ok("a .txt does not have a page", r.status === 400, String(r.status));
+    const rowLatest = (await (await fetch(fake.url + "/?json")).json()).paths.find(p => p.name === "levels.score");
+    /* this file was written straight to disk by the pull block, so it has no history: version is null, and the keys are still there */
+    ok("the listing row still carries version and has_metadata", rowLatest && "version" in rowLatest && "has_metadata" in rowLatest, JSON.stringify(rowLatest));
   }
 
   await fake.close();

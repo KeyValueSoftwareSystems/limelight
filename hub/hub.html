@@ -31,14 +31,7 @@ tr.up td{color:var(--faint)} tr.up td.s{color:var(--ok)} tr.up td.f{color:var(--
 .badge{display:inline-block;font:600 10px ui-monospace,monospace;letter-spacing:.08em;color:var(--amb);
   border:1px solid var(--line2);border-radius:4px;padding:1px 5px;margin-left:8px;vertical-align:1px}
 button.small{padding:3px 9px;font:11px ui-monospace,monospace;margin-left:8px}
-tr.ver td{background:#0b1018;color:var(--dim);padding-left:28px}
-tr.ver td.n{color:var(--ink)} tr.ver a{color:var(--blu)} tr.ver .meta-on{color:var(--ok);margin-left:8px;font-size:11px}
-tr.edit td{background:#0b1018;padding:10px 12px 12px 28px}
-textarea.json{width:100%;min-height:150px;background:#05070b;color:var(--ink);border:1px solid var(--line2);
-  border-radius:6px;padding:9px;font:12px/1.5 ui-monospace,monospace;resize:vertical}
-.editbar{display:flex;gap:8px;align-items:center;margin-top:8px}
-.editbar .err{color:var(--bad);font:11.5px ui-monospace,monospace;white-space:pre-wrap;flex:1}
-.editbar .warn{color:var(--amb);font:11.5px ui-monospace,monospace;flex:1}
+td a.dl{color:var(--dim);font-size:11px;margin-left:10px}
 </style>
 
 <div class="wrap">
@@ -57,8 +50,8 @@ textarea.json{width:100%;min-height:150px;background:#05070b;color:var(--ink);bo
   <tbody id="rows"></tbody>
 </table>
 <p class="note">Anything you upload here everyone on this network can pull with
-<span class="mono">limelight pull &lt;name&gt;</span>. Nothing can be deleted from
-the page; a mistake is fixed by uploading over it.</p>
+<span class="mono">limelight pull &lt;name&gt;</span>. Click a score for its versions and
+metadata. Nothing can be deleted from the page; a mistake is fixed by uploading over it.</p>
 </div>
 
 <script>
@@ -87,15 +80,14 @@ async function load() {
   if (base !== "/hub/") rows.push(`<tr><td class="n"><a class="dir" href="..">..</a></td><td></td><td></td></tr>`);
   for (const p of data.paths) {
     const dir = p.path_type === "Dir";
-    const score = !dir && /\.score$/.test(p.name) && p.version;
-    const a = dir ? `<a class="dir" href="${base}${enc(p.name)}/">${p.name}</a>`
-                  : `<a href="${base}${enc(p.name)}" download>${p.name}</a>`;
-    const extra = score ? `<span class="badge">v${p.version}</span>` +
-      `<button class="small versions" data-name="${enc(p.name)}">versions</button>` : "";
-    rows.push(`<tr data-name="${enc(p.name)}"><td class="n">${a}${extra}</td><td>${when(p.mtime)}</td><td class="r">${dir ? "" : human(p.size)}</td></tr>`);
+    const score = !dir && /\.score$/.test(p.name);
+    const a = dir   ? `<a class="dir" href="${base}${enc(p.name)}/">${p.name}</a>`
+            : score ? `<a href="${base}${enc(p.name)}?page">${p.name}</a>`
+                    : `<a href="${base}${enc(p.name)}" download>${p.name}</a>`;
+    const extra = score && p.version ? `<span class="badge">v${p.version}</span><a class="dl" href="${base}${enc(p.name)}" download>download</a>` : "";
+    rows.push(`<tr><td class="n">${a}${extra}</td><td>${when(p.mtime)}</td><td class="r">${dir ? "" : human(p.size)}</td></tr>`);
   }
   $("rows").innerHTML = rows.join("") || `<tr><td colspan="3" class="empty">empty — upload something</td></tr>`;
-  for (const name of openRows) if (rowFor(name)) showVersions(name);
 }
 
 $("file").addEventListener("change", async e => {
@@ -122,67 +114,6 @@ $("mkdir").addEventListener("click", async () => {
   if (r.status === 405) return err(`${name} already exists`);
   if (!r.ok) return err(`${r.status} ${r.statusText} creating ${name}`);
   load();
-});
-
-/* ---- versions of one .score, expanded under its row ----------------------- */
-const openRows = new Set();          /* names whose version list is expanded */
-
-function rowFor(name) { return document.querySelector(`tr[data-name="${name}"]`); }
-function clearUnder(name) { document.querySelectorAll(`tr[data-under="${name}"]`).forEach(tr => tr.remove()); }
-
-async function showVersions(name) {
-  clearUnder(name);
-  const r = await fetch(base + name + "?versions");
-  if (!r.ok) return err(`${r.status} ${r.statusText} listing versions of ${decodeURIComponent(name)}`);
-  const hist = await r.json();
-  let after = rowFor(name);
-  for (const v of [...hist.versions].reverse()) {
-    const tr = document.createElement("tr");
-    tr.className = "ver"; tr.dataset.under = name; tr.dataset.version = v.version;
-    tr.innerHTML = `<td class="n">v${v.version}${v.version === hist.latest ? ' <span class="badge">latest</span>' : ""}` +
-      `${v.has_metadata ? '<span class="meta-on">has metadata</span>' : ""}</td>` +
-      `<td>${when(v.mtime)}</td>` +
-      `<td class="r"><a href="${base}${name}?v=${v.version}" download>download</a>` +
-      `<button class="small edit" data-name="${name}" data-version="${v.version}" data-mergeable="${v.mergeable}">${v.has_metadata ? "edit" : "add"} metadata</button></td>`;
-    after.after(tr); after = tr;
-  }
-}
-
-async function openEditor(name, version, mergeable) {
-  document.querySelectorAll("tr.edit").forEach(tr => tr.remove());
-  const verRow = document.querySelector(`tr.ver[data-under="${name}"][data-version="${version}"]`);
-  const r = await fetch(`${base}${name}?meta&v=${version}`);
-  const current = r.ok ? await r.json() : {};
-  const tr = document.createElement("tr");
-  tr.className = "edit"; tr.dataset.under = name;
-  tr.innerHTML = `<td colspan="3">` +
-    `<textarea class="json" spellcheck="false">${JSON.stringify(current, null, 1).replace(/</g, "&lt;")}</textarea>` +
-    `<div class="editbar"><button class="save">save</button><button class="cancel">cancel</button>` +
-    `${mergeable === "false" ? '<span class="warn">this file is not a JSON object, so metadata is stored but will not be folded into downloads</span>' : '<span class="err"></span>'}</div></td>`;
-  verRow.after(tr);
-  const ta = tr.querySelector("textarea"), msg = tr.querySelector(".err") || tr.querySelector(".warn");
-  tr.querySelector(".cancel").onclick = () => tr.remove();
-  tr.querySelector(".save").onclick = async () => {
-    let obj;
-    try { obj = JSON.parse(ta.value); } catch (e) { msg.textContent = "not JSON: " + e.message; return; }
-    if (!obj || typeof obj !== "object" || Array.isArray(obj)) { msg.textContent = "metadata must be a JSON object, like {\"author\": \"…\"}"; return; }
-    const res = await fetch(`${base}${name}?meta&v=${version}`, { method: "PUT", body: JSON.stringify(obj) });
-    if (!res.ok) { msg.textContent = `${res.status} ${res.statusText}: ${await res.text()}`; return; }
-    tr.remove();
-    await load();
-  };
-  ta.focus();
-}
-
-$("rows").addEventListener("click", e => {
-  const b = e.target.closest("button");
-  if (!b) return;
-  if (b.classList.contains("versions")) {
-    const name = b.dataset.name;
-    if (openRows.has(name)) { openRows.delete(name); clearUnder(name); }
-    else { openRows.add(name); showVersions(name); }
-  }
-  if (b.classList.contains("edit")) openEditor(b.dataset.name, b.dataset.version, b.dataset.mergeable);
 });
 
 $("reload").addEventListener("click", load);
