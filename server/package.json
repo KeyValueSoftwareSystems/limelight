@@ -1,0 +1,15 @@
+{
+  "name": "limelight-score-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Score data retrieval server for the Limelight protocol",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test test/"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
