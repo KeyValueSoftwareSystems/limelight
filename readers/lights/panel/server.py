@@ -220,9 +220,11 @@ class State:
         return None
 
     def import_score(self, name, seed=3):
-        """Pull a score from the hub, format it (server/handler.js), bake a .lights.json
-        (bake.js --lights) into the first scan dir, symlink local audio if we have it,
-        and load it. Everything the manual flow did, from the page."""
+        """Pull a score from the hub and bake a .lights.json straight from it.
+        The hub serves the pipeline's raw score (its music intelligence: parts,
+        bars, releases); bake.js reads that directly via hubscore.fromHub, so there
+        is one protocol interpreter, not a parallel formatter. Then symlink local
+        audio if we have it, and load it -- everything the manual flow did."""
         name = os.path.basename(str(name)).replace(".score.json", "").replace(".score", "")
         if not name:
             self.import_log = "no score name"; return None
@@ -233,14 +235,13 @@ class State:
             raw = os.path.join(scores, name + ".score")
             with urllib.request.urlopen(HUB + "/hub/" + name + ".score", timeout=20) as r:
                 open(raw, "wb").write(r.read())
-            proto = os.path.join(scores, name + ".score.json")
             lights = os.path.join(self.dirs[0], name + ".lights.json")
-            for cmd in (["node", os.path.join(HERE, "format_score.mjs"), scores, name, proto],
-                        ["node", os.path.join(REPO, "readers/lights/bake.js"), proto, str(seed), "--lights", lights]):
-                res = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
-                if res.returncode != 0:
-                    self.import_log = f"{os.path.basename(cmd[1])} failed: {(res.stderr or res.stdout)[-400:]}"
-                    return None
+            cmd = ["node", os.path.join(REPO, "readers/lights/bake.js"),
+                   raw, str(seed), "--lights", lights]
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            if res.returncode != 0:
+                self.import_log = f"bake.js failed: {(res.stderr or res.stdout)[-400:]}"
+                return None
             for cand in (os.path.join(REPO, "synth", "out", name + ".wav"),
                          os.path.join(EXPER, name + ".cache.wav"), os.path.join(EXPER, name + ".mp3")):
                 if not os.path.isfile(cand):
