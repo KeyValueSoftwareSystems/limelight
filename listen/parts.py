@@ -6,12 +6,17 @@ warnings.filterwarnings("ignore")
 
 
 def features(path, first_s, bar_s, bars, sr=22050):
-    import librosa
-
-    y, _ = librosa.load(path, sr=sr, mono=True)
     edges = first_s + np.arange(bars + 1) * bar_s
     if first_s > 0.2:
         edges = np.concatenate([[0.0], edges])
+    return features_at(path, edges, sr)
+
+
+def features_at(path, edges, sr=22050):
+    import librosa
+
+    y, _ = librosa.load(path, sr=sr, mono=True)
+    edges = np.asarray(edges, dtype=float)
     frames = librosa.time_to_frames(edges, sr=sr, hop_length=512)
 
     chroma = librosa.feature.chroma_cqt(y=y, sr=sr, hop_length=512, bins_per_octave=36)
@@ -286,6 +291,58 @@ def name_groups(shaped, voices):
     return names
 
 
+def roles(shaped, voices, busy):
+    v = busy[0] if busy.ndim > 1 else busy
+    peak = np.percentile(v, 98) or 1.0
+    low = None
+    if voices is not None and voices.shape[0] > 1:
+        low = voices[1]
+        low = low / (np.percentile(low, 98) or 1.0)
+
+    told = []
+    for a, b, *_ in shaped:
+        full = float(np.median(v[a:b]) / peak) if b > a else 0.0
+        deep = float(np.median(low[a:b])) if low is not None and b > a else 0.0
+        told.append({"full": full, "deep": deep, "bars": b - a, "a": a, "b": b})
+
+    heavy = max((t["deep"] for t in told), default=0.0)
+    peaks = [i for i, t in enumerate(told)
+             if t["deep"] > heavy * 0.8 and t["full"] > 0.7 and t["bars"] >= 4]
+
+    out = []
+    for i, t in enumerate(told):
+        role = None
+        if t["full"] < 0.25 and t["bars"] <= 2:
+            role = "gap"
+        elif i in peaks:
+            role = "drop"
+        elif peaks and i == min(peaks) - 1 and t["deep"] < heavy * 0.6 and t["full"] > 0.45:
+            role = "build"
+        elif peaks and i + 1 in peaks and t["deep"] < heavy * 0.6 and t["full"] > 0.45:
+            role = "build"
+        elif not peaks and i == 0:
+            role = "intro"
+        elif peaks and i < min(peaks) and i == 0:
+            role = "intro"
+        elif peaks and i < min(peaks):
+            role = "verse"
+        elif peaks and i > max(peaks):
+            role = "outro" if i == len(told) - 1 else "breakdown"
+        elif peaks and t["deep"] < heavy * 0.5:
+            role = "breakdown"
+        elif peaks:
+            role = "anthem"
+        out.append(role)
+
+    if peaks:
+        seen = 0
+        for i, role in enumerate(out):
+            if role == "drop":
+                seen += 1
+                out[i] = f"drop {seen}" if seen > 1 else "drop"
+    return out
+
+
 def parts(path, grid, report=None, voices=None):
     bar_s = (60.0 / grid["bpm"]) * grid["beats_per_bar"]
     harmony, colour, busy, bright = features(path, grid["first_beat_s"], bar_s, grid["bars"])
@@ -301,10 +358,12 @@ def parts(path, grid, report=None, voices=None):
         report["parts"] = len(shaped)
         report["kinds"] = sorted({s[3] for s in shaped})
     named = name_groups(shaped, voices)
+    told = roles(shaped, voices, busy)
     out = []
-    for a, b, lab, word, rel, rise in shaped:
+    for n, (a, b, lab, word, rel, rise) in enumerate(shaped):
         one = {"from_bar": a + 1 - pickup, "to_bar": b - pickup,
                "repeats_as": named.get(lab, chr(65 + lab % 26)),
+               "role": told[n] if n < len(told) else None,
                "feels": word, "fullness": rel, "rise": rise}
         if voices is not None:
             much = how_much(voices, a, b)

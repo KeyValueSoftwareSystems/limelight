@@ -160,6 +160,9 @@ def show(slug, g, r, second_opinion=None):
         print(f"    fitted to     {r['fitted_share'] * 100:.0f}% of the beats, "
               f"{r['fitted_from_s']:.1f}s to {r['fitted_to_s']:.1f}s "
               f"(the rest is not on this grid)", file=w)
+    if "beats_listed" in r:
+        print(f"    beats listed   {r['beats_listed']} with weight and confidence "
+              f"(mean {r['mean_sure']:.2f})   {r['releases']} releases", file=w)
     if "parts" in r:
         print(f"    parts          {r['parts']}   {', '.join(r['kinds'])}", file=w)
     if "events" in r:

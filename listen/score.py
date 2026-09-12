@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from grid import grid, show
 from parts import curves, parts
+from pulse import pulse
 from events import events
 from harmony import changes as chord_changes
 from harmony import chords as find_chords
@@ -105,6 +106,8 @@ def read(path, slug):
     lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"])
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
     busy, bright = curves(path, g)
+    beats, pull, gone = pulse(path, g, times, positions, np.load(CACHE / f"{slug}.flux.npy"),
+                              env, report)
     pickup = 1 if g["first_beat_s"] > 0.2 else 0
     found, held = find_chords(path, slug)
     chord, chord_sure = chords_per_bar(found, held, g["first_beat_s"], bar_s, g["bars"], pickup)
@@ -144,6 +147,9 @@ def read(path, slug):
             "chord_sure": chord_sure,
         },
         "parts": parts(path, g, report, voices),
+        "beats": beats,
+        "tension": pull,
+        "releases": gone,
         "events": events(g, lanes, busy, bright,
                          np.load(CACHE / f"{slug}.flux.npy"),
                          pickup, report, env) + chord_changes(chord, pickup),
