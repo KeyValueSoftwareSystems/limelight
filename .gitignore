@@ -47,7 +47,9 @@ docs/server/node_modules/
 work/sep/
 work/sep-test/
 
-# Scores are built from audio the way maps are: regenerable, and large.
+# Scores are built from audio the way maps are: regenerable, and large. The
+# .score.json rule is the only thing covering readers/lights/panel/scores/,
+# which the panel writes on every hub import.
 *.score
 *.score.json
 # except the fixture cli/remote.test.js reads to check bytes survive a round trip.

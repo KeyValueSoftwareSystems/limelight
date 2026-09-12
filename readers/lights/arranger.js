@@ -180,13 +180,13 @@ function plan(score, enumResult, seed) {
 module.exports = { plan, contextsFor, sectionEnergyMean, energyReader };
 
 /* ---- CLI: plan a score and print the show, section by section ------------
-     node readers/lights/arranger.js [readers/lights/levels.score.json] [seed]   */
+     node readers/lights/arranger.js [score file] [seed]   */
 if (require.main === module) {
   const fs = require("fs"), path = require("path");
   const { enumerate } = require("./preflight.js");
-  const scoreFile = process.argv[2] || path.join(__dirname, "levels.score.json");
+  const scoreFile = process.argv[2] || null;
   const seed = +(process.argv[3] || 1);
-  const score = JSON.parse(fs.readFileSync(scoreFile, "utf8"));
+  const score = require("./fromscore.js").load(scoreFile);
   const layout = JSON.parse(fs.readFileSync(path.join(__dirname, "arc4-head.layout.json"), "utf8"));
   let palette = [];
   try { palette = JSON.parse(fs.readFileSync(path.join(__dirname, "arc4-head.palette.json"), "utf8")); } catch (e) {}
