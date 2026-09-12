@@ -104,11 +104,14 @@ def pulse(path, grid, times, positions, onsets, stems, report=None):
         on = True
         if holds_from is not None:
             on = holds_from - 0.05 <= t <= holds_to + 0.05
+        step = (t - grid["first_beat_s"]) / period
+        off = (step - round(step)) * period * 1000.0
         beats.append({
             "t": round(float(t), 4),
             "downbeat": bool(positions[i] == 1),
             "weight": round(float(hits[i]), 3),
             "sure": round(float(sure[i] if on else sure[i] * 0.5), 3),
+            "off_ms": round(float(off), 1),
         })
 
     if report is not None:

@@ -80,6 +80,9 @@ def hear(path, slug):
         shutil.rmtree(hold, ignore_errors=True)
 
     CACHE.mkdir(parents=True, exist_ok=True)
+    import json
+    (CACHE / f"{slug}.lead.json").write_text(
+        json.dumps({"separator": "htdemucs", "melody_from": "harmonic salience"}))
     np.save(tune, np.asarray(f0, dtype=np.float32))
     np.save(loud, np.asarray(strength, dtype=np.float32))
     return np.load(tune), np.load(loud)

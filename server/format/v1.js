@@ -65,8 +65,13 @@ export function format(raw) {
   if (raw.melody) out.melody = raw.melody;
   if (raw.voice) out.voice = raw.voice;
   if (raw.lead) out.lead = raw.lead;
+  if (raw.scales) out.scales = raw.scales;
+  if (raw.made_by) out.made_by = raw.made_by;
+  if (raw.chord_changes) out.chord_changes = raw.chord_changes;
+  if (raw.presence) out.presence = raw.presence;
 
-  for (const lane of ['width', 'air', 'pump', 'pace']) {
+  for (const lane of ['width', 'air', 'pump', 'pace',
+                      'drums', 'bass', 'vocals', 'other']) {
     if (Array.isArray(raw.bars?.[lane])) out[lane] = raw.bars[lane];
   }
 

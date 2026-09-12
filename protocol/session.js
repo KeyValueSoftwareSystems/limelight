@@ -127,8 +127,17 @@ function Session(score, opts) {
                               from_bar: (sc.grid && sc.grid.first_bar !== undefined)
                                         ? sc.grid.first_bar : 1,
                               values: inten, note: "from `bars.intensity`" };
-    if (sc.releases) out.moments = sc.releases.map(r => ({
-      at: positionOf(sc, r.at_s), kind: "drop", size: r.size }));
+    if (Array.isArray(sc.moments) && sc.moments.length) {
+      out.moments = sc.moments.map(m => ({
+        at: { bar: m.bar, beat: m.beat }, kind: m.is, what: m.what,
+        weight: m.weight, sure: m.sure,
+        ...(m.for_beats ? { for_beats: m.for_beats } : {}),
+        ...(m.back_at != null ? { back_at: m.back_at } : {}),
+        ...(m.into_bar != null ? { into_bar: m.into_bar } : {}) }));
+    } else if (sc.releases) {
+      out.moments = sc.releases.map(r => ({
+        at: positionOf(sc, r.at_s), kind: "drop", size: r.size }));
+    }
     return out;
   }
   function positionOf(sc, t) {

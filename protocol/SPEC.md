@@ -153,3 +153,83 @@ at all; and the score must not assume either.
 The pickup before bar 1 is bar 0 beat 4. That is correct and it reads as
 broken, so `before_first_beat` is set and the container shows the pre-roll
 rather than a bar number.
+
+## Two kinds of number, and why it matters
+
+Some fields are absolute and can be compared between songs. Some are divided by
+something inside their own song and mean nothing outside it. Reading a
+song-relative number as an absolute one is how every song ends up looking the
+same, because every song's loudest bar is 1.0 by construction — the quiet
+record and the loud one both reach it.
+
+The score says which is which, per lane, in `scales`:
+
+```json
+{ "width":     { "kind": "absolute", "runs": [0.0, 2.0] },
+  "intensity": { "kind": "per_song", "against": "the song's loudest bar" } }
+```
+
+Absolute: `width`, `pump`, `brightness`, `chord_sure`. Per-song: `intensity`,
+`air` (against the 98th percentile), `pace` (against the median bar), and each
+of `drums`, `bass`, `vocals`, `other` against **that stem's own** loudest bar.
+So drums at 0.8 does not mean the drums are loud, and it does not mean they are
+louder than the bass, which is on a different scale again.
+
+`loudness` is the field that lets a reader scale to the record rather than to
+an absolute level, and it is the reason the quiet song can light up at all.
+
+## Stems carry two numbers because there are two questions
+
+`level` is the mean of the same per-bar lane a reader already has, so the two
+can never disagree. `sits` is where the section falls between the song's 10th
+and 90th percentile for that stem, and `is` — `none`, `some`, `full` — is the
+bucket `sits` falls into. Use `level` to follow a curve and `is` to make a
+decision. They used to both be called `level` and disagreed by as much as a
+section reading 0.000 against a lane reading 0.170.
+
+## Presence is the same fact as a shape
+
+`presence` gives each stem as spans — the voice is `in` from bar 17 to 33, then
+`out` — for readers that want to ask "is the voice in now" and "when does it
+come back" rather than scan an array. It is the per-bar lanes with hysteresis,
+so it is coarser on purpose.
+
+## Melody
+
+`melody` is one entry per sustained note with `bar`, `beat`, `pitch` in MIDI,
+`held_beats`, and `from`, which is `voice` or `lead`. The voice comes from a
+vocal separation and a monophonic pitch tracker; the lead comes from the other
+stem and harmonic salience, because a monophonic tracker on a polyphonic stem
+chases whichever partial is loudest and returns noise.
+
+`voice` and `lead` each summarise their line and carry `sure`, driven by how
+many notes needed octave correction. A low `sure` means the pitch track is not
+to be trusted — one song in this set reads 0.0 — and a reader leaning on melody
+should check it rather than assume.
+
+## Chord changes
+
+`chord_changes` lists only the bars where the chord moves, with the new chord
+and a confidence. Expect less compression than it sounds: on a busy record it
+is still most of the bars.
+
+## Honesty fields
+
+`beats[].off_ms` is how far each beat sits from where the grid says it should
+be. On a programmed record it is near zero everywhere, which is itself worth
+knowing; on a played one it is where the performance disagreed with the model.
+
+`grid.holds_from_s` and `holds_to_s` are always present now, and
+`holds_measured` says whether that span was measured or is simply the whole
+song because nothing measured it. Outside a measured span the bar lines are
+extrapolated — calculated, not heard.
+
+`made_by` names the separator behind the vocal and the instrumental lines,
+because quality varies between songs and nothing else in the file records it.
+
+## What the score cannot do
+
+There is no stem audio. The separated stems are deleted once their loudness
+curves and pitch tracks have been taken, so nothing can offer to play just the
+drums or mute the vocal without re-running separation from scratch. Any reader
+that assumes otherwise is wrong about this file.

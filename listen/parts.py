@@ -368,6 +368,10 @@ def parts(path, grid, report=None, voices=None):
         if voices is not None:
             much = how_much(voices, a, b)
             one["playing"] = [n for n, (st, _) in much.items() if st != "none"]
-            one["stems"] = {n: {"is": st, "level": lv} for n, (st, lv) in much.items()}
+            one["stems"] = {
+                n: {"is": st, "sits": lv,
+                    "level": round(float(np.mean(voices[i][a:b])), 3)
+                    if b > a and i < voices.shape[0] else 0.0}
+                for i, (n, (st, lv)) in enumerate(much.items())}
         out.append(one)
     return out

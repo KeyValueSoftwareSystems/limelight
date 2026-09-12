@@ -28,7 +28,11 @@
 const fs = require("fs"), path = require("path");
 
 const ALWAYS = ["grid"];
-const KNOWN = ["grid", "beats", "downbeats", "sections", "energy", "moments", "layers"];
+const KNOWN = ["grid", "beats", "downbeats", "sections", "energy", "moments",
+               "layers", "melody", "voice", "lead", "scales", "made_by",
+               "chord_changes", "presence", "phrases", "key", "loudness",
+               "feel", "chords", "brightness", "width", "air", "pump",
+               "pace", "drums", "bass", "vocals", "other"];
 
 function respond(req) {
   const name = String(req.score || "").replace(/[^A-Za-z0-9_-]/g, "");

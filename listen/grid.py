@@ -131,6 +131,11 @@ def grid(times, downs, length_s, report=None):
     if report is not None and "fitted_share" in report:
         out["holds_from_s"] = report["fitted_from_s"]
         out["holds_to_s"] = report["fitted_to_s"]
+        out["holds_measured"] = True
+    else:
+        out["holds_from_s"] = round(first, 4)
+        out["holds_to_s"] = round(length_s, 4)
+        out["holds_measured"] = False
     return out
 
 

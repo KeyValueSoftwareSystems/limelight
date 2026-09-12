@@ -11,6 +11,14 @@ SEP = Path("work/sep/bin/audio-separator")
 MODEL = "vocals_mel_band_roformer.ckpt"
 
 
+def made_by(slug):
+    mark = CACHE / f"{slug}.voice.json"
+    if mark.exists():
+        import json
+        return json.loads(mark.read_text()).get("separator")
+    return None
+
+
 def clean(path, slug):
     at = CACHE / f"{slug}.voice.npy"
     tune = CACHE / f"{slug}.pitch.npy"
@@ -57,6 +65,9 @@ def clean(path, slug):
 
     shutil.rmtree(out, ignore_errors=True)
     at.parent.mkdir(parents=True, exist_ok=True)
+    import json
+    (CACHE / f"{slug}.voice.json").write_text(
+        json.dumps({"separator": MODEL.replace(".ckpt", "")}))
     np.save(at, env.astype(np.float32))
     if f0 is not None:
         np.save(tune, f0)

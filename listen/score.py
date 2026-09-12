@@ -14,6 +14,7 @@ from shape import shape
 from call import call
 from parts import curves, parts
 from pulse import pulse
+from facts import SCALES, presence, seated, turns
 from lead import hear as lead_line
 from melody import chants, echoes, fix as octaves, line as tune_line
 from melody import score as melody_of, sung as sung_in, voice as voice_of
@@ -24,7 +25,7 @@ from harmony import chords as find_chords
 from harmony import per_bar as chords_per_bar
 from stems import NAMES as STEM_NAMES
 from stems import envelopes, per_bar
-from voice import clean as clean_voice
+from voice import clean as clean_voice, made_by as voice_made_by
 from texture import sides, air, duck, pace
 
 
@@ -114,7 +115,11 @@ def sections(spans, voices, busy, pickup, report=None):
             "fullness": round(rel, 3),
             "rise": round(rise, 3),
             "playing": [n for n, (st, _) in has.items() if st != "none"],
-            "stems": {n: {"is": st, "level": lv} for n, (st, lv) in has.items()},
+            "stems": {
+                n: {"is": st, "sits": lv,
+                    "level": round(float(voices[i][a:b].mean()), 3)
+                    if b > a and i < voices.shape[0] else 0.0}
+                for i, (n, (st, lv)) in enumerate(has.items())},
         })
         had = has
     if report is not None:
@@ -251,7 +256,13 @@ def read(path, slug):
     return {
         "score": slug,
         "version": 0,
-        "song": {"length_s": round(length_s, 3)},
+        "song": {"length_s": round(length_s, 3), "bars": g["bars"]},
+        "scales": SCALES,
+        "made_by": {
+            "voice_from": voice_made_by(slug),
+            "lead_from": "htdemucs" if riff else None,
+            "melody_from": "harmonic salience" if riff else None,
+        },
         "grid": g,
         "key": {
             "root": f["tonal.key_edma.key"],
@@ -278,8 +289,11 @@ def read(path, slug):
         "parts": shaped,
         "beats": beats,
         "tension": pull,
-        "releases": gone,
+        "releases": seated(gone, g, pickup),
         "phrase_grid": phrase_rule,
+        "chord_changes": turns(score_bars["chord"], score_bars["chord_sure"],
+                              g["first_bar"]),
+        "presence": presence(score_bars, g["first_bar"]),
         "phrases": inner,
         "moments": staged,
         "signals": told_now,
