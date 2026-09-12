@@ -16,7 +16,12 @@ button.no{border-color:#6b3330}
 button.no.on{background:var(--bad);color:#2a0e0c;border-color:var(--bad)}
 .top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
   display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:11px 0 10px;margin-bottom:14px}
-#seek{flex:1;min-width:220px;accent-color:var(--ok);cursor:pointer}
+.scrub{flex-basis:100%;display:flex;flex-direction:column;gap:5px}
+#seek{width:100%;accent-color:var(--ok);cursor:pointer;height:20px}
+.zoombar{display:flex;gap:7px;align-items:center;font-size:11.5px;color:var(--faint)}
+.zoombar button{padding:2px 9px;font-size:12px;line-height:1.4}
+#viewing{font:12px ui-monospace,monospace;color:var(--amb);min-width:150px}
+.grab{cursor:grab} .grab:active{cursor:grabbing}
 .mono{font:12.5px ui-monospace,monospace;font-variant-numeric:tabular-nums}
 #play{min-width:84px;font-weight:600}
 h2{font:600 14px system-ui;margin:0 0 3px;letter-spacing:.01em}
@@ -81,6 +86,8 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 .chip b{opacity:.55;font-weight:400;font-family:ui-monospace,monospace;font-size:10.5px}
 .dim{color:var(--faint)}
 .warn{color:var(--bad)}
+#broke{background:#2a0e0c;border:1px solid var(--bad);color:#ffd9d6;border-radius:8px;
+  padding:10px 13px;margin:0 0 12px;font:12.5px ui-monospace,monospace;white-space:pre-wrap}
 </style>
 
 <div class="wrap">
@@ -88,13 +95,25 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 <div class="top">
   <select id="song" title="pick a song"></select>
   <button id="play" disabled>&#9654; Play</button>
-  <input id="seek" type="range" min="0" max="10000" value="0" title="drag to move through the song">
   <span class="mono" id="clock" style="min-width:96px;text-align:right">0:00</span>
   <button id="clicker" title="a tick on every beat, so you can hear whether the computer's beat matches the song">Metronome: off</button>
   <button id="muter" title="silence the song and leave only the metronome">Music: on</button>
   <span class="mono dim" id="facts"></span>
+  <div class="scrub">
+    <input id="seek" type="range" min="0" max="10000" value="0"
+           title="drag to move anywhere in the song">
+    <div class="zoombar">
+      <span class="dim" id="viewing">whole song</span>
+      <button id="zoomout" title="show more">&minus;</button>
+      <button id="zoomin" title="show less">+</button>
+      <button id="zoomfit" title="show the whole song again">Fit</button>
+      <button id="follow" title="keep the view centred on what is playing">Follow: off</button>
+      <span class="dim">scroll to zoom, drag to slide</span>
+    </div>
+  </div>
 </div>
 
+<div id="broke" hidden></div>
 <p class="note" style="margin-top:-4px">Everything on this page is something the computer <b>claims</b> about
   this song. Click any label, block or chip to hear that exact spot and judge it with your ears.</p>
 
@@ -166,6 +185,30 @@ const STEM = {drums:"#e0655f", bass:"#b98cd6", vocals:"#5bb98c", other:"#6fa8dc"
 const LANES = ["drums","bass","vocals","other"];
 const LANEWORD = {drums:"Drums", bass:"Bass", vocals:"Voice", other:"Chords"};
 let HUE = {};
+
+/* One window every timeline on the page obeys, so zooming the sections also
+   zooms the moments, the band, the instrument rows and the tune: they are four
+   views of one song and sliding them out of step makes them lie to each other. */
+const VIEW = { a: 0, b: 0, follow: false };
+const viewSpan = () => Math.max(0.25, VIEW.b - VIEW.a);
+const frac = t => (t - VIEW.a) / viewSpan();
+const pct = t => frac(t) * 100;
+const timeAt = f => VIEW.a + f * viewSpan();
+
+function setView(a, b) {
+  const total = SCORE ? SCORE.song.length_s : 0;
+  let lo = a, hi = b;
+  if (hi - lo < 0.75) { const m = (lo + hi) / 2; lo = m - 0.375; hi = m + 0.375; }
+  if (hi - lo > total) { lo = 0; hi = total; }
+  if (lo < 0) { hi -= lo; lo = 0; }
+  if (hi > total) { lo -= hi - total; hi = total; }
+  VIEW.a = Math.max(0, lo); VIEW.b = Math.min(total, hi);
+  $("viewing").textContent = (VIEW.b - VIEW.a >= total - 0.01)
+    ? "whole song" : `${mmss(VIEW.a)} \u2013 ${mmss(VIEW.b)}`;
+  if (SCORE) { place(); lanes(); tune(); subs(); }
+}
+
+function zoomAt(t, by) { setView(t - (t - VIEW.a) * by, t + (VIEW.b - t) * by); }
 
 const mmss = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
 const beatLen = () => 60 / SCORE.grid.bpm;
@@ -332,6 +375,7 @@ async function load(s, url, at) {
   } catch (e) { BASE = 0; }
   SHIFT = BASE;
   if (at) aud.currentTime = at;
+  setView(0, SCORE.song.length_s);
   draw();
 }
 
@@ -363,8 +407,7 @@ function draw() {
     const t0 = barTime(p.from_bar), t1 = Math.min(total, barTime(p.to_bar + 1));
     const el = document.createElement("div");
     el.className = "part";
-    el.style.left = `${(t0/total)*100}%`;
-    el.style.width = `${((t1-t0)/total)*100}%`;
+    el.dataset.t0 = t0; el.dataset.t1 = t1;
     const c = HUE[p.repeats_as];
     el.title = `${cap(p.role || p.repeats_as)} · ${mmss(t0)} – ${mmss(t1)} · `
              + `${FEELS[p.feels] || p.feels} · click to hear it`;
@@ -378,9 +421,8 @@ function draw() {
     if (t < 0 || t > total) continue;
     const el = document.createElement("div");
     el.className = "beat";
-    el.style.left = `${(t/total)*100}%`;
     const len = momentSpan(m);
-    if (len > 0) el.style.width = `${Math.max(0.2, (len/total)*100)}%`;
+    el.dataset.t0 = t; el.dataset.t1 = t + len;
     el.style.background = KIND[m.is] || "#8b93a6";
     el.style.opacity = 0.55 + 0.45 * (m.weight ?? 0);
     el.title = `${mmss(t)} · bar ${m.bar} · ${momentWords(m)} · click to hear it`;
@@ -395,8 +437,8 @@ function draw() {
     sh.className = "unmetered";
     sh.title = "the computer could not measure a steady beat here, so these bar "
              + "positions are guessed";
+    sh.dataset.t0 = l; sh.dataset.t1 = l + w;
     sh.style.cssText = `position:absolute;top:22px;bottom:0;z-index:2;pointer-events:none;
-      left:${(l/total)*100}%;width:${(w/total)*100}%;
       background:repeating-linear-gradient(135deg,
       rgba(224,101,95,.13) 0 7px,transparent 7px 14px);border-${side}:1px dashed rgba(224,101,95,.6)`;
     map.appendChild(sh);
@@ -423,9 +465,30 @@ function draw() {
     `<span><i style="background:${STEM.vocals}"></i>a note that was sung</span>`
     + `<span><i style="background:${STEM.other}"></i>a note played by the lead instrument</span>`
     + `<span><i style="background:#c8a2ff"></i>a tune you have already heard, coming back</span>`
-    + `<span class="dim">higher up the strip = higher note</span>`;
+    + `<span class="dim">higher up the strip = higher note</span>`
+    + `<span style="flex-basis:100%;margin-top:3px">The line of ticks under the notes is where each `
+    + `<b style="color:var(--ink)">phrase of the tune</b> starts and ends &mdash; click one to hear just `
+    + `that phrase. A &#8634; marks a phrase whose shape repeats an earlier one.</span>`;
 
-  lanes(); tune(); subs(); sections();
+  lanes(); tune(); subs(); sections(); place();
+}
+
+/* Absolutely-positioned rows are laid out here rather than where they are
+   built, so a zoom moves them without rebuilding the DOM. */
+function place() {
+  for (const el of document.querySelectorAll("#map .part,#map .beat,#subs .sub")) {
+    const t0 = +el.dataset.t0, t1 = +el.dataset.t1;
+    const l = pct(t0), w = Math.max(el.classList.contains("beat") ? 0.25 : 0, pct(t1) - l);
+    const off = l > 100 || pct(t1) < 0;
+    el.style.display = off ? "none" : "";
+    el.style.left = `${l}%`;
+    if (t1 > t0 || el.classList.contains("beat")) el.style.width = `${w}%`;
+  }
+  for (const sh of document.querySelectorAll("#map .unmetered")) {
+    const t0 = +sh.dataset.t0, t1 = +sh.dataset.t1;
+    sh.style.left = `${pct(t0)}%`;
+    sh.style.width = `${pct(t1) - pct(t0)}%`;
+  }
 }
 
 function subs() {
@@ -437,8 +500,7 @@ function subs() {
     const t0 = barTime(q.from_bar), t1 = Math.min(total, barTime(q.to_bar + 1));
     const el = document.createElement("div");
     el.className = "sub";
-    el.style.left = (100 * t0 / total) + "%";
-    el.style.width = (100 * (t1 - t0) / total) + "%";
+    el.dataset.t0 = t0; el.dataset.t1 = t1;
     const pair = DOINGWORD[q.doing];
     el.style.background = (DOING[q.doing] || "#39414f") + (pair ? "26" : "10");
     el.style.color = DOING[q.doing] || "#4e5768";
@@ -454,6 +516,7 @@ function subs() {
 const WINDOW = 8.0;
 const ZHIT = [];
 const THIT = [];
+const PHIT = [];
 
 function fit(c, h) {
   const r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
@@ -468,8 +531,10 @@ function fit(c, h) {
 function zoom() {
   const [g, W] = fit($("zoom"), 110);
   if (!SCORE) return;
-  const t = aud.currentTime, a = t - WINDOW/2, b = t + WINDOW/2;
-  const X = s => ((s - a)/WINDOW)*W;
+  const t = aud.currentTime;
+  const wide = Math.min(WINDOW, viewSpan());
+  const a = t - wide/2, b = t + wide/2;
+  const X = s => ((s - a)/wide)*W;
   const total = SCORE.song.length_s;
 
   for (const p of SCORE.parts || []) {
@@ -565,6 +630,8 @@ function zoom() {
 
   g.strokeStyle = "#e0655f"; g.lineWidth = 1.5;
   g.beginPath(); g.moveTo(W/2, 0); g.lineTo(W/2, 110); g.stroke();
+  g.fillStyle = "#4a5364"; g.font = "9.5px ui-monospace,monospace";
+  g.fillText(`${wide.toFixed(1)}s across`, 7, 104);
 }
 
 function tune() {
@@ -581,15 +648,41 @@ function tune() {
   const lo = Math.floor(Math.min(...seen) - 1);
   const hi = Math.ceil(Math.max(...seen) + 1);
   const span = Math.max(8, hi - lo), beat = beatLen();
-  const L = 14, top = 36, foot = 122, tall = foot - top;
+  const L = 14, top = 36, foot = 112, tall = foot - top;
   const Y = p => foot - ((p - lo)/span)*tall;
-  const X = s => L + (s/total)*(W - L - 6);
+  const X = s => L + frac(s)*(W - L - 6);
   const at = n => X(barTime(n.bar) + (n.beat - 1)*beat);
 
   for (let p = Math.ceil(lo/12)*12; p <= hi; p += 12) {
     g.strokeStyle = "#161d29"; g.lineWidth = 1;
     g.beginPath(); g.moveTo(L, Y(p)); g.lineTo(W-6, Y(p)); g.stroke();
   }
+
+  /* One band per melodic phrase: where a line of the tune starts and stops,
+     and which earlier line it is a repeat of. */
+  const per = SCORE.grid.beats_per_bar;
+  const phAt = ph => X(barTime(ph.from_bar) + (ph.from_beat - 1) * beat);
+  const phTo = ph => X(barTime(ph.to_bar) + (ph.to_beat - 1) * beat);
+  const mel = SCORE.melody_phrases || [];
+  mel.forEach((q, i) => {
+    const x0 = phAt(q), x1 = phTo(q);
+    if (x1 < L || x0 > W) return;
+    const voice = q.sung_by !== "lead";
+    g.strokeStyle = voice ? STEM.vocals : STEM.other;
+    g.globalAlpha = q.same_as != null ? 0.75 : 0.3;
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(x0, foot + 6); g.lineTo(x1, foot + 6); g.stroke();
+    g.beginPath(); g.moveTo(x0, foot + 3); g.lineTo(x0, foot + 9); g.stroke();
+    if (q.same_as != null && x1 - x0 > 26) {
+      g.fillStyle = voice ? STEM.vocals : STEM.other;
+      g.globalAlpha = 0.9; g.font = "8.5px ui-monospace,monospace";
+      g.fillText("\u21ba", (x0 + x1) / 2 - 3, foot + 4);
+    }
+    g.globalAlpha = 1;
+  });
+  PHIT.length = 0;
+  for (const q of mel) PHIT.push({ x0: phAt(q), x1: phTo(q), q });
 
   THIT.length = 0;
   const hooked = new Set();
@@ -624,7 +717,7 @@ function tune() {
 
   for (const n of notes) {
     const x = at(n);
-    const w = Math.max(2, ((n.held_beats*beat)/total)*(W - L - 6));
+    const w = Math.max(2, ((n.held_beats*beat)/viewSpan())*(W - L - 6));
     const hot = hooked.has(n.bar);
     g.fillStyle = hot ? "#c8a2ff" : n.from === "lead" ? STEM.other : STEM.vocals;
     g.globalAlpha = hot ? 1 : (n.from === "lead" ? 0.7 : 0.9);
@@ -675,8 +768,10 @@ function lanes() {
     g.fillStyle = STEM[n];
     for (let i = 0; i < v.length; i++) {
       if (v[i] == null) continue;
-      const x = (barTime(i+FIRSTBAR)/total)*W;
-      const w = Math.max(1, (BAR/total)*W - 0.4);
+      const t = barTime(i+FIRSTBAR);
+      if (t + BAR < VIEW.a || t > VIEW.b) continue;
+      const x = frac(t)*W;
+      const w = Math.max(1, (BAR/viewSpan())*W - 0.4);
       const bh = Math.max(0.5, v[i]*(h-12));
       g.globalAlpha = 0.30 + 0.6*v[i];
       g.fillRect(x, y+h-3-bh, w, bh);
@@ -769,7 +864,13 @@ function tick() {
     const t = aud.currentTime, total = SCORE.song.length_s;
     $("clock").textContent = `${mmss(t)} / ${mmss(total)}`;
     if (!dragging) $("seek").value = Math.round((t/total)*10000);
-    $("head").style.left = `${(t/total)*100}%`;
+    const hp = pct(t);
+    $("head").style.display = (hp < 0 || hp > 100) ? "none" : "";
+    $("head").style.left = `${hp}%`;
+    if (VIEW.follow && !aud.paused) {
+      const w = viewSpan();
+      if (t < VIEW.a + w*0.15 || t > VIEW.b - w*0.15) setView(t - w/2, t + w/2);
+    }
     if (stopAt !== null && t >= stopAt) { aud.pause(); stopAt = null; }
     zoom();
     if (clicking && ctx && !aud.paused) {
@@ -835,11 +936,11 @@ $("clicker").onclick = e => {
   e.target.textContent = "Metronome: " + (clicking ? "on" : "off");
 };
 const jump = e => {
-  if (!SCORE) return;
+  if (!SCORE || dragged) return;
   const r = e.currentTarget.getBoundingClientRect();
   stopAt = null;
   aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05,
-    ((e.clientX - r.left)/r.width) * SCORE.song.length_s));
+    timeAt((e.clientX - r.left)/r.width)));
 };
 $("map").onclick = jump;
 $("subs").onclick = jump;
@@ -854,19 +955,77 @@ $("zoom").onclick = e => {
   stopAt = null;
   aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05, at));
 };
-$("zoom").onwheel = e => {
-  if (!SCORE) return;
-  e.preventDefault();
-  stopAt = null;
-  aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05,
-    aud.currentTime + beatLen() * (e.deltaY > 0 ? 1 : -1)));
+let dragged = false;
+
+/* Every timeline shares one zoom, so the wheel does the same thing wherever
+   the pointer is and the views can never drift apart. */
+function zoomable(el, fromTime) {
+  el.classList.add("grab");
+  el.addEventListener("wheel", e => {
+    if (!SCORE) return;
+    e.preventDefault();
+    const r = el.getBoundingClientRect();
+    const at = fromTime ? fromTime((e.clientX - r.left) / r.width) : timeAt((e.clientX - r.left) / r.width);
+    zoomAt(at, e.deltaY > 0 ? 1.25 : 0.8);
+  }, { passive: false });
+  el.addEventListener("pointerdown", e => {
+    if (!SCORE || e.button !== 0) return;
+    const r = el.getBoundingClientRect();
+    const startX = e.clientX, a0 = VIEW.a, b0 = VIEW.b;
+    dragged = false;
+    const move = ev => {
+      const dx = (ev.clientX - startX) / r.width;
+      if (Math.abs(ev.clientX - startX) > 3) dragged = true;
+      if (dragged) setView(a0 - dx * (b0 - a0), b0 - dx * (b0 - a0));
+    };
+    const up = () => {
+      removeEventListener("pointermove", move);
+      removeEventListener("pointerup", up);
+      setTimeout(() => dragged = false, 0);
+    };
+    addEventListener("pointermove", move);
+    addEventListener("pointerup", up);
+  });
+}
+
+$("zoomin").onclick = () => zoomAt((VIEW.a + VIEW.b) / 2, 0.6);
+$("zoomout").onclick = () => zoomAt((VIEW.a + VIEW.b) / 2, 1.7);
+$("zoomfit").onclick = () => setView(0, SCORE ? SCORE.song.length_s : 0);
+$("follow").onclick = e => {
+  VIEW.follow = !VIEW.follow;
+  e.target.classList.toggle("on", VIEW.follow);
+  e.target.textContent = "Follow: " + (VIEW.follow ? "on" : "off");
 };
+
+addEventListener("keydown", e => {
+  const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
+  if (e.code === "Space" && !typing) {
+    e.preventDefault();
+    stopAt = null;
+    aud.paused ? aud.play() : aud.pause();
+  }
+  if (!SCORE || typing) return;
+  if (e.key === "ArrowLeft")  { aud.currentTime = Math.max(0, aud.currentTime - (e.shiftKey ? 10 : beatLen())); }
+  if (e.key === "ArrowRight") { aud.currentTime = Math.min(SCORE.song.length_s - 0.05, aud.currentTime + (e.shiftKey ? 10 : beatLen())); }
+  if (e.key === "f") $("zoomfit").click();
+});
 $("tune").onclick = e => {
   if (!SCORE) return;
   const r = e.target.getBoundingClientRect();
   const px = e.clientX - r.left;
   const hit = THIT.find(h => px >= h.x0 - 3 && px <= h.x1 + 3);
   if (hit) { hearMoment(hit.m); return; }
+  const py = e.clientY - r.top;
+  if (py > 118) {
+    const line = PHIT.find(h => px >= h.x0 - 2 && px <= h.x1 + 2);
+    if (line) {
+      const beat = beatLen();
+      const a = barTime(line.q.from_bar) + (line.q.from_beat - 1) * beat;
+      const b = barTime(line.q.to_bar) + (line.q.to_beat - 1) * beat;
+      play(Math.max(0, a - 0.25), b + 0.6);
+      return;
+    }
+  }
   const total = SCORE.song.length_s;
   const at = ((px - 14) / Math.max(1, r.width - 20)) * total;
   play(Math.max(0, Math.min(total - 0.1, at)), null);
@@ -876,7 +1035,26 @@ $("song").onchange = e => {
   aud.pause(); LIVE = -1;
   load(e.target.value, e.target.selectedOptions[0].dataset.a);
 };
-addEventListener("resize", () => { if (SCORE) { lanes(); tune(); zoom(); subs(); } });
+for (const id of ["map", "subs", "lanes", "tune"]) zoomable($(id));
+zoomable($("zoom"), f => aud.currentTime - Math.min(WINDOW, viewSpan())/2 + f * Math.min(WINDOW, viewSpan()));
+
+addEventListener("resize", () => { if (SCORE) { lanes(); tune(); zoom(); subs(); place(); } });
+
+/* A page that fails silently is worse than one that fails loudly: the first
+   screenshot of this rewrite looked merely empty, which reads as "no data". */
+function broke(what, where) {
+  const box = $("broke");
+  box.hidden = false;
+  box.textContent = `Something in this page broke, so parts of it are missing:\n${what}\n${where}`;
+}
+addEventListener("error", e =>
+  broke(e.message, `${(e.filename||"").split("/").pop()}:${e.lineno}:${e.colno}`));
+/* load() is async, so anything it throws is a rejected promise and never
+   reaches window.onerror -- which is why the first broken render looked like
+   an empty page rather than a fault. */
+addEventListener("unhandledrejection", e =>
+  broke(String(e.reason && e.reason.message || e.reason),
+        String(e.reason && e.reason.stack || "").split("\n")[1] || ""));
 
 library();
 tick();

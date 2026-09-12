@@ -18,6 +18,7 @@ from facts import SCALES, presence, seated, turns
 from lead import hear as lead_line
 from melody import chants, echoes, fix as octaves, line as tune_line
 from melody import score as melody_of, sung as sung_in, voice as voice_of
+from melody import phrases_of
 from moments import carries, moments, pick, weigh
 from phrase import phrases as sub_phrases
 from harmony import changes as chord_changes
@@ -338,6 +339,9 @@ def read(path, slug):
         report["phrases"] = len(inner)
         report["staged"] = len(staged)
 
+    tune_notes = sorted(melody_of(heard, g, pickup)
+                        + melody_of(riff, g, pickup, "lead"),
+                        key=lambda n: (n["bar"], n["beat"]))
     return {
         "score": slug,
         "version": 0,
@@ -384,9 +388,8 @@ def read(path, slug):
         "signals": told_now,
         "voice": voice_of(heard, slipped),
         "lead": voice_of(riff, strayed) if riff else None,
-        "melody": sorted(melody_of(heard, g, pickup)
-                         + melody_of(riff, g, pickup, "lead"),
-                         key=lambda n: (n["bar"], n["beat"])),
+        "melody": tune_notes,
+        "melody_phrases": phrases_of(tune_notes, g, g["beats_per_bar"]),
     }
 
 

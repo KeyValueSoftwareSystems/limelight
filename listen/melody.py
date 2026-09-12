@@ -210,3 +210,102 @@ def voice(notes, moved):
         "octave_fixes": int(moved),
         "sure": round(float(max(0.0, 1.0 - moved / len(notes) * 2.5)), 3),
     }
+
+
+def edges(xs):
+    n = len(xs)
+    out = [0.0] * n
+    for i in range(n):
+        lo = abs(xs[i] - xs[i - 1]) / (xs[i] + xs[i - 1]) if i > 0 and (xs[i] + xs[i - 1]) > 0 else 0.0
+        hi = abs(xs[i] - xs[i + 1]) / (xs[i] + xs[i + 1]) if i < n - 1 and (xs[i] + xs[i + 1]) > 0 else 0.0
+        out[i] = xs[i] * (lo + hi)
+    top = max(out) or 1.0
+    return [v / top for v in out]
+
+
+def breaths(notes, per, weights=(0.25, 0.5, 0.25), least=3, want_bars=4.0):
+    # LBDM assumes a clean monophonic line. A pitch track lifted off separated
+    # stems is neither: it is dense, it is noisy, and a voice note followed by a
+    # lead note is not a melodic interval at all. So a silence longer than half
+    # a bar always ends a phrase, and the rest of the peaks are taken strongest
+    # first until the phrases are about as long as phrases actually are.
+    if len(notes) < least * 2:
+        return []
+    at = [(n["bar"] * per + n["beat"] - 1) for n in notes]
+    step = [max(1e-3, at[i + 1] - at[i]) for i in range(len(notes) - 1)] + [1.0]
+    rest = [max(0.0, step[i] - notes[i]["held_beats"]) for i in range(len(notes))]
+    leap = [abs(notes[i + 1]["pitch"] - notes[i]["pitch"]) for i in range(len(notes) - 1)] + [0.0]
+    a, b, c = edges(leap), edges(step), edges([r + 1e-3 for r in rest])
+    w1, w2, w3 = weights
+    force = [w1 * a[i] + w2 * b[i] + w3 * c[i] for i in range(len(notes))]
+
+    firm = {i for i in range(len(notes) - 1) if rest[i] >= per}
+    peaks = [i for i in range(1, len(force) - 1)
+             if force[i] >= force[i - 1] and force[i] > force[i + 1]]
+    room = max(1, int((at[-1] - at[0]) / (want_bars * per)))
+    peaks.sort(key=lambda i: -force[i])
+    cut = sorted(firm)
+    for i in peaks:
+        if len(cut) >= room + len(firm):
+            break
+        if all(abs(i - c) >= least for c in cut):
+            cut.append(i)
+            cut.sort()
+    return cut
+
+
+def shapes(notes, per, cuts):
+    out, edge = [], [0] + [c + 1 for c in cuts] + [len(notes)]
+    for i in range(len(edge) - 1):
+        a, b = edge[i], edge[i + 1]
+        mine = notes[a:b]
+        if len(mine) < 2:
+            continue
+        steps = [round(mine[k + 1]["pitch"] - mine[k]["pitch"]) for k in range(len(mine) - 1)]
+        out.append({"from_bar": mine[0]["bar"], "from_beat": mine[0]["beat"],
+                    "to_bar": mine[-1]["bar"], "to_beat": mine[-1]["beat"],
+                    "notes": len(mine),
+                    "low": round(min(n["pitch"] for n in mine), 1),
+                    "high": round(max(n["pitch"] for n in mine), 1),
+                    "sung_by": "voice" if sum(1 for n in mine if n.get("from") != "lead") >= len(mine) / 2 else "lead",
+                    "steps": steps})
+    return out
+
+
+def rhymes(parts, slack=1.0, least=4):
+    for i, p in enumerate(parts):
+        p["same_as"] = None
+        p["sure"] = 0.0
+    for i in range(1, len(parts)):
+        best, mark = None, 0.0
+        for j in range(i):
+            a, b = parts[j]["steps"], parts[i]["steps"]
+            n = min(len(a), len(b))
+            if n < least:
+                continue
+            off = sum(abs(a[k] - b[k]) for k in range(n)) / n
+            fit = max(0.0, 1.0 - off / (slack * 3.0)) * (n / max(len(a), len(b)))
+            if fit > mark:
+                best, mark = j, fit
+        if best is not None and mark >= 0.55:
+            parts[i]["same_as"] = best
+            parts[i]["sure"] = round(mark, 3)
+    for p in parts:
+        p.pop("steps", None)
+    return parts
+
+
+def phrases_of(notes, g, per):
+    # The voice and the lead instrument are two melodies, not one. Reading them
+    # as a single stream makes an interval out of every handover between them,
+    # which is how 670 notes first came back as four phrases and then as 178.
+    out = []
+    for who in ("voice", "lead"):
+        mine = [n for n in notes if (n.get("from") == "lead") == (who == "lead")]
+        if len(mine) < 8:
+            continue
+        for p in rhymes(shapes(mine, per, breaths(mine, per))):
+            p["sung_by"] = who
+            out.append(p)
+    out.sort(key=lambda p: (p["from_bar"], p["from_beat"]))
+    return out
