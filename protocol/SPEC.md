@@ -255,6 +255,32 @@ should check it rather than assume.
 and a confidence. Expect less compression than it sounds: on a busy record it
 is still most of the bars.
 
+## What a reader can act on that is newer than the rest
+
+`ticks` is the only lane fast enough to drive a light on the beat. Everything
+else here is per bar or per section, and a bar at 128bpm is 1.875 seconds --
+four times slower than the kick. It carries one reading per sixteenth for each
+of the four stems, cut on the bar edges so it stays with the music through a
+tempo change, each stem scaled to its own loudest moment. `per_bar` says how
+many readings a bar holds, but read the length of the array and trust that
+instead: a score written before the rate was corrected declares sixteen and
+carries four.
+
+`sections[].repeats_as` is a letter. Two sections sharing one are the same
+section coming back, so a look used for the first can be used again for the
+second. `sections[].sure` is how cleanly that section sits inside its group,
+which is a measurement of the clustering and not a probability.
+
+`sections[].trades` appears on a section that alternates inside itself --
+`{"every_bars": 8, "sure": 0.497, "heard_in": ["pace", "drums", "vocals"]}`.
+A call and response never steps anywhere, so nothing else in this file
+reports it, and a rig that holds one look across it is holding through four
+turnovers of the music.
+
+`melody_phrases` is the tune broken into lines, each with the notes it spans,
+whether it was sung or played, and `same_as` naming an earlier line it repeats
+the shape of.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

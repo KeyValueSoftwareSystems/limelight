@@ -6,7 +6,7 @@
  */
 
 export const KNOWN = [
-  'song', 'grid', 'beats', 'downbeats', 'sections', 'energy',
+  'song', 'grid', 'beats', 'downbeats', 'sections', 'energy', 'ticks', 'melody_phrases',
   'brightness', 'width', 'air', 'pump', 'pace',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
@@ -116,8 +116,21 @@ export function format(raw) {
       fullness: part.fullness,
       rise:     part.rise,
       stems:    part.stems,
+      /* Which section this one is a repeat of, how cleanly it sits in that
+         group, and whether it trades back and forth inside itself. A reader
+         that knows a chorus is the chorus it already lit can light it the same
+         way; one that knows a verse turns over every eight bars can swap on
+         the cycle instead of holding one look for thirty-one bars. */
+      repeats_as: part.repeats_as,
+      sure:       part.sure,
+      trades:     part.trades,
     }));
   }
+
+  /* The fast lane. Everything else in this file is per bar or per section, and
+     a light that pulses on the beat cannot be driven from either. */
+  if (raw.ticks) out.ticks = raw.ticks;
+  if (Array.isArray(raw.melody_phrases)) out.melody_phrases = raw.melody_phrases;
 
   // ---- energy (backward compat) ----
   if (raw.energy) {
