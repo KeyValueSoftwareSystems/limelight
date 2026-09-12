@@ -178,7 +178,9 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 
 <section>
   <h2>How the sound itself changes</h2>
-  <p class="note">Six things the computer measures every bar that the rows above do not show.
+  <p class="note"><b>Press play and the page follows the music</b> at a zoom where a beat is
+    visible; press Fit to see the whole song again.
+    Six things the computer measures every bar that the rows above do not show.
     The number on the right of each row is its value where you are now.
     <b>Click anywhere to jump there.</b></p>
   <div class="holder"><canvas id="curves"></canvas><div class="pline" data-for="curves"></div></div>
@@ -1172,8 +1174,11 @@ function tick() {
     $("head").style.left = `${hp}%`;
     if (SCORE.bars) curves();
     if (VIEW.follow && !aud.paused) {
+      /* Slide with the playhead rather than jumping when it reaches the edge:
+         a view that leaps every few seconds reads as broken, and the point of
+         following is that the picture moves the way the music does. */
       const w = viewSpan();
-      if (t < VIEW.a + w*0.15 || t > VIEW.b - w*0.15) setView(t - w/2, t + w/2);
+      setView(t - w * 0.35, t + w * 0.65);
     }
     if (stopAt !== null && t >= stopAt) { aud.pause(); stopAt = null; }
     zoom();
@@ -1223,6 +1228,21 @@ function tick() {
 }
 
 $("play").onclick = () => { stopAt = null; aud.paused ? aud.play() : aud.pause(); };
+/* Pressing play on the whole song shows you the shape of four minutes while
+   your ears are inside one bar, and a per-bar curve does not move for nearly
+   two seconds. So playing pulls the view in to where a beat is visible and
+   makes it follow, which is what "nothing is changing" actually meant. */
+const CLOSE = 14;
+aud.addEventListener("play", () => {
+  if (!SCORE) return;
+  if (viewSpan() > SCORE.song.length_s * 0.5) {
+    VIEW.follow = true;
+    $("follow").classList.add("on");
+    $("follow").textContent = "Follow: on";
+    const t = aud.currentTime;
+    setView(t - CLOSE / 2, t + CLOSE / 2);
+  }
+});
 aud.onplay = () => $("play").innerHTML = "&#10073;&#10073; Pause";
 aud.onpause = () => $("play").innerHTML = "&#9654; Play";
 $("seek").oninput = e => { dragging = true; stopAt = null;
