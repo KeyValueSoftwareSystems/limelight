@@ -122,6 +122,11 @@ class H(http.server.BaseHTTPRequestHandler):
             return self._json(out)
         if p == "/verdicts.json":
             return self._json(read_verdicts())
+        if p.startswith("/downbeat/"):
+            at = os.path.join(ROOT, "truth", p[10:] + ".grid.json")
+            if not os.path.isfile(at):
+                return self._json({"downbeat_shift_beats": 0})
+            return self._json(json.loads(open(at).read()))
         if p.startswith("/taps/"):
             at = os.path.join(ROOT, "truth", p[6:] + ".taps.json")
             if not os.path.isfile(at):
@@ -159,6 +164,27 @@ class H(http.server.BaseHTTPRequestHandler):
                 if all(abs(t - x) > 0.4 for x in doc["changes_s"]):
                     doc["changes_s"].append(t)
                     doc["changes_s"].sort()
+            with open(at, "w") as f:
+                f.write(json.dumps(doc, indent=2) + "\n")
+            return self._json(doc)
+        if p == "/downbeat":
+            n = int(self.headers.get("Content-Length") or 0)
+            try:
+                v = json.loads(self.rfile.read(n) or b"{}")
+            except ValueError:
+                return self.send_error(400, "not json")
+            slug = v.get("slug", "unknown")
+            at = os.path.join(ROOT, "truth", f"{slug}.grid.json")
+            os.makedirs(os.path.dirname(at), exist_ok=True)
+            doc = {"song": slug, "how": "truth", "who": "amal, by ear, at the page"}
+            if os.path.isfile(at):
+                try:
+                    doc.update(json.loads(open(at).read()))
+                except ValueError:
+                    pass
+            doc["downbeat_shift_beats"] = int(v.get("shift", 0))
+            doc["why"] = ("four candidate phases measure the same; only a listener "
+                          "can choose which beat is one")
             with open(at, "w") as f:
                 f.write(json.dumps(doc, indent=2) + "\n")
             return self._json(doc)

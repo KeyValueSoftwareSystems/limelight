@@ -592,6 +592,7 @@
       "from_bar": 0,
       "to_bar": 16,
       "repeats_as": "voice + chords",
+      "role": "intro",
       "feels": "half a kit",
       "fullness": 0.583,
       "rise": 0.106,
@@ -624,6 +625,7 @@
       "from_bar": 17,
       "to_bar": 24,
       "repeats_as": "beat",
+      "role": "verse",
       "feels": "half a kit",
       "fullness": 0.534,
       "rise": 0.328,
@@ -655,6 +657,7 @@
       "from_bar": 25,
       "to_bar": 40,
       "repeats_as": "voice + beat",
+      "role": "build",
       "feels": "drums in",
       "fullness": 0.893,
       "rise": 0.026,
@@ -687,6 +690,7 @@
       "from_bar": 41,
       "to_bar": 56,
       "repeats_as": "voice + beat",
+      "role": "drop",
       "feels": "thinning",
       "fullness": 0.85,
       "rise": -0.302,
@@ -719,6 +723,7 @@
       "from_bar": 57,
       "to_bar": 62,
       "repeats_as": "beat",
+      "role": "breakdown",
       "feels": "drums out",
       "fullness": 0.422,
       "rise": 0.101,
@@ -750,6 +755,7 @@
       "from_bar": 63,
       "to_bar": 66,
       "repeats_as": "quiet",
+      "role": "outro",
       "feels": "no drums",
       "fullness": 0.01,
       "rise": -0.039,
@@ -774,15 +780,1796 @@
       }
     }
   ],
-  "events": [
+  "beats": [
     {
-      "bar": 0,
-      "beat": 1,
-      "is": "bass swells",
-      "for_bars": 4,
-      "strength": 0.583,
-      "then": "nothing changes"
+      "t": 0.37,
+      "downbeat": false,
+      "weight": 0.003,
+      "sure": 0.011
     },
+    {
+      "t": 1.03,
+      "downbeat": false,
+      "weight": 0.003,
+      "sure": 0.0
+    },
+    {
+      "t": 1.76,
+      "downbeat": true,
+      "weight": 0.353,
+      "sure": 0.452
+    },
+    {
+      "t": 2.43,
+      "downbeat": false,
+      "weight": 0.391,
+      "sure": 0.0
+    },
+    {
+      "t": 3.17,
+      "downbeat": false,
+      "weight": 0.172,
+      "sure": 0.187
+    },
+    {
+      "t": 3.83,
+      "downbeat": false,
+      "weight": 0.183,
+      "sure": 0.174
+    },
+    {
+      "t": 4.51,
+      "downbeat": true,
+      "weight": 0.088,
+      "sure": 0.0
+    },
+    {
+      "t": 5.14,
+      "downbeat": false,
+      "weight": 0.233,
+      "sure": 0.066
+    },
+    {
+      "t": 5.82,
+      "downbeat": false,
+      "weight": 0.326,
+      "sure": 0.215
+    },
+    {
+      "t": 6.48,
+      "downbeat": false,
+      "weight": 0.143,
+      "sure": 0.0
+    },
+    {
+      "t": 7.16,
+      "downbeat": true,
+      "weight": 0.04,
+      "sure": 0.144
+    },
+    {
+      "t": 7.84,
+      "downbeat": false,
+      "weight": 0.064,
+      "sure": 0.136
+    },
+    {
+      "t": 8.49,
+      "downbeat": false,
+      "weight": 0.047,
+      "sure": 0.0
+    },
+    {
+      "t": 9.11,
+      "downbeat": false,
+      "weight": 0.081,
+      "sure": 0.0
+    },
+    {
+      "t": 9.75,
+      "downbeat": true,
+      "weight": 0.393,
+      "sure": 0.497
+    },
+    {
+      "t": 10.46,
+      "downbeat": false,
+      "weight": 0.516,
+      "sure": 0.0
+    },
+    {
+      "t": 11.14,
+      "downbeat": false,
+      "weight": 0.315,
+      "sure": 0.062
+    },
+    {
+      "t": 11.78,
+      "downbeat": false,
+      "weight": 0.302,
+      "sure": 0.378
+    },
+    {
+      "t": 12.5,
+      "downbeat": true,
+      "weight": 0.192,
+      "sure": 0.0
+    },
+    {
+      "t": 13.17,
+      "downbeat": false,
+      "weight": 0.143,
+      "sure": 0.181
+    },
+    {
+      "t": 13.83,
+      "downbeat": false,
+      "weight": 0.145,
+      "sure": 0.18
+    },
+    {
+      "t": 14.53,
+      "downbeat": false,
+      "weight": 0.232,
+      "sure": 0.0
+    },
+    {
+      "t": 15.22,
+      "downbeat": true,
+      "weight": 0.139,
+      "sure": 0.38
+    },
+    {
+      "t": 15.9,
+      "downbeat": false,
+      "weight": 0.173,
+      "sure": 0.0
+    },
+    {
+      "t": 16.57,
+      "downbeat": false,
+      "weight": 0.25,
+      "sure": 0.0
+    },
+    {
+      "t": 17.22,
+      "downbeat": false,
+      "weight": 0.391,
+      "sure": 0.378
+    },
+    {
+      "t": 17.75,
+      "downbeat": true,
+      "weight": 0.789,
+      "sure": 0.498
+    },
+    {
+      "t": 18.29,
+      "downbeat": false,
+      "weight": 0.464,
+      "sure": 0.342
+    },
+    {
+      "t": 18.8,
+      "downbeat": false,
+      "weight": 0.193,
+      "sure": 0.303
+    },
+    {
+      "t": 19.27,
+      "downbeat": false,
+      "weight": 0.204,
+      "sure": 0.423
+    },
+    {
+      "t": 19.78,
+      "downbeat": true,
+      "weight": 0.375,
+      "sure": 0.383
+    },
+    {
+      "t": 20.27,
+      "downbeat": false,
+      "weight": 0.233,
+      "sure": 0.423
+    },
+    {
+      "t": 20.79,
+      "downbeat": false,
+      "weight": 0.396,
+      "sure": 0.344
+    },
+    {
+      "t": 21.27,
+      "downbeat": false,
+      "weight": 0.198,
+      "sure": 0.424
+    },
+    {
+      "t": 21.8,
+      "downbeat": true,
+      "weight": 0.462,
+      "sure": 0.304
+    },
+    {
+      "t": 22.3,
+      "downbeat": false,
+      "weight": 0.162,
+      "sure": 0.305
+    },
+    {
+      "t": 22.79,
+      "downbeat": false,
+      "weight": 0.136,
+      "sure": 0.345
+    },
+    {
+      "t": 23.27,
+      "downbeat": false,
+      "weight": 0.158,
+      "sure": 0.425
+    },
+    {
+      "t": 23.8,
+      "downbeat": true,
+      "weight": 0.441,
+      "sure": 0.306
+    },
+    {
+      "t": 24.3,
+      "downbeat": false,
+      "weight": 0.249,
+      "sure": 0.306
+    },
+    {
+      "t": 24.79,
+      "downbeat": false,
+      "weight": 0.242,
+      "sure": 0.346
+    },
+    {
+      "t": 25.29,
+      "downbeat": false,
+      "weight": 0.218,
+      "sure": 0.346
+    },
+    {
+      "t": 25.78,
+      "downbeat": true,
+      "weight": 0.512,
+      "sure": 0.387
+    },
+    {
+      "t": 26.3,
+      "downbeat": false,
+      "weight": 0.483,
+      "sure": 0.307
+    },
+    {
+      "t": 26.77,
+      "downbeat": false,
+      "weight": 0.265,
+      "sure": 0.427
+    },
+    {
+      "t": 27.28,
+      "downbeat": false,
+      "weight": 0.222,
+      "sure": 0.388
+    },
+    {
+      "t": 27.82,
+      "downbeat": true,
+      "weight": 0.123,
+      "sure": 0.228
+    },
+    {
+      "t": 28.32,
+      "downbeat": false,
+      "weight": 0.139,
+      "sure": 0.228
+    },
+    {
+      "t": 28.83,
+      "downbeat": false,
+      "weight": 0.172,
+      "sure": 0.189
+    },
+    {
+      "t": 29.31,
+      "downbeat": false,
+      "weight": 0.165,
+      "sure": 0.269
+    },
+    {
+      "t": 29.8,
+      "downbeat": true,
+      "weight": 0.379,
+      "sure": 0.309
+    },
+    {
+      "t": 30.29,
+      "downbeat": false,
+      "weight": 0.251,
+      "sure": 0.349
+    },
+    {
+      "t": 30.8,
+      "downbeat": false,
+      "weight": 0.21,
+      "sure": 0.31
+    },
+    {
+      "t": 31.29,
+      "downbeat": false,
+      "weight": 0.249,
+      "sure": 0.35
+    },
+    {
+      "t": 31.78,
+      "downbeat": true,
+      "weight": 0.181,
+      "sure": 0.39
+    },
+    {
+      "t": 32.27,
+      "downbeat": false,
+      "weight": 0.099,
+      "sure": 0.431
+    },
+    {
+      "t": 32.74,
+      "downbeat": false,
+      "weight": 0.083,
+      "sure": 0.449
+    },
+    {
+      "t": 33.26,
+      "downbeat": false,
+      "weight": 0.068,
+      "sure": 0.471
+    },
+    {
+      "t": 33.75,
+      "downbeat": true,
+      "weight": 0.204,
+      "sure": 0.488
+    },
+    {
+      "t": 34.24,
+      "downbeat": false,
+      "weight": 0.532,
+      "sure": 0.448
+    },
+    {
+      "t": 34.77,
+      "downbeat": false,
+      "weight": 0.492,
+      "sure": 0.432
+    },
+    {
+      "t": 35.25,
+      "downbeat": false,
+      "weight": 0.404,
+      "sure": 0.488
+    },
+    {
+      "t": 35.76,
+      "downbeat": true,
+      "weight": 0.54,
+      "sure": 0.473
+    },
+    {
+      "t": 36.25,
+      "downbeat": false,
+      "weight": 0.5,
+      "sure": 0.487
+    },
+    {
+      "t": 36.77,
+      "downbeat": false,
+      "weight": 0.574,
+      "sure": 0.433
+    },
+    {
+      "t": 37.25,
+      "downbeat": false,
+      "weight": 0.379,
+      "sure": 0.973
+    },
+    {
+      "t": 37.76,
+      "downbeat": true,
+      "weight": 0.603,
+      "sure": 0.948
+    },
+    {
+      "t": 38.25,
+      "downbeat": false,
+      "weight": 0.594,
+      "sure": 0.972
+    },
+    {
+      "t": 38.77,
+      "downbeat": false,
+      "weight": 0.513,
+      "sure": 0.869
+    },
+    {
+      "t": 39.25,
+      "downbeat": false,
+      "weight": 0.396,
+      "sure": 0.97
+    },
+    {
+      "t": 39.76,
+      "downbeat": true,
+      "weight": 0.623,
+      "sure": 0.95
+    },
+    {
+      "t": 40.25,
+      "downbeat": false,
+      "weight": 0.589,
+      "sure": 0.969
+    },
+    {
+      "t": 40.76,
+      "downbeat": false,
+      "weight": 0.302,
+      "sure": 0.951
+    },
+    {
+      "t": 41.26,
+      "downbeat": false,
+      "weight": 0.201,
+      "sure": 0.952
+    },
+    {
+      "t": 41.75,
+      "downbeat": true,
+      "weight": 0.683,
+      "sure": 0.967
+    },
+    {
+      "t": 42.25,
+      "downbeat": false,
+      "weight": 0.619,
+      "sure": 0.967
+    },
+    {
+      "t": 42.76,
+      "downbeat": false,
+      "weight": 0.268,
+      "sure": 0.954
+    },
+    {
+      "t": 43.26,
+      "downbeat": false,
+      "weight": 0.358,
+      "sure": 0.954
+    },
+    {
+      "t": 43.76,
+      "downbeat": true,
+      "weight": 0.664,
+      "sure": 0.955
+    },
+    {
+      "t": 44.25,
+      "downbeat": false,
+      "weight": 0.56,
+      "sure": 0.964
+    },
+    {
+      "t": 44.76,
+      "downbeat": false,
+      "weight": 0.399,
+      "sure": 0.956
+    },
+    {
+      "t": 45.26,
+      "downbeat": false,
+      "weight": 0.468,
+      "sure": 0.957
+    },
+    {
+      "t": 45.76,
+      "downbeat": true,
+      "weight": 0.591,
+      "sure": 0.957
+    },
+    {
+      "t": 46.26,
+      "downbeat": false,
+      "weight": 0.629,
+      "sure": 0.958
+    },
+    {
+      "t": 46.76,
+      "downbeat": false,
+      "weight": 0.558,
+      "sure": 0.959
+    },
+    {
+      "t": 47.25,
+      "downbeat": false,
+      "weight": 0.338,
+      "sure": 0.961
+    },
+    {
+      "t": 47.74,
+      "downbeat": true,
+      "weight": 0.013,
+      "sure": 0.88
+    },
+    {
+      "t": 48.24,
+      "downbeat": false,
+      "weight": 0.003,
+      "sure": 0.88
+    },
+    {
+      "t": 48.76,
+      "downbeat": false,
+      "weight": 0.035,
+      "sure": 0.961
+    },
+    {
+      "t": 49.24,
+      "downbeat": false,
+      "weight": 0.047,
+      "sure": 0.878
+    },
+    {
+      "t": 49.75,
+      "downbeat": true,
+      "weight": 0.725,
+      "sure": 0.958
+    },
+    {
+      "t": 50.26,
+      "downbeat": false,
+      "weight": 0.659,
+      "sure": 0.963
+    },
+    {
+      "t": 50.76,
+      "downbeat": false,
+      "weight": 0.739,
+      "sure": 0.963
+    },
+    {
+      "t": 51.26,
+      "downbeat": false,
+      "weight": 0.388,
+      "sure": 0.964
+    },
+    {
+      "t": 51.76,
+      "downbeat": true,
+      "weight": 0.997,
+      "sure": 0.965
+    },
+    {
+      "t": 52.26,
+      "downbeat": false,
+      "weight": 0.445,
+      "sure": 0.965
+    },
+    {
+      "t": 52.76,
+      "downbeat": false,
+      "weight": 0.737,
+      "sure": 0.966
+    },
+    {
+      "t": 53.25,
+      "downbeat": false,
+      "weight": 0.501,
+      "sure": 0.954
+    },
+    {
+      "t": 53.76,
+      "downbeat": true,
+      "weight": 0.725,
+      "sure": 0.967
+    },
+    {
+      "t": 54.26,
+      "downbeat": false,
+      "weight": 0.206,
+      "sure": 0.968
+    },
+    {
+      "t": 54.76,
+      "downbeat": false,
+      "weight": 0.666,
+      "sure": 0.968
+    },
+    {
+      "t": 55.26,
+      "downbeat": false,
+      "weight": 0.236,
+      "sure": 0.969
+    },
+    {
+      "t": 55.76,
+      "downbeat": true,
+      "weight": 0.73,
+      "sure": 0.969
+    },
+    {
+      "t": 56.26,
+      "downbeat": false,
+      "weight": 0.287,
+      "sure": 0.97
+    },
+    {
+      "t": 56.76,
+      "downbeat": false,
+      "weight": 0.697,
+      "sure": 0.971
+    },
+    {
+      "t": 57.25,
+      "downbeat": false,
+      "weight": 0.401,
+      "sure": 0.949
+    },
+    {
+      "t": 57.76,
+      "downbeat": true,
+      "weight": 0.744,
+      "sure": 0.972
+    },
+    {
+      "t": 58.26,
+      "downbeat": false,
+      "weight": 0.534,
+      "sure": 0.972
+    },
+    {
+      "t": 58.76,
+      "downbeat": false,
+      "weight": 0.766,
+      "sure": 0.973
+    },
+    {
+      "t": 59.26,
+      "downbeat": false,
+      "weight": 0.4,
+      "sure": 0.974
+    },
+    {
+      "t": 59.76,
+      "downbeat": true,
+      "weight": 0.851,
+      "sure": 0.974
+    },
+    {
+      "t": 60.26,
+      "downbeat": false,
+      "weight": 0.282,
+      "sure": 0.975
+    },
+    {
+      "t": 60.75,
+      "downbeat": false,
+      "weight": 0.683,
+      "sure": 0.945
+    },
+    {
+      "t": 61.24,
+      "downbeat": false,
+      "weight": 0.343,
+      "sure": 0.864
+    },
+    {
+      "t": 61.76,
+      "downbeat": true,
+      "weight": 0.762,
+      "sure": 0.977
+    },
+    {
+      "t": 62.26,
+      "downbeat": false,
+      "weight": 0.368,
+      "sure": 0.977
+    },
+    {
+      "t": 62.76,
+      "downbeat": false,
+      "weight": 0.82,
+      "sure": 0.978
+    },
+    {
+      "t": 63.26,
+      "downbeat": false,
+      "weight": 0.349,
+      "sure": 0.978
+    },
+    {
+      "t": 63.76,
+      "downbeat": true,
+      "weight": 0.256,
+      "sure": 0.979
+    },
+    {
+      "t": 64.24,
+      "downbeat": false,
+      "weight": 0.216,
+      "sure": 0.86
+    },
+    {
+      "t": 64.76,
+      "downbeat": false,
+      "weight": 0.087,
+      "sure": 0.98
+    },
+    {
+      "t": 65.24,
+      "downbeat": false,
+      "weight": 0.096,
+      "sure": 0.859
+    },
+    {
+      "t": 65.76,
+      "downbeat": true,
+      "weight": 0.819,
+      "sure": 0.981
+    },
+    {
+      "t": 66.26,
+      "downbeat": false,
+      "weight": 0.763,
+      "sure": 0.982
+    },
+    {
+      "t": 66.76,
+      "downbeat": false,
+      "weight": 0.919,
+      "sure": 0.983
+    },
+    {
+      "t": 67.26,
+      "downbeat": false,
+      "weight": 0.429,
+      "sure": 0.983
+    },
+    {
+      "t": 67.76,
+      "downbeat": true,
+      "weight": 0.945,
+      "sure": 0.984
+    },
+    {
+      "t": 68.26,
+      "downbeat": false,
+      "weight": 0.669,
+      "sure": 0.984
+    },
+    {
+      "t": 68.76,
+      "downbeat": false,
+      "weight": 0.648,
+      "sure": 0.985
+    },
+    {
+      "t": 69.25,
+      "downbeat": false,
+      "weight": 0.555,
+      "sure": 0.934
+    },
+    {
+      "t": 69.76,
+      "downbeat": true,
+      "weight": 0.895,
+      "sure": 0.986
+    },
+    {
+      "t": 70.26,
+      "downbeat": false,
+      "weight": 0.573,
+      "sure": 0.987
+    },
+    {
+      "t": 70.76,
+      "downbeat": false,
+      "weight": 0.87,
+      "sure": 0.987
+    },
+    {
+      "t": 71.26,
+      "downbeat": false,
+      "weight": 0.476,
+      "sure": 0.988
+    },
+    {
+      "t": 71.76,
+      "downbeat": true,
+      "weight": 0.912,
+      "sure": 0.989
+    },
+    {
+      "t": 72.25,
+      "downbeat": false,
+      "weight": 0.662,
+      "sure": 0.931
+    },
+    {
+      "t": 72.76,
+      "downbeat": false,
+      "weight": 0.583,
+      "sure": 0.99
+    },
+    {
+      "t": 73.25,
+      "downbeat": false,
+      "weight": 0.385,
+      "sure": 0.93
+    },
+    {
+      "t": 73.75,
+      "downbeat": true,
+      "weight": 1.0,
+      "sure": 0.929
+    },
+    {
+      "t": 74.26,
+      "downbeat": false,
+      "weight": 0.819,
+      "sure": 0.992
+    },
+    {
+      "t": 74.76,
+      "downbeat": false,
+      "weight": 0.927,
+      "sure": 0.992
+    },
+    {
+      "t": 75.26,
+      "downbeat": false,
+      "weight": 0.326,
+      "sure": 0.993
+    },
+    {
+      "t": 75.76,
+      "downbeat": true,
+      "weight": 0.942,
+      "sure": 0.993
+    },
+    {
+      "t": 76.26,
+      "downbeat": false,
+      "weight": 0.212,
+      "sure": 0.994
+    },
+    {
+      "t": 76.76,
+      "downbeat": false,
+      "weight": 0.654,
+      "sure": 0.995
+    },
+    {
+      "t": 77.24,
+      "downbeat": false,
+      "weight": 0.365,
+      "sure": 0.845
+    },
+    {
+      "t": 77.76,
+      "downbeat": true,
+      "weight": 0.876,
+      "sure": 0.996
+    },
+    {
+      "t": 78.26,
+      "downbeat": false,
+      "weight": 0.575,
+      "sure": 0.996
+    },
+    {
+      "t": 78.76,
+      "downbeat": false,
+      "weight": 0.648,
+      "sure": 0.997
+    },
+    {
+      "t": 79.26,
+      "downbeat": false,
+      "weight": 0.396,
+      "sure": 0.998
+    },
+    {
+      "t": 79.76,
+      "downbeat": true,
+      "weight": 0.197,
+      "sure": 0.998
+    },
+    {
+      "t": 80.24,
+      "downbeat": false,
+      "weight": 0.112,
+      "sure": 0.841
+    },
+    {
+      "t": 80.76,
+      "downbeat": false,
+      "weight": 0.157,
+      "sure": 0.999
+    },
+    {
+      "t": 81.27,
+      "downbeat": false,
+      "weight": 0.291,
+      "sure": 0.92
+    },
+    {
+      "t": 81.76,
+      "downbeat": true,
+      "weight": 0.729,
+      "sure": 0.999
+    },
+    {
+      "t": 82.26,
+      "downbeat": false,
+      "weight": 0.76,
+      "sure": 0.999
+    },
+    {
+      "t": 82.76,
+      "downbeat": false,
+      "weight": 0.642,
+      "sure": 0.998
+    },
+    {
+      "t": 83.26,
+      "downbeat": false,
+      "weight": 0.684,
+      "sure": 0.998
+    },
+    {
+      "t": 83.76,
+      "downbeat": true,
+      "weight": 1.0,
+      "sure": 0.997
+    },
+    {
+      "t": 84.26,
+      "downbeat": false,
+      "weight": 0.283,
+      "sure": 0.996
+    },
+    {
+      "t": 84.76,
+      "downbeat": false,
+      "weight": 1.0,
+      "sure": 0.996
+    },
+    {
+      "t": 85.26,
+      "downbeat": false,
+      "weight": 0.684,
+      "sure": 0.995
+    },
+    {
+      "t": 85.76,
+      "downbeat": true,
+      "weight": 1.0,
+      "sure": 0.995
+    },
+    {
+      "t": 86.26,
+      "downbeat": false,
+      "weight": 0.521,
+      "sure": 0.994
+    },
+    {
+      "t": 86.76,
+      "downbeat": false,
+      "weight": 1.0,
+      "sure": 0.993
+    },
+    {
+      "t": 87.26,
+      "downbeat": false,
+      "weight": 0.826,
+      "sure": 0.993
+    },
+    {
+      "t": 87.76,
+      "downbeat": true,
+      "weight": 1.0,
+      "sure": 0.992
+    },
+    {
+      "t": 88.26,
+      "downbeat": false,
+      "weight": 0.323,
+      "sure": 0.992
+    },
+    {
+      "t": 88.76,
+      "downbeat": false,
+      "weight": 1.0,
+      "sure": 0.991
+    },
+    {
+      "t": 89.25,
+      "downbeat": false,
+      "weight": 0.782,
+      "sure": 0.91
+    },
+    {
+      "t": 89.75,
+      "downbeat": true,
+      "weight": 1.0,
+      "sure": 0.91
+    },
+    {
+      "t": 90.26,
+      "downbeat": false,
+      "weight": 0.784,
+      "sure": 0.989
+    },
+    {
+      "t": 90.76,
+      "downbeat": false,
+      "weight": 1.0,
+      "sure": 0.989
+    },
+    {
+      "t": 91.26,
+      "downbeat": false,
+      "weight": 0.807,
+      "sure": 0.988
+    },
+    {
+      "t": 91.76,
+      "downbeat": true,
+      "weight": 0.963,
+      "sure": 0.987
+    },
+    {
+      "t": 92.26,
+      "downbeat": false,
+      "weight": 0.541,
+      "sure": 0.987
+    },
+    {
+      "t": 92.76,
+      "downbeat": false,
+      "weight": 1.0,
+      "sure": 0.986
+    },
+    {
+      "t": 93.26,
+      "downbeat": false,
+      "weight": 0.828,
+      "sure": 0.986
+    },
+    {
+      "t": 93.76,
+      "downbeat": true,
+      "weight": 0.771,
+      "sure": 0.985
+    },
+    {
+      "t": 94.26,
+      "downbeat": false,
+      "weight": 0.486,
+      "sure": 0.984
+    },
+    {
+      "t": 94.76,
+      "downbeat": false,
+      "weight": 0.936,
+      "sure": 0.984
+    },
+    {
+      "t": 95.26,
+      "downbeat": false,
+      "weight": 0.769,
+      "sure": 0.983
+    },
+    {
+      "t": 95.76,
+      "downbeat": true,
+      "weight": 0.792,
+      "sure": 0.983
+    },
+    {
+      "t": 96.26,
+      "downbeat": false,
+      "weight": 0.691,
+      "sure": 0.982
+    },
+    {
+      "t": 96.76,
+      "downbeat": false,
+      "weight": 1.0,
+      "sure": 0.981
+    },
+    {
+      "t": 97.25,
+      "downbeat": false,
+      "weight": 0.598,
+      "sure": 0.901
+    },
+    {
+      "t": 97.76,
+      "downbeat": true,
+      "weight": 1.0,
+      "sure": 0.98
+    },
+    {
+      "t": 98.26,
+      "downbeat": false,
+      "weight": 0.808,
+      "sure": 0.98
+    },
+    {
+      "t": 98.76,
+      "downbeat": false,
+      "weight": 0.884,
+      "sure": 0.979
+    },
+    {
+      "t": 99.26,
+      "downbeat": false,
+      "weight": 0.643,
+      "sure": 0.978
+    },
+    {
+      "t": 99.76,
+      "downbeat": true,
+      "weight": 0.809,
+      "sure": 0.978
+    },
+    {
+      "t": 100.26,
+      "downbeat": false,
+      "weight": 0.266,
+      "sure": 0.977
+    },
+    {
+      "t": 100.76,
+      "downbeat": false,
+      "weight": 1.0,
+      "sure": 0.977
+    },
+    {
+      "t": 101.25,
+      "downbeat": false,
+      "weight": 0.657,
+      "sure": 0.896
+    },
+    {
+      "t": 101.76,
+      "downbeat": true,
+      "weight": 0.7,
+      "sure": 0.975
+    },
+    {
+      "t": 102.26,
+      "downbeat": false,
+      "weight": 0.34,
+      "sure": 0.975
+    },
+    {
+      "t": 102.76,
+      "downbeat": false,
+      "weight": 0.697,
+      "sure": 0.974
+    },
+    {
+      "t": 103.26,
+      "downbeat": false,
+      "weight": 0.376,
+      "sure": 0.974
+    },
+    {
+      "t": 103.76,
+      "downbeat": true,
+      "weight": 0.9,
+      "sure": 0.973
+    },
+    {
+      "t": 104.26,
+      "downbeat": false,
+      "weight": 0.414,
+      "sure": 0.972
+    },
+    {
+      "t": 104.76,
+      "downbeat": false,
+      "weight": 0.605,
+      "sure": 0.972
+    },
+    {
+      "t": 105.26,
+      "downbeat": false,
+      "weight": 0.493,
+      "sure": 0.971
+    },
+    {
+      "t": 105.76,
+      "downbeat": true,
+      "weight": 0.718,
+      "sure": 0.971
+    },
+    {
+      "t": 106.26,
+      "downbeat": false,
+      "weight": 0.464,
+      "sure": 0.97
+    },
+    {
+      "t": 106.76,
+      "downbeat": false,
+      "weight": 0.644,
+      "sure": 0.969
+    },
+    {
+      "t": 107.26,
+      "downbeat": false,
+      "weight": 0.501,
+      "sure": 0.969
+    },
+    {
+      "t": 107.76,
+      "downbeat": true,
+      "weight": 0.692,
+      "sure": 0.968
+    },
+    {
+      "t": 108.26,
+      "downbeat": false,
+      "weight": 0.408,
+      "sure": 0.968
+    },
+    {
+      "t": 108.76,
+      "downbeat": false,
+      "weight": 0.883,
+      "sure": 0.967
+    },
+    {
+      "t": 109.26,
+      "downbeat": false,
+      "weight": 0.439,
+      "sure": 0.966
+    },
+    {
+      "t": 109.76,
+      "downbeat": true,
+      "weight": 0.295,
+      "sure": 0.966
+    },
+    {
+      "t": 110.27,
+      "downbeat": false,
+      "weight": 0.168,
+      "sure": 0.955
+    },
+    {
+      "t": 110.76,
+      "downbeat": false,
+      "weight": 0.071,
+      "sure": 0.965
+    },
+    {
+      "t": 111.24,
+      "downbeat": false,
+      "weight": 0.042,
+      "sure": 0.804
+    },
+    {
+      "t": 111.74,
+      "downbeat": true,
+      "weight": 0.016,
+      "sure": 0.803
+    },
+    {
+      "t": 112.24,
+      "downbeat": false,
+      "weight": 0.005,
+      "sure": 0.803
+    },
+    {
+      "t": 112.76,
+      "downbeat": false,
+      "weight": 0.003,
+      "sure": 0.962
+    },
+    {
+      "t": 113.26,
+      "downbeat": false,
+      "weight": 0.003,
+      "sure": 0.962
+    },
+    {
+      "t": 113.75,
+      "downbeat": true,
+      "weight": 0.04,
+      "sure": 0.881
+    },
+    {
+      "t": 114.29,
+      "downbeat": false,
+      "weight": 0.132,
+      "sure": 0.8
+    },
+    {
+      "t": 114.78,
+      "downbeat": false,
+      "weight": 0.083,
+      "sure": 0.88
+    },
+    {
+      "t": 115.29,
+      "downbeat": false,
+      "weight": 0.005,
+      "sure": 0.801
+    },
+    {
+      "t": 115.79,
+      "downbeat": true,
+      "weight": 0.228,
+      "sure": 0.801
+    },
+    {
+      "t": 116.29,
+      "downbeat": false,
+      "weight": 0.213,
+      "sure": 0.802
+    },
+    {
+      "t": 116.78,
+      "downbeat": false,
+      "weight": 0.02,
+      "sure": 0.883
+    },
+    {
+      "t": 117.29,
+      "downbeat": false,
+      "weight": 0.004,
+      "sure": 0.803
+    },
+    {
+      "t": 117.77,
+      "downbeat": true,
+      "weight": 0.569,
+      "sure": 0.964
+    },
+    {
+      "t": 118.28,
+      "downbeat": false,
+      "weight": 0.641,
+      "sure": 0.884
+    },
+    {
+      "t": 118.78,
+      "downbeat": false,
+      "weight": 0.607,
+      "sure": 0.885
+    },
+    {
+      "t": 119.29,
+      "downbeat": false,
+      "weight": 0.589,
+      "sure": 0.806
+    },
+    {
+      "t": 119.79,
+      "downbeat": true,
+      "weight": 0.726,
+      "sure": 0.806
+    },
+    {
+      "t": 120.29,
+      "downbeat": false,
+      "weight": 0.559,
+      "sure": 0.807
+    },
+    {
+      "t": 120.8,
+      "downbeat": false,
+      "weight": 0.469,
+      "sure": 0.727
+    },
+    {
+      "t": 121.29,
+      "downbeat": false,
+      "weight": 0.482,
+      "sure": 0.808
+    },
+    {
+      "t": 121.78,
+      "downbeat": true,
+      "weight": 0.662,
+      "sure": 0.889
+    },
+    {
+      "t": 122.28,
+      "downbeat": false,
+      "weight": 0.518,
+      "sure": 0.889
+    },
+    {
+      "t": 122.79,
+      "downbeat": false,
+      "weight": 0.507,
+      "sure": 0.81
+    },
+    {
+      "t": 123.28,
+      "downbeat": false,
+      "weight": 0.558,
+      "sure": 0.89
+    },
+    {
+      "t": 123.77,
+      "downbeat": true,
+      "weight": 0.633,
+      "sure": 0.971
+    },
+    {
+      "t": 124.29,
+      "downbeat": false,
+      "weight": 0.578,
+      "sure": 0.812
+    },
+    {
+      "t": 124.79,
+      "downbeat": false,
+      "weight": 0.147,
+      "sure": 0.812
+    },
+    {
+      "t": 125.26,
+      "downbeat": false,
+      "weight": 0.187,
+      "sure": 0.947
+    },
+    {
+      "t": 125.75,
+      "downbeat": true,
+      "weight": 0.023,
+      "sure": 0.867
+    },
+    {
+      "t": 126.25,
+      "downbeat": false,
+      "weight": 0.01,
+      "sure": 0.866
+    },
+    {
+      "t": 126.71,
+      "downbeat": false,
+      "weight": 0.032,
+      "sure": 0.545
+    },
+    {
+      "t": 127.15,
+      "downbeat": false,
+      "weight": 0.007,
+      "sure": 0.065
+    },
+    {
+      "t": 127.61,
+      "downbeat": true,
+      "weight": 0.004,
+      "sure": 0.0
+    }
+  ],
+  "tension": [
+    0.119,
+    0.156,
+    0.124,
+    0.254,
+    0.53,
+    0.498,
+    0.621,
+    0.695,
+    0.659,
+    0.725,
+    0.522,
+    0.206,
+    0.102,
+    0.003,
+    0.027,
+    0.229,
+    0.511,
+    0.66,
+    0.742,
+    0.744,
+    0.511,
+    0.196,
+    0.105,
+    0.073,
+    0.265,
+    0.446,
+    0.593,
+    0.887,
+    0.878,
+    0.855,
+    0.755,
+    0.663,
+    0.561,
+    0.309,
+    0.226,
+    0.361,
+    0.449,
+    0.393,
+    0.374,
+    0.322,
+    0.302,
+    0.218,
+    0.307,
+    0.233,
+    0.226,
+    0.248,
+    0.429,
+    0.458,
+    0.537,
+    0.542,
+    0.55,
+    0.504,
+    0.36,
+    0.121,
+    0.097,
+    0.05,
+    0.033,
+    0.012,
+    0.002,
+    0.002,
+    0.008,
+    0.0,
+    0.034,
+    0.077,
+    0.106,
+    0.185,
+    0.24,
+    0.301,
+    0.359,
+    0.46,
+    0.488,
+    0.514,
+    0.658,
+    0.674,
+    0.511,
+    0.611,
+    0.624,
+    0.417,
+    0.374,
+    0.194,
+    0.378,
+    0.16,
+    0.317,
+    0.097,
+    0.064,
+    0.065,
+    0.313,
+    0.347,
+    0.377,
+    0.679,
+    0.737,
+    0.621,
+    0.743,
+    0.631,
+    0.589,
+    0.59,
+    0.668,
+    0.374,
+    0.389,
+    0.383,
+    0.395,
+    0.362,
+    0.398,
+    0.402,
+    0.377,
+    0.385,
+    0.385,
+    0.278,
+    0.355,
+    0.306,
+    0.322,
+    0.342,
+    0.369,
+    0.314,
+    0.37,
+    0.237,
+    0.307,
+    0.203,
+    0.222,
+    0.286,
+    0.381,
+    0.31,
+    0.415,
+    0.308,
+    0.331,
+    0.411,
+    0.367,
+    0.377,
+    0.462,
+    0.326,
+    0.285,
+    0.272,
+    0.261,
+    0.324,
+    0.188,
+    0.203,
+    0.438,
+    0.337,
+    0.201,
+    0.108,
+    0.265,
+    0.351,
+    0.237,
+    0.447,
+    0.357,
+    0.36,
+    0.258,
+    0.338,
+    0.338,
+    0.322,
+    0.319,
+    0.32,
+    0.271,
+    0.452,
+    0.4,
+    0.308,
+    0.385,
+    0.239,
+    0.148,
+    0.251,
+    0.299,
+    0.281,
+    0.049,
+    0.095,
+    0.089,
+    0.027,
+    0.055,
+    0.132,
+    0.113,
+    0.188,
+    0.135,
+    0.116,
+    0.126,
+    0.045,
+    0.155,
+    0.176,
+    0.121,
+    0.145,
+    0.258,
+    0.162,
+    0.155,
+    0.139,
+    0.235,
+    0.106,
+    0.054,
+    0.127,
+    0.092,
+    0.048,
+    0.125,
+    0.056,
+    0.298,
+    0.262,
+    0.112,
+    0.228,
+    0.244,
+    0.317,
+    0.305,
+    0.332,
+    0.29,
+    0.27,
+    0.438,
+    0.328,
+    0.352,
+    0.33,
+    0.351,
+    0.367,
+    0.366,
+    0.278,
+    0.236,
+    0.233,
+    0.264,
+    0.177,
+    0.091,
+    0.014,
+    0.0,
+    0.076,
+    0.244,
+    0.385,
+    0.491,
+    0.49,
+    0.736,
+    0.799,
+    0.695,
+    0.642,
+    0.836,
+    0.667,
+    0.207,
+    0.307,
+    0.01,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.053,
+    0.051,
+    0.055,
+    0.187,
+    0.371,
+    0.512,
+    0.797,
+    0.783,
+    0.913,
+    0.775,
+    0.472,
+    0.112,
+    0.051
+  ],
+  "releases": [
+    {
+      "beat_index": 26,
+      "at_s": 17.75,
+      "lead_beats": 13,
+      "size": 0.551
+    },
+    {
+      "beat_index": 90,
+      "at_s": 49.75,
+      "lead_beats": 6,
+      "size": 0.7
+    },
+    {
+      "beat_index": 122,
+      "at_s": 65.76,
+      "lead_beats": 0,
+      "size": 0.656
+    },
+    {
+      "beat_index": 138,
+      "at_s": 73.75,
+      "lead_beats": 15,
+      "size": 0.364
+    },
+    {
+      "beat_index": 146,
+      "at_s": 77.76,
+      "lead_beats": 7,
+      "size": 0.333
+    },
+    {
+      "beat_index": 154,
+      "at_s": 81.76,
+      "lead_beats": 15,
+      "size": 0.54
+    },
+    {
+      "beat_index": 192,
+      "at_s": 100.76,
+      "lead_beats": 5,
+      "size": 0.35
+    },
+    {
+      "beat_index": 208,
+      "at_s": 108.76,
+      "lead_beats": 16,
+      "size": 0.322
+    },
+    {
+      "beat_index": 226,
+      "at_s": 117.77,
+      "lead_beats": 12,
+      "size": 0.453
+    }
+  ],
+  "events": [
     {
       "bar": 0,
       "beat": 3,
@@ -793,8 +2580,8 @@
       "bar": 1,
       "beat": 1,
       "is": "drums fades",
-      "for_bars": 4,
-      "strength": 0.598,
+      "for_bars": 7,
+      "strength": 0.614,
       "then": "nothing changes"
     },
     {
@@ -810,6 +2597,14 @@
       "strength": 0.238
     },
     {
+      "bar": 3,
+      "beat": 1,
+      "is": "voice fades",
+      "for_bars": 7,
+      "strength": 0.457,
+      "then": "other grows after"
+    },
+    {
       "bar": 4,
       "beat": 1,
       "is": "bass pause",
@@ -820,18 +2615,18 @@
     {
       "bar": 4,
       "beat": 1,
+      "is": "bass swells",
+      "for_bars": 4,
+      "strength": 0.514,
+      "then": "other grows after"
+    },
+    {
+      "bar": 4,
+      "beat": 1,
       "is": "voice pause",
       "for_bars": 2,
       "strength": 0.467,
       "then": "other grows after"
-    },
-    {
-      "bar": 5,
-      "beat": 1,
-      "is": "drums fades",
-      "for_bars": 4,
-      "strength": 0.636,
-      "then": "bass grows after"
     },
     {
       "bar": 5,
@@ -850,16 +2645,24 @@
     {
       "bar": 9,
       "beat": 1,
-      "is": "drums fades",
-      "for_bars": 4,
-      "strength": 0.547,
-      "then": "drums grows after"
-    },
-    {
-      "bar": 9,
-      "beat": 1,
       "is": "drums in",
       "strength": 0.23
+    },
+    {
+      "bar": 10,
+      "beat": 1,
+      "is": "voice swells",
+      "for_bars": 5,
+      "strength": 0.953,
+      "then": "bass thins after"
+    },
+    {
+      "bar": 10,
+      "beat": 1,
+      "is": "bass swells",
+      "for_bars": 8,
+      "strength": 0.939,
+      "then": "bass thins after"
     },
     {
       "bar": 10,
@@ -880,6 +2683,14 @@
     {
       "bar": 11,
       "beat": 1,
+      "is": "drums swells",
+      "for_bars": 6,
+      "strength": 0.508,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 11,
+      "beat": 1,
       "is": "voice back",
       "after": "voice pause",
       "strength": 0.233
@@ -887,17 +2698,17 @@
     {
       "bar": 13,
       "beat": 1,
-      "is": "bass swells",
-      "for_bars": 7,
-      "strength": 1.0,
+      "is": "voice pause",
+      "for_bars": 1,
+      "strength": 0.557,
       "then": "bass thins after"
     },
     {
       "bar": 13,
       "beat": 1,
-      "is": "voice pause",
-      "for_bars": 1,
-      "strength": 0.557,
+      "is": "chords swells",
+      "for_bars": 8,
+      "strength": 0.498,
       "then": "bass thins after"
     },
     {
@@ -926,7 +2737,7 @@
       "bar": 15,
       "beat": 1,
       "is": "voice fades",
-      "for_bars": 9,
+      "for_bars": 6,
       "strength": 1.0,
       "then": "vocals thins after"
     },
@@ -969,17 +2780,9 @@
     {
       "bar": 18,
       "beat": 1,
-      "is": "chords swells",
-      "for_bars": 6,
-      "strength": 0.965,
-      "then": "vocals thins after"
-    },
-    {
-      "bar": 18,
-      "beat": 1,
-      "is": "voice swells",
+      "is": "drums swells",
       "for_bars": 8,
-      "strength": 0.791,
+      "strength": 0.776,
       "then": "vocals thins after"
     },
     {
@@ -987,14 +2790,6 @@
       "beat": 1,
       "is": "lead out",
       "strength": 0.635
-    },
-    {
-      "bar": 18,
-      "beat": 1,
-      "is": "drums swells",
-      "for_bars": 6,
-      "strength": 0.625,
-      "then": "vocals thins after"
     },
     {
       "bar": 18,
@@ -1019,12 +2814,12 @@
       "strength": 1.0
     },
     {
-      "bar": 24,
+      "bar": 21,
       "beat": 1,
-      "is": "drums swells",
-      "for_bars": 6,
+      "is": "voice swells",
+      "for_bars": 8,
       "strength": 1.0,
-      "then": "vocals grows after"
+      "then": "other grows after"
     },
     {
       "bar": 24,
@@ -1078,11 +2873,35 @@
       "strength": 1.0
     },
     {
+      "bar": 26,
+      "beat": 1,
+      "is": "chords fades",
+      "for_bars": 6,
+      "strength": 0.738,
+      "then": "vocals grows after"
+    },
+    {
       "bar": 27,
       "beat": 1,
       "is": "bass pause",
       "for_bars": 2,
       "strength": 0.487,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 27,
+      "beat": 1,
+      "is": "bass swells",
+      "for_bars": 6,
+      "strength": 0.467,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 28,
+      "beat": 1,
+      "is": "drums fades",
+      "for_bars": 4,
+      "strength": 0.596,
       "then": "vocals grows after"
     },
     {
@@ -1108,19 +2927,19 @@
       "strength": 1.0
     },
     {
-      "bar": 29,
+      "bar": 32,
       "beat": 1,
-      "is": "drums fades",
-      "for_bars": 4,
-      "strength": 0.704,
-      "then": "vocals grows after"
+      "is": "drums swells",
+      "for_bars": 7,
+      "strength": 0.954,
+      "then": "drums grows after"
     },
     {
       "bar": 32,
       "beat": 1,
-      "is": "drums swells",
+      "is": "chords swells",
       "for_bars": 6,
-      "strength": 0.888,
+      "strength": 0.792,
       "then": "drums grows after"
     },
     {
@@ -1154,35 +2973,27 @@
       "strength": 0.878
     },
     {
-      "bar": 37,
-      "beat": 1,
-      "is": "voice fades",
-      "for_bars": 6,
-      "strength": 0.743,
-      "then": "bass thins after"
-    },
-    {
-      "bar": 37,
-      "beat": 1,
-      "is": "bass fades",
-      "for_bars": 4,
-      "strength": 0.534,
-      "then": "bass thins after"
-    },
-    {
-      "bar": 40,
+      "bar": 34,
       "beat": 1,
       "is": "bass swells",
+      "for_bars": 8,
+      "strength": 0.518,
+      "then": "drums grows after"
+    },
+    {
+      "bar": 35,
+      "beat": 1,
+      "is": "voice fades",
       "for_bars": 7,
-      "strength": 0.924,
-      "then": "vocals thins after"
+      "strength": 0.666,
+      "then": "drums grows after"
     },
     {
       "bar": 40,
       "beat": 1,
       "is": "chords swells",
-      "for_bars": 4,
-      "strength": 0.676,
+      "for_bars": 6,
+      "strength": 0.711,
       "then": "vocals thins after"
     },
     {
@@ -1219,33 +3030,49 @@
       "bar": 42,
       "beat": 1,
       "is": "voice swells",
-      "for_bars": 8,
+      "for_bars": 7,
       "strength": 0.516,
       "then": "bass grows after"
     },
     {
-      "bar": 49,
+      "bar": 44,
       "beat": 1,
       "is": "bass fades",
-      "for_bars": 5,
-      "strength": 0.953,
+      "for_bars": 8,
+      "strength": 0.708,
+      "then": "bass grows after"
+    },
+    {
+      "bar": 47,
+      "beat": 1,
+      "is": "drums fades",
+      "for_bars": 8,
+      "strength": 0.663,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 47,
+      "beat": 1,
+      "is": "chords fades",
+      "for_bars": 8,
+      "strength": 0.476,
+      "then": "vocals grows after"
+    },
+    {
+      "bar": 52,
+      "beat": 1,
+      "is": "voice fades",
+      "for_bars": 6,
+      "strength": 0.792,
       "then": "bass thins after"
     },
     {
-      "bar": 53,
+      "bar": 52,
       "beat": 1,
-      "is": "drums fades",
-      "for_bars": 6,
-      "strength": 1.0,
-      "then": "drums thins after"
-    },
-    {
-      "bar": 53,
-      "beat": 1,
-      "is": "voice fades",
+      "is": "bass fades",
       "for_bars": 4,
-      "strength": 0.784,
-      "then": "drums thins after"
+      "strength": 0.508,
+      "then": "bass thins after"
     },
     {
       "bar": 55,
@@ -1258,6 +3085,22 @@
         "other"
       ],
       "strength": 1.0,
+      "then": "drums thins after"
+    },
+    {
+      "bar": 55,
+      "beat": 1,
+      "is": "drums fades",
+      "for_bars": 7,
+      "strength": 0.739,
+      "then": "drums thins after"
+    },
+    {
+      "bar": 55,
+      "beat": 1,
+      "is": "chords fades",
+      "for_bars": 8,
+      "strength": 0.496,
       "then": "drums thins after"
     },
     {
@@ -1286,7 +3129,7 @@
       "bar": 56,
       "beat": 1,
       "is": "bass swells",
-      "for_bars": 6,
+      "for_bars": 5,
       "strength": 1.0,
       "then": "drums thins after"
     },
@@ -1304,14 +3147,6 @@
       "strength": 0.776
     },
     {
-      "bar": 56,
-      "beat": 1,
-      "is": "drums swells",
-      "for_bars": 4,
-      "strength": 0.7,
-      "then": "drums thins after"
-    },
-    {
       "bar": 57,
       "beat": 1,
       "is": "only voice + chords left",
@@ -1321,14 +3156,6 @@
         "other"
       ],
       "strength": 1.0,
-      "then": "bass grows after"
-    },
-    {
-      "bar": 57,
-      "beat": 1,
-      "is": "chords fades",
-      "for_bars": 10,
-      "strength": 0.956,
       "then": "bass grows after"
     },
     {
@@ -1373,28 +3200,20 @@
       "strength": 0.83
     },
     {
-      "bar": 59,
-      "beat": 1,
-      "is": "drums fades",
-      "for_bars": 8,
-      "strength": 0.737,
-      "then": "bass grows after"
-    },
-    {
-      "bar": 60,
-      "beat": 1,
-      "is": "bass fades",
-      "for_bars": 7,
-      "strength": 1.0,
-      "then": "bass grows after"
-    },
-    {
       "bar": 60,
       "beat": 1,
       "is": "voice pause",
       "for_bars": 2,
       "strength": 0.521,
       "then": "bass grows after"
+    },
+    {
+      "bar": 61,
+      "beat": 1,
+      "is": "bass fades",
+      "for_bars": 5,
+      "strength": 1.0,
+      "then": "other thins after"
     },
     {
       "bar": 61,
@@ -1411,11 +3230,11 @@
       "strength": 1.0
     },
     {
-      "bar": 63,
+      "bar": 62,
       "beat": 1,
       "is": "voice fades",
       "for_bars": 4,
-      "strength": 1.0,
+      "strength": 0.7,
       "then": "bass thins after"
     },
     {
@@ -1435,210 +3254,6 @@
       "beat": 1,
       "is": "chords out",
       "strength": 0.285
-    },
-    {
-      "bar": 1,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 5,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 6,
-      "beat": 1,
-      "is": "chord to Bb",
-      "strength": 0.4
-    },
-    {
-      "bar": 7,
-      "beat": 1,
-      "is": "chord to A",
-      "strength": 0.4
-    },
-    {
-      "bar": 9,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 10,
-      "beat": 1,
-      "is": "chord to Bb",
-      "strength": 0.4
-    },
-    {
-      "bar": 11,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 14,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 16,
-      "beat": 1,
-      "is": "chord to A",
-      "strength": 0.4
-    },
-    {
-      "bar": 17,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 18,
-      "beat": 1,
-      "is": "chord to D",
-      "strength": 0.4
-    },
-    {
-      "bar": 20,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 27,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 28,
-      "beat": 1,
-      "is": "chord to Bb",
-      "strength": 0.4
-    },
-    {
-      "bar": 29,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 31,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 33,
-      "beat": 1,
-      "is": "chord to D",
-      "strength": 0.4
-    },
-    {
-      "bar": 34,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 35,
-      "beat": 1,
-      "is": "chord to E",
-      "strength": 0.4
-    },
-    {
-      "bar": 36,
-      "beat": 1,
-      "is": "chord to F",
-      "strength": 0.4
-    },
-    {
-      "bar": 37,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 39,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 41,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 43,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 45,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 50,
-      "beat": 1,
-      "is": "chord to Bb",
-      "strength": 0.4
-    },
-    {
-      "bar": 51,
-      "beat": 1,
-      "is": "chord to C",
-      "strength": 0.4
-    },
-    {
-      "bar": 53,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 55,
-      "beat": 1,
-      "is": "chord to D",
-      "strength": 0.4
-    },
-    {
-      "bar": 56,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 57,
-      "beat": 1,
-      "is": "chord to D",
-      "strength": 0.4
-    },
-    {
-      "bar": 58,
-      "beat": 1,
-      "is": "chord to Dm",
-      "strength": 0.4
-    },
-    {
-      "bar": 60,
-      "beat": 1,
-      "is": "chord to Am",
-      "strength": 0.4
-    },
-    {
-      "bar": 63,
-      "beat": 1,
-      "is": "chord to D",
-      "strength": 0.4
     }
   ]
 }

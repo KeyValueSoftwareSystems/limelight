@@ -9,6 +9,7 @@ warnings.filterwarnings("ignore")
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from grid import grid, show
+from form import read as form_read
 from parts import curves, parts
 from pulse import pulse
 from events import events
@@ -85,6 +86,35 @@ def per_bar_loud(loud, times, g):
     return [round(x / peak, 3) if x is not None else None for x in out]
 
 
+def sections(spans, voices, busy, pickup, report=None):
+    from parts import how_much, word_for
+
+    v = busy[0] if busy.ndim > 1 else busy
+    peak = float(np.percentile(v, 98)) or 1.0
+    out, had = [], {}
+    for a, b, role in spans:
+        part = v[a:b] if b > a else v[a:a + 1]
+        rel = float(part.mean() / peak)
+        third = max(1, len(part) // 3)
+        rise = float((part[-third:].mean() - part[:third].mean()) / peak)
+        has = how_much(voices, a, b)
+        out.append({
+            "from_bar": a + 1 - pickup,
+            "to_bar": b - pickup,
+            "role": role,
+            "feels": word_for(rel, rise, has, had),
+            "fullness": round(rel, 3),
+            "rise": round(rise, 3),
+            "playing": [n for n, (st, _) in has.items() if st != "none"],
+            "stems": {n: {"is": st, "level": lv} for n, (st, lv) in has.items()},
+        })
+        had = has
+    if report is not None:
+        report["parts"] = len(out)
+        report["kinds"] = sorted({str(p["role"]) for p in out})
+    return out
+
+
 def read(path, slug):
     times, positions, downs = track(path, slug)
     length_s, loud, f = listen(path, slug, times)
@@ -106,11 +136,24 @@ def read(path, slug):
     lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"])
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
     busy, bright = curves(path, g)
-    beats, pull, gone = pulse(path, g, times, positions, np.load(CACHE / f"{slug}.flux.npy"),
-                              env, report)
     pickup = 1 if g["first_beat_s"] > 0.2 else 0
     found, held = find_chords(path, slug)
     chord, chord_sure = chords_per_bar(found, held, g["first_beat_s"], bar_s, g["bars"], pickup)
+    score_bars = {
+        "intensity": per_bar_loud(loud, times, g),
+        **{k: [round(x, 3) for x in lanes[k]] for k in STEM_NAMES},
+        "brightness": [round(float(x), 3) for x in bright.ravel()],
+        "chord": chord,
+        "chord_sure": chord_sure,
+    }
+    beats, pull, gone = pulse(path, g, times, positions, np.load(CACHE / f"{slug}.flux.npy"),
+                              env, report)
+    flux = np.load(CACHE / f"{slug}.flux.npy")
+    edges = ([0.0] if pickup else []) + [
+        g["first_beat_s"] + i * bar_s for i in range(g["bars"] + 1)]
+    hits = [int(((flux >= edges[i]) & (flux < edges[i + 1])).sum())
+            for i in range(len(edges) - 1)]
+    shaped = sections(form_read(score_bars, hits, pickup), voices, busy, pickup, report)
     show(slug, g, report, {"essentia hears": f["rhythm.bpm"]})
 
     return {
@@ -139,14 +182,8 @@ def read(path, slug):
             "danceability": round(f["rhythm.danceability"], 3),
             "onsets_per_second": round(f["rhythm.onset_rate"], 3),
         },
-        "bars": {
-            "intensity": per_bar_loud(loud, times, g),
-            **{k: [round(x, 3) for x in lanes[k]] for k in STEM_NAMES},
-            "brightness": [round(float(x), 3) for x in bright.ravel()],
-            "chord": chord,
-            "chord_sure": chord_sure,
-        },
-        "parts": parts(path, g, report, voices),
+        "bars": score_bars,
+        "parts": shaped,
         "beats": beats,
         "tension": pull,
         "releases": gone,
