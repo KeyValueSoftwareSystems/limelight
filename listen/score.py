@@ -14,7 +14,7 @@ from shape import shape
 from call import call
 from parts import curves, parts
 from pulse import pulse
-from moments import moments
+from moments import moments, weigh
 from phrase import phrases as sub_phrases
 from harmony import changes as chord_changes
 from harmony import chords as find_chords
@@ -206,9 +206,12 @@ def read(path, slug):
                        chroma, env, gone, pickup,
                        air=score_bars["air"], pace=score_bars["pace"],
                        width=score_bars["width"], tune=tune, report=report)
+    edges_at = {t["from"] - pickup + 1 for t in told}
     inner = sub_phrases(
         [(t["from"], t["to"], t["role"], t["nth"]) for t in told],
         score_bars, told_now, every, origin, pickup)
+    weigh(told_now, score_bars, edges_at,
+          {q["from_bar"] for q in inner}, pickup)
     if report is not None:
         report["phrases"] = len(inner)
 

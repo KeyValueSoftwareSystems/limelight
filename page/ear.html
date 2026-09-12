@@ -4,7 +4,7 @@
   --dim:#9aa3b8;--faint:#5c6478;--amb:#e8a33d;--ok:#5bb98c;--bad:#e0655f;--blu:#6fa8dc}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:13px/1.55 ui-sans-serif,system-ui,sans-serif;margin:0}
-.wrap{max-width:1100px;margin:0 auto;padding:16px 18px 80px}
+.wrap{max-width:none;margin:0;padding:14px 20px 80px}
 button,select{background:#182031;color:var(--ink);border:1px solid var(--line2);
   border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
 button:hover{border-color:#41506e}
@@ -22,6 +22,9 @@ button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c
 .part .tag{position:relative;padding:6px 5px;font:600 10px ui-monospace,monospace;
   text-shadow:0 1px 3px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .part.here{outline:2px solid var(--ok);outline-offset:-2px}
+.part{border-left:1px solid #39445c}
+.part:first-of-type{border-left:none}
+.beat{position:absolute;top:4px;width:2px;height:34px;z-index:4;pointer-events:none;border-radius:1px}
 #marks{width:100%;height:112px;display:block;margin-top:6px}
 #head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:3}
 #zoom{width:100%;height:86px;cursor:pointer;margin:0 0 6px;border:1px solid var(--line);border-radius:6px;
@@ -47,10 +50,10 @@ h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
 .subchip:hover{background:#1c212b}
 .sub{cursor:pointer}
 .sub:hover{filter:brightness(1.5)}
-.inside{flex-basis:100%;margin:6px 0 2px 8px;display:flex;flex-wrap:wrap;gap:4px}
+.inside{flex-basis:100%;margin:5px 0 2px 0;display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start}
 .chip{font:10px ui-monospace,monospace;border:1px solid;border-radius:3px;padding:1px 5px;opacity:.85}
 .tag{font:9px ui-monospace,monospace;color:#5c6478;text-transform:uppercase;letter-spacing:.08em;
-     min-width:58px;display:inline-block;padding-top:2px}
+     min-width:64px;display:inline-block;padding-top:2px;flex:0 0 auto}
 .chip b{opacity:.6;font-weight:400}
 .row{flex-wrap:wrap}
 </style>
@@ -141,7 +144,7 @@ function draw() {
     if (!(p.repeats_as in HUE)) HUE[p.repeats_as] = WHEEL[n++ % WHEEL.length];
 
   const map = $("map");
-  [...map.querySelectorAll(".part,.unmetered")].forEach(x => x.remove());
+  [...map.querySelectorAll(".part,.unmetered,.beat")].forEach(x => x.remove());
   const total = SCORE.song.length_s;
   for (const p of SCORE.parts || []) {
     const t0 = barTime(p.from_bar), t1 = Math.min(total, barTime(p.to_bar + 1));
@@ -158,6 +161,19 @@ function draw() {
     };
     map.appendChild(el);
   }
+  for (const m of SCORE.moments || []) {
+    if ((m.weight ?? 0) < 0.55) continue;
+    const t = barTime(m.bar) + (m.beat - 1) * (60 / SCORE.grid.bpm);
+    if (t < 0 || t > total) continue;
+    const el = document.createElement("div");
+    el.className = "beat";
+    el.style.left = `${(t/total)*100}%`;
+    el.style.background = KIND[m.is] || "#8b93a6";
+    el.style.opacity = 0.35 + 0.65 * (m.weight ?? 0);
+    el.title = `bar ${m.bar}.${m.beat} · ${m.is} ${m.what} · weight ${m.weight}`;
+    map.appendChild(el);
+  }
+
   const holds = SCORE.grid.holds_from_s;
   if (holds != null) {
     const sh = document.createElement("div");

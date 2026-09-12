@@ -43,21 +43,22 @@ def doing(now, was, ceiling, mid, opens, last, tail, here):
     wide, gone = now["adds"], now["drops"]
     rise, air, energy = now["rise"], now["air"], now["energy"]
     moved = wide + gone
+    drive = now["drive"]
     score = {
-        "intensifying": min(1.0, max(0.0, rise) / 0.22),
-        "easing": min(1.0, max(0.0, -rise) / 0.22),
+        "intensifying": min(1.0, max(0.0, drive) / 0.28),
+        "easing": min(1.0, max(0.0, -drive) / 0.28),
         "expanding": min(1.0, wide / 2.0) * 0.95,
         "thinning": min(1.0, gone / 2.0) * 0.95,
         "peaking": (0.95 * min(1.0, energy / max(ceiling, 1e-6))
                     if energy >= ceiling * 0.85 and abs(rise) < 0.18 else 0.0),
-        "sustaining": (max(0.0, 1.0 - abs(rise) / 0.18) * 0.70
-                       if energy > mid * 0.5 else 0.0),
+        "sustaining": (max(0.0, 1.0 - abs(drive) / 0.20) * 0.70
+                       if energy > mid * 0.5 and moved == 0 else 0.0),
         "establishing": 0.85 if was is None else 0.0,
-        "developing": 0.55 if now["turns"] and abs(rise) < 0.15 else 0.0,
+        "developing": 0.55 if now["turns"] and abs(drive) < 0.15 else 0.0,
         "suspending": (min(1.0, now["quiet_share"] / 0.30) * 0.9
                        if now["quiet_share"] > 0.12 else 0.0),
         "resolving": 0.8 if now["releases"] else 0.0,
-        "transitioning": (0.75 if last and moved and (rise > 0.08 or air > 0.12)
+        "transitioning": (0.75 if last and moved and (drive > 0.08 or air > 0.12)
                           else 0.0),
         "closing": 0.95 if tail and (energy < mid * 0.6 or rise < -0.15) else 0.0,
     }
@@ -103,6 +104,7 @@ def says(was, now, notes):
 def phrases(spans, bars, moments, every, origin, pickup):
     loud = lift(bars["intensity"])
     air = lift(bars.get("air") or bars["intensity"])
+    step = lift(bars.get("pace") or bars["intensity"])
     lane = {k: lift(bars[k]) for k in LANES}
     song_mid = float(np.median(loud))
 
@@ -132,9 +134,17 @@ def phrases(spans, bars, moments, every, origin, pickup):
             inside = [m for m in moments
                       if lo - pickup + 1 <= m["bar"] <= hi - pickup]
             airbit = air[lo:hi]
+            stepbit = step[lo:hi]
+            def slope(v):
+                if len(v) < 2:
+                    return 0.0
+                k = max(1, len(v) // 3)
+                return float(v[-k:].mean() - v[:k].mean())
+            climb = float(bit[-third:].mean() - bit[:third].mean())
             now = {
                 "energy": float(bit.mean()),
-                "rise": float(bit[-third:].mean() - bit[:third].mean()),
+                "rise": climb,
+                "drive": 0.45 * climb + 0.30 * slope(stepbit) + 0.25 * slope(airbit),
                 "air": float(airbit[-max(1, len(airbit) // 3):].mean()
                              - airbit[:max(1, len(airbit) // 3)].mean()),
                 "adds": len([k for k in playing if k not in (was or [])]),

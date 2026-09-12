@@ -368,6 +368,29 @@ def leading(found, spans, pickup, look=2):
     return list(best.values())
 
 
+def weigh(found, bars, edges, inner, pickup, look=2):
+    loud = lift(bars["intensity"])
+    seen = {}
+    for m in found:
+        seen[m["is"]] = seen.get(m["is"], 0) + 1
+    most = max(seen.values()) if seen else 1
+
+    for m in found:
+        at = m["bar"] - 1 + pickup
+        before = loud[max(0, at - look):at]
+        after = loud[at:at + look]
+        moved = (abs(float(after.mean()) - float(before.mean()))
+                 if len(before) and len(after) else 0.0)
+        rare = 1.0 - (seen.get(m["is"], 1) - 1) / max(most - 1, 1)
+        edge = 1.0 if m["bar"] in edges else (0.55 if m["bar"] in inner else 0.0)
+        m["weight"] = round(float(np.clip(
+            0.40 * min(1.0, moved / 0.45)
+            + 0.25 * rare
+            + 0.20 * edge
+            + 0.15 * m.get("sure", 0.0), 0.0, 1.0)), 3)
+    return found
+
+
 def moments(g, lanes, busy, bright, loud, chord, sure, spans, anchor,
             chroma, env, gone, pickup, air=None, pace=None, width=None,
             tune=None, report=None):
