@@ -4643,6 +4643,14 @@
     {
       "bar": 44,
       "beat": 1,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.584,
+      "for_beats": 3.11
+    },
+    {
+      "bar": 44,
+      "beat": 1,
       "is": "pause",
       "what": "bass",
       "sure": 0.986,
@@ -4754,6 +4762,14 @@
       "sure": 1.0
     },
     {
+      "bar": 60,
+      "beat": 4,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.792,
+      "for_beats": 4.22
+    },
+    {
       "bar": 61,
       "beat": 1,
       "is": "entrance",
@@ -4761,11 +4777,27 @@
       "sure": 1.0
     },
     {
+      "bar": 62,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 1.0,
+      "for_beats": 5.33
+    },
+    {
       "bar": 63,
       "beat": 1,
       "is": "change",
       "what": "harmony",
       "sure": 0.855
+    },
+    {
+      "bar": 64,
+      "beat": 4,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.796,
+      "for_beats": 4.25
     },
     {
       "bar": 65,
@@ -4781,6 +4813,30 @@
       "what": "voice",
       "sure": 0.718,
       "for_bars": 1
+    },
+    {
+      "bar": 68,
+      "beat": 4,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.904,
+      "for_beats": 4.82
+    },
+    {
+      "bar": 70,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.524,
+      "for_beats": 2.79
+    },
+    {
+      "bar": 74,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.456,
+      "for_beats": 2.43
     },
     {
       "bar": 75,
@@ -4837,6 +4893,14 @@
       "for_bars": 5
     },
     {
+      "bar": 76,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 1.0,
+      "for_beats": 8.77
+    },
+    {
       "bar": 77,
       "beat": 1,
       "is": "release",
@@ -4857,14 +4921,6 @@
       "is": "exit",
       "what": "drums",
       "sure": 0.379
-    },
-    {
-      "bar": 78,
-      "beat": 1,
-      "is": "highlight",
-      "what": "a held note",
-      "sure": 0.333,
-      "for_beats": 2.13
     },
     {
       "bar": 81,
@@ -4912,6 +4968,14 @@
       "is": "entrance",
       "what": "drums",
       "sure": 0.829
+    },
+    {
+      "bar": 84,
+      "beat": 1,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.852,
+      "for_beats": 4.54
     },
     {
       "bar": 84,

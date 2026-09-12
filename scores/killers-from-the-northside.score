@@ -2955,6 +2955,14 @@
     {
       "bar": 7,
       "beat": 1,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.988,
+      "for_beats": 3.95
+    },
+    {
+      "bar": 7,
+      "beat": 1,
       "is": "hook",
       "what": "the riff",
       "sure": 0.687
@@ -3046,11 +3054,11 @@
     },
     {
       "bar": 41,
-      "beat": 4,
+      "beat": 1,
       "is": "highlight",
-      "what": "a held note",
-      "sure": 0.333,
-      "for_beats": 1.6
+      "what": "voice sustained",
+      "sure": 0.856,
+      "for_beats": 3.42
     },
     {
       "bar": 42,

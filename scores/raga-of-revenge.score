@@ -2585,26 +2585,26 @@
     {
       "bar": 1,
       "beat": 1,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.328,
+      "for_beats": 1.64
+    },
+    {
+      "bar": 1,
+      "beat": 1,
       "is": "rise",
       "what": "everything",
       "sure": 0.334,
       "for_bars": 8
     },
     {
-      "bar": 2,
-      "beat": 2,
-      "is": "highlight",
-      "what": "a held note",
-      "sure": 0.487,
-      "for_beats": 2.92
-    },
-    {
       "bar": 3,
       "beat": 1,
       "is": "highlight",
-      "what": "a held note",
-      "sure": 0.403,
-      "for_beats": 2.42
+      "what": "voice sustained",
+      "sure": 0.708,
+      "for_beats": 3.54
     },
     {
       "bar": 3,
@@ -2660,6 +2660,14 @@
       "after_beats": 13
     },
     {
+      "bar": 8,
+      "beat": 4,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.86,
+      "for_beats": 4.3
+    },
+    {
       "bar": 9,
       "beat": 1,
       "is": "entrance",
@@ -2682,6 +2690,14 @@
       "for_bars": 1
     },
     {
+      "bar": 11,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 1.0,
+      "for_beats": 5.28
+    },
+    {
       "bar": 13,
       "beat": 1,
       "is": "hook",
@@ -2696,19 +2712,19 @@
       "sure": 1.0
     },
     {
+      "bar": 13,
+      "beat": 4,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 1.0,
+      "for_beats": 7.74
+    },
+    {
       "bar": 14,
       "beat": 1,
       "is": "change",
       "what": "texture",
       "sure": 0.755
-    },
-    {
-      "bar": 14,
-      "beat": 1,
-      "is": "highlight",
-      "what": "a held note",
-      "sure": 1.0,
-      "for_beats": 6.76
     },
     {
       "bar": 15,
@@ -2865,6 +2881,14 @@
       "into_bar": 24
     },
     {
+      "bar": 24,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.472,
+      "for_beats": 2.36
+    },
+    {
       "bar": 26,
       "beat": 1,
       "is": "fill",
@@ -2881,6 +2905,14 @@
     {
       "bar": 27,
       "beat": 1,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.484,
+      "for_beats": 2.42
+    },
+    {
+      "bar": 27,
+      "beat": 1,
       "is": "pause",
       "what": "bass",
       "sure": 0.574,
@@ -2893,6 +2925,14 @@
       "what": "voice",
       "sure": 0.331,
       "for_bars": 4
+    },
+    {
+      "bar": 29,
+      "beat": 4,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.744,
+      "for_beats": 3.72
     },
     {
       "bar": 31,
@@ -2934,6 +2974,14 @@
       "for_bars": 8
     },
     {
+      "bar": 32,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.448,
+      "for_beats": 2.24
+    },
+    {
       "bar": 34,
       "beat": 1,
       "is": "rise",
@@ -2942,12 +2990,28 @@
       "for_bars": 4
     },
     {
+      "bar": 34,
+      "beat": 4,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.864,
+      "for_beats": 4.32
+    },
+    {
       "bar": 35,
       "beat": 3,
       "is": "release",
       "what": "tension",
       "sure": 0.5,
       "after_beats": 15
+    },
+    {
+      "bar": 36,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 1.0,
+      "for_beats": 6.06
     },
     {
       "bar": 37,
@@ -3013,6 +3077,14 @@
       "for_bars": 7
     },
     {
+      "bar": 40,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.512,
+      "for_beats": 2.56
+    },
+    {
       "bar": 41,
       "beat": 1,
       "is": "change",
@@ -3028,12 +3100,28 @@
       "for_bars": 8
     },
     {
+      "bar": 48,
+      "beat": 4,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.364,
+      "for_beats": 1.82
+    },
+    {
       "bar": 49,
       "beat": 1,
       "is": "release",
       "what": "tension",
       "sure": 0.5,
       "after_beats": 5
+    },
+    {
+      "bar": 52,
+      "beat": 4,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.368,
+      "for_beats": 1.84
     },
     {
       "bar": 53,
@@ -3049,6 +3137,14 @@
       "is": "change",
       "what": "rhythm",
       "sure": 1.0
+    },
+    {
+      "bar": 54,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.296,
+      "for_beats": 1.48
     },
     {
       "bar": 55,
@@ -3112,12 +3208,12 @@
       "for_bars": 6
     },
     {
-      "bar": 56,
-      "beat": 4,
+      "bar": 57,
+      "beat": 1,
       "is": "highlight",
-      "what": "a held note",
-      "sure": 0.343,
-      "for_beats": 2.06
+      "what": "voice sustained",
+      "sure": 0.32,
+      "for_beats": 1.6
     },
     {
       "bar": 57,
@@ -3185,6 +3281,14 @@
       "is": "entrance",
       "what": "voice",
       "sure": 1.0
+    },
+    {
+      "bar": 62,
+      "beat": 2,
+      "is": "highlight",
+      "what": "voice sustained",
+      "sure": 0.88,
+      "for_beats": 4.4
     },
     {
       "bar": 63,

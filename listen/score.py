@@ -20,6 +20,7 @@ from harmony import chords as find_chords
 from harmony import per_bar as chords_per_bar
 from stems import NAMES as STEM_NAMES
 from stems import envelopes, per_bar
+from voice import clean as clean_voice
 
 
 CACHE = Path("work/heard")
@@ -135,6 +136,13 @@ def read(path, slug):
             report["moved_by_ear"] = shift
     bar_s = (60.0 / g["bpm"]) * g["beats_per_bar"]
     env = envelopes(path, slug)
+    sung = clean_voice(path, slug)
+    if sung is not None:
+        keep = min(len(sung), len(env["vocals"]))
+        lane = np.zeros_like(env["vocals"])
+        lane[:keep] = sung[:keep]
+        env["vocals"] = lane
+        report["voice_from"] = "roformer"
     lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"])
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
     busy, bright = curves(path, g)

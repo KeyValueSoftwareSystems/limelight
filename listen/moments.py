@@ -232,36 +232,38 @@ def again(chroma, spans, anchor, pickup, alike=0.90):
     return out
 
 
-def held(env, g, pickup, least=1.0):
+def held(env, g, pickup, least=0.7):
     v = np.asarray(env.get("vocals", []), dtype=float)
-    if not len(v):
+    if len(v) < RATE:
         return []
     top = float(np.percentile(v, 98)) or 1.0
     v = v / top
+    pad = 7
+    smooth = np.array([np.median(v[max(0, i - pad):i + pad + 1])
+                       for i in range(len(v))])
     beat_s = 60.0 / g["bpm"]
-    win = int(round(least * RATE))
-    out, i = [], 0
     per = g["beats_per_bar"]
-    while i < len(v) - win:
-        piece = v[i:i + win]
-        if piece.mean() > SURE:
-            wobble = float(piece.std() / (piece.mean() or 1.0))
-            j = i + win
-            while j < len(v) and v[j] > SURE * 0.8:
-                j += 1
-            span_s = (j - i) / RATE
-            if span_s >= least and wobble < 0.22:
-                t = g["first_beat_s"] + 0.0
-                at = i / RATE
-                step = (at - g["first_beat_s"]) / beat_s
-                idx = max(0, int(np.floor(step)))
+    floor = 0.40
+    out, i = [], 0
+    while i < len(smooth):
+        if smooth[i] < floor:
+            i += 1
+            continue
+        j = i
+        while j < len(smooth) and smooth[j] >= floor:
+            j += 1
+        span_s = (j - i) / RATE
+        if span_s >= least:
+            piece = smooth[i:j]
+            slope = float(np.abs(np.diff(piece)).mean()) if len(piece) > 1 else 1.0
+            if slope < 0.02:
+                idx = max(0, int(np.floor(
+                    (i / RATE - g["first_beat_s"]) / beat_s)))
                 out.append(say(idx // per + 1, idx % per + 1, "highlight",
-                               "a held note", min(1.0, span_s / 3.0),
+                               "voice sustained", min(1.0, span_s / 2.5),
                                for_beats=round(span_s / beat_s, 2)))
-            i = j
-        else:
-            i += win // 2
-    return out
+        i = j
+    return thin(out, 2)
 
 
 def leading(found, spans, pickup, look=2):
