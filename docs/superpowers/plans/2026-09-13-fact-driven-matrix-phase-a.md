@@ -633,7 +633,7 @@ git commit -m "lights: re-enumerate the cache with per-family affinity (form tab
 
 **Interfaces:**
 - Consumes: `Mu.subsectionsOf`, `Mu.momentsOf`, `Mu.perBar`, `Mu.lanesOf`, `Mu.stemLanesOf` (musical.js); `lanesBlock(score)` (now also `bass`); `harmonyBlock(score)`; `contextsFor`.
-- Produces: `factsBlock(score, sections, contexts, lanes, harmony, subs, moments, bpb) -> { from_bar: number, vectors: (Vector|null)[] }` with one entry per bar from `from_bar` to the last section's end; `plan.facts` set to it when the score has sections. Each vector is `{ form, doing, presence?: string[], moment?: string[], texture?: string[], harmony?: string[] }`; `presence`, `texture`, `harmony` are present only when the score has the lanes/chords; `doing` is always present (`"holding"` when no subsection says otherwise); `moment` only on bars where a moment lands.
+- Produces: `factsBlock(score, sections, contexts, lanes, harmony, subs, moments, bpb) -> { from_bar: number, vectors: (Vector|null)[] }` with one entry per bar from `from_bar` to the last section's end; `plan.facts` set to it when the score has sections. Each vector is `{ form, doing, presence?: string[], moment?: string[], texture?: string[], harmony?: string[] }`; `presence`, `texture`, `harmony` are present only when the score has the lanes/chords; `doing` is present only when the score has a subsection layer at all (`"holding"` where no subsection covers the bar or it says nothing) — a score without subsections carries no `doing`, so its vectors are form-only and its picks equal the form string's (Task 7 review ruling); `moment` only on bars where a moment lands.
 
 - [ ] **Step 1: Write the failing tests** (append before the summary loop in `arranger.test.js`; `MINI`, `SCORE`, `EN`, `format` and the levels loader are already in scope from earlier blocks)
 
@@ -644,7 +644,8 @@ git commit -m "lights: re-enumerate the cache with per-family affinity (form tab
   const F = p.facts;
   ok("the plan carries facts anchored at the first bar", F && F.from_bar === 0 && Array.isArray(F.vectors) && F.vectors.length === 20, F && `${F.from_bar} x ${F.vectors.length}`);
   const v4 = F.vectors[4], v9 = F.vectors[9], v0 = F.vectors[0];
-  ok("form comes from the section's context", v0.form === "intro" && v4.form === "drop" && F.vectors[16].form === "outro");
+  /* MINI's one high-energy section is also its last, so contextsFor labels it final_drop */
+  ok("form comes from the section's context", v0.form === "intro" && v4.form === "final_drop" && F.vectors[16].form === "outro");
   ok("doing comes from the subsection covering the bar", v4.doing === "expanding" && F.vectors[8].doing === "easing" && F.vectors[12].doing === "peaking");
   ok("presence reads the stem lanes against the 0.3 threshold",
      v4.presence.includes("drums:in") && v4.presence.includes("bass:in") && v4.presence.includes("vocals:out") && v9.presence.includes("drums:out"), JSON.stringify(v9.presence));
@@ -804,12 +805,13 @@ git commit -m "arranger: one context vector per bar (plan.facts) from the score'
 
   const p = plan(MINI, EN, 42);
   const base = p.assignments.find(a => a.layer === "par" && a.seq_id && a.from.bar === 4 && !a.variation);
-  ok("a base look carries the vector it was chosen with", base && base.facts && base.facts.form === "drop" && base.facts.doing && Array.isArray(base.facts.presence), JSON.stringify(base && base.facts));
+  /* MINI's one high-energy section is also its last, so its context is final_drop */
+  ok("a base look carries the vector it was chosen with", base && base.facts && base.facts.form === "final_drop" && base.facts.doing && Array.isArray(base.facts.presence), JSON.stringify(base && base.facts));
   const vari = p.assignments.find(a => a.layer === "par" && a.variation && a.from.bar === 8);
-  ok("a variation carries its own subsection's vector", vari && vari.facts.doing === "easing" && vari.facts.form === "drop", JSON.stringify(vari && vari.facts));
+  ok("a variation carries its own subsection's vector", vari && vari.facts.doing === "easing" && vari.facts.form === "final_drop", JSON.stringify(vari && vari.facts));
   ok("variations no longer step a context (no vcontext)", p.assignments.every(a => a.vcontext === undefined));
   const head = p.assignments.find(a => a.layer === "head" && a.from.bar === 4);
-  ok("the head look carries the section vector too", head && head.facts && head.facts.form === "drop");
+  ok("the head look carries the section vector too", head && head.facts && head.facts.form === "final_drop");
   ok("a plain score's looks carry form-and-holding vectors", plan(SCORE, EN, 42).assignments.filter(a => a.seq_id).every(a => a.facts && a.facts.form && a.facts.doing === "holding"));
   ok("no clashes with vector picks", clashes(p) === 0, `${clashes(p)}`);
   ok("the rich plan is still deterministic", JSON.stringify(plan(MINI, EN, 42)) === JSON.stringify(p));

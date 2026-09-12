@@ -106,7 +106,10 @@ A **context** is no longer a column name. It is a small vector of facts for one 
 Rules:
 
 - `form` is always present. Every other family may be absent (the score did not say)
-  or a list of facts.
+  or a list of facts. `doing` is present only when the score carries a subsection
+  layer at all (`holding` where no subsection covers the bar or it says nothing); a
+  score without subsections stays silent on it, exactly like presence, texture and
+  harmony, so its vectors carry only `form` and its picks equal the form string's.
 - A **bare string** is still accepted everywhere a vector is (`candidates("drop")`), and
   means `{ form: "drop" }`. This is the backward-compatible path and the path scores
   without richer fields take.
@@ -114,7 +117,9 @@ Rules:
   the plan as `plan.facts` (an anchored per-bar array) so the panel timeline and the
   CLI can show *why* a look was chosen.
 - For a **section's base look**, the vector is the section's form plus the facts that
-  hold for the majority of its bars. For a **subsection variation**, it is that
+  hold for a strict majority of its bars; a family with no majority word (a drop
+  whose phrases are expanding, easing and peaking in equal measure) is omitted, so
+  the matrix treats it as neutral rather than crowning a tied word. For a **subsection variation**, it is that
   subsection's own vector. For a **moment**, it is the moment fact plus the bar's
   facts.
 
@@ -139,7 +144,10 @@ Semantics, fixed by this spec:
 - A family the sequence does **not mention** is neutral: it does not enter the score.
 - Within a mentioned family, a fact the vector carries that the sequence scores **0**
   is a **veto**: the cell is 0. A fact the vector carries that the sequence does not
-  list scores the family's `_default` if given, else 0.5.
+  list scores the family's `_default` if given, else 0.5 — except in the **form**
+  family: a form the table does not name is a veto, and `_default` does not apply to
+  form. A sequence with no form table scores 0 on every vector (the form table is
+  required and complete).
 - Values are 0..1, validated like suitability today.
 
 New gesture fields, all optional, all rendered by `frame.js`:
