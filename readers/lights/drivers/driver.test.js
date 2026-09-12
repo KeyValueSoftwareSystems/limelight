@@ -118,6 +118,31 @@ const HEAD = {
      par[0] === 255 && par[1] === 0 && par[2] === 0 && par[3] === 0, JSON.stringify(par));
 }
 
+
+/* ---- aim: the wall is the anchor, the whole travel is the range -----------------
+   A profile may declare `aim` as three DMX anchors [lo, centre, hi] per axis: 0 maps
+   to lo, 0.5 to the CENTRE (the wall, where gestures assume "forward" is) and 1 to
+   hi, piecewise-linear. So a gesture's 0.5 lands on the wall while 0 and 1 still
+   reach the ends of the head's 540/180-degree travel. Two anchors [lo, hi] are a
+   plain window. Without `aim`, 0..1 is the whole travel. Park bypasses it. */
+{
+  const AIMED = { ...HEAD, aim: { pan: [0, 169, 255], tilt: [0, 40, 255] }, park: { pan: 169 / 255, tilt: 127 / 255, level: 0 } };
+  const d = Driver(AIMED);
+  const c = d.render({ pan: 0.5, tilt: 0.5 });
+  ok("aim: 0.5 is the wall on both axes", c[0] === 169 && c[2] === 40, `pan ${c[0]} tilt ${c[2]}`);
+  const lo = d.render({ pan: 0, tilt: 0 }), hi = d.render({ pan: 1, tilt: 1 });
+  ok("aim: 0 and 1 still reach the full travel", lo[0] === 0 && lo[2] === 0 && hi[0] === 255 && hi[2] === 255, `${lo[0]}/${lo[2]} .. ${hi[0]}/${hi[2]}`);
+  const q = d.render({ pan: 0.25, tilt: 0.75 });
+  ok("aim: the halves are linear about the centre (pan .25 -> 84.5, tilt .75 -> 147.5)",
+     q[0] === 84 && q[1] === 128 && q[2] === 147 && q[3] === 128, `${q.slice(0, 4)}`);
+  const p = d.park();
+  ok("aim: park bypasses the anchors (straight up, dark)", p[2] === 127 && p[0] === 169 && p[5] === 0, `pan ${p[0]} tilt ${p[2]}`);
+  const WIN = { ...HEAD, aim: { pan: [148, 190], tilt: [40, 92] } };
+  const w = Driver(WIN).render({ pan: 0.5, tilt: 0 });
+  ok("a two-anchor aim is still a plain window", w[0] === 169 && w[2] === 40, `pan ${w[0]} tilt ${w[2]}`);
+  ok("no aim: 0..1 is still the full travel", Driver(HEAD).render({ tilt: 0.5 })[2] === 128);
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

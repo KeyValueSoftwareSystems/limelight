@@ -23,6 +23,8 @@ const SCORE = {
   energy: { per: "bar", from_bar: 0, values: [
     0.05, 0.05, 0.06, 0.05, 0.07, 0.06, 0.05, 0.05, 0.06,
     0.90, 0.92, 0.95, 0.90, 0.93, 0.88, 0.90, 0.95, 0.90] },
+  moments: [{ bar: 9, beat: 1, is: "entrance", what: "drums", sure: 1, weight: 0.9 },
+            { bar: 13, beat: 3, is: "pause", what: "everything but bass", sure: 0.8, for_beats: 4, weight: 0.5 }],
 };
 
 const S = Session(SCORE, { now: () => 0 });
@@ -88,6 +90,46 @@ ok("raw hub score bakes the drop at the same time as the formatted one",
 ok("raw and formatted scores bake the same phase starts",
    JSON.stringify(rawBaked.phases.map(p => p.start)) === JSON.stringify(baked.phases.map(p => p.start)),
    `raw ${JSON.stringify(rawBaked.phases.map(p => p.start))}`);
+
+/* The timeline carries the moments and the looks in seconds, so the panel can
+   show where the show punctuates and where a section changes look inside. */
+const mo = baked.moments || [];
+ok("the timeline lists the score's moments", mo.length === 2, `${mo.length}`);
+const ent = mo.find(m => m.kind === "entrance");
+ok("a moment lands at its exact bar/beat on the wall clock",
+   ent && near(ent.t, wantAt(9)) && ent.bar === 9 && ent.beat === 1 && ent.weight === 0.9, JSON.stringify(ent));
+const pz = mo.find(m => m.kind === "pause");
+ok("a spanning moment carries its end in seconds", pz && near(pz.t, wantAt(13) + 2 * 60 / SCORE.grid.bpm) && near(pz.end, pz.t + 4 * 60 / SCORE.grid.bpm), JSON.stringify(pz));
+const looks = baked.looks || [];
+ok("the timeline lists every look (sequence assignment) in seconds",
+   looks.length >= 4 && looks.every(l => typeof l.start === "number" && typeof l.end === "number" && l.seq_id && l.layer),
+   JSON.stringify(looks.slice(0, 2)));
+ok("a look's start matches its section's bar on the wall clock",
+   looks.some(l => l.layer === "par" && near(l.start, wantAt(9))));
+
+/* The wire holds the head's pose whenever nothing drives it (a gap between looks,
+   a dark beat): a bare intent must not let the driver default pan/tilt to 0 and
+   send the head lurching across the room on every blackout. */
+{
+  const lightsOut = path.join(tmp, "baketest.lights.json");
+  execFileSync("node", [path.join(__dirname, "bake.js"), scoreFile, "1", "--lights", lightsOut], { stdio: "pipe" });
+  const L = JSON.parse(fs.readFileSync(lightsOut, "utf8"));
+  const pan = L.frames.map(f => f[28]), tilt = L.frames.map(f => f[30]);   // head @29: pan, tilt coarse
+  const ent = L.moments.find(m => m.kind === "entrance");
+  const beat = 60 / SCORE.grid.bpm, k = Math.round(ent.t * L.fps);
+  /* the beat before the entrance is a blackout: the head keeps gliding along its
+     own path in the dark (the override keeps its pose), and nothing may lurch --
+     0 is a real pose now (the end of travel), so the test is continuity, not "never 0" */
+  const k0 = Math.round((ent.t - beat) * L.fps) + 2, dark = L.frames.slice(k0, k);
+  const win = L.frames.slice(k0 - 5, k + 10);
+  const jump = Math.max(...win.slice(1).map((f, i) => Math.max(Math.abs(f[28] - win[i][28]), Math.abs(f[30] - win[i][30]))));
+  ok("through the blackout beat and into the blast the head never lurches (7 DMX per frame at most)", dark.length > 5 && jump <= 7, `max step ${jump} over ${win.length} frames`);
+  ok("and the blackout is dark", dark.every(f => f[33] === 0));
+  /* on the blast (weight .9) the head heads for the wall centre (169/40), never for 0/0 */
+  const before = dark[0], on = L.frames[k + 3];
+  ok("on the heavy entrance the head moves toward the wall centre",
+     Math.abs(on[28] - 169) <= Math.abs(before[28] - 169) && Math.abs(on[30] - 40) <= Math.abs(before[30] - 40), `pan ${before[28]}->${on[28]} tilt ${before[30]}->${on[30]}`);
+}
 
 fs.rmSync(tmp, { recursive: true, force: true });
 

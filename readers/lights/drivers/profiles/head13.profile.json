@@ -147,6 +147,19 @@
   "off": 0,
   "six": 100
  },
+ "aim": {
+  "pan": [
+   0,
+   169,
+   255
+  ],
+  "tilt": [
+   0,
+   40,
+   255
+  ],
+  "note": "anchors [lo, centre, hi]: 0.5 is the wall spot, 0/1 the ends of travel. Park bypasses this."
+ },
  "park": {
   "pan": 0.6627450980392157,
   "tilt": 0.4980392156862745,

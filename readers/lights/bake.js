@@ -62,40 +62,34 @@ const phases = (score.sections || []).map((sec, i) =>
   ({ start: secOf(sec.from.bar), end: secOf(sec.to.bar), phase: p.contexts[i] }));
 const duration = (score.song && score.song.length_s) || +to.toFixed(3);
 
+/* the moments (seconds, exact bar/beat kept) and the looks (every sequence
+   assignment, in seconds), so the panel can show where the show punctuates and
+   where a section changes look inside itself */
+const beatSec = 60 / score.grid.bpm;
+const secAt = q => +S.secondsAt(q.bar + shift, q.beat || 1).toFixed(3);
+const moments = require("./musical.js").momentsOf(score).map(m => ({
+  t: secAt(m), bar: m.bar, beat: m.beat, kind: m.kind, what: m.what, weight: m.weight,
+  ...(m.for_beats ? { end: +(secAt(m) + m.for_beats * beatSec).toFixed(3), for_beats: m.for_beats } : {}),
+}));
+const looks = p.assignments.filter(a => a.seq_id).map(a => ({
+  start: secAt(a.from), end: secAt(a.to), bar: a.from.bar, to_bar: a.to.bar, seq_id: a.seq_id, layer: a.layer,
+  section: a.section || null, context: a.context || null,
+  ...(a.variation ? { variation: true, doing: a.doing || null } : {}),
+}));
+
 /* --lights: emit the other agent's .lights.json (41-ch DMX frames), so their copied
    server/transport/audio_out play OUR show. Mapping goes through OUR drivers (same
-   channel truth as rig.py); gamma 1.6 on the intensity channels; pan/tilt slew-limited. */
+   channel truth as rig.py) via wire.js: gamma 1.6 on the intensity channels, the
+   head's pose slew-limited as one 16-bit value and held when undriven. */
 const lightsOut = opt("--lights", null);
 if (lightsOut) {
-  const drivers = require("./drivers/index.js");
-  const W = 41, addrOf = {};
-  for (const f of layout.fixtures) addrOf[f.id] = f.address;
-  const gammaIdx = new Set();
-  for (const f of layout.fixtures) {
-    if (f.type === "par7") { const a = f.address; gammaIdx.add(a); gammaIdx.add(a + 1); gammaIdx.add(a + 2); }
-    if (f.type === "head13") gammaIdx.add(f.address + 4);   // head dimmer channel
-  }
-  const gamma = v => Math.round(255 * Math.pow(Math.max(0, Math.min(255, v)) / 255, 1.6));
-  const frames = ticks.map(tk => {
-    const f = new Array(W).fill(0);
-    for (const fx of tk.fixtures) {
-      const slice = drivers.forType(fx.type).render(fx.intent || {});
-      const base = addrOf[fx.id] - 1;
-      for (let k = 0; k < slice.length && base + k < W; k++) f[base + k] = slice[k];
-    }
-    for (const idx of gammaIdx) f[idx] = gamma(f[idx] || 0);
-    return f;
-  });
-  const head = layout.fixtures.find(f => f.type === "head13");
-  if (head) { const pi = head.address - 1, ti = head.address + 1; let lp = 169, lt = 127;
-    for (const f of frames) {
-      lp += Math.max(-7, Math.min(7, f[pi] - lp)); f[pi] = lp;
-      lt += Math.max(-7, Math.min(7, f[ti] - lt)); f[ti] = lt;
-    } }
+  /* intents -> 41-ch frames through the drivers, with the display gamma and the
+     head's 16-bit slew/hold, all in wire.js (shared with preview.js) */
+  const frames = require("./wire.js").toLightsFrames(ticks, layout);
   fs.writeFileSync(lightsOut, JSON.stringify({
     rig: "arc4-head", style: "limelight", fps, duration, tempo: score.grid.bpm,
     source: (score.score || "song") + ".wav", wav: (score.score || "song") + ".wav",
-    beats, downbeats, sections: phases.map(x => x.start), phases, frames,
+    beats, downbeats, sections: phases.map(x => x.start), phases, moments, looks, frames,
   }));
   console.log(`baked ${frames.length} lights frames (41ch @ ${fps}fps, seed ${seed}) -> ${lightsOut}`);
   process.exit(0);
@@ -105,7 +99,7 @@ const out = opt("--out", path.join(
   process.env.SCRATCH || "/tmp/claude-1001/-home-alnas-Documents-Code-KeyCode-2026/49a4d46d-ce2c-4667-a443-9aef992651b0/scratchpad",
   (score.score || "song") + ".frames.json"));
 fs.writeFileSync(out, JSON.stringify({
-  score: score.score, seed, fps, from, to: +to.toFixed(3), count: ticks.length, duration, beats, downbeats, phases,
+  score: score.score, seed, fps, from, to: +to.toFixed(3), count: ticks.length, duration, beats, downbeats, phases, moments, looks,
   fixtures: (layout.fixtures || []).map(f => ({ id: f.id, type: f.type, address: f.address, universe: f.universe })),
   ticks,
 }));

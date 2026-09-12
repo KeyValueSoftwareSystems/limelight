@@ -32,9 +32,18 @@ function Driver(profile) {
   const base = () => chans.map(c => (c.default == null ? 0 : c.default));
   const lockZeros = f => { (idx.keep_zero || []).forEach(i => { f[i] = 0; }); return f; };
 
-  /* intent -> a channel slice of `footprint` values */
-  function render(intent) {
+  /* the stage's AIM in DMX, when the profile declares one. Three anchors
+     [lo, centre, hi] per axis map 0 -> lo, 0.5 -> centre, 1 -> hi piecewise, so a
+     gesture's "forward" (0.5) is the wall while 0 and 1 still reach the ends of the
+     head's full travel; two anchors [lo, hi] are a plain window. On this rig tilt 127
+     is straight up, so without an aim 0.5 over the whole travel is the ceiling.
+     Park is a device pose and bypasses it. */
+  const aim = profile.aim || null;
+
+  /* intent -> a channel slice of `footprint` values; opts.raw skips the aim window */
+  function render(intent, opts) {
     intent = intent || {};
+    const win = (opts && opts.raw) ? null : aim;
     const f = base();
     const lvl = intent.level == null ? 1 : intent.level;
 
@@ -60,8 +69,8 @@ function Driver(profile) {
     if (intent.dim != null && has("master")) f[first("master")] = clamp255(intent.dim);
     if (intent.strobe != null && has("strobe")) f[first("strobe")] = clamp255(255 * intent.strobe);
     if (intent.speed != null && has("speed")) f[first("speed")] = clamp255(255 * intent.speed);
-    if (intent.pan != null && has("pan")) set16(f, "pan", "pan_fine", intent.pan);
-    if (intent.tilt != null && has("tilt")) set16(f, "tilt", "tilt_fine", intent.tilt);
+    if (intent.pan != null && has("pan")) set16(f, "pan", "pan_fine", intent.pan, win && win.pan);
+    if (intent.tilt != null && has("tilt")) set16(f, "tilt", "tilt_fine", intent.tilt, win && win.tilt);
 
     if (intent.gobo != null && has("gobo")) {
       const g = (profile.gobo && typeof intent.gobo === "string") ? profile.gobo[intent.gobo] : intent.gobo;
@@ -81,9 +90,21 @@ function Driver(profile) {
   }
 
   /* normalized 0..1 -> a 16-bit value split across coarse + fine, or 8-bit if the
-     device has no fine channel. */
-  function set16(f, coarseRole, fineRole, n) {
+     device has no fine channel. With a window [lo, hi] (DMX), 0..1 spans the window:
+     the coarse channel is the whole DMX step, the fine one the remainder. */
+  function set16(f, coarseRole, fineRole, n, window) {
     const nn = Math.max(0, Math.min(1, n));
+    if (Array.isArray(window) && (window.length === 2 || window.length === 3)) {
+      const raw = window.length === 3
+        ? (nn <= 0.5 ? window[0] + (nn / 0.5) * (window[1] - window[0])
+                     : window[1] + ((nn - 0.5) / 0.5) * (window[2] - window[1]))
+        : window[0] + nn * (window[1] - window[0]);
+      const dmx = Math.max(0, Math.min(255, raw));
+      const coarse = Math.floor(dmx + 1e-9);
+      f[first(coarseRole)] = coarse;
+      if (has(fineRole)) f[first(fineRole)] = clamp255(255 * (dmx - coarse));
+      return;
+    }
     if (has(fineRole)) {
       const v = Math.round(nn * 65535);
       f[first(coarseRole)] = (v >> 8) & 255;
@@ -95,7 +116,7 @@ function Driver(profile) {
 
   /* the safe frame: the device's declared park intent (dimmer dark), full-footprint,
      locked channels zeroed. Never all-zero for a device with an on-by-default channel. */
-  function park() { return render(profile.park || { level: 0 }); }
+  function park() { return render(profile.park || { level: 0 }, { raw: true }); }
 
   return { can, footprint, profile, render, park };
 }

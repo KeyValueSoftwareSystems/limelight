@@ -40,8 +40,14 @@ function shape(raw) {
 
 function load(file) {
   /* Default to the live score. A copy kept beside the protocol went stale
-     the first time the pipeline changed, and the reader read the stale one. */
-  const at = file || path.join(__dirname, "..", "..", "scores", "levels.score");
+     the first time the pipeline changed, and the reader read the stale one.
+     The panel imports scores into its own scores/ folder, so look there when
+     the repo-root copy is absent. */
+  const candidates = file ? [file] : [
+    path.join(__dirname, "..", "..", "scores", "levels.score"),
+    path.join(__dirname, "panel", "scores", "levels.score"),
+  ];
+  const at = candidates.find(c => fs.existsSync(c)) || candidates[0];
   return shape(JSON.parse(fs.readFileSync(at, "utf8")));
 }
 
