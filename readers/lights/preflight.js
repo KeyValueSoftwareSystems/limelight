@@ -158,9 +158,9 @@ function validateAffinity(aff) {
   if (!aff || typeof aff !== "object") return bad("missing affinity");
   if (!aff.form || typeof aff.form !== "object") return bad("affinity.form missing");
   for (const fam of Object.keys(aff)) {
-    if (!FACTS[fam]) return bad("unknown affinity family `" + fam + "`; allowed: " + FAMILIES.join(", "));
+    if (!FAMILIES.includes(fam)) return bad("unknown affinity family `" + fam + "`; allowed: " + FAMILIES.join(", "));
     const table = aff[fam];
-    if (!table || typeof table !== "object") return bad("affinity." + fam + " is not an object");
+    if (!table || typeof table !== "object" || Array.isArray(table)) return bad("affinity." + fam + " is not an object");
     for (const f of Object.keys(table)) {
       if (f !== "_default" && !FACTS[fam].includes(f))
         return bad("unknown fact `" + f + "` in family `" + fam + "`; allowed: " + FACTS[fam].join(", "));
@@ -232,10 +232,10 @@ function enumerate(layout, options) {
     const v = validateSequence(seq, layout);
     if (!v.ok) { rejected++; continue; }
     const row = {};
-    for (const ctx of CONTEXTS) row[ctx] = gate(seq.suitability[ctx]);
+    for (const ctx of CONTEXTS) row[ctx] = gate(affinityOf(seq).form[ctx]);
     matrix[seq.id] = row;
     sequences.push({ id: seq.id, kind: seq.kind, boldness: seq.boldness, source: "llm",
-      fit: +Math.max(...CONTEXTS.map(c => seq.suitability[c])).toFixed(4),
+      fit: +Math.max(...CONTEXTS.map(c => affinityOf(seq).form[c])).toFixed(4),
       occupies: seq.occupies || [],
       ...(Array.isArray(seq.parts) ? { parts: seq.parts.map(p => p && p.seq).filter(Boolean) } : {}) });
   }

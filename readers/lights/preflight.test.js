@@ -207,6 +207,27 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
   ok("an affinity without form is rejected", !validateSequence({ ...base, affinity: { doing: { peaking: 1 } } }, RIG).ok);
   ok("neither affinity nor suitability is rejected", !validateSequence(base, RIG).ok);
   ok("validateAffinity is exported for generate.py's retry loop", validateAffinity({ form }).ok && !validateAffinity({ form, doing: { nope: 1 } }).ok);
+  const protoFamily = validateAffinity({ form, constructor: { peaking: 0.5 } });
+  ok("a family named after an Object.prototype member is rejected, not thrown",
+     !protoFamily.ok && /constructor/.test(protoFamily.reason), protoFamily.reason);
+  ok("a non-object (array) family table is rejected, not thrown",
+     !validateAffinity({ form, doing: [0.5] }).ok);
+}
+
+/* ---- affinity: enumerate's palette merge must not crash on affinity-only seqs -- */
+{
+  const affSeq = { id: "x_aff", kind: "individual", boldness: "ambient",
+    requires: { groups: ["all_pars"], caps: ["colour", "level"] },
+    occupies: ["pars:colour", "pars:level"],
+    affinity: { form: { intro: 0.9, verse: 0.3, break: 0.5, build: 0, drop: 0, outro: 0.9, silence: 0.5, final_drop: 0 },
+                doing: { peaking: 0.8 } } };
+  let threw = null, e = null;
+  try { e = enumerate(RIG, { palette: [affSeq] }); } catch (err) { threw = err; }
+  ok("enumerate does not throw on an affinity-only (no suitability) palette sequence",
+     !threw, threw && threw.message);
+  ok("its matrix row equals its affinity.form, gated as before",
+     !!e && e.matrix.x_aff && e.matrix.x_aff.intro === 0.9 && e.matrix.x_aff.drop === 0,
+     e && JSON.stringify(e.matrix.x_aff));
 }
 
 for (const [pass, name, detail] of out)
