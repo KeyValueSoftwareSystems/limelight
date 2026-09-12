@@ -42,7 +42,7 @@ button.no{border-color:#6b3330} button.no.on{background:var(--bad);color:#2a0e0c
 #head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:3}
 #zoom{width:100%;height:86px;cursor:pointer;margin:0 0 6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
-#tune{width:100%;height:86px;cursor:pointer;margin-top:6px;border:1px solid var(--line);border-radius:6px;
+#tune{width:100%;height:92px;cursor:pointer;margin-top:6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
 #lanes{width:100%;height:104px;margin-top:6px;border:1px solid var(--line);border-radius:6px;
   background:#05070b;display:block}
@@ -170,19 +170,11 @@ function draw() {
     el.style.left = `${(t0/total)*100}%`;
     el.style.width = `${((t1-t0)/total)*100}%`;
     const c = HUE[p.repeats_as];
-    const odd = tuneOdd(p);
     el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness??.5)*100)}%"></div>
-      <div class="tag" style="color:${c}">${p.role ? p.role.toUpperCase() : p.repeats_as}</div>
-      <div class="sung${odd ? "" : " quiet"}"
-        title="${partTune(p)} \u00b7 click to hear the tune itself"
-        >${odd}</div>`;
+      <div class="tag" style="color:${c}">${p.role ? p.role.toUpperCase() : p.repeats_as}</div>`;
     el.onclick = ev => {
       const r = map.getBoundingClientRect();
       play(((ev.clientX - r.left) / r.width) * total);
-    };
-    el.querySelector(".sung").onclick = ev => {
-      ev.stopPropagation();
-      hearTune(p.from_bar, p.to_bar);
     };
     map.appendChild(el);
   }
@@ -383,10 +375,10 @@ const WINDOW = 8.0;
 function zoom() {
   const c = $("zoom"), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
   if (c.width !== Math.round(r.width*dpr)) {
-    c.width = Math.round(r.width*dpr); c.height = Math.round(86*dpr);
+    c.width = Math.round(r.width*dpr); c.height = Math.round(92*dpr);
   }
   const g = c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
-  g.clearRect(0,0,r.width,86);
+  g.clearRect(0,0,r.width,92);
   if (!SCORE) return;
   const t = aud.currentTime, a = t - WINDOW/2, b = t + WINDOW/2;
   const X = s => ((s - a)/WINDOW)*r.width;
@@ -501,7 +493,7 @@ function tune() {
   const lo = Math.floor(Math.min(...seen) - 1);
   const hi = Math.ceil(Math.max(...seen) + 1);
   const span = Math.max(8, hi - lo), beat = 60 / SCORE.grid.bpm;
-  const top = 20, foot = 74, tall = foot - top;
+  const top = 30, foot = 78, tall = foot - top;
   const Y = p => foot - ((p - lo)/span)*tall;
   for (let p = Math.ceil(lo/12)*12; p <= hi; p += 12) {
     g.strokeStyle = "#1a212e"; g.lineWidth = 1;
@@ -532,6 +524,24 @@ function tune() {
     g.fillRect(x, Y(n.pitch) - 1.6, w, 3.2);
   }
   g.globalAlpha = 1;
+  const shelf = [];
+  g.font = "9px ui-monospace,monospace";
+  for (const h of THIT) {
+    const m = h.m;
+    const words = m.again_of != null ? `tune from bar ${m.again_of}`
+                : m.notes ? `${m.notes} notes on one pitch`
+                : m.what || "a hook";
+    const tw = g.measureText(words).width;
+    let lane = 0;
+    while (shelf[lane] != null && shelf[lane] > h.x0) lane++;
+    shelf[lane] = h.x0 + tw + 10;
+    const ly = 12 + (lane % 2) * 9;
+    g.strokeStyle = "#c8a2ff"; g.globalAlpha = .3; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(h.x0, ly + 2); g.lineTo(h.x0, top); g.stroke();
+    g.globalAlpha = 1;
+    g.fillStyle = "#c8a2ff";
+    g.fillText(words, h.x0 + 3, ly);
+  }
   g.font = "8px ui-monospace,monospace";
   g.fillStyle = STEM.vocals || "#5bb98c";
   g.fillText("green = voice", 6, 26);
