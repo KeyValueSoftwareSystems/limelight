@@ -332,7 +332,8 @@
       }
       $('gain').value = status.gain; $('gainval').textContent = `gain ${status.gain.toFixed(2)}`;
       if (Math.round(status.offset_ms) !== offset) applyOffset(status.offset_ms, false);
-      $('srv').textContent = `${status.fps} fps · ${status.playing ? 'playing' : 'holding'}`;
+      $('srv').textContent = `${status.fps} fps · ${status.playing ? 'playing' : 'holding'}`
+        + (status.clock ? ` · ${status.clock} clock${status.audio_backend ? ' (' + status.audio_backend + ')' : ''}` : '');
       $('analyzing').textContent = status.analyzing ? `analysing ${status.analyzing}…` : '';
       $('analyze').disabled = !!status.analyzing;
       if (status.analyze_log) $('alog').textContent = status.analyze_log.split('\n').slice(-3).join('\n');

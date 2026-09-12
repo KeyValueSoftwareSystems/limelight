@@ -19,6 +19,23 @@ experimentation/music_sync/.venv/bin/python readers/lights/panel/server.py \
 Drop `--no-net` (and coordinate single-sender on universe 0 first) to drive the real
 rig. `--gain`, `--offset-ms`, `--gateway`, `--universe` are as in the original.
 
+## The clock (why sync is honest now)
+
+The transport does not run a clock of its own; it hands the audio device to
+`protocol/clock.py` and reads the position back (see `protocol/clock.md`). Two paths:
+
+- **`sounddevice` installed** → `SoundDeviceOutput` + `MeasuredClock`: the position
+  is *measured* from frames actually delivered to the speaker, minus stream latency.
+  No start-up head start, and no slide across a song. `--offset-ms` then means only
+  the lamp + cable delay, which really is constant. **Install `sounddevice` for this.**
+- **no `sounddevice`** → pw-play + a counting clock (the old behaviour): a fallback
+  that still needs a hand-tuned `--offset-ms` and cannot beat tempo slide.
+
+`readers/lights/panel/transport.test.py` runs the clock contract's `conformance()`
+against the panel's clock; the measured path answers +0 ms on all three failures a
+counting clock has. `readers/lights/synccheck.py` (with `synccheck.test.py` in the
+suite) checks a baked show against its audio and fails if the two slide apart.
+
 ## How it plays our show
 
 - **bake.js `--lights`** renders a score into the other agent's `.lights.json` frame

@@ -418,8 +418,8 @@ def make_handler(state: State):
 
 def make_server(host, port, dirs, sender, fps=40, audio_factory=None, watchdog_s=3.0, offset_ms=0.0):
     if audio_factory is None:
-        from audio_out import AudioPlayer
-        audio_factory = AudioPlayer
+        from audio_out import make_audio   # SoundDeviceOutput if available, else pw-play
+        audio_factory = make_audio
     transport = Transport(sender, fps=fps, park=park_frame())
     transport.set_offset_ms(offset_ms)
     state = State(dirs, transport, audio_factory)

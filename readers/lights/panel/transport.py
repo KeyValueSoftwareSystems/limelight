@@ -1,15 +1,46 @@
-"""Frame transport: the master clock for audio and lights.
+"""Frame transport: the DMX side of playback, driven by the protocol's clock.
 
-play/pause/seek move an anchor (position, wall time); `tick()` at 40 Hz
-extrapolates from it and sends the matching frame to the PAR. The audio
-player is started/stopped from the same anchor so the two stay locked.
-Paused = hold and refresh the current frame.
+Where are we in the song? That question belongs to the protocol, and the answer
+is only as honest as the clock behind it. So the transport no longer runs a clock
+of its own -- it hands the audio device to protocol/clock.py and reads back the
+position:
+
+  * a device that can report how much sound it has actually played (SoundDeviceOutput)
+    gets a MeasuredClock: the position is measured, not guessed, so there is no
+    start-up head start to tune out and no slide across the song;
+  * pw-play (AudioPlayer) and lights-only preview cannot report a position, so they
+    get a CountingClock over wall time -- the old behaviour, kept for the fallback.
+
+`tick()` at 40 Hz reads clock.position(), subtracts the light-vs-sound offset (the
+lamp + cable delay, which really is constant), and sends the matching frame. Paused =
+hold and refresh the current frame. The output loop must never die: a dead loop is no
+DMX, and the head then runs its own auto-program.
 """
 import math
+import os
+import sys
 import threading
 import time
 
 import numpy as np
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", "..", "..", "protocol"))
+from clock import MeasuredClock, CountingClock, Device   # noqa: E402
+
+
+class _NullDevice(Device):
+    """No audio (lights-only preview): start/stop do nothing and played() is None,
+    so a CountingClock over it simply tracks wall time."""
+
+    def start(self, at: float) -> None:
+        pass
+
+    def stop(self) -> None:
+        pass
+
+    def played(self):
+        return None
 
 
 class Transport:
@@ -19,70 +50,64 @@ class Transport:
         self.park = None if park is None else list(park)   # safe dark frame (head parked); None = zeros
         self.gain_mask = None                               # bool per channel: which ones gain scales
         self.frames = None
-        self.playing = False
-        self.anchor_pos = 0.0
-        self.anchor_time = None
-        self.offset_s = 0.0
+        self.offset_s = 0.0                                 # light-vs-sound trim (lamp + cable)
         self.gain = 1.0
         self.net = True
         self.index = None
         self.rgb = [0, 0, 0]
+        self.values = []
         self.audio = None
+        self.clock = CountingClock(_NullDevice(), time.monotonic)   # replaced on load
         self.send_errors = 0
         self.last_send_error = None
         self.lock = threading.Lock()
 
     # ----- configuration ------------------------------------------------
+    def _make_clock(self, audio):
+        """A device that can say how much sound it has played gets measured; one
+        that cannot (pw-play, or no audio) is counted. Honest sync needs the first."""
+        if audio is not None and hasattr(audio, "played"):
+            return MeasuredClock(audio)
+        return CountingClock(audio if audio is not None else _NullDevice(), time.monotonic)
+
     def load(self, frames, fps: int, audio=None, gain_mask=None, park=None) -> None:
-        self._audio_stop()
         with self.lock:
+            self._stop_audio_locked()
             self.frames = np.asarray(frames, dtype=np.uint8)
             self.fps = int(fps)
             self.gain_mask = None if gain_mask is None else np.asarray(gain_mask, dtype=bool)
             if park is not None:
                 self.park = list(park)
-            self.playing = False
-            self.anchor_pos, self.anchor_time = 0.0, None
-            self.index, self.rgb = None, [0, 0, 0]
             self.audio = audio
+            self.clock = self._make_clock(audio)
+            self.index, self.rgb = None, [0, 0, 0]
 
-    def set_clock(self, position: float, playing: bool, now: float | None = None) -> None:
-        with self.lock:
-            self.anchor_pos = max(0.0, float(position))
-            self.anchor_time = time.monotonic() if now is None else now
-            self.playing = bool(playing)
+    def _stop_audio_locked(self) -> None:
+        try:
+            self.clock.pause()          # stops the current device wherever it is
+        except Exception:               # noqa: BLE001 - never let a bad device block a load
+            pass
 
     # ----- transport controls -----------------------------------------------
-    def _audio_stop(self) -> None:
-        if self.audio is not None:
-            self.audio.stop()
-
-    def _audio_start(self, position: float) -> None:
-        if self.audio is not None:
-            self.audio.start(position)
-
     def play(self, position: float | None = None, now: float | None = None) -> None:
-        now = time.monotonic() if now is None else now
-        pos = self.position(now) if position is None else max(0.0, float(position))
-        if self.frames is not None and pos >= self.duration:
-            pos = 0.0
-        self.set_clock(pos, True, now)
-        self._audio_start(pos)
+        with self.lock:
+            pos = self.clock.position() if position is None else max(0.0, float(position))
+            if self.frames is not None and pos >= self.duration:
+                pos = 0.0
+            self.clock.play(pos)
 
     def pause(self, now: float | None = None) -> None:
-        now = time.monotonic() if now is None else now
-        pos = self.position(now)
-        self._audio_stop()
-        self.set_clock(pos, False, now)
+        with self.lock:
+            self.clock.pause()
 
     def seek(self, position: float, now: float | None = None) -> None:
-        now = time.monotonic() if now is None else now
-        was_playing = self.playing
-        pos = max(0.0, float(position))
-        self._audio_stop()
-        self.set_clock(pos, was_playing, now)
-        if was_playing:
-            self._audio_start(pos)
+        with self.lock:
+            self.clock.seek(max(0.0, float(position)))
+
+    def nudge(self, delta_s: float, now: float | None = None) -> None:
+        """Shift the playhead by delta seconds (audio, if any, restarts at the new position)."""
+        with self.lock:
+            self.clock.seek(max(0.0, self.clock.position() + float(delta_s)))
 
     def set_offset_ms(self, ms: float) -> None:
         self.offset_s = float(ms) / 1000.0
@@ -100,27 +125,18 @@ class Transport:
         self.sender.blackout(pause=0, frame=self.park)
 
     def blackout(self) -> None:
-        self._audio_stop()
         with self.lock:
-            if self.playing:
-                self.anchor_pos = self.position()
-            self.playing = False
+            self.clock.pause()
+            self.rgb = [0, 0, 0]
         self._dark()
-        self.rgb = [0, 0, 0]
-
-    def nudge(self, delta_s: float, now: float | None = None) -> None:
-        """Shift the playhead by delta seconds (audio, if any, restarts at the new position)."""
-        now = time.monotonic() if now is None else now
-        self.seek(self.position(now) + float(delta_s), now)
 
     # ----- clock ----------------------------------------------------------
     def position(self, now: float | None = None) -> float:
-        if self.anchor_time is None:
-            return 0.0
-        if not self.playing:
-            return self.anchor_pos
-        now = time.monotonic() if now is None else now
-        return self.anchor_pos + (now - self.anchor_time)
+        return self.clock.position()
+
+    @property
+    def playing(self) -> bool:
+        return self.clock.playing
 
     @property
     def duration(self) -> float:
@@ -137,22 +153,19 @@ class Transport:
 
     def tick(self, now: float | None = None) -> None:
         with self.lock:
-            if self.frames is None or self.anchor_time is None:
+            if self.frames is None:
                 if self.park is not None and self.net:
                     self.sender.send(self.park)          # idle: keep the head parked, never silent
                 return
-            pos = self.position(now) - self.offset_s
+            # position is measured/counted by the clock; the offset is only the
+            # lamp + cable delay -- the audio start-up guesswork is gone.
+            pos = self.clock.position() - self.offset_s
             i = max(0, int(math.floor(pos * self.fps + 1e-6)))
             if i >= len(self.frames):
-                if self.playing:
-                    self.playing = False
-                    self.anchor_pos = self.duration
+                if self.clock.playing:
+                    self.clock.pause()
                     self.index, self.rgb = len(self.frames) - 1, [0, 0, 0]
-                    if self.audio is not None:
-                        self.audio.stop()
-                # end-of-song: keep the head PARKED, never go silent. (success-limelight's
-                # transport had a bug here -- it stopped sending the park after the last
-                # frame, so the head ran its auto-program; hold the park every tick.)
+                # end-of-song: keep the head PARKED, never go silent.
                 if self.park is not None and self.net:
                     self.sender.send(self.park)
                 return
@@ -162,11 +175,24 @@ class Transport:
             if self.net:
                 self.sender.send(vals)
 
+    def _audio_running(self) -> bool:
+        a = self.audio
+        if a is None:
+            return False
+        r = getattr(a, "running", None)
+        if r is not None:
+            return bool(r)
+        # a measuring device: audible if it reports a position
+        try:
+            return a.played() is not None
+        except Exception:  # noqa: BLE001
+            return False
+
     def status(self, now: float | None = None) -> dict:
         return {
             "loaded": self.frames is not None,
-            "playing": self.playing,
-            "position": self.position(now),
+            "playing": self.clock.playing,
+            "position": self.clock.position(),
             "duration": self.duration,
             "fps": self.fps,
             "index": self.index,
@@ -174,7 +200,11 @@ class Transport:
             "offset_ms": self.offset_s * 1000.0,
             "gain": self.gain,
             "net": self.net,
-            "audio": bool(self.audio is not None and self.audio.running),
+            "audio": self._audio_running(),
+            # so the browser can see which clock is live: "measured" reads the audio
+            # device's real position (honest); "counting" is the wall-time fallback.
+            "clock": "measured" if isinstance(self.clock, MeasuredClock) else "counting",
+            "audio_backend": type(self.audio).__name__ if self.audio is not None else None,
             "values": list(getattr(self, "values", [])),
             "send_errors": self.send_errors,
             "last_send_error": self.last_send_error,
