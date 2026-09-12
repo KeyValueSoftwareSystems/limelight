@@ -314,7 +314,11 @@ function hookWords(m) {
   const w = m.what || "";
   let g = w.match(/^the (riff|tune) from bar (\d+)$/);
   if (g) return `The same ${g[1]} again — first heard at bar ${g[2]}`;
-  if (w === "the riff") return "The main riff";
+  /* A hook with no again_of was not found by following the tune. It is chroma
+     similarity: the chords here resemble the chords somewhere else. Calling it
+     "the main tune" claimed a melody the computer never looked at, and some of
+     these run sixty seconds, which no riff does. */
+  if (w === "the riff") return "The chords here come back later";
   g = w.match(/^(\d+) (sung|played) on one note$/);
   if (g) return `${g[1]} notes ${g[2]} on a single pitch`;
   return cap(w || "a hook");
@@ -478,6 +482,9 @@ function draw() {
     `<span><i style="background:${STEM.vocals}"></i>a note that was sung</span>`
     + `<span><i style="background:${STEM.other}"></i>a note played by the lead instrument</span>`
     + `<span><i style="background:#c8a2ff"></i>a tune you have already heard, coming back</span>`
+    + `<span class="warn" style="flex-basis:100%">Only stretches the computer found by following the `
+    + `tune are shaded here. Claims about the chords repeating are listed with the moments instead, `
+    + `because they are not about the melody.</span>`
     + `<span class="dim">higher up the strip = higher note</span>`
     + `<span style="flex-basis:100%;margin-top:3px">The line of ticks under the notes is where each `
     + `<b style="color:var(--ink)">phrase of the tune</b> starts and ends &mdash; click one to hear just `
@@ -701,6 +708,7 @@ function tune() {
   const hooked = new Set();
   for (const m of SCORE.moments || []) {
     if (m.is !== "hook" || !m.for_beats) continue;
+    if (m.again_of == null && !m.notes) continue;
     const upto = m.bar + m.for_beats/SCORE.grid.beats_per_bar;
     for (let b = m.bar; b <= upto; b++) hooked.add(b);
     const a = barTime(m.bar) + (m.beat - 1)*beat;
@@ -743,8 +751,7 @@ function tune() {
   for (const h of THIT) {
     const m = h.m;
     const words = m.again_of != null ? `same tune as bar ${m.again_of}`
-                : m.notes ? `${m.notes} notes on one pitch`
-                : "the main tune";
+                : `${m.notes} notes on one pitch`;
     const tw = g.measureText(words).width;
     let lane = 0;
     while (shelf[lane] != null && shelf[lane] > h.x0) lane++;
@@ -790,20 +797,36 @@ function curves() {
       g.strokeStyle = "#131a26"; g.lineWidth = 1;
       g.beginPath(); g.moveTo(0, y0); g.lineTo(W, y0); g.stroke();
     }
-    g.strokeStyle = hue; g.lineWidth = 1.4; g.globalAlpha = .95;
-    g.beginPath();
-    let open = false;
-    for (let i = 0; i < v.length; i++) {
-      if (v[i] == null) { open = false; continue; }
-      const t = barTime(i + FIRSTBAR);
-      if (t + BAR < VIEW.a || t > VIEW.b) { open = false; continue; }
-      const x = L + frac(t) * (W - L - 46);
-      const y = y0 + h - 6 - (v[i]/top) * (h - 14);
-      open ? g.lineTo(x, y) : g.moveTo(x, y);
-      open = true;
-    }
-    g.stroke();
-    g.globalAlpha = 1;
+    /* Bar to bar these reverse direction on about three bars in five, which is
+       a coin toss dressed as a measurement. The faint line is every bar as
+       measured; the bold one is the median across four bars, a phrase, which is
+       the shape a person hears and the shape a light should follow. */
+    const line = (pick, alpha, wide) => {
+      g.strokeStyle = hue; g.lineWidth = wide; g.globalAlpha = alpha;
+      g.beginPath();
+      let open = false;
+      for (let i = 0; i < v.length; i++) {
+        const val = pick(i);
+        if (val == null) { open = false; continue; }
+        const t = barTime(i + FIRSTBAR);
+        if (t + BAR < VIEW.a || t > VIEW.b) { open = false; continue; }
+        const x = L + frac(t) * (W - L - 46);
+        const y = y0 + h - 6 - (val/top) * (h - 14);
+        open ? g.lineTo(x, y) : g.moveTo(x, y);
+        open = true;
+      }
+      g.stroke();
+      g.globalAlpha = 1;
+    };
+    const smooth = i => {
+      const near = [];
+      for (let k = i - 2; k <= i + 1; k++) if (v[k] != null) near.push(v[k]);
+      if (!near.length) return null;
+      near.sort((x, y) => x - y);
+      return near[near.length >> 1];
+    };
+    line(i => v[i], .28, 1);
+    line(smooth, 1, 1.7);
     g.fillStyle = hue; g.font = "600 10px ui-monospace,monospace";
     g.fillText(name.toUpperCase(), 7, y0 + 13);
     g.fillStyle = "#4a5364"; g.font = "8px ui-monospace,monospace";
