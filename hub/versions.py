@@ -5,7 +5,7 @@ On disk, beside the file:
     score/levels.score                         a copy of the latest version's bytes
     score/.versions/levels.score/1.score       version 1, exactly as uploaded
     score/.versions/levels.score/2.score
-    score/.versions/levels.score/2.meta.json   author metadata for version 2, once somebody adds it
+    score/.versions/levels.score/2.meta.json   fields for version 2: { name: { value, enforced } }
 
 The top-level copy is what keeps every plain GET, the listing, `limelight pull`
 and any dufs client working with no idea versions exist. Nothing in here knows
@@ -101,35 +101,73 @@ def get_meta(path, n):
         return json.load(f)
 
 
+SCALARS = (str, int, float, bool, type(None))
+
+
+def validate_meta(obj):
+    """The stored shape: { name: { value: <scalar>, enforced: <bool> } }.
+    Returns a normalised copy, or raises ValueError saying exactly what is wrong."""
+    if not isinstance(obj, dict):
+        raise ValueError("metadata must be a JSON object of fields")
+    out = {}
+    for key, entry in obj.items():
+        if not key.strip():
+            raise ValueError("empty field name")
+        if key != key.strip():
+            raise ValueError(f"field name {key!r} has leading or trailing spaces")
+        if not isinstance(entry, dict):
+            raise ValueError(f"entry {key!r} is not an object; expected {{\"value\": ..., \"enforced\": true|false}}")
+        if "value" not in entry:
+            raise ValueError(f"{key}: value is missing")
+        if not isinstance(entry["value"], SCALARS):
+            raise ValueError(f"{key}: value must be a string, number, boolean or null")
+        enforced = entry.get("enforced", False)
+        if not isinstance(enforced, bool):
+            raise ValueError(f"{key}: enforced must be true or false")
+        out[key] = {"value": entry["value"], "enforced": enforced}
+    return out
+
+
 def set_meta(path, n, data):
-    """Store metadata for version n. Raises ValueError with the reason when the
-    body is not a JSON object; nothing is written in that case."""
+    """Store fields for version n. Raises ValueError with the reason when the
+    body is not the shape above; nothing is written in that case."""
     try:
         obj = json.loads(data)
     except ValueError as e:
         raise ValueError(f"metadata is not JSON: {e}")
-    if not isinstance(obj, dict):
-        raise ValueError("metadata must be a JSON object")
-    _write(meta_path(path, n), _dump(obj))
+    fields = validate_meta(obj)
+    _write(meta_path(path, n), _dump(fields))
+    return fields
+
+
+def merge(obj, fields):
+    """Fold fields into a score object: each as an x- prefixed root key, and one
+    x-enforced list naming the enforced ones when there are any."""
+    enforced = []
+    for key, entry in fields.items():
+        obj["x-" + key] = entry["value"]
+        if entry.get("enforced"):
+            enforced.append("x-" + key)
+    if enforced:
+        obj["x-enforced"] = enforced
     return obj
 
 
 def read(path, n, raw=False):
-    """The bytes of version n. Unless raw, metadata is folded in under
-    author_metadata -- but only when there is metadata and the file is a JSON
-    object; otherwise the uploaded bytes come back exactly."""
+    """The bytes of version n. Unless raw, fields are folded in as x- keys --
+    but only when there are fields and the file is a JSON object; otherwise
+    the uploaded bytes come back exactly."""
     with open(version_path(path, n), "rb") as f:
         data = f.read()
     if raw:
         return data
-    meta = get_meta(path, n)
-    if meta is None:
+    fields = get_meta(path, n)
+    if fields is None:
         return data
     obj = parse_object(data)
     if obj is None:
         return data
-    obj["author_metadata"] = meta
-    return _dump(obj)
+    return _dump(merge(obj, fields))
 
 
 def history(path):
@@ -139,6 +177,8 @@ def history(path):
         st = os.stat(vp)
         with open(vp, "rb") as f:
             mergeable = parse_object(f.read()) is not None
+        fields = get_meta(path, n) or {}
         out.append({"version": n, "size": st.st_size, "mtime": int(st.st_mtime * 1000),
-                    "has_metadata": os.path.isfile(meta_path(path, n)), "mergeable": mergeable})
+                    "has_metadata": os.path.isfile(meta_path(path, n)), "mergeable": mergeable,
+                    "fields": len(fields), "enforced": sum(1 for e in fields.values() if e.get("enforced"))})
     return {"name": os.path.basename(path), "latest": latest(path), "versions": out}

@@ -131,53 +131,68 @@ async function startHub() {
     ok("and is not a versioned file", r.status === 400, String(r.status));
   }
 
-  /* ---- author metadata: added to a version, folded into its download -------- */
+  /* ---- metadata fields: x- keys at the root, and an x-enforced list ---------- */
   {
     fake.files.clear();
     const url = fake.url + "/m.score";
     const v1 = Buffer.from('{"score":"m","version":1,"grid":{"bpm":100}}');
     const v2 = Buffer.from('{"score":"m","version":2,"grid":{"bpm":110}}');
-    const put = (u, body) => fetch(u, { method: "PUT", body });
+    const put = (u, body) => fetch(u, { method: "PUT", body: typeof body === "string" || Buffer.isBuffer(body) ? body : JSON.stringify(body) });
     const text = async r => await r.text();
     await put(url, v1); await put(url, v2);
-    const meta = { author: "renjith", verified_bars: [1, 33], note: "downbeats checked by ear" };
+    const fields = { author: { value: "renjith", enforced: true }, bpm: { value: 128, enforced: false } };
 
-    let r = await put(url + "?meta&v=1", JSON.stringify(meta));
-    ok("metadata on a version is accepted", r.status === 204, String(r.status) + " " + await text(r));
-    ok("and reads back", JSON.stringify(await (await fetch(url + "?meta&v=1")).json()) === JSON.stringify(meta));
-    ok("a version without metadata reads back {}", (await text(await fetch(url + "?meta&v=2"))).trim() === "{}");
+    let r = await put(url + "?meta&v=1", fields);
+    ok("fields on a version are accepted", r.status === 204, String(r.status) + " " + await text(r));
+    ok("and read back unchanged", JSON.stringify(await (await fetch(url + "?meta&v=1")).json()) === JSON.stringify(fields));
+    ok("a version without fields reads back {}", (await text(await fetch(url + "?meta&v=2"))).trim() === "{}");
 
     const merged = JSON.parse(await text(await fetch(url + "?v=1")));
-    ok("the download of that version carries author_metadata",
-       JSON.stringify(merged.author_metadata) === JSON.stringify(meta) && merged.grid.bpm === 100, JSON.stringify(merged));
+    ok("the download has each field at the root with an x- prefix",
+       merged["x-author"] === "renjith" && merged["x-bpm"] === 128 && typeof merged["x-bpm"] === "number", JSON.stringify(merged));
+    ok("and one x-enforced list naming the enforced keys", JSON.stringify(merged["x-enforced"]) === '["x-author"]', JSON.stringify(merged["x-enforced"]));
+    ok("the score's own keys are kept", merged.grid.bpm === 100 && merged.score === "m");
+    ok("and author_metadata is gone", !("author_metadata" in merged));
     ok("?raw is the uploaded bytes exactly", Buffer.from(await (await fetch(url + "?v=1&raw")).arrayBuffer()).equals(v1));
-    ok("a version without metadata downloads byte-identical", Buffer.from(await (await fetch(url + "?v=2")).arrayBuffer()).equals(v2));
+    ok("a version without fields downloads byte-identical", Buffer.from(await (await fetch(url + "?v=2")).arrayBuffer()).equals(v2));
 
-    r = await put(url + "?meta", JSON.stringify({ latest: true }));
-    ok("?meta with no v means the latest", r.status === 204 && (await (await fetch(url + "?meta&v=2")).json()).latest === true);
-    const plain = await fetch(url);
-    const body = await text(plain);
-    ok("a plain GET of the latest now carries author_metadata", JSON.parse(body).author_metadata.latest === true);
+    r = await put(url + "?meta", { who: { value: "me" } });
+    ok("?meta with no v means the latest, and enforced defaults to false",
+       r.status === 204 && (await (await fetch(url + "?meta&v=2")).json()).who.enforced === false);
+    const latest = JSON.parse(await text(await fetch(url)));
+    ok("nothing enforced means no x-enforced key", latest["x-who"] === "me" && !("x-enforced" in latest), JSON.stringify(latest));
     const head = await fetch(url, { method: "HEAD" });
-    ok("and HEAD reports the merged length", Number(head.headers.get("content-length")) === Buffer.byteLength(body), head.headers.get("content-length") + " vs " + Buffer.byteLength(body));
+    ok("HEAD reports the merged length", Number(head.headers.get("content-length")) === Buffer.byteLength(JSON.stringify(latest, null, 1)));
 
-    r = await put(url + "?meta&v=1", "[1,2]");
-    ok("metadata that is not an object is refused", r.status === 400 && /object/.test(await text(r)));
-    r = await put(url + "?meta&v=1", "not json");
-    ok("metadata that is not JSON is refused with the parser's reason", r.status === 400 && /not JSON/.test(await text(r)));
-    ok("and the earlier metadata is untouched", (await (await fetch(url + "?meta&v=1")).json()).author === "renjith");
+    const refused = [
+      ["[1,2]", /object/],
+      [{ a: 1 }, /a.*not an object/],
+      [{ a: { value: { nested: 1 } } }, /a.*string, number, boolean or null/],
+      [{ a: { value: 1, enforced: "yes" } }, /a.*enforced must be true or false/],
+      [{ "": { value: 1 } }, /empty field name/],
+      [{ " a ": { value: 1 } }, /leading or trailing/],
+      [{ a: { enforced: true } }, /a.*value is missing/],
+    ];
+    for (const [body, why] of refused) {
+      r = await put(url + "?meta&v=1", typeof body === "string" ? body : JSON.stringify(body));
+      const t = await text(r);
+      ok(`refused: ${typeof body === "string" ? body : JSON.stringify(body)}`, r.status === 400 && why.test(t), `${r.status} ${t}`);
+    }
+    ok("and the earlier fields are untouched", (await (await fetch(url + "?meta&v=1")).json()).author.value === "renjith");
     r = await put(url + "?meta&v=9", "{}");
-    ok("metadata on a missing version is 404", r.status === 404);
+    ok("fields on a missing version are 404", r.status === 404);
 
     const hist = await (await fetch(url + "?versions")).json();
-    ok("?versions shows which versions have metadata", hist.versions.map(v => v.has_metadata).join(",") === "true,true");
+    ok("?versions counts fields and enforced per version",
+       hist.versions[0].fields === 2 && hist.versions[0].enforced === 1 && hist.versions[1].fields === 1 && hist.versions[1].enforced === 0, JSON.stringify(hist.versions));
+    ok("and still flags has_metadata", hist.versions.map(v => v.has_metadata).join(",") === "true,true");
     const row = (await (await fetch(fake.url + "/?json")).json()).paths.find(p => p.name === "m.score");
     ok("the listing row says the latest has metadata", row.has_metadata === true, JSON.stringify(row));
 
     const odd = fake.url + "/odd.score";
     await put(odd, "this is not json at all");
-    await put(odd + "?meta&v=1", JSON.stringify({ a: 1 }));
-    ok("a .score that is not JSON downloads unchanged even with metadata", (await text(await fetch(odd))) === "this is not json at all");
+    await put(odd + "?meta&v=1", { a: { value: 1 } });
+    ok("a .score that is not JSON downloads unchanged even with fields", (await text(await fetch(odd))) === "this is not json at all");
     ok("and ?versions says it is not mergeable", (await (await fetch(odd + "?versions")).json()).versions[0].mergeable === false);
   }
 
@@ -251,14 +266,14 @@ async function startHub() {
     const vurl = fake.url + "/lv.score";
     const a = Buffer.from('{"score":"lv","version":1}'), b = Buffer.from('{"score":"lv","version":2}');
     await fetch(vurl, { method: "PUT", body: a }); await fetch(vurl, { method: "PUT", body: b });
-    await fetch(vurl + "?meta&v=2", { method: "PUT", body: JSON.stringify({ who: "me" }) });
+    await fetch(vurl + "?meta&v=2", { method: "PUT", body: JSON.stringify({ who: { value: "me" } }) });
 
     r = await run(["pull", "lv.score@1"], fake.url, dir);
     ok("pull name@1 writes version 1", r.code === 0 && fs.readFileSync(path.join(dir, "lv.score")).equals(a), r.err);
     ok("and says which version", /lv\.score@1 ←/.test(r.out), r.out);
     r = await run(["pull", "lv.score"], fake.url, dir);
     ok("pull without @ is the latest, merged",
-       r.code === 0 && JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8")).author_metadata.who === "me", r.err);
+       r.code === 0 && JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"))["x-who"] === "me", r.err);
     r = await run(["pull", "lv.score@9"], fake.url, dir);
     ok("pull of a missing version exits 1 and lists the versions", r.code === 1 && /versions: 1, 2/.test(r.err), r.err);
   }
