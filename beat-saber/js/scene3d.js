@@ -14,9 +14,14 @@
   let saberMeshes = [];
 
   // music-reactive background state
-  let stars = null, gridHelper = null;
+  let stars = null, gridHelper = null, tunnelRings = [];
   let music = { energy: 0.4, phase: 0 };
   let pulseVal = 0, punchVal = 0, lastStep = 0;
+
+  // tunnel geometry constants
+  const TUN_COUNT = 18, TUN_DZ = 4.2, TUN_NEAR = BASE_CAM_Z + 4;
+  const TUN_SPAN = TUN_COUNT * TUN_DZ, TUN_RX = 11, TUN_RY = 6.5;
+  const TUN_BASE = new THREE.Color(0x2ec5ff), TUN_FLASH = new THREE.Color(0xffffff), TUN_DOWN = new THREE.Color(0xff2d55);
 
   function init(mountEl) {
     mount = mountEl;
@@ -53,8 +58,28 @@
     scene.add(line);
 
     makeStars();
+    makeTunnel();
     music = { energy: 0.4, phase: 0 }; pulseVal = 0; punchVal = 0;
     lastStep = performance.now();
+  }
+
+  // A ring tunnel receding down the lane. Rings scroll toward the camera (fly-
+  // through), and each beat brightens + expands them; downbeats flash them red.
+  function makeTunnel() {
+    const pts = [];
+    for (let i = 0; i <= 48; i++) {
+      const a = (i / 48) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a), Math.sin(a), 0));  // unit circle
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    for (let i = 0; i < TUN_COUNT; i++) {
+      const mat = new THREE.LineBasicMaterial({ color: 0x2ec5ff, transparent: true, opacity: 0.25 });
+      const ring = new THREE.LineLoop(geo, mat);
+      ring.position.set(0, 0, TUN_NEAR - (i + 1) * TUN_DZ);
+      ring.scale.set(TUN_RX, TUN_RY, 1);
+      scene.add(ring);
+      tunnelRings.push(ring);
+    }
   }
 
   // A starfield streaming toward the camera down the lane — the depth illusion.
@@ -109,6 +134,21 @@
 
     pulseVal = Math.max(0, pulseVal - dt * 3.2);
     if (gridHelper) gridHelper.material.opacity = 0.28 + pulseVal * 0.6;
+
+    if (tunnelRings.length) {
+      const speed = (7 + music.energy * 45) * dt;         // fly with the starfield
+      const bump = 1 + pulseVal * 0.12;                   // rings swell on the beat
+      const op = Math.min(1, 0.16 + pulseVal * 0.6 + music.energy * 0.12);
+      const col = TUN_BASE.clone().lerp(TUN_FLASH, pulseVal * 0.7);
+      if (punchVal > 0) col.lerp(TUN_DOWN, punchVal * 0.5);  // downbeat flash
+      for (const ring of tunnelRings) {
+        ring.position.z += speed;
+        if (ring.position.z > TUN_NEAR) ring.position.z -= TUN_SPAN;   // wrap to the far end
+        ring.scale.set(TUN_RX * bump, TUN_RY * bump, 1);
+        ring.material.opacity = op;
+        ring.material.color.copy(col);
+      }
+    }
 
     punchVal = Math.max(0, punchVal - dt * 4.0);
     if (camera) {
@@ -281,7 +321,7 @@
   function dispose() {
     clear();
     if (renderer) { renderer.dispose(); if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement); }
-    renderer = scene = camera = null; saberMeshes = []; stars = null; gridHelper = null;
+    renderer = scene = camera = null; saberMeshes = []; stars = null; gridHelper = null; tunnelRings = [];
   }
 
   window.Scene3D = { init, resize, spawnBlock, update, sliceBlock, missBlock,
