@@ -55,10 +55,13 @@ badge and a *versions* list with a download for each; `./limelight pull
 levels.score@2` fetches version 2, and plain `pull` is the latest. Other file
 types simply overwrite.
 
-**Author metadata.** Each version can carry a JSON object, added or edited from
-the page's *metadata* button. It is stored beside the version and folded into
-every download of that version under `author_metadata`; the uploaded bytes are
-never rewritten. `?raw` on the file URL skips the merge.
+**Metadata fields.** Click a score in the hub for its own page: every version,
+a download for each, a new version from a file picker, and the metadata on any
+version as named fields, each with an *enforce* checkbox. A download of that
+version carries every field at the root of the JSON as `x-<name>` (a value typed
+as `128` or `true` becomes a number or boolean), and one `x-enforced` list
+naming the enforced keys when there are any. The uploaded bytes are never
+rewritten; `?raw` on the file URL skips the merge.
 
 `node cli/remote.test.js` starts a private serve.py on a free port and runs
 both commands, the hub API, versions and metadata against it. The hub speaks
