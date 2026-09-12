@@ -71,7 +71,7 @@ const SCORE = {
 
 /* ---- the real levels score (smoke) -------------------------------------- */
 {
-  const LEVELS = require("./levels.score.json");
+  const LEVELS = require("./fromscore.js").load();
   const layout = require("./arc4-head.layout.json");
   const palette = require("./arc4-head.palette.json");
   const FULL = enumerate(layout, { palette });

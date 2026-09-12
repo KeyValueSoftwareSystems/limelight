@@ -52,5 +52,3 @@ work/sep-test/
 *.score.json
 # except the fixture cli/remote.test.js reads to check bytes survive a round trip.
 !protocol/levels.score
-# and the one readers/lights/arranger.test.js requires.
-!readers/lights/levels.score.json

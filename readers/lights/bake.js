@@ -18,11 +18,11 @@ const { Session } = require("../../protocol/session.js");
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
-const scoreFile = (args[0] && !args[0].startsWith("--")) ? args[0] : path.join(__dirname, "levels.score.json");
+const scoreFile = (args[0] && !args[0].startsWith("--")) ? args[0] : null;
 const seed = +((args[1] && !args[1].startsWith("--")) ? args[1] : 1);
 const fps = +opt("--fps", 40);
 
-const score = JSON.parse(fs.readFileSync(scoreFile, "utf8"));
+const score = require("./fromscore.js").load(scoreFile);
 const layout = require("./arc4-head.layout.json");
 const palette = require("./arc4-head.palette.json");
 const library = Object.fromEntries(palette.map(s => [s.id, s]));
