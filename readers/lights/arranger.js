@@ -47,7 +47,12 @@ function energyReader(score) {
       ? Math.min(...score.sections.map(s => s.from.bar)) : 1;
   } else {
     const E = score.energy || {};
-    from = E.from_bar || 1; vals = E.values || [];
+    /* `|| 1` reads bar 0 as absent and substitutes 1, which is a whole bar of
+       energy error on every 0-based score -- levels included. The bare-array
+       branch above escapes it only because it anchors to the first section's
+       bar instead. Default on absence, never on falsiness. */
+    from = (E.from_bar === undefined || E.from_bar === null) ? 1 : E.from_bar;
+    vals = E.values || [];
   }
   return bar => {
     const i = Math.round(bar) - from;
