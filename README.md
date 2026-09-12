@@ -39,6 +39,11 @@ seconds, and the application owns the clock and the meaning.
 network can list, upload to, download from and make folders in, from a browser
 or from the command line. It binds every interface and prints the address other
 machines should use. Files live in `hub/files/`, which is not committed.
+**Songs** live under `hub/files/score/`: the latest `<name>.score` and version
+history under `score/.versions/<name>.score/`. Playback audio lives separately
+under `hub/files/audio/<name>.mp3` (not shown in the hub listing); home pairs
+each score with that file when present. On startup any leftover root-level
+scores are moved into `score/`, and mp3s into `audio/`.
 
 ```
 ./limelight push protocol/levels.score      # upload under its basename, overwriting

@@ -10,7 +10,7 @@ const { openRemote, NotFound, Unreachable } = require("./remote.js");
 
 const REPO = path.join(__dirname, "..");
 const CLI = path.join(REPO, "limelight");
-const SCORE = fs.readFileSync(path.join(REPO, "scores", "levels.score"));
+const SCORE = fs.readFileSync(path.join(REPO, "protocol", "levels.score"));
 
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);
@@ -35,11 +35,12 @@ const freePort = () => new Promise(r => { const s = net.createServer(); s.listen
 
 /* start serve.py on a free port with a temp hub root; `files` reads and writes
    that root's score/ folder directly, which is what the assertions look at */
-async function startHub() {
+async function startHub(extraEnv = {}) {
   /* a root that does not exist yet, as on a fresh clone: the server must create it */
   const port = await freePort(), root = path.join(scratch(), "files");
   const proc = spawn("python3", [path.join(REPO, "serve.py")],
-    { env: { ...process.env, PORT: String(port), HOST: "127.0.0.1", HUB_ROOT: root }, stdio: ["ignore", "pipe", "pipe"] });
+    { env: { ...process.env, PORT: String(port), HOST: "127.0.0.1", HUB_ROOT: root,
+             LIMELIGHT_SCORE_BUILDER: "stub", ...extraEnv }, stdio: ["ignore", "pipe", "pipe"] });
   let stderr = ""; proc.stderr.on("data", d => stderr += d);
   const origin = `http://127.0.0.1:${port}`;
   for (let i = 0; i < 100; i++) {                     /* up to ~5 s to come up */
@@ -196,7 +197,7 @@ async function startHub() {
     ok("and ?versions says it is not mergeable", (await (await fetch(odd + "?versions")).json()).versions[0].mergeable === false);
   }
 
-  /* ---- profiles: how one user's application treats this score --------------- */
+  /* ---- personalities: how the artist wants this song to look ---------------- */
   {
     fake.files.clear();
     const url = fake.url + "/p.score";
@@ -207,59 +208,71 @@ async function startHub() {
     await put(url, v1);
     await put(url + "?meta&v=1", { author: { value: "renjith", enforced: true } });
 
-    let info = await json(await fetch(url + "?profiles"));
-    ok("a score starts with the palette and no profiles",
-       info.colours.length === 7 && info.colours[0].name === "red" && info.colours[0].hex === "#ff0000" && info.profiles.length === 0, JSON.stringify(info));
+    let info = await json(await fetch(url + "?personalities"));
+    ok("a score starts with the palette and no personalities",
+       info.colours.length === 7 && info.colours.map(c => c.name).join(",") === "red,green,blue,yellow,cyan,magenta,white"
+       && info.colours[0].hex === "#ff0000" && info.personalities.length === 0, JSON.stringify(info));
 
-    let r = await put(url + "?profile=muzammil", { colours: ["red", "blue"] });
-    ok("a profile with two colours is accepted", r.status === 204, `${r.status} ${await text(r)}`);
-    info = await json(await fetch(url + "?profiles"));
+    let r = await put(url + "?personality=sarath", { colours: ["magenta", "cyan"] });
+    ok("a personality with two colours is accepted", r.status === 204, `${r.status} ${await text(r)}`);
+    info = await json(await fetch(url + "?personalities"));
     ok("and listed with each colour resolved to a hex, in the order given",
-       JSON.stringify(info.profiles) === JSON.stringify([{ user: "muzammil", colours: [{ name: "red", hex: "#ff0000" }, { name: "blue", hex: "#0000ff" }] }]), JSON.stringify(info.profiles));
+       JSON.stringify(info.personalities) === JSON.stringify([{ user: "sarath", colours: [{ name: "magenta", hex: "#ff00ff" }, { name: "cyan", hex: "#00ffff" }] }]), JSON.stringify(info.personalities));
 
-    await put(url + "?profile=alnas", { colours: ["green"] });
-    info = await json(await fetch(url + "?profiles"));
-    ok("two profiles, sorted by user", info.profiles.map(p => p.user).join(",") === "alnas,muzammil");
+    await put(url + "?personality=alnas", { colours: ["green"] });
+    info = await json(await fetch(url + "?personalities"));
+    ok("two personalities, sorted by user", info.personalities.map(p => p.user).join(",") === "alnas,sarath");
     const row = (await json(await fetch(fake.url + "/?json"))).paths.find(p => p.name === "p.score");
-    ok("the listing row counts them", row.profiles === 2, JSON.stringify(row));
+    ok("the listing row counts them", row.personalities === 2, JSON.stringify(row));
 
-    r = await put(url + "?profile=muzammil", { colours: ["cyan"] });
-    info = await json(await fetch(url + "?profiles"));
-    ok("saving the same user again replaces the profile",
-       r.status === 204 && info.profiles.length === 2 && info.profiles.find(p => p.user === "muzammil").colours.map(c => c.hex).join() === "#00ffff");
+    r = await put(url + "?personality=sarath", { colours: ["blue"] });
+    info = await json(await fetch(url + "?personalities"));
+    ok("saving the same user again replaces the personality",
+       r.status === 204 && info.personalities.length === 2 && info.personalities.find(p => p.user === "sarath").colours.map(c => c.hex).join() === "#0000ff");
+
+    /* the old spelling still answers, so nothing written last week breaks */
+    const old = await json(await fetch(url + "?profiles"));
+    ok("?profiles still answers, under the new key",
+       old.personalities.length === 2, JSON.stringify(Object.keys(old)));
+    r = await put(url + "?profile=sarath", { colours: ["red"] });
+    ok("?profile= still saves", r.status === 204, `${r.status}`);
+    info = await json(await fetch(url + "?personalities"));
+    ok("and it is the same personality it wrote to",
+       info.personalities.find(p => p.user === "sarath").colours[0].name === "red");
+    await put(url + "?personality=sarath", { colours: ["blue"] });
 
     const refused = [
-      [url + "?profile=muzammil", { colours: ["purple"] }, /purple.*one of: red, green, blue/],
-      [url + "?profile=muzammil", {}, /colours is missing/],
-      [url + "?profile=muzammil", { colours: [] }, /at least one/],
-      [url + "?profile=muzammil", { colours: "red" }, /must be a list/],
-      [url + "?profile=muzammil", { colours: ["red", "red"] }, /repeated/],
-      [url + "?profile=muzammil", "[1]", /object/],
-      [url + "?profile=bad%20name!", { colours: ["red"] }, /letters, digits/],
-      [url + "?profile=" + "a".repeat(41), { colours: ["red"] }, /letters, digits/],
+      [url + "?personality=sarath", { colours: ["purple"] }, /purple.*one of: red, green, blue/],
+      [url + "?personality=sarath", {}, /colours is missing/],
+      [url + "?personality=sarath", { colours: [] }, /at least one/],
+      [url + "?personality=sarath", { colours: "red" }, /must be a list/],
+      [url + "?personality=sarath", { colours: ["red", "red"] }, /repeated/],
+      [url + "?personality=sarath", "[1]", /object/],
+      [url + "?personality=bad%20name!", { colours: ["red"] }, /letters, digits/],
+      [url + "?personality=" + "a".repeat(41), { colours: ["red"] }, /letters, digits/],
     ];
     for (const [u, body, why] of refused) {
       r = await put(u, body);
       const t = await text(r);
-      ok(`refused: ${decodeURIComponent(u.split("?profile=")[1])} ${typeof body === "string" ? body : JSON.stringify(body)}`, r.status === 400 && why.test(t), `${r.status} ${t}`);
+      ok(`refused: ${decodeURIComponent(u.split("?personality=")[1])} ${typeof body === "string" ? body : JSON.stringify(body)}`, r.status === 400 && why.test(t), `${r.status} ${t}`);
     }
-    info = await json(await fetch(url + "?profiles"));
-    ok("and nothing changed", info.profiles.length === 2 && info.profiles.find(p => p.user === "muzammil").colours[0].name === "cyan");
+    info = await json(await fetch(url + "?personalities"));
+    ok("and nothing changed", info.personalities.length === 2 && info.personalities.find(p => p.user === "sarath").colours[0].name === "blue");
 
-    const dl = await json(await fetch(url + "?v=1&profile=muzammil"));
-    ok("a download with a profile embeds it",
-       dl.profile && dl.profile.user === "muzammil" && dl.profile.colours[0].hex === "#00ffff", JSON.stringify(dl.profile));
+    const dl = await json(await fetch(url + "?v=1&personality=sarath"));
+    ok("a download with a personality embeds it",
+       dl.personality && dl.personality.user === "sarath" && dl.personality.colours[0].hex === "#0000ff", JSON.stringify(dl.personality));
     ok("after the author's keys, which are kept", dl["x-author"] === "renjith" && dl.grid.bpm === 100 && JSON.stringify(dl["x-enforced"]) === '["x-author"]');
-    const latest = await json(await fetch(url + "?profile=alnas"));
-    ok("without v it is the latest with that profile", latest.profile.user === "alnas" && latest.version === 1);
+    const latest = await json(await fetch(url + "?personality=alnas"));
+    ok("without v it is the latest with that personality", latest.personality.user === "alnas" && latest.version === 1);
 
-    r = await fetch(url + "?profile=nobody");
+    r = await fetch(url + "?personality=nobody");
     let t = await text(r);
-    ok("a missing profile is 404 and lists the users", r.status === 404 && /no profile nobody/.test(t) && /alnas, muzammil/.test(t), `${r.status} ${t}`);
-    r = await fetch(url + "?v=1&profile=nobody");
+    ok("a missing personality is 404 and lists the users", r.status === 404 && /no personality nobody/.test(t) && /alnas, sarath/.test(t), `${r.status} ${t}`);
+    r = await fetch(url + "?v=1&personality=nobody");
     ok("with a version too", r.status === 404);
-    r = await fetch(url + "?raw&profile=muzammil");
-    ok("raw and profile contradict", r.status === 400 && /contradict/.test(await text(r)));
+    r = await fetch(url + "?raw&personality=sarath");
+    ok("raw and personality contradict", r.status === 400 && /contradict/.test(await text(r)));
 
     const odd = fake.url + "/oddp.score";
     await put(odd, "not json"); await put(odd + "?profile=muzammil", { colours: ["red"] });
@@ -271,6 +284,56 @@ async function startHub() {
     await put(fake.url + "/notes.txt", "x");
     r = await fetch(fake.url + "/notes.txt?profiles");
     ok("only .score files have profiles", r.status === 400, String(r.status));
+  }
+
+  /* ---- POST /hub/score: protocol load, with an optional profile ------------ */
+  {
+    fake.files.clear();
+    const url = fake.url + "/loadme.score";
+    const score = {
+      score: "loadme", version: 1,
+      grid: { bpm: 100, beats_per_bar: 4, first_beat_s: 0 },
+      beats: { list: [[1, 1]], count: 1, derived_from: "grid", as: "[bar, beat]" },
+    };
+    await fetch(url, { method: "PUT", body: Buffer.from(JSON.stringify(score)) });
+    await fetch(url + "?profile=muzammil", { method: "PUT", body: JSON.stringify({ colours: ["red", "blue"] }) });
+
+    const load = payload => fetch(fake.origin + "/hub/score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const jsonOrText = async r => {
+      const t = await r.text();
+      try { return { raw: t, body: JSON.parse(t) }; } catch (e) { return { raw: t, body: null }; }
+    };
+
+    let r = await load({ score: "loadme", fields: ["beats"], personality: "muzammil" });
+    let got = await jsonOrText(r);
+    ok("POST /hub/score with a personality embeds it in the response",
+       r.status === 200 && got.body && got.body.personality && got.body.personality.user === "muzammil"
+       && got.body.personality.colours.map(c => c.hex).join() === "#ff0000,#0000ff",
+       `${r.status} ${got.raw}`);
+    ok("and under the old key as well, so nothing breaks mid-week",
+       got.body && got.body.profile && got.body.profile.user === "muzammil");
+
+    r = await load({ score: "loadme", fields: ["beats"], profile: "muzammil" });
+    got = await jsonOrText(r);
+    ok("asking with the old key still works",
+       r.status === 200 && got.body && got.body.personality
+       && got.body.personality.user === "muzammil", `${r.status} ${got.raw}`);
+
+    r = await load({ score: "loadme", fields: ["beats"] });
+    got = await jsonOrText(r);
+    ok("without one, neither key is sent",
+       r.status === 200 && got.body && !("personality" in got.body) && !("profile" in got.body),
+       `${r.status} ${got.raw}`);
+
+    r = await load({ score: "loadme", fields: ["beats"], personality: "nobody" });
+    got = await jsonOrText(r);
+    ok("a missing personality is 400 and lists the users",
+       r.status === 400 && got.body && /no personality nobody/.test(got.body.error || "") && /muzammil/.test(got.body.error || ""),
+       `${r.status} ${got.raw}`);
   }
 
   /* ---- limelight push ----------------------------------------------------- */
@@ -354,20 +417,23 @@ async function startHub() {
     r = await run(["pull", "lv.score@9"], fake.url, dir);
     ok("pull of a missing version exits 1 and lists the versions", r.code === 1 && /versions: 1, 2/.test(r.err), r.err);
 
-    /* profiles from the command line */
-    await fetch(vurl + "?profile=muzammil", { method: "PUT", body: JSON.stringify({ colours: ["cyan", "white"] }) });
-    r = await run(["pull", "lv.score", "--profile=muzammil"], fake.url, dir);
+    /* personalities from the command line */
+    await fetch(vurl + "?personality=sarath", { method: "PUT", body: JSON.stringify({ colours: ["magenta", "cyan"] }) });
+    r = await run(["pull", "lv.score", "--personality=sarath"], fake.url, dir);
     let pulled = JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"));
-    ok("pull --profile=user embeds the profile", r.code === 0 && pulled.profile && pulled.profile.colours.map(c => c.hex).join() === "#00ffff,#ffffff", r.err);
-    ok("and the message names it", /profile muzammil\)$/.test(r.out.trim()), r.out);
-    r = await run(["pull", "lv.score@1", "--profile", "muzammil"], fake.url, dir);
+    ok("pull --personality=user embeds it", r.code === 0 && pulled.personality && pulled.personality.colours.map(c => c.hex).join() === "#ff00ff,#00ffff", r.err);
+    ok("and the message names it", /personality sarath\)$/.test(r.out.trim()), r.out);
+    r = await run(["pull", "lv.score@1", "--personality", "sarath"], fake.url, dir);
     pulled = JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"));
-    ok("the space form works, with a version", r.code === 0 && pulled.version === 1 && pulled.profile.user === "muzammil", r.err);
-    r = await run(["pull", "lv.score", "--profile=nobody"], fake.url, dir);
-    ok("a missing profile exits 1 and lists the profiles", r.code === 1 && /no profile nobody/.test(r.err) && /profiles: muzammil/.test(r.err), r.err);
+    ok("the space form works, with a version", r.code === 0 && pulled.version === 1 && pulled.personality.user === "sarath", r.err);
+    r = await run(["pull", "lv.score", "--personality=nobody"], fake.url, dir);
+    ok("a missing personality exits 1 and lists them", r.code === 1 && /no personality nobody/.test(r.err) && /personalities: sarath/.test(r.err), r.err);
     r = await run(["pull", "lv.score"], fake.url, dir);
     pulled = JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"));
-    ok("no flag, no profile in the file", r.code === 0 && !("profile" in pulled), r.err);
+    ok("no flag, nothing embedded", r.code === 0 && !("personality" in pulled), r.err);
+    r = await run(["pull", "lv.score", "--profile=sarath"], fake.url, dir);
+    pulled = JSON.parse(fs.readFileSync(path.join(dir, "lv.score"), "utf8"));
+    ok("--profile still works, and writes the new key", r.code === 0 && pulled.personality && pulled.personality.user === "sarath", r.err);
     r = await run(["pull", "lv.score", "--colour=red"], fake.url, dir);
     ok("an unknown option is refused", r.code === 1 && /unknown option --colour/.test(r.err), r.err);
   }
@@ -405,6 +471,170 @@ async function startHub() {
     const rowLatest = (await (await fetch(fake.url + "/?json")).json()).paths.find(p => p.name === "levels.score");
     /* this file was written straight to disk by the pull block, so it has no history: version is null, and the keys are still there */
     ok("the listing row still carries version and has_metadata", rowLatest && "version" in rowLatest && "has_metadata" in rowLatest, JSON.stringify(rowLatest));
+
+    fake.files.clear();
+    const libScore = Buffer.from('{"score":"lib","version":1,"grid":{"bpm":100,"beats_per_bar":4,"bars":8,"first_beat_s":0},"song":{"length_s":10}}');
+    await fetch(fake.url + "/lib.score", { method: "PUT", body: libScore });
+    await fetch(fake.url + "/lib.mp3", { method: "PUT", body: Buffer.from("fake-mp3") });
+    let lib = await (await fetch(fake.origin + "/library.json")).json();
+    ok("/library.json lists hub score latest",
+       lib.some(x => x.slug === "lib" && x.audio === "/hub/audio/lib.mp3"
+         && x.score === "/hub/score/lib.score"), JSON.stringify(lib));
+    ok("mp3 is not listed beside scores",
+       !(await (await fetch(fake.url + "/?json")).json()).paths.some(p => /\.mp3$/i.test(p.name)));
+    ok("audio/ folder is hidden from hub root listing",
+       !(await (await fetch(fake.origin + "/hub/?json")).json()).paths.some(p => p.name === "audio"));
+    await fetch(fake.origin + "/hub/rooty.score", {
+      method: "PUT", body: Buffer.from('{"score":"rooty","version":1,"grid":{"bpm":90}}') });
+    lib = await (await fetch(fake.origin + "/library.json")).json();
+    ok("/library.json ignores scores left at hub root (canonical is score/)",
+       !lib.some(x => x.slug === "rooty"), JSON.stringify(lib));
+    const home = await fetch(fake.origin + "/");
+    const homeHtml = await home.text();
+    ok("home page links to hub", home.status === 200 && /href="\/hub\/score\/"/.test(homeHtml), String(home.status));
+    const hubPage = await (await fetch(fake.origin + "/hub/")).text();
+    ok("hub page links home", /href="\/"/.test(hubPage) && />Home</.test(hubPage));
+    const hubScore = await (await fetch(fake.origin + "/hub/score/lib.score")).json();
+    ok("home can load score from hub path", hubScore.score === "lib" && hubScore.grid.bpm === 100);
+  }
+
+  /* ---- migrate root songs into score/, mp3s into audio/ ------------------ */
+  {
+    const port = await freePort(), root = path.join(scratch(), "files");
+    fs.mkdirSync(root, { recursive: true });
+    const body = Buffer.from('{"score":"old","version":1,"grid":{"bpm":88}}');
+    fs.writeFileSync(path.join(root, "old.score"), body);
+    fs.writeFileSync(path.join(root, "old.mp3"), Buffer.from("audio-bytes"));
+    fs.mkdirSync(path.join(root, ".versions", "old.score"), { recursive: true });
+    fs.writeFileSync(path.join(root, ".versions", "old.score", "1.score"), body);
+    fs.writeFileSync(path.join(root, ".versions", "old.score", "1.meta.json"),
+      Buffer.from('{"author":{"value":"renjith","enforced":true}}'));
+    const proc = spawn("python3", [path.join(REPO, "serve.py")],
+      { env: { ...process.env, PORT: String(port), HOST: "127.0.0.1", HUB_ROOT: root,
+               LIMELIGHT_SCORE_BUILDER: "stub" }, stdio: ["ignore", "pipe", "pipe"] });
+    let stderr = ""; proc.stderr.on("data", d => stderr += d);
+    const origin = `http://127.0.0.1:${port}`;
+    for (let i = 0; i < 100; i++) {
+      try { await fetch(origin + "/hub/?json"); break; } catch (e) { await new Promise(r => setTimeout(r, 50)); }
+      if (i === 99) throw new Error("migrate serve.py never answered\n" + stderr);
+    }
+    try {
+      ok("migrate moved the score into score/",
+         fs.existsSync(path.join(root, "score", "old.score")) && !fs.existsSync(path.join(root, "old.score")));
+      ok("migrate moved the mp3 into audio/",
+         fs.existsSync(path.join(root, "audio", "old.mp3")) && !fs.existsSync(path.join(root, "old.mp3"))
+           && !fs.existsSync(path.join(root, "score", "old.mp3")));
+      ok("migrate moved .versions under score/",
+         fs.existsSync(path.join(root, "score", ".versions", "old.score", "1.score"))
+           && !fs.existsSync(path.join(root, ".versions")));
+      const lib = await (await fetch(origin + "/library.json")).json();
+      const row = lib.find(x => x.slug === "old");
+      ok("/library.json lists the migrated song under /hub/score/ with /hub/audio/",
+         row && row.score === "/hub/score/old.score" && row.audio === "/hub/audio/old.mp3", JSON.stringify(row));
+      const got = await (await fetch(origin + "/hub/score/old.score?v=1&raw")).arrayBuffer();
+      ok("migrated version 1 is still downloadable", Buffer.from(got).equals(body));
+    } finally {
+      await new Promise(r => { proc.on("exit", r); proc.kill(); });
+    }
+  }
+
+  /* ---- generate score from mp3 ------------------------------------------ */
+  {
+    fake.files.clear();
+    const put = (u, body) => fetch(u, { method: "PUT", body });
+    const text = async r => await r.text();
+    const json = async r => JSON.parse(await r.text());
+    const waitDone = async (url, scoreName, { minVersion = 1, afterId = null, ms = 5000 } = {}) => {
+      const t0 = Date.now();
+      while (Date.now() - t0 < ms) {
+        const info = await json(await fetch(url + "/?jobs"));
+        const job = (info.jobs || []).find(j => j.score_name === scoreName
+          && (j.status === "done" || j.status === "error")
+          && (j.version == null || j.version >= minVersion)
+          && (!afterId || j.id !== afterId));
+        if (job) return job;
+        await new Promise(r => setTimeout(r, 50));
+      }
+      return null;
+    };
+
+    let r = await put(fake.url + "/song.mp3", Buffer.from("not-really-mp3"));
+    ok("an mp3 upload is accepted", r.status === 201, `${r.status} ${await text(r)}`);
+    ok("mp3 landed under audio/, not score/",
+       fs.existsSync(path.join(fake.root, "audio", "song.mp3"))
+         && !fs.existsSync(path.join(fake.score, "song.mp3")));
+    r = await fetch(fake.url + "/song.mp3?generate", { method: "POST" });
+    let body = await json(r);
+    ok("POST ?generate returns 202 with a job", r.status === 202 && body.job && body.job.score_name === "song.score"
+       && body.job.status === "queued", JSON.stringify(body));
+
+    let job = await waitDone(fake.url, "song.score", { minVersion: 1 });
+    ok("the stub builder finishes", job && job.status === "done" && job.version === 1, JSON.stringify(job));
+    let listing = await json(await fetch(fake.url + "/?json"));
+    let row = listing.paths.find(p => p.name === "song.score");
+    ok("the listing shows the new score at v1", row && row.version === 1, JSON.stringify(row));
+    ok("and the mp3 is not listed in score/", !listing.paths.some(p => p.name === "song.mp3"));
+
+    const libAfter = await json(await fetch(fake.origin + "/library.json"));
+    const songLib = libAfter.find(x => x.slug === "song");
+    ok("/library.json pairs the hub mp3 with the generated score",
+       songLib && songLib.audio === "/hub/audio/song.mp3" && songLib.score === "/hub/score/song.score",
+       JSON.stringify(songLib));
+    r = await fetch(fake.origin + "/hub/audio/song.mp3", { headers: { Range: "bytes=0-1" } });
+    ok("hub mp3 answers Range with 206 and audio/mpeg",
+       r.status === 206 && /audio\/mpeg/.test(r.headers.get("content-type") || "")
+         && r.headers.get("content-range") === "bytes 0-1/14"
+         && Buffer.from(await r.arrayBuffer()).equals(Buffer.from("no")),
+       `${r.status} ${r.headers.get("content-type")} ${r.headers.get("content-range")}`);
+    r = await fetch(fake.url + "/song.mp3", { headers: { Range: "bytes=0-1" } });
+    ok("GET /hub/score/song.mp3 still serves from audio/",
+       r.status === 206 && Buffer.from(await r.arrayBuffer()).equals(Buffer.from("no")));
+
+    const firstId = job.id;
+    r = await fetch(fake.url + "/song.mp3?generate", { method: "POST" });
+    body = await json(r);
+    ok("generating again is accepted", r.status === 202, JSON.stringify(body));
+    job = await waitDone(fake.url, "song.score", { minVersion: 2, afterId: firstId });
+    ok("a second generate bumps the version", job && job.status === "done" && job.version === 2, JSON.stringify(job));
+    row = (await json(await fetch(fake.url + "/?json"))).paths.find(p => p.name === "song.score");
+    ok("the listing shows v2", row && row.version === 2, JSON.stringify(row));
+
+    r = await fetch(fake.url + "/notes.txt?generate", { method: "POST" });
+    ok("POST ?generate on a non-mp3 is 400", r.status === 400 && /mp3/i.test(await text(r)), String(r.status));
+    r = await fetch(fake.url + "/missing.mp3?generate", { method: "POST" });
+    ok("POST ?generate without a prior upload is 400", r.status === 400, String(r.status));
+  }
+
+  /* ---- generate: same score in flight is 409; different names queue ------ */
+  {
+    const slow = await startHub({ LIMELIGHT_SCORE_BUILDER_DELAY_MS: "400" });
+    try {
+      const json = async r => JSON.parse(await r.text());
+      const text = async r => await r.text();
+      await fetch(slow.url + "/a.mp3", { method: "PUT", body: Buffer.from("a") });
+      await fetch(slow.url + "/b.mp3", { method: "PUT", body: Buffer.from("b") });
+      let r = await fetch(slow.url + "/a.mp3?generate", { method: "POST" });
+      ok("slow generate starts", r.status === 202, await text(r));
+      r = await fetch(slow.url + "/a.mp3?generate", { method: "POST" });
+      ok("a second generate for the same score while in flight is 409",
+         r.status === 409 && /already/i.test(await text(r)), String(r.status));
+      r = await fetch(slow.url + "/b.mp3?generate", { method: "POST" });
+      const body = await json(r);
+      ok("a different mp3 is queued", r.status === 202 && body.job.status === "queued", JSON.stringify(body));
+      const wait = async name => {
+        for (let i = 0; i < 80; i++) {
+          const info = await json(await fetch(slow.url + "/?jobs"));
+          const job = (info.jobs || []).find(j => j.score_name === name);
+          if (job && job.status === "done") return job;
+          await new Promise(x => setTimeout(x, 50));
+        }
+        return null;
+      };
+      const a = await wait("a.score"), b = await wait("b.score");
+      ok("both queued jobs complete", a && a.version === 1 && b && b.version === 1, JSON.stringify({ a, b }));
+    } finally {
+      await slow.close();
+    }
   }
 
   await fake.close();

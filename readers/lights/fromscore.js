@@ -2,6 +2,20 @@
 const fs = require("fs");
 const path = require("path");
 
+/* The built score when the pipeline has run here, else the committed fixture.
+   Scores are built rather than committed, so a bare path into scores/ makes the
+   suite unrunnable on a fresh clone -- which is how four suites stopped running
+   without anything reporting a fault. */
+function scoreFile() {
+  const candidates = [
+    path.join(__dirname, "..", "..", "scores", "levels.score"),        // built by the pipeline here
+    path.join(__dirname, "panel", "scores", "levels.score"),           // imported by the panel
+    path.join(__dirname, "..", "..", "protocol", "levels.score"),      // the committed fixture
+  ];
+  return candidates.find(c => fs.existsSync(c)) || candidates[candidates.length - 1];
+}
+
+
 /* The arranger wants sections with bar/beat edges and a per-bar energy curve.
    The pipeline emits parts and bars.intensity. One place converts, so the
    reader and its tests read the same shape from the same committed score. */
@@ -41,13 +55,10 @@ function shape(raw) {
 function load(file) {
   /* Default to the live score. A copy kept beside the protocol went stale
      the first time the pipeline changed, and the reader read the stale one.
-     The panel imports scores into its own scores/ folder, so look there when
-     the repo-root copy is absent. */
-  const candidates = file ? [file] : [
-    path.join(__dirname, "..", "..", "scores", "levels.score"),
-    path.join(__dirname, "panel", "scores", "levels.score"),
-  ];
-  const at = candidates.find(c => fs.existsSync(c)) || candidates[0];
+     Scores are built rather than committed, so a bare path into scores/ made the
+     suite unrunnable on a fresh clone. Look, in order, for the built score, the
+     panel's imported copy, and the committed fixture beside the protocol. */
+  const at = file || scoreFile();
   return shape(JSON.parse(fs.readFileSync(at, "utf8")));
 }
 

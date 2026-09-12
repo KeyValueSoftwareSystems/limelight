@@ -11,7 +11,7 @@ hide.
 It binds every interface so the hub is reachable across the network; set
 HOST=127.0.0.1 to keep it to this machine.
 """
-import datetime, glob, http.server, json, os, socket, socketserver, sys, urllib.parse
+import datetime, http.server, json, os, socket, socketserver, sys, urllib.parse
 from hub import hub
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -107,18 +107,44 @@ class H(http.server.BaseHTTPRequestHandler):
         if p == "/container":
             return self._file("page/container.html")
         if p == "/library.json":
-            out = []
-            for f in sorted(glob.glob(os.path.join(ROOT, "scores", "*.score"))):
-                slug = os.path.splitext(os.path.basename(f))[0]
-                exact = os.path.join(ROOT, "work", "wav", slug + ".wav")
-                if os.path.isfile(exact):
-                    out.append({"slug": slug, "audio": f"/work/wav/{slug}.wav"})
-                    continue
-                for ext in (".mp3", ".wav"):
-                    audio = os.path.join(ROOT, "synth", "incoming", slug + ext)
-                    if os.path.isfile(audio):
-                        out.append({"slug": slug, "audio": f"/synth/incoming/{slug}{ext}"})
-                        break
+            out, seen = [], set()
+
+            def add_scores(dirpath, url_prefix):
+                if not os.path.isdir(dirpath):
+                    return
+                for name in sorted(os.listdir(dirpath)):
+                    if not name.endswith(".score"):
+                        continue
+                    full = os.path.join(dirpath, name)
+                    if not os.path.isfile(full):
+                        continue
+                    slug = name[:-6]  # strip .score
+                    if slug in seen:
+                        continue
+                    seen.add(slug)
+                    audio = None
+                    hub_mp3 = os.path.join(hub.ROOT, "audio", slug + ".mp3")
+                    if os.path.isfile(hub_mp3):
+                        audio = f"/hub/audio/{urllib.parse.quote(slug)}.mp3"
+                    else:
+                        exact = os.path.join(ROOT, "work", "wav", slug + ".wav")
+                        if os.path.isfile(exact):
+                            audio = f"/work/wav/{slug}.wav"
+                        else:
+                            for ext in (".mp3", ".wav"):
+                                candidate = os.path.join(ROOT, "synth", "incoming", slug + ext)
+                                if os.path.isfile(candidate):
+                                    audio = f"/synth/incoming/{slug}{ext}"
+                                    break
+                    out.append({
+                        "slug": slug,
+                        "audio": audio,
+                        "score": f"{url_prefix}{urllib.parse.quote(slug)}.score",
+                    })
+
+            # Canonical store only (migrate.py moves root leftovers into score/).
+            add_scores(os.path.join(hub.ROOT, "score"), "/hub/score/")
+            out.sort(key=lambda x: x["slug"].lower())
             return self._json(out)
         if p == "/verdicts.json":
             return self._json(read_verdicts())

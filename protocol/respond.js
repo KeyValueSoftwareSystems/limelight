@@ -24,9 +24,9 @@
       window that starts there, because renumbering is how you lose the ability
       to compare two windows of the same song.
 
-   5. A score that carries a `profile` -- pulled with `limelight pull --profile`
+   5. A score that carries a `personality` -- pulled with `limelight pull --personality`
       -- gets it back in every response, asked for or not. The consumer who
-      pulled with a profile meant it to apply to everything they render.
+      pulled with a personality meant it to apply to everything they render.
 */
 "use strict";
 const fs = require("fs"), path = require("path");
@@ -183,7 +183,8 @@ function respond(req) {
   }
   if (want.has("layers") && s.layers) out.layers = s.layers;
 
-  if (s.profile) out.profile = s.profile;
+  const person = s.personality || s.profile;
+  if (person) { out.personality = person; out.profile = person; }
   if (unknown.length) out.ignored = { fields: unknown, known: KNOWN };
   return out;
 }

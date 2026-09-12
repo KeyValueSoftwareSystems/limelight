@@ -39,6 +39,24 @@ const secondsAt = (bar, beat) => bar * 2 + (beat - 1) * 0.5; // fake grid
   ok("no extra below Expert", Mapper.mapExtra(down, { difficulty: "Normal", secondsAt }) === null);
 }
 
+// lanes/directions must be well-mixed, not a trivial index cycle (the low-bit bug)
+{
+  const lanes = [], dirs = [];
+  for (let bar = 0; bar < 60; bar++) for (let beat = 1; beat <= 4; beat++) {
+    const n = Mapper.mapBeat({ bar, beat, accent: beat === 1 }, { difficulty: "Normal", secondsAt });
+    lanes.push(n.lane); dirs.push(n.direction);
+  }
+  const trivialLane = lanes.every((l, i) => l === (i + 1) % 4);
+  ok("lanes are not a fixed 0-1-2-3 cycle", !trivialLane, lanes.slice(0, 8).join(""));
+  const counts = [0, 0, 0, 0]; lanes.forEach((l) => counts[l]++);
+  ok("every lane is used", counts.every((c) => c > 0), counts.join(","));
+  // offbeat directions should span more than the couple a trivial cycle yields
+  const offDirs = new Set();
+  for (let bar = 0; bar < 60; bar++) for (let beat = 2; beat <= 4; beat++)
+    offDirs.add(Mapper.mapBeat({ bar, beat, accent: false }, { difficulty: "Normal", secondsAt }).direction);
+  ok("offbeat directions vary (>=5 of 8)", offDirs.size >= 5, offDirs.size + " distinct");
+}
+
 let failed = 0;
 for (const [pass, name, detail] of out) { if (!pass) failed++; console.log(pass ? "pass" : "FAIL", name, detail); }
 console.log(failed ? `\n${failed} FAILED` : "\nall passed");

@@ -176,6 +176,16 @@ function applyWindow(out, w, grid) {
     out.chord_changes = out.chord_changes.filter(c => inWin(c.at.bar));
   }
 
+  /* melody is a list of notes, each at its own bar and beat; signals carry the
+     same shape as moments and may be flat or nested. Both were passing through
+     a window unclipped, so asking for eight bars returned the whole song. */
+  if (Array.isArray(out.melody)) {
+    out.melody = out.melody.filter(n => inWin(n.bar));
+  }
+  if (Array.isArray(out.signals)) {
+    out.signals = out.signals.filter(g => inWin((g.at || g).bar));
+  }
+
   // tension (per-beat: bpb values per bar)
   if (out.tension && Array.isArray(out.tension.values)) {
     const fromBar = out.tension.from_bar ?? 0;

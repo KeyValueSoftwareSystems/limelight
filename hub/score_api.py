@@ -16,17 +16,17 @@ KNOWN = [
     "brightness", "width", "air", "pump", "pace", "moments",
     "phrases", "layers", "chords", "key", "loudness", "feel",
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
-    "tension", "releases", "melody", "made_by",
+    "tension", "releases", "melody", "signals", "made_by",
 ]
 
 _STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
 _STEM_FOUR  = ["drums", "bass", "vocals", "other"]
 _CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace"]
-# profile rides with the score when present, asked for or not: it is how one
-# user's application treats this score, and a consumer that forgot to ask for it
-# should still get it. Muzammil added this; the move into hub/ dropped it, and
-# only his own test noticed.
-_ALWAYS = ["score", "version", "window", "grid", "profile"]
+# The personality rides with the score when present, asked for or not: it is how
+# the artist wants this song to look, and a consumer that forgot to ask should
+# still get it. `profile` was the old name and is still sent alongside, so a
+# reader written last week keeps working.
+_ALWAYS = ["score", "version", "window", "grid", "personality", "profile"]
 
 
 def _or(v, d):
@@ -173,14 +173,29 @@ def format_v1(raw):
                         "from_bar": first_bar, "lanes": stem_lanes}
 
     # ---- moments ----
+    # A moment says where it is as `at: {bar, beat}`, whichever source it came
+    # from. The pipeline writes bar and beat flat at the top of the object and
+    # the events fallback nested them, so the same field arrived in two shapes
+    # depending on which branch fired -- and a consumer reading m["at"] worked
+    # on one score and raised on the next.
+    _M_KEYS = ("is", "what", "sure", "weight", "strength",
+               "for_beats", "for_bars", "then", "after", "leaves")
     if raw.get("moments"):
-        out["moments"] = raw["moments"]
+        out["moments"] = []
+        for mo in raw["moments"]:
+            if mo.get("at"):
+                out["moments"].append(mo)
+                continue
+            m = {"at": {"bar": mo.get("bar"), "beat": mo.get("beat")}}
+            for k, v in mo.items():
+                if k not in ("bar", "beat") and v is not None:
+                    m[k] = v
+            out["moments"].append(m)
     elif isinstance(raw.get("events"), list):
         out["moments"] = []
         for ev in raw["events"]:
             m = {"at": {"bar": ev.get("bar"), "beat": ev.get("beat")}}
-            for k in ("is", "what", "sure", "weight", "strength",
-                      "for_beats", "for_bars", "then", "after", "leaves"):
+            for k in _M_KEYS:
                 if ev.get(k) is not None:
                     m[k] = ev[k]
             out["moments"].append(m)
@@ -323,17 +338,26 @@ def format_v1(raw):
                 "size": r.get("size"),
             })
 
-    # ---- melody (guard) ----
+    # ---- melody: the notes of the lead line and the voice ----
     if raw.get("melody"):
         out["melody"] = raw["melody"]
+    for k in ("lead", "voice"):
+        if raw.get(k):
+            out[k] = raw[k]
+
+    # ---- signals: changes the pipeline noticed that are not moments ----
+    if raw.get("signals"):
+        out["signals"] = raw["signals"]
 
     # ---- made_by ----
     if raw.get("made_by"):
         out["made_by"] = raw["made_by"]
 
-    # ---- profile: the consumer's layer, embedded by the hub on pull ----
-    if raw.get("profile"):
-        out["profile"] = raw["profile"]
+    # ---- personality: the artist's layer, embedded by the hub on pull ----
+    person = raw.get("personality") or raw.get("profile")
+    if person:
+        out["personality"] = person
+        out["profile"] = person        # the old name, until everyone has moved
 
     return out
 
@@ -429,6 +453,15 @@ def apply_window(out, w, grid):
     if out.get("releases"):
         out["releases"] = [r for r in out["releases"] if in_win(r["at"]["bar"])]
 
+    # melody — a list of notes, each at its own bar and beat
+    if isinstance(out.get("melody"), list):
+        out["melody"] = [n for n in out["melody"] if in_win(n.get("bar", 0))]
+
+    # signals — same shape as moments, flat or nested
+    if isinstance(out.get("signals"), list):
+        out["signals"] = [g for g in out["signals"]
+                          if in_win((g.get("at") or g).get("bar", 0))]
+
     # layers — subsection and presence spans
     if out.get("layers"):
         for name in ("subsection", "presence"):
@@ -469,9 +502,9 @@ def handle(body, fetch_score):
     """Process a score protocol request.
 
     body        -- the parsed JSON request body
-    fetch_score -- callable(name, profile=None) -> parsed score dict.
-                   `profile` is how one user's application treats this score;
-                   the hub embeds it when asked, or raises when it is missing.
+    fetch_score -- callable(name, personality=None) -> parsed score dict.
+                   `personality` is how the artist wants this song to look; the
+                   hub embeds it when asked, or raises when it is missing.
                    A fetcher that takes only a name still works.
     """
     if not body or not isinstance(body.get("score"), str) or not body["score"]:
@@ -484,16 +517,20 @@ def handle(body, fetch_score):
         if any(not isinstance(f, str) for f in fields):
             raise ValueError('every entry in "fields" must be a string')
 
-    profile = body.get("profile")
-    if profile is not None:
-        if not isinstance(profile, str) or not profile:
-            raise ValueError('"profile" must be a non-empty string')
+    # either spelling on the way in; `profile` was the name until this layer was
+    # called a personality, and a request written last week still has to work
+    person = body.get("personality")
+    if person is None:
+        person = body.get("profile")
+    if person is not None:
+        if not isinstance(person, str) or not person:
+            raise ValueError('"personality" must be a non-empty string')
 
     try:
-        raw = fetch_score(body["score"], profile)
+        raw = fetch_score(body["score"], person)
     except TypeError:
-        # a fetcher that predates profiles takes the name alone
-        if profile is not None:
+        # a fetcher that predates this takes the name alone
+        if person is not None:
             raise
         raw = fetch_score(body["score"])
 

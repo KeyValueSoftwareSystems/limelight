@@ -1,9 +1,6 @@
 <title>Verify</title>
+<link rel="stylesheet" href="/page/ui.css">
 <style>
-:root{--bg:#0a0d13;--pan:#0f141d;--line:#1b2230;--line2:#263047;--ink:#e6e9f0;
-  --dim:#9aa3b8;--faint:#5c6478;--amb:#e8a33d;--ok:#5bb98c;--bad:#e0655f;--blu:#6fa8dc}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.55 ui-sans-serif,system-ui,sans-serif;margin:0}
 .wrap{max-width:none;margin:0;padding:14px 20px 80px}
 button,select{background:#182031;color:var(--ink);border:1px solid var(--line2);
   border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
@@ -73,6 +70,14 @@ h2{font:600 13px system-ui;margin:22px 0 8px;color:var(--dim)}
 .row{flex-wrap:wrap}
 </style>
 
+<header class="top">
+  <a class="brand" href="/">Limelight</a>
+  <nav class="nav">
+    <a class="here" href="/">Home</a>
+    <a href="/hub/score/">Hub</a>
+  </nav>
+</header>
+
 <div class="wrap">
 <div class="bar">
   <select id="song"></select>
@@ -122,19 +127,20 @@ const evTime = e => barTime(e.bar) + (e.beat - 1) * (60 / SCORE.grid.bpm);
 async function library() {
   const list = await (await fetch("/library.json")).json();
   $("song").innerHTML = list.map(x =>
-    `<option value="${x.slug}" data-a="${x.audio}">${x.slug}</option>`).join("");
+    `<option value="${x.slug}" data-a="${x.audio || ""}" data-score="${x.score || ""}">${x.slug}</option>`).join("");
   const want = new URLSearchParams(location.search).get("song");
   const pick = list.find(x => x.slug === want) || list[0];
-  if (pick) { $("song").value = pick.slug; load(pick.slug, pick.audio); }
+  if (pick) { $("song").value = pick.slug; load(pick.slug, pick.audio, pick.score); }
 }
 
-async function load(s, url) {
+async function load(s, url, scoreUrl) {
   slug = s;
-  SCORE = await (await fetch(`/scores/${s}.score`)).json();
+  const src = scoreUrl || `/hub/score/${encodeURIComponent(s)}.score`;
+  SCORE = await (await fetch(src)).json();
   BAR = (60 / SCORE.grid.bpm) * SCORE.grid.beats_per_bar;
   FIRSTBAR = SCORE.grid.first_beat_s > 0.2 ? 0 : 1;
-  aud.src = url; aud.load();
-  $("play").disabled = false;
+  if (url) { aud.src = url; aud.load(); $("play").disabled = false; }
+  else { aud.removeAttribute("src"); $("play").disabled = true; }
   const g = SCORE.grid;
   $("facts").textContent = `${g.bpm} bpm · ${g.bars} bars`
     + (g.holds_from_s != null ? ` · grid holds from ${mmss(g.holds_from_s)}` : "");
@@ -763,7 +769,11 @@ $("clicker").onclick = e => {
   e.target.textContent = "click: " + (clicking ? "on" : "off");
 };
 aud.onseeked = () => sent = aud.currentTime;
-$("song").onchange = e => { aud.pause(); load(e.target.value, e.target.selectedOptions[0].dataset.a); };
+$("song").onchange = e => {
+  aud.pause();
+  const o = e.target.selectedOptions[0];
+  load(e.target.value, o.dataset.a, o.dataset.score);
+};
 addEventListener("resize", () => { if (SCORE) { lanes(); tune(); zoom(); } });
 
 library();

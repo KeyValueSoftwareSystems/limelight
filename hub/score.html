@@ -1,12 +1,22 @@
 <!-- One score: its versions, a download for each, a new version from here, the
-     metadata fields on any version, and the profiles of the people who use it.
+     metadata fields on any version, and the personalitys of the people who use it.
      Every request this page makes is one the CLI or curl could make; nothing
      here is page-only. Styles live in /page/ui.css. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Score</title>
 <link rel="stylesheet" href="/page/ui.css">
-
+</head>
+<body>
 <header class="top">
-  <a class="brand" href="/hub/">Limelight</a>
+  <a class="brand" href="/">Limelight</a>
+  <nav class="nav">
+    <a href="/">Home</a>
+    <a class="here" href="/hub/score/">Hub</a>
+  </nav>
   <span class="remote" id="remote"></span>
 </header>
 
@@ -37,10 +47,10 @@
 </section>
 
 <aside>
-  <div class="panel"><div class="inner">
-  <h2>Profiles <span class="count" id="pcount">0</span></h2>
+  <div class="panel pop"><div class="inner">
+  <h2>Personalitys <span class="count" id="pcount">0</span></h2>
   <table class="list compact" id="ptable">
-    <tbody id="profiles"></tbody>
+    <tbody id="personalities"></tbody>
   </table>
   <div class="pform">
     <div class="row"><input type="text" id="puser" placeholder="User name" maxlength="40" aria-label="User name"></div>
@@ -54,7 +64,7 @@
         <div class="msel-menu" id="pcolours-menu" role="listbox" aria-multiselectable="true" hidden></div>
       </div>
     </div>
-    <div class="row"><button id="psave" class="primary">Save profile</button><span class="msg ok" id="pmsg"></span></div>
+    <div class="row"><button id="psave" class="primary">Save personality</button><span class="msg ok" id="pmsg"></span></div>
   </div>
   </div></div>
   <p class="note" id="phint"></p>
@@ -69,7 +79,11 @@ const name = decodeURIComponent(file.slice(file.lastIndexOf("/") + 1));
 const enc = s => s.split("/").map(encodeURIComponent).join("/");
 const err = m => { $("msg").textContent = m; if (m) console.error(m); };
 const human = n => n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : (n / 1048576).toFixed(2) + " MB";
-const when = ms => new Date(ms).toISOString().slice(0, 16).replace("T", " ");
+const when = ms => {
+  const d = new Date(ms);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" });
+};
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 $("remote").textContent = "LIMELIGHT_REMOTE=" + location.origin + "/hub/score";
 
@@ -103,7 +117,8 @@ async function load() {
                           : `<span class="dim">none</span>`;
     rows.push(`<tr data-version="${v.version}"><td class="n">v${v.version}${v.version === HIST.latest ? ' <span class="badge latest">latest</span>' : ""}</td>` +
       `<td data-l="uploaded">${when(v.mtime)}</td><td class="r" data-l="size">${human(v.size)}</td><td data-l="metadata">${meta}</td>` +
-      `<td class="r actions"><a class="btn quiet" href="${file}?v=${v.version}" download>Download v${v.version}</a> ` +
+      `<td class="r actions"><button type="button" class="view quiet" data-version="${v.version}">View</button> ` +
+      `<a class="btn quiet" href="${file}?v=${v.version}" download>Download v${v.version}</a> ` +
       `<button type="button" class="edit" data-version="${v.version}" data-mergeable="${v.mergeable}">${v.fields ? "Edit" : "Add"} metadata</button></td></tr>`);
   }
   $("rows").innerHTML = rows.join("") || `<tr><td colspan="5" class="empty">No versions yet. Upload one above, or push it with <code>limelight push</code>.</td></tr>`;
@@ -135,7 +150,7 @@ function fieldRow(key, value, enforced) {
 }
 
 async function openEditor(version, mergeable) {
-  document.querySelectorAll("tr.edit").forEach(tr => tr.remove());
+  document.querySelectorAll("tr.edit, tr.view").forEach(tr => tr.remove());
   const verRow = document.querySelector(`tr[data-version="${version}"]`);
   if (!verRow) return err(`Cannot find version row v${version}`);
   let current = {};
@@ -185,14 +200,59 @@ async function openEditor(version, mergeable) {
   };
 }
 
+async function openViewer(version) {
+  document.querySelectorAll("tr.edit, tr.view").forEach(tr => tr.remove());
+  const verRow = document.querySelector(`tr[data-version="${version}"]`);
+  if (!verRow) return err(`Cannot find version row v${version}`);
+  err("");
+  let text;
+  try {
+    const r = await fetch(`${file}?v=${version}`);
+    if (!r.ok) return err(`${r.status} ${r.statusText} loading v${version}`);
+    text = await r.text();
+  } catch (e) {
+    return err("cannot reach the server: " + e.message);
+  }
+  let body = "", hint = "";
+  try {
+    body = JSON.stringify(JSON.parse(text), null, 2);
+  } catch (e) {
+    const max = 200000;
+    body = text.length > max ? text.slice(0, max) + "\n… truncated …" : text;
+    hint = "This version is not valid JSON; showing raw bytes.";
+  }
+  const tr = document.createElement("tr");
+  tr.className = "view";
+  tr.innerHTML = `<td colspan="5">` +
+    `<div class="viewbar"><span class="label">v${esc(String(version))} JSON</span>` +
+    `<span class="hint">${esc(hint)}</span>` +
+    `<button type="button" class="close quiet">Close</button></div>` +
+    `<pre class="json-view">${esc(body)}</pre></td>`;
+  verRow.after(tr);
+  tr.querySelector(".close").onclick = () => tr.remove();
+  tr.querySelector(".close").focus();
+}
+
 $("rows").addEventListener("click", e => {
+  const view = e.target.closest("button.view");
+  if (view) {
+    e.preventDefault();
+    openViewer(view.dataset.version).catch(ex => err(ex.message || String(ex)));
+    return;
+  }
   const b = e.target.closest("button.edit");
   if (!b) return;
   e.preventDefault();
   openEditor(b.dataset.version, b.dataset.mergeable).catch(ex => err(ex.message || String(ex)));
 });
 
-/* ---- profiles: how one user's application treats this score ----------------- */
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  const open = document.querySelector("tr.view, tr.edit");
+  if (open) open.remove();
+});
+
+/* ---- personalities: how one user's application treats this score ----------------- */
 let USERS = new Set();
 let COLOURS = []; /* [{name, hex}, ...] from the palette */
 const pmsg = (m, bad) => { $("pmsg").textContent = m; $("pmsg").className = bad ? "msg" : "msg ok"; };
@@ -228,27 +288,26 @@ function toggleColourMenu(force) {
   $("pcolours-btn").setAttribute("aria-expanded", open ? "true" : "false");
 }
 
-async function loadProfiles() {
-  const r = await fetch(file + "?profiles");
-  if (!r.ok) return err(`${r.status} ${r.statusText} listing profiles`);
+async function loadPersonalitys() {
+  const r = await fetch(file + "?personalities");
+  if (!r.ok) return err(`${r.status} ${r.statusText} listing personalitys`);
   const data = await r.json();
+  const selected = chosen();
   COLOURS = data.colours || [];
   const menu = $("pcolours-menu");
-  if (!menu.children.length) {
-    menu.innerHTML = COLOURS.map(c =>
-      `<label class="msel-opt"><input type="checkbox" value="${esc(c.name)}">` +
-      `<span class="swatch" style="background:${c.hex}"></span>${esc(c.name)}</label>`).join("");
-  }
-  USERS = new Set(data.profiles.map(p => p.user));
-  $("pcount").textContent = data.profiles.length;
-  $("profiles").innerHTML = data.profiles.map(p =>
+  menu.innerHTML = COLOURS.map(c =>
+    `<label class="msel-opt"><input type="checkbox" value="${esc(c.name)}"${selected.includes(c.name) ? " checked" : ""}>` +
+    `<span class="swatch" style="background:${c.hex}"></span>${esc(c.name)}</label>`).join("");
+  USERS = new Set(data.personalities.map(p => p.user));
+  $("pcount").textContent = data.personalities.length;
+  $("personalities").innerHTML = data.personalities.map(p =>
     `<tr><td class="n">${esc(p.user)}</td>` +
     `<td class="swatches" title="${p.colours.map(c => c.name).join(", ")}">${p.colours.map(c => `<span class="swatch" style="background:${c.hex}"></span>`).join("")}</td>` +
     `<td class="r"><button class="small quiet pedit" data-user="${esc(p.user)}" data-colours="${p.colours.map(c => c.name).join(",")}">Edit</button></td></tr>`).join("")
-    || `<tr><td colspan="3" class="empty">No profiles yet.</td></tr>`;
-  $("phint").innerHTML = data.profiles.length
-    ? `A profile is how one person's application treats this score. Pull with one: <code>limelight pull ${esc(name)} --profile=${esc(data.profiles[0].user)}</code>`
-    : "A profile is how one person's application treats this score. Add yours, then pull with <code>--profile=&lt;user&gt;</code>.";
+    || `<tr><td colspan="3" class="empty">No personalitys yet.</td></tr>`;
+  $("phint").innerHTML = data.personalities.length
+    ? `A personality is how one person's application treats this score. Pull with one: <code>limelight pull ${esc(name)} --personality=${esc(data.personalities[0].user)}</code>`
+    : "A personality is how one person's application treats this score. Add yours, then pull with <code>--personality=&lt;user&gt;</code>.";
   renderPicks();
 }
 
@@ -265,15 +324,15 @@ $("psave").addEventListener("click", async () => {
   if (!/^[A-Za-z0-9_-]{1,40}$/.test(user)) return pmsg("User name: 1-40 letters, digits, _ or -", true);
   if (!colours.length) return pmsg("Pick at least one colour.", true);
   const existed = USERS.has(user);
-  const r = await fetch(`${file}?profile=${encodeURIComponent(user)}`, { method: "PUT", body: JSON.stringify({ colours }) });
+  const r = await fetch(`${file}?personality=${encodeURIComponent(user)}`, { method: "PUT", body: JSON.stringify({ colours }) });
   if (!r.ok) return pmsg(`${r.status}: ${await r.text()}`, true);
   pmsg(`${existed ? "Replaced" : "Added"} ${user}: ${colours.join(", ")}`);
   $("puser").value = ""; setChosen([]);
   closeColourMenu();
-  loadProfiles();
+  loadPersonalitys();
 });
 
-$("profiles").addEventListener("click", e => {
+$("personalities").addEventListener("click", e => {
   const b = e.target.closest("button.pedit");
   if (!b) return;
   $("puser").value = b.dataset.user;
@@ -281,5 +340,8 @@ $("profiles").addEventListener("click", e => {
   $("puser").focus();
 });
 
-crumbs(); load(); loadProfiles();
+crumbs(); load(); loadPersonalitys();
 </script>
+
+</body>
+</html>
