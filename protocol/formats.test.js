@@ -87,6 +87,9 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
     noisy: (planted.bars.intensity || []).map(() => 0.4),
     held: (planted.bars.intensity || []).map(() => 0.6),
   });
+  if (Array.isArray(planted.parts) && planted.parts.length) {
+    planted.parts.forEach((q, i) => { q.edge = i === 0 ? null : 1.5 + i; });
+  }
   planted.motion = {
     per: "bar", from_bar: 1,
     moving: ["steady", "rising", "rising", "falling"],
@@ -137,6 +140,13 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
   ok("energy carries its own reliability too",
      (js2.energy || {}).tells !== undefined && (py2.energy || {}).tells !== undefined,
      `js ${(js2.energy||{}).tells}, py ${(py2.energy||{}).tells}`);
+
+  ok("a section says how much its boundary is worth, through both formatters",
+     (js2.sections || []).some(x => x.edge !== undefined)
+       && (py2.sections || []).some(x => x.edge !== undefined)
+       && JSON.stringify((js2.sections || []).map(x => x.edge))
+          === JSON.stringify((py2.sections || []).map(x => x.edge)),
+     `js ${JSON.stringify((js2.sections || []).map(x => x.edge))}`);
 
   ok("both formatters send the same motion track",
      JSON.stringify(js2.motion) === JSON.stringify(py2.motion),

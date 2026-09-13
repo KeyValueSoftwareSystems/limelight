@@ -2166,6 +2166,7 @@
       "from_bar": 0,
       "to_bar": 8,
       "role": "intro",
+      "edge": null,
       "repeats_as": "A",
       "sure": 0.639,
       "trades": null,
@@ -2202,8 +2203,8 @@
       "like": "A",
       "returns": true,
       "mood": {
-        "spacious_vs_claustrophobic": -0.407,
-        "tense_vs_relaxed": 0.347
+        "spacious_vs_claustrophobic": -0.416,
+        "tense_vs_relaxed": 0.375
       },
       "played": {
         "notes": 35,
@@ -2217,6 +2218,7 @@
       "from_bar": 9,
       "to_bar": 24,
       "role": "drop",
+      "edge": 5.31,
       "repeats_as": "B",
       "sure": 0.914,
       "trades": null,
@@ -2255,8 +2257,8 @@
       "like": "B",
       "returns": true,
       "mood": {
-        "spacious_vs_claustrophobic": -0.128,
-        "tense_vs_relaxed": 0.36
+        "spacious_vs_claustrophobic": -0.137,
+        "tense_vs_relaxed": 0.387
       },
       "played": {
         "notes": 56,
@@ -2270,8 +2272,9 @@
       "from_bar": 25,
       "to_bar": 32,
       "role": "breakdown",
+      "edge": 5.09,
       "repeats_as": "A",
-      "sure": 0.637,
+      "sure": 0.641,
       "trades": null,
       "feels": "drums out",
       "fullness": 0.71,
@@ -2306,8 +2309,8 @@
       "like": "A",
       "returns": true,
       "mood": {
-        "spacious_vs_claustrophobic": -0.286,
-        "tense_vs_relaxed": 0.363
+        "spacious_vs_claustrophobic": -0.295,
+        "tense_vs_relaxed": 0.39
       },
       "played": {
         "notes": 22,
@@ -2321,8 +2324,9 @@
       "from_bar": 33,
       "to_bar": 45,
       "role": "drop",
+      "edge": 3.96,
       "repeats_as": "B",
-      "sure": 0.922,
+      "sure": 0.92,
       "trades": null,
       "feels": "drums in",
       "fullness": 0.808,
@@ -2359,8 +2363,8 @@
       "like": "B",
       "returns": true,
       "mood": {
-        "spacious_vs_claustrophobic": -0.256,
-        "tense_vs_relaxed": 0.282
+        "spacious_vs_claustrophobic": -0.265,
+        "tense_vs_relaxed": 0.31
       },
       "played": {
         "notes": 39,
@@ -2374,8 +2378,9 @@
       "from_bar": 46,
       "to_bar": 50,
       "role": "breakdown",
+      "edge": 3.36,
       "repeats_as": "A",
-      "sure": 0.489,
+      "sure": 0.505,
       "trades": null,
       "feels": "half a kit",
       "fullness": 0.725,
@@ -2411,8 +2416,8 @@
       "like": "A",
       "returns": true,
       "mood": {
-        "spacious_vs_claustrophobic": 0.552,
-        "tense_vs_relaxed": -0.103
+        "spacious_vs_claustrophobic": 0.543,
+        "tense_vs_relaxed": -0.075
       },
       "played": {
         "notes": 5,
@@ -2426,6 +2431,7 @@
       "from_bar": 51,
       "to_bar": 66,
       "role": "verse",
+      "edge": 2.09,
       "repeats_as": "C",
       "sure": 0.0,
       "trades": {
@@ -2471,8 +2477,8 @@
       "like": "C",
       "returns": false,
       "mood": {
-        "spacious_vs_claustrophobic": -0.23,
-        "tense_vs_relaxed": -0.508
+        "spacious_vs_claustrophobic": -0.239,
+        "tense_vs_relaxed": -0.48
       },
       "sung": {
         "notes": 37,
@@ -2493,8 +2499,9 @@
       "from_bar": 67,
       "to_bar": 76,
       "role": "breakdown",
+      "edge": 1.43,
       "repeats_as": "A",
-      "sure": 0.381,
+      "sure": 0.388,
       "trades": null,
       "feels": "voice out",
       "fullness": 0.629,
@@ -2529,8 +2536,8 @@
       "like": "D",
       "returns": false,
       "mood": {
-        "spacious_vs_claustrophobic": 0.494,
-        "tense_vs_relaxed": -0.637
+        "spacious_vs_claustrophobic": 0.484,
+        "tense_vs_relaxed": -0.61
       },
       "sung": {
         "notes": 2,
@@ -2551,8 +2558,9 @@
       "from_bar": 77,
       "to_bar": 86,
       "role": "bridge",
+      "edge": 2.08,
       "repeats_as": "A",
-      "sure": 0.417,
+      "sure": 0.447,
       "trades": null,
       "feels": "half a kit",
       "fullness": 0.68,
@@ -2589,8 +2597,8 @@
       "like": "A",
       "returns": true,
       "mood": {
-        "spacious_vs_claustrophobic": 0.593,
-        "tense_vs_relaxed": -0.562
+        "spacious_vs_claustrophobic": 0.584,
+        "tense_vs_relaxed": -0.534
       },
       "played": {
         "notes": 38,
@@ -2602,37 +2610,38 @@
     },
     {
       "from_bar": 87,
-      "to_bar": 93,
+      "to_bar": 100,
       "role": "breakdown",
+      "edge": 1.76,
       "repeats_as": "A",
-      "sure": 0.481,
+      "sure": 0.588,
       "trades": null,
       "feels": "drums out",
-      "fullness": 0.56,
-      "rise": 0.613,
+      "fullness": 0.696,
+      "rise": 0.57,
       "playing": [
         "other"
       ],
       "stems": {
         "drums": {
           "is": "none",
-          "sits": 0.011,
-          "level": 0.183
+          "sits": 0.036,
+          "level": 0.158
         },
         "bass": {
           "is": "none",
           "sits": 0.019,
-          "level": 0.134
+          "level": 0.133
         },
         "vocals": {
           "is": "none",
           "sits": 0.0,
-          "level": 0.017
+          "level": 0.009
         },
         "other": {
           "is": "full",
-          "sits": 0.588,
-          "level": 0.642
+          "sits": 0.956,
+          "level": 0.734
         }
       },
       "also_heard": null,
@@ -2640,65 +2649,14 @@
       "like": "E",
       "returns": false,
       "mood": {
-        "spacious_vs_claustrophobic": 0.093,
-        "tense_vs_relaxed": 0.284
+        "spacious_vs_claustrophobic": -0.106,
+        "tense_vs_relaxed": 0.306
       },
       "played": {
-        "notes": 25,
-        "low": 61.2,
-        "high": 73.3,
-        "moves": 1.36,
-        "on_one_note": true
-      }
-    },
-    {
-      "from_bar": 94,
-      "to_bar": 100,
-      "role": "breakdown",
-      "repeats_as": "A",
-      "sure": 0.613,
-      "trades": null,
-      "feels": "no drums",
-      "fullness": 0.833,
-      "rise": 0.233,
-      "playing": [
-        "other"
-      ],
-      "stems": {
-        "drums": {
-          "is": "none",
-          "sits": 0.042,
-          "level": 0.134
-        },
-        "bass": {
-          "is": "none",
-          "sits": 0.017,
-          "level": 0.131
-        },
-        "vocals": {
-          "is": "none",
-          "sits": 0.0,
-          "level": 0.002
-        },
-        "other": {
-          "is": "full",
-          "sits": 1.0,
-          "level": 0.826
-        }
-      },
-      "also_heard": null,
-      "nth": 5,
-      "like": "A",
-      "returns": true,
-      "mood": {
-        "spacious_vs_claustrophobic": -0.285,
-        "tense_vs_relaxed": 0.272
-      },
-      "played": {
-        "notes": 23,
+        "notes": 48,
         "low": 59.0,
-        "high": 68.2,
-        "moves": 1.59,
+        "high": 73.3,
+        "moves": 1.48,
         "on_one_note": true
       }
     },
@@ -2706,8 +2664,9 @@
       "from_bar": 101,
       "to_bar": 120,
       "role": "drop",
+      "edge": 5.2,
       "repeats_as": "B",
-      "sure": 0.929,
+      "sure": 0.927,
       "trades": null,
       "feels": "drums in",
       "fullness": 0.795,
@@ -2744,8 +2703,8 @@
       "like": "B",
       "returns": true,
       "mood": {
-        "spacious_vs_claustrophobic": -0.142,
-        "tense_vs_relaxed": -0.097
+        "spacious_vs_claustrophobic": -0.152,
+        "tense_vs_relaxed": -0.07
       },
       "played": {
         "notes": 40,
@@ -2759,8 +2718,9 @@
       "from_bar": 121,
       "to_bar": 124,
       "role": "outro",
+      "edge": 3.58,
       "repeats_as": "A",
-      "sure": 0.241,
+      "sure": 0.265,
       "trades": null,
       "feels": "half a kit",
       "fullness": 0.316,
@@ -8295,17 +8255,15 @@
     },
     {
       "from_bar": 87,
-      "to_bar": 93,
+      "to_bar": 92,
       "in": "breakdown",
       "in_nth": 4,
-      "doing": "intensifying",
-      "also": [
-        "suspending"
-      ],
-      "sure": 0.961,
+      "doing": null,
+      "also": [],
+      "sure": 0.34,
       "says": "chords holding",
-      "energy": 0.118,
-      "rise": 0.027,
+      "energy": 0.101,
+      "rise": -0.051,
       "playing": [
         "other"
       ],
@@ -8313,16 +8271,35 @@
       "has_break": false
     },
     {
-      "from_bar": 94,
+      "from_bar": 93,
+      "to_bar": 96,
+      "in": "breakdown",
+      "in_nth": 4,
+      "doing": "suspending",
+      "also": [
+        "easing"
+      ],
+      "sure": 0.9,
+      "says": "chords holding",
+      "energy": 0.111,
+      "rise": -0.145,
+      "playing": [
+        "other"
+      ],
+      "moments": 0,
+      "has_break": false
+    },
+    {
+      "from_bar": 97,
       "to_bar": 100,
       "in": "breakdown",
-      "in_nth": 5,
+      "in_nth": 4,
       "doing": null,
       "also": [],
-      "sure": 0.072,
+      "sure": 0.019,
       "says": "chords holding",
-      "energy": 0.113,
-      "rise": -0.001,
+      "energy": 0.151,
+      "rise": -0.006,
       "playing": [
         "other"
       ],
@@ -9207,7 +9184,7 @@
       "is": "entrance",
       "what": "drums",
       "sure": 0.433,
-      "weight": 0.453
+      "weight": 0.363
     },
     {
       "bar": 94,
@@ -9215,7 +9192,7 @@
       "is": "change",
       "what": "double time",
       "sure": 1.0,
-      "weight": 0.424
+      "weight": 0.224
     },
     {
       "bar": 96,
@@ -20994,24 +20971,24 @@
     }
   ],
   "mood_axes": {
-    "spacious_vs_claustrophobic": 2.61,
-    "tense_vs_relaxed": 2.12
+    "spacious_vs_claustrophobic": 2.58,
+    "tense_vs_relaxed": 2.7
   },
   "curve_tells": {
-    "intensity": 5.39,
-    "width": 3.28,
-    "weight": 3.02,
-    "floor": 2.36,
-    "air": 1.36,
-    "noisy": 1.49,
+    "intensity": 5.89,
+    "width": 2.91,
+    "weight": 2.71,
+    "floor": 2.17,
+    "air": 1.55,
+    "noisy": 1.68,
     "held": 2.07,
-    "pump": 1.33,
-    "pace": 2.15,
-    "drums": 3.43,
-    "bass": 3.61,
-    "vocals": 3.51,
-    "other": 2.08,
-    "brightness": 0.99
+    "pump": 1.36,
+    "pace": 1.77,
+    "drums": 3.66,
+    "bass": 3.46,
+    "vocals": 3.65,
+    "other": 1.83,
+    "brightness": 1.02
   },
   "lyrics": null
 }

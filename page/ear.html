@@ -999,7 +999,7 @@ function motion() {
     if (says) says.textContent = "This song has no motion track.";
     return;
   }
-  const H = 96, L = 78, R = 46;
+  const H = 132, L = 78, R = 46;
   const [g, W] = fit(el, H);
   const from = m.from_bar == null ? FIRSTBAR : m.from_bar;
   const span = W - L - R;
@@ -1014,24 +1014,44 @@ function motion() {
     g.fillRect(x0, 10, Math.max(1, x1 - x0), 16);
   }
   g.globalAlpha = 1;
-  const w = m.winding;
-  if (Array.isArray(w) && w.length) {
-    const y0 = 34, hh = H - y0 - 14;
+  const y0 = 34, hh = H - y0 - 14;
+  const reach = (v, lo, hi) => {
+    const got = v.filter(x => x != null);
+    if (!got.length) return null;
+    const a = lo != null ? lo : Math.min(...got), b = hi != null ? hi : Math.max(...got);
+    return [a, Math.max(b, a + 1e-6)];
+  };
+  const plot = (v, hue, fill, lo, hi) => {
+    if (!Array.isArray(v) || !v.length) return false;
+    const range = reach(v, lo, hi);
+    if (!range) return false;
     g.beginPath();
     let open = false;
-    for (let i = 0; i < w.length; i++) {
+    for (let i = 0; i < v.length; i++) {
       const t = barTime(i + from);
-      if (t < VIEW.a - BAR || t > VIEW.b + BAR) { continue; }
-      const x = xOf(t), y = y0 + hh - (w[i] || 0) * hh;
+      if (t < VIEW.a - BAR || t > VIEW.b + BAR) continue;
+      if (v[i] == null) { open = false; continue; }
+      const x = xOf(t);
+      const y = y0 + hh - ((v[i] - range[0]) / (range[1] - range[0])) * hh;
       open ? g.lineTo(x, y) : g.moveTo(x, y);
       open = true;
     }
-    if (open) {
-      g.strokeStyle = "#e8a33d"; g.lineWidth = 1.6; g.stroke();
+    if (!open) return false;
+    g.strokeStyle = hue; g.lineWidth = fill ? 1.6 : 1.3;
+    g.globalAlpha = fill ? 1 : .85;
+    g.stroke();
+    if (fill) {
       g.lineTo(xOf(VIEW.b), y0 + hh); g.lineTo(xOf(VIEW.a), y0 + hh); g.closePath();
       g.fillStyle = "rgba(232,163,61,.16)"; g.fill();
     }
-  }
+    g.globalAlpha = 1;
+    return true;
+  };
+  plot(m.winding, "#e8a33d", true, 0, 1);
+  const bars = SCORE.bars || {};
+  const eFrom = FIRSTBAR;
+  const energy = Array.isArray(bars.intensity) && from === eFrom ? bars.intensity : null;
+  plot(energy, "#6f7ea0", false);
   const mark = (list, up) => {
     for (const x of list || []) {
       const t = barTime(x.bar);
@@ -1051,7 +1071,8 @@ function motion() {
   mark(m.ebbs, false);
   g.fillStyle = "#8a93a6"; g.font = "600 10px ui-monospace,monospace";
   g.fillText("DOING", 7, 22);
-  g.fillText("BUILD", 7, 46);
+  g.fillStyle = "#e8a33d"; g.fillText("BUILD", 7, 46);
+  g.fillStyle = "#6f7ea0"; g.fillText("LOUDNESS", 7, 60);
   const says = $("motionsays");
   if (says) {
     const t = m.tells;
@@ -1336,9 +1357,15 @@ function modelRan() {
 }
 
 function edgeWords(p) {
-  if (!modelRan()) return "";
-  if (p.also_heard == null) return ` <span class="dim">· only our own detectors heard this boundary</span>`;
-  return ` <span style="color:var(--ok)">· a second model heard this boundary too (${p.also_heard})</span>`;
+  let out = "";
+  if (typeof p.edge === "number") {
+    out += p.edge < 1.3
+      ? ` <b style="color:var(--bad)">· this boundary is worth only ${p.edge.toFixed(2)} against the noise either side, so treat it as a suggestion</b>`
+      : ` <span class="dim">· boundary worth ${p.edge.toFixed(2)}</span>`;
+  }
+  if (!modelRan()) return out;
+  if (p.also_heard == null) return out + ` <span class="dim">· only our own detectors heard it</span>`;
+  return out + ` <span style="color:var(--ok)">· a second model heard it too (${p.also_heard})</span>`;
 }
 
 function sungWords() {
@@ -1524,21 +1551,6 @@ function tick() {
 }
 
 $("play").onclick = () => { stopAt = null; aud.paused ? aud.play() : aud.pause(); };
-/* Pressing play on the whole song shows you the shape of four minutes while
-   your ears are inside one bar, and a per-bar curve does not move for nearly
-   two seconds. So playing pulls the view in to where a beat is visible and
-   makes it follow, which is what "nothing is changing" actually meant. */
-const CLOSE = 14;
-aud.addEventListener("play", () => {
-  if (!SCORE) return;
-  if (viewSpan() > SCORE.song.length_s * 0.5) {
-    VIEW.follow = true;
-    $("follow").classList.add("on");
-    $("follow").textContent = "Follow: on";
-    const t = aud.currentTime;
-    setView(t - CLOSE / 2, t + CLOSE / 2);
-  }
-});
 aud.onplay = () => $("play").innerHTML = "&#10073;&#10073; Pause";
 aud.onpause = () => $("play").innerHTML = "&#9654; Play";
 $("seek").oninput = e => { dragging = true; stopAt = null;
@@ -1667,7 +1679,7 @@ $("song").onchange = e => {
   const o = e.target.selectedOptions[0];
   load(e.target.value, o.dataset.a, 0, 0, 0, o.dataset.score);
 };
-for (const id of ["map", "subs", "chords", "lanes", "tune", "curves"]) zoomable($(id));
+for (const id of ["map", "subs", "chords", "lanes", "tune", "motion", "curves"]) zoomable($(id));
 zoomable($("zoom"), f => aud.currentTime - Math.min(WINDOW, viewSpan())/2 + f * Math.min(WINDOW, viewSpan()));
 
 addEventListener("resize", () => { if (SCORE) { lanes(); tune(); motion(); curves(); beatGrid(); zoom(); subs(); place(); } });

@@ -161,6 +161,7 @@ def format_v1(raw):
                 "sure": p.get("sure"),
                 "trades": p.get("trades"),
                 "also_heard": p.get("also_heard"),
+                "edge": p.get("edge"),
                 "mood": p.get("mood"),
                 "stems": p.get("stems"),
             }

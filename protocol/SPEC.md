@@ -500,6 +500,33 @@ of 2.41 across 344 of them. Requiring three kinds instead of two was tried and
 was worse on every count: fewer bars, lower lift, and two songs left with no
 moments at all.
 
+## How much a boundary is worth
+
+`sections[].edge` is how far apart this section and the one before it are,
+against how much each of them varies inside itself -- the same ratio `tells`
+uses for a lane, applied to a cut. It is null on the first section, which has
+nothing before it.
+
+A boundary at 5.31 is the drop landing in Levels. A boundary at 0.29 was
+Cipher's breakdown being cut into two breakdowns on nothing. The threshold the
+rest of this project uses is 1.3, and below that a reader should treat the cut
+as a suggestion rather than an event.
+
+Two sections with the same name on either side of a boundary worth less than
+1.3 are now merged, because the same section split in half on noise is a
+mistake with no upside. Thirteen of those existed across the library and one
+remains, Experience at bar 74 where the ratio is 1.16. Boundaries below 1.3
+that separate *different* names are left alone and shipped with their number:
+sixty of them exist, and they may be real changes that the level and the stems
+happen not to show.
+
+This is also the honest answer to why breakdowns were worse than drops. A drop
+is a large step in a loud passage and the evidence towers over the noise: drop
+boundaries fail the 1.3 check on 2 of 26. A breakdown boundary sits inside a
+quiet passage where the wiggles are the same size as the evidence, and fails on
+11 of 45. Chorus boundaries are worst at 11 of 32. The detector was applying one
+threshold to both.
+
 ## What the music is doing, which is not how loud it is
 
 `motion` answers the question a lighting desk actually asks: is this lifting,
@@ -518,16 +545,35 @@ The reason it exists is that energy is the wrong lane to watch and watching it
 is worse than watching nothing. Taking every sustained loudness jump across the
 library as drops -- found from the loudness curve itself, so our section labels
 are not the judge -- and asking where each lane sits in the eight bars before
-one, against every other eight-bar window in the same song:
+one, against every other eight-bar window in the same song, chance being 50:
 
-    floor inverted   70th percentile      noisy minus floor   67th
-    winding          68th                 air minus floor     63rd
-    energy           32nd
+    winding          66.6      inverted floor    66.4
+    inverted energy  65.6      noisy alone       52.1
 
-Chance is the 50th. Energy is not merely uninformative before a drop, it is
-reliably *low* -- four bars before Don't Look Down's drop the energy curve reads
-0.24, 0.24, 0.20, while air climbs to 1.02 and floor collapses from 0.31 to
-0.06. A reader keying a build off `energy` will fade down into the drop.
+**`winding` does not beat reading the energy curve upside down, and this spec
+should not pretend otherwise.** An earlier draft reported energy at the 32nd
+percentile and winding at the 68th as though they were two findings. They are
+one finding seen twice: the 32nd percentile for a lane is the 68th for its
+negation. The information was already in `intensity`.
+
+What is real is the observation, not the lane. Energy is not merely
+uninformative before a drop, it is reliably *low* -- four bars before Don't Look
+Down's drop the energy curve reads 0.24, 0.24, 0.20, while air climbs to 1.02
+and floor collapses from 0.31 to 0.06. A reader keying a build off `energy`
+without inverting it will fade down into the drop.
+
+`winding` is kept for two small reasons, neither of them new information. It
+rises into a drop, so a reader maps it to intensity without having to invert
+anything; and it is slightly more decisive, reaching the top quartile of its
+song on 52% of drops against 41% for inverted energy. A reader who already
+inverts `energy` gains almost nothing by switching.
+
+It is not redundant in the way `wash` was with `held`: against energy it
+correlates -0.33 on average, |r| >= 0.80 on only two of twenty-eight songs
+(Don't Look Down -0.84, Killers From The Northside -0.83) and below 0.60 on
+twenty-one. On Raga of Revenge it is +0.06, because there the `noisy` term
+dominates. So it is not the same curve -- it simply does not do better at the
+one job it was built for.
 
 Combining more lanes did not pay. Adding the slope of noisy and air to the blend
 moved it from 62.2 to 61.9, so the slope terms were dropped and the lane is two

@@ -173,6 +173,7 @@ export function format(raw) {
       /* Whether a model that shares nothing with our detectors heard this
          boundary too. Null means only we did, which is not the same as wrong. */
       also_heard: part.also_heard,
+      edge: part.edge,
       sure:       part.sure,
       trades:     part.trades,
       mood:       part.mood,
