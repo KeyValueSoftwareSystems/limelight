@@ -369,6 +369,35 @@ class State:
         return st
 
 
+
+BRIEFS = {"at": 0.0, "board": None}
+
+
+def briefs_board(max_age=90.0):
+    """`node tools/briefs.js --json`, cached briefly.
+
+    Each brief bakes a show, so the board costs real seconds. It is cached for
+    a minute and a half because nothing it measures can change without a rebake,
+    and a panel that polls would otherwise spend the machine on it.
+    """
+    now = time.monotonic()
+    if BRIEFS["board"] is not None and now - BRIEFS["at"] < max_age:
+        return {**BRIEFS["board"], "cached": True}
+    root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        "..", "..", ".."))
+    try:
+        out = subprocess.run(["node", os.path.join(root, "tools", "briefs.js"), "--json"],
+                             capture_output=True, text=True, timeout=300, cwd=root)
+        if out.returncode != 0:
+            return {"error": (out.stderr or out.stdout or "briefs failed").strip()[:400]}
+        board = json.loads(out.stdout)
+    except FileNotFoundError:
+        return {"error": "node is not on PATH, so the board cannot be built here"}
+    except Exception as e:  # noqa: BLE001
+        return {"error": str(e)[:400]}
+    BRIEFS["at"], BRIEFS["board"] = now, board
+    return {**board, "cached": False}
+
 def make_handler(state: State):
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
@@ -445,6 +474,12 @@ def make_handler(state: State):
                     return self._json({"error": str(e)}, 500)
             if path == "/api/meta":
                 return self._json(state.meta or {}, 200 if state.meta else 404)
+            if path == "/api/briefs":
+                # The board: what we asked the rig to do, and what it actually
+                # does, judged from baked frames. Runs here so it is one click
+                # rather than a trip to a terminal -- which is the whole reason
+                # the review loop was slow.
+                return self._json(briefs_board())
             if path.startswith("/audio/"):
                 audio = state.audio_path(path[len("/audio/"):])
                 if not audio:

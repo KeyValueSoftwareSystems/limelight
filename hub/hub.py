@@ -31,6 +31,10 @@ curl can use it:
     GET   /hub/audio/<name>.mp3            playback bytes (Range supported); audio/ is not listed
 
     Protocol load (hub/score_api.py):
+    GET   /hub/presets/?json               every preset and its manifest
+    GET   /hub/presets/?has=build,returns   only those containing all of them
+    GET   /hub/presets/<name>/<file>        one file out of a preset
+
     POST  /hub/score                       body {"score","fields"?, "personality"?, ...}
                                            -> protocol response; the personality embeds when asked
 
@@ -46,6 +50,7 @@ scores/mp3s/.versions and any score/*.mp3 siblings are moved into place.
 import json, os, urllib.parse
 from . import versions as V
 from . import personality as P
+from . import presets as PR
 from . import generate as G
 from . import migrate
 
@@ -251,6 +256,23 @@ def handle(h, method):
     if path is None:
         return _send(h, 403, "that path is not reachable")
     query = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
+
+    # The preset library, findable by what each one contains rather than by name.
+    rel = urllib.parse.unquote(parsed.path[len(PREFIX):]).strip("/")
+    if method in ("GET", "HEAD") and rel in (PR.PDIR, PR.PDIR + "/"):
+        head = method == "HEAD"
+        raw = query.get("has", [""])[0]
+        wants = [w for w in raw.replace("+", ",").split(",") if w]
+        if wants:
+            found, unknown = PR.matching(ROOT, wants)
+            body = {"asked_for": wants, "presets": found, "can_ask_for": PR.can_ask_for()}
+            if unknown:
+                body["unknown"] = unknown
+                body["note"] = ("an unknown name matches nothing, which looks exactly "
+                                "like having none -- so it is named here instead")
+            return _json(h, 200, body, head)
+        return _json(h, 200, {"presets": PR.all_of(ROOT),
+                              "can_ask_for": PR.can_ask_for()}, head)
     versioned = path != ROOT and V.is_versioned(path)
 
     if method == "POST":
