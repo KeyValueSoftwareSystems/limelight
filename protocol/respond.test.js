@@ -79,9 +79,9 @@ for (const [p, n, d] of out) console.log(`  ${p ? "pass" : "FAIL"}  ${n}${d ? " 
 const bad = out.filter(r => !r[0]).length;
 
 /* Everything the pipeline learns has to reach a reader, and four fields added
-   in one sitting did not: ticks, melody_phrases, and repeats_as and trades on
-   a section. They were computed, written to the score, drawn on the page, and
-   dropped by the formatter -- the quietest way there is for work to be lost. */
+   in one sitting did not: ticks, melody_phrases, and the section's repeat
+   letter and trades. They were computed, written to the score, drawn on the
+   page, and dropped by the formatter -- the quietest way for work to be lost. */
 {
   const fs2 = require("fs"), path2 = require("path");
   const said = respond({ score: "levels", want: "v1" });
@@ -91,7 +91,10 @@ const bad = out.filter(r => !r[0]).length;
   ok("the fast lane and the tune's lines reach a reader", gone.length === 0,
      gone.length ? `dropped: ${gone.join(", ")}` : want.join(", "));
   const first = (doc.sections || [])[0] || {};
-  ok("a section says which section it is a repeat of", "repeats_as" in first,
+  ok("a section says which section it is a repeat of", "like" in first,
+     `section carries: ${Object.keys(first).join(" ")}`);
+  ok("it does not also say it a second, different way",
+     !("repeats_as" in first) && !("chords_say" in (doc.key || {})),
      `section carries: ${Object.keys(first).join(" ")}`);
   const traded = (doc.sections || []).filter(x => x.trades).length;
   ok("a section that trades back and forth says so", traded > 0,

@@ -13,13 +13,13 @@ from groove import groove
 from heard import agrees, edges as model_edges
 from steady import all_tells as tells_of
 from words import WORDS_MODEL, words as lyrics
-from grid import grid, bar_edges, show
+from grid import grid, bar_edges, show, at_beat
 import motion
 import ident
 from form import on_phrase
 from shape import shape
 from call import call
-from parts import curves, parts
+from parts import curves
 from pulse import pulse
 from facts import SCALES, presence, seated, turns
 from lead import hear as lead_line
@@ -72,10 +72,6 @@ def second_opinion(path, slug):
 
 
 def agreed(mine, theirs, tol=0.070):
-    # Two beat trackers that share no code and no training data. Where they
-    # agree the grid is worth trusting; where they disagree by an octave one of
-    # them is counting a different pulse and the score cannot say which. This
-    # is the only confidence in the file nobody had to label by ear.
     if theirs is None or len(mine) < 4 or len(theirs) < 4:
         return None
     hit = sum(1 for t in mine if np.min(np.abs(theirs - t)) <= tol) / len(mine)
@@ -151,8 +147,7 @@ def per_bar_loud(loud, times, g):
     return [round(x / peak, 3) for x in out]
 
 
-def alike(spans, chroma, voices):
-    import sklearn.cluster
+def alike(spans, chroma, voices, labels):
     import sklearn.metrics
 
     rows = []
@@ -167,26 +162,11 @@ def alike(spans, chroma, voices):
         else:
             rows.append(h)
     x = np.vstack(rows)
-    if len(x) < 4:
-        return [chr(65 + i) for i in range(len(x))], [0.0] * len(x)
-    best, pick, apart = -2.0, list(range(len(x))), None
-    for k in range(2, min(7, len(x))):
-        got = sklearn.cluster.AgglomerativeClustering(
-            n_clusters=k, linkage="average").fit_predict(x)
-        if len(set(got)) < 2:
-            continue
-        s = float(sklearn.metrics.silhouette_score(x, got))
-        if s > best:
-            best, pick = s, list(got)
-            apart = sklearn.metrics.silhouette_samples(x, got)
-    order, out = {}, []
-    for lab in pick:
-        if lab not in order:
-            order[lab] = chr(65 + len(order))
-        out.append(order[lab])
-    sure = ([round(max(0.0, float(v)), 3) for v in apart] if apart is not None
-            else [0.0] * len(x))
-    return out, sure
+    out = list(labels[:len(x)]) + [None] * max(0, len(x) - len(labels))
+    if len(x) < 4 or len(set(out)) < 2:
+        return [0.0] * len(x)
+    apart = sklearn.metrics.silhouette_samples(x, np.asarray(out))
+    return [round(max(0.0, float(v)), 3) for v in apart]
 
 
 def turning(voices, a, b, busy):
@@ -212,7 +192,7 @@ def held_bars(v, a, b):
 
 
 def sections(spans, voices, busy, pickup, report=None, chroma=None, edges=None,
-             steps=None):
+             steps=None, labels=()):
     from parts import how_much, word_for
 
     v = busy[0] if busy.ndim > 1 else busy
@@ -220,12 +200,8 @@ def sections(spans, voices, busy, pickup, report=None, chroma=None, edges=None,
     peak = float(np.percentile(v, 98)) if v.size else 0.0
     if not np.isfinite(peak) or peak == 0.0:
         peak = 1.0
-    # Which sections are the same section coming back. This was written in
-    # parts.py and never ran: this function shadows that one, so every score
-    # ever made carried repeats_as: null and nothing could say that a chorus
-    # was a chorus it had already heard.
-    same, apart = (alike(spans, chroma, voices) if chroma is not None
-                   else ([None] * len(spans), [None] * len(spans)))
+    apart = (alike(spans, chroma, voices, labels) if chroma is not None
+             else [None] * len(spans))
     out, had = [], {}
     for n, (a, b, role) in enumerate(spans):
         part = held_bars(v, a, b)
@@ -239,7 +215,6 @@ def sections(spans, voices, busy, pickup, report=None, chroma=None, edges=None,
             "role": role,
             "edge": (edges[n] if edges is not None and n < len(edges) else None),
             "sudden": (steps[n] if steps is not None and n < len(steps) else None),
-            "repeats_as": same[n],
             "sure": apart[n],
             "trades": turning(voices, a, b, busy),
             "feels": word_for(rel, rise, has, had),
@@ -281,7 +256,9 @@ def read(path, slug):
             g["bars"] = int((length_s - g["first_beat_s"]) //
                             (60.0 / g["bpm"] * g["beats_per_bar"])) + 1
             report["moved_by_ear"] = shift
-    g["sure"] = agreed(times, second_opinion(path, slug))
+    on_grid = np.asarray([at_beat(g, i)
+                          for i in range(int(g["bars"] * g["beats_per_bar"]))])
+    g["sure"] = agreed(on_grid, second_opinion(path, slug))
     report["grid_sure"] = g["sure"]
     bar_s = (60.0 / g["bpm"]) * g["beats_per_bar"]
     # Bars are cut where the tempo map says they fall, not every bar_s seconds.
@@ -306,7 +283,7 @@ def read(path, slug):
     busy, bright = curves(path, g, edges=cuts)
     pickup = 1 if g["first_beat_s"] > 0.2 else 0
     g["first_bar"] = 0 if pickup else 1
-    g["last_bar"] = g["bars"] - pickup
+    g["last_bar"] = g["bars"]
     found, held = find_chords(path, slug)
     chord, chord_sure = chords_per_bar(found, held, g["first_beat_s"], bar_s, g["bars"], pickup)
     stereo = Path("synth/incoming") / f"{slug}.mp3"
@@ -321,7 +298,7 @@ def read(path, slug):
         "air": [round(float(x), 3) for x in air(path, edges_now)],
         "noisy": [round(float(x), 3) for x in noisy(path, edges_now)],
         "held": [round(float(x), 3) for x in ringing(env, edges_now)],
-        "pump": [round(float(x), 3) for x in duck(env, g, edges_now)],
+        "pump": [round(float(x), 3) for x in duck(env, g, edges_now, times)],
         "pace": [round(float(x), 3) for x in pace(flux_now, g, edges_now)],
         **{k: [round(x, 3) for x in lanes[k]] for k in STEM_NAMES},
         **{k: [round(x, 3) for x in lanes[k]] for k in STEM_MORE if k in lanes},
@@ -361,10 +338,19 @@ def read(path, slug):
     snapped = on_phrase([list(s) for s in found_spans], pickup,
                         firm=how.get("firm"), tell=grid_says)
     told = call([(a, b, m) for a, b, m in snapped], score_bars)
+    kept = []
+    for said in told:
+        if (kept and kept[-1]["role"] == said["role"] == "bridge"
+                and said["to"] - kept[-1]["from"] <= 16):
+            kept[-1]["to"] = said["to"]
+            continue
+        kept.append(said)
+    told = kept
     shaped = sections([(s["from"], s["to"], s["role"]) for s in told],
                       voices, busy, pickup, report, chroma,
                       edges=[s.get("edge") for s in told],
-                      steps=[s.get("sudden") for s in told])
+                      steps=[s.get("sudden") for s in told],
+                      labels=[s["like"] for s in told])
     # A second opinion on the boundaries from a model that shares no code and
     # no training data with the detectors above. Recorded per section rather
     # than merged into them: where both heard a boundary that is worth knowing,
@@ -379,16 +365,6 @@ def read(path, slug):
             part["also_heard"] = round(float(lift), 3) if lift else None
         report["model_edges"] = len(found)
         report["model_agreed"] = len(near)
-    merged, kept = [], []
-    for part, said in zip(shaped, told):
-        if (merged and merged[-1]["role"] == part["role"] == "bridge"
-                and part["to_bar"] - merged[-1]["from_bar"] + 1 <= 16):
-            merged[-1]["to_bar"] = part["to_bar"]
-            continue
-        merged.append(part)
-        kept.append(said)
-    shaped, told = merged, kept
-
     for part, said in zip(shaped, told):
         part["nth"] = said["nth"]
         part["like"] = said["like"]
@@ -400,8 +376,7 @@ def read(path, slug):
     anchor = peak[0]["mark"] if peak else (told[0]["mark"] if told else 0)
     origin = grid_says.get("origin", 1)
     every = grid_says.get("every", 4)
-    phrase_rule = {"every_bars": every, "from_bar": origin,
-                   "boundaries_on_grid": grid_says.get("on_grid", True)}
+    phrase_rule = {"every_bars": every, "from_bar": origin}
 
     lyrics_out = None
     heard_words = CACHE / f"{slug}.words.json"
@@ -422,9 +397,6 @@ def read(path, slug):
                        air=score_bars["air"], pace=score_bars["pace"],
                        width=score_bars["width"], tune=tune, report=report)
     edges_at = {t["from"] - pickup + 1 for t in told}
-    inner = sub_phrases(
-        [(t["from"], t["to"], t["role"], t["nth"]) for t in told],
-        score_bars, told_now, every, origin, pickup)
     heard = tune_line(tune, sung)
     heard, slipped = octaves(heard)
     told_now += chants(heard, g, pickup)
@@ -437,6 +409,9 @@ def read(path, slug):
     carries(told_now, [(a, b, m) for a, b, m in snapped], pickup,
             g["beats_per_bar"])
     told_now.sort(key=lambda m: (m["bar"], m["beat"], m["is"]))
+    inner = sub_phrases(
+        [(t["from"], t["to"], t["role"], t["nth"]) for t in told],
+        score_bars, told_now, every, origin, pickup)
     weigh(told_now, score_bars, edges_at,
           {q["from_bar"] for q in inner}, pickup)
     seats = [(p["from_bar"], p["to_bar"]) for p in shaped]
@@ -489,7 +464,7 @@ def read(path, slug):
         "bars": score_bars,
         "parts": shaped,
         "beats": beats,
-        "tension": pull,
+        "lift": pull,
         "releases": seated(gone, g, pickup),
         "phrase_grid": phrase_rule,
         "chord_changes": turns(score_bars["chord"], score_bars["chord_sure"],

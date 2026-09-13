@@ -166,8 +166,12 @@ def ladder(runs, first):
         step = max(1, int(round((runs[i + 1]["from_s"] - at) / runs[i]["period"])))
         at += step * runs[i]["period"]
         n += step
+        nxt = runs[i + 1]
+        seat = nxt.get("at")
+        if seat is not None:
+            at = seat + round((at - seat) / nxt["period"]) * nxt["period"]
         out.append({"from_beat": n, "at_s": round(at, 4),
-                    "bpm": round(60.0 / runs[i + 1]["period"], 3)})
+                    "bpm": round(60.0 / nxt["period"], 3)})
     return out
 
 

@@ -32,7 +32,7 @@ def confidence(times, grid):
     return np.clip(1.0 - off / (period * 0.25), 0.0, 1.0)
 
 
-def tension(bright, busy, stems, times):
+def lift(bright, stems, times):
     low = stems.get("bass")
     weight = np.zeros(len(times))
     if low is not None:
@@ -66,15 +66,7 @@ def releases(times, hits, pull, bpb, least=0.35):
         jump = float(hits[i] - before)
         if jump < least or hits[i] < 0.70:
             continue
-        back = pull[max(0, i - 16):i]
-        lead = 0
-        if len(back) > 2:
-            m = int(np.argmax(back))
-            j = int(np.argmin(back[:m + 1]))
-            if float(back[m] - back[j]) > 0.08:
-                lead = len(back) - j
         found.append({"beat_index": int(i), "at_s": round(float(times[i]), 3),
-                      "lead_beats": int(lead),
                       "size": round(float(min(1.0, jump)), 3)})
 
     out = []
@@ -93,7 +85,7 @@ def pulse(path, grid, times, positions, onsets, stems, report=None):
 
     hits = weights(times, stems)
     sure = confidence(times, grid)
-    pull = tension(bright, busy, stems, times)
+    pull = lift(bright, stems, times)
     gone = releases(times, hits, pull, grid["beats_per_bar"])
 
     holds_from = grid.get("holds_from_s")

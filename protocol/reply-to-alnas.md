@@ -153,8 +153,13 @@ worth your trust yet.
 What `melody_phrases` does now carry that it did not: `from_note` and `to_note`,
 indexing straight into `melody[]`. The bar.beat span could not be resolved back
 to its own notes — several notes share a beat — and it returned the wrong note
-set on 8% of phrases. Section-level repetition in `sections[].repeats_as` and
-`like` is measured and stands.
+set on 8% of phrases. Section-level repetition in `sections[].like` is measured
+and stands — and `repeats_as`, which used to sit beside it saying the same thing
+differently, is gone. It ran its own clustering and picked k by silhouette,
+which systematically chose k=2: on eight songs it called more than half of all
+section pairs the same music, 86.7% on Starlight, which has eight distinct
+sections. `like` never exceeds 37.8%. `parts[].sure` now grades how cleanly a
+section sits in its `like` group rather than in a grouping nothing shipped.
 
 ## 8. Character tags per section — I had this, and I took it out
 

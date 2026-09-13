@@ -21,11 +21,11 @@ const RAW = {
     { from_bar: 16, to_bar: 19, role: "outro", nth: 1, like: "C", returns: false, rise: -0.3, stems: stems(0, 0.3, 0, 0.4), playing: ["bass", "other"] },
   ],
   phrases: [
-    { from_bar: 0, to_bar: 3, in: "intro", in_nth: 1, doing: "establishing", also: [], sure: 0.9, says: "chords join", energy: 0.1, rise: 0.0, playing: ["other"], moments: 0, has_break: false },
-    { from_bar: 4, to_bar: 7, in: "drop", in_nth: 1, doing: "expanding", also: ["peaking"], sure: 0.9, says: "drums and bass join", energy: 0.9, rise: 0.0, playing: ["drums", "bass", "other"], moments: 1, has_break: false },
-    { from_bar: 8, to_bar: 11, in: "drop", in_nth: 1, doing: "easing", also: [], sure: 0.8, says: "a bar out, then back", energy: 0.8, rise: -0.1, playing: ["drums", "bass", "other"], moments: 1, has_break: true },
-    { from_bar: 12, to_bar: 15, in: "drop", in_nth: 1, doing: "peaking", also: [], sure: 0.8, says: "drums and bass and chords holding", energy: 0.95, rise: 0.02, playing: ["drums", "bass", "other"], moments: 0, has_break: false },
-    { from_bar: 16, to_bar: 19, in: "outro", in_nth: 1, doing: "thinning", also: ["closing"], sure: 0.9, says: "drums drop out", energy: 0.1, rise: -0.2, playing: ["bass"], moments: 0, has_break: false },
+    { from_bar: 0, to_bar: 3, in: "intro", in_nth: 1, doing: "establishing", also: [], sure: 0.9, says: "chords join", energy: 0.1, rise: 0.0, playing: ["other"], moments: 0 },
+    { from_bar: 4, to_bar: 7, in: "drop", in_nth: 1, doing: "expanding", also: ["peaking"], sure: 0.9, says: "drums and bass join", energy: 0.9, rise: 0.0, playing: ["drums", "bass", "other"], moments: 1 },
+    { from_bar: 8, to_bar: 11, in: "drop", in_nth: 1, doing: "easing", also: [], sure: 0.8, says: "a bar out, then back", energy: 0.8, rise: -0.1, playing: ["drums", "bass", "other"], moments: 1, break: { from_bar: 9, to_bar: 9, bars: 1, still: ["bass"], deepest: "drums", depth: 0.82 } },
+    { from_bar: 12, to_bar: 15, in: "drop", in_nth: 1, doing: "peaking", also: [], sure: 0.8, says: "drums and bass and chords holding", energy: 0.95, rise: 0.02, playing: ["drums", "bass", "other"], moments: 0 },
+    { from_bar: 16, to_bar: 19, in: "outro", in_nth: 1, doing: "thinning", also: ["closing"], sure: 0.9, says: "drums drop out", energy: 0.1, rise: -0.2, playing: ["bass"], moments: 0 },
   ],
   moments: [
     { bar: 4, beat: 1, is: "entrance", what: "drums", sure: 1.0, weight: 0.97 },
@@ -46,7 +46,7 @@ const RAW = {
     vocals: rep(0.0, 20),
     other: [...rep(0.7, 4), ...rep(0.8, 12), ...rep(0.4, 4)],
   },
-  phrase_grid: { every_bars: 4, from_bar: 0, boundaries_on_grid: true },
+  phrase_grid: { every_bars: 4, from_bar: 0 },
   /* per beat: winds up through the intro, high in the drop, falls in the outro */
   tension: [...Array.from({ length: 16 }, (_, i) => +(0.2 + 0.04 * i).toFixed(3)), ...rep(0.9, 48), ...rep(0.3, 16)],
 };

@@ -10,7 +10,7 @@ export const KNOWN = [
   'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor', 'noisy', 'held',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
-  'tension', 'releases', 'melody', 'signals', 'made_by', 'lyrics', 'tells',
+  'tension', 'lift', 'releases', 'melody', 'signals', 'made_by', 'lyrics', 'tells',
   'recording',
   'motion',
 ];
@@ -184,7 +184,6 @@ export function format(raw) {
          that knows a chorus is the chorus it already lit can light it the same
          way; one that knows a verse turns over every eight bars can swap on
          the cycle instead of holding one look for thirty-one bars. */
-      repeats_as: part.repeats_as,
       /* Whether a model that shares nothing with our detectors heard this
          boundary too. Null means only we did, which is not the same as wrong. */
       also_heard: part.also_heard,
@@ -234,7 +233,8 @@ export function format(raw) {
   if (raw.signals) out.signals = raw.signals;
   if (raw.voice) out.voice = raw.voice;
   if (raw.lead) out.lead = raw.lead;
-  if (raw.tension) out.tension = { per: 'beat', values: raw.tension };
+  { const pull = raw.lift ?? raw.tension;
+    if (pull) out.tension = out.lift = { per: 'beat', values: pull }; }
   if (raw.releases) out.releases = raw.releases;
   if (raw.phrase_grid) out.phrase_grid = raw.phrase_grid;
   if (raw.scales) out.scales = raw.scales;
@@ -339,7 +339,7 @@ export function format(raw) {
         energy:    p.energy,
         rise:      p.rise,
         playing:   p.playing,
-        has_break: p.has_break,
+        has_break: p.break != null || !!p.has_break,
         break: p.break,
       })),
     };
@@ -373,7 +373,6 @@ export function format(raw) {
       kind: 'rule',
       every_bars:          raw.phrase_grid.every_bars,
       from_bar:            raw.phrase_grid.from_bar,
-      boundaries_on_grid:  raw.phrase_grid.boundaries_on_grid,
     };
   }
 
@@ -434,9 +433,15 @@ export function format(raw) {
   const person = raw.personality || raw.profile;
   if (person) { out.personality = person; out.profile = person; }
 
-  // ---- tension ----
-  if (Array.isArray(raw.tension)) {
-    out.tension = { per: 'beat', from_bar: firstBar, from_beat: 1, values: raw.tension };
+  /* ---- lift ----
+     `tension` goes out beside it, the same object, for one release: readers
+     were built against that name. It never measured tension -- see the spec. */
+  {
+  const pull = Array.isArray(raw.lift) ? raw.lift : raw.tension;
+  if (Array.isArray(pull)) {
+    out.lift = { per: 'beat', from_bar: firstBar, from_beat: 1, values: pull };
+    out.tension = out.lift;
+  }
   }
 
   // ---- releases (seconds to positions) ----
@@ -449,7 +454,6 @@ export function format(raw) {
                          beat: Math.floor(i % bpb) + 1 };
       const one = { at, size: r.size };
       if (r.at_s !== undefined) one.at_s = r.at_s;
-      if (r.lead_beats !== undefined) one.lead_beats = r.lead_beats;
       return one;
     });
   }

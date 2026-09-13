@@ -43,7 +43,7 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
        : `${a.size} fields on both sides`);
 
   /* Comparing only the top level missed that the Python formatter carried no
-     section fields at all -- repeats_as, sure and trades were JS-only and the
+     section fields at all -- the repeat letter, sure and trades were JS-only and the
      test said both sides agreed. A protocol is not just its outermost keys. */
   const keysOf = list => {
     const k = new Set();

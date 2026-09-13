@@ -44,18 +44,25 @@ def air(path, edges, cut=6000):
     return np.clip(out / top, 0.0, 1.5)
 
 
-def duck(env, g, edges):
+def duck(env, g, edges, times=None):
     whole = sum(np.asarray(v, dtype=float) for v in env.values())
-    beat_s = 60.0 / g["bpm"]
-    frames = int(round(beat_s * RATE))
-    if frames < 4 or not len(whole):
+    if not len(whole):
         return np.zeros(len(edges) - 1)
-    n = len(whole) // frames
-    per = whole[: n * frames].reshape(n, frames)
-    top = per.max(axis=1)
-    low = per[:, : max(2, frames // 3)].min(axis=1)
-    deep = 1.0 - low / np.maximum(top, 1e-9)
-    wide = np.repeat(deep, frames)
+    beat_s = 60.0 / g["bpm"]
+    if times is None or len(times) < 4:
+        seats = np.arange(0.0, len(whole) / RATE, beat_s)
+    else:
+        seats = np.asarray(times, dtype=float)
+    at = np.clip((seats * RATE).astype(int), 0, len(whole))
+    wide = np.zeros(len(whole))
+    for i in range(len(at) - 1):
+        a, b = at[i], max(at[i] + 2, at[i + 1])
+        piece = whole[a:b]
+        if len(piece) < 2:
+            continue
+        top = float(piece.max())
+        low = float(piece[: max(2, len(piece) // 3)].min())
+        wide[a:b] = 1.0 - low / max(top, 1e-9)
     frames_at = np.clip(np.asarray(edges, dtype=float) * RATE, 0, len(wide))
     return np.clip(collapse(wide, frames_at), 0.0, 1.0)
 

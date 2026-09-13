@@ -18,7 +18,7 @@ def cut(a, b, every, origin, least=3, firm=()):
     edges = [a]
     step = max(2, int(every))
     first = a + ((origin - a) % step)
-    if first > a and first - a >= least:
+    if a < first < b and first - a >= least:
         edges.append(first)
     at = first if first > a else a + step
     while at < b:
@@ -181,18 +181,17 @@ def phrases(spans, bars, moments, every, origin, pickup):
                 "releases": any(m["is"] == "release" for m in inside),
                 "fills": any(m["is"] in ("fill", "rise") for m in inside),
             }
-            head, also, sure = doing(now, was, ceiling, song_mid,
-                                     si == len(spans) - 1)
+            head, also, _ = doing(now, was, ceiling, song_mid,
+                                  si == len(spans) - 1)
             raw.append({
                 "from_bar": lo + 1 - pickup, "to_bar": hi - pickup,
                 "in": role, "in_nth": nth,
-                "doing": head, "also": also, "sure": sure,
+                "doing": head, "also": also,
                 "says": says(was, playing, {"broke": broke}),
                 "energy": round(now["energy"], 3),
                 "rise": round(now["rise"], 3),
                 "playing": playing,
                 "moments": len([m for m in inside if m["is"] in BIG]),
-                "has_break": broke,
                 "break": gap,
             })
             was = playing
@@ -205,11 +204,14 @@ def phrases(spans, bars, moments, every, origin, pickup):
             last = out[-1]
             last["to_bar"] = p["to_bar"]
             last["moments"] += p["moments"]
-            last["has_break"] = last["has_break"] or p["has_break"]
             if last.get("break") is None:
                 last["break"] = p.get("break")
-            last["energy"] = round((last["energy"] + p["energy"]) / 2, 3)
-            last["sure"] = max(last["sure"], p["sure"])
+            whole = loud[last["from_bar"] - 1 + pickup:last["to_bar"] + pickup]
+            if len(whole):
+                third = max(1, len(whole) // 3)
+                last["energy"] = round(float(whole.mean()), 3)
+                last["rise"] = round(
+                    float(whole[-third:].mean() - whole[:third].mean()), 3)
         else:
             out.append(p)
     return out

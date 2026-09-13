@@ -195,10 +195,11 @@ def call(spans, bars):
     got, name = settle(got, name, bars)
     n = len(got)
 
-    letters = {}
+    letters, held = {}, {}
     for s in got:
         if s["mark"] not in letters:
             letters[s["mark"]] = chr(ord("A") + len(letters) % 26)
+        held[s["mark"]] = held.get(s["mark"], 0) + 1
 
     for i, s in enumerate(got):
         if i == 0:
@@ -216,5 +217,5 @@ def call(spans, bars):
         s["role"] = word
         s["nth"] = count[word]
         s["like"] = letters[s["mark"]]
-        s["returns"] = seen[s["mark"]] > 1
+        s["returns"] = held[s["mark"]] > 1
     return got

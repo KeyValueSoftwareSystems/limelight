@@ -35,7 +35,7 @@ function subsectionsOf(score) {
   const norm = (from, to, p) => ({
     from, to, in: or_(p.in, null), in_nth: or_(p.in_nth, null), doing: or_(p.doing, null),
     also: p.also || [], says: or_(p.says, null), energy: or_(p.energy, null), rise: or_(p.rise, null),
-    playing: p.playing || [], has_break: !!p.has_break,
+    playing: p.playing || [], has_break: p.break != null || !!p.has_break,
   });
   if (L && Array.isArray(L.spans))
     return L.spans.map(sp => norm(sp.from, sp.to, sp));

@@ -19,7 +19,7 @@ KNOWN = [
     "presence", "moments",
     "phrases", "layers", "chords", "key", "loudness", "feel",
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
-    "tension", "releases", "melody", "signals", "made_by",
+    "tension", "lift", "releases", "melody", "signals", "made_by",
     "lyrics", "tells", "motion", "recording",
 ]
 
@@ -165,12 +165,6 @@ def format_v1(raw):
                 "playing": p.get("playing"),
                 "fullness": p.get("fullness"),
                 "rise": p.get("rise"),
-                # Which section this repeats, how cleanly it sits in that
-                # group, whether it trades back and forth inside itself, and
-                # whether a model that shares nothing with our detectors heard
-                # the same boundary. The JS formatter carried these and this
-                # one did not.
-                "repeats_as": p.get("repeats_as"),
                 "sure": p.get("sure"),
                 "trades": p.get("trades"),
                 "also_heard": p.get("also_heard"),
@@ -273,18 +267,11 @@ def format_v1(raw):
             out["moments"].append(m)
 
     # ---- layers ----
-    if raw.get("layers"):
-        out["layers"] = dict(raw["layers"])
-    elif bars:
-        lanes = {}
-        for stem in _STEM_NAMES:
-            if isinstance(bars.get(stem), list):
-                lanes[stem] = bars[stem]
-        if lanes:
-            out["layers"] = lanes
-
-    if "layers" not in out:
-        out["layers"] = {}
+    # No stem-lane fallback here either: those lanes ship as out["stems"] with
+    # their normalisation stated, and layers means form, subsection and the
+    # rest. Putting raw arrays under the same name made layers.vocals an array
+    # while layers.form was a span list, and the JS formatter dropped it first.
+    out["layers"] = dict(raw["layers"]) if raw.get("layers") else {}
 
     # layers.subsection (from phrases)
     if "subsection" not in out["layers"] and isinstance(raw.get("phrases"), list):
@@ -298,7 +285,7 @@ def format_v1(raw):
                     "doing": p.get("doing"), "also": p.get("also"),
                     "says": p.get("says"), "energy": p.get("energy"),
                     "rise": p.get("rise"), "playing": p.get("playing"),
-                    "has_break": p.get("has_break"),
+                    "has_break": p.get("break") is not None or bool(p.get("has_break")),
                     "break": p.get("break"),
                 }
                 for p in raw["phrases"]
@@ -330,7 +317,6 @@ def format_v1(raw):
             "kind": "rule",
             "every_bars": pg.get("every_bars"),
             "from_bar": pg.get("from_bar"),
-            "boundaries_on_grid": pg.get("boundaries_on_grid"),
         }
 
     if not out["layers"]:
@@ -387,10 +373,14 @@ def format_v1(raw):
     if raw.get("feel"):
         out["feel"] = raw["feel"]
 
-    # ---- tension ----
-    if isinstance(raw.get("tension"), list):
-        out["tension"] = {"per": "beat", "from_bar": first_bar,
-                          "from_beat": 1, "values": raw["tension"]}
+    # ---- lift ----
+    # `tension` goes out beside it, unchanged, for one release: readers were
+    # built against that name. It never measured tension -- see the spec.
+    pull = raw.get("lift") if isinstance(raw.get("lift"), list) else raw.get("tension")
+    if isinstance(pull, list):
+        out["lift"] = {"per": "beat", "from_bar": first_bar,
+                       "from_beat": 1, "values": pull}
+        out["tension"] = out["lift"]
 
     # ---- releases (seconds to positions) ----
     if isinstance(raw.get("releases"), list):
@@ -404,8 +394,6 @@ def format_v1(raw):
             one = {"at": at, "size": r.get("size")}
             if r.get("at_s") is not None:
                 one["at_s"] = r["at_s"]
-            if r.get("lead_beats") is not None:
-                one["lead_beats"] = r["lead_beats"]
             out["releases"].append(one)
 
     # ---- melody: the notes of the lead line and the voice ----
@@ -517,16 +505,15 @@ def apply_window(out, w, grid):
     if out.get("chord_changes"):
         out["chord_changes"] = [c for c in out["chord_changes"] if in_win(c["at"]["bar"])]
 
-    # tension
-    if out.get("tension") and isinstance(out["tension"].get("values"), list):
-        fb = out["tension"].get("from_bar", 0)
-        start_beat = max(0, (lo - fb) * bpb)
-        end_beat = max(start_beat, (hi - fb) * bpb)
-        out["tension"] = {
-            **out["tension"],
-            "from_bar": lo, "from_beat": 1,
-            "values": out["tension"]["values"][start_beat:end_beat],
-        }
+    # lift (and the `tension` alias, which points at the same object)
+    for name in ("lift", "tension"):
+        row = out.get(name)
+        if row and isinstance(row.get("values"), list):
+            fb = row.get("from_bar", 0)
+            start_beat = max(0, (lo - fb) * bpb)
+            end_beat = max(start_beat, (hi - fb) * bpb)
+            out[name] = {**row, "from_bar": lo, "from_beat": 1,
+                         "values": row["values"][start_beat:end_beat]}
 
     # releases
     if out.get("releases"):

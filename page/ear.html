@@ -531,7 +531,7 @@ function draw() {
   HUE = {};
   let n = 0;
   for (const p of SCORE.parts || [])
-    if (!(p.repeats_as in HUE)) HUE[p.repeats_as] = WHEEL[n++ % WHEEL.length];
+    if (!(p.like in HUE)) HUE[p.like] = WHEEL[n++ % WHEEL.length];
 
   const map = $("map");
   [...map.querySelectorAll(".part,.unmetered,.beat")].forEach(x => x.remove());
@@ -543,14 +543,14 @@ function draw() {
     const ramp = typeof p.sudden === "number" && p.sudden < 0.5;
     el.className = ramp ? "part ramp" : "part";
     el.dataset.t0 = t0; el.dataset.t1 = t1;
-    const c = HUE[p.repeats_as];
-    el.title = `${cap(p.role || p.repeats_as)} · ${mmss(t0)} – ${mmss(t1)} · `
+    const c = HUE[p.like];
+    el.title = `${cap(p.role || p.like)} · ${mmss(t0)} – ${mmss(t1)} · `
              + `${FEELS[p.feels] || p.feels}`
              + (ramp ? ` · the change here is gradual (${p.sudden.toFixed(2)}), there is no moment to hit`
                      : (typeof p.sudden === "number" ? ` · lands on the bar (${p.sudden.toFixed(2)})` : ""))
              + ` · click to hear it`;
     el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness??.5)*100)}%"></div>
-      <div class="tag" style="color:${c}">${esc((p.role || p.repeats_as).toUpperCase())}</div>`;
+      <div class="tag" style="color:${c}">${esc((p.role || p.like).toUpperCase())}</div>`;
     map.appendChild(el);
   }
 
@@ -639,7 +639,7 @@ function draw() {
       <dt>The beat</dt><dd>${sure == null ? "<span class='dim'>not measured</span>"
         : `<b style="color:${sure < 0.6 ? "var(--bad)" : "var(--ok)"}">${pc(sure)}</b> \u00b7 ${trust}`}</dd>
       <dt>Phrases</dt><dd>every ${pg.every_bars ?? "?"} bars from bar ${pg.from_bar ?? "?"}
-        <span class="dim">\u00b7 ${pg.boundaries_on_grid ? "sections land on that grid" : "sections do not all land on that grid"}</span></dd>
+        </dd>
       <dt>Heard by</dt><dd class="dim">voice: ${esc(made.voice_from || "?")} \u00b7 lead: ${esc(made.lead_from || "?")}
         \u00b7 tune: ${esc(made.melody_from || "?")}</dd>
     </dl></div>`;
@@ -659,9 +659,10 @@ function draw() {
     return `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}${says}</span>`;
   }).join("")
     + (Array.isArray(SCORE.tension)
-       ? `<span><i style="background:#e0655f"></i><b style="color:var(--dim)">Tension</b> &mdash; how much `
-         + `the music is winding up. One reading a beat, so it is the only row here fast enough to show a `
-         + `build happening; the amber marks are where it breaks.</span>` : "");
+       ? `<span><i style="background:#e0655f"></i><b style="color:var(--dim)">Lift</b> &mdash; high-band `
+         + `presence rising and not backed by bass. One reading a beat, so it is the only row here fast `
+         + `enough to show a build happening. It leans high before a drop but only weakly (57%, p=0.17), `
+         + `so read it as a texture, not as tension.</span>` : "");
 
   const shown = (SCORE.moments || []).length, all = (SCORE.signals || []).length;
   $("dropped").textContent = all > shown
@@ -772,17 +773,17 @@ function zoom() {
     const t0 = barTime(p.from_bar), t1 = Math.min(total, barTime(p.to_bar + 1));
     if (t1 < a || t0 > b) continue;
     const x0 = Math.max(0, X(t0)), x1 = Math.min(W, X(t1));
-    const c = HUE[p.repeats_as] || "#6fa8dc";
+    const c = HUE[p.like] || "#6fa8dc";
     g.fillStyle = c + "16";
     g.fillRect(x0, 0, x1 - x0, 110);
     g.fillStyle = c; g.font = "600 10px ui-monospace,monospace";
     if (X(t0) >= 0) {
       g.strokeStyle = c; g.lineWidth = 2;
       g.beginPath(); g.moveTo(X(t0), 0); g.lineTo(X(t0), 110); g.stroke();
-      g.fillText((p.role ?? p.repeats_as).toUpperCase() + " starts here", X(t0) + 6, 13);
+      g.fillText((p.role ?? p.like).toUpperCase() + " starts here", X(t0) + 6, 13);
     } else if (x1 - x0 > 96) {
       g.globalAlpha = .7;
-      g.fillText("still in " + (p.role ?? p.repeats_as).toUpperCase(), x0 + 6, 13);
+      g.fillText("still in " + (p.role ?? p.like).toUpperCase(), x0 + 6, 13);
       g.globalAlpha = 1;
     }
   }
@@ -1051,7 +1052,6 @@ function motion() {
     g.globalAlpha = 1;
     return true;
   };
-  plot(m.winding, "#e8a33d", true, 0, 1);
   const bars = SCORE.bars || {};
   const eFrom = FIRSTBAR;
   const energy = Array.isArray(bars.intensity) && from === eFrom ? bars.intensity : null;
@@ -1398,7 +1398,7 @@ function sections() {
     const row = document.createElement("div");
     row.className = "row";
     row.innerHTML = `<span class="when">${mmss(t0)}</span>
-      <span class="what"><b class="role" style="color:${HUE[p.repeats_as]}">${esc(p.role ?? p.repeats_as)}</b>
+      <span class="what"><b class="role" style="color:${HUE[p.like]}">${esc(p.role ?? p.like)}</b>
         &nbsp;<b>${esc(FEELS[p.feels] || p.feels)}</b>
         <span class="dim">· ${playingWords(p.playing)} playing
         · bars ${p.from_bar}–${p.to_bar}</span>
@@ -1510,7 +1510,7 @@ function tick() {
       LIVE = at;
       const b = SCORE.bars || {}, idx = Math.max(0, bar - FIRSTBAR);
       const on = LANES.filter(n => Array.isArray(b[n]) && b[n][idx] > 0.12);
-      $("nowrole").innerHTML = `<span style="color:${HUE[p.repeats_as]}">${esc(cap(p.role ?? p.repeats_as))}</span>`
+      $("nowrole").innerHTML = `<span style="color:${HUE[p.like]}">${esc(cap(p.role ?? p.like))}</span>`
         + ` <span style="color:var(--dim);font-weight:400;font-size:15px">— ${esc(FEELS[p.feels] || p.feels)}</span>`;
       $("nowplay").innerHTML = on.length
         ? on.map(n => `<b style="color:${STEM[n]}">${LANEWORD[n]}</b>`).join(", ")

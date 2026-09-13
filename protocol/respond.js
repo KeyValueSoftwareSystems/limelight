@@ -111,7 +111,7 @@ function adapt(s) {
       ...(s.phrase_grid ? { phrase: { kind: "rule",
         every_bars: s.phrase_grid.every_bars,
         from_bar: s.phrase_grid.from_bar,
-        on_grid: s.phrase_grid.boundaries_on_grid } } : {}),
+      } } : {}),
     };
   }
   if (Array.isArray(s.bars && s.bars.intensity)) {

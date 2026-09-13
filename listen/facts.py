@@ -1,6 +1,7 @@
 import numpy as np
 
 STEMS = ("drums", "bass", "vocals", "other", "guitar", "piano")
+HOLD = 4
 
 SCALES = {
     "weight": {
@@ -90,13 +91,16 @@ def presence(bars, first_bar, on=0.40, off=0.15):
         )
         if not len(lane):
             continue
-        state, spans, at = "out", [], 0
+        state, spans, at, grey = "out", [], 0, 0
         for i, v in enumerate(lane):
             now = state
+            grey = grey + 1 if v < on else 0
             if state == "out" and v >= on:
                 now = "in"
             elif state == "in" and v < off:
                 now = "out"
+            elif state == "in" and grey >= HOLD:
+                now = "part"
             elif state == "out" and v >= off:
                 now = "part"
             elif state == "part" and v >= on:

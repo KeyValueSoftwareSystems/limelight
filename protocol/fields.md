@@ -111,7 +111,7 @@ and get back `{ curves: { brightness: { per: "bar", from_bar: 0, values: [...] }
 | `brightness` | how bright the bar sounds | maps to colour temperature, or to how sharp a visual reads |
 | `width` | how wide the stereo image is | a narrow mono verse and a wide chorus are a real, visible difference |
 | `air` | high-frequency openness | the difference between a filtered build and an open drop, which energy alone misses |
-| `pump` | how much the track ducks against the kick | this is the four-to-the-floor breathing that makes dance music feel like dance music |
+| `pump` | how far the summed envelope falls and recovers **within each beat** | the four-to-the-floor breathing that makes dance music feel like dance music. Until this round it was not on the beat at all: it reshaped the envelope from sample zero at the song's average bpm, so the blocks drifted against the music and the mean phase error was a quarter of a beat — exactly what random phase gives. It now indexes off the tracked beat times |
 | `pace` | how many events per bar | busy-ness, independent of loudness: a quiet fast passage is not a quiet slow one |
 
 The four stem lanes — `drums`, `bass`, `vocals`, `other` — are also per-bar
@@ -143,10 +143,13 @@ songs.** Each lane is divided by its own loudest bar in that song, so
 does not mean the drums are at eighty per cent, and it does not tell you whether
 the drums are louder than the bass.
 
-Worse, `parts[].stems[].level` is normalised a second, different way — as a
-share of the tenth-to-ninetieth percentile range of the same lane. So two fields
-that look like the same measurement on the same stem are on two different
-scales.
+A section's stems carry two numbers on two scales, and this document had them
+the wrong way round. Measured over 1340 stem-section rows: `level` is the mean
+of the per-bar lane, on the same per-stem-peak scale as the lane itself
+(1336/1340). It is **`sits`** that is the tenth-to-ninetieth percentile share
+(1307/1340). `scales` declares the lanes correctly and says nothing at all about
+either of these two, and they correlate at r = 0.94 — two near-duplicate numbers
+on two undeclared scales inside one object.
 
 Whatever we do here, the response must say which scale a number is on. My
 preference is to send it as a stated field rather than a convention somebody has

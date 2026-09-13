@@ -40,16 +40,15 @@ def moving(bars, look=4, hold=HOLD):
     s = slope(loud, look)
     raw = np.where(s > RISE, 1, np.where(s < FALL, -1, 0))
     out = []
-    state = 0
-    run = 0
+    state, want, run = 0, 0, 0
     for x in raw:
         if x == state:
-            run = 0
+            want, run = state, 0
         else:
-            run += 1
+            run = run + 1 if x == want else 1
+            want = x
             if run >= hold:
-                state = x
-                run = 0
+                state, run = want, 0
         out.append(state)
     return ["rising" if x > 0 else "falling" if x < 0 else "steady" for x in out]
 
@@ -137,15 +136,12 @@ def spans(labels, first_bar=1):
 
 def reading(bars, first_bar=1):
     move = moving(bars)
-    wind = winding(bars)
-    if not move and not wind:
+    if not move:
         return None
     return {
         "per": "bar",
         "from_bar": first_bar,
         "moving": move,
-        "winding": wind,
-        "spans": spans(move, first_bar),
         "tells": told(bars),
         "slams": [dict(x, bar=x["bar"] + first_bar) for x in slams(bars)],
         "ebbs": [dict(x, bar=x["bar"] + first_bar) for x in ebbs(bars)],

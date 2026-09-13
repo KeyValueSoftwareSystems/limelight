@@ -261,6 +261,15 @@ The score says which is which, per lane, in `scales`:
   "brightness": { "kind": "per_song", "against": "the song's loudest frame" } }
 ```
 
+Two lanes are named for something they do not measure, and the names are kept
+only because readers are built on them. `held` is documented as how much of the
+bar is ringing rather than struck; if that were so it would fall as onsets get
+denser, and it rises instead (r = +0.16, negative on only 8 of 28 songs). It is
+a duty cycle. `noisy` is documented as the unpitched share and fails both
+referents for that -- HPSS percussive r = +0.34, chroma entropy r = +0.16 -- and
+restates `air` at r = +0.67. Use them as textures with those names as labels,
+not as claims.
+
 Absolute: `width`, `pump`, `held`, `noisy`, `chord_sure`. Per-song: `intensity`,
 `weight`, `floor`, `brightness`, `air` (against the 98th percentile), `pace`
 (against the median bar), and each of `drums`, `bass`, `vocals`, `other`,
@@ -292,6 +301,15 @@ and 90th percentile for that stem, and `is` — `none`, `some`, `full` — is th
 bucket `sits` falls into. Use `level` to follow a curve and `is` to make a
 decision. They used to both be called `level` and disagreed by as much as a
 section reading 0.000 against a lane reading 0.170.
+
+**`none` does not mean silent.** It means `sits` is under 0.10 — the section is
+in the bottom tenth of *this song's own range* for that stem. On a record where
+the voice never stops, the quietest sections still come back `none`. That is why
+59 of the 230 sections carrying `sung` notes also say `vocals: none`, and 33 of
+315 carrying `played` say `other: none`: the pitch tracker found a line where
+the level bucket says "as quiet as this song gets". Neither field is wrong; they
+answer different questions. Read `is` as a rank within the song and `presence`
+or the raw lane for whether anything is there at all.
 
 ## Presence is the same fact as a shape
 
@@ -348,10 +366,32 @@ many readings a bar holds, but read the length of the array and trust that
 instead: a score written before the rate was corrected declares sixteen and
 carries four.
 
-`sections[].repeats_as` is a letter. Two sections sharing one are the same
+`sections[].like` is a letter. Two sections sharing one are the same
 section coming back, so a look used for the first can be used again for the
 second. `sections[].sure` is how cleanly that section sits inside its group,
-which is a measurement of the clustering and not a probability.
+which is a measurement of the grouping and not a probability.
+
+`sections[].role` -- intro, verse, chorus, drop, breakdown and the rest -- is
+the least trustworthy thing in this file, and it is also the most readable, so
+it needs saying plainly. **The boundaries are measured. The names on them are
+not.**
+
+The name comes from loudness, position and which stems are playing
+(`listen/call.py`). It looks consistent if you check it against `bars.intensity`
+-- chorus and drop outrank verse on 15 songs out of 15 -- but that is circular,
+because intensity is what chose the label. Check it against `fullness`, the
+energy figure this file actually publishes per section, and it is 8 of 15, which
+is a coin flip. Against published human transcriptions it does worse: Ultimate
+Guitar has The Nights as verse / pre-chorus / chorus and this file gives it no
+verse and no pre-chorus at all, and five breakdowns; Holocene is verse/chorus
+three times over and this file puts its one chorus at bar 191 of 209. A
+hook-lyric test -- does the line the sheet music calls the chorus land in a
+section named chorus, drop or post-chorus -- gets 6 of 30. `breakdown` is 21% of
+all sections, the largest class, and it is the fallback branch.
+
+So: drive a look off `like`, `edge`, `fullness` and the stem lanes, which are
+measured. Use `role` to put a word on screen for a human. Do not use it to
+decide what the lights do.
 
 `sections[].trades` appears on a section that alternates inside itself --
 `{"every_bars": 8, "sure": 0.497, "heard_in": ["pace", "drums", "vocals"]}`.
@@ -379,7 +419,7 @@ Tightening it does find real repeats — shift-aligned, six steps or more, exact
 with a guard requiring two intervals of a tone or wider, reaches 4.75x over the
 same control — but at 1.0% recall, on a segmentation that already returns the
 same figure as five notes one time and four the next. Section-level repetition
-is in `sections[].repeats_as` and `like`, and it is measured; melodic-phrase
+is in `sections[].like`, and it is measured; melodic-phrase
 repetition is not something this file can claim yet.
 
 `groove` is what the rhythm *is*, which nothing else here says. Per stem, the
@@ -419,11 +459,14 @@ floor under it, so it cannot come back below 0.56 and among the boundaries that
 have one it does not track our own `sure` (rho = -0.12). What it does carry is
 real: our `edge` averages 2.15 where MuQ agrees against 1.79 where it is silent.
 
-On Nebulakal the model is nearly certain about boundaries we rated weakly --
-bars 74 and 93 come back 0.99 and 0.95 against our 0.23 and 0.41 -- and it
-declines to back bars 128 and 146, which are also our two weakest. A boundary
-both methods like is worth committing a look to. A boundary only one of them
-likes is worth a gentler one.
+On Nebulakal the model is nearly certain about bars 74 and 93, coming back 0.99
+and 0.95, and declines to back bars 128 and 146. Do not read our `sure` against
+it as a second opinion on the same question: `also_heard` is about the boundary,
+`sure` is about how cleanly the section sits in its `like` group, and they are
+not two estimates of one thing. `edge` is the field to read beside it, and it
+does line up -- 2.15 where MuQ agrees against 1.79 where it is silent. A
+boundary both methods like is worth committing a look to. A boundary only one of
+them likes is worth a gentler one.
 
 null means only we heard it. That is not the same as wrong. It is null on 197 of
 305 boundaries.
@@ -669,53 +712,65 @@ quiet passage where the wiggles are the same size as the evidence, and fails on
 11 of 45. Chorus boundaries are worst at 11 of 32. The detector was applying one
 threshold to both.
 
+## `tension` was not tension, and a rig driving brightness off it inverts
+
+The field is now **`lift`**. The protocol sends `tension` beside it, the same
+object, for one release, because readers were built against that name.
+
+What it computes is `0.45 * clip(brightness - bass) + 0.55 * (brightness rising
+over eight beats)` -- high-band presence that the low end is not backing, and
+climbing. That is a real and specific texture. It is not tension. Reproduced
+from `bars.brightness` and the bass envelope it comes back at r = 1.000 across
+28 songs, and its correlation with `intensity` is +0.014.
+
+By section, mean z: pre-chorus +0.14, post-chorus +0.12, build +0.11, solo
++0.11, verse +0.07, chorus -0.00, drop -0.08, intro -0.37, outro -0.94. Read
+charitably that is the right shape for tension -- highest in the run-up,
+released at the drop. Tested directly it does not earn the word: over 70
+drop and chorus entries the four bars before are higher than the four bars after
+on 40 of them (57%), and against random bars in the same song the run-up sits
++0.15 z with p = 0.17. It leans the right way and cannot be shown to do more.
+
+The practical point is the one Alnas hit. `tension` invites a rig to map it to
+brightness, and a rig that does goes bright in the verse and dark at the drop.
+`lift` says what it is: a texture that thins out, not a wind-up you can trust.
+
 ## What the music is doing, which is not how loud it is
 
 `motion` answers the question a lighting desk actually asks: is this lifting,
-holding, falling away, or winding up. It carries `moving`, one of `rising`,
-`steady` or `falling` per bar, read off the loudness curve with two bars of
-hysteresis so it reports a settled state rather than every wobble; `spans`, the
-same thing as runs for a reader that wants "when does the lift start" instead
-of an array; and `winding`, which is the one that is not loudness at all.
+holding, or falling away. It carries `moving`, one of `rising`, `steady` or
+`falling` per bar, read off the loudness curve with two bars of hysteresis so it
+reports a settled state rather than every wobble, plus `tells`, `slams` and
+`ebbs`.
 
-`winding` is the build. It measures the thing a riser actually does, which is
-get **thinner**, not louder: the sub is filtered out and noise climbs, and then
-the drop returns the bottom. It is `0.7 * (1 - floor) + 0.3 * noisy`, scaled
-across the song.
+The labels are true. Against BS.1770 loudness measured independently from the
+stereo file, bars marked `rising` run at +0.46 LU/bar and `falling` at -1.00,
+rank-biserial +0.62. But the *changes* carry nothing: 20.1% of them land within
+two bars of a MuQ boundary against 22.4% for a matched circular-shift control.
+Read a `motion` state; do not treat a state change as an event.
 
-The reason it exists is that energy is the wrong lane to watch and watching it
-is worse than watching nothing. Taking every sustained loudness jump across the
-library as drops -- found from the loudness curve itself, so our section labels
-are not the judge -- and asking where each lane sits in the eight bars before
-one, against every other eight-bar window in the same song, chance being 50:
+The hysteresis had a defect worth naming because it is easy to write again. The
+run counter incremented on any disagreement with the current state rather than
+on a run of the same candidate, so `rising` followed by `falling` -- two samples
+that contradict each other -- flipped a settled state. 215 of 779 flips in the
+library were fired that way. It now counts agreement with the candidate.
 
-    winding          66.6      inverted floor    66.4
-    inverted energy  65.6      noisy alone       52.1
-
-**`winding` does not beat reading the energy curve upside down, and this spec
-should not pretend otherwise.** An earlier draft reported energy at the 32nd
-percentile and winding at the 68th as though they were two findings. They are
-one finding seen twice: the 32nd percentile for a lane is the 68th for its
-negation. The information was already in `intensity`.
+Two fields are gone from `motion`. `spans` was a bit-exact run-length encoding
+of `moving` in 29 songs out of 29, and a reader that wants runs can make them.
+`winding` was `0.7 * (1 - floor) + 0.3 * noisy`, recomputable from the two lanes
+it names to within 0.002 on 29 of 29. This spec already said the honest thing
+about it -- that it does not beat reading the energy curve upside down -- and
+kept it for ergonomics. Re-measured, plain inverted energy is about three
+percentile points *ahead*, because the published comparison had smoothed the
+baseline and not the contender. A field that loses to a lane already in the file
+and is computable from two other lanes in the file is not carrying its weight.
 
 What is real is the observation, not the lane. Energy is not merely
 uninformative before a drop, it is reliably *low* -- four bars before Don't Look
 Down's drop the energy curve reads 0.24, 0.24, 0.20, while air climbs to 1.02
 and floor collapses from 0.31 to 0.06. A reader keying a build off `energy`
-without inverting it will fade down into the drop.
-
-`winding` is kept for two small reasons, neither of them new information. It
-rises into a drop, so a reader maps it to intensity without having to invert
-anything; and it is slightly more decisive, reaching the top quartile of its
-song on 52% of drops against 41% for inverted energy. A reader who already
-inverts `energy` gains almost nothing by switching.
-
-It is not redundant in the way `wash` was with `held`: against energy it
-correlates -0.33 on average, |r| >= 0.80 on only two of twenty-eight songs
-(Don't Look Down -0.84, Killers From The Northside -0.83) and below 0.60 on
-twenty-one. On Raga of Revenge it is +0.06, because there the `noisy` term
-dominates. So it is not the same curve -- it simply does not do better at the
-one job it was built for.
+without inverting it will fade down into the drop. That is the finding; it is
+`floor` and `air` that carry it, and both ship.
 
 Combining more lanes did not pay. Adding the slope of noisy and air to the blend
 moved it from 62.2 to 61.9, so the slope terms were dropped and the lane is two
@@ -764,9 +819,33 @@ The rule this leaves behind: if the score knows when something happened, the
 protocol sends the second, not only the label. A label is a claim about a grid
 and a grid can be wrong; a second is what a speaker did.
 
+## Three fields that were one field twice
+
+`phrase_grid.boundaries_on_grid` claimed the song's sections land on the phrase
+grid. It equalled `every_bars != 4` on 29 songs out of 29 -- true on all ten
+songs with an 8- or 16-bar grid, false on all nineteen with a 4-bar one -- which
+is no information beyond a field sitting next to it in the same object. As an
+honesty flag it also pointed the wrong way: MuQ novelty peaks land on the
+declared grid 26.4% of the time when it says True and 31.4% when it says False.
+Gone from the score and from both formatters. `every_bars` and `from_bar` stay,
+and those do earn their place -- novelty peaks hit the declared origin 29.7%
+against 18.4% for the other origins of the same step, and slams 36.4% against
+17.9%.
+
+`phrases[].sure` graded the word in `doing`. Five of the ten words emitted
+exactly one value ever -- `resolving` always 0.800, `establishing` always 0.850,
+`expanding`, `thinning` and `closing` always 0.950 -- so for half the worded
+phrases the number was fixed by the word and said nothing about this phrase.
+Another 174 phrases carry `doing: null` and shipped a `sure` anyway: a
+confidence in a word that was suppressed. On the two words where it does vary it
+does not separate right from wrong -- phrases the audio agrees with score 86.7%
+at `sure` 1.0 and 82.5% below it, p = 0.58. Gone.
+
+`phrases[].has_break` is covered below.
+
 ## A dropout is a bar, not a flag
 
-`phrases[].has_break` said a phrase contains "a bar out, then back" and nothing
+`phrases[].has_break` said a phrase contained "a bar out, then back" and nothing
 else -- not which bar, not how long, not what kept playing. Alnas had to recover
 them from energy dips with a threshold of his own, which is work the file should
 have done. The detector already knew: it finds the quietest bar in the phrase,
@@ -774,7 +853,18 @@ checks it against 40% of the phrase median, and then threw the index away.
 
 `phrases[].break` now carries `from_bar`, `to_bar`, `bars`, `still` -- the stems
 that keep going -- plus `deepest` and `depth` for the stem that falls furthest
-and how far. `has_break` stays, so nothing that reads it breaks.
+and how far. The score no longer carries `has_break`: across 608 phrases it was
+exactly `break != null`, the same fact spelled twice, and two spellings of one
+fact are two things that can drift apart. The protocol still sends it, derived
+from `break` at format time, so nothing that reads it breaks.
+
+`depth` is the weak part of this. It reads 0.976 at the median and sits above
+0.80 on two thirds of breaks, and against the mix RMS drop it is supposed to
+describe it correlates at r = 0.38. Read `break` as "a stem went quiet here, and
+`deepest` names it"; do not read `depth` as how quiet. `still` holds for drums
+-- breaks naming drums as still lose 3.40 dB of percussive energy against 11.49
+dB otherwise, p = 1.2e-05 -- and does not hold for vocals, where words carried
+through the dip are the same either way (p = 0.77).
 
 The dip is one bar on the median phrase and runs to four at the longest, and
 just over a quarter of them are longer than a single bar, which is exactly the
@@ -1015,9 +1105,30 @@ a factor of two about what the beat is, and the honest report of that is a low
 number rather than a confident pick. Songs written to a click score 0.87 to
 1.00.
 
-`parts[].sure` is the silhouette of the clustering that decides `repeats_as` --
-how cleanly a section sits inside the group it was assigned to, rather than how
-likely its label is to be correct.
+`grid.sure` used to compare the two beat trackers' **input** to each other. It
+does not any more: it scores the grid that actually ships against the second
+tracker, which is what the field always claimed. The difference matters. Nine
+of twenty-nine grids fail an independent onset referee that their own tracker
+passes -- the tracker is right and the least-squares fit taken from it is not --
+and the old number could not see any of them. The Feeling read **0.816** while
+1.6% of its tracked beats landed on its own grid; it now reads 0.004. Across the
+library the gap between grids that pass the referee and grids that fail it went
+from 0.19 to 0.58. Under about 0.35, do not trust a bar number on that song.
+
+Three of those nine were repaired rather than flagged. `ladder()` built the
+tempo map by accumulating beats from the previous segment's period and threw
+away each segment's own measured anchor, so one spurious segment moved the phase
+of everything after it. Each segment now re-anchors on its own measurement with
+the beat count kept continuous, and Experience, Nod Krai and Raga of Revenge
+come back. Six still fail: The Feeling, which was fitted from 44% of the song
+and extrapolated across the rest, and Apex, Cipher, Entharo Mahanu and the two
+Where Are U Nows, which look like a metrical-level pick. Those are not fixed.
+They are now declared.
+
+`parts[].sure` is the silhouette of the `like` grouping -- how cleanly a section
+sits inside the group it was assigned to, rather than how likely its label is to
+be correct, and not a confidence in the boundary either. It used to grade a
+second grouping, `repeats_as`, which no longer ships.
 
 Neither is a probability. Both are measurements of agreement, which is a
 different and more honest thing than a guess dressed as one.
