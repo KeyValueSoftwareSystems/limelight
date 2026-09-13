@@ -70,3 +70,25 @@ def pace(onsets, g, edges):
         out[i] = ((hits >= a) & (hits < b)).sum() / (span / beat_s)
     mid = float(np.median(out[out > 0])) if (out > 0).any() else 1.0
     return np.clip(out / (mid or 1.0), 0.0, 4.0)
+
+
+def bands(path, edges, low=120, sub=60):
+    # Two measures of treble and none of weight. Most of what a drop feels like
+    # happens under 120 Hz, and the score could not see any of it: air is
+    # everything above 6 kHz and brightness is the high bins. weight is the
+    # share of the sound below 120 Hz, floor is the share below 60 Hz -- the
+    # part you feel in your chest rather than hear.
+    import librosa
+    y, sr = librosa.load(path, sr=22050, mono=True)
+    hop = sr // RATE
+    spec = np.abs(librosa.stft(y, n_fft=2048, hop_length=hop))
+    freqs = librosa.fft_frequencies(sr=sr, n_fft=2048)
+    whole = np.maximum(spec.sum(axis=0), 1e-9)
+    out = {}
+    for name, cut in (("weight", low), ("floor", sub)):
+        part = spec[freqs <= cut].sum(axis=0) / whole
+        frames = np.clip(np.asarray(edges, dtype=float) * RATE, 0, len(part))
+        v = collapse(part, frames)
+        top = float(np.percentile(v, 98)) or 1.0
+        out[name] = np.clip(v / top, 0.0, 1.5)
+    return out

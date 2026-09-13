@@ -8,7 +8,7 @@
    bar line, a hair either side of one, deep into the song), and fails on the
    first character of difference. */
 "use strict";
-const fs = require("fs"), path = require("path"), { execFileSync } = require("child_process");
+const fs = require("fs"), path = require("path"), os = require("os"), { execFileSync } = require("child_process");
 const { Session } = require("./session.js");
 
 /* The built score when the pipeline has run here, else the committed fixture.
@@ -99,6 +99,56 @@ const anyBeats = a.some(r => r.next.some(e => e.bar !== undefined && e.what === 
 const anySection = a.some(r => r.now.sections && r.now.sections.form);
 ok("the probes actually cover beats", anyBeats);
 ok("and sections", anySection);
+
+/* A song that changes tempo is the case a single bpm cannot express, and the
+   case both halves are most likely to disagree on. The score is built here
+   rather than committed, because a fixture on disk goes stale the moment the
+   fitter changes and then proves only that it used to pass. */
+const twoTempo = {
+  version: 0,
+  grid: { bpm: 120, beats_per_bar: 4, first_beat_s: 1.0, bars: 20,
+          tempo: [{ from_beat: 0, at_s: 1.0, bpm: 90 },
+                  { from_beat: 16, at_s: 11.666667, bpm: 120 }] },
+  song: { length_s: 60 },
+  beats: [], parts: [], phrases: [], moments: [], bars: {},
+};
+const tmp = path.join(os.tmpdir(), `parity-two-tempo-${process.pid}.json`);
+fs.writeFileSync(tmp, JSON.stringify(twoTempo));
+try {
+  const s2 = Session(twoTempo, { now: () => 0 });
+  /* the same doubles on both sides: rounding one and not the other compares
+     two different questions and calls the answer a parity fault */
+  const probes = [1, 2, 3, 5, 6, 8, 10].map(bx => s2.secondsAt(bx, 1));
+  const jsSide = probes.map(t => {
+    const s = Session(twoTempo, { songTime: () => t });
+    return { t, now: s.now().position };
+  });
+  const pySrc = `
+import json, sys
+sys.path.insert(0, ${JSON.stringify(__dirname)})
+import session
+score = json.load(open(${JSON.stringify(tmp)}))
+out = []
+for t in ${JSON.stringify(probes)}:
+    s = session.Session(score, song_time=lambda t=t: t)
+    out.append({"t": t, "now": s.now()["position"]})
+json.dump(out, sys.stdout)
+`;
+  const pySide = JSON.parse(execFileSync("python3", ["-c", pySrc], { encoding: "utf8" }));
+  const same = JSON.stringify(jsSide) === JSON.stringify(pySide);
+  ok("a tempo change reads the same in both languages", same,
+     same ? `${probes.length} probes across the change`
+          : `js ${JSON.stringify(jsSide)} vs py ${JSON.stringify(pySide)}`);
+  const onBar5 = Math.abs(s2.secondsAt(5, 1) - 11.666667) < 1e-4;
+  ok("bar 5 lands where the slow half ends, not where 120bpm would put it",
+     onBar5, `secondsAt(5,1) = ${s2.secondsAt(5, 1).toFixed(4)}s, want 11.6667s`);
+  const naive = 1.0 + 4 * (60 / 120) * 4;
+  ok("and that is a real difference from the single-tempo answer",
+     Math.abs(s2.secondsAt(5, 1) - naive) > 1.0,
+     `tempo map ${s2.secondsAt(5, 1).toFixed(3)}s vs one bpm ${naive.toFixed(3)}s`);
+} finally {
+  fs.unlinkSync(tmp);
+}
 
 const fails = out.filter(r => !r[0]);
 for (const [p, n, d] of out) if (!p) console.log(`  FAIL  ${n}   ${d}`);

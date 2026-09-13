@@ -6,16 +6,41 @@ else sits on top of it.
 
 ## The score
 
-Three numbers, and never a list of beat times.
+A rule for deriving beats, and never a list of beat times.
 
 ```json
-{ "grid": { "bpm": 128.0, "first_beat_s": 0.2233, "beats_per_bar": 4 } }
+{ "grid": { "bpm": 128.0, "first_beat_s": 0.2233, "beats_per_bar": 4,
+            "tempo": [ { "from_beat": 0, "at_s": 0.2233, "bpm": 128.0 } ] } }
 ```
 
 A list of beat times in seconds is what everyone builds first, and it is wrong
-the instant the tempo moves — every entry has to be recomputed and re-sent.
-Three numbers derive every beat in the recording and none of them change when
-somebody plays the record faster.
+the instant anything is edited — every entry has to be recomputed and re-sent.
+A rule derives every beat in the recording and none of it changes when somebody
+plays the record faster.
+
+`bpm` and `first_beat_s` alone were that rule until they met a song that
+changes tempo. Raga of Revenge opens at about 90 and settles at 120 after
+twenty seconds; fitting one tempo to it put the opening sections a bar and a
+half out, and nine of twenty-one songs had some span the single figure could
+not describe. So the rule is `tempo`: a list of constant-tempo segments, each
+saying that from beat `from_beat` onward — which lands at second `at_s` — the
+tempo is `bpm`. Beat 0 is bar 1 beat 1; a pickup before it counts backwards
+into bar 0 at the first segment's tempo.
+
+```
+secondsAt(bar, beat):
+    n   = (bar - 1) * beats_per_bar + (beat - 1)
+    seg = the last entry whose from_beat <= n
+    return seg.at_s + (n - seg.from_beat) * 60 / seg.bpm
+```
+
+A song whose tempo never moves is a map of length one, and that reproduces the
+old two-number arithmetic exactly — so there is one code path, not two.
+
+`bpm` and `first_beat_s` remain, and remain correct, as the song's dominant
+tempo and its first downbeat. A reader that only understands those two keeps
+working and is exactly as right as it was before. A reader that walks `tempo`
+is right on the songs that change. `tempo` is always present.
 
 ## Beats and downbeats are written out too
 
@@ -66,6 +91,26 @@ is a new version.
 **A window clips, it does not renumber.** Bar 33 is still called bar 33. And a
 section that starts before the window still comes back, because a consumer
 asking for eight bars needs to know it is sitting inside a sixteen-bar drop.
+
+### One field, two shapes
+
+`beats` travels in two different shapes depending on which door a reader comes
+through, and this is not yet settled.
+
+`protocol/respond.js`, the reference responder, sends
+`{ derived_from, as, count, list }` where the list is `[bar, beat]` pairs. That
+is what `response.example.json` shows and what `respond.test.js` and
+`session.test.js` assert.
+
+`server/format/v1.js` and `hub/score_api.py` send an array of one object per
+beat: `{ bar, beat, weight, sure, off_ms, downbeat }`. That carries strictly
+more -- `off_ms` is an honesty field described below and the pair form throws it
+away -- and `count` is the array's length.
+
+Both handle either shape on input; neither converts to the other on output. A
+reader written against one and pointed at the other will not crash, it will
+quietly read nothing, which is the worst of the three possible outcomes. Pick
+one before anyone writes a third reader.
 
 ## The two clocks
 
@@ -230,11 +275,167 @@ should check it rather than assume.
 and a confidence. Expect less compression than it sounds: on a busy record it
 is still most of the bars.
 
+## What a reader can act on that is newer than the rest
+
+`ticks` is the only lane fast enough to drive a light on the beat. Everything
+else here is per bar or per section, and a bar at 128bpm is 1.875 seconds --
+four times slower than the kick. It carries one reading per sixteenth for each
+of the four stems, cut on the bar edges so it stays with the music through a
+tempo change, each stem scaled to its own loudest moment. `per_bar` says how
+many readings a bar holds, but read the length of the array and trust that
+instead: a score written before the rate was corrected declares sixteen and
+carries four.
+
+`sections[].repeats_as` is a letter. Two sections sharing one are the same
+section coming back, so a look used for the first can be used again for the
+second. `sections[].sure` is how cleanly that section sits inside its group,
+which is a measurement of the clustering and not a probability.
+
+`sections[].trades` appears on a section that alternates inside itself --
+`{"every_bars": 8, "sure": 0.497, "heard_in": ["pace", "drums", "vocals"]}`.
+A call and response never steps anywhere, so nothing else in this file
+reports it, and a rig that holds one look across it is holding through four
+turnovers of the music.
+
+`melody_phrases` is the tune broken into lines, each with the notes it spans,
+whether it was sung or played, and `same_as` naming an earlier line it repeats
+the shape of.
+
+`groove` is what the rhythm *is*, which nothing else here says. Per stem, the
+strength of the hits at each sixteenth across a bar, plus `same_bar_to_bar` for
+how much the pattern holds from one bar to the next. `pace` counts events and
+throws the arrangement of them away: fourteen bars of Levels sit within 0.05 of
+"one event a beat" and they do not sound alike. Levels' kick reads
+`x...x...x...x...` and its bass `..x.......x...x.`; Nebulakal's kick is
+`X.........X.xx..`, which is not four-on-the-floor at all. A reader that wants
+to punch on the pattern rather than on the beat needs this.
+
+`weight` and `floor` are the bottom of the spectrum -- the share below 120 Hz
+and below 60. `air` and `brightness` are both the top, and nothing measured the
+bottom, which is most of what a drop feels like. `weight` tracks loudness
+closely enough to look redundant, and the places it does not are the point:
+bar 50 of Levels is 0.04 loud and 0.30 heavy, a bar that measures as nearly
+silent and still has a third of its energy under 120 Hz.
+
+`sections[].also_heard` is a second opinion on the boundary from MuQ, a model
+trained on a hundred and sixty thousand hours that shares no code, no features
+and no assumptions with the detectors in shape.py. It is not merged into
+`sure`: two numbers that disagree are worth more than one average that hides
+it. On Nebulakal the model is nearly certain about boundaries we rated
+middling -- bars 73 and 94 come back 0.99 and 0.95 against our 0.49 and 0.44 --
+and it declines to back bars 110 and 146, which are also our two weakest. A
+boundary both methods like is worth committing a look to. A boundary only one
+of them likes is worth a gentler one.
+
+null means only we heard it. That is not the same as wrong.
+
+`lyrics` is what the singer is singing and when. `lyrics.words` is every word
+with the second it starts and ends and the bar it falls in; `lyrics.lines`
+groups those words into the song's own phrases, breaking at the quietest moment
+within a beat of each phrase boundary rather than at a fixed word count, because
+sung lines start on a pickup before the bar line and the median gap between two
+sung words is zero -- singers do not leave silence between lines.
+
+`lines[].sure` is the part of the line that two passes agreed on. The song is
+transcribed twice with differently placed chunk boundaries, and a word counts as
+confirmed when both passes produce the same word within 1.2 seconds. This is the
+same rule as `grid.sure` and `also_heard`: one method's opinion is not evidence.
+It matters here more than anywhere else, because a transcriber is fluent and
+confident when it is wrong -- on The Nights it returns "when the thunderclap
+starts pinging down" for "when thunderclouds start pouring down", in exactly the
+register it uses for the lines it gets right. A line under 0.6 is usually one
+where the voice is buried under the production.
+
+`lyrics.checked_twice` is false when only one pass was run, and then no `sure`
+is present anywhere. Absent `sure` means unmeasured, never confirmed.
+
+`lyrics` is absent for songs the transcriber cannot read, and that set is larger
+than it looks. Qwen3-ASR covers thirty languages; Malayalam, Tamil and Telugu
+are not among them, and it does not decline. It picks the nearest language it
+knows and answers with confidence. Nebulakal comes back as Chinese reading
+"红灯，红灯，红灯，红灯"; Mizhiyoram as Chinese; Ponni Nadhi as Tamil forced
+into Devanagari; Entharo Mahanu as nothing at all. Arz Kiya Hai is Hindi, which
+is supported, and comes back as real Hindi lyrics.
+
+Asking the model twice at different points in the song does not sort this out.
+Mizhiyoram answers Chinese every time and Nebulakal answers Hindi every time --
+steadily, and wrongly. A language that holds still is not the same as a language
+that is right, which is why the gate is the two-pass word agreement in `sure`
+rather than anything the model says about itself.
+
+Indian-language lyrics need a model trained for them -- IndicWhisper or Sarvam
+Saarika-2.5. Until one is wired in, those songs carry no `lyrics` field, which
+is the honest answer rather than a field full of the wrong alphabet.
+
+`noisy` is how much of a bar is noise rather than pitch -- distortion, cymbals,
+breath -- measured as spectral flatness. `held` is how much of the bar the sound
+keeps ringing instead of hitting and stopping: the share of the bar spent above
+half the bar's own peak. A bar of staccato stabs and a bar of one held chord can
+carry the same energy and the same brightness and read completely differently,
+and nothing in the score could tell them apart.
+
+Both were checked against every curve already in the score before they were
+added, on eight songs. `held` never exceeds 0.71 correlation with an existing
+curve and `noisy` reaches 0.88 only on Levels, against air, sitting between 0.21
+and 0.60 elsewhere. A third candidate, the depth of the valleys between hits,
+was dropped: it tracked `held` at 0.93 on Strobe and 0.88 on Experience, which
+is one measurement wearing two names.
+
+`sections[].mood` is where a section sits on a handful of opposed axes -- calm
+against aggressive, happy against sad, warm against cold -- read by MuQ-MuLan,
+which was trained to place music and text in one space. The number is not a
+score against the word. It is the section's position within this song: zero is
+the song's own average, and the range runs to roughly plus or minus a half. So
+-0.4 on `calm_vs_aggressive` means one of the more aggressive stretches of this
+particular song, not an aggressive piece of music. The raw similarity carries
+an arbitrary offset -- every section of The Nights reads "bright" against
+"dark" -- and only the differences between sections survive it.
+
+`mood_axes` says which axes were worth keeping and by how much. Every axis is
+measured before it ships: each section is split in half and read twice, which
+gives a noise floor, and that floor is compared against how much whole sections
+differ from one another. The number in `mood_axes` is that ratio. Below 1.0 a
+section differs from itself more than it differs from other sections, and the
+axis is measuring nothing. Anything under 1.3 is dropped from the score rather
+than shipped as decoration.
+
+The bar is applied per song, because the reliability is per song and not per
+axis. bright/dark scores 0.86 on The Nights and 1.64 on Levels. calm/aggressive
+scores 2.49 on The Nights and 0.95 on Levels. Raga of Revenge reads warm/cold
+at 5.49. Holocene, which holds one mood for four minutes, clears the bar on
+almost nothing and so carries almost no mood -- which is the correct answer for
+that song, and the reason the gate exists.
+
+Unlike `also_heard`, where two independent methods vote on the same boundary,
+this is one model's opinion with no second method to check it against. The
+split-half ratio says the opinion is stable. It does not say it is right.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should
 be. On a programmed record it is near zero everywhere, which is itself worth
 knowing; on a played one it is where the performance disagreed with the model.
+
+`grid.sure` is how far two independent beat trackers agree about this song.
+The pipeline runs madmom's DBN and Beat This!, which share no code and no
+training data, and scores how many beats land within 70ms of each other and
+whether both chose the same metrical level. It is the one confidence in the
+file that nobody had to label by ear, and it is worth reading before acting
+boldly: Entharo Mahanu scores 0.21 because the two models disagree by exactly
+a factor of two about what the beat is, and the honest report of that is a low
+number rather than a confident pick. Songs written to a click score 0.87 to
+1.00.
+
+`parts[].sure` is the silhouette of the clustering that decides `repeats_as` --
+how cleanly a section sits inside the group it was assigned to, rather than how
+likely its label is to be correct.
+
+Neither is a probability. Both are measurements of agreement, which is a
+different and more honest thing than a guess dressed as one.
+
+`grid.tempo` says where the tempo was measured to change. It is not a
+confidence: a segment boundary means the beats really did move, not that the
+fitter was unsure. Uncertainty is what `holds_from_s` is for.
 
 `grid.holds_from_s` and `holds_to_s` are always present now, and
 `holds_measured` says whether that span was measured or is simply the whole

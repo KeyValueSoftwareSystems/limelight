@@ -13,15 +13,20 @@ import math
 
 KNOWN = [
     "song", "grid", "beats", "downbeats", "sections", "energy",
-    "brightness", "width", "air", "pump", "pace", "moments",
+    "brightness", "width", "air", "pump", "pace", "weight", "floor",
+    "noisy", "held",
+    "groove", "ticks", "melody_phrases", "phrase_grid", "scales",
+    "presence", "moments",
     "phrases", "layers", "chords", "key", "loudness", "feel",
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
-    "tension", "releases", "melody", "signals", "made_by",
+    "tension", "releases", "melody", "signals", "made_by", "mood_axes",
+    "lyrics",
 ]
 
 _STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
 _STEM_FOUR  = ["drums", "bass", "vocals", "other"]
-_CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace"]
+_CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace",
+                "weight", "floor", "noisy", "held"]
 # The personality rides with the score when present, asked for or not: it is how
 # the artist wants this song to look, and a consumer that forgot to ask should
 # still get it. `profile` was the old name and is still sent alongside, so a
@@ -81,9 +86,15 @@ def format_v1(raw):
             out["beats"] = raw["beats"]
         elif isinstance(raw["beats"], list):
             converted = []
+            walk_bar, walk_beat = first_bar, 0
             for idx, b in enumerate(raw["beats"]):
-                bar = first_bar + idx // bpb
-                beat = (idx % bpb) + 1
+                if isinstance(b, dict) and b.get("downbeat"):
+                    if walk_beat:
+                        walk_bar += 1
+                    walk_beat = 1
+                else:
+                    walk_beat += 1
+                bar, beat = walk_bar, walk_beat
                 entry = {"bar": bar, "beat": beat}
                 if isinstance(b, dict):
                     expected_t = first_beat_s + idx * beat_sec
@@ -100,6 +111,9 @@ def format_v1(raw):
 
     if raw.get("downbeats"):
         out["downbeats"] = raw["downbeats"]
+    elif isinstance(out.get("beats"), list) and isinstance(raw.get("beats"), list):
+        out["downbeats"] = [e for e, b in zip(out["beats"], raw["beats"])
+                            if isinstance(b, dict) and b.get("downbeat")]
 
     # ---- sections ----
     layers = raw.get("layers") or {}
@@ -127,6 +141,16 @@ def format_v1(raw):
                 "playing": p.get("playing"),
                 "fullness": p.get("fullness"),
                 "rise": p.get("rise"),
+                # Which section this repeats, how cleanly it sits in that
+                # group, whether it trades back and forth inside itself, and
+                # whether a model that shares nothing with our detectors heard
+                # the same boundary. The JS formatter carried these and this
+                # one did not.
+                "repeats_as": p.get("repeats_as"),
+                "sure": p.get("sure"),
+                "trades": p.get("trades"),
+                "also_heard": p.get("also_heard"),
+                "mood": p.get("mood"),
                 "stems": p.get("stems"),
             }
             for p in raw["parts"]
@@ -149,6 +173,17 @@ def format_v1(raw):
             out[lane] = bars[lane]
     if isinstance(bars.get("brightness"), list):
         out["brightness"] = bars["brightness"]
+    # air and brightness are both the top of the spectrum; nothing measured the
+    # bottom, which is most of what a drop feels like.
+    for band in ("weight", "floor", "noisy", "held"):
+        if isinstance(bars.get(band), list):
+            out[band] = bars[band]
+    # These three were carried by the JS formatter and not this one, which is
+    # the same drift in the other direction.
+    for whole in ("groove", "ticks", "melody_phrases",
+                  "phrase_grid", "scales", "presence", "mood_axes", "lyrics"):
+        if raw.get(whole) is not None:
+            out[whole] = raw[whole]
 
     # ---- curves ----
     curve_entries = {}

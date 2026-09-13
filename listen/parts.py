@@ -5,11 +5,12 @@ import numpy as np
 warnings.filterwarnings("ignore")
 
 
-def features(path, first_s, bar_s, bars, sr=22050):
-    edges = first_s + np.arange(bars + 1) * bar_s
-    if first_s > 0.2:
-        edges = np.concatenate([[0.0], edges])
-    return features_at(path, edges, sr)
+def features(path, first_s, bar_s, bars, sr=22050, edges=None):
+    if edges is None:
+        edges = first_s + np.arange(bars + 1) * bar_s
+        if first_s > 0.2:
+            edges = np.concatenate([[0.0], edges])
+    return features_at(path, np.asarray(edges, dtype=float), sr)
 
 
 def features_at(path, edges, sr=22050):
@@ -221,8 +222,10 @@ def playing_in(voices, a, b):
 
 
 def shape(cuts, labels, busy, voices=None):
-    v = busy[0]
-    peak = v.max() or 1.0
+    v = np.nan_to_num(np.asarray(busy[0], dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
+    peak = float(v.max()) if v.size else 0.0
+    if not np.isfinite(peak) or peak == 0.0:
+        peak = 1.0
     out = []
     order, seen = {}, 0
     had = {}

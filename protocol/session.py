@@ -66,6 +66,14 @@ class Session:
 
         self.beat_s = 60.0 / self.bpm          # song seconds per beat, never scaled
         self.bar_s = self.beat_s * self.bpb
+        # A song may change tempo. grid.tempo is the map: from beat `from_beat`
+        # onward, which lands at `at_s`, the tempo is `bpm`. A score without one
+        # is a song that never changes tempo, which is a map of length one -- so
+        # everything walks the map and there is no second path to keep in step.
+        self.tempo = sorted(g.get("tempo") or
+                            [{"from_beat": 0, "at_s": self.first, "bpm": self.bpm}],
+                            key=lambda x: x["from_beat"])
+
 
         self._wall = now or (lambda: time.monotonic())
         # A real music container already has a clock, and the thing playing the
@@ -103,8 +111,28 @@ class Session:
         """
         return round(x) if abs(x - round(x)) < 1e-9 else x
 
+    def _seg_at_beat(self, n):
+        k = 0
+        while k + 1 < len(self.tempo) and self.tempo[k + 1]["from_beat"] <= n:
+            k += 1
+        return self.tempo[k]
+
+    def _seg_at_time(self, t):
+        k = 0
+        while k + 1 < len(self.tempo) and self.tempo[k + 1]["at_s"] <= t:
+            k += 1
+        return self.tempo[k]
+
+    def _at_beat(self, n):
+        s = self._seg_at_beat(n)
+        return s["at_s"] + (n - s["from_beat"]) * (60.0 / s["bpm"])
+
+    def _beat_at(self, t):
+        s = self._seg_at_time(t)
+        return s["from_beat"] + (t - s["at_s"]) / (60.0 / s["bpm"])
+
     def position_at(self, t):
-        i = self._snap((t - self.first) / self.beat_s)
+        i = self._snap(self._beat_at(t))
         return {"bar": 1 + int(math.floor(i / self.bpb)),
                 "beat": _fx(_mod(i, self.bpb) + 1, 4),
                 "before_first_beat": t < self.first}
@@ -112,11 +140,10 @@ class Session:
     def seconds_at(self, bar, beat=1):
         # Bar 1 begins on the first downbeat. With first_bar 0 that bar is the
         # pickup BEFORE it, so anchoring there put every cue one bar late.
-        return (self.first + (bar - 1) * self.bar_s
-                + (_or(beat, 1) - 1) * self.beat_s)
+        return self._at_beat((bar - 1) * self.bpb + (_or(beat, 1) - 1))
 
     def _index(self, t):
-        return self._snap((t - self.first) / self.beat_s)
+        return self._snap(self._beat_at(t))
 
     def _from_index(self, i):
         return {"bar": 1 + int(math.floor(i / self.bpb)),
@@ -271,9 +298,12 @@ class Session:
 def _position_of(sc, t):
     g = sc["grid"]
     n = _or(g.get("beats_per_bar"), 4)
-    bar_s = (60.0 / g["bpm"]) * n
     fb = _or(g.get("first_bar"), 1)
-    b = (t - g["first_beat_s"]) / bar_s
+    tempo = g.get("tempo") or [{"from_beat": 0, "at_s": g["first_beat_s"], "bpm": g["bpm"]}]
+    k = 0
+    while k + 1 < len(tempo) and tempo[k + 1]["at_s"] <= t:
+        k += 1
+    b = (tempo[k]["from_beat"] + (t - tempo[k]["at_s"]) / (60.0 / tempo[k]["bpm"])) / n
     return {"bar": fb + int(math.floor(b)), "beat": _fx(_mod(b, 1) * n + 1, 3)}
 
 

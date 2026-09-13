@@ -6,16 +6,17 @@
  */
 
 export const KNOWN = [
-  'song', 'grid', 'beats', 'downbeats', 'sections', 'energy',
-  'brightness', 'width', 'air', 'pump', 'pace',
+  'song', 'grid', 'beats', 'downbeats', 'sections', 'energy', 'ticks', 'groove', 'melody_phrases',
+  'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor', 'noisy', 'held',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
-  'tension', 'releases', 'melody', 'signals', 'made_by',
+  'tension', 'releases', 'melody', 'signals', 'made_by', 'mood_axes', 'lyrics',
 ];
 
 const STEM_NAMES = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
 const STEM_FOUR  = ['drums', 'bass', 'vocals', 'other'];
-const CURVE_NAMES = ['energy', 'brightness', 'width', 'air', 'pump', 'pace'];
+const CURVE_NAMES = ['energy', 'brightness', 'width', 'air', 'pump', 'pace',
+                     'weight', 'floor', 'noisy', 'held'];
 
 /**
  * @param {object} raw  Parsed score file from disk.
@@ -52,14 +53,22 @@ export function format(raw) {
   // ---- grid (with holds_from / holds_to) ----
   if (raw.grid) {
     out.grid = { ...raw.grid };
-    if (raw.grid.holds_from_s != null) {
-      const i = (raw.grid.holds_from_s - firstBeatS) / beatSec;
-      out.grid.holds_from = { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(i % bpb) + 1 };
-    }
-    if (raw.grid.holds_to_s != null) {
-      const i = (raw.grid.holds_to_s - firstBeatS) / beatSec;
-      out.grid.holds_to = { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(i % bpb) + 1 };
-    }
+    /* A song may change tempo, so the beat a second falls on is a walk along
+       grid.tempo, not one division. Dividing by a single beatSec put holds_from
+       in the wrong bar on every song whose tempo moves. */
+    const map = (raw.grid.tempo && raw.grid.tempo.length)
+      ? raw.grid.tempo : [{ from_beat: 0, at_s: firstBeatS, bpm }];
+    const beatOf = t => {
+      let k = 0;
+      while (k + 1 < map.length && map[k + 1].at_s <= t) k++;
+      return map[k].from_beat + (t - map[k].at_s) / (60 / map[k].bpm);
+    };
+    const place = t => {
+      const i = beatOf(t);
+      return { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(((i % bpb) + bpb) % bpb) + 1 };
+    };
+    if (raw.grid.holds_from_s != null) out.grid.holds_from = place(raw.grid.holds_from_s);
+    if (raw.grid.holds_to_s != null) out.grid.holds_to = place(raw.grid.holds_to_s);
   }
 
   // ---- beats (two formats: protocol {list} or pipeline [{t, weight, sure}]) ----
@@ -67,9 +76,22 @@ export function format(raw) {
     if (raw.beats.list) {
       out.beats = raw.beats;
     } else if (Array.isArray(raw.beats)) {
+      /* Bars advance on the detected downbeat, not on a count of four from beat
+         zero. A song that opens with a pickup has fewer than a full bar before
+         its first downbeat, and counting idx/beats_per_bar put every beat after
+         it out of phase with the music -- on Levels the first downbeat sits at
+         index 2, so this called it bar 0 beat 3 and started its bars two beats
+         early for the whole song. respond.js has walked the flags since the day
+         a pickup score was first read; these two formatters never did. */
+      let walkBar = firstBar, walkBeat = 0;
       out.beats = raw.beats.map((b, idx) => {
-        const bar  = firstBar + Math.floor(idx / bpb);
-        const beat = (idx % bpb) + 1;
+        if (b.downbeat) {
+          if (walkBeat) walkBar += 1;
+          walkBeat = 1;
+        } else {
+          walkBeat += 1;
+        }
+        const bar = walkBar, beat = walkBeat;
         const expectedT = firstBeatS + idx * beatSec;
         const entry = { bar, beat };
         if (b.weight !== undefined) entry.weight = b.weight;
@@ -80,7 +102,13 @@ export function format(raw) {
       });
     }
   }
+  /* The one request SPEC uses as its example asks for downbeats, and neither
+     formatter ever produced any: a pipeline score has the flag on each beat and
+     no downbeats field, and both only passed a field through. Asking for them
+     got you nothing back. */
   if (raw.downbeats) out.downbeats = raw.downbeats;
+  else if (Array.isArray(out.beats) && Array.isArray(raw.beats))
+    out.downbeats = out.beats.filter((_, i) => raw.beats[i] && raw.beats[i].downbeat);
 
   // ---- sections (layers.form.spans or parts) ----
   if (raw.layers?.form?.spans) {
@@ -108,8 +136,30 @@ export function format(raw) {
       fullness: part.fullness,
       rise:     part.rise,
       stems:    part.stems,
+      /* Which section this one is a repeat of, how cleanly it sits in that
+         group, and whether it trades back and forth inside itself. A reader
+         that knows a chorus is the chorus it already lit can light it the same
+         way; one that knows a verse turns over every eight bars can swap on
+         the cycle instead of holding one look for thirty-one bars. */
+      repeats_as: part.repeats_as,
+      /* Whether a model that shares nothing with our detectors heard this
+         boundary too. Null means only we did, which is not the same as wrong. */
+      also_heard: part.also_heard,
+      sure:       part.sure,
+      trades:     part.trades,
+      mood:       part.mood,
     }));
   }
+
+  /* The fast lane. Everything else in this file is per bar or per section, and
+     a light that pulses on the beat cannot be driven from either. */
+  if (raw.ticks) out.ticks = raw.ticks;
+  /* Where the hits fall inside the bar, per stem. pace counts events and
+     throws the pattern away, and the pattern is what a light follows. */
+  if (raw.groove) out.groove = raw.groove;
+  if (Array.isArray(raw.melody_phrases)) out.melody_phrases = raw.melody_phrases;
+  if (raw.mood_axes) out.mood_axes = raw.mood_axes;
+  if (raw.lyrics) out.lyrics = raw.lyrics;
 
   // ---- energy (backward compat) ----
   if (raw.energy) {
@@ -138,6 +188,13 @@ export function format(raw) {
     if (Array.isArray(bars[lane])) out[lane] = bars[lane];
   }
   if (Array.isArray(bars.brightness)) out.brightness = bars.brightness;
+  /* air and brightness are both the top of the spectrum. weight is the share
+     below 120 Hz and floor below 60 -- a bar can read near silent on energy
+     and still be a third low end, which is a bar that feels like something. */
+  if (Array.isArray(bars.weight)) out.weight = bars.weight;
+  if (Array.isArray(bars.floor)) out.floor = bars.floor;
+  if (Array.isArray(bars.noisy)) out.noisy = bars.noisy;
+  if (Array.isArray(bars.held)) out.held = bars.held;
 
   // ---- curves (selectable per-bar arrays with metadata) ----
   const curveEntries = {};

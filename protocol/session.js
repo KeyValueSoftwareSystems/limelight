@@ -34,6 +34,32 @@ function Session(score, opts) {
 
   const beatSec = 60 / bpm;              /* song seconds per beat -- never scaled */
   const barSec = beatSec * bpb;
+  /* A song may change tempo. grid.tempo is the map: each entry says that from
+     beat `from_beat` onward, which lands at `at_s`, the tempo is `bpm`. A score
+     without one is a song that never changes tempo, which is the same thing as
+     a map of length one -- so everything below walks the map and there is no
+     second code path to keep in step. */
+  const tempo = (g.tempo && g.tempo.length)
+    ? g.tempo.slice().sort((a, b) => a.from_beat - b.from_beat)
+    : [{ from_beat: 0, at_s: first, bpm: bpm }];
+  function segAtBeat(n) {
+    let k = 0;
+    while (k + 1 < tempo.length && tempo[k + 1].from_beat <= n) k++;
+    return tempo[k];
+  }
+  function segAtTime(t) {
+    let k = 0;
+    while (k + 1 < tempo.length && tempo[k + 1].at_s <= t) k++;
+    return tempo[k];
+  }
+  const atBeat = n => {
+    const s = segAtBeat(n);
+    return s.at_s + (n - s.from_beat) * (60 / s.bpm);
+  };
+  const beatAt = t => {
+    const s = segAtTime(t);
+    return s.from_beat + (t - s.at_s) / (60 / s.bpm);
+  };
   /* Which number the first bar carries. Some songs open on a pickup and start
      at 0; others start at 1. Nothing used to say which, so this library assumed
      1 and shifted anything that said otherwise -- which is a one-bar error on
@@ -80,7 +106,7 @@ function Session(score, opts) {
   const snap = x => Math.abs(x - Math.round(x)) < 1e-9 ? Math.round(x) : x;
 
   function positionAt(t) {
-    const i = snap((t - first) / beatSec);
+    const i = snap(beatAt(t));
     return {
       bar: 1 + Math.floor(i / bpb),
       beat: +(mod(i, bpb) + 1).toFixed(4),
@@ -92,10 +118,10 @@ function Session(score, opts) {
     /* Bar 1 begins on the first downbeat, always. When first_bar is 0 that bar
        is a pickup sitting BEFORE the downbeat, not on it -- anchoring on
        first_bar put every section a whole bar late in the baked show. */
-    return first + (bar - 1) * barSec + (or_(beat, 1) - 1) * beatSec;
+    return atBeat((bar - 1) * bpb + (or_(beat, 1) - 1));
   }
   /* beats laid on one line, so "which beat is this" is one division */
-  const index = t => snap((t - first) / beatSec);
+  const index = t => snap(beatAt(t));
   const fromIndex = i => ({ bar: 1 + Math.floor(i / bpb), beat: (mod(i, bpb)) + 1 });
 
   /* ---- sections, in layers ------------------------------------------------
@@ -163,9 +189,12 @@ function Session(score, opts) {
     return out;
   }
   function positionOf(sc, t) {
-    const g = sc.grid, n = g.beats_per_bar || 4, barS = (60 / g.bpm) * n;
-    const fb = (g.first_bar !== undefined && g.first_bar !== null) ? g.first_bar : 1;
-    const b = (t - g.first_beat_s) / barS;
+    const g = sc.grid, n = g.beats_per_bar || 4;
+    const map = (g.tempo && g.tempo.length)
+      ? g.tempo : [{ from_beat: 0, at_s: g.first_beat_s, bpm: g.bpm }];
+    let k = 0;
+    while (k + 1 < map.length && map[k + 1].at_s <= t) k++;
+    const b = (map[k].from_beat + (t - map[k].at_s) / (60 / map[k].bpm)) / n;
     return { bar: 1 + Math.floor(b), beat: +(((b % 1) + 1) % 1 * n + 1).toFixed(3) };
   }
   score = adapt(score);

@@ -45,11 +45,14 @@ def envelopes(path, slug):
     return out
 
 
-def per_bar(env, first_s, bar_s, bars):
-    spans = []
-    if first_s > 0.2:
-        spans.append((0.0, first_s))
-    spans += [(first_s + b * bar_s, first_s + (b + 1) * bar_s) for b in range(bars)]
+def per_bar(env, first_s, bar_s, bars, edges=None):
+    if edges is not None:
+        spans = [(edges[i], edges[i + 1]) for i in range(len(edges) - 1)]
+    else:
+        spans = []
+        if first_s > 0.2:
+            spans.append((0.0, first_s))
+        spans += [(first_s + b * bar_s, first_s + (b + 1) * bar_s) for b in range(bars)]
     out = {}
     for name, v in env.items():
         rows = []
@@ -64,3 +67,27 @@ def per_bar(env, first_s, bar_s, bars):
 
 def present(v, floor=0.12):
     return bool(np.median(v) > floor)
+
+
+def per_tick(env, edges, per=16):
+    # One value per sixteenth instead of one per bar. A bar at 128bpm is 1.875s,
+    # so a kick at two hits a second sits above what a per-bar lane can even
+    # represent -- the wobble it shows there is aliasing, not the drum. A light
+    # that pulses on the beat needs a lane fast enough to carry the beat, and
+    # the envelopes are already computed at 100Hz before anything collapses
+    # them. Anchored to the bar edges, so this stays true through a tempo
+    # change rather than drifting off the music.
+    spans = []
+    for i in range(len(edges) - 1):
+        a, b = edges[i], edges[i + 1]
+        step = (b - a) / per
+        spans += [(a + k * step, a + (k + 1) * step) for k in range(per)]
+    out = {}
+    for name, v in env.items():
+        rows = []
+        for lo, hi in spans:
+            part = v[max(0, int(lo * RATE)):max(0, int(hi * RATE))]
+            rows.append(round(float(part.max()), 4) if len(part) else 0.0)
+        top = max(rows) or 1.0
+        out[name] = [round(x / top, 4) for x in rows]
+    return out

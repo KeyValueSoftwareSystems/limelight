@@ -124,8 +124,12 @@ function applyWindow(out, w, grid) {
   }
 
   if (out.downbeats) {
-    const list = out.downbeats.list.filter(b => inWin(b[0]));
-    out.downbeats = { derived_from: 'grid', as: '[bar, beat]', count: list.length, list };
+    if (out.downbeats.list) {
+      const list = out.downbeats.list.filter(b => inWin(b[0]));
+      out.downbeats = { derived_from: 'grid', as: '[bar, beat]', count: list.length, list };
+    } else if (Array.isArray(out.downbeats)) {
+      out.downbeats = out.downbeats.filter(b => inWin(b.bar));
+    }
   }
 
   if (out.sections) {
