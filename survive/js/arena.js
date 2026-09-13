@@ -10,6 +10,7 @@
   var raf = 0, running = false, paused = false, lastTime = 0;
   var lastBeatKey = -1, lastBar = -1;
   var stats, songEntry, onEnd;
+  var songLen = 0, lastSpark = 0;
 
   function resetStats() {
     return {
@@ -37,6 +38,8 @@
 
     var score = entry.score;
     if (!score) return Promise.reject(new Error("no score loaded"));
+    songLen = (score.song && score.song.length_s) || 180;
+    lastSpark = 0;
 
     audio = new Audio();
     audio.preload = "auto";
@@ -119,6 +122,9 @@
     var energyNow = (now.energy == null ? 0.5 : now.energy);
     hazards.setEnergy(energyNow);
     hazards.setPace(0.5 + energyNow * 1.6);
+    /* difficulty eases in over the first ~40% of the song, then holds full */
+    var ramp = 0.35 + 0.65 * ((now.seconds || 0) / Math.max(24, songLen * 0.4));
+    hazards.setRamp(ramp > 1 ? 1 : ramp);
 
     var currentBar = 1, currentBeat = 1, bpb = 4;
     if (now.position && !now.position.before_first_beat) {
@@ -176,59 +182,38 @@
         stats.totalDamage++;
         var secName = hazards.getSectionName() || "unknown";
         stats.damagePerSection[secName] = (stats.damagePerSection[secName] || 0) + 1;
-        window.Renderer.shake(1.2);
-        window.HUD.showBonus("HIT!", 0);
+        window.Renderer.shake(2.0);
+        window.Renderer.flash();
+        /* knock the player outward -- the hit reads as an impact, and pushes
+           them off whatever just struck */
+        var kd = Math.sqrt(player.x * player.x + player.y * player.y) || 1, kb = 1.8;
+        player.x += (player.x / kd) * kb; player.y += (player.y / kd) * kb;
+        var rr2 = Math.sqrt(player.x * player.x + player.y * player.y), maxr = ARENA_R - player.radius;
+        if (rr2 > maxr) { player.x *= maxr / rr2; player.y *= maxr / rr2; }
+        window.HUD.showBonus(damages[i].type.toUpperCase() + "!", 0);
       }
     }
 
-    var collected = hazards.checkNoteCollection(player.x, player.y, ARENA_R);
-    for (var i = 0; i < collected.length; i++) {
-      player.collectNote();
-      stats.notesCollected++;
-      window.HUD.showBonus("NOTE!", 0);
-    }
-
-    if (phase === "BRIDGE") {
-      var stepped = hazards.checkPadStep(player.x, player.y, ARENA_R);
-      if (stepped) {
-        window.HUD.showBonus("STEP!", 0);
+    /* near-miss: a bullet skimmed past without hitting -> a spark, so a clean
+       dodge feels earned */
+    if (!damages.length) {
+      var gap = hazards.minBulletGap(player.x, player.y, player.radius);
+      if (gap > 0 && gap < 0.5 && (now.seconds - lastSpark) > 0.2) {
+        window.Renderer.spark(player.x, player.y, ARENA_R);
+        lastSpark = now.seconds;
       }
     }
 
-    if (phase === "PRE_CHORUS") {
-      var spot = hazards.prechorusSpotlight(currentBar, currentBeat, bpb, hazards.getEnergy());
-      var sx = (spot.xPct / 100 - 0.5) * 2 * ARENA_R;
-      var sy = -(spot.yPct / 100 - 0.5) * 2 * ARENA_R;
-      var dist = Math.sqrt((player.x - sx) * (player.x - sx) + (player.y - sy) * (player.y - sy));
-      var safeR = (spot.radiusPct / 100) * ARENA_R;
-      if (dist <= safeR) {
-        player.heal(0);
-      }
-    }
-
-    var wedges = phase === "VERSE" ? hazards.verseWedges(currentBar, currentBeat, bpb, hazards.getPace()) : [];
-    var rings = phase === "CHORUS" ? hazards.chorusRings(currentBar, currentBeat, bpb, hazards.getTelegraphs()) : [];
-    var spotlight = phase === "PRE_CHORUS" ? hazards.prechorusSpotlight(currentBar, currentBeat, bpb, hazards.getEnergy()) : null;
-    var notes = phase === "DROP" ? hazards.dropNotes(currentBar, currentBeat, bpb, hazards.getNotes()) : [];
-    var padStep = phase === "BRIDGE" ? hazards.getPadStep() : -1;
-
+    /* One unified moveset: wedges, rings, lasers and bullet volleys, whatever
+       the section's director chose. The hazards hand back render-ready data so
+       the drawn hazard and the damage test above stay in step. */
+    var rd = hazards.getRenderData();
     window.Renderer.updatePlayer(player, ARENA_R);
     window.Renderer.updateBoss(null, ARENA_R, dt);
-    window.Renderer.updateWedges(wedges);
-    window.Renderer.updateRings(rings);
-    window.Renderer.updateSpotlight(spotlight);
-    window.Renderer.updateNotes(notes);
-
-    var padData = [];
-    if (phase === "BRIDGE") {
-      var ph = hazards.getPadHits();
-      var ps = hazards.getPadStep();
-      for (var i = 0; i < 4; i++) {
-        padData.push({ active: ps === i, hit: ph[i] || false });
-      }
-    }
-    window.Renderer.updatePads(padData);
-    window.Renderer.updateClear(false);
+    window.Renderer.updateWedges(rd.wedges);
+    window.Renderer.updateRings(rd.rings);
+    window.Renderer.updateLasers(rd.lasers);
+    window.Renderer.updateBullets(rd.bullets);
     window.Renderer.updateFrame(dt);
 
     window.HUD.update({
