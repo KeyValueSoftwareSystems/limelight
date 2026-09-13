@@ -13,6 +13,7 @@ import shutil
 import struct
 import subprocess
 import threading
+import time
 
 import soundfile as sf
 
@@ -86,14 +87,42 @@ class AudioPlayer:
         with self._lock:
             self.stop()
             src = self.source_for(position)
-            if shutil.which("pw-play"):
-                cmd = ["pw-play", src]
-            elif shutil.which("aplay"):
-                cmd = ["aplay", "-q", src]
+            # Try each player and keep the one that actually survives. Picking the
+            # first that EXISTS is what broke here: pw-play is installed, and
+            # exits immediately with "no node available" on a machine where
+            # PulseAudio owns the card, so every press of play looked like
+            # silence with no error anywhere. Existence is not capability.
+            last = None
+            for cmd in self._players(src):
+                proc = self._popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                time.sleep(0.15)
+                if proc.poll() is None:            # still alive: it is playing
+                    self.proc = proc
+                    self._spawned.append(proc)
+                    self.player = cmd[0]
+                    return
+                last = cmd[0]
+                self._spawned.append(proc)
+            raise RuntimeError(
+                "no working audio player: tried "
+                + ", ".join(c[0] for c in self._players(src))
+                + (f" (last was {last}, which exited straight away)" if last else ""))
+
+    def _players(self, src):
+        """Candidate commands, best first. LIMELIGHT_PLAYER forces one."""
+        forced = os.environ.get("LIMELIGHT_PLAYER")
+        names = [forced] if forced else ["paplay", "pw-play", "aplay", "ffplay"]
+        out = []
+        for n in names:
+            if not n or not shutil.which(n):
+                continue
+            if n == "aplay":
+                out.append([n, "-q", src])
+            elif n == "ffplay":
+                out.append([n, "-nodisp", "-autoexit", "-loglevel", "quiet", src])
             else:
-                raise RuntimeError("no audio player found (need pw-play or aplay)")
-            self.proc = self._popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            self._spawned.append(self.proc)
+                out.append([n, src])
+        return out
 
     def stop(self) -> None:
         with self._lock:
@@ -118,8 +147,17 @@ def make_audio(path: str):
     Fall back to pw-play (AudioPlayer), which cannot report a position -- the reason
     the panel needed a hand-tuned offset that changed every run.
     """
-    import importlib.util
-    if importlib.util.find_spec("sounddevice") is not None:
+    # Import it, do not merely look for the file. sounddevice is pure Python and
+    # is always importable as a FILE, but raises OSError at import when the
+    # PortAudio library is not on the machine -- so find_spec said yes, the
+    # measured device was chosen, and playback then failed on the first press of
+    # play with "PortAudio library not found". Ask the question that matters.
+    try:
+        import sounddevice  # noqa: F401
+        have_sd = True
+    except Exception:       # noqa: BLE001 - missing library, no device, anything
+        have_sd = False
+    if have_sd:
         proto = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                              "..", "..", "..", "protocol")
         if proto not in sys.path:
