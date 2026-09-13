@@ -185,7 +185,7 @@ def arrivals(pull, g, gone, pickup):
             bar = max(first, k // per + first)
             beat = k % per + 1
         out.append(say(bar, beat, "release", "tension",
-                       float(r.get("size", r.get("drop", 0.5)))))
+                       float(r.get("jump", r.get("size", 0.5)))))
     return out
 
 

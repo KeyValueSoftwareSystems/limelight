@@ -33,7 +33,7 @@ from harmony import chords as find_chords
 from harmony import per_bar as chords_per_bar
 from stems import NAMES as STEM_NAMES
 from stems import MORE as STEM_MORE
-from stems import envelopes, wider, per_bar, per_tick
+from stems import envelopes, wider, per_bar, per_beat, per_tick
 from voice import clean as clean_voice, made_by as voice_made_by
 from texture import air, bands, duck, pace, sides
 from grain import held as ringing, noisy
@@ -277,7 +277,10 @@ def read(path, slug):
     lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"], edges=cuts)
     lanes.update(per_bar(wider(path, slug), g["first_beat_s"], bar_s, g["bars"],
                          edges=cuts))
-    ticks = per_tick(env, cuts, per=g["beats_per_bar"] * 4)
+    heard_env = dict(env)
+    heard_env.update(wider(path, slug))
+    ticks = per_tick(heard_env, cuts, per=g["beats_per_bar"] * 4)
+    beat_lanes = per_beat(heard_env, times)
     swing = groove(env, cuts, per=g["beats_per_bar"] * 4)
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
     busy, bright = curves(path, g, edges=cuts)
@@ -297,7 +300,7 @@ def read(path, slug):
            for k, v in bands(stereo, edges_now).items()},
         "air": [round(float(x), 3) for x in air(path, edges_now)],
         "noisy": [round(float(x), 3) for x in noisy(path, edges_now)],
-        "held": [round(float(x), 3) for x in ringing(env, edges_now)],
+        "sustained": [round(float(x), 3) for x in ringing(env, edges_now)],
         "pump": [round(float(x), 3) for x in duck(env, g, edges_now, times)],
         "pace": [round(float(x), 3) for x in pace(flux_now, g, edges_now)],
         **{k: [round(x, 3) for x in lanes[k]] for k in STEM_NAMES},
@@ -478,6 +481,9 @@ def read(path, slug):
         "lead": voice_of(riff, strayed) if riff else None,
         "ticks": {"per_bar": g["beats_per_bar"] * 4, "of": "the loudest moment in each sixteenth",
                   **{k: v for k, v in ticks.items()}},
+        "per_beat": {"from_beat": 0, "of": "each stem's mean level over one beat, "
+                                           "scaled to that stem's own loudest beat",
+                     **{k: v for k, v in beat_lanes.items()}},
         "groove": swing,
         "melody": tune_notes,
         "melody_phrases": phrases_of(tune_notes, g, g["beats_per_bar"]),

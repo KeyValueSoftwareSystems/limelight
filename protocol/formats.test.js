@@ -82,11 +82,11 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
     words: [{ text: "Once", at_s: 2.88, to_s: 3.1, bar: 1, heard_twice: true }],
     lines: [{ at_s: 2.88, to_s: 6.1, from_bar: 1, to_bar: 2, text: "Once", sure: 1 }],
   };
-  planted.curve_tells = { intensity: 2.83, brightness: 0.92, noisy: 1.48, held: 1.81,
+  planted.curve_tells = { intensity: 2.83, brightness: 0.92, noisy: 1.48, sustained: 1.81,
                           weight: 3.02, floor: 2.36 };
   planted.bars = Object.assign({}, planted.bars, {
     noisy: (planted.bars.intensity || []).map(() => 0.4),
-    held: (planted.bars.intensity || []).map(() => 0.6),
+    sustained: (planted.bars.intensity || []).map(() => 0.6),
   });
   if (Array.isArray(planted.parts) && planted.parts.length) {
     planted.parts.forEach((q, i) => {
@@ -117,7 +117,7 @@ from score_api import format_v1
 print(json.dumps(format_v1(json.load(sys.stdin))))
 `], { encoding: "utf8", input: JSON.stringify(planted), maxBuffer: 1 << 28 }));
 
-  for (const want of ["lyrics", "noisy", "held", "motion"]) {
+  for (const want of ["lyrics", "noisy", "sustained", "motion"]) {
     ok(`${want} survives both formatters when the score has it`,
        js2[want] != null && py2[want] != null,
        `js ${js2[want] != null ? "yes" : "NO"}, py ${py2[want] != null ? "yes" : "NO"}`);
@@ -135,7 +135,7 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
   for (const side of [["js", js2], ["py", py2]]) {
     const [who, doc] = side;
     ok(`${who}: every bare lane it sends has its reliability in tells`,
-       !!doc.tells && ["energy", "brightness", "weight", "floor", "noisy", "held"]
+       !!doc.tells && ["energy", "brightness", "weight", "floor", "noisy", "sustained"]
          .every(n => doc.tells[n] !== undefined),
        doc.tells ? Object.keys(doc.tells).length + " lanes" : "no tells at all");
   }

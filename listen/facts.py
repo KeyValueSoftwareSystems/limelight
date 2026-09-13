@@ -27,15 +27,15 @@ SCALES = {
         "against": "the song's loudest frame",
         "means": "share of high-frequency bins above -38 dB",
     },
-    "held": {
+    "sustained": {
         "kind": "absolute",
         "runs": [0.0, 1.0],
-        "means": "how much of the bar is ringing rather than struck",
+        "means": "share of the bar spent at or above half its own peak",
     },
     "noisy": {
         "kind": "absolute",
         "runs": [0.0, 1.0],
-        "means": "how much of the sound is unpitched",
+        "means": "spectral flatness -- how noise-like rather than tonal",
     },
     "intensity": {
         "kind": "per_song",
@@ -56,6 +56,21 @@ SCALES = {
         "kind": "absolute",
         "runs": [0.0, 1.0],
         "means": "confidence in this bar's chord",
+    },
+    "ticks": {
+        "kind": "per_song",
+        "against": "that stem's own loudest sixteenth",
+        "means": "the loudest moment in each sixteenth of the bar",
+    },
+    "per_beat": {
+        "kind": "per_song",
+        "against": "that stem's own loudest beat",
+        "means": "that stem's mean level over one beat",
+    },
+    "groove": {
+        "kind": "per_song",
+        "against": "that stem's own strongest slot",
+        "means": "how hard that stem hits at each sixteenth of a bar",
     },
 }
 for name in STEMS:

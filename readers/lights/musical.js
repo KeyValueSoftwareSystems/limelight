@@ -54,7 +54,7 @@ function eventsOf(list) {
     const at = m.at || m;
     if (!isNum(at.bar)) continue;
     const o = { bar: at.bar, beat: or_(at.beat, 1), kind: or_(m.is, or_(m.kind, null)),
-      what: or_(m.what, null), weight: or_(m.weight, or_(m.strength, or_(m.size, null))),
+      what: or_(m.what, null), weight: or_(m.weight, or_(m.strength, or_(m.jump, or_(m.size, null)))),
       sure: or_(m.sure, null) };
     if (isNum(m.for_beats)) o.for_beats = m.for_beats;
     if (Array.isArray(m.still)) o.still = m.still;
