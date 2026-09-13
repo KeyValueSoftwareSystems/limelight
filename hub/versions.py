@@ -119,8 +119,19 @@ def validate_meta(obj):
             raise ValueError(f"entry {key!r} is not an object; expected {{\"value\": ..., \"enforced\": true|false}}")
         if "value" not in entry:
             raise ValueError(f"{key}: value is missing")
-        if not isinstance(entry["value"], SCALARS):
-            raise ValueError(f"{key}: value must be a string, number, boolean or null")
+        # Scalars, and lists of flat objects. The second exists for `effects`:
+        # what we want a reader to do with this song, stated on the song itself,
+        # so the label a developer reads and the check we run are one statement
+        # and cannot describe different bars. Nesting stops there -- anything
+        # deeper belongs in the score, not in a note about it.
+        v = entry["value"]
+        if not isinstance(v, SCALARS):
+            if not (isinstance(v, list) and all(
+                    isinstance(x, dict) and all(isinstance(y, SCALARS) for y in x.values())
+                    for x in v)):
+                raise ValueError(
+                    f"{key}: value must be a string, number, boolean, null, "
+                    "or a list of flat objects")
         enforced = entry.get("enforced", False)
         if not isinstance(enforced, bool):
             raise ValueError(f"{key}: enforced must be true or false")
