@@ -104,8 +104,13 @@ def switches(lanes, least=4, on=0.55, off=0.35):
             while j >= 0 and live[j] == live[i - 1]:
                 behind += 1
                 j -= 1
-            if ahead >= least and behind >= least:
-                cuts.append(i)
+            if ahead < least or behind < least:
+                continue
+            at = i
+            if live[i]:
+                while at > 0 and row[at - 1] > off:
+                    at -= 1
+            cuts.append(int(max(0, at)))
     return sorted(set(cuts))
 
 
@@ -153,10 +158,11 @@ def votes(a, low=2, high=10, slack=2):
     return [(i, hits / max(1, tries)) for i, hits in peaks], tries
 
 
-def agree(heard, held, turns, slack=3, most=0.60):
+def agree(heard, held, turns, shifts=(), slack=3, most=0.60):
     seen = [("vote", i, share) for i, share in heard]
     seen += [("lane", i, 1.0) for i in held]
     seen += [("step", i, 1.0) for i in turns]
+    seen += [("tempo", i, 1.0) for i in shifts]
     seen.sort(key=lambda row: row[1])
 
     bins = []
@@ -173,7 +179,8 @@ def agree(heard, held, turns, slack=3, most=0.60):
             if "vote" in kinds else 0.0
         if len(kinds) < 2 and loud < most:
             continue
-        firm = [i for kind, i, _ in group if kind == "lane"] or \
+        firm = [i for kind, i, _ in group if kind == "tempo"] or \
+               [i for kind, i, _ in group if kind == "lane"] or \
                [i for kind, i, _ in group if kind == "step"] or \
                [i for kind, i, _ in group if kind == "vote"]
         cuts.append(int(firm[0]))
@@ -246,7 +253,7 @@ def runs(mark, least=4):
     return spans
 
 
-def shape(path, edges, lanes=None, least=4):
+def shape(path, edges, lanes=None, least=4, shifts=()):
     harm, tex, rhy, inst = families(path, edges, lanes)
     a = affinity(harm, tex, rhy, inst)
     heard, tries = votes(a)
@@ -264,7 +271,7 @@ def shape(path, edges, lanes=None, least=4):
         busy = list(steps(rows[5, :n])) if rows.shape[0] > 5 else []
         sung = list(steps(rows[2, :n]))
         turns = [c for c in level + busy + sung if 0 < c < n]
-    cuts = agree(heard, held, turns)
+    cuts = agree(heard, held, turns, [c for c in shifts if 0 < c < n])
     cuts = sorted(set(cuts + [n]))
     spans = [[cuts[i], cuts[i + 1], 0] for i in range(len(cuts) - 1)]
     spans = [s for s in spans if s[1] > s[0]]

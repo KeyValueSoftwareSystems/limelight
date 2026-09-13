@@ -315,7 +315,14 @@ def read(path, slug):
                       [[x if x is not None else 0.0 for x in score_bars["intensity"]],
                        [x if x is not None else 0.0 for x in score_bars["pace"]]],
                      dtype=float)
-    found_spans, how, chroma = shape(path, edges, rows)
+    shifts = []
+    for seg in (g.get("tempo") or [])[1:]:
+        at = seg["at_s"]
+        near = min(range(len(edges)), key=lambda i: abs(edges[i] - at))
+        if abs(edges[near] - at) <= (edges[1] - edges[0] if len(edges) > 1 else 2.0):
+            shifts.append(near)
+    found_spans, how, chroma = shape(path, edges, rows, shifts=shifts)
+    report["tempo_shifts"] = len(shifts)
     report["sections_from"] = how
     grid_says = {}
     snapped = on_phrase([list(s) for s in found_spans], pickup,
