@@ -67,6 +67,16 @@ def main():
         head_channels[off(ch)] = {"role": "keep_zero", "default": 0}
 
     wheel = [{"name": n, "value": v, "rgb": list(rgb)} for n, v, rgb in rig.COLOURS]
+
+    # The AIM anchors: where the stage is, in DMX. Head gestures are written in
+    # normalised pan/tilt and assume 0.5 means "forward", but on this rig tilt 127 is
+    # straight up, so 0.5 over the whole travel is the ceiling. The driver maps
+    # 0 -> lo, 0.5 -> CENTRE (the wall: PAN_WALL_CENTRE, TILT_WALL) and 1 -> hi
+    # piecewise, so the wall is the anchor and the full 540/180-degree travel is
+    # still reachable at 0 and 1. Park bypasses the anchors.
+    aim = {"pan": [0, rig.PAN_WALL_CENTRE, 255],
+           "tilt": [0, rig.TILT_WALL, 255],
+           "note": "anchors [lo, centre, hi]: 0.5 is the wall spot, 0/1 the ends of travel. Park bypasses this."}
     head13 = {
         "type": "head13", "footprint": 13, "brightness": "master",
         "can": ["colour", "level", "move", "strobe", "gobo", "prism"],
@@ -75,6 +85,7 @@ def main():
         "spin_min": rig.COLOUR_SPIN_MIN,
         "gobo": {"open": rig.GOBO_OPEN, "flower": rig.GOBO_FLOWER},
         "prism": {"off": rig.PRISM_OFF, "six": rig.PRISM_6},
+        "aim": aim,
         # normalized park pose from rig's DMX facts; the bridge uses rig.park_frame()
         # for the real rig, this is the portable fallback.
         "park": {"pan": rig.PAN_WALL_CENTRE / 255.0, "tilt": rig.TILT_UP / 255.0,

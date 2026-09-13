@@ -1214,6 +1214,1269 @@
    ]
   }
  ],
+ "fit": {
+  "pair_call_response": 1,
+  "travelling_pulse": 0.7,
+  "strobe_pops": 0.8,
+  "head_sweep": 0.9,
+  "breathe": 0.8,
+  "build_ramp": 0.9,
+  "drop_combo_A": 0.8,
+  "hold_warm_white": 0.9,
+  "hold_amber": 0.9,
+  "hold_deep_blue": 0.9,
+  "hold_teal": 0.9,
+  "hold_indigo": 0.9,
+  "hold_rose": 0.9,
+  "hold_cyan": 0.9,
+  "hold_violet": 0.9,
+  "xfade_amber_deep_blue": 0.85,
+  "xfade_teal_violet": 0.85,
+  "xfade_rose_cyan": 0.85,
+  "xfade_green_indigo": 0.85,
+  "breathe_warm_white": 0.95,
+  "breathe_amber": 0.95,
+  "breathe_blue": 0.95,
+  "breathe_teal": 0.95,
+  "breathe_magenta": 0.95,
+  "head_roam_cool": 0.85,
+  "head_roam_soft": 0.85,
+  "head_roam_forest": 0.85,
+  "head_roam_dusk": 0.85,
+  "pair_alt_red_blue": 0.95,
+  "pair_alt_magenta_cyan": 0.95,
+  "pair_alt_orange_teal": 0.95,
+  "pair_alt_amber_violet": 0.95,
+  "pair_alt_green_pink": 0.95,
+  "pair_alt_white_deep_blue": 0.99,
+  "pair_alt_warm_white_rose": 0.95,
+  "pair_alt_gold_indigo": 0.95,
+  "mirror_bloom_out": 0.97,
+  "mirror_bloom_in": 0.97,
+  "mirror_split_colour": 0.97,
+  "mirror_vpulse": 0.82,
+  "mirror_wave": 0.97,
+  "chase_lr_white": 0.6,
+  "chase_rl_amber": 0.6,
+  "chase_bounce_cyan": 0.6,
+  "chase_rainbow": 0.65,
+  "chase_comet_magenta": 0.6,
+  "chase_sparkle_random": 0.55,
+  "hit_white": 0.92,
+  "hit_red": 0.92,
+  "hit_blue": 0.92,
+  "hit_amber": 0.92,
+  "hit_magenta": 0.92,
+  "hit_green": 0.92,
+  "strobe_pop_short": 0.97,
+  "strobe_burst_long": 0.97,
+  "strobe_accelerating": 0.97,
+  "strobe_machine_gun": 0.97,
+  "strobe_half_time": 0.85,
+  "strobe_colour_blue": 0.97,
+  "whiten_amber": 0.95,
+  "whiten_blue": 0.95,
+  "whiten_magenta": 0.95,
+  "whiten_teal": 0.95,
+  "blackout_snap": 0.9,
+  "blackout_head_park": 0.85,
+  "blackout_stutter": 0.88,
+  "head_pan_sweep": 1,
+  "head_tilt_kick": 1,
+  "head_figure_8": 1,
+  "head_spiral": 1,
+  "head_corner_snap": 1,
+  "head_fast_roam": 1,
+  "head_ping_pong": 1,
+  "head_nod": 1,
+  "head_dive": 1,
+  "head_sweep_colourstep": 1,
+  "head_warm_walk": 0.72,
+  "head_cool_walk": 0.72,
+  "head_full_wheel_step": 0.72,
+  "head_two_step_ping": 0.72,
+  "head_spin_slow": 0.75,
+  "head_spin_fast": 0.95,
+  "head_gobo_cycle": 0.75,
+  "head_gobo_flower_hold": 0.75,
+  "head_gobo_snap_beat": 0.82,
+  "head_prism_fan_sweep": 0.97,
+  "head_prism_static": 0.97,
+  "head_prism_spin": 1,
+  "build_breathe_to_blackout": 0.97,
+  "build_riser_head": 0.97,
+  "drop_impact": 0.98,
+  "drop_colour_slam": 0.98,
+  "intro_swell": 0.9,
+  "outro_fade": 0.95,
+  "verse_to_build": 0.85,
+  "break_hit_series": 0.9,
+  "combo_alt_sweep": 1,
+  "combo_strobe_spiral": 1,
+  "combo_bloom_prism": 1,
+  "combo_hit_gobo_fig8": 1,
+  "combo_chase_tiltkick": 0.72,
+  "combo_final_kitchen_sink": 1,
+  "combo_verse_groove": 0.9,
+  "combo_break_dark_head": 0.9,
+  "combo_whiten_riser": 0.96
+ },
+ "affinity": {
+  "form": {
+   "pair_call_response": {
+    "intro": 0,
+    "verse": 0.5,
+    "break": 0.4,
+    "build": 0.6,
+    "drop": 0.9,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.95
+   },
+   "travelling_pulse": {
+    "intro": 0,
+    "verse": 0.7,
+    "break": 0.4,
+    "build": 0.5,
+    "drop": 0.5,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.4
+   },
+   "strobe_pops": {
+    "intro": 0,
+    "verse": 0.2,
+    "break": 0.4,
+    "build": 0.7,
+    "drop": 0.8,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.85
+   },
+   "head_sweep": {
+    "intro": 0,
+    "verse": 0.4,
+    "break": 0.3,
+    "build": 0.7,
+    "drop": 0.9,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.9
+   },
+   "breathe": {
+    "intro": 0.85,
+    "verse": 0.2,
+    "break": 0.5,
+    "build": 0,
+    "drop": 0,
+    "outro": 0.85,
+    "silence": 0.55,
+    "final_drop": 0
+   },
+   "build_ramp": {
+    "intro": 0,
+    "verse": 0,
+    "break": 0.2,
+    "build": 0.9,
+    "drop": 0.3,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.3
+   },
+   "drop_combo_A": {
+    "intro": 0,
+    "verse": 0,
+    "break": 0,
+    "build": 0.3,
+    "drop": 0.95,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "hold_warm_white": {
+    "intro": 0.9,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.85,
+    "final_drop": 0
+   },
+   "hold_amber": {
+    "intro": 0.9,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.85,
+    "final_drop": 0
+   },
+   "hold_deep_blue": {
+    "intro": 0.9,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.85,
+    "final_drop": 0
+   },
+   "hold_teal": {
+    "intro": 0.9,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.85,
+    "final_drop": 0
+   },
+   "hold_indigo": {
+    "intro": 0.9,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.85,
+    "final_drop": 0
+   },
+   "hold_rose": {
+    "intro": 0.9,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.85,
+    "final_drop": 0
+   },
+   "hold_cyan": {
+    "intro": 0.9,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.85,
+    "final_drop": 0
+   },
+   "hold_violet": {
+    "intro": 0.9,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.85,
+    "final_drop": 0
+   },
+   "xfade_amber_deep_blue": {
+    "intro": 0.85,
+    "verse": 0.45,
+    "break": 0.5,
+    "build": 0.2,
+    "drop": 0.05,
+    "outro": 0.85,
+    "silence": 0.75,
+    "final_drop": 0
+   },
+   "xfade_teal_violet": {
+    "intro": 0.85,
+    "verse": 0.45,
+    "break": 0.5,
+    "build": 0.2,
+    "drop": 0.05,
+    "outro": 0.85,
+    "silence": 0.75,
+    "final_drop": 0
+   },
+   "xfade_rose_cyan": {
+    "intro": 0.85,
+    "verse": 0.45,
+    "break": 0.5,
+    "build": 0.2,
+    "drop": 0.05,
+    "outro": 0.85,
+    "silence": 0.75,
+    "final_drop": 0
+   },
+   "xfade_green_indigo": {
+    "intro": 0.85,
+    "verse": 0.45,
+    "break": 0.5,
+    "build": 0.2,
+    "drop": 0.05,
+    "outro": 0.85,
+    "silence": 0.75,
+    "final_drop": 0
+   },
+   "breathe_warm_white": {
+    "intro": 0.95,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.15,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.8,
+    "final_drop": 0
+   },
+   "breathe_amber": {
+    "intro": 0.95,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.15,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.8,
+    "final_drop": 0
+   },
+   "breathe_blue": {
+    "intro": 0.95,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.15,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.8,
+    "final_drop": 0
+   },
+   "breathe_teal": {
+    "intro": 0.95,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.15,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.8,
+    "final_drop": 0
+   },
+   "breathe_magenta": {
+    "intro": 0.95,
+    "verse": 0.4,
+    "break": 0.45,
+    "build": 0.15,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.8,
+    "final_drop": 0
+   },
+   "head_roam_cool": {
+    "intro": 0.85,
+    "verse": 0.45,
+    "break": 0.4,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.85,
+    "silence": 0.7,
+    "final_drop": 0
+   },
+   "head_roam_soft": {
+    "intro": 0.85,
+    "verse": 0.45,
+    "break": 0.4,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.85,
+    "silence": 0.7,
+    "final_drop": 0
+   },
+   "head_roam_forest": {
+    "intro": 0.85,
+    "verse": 0.45,
+    "break": 0.4,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.85,
+    "silence": 0.7,
+    "final_drop": 0
+   },
+   "head_roam_dusk": {
+    "intro": 0.85,
+    "verse": 0.45,
+    "break": 0.4,
+    "build": 0.1,
+    "drop": 0,
+    "outro": 0.85,
+    "silence": 0.7,
+    "final_drop": 0
+   },
+   "pair_alt_red_blue": {
+    "intro": 0.05,
+    "verse": 0.6,
+    "break": 0.6,
+    "build": 0.8,
+    "drop": 0.9,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.95
+   },
+   "pair_alt_magenta_cyan": {
+    "intro": 0.05,
+    "verse": 0.6,
+    "break": 0.6,
+    "build": 0.8,
+    "drop": 0.9,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.95
+   },
+   "pair_alt_orange_teal": {
+    "intro": 0.05,
+    "verse": 0.6,
+    "break": 0.6,
+    "build": 0.8,
+    "drop": 0.9,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.95
+   },
+   "pair_alt_amber_violet": {
+    "intro": 0.05,
+    "verse": 0.6,
+    "break": 0.6,
+    "build": 0.8,
+    "drop": 0.9,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.95
+   },
+   "pair_alt_green_pink": {
+    "intro": 0.05,
+    "verse": 0.6,
+    "break": 0.6,
+    "build": 0.8,
+    "drop": 0.9,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.95
+   },
+   "pair_alt_white_deep_blue": {
+    "intro": 0.05,
+    "verse": 0.45,
+    "break": 0.6,
+    "build": 0.8,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.99
+   },
+   "pair_alt_warm_white_rose": {
+    "intro": 0.05,
+    "verse": 0.6,
+    "break": 0.6,
+    "build": 0.8,
+    "drop": 0.9,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.95
+   },
+   "pair_alt_gold_indigo": {
+    "intro": 0.05,
+    "verse": 0.6,
+    "break": 0.6,
+    "build": 0.8,
+    "drop": 0.9,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.95
+   },
+   "mirror_bloom_out": {
+    "intro": 0.05,
+    "verse": 0.5,
+    "break": 0.6,
+    "build": 0.82,
+    "drop": 0.93,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "mirror_bloom_in": {
+    "intro": 0.05,
+    "verse": 0.5,
+    "break": 0.6,
+    "build": 0.82,
+    "drop": 0.93,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "mirror_split_colour": {
+    "intro": 0.1,
+    "verse": 0.55,
+    "break": 0.6,
+    "build": 0.82,
+    "drop": 0.93,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "mirror_vpulse": {
+    "intro": 0.05,
+    "verse": 0.6,
+    "break": 0.6,
+    "build": 0.82,
+    "drop": 0.75,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.8
+   },
+   "mirror_wave": {
+    "intro": 0.05,
+    "verse": 0.5,
+    "break": 0.6,
+    "build": 0.82,
+    "drop": 0.93,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "chase_lr_white": {
+    "intro": 0.1,
+    "verse": 0.6,
+    "break": 0.5,
+    "build": 0.55,
+    "drop": 0.55,
+    "outro": 0.15,
+    "silence": 0,
+    "final_drop": 0.55
+   },
+   "chase_rl_amber": {
+    "intro": 0.1,
+    "verse": 0.6,
+    "break": 0.5,
+    "build": 0.55,
+    "drop": 0.55,
+    "outro": 0.15,
+    "silence": 0,
+    "final_drop": 0.55
+   },
+   "chase_bounce_cyan": {
+    "intro": 0.1,
+    "verse": 0.6,
+    "break": 0.5,
+    "build": 0.55,
+    "drop": 0.55,
+    "outro": 0.15,
+    "silence": 0,
+    "final_drop": 0.55
+   },
+   "chase_rainbow": {
+    "intro": 0.1,
+    "verse": 0.65,
+    "break": 0.5,
+    "build": 0.55,
+    "drop": 0.55,
+    "outro": 0.15,
+    "silence": 0,
+    "final_drop": 0.55
+   },
+   "chase_comet_magenta": {
+    "intro": 0.1,
+    "verse": 0.6,
+    "break": 0.5,
+    "build": 0.55,
+    "drop": 0.55,
+    "outro": 0.15,
+    "silence": 0,
+    "final_drop": 0.55
+   },
+   "chase_sparkle_random": {
+    "intro": 0.2,
+    "verse": 0.5,
+    "break": 0.5,
+    "build": 0.55,
+    "drop": 0.55,
+    "outro": 0.15,
+    "silence": 0,
+    "final_drop": 0.55
+   },
+   "hit_white": {
+    "intro": 0,
+    "verse": 0.45,
+    "break": 0.85,
+    "build": 0.8,
+    "drop": 0.88,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.92
+   },
+   "hit_red": {
+    "intro": 0,
+    "verse": 0.45,
+    "break": 0.85,
+    "build": 0.8,
+    "drop": 0.88,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.92
+   },
+   "hit_blue": {
+    "intro": 0,
+    "verse": 0.45,
+    "break": 0.85,
+    "build": 0.8,
+    "drop": 0.88,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.92
+   },
+   "hit_amber": {
+    "intro": 0,
+    "verse": 0.45,
+    "break": 0.85,
+    "build": 0.8,
+    "drop": 0.88,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.92
+   },
+   "hit_magenta": {
+    "intro": 0,
+    "verse": 0.45,
+    "break": 0.85,
+    "build": 0.8,
+    "drop": 0.88,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.92
+   },
+   "hit_green": {
+    "intro": 0,
+    "verse": 0.45,
+    "break": 0.85,
+    "build": 0.8,
+    "drop": 0.88,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.92
+   },
+   "strobe_pop_short": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.8,
+    "build": 0.88,
+    "drop": 0.92,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "strobe_burst_long": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.8,
+    "build": 0.75,
+    "drop": 0.92,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "strobe_accelerating": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.8,
+    "build": 0.97,
+    "drop": 0.7,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "strobe_machine_gun": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.8,
+    "build": 0.88,
+    "drop": 0.92,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "strobe_half_time": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.8,
+    "build": 0.7,
+    "drop": 0.8,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.85
+   },
+   "strobe_colour_blue": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.8,
+    "build": 0.88,
+    "drop": 0.92,
+    "outro": 0,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "whiten_amber": {
+    "intro": 0.05,
+    "verse": 0.3,
+    "break": 0.4,
+    "build": 0.95,
+    "drop": 0.6,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.7
+   },
+   "whiten_blue": {
+    "intro": 0.05,
+    "verse": 0.3,
+    "break": 0.4,
+    "build": 0.95,
+    "drop": 0.6,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.7
+   },
+   "whiten_magenta": {
+    "intro": 0.05,
+    "verse": 0.3,
+    "break": 0.4,
+    "build": 0.95,
+    "drop": 0.6,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.7
+   },
+   "whiten_teal": {
+    "intro": 0.05,
+    "verse": 0.3,
+    "break": 0.4,
+    "build": 0.95,
+    "drop": 0.6,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.7
+   },
+   "blackout_snap": {
+    "intro": 0.15,
+    "verse": 0.1,
+    "break": 0.6,
+    "build": 0.9,
+    "drop": 0.2,
+    "outro": 0.2,
+    "silence": 0.3,
+    "final_drop": 0.35
+   },
+   "blackout_head_park": {
+    "intro": 0.15,
+    "verse": 0.1,
+    "break": 0.6,
+    "build": 0.85,
+    "drop": 0.2,
+    "outro": 0.2,
+    "silence": 0.3,
+    "final_drop": 0.35
+   },
+   "blackout_stutter": {
+    "intro": 0.15,
+    "verse": 0.1,
+    "break": 0.6,
+    "build": 0.88,
+    "drop": 0.3,
+    "outro": 0.2,
+    "silence": 0.3,
+    "final_drop": 0.35
+   },
+   "head_pan_sweep": {
+    "intro": 0.05,
+    "verse": 0.35,
+    "break": 0.5,
+    "build": 0.82,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "head_tilt_kick": {
+    "intro": 0.05,
+    "verse": 0.35,
+    "break": 0.5,
+    "build": 0.82,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "head_figure_8": {
+    "intro": 0.05,
+    "verse": 0.35,
+    "break": 0.5,
+    "build": 0.82,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "head_spiral": {
+    "intro": 0.05,
+    "verse": 0.35,
+    "break": 0.5,
+    "build": 0.82,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "head_corner_snap": {
+    "intro": 0.05,
+    "verse": 0.35,
+    "break": 0.5,
+    "build": 0.82,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "head_fast_roam": {
+    "intro": 0.05,
+    "verse": 0.35,
+    "break": 0.5,
+    "build": 0.82,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "head_ping_pong": {
+    "intro": 0.05,
+    "verse": 0.35,
+    "break": 0.5,
+    "build": 0.82,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "head_nod": {
+    "intro": 0.05,
+    "verse": 0.35,
+    "break": 0.5,
+    "build": 0.82,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "head_dive": {
+    "intro": 0.05,
+    "verse": 0.35,
+    "break": 0.5,
+    "build": 0.82,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "head_sweep_colourstep": {
+    "intro": 0.05,
+    "verse": 0.4,
+    "break": 0.5,
+    "build": 0.82,
+    "drop": 0.95,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "head_warm_walk": {
+    "intro": 0.2,
+    "verse": 0.55,
+    "break": 0.5,
+    "build": 0.6,
+    "drop": 0.7,
+    "outro": 0.2,
+    "silence": 0.05,
+    "final_drop": 0.72
+   },
+   "head_cool_walk": {
+    "intro": 0.2,
+    "verse": 0.55,
+    "break": 0.5,
+    "build": 0.6,
+    "drop": 0.7,
+    "outro": 0.2,
+    "silence": 0.05,
+    "final_drop": 0.72
+   },
+   "head_full_wheel_step": {
+    "intro": 0.2,
+    "verse": 0.55,
+    "break": 0.5,
+    "build": 0.6,
+    "drop": 0.65,
+    "outro": 0.2,
+    "silence": 0.05,
+    "final_drop": 0.72
+   },
+   "head_two_step_ping": {
+    "intro": 0.2,
+    "verse": 0.55,
+    "break": 0.5,
+    "build": 0.6,
+    "drop": 0.7,
+    "outro": 0.2,
+    "silence": 0.05,
+    "final_drop": 0.72
+   },
+   "head_spin_slow": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.5,
+    "build": 0.7,
+    "drop": 0.7,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.75
+   },
+   "head_spin_fast": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.5,
+    "build": 0.7,
+    "drop": 0.9,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.95
+   },
+   "head_gobo_cycle": {
+    "intro": 0.15,
+    "verse": 0.5,
+    "break": 0.5,
+    "build": 0.6,
+    "drop": 0.72,
+    "outro": 0.15,
+    "silence": 0,
+    "final_drop": 0.75
+   },
+   "head_gobo_flower_hold": {
+    "intro": 0.25,
+    "verse": 0.5,
+    "break": 0.5,
+    "build": 0.6,
+    "drop": 0.6,
+    "outro": 0.15,
+    "silence": 0,
+    "final_drop": 0.75
+   },
+   "head_gobo_snap_beat": {
+    "intro": 0.15,
+    "verse": 0.5,
+    "break": 0.5,
+    "build": 0.6,
+    "drop": 0.8,
+    "outro": 0.15,
+    "silence": 0,
+    "final_drop": 0.82
+   },
+   "head_prism_fan_sweep": {
+    "intro": 0,
+    "verse": 0.25,
+    "break": 0.45,
+    "build": 0.7,
+    "drop": 0.9,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "head_prism_static": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.45,
+    "build": 0.7,
+    "drop": 0.85,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.97
+   },
+   "head_prism_spin": {
+    "intro": 0,
+    "verse": 0.25,
+    "break": 0.45,
+    "build": 0.7,
+    "drop": 0.9,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "build_breathe_to_blackout": {
+    "intro": 0.1,
+    "verse": 0.25,
+    "break": 0.45,
+    "build": 0.97,
+    "drop": 0.55,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.7
+   },
+   "build_riser_head": {
+    "intro": 0.1,
+    "verse": 0.25,
+    "break": 0.45,
+    "build": 0.97,
+    "drop": 0.55,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.7
+   },
+   "drop_impact": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.55,
+    "build": 0.6,
+    "drop": 0.95,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.98
+   },
+   "drop_colour_slam": {
+    "intro": 0,
+    "verse": 0.3,
+    "break": 0.55,
+    "build": 0.6,
+    "drop": 0.95,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.98
+   },
+   "intro_swell": {
+    "intro": 0.9,
+    "verse": 0.4,
+    "break": 0.4,
+    "build": 0.15,
+    "drop": 0,
+    "outro": 0.9,
+    "silence": 0.7,
+    "final_drop": 0
+   },
+   "outro_fade": {
+    "intro": 0.6,
+    "verse": 0.4,
+    "break": 0.4,
+    "build": 0.15,
+    "drop": 0,
+    "outro": 0.95,
+    "silence": 0.7,
+    "final_drop": 0
+   },
+   "verse_to_build": {
+    "intro": 0.05,
+    "verse": 0.7,
+    "break": 0.4,
+    "build": 0.85,
+    "drop": 0.3,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.4
+   },
+   "break_hit_series": {
+    "intro": 0,
+    "verse": 0.35,
+    "break": 0.9,
+    "build": 0.85,
+    "drop": 0.7,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 0.85
+   },
+   "combo_alt_sweep": {
+    "intro": 0,
+    "verse": 0.25,
+    "break": 0.5,
+    "build": 0.75,
+    "drop": 0.97,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "combo_strobe_spiral": {
+    "intro": 0,
+    "verse": 0.25,
+    "break": 0.5,
+    "build": 0.75,
+    "drop": 0.97,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "combo_bloom_prism": {
+    "intro": 0,
+    "verse": 0.25,
+    "break": 0.5,
+    "build": 0.75,
+    "drop": 0.97,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "combo_hit_gobo_fig8": {
+    "intro": 0,
+    "verse": 0.25,
+    "break": 0.5,
+    "build": 0.75,
+    "drop": 0.97,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "combo_chase_tiltkick": {
+    "intro": 0.05,
+    "verse": 0.6,
+    "break": 0.5,
+    "build": 0.65,
+    "drop": 0.7,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.72
+   },
+   "combo_final_kitchen_sink": {
+    "intro": 0,
+    "verse": 0.25,
+    "break": 0.5,
+    "build": 0.8,
+    "drop": 1,
+    "outro": 0.05,
+    "silence": 0,
+    "final_drop": 1
+   },
+   "combo_verse_groove": {
+    "intro": 0.25,
+    "verse": 0.9,
+    "break": 0.45,
+    "build": 0.5,
+    "drop": 0.4,
+    "outro": 0.25,
+    "silence": 0.05,
+    "final_drop": 0.4
+   },
+   "combo_break_dark_head": {
+    "intro": 0.05,
+    "verse": 0.4,
+    "break": 0.9,
+    "build": 0.7,
+    "drop": 0.6,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.62
+   },
+   "combo_whiten_riser": {
+    "intro": 0.1,
+    "verse": 0.25,
+    "break": 0.45,
+    "build": 0.96,
+    "drop": 0.6,
+    "outro": 0.1,
+    "silence": 0,
+    "final_drop": 0.75
+   }
+  },
+  "doing": {
+   "pair_call_response": {
+    "peaking": 0.9,
+    "intensifying": 0.8,
+    "expanding": 0.8,
+    "holding": 0.6,
+    "easing": 0.4,
+    "thinning": 0.2,
+    "_default": 0.5
+   },
+   "travelling_pulse": {
+    "establishing": 0.7,
+    "easing": 0.7,
+    "holding": 0.7,
+    "developing": 0.7,
+    "peaking": 0.4,
+    "_default": 0.5
+   },
+   "strobe_pops": {
+    "peaking": 1,
+    "intensifying": 0.9,
+    "expanding": 0.7,
+    "easing": 0.2,
+    "thinning": 0,
+    "suspending": 0,
+    "_default": 0.4
+   },
+   "breathe": {
+    "establishing": 0.9,
+    "suspending": 0.9,
+    "thinning": 0.9,
+    "closing": 0.9,
+    "easing": 0.8,
+    "peaking": 0.1,
+    "intensifying": 0.2,
+    "_default": 0.5
+   },
+   "build_ramp": {
+    "intensifying": 1,
+    "expanding": 0.8,
+    "peaking": 0.7,
+    "easing": 0.2,
+    "thinning": 0.1,
+    "_default": 0.4
+   },
+   "drop_combo_A": {
+    "peaking": 1,
+    "expanding": 0.9,
+    "intensifying": 0.8,
+    "holding": 0.7,
+    "easing": 0.3,
+    "_default": 0.5
+   }
+  },
+  "presence": {
+   "pair_call_response": {
+    "drums:in": 0.9,
+    "drums:out": 0.3
+   },
+   "strobe_pops": {
+    "drums:in": 0.9,
+    "drums:out": 0
+   },
+   "head_sweep": {
+    "vocals:in": 0.5
+   },
+   "breathe": {
+    "drums:out": 0.9,
+    "drums:in": 0.4
+   },
+   "drop_combo_A": {
+    "drums:in": 1,
+    "drums:out": 0.1
+   }
+  },
+  "moment": {},
+  "texture": {
+   "pair_call_response": {
+    "busy": 0.8,
+    "narrow": 0.7,
+    "sparse": 0.4
+   },
+   "travelling_pulse": {
+    "wide": 0.8,
+    "sparse": 0.6
+   },
+   "strobe_pops": {
+    "busy": 0.9,
+    "sparse": 0.2
+   },
+   "head_sweep": {
+    "wide": 0.8
+   },
+   "breathe": {
+    "sparse": 0.8,
+    "busy": 0.2
+   },
+   "drop_combo_A": {
+    "busy": 0.9
+   }
+  },
+  "harmony": {}
+ },
  "matrix": {
   "pair_call_response": {
    "intro": 0,
@@ -2556,6 +3819,271 @@
      "score": 1
     }
    ]
+  },
+  "strongest_by_fact": {
+   "doing": {
+    "establishing": [
+     {
+      "id": "breathe",
+      "score": 0.72
+     },
+     {
+      "id": "travelling_pulse",
+      "score": 0.49
+     }
+    ],
+    "developing": [
+     {
+      "id": "travelling_pulse",
+      "score": 0.49
+     }
+    ],
+    "sustaining": [],
+    "expanding": [
+     {
+      "id": "pair_call_response",
+      "score": 0.8
+     },
+     {
+      "id": "build_ramp",
+      "score": 0.72
+     },
+     {
+      "id": "drop_combo_A",
+      "score": 0.72
+     },
+     {
+      "id": "strobe_pops",
+      "score": 0.56
+     }
+    ],
+    "intensifying": [
+     {
+      "id": "build_ramp",
+      "score": 0.9
+     },
+     {
+      "id": "pair_call_response",
+      "score": 0.8
+     },
+     {
+      "id": "strobe_pops",
+      "score": 0.72
+     },
+     {
+      "id": "drop_combo_A",
+      "score": 0.64
+     },
+     {
+      "id": "breathe",
+      "score": 0.16
+     }
+    ],
+    "peaking": [
+     {
+      "id": "pair_call_response",
+      "score": 0.9
+     },
+     {
+      "id": "strobe_pops",
+      "score": 0.8
+     },
+     {
+      "id": "drop_combo_A",
+      "score": 0.8
+     },
+     {
+      "id": "build_ramp",
+      "score": 0.63
+     },
+     {
+      "id": "travelling_pulse",
+      "score": 0.28
+     }
+    ],
+    "easing": [
+     {
+      "id": "breathe",
+      "score": 0.64
+     },
+     {
+      "id": "travelling_pulse",
+      "score": 0.49
+     },
+     {
+      "id": "pair_call_response",
+      "score": 0.4
+     },
+     {
+      "id": "drop_combo_A",
+      "score": 0.24
+     },
+     {
+      "id": "build_ramp",
+      "score": 0.18
+     }
+    ],
+    "thinning": [
+     {
+      "id": "breathe",
+      "score": 0.72
+     },
+     {
+      "id": "pair_call_response",
+      "score": 0.2
+     },
+     {
+      "id": "build_ramp",
+      "score": 0.09
+     }
+    ],
+    "resolving": [],
+    "suspending": [
+     {
+      "id": "breathe",
+      "score": 0.72
+     }
+    ],
+    "transitioning": [],
+    "closing": [
+     {
+      "id": "breathe",
+      "score": 0.72
+     }
+    ],
+    "holding": [
+     {
+      "id": "pair_call_response",
+      "score": 0.6
+     },
+     {
+      "id": "drop_combo_A",
+      "score": 0.56
+     },
+     {
+      "id": "travelling_pulse",
+      "score": 0.49
+     }
+    ]
+   },
+   "presence": {
+    "drums:in": [
+     {
+      "id": "pair_call_response",
+      "score": 0.9
+     },
+     {
+      "id": "drop_combo_A",
+      "score": 0.8
+     },
+     {
+      "id": "strobe_pops",
+      "score": 0.72
+     },
+     {
+      "id": "breathe",
+      "score": 0.32
+     }
+    ],
+    "drums:out": [
+     {
+      "id": "breathe",
+      "score": 0.72
+     },
+     {
+      "id": "pair_call_response",
+      "score": 0.3
+     },
+     {
+      "id": "drop_combo_A",
+      "score": 0.08
+     }
+    ],
+    "bass:in": [],
+    "bass:out": [],
+    "vocals:in": [
+     {
+      "id": "head_sweep",
+      "score": 0.45
+     }
+    ],
+    "vocals:out": []
+   },
+   "moment": {
+    "entrance": [],
+    "release": [],
+    "hook": [],
+    "pause": [],
+    "fill": [],
+    "rise": [],
+    "exit": [],
+    "accent": [],
+    "change": [],
+    "light": [],
+    "firm": [],
+    "heavy": []
+   },
+   "texture": {
+    "narrow": [
+     {
+      "id": "pair_call_response",
+      "score": 0.7
+     }
+    ],
+    "wide": [
+     {
+      "id": "head_sweep",
+      "score": 0.72
+     },
+     {
+      "id": "travelling_pulse",
+      "score": 0.56
+     }
+    ],
+    "sparse": [
+     {
+      "id": "breathe",
+      "score": 0.64
+     },
+     {
+      "id": "travelling_pulse",
+      "score": 0.42
+     },
+     {
+      "id": "pair_call_response",
+      "score": 0.4
+     },
+     {
+      "id": "strobe_pops",
+      "score": 0.16
+     }
+    ],
+    "busy": [
+     {
+      "id": "pair_call_response",
+      "score": 0.8
+     },
+     {
+      "id": "strobe_pops",
+      "score": 0.72
+     },
+     {
+      "id": "drop_combo_A",
+      "score": 0.72
+     },
+     {
+      "id": "breathe",
+      "score": 0.16
+     }
+    ],
+    "dull": [],
+    "bright": []
+   },
+   "harmony": {
+    "minor": [],
+    "major": [],
+    "changing": []
+   }
   },
   "sources": {
    "base": 7,

@@ -1,14 +1,15 @@
 {
- "layout": "0.4",
+ "layout": "0.5",
  "rig": "arc4-head",
- "note": "generated from rig.py; positions in metres on a 150cm-radius arc",
+ "geometry": "line",
+ "frame": "audience",
+ "note": "2026-09-13: four PARs in a straight LINE, 0.5 m apart, all facing the same way, head in the middle. Positions in metres in the AUDIENCE frame (+x = the audience's right); seen from behind the rig the right-most lamp is @1, so @1 is at x=-1.0. Hand-edited from the user's description; rig.py (the hardware authority) still describes the old 150 cm arc -- once it is updated, gen_layout.py regenerates this file.",
  "fixtures": [
   {
    "id": "par_1",
    "type": "par7",
-   "angle_deg": -32.5,
    "at": [
-    -0.806,
+    -1.0,
     0.0,
     0.0
    ],
@@ -18,9 +19,8 @@
   {
    "id": "par_8",
    "type": "par7",
-   "angle_deg": -17.0,
    "at": [
-    -0.439,
+    -0.5,
     0.0,
     0.0
    ],
@@ -30,9 +30,8 @@
   {
    "id": "par_15",
    "type": "par7",
-   "angle_deg": 17.0,
    "at": [
-    0.439,
+    0.5,
     0.0,
     0.0
    ],
@@ -42,9 +41,8 @@
   {
    "id": "par_22",
    "type": "par7",
-   "angle_deg": 32.5,
    "at": [
-    0.806,
+    1.0,
     0.0,
     0.0
    ],

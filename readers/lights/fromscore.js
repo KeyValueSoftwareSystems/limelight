@@ -7,8 +7,12 @@ const path = require("path");
    suite unrunnable on a fresh clone -- which is how four suites stopped running
    without anything reporting a fault. */
 function scoreFile() {
-  const built = path.join(__dirname, "..", "..", "scores", "levels.score");
-  return fs.existsSync(built) ? built : path.join(__dirname, "..", "..", "protocol", "levels.score");
+  const candidates = [
+    path.join(__dirname, "..", "..", "scores", "levels.score"),        // built by the pipeline here
+    path.join(__dirname, "panel", "scores", "levels.score"),           // imported by the panel
+    path.join(__dirname, "..", "..", "protocol", "levels.score"),      // the committed fixture
+  ];
+  return candidates.find(c => fs.existsSync(c)) || candidates[candidates.length - 1];
 }
 
 
@@ -50,7 +54,10 @@ function shape(raw) {
 
 function load(file) {
   /* Default to the live score. A copy kept beside the protocol went stale
-     the first time the pipeline changed, and the reader read the stale one. */
+     the first time the pipeline changed, and the reader read the stale one.
+     Scores are built rather than committed, so a bare path into scores/ made the
+     suite unrunnable on a fresh clone. Look, in order, for the built score, the
+     panel's imported copy, and the committed fixture beside the protocol. */
   const at = file || scoreFile();
   return shape(JSON.parse(fs.readFileSync(at, "utf8")));
 }

@@ -40,6 +40,16 @@ catch (e) {
      d.render({ level: 1 })[5] === 255, "master " + d.render({ level: 1 })[5]);
   const p = d.park();
   ok("head park is dark and never all-zero", p[5] === 0 && Math.max(...p) > 0, JSON.stringify(p));
+  /* the aim anchors, from rig.py's wall facts: 0.5 is the wall spot on both axes,
+     and the whole 540/180-degree travel stays reachable at 0 and 1 */
+  const aim = head13.aim || {};
+  ok("head13 declares aim anchors", Array.isArray(aim.pan) && Array.isArray(aim.tilt) && aim.pan.length === 3 && aim.tilt.length === 3, JSON.stringify(aim));
+  ok("pan anchors: full travel with the wall centre in the middle", aim.pan && aim.pan[0] === 0 && aim.pan[1] === 169 && aim.pan[2] === 255, JSON.stringify(aim.pan));
+  ok("tilt anchors: full travel with the wall spot in the middle", aim.tilt && aim.tilt[0] === 0 && aim.tilt[1] === 40 && aim.tilt[2] === 255, JSON.stringify(aim.tilt));
+  const f = d.render({ pan: 0.5, tilt: 0.5 });
+  ok("a centred gesture lands on the wall spot", f[0] === 169 && f[2] === 40, `pan ${f[0]} tilt ${f[2]}`);
+  ok("tilt 1 reaches the far end of the travel", d.render({ tilt: 1 })[2] === 255);
+  ok("park still points straight up", p[2] === 127, `tilt ${p[2]}`);
 }
 
 for (const [pass, name, detail] of out)

@@ -19,6 +19,39 @@ import argparse, json, os, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 GAMMA = 1.6
 MAX_STEP = 7          # DMX per frame for pan/tilt (success-limelight's HeadState cap)
+HEAD_PROFILE = os.path.join(HERE, "drivers", "profiles", "head13.profile.json")
+
+
+def load_aim(profile):
+    """The head's aim from the JS driver profile (generated from rig.py): per axis
+    either three DMX anchors [lo, centre, hi] (0 -> lo, 0.5 -> the wall, 1 -> hi,
+    piecewise) or a two-anchor window [lo, hi]. One source of truth with the JS
+    drivers; None means the profile has no aim (full travel, 0.5 = the ceiling)."""
+    aim = (profile or {}).get("aim") or {}
+    if not (isinstance(aim.get("pan"), list) and isinstance(aim.get("tilt"), list)):
+        return None
+    return {"pan": [int(v) for v in aim["pan"]], "tilt": [int(v) for v in aim["tilt"]]}
+
+
+def head_pose(intent, aim, last):
+    """(pan, tilt) DMX for an intent. A normalised value maps through the aim
+    anchors (or the full travel without any); an intent that carries no pan/tilt
+    HOLDS the last pose -- a blackout beat must not re-aim the head at park and back."""
+    def one(key):
+        v = intent.get(key)
+        if v is None:
+            return int(last[key])
+        n = max(0.0, min(1.0, float(v)))
+        if aim:
+            a = aim[key]
+            if len(a) == 3:
+                lo, mid, hi = a
+                raw = lo + (n / 0.5) * (mid - lo) if n <= 0.5 else mid + ((n - 0.5) / 0.5) * (hi - mid)
+            else:
+                raw = a[0] + n * (a[1] - a[0])
+            return int(round(max(0.0, min(255.0, raw))))
+        return int(round(n * 255))
+    return one("pan"), one("tilt")
 
 
 def find_rig():
@@ -48,6 +81,13 @@ def main():
     fps = show["fps"]
     ticks = show["ticks"]
     clamp = lambda v, lo, hi: max(lo, min(hi, v))
+    try:
+        aim = load_aim(json.load(open(HEAD_PROFILE)))
+    except (OSError, ValueError):
+        aim = None
+    # slew-limit state = what we last put on the wire, seeded to the park pose; the
+    # same dict is the pose the head HOLDS when an intent carries no pan/tilt
+    last = {"pan": rig.PAN_WALL_CENTRE, "tilt": rig.TILT_UP}
 
     def build(fixtures):
         """intents -> a 512 DMX frame via rig.py (keep-zero channels enforced there)."""
@@ -63,8 +103,7 @@ def main():
                 if it.get("strobe"):
                     f[addr - 1 + rig.PAR_STROBE] = clamp(int(round(255 * it["strobe"])), 0, 255)
             elif fx["type"] == "head13":
-                pan = int(round(clamp(it.get("pan", (rig.PAN_WALL_CENTRE / 255)), 0, 1) * 255))
-                tilt = int(round(clamp(it.get("tilt", (rig.TILT_UP / 255)), 0, 1) * 255))
+                pan, tilt = head_pose(it, aim, last)
                 dim = int(round(255 * clamp(lvl, 0, 1) * gain))
                 col = 0
                 if it.get("spin"):
@@ -82,9 +121,6 @@ def main():
             if f["id"] == fid:
                 return f["address"]
         raise KeyError(fid)
-
-    # slew-limit: state = what we last put on the wire, seeded to the park pose
-    last = {"pan": rig.PAN_WALL_CENTRE, "tilt": rig.TILT_UP}
 
     def slew(f):
         for ch, key in ((rig.H_PAN, "pan"), (rig.H_TILT, "tilt")):
