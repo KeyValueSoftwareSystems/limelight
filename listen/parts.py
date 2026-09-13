@@ -222,8 +222,10 @@ def playing_in(voices, a, b):
 
 
 def shape(cuts, labels, busy, voices=None):
-    v = busy[0]
-    peak = v.max() or 1.0
+    v = np.nan_to_num(np.asarray(busy[0], dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
+    peak = float(v.max()) if v.size else 0.0
+    if not np.isfinite(peak) or peak == 0.0:
+        peak = 1.0
     out = []
     order, seen = {}, 0
     had = {}

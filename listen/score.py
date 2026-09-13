@@ -33,7 +33,7 @@ from stems import NAMES as STEM_NAMES
 from stems import envelopes, per_bar, per_tick
 from voice import clean as clean_voice, made_by as voice_made_by
 from texture import air, bands, duck, pace, sides
-from grain import held, noisy
+from grain import held as ringing, noisy
 
 
 CACHE = Path("work/heard")
@@ -183,11 +183,24 @@ def turning(voices, a, b, busy):
     return cycle(lanes)
 
 
+def held_bars(v, a, b):
+    top = len(v)
+    if not top:
+        return np.zeros(1)
+    lo = min(max(0, a), top - 1)
+    hi = min(max(b, lo + 1), top)
+    part = v[lo:hi]
+    return part if part.size else v[-1:]
+
+
 def sections(spans, voices, busy, pickup, report=None, chroma=None):
     from parts import how_much, word_for
 
     v = busy[0] if busy.ndim > 1 else busy
-    peak = float(np.percentile(v, 98)) or 1.0
+    v = np.nan_to_num(np.asarray(v, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
+    peak = float(np.percentile(v, 98)) if v.size else 0.0
+    if not np.isfinite(peak) or peak == 0.0:
+        peak = 1.0
     # Which sections are the same section coming back. This was written in
     # parts.py and never ran: this function shadows that one, so every score
     # ever made carried repeats_as: null and nothing could say that a chorus
@@ -196,7 +209,7 @@ def sections(spans, voices, busy, pickup, report=None, chroma=None):
                    else ([None] * len(spans), [None] * len(spans)))
     out, had = [], {}
     for n, (a, b, role) in enumerate(spans):
-        part = v[a:b] if b > a else v[a:a + 1]
+        part = held_bars(v, a, b)
         rel = float(part.mean() / peak)
         third = max(1, len(part) // 3)
         rise = float((part[-third:].mean() - part[:third].mean()) / peak)
@@ -214,8 +227,8 @@ def sections(spans, voices, busy, pickup, report=None, chroma=None):
             "playing": [n for n, (st, _) in has.items() if st != "none"],
             "stems": {
                 n: {"is": st, "sits": lv,
-                    "level": round(float(voices[i][a:b].mean()), 3)
-                    if b > a and i < voices.shape[0] else 0.0}
+                    "level": round(float(held_bars(voices[i], a, b).mean()), 3)
+                    if i < voices.shape[0] else 0.0}
                 for i, (n, (st, lv)) in enumerate(has.items())},
         })
         had = has
@@ -285,7 +298,7 @@ def read(path, slug):
            for k, v in bands(stereo, edges_now).items()},
         "air": [round(float(x), 3) for x in air(path, edges_now)],
         "noisy": [round(float(x), 3) for x in noisy(path, edges_now)],
-        "held": [round(float(x), 3) for x in held(env, edges_now)],
+        "held": [round(float(x), 3) for x in ringing(env, edges_now)],
         "pump": [round(float(x), 3) for x in duck(env, g, edges_now)],
         "pace": [round(float(x), 3) for x in pace(flux_now, g, edges_now)],
         **{k: [round(x, 3) for x in lanes[k]] for k in STEM_NAMES},
@@ -467,5 +480,6 @@ if __name__ == "__main__":
     for arg in sys.argv[1:]:
         src = Path(arg)
         score = read(str(src), src.stem)
-        (out / f"{src.stem}.score").write_text(json.dumps(score, indent=2) + "\n")
+        (out / f"{src.stem}.score").write_text(
+            json.dumps(score, indent=2, allow_nan=False) + "\n")
         print(f"    -> scores/{src.stem}.score", file=sys.stderr)

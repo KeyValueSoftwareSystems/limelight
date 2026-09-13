@@ -86,9 +86,15 @@ def format_v1(raw):
             out["beats"] = raw["beats"]
         elif isinstance(raw["beats"], list):
             converted = []
+            walk_bar, walk_beat = first_bar, 0
             for idx, b in enumerate(raw["beats"]):
-                bar = first_bar + idx // bpb
-                beat = (idx % bpb) + 1
+                if isinstance(b, dict) and b.get("downbeat"):
+                    if walk_beat:
+                        walk_bar += 1
+                    walk_beat = 1
+                else:
+                    walk_beat += 1
+                bar, beat = walk_bar, walk_beat
                 entry = {"bar": bar, "beat": beat}
                 if isinstance(b, dict):
                     expected_t = first_beat_s + idx * beat_sec

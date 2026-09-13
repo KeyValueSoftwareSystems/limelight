@@ -15,13 +15,19 @@
 const fs = require("fs"), path = require("path");
 const { Session } = require("./session.js");
 
-/* Scores are built, not committed, so look wherever they actually land: the hub's
-   store first, then the one fixture that stays in the repo. Finding none is
-   reported as exactly that -- not as a pass. A check that quietly skips itself
-   when its input is missing is a check that can never fail, which is the trap
-   this project keeps catching itself in. */
-const dirs = [path.join(__dirname, "..", "hub", "files"),
-              path.join(__dirname, "..", "scores"),
+/* Scores are built, not committed, so look wherever they actually land. The
+   pipeline's own output comes first and everything else is a fallback: hub/files
+   is a gitignored local store of whatever was last uploaded, and preferring it
+   meant this suite validated old copies on a machine that had them and fresh
+   ones on a machine that did not. Twenty-one of twenty-eight songs were checked
+   in a shape three fields behind what the pipeline actually writes, and a score
+   that JSON.parse cannot read sat in scores/ while this printed 28 songs pass.
+   Finding none is reported as exactly that -- not as a pass. A check that
+   quietly skips itself when its input is missing is a check that can never
+   fail, which is the trap this project keeps catching itself in; a check that
+   quietly reads a different, older input is the same trap wearing a hat. */
+const dirs = [path.join(__dirname, "..", "scores"),
+              path.join(__dirname, "..", "hub", "files"),
               __dirname];
 const files = [];
 for (const d of dirs) {
@@ -40,10 +46,45 @@ if (!files.length) {
 }
 ok("there are scores to check", files.length > 0, files.length + " songs");
 
+/* The same song sitting in two places in two shapes is how a reader ends up
+   reading a score three fields behind the one the page shows. Said out loud
+   rather than failed, because hub/files is a local store and being behind is
+   not by itself a broken build. */
+{
+  const behind = [];
+  for (const f of files) {
+    const name = path.basename(f);
+    for (const d of dirs) {
+      const other = path.join(d, name);
+      if (other === f || !fs.existsSync(other)) continue;
+      let a, b;
+      try { a = JSON.parse(fs.readFileSync(f, "utf8")); } catch { continue; }
+      try { b = JSON.parse(fs.readFileSync(other, "utf8")); } catch { continue; }
+      const gap = Object.keys(a).filter(k => !(k in b));
+      if (gap.length) behind.push(`${name.slice(0, -6)} in ${path.basename(d)} lacks ${gap.join(", ")}`);
+    }
+  }
+  if (behind.length) {
+    console.log(`  note  ${behind.length} stale copies are not what was checked:`);
+    for (const line of behind.slice(0, 6)) console.log(`          ${line}`);
+    if (behind.length > 6) console.log(`          ... and ${behind.length - 6} more`);
+  }
+}
+
 let bases = {};
 for (const f of files) {
   const name = path.basename(f).slice(0, -6);
-  const sc = JSON.parse(fs.readFileSync(f, "utf8"));
+  let sc;
+  try {
+    sc = JSON.parse(fs.readFileSync(f, "utf8"));
+  } catch (e) {
+    /* NaN is what Python writes for a mean of nothing and is not JSON. One
+       score in the library carried it and no reader written in JavaScript
+       could open that song at all. One unreadable score must not stop the
+       other twenty-seven from being checked. */
+    ok(`${name}: the score file is valid JSON`, false, String(e.message).slice(0, 70));
+    continue;
+  }
   const s = Session(sc, { now: () => 1 });
   const g = sc.grid;
 

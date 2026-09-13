@@ -76,9 +76,22 @@ export function format(raw) {
     if (raw.beats.list) {
       out.beats = raw.beats;
     } else if (Array.isArray(raw.beats)) {
+      /* Bars advance on the detected downbeat, not on a count of four from beat
+         zero. A song that opens with a pickup has fewer than a full bar before
+         its first downbeat, and counting idx/beats_per_bar put every beat after
+         it out of phase with the music -- on Levels the first downbeat sits at
+         index 2, so this called it bar 0 beat 3 and started its bars two beats
+         early for the whole song. respond.js has walked the flags since the day
+         a pickup score was first read; these two formatters never did. */
+      let walkBar = firstBar, walkBeat = 0;
       out.beats = raw.beats.map((b, idx) => {
-        const bar  = firstBar + Math.floor(idx / bpb);
-        const beat = (idx % bpb) + 1;
+        if (b.downbeat) {
+          if (walkBeat) walkBar += 1;
+          walkBeat = 1;
+        } else {
+          walkBeat += 1;
+        }
+        const bar = walkBar, beat = walkBeat;
         const expectedT = firstBeatS + idx * beatSec;
         const entry = { bar, beat };
         if (b.weight !== undefined) entry.weight = b.weight;

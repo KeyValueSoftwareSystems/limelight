@@ -114,6 +114,40 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
        && (py2.lyrics || {}).lines && py2.lyrics.lines[0].sure === 1,
      "sure survives both");
 
+  /* A beat the tracker flagged as a downbeat is the first beat of a bar. That
+     is what a downbeat is. Both formatters counted bars as idx/beats_per_bar
+     instead, which is only the same thing when a song begins exactly on a
+     downbeat -- thirteen of the twenty-eight do not. On Levels the first
+     downbeat is beat index 2, so every bar the protocol reported started two
+     beats early, and a cue on "bar N beat 1" fired half a bar before the bar. */
+  {
+    const dir = path.join(root, "scores");
+    const songs = fs.readdirSync(dir).filter(x => x.endsWith(".score")).sort();
+    let checked = 0, offJs = [];
+    for (const f of songs) {
+      let sc;
+      try { sc = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")); } catch { continue; }
+      if (!Array.isArray(sc.beats) || !sc.beats.some(b => b.downbeat)) continue;
+      const got = fn(sc);
+      if (!Array.isArray(got.beats)) continue;
+      checked++;
+      /* Before the first downbeat the song is in its pickup, whose opening beat
+         is beat 1 of bar 0 without being a downbeat. The rule starts where the
+         bars do. */
+      const start = sc.beats.findIndex(b => b.downbeat);
+      for (let i = start; i < sc.beats.length; i++) {
+        const isDown = !!sc.beats[i].downbeat, isOne = got.beats[i].beat === 1;
+        if (isDown !== isOne) {
+          offJs.push(`${f.slice(0, -6)} beat ${i} (down=${isDown}, called beat ${got.beats[i].beat})`);
+          break;
+        }
+      }
+    }
+    ok("every downbeat is beat 1 and every beat 1 is a downbeat, in every song",
+       checked > 0 && offJs.length === 0,
+       offJs.length ? offJs.slice(0, 4).join(", ") : `${checked} songs`);
+  }
+
   const bad = out.filter(r => !r[0]).length;
   for (const [p, n, d] of out) if (!p) console.log(`  FAIL  ${n}   ${d}`);
   console.log(bad ? `\n${bad} of ${out.length} FAILED` : `\nall ${out.length} checks pass`);
