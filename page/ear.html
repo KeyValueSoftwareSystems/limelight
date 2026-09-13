@@ -270,8 +270,9 @@ let SCORE = null, slug = null, stopAt = null, BAR = 1, FIRSTBAR = 1, dragging = 
 let SHIFT = 0, BASE = 0;
 const WHEEL = ["#6fa8dc","#e8a33d","#5bb98c","#b98cd6","#d68c8c","#8cd6cf","#d6c98c","#a0a8bb"];
 const STEM = {drums:"#e0655f", bass:"#b98cd6", vocals:"#5bb98c", other:"#6fa8dc"};
-const LANES = ["drums","bass","vocals","other"];
-const LANEWORD = {drums:"Drums", bass:"Bass", vocals:"Voice", other:"Chords"};
+const LANES = ["drums","bass","vocals","guitar","piano","other"];
+const LANEWORD = {drums:"Drums", bass:"Bass", vocals:"Voice",
+                  guitar:"Guitar", piano:"Keys", other:"Rest"};
 let HUE = {};
 
 /* One window every timeline on the page obeys, so zooming the sections also
@@ -1596,6 +1597,7 @@ $("subs").onclick = jump;
 $("chords").onclick = jump;
 $("lanes").onclick = jump;
 $("curves").onclick = jump;
+$("motion").onclick = jump;
 $("zoom").onclick = e => {
   if (!SCORE) return;
   const r = e.target.getBoundingClientRect();

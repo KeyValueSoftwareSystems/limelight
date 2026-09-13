@@ -319,7 +319,8 @@ def read(path, slug):
                               env, report)
     flux = np.load(CACHE / f"{slug}.flux.npy")
     edges = list(cuts)
-    rows = np.asarray([score_bars[k] for k in STEM_NAMES] +
+    heard_stems = list(STEM_NAMES) + [k for k in STEM_MORE if k in score_bars]
+    rows = np.asarray([score_bars[k] for k in heard_stems] +
                       [[x if x is not None else 0.0 for x in score_bars["intensity"]],
                        [x if x is not None else 0.0 for x in score_bars["pace"]]],
                      dtype=float)
@@ -329,7 +330,8 @@ def read(path, slug):
         near = min(range(len(edges)), key=lambda i: abs(edges[i] - at))
         if abs(edges[near] - at) <= (edges[1] - edges[0] if len(edges) > 1 else 2.0):
             shifts.append(near)
-    found_spans, how, chroma = shape(path, edges, rows, shifts=shifts)
+    found_spans, how, chroma = shape(path, edges, rows, shifts=shifts,
+                                     stems=len(heard_stems))
     report["tempo_shifts"] = len(shifts)
     report["sections_from"] = how
     grid_says = {}

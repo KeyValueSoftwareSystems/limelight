@@ -253,7 +253,7 @@ def runs(mark, least=4):
     return spans
 
 
-def shape(path, edges, lanes=None, least=4, shifts=()):
+def shape(path, edges, lanes=None, least=4, shifts=(), stems=4):
     harm, tex, rhy, inst = families(path, edges, lanes)
     a = affinity(harm, tex, rhy, inst)
     heard, tries = votes(a)
@@ -261,14 +261,16 @@ def shape(path, edges, lanes=None, least=4, shifts=()):
     held, turns = [], []
     if lanes is not None:
         rows = np.asarray(lanes, dtype=float)
-        held = [c for c in switches(rows[:4, :n]) if 0 < c < n]
-        level = list(steps(rows[4, :n])) if rows.shape[0] > 4 else []
+        held = [c for c in switches(rows[:stems, :n]) if 0 < c < n]
+        level = (list(steps(rows[stems, :n]))
+                 if rows.shape[0] > stems else [])
         # A verse can change without any instrument arriving or leaving and
         # without the level moving: the singing turns over and the rhythm gets
         # busier, and nothing else does anything. Every boundary the segmenter
         # missed inside nebulakal's 28-bar "verse" was one of those, so the
         # busyness and the vocal level get a vote of their own.
-        busy = list(steps(rows[5, :n])) if rows.shape[0] > 5 else []
+        busy = (list(steps(rows[stems + 1, :n]))
+                if rows.shape[0] > stems + 1 else [])
         sung = list(steps(rows[2, :n]))
         turns = [c for c in level + busy + sung if 0 < c < n]
     cuts = agree(heard, held, turns, [c for c in shifts if 0 < c < n])
