@@ -42,7 +42,7 @@ section{margin:0 0 24px}
 .lead .ask span{color:var(--faint);font-size:12px}
 canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;background:#06090e}
 #zoom{height:110px;cursor:pointer}
-#tune{height:140px;cursor:pointer}
+#tune{height:200px;cursor:pointer}
 #curves{cursor:pointer}
 #beat{height:150px;cursor:default}
 #lanes{height:104px;cursor:pointer;border-radius:0 0 8px 8px;border-top:none}
@@ -647,8 +647,8 @@ function draw() {
     : "";
 
   $("tunekey").innerHTML =
-    `<span><i style="background:${STEM.vocals}"></i>a note that was sung</span>`
-    + `<span><i style="background:${STEM.other}"></i>a note played by the lead instrument</span>`
+    `<span><i style="background:#7ae8b0"></i>a note that was sung</span>`
+    + `<span><i style="background:#8fd0ff"></i>a note played by the lead instrument</span>`
     + `<span><i style="background:#c8a2ff"></i>a tune you have already heard, coming back</span>`
     + `<span class="dim">higher up = higher note</span>`
     + `<span class="dim" style="flex-basis:100%">The ticks under the notes are the `
@@ -843,7 +843,7 @@ function zoom() {
 }
 
 function tune() {
-  const [g, W] = fit($("tune"), 140);
+  const [g, W] = fit($("tune"), 200);
   const notes = SCORE.melody || [];
   if (!notes.length) {
     g.fillStyle = "#7b8599"; g.font = "12.5px system-ui";
@@ -858,13 +858,14 @@ function tune() {
   const span = Math.max(8, hi - lo);
   const perb = SCORE.grid.beats_per_bar;
   const noteAt = (bar, bt) => atBeat((bar - 1) * perb + ((bt || 1) - 1) + (SHIFT - BASE));
-  const L = 14, top = 36, foot = 112, tall = foot - top;
+  const L = 14, top = 34, foot = 176, tall = foot - top;
+  const SUNG = "#7ae8b0", LEAD = "#8fd0ff", BACK = "#c9a6ff";
   const Y = p => foot - ((p - lo)/span)*tall;
   const X = s => L + frac(s)*(W - L - 6);
   const at = n => X(noteAt(n.bar, n.beat));
 
   for (let p = Math.ceil(lo/12)*12; p <= hi; p += 12) {
-    g.strokeStyle = "#161d29"; g.lineWidth = 1;
+    g.strokeStyle = "#28344a"; g.lineWidth = 1;
     g.beginPath(); g.moveTo(L, Y(p)); g.lineTo(W-6, Y(p)); g.stroke();
   }
 
@@ -905,15 +906,15 @@ function tune() {
     THIT.push({x0: X(a), x1: X(a + m.for_beats*beat), m});
   }
   for (const h of THIT) {
-    g.fillStyle = "rgba(200,162,255,.13)";
+    g.fillStyle = "rgba(201,166,255,.20)";
     g.fillRect(h.x0, top - 5, Math.max(3, h.x1 - h.x0), tall + 10);
   }
 
   for (const src of ["voice", "lead"]) {
     const mine = notes.filter(n => (n.from === "lead") === (src === "lead"));
     if (mine.length < 2) continue;
-    g.strokeStyle = src === "lead" ? STEM.other : STEM.vocals;
-    g.globalAlpha = .25; g.lineWidth = 1;
+    g.strokeStyle = src === "lead" ? LEAD : SUNG;
+    g.globalAlpha = .5; g.lineWidth = 1.2;
     g.beginPath();
     let open = false;
     for (let i = 0; i < mine.length; i++) {
@@ -930,9 +931,9 @@ function tune() {
     const x = at(n);
     const w = Math.max(2, ((n.held_beats*beat)/viewSpan())*(W - L - 6));
     const hot = hooked.has(n.bar);
-    g.fillStyle = hot ? "#c8a2ff" : n.from === "lead" ? STEM.other : STEM.vocals;
-    g.globalAlpha = hot ? 1 : (n.from === "lead" ? 0.7 : 0.9);
-    g.fillRect(x, Y(n.pitch) - 1.7, w, 3.4);
+    g.fillStyle = hot ? BACK : n.from === "lead" ? LEAD : SUNG;
+    g.globalAlpha = 1;
+    g.fillRect(x, Y(n.pitch) - 2.3, Math.max(3, w), 4.6);
   }
   g.globalAlpha = 1;
 
@@ -954,7 +955,7 @@ function tune() {
     g.fillText(words, h.x0 + 4, ly);
   }
 
-  g.fillStyle = "#4a5364"; g.font = "9.5px ui-monospace,monospace";
+  g.fillStyle = "#8d97ab"; g.font = "9.5px ui-monospace,monospace";
   g.fillText(`${notes.length} notes in all`, L, 134);
   if (v.sure != null && v.sure < 0.5) {
     g.fillStyle = "#e0655f";
