@@ -709,6 +709,17 @@ function plan(scoreIn, enumResult, seed) {
   const has = (b, bt, k) => moments.some(m => m.bar === b && m.beat === bt && m.kind === k);
   for (const sg of signals) {
     if (sg.kind === "hook" && typeof sg.again_of === "number" && !has(sg.bar, sg.beat, "hook")) moments.push(sg);
+    /* A hole is the best thing that can happen to a show, and this loop was
+       dropping them. raga-of-revenge stops dead for one bar at 22 -- drums from
+       0.54 to 0.14, bass 0.58 to 0.04 -- and then the drop lands at 23. The
+       score says so plainly: pause bass and pause drums, four beats, at bar 22.
+       Both live in `signals`, only hooks and rises were being promoted, so the
+       plan brightened straight through the silence.
+
+       A pause, an exit and a transition all mean "something left". Take them,
+       so the rig can stop when the music stops. */
+    if ((sg.kind === "pause" || sg.kind === "exit" || sg.kind === "transition")
+        && !has(sg.bar, sg.beat, sg.kind)) moments.push(sg);
     if (sg.kind === "rise" && (typeof sg.weight !== "number" || sg.weight >= 0.2)) {
       const B = atBeat({ bar: sg.bar, beat: sg.beat });
       const len = typeof sg.for_beats === "number" && sg.for_beats > 0 ? sg.for_beats : 2 * bpb;

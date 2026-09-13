@@ -157,7 +157,11 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   ok("a heavy entrance holds its breath on the beat before", black && black.from.bar === 3 && black.from.beat === 4 && black.to.bar === 4 && black.to.beat === 1, JSON.stringify(black));
   ok("no fabricated drop-boundary blackout/blast when the score has moments",
      p.assignments.filter(a => a.type === "white_blast").length === 1 && p.assignments.filter(a => a.type === "blackout").length === 1);
-  const pause = p.assignments.find(a => a.type === "pause");
+  /* Find the pause this check is about rather than the first in the plan:
+     pause SIGNALS are promoted now as well as pause moments, so a song has
+     several holes and "the first" is no longer "the one at bar 51". */
+  const pause = p.assignments.find(a => a.type === "pause" && a.from.bar === 51)
+             || p.assignments.find(a => a.type === "pause");
   ok("a pause spans exactly its for_beats from its bar/beat",
      pause && pause.from.bar === 8 && pause.from.beat === 3 && pause.to.bar === 9 && pause.to.beat === 3, JSON.stringify(pause));
   ok("a pause carries its weight and what is still playing", pause && pause.params.strength === 0.5 && pause.params.still[0] === "bass");
@@ -209,7 +213,10 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   const firstDrop = LEVELS.sections.find(s => s.name === "drop");
   const looks = new Set(p.assignments.filter(a => a.layer === "par" && a.seq_id && within(a, firstDrop)).map(a => a.seq_id));
   ok("levels: the first drop (16 bars) holds several distinct PAR looks", looks.size >= 2, [...looks].join(", "));
-  const pause = p.assignments.find(a => a.type === "pause");
+  /* The pause this check is about, not the first in the plan: pause SIGNALS
+     are promoted now as well as pause moments, so a song has several holes. */
+  const pause = p.assignments.find(a => a.type === "pause" && a.from.bar === 51)
+             || p.assignments.find(a => a.type === "pause");
   ok("levels: the bar-51 pause lands at bar 51 beat 1 for 8 beats",
      pause && pause.from.bar === 51 && pause.from.beat === 1 && pause.to.bar === 53 && pause.to.beat === 1, JSON.stringify(pause));
   ok("levels: the bar-9 drums entrance blasts at bar 9 beat 1",
@@ -363,7 +370,10 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
      blast && blast.seq_id === "impact" && blast.from.bar === 4 && blast.from.beat === 1 && blast.params.strength === 0.97, JSON.stringify(blast));
   const black = p.assignments.find(a => a.type === "blackout");
   ok("its breath is a one-shot the beat before", black && black.seq_id === "breath" && black.from.bar === 3 && black.from.beat === 4, JSON.stringify(black));
-  const pause = p.assignments.find(a => a.type === "pause");
+  /* The pause this check is about, not the first in the plan: pause SIGNALS
+     are promoted now as well as pause moments, so a song has several holes. */
+  const pause = p.assignments.find(a => a.type === "pause" && a.from.bar === 51)
+             || p.assignments.find(a => a.type === "pause");
   ok("the pause is the hush one-shot for its for_beats", pause && pause.seq_id === "hush" && pause.from.bar === 8 && pause.to.bar === 9 && pause.to.beat === 3 && pause.params.still[0] === "bass", JSON.stringify(pause));
   const hook = p.assignments.find(a => a.type === "hook");
   ok("the hook is the hook_lift one-shot", hook && hook.seq_id === "hook_lift" && hook.from.bar === 6 && hook.to.bar === 8, JSON.stringify(hook));
