@@ -8,8 +8,10 @@
   var playerEl, bossEl;
   var hazardLayer;
   var wedgeEls = [], ringEls = [], noteEls = [], padEls = [], spotlightEl, clearEl;
+  var laserEls = [], bulletEls = [];
   var arenaSize = 0;
-  var beatPulse = 0, shakeMag = 0;
+  var beatPulse = 0, shakeMag = 0, flashMag = 0;
+  var flashEl, sparkEl;
   var lastStep = 0;
 
   var PHASE_COLORS = {
@@ -80,6 +82,20 @@
       hazardLayer.appendChild(p);
       padEls.push(p);
     }
+    for (var i = 0; i < 12; i++) {
+      var la = document.createElement("div");
+      la.className = "hazard-laser";
+      la.style.display = "none";
+      hazardLayer.appendChild(la);
+      laserEls.push(la);
+    }
+    for (var i = 0; i < 56; i++) {
+      var bu = document.createElement("div");
+      bu.className = "hazard-bullet";
+      bu.style.display = "none";
+      hazardLayer.appendChild(bu);
+      bulletEls.push(bu);
+    }
 
     bossEl = document.createElement("div");
     bossEl.className = "boss";
@@ -104,7 +120,16 @@
       '<div class="player__body"></div>';
     arena.appendChild(playerEl);
 
-    beatPulse = 0; shakeMag = 0;
+    sparkEl = document.createElement("div");
+    sparkEl.className = "fx-spark";
+    sparkEl.style.opacity = 0;
+    arena.appendChild(sparkEl);
+
+    flashEl = document.createElement("div");
+    flashEl.className = "fx-flash";
+    arena.appendChild(flashEl);
+
+    beatPulse = 0; shakeMag = 0; flashMag = 0;
     lastStep = performance.now();
     resize();
   }
@@ -136,6 +161,18 @@
 
   function shake(amount) {
     shakeMag = Math.max(shakeMag, amount);
+  }
+
+  function flash() { flashMag = 1; }
+
+  function spark(gameX, gameY, gameR) {
+    if (!sparkEl) return;
+    var pos = toArenaXY(gameX, gameY, gameR);
+    sparkEl.style.left = pos.left;
+    sparkEl.style.top = pos.top;
+    sparkEl.style.animation = "none";
+    void sparkEl.offsetWidth;                 // restart the keyframe
+    sparkEl.style.animation = "fx-spark-anim 0.32s ease-out";
   }
 
   function setPhase(phase) {
@@ -244,6 +281,43 @@
     }
   }
 
+  /* Lasers: a beam across the arena centre. rotDeg aligns the bar with the
+     game-space angle; thickFrac is a fraction of the arena size. */
+  function updateLasers(lasers) {
+    for (var i = 0; i < laserEls.length; i++) {
+      var el = laserEls[i];
+      if (i < lasers.length) {
+        var L = lasers[i];
+        el.style.display = "";
+        el.className = "hazard-laser" + (L.color === "amber" ? " hazard-laser--amber" : "");
+        el.style.height = Math.max(2, (L.thickFrac || 0.006) * arenaSize) + "px";
+        el.style.width = "150%";
+        el.style.opacity = L.opacity != null ? L.opacity : 1;
+        el.style.transform = "translate(-50%,-50%) rotate(" + (L.rotDeg || 0) + "deg)";
+      } else {
+        el.style.display = "none";
+      }
+    }
+  }
+
+  /* Bullets: live projectiles, positioned by percent of the arena. */
+  function updateBullets(bullets) {
+    var size = Math.max(7, arenaSize * 0.042);
+    for (var i = 0; i < bulletEls.length; i++) {
+      var el = bulletEls[i];
+      if (i < bullets.length) {
+        var b = bullets[i];
+        el.style.display = "";
+        el.style.left = b.xPct + "%";
+        el.style.top = b.yPct + "%";
+        el.style.width = size + "px";
+        el.style.height = size + "px";
+      } else {
+        el.style.display = "none";
+      }
+    }
+  }
+
   function updateClear(visible) {
     clearEl.classList.toggle("hazard-clear--visible", !!visible);
   }
@@ -257,9 +331,14 @@
     beatPulse = Math.max(0, beatPulse - frameDt * 3.5);
     var inner = arena.querySelector(".arena__inner-ring");
     if (inner) {
-      var bw = 2 + beatPulse * 3;
+      var bw = 2 + beatPulse * 5;                     // a stronger beat-synced pulse
       inner.style.borderWidth = bw + "px";
-      inner.style.opacity = 0.5 + beatPulse * 0.5;
+      inner.style.opacity = 0.45 + beatPulse * 0.55;
+    }
+
+    if (flashEl) {
+      if (flashMag > 0.01) { flashEl.style.opacity = flashMag * 0.55; flashMag *= Math.max(0, 1 - frameDt * 6); }
+      else { flashEl.style.opacity = 0; flashMag = 0; }
     }
 
     if (shakeMag > 0.01) {
@@ -274,9 +353,9 @@
   }
 
   function dispose() {
-    wedgeEls = []; ringEls = []; noteEls = []; padEls = [];
+    wedgeEls = []; ringEls = []; noteEls = []; padEls = []; laserEls = []; bulletEls = [];
     if (mount) mount.innerHTML = "";
-    mount = arena = playerEl = bossEl = hazardLayer = spotlightEl = clearEl = null;
+    mount = arena = playerEl = bossEl = hazardLayer = spotlightEl = clearEl = flashEl = sparkEl = null;
   }
 
   /* The boss is a fixed-size element at the arena centre, so its radius in game
@@ -298,11 +377,15 @@
     toArenaXY: toArenaXY,
     pulse: pulse,
     shake: shake,
+    flash: flash,
+    spark: spark,
     setPhase: setPhase,
     updatePlayer: updatePlayer,
     updateBoss: updateBoss,
     updateWedges: updateWedges,
     updateRings: updateRings,
+    updateLasers: updateLasers,
+    updateBullets: updateBullets,
     updateSpotlight: updateSpotlight,
     updateNotes: updateNotes,
     updatePads: updatePads,
