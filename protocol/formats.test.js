@@ -163,6 +163,11 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
        && (js2.releases || []).every(r => r.at_s !== undefined),
      `js ${JSON.stringify((js2.releases || []).slice(0, 2))}`);
 
+  ok("a dropout says which bars, how long and what kept playing, both sides",
+     JSON.stringify((js2.phrases || []).map(x => x.break))
+       === JSON.stringify((py2.phrases || []).map(x => x.break)),
+     `js ${JSON.stringify(((js2.phrases || [])[0] || {}).break)}`);
+
   ok("both formatters send the same motion track",
      JSON.stringify(js2.motion) === JSON.stringify(py2.motion),
      `js ${JSON.stringify(js2.motion || {}).slice(0, 50)}`);

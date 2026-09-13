@@ -300,6 +300,7 @@ def format_v1(raw):
                     "says": p.get("says"), "energy": p.get("energy"),
                     "rise": p.get("rise"), "playing": p.get("playing"),
                     "has_break": p.get("has_break"),
+                    "break": p.get("break"),
                 }
                 for p in raw["phrases"]
             ],

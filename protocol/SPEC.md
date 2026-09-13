@@ -657,6 +657,35 @@ The rule this leaves behind: if the score knows when something happened, the
 protocol sends the second, not only the label. A label is a claim about a grid
 and a grid can be wrong; a second is what a speaker did.
 
+## A dropout is a bar, not a flag
+
+`phrases[].has_break` said a phrase contains "a bar out, then back" and nothing
+else -- not which bar, not how long, not what kept playing. Alnas had to recover
+them from energy dips with a threshold of his own, which is work the file should
+have done. The detector already knew: it finds the quietest bar in the phrase,
+checks it against 40% of the phrase median, and then threw the index away.
+
+`phrases[].break` now carries `from_bar`, `to_bar`, `bars`, `still` -- the stems
+that keep going -- plus `deepest` and `depth` for the stem that falls furthest
+and how far. `has_break` stays, so nothing that reads it breaks.
+
+The dip is one bar on the median phrase and runs to four at the longest, and
+just over a quarter of them are longer than a single bar, which is exactly the
+detail the flag could not express.
+
+Whether these are real was checked against the stems, which are different data
+from the loudness curve that finds them. In every one of 112 candidates at least
+one stem falls inside the dip relative to the same phrase outside it, on 73% of
+them by 80% or more, and the median deepest stem falls by 0.99 -- something goes
+essentially silent. There were no candidates where nothing dropped.
+
+That check was run twice. The first version divided each stem's level in the dip
+by its phrase median and reported stems sitting at 285 times their own median,
+which is a near-zero denominator rather than a finding, and it led to a false
+conclusion that a fifth of the flags were artefacts. Comparing the dip against
+the rest of the same phrase, with a floor under the denominator, is what the
+numbers above use.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

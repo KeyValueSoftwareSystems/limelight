@@ -119,10 +119,41 @@ def phrases(spans, bars, moments, every, origin, pickup):
             if not len(bit):
                 continue
             broke = False
+            gap = None
             if len(bit) >= 4:
                 mid = float(np.median(bit))
                 low = int(np.argmin(bit))
                 if mid > 0 and bit[low] < mid * 0.40:
+                    under = bit < mid * 0.40
+                    head = low
+                    while head > 0 and under[head - 1]:
+                        head -= 1
+                    tail = low
+                    while tail + 1 < len(bit) and under[tail + 1]:
+                        tail += 1
+                    outside = np.ones(len(bit), dtype=bool)
+                    outside[head:tail + 1] = False
+                    still, fell = [], []
+                    for k in LANES:
+                        v = lane[k][lo:hi]
+                        if len(v) != len(bit) or not outside.any():
+                            continue
+                        was_at = float(v[outside].mean())
+                        now_at = float(v[head:tail + 1].mean())
+                        if was_at < 0.05:
+                            continue
+                        share = (was_at - now_at) / was_at
+                        if share < 0.40:
+                            still.append(k)
+                        fell.append((share, k))
+                    gap = {
+                        "from_bar": lo + head + 1 - pickup,
+                        "to_bar": lo + tail + 1 - pickup,
+                        "bars": tail - head + 1,
+                        "still": still,
+                        "deepest": max(fell)[1] if fell else None,
+                        "depth": round(float(max(fell)[0]), 3) if fell else None,
+                    }
                     bit = np.delete(bit, low)
                     broke = True
             third = max(1, len(bit) // 3)
@@ -162,6 +193,7 @@ def phrases(spans, bars, moments, every, origin, pickup):
                 "playing": playing,
                 "moments": len([m for m in inside if m["is"] in BIG]),
                 "has_break": broke,
+                "break": gap,
             })
             was = playing
 
@@ -174,6 +206,8 @@ def phrases(spans, bars, moments, every, origin, pickup):
             last["to_bar"] = p["to_bar"]
             last["moments"] += p["moments"]
             last["has_break"] = last["has_break"] or p["has_break"]
+            if last.get("break") is None:
+                last["break"] = p.get("break")
             last["energy"] = round((last["energy"] + p["energy"]) / 2, 3)
             last["sure"] = max(last["sure"], p["sure"])
         else:

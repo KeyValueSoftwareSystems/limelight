@@ -340,6 +340,7 @@ export function format(raw) {
         rise:      p.rise,
         playing:   p.playing,
         has_break: p.has_break,
+        break: p.break,
       })),
     };
   }
