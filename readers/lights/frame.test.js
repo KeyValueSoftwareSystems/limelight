@@ -437,6 +437,20 @@ const P = (extra, more) => ({ grid: { beats_per_bar: 4 }, assignments: [base(), 
   ok("no tension, no change", JSON.stringify(frame({ bar: 1, beat: 1.5 }, P(), CTX)) === JSON.stringify(frame({ bar: 1, beat: 1.5 }, P({ tension: null }), CTX)));
 }
 
+
+/* ---- a ramp grows to full over its span ----------------------------------------- */
+{
+  const base = () => ({ from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "hold_x", layer: "par", priority: 0, params: { floor: 0.3, peak: 1, mode: "hit", intensity: 1 } });
+  const head = () => ({ from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "head_x", layer: "head", priority: 1, params: { headDim: 0.8, motion: 0.5 } });
+  const P = (extra) => ({ grid: { beats_per_bar: 4 }, assignments: [base(), head(), ...(extra || [])] });
+  const ramp = { from: { bar: 2, beat: 1 }, to: { bar: 3, beat: 1 }, type: "ramp", layer: "modulate", priority: 4, params: { weight: 1 } };
+  const plain = g(frame({ bar: 2, beat: 1.5 }, P(), CTX), "par_1").level;
+  ok("at the start of a ramp nothing has grown yet", near(g(frame({ bar: 2, beat: 1.5 }, P([ramp]), CTX), "par_1").level, plain * (1 + 0.35 * 0.125), 0.01));
+  ok("near the end of the ramp the level has grown by a third", near(g(frame({ bar: 2, beat: 4.9 }, P([ramp]), CTX), "par_1").level, plain * (1 + 0.35 * 0.975), 0.01), `${g(frame({ bar: 2, beat: 4.9 }, P([ramp]), CTX), "par_1").level} vs ${plain}`);
+  ok("the head moves faster at the end of a ramp", g(frame({ bar: 2, beat: 4.3 }, P([ramp]), CTX), "head").pan !== g(frame({ bar: 2, beat: 4.3 }, P(), CTX), "head").pan);
+  ok("after the ramp the base is back", g(frame({ bar: 3, beat: 1.5 }, P([ramp]), CTX), "par_1").level === plain);
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

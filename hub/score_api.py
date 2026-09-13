@@ -442,10 +442,19 @@ def apply_window(out, w, grid):
         elif isinstance(out["beats"], list):
             out["beats"] = [b for b in out["beats"] if in_win(b.get("bar", 0))]
 
+    # downbeats arrive in two shapes: the wrapped {list: [[bar, beat], ...]} a
+    # score may carry, and the plain list of entries the formatter derives from
+    # beats. Windowing assumed the wrapped one, so any windowed request that
+    # included downbeats raised. The Node half already guarded for both.
     if out.get("downbeats"):
-        lst = [b for b in out["downbeats"]["list"] if in_win(b[0])]
-        out["downbeats"] = {"derived_from": "grid", "as": "[bar, beat]",
-                            "count": len(lst), "list": lst}
+        db = out["downbeats"]
+        if isinstance(db, dict) and isinstance(db.get("list"), list):
+            lst = [b for b in db["list"] if in_win(b[0])]
+            out["downbeats"] = {"derived_from": "grid", "as": "[bar, beat]",
+                                "count": len(lst), "list": lst}
+        elif isinstance(db, list):
+            out["downbeats"] = [b for b in db
+                                if in_win((b.get("bar", 0) if isinstance(b, dict) else b[0]))]
 
     if out.get("sections"):
         out["sections"] = [sp for sp in out["sections"] if span_touches(sp)]

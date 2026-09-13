@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Web control panel for the PAR show.
 
-  server.py [--port 8765] [--host 127.0.0.1] [--gain 1.0] [--offset-ms -240] [--no-net] [--gateway IP] [--universe N] [dir ...]
+  server.py [--port 8765] [--host 127.0.0.1] [--gain 1.0] [--offset-ms 0] [--no-net] [--gateway IP] [--universe N] [dir ...]
 
 Serves ui.html plus a small JSON API. The page is a remote control: play,
 pause and seek commands go to the transport, which is the master clock for
@@ -32,6 +32,7 @@ UI_PATH = os.path.join(HERE, "ui.html")
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))          # panel -> lights -> readers -> limelight
 EXPER = os.path.join(os.path.dirname(REPO), "experimentation")          # for local audio caches
 HUB = os.environ.get("HUB_URL", "http://192.168.1.38:8770")
+HUB_SCORES = HUB + "/hub/score"   # scores live under /hub/score/ (same as LIMELIGHT_REMOTE and the CLI)
 
 
 class NullSender:
@@ -97,18 +98,28 @@ class State:
                 return p
         return None
 
+    @staticmethod
+    def _audio_beside(lights_path, doc):
+        """The audio file beside a show. The score records a .wav, but any same-named
+        sibling works -- libsndfile decodes mp3/flac/ogg here -- so dropping a
+        <name>.mp3 next to the show plays with no conversion step."""
+        stem = os.path.splitext(os.path.basename(doc.get("wav") or doc.get("source") or ""))[0]
+        if not stem:
+            return None
+        d = os.path.dirname(lights_path)
+        for ext in (".wav", ".mp3", ".flac", ".ogg"):
+            cand = os.path.join(d, stem + ext)
+            if os.path.isfile(cand):
+                return cand
+        return None
+
     def audio_path(self, name):
         p = self.find(name)
         if not p:
             return None
         with open(p) as fh:
             doc = json.load(fh)
-        d = os.path.dirname(p)
-        for key in ("source", "wav"):
-            cand = doc.get(key)
-            if cand and os.path.isfile(os.path.join(d, os.path.basename(cand))):
-                return os.path.join(d, os.path.basename(cand))
-        return None
+        return self._audio_beside(p, doc)
 
     # ----- loading --------------------------------------------------------
     def load(self, name, force=False):
@@ -126,15 +137,15 @@ class State:
             full[:, : frames.shape[1]] = frames
             frames = full
         is_rig = frames.ndim == 2 and frames.shape[1] >= 41
-        wav = os.path.join(os.path.dirname(p), os.path.basename(doc.get("wav") or ""))
+        wav = self._audio_beside(p, doc)
         audio, audio_error = None, None
-        if self.audio_factory and doc.get("wav") and os.path.isfile(wav):
+        if self.audio_factory and wav:
             try:
                 audio = self.audio_factory(wav)
             except Exception as e:  # noqa: BLE001
                 audio_error = str(e)
-        elif doc.get("wav"):
-            audio_error = f"cached wav missing: {wav} (re-run analyze)"
+        elif doc.get("wav") or doc.get("source"):
+            audio_error = f"audio missing: {os.path.splitext(os.path.basename(doc.get('wav') or doc.get('source')))[0]}.[wav|mp3|flac|ogg] not beside the show"
         with self.lock:
             self.transport.load(frames, int(doc["fps"]), audio=audio,
                                 gain_mask=rig.intensity_mask(frames.shape[1]) if is_rig else None,
@@ -189,7 +200,7 @@ class State:
     def hub_list(self):
         """Raw hub listing for .score files: name (no extension), store version, mtime.
         The store `version` counts edits, so it tells you which revision you'd pull."""
-        with urllib.request.urlopen(HUB + "/hub/?json", timeout=8) as r:
+        with urllib.request.urlopen(HUB_SCORES + "/?json", timeout=8) as r:
             doc = json.load(r)
         out = []
         for p in doc.get("paths", []):
@@ -219,12 +230,32 @@ class State:
             pass
         return None
 
+    def _fetch_score_view(self, name):
+        """The score as the protocol format_v1 view: POST /hub/score with no
+        `fields` and no `window`, so nothing is filtered -- the whole song comes
+        back. Falls back to the raw .score when the hub is too old to answer the
+        protocol route (older deploys 405 it); bake reads either shape the same.
+        Returns (view_dict, how_string)."""
+        from urllib.error import HTTPError, URLError
+        req = urllib.request.Request(
+            HUB_SCORES, data=json.dumps({"score": name}).encode(),
+            headers={"Content-Type": "application/json"}, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=20) as r:
+                view = json.loads(r.read())
+            if isinstance(view, dict) and view.get("error"):
+                raise ValueError(view["error"])
+            return view, "protocol POST /hub/score (unfiltered)"
+        except (HTTPError, URLError, ValueError) as e:
+            with urllib.request.urlopen(HUB_SCORES + "/" + name + ".score", timeout=20) as r:
+                view = json.loads(r.read())
+            return view, f"raw .score fallback (protocol POST unavailable: {getattr(e, 'code', None) or e})"
+
     def import_score(self, name, seed=3):
-        """Pull a score from the hub and bake a .lights.json straight from it.
-        The hub serves the pipeline's raw score (its music intelligence: parts,
-        bars, releases); bake.js reads that directly via hubscore.fromHub, so there
-        is one protocol interpreter, not a parallel formatter. Then symlink local
-        audio if we have it, and load it -- everything the manual flow did."""
+        """Fetch a score through the protocol path (POST /hub/score, no filters)
+        and bake a .lights.json from it. Falls back to the raw .score if the hub
+        has no protocol endpoint yet; bake reads either shape identically. Then
+        symlink local audio if we have it, and load it."""
         name = os.path.basename(str(name)).replace(".score.json", "").replace(".score", "")
         if not name:
             self.import_log = "no score name"; return None
@@ -233,8 +264,9 @@ class State:
             ver = self.hub_version(name)   # which revision the hub holds right now
             scores = os.path.join(HERE, "scores"); os.makedirs(scores, exist_ok=True)
             raw = os.path.join(scores, name + ".score")
-            with urllib.request.urlopen(HUB + "/hub/" + name + ".score", timeout=20) as r:
-                open(raw, "wb").write(r.read())
+            view, via = self._fetch_score_view(name)
+            with open(raw, "w") as fh:
+                json.dump(view, fh)
             lights = os.path.join(self.dirs[0], name + ".lights.json")
             cmd = ["node", os.path.join(REPO, "readers/lights/bake.js"),
                    raw, str(seed), "--lights", lights]
@@ -259,7 +291,7 @@ class State:
                     pass
                 break
             vtag = f"v{ver}" if ver is not None else "v?"
-            self.import_log = f"imported {name} {vtag} (seed {seed})"
+            self.import_log = f"imported {name} {vtag} (seed {seed}) — {via}"
             meta = self.load(name + ".lights.json", force=True)
             if meta is not None:
                 meta["hub_version"] = ver
@@ -283,6 +315,7 @@ class State:
                    "paused_by_watchdog": getattr(self, "paused_by_watchdog", False),
                    "analyze_log": self.analyze_log, "audio_error": getattr(self, "audio_error", None),
                    "server_time": time.time(), "phase": self.phase_at(st["position"]),
+                   "dirs": self.dirs,   # where shows are scanned from, so a tool can write one here
                    "fixtures": rig.readout(vals) if len(vals) >= 41 else None})
         return st
 
@@ -375,7 +408,7 @@ def make_handler(state: State):
             if path == "/api/load":
                 try:
                     req = urllib.request.Request(
-                        HUB + "/hub/score",
+                        HUB_SCORES,
                         data=json.dumps(body).encode(),
                         headers={"Content-Type": "application/json"},
                         method="POST",
@@ -457,8 +490,8 @@ def main(argv=None):
     ap.add_argument("--port", type=int, default=8765)
     ap.add_argument("--no-net", action="store_true", help="start with output to the PAR disabled")
     ap.add_argument("--gain", type=float, default=1.0, help="initial brightness for PAR colours / head dimmer (0-1)")
-    ap.add_argument("--offset-ms", type=float, default=-240.0,
-                    help="light-vs-sound offset applied at start; -240 measured on this laptop+rig (lights 240 ms earlier)")
+    ap.add_argument("--offset-ms", type=float, default=0.0,
+                    help="light-vs-sound offset applied at start (default 0; e.g. -240 measured on this laptop+rig makes lights 240 ms earlier)")
     ap.add_argument("--gateway", default="2.0.0.100")
     ap.add_argument("--universe", type=int, default=rig.UNIVERSE)
     args = ap.parse_args(argv)

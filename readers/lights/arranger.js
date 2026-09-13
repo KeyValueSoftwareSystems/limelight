@@ -361,6 +361,7 @@ function plan(scoreIn, enumResult, seed) {
   /* the finer structure */
   const subs = Mu.subsectionsOf(score);
   const moments = Mu.momentsOf(score);
+  const signals = Mu.signalsOf(score);
   const lanes = lanesBlock(score);
   const harmony = harmonyBlock(score);
   const keyHue = harmony && harmony.key ? harmony.key.hue : null;
@@ -408,7 +409,8 @@ function plan(scoreIn, enumResult, seed) {
   const rawLanes = Mu.lanesOf(score);
   const sectionK = sections.map(() => 1);
   if (lanes && rawLanes && Array.isArray(rawLanes.pace)) {
-    const paceAt = Mu.perBar(rawLanes.from_bar, rawLanes.pace);
+    const paceRaw = Mu.perBar(rawLanes.from_bar, rawLanes.pace);
+    const paceAt = bar => { const v = paceRaw(bar); return (typeof v === "number" && v > 0) ? v : null; };   /* 0.0 = nothing detected */
     const subdiv = rawLanes.pace.map(() => 1);
     const fill = (fromBar, toBar, k) => {
       for (let b = fromBar; b < toBar; b++) { const i = b - lanes.from_bar; if (i >= 0 && i < subdiv.length) subdiv[i] = k; }
@@ -419,6 +421,18 @@ function plan(scoreIn, enumResult, seed) {
       for (const su of subsIn(sec))
         fill(barOf(su.f), barOf(su.t), subdivFor(meanOver(paceAt, barOf(su.f), barOf(su.t)), contexts[i]));
     });
+    /* a `change` signal (double time / half time) STEPS the rate from its bar to
+       the end of its section, or to the next change -- the music did, so the rig does */
+    for (const sg of signals) {
+      if (sg.kind !== "change" || typeof sg.what !== "string" || (typeof sg.sure === "number" && sg.sure < 0.5)) continue;
+      const k = /double/i.test(sg.what) ? 2 : /half/i.test(sg.what) ? 0.5 : null;
+      if (!k) continue;
+      const sec = sections.find(x => x.from.bar <= sg.bar && sg.bar < x.to.bar);
+      if (!sec) continue;
+      const next = signals.filter(o => o.kind === "change" && o.bar > sg.bar && o.bar < sec.to.bar).map(o => o.bar);
+      const end = next.length ? Math.min(...next) : sec.to.bar;
+      for (let b = sg.bar; b < end; b++) { const i = b - lanes.from_bar; if (i >= 0 && i < subdiv.length) subdiv[i] = Math.max(0.25, Math.min(4, subdiv[i] * k)); }
+    }
     lanes.subdiv = subdiv;
   }
 
@@ -561,14 +575,19 @@ function plan(scoreIn, enumResult, seed) {
      span) is drawn among the oneshot candidates. When the cache offers none (an
      older cache, an unknown kind) the fixed effects below still fire. */
   const FX_PRIORITY = { white_blast: 9, blackout: 9, pause: 8, hook: 7, accent_strobe: 5, modulate: 4, whiten: 3 };
+  const riffMemory = {};   /* a returning riff is lit the way it was lit the first time */
   const drawOneShots = (m, w, B, len) => {
     const bar = facts && facts.vectors[m.bar - facts.from_bar];
     const vector = { ...(bar || { form: ctxAt(B) }), moment: [m.kind, weightBand(w)] };
     if (!vector.form) return [];
     const shots = V.candidates(vector).filter(c => { const q = V.seq(c.id); return q && q.kind === "oneshot" && q.gesture && q.gesture.fx; });
     const out = [];
+    const riffKey = m.kind === "hook" && m.what ? "hook:" + m.what : null;
+    const remembered = riffKey && riffMemory[riffKey];
+    const chosen = {};
     for (const slot of ["before", "on", "span"]) {
-      const pick = pickWeighted(shots.filter(c => (V.seq(c.id).gesture.slot || "on") === slot), rng);
+      const pool = shots.filter(c => (V.seq(c.id).gesture.slot || "on") === slot);
+      const pick = (remembered && remembered[slot] && pool.some(c => c.id === remembered[slot])) ? { id: remembered[slot] } : pickWeighted(pool, rng);
       if (!pick) continue;
       const q = V.seq(pick.id), g = q.gesture;
       const dur = slot === "span" ? (len || q.duration_beats || bpb) : (q.duration_beats || 1);
@@ -577,12 +596,28 @@ function plan(scoreIn, enumResult, seed) {
       if (g.fx === "pause") params.still = m.still || [];
       if (g.fx === "whiten" && params.amount == null) params.amount = +clamp01(0.2 + 0.5 * w).toFixed(3);
       if (g.fx === "accent_strobe") params.strength = +clamp01(0.4 + 0.6 * w).toFixed(3);
+      chosen[slot] = pick.id;
       out.push({ from: fromBeat(start), to: fromBeat(start + dur), context: ctxAt(B), layer: g.fx === "modulate" ? "modulate" : "fx",
         priority: FX_PRIORITY[g.fx] || 6, type: g.fx, seq_id: pick.id, params, occupies: q.occupies || [],
         section: sectionAt(B), moment: m.kind, what: m.what, facts: vector });
     }
+    if (riffKey && out.length && !remembered) riffMemory[riffKey] = chosen;
     return out;
   };
+  /* returning riffs the signals name (again_of) join the moments, unless a moment
+     already sits on that bar and beat; a rise signal becomes a RAMP that arrives at
+     full exactly for_beats later -- frame grows level, motion and whiteness along it */
+  const has = (b, bt, k) => moments.some(m => m.bar === b && m.beat === bt && m.kind === k);
+  for (const sg of signals) {
+    if (sg.kind === "hook" && typeof sg.again_of === "number" && !has(sg.bar, sg.beat, "hook")) moments.push(sg);
+    if (sg.kind === "rise" && (typeof sg.weight !== "number" || sg.weight >= 0.2)) {
+      const B = atBeat({ bar: sg.bar, beat: sg.beat });
+      const len = typeof sg.for_beats === "number" && sg.for_beats > 0 ? sg.for_beats : 2 * bpb;
+      assignments.push({ from: fromBeat(B), to: fromBeat(B + len), context: ctxAt(B), layer: "modulate", priority: 4, type: "ramp",
+        params: { weight: typeof sg.weight === "number" ? clamp01(sg.weight) : 0.5 }, occupies: [], section: sectionAt(B), signal: "rise", what: sg.what });
+    }
+  }
+  moments.sort((a, b) => (a.bar - b.bar) || (a.beat - b.beat));
   for (const m of moments) {
     const w = typeof m.weight === "number" ? clamp01(m.weight) : 0.5;
     const B = atBeat({ bar: m.bar, beat: m.beat });

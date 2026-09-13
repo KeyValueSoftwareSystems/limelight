@@ -105,6 +105,20 @@ const FMT = format(JSON.parse(JSON.stringify(RAW)));
   ok("no tension -> null", M.tensionOf({ grid: RAW.grid }) === null);
 }
 
+
+/* ---- signals: the pipeline's other events (rise, change, hook again_of) ------- */
+{
+  const MS = require("./fixtures/mini_raw.js").RAW();
+  MS.signals = [{ bar: 1, beat: 1, is: "rise", what: "a sweep", sure: 0.8, for_beats: 12, weight: 0.6 },
+                { bar: 8, beat: 1, is: "change", what: "double time", sure: 1, weight: 0.5 },
+                { bar: 14, beat: 1, is: "hook", what: "the riff", again_of: 6, sure: 0.9, for_beats: 4, weight: 0.6 }];
+  const a = M.signalsOf(MS), b = M.signalsOf(format(JSON.parse(JSON.stringify(MS))));
+  ok("signals read from either shape identically", JSON.stringify(a) === JSON.stringify(b) && a.length === 3);
+  ok("a rise keeps its length and weight", a[0].kind === "rise" && a[0].for_beats === 12 && a[0].weight === 0.6);
+  ok("a returning hook keeps again_of", a[2].kind === "hook" && a[2].again_of === 6 && a[2].what === "the riff");
+  ok("no signals -> empty list", M.signalsOf({}).length === 0);
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

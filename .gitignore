@@ -62,3 +62,6 @@ work/sep-test/
 /docs
 .venv
 /tools
+# the effect picker (readers/lights/play.js) renders here for the panel to play
+readers/lights/panel/preview.lights.json
+readers/lights/panel/preview.frames.json
