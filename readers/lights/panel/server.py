@@ -209,9 +209,10 @@ class State:
             self._effects = json.loads(res.stdout)
         return self._effects
 
-    def play_effect(self, ident, bpm=128, bars=8):
-        """Render one effect for a few bars into the first scan folder, load it into
-        the transport and play from the top. Returns the effect row played."""
+    def play_effect(self, ident, bpm=128, bars=8, loops=4):
+        """Render one effect for a few bars and put its frames on the wire: straight
+        into the transport with NO audio and no song -- looped a few times, ending
+        dark. The transport is the sole Art-Net sender, so this is the wire path."""
         ident = str(ident).strip()
         if not ident:
             raise ValueError("no effect")
@@ -221,12 +222,25 @@ class State:
         res = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
         if res.returncode != 0 or "rendered" not in res.stdout:
             raise RuntimeError((res.stderr or res.stdout)[-300:] or "render failed")
-        meta = self.load("preview.lights.json", force=True)
-        if meta is None:
-            raise RuntimeError("rendered but preview.lights.json was not found in " + self.dirs[0])
-        self.transport.play(0.0)
+        with open(os.path.join(self.dirs[0], "preview.lights.json")) as fh:
+            doc = json.load(fh)
+        one = np.asarray(doc["frames"], dtype=np.uint8)
+        fps = int(doc["fps"])
+        frames = np.concatenate([np.tile(one, (max(1, int(loops)), 1)),
+                                 np.asarray([park_frame()], dtype=np.uint8)])   # end dark, head parked
         row = next((e for e in self.effects() if e["id"] == ident or str(e["n"]) == ident), None)
-        return {"effect": row or {"id": ident}, "log": res.stdout.strip().splitlines()[-1]}
+        name = "effect: " + (row["id"] if row else ident)
+        with self.lock:
+            self.transport.load(frames, fps, audio=None,
+                                gain_mask=rig.intensity_mask(frames.shape[1]), park=park_frame())
+            self.audio_error = None
+            self.track = "preview.lights.json"
+            self.version += 1
+            self.meta = {"name": self.track, "title": name, "source": None, "style": "effect",
+                         "fps": fps, "duration": len(frames) / fps, "tempo": doc.get("tempo"),
+                         "beats": [], "downbeats": [], "sections": [], "phases": [], "hub_version": None}
+        self.transport.play(0.0)
+        return {"effect": row or {"id": ident}, "log": f"{len(one)} frames x {loops}, no audio"}
 
     def hub_list(self):
         """Raw hub listing for .score files: name (no extension), store version, mtime.

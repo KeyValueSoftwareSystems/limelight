@@ -102,7 +102,7 @@ function render(s) {
   fs.mkdirSync(outDir, { recursive: true });
   const lights = path.join(outDir, "preview.lights.json"), framesOut = path.join(outDir, "preview.frames.json");
   fs.writeFileSync(lights, JSON.stringify({ rig: layout.rig || "arc4-head", style: "limelight", fps, duration: +dur.toFixed(3), tempo: bpm,
-    source: "preview.wav", wav: "preview.wav", beats, downbeats, sections: [0], phases: [{ start: 0, end: +dur.toFixed(3), phase: "preview" }],
+    source: null, wav: null, beats, downbeats, sections: [0], phases: [{ start: 0, end: +dur.toFixed(3), phase: "preview" }],   /* an effect has no song: never attach audio */
     looks: [{ start: 0, end: +dur.toFixed(3), seq_id: s.id, layer: s.kind }], moments: [], frames }));
   fs.writeFileSync(framesOut, JSON.stringify({ score: "preview:" + s.id, seed: 0, fps, from: 0, to: +dur.toFixed(3), duration: +dur.toFixed(3),
     beats, downbeats, phases: [], fixtures: (layout.fixtures || []).map(f => ({ id: f.id, type: f.type, address: f.address, universe: f.universe })), ticks }));
