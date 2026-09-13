@@ -17,7 +17,7 @@ const { Session } = require("./session.js");
    without anything reporting a fault. */
 function scoreFile() {
   const built = path.join(__dirname, "..", "scores", "levels.score");
-  return fs.existsSync(built) ? built : path.join(__dirname, "levels.score");
+  return built;
 }
 
 

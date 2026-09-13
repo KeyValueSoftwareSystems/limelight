@@ -57,8 +57,6 @@ work/sep-test/
 # which the panel writes on every hub import.
 *.score
 *.score.json
-# except the fixture cli/remote.test.js reads to check bytes survive a round trip.
-!protocol/levels.score
 /docs
 .venv
 /tools

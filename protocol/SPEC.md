@@ -441,13 +441,25 @@ ten of them, noisy on nine, width on eight, brightness on six -- on Levels
 brightness scores 0.92, which is below the point where it means anything.
 
 This was measured, not assumed, and it changed what we know about fields that
-had already shipped. floor and weight correlate at 0.90 across the library,
-close enough to the 0.93 that retired an earlier candidate for being one
-measurement wearing two names. Taking the part of floor that weight cannot
-predict and testing that on its own, it still carries section structure on
-eighteen of twenty-eight songs -- 3.62 on Wetwork, 2.56 on Don't Look Down -- so
-floor stays. On the other ten it is weight plus noise, and `tells` is how a
-reader finds out which song it is holding.
+had already shipped. floor and weight are the closest pair in the whole file:
+every per-bar lane was crossed with every other and they lead at mean |r| 0.86,
+reaching 0.9 or more on fourteen of twenty-eight songs and 0.99 at worst. That
+is past the 0.93 that retired an earlier candidate for being one measurement
+wearing two names. Taking the part of floor that weight cannot predict and
+testing that on its own, it still carries section structure on sixteen of
+twenty-eight songs -- 4.15 on The Feeling, 3.53 on The War Cry, 2.24 on Don't
+Look Down -- so floor stays. On the other twelve it is weight plus noise, and
+`tells` is how a reader finds out which song it is holding.
+
+That count was eighteen when it was first measured and is sixteen now; Levels at
+1.26 and Killers From The Northside at 1.23 slipped just under the 1.3 line when
+the per-bar lanes moved onto tempo-aware bar edges. The conclusion did not
+change but the number did, which is the reason to re-run a claim rather than
+quote it.
+
+The second-closest pair is drums against intensity at 0.66 mean, which is not
+redundancy: it is a loud song having loud drums. Nothing else in the file comes
+near.
 
 `sections[].mood` is where a section sits on a handful of opposed axes -- calm
 against aggressive, happy against sad, warm against cold -- read by MuQ-MuLan,
