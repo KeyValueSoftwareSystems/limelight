@@ -1,0 +1,312 @@
+{
+ "score": "levels",
+ "seed": 1,
+ "bar_shift": -1,
+ "bpm": 128.01,
+ "cues": [
+  {
+   "i": 0,
+   "role": "intro",
+   "from_s": 0.0,
+   "to_s": 19.86,
+   "from_bar": 0,
+   "to_bar": 9,
+   "nth": 1,
+   "like": "A",
+   "intensity": 0.373,
+   "par": "comet_chase",
+   "head": "sweep_locked",
+   "events": [
+    "pre_drop_blackout"
+   ],
+   "params": {
+    "palette": "gold"
+   },
+   "breaks": [],
+   "moments": [],
+   "note": "the riff alone: a gold comet along the arc, the head's spot following it on the wall"
+  },
+  {
+   "i": 1,
+   "role": "drop",
+   "from_s": 19.86,
+   "to_s": 49.857,
+   "from_bar": 9,
+   "to_bar": 25,
+   "nth": 1,
+   "like": "B",
+   "intensity": 0.55,
+   "par": "ripple_hits",
+   "head": "room_patterns",
+   "events": [
+    "break_blackout",
+    "strobe_pops",
+    "drop_hit"
+   ],
+   "params": {
+    "palette": "chord"
+   },
+   "breaks": [
+    [
+     32.984,
+     34.859,
+     true
+    ]
+   ],
+   "moments": [
+    "entrance"
+   ],
+   "note": "drop 1, the smallest: every beat ripples across the four lamps (blue/pink by chord), room-wide head patterns changing every bar, pops on downbeats only"
+  },
+  {
+   "i": 2,
+   "role": "build",
+   "from_s": 49.857,
+   "to_s": 64.856,
+   "from_bar": 25,
+   "to_bar": 33,
+   "nth": 1,
+   "like": "A",
+   "intensity": 0.388,
+   "par": "riff_build",
+   "head": "spiral_rise",
+   "events": [
+    "strobe_accelerate",
+    "pre_drop_blackout"
+   ],
+   "params": {
+    "palette": "gold"
+   },
+   "breaks": [],
+   "moments": [
+    "hook"
+   ],
+   "note": "the riff without drums: chase accelerating to 16ths, second comet joins, spiral climbing, strobe in the last two bars, blackout beat"
+  },
+  {
+   "i": 3,
+   "role": "drop",
+   "from_s": 64.856,
+   "to_s": 89.229,
+   "from_bar": 33,
+   "to_bar": 46,
+   "nth": 2,
+   "like": "B",
+   "intensity": 0.8,
+   "par": "ripple_hits",
+   "head": "figure8",
+   "events": [
+    "break_blackout",
+    "strobe_pops",
+    "drop_hit"
+   ],
+   "params": {
+    "palette": "chord"
+   },
+   "breaks": [
+    [
+     77.98,
+     79.855,
+     true
+    ],
+    [
+     87.354,
+     89.229,
+     false
+    ]
+   ],
+   "moments": [
+    "release"
+   ],
+   "note": "drop 2: the same ripple recognised, bigger: inner/outer in two chord colours, off-beat ghosts, pops on beats 1 and 3, prism, the head in a fast figure-8, dropout bar goes black then bursts"
+  },
+  {
+   "i": 4,
+   "role": "breakdown",
+   "from_s": 89.229,
+   "to_s": 98.604,
+   "from_bar": 46,
+   "to_bar": 51,
+   "nth": 2,
+   "like": "A",
+   "intensity": 0.418,
+   "par": "half_kit_taps",
+   "head": "spot_per_bar",
+   "events": [],
+   "params": {
+    "palette": "gold"
+   },
+   "breaks": [],
+   "moments": [
+    "hook"
+   ],
+   "note": "half a kit under the riff: soft taps per beat, gold comet, head jumping to a new spot each bar"
+  },
+  {
+   "i": 5,
+   "role": "verse",
+   "from_s": 98.604,
+   "to_s": 132.351,
+   "from_bar": 51,
+   "to_bar": 69,
+   "nth": 1,
+   "like": "C",
+   "intensity": 0.417,
+   "par": "vocal_swell",
+   "head": "spotlight",
+   "events": [
+    "pause_hold"
+   ],
+   "params": {
+    "palette": "warm"
+   },
+   "breaks": [],
+   "moments": [
+    "pause"
+   ],
+   "note": "the pause: one lamp breathing deep blue; then the vocal swells the inner pair in warm colours under a warm open spot, outer pair breathing blue"
+  },
+  {
+   "i": 6,
+   "role": "breakdown",
+   "from_s": 132.351,
+   "to_s": 149.225,
+   "from_bar": 69,
+   "to_bar": 78,
+   "nth": 3,
+   "like": "D",
+   "intensity": 0.41,
+   "par": "glide_gradient",
+   "head": "roam_slow",
+   "events": [],
+   "params": {
+    "palette": "cool"
+   },
+   "breaks": [],
+   "moments": [
+    "hook"
+   ],
+   "note": "chords in, voice out: a blue/pink gradient sliding along the arc, everything gliding, head roaming slowly"
+  },
+  {
+   "i": 7,
+   "role": "bridge",
+   "from_s": 149.225,
+   "to_s": 166.098,
+   "from_bar": 78,
+   "to_bar": 87,
+   "nth": 1,
+   "like": "A",
+   "intensity": 0.618,
+   "par": "bass_pump",
+   "head": "sweep_locked",
+   "events": [],
+   "params": {
+    "palette": "chord"
+   },
+   "breaks": [],
+   "moments": [],
+   "note": "the bridge: outer pair ducking on every beat and swelling back, inner pair running a 16th-note hat chase, head locked to it"
+  },
+  {
+   "i": 8,
+   "role": "breakdown",
+   "from_s": 166.098,
+   "to_s": 179.222,
+   "from_bar": 87,
+   "to_bar": 94,
+   "nth": 4,
+   "like": "E",
+   "intensity": 0.413,
+   "par": "brightness_follow",
+   "head": "head_bloom",
+   "events": [],
+   "params": {
+    "palette": "cool"
+   },
+   "breaks": [],
+   "moments": [],
+   "note": "the filter sweep: dark saturated colour blooming to white as the filter opens, head climbing from the wall to the ceiling with it"
+  },
+  {
+   "i": 9,
+   "role": "build",
+   "from_s": 179.222,
+   "to_s": 192.346,
+   "from_bar": 94,
+   "to_bar": 101,
+   "nth": 5,
+   "like": "A",
+   "intensity": 0.414,
+   "par": "riff_build",
+   "head": "spiral_rise",
+   "events": [
+    "strobe_accelerate",
+    "pre_drop_blackout"
+   ],
+   "params": {
+    "palette": "gold"
+   },
+   "breaks": [],
+   "moments": [
+    "hook"
+   ],
+   "note": "the riff returns (bar 3's hook): the same accelerating build as before, into the blackout"
+  },
+  {
+   "i": 10,
+   "role": "drop",
+   "from_s": 192.346,
+   "to_s": 229.843,
+   "from_bar": 101,
+   "to_bar": 121,
+   "nth": 3,
+   "like": "B",
+   "intensity": 1.0,
+   "par": "full_rig_hits",
+   "head": "room_patterns",
+   "events": [
+    "break_blackout",
+    "strobe_pops",
+    "wheel_spin_tail",
+    "white_finale",
+    "drop_hit"
+   ],
+   "params": {
+    "palette": "chord"
+   },
+   "breaks": [
+    [
+     205.47,
+     207.345,
+     true
+    ]
+   ],
+   "moments": [
+    "release"
+   ],
+   "note": "the final drop: all four lamps every beat in two chord colours, white downbeats, pops on 1 and 3 with the head popping too, dropout bar, wheel spin for four bars, white-strobe finale"
+  },
+  {
+   "i": 11,
+   "role": "outro",
+   "from_s": 229.843,
+   "to_s": 237.145,
+   "from_bar": 121,
+   "to_bar": 125,
+   "nth": 1,
+   "like": "A",
+   "intensity": 0.357,
+   "par": "fade_collapse",
+   "head": "park_fade",
+   "events": [],
+   "params": {
+    "palette": "cool"
+   },
+   "breaks": [],
+   "moments": [],
+   "note": "collapse inward to deep blue and dark; head drifts home"
+  }
+ ],
+ "note": "Avicii - Levels, curated from the arranger's seed-1 draft on 2026-09-13. Edit par/head/params/intensity per cue and re-render with score_show.py --plan."
+}
