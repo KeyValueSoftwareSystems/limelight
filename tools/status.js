@@ -90,9 +90,12 @@ item("a returning section reuses its earlier look", () => {
     if (s && s.repeat) (byRepeat[s.repeat] = byRepeat[s.repeat] || []).push(a.seq_id);
   }
   const groups = Object.entries(byRepeat).filter(([, v]) => v.length > 1);
+  /* Report how close it is rather than pass/fail only: going from five looks
+     for one label to two is most of the distance, and a flat "no" hides that. */
   const same = groups.filter(([, v]) => new Set(v).size === 1);
+  const spread = groups.map(([k, v]) => `${k}: ${new Set(v).size} look(s) across ${v.length} sections`);
   return { ok: groups.length > 0 && same.length === groups.length,
-           detail: groups.map(([k, v]) => `${k}: ${v.join(" / ")}`).join("   ") || "no repeats in this score" };
+           detail: spread.join("   ") || "no repeats in this score" };
 }, "the score says these are the same material; an audience learns a show by recognising it");
 
 /* ---- 4. does anything downstream read pace or signals? ----------------- */
