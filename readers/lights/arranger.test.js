@@ -189,7 +189,8 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   const bare = plan(SCORE, EN, 1), bare2 = plan(SCORE, EN, 2);
   ok("without harmony the hue is still seeded (today's behaviour)",
      bare.assignments.find(a => a.layer === "par").params.hue !== bare2.assignments.find(a => a.layer === "par").params.hue);
-  ok("a score without lanes or chords has no lanes/harmony block", !bare.lanes && !bare.harmony);
+  ok("a score without lanes or chords has no texture lanes or harmony (only growth from its rise)",
+     !bare.harmony && (!bare.lanes || Object.keys(bare.lanes).every(k => k === "from_bar" || k === "grow")));
 }
 
 /* ---- the raw score and its format_v1 view plan identically ------------------ */
@@ -376,6 +377,48 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   ok("one-shots do not move the section picks (same seed, same looks)",
      JSON.stringify(p.assignments.filter(a => a.layer === "par" || a.layer === "head").map(a => a.seq_id)) === JSON.stringify(old.assignments.filter(a => a.layer === "par" || a.layer === "head").map(a => a.seq_id)));
   ok("still no clashes", clashes(p) === 0);
+}
+
+
+/* ---- memory: repeated material gets its look back ------------------------------ */
+{
+  const R = {
+    grid: { bpm: 120, first_beat_s: 0, beats_per_bar: 4, bars: 24 },
+    sections: [
+      { from: { bar: 1, beat: 1 }, to: { bar: 5, beat: 1 }, name: "verse", like: "A" },
+      { from: { bar: 5, beat: 1 }, to: { bar: 9, beat: 1 }, name: "drop", like: "B", repeat: "B" },
+      { from: { bar: 9, beat: 1 }, to: { bar: 13, beat: 1 }, name: "verse", like: "A", repeat: "A" },
+      { from: { bar: 13, beat: 1 }, to: { bar: 17, beat: 1 }, name: "drop", like: "B", repeat: "B" },
+      { from: { bar: 17, beat: 1 }, to: { bar: 21, beat: 1 }, name: "bridge", like: "C" },
+      { from: { bar: 21, beat: 1 }, to: { bar: 25, beat: 1 }, name: "drop", like: "B", repeat: "B" },
+    ],
+    energy: { per: "bar", from_bar: 1, values: [0.3, 0.3, 0.3, 0.3, 0.9, 0.9, 0.9, 0.9, 0.3, 0.3, 0.3, 0.3, 0.9, 0.9, 0.9, 0.9, 0.4, 0.4, 0.4, 0.4, 0.95, 0.95, 0.95, 0.95] },
+  };
+  const p = plan(R, EN, 5);
+  const look = (bar, layer) => p.assignments.find(a => a.layer === layer && a.seq_id && a.from.bar === bar);
+  ok("the second drop wears the first drop's PAR look", look(13, "par").seq_id === look(5, "par").seq_id, `${look(5, "par").seq_id} vs ${look(13, "par").seq_id}`);
+  ok("and the same head look", look(13, "head").seq_id === look(5, "head").seq_id);
+  ok("the final drop keeps the drop's look too (bolder dynamics, same pattern)", look(21, "par").seq_id === look(5, "par").seq_id && look(21, "par").params.intensity >= look(5, "par").params.intensity);
+  ok("the returning verse wears the first verse's look", look(9, "par").seq_id === look(1, "par").seq_id);
+  ok("the bridge, new material, is its own draw (memory keyed by the score's like label)", look(17, "par").facts.form && look(17, "par").remembered === undefined);
+  ok("a repeat says so", look(13, "par").remembered === "B");
+  ok("memory is deterministic", JSON.stringify(plan(R, EN, 5)) === JSON.stringify(p));
+  const LEVELS = require("./fromscore.js").load();
+  const FULL = enumerate(require("./arc4-head.layout.json"), { palette: require("./arc4-head.palette.json") });
+  const q = plan(LEVELS, FULL, 3);
+  const drops = LEVELS.sections.filter(s => s.name === "drop");
+  const dropLooks = new Set(drops.map(d => q.assignments.find(a => a.layer === "par" && a.seq_id && !a.variation && a.from.bar === d.from.bar).seq_id));
+  ok("levels: the three drops share one base PAR look", dropLooks.size === 1, [...dropLooks].join(","));
+}
+
+/* ---- growth: a section rises across itself; tension rides per beat --------------- */
+{
+  const p = plan(MINI, EN, 42);
+  ok("the plan carries the per-beat tension, normalised", p.tension && p.tension.from_bar === 0 && p.tension.values.length === 80 && p.tension.values.every(v => v === null || (v >= 0 && v <= 1)));
+  ok("a rising section grows: its grow lane climbs from start to end", p.lanes.grow && p.lanes.grow[4] < p.lanes.grow[15], `${p.lanes.grow[4]} -> ${p.lanes.grow[15]}`);
+  ok("a falling section (outro, rise -0.3) sinks", p.lanes.grow[16] > p.lanes.grow[19]);
+  ok("a flat section sits at the middle", p.lanes.grow[0] === 0.5 && p.lanes.grow[3] === 0.5);
+  ok("format_v1 carries the same tension and growth", JSON.stringify(plan(format(require("./fixtures/mini_raw.js").RAW()), EN, 42)) === JSON.stringify(p));
 }
 
 for (const [pass, name, detail] of out)
