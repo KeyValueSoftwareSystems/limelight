@@ -49,7 +49,11 @@ const FIT_FLOOR = 0.35;   // a cell (fit x affinity) below this scores 0 but is 
    0..1), affinity (does it SUIT each context, 0..1), and boldness. */
 const VOCABULARY = [
   { id: "pair_call_response", kind: "individual", boldness: "accent",
+    description: "The inner pair and the outer pair trade every beat, hot magenta answering cyan.",
     occupies: ["pars:colour", "pars:level"],
+    gesture: { pattern: "inner_outer_alternation", group: "all_pars", keys: [
+      { at: 0, target: "inner", intent: { colour: [1, 0.1, 0.5], level: 1 } }, { at: 0, target: "outer", intent: { level: 0 } },
+      { at: 1, target: "inner", intent: { level: 0 } }, { at: 1, target: "outer", intent: { colour: [0.1, 0.7, 1], level: 1 } } ] },
     requires: g => g.inner.length >= 1 && g.outer.length >= 1,
     fit: g => {
       const n = g.inner.length + g.outer.length;
@@ -64,7 +68,10 @@ const VOCABULARY = [
                 texture: { busy: 0.8, narrow: 0.7, sparse: 0.4 } } },
 
   { id: "travelling_pulse", kind: "individual", boldness: "accent",
+    description: "A warm pulse walks along the line one lamp per beat, bounces at the ends and trails a tail.",
     occupies: ["pars:colour", "pars:level"],
+    gesture: { group: "arc", direction: "bounce", stagger: 1, repeat: "loop", keys: [
+      { at: 0, intent: { colour: [1, 0.75, 0.35], level: 1 } }, { at: 1, intent: { level: 0.45 } } ] },
     requires: g => g.pars.length >= 3,
     /* a chase reads better the more lamps it walks across; on only 4 it is modest */
     fit: g => (g.pars.length >= 3 ? clamp01(0.3 + 0.1 * g.pars.length) : 0),
@@ -73,7 +80,9 @@ const VOCABULARY = [
                 texture: { wide: 0.8, sparse: 0.6 } } },
 
   { id: "strobe_pops", kind: "individual", boldness: "accent",
+    description: "Every strobing lamp pops white at a fast fixture strobe.",
     occupies: ["pars:strobe"],
+    gesture: { group: "strobers", keys: [{ at: 0, intent: { colour: [1, 1, 1], level: 1, strobe: 0.7 } }] },
     requires: g => g.strobers.length >= 1,
     fit: g => (g.strobers.length >= 1 ? 0.8 : 0),
     affinity: { form: { intro: 0, verse: 0.2, break: 0.4, build: 0.7, drop: 0.8, outro: 0, silence: 0, final_drop: 0.85 },
@@ -82,7 +91,10 @@ const VOCABULARY = [
                 texture: { busy: 0.9, sparse: 0.2 } } },
 
   { id: "head_sweep", kind: "individual", boldness: "hero",
+    description: "The head sweeps the whole room end to end in white, level, and back.",
     occupies: ["head:move"],
+    gesture: { group: "head", repeat: "loop", keys: [
+      { at: 0, intent: { pan: 0.05, tilt: 0.5, colour: "white", level: 0.9 } }, { at: 4, intent: { pan: 0.95 } }, { at: 8, intent: { pan: 0.05 } } ] },
     requires: g => g.movers.length >= 1,
     fit: g => (g.movers.length >= 1 ? 0.9 : 0),
     affinity: { form: { intro: 0, verse: 0.4, break: 0.3, build: 0.7, drop: 0.9, outro: 0, silence: 0, final_drop: 0.9 },
@@ -90,7 +102,9 @@ const VOCABULARY = [
                 presence: { "vocals:in": 0.5 } } },
 
   { id: "breathe", kind: "individual", boldness: "ambient",
+    description: "All lamps breathe a warm amber wash once a bar.",
     occupies: ["pars:level"],
+    gesture: { group: "all_pars", keys: [{ at: 0, intent: { colour: [1, 0.7, 0.4], level: 0.7 } }] },
     requires: g => g.pars.length >= 1,
     fit: g => (g.pars.length >= 1 ? 0.8 : 0),
     affinity: { form: { intro: 0.85, verse: 0.2, break: 0.5, build: 0, drop: 0, outro: 0.85, silence: 0.55, final_drop: 0 },
@@ -101,7 +115,12 @@ const VOCABULARY = [
   /* compound: a scripted arc within one span -- whitening into accelerating pops,
      ending dark before the drop. */
   { id: "build_ramp", kind: "compound", boldness: "accent",
+    description: "Amber whitens and climbs over the first part of the span, then white strobe pops take over.",
     steps: [{ at: 0, seq: "breathe" }, { at: 0.4, seq: "strobe_pops" }],
+    gesture: { steps: [
+      { at: 0, gesture: { group: "all_pars", repeat: "once", keys: [
+        { at: 0, intent: { colour: [1, 0.6, 0.15], level: 0.4 } }, { at: 4, intent: { colour: [1, 1, 1], level: 1 } } ] } },
+      { at: 0.4, gesture: { group: "strobers", keys: [{ at: 0, intent: { colour: [1, 1, 1], level: 1, strobe: 0.7 } }] } } ] },
     occupies: ["pars:colour", "pars:level", "pars:strobe"],
     requires: g => g.pars.length >= 2 && g.strobers.length >= 1,
     fit: g => clamp01(0.5 + 0.1 * g.pars.length),
@@ -111,6 +130,7 @@ const VOCABULARY = [
   /* combination: several sequences layered concurrently, pre-vetted for taste. Its
      parts must not claim the same fixture-attribute (checked at enumeration). */
   { id: "drop_combo_A", kind: "combination", boldness: "hero",
+    description: "The pairs trade magenta and cyan under strobe pops while the head sweeps the room.",
     parts: [{ seq: "pair_call_response" }, { seq: "head_sweep" }, { seq: "strobe_pops" }],
     requires: g => g.inner.length >= 1 && g.outer.length >= 1 &&
       g.movers.length >= 1 && g.strobers.length >= 1,
@@ -168,6 +188,19 @@ const VOCABULARY = [
 ];
 
 const byIdVocab = id => VOCABULARY.find(v => v.id === id);
+/* a combination's gesture is its parts' gestures, layered (frame.js merges them per lamp) */
+for (const s of VOCABULARY) if (s.kind === "combination" && !s.gesture && Array.isArray(s.parts))
+  s.gesture = { parts: s.parts.map(p => { const q = byIdVocab(p.seq); return q && q.gesture ? q.gesture : null; }).filter(Boolean) };
+
+/* the base looks as a renderer library ({ id -> sequence with its gesture }): the
+   palette never carried them, so bake/play rendered them as a plain white wash --
+   travelling_pulse never travelled. Merge under the LLM palette: library = { ...palette, ...baseLibrary() }. */
+function baseLibrary() {
+  const lib = {};
+  for (const s of VOCABULARY) if (s.gesture && s.kind !== "oneshot")
+    lib[s.id] = { id: s.id, kind: s.kind, boldness: s.boldness, description: s.description || "", occupies: s.occupies || [], gesture: s.gesture };
+  return lib;
+}
 const seqFit = (id, g) => { const s = byIdVocab(id); return s && s.fit ? s.fit(g) : 0; };
 /* a combination's effective occupancy = the union of its parts' claims */
 const comboOccupies = s => {
@@ -374,7 +407,7 @@ function view(result) {
   };
 }
 
-module.exports = { enumerate, view, validateSequence, validateAffinity, affinityOf, layoutFacts, groupsOf,
+module.exports = { enumerate, view, validateSequence, validateAffinity, affinityOf, layoutFacts, groupsOf, baseLibrary,
                    VOCABULARY, CONTEXTS, FIT_FLOOR, BUDGETS, FACTS };
 
 /* ---- CLI: enumerate a layout, print the taste report, cache the matrix ---

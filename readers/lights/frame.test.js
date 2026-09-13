@@ -383,14 +383,14 @@ const P = (extra, more) => ({ grid: { beats_per_bar: 4 }, assignments: [base(), 
     mx = Math.max(mx, Math.abs(z.pan - a.pan) + Math.abs(z.tilt - a.tilt)); } return mx; };
   ok("a beat-scale gesture at full motion never asks for more than half the travel per beat", perBeat("fast", 1.0) <= 0.5 + 0.13, `${perBeat("fast", 1.0).toFixed(3)} (tilt kick allowed)`);
   ok("the fast gesture still reaches most of the room", sweep("fast", 1.0, 16).pan >= 0.7);
-  /* an axis the gesture holds still (a pan-only sweep) still takes the room figure,
-     scaled by motion, so tilt is never dead in a drop */
+  /* an axis the gesture keys still STAYS still: a pan sweep is a pan sweep (the tilt
+     kick on the beat is the only tilt it gets), whatever the motion */
   const LIB7 = { ...LIB6, panonly: { id: "panonly", kind: "individual", gesture: { group: "head", repeat: "loop", keys: [
     { at: 0, intent: { pan: 0.1, tilt: 0.5, colour: "white" } }, { at: 4, intent: { pan: 0.9 } }, { at: 8, intent: { pan: 0.1 } } ] } } };
   const sweep7 = (motion) => { const tilts = []; for (let b = 1; b <= 12; b++) for (let q = 1; q < 5; q += 0.5)
     tilts.push(g(frame({ bar: b, beat: q }, hp("panonly", motion), { layout: RIG, library: LIB7 }), "head").tilt); return Math.max(...tilts) - Math.min(...tilts); };
-  ok("a pan-only sweep at full motion still moves its tilt through the room", sweep7(1.0) >= 0.5, `${sweep7(1.0).toFixed(2)}`);
-  ok("and at low motion its tilt only drifts", sweep7(0.3) < 0.25, `${sweep7(0.3).toFixed(2)}`);
+  ok("a pan-only sweep keeps its tilt level as described, even at full motion", sweep7(1.0) <= 0.08 + 1e-9, `${sweep7(1.0).toFixed(2)}`);
+  ok("and at low motion its tilt does not move at all", sweep7(0.3) < 1e-6, `${sweep7(0.3).toFixed(2)}`);
   /* a single pose is not a parked head */
   const solo = sweep("one", 0.8, 12);
   ok("a one-position gesture roams the room over bars (pan and tilt)", solo.pan >= 0.5 && solo.tilt >= 0.3, `pan ${solo.pan.toFixed(2)} tilt ${solo.tilt.toFixed(2)}`);
@@ -449,6 +449,94 @@ const P = (extra, more) => ({ grid: { beats_per_bar: 4 }, assignments: [base(), 
   ok("near the end of the ramp the level has grown by a third", near(g(frame({ bar: 2, beat: 4.9 }, P([ramp]), CTX), "par_1").level, plain * (1 + 0.35 * 0.975), 0.01), `${g(frame({ bar: 2, beat: 4.9 }, P([ramp]), CTX), "par_1").level} vs ${plain}`);
   ok("the head moves faster at the end of a ramp", g(frame({ bar: 2, beat: 4.3 }, P([ramp]), CTX), "head").pan !== g(frame({ bar: 2, beat: 4.3 }, P(), CTX), "head").pan);
   ok("after the ramp the base is back", g(frame({ bar: 3, beat: 1.5 }, P([ramp]), CTX), "par_1").level === plain);
+}
+
+
+/* ---- a whiten ramp climbs to white and stays there ------------------------------
+   whiten_* keys amber at level 0.4 -> white at level 1 over 8 bars, repeat "once".
+   In hit mode it used to hit from the 12% floor, so between beats it was black; and
+   the crossfade looped, so at bar 9 it snapped back to amber. */
+{
+  const LIBW = { ...LIB, whiten_x: { id: "whiten_x", kind: "individual", gesture: { group: "all_pars", repeat: "once", keys: [
+    { at: 0, intent: { colour: [1, 0.6, 0.12], level: 0.4 } }, { at: 8, intent: { colour: [1, 1, 1], level: 1 } } ] } } };
+  const CW = { layout: RIG, library: LIBW };
+  const wp = (fromBar) => ({ grid: { beats_per_bar: 4 }, assignments: [{ from: { bar: fromBar, beat: 1 }, to: { bar: fromBar + 16, beat: 1 }, seq_id: "whiten_x", layer: "par", priority: 0, params: { floor: 0.12, peak: 1, mode: "hit", intensity: 1 } }] });
+  const W = (bar, beat, fromBar) => g(frame({ bar, beat }, wp(fromBar || 1), CW), "par_1");
+  ok("between beats at the start the wash sits at the ramp's own level, not the floor", W(1, 1.6).level >= 0.38, `${W(1, 1.6).level}`);
+  ok("it starts amber", W(1, 1).colour[1] < 0.7 && W(1, 1).colour[2] < 0.2, JSON.stringify(W(1, 1).colour));
+  ok("by the end of its bars it is white at full level between beats too", W(9, 1.6).level >= 0.99 && W(9, 1.6).colour.every(c => c >= 0.99), `${W(9, 1.6).level} ${JSON.stringify(W(9, 1.6).colour)}`);
+  ok("and it STAYS white: a once ramp does not loop back to amber", W(12, 2).colour.every(c => c >= 0.99), JSON.stringify(W(12, 2).colour));
+  ok("a ramp counts from its own start: placed at bar 5 it is amber at bar 5", W(5, 1, 5).colour[2] < 0.2, JSON.stringify(W(5, 1, 5).colour));
+  const X = g(frame({ bar: 3, beat: 1.6 }, { grid: { beats_per_bar: 4 }, assignments: [{ from: { bar: 1, beat: 1 }, to: { bar: 17, beat: 1 }, seq_id: "xfade_x", layer: "par", priority: 0, params: { floor: 0.12, peak: 1, mode: "hit", intensity: 1 } }] },
+    { layout: RIG, library: { xfade_x: { id: "xfade_x", kind: "individual", gesture: { group: "all_pars", repeat: "loop", keys: [
+      { at: 0, intent: { colour: [1, 0.6, 0.12], level: 0.3 } }, { at: 8, intent: { colour: [0, 0, 0.75], level: 0.35 } }, { at: 16, intent: { colour: [1, 0.6, 0.12], level: 0.3 } } ] } } } }), "par_1");
+  ok("an xfade whose key levels only wobble still leaves the level to the phrase dynamics", X.level < 0.2, `${X.level}`);
+}
+
+/* ---- head PROGRAMS: a gesture that names a shape is rendered as that shape --------
+   figure8 (pan one cycle, tilt two per loop), spiral (radius grows over the loop),
+   snap (one pose per beat, no easing), kick (tilt pulses on the beat), sweep (pan
+   between the keyed extremes). Programs come from gesture.program or the palette's
+   own ids (head_figure_8, head_spiral, head_corner_snap, head_tilt_kick, ...). */
+{
+  const LIBP = {
+    head_figure_8: { id: "head_figure_8", kind: "individual", gesture: { group: "head", program: "figure8", repeat: "loop", keys: [
+      { at: 0, intent: { pan: 0.3, tilt: 0.4, colour: "blue" } }, { at: 1, intent: { pan: 0.7, tilt: 0.6 } }, { at: 2, intent: { pan: 0.3, tilt: 0.6 } }, { at: 3, intent: { pan: 0.7, tilt: 0.4 } }, { at: 4, intent: { pan: 0.3, tilt: 0.4 } } ] } },
+    head_corner_snap: { id: "head_corner_snap", kind: "individual", gesture: { group: "head", repeat: "loop", keys: [
+      { at: 0, intent: { pan: 0.15, tilt: 0.15, colour: "yellow" } }, { at: 1, intent: { pan: 0.85, tilt: 0.15 } }, { at: 2, intent: { pan: 0.85, tilt: 0.85 } }, { at: 3, intent: { pan: 0.15, tilt: 0.85 } } ] } },
+    head_tilt_kick: { id: "head_tilt_kick", kind: "individual", gesture: { group: "head", repeat: "loop", keys: [
+      { at: 0, intent: { tilt: 0.75, pan: 0.5, colour: "red" } }, { at: 0.5, intent: { tilt: 0.35 } } ] } },
+    head_spiral: { id: "head_spiral", kind: "individual", gesture: { group: "head", repeat: "loop", keys: [
+      { at: 0, intent: { pan: 0.5, tilt: 0.5, colour: "green" } }, { at: 1, intent: { pan: 0.65, tilt: 0.6 } }, { at: 2, intent: { pan: 0.4, tilt: 0.7 } }, { at: 3, intent: { pan: 0.75, tilt: 0.35 } } ] } },
+  };
+  const CP = { layout: RIG, library: LIBP };
+  const hp = (seq, motion) => ({ grid: { beats_per_bar: 4 }, assignments: [{ from: { bar: 1, beat: 1 }, to: { bar: 17, beat: 1 }, seq_id: seq, layer: "head", priority: 1, params: { headDim: 0.8, motion: motion == null ? 0.5 : motion } }] });
+  const H = (seq, bar, beat, motion) => g(frame({ bar, beat }, hp(seq, motion), CP), "head");
+  /* sampled off the beat grid, so a pose that sits exactly on centre at a beat is not missed */
+  const samples = (seq, bars, step, motion) => { const a = []; for (let b = 1; b <= bars; b++) for (let q = 1 + step / 2; q < 5; q += step) a.push(H(seq, b, q, motion)); return a; };
+  const crossings = (vals, c) => vals.slice(1).filter((v, i) => (vals[i] - c) * (v - c) < 0).length;
+  /* figure8: over the loop, tilt crosses its centre twice as often as pan */
+  const f8 = samples("head_figure_8", 4, 0.25, 0.5);
+  const cP = 0.5, cT = 0.5;
+  ok("a figure-eight's tilt crosses centre about twice as often as its pan", crossings(f8.map(h => h.tilt), cT) >= 1.6 * crossings(f8.map(h => h.pan), cP) && crossings(f8.map(h => h.pan), cP) >= 2,
+     `pan ${crossings(f8.map(h => h.pan), cP)} tilt ${crossings(f8.map(h => h.tilt), cT)}`);
+  /* corner_snap: one pose per beat, held within the beat, four distinct corners */
+  const within = [1, 1.3, 1.6, 1.9].map(q => H("head_corner_snap", 1, q).pan + "/" + H("head_corner_snap", 1, q).tilt);
+  ok("a corner snap holds its pose within the beat", new Set(within).size === 1, within.join(" "));
+  const corners = new Set([1, 2, 3, 4].map(q => H("head_corner_snap", 1, q).pan + "/" + H("head_corner_snap", 1, q).tilt));
+  ok("and visits four distinct corners, one per beat", corners.size === 4, [...corners].join(" "));
+  /* tilt kick: tilt spikes on the beat and eases down within it */
+  const k0 = H("head_tilt_kick", 1, 1, 0.8).tilt, k3 = H("head_tilt_kick", 1, 1.3, 0.8).tilt, k7 = H("head_tilt_kick", 1, 1.7, 0.8).tilt;
+  ok("a tilt kick is highest on the beat and eases down through it", k0 > k3 && k3 > k7, `${k0} ${k3} ${k7}`);
+  ok("the kick repeats every beat", Math.abs(H("head_tilt_kick", 1, 2, 0.8).tilt - k0) < 0.02);
+  /* spiral: the radius from the centre grows across the loop */
+  const spS = samples("head_spiral", 2, 0.25, 0.5);
+  const mid = k => (Math.min(...spS.map(h => h[k])) + Math.max(...spS.map(h => h[k]))) / 2;   // the spiral's own centre
+  const sp = spS.map(h => Math.hypot(h.pan - mid("pan"), h.tilt - mid("tilt")));
+  const first = sp.slice(0, 4).reduce((a, b) => a + b, 0) / 4, last = sp.slice(12, 16).reduce((a, b) => a + b, 0) / 4;
+  ok("a spiral widens across its loop", last > first * 1.5, `${first.toFixed(3)} -> ${last.toFixed(3)}`);
+}
+
+/* ---- the base looks have real gestures -------------------------------------------- */
+{
+  const { baseLibrary } = require("./preflight.js");
+  const LIBB = baseLibrary();
+  ok("every base look carries a gesture", ["pair_call_response", "travelling_pulse", "strobe_pops", "head_sweep", "breathe", "build_ramp", "drop_combo_A"].every(id => LIBB[id] && LIBB[id].gesture), Object.keys(LIBB).join(","));
+  const CB = { layout: RIG, library: LIBB };
+  const pl = seq => ({ grid: { beats_per_bar: 4 }, assignments: [{ from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: seq, layer: "par", priority: 0, params: { floor: 0.1, peak: 1, mode: "hit", intensity: 1 } }] });
+  const lit = (F) => RIG.fixtures.filter(f => f.type === "par7").map(f => g(F, f.id).level);
+  const heads = [1, 2, 3, 4].map(q => lit(frame({ bar: 1, beat: q }, pl("travelling_pulse"), CB)).indexOf(Math.max(...lit(frame({ bar: 1, beat: q }, pl("travelling_pulse"), CB)))));
+  ok("travelling_pulse travels: a different lamp leads on each beat", new Set(heads).size === 4, heads.join(","));
+  const pcr = frame({ bar: 1, beat: 1 }, pl("pair_call_response"), CB);
+  ok("pair_call_response wears two colours, one per pair", JSON.stringify(g(pcr, "par_8").colour) !== JSON.stringify(g(pcr, "par_1").colour));
+  /* a combination merges its parts per lamp: the trade keeps its dark pair, the pops add strobe */
+  const combo = frame({ bar: 1, beat: 1 }, pl("drop_combo_A"), CB);
+  const lv = RIG.fixtures.filter(f => f.type === "par7").map(f => g(combo, f.id).level);
+  ok("drop_combo_A: one pair is lit and the other dark (the trade survives the strobe part)", lv.some(v => v === 0) && lv.some(v => v > 0.5), lv.join(","));
+  ok("and the lit lamps strobe", RIG.fixtures.filter(f => f.type === "par7").every(f => g(combo, f.id).strobe > 0));
+  /* a compound with fractional steps: build_ramp whitens first, pops from 40% of its span */
+  ok("build_ramp is a whitening wash in its first bars", !g(frame({ bar: 1, beat: 1 }, pl("build_ramp"), CB), "par_1").strobe);
+  ok("and strobes in its last bars", g(frame({ bar: 7, beat: 1 }, pl("build_ramp"), CB), "par_1").strobe > 0);
 }
 
 for (const [pass, name, detail] of out)

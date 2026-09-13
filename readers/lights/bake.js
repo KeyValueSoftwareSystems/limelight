@@ -25,7 +25,7 @@ const fps = +opt("--fps", 40);
 const score = require("./fromscore.js").load(scoreFile);
 const layout = require("./arc4-head.layout.json");
 const palette = require("./arc4-head.palette.json");
-const library = Object.fromEntries(palette.map(s => [s.id, s]));
+const library = { ...Object.fromEntries(palette.map(s => [s.id, s])), ...require("./preflight.js").baseLibrary() };   /* base looks render with their gestures */
 
 const en = enumerate(layout, { palette });
 const p = plan(score, en, seed);

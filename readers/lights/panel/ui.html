@@ -52,6 +52,14 @@
   .fxsw { width: 46px; height: 46px; border-radius: 8px; background: #000; border: 1px solid var(--line); transition: background 40ms linear; }
   .fx.head .fxsw { width: 64px; height: 64px; border-radius: 50%; position: relative; }
   .fx.head .fxsw::after { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: #fff; transform: translate(var(--px, 0px), var(--py, 0px)); box-shadow: 0 0 6px #fff; }
+  /* the Effects tab is about watching the rig: big lamps, a big head, centred */
+  body.fxtab .preview { justify-content: center; gap: 28px; margin: 18px 0 10px; }
+  body.fxtab .preview .row { gap: 26px; justify-content: center; flex: 1; }
+  body.fxtab .fx { font-size: 13px; gap: 8px; }
+  body.fxtab .fxsw { width: 120px; height: 120px; border-radius: 16px; }
+  body.fxtab .fx.head .fxsw { width: 170px; height: 170px; border-radius: 50%; }
+  body.fxtab .fx.head .fxsw::after { width: 12px; height: 12px; margin: -6px; box-shadow: 0 0 12px #fff; }
+  @media (max-width: 720px) { body.fxtab .fxsw { width: 64px; height: 64px; } body.fxtab .fx.head .fxsw { width: 90px; height: 90px; } }
   .countdown { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font: 700 160px system-ui; color: #fff; background: rgba(0,0,0,.6); z-index: 10; }
   .countdown.go { color: var(--ok); }
   .offsetwide { accent-color: var(--play); }
@@ -90,6 +98,45 @@
   .fxrow .where { font-size: 11px; color: var(--muted); }
   .fxrow.playing .name { color: var(--accent); }
   .fxrow.playing button { border-color: var(--accent); color: var(--accent); }
+  /* presets: the arranger's reasoning for one window of one song */
+  .pr-head { display: grid; grid-template-columns: auto 1fr; gap: 5px 14px; font-size: 13px; margin: 6px 0 4px; align-items: baseline; }
+  .pr-head b.k { color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .chip { display: inline-block; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); margin: 1px 4px 1px 0; vertical-align: middle; }
+  .chip.fam-form { border-color: #3d5a8a; } .chip.fam-doing { border-color: #5a3d8a; } .chip.fam-presence { border-color: #2f6b4d; }
+  .chip.fam-texture { border-color: #7a5a2f; } .chip.fam-harmony { border-color: #7a2f5a; } .chip.fam-moment { border-color: var(--accent); color: var(--accent); }
+  .chip.eff { border-color: #245a3d; color: var(--ok); font-family: inherit; }
+  .chip.ctx { text-transform: uppercase; letter-spacing: .06em; font-size: 10.5px; font-family: inherit; }
+  .pr-sec { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pr-sec span.sec { padding: 3px 8px; border-radius: 6px; font-size: 12px; border: 1px solid var(--line); }
+  table.pr { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  table.pr th { color: var(--muted); font-weight: 500; text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); font-size: 12px; }
+  table.pr td { padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  table.pr tr.drawn td:first-child { color: var(--accent); }
+  table.pr tr.extra[hidden] { display: none; }
+  .odds { display: inline-block; height: 8px; background: var(--play); border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .odds.dim { background: #3a4152; }
+  .barsgrid { display: flex; gap: 3px; overflow-x: auto; padding: 6px 0 8px; font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .barcol { flex: 0 0 auto; min-width: 88px; max-width: 140px; border-radius: 6px; padding: 5px 7px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+  .barcol .n { color: var(--muted); }
+  .barcol .f { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .barcol .m { color: var(--accent); white-space: nowrap; }
+  .draw { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 8px; background: var(--bg); }
+  .draw .hd { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .draw .hd .span { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); min-width: 104px; }
+  .draw .hd .pick { font-weight: 600; }
+  .draw .hd .pick.rem { color: var(--accent); }
+  .draw .vec { margin: 6px 0 2px; }
+  .cands { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1px 16px; margin-top: 4px; }
+  .cand { display: flex; gap: 6px; align-items: center; font-size: 12.5px; padding: 2px 0; }
+  .cand .pc { color: var(--muted); min-width: 34px; text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .cand .id { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .cand.chosen .id { color: var(--accent); font-weight: 600; }
+  .cand button, table.pr button { padding: 0 7px; font-size: 11px; line-height: 18px; }
+  .more { color: var(--muted); font-size: 12px; cursor: pointer; display: inline-block; margin-top: 4px; text-decoration: underline dotted; }
+  .pr-fixed { color: var(--muted); font-size: 12.5px; margin: 10px 0 0; line-height: 1.7; }
+  .pr-fixed code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); }
+  #presets h3 { margin: 16px 0 4px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  #presets h3 small { text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 8px; }
 </style>
 </head>
 <body>
@@ -107,6 +154,7 @@
   <nav class="tabs" id="tabs">
     <button data-tab="show" class="on">Show</button>
     <button data-tab="effects">Effects</button>
+    <button data-tab="presets">Presets</button>
   </nav>
 
   <!-- primary: one clear play control, the clock, and a safety -->
@@ -123,7 +171,7 @@
   <!-- what the rig is doing right now -->
   <div class="preview">
     <div class="swatch" id="swatch"><span id="rgb">0 · 0 · 0</span></div>
-    <div class="row" id="rigrow" hidden>
+    <div class="row" id="rigrow">
       <div class="fx" data-fx="1"><div class="fxsw"></div><span>PAR 1</span></div>
       <div class="fx" data-fx="8"><div class="fxsw"></div><span>PAR 8</span></div>
       <div class="fx head" data-fx="head"><div class="fxsw"></div><span id="headinfo">HEAD</span></div>
@@ -374,6 +422,7 @@
       el.hidden = fx ? !keepOnEffects : el.id === 'effects';
     }
     for (const id of ['track', 'reload', 'audiopill', 'phasepill']) $(id).hidden = fx;      // no song, no timeline, no phases
+    document.body.classList.toggle('fxtab', fx);                                          // big rig visualization
     document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
     store('tab', tab);
     if (tab === 'effects' && !effectsLoaded) loadEffects();
@@ -482,6 +531,8 @@
       $('phasepill').textContent = status.phase || (status.loaded ? '—' : 'no stream');
       if (status.paused_by_watchdog) $('srv').textContent = 'paused: page was closed / asleep — press Play to resume';
       if (status.send_errors) { $('netpill').textContent = `output FAILING (${status.send_errors}) — check the Ethernet cable`; $('netpill').className = 'pill warn'; }
+      $('rigrow').hidden = !status.fixtures;             // the rig visualization, whenever the server reads the rig
+      $('swatch').hidden = !!status.fixtures;             // (the single PAR 1 swatch is redundant next to it)
       if (status.fixtures) {
         for (const p of status.fixtures.pars) {
           const sw = document.querySelector(`.fx[data-fx="${p.addr}"] .fxsw`);
@@ -490,8 +541,11 @@
         const h = status.fixtures.head, hs = document.querySelector('.fx.head .fxsw');
         const lvl = h.dim / 255;
         hs.style.background = h.dim ? `rgba(255,255,255,${(0.15 + 0.85 * lvl).toFixed(2)})` : '#000';
-        hs.style.setProperty('--px', `${((h.pan - 169) / 24 * 26).toFixed(0)}px`);
-        hs.style.setProperty('--py', `${(-(h.tilt - 40) / 87 * 26).toFixed(0)}px`);
+        const R = hs.clientWidth / 2 - 8;                 // the dot's reach inside the circle
+        const npan = h.pan <= 169 ? (h.pan - 169) / 169 : (h.pan - 169) / 86;     // -1..1 across the full travel, 169 = the wall
+        const ntilt = h.tilt <= 40 ? (h.tilt - 40) / 40 : (h.tilt - 40) / 215;    // -1..1, 40 = the wall
+        hs.style.setProperty('--px', `${(npan * R).toFixed(0)}px`);
+        hs.style.setProperty('--py', `${(-ntilt * R).toFixed(0)}px`);
         $('headinfo').textContent = `HEAD pan ${h.pan} tilt ${h.tilt} dim ${h.dim}${h.prism ? ' prism' : ''}${h.strobe ? ' strobe' : ''}`;
       }
       $('gain').value = status.gain; $('gainval').textContent = `gain ${status.gain.toFixed(2)}`;
