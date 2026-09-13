@@ -589,7 +589,13 @@ function frame(position, plan, ctx) {
   const motionMod = mods.reduce((t, a) => t + (a.params && a.params.motion != null ? a.params.motion : 0), 0) + mod.motion + rampMotion;
   const hook = top("hook"), pause = top("pause");
   const hookK = hook ? 1 + 0.3 * strengthOf(hook) : 1;
-  const pauseK = pause ? 1 - 0.85 * strengthOf(pause) : 1;        /* a hush, not a blackout */
+  /* A hole is the most valuable thing a show can do, and treating every pause as
+     a gentle hush wastes it. A light pause still hushes; a heavy one goes dark,
+     because that is what the music did. raga-of-revenge stops dead for a bar
+     before its drop and the rig was sitting at 57% through it. Cubed so the
+     A light pause still hushes and a heavy one reaches black: 0.25 -> 0.69,
+     0.5 -> 0.38, 0.66 -> 0.18, 0.8 and above -> nothing at all. */
+  const pauseK = pause ? Math.max(0, 1 - 1.25 * strengthOf(pause)) : 1;
   const pauseHeadK = pause ? 1 - 0.7 * strengthOf(pause) : 1;
 
   const headIds = new Set(groups.head || []);
