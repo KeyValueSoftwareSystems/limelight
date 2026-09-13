@@ -197,6 +197,37 @@ class State:
         return True
 
     # ----- hub import -----------------------------------------------------
+    # ----- the effect library (readers/lights/play.js is the one render path) ----
+    PLAY_JS = os.path.join(REPO, "readers", "lights", "play.js")
+
+    def effects(self):
+        """The computed library, numbered as play.js numbers it (cached)."""
+        if getattr(self, "_effects", None) is None:
+            res = subprocess.run(["node", self.PLAY_JS, "--list", "--json"], capture_output=True, text=True, timeout=60)
+            if res.returncode != 0:
+                raise RuntimeError((res.stderr or res.stdout)[-300:])
+            self._effects = json.loads(res.stdout)
+        return self._effects
+
+    def play_effect(self, ident, bpm=128, bars=8):
+        """Render one effect for a few bars into the first scan folder, load it into
+        the transport and play from the top. Returns the effect row played."""
+        ident = str(ident).strip()
+        if not ident:
+            raise ValueError("no effect")
+        os.makedirs(self.dirs[0], exist_ok=True)
+        cmd = ["node", self.PLAY_JS, ident, "--no-play", "--out", self.dirs[0],
+               "--bpm", str(int(bpm)), "--bars", str(int(bars))]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        if res.returncode != 0 or "rendered" not in res.stdout:
+            raise RuntimeError((res.stderr or res.stdout)[-300:] or "render failed")
+        meta = self.load("preview.lights.json", force=True)
+        if meta is None:
+            raise RuntimeError("rendered but preview.lights.json was not found in " + self.dirs[0])
+        self.transport.play(0.0)
+        row = next((e for e in self.effects() if e["id"] == ident or str(e["n"]) == ident), None)
+        return {"effect": row or {"id": ident}, "log": res.stdout.strip().splitlines()[-1]}
+
     def hub_list(self):
         """Raw hub listing for .score files: name (no extension), store version, mtime.
         The store `version` counts edits, so it tells you which revision you'd pull."""
@@ -389,6 +420,11 @@ def make_handler(state: State):
             if path == "/api/status":
                 state.last_poll = time.monotonic()
                 return self._json(state.status())
+            if path == "/api/effects":
+                try:
+                    return self._json({"effects": state.effects()})
+                except Exception as e:  # noqa: BLE001
+                    return self._json({"error": str(e)}, 500)
             if path == "/api/meta":
                 return self._json(state.meta or {}, 200 if state.meta else 404)
             if path.startswith("/audio/"):
@@ -426,6 +462,15 @@ def make_handler(state: State):
                 meta = state.load(body.get("name", ""), force=bool(body.get("force")))
                 return self._json(meta, 200) if meta else \
                     self._json({"error": "show not baked yet — import it from the hub first"}, 404)
+            if path == "/api/effect":
+                try:
+                    out = state.play_effect(body.get("id", ""), body.get("bpm", 128), body.get("bars", 8))
+                    state.paused_by_watchdog = False
+                    state.last_poll = time.monotonic()
+                    out["status"] = state.status()
+                    return self._json(out)
+                except Exception as e:  # noqa: BLE001
+                    return self._json({"error": str(e)}, 500)
             if path == "/api/import":
                 meta = state.import_score(body.get("name", ""), int(body.get("seed", 3)))
                 return self._json(meta, 200) if meta else self._json({"error": state.import_log}, 500)

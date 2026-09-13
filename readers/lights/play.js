@@ -23,7 +23,7 @@ const { toLightsFrames } = require("./wire.js");
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
 const flag = k => args.includes(k);
-const positional = args.filter((a, i) => !a.startsWith("--") && !(i > 0 && args[i - 1].startsWith("--") && !["--list", "--no-play"].includes(args[i - 1])));
+const positional = args.filter((a, i) => !a.startsWith("--") && !(i > 0 && args[i - 1].startsWith("--") && !["--list", "--no-play", "--json"].includes(args[i - 1])));
 
 const HERE = __dirname;
 const layout = JSON.parse(fs.readFileSync(path.join(HERE, "arc4-head.layout.json"), "utf8"));
@@ -45,12 +45,14 @@ const isHeadSeq = s => (s.occupies || []).some(o => String(o).startsWith("head:"
 const list = cache.sequences.slice().sort((a, b) => (order[a.kind] - order[b.kind]) || a.id.localeCompare(b.id));
 const describe = s => (library[s.id] && library[s.id].description) ||
   (s.kind === "oneshot" ? `one-shot: ${s.gesture.fx} (${s.gesture.slot}, ${s.duration_beats} beats)` : "");
+const whereOf = s => (s.kind === "combination" ? "par+head" : isHeadSeq(s) ? "head" : s.kind === "oneshot" ? "fx" : "pars");
+const rows = () => list.map((s, i) => ({ n: i + 1, id: s.id, kind: s.kind, boldness: s.boldness, where: whereOf(s), description: describe(s) }));
 function printList() {
+  if (flag("--json")) { console.log(JSON.stringify(rows())); return; }
   let lastKind = null;
   list.forEach((s, i) => {
     if (s.kind !== lastKind) { console.log(`\n-- ${s.kind}${s.kind === "individual" ? " looks" : ""} --`); lastKind = s.kind; }
-    const where = s.kind === "combination" ? "par+head" : isHeadSeq(s) ? "head" : s.kind === "oneshot" ? "fx" : "pars";
-    console.log(`${String(i + 1).padStart(4)}. ${s.id.padEnd(28)} ${where.padEnd(8)} ${s.boldness.padEnd(8)} ${describe(s).slice(0, 70)}`);
+    console.log(`${String(i + 1).padStart(4)}. ${s.id.padEnd(28)} ${whereOf(s).padEnd(8)} ${s.boldness.padEnd(8)} ${describe(s).slice(0, 70)}`);
   });
   console.log(`\n${list.length} effects. bpm ${bpm}, ${bars} bars.`);
 }

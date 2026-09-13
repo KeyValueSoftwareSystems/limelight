@@ -13,6 +13,8 @@ ok("--list numbers every effect in the cache", /^\s+1\. /m.test(listing) && /one
 const cache = require("./arc4-head.matrix.json");
 ok("the list is as long as the cache", listing.includes(`${cache.sequences.length} effects.`));
 
+const rows = JSON.parse(run(["--list", "--json"]));
+ok("--list --json is the same list as rows with n/id/kind/where/description", Array.isArray(rows) && rows.length === cache.sequences.length && rows[0].n === 1 && rows.every(r => r.id && r.kind && r.where && "description" in r));
 const look = run(["pair_call_response", "--no-play", "--bars", "2", "--out", tmp]);
 ok("a look renders by id", /rendered #\d+ pair_call_response/.test(look), look.trim());
 const L = JSON.parse(fs.readFileSync(path.join(tmp, "preview.lights.json"), "utf8"));

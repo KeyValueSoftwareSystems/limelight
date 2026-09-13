@@ -67,6 +67,16 @@
   details.advanced[open] > summary::before { content: "\25BE  "; }
   details.advanced > .grid { padding: 0 16px 16px; margin-top: 0; }
   details.advanced .card { border: none; background: none; padding: 6px 0; }
+  /* tabs: Show (everything that was here) and Effects (the computed library, click to play) */
+  .tabs { display: flex; gap: 6px; margin: 0 0 14px; }
+  .tabs button { background: none; border: 1px solid transparent; color: var(--muted); padding: 6px 12px; border-radius: 8px; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; }
+  .tabs button.on { color: var(--text); border-color: var(--line); background: var(--panel); }
+  #fxlist h3 { margin: 14px 0 6px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .fxgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px; }
+  .fxbtn { display: flex; gap: 8px; align-items: baseline; text-align: left; padding: 8px 10px; }
+  .fxbtn small { color: var(--muted); }
+  .fxbtn .where { margin-left: auto; font-size: 11px; color: var(--muted); }
+  .fxbtn.playing { border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -81,6 +91,26 @@
 </header>
 
 <main>
+  <nav class="tabs" id="tabs">
+    <button data-tab="show" class="on">Show</button>
+    <button data-tab="effects">Effects</button>
+  </nav>
+
+  <!-- the effect library: every look and one-shot the enumeration computed for this
+       layout, numbered as play.js numbers them; click one and the panel renders it for
+       a few bars and plays it (POST /api/effect) -->
+  <section class="card" id="effects" hidden>
+    <h2>Effects — click one to play it</h2>
+    <div class="row">
+      <label class="meta">bpm <input type="number" id="fxbpm" value="128" min="40" max="220" style="width:70px"></label>
+      <label class="meta">bars <input type="number" id="fxbars" value="8" min="1" max="64" style="width:60px"></label>
+      <input type="search" id="fxfilter" placeholder="filter by name" style="width:200px">
+      <button id="fxstop">■ Stop</button>
+      <span class="meta" id="fxmsg"></span>
+    </div>
+    <div id="fxlist"><span class="meta">loading the library…</span></div>
+  </section>
+
   <!-- primary: one clear play control, the clock, and a safety -->
   <section class="deck">
     <button class="primary" id="play">▶ Play</button>
@@ -312,6 +342,51 @@
   const togglePlay = () => status && status.playing ? cmd('/api/pause') : cmd('/api/play');
   const seek = t => cmd('/api/seek', { position: Math.max(0, Math.min((meta ? meta.duration : 0) - 0.05, t)) });
   const nudge = d => cmd('/api/nudge', { delta: d });
+
+  // ---------------- tabs + the effect library ----------------
+  const showTab = tab => {
+    for (const el of document.querySelector('main').children)
+      if (el.id !== 'tabs') el.hidden = (el.id === 'effects') !== (tab === 'effects');
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+    store('tab', tab);
+    if (tab === 'effects' && !effectsLoaded) loadEffects();
+  };
+  let effectsLoaded = false, effects = [];
+  const renderEffects = () => {
+    const q = ($('fxfilter').value || '').trim().toLowerCase();
+    const list = $('fxlist'); list.innerHTML = '';
+    const kinds = [['individual', 'Looks'], ['compound', 'Compounds (scripted arcs)'], ['combination', 'Combinations (pars + head)'], ['oneshot', 'One-shots (punctuation for a moment)']];
+    for (const [kind, title] of kinds) {
+      const rows = effects.filter(e => e.kind === kind && (!q || e.id.includes(q) || (e.description || '').toLowerCase().includes(q)));
+      if (!rows.length) continue;
+      const h = document.createElement('h3'); h.textContent = `${title} · ${rows.length}`; list.appendChild(h);
+      const grid = document.createElement('div'); grid.className = 'fxgrid';
+      for (const e of rows) {
+        const b = document.createElement('button'); b.className = 'fxbtn'; b.dataset.id = e.id; b.title = e.description || e.id;
+        b.innerHTML = `<small>${e.n}.</small> <span>${e.id}</span> <span class="where">${e.where} · ${e.boldness}</span>`;
+        b.addEventListener('click', () => playEffect(e));
+        grid.appendChild(b);
+      }
+      list.appendChild(grid);
+    }
+  };
+  const loadEffects = async () => {
+    try { effects = (await api('/api/effects')).effects || []; effectsLoaded = true; renderEffects(); }
+    catch (e) { $('fxlist').innerHTML = `<span class="meta">could not load the library: ${e.message}</span>`; }
+  };
+  const playEffect = async e => {
+    $('fxmsg').textContent = `rendering #${e.n} ${e.id}…`;
+    document.querySelectorAll('.fxbtn').forEach(b => b.classList.toggle('playing', b.dataset.id === e.id));
+    try {
+      const r = await api('/api/effect', { id: e.id, bpm: +$('fxbpm').value || 128, bars: +$('fxbars').value || 8 });
+      if (r.status) applyStatus(r.status);
+      $('fxmsg').textContent = `playing #${e.n} ${e.id} — ${r.log || ''}`;
+    } catch (err) { $('fxmsg').textContent = `could not play ${e.id}: ${err.message}`; }
+  };
+  document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  $('fxfilter').addEventListener('input', renderEffects);
+  $('fxstop').addEventListener('click', () => { cmd('/api/stop'); document.querySelectorAll('.fxbtn').forEach(b => b.classList.remove('playing')); $('fxmsg').textContent = 'stopped'; });
+  showTab(recall('tab', 'show'));
   document.querySelectorAll('[data-nudgesec]').forEach(b => b.addEventListener('click', () => nudge(+b.dataset.nudgesec)));
   let counting = false;
   async function countdown() {
