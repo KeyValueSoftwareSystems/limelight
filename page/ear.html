@@ -62,6 +62,7 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 .part{position:absolute;top:22px;bottom:0;overflow:hidden;box-shadow:inset -1px 0 0 rgba(6,9,14,.9);
   border-left:1px solid #3b4761}
 .part:first-of-type{border-left:none}
+.part.ramp{border-left:1px dashed rgba(232,163,61,.8)}
 .part .fill{position:absolute;left:0;right:0;bottom:0;opacity:.30}
 .part .tag{position:absolute;left:0;right:0;bottom:4px;padding:0 5px;
   font:600 10px ui-monospace,monospace;text-shadow:0 1px 3px #000;white-space:nowrap;
@@ -188,6 +189,10 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
     <b>&#9650;</b> is where the loudness slams up, <b>&#9660;</b> where it drops away; the solid ones
     are structural, the hollow ones smaller steps.</p>
   <div class="holder"><canvas id="motion"></canvas><div class="pline" data-for="motion"></div></div>
+  <p class="note">A section edge drawn as a <b style="color:#e8a33d">dashed amber line</b> in the strip
+    above is one the music arrives at gradually &mdash; the two sections really do differ, but nothing
+    happens on that bar, so there is no instant to cue. Don't Look Down's second verse is one: the bass
+    climbs from 0.09 to 0.98 across eight bars while the loudness stays flat.</p>
   <p class="note" id="motionsays"></p>
 </section>
 
@@ -534,11 +539,15 @@ function draw() {
   for (const p of SCORE.parts || []) {
     const t0 = barTime(p.from_bar), t1 = Math.min(total, barTime(p.to_bar + 1));
     const el = document.createElement("div");
-    el.className = "part";
+    const ramp = typeof p.sudden === "number" && p.sudden < 0.5;
+    el.className = ramp ? "part ramp" : "part";
     el.dataset.t0 = t0; el.dataset.t1 = t1;
     const c = HUE[p.repeats_as];
     el.title = `${cap(p.role || p.repeats_as)} · ${mmss(t0)} – ${mmss(t1)} · `
-             + `${FEELS[p.feels] || p.feels} · click to hear it`;
+             + `${FEELS[p.feels] || p.feels}`
+             + (ramp ? ` · the change here is gradual (${p.sudden.toFixed(2)}), there is no moment to hit`
+                     : (typeof p.sudden === "number" ? ` · lands on the bar (${p.sudden.toFixed(2)})` : ""))
+             + ` · click to hear it`;
     el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness??.5)*100)}%"></div>
       <div class="tag" style="color:${c}">${esc((p.role || p.repeats_as).toUpperCase())}</div>`;
     map.appendChild(el);
