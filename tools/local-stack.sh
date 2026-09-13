@@ -86,9 +86,11 @@ start_panel() {
 case "${1:-start}" in
   stop)  stop ;;
   seed)  seed ;;
+  check) python3 tools/response.test.py ;;
   start) start_hub && seed && start_panel
          echo
          say "logs: /tmp/limelight-hub.log  /tmp/limelight-panel.log"
-         say "stop: tools/local-stack.sh stop" ;;
-  *) echo "usage: $0 [start|stop|seed]"; exit 2 ;;
+         say "stop: tools/local-stack.sh stop"
+         say "check: tools/local-stack.sh check   (folder and hub agree)" ;;
+  *) echo "usage: $0 [start|stop|seed|check]"; exit 2 ;;
 esac
