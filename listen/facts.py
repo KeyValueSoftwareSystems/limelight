@@ -1,6 +1,6 @@
 import numpy as np
 
-STEMS = ("drums", "bass", "vocals", "other")
+STEMS = ("drums", "bass", "vocals", "other", "guitar", "piano")
 
 SCALES = {
     "weight": {
@@ -22,9 +22,19 @@ SCALES = {
         "means": "how deeply the track ducks on the beat",
     },
     "brightness": {
+        "kind": "per_song",
+        "against": "the song's loudest frame",
+        "means": "share of high-frequency bins above -38 dB",
+    },
+    "held": {
         "kind": "absolute",
         "runs": [0.0, 1.0],
-        "means": "share of high-frequency bins above -38 dB",
+        "means": "how much of the bar is ringing rather than struck",
+    },
+    "noisy": {
+        "kind": "absolute",
+        "runs": [0.0, 1.0],
+        "means": "how much of the sound is unpitched",
     },
     "intensity": {
         "kind": "per_song",

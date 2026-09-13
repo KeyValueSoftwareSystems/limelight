@@ -75,6 +75,7 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
   planted.mood_axes = { calm_vs_aggressive: 2.49, warm_vs_cold: 1.51 };
   for (const part of planted.parts || [])
     part.mood = { calm_vs_aggressive: -0.31, warm_vs_cold: 0.12 };
+  planted.chords = { root: "C#", scale: "minor", confidence: 0.58, changes_per_beat: 0.05 };
   planted.lyrics = {
     language: "English", sung_in: "phrases of the song's own grid",
     checked_twice: true, sure: 0.82,
@@ -116,7 +117,7 @@ from score_api import format_v1
 print(json.dumps(format_v1(json.load(sys.stdin))))
 `], { encoding: "utf8", input: JSON.stringify(planted), maxBuffer: 1 << 28 }));
 
-  for (const want of ["mood_axes", "lyrics", "noisy", "held", "motion"]) {
+  for (const want of ["lyrics", "noisy", "held", "motion"]) {
     ok(`${want} survives both formatters when the score has it`,
        js2[want] != null && py2[want] != null,
        `js ${js2[want] != null ? "yes" : "NO"}, py ${py2[want] != null ? "yes" : "NO"}`);
@@ -197,9 +198,17 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
      `slams ${JSON.stringify(js2.motion.slams)} ebbs ${JSON.stringify(js2.motion.ebbs)}`);
 
   const jsMood = (js2.sections || [])[0] || {}, pyMood = (py2.sections || [])[0] || {};
-  ok("a section carries mood through both formatters",
-     jsMood.mood != null && pyMood.mood != null,
-     `js ${jsMood.mood != null ? "yes" : "NO"}, py ${pyMood.mood != null ? "yes" : "NO"}`);
+  ok("both formatters drop mood even when the score still carries it",
+     js2.mood_axes == null && py2.mood_axes == null
+       && jsMood.mood == null && pyMood.mood == null,
+     `js ${js2.mood_axes == null ? "dropped" : "KEPT"}/${jsMood.mood == null ? "dropped" : "KEPT"}, ` +
+     `py ${py2.mood_axes == null ? "dropped" : "KEPT"}/${pyMood.mood == null ? "dropped" : "KEPT"}`);
+  ok("both formatters drop the most-frequent-chord masquerading as a key",
+     js2.key?.chords_say == null && py2.key?.chords_say == null
+       && js2.chord_summary?.root == null && py2.chord_summary?.root == null
+       && js2.chord_summary?.changes_per_beat === 0.05
+       && py2.chord_summary?.changes_per_beat === 0.05,
+     `js ${JSON.stringify(js2.chord_summary)}, py ${JSON.stringify(py2.chord_summary)}`);
   ok("both formatters agree on the planted score's fields too",
      JSON.stringify(Object.keys(js2).filter(k => js2[k] != null).sort())
        === JSON.stringify(Object.keys(py2).filter(k => py2[k] != null).sort()),

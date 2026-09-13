@@ -37,16 +37,30 @@ Cheap, constant for the track, fetched once. These are the fields that stop
 every song looking the same, because they let a reader normalise itself against
 the record rather than against an absolute.
 
-**`key`** — `{root, scale, confidence, tuned_to_hz}`
-The key and whether we believe it. A reader can map a palette to it, a game can
-pick note sounds that are in tune with the track, and `tuned_to_hz` catches
-records that are not at A440 and would otherwise sound sour against anything we
-generate.
+**`key`** — `{root, scale, confidence, tuned_to_hz, changes_per_beat}`
+The key, from Essentia's `edma` profile. Against eleven published human
+transcriptions it is exactly right on seven and, when it is wrong, names the
+relative or the fifth — so a palette keyed to the *pitch collection* is safe and
+one keyed to major-versus-minor mood is not. `confidence` runs 0.66 to 0.98 on
+this library; read it as a ranking within the library, not a probability.
 
-**`chord_summary`** — `{root, scale, confidence, changes_per_beat}`
-Harmonic rhythm. `changes_per_beat` is the useful one: it separates a track that
-sits on one chord for eight bars from one that moves every beat, which is the
-difference between a slow wash and something that has to keep up.
+`tuned_to_hz` is `null` unless the record is confidently off A440. Essentia
+reports a tuning frequency for every song, but on most of this library that
+number is an artefact of an unreliable estimate — it came back at 434.2 Hz on 23
+of 29 songs while those songs' own melody lines sat within 10 cents of the A440
+grid. The field now goes out only when Essentia's equal-tempered deviation is
+under 0.10, which separated the six plausible readings from the 23 artefacts
+cleanly. A reader that finds `null` should assume A440.
+
+**`chord_summary`** — `{changes_per_beat}`
+Harmonic rhythm: it separates a track that sits on one chord for eight bars from
+one that moves every beat, which is the difference between a slow wash and
+something that has to keep up. It used to carry a `root`, `scale` and
+`confidence` too. Those were not a key estimate — Essentia builds them by taking
+the most frequent chord and reading its letter — and shipping them beside `key`
+gave a reader two fields that looked like the same claim and disagreed on 16 of
+29 songs. They are gone, along with `key.chords_say`, which was the same three
+numbers again.
 
 **`loudness`** — `{integrated_lufs, range_lu, dynamic_complexity}`
 How loud the record is overall and how much room it has. This is the field that

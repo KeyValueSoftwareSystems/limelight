@@ -257,14 +257,29 @@ The score says which is which, per lane, in `scales`:
 
 ```json
 { "width":     { "kind": "absolute", "runs": [0.0, 2.0] },
-  "intensity": { "kind": "per_song", "against": "the song's loudest bar" } }
+  "intensity": { "kind": "per_song", "against": "the song's loudest bar" },
+  "brightness": { "kind": "per_song", "against": "the song's loudest frame" } }
 ```
 
-Absolute: `width`, `pump`, `brightness`, `chord_sure`. Per-song: `intensity`,
-`air` (against the 98th percentile), `pace` (against the median bar), and each
-of `drums`, `bass`, `vocals`, `other` against **that stem's own** loudest bar.
-So drums at 0.8 does not mean the drums are loud, and it does not mean they are
-louder than the bass, which is on a different scale again.
+Absolute: `width`, `pump`, `held`, `noisy`, `chord_sure`. Per-song: `intensity`,
+`weight`, `floor`, `brightness`, `air` (against the 98th percentile), `pace`
+(against the median bar), and each of `drums`, `bass`, `vocals`, `other`,
+`guitar`, `piano` against **that stem's own** loudest bar. So drums at 0.8 does
+not mean the drums are loud, and it does not mean they are louder than the bass,
+which is on a different scale again.
+
+`scales` now names every lane the file ships. It used to be missing `guitar`,
+`piano`, `held` and `noisy` — four lanes a reader could normalise only by
+guessing. And `brightness` was declared absolute and is not: it counts mel bins
+above -38 dB against `ref=np.max`, which is the song's own loudest frame.
+
+A lane where 95% of the bars carry the same number is not a measurement, and it
+now ships as nulls rather than as a wall of one value. Holocene's `pace` read
+0.000 on 209 of its 210 bars, because the onset detector finds almost nothing in
+soft piano attacks; a reader taking that at face value would see a song where
+nothing ever happens. 95% is a floor, not a tuned threshold: the next-flattest
+lane in the library is Experience's `pace` at 74% one value, and that one still
+has a tell of 1.70 and real information in the remaining quarter.
 
 `loudness` is the field that lets a reader scale to the record rather than to
 an absolute level, and it is the reason the quiet song can light up at all.
@@ -293,10 +308,28 @@ vocal separation and a monophonic pitch tracker; the lead comes from the other
 stem and harmonic salience, because a monophonic tracker on a polyphonic stem
 chases whichever partial is loudest and returns noise.
 
-`voice` and `lead` each summarise their line and carry `sure`, driven by how
-many notes needed octave correction. A low `sure` means the pitch track is not
-to be trusted — one song in this set reads 0.0 — and a reader leaning on melody
-should check it rather than assume.
+`voice` and `lead` each summarise their line with `notes`, `low`, `high` and
+`octave_fixes`. They used to carry a `sure` derived from `octave_fixes`, and it
+is gone because its sign was backwards. The formula read repairs as damage, so
+it returned 0.0 both for a track the fixer had repaired perfectly and for pure
+noise — I ran both through it to check. Four of the seven tracks it scored 0.0
+were among the best in the library by every independent measure, and the field's
+strongest correlate on the lead was the share of consecutive notes at the *same*
+pitch (+0.50): it rewarded a drone and punished a melody. `octave_fixes` stays,
+because it is a true count of an operation performed, and a reader can decide
+what to make of it.
+
+Two things about `melody` worth knowing before leaning on it. The `high` figure
+was contaminated: `librosa.yin` returns its `fmax` when it cannot decide, and
+that rail is perfectly stable so it passed the held-note gate. 19 of 29 songs
+had a pre-correction maximum of exactly that rail, and `high` is a max statistic
+so a handful of frames set it. Frames at the tracker's ceiling are now dropped.
+And the `lead` half is not a melody. It is dominated by repeats and leaps (42.7%
+of its intervals are unisons against the voice's 30.9%, and it sits on the bar's
+chord root 22.9% of the time), which is what tracking the strongest harmonic of
+an accompaniment looks like. It carries real harmonic content — it beats a
+key-rotation control at p = 1e-7 — but read it as what the accompaniment is
+doing, not as a tune somebody sang.
 
 ## Chord changes
 
@@ -326,9 +359,28 @@ A call and response never steps anywhere, so nothing else in this file
 reports it, and a rig that holds one look across it is holding through four
 turnovers of the music.
 
-`melody_phrases` is the tune broken into lines, each with the notes it spans,
-whether it was sung or played, and `same_as` naming an earlier line it repeats
-the shape of.
+`melody_phrases` is the tune broken into lines: where each starts and stops,
+how many notes it holds, its lowest and highest, whether it was sung or played,
+and `from_note`/`to_note` indexing straight into `melody[]` so a reader can pull
+the actual notes back out. A phrase's bar.beat span could not do that on its own
+— several notes share a beat, and resolving a span against `melody[]` returned a
+different note set than the phrase reported on 8% of phrases.
+
+It used to carry `same_as`, naming an earlier line it repeated the shape of,
+with a `sure` beside it. That is gone. Two things were wrong with it. The index
+was written per-stream and then the voice and lead phrases were merged and
+re-sorted without remapping it, so 79% of the populated pointers named the wrong
+phrase and 43% named one in the other stream, which the rule never even compared
+against. And once that was fixed the field still did not survive a control: hold
+a phrase up against phrases drawn from *other songs* and the shipped threshold
+tags 12.9% of them, against 14.6% within the song — a lift of 1.13. It was
+matching the generic statistics of a pitch track, not this song's repetition.
+Tightening it does find real repeats — shift-aligned, six steps or more, exact,
+with a guard requiring two intervals of a tone or wider, reaches 4.75x over the
+same control — but at 1.0% recall, on a segmentation that already returns the
+same figure as five notes one time and four the next. Section-level repetition
+is in `sections[].repeats_as` and `like`, and it is measured; melodic-phrase
+repetition is not something this file can claim yet.
 
 `groove` is what the rhythm *is*, which nothing else here says. Per stem, the
 strength of the hits at each sixteenth across a bar, plus `same_bar_to_bar` for
@@ -347,16 +399,34 @@ bar 50 of Levels is 0.04 loud and 0.30 heavy, a bar that measures as nearly
 silent and still has a third of its energy under 120 Hz.
 
 `sections[].also_heard` is a second opinion on the boundary from MuQ, a model
-trained on a hundred and sixty thousand hours that shares no code, no features
-and no assumptions with the detectors in shape.py. It is not merged into
-`sure`: two numbers that disagree are worth more than one average that hides
-it. On Nebulakal the model is nearly certain about boundaries we rated
-middling -- bars 73 and 94 come back 0.99 and 0.95 against our 0.49 and 0.44 --
-and it declines to back bars 110 and 146, which are also our two weakest. A
-boundary both methods like is worth committing a look to. A boundary only one
-of them likes is worth a gentler one.
+that shares no code, no features and no assumptions with the detectors in
+shape.py. (The checkpoint loaded here is `MuQ-large-msd-iter`, trained on the
+Million Song Dataset -- not the hundred-and-sixty-thousand-hour corpus of the
+paper, whose authors say the released weights do not reach the published
+numbers.) It is not merged into `sure`: two numbers that disagree are worth
+more than one average that hides it.
 
-null means only we heard it. That is not the same as wrong.
+It is agreement **within two bars**, not on the bar. That distinction is the
+whole field. Matched against random bars of the same count and span, our
+boundaries land on a MuQ novelty peak 33.2% of the time against 23.7% by
+chance -- a lift of 1.41, p = 3e-05, above chance on 23 of 28 songs. Tighten the
+window to the exact bar and the lift is 1.11 with p = 0.87, which is no
+agreement at all. The two methods are hearing the same event; they are not
+placing it on the same bar.
+
+Read the presence, not the number. The value is a novelty peak height with a
+floor under it, so it cannot come back below 0.56 and among the boundaries that
+have one it does not track our own `sure` (rho = -0.12). What it does carry is
+real: our `edge` averages 2.15 where MuQ agrees against 1.79 where it is silent.
+
+On Nebulakal the model is nearly certain about boundaries we rated weakly --
+bars 74 and 93 come back 0.99 and 0.95 against our 0.23 and 0.41 -- and it
+declines to back bars 128 and 146, which are also our two weakest. A boundary
+both methods like is worth committing a look to. A boundary only one of them
+likes is worth a gentler one.
+
+null means only we heard it. That is not the same as wrong. It is null on 197 of
+305 boundaries.
 
 `lyrics` is what the singer is singing and when. `lyrics.words` is every word
 with the second it starts and ends and the bar it falls in; `lyrics.lines`
@@ -372,8 +442,15 @@ same rule as `grid.sure` and `also_heard`: one method's opinion is not evidence.
 It matters here more than anywhere else, because a transcriber is fluent and
 confident when it is wrong -- on The Nights it returns "when the thunderclap
 starts pinging down" for "when thunderclouds start pouring down", in exactly the
-register it uses for the lines it gets right. A line under 0.6 is usually one
-where the voice is buried under the production.
+register it uses for the lines it gets right.
+
+What `sure` is not: a measure of how buried the voice is. That was claimed here
+and it is wrong. Correlating `lines[].sure` against how far the vocal stem sits
+above its bar's own intensity, over 354 lines in 19 songs, gives r = +0.063,
+p = 0.24. It measures whether two passes produced the same word, and nothing
+else. A high `sure` means reproducible, which is not the same as right: Holocene
+scores 0.60 on a line that reads "Someone's part of me apart" where the record
+says "Someway, baby, it's part of me, apart from me".
 
 `lyrics.checked_twice` is false when only one pass was run, and then no `sure`
 is present anywhere. Absent `sure` means unmeasured, never confirmed.
@@ -381,10 +458,28 @@ is present anywhere. Absent `sure` means unmeasured, never confirmed.
 `lyrics` is absent for songs the transcriber cannot read, and that set is larger
 than it looks. Qwen3-ASR covers thirty languages; Malayalam, Tamil and Telugu
 are not among them, and it does not decline. It picks the nearest language it
-knows and answers with confidence. Nebulakal comes back as Chinese reading
-"红灯，红灯，红灯，红灯"; Mizhiyoram as Chinese; Ponni Nadhi as Tamil forced
-into Devanagari; Entharo Mahanu as nothing at all. Arz Kiya Hai is Hindi, which
-is supported, and comes back as real Hindi lyrics.
+knows and answers with confidence. Nebulakal comes back labelled Hindi in
+Devanagari; Mizhiyoram and World of Lokah as Chinese in Han; Entharo Mahanu, a
+Tyagaraja kriti, as the Amitabha mantra in Han; Ponni Nadhi as Tamil forced into
+Devanagari. Arz Kiya Hai is Hindi, which is supported, and comes back as real
+Hindi lyrics.
+
+The gate that drops them is the two-pass agreement in `sure` together with the
+script: below 0.25 and more than half non-Latin letters, the block does not
+ship. On this library that is exactly the five songs above -- World of Lokah
+0.026, Mizhiyoram 0.053, Entharo Mahanu 0.098, Ponni Nadhi 0.118, Nebulakal
+0.179 -- and it leaves the genuinely-Hindi Arz Kiya Hai at 0.443 and Raga of
+Revenge at 0.395 alone. The threshold is fitted to twenty-three songs, not
+derived; what makes it hold is that the unsupported languages cluster far below
+everything else, because a model decoding a language it has never seen cannot
+produce the same word twice. `made_by.words_from` names the transcriber so a
+reader can check its language list rather than trust this paragraph.
+
+The script test alone would not do it: Arz Kiya Hai is 93% Devanagari and
+correct. The `sure` test alone would not either: Shootout is English, scores
+0.000, and ships -- it reads "Zero zero zero zero zero", a decoder loop, and
+that failure is visible in the number where a reader can see it. Both tests
+together is what separates a wrong alphabet from a bad transcription.
 
 Asking the model twice at different points in the song does not sort this out.
 Mizhiyoram answers Chinese every time and Nebulakal answers Hindi every time --
@@ -430,15 +525,20 @@ breaks a reader that exists, so they are written down here rather than changed.
 
 `curves[].tells` is how much a curve is worth following on this particular song:
 how much more the sections differ from one another than a section differs from
-its own two halves. It is the same measurement that gates mood, applied to every
-per-bar curve. Above about 1.3 the curve is tracking the music. At 1.0 a section
-differs from itself as much as it differs from any other section, and a reader
-keying a look off that curve on that song is lighting noise.
+its own two halves. Read it as a band, not a line. Below 1.0 a section differs
+from itself as much as it differs from any other section and a reader keying a
+look off that curve is lighting noise; above 1.6 the curve is tracking the
+music; between them it is uncertain. The band is wide because the number moves:
+shifting every internal boundary by one bar changes each tell by 29% on average
+and flips the trust verdict on about one lane in seven, and section starts and
+slams are already known to sit a bar apart on 29 of 72 cases. Wrong boundaries
+do cost it -- random segmentations drop the mean tell 47% -- so it is not simply
+reading itself back, but one bar is expensive.
 
 No curve is reliable everywhere, and the differences are large. Across the
-twenty-eight songs, drums, bass and energy are never weak. pump says little on
-ten of them, noisy on nine, width on eight, brightness on six -- on Levels
-brightness scores 0.92, which is below the point where it means anything.
+twenty-nine songs only bass and drums are never weak. piano says little on
+fifteen of them, pump and noisy on eleven each, held, vocals, width and other on
+five, guitar and weight on four, floor and brightness on three.
 
 This was measured, not assumed, and it changed what we know about fields that
 had already shipped. floor and weight are the closest pair in the whole file:
@@ -461,34 +561,41 @@ The second-closest pair is drums against intensity at 0.66 mean, which is not
 redundancy: it is a loud song having loud drums. Nothing else in the file comes
 near.
 
-`sections[].mood` is where a section sits on a handful of opposed axes -- calm
-against aggressive, happy against sad, warm against cold -- read by MuQ-MuLan,
-which was trained to place music and text in one space. The number is not a
-score against the word. It is the section's position within this song: zero is
-the song's own average, and the range runs to roughly plus or minus a half. So
--0.4 on `calm_vs_aggressive` means one of the more aggressive stretches of this
-particular song, not an aggressive piece of music. The raw similarity carries
-an arbitrary offset -- every section of The Nights reads "bright" against
-"dark" -- and only the differences between sections survive it.
+`sections[].mood` and `mood_axes` are gone. They put every section on a handful
+of opposed axes -- calm against aggressive, happy against sad, warm against cold
+-- read by MuQ-MuLan, and `mood_axes` carried a ratio that was supposed to say
+the axis had cleared its own noise. Three measurements took the field out.
 
-`mood_axes` says which axes were worth keeping and by how much. Every axis is
-measured before it ships: each section is split in half and read twice, which
-gives a noise floor, and that floor is compared against how much whole sections
-differ from one another. The number in `mood_axes` is that ratio. Below 1.0 a
-section differs from itself more than it differs from other sections, and the
-axis is measuring nothing. Anything under 1.3 is dropped from the score rather
-than shipped as decoration.
+The ratio was not measuring noise. MuQ-MuLan is bit-exact deterministic: the
+same clip read twice returns the identical vector, so the "read it twice" floor
+the gate divided by was not measurement noise at all, it was how much a section
+changes between its first half and its second. Music does that on purpose.
 
-The bar is applied per song, because the reliability is per song and not per
-axis. bright/dark scores 0.86 on The Nights and 1.64 on Levels. calm/aggressive
-scores 2.49 on The Nights and 0.95 on Levels. Raga of Revenge reads warm/cold
-at 5.49. Holocene, which holds one mood for four minutes, clears the bar on
-almost nothing and so carries almost no mood -- which is the correct answer for
-that song, and the reason the gate exists.
+The gate did not beat a control. Recomputing it over random contiguous segments
+of the same sizes, ignoring where the sections actually are, passed 43.4% of
+axes against the real segmentation's 44.9%.
 
-Unlike `also_heard`, where two independent methods vote on the same boundary,
-this is one model's opinion with no second method to check it against. The
-split-half ratio says the opinion is stable. It does not say it is right.
+And the certificate did not predict the thing it certified. Across 88 (song,
+axis) cells with at least one repeated section, the correlation between an
+axis's gate score and how much its literal repeats actually agreed was -0.070.
+The highest-scoring axes were among the worst: mizhiyoram's warm/cold gated at
+1.90 and its repeats disagree more than unrelated sections do. On shootout, two
+sections the file itself marks as the same music read opposite signs on all
+seven axes.
+
+Two of the seven were also degenerate before any music was played. In the text
+tower, warm and cold sit at cosine 0.824 and spacious and claustrophobic at
+0.754, against 0.247 for bright and dark -- and since the projection is exactly
+the dot product with the difference of the two anchors, a short axis is a
+compressed dynamic range with the same audio-side noise on it. Of the rest,
+calm_vs_aggressive correlates with no per-bar lane above 0.11, and
+spacious_vs_claustrophobic correlates with `brightness` at -0.51, which is a
+brightness meter under a spatial name.
+
+The model is still in the file. `sections[].also_heard` is MuQ reading the same
+audio for boundaries, and that one does beat its control: 1.41x over matched
+random bars, p = 3e-05. Boundaries are a thing this model can be checked on.
+Affect is not, and there is no second method here to check it against.
 
 `moments[].agreed` is how strongly several different detectors concur that
 something happens in that bar, and it is how the bar earned its place.

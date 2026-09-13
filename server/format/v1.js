@@ -10,7 +10,7 @@ export const KNOWN = [
   'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor', 'noisy', 'held',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
-  'tension', 'releases', 'melody', 'signals', 'made_by', 'mood_axes', 'lyrics', 'tells',
+  'tension', 'releases', 'melody', 'signals', 'made_by', 'lyrics', 'tells',
   'recording',
   'motion',
 ];
@@ -192,7 +192,6 @@ export function format(raw) {
       sudden: part.sudden,
       sure:       part.sure,
       trades:     part.trades,
-      mood:       part.mood,
     }));
   }
 
@@ -215,7 +214,6 @@ export function format(raw) {
     }
     if (Object.keys(said).length) out.tells = said;
   }
-  if (raw.mood_axes) out.mood_axes = raw.mood_axes;
   if (raw.lyrics) out.lyrics = raw.lyrics;
 
   // ---- energy (backward compat) ----
@@ -419,24 +417,12 @@ export function format(raw) {
   // ---- key ----
   if (raw.key || raw.chords) {
     out.key = { ...(raw.key ?? {}) };
-    if (raw.chords) {
-      out.key.chords_say = {
-        root:       raw.chords.root,
-        scale:      raw.chords.scale,
-        confidence: raw.chords.confidence,
-      };
-      out.key.changes_per_beat = raw.chords.changes_per_beat;
-    }
+    if (raw.chords) out.key.changes_per_beat = raw.chords.changes_per_beat;
   }
 
   // ---- chord_summary ----
   if (raw.chords) {
-    out.chord_summary = {
-      root:             raw.chords.root,
-      scale:            raw.chords.scale,
-      confidence:       raw.chords.confidence,
-      changes_per_beat: raw.chords.changes_per_beat,
-    };
+    out.chord_summary = { changes_per_beat: raw.chords.changes_per_beat };
   }
 
   if (raw.loudness) out.loudness = raw.loudness;

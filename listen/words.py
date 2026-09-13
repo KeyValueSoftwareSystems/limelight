@@ -54,6 +54,25 @@ def breaks(kept, g, origin, every, rest=REST):
 SHORT = 2
 
 
+WORDS_MODEL = "Qwen3-ASR-0.6B"
+READABLE = 0.25
+HAN = ((0x4E00, 0x9FFF), (0x3400, 0x4DBF))
+DEVA = (0x0900, 0x097F)
+
+
+def foreign(kept, most=0.5):
+    seen = own = 0
+    for w in kept:
+        for ch in w.get("text", ""):
+            if not ch.isalpha():
+                continue
+            seen += 1
+            at = ord(ch)
+            if any(lo <= at <= hi for lo, hi in HAN) or DEVA[0] <= at <= DEVA[1]:
+                own += 1
+    return seen > 0 and own / seen > most
+
+
 def phrased(kept, g, origin, every, rest=REST):
     cuts = breaks(kept, g, origin, every, rest)
     out, now = [], []
@@ -123,4 +142,6 @@ def words(got, g, bars, origin=1, every=4, again=None):
            "checked_twice": twice, "words": kept, "lines": rows}
     if twice:
         out["sure"] = round(sum(1 for w in kept if w["heard_twice"]) / len(kept), 3)
+        if out["sure"] < READABLE and foreign(kept):
+            return None
     return out

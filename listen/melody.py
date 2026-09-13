@@ -7,9 +7,11 @@ HOLD = 12
 TOL = 0.7
 LOW = 30
 HIGH = 100
+CEIL = 1200.0
+RAIL = 0.99
 
 
-def line(tune, env, hold=HOLD, tol=TOL, floor=FLOOR):
+def line(tune, env, hold=HOLD, tol=TOL, floor=FLOOR, ceiling=CEIL):
     if tune is None or env is None or not len(tune) or not len(env):
         return []
     n = min(len(tune), len(env))
@@ -18,6 +20,7 @@ def line(tune, env, hold=HOLD, tol=TOL, floor=FLOOR):
     loud = loud / (float(np.percentile(loud, 98)) or 1.0)
     midi = 69 + 12 * np.log2(np.maximum(f0, 1e-6) / 440.0)
     on = (loud > floor) & np.isfinite(midi) & (midi > LOW) & (midi < HIGH)
+    on &= f0 < ceiling * RAIL
     out, i = [], 0
     while i < n:
         if not on[i]:
@@ -203,14 +206,13 @@ def sung(notes, spans, g, pickup, chanted=5):
 
 def voice(notes, moved):
     if not notes:
-        return {"notes": 0, "low": None, "high": None, "sure": 0.0}
+        return {"notes": 0, "low": None, "high": None}
     pitch = [x[1] for x in notes]
     return {
         "notes": len(notes),
         "low": round(float(min(pitch)), 1),
         "high": round(float(max(pitch)), 1),
         "octave_fixes": int(moved),
-        "sure": round(float(max(0.0, 1.0 - moved / len(notes) * 2.5)), 3),
     }
 
 
@@ -263,38 +265,14 @@ def shapes(notes, per, cuts):
         mine = notes[a:b]
         if len(mine) < 2:
             continue
-        steps = [round(mine[k + 1]["pitch"] - mine[k]["pitch"]) for k in range(len(mine) - 1)]
         out.append({"from_bar": mine[0]["bar"], "from_beat": mine[0]["beat"],
                     "to_bar": mine[-1]["bar"], "to_beat": mine[-1]["beat"],
                     "notes": len(mine),
                     "low": round(min(n["pitch"] for n in mine), 1),
                     "high": round(max(n["pitch"] for n in mine), 1),
                     "sung_by": "voice" if sum(1 for n in mine if n.get("from") != "lead") >= len(mine) / 2 else "lead",
-                    "steps": steps})
+                    "holds": [n["at_s"] for n in mine]})
     return out
-
-
-def rhymes(parts, slack=1.0, least=4):
-    for i, p in enumerate(parts):
-        p["same_as"] = None
-        p["sure"] = 0.0
-    for i in range(1, len(parts)):
-        best, mark = None, 0.0
-        for j in range(i):
-            a, b = parts[j]["steps"], parts[i]["steps"]
-            n = min(len(a), len(b))
-            if n < least:
-                continue
-            off = sum(abs(a[k] - b[k]) for k in range(n)) / n
-            fit = max(0.0, 1.0 - off / (slack * 3.0)) * (n / max(len(a), len(b)))
-            if fit > mark:
-                best, mark = j, fit
-        if best is not None and mark >= 0.55:
-            parts[i]["same_as"] = best
-            parts[i]["sure"] = round(mark, 3)
-    for p in parts:
-        p.pop("steps", None)
-    return parts
 
 
 def phrases_of(notes, g, per):
@@ -306,8 +284,14 @@ def phrases_of(notes, g, per):
         mine = [n for n in notes if (n.get("from") == "lead") == (who == "lead")]
         if len(mine) < 8:
             continue
-        for p in rhymes(shapes(mine, per, breaths(mine, per))):
+        for p in shapes(mine, per, breaths(mine, per)):
             p["sung_by"] = who
             out.append(p)
     out.sort(key=lambda p: (p["from_bar"], p["from_beat"]))
+    where = {round(float(n["at_s"]), 4): i for i, n in enumerate(notes)}
+    for p in out:
+        seats = [where.get(round(float(t), 4)) for t in p.pop("holds")]
+        seats = [i for i in seats if i is not None]
+        p["from_note"] = min(seats) if seats else None
+        p["to_note"] = max(seats) if seats else None
     return out

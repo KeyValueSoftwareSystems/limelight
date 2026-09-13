@@ -6,7 +6,7 @@
                       chords = a summary object, presence, phrase_grid
      format_v1 (hub)  sections, layers.{subsection,presence,phrase}, moments
                       passed through, top-level lanes + curves.*, stems.lanes,
-                      harmony, chords = a per-bar LIST, key.chords_say
+                      harmony, chords = a per-bar LIST
    Every reader here returns one canonical shape from either input, so the plan
    is identical whichever the hub handed us (the bake parity test pins that).
    Only fields present in BOTH shapes are read -- the raw file's finer

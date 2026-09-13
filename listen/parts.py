@@ -33,7 +33,11 @@ def features_at(path, edges, sr=22050):
     keep = len(frames) - 1
 
     def cut(data, how):
-        return librosa.util.sync(data, frames, aggregate=how)[:, 1:keep + 1]
+        got = librosa.util.sync(data, frames, aggregate=how)[:, 1:keep + 1]
+        if got.shape[1] < keep:
+            pad = np.zeros((got.shape[0], keep - got.shape[1]), dtype=got.dtype)
+            got = np.concatenate([got, pad], axis=1)
+        return got
 
     return cut(chroma, np.median), cut(mfcc, np.mean), cut(busy, np.mean), cut(bright, np.mean)
 
@@ -248,9 +252,10 @@ def shape(cuts, labels, busy, voices=None):
     return out
 
 
-def curves(path, grid):
+def curves(path, grid, edges=None):
     bar_s = (60.0 / grid["bpm"]) * grid["beats_per_bar"]
-    harmony, colour, busy, bright = features(path, grid["first_beat_s"], bar_s, grid["bars"])
+    harmony, colour, busy, bright = features(path, grid["first_beat_s"], bar_s,
+                                             grid["bars"], edges=edges)
     return busy, bright
 
 

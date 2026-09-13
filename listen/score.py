@@ -11,9 +11,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cycle import cycle
 from groove import groove
 from heard import agrees, edges as model_edges
-from mood import moods
 from steady import all_tells as tells_of
-from words import words as lyrics
+from words import WORDS_MODEL, words as lyrics
 from grid import grid, bar_edges, show
 import motion
 import ident
@@ -89,10 +88,23 @@ def agreed(mine, theirs, tol=0.070):
 
 
 WANT = ["rhythm.bpm", "tonal.key_edma.key", "tonal.key_edma.scale", "tonal.key_edma.strength",
-        "tonal.tuning_frequency", "tonal.chords_key", "tonal.chords_scale",
+        "tonal.tuning_frequency", "tonal.tuning_equal_tempered_deviation",
+        "tonal.chords_key", "tonal.chords_scale",
         "tonal.chords_strength.mean", "tonal.chords_changes_rate",
         "lowlevel.loudness_ebu128.integrated", "lowlevel.loudness_ebu128.loudness_range",
         "lowlevel.dynamic_complexity", "rhythm.danceability", "rhythm.onset_rate"]
+
+KEYS = ["key.root", "key.scale", "key.strength"]
+PROFILE = "edma"
+TEMPERED = 0.10
+SAME = 0.95
+
+
+def in_tune(f):
+    drift = f.get("tonal.tuning_equal_tempered_deviation")
+    if drift is None or drift >= TEMPERED:
+        return None
+    return round(f["tonal.tuning_frequency"], 1)
 
 
 def listen(path, slug, times):
@@ -100,7 +112,8 @@ def listen(path, slug, times):
     loud_at = CACHE / f"{slug}.loud.npy"
     if at.exists() and loud_at.exists() and (CACHE / f"{slug}.flux.npy").exists():
         d = json.loads(at.read_text())
-        return d["length_s"], np.load(loud_at), d["f"]
+        if all(k in d["f"] for k in WANT + KEYS):
+            return d["length_s"], np.load(loud_at), d["f"]
 
     import essentia.standard as es
 
@@ -113,6 +126,8 @@ def listen(path, slug, times):
         tonalStats=["mean", "stdev"],
     )(path)
     f = {k: (str(feats[k]) if isinstance(feats[k], str) else float(feats[k])) for k in WANT}
+    root, scale, strength = es.KeyExtractor(profileType=PROFILE)(audio)
+    f["key.root"], f["key.scale"], f["key.strength"] = str(root), str(scale), float(strength)
     length_s = len(audio) / 44100.0
     loud = np.asarray(loud, dtype=float)
     at.parent.mkdir(parents=True, exist_ok=True)
@@ -288,7 +303,7 @@ def read(path, slug):
     ticks = per_tick(env, cuts, per=g["beats_per_bar"] * 4)
     swing = groove(env, cuts, per=g["beats_per_bar"] * 4)
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
-    busy, bright = curves(path, g)
+    busy, bright = curves(path, g, edges=cuts)
     pickup = 1 if g["first_beat_s"] > 0.2 else 0
     g["first_bar"] = 0 if pickup else 1
     g["last_bar"] = g["bars"] - pickup
@@ -314,6 +329,15 @@ def read(path, slug):
         "chord": chord,
         "chord_sure": chord_sure,
     }
+    for name, lane in list(score_bars.items()):
+        if name in ("chord", "chord_sure") or not lane:
+            continue
+        seen = [x for x in lane if x is not None]
+        if not seen:
+            continue
+        top = max(seen.count(v) for v in set(seen))
+        if top / len(seen) >= SAME:
+            score_bars[name] = [None] * len(lane)
     beats, pull, gone = pulse(path, g, times, positions, np.load(CACHE / f"{slug}.flux.npy"),
                               env, report)
     flux = np.load(CACHE / f"{slug}.flux.npy")
@@ -369,15 +393,6 @@ def read(path, slug):
         part["nth"] = said["nth"]
         part["like"] = said["like"]
         part["returns"] = said["returns"]
-
-    mood_sure = {}
-    felt = CACHE / f"{slug}.mood.json"
-    if felt.exists():
-        mood_rows, mood_sure = moods(json.loads(felt.read_text()), shaped, pickup)
-        if mood_rows:
-            for part, row in zip(shaped, mood_rows):
-                part["mood"] = row
-        report["mood_axes"] = len(mood_sure)
 
     curve_tells = tells_of(score_bars, shaped, g["first_bar"])
 
@@ -447,20 +462,19 @@ def read(path, slug):
         "recording": ident.named(path),
         "made_by": {
             "voice_from": voice_made_by(slug),
+            "voice_pitch_from": "librosa.yin 65-1200 Hz" if heard else None,
             "lead_from": "htdemucs" if riff else None,
-            "melody_from": "harmonic salience" if riff else None,
+            "melody_from": "librosa.salience argmax, 80-1200 Hz" if riff else None,
+            "words_from": WORDS_MODEL if lyrics_out else None,
         },
         "grid": g,
         "key": {
-            "root": f["tonal.key_edma.key"],
-            "scale": f["tonal.key_edma.scale"],
-            "confidence": round(f["tonal.key_edma.strength"], 3),
-            "tuned_to_hz": round(f["tonal.tuning_frequency"], 1),
+            "root": f["key.root"],
+            "scale": f["key.scale"],
+            "confidence": round(f["key.strength"], 3),
+            "tuned_to_hz": in_tune(f),
         },
         "chords": {
-            "root": f["tonal.chords_key"],
-            "scale": f["tonal.chords_scale"],
-            "confidence": round(f["tonal.chords_strength.mean"], 3),
             "changes_per_beat": round(f["tonal.chords_changes_rate"], 4),
         },
         "loudness": {
@@ -492,7 +506,6 @@ def read(path, slug):
         "groove": swing,
         "melody": tune_notes,
         "melody_phrases": phrases_of(tune_notes, g, g["beats_per_bar"]),
-        "mood_axes": mood_sure or None,
         "curve_tells": curve_tells or None,
         "lyrics": lyrics_out,
     }

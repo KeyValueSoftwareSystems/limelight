@@ -134,20 +134,75 @@ are consonant skeletons. I found the cause tonight (the transcript keeps them;
 the aligner's per-word text does not) and have a fix written but not yet run
 across the library.
 
-## 7. Repetition below section level — not done
+## 7. Repetition below section level — not done, and I removed what looked like it
 
-`melody_phrases[].same_as` exists and may cover part of what you want. A repeat
-tag on `phrases` does not.
+`melody_phrases[].same_as` used to exist and I was going to point you at it. It
+is gone. Two things were wrong. The index was written per-stream, then the voice
+and lead phrases were merged and re-sorted without remapping it, so 79% of the
+populated pointers named the wrong phrase. After fixing that, I held each phrase
+up against phrases from *other songs*: the shipped threshold tagged 12.9% of
+those against 14.6% within the song. It was matching the generic statistics of a
+pitch track, not this song's repeats.
 
-## 8. Character tags per section — already there
+Tightening it does find real repetition — shift-aligned, six steps or more,
+exact, with a guard requiring two intervals of a tone or wider, gets 4.75x over
+that same control — but at 1.0% recall, and on a phrase segmentation that
+already returns the same figure as five notes one time and four the next. Not
+worth your trust yet.
 
-`sections[].mood` ships, and `mood_axes` says which axes survived their noise
-check on that song. It is **numbers on axes**, not a word: e.g.
-`{"spacious_vs_claustrophobic": -0.137, "tense_vs_relaxed": 0.387}`. Only axes
-that beat their own noise floor are included, so an absent axis means "we could
-not tell", not "neutral". If you want a palette driver, this is a safer one than
-key — and you were right to distrust key, F major against C# minor is the kind
-of disagreement that should stop you using it.
+What `melody_phrases` does now carry that it did not: `from_note` and `to_note`,
+indexing straight into `melody[]`. The bar.beat span could not be resolved back
+to its own notes — several notes share a beat — and it returned the wrong note
+set on 8% of phrases. Section-level repetition in `sections[].repeats_as` and
+`like` is measured and stands.
+
+## 8. Character tags per section — I had this, and I took it out
+
+I owe you a correction here. I was going to tell you `sections[].mood` was a
+safer palette driver than key. It is gone, and key is the one that got fixed.
+
+`mood` put each section on opposed axes (calm/aggressive, happy/sad, warm/cold)
+read by MuQ-MuLan, and `mood_axes` carried a ratio that was supposed to certify
+the axis had cleared its own noise. Three measurements took it out:
+
+- The ratio was not measuring noise. The model is bit-exact deterministic — the
+  same clip read twice returns the identical vector — so the "read it twice"
+  floor it divided by was how much a section changes between its halves. Music
+  does that on purpose.
+- It did not beat a control. Recompute it over random contiguous segments of the
+  same sizes, ignoring where the sections are, and 43.4% of axes pass against
+  the real segmentation's 44.9%.
+- The certificate did not predict the thing it certified. Over 88 (song, axis)
+  cells with a repeated section, the correlation between an axis's gate score
+  and how much its literal repeats agreed was **−0.070**. The worst offenders
+  were high scorers. On shootout, two sections the file itself marks as the same
+  music read opposite signs on all seven axes.
+
+If I had shipped you that as a palette driver you would have had a rig changing
+colour between two identical choruses, with a number in the file telling you it
+was reliable.
+
+**Key is now the field to use, and I was wrong to tell you to distrust it.** You
+were right that F major against C# minor was a disagreement that should stop
+you. The cause was ours: we were reading `tonal.key_edma` out of Essentia's
+MusicExtractor, whose tonal chain builds its key estimator with `usePolyphony`
+and `useThreeChords` on. That re-reads the tonic as the dominant — **11 of 28
+songs came back as exactly the subdominant**. Calling `es.KeyExtractor` directly
+with the same profile on the same files, scored against eleven published human
+transcriptions: **3/11 exact before, 7/11 after**. Levels went from F major,
+which shares 1 note in 120 with the record, to E major — still not the C# minor
+a human would write, but E major is C# minor's relative, so the pitch collection
+is now right and only the tonic is not.
+
+The second field in that disagreement is also gone. `chords.root`/`scale` and
+`key.chords_say` were never a key estimate — Essentia builds them by taking the
+most frequent chord and reading its letter. Shipping them beside `key` gave you
+two fields that looked like the same claim. `chord_summary` keeps
+`changes_per_beat`, which is the part that meant something.
+
+One caveat on key: when it is wrong it now usually names the relative or the
+fifth. A palette keyed to the **pitch collection** is safe. One keyed to
+major-versus-minor mood is not.
 
 ## 9. Smaller items
 

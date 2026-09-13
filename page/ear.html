@@ -892,8 +892,7 @@ function tune() {
     g.beginPath(); g.moveTo(L, Y(p)); g.lineTo(W-6, Y(p)); g.stroke();
   }
 
-  /* One band per melodic phrase: where a line of the tune starts and stops,
-     and which earlier line it is a repeat of. */
+  /* One band per melodic phrase: where a line of the tune starts and stops. */
   const per = SCORE.grid.beats_per_bar;
   const phAt = ph => X(noteAt(ph.from_bar, ph.from_beat));
   const phTo = ph => X(noteAt(ph.to_bar, ph.to_beat));
@@ -903,16 +902,11 @@ function tune() {
     if (x1 < L || x0 > W) return;
     const voice = q.sung_by !== "lead";
     g.strokeStyle = voice ? STEM.vocals : STEM.other;
-    g.globalAlpha = q.same_as != null ? 0.75 : 0.3;
+    g.globalAlpha = 0.55;
     g.lineWidth = 1;
     g.beginPath();
     g.moveTo(x0, foot + 6); g.lineTo(x1, foot + 6); g.stroke();
     g.beginPath(); g.moveTo(x0, foot + 2); g.lineTo(x0, foot + 10); g.stroke();
-    if (q.same_as != null && x1 - x0 > 14) {
-      g.fillStyle = voice ? STEM.vocals : STEM.other;
-      g.globalAlpha = 1; g.font = "600 10px ui-monospace,monospace";
-      g.fillText("\u21ba", (x0 + x1) / 2 - 3, foot + 15);
-    }
     g.globalAlpha = 1;
   });
   PHIT.length = 0;
@@ -1340,28 +1334,6 @@ function firstIndex() {
   return ((best % SCORE.grid.beats_per_bar) + SCORE.grid.beats_per_bar) % SCORE.grid.beats_per_bar;
 }
 
-const MOODWORD = {
-  bright_vs_dark:             ["brighter", "darker"],
-  calm_vs_aggressive:         ["calmer", "more aggressive"],
-  happy_vs_sad:               ["happier", "sadder"],
-  warm_vs_cold:               ["warmer", "colder"],
-  spacious_vs_claustrophobic: ["more open", "more closed-in"],
-  triumphant_vs_mournful:     ["more triumphant", "more mournful"],
-  tense_vs_relaxed:           ["tenser", "more relaxed"],
-};
-
-function moodWords(m) {
-  if (!m) return "";
-  const said = Object.entries(m)
-    .filter(([k, v]) => MOODWORD[k] && Math.abs(v) >= 0.15)
-    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
-    .slice(0, 2)
-    .map(([k, v]) => (Math.abs(v) >= 0.32 ? "much " : "") + MOODWORD[k][v > 0 ? 0 : 1]);
-  return said.length
-    ? ` <b style="color:var(--amb)">· ${said.join(" and ")} than the rest of this song</b>`
-    : "";
-}
-
 function modelRan() {
   return (SCORE.parts || []).some(p => p.also_heard != null);
 }
@@ -1432,7 +1404,7 @@ function sections() {
         · bars ${p.from_bar}–${p.to_bar}</span>
         <span style="color:#8fbf9f">· ${esc(partTune(p))}</span>${p.trades
           ? ` <b style="color:var(--vio)">· trades back and forth every ${p.trades.every_bars} bars</b>`
-          : ""}${moodWords(p.mood)}${edgeWords(p)}</span>
+          : ""}${edgeWords(p)}</span>
       <button data-from="${t0}" data-to="${t1}">Hear it</button>
       `;
 

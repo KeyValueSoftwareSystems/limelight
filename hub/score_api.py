@@ -19,7 +19,7 @@ KNOWN = [
     "presence", "moments",
     "phrases", "layers", "chords", "key", "loudness", "feel",
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
-    "tension", "releases", "melody", "signals", "made_by", "mood_axes",
+    "tension", "releases", "melody", "signals", "made_by",
     "lyrics", "tells", "motion", "recording",
 ]
 
@@ -176,7 +176,6 @@ def format_v1(raw):
                 "also_heard": p.get("also_heard"),
                 "edge": p.get("edge"),
                 "sudden": p.get("sudden"),
-                "mood": p.get("mood"),
                 "stems": p.get("stems"),
             }
             for p in raw["parts"]
@@ -216,7 +215,7 @@ def format_v1(raw):
         out["energy"]["tells"] = out["tells"]["energy"]
 
     for whole in ("groove", "ticks", "melody_phrases",
-                  "phrase_grid", "scales", "presence", "mood_axes", "lyrics",
+                  "phrase_grid", "scales", "presence", "lyrics",
                   "motion", "recording"):
         if raw.get(whole) is not None:
             out[whole] = raw[whole]
@@ -375,21 +374,12 @@ def format_v1(raw):
         out["key"] = dict(raw.get("key") or {})
         chords_obj = raw.get("chords")
         if chords_obj:
-            out["key"]["chords_say"] = {
-                "root": chords_obj.get("root"),
-                "scale": chords_obj.get("scale"),
-                "confidence": chords_obj.get("confidence"),
-            }
             out["key"]["changes_per_beat"] = chords_obj.get("changes_per_beat")
 
     # ---- chord_summary ----
     if raw.get("chords"):
-        c = raw["chords"]
         out["chord_summary"] = {
-            "root": c.get("root"),
-            "scale": c.get("scale"),
-            "confidence": c.get("confidence"),
-            "changes_per_beat": c.get("changes_per_beat"),
+            "changes_per_beat": raw["chords"].get("changes_per_beat"),
         }
 
     if raw.get("loudness"):
