@@ -341,7 +341,8 @@ function plan(scoreIn, enumResult, seed) {
      carving the base around it would leave colour/level unowned) */
   const isLook = id => occOf(id).some(t => t === "pars:level" || t.startsWith("all_pars"));
   const pickFor = (vector, grp, exclude) => {
-    const all = V.candidates(vector);
+    /* looks only: a one-shot is punctuation, never a look, whatever the fallback */
+    const all = V.candidates(vector).filter(c => { const q = V.seq(c.id); return !(q && q.kind === "oneshot"); });
     const same = all.filter(c => groupOf(c.id) === grp && (grp !== "par" || isLook(c.id)));
     const pool = (same.length ? same : all).filter(c => !(exclude || []).includes(c.id));
     return pickWeighted(pool, rng);
@@ -512,11 +513,42 @@ function plan(scoreIn, enumResult, seed) {
   const ctxAt = B => { const i = sections.findIndex(x => atBeat(x.from) <= B && B < atBeat(x.to)); return i >= 0 ? contexts[i] : null; };
   const spanFx = (B, len, extra) => ({ from: fromBeat(B), to: fromBeat(B + len), context: ctxAt(B), layer: "fx",
     occupies: [], section: sectionAt(B), ...extra });
+  /* phase B: a moment DRAWS its punctuation from the matrix. Its vector is the bar's
+     facts plus the moment kind and weight band; one one-shot per slot (before / on /
+     span) is drawn among the oneshot candidates. When the cache offers none (an
+     older cache, an unknown kind) the fixed effects below still fire. */
+  const FX_PRIORITY = { white_blast: 9, blackout: 9, pause: 8, hook: 7, accent_strobe: 5, modulate: 4, whiten: 3 };
+  const drawOneShots = (m, w, B, len) => {
+    const bar = facts && facts.vectors[m.bar - facts.from_bar];
+    const vector = { ...(bar || { form: ctxAt(B) }), moment: [m.kind, weightBand(w)] };
+    if (!vector.form) return [];
+    const shots = V.candidates(vector).filter(c => { const q = V.seq(c.id); return q && q.kind === "oneshot" && q.gesture && q.gesture.fx; });
+    const out = [];
+    for (const slot of ["before", "on", "span"]) {
+      const pick = pickWeighted(shots.filter(c => (V.seq(c.id).gesture.slot || "on") === slot), rng);
+      if (!pick) continue;
+      const q = V.seq(pick.id), g = q.gesture;
+      const dur = slot === "span" ? (len || q.duration_beats || bpb) : (q.duration_beats || 1);
+      const start = slot === "before" ? B - dur : B;
+      const params = { strength: w, ...(g.params || {}) };
+      if (g.fx === "pause") params.still = m.still || [];
+      if (g.fx === "whiten" && params.amount == null) params.amount = +clamp01(0.2 + 0.5 * w).toFixed(3);
+      if (g.fx === "accent_strobe") params.strength = +clamp01(0.4 + 0.6 * w).toFixed(3);
+      out.push({ from: fromBeat(start), to: fromBeat(start + dur), context: ctxAt(B), layer: g.fx === "modulate" ? "modulate" : "fx",
+        priority: FX_PRIORITY[g.fx] || 6, type: g.fx, seq_id: pick.id, params, occupies: q.occupies || [],
+        section: sectionAt(B), moment: m.kind, what: m.what, facts: vector });
+    }
+    return out;
+  };
   for (const m of moments) {
     const w = typeof m.weight === "number" ? clamp01(m.weight) : 0.5;
     const B = atBeat({ bar: m.bar, beat: m.beat });
     const len = typeof m.for_beats === "number" && m.for_beats > 0 ? m.for_beats : null;
     const tag = { moment: m.kind, what: m.what };
+    if (m.kind === "pause" || w >= 0.25) {
+      const shots = drawOneShots(m, w, B, len);
+      if (shots.length) { assignments.push(...shots); continue; }
+    }
     if (m.kind === "pause") {
       assignments.push(spanFx(B, len || bpb, { priority: 8, type: "pause", params: { strength: w, still: m.still || [] }, ...tag }));
       continue;

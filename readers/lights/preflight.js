@@ -121,6 +121,42 @@ const VOCABULARY = [
                 presence: { "drums:in": 1, "drums:out": 0.1 },
                 texture: { busy: 0.9 } } },
 
+  /* ---- one-shots (spec phase B): punctuation a MOMENT draws from the matrix. Each
+     maps to one of the renderer's typed effects (gesture.fx) for duration_beats,
+     placed at the moment (slot "on"), the beat before ("before") or over the
+     moment's span ("span"). affinity.moment lists the kinds and weight bands it
+     answers; `_default: 0` vetoes every other moment, so a hush never fires on an
+     entrance. Bare bars carry no moment fact, so one-shots never compete with looks. */
+  ...[
+    { id: "impact", fx: "white_blast", slot: "on", dur: 1, bold: "hero", occ: [],
+      form: { intro: 0.3, verse: 0.7, break: 0.7, build: 0.8, drop: 1, outro: 0.3, silence: 0.2, final_drop: 1 },
+      moment: { entrance: 1, release: 0.9, accent: 0.7, change: 0.5, transition: 0.6, highlight: 0.6, heavy: 1, firm: 0.7, light: 0.3, _default: 0 } },
+    { id: "breath", fx: "blackout", slot: "before", dur: 1, bold: "hero", occ: [],
+      form: { intro: 0.2, verse: 0.6, break: 0.7, build: 0.9, drop: 1, outro: 0.2, silence: 0.2, final_drop: 1 },
+      moment: { entrance: 1, release: 0.6, heavy: 1, firm: 0, light: 0, _default: 0 } },
+    { id: "flash", fx: "white_blast", slot: "on", dur: 1, bold: "accent", occ: [],
+      form: { intro: 0.4, verse: 0.8, break: 0.8, build: 0.8, drop: 0.7, outro: 0.4, silence: 0.3, final_drop: 0.7 },
+      moment: { entrance: 0.5, accent: 0.9, change: 0.8, highlight: 0.8, release: 0.5, transition: 0.6, light: 1, firm: 0.6, heavy: 0.2, _default: 0 } },
+    { id: "hush", fx: "pause", slot: "span", dur: 4, bold: "accent", occ: [],
+      form: { intro: 0.6, verse: 1, break: 1, build: 0.8, drop: 0.8, outro: 0.6, silence: 0.8, final_drop: 0.8 },
+      moment: { pause: 1, heavy: 1, firm: 1, light: 1, _default: 0 } },
+    { id: "hook_lift", fx: "hook", slot: "span", dur: 4, bold: "accent", occ: [],
+      form: { intro: 0.4, verse: 0.9, break: 0.9, build: 0.9, drop: 0.9, outro: 0.4, silence: 0.3, final_drop: 0.9 },
+      moment: { hook: 1, heavy: 1, firm: 1, light: 0.8, _default: 0 } },
+    { id: "riser", fx: "whiten", slot: "span", dur: 8, bold: "accent", occ: [],
+      form: { intro: 0.3, verse: 0.7, break: 0.9, build: 1, drop: 0.6, outro: 0.2, silence: 0.3, final_drop: 0.6 },
+      moment: { rise: 1, heavy: 1, firm: 1, light: 0.6, _default: 0 } },
+    { id: "fill_flicker", fx: "accent_strobe", slot: "span", dur: 4, bold: "accent", occ: ["pars:strobe"],
+      form: { intro: 0.1, verse: 0.6, break: 0.8, build: 0.9, drop: 1, outro: 0.1, silence: 0, final_drop: 1 },
+      moment: { fill: 1, heavy: 1, firm: 1, light: 0.7, _default: 0 } },
+    { id: "exit_dip", fx: "modulate", slot: "span", dur: 4, bold: "ambient", occ: [], params: { gain: 0.75, motion: -0.2, doing: "exit" },
+      form: { intro: 0.5, verse: 0.9, break: 0.9, build: 0.7, drop: 0.7, outro: 0.9, silence: 0.6, final_drop: 0.7 },
+      moment: { exit: 1, heavy: 1, firm: 1, light: 1, _default: 0 } },
+  ].map(o => ({ id: o.id, kind: "oneshot", boldness: o.bold, occupies: o.occ, duration_beats: o.dur,
+    gesture: { fx: o.fx, slot: o.slot, ...(o.params ? { params: o.params } : {}) },
+    requires: g => g.pars.length >= 1, fit: () => 0.9,
+    affinity: { form: o.form, moment: o.moment } })),
+
   /* A dangerous device type: only enumerated if the layout also carries the enforced
      safety limits for it. A gesture with no enforced limit is never offered. */
   { id: "laser_sweep", kind: "individual", boldness: "hero",
@@ -196,7 +232,13 @@ function validateSequence(seq, layout) {
   const { caps, groups } = layoutFacts(layout);
   const bad = reason => ({ ok: false, reason });
   if (!seq || typeof seq.id !== "string" || !seq.id) return bad("missing id");
-  if (!["individual", "compound", "combination"].includes(seq.kind)) return bad("bad kind");
+  if (!["individual", "compound", "combination", "oneshot"].includes(seq.kind)) return bad("bad kind");
+  if (seq.kind === "oneshot") {
+    if (!(Number.isInteger(seq.duration_beats) && seq.duration_beats > 0)) return bad("a oneshot needs duration_beats (a positive integer)");
+    const aff = seq.affinity || {};
+    if (!aff.moment || typeof aff.moment !== "object") return bad("a oneshot needs affinity.moment");
+    if (!seq.gesture || typeof seq.gesture.fx !== "string") return bad("a oneshot needs gesture.fx");
+  }
   if (!["ambient", "accent", "hero"].includes(seq.boldness)) return bad("bad boldness");
   const req = seq.requires || {};
   for (const c of (req.caps || [])) {
@@ -239,7 +281,8 @@ function enumerate(layout, options) {
     matrix[s.id] = row; fit[s.id] = f; store(s.id, s.affinity);
     sequences.push({ id: s.id, kind: s.kind, boldness: s.boldness, source: "base",
       fit: f, occupies: s.kind === "combination" ? comboOccupies(s) : (s.occupies || []),
-      ...(s.parts ? { parts: s.parts.map(p => p.seq) } : {}) });
+      ...(s.parts ? { parts: s.parts.map(p => p.seq) } : {}),
+      ...(s.kind === "oneshot" ? { gesture: s.gesture, duration_beats: s.duration_beats } : {}) });
   }
 
   let rejected = 0, dup = 0;
@@ -254,7 +297,8 @@ function enumerate(layout, options) {
     matrix[seq.id] = row; fit[seq.id] = f; store(seq.id, aff);
     sequences.push({ id: seq.id, kind: seq.kind, boldness: seq.boldness, source: "llm",
       fit: f, occupies: seq.occupies || [],
-      ...(Array.isArray(seq.parts) ? { parts: seq.parts.map(p => p && p.seq).filter(Boolean) } : {}) });
+      ...(Array.isArray(seq.parts) ? { parts: seq.parts.map(p => p && p.seq).filter(Boolean) } : {}),
+      ...(seq.kind === "oneshot" ? { gesture: seq.gesture, duration_beats: seq.duration_beats } : {}) });
   }
 
   const impossible = VOCABULARY.filter(s => !keptBase.includes(s)).map(s => s.id);
@@ -313,6 +357,9 @@ function view(result) {
   const fitK = s => (s.source === "llm" ? 1 : (F[s.id] != null ? F[s.id] : (s.fit != null ? s.fit : 1)));
   const score = (s, ctx) => {
     const v = toVector(ctx);
+    /* a one-shot is punctuation: it answers a MOMENT and nothing else, so a bar
+       without a moment fact never offers one (an unmatched family would be neutral) */
+    if (s.kind === "oneshot" && !(v.moment && v.moment.length)) return 0;
     const aff = affOf(s.id);
     if (!aff) return (M[s.id] || {})[v.form] || 0;       /* an older cache: form only */
     return gate(cellFor(aff, fitK(s), v));

@@ -353,6 +353,31 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
      !vari3 || vari3.facts.doing === "holding", vari3 && vari3.facts.doing);
 }
 
+
+/* ---- phase B: moments draw one-shots from the matrix; old caches keep the fixed fx -- */
+{
+  const p = plan(MINI, EN, 42);
+  const blast = p.assignments.find(a => a.type === "white_blast");
+  ok("the heavy entrance is a matrix-chosen one-shot (impact) at its exact bar/beat",
+     blast && blast.seq_id === "impact" && blast.from.bar === 4 && blast.from.beat === 1 && blast.params.strength === 0.97, JSON.stringify(blast));
+  const black = p.assignments.find(a => a.type === "blackout");
+  ok("its breath is a one-shot the beat before", black && black.seq_id === "breath" && black.from.bar === 3 && black.from.beat === 4, JSON.stringify(black));
+  const pause = p.assignments.find(a => a.type === "pause");
+  ok("the pause is the hush one-shot for its for_beats", pause && pause.seq_id === "hush" && pause.from.bar === 8 && pause.to.bar === 9 && pause.to.beat === 3 && pause.params.still[0] === "bass", JSON.stringify(pause));
+  const hook = p.assignments.find(a => a.type === "hook");
+  ok("the hook is the hook_lift one-shot", hook && hook.seq_id === "hook_lift" && hook.from.bar === 6 && hook.to.bar === 8, JSON.stringify(hook));
+  ok("a one-shot carries the moment vector it was chosen with", blast && blast.facts && blast.facts.moment && blast.facts.moment.includes("entrance") && blast.facts.moment.includes("heavy"));
+  /* the same rich cache with the one-shots removed: the looks must not move */
+  const old = plan(MINI, { ...EN, sequences: EN.sequences.filter(s => s.kind !== "oneshot") }, 42);
+  const ob = old.assignments.find(a => a.type === "white_blast");
+  ok("without one-shots in the cache the fixed effects still fire", ob && !ob.seq_id && ob.from.bar === 4 && old.assignments.some(a => a.type === "pause" && !a.seq_id));
+  const legacy = plan(MINI, { sequences: EN.sequences.filter(s => s.kind !== "oneshot"), matrix: EN.matrix }, 42);
+  ok("an old-shape cache (form only) still fires the fixed effects too", legacy.assignments.some(a => a.type === "white_blast" && !a.seq_id));
+  ok("one-shots do not move the section picks (same seed, same looks)",
+     JSON.stringify(p.assignments.filter(a => a.layer === "par" || a.layer === "head").map(a => a.seq_id)) === JSON.stringify(old.assignments.filter(a => a.layer === "par" || a.layer === "head").map(a => a.seq_id)));
+  ok("still no clashes", clashes(p) === 0);
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;
