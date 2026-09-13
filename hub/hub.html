@@ -46,7 +46,7 @@
     <col class="c-meta">
     <col class="c-personalities">
   </colgroup>
-  <thead><tr><th>Name</th><th>Updated</th><th>Size</th><th>Version</th><th>Metadata</th><th>Personalitys</th></tr></thead>
+  <thead><tr><th>Name</th><th>Updated</th><th>Size</th><th>Version</th><th>Metadata</th><th>Personalities</th><th>Audio</th></tr></thead>
   <tbody id="rows"></tbody>
 </table>
 </div>
@@ -101,17 +101,46 @@ function render() {
     const prof = score ? (p.personalities ? `${p.personalities} personality${p.personalities === 1 ? "" : "s"}` : `<span class="dim">none</span>`) : "";
     const meta = score ? (p.has_metadata ? "yes" : `<span class="dim">none</span>`) : "";
     const ver = score ? (p.version ? `<span class="badge">v${p.version}</span>` : `<span class="dim">no versions</span>`) : "";
+    /* Audio attaches under the SCORE's name, so the two can never drift apart --
+       unlike Generate from MP3, which names a new score after whatever the file
+       was called and is how one song ended up here twice. */
+    const audio = score
+      ? (p.audio
+          ? `<a class="btn small" href="/hub/audio/${enc(p.audio)}" title="${esc(p.audio)}">play</a>` +
+            ` <label class="btn small attach" title="replace the audio">replace<input type="file" accept="audio/*" hidden data-attach="${esc(p.name)}"></label>`
+          : `<label class="btn small attach">attach mp3<input type="file" accept="audio/*" hidden data-attach="${esc(p.name)}"></label>`)
+      : "";
     rows.push(`<tr>${cell("", a + dl, "n" + (score ? " name-score" : ""))}${cell("updated", when(p.mtime))}` +
-      `${cell("size", dir ? "" : human(p.size))}${cell("version", ver)}${cell("metadata", meta)}${cell("personalities", prof)}</tr>`);
+      `${cell("size", dir ? "" : human(p.size))}${cell("version", ver)}${cell("metadata", meta)}${cell("personalities", prof)}${cell("audio", audio)}</tr>`);
   }
   if (paths.length || (base !== "/hub/" && !q && rows.length)) {
     $("rows").innerHTML = rows.join("");
     return;
   }
   $("rows").innerHTML = q
-    ? `<tr><td colspan="6" class="empty">No names match “${esc(q)}”.</td></tr>`
-    : `<tr><td colspan="6" class="empty">Nothing here yet. Upload a file, or push one with <code>limelight push</code>.</td></tr>`;
+    ? `<tr><td colspan="7" class="empty">No names match “${esc(q)}”.</td></tr>`
+    : `<tr><td colspan="7" class="empty">Nothing here yet. Upload a file, or push one with <code>limelight push</code>.</td></tr>`;
 }
+
+/* attach audio to a score that already exists: one PUT, nothing regenerated */
+document.addEventListener("change", async e => {
+  const input = e.target.closest("input[data-attach]");
+  if (!input || !input.files || !input.files.length) return;
+  const scoreName = input.dataset.attach;
+  const f = input.files[0];
+  const ext = (f.name.split(".").pop() || "mp3").toLowerCase();
+  const label = input.closest("label");
+  const was = label ? label.textContent : "";
+  if (label) label.textContent = "sending…";
+  try {
+    const r = await fetch(base + enc(scoreName) + "?audio=" + encodeURIComponent(ext),
+                          { method: "PUT", body: f });
+    if (!r.ok) { err(`attach failed: ${r.status} ${await r.text()}`); }
+    else { err(""); await load(); return; }
+  } catch (ex) { err("attach failed: " + ex.message); }
+  if (label) label.textContent = was;
+  input.value = "";
+});
 
 async function load() {
   err("");

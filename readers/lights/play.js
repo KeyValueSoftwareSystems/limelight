@@ -31,7 +31,7 @@ const layout = JSON.parse(fs.readFileSync(path.join(HERE, "arc4-head.layout.json
 const cache = JSON.parse(fs.readFileSync(path.join(HERE, "arc4-head.matrix.json"), "utf8"));
 let palette = [];
 try { palette = JSON.parse(fs.readFileSync(path.join(HERE, "arc4-head.palette.json"), "utf8")); } catch (e) { /* base only */ }
-const library = Object.fromEntries(palette.map(s => [s.id, s]));
+const library = { ...Object.fromEntries(palette.map(s => [s.id, s])), ...require("./preflight.js").baseLibrary() };   /* the base looks render too */
 const bpm = +opt("--bpm", 128), bars = +opt("--bars", 8), fps = 40, bpb = 4;
 /* character knobs: --subdiv 0.5|1|2|4 (PAR pattern steps per beat, x the look's own),
    --motion 0..1 (how hard the head moves), --mode hit|breathe|hold (level shape;

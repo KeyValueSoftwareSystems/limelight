@@ -47,24 +47,44 @@ const floorLevel = p => +((p.floor != null ? p.floor : 0) * (p.intensity != null
 const colourOf = (k, keys) => (k && k.intent && k.intent.colour) ||
   (keys[0] && keys[0].intent && keys[0].intent.colour) || [1, 1, 1];
 
-/* A gesture with several colour keys (xfade_*) is a slow crossfade, not a static
-   colour: interpolate across the colour keys by bar position, looping. `at` is
-   read as bars (the only sensible reading for a slow morph); a single-colour
-   gesture (hold/breathe) returns its one colour unchanged. */
+/* A gesture with several colour keys (xfade_*, whiten_*) is a slow crossfade, not
+   a static colour: interpolate across the colour keys by bar position. `at` is read
+   as bars (the only sensible reading for a slow morph). A looping crossfade runs on
+   the global bar clock; a `repeat: "once"` ramp runs from ITS OWN START (ph.since,
+   beats since the assignment began) and HOLDS its last key -- a riser that reached
+   white stays white, it does not snap back to amber. A single-colour gesture
+   (hold/breathe) returns its one colour unchanged. */
 const lerp = (a, b, f) => a + (b - a) * f;
-function crossfadeColour(keys, ph) {
-  const ck = (keys || []).filter(k => k.intent && k.intent.colour);
-  if (ck.length <= 1) return colourOf(keys[0], keys);
-  const period = ck[ck.length - 1].at || ck.length;
-  const t = (((ph.globalBeat / (ph.bpb || 4)) % period) + period) % period;
+function rampTime(keys, ph, once) {
+  const period = keys[keys.length - 1].at || keys.length;
+  if (once) return Math.min(Math.max(0, (ph.since != null ? ph.since : ph.globalBeat) / (ph.bpb || 4)), period);
+  return (((ph.globalBeat / (ph.bpb || 4)) % period) + period) % period;
+}
+function interpKeys(ck, t, field) {
   for (let i = 0; i < ck.length - 1; i++) {
     const a = ck[i].at != null ? ck[i].at : i, b = ck[i + 1].at != null ? ck[i + 1].at : i + 1;
     if (t >= a && t < b) {
-      const f = (t - a) / ((b - a) || 1), A = ck[i].intent.colour, B = ck[i + 1].intent.colour;
-      return [lerp(A[0], B[0], f), lerp(A[1], B[1], f), lerp(A[2], B[2], f)].map(v => +v.toFixed(3));
+      const f = (t - a) / ((b - a) || 1), A = ck[i].intent[field], B = ck[i + 1].intent[field];
+      return Array.isArray(A) ? [lerp(A[0], B[0], f), lerp(A[1], B[1], f), lerp(A[2], B[2], f)].map(v => +v.toFixed(3)) : +lerp(A, B, f).toFixed(3);
     }
   }
-  return ck[ck.length - 1].intent.colour;
+  return ck[ck.length - 1].intent[field];
+}
+function crossfadeColour(keys, ph, once) {
+  const ck = (keys || []).filter(k => k.intent && k.intent.colour);
+  if (ck.length <= 1) return colourOf(keys[0], keys);
+  return interpKeys(ck, rampTime(ck, ph, once), "colour");
+}
+/* the LEVEL RAMP a crossfade writes into its keys (whiten: 0.4 -> 1): only when the
+   keys climb or fall by a real amount (>= 0.25); an xfade whose levels merely
+   wobble (0.3/0.35) leaves the level to the phrase dynamics, as before. */
+const RAMP_MIN = 0.25;
+function levelRamp(keys, ph, once) {
+  const lk = (keys || []).filter(k => k.intent && k.intent.level != null);
+  if (lk.length <= 1) return null;
+  const lv = lk.map(k => k.intent.level);
+  if (Math.max(...lv) - Math.min(...lv) < RAMP_MIN) return null;
+  return interpKeys(lk, rampTime(lk, ph, once), "level");
 }
 
 /* render a PAR gesture: the gesture chooses WHICH pars + their colour; the phase
@@ -139,16 +159,22 @@ function renderPar(gesture, ph, groups, p) {
     });
     return out;
   }
-  const c = crossfadeColour(keys, ph);
+  const once = gesture.repeat === "once";
+  const c = crossfadeColour(keys, ph, once);
   // strobe sequences (group "strobers") carry a strobe rate on their keys; the
   // fixture does the flashing, so hold the level and set the strobe channel.
   // renderPar used to drop strobe entirely, so they rendered as a plain wash.
   const strobeVal = keys.reduce((m, k) => Math.max(m, (k.intent && k.intent.strobe) || 0), 0);
   const steady = +((p.peak != null ? p.peak : 1) * (p.intensity != null ? p.intensity : 1)).toFixed(3);
+  // a ramp gesture (whiten: level 0.4 -> 1 over its bars) LIFTS THE FLOOR under the
+  // hits: the wash never drops to black between beats, and by the end it is a solid
+  // full-level white. (It used to hit from 12% to peak, so it read as pulses to black.)
+  const ramp = levelRamp(keys, ph, once);
+  const lvl = ramp == null ? on : Math.max(on, +(ramp * steady).toFixed(3));
   for (const id of (groups[gesture.group] || groups.all_pars || [])) {
     out[id] = strobeVal > 0
       ? { colour: c, level: steady, strobe: +strobeVal.toFixed(2) }
-      : { colour: c, level: on };
+      : { colour: c, level: lvl };
   }
   return out;
 }
@@ -162,11 +188,66 @@ function renderPar(gesture, ph, groups, p) {
    never faster than the wire can follow (half the travel per beat, easing peak
    included): a room-wide move is a phrase-scale move, a beat-scale one is a kick.
    The head eases through the poses, looping (a loop that does not close is closed
-   back to its first pose); discrete attributes step on the musical beat. A gesture
-   with fewer than two positions roams a room-scale figure so it is never still. */
+   back to its first pose); discrete attributes step on the musical beat. An axis the
+   gesture keys still STAYS still (a pan sweep is a pan sweep); a gesture with fewer
+   than two positions roams a room-scale figure so it is never parked.
+
+   PROGRAMS: a gesture that names a shape (gesture.program, or inferred from its id
+   by renderAssignment) is rendered as that shape, because four eased keyframes
+   cannot be a figure-eight, a spiral or a jump-cut:
+     figure8  pan one cycle, tilt two, per loop (period from motion, wire-bound)
+     spiral   the radius grows from the centre across the loop, two turns
+     snap     one pose per beat, HELD (no easing); the wire does the jump. The spread
+              is clamped to what the wire can cross in a beat (also ping-pong)
+     pulse    a per-beat gesture (kick, nod, dive): the keys play once per beat from
+              the beat, hold their last pose, snap back on the next beat; the swing is
+              clamped to what the wire can do within a beat (PULSE_MAX). Never stretched. */
 const EXTENT_MIN = 0.10;           // share of the travel a path spans at motion 0
 const MAX_TRAVEL_PER_BEAT = 0.5;   // normalised pan+tilt per beat the wire's slew can follow
 const TILT_KICK = 0.08;
+const PULSE_MAX = 0.15;            // the swing a per-beat kick can make and come back from
+const ease = f => 0.5 - 0.5 * Math.cos(Math.PI * f);      // ease in/out: kind to a mechanical head
+const HEAD_PROGRAMS = {
+  figure8(sp, ctx) {
+    const { cp, ct, Ep, Et, motion, beatPos } = ctx;
+    const T = Math.max(8 / (0.5 + motion), Math.max(Math.PI * Ep, 2 * Math.PI * Et) / MAX_TRAVEL_PER_BEAT);
+    const th = 2 * Math.PI * (((beatPos % T) + T) % T) / T;
+    return { pan: cp + (Ep / 2) * Math.sin(th), tilt: ct + (Et / 2) * Math.sin(2 * th) };
+  },
+  spiral(sp, ctx) {
+    const { cp, ct, Ep, Et, motion, beatPos } = ctx, turns = 2;
+    const T = Math.max(8 / (0.5 + motion), Math.PI * turns * Math.max(Ep, Et) / MAX_TRAVEL_PER_BEAT);
+    const r = 0.15 + 0.85 * ((((beatPos % T) + T) % T) / T), th = 2 * Math.PI * turns * (r - 0.15) / 0.85;
+    return { pan: cp + r * (Ep / 2) * Math.cos(th), tilt: ct + r * (Et / 2) * Math.sin(th) };
+  },
+  snap(sp, ctx) {
+    const { cp, ct, beatPos } = ctx;
+    /* distinct poses in key order; clamp the biggest per-axis jump to one beat of wire */
+    const poses = sp.filter((q, i) => i === 0 || Math.abs(q.pan - sp[i - 1].pan) > 1e-6 || Math.abs(q.tilt - sp[i - 1].tilt) > 1e-6);
+    if (poses.length > 1 && Math.abs(poses[poses.length - 1].pan - poses[0].pan) < 1e-6 && Math.abs(poses[poses.length - 1].tilt - poses[0].tilt) < 1e-6) poses.pop();
+    let jump = 0;
+    poses.forEach((q, i) => { const n = poses[(i + 1) % poses.length]; jump = Math.max(jump, Math.abs(n.pan - q.pan), Math.abs(n.tilt - q.tilt)); });
+    const k = jump > MAX_TRAVEL_PER_BEAT ? MAX_TRAVEL_PER_BEAT / jump : 1;
+    const q = poses[((Math.floor(beatPos + 1e-9) % poses.length) + poses.length) % poses.length];
+    return { pan: cp + (q.pan - cp) * k, tilt: ct + (q.tilt - ct) * k };
+  },
+  pulse(sp, ctx) {
+    const { ph } = ctx;
+    /* the AUTHORED poses (never stretched), shrunk about their centre to PULSE_MAX */
+    const raw = ctx.raw, pans = raw.map(q => q.pan), tilts = raw.map(q => q.tilt);
+    const cp = (Math.min(...pans) + Math.max(...pans)) / 2, ct = (Math.min(...tilts) + Math.max(...tilts)) / 2;
+    const span = Math.max(Math.max(...pans) - Math.min(...pans), Math.max(...tilts) - Math.min(...tilts));
+    const k = span > PULSE_MAX ? PULSE_MAX / span : 1;
+    const last = raw[raw.length - 1].at || 1, scale = last > 1 ? 1 / last : 1;   // a two-beat kick plays within the beat
+    const t = ph.phaseInBeat / scale;
+    let i = 0;
+    while (i < raw.length - 2 && !(t >= raw[i].at && t < raw[i + 1].at)) i++;
+    const a = raw[i], b = raw[i + 1] || a;
+    const f = t >= b.at ? 1 : Math.max(0, Math.min(1, (t - a.at) / ((b.at - a.at) || 1)));
+    const e = ease(f);
+    return { pan: cp + (a.pan + (b.pan - a.pan) * e - cp) * k, tilt: ct + (a.tilt + (b.tilt - a.tilt) * e - ct) * k };
+  },
+};
 function renderHead(gesture, ph, groups, p) {
   const out = {}, keys = gesture.keys || [];
   const clamp01 = v => Math.max(0, Math.min(1, v));
@@ -188,6 +269,7 @@ function renderHead(gesture, ph, groups, p) {
   for (const q of poses) { if (q.pan == null) q.pan = firstPan ? firstPan.pan : null; if (q.tilt == null) q.tilt = firstTilt ? firstTilt.tilt : null; }
   const distinct = new Set(poses.map(q => q.pan + "/" + q.tilt)).size;
   const loops = (gesture.repeat || "loop") === "loop";
+  const program = gesture.program && HEAD_PROGRAMS[gesture.program] ? gesture.program : null;
 
   let pan, tilt, period = 0, rate = speed;
   if (poses.length >= 2 && distinct >= 2 && firstPan && firstTilt && ks[ks.length - 1].at > 0) {
@@ -198,6 +280,13 @@ function renderHead(gesture, ph, groups, p) {
     const kp = pmax - pmin > 1e-6 ? Math.max(1, E / (pmax - pmin)) : 1;
     const kt = tmax - tmin > 1e-6 ? Math.max(1, E / (tmax - tmin)) : 1;
     const sp = poses.map(q => ({ at: q.at, pan: clamp01(cp + (q.pan - cp) * kp), tilt: clamp01(ct + (q.tilt - ct) * kt) }));
+    if (program) {
+      /* a named shape about the gesture's centre; the extent is at least the authored span */
+      const Ep = Math.min(1, Math.max(pmax - pmin, E)), Et = Math.min(1, Math.max(tmax - tmin, E));
+      const r = HEAD_PROGRAMS[program](sp, { cp, ct, Ep, Et, motion, beatPos, ph, raw: poses });
+      pan = r.pan; tilt = r.tilt;
+      period = ks[ks.length - 1].at; rate = 1;
+    } else {
     /* a loop that does not end where it began is closed back to its first pose */
     const last = sp[sp.length - 1], first = sp[0];
     if (loops && (Math.abs(last.pan - first.pan) > 1e-6 || Math.abs(last.tilt - first.tilt) > 1e-6)) {
@@ -218,14 +307,11 @@ function renderHead(gesture, ph, groups, p) {
     while (i < sp.length - 2 && !(t >= sp[i].at && t < sp[i + 1].at)) i++;
     const a = sp[i], b = sp[i + 1];
     const f = clamp01((t - a.at) / ((b.at - a.at) || 1));
-    const e = 0.5 - 0.5 * Math.cos(Math.PI * f);              // ease in/out: kind to a mechanical head
+    const e = ease(f);
     pan = a.pan + (b.pan - a.pan) * e;
     tilt = a.tilt + (b.tilt - a.tilt) * e;
-    /* an axis the gesture holds still (a pan-only sweep) takes the room figure
-       instead, scaled by motion, so neither axis is ever dead in a drop */
-    const bars = beatPos / ph.bpb;
-    if (pmax - pmin <= 1e-6) pan = clamp01(pan + (E / 2) * Math.sin(2 * Math.PI * bars / 2));
-    if (tmax - tmin <= 1e-6) tilt = clamp01(tilt + (E / 2) * 0.8 * Math.sin(2 * Math.PI * bars / 3));
+    if (motion > 0.6) tilt = tilt + TILT_KICK * hitEnv(ph.phaseInBeat);       // tilt kick, on a free path only
+    }
   } else {
     /* the default: a room-scale figure about the gesture's pose (or the wall), pan
        over two bars and tilt over three, so the head is never still */
@@ -233,8 +319,8 @@ function renderHead(gesture, ph, groups, p) {
     const bars = beatPos / ph.bpb;
     pan = clamp01(cp + (E / 2) * Math.sin(2 * Math.PI * bars / 2));
     tilt = clamp01(ct + (E / 2) * 0.8 * Math.sin(2 * Math.PI * bars / 3));
+    if (motion > 0.6) tilt = tilt + TILT_KICK * hitEnv(ph.phaseInBeat);       // tilt kick
   }
-  if (motion > 0.6) tilt = tilt + TILT_KICK * hitEnv(ph.phaseInBeat);       // tilt kick
 
   /* discrete attributes: the latest key at or before the path time of the LAST
      MUSICAL BEAT (looping), so a mechanical wheel/gobo change lands on a beat where
@@ -263,6 +349,27 @@ function renderHead(gesture, ph, groups, p) {
 /* `ph` is the real musical clock (the head, compound steps, downbeats); `phk` is
    the PAR PATTERN clock -- the same clock run at the bar's subdivision (half,
    normal or double time), so hits, trades, chases and breath follow the pace. */
+/* a head gesture's shape, from an explicit gesture.program or the sequence's own
+   name (head_figure_8, head_spiral, head_corner_snap, head_ping_pong, head_tilt_kick,
+   head_nod, head_dive) -- only when the gesture actually keys two or more poses */
+const PROGRAM_HINTS = [[/figure_?8|figure_?eight/, "figure8"], [/spiral/, "spiral"], [/snap|ping_?pong/, "snap"], [/kick|nod|dive|bob/, "pulse"]];
+function programOf(id, g) {
+  if (g.program) return g.program;
+  const posed = (g.keys || []).filter(k => k.intent && (k.intent.pan != null || k.intent.tilt != null));
+  if (posed.length < 2) return null;
+  const hit = PROGRAM_HINTS.find(([re]) => re.test(id || ""));
+  return hit ? hit[1] : null;
+}
+/* merge one part of a combination onto what earlier parts drew: attributes add up
+   (a strobe part puts strobe on the pair trade), the level belongs to the first part
+   that set one (a strobe's steady level must not relight the trade's dark pair) */
+function mergeParts(out, part) {
+  for (const id of Object.keys(part)) {
+    const prev = out[id];
+    out[id] = prev ? { ...prev, ...part[id], ...(prev.level != null ? { level: prev.level } : {}) } : part[id];
+  }
+  return out;
+}
 function renderAssignment(a, seq, ph, groups, phk) {
   const p = a.params || {}, isHead = a.layer === "head";
   phk = phk || ph;
@@ -270,21 +377,33 @@ function renderAssignment(a, seq, ph, groups, phk) {
     if (isHead) return renderHead({ group: "head", keys: [{ intent: { colour: "white" } }] }, ph, groups, p);
     return renderPar({ group: "all_pars", keys: [{ intent: { colour: [1, 1, 1] } }] }, phk, groups, p);
   }
+  /* beats since this assignment began: a one-way ramp (whiten) runs from its own start */
+  const bpb = ph.bpb || 4, from = a.from || { bar: 1, beat: 1 };
+  const since = (ph.bar - from.bar) * bpb + ((ph.beat || 1) - (from.beat || 1));
+  const phs = { ...phk, since };
+  const withProgram = g => (g.group === "head" ? { ...g, program: programOf(seq.id, g) } : g);
   let g = seq.gesture;
   if (seq.kind === "compound" && Array.isArray(g.steps)) {
-    const barInSec = ph.bar - a.from.bar;
-    const step = g.steps.find(s => barInSec >= s.from && barInSec < s.to) || g.steps[g.steps.length - 1];
+    const barInSec = ph.bar - from.bar;
+    let step;
+    if (g.steps.some(s => s.at != null && s.from == null)) {
+      /* steps placed at FRACTIONS of the assignment's span (build_ramp: pops from 0.4) */
+      const to = a.to || { bar: from.bar + 8, beat: from.beat || 1 };
+      const len = Math.max(1e-6, (to.bar - from.bar) * bpb + ((to.beat || 1) - (from.beat || 1)));
+      const frac = Math.max(0, since / len);
+      step = [...g.steps].reverse().find(s => frac >= (s.at || 0)) || g.steps[0];
+    } else step = g.steps.find(s => barInSec >= s.from && barInSec < s.to) || g.steps[g.steps.length - 1];
     g = step.gesture || step;
   } else if (seq.kind === "combination" && Array.isArray(g.parts)) {
     const out = {};
     for (const part of g.parts) {
       const pg = part.gesture || part;
-      if (isHead && pg.group === "head") Object.assign(out, renderHead(pg, ph, groups, p));
-      else if (!isHead && pg.group !== "head") Object.assign(out, renderPar(pg, phk, groups, p));
+      if (isHead && pg.group === "head") mergeParts(out, renderHead(withProgram(pg), ph, groups, p));
+      else if (!isHead && pg.group !== "head") mergeParts(out, renderPar(pg, phs, groups, p));
     }
     return out;
   }
-  return (isHead || g.group === "head") ? renderHead(g, ph, groups, p) : renderPar(g, phk, groups, p);
+  return (isHead || g.group === "head") ? renderHead(withProgram(g), ph, groups, p) : renderPar(g, phs, groups, p);
 }
 
 /* compose several intents on one fixture: higher priority wins colour/motion,

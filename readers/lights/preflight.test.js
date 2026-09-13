@@ -4,7 +4,7 @@
    fits each musical situation, plus a human-readable report. Sequences key off the
    device drivers' declared capabilities, never fixture ids. */
 "use strict";
-const { enumerate, view, validateSequence, validateAffinity, VOCABULARY } = require("./preflight.js");
+const { enumerate, view, validateSequence, validateAffinity, VOCABULARY, baseLibrary } = require("./preflight.js");
 
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);
@@ -314,6 +314,17 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
   const pauseShots = v.candidates({ form: "verse", moment: ["pause", "light"] }).filter(c => v.seq(c.id).kind === "oneshot").map(c => c.id);
   ok("a pause offers the hush and nothing that hits", pauseShots.includes("hush") && !pauseShots.includes("impact") && !pauseShots.includes("breath"), pauseShots.join(","));
   ok("one-shots never appear for a bar without a moment", !v.candidates({ form: "drop" }).some(c => v.seq(c.id).kind === "oneshot"));
+}
+
+
+/* ---- the base looks are a renderer library too ------------------------------------- */
+{
+  const lib = baseLibrary();
+  ok("baseLibrary carries every base look with a gesture, one-shots excluded",
+     ["pair_call_response", "travelling_pulse", "strobe_pops", "head_sweep", "breathe", "build_ramp", "drop_combo_A"].every(id => lib[id] && lib[id].gesture) && !lib.impact && !lib.laser_sweep,
+     Object.keys(lib).join(","));
+  ok("a combination's gesture is its parts' gestures", Array.isArray(lib.drop_combo_A.gesture.parts) && lib.drop_combo_A.gesture.parts.length === 3);
+  ok("every base look describes itself", Object.values(lib).every(s => s.description && s.description.length > 10));
 }
 
 for (const [pass, name, detail] of out)

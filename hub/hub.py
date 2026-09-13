@@ -29,6 +29,10 @@ curl can use it:
                                            same score already in flight -> 409
     GET   /hub/<dir>/?jobs                 -> { jobs: [{id, name, status, version, error, ...}] }
     GET   /hub/audio/<name>.mp3            playback bytes (Range supported); audio/ is not listed
+    PUT   /hub/score/<name>.score?audio    attach audio to a score that already exists.
+                                           Body is the audio; it lands in audio/ under the
+                                           score's own name, so the two can never drift apart,
+                                           and nothing is regenerated.
 
     Protocol load (hub/score_api.py):
     GET   /hub/presets/?json               every preset and its manifest
@@ -146,6 +150,13 @@ def _listing(urlpath, path):
             row["version"] = n
             row["has_metadata"] = bool(n) and V.get_meta(full, n) is not None
             row["personalities"] = len(P.all_of(full))
+            # Whether the audio is here too. An app that pulls a score can play
+            # the song without already owning the track, but only if it can find
+            # out -- and audio/ is deliberately not listed, so say it here.
+            if name.endswith(".score"):
+                stem = name[:-len(".score")]
+                row["audio"] = next((stem + e for e in (".mp3", ".wav", ".flac", ".ogg")
+                                     if os.path.isfile(os.path.join(audio_dir(), stem + e))), None)
         entries.append(row)
     return json.dumps({"href": urlpath, "kind": "Index", "allow_upload": True,
                        "allow_delete": False, "paths": entries})
@@ -366,6 +377,31 @@ def handle(h, method):
             os.replace(tmp, path)
             return _send(h, 201, "created")
         os.makedirs(os.path.dirname(path), exist_ok=True)
+        # Attach audio to a score that is already here. Naming it after the score
+        # rather than after whatever the file was called is the whole point: the
+        # generate path names a score after its mp3, which is how the same song
+        # ended up on the hub twice under two spellings.
+        if "audio" in query and path.endswith(".score"):
+            if not os.path.isfile(path):
+                return _send(h, 404, f"no score {os.path.basename(path)} to attach audio to")
+            # `body` was already read at the top of the PUT handler; reading it
+            # again would block forever waiting for bytes that are gone.
+            if not body:
+                return _send(h, 400, "empty body")
+            ext = (query.get("audio", [""])[0] or "").lower().lstrip(".") or "mp3"
+            if ext not in ("mp3", "wav", "flac", "ogg"):
+                return _send(h, 400, "audio must be one of: mp3, wav, flac, ogg")
+            stem = os.path.basename(path)[:-len(".score")]
+            os.makedirs(audio_dir(), exist_ok=True)
+            at = os.path.join(audio_dir(), stem + "." + ext)
+            tmp = at + ".uploading"
+            with open(tmp, "wb") as f:
+                f.write(body)
+            os.replace(tmp, at)
+            return _json(h, 201, {"score": stem, "audio": os.path.basename(at),
+                                  "bytes": len(body),
+                                  "url": PREFIX + "/" + AUDIO + "/" + os.path.basename(at)})
+
         if versioned and _who(query) is not None:
             try:
                 P.put(path, _who(query), body)
