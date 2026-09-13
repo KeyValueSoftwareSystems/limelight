@@ -775,6 +775,39 @@ on this machine's 3.6 GB GPU, which is sixteen hours for the library against
 seventeen minutes. It is the right thing to move to when there is a bigger card,
 not something to pretend is free.
 
+## A section start and a slam can be a bar apart, and neither is wrong
+
+Amal heard the drop in Nebulakal at 1:50. The section boundary says 1:50 and
+`motion.slams` says 1:52, and by the raw lanes the slam is right: at bar 58
+`floor` goes 0.17 to 0.95, the voice cuts to 0.00, the pad falls 0.95 to 0.21
+and `winding` collapses 0.70 to 0.28. One bar apart.
+
+That was checked across the library on every big slam with a section boundary
+within four bars. Of 72, forty-three land on exactly the same bar, twenty-two
+lead by one and seven lag by one. The bias is real -- three times more lead than
+lag, mean -0.18 bars, about a third of a second -- and three explanations for it
+were tested and all three failed.
+
+It is not phrase snapping: in the one-bar cases the section bar sits on the
+phrase grid 27% of the time, which is exactly how often the slam bar does.
+
+It is not the onset walk-back in `switches`, which moves entries backwards and
+would be the obvious culprit given the asymmetry. Turning it off moves the mean
+to -0.05 and makes the answer worse: exact hits fall from 43 to 39 and the lag
+side doubles from 10 to 20. It buys symmetry with scatter.
+
+And it cannot be sharpened with the bassline. A one-bar jump in `floor` is the
+crispest evidence a drop leaves, but only 45% of big slams have an unambiguous
+one nearby, and where there is one it disagrees with the slam bar on 52% of them
+and with the nearest section boundary on 65%. Three instruments, three answers.
+
+So the bar of disagreement is the resolution of the measurement, not an offset
+waiting to be removed. A slam's bar comes from a four-bar windowed mean on
+either side and cannot be sharper than that. A reader who needs the instant
+should cue from `motion.slams` and `beats[].t`, and treat `sections[].from` as
+where the structure changes rather than where the hit is. Where they differ by
+a bar, they are both telling the truth about different questions.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should
