@@ -854,6 +854,44 @@ If you are checking a boundary against your ears, take the time from
 `bar_edges`, or from `sections[].from` through a formatter, and never rebuild it
 from the bar number with a multiplication.
 
+## The bass names the bar
+
+When several stems switch within a bar or two of each other, something has to
+choose which bar the section starts on. That choice was "the lowest number",
+which is not a reason.
+
+Amal listened to ten boundaries where the stems disagree and said which bar the
+change is on. With three he had already confirmed on Afterglow that is thirteen
+boundaries of ground truth, and it settles what no internal referee could: on
+those thirteen, asking each stem how often it names the confirmed bar when it
+votes at all gives
+
+    bass    9 of 11   82%        other   1 of 4   25%
+    vocals  3 of 4    75%        guitar  1 of 5   20%
+                                 drums   1 of 8   12%
+
+against about 33% for a lane guessing among the candidates. Bass at 82% and
+drums at 12% is not a tie-break dressed up: drummers fill *into* a change and
+land after it, bass lands on the downbeat of the new section. A bin now takes
+the bar the bass names whenever the bass names one, and falls back to the bar
+most of the group named.
+
+Both measures agree, which is the reason to believe it. Boundaries landing on
+the confirmed bar went 7 of 13 to 11 of 13, and the independent movement referee
+-- the bar with the largest change across all lanes -- went from 48% exact to
+51%, mean offset +0.09 to +0.00, mean absolute 0.75 to 0.70.
+
+The two it still misses are honest. Levels bar 69 has no bass vote at all, and
+The Nights bar 41 is one of the two where the bass is itself wrong.
+
+Four earlier attempts at this failed and are recorded so nobody repeats them:
+removing the backward walk in switches(), sharpening the bar with the bassline
+returning, feeding six stems to the detector (which fixed one song and was
+neutral across the library), and taking the most-voted lane bar (which
+overshot Afterglow's breakdown to 58). Picking the bar with the largest lane
+movement was never tried, because that is the rule the referee scores with and
+it would have proved nothing.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

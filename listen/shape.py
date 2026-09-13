@@ -158,7 +158,7 @@ def votes(a, low=2, high=10, slack=2):
     return [(i, hits / max(1, tries)) for i, hits in peaks], tries
 
 
-def agree(heard, held, turns, shifts=(), slack=3, most=0.60):
+def agree(heard, held, turns, shifts=(), slack=3, most=0.60, lands=()):
     seen = [("vote", i, share) for i, share in heard]
     seen += [("lane", i, 1.0) for i in held]
     seen += [("step", i, 1.0) for i in turns]
@@ -183,6 +183,9 @@ def agree(heard, held, turns, shifts=(), slack=3, most=0.60):
                [i for kind, i, _ in group if kind == "lane"] or \
                [i for kind, i, _ in group if kind == "step"] or \
                [i for kind, i, _ in group if kind == "vote"]
+        sure = [i for i in firm if i in lands]
+        if sure:
+            firm = sure
         tally = {}
         for i in firm:
             tally[i] = tally.get(i, 0) + 1
@@ -261,10 +264,11 @@ def shape(path, edges, lanes=None, least=4, shifts=(), stems=4):
     a = affinity(harm, tex, rhy, inst)
     heard, tries = votes(a)
     n = harm.shape[1]
-    held, turns = [], []
+    held, turns, low = [], [], set()
     if lanes is not None:
         rows = np.asarray(lanes, dtype=float)
         held = [c for c in switches(rows[:stems, :n]) if 0 < c < n]
+        low = set(switches(rows[1:2, :n])) if stems > 1 else set()
         level = (list(steps(rows[stems, :n]))
                  if rows.shape[0] > stems else [])
         # A verse can change without any instrument arriving or leaving and
@@ -276,7 +280,8 @@ def shape(path, edges, lanes=None, least=4, shifts=(), stems=4):
                 if rows.shape[0] > stems + 1 else [])
         sung = list(steps(rows[2, :n]))
         turns = [c for c in level + busy + sung if 0 < c < n]
-    cuts = agree(heard, held, turns, [c for c in shifts if 0 < c < n])
+    cuts = agree(heard, held, turns, [c for c in shifts if 0 < c < n],
+                 lands=low if lanes is not None else ())
     cuts = sorted(set(cuts + [n]))
     spans = [[cuts[i], cuts[i + 1], 0] for i in range(len(cuts) - 1)]
     spans = [s for s in spans if s[1] > s[0]]

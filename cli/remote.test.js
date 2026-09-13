@@ -179,7 +179,7 @@ async function startHub(extraEnv = {}) {
     const refused = [
       ["[1,2]", /object/],
       [{ a: 1 }, /a.*not an object/],
-      [{ a: { value: { nested: 1 } } }, /a.*string, number, boolean or null/],
+      [{ a: { value: { nested: 1 } } }, /a.*value must be a string, number, boolean/],
       [{ a: { value: 1, enforced: "yes" } }, /a.*enforced must be true or false/],
       [{ "": { value: 1 } }, /empty field name/],
       [{ " a ": { value: 1 } }, /leading or trailing/],
