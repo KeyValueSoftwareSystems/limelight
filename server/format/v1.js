@@ -283,7 +283,7 @@ export function format(raw) {
 
   // ---- stems (per-bar, with normalisation stated) ----
   const stemLanes = {};
-  for (const s of STEM_FOUR) {
+  for (const s of STEM_NAMES) {
     if (Array.isArray(bars[s])) stemLanes[s] = bars[s];
   }
   if (Object.keys(stemLanes).length) {

@@ -728,6 +728,53 @@ lanes that name a register do not carry it. There is no single field for "a
 sustained thing high in the background", and until one is measured rather than
 assumed, this combination is the honest answer.
 
+## Six stems, because `other` was hiding a good lane
+
+Amal asked about a sustained high element behind Levels' last breakdown and the
+answer was that it lives in `other`. His response was the right one: `other` is
+not a thing, it is everything we could not name, and a bucket that holds the
+lead synth, the pads and the noise floor at once cannot be followed.
+
+`guitar` and `piano` are now their own lanes, taken from a second pass with
+`htdemucs_6s`. The four stems still come from `htdemucs` exactly as before, so
+`presence`, `groove`, `sections[].stems` and every structural signal built on
+them are untouched.
+
+Running only the six-stem model was tried first and is wrong. Its `other` is not
+the old `other` with two things removed -- the two models decompose differently
+throughout, and the six-stem `other` correlates with the four-stem one at 0.23.
+Rebuilding it as other plus guitar plus piano reaches only 0.69, with a mean
+error of 37% of the signal. Levels' pause moved from bar 51 to bar 26 and the
+lighting reader's own test caught it. So both models run: about 36 seconds a
+song on top of 12, all of it once and then cached.
+
+The gain was measured on seven songs before the pipeline was touched, as
+between-section spread over within-section spread, the same ratio `tells` uses:
+
+    song              guitar  piano   other (6)  other (4)
+    dont-look-down     5.86    2.12     3.14      1.78
+    levels             1.84    3.53     0.82      1.83
+    the-nights         2.00    0.79     4.05      2.45
+    holocene           2.10    1.28     2.39      2.77
+    nebulakal          1.62    1.30     1.85      1.82
+    raga-of-revenge    0.72    2.15     1.17      1.60
+    wetwork            0.87    0.85     1.47      2.71
+
+Guitar or piano clears the 1.3 floor on six of the seven. Don't Look Down's
+guitar at 5.86 is the strongest single lane measured anywhere in this project,
+against an `other` of 1.78 that was carrying it before. Raga Of Revenge, which
+had only six of fourteen lanes above the floor, gains a 2.15. On The Nights and
+Wetwork neither new lane clears it and `other` stays the better one, which is
+what `tells` is for.
+
+Separation costs about 36 seconds a song against 12, all of it the first time.
+
+BS-RoFormer was tried and is not here. It is the better model -- 12.9 dB SDR on
+vocals against htdemucs's 9.6 -- but it needs about thirty-four minutes a song
+on this machine's 3.6 GB GPU, which is sixteen hours for the library against
+seventeen minutes. It is the right thing to move to when there is a bigger card,
+not something to pretend is free.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

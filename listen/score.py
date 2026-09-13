@@ -33,7 +33,8 @@ from harmony import changes as chord_changes
 from harmony import chords as find_chords
 from harmony import per_bar as chords_per_bar
 from stems import NAMES as STEM_NAMES
-from stems import envelopes, per_bar, per_tick
+from stems import MORE as STEM_MORE
+from stems import envelopes, wider, per_bar, per_tick
 from voice import clean as clean_voice, made_by as voice_made_by
 from texture import air, bands, duck, pace, sides
 from grain import held as ringing, noisy
@@ -282,6 +283,8 @@ def read(path, slug):
         env["vocals"] = lane
         report["voice_from"] = "roformer"
     lanes = per_bar(env, g["first_beat_s"], bar_s, g["bars"], edges=cuts)
+    lanes.update(per_bar(wider(path, slug), g["first_beat_s"], bar_s, g["bars"],
+                         edges=cuts))
     ticks = per_tick(env, cuts, per=g["beats_per_bar"] * 4)
     swing = groove(env, cuts, per=g["beats_per_bar"] * 4)
     voices = np.vstack([lanes[k] for k in STEM_NAMES])
@@ -307,6 +310,7 @@ def read(path, slug):
         "pump": [round(float(x), 3) for x in duck(env, g, edges_now)],
         "pace": [round(float(x), 3) for x in pace(flux_now, g, edges_now)],
         **{k: [round(x, 3) for x in lanes[k]] for k in STEM_NAMES},
+        **{k: [round(x, 3) for x in lanes[k]] for k in STEM_MORE if k in lanes},
         "brightness": [round(float(x), 3) for x in bright.ravel()],
         "chord": chord,
         "chord_sure": chord_sure,

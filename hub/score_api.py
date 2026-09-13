@@ -238,7 +238,7 @@ def format_v1(raw):
 
     # ---- stems ----
     stem_lanes = {}
-    for s in _STEM_FOUR:
+    for s in _STEM_NAMES:
         if isinstance(bars.get(s), list):
             stem_lanes[s] = bars[s]
     if stem_lanes:
