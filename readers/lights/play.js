@@ -33,7 +33,10 @@ try { palette = JSON.parse(fs.readFileSync(path.join(HERE, "arc4-head.palette.js
 const library = Object.fromEntries(palette.map(s => [s.id, s]));
 const bpm = +opt("--bpm", 128), bars = +opt("--bars", 8), fps = 40, bpb = 4;
 const panel = opt("--panel", "http://127.0.0.1:8766");
-const outDir = opt("--out", path.join(HERE, "panel"));
+/* where to write: an explicit --out, else the folder the running panel scans (its
+   status reports `dirs`), else synth/out if it exists (the README's example), else
+   the panel folder (the panel's default when started with no folder) */
+let outDir = opt("--out", null);
 
 /* the library, numbered: looks first (pars, head, combinations), then one-shots */
 const order = { individual: 0, compound: 1, combination: 2, oneshot: 3 };
@@ -105,6 +108,22 @@ function render(s) {
 }
 
 /* the panel: load the file by name from its scan folders, then play */
+function getJson(url) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = http.request({ hostname: u.hostname, port: u.port, path: u.pathname, method: "GET", timeout: 3000 },
+      res => { let s = ""; res.on("data", d => s += d); res.on("end", () => { try { resolve(JSON.parse(s)); } catch (e) { reject(e); } }); });
+    req.on("error", reject); req.on("timeout", () => { req.destroy(new Error("timeout")); }); req.end();
+  });
+}
+async function resolveOutDir() {
+  if (outDir) return outDir;
+  for (const base of [panel, panel.replace(":8766", ":8765")]) {
+    try { const st = await getJson(base + "/api/status"); if (Array.isArray(st.dirs) && st.dirs[0]) return (outDir = st.dirs[0]); } catch (e) { /* next */ }
+  }
+  const synth = path.join(HERE, "..", "..", "synth", "out");
+  return (outDir = fs.existsSync(synth) ? synth : path.join(HERE, "panel"));
+}
 function post(url, body) {
   return new Promise((resolve, reject) => {
     const u = new URL(url), data = JSON.stringify(body || {});
@@ -142,6 +161,7 @@ function pick(token) {
 async function playToken(token) {
   const s = pick(token);
   if (!s) { console.log(`no effect "${token}" (1..${list.length} or an id)`); return; }
+  await resolveOutDir();
   const r = render(s);
   console.log(`rendered #${list.indexOf(s) + 1} ${s.id} (${s.kind}, ${s.boldness}): ${r.frames} frames, ${bars} bars @ ${bpm} bpm -> ${path.relative(process.cwd(), r.lights)}`);
   if (!flag("--no-play")) await playOnPanel(r.lights);

@@ -315,6 +315,7 @@ class State:
                    "paused_by_watchdog": getattr(self, "paused_by_watchdog", False),
                    "analyze_log": self.analyze_log, "audio_error": getattr(self, "audio_error", None),
                    "server_time": time.time(), "phase": self.phase_at(st["position"]),
+                   "dirs": self.dirs,   # where shows are scanned from, so a tool can write one here
                    "fixtures": rig.readout(vals) if len(vals) >= 41 else None})
         return st
 
