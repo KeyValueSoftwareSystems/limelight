@@ -97,14 +97,6 @@
     <button data-tab="effects">Effects</button>
   </nav>
 
-  <!-- the effect library: every look and one-shot the enumeration computed for this
-       layout, numbered as play.js numbers them; click one and the panel renders it for
-       a few bars and plays it (POST /api/effect) -->
-  <section class="card" id="effects" hidden>
-    <h2>Effects <span class="meta" id="fxmsg"></span></h2>
-    <div id="fxlist"><span class="meta">loading the library…</span></div>
-  </section>
-
   <!-- primary: one clear play control, the clock, and a safety -->
   <section class="deck">
     <button class="primary" id="play">▶ Play</button>
@@ -129,6 +121,14 @@
     <span style="flex:1"></span>
     <span class="meta">beat <span id="beatno">–</span> · bar <span id="barno">–</span> · frame <span id="frame">–</span></span>
   </div>
+
+  <!-- the effect library: every look and one-shot the enumeration computed for this
+       layout, numbered as play.js numbers them; click one and the panel renders it for
+       a few bars and plays it (POST /api/effect) -->
+  <section class="card" id="effects" hidden>
+    <h2>Effects <span class="meta" id="fxmsg"></span></h2>
+    <div id="fxlist"><span class="meta">loading the library…</span></div>
+  </section>
 
   <!-- sync: one control, coarse and fine together -->
   <section class="card">
@@ -339,8 +339,13 @@
 
   // ---------------- tabs + the effect library ----------------
   const showTab = tab => {
-    for (const el of document.querySelector('main').children)
-      if (el.id !== 'tabs') el.hidden = (el.id === 'effects') !== (tab === 'effects');
+    const fx = tab === 'effects';
+    for (const el of document.querySelector('main').children) {
+      if (el.id === 'tabs') continue;
+      const keepOnEffects = el.id === 'effects' || el.classList.contains('preview');   // the rig visualization stays
+      el.hidden = fx ? !keepOnEffects : el.id === 'effects';
+    }
+    for (const id of ['track', 'reload', 'audiopill', 'phasepill']) $(id).hidden = fx;      // no song, no timeline, no phases
     document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
     store('tab', tab);
     if (tab === 'effects' && !effectsLoaded) loadEffects();
