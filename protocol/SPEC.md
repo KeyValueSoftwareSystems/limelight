@@ -92,6 +92,35 @@ is a new version.
 section that starts before the window still comes back, because a consumer
 asking for eight bars needs to know it is sitting inside a sixteen-bar drop.
 
+### Which bar a beat is in
+
+A beat says which bar and beat it is, and that answer comes from its time read
+through the tempo map, rounded to the nearest grid beat -- the same arithmetic
+`listen/pulse.py` uses to decide what `off_ms` is measured from. `v1.js`,
+`hub/score_api.py` and `respond.js` all do this, and a test holds them to it
+across every song.
+
+Two other rules were tried and are written down here because both looked right.
+Counting the position in the list, `index / beats_per_bar`, assumes a song opens
+on a downbeat; thirteen of twenty-eight open with a pickup, and on Levels the
+first downbeat is index 2, so every bar in the protocol began two beats before
+the bar. Walking the tracker's `downbeat` flags fixes the pickup and then
+drifts, because the flags are not reliably one in four: on Cipher the walk
+counted 274 bars where the grid says 337, and the beats and the sections stopped
+agreeing about what bar 200 was.
+
+Rounding lets two beats land in one grid slot, and then a bar has two beat ones.
+That happens forty-six times in about twelve thousand beats across the library,
+always on songs whose grid the score already doubts, and it is the recording
+rather than the rule: the tracker heard a beat the grid has no room for, and
+`off_ms` says how far out it was. Forcing the numbers to keep increasing was
+tried to remove those collisions and was much worse -- one collision early in
+Where Are U Now pushed the count ahead of the grid and the next 394 beats
+inherited it.
+
+A pickup bar is numbered from its own first beat, so that every bar in the list,
+that one included, has a beat one.
+
 ### One field, two shapes
 
 `beats` travels in two different shapes depending on which door a reader comes
@@ -380,6 +409,27 @@ curve and `noisy` reaches 0.88 only on Levels, against air, sitting between 0.21
 and 0.60 elsewhere. A third candidate, the depth of the valleys between hits,
 was dropped: it tracked `held` at 0.93 on Strobe and 0.88 on Experience, which
 is one measurement wearing two names.
+
+`curves[].tells` is how much a curve is worth following on this particular song:
+how much more the sections differ from one another than a section differs from
+its own two halves. It is the same measurement that gates mood, applied to every
+per-bar curve. Above about 1.3 the curve is tracking the music. At 1.0 a section
+differs from itself as much as it differs from any other section, and a reader
+keying a look off that curve on that song is lighting noise.
+
+No curve is reliable everywhere, and the differences are large. Across the
+twenty-eight songs, drums, bass and energy are never weak. pump says little on
+ten of them, noisy on nine, width on eight, brightness on six -- on Levels
+brightness scores 0.92, which is below the point where it means anything.
+
+This was measured, not assumed, and it changed what we know about fields that
+had already shipped. floor and weight correlate at 0.90 across the library,
+close enough to the 0.93 that retired an earlier candidate for being one
+measurement wearing two names. Taking the part of floor that weight cannot
+predict and testing that on its own, it still carries section structure on
+eighteen of twenty-eight songs -- 3.62 on Wetwork, 2.56 on Don't Look Down -- so
+floor stays. On the other ten it is weight plus noise, and `tells` is how a
+reader finds out which song it is holding.
 
 `sections[].mood` is where a section sits on a handful of opposed axes -- calm
 against aggressive, happy against sad, warm against cold -- read by MuQ-MuLan,

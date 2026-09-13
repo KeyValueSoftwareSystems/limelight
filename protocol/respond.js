@@ -58,10 +58,23 @@ function adapt(s) {
   if (Array.isArray(s.beats) && s.grid) {
     /* Bar 1 is the first downbeat, matching session.js. Numbering from
        grid.first_bar put a pickup score's beats a bar out. */
-    let bar = 0, beat = 0;
-    const pairs = s.beats.map(b => {
-      if (b.downbeat) { if (beat) bar += 1; beat = 1; } else { beat += 1; }
-      return [bar, beat];
+    const per = s.grid.beats_per_bar || 4;
+    const base = (s.grid.first_bar !== undefined && s.grid.first_bar !== null)
+      ? s.grid.first_bar : 1;
+    const map = (Array.isArray(s.grid.tempo) && s.grid.tempo.length)
+      ? s.grid.tempo
+      : [{ from_beat: 0, at_s: s.grid.first_beat_s, bpm: s.grid.bpm }];
+    const beatNo = at => {
+      let k = 0;
+      while (k + 1 < map.length && map[k + 1].at_s <= at) k++;
+      const seg = map[k];
+      return seg.from_beat + (at - seg.at_s) / (60 / seg.bpm);
+    };
+    let lead = 0;
+    const pairs = s.beats.map((b, i) => {
+      const n = (b.t != null) ? Math.round(beatNo(b.t)) : i;
+      if (n < 0) { lead += 1; return [base, lead]; }
+      return [Math.max(base, 1 + Math.floor(n / per)), 1 + (((n % per) + per) % per)];
     });
     out.beats = { derived_from: "grid", as: "[bar, beat]",
                   count: pairs.length, list: pairs };

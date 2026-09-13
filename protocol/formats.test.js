@@ -81,6 +81,7 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
     words: [{ text: "Once", at_s: 2.88, to_s: 3.1, bar: 1, heard_twice: true }],
     lines: [{ at_s: 2.88, to_s: 6.1, from_bar: 1, to_bar: 2, text: "Once", sure: 1 }],
   };
+  planted.curve_tells = { intensity: 2.83, brightness: 0.92, noisy: 1.48, held: 1.81 };
   planted.bars = Object.assign({}, planted.bars, {
     noisy: (planted.bars.intensity || []).map(() => 0.4),
     held: (planted.bars.intensity || []).map(() => 0.6),
@@ -101,6 +102,11 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
        js2[want] != null && py2[want] != null,
        `js ${js2[want] != null ? "yes" : "NO"}, py ${py2[want] != null ? "yes" : "NO"}`);
   }
+  ok("a curve carries how much it tells you on this song, through both formatters",
+     (js2.curves || {}).brightness && js2.curves.brightness.tells === 0.92
+       && (py2.curves || {}).brightness && py2.curves.brightness.tells === 0.92,
+     `js ${(js2.curves || {}).brightness?.tells}, py ${(py2.curves || {}).brightness?.tells}`);
+
   const jsMood = (js2.sections || [])[0] || {}, pyMood = (py2.sections || [])[0] || {};
   ok("a section carries mood through both formatters",
      jsMood.mood != null && pyMood.mood != null,
@@ -114,38 +120,98 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
        && (py2.lyrics || {}).lines && py2.lyrics.lines[0].sure === 1,
      "sure survives both");
 
-  /* A beat the tracker flagged as a downbeat is the first beat of a bar. That
-     is what a downbeat is. Both formatters counted bars as idx/beats_per_bar
-     instead, which is only the same thing when a song begins exactly on a
-     downbeat -- thirteen of the twenty-eight do not. On Levels the first
-     downbeat is beat index 2, so every bar the protocol reported started two
-     beats early, and a cue on "bar N beat 1" fired half a bar before the bar. */
+  /* Which bar a beat is in, checked against the grid that decides where bars
+     start, for every song rather than the one fixture.
+
+     Two rules were shipped and both were wrong. Counting idx/beats_per_bar
+     assumes a song opens on a downbeat, and thirteen of twenty-eight open with
+     a pickup: on Levels the first downbeat is beat index 2, so every bar began
+     two beats early. Walking the tracker's downbeat flags fixed that and
+     drifted instead -- the flags are not reliably one in four, and on Cipher
+     the walk counted 274 bars where the grid says 337, so the beats and the
+     sections stopped agreeing about what bar 200 was.
+
+     pulse.py decides which grid beat a detected beat is by rounding
+     (t - first_beat_s) / period, and that is the rule here, read through the
+     tempo map. A tracker hears a bar of three or five now and then, so a
+     handful of beats land a slot out; a numbering error puts every beat out,
+     not five in five hundred. */
   {
     const dir = path.join(root, "scores");
-    const songs = fs.readdirSync(dir).filter(x => x.endsWith(".score")).sort();
-    let checked = 0, offJs = [];
+    const songs = fs.existsSync(dir)
+      ? fs.readdirSync(dir).filter(x => x.endsWith(".score")).sort() : [];
+    let checked = 0, adrift = [], dupes = [], noOne = [], torn = [];
+    let allBeats = 0, allBumps = 0;
+    const firstOf = sc => (sc.grid.first_bar !== undefined && sc.grid.first_bar !== null)
+      ? sc.grid.first_bar : null;
     for (const f of songs) {
       let sc;
       try { sc = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")); } catch { continue; }
-      if (!Array.isArray(sc.beats) || !sc.beats.some(b => b.downbeat)) continue;
+      if (!Array.isArray(sc.beats) || !sc.beats.length || !sc.grid) continue;
       const got = fn(sc);
       if (!Array.isArray(got.beats)) continue;
       checked++;
-      /* Before the first downbeat the song is in its pickup, whose opening beat
-         is beat 1 of bar 0 without being a downbeat. The rule starts where the
-         bars do. */
-      const start = sc.beats.findIndex(b => b.downbeat);
-      for (let i = start; i < sc.beats.length; i++) {
-        const isDown = !!sc.beats[i].downbeat, isOne = got.beats[i].beat === 1;
-        if (isDown !== isOne) {
-          offJs.push(`${f.slice(0, -6)} beat ${i} (down=${isDown}, called beat ${got.beats[i].beat})`);
-          break;
-        }
+      const g = sc.grid, per = g.beats_per_bar || 4;
+      const map = (Array.isArray(g.tempo) && g.tempo.length)
+        ? g.tempo : [{ from_beat: 0, at_s: g.first_beat_s, bpm: g.bpm }];
+      const beatNo = at => {
+        let k = 0;
+        while (k + 1 < map.length && map[k + 1].at_s <= at) k++;
+        const s = map[k];
+        return s.from_beat + (at - s.at_s) / (60 / s.bpm);
+      };
+      let drift = 0, seen = new Set(), prev = -Infinity, bumps = 0;
+      got.beats.forEach((e, i) => {
+        const key = e.bar + ":" + e.beat, rank = e.bar * 1000 + e.beat;
+        if (seen.has(key) || rank < prev) bumps++;
+        seen.add(key);
+        prev = rank;
+        const at = sc.beats[i] && sc.beats[i].t;
+        if (at == null) return;
+        const n = Math.round(beatNo(at));
+        if (n < 0) return;
+        const bar = 1 + Math.floor(n / per), beat = 1 + (((n % per) + per) % per);
+        if (e.bar !== bar || e.beat !== beat) drift++;
+      });
+      allBeats += got.beats.length;
+      allBumps += bumps;
+      if (bumps) dupes.push(`${f.slice(0, -6)} ${bumps}`);
+      /* Where the tracker lost the beat entirely there is nothing to number.
+         Cipher's list has 238 holes wider than a beat and a's 160; a song whose
+         list is unbroken has none, and on those the grid rule has to hold
+         exactly. The score already says which is which, in grid.sure and in the
+         striping the page draws over the guessed stretches. */
+      const period = 60 / (g.bpm || 120);
+      let holes = 0;
+      for (let i = 1; i < sc.beats.length; i++) {
+        if (sc.beats[i].t - sc.beats[i - 1].t > period * 1.5) holes++;
+      }
+      if (drift) adrift.push(`${f.slice(0, -6)} ${drift}/${got.beats.length}`);
+      if (holes > 0) torn.push(`${f.slice(0, -6)} ${holes}`);
+      const pickup = firstOf(sc);
+      const hasPickup = pickup != null && got.beats.some(e => e.bar === pickup);
+      if (hasPickup && !got.beats.some(e => e.bar === pickup && e.beat === 1)) {
+        noOne.push(`${f.slice(0, -6)} pickup bar ${pickup} has no beat one`);
       }
     }
-    ok("every downbeat is beat 1 and every beat 1 is a downbeat, in every song",
-       checked > 0 && offJs.length === 0,
-       offJs.length ? offJs.slice(0, 4).join(", ") : `${checked} songs`);
+    ok("every beat lands in the bar the grid puts it in, wherever the beat was found",
+       checked > 0 && adrift.length === 0,
+       adrift.length ? adrift.slice(0, 4).join(", ")
+         : `${checked} songs, ${torn.length} of them with holes in the beat list`);
+    /* Two beats land in one grid slot where the tracker heard an extra, and a
+       bar with two of them has two beat ones. That is the recording, not the
+       rule: it happens forty-six times in twelve thousand beats, all on songs
+       whose grid the score already doubts. A rule that has come loose does it
+       thousands of times -- the clamp tried before this one put 394 beats out
+       on a single song -- so the guard is the rate across the library, not a
+       threshold invented per song. */
+    const rate = allBeats ? allBumps / allBeats : 0;
+    ok("beats collide only where the recording makes them",
+       rate < 0.01,
+       `${allBumps} in ${allBeats} beats (${(rate * 100).toFixed(2)}%)`
+         + (dupes.length ? ` \u00b7 ${dupes.slice(0, 3).join(", ")}` : ""));
+    ok("the pickup bar, where a song has one, is numbered from its first beat",
+       noOne.length === 0, noOne.slice(0, 4).join(", ") || "clean");
   }
 
   const bad = out.filter(r => !r[0]).length;

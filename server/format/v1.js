@@ -76,22 +76,49 @@ export function format(raw) {
     if (raw.beats.list) {
       out.beats = raw.beats;
     } else if (Array.isArray(raw.beats)) {
-      /* Bars advance on the detected downbeat, not on a count of four from beat
-         zero. A song that opens with a pickup has fewer than a full bar before
-         its first downbeat, and counting idx/beats_per_bar put every beat after
-         it out of phase with the music -- on Levels the first downbeat sits at
-         index 2, so this called it bar 0 beat 3 and started its bars two beats
-         early for the whole song. respond.js has walked the flags since the day
-         a pickup score was first read; these two formatters never did. */
-      let walkBar = firstBar, walkBeat = 0;
+      /* Which bar a beat is in comes from its time, read through the tempo map,
+         because that is how the pipeline decides where a bar starts and it is
+         the only answer that agrees with the sections.
+
+         Two wrong answers came before this one. Counting idx/beats_per_bar
+         assumes the song begins on a downbeat, and thirteen of twenty-eight
+         open with a pickup, which put every bar two beats early on Levels.
+         Walking the tracker's downbeat flags fixes the pickup and then drifts,
+         because the flags are not reliably every fourth beat: on Cipher it
+         produced 274 bars where the grid says 337, so the beats and the
+         sections no longer agreed about what bar 200 was. */
+      const map = (Array.isArray(grid.tempo) && grid.tempo.length)
+        ? grid.tempo
+        : [{ from_beat: 0, at_s: firstBeatS, bpm }];
+      const beatNo = at => {
+        let k = 0;
+        while (k + 1 < map.length && map[k + 1].at_s <= at) k++;
+        const seg = map[k];
+        return seg.from_beat + (at - seg.at_s) / (60 / seg.bpm);
+      };
+      let lead = 0;
       out.beats = raw.beats.map((b, idx) => {
-        if (b.downbeat) {
-          if (walkBeat) walkBar += 1;
-          walkBeat = 1;
-        } else {
-          walkBeat += 1;
+        /* Nearest grid beat, which is how pulse.py decides what off_ms is
+           measured from. Forcing the numbers to keep increasing was tried and
+           was worse: one early collision on Where Are U Now put `last` ahead of
+           the grid and the next 394 beats inherited the push, where rounding on
+           its own collides 46 times in twelve thousand beats across the
+           library. A collision is the tracker hearing two beats where the grid
+           has one, and off_ms says so. */
+        const n = (b.t != null) ? Math.round(beatNo(b.t)) : idx;
+        /* Before grid beat zero the song is in its pickup, a bar shorter than
+           the others. It is numbered from its own first beat so that every bar
+           in the list, that one included, has a beat one. */
+        if (n < 0) {
+          lead += 1;
+          return Object.assign({ bar: firstBar, beat: lead },
+            b.weight !== undefined ? { weight: b.weight } : {},
+            b.sure !== undefined ? { sure: b.sure } : {},
+            b.t !== undefined ? { off_ms: Math.round((b.t - (firstBeatS + idx * beatSec)) * 1000) } : {},
+            b.downbeat !== undefined ? { downbeat: b.downbeat } : {});
         }
-        const bar = walkBar, beat = walkBeat;
+        const bar = Math.max(firstBar, 1 + Math.floor(n / bpb));
+        const beat = 1 + (((n % bpb) + bpb) % bpb);
         const expectedT = firstBeatS + idx * beatSec;
         const entry = { bar, beat };
         if (b.weight !== undefined) entry.weight = b.weight;
@@ -206,11 +233,13 @@ export function format(raw) {
       src = bars[name];
     }
     if (Array.isArray(src)) {
+      const lane = (name === 'energy') ? 'intensity' : name;
       curveEntries[name] = {
         per: 'bar',
         from_bar: (name === 'energy' && raw.energy?.from_bar != null)
           ? raw.energy.from_bar : firstBar,
         values: src,
+        tells: raw.curve_tells?.[lane],
       };
     }
   }
