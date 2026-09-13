@@ -86,15 +86,26 @@ def format_v1(raw):
             out["beats"] = raw["beats"]
         elif isinstance(raw["beats"], list):
             converted = []
-            walk_bar, walk_beat = first_bar, 0
+            tempo_map = grid.get("tempo") or [
+                {"from_beat": 0, "at_s": first_beat_s, "bpm": grid.get("bpm") or 120}]
+
+            def _beat_no(at):
+                k = 0
+                while k + 1 < len(tempo_map) and tempo_map[k + 1]["at_s"] <= at:
+                    k += 1
+                seg = tempo_map[k]
+                return seg["from_beat"] + (at - seg["at_s"]) / (60.0 / seg["bpm"])
+
+            lead = 0
             for idx, b in enumerate(raw["beats"]):
-                if isinstance(b, dict) and b.get("downbeat"):
-                    if walk_beat:
-                        walk_bar += 1
-                    walk_beat = 1
+                at = b.get("t") if isinstance(b, dict) else None
+                n = int(round(_beat_no(at))) if at is not None else idx
+                if n < 0:
+                    lead += 1
+                    bar, beat = first_bar, lead
                 else:
-                    walk_beat += 1
-                bar, beat = walk_bar, walk_beat
+                    bar = max(first_bar, 1 + n // bpb)
+                    beat = 1 + (n % bpb)
                 entry = {"bar": bar, "beat": beat}
                 if isinstance(b, dict):
                     expected_t = first_beat_s + idx * beat_sec

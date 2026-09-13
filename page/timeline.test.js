@@ -18,6 +18,24 @@ const src = (html.match(/<script>([\s\S]*)<\/script>/) || [])[1] || "";
 const out = [];
 const ok = (n, c, d) => out.push([!!c, n, d || ""]);
 
+/* The page can parse and still be gutted. A careless edit once removed the word
+   tables, library(), load() and play() in one go; the file was still valid
+   JavaScript and the browser answered "library is not defined" on a blank page.
+   Anything the page calls at the bottom of the file has to exist by then. */
+{
+  const needed = ["library", "load", "play", "tick", "curves", "sections",
+                  "lanes", "tune", "beatGrid", "zoom", "broke"];
+  const missing = needed.filter(n =>
+    !new RegExp(`(async\\s+)?function\\s+${n}\\s*\\(`).test(src));
+  ok("every function the page calls is still defined", missing.length === 0,
+     missing.length ? "missing " + missing.join(", ") : `${needed.length} present`);
+  const calls = [...src.matchAll(/^([a-zA-Z_$][\w$]*)\(\);$/gm)].map(m => m[1]);
+  const unbound = calls.filter(n =>
+    !new RegExp(`(async\\s+)?function\\s+${n}\\s*\\(`).test(src));
+  ok("nothing is called at the end of the file that was never defined",
+     unbound.length === 0, unbound.join(", ") || calls.join(", "));
+}
+
 const block = src.match(/let TEMPO = \[\];[\s\S]*?const barAtTime = [^\n]*\n/);
 ok("the page's timeline helpers can be found", !!block,
    block ? "" : "ear.html no longer defines TEMPO/atBeat/barTime as expected");
