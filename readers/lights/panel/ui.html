@@ -380,7 +380,9 @@
     try { effects = (await api('/api/effects')).effects || []; effectsLoaded = true; renderEffects(); }
     catch (e) { $('fxlist').innerHTML = `<span class="meta">could not load the library: ${e.message}</span>`; }
   };
+  let current = null;                      // the effect playing now: the knobs re-render it live
   const playEffect = async e => {
+    current = e;
     $('fxmsg').textContent = `rendering #${e.n} ${e.id}…`;
     document.querySelectorAll('.fxrow').forEach(r => r.classList.toggle('playing', r.dataset.id === e.id));
     try {
@@ -391,7 +393,14 @@
     } catch (err) { $('fxmsg').textContent = `could not play ${e.id}: ${err.message}`; }
   };
   document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
-  $('fxmotion').addEventListener('input', () => { $('fxmotionv').textContent = $('fxmotion').value; });
+  // the knobs are live: a change re-renders the current effect with the new settings
+  const reapply = () => { if (current) playEffect(current); };
+  for (const id of ['fxbpm', 'fxbars', 'fxsubdiv', 'fxmode']) $(id).addEventListener('change', reapply);
+  let motionTimer = null;
+  $('fxmotion').addEventListener('input', () => {
+    $('fxmotionv').textContent = $('fxmotion').value;
+    clearTimeout(motionTimer); motionTimer = setTimeout(reapply, 300);
+  });
   showTab(recall('tab', 'show'));
   document.querySelectorAll('[data-nudgesec]').forEach(b => b.addEventListener('click', () => nudge(+b.dataset.nudgesec)));
   let counting = false;
