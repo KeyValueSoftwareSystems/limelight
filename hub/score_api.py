@@ -20,7 +20,7 @@ KNOWN = [
     "phrases", "layers", "chords", "key", "loudness", "feel",
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
     "tension", "releases", "melody", "signals", "made_by", "mood_axes",
-    "lyrics", "tells", "motion",
+    "lyrics", "tells", "motion", "recording",
 ]
 
 _STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
@@ -217,7 +217,7 @@ def format_v1(raw):
 
     for whole in ("groove", "ticks", "melody_phrases",
                   "phrase_grid", "scales", "presence", "mood_axes", "lyrics",
-                  "motion"):
+                  "motion", "recording"):
         if raw.get(whole) is not None:
             out[whole] = raw[whole]
 

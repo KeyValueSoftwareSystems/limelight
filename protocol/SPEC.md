@@ -686,6 +686,48 @@ conclusion that a fifth of the flags were artefacts. Comparing the dip against
 the rest of the same phrase, with a floor under the denominator, is what the
 numbers above use.
 
+## Which file this score belongs to
+
+`recording` is a fingerprint of the audio: `fingerprint` as hex, `bits`, and
+`heard_seconds`. It is eight mel bands over thirty-two slices of the first two
+minutes, reduced to the sign of the change from one slice to the next, so it
+survives re-encoding. Alnas had no way to tell whether a score belonged to the
+file he was about to play it against and fell back on matching durations.
+
+A plain hash of the samples was tried first and is useless here. The same
+recording as wav, 192 kbps mp3 and 128 kbps mp3 gives three different digests,
+and since the pipeline reads wav while the hub stores mp3, it would have
+mismatched every single time. The coarse fingerprint gives **zero** bits of
+difference across those same three encodings.
+
+Across the library it separates cleanly: 378 pairs of different songs, the
+closest two -- The War Cry and Where Are U Now -- 84 bits apart out of 248, a
+median of 120, and nothing under 15%. Same recording is 0 and the nearest
+different song is 84, so any threshold between 1 and 83 decides it. Compare with
+a Hamming distance and treat anything over about 20 bits as a different
+recording.
+
+## Finding a thing that is not in any one lane
+
+Amal asked whether the protocol exposes the sustained high element behind
+Levels' last breakdown, between 3:04 and 3:11. It does, and the answer is worth
+recording because the obvious lane is the wrong one.
+
+That passage is bars 95 to 99. The element is in `stems.other` -- everything
+that is not drums, bass or voice -- which peaks at 1.00 at bar 97 while `held`
+reads 0.85, so it is sustained rather than struck. `energy` reads 0.165 there
+and sees nothing at all, the same blindness it has before a drop.
+
+`brightness` is the lane a reader would reach for and it is useless here: it
+sits pinned between 0.96 and 1.00 for the whole passage, and its `tells` on this
+song is 1.02, below the 1.3 floor. The score already says not to use it. `air`
+is falling through the window, from 1.08 at bar 93 to 0.60 at bar 99.
+
+So the recipe is `stems.other` high, `held` high, `energy` low, and the two
+lanes that name a register do not carry it. There is no single field for "a
+sustained thing high in the background", and until one is measured rather than
+assumed, this combination is the honest answer.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

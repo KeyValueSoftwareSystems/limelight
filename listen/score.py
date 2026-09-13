@@ -16,6 +16,7 @@ from steady import all_tells as tells_of
 from words import words as lyrics
 from grid import grid, bar_edges, show
 import motion
+import ident
 from form import on_phrase
 from shape import shape
 from call import call
@@ -438,6 +439,7 @@ def read(path, slug):
         "version": 0,
         "song": {"length_s": round(length_s, 3), "bars": g["bars"]},
         "scales": SCALES,
+        "recording": ident.named(path),
         "made_by": {
             "voice_from": voice_made_by(slug),
             "lead_from": "htdemucs" if riff else None,
