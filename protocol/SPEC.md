@@ -836,6 +836,24 @@ English has no combining marks and was never affected, which is why the pipeline
 looked fine. The words now take their spelling from the transcript and their
 timing from the aligner.
 
+## Where bar N actually starts
+
+This cost most of a night, so it is written down. A score's bar N starts at
+`bar_edges(g)[N]`, and for the twenty-three songs that open on a pickup that is
+`at_beat(g, (N - 1) * beats_per_bar)`, **not** `at_beat(g, N * beats_per_bar)`.
+The pickup is bar 0 and it is shorter than a bar, so every later bar is one
+multiple of the beat count behind what the naive formula gives.
+
+Afterglow's bar 16 begins at 20.92 s. The naive formula says 22.30 s, exactly
+one bar late. The page has always drawn it correctly; a diagnostic written
+against the naive formula reported every section a bar later than the file
+actually places it, which made a real one-bar error look like an argument about
+numbering conventions for several hours.
+
+If you are checking a boundary against your ears, take the time from
+`bar_edges`, or from `sections[].from` through a formatter, and never rebuild it
+from the bar number with a multiplication.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

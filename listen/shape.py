@@ -183,7 +183,10 @@ def agree(heard, held, turns, shifts=(), slack=3, most=0.60):
                [i for kind, i, _ in group if kind == "lane"] or \
                [i for kind, i, _ in group if kind == "step"] or \
                [i for kind, i, _ in group if kind == "vote"]
-        cuts.append(int(firm[0]))
+        tally = {}
+        for i in firm:
+            tally[i] = tally.get(i, 0) + 1
+        cuts.append(int(min(tally, key=lambda i: (-tally[i], i))))
     return [0] + sorted(set(cuts))
 
 
