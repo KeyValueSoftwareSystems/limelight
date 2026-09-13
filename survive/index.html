@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Survive the Song</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <main id="app">
+
+    <!-- ========================= MAIN MENU ========================= -->
+    <section class="screen screen--menu is-active" id="screen-menu">
+      <div class="menu">
+        <h1 class="logo">SURVIVE<br><span class="logo__accent">THE SONG</span></h1>
+        <div class="tagline">LISTEN &middot; LEARN &middot; MASTER</div>
+        <nav class="menu__nav">
+          <button class="btn btn--primary" data-nav="songs">Play</button>
+          <button class="btn" data-nav="howto">How to Play</button>
+        </nav>
+        <footer class="menu__footer">
+          <span class="version">v0.2 &middot; survival only</span>
+        </footer>
+      </div>
+    </section>
+
+    <!-- ========================= SONG SELECT ========================= -->
+    <section class="screen screen--songs" id="screen-songs">
+      <header class="topbar">
+        <button class="btn btn--ghost" data-nav="menu">&larr; Back</button>
+        <h2 class="topbar__title">Your Songs</h2>
+        <div class="topbar__spacer"></div>
+      </header>
+
+      <div class="songs">
+        <!-- left: library list -->
+        <div class="songs__left">
+          <div class="songs__header">
+            <h2>Your library</h2>
+            <span id="library-count">0 TRACKS</span>
+          </div>
+          <div class="songs__filters">
+            <div class="filter-chip is-active" data-filter="all">All</div>
+            <div class="filter-chip" data-filter="slow">Under 90 BPM</div>
+            <div class="filter-chip" data-filter="unsurv">Never survived</div>
+            <div class="filter-chip" data-filter="short">Short (&lt; 3 min)</div>
+          </div>
+          <ul class="songlist" id="songlist"></ul>
+          <div class="songs__drop-zone"><span>+</span> Drop in any track</div>
+        </div>
+
+        <!-- right: detail panel -->
+        <div class="songs__right" id="detail-panel">
+          <div>
+            <div class="detail__selected">SELECTED</div>
+            <div class="detail__title" id="detail-title">&mdash;</div>
+          </div>
+
+          <div style="flex:1;display:flex;flex-direction:column">
+            <div class="detail__chart-label">WHERE YOU LOSE HEARTS</div>
+            <div class="detail__chart" id="detail-chart"></div>
+            <div class="detail__chart-tip" id="detail-tip"></div>
+          </div>
+
+          <div class="detail__options">
+            <div class="detail__option">
+              <span>No-fail practice</span>
+              <span class="detail__option-val" id="opt-nofail" data-toggle="nofail">OFF</span>
+            </div>
+            <div class="detail__option">
+              <span>Start from</span>
+              <span class="detail__option-val--muted" id="opt-startfrom">BEGINNING</span>
+            </div>
+            <div class="detail__option">
+              <span>Speed</span>
+              <span class="detail__option-val--muted" id="opt-speed">100%</span>
+            </div>
+          </div>
+
+          <div class="detail__actions">
+            <button class="btn btn--primary" id="btn-start">SURVIVE IT</button>
+            <button class="detail__actions btn--secondary" id="btn-practice">Practice</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= HOW TO PLAY ========================= -->
+    <section class="screen screen--howto" id="screen-howto">
+      <div class="panel">
+        <header class="topbar">
+          <button class="btn btn--ghost" data-nav="menu">&larr; Back</button>
+          <h2 class="topbar__title">How to Play</h2>
+          <div class="topbar__spacer"></div>
+        </header>
+        <div class="howto">
+          <div class="howto__row"><span class="howto__key">W A S D</span><p>Move around the arena</p></div>
+          <div class="howto__row"><span class="howto__key">SPACE</span><p>Dash &mdash; dodge through danger zones, invulnerable while dashing</p></div>
+          <div class="howto__sep"></div>
+          <div class="howto__row"><span class="howto__icon">&#10040;</span><p><strong>Verse &mdash; Read the beat:</strong> Wedge sweeps rotate. Walk between the danger arcs.</p></div>
+          <div class="howto__row"><span class="howto__icon">&#9788;</span><p><strong>Pre-chorus &mdash; Stay in the light:</strong> A safe spotlight drifts. Stand in it to heal.</p></div>
+          <div class="howto__row"><span class="howto__icon">&#9711;</span><p><strong>Chorus &mdash; Thread the gap:</strong> Rings close on the snare. Dash through the one opening.</p></div>
+          <div class="howto__row"><span class="howto__icon">&#9733;</span><p><strong>Drop &mdash; Charge the shield:</strong> Notes fly inward. Collect them to keep your shield alive.</p></div>
+          <div class="howto__row"><span class="howto__icon">&#9632;</span><p><strong>Bridge &mdash; Mirror the pattern:</strong> Pads flash in order. Step on them with the music.</p></div>
+          <div class="howto__sep"></div>
+          <p class="howto__tip">The boss follows the music. Every pattern is learnable. Replaying the same song means the same patterns &mdash; your skill is knowing what comes next. No attack button. You only survive.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= IN-GAME ========================= -->
+    <section class="screen screen--game" id="screen-game">
+      <!-- Arena mount (2D DOM renderer goes here) -->
+      <div id="arena-mount" class="arena-mount"></div>
+
+      <!-- HUD overlay -->
+      <div class="hud" id="hud">
+        <!-- Top left: vitals -->
+        <div class="hud__vitals">
+          <div class="hud__hearts" id="hud-hearts">
+            <div class="hud__heart" data-heart="0"></div>
+            <div class="hud__heart" data-heart="1"></div>
+            <div class="hud__heart" data-heart="2"></div>
+            <div class="hud__hearts-count" id="hud-hearts-count">3 / 3</div>
+          </div>
+          <div class="hud__shield-wrap">
+            <div class="hud__shield-label"><span>SHIELD</span><span id="hud-shield-pct">0%</span></div>
+            <div class="hud__shield-bar"><div class="hud__shield-fill" id="hud-shield-fill"></div></div>
+          </div>
+        </div>
+
+        <!-- Top centre: section timeline -->
+        <div class="hud__timeline">
+          <div class="hud__song-info">
+            <div class="hud__song-title" id="hud-song-title">Song <span>· Artist</span></div>
+            <div class="hud__song-time" id="hud-song-time">0:00 / 0:00</div>
+          </div>
+          <div class="hud__sections-bar" id="hud-sections-bar"></div>
+          <div class="hud__section-labels" id="hud-section-labels"></div>
+        </div>
+
+        <!-- Top right: clean bars + mastery -->
+        <div class="hud__stats">
+          <div class="hud__stat-box">
+            <div class="hud__stat-label">CLEAN BARS</div>
+            <div class="hud__stat-value" id="hud-clean-bars">0</div>
+          </div>
+          <div class="hud__stat-box hud__stat-box--mastery">
+            <div class="hud__stat-label">MASTERY</div>
+            <div class="hud__stat-value" id="hud-mastery">0%</div>
+          </div>
+        </div>
+
+        <!-- Bottom centre: incoming hazard lane -->
+        <div class="hud__incoming">
+          <div class="hud__incoming-header">
+            <div class="hud__incoming-title">INCOMING — NEXT 2 BARS</div>
+            <div class="hud__incoming-beats" id="hud-incoming-beats">
+              <div class="hud__incoming-dot"></div>
+              <div class="hud__incoming-dot"></div>
+              <div class="hud__incoming-dot"></div>
+              <div class="hud__incoming-dot"></div>
+            </div>
+          </div>
+          <div class="hud__incoming-lane" id="hud-incoming-lane">
+            <div class="hud__incoming-playhead"></div>
+          </div>
+        </div>
+
+        <!-- Bottom left: input hints -->
+        <div class="hud__inputs">
+          <div class="hud__keys">
+            <div></div>
+            <div class="hud__key">W</div>
+            <div></div>
+            <div class="hud__key">A</div>
+            <div class="hud__key">S</div>
+            <div class="hud__key">D</div>
+          </div>
+          <div class="hud__input-labels">
+            <div class="hud__input-label-move">MOVE</div>
+            <div class="hud__input-label-dash">SPACE · DASH</div>
+          </div>
+        </div>
+
+        <!-- Bottom right: dash charges -->
+        <div class="hud__dash-charges">
+          <div class="hud__dash-label">DASH · SPACE</div>
+          <div class="hud__dash-dots" id="hud-dash-dots">
+            <div class="hud__dash-dot hud__dash-dot--full"></div>
+            <div class="hud__dash-dot hud__dash-dot--full"></div>
+            <div class="hud__dash-dot"></div>
+          </div>
+          <div class="hud__dash-refill">refills on the 1</div>
+        </div>
+
+        <!-- Bonus popup -->
+        <div class="hud__bonus" id="hud-bonus"></div>
+
+        <!-- Right edge threat -->
+        <div class="hud__threat-edge" id="hud-threat-edge"></div>
+      </div>
+    </section>
+
+    <!-- ========================= PAUSE ========================= -->
+    <section class="screen screen--pause" id="screen-pause">
+      <div class="pause__backdrop"></div>
+      <div class="pause__modal">
+        <div class="pause__left">
+          <div class="pause__title">Paused</div>
+          <div class="pause__context" id="pause-context">Song · SECTION · bar 0</div>
+          <div class="pause__actions">
+            <div class="pause__action" id="pause-resume">
+              Resume <span class="pause__action-key">ESC</span>
+            </div>
+            <div class="pause__action" id="pause-restart-section">
+              Restart this section <span class="pause__action-key">R</span>
+            </div>
+            <div class="pause__action" id="pause-restart-song">
+              Restart song <span class="pause__action-key">⇧R</span>
+            </div>
+            <div class="pause__action" id="pause-quit">
+              Quit to library
+            </div>
+          </div>
+        </div>
+        <div class="pause__right">
+          <div>
+            <div class="pause__section-label">AUDIO OFFSET</div>
+            <div class="pause__offset-track">
+              <div class="pause__offset-center"></div>
+              <div class="pause__offset-thumb" id="pause-offset-thumb"></div>
+            </div>
+            <div class="pause__offset-labels">
+              <span>−120 ms</span>
+              <span id="pause-offset-value">+0 ms</span>
+              <span>+120 ms</span>
+            </div>
+            <div class="pause__tap-calibrate" id="pause-tap-calibrate">
+              <span>Tap SPACE on 8 beats</span>
+              <span class="pause__tap-count" id="pause-tap-count">0 / 8</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="pause__section-label">SURVIVAL ASSISTS</div>
+            <div class="pause__assists">
+              <div class="pause__assist" data-assist="wide-safe">
+                <span>Wider safe zones</span>
+                <span class="pause__assist-val pause__assist-val--off" id="assist-wide">OFF</span>
+              </div>
+              <div class="pause__assist" data-assist="reduce-flash">
+                <span>Reduce flashing</span>
+                <span class="pause__assist-val pause__assist-val--off" id="assist-flash">OFF</span>
+              </div>
+              <div class="pause__assist" data-assist="outlines-only">
+                <span>Hazard outlines only</span>
+                <span class="pause__assist-val pause__assist-val--off" id="assist-outlines">OFF</span>
+              </div>
+              <div class="pause__assist" data-assist="metronome">
+                <span>Metronome click</span>
+                <span class="pause__assist-val pause__assist-val--off" id="assist-metro">OFF</span>
+              </div>
+            </div>
+            <div class="pause__assist-note">Assists never lock rewards. Mastery % records which assists were on, and that is all.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= RESULTS ========================= -->
+    <section class="screen screen--results" id="screen-results">
+      <!-- Survived variant -->
+      <div class="results results--survived" id="results-survived" style="display:none">
+        <div class="results__status results__status--survived" id="res-status-s">SURVIVED · FIRST TIME</div>
+        <div class="results__headline" id="res-headline-s">You made it to the outro</div>
+
+        <div class="results__body">
+          <div class="results__mastery-ring" id="res-mastery-ring">
+            <div class="results__mastery-inner">
+              <div>
+                <div class="results__mastery-pct" id="res-mastery-pct">0%</div>
+                <div class="results__mastery-label">MASTERY</div>
+              </div>
+            </div>
+          </div>
+          <div class="results__stats-list">
+            <div class="results__stat-row"><span>Hearts left</span><span id="res-hearts">3 / 3</span></div>
+            <div class="results__stat-row"><span>Longest clean streak</span><span id="res-clean">0 bars</span></div>
+            <div class="results__stat-row"><span>Notes caught</span><span id="res-notes">0 / 0</span></div>
+            <div class="results__stat-row results__stat-row--danger"><span>Weakest section</span><span id="res-weakest">—</span></div>
+          </div>
+        </div>
+
+        <div class="results__chart-section">
+          <div class="results__chart-title">DAMAGE BY SECTION</div>
+          <div class="results__chart" id="res-chart-s"></div>
+        </div>
+
+        <div class="results__actions">
+          <button class="btn btn--primary" id="btn-drill">Drill</button>
+          <button class="btn" id="btn-run-again">Run it again</button>
+          <button class="btn" data-nav="songs">Songs</button>
+        </div>
+      </div>
+
+      <!-- Died variant -->
+      <div class="results results--died" id="results-died" style="display:none">
+        <div class="results__status results__status--died" id="res-status-d">OUT OF HEARTS · 0:00 IN</div>
+        <div class="results__headline" id="res-headline-d">The drop got you. Again.</div>
+
+        <div class="results__death-detail">
+          <div class="results__death-label">WHAT ENDED THE RUN</div>
+          <div class="results__death-info">
+            <div class="results__death-icon"></div>
+            <div class="results__death-text">
+              <strong id="res-death-what">Closing ring, bar 84</strong>
+              <p id="res-death-tip">—</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="results__mini-stats">
+          <div class="results__mini-stat">
+            <div class="results__mini-stat-value" id="res-bars-survived">0</div>
+            <div class="results__mini-stat-label">BARS SURVIVED</div>
+          </div>
+          <div class="results__mini-stat">
+            <div class="results__mini-stat-value" id="res-vs-last">+0</div>
+            <div class="results__mini-stat-label">VS LAST RUN</div>
+          </div>
+          <div class="results__mini-stat">
+            <div class="results__mini-stat-value" id="res-attempt">1st</div>
+            <div class="results__mini-stat-label">ATTEMPT TONIGHT</div>
+          </div>
+        </div>
+
+        <div class="results__actions">
+          <button class="btn btn--primary" id="btn-retry-bar">Retry from bar <span id="res-retry-bar">0</span> <span style="font-family:var(--font-mono);font-size:0.8em;opacity:0.6">SPACE</span></button>
+          <button class="btn" id="btn-slow">Slow to 80%</button>
+        </div>
+      </div>
+
+      <!-- Challenges (shared) -->
+      <div class="results__challenges" id="res-challenges"></div>
+    </section>
+
+  </main>
+
+  <!-- vendor (no Three.js) -->
+  <script src="vendor/session.js"></script>
+  <script src="vendor/clock.js"></script>
+
+  <!-- game modules -->
+  <script src="js/limelight.js"></script>
+  <script src="js/mastery.js"></script>
+  <script src="js/challenges.js"></script>
+  <script src="js/telegraph.js"></script>
+  <script src="js/hud.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/hazards.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/arena.js"></script>
+  <script src="js/screens.js"></script>
+
+</body>
+</html>
