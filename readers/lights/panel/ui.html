@@ -58,6 +58,17 @@
   /* clean layout: a primary deck, a compact preview strip, and advanced tucked away */
   .deck { display: flex; gap: 14px; align-items: center; margin: 4px 0 12px; }
   .deck .time { flex: 0 0 auto; }
+  .briefs { display: flex; flex-direction: column; gap: 8px; }
+  .brief { display: grid; grid-template-columns: 72px 1fr; gap: 10px; align-items: start;
+           padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+  .brief .state { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; text-align: center;
+                  padding: 3px 0; border-radius: 4px; }
+  .brief .doing { background: #14532d; color: #bbf7d0; }
+  .brief .notyet { background: #3f1d1d; color: #fecaca; }
+  .brief .skip { background: var(--panel); color: var(--dim); }
+  .brief .what { font-size: 13px; }
+  .brief .detail { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
+                   margin-top: 3px; word-break: break-word; }
   .preview { display: flex; gap: 18px; align-items: center; margin: 12px 0 4px; }
   .preview .swatch { width: 64px; height: 64px; border-radius: 10px; padding-bottom: 4px; }
   .preview .swatch span { font-size: 10px; }
@@ -153,6 +164,15 @@
     </div>
     <input type="range" id="offset" min="-3000" max="3000" step="5" value="0">
     <p class="hint">Positive moves the lights <b>later</b>; if they lag the music, go negative. The server is the player — closing this page pauses the show within 3 s. Keys: <kbd>K</kbd> play · <kbd>←</kbd>/<kbd>→</kbd> ±10 ms · <kbd>J</kbd>/<kbd>L</kbd> seek ±5 s.</p>
+  </section>
+
+  <!-- what we asked the rig to do, and what it actually does -->
+  <section class="card">
+    <h2>Briefs — what we asked for <span class="meta" id="briefscore"></span></h2>
+    <div id="briefs" class="briefs"><p class="hint">loading…</p></div>
+    <p class="hint">Judged from the baked frames, not from the code, so it says what the rig
+      does rather than what it was meant to do. Add one by dropping a file in <code>briefs/</code>.
+      <button id="briefsagain" style="margin-left:8px">re-check</button></p>
   </section>
 
   <!-- everything else, out of the way until needed -->
@@ -600,6 +620,35 @@
     setInterval(animate, 40);
   })();
 })();
+
+/* ---- briefs: the board, refreshed on demand rather than polled ---------- */
+async function loadBriefs(){
+  const box = document.getElementById('briefs');
+  const score = document.getElementById('briefscore');
+  box.innerHTML = '<p class="hint">checking… this bakes each show, so give it a few seconds</p>';
+  try {
+    const r = await fetch('/api/briefs');
+    const d = await r.json();
+    if (d.error) { box.innerHTML = '<p class="hint">' + d.error + '</p>'; score.textContent = ''; return; }
+    const rows = d.briefs || [];
+    const doing = rows.filter(b => b.state === 'doing').length;
+    const judged = rows.filter(b => b.state === 'doing' || b.state === 'not-yet').length;
+    score.textContent = `${doing} of ${judged} landing` + (d.cached ? ' · cached' : '');
+    box.innerHTML = rows.map(b => {
+      const cls = b.state === 'doing' ? 'doing' : b.state === 'not-yet' ? 'notyet' : 'skip';
+      const label = b.state === 'doing' ? 'doing' : b.state === 'not-yet' ? 'not yet' : '—';
+      const where = `${b.song} ${b.from_bar}–${b.from_bar + (b.bars || 1) - 1}`;
+      const esc = t => String(t == null ? '' : t).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+      return `<div class="brief"><div class="state ${cls}">${label}</div>` +
+             `<div><div class="what"><b>${esc(b.effect)}</b> · ${esc(where)}</div>` +
+             `<div class="detail">${esc(b.detail)}</div>` +
+             (b.want ? `<div class="detail">want: ${esc(b.want)}</div>` : '') +
+             `</div></div>`;
+    }).join('') || '<p class="hint">no briefs yet — add one in briefs/</p>';
+  } catch (e) { box.innerHTML = '<p class="hint">' + e.message + '</p>'; }
+}
+document.getElementById('briefsagain').addEventListener('click', loadBriefs);
+loadBriefs();
 </script>
 </body>
 </html>
