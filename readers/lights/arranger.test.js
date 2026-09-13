@@ -564,6 +564,31 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
      Object.keys(HUE).map(k => HUE[k]).length === new Set(Object.keys(HUE).map(k => HUE[k])).size);
 }
 
+/* ---- the artist's palette rides from the response into the plan -------------- */
+{
+  const bare = plan(require("./fixtures/mini_raw.js").RAW(), EN, 42);
+  ok("a song with no personality constrains nothing", bare.palette === undefined);
+
+  const P = require("./fixtures/mini_raw.js").RAW();
+  P.personality = { user: "renjith", colours: [{ name: "red", hex: "#ff0000" }, { name: "white", hex: "#ffffff" }] };
+  const p = plan(P, EN, 42);
+  ok("the personality's colours become the plan's palette",
+     JSON.stringify(p.palette) === JSON.stringify([{ name: "red", rgb: [1, 0, 0] }, { name: "white", rgb: [1, 1, 1] }]),
+     JSON.stringify(p.palette));
+
+  /* the old spelling still answers: a personality saved as `profile` is the same thing */
+  const O = require("./fixtures/mini_raw.js").RAW();
+  O.profile = P.personality;
+  ok("a personality under its old name is read the same way",
+     JSON.stringify(plan(O, EN, 42).palette) === JSON.stringify(p.palette));
+
+  /* the palette is the only thing it changes: same plan otherwise */
+  const a = { ...p }, b = { ...bare };
+  delete a.palette; delete b.palette;
+  ok("choosing colours does not change which gestures the show plays",
+     JSON.stringify(a) === JSON.stringify(b));
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

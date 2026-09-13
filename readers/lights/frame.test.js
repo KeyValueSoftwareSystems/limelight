@@ -1,7 +1,7 @@
 /* frame.js tests -- dynamics-driven PAR hits, a lively head, and the contrast
    overrides. Pure in position. Plain node idiom. */
 "use strict";
-const { frame } = require("./frame.js");
+const { frame, palettise, palettiseName } = require("./frame.js");
 
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);
@@ -163,6 +163,51 @@ const P = (extra, more) => ({ grid: { beats_per_bar: 4 }, assignments: [base(), 
   const down = g(frame({ bar: 2, beat: 4 }, P([sw]), CTX), "par_1").level;
   ok("a swell is brightest early in its span and falls away", up > down && down > 0, `${up} -> ${down}`);
   ok("a swell is not a snap: it never sits at full for its whole span", up < 1 || down < 1, `${up} ${down}`);
+}
+
+/* ---- the artist's palette has the last word on colour ------------------------
+   A personality says this song is red and white. The rig can make any colour;
+   after this, it makes two. Nearest is judged on saturation first and hue
+   second, so a saturated colour finds the nearest HUE and a washed-out one finds
+   the white end -- plain RGB distance sends every saturated colour to white,
+   which is the opposite of what choosing red means. */
+{
+  const RW = [{ name: "red", rgb: [1, 0, 0] }, { name: "white", rgb: [1, 1, 1] }];
+  const near = (a, b) => Math.abs(a - b) < 0.02;
+  const sat = c => { const M = Math.max(...c), m = Math.min(...c); return M ? (M - m) / M : 0; };
+
+  ok("no palette leaves a colour exactly as the show drew it",
+     JSON.stringify(palettise([0, 0.85, 1], null)) === JSON.stringify([0, 0.85, 1]));
+
+  const teal = palettise([0, 0.85, 1], RW);
+  ok("a saturated colour lands on the saturated end, not on white",
+     teal[0] === 1 && teal[1] === 0 && teal[2] === 0, teal.join(","));
+  const magenta = palettise([1, 0, 1], RW);
+  ok("so does a colour on the other side of the wheel", sat(magenta) > 0.9 && magenta[0] === 1 && magenta[1] === 0, magenta.join(","));
+
+  const pale = palettise([1, 0.85, 0.85], RW);
+  ok("a washed-out colour lands on white", sat(pale) < 0.05, pale.join(","));
+
+  /* brightness is the show's business, not the palette's */
+  const dim = palettise([0, 0.3, 0.36], RW);
+  ok("a dim colour stays dim", near(Math.max(...dim), 0.36) && dim[0] > dim[1], dim.join(","));
+
+  ok("the head's wheel name is snapped too", palettiseName("light blue", RW) === "red" && palettiseName("white", RW) === "white",
+     palettiseName("light blue", RW) + "/" + palettiseName("white", RW));
+
+  /* and it reaches the rendered frame, after the look, the tint and the hit */
+  const P2 = extra => ({ grid: { beats_per_bar: 4 }, palette: RW,
+    assignments: [base(), headA(), ...(extra || [])] });
+  const lit = frame({ bar: 2, beat: 1 }, P2(), CTX);
+  ok("every lamp in a palette show wears a palette colour",
+     lit.fixtures.filter(f => Array.isArray(f.intent.colour))
+        .every(f => { const c = f.intent.colour; return sat(c) < 0.06 || (c[0] === 1 && c[1] === 0 && c[2] === 0); }),
+     JSON.stringify(lit.fixtures.map(f => f.intent.colour)));
+  const hit = frame({ bar: 2, beat: 1 }, P2([{ from: { bar: 2, beat: 1 }, to: { bar: 2, beat: 2 },
+    type: "white_blast", priority: 9, params: { strength: 1, hue: 0.5 } }]), CTX);
+  const hc = g(hit, "par_1").colour;
+  ok("a hit asking for a hue the artist did not allow gets one they did",
+     hc[0] === 1 && hc[1] === 0 && hc[2] === 0, hc.join(","));
 }
 
 /* ---- a pause sits the rig down for its beats, scaled by weight ---------------- */

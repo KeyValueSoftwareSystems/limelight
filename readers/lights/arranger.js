@@ -154,6 +154,28 @@ function handovers(score, least = 2.0) {
   return out;
 }
 
+/* ---- the artist's palette ----------------------------------------------------
+   The personality rides in the protocol response whether a reader asked for it
+   or not: it is how the person playing this song wants it to look, and it is per
+   song on purpose -- one palette across a whole set would make twenty tracks
+   look like one. The plan carries it forward as musical intent; frame.js decides
+   what it is in light. A song with no personality is unconstrained, as before. */
+function paletteOf(score) {
+  const p = (score && (score.personality || score.profile)) || null;
+  const cols = p && Array.isArray(p.colours) ? p.colours : null;
+  if (!cols || !cols.length) return null;
+  const out = [];
+  for (const c of cols) {
+    const hex = typeof c === "string" ? c : c && c.hex;
+    const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ""));
+    if (!m) continue;
+    const n = parseInt(m[1], 16);
+    out.push({ name: (typeof c === "object" && c.name) || null,
+               rgb: [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255] });
+  }
+  return out.length ? out : null;
+}
+
 /* ---- what colour a hit is ---------------------------------------------------
    A hit takes its colour from the music, never from a mood board. Two sources,
    both stated by the score: the song's KEY, which puts the whole show somewhere
@@ -997,6 +1019,8 @@ function plan(scoreIn, enumResult, seed) {
   }
 
   const out = { seed: (seed || 0) >>> 0, grid: score.grid, contexts, assignments };
+  const palette = paletteOf(score);
+  if (palette) out.palette = palette;
   if (facts) out.facts = facts;
   if (lanesOut) out.lanes = lanesOut;
   if (tension) out.tension = tension;
@@ -1020,7 +1044,7 @@ function clashes(p) {
   return n;
 }
 
-module.exports = { plan, contextsFor, sectionEnergyMean, energyReader, clashes, carve, factsBlock, majorityVector };
+module.exports = { plan, contextsFor, sectionEnergyMean, energyReader, clashes, carve, factsBlock, majorityVector, paletteOf };
 
 /* ---- CLI: plan a score and print the show, section by section ------------
      node readers/lights/arranger.js [score file] [seed]   */

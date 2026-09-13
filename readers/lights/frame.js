@@ -486,6 +486,59 @@ function tint(colour, hue, amount, minor) {
   return hsv2rgb(h, sat, v);
 }
 
+/* ---- the artist's palette ----------------------------------------------------
+   A personality says which colours this song is allowed to use. The rig can make
+   any colour; the artist has decided this song makes two. So every colour the
+   show produces -- from a look, from the key's tint, from a hit, from a build's
+   whitening -- is snapped to the nearest colour the artist allowed, keeping the
+   brightness the show asked for. Absent a palette nothing here runs and the show
+   renders exactly as it did.
+
+   Nearest is judged on SATURATION first and hue second, because that is how the
+   eye sorts a short palette: a washed-out colour belongs to the white end and a
+   saturated one belongs to whichever hue is nearest. Judging on plain RGB
+   distance instead sends every saturated colour to white -- a dim teal is closer
+   to grey than to red in RGB -- which is the opposite of what an artist choosing
+   red means. With red and white the flip happens at half saturation, so a build
+   that whitens does not fade to pink: it turns, once, and you see it turn. */
+const PALETTE_NAMES = { white: [1, 1, 1], red: [1, 0, 0], yellow: [1, 0.85, 0], blue: [0, 0, 1],
+  green: [0, 1, 0], pink: [1, 0, 0.55], orange: [1, 0.3, 0], "light blue": [0, 0.6, 1],
+  cyan: [0, 1, 1], magenta: [1, 0, 1], amber: [1, 0.65, 0] };
+
+const paletteRGB = e => (Array.isArray(e) ? e : e && e.rgb) || null;
+
+function nearestAllowed(palette, colour) {
+  const [h, s] = rgb2hsv(colour);
+  let best = null, bestD = Infinity;
+  for (const e of palette) {
+    const rgb = paletteRGB(e);
+    if (!rgb) continue;
+    const [ph, ps] = rgb2hsv(rgb);
+    let dh = Math.abs(ph - h); if (dh > 0.5) dh = 1 - dh;
+    const d = Math.abs(ps - s) + ps * s * dh;
+    if (d < bestD) { bestD = d; best = e; }
+  }
+  return best;
+}
+
+/* an rgb colour, in the artist's palette, at the brightness it already had */
+function palettise(colour, palette) {
+  if (!palette || !palette.length || !Array.isArray(colour) || colour.length < 3) return colour;
+  const best = nearestAllowed(palette, colour);
+  if (!best) return colour;
+  const [bh, bs] = rgb2hsv(paletteRGB(best));
+  return hsv2rgb(bh, bs, rgb2hsv(colour)[2]);
+}
+
+/* the same for a colour NAME, which is what a head look asks for: the head has a
+   wheel, not three channels, so it picks a slot rather than mixing. */
+function palettiseName(name, palette) {
+  if (!palette || !palette.length || typeof name !== "string") return name;
+  const rgb = PALETTE_NAMES[name.toLowerCase()];
+  const best = rgb ? nearestAllowed(palette, rgb) : palette[0];
+  return (best && best.name) || name;
+}
+
 /* ---- the hit: one override, a family of gestures ----------------------------
    Every hit used to be the same picture -- the whole rig, white, for one beat --
    so seventeen different moments in a song produced seventeen identical flashes
@@ -710,6 +763,14 @@ function frame(position, plan, ctx) {
       fx.intent.strobe = +clamp01((accent.params.strength || 0.8) * mod.strobeK).toFixed(2);
   }
 
+  /* the artist's palette has the last word on colour, after the looks, the key's
+     tint and the whitening have all had theirs */
+  const palette = plan.palette;
+  if (palette && palette.length) for (const fx of fixtures) {
+    if (Array.isArray(fx.intent.colour)) fx.intent.colour = palettise(fx.intent.colour, palette);
+    else if (typeof fx.intent.colour === "string") fx.intent.colour = palettiseName(fx.intent.colour, palette);
+  }
+
   /* contrast overrides take the rig for their beat, scaled by the moment's
      weight and shaped by the hit's three dials (see hitCover / hitEnvelope).
      They are about LIGHT, not aim: the head keeps the pose its own look gave it,
@@ -719,7 +780,8 @@ function frame(position, plan, ctx) {
     const sf = blast ? strengthOf(blast) : 0;
     const peak = blast ? +(0.5 + 0.5 * sf).toFixed(3) : 0;
     const hue = typeof bp.hue === "number" ? bp.hue : null;
-    const hitCol = hue === null ? [1, 1, 1] : hsv2rgb(hue, 1, 1);
+    let hitCol = hue === null ? [1, 1, 1] : hsv2rgb(hue, 1, 1);
+    if (palette && palette.length) hitCol = palettise(hitCol, palette);
     const cover = blast ? hitCover(bp.coverage, groups) : null;
     const arc = groups.arc || [];
     const span = blast ? Math.max(1e-6, at(blast.to) - at(blast.from)) : 1;
@@ -746,15 +808,16 @@ function frame(position, plan, ctx) {
            stage, prism open -- a few frames of travel inside the aim window */
         if (cover) continue;
         if (sf >= 0.9) { pose.pan = 0.5; pose.tilt = 0.5; }
-        fx.intent = { colour: hue === null ? "white" : (fx.intent.colour || "white"),
+        const headName = hue === null ? "white" : (fx.intent.colour || "white");
+        fx.intent = { colour: palette && palette.length ? palettiseName(headName, palette) : headName,
                       level: Math.max(dim, lvl), ...(sf >= 0.7 ? { prism: true } : {}), ...pose };
       } else {
-        fx.intent = lvl > dim ? { colour: hitCol, level: lvl }
-                              : { colour: fx.intent.colour || hitCol, level: dim };
+        const keep = Array.isArray(fx.intent.colour) ? fx.intent.colour : hitCol;
+        fx.intent = lvl > dim ? { colour: hitCol, level: lvl } : { colour: keep, level: dim };
       }
     }
   }
   return { position, fixtures };
 }
 
-module.exports = { frame, resolveGroups, renderPar, renderHead, parLevel, hitEnv, hitCover, hitEnvelope, compose, tint, modulationAt };
+module.exports = { frame, resolveGroups, renderPar, renderHead, parLevel, hitEnv, hitCover, hitEnvelope, compose, tint, palettise, palettiseName, modulationAt };
