@@ -413,6 +413,43 @@ being decided by a tie-break that nobody had stated, which is how the same
 detector gave three different answers on three different songs and all of them
 looked equally defensible.
 
+It turns out to be the published convention, which we arrived at independently
+and should have looked up first. Only two annotation guides in the field state a
+rule for this at all, and both say the same thing. SALAMI's ISMIR 2011 paper
+records "a preference to have segment boundaries fall on downbeats, even in the
+presence of pickups" (the rule never made it into the distributed annotator
+guide, which contains no timing convention at all). And the Jazz Structure
+Dataset is almost verbatim what we settled on: boundaries go at "the first
+downbeat in the harmonic schema of the chorus, which implies that the theme or
+solo melody may start earlier (due to pickups) or later". A voice arriving
+early is a pickup. The boundary does not follow it.
+
+Isophonics says only "every segment starts at a bar boundary" and never defines
+pickup handling; RWC/AIST snaps to beats rather than bars and handles ambiguity
+by annotating only "when the music structure is obvious". No dataset
+documentation anywhere says what to do when the drums leave at bar 40, the voice
+enters at 41 and the bass leaves at 42.
+
+**Report a boundary score with its tolerance or it means nothing.** Ours against
+the thirteen confirmed boundaries:
+
+    exact bar      12 of 13     0.923
+    within 0.5 s   12 of 13     0.923
+    within 3 s     13 of 13     1.000
+
+The single miss is 1.90 s, which is inside the tolerance MIREX has used since
+2005 and outside the one it uses alongside it. Those two windows do not measure
+the same ability -- a meta-analysis of the MIREX task found boundary precision
+at 0.5 s does not correlate with precision at 3 s -- and 3 s was chosen as
+roughly one bar at 80 bpm while 0.5 s is roughly one beat.
+
+Two cautions on that table. Thirteen points is a small sample, and they are
+in-sample: they were used to choose the tie-break, so this is a fit, not a
+held-out score. And for scale, two trained annotators on SALAMI agree with each
+other at F1 = 0.665 at 0.5 s and 0.749 at 3 s. The "about 90% human ceiling"
+often quoted is a 3-second figure measured on the Beatles and RWC-Pop, and it
+does not transfer to harder repertoire.
+
 `sections[].role` -- intro, verse, chorus, drop, breakdown and the rest -- is
 the least trustworthy thing in this file, and it is also the most readable, so
 it needs saying plainly. **The boundaries are measured. The names on them are
