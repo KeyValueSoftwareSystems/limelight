@@ -92,6 +92,26 @@ is a new version.
 section that starts before the window still comes back, because a consumer
 asking for eight bars needs to know it is sitting inside a sixteen-bar drop.
 
+### One field, two shapes
+
+`beats` travels in two different shapes depending on which door a reader comes
+through, and this is not yet settled.
+
+`protocol/respond.js`, the reference responder, sends
+`{ derived_from, as, count, list }` where the list is `[bar, beat]` pairs. That
+is what `response.example.json` shows and what `respond.test.js` and
+`session.test.js` assert.
+
+`server/format/v1.js` and `hub/score_api.py` send an array of one object per
+beat: `{ bar, beat, weight, sure, off_ms, downbeat }`. That carries strictly
+more -- `off_ms` is an honesty field described below and the pair form throws it
+away -- and `count` is the array's length.
+
+Both handle either shape on input; neither converts to the other on output. A
+reader written against one and pointed at the other will not crash, it will
+quietly read nothing, which is the worst of the three possible outcomes. Pick
+one before anyone writes a third reader.
+
 ## The two clocks
 
 Keeping these apart is the whole design.

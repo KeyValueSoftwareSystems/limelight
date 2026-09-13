@@ -102,7 +102,13 @@ export function format(raw) {
       });
     }
   }
+  /* The one request SPEC uses as its example asks for downbeats, and neither
+     formatter ever produced any: a pipeline score has the flag on each beat and
+     no downbeats field, and both only passed a field through. Asking for them
+     got you nothing back. */
   if (raw.downbeats) out.downbeats = raw.downbeats;
+  else if (Array.isArray(out.beats) && Array.isArray(raw.beats))
+    out.downbeats = out.beats.filter((_, i) => raw.beats[i] && raw.beats[i].downbeat);
 
   // ---- sections (layers.form.spans or parts) ----
   if (raw.layers?.form?.spans) {

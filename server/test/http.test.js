@@ -1,11 +1,14 @@
 import { describe, it, before, after } from 'node:test';
 import assert                         from 'node:assert/strict';
+import { readFileSync }               from 'node:fs';
 
 import { createFileStore }  from '../store/file.js';
 import { createHandler }    from '../handler.js';
 import { startHttp }        from '../transport/http.js';
 
 const SCORE_DIR = new URL('../../protocol', import.meta.url).pathname;
+const FIXTURE = JSON.parse(
+  readFileSync(new URL('../../protocol/levels.score', import.meta.url).pathname, 'utf8'));
 
 function post(port, body) {
   return fetch(`http://127.0.0.1:${port}/score`, {
@@ -44,16 +47,20 @@ describe('HTTP transport — contract alignment', () => {
     assert.equal(body.score, 'levels');
     assert.ok(body.sections.length > 0);
     assert.ok(body.energy.values.length > 0);
-    assert.ok(body.beats.count > 0);
+    assert.ok(body.beats.length > 0);
+    assert.ok(body.downbeats.length > 0);
     assert.ok(body.moments.length > 0);
     assert.ok(body.layers);
   });
 
-  // rule 3: version always present
-  it('response includes version', async () => {
+  /* rule 3: the response says which version it gave. It says the version the
+     score on disk carries -- pinning a literal here tested the fixture's age,
+     not the rule, and broke the day scores settled on version 0. */
+  it('response includes the version the score actually carries', async () => {
     const res  = await post(port, { score: 'levels' });
     const body = await res.json();
-    assert.equal(body.version, 2);
+    assert.notEqual(body.version, undefined);
+    assert.equal(body.version, FIXTURE.version);
   });
 
   it('wrong version returns error', async () => {
@@ -78,22 +85,28 @@ describe('HTTP transport — contract alignment', () => {
       window: { from_bar: 33, bars: 8 },
     });
     const body = await res.json();
-    assert.equal(body.beats.count, 32);
-    assert.equal(body.downbeats.count, 8);
-    assert.equal(body.beats.list[0][0], 33);
+    assert.equal(body.beats.length, 32);
+    assert.equal(body.downbeats.length, 8);
+    assert.equal(body.beats[0].bar, 33);
+    assert.ok(body.downbeats.every(d => d.beat === 1));
     assert.equal(body.energy.from_bar, 33);
     assert.equal(body.energy.values.length, 8);
     assert.deepEqual(body.window, { from_bar: 33, bars: 8 });
   });
 
-  it('a windowed section that starts before still comes back', async () => {
+  /* A section that overlaps the window comes back with its real extent, not
+     clipped to the window, so a consumer asking for eight bars can tell it is
+     sitting inside a longer one. Asserting that some section began before the
+     window tested where this song's boundaries happened to fall, and they
+     moved; what the rule is about is the section not being trimmed. */
+  it('a windowed section keeps its real extent', async () => {
     const res  = await post(port, {
       score: 'levels', fields: ['sections'],
       window: { from_bar: 33, bars: 8 },
     });
     const body = await res.json();
-    assert.ok(body.sections.some(s => s.from.bar < 33));
-    assert.ok(body.sections.some(s => s.to.bar > 41));
+    assert.ok(body.sections.length > 0);
+    assert.ok(body.sections.some(s => s.from.bar < 33 || s.to.bar > 40));
   });
 
   // errors

@@ -111,6 +111,9 @@ def format_v1(raw):
 
     if raw.get("downbeats"):
         out["downbeats"] = raw["downbeats"]
+    elif isinstance(out.get("beats"), list) and isinstance(raw.get("beats"), list):
+        out["downbeats"] = [e for e, b in zip(out["beats"], raw["beats"])
+                            if isinstance(b, dict) and b.get("downbeat")]
 
     # ---- sections ----
     layers = raw.get("layers") or {}
