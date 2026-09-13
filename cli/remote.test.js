@@ -179,7 +179,10 @@ async function startHub(extraEnv = {}) {
     const refused = [
       ["[1,2]", /object/],
       [{ a: 1 }, /a.*not an object/],
-      [{ a: { value: { nested: 1 } } }, /a.*string, number, boolean or null/],
+      [{ a: { value: { nested: 1 } } }, /a.*string, number, boolean, null, or a list of flat objects/],
+      /* a list of flat objects IS allowed -- that is how `effects` travels -- but
+         a list with a nested object in it is not, and the message says which */
+      [{ a: { value: [{ ok: 1 }, { deep: { no: 1 } }] } }, /list of flat objects/],
       [{ a: { value: 1, enforced: "yes" } }, /a.*enforced must be true or false/],
       [{ "": { value: 1 } }, /empty field name/],
       [{ " a ": { value: 1 } }, /leading or trailing/],

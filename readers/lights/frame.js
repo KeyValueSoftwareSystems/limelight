@@ -36,14 +36,37 @@ const hitEnv = x => (x < 0.08 ? 1 : Math.max(0, 1 - (x - 0.08) / 0.30));
 /* the PAR level for this instant, from the phase dynamics: contrast between a floor
    and a peak, shaped either as a per-beat hit or a per-bar breath. */
 function parLevel(p, ph) {
-  const floor = p.floor != null ? p.floor : 0, peak = p.peak != null ? p.peak : 1;
+  let floor = p.floor != null ? p.floor : 0;
+  const peak = p.peak != null ? p.peak : 1;
   const k = p.intensity != null ? p.intensity : 1;
+  /* A look that is the same in bar 1 and bar 16 of its own span cannot build.
+     `grow` says how much of the gap between floor and peak to close by the end
+     of the span, and `ph.through` is where we are in it -- so a rising section
+     lifts its floor as it goes and a falling one settles. Absent either, this is
+     exactly what it was before. */
+  if (p.grow && ph.through != null) {
+    floor = floor + (peak - floor) * p.grow * Math.max(0, Math.min(1, ph.through));
+  }
   const shape = p.mode === "breathe"
     ? 0.5 + 0.5 * Math.sin(2 * Math.PI * ph.phaseInBar)
     : hitEnv(ph.phaseInBeat);
   return +((floor + (peak - floor) * shape) * k).toFixed(3);
 }
 const floorLevel = p => +((p.floor != null ? p.floor : 0) * (p.intensity != null ? p.intensity : 1)).toFixed(3);
+
+/* The musical clock, moved back by a number of beats. A lamp's place in the row
+   only ever chose WHETHER it was lit, never when -- so the four PARs moved as
+   one block and no ripple, wave or travelling accent could be expressed at all.
+   Shifting each lamp's clock by its position is the whole mechanism: same curve,
+   arriving later the further along the row you look. */
+function shiftBeats(ph, beats) {
+  if (!beats) return ph;
+  const B = ph.globalBeat + ph.phaseInBeat - beats;
+  const fl = Math.floor(B + 1e-9);
+  return { ...ph, globalBeat: fl, phaseInBeat: Math.max(0, B - fl),
+           beatInBar: ((fl % ph.bpb) + ph.bpb) % ph.bpb,
+           phaseInBar: (((B / ph.bpb) % 1) + 1) % 1 };
+}
 const colourOf = (k, keys) => (k && k.intent && k.intent.colour) ||
   (keys[0] && keys[0].intent && keys[0].intent.colour) || [1, 1, 1];
 
@@ -171,10 +194,24 @@ function renderPar(gesture, ph, groups, p) {
   // full-level white. (It used to hit from 12% to peak, so it read as pulses to black.)
   const ramp = levelRamp(keys, ph, once);
   const lvl = ramp == null ? on : Math.max(on, +(ramp * steady).toFixed(3));
-  for (const id of (groups[gesture.group] || groups.all_pars || [])) {
+  /* `spread` is beats between one lamp and the next, along the physical row.
+     0 is what every look did before. A sixteenth is a flutter, a quarter is a
+     clear wave, a whole beat is a chase. */
+  const ids = groups[gesture.group] || groups.all_pars || [];
+  const order = (groups.arc && groups.arc.length) ? groups.arc : ids;
+  const spread = p.spread || 0;
+  const levelFor = id => {
+    if (!spread) return lvl;
+    const i = Math.max(0, order.indexOf(id));
+    const phi = shiftBeats(ph, i * spread);
+    const on_i = parLevel(p, phi);
+    const ramp_i = levelRamp(keys, phi, once);
+    return ramp_i == null ? on_i : Math.max(on_i, +(ramp_i * steady).toFixed(3));
+  };
+  for (const id of ids) {
     out[id] = strobeVal > 0
       ? { colour: c, level: steady, strobe: +strobeVal.toFixed(2) }
-      : { colour: c, level: lvl };
+      : { colour: c, level: levelFor(id) };
   }
   return out;
 }
@@ -569,7 +606,13 @@ function frame(position, plan, ctx) {
       tuned = { ...p, floor: +Math.min(peak, floor * mod.floorK).toFixed(3) };
     }
     /* a carved base piece keeps its section's origin so a scripted compound does not restart */
-    const rendered = renderAssignment({ ...a, params: tuned, from: a.origin || a.from }, library[a.seq_id], ph, groups, phk);
+    /* How far through its own span this assignment is, 0 to 1. Without it a look
+       renders identically in the first bar and the last, so nothing can build. */
+    const span = Math.max(1e-6, at(a.to) - at(a.from));
+    const through = clamp01((here - at(a.from)) / span);
+    const rendered = renderAssignment({ ...a, params: tuned, from: a.origin || a.from },
+                                      library[a.seq_id], { ...ph, through }, groups,
+                                      { ...phk, through });
     /* a layer drives its own fixtures only: `strobers` is every fixture that can
        strobe, head included, and a PAR look must never put strobe on the head */
     for (const id of Object.keys(rendered)) {

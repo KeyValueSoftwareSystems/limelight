@@ -471,7 +471,26 @@ function plan(scoreIn, enumResult, seed) {
     let remembered;
     const par = (mem && stillFits(mem.par)) ? { id: mem.par } : pickFor(sectionVector, "par");
     if (mem && par && par.id === mem.par) remembered = label;
-    const parParams = { rate, hue, floor: dyn.floor, peak: dyn.peak, mode: dyn.mode, intensity: boldness };
+    /* Two things the renderer can now express and nothing was setting.
+
+       `grow` closes the gap between floor and peak across the section's own
+       span, so a section the score says is rising actually rises instead of
+       being the same in its first bar and its last. Taken straight from the
+       section's rise; a falling section gets none, because a look that grows
+       through an outro is fighting the music.
+
+       `spread` is beats between one lamp and the next along the row -- the
+       thing that turns four lamps into a rig with width rather than one lamp
+       wired four times. Wide when the music is sparse, because a wave needs
+       room to travel; nothing when it is busy, because at speed the lamps
+       should land together. */
+    const secRise = partRise(sec, score) || 0;
+    const grow = secRise > 0.02 ? +clamp01(secRise * 2.2).toFixed(3) : 0;
+    const spread = rate >= 1.5 ? 0
+                 : rate >= 0.9 ? 0.125
+                 : dyn.mode === "breathe" ? 0.5 : 0.25;
+    const parParams = { rate, hue, floor: dyn.floor, peak: dyn.peak, mode: dyn.mode,
+                        intensity: boldness, grow, spread };
 
     const inside = subsIn(sec);
 
