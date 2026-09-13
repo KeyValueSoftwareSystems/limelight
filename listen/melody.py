@@ -1,4 +1,5 @@
 import numpy as np
+from grid import at_beat, beat_at
 
 RATE = 100
 FLOOR = 0.25
@@ -55,8 +56,7 @@ def fix(notes, look=4, far=7):
 
 
 def seat(at, g, pickup):
-    beat_s = 60.0 / g["bpm"]
-    step = int(np.floor((at - g["first_beat_s"]) / beat_s + 1e-6))
+    step = int(np.floor(beat_at(g, at) + 1e-6))
     per = g["beats_per_bar"]
     if step < 0:
         return 0, 1
@@ -162,11 +162,10 @@ def echoes(notes, g, pickup, least=6, slack=1.0, sway=0.45, apart=4,
 
 
 def sung(notes, spans, g, pickup, chanted=5):
-    beat_s = 60.0 / g["bpm"]
     per = g["beats_per_bar"]
 
     def at_bar(bar):
-        return g["first_beat_s"] + (bar - 1 + pickup) * per * beat_s
+        return at_beat(g, (bar - 1 + pickup) * per)
 
     out = []
     for a, b in spans:

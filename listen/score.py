@@ -15,6 +15,7 @@ from mood import moods
 from steady import all_tells as tells_of
 from words import words as lyrics
 from grid import grid, bar_edges, show
+import motion
 from form import on_phrase
 from shape import shape
 from call import call
@@ -120,18 +121,17 @@ def listen(path, slug, times):
 
 
 def per_bar_loud(loud, times, g):
-    period = 60.0 / g["bpm"]
-    span = period * g["beats_per_bar"]
-    at = np.floor((times - g["first_beat_s"]) / span).astype(int) + 1
+    cuts = bar_edges(g)
+    at = np.searchsorted(np.asarray(cuts, dtype=float), np.asarray(times, dtype=float),
+                         side="right") - 1
     out = []
-    first = 0 if g["first_beat_s"] > 0.2 else 1
-    for b in range(first, g["bars"] + 1):
+    for b in range(len(cuts) - 1):
         v = loud[(at == b) & (loud > 0)]
-        out.append(float(v.mean()) if len(v) else None)
-    peak = max((x for x in out if x is not None), default=None)
+        out.append(float(v.mean()) if len(v) else 0.0)
+    peak = max(out, default=0.0)
     if not peak:
-        return [None] * len(out)
-    return [round(x / peak, 3) if x is not None else None for x in out]
+        return [0.0] * len(out)
+    return [round(x / peak, 3) for x in out]
 
 
 def alike(spans, chroma, voices):
@@ -469,6 +469,7 @@ def read(path, slug):
         "chord_changes": turns(score_bars["chord"], score_bars["chord_sure"],
                               g["first_bar"]),
         "presence": presence(score_bars, g["first_bar"]),
+        "motion": motion.reading(score_bars, g["first_bar"]),
         "phrases": inner,
         "moments": staged,
         "signals": told_now,

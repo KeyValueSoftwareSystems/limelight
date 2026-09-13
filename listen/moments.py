@@ -1,4 +1,5 @@
 import numpy as np
+from grid import beat_at
 
 RATE = 100
 NAMES = ("drums", "bass", "vocals", "other")
@@ -10,9 +11,7 @@ HOLD = 2
 
 
 def where(t, g, pickup):
-    beat_s = 60.0 / g["bpm"]
-    step = (t - g["first_beat_s"]) / beat_s
-    idx = int(np.floor(step + 1e-6))
+    idx = int(np.floor(beat_at(g, t) + 1e-6))
     per = g["beats_per_bar"]
     bar = idx // per + 1 - (0 if pickup else 0)
     beat = idx % per + 1

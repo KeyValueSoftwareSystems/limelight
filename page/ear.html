@@ -179,6 +179,19 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 </section>
 
 <section>
+  <h2>What the music is doing</h2>
+  <p class="note">Loudness answers "how loud", not "what is happening". This row answers
+    the second question. The <b>band</b> is whether the loudness is <b style="color:#7ae8b0">rising</b>,
+    <b style="color:#8a93a6">steady</b> or <b style="color:#8fd0ff">falling</b>.
+    The <b style="color:#e8a33d">filled curve</b> is the <b>build</b> &mdash; how much this bar sounds
+    like a riser, which is the sub being filtered out while noise climbs.
+    <b>&#9650;</b> is where the loudness slams up, <b>&#9660;</b> where it drops away; the solid ones
+    are structural, the hollow ones smaller steps.</p>
+  <div class="holder"><canvas id="motion"></canvas><div class="pline" data-for="motion"></div></div>
+  <p class="note" id="motionsays"></p>
+</section>
+
+<section>
   <h2>How the sound itself changes</h2>
   <p class="note"><b>Press play and the page follows the music</b> at a zoom where a beat is
     visible; press Fit to see the whole song again.
@@ -275,7 +288,7 @@ function setView(a, b) {
   VIEW.a = Math.max(0, lo); VIEW.b = Math.min(total, hi);
   $("viewing").textContent = (VIEW.b - VIEW.a >= total - 0.01)
     ? "whole song" : `${mmss(VIEW.a)} \u2013 ${mmss(VIEW.b)}`;
-  if (SCORE) { place(); lanes(); tune(); curves(); subs(); chordRow(); }
+  if (SCORE) { place(); lanes(); tune(); motion(); curves(); subs(); chordRow(); }
 }
 
 function zoomAt(t, by) { setView(t - (t - VIEW.a) * by, t + (VIEW.b - t) * by); }
@@ -657,7 +670,7 @@ function draw() {
     + `the tune are shaded; chord repeats are listed with the moments, not here.</span>`
 ;
 
-  lanes(); tune(); curves(); beatGrid(); subs(); chordRow(); sections(); sungWords(); place();
+  lanes(); tune(); motion(); curves(); beatGrid(); subs(); chordRow(); sections(); sungWords(); place();
 }
 
 /* Absolutely-positioned rows are laid out here rather than where they are
@@ -976,6 +989,81 @@ const CURVES = [
   ["noisy",      "Noise",      "#d98e8e", "how much is noise \u2014 distortion, cymbals, breath \u2014 rather than clear notes"],
   ["held",       "Sustain",    "#7fa8d4", "how much of the bar the sound keeps ringing instead of hitting and stopping"],
 ];
+
+function motion() {
+  const m = SCORE.motion;
+  const el = $("motion");
+  if (!m || !Array.isArray(m.moving) || !m.moving.length) {
+    if (el) { el.height = 0; el.style.height = "0px"; }
+    const says = $("motionsays");
+    if (says) says.textContent = "This song has no motion track.";
+    return;
+  }
+  const H = 96, L = 78, R = 46;
+  const [g, W] = fit(el, H);
+  const from = m.from_bar == null ? FIRSTBAR : m.from_bar;
+  const span = W - L - R;
+  const COLOUR = { rising: "#7ae8b0", steady: "#39435a", falling: "#8fd0ff" };
+  const xOf = t => L + frac(t) * span;
+  for (let i = 0; i < m.moving.length; i++) {
+    const t0 = barTime(i + from), t1 = barTime(i + from + 1);
+    if (t1 < VIEW.a || t0 > VIEW.b) continue;
+    const x0 = xOf(t0), x1 = xOf(t1);
+    g.fillStyle = COLOUR[m.moving[i]] || COLOUR.steady;
+    g.globalAlpha = m.moving[i] === "steady" ? .5 : .85;
+    g.fillRect(x0, 10, Math.max(1, x1 - x0), 16);
+  }
+  g.globalAlpha = 1;
+  const w = m.winding;
+  if (Array.isArray(w) && w.length) {
+    const y0 = 34, hh = H - y0 - 14;
+    g.beginPath();
+    let open = false;
+    for (let i = 0; i < w.length; i++) {
+      const t = barTime(i + from);
+      if (t < VIEW.a - BAR || t > VIEW.b + BAR) { continue; }
+      const x = xOf(t), y = y0 + hh - (w[i] || 0) * hh;
+      open ? g.lineTo(x, y) : g.moveTo(x, y);
+      open = true;
+    }
+    if (open) {
+      g.strokeStyle = "#e8a33d"; g.lineWidth = 1.6; g.stroke();
+      g.lineTo(xOf(VIEW.b), y0 + hh); g.lineTo(xOf(VIEW.a), y0 + hh); g.closePath();
+      g.fillStyle = "rgba(232,163,61,.16)"; g.fill();
+    }
+  }
+  const mark = (list, up) => {
+    for (const x of list || []) {
+      const t = barTime(x.bar);
+      if (t < VIEW.a || t > VIEW.b) continue;
+      const px = xOf(t), py = up ? 34 : H - 12;
+      g.fillStyle = up ? "#7ae8b0" : "#8fd0ff";
+      g.strokeStyle = g.fillStyle; g.lineWidth = 1.2;
+      g.beginPath();
+      g.moveTo(px, up ? py - 7 : py + 7);
+      g.lineTo(px - 5, up ? py : py);
+      g.lineTo(px + 5, up ? py : py);
+      g.closePath();
+      x.big ? g.fill() : g.stroke();
+    }
+  };
+  mark(m.slams, true);
+  mark(m.ebbs, false);
+  g.fillStyle = "#8a93a6"; g.font = "600 10px ui-monospace,monospace";
+  g.fillText("DOING", 7, 22);
+  g.fillText("BUILD", 7, 46);
+  const says = $("motionsays");
+  if (says) {
+    const t = m.tells;
+    says.innerHTML = t == null
+      ? "The build row has no reliability figure on this song: nothing here steps up hard enough to call a drop."
+      : ("On this song the build row sits at the <b>" + t + "th percentile</b> of the song in the eight bars "
+         + "before a drop" + (t >= 65 ? " \u2014 it is worth following here."
+             : t >= 50 ? " \u2014 weak here, treat it with care."
+             : " \u2014 it does not work on this song, do not light off it.")
+         + " Chance is 50.");
+  }
+}
 
 function curves() {
   const tense = Array.isArray(SCORE.tension) ? SCORE.tension : null;
@@ -1379,7 +1467,7 @@ function tick() {
     const hp = pct(t);
     $("head").style.display = (hp < 0 || hp > 100) ? "none" : "";
     $("head").style.left = `${hp}%`;
-    if (SCORE.bars) curves();
+    if (SCORE.bars) { motion(); curves(); }
     if (VIEW.follow && !aud.paused) {
       /* Slide with the playhead rather than jumping when it reaches the edge:
          a view that leaps every few seconds reads as broken, and the point of
@@ -1582,7 +1670,7 @@ $("song").onchange = e => {
 for (const id of ["map", "subs", "chords", "lanes", "tune", "curves"]) zoomable($(id));
 zoomable($("zoom"), f => aud.currentTime - Math.min(WINDOW, viewSpan())/2 + f * Math.min(WINDOW, viewSpan()));
 
-addEventListener("resize", () => { if (SCORE) { lanes(); tune(); curves(); beatGrid(); zoom(); subs(); place(); } });
+addEventListener("resize", () => { if (SCORE) { lanes(); tune(); motion(); curves(); beatGrid(); zoom(); subs(); place(); } });
 
 /* A page that fails silently is worse than one that fails loudly: the first
    screenshot of this rewrite looked merely empty, which reads as "no data". */

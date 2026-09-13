@@ -81,11 +81,23 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
     words: [{ text: "Once", at_s: 2.88, to_s: 3.1, bar: 1, heard_twice: true }],
     lines: [{ at_s: 2.88, to_s: 6.1, from_bar: 1, to_bar: 2, text: "Once", sure: 1 }],
   };
-  planted.curve_tells = { intensity: 2.83, brightness: 0.92, noisy: 1.48, held: 1.81 };
+  planted.curve_tells = { intensity: 2.83, brightness: 0.92, noisy: 1.48, held: 1.81,
+                          weight: 3.02, floor: 2.36 };
   planted.bars = Object.assign({}, planted.bars, {
     noisy: (planted.bars.intensity || []).map(() => 0.4),
     held: (planted.bars.intensity || []).map(() => 0.6),
   });
+  planted.motion = {
+    per: "bar", from_bar: 1,
+    moving: ["steady", "rising", "rising", "falling"],
+    winding: [0.1, 0.4, 0.9, 0.2],
+    spans: [{ from_bar: 1, to_bar: 1, doing: "steady" },
+            { from_bar: 2, to_bar: 3, doing: "rising" },
+            { from_bar: 4, to_bar: 4, doing: "falling" }],
+    tells: 73.4,
+    slams: [{ bar: 3, by: 0.68, big: true }],
+    ebbs: [{ bar: 4, by: 0.59, big: true }],
+  };
 
   const js2 = fn(planted);
   const py2 = JSON.parse(execFileSync(
@@ -97,7 +109,7 @@ from score_api import format_v1
 print(json.dumps(format_v1(json.load(sys.stdin))))
 `], { encoding: "utf8", input: JSON.stringify(planted), maxBuffer: 1 << 28 }));
 
-  for (const want of ["mood_axes", "lyrics", "noisy", "held"]) {
+  for (const want of ["mood_axes", "lyrics", "noisy", "held", "motion"]) {
     ok(`${want} survives both formatters when the score has it`,
        js2[want] != null && py2[want] != null,
        `js ${js2[want] != null ? "yes" : "NO"}, py ${py2[want] != null ? "yes" : "NO"}`);
@@ -106,6 +118,42 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
      (js2.curves || {}).brightness && js2.curves.brightness.tells === 0.92
        && (py2.curves || {}).brightness && py2.curves.brightness.tells === 0.92,
      `js ${(js2.curves || {}).brightness?.tells}, py ${(py2.curves || {}).brightness?.tells}`);
+
+  /* A lane travels as a bare array for the readers that already read it that
+     way, so its reliability rides alongside in `tells` rather than inside. It
+     has to reach a reader: on Levels brightness scores 0.99, which is below the
+     point where it means anything, and a reader holding the bare array had no
+     way to find that out. */
+  for (const side of [["js", js2], ["py", py2]]) {
+    const [who, doc] = side;
+    ok(`${who}: every bare lane it sends has its reliability in tells`,
+       !!doc.tells && ["energy", "brightness", "weight", "floor", "noisy", "held"]
+         .every(n => doc.tells[n] !== undefined),
+       doc.tells ? Object.keys(doc.tells).length + " lanes" : "no tells at all");
+  }
+  ok("both formatters agree on what each lane tells you",
+     JSON.stringify(js2.tells) === JSON.stringify(py2.tells),
+     JSON.stringify(js2.tells || {}).slice(0, 60));
+  ok("energy carries its own reliability too",
+     (js2.energy || {}).tells !== undefined && (py2.energy || {}).tells !== undefined,
+     `js ${(js2.energy||{}).tells}, py ${(py2.energy||{}).tells}`);
+
+  ok("both formatters send the same motion track",
+     JSON.stringify(js2.motion) === JSON.stringify(py2.motion),
+     `js ${JSON.stringify(js2.motion || {}).slice(0, 50)}`);
+  ok("motion says which way the loudness is going, per bar",
+     Array.isArray((js2.motion || {}).moving)
+       && js2.motion.moving.length === planted.motion.moving.length
+       && js2.motion.moving.every(x => ["rising", "steady", "falling"].includes(x)),
+     `${(js2.motion || {}).moving}`);
+  ok("motion carries the build and how much it is worth on this song",
+     Array.isArray((js2.motion || {}).winding) && typeof js2.motion.tells === "number"
+       && Array.isArray(py2.motion.winding) && typeof py2.motion.tells === "number",
+     `js tells ${(js2.motion || {}).tells}, py tells ${(py2.motion || {}).tells}`);
+  ok("a structural slam and a structural ebb are both marked big",
+     (js2.motion.slams || []).some(x => x.big === true)
+       && (js2.motion.ebbs || []).some(x => x.big === true),
+     `slams ${JSON.stringify(js2.motion.slams)} ebbs ${JSON.stringify(js2.motion.ebbs)}`);
 
   const jsMood = (js2.sections || [])[0] || {}, pyMood = (py2.sections || [])[0] || {};
   ok("a section carries mood through both formatters",
