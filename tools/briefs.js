@@ -22,6 +22,7 @@ const EFFECTS = {
   "ripple":      { check: "below-half", measure: "lamps identical" },
   "glides":      { check: "never-still", measure: "longest still stretch" },
   "lands":       { check: "hits", measure: "change on the marked beat" },
+  "escalates":   { check: "escalates", measure: "each return bigger than the last" },
 };
 
 const dir = path.join(R, "briefs");
@@ -41,7 +42,8 @@ for (const f of files) {
   const sp = findScore(b.song);
   if (!sp) { row.state = "no-score"; row.detail = `${b.song} is not built on this machine`; results.push(row); continue; }
   const r = M.judge({ score: sp, song: b.song, from: b.from_bar, bars: b.bars,
-                      effect: b.effect, check: e.check, measure: e.measure, seed: b.seed || 7 });
+                      effect: b.effect, check: e.check, measure: e.measure, seed: b.seed || 7,
+                      like: b.like });
   row.state = r.ok ? "doing" : "not-yet";
   row.detail = r.verdict;
   results.push(row);

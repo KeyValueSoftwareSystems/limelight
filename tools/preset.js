@@ -81,6 +81,16 @@ const FINDERS = {
     }
     return null;
   },
+  /* the whole track. Some questions cannot be asked of a fragment -- whether the
+     second drop is bigger than the first needs both drops in view -- and how
+     much of a song a test needs is the test's business, not the cutter's. */
+  "whole-song": () => {
+    const fb = g.first_bar === undefined || g.first_bar === null ? 1 : g.first_bar;
+    const last = g.last_bar !== undefined && g.last_bar !== null
+      ? g.last_bar : fb + (g.bars || 0) - 1;
+    return { from: 1, bars: Math.max(1, last), why: "the whole song" };
+  },
+
   /* the quietest stretch of at least four bars */
   "quietest": () => {
     const v = (score.bars || {}).intensity || [];

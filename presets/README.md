@@ -21,6 +21,15 @@ corresponds to. A player adds that to its own position to get song time, and the
 response — which is in bars and beats — then lines up exactly. So the cut can be
 sloppy at both ends; what matters is that the offset is recorded.
 
+## A preset is not always a fragment
+
+Some questions cannot be asked of a short clip. Whether the second drop is
+bigger than the first needs both drops in view, and whether a show escalates
+across a set needs the whole track. How much of a song a test needs is the
+test's business, so `find` accepts `whole-song` alongside the passage finders.
+Short clips are for isolating one moment; full songs are for anything about
+shape across a song.
+
 ## The ladder
 
 Each preset should add exactly one capability to the one before it, so a failure
