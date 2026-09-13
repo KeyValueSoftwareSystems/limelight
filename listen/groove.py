@@ -45,11 +45,17 @@ def pattern(env, edges, per=16, least=4):
     return v
 
 
-def shape_of(v, floor=0.35):
+SHARE = 0.5
+
+
+def shape_of(v, share=SHARE):
     if v is None or not len(v):
         return None
     mean = v.mean(axis=0)
-    on = [i for i, x in enumerate(mean) if x >= floor]
+    mid = float(np.median(mean))
+    top = float(mean.max())
+    cut = mid + share * (top - mid)
+    on = [i for i, x in enumerate(mean) if top > mid and x >= cut]
     return {"per_bar": int(v.shape[1]),
             "on": on,
             "strength": [round(float(x), 3) for x in mean]}

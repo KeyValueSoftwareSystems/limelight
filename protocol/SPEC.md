@@ -460,6 +460,28 @@ Unlike `also_heard`, where two independent methods vote on the same boundary,
 this is one model's opinion with no second method to check it against. The
 split-half ratio says the opinion is stable. It does not say it is right.
 
+`moments[].agreed` is how strongly several different detectors concur that
+something happens in that bar, and it is how the bar earned its place.
+
+A moment used to be kept only if one signal was loud enough on its own. That
+threw away the thing this project treats as evidence everywhere else. Bar 7 of
+Raga of Revenge is where the drums come in, the harmony turns, the riff arrives,
+a sweep lands, the tension lets go, and the song changes tempo from 89 to 120 --
+six detectors, five different kinds, at one instant. The loudest of them scored
+0.399 against a bar that needed 0.70 alone, so every one was dropped and the
+page said nothing was notable there. Amal heard it and asked why.
+
+A bar now earns a moment either the old way, one strong signal, or by two or more
+distinct kinds concurring, combined as independent evidence. `agreed` carries
+that combined figure: bar 7 comes out at 0.899.
+
+This was checked against landmarks none of the detectors can see -- where the
+tempo changes, where a section begins, where a release lands. Agreed bars fall
+on one of those 67% of the time against 28% for a bar picked at random, a lift
+of 2.41 across 344 of them. Requiring three kinds instead of two was tried and
+was worse on every count: fewer bars, lower lift, and two songs left with no
+moments at all.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

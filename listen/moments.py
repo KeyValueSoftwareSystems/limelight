@@ -472,18 +472,41 @@ def weigh(found, bars, edges, inner, pickup, look=2):
     return found
 
 
+KINDS = 2
+TOGETHER = 0.70
+
+
+def agreed_bars(found, least=KINDS, floor=TOGETHER):
+    by = {}
+    for m in found:
+        by.setdefault(m["bar"], []).append(m)
+    out = {}
+    for bar, here in by.items():
+        if len({m.get("is") for m in here}) < least:
+            continue
+        left = 1.0
+        for w in sorted((m.get("weight") or 0.0) for m in here)[::-1][:6]:
+            left *= (1.0 - w)
+        if 1.0 - left >= floor:
+            out[bar] = round(1.0 - left, 3)
+    return out
+
+
 def pick(found, edges, bars, room=8, strong=0.70):
     if not found:
         return []
     most = max(4, int(bars) // room)
+    agreed = agreed_bars(found)
     best = {}
     for m in found:
         w = m.get("weight", 0.0)
         pays = "back_at" in m or "into_bar" in m
         earned = ((pays and w >= 0.35) or (m["bar"] in edges and w >= 0.55)
-                  or w >= strong)
+                  or w >= strong or m["bar"] in agreed)
         if not earned:
             continue
+        if m["bar"] in agreed:
+            m["agreed"] = agreed[m["bar"]]
         best.setdefault(m["bar"], []).append(m)
     keep = []
     for here in best.values():
@@ -494,7 +517,8 @@ def pick(found, edges, bars, room=8, strong=0.70):
                     and ("back_at" in take[0] or "into_bar" in take[0]):
                 take.append(m)
         keep += take
-    keep = sorted(keep, key=lambda m: -m.get("weight", 0.0))[:most]
+    keep = sorted(keep, key=lambda m: -max(m.get("weight", 0.0),
+                                           m.get("agreed", 0.0)))[:most]
     return sorted(keep, key=lambda m: (m["bar"], m["beat"]))
 
 
