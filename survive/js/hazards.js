@@ -87,9 +87,9 @@
        safe wedge around a per-bar direction, so there is always a lane to stand
        in. Each axis fires two bullets (opposite directions). */
     function spokeSet(bar, e, dense, ramp) {
-      var count = (dense ? 5 : 4) + Math.round(e * 3 * ramp);
+      var count = (dense ? 5 : 3) + Math.round(e * (dense ? 3 : 2) * ramp);   // chorus volleys stay sparse
       var gapCenter = rnd(bar, 9) * TAU;
-      var gapHalf = ((dense ? 26 : 34) + (1 - ramp) * 18) * D2R;   // wider safe lane early
+      var gapHalf = ((dense ? 26 : 40) + (1 - ramp) * 18) * D2R;   // wider safe lane (and wider still early)
       var arc = Math.PI - 2 * gapHalf;
       if (arc < Math.PI * 0.4) { arc = Math.PI * 0.5; gapHalf = (Math.PI - arc) / 2; }
       var start = gapCenter + gapHalf, step = arc / count, axes = [];
@@ -126,10 +126,9 @@
           if (bar % 2 === 0) tele("ring", { gapDeg: hash(bar, 0) % 360 });
           else               tele("bullet", { spokes: spokeSet(bar, e, false, ramp) });
         }
-        if (ramp > 0.8 && e > 0.62) {                                 // only a loud, late chorus stacks
-          if (bar % 2 === 0) tele("bullet", { spokes: spokeSet(bar, e, false, ramp) });
-          else               tele("laser", { angle: A(3) });
-        }
+        /* a loud, late chorus adds at most one laser -- never a second volley,
+           which is what turned the ring into a wall of spokes */
+        if (ramp > 0.8 && e > 0.62 && bar % 2 === 1) tele("laser", { angle: A(3) });
       } else if (phase === "DROP") {
         tele("bullet", { spokes: spokeSet(bar, e, true, ramp) });     // bullet-hell
         if (ramp > 0.6) tele("laser", { angle: A(4) });
@@ -220,9 +219,9 @@
         } else if (t.type === "bullet") {
           /* aim: faint beams along each axis until the volley fires */
           if (!t.emitted && (t.stageName === "outline" || t.stageName === "fill")) {
-            var op = t.stageName === "fill" ? 0.42 : 0.24;
+            var op = t.stageName === "fill" ? 0.3 : 0.15;   // subtler aim lines
             for (var k = 0; k < (d.spokes || []).length; k++)
-              lasers.push({ rotDeg: -d.spokes[k] * R2D, thickFrac: 0.006, opacity: op, color: "amber" });
+              lasers.push({ rotDeg: -d.spokes[k] * R2D, thickFrac: 0.004, opacity: op, color: "amber" });
           }
         }
       }
