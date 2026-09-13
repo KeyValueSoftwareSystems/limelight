@@ -296,6 +296,26 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
   }
 }
 
+
+/* ---- phase B: one-shots, chosen by the matrix for a moment ------------------- */
+{
+  const form = { intro: 0.3, verse: 0.7, break: 0.7, build: 0.8, drop: 1, outro: 0.3, silence: 0.2, final_drop: 1 };
+  const shot = { id: "x_shot", kind: "oneshot", boldness: "accent", requires: { groups: ["all_pars"], caps: ["level"] }, occupies: [],
+    duration_beats: 1, gesture: { fx: "white_blast", slot: "on" }, affinity: { form, moment: { entrance: 1, heavy: 1, _default: 0 } } };
+  ok("a one-shot with a moment affinity and a duration validates", validateSequence(shot, RIG).ok, JSON.stringify(validateSequence(shot, RIG)));
+  ok("a one-shot without duration_beats is rejected", !validateSequence({ ...shot, duration_beats: undefined }, RIG).ok);
+  ok("a one-shot without a moment affinity is rejected", !validateSequence({ ...shot, affinity: { form } }, RIG).ok);
+  const e = enumerate(RIG);
+  const impact = e.sequences.find(s => s.id === "impact");
+  ok("the base vocabulary carries one-shots with their gesture in the cache", impact && impact.kind === "oneshot" && impact.gesture && impact.gesture.fx === "white_blast" && impact.duration_beats === 1, JSON.stringify(impact));
+  const v = view(e);
+  const shots = v.candidates({ form: "drop", moment: ["entrance", "heavy"] }).filter(c => v.seq(c.id).kind === "oneshot").map(c => c.id);
+  ok("a heavy entrance in a drop offers the impact and the breath, not the hush", shots.includes("impact") && shots.includes("breath") && !shots.includes("hush"), shots.join(","));
+  const pauseShots = v.candidates({ form: "verse", moment: ["pause", "light"] }).filter(c => v.seq(c.id).kind === "oneshot").map(c => c.id);
+  ok("a pause offers the hush and nothing that hits", pauseShots.includes("hush") && !pauseShots.includes("impact") && !pauseShots.includes("breath"), pauseShots.join(","));
+  ok("one-shots never appear for a bar without a moment", !v.candidates({ form: "drop" }).some(c => v.seq(c.id).kind === "oneshot"));
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;
