@@ -175,8 +175,32 @@ json.dump({"request": body, "response": S.handle(body, lambda n, p=None: raw)}, 
 fs.writeFileSync(path.join(out, "response.json"),
   execFileSync("python3", ["-c", py], { maxBuffer: 64 << 20 }).toString());
 
+/* What musical facts this stretch actually contains, read from the response
+   rather than asserted by whoever wrote the recipe. This is what makes a preset
+   findable by an app that has never heard of it: a game looking for a tempo
+   change asks for presets that contain one, without knowing which song it is. */
+const resp = JSON.parse(fs.readFileSync(path.join(out, "response.json"), "utf8")).response;
+const sig = resp.signals || [];
+const sec = resp.sections || [];
+const paceV = ((resp.curves || {}).pace || {}).values || [];
+const contains = {
+  bars,
+  sections: sec.length,
+  has_build: sig.some(x => x.is === "rise"),
+  has_tempo_change: sig.some(x => /time$/.test(String(x.what || ""))),
+  has_returning_material: sec.filter(x => x.repeat).length > 1,
+  has_returning_riff: sig.some(x => x.again_of !== undefined),
+  heaviest_moment: Math.max(0, ...sig.concat(resp.moments || [])
+    .map(x => x.weight || 0)).toFixed(3) * 1,
+  pace_rises: paceV.length > 2
+    && paceV.slice(-Math.ceil(paceV.length / 3)).reduce((a, b) => a + b, 0)
+       > paceV.slice(0, Math.ceil(paceV.length / 3)).reduce((a, b) => a + b, 0) * 1.25,
+  has_silence: paceV.some(v => v === 0),
+};
+
 fs.writeFileSync(path.join(out, "preset.json"), JSON.stringify({
   name: recipe.name, song: recipe.song, tests: recipe.tests, effect: recipe.effect,
+  contains,
   from_bar: from, bars, starts_at_s: +startS.toFixed(4), ends_at_s: +endS.toFixed(4),
   found: found.why, clip, score_version: score.version,
   note: "starts_at_s is the song-second of this clip's first sample. Add it to the "
