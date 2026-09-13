@@ -445,7 +445,15 @@ function plan(scoreIn, enumResult, seed) {
        this material has played before and the remembered look still suits here */
     const label = sec.like || sec.repeat || null;
     const mem = label && memory[label];
-    const stillFits = id => id && V.candidates(sectionVector).some(c => c.id === id);
+    /* a remembered look returns unless this section's FORM vetoes it (affinity 0);
+       being merely weak here is not a reason to break the show's rule */
+    const stillFits = id => {
+      if (!id) return false;
+      const A = enumResult && enumResult.affinity;
+      if (A && A.form && A.form[id]) return A.form[id][context] > 0;
+      const M = enumResult && enumResult.matrix;
+      return !!(M && M[id] && M[id][context] > 0);
+    };
     let remembered;
     const par = (mem && stillFits(mem.par)) ? { id: mem.par } : pickFor(sectionVector, "par");
     if (mem && par && par.id === mem.par) remembered = label;
