@@ -68,10 +68,13 @@ def score(notes, g, pickup, played="voice"):
     out = []
     for at, pitch, held in notes:
         bar, beat = seat(at, g, pickup)
+        step = beat_at(g, at)
         out.append(
             {
                 "bar": bar,
                 "beat": beat,
+                "at_s": round(float(at), 3),
+                "in_beat": round(float(step - np.floor(step + 1e-6)), 3),
                 "pitch": round(pitch, 1),
                 "held_beats": round(held / beat_s, 2),
                 "from": played,

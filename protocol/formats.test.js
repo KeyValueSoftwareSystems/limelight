@@ -93,6 +93,7 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
       q.sudden = i === 0 ? null : 0.4 + i * 0.3;
     });
   }
+  planted.releases = [{ beat_index: 34, at_s: 19.86, lead_beats: 16, size: 0.82, bar: 8, beat: 3 }];
   planted.motion = {
     per: "bar", from_bar: 1,
     moving: ["steady", "rising", "rising", "falling"],
@@ -156,6 +157,11 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
        && JSON.stringify((js2.sections || []).map(x => x.sudden))
           === JSON.stringify((py2.sections || []).map(x => x.sudden)),
      `js ${JSON.stringify((js2.sections || []).map(x => x.sudden))}`);
+
+  ok("a release keeps the beat and the second the score measured, both sides",
+     JSON.stringify(js2.releases) === JSON.stringify(py2.releases)
+       && (js2.releases || []).every(r => r.at_s !== undefined),
+     `js ${JSON.stringify((js2.releases || []).slice(0, 2))}`);
 
   ok("both formatters send the same motion track",
      JSON.stringify(js2.motion) === JSON.stringify(py2.motion),

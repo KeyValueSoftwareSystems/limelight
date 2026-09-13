@@ -453,11 +453,15 @@ export function format(raw) {
   // ---- releases (seconds to positions) ----
   if (Array.isArray(raw.releases)) {
     out.releases = raw.releases.map(r => {
+      const has = r.bar !== undefined && r.beat !== undefined;
       const i = (r.at_s - firstBeatS) / beatSec;
-      return {
-        at:   { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(i % bpb) + 1 },
-        size: r.size,
-      };
+      const at = has ? { bar: r.bar, beat: r.beat }
+                     : { bar: firstBar + Math.floor(i / bpb),
+                         beat: Math.floor(i % bpb) + 1 };
+      const one = { at, size: r.size };
+      if (r.at_s !== undefined) one.at_s = r.at_s;
+      if (r.lead_beats !== undefined) one.lead_beats = r.lead_beats;
+      return one;
     });
   }
 

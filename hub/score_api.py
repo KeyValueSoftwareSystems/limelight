@@ -405,11 +405,17 @@ def format_v1(raw):
     if isinstance(raw.get("releases"), list):
         out["releases"] = []
         for r in raw["releases"]:
-            i = (r["at_s"] - first_beat_s) / beat_sec
-            out["releases"].append({
-                "at": {"bar": first_bar + int(i // bpb), "beat": int(i % bpb) + 1},
-                "size": r.get("size"),
-            })
+            if r.get("bar") is not None and r.get("beat") is not None:
+                at = {"bar": r["bar"], "beat": r["beat"]}
+            else:
+                i = (r["at_s"] - first_beat_s) / beat_sec
+                at = {"bar": first_bar + int(i // bpb), "beat": int(i % bpb) + 1}
+            one = {"at": at, "size": r.get("size")}
+            if r.get("at_s") is not None:
+                one["at_s"] = r["at_s"]
+            if r.get("lead_beats") is not None:
+                one["lead_beats"] = r["lead_beats"]
+            out["releases"].append(one)
 
     # ---- melody: the notes of the lead line and the voice ----
     if raw.get("melody"):

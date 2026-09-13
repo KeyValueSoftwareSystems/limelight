@@ -615,6 +615,36 @@ how far and `big` for whether it is structural. `ebbs` is the one nothing else
 reported: a song loses energy as deliberately as it gains it, and the moment the
 drums walk out is a cue in its own right.
 
+## Times, because a label is not a time
+
+Every event that has a moment now carries the second it happens at, and this is
+the correction of a real fault rather than an addition. Alnas built a show off
+this file and reported a constant two-beat offset. He was right, and the offset
+was not in the tracker.
+
+`beats[]` never carried `t`. A reader could only rebuild a beat's time from its
+bar and beat, and `off_ms` -- the field whose whole job is to say how far a beat
+sits from the grid -- was being recomputed by the formatter against a uniform
+grid indexed by the beat's position in the list. Levels' first beat measures
+-13.5 ms in the score and reached him as -951 ms, which at 128 bpm is 2.03
+beats. Beats now carry `t` and the `off_ms` the score measured.
+
+`releases[]` had the same shape of fault. The formatter recomputed the position
+from `at_s` on a uniform grid and then threw `at_s` away, so a release the score
+placed at bar 8 beat 3 arrived as bar 8 beat 1: the pickup's two beats, again.
+Releases now carry `at`, `at_s` and `lead_beats` as measured. He called an
+aligned release the most valuable single cue in the file.
+
+`melody[]` carried `bar` and `beat` and nothing finer, so ninety slots in Levels
+held more than one note and five notes were exact duplicates of the one before.
+Notes now carry `at_s` and `in_beat`, where `in_beat` is how far through the
+beat the note starts, 0.0 on the beat and 0.5 exactly between two. A chase can
+follow an arpeggio note by note instead of guessing a rate from `pace`.
+
+The rule this leaves behind: if the score knows when something happened, the
+protocol sends the second, not only the label. A label is a claim about a grid
+and a grid can be wrong; a second is what a speaker did.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should
