@@ -1,0 +1,264 @@
+{
+ "score": "dont-look-down",
+ "seed": 1,
+ "bar_shift": -1,
+ "bpm": 127.998,
+ "cues": [
+  {
+   "i": 0,
+   "role": "intro",
+   "role_key": "intro",
+   "from_s": 0.0,
+   "to_s": 11.702,
+   "from_bar": 0,
+   "to_bar": 5,
+   "nth": 1,
+   "like": "A",
+   "intensity": 0.477,
+   "par": "comet_chase",
+   "head": "sweep_locked",
+   "events": [],
+   "params": {
+    "palette": "gold"
+   },
+   "breaks": [],
+   "moments": [
+    "entrance"
+   ],
+   "note": "intro, no drums: a gold comet along the arc, head following on the wall"
+  },
+  {
+   "i": 1,
+   "role": "verse",
+   "role_key": "verse",
+   "from_s": 11.702,
+   "to_s": 39.827,
+   "from_bar": 5,
+   "to_bar": 20,
+   "nth": 1,
+   "like": "A",
+   "intensity": 0.515,
+   "par": "vocal_swell",
+   "head": "spotlight",
+   "events": [],
+   "params": {
+    "palette": "warm"
+   },
+   "breaks": [],
+   "moments": [],
+   "note": "verse, voice in: inner pair swells with the vocal under a warm spot"
+  },
+  {
+   "i": 2,
+   "role": "verse",
+   "role_key": "verse",
+   "from_s": 39.827,
+   "to_s": 73.578,
+   "from_bar": 20,
+   "to_bar": 38,
+   "nth": 2,
+   "like": "B",
+   "intensity": 0.574,
+   "par": "vocal_swell",
+   "head": "spotlight",
+   "events": [
+    "pre_drop_blackout"
+   ],
+   "params": {
+    "palette": "warm"
+   },
+   "breaks": [],
+   "moments": [],
+   "note": "verse, voice no drums, rising to drop 1: same warm voice look, blackout on the last beat"
+  },
+  {
+   "i": 3,
+   "role": "drop",
+   "role_key": "drop",
+   "from_s": 73.578,
+   "to_s": 103.578,
+   "from_bar": 38,
+   "to_bar": 54,
+   "nth": 1,
+   "like": "C",
+   "intensity": 0.55,
+   "par": "ripple_hits",
+   "head": "corner_snaps",
+   "events": [
+    "break_blackout",
+    "strobe_pops",
+    "drop_hit"
+   ],
+   "params": {
+    "palette": "chord"
+   },
+   "breaks": [
+    [
+     86.703,
+     88.578,
+     true
+    ]
+   ],
+   "moments": [
+    "exit",
+    "transition"
+   ],
+   "note": "DROP 1 (material C): every beat ripples across the four PARs blue/pink by chord, head snapping between corners, dropout+pops"
+  },
+  {
+   "i": 4,
+   "role": "breakdown",
+   "role_key": "breakdown",
+   "from_s": 103.578,
+   "to_s": 135.454,
+   "from_bar": 54,
+   "to_bar": 71,
+   "nth": 1,
+   "like": "A",
+   "intensity": 0.519,
+   "par": "glide_gradient",
+   "head": "roam_slow",
+   "events": [],
+   "params": {
+    "palette": "cool"
+   },
+   "breaks": [],
+   "moments": [
+    "exit",
+    "hook",
+    "hook"
+   ],
+   "note": "breakdown, drums out (the two hooks return): a blue/pink gradient gliding along the arc, head roaming slow"
+  },
+  {
+   "i": 5,
+   "role": "verse",
+   "role_key": "verse",
+   "from_s": 135.454,
+   "to_s": 171.079,
+   "from_bar": 71,
+   "to_bar": 90,
+   "nth": 3,
+   "like": "B",
+   "intensity": 0.627,
+   "par": "vocal_swell",
+   "head": "spotlight",
+   "events": [],
+   "params": {
+    "palette": "warm"
+   },
+   "breaks": [],
+   "moments": [
+    "entrance"
+   ],
+   "note": "verse #3, half a kit: the voice carries it again in warm colour under a warm spot"
+  },
+  {
+   "i": 6,
+   "role": "build",
+   "role_key": "build",
+   "from_s": 171.079,
+   "to_s": 182.329,
+   "from_bar": 90,
+   "to_bar": 96,
+   "nth": 2,
+   "like": "B",
+   "intensity": 0.508,
+   "par": "pace_build",
+   "head": "spiral_rise",
+   "events": [
+    "strobe_accelerate",
+    "pause_hold",
+    "pre_drop_blackout"
+   ],
+   "params": {
+    "palette": "cool"
+   },
+   "breaks": [],
+   "moments": [
+    "transition",
+    "hook",
+    "pause"
+   ],
+   "note": "THE run into drop 2 (bars 90-96): chase rate follows the pace lane, floor rises with tension; the bar-95 'everything but voice' hole holds the voice colour on one pair for four beats; blackout on the last beat"
+  },
+  {
+   "i": 7,
+   "role": "drop",
+   "role_key": "final_drop",
+   "from_s": 182.329,
+   "to_s": 195.455,
+   "from_bar": 96,
+   "to_bar": 103,
+   "nth": 2,
+   "like": "C",
+   "intensity": 1.0,
+   "par": "ripple_hits",
+   "head": "corner_snaps",
+   "events": [
+    "strobe_pops",
+    "release_accent",
+    "white_finale",
+    "drop_hit"
+   ],
+   "params": {
+    "palette": "chord"
+   },
+   "breaks": [],
+   "moments": [
+    "release"
+   ],
+   "note": "DROP 2 (material C, the same as drop 1 only bigger): identical ripple + corner-snap look at full intensity, the bar-96 release blooms white ON the beat, white-strobe finale"
+  },
+  {
+   "i": 8,
+   "role": "post-chorus",
+   "role_key": "bridge",
+   "from_s": 195.455,
+   "to_s": 214.205,
+   "from_bar": 103,
+   "to_bar": 113,
+   "nth": 1,
+   "like": "B",
+   "intensity": 0.9,
+   "par": "pair_alternate",
+   "head": "figure8",
+   "events": [
+    "pause_hold"
+   ],
+   "params": {
+    "palette": "chord"
+   },
+   "breaks": [],
+   "moments": [
+    "pause",
+    "hook"
+   ],
+   "note": "post-chorus, everything full: inner/outer answer in chord colours, head in a fast figure-8 -- the victory lap"
+  },
+  {
+   "i": 9,
+   "role": "outro",
+   "role_key": "outro",
+   "from_s": 214.205,
+   "to_s": 220.218,
+   "from_bar": 113,
+   "to_bar": 117,
+   "nth": 1,
+   "like": "D",
+   "intensity": 0.307,
+   "par": "fade_collapse",
+   "head": "park_fade",
+   "events": [],
+   "params": {
+    "palette": "cool"
+   },
+   "breaks": [],
+   "moments": [
+    "exit"
+   ],
+   "note": "outro, drums out: collapse inward to deep blue and dark, head drifts home"
+  }
+ ],
+ "note": "Don't Look Down, curated 2026-09-13 from the HUB score (pulled via /hub/score), 10 sections, bar_shift -1 measured from the audio. Builds are pace/tension-driven; both drops (material C) share ripple_hits+corner_snaps, the second bigger; the bar-95 'everything but voice' hole holds the voice colour; the bar-96 release blooms on the beat."
+}

@@ -1,0 +1,18 @@
+# The show pipeline: analyse a track, render frames, drive the rig.
+#   python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+#
+# Versions are what the lane was developed and tested against on 2026-09-13
+# (130 passing tests). librosa pulls in numba, scipy, scikit-learn, soxr,
+# joblib and pooch itself; they are not listed because nothing here imports
+# them directly.
+librosa==1.0.0
+numpy==2.5.3
+soundfile==0.14.0
+
+# Tests only.
+pytest==9.1.1
+
+# poc/ only, and it wants its own venv:
+#   pygdtf==1.4.5
+#   sacn==1.11.0
+#   pymvr==1.0.7

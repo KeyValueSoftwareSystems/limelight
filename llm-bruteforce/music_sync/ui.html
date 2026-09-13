@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PAR Show Control</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --line: #2a2f3a; --text: #e6e8ee; --muted: #8b92a5;
+    --accent: #ffb454; --ok: #4fd18b; --warn: #ff6b6b; --play: #3aa0ff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { font-size: 16px; margin: 0 12px 0 0; font-weight: 600; letter-spacing: .02em; }
+  main { padding: 16px 18px 28px; max-width: 1200px; margin: 0 auto; }
+  select, input[type=number], button { background: #1f2330; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font: inherit; }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--muted); }
+  button.primary { background: var(--play); border-color: var(--play); color: #06131f; font-weight: 600; min-width: 110px; }
+  button.danger { background: #2a1416; border-color: #4a1d21; color: #ff9b9b; }
+  button:disabled { opacity: .45; cursor: default; }
+  .transport { display: grid; grid-template-columns: 150px 1fr; gap: 18px; align-items: center; margin-bottom: 14px; }
+  .swatch { width: 150px; height: 150px; border-radius: 12px; background: #000; border: 1px solid var(--line); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; transition: background 40ms linear; }
+  .swatch span { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: rgba(0,0,0,.55); padding: 2px 6px; border-radius: 4px; }
+  .controls { display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .time { font: 26px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .02em; }
+  .time small { font-size: 14px; color: var(--muted); margin-left: 10px; }
+  .meta { color: var(--muted); font-size: 13px; }
+  canvas#timeline { width: 100%; height: 96px; display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; cursor: crosshair; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-top: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 10px; }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .big { font: 600 22px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--accent); min-width: 90px; text-align: center; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
+  .kv b { color: var(--muted); font-weight: 500; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .pill.on { color: var(--ok); border-color: #245a3d; }
+  .pill.warn { color: var(--warn); border-color: #5a2424; }
+  label.chk { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  table.taps { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+  table.taps td, table.taps th { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: left; }
+  table.taps th { color: var(--muted); font-weight: 500; }
+  kbd { font: 12px ui-monospace, monospace; background: #22283a; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
+  .fx { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); }
+  .fxsw { width: 46px; height: 46px; border-radius: 8px; background: #000; border: 1px solid var(--line); transition: background 40ms linear; }
+  .fx.head .fxsw { width: 64px; height: 64px; border-radius: 50%; position: relative; }
+  .fx.head .fxsw::after { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: #fff; transform: translate(var(--px, 0px), var(--py, 0px)); box-shadow: 0 0 6px #fff; }
+  .countdown { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font: 700 160px system-ui; color: #fff; background: rgba(0,0,0,.6); z-index: 10; }
+  .countdown.go { color: var(--ok); }
+  .offsetwide { accent-color: var(--play); }
+  .fxlib { margin-top: 14px; }
+  .fxlib .fxhead { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 4px; }
+  .fxlib .fxhead h2 { margin: 0; }
+  .fxlib .now { color: var(--muted); font-size: 12.5px; flex-basis: 100%; min-height: 18px; }
+  .fxlib .now b { color: var(--text); font-weight: 600; }
+  .fxlib .now .role { color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: 11.5px; margin-right: 6px; }
+  button.toggle.on { background: #1f3b2c; border-color: var(--ok); color: var(--ok); }
+  .fxgroup { margin-top: 12px; }
+  .fxgroup h3 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px; font-weight: 500; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 8px; }
+  .tile { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: #12151c; opacity: .45; transition: opacity 120ms, box-shadow 120ms, border-color 120ms, background 120ms; }
+  .tile .name { font: 600 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .tile .doc { color: var(--muted); font-size: 11.5px; margin-top: 3px; line-height: 1.35; }
+  .tile .roles { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 3px; }
+  .tile .roles span { font-size: 10px; padding: 0 5px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .tile .roles span.here { border-color: var(--accent); color: var(--accent); }
+  .tile.assigned { opacity: 1; border-color: var(--accent); border-style: dashed; }
+  .tile.firing { opacity: 1; border-color: var(--accent); border-style: solid; background: #2a2314; box-shadow: 0 0 14px rgba(255,180,84,.45); }
+  .tile.firing .name { color: var(--accent); }
+  .fxlib.only .tile:not(.assigned) { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>PAR show</h1>
+  <select id="track"></select>
+  <button id="reload" title="Rescan folders">↻</button>
+  <span class="meta" id="trackmeta"></span>
+  <span style="flex:1"></span>
+  <select id="style"><option value="pulse">pulse</option><option value="bands">bands</option><option value="concert">concert</option></select>
+  <button id="analyze">Re-analyze</button>
+  <span class="meta" id="analyzing"></span>
+</header>
+
+<main>
+  <section class="transport">
+    <div class="swatch" id="swatch"><span id="rgb">0 · 0 · 0</span></div>
+    <div class="controls">
+      <div class="row">
+        <button class="primary" id="play">▶ Play</button>
+        <button id="countdown" title="3-2-1 then play: press play on your music at GO">⏱ 3·2·1 Go</button>
+        <button id="stop">■ Stop</button>
+        <button class="danger" id="blackout">Blackout</button>
+        <span class="pill" id="netpill">output off</span>
+        <span class="pill" id="audiopill">audio —</span>
+        <span class="pill" id="phasepill">—</span>
+      </div>
+      <div class="row">
+        <span class="meta">sync nudge (lights):</span>
+        <button data-nudgesec="-1">−1 s</button><button data-nudgesec="-0.25">−¼ s</button>
+        <button data-nudgesec="0.25">+¼ s</button><button data-nudgesec="1">+1 s</button>
+        <span class="meta">→ earlier / later than the music. Fine offset in ms below.</span>
+      </div>
+      <div class="time"><span id="pos">0:00.00</span><small id="dur">/ 0:00</small><small>beat <span id="beatno">–</span> · bar <span id="barno">–</span> · frame <span id="frame">–</span></small></div>
+      <div class="meta">Keys: <kbd>K</kbd> play/pause · <kbd>G</kbd> 3·2·1 go · <kbd>Space</kbd> tap · <kbd>←</kbd>/<kbd>→</kbd> offset ±10 ms (<kbd>Shift</kbd> ±40) · <kbd>,</kbd>/<kbd>.</kbd> nudge ∓¼ s · <kbd>J</kbd>/<kbd>L</kbd> seek ∓5 s · click the timeline to seek</div>
+      <div class="row" id="rigrow" hidden>
+        <div class="fx" data-fx="1"><div class="fxsw"></div><span>PAR 1</span></div>
+        <div class="fx" data-fx="8"><div class="fxsw"></div><span>PAR 8</span></div>
+        <div class="fx head" data-fx="head"><div class="fxsw"></div><span id="headinfo">HEAD</span></div>
+        <div class="fx" data-fx="15"><div class="fxsw"></div><span>PAR 15</span></div>
+        <div class="fx" data-fx="22"><div class="fxsw"></div><span>PAR 22</span></div>
+      </div>
+    </div>
+  </section>
+
+  <canvas id="timeline" height="96"></canvas>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Delay (light vs sound)</h2>
+      <div class="row">
+        <button data-nudge="-40">−40</button><button data-nudge="-10">−10</button>
+        <span class="big" id="offsetval">0 ms</span>
+        <button data-nudge="10">+10</button><button data-nudge="40">+40</button>
+        <button id="offsetzero" title="reset to 0">0</button>
+      </div>
+      <input type="range" id="offset" min="-3000" max="3000" step="5" value="0">
+      <p class="hint">Closing this page pauses the show within 3 s (the server is the player; the page is its only remote). Positive moves the lights <b>later</b>. If the lights run <em>ahead</em> of the music, go positive; if they <em>lag</em>, go negative. Use the ±1 s / ±¼ s nudges above for coarse sync, this for fine. Applies instantly; the server starts at its configured default (−240 ms).</p>
+    </div>
+
+    <div class="card">
+      <h2>Tap calibration</h2>
+      <div class="row">
+        <label class="chk"><input type="radio" name="tapmode" value="sound" checked> tap to the <b>sound</b></label>
+        <label class="chk"><input type="radio" name="tapmode" value="light"> tap to the <b>light</b></label>
+        <span style="flex:1"></span>
+        <button id="tapreset">Reset</button>
+      </div>
+      <table class="taps">
+        <tr><th></th><th>taps</th><th>median vs beat</th><th>spread</th></tr>
+        <tr><td>sound</td><td id="ts_n">0</td><td id="ts_med" class="mono">—</td><td id="ts_sd" class="mono">—</td></tr>
+        <tr><td>light</td><td id="tl_n">0</td><td id="tl_med" class="mono">—</td><td id="tl_sd" class="mono">—</td></tr>
+      </table>
+      <p id="suggest" class="hint"></p>
+      <div class="row" style="margin-top:8px"><button id="apply" disabled>Apply suggestion</button></div>
+    </div>
+
+    <div class="card">
+      <h2>Output</h2>
+      <div class="row"><label class="chk"><input type="checkbox" id="net"> send to PAR</label><span style="flex:1"></span><span class="mono" id="gainval">gain 1.00</span></div>
+      <input type="range" id="gain" min="0" max="1" step="0.05" value="1">
+      <div class="kv" style="margin-top:10px">
+        <b>server</b><span id="srv" class="mono">—</span>
+        <b>stream</b><span id="streaminfo" class="mono">—</span>
+        <b>sections</b><span id="sections" class="mono">—</span>
+        <b>last analyze</b><span id="alog" class="mono" style="white-space:pre-wrap;font-size:12px">—</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card fxlib" id="fxlib">
+    <div class="fxhead">
+      <h2>Effect library</h2>
+      <span class="pill" id="fxcount">—</span>
+      <button class="toggle" id="fxonly" title="Hide every effect the current cue is not using">Only in use now</button>
+      <span style="flex:1"></span>
+      <span class="meta">solid = firing now · dashed = assigned to this cue, waiting for its moment</span>
+      <div class="now" id="fxnow">—</div>
+    </div>
+    <p class="hint" id="fxhint" hidden></p>
+    <div id="fxgroups"></div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const canvas = $('timeline');
+  const ctx = canvas.getContext('2d');
+  let meta = null, status = null, version = -1, loading = false, polling = false;
+  let statusAt = 0;                       // performance.now() when `status` arrived
+  let taps = { sound: [], light: [] };
+  const TAP_HELP = 'Play the track, press <kbd>Space</kbd> on each beat you <b>hear</b> (8+ taps), then switch to <b>light</b> and tap on each flash you <b>see</b>. Your reaction time cancels out; the difference is the light delay.';
+
+  const api = async (path, body) => {
+    const r = await fetch(path, body === undefined ? {} : {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(path + ' -> ' + r.status);
+    return r.json();
+  };
+  const fmt = (s, cs = true) => {
+    if (!isFinite(s)) s = 0;
+    const m = Math.floor(s / 60), sec = s - m * 60;
+    return cs ? `${m}:${sec.toFixed(2).padStart(5, '0')}` : `${m}:${Math.floor(sec).toString().padStart(2, '0')}`;
+  };
+  const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const recall = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
+
+  // Best estimate of the server's playhead right now (extrapolated between polls).
+  const now = () => {
+    if (!status || !status.loaded) return 0;
+    const t = status.playing ? status.position + (performance.now() - statusAt) / 1000 : status.position;
+    return Math.max(0, Math.min(status.duration || t, t));
+  };
+  const applyStatus = st => { status = st; statusAt = performance.now(); };
+
+  // ---------------- tracks ----------------
+  async function loadTracks() {
+    const { tracks } = await api('/api/tracks');
+    const sel = $('track');
+    const prev = sel.value || recall('track', null);
+    sel.innerHTML = '';
+    for (const t of tracks) {
+      const o = document.createElement('option');
+      o.value = t.name; o.textContent = `${t.title}  (${t.style || '?'}, ${t.tempo ? t.tempo.toFixed(0) + ' bpm' : ''})`;
+      sel.appendChild(o);
+    }
+    if (tracks.length) {
+      sel.value = tracks.some(t => t.name === prev) ? prev : tracks[0].name;
+      if (!meta || meta.name !== sel.value) await loadTrack(sel.value);
+    }
+  }
+  async function loadTrack(name) {
+    if (loading) return;
+    loading = true;
+    try {
+      meta = await api('/api/load', { name });
+      version = meta.version;
+      store('track', name);
+    } finally { loading = false; }
+    $('dur').textContent = '/ ' + fmt(meta.duration, false);
+    $('trackmeta').textContent = `${meta.source || ''} · ${meta.tempo ? meta.tempo.toFixed(1) + ' BPM' : ''} · ${meta.beats.length} beats · ${meta.fps} fps`;
+    $('streaminfo').textContent = `${meta.frames} frames @ ${meta.fps} fps, style ${meta.style}`;
+    $('sections').textContent = meta.sections.map(fmt).join('  ');
+    $('style').value = meta.style || 'pulse';
+    $('style').disabled = $('analyze').disabled = !meta.audio_url;      // synthetic timeline: nothing to re-analyze
+    $('rigrow').hidden = !(meta.width >= 41);
+    taps = { sound: [], light: [] }; renderTaps();
+    setPlan(meta.plan);
+    draw();
+  }
+  $('track').addEventListener('change', e => loadTrack(e.target.value));
+  $('reload').addEventListener('click', loadTracks);
+
+  // ---------------- transport ----------------
+  const cmd = async (path, body = {}) => { try { applyStatus(await api(path, body)); } catch (e) {} };
+  const togglePlay = () => status && status.playing ? cmd('/api/pause') : cmd('/api/play');
+  const seek = t => cmd('/api/seek', { position: Math.max(0, Math.min((meta ? meta.duration : 0) - 0.05, t)) });
+  const nudge = d => cmd('/api/nudge', { delta: d });
+  document.querySelectorAll('[data-nudgesec]').forEach(b => b.addEventListener('click', () => nudge(+b.dataset.nudgesec)));
+  let counting = false;
+  async function countdown() {
+    if (counting) return; counting = true;
+    await cmd('/api/pause'); await cmd('/api/seek', { position: 0 });
+    const el = document.createElement('div'); el.className = 'countdown'; document.body.appendChild(el);
+    for (const n of ['3', '2', '1']) { el.textContent = n; await new Promise(r => setTimeout(r, 1000)); }
+    el.textContent = 'GO'; el.classList.add('go');
+    await cmd('/api/play', { position: 0 });
+    setTimeout(() => el.remove(), 600); counting = false;
+  }
+  $('countdown').addEventListener('click', countdown);
+  $('play').addEventListener('click', togglePlay);
+  $('stop').addEventListener('click', () => cmd('/api/stop'));
+  $('blackout').addEventListener('click', () => cmd('/api/blackout'));
+
+  // ---------------- settings ----------------
+  let offset = recall('offset_ms', 0);
+  const applyOffset = (v, push = true) => {
+    offset = Math.max(-3000, Math.min(3000, Math.round(v)));
+    $('offset').value = offset; $('offsetval').textContent = `${offset > 0 ? '+' : ''}${offset} ms`;
+    store('offset_ms', offset);
+    if (push) api('/api/settings', { offset_ms: offset }).catch(() => {});
+    renderTaps();
+  };
+  $('offset').addEventListener('input', e => applyOffset(+e.target.value));
+  $('offsetzero').addEventListener('click', () => applyOffset(0));
+  document.querySelectorAll('[data-nudge]').forEach(b => b.addEventListener('click', () => applyOffset(offset + +b.dataset.nudge)));
+
+  $('gain').addEventListener('input', e => { $('gainval').textContent = `gain ${(+e.target.value).toFixed(2)}`; api('/api/settings', { gain: +e.target.value }); });
+  $('net').addEventListener('change', e => api('/api/settings', { net: e.target.checked }));
+
+  $('analyze').addEventListener('click', async () => {
+    if (!meta) return;
+    await cmd('/api/pause');
+    try { await api('/api/analyze', { name: meta.name, style: $('style').value }); }
+    catch (e) { $('analyzing').textContent = 'busy'; }
+  });
+
+  // ---------------- status polling ----------------
+  async function poll() {
+    if (polling) return;
+    polling = true;
+    try {
+      applyStatus(await api('/api/status'));
+      const [r, g, b] = status.fixtures ? status.fixtures.pars[0].rgb : status.rgb;
+      $('swatch').style.background = `rgb(${r},${g},${b})`;
+      $('rgb').textContent = (status.fixtures ? 'PAR 1  ' : '') + `${r} · ${g} · ${b}`;
+      $('frame').textContent = status.index ?? '–';
+      $('net').checked = status.net;
+      $('netpill').textContent = status.net ? 'output → PAR' : 'output off';
+      $('netpill').className = 'pill' + (status.net ? ' on' : '');
+      const ap = $('audiopill');
+      if (status.audio_error) { ap.textContent = 'audio: ' + status.audio_error; ap.className = 'pill warn'; }
+      else if (meta && !meta.audio_url) { ap.textContent = 'audio: play it yourself, sync with nudges'; ap.className = 'pill'; }
+      else { ap.textContent = status.audio ? 'audio playing' : (status.playing ? 'audio starting…' : 'audio idle'); ap.className = 'pill' + (status.audio ? ' on' : ''); }
+      $('play').textContent = status.playing ? '❚❚ Pause' : '▶ Play';
+      $('phasepill').textContent = status.phase || (status.loaded ? '—' : 'no stream');
+      if (status.paused_by_watchdog) $('srv').textContent = 'paused: page was closed / asleep — press Play to resume';
+      if (status.send_errors) { $('netpill').textContent = `output FAILING (${status.send_errors}) — check the Ethernet cable`; $('netpill').className = 'pill warn'; }
+      if (status.fixtures) {
+        for (const p of status.fixtures.pars) {
+          const sw = document.querySelector(`.fx[data-fx="${p.addr}"] .fxsw`);
+          if (sw) sw.style.background = `rgb(${p.rgb.join(',')})`;
+        }
+        const h = status.fixtures.head, hs = document.querySelector('.fx.head .fxsw');
+        const lvl = h.dim / 255;
+        hs.style.background = h.dim ? `rgba(255,255,255,${(0.15 + 0.85 * lvl).toFixed(2)})` : '#000';
+        hs.style.setProperty('--px', `${((h.pan - 169) / 24 * 26).toFixed(0)}px`);
+        hs.style.setProperty('--py', `${(-(h.tilt - 40) / 87 * 26).toFixed(0)}px`);
+        $('headinfo').textContent = `HEAD pan ${h.pan} tilt ${h.tilt} dim ${h.dim}${h.prism ? ' prism' : ''}${h.strobe ? ' strobe' : ''}`;
+      }
+      $('gain').value = status.gain; $('gainval').textContent = `gain ${status.gain.toFixed(2)}`;
+      if (Math.round(status.offset_ms) !== offset) applyOffset(status.offset_ms, false);
+      $('srv').textContent = `${status.fps} fps · ${status.playing ? 'playing' : 'holding'}`;
+      $('analyzing').textContent = status.analyzing ? `analysing ${status.analyzing}…` : '';
+      $('analyze').disabled = !!status.analyzing;
+      if (status.analyze_log) $('alog').textContent = status.analyze_log.split('\n').slice(-3).join('\n');
+      // the server re-rendered this track (re-analyze finished): pick up the new frames once
+      if (meta && status.track === meta.name && status.version > version && !status.analyzing && !loading) await loadTrack(meta.name);
+    } catch (e) { $('srv').textContent = 'server unreachable'; }
+    finally { polling = false; }
+  }
+  setInterval(poll, 100);
+
+  // smooth playhead between polls (a timer, not requestAnimationFrame, so it keeps
+  // running when the tab is not focused)
+  function animate() {
+    const t = now();
+    $('pos').textContent = fmt(t);
+    if (meta) {
+      const bi = upper(meta.beats, t), di = upper(meta.downbeats, t);
+      $('beatno').textContent = bi > 0 ? bi : '–';
+      $('barno').textContent = di > 0 ? di : '–';
+    }
+    draw(t);
+    updateFx(t);
+  }
+  const upper = (arr, x) => { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] <= x) lo = m + 1; else hi = m; } return lo; };
+
+  // ---------------- effect library ----------------
+  // The library card shows every effect the renderer knows (GET /api/effects). A show
+  // rendered from a score carries its plan (which PAR look, head look and events each cue
+  // uses) and, per event, the spans in which it actually changed a frame; the tiles follow
+  // the playhead: looks light up for their whole cue, events flash when they fire.
+  const LAYER_TITLES = { par: 'PAR looks', head: 'Head looks', event: 'Events (fired by rule)' };
+  let fxTiles = {}, fxState = {}, planCues = [], activity = {}, lastCue = undefined;
+  let fxOnly = recall('fx_only', false);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const firstSentence = d => { const m = (d || '').replace(/\s+/g, ' ').match(/^.*?\.(\s|$)/); return m ? m[0].trim() : (d || ''); };
+  async function loadEffects() {
+    let effects = [];
+    try { effects = (await api('/api/effects')).effects; } catch (e) { $('fxcount').textContent = 'library unavailable'; return; }
+    const root = $('fxgroups'); root.innerHTML = ''; fxTiles = {}; fxState = {};
+    for (const layer of ['par', 'head', 'event']) {
+      const g = document.createElement('div'); g.className = 'fxgroup'; g.dataset.layer = layer;
+      g.innerHTML = `<h3>${LAYER_TITLES[layer]}</h3><div class="tiles"></div>`;
+      const tiles = g.querySelector('.tiles');
+      for (const e of effects.filter(e => e.layer === layer)) {
+        const el = document.createElement('div'); el.className = 'tile'; el.title = e.doc || '';
+        const roles = Object.entries(e.suits || {}).filter(([, w]) => w > 0).sort((a, b) => b[1] - a[1]);
+        el.innerHTML = `<div class="name">${esc(e.name)}</div><div class="doc">${esc(firstSentence(e.doc))}</div>` +
+          `<div class="roles">${roles.map(([r]) => `<span data-role="${esc(r)}">${esc(r.replace('_', ' '))}</span>`).join('')}</div>`;
+        tiles.appendChild(el); fxTiles[e.name] = { el, layer, group: g };
+      }
+      root.appendChild(g);
+    }
+    $('fxcount').textContent = `${effects.length} effects`;
+    applyFxOnly();
+  }
+  function setPlan(plan) {
+    planCues = (plan && plan.cues ? plan.cues.slice() : []).sort((a, b) => a.from_s - b.from_s);
+    activity = (plan && plan.activity) || {};
+    const hint = $('fxhint');
+    hint.hidden = planCues.length > 0;
+    hint.textContent = planCues.length ? '' : `This show (style ${meta ? meta.style : '?'}) was not rendered from the library, so nothing lights up here. Pick a score-rendered show such as "levels".`;
+    lastCue = undefined;
+    updateFx(now());
+  }
+  const cueAt = t => { let lo = 0, hi = planCues.length; while (lo < hi) { const m = (lo + hi) >> 1; if (planCues[m].from_s <= t) lo = m + 1; else hi = m; } const c = planCues[lo - 1]; return c && t < c.to_s ? c : null; };
+  const firing = (name, t) => { const sp = activity[name]; if (!sp || !sp.length) return false; let lo = 0, hi = sp.length; while (lo < hi) { const m = (lo + hi) >> 1; if (sp[m][0] <= t) lo = m + 1; else hi = m; } const s = sp[lo - 1]; return !!s && t < s[1]; };
+  function updateFx(t) {
+    const cue = cueAt(t);
+    const assigned = new Set(cue ? [cue.par, cue.head, ...(cue.events || [])] : []);
+    for (const [name, tile] of Object.entries(fxTiles)) {
+      let cls = 'tile';
+      if (assigned.has(name)) cls += (tile.layer !== 'event' || firing(name, t)) ? ' assigned firing' : ' assigned';
+      if (fxState[name] !== cls) { tile.el.className = cls; fxState[name] = cls; }
+    }
+    if (cue !== lastCue) {
+      lastCue = cue;
+      const role = cue ? (cue.role_key || cue.role) : null;
+      for (const tile of Object.values(fxTiles)) for (const chip of tile.el.querySelectorAll('.roles span')) chip.classList.toggle('here', !!role && chip.dataset.role === role);
+      $('fxnow').innerHTML = cue
+        ? `<span class="role">${esc(role.replace('_', ' '))}</span><b>${fmt(cue.from_s, false)}–${fmt(cue.to_s, false)}</b> · ${esc(cue.par)} + ${esc(cue.head)}` +
+          `${(cue.events || []).length ? ' · ' + cue.events.map(esc).join(', ') : ''}${cue.note ? '<br>' + esc(cue.note) : ''}`
+        : (planCues.length ? '—' : '');
+      for (const g of document.querySelectorAll('.fxgroup')) g.hidden = fxOnly && ![...g.querySelectorAll('.tile')].some(el => el.classList.contains('assigned'));
+    }
+  }
+  function applyFxOnly() {
+    $('fxlib').classList.toggle('only', fxOnly);
+    $('fxonly').classList.toggle('on', fxOnly);
+    $('fxonly').textContent = fxOnly ? 'Showing only what is in use' : 'Only in use now';
+    store('fx_only', fxOnly);
+    lastCue = undefined; updateFx(now());
+  }
+  $('fxonly').addEventListener('click', () => { fxOnly = !fxOnly; applyFxOnly(); });
+
+  // ---------------- timeline ----------------
+  function draw(t = now()) {
+    const W = canvas.clientWidth, H = canvas.height;
+    if (canvas.width !== W) canvas.width = W;
+    ctx.clearRect(0, 0, W, H);
+    if (!meta) return;
+    const x = s => s / meta.duration * W;
+    const PH = { intro: 'rgba(58,160,255,0.10)', verse: 'rgba(79,209,139,0.10)', build: 'rgba(255,180,84,0.16)', drop: 'rgba(255,92,92,0.18)', final_drop: 'rgba(255,60,60,0.26)', anthem: 'rgba(255,140,92,0.16)', bridge: 'rgba(255,220,120,0.14)', breakdown: 'rgba(200,120,255,0.12)', outro: 'rgba(58,160,255,0.08)', gap: 'rgba(0,0,0,0.3)' };
+    if (meta.phases && meta.phases.length) {
+      for (const p of meta.phases) {
+        ctx.fillStyle = PH[p.phase] || 'rgba(255,255,255,0.06)';
+        ctx.fillRect(x(p.start), 0, x(p.end) - x(p.start), H);
+        ctx.fillStyle = '#c9cede'; ctx.font = '11px system-ui';
+        ctx.fillText(`${fmt(p.start, false)} ${p.phase}`, x(p.start) + 4, 12);
+      }
+    } else {
+      const secs = meta.sections.concat([meta.duration]);
+      for (let i = 0; i < secs.length - 1; i++) {
+        ctx.fillStyle = i % 2 ? 'rgba(255,180,84,0.08)' : 'rgba(58,160,255,0.08)';
+        ctx.fillRect(x(secs[i]), 0, x(secs[i + 1]) - x(secs[i]), H);
+        ctx.fillStyle = '#8b92a5'; ctx.font = '11px system-ui';
+        ctx.fillText(fmt(secs[i], false), x(secs[i]) + 4, 12);
+      }
+    }
+    ctx.strokeStyle = 'rgba(230,232,238,0.25)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (const b of meta.beats) { const px = Math.round(x(b)) + .5; ctx.moveTo(px, H - 18); ctx.lineTo(px, H - 6); }
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,180,84,0.8)';
+    ctx.beginPath();
+    for (const b of meta.downbeats) { const px = Math.round(x(b)) + .5; ctx.moveTo(px, H - 34); ctx.lineTo(px, H - 6); }
+    ctx.stroke();
+    for (const s of taps.sound) { ctx.fillStyle = '#4fd18b'; ctx.fillRect(x(s) - 1, 18, 2, 10); }
+    for (const s of taps.light) { ctx.fillStyle = '#ff6b6b'; ctx.fillRect(x(s) - 1, 30, 2, 10); }
+    const px = x(t);
+    ctx.strokeStyle = '#ff5c5c'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
+  }
+  canvas.addEventListener('click', e => {
+    if (!meta) return;
+    const r = canvas.getBoundingClientRect();
+    seek((e.clientX - r.left) / r.width * meta.duration);
+  });
+  window.addEventListener('resize', () => draw());
+
+  // ---------------- tap calibration ----------------
+  const median = a => { if (!a.length) return NaN; const s = [...a].sort((p, q) => p - q); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+  const spread = a => { if (a.length < 2) return NaN; const m = a.reduce((p, q) => p + q, 0) / a.length; return Math.sqrt(a.reduce((p, q) => p + (q - m) ** 2, 0) / (a.length - 1)); };
+  const errors = arr => arr.map(t => { let best = Infinity; for (const b of meta.beats) { const d = t - b; if (Math.abs(d) < Math.abs(best)) best = d; } return best * 1000; });
+  const signed = v => `${v >= 0 ? '+' : ''}${v.toFixed(0)} ms`;
+  function renderTaps() {
+    if (!meta) return;
+    const es = errors(taps.sound), el = errors(taps.light);
+    $('ts_n').textContent = es.length; $('tl_n').textContent = el.length;
+    $('ts_med').textContent = es.length ? signed(median(es)) : '—';
+    $('tl_med').textContent = el.length ? signed(median(el)) : '—';
+    $('ts_sd').textContent = es.length > 1 ? `±${spread(es).toFixed(0)}` : '—';
+    $('tl_sd').textContent = el.length > 1 ? `±${spread(el).toFixed(0)}` : '—';
+    const apply = $('apply');
+    if (es.length >= 4 && el.length >= 4) {
+      const delta = median(el) - median(es);      // + => light seen after sound
+      const target = Math.round(offset - delta);
+      $('suggest').innerHTML = `Lights are seen <b>${Math.abs(delta).toFixed(0)} ms ${delta >= 0 ? 'after' : 'before'}</b> the sound. Suggested offset: <b>${target > 0 ? '+' : ''}${target} ms</b> (currently ${offset > 0 ? '+' : ''}${offset}).`;
+      apply.disabled = false; apply.dataset.target = target;
+    } else {
+      $('suggest').innerHTML = TAP_HELP;
+      apply.disabled = true;
+    }
+  }
+  $('apply').addEventListener('click', () => applyOffset(+$('apply').dataset.target));
+  $('tapreset').addEventListener('click', () => { taps = { sound: [], light: [] }; renderTaps(); });
+
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input[type=number], select')) return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (!meta || !status || !status.playing) return;
+      const mode = document.querySelector('input[name=tapmode]:checked').value;
+      taps[mode].push(now());
+      renderTaps();
+    } else if (e.key === 'k' || e.key === 'K') { e.preventDefault(); togglePlay(); }
+    else if (e.key === 'j' || e.key === 'J') { e.preventDefault(); seek(now() - 5); }
+    else if (e.key === 'l' || e.key === 'L') { e.preventDefault(); seek(now() + 5); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); applyOffset(offset - (e.shiftKey ? 40 : 10)); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); applyOffset(offset + (e.shiftKey ? 40 : 10)); }
+  });
+
+  // ---------------- boot ----------------
+  (async () => {
+    $('suggest').innerHTML = TAP_HELP;
+    await loadEffects();
+    await loadTracks();
+    try { const st = await api('/api/status'); applyOffset(st.offset_ms, false); } catch (e) { applyOffset(offset); }
+    await poll();
+    animate();
+    setInterval(animate, 40);
+  })();
+})();
+</script>
+</body>
+</html>
