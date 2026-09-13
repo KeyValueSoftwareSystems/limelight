@@ -386,6 +386,33 @@ section coming back, so a look used for the first can be used again for the
 second. `sections[].sure` is how cleanly that section sits inside its group,
 which is a measurement of the grouping and not a probability.
 
+**What a boundary is.** A section starts where the *arrangement* changes: a
+stem enters or leaves. It does not start where a new vocal phrase starts, and
+the difference is a bar often enough to matter.
+
+The Nights is the case that forced the question. Three things happen in three
+consecutive bars -- the drums leave at 40, the voice enters at 41 over a bass
+that is still playing, and the bass leaves at 42. A listener can defend any of
+them. Having settled on the arrangement, there were still two ways to read it,
+and they were tested against the thirteen boundaries a human confirmed by ear:
+
+    the bar where the most stems change at once     8 of 13
+    the bar where the bass enters or leaves        12 of 13
+
+So the ear does not weight the stems equally. Nine of the thirteen confirmed
+boundaries are a bass entry or exit, and weighting every stem the same loses
+five of them. The bass is what carries a section: when it changes the section
+changes, and when a voice enters over an unchanged bass that is a phrase
+starting, not a section.
+
+The Nights bar 41 is the one miss, and under this definition it is a miss on
+purpose: the voice enters at 41, the bass leaves at 42, and the file says 42.
+
+This is a definition, not a discovery. It is written down here because it was
+being decided by a tie-break that nobody had stated, which is how the same
+detector gave three different answers on three different songs and all of them
+looked equally defensible.
+
 `sections[].role` -- intro, verse, chorus, drop, breakdown and the rest -- is
 the least trustworthy thing in this file, and it is also the most readable, so
 it needs saying plainly. **The boundaries are measured. The names on them are
