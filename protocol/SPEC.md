@@ -381,6 +381,27 @@ and 0.60 elsewhere. A third candidate, the depth of the valleys between hits,
 was dropped: it tracked `held` at 0.93 on Strobe and 0.88 on Experience, which
 is one measurement wearing two names.
 
+`curves[].tells` is how much a curve is worth following on this particular song:
+how much more the sections differ from one another than a section differs from
+its own two halves. It is the same measurement that gates mood, applied to every
+per-bar curve. Above about 1.3 the curve is tracking the music. At 1.0 a section
+differs from itself as much as it differs from any other section, and a reader
+keying a look off that curve on that song is lighting noise.
+
+No curve is reliable everywhere, and the differences are large. Across the
+twenty-eight songs, drums, bass and energy are never weak. pump says little on
+ten of them, noisy on nine, width on eight, brightness on six -- on Levels
+brightness scores 0.92, which is below the point where it means anything.
+
+This was measured, not assumed, and it changed what we know about fields that
+had already shipped. floor and weight correlate at 0.90 across the library,
+close enough to the 0.93 that retired an earlier candidate for being one
+measurement wearing two names. Taking the part of floor that weight cannot
+predict and testing that on its own, it still carries section structure on
+eighteen of twenty-eight songs -- 3.62 on Wetwork, 2.56 on Don't Look Down -- so
+floor stays. On the other ten it is weight plus noise, and `tells` is how a
+reader finds out which song it is holding.
+
 `sections[].mood` is where a section sits on a handful of opposed axes -- calm
 against aggressive, happy against sad, warm against cold -- read by MuQ-MuLan,
 which was trained to place music and text in one space. The number is not a

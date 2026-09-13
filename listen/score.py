@@ -12,6 +12,7 @@ from cycle import cycle
 from groove import groove
 from heard import agrees, edges as model_edges
 from mood import moods
+from steady import all_tells as tells_of
 from words import words as lyrics
 from grid import grid, bar_edges, show
 from form import on_phrase
@@ -360,6 +361,8 @@ def read(path, slug):
                 part["mood"] = row
         report["mood_axes"] = len(mood_sure)
 
+    curve_tells = tells_of(score_bars, shaped, g["first_bar"])
+
     peak = [t for t in told if t["role"] in ("drop", "chorus")]
     anchor = peak[0]["mark"] if peak else (told[0]["mark"] if told else 0)
     origin = grid_says.get("origin", 1)
@@ -470,6 +473,7 @@ def read(path, slug):
         "melody": tune_notes,
         "melody_phrases": phrases_of(tune_notes, g, g["beats_per_bar"]),
         "mood_axes": mood_sure or None,
+        "curve_tells": curve_tells or None,
         "lyrics": lyrics_out,
     }
 

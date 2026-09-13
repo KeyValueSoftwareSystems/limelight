@@ -194,7 +194,9 @@ def format_v1(raw):
             src = bars.get(name)
         if isinstance(src, list):
             fb = (raw.get("energy") or {}).get("from_bar", first_bar) if name == "energy" else first_bar
-            curve_entries[name] = {"per": "bar", "from_bar": fb, "values": src}
+            lane = "intensity" if name == "energy" else name
+            curve_entries[name] = {"per": "bar", "from_bar": fb, "values": src,
+                                   "tells": (raw.get("curve_tells") or {}).get(lane)}
     if curve_entries:
         out["curves"] = curve_entries
 

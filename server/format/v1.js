@@ -206,11 +206,13 @@ export function format(raw) {
       src = bars[name];
     }
     if (Array.isArray(src)) {
+      const lane = (name === 'energy') ? 'intensity' : name;
       curveEntries[name] = {
         per: 'bar',
         from_bar: (name === 'energy' && raw.energy?.from_bar != null)
           ? raw.energy.from_bar : firstBar,
         values: src,
+        tells: raw.curve_tells?.[lane],
       };
     }
   }

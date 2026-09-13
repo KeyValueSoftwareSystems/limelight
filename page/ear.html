@@ -186,6 +186,12 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
     The number on the right of each row is its value where you are now.
     <b>Click anywhere to jump there.</b></p>
   <div class="holder"><canvas id="curves"></canvas><div class="pline" data-for="curves"></div></div>
+  <p class="note">Each row carries a number saying how much it actually tells you
+    <b>about this song</b>: how much more the parts differ from each other than a part differs from
+    its own two halves. Above about 1.3 the row is following the music; at 1.0 a part differs from
+    itself as much as from any other part, and the row is noise you could light by mistake.
+    No curve is reliable on every song &mdash; Pump says little on ten of the twenty-eight,
+    Brightness on six.</p>
   <div class="legend" id="curvekey"></div>
 </section>
 
@@ -272,9 +278,30 @@ function setView(a, b) {
 function zoomAt(t, by) { setView(t - (t - VIEW.a) * by, t + (VIEW.b - t) * by); }
 
 const mmss = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
-const beatLen = () => 60 / SCORE.grid.bpm;
-const firstBeat = () => SCORE.grid.first_beat_s + (SHIFT - BASE) * beatLen();
-const barTime = b => b <= 0 ? 0 : firstBeat() + (b - 1) * BAR;
+let TEMPO = [];
+const segAtBeat = n => {
+  let k = 0;
+  while (k + 1 < TEMPO.length && TEMPO[k + 1].from_beat <= n) k++;
+  return TEMPO[k];
+};
+const segAtTime = t => {
+  let k = 0;
+  while (k + 1 < TEMPO.length && TEMPO[k + 1].at_s <= t) k++;
+  return TEMPO[k];
+};
+const atBeat = n => {
+  const s = segAtBeat(n);
+  return s.at_s + (n - s.from_beat) * (60 / s.bpm);
+};
+const beatAt = t => {
+  const s = segAtTime(t);
+  return s.from_beat + (t - s.at_s) / (60 / s.bpm);
+};
+const beatLen = at => 60 / segAtTime(at == null ? (aud.currentTime || 0) : at).bpm;
+const perBar = () => SCORE.grid.beats_per_bar;
+const firstBeat = () => atBeat(SHIFT - BASE);
+const barTime = b => b <= 0 ? 0 : atBeat((b - 1) * perBar() + (SHIFT - BASE));
+const barAtTime = t => Math.floor(beatAt(t) / perBar()) + 1;
 const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
 const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -436,6 +463,9 @@ async function load(s, url, at, from, to, scoreUrl) {
   /* A song can arrive from the hub as easily as from the folder beside this
      page, so the caller may name where its score lives. */
   SCORE = await (await fetch(scoreUrl || `/scores/${s}.score`)).json();
+  TEMPO = (SCORE.grid.tempo && SCORE.grid.tempo.length)
+    ? SCORE.grid.tempo
+    : [{ from_beat: 0, at_s: SCORE.grid.first_beat_s, bpm: SCORE.grid.bpm }];
   BAR = (60 / SCORE.grid.bpm) * SCORE.grid.beats_per_bar;
   FIRSTBAR = SCORE.grid.first_beat_s > 0.2 ? 0 : 1;
   if (url) { aud.src = url; aud.load(); $("play").disabled = false; }
@@ -461,8 +491,14 @@ function play(from, until) {
   aud.play();
 }
 
-function momentTime(m) { return barTime(m.bar) + (m.beat - 1) * beatLen(); }
-function momentSpan(m) { return m.for_beats ? m.for_beats * beatLen() : 0; }
+function momentTime(m) {
+  return atBeat((m.bar - 1) * perBar() + (m.beat - 1) + (SHIFT - BASE));
+}
+function momentSpan(m) {
+  if (!m.for_beats) return 0;
+  return atBeat((m.bar - 1) * perBar() + (m.beat - 1) + m.for_beats + (SHIFT - BASE))
+       - momentTime(m);
+}
 
 function hearMoment(m) {
   const t = momentTime(m);
@@ -588,8 +624,14 @@ function draw() {
     + `stays the same from one bar to the next &mdash; a locked loop scores high, a part that `
     + `keeps changing scores low.</span>`;
 
-  $("curvekey").innerHTML = CURVES.map(([k, n, hue, why]) =>
-    `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}</span>`).join("")
+  $("curvekey").innerHTML = CURVES.map(([k, n, hue, why]) => {
+    const t = (SCORE.curve_tells || {})[k];
+    const weak = t != null && t < 1.3;
+    const says = t == null ? ""
+      : weak ? ` <b style="color:var(--bad)">&mdash; on this song it barely changes between parts (${t.toFixed(2)}), so do not follow it here</b>`
+             : ` <b style="color:var(--ok)">&mdash; ${t.toFixed(2)}</b>`;
+    return `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}${says}</span>`;
+  }).join("")
     + (Array.isArray(SCORE.tension)
        ? `<span><i style="background:#e0655f"></i><b style="color:var(--dim)">Tension</b> &mdash; how much `
          + `the music is winding up. One reading a beat, so it is the only row here fast enough to show a `
@@ -730,7 +772,7 @@ function zoom() {
     g.beginPath(); g.moveTo(x, down ? 22 : 36); g.lineTo(x, 54); g.stroke();
     g.globalAlpha = 1;
     if (down) {
-      const n = Math.round((bt.t - firstBeat())/BAR) + 1;
+      const n = Math.round(beatAt(bt.t) / perBar()) + 1;
       g.fillStyle = "#7b8599"; g.font = "10px ui-monospace,monospace";
       g.fillText("bar " + n, x + 4, 106);
     }
@@ -942,7 +984,7 @@ function curves() {
   const mine = rows;
   if (!mine.length) return;
   const h = ROW, L = 78;
-  const bar = Math.max(0, Math.floor((aud.currentTime - SCORE.grid.first_beat_s)/BAR) + 1 - FIRSTBAR);
+  const bar = Math.max(0, barAtTime(aud.currentTime) - FIRSTBAR);
   mine.forEach(([key, name, hue, why], row) => {
     const v = b[key], y0 = row*h;
     const got = v.filter(x => x != null);
@@ -1332,7 +1374,7 @@ function tick() {
               ((i - (SHIFT - BASE)) % per + per) % per === firstIndex());
       }
     }
-    const bar = Math.floor((t - SCORE.grid.first_beat_s)/BAR) + 1;
+    const bar = barAtTime(t);
     let at = -1;
     (SCORE.parts||[]).forEach((p,i) => { if (bar >= p.from_bar && bar <= p.to_bar) at = i; });
     document.querySelectorAll(".part").forEach((n,i) => n.classList.toggle("here", i === at));

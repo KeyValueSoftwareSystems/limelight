@@ -81,6 +81,7 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
     words: [{ text: "Once", at_s: 2.88, to_s: 3.1, bar: 1, heard_twice: true }],
     lines: [{ at_s: 2.88, to_s: 6.1, from_bar: 1, to_bar: 2, text: "Once", sure: 1 }],
   };
+  planted.curve_tells = { intensity: 2.83, brightness: 0.92, noisy: 1.48, held: 1.81 };
   planted.bars = Object.assign({}, planted.bars, {
     noisy: (planted.bars.intensity || []).map(() => 0.4),
     held: (planted.bars.intensity || []).map(() => 0.6),
@@ -101,6 +102,11 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
        js2[want] != null && py2[want] != null,
        `js ${js2[want] != null ? "yes" : "NO"}, py ${py2[want] != null ? "yes" : "NO"}`);
   }
+  ok("a curve carries how much it tells you on this song, through both formatters",
+     (js2.curves || {}).brightness && js2.curves.brightness.tells === 0.92
+       && (py2.curves || {}).brightness && py2.curves.brightness.tells === 0.92,
+     `js ${(js2.curves || {}).brightness?.tells}, py ${(py2.curves || {}).brightness?.tells}`);
+
   const jsMood = (js2.sections || [])[0] || {}, pyMood = (py2.sections || [])[0] || {};
   ok("a section carries mood through both formatters",
      jsMood.mood != null && pyMood.mood != null,
