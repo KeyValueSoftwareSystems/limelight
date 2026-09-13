@@ -127,6 +127,13 @@
        a few bars and plays it (POST /api/effect) -->
   <section class="card" id="effects" hidden>
     <h2>Effects <span class="meta" id="fxmsg"></span></h2>
+    <div class="row" style="margin-bottom:6px">
+      <label class="meta">bpm <input type="number" id="fxbpm" value="128" min="40" max="220" style="width:68px"></label>
+      <label class="meta">speed <select id="fxsubdiv"><option value="auto">the look's own</option><option value="0.5">½× (on the bar)</option><option value="1">1× (on the beat)</option><option value="2">2× (off-beats too)</option><option value="4">4× (sixteenths)</option></select></label>
+      <label class="meta">head <input type="range" id="fxmotion" min="0" max="1" step="0.05" value="0.85" style="width:90px"> <span id="fxmotionv">0.85</span></label>
+      <label class="meta">level <select id="fxmode"><option value="auto">auto</option><option value="hit">hits</option><option value="breathe">breathe</option><option value="hold">hold</option></select></label>
+      <label class="meta">bars <input type="number" id="fxbars" value="8" min="1" max="32" style="width:56px"></label>
+    </div>
     <div id="fxlist"><span class="meta">loading the library…</span></div>
   </section>
 
@@ -376,12 +383,14 @@
     $('fxmsg').textContent = `rendering #${e.n} ${e.id}…`;
     document.querySelectorAll('.fxrow').forEach(r => r.classList.toggle('playing', r.dataset.id === e.id));
     try {
-      const r = await api('/api/effect', { id: e.id, bpm: 128, bars: 8 });
+      const r = await api('/api/effect', { id: e.id, bpm: +$('fxbpm').value || 128, bars: +$('fxbars').value || 8,
+        subdiv: $('fxsubdiv').value, motion: $('fxmotion').value, mode: $('fxmode').value });
       if (r.status) applyStatus(r.status);
       $('fxmsg').textContent = `playing #${e.n} ${e.id}`;
     } catch (err) { $('fxmsg').textContent = `could not play ${e.id}: ${err.message}`; }
   };
   document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  $('fxmotion').addEventListener('input', () => { $('fxmotionv').textContent = $('fxmotion').value; });
   showTab(recall('tab', 'show'));
   document.querySelectorAll('[data-nudgesec]').forEach(b => b.addEventListener('click', () => nudge(+b.dataset.nudgesec)));
   let counting = false;

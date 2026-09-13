@@ -209,7 +209,7 @@ class State:
             self._effects = json.loads(res.stdout)
         return self._effects
 
-    def play_effect(self, ident, bpm=128, bars=8, loops=4):
+    def play_effect(self, ident, bpm=128, bars=8, loops=4, knobs=None):
         """Render one effect for a few bars and put its frames on the wire: straight
         into the transport with NO audio and no song -- looped a few times, ending
         dark. The transport is the sole Art-Net sender, so this is the wire path."""
@@ -219,6 +219,10 @@ class State:
         os.makedirs(self.dirs[0], exist_ok=True)
         cmd = ["node", self.PLAY_JS, ident, "--no-play", "--out", self.dirs[0],
                "--bpm", str(int(bpm)), "--bars", str(int(bars))]
+        for key in ("subdiv", "motion", "mode", "level"):          # the character knobs, when the page sets them
+            val = (knobs or {}).get(key)
+            if val not in (None, "", "auto"):
+                cmd += ["--" + key, str(val)]
         res = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
         if res.returncode != 0 or "rendered" not in res.stdout:
             raise RuntimeError((res.stderr or res.stdout)[-300:] or "render failed")
@@ -478,7 +482,8 @@ def make_handler(state: State):
                     self._json({"error": "show not baked yet — import it from the hub first"}, 404)
             if path == "/api/effect":
                 try:
-                    out = state.play_effect(body.get("id", ""), body.get("bpm", 128), body.get("bars", 8))
+                    out = state.play_effect(body.get("id", ""), body.get("bpm", 128), body.get("bars", 8),
+                                            knobs={k: body.get(k) for k in ("subdiv", "motion", "mode", "level")})
                     state.paused_by_watchdog = False
                     state.last_poll = time.monotonic()
                     out["status"] = state.status()

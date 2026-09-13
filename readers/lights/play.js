@@ -13,7 +13,8 @@
      node readers/lights/play.js 42              play #42 and exit
      node readers/lights/play.js impact          by id
      node readers/lights/play.js --list          just the list
-   Options: --bpm 128  --bars 8  --panel http://127.0.0.1:8766  --no-play  --out DIR
+   Options: --bpm 128  --bars 8  --subdiv 0.5|1|2|4  --motion 0..1  --mode hit|breathe|hold  --level 0..1
+            --panel http://127.0.0.1:8766  --no-play  --out DIR
 
    In the loop: a number or an id plays; `s` stops; `l` lists again; `q` quits. */
 const fs = require("fs"), path = require("path"), http = require("http"), readline = require("readline");
@@ -32,6 +33,13 @@ let palette = [];
 try { palette = JSON.parse(fs.readFileSync(path.join(HERE, "arc4-head.palette.json"), "utf8")); } catch (e) { /* base only */ }
 const library = Object.fromEntries(palette.map(s => [s.id, s]));
 const bpm = +opt("--bpm", 128), bars = +opt("--bars", 8), fps = 40, bpb = 4;
+/* character knobs: --subdiv 0.5|1|2|4 (PAR pattern steps per beat, x the look's own),
+   --motion 0..1 (how hard the head moves), --mode hit|breathe|hold (level shape;
+   default: the look's own character), --level 0..1 (intensity) */
+const subdiv = opt("--subdiv", null) !== null ? Math.max(0.25, Math.min(4, +opt("--subdiv"))) : null;
+const motionOpt = opt("--motion", null) !== null ? Math.max(0, Math.min(1, +opt("--motion"))) : null;
+const modeOpt = opt("--mode", null);
+const levelOpt = opt("--level", null) !== null ? Math.max(0, Math.min(1, +opt("--level"))) : null;
 const panel = opt("--panel", "http://127.0.0.1:8766");
 /* where to write: an explicit --out, else the folder the running panel scans (its
    status reports `dirs`), else synth/out if it exists (the README's example), else
@@ -62,18 +70,25 @@ function planFor(s) {
   const span = { from: { bar: 1, beat: 1 }, to: { bar: bars + 1, beat: 1 } };
   const lib = library[s.id] || {};
   const bold = s.boldness || "accent";
-  const dyn = /^hold_/.test(s.id) ? { floor: 0.6, peak: 0.6, mode: "breathe" }
-            : bold === "ambient" ? { floor: 0.25, peak: 0.7, mode: "breathe" }
-            : { floor: 0.12, peak: 1.0, mode: "hit" };
+  let dyn = /^hold_/.test(s.id) ? { floor: 0.6, peak: 0.6, mode: "breathe" }
+          : bold === "ambient" ? { floor: 0.25, peak: 0.7, mode: "breathe" }
+          : { floor: 0.12, peak: 1.0, mode: "hit" };
+  if (modeOpt === "hold") dyn = { floor: 0.7, peak: 0.7, mode: "breathe" };
+  else if (modeOpt === "breathe") dyn = { floor: 0.2, peak: 0.8, mode: "breathe" };
+  else if (modeOpt === "hit") dyn = { floor: 0.12, peak: 1.0, mode: "hit" };
+  const intensity = levelOpt !== null ? levelOpt : 1;
+  const motion = motionOpt !== null ? motionOpt : (bold === "ambient" ? 0.4 : 0.85);
   const par = { ...span, seq_id: s.id, layer: "par", priority: 0, occupies: s.occupies || [],
-    params: { ...dyn, intensity: 1, hue: 0.5, headDim: 0.9, motion: 0.85 } };
+    params: { ...dyn, intensity, hue: 0.5, headDim: 0.9, motion } };
   const head = { ...span, seq_id: s.id, layer: "head", priority: 1, occupies: s.occupies || [],
-    params: { headDim: 0.9, motion: bold === "ambient" ? 0.4 : 0.85, intensity: 0.9 } };
+    params: { headDim: 0.9 * (levelOpt !== null ? levelOpt : 1), motion, intensity: 0.9 } };
   const a = [];
   if (s.kind === "oneshot") {
-    /* a quiet base so the punctuation reads, and the one-shot every two bars */
-    a.push({ ...span, seq_id: "hold_deep_blue", layer: "par", priority: 0, params: { floor: 0.15, peak: 0.3, mode: "breathe", intensity: 1 }, occupies: ["pars:level", "pars:colour"] });
-    a.push({ ...span, seq_id: "head_roam_soft", layer: "head", priority: 1, params: { headDim: 0.6, motion: 0.4 }, occupies: ["head:move"] });
+    /* a one-shot is punctuation on top of a look, so show it over a colourful, gently
+       moving base -- a static blue wash made every one-shot look blue -- fired every two bars */
+    const baseId = ["xfade_amber_deep_blue", "chase_rainbow", "pair_alt_gold_indigo", "hold_warm_white"].find(id => library[id]) || "hold_warm_white";
+    a.push({ ...span, seq_id: baseId, layer: "par", priority: 0, params: { floor: 0.25, peak: 0.55, mode: "breathe", intensity: 1 }, occupies: ["pars:level", "pars:colour"] });
+    a.push({ ...span, seq_id: library["head_roam_cool"] ? "head_roam_cool" : "head_roam_soft", layer: "head", priority: 1, params: { headDim: 0.6, motion: 0.4 }, occupies: ["head:move"] });
     const g = s.gesture || {}, dur = s.duration_beats || 1;
     for (let bar = 2; bar <= bars; bar += 2) {
       const B = (bar - 1) * bpb, len = g.slot === "span" ? Math.min(dur, 2 * bpb) : dur, start = g.slot === "before" ? B - len : B;
@@ -86,7 +101,9 @@ function planFor(s) {
   } else if (s.kind === "combination") a.push(par, head);
   else if (isHeadSeq(s)) a.push(head);
   else a.push(par);
-  return { grid: { beats_per_bar: bpb }, contexts: ["drop"], assignments: a };
+  const plan = { grid: { beats_per_bar: bpb }, contexts: ["drop"], assignments: a };
+  if (subdiv !== null) plan.lanes = { from_bar: 1, subdiv: Array.from({ length: bars }, () => subdiv) };   /* the PAR pattern clock */
+  return plan;
 }
 
 function render(s) {
@@ -165,7 +182,8 @@ async function playToken(token) {
   if (!s) { console.log(`no effect "${token}" (1..${list.length} or an id)`); return; }
   await resolveOutDir();
   const r = render(s);
-  console.log(`rendered #${list.indexOf(s) + 1} ${s.id} (${s.kind}, ${s.boldness}): ${r.frames} frames, ${bars} bars @ ${bpm} bpm -> ${path.relative(process.cwd(), r.lights)}`);
+  const knobs = [subdiv !== null ? `x${subdiv}` : null, motionOpt !== null ? `motion ${motionOpt}` : null, modeOpt, levelOpt !== null ? `level ${levelOpt}` : null].filter(Boolean).join(", ");
+  console.log(`rendered #${list.indexOf(s) + 1} ${s.id} (${s.kind}, ${s.boldness}): ${r.frames} frames, ${bars} bars @ ${bpm} bpm${knobs ? " [" + knobs + "]" : ""} -> ${path.relative(process.cwd(), r.lights)}`);
   if (!flag("--no-play")) await playOnPanel(r.lights);
 }
 
