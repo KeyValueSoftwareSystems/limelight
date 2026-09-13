@@ -25,6 +25,7 @@ import rig
 from rig import park_frame   # park_frame lives in rig.py now (no numpy-heavy concert needed)
 from transport import Transport
 
+import urllib.parse
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -258,7 +259,10 @@ class State:
                 continue
             out.append({"name": n[:-len(".score")],
                         "version": p.get("version"),
-                        "mtime": p.get("mtime")})
+                        "mtime": p.get("mtime"),
+                        # the audio the hub holds for this score, if any; audio/
+                        # is not browsable, so the listing is the only way to know
+                        "audio": p.get("audio")})
         return sorted(out, key=lambda d: d["name"])
 
     def hub_tracks(self):
@@ -300,6 +304,37 @@ class State:
                 view = json.loads(r.read())
             return view, f"raw .score fallback (protocol POST unavailable: {getattr(e, 'code', None) or e})"
 
+    def _fetch_hub_audio(self, name):
+        """Download the audio the hub holds for this score, or None.
+
+        The listing says which file it is -- audio/ is deliberately not
+        browsable -- so ask the listing rather than guessing an extension. Cached
+        beside the shows, so a second import of the same song costs nothing.
+        """
+        try:
+            for row in self.hub_list():
+                if row.get("name") != name:      # hub_list already strips ".score"
+                    continue
+                fname = row.get("audio")
+                if not fname:
+                    return None
+                at = os.path.join(self.dirs[0], fname)
+                if os.path.isfile(at) and os.path.getsize(at) > 0:
+                    return at
+                url = HUB + "/hub/audio/" + urllib.parse.quote(fname)
+                tmp = at + ".downloading"
+                with urllib.request.urlopen(url, timeout=120) as r, open(tmp, "wb") as f:
+                    while True:
+                        chunk = r.read(1 << 20)
+                        if not chunk:
+                            break
+                        f.write(chunk)
+                os.replace(tmp, at)
+                return at
+        except Exception as e:  # noqa: BLE001
+            self.import_log = f"(audio not fetched: {e}) "
+        return None
+
     def import_score(self, name, seed=3):
         """Fetch a score through the protocol path (POST /hub/score, no filters)
         and bake a .lights.json from it. Falls back to the raw .score if the hub
@@ -323,11 +358,17 @@ class State:
             if res.returncode != 0:
                 self.import_log = f"bake.js failed: {(res.stderr or res.stdout)[-400:]}"
                 return None
+            # Audio the hub is holding for this score, when we do not have the
+            # track locally. A downstream machine can now play a song it has
+            # never owned: pull the score, pull the audio the score names.
+            fetched = self._fetch_hub_audio(name)
             for cand in (os.path.join(REPO, "synth", "out", name + ".wav"),
-                         os.path.join(EXPER, name + ".cache.wav"), os.path.join(EXPER, name + ".mp3")):
-                if not os.path.isfile(cand):
+                         os.path.join(EXPER, name + ".cache.wav"),
+                         os.path.join(EXPER, name + ".mp3"),
+                         fetched):
+                if not cand or not os.path.isfile(cand):
                     continue
-                link = os.path.join(self.dirs[0], name + ".wav")
+                link = os.path.join(self.dirs[0], name + os.path.splitext(cand)[1])
                 if os.path.abspath(cand) == os.path.abspath(link):
                     break                      # audio already in place -- never touch a real file
                 try:
