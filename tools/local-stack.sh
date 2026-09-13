@@ -52,7 +52,7 @@ seed() {
     [ -e "$f" ] || continue
     stem=$(basename "$f" .score)
     src=""
-    for cand in "synth/incoming/$stem.mp3" "synth/out/$stem.wav" "synth/incoming/$stem.wav"; do
+    for cand in "audio/$stem.mp3" "audio/$stem.wav" "synth/incoming/$stem.mp3" "synth/out/$stem.wav"; do
       [ -f "$cand" ] && { src="$cand"; break; }
     done
     [ -z "$src" ] && { say "audio    $stem -- none on this machine"; continue; }
