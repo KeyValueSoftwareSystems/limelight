@@ -40,6 +40,55 @@ function mulberry32(a) {
   };
 }
 
+/* ---- how much this song wants doing to it -----------------------------------
+   A mournful, harmonically static piece and a four-on-the-floor record can want
+   opposite things from the same rig, and the palette alone cannot tell them
+   apart -- a strobe is equally POSSIBLE on both.
+
+   What separates them is already in the response, in fields whose direction is
+   unambiguous. `tells` says how much each curve actually moves on this song;
+   `loudness` says how much room the record left itself; `feel` says how busy it
+   is. Not mood_axes: the axes differ from song to song and nothing states which
+   end of "happy_vs_sad" a 3.31 sits at, so building on it would be guessing.
+
+   Returns 0..1. Near 0 means the music is doing little and the rig should do
+   less. Near 1 means the record is already loud and busy and can take it. */
+function appetite(score) {
+  const t = score.tells || {}, l = score.loudness || {}, f = score.feel || {};
+  const c = score.chord_summary || score.chords || {};
+  const num = (v, d) => (typeof v === "number" ? v : d);
+
+  /* how much the song itself moves: the three curves that describe motion */
+  const moving = num(t.drums, 3) + num(t.energy, 3) + num(t.pump, 1);
+  const drive = clamp01((moving - 5) / 15);              /* ~6 quiet, ~22 busy */
+
+  /* how much room it left itself. A wide range and high dynamic complexity mean
+     the music supplies its own contrast and the rig need not shout over it. */
+  const room = clamp01((num(l.range_lu, 5) - 3) / 5) * 0.5
+             + clamp01((num(l.dynamic_complexity, 3) - 2) / 3) * 0.5;
+
+  /* harmony that barely moves is modal writing, and modal writing does not want
+     a gesture every eight bars */
+  const harmonic = clamp01((num(c.changes_per_beat, 0.05) - 0.02) / 0.05);
+
+  const busy = clamp01((num(f.onsets_per_second, 4) - 2.5) / 3);
+
+  const a = clamp01(0.45 * drive + 0.2 * busy + 0.2 * harmonic + 0.15 * (1 - room));
+  return +a.toFixed(3);
+}
+
+/* Looks that shout, detected from what they DO rather than from their names:
+   anything that claims the strobe channel, or carries a strobe on a key. */
+function shouts(seq) {
+  if (!seq) return false;
+  if ((seq.occupies || []).some(o => /strobe/.test(o))) return true;
+  const keys = (seq.gesture && seq.gesture.keys) || [];
+  if (keys.some(k => k.intent && k.intent.strobe)) return true;
+  for (const part of (seq.parts || [])) if (/strobe/.test(part.seq || "")) return true;
+  for (const step of (seq.steps || [])) if (/strobe/.test(step.seq || "")) return true;
+  return false;
+}
+
 const pickWeighted = (cands, rng) => {
   if (!cands.length) return null;
   const total = cands.reduce((s, c) => s + c.score, 0);
@@ -321,6 +370,10 @@ function plan(scoreIn, enumResult, seed) {
   const score = (scoreIn && Array.isArray(scoreIn.sections)) ? scoreIn : shape(scoreIn || {});
   const rng = mulberry32((seed || 0) >>> 0);
   const V = view(enumResult);
+  /* how much doing-to this song can take, 0..1, from its own numbers */
+  const want = (typeof process !== "undefined" && process.env && process.env.LIMELIGHT_APPETITE)
+    ? clamp01(parseFloat(process.env.LIMELIGHT_APPETITE))
+    : appetite(score);
   const energyAt = energyReader(score);
   const sections = score.sections || [];
   const contexts = contextsFor(sections, energyAt, score);
@@ -344,7 +397,21 @@ function plan(scoreIn, enumResult, seed) {
     /* looks only: a one-shot is punctuation, never a look, whatever the fallback */
     const all = V.candidates(vector).filter(c => { const q = V.seq(c.id); return !(q && q.kind === "oneshot"); });
     const same = all.filter(c => groupOf(c.id) === grp && (grp !== "par" || isLook(c.id)));
-    const pool = (same.length ? same : all).filter(c => !(exclude || []).includes(c.id));
+    let pool = (same.length ? same : all).filter(c => !(exclude || []).includes(c.id));
+    /* Weight the draw by what this song can take. A look that shouts keeps its
+       full score on a busy record and loses most of it on a restrained one, so
+       a mournful modal piece stops drawing strobes without anybody hand-listing
+       which songs may have them. Boldness is scaled the same way and in the same
+       direction, gently, so a quiet song leans ambient rather than hero. */
+    const BOLD = { ambient: 0, accent: 0.5, hero: 1 };
+    const tempered = pool.map(c => {
+      const q = V.seq(c.id);
+      let k = 1;
+      if (shouts(q)) k *= 0.1 + 0.9 * want;
+      k *= 1 - 0.5 * (BOLD[c.boldness] != null ? BOLD[c.boldness] : 0.5) * (1 - want);
+      return { ...c, score: c.score * k };
+    }).filter(c => c.score > 0);
+    if (tempered.length) pool = tempered;
     return pickWeighted(pool, rng);
   };
   /* what an assignment actually drives: its sequence's claims on ITS layer's
