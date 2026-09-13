@@ -10,7 +10,8 @@ export const KNOWN = [
   'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor', 'noisy', 'held',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
-  'tension', 'releases', 'melody', 'signals', 'made_by', 'mood_axes', 'lyrics',
+  'tension', 'releases', 'melody', 'signals', 'made_by', 'mood_axes', 'lyrics', 'tells',
+  'motion',
 ];
 
 const STEM_NAMES = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
@@ -185,6 +186,18 @@ export function format(raw) {
      throws the pattern away, and the pattern is what a light follows. */
   if (raw.groove) out.groove = raw.groove;
   if (Array.isArray(raw.melody_phrases)) out.melody_phrases = raw.melody_phrases;
+  /* How much each per-bar lane tells you about this song, beside the lanes
+     themselves rather than inside them: a reader already holding out.weight as
+     an array keeps holding an array, and can look up out.tells.weight to find
+     out whether it is worth following here. curves.<name>.tells says the same
+     thing, but nothing reads curves -- the readers all take the bare lanes. */
+  if (raw.curve_tells) {
+    const said = {};
+    for (const [name, v] of Object.entries(raw.curve_tells)) {
+      said[name === 'intensity' ? 'energy' : name] = v;
+    }
+    if (Object.keys(said).length) out.tells = said;
+  }
   if (raw.mood_axes) out.mood_axes = raw.mood_axes;
   if (raw.lyrics) out.lyrics = raw.lyrics;
 
@@ -193,6 +206,10 @@ export function format(raw) {
     out.energy = raw.energy;
   } else if (Array.isArray(raw.bars?.intensity)) {
     out.energy = { per: 'bar', from_bar: firstBar, values: raw.bars.intensity };
+  }
+
+  if (out.energy && out.tells && out.tells.energy !== undefined) {
+    out.energy.tells = out.tells.energy;
   }
 
   // ---- bare per-bar lanes (backward compat) ----
@@ -209,6 +226,7 @@ export function format(raw) {
   if (raw.made_by) out.made_by = raw.made_by;
   if (raw.chord_changes) out.chord_changes = raw.chord_changes;
   if (raw.presence) out.presence = raw.presence;
+  if (raw.motion) out.motion = raw.motion;
 
   const bars = raw.bars || {};
   for (const lane of ['width', 'air', 'pump', 'pace']) {

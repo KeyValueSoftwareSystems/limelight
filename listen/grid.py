@@ -297,3 +297,11 @@ def bar_edges(g):
     if g["first_beat_s"] > 0.2:
         out = [0.0] + out
     return out
+
+
+def beat_at(g, t):
+    segs = g.get("tempo") or [{"from_beat": 0, "at_s": g["first_beat_s"], "bpm": g["bpm"]}]
+    k = 0
+    while k + 1 < len(segs) and segs[k + 1]["at_s"] <= t:
+        k += 1
+    return segs[k]["from_beat"] + (t - segs[k]["at_s"]) * (segs[k]["bpm"] / 60.0)

@@ -410,6 +410,24 @@ and 0.60 elsewhere. A third candidate, the depth of the valleys between hits,
 was dropped: it tracked `held` at 0.93 on Strobe and 0.88 on Experience, which
 is one measurement wearing two names.
 
+`tells` sits beside the per-bar lanes and says how much each is worth following
+on this song. The lanes themselves travel as bare arrays because that is how
+every reader already reads them, so the number rides alongside rather than
+inside: `energy` is an array of values and `tells.energy` is what it is worth.
+`curves.<name>.tells` carries the same figure for anyone reading the wrapped
+form, and `energy.tells` for anyone reading that.
+
+A reader that keys a look off a lane should look the lane up in `tells` first.
+On Levels, brightness scores 0.99 -- below the point where it means anything --
+and until this was added a reader holding the bare `brightness` array had no way
+to know.
+
+One name still means two things and one thing still has two names, and both are
+worth knowing about before they bite. The per-bar energy curve is `intensity` in
+the score file and `energy` in the protocol. `phrases[].energy` is not that
+curve at all -- it is a single figure for one phrase. Renaming any of them
+breaks a reader that exists, so they are written down here rather than changed.
+
 `curves[].tells` is how much a curve is worth following on this particular song:
 how much more the sections differ from one another than a section differs from
 its own two halves. It is the same measurement that gates mood, applied to every
@@ -481,6 +499,52 @@ on one of those 67% of the time against 28% for a bar picked at random, a lift
 of 2.41 across 344 of them. Requiring three kinds instead of two was tried and
 was worse on every count: fewer bars, lower lift, and two songs left with no
 moments at all.
+
+## What the music is doing, which is not how loud it is
+
+`motion` answers the question a lighting desk actually asks: is this lifting,
+holding, falling away, or winding up. It carries `moving`, one of `rising`,
+`steady` or `falling` per bar, read off the loudness curve with two bars of
+hysteresis so it reports a settled state rather than every wobble; `spans`, the
+same thing as runs for a reader that wants "when does the lift start" instead
+of an array; and `winding`, which is the one that is not loudness at all.
+
+`winding` is the build. It measures the thing a riser actually does, which is
+get **thinner**, not louder: the sub is filtered out and noise climbs, and then
+the drop returns the bottom. It is `0.7 * (1 - floor) + 0.3 * noisy`, scaled
+across the song.
+
+The reason it exists is that energy is the wrong lane to watch and watching it
+is worse than watching nothing. Taking every sustained loudness jump across the
+library as drops -- found from the loudness curve itself, so our section labels
+are not the judge -- and asking where each lane sits in the eight bars before
+one, against every other eight-bar window in the same song:
+
+    floor inverted   70th percentile      noisy minus floor   67th
+    winding          68th                 air minus floor     63rd
+    energy           32nd
+
+Chance is the 50th. Energy is not merely uninformative before a drop, it is
+reliably *low* -- four bars before Don't Look Down's drop the energy curve reads
+0.24, 0.24, 0.20, while air climbs to 1.02 and floor collapses from 0.31 to
+0.06. A reader keying a build off `energy` will fade down into the drop.
+
+Combining more lanes did not pay. Adding the slope of noisy and air to the blend
+moved it from 62.2 to 61.9, so the slope terms were dropped and the lane is two
+terms. `gone only` -- floor inverted with nothing else -- scores 62.5, within
+noise of the blend that shipped.
+
+`motion.tells` is per song and is not the split-half number the other lanes
+carry. It is the percentile `winding` reaches in the eight bars before this
+song's structural drops, so 50 is chance and higher is better. It is above 65 on
+eighteen of twenty-eight songs and below 50 on seven: it is an EDM-shaped
+measure and it says so rather than pretending otherwise. A drop here is a jump
+at least half the size of the song's biggest, which is what `slams[].big` marks.
+
+`slams` and `ebbs` are where the loudness steps up and steps down, with `by` for
+how far and `big` for whether it is structural. `ebbs` is the one nothing else
+reported: a song loses energy as deliberately as it gains it, and the moment the
+drums walk out is a cue in its own right.
 
 ## Honesty fields
 

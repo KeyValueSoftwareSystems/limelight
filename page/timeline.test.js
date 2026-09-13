@@ -95,6 +95,51 @@ if (block) {
      mapped > 0, `${mapped} songs carry a tempo map`);
 }
 
+{
+  const body = src.match(/function motion\(\)\s*\{[\s\S]*?\n\}/);
+  ok("the page has a motion row to draw", !!body, body ? "found" : "motion() is gone");
+  if (body) {
+    let drew = 0, said = "", labels = [];
+    const dir = path.join(root, "scores");
+    const songs = fs.existsSync(dir)
+      ? fs.readdirSync(dir).filter(f => f.endsWith(".score")).sort() : [];
+    for (const f of songs) {
+      const score = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
+      if (!score.motion) continue;
+      const g = score.grid;
+      const ctx = new Proxy({}, { get: (t, k) => {
+        if (k === "fillRect") return () => drew++;
+        if (k === "fillText") return (x) => labels.push(x);
+        if (k === "measureText") return () => ({ width: 10 });
+        return () => undefined;
+      }, set: () => true });
+      const saysEl = { textContent: "", innerHTML: "" };
+      const atB = n => { const t = g.tempo || [{ from_beat: 0, at_s: g.first_beat_s, bpm: g.bpm }];
+        let k = 0; while (k + 1 < t.length && t[k + 1].from_beat <= n) k++;
+        return t[k].at_s + (n - t[k].from_beat) * (60 / t[k].bpm); };
+      const env = {
+        SCORE: score, FIRSTBAR: g.first_bar, BAR: 60 / g.bpm * g.beats_per_bar,
+        VIEW: { a: 0, b: score.song.length_s },
+        barTime: b => atB((b - g.first_bar) * g.beats_per_bar),
+        frac: t => t / score.song.length_s,
+        fit: () => [ctx, 1200],
+        $: id => (id === "motionsays" ? saysEl : { height: 0, style: {} }),
+      };
+      try {
+        new Function(...Object.keys(env), body[0] + "; return motion;")(...Object.values(env))();
+      } catch (e) {
+        ok(`${f.slice(0, -6)}: the motion row draws without throwing`, false, e.message);
+      }
+      said = saysEl.innerHTML || saysEl.textContent;
+    }
+    ok("the motion row draws a band for the bars of every song", drew > 0, `${drew} bars`);
+    ok("the motion row labels both what it shows",
+       labels.includes("DOING") && labels.includes("BUILD"), labels.join(","));
+    ok("the motion row says how much its build is worth on this song",
+       /percentile|no reliability/.test(said), said.replace(/<[^>]+>/g, "").slice(0, 70));
+  }
+}
+
 const bad = out.filter(r => !r[0]).length;
 for (const [p, n, d] of out) if (!p) console.log(`  FAIL  ${n}   ${d}`);
 console.log(bad ? `\n${bad} of ${out.length} FAILED` : `\nall ${out.length} checks pass`);

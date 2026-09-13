@@ -177,7 +177,7 @@ def agree(heard, held, turns, shifts=(), slack=3, most=0.60):
         kinds = {kind for kind, _, _ in group}
         loud = max(share for kind, _, share in group if kind == "vote") \
             if "vote" in kinds else 0.0
-        if len(kinds) < 2 and loud < most:
+        if len(kinds) < 2 and loud < most and "lane" not in kinds:
             continue
         firm = [i for kind, i, _ in group if kind == "tempo"] or \
                [i for kind, i, _ in group if kind == "lane"] or \
@@ -295,9 +295,11 @@ def shape(path, edges, lanes=None, least=4, shifts=()):
     cuts = [s[0] for s in spans] + [spans[-1][1]]
     mark = alike(harm, tex, cuts)
     out = [(cuts[i], cuts[i + 1], mark[i]) for i in range(len(cuts) - 1)]
+    stood = set(held)
     joined = []
     for a_, b_, c_ in out:
-        if joined and joined[-1][2] == c_ and joined[-1][1] == a_:
+        if (joined and joined[-1][2] == c_ and joined[-1][1] == a_
+                and a_ not in stood):
             joined[-1][1] = b_
         else:
             joined.append([a_, b_, c_])

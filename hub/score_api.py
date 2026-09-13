@@ -20,7 +20,7 @@ KNOWN = [
     "phrases", "layers", "chords", "key", "loudness", "feel",
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
     "tension", "releases", "melody", "signals", "made_by", "mood_axes",
-    "lyrics",
+    "lyrics", "tells", "motion",
 ]
 
 _STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
@@ -191,8 +191,18 @@ def format_v1(raw):
             out[band] = bars[band]
     # These three were carried by the JS formatter and not this one, which is
     # the same drift in the other direction.
+    said = {}
+    for name, v in (raw.get("curve_tells") or {}).items():
+        said["energy" if name == "intensity" else name] = v
+    if said:
+        out["tells"] = said
+
+    if isinstance(out.get("energy"), dict) and "energy" in (out.get("tells") or {}):
+        out["energy"]["tells"] = out["tells"]["energy"]
+
     for whole in ("groove", "ticks", "melody_phrases",
-                  "phrase_grid", "scales", "presence", "mood_axes", "lyrics"):
+                  "phrase_grid", "scales", "presence", "mood_axes", "lyrics",
+                  "motion"):
         if raw.get(whole) is not None:
             out[whole] = raw[whole]
 
