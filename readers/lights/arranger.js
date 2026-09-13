@@ -404,6 +404,19 @@ function plan(scoreIn, enumResult, seed) {
        which songs may have them. Boldness is scaled the same way and in the same
        direction, gently, so a quiet song leans ambient rather than hero. */
     const BOLD = { ambient: 0, accent: 0.5, hero: 1 };
+    /* Below a point, weighting is not enough. A hero strobe keeps about a fifth
+       of its score at an appetite of 0.27, and a fifth of a high score still
+       wins draws -- raga-of-revenge drew strobe_machine_gun twice through a
+       chorus the measurements call restrained. Under that threshold a look that
+       shouts is removed rather than made unlikely, whenever anything else is
+       available: "this song does not want strobes" is a statement, not a dice
+       roll. If nothing else fits, it still comes back rather than leaving the
+       section dark. */
+    const QUIET = 0.35;
+    if (want < QUIET) {
+      const calm = pool.filter(c => !shouts(V.seq(c.id)));
+      if (calm.length) pool = calm;
+    }
     const tempered = pool.map(c => {
       const q = V.seq(c.id);
       let k = 1;

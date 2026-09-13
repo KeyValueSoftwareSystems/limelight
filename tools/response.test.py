@@ -62,6 +62,19 @@ songs = [p["name"][:-len(".score")] for p in listing.get("paths", [])
          if p.get("name", "").endswith(".score")]
 ok("the hub has scores to compare against", bool(songs), f"{len(songs)}: {', '.join(songs)}")
 
+# A score the hub holds but the folder does not is worth saying out loud rather
+# than failing on: it means the hub is carrying something Amal has since dropped,
+# and the fix is to notice it, not to call the two copies inconsistent.
+have = set()
+for d in ("scores", os.path.join("hub", "files", "score")):
+    p = os.path.join(REPO, d)
+    if os.path.isdir(p):
+        have |= {f[:-len(".score")] for f in os.listdir(p) if f.endswith(".score")}
+stale = [s for s in songs if s not in have]
+if stale:
+    print(f"  note: on the hub but not in scores/: {', '.join(stale)}")
+songs = [s for s in songs if s in have]
+
 for song in songs:
     for case in CASES:
         body = {"score": song, **case}
