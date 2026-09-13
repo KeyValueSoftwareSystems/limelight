@@ -26,9 +26,37 @@ const { shape } = require(path.join(R, "readers/lights/fromscore.js"));
 
 const layout = rd("readers/lights/arc4-head.layout.json");
 const palette = rd("readers/lights/arc4-head.palette.json");
-const score = shape(rd("protocol/levels.score"));
+/* Scores are built or pulled, never committed. Use whichever of these is here;
+   the repo fixture is gone, so a hard path into protocol/ is a crash. */
+const SONG = process.env.SONG || "levels";
+const scorePath = [path.join(R, "scores", SONG + ".score"),
+                   path.join(R, "readers/lights/panel/scores", SONG + ".score")]
+  .find(p => fs.existsSync(p));
+if (!scorePath) {
+  console.log(`\nno score for ${SONG} on this machine.`);
+  console.log(`  pull one:  limelight pull ${SONG}.score   (or set SONG=<name>)\n`);
+  process.exit(2);
+}
+const score = shape(JSON.parse(fs.readFileSync(scorePath, "utf8")));
 
 const RIG = { rig: "arc4-head", fixtures: layout.fixtures };
+
+/* The real plan for the real song, rendered through the real renderer. The first
+   version of these probes built synthetic plans with hand-written parameters,
+   which measured what the renderer does when nobody asks it for anything --
+   not what the rig actually does. A capability can be present and unused, and
+   only the real plan tells the two apart. */
+const PLAN = plan(score, enumerate(layout, { palette }), 7);
+const CTX = { layout, library: Object.fromEntries(palette.map(g => [g.id, g])) };
+const parIds = ["par_1", "par_8", "par_15", "par_22"];
+const lvl = (bar, beat, id) => {
+  const f = frame({ bar, beat }, PLAN, CTX).fixtures.find(x => x.id === id);
+  return f ? f.intent.level : 0;
+};
+/* the longest par assignment, so "does a look develop" has room to be answered */
+const longest = (PLAN.assignments || []).filter(a => a.layer === "par")
+  .sort((a, b) => (b.to.bar - b.from.bar) - (a.to.bar - a.from.bar))[0];
+
 const items = [];
 const item = (name, fn, why) => {
   let ok, detail;
@@ -39,65 +67,41 @@ const item = (name, fn, why) => {
 
 /* ---- 1. does a look develop across a section? -------------------------- */
 item("a look develops across a section", () => {
-  const LIB = { g: { id: "g", kind: "individual",
-    gesture: { group: "all_pars", keys: [{ intent: { colour: [1, 0, 1] } }] } } };
-  const P = { grid: { beats_per_bar: 4 }, assignments: [{
-    from: { bar: 1, beat: 1 }, to: { bar: 17, beat: 1 }, seq_id: "g",
-    layer: "par", priority: 0, params: { floor: 0.1, peak: 1, mode: "hit", intensity: 1 } }] };
-  const C = { layout: RIG, library: LIB };
-  const lv = b => frame({ bar: b, beat: 1 }, P, C).fixtures.find(f => f.id === "par_1").intent.level;
-  const early = lv(2), late = lv(15);
+  if (!longest) return { ok: null, detail: "no par assignment in the plan" };
+  const a = longest, span = a.to.bar - a.from.bar;
+  const early = lvl(a.from.bar + 1, 2.5, "par_1");
+  const late = lvl(a.to.bar - 1, 2.5, "par_1");
   return { ok: Math.abs(early - late) > 0.02,
-           detail: `bar 2 -> ${early.toFixed(2)}, bar 15 -> ${late.toFixed(2)} in one 16-bar section` };
+           detail: `${a.seq_id} over ${span} bars: bar ${a.from.bar + 1} -> ${early.toFixed(2)}, `
+                 + `bar ${a.to.bar - 1} -> ${late.toFixed(2)}  (grow=${(a.params || {}).grow})` };
 }, "a build cannot grow if the same bar-in produces the same level bar-out");
 
 /* ---- 2. does an unlit lamp fade, or snap to the floor? ----------------- */
 item("an off lamp fades rather than snapping", () => {
-  const LIB = { alt: { id: "alt", kind: "individual", gesture: {
-    pattern: "inner_outer_alternation",
-    keys: [{ target: "inner", intent: { colour: [1, 0, 1] } },
-           { target: "outer", intent: { colour: [0, 1, 1] } }] } } };
-  const P = { grid: { beats_per_bar: 4 }, assignments: [{
-    from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "alt",
-    layer: "par", priority: 0, params: { floor: 0.08, peak: 0.35, mode: "breathe", intensity: 1 } }] };
-  const C = { layout: RIG, library: LIB };
-  /* Counting distinct levels is not enough: an alternating look breathes for
-     half the bar and then sits flat, which still yields plenty of distinct
-     values. What gives it away is the flat RUN, so measure the longest stretch
-     of identical output. */
+  if (!longest) return { ok: null, detail: "no par assignment in the plan" };
+  const b = longest.from.bar + 1;
   const vals = [];
-  for (let i = 0; i < 32; i++)
-    vals.push(frame({ bar: 1, beat: 1 + i * 0.125 }, P, C)
-      .fixtures.find(f => f.id === "par_1").intent.level.toFixed(3));
+  for (let i = 0; i < 32; i++) vals.push(lvl(b, 1 + i * 0.125, "par_1").toFixed(3));
   let run = 1, worst = 1;
-  for (let i = 1; i < vals.length; i++) {
-    run = vals[i] === vals[i - 1] ? run + 1 : 1;
-    if (run > worst) worst = run;
-  }
-  const share = worst / vals.length;
-  return { ok: share < 0.25,
+  for (let i = 1; i < vals.length; i++) { run = vals[i] === vals[i - 1] ? run + 1 : 1; if (run > worst) worst = run; }
+  return { ok: worst / vals.length < 0.25,
            detail: `held one level for ${worst} of ${vals.length} samples `
-                 + `(${Math.round(share * 100)}% of the bar motionless)` };
+                 + `(${Math.round(worst / vals.length * 100)}% of the bar motionless)` };
 }, "the smooth curve is computed and then discarded by a yes/no gate");
 
 /* ---- 2b. do the lamps ever differ from each other? --------------------- */
 item("lamps differ from each other across a bar", () => {
-  const LIB = { g: { id: "g", kind: "individual",
-    gesture: { group: "all_pars", keys: [{ intent: { colour: [1, 0, 1] } }] } } };
-  const P = { grid: { beats_per_bar: 4 }, assignments: [{
-    from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "g",
-    layer: "par", priority: 0, params: { floor: 0.1, peak: 1, mode: "hit", intensity: 1 } }] };
-  const C = { layout: RIG, library: LIB };
-  const ids = ["par_1", "par_8", "par_15", "par_22"];
+  if (!longest) return { ok: null, detail: "no par assignment in the plan" };
+  const b = longest.from.bar + 1;
   let together = 0, n = 0;
   for (let i = 0; i < 16; i++) {
-    const F = frame({ bar: 1, beat: 1 + i * 0.25 }, P, C);
-    const lv = ids.map(id => F.fixtures.find(f => f.id === id).intent.level.toFixed(3));
-    if (new Set(lv).size === 1) together++;
+    const v = parIds.map(id => lvl(b, 1 + i * 0.25, id).toFixed(3));
+    if (new Set(v).size === 1) together++;
     n++;
   }
   return { ok: together < n,
-           detail: `all four lamps identical at ${together} of ${n} instants in a bar` };
+           detail: `all four lamps identical at ${together} of ${n} instants in a bar `
+                 + `(spread=${(longest.params || {}).spread})` };
 }, "a ripple across the rig is the same curve reaching each lamp slightly later; "
  + "with one level copied to every lamp that cannot be expressed at all");
 
@@ -137,8 +141,8 @@ item("signals and melody are askable and windowed", () => {
 import json, sys
 sys.path.insert(0, ${JSON.stringify(path.join(R, "hub"))})
 import score_api as S
-raw = json.load(open(${JSON.stringify(path.join(R, "protocol/levels.score"))}))
-r = S.handle({"score":"levels","fields":["signals","melody"],
+raw = json.load(open(${JSON.stringify(scorePath)}))
+r = S.handle({"score":" + JSON.stringify(SONG) + ","fields":["signals","melody"],
               "window":{"from_bar":25,"bars":9}}, lambda n, p=None: raw)
 sig, mel = r.get("signals") or [], r.get("melody") or []
 bars = [x.get("bar") for x in mel]
@@ -153,7 +157,7 @@ print(json.dumps({"signals": len(sig), "melody": len(mel),
 
 /* ---- 6. melody timing resolution -------------------------------------- */
 item("melody notes carry their real timing", () => {
-  const raw = rd("protocol/levels.score");
+  const raw = JSON.parse(fs.readFileSync(scorePath, "utf8"));
   const m = raw.melody || [];
   const frac = m.filter(n => !Number.isInteger(n.beat)).length;
   const short = m.filter(n => (n.held_beats || 0) < 1).length;
