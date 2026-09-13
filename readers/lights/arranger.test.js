@@ -168,11 +168,16 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   const hook = p.assignments.find(a => a.type === "hook");
   ok("a hook spans its for_beats", hook && hook.from.bar === 6 && hook.to.bar === 8 && hook.params.strength === 0.7, JSON.stringify(hook));
   const light = plan({ ...MINI, moments: [{ bar: 12, beat: 1, is: "accent", what: "the band", weight: 0.4 }] }, EN, 42);
-  const lb = light.assignments.find(a => a.type === "white_blast");
+  /* Scope these to the moment under test. The fixture's band slams in at bar 4
+     -- drums and bass from 0.05 to 0.9 -- and a handover there is now a gesture
+     in its own right, so "the only blast in the plan" stopped being a safe way
+     to ask about the blast at bar 12. */
+  const lb = light.assignments.find(a => a.type === "white_blast" && a.from.bar === 12);
   ok("a light moment (weight .4) flashes but does not hold its breath",
      lb && lb.params.strength === 0.4 && !light.assignments.some(a => a.type === "blackout"));
   const noise = plan({ ...MINI, moments: [{ bar: 12, beat: 1, is: "change", what: "narrows", weight: 0.1 }] }, EN, 42);
-  ok("a negligible moment (weight .1) is ignored", !noise.assignments.some(a => a.type === "white_blast"));
+  ok("a negligible moment (weight .1) is ignored",
+     !noise.assignments.some(a => a.type === "white_blast" && a.from.bar === 12));
 }
 
 /* ---- texture lanes and harmony ride in the plan, per bar --------------------- */

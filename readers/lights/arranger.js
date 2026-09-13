@@ -77,6 +77,78 @@ function appetite(score) {
   return +a.toFixed(3);
 }
 
+/* ---- what has the listener's ear -------------------------------------------
+   A designer does not track every event; they track what the room is listening
+   to, and act when that changes hands. Attention follows SURPRISE rather than
+   loudness: a lane that is loud and steady fades into the background, and one
+   that jumps takes the ear even if it is quieter. So for each stem, measure how
+   far it has moved from what it has been doing over the last few bars, in units
+   of its own variability, and require it to be audible at all before it can
+   take the ear.
+
+   This disagrees with the signal list in useful places. At bar 7 of
+   raga-of-revenge the score flags the drums entering as the heaviest event, but
+   the voice jumps nearly twice as hard -- and the voice is what you notice.
+
+   Bar resolution, because that is what the score publishes. Within-bar
+   handovers are invisible until the stem lanes arrive per beat. */
+const EAR_LANES = ["drums", "bass", "vocals", "guitar", "piano", "other"];
+const EAR_LOOK = 4;          /* bars of recent history each lane is judged against */
+const EAR_FLOOR = 0.25;      /* below this a lane is not audible enough to matter */
+
+function attention(score) {
+  /* Either score shape: the pipeline writes bars.drums, the protocol response
+     writes stems.lanes.drums. Reading only one made the same song plan
+     differently depending on which shape it arrived in. */
+  const bars = (score && score.bars) || {};
+  const st = ((score && score.stems) || {}).lanes || {};
+  const laneOf = k => (Array.isArray(bars[k]) && bars[k].length) ? bars[k]
+                    : (Array.isArray(st[k]) && st[k].length) ? st[k] : null;
+  const lanes = EAR_LANES.filter(k => laneOf(k));
+  if (!lanes.length) return [];
+  const n = Math.max(...lanes.map(k => laneOf(k).length));
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    let who = null, best = -Infinity;
+    for (const k of lanes) {
+      const v = laneOf(k), here = v[i];
+      if (here == null || here < EAR_FLOOR) continue;
+      const past = v.slice(Math.max(0, i - EAR_LOOK), i).filter(x => x != null);
+      if (!past.length) continue;
+      const m = past.reduce((a, b) => a + b, 0) / past.length;
+      const sd = Math.sqrt(past.reduce((a, b) => a + (b - m) * (b - m), 0) / past.length);
+      const surprise = (here - m) / Math.max(sd, 0.06);
+      if (surprise > best) { best = surprise; who = k; }
+    }
+    out.push({ bar: i, lane: who, surprise: who ? +best.toFixed(2) : 0 });
+  }
+  return out;
+}
+
+/* Where the ear changes hands hard enough to be worth a gesture. Only a real
+   handover counts -- the same voice getting louder is not a new moment. */
+function handovers(score, least = 2.0) {
+  const a = attention(score);
+  const out = [];
+  let held = null;
+  for (const row of a) {
+    if (!row.lane) continue;
+    if (row.lane !== held && row.surprise >= least) {
+      /* Deliberately capped below the weight of a genuine flagged signal. A
+         handover is worth a gesture where nothing else marks the moment -- bar
+         55 of raga, which the score leaves blank -- but it must not displace an
+         entrance or a release the pipeline actually measured. */
+      out.push({ bar: row.bar, beat: 1, kind: "handover", is: "handover",
+                 what: row.lane, weight: +Math.min(0.44, 0.28 + row.surprise / 40).toFixed(3),
+                 surprise: row.surprise });
+      held = row.lane;
+    } else if (row.lane === held) {
+      /* holding: nothing to say */
+    }
+  }
+  return out;
+}
+
 /* Looks that shout, detected from what they DO rather than from their names:
    anything that claims the strobe channel, or carries a strobe on a key. */
 function shouts(seq) {
@@ -708,24 +780,74 @@ function plan(scoreIn, enumResult, seed) {
      full exactly for_beats later -- frame grows level, motion and whiteness along it */
   const has = (b, bt, k) => moments.some(m => m.bar === b && m.beat === bt && m.kind === k);
   for (const sg of signals) {
-    if (sg.kind === "hook" && typeof sg.again_of === "number" && !has(sg.bar, sg.beat, "hook")) moments.push(sg);
-    /* A hole is the best thing that can happen to a show, and this loop was
-       dropping them. raga-of-revenge stops dead for one bar at 22 -- drums from
-       0.54 to 0.14, bass 0.58 to 0.04 -- and then the drop lands at 23. The
-       score says so plainly: pause bass and pause drums, four beats, at bar 22.
-       Both live in `signals`, only hooks and rises were being promoted, so the
-       plan brightened straight through the silence.
-
-       A pause, an exit and a transition all mean "something left". Take them,
-       so the rig can stop when the music stops. */
-    if ((sg.kind === "pause" || sg.kind === "exit" || sg.kind === "transition")
-        && !has(sg.bar, sg.beat, sg.kind)) moments.push(sg);
+    /* Every kind of signal is a candidate, not just the three this loop used to
+       take. raga-of-revenge marks drums entering at bar 7, the harmony turning
+       six times, a rhythm change at 52 weighted 0.64, the band accenting at 60 --
+       around sixty signals in one song, and all but the hooks and rises went
+       straight in the bin. A gesture should be possible anywhere the music says
+       something happened. */
+    if (!has(sg.bar, sg.beat, sg.kind)) moments.push(sg);
     if (sg.kind === "rise" && (typeof sg.weight !== "number" || sg.weight >= 0.2)) {
       const B = atBeat({ bar: sg.bar, beat: sg.beat });
       const len = typeof sg.for_beats === "number" && sg.for_beats > 0 ? sg.for_beats : 2 * bpb;
       assignments.push({ from: fromBeat(B), to: fromBeat(B + len), context: ctxAt(B), layer: "modulate", priority: 4, type: "ramp",
         params: { weight: typeof sg.weight === "number" ? clamp01(sg.weight) : 0.5 }, occupies: [], section: sectionAt(B), signal: "rise", what: sg.what });
     }
+  }
+  /* The ear changing hands is a moment in its own right, and often the only
+     thing marking one -- bar 55 of raga-of-revenge is the biggest jump in the
+     song and the score flags nothing there at all. */
+  for (const h of handovers(score)) {
+    /* Only where nothing else already speaks for that bar or its neighbour --
+       the point is to cover the score's blind spots, not to double up on the
+       moments it already found. */
+    /* Same bar only. A neighbouring bar having a signal does not mean this one
+       is spoken for -- bar 55 of raga is the biggest jump in the song and was
+       being suppressed because bar 56 happens to carry a vocal pause. */
+    if (!moments.some(m => m.bar === h.bar)) moments.push(h);
+  }
+  /* ---- one thing per moment, and only the moments that earn one ------------
+     Taking every signal makes the opposite problem: bar 7 carries drums
+     entering, the harmony turning and the riff returning, all on one downbeat,
+     and three gestures at once is exactly the wall of light a show is supposed
+     to avoid. So collapse each position to its heaviest single event -- the
+     rig says one thing, about the most important thing that happened.
+
+     Then rank what is left and keep roughly one event every four bars. A song
+     does not have sixty moments in it; it has a dozen, and the rest is the
+     quiet that makes them read. Cutting by rank rather than by a fixed weight
+     means a busy song and a still one both end up with a show that breathes. */
+  {
+    const best = new Map();
+    for (const m of moments) {
+      const at = `${m.bar}:${m.beat}`;
+      const w = typeof m.weight === "number" ? m.weight : 0.5;
+      const prev = best.get(at);
+      if (!prev || w > (typeof prev.weight === "number" ? prev.weight : 0.5)) best.set(at, m);
+    }
+    const one = [...best.values()];
+    const span = Math.max(1, (sections.length ? sections[sections.length - 1].to.bar : 64));
+    const keep = Math.max(6, Math.min(24, Math.round(span / 4)));
+    one.sort((a, b) => ((b.weight || 0.5) - (a.weight || 0.5)));
+    const kept = one.filter(m => m.kind !== "handover").slice(0, keep);
+
+    /* Handovers are capped below real signals on purpose, which means ranking
+       alone would always drop them -- and the whole reason they exist is to
+       cover bars the score says nothing about. So they are chosen separately,
+       strongest surprise first, and only where the show would otherwise be
+       silent for a long stretch. Bar 55 of raga is the biggest jump in the song
+       with no signal on it; this is what puts a gesture there. */
+    const GAP = 4;
+    const picks = one.filter(m => m.kind === "handover")
+      .sort((a, b) => (b.surprise || 0) - (a.surprise || 0));
+    const taken = [];
+    for (const h of picks) {
+      if (taken.length >= 4) break;
+      const lonely = !kept.concat(taken).some(m => Math.abs(m.bar - h.bar) < GAP);
+      if (lonely) taken.push(h);
+    }
+    moments.length = 0;
+    moments.push(...kept, ...taken);
   }
   moments.sort((a, b) => (a.bar - b.bar) || (a.beat - b.beat));
   for (const m of moments) {
