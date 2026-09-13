@@ -808,6 +808,34 @@ should cue from `motion.slams` and `beats[].t`, and treat `sections[].from` as
 where the structure changes rather than where the hit is. Where they differ by
 a bar, they are both telling the truth about different questions.
 
+## Which languages the words can be trusted in
+
+Twenty-three of twenty-eight songs carry `lyrics`. They are not equally good and
+`lyrics.sure` -- how much two independent transcription passes agreed -- is what
+separates them. Read it before showing a word to anybody.
+
+English works: Don't Look Down 0.85, Language 0.75, Where Are U Now 0.72,
+Starlight and The Nights 0.61. Hindi works: Arz Kiya Hai reaches 0.44 with its
+vowel signs intact.
+
+Malayalam, Tamil and Telugu do not. Nebulakal reads 0.18, Mizhiyoram 0.05,
+Ponni Nadhi 0.12, Entharo Mahanu 0.10. The failure is not transcription quality
+but script: Qwen3-ASR has no Malayalam, Tamil or Telugu, so it forces the sound
+into Devanagari and calls it Hindi, or into Latin and calls it Chinese. Ponni
+Nadhi is Tamil written in Devanagari. Two passes over the same audio then
+disagree almost entirely, which is why `sure` collapses -- the number is doing
+its job.
+
+Below about 0.3 the words are not words. IndicWhisper or Sarvam is the fix and
+neither is wired in.
+
+One bug worth naming because it hid all of this. The forced aligner returns
+per-word text with every combining mark stripped, so Devanagari arrived as bare
+consonants -- "कनम वमनम करल यदध" where the transcript said "देखो नौकुंपों मानो राजमा".
+English has no combining marks and was never affected, which is why the pipeline
+looked fine. The words now take their spelling from the transcript and their
+timing from the aligner.
+
 ## Honesty fields
 
 `beats[].off_ms` is how far each beat sits from where the grid says it should

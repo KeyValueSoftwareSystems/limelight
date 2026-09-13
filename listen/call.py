@@ -5,6 +5,7 @@ ALIVE = 0.15
 CLIMB = 0.10
 WORTH = 1.3
 LANES = ("drums", "bass", "vocals", "other")
+MORE = ("guitar", "piano")
 
 
 def lift(x):
@@ -35,8 +36,12 @@ def facts(spans, bars):
     return out, lane
 
 
+def heard(bars):
+    return [lift(bars[k]) for k in LANES + MORE if bars.get(k)] + [lift(bars["intensity"])]
+
+
 def edge(bars, a, b, c):
-    rows = [lift(bars[k]) for k in LANES] + [lift(bars["intensity"])]
+    rows = heard(bars)
     if min(b - a, c - b) < 2:
         return None
     apart, noise = [], []
@@ -53,7 +58,7 @@ def edge(bars, a, b, c):
 
 
 def sudden(bars, a, b, c, near=2):
-    rows = [lift(bars[k]) for k in LANES] + [lift(bars["intensity"])]
+    rows = heard(bars)
     if min(b - a, c - b) < near + 1:
         return None
     local, whole = [], []

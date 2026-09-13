@@ -175,7 +175,7 @@ def arrivals(pull, g, gone, pickup):
     per = g["beats_per_bar"]
     for r in gone or []:
         i = int(r.get("beat_index", 0))
-        bar = i // per + 1
+        bar = i // per + 1 - pickup
         beat = i % per + 1
         out.append(say(bar, beat, "release", "tension",
                        float(r.get("drop", 0.5)),
@@ -491,7 +491,7 @@ def agreed_bars(found, least=KINDS, floor=TOGETHER):
     return out
 
 
-def pick(found, edges, bars, room=8, strong=0.70):
+def pick(found, edges, bars, room=6, strong=0.70):
     if not found:
         return []
     most = max(4, int(bars) // room)
