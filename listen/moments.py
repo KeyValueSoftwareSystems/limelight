@@ -174,11 +174,18 @@ def arrivals(pull, g, gone, pickup):
     out = []
     per = g["beats_per_bar"]
     for r in gone or []:
-        i = int(r.get("beat_index", 0))
-        bar = i // per + 1 - pickup
-        beat = i % per + 1
+        at = r.get("at_s")
+        if at is None:
+            i = int(r.get("beat_index", 0))
+            bar = i // per + 1 - pickup
+            beat = i % per + 1
+        else:
+            k = int(round(beat_at(g, float(at))))
+            first = g.get("first_bar", 1 - pickup)
+            bar = max(first, k // per + first)
+            beat = k % per + 1
         out.append(say(bar, beat, "release", "tension",
-                       float(r.get("drop", 0.5)),
+                       float(r.get("size", r.get("drop", 0.5))),
                        after_beats=int(r.get("lead_beats", 0))))
     return out
 

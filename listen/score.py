@@ -296,8 +296,7 @@ def read(path, slug):
     chord, chord_sure = chords_per_bar(found, held, g["first_beat_s"], bar_s, g["bars"], pickup)
     stereo = Path("synth/incoming") / f"{slug}.mp3"
     stereo = str(stereo) if stereo.exists() else path
-    edges_now = ([0.0] if pickup else []) + [
-        g["first_beat_s"] + i * bar_s for i in range(g["bars"] + 1)]
+    edges_now = cuts
     flux_now = np.load(CACHE / f"{slug}.flux.npy")
     score_bars = {
         "intensity": per_bar_loud(loud, times, g),

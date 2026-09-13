@@ -114,13 +114,20 @@ def presence(bars, first_bar, on=0.40, off=0.15):
 
 
 def seated(gone, g, pickup):
-    beat_s = 60.0 / g["bpm"]
+    from grid import beat_at
     per = g["beats_per_bar"]
+    first = g.get("first_bar", 1 - pickup)
     out = []
     for r in gone or []:
-        i = int(r.get("beat_index", 0))
         was = dict(r)
-        was["bar"] = i // per + 1 - pickup
-        was["beat"] = i % per + 1
+        at = r.get("at_s")
+        if at is None:
+            i = int(r.get("beat_index", 0))
+            was["bar"] = i // per + 1 - pickup
+            was["beat"] = i % per + 1
+        else:
+            k = int(round(beat_at(g, float(at))))
+            was["bar"] = max(first, k // per + first)
+            was["beat"] = k % per + 1
         out.append(was)
     return out
