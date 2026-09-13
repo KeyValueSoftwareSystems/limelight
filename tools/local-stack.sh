@@ -76,11 +76,15 @@ start_panel() {
     python3 -m venv .venv-panel >/dev/null 2>&1
     "$REPO/.venv-panel/bin/pip" install -q --disable-pip-version-check numpy soundfile
   fi
+  # LIVE=1 drives the real rig. Off by default so two people on one network
+  # cannot both claim universe 0 without meaning to.
+  NET_FLAG="--no-net"
+  [ "${LIVE:-0}" = "1" ] && NET_FLAG=""
   HUB_URL="$HUB" nohup "$PY" readers/lights/panel/server.py \
-      --no-net --host 0.0.0.0 --port "$PANEL_PORT" --gain 0.6 "$REPO/synth/out" \
+      $NET_FLAG --host 0.0.0.0 --port "$PANEL_PORT" --gain 0.6 "$REPO/synth/out" \
       >/tmp/limelight-panel.log 2>&1 &
   wait_for "http://127.0.0.1:$PANEL_PORT/" 20 || { say "panel did not start -- see /tmp/limelight-panel.log"; return 1; }
-  say "panel    http://127.0.0.1:$PANEL_PORT/   (--no-net: nothing is sent to the rig)"
+  say "panel    http://127.0.0.1:$PANEL_PORT/   ${NET_FLAG:+(--no-net: nothing is sent to the rig)}${NET_FLAG:-(LIVE: driving the rig)}"
 }
 
 case "${1:-start}" in
