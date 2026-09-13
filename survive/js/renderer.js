@@ -279,10 +279,22 @@
     mount = arena = playerEl = bossEl = hazardLayer = spotlightEl = clearEl = null;
   }
 
+  /* The boss is a fixed-size element at the arena centre, so its radius in game
+     units depends on how big the arena is drawn. Report it in game units so the
+     arena can keep the player out of it at any viewport size. */
+  function bossRadius(gameR) {
+    if (!bossEl) return 0;
+    var r = arenaRadius();
+    var bossPx = (bossEl.offsetWidth || 0) / 2;
+    if (r <= 0 || !bossPx) return 0;
+    return (bossPx / r) * gameR;
+  }
+
   window.Renderer = {
     init: init,
     resize: resize,
     arenaRadius: arenaRadius,
+    bossRadius: bossRadius,
     toArenaXY: toArenaXY,
     pulse: pulse,
     shake: shake,
