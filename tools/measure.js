@@ -155,6 +155,28 @@ function landsOn(show, score, marks) {
   return out;
 }
 
+/* Does repeated material get bigger each time it comes back?
+   A last chorus that looks like the first is a show that forgot it was building
+   toward something. This needs the whole song in view, which is why a preset is
+   not always a fragment. */
+function escalation(show, score, like) {
+  const parts = (score.parts || []).filter(p => p.like);
+  const groups = {};
+  for (const p of parts) (groups[p.like] = groups[p.like] || []).push(p);
+  const out = {};
+  for (const [key, list] of Object.entries(groups)) {
+    if (list.length < 2) continue;
+    if (like && key !== like) continue;
+    out[key] = list.map(p => {
+      const rows = hitsPerBar(show, score, p.from_bar, p.to_bar - p.from_bar + 1);
+      const bars = Math.max(1, rows.length);
+      return { from_bar: p.from_bar, role: p.role,
+               hits: +(rows.reduce((s, r) => s + r.changes, 0) / bars).toFixed(2) };
+    });
+  }
+  return out;
+}
+
 function judge(opts, print) {
   const score = JSON.parse(fs.readFileSync(opts.score, "utf8"));
   const show = bakeFrames(opts.score, opts.seed || 7);
@@ -215,6 +237,19 @@ function judge(opts, print) {
         + (ok ? "" : " — " + got.filter(x => x.jump < 25)
              .map(x => `bar ${x.bar} beat ${x.beat} (${x.what})`).join(", "))
       : "no moments above weight 0.6 in this window";
+  } else if (opts.check === "escalates") {
+    const groups = escalation(show, score, opts.like);
+    const lines = [], bad = [];
+    for (const [key, list] of Object.entries(groups)) {
+      lines.push(`${key}: ` + list.map(x => `bar ${x.from_bar} ${x.hits}`).join(" -> "));
+      for (let i = 1; i < list.length; i++)
+        if (list[i].hits <= list[i - 1].hits)
+          bad.push(`${key} at bar ${list[i].from_bar} is no bigger than bar ${list[i - 1].from_bar}`);
+    }
+    ok = lines.length > 0 && bad.length === 0;
+    verdict = lines.length
+      ? lines.join("; ") + (ok ? " — each return is bigger" : " — " + bad.join(", "))
+      : "no material returns more than once in this song";
   } else {
     verdict = "no automatic verdict for this effect yet";
   }
@@ -228,4 +263,4 @@ function measure(opts) {
   return r;
 }
 
-module.exports = { measure, judge, bakeFrames, changesPerBar, hitsPerBar, unison, motionless, landsOn };
+module.exports = { measure, judge, escalation, bakeFrames, changesPerBar, hitsPerBar, unison, motionless, landsOn };
