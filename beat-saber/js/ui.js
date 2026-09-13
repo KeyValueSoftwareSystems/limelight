@@ -55,6 +55,21 @@ async function initLibrary() {
     `Start the game with <code>python3 beat-saber/server.py</code> (it talks to the hub).</li>`);
 }
 
+// ---- Song display helpers -------------------------------------------------
+function hasArtist(s) { return s.artist && s.artist !== "—"; }
+function initialOf(name) {
+  const m = String(name || "").match(/[A-Za-z0-9]/);
+  return (m ? m[0] : "♫").toUpperCase();
+}
+// A stable hue per song so its art tile has a consistent identity colour.
+function hueOf(key) {
+  let h = 0; const s = String(key || "");
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h % 360;
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, (c) => (
+  { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
 // ---- Song list rendering --------------------------------------------------
 function renderSongs() {
   const songlist = document.getElementById("songlist");
@@ -63,13 +78,14 @@ function renderSongs() {
     const li = document.createElement("li");
     li.className = "song" + (i === selected ? " is-active" : "");
     li.dataset.index = i;
+    li.style.setProperty("--hue", hueOf(song.slug || song.name));
     li.innerHTML = `
-      <div class="song__art">${song.icon}</div>
+      <div class="song__art">${initialOf(song.name)}</div>
       <div class="song__info">
-        <div class="song__title">${song.name}</div>
-        <div class="song__artist">${song.artist}</div>
+        <div class="song__title">${esc(song.name)}</div>
+        ${hasArtist(song) ? `<div class="song__artist">${esc(song.artist)}</div>` : ""}
       </div>
-      <div class="song__bpm">BPM<b>${song.bpm || "—"}</b></div>`;
+      <div class="song__bpm"><span>BPM</span><b>${song.bpm || "—"}</b></div>`;
     li.addEventListener("click", () => selectSong(i));
     songlist.appendChild(li);
   });
@@ -80,9 +96,13 @@ function selectSong(i) {
   document.querySelectorAll(".song").forEach((el) =>
     el.classList.toggle("is-active", Number(el.dataset.index) === i));
   const s = songs[i];
-  document.getElementById("preview-cover").textContent = s.icon;
+  const cover = document.getElementById("preview-cover");
+  cover.textContent = initialOf(s.name);
+  cover.parentElement.style.setProperty("--hue", hueOf(s.slug || s.name));
   document.getElementById("preview-title").textContent = s.name;
-  document.getElementById("preview-artist").textContent = s.artist;
+  const artistEl = document.getElementById("preview-artist");
+  artistEl.textContent = hasArtist(s) ? s.artist : "";
+  artistEl.style.display = hasArtist(s) ? "" : "none";
   document.getElementById("preview-bpm").textContent = s.bpm || "—";
   document.getElementById("preview-length").textContent = s.length || "—";
   document.getElementById("preview-hiscore").textContent = s.hiscore || "—";

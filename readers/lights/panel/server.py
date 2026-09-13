@@ -197,6 +197,55 @@ class State:
         return True
 
     # ----- hub import -----------------------------------------------------
+    # ----- the effect library (readers/lights/play.js is the one render path) ----
+    PLAY_JS = os.path.join(REPO, "readers", "lights", "play.js")
+
+    def effects(self):
+        """The computed library, numbered as play.js numbers it (cached)."""
+        if getattr(self, "_effects", None) is None:
+            res = subprocess.run(["node", self.PLAY_JS, "--list", "--json"], capture_output=True, text=True, timeout=60)
+            if res.returncode != 0:
+                raise RuntimeError((res.stderr or res.stdout)[-300:])
+            self._effects = json.loads(res.stdout)
+        return self._effects
+
+    def play_effect(self, ident, bpm=128, bars=8, loops=4, knobs=None):
+        """Render one effect for a few bars and put its frames on the wire: straight
+        into the transport with NO audio and no song -- looped a few times, ending
+        dark. The transport is the sole Art-Net sender, so this is the wire path."""
+        ident = str(ident).strip()
+        if not ident:
+            raise ValueError("no effect")
+        os.makedirs(self.dirs[0], exist_ok=True)
+        cmd = ["node", self.PLAY_JS, ident, "--no-play", "--out", self.dirs[0],
+               "--bpm", str(int(bpm)), "--bars", str(int(bars))]
+        for key in ("subdiv", "motion", "mode", "level"):          # the character knobs, when the page sets them
+            val = (knobs or {}).get(key)
+            if val not in (None, "", "auto"):
+                cmd += ["--" + key, str(val)]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        if res.returncode != 0 or "rendered" not in res.stdout:
+            raise RuntimeError((res.stderr or res.stdout)[-300:] or "render failed")
+        with open(os.path.join(self.dirs[0], "preview.lights.json")) as fh:
+            doc = json.load(fh)
+        one = np.asarray(doc["frames"], dtype=np.uint8)
+        fps = int(doc["fps"])
+        frames = np.concatenate([np.tile(one, (max(1, int(loops)), 1)),
+                                 np.asarray([park_frame()], dtype=np.uint8)])   # end dark, head parked
+        row = next((e for e in self.effects() if e["id"] == ident or str(e["n"]) == ident), None)
+        name = "effect: " + (row["id"] if row else ident)
+        with self.lock:
+            self.transport.load(frames, fps, audio=None,
+                                gain_mask=rig.intensity_mask(frames.shape[1]), park=park_frame())
+            self.audio_error = None
+            self.track = "preview.lights.json"
+            self.version += 1
+            self.meta = {"name": self.track, "title": name, "source": None, "style": "effect",
+                         "fps": fps, "duration": len(frames) / fps, "tempo": doc.get("tempo"),
+                         "beats": [], "downbeats": [], "sections": [], "phases": [], "hub_version": None}
+        self.transport.play(0.0)
+        return {"effect": row or {"id": ident}, "log": f"{len(one)} frames x {loops}, no audio"}
+
     def hub_list(self):
         """Raw hub listing for .score files: name (no extension), store version, mtime.
         The store `version` counts edits, so it tells you which revision you'd pull."""
@@ -320,6 +369,35 @@ class State:
         return st
 
 
+
+BRIEFS = {"at": 0.0, "board": None}
+
+
+def briefs_board(max_age=90.0):
+    """`node tools/briefs.js --json`, cached briefly.
+
+    Each brief bakes a show, so the board costs real seconds. It is cached for
+    a minute and a half because nothing it measures can change without a rebake,
+    and a panel that polls would otherwise spend the machine on it.
+    """
+    now = time.monotonic()
+    if BRIEFS["board"] is not None and now - BRIEFS["at"] < max_age:
+        return {**BRIEFS["board"], "cached": True}
+    root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        "..", "..", ".."))
+    try:
+        out = subprocess.run(["node", os.path.join(root, "tools", "briefs.js"), "--json"],
+                             capture_output=True, text=True, timeout=300, cwd=root)
+        if out.returncode != 0:
+            return {"error": (out.stderr or out.stdout or "briefs failed").strip()[:400]}
+        board = json.loads(out.stdout)
+    except FileNotFoundError:
+        return {"error": "node is not on PATH, so the board cannot be built here"}
+    except Exception as e:  # noqa: BLE001
+        return {"error": str(e)[:400]}
+    BRIEFS["at"], BRIEFS["board"] = now, board
+    return {**board, "cached": False}
+
 def make_handler(state: State):
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
@@ -389,8 +467,19 @@ def make_handler(state: State):
             if path == "/api/status":
                 state.last_poll = time.monotonic()
                 return self._json(state.status())
+            if path == "/api/effects":
+                try:
+                    return self._json({"effects": state.effects()})
+                except Exception as e:  # noqa: BLE001
+                    return self._json({"error": str(e)}, 500)
             if path == "/api/meta":
                 return self._json(state.meta or {}, 200 if state.meta else 404)
+            if path == "/api/briefs":
+                # The board: what we asked the rig to do, and what it actually
+                # does, judged from baked frames. Runs here so it is one click
+                # rather than a trip to a terminal -- which is the whole reason
+                # the review loop was slow.
+                return self._json(briefs_board())
             if path.startswith("/audio/"):
                 audio = state.audio_path(path[len("/audio/"):])
                 if not audio:
@@ -426,6 +515,16 @@ def make_handler(state: State):
                 meta = state.load(body.get("name", ""), force=bool(body.get("force")))
                 return self._json(meta, 200) if meta else \
                     self._json({"error": "show not baked yet — import it from the hub first"}, 404)
+            if path == "/api/effect":
+                try:
+                    out = state.play_effect(body.get("id", ""), body.get("bpm", 128), body.get("bars", 8),
+                                            knobs={k: body.get(k) for k in ("subdiv", "motion", "mode", "level")})
+                    state.paused_by_watchdog = False
+                    state.last_poll = time.monotonic()
+                    out["status"] = state.status()
+                    return self._json(out)
+                except Exception as e:  # noqa: BLE001
+                    return self._json({"error": str(e)}, 500)
             if path == "/api/import":
                 meta = state.import_score(body.get("name", ""), int(body.get("seed", 3)))
                 return self._json(meta, 200) if meta else self._json({"error": state.import_log}, 500)

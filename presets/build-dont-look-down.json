@@ -1,0 +1,9 @@
+{
+  "name": "build-dont-look-down",
+  "song": "dont-look-down",
+  "tests": "Does the rig get busier through a build, rather than waiting and stepping at the drop?",
+  "find": "strongest-build",
+  "pad_bars": 2,
+  "effect": "speed-rises",
+  "note": "Chosen because its build is unambiguous. Levels has one too, but our own measurements say it is thin, so it is a poor thing to judge against."
+}

@@ -10,6 +10,7 @@
     --accent: #ffb454; --ok: #4fd18b; --warn: #ff6b6b; --play: #3aa0ff;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }   /* the tab switch hides by attribute; author display rules must not win */
   body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
   header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--line); background: var(--panel); }
   header h1 { font-size: 16px; margin: 0 12px 0 0; font-weight: 600; letter-spacing: .02em; }
@@ -57,6 +58,17 @@
   /* clean layout: a primary deck, a compact preview strip, and advanced tucked away */
   .deck { display: flex; gap: 14px; align-items: center; margin: 4px 0 12px; }
   .deck .time { flex: 0 0 auto; }
+  .briefs { display: flex; flex-direction: column; gap: 8px; }
+  .brief { display: grid; grid-template-columns: 72px 1fr; gap: 10px; align-items: start;
+           padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+  .brief .state { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; text-align: center;
+                  padding: 3px 0; border-radius: 4px; }
+  .brief .doing { background: #14532d; color: #bbf7d0; }
+  .brief .notyet { background: #3f1d1d; color: #fecaca; }
+  .brief .skip { background: var(--panel); color: var(--dim); }
+  .brief .what { font-size: 13px; }
+  .brief .detail { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dim);
+                   margin-top: 3px; word-break: break-word; }
   .preview { display: flex; gap: 18px; align-items: center; margin: 12px 0 4px; }
   .preview .swatch { width: 64px; height: 64px; border-radius: 10px; padding-bottom: 4px; }
   .preview .swatch span { font-size: 10px; }
@@ -67,6 +79,17 @@
   details.advanced[open] > summary::before { content: "\25BE  "; }
   details.advanced > .grid { padding: 0 16px 16px; margin-top: 0; }
   details.advanced .card { border: none; background: none; padding: 6px 0; }
+  /* tabs: Show (everything that was here) and Effects (the computed library, click to play) */
+  .tabs { display: flex; gap: 6px; margin: 0 0 14px; }
+  .tabs button { background: none; border: 1px solid transparent; color: var(--muted); padding: 6px 12px; border-radius: 8px; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; }
+  .tabs button.on { color: var(--text); border-color: var(--line); background: var(--panel); }
+  #fxlist h3 { margin: 14px 0 4px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .fxrow { display: flex; gap: 10px; align-items: center; padding: 7px 4px; border-bottom: 1px solid var(--line); }
+  .fxrow small { color: var(--muted); min-width: 32px; text-align: right; }
+  .fxrow .desc { color: var(--muted); font-size: 13px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fxrow .where { font-size: 11px; color: var(--muted); }
+  .fxrow.playing .name { color: var(--accent); }
+  .fxrow.playing button { border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -81,6 +104,11 @@
 </header>
 
 <main>
+  <nav class="tabs" id="tabs">
+    <button data-tab="show" class="on">Show</button>
+    <button data-tab="effects">Effects</button>
+  </nav>
+
   <!-- primary: one clear play control, the clock, and a safety -->
   <section class="deck">
     <button class="primary" id="play">▶ Play</button>
@@ -106,6 +134,21 @@
     <span class="meta">beat <span id="beatno">–</span> · bar <span id="barno">–</span> · frame <span id="frame">–</span></span>
   </div>
 
+  <!-- the effect library: every look and one-shot the enumeration computed for this
+       layout, numbered as play.js numbers them; click one and the panel renders it for
+       a few bars and plays it (POST /api/effect) -->
+  <section class="card" id="effects" hidden>
+    <h2>Effects <span class="meta" id="fxmsg"></span></h2>
+    <div class="row" style="margin-bottom:6px">
+      <label class="meta">bpm <input type="number" id="fxbpm" value="128" min="40" max="220" style="width:68px"></label>
+      <label class="meta">speed <select id="fxsubdiv"><option value="auto">the look's own</option><option value="0.5">½× (on the bar)</option><option value="1">1× (on the beat)</option><option value="2">2× (off-beats too)</option><option value="4">4× (sixteenths)</option></select></label>
+      <label class="meta">head <input type="range" id="fxmotion" min="0" max="1" step="0.05" value="0.85" style="width:90px"> <span id="fxmotionv">0.85</span></label>
+      <label class="meta">level <select id="fxmode"><option value="auto">auto</option><option value="hit">hits</option><option value="breathe">breathe</option><option value="hold">hold</option></select></label>
+      <label class="meta">bars <input type="number" id="fxbars" value="8" min="1" max="32" style="width:56px"></label>
+    </div>
+    <div id="fxlist"><span class="meta">loading the library…</span></div>
+  </section>
+
   <!-- sync: one control, coarse and fine together -->
   <section class="card">
     <h2>Sync — lights vs sound</h2>
@@ -121,6 +164,15 @@
     </div>
     <input type="range" id="offset" min="-3000" max="3000" step="5" value="0">
     <p class="hint">Positive moves the lights <b>later</b>; if they lag the music, go negative. The server is the player — closing this page pauses the show within 3 s. Keys: <kbd>K</kbd> play · <kbd>←</kbd>/<kbd>→</kbd> ±10 ms · <kbd>J</kbd>/<kbd>L</kbd> seek ±5 s.</p>
+  </section>
+
+  <!-- what we asked the rig to do, and what it actually does -->
+  <section class="card">
+    <h2>Briefs — what we asked for <span class="meta" id="briefscore"></span></h2>
+    <div id="briefs" class="briefs"><p class="hint">loading…</p></div>
+    <p class="hint">Judged from the baked frames, not from the code, so it says what the rig
+      does rather than what it was meant to do. Add one by dropping a file in <code>briefs/</code>.
+      <button id="briefsagain" style="margin-left:8px">re-check</button></p>
   </section>
 
   <!-- everything else, out of the way until needed -->
@@ -312,6 +364,64 @@
   const togglePlay = () => status && status.playing ? cmd('/api/pause') : cmd('/api/play');
   const seek = t => cmd('/api/seek', { position: Math.max(0, Math.min((meta ? meta.duration : 0) - 0.05, t)) });
   const nudge = d => cmd('/api/nudge', { delta: d });
+
+  // ---------------- tabs + the effect library ----------------
+  const showTab = tab => {
+    const fx = tab === 'effects';
+    for (const el of document.querySelector('main').children) {
+      if (el.id === 'tabs') continue;
+      const keepOnEffects = el.id === 'effects' || el.classList.contains('preview');   // the rig visualization stays
+      el.hidden = fx ? !keepOnEffects : el.id === 'effects';
+    }
+    for (const id of ['track', 'reload', 'audiopill', 'phasepill']) $(id).hidden = fx;      // no song, no timeline, no phases
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+    store('tab', tab);
+    if (tab === 'effects' && !effectsLoaded) loadEffects();
+  };
+  let effectsLoaded = false, effects = [];
+  const renderEffects = () => {
+    const list = $('fxlist'); list.innerHTML = '';
+    const kinds = [['individual', 'Looks'], ['compound', 'Compounds'], ['combination', 'Combinations'], ['oneshot', 'One-shots']];
+    for (const [kind, title] of kinds) {
+      const rows = effects.filter(e => e.kind === kind);
+      if (!rows.length) continue;
+      const h = document.createElement('h3'); h.textContent = title; list.appendChild(h);
+      for (const e of rows) {
+        const row = document.createElement('div'); row.className = 'fxrow'; row.dataset.id = e.id;
+        row.innerHTML = `<small>${e.n}.</small><span class="name">${e.id}</span><span class="desc" title="${(e.description || '').replace(/"/g, '&quot;')}">${e.description || ''}</span><span class="where">${e.where}</span>`;
+        const b = document.createElement('button'); b.textContent = '▶'; b.title = `play ${e.id}`;
+        b.addEventListener('click', () => playEffect(e));
+        row.appendChild(b);
+        list.appendChild(row);
+      }
+    }
+  };
+  const loadEffects = async () => {
+    try { effects = (await api('/api/effects')).effects || []; effectsLoaded = true; renderEffects(); }
+    catch (e) { $('fxlist').innerHTML = `<span class="meta">could not load the library: ${e.message}</span>`; }
+  };
+  let current = null;                      // the effect playing now: the knobs re-render it live
+  const playEffect = async e => {
+    current = e;
+    $('fxmsg').textContent = `rendering #${e.n} ${e.id}…`;
+    document.querySelectorAll('.fxrow').forEach(r => r.classList.toggle('playing', r.dataset.id === e.id));
+    try {
+      const r = await api('/api/effect', { id: e.id, bpm: +$('fxbpm').value || 128, bars: +$('fxbars').value || 8,
+        subdiv: $('fxsubdiv').value, motion: $('fxmotion').value, mode: $('fxmode').value });
+      if (r.status) applyStatus(r.status);
+      $('fxmsg').textContent = `playing #${e.n} ${e.id}`;
+    } catch (err) { $('fxmsg').textContent = `could not play ${e.id}: ${err.message}`; }
+  };
+  document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  // the knobs are live: a change re-renders the current effect with the new settings
+  const reapply = () => { if (current) playEffect(current); };
+  for (const id of ['fxbpm', 'fxbars', 'fxsubdiv', 'fxmode']) $(id).addEventListener('change', reapply);
+  let motionTimer = null;
+  $('fxmotion').addEventListener('input', () => {
+    $('fxmotionv').textContent = $('fxmotion').value;
+    clearTimeout(motionTimer); motionTimer = setTimeout(reapply, 300);
+  });
+  showTab(recall('tab', 'show'));
   document.querySelectorAll('[data-nudgesec]').forEach(b => b.addEventListener('click', () => nudge(+b.dataset.nudgesec)));
   let counting = false;
   async function countdown() {
@@ -510,6 +620,35 @@
     setInterval(animate, 40);
   })();
 })();
+
+/* ---- briefs: the board, refreshed on demand rather than polled ---------- */
+async function loadBriefs(){
+  const box = document.getElementById('briefs');
+  const score = document.getElementById('briefscore');
+  box.innerHTML = '<p class="hint">checking… this bakes each show, so give it a few seconds</p>';
+  try {
+    const r = await fetch('/api/briefs');
+    const d = await r.json();
+    if (d.error) { box.innerHTML = '<p class="hint">' + d.error + '</p>'; score.textContent = ''; return; }
+    const rows = d.briefs || [];
+    const doing = rows.filter(b => b.state === 'doing').length;
+    const judged = rows.filter(b => b.state === 'doing' || b.state === 'not-yet').length;
+    score.textContent = `${doing} of ${judged} landing` + (d.cached ? ' · cached' : '');
+    box.innerHTML = rows.map(b => {
+      const cls = b.state === 'doing' ? 'doing' : b.state === 'not-yet' ? 'notyet' : 'skip';
+      const label = b.state === 'doing' ? 'doing' : b.state === 'not-yet' ? 'not yet' : '—';
+      const where = `${b.song} ${b.from_bar}–${b.from_bar + (b.bars || 1) - 1}`;
+      const esc = t => String(t == null ? '' : t).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+      return `<div class="brief"><div class="state ${cls}">${label}</div>` +
+             `<div><div class="what"><b>${esc(b.effect)}</b> · ${esc(where)}</div>` +
+             `<div class="detail">${esc(b.detail)}</div>` +
+             (b.want ? `<div class="detail">want: ${esc(b.want)}</div>` : '') +
+             `</div></div>`;
+    }).join('') || '<p class="hint">no briefs yet — add one in briefs/</p>';
+  } catch (e) { box.innerHTML = '<p class="hint">' + e.message + '</p>'; }
+}
+document.getElementById('briefsagain').addEventListener('click', loadBriefs);
+loadBriefs();
 </script>
 </body>
 </html>
