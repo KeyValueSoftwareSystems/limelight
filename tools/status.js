@@ -80,6 +80,27 @@ item("an off lamp fades rather than snapping", () => {
                  + `(${Math.round(share * 100)}% of the bar motionless)` };
 }, "the smooth curve is computed and then discarded by a yes/no gate");
 
+/* ---- 2b. do the lamps ever differ from each other? --------------------- */
+item("lamps differ from each other across a bar", () => {
+  const LIB = { g: { id: "g", kind: "individual",
+    gesture: { group: "all_pars", keys: [{ intent: { colour: [1, 0, 1] } }] } } };
+  const P = { grid: { beats_per_bar: 4 }, assignments: [{
+    from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "g",
+    layer: "par", priority: 0, params: { floor: 0.1, peak: 1, mode: "hit", intensity: 1 } }] };
+  const C = { layout: RIG, library: LIB };
+  const ids = ["par_1", "par_8", "par_15", "par_22"];
+  let together = 0, n = 0;
+  for (let i = 0; i < 16; i++) {
+    const F = frame({ bar: 1, beat: 1 + i * 0.25 }, P, C);
+    const lv = ids.map(id => F.fixtures.find(f => f.id === id).intent.level.toFixed(3));
+    if (new Set(lv).size === 1) together++;
+    n++;
+  }
+  return { ok: together < n,
+           detail: `all four lamps identical at ${together} of ${n} instants in a bar` };
+}, "a ripple across the rig is the same curve reaching each lamp slightly later; "
+ + "with one level copied to every lamp that cannot be expressed at all");
+
 /* ---- 3. does a returning section get the look it had before? ----------- */
 item("a returning section reuses its earlier look", () => {
   const p = plan(score, enumerate(layout, { palette }), 7);
