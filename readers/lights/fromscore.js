@@ -10,7 +10,6 @@ function scoreFile() {
   const candidates = [
     path.join(__dirname, "..", "..", "scores", "levels.score"),        // built by the pipeline here
     path.join(__dirname, "panel", "scores", "levels.score"),           // imported by the panel
-    path.join(__dirname, "..", "..", "protocol", "levels.score"),      // the committed fixture
   ];
   return candidates.find(c => fs.existsSync(c)) || candidates[candidates.length - 1];
 }

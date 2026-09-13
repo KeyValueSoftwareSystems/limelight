@@ -11,6 +11,7 @@ export const KNOWN = [
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
   'tension', 'releases', 'melody', 'signals', 'made_by', 'mood_axes', 'lyrics', 'tells',
+  'recording',
   'motion',
 ];
 
@@ -240,6 +241,7 @@ export function format(raw) {
   if (raw.phrase_grid) out.phrase_grid = raw.phrase_grid;
   if (raw.scales) out.scales = raw.scales;
   if (raw.made_by) out.made_by = raw.made_by;
+  if (raw.recording) out.recording = raw.recording;
   if (raw.chord_changes) out.chord_changes = raw.chord_changes;
   if (raw.presence) out.presence = raw.presence;
   if (raw.motion) out.motion = raw.motion;
@@ -281,7 +283,7 @@ export function format(raw) {
 
   // ---- stems (per-bar, with normalisation stated) ----
   const stemLanes = {};
-  for (const s of STEM_FOUR) {
+  for (const s of STEM_NAMES) {
     if (Array.isArray(bars[s])) stemLanes[s] = bars[s];
   }
   if (Object.keys(stemLanes).length) {
@@ -340,6 +342,7 @@ export function format(raw) {
         rise:      p.rise,
         playing:   p.playing,
         has_break: p.has_break,
+        break: p.break,
       })),
     };
   }

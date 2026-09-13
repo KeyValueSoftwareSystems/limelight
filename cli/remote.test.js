@@ -10,7 +10,18 @@ const { openRemote, NotFound, Unreachable } = require("./remote.js");
 
 const REPO = path.join(__dirname, "..");
 const CLI = path.join(REPO, "limelight");
-const SCORE = fs.readFileSync(path.join(REPO, "protocol", "levels.score"));
+/* Bytes to push and pull, not a score to read. The committed fixture this used
+   to load went stale every time the pipeline changed -- it was refreshed three
+   times in one night -- so it is gone. A built score is used when one is there,
+   because exercising a realistic size is worth something, and a deterministic
+   blob stands in when there is not. */
+const SCORE = (() => {
+  const built = path.join(REPO, "scores", "levels.score");
+  if (fs.existsSync(built)) return fs.readFileSync(built);
+  const rows = [];
+  for (let i = 0; i < 400; i++) rows.push({ bar: i, beat: 1 + (i % 4), weight: (i % 97) / 97 });
+  return Buffer.from(JSON.stringify({ score: "stand-in", version: 0, beats: rows }));
+})();
 
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);

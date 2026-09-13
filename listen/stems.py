@@ -9,7 +9,9 @@ warnings.filterwarnings("ignore")
 
 CACHE = Path("work/heard")
 MODEL = "htdemucs"
+WIDER = "htdemucs_6s"
 NAMES = ("drums", "bass", "vocals", "other")
+MORE = ("guitar", "piano")
 RATE = 100
 
 
@@ -32,6 +34,41 @@ def envelopes(path, slug):
     out = {}
     for name in NAMES:
         x, sr = sf.read(str(made / f"{name}.wav"), dtype="float32")
+        if x.ndim > 1:
+            x = x.mean(axis=1)
+        hop = sr // RATE
+        n = len(x) // hop
+        out[name] = np.sqrt((x[: n * hop].reshape(n, hop) ** 2).mean(axis=1))
+
+    at.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(at, **out)
+    for f in made.glob("*.wav"):
+        f.unlink()
+    return out
+
+
+def wider(path, slug):
+    at = CACHE / f"{slug}.{WIDER}.npz"
+    if at.exists():
+        z = np.load(at)
+        return {k: z[k] for k in MORE if k in z.files}
+
+    work = Path("work/stems") / slug
+    work.mkdir(parents=True, exist_ok=True)
+    made = work / WIDER / Path(path).stem
+    if not (made / "guitar.wav").exists():
+        subprocess.run([sys.executable, "-m", "demucs", "-n", WIDER,
+                        "-o", str(work), path], check=True,
+                       stdout=sys.stderr)
+
+    import soundfile as sf
+
+    out = {}
+    for name in MORE:
+        f = made / f"{name}.wav"
+        if not f.exists():
+            continue
+        x, sr = sf.read(str(f), dtype="float32")
         if x.ndim > 1:
             x = x.mean(axis=1)
         hop = sr // RATE

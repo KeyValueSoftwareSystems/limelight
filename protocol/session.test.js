@@ -15,7 +15,7 @@ const fs_ = require("fs"), path_ = require("path");
    fresh clone, which is how four suites stopped running with nothing red. */
 function scoreFile() {
   const built = path_.join(__dirname, "..", "scores", "levels.score");
-  return fs_.existsSync(built) ? built : path_.join(__dirname, "levels.score");
+  return built;
 }
 const score = adapt(JSON.parse(fs_.readFileSync(scoreFile(), "utf8")));
 /* Every timing expectation comes from the score's own grid. Hardcoding 128.0

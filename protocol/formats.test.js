@@ -163,6 +163,22 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
        && (js2.releases || []).every(r => r.at_s !== undefined),
      `js ${JSON.stringify((js2.releases || []).slice(0, 2))}`);
 
+  ok("a dropout says which bars, how long and what kept playing, both sides",
+     JSON.stringify((js2.phrases || []).map(x => x.break))
+       === JSON.stringify((py2.phrases || []).map(x => x.break)),
+     `js ${JSON.stringify(((js2.phrases || [])[0] || {}).break)}`);
+
+  ok("every stem the score carries reaches the reader, both sides",
+     JSON.stringify(Object.keys((js2.stems || {}).lanes || {}))
+       === JSON.stringify(Object.keys((py2.stems || {}).lanes || {})),
+     `js ${Object.keys((js2.stems || {}).lanes || {})}`);
+
+  ok("a lane that has a reliability number is a lane the reader can fetch",
+     Object.keys(js2.tells || {})
+       .filter(n => ["drums","bass","vocals","other","guitar","piano"].includes(n))
+       .every(n => ((js2.stems || {}).lanes || {})[n] !== undefined),
+     `tells ${Object.keys(js2.tells || {})} vs stems ${Object.keys((js2.stems || {}).lanes || {})}`);
+
   ok("both formatters send the same motion track",
      JSON.stringify(js2.motion) === JSON.stringify(py2.motion),
      `js ${JSON.stringify(js2.motion || {}).slice(0, 50)}`);

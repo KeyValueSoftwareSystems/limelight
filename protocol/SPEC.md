@@ -441,13 +441,25 @@ ten of them, noisy on nine, width on eight, brightness on six -- on Levels
 brightness scores 0.92, which is below the point where it means anything.
 
 This was measured, not assumed, and it changed what we know about fields that
-had already shipped. floor and weight correlate at 0.90 across the library,
-close enough to the 0.93 that retired an earlier candidate for being one
-measurement wearing two names. Taking the part of floor that weight cannot
-predict and testing that on its own, it still carries section structure on
-eighteen of twenty-eight songs -- 3.62 on Wetwork, 2.56 on Don't Look Down -- so
-floor stays. On the other ten it is weight plus noise, and `tells` is how a
-reader finds out which song it is holding.
+had already shipped. floor and weight are the closest pair in the whole file:
+every per-bar lane was crossed with every other and they lead at mean |r| 0.86,
+reaching 0.9 or more on fourteen of twenty-eight songs and 0.99 at worst. That
+is past the 0.93 that retired an earlier candidate for being one measurement
+wearing two names. Taking the part of floor that weight cannot predict and
+testing that on its own, it still carries section structure on sixteen of
+twenty-eight songs -- 4.15 on The Feeling, 3.53 on The War Cry, 2.24 on Don't
+Look Down -- so floor stays. On the other twelve it is weight plus noise, and
+`tells` is how a reader finds out which song it is holding.
+
+That count was eighteen when it was first measured and is sixteen now; Levels at
+1.26 and Killers From The Northside at 1.23 slipped just under the 1.3 line when
+the per-bar lanes moved onto tempo-aware bar edges. The conclusion did not
+change but the number did, which is the reason to re-run a claim rather than
+quote it.
+
+The second-closest pair is drums against intensity at 0.66 mean, which is not
+redundancy: it is a loud song having loud drums. Nothing else in the file comes
+near.
 
 `sections[].mood` is where a section sits on a handful of opposed axes -- calm
 against aggressive, happy against sad, warm against cold -- read by MuQ-MuLan,
@@ -644,6 +656,157 @@ follow an arpeggio note by note instead of guessing a rate from `pace`.
 The rule this leaves behind: if the score knows when something happened, the
 protocol sends the second, not only the label. A label is a claim about a grid
 and a grid can be wrong; a second is what a speaker did.
+
+## A dropout is a bar, not a flag
+
+`phrases[].has_break` said a phrase contains "a bar out, then back" and nothing
+else -- not which bar, not how long, not what kept playing. Alnas had to recover
+them from energy dips with a threshold of his own, which is work the file should
+have done. The detector already knew: it finds the quietest bar in the phrase,
+checks it against 40% of the phrase median, and then threw the index away.
+
+`phrases[].break` now carries `from_bar`, `to_bar`, `bars`, `still` -- the stems
+that keep going -- plus `deepest` and `depth` for the stem that falls furthest
+and how far. `has_break` stays, so nothing that reads it breaks.
+
+The dip is one bar on the median phrase and runs to four at the longest, and
+just over a quarter of them are longer than a single bar, which is exactly the
+detail the flag could not express.
+
+Whether these are real was checked against the stems, which are different data
+from the loudness curve that finds them. In every one of 112 candidates at least
+one stem falls inside the dip relative to the same phrase outside it, on 73% of
+them by 80% or more, and the median deepest stem falls by 0.99 -- something goes
+essentially silent. There were no candidates where nothing dropped.
+
+That check was run twice. The first version divided each stem's level in the dip
+by its phrase median and reported stems sitting at 285 times their own median,
+which is a near-zero denominator rather than a finding, and it led to a false
+conclusion that a fifth of the flags were artefacts. Comparing the dip against
+the rest of the same phrase, with a floor under the denominator, is what the
+numbers above use.
+
+## Which file this score belongs to
+
+`recording` is a fingerprint of the audio: `fingerprint` as hex, `bits`, and
+`heard_seconds`. It is eight mel bands over thirty-two slices of the first two
+minutes, reduced to the sign of the change from one slice to the next, so it
+survives re-encoding. Alnas had no way to tell whether a score belonged to the
+file he was about to play it against and fell back on matching durations.
+
+A plain hash of the samples was tried first and is useless here. The same
+recording as wav, 192 kbps mp3 and 128 kbps mp3 gives three different digests,
+and since the pipeline reads wav while the hub stores mp3, it would have
+mismatched every single time. The coarse fingerprint gives **zero** bits of
+difference across those same three encodings.
+
+Across the library it separates cleanly: 378 pairs of different songs, the
+closest two -- The War Cry and Where Are U Now -- 84 bits apart out of 248, a
+median of 120, and nothing under 15%. Same recording is 0 and the nearest
+different song is 84, so any threshold between 1 and 83 decides it. Compare with
+a Hamming distance and treat anything over about 20 bits as a different
+recording.
+
+## Finding a thing that is not in any one lane
+
+Amal asked whether the protocol exposes the sustained high element behind
+Levels' last breakdown, between 3:04 and 3:11. It does, and the answer is worth
+recording because the obvious lane is the wrong one.
+
+That passage is bars 95 to 99. The element is in `stems.other` -- everything
+that is not drums, bass or voice -- which peaks at 1.00 at bar 97 while `held`
+reads 0.85, so it is sustained rather than struck. `energy` reads 0.165 there
+and sees nothing at all, the same blindness it has before a drop.
+
+`brightness` is the lane a reader would reach for and it is useless here: it
+sits pinned between 0.96 and 1.00 for the whole passage, and its `tells` on this
+song is 1.02, below the 1.3 floor. The score already says not to use it. `air`
+is falling through the window, from 1.08 at bar 93 to 0.60 at bar 99.
+
+So the recipe is `stems.other` high, `held` high, `energy` low, and the two
+lanes that name a register do not carry it. There is no single field for "a
+sustained thing high in the background", and until one is measured rather than
+assumed, this combination is the honest answer.
+
+## Six stems, because `other` was hiding a good lane
+
+Amal asked about a sustained high element behind Levels' last breakdown and the
+answer was that it lives in `other`. His response was the right one: `other` is
+not a thing, it is everything we could not name, and a bucket that holds the
+lead synth, the pads and the noise floor at once cannot be followed.
+
+`guitar` and `piano` are now their own lanes, taken from a second pass with
+`htdemucs_6s`. The four stems still come from `htdemucs` exactly as before, so
+`presence`, `groove`, `sections[].stems` and every structural signal built on
+them are untouched.
+
+Running only the six-stem model was tried first and is wrong. Its `other` is not
+the old `other` with two things removed -- the two models decompose differently
+throughout, and the six-stem `other` correlates with the four-stem one at 0.23.
+Rebuilding it as other plus guitar plus piano reaches only 0.69, with a mean
+error of 37% of the signal. Levels' pause moved from bar 51 to bar 26 and the
+lighting reader's own test caught it. So both models run: about 36 seconds a
+song on top of 12, all of it once and then cached.
+
+The gain was measured on seven songs before the pipeline was touched, as
+between-section spread over within-section spread, the same ratio `tells` uses:
+
+    song              guitar  piano   other (6)  other (4)
+    dont-look-down     5.86    2.12     3.14      1.78
+    levels             1.84    3.53     0.82      1.83
+    the-nights         2.00    0.79     4.05      2.45
+    holocene           2.10    1.28     2.39      2.77
+    nebulakal          1.62    1.30     1.85      1.82
+    raga-of-revenge    0.72    2.15     1.17      1.60
+    wetwork            0.87    0.85     1.47      2.71
+
+Guitar or piano clears the 1.3 floor on six of the seven. Don't Look Down's
+guitar at 5.86 is the strongest single lane measured anywhere in this project,
+against an `other` of 1.78 that was carrying it before. Raga Of Revenge, which
+had only six of fourteen lanes above the floor, gains a 2.15. On The Nights and
+Wetwork neither new lane clears it and `other` stays the better one, which is
+what `tells` is for.
+
+Separation costs about 36 seconds a song against 12, all of it the first time.
+
+BS-RoFormer was tried and is not here. It is the better model -- 12.9 dB SDR on
+vocals against htdemucs's 9.6 -- but it needs about thirty-four minutes a song
+on this machine's 3.6 GB GPU, which is sixteen hours for the library against
+seventeen minutes. It is the right thing to move to when there is a bigger card,
+not something to pretend is free.
+
+## A section start and a slam can be a bar apart, and neither is wrong
+
+Amal heard the drop in Nebulakal at 1:50. The section boundary says 1:50 and
+`motion.slams` says 1:52, and by the raw lanes the slam is right: at bar 58
+`floor` goes 0.17 to 0.95, the voice cuts to 0.00, the pad falls 0.95 to 0.21
+and `winding` collapses 0.70 to 0.28. One bar apart.
+
+That was checked across the library on every big slam with a section boundary
+within four bars. Of 72, forty-three land on exactly the same bar, twenty-two
+lead by one and seven lag by one. The bias is real -- three times more lead than
+lag, mean -0.18 bars, about a third of a second -- and three explanations for it
+were tested and all three failed.
+
+It is not phrase snapping: in the one-bar cases the section bar sits on the
+phrase grid 27% of the time, which is exactly how often the slam bar does.
+
+It is not the onset walk-back in `switches`, which moves entries backwards and
+would be the obvious culprit given the asymmetry. Turning it off moves the mean
+to -0.05 and makes the answer worse: exact hits fall from 43 to 39 and the lag
+side doubles from 10 to 20. It buys symmetry with scatter.
+
+And it cannot be sharpened with the bassline. A one-bar jump in `floor` is the
+crispest evidence a drop leaves, but only 45% of big slams have an unambiguous
+one nearby, and where there is one it disagrees with the slam bar on 52% of them
+and with the nearest section boundary on 65%. Three instruments, three answers.
+
+So the bar of disagreement is the resolution of the measurement, not an offset
+waiting to be removed. A slam's bar comes from a four-bar windowed mean on
+either side and cannot be sharper than that. A reader who needs the instant
+should cue from `motion.slams` and `beats[].t`, and treat `sections[].from` as
+where the structure changes rather than where the hit is. Where they differ by
+a bar, they are both telling the truth about different questions.
 
 ## Honesty fields
 

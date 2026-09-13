@@ -1,14 +1,33 @@
 import { describe, it, before, after } from 'node:test';
 import assert                         from 'node:assert/strict';
-import { readFileSync }               from 'node:fs';
+import { readFileSync, existsSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir }                    from 'node:os';
+import { join }                      from 'node:path';
 
 import { createFileStore }  from '../store/file.js';
 import { createHandler }    from '../handler.js';
 import { startHttp }        from '../transport/http.js';
 
-const SCORE_DIR = new URL('../../protocol', import.meta.url).pathname;
-const FIXTURE = JSON.parse(
-  readFileSync(new URL('../../protocol/levels.score', import.meta.url).pathname, 'utf8'));
+/* The score this serves used to be a file committed next to the spec, which
+   went stale every time the pipeline changed. The test now lays its own copy
+   down in a scratch directory, so nothing in the repository can rot. */
+const SCORE_DIR = mkdtempSync(join(tmpdir(), 'limelight-http-'));
+const FIXTURE = (() => {
+  const built = new URL('../../scores/levels.score', import.meta.url).pathname;
+  if (existsSync(built)) return JSON.parse(readFileSync(built, 'utf8'));
+  const bars = { intensity: [], drums: [], bass: [], vocals: [], other: [] };
+  for (let i = 0; i < 64; i++)
+    for (const k of Object.keys(bars)) bars[k].push(((i * 7) % 100) / 100);
+  return {
+    score: 'stand-in', version: 0,
+    song: { length_s: 120, bars: 64 },
+    grid: { bpm: 120, beats_per_bar: 4, first_beat_s: 0, first_bar: 1, bars: 64 },
+    bars,
+    parts: [{ from_bar: 1, to_bar: 32, role: 'verse', stems: {} },
+            { from_bar: 33, to_bar: 64, role: 'chorus', stems: {} }],
+  };
+})();
+writeFileSync(join(SCORE_DIR, 'levels.score'), JSON.stringify(FIXTURE));
 
 function post(port, body) {
   return fetch(`http://127.0.0.1:${port}/score`, {

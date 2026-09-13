@@ -5,7 +5,7 @@ const { respond } = require("./respond.js");
 const fs_ = require("fs"), path_ = require("path");
 function scoreFile() {
   const built = path_.join(__dirname, "..", "scores", "levels.score");
-  return fs_.existsSync(built) ? built : path_.join(__dirname, "levels.score");
+  return built;
 }
 const out = [];
 const ok = (n, c, d) => out.push([!!c, n, d || ""]);
