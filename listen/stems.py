@@ -102,6 +102,23 @@ def per_bar(env, first_s, bar_s, bars, edges=None):
     return out
 
 
+def per_beat(env, times):
+    seats = np.asarray(times, dtype=float)
+    if len(seats) < 2:
+        return {}
+    out = {}
+    for name, v in env.items():
+        rows = []
+        for i in range(len(seats) - 1):
+            a = max(0, int(seats[i] * RATE))
+            b = max(a + 1, int(seats[i + 1] * RATE))
+            part = v[a:b]
+            rows.append(float(part.mean()) if len(part) else 0.0)
+        top = max(rows) or 1.0
+        out[name] = [round(x / top, 4) for x in rows]
+    return out
+
+
 def present(v, floor=0.12):
     return bool(np.median(v) > floor)
 

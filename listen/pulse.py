@@ -2,6 +2,8 @@ import warnings
 
 import numpy as np
 
+from grid import at_beat, beat_at
+
 warnings.filterwarnings("ignore")
 
 RATE = 100
@@ -23,13 +25,6 @@ def weights(times, stems):
         hit += np.array([at(v / top, t, t + 0.09) for t in times])
     top = np.percentile(hit, 95) or 1.0
     return np.clip(hit / top, 0.0, 1.0)
-
-
-def confidence(times, grid):
-    period = 60.0 / grid["bpm"]
-    k = np.rint((times - grid["first_beat_s"]) / period)
-    off = np.abs(times - (grid["first_beat_s"] + k * period))
-    return np.clip(1.0 - off / (period * 0.25), 0.0, 1.0)
 
 
 def lift(bright, stems, times):
@@ -67,10 +62,10 @@ def releases(times, hits, pull, bpb, least=0.35):
         if jump < least or hits[i] < 0.70:
             continue
         found.append({"beat_index": int(i), "at_s": round(float(times[i]), 3),
-                      "size": round(float(min(1.0, jump)), 3)})
+                      "jump": round(float(min(1.0, jump)), 3)})
 
     out = []
-    for r in sorted(found, key=lambda x: -x["size"]):
+    for r in sorted(found, key=lambda x: -x["jump"]):
         if all(abs(r["beat_index"] - o["beat_index"]) >= bpb * 4 for o in out):
             out.append(r)
     return sorted(out, key=lambda x: x["beat_index"])
@@ -84,31 +79,23 @@ def pulse(path, grid, times, positions, onsets, stems, report=None):
     _, _, busy, bright = features_at(path, edges)
 
     hits = weights(times, stems)
-    sure = confidence(times, grid)
     pull = lift(bright, stems, times)
     gone = releases(times, hits, pull, grid["beats_per_bar"])
 
-    holds_from = grid.get("holds_from_s")
-    holds_to = grid.get("holds_to_s")
-
     beats = []
     for i, t in enumerate(times):
-        on = True
-        if holds_from is not None:
-            on = holds_from - 0.05 <= t <= holds_to + 0.05
-        step = (t - grid["first_beat_s"]) / period
-        off = (step - round(step)) * period * 1000.0
+        seat = at_beat(grid, int(round(beat_at(grid, float(t)))))
         beats.append({
             "t": round(float(t), 4),
             "downbeat": bool(positions[i] == 1),
             "weight": round(float(hits[i]), 3),
-            "sure": round(float(sure[i] if on else sure[i] * 0.5), 3),
-            "off_ms": round(float(off), 1),
+            "off_ms": round(float((t - seat) * 1000.0), 1),
         })
 
     if report is not None:
         report["beats_listed"] = len(beats)
         report["releases"] = len(gone)
-        report["mean_sure"] = round(float(sure.mean()), 3)
+        report["mean_off_ms"] = round(
+            float(np.mean([abs(b["off_ms"]) for b in beats])), 1)
 
     return beats, [round(float(x), 3) for x in pull], gone

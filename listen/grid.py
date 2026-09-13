@@ -279,8 +279,9 @@ def show(slug, g, r, second_opinion=None):
               f"{r['fitted_from_s']:.1f}s to {r['fitted_to_s']:.1f}s "
               f"(the rest is not on this grid)", file=w)
     if "beats_listed" in r:
-        print(f"    beats listed   {r['beats_listed']} with weight and confidence "
-              f"(mean {r['mean_sure']:.2f})   {r['releases']} releases", file=w)
+        print(f"    beats listed   {r['beats_listed']} with weight   "
+              f"mean {r['mean_off_ms']:.1f} ms off the grid   "
+              f"{r['releases']} releases", file=w)
     if "parts" in r:
         print(f"    parts          {r['parts']}   {', '.join(r['kinds'])}", file=w)
     if "events" in r:

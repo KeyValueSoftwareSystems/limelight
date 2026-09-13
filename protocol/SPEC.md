@@ -261,14 +261,29 @@ The score says which is which, per lane, in `scales`:
   "brightness": { "kind": "per_song", "against": "the song's loudest frame" } }
 ```
 
-Two lanes are named for something they do not measure, and the names are kept
-only because readers are built on them. `held` is documented as how much of the
-bar is ringing rather than struck; if that were so it would fall as onsets get
-denser, and it rises instead (r = +0.16, negative on only 8 of 28 songs). It is
-a duty cycle. `noisy` is documented as the unpitched share and fails both
-referents for that -- HPSS percussive r = +0.34, chroma entropy r = +0.16 -- and
-restates `air` at r = +0.67. Use them as textures with those names as labels,
-not as claims.
+`held` is now `sustained`, and readers were updated with it. It was documented
+as how much of the bar is ringing rather than struck; if that were so it would
+fall as onsets get denser, and it rises instead (r = +0.16 with onset density,
+negative on only 8 of 28 songs). What it computes is the share of the bar spent
+at or above half that bar's own peak. High means the sound holds; low means it
+hits and stops.
+
+`noisy` is `librosa.spectral_flatness`, which is the standard noise-versus-tone
+measure, and the name is right. Two caveats. It is not a stem-level claim about
+unpitched *instruments*: an audit tested it against HPSS percussive share and
+chroma entropy and read the weak agreements there as failures, but those measure
+transient-versus-sustained and pitch-class spread, which are different
+questions -- the +0.34 against HPSS percussive is agreement in the right
+direction. The real caveat is redundancy: it restates `air` at r = +0.67,
+because both are weighted toward the top of the spectrum.
+
+`releases[].size` is now `releases[].jump`, because size read as loudness and it
+is not one. It is the beat's weight minus the preceding baseline. A release beat
+is usually already at full weight -- 39% of them clip at 1.000 -- so in practice
+the number is driven by how quiet it got first: it correlates -0.89 with the
+baseline and -0.02 with the hit itself. It is the size of the gap the drop
+arrives into, which for a drop is the thing that matters, but it is a difference,
+not a level.
 
 Absolute: `width`, `pump`, `held`, `noisy`, `chord_sure`. Per-song: `intensity`,
 `weight`, `floor`, `brightness`, `air` (against the 98th percentile), `pace`

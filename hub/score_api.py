@@ -14,8 +14,8 @@ import math
 KNOWN = [
     "song", "grid", "beats", "downbeats", "sections", "energy",
     "brightness", "width", "air", "pump", "pace", "weight", "floor",
-    "noisy", "held",
-    "groove", "ticks", "melody_phrases", "phrase_grid", "scales",
+    "noisy", "sustained",
+    "groove", "ticks", "per_beat", "melody_phrases", "phrase_grid", "scales",
     "presence", "moments",
     "phrases", "layers", "chords", "key", "loudness", "feel",
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
@@ -26,7 +26,7 @@ KNOWN = [
 _STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
 _STEM_FOUR  = ["drums", "bass", "vocals", "other"]
 _CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace",
-                "weight", "floor", "noisy", "held"]
+                "weight", "floor", "noisy", "sustained"]
 # The personality rides with the score when present, asked for or not: it is how
 # the artist wants this song to look, and a consumer that forgot to ask should
 # still get it. `profile` was the old name and is still sent alongside, so a
@@ -194,7 +194,7 @@ def format_v1(raw):
         out["brightness"] = bars["brightness"]
     # air and brightness are both the top of the spectrum; nothing measured the
     # bottom, which is most of what a drop feels like.
-    for band in ("weight", "floor", "noisy", "held"):
+    for band in ("weight", "floor", "noisy", "sustained"):
         if isinstance(bars.get(band), list):
             out[band] = bars[band]
     # These three were carried by the JS formatter and not this one, which is
@@ -208,7 +208,7 @@ def format_v1(raw):
     if isinstance(out.get("energy"), dict) and "energy" in (out.get("tells") or {}):
         out["energy"]["tells"] = out["tells"]["energy"]
 
-    for whole in ("groove", "ticks", "melody_phrases",
+    for whole in ("groove", "ticks", "per_beat", "melody_phrases",
                   "phrase_grid", "scales", "presence", "lyrics",
                   "motion", "recording"):
         if raw.get(whole) is not None:
@@ -292,21 +292,18 @@ def format_v1(raw):
             ],
         }
 
-    # layers.presence (from parts[].stems)
-    if "presence" not in out["layers"] and isinstance(raw.get("parts"), list):
-        pres_spans = []
-        for part in raw["parts"]:
-            stems = part.get("stems")
-            if not stems:
-                continue
-            for stem, info in stems.items():
-                state = info if isinstance(info, str) else (info.get("is") if isinstance(info, dict) else None)
-                if state and state != "none":
-                    pres_spans.append({
-                        "from": {"bar": part["from_bar"], "beat": 1},
-                        "to": {"bar": part["to_bar"] + 1, "beat": 1},
-                        "stem": stem, "state": state,
-                    })
+    # layers.presence -- from the per-bar `presence` spans, never from
+    # parts[].stems. Both described the same fact and disagreed on 15.5% of
+    # vocal bars, because a section's `is` is a bucket of where that stem sits
+    # across the whole section and `presence` is measured bar by bar.
+    if "presence" not in out["layers"] and isinstance(raw.get("presence"), dict):
+        pres_spans = [
+            {"from": {"bar": sp["from_bar"], "beat": 1},
+             "to": {"bar": sp["to_bar"] + 1, "beat": 1},
+             "stem": stem, "state": sp["is"]}
+            for stem, spans in raw["presence"].items()
+            for sp in spans if sp.get("is") != "out"
+        ]
         if pres_spans:
             out["layers"]["presence"] = {"kind": "sparse", "spans": pres_spans}
 
@@ -391,7 +388,7 @@ def format_v1(raw):
             else:
                 i = (r["at_s"] - first_beat_s) / beat_sec
                 at = {"bar": first_bar + int(i // bpb), "beat": int(i % bpb) + 1}
-            one = {"at": at, "size": r.get("size")}
+            one = {"at": at, "jump": r.get("jump", r.get("size"))}
             if r.get("at_s") is not None:
                 one["at_s"] = r["at_s"]
             out["releases"].append(one)

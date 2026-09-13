@@ -111,6 +111,7 @@ and get back `{ curves: { brightness: { per: "bar", from_bar: 0, values: [...] }
 | `brightness` | how bright the bar sounds | maps to colour temperature, or to how sharp a visual reads |
 | `width` | how wide the stereo image is | a narrow mono verse and a wide chorus are a real, visible difference |
 | `air` | high-frequency openness | the difference between a filtered build and an open drop, which energy alone misses |
+| `sustained` | share of the bar spent at or above half its own peak | high means the sound holds through the bar, low means it hits and stops. Called `held` until this round, and documented as "ringing rather than struck", which is the opposite of what it does |
 | `pump` | how far the summed envelope falls and recovers **within each beat** | the four-to-the-floor breathing that makes dance music feel like dance music. Until this round it was not on the beat at all: it reshaped the envelope from sample zero at the song's average bpm, so the blocks drifted against the music and the mean phase error was a quarter of a beat — exactly what random phase gives. It now indexes off the tracked beat times |
 | `pace` | how many events per bar | busy-ness, independent of loudness: a quiet fast passage is not a quiet slow one |
 

@@ -6,8 +6,8 @@
  */
 
 export const KNOWN = [
-  'song', 'grid', 'beats', 'downbeats', 'sections', 'energy', 'ticks', 'groove', 'melody_phrases',
-  'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor', 'noisy', 'held',
+  'song', 'grid', 'beats', 'downbeats', 'sections', 'energy', 'ticks', 'per_beat', 'groove', 'melody_phrases',
+  'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor', 'noisy', 'sustained',
   'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
   'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
   'tension', 'lift', 'releases', 'melody', 'signals', 'made_by', 'lyrics', 'tells',
@@ -18,7 +18,7 @@ export const KNOWN = [
 const STEM_NAMES = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
 const STEM_FOUR  = ['drums', 'bass', 'vocals', 'other'];
 const CURVE_NAMES = ['energy', 'brightness', 'width', 'air', 'pump', 'pace',
-                     'weight', 'floor', 'noisy', 'held'];
+                     'weight', 'floor', 'noisy', 'sustained'];
 
 /**
  * @param {object} raw  Parsed score file from disk.
@@ -197,6 +197,7 @@ export function format(raw) {
   /* The fast lane. Everything else in this file is per bar or per section, and
      a light that pulses on the beat cannot be driven from either. */
   if (raw.ticks) out.ticks = raw.ticks;
+  if (raw.per_beat) out.per_beat = raw.per_beat;
   /* Where the hits fall inside the bar, per stem. pace counts events and
      throws the pattern away, and the pattern is what a light follows. */
   if (raw.groove) out.groove = raw.groove;
@@ -255,7 +256,7 @@ export function format(raw) {
   if (Array.isArray(bars.weight)) out.weight = bars.weight;
   if (Array.isArray(bars.floor)) out.floor = bars.floor;
   if (Array.isArray(bars.noisy)) out.noisy = bars.noisy;
-  if (Array.isArray(bars.held)) out.held = bars.held;
+  if (Array.isArray(bars.sustained)) out.sustained = bars.sustained;
 
   // ---- curves (selectable per-bar arrays with metadata) ----
   const curveEntries = {};
@@ -345,21 +346,21 @@ export function format(raw) {
     };
   }
 
-  // layers.presence (from parts[].stems)
-  if (!out.layers.presence && Array.isArray(raw.parts)) {
+  /* layers.presence -- from the per-bar `presence` spans, never from
+     parts[].stems. Both described the same fact and disagreed on 15.5% of
+     vocal bars, because a section's `is` buckets where that stem sits across
+     the whole section and `presence` is measured bar by bar. */
+  if (!out.layers.presence && raw.presence && typeof raw.presence === 'object') {
     const presSpans = [];
-    for (const part of raw.parts) {
-      if (!part.stems) continue;
-      for (const [stem, info] of Object.entries(part.stems)) {
-        const state = typeof info === 'string' ? info : info?.is;
-        if (state && state !== 'none') {
-          presSpans.push({
-            from:  { bar: part.from_bar, beat: 1 },
-            to:    { bar: part.to_bar + 1, beat: 1 },
-            stem,
-            state,
-          });
-        }
+    for (const [stem, spans] of Object.entries(raw.presence)) {
+      for (const sp of spans || []) {
+        if (sp.is === 'out') continue;
+        presSpans.push({
+          from:  { bar: sp.from_bar, beat: 1 },
+          to:    { bar: sp.to_bar + 1, beat: 1 },
+          stem,
+          state: sp.is,
+        });
       }
     }
     if (presSpans.length) {
@@ -452,7 +453,7 @@ export function format(raw) {
       const at = has ? { bar: r.bar, beat: r.beat }
                      : { bar: firstBar + Math.floor(i / bpb),
                          beat: Math.floor(i % bpb) + 1 };
-      const one = { at, size: r.size };
+      const one = { at, jump: r.jump ?? r.size };
       if (r.at_s !== undefined) one.at_s = r.at_s;
       return one;
     });
