@@ -106,6 +106,11 @@ function attention(score) {
                     : (Array.isArray(st[k]) && st[k].length) ? st[k] : null;
   const lanes = EAR_LANES.filter(k => laneOf(k));
   if (!lanes.length) return [];
+  /* the lanes are anchored at the score's first bar, which is 0 on nine of the
+     seventeen songs and 1 on the rest. Reading the array index as a bar number
+     put every handover a bar early on half the catalogue. */
+  const from = (score.stems && typeof score.stems.from_bar === "number")
+    ? score.stems.from_bar : Mu.firstBarOf(score);
   const n = Math.max(...lanes.map(k => laneOf(k).length));
   const out = [];
   for (let i = 0; i < n; i++) {
@@ -120,7 +125,7 @@ function attention(score) {
       const surprise = (here - m) / Math.max(sd, 0.06);
       if (surprise > best) { best = surprise; who = k; }
     }
-    out.push({ bar: i, lane: who, surprise: who ? +best.toFixed(2) : 0 });
+    out.push({ bar: from + i, lane: who, surprise: who ? +best.toFixed(2) : 0 });
   }
   return out;
 }
@@ -148,6 +153,17 @@ function handovers(score, least = 2.0) {
   }
   return out;
 }
+
+/* ---- what colour a hit is ---------------------------------------------------
+   A hit takes its colour from the music, never from a mood board. Two sources,
+   both stated by the score: the song's KEY, which puts the whole show somewhere
+   on the circle of fifths, and the LANE that has just taken the ear, so a
+   handover to the bass and a handover to the guitar are not the same picture.
+   The hues are spread around the wheel and FIXED, so an instrument is the same
+   colour every time it speaks -- which is what lets an audience read them as
+   voices rather than as decoration. These are musical facts (a hue on the
+   wheel), not rig settings; frame.js decides what the hue is in light. */
+const LANE_HUE = { drums: 0.00, guitar: 0.95, vocals: 0.13, piano: 0.50, bass: 0.66, other: 0.80 };
 
 /* Looks that shout, detected from what they DO rather than from their names:
    anything that claims the strobe channel, or carries a strobe on a key. */
@@ -747,17 +763,50 @@ function plan(scoreIn, enumResult, seed) {
      older cache, an unknown kind) the fixed effects below still fire. */
   const FX_PRIORITY = { white_blast: 9, blackout: 9, pause: 8, hook: 7, accent_strobe: 5, modulate: 4, whiten: 3 };
   const riffMemory = {};   /* a returning riff is lit the way it was lit the first time */
-  const drawOneShots = (m, w, B, len) => {
+  /* a gesture states its colour as an INTENT -- white, the song's key, the voice
+     that just took the ear -- and the plan resolves it to a hue here, where the
+     score is. The intent travels with the show file so a venue can see why. */
+  const toneHue = (tone, m) => {
+    const key = typeof keyHue === "number" ? keyHue : null;
+    if (tone === "lane") { const h = LANE_HUE[m && m.what]; return h === undefined ? key : h; }
+    if (tone === "key") return key;
+    return null;
+  };
+  let lastShot = null;     /* what the previous moment said, so this one says something else */
+  const drawOneShots = (m, w, B, len, isPeak) => {
     const bar = facts && facts.vectors[m.bar - facts.from_bar];
     const vector = { ...(bar || { form: ctxAt(B) }), moment: [m.kind, weightBand(w)] };
     if (!vector.form) return [];
-    const shots = V.candidates(vector).filter(c => { const q = V.seq(c.id); return q && q.kind === "oneshot" && q.gesture && q.gesture.fx; });
+    let shots = V.candidates(vector).filter(c => { const q = V.seq(c.id); return q && q.kind === "oneshot" && q.gesture && q.gesture.fx; });
+    /* the budget. A `hero` one-shot takes the whole rig in white, and a song has
+       two or three moments that deserve that -- so only a PEAK may draw one.
+       Without this every moment reaches for the biggest thing in the box and the
+       show gets louder without ever getting shapelier. */
+    if (!isPeak) {
+      const quiet = shots.filter(c => (V.seq(c.id).boldness || "accent") !== "hero");
+      if (quiet.length) shots = quiet;
+    } else {
+      /* and a peak TAKES the biggest thing in the box -- that is what makes it a
+         peak. A budget that only ever subtracts leaves a show with no full stop
+         in it at all, which is the same complaint from the other side. */
+      const bold = shots.filter(c => (V.seq(c.id).boldness || "accent") === "hero");
+      if (bold.length) shots = bold;
+    }
     const out = [];
     const riffKey = m.kind === "hook" && m.what ? "hook:" + m.what : null;
     const remembered = riffKey && riffMemory[riffKey];
     const chosen = {};
     for (const slot of ["before", "on", "span"]) {
-      const pool = shots.filter(c => (V.seq(c.id).gesture.slot || "on") === slot);
+      let pool = shots.filter(c => (V.seq(c.id).gesture.slot || "on") === slot);
+      /* and no two moments in a row say the same thing. This is the single most
+         visible cause of a show reading as monotonous: seventeen draws from a
+         pool the top candidate dominates come out as seventeen identical
+         flashes, however wide the vocabulary is. A remembered riff is exempt --
+         a returning hook is SUPPOSED to look like itself. */
+      if (pool.length > 1 && lastShot && !isPeak && !(remembered && remembered[slot])) {
+        const fresh = pool.filter(c => c.id !== lastShot);
+        if (fresh.length) pool = fresh;
+      }
       const pick = (remembered && remembered[slot] && pool.some(c => c.id === remembered[slot])) ? { id: remembered[slot] } : pickWeighted(pool, rng);
       if (!pick) continue;
       const q = V.seq(pick.id), g = q.gesture;
@@ -767,7 +816,9 @@ function plan(scoreIn, enumResult, seed) {
       if (g.fx === "pause") params.still = m.still || [];
       if (g.fx === "whiten" && params.amount == null) params.amount = +clamp01(0.2 + 0.5 * w).toFixed(3);
       if (g.fx === "accent_strobe") params.strength = +clamp01(0.4 + 0.6 * w).toFixed(3);
+      if (params.tone && params.hue == null) { const h = toneHue(params.tone, m); if (h !== null) params.hue = h; }
       chosen[slot] = pick.id;
+      if (slot !== "before") lastShot = pick.id;
       out.push({ from: fromBeat(start), to: fromBeat(start + dur), context: ctxAt(B), layer: g.fx === "modulate" ? "modulate" : "fx",
         priority: FX_PRIORITY[g.fx] || 6, type: g.fx, seq_id: pick.id, params, occupies: q.occupies || [],
         section: sectionAt(B), moment: m.kind, what: m.what, facts: vector });
@@ -817,12 +868,38 @@ function plan(scoreIn, enumResult, seed) {
      does not have sixty moments in it; it has a dozen, and the rest is the
      quiet that makes them read. Cutting by rank rather than by a fixed weight
      means a busy song and a still one both end up with a show that breathes. */
+  const peaks = new Set();
   {
+    /* A PAUSE and a hit on the same downbeat are not two descriptions competing
+       for one bar; they are the two halves of one event -- the band stopped AND
+       the voice came in. Where the band actually fell, the stop is the bigger
+       half, whatever the two weights say. Bar 22 of raga-of-revenge is the hole
+       before the drop (drums 0.54 -> 0.14, bass 0.58 -> 0.04, strings 0.87 ->
+       0.40) and the entrance sharing that downbeat was winning it a full-rig
+       white blast, which is a lie about what the music did. Measured from the
+       stems, not assumed: the voice is left out of the sum, because a bar where
+       only the voice remains is exactly the case this is for. */
+    const SL = Mu.stemLanesOf(score);
+    const band = bar => {
+      if (!SL) return null;
+      const i = bar - SL.from_bar;
+      let sum = 0, n = 0;
+      for (const k of ["drums", "bass", "other"]) {
+        const v = SL.lanes[k];
+        if (!Array.isArray(v) || i < 0 || i >= v.length || v[i] == null) continue;
+        sum += v[i]; n++;
+      }
+      return n ? sum / n : null;
+    };
+    const fell = bar => { const a = band(bar - 1), b = band(bar); return a != null && b != null && a > 0.15 && b <= 0.55 * a; };
+
     const best = new Map();
     for (const m of moments) {
       const at = `${m.bar}:${m.beat}`;
       const w = typeof m.weight === "number" ? m.weight : 0.5;
       const prev = best.get(at);
+      if (prev && prev.kind === "pause" && fell(prev.bar)) continue;
+      if (m.kind === "pause" && fell(m.bar)) { best.set(at, m); continue; }
       if (!prev || w > (typeof prev.weight === "number" ? prev.weight : 0.5)) best.set(at, m);
     }
     const one = [...best.values()];
@@ -846,6 +923,28 @@ function plan(scoreIn, enumResult, seed) {
       const lonely = !kept.concat(taken).some(m => Math.abs(m.bar - h.bar) < GAP);
       if (lonely) taken.push(h);
     }
+    /* ---- the shape of the show ------------------------------------------
+       Ranking says which moments survive; it does not say which of them MATTER.
+       Give every survivor the same full-rig gesture and the plan is additive --
+       louder and louder, and at the end nothing was the peak because everything
+       was. So name the peaks: the two or three heaviest moments in the song are
+       the only ones allowed to spend a hero gesture, and every other moment is
+       punctuation drawn from the accents. The contrast between those two is the
+       show. */
+    const HITS = ["entrance", "release", "accent", "change", "transition", "highlight"];
+    const many = Math.max(1, Math.min(3, Math.round(keep / 6)));
+    /* What makes a hit big is not its own weight but what it follows. The bar
+       after a measured hole is the biggest thing in the song whatever number
+       the score put on it -- bar 23 of raga is the band slamming back in after
+       everything stopped, and it was ranking below three ordinary releases. */
+    const heft = m => (typeof m.weight === "number" ? m.weight : 0.5) + (fell(m.bar - 1) ? 0.25 : 0);
+    /* and a floor under it: the biggest moment in a song that has no big moments
+       is not a peak. Ranking alone would hand a full-rig blast and a blackout to
+       a single weight-0.4 accent purely for being the only thing there. */
+    const PEAK_LEAST = 0.5;
+    const hits = kept.filter(m => HITS.includes(m.kind) && heft(m) >= PEAK_LEAST).sort((a, b) => heft(b) - heft(a));
+    for (const m of hits.slice(0, many)) peaks.add(m);
+
     moments.length = 0;
     moments.push(...kept, ...taken);
   }
@@ -855,8 +954,9 @@ function plan(scoreIn, enumResult, seed) {
     const B = atBeat({ bar: m.bar, beat: m.beat });
     const len = typeof m.for_beats === "number" && m.for_beats > 0 ? m.for_beats : null;
     const tag = { moment: m.kind, what: m.what };
+    const isPeak = peaks.has(m);
     if (m.kind === "pause" || w >= 0.25) {
-      const shots = drawOneShots(m, w, B, len);
+      const shots = drawOneShots(m, w, B, len, isPeak);
       if (shots.length) { assignments.push(...shots); continue; }
     }
     if (m.kind === "pause") {
@@ -873,10 +973,26 @@ function plan(scoreIn, enumResult, seed) {
         occupies: ["pars:strobe"], ...tag }));
     } else if (m.kind === "exit") {
       assignments.push(spanFx(B, len || bpb, { priority: 4, type: "modulate", layer: "modulate", params: { gain: 0.75, motion: -0.2, doing: "exit" }, ...tag }));
-    } else {                                       /* entrance, release, accent, change, ... a hit */
-      if (w >= 0.75)
-        assignments.push(spanFx(B - 1, 1, { priority: 9, type: "blackout", params: { strength: w }, ...tag }));
-      assignments.push(spanFx(B, 1, { priority: 9, type: "white_blast", params: { strength: w }, ...tag }));
+    } else {                       /* entrance, release, accent, change, handover... a hit */
+      /* the fixed effects, for when the cache offers no one-shot -- an older
+         cache, or a kind it has no gesture for. They obey the same budget as the
+         matrix does: the whole rig in white belongs to a peak, and anything else
+         is punctuation. A fallback that always blasted was quietly putting the
+         monotony back whatever the vocabulary did. */
+      const hit = (start, dur, extra) => assignments.push(spanFx(start, dur,
+        { priority: 9, type: "white_blast", params: { strength: w, ...extra }, ...tag }));
+      const laneHue = toneHue("lane", m);
+      if (isPeak) {
+        if (w >= 0.75) assignments.push(spanFx(B - 1, 1, { priority: 9, type: "blackout", params: { strength: w }, ...tag }));
+        hit(B, 1, {});
+      } else if (m.kind === "handover") {
+        /* the room turns the colour of whoever just took the ear */
+        hit(B, 2, { coverage: "inner", shape: "swell", tone: "lane", ...(laneHue === null ? {} : { hue: laneHue }) });
+      } else if (w >= 0.5) {
+        hit(B, 1, { coverage: "inner", tone: "key", ...(typeof keyHue === "number" ? { hue: keyHue } : {}) });
+      } else {
+        hit(B, 1, { coverage: "outer", tone: "white" });
+      }
     }
   }
 

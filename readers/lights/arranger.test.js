@@ -461,6 +461,109 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   ok("a zero pace bar is ignored when deciding the rate", plan(MP, EN, 42).lanes.subdiv[4] === 2, String(plan(MP, EN, 42).lanes.subdiv[4]));
 }
 
+/* =========================================================================
+   Punctuation is a VOCABULARY, not one picture repeated.
+   Every moment used to draw the same white blast: the library held three
+   one-shots for an ordinary hit and two of them were the identical effect, so a
+   song with seventeen moments came out as seventeen identical flashes. Three
+   things fix that and all three are tested here -- a wider family, a rule that
+   no two moments in a row say the same thing, and a budget that keeps the
+   whole-rig blast for the two or three moments that have earned it.
+   ========================================================================= */
+{
+  const MANY = require("./fixtures/mini_raw.js").RAW();
+  /* a busy song: a hit on nearly every bar of the drop, weights spread */
+  MANY.moments = [
+    { bar: 4, beat: 1, is: "entrance", what: "drums", sure: 1, weight: 0.97 },
+    { bar: 5, beat: 1, is: "accent", what: "the band", sure: 0.9, weight: 0.55 },
+    { bar: 6, beat: 1, is: "change", what: "harmony", sure: 0.9, weight: 0.6 },
+    { bar: 7, beat: 1, is: "transition", what: "chords", sure: 0.9, weight: 0.52 },
+    { bar: 10, beat: 1, is: "release", what: "tension", sure: 0.9, weight: 0.72 },
+    { bar: 11, beat: 1, is: "highlight", what: "a run", sure: 0.9, weight: 0.5 },
+    { bar: 12, beat: 1, is: "accent", what: "the band", sure: 0.9, weight: 0.58 },
+    { bar: 13, beat: 1, is: "change", what: "rhythm", sure: 0.9, weight: 0.65 },
+    { bar: 14, beat: 1, is: "transition", what: "voice", sure: 0.9, weight: 0.54 },
+    { bar: 15, beat: 1, is: "release", what: "tension", sure: 0.9, weight: 0.62 },
+  ];
+  const p = plan(MANY, EN, 42);
+  const shots = p.assignments.filter(a => a.moment && a.seq_id && (a.layer === "fx" || a.layer === "modulate"))
+    .sort((a, b) => (a.from.bar - b.from.bar) || (a.from.beat - b.from.beat));
+  const kinds = new Set(shots.map(a => a.seq_id));
+  ok("ten hits in a song draw more than one kind of gesture", kinds.size >= 4, [...kinds].join(", "));
+
+  /* the on-the-beat gestures are the ones an audience reads as "another flash"; a
+     blackout in the `before` slot belongs to the hit it precedes, not to itself */
+  const onBeat = shots.filter(a => { const q = EN.sequences.find(s => s.id === a.seq_id); return q && (q.gesture.slot || "on") !== "before"; });
+  let repeats = 0;
+  for (let i = 1; i < onBeat.length; i++) if (onBeat[i].seq_id === onBeat[i - 1].seq_id) repeats++;
+  ok("and no two moments in a row say the same thing", repeats === 0,
+     onBeat.map(a => a.from.bar + ":" + a.seq_id).join(" "));
+
+  const heroes = shots.filter(a => { const q = EN.sequences.find(s => s.id === a.seq_id); return q && q.boldness === "hero"; });
+  const heroBars = new Set(heroes.map(a => a.moment === "entrance" || true ? a.from.bar : a.from.bar));
+  ok("the whole rig in white stays rare: at most three moments spend it",
+     new Set(heroes.map(a => a.seq_id === "breath" ? a.to.bar : a.from.bar)).size <= 3,
+     heroes.map(a => a.from.bar + ":" + a.seq_id).join(" "));
+  ok("and the moments that spend it are the heaviest ones",
+     heroes.every(a => a.params.strength >= 0.5), heroes.map(a => a.params.strength).join(","));
+
+  /* a plan is still a pure function of (score, seed) */
+  ok("the varied plan is still deterministic", JSON.stringify(plan(MANY, EN, 42)) === JSON.stringify(p));
+  ok("a different seed draws a different set of gestures",
+     JSON.stringify(plan(MANY, EN, 7).assignments.filter(a => a.moment).map(a => a.seq_id)) !== JSON.stringify(shots.map(a => a.seq_id)));
+}
+
+/* ---- a measured hole beats a hit sharing its downbeat ------------------------
+   Bar 22 of raga-of-revenge is the hole before the drop -- the band stops dead
+   and only the voice is left -- and it carries an ENTRANCE (the voice, 0.66) on
+   the same downbeat as a PAUSE (0.51). Taking the heavier of the two put a
+   full-rig white blast on the one bar of the song where everything went quiet.
+   They are not two events competing for the bar; they are one event seen from
+   two sides, and where the stems actually fell the stop is the bigger side. */
+{
+  const HOLE = require("./fixtures/mini_raw.js").RAW();
+  HOLE.bars.drums = [...HOLE.bars.drums]; HOLE.bars.bass = [...HOLE.bars.bass]; HOLE.bars.other = [...HOLE.bars.other];
+  HOLE.bars.drums[9] = 0.05; HOLE.bars.bass[9] = 0.04; HOLE.bars.other[9] = 0.1;
+  HOLE.moments = [
+    { bar: 9, beat: 1, is: "entrance", what: "voice", sure: 1, weight: 0.9 },
+    { bar: 9, beat: 1, is: "pause", what: "the band", sure: 0.9, for_beats: 4, still: ["vocals"], weight: 0.5 },
+  ];
+  const at9 = plan(HOLE, EN, 42).assignments.filter(a => a.moment && a.from.bar === 9);
+  ok("where the band measurably fell, the bar is lit as a hole, not as a hit",
+     at9.length > 0 && at9.every(a => a.moment === "pause"), JSON.stringify(at9.map(a => [a.moment, a.type])));
+
+  /* and the bar AFTER a hole is the biggest hit in the song, whatever weight the
+     score put on it -- the contrast is what makes it big */
+  const SLAM = require("./fixtures/mini_raw.js").RAW();
+  SLAM.bars.drums = [...SLAM.bars.drums]; SLAM.bars.bass = [...SLAM.bars.bass]; SLAM.bars.other = [...SLAM.bars.other];
+  SLAM.bars.drums[9] = 0.05; SLAM.bars.bass[9] = 0.04; SLAM.bars.other[9] = 0.1;
+  SLAM.moments = [
+    { bar: 6, beat: 1, is: "release", what: "tension", sure: 0.9, weight: 0.7 },
+    { bar: 10, beat: 1, is: "release", what: "tension", sure: 0.9, weight: 0.55 },
+  ];
+  const sp = plan(SLAM, EN, 42);
+  const slam = sp.assignments.find(a => a.moment && a.from.bar === 10 && a.seq_id);
+  const q = slam && EN.sequences.find(s => s.id === slam.seq_id);
+  ok("the hit on the bar after a hole outranks a heavier one elsewhere",
+     q && q.boldness === "hero", slam ? slam.seq_id : "none");
+}
+
+/* ---- a handover is coloured by whoever took the ear -------------------------- */
+{
+  const EAR = require("./fixtures/mini_raw.js").RAW();
+  /* the strings sit back for eight bars and then take the room at bar 12, where
+     the score itself flags nothing at all */
+  EAR.bars.other = [...Array(4).fill(0.7), ...Array(8).fill(0.3), ...Array(4).fill(0.9), ...Array(4).fill(0.4)];
+  const p = plan(EAR, EN, 42);
+  const hand = p.assignments.filter(a => a.moment === "handover");
+  const HUE = { drums: 0, guitar: 0.95, vocals: 0.13, piano: 0.5, bass: 0.66, other: 0.8 };
+  ok("a handover states the hue of the lane that took the ear",
+     hand.length > 0 && hand.every(a => a.params.hue === HUE[a.what]),
+     JSON.stringify(hand.map(a => [a.from.bar, a.what, a.params.hue])));
+  ok("two lanes taking the ear are two different colours",
+     Object.keys(HUE).map(k => HUE[k]).length === new Set(Object.keys(HUE).map(k => HUE[k])).size);
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

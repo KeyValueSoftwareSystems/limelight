@@ -120,6 +120,51 @@ const P = (extra, more) => ({ grid: { beats_per_bar: 4 }, assignments: [base(), 
   ok("a light blast leaves the head's prism alone", !g(light, "head").prism && g(strong, "head").prism === true);
 }
 
+/* ---- a hit is a family, not one picture -------------------------------------
+   The three dials: which lamps take it, what colour it is, how it sits in time.
+   With none of them set it must be the old white blast, byte for byte. */
+{
+  const hit = (params, at, to) => frame(at, P([{ from: at, to: to || { bar: at.bar, beat: at.beat + 1 },
+    type: "white_blast", priority: 9, params: { strength: 1, ...params } }]), CTX);
+
+  const plainA = hit({}, { bar: 2, beat: 1 });
+  const plainB = frame({ bar: 2, beat: 1 }, P([{ from: { bar: 2, beat: 1 }, to: { bar: 2, beat: 2 }, type: "white_blast", priority: 9, params: { strength: 1 } }]), CTX);
+  ok("a hit with no dials set is exactly the old white blast", JSON.stringify(plainA) === JSON.stringify(plainB));
+
+  /* coverage: the lamps outside it keep their look, dimmed. That contrast IS the
+     gesture -- blacking them out would just be a different wall. */
+  const narrow = hit({ coverage: "outer" }, { bar: 2, beat: 1 });
+  const inner = [g(narrow, "par_8").level, g(narrow, "par_15").level];
+  const outer = [g(narrow, "par_1").level, g(narrow, "par_22").level];
+  ok("a hit on the outer pair fires the outer lamps", outer.every(v => v === 1), outer.join(","));
+  ok("and dims the inner pair instead of blacking it", inner.every(v => v > 0 && v < 0.3), inner.join(","));
+  ok("the head sits out a partial hit and keeps its own look",
+     g(narrow, "head").level === g(frame({ bar: 2, beat: 1 }, P(), CTX), "head").level, `${g(narrow, "head").level}`);
+
+  /* colour: a hue the music named, not white */
+  const red = hit({ hue: 0 }, { bar: 2, beat: 1 });
+  const blue = hit({ hue: 0.66 }, { bar: 2, beat: 1 });
+  const rc = g(red, "par_1").colour, bc = g(blue, "par_1").colour;
+  ok("a hit in the key's hue is that colour, not white", rc[0] === 1 && rc[1] < 0.1 && rc[2] < 0.1, rc.join(","));
+  ok("a different hue is a different picture", bc[2] === 1 && bc[0] < 0.3, bc.join(","));
+
+  /* shape: travel reaches the far end of the row after the near one */
+  const tr = { from: { bar: 2, beat: 1 }, to: { bar: 2, beat: 3 }, type: "white_blast", priority: 9,
+    params: { strength: 1, shape: "travel", spread: 0.5 } };
+  const t0 = frame({ bar: 2, beat: 1 }, P([tr]), CTX), t1 = frame({ bar: 2, beat: 2.6 }, P([tr]), CTX);
+  ok("a travelling hit lights the near end of the row first",
+     g(t0, "par_1").level > g(t0, "par_22").level, `${g(t0, "par_1").level} vs ${g(t0, "par_22").level}`);
+  ok("and the far end later", g(t1, "par_22").level > g(t1, "par_1").level, `${g(t1, "par_22").level} vs ${g(t1, "par_1").level}`);
+
+  /* shape: a swell blooms and falls instead of snapping on and off */
+  const sw = { from: { bar: 2, beat: 1 }, to: { bar: 3, beat: 1 }, type: "white_blast", priority: 9,
+    params: { strength: 1, shape: "swell" } };
+  const up = g(frame({ bar: 2, beat: 2 }, P([sw]), CTX), "par_1").level;
+  const down = g(frame({ bar: 2, beat: 4 }, P([sw]), CTX), "par_1").level;
+  ok("a swell is brightest early in its span and falls away", up > down && down > 0, `${up} -> ${down}`);
+  ok("a swell is not a snap: it never sits at full for its whole span", up < 1 || down < 1, `${up} ${down}`);
+}
+
 /* ---- a pause sits the rig down for its beats, scaled by weight ---------------- */
 {
   const plain = frame({ bar: 3, beat: 1 }, P(), CTX);

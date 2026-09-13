@@ -146,17 +146,73 @@ const VOCABULARY = [
      placed at the moment (slot "on"), the beat before ("before") or over the
      moment's span ("span"). affinity.moment lists the kinds and weight bands it
      answers; `_default: 0` vetoes every other moment, so a hush never fires on an
-     entrance. Bare bars carry no moment fact, so one-shots never compete with looks. */
+     entrance. Bare bars carry no moment fact, so one-shots never compete with looks.
+
+     There used to be three of these for every hit a song contains -- impact,
+     flash and breath -- and two of the three were the same white blast, so a
+     song's seventeen moments came out as seventeen identical flashes. A hit is
+     now a family: `tone` says what colour it is (white, the song's key, or the
+     stem that just took the ear), `coverage` which lamps take it, `shape` how it
+     sits in time. Params here are RIG-INDEPENDENT musical intent -- "the inner
+     pair, in the key, swelling" -- and frame.js decides what that is in light,
+     so a venue on a different rig renders the same show its own way.
+
+     Boldness is the budget: only `hero` takes the whole rig white, and the
+     arranger spends those on the two or three peaks it picks. Everything else
+     is drawn from the accents, which is what keeps a show compositional instead
+     of merely loud. */
   ...[
+    /* the full stop: the whole rig, white, on the beat. A song gets two or three. */
     { id: "impact", fx: "white_blast", slot: "on", dur: 1, bold: "hero", occ: [],
       form: { intro: 0.3, verse: 0.7, break: 0.7, build: 0.8, drop: 1, outro: 0.3, silence: 0.2, final_drop: 1 },
       moment: { entrance: 1, release: 0.9, accent: 0.7, change: 0.5, transition: 0.6, highlight: 0.6, heavy: 1, firm: 0.7, light: 0.3, _default: 0 } },
+    /* the hole before it. Darkness is the cheapest contrast there is. */
     { id: "breath", fx: "blackout", slot: "before", dur: 1, bold: "hero", occ: [],
       form: { intro: 0.2, verse: 0.6, break: 0.7, build: 0.9, drop: 1, outro: 0.2, silence: 0.2, final_drop: 1 },
-      moment: { entrance: 1, release: 0.6, heavy: 1, firm: 0, light: 0, _default: 0 } },
+      /* it used to answer only a HEAVY moment, which on most songs is no moment
+         at all -- raga's biggest hit is weighted 0.71 and never got its hole.
+         Weight is the wrong gate now that boldness is one: a blackout is `hero`,
+         so only a peak can draw it, and a peak has earned it by definition. */
+      moment: { entrance: 1, release: 0.9, change: 0.7, transition: 0.7, accent: 0.6, highlight: 0.6,
+                heavy: 1, firm: 0.9, light: 0.4, _default: 0 } },
+    /* a flick at the edges of the room: the outer pair only, so the hit reads as
+       punctuation rather than as another wall of white */
     { id: "flash", fx: "white_blast", slot: "on", dur: 1, bold: "accent", occ: [],
+      params: { coverage: "outer", tone: "white" },
       form: { intro: 0.4, verse: 0.8, break: 0.8, build: 0.8, drop: 0.7, outro: 0.4, silence: 0.3, final_drop: 0.7 },
       moment: { entrance: 0.5, accent: 0.9, change: 0.8, highlight: 0.8, release: 0.5, transition: 0.6, light: 1, firm: 0.6, heavy: 0.2, _default: 0 } },
+    /* the same beat in the song's own colour, landing at the centre of the rig */
+    { id: "stab", fx: "white_blast", slot: "on", dur: 1, bold: "accent", occ: [],
+      params: { coverage: "inner", tone: "key" },
+      form: { intro: 0.5, verse: 0.9, break: 0.9, build: 0.9, drop: 0.8, outro: 0.5, silence: 0.4, final_drop: 0.8 },
+      moment: { accent: 1, change: 1, transition: 0.8, highlight: 0.9, entrance: 0.6, release: 0.6, light: 0.9, firm: 1, heavy: 0.5, _default: 0 } },
+    /* the hit crosses the room instead of arriving everywhere at once -- a
+       transition that moves, which is what a transition does */
+    { id: "cross", fx: "white_blast", slot: "on", dur: 2, bold: "accent", occ: [],
+      params: { shape: "travel", spread: 0.5, tone: "white" },
+      form: { intro: 0.4, verse: 0.8, break: 0.9, build: 0.9, drop: 0.7, outro: 0.4, silence: 0.3, final_drop: 0.7 },
+      moment: { transition: 1, change: 0.9, entrance: 0.7, accent: 0.6, highlight: 0.7, release: 0.5, light: 0.8, firm: 1, heavy: 0.6, _default: 0 } },
+    /* not a punch but a wash: it blooms and falls away across four beats. What a
+       release actually sounds like. */
+    { id: "swell", fx: "white_blast", slot: "on", dur: 4, bold: "ambient", occ: [],
+      params: { shape: "swell", tone: "key" },
+      form: { intro: 0.8, verse: 1, break: 1, build: 0.7, drop: 0.5, outro: 0.9, silence: 0.7, final_drop: 0.5 },
+      moment: { release: 1, highlight: 1, change: 0.8, entrance: 0.6, transition: 0.7, accent: 0.5, light: 1, firm: 0.9, heavy: 0.4, _default: 0 } },
+    /* the subtract: the rig drops out ON the beat and comes back. Nobody spends
+       darkness on a mid-song change, and it is the loudest thing in the box. */
+    { id: "cut", fx: "blackout", slot: "on", dur: 1, bold: "accent", occ: [],
+      form: { intro: 0.3, verse: 0.8, break: 1, build: 0.6, drop: 0.8, outro: 0.4, silence: 0.5, final_drop: 0.8 },
+      moment: { change: 1, transition: 0.9, accent: 0.6, release: 0.7, highlight: 0.5, light: 0.6, firm: 1, heavy: 0.8, _default: 0 } },
+    /* the ear changed hands: the centre of the rig turns the new voice's colour */
+    { id: "handoff", fx: "white_blast", slot: "on", dur: 2, bold: "accent", occ: [],
+      params: { coverage: "inner", shape: "swell", tone: "lane" },
+      form: { intro: 0.8, verse: 1, break: 1, build: 0.9, drop: 0.8, outro: 0.8, silence: 0.6, final_drop: 0.8 },
+      moment: { handover: 1, light: 1, firm: 1, heavy: 0.8, _default: 0 } },
+    /* the same, crossing the room: the new voice arrives from one side */
+    { id: "turn", fx: "white_blast", slot: "on", dur: 3, bold: "accent", occ: [],
+      params: { shape: "travel", spread: 0.75, tone: "lane" },
+      form: { intro: 0.7, verse: 1, break: 1, build: 0.9, drop: 0.7, outro: 0.7, silence: 0.5, final_drop: 0.7 },
+      moment: { handover: 1, light: 1, firm: 1, heavy: 0.8, _default: 0 } },
     { id: "hush", fx: "pause", slot: "span", dur: 4, bold: "accent", occ: [],
       form: { intro: 0.6, verse: 1, break: 1, build: 0.8, drop: 0.8, outro: 0.6, silence: 0.8, final_drop: 0.8 },
       moment: { pause: 1, heavy: 1, firm: 1, light: 1, _default: 0 } },

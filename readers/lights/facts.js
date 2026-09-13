@@ -17,7 +17,7 @@ const FACTS = {
           "easing", "thinning", "resolving", "suspending", "transitioning", "closing", "holding"],
   presence: ["drums:in", "drums:out", "bass:in", "bass:out", "vocals:in", "vocals:out"],
   moment: ["entrance", "release", "hook", "pause", "fill", "rise", "exit", "accent", "change",
-           "transition", "highlight", "light", "firm", "heavy"],
+           "transition", "highlight", "handover", "light", "firm", "heavy"],
   texture: ["narrow", "wide", "sparse", "busy", "dull", "bright"],
   harmony: ["minor", "major", "changing"],
 };

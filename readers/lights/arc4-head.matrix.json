@@ -117,9 +117,114 @@
    "occupies": [],
    "gesture": {
     "fx": "white_blast",
+    "slot": "on",
+    "params": {
+     "coverage": "outer",
+     "tone": "white"
+    }
+   },
+   "duration_beats": 1
+  },
+  {
+   "id": "stab",
+   "kind": "oneshot",
+   "boldness": "accent",
+   "source": "base",
+   "fit": 0.9,
+   "occupies": [],
+   "gesture": {
+    "fx": "white_blast",
+    "slot": "on",
+    "params": {
+     "coverage": "inner",
+     "tone": "key"
+    }
+   },
+   "duration_beats": 1
+  },
+  {
+   "id": "cross",
+   "kind": "oneshot",
+   "boldness": "accent",
+   "source": "base",
+   "fit": 0.9,
+   "occupies": [],
+   "gesture": {
+    "fx": "white_blast",
+    "slot": "on",
+    "params": {
+     "shape": "travel",
+     "spread": 0.5,
+     "tone": "white"
+    }
+   },
+   "duration_beats": 2
+  },
+  {
+   "id": "swell",
+   "kind": "oneshot",
+   "boldness": "ambient",
+   "source": "base",
+   "fit": 0.9,
+   "occupies": [],
+   "gesture": {
+    "fx": "white_blast",
+    "slot": "on",
+    "params": {
+     "shape": "swell",
+     "tone": "key"
+    }
+   },
+   "duration_beats": 4
+  },
+  {
+   "id": "cut",
+   "kind": "oneshot",
+   "boldness": "accent",
+   "source": "base",
+   "fit": 0.9,
+   "occupies": [],
+   "gesture": {
+    "fx": "blackout",
     "slot": "on"
    },
    "duration_beats": 1
+  },
+  {
+   "id": "handoff",
+   "kind": "oneshot",
+   "boldness": "accent",
+   "source": "base",
+   "fit": 0.9,
+   "occupies": [],
+   "gesture": {
+    "fx": "white_blast",
+    "slot": "on",
+    "params": {
+     "coverage": "inner",
+     "shape": "swell",
+     "tone": "lane"
+    }
+   },
+   "duration_beats": 2
+  },
+  {
+   "id": "turn",
+   "kind": "oneshot",
+   "boldness": "accent",
+   "source": "base",
+   "fit": 0.9,
+   "occupies": [],
+   "gesture": {
+    "fx": "white_blast",
+    "slot": "on",
+    "params": {
+     "shape": "travel",
+     "spread": 0.75,
+     "tone": "lane"
+    }
+   },
+   "duration_beats": 3
   },
   {
    "id": "hush",
@@ -1336,6 +1441,12 @@
   "impact": 0.9,
   "breath": 0.9,
   "flash": 0.9,
+  "stab": 0.9,
+  "cross": 0.9,
+  "swell": 0.9,
+  "cut": 0.9,
+  "handoff": 0.9,
+  "turn": 0.9,
   "hush": 0.9,
   "hook_lift": 0.9,
   "riser": 0.9,
@@ -1540,6 +1651,66 @@
     "drop": 0.7,
     "outro": 0.4,
     "silence": 0.3,
+    "final_drop": 0.7
+   },
+   "stab": {
+    "intro": 0.5,
+    "verse": 0.9,
+    "break": 0.9,
+    "build": 0.9,
+    "drop": 0.8,
+    "outro": 0.5,
+    "silence": 0.4,
+    "final_drop": 0.8
+   },
+   "cross": {
+    "intro": 0.4,
+    "verse": 0.8,
+    "break": 0.9,
+    "build": 0.9,
+    "drop": 0.7,
+    "outro": 0.4,
+    "silence": 0.3,
+    "final_drop": 0.7
+   },
+   "swell": {
+    "intro": 0.8,
+    "verse": 1,
+    "break": 1,
+    "build": 0.7,
+    "drop": 0.5,
+    "outro": 0.9,
+    "silence": 0.7,
+    "final_drop": 0.5
+   },
+   "cut": {
+    "intro": 0.3,
+    "verse": 0.8,
+    "break": 1,
+    "build": 0.6,
+    "drop": 0.8,
+    "outro": 0.4,
+    "silence": 0.5,
+    "final_drop": 0.8
+   },
+   "handoff": {
+    "intro": 0.8,
+    "verse": 1,
+    "break": 1,
+    "build": 0.9,
+    "drop": 0.8,
+    "outro": 0.8,
+    "silence": 0.6,
+    "final_drop": 0.8
+   },
+   "turn": {
+    "intro": 0.7,
+    "verse": 1,
+    "break": 1,
+    "build": 0.9,
+    "drop": 0.7,
+    "outro": 0.7,
+    "silence": 0.5,
     "final_drop": 0.7
    },
    "hush": {
@@ -2663,10 +2834,14 @@
    },
    "breath": {
     "entrance": 1,
-    "release": 0.6,
+    "release": 0.9,
+    "change": 0.7,
+    "transition": 0.7,
+    "accent": 0.6,
+    "highlight": 0.6,
     "heavy": 1,
-    "firm": 0,
-    "light": 0,
+    "firm": 0.9,
+    "light": 0.4,
     "_default": 0
    },
    "flash": {
@@ -2679,6 +2854,67 @@
     "light": 1,
     "firm": 0.6,
     "heavy": 0.2,
+    "_default": 0
+   },
+   "stab": {
+    "accent": 1,
+    "change": 1,
+    "transition": 0.8,
+    "highlight": 0.9,
+    "entrance": 0.6,
+    "release": 0.6,
+    "light": 0.9,
+    "firm": 1,
+    "heavy": 0.5,
+    "_default": 0
+   },
+   "cross": {
+    "transition": 1,
+    "change": 0.9,
+    "entrance": 0.7,
+    "accent": 0.6,
+    "highlight": 0.7,
+    "release": 0.5,
+    "light": 0.8,
+    "firm": 1,
+    "heavy": 0.6,
+    "_default": 0
+   },
+   "swell": {
+    "release": 1,
+    "highlight": 1,
+    "change": 0.8,
+    "entrance": 0.6,
+    "transition": 0.7,
+    "accent": 0.5,
+    "light": 1,
+    "firm": 0.9,
+    "heavy": 0.4,
+    "_default": 0
+   },
+   "cut": {
+    "change": 1,
+    "transition": 0.9,
+    "accent": 0.6,
+    "release": 0.7,
+    "highlight": 0.5,
+    "light": 0.6,
+    "firm": 1,
+    "heavy": 0.8,
+    "_default": 0
+   },
+   "handoff": {
+    "handover": 1,
+    "light": 1,
+    "firm": 1,
+    "heavy": 0.8,
+    "_default": 0
+   },
+   "turn": {
+    "handover": 1,
+    "light": 1,
+    "firm": 1,
+    "heavy": 0.8,
     "_default": 0
    },
    "hush": {
@@ -2843,6 +3079,66 @@
    "drop": 0.63,
    "outro": 0.36,
    "silence": 0,
+   "final_drop": 0.63
+  },
+  "stab": {
+   "intro": 0.45,
+   "verse": 0.81,
+   "break": 0.81,
+   "build": 0.81,
+   "drop": 0.72,
+   "outro": 0.45,
+   "silence": 0.36,
+   "final_drop": 0.72
+  },
+  "cross": {
+   "intro": 0.36,
+   "verse": 0.72,
+   "break": 0.81,
+   "build": 0.81,
+   "drop": 0.63,
+   "outro": 0.36,
+   "silence": 0,
+   "final_drop": 0.63
+  },
+  "swell": {
+   "intro": 0.72,
+   "verse": 0.9,
+   "break": 0.9,
+   "build": 0.63,
+   "drop": 0.45,
+   "outro": 0.81,
+   "silence": 0.63,
+   "final_drop": 0.45
+  },
+  "cut": {
+   "intro": 0,
+   "verse": 0.72,
+   "break": 0.9,
+   "build": 0.54,
+   "drop": 0.72,
+   "outro": 0.36,
+   "silence": 0.45,
+   "final_drop": 0.72
+  },
+  "handoff": {
+   "intro": 0.72,
+   "verse": 0.9,
+   "break": 0.9,
+   "build": 0.81,
+   "drop": 0.72,
+   "outro": 0.72,
+   "silence": 0.54,
+   "final_drop": 0.72
+  },
+  "turn": {
+   "intro": 0.63,
+   "verse": 0.9,
+   "break": 0.9,
+   "build": 0.81,
+   "drop": 0.63,
+   "outro": 0.63,
+   "silence": 0.45,
    "final_drop": 0.63
   },
   "hush": {
@@ -3889,6 +4185,12 @@
    "impact",
    "breath",
    "flash",
+   "stab",
+   "cross",
+   "swell",
+   "cut",
+   "handoff",
+   "turn",
    "hush",
    "hook_lift",
    "riser",
@@ -4022,46 +4324,46 @@
    ],
    "verse": [
     {
+     "id": "swell",
+     "score": 0.9
+    },
+    {
+     "id": "handoff",
+     "score": 0.9
+    },
+    {
+     "id": "turn",
+     "score": 0.9
+    },
+    {
      "id": "hush",
      "score": 0.9
     },
     {
      "id": "combo_verse_groove",
      "score": 0.9
-    },
-    {
-     "id": "hook_lift",
-     "score": 0.81
-    },
-    {
-     "id": "exit_dip",
-     "score": 0.81
-    },
-    {
-     "id": "flash",
-     "score": 0.72
     }
    ],
    "break": [
     {
+     "id": "swell",
+     "score": 0.9
+    },
+    {
+     "id": "cut",
+     "score": 0.9
+    },
+    {
+     "id": "handoff",
+     "score": 0.9
+    },
+    {
+     "id": "turn",
+     "score": 0.9
+    },
+    {
      "id": "hush",
      "score": 0.9
-    },
-    {
-     "id": "break_hit_series",
-     "score": 0.9
-    },
-    {
-     "id": "combo_break_dark_head",
-     "score": 0.9
-    },
-    {
-     "id": "hit_white",
-     "score": 0.85
-    },
-    {
-     "id": "hit_red",
-     "score": 0.85
     }
    ],
    "build": [
@@ -4375,22 +4677,38 @@
       "score": 0.9
      },
      {
-      "id": "flash",
-      "score": 0.45
+      "id": "cross",
+      "score": 0.63
+     },
+     {
+      "id": "stab",
+      "score": 0.54
+     },
+     {
+      "id": "swell",
+      "score": 0.54
      }
     ],
     "release": [
+     {
+      "id": "swell",
+      "score": 0.9
+     },
      {
       "id": "impact",
       "score": 0.81
      },
      {
       "id": "breath",
-      "score": 0.54
+      "score": 0.81
      },
      {
-      "id": "flash",
-      "score": 0.45
+      "id": "cut",
+      "score": 0.63
+     },
+     {
+      "id": "stab",
+      "score": 0.54
      }
     ],
     "hook": [
@@ -4425,42 +4743,100 @@
     ],
     "accent": [
      {
+      "id": "stab",
+      "score": 0.9
+     },
+     {
       "id": "flash",
       "score": 0.81
      },
      {
       "id": "impact",
       "score": 0.63
+     },
+     {
+      "id": "breath",
+      "score": 0.54
+     },
+     {
+      "id": "cross",
+      "score": 0.54
      }
     ],
     "change": [
      {
+      "id": "stab",
+      "score": 0.9
+     },
+     {
+      "id": "cut",
+      "score": 0.9
+     },
+     {
+      "id": "cross",
+      "score": 0.81
+     },
+     {
       "id": "flash",
       "score": 0.72
      },
      {
-      "id": "impact",
-      "score": 0.45
+      "id": "swell",
+      "score": 0.72
      }
     ],
     "transition": [
      {
-      "id": "impact",
-      "score": 0.54
+      "id": "cross",
+      "score": 0.9
      },
      {
-      "id": "flash",
-      "score": 0.54
+      "id": "cut",
+      "score": 0.81
+     },
+     {
+      "id": "stab",
+      "score": 0.72
+     },
+     {
+      "id": "breath",
+      "score": 0.63
+     },
+     {
+      "id": "swell",
+      "score": 0.63
      }
     ],
     "highlight": [
+     {
+      "id": "swell",
+      "score": 0.9
+     },
+     {
+      "id": "stab",
+      "score": 0.81
+     },
      {
       "id": "flash",
       "score": 0.72
      },
      {
+      "id": "cross",
+      "score": 0.63
+     },
+     {
       "id": "impact",
       "score": 0.54
+     }
+    ],
+    "handover": [
+     {
+      "id": "handoff",
+      "score": 0.9
+     },
+     {
+      "id": "turn",
+      "score": 0.9
      }
     ],
     "light": [
@@ -4469,41 +4845,41 @@
       "score": 0.9
      },
      {
+      "id": "swell",
+      "score": 0.9
+     },
+     {
+      "id": "handoff",
+      "score": 0.9
+     },
+     {
+      "id": "turn",
+      "score": 0.9
+     },
+     {
       "id": "hush",
       "score": 0.9
-     },
-     {
-      "id": "exit_dip",
-      "score": 0.9
-     },
-     {
-      "id": "hook_lift",
-      "score": 0.72
-     },
-     {
-      "id": "fill_flicker",
-      "score": 0.63
      }
     ],
     "firm": [
      {
-      "id": "hush",
+      "id": "stab",
       "score": 0.9
      },
      {
-      "id": "hook_lift",
+      "id": "cross",
       "score": 0.9
      },
      {
-      "id": "riser",
+      "id": "cut",
       "score": 0.9
      },
      {
-      "id": "fill_flicker",
+      "id": "handoff",
       "score": 0.9
      },
      {
-      "id": "exit_dip",
+      "id": "turn",
       "score": 0.9
      }
     ],
@@ -4593,7 +4969,7 @@
    }
   },
   "sources": {
-   "base": 15,
+   "base": 21,
    "llm": 98
   },
   "rejected": 0,

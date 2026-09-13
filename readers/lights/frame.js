@@ -486,6 +486,55 @@ function tint(colour, hue, amount, minor) {
   return hsv2rgb(h, sat, v);
 }
 
+/* ---- the hit: one override, a family of gestures ----------------------------
+   Every hit used to be the same picture -- the whole rig, white, for one beat --
+   so seventeen different moments in a song produced seventeen identical flashes
+   and the show read as a strobe with opinions. The picture now has three dials
+   the plan sets, and a hit that sets none of them is the old white blast, byte
+   for byte.
+
+     tone      white, or a hue the music names (its key, or the stem that has
+               just taken the ear). A coloured hit belongs to the song.
+     coverage  which lamps take it. A hit on two lamps of four is punctuation; a
+               hit on all of them is a full stop, and a song has two or three
+               full stops in it, not seventeen. The lamps outside it are not
+               switched off -- they keep their look, dimmed, which is what makes
+               the ones inside it read.
+     shape     how it sits in time. `snap` lands and is gone. `swell` blooms and
+               falls across its span, so a release reads as a wash rather than a
+               punch. `travel` fires each lamp a little after the one before, and
+               the hit crosses the room. */
+const HIT_REST = 0.18;              /* what a lamp outside the coverage keeps */
+
+function hitCover(coverage, groups) {
+  const arc = groups.arc || [];
+  const half = Math.ceil(arc.length / 2);
+  switch (coverage) {
+    case "inner": return new Set(groups.inner || []);
+    case "outer": return new Set(groups.outer || []);
+    case "ends":  return new Set([arc[0], arc[arc.length - 1]].filter(Boolean));
+    case "left":  return new Set(arc.slice(0, half));
+    case "right": return new Set(arc.slice(arc.length - half));
+    case "odd":   return new Set(arc.filter((_, i) => i % 2 === 1));
+    case "even":  return new Set(arc.filter((_, i) => i % 2 === 0));
+    default:      return null;                                  /* all of them */
+  }
+}
+
+/* t: beats since the hit began. span: its length in beats. i: the lamp's place
+   along the row, which only matters to a travelling hit. */
+function hitEnvelope(shape, t, span, i, spread) {
+  if (shape === "travel") {
+    const u = t - i * (spread > 0 ? spread : 0.5);
+    return u < 0 ? 0 : Math.max(0, 1 - u / Math.max(0.5, Math.min(1, span)));
+  }
+  if (shape === "swell") {
+    const up = Math.max(1e-6, 0.25 * span);
+    return t < up ? Math.max(0, t / up) : Math.max(0, 1 - (t - up) / Math.max(1e-6, span - up));
+  }
+  return 1;
+}
+
 /* ---- per-bar modulation from the plan's texture lanes and harmony ------------
    Everything here is neutral (a no-op) when the plan carries no lanes/harmony, so
    a plain plan renders exactly as before. A null bar reads as the neutral middle. */
@@ -661,26 +710,51 @@ function frame(position, plan, ctx) {
       fx.intent.strobe = +clamp01((accent.params.strength || 0.8) * mod.strobeK).toFixed(2);
   }
 
-  /* contrast overrides take the whole rig for their beat, scaled by the moment's
-     weight. They are about LIGHT, not aim: the head keeps the pose its own look
-     gave it, so the wire never lurches to pan 0 / tilt 0 on a dark beat. */
+  /* contrast overrides take the rig for their beat, scaled by the moment's
+     weight and shaped by the hit's three dials (see hitCover / hitEnvelope).
+     They are about LIGHT, not aim: the head keeps the pose its own look gave it,
+     so the wire never lurches to pan 0 / tilt 0 on a dark beat. */
   if (blast || blackout) {
-    const sf = blast ? strengthOf(blast) : 0, lvl = blast ? +(0.5 + 0.5 * sf).toFixed(3) : 0;
+    const bp = (blast && blast.params) || {};
+    const sf = blast ? strengthOf(blast) : 0;
+    const peak = blast ? +(0.5 + 0.5 * sf).toFixed(3) : 0;
+    const hue = typeof bp.hue === "number" ? bp.hue : null;
+    const hitCol = hue === null ? [1, 1, 1] : hsv2rgb(hue, 1, 1);
+    const cover = blast ? hitCover(bp.coverage, groups) : null;
+    const arc = groups.arc || [];
+    const span = blast ? Math.max(1e-6, at(blast.to) - at(blast.from)) : 1;
+    const t = blast ? here - at(blast.from) : 0;   /* `here` already carries the fraction */
+    const rest = typeof bp.rest === "number" ? clamp01(bp.rest) : HIT_REST;
     for (const fx of fixtures) {
+      const pose = {};
+      if (fx.intent.pan != null) pose.pan = fx.intent.pan;
+      if (fx.intent.tilt != null) pose.tilt = fx.intent.tilt;
+      if (!blast) {                                  /* a blackout is still a blackout */
+        fx.intent = isHead(fx) ? { ...pose, level: 0 } : { level: 0 };
+        continue;
+      }
+      const i = Math.max(0, arc.indexOf(fx.id));
+      const env = hitEnvelope(bp.shape, t, span, i, bp.spread);
+      const base = fx.intent.level != null ? clamp01(fx.intent.level) : 0;
+      const dim = +(base * rest).toFixed(3);
+      const lvl = (!cover || cover.has(fx.id)) ? +(peak * env).toFixed(3) : 0;
       if (isHead(fx)) {
-        /* a HEAVY hit (an entrance, weight .9+) is the one deliberate snap: centre
+        /* the hero fixture joins a full-rig hit and sits out a partial one: a stab
+           on two lamps should not swing the head, and something has to carry the
+           continuity through punctuation.
+           a HEAVY hit (an entrance, weight .9+) is the one deliberate snap: centre
            stage, prism open -- a few frames of travel inside the aim window */
-        const pose = {};
-        if (fx.intent.pan != null) pose.pan = fx.intent.pan;
-        if (fx.intent.tilt != null) pose.tilt = fx.intent.tilt;
-        if (blast && sf >= 0.9) { pose.pan = 0.5; pose.tilt = 0.5; }
-        fx.intent = blast ? { colour: "white", level: lvl, ...(sf >= 0.7 ? { prism: true } : {}), ...pose } : { ...pose, level: 0 };
+        if (cover) continue;
+        if (sf >= 0.9) { pose.pan = 0.5; pose.tilt = 0.5; }
+        fx.intent = { colour: hue === null ? "white" : (fx.intent.colour || "white"),
+                      level: Math.max(dim, lvl), ...(sf >= 0.7 ? { prism: true } : {}), ...pose };
       } else {
-        fx.intent = blast ? { colour: [1, 1, 1], level: lvl } : { level: 0 };
+        fx.intent = lvl > dim ? { colour: hitCol, level: lvl }
+                              : { colour: fx.intent.colour || hitCol, level: dim };
       }
     }
   }
   return { position, fixtures };
 }
 
-module.exports = { frame, resolveGroups, renderPar, renderHead, parLevel, hitEnv, compose, tint, modulationAt };
+module.exports = { frame, resolveGroups, renderPar, renderHead, parLevel, hitEnv, hitCover, hitEnvelope, compose, tint, modulationAt };
