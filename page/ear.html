@@ -1363,6 +1363,11 @@ function edgeWords(p) {
       ? ` <b style="color:var(--bad)">· this boundary is worth only ${p.edge.toFixed(2)} against the noise either side, so treat it as a suggestion</b>`
       : ` <span class="dim">· boundary worth ${p.edge.toFixed(2)}</span>`;
   }
+  if (typeof p.sudden === "number") {
+    out += p.sudden < 0.5
+      ? ` <b style="color:#e8a33d">· the change here is a ramp (${p.sudden.toFixed(2)}), not a moment &mdash; fade through it, there is nothing to hit</b>`
+      : ` <span class="dim">· lands on the bar (${p.sudden.toFixed(2)})</span>`;
+  }
   if (!modelRan()) return out;
   if (p.also_heard == null) return out + ` <span class="dim">· only our own detectors heard it</span>`;
   return out + ` <span style="color:var(--ok)">· a second model heard it too (${p.also_heard})</span>`;

@@ -194,7 +194,8 @@ def held_bars(v, a, b):
     return part if part.size else v[-1:]
 
 
-def sections(spans, voices, busy, pickup, report=None, chroma=None, edges=None):
+def sections(spans, voices, busy, pickup, report=None, chroma=None, edges=None,
+             steps=None):
     from parts import how_much, word_for
 
     v = busy[0] if busy.ndim > 1 else busy
@@ -220,6 +221,7 @@ def sections(spans, voices, busy, pickup, report=None, chroma=None, edges=None):
             "to_bar": b - pickup,
             "role": role,
             "edge": (edges[n] if edges is not None and n < len(edges) else None),
+            "sudden": (steps[n] if steps is not None and n < len(steps) else None),
             "repeats_as": same[n],
             "sure": apart[n],
             "trades": turning(voices, a, b, busy),
@@ -331,7 +333,8 @@ def read(path, slug):
     told = call([(a, b, m) for a, b, m in snapped], score_bars)
     shaped = sections([(s["from"], s["to"], s["role"]) for s in told],
                       voices, busy, pickup, report, chroma,
-                      edges=[s.get("edge") for s in told])
+                      edges=[s.get("edge") for s in told],
+                      steps=[s.get("sudden") for s in told])
     # A second opinion on the boundaries from a model that shares no code and
     # no training data with the detectors above. Recorded per section rather
     # than merged into them: where both heard a boundary that is worth knowing,

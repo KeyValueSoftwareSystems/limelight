@@ -97,6 +97,12 @@ export function format(raw) {
         const seg = map[k];
         return seg.from_beat + (at - seg.at_s) / (60 / seg.bpm);
       };
+      const atBeat = (n) => {
+        if (!map || !map.length) return firstBeatS + n * beatSec;
+        let k = 0;
+        while (k + 1 < map.length && map[k + 1].from_beat <= n) k++;
+        return map[k].at_s + (n - map[k].from_beat) * (60 / map[k].bpm);
+      };
       let lead = 0;
       out.beats = raw.beats.map((b, idx) => {
         /* Nearest grid beat, which is how pulse.py decides what off_ms is
@@ -110,21 +116,29 @@ export function format(raw) {
         /* Before grid beat zero the song is in its pickup, a bar shorter than
            the others. It is numbered from its own first beat so that every bar
            in the list, that one included, has a beat one. */
+        const drift = (t, at) => {
+          if (b.off_ms !== undefined) return Math.round(b.off_ms);
+          if (t == null) return undefined;
+          return Math.round((t - at) * 1000);
+        };
         if (n < 0) {
           lead += 1;
+          const off = drift(b.t, atBeat(n));
           return Object.assign({ bar: firstBar, beat: lead },
+            b.t !== undefined ? { t: b.t } : {},
             b.weight !== undefined ? { weight: b.weight } : {},
             b.sure !== undefined ? { sure: b.sure } : {},
-            b.t !== undefined ? { off_ms: Math.round((b.t - (firstBeatS + idx * beatSec)) * 1000) } : {},
+            off !== undefined ? { off_ms: off } : {},
             b.downbeat !== undefined ? { downbeat: b.downbeat } : {});
         }
         const bar = Math.max(firstBar, 1 + Math.floor(n / bpb));
         const beat = 1 + (((n % bpb) + bpb) % bpb);
-        const expectedT = firstBeatS + idx * beatSec;
         const entry = { bar, beat };
+        if (b.t      !== undefined) entry.t      = b.t;
         if (b.weight !== undefined) entry.weight = b.weight;
         if (b.sure   !== undefined) entry.sure   = b.sure;
-        if (b.t      !== undefined) entry.off_ms  = Math.round((b.t - expectedT) * 1000);
+        const off = drift(b.t, atBeat(n));
+        if (off !== undefined) entry.off_ms = off;
         if (b.downbeat !== undefined) entry.downbeat = b.downbeat;
         return entry;
       });
@@ -174,6 +188,7 @@ export function format(raw) {
          boundary too. Null means only we did, which is not the same as wrong. */
       also_heard: part.also_heard,
       edge: part.edge,
+      sudden: part.sudden,
       sure:       part.sure,
       trades:     part.trades,
       mood:       part.mood,

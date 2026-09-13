@@ -139,6 +139,58 @@ for (const f of files) {
      numbered.map(p => p.role).join(", "));
 }
 
+/* Alnas reported that sections were a bar late and proposed the check himself:
+   the first section calling drums "full" should start where the drums arrive.
+   It was worth running and it does not hold, for a reason worth writing down.
+
+   `presence` marks any stretch where a stem is audible; `drums: full` marks a
+   section where the drums dominate. Ponni Nadhi has an intro fill from bar 1,
+   six silent bars, and the real entrance at 17 -- presence says bar 1, the
+   section says 17, and both are right. The Nights sustains 0.32 from bar 9
+   under one 1.12 spike at 17. Six songs disagreed by six to sixteen bars and
+   the score was correct on every one, so the check was dropped rather than
+   loosened until it passed.
+
+   The alignment claim itself was tested on Levels, where the drums lane and the
+   first drums-full section both land on bar 9: no offset. What was real is
+   below. */
+
+/* The other half of his report was a constant two-beat label offset. That was
+   real and it was ours: the formatter recomputed off_ms against a uniform grid
+   indexed by the beat's position in the list, turning a 13 ms score into a
+   951 ms answer, which at 128 bpm is exactly two beats. The fix is to send what
+   the score measured, so the invariant to hold is fidelity, not smallness.
+   Songs whose grid genuinely fits badly -- World Of Lokah has 78 of 206 beats
+   more than 250 ms out in the score itself -- must still come through unchanged
+   rather than be quietly tidied. */
+{
+  const fmt = require("../server/format/v1.js");
+  const format = fmt.format || fmt.default;
+  if (typeof format === "function") {
+    for (const f of files) {
+      const raw = JSON.parse(fs.readFileSync(f, "utf8"));
+      const name = path.basename(f).replace(/\.score(\.json)?$/, "");
+      if (!Array.isArray(raw.beats) || !raw.beats.length) continue;
+      let doc;
+      try { doc = format(raw); } catch { continue; }
+      const got = Array.isArray(doc.beats) ? doc.beats : [];
+      if (got.length !== raw.beats.length) continue;
+      let drift = 0, worst = 0, noT = 0;
+      for (let i = 0; i < got.length; i++) {
+        if (got[i].t === undefined && raw.beats[i].t !== undefined) noT++;
+        if (raw.beats[i].off_ms == null || got[i].off_ms == null) continue;
+        const d = Math.abs(got[i].off_ms - raw.beats[i].off_ms);
+        worst = Math.max(worst, d);
+        if (d > 1) drift++;
+      }
+      ok(`${name}: the reader is told the off_ms the score measured`,
+         drift === 0, `${drift} beats differ, worst ${worst} ms`);
+      ok(`${name}: every beat the reader receives carries its own time`,
+         noT === 0, `${noT} beats have no t`);
+    }
+  }
+}
+
 if (files.length > 1)
   ok("both bar bases are represented, so this actually tests the thing",
      Object.keys(bases).length > 1, JSON.stringify(bases));

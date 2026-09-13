@@ -88,7 +88,10 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
     held: (planted.bars.intensity || []).map(() => 0.6),
   });
   if (Array.isArray(planted.parts) && planted.parts.length) {
-    planted.parts.forEach((q, i) => { q.edge = i === 0 ? null : 1.5 + i; });
+    planted.parts.forEach((q, i) => {
+      q.edge = i === 0 ? null : 1.5 + i;
+      q.sudden = i === 0 ? null : 0.4 + i * 0.3;
+    });
   }
   planted.motion = {
     per: "bar", from_bar: 1,
@@ -147,6 +150,12 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
        && JSON.stringify((js2.sections || []).map(x => x.edge))
           === JSON.stringify((py2.sections || []).map(x => x.edge)),
      `js ${JSON.stringify((js2.sections || []).map(x => x.edge))}`);
+
+  ok("a section says whether its boundary is a step or a ramp, through both formatters",
+     (js2.sections || []).some(x => x.sudden !== undefined)
+       && JSON.stringify((js2.sections || []).map(x => x.sudden))
+          === JSON.stringify((py2.sections || []).map(x => x.sudden)),
+     `js ${JSON.stringify((js2.sections || []).map(x => x.sudden))}`);
 
   ok("both formatters send the same motion track",
      JSON.stringify(js2.motion) === JSON.stringify(py2.motion),

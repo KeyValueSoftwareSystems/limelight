@@ -96,6 +96,16 @@ def format_v1(raw):
                 seg = tempo_map[k]
                 return seg["from_beat"] + (at - seg["at_s"]) / (60.0 / seg["bpm"])
 
+            def _near(x):
+                return int(math.floor(float(x) + 0.5))
+
+            def _at_beat(n):
+                k = 0
+                while k + 1 < len(tempo_map) and tempo_map[k + 1]["from_beat"] <= n:
+                    k += 1
+                seg = tempo_map[k]
+                return seg["at_s"] + (n - seg["from_beat"]) * (60.0 / seg["bpm"])
+
             lead = 0
             for idx, b in enumerate(raw["beats"]):
                 at = b.get("t") if isinstance(b, dict) else None
@@ -108,13 +118,16 @@ def format_v1(raw):
                     beat = 1 + (n % bpb)
                 entry = {"bar": bar, "beat": beat}
                 if isinstance(b, dict):
-                    expected_t = first_beat_s + idx * beat_sec
+                    if b.get("t") is not None:
+                        entry["t"] = b["t"]
                     if b.get("weight") is not None:
                         entry["weight"] = b["weight"]
                     if b.get("sure") is not None:
                         entry["sure"] = b["sure"]
-                    if b.get("t") is not None:
-                        entry["off_ms"] = round((b["t"] - expected_t) * 1000)
+                    if b.get("off_ms") is not None:
+                        entry["off_ms"] = _near(b["off_ms"])
+                    elif b.get("t") is not None:
+                        entry["off_ms"] = _near((b["t"] - _at_beat(n)) * 1000)
                     if b.get("downbeat") is not None:
                         entry["downbeat"] = b["downbeat"]
                 converted.append(entry)
@@ -162,6 +175,7 @@ def format_v1(raw):
                 "trades": p.get("trades"),
                 "also_heard": p.get("also_heard"),
                 "edge": p.get("edge"),
+                "sudden": p.get("sudden"),
                 "mood": p.get("mood"),
                 "stems": p.get("stems"),
             }

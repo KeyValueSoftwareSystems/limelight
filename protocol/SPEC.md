@@ -520,6 +520,29 @@ that separate *different* names are left alone and shipped with their number:
 sixty of them exist, and they may be real changes that the level and the stems
 happen not to show.
 
+`edge` says how different the two sections are. `sections[].sudden` says how
+much of that difference happens *at* the boundary: the jump across the two bars
+either side, over the total distance between the sections. At 1.0 the whole
+change lands on the bar. At 0.3 the sections really do differ and the change is
+a ramp spread over eight bars, so the exact bar is arbitrary and no listener
+will feel an event there.
+
+They are different questions and the numbers know it: across 279 boundaries they
+correlate at -0.16, and they disagree on 62 of them -- 30 boundaries pass the
+1.3 difference check while being ramps, and 32 fail it while being clean steps.
+(`wash` was dropped for correlating 0.93 with `held`; this is nothing like that.)
+
+Don't Look Down is the worked example. Its boundary at bar 20 scores 1.66 for
+difference and 0.39 for suddenness: the bass climbs 0.09, 0.23, 0.34, 0.46,
+0.67, 0.98 from bar 16 to bar 23 while the energy stays flat. The two sections
+are genuinely different and there is no moment between them. Amal played it and
+said he could not feel any change at that boundary. He was right, and `edge`
+alone could not have told him why. Its drop at bar 38 scores 1.14 and bar 103
+scores 1.77.
+
+A reader should cue a step and fade through a ramp. Below about 0.5 there is no
+instant to hit.
+
 This is also the honest answer to why breakdowns were worse than drops. A drop
 is a large step in a loud passage and the evidence towers over the noise: drop
 boundaries fail the 1.3 check on 2 of 26. A breakdown boundary sits inside a

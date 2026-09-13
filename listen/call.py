@@ -52,6 +52,24 @@ def edge(bars, a, b, c):
     return float(np.mean(apart)) / wide
 
 
+def sudden(bars, a, b, c, near=2):
+    rows = [lift(bars[k]) for k in LANES] + [lift(bars["intensity"])]
+    if min(b - a, c - b) < near + 1:
+        return None
+    local, whole = [], []
+    for v in rows:
+        left, right = v[a:b], v[b:c]
+        if not len(left) or not len(right):
+            return None
+        local.append(abs(float(v[b:b + near].mean())
+                         - float(v[max(a, b - near):b].mean())))
+        whole.append(abs(float(right.mean()) - float(left.mean())))
+    wide = float(np.mean(whole))
+    if wide <= 1e-6:
+        return None
+    return float(np.mean(local)) / wide
+
+
 def settle(got, name, bars):
     while True:
         merged = False
@@ -180,9 +198,12 @@ def call(spans, bars):
     for i, s in enumerate(got):
         if i == 0:
             s["edge"] = None
+            s["sudden"] = None
             continue
         worth = edge(bars, got[i - 1]["from"], s["from"], s["to"])
         s["edge"] = None if worth is None else round(worth, 2)
+        step = sudden(bars, got[i - 1]["from"], s["from"], s["to"])
+        s["sudden"] = None if step is None else round(step, 2)
 
     count = {}
     for s, word in zip(got, name):
