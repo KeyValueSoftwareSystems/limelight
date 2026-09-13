@@ -422,8 +422,15 @@ function frame(position, plan, ctx) {
             phaseInBar: (((Bk / bpb) % 1) + 1) % 1 };
   }
   const mods = active.filter(a => a.type === "modulate");
-  const gainMod = mods.reduce((g, a) => g * (a.params && a.params.gain != null ? a.params.gain : 1), 1);
-  const motionMod = mods.reduce((t, a) => t + (a.params && a.params.motion != null ? a.params.motion : 0), 0) + mod.motion;
+  /* ramps (a rise signal): grow toward full across the span, weight-scaled */
+  let rampGain = 1, rampMotion = 0, rampWhiten = 0;
+  for (const a of active.filter(x => x.type === "ramp")) {
+    const span = Math.max(1e-6, at(a.to) - at(a.from));
+    const prog = clamp01((here - at(a.from)) / span), w = a.params && a.params.weight != null ? clamp01(a.params.weight) : 0.5;
+    rampGain *= 1 + 0.35 * w * prog; rampMotion += 0.3 * w * prog; rampWhiten += 0.25 * w * prog;
+  }
+  const gainMod = mods.reduce((g, a) => g * (a.params && a.params.gain != null ? a.params.gain : 1), 1) * rampGain;
+  const motionMod = mods.reduce((t, a) => t + (a.params && a.params.motion != null ? a.params.motion : 0), 0) + mod.motion + rampMotion;
   const hook = top("hook"), pause = top("pause");
   const hookK = hook ? 1 + 0.3 * strengthOf(hook) : 1;
   const pauseK = pause ? 1 - 0.85 * strengthOf(pause) : 1;        /* a hush, not a blackout */
@@ -462,7 +469,7 @@ function frame(position, plan, ctx) {
      build/bright -> whiten the PAR colour; harmony -> tint it; width -> close the
      arc; subsections/hook/pause -> level; hook -> the head's prism. */
   const accent = top("accent_strobe"), whiten = top("whiten");
-  const whitenAmt = clamp01((whiten ? (whiten.params.amount || 0.3) : 0) + mod.whiten);
+  const whitenAmt = clamp01((whiten ? (whiten.params.amount || 0.3) : 0) + mod.whiten + rampWhiten);
   const outer = new Set(groups.outer || []);
   const tintAmt = clamp01(0.6 * mod.sure);
   for (const fx of fixtures) {

@@ -44,11 +44,13 @@ function subsectionsOf(score) {
   return [];
 }
 
-/* ---- moments: {bar, beat, is|kind, weight|strength, for_beats, still} ------- */
-function momentsOf(score) {
-  if (!score || !Array.isArray(score.moments)) return [];
+/* ---- moments and signals: {bar, beat, is|kind, weight|strength, for_beats, still,
+   again_of}. Signals are the pipeline's other events (rises, tempo changes, riffs
+   returning); both shapes pass them through untouched, so one normaliser serves. */
+function eventsOf(list) {
+  if (!Array.isArray(list)) return [];
   const out = [];
-  for (const m of score.moments) {
+  for (const m of list) {
     const at = m.at || m;
     if (!isNum(at.bar)) continue;
     const o = { bar: at.bar, beat: or_(at.beat, 1), kind: or_(m.is, or_(m.kind, null)),
@@ -56,10 +58,13 @@ function momentsOf(score) {
       sure: or_(m.sure, null) };
     if (isNum(m.for_beats)) o.for_beats = m.for_beats;
     if (Array.isArray(m.still)) o.still = m.still;
+    if (isNum(m.again_of)) o.again_of = m.again_of;
     out.push(o);
   }
   return out;
 }
+const momentsOf = score => eventsOf(score && score.moments);
+const signalsOf = score => eventsOf(score && score.signals);
 
 /* ---- the per-bar texture lanes: bars.* (raw) or top-level / curves (format_v1) */
 const LANES = ["width", "air", "pump", "pace", "brightness"];
@@ -167,5 +172,5 @@ function perBar(from_bar, values) {
   };
 }
 
-module.exports = { firstBarOf, subsectionsOf, momentsOf, lanesOf, stemLanesOf, harmonyOf, tensionOf,
+module.exports = { firstBarOf, subsectionsOf, momentsOf, signalsOf, lanesOf, stemLanesOf, harmonyOf, tensionOf,
                    chordOf, hueOfChord, normalise, perBar, LANES, STEMS };

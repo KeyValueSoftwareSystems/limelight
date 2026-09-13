@@ -421,6 +421,31 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   ok("format_v1 carries the same tension and growth", JSON.stringify(plan(format(require("./fixtures/mini_raw.js").RAW()), EN, 42)) === JSON.stringify(p));
 }
 
+
+/* ---- signals: rise ramps, change steps the rate, a returning riff is lit the same -- */
+{
+  const MS = require("./fixtures/mini_raw.js").RAW();
+  MS.signals = [{ bar: 1, beat: 1, is: "rise", what: "a sweep", sure: 0.8, for_beats: 12, weight: 0.6 },
+                { bar: 2, beat: 1, is: "change", what: "half time", sure: 1, weight: 0.4 },
+                { bar: 8, beat: 1, is: "change", what: "double time", sure: 1, weight: 0.5 },
+                { bar: 14, beat: 1, is: "hook", what: "the riff", again_of: 6, sure: 0.9, for_beats: 4, weight: 0.6 }];
+  const p = plan(MS, EN, 42);
+  const ramp = p.assignments.find(a => a.type === "ramp");
+  ok("a rise signal becomes a ramp that arrives at full exactly for_beats later",
+     ramp && ramp.from.bar === 1 && ramp.from.beat === 1 && ramp.to.bar === 4 && ramp.to.beat === 1 && ramp.params.weight === 0.6, JSON.stringify(ramp));
+  const sd = p.lanes.subdiv;
+  ok("a half-time change steps the rate down from its bar to the section's end", sd[1] === 0.5 && sd[2] === 0.25 && sd[3] === 0.25, JSON.stringify(sd.slice(0, 4)));
+  ok("a double-time change steps the rate up from its bar", sd[7] === 1 && sd[8] === 2 && sd[15] === 2, JSON.stringify(sd.slice(6, 16)));
+  const hooks = p.assignments.filter(a => a.moment === "hook");
+  ok("the returning riff is lit like the first time (same one-shot, from the signal's bar)",
+     hooks.length === 2 && hooks[0].seq_id === hooks[1].seq_id && hooks.some(h => h.from.bar === 14 && h.to.bar === 15), JSON.stringify(hooks.map(h => [h.from.bar, h.seq_id])));
+  ok("signals plan identically from either shape", JSON.stringify(plan(format(JSON.parse(JSON.stringify(MS))), EN, 42)) === JSON.stringify(p));
+  /* a pace bar of 0.0 means nothing was detected, not silence */
+  const MP = require("./fixtures/mini_raw.js").RAW();
+  MP.bars.pace = [0.2, 0.2, 0.2, 0.2, 1.6, 1.6, 0, 1.6, 1.6, 1.6, 0, 1.6, 1.6, 0, 1.6, 1.6, 0.1, 0.1, 0.1, 0.1];
+  ok("a zero pace bar is ignored when deciding the rate", plan(MP, EN, 42).lanes.subdiv[4] === 2, String(plan(MP, EN, 42).lanes.subdiv[4]));
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;
