@@ -113,6 +113,13 @@
     var now = session.now();
     var upcoming = session.next(LEAD_MS);
 
+    /* The song's own energy sets how much danger there is: quiet bars ease off,
+       loud bars fill the ring. Fed every frame so the hazards -- which already
+       read pace/energy -- breathe with the music instead of running flat. */
+    var energyNow = (now.energy == null ? 0.5 : now.energy);
+    hazards.setEnergy(energyNow);
+    hazards.setPace(0.5 + energyNow * 1.6);
+
     var currentBar = 1, currentBeat = 1, bpb = 4;
     if (now.position && !now.position.before_first_beat) {
       currentBar = now.position.bar || 1;
@@ -150,6 +157,15 @@
     window.Renderer.setPhase(phase);
 
     player.update(dt);
+
+    /* The thing in the middle is solid: push the player back to its edge rather
+       than let it walk (or dash) through the boss. */
+    var keepOut = window.Renderer.bossRadius(ARENA_R) + player.radius;
+    var pDist = Math.sqrt(player.x * player.x + player.y * player.y);
+    if (pDist < keepOut) {
+      if (pDist > 1e-4) { player.x *= keepOut / pDist; player.y *= keepOut / pDist; }
+      else { player.y = keepOut; }
+    }
 
     var damages = hazards.checkDamage(player.x, player.y, player.radius, ARENA_R);
     for (var i = 0; i < damages.length; i++) {
@@ -228,6 +244,7 @@
       currentBar: currentBar,
       currentBeat: currentBeat,
       bpb: bpb,
+      seconds: now.seconds,
     });
 
     window.Challenges.check(stats, hazards, player, now);

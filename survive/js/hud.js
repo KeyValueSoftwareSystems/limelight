@@ -98,6 +98,9 @@
     updateTimeline(state.currentBar, state.section);
     updateDashCharges(state.dashCharges, state.maxDashes);
     updateIncomingBeats(state.currentBeat, state.bpb);
+
+    var timeEl = $("hud-song-time");
+    if (timeEl) timeEl.textContent = fmtTime(state.seconds || 0) + " / " + songLength;
   }
 
   function updateTimeline(currentBar, currentSection) {
@@ -124,11 +127,6 @@
     for (var i = 0; i < labels.length; i++) {
       labels[i].classList.toggle("is-current",
         labels[i].dataset.name && labels[i].dataset.name.toLowerCase() === (currentSection || "").toLowerCase());
-    }
-
-    var timeEl = $("hud-song-time");
-    if (timeEl) {
-      timeEl.textContent = fmtTime(0) + " / " + songLength;
     }
   }
 

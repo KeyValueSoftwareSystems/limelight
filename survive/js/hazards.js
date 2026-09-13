@@ -111,7 +111,16 @@
 
   /* ---- Hazard Manager ---- */
   function create(score) {
+    /* The hub serves a score with `parts` (0-based bars), not `sections`. Build
+       sections from parts the same way the HUD does -- without this the section
+       lookup finds nothing, the phase never leaves IDLE, and the boss never
+       attacks. `to_bar` is inclusive, so the half-open end is +1. */
     var sections = score.sections || [];
+    if (!sections.length && score.parts) {
+      sections = score.parts.map(function (p) {
+        return { from: { bar: p.from_bar, beat: 1 }, to: { bar: p.to_bar + 1, beat: 1 }, name: p.role };
+      });
+    }
     var bpb = (score.grid && score.grid.beats_per_bar) || 4;
     var telegraphPool = window.Telegraph.Pool();
     var phase = "IDLE";
@@ -146,10 +155,14 @@
         telegraphPool.add({ type: "sweep", bar: bar, bpb: bpb });
       }
       if (phase === "CHORUS") {
-        telegraphPool.add({ type: "ring", bar: bar, bpb: bpb });
+        /* Chorus density rides the energy curve: a quiet bar rests every other
+           bar, a loud one fires every bar. */
+        if (energyScale > 0.4 || (bar % 2 === 0)) {
+          telegraphPool.add({ type: "ring", bar: bar, bpb: bpb });
+        }
       }
       if (phase === "DROP") {
-        var noteCount = 3 + (hash(bar, 0) % 4);
+        var noteCount = 2 + Math.round(energyScale * 4) + (hash(bar, 0) % 2);
         for (var i = 0; i < noteCount; i++) {
           var angle = (i / noteCount) * Math.PI * 2 + (hash(bar, i) % 100) / 100;
           activeNotes.push({
@@ -230,7 +243,10 @@
             var playerAngle = ((Math.atan2(-playerY, playerX) * 180 / Math.PI) + 360) % 360;
             var diff = Math.abs(playerAngle - gapDeg);
             if (diff > 180) diff = 360 - diff;
-            if (diff > 30) {
+            /* The safe gap narrows as the song gets louder -- still open, but a
+               peak chorus asks for a tighter line than a quiet one. */
+            var safeHalf = 30 - energyScale * 12;
+            if (diff > safeHalf) {
               damages.push({ type: "ring", bar: t.bar });
             }
             window.Telegraph.markDamaged(t);
