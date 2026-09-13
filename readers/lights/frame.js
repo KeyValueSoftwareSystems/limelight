@@ -87,9 +87,14 @@ function renderPar(gesture, ph, groups, p) {
     // alternation never read; it also forced both on for the downbeat.)
     // The off pair goes fully dark, not to the floor: at 12% dim red reads as off
     // but dim blue is still visibly on, so the floor made the trade look lopsided.
-    const activeLvl = +((p.peak != null ? p.peak : 1) * (p.intensity != null ? p.intensity : 1)).toFixed(3);
-    for (const id of (groups.inner || [])) out[id] = { colour: inC, level: onInner ? activeLvl : 0 };
-    for (const id of (groups.outer || [])) out[id] = { colour: outC, level: onInner ? 0 : activeLvl };
+    // In breathe mode the level CURVE passes through: the active pair follows it and
+    // the resting pair sits at the floor, so a sustained trade breathes like a wash.
+    // (Holding the active pair and darkening the rest was binarising the curve.)
+    const held = p.mode !== "breathe";
+    const activeLvl = held ? +((p.peak != null ? p.peak : 1) * (p.intensity != null ? p.intensity : 1)).toFixed(3) : on;
+    const restLvl = held ? 0 : flo;
+    for (const id of (groups.inner || [])) out[id] = { colour: inC, level: onInner ? activeLvl : restLvl };
+    for (const id of (groups.outer || [])) out[id] = { colour: outC, level: onInner ? restLvl : activeLvl };
     return out;
   }
   if (gesture.group === "arc" && (gesture.stagger > 0 || gesture.direction)) {
@@ -117,15 +122,18 @@ function renderPar(gesture, ph, groups, p) {
     // the head is HELD bright for its whole step, not `on` (the hit-envelope, which
     // sags to the floor by the end of the beat and left a dim colour lingering an
     // extra step). Off positions are fully dark; a comet keeps its spatial tail.
-    const activeLvl = +((p.peak != null ? p.peak : 1) * (p.intensity != null ? p.intensity : 1)).toFixed(3);
+    // breathe mode: the curve passes through (head follows it, the rest at the floor)
+    const held = p.mode !== "breathe";
+    const activeLvl = held ? +((p.peak != null ? p.peak : 1) * (p.intensity != null ? p.intensity : 1)).toFixed(3) : on;
+    const restLvl = held ? 0 : flo;
     arc.forEach((id, i) => {
       let lvl;
       if (comet) {
         const d = dir === "R2L" ? i - head : head - i;  // >0 = behind the head
-        lvl = d === 0 ? activeLvl : d === 1 ? activeLvl * 0.45 : d === 2 ? activeLvl * 0.18 : 0;
-        if (d < 0) lvl = 0;
+        lvl = d === 0 ? activeLvl : d === 1 ? Math.max(restLvl, activeLvl * 0.45) : d === 2 ? Math.max(restLvl, activeLvl * 0.18) : restLvl;
+        if (d < 0) lvl = restLvl;
       } else {
-        lvl = i === head ? activeLvl : 0;               // clean chase: only the head, held
+        lvl = i === head ? activeLvl : restLvl;         // clean chase: only the head lit
       }
       out[id] = { colour: headColour, level: +lvl.toFixed(3) };
     });
@@ -325,7 +333,7 @@ function tint(colour, hue, amount, minor) {
 /* ---- per-bar modulation from the plan's texture lanes and harmony ------------
    Everything here is neutral (a no-op) when the plan carries no lanes/harmony, so
    a plain plan renders exactly as before. A null bar reads as the neutral middle. */
-function modulationAt(plan, bar) {
+function modulationAt(plan, bar, beatInBar, bpb) {
   const m = { gain: 1, floorK: 1, motion: 0, outerK: 1, whiten: 0, headK: 1, strobeK: 1, subdiv: 1,
               drumsOut: false, hue: null, minor: null, sure: 0 };
   /* an ABSENT lane is no information (undefined: the factor is skipped); a null
@@ -353,6 +361,18 @@ function modulationAt(plan, bar) {
     if (vocals !== undefined && vocals !== null && vocals >= 0.3) { m.headK *= 1.15; m.motion -= 0.15; }   /* the head listens */
     /* the PAR pattern clock: events per beat (0.5 half time, 1, 2 double time) */
     if (subdiv !== undefined && typeof subdiv === "number" && subdiv > 0) m.subdiv = Math.max(0.25, Math.min(4, subdiv));
+    /* growth: a rising section climbs across itself (0.5 = at rest) */
+    const grow = read(L, "grow", 0.5);
+    if (grow !== undefined) { m.gain *= 0.8 + 0.4 * grow; m.motion += 0.3 * (grow - 0.5); }
+  }
+  /* tension: the score's per-beat wind-up lifts level and motion toward a release */
+  const T = plan.tension;
+  if (T && Array.isArray(T.values) && T.values.length) {
+    let i = (Math.round(bar) - (T.from_bar || 0)) * (bpb || 4) + (beatInBar || 0);
+    i = Math.max(0, Math.min(T.values.length - 1, i));
+    const t = typeof T.values[i] === "number" ? T.values[i] : 0.5;
+    m.gain *= 0.85 + 0.3 * t;
+    m.motion += 0.3 * (t - 0.5);
   }
   const H = plan.harmony;
   if (H) {
@@ -390,7 +410,7 @@ function frame(position, plan, ctx) {
   const blast = top("white_blast"), blackout = top("blackout");
 
   /* the bar's texture + harmony, and the span modifiers riding on the base */
-  const mod = modulationAt(plan, ph.bar);
+  const mod = modulationAt(plan, ph.bar, ph.beatInBar, bpb);
   /* the PAR pattern clock: the musical clock run at the bar's subdivision. At a
      bar line B*k is whole for k in {0.5,1,2}, so a speed change re-aligns on the
      downbeat with no glitch. k = 1 is the real clock, byte for byte. */

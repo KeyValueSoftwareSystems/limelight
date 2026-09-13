@@ -47,6 +47,8 @@ const RAW = {
     other: [...rep(0.7, 4), ...rep(0.8, 12), ...rep(0.4, 4)],
   },
   phrase_grid: { every_bars: 4, from_bar: 0, boundaries_on_grid: true },
+  /* per beat: winds up through the intro, high in the drop, falls in the outro */
+  tension: [...Array.from({ length: 16 }, (_, i) => +(0.2 + 0.04 * i).toFixed(3)), ...rep(0.9, 48), ...rep(0.3, 16)],
 };
 
 module.exports = { RAW: () => JSON.parse(JSON.stringify(RAW)) };

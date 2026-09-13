@@ -96,6 +96,15 @@ const FMT = format(JSON.parse(JSON.stringify(RAW)));
   ok("perBar of nothing reads null", M.perBar(0, null)(1) === null);
 }
 
+
+/* ---- tension: one value per beat, anchored at the first bar ---------------- */
+{
+  const a = M.tensionOf(RAW), b = M.tensionOf(FMT);
+  ok("tension reads from either shape identically", JSON.stringify(a) === JSON.stringify(b));
+  ok("tension is per beat from the first bar", a && a.from_bar === 0 && a.values.length === 80 && a.values[0] === 0.2);
+  ok("no tension -> null", M.tensionOf({ grid: RAW.grid }) === null);
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

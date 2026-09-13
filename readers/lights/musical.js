@@ -111,6 +111,16 @@ function harmonyOf(score) {
            confidence: chords.map((_, i) => or_(confidence[i], null)), key };
 }
 
+/* ---- tension: one value per beat -- a bare array (raw) or {per:'beat', from_bar,
+   values} (format_v1); anchored at the first bar, beat 1 ------------------------- */
+function tensionOf(score) {
+  if (!score) return null;
+  if (Array.isArray(score.tension)) return { from_bar: firstBarOf(score), values: score.tension };
+  const T = score.tension;
+  if (T && Array.isArray(T.values)) return { from_bar: or_(T.from_bar, firstBarOf(score)), values: T.values };
+  return null;
+}
+
 /* a chord name -> { root: pitch class 0..11, minor } ; null when unparseable */
 const PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 function chordOf(name) {
@@ -157,5 +167,5 @@ function perBar(from_bar, values) {
   };
 }
 
-module.exports = { firstBarOf, subsectionsOf, momentsOf, lanesOf, stemLanesOf, harmonyOf,
+module.exports = { firstBarOf, subsectionsOf, momentsOf, lanesOf, stemLanesOf, harmonyOf, tensionOf,
                    chordOf, hueOfChord, normalise, perBar, LANES, STEMS };

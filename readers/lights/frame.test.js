@@ -397,6 +397,46 @@ const P = (extra, more) => ({ grid: { beats_per_bar: 4 }, assignments: [base(), 
   ok("and at low motion it only drifts", sweep("one", 0.3, 12).pan < 0.5);
 }
 
+
+/* ---- the level curve passes through every PAR path -------------------------------
+   In breathe mode an alternating or chasing look must breathe like a wash: the
+   active lamps follow the curve and the resting ones sit at the floor. In hit mode
+   the trade stays crisp (active held, off dark) -- the rig review asked for that. */
+{
+  const LIB8 = { ...LIB,
+    trade_y: { id: "trade_y", kind: "individual", gesture: { pattern: "inner_outer_alternation", group: "all_pars",
+      keys: [{ at: 0, target: "inner", intent: { level: 0.9, colour: [1, 0, 0] } }, { at: 0, target: "outer", intent: { level: 0 } },
+             { at: 1, target: "inner", intent: { level: 0 } }, { at: 1, target: "outer", intent: { level: 0.9, colour: [0, 0, 1] } }] } },
+    chase_y: { id: "chase_y", kind: "individual", gesture: { group: "arc", direction: "L2R", keys: [{ intent: { colour: [0, 1, 0], level: 0.9 } }] } },
+  };
+  const C8 = { layout: RIG, library: LIB8 };
+  const pl = (seq, mode) => ({ grid: { beats_per_bar: 4 }, assignments: [{ from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: seq, layer: "par", priority: 0,
+    params: { floor: 0.08, peak: 0.35, mode, intensity: 1 } }] });
+  const lit = (F) => Math.max(...RIG.fixtures.filter(f => f.type === "par7").map(f => g(F, f.id).level));
+  const trace = (seq, mode) => [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5].map(b => lit(frame({ bar: 1, beat: b }, pl(seq, mode), C8)));
+  const wash = trace("hold_x", "breathe"), trade = trace("trade_y", "breathe"), chase = trace("chase_y", "breathe");
+  const near2 = (a, b) => a.every((v, i) => Math.abs(v - b[i]) < 0.02);
+  ok("a breathing trade follows the same curve as a breathing wash", near2(trade, wash), `${trade} vs ${wash}`);
+  ok("a breathing chase follows it too", near2(chase, wash), `${chase} vs ${wash}`);
+  ok("the breathing trade's resting pair sits at the floor, not dark",
+     g(frame({ bar: 1, beat: 1.5 }, pl("trade_y", "breathe"), C8), "par_1").level >= 0.07 && g(frame({ bar: 1, beat: 1.5 }, pl("trade_y", "breathe"), C8), "par_1").level <= 0.09);
+  const hitTrade = frame({ bar: 1, beat: 1.6 }, pl("trade_y", "hit"), C8);
+  ok("a hit-mode trade stays crisp: active pair held, off pair dark", g(hitTrade, "par_8").level === 0.35 && g(hitTrade, "par_1").level === 0);
+}
+
+/* ---- growth and tension ride on the level and the head ------------------------- */
+{
+  const base = () => ({ from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "hold_x", layer: "par", priority: 0, params: { floor: 0.3, peak: 1, mode: "hit", intensity: 1 } });
+  const head = () => ({ from: { bar: 1, beat: 1 }, to: { bar: 9, beat: 1 }, seq_id: "head_x", layer: "head", priority: 1, params: { headDim: 0.8, motion: 0.5 } });
+  const P = (more) => ({ grid: { beats_per_bar: 4 }, assignments: [base(), head()], ...more });
+  const low = frame({ bar: 1, beat: 1.5 }, P({ lanes: { from_bar: 1, grow: [0, 1] } }), CTX), high = frame({ bar: 2, beat: 1.5 }, P({ lanes: { from_bar: 1, grow: [0, 1] } }), CTX);
+  ok("a growing section is brighter at its end than its start", g(high, "par_1").level > g(low, "par_1").level, `${g(low, "par_1").level} -> ${g(high, "par_1").level}`);
+  const tLow = frame({ bar: 1, beat: 1.5 }, P({ tension: { from_bar: 1, values: [0, 0, 0, 0, 1, 1, 1, 1] } }), CTX), tHigh = frame({ bar: 2, beat: 1.5 }, P({ tension: { from_bar: 1, values: [0, 0, 0, 0, 1, 1, 1, 1] } }), CTX);
+  ok("high tension lifts the level between hits", g(tHigh, "par_1").level > g(tLow, "par_1").level, `${g(tLow, "par_1").level} -> ${g(tHigh, "par_1").level}`);
+  ok("high tension moves the head faster", g(frame({ bar: 2, beat: 2.3 }, P({ tension: { from_bar: 1, values: [0, 0, 0, 0, 1, 1, 1, 1] } }), CTX), "head").pan !== g(frame({ bar: 2, beat: 2.3 }, P(), CTX), "head").pan);
+  ok("no tension, no change", JSON.stringify(frame({ bar: 1, beat: 1.5 }, P(), CTX)) === JSON.stringify(frame({ bar: 1, beat: 1.5 }, P({ tension: null }), CTX)));
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

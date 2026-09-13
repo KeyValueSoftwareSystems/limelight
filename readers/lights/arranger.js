@@ -366,6 +366,34 @@ function plan(scoreIn, enumResult, seed) {
   const keyHue = harmony && harmony.key ? harmony.key.hue : null;
   const facts = factsBlock(score, sections, contexts, lanes, harmony, subs, moments, bpb);
 
+  /* growth: a section that RISES grows across itself instead of holding one level.
+     A per-bar `grow` lane, 0.5 at rest, climbing (or sinking) with the section's
+     rise from its first bar to its last; frame scales level and motion by it. */
+  let lanesOut = lanes;
+  if (facts) {
+    const grow = facts.vectors.map(() => 0.5);
+    sections.forEach(sec => {
+      const r = partRise(sec, score) || 0;
+      const n = sec.to.bar - sec.from.bar;
+      for (let bar = sec.from.bar; bar < sec.to.bar; bar++) {
+        const i = bar - facts.from_bar;
+        if (i < 0 || i >= grow.length) continue;
+        const pos = n > 1 ? (bar - sec.from.bar) / (n - 1) : 0.5;
+        grow[i] = +clamp01(0.5 + r * (pos - 0.5) * 2).toFixed(4);
+      }
+    });
+    if (grow.some(v => v !== 0.5)) { if (!lanesOut) lanesOut = { from_bar: facts.from_bar }; lanesOut.grow = grow; }   /* same object as lanes: the pace pre-pass adds subdiv to it too */
+  }
+  /* tension: the score's per-beat wind-up, normalised per song; frame lifts level
+     and motion with it so a build climbs toward its release beat by beat */
+  const tensionRaw = Mu.tensionOf(score);
+  const tension = tensionRaw ? { from_bar: tensionRaw.from_bar, values: Mu.normalise(tensionRaw.values) } : null;
+
+  /* memory: repeated material gets its look back. Keyed by the score's own label
+     (like / repeat), so the three drops of a song wear one pattern -- the audience
+     learns the show's rules -- while each keeps its own dynamics and variations. */
+  const memory = {};
+
   /* the subsections inside a section, clipped to it, at least a bar long */
   const subsIn = sec => {
     const secFrom = atBeat(sec.from), secTo = atBeat(sec.to);
@@ -413,8 +441,14 @@ function plan(scoreIn, enumResult, seed) {
     const vectors = facts ? facts.vectors : [];
     const sectionVector = facts ? majorityVector(vectors, idx(sec.from.bar), idx(sec.to.bar), context) : { form: context };
 
-    /* the PARs: a look + the phase's contrast (floor/peak/mode) */
-    const par = pickFor(sectionVector, "par");
+    /* the PARs: a look + the phase's contrast (floor/peak/mode) -- remembered when
+       this material has played before and the remembered look still suits here */
+    const label = sec.like || sec.repeat || null;
+    const mem = label && memory[label];
+    const stillFits = id => id && V.candidates(sectionVector).some(c => c.id === id);
+    let remembered;
+    const par = (mem && stillFits(mem.par)) ? { id: mem.par } : pickFor(sectionVector, "par");
+    if (mem && par && par.id === mem.par) remembered = label;
     const parParams = { rate, hue, floor: dyn.floor, peak: dyn.peak, mode: dyn.mode, intensity: boldness };
 
     const inside = subsIn(sec);
@@ -465,18 +499,19 @@ function plan(scoreIn, enumResult, seed) {
       pieces.forEach((pc, k) => assignments.push({
         from: fromBeat(pc[0]), to: fromBeat(pc[1]), seq_id: par.id, context, layer: "par", priority: 0,
         ...(pieces.length > 1 ? { piece: k, origin: sec.from } : {}),   /* so a scripted compound keeps its clock */
-        params: parParams, facts: sectionVector, occupies: occFor(par.id, "par"), section: sec.name,
+        params: parParams, facts: sectionVector, ...(remembered ? { remembered } : {}), occupies: occFor(par.id, "par"), section: sec.name,
       }));
       for (const v of variations) { const { f, t, ...a } = v; assignments.push(a); }
     }
 
     /* the head: always moving/lit, its own colour voice, speed by phase -- one
        continuous look per section, so the hero element reads as continuity */
-    const head = pickFor(sectionVector, "head");
+    const head = (mem && stillFits(mem.head)) ? { id: mem.head } : pickFor(sectionVector, "head");
+    if (label) memory[label] = { par: par && par.id, head: head && head.id };
     if (head) assignments.push({
       from: sec.from, to: sec.to, seq_id: head.id, context, layer: "head", priority: 1,
       params: { rate, hue, headDim: dyn.head, motion: dyn.motion, intensity: dyn.head },
-      facts: sectionVector, occupies: occFor(head.id, "head"), section: sec.name,
+      facts: sectionVector, ...(mem && head.id === mem.head ? { remembered: label } : {}), occupies: occFor(head.id, "head"), section: sec.name,
     });
 
     /* extra musical aspects, overlapping on their own fixture attribute so they
@@ -572,7 +607,8 @@ function plan(scoreIn, enumResult, seed) {
 
   const out = { seed: (seed || 0) >>> 0, grid: score.grid, contexts, assignments };
   if (facts) out.facts = facts;
-  if (lanes) out.lanes = lanes;
+  if (lanesOut) out.lanes = lanesOut;
+  if (tension) out.tension = tension;
   if (harmony) out.harmony = harmony;
   return out;
 }
