@@ -465,8 +465,16 @@ Guitar has The Nights as verse / pre-chorus / chorus and this file gives it no
 verse and no pre-chorus at all, and five breakdowns; Holocene is verse/chorus
 three times over and this file puts its one chorus at bar 191 of 209. A
 hook-lyric test -- does the line the sheet music calls the chorus land in a
-section named chorus, drop or post-chorus -- gets 6 of 30. `breakdown` is 21% of
-all sections, the largest class, and it is the fallback branch.
+section named chorus, drop or post-chorus -- gets 6 of 30.
+
+`breakdown` is 19% of all sections, the largest class. An earlier draft of this
+spec called it the fallback branch. That is wrong and worth correcting: it has a
+dedicated rule, and the fallback block accounts for 10% of breakdowns and 6.8%
+of all sections. What makes it a wastebasket is that its rule defines it as the
+peak's negative space -- quieter and thinner than the anchor -- so it absorbs
+whatever the other rules did not claim. Measured, its members are exactly as
+spread out as a random draw of the same size from the same songs (dispersion
+ratio 0.987, p = 0.37). It is a residual, not a category.
 
 So: drive a look off `like`, `edge`, `fullness` and the stem lanes, which are
 measured. Use `role` to put a word on screen for a human. Do not use it to

@@ -102,7 +102,6 @@ def call(spans, bars):
     mid = float(np.median([s["loud"] for s in got]))
 
     beats = float((lane["drums"] > ALIVE).mean()) >= 0.40
-    sings = float((lane["vocals"] > SURE).mean()) >= 0.15
 
     seen = {}
     for s in got:
@@ -185,11 +184,11 @@ def call(spans, bars):
 
     named = {}
     for i, s in enumerate(got):
-        if name[i] not in ("interlude", "developing", "bridge",
+        if name[i] not in ("interlude", "bridge",
                            "intro", "outro"):
             named.setdefault(s["mark"], name[i])
     for i, s in enumerate(got):
-        if name[i] in ("interlude", "developing") and s["mark"] in named:
+        if name[i] == "interlude" and s["mark"] in named:
             name[i] = named[s["mark"]]
 
     got, name = settle(got, name, bars)
