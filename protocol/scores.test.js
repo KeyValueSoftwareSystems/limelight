@@ -88,6 +88,22 @@ for (const f of files) {
   const s = Session(sc, { now: () => 1 });
   const g = sc.grid;
 
+  /* A song whose vocal stem is present for a good part of its length has a
+     voice line. This exists because a variable named sung held the vocal
+     envelope and a later block reused the name for the lyrics, so every score
+     rebuilt that night came out with voice.notes = 0. Nothing crashed and
+     melody stayed non-empty, because the lead instrument still contributed
+     notes -- only the singing was gone, and only this would have said so. */
+  {
+    const lane = ((sc.bars || {}).vocals || []).filter(x => x != null);
+    const live = lane.filter(x => x > 0.12).length / Math.max(1, lane.length);
+    if (lane.length && live > 0.3) {
+      const notes = (sc.voice && sc.voice.notes) || 0;
+      ok(`${name}: the voice is present for ${Math.round(live * 100)}% of bars, so it has a line`,
+         notes > 0, `voice.notes ${notes}`);
+    }
+  }
+
   /* A score either states its bar base or predates the field and means 1. Both are
      legal; what is never legal is a stated base that is not a whole number, because
      then every bar in the song is half a bar from where it says it is. */

@@ -354,9 +354,9 @@ def read(path, slug):
     mood_sure = {}
     felt = CACHE / f"{slug}.mood.json"
     if felt.exists():
-        rows, mood_sure = moods(json.loads(felt.read_text()), shaped, pickup)
-        if rows:
-            for part, row in zip(shaped, rows):
+        mood_rows, mood_sure = moods(json.loads(felt.read_text()), shaped, pickup)
+        if mood_rows:
+            for part, row in zip(shaped, mood_rows):
                 part["mood"] = row
         report["mood_axes"] = len(mood_sure)
 
@@ -367,15 +367,15 @@ def read(path, slug):
     phrase_rule = {"every_bars": every, "from_bar": origin,
                    "boundaries_on_grid": grid_says.get("on_grid", True)}
 
-    sung = None
+    lyrics_out = None
     heard_words = CACHE / f"{slug}.words.json"
     if heard_words.exists():
         twice = CACHE / f"{slug}.words2.json"
-        sung = lyrics(json.loads(heard_words.read_text()), g, g["bars"], origin, 2,
-                      again=(json.loads(twice.read_text()).get("said")
-                             if twice.exists() else None))
-        if sung:
-            report["words"] = len(sung["words"])
+        lyrics_out = lyrics(json.loads(heard_words.read_text()), g, g["bars"], origin, 2,
+                            again=(json.loads(twice.read_text()).get("said")
+                                   if twice.exists() else None))
+        if lyrics_out:
+            report["words"] = len(lyrics_out["words"])
     show(slug, g, report, {"essentia hears": f["rhythm.bpm"]})
 
     told_now = moments(g, lanes, busy.ravel() if busy.ndim > 1 else busy,
@@ -470,7 +470,7 @@ def read(path, slug):
         "melody": tune_notes,
         "melody_phrases": phrases_of(tune_notes, g, g["beats_per_bar"]),
         "mood_axes": mood_sure or None,
-        "lyrics": sung,
+        "lyrics": lyrics_out,
     }
 
 

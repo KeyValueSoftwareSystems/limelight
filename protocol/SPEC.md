@@ -349,6 +349,24 @@ where the voice is buried under the production.
 `lyrics.checked_twice` is false when only one pass was run, and then no `sure`
 is present anywhere. Absent `sure` means unmeasured, never confirmed.
 
+`lyrics` is absent for songs the transcriber cannot read, and that set is larger
+than it looks. Qwen3-ASR covers thirty languages; Malayalam, Tamil and Telugu
+are not among them, and it does not decline. It picks the nearest language it
+knows and answers with confidence. Nebulakal comes back as Chinese reading
+"红灯，红灯，红灯，红灯"; Mizhiyoram as Chinese; Ponni Nadhi as Tamil forced
+into Devanagari; Entharo Mahanu as nothing at all. Arz Kiya Hai is Hindi, which
+is supported, and comes back as real Hindi lyrics.
+
+Asking the model twice at different points in the song does not sort this out.
+Mizhiyoram answers Chinese every time and Nebulakal answers Hindi every time --
+steadily, and wrongly. A language that holds still is not the same as a language
+that is right, which is why the gate is the two-pass word agreement in `sure`
+rather than anything the model says about itself.
+
+Indian-language lyrics need a model trained for them -- IndicWhisper or Sarvam
+Saarika-2.5. Until one is wired in, those songs carry no `lyrics` field, which
+is the honest answer rather than a field full of the wrong alphabet.
+
 `noisy` is how much of a bar is noise rather than pitch -- distortion, cymbals,
 breath -- measured as spectral flatness. `held` is how much of the bar the sound
 keeps ringing instead of hitting and stopping: the share of the bar spent above
