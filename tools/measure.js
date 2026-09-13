@@ -83,17 +83,91 @@ function changesPerBar(show, score, from, bars) {
   return out;
 }
 
-function measure(opts) {
+
+/* all four lamps identical, as a share of the instants sampled */
+function unison(show, score, from, bars) {
+  const blocks = parBlocks();
+  const g = score.grid, bpb = g.beats_per_bar || 4;
+  const barSec = (60 / g.bpm) * bpb;
+  const at = bar => g.first_beat_s + (bar - 1) * barSec;
+  const i0 = Math.max(0, Math.round(at(from) * show.fps));
+  const i1 = Math.min(show.frames.length, Math.round(at(from + bars) * show.fps));
+  const sum = (f, b) => { let t = 0;
+    for (let k = b.at; k < Math.min(f.length, b.at + b.width); k++) t += f[k]; return t; };
+  /* "Not identical" is too weak a test. An alternating look splits the rig into
+     two halves and flips between them, which gives two distinct values and would
+     pass -- but a flip is not a ripple. A wave across four lamps shows four
+     different values most of the time, because the same curve reaches each lamp
+     at a different point. So count how many distinct values there are. */
+  let together = 0, n = 0, distinct = 0;
+  for (let i = i0; i < i1; i++) {
+    const v = blocks.map(b => sum(show.frames[i], b));
+    const k = new Set(v).size;
+    if (k === 1) together++;
+    distinct += k;
+    n++;
+  }
+  return { together, n, share: n ? together / n : 1,
+           avgDistinct: n ? distinct / n : 1, lamps: blocks.length };
+}
+
+/* the longest stretch a lamp holds one level, as a share of a bar */
+function motionless(show, score, from, bars) {
+  const blocks = parBlocks();
+  const g = score.grid, bpb = g.beats_per_bar || 4;
+  const barSec = (60 / g.bpm) * bpb;
+  const at = bar => g.first_beat_s + (bar - 1) * barSec;
+  const sum = (f, b) => { let t = 0;
+    for (let k = b.at; k < Math.min(f.length, b.at + b.width); k++) t += f[k]; return t; };
+  const perBar = Math.max(1, Math.round(barSec * show.fps));
+  let worst = 0;
+  for (const b of blocks) {
+    const i0 = Math.max(0, Math.round(at(from) * show.fps));
+    const i1 = Math.min(show.frames.length, Math.round(at(from + bars) * show.fps));
+    let run = 1, prev = null;
+    for (let i = i0; i < i1; i++) {
+      const v = sum(show.frames[i], b);
+      run = v === prev ? run + 1 : 1;
+      prev = v;
+      if (run > worst) worst = run;
+    }
+  }
+  return { worst, perBar, share: worst / perBar };
+}
+
+/* does a lamp move within a short window of a marked beat? */
+function landsOn(show, score, marks) {
+  const blocks = parBlocks();
+  const g = score.grid, bpb = g.beats_per_bar || 4;
+  const beatSec = 60 / g.bpm, barSec = beatSec * bpb;
+  const sum = (f, b) => { let t = 0;
+    for (let k = b.at; k < Math.min(f.length, b.at + b.width); k++) t += f[k]; return t; };
+  const out = [];
+  for (const m of marks) {
+    const t = g.first_beat_s + (m.bar - 1) * barSec + ((m.beat || 1) - 1) * beatSec;
+    const c = Math.round(t * show.fps), w = Math.round(0.1 * show.fps);
+    let biggest = 0;
+    for (let i = Math.max(1, c - w); i < Math.min(show.frames.length, c + w); i++)
+      for (const b of blocks)
+        biggest = Math.max(biggest, Math.abs(sum(show.frames[i], b) - sum(show.frames[i - 1], b)));
+    out.push({ ...m, jump: biggest });
+  }
+  return out;
+}
+
+function judge(opts, print) {
   const score = JSON.parse(fs.readFileSync(opts.score, "utf8"));
   const show = bakeFrames(opts.score, opts.seed || 7);
   const rows = hitsPerBar(show, score, opts.from, opts.bars);
 
-  console.log(`\n${opts.song}, bars ${opts.from}-${opts.from + opts.bars - 1} — ${opts.effect}`);
-  console.log(`measuring: ${opts.measure}\n`);
-  const most = Math.max(1, ...rows.map(r => r.changes));
-  for (const r of rows) {
-    const bar = "#".repeat(Math.round((r.changes / most) * 40));
-    console.log(`  bar ${String(r.bar).padStart(3)}  ${String(r.changes).padStart(4)}  ${bar}`);
+  if (print) {
+    console.log(`\n${opts.song}, bars ${opts.from}-${opts.from + opts.bars - 1} — ${opts.effect}`);
+    console.log(`measuring: ${opts.measure}\n`);
+    const most = Math.max(1, ...rows.map(r => r.changes));
+    for (const r of rows) {
+      const bar = "#".repeat(Math.round((r.changes / most) * 40));
+      console.log(`  bar ${String(r.bar).padStart(3)}  ${String(r.changes).padStart(4)}  ${bar}`);
+    }
   }
 
   let ok = false, verdict = "";
@@ -115,12 +189,43 @@ function measure(opts) {
                     ? " — nothing until the end, so this is a step at the drop, not a build"
                     : " — flat, the build does not read");
   } else if (opts.check === "below-half") {
-    ok = false; verdict = "run tools/status.js for the unison probe";
+    const u = unison(show, score, opts.from, opts.bars);
+    /* more than half the lamps distinct, on average, is a wave rather than a flip */
+    ok = u.avgDistinct > u.lamps / 2;
+    verdict = `${u.avgDistinct.toFixed(1)} of ${u.lamps} lamps differ at a typical instant`
+            + ` (identical at ${(u.share * 100).toFixed(0)}%)`
+            + (ok ? " — a wave across the rig"
+                  : u.avgDistinct > 1.2 ? " — the rig flips between halves, it does not ripple"
+                                        : " — they move as one");
+  } else if (opts.check === "never-still") {
+    const m = motionless(show, score, opts.from, opts.bars);
+    ok = m.share < 0.25;
+    verdict = `longest motionless stretch is ${(m.share * 100).toFixed(0)}% of a bar`
+            + (ok ? " — it glides" : " — it holds and then snaps");
+  } else if (opts.check === "hits") {
+    const marks = ((score.signals || []).concat(score.moments || []))
+      .filter(x => x.bar >= opts.from && x.bar < opts.from + opts.bars)
+      .filter(x => (x.weight || 0) >= 0.6)
+      .map(x => ({ bar: x.bar, beat: x.beat || 1, what: x.what || x.is, weight: x.weight }));
+    const got = landsOn(show, score, marks);
+    const landed = got.filter(x => x.jump >= 25);
+    ok = marks.length > 0 && landed.length === marks.length;
+    verdict = marks.length
+      ? `${landed.length} of ${marks.length} weighted moments have a visible change within 100 ms`
+        + (ok ? "" : " — " + got.filter(x => x.jump < 25)
+             .map(x => `bar ${x.bar} beat ${x.beat} (${x.what})`).join(", "))
+      : "no moments above weight 0.6 in this window";
   } else {
     verdict = "no automatic verdict for this effect yet";
   }
-  console.log(`\n  ${ok ? "PASS" : "not yet"}  ${verdict}\n`);
-  process.exitCode = ok ? 0 : 1;
+  if (print) console.log(`\n  ${ok ? "PASS" : "not yet"}  ${verdict}\n`);
+  return { ok, verdict, rows };
 }
 
-module.exports = { measure, bakeFrames, changesPerBar, hitsPerBar };
+function measure(opts) {
+  const r = judge(opts, true);
+  process.exitCode = r.ok ? 0 : 1;
+  return r;
+}
+
+module.exports = { measure, judge, bakeFrames, changesPerBar, hitsPerBar, unison, motionless, landsOn };

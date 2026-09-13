@@ -34,6 +34,13 @@ const EFFECTS = {
     measure: "share of instants where all four lamps are identical",
     check: "below-half",
   },
+  "glides": {
+    want: "A quiet section should glide. No lamp should sit at one level for a large "
+        + "part of a bar, and nothing should snap.",
+    from: "nothing in the score -- this is about how the renderer shapes a level.",
+    measure: "longest stretch a lamp holds one level, as a share of a bar",
+    check: "never-still",
+  },
   "lands": {
     want: "Something visible should happen ON the marked beat, not after it.",
     from: "signals of kind `release`, with a weight saying how much it matters.",
