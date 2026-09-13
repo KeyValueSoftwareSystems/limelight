@@ -84,7 +84,11 @@ start_panel() {
       $NET_FLAG --host 0.0.0.0 --port "$PANEL_PORT" --gain 0.6 "$REPO/synth/out" \
       >/tmp/limelight-panel.log 2>&1 &
   wait_for "http://127.0.0.1:$PANEL_PORT/" 20 || { say "panel did not start -- see /tmp/limelight-panel.log"; return 1; }
-  say "panel    http://127.0.0.1:$PANEL_PORT/   ${NET_FLAG:+(--no-net: nothing is sent to the rig)}${NET_FLAG:-(LIVE: driving the rig)}"
+  if [ -n "$NET_FLAG" ]; then
+    say "panel    http://127.0.0.1:$PANEL_PORT/   (--no-net: nothing is sent to the rig; LIVE=1 to drive it)"
+  else
+    say "panel    http://127.0.0.1:$PANEL_PORT/   (LIVE: driving the rig on universe 0)"
+  fi
 }
 
 case "${1:-start}" in
