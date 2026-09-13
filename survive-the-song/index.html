@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Survive the Song</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="game">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-heart" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 21s-7.5-4.9-10-9.3C.4 8.6 1.7 5 5.1 5c2 0 3.3 1.2 3.9 2.3C9.6 6.2 10.9 5 13 5c3.4 0 4.7 3.6 3.1 6.7C19.5 16.1 12 21 12 21z"/>
+    </symbol>
+  </svg>
+
+  <div class="stage-wrap">
+    <div class="game-hud">
+      <div class="game-hud__title"><b>Blinding Lights</b><span>The Weeknd</span></div>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="game-hud__time" id="time">0:00 / 1:30</div>
+      <div class="game-hud__hearts hearts" id="hearts"></div>
+    </div>
+
+    <div class="arena-frame">
+      <span class="arena-badge tag tag--verse" id="badge">VERSE</span>
+      <canvas id="arena" tabindex="0"></canvas>
+
+      <div class="arena-keys">
+        <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span>
+        <span class="arena-keys__lbl">move</span>
+        <span class="key key--space">SPACE</span>
+        <span class="arena-keys__lbl">dash</span>
+      </div>
+
+      <!-- start / win / lose -->
+      <div class="overlay show" id="overlay">
+        <div class="overlay__card">
+          <h1 class="overlay__logo">Survive<br>the <span>Song</span></h1>
+          <div class="overlay__sub" id="o-title">Read the danger. Dodge. Survive.</div>
+          <p class="overlay__text" id="o-text">
+            The boss telegraphs every attack in coral. Move early, dash through the gaps,
+            and last the whole song. You have three hearts.
+          </p>
+          <button class="btn btn--primary" id="o-btn">Play ▸</button>
+          <div class="overlay__hint">move <b>WASD</b> · dash <b>SPACE</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>
