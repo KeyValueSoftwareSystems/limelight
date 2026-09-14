@@ -36,7 +36,7 @@ export const KNOWN = [
   "stems_53",
 ];
 
-const STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"];
+const STEM_NAMES = [];
 const CURVE_NAMES = ["energy"];
 
 export function format(raw) {
