@@ -519,11 +519,29 @@
     color: var(--amb);
     letter-spacing: 0.02em;
   }
-  .ai-card p {
+  .ai-card p,
+  .ai-card pre {
     margin: 0 0 6px;
     color: var(--dim);
     font-size: 13px;
     line-height: 1.65;
+  }
+  .ai-card pre {
+    white-space: pre-wrap;
+    font-family: inherit;
+  }
+  .ai-card summary {
+    cursor: pointer;
+    color: var(--amb);
+    font: 600 13px system-ui;
+    padding: 10px 0 4px;
+    user-select: none;
+  }
+  .ai-card summary:hover {
+    color: #fff;
+  }
+  .ai-card details[open] summary {
+    margin-bottom: 8px;
   }
   .ai-card .ai-tag {
     display: inline-block;
@@ -732,13 +750,13 @@
   <section id="ai-intel" hidden>
     <h2>🎵 AI Music Intelligence</h2>
     <p class="note">
-      A large music-understanding model (<b>MOSS-Music-8B</b>) listened to this
-      song and described what it heard. Below it, a
-      <b>chord recognition model (BTC)</b> with a 170-chord vocabulary
-      identified every chord change.
+      <b>MOSS-Music-8B-Thinking</b> performed a full chain-of-thought analysis
+      of this song — captioning, structure, chords, instruments, vocals,
+      emotion, rhythm, production, and musicology. Per-stem deep features
+      extracted via cascade separation (MelBand-RoFormer → htdemucs_6s).
     </p>
     <div id="ai-caption" class="ai-card"></div>
-    <div id="ai-analysis" class="ai-card" hidden></div>
+    <div id="ai-cards"></div>
     <div id="moss-sections" hidden></div>
     <div class="legend" id="ai-legend"></div>
   </section>
@@ -1527,8 +1545,10 @@
         </dd>
       <dt>Heard by</dt><dd class="dim">voice: ${esc(made.voice_from || "?")} \u00b7 lead: ${esc(made.lead_from || "?")}
         \u00b7 tune: ${esc(made.melody_from || "?")}</dd>
-      ${SCORE.moss_sections ? `<dt>AI sections</dt><dd><b style="color:var(--ok)">${SCORE.moss_sections.length} sections</b> detected by MOSS-Music-8B</dd>` : ""}
-      ${SCORE.btc_chords_raw ? `<dt>AI chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b> from BTC 170-chord model</dd>` : ""}
+      ${SCORE.moss_sections ? `<dt>AI sections</dt><dd><b style="color:var(--ok)">${SCORE.moss_sections.length} sections</b> (MOSS-Music-8B-Thinking)</dd>` : ""}
+      ${SCORE.btc_chords_raw ? `<dt>AI chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b> (BTC) ${SCORE.moss && SCORE.moss.chords ? `+ <b>${SCORE.moss.chords.length}</b> (MOSS)` : ""}</dd>` : ""}
+      ${SCORE.moss ? `<dt>MOSS model</dt><dd class="dim">${esc(SCORE.moss.model || "?")} via ${esc(SCORE.moss.engine || "?")}</dd>` : ""}
+      ${SCORE.stem_analysis ? `<dt>Deep stems</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stem_analysis).length} stems</b> analyzed (onsets, pitch, spectral, drums)</dd>` : ""}
     </dl></div>`;
 
     $("beatkey").innerHTML =
@@ -1762,7 +1782,7 @@
     }
 
     const per = SCORE.grid.beats_per_bar;
-    SCORE.beats.forEach((bt, i) => {
+    (SCORE.beats || []).forEach((bt, i) => {
       if (bt.t < a || bt.t > b) return;
       const x = X(bt.t);
       const down = (((i - (SHIFT - BASE)) % per) + per) % per === firstIndex();
@@ -2517,7 +2537,7 @@
   function firstIndex() {
     let best = 0,
       gap = 1e9;
-    SCORE.beats.forEach((bt, i) => {
+    (SCORE.beats || []).forEach((bt, i) => {
       const d = Math.abs(bt.t - SCORE.grid.first_beat_s);
       if (d < gap) {
         gap = d;
@@ -2581,64 +2601,172 @@
   function aiIntel() {
     const sec = $("ai-intel");
     const capBox = $("ai-caption");
-    const anaBox = $("ai-analysis");
+    const cards = $("ai-cards");
     const msBox = $("moss-sections");
     const legBox = $("ai-legend");
-
     if (!SCORE) {
       sec.hidden = true;
       return;
     }
-
-    const hasCap = SCORE.moss_caption;
-    const hasAna = SCORE.moss_analysis;
+    const M = SCORE.moss || {};
+    const hasCap = M.caption || SCORE.moss_caption;
     const hasSec = SCORE.moss_sections && SCORE.moss_sections.length;
-    const hasBtc = SCORE.btc_chords_raw && SCORE.btc_chords_raw.length;
-
-    if (!hasCap && !hasAna && !hasSec && !hasBtc) {
+    const hasStem = SCORE.stem_analysis;
+    if (!hasCap && !hasStem) {
       sec.hidden = true;
       return;
     }
     sec.hidden = false;
 
-    if (hasCap) {
-      capBox.innerHTML = `<h3>What the AI Heard</h3><p>${esc(SCORE.moss_caption)}</p>`;
-      if (hasBtc) {
-        capBox.innerHTML += `<div style="margin-top:8px"><span class="ai-tag">${SCORE.btc_chords_raw.length} chord changes detected (BTC 170-vocab)</span></div>`;
-      }
-    } else {
-      capBox.innerHTML = "";
-    }
+    const capText = M.caption || SCORE.moss_caption || "";
+    if (capText) {
+      capBox.innerHTML = `<h3>What the AI Heard</h3><p>${esc(capText)}</p>`;
+    } else capBox.innerHTML = "";
 
-    if (hasAna) {
-      anaBox.hidden = false;
-      anaBox.innerHTML = `<h3>Key &amp; Harmony Analysis</h3><p>${esc(SCORE.moss_analysis)}</p>`;
-    } else {
-      anaBox.hidden = true;
-    }
+    let html = "";
+    const dc = {
+      vocals: "#e8a33d",
+      drums: "#e0655f",
+      bass: "#6fa8dc",
+      guitar: "#5bb98c",
+      piano: "#b98cd6",
+      other: "#a0a8bb",
+    };
 
-    if (hasSec) {
-      msBox.hidden = false;
-      msBox.innerHTML = "";
+    // Instrument dominance — the big visual: who plays where over time
+    if (SCORE.instrument_dominance && SCORE.instrument_dominance.length > 4) {
+      const id = SCORE.instrument_dominance;
       const total = SCORE.song.length_s;
-      SCORE.moss_sections.forEach((s, i) => {
-        const l = (s.start / total) * 100;
-        const w = Math.max(0.5, ((s.end - s.start) / total) * 100);
-        const c = MSEC_COLORS[i % MSEC_COLORS.length];
-        const el = document.createElement("div");
-        el.className = "msec";
-        el.style.cssText = `left:${l}%;width:${w}%;background:${c}22`;
-        el.title = `${s.label} · ${mmss(s.start)} – ${mmss(s.end)}`;
-        el.innerHTML =
-          `<div class="mtag" style="color:${c}">${esc(s.label)}</div>` +
-          `<div class="mtime">${mmss(s.start)}</div>`;
-        el.onclick = (ev) => {
-          ev.stopPropagation();
-          play(s.start, Math.min(s.end, s.start + 12));
-        };
-        msBox.appendChild(el);
-      });
-      legBox.innerHTML = `<span class="dim">AI sections (MOSS-Music-8B) – click to hear</span>`;
+      const strip = id
+        .map((d) => {
+          const c = dc[d.dominant] || "#888";
+          const ts = mmss(d.start);
+          return `<div style="flex:1;height:24px;background:${c};opacity:0.8;cursor:pointer" title="${ts}: ${d.dominant} leads" onclick="play(${d.start})"></div>`;
+        })
+        .join("");
+      const leg = Object.entries(dc)
+        .map(
+          ([k, c]) => `<span style="color:${c};font-weight:bold">■</span> ${k}`,
+        )
+        .join("&nbsp;&nbsp;");
+      html +=
+        `<div class="ai-card"><h3>Who's Playing Where</h3>` +
+        `<div style="height:24px;display:flex;border-radius:4px;overflow:hidden">${strip}</div>` +
+        `<div style="font-size:12px;margin-top:6px;opacity:0.7">${leg} &nbsp;— click any segment to hear it</div></div>`;
+    }
+
+    // Stem breakdown — human readable, not raw numbers
+    if (hasStem) {
+      const SA = SCORE.stem_analysis;
+      const names = Object.keys(SA);
+      const maxOnsets = Math.max(...names.map((n) => SA[n].onset_count || 0));
+      let stemHtml = "";
+      for (const name of names) {
+        const d = SA[name];
+        const pct =
+          maxOnsets > 0 ? ((d.onset_count || 0) / maxOnsets) * 100 : 0;
+        const col = dc[name] || "#888";
+        let desc = "";
+        if (name === "vocals" && d.vocal_characteristics) {
+          const vc = d.vocal_characteristics;
+          desc = `Range: ${vc.pitch_range_low} to ${vc.pitch_range_high} (${vc.pitch_range_semitones} semitones), ${vc.total_notes} melodic notes`;
+        } else if (name === "drums" && d.drum_summary) {
+          const ds = d.drum_summary;
+          desc = `${ds.kick_count} kicks, ${ds.snare_count} snares, ${ds.hihat_count} hi-hats`;
+          if (ds.kick_bpm_est) desc += ` — kick tempo ~${ds.kick_bpm_est} BPM`;
+        } else if (d.note_count) {
+          desc = `${d.note_count} melodic notes detected`;
+        } else {
+          desc = `${d.onset_count} rhythmic events`;
+        }
+        stemHtml +=
+          `<div style="margin-bottom:6px">` +
+          `<div style="display:flex;align-items:center;gap:8px">` +
+          `<span style="color:${col};font-weight:bold;width:60px;text-transform:capitalize">${name}</span>` +
+          `<div style="flex:1;height:8px;background:#1a2233;border-radius:4px;overflow:hidden">` +
+          `<div style="width:${pct}%;height:100%;background:${col};border-radius:4px"></div></div></div>` +
+          `<div style="font-size:11px;opacity:0.6;margin-left:68px">${desc}</div></div>`;
+      }
+      html += `<div class="ai-card"><h3>Stem Separation (6-stem cascade)</h3>${stemHtml}</div>`;
+    }
+
+    // Energy over time — proper visualization with labels
+    if (SCORE.energy_profile && SCORE.energy_profile.length) {
+      const ep = SCORE.energy_profile;
+      const vals = ep.map((e) => e.rms_db);
+      const mx = Math.max(...vals),
+        mn = Math.min(...vals);
+      const range = mx - mn || 1;
+      const bars = ep
+        .map((e) => {
+          const norm = (e.rms_db - mn) / range;
+          const h = Math.max(3, Math.round(norm * 40));
+          const hue = Math.round(norm * 30 + 15);
+          return `<div style="flex:1;height:${h}px;background:hsl(${hue},70%,55%);opacity:0.85;cursor:pointer;border-radius:1px" title="${mmss(e.start)}: ${norm > 0.8 ? "loud" : norm > 0.5 ? "medium" : norm > 0.2 ? "quiet" : "very quiet"}" onclick="play(${e.start})"></div>`;
+        })
+        .join("");
+      const loud = ep.reduce((a, b) => (b.rms_db > a.rms_db ? b : a));
+      const quiet = ep.reduce((a, b) => (b.rms_db < a.rms_db ? b : a));
+      html +=
+        `<div class="ai-card"><h3>Energy Over Time</h3>` +
+        `<div style="height:42px;display:flex;align-items:flex-end;gap:1px">${bars}</div>` +
+        `<div style="font-size:12px;margin-top:6px;opacity:0.7">` +
+        `Loudest at <b style="cursor:pointer" onclick="play(${loud.start})">${mmss(loud.start)}</b> · ` +
+        `Quietest at <b style="cursor:pointer" onclick="play(${quiet.start})">${mmss(quiet.start)}</b> · ` +
+        `Click any bar to jump there</div></div>`;
+    }
+
+    // Key changes — only show if key actually changes
+    if (SCORE.key_sections && SCORE.key_sections.length) {
+      const ks = SCORE.key_sections;
+      const keys = [...new Set(ks.map((k) => `${k.key} ${k.mode}`))];
+      if (keys.length === 1) {
+        html += `<div class="ai-card"><h3>Key</h3><p>Stays in <b>${keys[0]}</b> throughout</p></div>`;
+      } else {
+        const chips = ks
+          .map(
+            (k) =>
+              `<span class="ai-tag" style="cursor:pointer" onclick="play(${k.start})"><b>${k.key} ${k.mode}</b> from ${mmss(k.start)}</span>`,
+          )
+          .join(" ");
+        html += `<div class="ai-card"><h3>Key Changes</h3><p>Moves between ${keys.length} keys:</p>${chips}</div>`;
+      }
+    }
+
+    cards.innerHTML = html;
+
+    // MOSS sections in the bottom section — hide if broken
+    if (hasSec) {
+      const total = SCORE.song.length_s;
+      const lastEnd =
+        parseFloat(SCORE.moss_sections[SCORE.moss_sections.length - 1].end) ||
+        0;
+      if (lastEnd / total < 0.5) {
+        msBox.hidden = true;
+        legBox.innerHTML = "";
+      } else {
+        msBox.hidden = false;
+        msBox.innerHTML = "";
+        SCORE.moss_sections.forEach((s, i) => {
+          const l = (parseFloat(s.start) / total) * 100;
+          const w = Math.max(
+            0.5,
+            ((parseFloat(s.end) - parseFloat(s.start)) / total) * 100,
+          );
+          const c = MSEC_COLORS[i % MSEC_COLORS.length];
+          const el = document.createElement("div");
+          el.className = "msec";
+          el.style.cssText = `left:${l}%;width:${w}%;background:${c}22`;
+          el.title = `${s.label} · ${mmss(s.start)} – ${mmss(s.end)}`;
+          el.innerHTML = `<div class="mtag" style="color:${c}">${esc(s.label)}</div><div class="mtime">${mmss(s.start)}</div>`;
+          el.onclick = (ev) => {
+            ev.stopPropagation();
+            play(s.start, Math.min(s.end, s.start + 12));
+          };
+          msBox.appendChild(el);
+        });
+        legBox.innerHTML = `<span class="dim">AI sections (MOSS-Thinking) — click to hear</span>`;
+      }
     } else {
       msBox.hidden = true;
       legBox.innerHTML = "";
