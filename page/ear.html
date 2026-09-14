@@ -21,28 +21,37 @@
     background: var(--bg);
     color: var(--ink);
     font:
-      13.5px/1.6 ui-sans-serif,
+      13.5px/1.6 -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
       system-ui,
       sans-serif;
     margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   .wrap {
-    padding: 0 20px 90px;
-    max-width: 1700px;
+    padding: 14px 24px 90px;
+    max-width: 1600px;
     margin: 0 auto;
   }
   button,
   select {
-    background: #1a2233;
+    background: #151c2a;
     color: var(--ink);
     border: 1px solid var(--line2);
     border-radius: 6px;
-    padding: 6px 12px;
+    padding: 6px 14px;
     font: inherit;
+    font-size: 12.5px;
     cursor: pointer;
+    transition:
+      border-color 0.15s,
+      background 0.15s;
   }
   button:hover {
-    border-color: #46587a;
+    border-color: #4a5f82;
+    background: #1c2538;
   }
   button:focus-visible,
   select:focus-visible {
@@ -71,49 +80,90 @@
     color: #2a0e0c;
     border-color: var(--bad);
   }
-  .top {
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2398a2b8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+    min-width: 180px;
+  }
+  .sticky-header {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 30;
     background: var(--bg);
+  }
+  .navbar {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 24px;
     border-bottom: 1px solid var(--line);
+  }
+  .controls {
     display: flex;
     gap: 10px;
     align-items: center;
     flex-wrap: wrap;
-    padding: 11px 0 10px;
-    margin-bottom: 14px;
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--line);
+    max-width: 1648px;
+    margin: 0 auto;
   }
   .scrub {
     flex-basis: 100%;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
   }
   #seek {
     width: 100%;
     accent-color: var(--ok);
     cursor: pointer;
-    height: 20px;
+    height: 6px;
+    border-radius: 3px;
+    appearance: none;
+    background: #1a2233;
+    outline: none;
+  }
+  #seek::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ok);
+    border: 2px solid var(--bg);
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  }
+  #seek::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ok);
+    border: 2px solid var(--bg);
+    cursor: pointer;
   }
   .zoombar {
     display: flex;
     gap: 7px;
     align-items: center;
-    font-size: 11.5px;
+    font-size: 11px;
     color: var(--faint);
   }
   .zoombar button {
-    padding: 2px 9px;
-    font-size: 12px;
+    padding: 2px 10px;
+    font-size: 11px;
     line-height: 1.4;
+    border-radius: 4px;
   }
   #viewing {
     font:
-      12px ui-monospace,
+      11px ui-monospace,
       monospace;
     color: var(--amb);
-    min-width: 150px;
+    min-width: 140px;
   }
   .grab {
     cursor: grab;
@@ -132,55 +182,62 @@
     font-weight: 600;
   }
   h2 {
-    font: 600 14px system-ui;
-    margin: 0 0 3px;
-    letter-spacing: 0.01em;
+    font:
+      600 11px ui-monospace,
+      monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amb);
+    margin: 0 0 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #1a2030;
   }
   .note {
-    color: var(--dim);
-    font-size: 12.5px;
-    margin: 0 0 8px;
+    color: var(--faint);
+    font-size: 11.5px;
+    margin: 0 0 10px;
     max-width: 98ch;
   }
   .note b {
-    color: var(--ink);
+    color: var(--dim);
     font-weight: 600;
   }
   section {
-    margin: 0 0 24px;
+    margin: 0 0 28px;
   }
   .lead {
-    background: var(--pan);
+    background: linear-gradient(135deg, #0e1420, #121a28);
     border: 1px solid var(--line);
-    border-radius: 9px;
-    padding: 13px 15px;
+    border-radius: 10px;
+    padding: 16px 18px;
     display: flex;
-    gap: 18px;
+    gap: 20px;
     align-items: flex-start;
     flex-wrap: wrap;
   }
   .lead .big {
-    font: 600 19px system-ui;
+    font: 600 20px system-ui;
     letter-spacing: 0.01em;
   }
   .lead .when {
     font:
-      12.5px ui-monospace,
+      11.5px ui-monospace,
       monospace;
     color: var(--amb);
+    opacity: 0.85;
   }
   .lead dl {
     margin: 0;
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 3px 12px;
+    gap: 4px 14px;
     align-items: baseline;
   }
   .lead dt {
     color: var(--faint);
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.07em;
+    letter-spacing: 0.08em;
   }
   .lead dd {
     margin: 0;
@@ -209,17 +266,15 @@
     width: 100%;
     border: 1px solid var(--line);
     border-radius: 8px;
-    background: #06090e;
+    background: #060910;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
   #zoom {
     height: 110px;
     cursor: pointer;
   }
   #tune {
-    height: 200px;
-    cursor: pointer;
-  }
-  #curves {
+    height: 220px;
     cursor: pointer;
   }
   #beat {
@@ -234,13 +289,14 @@
   }
   #map {
     position: relative;
-    height: 124px;
+    height: 130px;
     border: 1px solid var(--line);
     border-bottom: none;
-    border-radius: 8px 8px 0 0;
-    background: #06090e;
+    border-radius: 10px 10px 0 0;
+    background: #060910;
     overflow: hidden;
     cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
   }
   #chords {
     position: relative;
@@ -268,15 +324,6 @@
   .chd:hover {
     background: #16202b;
   }
-  #subs {
-    position: relative;
-    height: 22px;
-    border-left: 1px solid var(--line);
-    border-right: 1px solid var(--line);
-    background: #0d121a;
-    overflow: hidden;
-    cursor: pointer;
-  }
   #dots {
     position: absolute;
     left: 0;
@@ -302,32 +349,34 @@
     top: 22px;
     bottom: 0;
     overflow: hidden;
-    box-shadow: inset -1px 0 0 rgba(6, 9, 14, 0.9);
-    border-left: 1px solid #3b4761;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    transition: filter 0.15s;
+    cursor: pointer;
   }
   .part:first-of-type {
     border-left: none;
   }
-  .part.ramp {
-    border-left: 1px dashed rgba(232, 163, 61, 0.8);
+  .part:hover {
+    filter: brightness(1.3);
   }
   .part .fill {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    opacity: 0.3;
+    opacity: 0.25;
   }
   .part .tag {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 4px;
-    padding: 0 5px;
+    padding: 0 6px;
     font:
-      600 10px ui-monospace,
+      600 9.5px ui-monospace,
       monospace;
-    text-shadow: 0 1px 3px #000;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -358,22 +407,6 @@
   .beat.gone:hover {
     opacity: 0.9;
   }
-  .sub {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    border-left: 1px solid #2c3340;
-    font:
-      9.5px ui-monospace,
-      monospace;
-    padding: 2px 0 0 4px;
-    overflow: hidden;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-  .sub:hover {
-    filter: brightness(1.55);
-  }
   #head {
     position: absolute;
     top: 0;
@@ -400,15 +433,15 @@
   .legend {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px 15px;
-    margin: 7px 0 0;
-    font-size: 11.5px;
+    gap: 4px 14px;
+    margin: 8px 0 0;
+    font-size: 11px;
     color: var(--faint);
   }
   .legend i {
     display: inline-block;
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     border-radius: 2px;
     margin-right: 5px;
     vertical-align: 0;
@@ -422,12 +455,13 @@
     display: flex;
     gap: 10px;
     align-items: center;
-    padding: 9px 0;
-    border-bottom: 1px solid #161d2a;
+    padding: 10px 0;
+    border-bottom: 1px solid #141a24;
     flex-wrap: wrap;
+    transition: background 0.1s;
   }
   .row:hover {
-    background: #0e141e;
+    background: #0c1220;
   }
   .row .when {
     font:
@@ -507,17 +541,21 @@
     white-space: pre-wrap;
   }
   .ai-card {
-    background: linear-gradient(135deg, #0f1520, #141c2a);
-    border: 1px solid #1f2d44;
+    background: linear-gradient(135deg, #0c1219, #111a28);
+    border: 1px solid #1a2840;
     border-radius: 10px;
-    padding: 16px 18px;
-    margin: 0 0 10px;
+    padding: 18px 20px;
+    margin: 0 0 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   .ai-card h3 {
-    margin: 0 0 8px;
-    font: 600 13px system-ui;
+    margin: 0 0 10px;
+    font:
+      600 11px ui-monospace,
+      monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--amb);
-    letter-spacing: 0.02em;
   }
   .ai-card p,
   .ai-card pre {
@@ -614,74 +652,17 @@
   #indic-box .indic-line:hover {
     background: #0e141e;
   }
-  #moss-map {
-    position: relative;
-    height: 48px;
-    border: 1px solid #1a3040;
-    border-top: 1px dashed #1a3040;
-    background: #080c14;
-    overflow: hidden;
-    cursor: pointer;
-  }
-  #moss-map .mpart {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    overflow: hidden;
-    border-left: 1px solid #2a3a52;
-  }
-  #moss-map .mpart:first-child {
-    border-left: none;
-  }
-  #moss-map .mpart:hover {
-    filter: brightness(1.5);
-  }
-  #moss-map .mpart .mfill {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    opacity: 0.2;
-  }
-  #moss-map .mpart .mtag {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 3px;
-    padding: 0 4px;
-    font:
-      600 9.5px ui-monospace,
-      monospace;
-    text-shadow: 0 1px 3px #000;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .moss-row-label {
-    font:
-      9px ui-monospace,
-      monospace;
-    color: var(--ok);
-    letter-spacing: 0.06em;
-    position: absolute;
-    left: 5px;
-    top: 3px;
-    z-index: 2;
-    opacity: 0.7;
-  }
 </style>
 
-<header class="top">
-  <a class="brand" href="/">Limelight</a>
-  <nav class="nav">
-    <a class="here" href="/">Home</a>
-    <a href="/hub/score/">Hub</a>
-  </nav>
-</header>
-
-<div class="wrap">
-  <div class="top">
+<div class="sticky-header">
+  <header class="navbar">
+    <a class="brand" href="/">Limelight</a>
+    <nav class="nav">
+      <a class="here" href="/">Home</a>
+      <a href="/hub/score/">Hub</a>
+    </nav>
+  </header>
+  <div class="controls">
     <select id="song" title="pick a song"></select>
     <button id="play" disabled>&#9654; Play</button>
     <span class="mono" id="clock" style="min-width: 96px; text-align: right"
@@ -689,11 +670,11 @@
     >
     <button
       id="clicker"
-      title="a tick on every beat, so you can hear whether the computer's beat matches the song"
+      title="Tick on every beat to verify the computer's beat matches the song"
     >
       Metronome: off
     </button>
-    <button id="muter" title="silence the song and leave only the metronome">
+    <button id="muter" title="Silence the song and leave only the metronome">
       Music: on
     </button>
     <span class="mono dim" id="facts"></span>
@@ -704,26 +685,26 @@
         min="0"
         max="10000"
         value="0"
-        title="drag to move anywhere in the song"
+        title="Drag to scrub through the song"
       />
       <div class="zoombar">
         <span class="dim" id="viewing">whole song</span>
-        <button id="zoomout" title="show more">&minus;</button>
-        <button id="zoomin" title="show less">+</button>
-        <button id="zoomfit" title="show the whole song again">Fit</button>
-        <button id="follow" title="keep the view centred on what is playing">
+        <button id="zoomout" title="Zoom out">&minus;</button>
+        <button id="zoomin" title="Zoom in">+</button>
+        <button id="zoomfit" title="Fit whole song">Fit</button>
+        <button id="follow" title="Keep view centred on playhead">
           Follow: off
         </button>
         <span class="dim">scroll to zoom, drag to slide</span>
       </div>
     </div>
   </div>
+</div>
 
+<div class="wrap">
   <div id="broke" hidden></div>
   <p class="note" style="margin-top: -4px">
-    Everything below is <b>automatically generated</b> from the audio using SOTA
-    AI models (MOSS-Music-8B, BTC, MelBand-RoFormer, Whisper). Click any label,
-    block or chip to hear that exact spot.
+    AI-generated from audio — <b>click anything to hear it</b>
   </p>
 
   <section>
@@ -748,12 +729,9 @@
   </section>
 
   <section id="ai-intel" hidden>
-    <h2>🎵 AI Music Intelligence</h2>
+    <h2>AI Intelligence</h2>
     <p class="note">
-      <b>MOSS-Music-8B-Thinking</b> performed a full chain-of-thought analysis
-      of this song — captioning, structure, chords, instruments, vocals,
-      emotion, rhythm, production, and musicology. Per-stem deep features
-      extracted via cascade separation (MelBand-RoFormer → htdemucs_6s).
+      MOSS-Music-8B + cascade stem separation + deep feature extraction
     </p>
     <div id="ai-caption" class="ai-card"></div>
     <div id="ai-cards"></div>
@@ -762,36 +740,23 @@
   </section>
 
   <section id="indic-box" hidden>
-    <h2>🗣️ Lyrics (Indic Language)</h2>
+    <h2>Indic Lyrics</h2>
     <p class="note">
-      Transcribed by <b>Whisper-large-v3</b> from the isolated vocal stem. The
-      original audio was separated using <b>MelBand-RoFormer</b> before
-      transcription.
+      Transcribed by Whisper-large-v3 from the isolated vocal stem
     </p>
     <div class="lead" id="indic-sung"></div>
   </section>
 
   <section>
-    <h2>The next few seconds</h2>
-    <p class="note">
-      The <b style="color: #e0655f">red line</b> is where you are now; the song
-      slides left past it. Tall white ticks start a bar, small amber ticks are
-      the beats in between &mdash; turn the metronome on and they should land
-      with the music. Each boxed label is something the computer expects to
-      happen there: <b>click a label to replay just that</b>, click anywhere
-      else to jump, scroll to step one beat.
-    </p>
+    <h2>Live View</h2>
+    <p class="note">Around the playhead — click labels to hear</p>
     <canvas id="zoom"></canvas>
   </section>
 
   <section>
-    <h2>The whole song</h2>
+    <h2>Timeline</h2>
     <p class="note">
-      The narrow top strip holds the <b>notable moments</b> &mdash; hover one to
-      read it, click to hear it. Below it are the <b>sections</b>, each drawn as
-      tall as it sounds full. The thin band under the section names says what
-      the music is <b>doing</b>. The four rows at the bottom are how loud each
-      instrument is, bar by bar. <b>Click anywhere to jump there.</b>
+      Sections, moments, chords, instruments — click to jump
       <span id="dropped" class="dim"></span>
     </p>
     <div id="map">
@@ -799,16 +764,8 @@
       <div id="head"></div>
     </div>
     <div class="holder">
-      <div id="subs"></div>
-      <div class="pline" data-for="subs"></div>
-    </div>
-    <div class="holder">
       <div id="chords"></div>
       <div class="pline" data-for="chords"></div>
-    </div>
-    <div class="holder" id="moss-map-holder" hidden>
-      <div id="moss-map"><span class="moss-row-label">MOSS-8B</span></div>
-      <div class="pline" data-for="moss-map"></div>
     </div>
     <div class="holder">
       <canvas id="lanes"></canvas>
@@ -818,88 +775,20 @@
   </section>
 
   <section>
-    <h2>What the music is doing</h2>
+    <h2>Rhythm</h2>
     <p class="note">
-      Loudness answers "how loud", not "what is happening". This row answers the
-      second question. The <b>band</b> is whether the loudness is
-      <b style="color: #7ae8b0">rising</b>,
-      <b style="color: #8a93a6">steady</b> or
-      <b style="color: #8fd0ff">falling</b>. The
-      <b style="color: #e8a33d">filled curve</b> is the <b>build</b> &mdash; how
-      much this bar sounds like a riser, which is the sub being filtered out
-      while noise climbs. <b>&#9650;</b> is where the loudness slams up,
-      <b>&#9660;</b> where it drops away; the solid ones are structural, the
-      hollow ones smaller steps.
-    </p>
-    <div class="holder">
-      <canvas id="motion"></canvas>
-      <div class="pline" data-for="motion"></div>
-    </div>
-    <p class="note">
-      A section edge drawn as a
-      <b style="color: #e8a33d">dashed amber line</b> in the strip above is one
-      the music arrives at gradually &mdash; the two sections really do differ,
-      but nothing happens on that bar, so there is no instant to cue. Don't Look
-      Down's second verse is one: the bass climbs from 0.09 to 0.98 across eight
-      bars while the loudness stays flat.
-    </p>
-    <p class="note" id="motionsays"></p>
-  </section>
-
-  <section>
-    <h2>How the sound itself changes</h2>
-    <p class="note">
-      <b>Press play and the page follows the music</b> at a zoom where a beat is
-      visible; press Fit to see the whole song again. Six things the computer
-      measures every bar that the rows above do not show. The number on the
-      right of each row is its value where you are now.
-      <b>Click anywhere to jump there.</b>
-    </p>
-    <div class="holder">
-      <canvas id="curves"></canvas>
-      <div class="pline" data-for="curves"></div>
-    </div>
-    <p class="note">
-      An <b style="color: #e8a33d">amber dashed line</b> is where the song
-      <b>changes tempo</b> &mdash; a real event you can hear, and one the rest
-      of this page can only show by everything after it shifting.
-    </p>
-    <p class="note">
-      Each row carries a number saying how much it actually tells you
-      <b>about this song</b>: how much more the parts differ from each other
-      than a part differs from its own two halves. Above about 1.3 the row is
-      following the music; at 1.0 a part differs from itself as much as from any
-      other part, and the row is noise you could light by mistake. No curve is
-      reliable on every song &mdash; Pump says little on ten of the
-      twenty-eight, Brightness on six.
-    </p>
-    <div class="legend" id="curvekey"></div>
-  </section>
-
-  <section>
-    <h2>The rhythm</h2>
-    <p class="note">
-      Where the hits actually land inside one bar &mdash; the pattern, not how
-      many. Each column is a sixteenth, left to right across a bar; a filled
-      block is a hit there. <b>This is the thing you hum back</b>, and it is the
-      only row on this page that says what the rhythm <i>is</i> rather than how
-      much of it there is.
+      Drum pattern per 16th-note slot — taller = stronger, right = consistency
     </p>
     <canvas id="beat"></canvas>
     <div class="legend" id="beatkey"></div>
   </section>
 
   <section>
-    <h2>The tune</h2>
+    <h2>Melody</h2>
     <p class="note">
-      The computer followed the pitch of the singing and of the lead instrument
-      and wrote down every note. Below, <b>each mark is one note</b>: further
-      right is later in the song, higher up is a higher note, and the faint line
-      joins notes that follow each other, so you can see the tune rise and fall.
-      This is how it knows when a tune comes back later &mdash; which is what
-      the lighting reader uses to repeat a look.
-      <b>Click a shaded stretch to hear a tune that repeats</b>, or click
-      anywhere to jump there.
+      <b style="color: #7ae8b0">Sung</b> and
+      <b style="color: #8fd0ff">played</b> notes — click shaded areas to hear
+      repeated tunes
     </p>
     <div class="holder">
       <canvas id="tune"></canvas>
@@ -909,34 +798,20 @@
   </section>
 
   <section id="lyricbox" hidden>
-    <h2>The words</h2>
-    <p class="note">
-      The computer listened to the singing and wrote down every word with the
-      moment it was sung, then
-      <b>listened a second time in differently placed chunks</b> and kept score
-      of which words both passes produced. The number on the left is how much of
-      that line both passes agreed on. <b>Lines below 0.6 are marked</b> &mdash;
-      those are usually where the voice is buried under the production, and the
-      computer is guessing. <b>Click a line to hear it.</b>
-    </p>
+    <h2>Lyrics</h2>
+    <p class="note">Confidence-scored lyrics — click a line to hear it</p>
     <div class="lead" id="sung"></div>
   </section>
 
   <section>
-    <h2>What the computer will admit about this score</h2>
-    <p class="note">
-      Facts about the whole song, and how far it trusts its own reading.
-    </p>
+    <h2>Metadata</h2>
+    <p class="note">Key stats and confidence levels</p>
     <div class="lead" id="owned"></div>
   </section>
 
   <section>
-    <h2>Every section, in order</h2>
-    <p class="note">
-      One row per section. <b>Hear it</b> plays the first few seconds. The chips
-      under each row are the smaller claims inside it &mdash; click any chip to
-      hear only that part.
-    </p>
+    <h2>Section Detail</h2>
+    <p class="note">Click to play any section</p>
     <div id="sections"></div>
   </section>
 </div>
@@ -974,10 +849,10 @@
   const LANEWORD = {
     drums: "Drums",
     bass: "Bass",
-    vocals: "Voice",
+    vocals: "Vocals",
     guitar: "Guitar",
     piano: "Keys",
-    other: "Rest",
+    other: "Other",
   };
   let HUE = {};
 
@@ -1021,9 +896,6 @@
       place();
       lanes();
       tune();
-      motion();
-      curves();
-      subs();
       chordRow();
     }
   }
@@ -1103,80 +975,6 @@
     "voice sustained": "one long held vocal note",
     "a vocal run": "a fast run of vocal notes",
   };
-
-  const DOING = {
-    intensifying: "#e0655f",
-    easing: "#6fa8dc",
-    expanding: "#5bb98c",
-    thinning: "#c98fd1",
-    peaking: "#f2c14e",
-    suspending: "#c8a2ff",
-    resolving: "#7ad4c8",
-    establishing: "#9fd18b",
-    closing: "#8b93a6",
-  };
-
-  const DOINGWORD = {
-    establishing: ["open", "the song is setting itself up"],
-    expanding: ["more", "more instruments come in"],
-    thinning: ["fewer", "instruments drop away"],
-    intensifying: ["harder", "it is getting harder and louder"],
-    easing: ["easing", "it is backing off"],
-    peaking: ["peak", "it is as big as this song gets"],
-    suspending: ["held", "it is being held back, mostly quiet"],
-    resolving: ["payoff", "the tension pays off here"],
-    closing: ["ending", "it is winding down to the end"],
-  };
-
-  const FEELS = {
-    "no drums": "no drums",
-    "drums in": "the drums come in",
-    "drums out": "the drums are gone",
-    "voice in": "the singing starts",
-    "voice out": "no singing",
-    "voice, no drums": "singing, no drums",
-    "half a kit": "only part of the drum kit",
-    full: "everything playing",
-    steady: "steady",
-    building: "building",
-    thinning: "thinning out",
-  };
-
-  function listed(items) {
-    if (items.length < 3) return items.join(" and ");
-    return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
-  }
-
-  function saysWords(s) {
-    if (!s) return "";
-    if (s === "bare") return "almost nothing playing";
-    if (s === "a bar out, then back") return "one bar out of step, then back";
-    const io = s.match(/^(.*) in, (.*) out$/);
-    if (io)
-      return (
-        listed(io[1].split(" and ")) +
-        " in, " +
-        listed(io[2].split(" and ")) +
-        " out"
-      );
-    const m = s.match(/^(.*) (join|drop out|holding)$/);
-    if (!m) return s;
-    const items = m[1].split(" and ");
-    const many = items.length > 1 || /^(drums|chords)$/.test(items[0]);
-    const verb =
-      m[2] === "join"
-        ? many
-          ? "come in"
-          : "comes in"
-        : m[2] === "drop out"
-          ? many
-            ? "drop out"
-            : "drops out"
-          : many
-            ? "keep going"
-            : "keeps going";
-    return listed(items) + " " + verb;
-  }
 
   const noun = (w) => (PART[w] || [w, 0])[0];
   const agree = (w, one, many) => ((PART[w] || [w, 0])[1] ? many : one);
@@ -1265,17 +1063,6 @@
             ? "across an octave and a half"
             : "across two octaves";
     return `the tune ${how}, ${wide}, ${verb}`;
-  }
-
-  function partTune(p) {
-    if (p.sung && p.sung.notes) return tuneWords(p.sung, "voice");
-    if (p.played && p.played.notes) return tuneWords(p.played, "lead");
-    return "no tune the computer could follow here";
-  }
-
-  function playingWords(list) {
-    const w = (list || []).map((n) => (LANEWORD[n] || n).toLowerCase());
-    return w.length ? listed(w) : "nothing";
   }
 
   async function library() {
@@ -1372,65 +1159,44 @@
     play(Math.max(0, t - 0.8), t + Math.max(momentSpan(m), 1.6) + 0.8);
   }
 
+  function mossSections() {
+    return SCORE.moss_sections || [];
+  }
+  function mossAt(t) {
+    for (const s of mossSections()) {
+      if (t >= s.start && t < s.end) return s;
+    }
+    return null;
+  }
+
   function draw() {
     HUE = {};
-    let n = 0;
-    for (const p of SCORE.parts || [])
-      if (!(p.like in HUE)) HUE[p.like] = WHEEL[n++ % WHEEL.length];
+    const secs = mossSections();
+    secs.forEach((s, i) => {
+      HUE[s.label] = HUE[s.label] || MSEC_COLORS[i % MSEC_COLORS.length];
+    });
 
     const map = $("map");
-    [...map.querySelectorAll(".part,.unmetered,.beat")].forEach((x) =>
-      x.remove(),
-    );
+    [...map.querySelectorAll(".part,.beat")].forEach((x) => x.remove());
     const total = SCORE.song.length_s;
 
-    for (const p of SCORE.parts || []) {
-      const t0 = barTime(p.from_bar),
-        t1 = Math.min(total, barTime(p.to_bar + 1));
+    secs.forEach((s, i) => {
+      const t0 = s.start,
+        t1 = Math.min(total, s.end);
       const el = document.createElement("div");
-      const ramp = typeof p.sudden === "number" && p.sudden < 0.5;
-      el.className = ramp ? "part ramp" : "part";
+      el.className = "part";
       el.dataset.t0 = t0;
       el.dataset.t1 = t1;
-      const c = HUE[p.like];
-      el.title =
-        `${cap(p.role || p.like)} · ${mmss(t0)} – ${mmss(t1)} · ` +
-        `${FEELS[p.feels] || p.feels}` +
-        (ramp
-          ? ` · the change here is gradual (${p.sudden.toFixed(2)}), there is no moment to hit`
-          : typeof p.sudden === "number"
-            ? ` · lands on the bar (${p.sudden.toFixed(2)})`
-            : "") +
-        ` · click to hear it`;
-      el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness ?? 0.5) * 100)}%"></div>
-      <div class="tag" style="color:${c}">${esc((p.role || p.like).toUpperCase())}</div>`;
-      map.appendChild(el);
-    }
-
-    /* Everything the detectors proposed, including what the culling threw away.
-     Levels keeps eight moments out of seventy-eight signals, and the seventy
-     were invisible -- so "did it miss this" could not be answered by looking. */
-    const kept = new Set(
-      (SCORE.moments || []).map((m) => `${m.bar}.${m.beat}.${m.is}`),
-    );
-    for (const g of SCORE.signals || []) {
-      if (kept.has(`${g.bar}.${g.beat}.${g.is}`)) continue;
-      const t = momentTime(g);
-      if (t < 0 || t > total) continue;
-      const el = document.createElement("div");
-      el.className = "beat gone";
-      el.dataset.t0 = t;
-      el.dataset.t1 = t;
-      el.style.background = KIND[g.is] || "#8b93a6";
-      el.title =
-        `${mmss(t)} · bar ${g.bar} · ${momentWords(g)} · considered and dropped` +
-        ` (weight ${g.weight ?? "-"}, sure ${g.sure ?? "-"})`;
+      const c = HUE[s.label] || MSEC_COLORS[i % MSEC_COLORS.length];
+      el.title = `${cap(s.label)} · ${mmss(t0)} – ${mmss(t1)} · click to hear`;
+      el.innerHTML = `<div class="fill" style="background:${c};height:70%"></div>
+      <div class="tag" style="color:${c}">${esc(s.label.toUpperCase())}</div>`;
       el.onclick = (ev) => {
         ev.stopPropagation();
-        hearMoment(g);
+        play(t0, Math.min(t1, t0 + 12));
       };
       map.appendChild(el);
-    }
+    });
 
     for (const m of SCORE.moments || []) {
       const t = momentTime(m);
@@ -1450,55 +1216,19 @@
       map.appendChild(el);
     }
 
-    const from = SCORE.grid.holds_from_s,
-      upto = SCORE.grid.holds_to_s;
-    const hatch = (l, w, side) => {
-      if (w <= 0) return;
-      const sh = document.createElement("div");
-      sh.className = "unmetered";
-      sh.title =
-        "the computer could not measure a steady beat here, so these bar " +
-        "positions are guessed";
-      sh.dataset.t0 = l;
-      sh.dataset.t1 = l + w;
-      sh.style.cssText = `position:absolute;top:22px;bottom:0;z-index:2;pointer-events:none;
-      background:repeating-linear-gradient(135deg,
-      rgba(224,101,95,.13) 0 7px,transparent 7px 14px);border-${side}:1px dashed rgba(224,101,95,.6)`;
-      map.appendChild(sh);
-    };
-    if (from != null && from > 0) hatch(0, from, "right");
-    if (upto != null && upto < total) hatch(upto, total - upto, "left");
-
-    let stripe = 0;
-    if (from != null || upto != null)
-      stripe = Math.round(
-        (100 * ((from || 0) + Math.max(0, total - (upto ?? total)))) / total,
-      );
-
-    const used = new Set((SCORE.phrases || []).map((q) => q.doing));
     $("legend").innerHTML =
-      `<span class="dim">Instruments${
-        SCORE.ticks
-          ? " \u2014 filled line is four readings a beat, faint blocks behind are one a bar"
-          : ""
-      }:</span>` +
+      `<span class="dim">Sections</span>` +
+      [...new Set(secs.map((s) => s.label))]
+        .map(
+          (lab) =>
+            `<span><i style="background:${HUE[lab]}"></i>${cap(lab)}</span>`,
+        )
+        .join("") +
+      `<span class="dim" style="flex-basis:100%;margin-top:3px">Instruments</span>` +
       LANES.map(
         (k) =>
           `<span><i style="background:${STEM[k]}"></i>${LANEWORD[k]}</span>`,
-      ).join("") +
-      `<span class="dim" style="flex-basis:100%;margin-top:3px">What the band under the sections means:</span>` +
-      Object.entries(DOINGWORD)
-        .filter(([k]) => used.has(k))
-        .map(
-          ([k, v]) =>
-            `<span><i style="background:${DOING[k]}"></i><em>${v[0]}</em> — ${v[1]}</span>`,
-        )
-        .join("") +
-      (stripe > 0
-        ? `<span class="warn" style="flex-basis:100%;margin-top:3px">Striped = the computer ` +
-          `could not measure a steady beat there, so those bar positions are guessed ` +
-          `(${stripe}% of the song)</span>`
-        : "");
+      ).join("");
 
     const k = SCORE.key || {},
       L = SCORE.loudness || {},
@@ -1552,29 +1282,7 @@
     </dl></div>`;
 
     $("beatkey").innerHTML =
-      `<span class="dim">Numbers along the top are the four beats of the bar. ` +
-      `A taller block is a stronger hit. The figure on the right is how much the pattern ` +
-      `stays the same from one bar to the next &mdash; a locked loop scores high, a part that ` +
-      `keeps changing scores low.</span>`;
-
-    $("curvekey").innerHTML =
-      CURVES.map(([k, n, hue, why]) => {
-        const t = (SCORE.curve_tells || {})[k];
-        const weak = t != null && t < 1.3;
-        const says =
-          t == null
-            ? ""
-            : weak
-              ? ` <b style="color:var(--bad)">&mdash; on this song it barely changes between parts (${t.toFixed(2)}), so do not follow it here</b>`
-              : ` <b style="color:var(--ok)">&mdash; ${t.toFixed(2)}</b>`;
-        return `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}${says}</span>`;
-      }).join("") +
-      (Array.isArray(SCORE.tension)
-        ? `<span><i style="background:#e0655f"></i><b style="color:var(--dim)">Lift</b> &mdash; high-band ` +
-          `presence rising and not backed by bass. One reading a beat, so it is the only row here fast ` +
-          `enough to show a build happening. It leans high before a drop but only weakly (57%, p=0.17), ` +
-          `so read it as a texture, not as tension.</span>`
-        : "");
+      `<span class="dim">Taller = stronger hit. Right-side % = pattern consistency across bars.</span>`;
 
     const shown = (SCORE.moments || []).length,
       all = (SCORE.signals || []).length;
@@ -1585,23 +1293,15 @@
         : "";
 
     $("tunekey").innerHTML =
-      `<span><i style="background:#7ae8b0"></i>a note that was sung</span>` +
-      `<span><i style="background:#8fd0ff"></i>a note played by the lead instrument</span>` +
-      `<span><i style="background:#c8a2ff"></i>a tune you have already heard, coming back</span>` +
-      `<span class="dim">higher up = higher note</span>` +
-      `<span class="dim" style="flex-basis:100%">The ticks under the notes are the ` +
-      `<b style="color:var(--ink)">phrases of the tune</b> &mdash; click one to hear it, ` +
-      `&#8634; marks one whose shape repeats an earlier phrase. Only stretches found by following ` +
-      `the tune are shaded; chord repeats are listed with the moments, not here.</span>`;
+      `<span><i style="background:#7ae8b0"></i>Sung</span>` +
+      `<span><i style="background:#8fd0ff"></i>Played (lead)</span>` +
+      `<span><i style="background:#c8a2ff"></i>Repeated tune</span>` +
+      `<span class="dim">Click shaded phrases to hear them</span>`;
 
     lanes();
     tune();
-    motion();
-    curves();
     beatGrid();
-    subs();
     chordRow();
-    mossMap();
     sections();
     sungWords();
     aiIntel();
@@ -1613,7 +1313,7 @@
    built, so a zoom moves them without rebuilding the DOM. */
   function place() {
     for (const el of document.querySelectorAll(
-      "#map .part,#map .beat,#subs .sub,#chords .chd,#moss-map .mpart",
+      "#map .part,#map .beat,#chords .chd",
     )) {
       const t0 = +el.dataset.t0,
         t1 = +el.dataset.t1;
@@ -1627,12 +1327,6 @@
       const w = Math.max(el.classList.contains("beat") ? 0.25 : 0, cr - cl);
       el.style.left = `${cl}%`;
       el.style.width = `${w}%`;
-    }
-    for (const sh of document.querySelectorAll("#map .unmetered")) {
-      const t0 = +sh.dataset.t0,
-        t1 = +sh.dataset.t1;
-      sh.style.left = `${pct(t0)}%`;
-      sh.style.width = `${pct(t1) - pct(t0)}%`;
     }
   }
 
@@ -1657,71 +1351,6 @@
       el.textContent = c.chord;
       box.appendChild(el);
     });
-  }
-
-  function mossMap() {
-    const holder = $("moss-map-holder");
-    const box = $("moss-map");
-    const secs = SCORE && SCORE.moss_sections;
-    if (!secs || !secs.length) {
-      holder.hidden = true;
-      return;
-    }
-    holder.hidden = false;
-    const label = box.querySelector(".moss-row-label");
-    box.innerHTML = "";
-    if (label) box.appendChild(label);
-    else {
-      const lb = document.createElement("span");
-      lb.className = "moss-row-label";
-      lb.textContent = "MOSS-8B";
-      box.appendChild(lb);
-    }
-
-    const total = SCORE.song.length_s;
-    secs.forEach((s, i) => {
-      const c = MSEC_COLORS[i % MSEC_COLORS.length];
-      const el = document.createElement("div");
-      el.className = "mpart";
-      el.dataset.t0 = s.start;
-      el.dataset.t1 = s.end;
-      el.title = `${s.label} · ${mmss(s.start)} – ${mmss(s.end)} · click to hear (MOSS-Music-8B)`;
-      el.innerHTML =
-        `<div class="mfill" style="background:${c}"></div>` +
-        `<div class="mtag" style="color:${c}">${esc(s.label.toUpperCase())}</div>`;
-      el.onclick = (ev) => {
-        ev.stopPropagation();
-        play(s.start, Math.min(s.end, s.start + 12));
-      };
-      box.appendChild(el);
-    });
-  }
-
-  function subs() {
-    const box = $("subs");
-    box.innerHTML = "";
-    if (!SCORE || !SCORE.phrases) return;
-    const total = SCORE.song.length_s;
-    const px = box.clientWidth || 1200;
-    for (const q of SCORE.phrases) {
-      const t0 = barTime(q.from_bar),
-        t1 = Math.min(total, barTime(q.to_bar + 1));
-      const el = document.createElement("div");
-      el.className = "sub";
-      el.dataset.t0 = t0;
-      el.dataset.t1 = t1;
-      const pair = DOINGWORD[q.doing];
-      el.style.background =
-        (DOING[q.doing] || "#39414f") + (pair ? "26" : "10");
-      el.style.color = DOING[q.doing] || "#4e5768";
-      el.title =
-        `bars ${q.from_bar}–${q.to_bar} · ` +
-        (pair ? pair[1] : "nothing it is sure enough to name") +
-        ` · ${saysWords(q.says)} · click to hear it`;
-      const room = ((t1 - t0) / total) * px;
-      el.textContent = pair && room >= pair[0].length * 5.9 + 9 ? pair[0] : "";
-      box.appendChild(el);
-    }
   }
 
   const WINDOW = 8.0;
@@ -1751,13 +1380,13 @@
     const X = (s) => ((s - a) / wide) * W;
     const total = SCORE.song.length_s;
 
-    for (const p of SCORE.parts || []) {
-      const t0 = barTime(p.from_bar),
-        t1 = Math.min(total, barTime(p.to_bar + 1));
+    for (const s of mossSections()) {
+      const t0 = s.start,
+        t1 = Math.min(total, s.end);
       if (t1 < a || t0 > b) continue;
       const x0 = Math.max(0, X(t0)),
         x1 = Math.min(W, X(t1));
-      const c = HUE[p.like] || "#6fa8dc";
+      const c = HUE[s.label] || "#6fa8dc";
       g.fillStyle = c + "16";
       g.fillRect(x0, 0, x1 - x0, 110);
       g.fillStyle = c;
@@ -1769,14 +1398,10 @@
         g.moveTo(X(t0), 0);
         g.lineTo(X(t0), 110);
         g.stroke();
-        g.fillText(
-          (p.role ?? p.like).toUpperCase() + " starts here",
-          X(t0) + 6,
-          13,
-        );
+        g.fillText(s.label.toUpperCase() + " starts here", X(t0) + 6, 13);
       } else if (x1 - x0 > 96) {
         g.globalAlpha = 0.7;
-        g.fillText("still in " + (p.role ?? p.like).toUpperCase(), x0 + 6, 13);
+        g.fillText("still in " + s.label.toUpperCase(), x0 + 6, 13);
         g.globalAlpha = 1;
       }
     }
@@ -1801,29 +1426,6 @@
         g.fillText("bar " + n, x + 4, 106);
       }
     });
-
-    for (const q of SCORE.phrases || []) {
-      const q0 = barTime(q.from_bar),
-        q1 = barTime(q.to_bar + 1);
-      if (q1 < a || q0 > b) continue;
-      const hue = DOING[q.doing] || "#39414f";
-      const x0 = Math.max(0, X(q0)),
-        x1 = Math.min(W, X(q1));
-      const pair = DOINGWORD[q.doing];
-      g.fillStyle = hue + (pair ? "22" : "0c");
-      g.fillRect(x0, 56, x1 - x0, 13);
-      g.strokeStyle = hue;
-      g.lineWidth = 1;
-      g.beginPath();
-      g.moveTo(x0, 56);
-      g.lineTo(x0, 69);
-      g.stroke();
-      g.fillStyle = hue;
-      g.font = "9.5px ui-monospace,monospace";
-      if (pair && x1 - x0 > g.measureText(pair[1]).width + 10)
-        g.fillText(pair[1], x0 + 4, 66);
-      else if (pair && x1 - x0 > 46) g.fillText(pair[0], x0 + 4, 66);
-    }
 
     ZHIT.length = 0;
     const shelf = [];
@@ -1895,9 +1497,9 @@
     const [g, W] = fit($("tune"), 200);
     const notes = SCORE.melody || [];
     if (!notes.length) {
-      g.fillStyle = "#7b8599";
-      g.font = "12.5px system-ui";
-      g.fillText("The computer could not follow a tune in this song.", 14, 30);
+      g.fillStyle = "#4a5568";
+      g.font = "12px system-ui";
+      g.fillText("No melody detected", 14, 30);
       return;
     }
     const v = SCORE.voice || {};
@@ -1920,13 +1522,34 @@
     const X = (s) => L + frac(s) * (W - L - 6);
     const at = (n) => X(noteAt(n.bar, n.beat));
 
-    for (let p = Math.ceil(lo / 12) * 12; p <= hi; p += 12) {
-      g.strokeStyle = "#28344a";
-      g.lineWidth = 1;
+    const NOTENAMES = [
+      "C",
+      "C#",
+      "D",
+      "D#",
+      "E",
+      "F",
+      "F#",
+      "G",
+      "G#",
+      "A",
+      "A#",
+      "B",
+    ];
+    for (let p = Math.ceil(lo); p <= hi; p++) {
+      const isOctave = p % 12 === 0;
+      const isC = p % 12 === 0;
+      g.strokeStyle = isOctave ? "#2a3a52" : "#151d2a";
+      g.lineWidth = isOctave ? 1 : 0.5;
       g.beginPath();
       g.moveTo(L, Y(p));
       g.lineTo(W - 6, Y(p));
       g.stroke();
+      if (isC && Y(p) > top + 10 && Y(p) < foot - 5) {
+        g.fillStyle = "#3a4560";
+        g.font = "9px ui-monospace,monospace";
+        g.fillText("C" + Math.floor(p / 12 - 1), 1, Y(p) + 3);
+      }
     }
 
     /* One band per melodic phrase: where a line of the tune starts and stops. */
@@ -1975,9 +1598,10 @@
         (n) => (n.from === "lead") === (src === "lead"),
       );
       if (mine.length < 2) continue;
-      g.strokeStyle = src === "lead" ? LEAD : SUNG;
-      g.globalAlpha = 0.5;
-      g.lineWidth = 1.2;
+      const col = src === "lead" ? LEAD : SUNG;
+      g.strokeStyle = col;
+      g.globalAlpha = 0.3;
+      g.lineWidth = 1.5;
       g.beginPath();
       let open = false;
       for (let i = 0; i < mine.length; i++) {
@@ -1997,11 +1621,25 @@
 
     for (const n of notes) {
       const x = at(n);
-      const w = Math.max(2, ((n.held_beats * beat) / viewSpan()) * (W - L - 6));
+      const w = Math.max(3, ((n.held_beats * beat) / viewSpan()) * (W - L - 6));
       const hot = hooked.has(n.bar);
-      g.fillStyle = hot ? BACK : n.from === "lead" ? LEAD : SUNG;
-      g.globalAlpha = 1;
-      g.fillRect(x, Y(n.pitch) - 2.3, Math.max(3, w), 4.6);
+      const col = hot ? BACK : n.from === "lead" ? LEAD : SUNG;
+      g.fillStyle = col;
+      g.globalAlpha = 0.9;
+      const h = 3.5;
+      const r = Math.min(h, w / 2);
+      const y0 = Y(n.pitch) - h / 2;
+      g.beginPath();
+      g.moveTo(x + r, y0);
+      g.lineTo(x + w - r, y0);
+      g.arcTo(x + w, y0, x + w, y0 + r, r);
+      g.lineTo(x + w, y0 + h - r);
+      g.arcTo(x + w, y0 + h, x + w - r, y0 + h, r);
+      g.lineTo(x + r, y0 + h);
+      g.arcTo(x, y0 + h, x, y0 + h - r, r);
+      g.lineTo(x, y0 + r);
+      g.arcTo(x, y0, x + r, y0, r);
+      g.fill();
     }
     g.globalAlpha = 1;
 
@@ -2041,360 +1679,6 @@
         134,
       );
     }
-  }
-
-  const CURVES = [
-    ["intensity", "Loudness", "#e8a33d", "how loud this bar is"],
-    ["pace", "Busyness", "#7ad4c8", "notes and hits per beat, 1.0 is ordinary"],
-    ["brightness", "Brightness", "#f2c14e", "how much of the sound is treble"],
-    [
-      "air",
-      "Air",
-      "#8fd6ff",
-      "the very top, above 6 kHz \u2014 cymbals, breath, sparkle",
-    ],
-    ["pump", "Pump", "#d16bd1", "how hard the track ducks on every beat"],
-    [
-      "width",
-      "Width",
-      "#9fd18b",
-      "how far the sound spreads either side of the middle",
-    ],
-    [
-      "weight",
-      "Weight",
-      "#c97f4a",
-      "how much of the sound sits below 120 Hz \u2014 how heavy it is",
-    ],
-    [
-      "floor",
-      "Floor",
-      "#8a6bd1",
-      "below 60 Hz, the part you feel in your chest rather than hear",
-    ],
-    [
-      "noisy",
-      "Noise",
-      "#d98e8e",
-      "how much is noise \u2014 distortion, cymbals, breath \u2014 rather than clear notes",
-    ],
-    [
-      "sustained",
-      "Sustained",
-      "#7fa8d4",
-      "the share of the bar the sound stays at or above half its own peak: high means it holds, low means it hits and stops",
-    ],
-  ];
-
-  function motion() {
-    const m = SCORE.motion;
-    const el = $("motion");
-    if (!m || !Array.isArray(m.moving) || !m.moving.length) {
-      if (el) {
-        el.height = 0;
-        el.style.height = "0px";
-      }
-      const says = $("motionsays");
-      if (says) says.textContent = "This song has no motion track.";
-      return;
-    }
-    const H = 132,
-      L = 78,
-      R = 46;
-    const [g, W] = fit(el, H);
-    const from = m.from_bar == null ? FIRSTBAR : m.from_bar;
-    const span = W - L - R;
-    const COLOUR = { rising: "#7ae8b0", steady: "#39435a", falling: "#8fd0ff" };
-    const xOf = (t) => L + frac(t) * span;
-    for (let i = 0; i < m.moving.length; i++) {
-      const t0 = barTime(i + from),
-        t1 = barTime(i + from + 1);
-      if (t1 < VIEW.a || t0 > VIEW.b) continue;
-      const x0 = xOf(t0),
-        x1 = xOf(t1);
-      g.fillStyle = COLOUR[m.moving[i]] || COLOUR.steady;
-      g.globalAlpha = m.moving[i] === "steady" ? 0.5 : 0.85;
-      g.fillRect(x0, 10, Math.max(1, x1 - x0), 16);
-    }
-    g.globalAlpha = 1;
-    const y0 = 34,
-      hh = H - y0 - 14;
-    const reach = (v, lo, hi) => {
-      const got = v.filter((x) => x != null);
-      if (!got.length) return null;
-      const a = lo != null ? lo : Math.min(...got),
-        b = hi != null ? hi : Math.max(...got);
-      return [a, Math.max(b, a + 1e-6)];
-    };
-    const plot = (v, hue, fill, lo, hi) => {
-      if (!Array.isArray(v) || !v.length) return false;
-      const range = reach(v, lo, hi);
-      if (!range) return false;
-      g.beginPath();
-      let open = false;
-      for (let i = 0; i < v.length; i++) {
-        const t = barTime(i + from);
-        if (t < VIEW.a - BAR || t > VIEW.b + BAR) continue;
-        if (v[i] == null) {
-          open = false;
-          continue;
-        }
-        const x = xOf(t);
-        const y = y0 + hh - ((v[i] - range[0]) / (range[1] - range[0])) * hh;
-        open ? g.lineTo(x, y) : g.moveTo(x, y);
-        open = true;
-      }
-      if (!open) return false;
-      g.strokeStyle = hue;
-      g.lineWidth = fill ? 1.6 : 1.3;
-      g.globalAlpha = fill ? 1 : 0.85;
-      g.stroke();
-      if (fill) {
-        g.lineTo(xOf(VIEW.b), y0 + hh);
-        g.lineTo(xOf(VIEW.a), y0 + hh);
-        g.closePath();
-        g.fillStyle = "rgba(232,163,61,.16)";
-        g.fill();
-      }
-      g.globalAlpha = 1;
-      return true;
-    };
-    const bars = SCORE.bars || {};
-    const eFrom = FIRSTBAR;
-    const energy =
-      Array.isArray(bars.intensity) && from === eFrom ? bars.intensity : null;
-    plot(energy, "#6f7ea0", false);
-    const mark = (list, up) => {
-      for (const x of list || []) {
-        const t = barTime(x.bar);
-        if (t < VIEW.a || t > VIEW.b) continue;
-        const px = xOf(t),
-          py = up ? 34 : H - 12;
-        g.fillStyle = up ? "#7ae8b0" : "#8fd0ff";
-        g.strokeStyle = g.fillStyle;
-        g.lineWidth = 1.2;
-        g.beginPath();
-        g.moveTo(px, up ? py - 7 : py + 7);
-        g.lineTo(px - 5, up ? py : py);
-        g.lineTo(px + 5, up ? py : py);
-        g.closePath();
-        x.big ? g.fill() : g.stroke();
-      }
-    };
-    mark(m.slams, true);
-    mark(m.ebbs, false);
-    g.fillStyle = "#8a93a6";
-    g.font = "600 10px ui-monospace,monospace";
-    g.fillText("DOING", 7, 22);
-    g.fillStyle = "#e8a33d";
-    g.fillText("BUILD", 7, 46);
-    g.fillStyle = "#6f7ea0";
-    g.fillText("LOUDNESS", 7, 60);
-    const says = $("motionsays");
-    if (says) {
-      const t = m.tells;
-      says.innerHTML =
-        t == null
-          ? "The build row has no reliability figure on this song: nothing here steps up hard enough to call a drop."
-          : "On this song the build row sits at the <b>" +
-            t +
-            "th percentile</b> of the song in the eight bars " +
-            "before a drop" +
-            (t >= 65
-              ? " \u2014 it is worth following here."
-              : t >= 50
-                ? " \u2014 weak here, treat it with care."
-                : " \u2014 it does not work on this song, do not light off it.") +
-            " Chance is 50.";
-    }
-  }
-
-  function curves() {
-    const tense = Array.isArray(SCORE.tension) ? SCORE.tension : null;
-    const rows = CURVES.filter((c) => Array.isArray((SCORE.bars || {})[c[0]]));
-    /* Six rows in 190px left eighteen pixels of drawing height each, so a change
-     from 0.09 to 0.79 -- the whole distance between a breakdown and a drop --
-     came out as twelve pixels of wobble. The data was never flat; there was
-     nowhere to draw it. */
-    const ROW = 58;
-    const [g, W] = fit($("curves"), rows.length * ROW + (tense ? 46 : 0));
-    const b = SCORE.bars || {};
-    const mine = rows;
-    if (!mine.length) return;
-    const h = ROW,
-      L = 78;
-    const bar = Math.max(0, barAtTime(aud.currentTime) - FIRSTBAR);
-    const tall = mine.length * ROW + (tense ? 46 : 0);
-    for (let k = 1; k < TEMPO.length; k++) {
-      const at = TEMPO[k].at_s;
-      if (at < VIEW.a || at > VIEW.b) continue;
-      const x = L + frac(at) * (W - L - 46);
-      g.save();
-      g.strokeStyle = "#e8a33d";
-      g.lineWidth = 1;
-      g.setLineDash([3, 3]);
-      g.globalAlpha = 0.85;
-      g.beginPath();
-      g.moveTo(x, 0);
-      g.lineTo(x, tall);
-      g.stroke();
-      g.restore();
-      g.fillStyle = "#e8a33d";
-      g.font = "600 9px ui-monospace,monospace";
-      g.fillText(
-        `${Math.round(TEMPO[k - 1].bpm)}\u2192${Math.round(TEMPO[k].bpm)} bpm`,
-        x + 3,
-        9,
-      );
-    }
-    mine.forEach(([key, name, hue, why], row) => {
-      const v = b[key],
-        y0 = row * h;
-      const got = v.filter((x) => x != null);
-      /* Scaled to what this lane actually does, not to its maximum: width lives
-       between 0.26 and 0.83 and spent half its height drawing the empty space
-       under 0.26. */
-      const hi = Math.max(...got),
-        lo = Math.min(...got);
-      const reach = Math.max(1e-6, hi - lo);
-      const at = (x) => (x - lo) / reach;
-      if (row) {
-        g.strokeStyle = "#131a26";
-        g.lineWidth = 1;
-        g.beginPath();
-        g.moveTo(0, y0);
-        g.lineTo(W, y0);
-        g.stroke();
-      }
-      /* Bar to bar these reverse direction on about three bars in five, which is
-       a coin toss dressed as a measurement. The faint line is every bar as
-       measured; the bold one is the median across four bars, a phrase, which is
-       the shape a person hears and the shape a light should follow. */
-      const line = (pick, alpha, wide) => {
-        g.strokeStyle = hue;
-        g.lineWidth = wide;
-        g.globalAlpha = alpha;
-        g.beginPath();
-        let open = false;
-        for (let i = 0; i < v.length; i++) {
-          const val = pick(i);
-          if (val == null) {
-            open = false;
-            continue;
-          }
-          const t = barTime(i + FIRSTBAR);
-          if (t + BAR < VIEW.a || t > VIEW.b) {
-            open = false;
-            continue;
-          }
-          const x = L + frac(t) * (W - L - 46);
-          const y = y0 + h - 8 - at(val) * (h - 20);
-          open ? g.lineTo(x, y) : g.moveTo(x, y);
-          open = true;
-        }
-        g.stroke();
-        g.globalAlpha = 1;
-      };
-      const smooth = (i) => {
-        const near = [];
-        for (let k = i - 2; k <= i + 1; k++) if (v[k] != null) near.push(v[k]);
-        if (!near.length) return null;
-        near.sort((x, y) => x - y);
-        return near[near.length >> 1];
-      };
-      line((i) => v[i], 0.28, 1);
-      line(smooth, 1, 1.7);
-      g.fillStyle = hue;
-      g.font = "600 10px ui-monospace,monospace";
-      g.fillText(name.toUpperCase(), 7, y0 + 13);
-      g.fillStyle = "#4a5364";
-      g.font = "8px ui-monospace,monospace";
-      g.fillText(hi.toFixed(2), 7, y0 + 24);
-      g.fillText(lo.toFixed(2), 7, y0 + h - 6);
-      const now = v[bar];
-      g.fillStyle = now == null ? "#3a4152" : hue;
-      g.font = "600 12px ui-monospace,monospace";
-      g.fillText(
-        now == null ? "\u2014" : now.toFixed(2),
-        W - 40,
-        y0 + h / 2 + 4,
-      );
-    });
-
-    /* tension runs per beat, not per bar, so it is the one curve here that can
-     show a build happening rather than a bar having happened. The releases are
-     where it breaks -- the drops -- and they are what a rig waits for. */
-    if (!tense) return;
-    const y0 = rows.length * ROW,
-      hh = 46,
-      per = SCORE.grid.beats_per_bar;
-    g.strokeStyle = "#131a26";
-    g.lineWidth = 1;
-    g.beginPath();
-    g.moveTo(0, y0);
-    g.lineTo(W, y0);
-    g.stroke();
-    const beats = SCORE.beats || [];
-    const tAt = (i) =>
-      beats[i] && beats[i].t != null ? beats[i].t : atBeat(i + (SHIFT - BASE));
-    g.strokeStyle = "#e0655f";
-    g.lineWidth = 1.5;
-    g.beginPath();
-    let open = false;
-    for (let i = 0; i < tense.length; i++) {
-      const t = tAt(i);
-      if (t < VIEW.a - 1 || t > VIEW.b + 1) {
-        open = false;
-        continue;
-      }
-      const x = L + frac(t) * (W - L - 46);
-      const y = y0 + hh - 8 - (tense[i] || 0) * (hh - 20);
-      open ? g.lineTo(x, y) : g.moveTo(x, y);
-      open = true;
-    }
-    g.stroke();
-    for (const r of SCORE.releases || []) {
-      const t =
-        r.at_s != null
-          ? r.at_s
-          : atBeat((r.bar - 1) * per + ((r.beat || 1) - 1) + (SHIFT - BASE));
-      if (t < VIEW.a || t > VIEW.b) continue;
-      const x = L + frac(t) * (W - L - 46);
-      g.strokeStyle = "#f2c14e";
-      g.lineWidth = 1.5;
-      g.globalAlpha = 0.9;
-      g.beginPath();
-      g.moveTo(x, y0 + 3);
-      g.lineTo(x, y0 + hh - 3);
-      g.stroke();
-      g.fillStyle = "#f2c14e";
-      g.font = "8.5px ui-monospace,monospace";
-      g.fillText("drop", x + 3, y0 + 11);
-      g.globalAlpha = 1;
-    }
-    g.fillStyle = "#e0655f";
-    g.font = "600 10px ui-monospace,monospace";
-    g.fillText("TENSION", 7, y0 + 13);
-    g.fillStyle = "#4a5364";
-    g.font = "8px ui-monospace,monospace";
-    g.fillText("per beat", 7, y0 + hh - 5);
-    let bi = 0,
-      gap = Infinity;
-    for (let i = 0; i < tense.length; i++) {
-      const d = Math.abs(tAt(i) - aud.currentTime);
-      if (d < gap) {
-        gap = d;
-        bi = i;
-      }
-    }
-    const now = gap > 2 ? null : tense[bi];
-    g.fillStyle = now == null ? "#3a4152" : "#e0655f";
-    g.font = "600 12px ui-monospace,monospace";
-    g.fillText(
-      now == null ? "\u2014" : now.toFixed(2),
-      W - 40,
-      y0 + hh / 2 + 4,
-    );
   }
 
   function beatGrid() {
@@ -2550,35 +1834,6 @@
     );
   }
 
-  function modelRan() {
-    return (SCORE.parts || []).some((p) => p.also_heard != null);
-  }
-
-  function edgeWords(p) {
-    let out = "";
-    if (typeof p.edge === "number") {
-      out +=
-        p.edge < 1.3
-          ? ` <b style="color:var(--bad)">· this boundary is worth only ${p.edge.toFixed(2)} against the noise either side, so treat it as a suggestion</b>`
-          : ` <span class="dim">· boundary worth ${p.edge.toFixed(2)}</span>`;
-    }
-    if (typeof p.sudden === "number") {
-      out +=
-        p.sudden < 0.5
-          ? ` <b style="color:#e8a33d">· the change here is a ramp (${p.sudden.toFixed(2)}), not a moment &mdash; fade through it, there is nothing to hit</b>`
-          : ` <span class="dim">· lands on the bar (${p.sudden.toFixed(2)})</span>`;
-    }
-    if (!modelRan()) return out;
-    if (p.also_heard == null)
-      return (
-        out + ` <span class="dim">· only our own detectors heard it</span>`
-      );
-    return (
-      out +
-      ` <span style="color:var(--ok)">· a second model heard it too (${p.also_heard})</span>`
-    );
-  }
-
   const MSEC_COLORS = [
     "#e8a33d",
     "#5bb98c",
@@ -2633,64 +1888,62 @@
       other: "#a0a8bb",
     };
 
-    // Instrument dominance — the big visual: who plays where over time
     if (SCORE.instrument_dominance && SCORE.instrument_dominance.length > 4) {
       const id = SCORE.instrument_dominance;
-      const total = SCORE.song.length_s;
       const strip = id
         .map((d) => {
           const c = dc[d.dominant] || "#888";
-          const ts = mmss(d.start);
-          return `<div style="flex:1;height:24px;background:${c};opacity:0.8;cursor:pointer" title="${ts}: ${d.dominant} leads" onclick="play(${d.start})"></div>`;
+          return `<div style="flex:1;height:20px;background:${c};opacity:0.75;cursor:pointer;transition:opacity 0.1s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.75" title="${mmss(d.start)}: ${d.dominant}" onclick="play(${d.start})"></div>`;
         })
         .join("");
-      const leg = Object.entries(dc)
+      const present = [...new Set(id.map((d) => d.dominant))];
+      const leg = present
         .map(
-          ([k, c]) => `<span style="color:${c};font-weight:bold">■</span> ${k}`,
+          (k) =>
+            `<span style="color:${dc[k] || "#888"};font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.04em">■ ${k}</span>`,
         )
         .join("&nbsp;&nbsp;");
       html +=
-        `<div class="ai-card"><h3>Who's Playing Where</h3>` +
-        `<div style="height:24px;display:flex;border-radius:4px;overflow:hidden">${strip}</div>` +
-        `<div style="font-size:12px;margin-top:6px;opacity:0.7">${leg} &nbsp;— click any segment to hear it</div></div>`;
+        `<div class="ai-card"><h3>Dominance</h3>` +
+        `<div style="height:20px;display:flex;border-radius:4px;overflow:hidden">${strip}</div>` +
+        `<div style="font-size:10.5px;margin-top:6px;color:#4a5568">${leg}</div></div>`;
     }
 
-    // Stem breakdown — human readable, not raw numbers
     if (hasStem) {
       const SA = SCORE.stem_analysis;
-      const names = Object.keys(SA);
+      const names = Object.keys(SA).filter((n) => (SA[n].onset_count || 0) > 5);
       const maxOnsets = Math.max(...names.map((n) => SA[n].onset_count || 0));
       let stemHtml = "";
       for (const name of names) {
         const d = SA[name];
         const pct =
           maxOnsets > 0 ? ((d.onset_count || 0) / maxOnsets) * 100 : 0;
-        const col = dc[name] || "#888";
+        const col = dc[name] || "#6fa8dc";
         let desc = "";
         if (name === "vocals" && d.vocal_characteristics) {
           const vc = d.vocal_characteristics;
-          desc = `Range: ${vc.pitch_range_low} to ${vc.pitch_range_high} (${vc.pitch_range_semitones} semitones), ${vc.total_notes} melodic notes`;
+          desc = `${vc.pitch_range_low}–${vc.pitch_range_high} (${vc.pitch_range_semitones} semitones) · ${vc.total_notes} notes`;
         } else if (name === "drums" && d.drum_summary) {
           const ds = d.drum_summary;
-          desc = `${ds.kick_count} kicks, ${ds.snare_count} snares, ${ds.hihat_count} hi-hats`;
-          if (ds.kick_bpm_est) desc += ` — kick tempo ~${ds.kick_bpm_est} BPM`;
+          desc = `${ds.kick_count} kicks · ${ds.snare_count} snares · ${ds.hihat_count} hi-hats`;
+          if (ds.kick_bpm_est) desc += ` · ~${ds.kick_bpm_est} BPM`;
         } else if (d.note_count) {
-          desc = `${d.note_count} melodic notes detected`;
+          desc = `${d.note_count} notes`;
         } else {
-          desc = `${d.onset_count} rhythmic events`;
+          desc = `${d.onset_count} events`;
         }
         stemHtml +=
-          `<div style="margin-bottom:6px">` +
-          `<div style="display:flex;align-items:center;gap:8px">` +
-          `<span style="color:${col};font-weight:bold;width:60px;text-transform:capitalize">${name}</span>` +
-          `<div style="flex:1;height:8px;background:#1a2233;border-radius:4px;overflow:hidden">` +
-          `<div style="width:${pct}%;height:100%;background:${col};border-radius:4px"></div></div></div>` +
-          `<div style="font-size:11px;opacity:0.6;margin-left:68px">${desc}</div></div>`;
+          `<div style="margin-bottom:8px">` +
+          `<div style="display:flex;align-items:center;gap:10px">` +
+          `<span style="color:${col};font-weight:600;width:56px;font-size:11px;text-transform:uppercase;letter-spacing:0.04em">${name}</span>` +
+          `<div style="flex:1;height:6px;background:#111a28;border-radius:3px;overflow:hidden">` +
+          `<div style="width:${pct}%;height:100%;background:${col};border-radius:3px;transition:width 0.3s"></div></div>` +
+          `<span style="font-size:10px;color:#5a6274;min-width:32px;text-align:right">${d.onset_count}</span></div>` +
+          `<div style="font-size:10.5px;color:#4a5568;margin-left:66px;margin-top:1px">${desc}</div></div>`;
       }
-      html += `<div class="ai-card"><h3>Stem Separation (6-stem cascade)</h3>${stemHtml}</div>`;
+      html += `<div class="ai-card"><h3>Instrument Stems</h3>${stemHtml}</div>`;
     }
 
-    // Energy over time — proper visualization with labels
     if (SCORE.energy_profile && SCORE.energy_profile.length) {
       const ep = SCORE.energy_profile;
       const vals = ep.map((e) => e.rms_db);
@@ -2700,77 +1953,42 @@
       const bars = ep
         .map((e) => {
           const norm = (e.rms_db - mn) / range;
-          const h = Math.max(3, Math.round(norm * 40));
-          const hue = Math.round(norm * 30 + 15);
-          return `<div style="flex:1;height:${h}px;background:hsl(${hue},70%,55%);opacity:0.85;cursor:pointer;border-radius:1px" title="${mmss(e.start)}: ${norm > 0.8 ? "loud" : norm > 0.5 ? "medium" : norm > 0.2 ? "quiet" : "very quiet"}" onclick="play(${e.start})"></div>`;
+          const h = Math.max(2, Math.round(norm * 36));
+          const r = Math.round(norm * 120 + 130);
+          const g = Math.round((1 - norm) * 80 + 80);
+          const b = Math.round((1 - norm) * 40 + 60);
+          return `<div style="flex:1;height:${h}px;background:rgb(${r},${g},${b});opacity:0.8;cursor:pointer;border-radius:1px;transition:opacity 0.1s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8" title="${mmss(e.start)}" onclick="play(${e.start})"></div>`;
         })
         .join("");
       const loud = ep.reduce((a, b) => (b.rms_db > a.rms_db ? b : a));
       const quiet = ep.reduce((a, b) => (b.rms_db < a.rms_db ? b : a));
       html +=
-        `<div class="ai-card"><h3>Energy Over Time</h3>` +
-        `<div style="height:42px;display:flex;align-items:flex-end;gap:1px">${bars}</div>` +
-        `<div style="font-size:12px;margin-top:6px;opacity:0.7">` +
-        `Loudest at <b style="cursor:pointer" onclick="play(${loud.start})">${mmss(loud.start)}</b> · ` +
-        `Quietest at <b style="cursor:pointer" onclick="play(${quiet.start})">${mmss(quiet.start)}</b> · ` +
-        `Click any bar to jump there</div></div>`;
+        `<div class="ai-card"><h3>Energy</h3>` +
+        `<div style="height:38px;display:flex;align-items:flex-end;gap:1px;border-radius:4px;overflow:hidden">${bars}</div>` +
+        `<div style="font-size:10.5px;margin-top:6px;color:#4a5568">` +
+        `Peak at <b style="cursor:pointer;color:var(--amb)" onclick="play(${loud.start})">${mmss(loud.start)}</b> · ` +
+        `Quietest at <b style="cursor:pointer;color:var(--dim)" onclick="play(${quiet.start})">${mmss(quiet.start)}</b></div></div>`;
     }
 
-    // Key changes — only show if key actually changes
     if (SCORE.key_sections && SCORE.key_sections.length) {
       const ks = SCORE.key_sections;
       const keys = [...new Set(ks.map((k) => `${k.key} ${k.mode}`))];
       if (keys.length === 1) {
-        html += `<div class="ai-card"><h3>Key</h3><p>Stays in <b>${keys[0]}</b> throughout</p></div>`;
+        html += `<div class="ai-card"><h3>Key</h3><p style="font-size:13px"><b style="color:var(--ok)">${keys[0]}</b> throughout</p></div>`;
       } else {
         const chips = ks
           .map(
             (k) =>
-              `<span class="ai-tag" style="cursor:pointer" onclick="play(${k.start})"><b>${k.key} ${k.mode}</b> from ${mmss(k.start)}</span>`,
+              `<span class="ai-tag" style="cursor:pointer" onclick="play(${k.start})"><b>${k.key} ${k.mode}</b> ${mmss(k.start)}</span>`,
           )
           .join(" ");
-        html += `<div class="ai-card"><h3>Key Changes</h3><p>Moves between ${keys.length} keys:</p>${chips}</div>`;
+        html += `<div class="ai-card"><h3>Key</h3><p style="font-size:11px;color:#4a5568">${keys.length} key regions detected</p>${chips}</div>`;
       }
     }
 
     cards.innerHTML = html;
-
-    // MOSS sections in the bottom section — hide if broken
-    if (hasSec) {
-      const total = SCORE.song.length_s;
-      const lastEnd =
-        parseFloat(SCORE.moss_sections[SCORE.moss_sections.length - 1].end) ||
-        0;
-      if (lastEnd / total < 0.5) {
-        msBox.hidden = true;
-        legBox.innerHTML = "";
-      } else {
-        msBox.hidden = false;
-        msBox.innerHTML = "";
-        SCORE.moss_sections.forEach((s, i) => {
-          const l = (parseFloat(s.start) / total) * 100;
-          const w = Math.max(
-            0.5,
-            ((parseFloat(s.end) - parseFloat(s.start)) / total) * 100,
-          );
-          const c = MSEC_COLORS[i % MSEC_COLORS.length];
-          const el = document.createElement("div");
-          el.className = "msec";
-          el.style.cssText = `left:${l}%;width:${w}%;background:${c}22`;
-          el.title = `${s.label} · ${mmss(s.start)} – ${mmss(s.end)}`;
-          el.innerHTML = `<div class="mtag" style="color:${c}">${esc(s.label)}</div><div class="mtime">${mmss(s.start)}</div>`;
-          el.onclick = (ev) => {
-            ev.stopPropagation();
-            play(s.start, Math.min(s.end, s.start + 12));
-          };
-          msBox.appendChild(el);
-        });
-        legBox.innerHTML = `<span class="dim">AI sections (MOSS-Thinking) — click to hear</span>`;
-      }
-    } else {
-      msBox.hidden = true;
-      legBox.innerHTML = "";
-    }
+    msBox.hidden = true;
+    legBox.innerHTML = "";
   }
 
   function indicLyrics() {
@@ -2881,72 +2099,43 @@
     const box = $("sections");
     box.innerHTML = "";
     const total = SCORE.song.length_s;
-    for (const p of SCORE.parts || []) {
-      const t0 = barTime(p.from_bar),
-        t1 = Math.min(total, barTime(p.to_bar + 1));
+    for (const s of mossSections()) {
+      const t0 = s.start,
+        t1 = Math.min(total, s.end);
+      const c = HUE[s.label] || "#e8a33d";
+      const dur = t1 - t0;
       const row = document.createElement("div");
       row.className = "row";
       row.innerHTML = `<span class="when">${mmss(t0)}</span>
-      <span class="what"><b class="role" style="color:${HUE[p.like]}">${esc(p.role ?? p.like)}</b>
-        &nbsp;<b>${esc(FEELS[p.feels] || p.feels)}</b>
-        <span class="dim">· ${playingWords(p.playing)} playing
-        · bars ${p.from_bar}–${p.to_bar}</span>
-        <span style="color:#8fbf9f">· ${esc(partTune(p))}</span>${
-          p.trades
-            ? ` <b style="color:var(--vio)">· trades back and forth every ${p.trades.every_bars} bars</b>`
-            : ""
-        }${edgeWords(p)}</span>
-      <button data-from="${t0}" data-to="${t1}">Hear it</button>
-      `;
+      <span class="what"><b class="role" style="color:${c}">${esc(cap(s.label))}</b>
+        <span class="dim">· ${mmss(t0)} – ${mmss(t1)} · ${Math.round(dur)}s</span></span>
+      <button data-from="${t0}" data-to="${t1}">Hear it</button>`;
 
-      const mine = (SCORE.phrases || []).filter(
-        (q) => q.from_bar >= p.from_bar && q.to_bar <= p.to_bar,
-      );
-      if (mine.length) {
-        const band = document.createElement("div");
-        band.className = "inside";
-        band.innerHTML =
-          `<span class="tag">doing</span>` +
-          mine
-            .map((q) => {
-              const pair = DOINGWORD[q.doing];
-              const hue = DOING[q.doing] || "#2b313c";
-              const said = esc(saysWords(q.says));
-              return `<span class="chip" data-b0="${q.from_bar}" data-b1="${q.to_bar}"
-           style="border-color:${hue};color:${pair ? hue : "#5a6274"}"
-           title="click to hear bars ${q.from_bar}–${q.to_bar}"><b>bars ${q.from_bar}–${q.to_bar}</b> ${
-             pair ? esc(pair[1]) + " · " + said : said
-           }</span>`;
-            })
-            .join("");
-        band.querySelectorAll(".chip").forEach((el) => {
-          el.onclick = () =>
-            play(barTime(+el.dataset.b0), barTime(+el.dataset.b1 + 1));
-        });
-        row.appendChild(band);
-      }
-
-      const inside = (SCORE.moments || [])
-        .filter((m) => m.bar >= p.from_bar && m.bar <= p.to_bar)
-        .sort((a, b) => a.bar - b.bar || a.beat - b.beat);
-      if (inside.length) {
-        const strip = document.createElement("div");
-        strip.className = "inside";
-        strip.innerHTML =
-          `<span class="tag">moments</span>` +
-          inside
-            .map(
-              (m) =>
-                `<span class="chip" style="border-color:${KIND[m.is] || "#3a4152"};color:${KIND[m.is] || "#8b93a6"}"
-           title="bar ${m.bar}, beat ${m.beat} · click to hear it"><b>bar ${m.bar}</b> ${esc(
-             momentWords(m),
-           )}</span>`,
-            )
-            .join("");
-        strip.querySelectorAll(".chip").forEach((el, i) => {
-          el.onclick = () => hearMoment(inside[i]);
-        });
-        row.appendChild(strip);
+      const fb = s.from_bar || 0,
+        tb = s.to_bar || 0;
+      if (fb && tb) {
+        const inside = (SCORE.moments || [])
+          .filter((m) => m.bar >= fb && m.bar <= tb)
+          .sort((a, b) => a.bar - b.bar || a.beat - b.beat);
+        if (inside.length) {
+          const strip = document.createElement("div");
+          strip.className = "inside";
+          strip.innerHTML =
+            `<span class="tag">moments</span>` +
+            inside
+              .map(
+                (m) =>
+                  `<span class="chip" style="border-color:${KIND[m.is] || "#3a4152"};color:${KIND[m.is] || "#8b93a6"}"
+             title="bar ${m.bar}, beat ${m.beat} · click to hear it"><b>bar ${m.bar}</b> ${esc(
+               momentWords(m),
+             )}</span>`,
+              )
+              .join("");
+          strip.querySelectorAll(".chip").forEach((el, i) => {
+            el.onclick = () => hearMoment(inside[i]);
+          });
+          row.appendChild(strip);
+        }
       }
 
       box.appendChild(row);
@@ -2979,14 +2168,11 @@
         total = SCORE.song.length_s;
       $("clock").textContent = `${mmss(t)} / ${mmss(total)}`;
       if (!dragging) $("seek").value = Math.round((t / total) * 10000);
-      /* One playhead per view, each with its own left inset, because the tune
-       and the curves reserve room down the side for their labels and a bare
-       percentage would sit a few pixels off the music on those two. */
       for (const el of document.querySelectorAll(".pline")) {
         const who = el.dataset.for;
         const box = $(who);
-        const L = who === "curves" ? 78 : who === "tune" ? 14 : 0;
-        const R = who === "curves" ? 46 : who === "tune" ? 6 : 0;
+        const L = who === "tune" ? 14 : 0;
+        const R = who === "tune" ? 6 : 0;
         const f = frac(t),
           w = box.clientWidth || 1;
         el.style.display = f < 0 || f > 1 ? "none" : "block";
@@ -2995,10 +2181,6 @@
       const hp = pct(t);
       $("head").style.display = hp < 0 || hp > 100 ? "none" : "";
       $("head").style.left = `${hp}%`;
-      if (SCORE.bars) {
-        motion();
-        curves();
-      }
       if (VIEW.follow && !aud.paused) {
         /* Slide with the playhead rather than jumping when it reaches the edge:
          a view that leaps every few seconds reads as broken, and the point of
@@ -3024,40 +2206,29 @@
         }
       }
       const bar = barAtTime(t);
-      let at = -1;
-      (SCORE.parts || []).forEach((p, i) => {
-        if (bar >= p.from_bar && bar <= p.to_bar) at = i;
-      });
+      const ms = mossAt(t);
+      const secs = mossSections();
+      let at = ms ? secs.indexOf(ms) : -1;
       document
         .querySelectorAll(".part")
         .forEach((n, i) => n.classList.toggle("here", i === at));
       $("nowtime").textContent =
         `${mmss(t)} · bar ${Math.max(0, bar)} of ${SCORE.grid.bars}`;
-      if (at >= 0) {
-        const p = SCORE.parts[at];
+      if (ms) {
         LIVE = at;
         const b = SCORE.bars || {},
           idx = Math.max(0, bar - FIRSTBAR);
         const on = LANES.filter((n) => Array.isArray(b[n]) && b[n][idx] > 0.12);
         $("nowrole").innerHTML =
-          `<span style="color:${HUE[p.like]}">${esc(cap(p.role ?? p.like))}</span>` +
-          ` <span style="color:var(--dim);font-weight:400;font-size:15px">— ${esc(FEELS[p.feels] || p.feels)}</span>`;
+          `<span style="color:${HUE[ms.label] || "#e8a33d"}">${esc(cap(ms.label))}</span>`;
         $("nowplay").innerHTML = on.length
           ? on
               .map((n) => `<b style="color:${STEM[n]}">${LANEWORD[n]}</b>`)
               .join(", ")
           : `<span class="dim">nothing</span>`;
-        const q = (SCORE.phrases || []).find(
-          (x) => bar >= x.from_bar && bar <= x.to_bar,
-        );
-        const pair = q && DOINGWORD[q.doing];
         $("nowsung").innerHTML = nowSinging(t);
-        $("nowmoment").dataset.trades = p.trades ? p.trades.every_bars : "";
-        $("nowdoing").innerHTML = q
-          ? (pair
-              ? `<b style="color:${DOING[q.doing]}">${cap(pair[1])}</b> · `
-              : "") + `<span class="dim">${esc(saysWords(q.says))}</span>`
-          : `<span class="dim">—</span>`;
+        $("nowdoing").innerHTML =
+          `<span class="dim">${mmss(ms.start)} – ${mmss(ms.end)}</span>`;
         const here = (SCORE.moments || [])
           .filter((m) => {
             const mt = momentTime(m);
@@ -3075,10 +2246,7 @@
                   `<b style="color:${KIND[m.is] || "#8b93a6"}">${esc(momentWords(m))}</b>`,
               )
               .join(" · ")
-          : `<span class="dim">nothing the computer calls notable</span>`;
-        if (p.trades)
-          $("nowmoment").innerHTML +=
-            ` <span style="color:var(--vio)">· this part trades back and forth every ${p.trades.every_bars} bars</span>`;
+          : `<span class="dim">—</span>`;
       }
     }
     requestAnimationFrame(tick);
@@ -3124,12 +2292,8 @@
     );
   };
   $("map").onclick = jump;
-  $("subs").onclick = jump;
   $("chords").onclick = jump;
-  $("moss-map").onclick = jump;
   $("lanes").onclick = jump;
-  $("curves").onclick = jump;
-  $("motion").onclick = jump;
   $("zoom").onclick = (e) => {
     if (!SCORE) return;
     const r = e.target.getBoundingClientRect();
@@ -3255,17 +2419,7 @@
     const o = e.target.selectedOptions[0];
     load(e.target.value, o.dataset.a, 0, 0, 0, o.dataset.score);
   };
-  for (const id of [
-    "map",
-    "subs",
-    "chords",
-    "moss-map",
-    "lanes",
-    "tune",
-    "motion",
-    "curves",
-  ])
-    zoomable($(id));
+  for (const id of ["map", "chords", "lanes", "tune"]) zoomable($(id));
   zoomable(
     $("zoom"),
     (f) =>
@@ -3278,11 +2432,8 @@
     if (SCORE) {
       lanes();
       tune();
-      motion();
-      curves();
       beatGrid();
       zoom();
-      subs();
       place();
     }
   });
