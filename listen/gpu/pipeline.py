@@ -460,19 +460,21 @@ SECTIONS_PROMPT = (
 )
 
 MOMENTS_PROMPT = (
-    "Listen to this song carefully and identify its significant musical moments - "
-    "events a lighting designer, VJ, or video editor would sync visuals to.\n\n"
+    "Listen to this song and pinpoint exact timestamps where something musically significant happens — "
+    "the precise beat where a bass drop lands, the exact moment a vocal enters or cuts out, "
+    "the instant a new instrument joins, a snare fill starts, energy shifts, or silence hits.\n\n"
     "Return ONLY a JSON array:\n"
     '[{"time_s": float, "type": "...", "what": "specific instrument or element", '
     '"intensity": 0.0-1.0, "duration_s": float, '
-    '"description": "unique sentence describing what makes this moment special"}, ...]\n\n'
+    '"description": "unique sentence describing what happens at this exact moment"}, ...]\n\n'
     "Types: drop, build, breakdown, climax, entrance, exit, fill, accent, hook, release, "
     "pause, silence, vocal_moment, key_change, tempo_change, groove_lock, call_response, "
     "surprise, stab, swell, transition, solo\n\n"
+    "CRITICAL: timestamps must be precise to the actual audio event, NOT rounded to 5s or 10s. "
+    "Use fractional seconds (e.g. 13.2, 47.8, 102.5) based on where you actually hear the event. "
+    "A lighting designer needs frame-accurate cues, not approximations.\n\n"
     "Find moments across the ENTIRE song from start to finish. "
-    "Include builds leading to drops, vocal entries, instrumental solos, "
-    "texture changes, dynamic shifts, and transitions between sections. "
-    "Name specific instruments and production elements. "
+    "Name the specific instrument, synth, drum, or vocal that triggers each moment. "
     "Every description must be unique and specific to THIS song. Output ONLY the JSON array."
 )
 
