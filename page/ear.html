@@ -238,14 +238,13 @@
   }
   h2 {
     font:
-      600 11px ui-monospace,
+      600 11.5px ui-monospace,
       monospace;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--amb);
-    margin: 0 0 6px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #1a2030;
+    margin: 0 0 4px;
+    padding-bottom: 0;
   }
   .note {
     color: var(--faint);
@@ -258,7 +257,13 @@
     font-weight: 600;
   }
   section {
-    margin: 0 0 28px;
+    margin: 0 0 32px;
+    padding-top: 8px;
+    border-top: 1px solid #111822;
+  }
+  section:first-child {
+    border-top: none;
+    padding-top: 0;
   }
   .lead {
     background: linear-gradient(135deg, #0e1420, #121a28);
@@ -799,9 +804,6 @@
 
 <div class="wrap">
   <div id="broke" hidden></div>
-  <p class="note" style="margin-top: -4px">
-    AI-generated from audio — <b>click anything to hear it</b>
-  </p>
 
   <section>
     <h2>Timeline</h2>
@@ -1377,13 +1379,13 @@
     $("beatkey").innerHTML =
       `<span class="dim">Taller = stronger hit. Right-side % = pattern consistency across bars.</span>`;
 
-    const shown = (SCORE.moments || []).length,
-      all = (SCORE.signals || []).length;
-    $("dropped").textContent =
-      all > shown
-        ? `The detectors proposed ${all} moments and kept ${shown}; the ${all - shown} dropped ones ` +
-          `are the faint ticks under the strip, so you can see what it decided against.`
-        : "";
+    const dropped = $("dropped");
+    if (dropped) {
+      const shown = (SCORE.moments || []).length,
+        all = (SCORE.signals || []).length;
+      dropped.textContent =
+        all > shown ? `${all - shown} weaker moments hidden` : "";
+    }
 
     $("tunekey").innerHTML =
       `<span><i style="background:#7ae8b0"></i>Sung</span>` +
@@ -2199,10 +2201,7 @@
 
       box.appendChild(row);
       row.querySelector("[data-from]").onclick = (e) =>
-        play(
-          +e.target.dataset.from,
-          Math.min(+e.target.dataset.to, +e.target.dataset.from + 12),
-        );
+        play(+e.target.dataset.from);
     }
   }
 
