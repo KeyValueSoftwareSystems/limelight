@@ -111,6 +111,61 @@
     max-width: 1648px;
     margin: 0 auto;
   }
+  .nowbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 6px 24px;
+    border-bottom: 1px solid var(--line);
+    max-width: 1648px;
+    margin: 0 auto;
+    min-height: 32px;
+    flex-wrap: wrap;
+  }
+  .now-section {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 200px;
+  }
+  .now-section .when {
+    font:
+      11px ui-monospace,
+      monospace;
+    color: var(--amb);
+    opacity: 0.85;
+  }
+  .now-section .big {
+    font: 600 15px system-ui;
+    letter-spacing: 0.01em;
+  }
+  .now-detail {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .now-item {
+    font-size: 12px;
+    color: var(--dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+  }
+  .now-item em {
+    font-style: normal;
+    color: var(--faint);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-right: 6px;
+  }
+  .now-item b {
+    color: var(--ink);
+    font-weight: 600;
+  }
   .scrub {
     flex-basis: 100%;
     display: flex;
@@ -699,6 +754,20 @@
       </div>
     </div>
   </div>
+  <div class="nowbar">
+    <div class="now-section">
+      <span class="when" id="nowtime">0:00</span>
+      <span class="big" id="nowrole">&mdash;</span>
+    </div>
+    <div class="now-detail">
+      <span class="now-item"><em>Playing</em> <b id="nowplay">&mdash;</b></span>
+      <span class="now-item"><em>Now</em> <b id="nowmoment">&mdash;</b></span>
+      <span class="now-item"><em>Doing</em> <b id="nowdoing">&mdash;</b></span>
+      <span class="now-item" id="nowsung-wrap"
+        ><em>Singing</em> <b id="nowsung">&mdash;</b></span
+      >
+    </div>
+  </div>
 </div>
 
 <div class="wrap">
@@ -706,27 +775,6 @@
   <p class="note" style="margin-top: -4px">
     AI-generated from audio — <b>click anything to hear it</b>
   </p>
-
-  <section>
-    <div class="lead">
-      <div class="col">
-        <div class="when" id="nowtime">0:00</div>
-        <div class="big" id="nowrole">&mdash;</div>
-      </div>
-      <div class="col">
-        <dl>
-          <dt>Playing</dt>
-          <dd id="nowplay">&mdash;</dd>
-          <dt>Doing</dt>
-          <dd id="nowdoing">&mdash;</dd>
-          <dt>Right now</dt>
-          <dd id="nowmoment">&mdash;</dd>
-          <dt>Singing</dt>
-          <dd id="nowsung">&mdash;</dd>
-        </dl>
-      </div>
-    </div>
-  </section>
 
   <section id="ai-intel" hidden>
     <h2>AI Intelligence</h2>
@@ -2282,14 +2330,16 @@
   const jump = (e) => {
     if (!SCORE || dragged) return;
     const r = e.currentTarget.getBoundingClientRect();
-    stopAt = null;
-    aud.currentTime = Math.max(
+    const t = Math.max(
       0,
       Math.min(
         SCORE.song.length_s - 0.05,
         timeAt((e.clientX - r.left) / r.width),
       ),
     );
+    stopAt = null;
+    aud.currentTime = t;
+    aud.play();
   };
   $("map").onclick = jump;
   $("chords").onclick = jump;
