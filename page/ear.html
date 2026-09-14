@@ -400,10 +400,13 @@
     padding: 2px 0 0 4px;
     overflow: hidden;
     white-space: nowrap;
+    text-overflow: ellipsis;
     cursor: pointer;
+    min-width: 0;
   }
   .chd:hover {
     background: #16202b;
+    z-index: 2;
   }
   #dots {
     position: absolute;
@@ -1433,6 +1436,7 @@
   /* Absolutely-positioned rows are laid out here rather than where they are
    built, so a zoom moves them without rebuilding the DOM. */
   function place() {
+    const cw = $("chords")?.clientWidth || 1;
     for (const el of document.querySelectorAll(
       "#map .part,#map .beat,#chords .chd",
     )) {
@@ -1448,6 +1452,10 @@
       const w = Math.max(el.classList.contains("beat") ? 0.25 : 0, cr - cl);
       el.style.left = `${cl}%`;
       el.style.width = `${w}%`;
+      if (el.classList.contains("chd")) {
+        const px = (w / 100) * cw;
+        el.style.fontSize = px < 30 ? "0" : "";
+      }
     }
   }
 
