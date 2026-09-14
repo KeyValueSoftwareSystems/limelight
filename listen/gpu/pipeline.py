@@ -180,7 +180,7 @@ def clean_sections(sections):
     return out
 
 
-def clean_moments(moments):
+def clean_moments(moments, beats=None):
     if not moments:
         return []
     seen = set()
@@ -191,12 +191,16 @@ def clean_moments(moments):
             t = float(str(m.get("time_s", 0)).rstrip("s"))
         except:
             t = 0
+        if beats:
+            closest = min(beats, key=lambda b: abs(b - t))
+            if abs(closest - t) < 2.0:
+                t = closest
         key = f"{mtype}_{int(t / 3)}"
         if key in seen:
             continue
         seen.add(key)
         m["type"] = mtype
-        m["time_s"] = round(t, 2)
+        m["time_s"] = round(t, 3)
         cleaned.append(m)
     return cleaned
 
@@ -637,7 +641,8 @@ def run_pipeline(wav_path):
                     if task == "sections":
                         score["sections"] = clean_sections(raw)
                     elif task == "moments":
-                        score["moments"] = clean_moments(raw)
+                        beat_times = [b["t"] for b in score.get("beats", [])]
+                        score["moments"] = clean_moments(raw, beats=beat_times)
                     elif task == "emotion":
                         score["emotion"] = clean_emotion(raw)
                     print(
