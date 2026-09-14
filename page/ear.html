@@ -596,6 +596,62 @@
   #indic-box .indic-line:hover {
     background: #0e141e;
   }
+  #moss-map {
+    position: relative;
+    height: 48px;
+    border: 1px solid #1a3040;
+    border-top: 1px dashed #1a3040;
+    background: #080c14;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  #moss-map .mpart {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    border-left: 1px solid #2a3a52;
+  }
+  #moss-map .mpart:first-child {
+    border-left: none;
+  }
+  #moss-map .mpart:hover {
+    filter: brightness(1.5);
+  }
+  #moss-map .mpart .mfill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    opacity: 0.2;
+  }
+  #moss-map .mpart .mtag {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 3px;
+    padding: 0 4px;
+    font:
+      600 9.5px ui-monospace,
+      monospace;
+    text-shadow: 0 1px 3px #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .moss-row-label {
+    font:
+      9px ui-monospace,
+      monospace;
+    color: var(--ok);
+    letter-spacing: 0.06em;
+    position: absolute;
+    left: 5px;
+    top: 3px;
+    z-index: 2;
+    opacity: 0.7;
+  }
 </style>
 
 <header class="top">
@@ -731,6 +787,10 @@
     <div class="holder">
       <div id="chords"></div>
       <div class="pline" data-for="chords"></div>
+    </div>
+    <div class="holder" id="moss-map-holder" hidden>
+      <div id="moss-map"><span class="moss-row-label">MOSS-8B</span></div>
+      <div class="pline" data-for="moss-map"></div>
     </div>
     <div class="holder">
       <canvas id="lanes"></canvas>
@@ -1324,12 +1384,8 @@
             ? ` · lands on the bar (${p.sudden.toFixed(2)})`
             : "") +
         ` · click to hear it`;
-      const mossTag =
-        p.moss_label && p.moss_label !== (p.role || p.like)
-          ? ` <span style="opacity:.55;font-weight:400">[${esc(p.moss_label)}]</span>`
-          : "";
       el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness ?? 0.5) * 100)}%"></div>
-      <div class="tag" style="color:${c}">${esc((p.role || p.like).toUpperCase())}${mossTag}</div>`;
+      <div class="tag" style="color:${c}">${esc((p.role || p.like).toUpperCase())}</div>`;
       map.appendChild(el);
     }
 
@@ -1525,6 +1581,7 @@
     beatGrid();
     subs();
     chordRow();
+    mossMap();
     sections();
     sungWords();
     aiIntel();
@@ -1536,17 +1593,20 @@
    built, so a zoom moves them without rebuilding the DOM. */
   function place() {
     for (const el of document.querySelectorAll(
-      "#map .part,#map .beat,#subs .sub,#chords .chd",
+      "#map .part,#map .beat,#subs .sub,#chords .chd,#moss-map .mpart",
     )) {
       const t0 = +el.dataset.t0,
         t1 = +el.dataset.t1;
-      const l = pct(t0),
-        w = Math.max(el.classList.contains("beat") ? 0.25 : 0, pct(t1) - l);
-      if (el.classList.contains("chd")) el.style.width = `${w}%`;
-      const off = l > 100 || pct(t1) < 0;
+      let l = pct(t0);
+      let r = pct(t1);
+      const off = l > 100 || r < 0;
       el.style.display = off ? "none" : "";
-      el.style.left = `${l}%`;
-      if (t1 > t0 || el.classList.contains("beat")) el.style.width = `${w}%`;
+      if (off) continue;
+      const cl = Math.max(0, l);
+      const cr = Math.min(100, r);
+      const w = Math.max(el.classList.contains("beat") ? 0.25 : 0, cr - cl);
+      el.style.left = `${cl}%`;
+      el.style.width = `${w}%`;
     }
     for (const sh of document.querySelectorAll("#map .unmetered")) {
       const t0 = +sh.dataset.t0,
@@ -1575,6 +1635,44 @@
         `bar ${c.bar} · ${c.chord} · the computer is ${Math.round((c.sure ?? 0) * 100)}% sure` +
         ` · click to hear it`;
       el.textContent = c.chord;
+      box.appendChild(el);
+    });
+  }
+
+  function mossMap() {
+    const holder = $("moss-map-holder");
+    const box = $("moss-map");
+    const secs = SCORE && SCORE.moss_sections;
+    if (!secs || !secs.length) {
+      holder.hidden = true;
+      return;
+    }
+    holder.hidden = false;
+    const label = box.querySelector(".moss-row-label");
+    box.innerHTML = "";
+    if (label) box.appendChild(label);
+    else {
+      const lb = document.createElement("span");
+      lb.className = "moss-row-label";
+      lb.textContent = "MOSS-8B";
+      box.appendChild(lb);
+    }
+
+    const total = SCORE.song.length_s;
+    secs.forEach((s, i) => {
+      const c = MSEC_COLORS[i % MSEC_COLORS.length];
+      const el = document.createElement("div");
+      el.className = "mpart";
+      el.dataset.t0 = s.start;
+      el.dataset.t1 = s.end;
+      el.title = `${s.label} · ${mmss(s.start)} – ${mmss(s.end)} · click to hear (MOSS-Music-8B)`;
+      el.innerHTML =
+        `<div class="mfill" style="background:${c}"></div>` +
+        `<div class="mtag" style="color:${c}">${esc(s.label.toUpperCase())}</div>`;
+      el.onclick = (ev) => {
+        ev.stopPropagation();
+        play(s.start, Math.min(s.end, s.start + 12));
+      };
       box.appendChild(el);
     });
   }
@@ -2661,11 +2759,7 @@
       const row = document.createElement("div");
       row.className = "row";
       row.innerHTML = `<span class="when">${mmss(t0)}</span>
-      <span class="what"><b class="role" style="color:${HUE[p.like]}">${esc(p.role ?? p.like)}</b>${
-        p.moss_label && p.moss_label !== (p.role || p.like)
-          ? ` <span class="ai-tag" style="margin:0 4px;vertical-align:1px" title="MOSS-Music-8B called this section '${esc(p.moss_label)}'">${esc(p.moss_label)}</span>`
-          : ""
-      }
+      <span class="what"><b class="role" style="color:${HUE[p.like]}">${esc(p.role ?? p.like)}</b>
         &nbsp;<b>${esc(FEELS[p.feels] || p.feels)}</b>
         <span class="dim">· ${playingWords(p.playing)} playing
         · bars ${p.from_bar}–${p.to_bar}</span>
@@ -2819,9 +2913,6 @@
         const on = LANES.filter((n) => Array.isArray(b[n]) && b[n][idx] > 0.12);
         $("nowrole").innerHTML =
           `<span style="color:${HUE[p.like]}">${esc(cap(p.role ?? p.like))}</span>` +
-          (p.moss_label && p.moss_label !== (p.role || p.like)
-            ? ` <span class="ai-tag" style="vertical-align:2px">${esc(p.moss_label)}</span>`
-            : "") +
           ` <span style="color:var(--dim);font-weight:400;font-size:15px">— ${esc(FEELS[p.feels] || p.feels)}</span>`;
         $("nowplay").innerHTML = on.length
           ? on
@@ -2907,6 +2998,7 @@
   $("map").onclick = jump;
   $("subs").onclick = jump;
   $("chords").onclick = jump;
+  $("moss-map").onclick = jump;
   $("lanes").onclick = jump;
   $("curves").onclick = jump;
   $("motion").onclick = jump;
@@ -3039,6 +3131,7 @@
     "map",
     "subs",
     "chords",
+    "moss-map",
     "lanes",
     "tune",
     "motion",
