@@ -879,7 +879,7 @@
   <section id="lyricbox" hidden>
     <h2>Lyrics</h2>
     <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      MOSS-Music-8B transcription + Whisper-large-v3 ASR
+      MOSS-Music-8B lyrics transcription (15.88% WER)
     </p>
     <div id="moss-lyrics-box" style="margin-bottom: 12px"></div>
     <div class="lead" id="sung"></div>
@@ -2007,25 +2007,35 @@
   function sungWords() {
     const box = $("sung"),
       sec = $("lyricbox");
-    const got = SCORE.lyrics;
-    const M = SCORE.moss || {};
     const mLyrBox = $("moss-lyrics-box");
     box.innerHTML = "";
     if (mLyrBox) mLyrBox.innerHTML = "";
 
-    const hasWhisper = got && (got.lines || []).length;
-    const hasMossLyr = M.lyrics && M.lyrics.length > 20;
-    if (!hasWhisper && !hasMossLyr) {
+    const mossLyr = SCORE.lyrics_moss;
+    const whisper = SCORE.lyrics;
+    const hasMoss = mossLyr && (mossLyr.lines || []).length;
+    const hasWhisper = whisper && (whisper.lines || []).length;
+    if (!hasMoss && !hasWhisper) {
       sec.hidden = true;
       return;
     }
     sec.hidden = false;
 
-    if (hasMossLyr && mLyrBox) {
-      mLyrBox.innerHTML = `<div class="ai-card" style="padding:10px 14px"><div style="color:var(--ink);font-size:12.5px;line-height:1.8;white-space:pre-wrap;max-height:250px;overflow-y:auto">${esc(M.lyrics)}</div></div>`;
+    if (hasMoss && mLyrBox) {
+      let html = "";
+      for (const l of mossLyr.lines) {
+        html +=
+          `<div style="display:flex;gap:10px;align-items:baseline;padding:3px 0;border-bottom:1px solid var(--line)">` +
+          `<span style="color:var(--dim);font:10px ui-monospace,monospace;min-width:44px">${mmss(l.start)}</span>` +
+          `<span style="color:var(--ink);font-size:13px;flex:1;line-height:1.6">${esc(l.text)}</span>` +
+          `<button onclick="play(${l.start})" style="font-size:10px;padding:2px 8px;cursor:pointer;background:var(--line);border:none;color:var(--dim);border-radius:3px">▶</button>` +
+          `</div>`;
+      }
+      mLyrBox.innerHTML = `<div style="max-height:320px;overflow-y:auto;padding:8px 12px;background:var(--pan);border-radius:8px;border:1px solid var(--line)">${html}</div>`;
     }
-    if (!hasWhisper) return;
-    for (const r of got.lines) {
+
+    if (!hasWhisper || hasMoss) return;
+    for (const r of whisper.lines) {
       const weak = r.sure != null && r.sure < 0.6;
       const row = document.createElement("div");
       row.className = "row";
@@ -2035,17 +2045,10 @@
           ? `<b style="color:${weak ? "var(--bad)" : "var(--ok)"}">${r.sure.toFixed(2)}</b>&nbsp;`
           : ""
       }<span style="color:${weak ? "var(--faint)" : "var(--ink)"}">${esc(r.text)}</span>
-        <span class="dim">· bars ${r.from_bar}\u2013${r.to_bar}${
-          weak
-            ? " · the voice is buried here, treat these words as a guess"
-            : ""
-        }</span></span>
+        <span class="dim">· bars ${r.from_bar}\u2013${r.to_bar}</span></span>
       <button data-from="${r.at_s}" data-to="${r.to_s + 0.4}">Hear it</button>`;
       row.querySelector("[data-from]").onclick = (e) =>
-        play(
-          +e.target.dataset.from,
-          Math.min(+e.target.dataset.to, +e.target.dataset.from + 14),
-        );
+        play(+e.target.dataset.from);
       box.appendChild(row);
     }
   }

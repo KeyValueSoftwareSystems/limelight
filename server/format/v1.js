@@ -34,6 +34,7 @@ export const KNOWN = [
   "moss_caption",
   "btc_chords_raw",
   "stems_53",
+  "lyrics_moss",
 ];
 
 const STEM_NAMES = [];
@@ -362,6 +363,7 @@ export function format(raw) {
   if (raw.moss_caption) out.moss_caption = raw.moss_caption;
   if (raw.btc_chords_raw) out.btc_chords_raw = raw.btc_chords_raw;
   if (raw.stems_53) out.stems_53 = raw.stems_53;
+  if (raw.lyrics_moss) out.lyrics_moss = raw.lyrics_moss;
 
   return out;
 }
