@@ -1241,7 +1241,9 @@
       <div class="tag" style="color:${c}">${esc(s.label.toUpperCase())}</div>`;
       el.onclick = (ev) => {
         ev.stopPropagation();
-        play(t0, Math.min(t1, t0 + 12));
+        const r = el.parentElement.getBoundingClientRect();
+        const clickT = timeAt((ev.clientX - r.left) / r.width);
+        play(Math.max(t0, clickT), t1);
       };
       map.appendChild(el);
     });
@@ -1326,7 +1328,7 @@
       ${SCORE.moss_sections ? `<dt>AI sections</dt><dd><b style="color:var(--ok)">${SCORE.moss_sections.length} sections</b> (MOSS-Music-8B-Thinking)</dd>` : ""}
       ${SCORE.btc_chords_raw ? `<dt>AI chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b> (BTC) ${SCORE.moss && SCORE.moss.chords ? `+ <b>${SCORE.moss.chords.length}</b> (MOSS)` : ""}</dd>` : ""}
       ${SCORE.moss ? `<dt>MOSS model</dt><dd class="dim">${esc(SCORE.moss.model || "?")} via ${esc(SCORE.moss.engine || "?")}</dd>` : ""}
-      ${SCORE.stem_analysis ? `<dt>Deep stems</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stem_analysis).length} stems</b> analyzed (onsets, pitch, spectral, drums)</dd>` : ""}
+      ${SCORE.stems_53 ? `<dt>53-stem separation</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems_53).length} instruments</b> detected (MVSep Mega BS-RoFormer)</dd>` : ""}
     </dl></div>`;
 
     $("beatkey").innerHTML =
@@ -1914,8 +1916,8 @@
     const M = SCORE.moss || {};
     const hasCap = M.caption || SCORE.moss_caption;
     const hasSec = SCORE.moss_sections && SCORE.moss_sections.length;
-    const hasStem = SCORE.stem_analysis;
-    if (!hasCap && !hasStem) {
+    const has53 = SCORE.stems_53 && Object.keys(SCORE.stems_53).length;
+    if (!hasCap && !has53) {
       sec.hidden = true;
       return;
     }
@@ -1957,39 +1959,46 @@
         `<div style="font-size:10.5px;margin-top:6px;color:#4a5568">${leg}</div></div>`;
     }
 
-    if (hasStem) {
-      const SA = SCORE.stem_analysis;
-      const names = Object.keys(SA).filter((n) => (SA[n].onset_count || 0) > 5);
-      const maxOnsets = Math.max(...names.map((n) => SA[n].onset_count || 0));
+    const s53 = SCORE.stems_53;
+    if (s53 && Object.keys(s53).length) {
+      const STEM_COLS = [
+        "#e8a33d",
+        "#5bb98c",
+        "#6fa8dc",
+        "#b98cd6",
+        "#e0655f",
+        "#8cd6cf",
+        "#d6c98c",
+        "#c8a2ff",
+        "#7ae8b0",
+        "#f2c14e",
+        "#d16bd1",
+        "#9fd18b",
+        "#7ad4c8",
+        "#8fd0ff",
+        "#d68c8c",
+        "#a0a8bb",
+        "#e07e5f",
+        "#5bd6b9",
+      ];
+      const sorted = Object.entries(s53)
+        .map(([k, v]) => [k, v.db ?? -60, v.rms ?? 0, v.peak ?? 0])
+        .sort((a, b) => b[2] - a[2]);
+      const maxRms = Math.max(...sorted.map((s) => s[2]));
       let stemHtml = "";
-      for (const name of names) {
-        const d = SA[name];
-        const pct =
-          maxOnsets > 0 ? ((d.onset_count || 0) / maxOnsets) * 100 : 0;
-        const col = dc[name] || "#6fa8dc";
-        let desc = "";
-        if (name === "vocals" && d.vocal_characteristics) {
-          const vc = d.vocal_characteristics;
-          desc = `${vc.pitch_range_low}–${vc.pitch_range_high} (${vc.pitch_range_semitones} semitones) · ${vc.total_notes} notes`;
-        } else if (name === "drums" && d.drum_summary) {
-          const ds = d.drum_summary;
-          desc = `${ds.kick_count} kicks · ${ds.snare_count} snares · ${ds.hihat_count} hi-hats`;
-          if (ds.kick_bpm_est) desc += ` · ~${ds.kick_bpm_est} BPM`;
-        } else if (d.note_count) {
-          desc = `${d.note_count} notes`;
-        } else {
-          desc = `${d.onset_count} events`;
-        }
+      sorted.forEach(([name, db, rms, peak], i) => {
+        const pct = maxRms > 0 ? (rms / maxRms) * 100 : 0;
+        const col = STEM_COLS[i % STEM_COLS.length];
+        const label = name.replace(/-/g, " ");
         stemHtml +=
-          `<div style="margin-bottom:8px">` +
+          `<div style="margin-bottom:6px">` +
           `<div style="display:flex;align-items:center;gap:10px">` +
-          `<span style="color:${col};font-weight:600;width:56px;font-size:11px;text-transform:uppercase;letter-spacing:0.04em">${name}</span>` +
+          `<span style="color:${col};font-weight:600;width:100px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(label)}">${esc(label)}</span>` +
           `<div style="flex:1;height:6px;background:#111a28;border-radius:3px;overflow:hidden">` +
-          `<div style="width:${pct}%;height:100%;background:${col};border-radius:3px;transition:width 0.3s"></div></div>` +
-          `<span style="font-size:10px;color:#5a6274;min-width:32px;text-align:right">${d.onset_count}</span></div>` +
-          `<div style="font-size:10.5px;color:#4a5568;margin-left:66px;margin-top:1px">${desc}</div></div>`;
-      }
-      html += `<div class="ai-card"><h3>Instrument Stems</h3>${stemHtml}</div>`;
+          `<div style="width:${pct.toFixed(1)}%;height:100%;background:${col};border-radius:3px;transition:width 0.3s"></div></div>` +
+          `<span style="font-size:9.5px;color:#5a6274;min-width:42px;text-align:right">${db.toFixed(1)} dB</span></div></div>`;
+      });
+      html += `<div class="ai-card"><h3>Detected Instruments (${sorted.length})</h3>${stemHtml}</div>`;
     }
 
     if (SCORE.energy_profile && SCORE.energy_profile.length) {

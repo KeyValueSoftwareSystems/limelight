@@ -68,6 +68,7 @@ const KNOWN = [
   "key_sections",
   "instrument_dominance",
   "btc_chords_raw",
+  "stems_53",
 ];
 
 /* The pipeline writes parts and bars.intensity; the protocol says sections and

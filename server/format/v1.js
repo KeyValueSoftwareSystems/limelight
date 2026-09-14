@@ -37,6 +37,7 @@ export const KNOWN = [
   "key_sections",
   "instrument_dominance",
   "btc_chords_raw",
+  "stems_53",
 ];
 
 const STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"];
@@ -369,6 +370,7 @@ export function format(raw) {
   if (raw.instrument_dominance)
     out.instrument_dominance = raw.instrument_dominance;
   if (raw.btc_chords_raw) out.btc_chords_raw = raw.btc_chords_raw;
+  if (raw.stems_53) out.stems_53 = raw.stems_53;
 
   return out;
 }
