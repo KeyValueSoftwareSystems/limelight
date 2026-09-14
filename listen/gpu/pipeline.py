@@ -180,7 +180,7 @@ def clean_sections(sections):
     return out
 
 
-def clean_moments(moments, beats=None):
+def clean_moments(moments, beats=None, section_bounds=None):
     if not moments:
         return []
     seen = set()
@@ -191,9 +191,13 @@ def clean_moments(moments, beats=None):
             t = float(str(m.get("time_s", 0)).rstrip("s"))
         except:
             t = 0
+        if section_bounds:
+            closest_sec = min(section_bounds, key=lambda b: abs(b - t))
+            if abs(closest_sec - t) < 3.0:
+                t = closest_sec
         if beats:
             closest = min(beats, key=lambda b: abs(b - t))
-            if abs(closest - t) < 2.0:
+            if abs(closest - t) < 1.0:
                 t = closest
         key = f"{mtype}_{int(t / 3)}"
         if key in seen:
@@ -455,50 +459,79 @@ def moss_json(wav, prompt, retries=3):
 
 
 SECTIONS_PROMPT = (
-    "Listen to this song and segment it into its structural sections with precise timestamps.\n\n"
+    "You are a professional music analyst. Listen to this entire song and identify every structural section.\n\n"
     'Return ONLY a JSON array: [{"label": "...", "start": 0.0, "end": 15.5}, ...]\n\n'
-    "Labels: intro, verse, pre-chorus, chorus, post-chorus, bridge, instrumental, solo, outro, "
-    "breakdown, drop, build, interlude, hook, ad-lib, coda\n\n"
-    "Repeated sections share the same label. Cover every second with no gaps. "
-    "Prefer boundaries on strong beats. Output ONLY the JSON array."
+    "Section labels and what they mean:\n"
+    "  intro — opening before main elements arrive\n"
+    "  verse — main storytelling section, usually with vocals\n"
+    "  pre-chorus — transitional buildup leading into chorus\n"
+    "  chorus — the hook, the catchiest/most energetic repeating part\n"
+    "  post-chorus — comes right after chorus, often instrumental or with a tag\n"
+    "  bridge — a contrasting section that appears once, different melody/chords\n"
+    "  instrumental — no vocals, instruments featured\n"
+    "  solo — one instrument takes the lead (guitar solo, synth solo, etc.)\n"
+    "  breakdown — energy drops, instruments strip away\n"
+    "  drop — the big payoff moment in electronic music where bass/beat hits hard\n"
+    "  build — energy rising, risers/rolls leading to a drop or chorus\n"
+    "  interlude — a brief passage connecting two sections\n"
+    "  outro — the ending of the song, energy winding down\n\n"
+    "RULES:\n"
+    "- Cover the ENTIRE song from 0.0s to the very last second with NO gaps.\n"
+    "- The last section's end time must equal the song's total duration.\n"
+    "- Place boundaries where the music actually changes — on strong beats.\n"
+    "- Repeated sections share the same label (e.g. two choruses are both 'chorus').\n"
+    "- A typical pop/electronic song has 8-16 sections. Instrumentals may have fewer.\n"
+    "Output ONLY the JSON array."
 )
 
 MOMENTS_PROMPT = (
-    "Listen to this song and pinpoint exact timestamps where something musically significant happens — "
-    "the precise beat where a bass drop lands, the exact moment a vocal enters or cuts out, "
-    "the instant a new instrument joins, a snare fill starts, energy shifts, or silence hits.\n\n"
+    "You are a music production analyst. Listen to this song and identify ONLY actual musical events — "
+    "specific instants where something audibly changes in the mix.\n\n"
     "Return ONLY a JSON array:\n"
-    '[{"time_s": float, "type": "...", "what": "specific instrument or element", '
-    '"intensity": 0.0-1.0, "duration_s": float, '
-    '"description": "unique sentence describing what happens at this exact moment"}, ...]\n\n'
-    "Types: drop, build, breakdown, climax, entrance, exit, fill, accent, hook, release, "
-    "pause, silence, vocal_moment, key_change, tempo_change, groove_lock, call_response, "
-    "surprise, stab, swell, transition, solo\n\n"
-    "CRITICAL: timestamps must be precise to the actual audio event, NOT rounded to 5s or 10s. "
-    "Use fractional seconds (e.g. 13.2, 47.8, 102.5) based on where you actually hear the event. "
-    "A lighting designer needs frame-accurate cues, not approximations.\n\n"
-    "Find moments across the ENTIRE song from start to finish. "
-    "Name the specific instrument, synth, drum, or vocal that triggers each moment. "
-    "Every description must be unique and specific to THIS song. Output ONLY the JSON array."
+    '[{"time_s": float, "type": "...", "what": "kick drum / lead synth / vocal etc", '
+    '"intensity": 0.0-1.0, "description": "what specifically happens at this instant"}, ...]\n\n'
+    "Valid types (these are EVENTS, not sections):\n"
+    "  drop — bass/beat suddenly hits after silence or buildup\n"
+    "  build — energy starts rising (risers, snare rolls, filters opening)\n"
+    "  breakdown — instruments strip away, energy drops suddenly\n"
+    "  fill — drum fill, snare roll, or transition element\n"
+    "  entrance — a new instrument or voice appears for the first time\n"
+    "  exit — an instrument or voice disappears from the mix\n"
+    "  accent — a stab, hit, or impact sound\n"
+    "  silence — everything stops or nearly stops\n"
+    "  key_change — the key or tonality shifts\n"
+    "  tempo_change — the tempo audibly changes\n"
+    "  solo — an instrument takes a solo\n"
+    "  surprise — something unexpected happens in the production\n\n"
+    "DO NOT use types like intro, verse, chorus, outro, hook — those are sections, not moments.\n"
+    "DO NOT describe what section is playing — describe what SOUND EVENT happens at that instant.\n\n"
+    "Timestamps must be precise, not rounded to 5 or 10 seconds. "
+    "Output ONLY the JSON array."
 )
 
 EMOTION_PROMPT = (
-    "Analyse the emotional trajectory of this song from beginning to end.\n\n"
-    "Return ONLY a JSON array of segments, each covering approximately 10-15 seconds:\n"
-    '[{"start": 0.0, "end": 15.0, "energy": 7, "valence": 6, "arousal": 8, '
+    "Listen to this song as a listener would and describe what you FEEL at each moment.\n\n"
+    "Return ONLY a JSON array of segments covering the entire song:\n"
+    '[{"start": 0.0, "end": 12.5, "energy": 7, "valence": 6, "arousal": 8, '
     '"tension": 4, "brightness": 7, "groove": 8, '
-    '"emotion": "euphoric", "description": "driving synths and soaring vocals create an uplifting rush"}, ...]\n\n'
-    "Dimensions (all 1-10):\n"
-    "- energy: loud/powerful vs quiet/soft\n"
-    "- valence: happy/bright vs sad/dark\n"
-    "- arousal: exciting/stimulating vs calm/relaxing\n"
-    "- tension: tense/unresolved vs resolved/relaxed\n"
-    "- brightness: bright/shimmering vs dark/heavy\n"
-    "- groove: rhythmic/danceable vs still/ambient\n\n"
-    "emotion: one word (euphoric, melancholic, aggressive, tender, triumphant, anxious, serene, "
-    "nostalgic, defiant, playful, bittersweet, ethereal, intense, hopeful, dark, dreamy, powerful, etc.)\n\n"
-    "description: one sentence about what creates that feeling - name instruments, textures, production.\n\n"
-    "Cover the entire song with no gaps. Output ONLY the JSON array."
+    '"emotion": "anticipation", "description": "soft piano builds quiet excitement before the beat arrives"}, ...]\n\n'
+    "Dimensions (1-10, vary them — flat lines mean you are not listening):\n"
+    "- energy: how loud/powerful does this feel?\n"
+    "- valence: does it feel happy/uplifting or sad/heavy?\n"
+    "- arousal: does it feel exciting or calm?\n"
+    "- tension: does it feel tense/unresolved or released/resolved?\n"
+    "- brightness: does the timbre feel bright/airy or dark/warm?\n"
+    "- groove: does it make you want to move or sit still?\n\n"
+    "emotion: the ONE word that best captures how this part FEELS to a listener. "
+    "Vary it — a song is a journey, the emotion MUST change between segments. "
+    "Choose from: anticipation, euphoria, melancholy, aggression, tenderness, triumph, "
+    "anxiety, serenity, nostalgia, defiance, playfulness, bittersweetness, wonder, "
+    "intensity, hope, darkness, dreaminess, power, longing, joy, tension, release, "
+    "grandeur, intimacy, rebellion, bliss, unease, confidence, vulnerability, freedom.\n\n"
+    "description: describe what specific sounds create that feeling.\n\n"
+    "Segment boundaries should align with emotional shifts, not fixed intervals. "
+    "A quiet intro and a massive drop should NOT have the same emotion or similar dimension values. "
+    "Cover the entire song from 0.0 to the end with no gaps. Output ONLY the JSON array."
 )
 
 CAPTION_PROMPT = "Describe this song in one paragraph: genre, mood, instrumentation, production style, and overall vibe. Be specific and concise."
@@ -639,10 +672,37 @@ def run_pipeline(wav_path):
                 raw = moss_json(wav_path, prompt)
                 if raw:
                     if task == "sections":
-                        score["sections"] = clean_sections(raw)
+                        cleaned = clean_sections(raw)
+                        dur = score["song"]["length_s"]
+                        coverage = (
+                            max((s["end"] for s in cleaned), default=0)
+                            if cleaned
+                            else 0
+                        )
+                        if coverage < dur * 0.8:
+                            print(
+                                f"    sections: only covers {coverage:.0f}/{dur:.0f}s, retrying...",
+                                flush=True,
+                            )
+                            raw2 = moss_json(wav_path, prompt)
+                            if raw2:
+                                c2 = clean_sections(raw2)
+                                cov2 = (
+                                    max((s["end"] for s in c2), default=0) if c2 else 0
+                                )
+                                if cov2 > coverage:
+                                    cleaned = c2
+                        score["sections"] = cleaned
                     elif task == "moments":
                         beat_times = [b["t"] for b in score.get("beats", [])]
-                        score["moments"] = clean_moments(raw, beats=beat_times)
+                        sec_bounds = []
+                        for s in score.get("sections", []):
+                            sec_bounds.extend([s["start"], s["end"]])
+                        score["moments"] = clean_moments(
+                            raw,
+                            beats=beat_times,
+                            section_bounds=sorted(set(sec_bounds)),
+                        )
                     elif task == "emotion":
                         score["emotion"] = clean_emotion(raw)
                     print(
