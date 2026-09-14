@@ -30,7 +30,9 @@ def stop_sglang():
 
 def start_sglang():
     print("    [restarting SGLang...]", flush=True)
+    venv_bin = os.path.dirname(os.path.abspath(sys.executable))
     env = dict(os.environ, SGLANG_DISABLE_CUDNN_CHECK="1")
+    env["PATH"] = venv_bin + ":" + env.get("PATH", "")
     subprocess.Popen(
         [
             sys.executable,
