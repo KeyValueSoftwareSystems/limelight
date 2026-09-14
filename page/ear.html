@@ -734,7 +734,7 @@
         <div class="tl-content">
           <canvas
             id="emotion-canvas"
-            style="width: 100%; height: 160px"
+            style="width: 100%; height: 320px"
           ></canvas>
         </div>
       </div>
@@ -1789,7 +1789,7 @@
     const emo = SCORE.emotion;
     if (!emo || !emo.length) return;
     const canvas = $("emotion-canvas");
-    const h = 160;
+    const h = 320;
     const [g, w] = fit(canvas, h);
 
     let lo = 10,
