@@ -859,8 +859,12 @@
   <section>
     <h2>Melody</h2>
     <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      Librosa pYIN pitch tracking on isolated vocal + instrument stems
+      MOSS-Music-8B pitch analysis + pYIN tracking on isolated stems
     </p>
+    <div
+      id="moss-voice-line"
+      style="font-size: 12px; color: var(--dim); margin-bottom: 8px"
+    ></div>
     <div class="holder">
       <canvas id="tune"></canvas>
       <div class="pline" data-for="tune"></div>
@@ -871,8 +875,12 @@
   <section>
     <h2>Rhythm</h2>
     <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      Librosa STFT drum frequency band analysis per 16th-note slot
+      MOSS-Music-8B rhythm analysis + madmom beat tracking
     </p>
+    <div
+      id="moss-rhythm-line"
+      style="font-size: 12px; color: var(--dim); margin-bottom: 8px"
+    ></div>
     <canvas id="beat"></canvas>
     <div class="legend" id="beatkey"></div>
   </section>
@@ -880,8 +888,9 @@
   <section id="lyricbox" hidden>
     <h2>Lyrics</h2>
     <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      Whisper-large-v3 ASR on isolated vocal stem
+      MOSS-Music-8B transcription + Whisper-large-v3 ASR
     </p>
+    <div id="moss-lyrics-box" style="margin-bottom: 12px"></div>
     <div class="lead" id="sung"></div>
   </section>
 
@@ -1390,8 +1399,25 @@
     $("tunekey").innerHTML =
       `<span><i style="background:#7ae8b0"></i>Sung</span>` +
       `<span><i style="background:#8fd0ff"></i>Played (lead)</span>` +
-      `<span><i style="background:#c8a2ff"></i>Repeated tune</span>` +
-      `<span class="dim">Click shaded phrases to hear them</span>`;
+      `<span><i style="background:#c8a2ff"></i>Repeated tune</span>`;
+
+    const MO = SCORE.moss || {};
+    const vl = $("moss-voice-line");
+    if (vl)
+      vl.textContent = MO.voice
+        ? MO.voice
+            .split("\n")[0]
+            .replace(/^[\s*#-]+/, "")
+            .slice(0, 200)
+        : "";
+    const rl = $("moss-rhythm-line");
+    if (rl)
+      rl.textContent = MO.rhythm_groove
+        ? MO.rhythm_groove
+            .split("\n")[0]
+            .replace(/^[\s*#-]+/, "")
+            .slice(0, 200)
+        : "";
 
     lanes();
     tune();
@@ -1970,12 +1996,16 @@
     }
     sec.hidden = false;
 
-    const capText = M.caption || SCORE.moss_caption || "";
-    if (capText) {
-      capBox.innerHTML = `<h3>What the AI Heard</h3><p class="tech">MOSS-Music-8B-Thinking via SGLang</p><p>${esc(capText)}</p>`;
-    } else capBox.innerHTML = "";
-
+    capBox.innerHTML = "";
     let html = "";
+
+    if (M.key_tempo) {
+      html += `<div class="ai-card" style="padding:10px 14px"><span style="font:600 11px ui-monospace,monospace;letter-spacing:0.1em;text-transform:uppercase;color:var(--amb)">KEY &amp; TEMPO</span> <span style="color:var(--ink);font-size:13px;margin-left:8px">${esc(M.key_tempo)}</span></div>`;
+    }
+
+    if (M.caption) {
+      html += `<div class="ai-card" style="padding:10px 14px"><span style="font:600 11px ui-monospace,monospace;letter-spacing:0.1em;text-transform:uppercase;color:var(--amb)">SUMMARY</span> <span style="color:var(--dim);font-size:12.5px;margin-left:8px">${esc(M.caption.length > 300 ? M.caption.slice(0, 300) + "…" : M.caption)}</span></div>`;
+    }
 
     const s53 = SCORE.stems_53;
     if (s53 && Object.keys(s53).length) {
@@ -2009,42 +2039,13 @@
         const col = STEM_COLS[i % STEM_COLS.length];
         const label = name.replace(/-/g, " ");
         stemHtml +=
-          `<div style="margin-bottom:6px">` +
-          `<div style="display:flex;align-items:center;gap:10px">` +
-          `<span style="color:${col};font-weight:600;width:100px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(label)}">${esc(label)}</span>` +
-          `<div style="flex:1;height:6px;background:#111a28;border-radius:3px;overflow:hidden">` +
-          `<div style="width:${pct.toFixed(1)}%;height:100%;background:${col};border-radius:3px;transition:width 0.3s"></div></div>` +
-          `<span style="font-size:9.5px;color:#5a6274;min-width:42px;text-align:right">${db.toFixed(1)} dB</span></div></div>`;
+          `<div style="margin-bottom:4px;display:flex;align-items:center;gap:8px">` +
+          `<span style="color:${col};font-weight:600;width:90px;font-size:10px;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(label)}">${esc(label)}</span>` +
+          `<div style="flex:1;height:5px;background:#111a28;border-radius:3px;overflow:hidden">` +
+          `<div style="width:${pct.toFixed(1)}%;height:100%;background:${col};border-radius:3px"></div></div>` +
+          `<span style="font-size:9px;color:#4a5568;min-width:38px;text-align:right">${db.toFixed(1)} dB</span></div>`;
       });
-      html += `<div class="ai-card"><h3>Detected Instruments (${sorted.length})</h3><p class="tech">MVSep Mega 53-Stem BS-RoFormer · silent stems filtered out</p>${stemHtml}</div>`;
-    }
-
-    if (M.instruments) {
-      html += `<div class="ai-card"><h3>Instrumentation</h3><p class="tech">MOSS-Music-8B-Thinking · instrument identification with timestamps</p><div style="color:var(--ink);font-size:12.5px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto">${esc(M.instruments)}</div></div>`;
-    }
-
-    if (M.emotion_trajectory) {
-      html += `<div class="ai-card"><h3>Energy &amp; Emotion</h3><p class="tech">MOSS-Music-8B-Thinking · energy, valence, arousal per section</p><div style="color:var(--ink);font-size:12.5px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto">${esc(M.emotion_trajectory)}</div></div>`;
-    }
-
-    if (M.key_tempo) {
-      html += `<div class="ai-card"><h3>Key &amp; Tempo</h3><p class="tech">MOSS-Music-8B-Thinking · key, mode, tempo, time signature</p><p style="font-size:13px;color:var(--ink);line-height:1.7">${esc(M.key_tempo)}</p></div>`;
-    }
-
-    if (M.rhythm_groove) {
-      html += `<div class="ai-card"><h3>Rhythm &amp; Groove</h3><p class="tech">MOSS-Music-8B-Thinking · groove feel, drum patterns, rhythmic complexity</p><div style="color:var(--ink);font-size:12.5px;line-height:1.7;white-space:pre-wrap;max-height:250px;overflow-y:auto">${esc(M.rhythm_groove)}</div></div>`;
-    }
-
-    if (M.voice) {
-      html += `<div class="ai-card"><h3>Voice</h3><p class="tech">MOSS-Music-8B-Thinking · vocal characteristics, style, language</p><p style="font-size:13px;color:var(--ink);line-height:1.7">${esc(M.voice)}</p></div>`;
-    }
-
-    if (M.production) {
-      html += `<div class="ai-card"><h3>Production</h3><p class="tech">MOSS-Music-8B-Thinking · mixing, effects, stereo width, sonic aesthetic</p><div style="color:var(--ink);font-size:12.5px;line-height:1.7;white-space:pre-wrap;max-height:250px;overflow-y:auto">${esc(M.production)}</div></div>`;
-    }
-
-    if (M.deep_analysis) {
-      html += `<div class="ai-card"><h3>Deep Analysis</h3><p class="tech">MOSS-Music-8B-Thinking · professional musicological analysis</p><div style="color:var(--ink);font-size:12.5px;line-height:1.7;white-space:pre-wrap;max-height:350px;overflow-y:auto">${esc(M.deep_analysis)}</div></div>`;
+      html += `<div class="ai-card"><h3>Detected Instruments (${sorted.length})</h3><p class="tech">MVSep Mega 53-Stem BS-RoFormer</p>${stemHtml}</div>`;
     }
 
     cards.innerHTML = html;
@@ -2104,12 +2105,23 @@
     const box = $("sung"),
       sec = $("lyricbox");
     const got = SCORE.lyrics;
+    const M = SCORE.moss || {};
+    const mLyrBox = $("moss-lyrics-box");
     box.innerHTML = "";
-    if (!got || !(got.lines || []).length) {
+    if (mLyrBox) mLyrBox.innerHTML = "";
+
+    const hasWhisper = got && (got.lines || []).length;
+    const hasMossLyr = M.lyrics && M.lyrics.length > 20;
+    if (!hasWhisper && !hasMossLyr) {
       sec.hidden = true;
       return;
     }
     sec.hidden = false;
+
+    if (hasMossLyr && mLyrBox) {
+      mLyrBox.innerHTML = `<div class="ai-card" style="padding:10px 14px"><div style="color:var(--ink);font-size:12.5px;line-height:1.8;white-space:pre-wrap;max-height:250px;overflow-y:auto">${esc(M.lyrics)}</div></div>`;
+    }
+    if (!hasWhisper) return;
     for (const r of got.lines) {
       const weak = r.sure != null && r.sure < 0.6;
       const row = document.createElement("div");
