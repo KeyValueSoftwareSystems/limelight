@@ -1411,7 +1411,7 @@
       ${mossSections().length ? `<dt>Sections</dt><dd><b style="color:var(--ok)">${mossSections().length} sections</b></dd>` : ""}
       ${SCORE.btc_chords_raw ? `<dt>Chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b></dd>` : ""}
       ${SCORE.stems_53 ? `<dt>Instruments</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems_53).length} stems</b> detected</dd>` : ""}
-      ${(SCORE.moments || []).length ? `<dt>Moments</dt><dd><b style="color:var(--ok)">${(SCORE.moments).length} events</b></dd>` : ""}
+      ${(SCORE.moments || []).length ? `<dt>Moments</dt><dd><b style="color:var(--ok)">${SCORE.moments.length} events</b></dd>` : ""}
       ${(SCORE.emotion || []).length ? `<dt>Emotion</dt><dd><b style="color:var(--ok)">${SCORE.emotion.length} segments</b></dd>` : ""}
     </dl></div>
     <div class="col"><dl>
@@ -1498,24 +1498,35 @@
     }
   }
 
+  const CHORD_COLORS = {
+    C: "#e8a33d",
+    D: "#5bb98c",
+    E: "#6fa8dc",
+    F: "#b98cd6",
+    G: "#d68c8c",
+    A: "#8cd6cf",
+    B: "#d6c98c",
+  };
+  function chordColor(ch) {
+    const root = (ch || "").replace(/:.*/, "").replace(/[#b]/g, "");
+    return CHORD_COLORS[root] || "#a0a8bb";
+  }
+
   function chordRow() {
     const box = $("chords");
     box.innerHTML = "";
-    const list = SCORE.chord_changes || [];
-    if (!list.length) return;
-    const total = SCORE.song.length_s,
-      px = box.clientWidth || 1200;
-    list.forEach((c, i) => {
-      const t0 = barTime(c.bar);
-      const t1 = i + 1 < list.length ? barTime(list[i + 1].bar) : total;
+    const btc = SCORE.btc_chords_raw || [];
+    if (!btc.length) return;
+    const total = SCORE.song.length_s;
+    btc.forEach((c) => {
+      if (c.chord === "N") return;
       const el = document.createElement("div");
       el.className = "chd";
-      el.dataset.t0 = t0;
-      el.dataset.t1 = t1;
-      el.style.opacity = 0.45 + 0.55 * (c.sure ?? 0.5);
-      el.title =
-        `bar ${c.bar} · ${c.chord} · the computer is ${Math.round((c.sure ?? 0) * 100)}% sure` +
-        ` · click to hear it`;
+      el.dataset.t0 = c.start;
+      el.dataset.t1 = c.end;
+      const col = chordColor(c.chord);
+      el.style.borderBottom = `2px solid ${col}`;
+      el.title = `${c.chord} · ${mmss(c.start)}–${mmss(c.end)} · click to hear`;
       el.textContent = c.chord;
       box.appendChild(el);
     });
@@ -1539,7 +1550,7 @@
   }
 
   function zoom() {
-    const [g, W] = fit($("zoom"), 110);
+    const [g, W] = fit($("zoom"), 80);
     if (!SCORE) return;
     const t = aud.currentTime;
     const wide = Math.min(WINDOW, viewSpan());
@@ -1556,7 +1567,7 @@
         x1 = Math.min(W, X(t1));
       const c = HUE[s.label] || "#6fa8dc";
       g.fillStyle = c + "16";
-      g.fillRect(x0, 0, x1 - x0, 110);
+      g.fillRect(x0, 0, x1 - x0, 80);
       g.fillStyle = c;
       g.font = "600 10px ui-monospace,monospace";
       if (X(t0) >= 0) {
@@ -1564,7 +1575,7 @@
         g.lineWidth = 2;
         g.beginPath();
         g.moveTo(X(t0), 0);
-        g.lineTo(X(t0), 110);
+        g.lineTo(X(t0), 80);
         g.stroke();
         g.fillText(s.label.toUpperCase() + " starts here", X(t0) + 6, 13);
       } else if (x1 - x0 > 96) {
@@ -1591,7 +1602,7 @@
         const n = Math.round(beatAt(bt.t) / perBar()) + 1;
         g.fillStyle = "#7b8599";
         g.font = "10px ui-monospace,monospace";
-        g.fillText("bar " + n, x + 4, 106);
+        g.fillText("bar " + n, x + 4, 74);
       }
     });
 
@@ -1655,15 +1666,15 @@
     g.lineWidth = 1.5;
     g.beginPath();
     g.moveTo(W / 2, 0);
-    g.lineTo(W / 2, 110);
+    g.lineTo(W / 2, 80);
     g.stroke();
     g.fillStyle = "#4a5364";
     g.font = "9.5px ui-monospace,monospace";
-    g.fillText(`${wide.toFixed(1)}s across`, 7, 104);
+    g.fillText(`${wide.toFixed(1)}s across`, 7, 74);
   }
 
   function tune() {
-    const [g, W] = fit($("tune"), 200);
+    const [g, W] = fit($("tune"), 100);
     const notes = SCORE.melody || [];
     if (!notes.length) {
       g.fillStyle = "#4a5568";
@@ -1681,8 +1692,8 @@
     const noteAt = (bar, bt) =>
       atBeat((bar - 1) * perb + ((bt || 1) - 1) + (SHIFT - BASE));
     const L = 14,
-      top = 34,
-      foot = 176,
+      top = 8,
+      foot = 92,
       tall = foot - top;
     const SUNG = "#7ae8b0",
       LEAD = "#8fd0ff",
@@ -1837,34 +1848,28 @@
       g.fillText(words, h.x0 + 4, ly);
     }
 
-    g.fillStyle = "#8d97ab";
-    g.font = "9.5px ui-monospace,monospace";
-    g.fillText(`${notes.length} notes in all`, L, 134);
     if (v.sure != null && v.sure < 0.5) {
-      g.fillStyle = "#e0655f";
-      g.fillText(
-        "the pitch reading is unreliable in this song — treat the tune with suspicion",
-        L + 110,
-        134,
-      );
+      g.fillStyle = "#e0655f44";
+      g.font = "9px ui-monospace,monospace";
+      g.fillText("low confidence", L, foot + 10);
     }
   }
 
   function beatGrid() {
     const gr = SCORE.groove || {};
     const names = LANES.filter((n) => gr[n] && gr[n].strength);
-    const [g, W] = fit($("beat"), 150);
+    const [g, W] = fit($("beat"), 80);
     if (!names.length) {
       g.fillStyle = "#7b8599";
-      g.font = "12.5px system-ui";
-      g.fillText("No rhythm pattern in this score yet.", 14, 28);
+      g.font = "11px system-ui";
+      g.fillText("No rhythm pattern", 14, 20);
       return;
     }
     const per = gr[names[0]].per_bar || 16;
-    const L = 78,
-      R = 150,
-      cell = Math.min(34, (W - L - R) / per),
-      h = 150 / names.length;
+    const L = 60,
+      R = 100,
+      cell = Math.min(28, (W - L - R) / per),
+      h = 80 / names.length;
     names.forEach((n, row) => {
       const y = row * h,
         d = gr[n];
@@ -2142,7 +2147,6 @@
     }
     sec.hidden = false;
 
-    
     const sorted = [...mo].sort(
       (a, b) => (a.time_s || a.bar || 0) - (b.time_s || b.bar || 0),
     );
