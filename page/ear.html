@@ -324,10 +324,7 @@
   canvas {
     display: block;
     width: 100%;
-    border: 1px solid var(--line);
-    border-radius: 8px;
     background: #060910;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
   #zoom {
     height: 110px;
@@ -361,6 +358,9 @@
     display: flex;
     align-items: stretch;
   }
+  .tl-row[hidden] {
+    display: none !important;
+  }
   .tl-label {
     width: 62px;
     min-width: 62px;
@@ -384,154 +384,18 @@
     border-right: 1px solid var(--line);
     background: #060910;
     cursor: pointer;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  #tl-rows .tl-row:first-of-type .tl-content canvas,
+  #tl-rows .tl-row:first-of-type .tl-content > div {
+    border-top: 1px solid var(--line);
+    border-radius: 10px 10px 0 0;
   }
   #tl-rows .tl-row:last-of-type .tl-content canvas,
   #tl-rows .tl-row:last-of-type .tl-content > div {
     border-bottom: 1px solid var(--line);
     border-radius: 0 0 10px 10px;
-  }
-  #map {
-    position: relative;
-    height: 140px;
-    border: 1px solid var(--line);
-    border-bottom: none;
-    border-radius: 10px 10px 0 0;
-    background: #060910;
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-  }
-  #chords {
-    position: relative;
-    height: 80px;
-    border-left: 1px solid var(--line);
-    border-right: 1px solid var(--line);
-    background: #0b1016;
-    overflow: hidden;
-    cursor: pointer;
-  }
-  .chd {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    border-left: 1px solid #2a3140;
-    display: flex;
-    align-items: center;
-    padding-left: 8px;
-    font:
-      700 16px ui-monospace,
-      monospace;
-    color: #e0ecf8;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    cursor: pointer;
-    min-width: 0;
-    transition: background 0.1s;
-  }
-  .chd:hover {
-    background: #1a2a3d;
-    z-index: 2;
-  }
-  #moments-row {
-    position: relative;
-    height: 140px;
-    border-left: 1px solid var(--line);
-    border-right: 1px solid var(--line);
-    background: #060910;
-    overflow: hidden;
-    cursor: pointer;
-  }
-  .part {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    overflow: hidden;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    transition: filter 0.15s;
-    cursor: pointer;
-  }
-  .part:first-of-type {
-    border-left: none;
-  }
-  .part:hover {
-    filter: brightness(1.3);
-  }
-  .part .fill {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0.25;
-  }
-  .part .tag {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 4px;
-    padding: 0 6px;
-    font:
-      600 9.5px ui-monospace,
-      monospace;
-    letter-spacing: 0.04em;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .part.here {
-    outline: 2px solid var(--ok);
-    outline-offset: -2px;
-  }
-  .mom {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    min-width: 4px;
-    z-index: 4;
-    border-radius: 3px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    padding: 6px 6px;
-    overflow: hidden;
-  }
-  .mom:hover {
-    filter: brightness(1.4);
-    z-index: 8;
-  }
-  .mom .mom-type {
-    font:
-      700 11px ui-monospace,
-      monospace;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .mom .mom-desc {
-    font: 10px system-ui;
-    opacity: 0.7;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 2px;
-  }
-  .mom .mom-time {
-    font:
-      9px ui-monospace,
-      monospace;
-    opacity: 0.5;
-    margin-top: auto;
-  }
-  #head {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--ok);
-    pointer-events: none;
-    z-index: 6;
   }
   .holder {
     position: relative;
@@ -546,27 +410,6 @@
     z-index: 6;
     opacity: 0.85;
     display: none;
-  }
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 14px;
-    margin: 8px 0 0;
-    font-size: 11px;
-    color: var(--faint);
-  }
-  .legend i {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 2px;
-    margin-right: 5px;
-    vertical-align: 0;
-    font-style: normal;
-  }
-  .legend em {
-    font-style: normal;
-    color: var(--dim);
   }
   .row {
     display: flex;
@@ -856,83 +699,77 @@
   <section>
     <h2>Timeline</h2>
     <div id="tl-rows">
-      <div class="tl-row">
+      <div class="tl-row" id="beats-row" hidden>
+        <span class="tl-label">BEATS</span>
+        <div class="tl-content">
+          <canvas id="zoom" style="width: 100%; height: 100px"></canvas>
+        </div>
+      </div>
+      <div class="tl-row" id="sections-row" hidden>
         <span class="tl-label">SECTIONS</span>
         <div class="tl-content">
-          <div id="map"><div id="head"></div></div>
+          <canvas
+            id="sections-canvas"
+            style="width: 100%; height: 80px"
+          ></canvas>
         </div>
       </div>
-      <div class="tl-row">
+      <div class="tl-row" id="moments-row" hidden>
         <span class="tl-label">MOMENTS</span>
         <div class="tl-content">
-          <div id="moments-row"></div>
+          <canvas
+            id="moments-canvas"
+            style="width: 100%; height: 60px"
+          ></canvas>
         </div>
       </div>
-      <div class="tl-row">
+      <div class="tl-row" id="chords-row" hidden>
         <span class="tl-label">CHORDS</span>
-        <div class="tl-content"><div id="chords"></div></div>
+        <div class="tl-content">
+          <canvas id="chords-canvas" style="width: 100%; height: 50px"></canvas>
+        </div>
       </div>
       <div class="tl-row" id="emotion-row" hidden>
         <span class="tl-label">EMOTION</span>
         <div class="tl-content">
           <canvas
             id="emotion-canvas"
-            style="width: 100%; height: 140px"
+            style="width: 100%; height: 160px"
           ></canvas>
         </div>
       </div>
       <div class="tl-row" id="melody-row" hidden>
         <span class="tl-label">MELODY</span>
         <div class="tl-content">
-          <canvas id="melody-canvas" style="width: 100%; height: 80px"></canvas>
+          <canvas
+            id="melody-canvas"
+            style="width: 100%; height: 100px"
+          ></canvas>
         </div>
       </div>
       <div class="tl-row" id="rhythm-row" hidden>
         <span class="tl-label">RHYTHM</span>
         <div class="tl-content">
-          <canvas id="rhythm-canvas" style="width: 100%; height: 50px"></canvas>
+          <canvas
+            id="rhythm-canvas"
+            style="width: 100%; height: 100px"
+          ></canvas>
         </div>
       </div>
       <div class="tl-row" id="stems-row" hidden>
         <span class="tl-label">STEMS</span>
         <div class="tl-content">
-          <canvas id="stems-canvas" style="width: 100%; height: 200px"></canvas>
-        </div>
-      </div>
-      <div class="tl-row" id="beats-row">
-        <span class="tl-label">BEATS</span>
-        <div class="tl-content">
-          <canvas id="zoom" style="width: 100%; height: 100px"></canvas>
+          <canvas id="stems-canvas" style="width: 100%; height: 400px"></canvas>
         </div>
       </div>
       <div id="tl-seeker"></div>
     </div>
-    <div class="legend" id="legend"></div>
   </section>
 
-  <section id="section-detail-box">
-    <h2>Section Detail</h2>
-    <div id="sections"></div>
-  </section>
-
-  <section>
+  <section id="meta-section" hidden>
     <h2>Metadata</h2>
     <div class="lead" id="owned"></div>
   </section>
-
-  <div id="lyricbox" hidden></div>
-  <div id="sung" hidden></div>
-  <div id="moss-lyrics-box" hidden></div>
-  <div id="moss-voice-line" hidden></div>
-  <div id="moss-rhythm-line" hidden></div>
-  <div id="indic-box" hidden><div id="indic-sung"></div></div>
-  <div id="ai-intel" hidden></div>
-  <div id="moments-list" hidden></div>
-  <div id="emotion-detail" hidden></div>
-  <canvas id="tune" hidden></canvas>
-  <canvas id="beat" hidden></canvas>
-  <div id="tunekey" hidden></div>
-  <div id="beatkey" hidden></div>
 </div>
 
 <script src="/protocol/session.js"></script>
@@ -1013,10 +850,9 @@
         : `${mmss(VIEW.a)} \u2013 ${mmss(VIEW.b)}`;
     if (SCORE) {
       place();
-      chordRow();
       if ((SCORE.emotion || []).length) emotionTimeline();
       if ((SCORE.melody || []).length) melodyTimeline();
-      if (SCORE.rhythm) rhythmTimeline();
+      if (SCORE.rhythm && SCORE.rhythm.hits) rhythmTimeline();
       if (SCORE.stems_temporal) stemsTimeline();
       zoom();
     }
@@ -1339,77 +1175,15 @@
         MSEC_COLORS[i % MSEC_COLORS.length];
     });
 
-    const map = $("map");
-    [...map.querySelectorAll(".part")].forEach((x) => x.remove());
-    const total = SCORE.song.length_s;
-
-    secs.forEach((s, i) => {
-      const t0 = s.start,
-        t1 = Math.min(total, s.end);
-      const el = document.createElement("div");
-      el.className = "part";
-      el.dataset.t0 = t0;
-      el.dataset.t1 = t1;
-      const c = HUE[s.label] || MSEC_COLORS[i % MSEC_COLORS.length];
-      el.title = `${cap(s.label)} · ${mmss(t0)} – ${mmss(t1)} · click to hear`;
-      el.innerHTML = `<div class="fill" style="background:${c};height:70%"></div>
-      <div class="tag" style="color:${c}">${esc(s.label.toUpperCase())}</div>`;
-      map.appendChild(el);
-    });
-
-    /* Moments as timeline row */
-    const mrow = $("moments-row");
-    [...mrow.querySelectorAll(".mom")].forEach((x) => x.remove());
+    sectionsCanvas();
+    momentsCanvas();
     const allMoments = SCORE.moments || [];
-    for (const m of allMoments) {
-      const t = m.time_s != null ? m.time_s : momentTime(m);
-      if (t < 0 || t > total) continue;
-      const el = document.createElement("div");
-      el.className = "mom";
-      const len = m.duration_s || momentSpan(m) || 2.0;
-      el.dataset.t0 = t;
-      el.dataset.t1 = t + len;
-      const type = m.type || m.is || "?";
-      const hue = MOMENT_TYPE_COLORS[type] || KIND[m.is] || "#8b93a6";
-      el.style.borderLeft = `3px solid ${hue}`;
-      el.style.background = hue + "22";
-      const intensity = m.intensity ?? m.weight ?? 0.5;
-      const desc = m.description || m.what || momentWords(m) || type;
-      const what = m.what || "";
-      el.title = `${mmss(t)} · ${type} · ${desc}`;
-      el.innerHTML = `<span class="mom-type" style="color:${hue}">${esc(type.toUpperCase())}</span><span class="mom-desc" style="color:${hue}">${esc(what || desc)}</span><span class="mom-time" style="color:${hue}">${mmss(t)}</span>`;
-      mrow.appendChild(el);
-    }
 
     const momTypes = {};
     for (const m of allMoments) {
       const t = m.type || m.is;
       if (t) momTypes[t] = (momTypes[t] || 0) + 1;
     }
-    $("legend").innerHTML =
-      `<span class="dim">Sections</span>` +
-      [...new Set(secs.map((s) => s.label))]
-        .map(
-          (lab) =>
-            `<span><i style="background:${HUE[lab]}"></i>${cap(lab)}</span>`,
-        )
-        .join("") +
-      (Object.keys(momTypes).length
-        ? `<span class="dim" style="margin-left:12px">Moments</span>` +
-          Object.entries(momTypes)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 8)
-            .map(
-              ([t, c]) =>
-                `<span><i style="background:${MOMENT_TYPE_COLORS[t] || "#8b93a6"}"></i>${t}(${c})</span>`,
-            )
-            .join("") +
-          `<span class="dim" style="margin-left:12px">Emotion</span>` +
-          EMO_LINES.map(
-            (ln) =>
-              `<span><i style="background:${ln.color}"></i>${ln.label}</span>`,
-          ).join("")
-        : "");
 
     const g = SCORE.grid;
     const kt = SCORE.key_tempo || "";
@@ -1423,17 +1197,20 @@
       ${SCORE.btc_chords_raw ? `<dt>Chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b> (BTC Transformer)</dd>` : ""}
       ${SCORE.stems ? `<dt>Instruments</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems).length} stems</b> detected (53-stem BS-RoFormer)</dd>` : ""}
       ${(SCORE.moments || []).length ? `<dt>Moments</dt><dd><b style="color:var(--ok)">${SCORE.moments.length} events</b></dd>` : ""}
-      ${(SCORE.emotion || []).length ? `<dt>Emotion</dt><dd><b style="color:var(--ok)">${SCORE.emotion.length} segments</b></dd>` : ""}
+      ${(SCORE.emotion || []).length ? `<dt>Emotion</dt><dd><b style="color:var(--ok)">${SCORE.emotion.length} segments</b> (6 dimensions)</dd>` : ""}
+      ${(SCORE.melody || []).length ? `<dt>Melody</dt><dd><b style="color:var(--ok)">${SCORE.melody.length} notes</b> (basic-pitch)</dd>` : ""}
+      ${SCORE.rhythm ? `<dt>Rhythm</dt><dd><b style="color:var(--ok)">${(SCORE.rhythm.hits || []).length} onsets</b></dd>` : ""}
+      ${SCORE.stems_temporal ? `<dt>Temporal</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems_temporal.stems || {}).length} stems</b> (0.5s windows)</dd>` : ""}
     </dl></div>
     <div class="col"><dl>
       <dt>Technology</dt>
       <dd class="dim" style="font-size:10px;line-height:1.8">
-        MOSS-Music-8B-Thinking (sections, moments, emotion, lyrics, caption)<br>
+        MOSS-Music-8B-Thinking (sections, moments, emotion, lyrics, caption, key)<br>
+        MVSep Mega 53-Stem BS-RoFormer (stem separation + temporal activity)<br>
         BTC Transformer (chord recognition, 170-chord vocabulary)<br>
-        MVSep Mega 53-Stem BS-RoFormer (stem separation)<br>
+        basic-pitch / ONNX (melody transcription)<br>
         madmom (beat &amp; downbeat tracking)<br>
-        SongFormer (structural segmentation)<br>
-        Whisper-large-v3 (Indic ASR)
+        librosa (rhythm onset detection)
       </dd>
     </dl></div>`;
 
@@ -1448,30 +1225,36 @@
         `<span><i style="background:#8fd0ff"></i>Played (lead)</span>` +
         `<span><i style="background:#c8a2ff"></i>Repeated tune</span>`;
 
-    chordRow();
+    const hasBeats = (SCORE.beats || []).length > 0;
+    $("beats-row").hidden = !hasBeats;
 
+    const hasSections = mossSections().length > 0;
+    const hasMoments = (SCORE.moments || []).length > 0;
+    const hasChords = (SCORE.btc_chords_raw || []).length > 0;
     const hasEmotion = (SCORE.emotion || []).length > 0;
-    $("emotion-row").hidden = !hasEmotion;
-    if (hasEmotion) emotionTimeline();
-
     const hasMelody = (SCORE.melody || []).length > 0;
-    $("melody-row").hidden = !hasMelody;
-    if (hasMelody) melodyTimeline();
-
-    const hasRhythm = SCORE.rhythm && typeof SCORE.rhythm === "object";
-    $("rhythm-row").hidden = !hasRhythm;
-    if (hasRhythm) rhythmTimeline();
-
+    const hasRhythm =
+      SCORE.rhythm && SCORE.rhythm.hits && SCORE.rhythm.hits.length > 0;
     const hasStems =
       SCORE.stems_temporal &&
       SCORE.stems_temporal.stems &&
       Object.keys(SCORE.stems_temporal.stems).length > 0;
-    $("stems-row").hidden = !hasStems;
-    if (hasStems) stemsTimeline();
 
-    const hasSections = mossSections().length > 0;
-    $("section-detail-box").hidden = !hasSections;
-    if (hasSections) sections();
+    $("sections-row").hidden = !hasSections;
+    $("moments-row").hidden = !hasMoments;
+    $("chords-row").hidden = !hasChords;
+    $("emotion-row").hidden = !hasEmotion;
+    $("melody-row").hidden = !hasMelody;
+    $("rhythm-row").hidden = !hasRhythm;
+    $("stems-row").hidden = !hasStems;
+
+    if (hasEmotion) emotionTimeline();
+    if (hasMelody) melodyTimeline();
+    if (hasRhythm) rhythmTimeline();
+    if (hasStems) stemsTimeline();
+    chordsCanvas();
+
+    $("meta-section").hidden = false;
 
     sungWords();
     aiIntel();
@@ -1479,31 +1262,112 @@
     place();
   }
 
-  /* Absolutely-positioned rows are laid out here rather than where they are
-   built, so a zoom moves them without rebuilding the DOM. */
   function place() {
-    const cw = $("chords")?.clientWidth || 1;
-    for (const el of document.querySelectorAll(
-      "#map .part,#moments-row .mom,#chords .chd",
-    )) {
-      const t0 = +el.dataset.t0,
-        t1 = +el.dataset.t1;
-      let l = pct(t0);
-      let r = pct(t1);
-      const off = l > 100 || r < 0;
-      el.style.display = off ? "none" : "";
-      if (off) continue;
-      const cl = Math.max(0, l);
-      const cr = Math.min(100, r);
-      const w = Math.max(el.classList.contains("mom") ? 0.25 : 0, cr - cl);
-      el.style.left = `${cl}%`;
-      el.style.width = `${w}%`;
-      if (el.classList.contains("chd")) {
-        const px = (w / 100) * cw;
-        if (px < 14) el.style.fontSize = "0";
-        else if (px < 40) el.style.fontSize = "11px";
-        else el.style.fontSize = "";
+    sectionsCanvas();
+    momentsCanvas();
+    chordsCanvas();
+  }
+
+  function sectionsCanvas() {
+    const secs = mossSections();
+    if (!secs.length) return;
+    const canvas = $("sections-canvas");
+    const h = 80;
+    const [g, w] = fit(canvas, h);
+
+    for (const s of secs) {
+      const x0 = frac(s.start) * w,
+        x1 = frac(s.end) * w;
+      if (x1 < 0 || x0 > w) continue;
+      const lx = Math.max(0, x0),
+        rx = Math.min(w, x1),
+        pw = rx - lx;
+      if (pw < 1) continue;
+      const c = HUE[s.label] || MSEC_COLORS[0];
+
+      g.fillStyle = c;
+      g.globalAlpha = 0.25;
+      g.fillRect(lx, 0, pw, h);
+      g.globalAlpha = 1;
+
+      g.strokeStyle = "rgba(255,255,255,0.08)";
+      g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(lx, 0);
+      g.lineTo(lx, h);
+      g.stroke();
+
+      if (pw > 30) {
+        const label = s.label.toUpperCase();
+        const fs = pw > 100 ? 11 : pw > 60 ? 9 : 7;
+        g.font = `600 ${fs}px ui-monospace,monospace`;
+        g.fillStyle = c;
+        g.globalAlpha = 0.85;
+        g.save();
+        g.beginPath();
+        g.rect(lx + 4, 0, pw - 8, h);
+        g.clip();
+        g.fillText(label, lx + 6, h - 8);
+        g.restore();
+        g.globalAlpha = 1;
       }
+    }
+  }
+
+  function momentsCanvas() {
+    const moms = SCORE.moments || [];
+    if (!moms.length) return;
+    const canvas = $("moments-canvas");
+    const h = 60;
+    const [g, w] = fit(canvas, h);
+    const total = SCORE.song.length_s;
+
+    for (const m of moms) {
+      const t = m.time_s != null ? m.time_s : momentTime(m);
+      if (t < 0 || t > total) continue;
+      const len = m.duration_s || momentSpan(m) || 2.0;
+      const x0 = frac(t) * w,
+        x1 = frac(t + len) * w;
+      if (x1 < 0 || x0 > w) continue;
+      const lx = Math.max(0, x0),
+        rx = Math.min(w, x1),
+        pw = rx - lx;
+      if (pw < 2) continue;
+
+      const type = m.type || m.is || "?";
+      const hue = MOMENT_TYPE_COLORS[type] || KIND[m.is] || "#8b93a6";
+
+      g.fillStyle = hue;
+      g.globalAlpha = 0.15;
+      g.fillRect(lx, 0, pw, h);
+      g.globalAlpha = 1;
+
+      g.fillStyle = hue;
+      g.fillRect(lx, 0, 3, h);
+
+      g.save();
+      g.beginPath();
+      g.rect(lx + 5, 0, pw - 7, h);
+      g.clip();
+      if (pw > 30) {
+        g.font = "700 10px ui-monospace,monospace";
+        g.fillStyle = hue;
+        g.fillText(type.toUpperCase(), lx + 6, 14);
+      }
+      if (pw > 60) {
+        const desc = m.description || m.what || "";
+        g.font = "9px system-ui";
+        g.fillStyle = hue;
+        g.globalAlpha = 0.7;
+        g.fillText(desc.slice(0, 50), lx + 6, 28);
+        g.globalAlpha = 1;
+      }
+      g.font = "8px ui-monospace,monospace";
+      g.fillStyle = hue;
+      g.globalAlpha = 0.5;
+      g.fillText(mmss(t), lx + 6, h - 6);
+      g.globalAlpha = 1;
+      g.restore();
     }
   }
 
@@ -1521,25 +1385,53 @@
     return CHORD_COLORS[root] || "#a0a8bb";
   }
 
-  function chordRow() {
-    const box = $("chords");
-    box.innerHTML = "";
+  function chordsCanvas() {
     const btc = SCORE.btc_chords_raw || [];
     if (!btc.length) return;
-    const total = SCORE.song.length_s;
-    btc.forEach((c) => {
-      if (c.chord === "N") return;
-      const el = document.createElement("div");
-      el.className = "chd";
-      el.dataset.t0 = c.start;
-      el.dataset.t1 = c.end;
+    const canvas = $("chords-canvas");
+    const [g, w] = fit(canvas, 50);
+    const h = 50;
+
+    for (const c of btc) {
+      if (c.chord === "N") continue;
+      const x0 = frac(c.start) * w;
+      const x1 = frac(c.end) * w;
+      if (x1 < 0 || x0 > w) continue;
+      const lx = Math.max(0, x0);
+      const rx = Math.min(w, x1);
+      const pw = rx - lx;
+      if (pw < 1) continue;
+
       const col = chordColor(c.chord);
-      el.style.borderBottom = `3px solid ${col}`;
-      el.style.background = col + "12";
-      el.title = `${c.chord} · ${mmss(c.start)}–${mmss(c.end)}`;
-      el.textContent = c.chord;
-      box.appendChild(el);
-    });
+      g.fillStyle = col;
+      g.globalAlpha = 0.08;
+      g.fillRect(lx, 0, pw, h);
+      g.globalAlpha = 1;
+
+      g.fillStyle = col;
+      g.fillRect(lx, h - 3, pw, 3);
+
+      g.strokeStyle = "#1a2535";
+      g.lineWidth = 0.5;
+      g.beginPath();
+      g.moveTo(lx, 0);
+      g.lineTo(lx, h);
+      g.stroke();
+
+      if (pw > 18) {
+        const fs = pw > 60 ? 14 : pw > 35 ? 11 : 9;
+        g.font = `700 ${fs}px ui-monospace,monospace`;
+        g.fillStyle = "#d0dae8";
+        g.textBaseline = "middle";
+        g.save();
+        g.beginPath();
+        g.rect(lx + 2, 0, pw - 4, h);
+        g.clip();
+        g.fillText(c.chord, lx + 4, h / 2);
+        g.restore();
+        g.textBaseline = "alphabetic";
+      }
+    }
   }
 
   const WINDOW = 8.0;
@@ -1565,7 +1457,7 @@
     const a = VIEW.a,
       b = VIEW.b;
     const X = (s) => frac(s) * W;
-    const h = 100;
+    const h = 140;
 
     const per = SCORE.grid.beats_per_bar;
     (SCORE.beats || []).forEach((bt, i) => {
@@ -1897,95 +1789,118 @@
     const emo = SCORE.emotion;
     if (!emo || !emo.length) return;
     const canvas = $("emotion-canvas");
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth || 800;
-    const h = 140;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    canvas.style.height = h + "px";
-    const g = canvas.getContext("2d");
-    g.scale(dpr, dpr);
-    g.clearRect(0, 0, w, h);
+    const h = 160;
+    const [g, w] = fit(canvas, h);
 
-    const pad = 14;
-    const bottom = h - 6;
-    const top = pad;
-    const X = (t) => frac(t) * w;
-    const Y = (v) => top + (1 - v / 10) * (bottom - top);
-
+    let lo = 10,
+      hi = 0;
     for (const e of emo) {
+      for (const ln of EMO_LINES) {
+        const v = e[ln.key];
+        if (v != null) {
+          lo = Math.min(lo, v);
+          hi = Math.max(hi, v);
+        }
+      }
+    }
+    lo = Math.max(0, lo - 1);
+    hi = Math.min(10, hi + 1);
+    if (hi - lo < 2) {
+      lo = Math.max(0, lo - 1);
+      hi = Math.min(10, hi + 1);
+    }
+    const range = hi - lo || 1;
+
+    const X = (t) => frac(t) * w;
+    const Y = (v) => 14 + (1 - (v - lo) / range) * (h - 20);
+
+    let prevEmoLabel = "";
+    for (let ei = 0; ei < emo.length; ei++) {
+      const e = emo[ei];
       const x0 = X(e.start),
         x1 = X(e.end);
       if (x1 < 0 || x0 > w) continue;
       const col = EMOTION_COLORS[e.emotion] || "#4a5568";
       g.fillStyle = col;
-      g.globalAlpha = 0.08;
+      g.globalAlpha = 0.06;
       g.fillRect(Math.max(0, x0), 0, Math.min(w, x1) - Math.max(0, x0), h);
       g.globalAlpha = 1;
-      const mid = (Math.max(0, x0) + Math.min(w, x1)) / 2;
-      const pw = Math.min(w, x1) - Math.max(0, x0);
-      if (pw > 40) {
+      if (e.emotion !== prevEmoLabel) {
         g.fillStyle = col;
-        g.globalAlpha = 0.5;
+        g.globalAlpha = 0.8;
         g.font = "600 9px system-ui";
-        g.textAlign = "center";
-        g.fillText(e.emotion, mid, 10);
-        g.textAlign = "start";
+        g.fillText(e.emotion, Math.max(0, x0) + 4, 10);
         g.globalAlpha = 1;
       }
+      prevEmoLabel = e.emotion;
     }
 
-    for (let v = 2; v <= 8; v += 2) {
+    for (let v = Math.ceil(lo); v <= Math.floor(hi); v++) {
+      const yy = Y(v);
       g.strokeStyle = "#1a2030";
       g.lineWidth = 0.5;
       g.beginPath();
-      g.moveTo(0, Y(v));
-      g.lineTo(w, Y(v));
+      g.moveTo(0, yy);
+      g.lineTo(w, yy);
       g.stroke();
+      g.fillStyle = "#2a3040";
+      g.font = "8px ui-monospace,monospace";
+      g.fillText(v, 2, yy - 2);
     }
 
+    const startYs = [],
+      endYs = [];
     for (const ln of EMO_LINES) {
       g.strokeStyle = ln.color;
       g.lineWidth = 2;
-      g.globalAlpha = 0.85;
+      g.globalAlpha = 0.9;
       g.beginPath();
-      let started = false;
-      for (const e of emo) {
-        const mid = (e.start + e.end) / 2;
-        const x = X(mid),
-          y = Y(e[ln.key] || 5);
-        if (x < -10 || x > w + 10) continue;
-        if (!started) {
-          g.moveTo(x, y);
-          started = true;
-        } else g.lineTo(x, y);
+      let firstY = 0,
+        lastY = 0;
+      for (let ei = 0; ei < emo.length; ei++) {
+        const e = emo[ei],
+          v = e[ln.key] || 5,
+          y = Y(v);
+        if (ei === 0) {
+          g.moveTo(Math.max(0, X(e.start)), y);
+          firstY = y;
+        }
+        g.lineTo(X((e.start + e.end) / 2), y);
+        if (ei === emo.length - 1) {
+          g.lineTo(Math.min(w, X(e.end)), y);
+          lastY = y;
+        }
       }
       g.stroke();
       g.globalAlpha = 1;
+      startYs.push({ label: ln.label, color: ln.color, y: firstY });
+      endYs.push({ label: ln.label, color: ln.color, y: lastY });
     }
-
-    g.font = "600 8px ui-monospace,monospace";
-    EMO_LINES.forEach((ln, i) => {
-      const lx = 4 + i * 54;
-      g.fillStyle = ln.color;
-      g.fillRect(lx, h - 12, 6, 6);
-      g.fillText(ln.label, lx + 9, h - 6);
-    });
+    function drawLabels(items, x, align) {
+      items.sort((a, b) => a.y - b.y);
+      let prev = -20;
+      for (const it of items) {
+        let ly = it.y + 3;
+        if (ly - prev < 12) ly = prev + 12;
+        g.fillStyle = it.color;
+        g.globalAlpha = 0.9;
+        g.font = "600 9px system-ui";
+        g.textAlign = align;
+        g.fillText(it.label, x, ly);
+        g.textAlign = "start";
+        g.globalAlpha = 1;
+        prev = ly;
+      }
+    }
+    drawLabels(startYs, 4, "left");
   }
 
   function melodyTimeline() {
     const notes = SCORE.melody || [];
     if (!notes.length) return;
     const canvas = $("melody-canvas");
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth || 800;
-    const h = 80;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    canvas.style.height = h + "px";
-    const g = canvas.getContext("2d");
-    g.scale(dpr, dpr);
-    g.clearRect(0, 0, w, h);
+    const h = 100;
+    const [g, w] = fit(canvas, h);
 
     const pitches = notes
       .map((n) => n.pitch || n.note || 0)
@@ -2015,15 +1930,8 @@
     const rhy = SCORE.rhythm;
     if (!rhy) return;
     const canvas = $("rhythm-canvas");
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth || 800;
-    const h = 50;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    canvas.style.height = h + "px";
-    const g = canvas.getContext("2d");
-    g.scale(dpr, dpr);
-    g.clearRect(0, 0, w, h);
+    const h = 100;
+    const [g, w] = fit(canvas, h);
 
     const hits = rhy.hits || rhy.patterns || [];
     if (Array.isArray(hits) && hits.length) {
@@ -2053,7 +1961,7 @@
     if (!names.length) return;
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.clientWidth || 800;
-    const rowH = Math.max(10, Math.min(24, 200 / names.length));
+    const rowH = Math.max(14, Math.min(28, 600 / names.length));
     const h = names.length * rowH;
     canvas.width = w * dpr;
     canvas.height = h * dpr;
@@ -2194,15 +2102,16 @@
       )
       .join(" ");
 
-    $("moments-list").innerHTML =
-      `<div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:8px">${legend}</div>${html}`;
+    const ml = $("moments-list");
+    if (ml)
+      ml.innerHTML = `<div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:8px">${legend}</div>${html}`;
   }
 
   function indicLyrics() {
     const sec = $("indic-box");
     const box = $("indic-sung");
-    if (!SCORE || !SCORE.lyrics) {
-      sec.hidden = true;
+    if (!sec || !box || !SCORE || !SCORE.lyrics) {
+      if (sec) sec.hidden = true;
       return;
     }
 
@@ -2250,6 +2159,7 @@
     const box = $("sung"),
       sec = $("lyricbox");
     const mLyrBox = $("moss-lyrics-box");
+    if (!box || !sec) return;
     box.innerHTML = "";
     if (mLyrBox) mLyrBox.innerHTML = "";
 
@@ -2396,12 +2306,7 @@
           seeker.style.display = "none";
         }
       }
-      const hp = pct(t);
-      const headEl = $("head");
-      if (headEl) {
-        headEl.style.display = hp < 0 || hp > 100 ? "none" : "";
-        headEl.style.left = `${hp}%`;
-      }
+
       if (VIEW.follow && !aud.paused) {
         /* Slide with the playhead rather than jumping when it reaches the edge:
          a view that leaps every few seconds reads as broken, and the point of
@@ -2429,14 +2334,11 @@
       const bar = barAtTime(t);
       const ms = mossAt(t);
       const secs = mossSections();
-      let at = ms ? secs.indexOf(ms) : -1;
-      document
-        .querySelectorAll(".part")
-        .forEach((n, i) => n.classList.toggle("here", i === at));
+
       $("nowtime").textContent =
         `${mmss(t)} · bar ${Math.max(0, bar)} of ${SCORE.grid.bars}`;
       if (ms) {
-        LIVE = at;
+        LIVE = secs.indexOf(ms);
         const s53 = SCORE.stems || {};
         const topInst = Object.entries(s53)
           .sort((a, b) => b[1].rms - a[1].rms)
@@ -2520,10 +2422,10 @@
     seekTo(timeAt((e.clientX - r.left) / r.width));
   }
   for (const id of [
-    "map",
-    "chords",
+    "sections-canvas",
+    "moments-canvas",
+    "chords-canvas",
     "zoom",
-    "moments-row",
     "emotion-canvas",
     "melody-canvas",
     "rhythm-canvas",
@@ -2604,30 +2506,31 @@
     }
     if (e.key === "f") $("zoomfit").click();
   });
-  $("tune").onclick = (e) => {
-    if (!SCORE) return;
-    const r = e.target.getBoundingClientRect();
-    const px = e.clientX - r.left;
-    const hit = THIT.find((h) => px >= h.x0 - 3 && px <= h.x1 + 3);
-    if (hit) {
-      hearMoment(hit.m);
-      return;
-    }
-    const py = e.clientY - r.top;
-    if (py > 118) {
-      const line = PHIT.find((h) => px >= h.x0 - 2 && px <= h.x1 + 2);
-      if (line) {
-        const beat = beatLen();
-        const a = barTime(line.q.from_bar) + (line.q.from_beat - 1) * beat;
-        const b = barTime(line.q.to_bar) + (line.q.to_beat - 1) * beat;
-        play(Math.max(0, a - 0.25));
+  if ($("tune"))
+    $("tune").onclick = (e) => {
+      if (!SCORE) return;
+      const r = e.target.getBoundingClientRect();
+      const px = e.clientX - r.left;
+      const hit = THIT.find((h) => px >= h.x0 - 3 && px <= h.x1 + 3);
+      if (hit) {
+        hearMoment(hit.m);
         return;
       }
-    }
-    const total = SCORE.song.length_s;
-    const at = ((px - 14) / Math.max(1, r.width - 20)) * total;
-    play(Math.max(0, Math.min(total - 0.1, at)));
-  };
+      const py = e.clientY - r.top;
+      if (py > 118) {
+        const line = PHIT.find((h) => px >= h.x0 - 2 && px <= h.x1 + 2);
+        if (line) {
+          const beat = beatLen();
+          const a = barTime(line.q.from_bar) + (line.q.from_beat - 1) * beat;
+          const b = barTime(line.q.to_bar) + (line.q.to_beat - 1) * beat;
+          play(Math.max(0, a - 0.25));
+          return;
+        }
+      }
+      const total = SCORE.song.length_s;
+      const at = ((px - 14) / Math.max(1, r.width - 20)) * total;
+      play(Math.max(0, Math.min(total - 0.1, at)));
+    };
   aud.onseeked = () => (sent = aud.currentTime);
   $("song").onchange = (e) => {
     aud.pause();
@@ -2642,9 +2545,9 @@
     load(e.target.value, o.dataset.a, 0, 0, 0, o.dataset.score);
   };
   for (const id of [
-    "map",
-    "chords",
-    "moments-row",
+    "sections-canvas",
+    "moments-canvas",
+    "chords-canvas",
     "emotion-canvas",
     "melody-canvas",
     "rhythm-canvas",
@@ -2655,13 +2558,12 @@
 
   addEventListener("resize", () => {
     if (SCORE) {
+      place();
       zoom();
       if ((SCORE.emotion || []).length) emotionTimeline();
       if ((SCORE.melody || []).length) melodyTimeline();
-      if (SCORE.rhythm) rhythmTimeline();
+      if (SCORE.rhythm && SCORE.rhythm.hits) rhythmTimeline();
       if (SCORE.stems_temporal) stemsTimeline();
-      chordRow();
-      place();
     }
   });
 
