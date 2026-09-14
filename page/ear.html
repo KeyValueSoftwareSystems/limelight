@@ -347,6 +347,16 @@
   #tl-rows {
     position: relative;
   }
+  #tl-seeker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--ok);
+    pointer-events: none;
+    z-index: 10;
+    display: none;
+  }
   .tl-row {
     display: flex;
     align-items: stretch;
@@ -820,7 +830,7 @@
 <div class="wrap">
   <div id="broke" hidden></div>
 
-  <section id="timeline-section" style="position: relative">
+  <section>
     <h2>Timeline</h2>
     <div id="tl-rows">
       <div class="tl-row">
@@ -828,6 +838,7 @@
         <div class="tl-content">
           <div id="map">
             <div id="dots"><span>MOMENTS</span></div>
+            <div id="head"></div>
           </div>
         </div>
       </div>
@@ -835,44 +846,9 @@
         <span class="tl-label">CHORDS</span>
         <div class="tl-content"><div id="chords"></div></div>
       </div>
-      <div class="tl-row">
-        <span class="tl-label">MELODY</span>
-        <div class="tl-content"><canvas id="tune"></canvas></div>
-      </div>
-      <div class="tl-row">
-        <span class="tl-label">RHYTHM</span>
-        <div class="tl-content"><canvas id="beat"></canvas></div>
-      </div>
-      <div class="tl-row">
-        <span class="tl-label">BEAT GRID</span>
-        <div class="tl-content"><canvas id="zoom"></canvas></div>
-      </div>
-      <div class="tl-row" id="stems-temporal-row" hidden>
-        <span class="tl-label">STEMS</span>
-        <div class="tl-content">
-          <canvas
-            id="stems-heatmap"
-            style="width: 100%; height: 120px"
-          ></canvas>
-        </div>
-      </div>
-      <div
-        id="tl-seeker"
-        style="
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          width: 2px;
-          background: var(--ok);
-          pointer-events: none;
-          z-index: 10;
-          display: none;
-        "
-      ></div>
+      <div id="tl-seeker"></div>
     </div>
     <div class="legend" id="legend"></div>
-    <div class="legend" id="tunekey"></div>
-    <div class="legend" id="beatkey"></div>
   </section>
 
   <section id="emotion-box" hidden>
@@ -887,6 +863,23 @@
   <section id="moments-box" hidden>
     <h2>Notable Moments</h2>
     <div id="moments-list"></div>
+  </section>
+
+  <section id="melody-box" hidden>
+    <h2>Melody</h2>
+    <div class="holder"><canvas id="tune"></canvas></div>
+    <div class="legend" id="tunekey"></div>
+  </section>
+
+  <section id="rhythm-box" hidden>
+    <h2>Rhythm</h2>
+    <canvas id="beat"></canvas>
+    <div class="legend" id="beatkey"></div>
+  </section>
+
+  <section>
+    <h2>Live View</h2>
+    <canvas id="zoom"></canvas>
   </section>
 
   <section>
@@ -1369,111 +1362,67 @@
         )
         .join("");
 
-    const k = SCORE.key || {},
-      L = SCORE.loudness || {},
-      made = SCORE.made_by || {};
-    const f = SCORE.feel || {},
-      pg = SCORE.phrase_grid || {};
-    const pc = (v) => (v == null ? "\u2014" : `${Math.round(v * 100)}%`);
-    const sure = SCORE.grid.sure;
-    const trust =
-      sure == null
-        ? "not measured"
-        : sure >= 0.85
-          ? "two beat trackers agree closely"
-          : sure >= 0.6
-            ? "two beat trackers mostly agree"
-            : "two beat trackers disagree \u2014 treat every bar here with suspicion";
+    const g = SCORE.grid;
+    const kt = SCORE.key_tempo || "";
     $("owned").innerHTML = `<div class="col"><dl>
-      <dt>Key</dt><dd>${
-        k.root
-          ? `<b>${esc(k.root)} ${esc(k.scale || "")}</b>, ${pc(k.confidence)} sure` +
-            (k.tuned_to_hz
-              ? ` <span class="dim">\u00b7 tuned to ${k.tuned_to_hz} Hz</span>`
-              : "")
-          : "\u2014"
-      }</dd>
-      <dt>Loudness</dt><dd>${
-        L.integrated_lufs != null
-          ? `${L.integrated_lufs} LUFS <span class="dim">\u00b7 ${L.range_lu} LU between quiet and loud</span>`
-          : "\u2014"
-      }</dd>
-      <dt>Feel</dt><dd>${
-        f.onsets_per_second != null
-          ? `${f.onsets_per_second.toFixed(1)} hits a second <span class="dim">\u00b7 danceability ${f.danceability}</span>`
-          : "\u2014"
-      }</dd>
+      ${SCORE.caption ? `<dt>Caption</dt><dd>${esc(SCORE.caption).slice(0, 300)}</dd>` : ""}
+      ${kt ? `<dt>Key &amp; Tempo</dt><dd>${esc(typeof kt === "string" ? kt.split("\\n")[0].slice(0, 200) : JSON.stringify(kt).slice(0, 200))}</dd>` : ""}
+      <dt>Tempo</dt><dd><b>${Math.round(g.bpm)} BPM</b> · ${g.beats_per_bar}/4 · ${g.bars} bars</dd>
     </dl></div>
     <div class="col"><dl>
-      <dt>The beat</dt><dd>${
-        sure == null
-          ? "<span class='dim'>not measured</span>"
-          : `<b style="color:${sure < 0.6 ? "var(--bad)" : "var(--ok)"}">${pc(sure)}</b> \u00b7 ${trust}`
-      }</dd>
-      <dt>Phrases</dt><dd>every ${pg.every_bars ?? "?"} bars from bar ${pg.from_bar ?? "?"}
-        </dd>
-      <dt>Heard by</dt><dd class="dim">voice: ${esc(made.voice_from || "?")} \u00b7 lead: ${esc(made.lead_from || "?")}
-        \u00b7 tune: ${esc(made.melody_from || "?")}</dd>
       ${mossSections().length ? `<dt>Sections</dt><dd><b style="color:var(--ok)">${mossSections().length} sections</b></dd>` : ""}
-      ${SCORE.btc_chords_raw ? `<dt>Chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b></dd>` : ""}
-      ${SCORE.stems_53 ? `<dt>Instruments</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems_53).length} stems</b> detected</dd>` : ""}
+      ${SCORE.btc_chords_raw ? `<dt>Chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b> (BTC Transformer)</dd>` : ""}
+      ${SCORE.stems_53 ? `<dt>Instruments</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems_53).length} stems</b> detected (53-stem BS-RoFormer)</dd>` : ""}
       ${(SCORE.moments || []).length ? `<dt>Moments</dt><dd><b style="color:var(--ok)">${SCORE.moments.length} events</b></dd>` : ""}
       ${(SCORE.emotion || []).length ? `<dt>Emotion</dt><dd><b style="color:var(--ok)">${SCORE.emotion.length} segments</b></dd>` : ""}
     </dl></div>
     <div class="col"><dl>
       <dt>Technology</dt>
       <dd class="dim" style="font-size:10px;line-height:1.8">
-        MOSS-Music-8B-Thinking (sections, moments, emotion, lyrics, melody, rhythm, caption)<br>
-        BTC Transformer (chord recognition)<br>
+        MOSS-Music-8B-Thinking (sections, moments, emotion, lyrics, caption)<br>
+        BTC Transformer (chord recognition, 170-chord vocabulary)<br>
         MVSep Mega 53-Stem BS-RoFormer (stem separation)<br>
         madmom (beat &amp; downbeat tracking)<br>
-        pYIN (pitch tracking)<br>
-        Whisper-large-v3 (Indic ASR fallback)
+        SongFormer (structural segmentation)<br>
+        Whisper-large-v3 (Indic ASR)
       </dd>
     </dl></div>`;
 
-    $("beatkey").innerHTML =
-      `<span class="dim">Taller = stronger hit. Right-side % = pattern consistency across bars.</span>`;
+    const bk = $("beatkey");
+    if (bk)
+      bk.innerHTML = `<span class="dim">Taller = stronger hit. Right-side % = pattern consistency across bars.</span>`;
 
-    const dropped = $("dropped");
-    if (dropped) {
-      const shown = (SCORE.moments || []).length,
-        all = (SCORE.signals || []).length;
-      dropped.textContent =
-        all > shown ? `${all - shown} weaker moments hidden` : "";
-    }
+    const tk = $("tunekey");
+    if (tk)
+      tk.innerHTML =
+        `<span><i style="background:#7ae8b0"></i>Sung</span>` +
+        `<span><i style="background:#8fd0ff"></i>Played (lead)</span>` +
+        `<span><i style="background:#c8a2ff"></i>Repeated tune</span>`;
 
-    $("tunekey").innerHTML =
-      `<span><i style="background:#7ae8b0"></i>Sung</span>` +
-      `<span><i style="background:#8fd0ff"></i>Played (lead)</span>` +
-      `<span><i style="background:#c8a2ff"></i>Repeated tune</span>`;
-
-    const MO = SCORE.moss || {};
-    const vl = $("moss-voice-line");
-    if (vl)
-      vl.textContent = MO.voice
-        ? MO.voice
-            .split("\n")[0]
-            .replace(/^[\s*#-]+/, "")
-            .slice(0, 200)
-        : "";
-    const rl = $("moss-rhythm-line");
-    if (rl)
-      rl.textContent = MO.rhythm_groove
-        ? MO.rhythm_groove
-            .split("\n")[0]
-            .replace(/^[\s*#-]+/, "")
-            .slice(0, 200)
-        : "";
-
-    tune();
-    beatGrid();
     chordRow();
     sections();
+
+    const hasMelody = (SCORE.melody || []).length > 0;
+    $("melody-box").hidden = !hasMelody;
+    if (hasMelody) tune();
+
+    const hasGroove =
+      SCORE.groove &&
+      typeof SCORE.groove === "object" &&
+      Object.keys(SCORE.groove).length > 0;
+    $("rhythm-box").hidden = !hasGroove;
+    if (hasGroove) beatGrid();
+
+    const hasEmotion = (SCORE.emotion || []).length > 0;
+    $("emotion-box").hidden = !hasEmotion;
+    if (hasEmotion) emotionArc();
+
+    const hasMoments = (SCORE.moments || []).length > 0;
+    $("moments-box").hidden = !hasMoments;
+    if (hasMoments) momentsDisplay();
+
     sungWords();
     aiIntel();
-    emotionArc();
-    momentsDisplay();
     indicLyrics();
     place();
   }
@@ -1556,7 +1505,7 @@
   }
 
   function zoom() {
-    const [g, W] = fit($("zoom"), 80);
+    const [g, W] = fit($("zoom"), 110);
     if (!SCORE) return;
     const t = aud.currentTime;
     const wide = Math.min(WINDOW, viewSpan());
@@ -1573,7 +1522,7 @@
         x1 = Math.min(W, X(t1));
       const c = HUE[s.label] || "#6fa8dc";
       g.fillStyle = c + "16";
-      g.fillRect(x0, 0, x1 - x0, 80);
+      g.fillRect(x0, 0, x1 - x0, 110);
       g.fillStyle = c;
       g.font = "600 10px ui-monospace,monospace";
       if (X(t0) >= 0) {
@@ -1581,7 +1530,7 @@
         g.lineWidth = 2;
         g.beginPath();
         g.moveTo(X(t0), 0);
-        g.lineTo(X(t0), 80);
+        g.lineTo(X(t0), 110);
         g.stroke();
         g.fillText(s.label.toUpperCase() + " starts here", X(t0) + 6, 13);
       } else if (x1 - x0 > 96) {
@@ -1608,7 +1557,7 @@
         const n = Math.round(beatAt(bt.t) / perBar()) + 1;
         g.fillStyle = "#7b8599";
         g.font = "10px ui-monospace,monospace";
-        g.fillText("bar " + n, x + 4, 74);
+        g.fillText("bar " + n, x + 4, 104);
       }
     });
 
@@ -1672,15 +1621,15 @@
     g.lineWidth = 1.5;
     g.beginPath();
     g.moveTo(W / 2, 0);
-    g.lineTo(W / 2, 80);
+    g.lineTo(W / 2, 110);
     g.stroke();
     g.fillStyle = "#4a5364";
     g.font = "9.5px ui-monospace,monospace";
-    g.fillText(`${wide.toFixed(1)}s across`, 7, 74);
+    g.fillText(`${wide.toFixed(1)}s across`, 7, 104);
   }
 
   function tune() {
-    const [g, W] = fit($("tune"), 100);
+    const [g, W] = fit($("tune"), 180);
     const notes = SCORE.melody || [];
     if (!notes.length) {
       g.fillStyle = "#4a5568";
@@ -1698,8 +1647,8 @@
     const noteAt = (bar, bt) =>
       atBeat((bar - 1) * perb + ((bt || 1) - 1) + (SHIFT - BASE));
     const L = 14,
-      top = 8,
-      foot = 92,
+      top = 24,
+      foot = 164,
       tall = foot - top;
     const SUNG = "#7ae8b0",
       LEAD = "#8fd0ff",
@@ -1864,18 +1813,18 @@
   function beatGrid() {
     const gr = SCORE.groove || {};
     const names = LANES.filter((n) => gr[n] && gr[n].strength);
-    const [g, W] = fit($("beat"), 80);
+    const [g, W] = fit($("beat"), 140);
     if (!names.length) {
       g.fillStyle = "#7b8599";
-      g.font = "11px system-ui";
-      g.fillText("No rhythm pattern", 14, 20);
+      g.font = "12px system-ui";
+      g.fillText("No rhythm pattern in this score yet.", 14, 28);
       return;
     }
     const per = gr[names[0]].per_bar || 16;
-    const L = 60,
-      R = 100,
-      cell = Math.min(28, (W - L - R) / per),
-      h = 80 / names.length;
+    const L = 78,
+      R = 150,
+      cell = Math.min(34, (W - L - R) / per),
+      h = 140 / names.length;
     names.forEach((n, row) => {
       const y = row * h,
         d = gr[n];
@@ -2322,7 +2271,8 @@
       const hp = pct(t);
       const headEl = $("head");
       if (headEl) {
-        headEl.style.display = "none";
+        headEl.style.display = hp < 0 || hp > 100 ? "none" : "";
+        headEl.style.left = `${hp}%`;
       }
       if (VIEW.follow && !aud.paused) {
         /* Slide with the playhead rather than jumping when it reaches the edge:

@@ -2,7 +2,7 @@ import os, json, time, glob, re
 import requests
 
 SGLANG_URL = os.environ.get("SGLANG_URL", "http://localhost:30000")
-OUT_DIR = os.environ.get("OUT_DIR", "moss-v2")
+OUT_DIR = os.environ.get("OUT_DIR", "deep")
 WAV_DIR = os.environ.get("WAV_DIR", "wav")
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -26,16 +26,23 @@ def is_bad(text):
 
 
 def strip_think(text):
-    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+    if "<think>" in text:
+        idx = text.find("[")
+        if idx >= 0:
+            text = text[idx:]
+        else:
+            text = ""
+    return text.strip()
 
 
-def query(wav_path, prompt, max_tokens=8192):
+def query(wav_path, prompt, max_tokens=16384):
     resp = requests.post(
         f"{SGLANG_URL}/generate",
         json={
             "text": prompt,
             "audio_data": wav_path,
-            "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.0},
+            "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.1},
         },
         timeout=600,
     )
@@ -43,49 +50,7 @@ def query(wav_path, prompt, max_tokens=8192):
     return strip_think(resp.json()["text"])
 
 
-MOMENTS_PROMPT = """Identify every notable musical moment/event in this song. A "moment" is a specific event at a precise time that a lighting desk, rhythm game, or video editor would fire a cue on.
-
-Return ONLY a JSON array. Each object must have:
-- "time_s": float (seconds from start)
-- "type": one of the types below
-- "what": string (specific instrument or element involved)
-- "intensity": float 0.0–1.0 (how impactful)
-- "duration_s": float (0 for punctual, >0 for spans like builds/fills)
-- "description": string (one sentence)
-
-MOMENT TYPES (use the most specific one):
-- drop: the exact moment bass/kick returns after a build — maximum energy payoff
-- build: rising tension (snare roll, filter sweep, noise riser) leading to a drop or chorus
-- breakdown: energy deliberately stripped — pads only, half the instruments gone
-- climax: peak emotional/dynamic intensity of the entire song
-- entrance: a specific instrument enters (name it: "kick", "lead vocal", "strings", etc.)
-- exit: a specific instrument drops out
-- fill: drum fill or percussive flourish
-- accent: sharp full-band hit, stab, or rhythmic unison
-- hook: the main melodic hook or riff appears/returns
-- release: tension resolves — the payoff after sustained tension
-- pause: brief silence or near-silence (everything drops momentarily)
-- silence: true silence, longer than a beat
-- vocal_moment: belting, falsetto switch, ad-lib, vocal run, scream, whisper
-- key_change: modulation to a different key
-- tempo_change: BPM shifts
-- groove_lock: rhythm locks into a tight new pocket/groove
-- call_response: musical or vocal call-and-response
-- surprise: unexpected harmonic, rhythmic, or textural shift
-- stab: short sharp rhythmic unison hit
-- swell: gradual crescendo (strings, pads, choir building)
-- transition: passage connecting two sections (not a section itself)
-- solo: single instrument spotlight begins
-
-RULES:
-1. Find AT LEAST 15 moments, ideally 20-40 for a full song.
-2. Every drop, build, and breakdown MUST be identified — these are the most important.
-3. Name specific instruments from the 53-stem vocabulary (kick, snare, lead-vocal, synth, strings, etc.), not generic "drums" or "other".
-4. The "climax" type should appear exactly once — the single most intense moment.
-5. Cover the entire song — don't cluster all moments in the first half.
-6. Output ONLY the JSON array, no explanation."""
-
-SECTIONS_V2_PROMPT = """Segment this song into structural sections with precise timestamps.
+SECTIONS_PROMPT = """Segment this song into structural sections with precise timestamps.
 
 Return ONLY a JSON array: [{"label": "...", "start": 0.0, "end": 15.5}, ...]
 
@@ -115,33 +80,52 @@ CRITICAL RULES:
 5. For EDM: builds MUST be labeled "build", drops MUST be labeled "drop", breakdowns MUST be "breakdown".
 6. Output ONLY the JSON array."""
 
+MOMENTS_PROMPT = """Identify the most important structural moments in this song. A "moment" is a significant musical event that a lighting designer, rhythm game, or video editor would cue on.
+
+Return ONLY a JSON array. Each object:
+- "time_s": float (seconds from start)
+- "type": one of the types below
+- "what": string (specific instrument involved)
+- "intensity": float 0.0–1.0
+- "duration_s": float (0 for instant, >0 for spans)
+- "description": string (one UNIQUE sentence — never repeat the same description)
+
+MOMENT TYPES:
+drop, build, breakdown, climax, entrance, exit, fill, accent, hook, release, pause, silence, vocal_moment, key_change, tempo_change, groove_lock, call_response, surprise, stab, swell, transition, solo
+
+RULES:
+1. Only genuinely significant events — NOT every beat or instrument hit.
+2. A typical 3-minute song has 10-20 moments. A 6-minute song has 15-30.
+3. Each "drop" means the ACTUAL bass return after a build. A song has 1-4 drops max.
+4. Each "build" means sustained rising tension. A song has 1-4 builds max.
+5. "climax" appears EXACTLY ONCE — the single peak of the entire song.
+6. Every description must be UNIQUE. Never write "continues" or "again".
+7. Name specific instruments (kick, snare, lead vocal, synth pad, bass guitar), not "drums" or "instruments".
+8. Cover the whole song evenly — don't cluster in the first half.
+9. Output ONLY the JSON array."""
+
 EMOTION_PROMPT = """Analyze the emotional trajectory of this song from start to finish.
 
 Return ONLY a JSON array of segments, each covering ~10-15 seconds:
-[{
-  "start": 0.0, "end": 15.0,
-  "energy": 7, "valence": 6, "arousal": 8,
-  "emotion": "euphoric",
-  "description": "High energy synth build with rising anticipation"
-}, ...]
+[{"start": 0.0, "end": 15.0, "energy": 7, "valence": 6, "arousal": 8, "emotion": "euphoric", "description": "..."}, ...]
 
-- energy: 1-10 (how loud/intense)
-- valence: 1-10 (how positive/happy vs sad/dark)
-- arousal: 1-10 (how exciting/stimulating vs calm)
+- energy: 1-10 (loud/intense vs quiet)
+- valence: 1-10 (positive/happy vs sad/dark)
+- arousal: 1-10 (exciting vs calm)
 - emotion: one word (euphoric, melancholic, aggressive, tender, triumphant, anxious, serene, nostalgic, defiant, playful, etc.)
 - description: one sentence about what's happening musically
 
 Cover the ENTIRE song. Identify the emotional climax."""
 
 PROMPTS = {
-    "sections": SECTIONS_V2_PROMPT,
+    "sections": SECTIONS_PROMPT,
     "moments": MOMENTS_PROMPT,
     "emotion": EMOTION_PROMPT,
 }
 
 if __name__ == "__main__":
     wavs = sorted(glob.glob(os.path.join(WAV_DIR, "*.wav")))
-    print(f"MOSS v2: {len(wavs)} songs x {len(PROMPTS)} prompts", flush=True)
+    print(f"MOSS deep: {len(wavs)} songs x {len(PROMPTS)} prompts", flush=True)
 
     for i, wav in enumerate(wavs):
         slug = os.path.splitext(os.path.basename(wav))[0]
@@ -169,7 +153,6 @@ if __name__ == "__main__":
                     if is_bad(resp):
                         print(f"  {task}: BAD attempt {attempt + 1}", flush=True)
                         continue
-                    # Try to parse JSON
                     match = re.search(r"\[.*\]", resp, re.DOTALL)
                     if match:
                         parsed = json.loads(match.group())
@@ -193,11 +176,8 @@ if __name__ == "__main__":
                 except Exception as e:
                     print(f"  {task}: ERR attempt {attempt + 1}: {e}", flush=True)
 
-        results["_model"] = "MOSS-Music-8B-Thinking"
-        results["_engine"] = "sglang-generate"
-        results["_time_s"] = round(time.time() - t0, 1)
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
-        print(f"  DONE {slug} in {results['_time_s']:.0f}s", flush=True)
+        print(f"  DONE {slug} in {time.time() - t0:.0f}s", flush=True)
 
-    print("MOSS_V2_DONE", flush=True)
+    print("DONE_ALL", flush=True)
