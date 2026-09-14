@@ -173,8 +173,10 @@ def main():
 
         changed = False
 
-        if "sections_v2" in moss:
-            score["sections"] = clean_sections(moss["sections_v2"])
+        if "sections" in moss or "sections_v2" in moss:
+            score["sections"] = clean_sections(
+                moss.get("sections") or moss["sections_v2"]
+            )
             changed = True
             print(f"  {slug}: sections = {len(score['sections'])}")
 

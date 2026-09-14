@@ -6,23 +6,42 @@ OUT_DIR = os.environ.get("OUT_DIR", "moss-v2")
 WAV_DIR = os.environ.get("WAV_DIR", "wav")
 os.makedirs(OUT_DIR, exist_ok=True)
 
-BAD = ["unable to analyze", "cannot provide", "no audio", "haven't provided",
-       "no song has been", "provide the audio", "What I can do", "general framework",
-       "provide me with", "don't have access", "I don't have enough information"]
+BAD = [
+    "unable to analyze",
+    "cannot provide",
+    "no audio",
+    "haven't provided",
+    "no song has been",
+    "provide the audio",
+    "What I can do",
+    "general framework",
+    "provide me with",
+    "don't have access",
+    "I don't have enough information",
+]
+
 
 def is_bad(text):
     return any(b.lower() in text.lower() for b in BAD)
 
+
 def strip_think(text):
-    return re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
 
 def query(wav_path, prompt, max_tokens=8192):
-    resp = requests.post(f"{SGLANG_URL}/generate", json={
-        "text": prompt, "audio_data": wav_path,
-        "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.0},
-    }, timeout=600)
+    resp = requests.post(
+        f"{SGLANG_URL}/generate",
+        json={
+            "text": prompt,
+            "audio_data": wav_path,
+            "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.0},
+        },
+        timeout=600,
+    )
     resp.raise_for_status()
     return strip_think(resp.json()["text"])
+
 
 MOMENTS_PROMPT = """Identify every notable musical moment/event in this song. A "moment" is a specific event at a precise time that a lighting desk, rhythm game, or video editor would fire a cue on.
 
@@ -115,7 +134,7 @@ Return ONLY a JSON array of segments, each covering ~10-15 seconds:
 Cover the ENTIRE song. Identify the emotional climax."""
 
 PROMPTS = {
-    "sections_v2": SECTIONS_V2_PROMPT,
+    "sections": SECTIONS_V2_PROMPT,
     "moments": MOMENTS_PROMPT,
     "emotion": EMOTION_PROMPT,
 }
@@ -130,11 +149,11 @@ if __name__ == "__main__":
         if os.path.exists(out_path):
             existing = json.load(open(out_path))
             if all(k in existing for k in PROMPTS):
-                print(f"[{i+1}/{len(wavs)}] {slug} — skip (complete)", flush=True)
+                print(f"[{i + 1}/{len(wavs)}] {slug} — skip (complete)", flush=True)
                 continue
 
         t0 = time.time()
-        print(f"[{i+1}/{len(wavs)}] {slug}", flush=True)
+        print(f"[{i + 1}/{len(wavs)}] {slug}", flush=True)
         results = {}
         if os.path.exists(out_path):
             results = json.load(open(out_path))
@@ -148,22 +167,31 @@ if __name__ == "__main__":
                 try:
                     resp = query(wav, prompt)
                     if is_bad(resp):
-                        print(f"  {task}: BAD attempt {attempt+1}", flush=True)
+                        print(f"  {task}: BAD attempt {attempt + 1}", flush=True)
                         continue
                     # Try to parse JSON
-                    match = re.search(r'\[.*\]', resp, re.DOTALL)
+                    match = re.search(r"\[.*\]", resp, re.DOTALL)
                     if match:
                         parsed = json.loads(match.group())
                         results[task] = parsed
-                        print(f"  {task}: {len(parsed)} items, {time.time()-tt:.1f}s", flush=True)
+                        print(
+                            f"  {task}: {len(parsed)} items, {time.time() - tt:.1f}s",
+                            flush=True,
+                        )
                     else:
                         results[task + "_raw"] = resp
-                        print(f"  {task}: no JSON found, saved raw ({len(resp)}c), {time.time()-tt:.1f}s", flush=True)
+                        print(
+                            f"  {task}: no JSON found, saved raw ({len(resp)}c), {time.time() - tt:.1f}s",
+                            flush=True,
+                        )
                     break
                 except json.JSONDecodeError as e:
-                    print(f"  {task}: JSON parse error attempt {attempt+1}: {e}", flush=True)
+                    print(
+                        f"  {task}: JSON parse error attempt {attempt + 1}: {e}",
+                        flush=True,
+                    )
                 except Exception as e:
-                    print(f"  {task}: ERR attempt {attempt+1}: {e}", flush=True)
+                    print(f"  {task}: ERR attempt {attempt + 1}: {e}", flush=True)
 
         results["_model"] = "MOSS-Music-8B-Thinking"
         results["_engine"] = "sglang-generate"
