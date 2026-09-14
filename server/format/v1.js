@@ -5,36 +5,22 @@ export const KNOWN = [
   "downbeats",
   "sections",
   "energy",
-  "ticks",
-  "per_beat",
   "groove",
   "melody_phrases",
   "moments",
-  "phrases",
-  "layers",
   "chords",
   "key",
   "loudness",
   "feel",
-  "curves",
-  "stems",
-  "harmony",
-  "chord_changes",
-  "chord_summary",
-  "tension",
-  "lift",
-  "releases",
   "melody",
   "made_by",
   "lyrics",
-  "tells",
   "recording",
-  "moss",
-  "moss_sections",
-  "moss_caption",
+  "caption",
   "btc_chords_raw",
   "stems_53",
-  "lyrics_moss",
+  "beat_consensus",
+  "emotion",
 ];
 
 const STEM_NAMES = [];
@@ -154,8 +140,8 @@ export function format(raw) {
       (_, i) => raw.beats[i] && raw.beats[i].downbeat,
     );
 
-  if (Array.isArray(raw.moss_sections) && raw.moss_sections.length) {
-    out.sections = raw.moss_sections.map((s) => ({
+  if (Array.isArray(raw.sections) && raw.sections.length) {
+    out.sections = raw.sections.map((s) => ({
       from: { bar: s.from_bar || 0, beat: 1 },
       to: { bar: (s.to_bar || 0) + 1, beat: 1 },
       name: s.label,
@@ -358,12 +344,11 @@ export function format(raw) {
     out.profile = person;
   }
 
-  if (raw.moss) out.moss = raw.moss;
-  if (raw.moss_sections) out.moss_sections = raw.moss_sections;
-  if (raw.moss_caption) out.moss_caption = raw.moss_caption;
+  if (raw.caption) out.caption = raw.caption;
   if (raw.btc_chords_raw) out.btc_chords_raw = raw.btc_chords_raw;
   if (raw.stems_53) out.stems_53 = raw.stems_53;
-  if (raw.lyrics_moss) out.lyrics_moss = raw.lyrics_moss;
+  if (raw.beat_consensus) out.beat_consensus = raw.beat_consensus;
+  if (raw.emotion) out.emotion = raw.emotion;
 
   return out;
 }

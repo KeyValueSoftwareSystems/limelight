@@ -795,8 +795,20 @@
       <span class="now-item"><em>Playing</em> <b id="nowplay">&mdash;</b></span>
       <span class="now-item"><em>Now</em> <b id="nowmoment">&mdash;</b></span>
       <span class="now-item"><em>Doing</em> <b id="nowdoing">&mdash;</b></span>
-      <span class="now-item" id="nowsung-wrap"
-        ><em>Singing</em> <b id="nowsung">&mdash;</b></span
+      <span class="now-item" id="nowsung-wrap" style="flex: 1; min-width: 0"
+        ><em>Singing</em>
+        <b
+          id="nowsung"
+          style="
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            max-width: 100%;
+            vertical-align: bottom;
+          "
+          >&mdash;</b
+        ></span
       >
     </div>
   </div>
@@ -807,9 +819,6 @@
 
   <section>
     <h2>Timeline</h2>
-    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      MOSS-Music-8B sections · click anywhere to play from that point
-    </p>
     <div class="tl-row">
       <span class="tl-label">SECTIONS</span>
       <div class="tl-content">
@@ -828,86 +837,76 @@
         </div>
       </div>
     </div>
-    <div class="legend" id="legend"></div>
-  </section>
-
-  <section>
-    <h2>Live View</h2>
-    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      Real-time playhead · beat grid + stem activity
-    </p>
-    <canvas id="zoom"></canvas>
-  </section>
-
-  <section id="ai-intel" hidden>
-    <h2>AI Intelligence</h2>
-    <div id="ai-caption" class="ai-card"></div>
-    <div id="ai-cards"></div>
-    <div id="moss-sections" hidden></div>
-    <div class="legend" id="ai-legend"></div>
-  </section>
-
-  <section>
-    <h2>Melody</h2>
-    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      MOSS-Music-8B pitch analysis + pYIN tracking on isolated stems
-    </p>
-    <div
-      id="moss-voice-line"
-      style="font-size: 12px; color: var(--dim); margin-bottom: 8px"
-    ></div>
-    <div class="holder">
-      <canvas id="tune"></canvas>
-      <div class="pline" data-for="tune"></div>
+    <div class="tl-row">
+      <span class="tl-label">MELODY</span>
+      <div class="tl-content">
+        <div class="holder">
+          <canvas id="tune"></canvas>
+          <div class="pline" data-for="tune"></div>
+        </div>
+      </div>
     </div>
+    <div class="tl-row">
+      <span class="tl-label">RHYTHM</span>
+      <div class="tl-content">
+        <canvas id="beat"></canvas>
+      </div>
+    </div>
+    <div class="tl-row">
+      <span class="tl-label">BEAT GRID</span>
+      <div class="tl-content">
+        <canvas id="zoom"></canvas>
+      </div>
+    </div>
+    <div class="tl-row" id="stems-temporal-row" hidden>
+      <span class="tl-label">STEMS</span>
+      <div class="tl-content">
+        <canvas id="stems-heatmap" style="width: 100%; height: 120px"></canvas>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
     <div class="legend" id="tunekey"></div>
-  </section>
-
-  <section>
-    <h2>Rhythm</h2>
-    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      MOSS-Music-8B rhythm analysis + madmom beat tracking
-    </p>
-    <div
-      id="moss-rhythm-line"
-      style="font-size: 12px; color: var(--dim); margin-bottom: 8px"
-    ></div>
-    <canvas id="beat"></canvas>
     <div class="legend" id="beatkey"></div>
   </section>
 
-  <section id="lyricbox" hidden>
-    <h2>Lyrics</h2>
-    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      MOSS-Music-8B lyrics transcription (15.88% WER)
-    </p>
-    <div id="moss-lyrics-box" style="margin-bottom: 12px"></div>
-    <div class="lead" id="sung"></div>
+  <section id="emotion-box" hidden>
+    <h2>Emotion Arc</h2>
+    <canvas
+      id="emotion-canvas"
+      style="width: 100%; height: 120px; border-radius: 8px"
+    ></canvas>
+    <div id="emotion-detail" style="margin-top: 8px"></div>
   </section>
 
-  <section id="indic-box" hidden>
-    <h2>Indic Lyrics</h2>
-    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      Whisper-large-v3 with Indic language support
-    </p>
-    <div class="lead" id="indic-sung"></div>
-  </section>
-
-  <section>
-    <h2>Metadata</h2>
-    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      Pipeline confidence levels and provenance
-    </p>
-    <div class="lead" id="owned"></div>
+  <section id="moments-box" hidden>
+    <h2>Notable Moments</h2>
+    <div id="moments-list"></div>
   </section>
 
   <section>
     <h2>Section Detail</h2>
-    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
-      MOSS-Music-8B structural analysis · click to play
-    </p>
     <div id="sections"></div>
   </section>
+
+  <section>
+    <h2>Metadata</h2>
+    <div class="lead" id="owned"></div>
+  </section>
+
+  <div id="lyricbox" hidden></div>
+  <div id="sung" hidden></div>
+  <div id="moss-lyrics-box" hidden></div>
+  <div id="moss-voice-line" hidden></div>
+  <div id="moss-rhythm-line" hidden></div>
+  <div id="indic-box" hidden><div id="indic-sung"></div></div>
+  <div id="ai-intel" hidden>
+    <div id="ai-caption"></div>
+    <div id="ai-cards"></div>
+    <div id="moss-sections" hidden></div>
+    <div id="ai-legend"></div>
+  </div>
+  <div id="stems-legend" hidden></div>
+  <div id="dropped" hidden></div>
 </div>
 
 <script src="/protocol/session.js"></script>
@@ -1252,7 +1251,7 @@
   }
 
   function mossSections() {
-    return SCORE.moss_sections || [];
+    return SCORE.sections || [];
   }
   function mossAt(t) {
     for (const s of mossSections()) {
@@ -1261,11 +1260,53 @@
     return null;
   }
 
+  const SECTION_HUE = {
+    intro: "#39414f",
+    outro: "#39414f",
+    verse: "#5bb98c",
+    chorus: "#e8a33d",
+    "pre-chorus": "#6fa8dc",
+    "post-chorus": "#b98cd6",
+    bridge: "#d68c8c",
+    instrumental: "#8cd6cf",
+    solo: "#c8a2ff",
+    breakdown: "#a0a8bb",
+    buildup: "#f2c14e",
+    drop: "#e06050",
+    interlude: "#7ae8b0",
+    hook: "#e8a33d",
+    refrain: "#e8a33d",
+    coda: "#39414f",
+    riser: "#f2c14e",
+    ambient: "#6fa8dc",
+    transition: "#a0a8bb",
+    ad_lib: "#b98cd6",
+    vamp: "#8cd6cf",
+    tag: "#d6c98c",
+    turnaround: "#7ad4c8",
+    modulation: "#d16bd1",
+    recapitulation: "#5bb98c",
+    stanza: "#5bb98c",
+    anthem: "#e8a33d",
+    chant: "#d68c8c",
+    alaap: "#6fa8dc",
+    jod: "#8cd6cf",
+    gat: "#e8a33d",
+    jhala: "#e06050",
+    sanchari: "#b98cd6",
+    antara: "#5bb98c",
+    sthayi: "#e8a33d",
+    abhog: "#39414f",
+  };
+
   function draw() {
     HUE = {};
     const secs = mossSections();
     secs.forEach((s, i) => {
-      HUE[s.label] = HUE[s.label] || MSEC_COLORS[i % MSEC_COLORS.length];
+      HUE[s.label] =
+        HUE[s.label] ||
+        SECTION_HUE[s.label] ||
+        MSEC_COLORS[i % MSEC_COLORS.length];
     });
 
     const map = $("map");
@@ -1292,20 +1333,23 @@
       map.appendChild(el);
     });
 
-    for (const m of SCORE.moments || []) {
-      const t = momentTime(m);
+    const allMoments = SCORE.moments || [];
+    for (const m of allMoments) {
+      const t = m.time_s != null ? m.time_s : momentTime(m);
       if (t < 0 || t > total) continue;
       const el = document.createElement("div");
       el.className = "beat";
-      const len = momentSpan(m);
+      const len = m.duration_s || momentSpan(m);
       el.dataset.t0 = t;
       el.dataset.t1 = t + len;
-      el.style.background = KIND[m.is] || "#8b93a6";
-      el.style.opacity = 0.55 + 0.45 * (m.weight ?? 0);
-      el.title = `${mmss(t)} · bar ${m.bar} · ${momentWords(m)} · click to hear it`;
+      const type = m.type || m.is || "?";
+      el.style.background = MOMENT_TYPE_COLORS[type] || KIND[m.is] || "#8b93a6";
+      el.style.opacity = 0.55 + 0.45 * (m.intensity ?? m.weight ?? 0);
+      const desc = m.what || momentWords(m) || type;
+      el.title = `${mmss(t)} · ${type} · ${desc} · click to hear`;
       el.onclick = (ev) => {
         ev.stopPropagation();
-        hearMoment(m);
+        play(t);
       };
       map.appendChild(el);
     }
@@ -1364,10 +1408,22 @@
         </dd>
       <dt>Heard by</dt><dd class="dim">voice: ${esc(made.voice_from || "?")} \u00b7 lead: ${esc(made.lead_from || "?")}
         \u00b7 tune: ${esc(made.melody_from || "?")}</dd>
-      ${SCORE.moss_sections ? `<dt>AI sections</dt><dd><b style="color:var(--ok)">${SCORE.moss_sections.length} sections</b> (MOSS-Music-8B-Thinking)</dd>` : ""}
-      ${SCORE.btc_chords_raw ? `<dt>AI chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b> (BTC) ${SCORE.moss && SCORE.moss.chords ? `+ <b>${SCORE.moss.chords.length}</b> (MOSS)` : ""}</dd>` : ""}
-      ${SCORE.moss ? `<dt>MOSS model</dt><dd class="dim">${esc(SCORE.moss.model || "?")} via ${esc(SCORE.moss.engine || "?")}</dd>` : ""}
-      ${SCORE.stems_53 ? `<dt>53-stem separation</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems_53).length} instruments</b> detected (MVSep Mega BS-RoFormer)</dd>` : ""}
+      ${mossSections().length ? `<dt>Sections</dt><dd><b style="color:var(--ok)">${mossSections().length} sections</b></dd>` : ""}
+      ${SCORE.btc_chords_raw ? `<dt>Chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b></dd>` : ""}
+      ${SCORE.stems_53 ? `<dt>Instruments</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems_53).length} stems</b> detected</dd>` : ""}
+      ${(SCORE.moments || []).length ? `<dt>Moments</dt><dd><b style="color:var(--ok)">${(SCORE.moments).length} events</b></dd>` : ""}
+      ${(SCORE.emotion || []).length ? `<dt>Emotion</dt><dd><b style="color:var(--ok)">${SCORE.emotion.length} segments</b></dd>` : ""}
+    </dl></div>
+    <div class="col"><dl>
+      <dt>Technology</dt>
+      <dd class="dim" style="font-size:10px;line-height:1.8">
+        MOSS-Music-8B-Thinking (sections, moments, emotion, lyrics, melody, rhythm, caption)<br>
+        BTC Transformer (chord recognition)<br>
+        MVSep Mega 53-Stem BS-RoFormer (stem separation)<br>
+        madmom (beat &amp; downbeat tracking)<br>
+        pYIN (pitch tracking)<br>
+        Whisper-large-v3 (Indic ASR fallback)
+      </dd>
     </dl></div>`;
 
     $("beatkey").innerHTML =
@@ -1410,6 +1466,8 @@
     sections();
     sungWords();
     aiIntel();
+    emotionArc();
+    momentsDisplay();
     indicLyrics();
     place();
   }
@@ -1541,13 +1599,14 @@
     const shelf = [];
     g.font = "10px ui-monospace,monospace";
     for (const m of SCORE.moments || []) {
-      const mt = momentTime(m),
-        len = momentSpan(m);
+      const mt = m.time_s != null ? m.time_s : momentTime(m),
+        len = m.duration_s || momentSpan(m);
       if (mt + len < a || mt > b) continue;
       const x = X(mt);
-      const hue = KIND[m.is] || "#8b93a6";
+      const type = m.type || m.is || "?";
+      const hue = MOMENT_TYPE_COLORS[type] || KIND[m.is] || "#8b93a6";
       g.fillStyle = hue;
-      g.globalAlpha = 0.55 + 0.45 * (m.weight ?? m.sure ?? 0);
+      g.globalAlpha = 0.55 + 0.45 * (m.intensity ?? m.weight ?? m.sure ?? 0);
       let x1 = x;
       if (len > 0) {
         x1 = X(mt + len);
@@ -1691,7 +1750,7 @@
     THIT.length = 0;
     const hooked = new Set();
     for (const m of SCORE.moments || []) {
-      if (m.is !== "hook" || !m.for_beats) continue;
+      if ((m.type || m.is) !== "hook" || !m.for_beats) continue;
       if (m.again_of == null && !m.notes) continue;
       const upto = m.bar + m.for_beats / SCORE.grid.beats_per_bar;
       for (let b = m.bar; b <= upto; b++) hooked.add(b);
@@ -1888,8 +1947,8 @@
       return;
     }
     const M = SCORE.moss || {};
-    const hasCap = M.caption || SCORE.moss_caption;
-    const hasSec = SCORE.moss_sections && SCORE.moss_sections.length;
+    const hasCap = M.caption || SCORE.caption;
+    const hasSec = SCORE.sections && SCORE.sections.length;
     const has53 = SCORE.stems_53 && Object.keys(SCORE.stems_53).length;
     const hasMoss =
       M.caption || M.instruments || M.emotion_trajectory || M.key_tempo;
@@ -1956,6 +2015,175 @@
     legBox.innerHTML = "";
   }
 
+  const EMOTION_COLORS = {
+    euphoric: "#e8a33d",
+    hopeful: "#5bb98c",
+    melancholic: "#6fa8dc",
+    aggressive: "#e06050",
+    tender: "#b98cd6",
+    triumphant: "#e8a33d",
+    anxious: "#e06050",
+    serene: "#5bb98c",
+    nostalgic: "#6fa8dc",
+    defiant: "#e06050",
+    playful: "#e8a33d",
+    dark: "#39414f",
+    energetic: "#e8a33d",
+    calm: "#5bb98c",
+    intense: "#e06050",
+    joyful: "#e8a33d",
+    sad: "#6fa8dc",
+    powerful: "#e06050",
+    dreamy: "#b98cd6",
+    mysterious: "#39414f",
+  };
+
+  function emotionArc() {
+    const sec = $("emotion-box");
+    const emo = SCORE.emotion;
+    if (!emo || !emo.length) {
+      sec.hidden = true;
+      return;
+    }
+    sec.hidden = false;
+
+    const canvas = $("emotion-canvas");
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth || 800;
+    const h = 120;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
+    const g = canvas.getContext("2d");
+    g.scale(dpr, dpr);
+
+    const total = SCORE.song.length_s;
+    const barW = w / emo.length;
+
+    emo.forEach((e, i) => {
+      const x = i * barW;
+      const energy = (e.energy || 5) / 10;
+      const valence = (e.valence || 5) / 10;
+      const col = EMOTION_COLORS[e.emotion] || "#6fa8dc";
+
+      g.fillStyle = col;
+      g.globalAlpha = 0.15 + energy * 0.6;
+      g.fillRect(x, 0, barW - 1, h);
+
+      g.globalAlpha = 0.9;
+      const eH = energy * (h - 20);
+      g.fillStyle = "#e8a33d";
+      g.fillRect(x + 2, h - 10 - eH, 3, eH);
+
+      const vH = valence * (h - 20);
+      g.fillStyle = "#5bb98c";
+      g.fillRect(x + 6, h - 10 - vH, 3, vH);
+
+      const aH = ((e.arousal || 5) / 10) * (h - 20);
+      g.fillStyle = "#e06050";
+      g.fillRect(x + 10, h - 10 - aH, 3, aH);
+
+      g.globalAlpha = 1;
+      if (barW > 50) {
+        g.fillStyle = "#7b8599";
+        g.font = "9px ui-monospace,monospace";
+        g.fillText(e.emotion || "", x + 4, 12);
+      }
+    });
+
+    g.globalAlpha = 1;
+    const det = $("emotion-detail");
+    det.innerHTML = `<div style="display:flex;gap:12px;font-size:11px;color:var(--dim)">
+      <span><span style="color:#e8a33d">■</span> Energy</span>
+      <span><span style="color:#5bb98c">■</span> Valence</span>
+      <span><span style="color:#e06050">■</span> Arousal</span>
+    </div>`;
+
+    canvas.onclick = (ev) => {
+      const r = canvas.getBoundingClientRect();
+      const frac = (ev.clientX - r.left) / r.width;
+      play(frac * total);
+    };
+  }
+
+  const MOMENT_TYPE_COLORS = {
+    drop: "#e06050",
+    build: "#e8a33d",
+    breakdown: "#6fa8dc",
+    climax: "#ff4444",
+    entrance: "#5bb98c",
+    exit: "#b98cd6",
+    fill: "#e8a33d",
+    accent: "#e06050",
+    hook: "#5bb98c",
+    release: "#6fa8dc",
+    pause: "#39414f",
+    silence: "#1a2230",
+    vocal_moment: "#b98cd6",
+    key_change: "#e8a33d",
+    tempo_change: "#e06050",
+    groove_lock: "#5bb98c",
+    call_response: "#6fa8dc",
+    surprise: "#ff4444",
+    stab: "#e06050",
+    swell: "#b98cd6",
+    transition: "#39414f",
+    solo: "#e8a33d",
+    intro: "#39414f",
+  };
+
+  function momentsDisplay() {
+    const sec = $("moments-box");
+    const mo = SCORE.moments;
+    if (!mo || !mo.length) {
+      sec.hidden = true;
+      return;
+    }
+    sec.hidden = false;
+
+    
+    const sorted = [...mo].sort(
+      (a, b) => (a.time_s || a.bar || 0) - (b.time_s || b.bar || 0),
+    );
+
+    let html = '<div style="display:flex;flex-direction:column;gap:4px">';
+    sorted.forEach((m) => {
+      const t = m.time_s != null ? m.time_s : m.bar ? barTime(m.bar) : 0;
+      const type = m.type || m.is || "?";
+      const col = MOMENT_TYPE_COLORS[type] || "#6fa8dc";
+      const what = m.what || "";
+      const desc = m.description || "";
+      const intensity = m.intensity != null ? m.intensity : m.weight || 0;
+      const dur = m.duration_s || 0;
+
+      html += `<div onclick="play(${t})" style="display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;border-radius:6px;border-left:3px solid ${col};background:var(--pan);transition:background 0.15s" onmouseover="this.style.background='var(--line)'" onmouseout="this.style.background='var(--pan)'">
+        <span style="min-width:40px;font:10px ui-monospace,monospace;color:var(--dim)">${mmss(t)}</span>
+        <span style="min-width:90px;font:600 10px ui-monospace,monospace;letter-spacing:0.05em;text-transform:uppercase;color:${col}">${esc(type)}</span>
+        <span style="flex:1;font-size:12px;color:var(--ink)">${esc(what)}${desc ? " — " + esc(desc) : ""}</span>
+        <span style="min-width:30px;text-align:right;font:10px ui-monospace,monospace;color:var(--dim)">${dur > 0 ? dur.toFixed(1) + "s" : "·"}</span>
+        <div style="width:40px;height:6px;background:var(--line);border-radius:3px;overflow:hidden"><div style="width:${Math.round(intensity * 100)}%;height:100%;background:${col};border-radius:3px"></div></div>
+      </div>`;
+    });
+    html += "</div>";
+
+    const types = {};
+    sorted.forEach((m) => {
+      const t = m.type || m.is;
+      types[t] = (types[t] || 0) + 1;
+    });
+    const legend = Object.entries(types)
+      .sort((a, b) => b[1] - a[1])
+      .map(
+        ([t, c]) =>
+          `<span style="font-size:10px"><span style="color:${MOMENT_TYPE_COLORS[t] || "#6fa8dc"}">■</span> ${t} (${c})</span>`,
+      )
+      .join(" ");
+
+    $("moments-list").innerHTML =
+      `<div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:8px">${legend}</div>${html}`;
+  }
+
   function indicLyrics() {
     const sec = $("indic-box");
     const box = $("indic-sung");
@@ -2011,7 +2239,7 @@
     box.innerHTML = "";
     if (mLyrBox) mLyrBox.innerHTML = "";
 
-    const mossLyr = SCORE.lyrics_moss;
+    const mossLyr = SCORE.lyrics;
     const whisper = SCORE.lyrics;
     const hasMoss = mossLyr && (mossLyr.lines || []).length;
     const hasWhisper = whisper && (whisper.lines || []).length;
@@ -2054,24 +2282,22 @@
   }
 
   function nowSinging(t) {
+    const mossL = SCORE.lyrics;
+    if (mossL && (mossL.lines || []).length) {
+      const line = mossL.lines.find((l) => {
+        const next = mossL.lines[mossL.lines.indexOf(l) + 1];
+        const end = next ? next.start : l.start + 10;
+        return t >= l.start - 0.3 && t < end;
+      });
+      if (!line) return `<span class="dim">\u2014</span>`;
+      return esc(line.text);
+    }
     const got = SCORE.lyrics;
     if (!got || !(got.lines || []).length)
       return `<span class="dim">\u2014</span>`;
     const line = got.lines.find((r) => t >= r.at_s - 0.2 && t <= r.to_s + 0.4);
-    if (!line) return `<span class="dim">nothing</span>`;
-    const now = (got.words || []).find(
-      (w) => t >= w.at_s - 0.05 && t <= w.to_s + 0.15,
-    );
-    const weak = line.sure != null && line.sure < 0.6;
-    const said = line.text
-      .split(" ")
-      .map((w) =>
-        now && w === now.text
-          ? `<b style="color:var(--amb)">${esc(w)}</b>`
-          : esc(w),
-      )
-      .join(" ");
-    return said + (weak ? ` <span class="dim">· unsure</span>` : "");
+    if (!line) return `<span class="dim">\u2014</span>`;
+    return esc(line.text);
   }
 
   function sections() {
@@ -2094,8 +2320,11 @@
         tb = s.to_bar || 0;
       if (fb && tb) {
         const inside = (SCORE.moments || [])
-          .filter((m) => m.bar >= fb && m.bar <= tb)
-          .sort((a, b) => a.bar - b.bar || a.beat - b.beat);
+          .filter((m) => {
+            if (m.time_s != null) return m.time_s >= t0 && m.time_s < t1;
+            return m.bar >= fb && m.bar <= tb;
+          })
+          .sort((a, b) => (a.time_s || a.bar || 0) - (b.time_s || b.bar || 0));
         if (inside.length) {
           const strip = document.createElement("div");
           strip.className = "inside";
@@ -2209,19 +2438,23 @@
           `<span class="dim">${mmss(ms.start)} – ${mmss(ms.end)}</span>`;
         const here = (SCORE.moments || [])
           .filter((m) => {
-            const mt = momentTime(m);
+            const mt = m.time_s != null ? m.time_s : momentTime(m);
+            const span = m.duration_s || momentSpan(m);
             return (
               t >= mt - beatLen() * 0.75 &&
-              t <= mt + Math.max(momentSpan(m), beatLen() * 0.75)
+              t <= mt + Math.max(span, beatLen() * 0.75)
             );
           })
-          .sort((x, y) => (y.weight || 0) - (x.weight || 0))
+          .sort(
+            (x, y) =>
+              (y.intensity ?? y.weight ?? 0) - (x.intensity ?? x.weight ?? 0),
+          )
           .slice(0, 2);
         $("nowmoment").innerHTML = here.length
           ? here
               .map(
                 (m) =>
-                  `<b style="color:${KIND[m.is] || "#8b93a6"}">${esc(momentWords(m))}</b>`,
+                  `<b style="color:${MOMENT_TYPE_COLORS[m.type || m.is] || KIND[m.is] || "#8b93a6"}">${esc(m.what || momentWords(m))}</b>`,
               )
               .join(" · ")
           : `<span class="dim">—</span>`;
