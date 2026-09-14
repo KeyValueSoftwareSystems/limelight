@@ -50,7 +50,7 @@ const KNOWN = [
   "lyrics",
   "caption",
   "btc_chords_raw",
-  "stems_53",
+  "stems",
   "beat_consensus",
   "emotion",
   "recording",

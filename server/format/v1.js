@@ -18,7 +18,7 @@ export const KNOWN = [
   "recording",
   "caption",
   "btc_chords_raw",
-  "stems_53",
+  "stems",
   "beat_consensus",
   "emotion",
 ];
@@ -346,7 +346,7 @@ export function format(raw) {
 
   if (raw.caption) out.caption = raw.caption;
   if (raw.btc_chords_raw) out.btc_chords_raw = raw.btc_chords_raw;
-  if (raw.stems_53) out.stems_53 = raw.stems_53;
+  if (raw.stems) out.stems = raw.stems;
   if (raw.beat_consensus) out.beat_consensus = raw.beat_consensus;
   if (raw.emotion) out.emotion = raw.emotion;
 

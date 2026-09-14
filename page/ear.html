@@ -378,9 +378,21 @@
     flex: 1;
     min-width: 0;
   }
+  .tl-content canvas {
+    display: block;
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    background: #060910;
+    cursor: pointer;
+  }
+  #tl-rows .tl-row:last-of-type .tl-content canvas,
+  #tl-rows .tl-row:last-of-type .tl-content > div {
+    border-bottom: 1px solid var(--line);
+    border-radius: 0 0 10px 10px;
+  }
   #map {
     position: relative;
-    height: 130px;
+    height: 140px;
     border: 1px solid var(--line);
     border-bottom: none;
     border-radius: 10px 10px 0 0;
@@ -391,7 +403,7 @@
   }
   #chords {
     position: relative;
-    height: 20px;
+    height: 80px;
     border-left: 1px solid var(--line);
     border-right: 1px solid var(--line);
     background: #0b1016;
@@ -403,44 +415,36 @@
     top: 0;
     bottom: 0;
     border-left: 1px solid #2a3140;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
     font:
-      9.5px ui-monospace,
+      700 16px ui-monospace,
       monospace;
-    color: #8fb8d6;
-    padding: 2px 0 0 4px;
+    color: #e0ecf8;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     cursor: pointer;
     min-width: 0;
+    transition: background 0.1s;
   }
   .chd:hover {
-    background: #16202b;
+    background: #1a2a3d;
     z-index: 2;
   }
-  #dots {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 22px;
-    background: #0a1019;
-    border-bottom: 1px solid #1a2230;
-    z-index: 1;
-  }
-  #dots span {
-    position: absolute;
-    left: 7px;
-    top: 4px;
-    font:
-      9px ui-monospace,
-      monospace;
-    color: #4d5768;
-    letter-spacing: 0.09em;
+  #moments-row {
+    position: relative;
+    height: 140px;
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    background: #060910;
+    overflow: hidden;
+    cursor: pointer;
   }
   .part {
     position: absolute;
-    top: 22px;
+    top: 0;
     bottom: 0;
     overflow: hidden;
     border-left: 1px solid rgba(255, 255, 255, 0.08);
@@ -479,27 +483,46 @@
     outline: 2px solid var(--ok);
     outline-offset: -2px;
   }
-  .beat {
+  .mom {
     position: absolute;
-    top: 5px;
-    height: 12px;
-    min-width: 3px;
+    top: 0;
+    bottom: 0;
+    min-width: 4px;
     z-index: 4;
-    border-radius: 2px;
+    border-radius: 3px;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 6px;
+    overflow: hidden;
   }
-  .beat:hover {
-    filter: brightness(1.8);
-    transform: scaleY(1.4);
+  .mom:hover {
+    filter: brightness(1.4);
+    z-index: 8;
   }
-  .beat.gone {
-    top: 17px;
-    height: 4px;
-    opacity: 0.3;
-    border-radius: 1px;
+  .mom .mom-type {
+    font:
+      700 11px ui-monospace,
+      monospace;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .beat.gone:hover {
-    opacity: 0.9;
+  .mom .mom-desc {
+    font: 10px system-ui;
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+  .mom .mom-time {
+    font:
+      9px ui-monospace,
+      monospace;
+    opacity: 0.5;
+    margin-top: auto;
   }
   #head {
     position: absolute;
@@ -836,53 +859,58 @@
       <div class="tl-row">
         <span class="tl-label">SECTIONS</span>
         <div class="tl-content">
-          <div id="map">
-            <div id="dots"><span>MOMENTS</span></div>
-            <div id="head"></div>
-          </div>
+          <div id="map"><div id="head"></div></div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <span class="tl-label">MOMENTS</span>
+        <div class="tl-content">
+          <div id="moments-row"></div>
         </div>
       </div>
       <div class="tl-row">
         <span class="tl-label">CHORDS</span>
         <div class="tl-content"><div id="chords"></div></div>
       </div>
+      <div class="tl-row" id="emotion-row" hidden>
+        <span class="tl-label">EMOTION</span>
+        <div class="tl-content">
+          <canvas
+            id="emotion-canvas"
+            style="width: 100%; height: 140px"
+          ></canvas>
+        </div>
+      </div>
+      <div class="tl-row" id="melody-row" hidden>
+        <span class="tl-label">MELODY</span>
+        <div class="tl-content">
+          <canvas id="melody-canvas" style="width: 100%; height: 80px"></canvas>
+        </div>
+      </div>
+      <div class="tl-row" id="rhythm-row" hidden>
+        <span class="tl-label">RHYTHM</span>
+        <div class="tl-content">
+          <canvas id="rhythm-canvas" style="width: 100%; height: 50px"></canvas>
+        </div>
+      </div>
+      <div class="tl-row" id="stems-row" hidden>
+        <span class="tl-label">STEMS</span>
+        <div class="tl-content">
+          <canvas id="stems-canvas" style="width: 100%; height: 200px"></canvas>
+        </div>
+      </div>
+      <div class="tl-row" id="beats-row">
+        <span class="tl-label">BEATS</span>
+        <div class="tl-content">
+          <canvas id="zoom" style="width: 100%; height: 100px"></canvas>
+        </div>
+      </div>
       <div id="tl-seeker"></div>
     </div>
     <div class="legend" id="legend"></div>
   </section>
 
-  <section id="emotion-box" hidden>
-    <h2>Emotion Arc</h2>
-    <canvas
-      id="emotion-canvas"
-      style="width: 100%; height: 120px; border-radius: 8px"
-    ></canvas>
-    <div id="emotion-detail" style="margin-top: 8px"></div>
-  </section>
-
-  <section id="moments-box" hidden>
-    <h2>Notable Moments</h2>
-    <div id="moments-list"></div>
-  </section>
-
-  <section id="melody-box" hidden>
-    <h2>Melody</h2>
-    <div class="holder"><canvas id="tune"></canvas></div>
-    <div class="legend" id="tunekey"></div>
-  </section>
-
-  <section id="rhythm-box" hidden>
-    <h2>Rhythm</h2>
-    <canvas id="beat"></canvas>
-    <div class="legend" id="beatkey"></div>
-  </section>
-
-  <section>
-    <h2>Live View</h2>
-    <canvas id="zoom"></canvas>
-  </section>
-
-  <section>
+  <section id="section-detail-box">
     <h2>Section Detail</h2>
     <div id="sections"></div>
   </section>
@@ -898,14 +926,13 @@
   <div id="moss-voice-line" hidden></div>
   <div id="moss-rhythm-line" hidden></div>
   <div id="indic-box" hidden><div id="indic-sung"></div></div>
-  <div id="ai-intel" hidden>
-    <div id="ai-caption"></div>
-    <div id="ai-cards"></div>
-    <div id="moss-sections" hidden></div>
-    <div id="ai-legend"></div>
-  </div>
-  <div id="stems-legend" hidden></div>
-  <div id="dropped" hidden></div>
+  <div id="ai-intel" hidden></div>
+  <div id="moments-list" hidden></div>
+  <div id="emotion-detail" hidden></div>
+  <canvas id="tune" hidden></canvas>
+  <canvas id="beat" hidden></canvas>
+  <div id="tunekey" hidden></div>
+  <div id="beatkey" hidden></div>
 </div>
 
 <script src="/protocol/session.js"></script>
@@ -986,8 +1013,12 @@
         : `${mmss(VIEW.a)} \u2013 ${mmss(VIEW.b)}`;
     if (SCORE) {
       place();
-      tune();
       chordRow();
+      if ((SCORE.emotion || []).length) emotionTimeline();
+      if ((SCORE.melody || []).length) melodyTimeline();
+      if (SCORE.rhythm) rhythmTimeline();
+      if (SCORE.stems_temporal) stemsTimeline();
+      zoom();
     }
   }
 
@@ -1309,7 +1340,7 @@
     });
 
     const map = $("map");
-    [...map.querySelectorAll(".part,.beat")].forEach((x) => x.remove());
+    [...map.querySelectorAll(".part")].forEach((x) => x.remove());
     const total = SCORE.song.length_s;
 
     secs.forEach((s, i) => {
@@ -1323,36 +1354,38 @@
       el.title = `${cap(s.label)} · ${mmss(t0)} – ${mmss(t1)} · click to hear`;
       el.innerHTML = `<div class="fill" style="background:${c};height:70%"></div>
       <div class="tag" style="color:${c}">${esc(s.label.toUpperCase())}</div>`;
-      el.onclick = (ev) => {
-        ev.stopPropagation();
-        const r = el.parentElement.getBoundingClientRect();
-        const clickT = timeAt((ev.clientX - r.left) / r.width);
-        play(Math.max(t0, clickT));
-      };
       map.appendChild(el);
     });
 
+    /* Moments as timeline row */
+    const mrow = $("moments-row");
+    [...mrow.querySelectorAll(".mom")].forEach((x) => x.remove());
     const allMoments = SCORE.moments || [];
     for (const m of allMoments) {
       const t = m.time_s != null ? m.time_s : momentTime(m);
       if (t < 0 || t > total) continue;
       const el = document.createElement("div");
-      el.className = "beat";
-      const len = m.duration_s || momentSpan(m);
+      el.className = "mom";
+      const len = m.duration_s || momentSpan(m) || 2.0;
       el.dataset.t0 = t;
       el.dataset.t1 = t + len;
       const type = m.type || m.is || "?";
-      el.style.background = MOMENT_TYPE_COLORS[type] || KIND[m.is] || "#8b93a6";
-      el.style.opacity = 0.55 + 0.45 * (m.intensity ?? m.weight ?? 0);
-      const desc = m.what || momentWords(m) || type;
-      el.title = `${mmss(t)} · ${type} · ${desc} · click to hear`;
-      el.onclick = (ev) => {
-        ev.stopPropagation();
-        play(t);
-      };
-      map.appendChild(el);
+      const hue = MOMENT_TYPE_COLORS[type] || KIND[m.is] || "#8b93a6";
+      el.style.borderLeft = `3px solid ${hue}`;
+      el.style.background = hue + "22";
+      const intensity = m.intensity ?? m.weight ?? 0.5;
+      const desc = m.description || m.what || momentWords(m) || type;
+      const what = m.what || "";
+      el.title = `${mmss(t)} · ${type} · ${desc}`;
+      el.innerHTML = `<span class="mom-type" style="color:${hue}">${esc(type.toUpperCase())}</span><span class="mom-desc" style="color:${hue}">${esc(what || desc)}</span><span class="mom-time" style="color:${hue}">${mmss(t)}</span>`;
+      mrow.appendChild(el);
     }
 
+    const momTypes = {};
+    for (const m of allMoments) {
+      const t = m.type || m.is;
+      if (t) momTypes[t] = (momTypes[t] || 0) + 1;
+    }
     $("legend").innerHTML =
       `<span class="dim">Sections</span>` +
       [...new Set(secs.map((s) => s.label))]
@@ -1360,7 +1393,23 @@
           (lab) =>
             `<span><i style="background:${HUE[lab]}"></i>${cap(lab)}</span>`,
         )
-        .join("");
+        .join("") +
+      (Object.keys(momTypes).length
+        ? `<span class="dim" style="margin-left:12px">Moments</span>` +
+          Object.entries(momTypes)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8)
+            .map(
+              ([t, c]) =>
+                `<span><i style="background:${MOMENT_TYPE_COLORS[t] || "#8b93a6"}"></i>${t}(${c})</span>`,
+            )
+            .join("") +
+          `<span class="dim" style="margin-left:12px">Emotion</span>` +
+          EMO_LINES.map(
+            (ln) =>
+              `<span><i style="background:${ln.color}"></i>${ln.label}</span>`,
+          ).join("")
+        : "");
 
     const g = SCORE.grid;
     const kt = SCORE.key_tempo || "";
@@ -1372,7 +1421,7 @@
     <div class="col"><dl>
       ${mossSections().length ? `<dt>Sections</dt><dd><b style="color:var(--ok)">${mossSections().length} sections</b></dd>` : ""}
       ${SCORE.btc_chords_raw ? `<dt>Chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b> (BTC Transformer)</dd>` : ""}
-      ${SCORE.stems_53 ? `<dt>Instruments</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems_53).length} stems</b> detected (53-stem BS-RoFormer)</dd>` : ""}
+      ${SCORE.stems ? `<dt>Instruments</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems).length} stems</b> detected (53-stem BS-RoFormer)</dd>` : ""}
       ${(SCORE.moments || []).length ? `<dt>Moments</dt><dd><b style="color:var(--ok)">${SCORE.moments.length} events</b></dd>` : ""}
       ${(SCORE.emotion || []).length ? `<dt>Emotion</dt><dd><b style="color:var(--ok)">${SCORE.emotion.length} segments</b></dd>` : ""}
     </dl></div>
@@ -1400,26 +1449,29 @@
         `<span><i style="background:#c8a2ff"></i>Repeated tune</span>`;
 
     chordRow();
-    sections();
-
-    const hasMelody = (SCORE.melody || []).length > 0;
-    $("melody-box").hidden = !hasMelody;
-    if (hasMelody) tune();
-
-    const hasGroove =
-      SCORE.groove &&
-      typeof SCORE.groove === "object" &&
-      Object.keys(SCORE.groove).length > 0;
-    $("rhythm-box").hidden = !hasGroove;
-    if (hasGroove) beatGrid();
 
     const hasEmotion = (SCORE.emotion || []).length > 0;
-    $("emotion-box").hidden = !hasEmotion;
-    if (hasEmotion) emotionArc();
+    $("emotion-row").hidden = !hasEmotion;
+    if (hasEmotion) emotionTimeline();
 
-    const hasMoments = (SCORE.moments || []).length > 0;
-    $("moments-box").hidden = !hasMoments;
-    if (hasMoments) momentsDisplay();
+    const hasMelody = (SCORE.melody || []).length > 0;
+    $("melody-row").hidden = !hasMelody;
+    if (hasMelody) melodyTimeline();
+
+    const hasRhythm = SCORE.rhythm && typeof SCORE.rhythm === "object";
+    $("rhythm-row").hidden = !hasRhythm;
+    if (hasRhythm) rhythmTimeline();
+
+    const hasStems =
+      SCORE.stems_temporal &&
+      SCORE.stems_temporal.stems &&
+      Object.keys(SCORE.stems_temporal.stems).length > 0;
+    $("stems-row").hidden = !hasStems;
+    if (hasStems) stemsTimeline();
+
+    const hasSections = mossSections().length > 0;
+    $("section-detail-box").hidden = !hasSections;
+    if (hasSections) sections();
 
     sungWords();
     aiIntel();
@@ -1432,7 +1484,7 @@
   function place() {
     const cw = $("chords")?.clientWidth || 1;
     for (const el of document.querySelectorAll(
-      "#map .part,#map .beat,#chords .chd",
+      "#map .part,#moments-row .mom,#chords .chd",
     )) {
       const t0 = +el.dataset.t0,
         t1 = +el.dataset.t1;
@@ -1443,12 +1495,14 @@
       if (off) continue;
       const cl = Math.max(0, l);
       const cr = Math.min(100, r);
-      const w = Math.max(el.classList.contains("beat") ? 0.25 : 0, cr - cl);
+      const w = Math.max(el.classList.contains("mom") ? 0.25 : 0, cr - cl);
       el.style.left = `${cl}%`;
       el.style.width = `${w}%`;
       if (el.classList.contains("chd")) {
         const px = (w / 100) * cw;
-        el.style.fontSize = px < 30 ? "0" : "";
+        if (px < 14) el.style.fontSize = "0";
+        else if (px < 40) el.style.fontSize = "11px";
+        else el.style.fontSize = "";
       }
     }
   }
@@ -1480,8 +1534,9 @@
       el.dataset.t0 = c.start;
       el.dataset.t1 = c.end;
       const col = chordColor(c.chord);
-      el.style.borderBottom = `2px solid ${col}`;
-      el.title = `${c.chord} · ${mmss(c.start)}–${mmss(c.end)} · click to hear`;
+      el.style.borderBottom = `3px solid ${col}`;
+      el.style.background = col + "12";
+      el.title = `${c.chord} · ${mmss(c.start)}–${mmss(c.end)}`;
       el.textContent = c.chord;
       box.appendChild(el);
     });
@@ -1505,40 +1560,12 @@
   }
 
   function zoom() {
-    const [g, W] = fit($("zoom"), 110);
+    const [g, W] = fit($("zoom"), 100);
     if (!SCORE) return;
-    const t = aud.currentTime;
-    const wide = Math.min(WINDOW, viewSpan());
-    const a = t - wide / 2,
-      b = t + wide / 2;
-    const X = (s) => ((s - a) / wide) * W;
-    const total = SCORE.song.length_s;
-
-    for (const s of mossSections()) {
-      const t0 = s.start,
-        t1 = Math.min(total, s.end);
-      if (t1 < a || t0 > b) continue;
-      const x0 = Math.max(0, X(t0)),
-        x1 = Math.min(W, X(t1));
-      const c = HUE[s.label] || "#6fa8dc";
-      g.fillStyle = c + "16";
-      g.fillRect(x0, 0, x1 - x0, 110);
-      g.fillStyle = c;
-      g.font = "600 10px ui-monospace,monospace";
-      if (X(t0) >= 0) {
-        g.strokeStyle = c;
-        g.lineWidth = 2;
-        g.beginPath();
-        g.moveTo(X(t0), 0);
-        g.lineTo(X(t0), 110);
-        g.stroke();
-        g.fillText(s.label.toUpperCase() + " starts here", X(t0) + 6, 13);
-      } else if (x1 - x0 > 96) {
-        g.globalAlpha = 0.7;
-        g.fillText("still in " + s.label.toUpperCase(), x0 + 6, 13);
-        g.globalAlpha = 1;
-      }
-    }
+    const a = VIEW.a,
+      b = VIEW.b;
+    const X = (s) => frac(s) * W;
+    const h = 100;
 
     const per = SCORE.grid.beats_per_bar;
     (SCORE.beats || []).forEach((bt, i) => {
@@ -1547,85 +1574,21 @@
       const down = (((i - (SHIFT - BASE)) % per) + per) % per === firstIndex();
       g.strokeStyle = down ? "#ffffff" : "#e8a33d";
       g.lineWidth = down ? 2 : 1;
-      g.globalAlpha = down ? 1 : 0.5;
+      g.globalAlpha = down ? 1 : 0.4;
       g.beginPath();
-      g.moveTo(x, down ? 22 : 36);
-      g.lineTo(x, 54);
+      g.moveTo(x, down ? 0 : 14);
+      g.lineTo(x, h - 8);
       g.stroke();
       g.globalAlpha = 1;
       if (down) {
         const n = Math.round(beatAt(bt.t) / perBar()) + 1;
         g.fillStyle = "#7b8599";
-        g.font = "10px ui-monospace,monospace";
-        g.fillText("bar " + n, x + 4, 104);
+        g.font = "9px ui-monospace,monospace";
+        g.fillText(n, x + 3, h - 2);
       }
     });
 
     ZHIT.length = 0;
-    const shelf = [];
-    g.font = "10px ui-monospace,monospace";
-    for (const m of SCORE.moments || []) {
-      const mt = m.time_s != null ? m.time_s : momentTime(m),
-        len = m.duration_s || momentSpan(m);
-      if (mt + len < a || mt > b) continue;
-      const x = X(mt);
-      const type = m.type || m.is || "?";
-      const hue = MOMENT_TYPE_COLORS[type] || KIND[m.is] || "#8b93a6";
-      g.fillStyle = hue;
-      g.globalAlpha = 0.55 + 0.45 * (m.intensity ?? m.weight ?? m.sure ?? 0);
-      let x1 = x;
-      if (len > 0) {
-        x1 = X(mt + len);
-        g.fillRect(x, 26, Math.max(3, x1 - x), 6);
-        g.globalAlpha = 1;
-        g.fillRect(x, 23, 2, 12);
-      } else {
-        g.beginPath();
-        g.arc(x, 29, 3.5, 0, 6.284);
-        g.fill();
-      }
-      g.globalAlpha = 1;
-      const words = shortMoment(m);
-      const tw = g.measureText(words).width;
-      let lane = 0;
-      while (shelf[lane] != null && shelf[lane] > x) lane++;
-      shelf[lane] = x + tw + 14;
-      const ly = 88 - lane * 13;
-      g.strokeStyle = hue;
-      g.globalAlpha = 0.45;
-      g.lineWidth = 1;
-      g.beginPath();
-      g.moveTo(x, 33);
-      g.lineTo(x, ly - 9);
-      g.stroke();
-      g.globalAlpha = 1;
-      g.fillStyle = "rgba(6,9,14,.92)";
-      g.fillRect(x + 1, ly - 9, tw + 8, 12);
-      g.strokeStyle = hue;
-      g.globalAlpha = 0.6;
-      g.lineWidth = 1;
-      g.strokeRect(x + 1.5, ly - 8.5, tw + 7, 11);
-      g.globalAlpha = 1;
-      g.fillStyle = hue;
-      g.fillText(words, x + 5, ly);
-      ZHIT.push({
-        x0: Math.min(x, x1) - 5,
-        x1: Math.max(x1, x + tw + 10),
-        y0: ly - 10,
-        y1: ly + 4,
-        m,
-      });
-    }
-
-    g.strokeStyle = "#e0655f";
-    g.lineWidth = 1.5;
-    g.beginPath();
-    g.moveTo(W / 2, 0);
-    g.lineTo(W / 2, 110);
-    g.stroke();
-    g.fillStyle = "#4a5364";
-    g.font = "9.5px ui-monospace,monospace";
-    g.fillText(`${wide.toFixed(1)}s across`, 7, 104);
   }
 
   function tune() {
@@ -1921,73 +1884,242 @@
     mysterious: "#39414f",
   };
 
-  function emotionArc() {
-    const sec = $("emotion-box");
-    const emo = SCORE.emotion;
-    if (!emo || !emo.length) {
-      sec.hidden = true;
-      return;
-    }
-    sec.hidden = false;
+  const EMO_LINES = [
+    { key: "energy", color: "#e8a33d", label: "Energy" },
+    { key: "valence", color: "#5bb98c", label: "Valence" },
+    { key: "arousal", color: "#e06050", label: "Arousal" },
+    { key: "tension", color: "#c8a2ff", label: "Tension" },
+    { key: "brightness", color: "#8fd0ff", label: "Bright" },
+    { key: "groove", color: "#f2c14e", label: "Groove" },
+  ];
 
+  function emotionTimeline() {
+    const emo = SCORE.emotion;
+    if (!emo || !emo.length) return;
     const canvas = $("emotion-canvas");
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.clientWidth || 800;
-    const h = 120;
+    const h = 140;
     canvas.width = w * dpr;
     canvas.height = h * dpr;
-    canvas.style.width = w + "px";
     canvas.style.height = h + "px";
     const g = canvas.getContext("2d");
     g.scale(dpr, dpr);
+    g.clearRect(0, 0, w, h);
 
+    const pad = 14;
+    const bottom = h - 6;
+    const top = pad;
+    const X = (t) => frac(t) * w;
+    const Y = (v) => top + (1 - v / 10) * (bottom - top);
+
+    for (const e of emo) {
+      const x0 = X(e.start),
+        x1 = X(e.end);
+      if (x1 < 0 || x0 > w) continue;
+      const col = EMOTION_COLORS[e.emotion] || "#4a5568";
+      g.fillStyle = col;
+      g.globalAlpha = 0.08;
+      g.fillRect(Math.max(0, x0), 0, Math.min(w, x1) - Math.max(0, x0), h);
+      g.globalAlpha = 1;
+      const mid = (Math.max(0, x0) + Math.min(w, x1)) / 2;
+      const pw = Math.min(w, x1) - Math.max(0, x0);
+      if (pw > 40) {
+        g.fillStyle = col;
+        g.globalAlpha = 0.5;
+        g.font = "600 9px system-ui";
+        g.textAlign = "center";
+        g.fillText(e.emotion, mid, 10);
+        g.textAlign = "start";
+        g.globalAlpha = 1;
+      }
+    }
+
+    for (let v = 2; v <= 8; v += 2) {
+      g.strokeStyle = "#1a2030";
+      g.lineWidth = 0.5;
+      g.beginPath();
+      g.moveTo(0, Y(v));
+      g.lineTo(w, Y(v));
+      g.stroke();
+    }
+
+    for (const ln of EMO_LINES) {
+      g.strokeStyle = ln.color;
+      g.lineWidth = 2;
+      g.globalAlpha = 0.85;
+      g.beginPath();
+      let started = false;
+      for (const e of emo) {
+        const mid = (e.start + e.end) / 2;
+        const x = X(mid),
+          y = Y(e[ln.key] || 5);
+        if (x < -10 || x > w + 10) continue;
+        if (!started) {
+          g.moveTo(x, y);
+          started = true;
+        } else g.lineTo(x, y);
+      }
+      g.stroke();
+      g.globalAlpha = 1;
+    }
+
+    g.font = "600 8px ui-monospace,monospace";
+    EMO_LINES.forEach((ln, i) => {
+      const lx = 4 + i * 54;
+      g.fillStyle = ln.color;
+      g.fillRect(lx, h - 12, 6, 6);
+      g.fillText(ln.label, lx + 9, h - 6);
+    });
+  }
+
+  function melodyTimeline() {
+    const notes = SCORE.melody || [];
+    if (!notes.length) return;
+    const canvas = $("melody-canvas");
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth || 800;
+    const h = 80;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.height = h + "px";
+    const g = canvas.getContext("2d");
+    g.scale(dpr, dpr);
+    g.clearRect(0, 0, w, h);
+
+    const pitches = notes
+      .map((n) => n.pitch || n.note || 0)
+      .filter((p) => p > 0);
+    if (!pitches.length) return;
+    const lo = Math.min(...pitches) - 1;
+    const hi = Math.max(...pitches) + 1;
+    const range = hi - lo || 1;
+    const pad = 6;
+
+    for (const n of notes) {
+      const p = n.pitch || n.note || 0;
+      if (p <= 0) continue;
+      const x0 = frac(n.start || n.time_s || 0) * w;
+      const x1 = frac((n.start || n.time_s || 0) + (n.duration || 0.1)) * w;
+      if (x1 < 0 || x0 > w) continue;
+      const y = pad + (1 - (p - lo) / range) * (h - pad * 2);
+      const vel = n.velocity || 0.5;
+      g.fillStyle = vel > 0.6 ? "#7ae8b0" : "#8fd0ff";
+      g.globalAlpha = 0.3 + vel * 0.7;
+      g.fillRect(x0, y - 2, Math.max(2, x1 - x0), 4);
+    }
+    g.globalAlpha = 1;
+  }
+
+  function rhythmTimeline() {
+    const rhy = SCORE.rhythm;
+    if (!rhy) return;
+    const canvas = $("rhythm-canvas");
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth || 800;
+    const h = 50;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.height = h + "px";
+    const g = canvas.getContext("2d");
+    g.scale(dpr, dpr);
+    g.clearRect(0, 0, w, h);
+
+    const hits = rhy.hits || rhy.patterns || [];
+    if (Array.isArray(hits) && hits.length) {
+      for (const p of hits) {
+        const t = p.t || p.time_s || 0;
+        const x = frac(t) * w;
+        if (x < 0 || x > w) continue;
+        const vel = p.intensity || p.velocity || 0.5;
+        g.fillStyle = "#e8a33d";
+        g.globalAlpha = 0.2 + vel * 0.8;
+        const barH = vel * (h - 4);
+        g.fillRect(x, h - barH, Math.max(1, 2), barH);
+      }
+    }
+    g.globalAlpha = 1;
+  }
+
+  function stemsTimeline() {
+    const st = SCORE.stems_temporal;
+    if (!st || !st.stems) return;
+    const canvas = $("stems-canvas");
+    const names = Object.keys(st.stems).sort((a, b) => {
+      const sa = SCORE.stems && SCORE.stems[a] ? SCORE.stems[a].rms : 0;
+      const sb = SCORE.stems && SCORE.stems[b] ? SCORE.stems[b].rms : 0;
+      return sb - sa;
+    });
+    if (!names.length) return;
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth || 800;
+    const rowH = Math.max(10, Math.min(24, 200 / names.length));
+    const h = names.length * rowH;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.height = h + "px";
+    const g = canvas.getContext("2d");
+    g.scale(dpr, dpr);
+    g.clearRect(0, 0, w, h);
+
+    const winS = st.window_s || 0.5;
     const total = SCORE.song.length_s;
-    const barW = w / emo.length;
+    const STEM_COLORS = {
+      "lead-vocal": "#7ae8b0",
+      vocal: "#5bb98c",
+      "back-vocal": "#8cd6cf",
+      drums: "#e06050",
+      kick: "#e0655f",
+      snare: "#d68c8c",
+      hh: "#f2c14e",
+      bass: "#b98cd6",
+      "double-bass": "#c8a2ff",
+      guitar: "#6fa8dc",
+      "electric-guitar": "#8fd0ff",
+      "acoustic-guitar": "#7ad4c8",
+      piano: "#e8a33d",
+      "digital-piano": "#d6c98c",
+      keys: "#f2c14e",
+      synth: "#c8a2ff",
+      strings: "#b98cd6",
+      organ: "#d16bd1",
+    };
 
-    emo.forEach((e, i) => {
-      const x = i * barW;
-      const energy = (e.energy || 5) / 10;
-      const valence = (e.valence || 5) / 10;
-      const col = EMOTION_COLORS[e.emotion] || "#6fa8dc";
+    names.forEach((name, row) => {
+      const vals = st.stems[name];
+      const y = row * rowH;
+      const col = STEM_COLORS[name] || WHEEL[row % WHEEL.length];
+
+      g.fillStyle = "#0a0e14";
+      g.fillRect(0, y, w, rowH);
+
+      for (let i = 0; i < vals.length; i++) {
+        const t0 = i * winS;
+        const t1 = (i + 1) * winS;
+        const x0 = frac(t0) * w;
+        const x1 = frac(t1) * w;
+        if (x1 < 0 || x0 > w) continue;
+        const v = vals[i];
+        if (v < 0.02) continue;
+        g.fillStyle = col;
+        g.globalAlpha = 0.15 + v * 0.85;
+        g.fillRect(Math.max(0, x0), y + 1, Math.max(1, x1 - x0), rowH - 2);
+      }
+      g.globalAlpha = 1;
 
       g.fillStyle = col;
-      g.globalAlpha = 0.15 + energy * 0.6;
-      g.fillRect(x, 0, barW - 1, h);
-
-      g.globalAlpha = 0.9;
-      const eH = energy * (h - 20);
-      g.fillStyle = "#e8a33d";
-      g.fillRect(x + 2, h - 10 - eH, 3, eH);
-
-      const vH = valence * (h - 20);
-      g.fillStyle = "#5bb98c";
-      g.fillRect(x + 6, h - 10 - vH, 3, vH);
-
-      const aH = ((e.arousal || 5) / 10) * (h - 20);
-      g.fillStyle = "#e06050";
-      g.fillRect(x + 10, h - 10 - aH, 3, aH);
-
+      g.globalAlpha = 0.7;
+      g.font = "600 8px ui-monospace,monospace";
+      g.fillText(name, 3, y + rowH - 3);
       g.globalAlpha = 1;
-      if (barW > 50) {
-        g.fillStyle = "#7b8599";
-        g.font = "9px ui-monospace,monospace";
-        g.fillText(e.emotion || "", x + 4, 12);
-      }
+
+      g.strokeStyle = "#111822";
+      g.lineWidth = 0.5;
+      g.beginPath();
+      g.moveTo(0, y + rowH);
+      g.lineTo(w, y + rowH);
+      g.stroke();
     });
-
-    g.globalAlpha = 1;
-    const det = $("emotion-detail");
-    det.innerHTML = `<div style="display:flex;gap:12px;font-size:11px;color:var(--dim)">
-      <span><span style="color:#e8a33d">■</span> Energy</span>
-      <span><span style="color:#5bb98c">■</span> Valence</span>
-      <span><span style="color:#e06050">■</span> Arousal</span>
-    </div>`;
-
-    canvas.onclick = (ev) => {
-      const r = canvas.getBoundingClientRect();
-      const frac = (ev.clientX - r.left) / r.width;
-      play(frac * total);
-    };
   }
 
   const MOMENT_TYPE_COLORS = {
@@ -2193,40 +2325,36 @@
       const dur = t1 - t0;
       const row = document.createElement("div");
       row.className = "row";
-      row.innerHTML = `<span class="when">${mmss(t0)}</span>
-      <span class="what"><b class="role" style="color:${c}">${esc(cap(s.label))}</b>
-        <span class="dim">· ${mmss(t0)} – ${mmss(t1)} · ${Math.round(dur)}s</span></span>
-      <button data-from="${t0}" data-to="${t1}">Hear it</button>`;
 
-      const fb = s.from_bar || 0,
-        tb = s.to_bar || 0;
-      if (fb && tb) {
-        const inside = (SCORE.moments || [])
-          .filter((m) => {
-            if (m.time_s != null) return m.time_s >= t0 && m.time_s < t1;
-            return m.bar >= fb && m.bar <= tb;
-          })
-          .sort((a, b) => (a.time_s || a.bar || 0) - (b.time_s || b.bar || 0));
-        if (inside.length) {
-          const strip = document.createElement("div");
-          strip.className = "inside";
-          strip.innerHTML =
-            `<span class="tag">moments</span>` +
-            inside
-              .map(
-                (m) =>
-                  `<span class="chip" style="border-color:${KIND[m.is] || "#3a4152"};color:${KIND[m.is] || "#8b93a6"}"
-             title="bar ${m.bar}, beat ${m.beat} · click to hear it"><b>bar ${m.bar}</b> ${esc(
-               momentWords(m),
-             )}</span>`,
-              )
-              .join("");
-          strip.querySelectorAll(".chip").forEach((el, i) => {
-            el.onclick = () => hearMoment(inside[i]);
-          });
-          row.appendChild(strip);
-        }
+      const inside = (SCORE.moments || [])
+        .filter((m) => {
+          const mt = m.time_s ?? 0;
+          return mt >= t0 && mt < t1;
+        })
+        .sort((a, b) => (a.time_s || 0) - (b.time_s || 0));
+
+      let momHtml = "";
+      if (inside.length) {
+        momHtml =
+          `<div class="inside"><span class="tag">moments</span>` +
+          inside
+            .map((m) => {
+              const type = m.type || m.is || "?";
+              const col = MOMENT_TYPE_COLORS[type] || "#8b93a6";
+              return `<span class="chip" style="border-color:${col};color:${col}" title="${mmss(m.time_s || 0)} · ${type}">${mmss(m.time_s || 0)} ${esc(type)}</span>`;
+            })
+            .join("") +
+          `</div>`;
       }
+
+      row.innerHTML = `<span class="when">${mmss(t0)}</span>
+        <span class="what"><b class="role" style="color:${c}">${esc(cap(s.label))}</b>
+        <span class="dim">· ${mmss(t0)} – ${mmss(t1)} · ${Math.round(dur)}s</span></span>
+        <button data-from="${t0}" data-to="${t1}">Hear it</button>${momHtml}`;
+
+      row.querySelectorAll(".chip").forEach((el, i) => {
+        el.onclick = () => play(inside[i].time_s || 0);
+      });
 
       box.appendChild(row);
       row.querySelector("[data-from]").onclick = (e) =>
@@ -2309,7 +2437,7 @@
         `${mmss(t)} · bar ${Math.max(0, bar)} of ${SCORE.grid.bars}`;
       if (ms) {
         LIVE = at;
-        const s53 = SCORE.stems_53 || {};
+        const s53 = SCORE.stems || {};
         const topInst = Object.entries(s53)
           .sort((a, b) => b[1].rms - a[1].rms)
           .slice(0, 5)
@@ -2378,38 +2506,32 @@
     e.target.classList.toggle("on", clicking);
     e.target.textContent = "Metronome: " + (clicking ? "on" : "off");
   };
-  const jump = (e) => {
-    if (!SCORE || dragged) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    const t = Math.max(
-      0,
-      Math.min(
-        SCORE.song.length_s - 0.05,
-        timeAt((e.clientX - r.left) / r.width),
-      ),
-    );
+  function seekTo(t) {
+    if (!SCORE) return;
+    t = Math.max(0, Math.min(SCORE.song.length_s - 0.05, t));
     stopAt = null;
     aud.currentTime = t;
-    aud.play();
-  };
-  $("map").onclick = jump;
-  $("chords").onclick = jump;
-  $("zoom").onclick = (e) => {
-    if (!SCORE) return;
-    const r = e.target.getBoundingClientRect();
-    const px = e.clientX - r.left,
-      py = e.clientY - r.top;
-    const hit = ZHIT.find(
-      (h) => px >= h.x0 && px <= h.x1 && py >= h.y0 && py <= h.y1,
-    );
-    if (hit) {
-      hearMoment(hit.m);
-      return;
-    }
-    const at = aud.currentTime - WINDOW / 2 + (px / r.width) * WINDOW;
-    stopAt = null;
-    aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05, at));
-  };
+    if (aud.paused) aud.play();
+  }
+  function jumpFromClick(e) {
+    if (!SCORE || dragged) return;
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    seekTo(timeAt((e.clientX - r.left) / r.width));
+  }
+  for (const id of [
+    "map",
+    "chords",
+    "zoom",
+    "moments-row",
+    "emotion-canvas",
+    "melody-canvas",
+    "rhythm-canvas",
+    "stems-canvas",
+  ]) {
+    const el = $(id);
+    if (el) el.onclick = jumpFromClick;
+  }
   let dragged = false;
 
   /* Every timeline shares one zoom, so the wheel does the same thing wherever
@@ -2519,20 +2641,26 @@
     const o = e.target.selectedOptions[0];
     load(e.target.value, o.dataset.a, 0, 0, 0, o.dataset.score);
   };
-  for (const id of ["map", "chords", "tune"]) zoomable($(id));
-  zoomable(
-    $("zoom"),
-    (f) =>
-      aud.currentTime -
-      Math.min(WINDOW, viewSpan()) / 2 +
-      f * Math.min(WINDOW, viewSpan()),
-  );
+  for (const id of [
+    "map",
+    "chords",
+    "moments-row",
+    "emotion-canvas",
+    "melody-canvas",
+    "rhythm-canvas",
+    "stems-canvas",
+    "zoom",
+  ])
+    zoomable($(id));
 
   addEventListener("resize", () => {
     if (SCORE) {
-      tune();
-      beatGrid();
       zoom();
+      if ((SCORE.emotion || []).length) emotionTimeline();
+      if ((SCORE.melody || []).length) melodyTimeline();
+      if (SCORE.rhythm) rhythmTimeline();
+      if (SCORE.stems_temporal) stemsTimeline();
+      chordRow();
       place();
     }
   });

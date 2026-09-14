@@ -42,7 +42,7 @@ def query(wav_path, prompt, max_tokens=16384):
         json={
             "text": prompt,
             "audio_data": wav_path,
-            "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.1},
+            "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.05},
         },
         timeout=600,
     )
@@ -50,72 +50,40 @@ def query(wav_path, prompt, max_tokens=16384):
     return strip_think(resp.json()["text"])
 
 
-SECTIONS_PROMPT = """Segment this song into structural sections with precise timestamps.
+SECTIONS_PROMPT = """Listen to this song and segment it into its structural sections with precise timestamps.
 
 Return ONLY a JSON array: [{"label": "...", "start": 0.0, "end": 15.5}, ...]
 
-LABEL VOCABULARY — pick the MOST SPECIFIC label:
+Labels: intro, verse, pre-chorus, chorus, post-chorus, bridge, instrumental, solo, outro, breakdown, drop, build, interlude, hook, ad-lib, coda
 
-UNIVERSAL:
-intro, verse, pre-chorus, chorus, post-chorus, bridge, instrumental, solo, interlude, outro, coda, breakdown, ad-lib
+Repeated sections share the same label. Cover every second with no gaps. Prefer boundaries on strong beats. Output ONLY the JSON array."""
 
-EDM/ELECTRONIC:
-drop (bass+kick return after build, maximum energy), build (rising tension: snare rolls, filter sweep, riser), breakdown (energy removed, atmospheric)
+MOMENTS_PROMPT = """Listen to this song and identify its most significant musical moments — events a lighting designer or video editor would cue on.
 
-ROCK/METAL:
-riff (guitar-driven melodic pattern), solo, breakdown (heavy half-tempo)
+Return ONLY a JSON array:
+[{"time_s": float, "type": "...", "what": "specific instrument", "intensity": 0.0-1.0, "duration_s": float, "description": "unique sentence"}, ...]
 
-HIP-HOP:
-hook, verse, skit
+Types: drop, build, breakdown, climax, entrance, exit, fill, accent, hook, release, pause, silence, vocal_moment, key_change, tempo_change, groove_lock, call_response, surprise, stab, swell, transition, solo
 
-INDIAN CLASSICAL (Carnatic): pallavi, anupallavi, charanam, chittaswaram
-INDIAN CLASSICAL (Hindustani): sthayi, antara, sanchari, abhog
-R&B/SOUL: vamp, tag
+Focus on quality — only genuinely noticeable events. Name specific instruments. Every description must be unique. Output ONLY the JSON array."""
 
-CRITICAL RULES:
-1. Do NOT use generic labels when a specific one fits. If bass drops in after a build → "drop" not "chorus". If guitar plays alone → "solo" not "instrumental".
-2. Do NOT number sections (no "verse 1"). Timestamps differentiate repeats.
-3. Every second must be covered — no gaps.
-4. For Indian classical/semi-classical, use Indian terminology.
-5. For EDM: builds MUST be labeled "build", drops MUST be labeled "drop", breakdowns MUST be "breakdown".
-6. Output ONLY the JSON array."""
+EMOTION_PROMPT = """Analyse the emotional trajectory of this song from beginning to end.
 
-MOMENTS_PROMPT = """Identify the most important structural moments in this song. A "moment" is a significant musical event that a lighting designer, rhythm game, or video editor would cue on.
+Return ONLY a JSON array of segments, each covering approximately 10-15 seconds:
+[{"start": 0.0, "end": 15.0, "energy": 7, "valence": 6, "arousal": 8, "tension": 4, "brightness": 7, "groove": 8, "emotion": "euphoric", "description": "driving synths and soaring vocals create an uplifting rush"}, ...]
 
-Return ONLY a JSON array. Each object:
-- "time_s": float (seconds from start)
-- "type": one of the types below
-- "what": string (specific instrument involved)
-- "intensity": float 0.0–1.0
-- "duration_s": float (0 for instant, >0 for spans)
-- "description": string (one UNIQUE sentence — never repeat the same description)
+Dimensions (all 1-10):
+- energy: loud/powerful vs quiet/soft
+- valence: happy/bright vs sad/dark
+- arousal: exciting/stimulating vs calm/relaxing
+- tension: tense/unresolved vs resolved/relaxed
+- brightness: bright/shimmering vs dark/heavy
+- groove: rhythmic/danceable vs still/ambient
 
-MOMENT TYPES:
-drop, build, breakdown, climax, entrance, exit, fill, accent, hook, release, pause, silence, vocal_moment, key_change, tempo_change, groove_lock, call_response, surprise, stab, swell, transition, solo
+emotion: one word (euphoric, melancholic, aggressive, tender, triumphant, anxious, serene, nostalgic, defiant, playful, bittersweet, ethereal, intense, hopeful, dark, dreamy, powerful, etc.)
+description: one sentence about what creates that feeling - name instruments, textures, production.
 
-RULES:
-1. Only genuinely significant events — NOT every beat or instrument hit.
-2. A typical 3-minute song has 10-20 moments. A 6-minute song has 15-30.
-3. Each "drop" means the ACTUAL bass return after a build. A song has 1-4 drops max.
-4. Each "build" means sustained rising tension. A song has 1-4 builds max.
-5. "climax" appears EXACTLY ONCE — the single peak of the entire song.
-6. Every description must be UNIQUE. Never write "continues" or "again".
-7. Name specific instruments (kick, snare, lead vocal, synth pad, bass guitar), not "drums" or "instruments".
-8. Cover the whole song evenly — don't cluster in the first half.
-9. Output ONLY the JSON array."""
-
-EMOTION_PROMPT = """Analyze the emotional trajectory of this song from start to finish.
-
-Return ONLY a JSON array of segments, each covering ~10-15 seconds:
-[{"start": 0.0, "end": 15.0, "energy": 7, "valence": 6, "arousal": 8, "emotion": "euphoric", "description": "..."}, ...]
-
-- energy: 1-10 (loud/intense vs quiet)
-- valence: 1-10 (positive/happy vs sad/dark)
-- arousal: 1-10 (exciting vs calm)
-- emotion: one word (euphoric, melancholic, aggressive, tender, triumphant, anxious, serene, nostalgic, defiant, playful, etc.)
-- description: one sentence about what's happening musically
-
-Cover the ENTIRE song. Identify the emotional climax."""
+Cover the entire song with no gaps. Output ONLY the JSON array."""
 
 PROMPTS = {
     "sections": SECTIONS_PROMPT,
@@ -130,22 +98,12 @@ if __name__ == "__main__":
     for i, wav in enumerate(wavs):
         slug = os.path.splitext(os.path.basename(wav))[0]
         out_path = os.path.join(OUT_DIR, f"{slug}.json")
-        if os.path.exists(out_path):
-            existing = json.load(open(out_path))
-            if all(k in existing for k in PROMPTS):
-                print(f"[{i + 1}/{len(wavs)}] {slug} — skip (complete)", flush=True)
-                continue
+        results = {}
 
         t0 = time.time()
         print(f"[{i + 1}/{len(wavs)}] {slug}", flush=True)
-        results = {}
-        if os.path.exists(out_path):
-            results = json.load(open(out_path))
 
         for task, prompt in PROMPTS.items():
-            if task in results:
-                print(f"  {task}: cached", flush=True)
-                continue
             tt = time.time()
             for attempt in range(3):
                 try:
