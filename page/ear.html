@@ -1,107 +1,601 @@
-<title>What the score heard</title>
-<link rel="stylesheet" href="/page/ui.css">
+<title>Limelight — Music Intelligence</title>
+<link rel="stylesheet" href="/page/ui.css" />
 <style>
-:root{--bg:#0b0e14;--pan:#111722;--line:#1d2533;--line2:#2b3648;--ink:#e8ebf2;
-  --dim:#98a2b8;--faint:#626c82;--amb:#e8a33d;--ok:#5bb98c;--bad:#e0655f;--vio:#c8a2ff}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13.5px/1.6 ui-sans-serif,system-ui,sans-serif;margin:0}
-.wrap{padding:0 20px 90px;max-width:1700px;margin:0 auto}
-button,select{background:#1a2233;color:var(--ink);border:1px solid var(--line2);
-  border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
-button:hover{border-color:#46587a}
-button:focus-visible,select:focus-visible{outline:2px solid var(--amb);outline-offset:1px}
-button.on{background:var(--amb);color:#180f02;font-weight:600;border-color:var(--amb)}
-button.yes{border-color:#2f5f4a}
-button.yes.on{background:var(--ok);color:#05140d;border-color:var(--ok)}
-button.no{border-color:#6b3330}
-button.no.on{background:var(--bad);color:#2a0e0c;border-color:var(--bad)}
-.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
-  display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:11px 0 10px;margin-bottom:14px}
-.scrub{flex-basis:100%;display:flex;flex-direction:column;gap:5px}
-#seek{width:100%;accent-color:var(--ok);cursor:pointer;height:20px}
-.zoombar{display:flex;gap:7px;align-items:center;font-size:11.5px;color:var(--faint)}
-.zoombar button{padding:2px 9px;font-size:12px;line-height:1.4}
-#viewing{font:12px ui-monospace,monospace;color:var(--amb);min-width:150px}
-.grab{cursor:grab} .grab:active{cursor:grabbing}
-.mono{font:12.5px ui-monospace,monospace;font-variant-numeric:tabular-nums}
-#play{min-width:84px;font-weight:600}
-h2{font:600 14px system-ui;margin:0 0 3px;letter-spacing:.01em}
-.note{color:var(--dim);font-size:12.5px;margin:0 0 8px;max-width:98ch}
-.note b{color:var(--ink);font-weight:600}
-section{margin:0 0 24px}
-.lead{background:var(--pan);border:1px solid var(--line);border-radius:9px;padding:13px 15px;
-  display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
-.lead .big{font:600 19px system-ui;letter-spacing:.01em}
-.lead .when{font:12.5px ui-monospace,monospace;color:var(--amb)}
-.lead dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 12px;align-items:baseline}
-.lead dt{color:var(--faint);font-size:11px;text-transform:uppercase;letter-spacing:.07em}
-.lead dd{margin:0;color:var(--dim)}
-.lead dd b{color:var(--ink);font-weight:600}
-.lead .col{flex:1;min-width:290px}
-.lead .ask{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-.lead .ask span{color:var(--faint);font-size:12px}
-canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;background:#06090e}
-#zoom{height:110px;cursor:pointer}
-#tune{height:200px;cursor:pointer}
-#curves{cursor:pointer}
-#beat{height:150px;cursor:default}
-#lanes{height:104px;cursor:pointer;border-radius:0 0 8px 8px;border-top:none}
-#map{position:relative;height:124px;border:1px solid var(--line);border-bottom:none;
-  border-radius:8px 8px 0 0;background:#06090e;overflow:hidden;cursor:pointer}
-#chords{position:relative;height:20px;border-left:1px solid var(--line);
-  border-right:1px solid var(--line);background:#0b1016;overflow:hidden;cursor:pointer}
-.chd{position:absolute;top:0;bottom:0;border-left:1px solid #2a3140;font:9.5px ui-monospace,monospace;
-  color:#8fb8d6;padding:2px 0 0 4px;overflow:hidden;white-space:nowrap;cursor:pointer}
-.chd:hover{background:#16202b}
-#subs{position:relative;height:22px;border-left:1px solid var(--line);
-  border-right:1px solid var(--line);background:#0d121a;overflow:hidden;cursor:pointer}
-#dots{position:absolute;left:0;right:0;top:0;height:22px;background:#0a1019;
-  border-bottom:1px solid #1a2230;z-index:1}
-#dots span{position:absolute;left:7px;top:4px;font:9px ui-monospace,monospace;color:#4d5768;
-  letter-spacing:.09em}
-.part{position:absolute;top:22px;bottom:0;overflow:hidden;box-shadow:inset -1px 0 0 rgba(6,9,14,.9);
-  border-left:1px solid #3b4761}
-.part:first-of-type{border-left:none}
-.part.ramp{border-left:1px dashed rgba(232,163,61,.8)}
-.part .fill{position:absolute;left:0;right:0;bottom:0;opacity:.30}
-.part .tag{position:absolute;left:0;right:0;bottom:4px;padding:0 5px;
-  font:600 10px ui-monospace,monospace;text-shadow:0 1px 3px #000;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis}
-.part.here{outline:2px solid var(--ok);outline-offset:-2px}
-.beat{position:absolute;top:5px;height:12px;min-width:3px;z-index:4;border-radius:2px;cursor:pointer}
-.beat:hover{filter:brightness(1.8);transform:scaleY(1.4)}
-.beat.gone{top:17px;height:4px;opacity:.3;border-radius:1px}
-.beat.gone:hover{opacity:.9}
-.sub{position:absolute;top:0;bottom:0;border-left:1px solid #2c3340;font:9.5px ui-monospace,monospace;
-  padding:2px 0 0 4px;overflow:hidden;white-space:nowrap;cursor:pointer}
-.sub:hover{filter:brightness(1.55)}
-#head{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;z-index:6}
-.holder{position:relative}
-.pline{position:absolute;top:0;bottom:0;width:2px;background:var(--ok);pointer-events:none;
-  z-index:6;opacity:.85;display:none}
-.legend{display:flex;flex-wrap:wrap;gap:5px 15px;margin:7px 0 0;font-size:11.5px;color:var(--faint)}
-.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;
-  vertical-align:0;font-style:normal}
-.legend em{font-style:normal;color:var(--dim)}
-.row{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #161d2a;
-  flex-wrap:wrap}
-.row:hover{background:#0e141e}
-.row .when{font:12.5px ui-monospace,monospace;color:var(--amb);min-width:52px}
-.row .what{flex:1;min-width:260px;color:var(--dim)}
-.row .what b{color:var(--ink)}
-.row .what .role{font-weight:700;text-transform:capitalize}
-.row button{padding:4px 10px;font-size:12px}
-.inside{flex-basis:100%;margin:4px 0 0;display:flex;flex-wrap:wrap;gap:5px;align-items:flex-start}
-.tag{font:9.5px ui-monospace,monospace;color:var(--faint);text-transform:uppercase;
-  letter-spacing:.09em;min-width:74px;padding-top:4px;flex:0 0 auto}
-.chip{font-size:11.5px;border:1px solid;border-radius:4px;padding:2px 7px;cursor:pointer;
-  background:#0d121a}
-.chip:hover{filter:brightness(1.45)}
-.chip b{opacity:.55;font-weight:400;font-family:ui-monospace,monospace;font-size:10.5px}
-.dim{color:var(--faint)}
-.warn{color:var(--bad)}
-#broke{background:#2a0e0c;border:1px solid var(--bad);color:#ffd9d6;border-radius:8px;
-  padding:10px 13px;margin:0 0 12px;font:12.5px ui-monospace,monospace;white-space:pre-wrap}
+  :root {
+    --bg: #0b0e14;
+    --pan: #111722;
+    --line: #1d2533;
+    --line2: #2b3648;
+    --ink: #e8ebf2;
+    --dim: #98a2b8;
+    --faint: #626c82;
+    --amb: #e8a33d;
+    --ok: #5bb98c;
+    --bad: #e0655f;
+    --vio: #c8a2ff;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font:
+      13.5px/1.6 ui-sans-serif,
+      system-ui,
+      sans-serif;
+    margin: 0;
+  }
+  .wrap {
+    padding: 0 20px 90px;
+    max-width: 1700px;
+    margin: 0 auto;
+  }
+  button,
+  select {
+    background: #1a2233;
+    color: var(--ink);
+    border: 1px solid var(--line2);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font: inherit;
+    cursor: pointer;
+  }
+  button:hover {
+    border-color: #46587a;
+  }
+  button:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--amb);
+    outline-offset: 1px;
+  }
+  button.on {
+    background: var(--amb);
+    color: #180f02;
+    font-weight: 600;
+    border-color: var(--amb);
+  }
+  button.yes {
+    border-color: #2f5f4a;
+  }
+  button.yes.on {
+    background: var(--ok);
+    color: #05140d;
+    border-color: var(--ok);
+  }
+  button.no {
+    border-color: #6b3330;
+  }
+  button.no.on {
+    background: var(--bad);
+    color: #2a0e0c;
+    border-color: var(--bad);
+  }
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 11px 0 10px;
+    margin-bottom: 14px;
+  }
+  .scrub {
+    flex-basis: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  #seek {
+    width: 100%;
+    accent-color: var(--ok);
+    cursor: pointer;
+    height: 20px;
+  }
+  .zoombar {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    font-size: 11.5px;
+    color: var(--faint);
+  }
+  .zoombar button {
+    padding: 2px 9px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  #viewing {
+    font:
+      12px ui-monospace,
+      monospace;
+    color: var(--amb);
+    min-width: 150px;
+  }
+  .grab {
+    cursor: grab;
+  }
+  .grab:active {
+    cursor: grabbing;
+  }
+  .mono {
+    font:
+      12.5px ui-monospace,
+      monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  #play {
+    min-width: 84px;
+    font-weight: 600;
+  }
+  h2 {
+    font: 600 14px system-ui;
+    margin: 0 0 3px;
+    letter-spacing: 0.01em;
+  }
+  .note {
+    color: var(--dim);
+    font-size: 12.5px;
+    margin: 0 0 8px;
+    max-width: 98ch;
+  }
+  .note b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  section {
+    margin: 0 0 24px;
+  }
+  .lead {
+    background: var(--pan);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 13px 15px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .lead .big {
+    font: 600 19px system-ui;
+    letter-spacing: 0.01em;
+  }
+  .lead .when {
+    font:
+      12.5px ui-monospace,
+      monospace;
+    color: var(--amb);
+  }
+  .lead dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 12px;
+    align-items: baseline;
+  }
+  .lead dt {
+    color: var(--faint);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .lead dd {
+    margin: 0;
+    color: var(--dim);
+  }
+  .lead dd b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .lead .col {
+    flex: 1;
+    min-width: 290px;
+  }
+  .lead .ask {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .lead .ask span {
+    color: var(--faint);
+    font-size: 12px;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #06090e;
+  }
+  #zoom {
+    height: 110px;
+    cursor: pointer;
+  }
+  #tune {
+    height: 200px;
+    cursor: pointer;
+  }
+  #curves {
+    cursor: pointer;
+  }
+  #beat {
+    height: 150px;
+    cursor: default;
+  }
+  #lanes {
+    height: 104px;
+    cursor: pointer;
+    border-radius: 0 0 8px 8px;
+    border-top: none;
+  }
+  #map {
+    position: relative;
+    height: 124px;
+    border: 1px solid var(--line);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    background: #06090e;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  #chords {
+    position: relative;
+    height: 20px;
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    background: #0b1016;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .chd {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid #2a3140;
+    font:
+      9.5px ui-monospace,
+      monospace;
+    color: #8fb8d6;
+    padding: 2px 0 0 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .chd:hover {
+    background: #16202b;
+  }
+  #subs {
+    position: relative;
+    height: 22px;
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    background: #0d121a;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  #dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 22px;
+    background: #0a1019;
+    border-bottom: 1px solid #1a2230;
+    z-index: 1;
+  }
+  #dots span {
+    position: absolute;
+    left: 7px;
+    top: 4px;
+    font:
+      9px ui-monospace,
+      monospace;
+    color: #4d5768;
+    letter-spacing: 0.09em;
+  }
+  .part {
+    position: absolute;
+    top: 22px;
+    bottom: 0;
+    overflow: hidden;
+    box-shadow: inset -1px 0 0 rgba(6, 9, 14, 0.9);
+    border-left: 1px solid #3b4761;
+  }
+  .part:first-of-type {
+    border-left: none;
+  }
+  .part.ramp {
+    border-left: 1px dashed rgba(232, 163, 61, 0.8);
+  }
+  .part .fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.3;
+  }
+  .part .tag {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    padding: 0 5px;
+    font:
+      600 10px ui-monospace,
+      monospace;
+    text-shadow: 0 1px 3px #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .part.here {
+    outline: 2px solid var(--ok);
+    outline-offset: -2px;
+  }
+  .beat {
+    position: absolute;
+    top: 5px;
+    height: 12px;
+    min-width: 3px;
+    z-index: 4;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .beat:hover {
+    filter: brightness(1.8);
+    transform: scaleY(1.4);
+  }
+  .beat.gone {
+    top: 17px;
+    height: 4px;
+    opacity: 0.3;
+    border-radius: 1px;
+  }
+  .beat.gone:hover {
+    opacity: 0.9;
+  }
+  .sub {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid #2c3340;
+    font:
+      9.5px ui-monospace,
+      monospace;
+    padding: 2px 0 0 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .sub:hover {
+    filter: brightness(1.55);
+  }
+  #head {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--ok);
+    pointer-events: none;
+    z-index: 6;
+  }
+  .holder {
+    position: relative;
+  }
+  .pline {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--ok);
+    pointer-events: none;
+    z-index: 6;
+    opacity: 0.85;
+    display: none;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 15px;
+    margin: 7px 0 0;
+    font-size: 11.5px;
+    color: var(--faint);
+  }
+  .legend i {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    margin-right: 5px;
+    vertical-align: 0;
+    font-style: normal;
+  }
+  .legend em {
+    font-style: normal;
+    color: var(--dim);
+  }
+  .row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid #161d2a;
+    flex-wrap: wrap;
+  }
+  .row:hover {
+    background: #0e141e;
+  }
+  .row .when {
+    font:
+      12.5px ui-monospace,
+      monospace;
+    color: var(--amb);
+    min-width: 52px;
+  }
+  .row .what {
+    flex: 1;
+    min-width: 260px;
+    color: var(--dim);
+  }
+  .row .what b {
+    color: var(--ink);
+  }
+  .row .what .role {
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+  .row button {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .inside {
+    flex-basis: 100%;
+    margin: 4px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: flex-start;
+  }
+  .tag {
+    font:
+      9.5px ui-monospace,
+      monospace;
+    color: var(--faint);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    min-width: 74px;
+    padding-top: 4px;
+    flex: 0 0 auto;
+  }
+  .chip {
+    font-size: 11.5px;
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 2px 7px;
+    cursor: pointer;
+    background: #0d121a;
+  }
+  .chip:hover {
+    filter: brightness(1.45);
+  }
+  .chip b {
+    opacity: 0.55;
+    font-weight: 400;
+    font-family: ui-monospace, monospace;
+    font-size: 10.5px;
+  }
+  .dim {
+    color: var(--faint);
+  }
+  .warn {
+    color: var(--bad);
+  }
+  #broke {
+    background: #2a0e0c;
+    border: 1px solid var(--bad);
+    color: #ffd9d6;
+    border-radius: 8px;
+    padding: 10px 13px;
+    margin: 0 0 12px;
+    font:
+      12.5px ui-monospace,
+      monospace;
+    white-space: pre-wrap;
+  }
+  .ai-card {
+    background: linear-gradient(135deg, #0f1520, #141c2a);
+    border: 1px solid #1f2d44;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 0 0 10px;
+  }
+  .ai-card h3 {
+    margin: 0 0 8px;
+    font: 600 13px system-ui;
+    color: var(--amb);
+    letter-spacing: 0.02em;
+  }
+  .ai-card p {
+    margin: 0 0 6px;
+    color: var(--dim);
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .ai-card .ai-tag {
+    display: inline-block;
+    background: #1a2538;
+    border: 1px solid #2a3a52;
+    border-radius: 4px;
+    padding: 1px 8px;
+    font:
+      10.5px ui-monospace,
+      monospace;
+    color: var(--ok);
+    margin: 0 4px 4px 0;
+  }
+  #moss-sections {
+    position: relative;
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #0a0e16;
+    overflow: hidden;
+    cursor: pointer;
+    margin: 6px 0;
+  }
+  .msec {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    border-left: 1px solid #2a3a52;
+    transition: filter 0.15s;
+  }
+  .msec:first-child {
+    border-left: none;
+  }
+  .msec:hover {
+    filter: brightness(1.6);
+  }
+  .msec .mtag {
+    position: absolute;
+    left: 4px;
+    top: 3px;
+    font:
+      600 9px ui-monospace,
+      monospace;
+    text-shadow: 0 1px 3px #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 8px);
+  }
+  .msec .mtime {
+    position: absolute;
+    left: 4px;
+    bottom: 2px;
+    font:
+      8.5px ui-monospace,
+      monospace;
+    color: rgba(255, 255, 255, 0.4);
+    white-space: nowrap;
+  }
+  #indic-box .lead {
+    flex-direction: column;
+    gap: 10px;
+  }
+  #indic-box .indic-line {
+    padding: 6px 0;
+    border-bottom: 1px solid #161d2a;
+    cursor: pointer;
+  }
+  #indic-box .indic-line:hover {
+    background: #0e141e;
+  }
 </style>
 
 <header class="top">
@@ -113,1581 +607,2477 @@ canvas{display:block;width:100%;border:1px solid var(--line);border-radius:8px;b
 </header>
 
 <div class="wrap">
-
-<div class="top">
-  <select id="song" title="pick a song"></select>
-  <button id="play" disabled>&#9654; Play</button>
-  <span class="mono" id="clock" style="min-width:96px;text-align:right">0:00</span>
-  <button id="clicker" title="a tick on every beat, so you can hear whether the computer's beat matches the song">Metronome: off</button>
-  <button id="muter" title="silence the song and leave only the metronome">Music: on</button>
-  <span class="mono dim" id="facts"></span>
-  <div class="scrub">
-    <input id="seek" type="range" min="0" max="10000" value="0"
-           title="drag to move anywhere in the song">
-    <div class="zoombar">
-      <span class="dim" id="viewing">whole song</span>
-      <button id="zoomout" title="show more">&minus;</button>
-      <button id="zoomin" title="show less">+</button>
-      <button id="zoomfit" title="show the whole song again">Fit</button>
-      <button id="follow" title="keep the view centred on what is playing">Follow: off</button>
-      <span class="dim">scroll to zoom, drag to slide</span>
+  <div class="top">
+    <select id="song" title="pick a song"></select>
+    <button id="play" disabled>&#9654; Play</button>
+    <span class="mono" id="clock" style="min-width: 96px; text-align: right"
+      >0:00</span
+    >
+    <button
+      id="clicker"
+      title="a tick on every beat, so you can hear whether the computer's beat matches the song"
+    >
+      Metronome: off
+    </button>
+    <button id="muter" title="silence the song and leave only the metronome">
+      Music: on
+    </button>
+    <span class="mono dim" id="facts"></span>
+    <div class="scrub">
+      <input
+        id="seek"
+        type="range"
+        min="0"
+        max="10000"
+        value="0"
+        title="drag to move anywhere in the song"
+      />
+      <div class="zoombar">
+        <span class="dim" id="viewing">whole song</span>
+        <button id="zoomout" title="show more">&minus;</button>
+        <button id="zoomin" title="show less">+</button>
+        <button id="zoomfit" title="show the whole song again">Fit</button>
+        <button id="follow" title="keep the view centred on what is playing">
+          Follow: off
+        </button>
+        <span class="dim">scroll to zoom, drag to slide</span>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="broke" hidden></div>
-<p class="note" style="margin-top:-4px">Everything on this page is something the computer <b>claims</b> about
-  this song. Click any label, block or chip to hear that exact spot and judge it with your ears.</p>
+  <div id="broke" hidden></div>
+  <p class="note" style="margin-top: -4px">
+    Everything below is <b>automatically generated</b> from the audio using SOTA
+    AI models (MOSS-Music-8B, BTC, MelBand-RoFormer, Whisper). Click any label,
+    block or chip to hear that exact spot.
+  </p>
 
-<section>
-  <div class="lead">
-    <div class="col">
-      <div class="when" id="nowtime">0:00</div>
-      <div class="big" id="nowrole">&mdash;</div>
+  <section>
+    <div class="lead">
+      <div class="col">
+        <div class="when" id="nowtime">0:00</div>
+        <div class="big" id="nowrole">&mdash;</div>
+      </div>
+      <div class="col">
+        <dl>
+          <dt>Playing</dt>
+          <dd id="nowplay">&mdash;</dd>
+          <dt>Doing</dt>
+          <dd id="nowdoing">&mdash;</dd>
+          <dt>Right now</dt>
+          <dd id="nowmoment">&mdash;</dd>
+          <dt>Singing</dt>
+          <dd id="nowsung">&mdash;</dd>
+        </dl>
+      </div>
     </div>
-    <div class="col">
-      <dl>
-        <dt>Playing</dt><dd id="nowplay">&mdash;</dd>
-        <dt>Doing</dt><dd id="nowdoing">&mdash;</dd>
-        <dt>Right now</dt><dd id="nowmoment">&mdash;</dd>
-        <dt>Singing</dt><dd id="nowsung">&mdash;</dd>
-      </dl>
+  </section>
+
+  <section id="ai-intel" hidden>
+    <h2>🎵 AI Music Intelligence</h2>
+    <p class="note">
+      A large music-understanding model (<b>MOSS-Music-8B</b>) listened to this
+      song and described what it heard. Below it, a
+      <b>chord recognition model (BTC)</b> with a 170-chord vocabulary
+      identified every chord change.
+    </p>
+    <div id="ai-caption" class="ai-card"></div>
+    <div id="ai-analysis" class="ai-card" hidden></div>
+    <div id="moss-sections" hidden></div>
+    <div class="legend" id="ai-legend"></div>
+  </section>
+
+  <section id="indic-box" hidden>
+    <h2>🗣️ Lyrics (Indic Language)</h2>
+    <p class="note">
+      Transcribed by <b>Whisper-large-v3</b> from the isolated vocal stem. The
+      original audio was separated using <b>MelBand-RoFormer</b> before
+      transcription.
+    </p>
+    <div class="lead" id="indic-sung"></div>
+  </section>
+
+  <section>
+    <h2>The next few seconds</h2>
+    <p class="note">
+      The <b style="color: #e0655f">red line</b> is where you are now; the song
+      slides left past it. Tall white ticks start a bar, small amber ticks are
+      the beats in between &mdash; turn the metronome on and they should land
+      with the music. Each boxed label is something the computer expects to
+      happen there: <b>click a label to replay just that</b>, click anywhere
+      else to jump, scroll to step one beat.
+    </p>
+    <canvas id="zoom"></canvas>
+  </section>
+
+  <section>
+    <h2>The whole song</h2>
+    <p class="note">
+      The narrow top strip holds the <b>notable moments</b> &mdash; hover one to
+      read it, click to hear it. Below it are the <b>sections</b>, each drawn as
+      tall as it sounds full. The thin band under the section names says what
+      the music is <b>doing</b>. The four rows at the bottom are how loud each
+      instrument is, bar by bar. <b>Click anywhere to jump there.</b>
+      <span id="dropped" class="dim"></span>
+    </p>
+    <div id="map">
+      <div id="dots"><span>MOMENTS</span></div>
+      <div id="head"></div>
     </div>
-  </div>
-</section>
+    <div class="holder">
+      <div id="subs"></div>
+      <div class="pline" data-for="subs"></div>
+    </div>
+    <div class="holder">
+      <div id="chords"></div>
+      <div class="pline" data-for="chords"></div>
+    </div>
+    <div class="holder">
+      <canvas id="lanes"></canvas>
+      <div class="pline" data-for="lanes"></div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
 
-<section>
-  <h2>The next few seconds</h2>
-  <p class="note">The <b style="color:#e0655f">red line</b> is where you are now; the song slides left past it.
-    Tall white ticks start a bar, small amber ticks are the beats in between &mdash; turn the metronome on and
-    they should land with the music. Each boxed label is something the computer expects to happen there:
-    <b>click a label to replay just that</b>, click anywhere else to jump, scroll to step one beat.</p>
-  <canvas id="zoom"></canvas>
-</section>
+  <section>
+    <h2>What the music is doing</h2>
+    <p class="note">
+      Loudness answers "how loud", not "what is happening". This row answers the
+      second question. The <b>band</b> is whether the loudness is
+      <b style="color: #7ae8b0">rising</b>,
+      <b style="color: #8a93a6">steady</b> or
+      <b style="color: #8fd0ff">falling</b>. The
+      <b style="color: #e8a33d">filled curve</b> is the <b>build</b> &mdash; how
+      much this bar sounds like a riser, which is the sub being filtered out
+      while noise climbs. <b>&#9650;</b> is where the loudness slams up,
+      <b>&#9660;</b> where it drops away; the solid ones are structural, the
+      hollow ones smaller steps.
+    </p>
+    <div class="holder">
+      <canvas id="motion"></canvas>
+      <div class="pline" data-for="motion"></div>
+    </div>
+    <p class="note">
+      A section edge drawn as a
+      <b style="color: #e8a33d">dashed amber line</b> in the strip above is one
+      the music arrives at gradually &mdash; the two sections really do differ,
+      but nothing happens on that bar, so there is no instant to cue. Don't Look
+      Down's second verse is one: the bass climbs from 0.09 to 0.98 across eight
+      bars while the loudness stays flat.
+    </p>
+    <p class="note" id="motionsays"></p>
+  </section>
 
-<section>
-  <h2>The whole song</h2>
-  <p class="note">The narrow top strip holds the <b>notable moments</b> &mdash; hover one to read it, click to
-    hear it. Below it are the <b>sections</b>, each drawn as tall as it sounds full. The thin band under the
-    section names says what the music is <b>doing</b>. The four rows at the bottom are how loud each
-    instrument is, bar by bar. <b>Click anywhere to jump there.</b>
-    <span id="dropped" class="dim"></span></p>
-  <div id="map"><div id="dots"><span>MOMENTS</span></div><div id="head"></div></div>
-  <div class="holder"><div id="subs"></div><div class="pline" data-for="subs"></div></div>
-  <div class="holder"><div id="chords"></div><div class="pline" data-for="chords"></div></div>
-  <div class="holder"><canvas id="lanes"></canvas><div class="pline" data-for="lanes"></div></div>
-  <div class="legend" id="legend"></div>
-</section>
+  <section>
+    <h2>How the sound itself changes</h2>
+    <p class="note">
+      <b>Press play and the page follows the music</b> at a zoom where a beat is
+      visible; press Fit to see the whole song again. Six things the computer
+      measures every bar that the rows above do not show. The number on the
+      right of each row is its value where you are now.
+      <b>Click anywhere to jump there.</b>
+    </p>
+    <div class="holder">
+      <canvas id="curves"></canvas>
+      <div class="pline" data-for="curves"></div>
+    </div>
+    <p class="note">
+      An <b style="color: #e8a33d">amber dashed line</b> is where the song
+      <b>changes tempo</b> &mdash; a real event you can hear, and one the rest
+      of this page can only show by everything after it shifting.
+    </p>
+    <p class="note">
+      Each row carries a number saying how much it actually tells you
+      <b>about this song</b>: how much more the parts differ from each other
+      than a part differs from its own two halves. Above about 1.3 the row is
+      following the music; at 1.0 a part differs from itself as much as from any
+      other part, and the row is noise you could light by mistake. No curve is
+      reliable on every song &mdash; Pump says little on ten of the
+      twenty-eight, Brightness on six.
+    </p>
+    <div class="legend" id="curvekey"></div>
+  </section>
 
-<section>
-  <h2>What the music is doing</h2>
-  <p class="note">Loudness answers "how loud", not "what is happening". This row answers
-    the second question. The <b>band</b> is whether the loudness is <b style="color:#7ae8b0">rising</b>,
-    <b style="color:#8a93a6">steady</b> or <b style="color:#8fd0ff">falling</b>.
-    The <b style="color:#e8a33d">filled curve</b> is the <b>build</b> &mdash; how much this bar sounds
-    like a riser, which is the sub being filtered out while noise climbs.
-    <b>&#9650;</b> is where the loudness slams up, <b>&#9660;</b> where it drops away; the solid ones
-    are structural, the hollow ones smaller steps.</p>
-  <div class="holder"><canvas id="motion"></canvas><div class="pline" data-for="motion"></div></div>
-  <p class="note">A section edge drawn as a <b style="color:#e8a33d">dashed amber line</b> in the strip
-    above is one the music arrives at gradually &mdash; the two sections really do differ, but nothing
-    happens on that bar, so there is no instant to cue. Don't Look Down's second verse is one: the bass
-    climbs from 0.09 to 0.98 across eight bars while the loudness stays flat.</p>
-  <p class="note" id="motionsays"></p>
-</section>
+  <section>
+    <h2>The rhythm</h2>
+    <p class="note">
+      Where the hits actually land inside one bar &mdash; the pattern, not how
+      many. Each column is a sixteenth, left to right across a bar; a filled
+      block is a hit there. <b>This is the thing you hum back</b>, and it is the
+      only row on this page that says what the rhythm <i>is</i> rather than how
+      much of it there is.
+    </p>
+    <canvas id="beat"></canvas>
+    <div class="legend" id="beatkey"></div>
+  </section>
 
-<section>
-  <h2>How the sound itself changes</h2>
-  <p class="note"><b>Press play and the page follows the music</b> at a zoom where a beat is
-    visible; press Fit to see the whole song again.
-    Six things the computer measures every bar that the rows above do not show.
-    The number on the right of each row is its value where you are now.
-    <b>Click anywhere to jump there.</b></p>
-  <div class="holder"><canvas id="curves"></canvas><div class="pline" data-for="curves"></div></div>
-  <p class="note">An <b style="color:#e8a33d">amber dashed line</b> is where the song
-    <b>changes tempo</b> &mdash; a real event you can hear, and one the rest of this page can only
-    show by everything after it shifting.</p>
-  <p class="note">Each row carries a number saying how much it actually tells you
-    <b>about this song</b>: how much more the parts differ from each other than a part differs from
-    its own two halves. Above about 1.3 the row is following the music; at 1.0 a part differs from
-    itself as much as from any other part, and the row is noise you could light by mistake.
-    No curve is reliable on every song &mdash; Pump says little on ten of the twenty-eight,
-    Brightness on six.</p>
-  <div class="legend" id="curvekey"></div>
-</section>
+  <section>
+    <h2>The tune</h2>
+    <p class="note">
+      The computer followed the pitch of the singing and of the lead instrument
+      and wrote down every note. Below, <b>each mark is one note</b>: further
+      right is later in the song, higher up is a higher note, and the faint line
+      joins notes that follow each other, so you can see the tune rise and fall.
+      This is how it knows when a tune comes back later &mdash; which is what
+      the lighting reader uses to repeat a look.
+      <b>Click a shaded stretch to hear a tune that repeats</b>, or click
+      anywhere to jump there.
+    </p>
+    <div class="holder">
+      <canvas id="tune"></canvas>
+      <div class="pline" data-for="tune"></div>
+    </div>
+    <div class="legend" id="tunekey"></div>
+  </section>
 
-<section>
-  <h2>The rhythm</h2>
-  <p class="note">Where the hits actually land inside one bar &mdash; the pattern, not how many.
-    Each column is a sixteenth, left to right across a bar; a filled block is a hit there.
-    <b>This is the thing you hum back</b>, and it is the only row on this page that says what the
-    rhythm <i>is</i> rather than how much of it there is.</p>
-  <canvas id="beat"></canvas>
-  <div class="legend" id="beatkey"></div>
-</section>
+  <section id="lyricbox" hidden>
+    <h2>The words</h2>
+    <p class="note">
+      The computer listened to the singing and wrote down every word with the
+      moment it was sung, then
+      <b>listened a second time in differently placed chunks</b> and kept score
+      of which words both passes produced. The number on the left is how much of
+      that line both passes agreed on. <b>Lines below 0.6 are marked</b> &mdash;
+      those are usually where the voice is buried under the production, and the
+      computer is guessing. <b>Click a line to hear it.</b>
+    </p>
+    <div class="lead" id="sung"></div>
+  </section>
 
-<section>
-  <h2>The tune</h2>
-  <p class="note">The computer followed the pitch of the singing and of the lead instrument and wrote down
-    every note. Below, <b>each mark is one note</b>: further right is later in the song, higher up is a higher
-    note, and the faint line joins notes that follow each other, so you can see the tune rise and fall.
-    This is how it knows when a tune comes back later &mdash; which is what the lighting reader uses to repeat
-    a look. <b>Click a shaded stretch to hear a tune that repeats</b>, or click anywhere to jump there.</p>
-  <div class="holder"><canvas id="tune"></canvas><div class="pline" data-for="tune"></div></div>
-  <div class="legend" id="tunekey"></div>
-</section>
+  <section>
+    <h2>What the computer will admit about this score</h2>
+    <p class="note">
+      Facts about the whole song, and how far it trusts its own reading.
+    </p>
+    <div class="lead" id="owned"></div>
+  </section>
 
-<section id="lyricbox" hidden>
-  <h2>The words</h2>
-  <p class="note">The computer listened to the singing and wrote down every word with the moment it
-    was sung, then <b>listened a second time in differently placed chunks</b> and kept score of which
-    words both passes produced. The number on the left is how much of that line both passes agreed on.
-    <b>Lines below 0.6 are marked</b> &mdash; those are usually where the voice is buried under the
-    production, and the computer is guessing. <b>Click a line to hear it.</b></p>
-  <div class="lead" id="sung"></div>
-</section>
-
-<section>
-  <h2>What the computer will admit about this score</h2>
-  <p class="note">Facts about the whole song, and how far it trusts its own reading.</p>
-  <div class="lead" id="owned"></div>
-</section>
-
-<section>
-  <h2>Every section, in order</h2>
-  <p class="note">One row per section. <b>Hear it</b> plays the first few seconds. The chips under each row
-    are the smaller claims inside it &mdash; click any chip to hear only that part.</p>
-  <div id="sections"></div>
-</section>
-
+  <section>
+    <h2>Every section, in order</h2>
+    <p class="note">
+      One row per section. <b>Hear it</b> plays the first few seconds. The chips
+      under each row are the smaller claims inside it &mdash; click any chip to
+      hear only that part.
+    </p>
+    <div id="sections"></div>
+  </section>
 </div>
 
 <script src="/protocol/session.js"></script>
 <script>
-const $ = i => document.getElementById(i);
-const aud = new Audio(); aud.preload = "auto";
-let SCORE = null, slug = null, stopAt = null, BAR = 1, FIRSTBAR = 1, dragging = false;
-let SHIFT = 0, BASE = 0;
-const WHEEL = ["#6fa8dc","#e8a33d","#5bb98c","#b98cd6","#d68c8c","#8cd6cf","#d6c98c","#a0a8bb"];
-const STEM = {drums:"#e0655f", bass:"#b98cd6", vocals:"#5bb98c", other:"#6fa8dc"};
-const LANES = ["drums","bass","vocals","guitar","piano","other"];
-const LANEWORD = {drums:"Drums", bass:"Bass", vocals:"Voice",
-                  guitar:"Guitar", piano:"Keys", other:"Rest"};
-let HUE = {};
+  const $ = (i) => document.getElementById(i);
+  const aud = new Audio();
+  aud.preload = "auto";
+  let SCORE = null,
+    slug = null,
+    stopAt = null,
+    BAR = 1,
+    FIRSTBAR = 1,
+    dragging = false;
+  let SHIFT = 0,
+    BASE = 0;
+  const WHEEL = [
+    "#6fa8dc",
+    "#e8a33d",
+    "#5bb98c",
+    "#b98cd6",
+    "#d68c8c",
+    "#8cd6cf",
+    "#d6c98c",
+    "#a0a8bb",
+  ];
+  const STEM = {
+    drums: "#e0655f",
+    bass: "#b98cd6",
+    vocals: "#5bb98c",
+    other: "#6fa8dc",
+  };
+  const LANES = ["drums", "bass", "vocals", "guitar", "piano", "other"];
+  const LANEWORD = {
+    drums: "Drums",
+    bass: "Bass",
+    vocals: "Voice",
+    guitar: "Guitar",
+    piano: "Keys",
+    other: "Rest",
+  };
+  let HUE = {};
 
-/* One window every timeline on the page obeys, so zooming the sections also
+  /* One window every timeline on the page obeys, so zooming the sections also
    zooms the moments, the band, the instrument rows and the tune: they are four
    views of one song and sliding them out of step makes them lie to each other. */
-const VIEW = { a: 0, b: 0, follow: false };
-const viewSpan = () => Math.max(0.25, VIEW.b - VIEW.a);
-const frac = t => (t - VIEW.a) / viewSpan();
-const pct = t => frac(t) * 100;
-const timeAt = f => VIEW.a + f * viewSpan();
+  const VIEW = { a: 0, b: 0, follow: false };
+  const viewSpan = () => Math.max(0.25, VIEW.b - VIEW.a);
+  const frac = (t) => (t - VIEW.a) / viewSpan();
+  const pct = (t) => frac(t) * 100;
+  const timeAt = (f) => VIEW.a + f * viewSpan();
 
-function setView(a, b) {
-  const total = SCORE ? SCORE.song.length_s : 0;
-  let lo = a, hi = b;
-  if (hi - lo < 0.75) { const m = (lo + hi) / 2; lo = m - 0.375; hi = m + 0.375; }
-  if (hi - lo > total) { lo = 0; hi = total; }
-  if (lo < 0) { hi -= lo; lo = 0; }
-  if (hi > total) { lo -= hi - total; hi = total; }
-  VIEW.a = Math.max(0, lo); VIEW.b = Math.min(total, hi);
-  $("viewing").textContent = (VIEW.b - VIEW.a >= total - 0.01)
-    ? "whole song" : `${mmss(VIEW.a)} \u2013 ${mmss(VIEW.b)}`;
-  if (SCORE) { place(); lanes(); tune(); motion(); curves(); subs(); chordRow(); }
-}
-
-function zoomAt(t, by) { setView(t - (t - VIEW.a) * by, t + (VIEW.b - t) * by); }
-
-const mmss = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
-let TEMPO = [];
-const segAtBeat = n => {
-  let k = 0;
-  while (k + 1 < TEMPO.length && TEMPO[k + 1].from_beat <= n) k++;
-  return TEMPO[k];
-};
-const segAtTime = t => {
-  let k = 0;
-  while (k + 1 < TEMPO.length && TEMPO[k + 1].at_s <= t) k++;
-  return TEMPO[k];
-};
-const atBeat = n => {
-  const s = segAtBeat(n);
-  return s.at_s + (n - s.from_beat) * (60 / s.bpm);
-};
-const beatAt = t => {
-  const s = segAtTime(t);
-  return s.from_beat + (t - s.at_s) / (60 / s.bpm);
-};
-const beatLen = at => 60 / segAtTime(at == null ? (aud.currentTime || 0) : at).bpm;
-const perBar = () => SCORE.grid.beats_per_bar;
-const firstBeat = () => atBeat(SHIFT - BASE);
-const barTime = b => b <= 0 ? 0 : atBeat((b - 1) * perBar() + (SHIFT - BASE));
-const barAtTime = t => Math.floor(beatAt(t) / perBar()) + 1;
-const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
-const esc = s => String(s).replace(/[&<>"]/g, c =>
-  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-
-const KIND = {entrance:"#5bb98c", exit:"#e0655f", fill:"#e8a33d", accent:"#f2c14e",
-  pause:"#8b93a6", rise:"#6fa8dc", release:"#d16bd1", change:"#7ad4c8",
-  hook:"#f28c8c", highlight:"#c8a2ff", transition:"#9fb0c9"};
-
-const PART = {drums:["the drums", 1], bass:["the bass", 0], voice:["the voice", 0],
-  vocals:["the voice", 0], chords:["the chords", 1], other:["the chords", 1]};
-
-const CHANGED = {harmony:"the chords change", texture:"the texture changes",
-  rhythm:"the rhythm changes", "opens up":"the sound opens up",
-  brightness:"the tone gets brighter"};
-
-const HIGH = {"voice at full reach":"the singer reaches their highest note",
-  "voice sustained":"one long held vocal note", "a vocal run":"a fast run of vocal notes"};
-
-const DOING = {intensifying:"#e0655f", easing:"#6fa8dc", expanding:"#5bb98c",
-  thinning:"#c98fd1", peaking:"#f2c14e", suspending:"#c8a2ff",
-  resolving:"#7ad4c8", establishing:"#9fd18b", closing:"#8b93a6"};
-
-const DOINGWORD = {establishing:["open", "the song is setting itself up"],
-  expanding:["more", "more instruments come in"],
-  thinning:["fewer", "instruments drop away"],
-  intensifying:["harder", "it is getting harder and louder"],
-  easing:["easing", "it is backing off"],
-  peaking:["peak", "it is as big as this song gets"],
-  suspending:["held", "it is being held back, mostly quiet"],
-  resolving:["payoff", "the tension pays off here"],
-  closing:["ending", "it is winding down to the end"]};
-
-const FEELS = {"no drums":"no drums", "drums in":"the drums come in",
-  "drums out":"the drums are gone", "voice in":"the singing starts",
-  "voice out":"no singing", "voice, no drums":"singing, no drums",
-  "half a kit":"only part of the drum kit", "full":"everything playing",
-  "steady":"steady", "building":"building", "thinning":"thinning out"};
-
-function listed(items) {
-  if (items.length < 3) return items.join(" and ");
-  return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
-}
-
-function saysWords(s) {
-  if (!s) return "";
-  if (s === "bare") return "almost nothing playing";
-  if (s === "a bar out, then back") return "one bar out of step, then back";
-  const io = s.match(/^(.*) in, (.*) out$/);
-  if (io) return listed(io[1].split(" and ")) + " in, " + listed(io[2].split(" and ")) + " out";
-  const m = s.match(/^(.*) (join|drop out|holding)$/);
-  if (!m) return s;
-  const items = m[1].split(" and ");
-  const many = items.length > 1 || /^(drums|chords)$/.test(items[0]);
-  const verb = m[2] === "join" ? (many ? "come in" : "comes in")
-             : m[2] === "drop out" ? (many ? "drop out" : "drops out")
-             : (many ? "keep going" : "keeps going");
-  return listed(items) + " " + verb;
-}
-
-const noun = w => (PART[w] || [w, 0])[0];
-const agree = (w, one, many) => (PART[w] || [w, 0])[1] ? many : one;
-
-function momentWords(m) {
-  const w = m.what || "";
-  const into = m.into_bar != null ? ` — lands on bar ${m.into_bar}` : "";
-  const back = m.back_at != null ? ` — back at bar ${m.back_at}` : "";
-  switch (m.is) {
-    case "entrance": return cap(noun(w)) + agree(w, " comes in", " come in");
-    case "exit": return cap(noun(w)) + agree(w, " drops out", " drop out");
-    case "pause":
-      if (w === "everything") return "Everything stops" + back;
-      if (w.startsWith("everything but "))
-        return "Everything stops except " + noun(w.slice(15)) + back;
-      return cap(noun(w)) + agree(w, " stops", " stop") + " for a moment" + back;
-    case "fill": return "A drum fill" + into;
-    case "accent": return "One big hit from the whole band";
-    case "rise": return (w === "a sweep" ? "A sweep builds" : cap(w) + " builds") + into;
-    case "release": return "The drop — the tension lets go" + into;
-    case "change": return cap(CHANGED[w] || `the ${w} changes`);
-    case "hook": return hookWords(m);
-    case "highlight": return cap(HIGH[w] || w);
-    case "transition": return handover(w) + into;
+  function setView(a, b) {
+    const total = SCORE ? SCORE.song.length_s : 0;
+    let lo = a,
+      hi = b;
+    if (hi - lo < 0.75) {
+      const m = (lo + hi) / 2;
+      lo = m - 0.375;
+      hi = m + 0.375;
+    }
+    if (hi - lo > total) {
+      lo = 0;
+      hi = total;
+    }
+    if (lo < 0) {
+      hi -= lo;
+      lo = 0;
+    }
+    if (hi > total) {
+      lo -= hi - total;
+      hi = total;
+    }
+    VIEW.a = Math.max(0, lo);
+    VIEW.b = Math.min(total, hi);
+    $("viewing").textContent =
+      VIEW.b - VIEW.a >= total - 0.01
+        ? "whole song"
+        : `${mmss(VIEW.a)} \u2013 ${mmss(VIEW.b)}`;
+    if (SCORE) {
+      place();
+      lanes();
+      tune();
+      motion();
+      curves();
+      subs();
+      chordRow();
+    }
   }
-  return cap(w || m.is);
-}
 
-function hookWords(m) {
-  const w = m.what || "";
-  let g = w.match(/^the (riff|tune) from bar (\d+)$/);
-  if (g) return `The same ${g[1]} again — first heard at bar ${g[2]}`;
-  /* A hook with no again_of was not found by following the tune. It is chroma
+  function zoomAt(t, by) {
+    setView(t - (t - VIEW.a) * by, t + (VIEW.b - t) * by);
+  }
+
+  const mmss = (s) =>
+    `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  let TEMPO = [];
+  const segAtBeat = (n) => {
+    let k = 0;
+    while (k + 1 < TEMPO.length && TEMPO[k + 1].from_beat <= n) k++;
+    return TEMPO[k];
+  };
+  const segAtTime = (t) => {
+    let k = 0;
+    while (k + 1 < TEMPO.length && TEMPO[k + 1].at_s <= t) k++;
+    return TEMPO[k];
+  };
+  const atBeat = (n) => {
+    const s = segAtBeat(n);
+    return s.at_s + (n - s.from_beat) * (60 / s.bpm);
+  };
+  const beatAt = (t) => {
+    const s = segAtTime(t);
+    return s.from_beat + (t - s.at_s) / (60 / s.bpm);
+  };
+  const beatLen = (at) =>
+    60 / segAtTime(at == null ? aud.currentTime || 0 : at).bpm;
+  const perBar = () => SCORE.grid.beats_per_bar;
+  const firstBeat = () => atBeat(SHIFT - BASE);
+  const barTime = (b) =>
+    b <= 0 ? 0 : atBeat((b - 1) * perBar() + (SHIFT - BASE));
+  const barAtTime = (t) => Math.floor(beatAt(t) / perBar()) + 1;
+  const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+  const esc = (s) =>
+    String(s).replace(
+      /[&<>"]/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+    );
+
+  const KIND = {
+    entrance: "#5bb98c",
+    exit: "#e0655f",
+    fill: "#e8a33d",
+    accent: "#f2c14e",
+    pause: "#8b93a6",
+    rise: "#6fa8dc",
+    release: "#d16bd1",
+    change: "#7ad4c8",
+    hook: "#f28c8c",
+    highlight: "#c8a2ff",
+    transition: "#9fb0c9",
+  };
+
+  const PART = {
+    drums: ["the drums", 1],
+    bass: ["the bass", 0],
+    voice: ["the voice", 0],
+    vocals: ["the voice", 0],
+    chords: ["the chords", 1],
+    other: ["the chords", 1],
+  };
+
+  const CHANGED = {
+    harmony: "the chords change",
+    texture: "the texture changes",
+    rhythm: "the rhythm changes",
+    "opens up": "the sound opens up",
+    brightness: "the tone gets brighter",
+  };
+
+  const HIGH = {
+    "voice at full reach": "the singer reaches their highest note",
+    "voice sustained": "one long held vocal note",
+    "a vocal run": "a fast run of vocal notes",
+  };
+
+  const DOING = {
+    intensifying: "#e0655f",
+    easing: "#6fa8dc",
+    expanding: "#5bb98c",
+    thinning: "#c98fd1",
+    peaking: "#f2c14e",
+    suspending: "#c8a2ff",
+    resolving: "#7ad4c8",
+    establishing: "#9fd18b",
+    closing: "#8b93a6",
+  };
+
+  const DOINGWORD = {
+    establishing: ["open", "the song is setting itself up"],
+    expanding: ["more", "more instruments come in"],
+    thinning: ["fewer", "instruments drop away"],
+    intensifying: ["harder", "it is getting harder and louder"],
+    easing: ["easing", "it is backing off"],
+    peaking: ["peak", "it is as big as this song gets"],
+    suspending: ["held", "it is being held back, mostly quiet"],
+    resolving: ["payoff", "the tension pays off here"],
+    closing: ["ending", "it is winding down to the end"],
+  };
+
+  const FEELS = {
+    "no drums": "no drums",
+    "drums in": "the drums come in",
+    "drums out": "the drums are gone",
+    "voice in": "the singing starts",
+    "voice out": "no singing",
+    "voice, no drums": "singing, no drums",
+    "half a kit": "only part of the drum kit",
+    full: "everything playing",
+    steady: "steady",
+    building: "building",
+    thinning: "thinning out",
+  };
+
+  function listed(items) {
+    if (items.length < 3) return items.join(" and ");
+    return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
+  }
+
+  function saysWords(s) {
+    if (!s) return "";
+    if (s === "bare") return "almost nothing playing";
+    if (s === "a bar out, then back") return "one bar out of step, then back";
+    const io = s.match(/^(.*) in, (.*) out$/);
+    if (io)
+      return (
+        listed(io[1].split(" and ")) +
+        " in, " +
+        listed(io[2].split(" and ")) +
+        " out"
+      );
+    const m = s.match(/^(.*) (join|drop out|holding)$/);
+    if (!m) return s;
+    const items = m[1].split(" and ");
+    const many = items.length > 1 || /^(drums|chords)$/.test(items[0]);
+    const verb =
+      m[2] === "join"
+        ? many
+          ? "come in"
+          : "comes in"
+        : m[2] === "drop out"
+          ? many
+            ? "drop out"
+            : "drops out"
+          : many
+            ? "keep going"
+            : "keeps going";
+    return listed(items) + " " + verb;
+  }
+
+  const noun = (w) => (PART[w] || [w, 0])[0];
+  const agree = (w, one, many) => ((PART[w] || [w, 0])[1] ? many : one);
+
+  function momentWords(m) {
+    const w = m.what || "";
+    const into = m.into_bar != null ? ` — lands on bar ${m.into_bar}` : "";
+    const back = m.back_at != null ? ` — back at bar ${m.back_at}` : "";
+    switch (m.is) {
+      case "entrance":
+        return cap(noun(w)) + agree(w, " comes in", " come in");
+      case "exit":
+        return cap(noun(w)) + agree(w, " drops out", " drop out");
+      case "pause":
+        if (w === "everything") return "Everything stops" + back;
+        if (w.startsWith("everything but "))
+          return "Everything stops except " + noun(w.slice(15)) + back;
+        return (
+          cap(noun(w)) + agree(w, " stops", " stop") + " for a moment" + back
+        );
+      case "fill":
+        return "A drum fill" + into;
+      case "accent":
+        return "One big hit from the whole band";
+      case "rise":
+        return (w === "a sweep" ? "A sweep builds" : cap(w) + " builds") + into;
+      case "release":
+        return "The drop — the tension lets go" + into;
+      case "change":
+        return cap(CHANGED[w] || `the ${w} changes`);
+      case "hook":
+        return hookWords(m);
+      case "highlight":
+        return cap(HIGH[w] || w);
+      case "transition":
+        return handover(w) + into;
+    }
+    return cap(w || m.is);
+  }
+
+  function hookWords(m) {
+    const w = m.what || "";
+    let g = w.match(/^the (riff|tune) from bar (\d+)$/);
+    if (g) return `The same ${g[1]} again — first heard at bar ${g[2]}`;
+    /* A hook with no again_of was not found by following the tune. It is chroma
      similarity: the chords here resemble the chords somewhere else. Calling it
      "the main tune" claimed a melody the computer never looked at, and some of
      these run sixty seconds, which no riff does. */
-  if (w === "the riff") return "The chords here come back later";
-  g = w.match(/^(\d+) (sung|played) on one note$/);
-  if (g) return `${g[1]} notes ${g[2]} on a single pitch`;
-  return cap(w || "a hook");
-}
+    if (w === "the riff") return "The chords here come back later";
+    g = w.match(/^(\d+) (sung|played) on one note$/);
+    if (g) return `${g[1]} notes ${g[2]} on a single pitch`;
+    return cap(w || "a hook");
+  }
 
-function handover(w) {
-  if (w === "a sweep") return "A sweep carries into the next section";
-  if (w === "everything") return "Everything cuts, into the next section";
-  if (w === "brightness") return "The tone shifts into the next section";
-  return cap(noun(w)) + agree(w, " hands", " hand") + " over into the next section";
-}
+  function handover(w) {
+    if (w === "a sweep") return "A sweep carries into the next section";
+    if (w === "everything") return "Everything cuts, into the next section";
+    if (w === "brightness") return "The tone shifts into the next section";
+    return (
+      cap(noun(w)) + agree(w, " hands", " hand") + " over into the next section"
+    );
+  }
 
-function shortMoment(m) {
-  const t = momentWords(m);
-  return t.length > 44 ? t.slice(0, 42).replace(/[ ,—]+$/, "") + "…" : t;
-}
+  function shortMoment(m) {
+    const t = momentWords(m);
+    return t.length > 44 ? t.slice(0, 42).replace(/[ ,—]+$/, "") + "…" : t;
+  }
 
-function tuneWords(s, who) {
-  const verb = who === "lead" ? "played on an instrument" : "sung";
-  if (!s || !s.notes) return "nothing " + verb + " here";
-  if (s.on_one_note) return `the tune sits on one repeated note, ${verb}`;
-  const how = s.moves < 1.2 ? "moves one step at a time"
-            : s.moves < 2.5 ? "moves in small steps"
-            : "leaps between notes";
-  const span = s.high - s.low;
-  const wide = span < 5 ? "inside a narrow range"
-             : span < 12 ? "inside about one octave"
-             : span < 20 ? "across an octave and a half"
-             : "across two octaves";
-  return `the tune ${how}, ${wide}, ${verb}`;
-}
+  function tuneWords(s, who) {
+    const verb = who === "lead" ? "played on an instrument" : "sung";
+    if (!s || !s.notes) return "nothing " + verb + " here";
+    if (s.on_one_note) return `the tune sits on one repeated note, ${verb}`;
+    const how =
+      s.moves < 1.2
+        ? "moves one step at a time"
+        : s.moves < 2.5
+          ? "moves in small steps"
+          : "leaps between notes";
+    const span = s.high - s.low;
+    const wide =
+      span < 5
+        ? "inside a narrow range"
+        : span < 12
+          ? "inside about one octave"
+          : span < 20
+            ? "across an octave and a half"
+            : "across two octaves";
+    return `the tune ${how}, ${wide}, ${verb}`;
+  }
 
-function partTune(p) {
-  if (p.sung && p.sung.notes) return tuneWords(p.sung, "voice");
-  if (p.played && p.played.notes) return tuneWords(p.played, "lead");
-  return "no tune the computer could follow here";
-}
+  function partTune(p) {
+    if (p.sung && p.sung.notes) return tuneWords(p.sung, "voice");
+    if (p.played && p.played.notes) return tuneWords(p.played, "lead");
+    return "no tune the computer could follow here";
+  }
 
-function playingWords(list) {
-  const w = (list || []).map(n => (LANEWORD[n] || n).toLowerCase());
-  return w.length ? listed(w) : "nothing";
-}
+  function playingWords(list) {
+    const w = (list || []).map((n) => (LANEWORD[n] || n).toLowerCase());
+    return w.length ? listed(w) : "nothing";
+  }
 
-async function library() {
-  const list = await (await fetch("/library.json")).json();
-  $("song").innerHTML = list.map(x =>
-    `<option value="${x.slug}" data-a="${x.audio || ""}" data-score="${x.score || ""}">${x.slug}</option>`).join("");
-  const args = new URLSearchParams(location.search);
-  const pick = list.find(x => x.slug === args.get("song")) || list[0];
-  if (pick) {
-    $("song").value = pick.slug;
-    if (args.get("song") !== pick.slug) {
-      const url = new URL(location.href);
-      url.searchParams.set("song", pick.slug);
-      history.replaceState(null, "", url);
+  async function library() {
+    const list = await (await fetch("/library.json")).json();
+    $("song").innerHTML = list
+      .map(
+        (x) =>
+          `<option value="${x.slug}" data-a="${x.audio || ""}" data-score="${x.score || ""}">${x.slug}</option>`,
+      )
+      .join("");
+    const args = new URLSearchParams(location.search);
+    const pick = list.find((x) => x.slug === args.get("song")) || list[0];
+    if (pick) {
+      $("song").value = pick.slug;
+      if (args.get("song") !== pick.slug) {
+        const url = new URL(location.href);
+        url.searchParams.set("song", pick.slug);
+        history.replaceState(null, "", url);
+      }
+      load(
+        pick.slug,
+        pick.audio,
+        +args.get("at") || 0,
+        +args.get("from") || 0,
+        +args.get("to") || 0,
+        pick.score,
+      );
     }
-    load(pick.slug, pick.audio, +args.get("at") || 0,
-         +args.get("from") || 0, +args.get("to") || 0, pick.score);
   }
-}
 
-async function load(s, url, at, from, to, scoreUrl) {
-  slug = s;
-  /* A song can arrive from the hub as easily as from the folder beside this
+  async function load(s, url, at, from, to, scoreUrl) {
+    slug = s;
+    /* A song can arrive from the hub as easily as from the folder beside this
      page, so the caller may name where its score lives. */
-  SCORE = await (await fetch(scoreUrl || `/scores/${s}.score`)).json();
-  TEMPO = (SCORE.grid.tempo && SCORE.grid.tempo.length)
-    ? SCORE.grid.tempo
-    : [{ from_beat: 0, at_s: SCORE.grid.first_beat_s, bpm: SCORE.grid.bpm }];
-  BAR = (60 / SCORE.grid.bpm) * SCORE.grid.beats_per_bar;
-  FIRSTBAR = SCORE.grid.first_beat_s > 0.2 ? 0 : 1;
-  if (url) { aud.src = url; aud.load(); $("play").disabled = false; }
-  else { aud.removeAttribute("src"); $("play").disabled = true; }
-  const g = SCORE.grid;
-  const many = (SCORE.moments || []).length;
-  $("facts").textContent = `${Math.round(g.bpm)} beats a minute · ${g.bars} bars`
-    + ` · ${many} notable moment${many === 1 ? "" : "s"}`;
-  BASE = 0;
-  try {
-    const saved = await (await fetch(`/downbeat/${s}`)).json();
-    BASE = saved.downbeat_shift_beats || 0;
-  } catch (e) { BASE = 0; }
-  SHIFT = BASE;
-  if (at) aud.currentTime = at;
-  setView(from && to ? from : 0, from && to ? to : SCORE.song.length_s);
-  draw();
-}
-
-function play(from, until) {
-  stopAt = until ?? null;
-  aud.currentTime = Math.max(0, from);
-  aud.play();
-}
-
-function momentTime(m) {
-  return atBeat((m.bar - 1) * perBar() + (m.beat - 1) + (SHIFT - BASE));
-}
-function momentSpan(m) {
-  if (!m.for_beats) return 0;
-  return atBeat((m.bar - 1) * perBar() + (m.beat - 1) + m.for_beats + (SHIFT - BASE))
-       - momentTime(m);
-}
-
-function hearMoment(m) {
-  const t = momentTime(m);
-  play(Math.max(0, t - 0.8), t + Math.max(momentSpan(m), 1.6) + 0.8);
-}
-
-function draw() {
-  HUE = {};
-  let n = 0;
-  for (const p of SCORE.parts || [])
-    if (!(p.like in HUE)) HUE[p.like] = WHEEL[n++ % WHEEL.length];
-
-  const map = $("map");
-  [...map.querySelectorAll(".part,.unmetered,.beat")].forEach(x => x.remove());
-  const total = SCORE.song.length_s;
-
-  for (const p of SCORE.parts || []) {
-    const t0 = barTime(p.from_bar), t1 = Math.min(total, barTime(p.to_bar + 1));
-    const el = document.createElement("div");
-    const ramp = typeof p.sudden === "number" && p.sudden < 0.5;
-    el.className = ramp ? "part ramp" : "part";
-    el.dataset.t0 = t0; el.dataset.t1 = t1;
-    const c = HUE[p.like];
-    el.title = `${cap(p.role || p.like)} · ${mmss(t0)} – ${mmss(t1)} · `
-             + `${FEELS[p.feels] || p.feels}`
-             + (ramp ? ` · the change here is gradual (${p.sudden.toFixed(2)}), there is no moment to hit`
-                     : (typeof p.sudden === "number" ? ` · lands on the bar (${p.sudden.toFixed(2)})` : ""))
-             + ` · click to hear it`;
-    el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness??.5)*100)}%"></div>
-      <div class="tag" style="color:${c}">${esc((p.role || p.like).toUpperCase())}</div>`;
-    map.appendChild(el);
+    SCORE = await (await fetch(scoreUrl || `/scores/${s}.score`)).json();
+    TEMPO =
+      SCORE.grid.tempo && SCORE.grid.tempo.length
+        ? SCORE.grid.tempo
+        : [
+            {
+              from_beat: 0,
+              at_s: SCORE.grid.first_beat_s,
+              bpm: SCORE.grid.bpm,
+            },
+          ];
+    BAR = (60 / SCORE.grid.bpm) * SCORE.grid.beats_per_bar;
+    FIRSTBAR = SCORE.grid.first_beat_s > 0.2 ? 0 : 1;
+    if (url) {
+      aud.src = url;
+      aud.load();
+      $("play").disabled = false;
+    } else {
+      aud.removeAttribute("src");
+      $("play").disabled = true;
+    }
+    const g = SCORE.grid;
+    const many = (SCORE.moments || []).length;
+    $("facts").textContent =
+      `${Math.round(g.bpm)} beats a minute · ${g.bars} bars` +
+      ` · ${many} notable moment${many === 1 ? "" : "s"}`;
+    BASE = 0;
+    try {
+      const saved = await (await fetch(`/downbeat/${s}`)).json();
+      BASE = saved.downbeat_shift_beats || 0;
+    } catch (e) {
+      BASE = 0;
+    }
+    SHIFT = BASE;
+    if (at) aud.currentTime = at;
+    setView(from && to ? from : 0, from && to ? to : SCORE.song.length_s);
+    draw();
   }
 
-  /* Everything the detectors proposed, including what the culling threw away.
+  function play(from, until) {
+    stopAt = until ?? null;
+    aud.currentTime = Math.max(0, from);
+    aud.play();
+  }
+
+  function momentTime(m) {
+    return atBeat((m.bar - 1) * perBar() + (m.beat - 1) + (SHIFT - BASE));
+  }
+  function momentSpan(m) {
+    if (!m.for_beats) return 0;
+    return (
+      atBeat(
+        (m.bar - 1) * perBar() + (m.beat - 1) + m.for_beats + (SHIFT - BASE),
+      ) - momentTime(m)
+    );
+  }
+
+  function hearMoment(m) {
+    const t = momentTime(m);
+    play(Math.max(0, t - 0.8), t + Math.max(momentSpan(m), 1.6) + 0.8);
+  }
+
+  function draw() {
+    HUE = {};
+    let n = 0;
+    for (const p of SCORE.parts || [])
+      if (!(p.like in HUE)) HUE[p.like] = WHEEL[n++ % WHEEL.length];
+
+    const map = $("map");
+    [...map.querySelectorAll(".part,.unmetered,.beat")].forEach((x) =>
+      x.remove(),
+    );
+    const total = SCORE.song.length_s;
+
+    for (const p of SCORE.parts || []) {
+      const t0 = barTime(p.from_bar),
+        t1 = Math.min(total, barTime(p.to_bar + 1));
+      const el = document.createElement("div");
+      const ramp = typeof p.sudden === "number" && p.sudden < 0.5;
+      el.className = ramp ? "part ramp" : "part";
+      el.dataset.t0 = t0;
+      el.dataset.t1 = t1;
+      const c = HUE[p.like];
+      el.title =
+        `${cap(p.role || p.like)} · ${mmss(t0)} – ${mmss(t1)} · ` +
+        `${FEELS[p.feels] || p.feels}` +
+        (ramp
+          ? ` · the change here is gradual (${p.sudden.toFixed(2)}), there is no moment to hit`
+          : typeof p.sudden === "number"
+            ? ` · lands on the bar (${p.sudden.toFixed(2)})`
+            : "") +
+        ` · click to hear it`;
+      el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness ?? 0.5) * 100)}%"></div>
+      <div class="tag" style="color:${c}">${esc((p.role || p.like).toUpperCase())}</div>`;
+      map.appendChild(el);
+    }
+
+    /* Everything the detectors proposed, including what the culling threw away.
      Levels keeps eight moments out of seventy-eight signals, and the seventy
      were invisible -- so "did it miss this" could not be answered by looking. */
-  const kept = new Set((SCORE.moments || []).map(m => `${m.bar}.${m.beat}.${m.is}`));
-  for (const g of SCORE.signals || []) {
-    if (kept.has(`${g.bar}.${g.beat}.${g.is}`)) continue;
-    const t = momentTime(g);
-    if (t < 0 || t > total) continue;
-    const el = document.createElement("div");
-    el.className = "beat gone";
-    el.dataset.t0 = t; el.dataset.t1 = t;
-    el.style.background = KIND[g.is] || "#8b93a6";
-    el.title = `${mmss(t)} · bar ${g.bar} · ${momentWords(g)} · considered and dropped`
-             + ` (weight ${g.weight ?? "-"}, sure ${g.sure ?? "-"})`;
-    el.onclick = ev => { ev.stopPropagation(); hearMoment(g); };
-    map.appendChild(el);
-  }
+    const kept = new Set(
+      (SCORE.moments || []).map((m) => `${m.bar}.${m.beat}.${m.is}`),
+    );
+    for (const g of SCORE.signals || []) {
+      if (kept.has(`${g.bar}.${g.beat}.${g.is}`)) continue;
+      const t = momentTime(g);
+      if (t < 0 || t > total) continue;
+      const el = document.createElement("div");
+      el.className = "beat gone";
+      el.dataset.t0 = t;
+      el.dataset.t1 = t;
+      el.style.background = KIND[g.is] || "#8b93a6";
+      el.title =
+        `${mmss(t)} · bar ${g.bar} · ${momentWords(g)} · considered and dropped` +
+        ` (weight ${g.weight ?? "-"}, sure ${g.sure ?? "-"})`;
+      el.onclick = (ev) => {
+        ev.stopPropagation();
+        hearMoment(g);
+      };
+      map.appendChild(el);
+    }
 
-  for (const m of SCORE.moments || []) {
-    const t = momentTime(m);
-    if (t < 0 || t > total) continue;
-    const el = document.createElement("div");
-    el.className = "beat";
-    const len = momentSpan(m);
-    el.dataset.t0 = t; el.dataset.t1 = t + len;
-    el.style.background = KIND[m.is] || "#8b93a6";
-    el.style.opacity = 0.55 + 0.45 * (m.weight ?? 0);
-    el.title = `${mmss(t)} · bar ${m.bar} · ${momentWords(m)} · click to hear it`;
-    el.onclick = ev => { ev.stopPropagation(); hearMoment(m); };
-    map.appendChild(el);
-  }
+    for (const m of SCORE.moments || []) {
+      const t = momentTime(m);
+      if (t < 0 || t > total) continue;
+      const el = document.createElement("div");
+      el.className = "beat";
+      const len = momentSpan(m);
+      el.dataset.t0 = t;
+      el.dataset.t1 = t + len;
+      el.style.background = KIND[m.is] || "#8b93a6";
+      el.style.opacity = 0.55 + 0.45 * (m.weight ?? 0);
+      el.title = `${mmss(t)} · bar ${m.bar} · ${momentWords(m)} · click to hear it`;
+      el.onclick = (ev) => {
+        ev.stopPropagation();
+        hearMoment(m);
+      };
+      map.appendChild(el);
+    }
 
-  const from = SCORE.grid.holds_from_s, upto = SCORE.grid.holds_to_s;
-  const hatch = (l, w, side) => {
-    if (w <= 0) return;
-    const sh = document.createElement("div");
-    sh.className = "unmetered";
-    sh.title = "the computer could not measure a steady beat here, so these bar "
-             + "positions are guessed";
-    sh.dataset.t0 = l; sh.dataset.t1 = l + w;
-    sh.style.cssText = `position:absolute;top:22px;bottom:0;z-index:2;pointer-events:none;
+    const from = SCORE.grid.holds_from_s,
+      upto = SCORE.grid.holds_to_s;
+    const hatch = (l, w, side) => {
+      if (w <= 0) return;
+      const sh = document.createElement("div");
+      sh.className = "unmetered";
+      sh.title =
+        "the computer could not measure a steady beat here, so these bar " +
+        "positions are guessed";
+      sh.dataset.t0 = l;
+      sh.dataset.t1 = l + w;
+      sh.style.cssText = `position:absolute;top:22px;bottom:0;z-index:2;pointer-events:none;
       background:repeating-linear-gradient(135deg,
       rgba(224,101,95,.13) 0 7px,transparent 7px 14px);border-${side}:1px dashed rgba(224,101,95,.6)`;
-    map.appendChild(sh);
-  };
-  if (from != null && from > 0) hatch(0, from, "right");
-  if (upto != null && upto < total) hatch(upto, total - upto, "left");
+      map.appendChild(sh);
+    };
+    if (from != null && from > 0) hatch(0, from, "right");
+    if (upto != null && upto < total) hatch(upto, total - upto, "left");
 
-  let stripe = 0;
-  if (from != null || upto != null)
-    stripe = Math.round(100 * ((from || 0) + Math.max(0, total - (upto ?? total))) / total);
+    let stripe = 0;
+    if (from != null || upto != null)
+      stripe = Math.round(
+        (100 * ((from || 0) + Math.max(0, total - (upto ?? total)))) / total,
+      );
 
-  const used = new Set((SCORE.phrases || []).map(q => q.doing));
-  $("legend").innerHTML =
-    `<span class="dim">Instruments${SCORE.ticks
-       ? " \u2014 filled line is four readings a beat, faint blocks behind are one a bar" : ""}:</span>`
-    + LANES.map(k => `<span><i style="background:${STEM[k]}"></i>${LANEWORD[k]}</span>`).join("")
-    + `<span class="dim" style="flex-basis:100%;margin-top:3px">What the band under the sections means:</span>`
-    + Object.entries(DOINGWORD).filter(([k]) => used.has(k)).map(([k, v]) =>
-        `<span><i style="background:${DOING[k]}"></i><em>${v[0]}</em> — ${v[1]}</span>`).join("")
-    + (stripe > 0 ? `<span class="warn" style="flex-basis:100%;margin-top:3px">Striped = the computer `
-                  + `could not measure a steady beat there, so those bar positions are guessed `
-                  + `(${stripe}% of the song)</span>` : "");
+    const used = new Set((SCORE.phrases || []).map((q) => q.doing));
+    $("legend").innerHTML =
+      `<span class="dim">Instruments${
+        SCORE.ticks
+          ? " \u2014 filled line is four readings a beat, faint blocks behind are one a bar"
+          : ""
+      }:</span>` +
+      LANES.map(
+        (k) =>
+          `<span><i style="background:${STEM[k]}"></i>${LANEWORD[k]}</span>`,
+      ).join("") +
+      `<span class="dim" style="flex-basis:100%;margin-top:3px">What the band under the sections means:</span>` +
+      Object.entries(DOINGWORD)
+        .filter(([k]) => used.has(k))
+        .map(
+          ([k, v]) =>
+            `<span><i style="background:${DOING[k]}"></i><em>${v[0]}</em> — ${v[1]}</span>`,
+        )
+        .join("") +
+      (stripe > 0
+        ? `<span class="warn" style="flex-basis:100%;margin-top:3px">Striped = the computer ` +
+          `could not measure a steady beat there, so those bar positions are guessed ` +
+          `(${stripe}% of the song)</span>`
+        : "");
 
-  const k = SCORE.key || {}, L = SCORE.loudness || {}, made = SCORE.made_by || {};
-  const f = SCORE.feel || {}, pg = SCORE.phrase_grid || {};
-  const pc = v => v == null ? "\u2014" : `${Math.round(v * 100)}%`;
-  const sure = SCORE.grid.sure;
-  const trust = sure == null ? "not measured"
-    : sure >= 0.85 ? "two beat trackers agree closely"
-    : sure >= 0.6 ? "two beat trackers mostly agree"
-    : "two beat trackers disagree \u2014 treat every bar here with suspicion";
-  $("owned").innerHTML =
-    `<div class="col"><dl>
-      <dt>Key</dt><dd>${k.root ? `<b>${esc(k.root)} ${esc(k.scale || "")}</b>, ${pc(k.confidence)} sure`
-        + (k.tuned_to_hz ? ` <span class="dim">\u00b7 tuned to ${k.tuned_to_hz} Hz</span>` : "") : "\u2014"}</dd>
-      <dt>Loudness</dt><dd>${L.integrated_lufs != null
-        ? `${L.integrated_lufs} LUFS <span class="dim">\u00b7 ${L.range_lu} LU between quiet and loud</span>` : "\u2014"}</dd>
-      <dt>Feel</dt><dd>${f.onsets_per_second != null
-        ? `${f.onsets_per_second.toFixed(1)} hits a second <span class="dim">\u00b7 danceability ${f.danceability}</span>` : "\u2014"}</dd>
+    const k = SCORE.key || {},
+      L = SCORE.loudness || {},
+      made = SCORE.made_by || {};
+    const f = SCORE.feel || {},
+      pg = SCORE.phrase_grid || {};
+    const pc = (v) => (v == null ? "\u2014" : `${Math.round(v * 100)}%`);
+    const sure = SCORE.grid.sure;
+    const trust =
+      sure == null
+        ? "not measured"
+        : sure >= 0.85
+          ? "two beat trackers agree closely"
+          : sure >= 0.6
+            ? "two beat trackers mostly agree"
+            : "two beat trackers disagree \u2014 treat every bar here with suspicion";
+    $("owned").innerHTML = `<div class="col"><dl>
+      <dt>Key</dt><dd>${
+        k.root
+          ? `<b>${esc(k.root)} ${esc(k.scale || "")}</b>, ${pc(k.confidence)} sure` +
+            (k.tuned_to_hz
+              ? ` <span class="dim">\u00b7 tuned to ${k.tuned_to_hz} Hz</span>`
+              : "")
+          : "\u2014"
+      }</dd>
+      <dt>Loudness</dt><dd>${
+        L.integrated_lufs != null
+          ? `${L.integrated_lufs} LUFS <span class="dim">\u00b7 ${L.range_lu} LU between quiet and loud</span>`
+          : "\u2014"
+      }</dd>
+      <dt>Feel</dt><dd>${
+        f.onsets_per_second != null
+          ? `${f.onsets_per_second.toFixed(1)} hits a second <span class="dim">\u00b7 danceability ${f.danceability}</span>`
+          : "\u2014"
+      }</dd>
     </dl></div>
     <div class="col"><dl>
-      <dt>The beat</dt><dd>${sure == null ? "<span class='dim'>not measured</span>"
-        : `<b style="color:${sure < 0.6 ? "var(--bad)" : "var(--ok)"}">${pc(sure)}</b> \u00b7 ${trust}`}</dd>
+      <dt>The beat</dt><dd>${
+        sure == null
+          ? "<span class='dim'>not measured</span>"
+          : `<b style="color:${sure < 0.6 ? "var(--bad)" : "var(--ok)"}">${pc(sure)}</b> \u00b7 ${trust}`
+      }</dd>
       <dt>Phrases</dt><dd>every ${pg.every_bars ?? "?"} bars from bar ${pg.from_bar ?? "?"}
         </dd>
       <dt>Heard by</dt><dd class="dim">voice: ${esc(made.voice_from || "?")} \u00b7 lead: ${esc(made.lead_from || "?")}
         \u00b7 tune: ${esc(made.melody_from || "?")}</dd>
+      ${SCORE.moss_sections ? `<dt>AI sections</dt><dd><b style="color:var(--ok)">${SCORE.moss_sections.length} sections</b> detected by MOSS-Music-8B</dd>` : ""}
+      ${SCORE.btc_chords_raw ? `<dt>AI chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b> from BTC 170-chord model</dd>` : ""}
     </dl></div>`;
 
-  $("beatkey").innerHTML =
-    `<span class="dim">Numbers along the top are the four beats of the bar. `
-    + `A taller block is a stronger hit. The figure on the right is how much the pattern `
-    + `stays the same from one bar to the next &mdash; a locked loop scores high, a part that `
-    + `keeps changing scores low.</span>`;
+    $("beatkey").innerHTML =
+      `<span class="dim">Numbers along the top are the four beats of the bar. ` +
+      `A taller block is a stronger hit. The figure on the right is how much the pattern ` +
+      `stays the same from one bar to the next &mdash; a locked loop scores high, a part that ` +
+      `keeps changing scores low.</span>`;
 
-  $("curvekey").innerHTML = CURVES.map(([k, n, hue, why]) => {
-    const t = (SCORE.curve_tells || {})[k];
-    const weak = t != null && t < 1.3;
-    const says = t == null ? ""
-      : weak ? ` <b style="color:var(--bad)">&mdash; on this song it barely changes between parts (${t.toFixed(2)}), so do not follow it here</b>`
-             : ` <b style="color:var(--ok)">&mdash; ${t.toFixed(2)}</b>`;
-    return `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}${says}</span>`;
-  }).join("")
-    + (Array.isArray(SCORE.tension)
-       ? `<span><i style="background:#e0655f"></i><b style="color:var(--dim)">Lift</b> &mdash; high-band `
-         + `presence rising and not backed by bass. One reading a beat, so it is the only row here fast `
-         + `enough to show a build happening. It leans high before a drop but only weakly (57%, p=0.17), `
-         + `so read it as a texture, not as tension.</span>` : "");
+    $("curvekey").innerHTML =
+      CURVES.map(([k, n, hue, why]) => {
+        const t = (SCORE.curve_tells || {})[k];
+        const weak = t != null && t < 1.3;
+        const says =
+          t == null
+            ? ""
+            : weak
+              ? ` <b style="color:var(--bad)">&mdash; on this song it barely changes between parts (${t.toFixed(2)}), so do not follow it here</b>`
+              : ` <b style="color:var(--ok)">&mdash; ${t.toFixed(2)}</b>`;
+        return `<span><i style="background:${hue}"></i><b style="color:var(--dim)">${n}</b> &mdash; ${why}${says}</span>`;
+      }).join("") +
+      (Array.isArray(SCORE.tension)
+        ? `<span><i style="background:#e0655f"></i><b style="color:var(--dim)">Lift</b> &mdash; high-band ` +
+          `presence rising and not backed by bass. One reading a beat, so it is the only row here fast ` +
+          `enough to show a build happening. It leans high before a drop but only weakly (57%, p=0.17), ` +
+          `so read it as a texture, not as tension.</span>`
+        : "");
 
-  const shown = (SCORE.moments || []).length, all = (SCORE.signals || []).length;
-  $("dropped").textContent = all > shown
-    ? `The detectors proposed ${all} moments and kept ${shown}; the ${all - shown} dropped ones `
-      + `are the faint ticks under the strip, so you can see what it decided against.`
-    : "";
+    const shown = (SCORE.moments || []).length,
+      all = (SCORE.signals || []).length;
+    $("dropped").textContent =
+      all > shown
+        ? `The detectors proposed ${all} moments and kept ${shown}; the ${all - shown} dropped ones ` +
+          `are the faint ticks under the strip, so you can see what it decided against.`
+        : "";
 
-  $("tunekey").innerHTML =
-    `<span><i style="background:#7ae8b0"></i>a note that was sung</span>`
-    + `<span><i style="background:#8fd0ff"></i>a note played by the lead instrument</span>`
-    + `<span><i style="background:#c8a2ff"></i>a tune you have already heard, coming back</span>`
-    + `<span class="dim">higher up = higher note</span>`
-    + `<span class="dim" style="flex-basis:100%">The ticks under the notes are the `
-    + `<b style="color:var(--ink)">phrases of the tune</b> &mdash; click one to hear it, `
-    + `&#8634; marks one whose shape repeats an earlier phrase. Only stretches found by following `
-    + `the tune are shaded; chord repeats are listed with the moments, not here.</span>`
-;
+    $("tunekey").innerHTML =
+      `<span><i style="background:#7ae8b0"></i>a note that was sung</span>` +
+      `<span><i style="background:#8fd0ff"></i>a note played by the lead instrument</span>` +
+      `<span><i style="background:#c8a2ff"></i>a tune you have already heard, coming back</span>` +
+      `<span class="dim">higher up = higher note</span>` +
+      `<span class="dim" style="flex-basis:100%">The ticks under the notes are the ` +
+      `<b style="color:var(--ink)">phrases of the tune</b> &mdash; click one to hear it, ` +
+      `&#8634; marks one whose shape repeats an earlier phrase. Only stretches found by following ` +
+      `the tune are shaded; chord repeats are listed with the moments, not here.</span>`;
 
-  lanes(); tune(); motion(); curves(); beatGrid(); subs(); chordRow(); sections(); sungWords(); place();
-}
+    lanes();
+    tune();
+    motion();
+    curves();
+    beatGrid();
+    subs();
+    chordRow();
+    sections();
+    sungWords();
+    aiIntel();
+    indicLyrics();
+    place();
+  }
 
-/* Absolutely-positioned rows are laid out here rather than where they are
+  /* Absolutely-positioned rows are laid out here rather than where they are
    built, so a zoom moves them without rebuilding the DOM. */
-function place() {
-  for (const el of document.querySelectorAll("#map .part,#map .beat,#subs .sub,#chords .chd")) {
-    const t0 = +el.dataset.t0, t1 = +el.dataset.t1;
-    const l = pct(t0), w = Math.max(el.classList.contains("beat") ? 0.25 : 0, pct(t1) - l);
-    if (el.classList.contains("chd")) el.style.width = `${w}%`;
-    const off = l > 100 || pct(t1) < 0;
-    el.style.display = off ? "none" : "";
-    el.style.left = `${l}%`;
-    if (t1 > t0 || el.classList.contains("beat")) el.style.width = `${w}%`;
-  }
-  for (const sh of document.querySelectorAll("#map .unmetered")) {
-    const t0 = +sh.dataset.t0, t1 = +sh.dataset.t1;
-    sh.style.left = `${pct(t0)}%`;
-    sh.style.width = `${pct(t1) - pct(t0)}%`;
-  }
-}
-
-function chordRow() {
-  const box = $("chords"); box.innerHTML = "";
-  const list = SCORE.chord_changes || [];
-  if (!list.length) return;
-  const total = SCORE.song.length_s, px = box.clientWidth || 1200;
-  list.forEach((c, i) => {
-    const t0 = barTime(c.bar);
-    const t1 = i + 1 < list.length ? barTime(list[i + 1].bar) : total;
-    const el = document.createElement("div");
-    el.className = "chd";
-    el.dataset.t0 = t0; el.dataset.t1 = t1;
-    el.style.opacity = 0.45 + 0.55 * (c.sure ?? 0.5);
-    el.title = `bar ${c.bar} · ${c.chord} · the computer is ${Math.round((c.sure ?? 0) * 100)}% sure`
-             + ` · click to hear it`;
-    el.textContent = c.chord;
-    box.appendChild(el);
-  });
-}
-
-function subs() {
-  const box = $("subs"); box.innerHTML = "";
-  if (!SCORE || !SCORE.phrases) return;
-  const total = SCORE.song.length_s;
-  const px = box.clientWidth || 1200;
-  for (const q of SCORE.phrases) {
-    const t0 = barTime(q.from_bar), t1 = Math.min(total, barTime(q.to_bar + 1));
-    const el = document.createElement("div");
-    el.className = "sub";
-    el.dataset.t0 = t0; el.dataset.t1 = t1;
-    const pair = DOINGWORD[q.doing];
-    el.style.background = (DOING[q.doing] || "#39414f") + (pair ? "26" : "10");
-    el.style.color = DOING[q.doing] || "#4e5768";
-    el.title = `bars ${q.from_bar}–${q.to_bar} · `
-      + (pair ? pair[1] : "nothing it is sure enough to name")
-      + ` · ${saysWords(q.says)} · click to hear it`;
-    const room = ((t1 - t0) / total) * px;
-    el.textContent = pair && room >= pair[0].length * 5.9 + 9 ? pair[0] : "";
-    box.appendChild(el);
-  }
-}
-
-const WINDOW = 8.0;
-const ZHIT = [];
-const THIT = [];
-const PHIT = [];
-
-function fit(c, h) {
-  const r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
-  c.width = Math.max(1, Math.round(r.width * dpr));
-  c.height = Math.round(h * dpr);
-  c.style.height = h + "px";
-  const g = c.getContext("2d");
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  g.clearRect(0, 0, r.width, h);
-  return [g, r.width];
-}
-
-function zoom() {
-  const [g, W] = fit($("zoom"), 110);
-  if (!SCORE) return;
-  const t = aud.currentTime;
-  const wide = Math.min(WINDOW, viewSpan());
-  const a = t - wide/2, b = t + wide/2;
-  const X = s => ((s - a)/wide)*W;
-  const total = SCORE.song.length_s;
-
-  for (const p of SCORE.parts || []) {
-    const t0 = barTime(p.from_bar), t1 = Math.min(total, barTime(p.to_bar + 1));
-    if (t1 < a || t0 > b) continue;
-    const x0 = Math.max(0, X(t0)), x1 = Math.min(W, X(t1));
-    const c = HUE[p.like] || "#6fa8dc";
-    g.fillStyle = c + "16";
-    g.fillRect(x0, 0, x1 - x0, 110);
-    g.fillStyle = c; g.font = "600 10px ui-monospace,monospace";
-    if (X(t0) >= 0) {
-      g.strokeStyle = c; g.lineWidth = 2;
-      g.beginPath(); g.moveTo(X(t0), 0); g.lineTo(X(t0), 110); g.stroke();
-      g.fillText((p.role ?? p.like).toUpperCase() + " starts here", X(t0) + 6, 13);
-    } else if (x1 - x0 > 96) {
-      g.globalAlpha = .7;
-      g.fillText("still in " + (p.role ?? p.like).toUpperCase(), x0 + 6, 13);
-      g.globalAlpha = 1;
+  function place() {
+    for (const el of document.querySelectorAll(
+      "#map .part,#map .beat,#subs .sub,#chords .chd",
+    )) {
+      const t0 = +el.dataset.t0,
+        t1 = +el.dataset.t1;
+      const l = pct(t0),
+        w = Math.max(el.classList.contains("beat") ? 0.25 : 0, pct(t1) - l);
+      if (el.classList.contains("chd")) el.style.width = `${w}%`;
+      const off = l > 100 || pct(t1) < 0;
+      el.style.display = off ? "none" : "";
+      el.style.left = `${l}%`;
+      if (t1 > t0 || el.classList.contains("beat")) el.style.width = `${w}%`;
+    }
+    for (const sh of document.querySelectorAll("#map .unmetered")) {
+      const t0 = +sh.dataset.t0,
+        t1 = +sh.dataset.t1;
+      sh.style.left = `${pct(t0)}%`;
+      sh.style.width = `${pct(t1) - pct(t0)}%`;
     }
   }
 
-  const per = SCORE.grid.beats_per_bar;
-  SCORE.beats.forEach((bt, i) => {
-    if (bt.t < a || bt.t > b) return;
-    const x = X(bt.t);
-    const down = ((i - (SHIFT - BASE)) % per + per) % per === firstIndex();
-    g.strokeStyle = down ? "#ffffff" : "#e8a33d";
-    g.lineWidth = down ? 2 : 1;
-    g.globalAlpha = down ? 1 : .5;
-    g.beginPath(); g.moveTo(x, down ? 22 : 36); g.lineTo(x, 54); g.stroke();
-    g.globalAlpha = 1;
-    if (down) {
-      const n = Math.round(beatAt(bt.t) / perBar()) + 1;
-      g.fillStyle = "#7b8599"; g.font = "10px ui-monospace,monospace";
-      g.fillText("bar " + n, x + 4, 106);
+  function chordRow() {
+    const box = $("chords");
+    box.innerHTML = "";
+    const list = SCORE.chord_changes || [];
+    if (!list.length) return;
+    const total = SCORE.song.length_s,
+      px = box.clientWidth || 1200;
+    list.forEach((c, i) => {
+      const t0 = barTime(c.bar);
+      const t1 = i + 1 < list.length ? barTime(list[i + 1].bar) : total;
+      const el = document.createElement("div");
+      el.className = "chd";
+      el.dataset.t0 = t0;
+      el.dataset.t1 = t1;
+      el.style.opacity = 0.45 + 0.55 * (c.sure ?? 0.5);
+      el.title =
+        `bar ${c.bar} · ${c.chord} · the computer is ${Math.round((c.sure ?? 0) * 100)}% sure` +
+        ` · click to hear it`;
+      el.textContent = c.chord;
+      box.appendChild(el);
+    });
+  }
+
+  function subs() {
+    const box = $("subs");
+    box.innerHTML = "";
+    if (!SCORE || !SCORE.phrases) return;
+    const total = SCORE.song.length_s;
+    const px = box.clientWidth || 1200;
+    for (const q of SCORE.phrases) {
+      const t0 = barTime(q.from_bar),
+        t1 = Math.min(total, barTime(q.to_bar + 1));
+      const el = document.createElement("div");
+      el.className = "sub";
+      el.dataset.t0 = t0;
+      el.dataset.t1 = t1;
+      const pair = DOINGWORD[q.doing];
+      el.style.background =
+        (DOING[q.doing] || "#39414f") + (pair ? "26" : "10");
+      el.style.color = DOING[q.doing] || "#4e5768";
+      el.title =
+        `bars ${q.from_bar}–${q.to_bar} · ` +
+        (pair ? pair[1] : "nothing it is sure enough to name") +
+        ` · ${saysWords(q.says)} · click to hear it`;
+      const room = ((t1 - t0) / total) * px;
+      el.textContent = pair && room >= pair[0].length * 5.9 + 9 ? pair[0] : "";
+      box.appendChild(el);
     }
-  });
-
-  for (const q of SCORE.phrases || []) {
-    const q0 = barTime(q.from_bar), q1 = barTime(q.to_bar + 1);
-    if (q1 < a || q0 > b) continue;
-    const hue = DOING[q.doing] || "#39414f";
-    const x0 = Math.max(0, X(q0)), x1 = Math.min(W, X(q1));
-    const pair = DOINGWORD[q.doing];
-    g.fillStyle = hue + (pair ? "22" : "0c");
-    g.fillRect(x0, 56, x1 - x0, 13);
-    g.strokeStyle = hue; g.lineWidth = 1;
-    g.beginPath(); g.moveTo(x0, 56); g.lineTo(x0, 69); g.stroke();
-    g.fillStyle = hue; g.font = "9.5px ui-monospace,monospace";
-    if (pair && x1 - x0 > g.measureText(pair[1]).width + 10) g.fillText(pair[1], x0 + 4, 66);
-    else if (pair && x1 - x0 > 46) g.fillText(pair[0], x0 + 4, 66);
   }
 
-  ZHIT.length = 0;
-  const shelf = [];
-  g.font = "10px ui-monospace,monospace";
-  for (const m of SCORE.moments || []) {
-    const mt = momentTime(m), len = momentSpan(m);
-    if (mt + len < a || mt > b) continue;
-    const x = X(mt);
-    const hue = KIND[m.is] || "#8b93a6";
-    g.fillStyle = hue;
-    g.globalAlpha = .55 + .45*(m.weight ?? m.sure ?? 0);
-    let x1 = x;
-    if (len > 0) {
-      x1 = X(mt + len);
-      g.fillRect(x, 26, Math.max(3, x1 - x), 6);
-      g.globalAlpha = 1;
-      g.fillRect(x, 23, 2, 12);
-    } else {
-      g.beginPath(); g.arc(x, 29, 3.5, 0, 6.284); g.fill();
+  const WINDOW = 8.0;
+  const ZHIT = [];
+  const THIT = [];
+  const PHIT = [];
+
+  function fit(c, h) {
+    const r = c.getBoundingClientRect(),
+      dpr = devicePixelRatio || 1;
+    c.width = Math.max(1, Math.round(r.width * dpr));
+    c.height = Math.round(h * dpr);
+    c.style.height = h + "px";
+    const g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, r.width, h);
+    return [g, r.width];
+  }
+
+  function zoom() {
+    const [g, W] = fit($("zoom"), 110);
+    if (!SCORE) return;
+    const t = aud.currentTime;
+    const wide = Math.min(WINDOW, viewSpan());
+    const a = t - wide / 2,
+      b = t + wide / 2;
+    const X = (s) => ((s - a) / wide) * W;
+    const total = SCORE.song.length_s;
+
+    for (const p of SCORE.parts || []) {
+      const t0 = barTime(p.from_bar),
+        t1 = Math.min(total, barTime(p.to_bar + 1));
+      if (t1 < a || t0 > b) continue;
+      const x0 = Math.max(0, X(t0)),
+        x1 = Math.min(W, X(t1));
+      const c = HUE[p.like] || "#6fa8dc";
+      g.fillStyle = c + "16";
+      g.fillRect(x0, 0, x1 - x0, 110);
+      g.fillStyle = c;
+      g.font = "600 10px ui-monospace,monospace";
+      if (X(t0) >= 0) {
+        g.strokeStyle = c;
+        g.lineWidth = 2;
+        g.beginPath();
+        g.moveTo(X(t0), 0);
+        g.lineTo(X(t0), 110);
+        g.stroke();
+        g.fillText(
+          (p.role ?? p.like).toUpperCase() + " starts here",
+          X(t0) + 6,
+          13,
+        );
+      } else if (x1 - x0 > 96) {
+        g.globalAlpha = 0.7;
+        g.fillText("still in " + (p.role ?? p.like).toUpperCase(), x0 + 6, 13);
+        g.globalAlpha = 1;
+      }
     }
-    g.globalAlpha = 1;
-    const words = shortMoment(m);
-    const tw = g.measureText(words).width;
-    let lane = 0;
-    while (shelf[lane] != null && shelf[lane] > x) lane++;
-    shelf[lane] = x + tw + 14;
-    const ly = 88 - lane*13;
-    g.strokeStyle = hue; g.globalAlpha = .45; g.lineWidth = 1;
-    g.beginPath(); g.moveTo(x, 33); g.lineTo(x, ly - 9); g.stroke();
-    g.globalAlpha = 1;
-    g.fillStyle = "rgba(6,9,14,.92)";
-    g.fillRect(x + 1, ly - 9, tw + 8, 12);
-    g.strokeStyle = hue; g.globalAlpha = .6; g.lineWidth = 1;
-    g.strokeRect(x + 1.5, ly - 8.5, tw + 7, 11);
-    g.globalAlpha = 1;
-    g.fillStyle = hue;
-    g.fillText(words, x + 5, ly);
-    ZHIT.push({x0: Math.min(x, x1) - 5, x1: Math.max(x1, x + tw + 10),
-               y0: ly - 10, y1: ly + 4, m});
-  }
 
-  g.strokeStyle = "#e0655f"; g.lineWidth = 1.5;
-  g.beginPath(); g.moveTo(W/2, 0); g.lineTo(W/2, 110); g.stroke();
-  g.fillStyle = "#4a5364"; g.font = "9.5px ui-monospace,monospace";
-  g.fillText(`${wide.toFixed(1)}s across`, 7, 104);
-}
-
-function tune() {
-  const [g, W] = fit($("tune"), 200);
-  const notes = SCORE.melody || [];
-  if (!notes.length) {
-    g.fillStyle = "#7b8599"; g.font = "12.5px system-ui";
-    g.fillText("The computer could not follow a tune in this song.", 14, 30);
-    return;
-  }
-  const v = SCORE.voice || {};
-  const total = SCORE.song.length_s;
-  const seen = notes.map(n => n.pitch);
-  const lo = Math.floor(Math.min(...seen) - 1);
-  const hi = Math.ceil(Math.max(...seen) + 1);
-  const span = Math.max(8, hi - lo);
-  const perb = SCORE.grid.beats_per_bar;
-  const noteAt = (bar, bt) => atBeat((bar - 1) * perb + ((bt || 1) - 1) + (SHIFT - BASE));
-  const L = 14, top = 34, foot = 176, tall = foot - top;
-  const SUNG = "#7ae8b0", LEAD = "#8fd0ff", BACK = "#c9a6ff";
-  const Y = p => foot - ((p - lo)/span)*tall;
-  const X = s => L + frac(s)*(W - L - 6);
-  const at = n => X(noteAt(n.bar, n.beat));
-
-  for (let p = Math.ceil(lo/12)*12; p <= hi; p += 12) {
-    g.strokeStyle = "#28344a"; g.lineWidth = 1;
-    g.beginPath(); g.moveTo(L, Y(p)); g.lineTo(W-6, Y(p)); g.stroke();
-  }
-
-  /* One band per melodic phrase: where a line of the tune starts and stops. */
-  const per = SCORE.grid.beats_per_bar;
-  const phAt = ph => X(noteAt(ph.from_bar, ph.from_beat));
-  const phTo = ph => X(noteAt(ph.to_bar, ph.to_beat));
-  const mel = SCORE.melody_phrases || [];
-  mel.forEach((q, i) => {
-    const x0 = phAt(q), x1 = phTo(q);
-    if (x1 < L || x0 > W) return;
-    const voice = q.sung_by !== "lead";
-    g.strokeStyle = voice ? STEM.vocals : STEM.other;
-    g.globalAlpha = 0.55;
-    g.lineWidth = 1;
-    g.beginPath();
-    g.moveTo(x0, foot + 6); g.lineTo(x1, foot + 6); g.stroke();
-    g.beginPath(); g.moveTo(x0, foot + 2); g.lineTo(x0, foot + 10); g.stroke();
-    g.globalAlpha = 1;
-  });
-  PHIT.length = 0;
-  for (const q of mel) PHIT.push({ x0: phAt(q), x1: phTo(q), q });
-
-  THIT.length = 0;
-  const hooked = new Set();
-  for (const m of SCORE.moments || []) {
-    if (m.is !== "hook" || !m.for_beats) continue;
-    if (m.again_of == null && !m.notes) continue;
-    const upto = m.bar + m.for_beats/SCORE.grid.beats_per_bar;
-    for (let b = m.bar; b <= upto; b++) hooked.add(b);
-    const a = noteAt(m.bar, m.beat);
-    THIT.push({x0: X(a), x1: X(a + m.for_beats*beat), m});
-  }
-  for (const h of THIT) {
-    g.fillStyle = "rgba(201,166,255,.20)";
-    g.fillRect(h.x0, top - 5, Math.max(3, h.x1 - h.x0), tall + 10);
-  }
-
-  for (const src of ["voice", "lead"]) {
-    const mine = notes.filter(n => (n.from === "lead") === (src === "lead"));
-    if (mine.length < 2) continue;
-    g.strokeStyle = src === "lead" ? LEAD : SUNG;
-    g.globalAlpha = .5; g.lineWidth = 1.2;
-    g.beginPath();
-    let open = false;
-    for (let i = 0; i < mine.length; i++) {
-      const x = at(mine[i]), y = Y(mine[i].pitch);
-      const near = i > 0 && barTime(mine[i].bar) - barTime(mine[i-1].bar) <= BAR;
-      if (near && open) g.lineTo(x, y);
-      else { g.moveTo(x, y); open = true; }
-    }
-    g.stroke();
-    g.globalAlpha = 1;
-  }
-
-  for (const n of notes) {
-    const x = at(n);
-    const w = Math.max(2, ((n.held_beats*beat)/viewSpan())*(W - L - 6));
-    const hot = hooked.has(n.bar);
-    g.fillStyle = hot ? BACK : n.from === "lead" ? LEAD : SUNG;
-    g.globalAlpha = 1;
-    g.fillRect(x, Y(n.pitch) - 2.3, Math.max(3, w), 4.6);
-  }
-  g.globalAlpha = 1;
-
-  const shelf = [];
-  g.font = "10px ui-monospace,monospace";
-  for (const h of THIT) {
-    const m = h.m;
-    const words = m.again_of != null ? `same tune as bar ${m.again_of}`
-                : `${m.notes} notes on one pitch`;
-    const tw = g.measureText(words).width;
-    let lane = 0;
-    while (shelf[lane] != null && shelf[lane] > h.x0) lane++;
-    shelf[lane] = h.x0 + tw + 12;
-    const ly = 14 + (lane % 2) * 12;
-    g.strokeStyle = "#c8a2ff"; g.globalAlpha = .35; g.lineWidth = 1;
-    g.beginPath(); g.moveTo(h.x0, ly + 3); g.lineTo(h.x0, top - 5); g.stroke();
-    g.globalAlpha = 1;
-    g.fillStyle = "#c8a2ff";
-    g.fillText(words, h.x0 + 4, ly);
-  }
-
-  g.fillStyle = "#8d97ab"; g.font = "9.5px ui-monospace,monospace";
-  g.fillText(`${notes.length} notes in all`, L, 134);
-  if (v.sure != null && v.sure < 0.5) {
-    g.fillStyle = "#e0655f";
-    g.fillText("the pitch reading is unreliable in this song — treat the tune with suspicion",
-               L + 110, 134);
-  }
-}
-
-const CURVES = [
-  ["intensity",  "Loudness",   "#e8a33d", "how loud this bar is"],
-  ["pace",       "Busyness",   "#7ad4c8", "notes and hits per beat, 1.0 is ordinary"],
-  ["brightness", "Brightness", "#f2c14e", "how much of the sound is treble"],
-  ["air",        "Air",        "#8fd6ff", "the very top, above 6 kHz \u2014 cymbals, breath, sparkle"],
-  ["pump",       "Pump",       "#d16bd1", "how hard the track ducks on every beat"],
-  ["width",      "Width",      "#9fd18b", "how far the sound spreads either side of the middle"],
-  ["weight",     "Weight",     "#c97f4a", "how much of the sound sits below 120 Hz \u2014 how heavy it is"],
-  ["floor",      "Floor",      "#8a6bd1", "below 60 Hz, the part you feel in your chest rather than hear"],
-  ["noisy",      "Noise",      "#d98e8e", "how much is noise \u2014 distortion, cymbals, breath \u2014 rather than clear notes"],
-  ["sustained",  "Sustained",  "#7fa8d4", "the share of the bar the sound stays at or above half its own peak: high means it holds, low means it hits and stops"],
-];
-
-function motion() {
-  const m = SCORE.motion;
-  const el = $("motion");
-  if (!m || !Array.isArray(m.moving) || !m.moving.length) {
-    if (el) { el.height = 0; el.style.height = "0px"; }
-    const says = $("motionsays");
-    if (says) says.textContent = "This song has no motion track.";
-    return;
-  }
-  const H = 132, L = 78, R = 46;
-  const [g, W] = fit(el, H);
-  const from = m.from_bar == null ? FIRSTBAR : m.from_bar;
-  const span = W - L - R;
-  const COLOUR = { rising: "#7ae8b0", steady: "#39435a", falling: "#8fd0ff" };
-  const xOf = t => L + frac(t) * span;
-  for (let i = 0; i < m.moving.length; i++) {
-    const t0 = barTime(i + from), t1 = barTime(i + from + 1);
-    if (t1 < VIEW.a || t0 > VIEW.b) continue;
-    const x0 = xOf(t0), x1 = xOf(t1);
-    g.fillStyle = COLOUR[m.moving[i]] || COLOUR.steady;
-    g.globalAlpha = m.moving[i] === "steady" ? .5 : .85;
-    g.fillRect(x0, 10, Math.max(1, x1 - x0), 16);
-  }
-  g.globalAlpha = 1;
-  const y0 = 34, hh = H - y0 - 14;
-  const reach = (v, lo, hi) => {
-    const got = v.filter(x => x != null);
-    if (!got.length) return null;
-    const a = lo != null ? lo : Math.min(...got), b = hi != null ? hi : Math.max(...got);
-    return [a, Math.max(b, a + 1e-6)];
-  };
-  const plot = (v, hue, fill, lo, hi) => {
-    if (!Array.isArray(v) || !v.length) return false;
-    const range = reach(v, lo, hi);
-    if (!range) return false;
-    g.beginPath();
-    let open = false;
-    for (let i = 0; i < v.length; i++) {
-      const t = barTime(i + from);
-      if (t < VIEW.a - BAR || t > VIEW.b + BAR) continue;
-      if (v[i] == null) { open = false; continue; }
-      const x = xOf(t);
-      const y = y0 + hh - ((v[i] - range[0]) / (range[1] - range[0])) * hh;
-      open ? g.lineTo(x, y) : g.moveTo(x, y);
-      open = true;
-    }
-    if (!open) return false;
-    g.strokeStyle = hue; g.lineWidth = fill ? 1.6 : 1.3;
-    g.globalAlpha = fill ? 1 : .85;
-    g.stroke();
-    if (fill) {
-      g.lineTo(xOf(VIEW.b), y0 + hh); g.lineTo(xOf(VIEW.a), y0 + hh); g.closePath();
-      g.fillStyle = "rgba(232,163,61,.16)"; g.fill();
-    }
-    g.globalAlpha = 1;
-    return true;
-  };
-  const bars = SCORE.bars || {};
-  const eFrom = FIRSTBAR;
-  const energy = Array.isArray(bars.intensity) && from === eFrom ? bars.intensity : null;
-  plot(energy, "#6f7ea0", false);
-  const mark = (list, up) => {
-    for (const x of list || []) {
-      const t = barTime(x.bar);
-      if (t < VIEW.a || t > VIEW.b) continue;
-      const px = xOf(t), py = up ? 34 : H - 12;
-      g.fillStyle = up ? "#7ae8b0" : "#8fd0ff";
-      g.strokeStyle = g.fillStyle; g.lineWidth = 1.2;
+    const per = SCORE.grid.beats_per_bar;
+    SCORE.beats.forEach((bt, i) => {
+      if (bt.t < a || bt.t > b) return;
+      const x = X(bt.t);
+      const down = (((i - (SHIFT - BASE)) % per) + per) % per === firstIndex();
+      g.strokeStyle = down ? "#ffffff" : "#e8a33d";
+      g.lineWidth = down ? 2 : 1;
+      g.globalAlpha = down ? 1 : 0.5;
       g.beginPath();
-      g.moveTo(px, up ? py - 7 : py + 7);
-      g.lineTo(px - 5, up ? py : py);
-      g.lineTo(px + 5, up ? py : py);
-      g.closePath();
-      x.big ? g.fill() : g.stroke();
-    }
-  };
-  mark(m.slams, true);
-  mark(m.ebbs, false);
-  g.fillStyle = "#8a93a6"; g.font = "600 10px ui-monospace,monospace";
-  g.fillText("DOING", 7, 22);
-  g.fillStyle = "#e8a33d"; g.fillText("BUILD", 7, 46);
-  g.fillStyle = "#6f7ea0"; g.fillText("LOUDNESS", 7, 60);
-  const says = $("motionsays");
-  if (says) {
-    const t = m.tells;
-    says.innerHTML = t == null
-      ? "The build row has no reliability figure on this song: nothing here steps up hard enough to call a drop."
-      : ("On this song the build row sits at the <b>" + t + "th percentile</b> of the song in the eight bars "
-         + "before a drop" + (t >= 65 ? " \u2014 it is worth following here."
-             : t >= 50 ? " \u2014 weak here, treat it with care."
-             : " \u2014 it does not work on this song, do not light off it.")
-         + " Chance is 50.");
-  }
-}
+      g.moveTo(x, down ? 22 : 36);
+      g.lineTo(x, 54);
+      g.stroke();
+      g.globalAlpha = 1;
+      if (down) {
+        const n = Math.round(beatAt(bt.t) / perBar()) + 1;
+        g.fillStyle = "#7b8599";
+        g.font = "10px ui-monospace,monospace";
+        g.fillText("bar " + n, x + 4, 106);
+      }
+    });
 
-function curves() {
-  const tense = Array.isArray(SCORE.tension) ? SCORE.tension : null;
-  const rows = CURVES.filter(c => Array.isArray((SCORE.bars || {})[c[0]]));
-  /* Six rows in 190px left eighteen pixels of drawing height each, so a change
-     from 0.09 to 0.79 -- the whole distance between a breakdown and a drop --
-     came out as twelve pixels of wobble. The data was never flat; there was
-     nowhere to draw it. */
-  const ROW = 58;
-  const [g, W] = fit($("curves"), rows.length * ROW + (tense ? 46 : 0));
-  const b = SCORE.bars || {};
-  const mine = rows;
-  if (!mine.length) return;
-  const h = ROW, L = 78;
-  const bar = Math.max(0, barAtTime(aud.currentTime) - FIRSTBAR);
-  const tall = mine.length * ROW + (tense ? 46 : 0);
-  for (let k = 1; k < TEMPO.length; k++) {
-    const at = TEMPO[k].at_s;
-    if (at < VIEW.a || at > VIEW.b) continue;
-    const x = L + frac(at) * (W - L - 46);
-    g.save();
-    g.strokeStyle = "#e8a33d"; g.lineWidth = 1; g.setLineDash([3, 3]); g.globalAlpha = .85;
-    g.beginPath(); g.moveTo(x, 0); g.lineTo(x, tall); g.stroke();
-    g.restore();
-    g.fillStyle = "#e8a33d"; g.font = "600 9px ui-monospace,monospace";
-    g.fillText(`${Math.round(TEMPO[k - 1].bpm)}\u2192${Math.round(TEMPO[k].bpm)} bpm`, x + 3, 9);
-  }
-  mine.forEach(([key, name, hue, why], row) => {
-    const v = b[key], y0 = row*h;
-    const got = v.filter(x => x != null);
-    /* Scaled to what this lane actually does, not to its maximum: width lives
-       between 0.26 and 0.83 and spent half its height drawing the empty space
-       under 0.26. */
-    const hi = Math.max(...got), lo = Math.min(...got);
-    const reach = Math.max(1e-6, hi - lo);
-    const at = x => (x - lo) / reach;
-    if (row) {
-      g.strokeStyle = "#131a26"; g.lineWidth = 1;
-      g.beginPath(); g.moveTo(0, y0); g.lineTo(W, y0); g.stroke();
+    for (const q of SCORE.phrases || []) {
+      const q0 = barTime(q.from_bar),
+        q1 = barTime(q.to_bar + 1);
+      if (q1 < a || q0 > b) continue;
+      const hue = DOING[q.doing] || "#39414f";
+      const x0 = Math.max(0, X(q0)),
+        x1 = Math.min(W, X(q1));
+      const pair = DOINGWORD[q.doing];
+      g.fillStyle = hue + (pair ? "22" : "0c");
+      g.fillRect(x0, 56, x1 - x0, 13);
+      g.strokeStyle = hue;
+      g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(x0, 56);
+      g.lineTo(x0, 69);
+      g.stroke();
+      g.fillStyle = hue;
+      g.font = "9.5px ui-monospace,monospace";
+      if (pair && x1 - x0 > g.measureText(pair[1]).width + 10)
+        g.fillText(pair[1], x0 + 4, 66);
+      else if (pair && x1 - x0 > 46) g.fillText(pair[0], x0 + 4, 66);
     }
-    /* Bar to bar these reverse direction on about three bars in five, which is
-       a coin toss dressed as a measurement. The faint line is every bar as
-       measured; the bold one is the median across four bars, a phrase, which is
-       the shape a person hears and the shape a light should follow. */
-    const line = (pick, alpha, wide) => {
-      g.strokeStyle = hue; g.lineWidth = wide; g.globalAlpha = alpha;
+
+    ZHIT.length = 0;
+    const shelf = [];
+    g.font = "10px ui-monospace,monospace";
+    for (const m of SCORE.moments || []) {
+      const mt = momentTime(m),
+        len = momentSpan(m);
+      if (mt + len < a || mt > b) continue;
+      const x = X(mt);
+      const hue = KIND[m.is] || "#8b93a6";
+      g.fillStyle = hue;
+      g.globalAlpha = 0.55 + 0.45 * (m.weight ?? m.sure ?? 0);
+      let x1 = x;
+      if (len > 0) {
+        x1 = X(mt + len);
+        g.fillRect(x, 26, Math.max(3, x1 - x), 6);
+        g.globalAlpha = 1;
+        g.fillRect(x, 23, 2, 12);
+      } else {
+        g.beginPath();
+        g.arc(x, 29, 3.5, 0, 6.284);
+        g.fill();
+      }
+      g.globalAlpha = 1;
+      const words = shortMoment(m);
+      const tw = g.measureText(words).width;
+      let lane = 0;
+      while (shelf[lane] != null && shelf[lane] > x) lane++;
+      shelf[lane] = x + tw + 14;
+      const ly = 88 - lane * 13;
+      g.strokeStyle = hue;
+      g.globalAlpha = 0.45;
+      g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(x, 33);
+      g.lineTo(x, ly - 9);
+      g.stroke();
+      g.globalAlpha = 1;
+      g.fillStyle = "rgba(6,9,14,.92)";
+      g.fillRect(x + 1, ly - 9, tw + 8, 12);
+      g.strokeStyle = hue;
+      g.globalAlpha = 0.6;
+      g.lineWidth = 1;
+      g.strokeRect(x + 1.5, ly - 8.5, tw + 7, 11);
+      g.globalAlpha = 1;
+      g.fillStyle = hue;
+      g.fillText(words, x + 5, ly);
+      ZHIT.push({
+        x0: Math.min(x, x1) - 5,
+        x1: Math.max(x1, x + tw + 10),
+        y0: ly - 10,
+        y1: ly + 4,
+        m,
+      });
+    }
+
+    g.strokeStyle = "#e0655f";
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.moveTo(W / 2, 0);
+    g.lineTo(W / 2, 110);
+    g.stroke();
+    g.fillStyle = "#4a5364";
+    g.font = "9.5px ui-monospace,monospace";
+    g.fillText(`${wide.toFixed(1)}s across`, 7, 104);
+  }
+
+  function tune() {
+    const [g, W] = fit($("tune"), 200);
+    const notes = SCORE.melody || [];
+    if (!notes.length) {
+      g.fillStyle = "#7b8599";
+      g.font = "12.5px system-ui";
+      g.fillText("The computer could not follow a tune in this song.", 14, 30);
+      return;
+    }
+    const v = SCORE.voice || {};
+    const total = SCORE.song.length_s;
+    const seen = notes.map((n) => n.pitch);
+    const lo = Math.floor(Math.min(...seen) - 1);
+    const hi = Math.ceil(Math.max(...seen) + 1);
+    const span = Math.max(8, hi - lo);
+    const perb = SCORE.grid.beats_per_bar;
+    const noteAt = (bar, bt) =>
+      atBeat((bar - 1) * perb + ((bt || 1) - 1) + (SHIFT - BASE));
+    const L = 14,
+      top = 34,
+      foot = 176,
+      tall = foot - top;
+    const SUNG = "#7ae8b0",
+      LEAD = "#8fd0ff",
+      BACK = "#c9a6ff";
+    const Y = (p) => foot - ((p - lo) / span) * tall;
+    const X = (s) => L + frac(s) * (W - L - 6);
+    const at = (n) => X(noteAt(n.bar, n.beat));
+
+    for (let p = Math.ceil(lo / 12) * 12; p <= hi; p += 12) {
+      g.strokeStyle = "#28344a";
+      g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(L, Y(p));
+      g.lineTo(W - 6, Y(p));
+      g.stroke();
+    }
+
+    /* One band per melodic phrase: where a line of the tune starts and stops. */
+    const per = SCORE.grid.beats_per_bar;
+    const phAt = (ph) => X(noteAt(ph.from_bar, ph.from_beat));
+    const phTo = (ph) => X(noteAt(ph.to_bar, ph.to_beat));
+    const mel = SCORE.melody_phrases || [];
+    mel.forEach((q, i) => {
+      const x0 = phAt(q),
+        x1 = phTo(q);
+      if (x1 < L || x0 > W) return;
+      const voice = q.sung_by !== "lead";
+      g.strokeStyle = voice ? STEM.vocals : STEM.other;
+      g.globalAlpha = 0.55;
+      g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(x0, foot + 6);
+      g.lineTo(x1, foot + 6);
+      g.stroke();
+      g.beginPath();
+      g.moveTo(x0, foot + 2);
+      g.lineTo(x0, foot + 10);
+      g.stroke();
+      g.globalAlpha = 1;
+    });
+    PHIT.length = 0;
+    for (const q of mel) PHIT.push({ x0: phAt(q), x1: phTo(q), q });
+
+    THIT.length = 0;
+    const hooked = new Set();
+    for (const m of SCORE.moments || []) {
+      if (m.is !== "hook" || !m.for_beats) continue;
+      if (m.again_of == null && !m.notes) continue;
+      const upto = m.bar + m.for_beats / SCORE.grid.beats_per_bar;
+      for (let b = m.bar; b <= upto; b++) hooked.add(b);
+      const a = noteAt(m.bar, m.beat);
+      THIT.push({ x0: X(a), x1: X(a + m.for_beats * beat), m });
+    }
+    for (const h of THIT) {
+      g.fillStyle = "rgba(201,166,255,.20)";
+      g.fillRect(h.x0, top - 5, Math.max(3, h.x1 - h.x0), tall + 10);
+    }
+
+    for (const src of ["voice", "lead"]) {
+      const mine = notes.filter(
+        (n) => (n.from === "lead") === (src === "lead"),
+      );
+      if (mine.length < 2) continue;
+      g.strokeStyle = src === "lead" ? LEAD : SUNG;
+      g.globalAlpha = 0.5;
+      g.lineWidth = 1.2;
       g.beginPath();
       let open = false;
-      for (let i = 0; i < v.length; i++) {
-        const val = pick(i);
-        if (val == null) { open = false; continue; }
-        const t = barTime(i + FIRSTBAR);
-        if (t + BAR < VIEW.a || t > VIEW.b) { open = false; continue; }
-        const x = L + frac(t) * (W - L - 46);
-        const y = y0 + h - 8 - at(val) * (h - 20);
-        open ? g.lineTo(x, y) : g.moveTo(x, y);
-        open = true;
+      for (let i = 0; i < mine.length; i++) {
+        const x = at(mine[i]),
+          y = Y(mine[i].pitch);
+        const near =
+          i > 0 && barTime(mine[i].bar) - barTime(mine[i - 1].bar) <= BAR;
+        if (near && open) g.lineTo(x, y);
+        else {
+          g.moveTo(x, y);
+          open = true;
+        }
       }
       g.stroke();
       g.globalAlpha = 1;
-    };
-    const smooth = i => {
-      const near = [];
-      for (let k = i - 2; k <= i + 1; k++) if (v[k] != null) near.push(v[k]);
-      if (!near.length) return null;
-      near.sort((x, y) => x - y);
-      return near[near.length >> 1];
-    };
-    line(i => v[i], .28, 1);
-    line(smooth, 1, 1.7);
-    g.fillStyle = hue; g.font = "600 10px ui-monospace,monospace";
-    g.fillText(name.toUpperCase(), 7, y0 + 13);
-    g.fillStyle = "#4a5364"; g.font = "8px ui-monospace,monospace";
-    g.fillText(hi.toFixed(2), 7, y0 + 24);
-    g.fillText(lo.toFixed(2), 7, y0 + h - 6);
-    const now = v[bar];
-    g.fillStyle = now == null ? "#3a4152" : hue;
-    g.font = "600 12px ui-monospace,monospace";
-    g.fillText(now == null ? "\u2014" : now.toFixed(2), W - 40, y0 + h/2 + 4);
-  });
+    }
 
-  /* tension runs per beat, not per bar, so it is the one curve here that can
+    for (const n of notes) {
+      const x = at(n);
+      const w = Math.max(2, ((n.held_beats * beat) / viewSpan()) * (W - L - 6));
+      const hot = hooked.has(n.bar);
+      g.fillStyle = hot ? BACK : n.from === "lead" ? LEAD : SUNG;
+      g.globalAlpha = 1;
+      g.fillRect(x, Y(n.pitch) - 2.3, Math.max(3, w), 4.6);
+    }
+    g.globalAlpha = 1;
+
+    const shelf = [];
+    g.font = "10px ui-monospace,monospace";
+    for (const h of THIT) {
+      const m = h.m;
+      const words =
+        m.again_of != null
+          ? `same tune as bar ${m.again_of}`
+          : `${m.notes} notes on one pitch`;
+      const tw = g.measureText(words).width;
+      let lane = 0;
+      while (shelf[lane] != null && shelf[lane] > h.x0) lane++;
+      shelf[lane] = h.x0 + tw + 12;
+      const ly = 14 + (lane % 2) * 12;
+      g.strokeStyle = "#c8a2ff";
+      g.globalAlpha = 0.35;
+      g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(h.x0, ly + 3);
+      g.lineTo(h.x0, top - 5);
+      g.stroke();
+      g.globalAlpha = 1;
+      g.fillStyle = "#c8a2ff";
+      g.fillText(words, h.x0 + 4, ly);
+    }
+
+    g.fillStyle = "#8d97ab";
+    g.font = "9.5px ui-monospace,monospace";
+    g.fillText(`${notes.length} notes in all`, L, 134);
+    if (v.sure != null && v.sure < 0.5) {
+      g.fillStyle = "#e0655f";
+      g.fillText(
+        "the pitch reading is unreliable in this song — treat the tune with suspicion",
+        L + 110,
+        134,
+      );
+    }
+  }
+
+  const CURVES = [
+    ["intensity", "Loudness", "#e8a33d", "how loud this bar is"],
+    ["pace", "Busyness", "#7ad4c8", "notes and hits per beat, 1.0 is ordinary"],
+    ["brightness", "Brightness", "#f2c14e", "how much of the sound is treble"],
+    [
+      "air",
+      "Air",
+      "#8fd6ff",
+      "the very top, above 6 kHz \u2014 cymbals, breath, sparkle",
+    ],
+    ["pump", "Pump", "#d16bd1", "how hard the track ducks on every beat"],
+    [
+      "width",
+      "Width",
+      "#9fd18b",
+      "how far the sound spreads either side of the middle",
+    ],
+    [
+      "weight",
+      "Weight",
+      "#c97f4a",
+      "how much of the sound sits below 120 Hz \u2014 how heavy it is",
+    ],
+    [
+      "floor",
+      "Floor",
+      "#8a6bd1",
+      "below 60 Hz, the part you feel in your chest rather than hear",
+    ],
+    [
+      "noisy",
+      "Noise",
+      "#d98e8e",
+      "how much is noise \u2014 distortion, cymbals, breath \u2014 rather than clear notes",
+    ],
+    [
+      "sustained",
+      "Sustained",
+      "#7fa8d4",
+      "the share of the bar the sound stays at or above half its own peak: high means it holds, low means it hits and stops",
+    ],
+  ];
+
+  function motion() {
+    const m = SCORE.motion;
+    const el = $("motion");
+    if (!m || !Array.isArray(m.moving) || !m.moving.length) {
+      if (el) {
+        el.height = 0;
+        el.style.height = "0px";
+      }
+      const says = $("motionsays");
+      if (says) says.textContent = "This song has no motion track.";
+      return;
+    }
+    const H = 132,
+      L = 78,
+      R = 46;
+    const [g, W] = fit(el, H);
+    const from = m.from_bar == null ? FIRSTBAR : m.from_bar;
+    const span = W - L - R;
+    const COLOUR = { rising: "#7ae8b0", steady: "#39435a", falling: "#8fd0ff" };
+    const xOf = (t) => L + frac(t) * span;
+    for (let i = 0; i < m.moving.length; i++) {
+      const t0 = barTime(i + from),
+        t1 = barTime(i + from + 1);
+      if (t1 < VIEW.a || t0 > VIEW.b) continue;
+      const x0 = xOf(t0),
+        x1 = xOf(t1);
+      g.fillStyle = COLOUR[m.moving[i]] || COLOUR.steady;
+      g.globalAlpha = m.moving[i] === "steady" ? 0.5 : 0.85;
+      g.fillRect(x0, 10, Math.max(1, x1 - x0), 16);
+    }
+    g.globalAlpha = 1;
+    const y0 = 34,
+      hh = H - y0 - 14;
+    const reach = (v, lo, hi) => {
+      const got = v.filter((x) => x != null);
+      if (!got.length) return null;
+      const a = lo != null ? lo : Math.min(...got),
+        b = hi != null ? hi : Math.max(...got);
+      return [a, Math.max(b, a + 1e-6)];
+    };
+    const plot = (v, hue, fill, lo, hi) => {
+      if (!Array.isArray(v) || !v.length) return false;
+      const range = reach(v, lo, hi);
+      if (!range) return false;
+      g.beginPath();
+      let open = false;
+      for (let i = 0; i < v.length; i++) {
+        const t = barTime(i + from);
+        if (t < VIEW.a - BAR || t > VIEW.b + BAR) continue;
+        if (v[i] == null) {
+          open = false;
+          continue;
+        }
+        const x = xOf(t);
+        const y = y0 + hh - ((v[i] - range[0]) / (range[1] - range[0])) * hh;
+        open ? g.lineTo(x, y) : g.moveTo(x, y);
+        open = true;
+      }
+      if (!open) return false;
+      g.strokeStyle = hue;
+      g.lineWidth = fill ? 1.6 : 1.3;
+      g.globalAlpha = fill ? 1 : 0.85;
+      g.stroke();
+      if (fill) {
+        g.lineTo(xOf(VIEW.b), y0 + hh);
+        g.lineTo(xOf(VIEW.a), y0 + hh);
+        g.closePath();
+        g.fillStyle = "rgba(232,163,61,.16)";
+        g.fill();
+      }
+      g.globalAlpha = 1;
+      return true;
+    };
+    const bars = SCORE.bars || {};
+    const eFrom = FIRSTBAR;
+    const energy =
+      Array.isArray(bars.intensity) && from === eFrom ? bars.intensity : null;
+    plot(energy, "#6f7ea0", false);
+    const mark = (list, up) => {
+      for (const x of list || []) {
+        const t = barTime(x.bar);
+        if (t < VIEW.a || t > VIEW.b) continue;
+        const px = xOf(t),
+          py = up ? 34 : H - 12;
+        g.fillStyle = up ? "#7ae8b0" : "#8fd0ff";
+        g.strokeStyle = g.fillStyle;
+        g.lineWidth = 1.2;
+        g.beginPath();
+        g.moveTo(px, up ? py - 7 : py + 7);
+        g.lineTo(px - 5, up ? py : py);
+        g.lineTo(px + 5, up ? py : py);
+        g.closePath();
+        x.big ? g.fill() : g.stroke();
+      }
+    };
+    mark(m.slams, true);
+    mark(m.ebbs, false);
+    g.fillStyle = "#8a93a6";
+    g.font = "600 10px ui-monospace,monospace";
+    g.fillText("DOING", 7, 22);
+    g.fillStyle = "#e8a33d";
+    g.fillText("BUILD", 7, 46);
+    g.fillStyle = "#6f7ea0";
+    g.fillText("LOUDNESS", 7, 60);
+    const says = $("motionsays");
+    if (says) {
+      const t = m.tells;
+      says.innerHTML =
+        t == null
+          ? "The build row has no reliability figure on this song: nothing here steps up hard enough to call a drop."
+          : "On this song the build row sits at the <b>" +
+            t +
+            "th percentile</b> of the song in the eight bars " +
+            "before a drop" +
+            (t >= 65
+              ? " \u2014 it is worth following here."
+              : t >= 50
+                ? " \u2014 weak here, treat it with care."
+                : " \u2014 it does not work on this song, do not light off it.") +
+            " Chance is 50.";
+    }
+  }
+
+  function curves() {
+    const tense = Array.isArray(SCORE.tension) ? SCORE.tension : null;
+    const rows = CURVES.filter((c) => Array.isArray((SCORE.bars || {})[c[0]]));
+    /* Six rows in 190px left eighteen pixels of drawing height each, so a change
+     from 0.09 to 0.79 -- the whole distance between a breakdown and a drop --
+     came out as twelve pixels of wobble. The data was never flat; there was
+     nowhere to draw it. */
+    const ROW = 58;
+    const [g, W] = fit($("curves"), rows.length * ROW + (tense ? 46 : 0));
+    const b = SCORE.bars || {};
+    const mine = rows;
+    if (!mine.length) return;
+    const h = ROW,
+      L = 78;
+    const bar = Math.max(0, barAtTime(aud.currentTime) - FIRSTBAR);
+    const tall = mine.length * ROW + (tense ? 46 : 0);
+    for (let k = 1; k < TEMPO.length; k++) {
+      const at = TEMPO[k].at_s;
+      if (at < VIEW.a || at > VIEW.b) continue;
+      const x = L + frac(at) * (W - L - 46);
+      g.save();
+      g.strokeStyle = "#e8a33d";
+      g.lineWidth = 1;
+      g.setLineDash([3, 3]);
+      g.globalAlpha = 0.85;
+      g.beginPath();
+      g.moveTo(x, 0);
+      g.lineTo(x, tall);
+      g.stroke();
+      g.restore();
+      g.fillStyle = "#e8a33d";
+      g.font = "600 9px ui-monospace,monospace";
+      g.fillText(
+        `${Math.round(TEMPO[k - 1].bpm)}\u2192${Math.round(TEMPO[k].bpm)} bpm`,
+        x + 3,
+        9,
+      );
+    }
+    mine.forEach(([key, name, hue, why], row) => {
+      const v = b[key],
+        y0 = row * h;
+      const got = v.filter((x) => x != null);
+      /* Scaled to what this lane actually does, not to its maximum: width lives
+       between 0.26 and 0.83 and spent half its height drawing the empty space
+       under 0.26. */
+      const hi = Math.max(...got),
+        lo = Math.min(...got);
+      const reach = Math.max(1e-6, hi - lo);
+      const at = (x) => (x - lo) / reach;
+      if (row) {
+        g.strokeStyle = "#131a26";
+        g.lineWidth = 1;
+        g.beginPath();
+        g.moveTo(0, y0);
+        g.lineTo(W, y0);
+        g.stroke();
+      }
+      /* Bar to bar these reverse direction on about three bars in five, which is
+       a coin toss dressed as a measurement. The faint line is every bar as
+       measured; the bold one is the median across four bars, a phrase, which is
+       the shape a person hears and the shape a light should follow. */
+      const line = (pick, alpha, wide) => {
+        g.strokeStyle = hue;
+        g.lineWidth = wide;
+        g.globalAlpha = alpha;
+        g.beginPath();
+        let open = false;
+        for (let i = 0; i < v.length; i++) {
+          const val = pick(i);
+          if (val == null) {
+            open = false;
+            continue;
+          }
+          const t = barTime(i + FIRSTBAR);
+          if (t + BAR < VIEW.a || t > VIEW.b) {
+            open = false;
+            continue;
+          }
+          const x = L + frac(t) * (W - L - 46);
+          const y = y0 + h - 8 - at(val) * (h - 20);
+          open ? g.lineTo(x, y) : g.moveTo(x, y);
+          open = true;
+        }
+        g.stroke();
+        g.globalAlpha = 1;
+      };
+      const smooth = (i) => {
+        const near = [];
+        for (let k = i - 2; k <= i + 1; k++) if (v[k] != null) near.push(v[k]);
+        if (!near.length) return null;
+        near.sort((x, y) => x - y);
+        return near[near.length >> 1];
+      };
+      line((i) => v[i], 0.28, 1);
+      line(smooth, 1, 1.7);
+      g.fillStyle = hue;
+      g.font = "600 10px ui-monospace,monospace";
+      g.fillText(name.toUpperCase(), 7, y0 + 13);
+      g.fillStyle = "#4a5364";
+      g.font = "8px ui-monospace,monospace";
+      g.fillText(hi.toFixed(2), 7, y0 + 24);
+      g.fillText(lo.toFixed(2), 7, y0 + h - 6);
+      const now = v[bar];
+      g.fillStyle = now == null ? "#3a4152" : hue;
+      g.font = "600 12px ui-monospace,monospace";
+      g.fillText(
+        now == null ? "\u2014" : now.toFixed(2),
+        W - 40,
+        y0 + h / 2 + 4,
+      );
+    });
+
+    /* tension runs per beat, not per bar, so it is the one curve here that can
      show a build happening rather than a bar having happened. The releases are
      where it breaks -- the drops -- and they are what a rig waits for. */
-  if (!tense) return;
-  const y0 = rows.length * ROW, hh = 46, per = SCORE.grid.beats_per_bar;
-  g.strokeStyle = "#131a26"; g.lineWidth = 1;
-  g.beginPath(); g.moveTo(0, y0); g.lineTo(W, y0); g.stroke();
-  const beats = SCORE.beats || [];
-  const tAt = i => (beats[i] && beats[i].t != null)
-    ? beats[i].t : atBeat(i + (SHIFT - BASE));
-  g.strokeStyle = "#e0655f"; g.lineWidth = 1.5;
-  g.beginPath();
-  let open = false;
-  for (let i = 0; i < tense.length; i++) {
-    const t = tAt(i);
-    if (t < VIEW.a - 1 || t > VIEW.b + 1) { open = false; continue; }
-    const x = L + frac(t) * (W - L - 46);
-    const y = y0 + hh - 8 - (tense[i] || 0) * (hh - 20);
-    open ? g.lineTo(x, y) : g.moveTo(x, y);
-    open = true;
-  }
-  g.stroke();
-  for (const r of SCORE.releases || []) {
-    const t = r.at_s != null ? r.at_s
-      : atBeat((r.bar - 1) * per + ((r.beat || 1) - 1) + (SHIFT - BASE));
-    if (t < VIEW.a || t > VIEW.b) continue;
-    const x = L + frac(t) * (W - L - 46);
-    g.strokeStyle = "#f2c14e"; g.lineWidth = 1.5; g.globalAlpha = .9;
-    g.beginPath(); g.moveTo(x, y0 + 3); g.lineTo(x, y0 + hh - 3); g.stroke();
-    g.fillStyle = "#f2c14e"; g.font = "8.5px ui-monospace,monospace";
-    g.fillText("drop", x + 3, y0 + 11);
-    g.globalAlpha = 1;
-  }
-  g.fillStyle = "#e0655f"; g.font = "600 10px ui-monospace,monospace";
-  g.fillText("TENSION", 7, y0 + 13);
-  g.fillStyle = "#4a5364"; g.font = "8px ui-monospace,monospace";
-  g.fillText("per beat", 7, y0 + hh - 5);
-  let bi = 0, gap = Infinity;
-  for (let i = 0; i < tense.length; i++) {
-    const d = Math.abs(tAt(i) - aud.currentTime);
-    if (d < gap) { gap = d; bi = i; }
-  }
-  const now = gap > 2 ? null : tense[bi];
-  g.fillStyle = now == null ? "#3a4152" : "#e0655f";
-  g.font = "600 12px ui-monospace,monospace";
-  g.fillText(now == null ? "\u2014" : now.toFixed(2), W - 40, y0 + hh/2 + 4);
-}
-
-function beatGrid() {
-  const gr = SCORE.groove || {};
-  const names = LANES.filter(n => gr[n] && gr[n].strength);
-  const [g, W] = fit($("beat"), 150);
-  if (!names.length) {
-    g.fillStyle = "#7b8599"; g.font = "12.5px system-ui";
-    g.fillText("No rhythm pattern in this score yet.", 14, 28);
-    return;
-  }
-  const per = gr[names[0]].per_bar || 16;
-  const L = 78, R = 150, cell = Math.min(34, (W - L - R) / per), h = 150 / names.length;
-  names.forEach((n, row) => {
-    const y = row * h, d = gr[n];
-    g.fillStyle = STEM[n]; g.font = "600 10px ui-monospace,monospace";
-    g.fillText(LANEWORD[n].toUpperCase(), 7, y + h / 2 + 3);
-    for (let i = 0; i < per; i++) {
-      const v = d.strength[i] ?? 0;
-      const x = L + i * cell;
-      const beat = i % 4 === 0;
-      g.fillStyle = beat ? "#1a2230" : "#12181f";
-      g.fillRect(x + 1, y + 6, cell - 2, h - 14);
-      if (v > 0.05) {
-        g.fillStyle = STEM[n];
-        g.globalAlpha = Math.min(1, 0.15 + v * 1.2);
-        const tall = Math.max(3, v * (h - 16));
-        g.fillRect(x + 1, y + h - 8 - tall, cell - 2, tall);
-        g.globalAlpha = 1;
+    if (!tense) return;
+    const y0 = rows.length * ROW,
+      hh = 46,
+      per = SCORE.grid.beats_per_bar;
+    g.strokeStyle = "#131a26";
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(0, y0);
+    g.lineTo(W, y0);
+    g.stroke();
+    const beats = SCORE.beats || [];
+    const tAt = (i) =>
+      beats[i] && beats[i].t != null ? beats[i].t : atBeat(i + (SHIFT - BASE));
+    g.strokeStyle = "#e0655f";
+    g.lineWidth = 1.5;
+    g.beginPath();
+    let open = false;
+    for (let i = 0; i < tense.length; i++) {
+      const t = tAt(i);
+      if (t < VIEW.a - 1 || t > VIEW.b + 1) {
+        open = false;
+        continue;
       }
-      if (row === 0) {
-        g.fillStyle = beat ? "#7b8599" : "#39414f";
-        g.font = "8px ui-monospace,monospace";
-        if (beat) g.fillText(String(i / 4 + 1), x + cell / 2 - 2, 8);
+      const x = L + frac(t) * (W - L - 46);
+      const y = y0 + hh - 8 - (tense[i] || 0) * (hh - 20);
+      open ? g.lineTo(x, y) : g.moveTo(x, y);
+      open = true;
+    }
+    g.stroke();
+    for (const r of SCORE.releases || []) {
+      const t =
+        r.at_s != null
+          ? r.at_s
+          : atBeat((r.bar - 1) * per + ((r.beat || 1) - 1) + (SHIFT - BASE));
+      if (t < VIEW.a || t > VIEW.b) continue;
+      const x = L + frac(t) * (W - L - 46);
+      g.strokeStyle = "#f2c14e";
+      g.lineWidth = 1.5;
+      g.globalAlpha = 0.9;
+      g.beginPath();
+      g.moveTo(x, y0 + 3);
+      g.lineTo(x, y0 + hh - 3);
+      g.stroke();
+      g.fillStyle = "#f2c14e";
+      g.font = "8.5px ui-monospace,monospace";
+      g.fillText("drop", x + 3, y0 + 11);
+      g.globalAlpha = 1;
+    }
+    g.fillStyle = "#e0655f";
+    g.font = "600 10px ui-monospace,monospace";
+    g.fillText("TENSION", 7, y0 + 13);
+    g.fillStyle = "#4a5364";
+    g.font = "8px ui-monospace,monospace";
+    g.fillText("per beat", 7, y0 + hh - 5);
+    let bi = 0,
+      gap = Infinity;
+    for (let i = 0; i < tense.length; i++) {
+      const d = Math.abs(tAt(i) - aud.currentTime);
+      if (d < gap) {
+        gap = d;
+        bi = i;
       }
     }
-    const same = d.same_bar_to_bar;
-    g.fillStyle = "#4a5364"; g.font = "9.5px ui-monospace,monospace";
-    g.fillText(same == null ? "" : `${Math.round(same * 100)}% the same each bar`,
-               L + per * cell + 10, y + h / 2 + 3);
-  });
-}
+    const now = gap > 2 ? null : tense[bi];
+    g.fillStyle = now == null ? "#3a4152" : "#e0655f";
+    g.font = "600 12px ui-monospace,monospace";
+    g.fillText(
+      now == null ? "\u2014" : now.toFixed(2),
+      W - 40,
+      y0 + hh / 2 + 4,
+    );
+  }
 
-function lanes() {
-  const [g, W] = fit($("lanes"), 104);
-  const b = SCORE.bars || {};
-  const names = LANES.filter(n => Array.isArray(b[n]));
-  if (!names.length) return;
-  const total = SCORE.song.length_s, h = 104 / names.length;
-  names.forEach((n, row) => {
-    const y = row*h, v = b[n];
-    if (row) {
-      g.strokeStyle = "#131a26"; g.lineWidth = 1;
-      g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+  function beatGrid() {
+    const gr = SCORE.groove || {};
+    const names = LANES.filter((n) => gr[n] && gr[n].strength);
+    const [g, W] = fit($("beat"), 150);
+    if (!names.length) {
+      g.fillStyle = "#7b8599";
+      g.font = "12.5px system-ui";
+      g.fillText("No rhythm pattern in this score yet.", 14, 28);
+      return;
     }
-    /* ticks is this same lane at four readings a beat instead of one a bar,
+    const per = gr[names[0]].per_bar || 16;
+    const L = 78,
+      R = 150,
+      cell = Math.min(34, (W - L - R) / per),
+      h = 150 / names.length;
+    names.forEach((n, row) => {
+      const y = row * h,
+        d = gr[n];
+      g.fillStyle = STEM[n];
+      g.font = "600 10px ui-monospace,monospace";
+      g.fillText(LANEWORD[n].toUpperCase(), 7, y + h / 2 + 3);
+      for (let i = 0; i < per; i++) {
+        const v = d.strength[i] ?? 0;
+        const x = L + i * cell;
+        const beat = i % 4 === 0;
+        g.fillStyle = beat ? "#1a2230" : "#12181f";
+        g.fillRect(x + 1, y + 6, cell - 2, h - 14);
+        if (v > 0.05) {
+          g.fillStyle = STEM[n];
+          g.globalAlpha = Math.min(1, 0.15 + v * 1.2);
+          const tall = Math.max(3, v * (h - 16));
+          g.fillRect(x + 1, y + h - 8 - tall, cell - 2, tall);
+          g.globalAlpha = 1;
+        }
+        if (row === 0) {
+          g.fillStyle = beat ? "#7b8599" : "#39414f";
+          g.font = "8px ui-monospace,monospace";
+          if (beat) g.fillText(String(i / 4 + 1), x + cell / 2 - 2, 8);
+        }
+      }
+      const same = d.same_bar_to_bar;
+      g.fillStyle = "#4a5364";
+      g.font = "9.5px ui-monospace,monospace";
+      g.fillText(
+        same == null ? "" : `${Math.round(same * 100)}% the same each bar`,
+        L + per * cell + 10,
+        y + h / 2 + 3,
+      );
+    });
+  }
+
+  function lanes() {
+    const [g, W] = fit($("lanes"), 104);
+    const b = SCORE.bars || {};
+    const names = LANES.filter((n) => Array.isArray(b[n]));
+    if (!names.length) return;
+    const total = SCORE.song.length_s,
+      h = 104 / names.length;
+    names.forEach((n, row) => {
+      const y = row * h,
+        v = b[n];
+      if (row) {
+        g.strokeStyle = "#131a26";
+        g.lineWidth = 1;
+        g.beginPath();
+        g.moveTo(0, y);
+        g.lineTo(W, y);
+        g.stroke();
+      }
+      /* ticks is this same lane at four readings a beat instead of one a bar,
        which is the difference between a shape and a pulse. When the score
        carries it, it is drawn filled and the per-bar blocks sit behind at low
        opacity so the section-scale shape survives at full zoom out. */
-    const fast = (SCORE.ticks || {})[n];
-    const per = (SCORE.ticks || {}).per_bar || 0;
-    g.fillStyle = STEM[n];
-    for (let i = 0; i < v.length; i++) {
-      if (v[i] == null) continue;
-      const t = barTime(i+FIRSTBAR);
-      if (t + BAR < VIEW.a || t > VIEW.b) continue;
-      const x = frac(t)*W;
-      const w = Math.max(1, (BAR/viewSpan())*W - 0.4);
-      const bh = Math.max(0.5, v[i]*(h-12));
-      g.globalAlpha = fast ? 0.13 : (0.30 + 0.6*v[i]);
-      g.fillRect(x, y+h-3-bh, w, bh);
-    }
-    if (fast && fast.length > 1) {
-      /* How many readings a bar is derived from the data, not from the field
+      const fast = (SCORE.ticks || {})[n];
+      const per = (SCORE.ticks || {}).per_bar || 0;
+      g.fillStyle = STEM[n];
+      for (let i = 0; i < v.length; i++) {
+        if (v[i] == null) continue;
+        const t = barTime(i + FIRSTBAR);
+        if (t + BAR < VIEW.a || t > VIEW.b) continue;
+        const x = frac(t) * W;
+        const w = Math.max(1, (BAR / viewSpan()) * W - 0.4);
+        const bh = Math.max(0.5, v[i] * (h - 12));
+        g.globalAlpha = fast ? 0.13 : 0.3 + 0.6 * v[i];
+        g.fillRect(x, y + h - 3 - bh, w, bh);
+      }
+      if (fast && fast.length > 1) {
+        /* How many readings a bar is derived from the data, not from the field
          that claims it: a score written before the rate was corrected declares
          sixteen and carries four, and trusting the label drew the whole song
          into the first quarter of the lane. Each reading is placed inside its
          own bar, so this stays true where bars are not all the same length. */
-      const first = SCORE.grid.first_beat_s > 0.2 ? 1 : 0;
-      const spans = SCORE.grid.bars + first;
-      const each = Math.max(1, Math.round(fast.length / spans));
-      const edgeAt = k => k < first ? 0 : barTime(k - first + 1);
-      const tickAt = i => {
-        const sp = Math.min(spans - 1, Math.floor(i / each));
-        const a0 = edgeAt(sp), a1 = edgeAt(sp + 1);
-        return a0 + ((i % each) / each) * (a1 - a0);
-      };
-      g.beginPath();
-      let drawn = false;
-      for (let i = 0; i < fast.length; i++) {
-        const t = tickAt(i);
-        if (t < VIEW.a - BAR || t > VIEW.b + BAR) continue;
-        const x = frac(t) * W;
-        if (!drawn) { g.moveTo(x, y + h - 3); drawn = true; }
-        g.lineTo(x, y + h - 3 - Math.max(0.5, fast[i] * (h - 12)));
+        const first = SCORE.grid.first_beat_s > 0.2 ? 1 : 0;
+        const spans = SCORE.grid.bars + first;
+        const each = Math.max(1, Math.round(fast.length / spans));
+        const edgeAt = (k) => (k < first ? 0 : barTime(k - first + 1));
+        const tickAt = (i) => {
+          const sp = Math.min(spans - 1, Math.floor(i / each));
+          const a0 = edgeAt(sp),
+            a1 = edgeAt(sp + 1);
+          return a0 + ((i % each) / each) * (a1 - a0);
+        };
+        g.beginPath();
+        let drawn = false;
+        for (let i = 0; i < fast.length; i++) {
+          const t = tickAt(i);
+          if (t < VIEW.a - BAR || t > VIEW.b + BAR) continue;
+          const x = frac(t) * W;
+          if (!drawn) {
+            g.moveTo(x, y + h - 3);
+            drawn = true;
+          }
+          g.lineTo(x, y + h - 3 - Math.max(0.5, fast[i] * (h - 12)));
+        }
+        if (drawn) {
+          g.lineTo(
+            frac(Math.min(VIEW.b, tickAt(fast.length - 1))) * W,
+            y + h - 3,
+          );
+          g.closePath();
+          g.globalAlpha = 0.5;
+          g.fillStyle = STEM[n];
+          g.fill();
+          g.globalAlpha = 0.95;
+          g.strokeStyle = STEM[n];
+          g.lineWidth = 1;
+          g.stroke();
+        }
+        g.globalAlpha = 1;
       }
-      if (drawn) {
-        g.lineTo(frac(Math.min(VIEW.b, tickAt(fast.length - 1))) * W, y + h - 3);
-        g.closePath();
-        g.globalAlpha = .5; g.fillStyle = STEM[n]; g.fill();
-        g.globalAlpha = .95; g.strokeStyle = STEM[n]; g.lineWidth = 1; g.stroke();
-      }
+      g.globalAlpha = 0.85;
+      g.font = "600 9.5px ui-monospace,monospace";
+      g.fillText(LANEWORD[n].toUpperCase(), 7, y + 12);
       g.globalAlpha = 1;
+    });
+  }
+
+  function firstIndex() {
+    let best = 0,
+      gap = 1e9;
+    SCORE.beats.forEach((bt, i) => {
+      const d = Math.abs(bt.t - SCORE.grid.first_beat_s);
+      if (d < gap) {
+        gap = d;
+        best = i;
+      }
+    });
+    return (
+      ((best % SCORE.grid.beats_per_bar) + SCORE.grid.beats_per_bar) %
+      SCORE.grid.beats_per_bar
+    );
+  }
+
+  function modelRan() {
+    return (SCORE.parts || []).some((p) => p.also_heard != null);
+  }
+
+  function edgeWords(p) {
+    let out = "";
+    if (typeof p.edge === "number") {
+      out +=
+        p.edge < 1.3
+          ? ` <b style="color:var(--bad)">· this boundary is worth only ${p.edge.toFixed(2)} against the noise either side, so treat it as a suggestion</b>`
+          : ` <span class="dim">· boundary worth ${p.edge.toFixed(2)}</span>`;
     }
-    g.globalAlpha = .85; g.font = "600 9.5px ui-monospace,monospace";
-    g.fillText(LANEWORD[n].toUpperCase(), 7, y+12); g.globalAlpha = 1;
-  });
-}
-
-function firstIndex() {
-  let best = 0, gap = 1e9;
-  SCORE.beats.forEach((bt, i) => {
-    const d = Math.abs(bt.t - SCORE.grid.first_beat_s);
-    if (d < gap) { gap = d; best = i; }
-  });
-  return ((best % SCORE.grid.beats_per_bar) + SCORE.grid.beats_per_bar) % SCORE.grid.beats_per_bar;
-}
-
-function modelRan() {
-  return (SCORE.parts || []).some(p => p.also_heard != null);
-}
-
-function edgeWords(p) {
-  let out = "";
-  if (typeof p.edge === "number") {
-    out += p.edge < 1.3
-      ? ` <b style="color:var(--bad)">· this boundary is worth only ${p.edge.toFixed(2)} against the noise either side, so treat it as a suggestion</b>`
-      : ` <span class="dim">· boundary worth ${p.edge.toFixed(2)}</span>`;
+    if (typeof p.sudden === "number") {
+      out +=
+        p.sudden < 0.5
+          ? ` <b style="color:#e8a33d">· the change here is a ramp (${p.sudden.toFixed(2)}), not a moment &mdash; fade through it, there is nothing to hit</b>`
+          : ` <span class="dim">· lands on the bar (${p.sudden.toFixed(2)})</span>`;
+    }
+    if (!modelRan()) return out;
+    if (p.also_heard == null)
+      return (
+        out + ` <span class="dim">· only our own detectors heard it</span>`
+      );
+    return (
+      out +
+      ` <span style="color:var(--ok)">· a second model heard it too (${p.also_heard})</span>`
+    );
   }
-  if (typeof p.sudden === "number") {
-    out += p.sudden < 0.5
-      ? ` <b style="color:#e8a33d">· the change here is a ramp (${p.sudden.toFixed(2)}), not a moment &mdash; fade through it, there is nothing to hit</b>`
-      : ` <span class="dim">· lands on the bar (${p.sudden.toFixed(2)})</span>`;
-  }
-  if (!modelRan()) return out;
-  if (p.also_heard == null) return out + ` <span class="dim">· only our own detectors heard it</span>`;
-  return out + ` <span style="color:var(--ok)">· a second model heard it too (${p.also_heard})</span>`;
-}
 
-function sungWords() {
-  const box = $("sung"), sec = $("lyricbox");
-  const got = SCORE.lyrics;
-  box.innerHTML = "";
-  if (!got || !(got.lines || []).length) { sec.hidden = true; return; }
-  sec.hidden = false;
-  for (const r of got.lines) {
-    const weak = r.sure != null && r.sure < 0.6;
-    const row = document.createElement("div");
-    row.className = "row";
-    row.innerHTML = `<span class="when">${mmss(r.at_s)}</span>
-      <span class="what">${r.sure != null
-          ? `<b style="color:${weak ? "var(--bad)" : "var(--ok)"}">${r.sure.toFixed(2)}</b>&nbsp;` : ""
-        }<span style="color:${weak ? "var(--faint)" : "var(--ink)"}">${esc(r.text)}</span>
+  const MSEC_COLORS = [
+    "#e8a33d",
+    "#5bb98c",
+    "#6fa8dc",
+    "#b98cd6",
+    "#d68c8c",
+    "#8cd6cf",
+    "#d6c98c",
+    "#a0a8bb",
+    "#7ae8b0",
+    "#c8a2ff",
+    "#f2c14e",
+    "#d16bd1",
+    "#9fd18b",
+    "#7ad4c8",
+    "#e0655f",
+    "#8fd0ff",
+  ];
+
+  function aiIntel() {
+    const sec = $("ai-intel");
+    const capBox = $("ai-caption");
+    const anaBox = $("ai-analysis");
+    const msBox = $("moss-sections");
+    const legBox = $("ai-legend");
+
+    if (!SCORE) {
+      sec.hidden = true;
+      return;
+    }
+
+    const hasCap = SCORE.moss_caption;
+    const hasAna = SCORE.moss_analysis;
+    const hasSec = SCORE.moss_sections && SCORE.moss_sections.length;
+    const hasBtc = SCORE.btc_chords_raw && SCORE.btc_chords_raw.length;
+
+    if (!hasCap && !hasAna && !hasSec && !hasBtc) {
+      sec.hidden = true;
+      return;
+    }
+    sec.hidden = false;
+
+    if (hasCap) {
+      capBox.innerHTML = `<h3>What the AI Heard</h3><p>${esc(SCORE.moss_caption)}</p>`;
+      if (hasBtc) {
+        capBox.innerHTML += `<div style="margin-top:8px"><span class="ai-tag">${SCORE.btc_chords_raw.length} chord changes detected (BTC 170-vocab)</span></div>`;
+      }
+    } else {
+      capBox.innerHTML = "";
+    }
+
+    if (hasAna) {
+      anaBox.hidden = false;
+      anaBox.innerHTML = `<h3>Key &amp; Harmony Analysis</h3><p>${esc(SCORE.moss_analysis)}</p>`;
+    } else {
+      anaBox.hidden = true;
+    }
+
+    if (hasSec) {
+      msBox.hidden = false;
+      msBox.innerHTML = "";
+      const total = SCORE.song.length_s;
+      SCORE.moss_sections.forEach((s, i) => {
+        const l = (s.start / total) * 100;
+        const w = Math.max(0.5, ((s.end - s.start) / total) * 100);
+        const c = MSEC_COLORS[i % MSEC_COLORS.length];
+        const el = document.createElement("div");
+        el.className = "msec";
+        el.style.cssText = `left:${l}%;width:${w}%;background:${c}22`;
+        el.title = `${s.label} · ${mmss(s.start)} – ${mmss(s.end)}`;
+        el.innerHTML =
+          `<div class="mtag" style="color:${c}">${esc(s.label)}</div>` +
+          `<div class="mtime">${mmss(s.start)}</div>`;
+        el.onclick = (ev) => {
+          ev.stopPropagation();
+          play(s.start, Math.min(s.end, s.start + 12));
+        };
+        msBox.appendChild(el);
+      });
+      legBox.innerHTML = `<span class="dim">AI sections (MOSS-Music-8B) – click to hear</span>`;
+    } else {
+      msBox.hidden = true;
+      legBox.innerHTML = "";
+    }
+  }
+
+  function indicLyrics() {
+    const sec = $("indic-box");
+    const box = $("indic-sung");
+    if (!SCORE || !SCORE.lyrics) {
+      sec.hidden = true;
+      return;
+    }
+
+    const ly = SCORE.lyrics;
+    if (!ly.indic_text || ly.indic_text.length < 10) {
+      sec.hidden = true;
+      return;
+    }
+    sec.hidden = false;
+    box.innerHTML = "";
+
+    const lang = ly.indic_language || "unknown";
+    const model = ly.indic_model || "whisper-large-v3";
+    const header = document.createElement("div");
+    header.style.cssText = "margin-bottom:10px";
+    header.innerHTML =
+      `<span class="ai-tag">${esc(lang)}</span>` +
+      `<span class="ai-tag">${esc(model)}</span>`;
+    box.appendChild(header);
+
+    const chunks = ly.indic_chunks || [];
+    if (chunks.length) {
+      for (const ch of chunks) {
+        const row = document.createElement("div");
+        row.className = "indic-line";
+        const ts = ch.timestamp;
+        const from = ts && ts[0] != null ? ts[0] : 0;
+        const to = ts && ts[1] != null ? ts[1] : from + 5;
+        row.innerHTML =
+          `<span class="when">${mmss(from)}</span> ` +
+          `<span style="color:var(--ink)">${esc(ch.text || "")}</span>`;
+        row.onclick = () => play(from, Math.min(to, from + 14));
+        box.appendChild(row);
+      }
+    } else {
+      const full = document.createElement("div");
+      full.style.cssText =
+        "color:var(--ink);line-height:1.8;white-space:pre-wrap";
+      full.textContent = ly.indic_text;
+      box.appendChild(full);
+    }
+  }
+
+  function sungWords() {
+    const box = $("sung"),
+      sec = $("lyricbox");
+    const got = SCORE.lyrics;
+    box.innerHTML = "";
+    if (!got || !(got.lines || []).length) {
+      sec.hidden = true;
+      return;
+    }
+    sec.hidden = false;
+    for (const r of got.lines) {
+      const weak = r.sure != null && r.sure < 0.6;
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `<span class="when">${mmss(r.at_s)}</span>
+      <span class="what">${
+        r.sure != null
+          ? `<b style="color:${weak ? "var(--bad)" : "var(--ok)"}">${r.sure.toFixed(2)}</b>&nbsp;`
+          : ""
+      }<span style="color:${weak ? "var(--faint)" : "var(--ink)"}">${esc(r.text)}</span>
         <span class="dim">· bars ${r.from_bar}\u2013${r.to_bar}${
-          weak ? " · the voice is buried here, treat these words as a guess" : ""}</span></span>
+          weak
+            ? " · the voice is buried here, treat these words as a guess"
+            : ""
+        }</span></span>
       <button data-from="${r.at_s}" data-to="${r.to_s + 0.4}">Hear it</button>`;
-    row.querySelector("[data-from]").onclick = e =>
-      play(+e.target.dataset.from, Math.min(+e.target.dataset.to, +e.target.dataset.from + 14));
-    box.appendChild(row);
+      row.querySelector("[data-from]").onclick = (e) =>
+        play(
+          +e.target.dataset.from,
+          Math.min(+e.target.dataset.to, +e.target.dataset.from + 14),
+        );
+      box.appendChild(row);
+    }
   }
-}
 
-function nowSinging(t) {
-  const got = SCORE.lyrics;
-  if (!got || !(got.lines || []).length) return `<span class="dim">\u2014</span>`;
-  const line = got.lines.find(r => t >= r.at_s - 0.2 && t <= r.to_s + 0.4);
-  if (!line) return `<span class="dim">nothing</span>`;
-  const now = (got.words || []).find(w => t >= w.at_s - 0.05 && t <= w.to_s + 0.15);
-  const weak = line.sure != null && line.sure < 0.6;
-  const said = line.text.split(" ").map(w =>
-    now && w === now.text ? `<b style="color:var(--amb)">${esc(w)}</b>` : esc(w)).join(" ");
-  return said + (weak ? ` <span class="dim">· unsure</span>` : "");
-}
+  function nowSinging(t) {
+    const got = SCORE.lyrics;
+    if (!got || !(got.lines || []).length)
+      return `<span class="dim">\u2014</span>`;
+    const line = got.lines.find((r) => t >= r.at_s - 0.2 && t <= r.to_s + 0.4);
+    if (!line) return `<span class="dim">nothing</span>`;
+    const now = (got.words || []).find(
+      (w) => t >= w.at_s - 0.05 && t <= w.to_s + 0.15,
+    );
+    const weak = line.sure != null && line.sure < 0.6;
+    const said = line.text
+      .split(" ")
+      .map((w) =>
+        now && w === now.text
+          ? `<b style="color:var(--amb)">${esc(w)}</b>`
+          : esc(w),
+      )
+      .join(" ");
+    return said + (weak ? ` <span class="dim">· unsure</span>` : "");
+  }
 
-function sections() {
-  const box = $("sections"); box.innerHTML = "";
-  const total = SCORE.song.length_s;
-  for (const p of SCORE.parts || []) {
-    const t0 = barTime(p.from_bar), t1 = Math.min(total, barTime(p.to_bar+1));
-    const row = document.createElement("div");
-    row.className = "row";
-    row.innerHTML = `<span class="when">${mmss(t0)}</span>
+  function sections() {
+    const box = $("sections");
+    box.innerHTML = "";
+    const total = SCORE.song.length_s;
+    for (const p of SCORE.parts || []) {
+      const t0 = barTime(p.from_bar),
+        t1 = Math.min(total, barTime(p.to_bar + 1));
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `<span class="when">${mmss(t0)}</span>
       <span class="what"><b class="role" style="color:${HUE[p.like]}">${esc(p.role ?? p.like)}</b>
         &nbsp;<b>${esc(FEELS[p.feels] || p.feels)}</b>
         <span class="dim">· ${playingWords(p.playing)} playing
         · bars ${p.from_bar}–${p.to_bar}</span>
-        <span style="color:#8fbf9f">· ${esc(partTune(p))}</span>${p.trades
-          ? ` <b style="color:var(--vio)">· trades back and forth every ${p.trades.every_bars} bars</b>`
-          : ""}${edgeWords(p)}</span>
+        <span style="color:#8fbf9f">· ${esc(partTune(p))}</span>${
+          p.trades
+            ? ` <b style="color:var(--vio)">· trades back and forth every ${p.trades.every_bars} bars</b>`
+            : ""
+        }${edgeWords(p)}</span>
       <button data-from="${t0}" data-to="${t1}">Hear it</button>
       `;
 
-    const mine = (SCORE.phrases || [])
-      .filter(q => q.from_bar >= p.from_bar && q.to_bar <= p.to_bar);
-    if (mine.length) {
-      const band = document.createElement("div");
-      band.className = "inside";
-      band.innerHTML = `<span class="tag">doing</span>` + mine.map(q => {
-        const pair = DOINGWORD[q.doing];
-        const hue = DOING[q.doing] || "#2b313c";
-        const said = esc(saysWords(q.says));
-        return `<span class="chip" data-b0="${q.from_bar}" data-b1="${q.to_bar}"
+      const mine = (SCORE.phrases || []).filter(
+        (q) => q.from_bar >= p.from_bar && q.to_bar <= p.to_bar,
+      );
+      if (mine.length) {
+        const band = document.createElement("div");
+        band.className = "inside";
+        band.innerHTML =
+          `<span class="tag">doing</span>` +
+          mine
+            .map((q) => {
+              const pair = DOINGWORD[q.doing];
+              const hue = DOING[q.doing] || "#2b313c";
+              const said = esc(saysWords(q.says));
+              return `<span class="chip" data-b0="${q.from_bar}" data-b1="${q.to_bar}"
            style="border-color:${hue};color:${pair ? hue : "#5a6274"}"
            title="click to hear bars ${q.from_bar}–${q.to_bar}"><b>bars ${q.from_bar}–${q.to_bar}</b> ${
-             pair ? esc(pair[1]) + " · " + said : said}</span>`;
-      }).join("");
-      band.querySelectorAll(".chip").forEach(el => {
-        el.onclick = () => play(barTime(+el.dataset.b0), barTime(+el.dataset.b1 + 1));
-      });
-      row.appendChild(band);
-    }
+             pair ? esc(pair[1]) + " · " + said : said
+           }</span>`;
+            })
+            .join("");
+        band.querySelectorAll(".chip").forEach((el) => {
+          el.onclick = () =>
+            play(barTime(+el.dataset.b0), barTime(+el.dataset.b1 + 1));
+        });
+        row.appendChild(band);
+      }
 
-    const inside = (SCORE.moments || [])
-      .filter(m => m.bar >= p.from_bar && m.bar <= p.to_bar)
-      .sort((a,b) => a.bar - b.bar || a.beat - b.beat);
-    if (inside.length) {
-      const strip = document.createElement("div");
-      strip.className = "inside";
-      strip.innerHTML = `<span class="tag">moments</span>` + inside.map(m =>
-        `<span class="chip" style="border-color:${KIND[m.is]||'#3a4152'};color:${KIND[m.is]||'#8b93a6'}"
-           title="bar ${m.bar}, beat ${m.beat} · click to hear it"><b>bar ${m.bar}</b> ${
-             esc(momentWords(m))}</span>`).join("");
-      strip.querySelectorAll(".chip").forEach((el, i) => {
-        el.onclick = () => hearMoment(inside[i]);
-      });
-      row.appendChild(strip);
-    }
+      const inside = (SCORE.moments || [])
+        .filter((m) => m.bar >= p.from_bar && m.bar <= p.to_bar)
+        .sort((a, b) => a.bar - b.bar || a.beat - b.beat);
+      if (inside.length) {
+        const strip = document.createElement("div");
+        strip.className = "inside";
+        strip.innerHTML =
+          `<span class="tag">moments</span>` +
+          inside
+            .map(
+              (m) =>
+                `<span class="chip" style="border-color:${KIND[m.is] || "#3a4152"};color:${KIND[m.is] || "#8b93a6"}"
+           title="bar ${m.bar}, beat ${m.beat} · click to hear it"><b>bar ${m.bar}</b> ${esc(
+             momentWords(m),
+           )}</span>`,
+            )
+            .join("");
+        strip.querySelectorAll(".chip").forEach((el, i) => {
+          el.onclick = () => hearMoment(inside[i]);
+        });
+        row.appendChild(strip);
+      }
 
-    box.appendChild(row);
-    row.querySelector("[data-from]").onclick = e =>
-      play(+e.target.dataset.from, Math.min(+e.target.dataset.to, +e.target.dataset.from + 12));
+      box.appendChild(row);
+      row.querySelector("[data-from]").onclick = (e) =>
+        play(
+          +e.target.dataset.from,
+          Math.min(+e.target.dataset.to, +e.target.dataset.from + 12),
+        );
+    }
   }
-}
 
-let ctx = null, clicking = false, sent = -1;
-function click(when, down) {
-  const o = ctx.createOscillator(), amp = ctx.createGain();
-  o.frequency.value = down ? 900 : 1800;
-  amp.gain.setValueAtTime(down ? .5 : .25, when);
-  amp.gain.exponentialRampToValueAtTime(.0001, when + .05);
-  o.connect(amp).connect(ctx.destination);
-  o.start(when); o.stop(when + .06);
-}
+  let ctx = null,
+    clicking = false,
+    sent = -1;
+  function click(when, down) {
+    const o = ctx.createOscillator(),
+      amp = ctx.createGain();
+    o.frequency.value = down ? 900 : 1800;
+    amp.gain.setValueAtTime(down ? 0.5 : 0.25, when);
+    amp.gain.exponentialRampToValueAtTime(0.0001, when + 0.05);
+    o.connect(amp).connect(ctx.destination);
+    o.start(when);
+    o.stop(when + 0.06);
+  }
 
-let LIVE = -1;
-function tick() {
-  if (SCORE) {
-    const t = aud.currentTime, total = SCORE.song.length_s;
-    $("clock").textContent = `${mmss(t)} / ${mmss(total)}`;
-    if (!dragging) $("seek").value = Math.round((t/total)*10000);
-    /* One playhead per view, each with its own left inset, because the tune
+  let LIVE = -1;
+  function tick() {
+    if (SCORE) {
+      const t = aud.currentTime,
+        total = SCORE.song.length_s;
+      $("clock").textContent = `${mmss(t)} / ${mmss(total)}`;
+      if (!dragging) $("seek").value = Math.round((t / total) * 10000);
+      /* One playhead per view, each with its own left inset, because the tune
        and the curves reserve room down the side for their labels and a bare
        percentage would sit a few pixels off the music on those two. */
-    for (const el of document.querySelectorAll(".pline")) {
-      const who = el.dataset.for;
-      const box = $(who);
-      const L = who === "curves" ? 78 : who === "tune" ? 14 : 0;
-      const R = who === "curves" ? 46 : who === "tune" ? 6 : 0;
-      const f = frac(t), w = box.clientWidth || 1;
-      el.style.display = (f < 0 || f > 1) ? "none" : "block";
-      el.style.left = `${L + f * (w - L - R)}px`;
-    }
-    const hp = pct(t);
-    $("head").style.display = (hp < 0 || hp > 100) ? "none" : "";
-    $("head").style.left = `${hp}%`;
-    if (SCORE.bars) { motion(); curves(); }
-    if (VIEW.follow && !aud.paused) {
-      /* Slide with the playhead rather than jumping when it reaches the edge:
+      for (const el of document.querySelectorAll(".pline")) {
+        const who = el.dataset.for;
+        const box = $(who);
+        const L = who === "curves" ? 78 : who === "tune" ? 14 : 0;
+        const R = who === "curves" ? 46 : who === "tune" ? 6 : 0;
+        const f = frac(t),
+          w = box.clientWidth || 1;
+        el.style.display = f < 0 || f > 1 ? "none" : "block";
+        el.style.left = `${L + f * (w - L - R)}px`;
+      }
+      const hp = pct(t);
+      $("head").style.display = hp < 0 || hp > 100 ? "none" : "";
+      $("head").style.left = `${hp}%`;
+      if (SCORE.bars) {
+        motion();
+        curves();
+      }
+      if (VIEW.follow && !aud.paused) {
+        /* Slide with the playhead rather than jumping when it reaches the edge:
          a view that leaps every few seconds reads as broken, and the point of
          following is that the picture moves the way the music does. */
-      const w = viewSpan();
-      setView(t - w * 0.35, t + w * 0.65);
-    }
-    if (stopAt !== null && t >= stopAt) { aud.pause(); stopAt = null; }
-    zoom();
-    if (clicking && ctx && !aud.paused) {
-      for (const bt of SCORE.beats || []) {
-        if (bt.t <= sent || bt.t < t || bt.t > t + 0.35) continue;
-        sent = bt.t;
-        const i = SCORE.beats.indexOf(bt), per = SCORE.grid.beats_per_bar;
-        click(ctx.currentTime + (bt.t - t),
-              ((i - (SHIFT - BASE)) % per + per) % per === firstIndex());
+        const w = viewSpan();
+        setView(t - w * 0.35, t + w * 0.65);
+      }
+      if (stopAt !== null && t >= stopAt) {
+        aud.pause();
+        stopAt = null;
+      }
+      zoom();
+      if (clicking && ctx && !aud.paused) {
+        for (const bt of SCORE.beats || []) {
+          if (bt.t <= sent || bt.t < t || bt.t > t + 0.35) continue;
+          sent = bt.t;
+          const i = SCORE.beats.indexOf(bt),
+            per = SCORE.grid.beats_per_bar;
+          click(
+            ctx.currentTime + (bt.t - t),
+            (((i - (SHIFT - BASE)) % per) + per) % per === firstIndex(),
+          );
+        }
+      }
+      const bar = barAtTime(t);
+      let at = -1;
+      (SCORE.parts || []).forEach((p, i) => {
+        if (bar >= p.from_bar && bar <= p.to_bar) at = i;
+      });
+      document
+        .querySelectorAll(".part")
+        .forEach((n, i) => n.classList.toggle("here", i === at));
+      $("nowtime").textContent =
+        `${mmss(t)} · bar ${Math.max(0, bar)} of ${SCORE.grid.bars}`;
+      if (at >= 0) {
+        const p = SCORE.parts[at];
+        LIVE = at;
+        const b = SCORE.bars || {},
+          idx = Math.max(0, bar - FIRSTBAR);
+        const on = LANES.filter((n) => Array.isArray(b[n]) && b[n][idx] > 0.12);
+        $("nowrole").innerHTML =
+          `<span style="color:${HUE[p.like]}">${esc(cap(p.role ?? p.like))}</span>` +
+          ` <span style="color:var(--dim);font-weight:400;font-size:15px">— ${esc(FEELS[p.feels] || p.feels)}</span>`;
+        $("nowplay").innerHTML = on.length
+          ? on
+              .map((n) => `<b style="color:${STEM[n]}">${LANEWORD[n]}</b>`)
+              .join(", ")
+          : `<span class="dim">nothing</span>`;
+        const q = (SCORE.phrases || []).find(
+          (x) => bar >= x.from_bar && bar <= x.to_bar,
+        );
+        const pair = q && DOINGWORD[q.doing];
+        $("nowsung").innerHTML = nowSinging(t);
+        $("nowmoment").dataset.trades = p.trades ? p.trades.every_bars : "";
+        $("nowdoing").innerHTML = q
+          ? (pair
+              ? `<b style="color:${DOING[q.doing]}">${cap(pair[1])}</b> · `
+              : "") + `<span class="dim">${esc(saysWords(q.says))}</span>`
+          : `<span class="dim">—</span>`;
+        const here = (SCORE.moments || [])
+          .filter((m) => {
+            const mt = momentTime(m);
+            return (
+              t >= mt - beatLen() * 0.75 &&
+              t <= mt + Math.max(momentSpan(m), beatLen() * 0.75)
+            );
+          })
+          .sort((x, y) => (y.weight || 0) - (x.weight || 0))
+          .slice(0, 2);
+        $("nowmoment").innerHTML = here.length
+          ? here
+              .map(
+                (m) =>
+                  `<b style="color:${KIND[m.is] || "#8b93a6"}">${esc(momentWords(m))}</b>`,
+              )
+              .join(" · ")
+          : `<span class="dim">nothing the computer calls notable</span>`;
+        if (p.trades)
+          $("nowmoment").innerHTML +=
+            ` <span style="color:var(--vio)">· this part trades back and forth every ${p.trades.every_bars} bars</span>`;
       }
     }
-    const bar = barAtTime(t);
-    let at = -1;
-    (SCORE.parts||[]).forEach((p,i) => { if (bar >= p.from_bar && bar <= p.to_bar) at = i; });
-    document.querySelectorAll(".part").forEach((n,i) => n.classList.toggle("here", i === at));
-    $("nowtime").textContent = `${mmss(t)} · bar ${Math.max(0, bar)} of ${SCORE.grid.bars}`;
-    if (at >= 0) {
-      const p = SCORE.parts[at];
-      LIVE = at;
-      const b = SCORE.bars || {}, idx = Math.max(0, bar - FIRSTBAR);
-      const on = LANES.filter(n => Array.isArray(b[n]) && b[n][idx] > 0.12);
-      $("nowrole").innerHTML = `<span style="color:${HUE[p.like]}">${esc(cap(p.role ?? p.like))}</span>`
-        + ` <span style="color:var(--dim);font-weight:400;font-size:15px">— ${esc(FEELS[p.feels] || p.feels)}</span>`;
-      $("nowplay").innerHTML = on.length
-        ? on.map(n => `<b style="color:${STEM[n]}">${LANEWORD[n]}</b>`).join(", ")
-        : `<span class="dim">nothing</span>`;
-      const q = (SCORE.phrases || []).find(x => bar >= x.from_bar && bar <= x.to_bar);
-      const pair = q && DOINGWORD[q.doing];
-      $("nowsung").innerHTML = nowSinging(t);
-      $("nowmoment").dataset.trades = p.trades ? p.trades.every_bars : "";
-      $("nowdoing").innerHTML = q
-        ? (pair ? `<b style="color:${DOING[q.doing]}">${cap(pair[1])}</b> · ` : "")
-          + `<span class="dim">${esc(saysWords(q.says))}</span>`
-        : `<span class="dim">—</span>`;
-      const here = (SCORE.moments||[]).filter(m => {
-        const mt = momentTime(m);
-        return t >= mt - beatLen()*0.75 && t <= mt + Math.max(momentSpan(m), beatLen()*0.75);
-      }).sort((x,y) => (y.weight||0)-(x.weight||0)).slice(0,2);
-      $("nowmoment").innerHTML = here.length
-        ? here.map(m => `<b style="color:${KIND[m.is]||'#8b93a6'}">${esc(momentWords(m))}</b>`).join(" · ")
-        : `<span class="dim">nothing the computer calls notable</span>`;
-      if (p.trades) $("nowmoment").innerHTML +=
-        ` <span style="color:var(--vio)">· this part trades back and forth every ${p.trades.every_bars} bars</span>`;
-    }
+    requestAnimationFrame(tick);
   }
-  requestAnimationFrame(tick);
-}
 
-$("play").onclick = () => { stopAt = null; aud.paused ? aud.play() : aud.pause(); };
-aud.onplay = () => $("play").innerHTML = "&#10073;&#10073; Pause";
-aud.onpause = () => $("play").innerHTML = "&#9654; Play";
-$("seek").oninput = e => { dragging = true; stopAt = null;
-  if (SCORE) aud.currentTime = (e.target.value/10000)*SCORE.song.length_s; };
-$("seek").onchange = () => dragging = false;
-$("muter").onclick = e => {
-  const off = !e.target.classList.contains("on");
-  e.target.classList.toggle("on", off);
-  e.target.textContent = off ? "Music: off" : "Music: on";
-  aud.volume = off ? 0 : 1;
-  if (off && !clicking) $("clicker").click();
-};
-$("clicker").onclick = e => {
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-  ctx.resume();
-  clicking = !clicking; sent = aud.currentTime;
-  e.target.classList.toggle("on", clicking);
-  e.target.textContent = "Metronome: " + (clicking ? "on" : "off");
-};
-const jump = e => {
-  if (!SCORE || dragged) return;
-  const r = e.currentTarget.getBoundingClientRect();
-  stopAt = null;
-  aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05,
-    timeAt((e.clientX - r.left)/r.width)));
-};
-$("map").onclick = jump;
-$("subs").onclick = jump;
-$("chords").onclick = jump;
-$("lanes").onclick = jump;
-$("curves").onclick = jump;
-$("motion").onclick = jump;
-$("zoom").onclick = e => {
-  if (!SCORE) return;
-  const r = e.target.getBoundingClientRect();
-  const px = e.clientX - r.left, py = e.clientY - r.top;
-  const hit = ZHIT.find(h => px >= h.x0 && px <= h.x1 && py >= h.y0 && py <= h.y1);
-  if (hit) { hearMoment(hit.m); return; }
-  const at = aud.currentTime - WINDOW/2 + (px/r.width) * WINDOW;
-  stopAt = null;
-  aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05, at));
-};
-let dragged = false;
-
-/* Every timeline shares one zoom, so the wheel does the same thing wherever
-   the pointer is and the views can never drift apart. */
-function zoomable(el, fromTime) {
-  el.classList.add("grab");
-  el.addEventListener("wheel", e => {
-    if (!SCORE) return;
-    e.preventDefault();
-    const r = el.getBoundingClientRect();
-    const at = fromTime ? fromTime((e.clientX - r.left) / r.width) : timeAt((e.clientX - r.left) / r.width);
-    zoomAt(at, e.deltaY > 0 ? 1.25 : 0.8);
-  }, { passive: false });
-  el.addEventListener("pointerdown", e => {
-    if (!SCORE || e.button !== 0) return;
-    const r = el.getBoundingClientRect();
-    const startX = e.clientX, a0 = VIEW.a, b0 = VIEW.b;
-    dragged = false;
-    const move = ev => {
-      const dx = (ev.clientX - startX) / r.width;
-      if (Math.abs(ev.clientX - startX) > 3) dragged = true;
-      if (dragged) setView(a0 - dx * (b0 - a0), b0 - dx * (b0 - a0));
-    };
-    const up = () => {
-      removeEventListener("pointermove", move);
-      removeEventListener("pointerup", up);
-      setTimeout(() => dragged = false, 0);
-    };
-    addEventListener("pointermove", move);
-    addEventListener("pointerup", up);
-  });
-}
-
-$("zoomin").onclick = () => zoomAt((VIEW.a + VIEW.b) / 2, 0.6);
-$("zoomout").onclick = () => zoomAt((VIEW.a + VIEW.b) / 2, 1.7);
-$("zoomfit").onclick = () => setView(0, SCORE ? SCORE.song.length_s : 0);
-$("follow").onclick = e => {
-  VIEW.follow = !VIEW.follow;
-  e.target.classList.toggle("on", VIEW.follow);
-  e.target.textContent = "Follow: " + (VIEW.follow ? "on" : "off");
-};
-
-addEventListener("keydown", e => {
-  const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
-  if (e.code === "Space" && !typing) {
-    e.preventDefault();
+  $("play").onclick = () => {
     stopAt = null;
     aud.paused ? aud.play() : aud.pause();
-  }
-  if (!SCORE || typing) return;
-  if (e.key === "ArrowLeft")  { aud.currentTime = Math.max(0, aud.currentTime - (e.shiftKey ? 10 : beatLen())); }
-  if (e.key === "ArrowRight") { aud.currentTime = Math.min(SCORE.song.length_s - 0.05, aud.currentTime + (e.shiftKey ? 10 : beatLen())); }
-  if (e.key === "f") $("zoomfit").click();
-});
-$("tune").onclick = e => {
-  if (!SCORE) return;
-  const r = e.target.getBoundingClientRect();
-  const px = e.clientX - r.left;
-  const hit = THIT.find(h => px >= h.x0 - 3 && px <= h.x1 + 3);
-  if (hit) { hearMoment(hit.m); return; }
-  const py = e.clientY - r.top;
-  if (py > 118) {
-    const line = PHIT.find(h => px >= h.x0 - 2 && px <= h.x1 + 2);
-    if (line) {
-      const beat = beatLen();
-      const a = barTime(line.q.from_bar) + (line.q.from_beat - 1) * beat;
-      const b = barTime(line.q.to_bar) + (line.q.to_beat - 1) * beat;
-      play(Math.max(0, a - 0.25), b + 0.6);
+  };
+  aud.onplay = () => ($("play").innerHTML = "&#10073;&#10073; Pause");
+  aud.onpause = () => ($("play").innerHTML = "&#9654; Play");
+  $("seek").oninput = (e) => {
+    dragging = true;
+    stopAt = null;
+    if (SCORE) aud.currentTime = (e.target.value / 10000) * SCORE.song.length_s;
+  };
+  $("seek").onchange = () => (dragging = false);
+  $("muter").onclick = (e) => {
+    const off = !e.target.classList.contains("on");
+    e.target.classList.toggle("on", off);
+    e.target.textContent = off ? "Music: off" : "Music: on";
+    aud.volume = off ? 0 : 1;
+    if (off && !clicking) $("clicker").click();
+  };
+  $("clicker").onclick = (e) => {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume();
+    clicking = !clicking;
+    sent = aud.currentTime;
+    e.target.classList.toggle("on", clicking);
+    e.target.textContent = "Metronome: " + (clicking ? "on" : "off");
+  };
+  const jump = (e) => {
+    if (!SCORE || dragged) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    stopAt = null;
+    aud.currentTime = Math.max(
+      0,
+      Math.min(
+        SCORE.song.length_s - 0.05,
+        timeAt((e.clientX - r.left) / r.width),
+      ),
+    );
+  };
+  $("map").onclick = jump;
+  $("subs").onclick = jump;
+  $("chords").onclick = jump;
+  $("lanes").onclick = jump;
+  $("curves").onclick = jump;
+  $("motion").onclick = jump;
+  $("zoom").onclick = (e) => {
+    if (!SCORE) return;
+    const r = e.target.getBoundingClientRect();
+    const px = e.clientX - r.left,
+      py = e.clientY - r.top;
+    const hit = ZHIT.find(
+      (h) => px >= h.x0 && px <= h.x1 && py >= h.y0 && py <= h.y1,
+    );
+    if (hit) {
+      hearMoment(hit.m);
       return;
     }
+    const at = aud.currentTime - WINDOW / 2 + (px / r.width) * WINDOW;
+    stopAt = null;
+    aud.currentTime = Math.max(0, Math.min(SCORE.song.length_s - 0.05, at));
+  };
+  let dragged = false;
+
+  /* Every timeline shares one zoom, so the wheel does the same thing wherever
+   the pointer is and the views can never drift apart. */
+  function zoomable(el, fromTime) {
+    el.classList.add("grab");
+    el.addEventListener(
+      "wheel",
+      (e) => {
+        if (!SCORE) return;
+        e.preventDefault();
+        const r = el.getBoundingClientRect();
+        const at = fromTime
+          ? fromTime((e.clientX - r.left) / r.width)
+          : timeAt((e.clientX - r.left) / r.width);
+        zoomAt(at, e.deltaY > 0 ? 1.25 : 0.8);
+      },
+      { passive: false },
+    );
+    el.addEventListener("pointerdown", (e) => {
+      if (!SCORE || e.button !== 0) return;
+      const r = el.getBoundingClientRect();
+      const startX = e.clientX,
+        a0 = VIEW.a,
+        b0 = VIEW.b;
+      dragged = false;
+      const move = (ev) => {
+        const dx = (ev.clientX - startX) / r.width;
+        if (Math.abs(ev.clientX - startX) > 3) dragged = true;
+        if (dragged) setView(a0 - dx * (b0 - a0), b0 - dx * (b0 - a0));
+      };
+      const up = () => {
+        removeEventListener("pointermove", move);
+        removeEventListener("pointerup", up);
+        setTimeout(() => (dragged = false), 0);
+      };
+      addEventListener("pointermove", move);
+      addEventListener("pointerup", up);
+    });
   }
-  const total = SCORE.song.length_s;
-  const at = ((px - 14) / Math.max(1, r.width - 20)) * total;
-  play(Math.max(0, Math.min(total - 0.1, at)), null);
-};
-aud.onseeked = () => sent = aud.currentTime;
-$("song").onchange = e => {
-  aud.pause(); LIVE = -1;
-  /* Put the song in the address bar so a refresh comes back to it, and so a
+
+  $("zoomin").onclick = () => zoomAt((VIEW.a + VIEW.b) / 2, 0.6);
+  $("zoomout").onclick = () => zoomAt((VIEW.a + VIEW.b) / 2, 1.7);
+  $("zoomfit").onclick = () => setView(0, SCORE ? SCORE.song.length_s : 0);
+  $("follow").onclick = (e) => {
+    VIEW.follow = !VIEW.follow;
+    e.target.classList.toggle("on", VIEW.follow);
+    e.target.textContent = "Follow: " + (VIEW.follow ? "on" : "off");
+  };
+
+  addEventListener("keydown", (e) => {
+    const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
+    if (e.code === "Space" && !typing) {
+      e.preventDefault();
+      stopAt = null;
+      aud.paused ? aud.play() : aud.pause();
+    }
+    if (!SCORE || typing) return;
+    if (e.key === "ArrowLeft") {
+      aud.currentTime = Math.max(
+        0,
+        aud.currentTime - (e.shiftKey ? 10 : beatLen()),
+      );
+    }
+    if (e.key === "ArrowRight") {
+      aud.currentTime = Math.min(
+        SCORE.song.length_s - 0.05,
+        aud.currentTime + (e.shiftKey ? 10 : beatLen()),
+      );
+    }
+    if (e.key === "f") $("zoomfit").click();
+  });
+  $("tune").onclick = (e) => {
+    if (!SCORE) return;
+    const r = e.target.getBoundingClientRect();
+    const px = e.clientX - r.left;
+    const hit = THIT.find((h) => px >= h.x0 - 3 && px <= h.x1 + 3);
+    if (hit) {
+      hearMoment(hit.m);
+      return;
+    }
+    const py = e.clientY - r.top;
+    if (py > 118) {
+      const line = PHIT.find((h) => px >= h.x0 - 2 && px <= h.x1 + 2);
+      if (line) {
+        const beat = beatLen();
+        const a = barTime(line.q.from_bar) + (line.q.from_beat - 1) * beat;
+        const b = barTime(line.q.to_bar) + (line.q.to_beat - 1) * beat;
+        play(Math.max(0, a - 0.25), b + 0.6);
+        return;
+      }
+    }
+    const total = SCORE.song.length_s;
+    const at = ((px - 14) / Math.max(1, r.width - 20)) * total;
+    play(Math.max(0, Math.min(total - 0.1, at)), null);
+  };
+  aud.onseeked = () => (sent = aud.currentTime);
+  $("song").onchange = (e) => {
+    aud.pause();
+    LIVE = -1;
+    /* Put the song in the address bar so a refresh comes back to it, and so a
      link to what you are looking at is just the address. */
-  const url = new URL(location.href);
-  url.searchParams.set("song", e.target.value);
-  url.searchParams.delete("at");
-  history.replaceState(null, "", url);
-  const o = e.target.selectedOptions[0];
-  load(e.target.value, o.dataset.a, 0, 0, 0, o.dataset.score);
-};
-for (const id of ["map", "subs", "chords", "lanes", "tune", "motion", "curves"]) zoomable($(id));
-zoomable($("zoom"), f => aud.currentTime - Math.min(WINDOW, viewSpan())/2 + f * Math.min(WINDOW, viewSpan()));
+    const url = new URL(location.href);
+    url.searchParams.set("song", e.target.value);
+    url.searchParams.delete("at");
+    history.replaceState(null, "", url);
+    const o = e.target.selectedOptions[0];
+    load(e.target.value, o.dataset.a, 0, 0, 0, o.dataset.score);
+  };
+  for (const id of [
+    "map",
+    "subs",
+    "chords",
+    "lanes",
+    "tune",
+    "motion",
+    "curves",
+  ])
+    zoomable($(id));
+  zoomable(
+    $("zoom"),
+    (f) =>
+      aud.currentTime -
+      Math.min(WINDOW, viewSpan()) / 2 +
+      f * Math.min(WINDOW, viewSpan()),
+  );
 
-addEventListener("resize", () => { if (SCORE) { lanes(); tune(); motion(); curves(); beatGrid(); zoom(); subs(); place(); } });
+  addEventListener("resize", () => {
+    if (SCORE) {
+      lanes();
+      tune();
+      motion();
+      curves();
+      beatGrid();
+      zoom();
+      subs();
+      place();
+    }
+  });
 
-/* A page that fails silently is worse than one that fails loudly: the first
+  /* A page that fails silently is worse than one that fails loudly: the first
    screenshot of this rewrite looked merely empty, which reads as "no data". */
-function broke(what, where) {
-  const box = $("broke");
-  box.hidden = false;
-  box.textContent = `Something in this page broke, so parts of it are missing:\n${what}\n${where}`;
-}
-addEventListener("error", e =>
-  broke(e.message, `${(e.filename||"").split("/").pop()}:${e.lineno}:${e.colno}`));
-/* load() is async, so anything it throws is a rejected promise and never
+  function broke(what, where) {
+    const box = $("broke");
+    box.hidden = false;
+    box.textContent = `Something in this page broke, so parts of it are missing:\n${what}\n${where}`;
+  }
+  addEventListener("error", (e) =>
+    broke(
+      e.message,
+      `${(e.filename || "").split("/").pop()}:${e.lineno}:${e.colno}`,
+    ),
+  );
+  /* load() is async, so anything it throws is a rejected promise and never
    reaches window.onerror -- which is why the first broken render looked like
    an empty page rather than a fault. */
-addEventListener("unhandledrejection", e =>
-  broke(String(e.reason && e.reason.message || e.reason),
-        String(e.reason && e.reason.stack || "").split("\n")[1] || ""));
+  addEventListener("unhandledrejection", (e) =>
+    broke(
+      String((e.reason && e.reason.message) || e.reason),
+      String((e.reason && e.reason.stack) || "").split("\n")[1] || "",
+    ),
+  );
 
-library();
-tick();
+  library();
+  tick();
 </script>
