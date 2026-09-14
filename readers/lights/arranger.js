@@ -90,27 +90,47 @@ function appetite(score) {
    raga-of-revenge the score flags the drums entering as the heaviest event, but
    the voice jumps nearly twice as hard -- and the voice is what you notice.
 
-   Bar resolution, because that is what the score publishes. Within-bar
-   handovers are invisible until the stem lanes arrive per beat. */
+   Per BEAT where the score carries `per_beat`, per bar where it does not. This
+   is the difference between seeing a handover and only hearing about it
+   afterwards: at 120bpm a bar is two seconds, so the strings landing on the
+   downbeat and the bass taking the ear half a bar later averaged into one
+   number and vanished. Bar 22 of raga-of-revenge reads 0.06 on the per-bar drum
+   lane; per beat it is 0.05, 0.09, 0.88, 0.72 -- the band is gone for two beats
+   and back for two, and the bar average describes neither half. */
 const EAR_LANES = ["drums", "bass", "vocals", "guitar", "piano", "other"];
 const EAR_LOOK = 4;          /* bars of recent history each lane is judged against */
 const EAR_FLOOR = 0.25;      /* below this a lane is not audible enough to matter */
 
 function attention(score) {
-  /* Either score shape: the pipeline writes bars.drums, the protocol response
-     writes stems.lanes.drums. Reading only one made the same song plan
-     differently depending on which shape it arrived in. */
+  /* Three shapes in the wild, best first: the response's `per_beat` block (one
+     value per stem per beat), the pipeline's bars.drums, the response's
+     stems.lanes.drums. Reading only one made the same song plan differently
+     depending on which shape it arrived in. */
+  const pb = (score && score.per_beat) || null;
   const bars = (score && score.bars) || {};
   const st = ((score && score.stems) || {}).lanes || {};
-  const laneOf = k => (Array.isArray(bars[k]) && bars[k].length) ? bars[k]
-                    : (Array.isArray(st[k]) && st[k].length) ? st[k] : null;
+  const bpb = ((score && score.grid) || {}).beats_per_bar || 4;
+  const perBeat = !!(pb && EAR_LANES.some(k => Array.isArray(pb[k]) && pb[k].length));
+  const laneOf = k => perBeat
+    ? (Array.isArray(pb[k]) && pb[k].length ? pb[k] : null)
+    : (Array.isArray(bars[k]) && bars[k].length) ? bars[k]
+    : (Array.isArray(st[k]) && st[k].length) ? st[k] : null;
   const lanes = EAR_LANES.filter(k => laneOf(k));
   if (!lanes.length) return [];
   /* the lanes are anchored at the score's first bar, which is 0 on nine of the
      seventeen songs and 1 on the rest. Reading the array index as a bar number
      put every handover a bar early on half the catalogue. */
-  const from = (score.stems && typeof score.stems.from_bar === "number")
-    ? score.stems.from_bar : Mu.firstBarOf(score);
+  const firstBar = Mu.firstBarOf(score);
+  const fromBar = (!perBeat && score.stems && typeof score.stems.from_bar === "number")
+    ? score.stems.from_bar : firstBar;
+  /* how many samples make a bar, so the window below is four BARS of history
+     whichever resolution the score arrived at */
+  const step = perBeat ? bpb : 1;
+  const where = i => {
+    if (!perBeat) return { bar: fromBar + i, beat: 1 };
+    const b = (pb.from_beat || 0) + i;
+    return { bar: firstBar + Math.floor(b / bpb), beat: (((b % bpb) + bpb) % bpb) + 1 };
+  };
   const n = Math.max(...lanes.map(k => laneOf(k).length));
   const out = [];
   for (let i = 0; i < n; i++) {
@@ -118,14 +138,14 @@ function attention(score) {
     for (const k of lanes) {
       const v = laneOf(k), here = v[i];
       if (here == null || here < EAR_FLOOR) continue;
-      const past = v.slice(Math.max(0, i - EAR_LOOK), i).filter(x => x != null);
+      const past = v.slice(Math.max(0, i - EAR_LOOK * step), i).filter(x => x != null);
       if (!past.length) continue;
       const m = past.reduce((a, b) => a + b, 0) / past.length;
       const sd = Math.sqrt(past.reduce((a, b) => a + (b - m) * (b - m), 0) / past.length);
       const surprise = (here - m) / Math.max(sd, 0.06);
       if (surprise > best) { best = surprise; who = k; }
     }
-    out.push({ bar: from + i, lane: who, surprise: who ? +best.toFixed(2) : 0 });
+    out.push({ ...where(i), lane: who, surprise: who ? +best.toFixed(2) : 0 });
   }
   return out;
 }
@@ -143,7 +163,7 @@ function handovers(score, least = 2.0) {
          handover is worth a gesture where nothing else marks the moment -- bar
          55 of raga, which the score leaves blank -- but it must not displace an
          entrance or a release the pipeline actually measured. */
-      out.push({ bar: row.bar, beat: 1, kind: "handover", is: "handover",
+      out.push({ bar: row.bar, beat: row.beat, kind: "handover", is: "handover",
                  what: row.lane, weight: +Math.min(0.44, 0.28 + row.surprise / 40).toFixed(3),
                  surprise: row.surprise });
       held = row.lane;
@@ -186,6 +206,61 @@ function paletteOf(score) {
    voices rather than as decoration. These are musical facts (a hue on the
    wheel), not rig settings; frame.js decides what the hue is in light. */
 const LANE_HUE = { drums: 0.00, guitar: 0.95, vocals: 0.13, piano: 0.50, bass: 0.66, other: 0.80 };
+
+/* ---- where a flagged hole actually sits, to the beat -------------------------
+   The score marks a pause on a BAR. The per-beat lanes say which beats inside it
+   the band is really gone for, and it is rarely the whole bar. On
+   raga-of-revenge the pause flagged at bar 22 runs from bar 21 beat 3 to bar 22
+   beat 3: it starts and ends in the middle of bars, and a hush held across the
+   whole of bar 22 sits dark through two beats where the drums are back at 0.88.
+
+   Only the band is measured -- drums, bass and the rest of the kit -- because
+   the case this is for is the one where everything stops and a voice is left. */
+function holeAt(score, bar, beat, bpb) {
+  const pb = (score && score.per_beat) || null;
+  if (!pb) return null;
+  const lanes = ["drums", "bass", "other"].map(k => pb[k]).filter(v => Array.isArray(v) && v.length);
+  if (!lanes.length) return null;
+  const from_beat = pb.from_beat || 0;
+  const firstBar = Mu.firstBarOf(score);
+  const at = (bar - firstBar) * bpb + ((beat || 1) - 1) - from_beat;
+  const band = i => {
+    let sum = 0, n = 0;
+    for (const v of lanes) if (i >= 0 && i < v.length && v[i] != null) { sum += v[i]; n++; }
+    return n ? sum / n : null;
+  };
+  /* what the band was doing just before, so "gone" is relative to this song */
+  let ref = 0, rn = 0;
+  for (let i = at - 3 * bpb; i < at - 1; i++) { const b = band(i); if (b != null) { ref += b; rn++; } }
+  if (!rn) return null;
+  ref /= rn;
+  /* Only a real hole may overrule the score. Where the band was already quiet
+     the flagged pause is a fade, not a drop, and the measured run says almost
+     nothing -- levels flags a pause at bar 51 in a stretch that has been dying
+     since bar 49, and trimming it to the two quietest beats threw away six beats
+     the score was right about. Both gates matter: something loud before, and
+     something clearly gone after. */
+  if (ref < 0.3) return null;
+  const down = i => { const b = band(i); return b != null && b <= 0.35 * ref; };
+  /* the quiet run nearest the flagged beat -- it may have begun before it */
+  let seed = -1;
+  for (let d = 0; d <= bpb && seed < 0; d++) {
+    if (down(at + d)) seed = at + d;
+    else if (d && down(at - d)) seed = at - d;
+  }
+  if (seed < 0) return null;
+  let lo = seed, hi = seed;
+  while (down(lo - 1)) lo--;
+  while (down(hi + 1)) hi++;
+  const len = hi - lo + 1;
+  if (len < 2) return null;                          /* one beat is a gap, not a hole */
+  /* and it must still be the hole the score flagged. A refinement that starts
+     more than a bar away from the mark is not a refinement, it is a different
+     event, and the two blocks do not yet agree well enough to allow that. */
+  if (lo > at + bpb || hi < at - bpb) return null;
+  const pos = i => { const b = from_beat + i; return { bar: firstBar + Math.floor(b / bpb), beat: (((b % bpb) + bpb) % bpb) + 1 }; };
+  return { from: pos(lo), to: pos(hi + 1), beats: len };
+}
 
 /* Looks that shout, detected from what they DO rather than from their names:
    anything that claims the strobe channel, or carries a strobe on a key. */
@@ -832,8 +907,15 @@ function plan(scoreIn, enumResult, seed) {
       const pick = (remembered && remembered[slot] && pool.some(c => c.id === remembered[slot])) ? { id: remembered[slot] } : pickWeighted(pool, rng);
       if (!pick) continue;
       const q = V.seq(pick.id), g = q.gesture;
-      const dur = slot === "span" ? (len || q.duration_beats || bpb) : (q.duration_beats || 1);
-      const start = slot === "before" ? B - dur : B;
+      let dur = slot === "span" ? (len || q.duration_beats || bpb) : (q.duration_beats || 1);
+      let start = slot === "before" ? B - dur : B;
+      /* a hush belongs to the beats the band is actually gone for, not to the bar
+         the score hung the pause on */
+      let measured = null;
+      if (g.fx === "pause") {
+        const hole = holeAt(score, m.bar, m.beat, bpb);
+        if (hole) { start = atBeat(hole.from); dur = hole.beats; measured = hole.beats; }
+      }
       const params = { strength: w, ...(g.params || {}) };
       if (g.fx === "pause") params.still = m.still || [];
       if (g.fx === "whiten" && params.amount == null) params.amount = +clamp01(0.2 + 0.5 * w).toFixed(3);
@@ -843,7 +925,7 @@ function plan(scoreIn, enumResult, seed) {
       if (slot !== "before") lastShot = pick.id;
       out.push({ from: fromBeat(start), to: fromBeat(start + dur), context: ctxAt(B), layer: g.fx === "modulate" ? "modulate" : "fx",
         priority: FX_PRIORITY[g.fx] || 6, type: g.fx, seq_id: pick.id, params, occupies: q.occupies || [],
-        section: sectionAt(B), moment: m.kind, what: m.what, facts: vector });
+        section: sectionAt(B), moment: m.kind, what: m.what, ...(measured ? { measured } : {}), facts: vector });
     }
     if (riffKey && out.length && !remembered) riffMemory[riffKey] = chosen;
     return out;
@@ -874,10 +956,12 @@ function plan(scoreIn, enumResult, seed) {
     /* Only where nothing else already speaks for that bar or its neighbour --
        the point is to cover the score's blind spots, not to double up on the
        moments it already found. */
-    /* Same bar only. A neighbouring bar having a signal does not mean this one
-       is spoken for -- bar 55 of raga is the biggest jump in the song and was
-       being suppressed because bar 56 happens to carry a vocal pause. */
-    if (!moments.some(m => m.bar === h.bar)) moments.push(h);
+    /* Same POSITION only, once the lanes arrive per beat. Suppressing a whole bar
+       was right when a handover could only ever land on a downbeat; it is wrong
+       now, because the case these exist for is the ear moving INSIDE a bar --
+       the strings land on the downbeat and the bass takes the room two beats
+       later. A bar carrying an entrance on beat 1 is not spoken for on beat 3. */
+    if (!moments.some(m => m.bar === h.bar && m.beat === h.beat)) moments.push(h);
   }
   /* ---- one thing per moment, and only the moments that earn one ------------
      Taking every signal makes the opposite problem: bar 7 carries drums
@@ -901,6 +985,15 @@ function plan(scoreIn, enumResult, seed) {
        white blast, which is a lie about what the music did. Measured from the
        stems, not assumed: the voice is left out of the sum, because a bar where
        only the voice remains is exactly the case this is for. */
+    /* Deliberately the per-BAR lanes, not the finer ones. This decides which bar
+       is a PEAK, and a peak has to agree with the structure the score itself
+       names. The two blocks do not agree about where things are: measured across
+       193 releases in 29 songs, the per-bar stem lanes put the band's jump one
+       bar AFTER the named release 48% of the time while the per-beat lanes sit
+       roughly on it -- but on raga-of-revenge it is the other way round, and the
+       per-beat lanes read the band back two beats before the release the score
+       marks. Until that is settled, per_beat refines WHERE something already
+       known sits; it does not get to move the biggest cue in a song. */
     const SL = Mu.stemLanesOf(score);
     const band = bar => {
       if (!SL) return null;
@@ -936,13 +1029,14 @@ function plan(scoreIn, enumResult, seed) {
        strongest surprise first, and only where the show would otherwise be
        silent for a long stretch. Bar 55 of raga is the biggest jump in the song
        with no signal on it; this is what puts a gesture there. */
-    const GAP = 4;
+    const GAP = 6;                       /* beats, so a bar and a half of quiet either side */
+    const beatOf = m => (m.bar * bpb) + ((m.beat || 1) - 1);
     const picks = one.filter(m => m.kind === "handover")
       .sort((a, b) => (b.surprise || 0) - (a.surprise || 0));
     const taken = [];
     for (const h of picks) {
-      if (taken.length >= 4) break;
-      const lonely = !kept.concat(taken).some(m => Math.abs(m.bar - h.bar) < GAP);
+      if (taken.length >= 5) break;
+      const lonely = !kept.concat(taken).some(m => Math.abs(beatOf(m) - beatOf(h)) < GAP);
       if (lonely) taken.push(h);
     }
     /* ---- the shape of the show ------------------------------------------
@@ -982,7 +1076,14 @@ function plan(scoreIn, enumResult, seed) {
       if (shots.length) { assignments.push(...shots); continue; }
     }
     if (m.kind === "pause") {
-      assignments.push(spanFx(B, len || bpb, { priority: 8, type: "pause", params: { strength: w, still: m.still || [] }, ...tag }));
+      const hole = holeAt(score, m.bar, m.beat, bpb);
+      if (hole) {
+        assignments.push({ from: hole.from, to: hole.to, context: ctxAt(B), layer: "fx", occupies: [],
+          section: sectionAt(atBeat(hole.from)), priority: 8, type: "pause",
+          params: { strength: w, still: m.still || [] }, measured: hole.beats, ...tag });
+      } else {
+        assignments.push(spanFx(B, len || bpb, { priority: 8, type: "pause", params: { strength: w, still: m.still || [] }, ...tag }));
+      }
       continue;
     }
     if (w < 0.25) continue;                        /* below this a moment is noise */

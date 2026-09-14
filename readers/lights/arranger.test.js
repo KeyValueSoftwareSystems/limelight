@@ -589,6 +589,56 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
      JSON.stringify(a) === JSON.stringify(b));
 }
 
+/* ---- the lanes arrive per beat, and the show follows them there --------------
+   The stem lanes used to be one value per bar, which at 120bpm is one number
+   for two seconds of music. Amal's `per_beat` block is one value per stem per
+   beat, and two things that were invisible become visible: the ear changing
+   hands INSIDE a bar, and where a flagged hole actually starts and stops. */
+{
+  const mk = () => {
+    const B = require("./fixtures/mini_raw.js").RAW();
+    const bpb = 4, n = 20 * bpb;
+    const flat = v => Array.from({ length: n }, () => v);
+    B.per_beat = { from_beat: 0, drums: flat(0.8), bass: flat(0.8), vocals: flat(0.1),
+                   other: flat(0.8), guitar: flat(0.05), piano: flat(0.05) };
+    return B;
+  };
+
+  /* a hole that starts and ends in the MIDDLE of bars, the way real ones do */
+  const H = mk();
+  H.moments = [{ bar: 9, beat: 1, is: "pause", what: "the band", sure: 0.9, for_beats: 4, still: ["vocals"], weight: 0.6 }];
+  for (const k of ["drums", "bass", "other"])
+    for (let i = 8 * 4 + 2; i < 9 * 4 + 2; i++) H.per_beat[k][i] = 0.02;   /* bar 8 beat 3 -> bar 9 beat 2 */
+  const hp = plan(H, EN, 42).assignments.find(a => a.type === "pause");
+  ok("a hush plays over the beats the band is really gone for, not the bar it was flagged on",
+     hp && hp.from.bar === 8 && hp.from.beat === 3 && hp.to.bar === 9 && hp.to.beat === 3,
+     hp ? `${hp.from.bar}.${hp.from.beat} -> ${hp.to.bar}.${hp.to.beat}` : "none");
+  ok("and says so, so a venue can see the span was measured", hp && hp.measured === 4, String(hp && hp.measured));
+
+  /* a gradual fade is not a hole: the score's own span wins */
+  const F = mk();
+  F.moments = [{ bar: 9, beat: 1, is: "pause", what: "the band", sure: 0.9, for_beats: 4, still: ["vocals"], weight: 0.6 }];
+  for (const k of ["drums", "bass", "other"])
+    for (let i = 0; i < F.per_beat[k].length; i++) F.per_beat[k][i] = Math.max(0.05, 0.8 - 0.02 * i);
+  const fp = plan(F, EN, 42).assignments.find(a => a.type === "pause");
+  ok("where the band was already dying, the score's span is kept and nothing is measured",
+     fp && fp.measured === undefined, JSON.stringify(fp && [fp.from, fp.to, fp.measured]));
+
+  /* the ear moving inside a bar */
+  const E = mk();
+  E.moments = [];
+  for (let i = 12 * 4; i < E.per_beat.guitar.length; i++) E.per_beat.guitar[i] = 0.05;
+  for (let i = 12 * 4 + 2; i < 12 * 4 + 4; i++) E.per_beat.guitar[i] = 0.95;   /* bar 12, beats 3-4 only */
+  const hand = plan(E, EN, 42).assignments.filter(a => a.moment === "handover");
+  ok("a lane that takes the ear on beat 3 is seen on beat 3, not on the downbeat",
+     hand.some(a => a.from.bar === 12 && a.from.beat === 3 && a.what === "guitar"),
+     JSON.stringify(hand.map(a => [a.from.bar, a.from.beat, a.what])));
+
+  /* and a score with no per_beat still plans, at bar resolution, as before */
+  const old = require("./fixtures/mini_raw.js").RAW();
+  ok("a score without per_beat still plans", plan(old, EN, 42).assignments.length > 0);
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;
