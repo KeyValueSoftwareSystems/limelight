@@ -15,37 +15,56 @@ sglang_lock = threading.Lock()
 
 import subprocess, signal
 
+
 def stop_sglang():
-    print('    [stopping SGLang to free GPU...]', flush=True)
+    print("    [stopping SGLang to free GPU...]", flush=True)
     os.system('pkill -f "sglang.launch_server" 2>/dev/null')
     import time as _t
+
     _t.sleep(3)
     import torch
+
     torch.cuda.empty_cache()
     gc.collect()
 
+
 def start_sglang():
-    print('    [restarting SGLang...]', flush=True)
-    env = dict(os.environ, SGLANG_DISABLE_CUDNN_CHECK='1')
+    print("    [restarting SGLang...]", flush=True)
+    env = dict(os.environ, SGLANG_DISABLE_CUDNN_CHECK="1")
     subprocess.Popen(
-        ['python3', '-m', 'sglang.launch_server',
-         '--model-path', os.path.join(BASE, 'moss-thinking'),
-         '--host', '0.0.0.0', '--port', '30000', '--tp', '1',
-         '--chat-template', os.path.join(BASE, 'moss-thinking/chat_template.jinja'),
-         '--trust-remote-code'],
-        env=env, stdout=open('/dev/null','w'), stderr=open('/dev/null','w'),
-        cwd=BASE
+        [
+            sys.executable,
+            "-m",
+            "sglang.launch_server",
+            "--model-path",
+            os.path.join(BASE, "moss-thinking"),
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "30000",
+            "--tp",
+            "1",
+            "--chat-template",
+            os.path.join(BASE, "moss-thinking/chat_template.jinja"),
+            "--trust-remote-code",
+        ],
+        env=env,
+        stdout=open("/dev/null", "w"),
+        stderr=open("/dev/null", "w"),
+        cwd=BASE,
     )
     import time as _t, requests as _r
+
     for i in range(120):
         _t.sleep(2)
         try:
-            resp = _r.get(f'{SGLANG_URL}/health', timeout=2)
+            resp = _r.get(f"{SGLANG_URL}/health", timeout=2)
             if resp.status_code == 200:
-                print(f'    [SGLang ready after {(i+1)*2}s]', flush=True)
+                print(f"    [SGLang ready after {(i + 1) * 2}s]", flush=True)
                 return True
-        except: pass
-    print('    [SGLang failed to start!]', flush=True)
+        except:
+            pass
+    print("    [SGLang failed to start!]", flush=True)
     return False
 
 
@@ -371,7 +390,16 @@ def step_chords(wav):
             "puar-playground/btc-chord", trust_remote_code=True
         )
     chords = _btc_model.predict(wav)
-    return [{"start": c["start"], "end": c["end"], "chord": c["chord"]} for c in chords]
+    raw = [{"start": c["start"], "end": c["end"], "chord": c["chord"]} for c in chords]
+    # Fill N-chords with previous real chord so there are no gaps
+    prev = None
+    for c in raw:
+        if c["chord"] != "N":
+            prev = c["chord"]
+        elif prev:
+            c["chord"] = prev
+    # Remove any remaining leading N-chords
+    return [c for c in raw if c["chord"] != "N"]
 
 
 import requests
@@ -430,8 +458,8 @@ SECTIONS_PROMPT = (
 )
 
 MOMENTS_PROMPT = (
-    "Listen to this song carefully and identify its most significant musical moments - "
-    "events a lighting designer or video editor would cue on.\n\n"
+    "Listen to this song carefully and identify its significant musical moments - "
+    "events a lighting designer, VJ, or video editor would sync visuals to.\n\n"
     "Return ONLY a JSON array:\n"
     '[{"time_s": float, "type": "...", "what": "specific instrument or element", '
     '"intensity": 0.0-1.0, "duration_s": float, '
@@ -439,7 +467,10 @@ MOMENTS_PROMPT = (
     "Types: drop, build, breakdown, climax, entrance, exit, fill, accent, hook, release, "
     "pause, silence, vocal_moment, key_change, tempo_change, groove_lock, call_response, "
     "surprise, stab, swell, transition, solo\n\n"
-    "Focus on quality - only genuinely noticeable events. Name specific instruments. "
+    "Find moments across the ENTIRE song from start to finish. "
+    "Include builds leading to drops, vocal entries, instrumental solos, "
+    "texture changes, dynamic shifts, and transitions between sections. "
+    "Name specific instruments and production elements. "
     "Every description must be unique and specific to THIS song. Output ONLY the JSON array."
 )
 
@@ -578,6 +609,7 @@ def run_pipeline(wav_path):
         del _btc_model
         _btc_model = None
         import torch
+
         torch.cuda.empty_cache()
         gc.collect()
 
@@ -633,9 +665,13 @@ def run_pipeline(wav_path):
                                 ts_str, text = ts_match.groups()
                                 parts = ts_str.split(":")
                                 secs = float(parts[0]) * 60 + float(parts[1])
-                                if text.strip():
+                                text = re.sub(
+                                    r"^-\s*\d+:\d+[\.\d]*\]\s*", "", text
+                                ).strip()
+                                text = re.sub(r"\[\d+:\d+[\.\d]*\]$", "", text).strip()
+                                if text:
                                     lines.append(
-                                        {"start": round(secs, 2), "text": text.strip()}
+                                        {"start": round(secs, 2), "text": text}
                                     )
                         if lines:
                             score["lyrics"] = {"lines": lines}
