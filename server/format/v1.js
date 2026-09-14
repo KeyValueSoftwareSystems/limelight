@@ -32,10 +32,6 @@ export const KNOWN = [
   "moss",
   "moss_sections",
   "moss_caption",
-  "stem_analysis",
-  "energy_profile",
-  "key_sections",
-  "instrument_dominance",
   "btc_chords_raw",
   "stems_53",
 ];
@@ -364,11 +360,6 @@ export function format(raw) {
   if (raw.moss) out.moss = raw.moss;
   if (raw.moss_sections) out.moss_sections = raw.moss_sections;
   if (raw.moss_caption) out.moss_caption = raw.moss_caption;
-  if (raw.stem_analysis) out.stem_analysis = raw.stem_analysis;
-  if (raw.energy_profile) out.energy_profile = raw.energy_profile;
-  if (raw.key_sections) out.key_sections = raw.key_sections;
-  if (raw.instrument_dominance)
-    out.instrument_dominance = raw.instrument_dominance;
   if (raw.btc_chords_raw) out.btc_chords_raw = raw.btc_chords_raw;
   if (raw.stems_53) out.stems_53 = raw.stems_53;
 

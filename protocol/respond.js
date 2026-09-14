@@ -63,10 +63,6 @@ const KNOWN = [
   "moss",
   "moss_sections",
   "moss_caption",
-  "stem_analysis",
-  "energy_profile",
-  "key_sections",
-  "instrument_dominance",
   "btc_chords_raw",
   "stems_53",
 ];
