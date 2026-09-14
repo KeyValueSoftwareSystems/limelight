@@ -342,6 +342,27 @@
     border-radius: 0 0 8px 8px;
     border-top: none;
   }
+  .tl-row {
+    display: flex;
+    align-items: stretch;
+  }
+  .tl-label {
+    width: 62px;
+    min-width: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font:
+      600 8.5px ui-monospace,
+      monospace;
+    letter-spacing: 0.08em;
+    color: #4a5568;
+  }
+  .tl-content {
+    flex: 1;
+    min-width: 0;
+  }
   #map {
     position: relative;
     height: 130px;
@@ -787,17 +808,32 @@
     <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
       MOSS-Music-8B sections · click anywhere to play from that point
     </p>
-    <div id="map">
-      <div id="dots"><span>MOMENTS</span></div>
-      <div id="head"></div>
+    <div class="tl-row">
+      <span class="tl-label">SECTIONS</span>
+      <div class="tl-content">
+        <div id="map">
+          <div id="dots"><span>MOMENTS</span></div>
+          <div id="head"></div>
+        </div>
+      </div>
     </div>
-    <div class="holder">
-      <div id="chords"></div>
-      <div class="pline" data-for="chords"></div>
+    <div class="tl-row">
+      <span class="tl-label">CHORDS</span>
+      <div class="tl-content">
+        <div class="holder">
+          <div id="chords"></div>
+          <div class="pline" data-for="chords"></div>
+        </div>
+      </div>
     </div>
-    <div class="holder">
-      <canvas id="lanes"></canvas>
-      <div class="pline" data-for="lanes"></div>
+    <div class="tl-row">
+      <span class="tl-label">STEMS</span>
+      <div class="tl-content">
+        <div class="holder">
+          <canvas id="lanes"></canvas>
+          <div class="pline" data-for="lanes"></div>
+        </div>
+      </div>
     </div>
     <div class="legend" id="legend"></div>
   </section>
@@ -1924,7 +1960,9 @@
     const hasCap = M.caption || SCORE.moss_caption;
     const hasSec = SCORE.moss_sections && SCORE.moss_sections.length;
     const has53 = SCORE.stems_53 && Object.keys(SCORE.stems_53).length;
-    if (!hasCap && !has53) {
+    const hasMoss =
+      M.caption || M.instruments || M.emotion_trajectory || M.key_tempo;
+    if (!hasMoss && !has53) {
       sec.hidden = true;
       return;
     }
@@ -1936,35 +1974,6 @@
     } else capBox.innerHTML = "";
 
     let html = "";
-    const dc = {
-      vocals: "#e8a33d",
-      drums: "#e0655f",
-      bass: "#6fa8dc",
-      guitar: "#5bb98c",
-      piano: "#b98cd6",
-      other: "#a0a8bb",
-    };
-
-    if (SCORE.instrument_dominance && SCORE.instrument_dominance.length > 4) {
-      const id = SCORE.instrument_dominance;
-      const strip = id
-        .map((d) => {
-          const c = dc[d.dominant] || "#888";
-          return `<div style="flex:1;height:20px;background:${c};opacity:0.75;cursor:pointer;transition:opacity 0.1s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.75" title="${mmss(d.start)}: ${d.dominant}" onclick="play(${d.start})"></div>`;
-        })
-        .join("");
-      const present = [...new Set(id.map((d) => d.dominant))];
-      const leg = present
-        .map(
-          (k) =>
-            `<span style="color:${dc[k] || "#888"};font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.04em">■ ${k}</span>`,
-        )
-        .join("&nbsp;&nbsp;");
-      html +=
-        `<div class="ai-card"><h3>Dominance</h3><p class="tech">Librosa RMS per stem · which instrument is loudest over time</p>` +
-        `<div style="height:20px;display:flex;border-radius:4px;overflow:hidden">${strip}</div>` +
-        `<div style="font-size:10.5px;margin-top:6px;color:#4a5568">${leg}</div></div>`;
-    }
 
     const s53 = SCORE.stems_53;
     if (s53 && Object.keys(s53).length) {
@@ -2008,47 +2017,32 @@
       html += `<div class="ai-card"><h3>Detected Instruments (${sorted.length})</h3><p class="tech">MVSep Mega 53-Stem BS-RoFormer · silent stems filtered out</p>${stemHtml}</div>`;
     }
 
-    if (SCORE.energy_profile && SCORE.energy_profile.length) {
-      const ep = SCORE.energy_profile;
-      const vals = ep.map((e) => e.rms_db);
-      const mx = Math.max(...vals),
-        mn = Math.min(...vals);
-      const range = mx - mn || 1;
-      const maxH = 64;
-      const bars = ep
-        .map((e) => {
-          const norm = (e.rms_db - mn) / range;
-          const h = Math.max(3, Math.round(norm * maxH));
-          const r = Math.round(180 + norm * 75);
-          const g = Math.round(100 - norm * 50);
-          const b = Math.round(60 - norm * 20);
-          return `<div style="flex:1;min-width:3px;height:${h}px;background:rgb(${r},${g},${b});border-radius:2px 2px 0 0;cursor:pointer;transition:opacity 0.1s;opacity:0.85" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.85" title="${mmss(e.start)} · ${e.rms_db} dB" onclick="play(${e.start})"></div>`;
-        })
-        .join("");
-      const loud = ep.reduce((a, b) => (b.rms_db > a.rms_db ? b : a));
-      const quiet = ep.reduce((a, b) => (b.rms_db < a.rms_db ? b : a));
-      html +=
-        `<div class="ai-card"><h3>Energy</h3><p class="tech">Librosa RMS energy per 5s segment</p>` +
-        `<div style="height:${maxH}px;display:flex;align-items:flex-end;gap:1px;border-radius:4px;overflow:hidden;background:#0a0f18">${bars}</div>` +
-        `<div style="font-size:10.5px;margin-top:6px;color:#4a5568">` +
-        `Peak at <b style="cursor:pointer;color:var(--amb)" onclick="play(${loud.start})">${mmss(loud.start)}</b> · ` +
-        `Quietest at <b style="cursor:pointer;color:var(--dim)" onclick="play(${quiet.start})">${mmss(quiet.start)}</b></div></div>`;
+    if (M.instruments) {
+      html += `<div class="ai-card"><h3>Instrumentation</h3><p class="tech">MOSS-Music-8B-Thinking · instrument identification with timestamps</p><div style="color:var(--ink);font-size:12.5px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto">${esc(M.instruments)}</div></div>`;
     }
 
-    if (SCORE.key_sections && SCORE.key_sections.length) {
-      const ks = SCORE.key_sections;
-      const keys = [...new Set(ks.map((k) => `${k.key} ${k.mode}`))];
-      if (keys.length === 1) {
-        html += `<div class="ai-card"><h3>Key</h3><p class="tech">Librosa chroma CQT + Krumhansl-Schmuckler key profiles</p><p style="font-size:13px"><b style="color:var(--ok)">${keys[0]}</b> throughout</p></div>`;
-      } else {
-        const chips = ks
-          .map(
-            (k) =>
-              `<span class="ai-tag" style="cursor:pointer" onclick="play(${k.start})"><b>${k.key} ${k.mode}</b> ${mmss(k.start)}</span>`,
-          )
-          .join(" ");
-        html += `<div class="ai-card"><h3>Key</h3><p class="tech">Librosa chroma CQT + Krumhansl-Schmuckler key profiles</p><p style="font-size:11px;color:#4a5568">${keys.length} key regions detected</p>${chips}</div>`;
-      }
+    if (M.emotion_trajectory) {
+      html += `<div class="ai-card"><h3>Energy &amp; Emotion</h3><p class="tech">MOSS-Music-8B-Thinking · energy, valence, arousal per section</p><div style="color:var(--ink);font-size:12.5px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto">${esc(M.emotion_trajectory)}</div></div>`;
+    }
+
+    if (M.key_tempo) {
+      html += `<div class="ai-card"><h3>Key &amp; Tempo</h3><p class="tech">MOSS-Music-8B-Thinking · key, mode, tempo, time signature</p><p style="font-size:13px;color:var(--ink);line-height:1.7">${esc(M.key_tempo)}</p></div>`;
+    }
+
+    if (M.rhythm_groove) {
+      html += `<div class="ai-card"><h3>Rhythm &amp; Groove</h3><p class="tech">MOSS-Music-8B-Thinking · groove feel, drum patterns, rhythmic complexity</p><div style="color:var(--ink);font-size:12.5px;line-height:1.7;white-space:pre-wrap;max-height:250px;overflow-y:auto">${esc(M.rhythm_groove)}</div></div>`;
+    }
+
+    if (M.voice) {
+      html += `<div class="ai-card"><h3>Voice</h3><p class="tech">MOSS-Music-8B-Thinking · vocal characteristics, style, language</p><p style="font-size:13px;color:var(--ink);line-height:1.7">${esc(M.voice)}</p></div>`;
+    }
+
+    if (M.production) {
+      html += `<div class="ai-card"><h3>Production</h3><p class="tech">MOSS-Music-8B-Thinking · mixing, effects, stereo width, sonic aesthetic</p><div style="color:var(--ink);font-size:12.5px;line-height:1.7;white-space:pre-wrap;max-height:250px;overflow-y:auto">${esc(M.production)}</div></div>`;
+    }
+
+    if (M.deep_analysis) {
+      html += `<div class="ai-card"><h3>Deep Analysis</h3><p class="tech">MOSS-Music-8B-Thinking · professional musicological analysis</p><div style="color:var(--ink);font-size:12.5px;line-height:1.7;white-space:pre-wrap;max-height:350px;overflow-y:auto">${esc(M.deep_analysis)}</div></div>`;
     }
 
     cards.innerHTML = html;
