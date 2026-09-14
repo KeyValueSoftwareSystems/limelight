@@ -1324,8 +1324,12 @@
             ? ` · lands on the bar (${p.sudden.toFixed(2)})`
             : "") +
         ` · click to hear it`;
+      const mossTag =
+        p.moss_label && p.moss_label !== (p.role || p.like)
+          ? ` <span style="opacity:.55;font-weight:400">[${esc(p.moss_label)}]</span>`
+          : "";
       el.innerHTML = `<div class="fill" style="background:${c};height:${Math.round((p.fullness ?? 0.5) * 100)}%"></div>
-      <div class="tag" style="color:${c}">${esc((p.role || p.like).toUpperCase())}</div>`;
+      <div class="tag" style="color:${c}">${esc((p.role || p.like).toUpperCase())}${mossTag}</div>`;
       map.appendChild(el);
     }
 
@@ -2657,7 +2661,11 @@
       const row = document.createElement("div");
       row.className = "row";
       row.innerHTML = `<span class="when">${mmss(t0)}</span>
-      <span class="what"><b class="role" style="color:${HUE[p.like]}">${esc(p.role ?? p.like)}</b>
+      <span class="what"><b class="role" style="color:${HUE[p.like]}">${esc(p.role ?? p.like)}</b>${
+        p.moss_label && p.moss_label !== (p.role || p.like)
+          ? ` <span class="ai-tag" style="margin:0 4px;vertical-align:1px" title="MOSS-Music-8B called this section '${esc(p.moss_label)}'">${esc(p.moss_label)}</span>`
+          : ""
+      }
         &nbsp;<b>${esc(FEELS[p.feels] || p.feels)}</b>
         <span class="dim">· ${playingWords(p.playing)} playing
         · bars ${p.from_bar}–${p.to_bar}</span>
@@ -2811,6 +2819,9 @@
         const on = LANES.filter((n) => Array.isArray(b[n]) && b[n][idx] > 0.12);
         $("nowrole").innerHTML =
           `<span style="color:${HUE[p.like]}">${esc(cap(p.role ?? p.like))}</span>` +
+          (p.moss_label && p.moss_label !== (p.role || p.like)
+            ? ` <span class="ai-tag" style="vertical-align:2px">${esc(p.moss_label)}</span>`
+            : "") +
           ` <span style="color:var(--dim);font-weight:400;font-size:15px">— ${esc(FEELS[p.feels] || p.feels)}</span>`;
         $("nowplay").innerHTML = on.length
           ? on
