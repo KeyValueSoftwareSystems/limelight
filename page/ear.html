@@ -604,13 +604,19 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   .ai-card h3 {
-    margin: 0 0 10px;
+    margin: 0 0 2px;
     font:
       600 11px ui-monospace,
       monospace;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--amb);
+  }
+  .ai-card .tech {
+    margin: 0 0 10px;
+    font-size: 10px;
+    color: #4a5568;
+    letter-spacing: 0.02em;
   }
   .ai-card p,
   .ai-card pre {
@@ -776,36 +782,10 @@
     AI-generated from audio — <b>click anything to hear it</b>
   </p>
 
-  <section id="ai-intel" hidden>
-    <h2>AI Intelligence</h2>
-    <p class="note">
-      MOSS-Music-8B + cascade stem separation + deep feature extraction
-    </p>
-    <div id="ai-caption" class="ai-card"></div>
-    <div id="ai-cards"></div>
-    <div id="moss-sections" hidden></div>
-    <div class="legend" id="ai-legend"></div>
-  </section>
-
-  <section id="indic-box" hidden>
-    <h2>Indic Lyrics</h2>
-    <p class="note">
-      Transcribed by Whisper-large-v3 from the isolated vocal stem
-    </p>
-    <div class="lead" id="indic-sung"></div>
-  </section>
-
-  <section>
-    <h2>Live View</h2>
-    <p class="note">Around the playhead — click labels to hear</p>
-    <canvas id="zoom"></canvas>
-  </section>
-
   <section>
     <h2>Timeline</h2>
-    <p class="note">
-      Sections, moments, chords, instruments — click to jump
-      <span id="dropped" class="dim"></span>
+    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
+      MOSS-Music-8B sections · click anywhere to play from that point
     </p>
     <div id="map">
       <div id="dots"><span>MOMENTS</span></div>
@@ -823,20 +803,25 @@
   </section>
 
   <section>
-    <h2>Rhythm</h2>
-    <p class="note">
-      Drum pattern per 16th-note slot — taller = stronger, right = consistency
+    <h2>Live View</h2>
+    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
+      Real-time playhead · beat grid + stem activity
     </p>
-    <canvas id="beat"></canvas>
-    <div class="legend" id="beatkey"></div>
+    <canvas id="zoom"></canvas>
+  </section>
+
+  <section id="ai-intel" hidden>
+    <h2>AI Intelligence</h2>
+    <div id="ai-caption" class="ai-card"></div>
+    <div id="ai-cards"></div>
+    <div id="moss-sections" hidden></div>
+    <div class="legend" id="ai-legend"></div>
   </section>
 
   <section>
     <h2>Melody</h2>
-    <p class="note">
-      <b style="color: #7ae8b0">Sung</b> and
-      <b style="color: #8fd0ff">played</b> notes — click shaded areas to hear
-      repeated tunes
+    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
+      Librosa pYIN pitch tracking on isolated vocal + instrument stems
     </p>
     <div class="holder">
       <canvas id="tune"></canvas>
@@ -845,21 +830,44 @@
     <div class="legend" id="tunekey"></div>
   </section>
 
+  <section>
+    <h2>Rhythm</h2>
+    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
+      Librosa STFT drum frequency band analysis per 16th-note slot
+    </p>
+    <canvas id="beat"></canvas>
+    <div class="legend" id="beatkey"></div>
+  </section>
+
   <section id="lyricbox" hidden>
     <h2>Lyrics</h2>
-    <p class="note">Confidence-scored lyrics — click a line to hear it</p>
+    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
+      Whisper-large-v3 ASR on isolated vocal stem
+    </p>
     <div class="lead" id="sung"></div>
+  </section>
+
+  <section id="indic-box" hidden>
+    <h2>Indic Lyrics</h2>
+    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
+      Whisper-large-v3 with Indic language support
+    </p>
+    <div class="lead" id="indic-sung"></div>
   </section>
 
   <section>
     <h2>Metadata</h2>
-    <p class="note">Key stats and confidence levels</p>
+    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
+      Pipeline confidence levels and provenance
+    </p>
     <div class="lead" id="owned"></div>
   </section>
 
   <section>
     <h2>Section Detail</h2>
-    <p class="note">Click to play any section</p>
+    <p class="tech" style="color: #4a5568; font-size: 10px; margin: 0 0 8px">
+      MOSS-Music-8B structural analysis · click to play
+    </p>
     <div id="sections"></div>
   </section>
 </div>
@@ -1184,8 +1192,8 @@
     draw();
   }
 
-  function play(from, until) {
-    stopAt = until ?? null;
+  function play(from) {
+    stopAt = null;
     aud.currentTime = Math.max(0, from);
     aud.play();
   }
@@ -1203,8 +1211,7 @@
   }
 
   function hearMoment(m) {
-    const t = momentTime(m);
-    play(Math.max(0, t - 0.8), t + Math.max(momentSpan(m), 1.6) + 0.8);
+    play(Math.max(0, momentTime(m) - 0.3));
   }
 
   function mossSections() {
@@ -1243,7 +1250,7 @@
         ev.stopPropagation();
         const r = el.parentElement.getBoundingClientRect();
         const clickT = timeAt((ev.clientX - r.left) / r.width);
-        play(Math.max(t0, clickT), t1);
+        play(Math.max(t0, clickT));
       };
       map.appendChild(el);
     });
@@ -1925,7 +1932,7 @@
 
     const capText = M.caption || SCORE.moss_caption || "";
     if (capText) {
-      capBox.innerHTML = `<h3>What the AI Heard</h3><p>${esc(capText)}</p>`;
+      capBox.innerHTML = `<h3>What the AI Heard</h3><p class="tech">MOSS-Music-8B-Thinking via SGLang</p><p>${esc(capText)}</p>`;
     } else capBox.innerHTML = "";
 
     let html = "";
@@ -1954,7 +1961,7 @@
         )
         .join("&nbsp;&nbsp;");
       html +=
-        `<div class="ai-card"><h3>Dominance</h3>` +
+        `<div class="ai-card"><h3>Dominance</h3><p class="tech">Librosa RMS per stem · which instrument is loudest over time</p>` +
         `<div style="height:20px;display:flex;border-radius:4px;overflow:hidden">${strip}</div>` +
         `<div style="font-size:10.5px;margin-top:6px;color:#4a5568">${leg}</div></div>`;
     }
@@ -1998,7 +2005,7 @@
           `<div style="width:${pct.toFixed(1)}%;height:100%;background:${col};border-radius:3px;transition:width 0.3s"></div></div>` +
           `<span style="font-size:9.5px;color:#5a6274;min-width:42px;text-align:right">${db.toFixed(1)} dB</span></div></div>`;
       });
-      html += `<div class="ai-card"><h3>Detected Instruments (${sorted.length})</h3>${stemHtml}</div>`;
+      html += `<div class="ai-card"><h3>Detected Instruments (${sorted.length})</h3><p class="tech">MVSep Mega 53-Stem BS-RoFormer · silent stems filtered out</p>${stemHtml}</div>`;
     }
 
     if (SCORE.energy_profile && SCORE.energy_profile.length) {
@@ -2007,21 +2014,22 @@
       const mx = Math.max(...vals),
         mn = Math.min(...vals);
       const range = mx - mn || 1;
+      const maxH = 64;
       const bars = ep
         .map((e) => {
           const norm = (e.rms_db - mn) / range;
-          const h = Math.max(2, Math.round(norm * 36));
-          const r = Math.round(norm * 120 + 130);
-          const g = Math.round((1 - norm) * 80 + 80);
-          const b = Math.round((1 - norm) * 40 + 60);
-          return `<div style="flex:1;height:${h}px;background:rgb(${r},${g},${b});opacity:0.8;cursor:pointer;border-radius:1px;transition:opacity 0.1s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8" title="${mmss(e.start)}" onclick="play(${e.start})"></div>`;
+          const h = Math.max(3, Math.round(norm * maxH));
+          const r = Math.round(180 + norm * 75);
+          const g = Math.round(100 - norm * 50);
+          const b = Math.round(60 - norm * 20);
+          return `<div style="flex:1;min-width:3px;height:${h}px;background:rgb(${r},${g},${b});border-radius:2px 2px 0 0;cursor:pointer;transition:opacity 0.1s;opacity:0.85" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.85" title="${mmss(e.start)} · ${e.rms_db} dB" onclick="play(${e.start})"></div>`;
         })
         .join("");
       const loud = ep.reduce((a, b) => (b.rms_db > a.rms_db ? b : a));
       const quiet = ep.reduce((a, b) => (b.rms_db < a.rms_db ? b : a));
       html +=
-        `<div class="ai-card"><h3>Energy</h3>` +
-        `<div style="height:38px;display:flex;align-items:flex-end;gap:1px;border-radius:4px;overflow:hidden">${bars}</div>` +
+        `<div class="ai-card"><h3>Energy</h3><p class="tech">Librosa RMS energy per 5s segment</p>` +
+        `<div style="height:${maxH}px;display:flex;align-items:flex-end;gap:1px;border-radius:4px;overflow:hidden;background:#0a0f18">${bars}</div>` +
         `<div style="font-size:10.5px;margin-top:6px;color:#4a5568">` +
         `Peak at <b style="cursor:pointer;color:var(--amb)" onclick="play(${loud.start})">${mmss(loud.start)}</b> · ` +
         `Quietest at <b style="cursor:pointer;color:var(--dim)" onclick="play(${quiet.start})">${mmss(quiet.start)}</b></div></div>`;
@@ -2031,7 +2039,7 @@
       const ks = SCORE.key_sections;
       const keys = [...new Set(ks.map((k) => `${k.key} ${k.mode}`))];
       if (keys.length === 1) {
-        html += `<div class="ai-card"><h3>Key</h3><p style="font-size:13px"><b style="color:var(--ok)">${keys[0]}</b> throughout</p></div>`;
+        html += `<div class="ai-card"><h3>Key</h3><p class="tech">Librosa chroma CQT + Krumhansl-Schmuckler key profiles</p><p style="font-size:13px"><b style="color:var(--ok)">${keys[0]}</b> throughout</p></div>`;
       } else {
         const chips = ks
           .map(
@@ -2039,7 +2047,7 @@
               `<span class="ai-tag" style="cursor:pointer" onclick="play(${k.start})"><b>${k.key} ${k.mode}</b> ${mmss(k.start)}</span>`,
           )
           .join(" ");
-        html += `<div class="ai-card"><h3>Key</h3><p style="font-size:11px;color:#4a5568">${keys.length} key regions detected</p>${chips}</div>`;
+        html += `<div class="ai-card"><h3>Key</h3><p class="tech">Librosa chroma CQT + Krumhansl-Schmuckler key profiles</p><p style="font-size:11px;color:#4a5568">${keys.length} key regions detected</p>${chips}</div>`;
       }
     }
 
@@ -2084,7 +2092,7 @@
         row.innerHTML =
           `<span class="when">${mmss(from)}</span> ` +
           `<span style="color:var(--ink)">${esc(ch.text || "")}</span>`;
-        row.onclick = () => play(from, Math.min(to, from + 14));
+        row.onclick = () => play(from);
         box.appendChild(row);
       }
     } else {
@@ -2457,13 +2465,13 @@
         const beat = beatLen();
         const a = barTime(line.q.from_bar) + (line.q.from_beat - 1) * beat;
         const b = barTime(line.q.to_bar) + (line.q.to_beat - 1) * beat;
-        play(Math.max(0, a - 0.25), b + 0.6);
+        play(Math.max(0, a - 0.25));
         return;
       }
     }
     const total = SCORE.song.length_s;
     const at = ((px - 14) / Math.max(1, r.width - 20)) * total;
-    play(Math.max(0, Math.min(total - 0.1, at)), null);
+    play(Math.max(0, Math.min(total - 0.1, at)));
   };
   aud.onseeked = () => (sent = aud.currentTime);
   $("song").onchange = (e) => {
