@@ -1207,10 +1207,42 @@
 
     const g = SCORE.grid;
     const kt = SCORE.key_tempo || "";
+    let ktParsed = null;
+    if (kt) {
+      try {
+        ktParsed =
+          typeof kt === "string"
+            ? JSON.parse(kt)
+            : typeof kt === "object"
+              ? kt
+              : null;
+      } catch {}
+      if (!ktParsed && typeof kt === "string") {
+        ktParsed = {};
+        for (const line of kt.split("\n")) {
+          const m = line.match(
+            /^(Key|Tempo|Time signature|Changes)\s*:\s*(.+)/i,
+          );
+          if (m) ktParsed[m[1]] = m[2].trim();
+        }
+      }
+    }
+    const mossKey = ktParsed && ktParsed.Key ? ktParsed.Key : "";
+    const mossTempo = ktParsed && ktParsed.Tempo ? ktParsed.Tempo : "";
+    const mossTimeSig =
+      ktParsed && ktParsed["Time signature"] ? ktParsed["Time signature"] : "";
+    const mossChanges =
+      ktParsed &&
+      ktParsed.Changes &&
+      ktParsed.Changes !== "No clear changes detected."
+        ? ktParsed.Changes
+        : "";
     $("owned").innerHTML = `<div class="col"><dl>
       ${SCORE.caption ? `<dt>Caption</dt><dd>${esc(SCORE.caption).slice(0, 300)}</dd>` : ""}
-      ${kt ? `<dt>Key &amp; Tempo</dt><dd>${esc(typeof kt === "string" ? kt.split("\\n")[0].slice(0, 200) : JSON.stringify(kt).slice(0, 200))}</dd>` : ""}
-      <dt>Tempo</dt><dd><b>${Math.round(g.bpm)} BPM</b> · ${g.beats_per_bar}/4 · ${g.bars} bars</dd>
+      ${mossKey ? `<dt>Key</dt><dd><b>${esc(mossKey)}</b></dd>` : ""}
+      <dt>Tempo</dt><dd><b>${Math.round(g.bpm)} BPM</b> · ${g.beats_per_bar}/4 · ${g.bars} bars${mossTempo ? ` <span class="dim" style="font-size:10px">(MOSS: ${esc(mossTempo)})</span>` : ""}</dd>
+      ${mossTimeSig && mossTimeSig !== g.beats_per_bar + "/4" ? `<dt>Time Sig</dt><dd>${esc(mossTimeSig)} <span class="dim" style="font-size:10px">(MOSS)</span></dd>` : ""}
+      ${mossChanges ? `<dt>Changes</dt><dd class="dim" style="font-size:11px">${esc(mossChanges)}</dd>` : ""}
     </dl></div>
     <div class="col"><dl>
       ${mossSections().length ? `<dt>Sections</dt><dd><b style="color:var(--ok)">${mossSections().length} sections</b></dd>` : ""}
