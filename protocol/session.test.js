@@ -10,8 +10,9 @@ const { Session } = require("./session.js");
    sample goes stale the first time the pipeline changes. */
 const { adapt } = require("./respond.js");
 const fs_ = require("fs"), path_ = require("path");
-const score = adapt(JSON.parse(
-  fs_.readFileSync(require("./fixture.js").need("session"), "utf8")));
+const RAW = JSON.parse(
+  fs_.readFileSync(require("./fixture.js").need("session"), "utf8"));
+const score = adapt(RAW);
 /* Every timing expectation comes from the score's own grid. Hardcoding 128.0
    and 0.2233 pinned this suite to a fixture that no longer exists. */
 const BEAT_S = 60 / score.grid.bpm;
@@ -136,15 +137,30 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
 
   /* the list is a convenience; the grid is the authority. If these two ever
      disagree the list is what is wrong, so check it every run. */
+  /* Which grid beat a detected beat is, from its time on the tempo map --
+     not from its position in the list. Counting positions assumes the list
+     has no holes, and a tracker that loses the beat for two bars leaves one:
+     afterglow has 32, and every beat after the first hole then read as
+     drifted, 448 of 449 of them. */
   let drift = 0;
-  /* A pickup means bar 1 does not start at beat index 0, so count from the
-     first downbeat rather than assuming the song opens on one. */
-  const opens = B.list.findIndex(b => b[0] === 1 && b[1] === 1);
+  const gmap = (score.grid.tempo && score.grid.tempo.length)
+    ? score.grid.tempo
+    : [{ from_beat: 0, at_s: score.grid.first_beat_s || 0, bpm: score.grid.bpm }];
+  const base = score.grid.first_bar != null ? score.grid.first_bar : 1;
+  const beatNo = (t) => {
+    let k = 0;
+    while (k + 1 < gmap.length && gmap[k + 1].at_s <= t) k++;
+    const seg = gmap[k];
+    return seg.from_beat + (t - seg.at_s) / (60 / seg.bpm);
+  };
+  const raw = Array.isArray(RAW.beats) ? RAW.beats : [];
   B.list.forEach((b, i) => {
-    const k = i - opens;
-    const want = k < 0 ? [0, bpb + k + 1]
-                       : [Math.floor(k / bpb) + 1, (k % bpb) + 1];
-    if (b[0] !== want[0] || b[1] !== want[1]) drift++;
+    const t = raw[i] && raw[i].t;
+    if (t == null) return;
+    const n = Math.round(beatNo(t));
+    const want = n < 0 ? null
+      : [Math.max(base, 1 + Math.floor(n / bpb)), 1 + (((n % bpb) + bpb) % bpb)];
+    if (want && (b[0] !== want[0] || b[1] !== want[1])) drift++;
   });
   /* On a real recording the tracker occasionally hears a bar of three or five,
      so a couple of beats land in a different slot. A numbering error would put
@@ -183,7 +199,10 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
 {
   const s = Session(score, { now: clock });
   const L = score.layers || {};
-  ok("the score carries more than one layer", Object.keys(L).length >= 4,
+  /* More than one, as the name says. The number was four, which was how many
+     layers one pipeline emitted rather than anything the protocol requires --
+     a song with no square phrase grid states no phrase rule and has three. */
+  ok("the score carries more than one layer", Object.keys(L).length >= 2,
      Object.keys(L).join(", "));
 
   /* a partition covers every bar exactly once */
@@ -202,13 +221,20 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
      section, which is the same claim about the same shape. */
   const per = score.grid.beats_per_bar || 4;
   const edges = (L.form.spans || []).map(sp => sp.from.bar);
-  const carries = (score.moments || []).filter(m => {
+  const crosses = (m) => {
     const end = m.back_at != null ? m.back_at
               : m.for_beats ? m.bar + m.for_beats / per : null;
     return end != null && edges.some(e => m.bar < e && e < end);
-  });
-  ok("a moment can cross a form boundary", carries.length > 0,
-     carries.length + " of " + (score.moments || []).length);
+  };
+  /* Moments are instants in these scores, so nothing in that list can cross
+     anything. An instrument playing through a section line is the same claim
+     about the same shape, and is what the presence layer is for. */
+  const carries = (score.moments || []).filter(crosses);
+  const spanning = (((L.presence || {}).spans) || []).filter(sp =>
+    edges.some(e => sp.from.bar < e && e < sp.to.bar));
+  ok("something in the score crosses a form boundary",
+     carries.length + spanning.length > 0,
+     `${carries.length} moments, ${spanning.length} presence spans`);
 
   /* several layers answer at once, and that is not a bug */
   /* This named bar 78 and the four layers one pipeline happened to emit.
@@ -226,28 +252,45 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
      `carried ${carried.join(", ")} · answered ${answered.join(", ") || "none"}`);
 
   /* rule 8: the voice has one writer */
-  const vocalInPresence = (L.presence.spans || []).some(sp => sp.name === "vocals");
+  const vocalInPresence = (((L.presence || {}).spans) || [])
+    .some(sp => sp.name === "vocals");
   ok("the voice is not described by two layers at once", !vocalInPresence);
 
-  /* phrase is derived, not stored */
-  ok("phrase is a rule rather than a list", L.phrase.kind === "rule");
-  const p1 = s.sectionsAt({ bar: L.phrase.from_bar, beat: 1 }).phrase;
-  const p2 = s.sectionsAt({ bar: L.phrase.from_bar + L.phrase.every_bars, beat: 1 }).phrase;
-  ok("consecutive phrases are consecutive", p2.index === p1.index + 1,
-     p1.index + " -> " + p2.index);
+  /* phrase is derived, not stored, and a song whose section boundaries do not
+     sit on a 4- or 8-bar grid has no phrase rule to state. Asserting one
+     asserted that every song is square, which none of the nine currently
+     built are -- their boundaries land on a multiple of four between 6% and
+     44% of the time. When there is a rule, it still has to hold. */
+  if (L.phrase) {
+    ok("phrase is a rule rather than a list", L.phrase.kind === "rule");
+    const p1 = s.sectionsAt({ bar: L.phrase.from_bar, beat: 1 }).phrase;
+    const p2 = s.sectionsAt({ bar: L.phrase.from_bar + L.phrase.every_bars, beat: 1 }).phrase;
+    ok("consecutive phrases are consecutive", p2.index === p1.index + 1,
+       p1.index + " -> " + p2.index);
+  } else {
+    ok("a song with no square phrase grid states no phrase rule",
+       s.sectionsAt({ bar: 1, beat: 1 }).phrase == null);
+  }
 }
 
 /* ---- until(): building toward a change rather than reacting to one ------- */
 {
   const s = Session(score, { now: clock });
+  /* Seek to where the span actually starts. A song with a pickup has its first
+     section beginning on bar 0 beat 4, and asking for bar 0 beat 1 seeks to
+     1.1 seconds before the recording, where nothing is coming. */
   const form = (score.layers.form.spans || []).find(sp => sp.to.bar - sp.from.bar >= 4);
-  s.seek(s.secondsAt(form.from.bar, 1)); s.play();
+  s.seek(s.secondsAt(form.from.bar, form.from.beat || 1)); s.play();
 
   const u = s.until("form");
   ok("until() says which section ends and when", u && u.name === form.name,
      u && `${u.name} in ${u.in_ms} ms`);
+  /* In bars, counted from where the span really starts and ends. A pickup
+     section runs bar 0 beat 4 to bar 8 beat 3, which is 7.75 bars, not 8. */
+  const inBeats = q => (q.bar - 1) * bpb + ((q.beat || 1) - 1);
   ok("and how many bars that is",
-     near(u.bars, form.to.bar - form.from.bar, 1e-6), u && u.bars + " bars");
+     near(u.bars, (inBeats(form.to) - inBeats(form.from)) / bpb, 1e-6),
+     u && u.bars + " bars");
 
   s.rate(2);
   const u2 = s.until("form");
@@ -260,7 +303,7 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
 {
   const s = Session(score, { now: clock });
   const form = score.layers.form.spans[3];
-  s.seek(s.secondsAt(form.to.bar, 1) - 1.0); s.play();
+  s.seek(s.secondsAt(form.to.bar, form.to.beat || 1) - 1.0); s.play();
   const up = s.next(2000).filter(e => e.layer);
   ok("a section boundary shows up before it happens", up.length > 0,
      up.map(e => e.what + " +" + e.in_ms + "ms").join("  "));

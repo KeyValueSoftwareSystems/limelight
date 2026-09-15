@@ -12,14 +12,20 @@ import { startHttp }        from '../transport/http.js';
    went stale every time the pipeline changed. The test now lays its own copy
    down in a scratch directory, so nothing in the repository can rot. */
 const SCORE_DIR = mkdtempSync(join(tmpdir(), 'limelight-http-'));
-const FIXTURE = (() => {
-  const built = new URL('../../scores/levels.score', import.meta.url).pathname;
-  if (existsSync(built)) return JSON.parse(readFileSync(built, 'utf8'));
+const FIXTURE = await (async () => {
+  const { createRequire } = await import('node:module');
+  const pick = createRequire(import.meta.url)('../../protocol/fixture.js').pick();
+  if (pick && existsSync(pick)) {
+    const built = JSON.parse(readFileSync(pick, 'utf8'));
+    /* The envelope is what this file is serving under, and a score with no
+       version is version 0 -- the value the protocol answers with. */
+    return { ...built, score: 'levels', version: built.version ?? 0 };
+  }
   const bars = { intensity: [], drums: [], bass: [], vocals: [], other: [] };
   for (let i = 0; i < 64; i++)
     for (const k of Object.keys(bars)) bars[k].push(((i * 7) % 100) / 100);
   return {
-    score: 'stand-in', version: 0,
+    score: 'levels', version: 0,
     song: { length_s: 120, bars: 64 },
     grid: { bpm: 120, beats_per_bar: 4, first_beat_s: 0, first_bar: 1, bars: 64 },
     bars,
@@ -98,19 +104,30 @@ describe('HTTP transport — contract alignment', () => {
   });
 
   // rule 4: window
+  /* The window used to be bar 33, which was a section line in one song and
+     nothing in the next. It is taken from the score being served, and what
+     it should contain is counted from the unwindowed answer rather than
+     assumed to be a full eight bars of four. */
   it('a window clips beats and does not re-anchor', async () => {
+    const all = await (await post(port, {
+      score: 'levels', fields: ['beats', 'downbeats', 'energy'] })).json();
+    const from = (all.sections || [{ from: { bar: 2 } }])[0]
+      ? Math.max(2, all.beats[Math.floor(all.beats.length / 3)].bar) : 2;
+    const inWin = b => b.bar >= from && b.bar < from + 8;
+    const wantBeats = all.beats.filter(inWin).length;
+    const wantDown = (all.downbeats || []).filter(inWin).length;
     const res  = await post(port, {
       score: 'levels', fields: ['beats', 'downbeats', 'energy'],
-      window: { from_bar: 33, bars: 8 },
+      window: { from_bar: from, bars: 8 },
     });
     const body = await res.json();
-    assert.equal(body.beats.length, 32);
-    assert.equal(body.downbeats.length, 8);
-    assert.equal(body.beats[0].bar, 33);
+    assert.equal(body.beats.length, wantBeats);
+    assert.equal(body.downbeats.length, wantDown);
+    assert.equal(body.beats[0].bar, from);
     assert.ok(body.downbeats.every(d => d.beat === 1));
-    assert.equal(body.energy.from_bar, 33);
+    assert.equal(body.energy.from_bar, from);
     assert.equal(body.energy.values.length, 8);
-    assert.deepEqual(body.window, { from_bar: 33, bars: 8 });
+    assert.deepEqual(body.window, { from_bar: from, bars: 8 });
   });
 
   /* A section that overlaps the window comes back with its real extent, not

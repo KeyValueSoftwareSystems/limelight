@@ -787,7 +787,7 @@ def make_prompt(task_prompt, duration_s):
 
 def run_pipeline(wav_path):
     slug = os.path.splitext(os.path.basename(wav_path))[0]
-    score = {"song": {"slug": slug}}
+    score = {"score": slug, "version": 0, "song": {"slug": slug}}
     t_total = time.time()
 
     t = time.time()
@@ -839,7 +839,13 @@ def run_pipeline(wav_path):
         import numpy as np
 
         beats, downbeats, bpm = results["beats"]
-        score["beats"] = [{"t": b} for b in beats]
+        marks = sorted(float(d) for d in (downbeats or []))
+        score["beats"] = []
+        for b in beats:
+            row = {"t": b}
+            if marks and min(abs(m - b) for m in marks) < 0.05:
+                row["downbeat"] = True
+            score["beats"].append(row)
         bpb = 4
         if len(downbeats) >= 2:
             gaps = [

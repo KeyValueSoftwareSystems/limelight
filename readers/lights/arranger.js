@@ -607,7 +607,7 @@ function plan(scoreIn, enumResult, seed) {
     lanes.subdiv = subdiv;
   }
 
-  const assignments = [];
+  let assignments = [];
   sections.forEach((sec, i) => {
     const context = contexts[i];
     const dyn = DYN[context] || DYN.verse;
@@ -898,6 +898,34 @@ function plan(scoreIn, enumResult, seed) {
         assignments.push(spanFx(B - 1, 1, { priority: 9, type: "blackout", params: { strength: w }, ...tag }));
       assignments.push(spanFx(B, 1, { priority: 9, type: "white_blast", params: { strength: w }, ...tag }));
     }
+  }
+
+  /* Two moments close together each ask for the same accent, and the rig is
+     then told to run one flicker twice at once on the same attribute. Priority
+     cannot settle that -- both copies carry the same one -- so the duplicate
+     is dropped here and the longer of the two is kept. */
+  {
+    const per = (score.grid && score.grid.beats_per_bar) || 4;
+    const at = q => (q.bar - 1) * per + ((q.beat || 1) - 1);
+    const len = a => at(a.to) - at(a.from);
+    const seqs = assignments
+      .map((a, i) => ({ a, i }))
+      .filter(x => x.a.seq_id)
+      .sort((x, y) => len(y.a) - len(x.a));
+    const drop = new Set();
+    for (let i = 0; i < seqs.length; i++) {
+      if (drop.has(seqs[i].i)) continue;
+      for (let j = i + 1; j < seqs.length; j++) {
+        if (drop.has(seqs[j].i)) continue;
+        const a = seqs[i].a, b = seqs[j].a;
+        if (a.seq_id !== b.seq_id || a.priority !== b.priority) continue;
+        if (at(a.from) >= at(b.to) || at(b.from) >= at(a.to)) continue;
+        if (!(a.occupies || []).some(t => (b.occupies || []).includes(t))) continue;
+        drop.add(seqs[j].i);
+      }
+    }
+    if (drop.size)
+      assignments = assignments.filter((_, i) => !drop.has(i));
   }
 
   const out = { seed: (seed || 0) >>> 0, grid: score.grid, contexts, assignments };

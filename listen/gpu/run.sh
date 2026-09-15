@@ -16,4 +16,7 @@ echo "== songformer second opinion =="
 echo "== merging =="
 ./venv/bin/python merge_songformer.py score-out songformer-out
 
+echo "== finishing =="
+./venv/bin/python finish.py score-out/*.score
+
 echo "done -> score-out/"

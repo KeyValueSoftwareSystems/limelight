@@ -65,10 +65,12 @@ def format_v1(raw):
         n = int(round(_beat_of(float(t))))
         return {"bar": max(first_bar, 1 + n // bpb), "beat": 1 + (n % bpb)}
 
-    if raw.get("score") is not None:
-        out["score"] = raw["score"]
-    if raw.get("version") is not None:
-        out["version"] = raw["version"]
+    named = raw.get("score")
+    if named is None:
+        named = (raw.get("song") or {}).get("slug")
+    if named is not None:
+        out["score"] = named
+    out["version"] = _or(raw.get("version"), 0)
 
     if raw.get("song"):
         out["song"] = dict(raw["song"])
@@ -140,8 +142,10 @@ def format_v1(raw):
     if raw.get("downbeats"):
         out["downbeats"] = raw["downbeats"]
     elif isinstance(out.get("beats"), list) and isinstance(raw.get("beats"), list):
-        out["downbeats"] = [e for e, b in zip(out["beats"], raw["beats"])
-                            if isinstance(b, dict) and b.get("downbeat")]
+        flagged = [e for e, b in zip(out["beats"], raw["beats"])
+                   if isinstance(b, dict) and b.get("downbeat")]
+        out["downbeats"] = flagged or [e for e in out["beats"]
+                                       if e.get("beat") == 1]
 
     layers = raw.get("layers") or {}
     form = layers.get("form") or {}
@@ -515,6 +519,21 @@ def format_v1(raw):
             "every_bars": pg.get("every_bars"),
             "from_bar": pg.get("from_bar"),
         }
+
+    if ("phrase" not in out["layers"] and not raw.get("phrase_grid")
+            and isinstance(out.get("sections"), list) and len(out["sections"]) > 2):
+        edges = [x["from"]["bar"] for x in out["sections"]]
+        start = edges[0]
+        best = None
+        for per in (8, 4):
+            on = sum(1 for b in edges if (b - start) % per == 0) / len(edges)
+            if on >= 0.5:
+                best = per
+                break
+        if best:
+            out["layers"]["phrase"] = {"kind": "rule", "every_bars": best,
+                                       "from_bar": start,
+                                       "derived_from": "where the sections fall"}
 
     if not out["layers"]:
         del out["layers"]

@@ -3,50 +3,66 @@
 "use strict";
 const { respond } = require("./respond.js");
 const fs_ = require("fs"), path_ = require("path");
-function scoreFile() {
-  const built = path_.join(__dirname, "..", "scores", "levels.score");
-  return built;
-}
+const scoreFile = () => require("./fixture.js").need("respond");
+const SCORE_PATH = scoreFile();
+process.env.LIMELIGHT_SCORES = path_.dirname(SCORE_PATH);
+const NAME = path_.basename(SCORE_PATH, ".score");
+console.log(`# respond: ${NAME}`);
 const out = [];
 const ok = (n, c, d) => out.push([!!c, n, d || ""]);
 
+/* Which bars to ask about comes from this score, not from the one this suite
+   used to be written against. WIN starts a section that runs at least 8 bars;
+   MID sits inside a longer one, so "a section starts before the window" is
+   actually being tested rather than restated. */
+const FULL = respond({ score: NAME, fields: ["beats", "downbeats", "sections", "energy"] });
+const LONG = (FULL.sections || []).find(s => s.to.bar - s.from.bar >= 10)
+          || (FULL.sections || [])[1] || { from: { bar: 1 }, to: { bar: 9 } };
+const WIN = LONG.from.bar, MID = LONG.from.bar + 3;
+const inWin = (b, from, n) => b >= from && b < from + n;
+const BEATS8 = (FULL.beats.list || []).filter(b => inWin(b[0], WIN, 8)).length;
+const DOWN8 = (FULL.downbeats && FULL.downbeats.list ? FULL.downbeats.list : [])
+  .filter(b => inWin(b[0], WIN, 8)).length;
+
 {
-  const r = respond({ score: "levels", fields: ["downbeats"] });
+  const r = respond({ score: NAME, fields: ["downbeats"] });
   ok("grid comes back even when nobody asked for it", !!r.grid);
   ok("a field nobody asked for is not sent", !r.beats && !r.energy && !r.sections,
      Object.keys(r).join(", "));
   ok("the response says which version it gave", r.version !== undefined, "v" + r.version);
 }
 {
-  const r = respond({ score: "levels", fields: ["downbeats", "tempo_curve"] });
+  const r = respond({ score: NAME, fields: ["downbeats", "tempo_curve"] });
   ok("an unknown field is reported rather than ignored silently",
      r.ignored && r.ignored.fields.includes("tempo_curve"),
      JSON.stringify(r.ignored && r.ignored.fields));
 }
 {
-  const r = respond({ score: "levels", fields: ["beats", "downbeats", "energy"],
-                      window: { from_bar: 33, bars: 8 } });
-  ok("a window clips the beats", r.beats.count === 32, r.beats.count + " beats");
-  ok("and the downbeats", r.downbeats.count === 8, r.downbeats.count + " downbeats");
-  ok("a window does not renumber -- bar 33 is still bar 33",
-     r.beats.list[0][0] === 33, JSON.stringify(r.beats.list[0]));
+  const r = respond({ score: NAME, fields: ["beats", "downbeats", "energy"],
+                      window: { from_bar: WIN, bars: 8 } });
+  ok("a window clips the beats", r.beats.count === BEATS8,
+     `${r.beats.count} beats, ${BEATS8} of them lie in bars ${WIN}..${WIN + 7}`);
+  ok("and the downbeats", r.downbeats.count === DOWN8,
+     `${r.downbeats.count} downbeats, expected ${DOWN8}`);
+  ok(`a window does not renumber -- bar ${WIN} is still bar ${WIN}`,
+     r.beats.list[0][0] === WIN, JSON.stringify(r.beats.list[0]));
   ok("energy is clipped and says where it now starts",
-     r.energy.from_bar === 33 && r.energy.values.length === 8,
+     r.energy.from_bar === WIN && r.energy.values.length === 8,
      `from ${r.energy.from_bar}, ${r.energy.values.length} values`);
 }
 {
   /* 36 sits inside the drop that starts at 33, so a section really does begin
      before the window. Asking from 33 tested nothing: it is a section start. */
-  const r = respond({ score: "levels", fields: ["sections"],
-                      window: { from_bar: 36, bars: 8 } });
+  const r = respond({ score: NAME, fields: ["sections"],
+                      window: { from_bar: MID, bars: 8 } });
   const names = r.sections.map(s => `${s.name} ${s.from.bar}-${s.to.bar}`);
   ok("a section that starts before the window still comes back",
-     r.sections.some(s => s.from.bar < 36), names.join(", "));
-  ok("because a consumer asking for 8 bars needs to know it is inside a longer drop",
-     r.sections.some(s => s.to.bar > 44));
+     r.sections.some(s => s.from.bar < MID), names.join(", "));
+  ok("because a consumer asking for 8 bars needs to know it is inside a longer section",
+     r.sections.some(s => s.to.bar > MID + 8));
 }
 {
-  const r = respond({ score: "levels", version: 99, fields: ["grid"] });
+  const r = respond({ score: NAME, version: 99, fields: ["grid"] });
   ok("asking for a version that does not exist is an error, not a silent swap",
      !!r.error, r.error);
 }
@@ -68,7 +84,7 @@ const ok = (n, c, d) => out.push([!!c, n, d || ""]);
     const r = respond({ score: "withprofile", fields: ["grid"] });
     ok("a score with a profile answers with it, asked for or not",
        r.profile && r.profile.user === "muzammil" && r.profile.colours[0].hex === "#ff0000", JSON.stringify(r.profile));
-    const plain = respond({ score: "levels", fields: ["grid"] });
+    const plain = respond({ score: NAME, fields: ["grid"] });
     ok("a score without one answers without", !("profile" in plain));
   } finally {
     fs.unlinkSync(tmp);
@@ -84,7 +100,7 @@ const bad = out.filter(r => !r[0]).length;
    page, and dropped by the formatter -- the quietest way for work to be lost. */
 {
   const fs2 = require("fs"), path2 = require("path");
-  const said = respond({ score: "levels", want: "v1" });
+  const said = respond({ score: NAME, want: "v1" });
   const doc = said && (said.score || said.body || said);
   const want = ["ticks", "melody_phrases", "chord_changes"];
   const gone = want.filter(k => doc[k] == null);

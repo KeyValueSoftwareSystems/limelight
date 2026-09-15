@@ -319,6 +319,33 @@ def _adapt(sc):
     step by hand is how the two scores for Levels ended up 9.89 beats apart
     without anything failing.
     """
+    secs = sc.get("sections") if sc else None
+    if (sc and isinstance(secs, list) and secs and not secs[0].get("from")
+            and not (sc.get("layers") or {}).get("form")):
+        grid = sc.get("grid") or {}
+        per = grid.get("beats_per_bar") or 4
+        base = _or(grid.get("first_bar"), 1)
+        tempo = grid.get("tempo") or [{"from_beat": 0,
+                                       "at_s": grid.get("first_beat_s") or 0,
+                                       "bpm": grid.get("bpm") or 120}]
+
+        def _put(t):
+            k = 0
+            while k + 1 < len(tempo) and tempo[k + 1]["at_s"] <= t:
+                k += 1
+            seg = tempo[k]
+            n = int(round(seg["from_beat"] + (t - seg["at_s"]) / (60.0 / seg["bpm"])))
+            return {"bar": max(base, 1 + n // per), "beat": 1 + (n % per)}
+
+        sc = dict(sc)
+        layers = dict(sc.get("layers") or {})
+        layers["form"] = {"kind": "partition",
+                          "note": "from `sections`, placed on the tempo map.",
+                          "spans": [{"from": _put(x["start"]), "to": _put(x["end"]),
+                                     "name": x.get("label"), "nth": i + 1,
+                                     "like": x.get("label")}
+                                    for i, x in enumerate(secs)]}
+        sc["layers"] = layers
     if not sc or sc.get("layers") or not sc.get("parts"):
         return sc
     out = dict(sc)

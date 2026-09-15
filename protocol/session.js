@@ -152,6 +152,30 @@ function Session(score, opts) {
         ...(m.back_at != null ? { back_at: m.back_at } : {}),
         ...(m.into_bar != null ? { into_bar: m.into_bar } : {}) })) });
     }
+    if (Array.isArray(sc.sections) && sc.sections.length && !sc.sections[0].from
+        && !(sc.layers && sc.layers.form)) {
+      const per = (sc.grid || {}).beats_per_bar || 4;
+      const base = (sc.grid || {}).first_bar != null ? sc.grid.first_bar : 1;
+      const map = ((sc.grid || {}).tempo || []).length
+        ? sc.grid.tempo
+        : [{ from_beat: 0, at_s: (sc.grid || {}).first_beat_s || 0,
+             bpm: (sc.grid || {}).bpm || 120 }];
+      const put = (t) => {
+        let k = 0;
+        while (k + 1 < map.length && map[k + 1].at_s <= t) k++;
+        const seg = map[k];
+        const n = Math.round(seg.from_beat + (t - seg.at_s) / (60 / seg.bpm));
+        return { bar: Math.max(base, 1 + Math.floor(n / per)),
+                 beat: 1 + (((n % per) + per) % per) };
+      };
+      sc = Object.assign({}, sc, { layers: {
+        ...(sc.layers || {}),
+        form: { kind: "partition",
+          note: "from `sections`, placed on the tempo map.",
+          spans: sc.sections.map((x, i) => ({
+            from: put(x.start), to: put(x.end), name: x.label, nth: i + 1,
+            like: x.label })) } } });
+    }
     if (!sc.parts) return sc;
     if (sc.layers && sc.layers.form) return sc;
     const out = Object.assign({}, sc);

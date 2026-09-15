@@ -61,6 +61,22 @@ const KNOWN = [
 /* The pipeline writes parts and bars.intensity; the protocol says sections and
    energy. server/format/v1.js does the same mapping for the HTTP path, which is
    ESM and cannot be required from here. */
+/* The derived lanes -- energy, presence, subsection -- are worked out once, in
+   server/format/v1.js, and borrowed here. Writing them out a second time is
+   how this file and that one came to disagree about sections in the first
+   place. If the ESM require is not available the protocol simply answers
+   without them rather than with a different set. */
+let _v1 = null;
+function derived(sc) {
+  try {
+    if (_v1 === null) _v1 = require("../server/format/v1.js");
+    return _v1.format(sc);
+  } catch (e) {
+    _v1 = false;
+    return null;
+  }
+}
+
 function adapt(s) {
   const shaped =
     Array.isArray(s.sections) && (!s.sections.length || s.sections[0].from);
@@ -97,36 +113,8 @@ function adapt(s) {
       also_heard: sec.also_heard,
     }));
   }
-  if (!s.energy && s.stems_temporal && s.stems_temporal.stems && g.bars) {
-    const atBeat = (n) => {
-      let k = 0;
-      while (k + 1 < map.length && map[k + 1].from_beat <= n) k++;
-      const seg = map[k];
-      return seg.at_s + (n - seg.from_beat) * (60 / seg.bpm);
-    };
-    const lanes = Object.values(s.stems_temporal.stems).filter(
-      (v) => Array.isArray(v) && v.length,
-    );
-    if (lanes.length) {
-      const w = s.stems_temporal.window_s || 0.5;
-      const n = Math.min(...lanes.map((v) => v.length));
-      const mean = [];
-      for (let i = 0; i < n; i++)
-        mean.push(lanes.reduce((a, v) => a + v[i], 0) / lanes.length);
-      const rows = [];
-      for (let b = 0; b < g.bars; b++) {
-        const a = Math.floor(atBeat(b * per) / w);
-        const z = Math.max(a + 1, Math.floor(atBeat((b + 1) * per) / w));
-        const cut = mean.slice(Math.max(0, a), Math.min(n, z));
-        rows.push(cut.length ? cut.reduce((x, y) => x + y, 0) / cut.length : 0);
-      }
-      const top = Math.max(...rows);
-      if (top > 0)
-        out.energy = { per: "bar", from_bar: base,
-                       values: rows.map((v) => +(v / top).toFixed(3)),
-                       normalised: "per-song-peak" };
-    }
-  }
+  const done = derived(s);
+  if (!s.energy && done && done.energy) out.energy = done.energy;
   if (Array.isArray(s.moments) && s.moments.length && !s.moments[0].at) {
     out.moments = s.moments.map((mo) =>
       mo.time_s != null ? { at: place(mo.time_s), ...mo } : mo,
@@ -176,8 +164,23 @@ function adapt(s) {
   /* form is a partition of the song; subsection partitions each section. Other
      things -- a hook carrying into the next section -- cross those boundaries,
      which is the whole reason these are layers and not one list. */
+  if (done && done.layers) {
+    for (const name of ["presence", "subsection"])
+      if (done.layers[name] && !(s.layers || {})[name])
+        out[name === "subsection" ? "_subsection" : "_presence"] = done.layers[name];
+  }
+  if (out.sections && out.sections.length > 2) {
+    const edges = out.sections.map((x) => x.from.bar);
+    const start = edges[0];
+    for (const per of [8, 4]) {
+      const on = edges.filter((b) => (b - start) % per === 0).length / edges.length;
+      if (on >= 0.5) { out.phrase_grid = { every_bars: per, from_bar: start }; break; }
+    }
+  }
   if (out.sections) {
     out.layers = {
+      ...(out._presence ? { presence: out._presence } : {}),
+      ...(out._subsection ? { subsection: out._subsection } : {}),
       form: { kind: "partition", spans: out.sections },
       ...(Array.isArray(s.phrases)
         ? {
@@ -230,16 +233,18 @@ function adapt(s) {
             },
           }
         : {}),
-      ...(s.phrase_grid
+      ...((s.phrase_grid || out.phrase_grid)
         ? {
             phrase: {
               kind: "rule",
-              every_bars: s.phrase_grid.every_bars,
-              from_bar: s.phrase_grid.from_bar,
+              every_bars: (s.phrase_grid || out.phrase_grid).every_bars,
+              from_bar: (s.phrase_grid || out.phrase_grid).from_bar,
             },
           }
         : {}),
     };
+    delete out._presence;
+    delete out._subsection;
   }
   if (Array.isArray(s.bars && s.bars.intensity)) {
     out.energy = {
@@ -277,6 +282,9 @@ function respond(req) {
     };
   }
   const s = adapt(JSON.parse(fs.readFileSync(file, "utf8")));
+  /* A score with no version is version 0, the one the pipeline writes. */
+  if (s.version == null) s.version = 0;
+  if (s.score == null) s.score = (s.song || {}).slug || name;
 
   if (req.version !== undefined && req.version !== s.version) {
     return {

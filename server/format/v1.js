@@ -79,8 +79,13 @@ export function format(raw) {
     };
   };
 
-  if (raw.score != null) out.score = raw.score;
-  if (raw.version != null) out.version = raw.version;
+  /* A score that does not name itself is named by its song, and a score with
+     no version is version 0 -- the one the pipeline writes. Leaving these
+     undefined made the protocol answer without an envelope whenever a score
+     was built by a run that predated them. */
+  const named = raw.score != null ? raw.score : (raw.song || {}).slug;
+  if (named != null) out.score = named;
+  out.version = raw.version != null ? raw.version : 0;
 
   if (raw.song) {
     out.song = { ...raw.song };
@@ -142,12 +147,24 @@ export function format(raw) {
     }
   }
   if (raw.downbeats) out.downbeats = raw.downbeats;
-  else if (Array.isArray(out.beats) && Array.isArray(raw.beats))
-    out.downbeats = out.beats.filter(
+  else if (Array.isArray(out.beats) && Array.isArray(raw.beats)) {
+    const flagged = out.beats.filter(
       (_, i) => raw.beats[i] && raw.beats[i].downbeat,
     );
+    out.downbeats = flagged.length
+      ? flagged
+      : out.beats.filter((b) => b.beat === 1);
+  }
 
-  if (Array.isArray(raw.sections) && raw.sections.length) {
+  const formSpans = raw.layers && raw.layers.form && raw.layers.form.spans;
+  if (Array.isArray(formSpans) && formSpans.length) {
+    out.sections = formSpans.map((sp) => {
+      const row = { from: sp.from, to: sp.to, name: sp.name, repeat: sp.repeat };
+      for (const extra of ["rise", "playing", "stems", "fullness", "feels"])
+        if (sp[extra] != null) row[extra] = sp[extra];
+      return row;
+    });
+  } else if (Array.isArray(raw.sections) && raw.sections.length) {
     out.sections = raw.sections.map((s, i) => {
       const from =
         s.from_bar != null ? { bar: s.from_bar, beat: 1 } : place(s.start);
@@ -497,6 +514,20 @@ export function format(raw) {
       every_bars: raw.phrase_grid.every_bars,
       from_bar: raw.phrase_grid.from_bar,
     };
+  }
+
+  if (!out.layers.phrase && !raw.phrase_grid && Array.isArray(out.sections)
+      && out.sections.length > 2) {
+    const edges = out.sections.map((x) => x.from.bar);
+    const start = edges[0];
+    let best = null;
+    for (const p of [8, 4]) {
+      const on = edges.filter((b) => (b - start) % p === 0).length / edges.length;
+      if (on >= 0.5) { best = p; break; }
+    }
+    if (best)
+      out.layers.phrase = { kind: "rule", every_bars: best, from_bar: start,
+                            derived_from: "where the sections fall" };
   }
 
   if (!Object.keys(out.layers).length) delete out.layers;
