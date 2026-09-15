@@ -270,7 +270,9 @@ const noHead = { rig: "arc4", fixtures: RIG.fixtures.filter(f => f.type !== "hea
   const ids = ctx => v.candidates(ctx).map(c => c.id);
   ok("a vetoed fact removes the sequence", ids("drop").includes("x_veto") && !ids({ form: "drop", doing: "peaking" }).includes("x_veto"));
   const easing = v.candidates({ form: "drop", doing: "easing" }).find(c => c.id === "x_veto");
-  ok("a matched fact joins the geometric mean", easing && Math.abs(easing.score - Math.sqrt(0.8 * 0.9)) < 1e-3, easing && String(easing.score));
+  /* form weight 2.0, doing weight 1.5: exp((2*ln(0.8) + 1.5*ln(0.9)) / 3.5) */
+  const wgmExpected = Math.exp((2.0 * Math.log(0.8) + 1.5 * Math.log(0.9)) / 3.5);
+  ok("a matched fact joins the weighted geometric mean", easing && Math.abs(easing.score - wgmExpected) < 1e-3, easing && String(easing.score));
   const neutral = v.candidates({ form: "drop", texture: ["busy"] }).find(c => c.id === "x_veto");
   ok("an unmentioned family leaves the score alone", neutral && neutral.score === 0.8, neutral && String(neutral.score));
   ok("the order of facts in a family does not matter",
