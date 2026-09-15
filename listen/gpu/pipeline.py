@@ -16,6 +16,25 @@ sglang_lock = threading.Lock()
 import subprocess, signal
 
 
+def gpu_pids():
+    try:
+        out = subprocess.run(
+            ["nvidia-smi", "--query-compute-apps=pid", "--format=csv,noheader"],
+            capture_output=True, text=True, timeout=20).stdout
+    except Exception:
+        return []
+    keep = {os.getpid(), os.getppid()}
+    found = []
+    for tok in out.split():
+        try:
+            pid = int(tok)
+        except ValueError:
+            continue
+        if pid not in keep:
+            found.append(pid)
+    return found
+
+
 def stop_sglang():
     print("    [stopping SGLang to free GPU...]", flush=True)
     os.system('pkill -9 -f "sglang" 2>/dev/null')
@@ -24,7 +43,11 @@ def stop_sglang():
     _t.sleep(2)
     os.system('pkill -9 -f "sglang" 2>/dev/null')
     _t.sleep(2)
-    os.system("fuser -k /dev/nvidia* 2>/dev/null")
+    for pid in gpu_pids():
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
     _t.sleep(2)
     import torch
 
