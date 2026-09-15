@@ -23,8 +23,9 @@ export const KNOWN = [
   "emotion",
 ];
 
-const STEM_NAMES = [];
-const CURVE_NAMES = ["energy"];
+const STEM_NAMES = ["drums", "bass", "vocals", "other", "guitar", "piano"];
+const CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace",
+                     "weight", "floor", "noisy", "sustained"];
 
 export function format(raw) {
   const out = {};
@@ -254,6 +255,7 @@ export function format(raw) {
         in: p.in,
         in_nth: p.in_nth,
         doing: p.doing,
+        also: p.also || [],
         says: p.says,
         energy: p.energy,
         rise: p.rise,
@@ -344,9 +346,74 @@ export function format(raw) {
     out.profile = person;
   }
 
+  /* BTC emits chords as timed spans. Readers ask for them per bar, plus a
+     key -- the same shape the old Essentia path produced -- so give them both
+     rather than the model's raw output under an internal name. */
+  if (Array.isArray(raw.btc_chords_raw) && raw.btc_chords_raw.length) {
+    const spans = raw.btc_chords_raw
+      .filter((c) => c && Number.isFinite(c.start) && Number.isFinite(c.end))
+      .map((c) => ({ start: c.start, end: c.end, chord: String(c.chord) }));
+    out.chords = { of: "seconds", spans };
+
+    const bpb = grid.beats_per_bar || 4;
+    const barSec = beatSec * bpb;
+    if (barSec > 0 && grid.bars) {
+      const perBar = [];
+      for (let b = 0; b < grid.bars; b++) {
+        const a = firstBeatS + b * barSec;
+        const z = a + barSec;
+        let best = null, bestOverlap = 0;
+        for (const c of spans) {
+          const ov = Math.min(z, c.end) - Math.max(a, c.start);
+          if (ov > bestOverlap) { bestOverlap = ov; best = c.chord; }
+        }
+        perBar.push(best && best !== "N" ? best : null);
+      }
+      out.harmony = { from_bar: firstBar, chords: perBar,
+                      confidence: perBar.map((c) => (c ? 1 : null)) };
+      const seen = {};
+      for (const c of perBar) if (c) seen[c] = (seen[c] || 0) + 1;
+      const top = Object.entries(seen).sort((a, b) => b[1] - a[1])[0];
+      if (top) {
+        const m = /^([A-G][#b]?)(.*)$/.exec(top[0]);
+        if (m) out.key = { root: m[1], scale: /min|m$/.test(m[2]) ? "minor" : "major",
+                           from: "most common BTC chord" };
+      }
+    }
+  }
+
+  if (raw.signals) out.signals = raw.signals;
   if (raw.caption) out.caption = raw.caption;
-  if (raw.btc_chords_raw) out.btc_chords_raw = raw.btc_chords_raw;
-  if (raw.stems) out.stems = raw.stems;
+
+  /* the 53-stem summary is a different fact from the per-bar lanes above:
+     one is "how loud is this instrument across the whole record", the other
+     is "where is it bar by bar". Merging them under one key made the summary
+     silently delete the lanes every reader asks for. */
+  if (raw.stems && !Array.isArray(raw.stems)) {
+    const lanes = out.stems && out.stems.lanes ? out.stems : null;
+    const summary = Object.entries(raw.stems)
+      .filter(([, v]) => v && typeof v === "object" && "rms" in v)
+      .map(([name, v]) => ({ name, rms: v.rms, peak: v.peak, db: v.db }))
+      .sort((a, b) => b.rms - a.rms);
+    if (summary.length) out.instruments = { of: "whole recording", heard: summary };
+    else if (!lanes) out.stems = raw.stems;
+    if (lanes) out.stems = lanes;
+  }
+
+  /* per-instrument level over time -- 53-stem separation at half-second
+     resolution. This is the finest-grained thing in the file and nothing
+     was carrying it to a reader. */
+  if (raw.stems_temporal && raw.stems_temporal.stems) {
+    out.instruments_over_time = {
+      per: "window",
+      window_s: raw.stems_temporal.window_s,
+      normalised: "per-instrument-peak-within-song",
+      lanes: raw.stems_temporal.stems,
+    };
+  }
+
+  if (raw.rhythm) out.rhythm = raw.rhythm;
+  if (raw.key_tempo) out.key_tempo = raw.key_tempo;
   if (raw.beat_consensus) out.beat_consensus = raw.beat_consensus;
   if (raw.emotion) out.emotion = raw.emotion;
 
