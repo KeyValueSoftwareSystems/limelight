@@ -722,22 +722,23 @@
             style="width: 100%; height: 60px"
           ></canvas>
           <div
-            id="mom-tip"
+            id="tl-tip"
             style="
               display: none;
               position: fixed;
               pointer-events: none;
               z-index: 999;
-              background: #1a1f2e;
+              background: #151c2aee;
               border: 1px solid #334;
               border-radius: 6px;
-              padding: 6px 10px;
+              padding: 8px 12px;
               font:
                 11px ui-monospace,
                 monospace;
               color: #dde;
-              max-width: 300px;
-              white-space: nowrap;
+              max-width: 360px;
+              line-height: 1.5;
+              backdrop-filter: blur(6px);
             "
           ></div>
         </div>
@@ -1393,48 +1394,224 @@
     }
   }
 
-  (function initMomTip() {
-    const mc = $("moments-canvas");
-    const tip = $("mom-tip");
-    if (!mc || !tip) return;
-    mc.addEventListener("mousemove", (e) => {
-      const moms = SCORE.moments || [];
-      if (!moms.length) {
+  (function initTooltips() {
+    const tip = $("tl-tip");
+    if (!tip) return;
+
+    function showTip(e, html) {
+      if (!html) {
         tip.style.display = "none";
         return;
       }
-      const rect = mc.getBoundingClientRect();
-      const xFrac = (e.clientX - rect.left) / rect.width;
-      const t = timeAt(xFrac);
-      let hit = null;
-      for (const m of moms) {
-        const mt = m.time_s != null ? m.time_s : 0;
-        const dur = m.duration_s || 2.0;
-        if (t >= mt && t <= mt + dur) {
-          hit = m;
-          break;
+      tip.innerHTML = html;
+      tip.style.display = "block";
+      const tx = Math.min(e.clientX + 14, window.innerWidth - 380);
+      tip.style.left = tx + "px";
+      tip.style.top = e.clientY - 12 + "px";
+    }
+    function hideTip() {
+      tip.style.display = "none";
+    }
+
+    function canvasTime(e, canvas) {
+      const r = canvas.getBoundingClientRect();
+      return timeAt((e.clientX - r.left) / r.width);
+    }
+
+    function wire(id, resolver) {
+      const el = $(id);
+      if (!el) return;
+      el.addEventListener("mousemove", (e) =>
+        showTip(e, resolver(canvasTime(e, el), e)),
+      );
+      el.addEventListener("mouseleave", hideTip);
+    }
+
+    wire("sections-canvas", (t) => {
+      for (const s of mossSections()) {
+        if (t >= s.start && t <= s.end) {
+          const c = HUE[s.label] || MSEC_COLORS[0];
+          return (
+            `<span style="color:${c};font-weight:700">${s.label.toUpperCase()}</span>` +
+            `<span style="color:#7b8599"> · ${mmss(s.start)} – ${mmss(s.end)}</span>`
+          );
         }
       }
-      if (hit) {
-        const type = hit.type || "?";
-        const what = hit.what || "";
-        const desc = hit.description || "";
-        const col = MOMENT_TYPE_COLORS[type] || "#8b93a6";
-        tip.innerHTML =
-          `<span style="color:${col};font-weight:700">${type.toUpperCase()}</span>` +
-          (what ? ` · <span style="color:#aab">${what}</span>` : "") +
-          (desc
-            ? `<br><span style="color:#889;font-size:10px">${desc}</span>`
-            : "");
-        tip.style.display = "block";
-        tip.style.left = e.clientX + 12 + "px";
-        tip.style.top = e.clientY - 10 + "px";
-      } else {
-        tip.style.display = "none";
+    });
+
+    wire("moments-canvas", (t) => {
+      for (const m of SCORE.moments || []) {
+        const mt = m.time_s != null ? m.time_s : 0;
+        if (t >= mt && t <= mt + (m.duration_s || 2.0)) {
+          const type = m.type || "?";
+          const col = MOMENT_TYPE_COLORS[type] || "#8b93a6";
+          return (
+            `<span style="color:${col};font-weight:700">${type.toUpperCase()}</span>` +
+            (m.what ? ` · <span style="color:#aab">${m.what}</span>` : "") +
+            `<span style="color:#556"> @ ${mmss(mt)}</span>` +
+            (m.description
+              ? `<br><span style="color:#889;font-size:10px">${m.description}</span>`
+              : "")
+          );
+        }
       }
     });
-    mc.addEventListener("mouseleave", () => {
-      tip.style.display = "none";
+
+    wire("chords-canvas", (t) => {
+      for (const c of SCORE.btc_chords_raw || []) {
+        if (c.chord === "N") continue;
+        if (t >= c.start && t <= c.end) {
+          const col = chordColor(c.chord);
+          return (
+            `<span style="color:${col};font-weight:700;font-size:14px">${c.chord}</span>` +
+            `<span style="color:#7b8599"> · ${mmss(c.start)} – ${mmss(c.end)}</span>`
+          );
+        }
+      }
+    });
+
+    wire("emotion-canvas", (t) => {
+      const emo = SCORE.emotion || [];
+      for (const e of emo) {
+        if (t >= e.start && t <= e.end) {
+          const col = EMOTION_COLORS[e.emotion] || "#4a5568";
+          let html =
+            `<span style="color:${col};font-weight:700">${e.emotion || "?"}</span>` +
+            `<span style="color:#7b8599"> · ${mmss(e.start)} – ${mmss(e.end)}</span>`;
+          const dims = [];
+          for (const ln of EMO_LINES) {
+            const v = e[ln.key];
+            if (v != null)
+              dims.push(
+                `<span style="color:${ln.color}">${ln.label}: ${v}</span>`,
+              );
+          }
+          if (dims.length)
+            html += `<br><span style="font-size:10px">${dims.join(" · ")}</span>`;
+          if (e.description)
+            html += `<br><span style="color:#889;font-size:10px">${e.description}</span>`;
+          return html;
+        }
+      }
+    });
+
+    wire("zoom", (t) => {
+      const beats = SCORE.beats || [];
+      let closest = null,
+        minD = 0.2;
+      for (const bt of beats) {
+        const d = Math.abs(bt.t - t);
+        if (d < minD) {
+          minD = d;
+          closest = bt;
+        }
+      }
+      if (closest) {
+        const per = SCORE.grid.beats_per_bar;
+        const idx = beats.indexOf(closest);
+        const down =
+          (((idx - (SHIFT - BASE)) % per) + per) % per === firstIndex();
+        const bar = Math.floor(idx / per) + 1;
+        const beat = (idx % per) + 1;
+        return (
+          `<span style="color:${down ? "#fff" : "#e8a33d"};font-weight:700">${down ? "▼ Downbeat" : "Beat"}</span>` +
+          `<span style="color:#7b8599"> · Bar ${bar}, Beat ${beat}</span>` +
+          `<br><span style="color:#556;font-size:10px">${closest.t.toFixed(2)}s</span>`
+        );
+      }
+    });
+
+    wire("melody-canvas", (t) => {
+      const notes = SCORE.melody || [];
+      for (const n of notes) {
+        const s = n.start || n.time_s || 0;
+        const dur = n.duration || 0.1;
+        if (t >= s && t <= s + dur) {
+          const p = n.pitch || n.note || 0;
+          const NAMES = [
+            "C",
+            "C#",
+            "D",
+            "D#",
+            "E",
+            "F",
+            "F#",
+            "G",
+            "G#",
+            "A",
+            "A#",
+            "B",
+          ];
+          const name =
+            NAMES[Math.round(p) % 12] + Math.floor(Math.round(p) / 12 - 1);
+          const vel =
+            n.velocity != null ? (n.velocity * 100).toFixed(0) + "%" : "";
+          return (
+            `<span style="color:#7ae8b0;font-weight:700">${name}</span>` +
+            `<span style="color:#7b8599"> · MIDI ${Math.round(p)}</span>` +
+            (vel ? ` · <span style="color:#8fd0ff">${vel} vel</span>` : "") +
+            `<br><span style="color:#556;font-size:10px">${dur.toFixed(2)}s duration</span>`
+          );
+        }
+      }
+    });
+
+    wire("rhythm-canvas", (t) => {
+      const rhy = SCORE.rhythm;
+      if (!rhy) return;
+      const hits = rhy.hits || rhy.patterns || [];
+      let closest = null,
+        minD = 0.1;
+      for (const p of hits) {
+        const ht = p.t || p.time_s || 0;
+        const d = Math.abs(ht - t);
+        if (d < minD) {
+          minD = d;
+          closest = p;
+        }
+      }
+      if (closest) {
+        const vel = closest.intensity || closest.velocity || 0;
+        return (
+          `<span style="color:#e8a33d;font-weight:700">Onset</span>` +
+          `<span style="color:#7b8599"> · ${(closest.t || closest.time_s || 0).toFixed(2)}s</span>` +
+          `<br><span style="color:#556;font-size:10px">Intensity: ${(vel * 100).toFixed(0)}%</span>`
+        );
+      }
+    });
+
+    wire("stems-canvas", (t, e) => {
+      const st = SCORE.stems_temporal;
+      if (!st || !st.stems) return;
+      const canvas = $("stems-canvas");
+      const rect = canvas.getBoundingClientRect();
+      const names = Object.keys(st.stems).sort((a, b) => {
+        const sa = SCORE.stems && SCORE.stems[a] ? SCORE.stems[a].rms : 0;
+        const sb = SCORE.stems && SCORE.stems[b] ? SCORE.stems[b].rms : 0;
+        return sb - sa;
+      });
+      if (!names.length) return;
+      const rowH = Math.max(14, Math.min(28, 600 / names.length));
+      const yLocal =
+        ((e.clientY - rect.top) *
+          (canvas.height / (window.devicePixelRatio || 1))) /
+        canvas.height;
+      const rowIdx = Math.floor((e.clientY - rect.top) / rowH);
+      if (rowIdx < 0 || rowIdx >= names.length) return;
+      const name = names[rowIdx];
+      const winS = st.window_s || 0.5;
+      const wIdx = Math.floor(t / winS);
+      const vals = st.stems[name];
+      const v = vals && wIdx >= 0 && wIdx < vals.length ? vals[wIdx] : 0;
+      const rms =
+        SCORE.stems && SCORE.stems[name] ? SCORE.stems[name].rms : null;
+      return (
+        `<span style="color:#7ae8b0;font-weight:700">${name}</span>` +
+        `<span style="color:#7b8599"> @ ${mmss(t)}</span>` +
+        `<br><span style="color:#556;font-size:10px">Level: ${(v * 100).toFixed(1)}%` +
+        (rms != null ? ` · Avg RMS: ${rms.toFixed(4)}` : "") +
+        `</span>`
+      );
     });
   })();
 
