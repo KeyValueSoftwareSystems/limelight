@@ -49,6 +49,15 @@ line rather than regenerate everything.
 
 Return only JSON.
 
+DIAL TYPES
+  extent: one of "all", "inner", "outer", "ends", "left", "right", "single"
+  colour: hex string "#rrggbb" or [r, g, b] with values 0–1
+  colours: array of two colours
+  curve: one of "linear", "ease", "settle"
+  stream: a stream name from the overview
+  streams: array of two stream names from the overview
+  All numeric dials have (min..max) shown in the effect list below.
+
 AVAILABLE EFFECTS
 {effects_block}
 

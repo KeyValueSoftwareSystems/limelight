@@ -1764,8 +1764,18 @@ def make_handler(library, baker, rig):
                     sys.path.insert(0, HERE)
                     from composer import compose, DEFAULT_MODEL
                     plan, report, overview = compose(song, model=body.get("model", DEFAULT_MODEL))
-                    return self._json({"plan": plan, "report": report})
+                    # persist the plan so it can be reviewed
+                    os.makedirs(WORK, exist_ok=True)
+                    ts = time.strftime("%Y%m%d-%H%M%S")
+                    plan_path = os.path.join(WORK, "%s-%s.plan.json" % (song, ts))
+                    with open(plan_path, "w") as fh:
+                        json.dump({"song": song, "plan": plan, "report": report,
+                                   "model": body.get("model", DEFAULT_MODEL),
+                                   "created": ts}, fh, indent=1)
+                    sys.stderr.write("composed plan -> %s\n" % plan_path)
+                    return self._json({"plan": plan, "report": report, "saved": plan_path})
                 except Exception as e:                              # noqa: BLE001
+                    import traceback; traceback.print_exc()
                     return self._json({"error": str(e)}, 500)
 
             if path == "/api/bake-plan":

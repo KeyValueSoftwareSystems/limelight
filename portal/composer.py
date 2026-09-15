@@ -301,14 +301,32 @@ def handle_tool_call(name, args, overview):
 # ── effects block for the prompt ──────────────────────────────────────────────
 
 def build_effects_block(catalog):
-    """Format the catalog effects into a compact block for the system prompt."""
+    """Format the catalog effects into a compact block for the system prompt,
+    including dial types and valid ranges so the LLM knows what values to emit."""
     lines = []
     for e in catalog:
-        dials = ", ".join(e.get("dials", {}).keys())
+        dial_parts = []
+        for dk, dv in e.get("dials", {}).items():
+            if isinstance(dv, dict):
+                default = dv.get("default")
+                lo, hi = dv.get("min"), dv.get("max")
+                if lo is not None and hi is not None:
+                    dial_parts.append(f"{dk}={default} ({lo}..{hi})")
+                elif isinstance(default, list):
+                    dial_parts.append(f"{dk}={default} (rgb 0-1 or hex)")
+                elif isinstance(default, str):
+                    dial_parts.append(f"{dk}=\"{default}\"")
+                else:
+                    dial_parts.append(f"{dk}={default}")
+            else:
+                dial_parts.append(f"{dk}={dv}")
         fires = ", ".join(e.get("fires_on", []))
+        span = ""
+        if e.get("span_anchors"):
+            span = f"  (anchor with {' + '.join(e['span_anchors'])})"
         lines.append(
-            f"  {e['id']} ({e['kind']}, {e['dimension']}): {e['blurb']}\n"
-            f"    dials: {dials}\n"
+            f"  {e['id']} ({e['kind']}, {e['dimension']}): {e['blurb']}{span}\n"
+            f"    dials: {', '.join(dial_parts) if dial_parts else '(none)'}\n"
             f"    fires on: {fires}\n"
             f"    returns: {e.get('returns', True)}"
         )
