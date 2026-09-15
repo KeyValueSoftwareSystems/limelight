@@ -532,9 +532,12 @@ MOMENTS_PROMPT = (
     "hook_onset — recognizable hook/riff begins\n"
     "climax — local peak of intensity\n"
     "resolution — tension settles\n\n"
-    "CRITICAL: Use at least 5 different types. No type should exceed 30% of total.\n"
-    "- entrance = new instrument literally starts. NOT a texture shift or section start.\n"
-    "- Use arrival for drops/chorus landings, accent for crashes, change for texture shifts.\n"
+    "CRITICAL RULES:\n"
+    "- Use at least 5 different types. No single type should exceed 25% of total.\n"
+    "- entrance = instrument literally starts playing for the first time or after long absence.\n"
+    "- arrival = drop lands, chorus kicks in. accent = crash, stab, prominent hit.\n"
+    "- change = texture/groove shift. fill = drum fill, melodic ornament.\n"
+    "- climax = peak intensity. resolution = tension settles.\n"
     "- Sort by time_s. Do not annotate every beat or chord change.\n\n"
     "Return ONLY the JSON array."
 )
@@ -597,14 +600,8 @@ KEY_PROMPT = (
 )
 
 
-def make_prompt(task_prompt, duration_s, sections=None):
-    base = f"{COMMON_PROMPT}\n\nAuthoritative audio duration: {duration_s} seconds."
-    if sections:
-        sec_str = "; ".join(
-            f"{s['label']} {s['start']:.1f}-{s['end']:.1f}s" for s in sections
-        )
-        base += f"\n\nStructural sections already identified: [{sec_str}]. Use these boundaries as guides — emotion should shift at or near section changes."
-    return f"{base}\n\n{task_prompt}"
+def make_prompt(task_prompt, duration_s):
+    return f"{COMMON_PROMPT}\n\nAudio duration: {duration_s} seconds.\n\n{task_prompt}"
 
 
 def run_pipeline(wav_path):
@@ -735,8 +732,7 @@ def run_pipeline(wav_path):
         ("lyrics", LYRICS_PROMPT, False),
         ("key_tempo", KEY_PROMPT, False),
     ]:
-        secs_ctx = score.get("sections") if task == "emotion" else None
-        prompt = make_prompt(raw_prompt, dur, sections=secs_ctx)
+        prompt = make_prompt(raw_prompt, dur)
         t = time.time()
         try:
             if is_json:
