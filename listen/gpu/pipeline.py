@@ -468,83 +468,144 @@ def moss_json(wav, prompt, retries=3):
     return None
 
 
+COMMON_PROMPT = (
+    "Analyze only the supplied audio. Ground every annotation in audible evidence. "
+    "Describe the music itself, without prescribing lighting, visuals or other actions. "
+    "Do not infer events from genre conventions or an expected song structure.\n\n"
+    "All timestamps are seconds relative to the beginning of the supplied audio. "
+    "Use your best supported timing estimate; extra decimal places do not imply accuracy. "
+    "Use the supplied duration as the authoritative endpoint.\n\n"
+    "Return valid JSON only: no Markdown, commentary, NaN or trailing commas. "
+    "Use exactly the requested fields."
+)
+
 SECTIONS_PROMPT = (
-    "You are a professional music analyst. Listen to this entire song and identify every structural section.\n\n"
-    'Return ONLY a JSON array: [{"label": "...", "start": 0.0, "end": 15.5}, ...]\n\n'
-    "Section labels and what they mean:\n"
-    "  intro — opening before main elements arrive\n"
-    "  verse — main storytelling section, usually with vocals\n"
-    "  pre-chorus — transitional buildup leading into chorus\n"
-    "  chorus — the hook, the catchiest/most energetic repeating part\n"
-    "  post-chorus — comes right after chorus, often instrumental or with a tag\n"
-    "  bridge — a contrasting section that appears once, different melody/chords\n"
-    "  instrumental — no vocals, instruments featured\n"
-    "  solo — one instrument takes the lead (guitar solo, synth solo, etc.)\n"
-    "  breakdown — energy drops, instruments strip away\n"
-    "  drop — the big payoff moment in electronic music where bass/beat hits hard\n"
-    "  build — energy rising, risers/rolls leading to a drop or chorus\n"
-    "  interlude — a brief passage connecting two sections\n"
-    "  outro — the ending of the song, energy winding down\n\n"
-    "RULES:\n"
-    "- Cover the ENTIRE song from 0.0s to the very last second with NO gaps.\n"
-    "- The last section's end time must equal the song's total duration.\n"
-    "- Place boundaries where the music actually changes — on strong beats.\n"
-    "- Repeated sections share the same label (e.g. two choruses are both 'chorus').\n"
-    "- A typical pop/electronic song has 8-16 sections. Instrumentals may have fewer.\n"
-    "Output ONLY the JSON array."
+    "Listen to the entire recording and identify its major structural sections. "
+    "Assess repetition, contrast, melody, harmony, rhythm, vocals and arrangement "
+    "together. Loudness changes alone do not establish a new section.\n\n"
+    "Return a JSON array of objects with exactly these fields:\n"
+    "- label: one allowed section label\n"
+    "- start: number, seconds\n"
+    "- end: number, seconds\n\n"
+    "Allowed labels:\n"
+    "- intro: opening passage establishing the piece before its main body\n"
+    "- verse: recurring passage developing lyrical or musical material, often with changing words over related music\n"
+    "- pre-chorus: distinct passage preparing a chorus\n"
+    "- chorus: recurring central refrain or thematic anchor; it need not be the loudest passage, and a catchy motif alone does not establish a chorus\n"
+    "- post-chorus: distinct extension or response following a chorus\n"
+    "- bridge: contrasting passage providing departure from the surrounding structure; it may occur more than once\n"
+    "- instrumental: distinct instrument-led passage whose structural role is not better described by another allowed label\n"
+    "- solo: distinct passage organized around a foregrounded instrumental lead\n"
+    "- breakdown: sustained reduction or dismantling of an established arrangement\n"
+    "- drop: sustained payoff section marked by the arrival or return of a prominent beat, bass or main groove; label the passage, not just its first hit\n"
+    "- build: distinct passage organized around increasing anticipation or intensity\n"
+    "- interlude: intervening passage connecting or separating larger sections\n"
+    "- outro: closing passage, whether fading, sustained or forceful\n"
+    "- other: clear structural passage that does not fit the allowed labels\n\n"
+    "Rules:\n"
+    "- Cover 0.0 through the supplied duration with no gaps or overlaps.\n"
+    "- Every section must have start < end.\n"
+    "- Sort by start; each end must equal the next start.\n"
+    "- The final end must equal the supplied duration exactly.\n"
+    "- Place boundaries at audible structural transitions. Use beat or phrase alignment when supported; do not force off-beat or free-time changes onto a grid.\n"
+    "- Preserve recurring section boundaries even when adjacent labels are identical.\n"
+    "- Repeated sections use the same label, without numbering.\n"
+    "- Do not split for a brief fill, accent, entrance or small arrangement variation.\n"
+    "- Do not label every vocal-free passage instrumental: an instrumental intro, chorus or outro should retain its structural role.\n"
+    "- Do not require an intro, chorus, bridge, outro or any fixed section count.\n"
+    "- Use other when a role is unclear or outside this vocabulary; do not force verse-chorus form onto the recording.\n\n"
+    "Return ONLY the JSON array."
 )
 
 MOMENTS_PROMPT = (
-    "Listen to this song and identify every distinct musical event — "
-    "specific instants where something audibly changes.\n\n"
-    "Return ONLY a JSON array:\n"
-    '[{"time_s": float, "type": "...", "what": "instrument or element", '
-    '"intensity": 0.0-1.0, "description": "what happens"}, ...]\n\n'
-    "Use ONLY these types:\n"
-    "  entrance — a voice, instrument or musical layer begins\n"
-    "  exit — a voice, instrument or layer ends\n"
-    "  accent — a prominent hit, chord or note\n"
-    "  fill — a short rhythmic or melodic embellishment\n"
-    "  stop — an abrupt interruption of musical activity\n"
-    "  resume — music restarts after an interruption\n"
-    "  change — a distinct switch in rhythm, harmony or texture\n"
-    "  arrival — a new phrase, theme or section lands\n"
-    "  hook_onset — a recognisable recurring motif begins\n"
-    "  climax — a local peak of intensity or expression\n"
-    "  resolution — musical tension audibly settles\n\n"
-    "Timestamps must be precise, not rounded. "
-    "Name the specific instrument or sound in 'what'. "
-    "Output ONLY the JSON array, no explanation."
+    "Listen across the entire recording and identify salient, localized musical "
+    "events: occurrences that a reader could meaningfully reference or synchronize to. "
+    "Select clearly audible events, not every note, beat or minor fluctuation.\n\n"
+    "Return a JSON array of objects with exactly these fields:\n"
+    "- time_s: number, event anchor in seconds\n"
+    "- type: one allowed event type\n"
+    "- what: affected instrument, voice, layer or ensemble\n"
+    "- intensity: number from 0.0 to 1.0, perceived prominence of this event in its local musical context; this is not confidence or absolute loudness\n"
+    "- description: short, factual description of what audibly happens\n\n"
+    "Allowed types and timestamp anchors:\n"
+    "- entrance: a voice, instrument or layer joins or returns after a meaningful absence; timestamp its audible onset\n"
+    "- exit: a voice, instrument or layer leaves for a meaningful interval; timestamp its audible departure, excluding lingering reverb\n"
+    "- accent: a hit, note or chord that stands out from the surrounding pattern; timestamp its onset\n"
+    "- fill: a brief rhythmic or melodic embellishment; timestamp its beginning\n"
+    "- stop: an abrupt ensemble-wide interruption; timestamp the cutoff\n"
+    "- resume: ensemble activity restarts after an interruption; timestamp the restart\n"
+    "- change: a distinct switch in groove, harmony, timbre or texture; timestamp the switch, excluding routine chord changes\n"
+    "- arrival: a clearly marked landing of a section or major phrase/theme; timestamp the landing, not its preceding preparation\n"
+    "- hook_onset: the beginning of a clearly recognizable hook occurrence; establish recurrence from the recording where possible\n"
+    "- climax: a salient local culmination of intensity or expression; timestamp the culmination, not the start of its buildup\n"
+    "- resolution: a clearly audible settling of musical tension; timestamp the settling point\n\n"
+    "Rules:\n"
+    "- Sort chronologically; all times must be >= 0 and < the supplied duration.\n"
+    "- Do not annotate every kick, snare, chord change, phrase or vocal breath.\n"
+    "- Do not enumerate all instruments already present at the recording's start.\n"
+    "- Repeated salient hook occurrences or fills may each receive an event.\n"
+    "- Use entrance/exit for individual layers and stop/resume for the ensemble.\n"
+    "- Prefer a specific type over change when a specific type fits.\n"
+    "- Simultaneous events are allowed when they convey distinct information; do not describe the same event redundantly under several types.\n"
+    "- Name instruments only as specifically as the audio supports. Use descriptions such as 'low bass layer', 'pitched lead' or 'ensemble' when identity is unclear.\n"
+    "- Intensity anchors: 0.25 noticeable but subtle; 0.5 clear; 0.75 prominent; 1.0 exceptionally dominant locally.\n"
+    "- A quiet stop or exposed entrance can be highly prominent.\n"
+    "- Omit speculative events. Return [] if none are clearly supported.\n\n"
+    "Return ONLY the JSON array."
 )
 
 EMOTION_PROMPT = (
-    "Listen to this song as a listener would and describe what you FEEL at each moment.\n\n"
-    "Return ONLY a JSON array of segments covering the entire song:\n"
-    '[{"start": 0.0, "end": 12.5, "energy": 7, "valence": 6, "arousal": 8, '
-    '"tension": 4, "brightness": 7, "groove": 8, '
-    '"emotion": "anticipation", "description": "soft piano builds quiet excitement before the beat arrives"}, ...]\n\n'
-    "Dimensions (1-10, vary them — flat lines mean you are not listening):\n"
-    "- energy: how loud/powerful does this feel?\n"
-    "- valence: does it feel happy/uplifting or sad/heavy?\n"
-    "- arousal: does it feel exciting or calm?\n"
-    "- tension: does it feel tense/unresolved or released/resolved?\n"
-    "- brightness: does the timbre feel bright/airy or dark/warm?\n"
-    "- groove: does it make you want to move or sit still?\n\n"
-    "emotion: the ONE word that best captures how this part FEELS to a listener. "
-    "Vary it — a song is a journey, the emotion MUST change between segments. "
-    "Choose from: anticipation, euphoria, melancholy, aggression, tenderness, triumph, "
-    "anxiety, serenity, nostalgia, defiance, playfulness, bittersweetness, wonder, "
-    "intensity, hope, darkness, dreaminess, power, longing, joy, tension, release, "
-    "grandeur, intimacy, rebellion, bliss, unease, confidence, vulnerability, freedom.\n\n"
-    "description: describe what specific sounds create that feeling.\n\n"
-    "Segment boundaries should align with emotional shifts, not fixed intervals. "
-    "A quiet intro and a massive drop should NOT have the same emotion or similar dimension values. "
-    "Cover the entire song from 0.0 to the end with no gaps. Output ONLY the JSON array."
+    "Listen to the entire recording and describe its perceived expressive character "
+    "over time. Treat emotion as an interpretation supported by audible musical cues, "
+    "not an objective fact about what every listener feels.\n\n"
+    "Return a JSON array of objects with exactly these fields:\n"
+    "- start: number, seconds\n"
+    "- end: number, seconds\n"
+    "- energy: integer from 1 to 10\n"
+    "- valence: integer from 1 to 10\n"
+    "- arousal: integer from 1 to 10\n"
+    "- tension: integer from 1 to 10\n"
+    "- brightness: integer from 1 to 10\n"
+    "- groove: integer from 1 to 10\n"
+    "- emotion: one allowed label\n"
+    "- description: short explanation connecting audible sounds to the interpretation\n\n"
+    "Rate dimensions independently using these anchors:\n"
+    "- energy: 1 = very restrained or delicate; 5 = moderate force; 10 = exceptionally forceful or powerful\n"
+    "- valence: 1 = strongly sorrowful or negative; 5 = neutral or mixed; 10 = strongly joyful or positive\n"
+    "- arousal: 1 = deeply calm; 5 = moderately activated; 10 = intensely excited or agitated\n"
+    "- tension: 1 = settled or at rest; 5 = some anticipation or instability; 10 = strongly unresolved or suspenseful\n"
+    "- brightness: 1 = dark or muted timbre; 5 = balanced; 10 = brilliant or sharp timbre; this is a timbral property, not happiness\n"
+    "- groove: 1 = little perceived rhythmic pull; 5 = moderate rhythmic pull; 10 = compelling rhythmic propulsion; this is not simply tempo or loudness\n\n"
+    "Allowed emotion labels:\n"
+    "anticipation, euphoria, melancholy, aggression, tenderness, triumph, "
+    "anxiety, serenity, nostalgia, defiance, playfulness, bittersweetness, "
+    "wonder, intensity, hope, darkness, dreaminess, power, longing, joy, "
+    "tension, release, grandeur, intimacy, rebellion, bliss, unease, "
+    "confidence, vulnerability, freedom, neutral, mixed\n\n"
+    "Rules:\n"
+    "- Cover 0.0 through the supplied duration with no gaps or overlaps.\n"
+    "- Every segment must have start < end.\n"
+    "- Sort by start; each end must equal the next start.\n"
+    "- The final end must equal the supplied duration exactly.\n"
+    "- Split at meaningful, sustained changes in expressive character or dimensions.\n"
+    "- Do not split at fixed intervals, every musical event or every section boundary.\n"
+    "- Stable passages should retain stable values and may retain the same emotion.\n"
+    "- Do not invent an emotional journey or force use of the full rating range.\n"
+    "- A quiet intro and a loud drop may share an emotion while differing in energy.\n"
+    "- High energy does not imply positive valence; low energy does not imply sadness.\n"
+    "- Groove can be strong in quiet music; tension can rise while energy falls.\n"
+    "- Choose mixed for clearly coexisting emotional qualities and neutral when no strong emotional character is supported.\n"
+    "- Describe audible causes: phrasing, harmony, rhythm, register, instrumentation, texture or dynamics. Do not invent lyrics, narrative or performer intentions.\n\n"
+    "Return ONLY the JSON array."
 )
 
 CAPTION_PROMPT = "Describe this song in one paragraph: genre, mood, instrumentation, production style, and overall vibe. Be specific and concise."
 LYRICS_PROMPT = "Transcribe the lyrics of this song with timestamps. Format each line as:\n[MM:SS] lyric text\n\nIf there are no vocals or lyrics, respond with: [no lyrics]"
 KEY_PROMPT = "What is the musical key and tempo of this song? Include mode (major/minor), any key changes, and time signature. Be concise."
+
+
+def make_prompt(task_prompt, duration_s):
+    return f"{COMMON_PROMPT}\n\nAuthoritative audio duration: {duration_s} seconds.\n\n{task_prompt}"
 
 
 def run_pipeline(wav_path):
@@ -666,7 +727,8 @@ def run_pipeline(wav_path):
 
     print("  [phase 3] MOSS queries ...", flush=True)
     p3 = time.time()
-    for task, prompt, is_json in [
+    dur = score["song"]["length_s"]
+    for task, raw_prompt, is_json in [
         ("sections", SECTIONS_PROMPT, True),
         ("moments", MOMENTS_PROMPT, True),
         ("emotion", EMOTION_PROMPT, True),
@@ -674,6 +736,7 @@ def run_pipeline(wav_path):
         ("lyrics", LYRICS_PROMPT, False),
         ("key_tempo", KEY_PROMPT, False),
     ]:
+        prompt = make_prompt(raw_prompt, dur) if is_json else raw_prompt
         t = time.time()
         try:
             if is_json:
