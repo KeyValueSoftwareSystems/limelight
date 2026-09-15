@@ -1330,7 +1330,7 @@
       </dd>
       <dt>Measured here, not modelled</dt>
       <dd class="dim" style="font-size:10px;line-height:1.8">
-        moments &mdash; 14 kinds, each read off the lanes, the grid or the chords<br>
+        moments &mdash; 16 kinds, each read off the lanes, the grid or the chords<br>
         emotion &mdash; energy, brightness and groove off the stem lanes<br>
         <span style="opacity:.75">no language model is asked what happens in the song</span>
       </dd>
@@ -1425,6 +1425,14 @@
     }
   }
 
+  function playersOf(m) {
+    const seen = [];
+    for (const who of [].concat(m.with || [], m.instruments || [])) {
+      if (who && who !== m.what && !seen.includes(who)) seen.push(who);
+    }
+    return seen;
+  }
+
   function momentSpanSeconds(m) {
     const held = m.hold_s || m.duration_s || momentSpan(m) || 0;
     return held > 0 ? held : 0;
@@ -1447,7 +1455,9 @@
       const x1 = held > 0 ? frac(t + held) * probe : x0;
       if (x1 < -4 || x0 > probe + 4) continue;
       const type = (m.type || m.is || "?").toUpperCase();
-      const tail = m.what || m.description || "";
+      const played = playersOf(m);
+      const tail =
+        m.what || (played.length ? played.slice(0, 3).join(", ") : "") || m.description || "";
       mg.font = "700 9px ui-monospace,monospace";
       let ink = mg.measureText(type).width;
       if (tail) {
@@ -1601,6 +1611,9 @@
           return (
             `<span style="color:${col};font-weight:700">${type.toUpperCase()}</span>` +
             (m.what ? ` · <span style="color:#aab">${m.what}</span>` : "") +
+            (playersOf(m).length
+              ? ` <span style="color:#7c8496;font-size:10px">${playersOf(m).join(", ")}</span>`
+              : "") +
             `<span style="color:#556"> @ ${mmss(m.time_s || 0)}${held > 0 ? ` · ${held.toFixed(1)}s` : ""}</span>` +
             (m.description
               ? `<br><span style="color:#889;font-size:10px">${m.description}</span>`

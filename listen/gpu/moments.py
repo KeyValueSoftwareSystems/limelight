@@ -1323,6 +1323,7 @@ def find(
     )
     picked = picked + (rest if want is None else rest[: max(0, want - len(picked))])
 
+
     rank = {k: i for i, k in enumerate(ORDER)}
     thinned = []
     for g in sorted(picked, key=lambda x: rank[x["type"]]):
@@ -1336,6 +1337,36 @@ def find(
     picked = _no_contradictions(picked, together)
 
     picked = _one_event(picked, rank)
+
+    shown = {}
+    for g in sorted(picked, key=lambda x: x["t"]):
+        arrives = g["type"] == "entrance" or "entrance" in (g.get("alongside") or [])
+        if not arrives:
+            continue
+        for who in _names_of(g) + list(g.get("instruments") or []):
+            shown.setdefault(who, g["t"])
+    adopted = []
+    for g in picked:
+        if g["type"] != "exit":
+            continue
+        head = (g["parts"][0] if g.get("parts") else {}).get("what")
+        if not head or shown.get(head, 1e9) < g["t"]:
+            continue
+        best = None
+        for h in groups:
+            if h["type"] != "entrance" or h["t"] >= g["t"]:
+                continue
+            if (h["parts"][0] if h.get("parts") else {}).get("what") != head:
+                continue
+            weight = h["heard"] if h.get("heard") is not None else h["size"]
+            if best is None or weight > (
+                best["heard"] if best.get("heard") is not None else best["size"]
+            ):
+                best = h
+        if best is not None:
+            adopted.append(best)
+            shown[head] = best["t"]
+    picked = picked + adopted
 
     one = {"entrance": "enters", "exit": "drops out"}
     many = {"entrance": "enter", "exit": "drop out"}
