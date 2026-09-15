@@ -220,6 +220,31 @@ def bar_spans(beats, sections, duration):
     return named or None
 
 
+def _over_a_phrase(modes, span=2):
+    """Read mode across a phrase rather than one bar.
+
+    Per bar it is not a continuous measure at all, it is a chord label: a bar
+    holds a median of two chords and they are usually the same quality, so 59%
+    of bars land on exactly +1 or -1 and 86% do on the worst song. Drawn beside
+    three continuous curves that reads as tonality lurching every two seconds,
+    when the song is alternating Am and C inside one key.
+
+    A single Am in a major song does not make that bar sad. Averaged over two
+    bars either side the number answers the question the field is actually
+    asking - how major is the harmony through here - which is what a mood
+    dimension means and what a reader firing colour off it wants.
+
+    Still `mode`, because it still measures major against minor. Only the
+    window changed."""
+    if not modes:
+        return modes
+    out = []
+    for i in range(len(modes)):
+        near = [m for m in modes[max(0, i - span):i + span + 1] if m is not None]
+        out.append(round(sum(near) / len(near), 3) if near else None)
+    return out
+
+
 def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=None, heard=None, chords=None, beats=None):
     """The feel of each span, measured, whatever named the spans.
 
@@ -295,6 +320,7 @@ def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=Non
                 seg["measured"] = moved
 
     if any(m is not None for m in modes):
+        modes = _over_a_phrase(modes)
         for seg, m in zip(filled, modes):
             if m is None:
                 seg.pop("mode", None)
