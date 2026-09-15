@@ -37,6 +37,10 @@ function toVector(ctx) {
   return v;
 }
 
+/* per-family importance in the weighted geometric mean: form anchors the draw,
+   doing and moment tilt it, presence/texture/harmony are nuances. */
+const FAMILY_WEIGHT = { form: 2.0, doing: 1.5, presence: 0.8, texture: 0.6, moment: 1.5, harmony: 0.5 };
+
 /* affinity: { family: { fact: 0..1, _default?: 0..1 } } for ONE sequence.
    fitK: the sequence's fit multiplier (a base sequence's fit; 1 for a palette one). */
 function cellFor(affinity, fitK, vector) {
@@ -47,6 +51,7 @@ function cellFor(affinity, fitK, vector) {
   for (const fam of FAMILIES) {
     const table = affinity && affinity[fam];
     if (!table) continue;                                   /* unmentioned family: neutral */
+    const w = FAMILY_WEIGHT[fam] || 1;
     const facts = fam === "form" ? [v.form] : (v[fam] || []);
     for (const f of facts) {
       let a = table[f];
@@ -55,7 +60,7 @@ function cellFor(affinity, fitK, vector) {
         a = table._default !== undefined ? table._default : 0.5;
       }
       if (!(a > 0)) return 0;                                /* a veto */
-      logs += Math.log(Math.min(1, a)); n++;
+      logs += w * Math.log(Math.min(1, a)); n += w;
     }
   }
   if (!n) return 0;                                         /* belt and braces: a form table always
@@ -63,4 +68,4 @@ function cellFor(affinity, fitK, vector) {
   return +(fitK * Math.exp(logs / n)).toFixed(4);
 }
 
-module.exports = { FACTS, FAMILIES, toVector, cellFor };
+module.exports = { FACTS, FAMILIES, FAMILY_WEIGHT, toVector, cellFor };

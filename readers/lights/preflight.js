@@ -463,8 +463,23 @@ function view(result) {
   };
 }
 
+/* how different two sequences look on the rig: 0 for identical, ~1 for maximally
+   different. Jaccard distance on occupancy tokens, boldness step, kind mismatch. */
+function seqDistance(idA, idB, seqMap) {
+  if (!idA || !idB || idA === idB) return 0;
+  const a = seqMap[idA], b = seqMap[idB];
+  if (!a || !b) return 1;
+  const oA = new Set(a.occupies || []), oB = new Set(b.occupies || []);
+  const union = new Set([...oA, ...oB]), inter = [...oA].filter(x => oB.has(x));
+  const jaccard = union.size ? 1 - inter.length / union.size : 1;
+  const BOLD = { ambient: 0, accent: 0.5, hero: 1 };
+  const boldDist = Math.abs((BOLD[a.boldness] || 0.5) - (BOLD[b.boldness] || 0.5));
+  const kindDist = a.kind !== b.kind ? 0.3 : 0;
+  return Math.min(1, 0.5 * jaccard + 0.3 * boldDist + 0.2 * kindDist);
+}
+
 module.exports = { enumerate, view, validateSequence, validateAffinity, affinityOf, layoutFacts, groupsOf, baseLibrary,
-                   VOCABULARY, CONTEXTS, FIT_FLOOR, BUDGETS, FACTS };
+                   seqDistance, VOCABULARY, CONTEXTS, FIT_FLOOR, BUDGETS, FACTS };
 
 /* ---- CLI: enumerate a layout, print the taste report, cache the matrix ---
      node readers/lights/preflight.js [readers/lights/arc4-head.layout.json]

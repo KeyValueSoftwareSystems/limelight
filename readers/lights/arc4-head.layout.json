@@ -64,5 +64,10 @@
  "limits": {
   "max_pan_per_frame": 7,
   "max_tilt_per_frame": 7
+ },
+ "personality": {
+  "aggression": 0.5,
+  "variety": 0.5,
+  "dynamic_range": 0.5
  }
 }

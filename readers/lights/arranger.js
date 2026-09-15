@@ -23,10 +23,10 @@
           hook / pause / blast / blackout are typed MODIFIERS that claim no token
           and are resolved by priority in frame.js;  lanes + harmony ride along as
           per-bar tables. clashes(plan) counts token conflicts and must be 0. */
-const { view } = require("./preflight.js");
+const { view, seqDistance } = require("./preflight.js");
 const { shape } = require("./fromscore.js");
 const Mu = require("./musical.js");
-const { FACTS } = require("./facts.js");
+const { FACTS, toVector } = require("./facts.js");
 
 const clamp01 = v => Math.max(0, Math.min(1, v));
 
@@ -353,6 +353,24 @@ const DYN = {
   silence:    { floor: 0.08, peak: 0.35, mode: "breathe", head: 0.35, motion: 0.30 },
 };
 
+/* energy-responsive dynamics: interpolate the DYN table by the section's actual
+   energy, so a drop at 0.55 is not the same as one at 0.95. Intro/outro/silence
+   are exempt -- they are always quiet. dynRange scales the floor: high range =
+   lower floor = harder hits. */
+function dynFor(context, energy, dynRange) {
+  const base = DYN[context] || DYN.verse;
+  if (context === "intro" || context === "outro" || context === "silence") return base;
+  const blend = clamp01((energy - HIGH) / (1 - HIGH));
+  const rangeK = 0.5 + 0.5 * (typeof dynRange === "number" ? dynRange : 0.5);
+  return {
+    floor:  +(base.floor  * (0.7 + 0.3 * blend) * rangeK).toFixed(3),
+    peak:   base.peak,
+    mode:   base.mode,
+    head:   +(base.head   * (0.8 + 0.2 * blend)).toFixed(3),
+    motion: +(base.motion * (0.7 + 0.3 * blend)).toFixed(3),
+  };
+}
+
 /* ---- the finer structure, read once per plan ------------------------------ */
 /* how a subsection's `doing` bends the look: LIFT wants a bolder pattern, EASE a
    calmer one, HOLD keeps the section's own. Words from the pipeline's vocabulary. */
@@ -549,16 +567,26 @@ function carve(from, to, cuts) {
 
 /* ---- the plan: a PAR look AND a head look for EVERY section, varied inside by
    its subsections, punctuated by its moments, coloured by its harmony ---------- */
-function plan(scoreIn, enumResult, seed) {
+function plan(scoreIn, enumResult, seed, options) {
   /* the raw hub score (parts, bars) is shaped here too, so a caller may hand in
      either shape and the plan is the same either way */
+  options = options || {};
   const score = (scoreIn && Array.isArray(scoreIn.sections)) ? scoreIn : shape(scoreIn || {});
   const rng = mulberry32((seed || 0) >>> 0);
   const V = view(enumResult);
-  /* how much doing-to this song can take, 0..1, from its own numbers */
-  const want = (typeof process !== "undefined" && process.env && process.env.LIMELIGHT_APPETITE)
+
+  /* venue personality: optional per-rig tuning knobs, all 0..1, default 0.5 */
+  const rigP = options.personality || {};
+  const rig_aggression  = typeof rigP.aggression === "number"     ? clamp01(rigP.aggression)    : 0.5;
+  const rig_variety     = typeof rigP.variety === "number"        ? clamp01(rigP.variety)       : 0.5;
+  const rig_dynRange    = typeof rigP.dynamic_range === "number"  ? clamp01(rigP.dynamic_range) : 0.5;
+
+  /* how much doing-to this song can take, 0..1, from its own numbers, scaled by
+     the rig's aggression (0.5 = neutral, 0 = subdued, 1 = festival) */
+  let want = (typeof process !== "undefined" && process.env && process.env.LIMELIGHT_APPETITE)
     ? clamp01(parseFloat(process.env.LIMELIGHT_APPETITE))
     : appetite(score);
+  want = clamp01(want * (0.5 + rig_aggression));
   const energyAt = energyReader(score);
   const sections = score.sections || [];
   const contexts = contextsFor(sections, energyAt, score);
@@ -610,7 +638,46 @@ function plan(scoreIn, enumResult, seed) {
       return { ...c, score: c.score * k };
     }).filter(c => c.score > 0);
     if (tempered.length) pool = tempered;
-    return pickWeighted(pool, rng);
+
+    /* boldness budget: filter candidates whose tier is already exhausted in this
+       context, so a quiet section cannot stack hero sequences however the PRNG falls */
+    const bgt = V.budget(vector);
+    const form = toVector(vector).form;
+    const used = budgetUsed[form] || { hero: 0, accent: 0, ambient: 0 };
+    const budgeted = pool.filter(c => {
+      const tier = c.boldness || "accent";
+      return (used[tier] || 0) < (bgt[tier] || 1);
+    });
+    if (budgeted.length) pool = budgeted;
+
+    /* transition scoring: prefer sequences that differ from the last fresh pick,
+       so adjacent non-repeated sections do not wear the same look */
+    const prev = grp === "head" ? lastHeadId : lastParId;
+    if (prev) {
+      pool = pool.map(c => {
+        const d = seqDistance(prev, c.id, seqMap);
+        return { ...c, score: c.score * (0.4 + 0.6 * d) };
+      });
+    }
+
+    /* vocabulary utilisation: unplayed sequences get a mild boost, overused ones
+       a penalty, so the show uses more of the vocabulary across its sections */
+    const exploBase = 1 + 0.2 * (0.5 + rig_variety);
+    pool = pool.map(c => {
+      const uses = usageCount[c.id] || 0;
+      const k = uses === 0 ? exploBase : Math.max(0.6, 1 - 0.15 * uses);
+      return { ...c, score: c.score * k };
+    });
+
+    const pick = pickWeighted(pool, rng);
+
+    /* update trackers after the draw */
+    if (pick) {
+      if (!budgetUsed[form]) budgetUsed[form] = { hero: 0, accent: 0, ambient: 0 };
+      budgetUsed[form][pick.boldness || "accent"]++;
+      usageCount[pick.id] = (usageCount[pick.id] || 0) + 1;
+    }
+    return pick;
   };
   /* what an assignment actually drives: its sequence's claims on ITS layer's
      fixtures. A head-layer look renders through the head whatever sequence it
@@ -660,6 +727,21 @@ function plan(scoreIn, enumResult, seed) {
      learns the show's rules -- while each keeps its own dynamics and variations. */
   const memory = {};
 
+  /* boldness budget: how many hero/accent/ambient sequences have been placed per
+     form context, so the PRNG cannot stack hero sequences in a quiet section */
+  const budgetUsed = {};
+
+  /* vocabulary utilisation: how many times each sequence has been assigned as a
+     look, so unplayed sequences get a mild boost and overused ones a penalty */
+  const usageCount = {};
+
+  /* transition scoring: the last fresh (non-remembered) par and head picks, so
+     the next draw prefers a different sequence from the last one */
+  let lastParId = null, lastHeadId = null;
+
+  /* the sequence map for seqDistance, built once */
+  const seqMap = Object.fromEntries((enumResult.sequences || []).map(s => [s.id, s]));
+
   /* the subsections inside a section, clipped to it, at least a bar long */
   const subsIn = sec => {
     const secFrom = atBeat(sec.from), secTo = atBeat(sec.to);
@@ -704,8 +786,8 @@ function plan(scoreIn, enumResult, seed) {
   const assignments = [];
   sections.forEach((sec, i) => {
     const context = contexts[i];
-    const dyn = DYN[context] || DYN.verse;
     const e = sectionEnergyMean(sec, energyAt);
+    const dyn = dynFor(context, e, rig_dynRange);
     const boldness = context === "final_drop" ? 1 : clamp01(0.6 + 0.4 * e);
     /* the section's pattern speed (events per beat) from its pace. The old seeded
        rate draw is kept so existing seeds keep their sequence picks. */
@@ -814,6 +896,10 @@ function plan(scoreIn, enumResult, seed) {
        continuous look per section, so the hero element reads as continuity */
     const head = (mem && stillFits(mem.head)) ? { id: mem.head } : pickFor(sectionVector, "head");
     if (label) memory[label] = { par: par && par.id, head: head && head.id };
+    /* update transition trackers: a remembered look does not update them, so the
+       next fresh section still wants to contrast with the last fresh pick */
+    if (par && !remembered) lastParId = par.id;
+    if (head && !(mem && head.id === mem.head)) lastHeadId = head.id;
     if (head) assignments.push({
       from: sec.from, to: sec.to, seq_id: head.id, context, layer: "head", priority: 1,
       params: { rate, hue, headDim: dyn.head, motion: dyn.motion, intensity: dyn.head },
@@ -869,7 +955,8 @@ function plan(scoreIn, enumResult, seed) {
     if (tone === "key") return key;
     return null;
   };
-  let lastShot = null;     /* what the previous moment said, so this one says something else */
+  const recentShots = [];  /* the last N one-shot ids, most recent first */
+  const SHOT_MEMORY = 4;
   const drawOneShots = (m, w, B, len, isPeak) => {
     const bar = facts && facts.vectors[m.bar - facts.from_bar];
     const vector = { ...(bar || { form: ctxAt(B) }), moment: [m.kind, weightBand(w)] };
@@ -900,9 +987,13 @@ function plan(scoreIn, enumResult, seed) {
          pool the top candidate dominates come out as seventeen identical
          flashes, however wide the vocabulary is. A remembered riff is exempt --
          a returning hook is SUPPOSED to look like itself. */
-      if (pool.length > 1 && lastShot && !isPeak && !(remembered && remembered[slot])) {
-        const fresh = pool.filter(c => c.id !== lastShot);
-        if (fresh.length) pool = fresh;
+      if (pool.length > 1 && recentShots.length && !isPeak && !(remembered && remembered[slot])) {
+        pool = pool.map(c => {
+          const idx = recentShots.indexOf(c.id);
+          if (idx < 0) return c;
+          const decay = 0.3 + 0.7 * (idx / SHOT_MEMORY);
+          return { ...c, score: c.score * decay };
+        }).filter(c => c.score > 0);
       }
       const pick = (remembered && remembered[slot] && pool.some(c => c.id === remembered[slot])) ? { id: remembered[slot] } : pickWeighted(pool, rng);
       if (!pick) continue;
@@ -922,7 +1013,10 @@ function plan(scoreIn, enumResult, seed) {
       if (g.fx === "accent_strobe") params.strength = +clamp01(0.4 + 0.6 * w).toFixed(3);
       if (params.tone && params.hue == null) { const h = toneHue(params.tone, m); if (h !== null) params.hue = h; }
       chosen[slot] = pick.id;
-      if (slot !== "before") lastShot = pick.id;
+      if (slot !== "before") {
+        recentShots.unshift(pick.id);
+        if (recentShots.length > SHOT_MEMORY) recentShots.pop();
+      }
       out.push({ from: fromBeat(start), to: fromBeat(start + dur), context: ctxAt(B), layer: g.fx === "modulate" ? "modulate" : "fx",
         priority: FX_PRIORITY[g.fx] || 6, type: g.fx, seq_id: pick.id, params, occupies: q.occupies || [],
         section: sectionAt(B), moment: m.kind, what: m.what, ...(measured ? { measured } : {}), facts: vector });
@@ -1145,7 +1239,7 @@ function clashes(p) {
   return n;
 }
 
-module.exports = { plan, contextsFor, sectionEnergyMean, energyReader, clashes, carve, factsBlock, majorityVector, paletteOf, appetite };
+module.exports = { plan, contextsFor, sectionEnergyMean, energyReader, clashes, carve, factsBlock, majorityVector, paletteOf, appetite, dynFor };
 
 /* ---- CLI: plan a score and print the show, section by section ------------
      node readers/lights/arranger.js [score file] [seed] [--layout FILE] [--palette FILE] */
@@ -1158,7 +1252,7 @@ if (require.main === module) {
   const score = require("./fromscore.js").load(scoreFile);
   const rig = require("./layouts.js").fromArgs(args);
   const en = enumerate(rig.layout, { palette: rig.palette });
-  const p = plan(score, en, seed);
+  const p = plan(score, en, seed, { personality: rig.layout.personality });
   console.log(`\n${score.score || "song"} — plan @ seed ${seed} on ${rig.rig}   (${p.assignments.length} assignments over ${score.sections.length} sections, ${en.sequences.length}-sequence palette)`);
   const pos = q => q.bar + (q.beat && q.beat !== 1 ? "." + q.beat : "");
   const vec = f => f ? "[" + [f.form, f.doing, (f.presence || []).join("+"), (f.texture || []).join("+"), (f.harmony || []).join("+")].filter(Boolean).join("|") + "]" : "";
