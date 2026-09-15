@@ -183,40 +183,98 @@ function resolveState(s) {
 }
 
 const resolvedGestures = (plan.gestures || []).map(resolveGesture).filter(Boolean);
-/* A state is a looped frame set, so a section with no binding over it renders
-   the same two seconds for its whole length. Two wrong fixes were tried first
-   and both are recorded here because the numbers said so.
+/* A state is a looped frame set, so a section with no binding over it holds one
+   still look for its whole length. Two earlier attempts are recorded because
+   both measured worse: a beat pulse read as constant pulsating, and binding
+   every section to its loudest lane dropped correlation with the mix from
+   0.555 to 0.403.
 
-   A beat pulse made the rig tick on every beat regardless of the music: it read
-   as constant pulsating, which is not what a designed show does. Binding every
-   section to its loudest lane was worse - correlation with the mix fell from
-   0.555 to 0.403, because following the backing vocal dims the rig every time
-   the singer rests while the band is at full cry.
-
-   What is left is the part that measured well: the resting look sits where the
-   song's own energy is. energy is measured per bar and already in the score. No
-   pulse, no metronome - the rig is simply brighter where the music is bigger,
-   which is what a designer does by hand. */
-const feel = (score.emotion || []).filter(e => typeof e.energy === "number");
-const feelLo = feel.length ? Math.min(...feel.map(e => e.energy)) : 0;
-const feelHi = feel.length ? Math.max(...feel.map(e => e.energy)) : 1;
-function energyAt(t) {
-  if (feel.length < 2 || feelHi <= feelLo) return 0.5;
-  let lo = 0, hi = feel.length - 1;
-  while (hi - lo > 1) {
-    const mid = (lo + hi) >> 1;
-    if ((feel[mid].start || 0) <= t) lo = mid; else hi = mid;
+   What is left ties the resting look to the music that is actually sounding.
+   The composer picks a state from the section's NAME, and on raga-of-revenge
+   that put `drone` at 0.12 over an intro carrying ten instruments and the
+   loudest vocal in the song: the intro is 32% quieter than the chorus and was
+   lit three times darker. The mix curve is measured, per half second, already
+   in the file - so the rig sits in proportion to it and a busy intro stops
+   being treated as silence. */
+/* The venue forbids the head throwing light into certain pan angles, and
+   server.py enforces it by forcing the head's dimmer to zero inside a zone. A
+   show that aims there is a show with a dark head, which is what was on screen:
+   follow's sweep reached pan DMX 111 - -123 degrees, inside the -150..-110
+   keep-out - so the head went black for part of every cycle. The clamp stays as
+   the backstop; the show simply stops pointing at the bar. */
+const PAN_WALL_CENTRE = 169, PAN_DEG_PER_DMX = 540 / 255;
+const keepOut = (() => {
+  try {
+    const lim = JSON.parse(fs.readFileSync(path.join(HERE, "limits.json"), "utf8"));
+    return (lim.keep_out || []).map(z => {
+      const a = PAN_WALL_CENTRE + (z.pan_from_deg || 0) / PAN_DEG_PER_DMX;
+      const b = PAN_WALL_CENTRE + (z.pan_to_deg || 0) / PAN_DEG_PER_DMX;
+      return [Math.min(a, b), Math.max(a, b)];
+    });
+  } catch (e) { return []; }
+})();
+function safePan(dmx) {
+  let v = dmx;
+  for (const [a, b] of keepOut) {
+    if (v > a && v < b) v = (v - a < b - v) ? Math.floor(a) - 2 : Math.ceil(b) + 2;
   }
-  const a = feel[lo], b = feel[Math.min(lo + 1, feel.length - 1)];
-  const span = Math.max(1e-6, (b.start || 0) - (a.start || 0));
-  const f = Math.max(0, Math.min(1, (t - (a.start || 0)) / span));
-  const e = a.energy + (b.energy - a.energy) * f;
-  return (e - feelLo) / (feelHi - feelLo);
+  return Math.max(0, Math.min(255, v));
 }
+
+const lanes = ((score.stems_temporal || {}).stems) || {};
+const laneW = (score.stems_temporal || {}).window_s || 0.5;
+const laneNames = Object.keys(lanes);
+const mixCurve = (() => {
+  if (!laneNames.length) return [];
+  const n = Math.min(...laneNames.map(k => lanes[k].length));
+  const out = new Array(n);
+  for (let i = 0; i < n; i++) {
+    let sum = 0;
+    for (const k of laneNames) sum += lanes[k][i];
+    out[i] = sum / laneNames.length;
+  }
+  return out;
+})();
+const mixSorted = mixCurve.slice().sort((a, b) => a - b);
+const mixLo = mixSorted.length ? mixSorted[Math.floor(mixSorted.length * 0.05)] : 0;
+const mixHi = mixSorted.length ? mixSorted[Math.floor(mixSorted.length * 0.95)] : 1;
+function mixAt(t) {
+  if (!mixCurve.length || mixHi <= mixLo) return 0.5;
+  const i = Math.max(0, Math.min(mixCurve.length - 1, Math.round(t / laneW)));
+  return Math.max(0, Math.min(1, (mixCurve[i] - mixLo) / (mixHi - mixLo)));
+}
+const STATE_FADE = 1.1;
+const GESTURE_FADE = 0.18;
+const INSTANT = new Set(["impact", "blackout", "cut", "stab", "strobe", "flare"]);
+function ease(x) {
+  const u = Math.max(0, Math.min(1, x));
+  return u * u * (3 - 2 * u);
+}
+function mixFrames(from, to, k, offset, width) {
+  const out = to.slice();
+  for (let c = 0; c < width; c++) {
+    const at = offset + c;
+    out[at] = Math.max(0, Math.min(255,
+      Math.round((from[at] || 0) + ((to[at] || 0) - (from[at] || 0)) * k)));
+  }
+  return out;
+}
+
 function sits(frame, t, width, offset, head) {
-  const k = 0.62 + 0.52 * energyAt(t);
-  const out = frame.slice();
   const chans = head ? [5] : [1, 2, 3];
+  let now = 0;
+  for (const c of chans) {
+    if (c < width) now = Math.max(now, frame[offset + c] || 0);
+  }
+  if (now <= 0) return frame;
+  /* What this passage is worth in light, from the mix alone. Only ever lifts:
+     a composer who asked for more than the music warrants keeps it, and every
+     gesture is untouched. The cap stops a near-dark state being turned into a
+     wash. */
+  const want = (0.16 + 0.70 * mixAt(t)) * 255;
+  const k = Math.max(1, Math.min(2.8, want / now));
+  if (k <= 1.02) return frame;
+  const out = frame.slice();
   for (const c of chans) {
     const at = offset + c;
     if (c >= width) continue;
@@ -281,7 +339,7 @@ for (let t = 0; t < dur; t += 1 / fps) {
     /* base = the resting look for this fixture: an active binding, else the
        section state (looped so it animates). It always sits under a gesture so
        a departure has something to return to. */
-    let base = null;
+    let base = null, bindStart = null;
     for (const b of bindingResults) {
       if (t < b.startS || t >= b.endS) continue;
       if (!b.dmx.per_fixture.includes(fid)) continue;
@@ -289,13 +347,42 @@ for (let t = 0; t < dur; t += 1 / fps) {
       base = (b.dmx.binding && typeof b.dmx.render === "function")
         ? b.dmx.render(b.valueAt(t), t)
         : frameAt(b.dmx, t - b.startS, b.endS - b.startS, bpm);
+      bindStart = b.startS;
       break;
     }
     if (!base) {
-      for (const s of stateResults) {
+      for (let si = 0; si < stateResults.length; si++) {
+        const s = stateResults[si];
         if (t < s.startS || t >= s.endS) continue;
         if (!s.dmx.per_fixture.includes(fid)) continue;
         base = sits(frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm), t, W, o, isHead);
+        /* A section change is a change of look, not a cut. Holding the previous
+           state under the new one for a beat and crossing between them is what a
+           person does on a fader; snapping is what a bug does, and on
+           raga-of-revenge the pars jumped 101 to 179 in a single frame at 25.4s. */
+        const into = t - s.startS;
+        if (into < STATE_FADE && si > 0) {
+          const prev = stateResults[si - 1];
+          if (prev && prev.dmx.per_fixture.includes(fid)) {
+            const was = sits(frameAt(prev.dmx, Math.max(0, s.startS - prev.startS),
+                                     prev.endS - prev.startS, bpm), t, W, o, isHead);
+            base = mixFrames(was, base, ease(into / STATE_FADE), o, W);
+          }
+        }
+        break;
+      }
+    }
+
+    /* A binding takes over from the section's resting look, and taking over is
+       still a change of look. Without this the rig jumped at 47.8s and 81.3s,
+       where a split binding starts, for no reason an audience could hear. */
+    if (base && bindStart != null && t - bindStart < STATE_FADE) {
+      for (const st of stateResults) {
+        if (bindStart < st.startS || bindStart >= st.endS) continue;
+        if (!st.dmx.per_fixture.includes(fid)) continue;
+        const was = sits(frameAt(st.dmx, bindStart - st.startS,
+                                 st.endS - st.startS, bpm), t, W, o, isHead);
+        base = mixFrames(was, base, ease((t - bindStart) / STATE_FADE), o, W);
         break;
       }
     }
@@ -309,7 +396,18 @@ for (let t = 0; t < dur; t += 1 / fps) {
       if (!cand.dmx.per_fixture.includes(fid)) continue;
       if (cand.startS >= gStart) { g = cand; gStart = cand.startS; }
     }
-    const gsrc = g ? frameAt(g.dmx, t - g.startS, g.endS - g.startS, bpm) : null;
+    let gsrc = g ? frameAt(g.dmx, t - g.startS, g.endS - g.startS, bpm) : null;
+    /* A hit is meant to be instant; a sweep, a lift, a tint are not, and they
+       were snapping on because a gesture simply replaced the base on its first
+       frame. On raga-of-revenge the head jumped 50 to 179 in a single frame at
+       22.1s when the sweep began. Everything that is not a hit now crosses in
+       and out over a sixth of a second. */
+    if (gsrc && base && !INSTANT.has(g.eid)) {
+      const inK = ease((t - g.startS) / GESTURE_FADE);
+      const outK = ease((g.endS - t) / GESTURE_FADE);
+      const k = Math.min(inK, outK);
+      if (k < 0.999) gsrc = mixFrames(base, gsrc, k, o, W);
+    }
 
     /* compose the gesture over the base */
     if (gsrc && REDUCTIVE.has(g.eid)) {
@@ -339,9 +437,12 @@ for (let t = 0; t < dur; t += 1 / fps) {
    combined value slewed (as readers/lights/wire.js does). */
 const movers = fixtureIds.map(id => fixtureChannels[id]).filter(fc => fc && fc.panCh >= 0);
 for (const fc of movers) {
+  for (let i = 0; i < allFrames.length; i++) {
+    allFrames[i][fc.panCh] = safePan(allFrames[i][fc.panCh]);
+  }
   for (let i = 1; i < allFrames.length; i++) {
     const prev = allFrames[i - 1], cur = allFrames[i];
-    cur[fc.panCh] = slew(prev[fc.panCh], cur[fc.panCh], fc.maxPan);
+    cur[fc.panCh] = safePan(slew(prev[fc.panCh], cur[fc.panCh], fc.maxPan));
     if (fc.tiltCh >= 0) cur[fc.tiltCh] = slew(prev[fc.tiltCh], cur[fc.tiltCh], fc.maxTilt);
   }
 }

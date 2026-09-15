@@ -786,6 +786,25 @@ function plan(scoreIn, enumResult, seed, options) {
   const rng = mulberry32((seed || 0) >>> 0);
   const V = view(enumResult);
 
+  const explainOn = !!options.explain;
+  const oddsOf = (cands) => {
+    const total = cands.reduce((s, c) => s + (c.score > 0 ? c.score : 0), 0);
+    if (!(total > 0))
+      return cands.map((c) => ({
+        id: c.id,
+        score: 0,
+        odds: +(1 / cands.length).toFixed(6),
+      }));
+    return cands.map((c) => ({
+      id: c.id,
+      score: +(c.score > 0 ? c.score : 0).toFixed(6),
+      odds: +((c.score > 0 ? c.score : 0) / total).toFixed(6),
+    }));
+  };
+  const certain = (id) => [{ id, score: 1, odds: 1 }];
+  const withPool = (pick, cands) =>
+    pick && explainOn ? { ...pick, pool: oddsOf(cands) } : pick;
+
   /* venue personality: optional per-rig tuning knobs, all 0..1, default 0.5 */
   const rigP = options.personality || {};
   const rig_aggression =
@@ -917,7 +936,7 @@ function plan(scoreIn, enumResult, seed, options) {
       budgetUsed[form][pick.boldness || "accent"]++;
       usageCount[pick.id] = (usageCount[pick.id] || 0) + 1;
     }
-    return pick;
+    return withPool(pick, pool);
   };
   /* what an assignment actually drives: its sequence's claims on ITS layer's
      fixtures. A head-layer look renders through the head whatever sequence it
@@ -1118,7 +1137,7 @@ function plan(scoreIn, enumResult, seed, options) {
     let remembered;
     const par =
       mem && stillFits(mem.par)
-        ? { id: mem.par }
+        ? { id: mem.par, ...(explainOn ? { pool: certain(mem.par) } : {}) }
         : pickFor(sectionVector, "par");
     if (mem && par && par.id === mem.par) remembered = label;
     /* Two things the renderer can now express and nothing was setting.
@@ -1209,6 +1228,7 @@ function plan(scoreIn, enumResult, seed, options) {
             params: vp,
             occupies: occFor(pick.id, "par"),
             section: sec.name,
+            ...(explainOn && pick.pool ? { pool: pick.pool } : {}),
             f: su.f,
             t: su.t,
           });
@@ -1268,6 +1288,7 @@ function plan(scoreIn, enumResult, seed, options) {
           ...(remembered ? { remembered } : {}),
           occupies: occFor(par.id, "par"),
           section: sec.name,
+          ...(explainOn && par.pool ? { pool: par.pool } : {}),
         }),
       );
       for (const v of variations) {
@@ -1280,7 +1301,7 @@ function plan(scoreIn, enumResult, seed, options) {
        continuous look per section, so the hero element reads as continuity */
     const head =
       mem && stillFits(mem.head)
-        ? { id: mem.head }
+        ? { id: mem.head, ...(explainOn ? { pool: certain(mem.head) } : {}) }
         : pickFor(sectionVector, "head");
     if (label) memory[label] = { par: par && par.id, head: head && head.id };
     /* update transition trackers: a remembered look does not update them, so the
@@ -1306,6 +1327,7 @@ function plan(scoreIn, enumResult, seed, options) {
         ...(mem && head.id === mem.head ? { remembered: label } : {}),
         occupies: occFor(head.id, "head"),
         section: sec.name,
+        ...(explainOn && head.pool ? { pool: head.pool } : {}),
       });
 
     /* extra musical aspects, overlapping on their own fixture attribute so they
@@ -1482,13 +1504,17 @@ function plan(scoreIn, enumResult, seed, options) {
           })
           .filter((c) => c.score > 0);
       }
-      const pick =
+      const reuse =
         remembered &&
         remembered[slot] &&
-        pool.some((c) => c.id === remembered[slot])
-          ? { id: remembered[slot] }
-          : pickWeighted(pool, rng);
+        pool.some((c) => c.id === remembered[slot]);
+      const pick = reuse ? { id: remembered[slot] } : pickWeighted(pool, rng);
       if (!pick) continue;
+      const shotPool = !explainOn
+        ? null
+        : reuse
+          ? certain(remembered[slot])
+          : oddsOf(pool);
       const q = V.seq(pick.id),
         g = q.gesture;
       let dur =
@@ -1537,6 +1563,7 @@ function plan(scoreIn, enumResult, seed, options) {
         what: m.what,
         ...(measured ? { measured } : {}),
         facts: vector,
+        ...(shotPool ? { pool: shotPool } : {}),
       });
     }
     if (riffKey && out.length && !remembered) riffMemory[riffKey] = chosen;

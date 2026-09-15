@@ -65,10 +65,10 @@ ok("an unknown effect type allows nothing",
 
 print("validate_edits params")
 ok("params survive validation",
-   one(type="stab", bar=1, beats=1, params={"coverage": "outer"})["params"]
-   == {"coverage": "outer"})
+   one(type="stab", bar=1, beats=1, params={"extent": "outer"})["params"]
+   == {"extent": "outer"})
 ok("a dial the effect's renderer type cannot read leaves no params behind",
-   "params" not in one(type="cut", bar=1, beats=1, params={"coverage": "outer"}))
+   "params" not in one(type="cut", bar=1, beats=1, params={"extent": "outer"}))
 ok("an edit with no params carries none",
    "params" not in one(type="stab", bar=1, beats=1))
 

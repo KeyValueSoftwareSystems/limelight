@@ -33,7 +33,50 @@ def score_file(song):
     return os.path.join(store, "%d.score" % max(ns)) if ns else flat
 
 
-def brief_for(song, overview, effects_block, hub):
+def effect_behaviour(rig):
+    try:
+        out = subprocess.run(["node", os.path.join(HERE, "venues", "probe.js"), rig],
+                             capture_output=True, text=True, timeout=120).stdout
+    except Exception:
+        return "  (could not measure the rig)"
+    keep = [l for l in out.splitlines() if l.strip() and not l.startswith(rig)]
+    return "\n".join("  " + l for l in keep)
+
+
+def rig_facts(rig):
+    at = os.path.join(HERE, "venues", rig, "manifest.json")
+    lim = os.path.join(HERE, "limits.json")
+    bits = []
+    try:
+        m = json.load(open(at))
+        fx = m.get("fixtures") or {}
+        bits.append(f"  {rig}: {fx.get('pars', '?')} PAR cans (RGB) and "
+                    f"{fx.get('heads', '?')} moving head(s), {m.get('total_channels')} DMX channels.")
+        if (fx.get("pars") or 0) <= 6:
+            bits.append("  This is a SMALL rig. An extent that names half of it leaves the")
+            bits.append("  other half dim, and effects that want many lamps - spectrum, chase -")
+            bits.append("  have little room to read. Prefer whole-rig moves and colour.")
+    except Exception:
+        pass
+    try:
+        L = json.load(open(lim))
+        mi = L.get("max_intensity") or {}
+        bits.append(f"  Ceilings: pars {mi.get('par')}, head {mi.get('head')}.")
+        for z in (L.get("keep_out") or []):
+            bits.append(f"  KEEP OUT: the head may not throw light between "
+                        f"{z.get('pan_from_deg')} and {z.get('pan_to_deg')} degrees "
+                        f"({z.get('name')}). Aiming there blacks the head out.")
+        st = L.get("strobe") or {}
+        if not st.get("allowed", True):
+            bits.append("  Strobe is FORBIDDEN in this venue; do not use strobing effects.")
+    except Exception:
+        pass
+    return "\n".join(bits) or "  (rig unknown)"
+
+
+def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
+    EFFECT_BEHAVIOUR = effect_behaviour(rig)
+    RIG_FACTS = rig_facts(rig)
     ask = os.path.join(REPO, "portal", "ask.py")
     SCORE_AT = score_file(song)
     return "\n".join(
@@ -80,6 +123,54 @@ def brief_for(song, overview, effects_block, hub):
             "Spend them where a cue depends on the answer. Whether the harp earns its",
             "own lamp depends on the harp's lane; whether two vocals may trade places",
             "depends on comparing them. Do not ask about spans you will not light.",
+            "",
+            "WHAT THE SCORE MEANS",
+            "",
+            "Nothing in the file is a model's opinion; every field is measured.",
+            "",
+            "  moments    an instant worth answering. `intensity` is 0..1 WITHIN this",
+            "             song, so 1.00 means the biggest of its kind here, not in music.",
+            "             climax = the fullest passage, peak = the loudest stretch - they",
+            "             are different claims and often different places.",
+            "  sections   the song's form. The NAME is a pop-song label and may be wrong",
+            "             for this music; the numbers under it are not. Never light a",
+            "             section from its name alone - read what is playing in it.",
+            "  emotion    energy / brightness / groove measured per bar, 0..10 WITHIN this",
+            "             song, and mode -1 minor to +1 major. Scaled per song, so 7 is",
+            "             mid here, not loud in absolute terms.",
+            "  lanes      39 separated instruments at half-second resolution, each with",
+            "             its dB in the mix. This is what the audience actually hears.",
+            "  beats      measured beat times, not bpm arithmetic. On a song that changes",
+            "             tempo the two disagree by over a second by the end.",
+            "",
+            "HOW THE LAMPS ACTUALLY BEHAVE",
+            "",
+            "Measured by rendering each effect on this rig and reading the DMX:",
+            "",
+            EFFECT_BEHAVIOUR,
+            "",
+            "  peak/floor are the rig's average level 0..1, swing is peak minus floor,",
+            "  `lit` is how many of the lamps it touches. An effect with swing near zero",
+            "  changes colour or place, not brightness.",
+            "",
+            "THE RIG YOU ARE WRITING FOR",
+            "",
+            RIG_FACTS,
+            "",
+            "DESIGNING LIKE A PERSON, NOT A LABEL",
+            "",
+            "  A section called `intro` is not automatically dark. On this song the",
+            "  intro carries ten instruments including the loudest vocal in the track,",
+            "  and a `drone` at 0.12 over it reads as a fault, not a choice. Set the",
+            "  resting level from what is PLAYING - the instrument list above gives you",
+            "  dB and coverage for every lane.",
+            "  Contrast is the whole craft: if everything is at 0.8 nothing is bright,",
+            "  and if everything is at 0.15 the rig looks broken. Give a song a floor",
+            "  and a ceiling and spend the range.",
+            "  A gesture is worth having only if the thing before it was different.",
+            "  Hold a look; change it when the music changes, not on a timer.",
+            "  Colour carries meaning here: mode below zero is minor, above is major,",
+            "  and brightness is a measured timbre, not a mood word.",
             "",
             "WHAT TO WRITE",
             "",

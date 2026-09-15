@@ -34,6 +34,9 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))          # panel 
 EXPER = os.path.join(os.path.dirname(REPO), "experimentation")          # for local audio caches
 HUB = os.environ.get("HUB_URL", "http://192.168.1.38:8770")
 HUB_SCORES = HUB + "/hub/score"   # scores live under /hub/score/ (same as LIMELIGHT_REMOTE and the CLI)
+PRESETS_DIR = os.path.join(REPO, "presets")
+EXPLAIN_JS = os.path.join(REPO, "readers", "lights", "explain.js")
+EXPLAIN_SEED = 3
 
 
 class NullSender:
@@ -58,6 +61,7 @@ class State:
         self.last_poll = time.monotonic()
         self.import_log = ""
         self.importing = None
+        self._explained = {}
 
     def watchdog(self, stop, timeout_s):
         """The page is the only operator: if it stops polling (tab closed, laptop asleep)
@@ -246,6 +250,46 @@ class State:
                          "beats": [], "downbeats": [], "sections": [], "phases": [], "hub_version": None}
         self.transport.play(0.0)
         return {"effect": row or {"id": ident}, "log": f"{len(one)} frames x {loops}, no audio"}
+
+    def _explain(self, args, timeout=300):
+        res = subprocess.run(["node", EXPLAIN_JS] + list(args) + ["--json"],
+                             capture_output=True, text=True, timeout=timeout)
+        if not (res.stdout or "").strip():
+            raise RuntimeError((res.stderr or res.stdout or "")[-300:] or "explain.js produced nothing")
+        return json.loads(res.stdout)
+
+    def presets(self):
+        rows = self._explain(["--list", "--dir", PRESETS_DIR])
+        shows = {t["title"]: t["name"] for t in self.tracks()}
+        for r in rows:
+            r["show"] = shows.get(r.get("song"))
+        return rows
+
+    def preset_path(self, name):
+        base = os.path.basename(str(name or "").strip())
+        if base.endswith(".json"):
+            base = base[:-len(".json")]
+        path = os.path.join(PRESETS_DIR, base + ".json")
+        if not base or not os.path.isfile(path):
+            raise FileNotFoundError("no preset called %s" % base)
+        return path
+
+    def explain_preset(self, name, seed=EXPLAIN_SEED):
+        path = self.preset_path(name)
+        try:
+            n = int(seed)
+        except (TypeError, ValueError):
+            n = EXPLAIN_SEED
+        key = (os.path.basename(path), n)
+        stamp = os.path.getmtime(path)
+        with self.lock:
+            hit = self._explained.get(key)
+        if hit and hit[0] == stamp:
+            return hit[1]
+        doc = self._explain([path, "--seed", str(n)])
+        with self.lock:
+            self._explained[key] = (stamp, doc)
+        return doc
 
     def hub_list(self):
         """Raw hub listing for .score files: name (no extension), store version, mtime.
@@ -515,6 +559,21 @@ def make_handler(state: State):
                     return self._json({"error": str(e)}, 500)
             if path == "/api/meta":
                 return self._json(state.meta or {}, 200 if state.meta else 404)
+            if path == "/api/presets":
+                try:
+                    return self._json({"presets": state.presets()})
+                except Exception as e:
+                    return self._json({"error": str(e)}, 500)
+            if path == "/api/preset":
+                q = urllib.parse.parse_qs(urlparse(self.path).query)
+                try:
+                    doc = state.explain_preset((q.get("name") or [""])[0],
+                                               (q.get("seed") or [EXPLAIN_SEED])[0])
+                except FileNotFoundError as e:
+                    return self._json({"error": str(e)}, 404)
+                except Exception as e:
+                    return self._json({"error": str(e)}, 500)
+                return self._json(doc, 422 if doc.get("error") else 200)
             if path == "/api/briefs":
                 # The board: what we asked the rig to do, and what it actually
                 # does, judged from baked frames. Runs here so it is one click

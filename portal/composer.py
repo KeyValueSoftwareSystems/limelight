@@ -56,6 +56,32 @@ def fetch_overview(song):
     return data
 
 
+def _section_weight(data, sec):
+    sc = _score_of(data) if data.get("_song") else {}
+    stp = sc.get("stems_temporal") or {}
+    lanes = stp.get("stems") or {}
+    if not lanes:
+        return ""
+    w = stp.get("window_s") or 0.5
+    n = min(len(v) for v in lanes.values())
+    whole = [sum(v[i] for v in lanes.values()) / len(lanes) for i in range(n)]
+    order = sorted(whole)
+    lo = order[int(len(order) * 0.05)]
+    hi = order[int(len(order) * 0.95)]
+    a_s, b_s = sec.get("start"), sec.get("end")
+    if a_s is None or b_s is None or hi <= lo:
+        return ""
+    seg = whole[int(a_s / w):int(b_s / w) + 1]
+    if not seg:
+        return ""
+    mean = sum(seg) / len(seg)
+    rel = max(0.0, min(1.0, (mean - lo) / (hi - lo)))
+    busy = sum(1 for nm, v in lanes.items()
+               if sum(1 for x in v[int(a_s / w):int(b_s / w) + 1] if x > 0.2)
+               > 0.25 * max(1, int((b_s - a_s) / w)))
+    return f"   [loudness {rel:.2f} of this song's range, {busy} instruments carrying]"
+
+
 def format_overview(data):
     """Format the score overview into a compact string for the LLM."""
     lines = []
@@ -67,6 +93,12 @@ def format_overview(data):
 
     g = data.get("grid") or {}
     lines.append(f"TEMPO: {g.get('bpm', '?')} bpm, {g.get('beats_per_bar', 4)}/4, {g.get('bars', '?')} bars")
+    steady = g.get("steady")
+    if isinstance(steady, (int, float)):
+        lines.append(f"  grid.steady {steady:.2f} - how even the beat is; under 0.35 do not trust a bar number")
+    if (g.get("tempo") or []) and len(g["tempo"]) > 1:
+        moves = ", ".join(f"{t.get('bpm')} bpm from {t.get('at_s')}s" for t in g["tempo"][:4])
+        lines.append(f"  THIS SONG CHANGES TEMPO: {moves}")
 
     k = data.get("key") or {}
     if k:
@@ -78,7 +110,8 @@ def format_overview(data):
         name = s.get("name", "unnamed")
         fr = s.get("from", {})
         to = s.get("to", {})
-        lines.append(f"  [{i}] {name}: bar {fr.get('bar', '?')} → {to.get('bar', '?')}")
+        lines.append(f"  [{i}] {name}: bar {fr.get('bar', '?')} → {to.get('bar', '?')}"
+                     + _section_weight(data, sec))
 
     moments = data.get("moments") or []
     lines.append(f"\nMOMENTS ({len(moments)}):")

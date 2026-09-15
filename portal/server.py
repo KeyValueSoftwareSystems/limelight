@@ -957,6 +957,58 @@ def dial_filter(fx, params):
     return out
 
 
+def dial_types():
+    try:
+        with open(CATALOG) as fh:
+            return json.load(fh).get("dial_types") or {}
+    except (OSError, ValueError):
+        return {}
+
+
+def clean_dial(name, value, rule, types):
+    spec = dict(types.get(name) or {})
+    for k in ("type", "min", "max", "values"):
+        if isinstance(rule, dict) and k in rule:
+            spec[k] = rule[k]
+    kind = spec.get("type")
+    if kind == "enum":
+        return value if value in (spec.get("values") or []) else None
+    if kind == "bool":
+        return value if isinstance(value, bool) else None
+    if kind == "colour":
+        if not isinstance(value, (list, tuple)) or len(value) != 3:
+            return None
+        try:
+            return [max(0.0, min(1.0, float(c))) for c in value]
+        except (TypeError, ValueError):
+            return None
+    if kind in ("int", "float"):
+        if isinstance(value, bool):
+            return None
+        try:
+            n = float(value)
+        except (TypeError, ValueError):
+            return None
+        n = max(float(spec.get("min", 0.0)), min(float(spec.get("max", 1.0)), n))
+        return int(round(n)) if kind == "int" else n
+    return None
+
+
+def effect_dials(spec, params):
+    declared = spec.get("dials")
+    if not isinstance(declared, dict):
+        return dial_filter(spec.get("fx"), params)
+    types = dial_types()
+    out = {}
+    for k, v in (params or {}).items():
+        if k not in declared:
+            continue
+        clean = clean_dial(k, v, declared[k], types)
+        if clean is not None:
+            out[k] = clean
+    return out
+
+
 def save_custom(body):
     base = {e["id"]: e for e in json.load(open(CATALOG))["effects"]}.get(body.get("base"))
     if not base:
@@ -1012,7 +1064,7 @@ def validate_edits(edits):
         row = {"type": e["type"], "bar": int(e["bar"]),
                "beat": max(1, min(16, int(e.get("beat") or 1))),
                "beats": max(1, min(256, int(round(float(e.get("beats", fallback) or 1)))))}
-        dials = dial_filter(spec.get("fx") or spec.get("dimension"), e.get("params"))
+        dials = effect_dials(spec, e.get("params"))
         if dials:
             row["params"] = dials
         if e.get("off"):
