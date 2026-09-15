@@ -8,8 +8,15 @@
    single packet goes to the fixtures.
 
      node readers/lights/bake.js [score.json] [seed] [--fps 40] [--from S] [--to S] [--out FILE]
+                                [--layout FILE] [--palette FILE]
 
-   seconds->position uses the protocol clock (session.js), so it honours the grid. */
+   seconds->position uses the protocol clock (session.js), so it honours the grid.
+
+   --layout is the whole point of the protocol: the SHOW is {score, seed, edits},
+   and the venue re-derives the plan against its own rig. The same score and seed
+   baked against a different layout is the same show on a different rig, not a
+   different show -- enumerate() re-checks the effect library against the fixtures
+   in front of it, and frame.js renders the plan's musical intent onto them. */
 const fs = require("fs"), path = require("path");
 const { enumerate } = require("./preflight.js");
 const { plan } = require("./arranger.js");
@@ -23,9 +30,9 @@ const seed = +((args[1] && !args[1].startsWith("--")) ? args[1] : 1);
 const fps = +opt("--fps", 40);
 
 const score = require("./fromscore.js").load(scoreFile);
-const layout = require("./arc4-head.layout.json");
-const palette = require("./arc4-head.palette.json");
-const library = { ...Object.fromEntries(palette.map(s => [s.id, s])), ...require("./preflight.js").baseLibrary() };   /* base looks render with their gestures */
+const rig = require("./layouts.js").fromArgs(args);
+const layout = rig.layout, palette = rig.palette;
+const library = require("./layouts.js").libraryOf(palette);   /* base looks render with their gestures */
 
 const en = enumerate(layout, { palette });
 const p = plan(score, en, seed);
@@ -77,34 +84,36 @@ const looks = p.assignments.filter(a => a.seq_id).map(a => ({
   ...(a.variation ? { variation: true, doing: a.doing || null } : {}),
 }));
 
-/* --lights: emit the other agent's .lights.json (41-ch DMX frames), so their copied
-   server/transport/audio_out play OUR show. Mapping goes through OUR drivers (same
-   channel truth as rig.py) via wire.js: gamma 1.6 on the intensity channels, the
-   head's pose slew-limited as one 16-bit value and held when undriven. */
+/* --lights: emit the other agent's .lights.json (DMX frames, as wide as the rig),
+   so their copied server/transport/audio_out play OUR show. Mapping goes through OUR
+   drivers (same channel truth as rig.py) via wire.js: gamma 1.6 on the intensity
+   channels, every head's pose slew-limited as one 16-bit value and held when undriven. */
 const lightsOut = opt("--lights", null);
 if (lightsOut) {
-  /* intents -> 41-ch frames through the drivers, with the display gamma and the
-     head's 16-bit slew/hold, all in wire.js (shared with preview.js) */
+  /* intents -> DMX frames through the drivers, with the display gamma and the
+     heads' 16-bit slew/hold, all in wire.js (shared with preview.js) */
   const frames = require("./wire.js").toLightsFrames(ticks, layout);
   fs.writeFileSync(lightsOut, JSON.stringify({
-    rig: "arc4-head", style: "limelight", fps, duration, tempo: score.grid.bpm,
+    rig: rig.rig, style: "limelight", fps, duration, tempo: score.grid.bpm,
     source: (score.score || "song") + ".wav", wav: (score.score || "song") + ".wav",
     beats, downbeats, sections: phases.map(x => x.start), phases, moments, looks, facts: p.facts || null, frames,
   }));
-  console.log(`baked ${frames.length} lights frames (41ch @ ${fps}fps, seed ${seed}) -> ${lightsOut}`);
+  console.log(`baked ${frames.length} lights frames (${frames[0] ? frames[0].length : 0}ch @ ${fps}fps, seed ${seed}, rig ${rig.rig}) -> ${lightsOut}`);
   process.exit(0);
 }
 
 /* Default beside the repo, not into one person's scratchpad. The previous
    default was an absolute path that existed on exactly one laptop, so anybody
-   else who ran this wrote into a directory that was not there. */
+   else who ran this wrote into a directory that was not there. A non-default rig
+   names itself in the file, so baking the same show for a second venue does not
+   silently overwrite the first. */
 const out = opt("--out", path.join(
   process.env.SCRATCH || path.join(__dirname, "..", "..", "work", "shows"),
-  (score.score || "song") + ".frames.json"));
+  (score.score || "song") + (rig.isDefault ? "" : "." + rig.base) + ".frames.json"));
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, JSON.stringify({
   score: score.score, seed, fps, from, to: +to.toFixed(3), count: ticks.length, duration, beats, downbeats, phases, moments, looks, facts: p.facts || null,
   fixtures: (layout.fixtures || []).map(f => ({ id: f.id, type: f.type, address: f.address, universe: f.universe })),
   ticks,
 }));
-console.log(`baked ${ticks.length} ticks  (${from}..${(+to).toFixed(1)}s @ ${fps}fps, seed ${seed})  -> ${out}`);
+console.log(`baked ${ticks.length} ticks  (${from}..${(+to).toFixed(1)}s @ ${fps}fps, seed ${seed}, rig ${rig.rig})  -> ${out}`);

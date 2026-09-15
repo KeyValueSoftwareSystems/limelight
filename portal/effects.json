@@ -1,0 +1,101 @@
+{
+  "note": "The effect palette. Every tile maps to one of the renderer's typed effects (readers/lights/frame.js) with the dials readers/lights/preflight.js gives it, so a tile is the same thing the arranger would place, chosen by a person instead of by the music. `beats` is only the length it arrives at -- the creator drags it. Nothing here is a parameter form: the dials are the tile's identity.",
+  "effects": [
+    {
+      "id": "blackout",
+      "name": "Blackout",
+      "blurb": "The rig goes dark and stays dark.",
+      "fx": "blackout",
+      "beats": 4,
+      "params": { "strength": 1 }
+    },
+    {
+      "id": "cut",
+      "name": "Cut",
+      "blurb": "The rig drops out for one beat.",
+      "fx": "blackout",
+      "beats": 1,
+      "params": { "strength": 1 }
+    },
+    {
+      "id": "impact",
+      "name": "Impact",
+      "blurb": "The whole rig, white, on the beat.",
+      "fx": "white_blast",
+      "beats": 1,
+      "params": { "strength": 1, "tone": "white" }
+    },
+    {
+      "id": "flash",
+      "name": "Flash",
+      "blurb": "A white flick on the outer pair only.",
+      "fx": "white_blast",
+      "beats": 1,
+      "params": { "strength": 0.9, "coverage": "outer", "tone": "white" }
+    },
+    {
+      "id": "stab",
+      "name": "Stab",
+      "blurb": "A hit on the centre pair, in the song's own colour.",
+      "fx": "white_blast",
+      "beats": 1,
+      "params": { "strength": 0.9, "coverage": "inner", "tone": "key" }
+    },
+    {
+      "id": "cross",
+      "name": "Cross",
+      "blurb": "The hit crosses the room, lamp after lamp.",
+      "fx": "white_blast",
+      "beats": 2,
+      "params": { "strength": 0.9, "shape": "travel", "spread": 0.5, "tone": "white" }
+    },
+    {
+      "id": "swell",
+      "name": "Swell",
+      "blurb": "A wash that blooms and falls away.",
+      "fx": "white_blast",
+      "beats": 4,
+      "params": { "strength": 0.85, "shape": "swell", "tone": "key" }
+    },
+    {
+      "id": "hush",
+      "name": "Hush",
+      "blurb": "Levels fall away and the head sinks toward the wall.",
+      "fx": "pause",
+      "beats": 4,
+      "params": { "strength": 0.7, "still": [] }
+    },
+    {
+      "id": "hook_lift",
+      "name": "Hook lift",
+      "blurb": "Lifts the whole rig and opens the head's prism.",
+      "fx": "hook",
+      "beats": 4,
+      "params": { "strength": 0.9 }
+    },
+    {
+      "id": "riser",
+      "name": "Riser",
+      "blurb": "Colour washes toward white across the span.",
+      "fx": "whiten",
+      "beats": 8,
+      "params": { "amount": 0.7 }
+    },
+    {
+      "id": "fill_flicker",
+      "name": "Fill flicker",
+      "blurb": "The pars strobe on the front of each beat.",
+      "fx": "accent_strobe",
+      "beats": 4,
+      "params": { "strength": 0.9 }
+    },
+    {
+      "id": "exit_dip",
+      "name": "Exit dip",
+      "blurb": "Level and movement ease back together.",
+      "fx": "modulate",
+      "beats": 4,
+      "params": { "gain": 0.7, "motion": -0.3, "doing": "exit" }
+    }
+  ]
+}

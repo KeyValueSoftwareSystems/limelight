@@ -1,0 +1,53 @@
+{
+ "note": "The venue catalogue. A VENUE is a name with one or more named LAYOUTS under it, because a room reconfigures and each configuration is a different rig. The layout file is the rig; the venue is who owns it and what they call that configuration. This belongs on the hub beside the scores eventually; it is here so the shape gets settled in one place first.",
+ "shape": {
+  "id": "stable, survives renaming",
+  "name": "what people search for",
+  "example": "true when the venue itself is invented",
+  "access": "public | locked -- a venue owns its rig and says who may target it",
+  "locked_because": "what the person is actually missing, in plain words",
+  "logo": "a file under portal/logos/. Missing is fine: the page draws a monogram.",
+  "layouts": "[{name, file, placeholder}] -- file is a *.layout.json in readers/lights/",
+  "default": "which of those layouts is live unless someone says otherwise"
+ },
+ "logos_dir": "portal/logos",
+ "default_venue": "ven_desk",
+ "venues": [
+  {
+   "id": "ven_keycode",
+   "name": "KeyCode Stage",
+   "example": false,
+   "access": "public",
+   "note": "Our own event, and the only venue here anyone may design for and play.",
+   "logo": "ven_keycode.png",
+   "logo_note": "Drop the supplied KeyCode logo at portal/logos/ven_keycode.svg (or .png) and it replaces the drawn monogram with no code change.",
+   "rig_placeholder": true,
+   "rig_placeholder_note": "We have not been given KeyCode's fixture list. The rig below is a stand-in so the demo runs; it is NOT what is hanging at KeyCode, and it is marked as such wherever it appears. Replace it when the real list arrives.",
+   "layouts": [
+    {
+     "name": "Main stage (placeholder rig)",
+     "file": "club16-2head.layout.json",
+     "placeholder": true
+    }
+   ],
+   "default": "club16-2head.layout.json"
+  },
+  {
+   "id": "ven_omnia",
+   "name": "OMNIA",
+   "example": false,
+   "access": "locked",
+   "locked_because": "This venue has not granted your account access to its rig. Access is granted by the venue to named designers; nothing in this build can request it.",
+   "logo": "ven_omnia.jpg",
+   "layouts": [
+    {
+     "name": "House rig",
+     "file": "club16-2head.layout.json"
+    }
+   ],
+   "default": "club16-2head.layout.json",
+   "note": "A real nightclub, here to show what a venue-controlled rig looks like. We have no relationship with it and no access to its rig.",
+   "rig_note": "We do not have OMNIA's fixture list. The rig shown is a stand-in so the catalogue renders; it is NOT what is hanging there."
+  }
+ ]
+}

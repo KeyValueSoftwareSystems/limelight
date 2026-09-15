@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The same show on two rigs</title>
+<style>
+  :root { color-scheme: dark; --ink:#e9e6e1; --dim:#9b968e; --line:#2a2a2e; --ground:#0d0d10; --panel:#141418; --ok:#5fd08a; --warn:#ffb454; --bad:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font:14px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width:1180px; margin:0 auto; padding:28px 20px 80px; }
+  h1 { font-size:22px; margin:0 0 6px; font-weight:620; letter-spacing:-0.01em; }
+  h2 { font-size:15px; margin:34px 0 10px; font-weight:620; letter-spacing:-0.005em; }
+  .lede { color:var(--dim); margin:0 0 18px; max-width:70ch; }
+  .sub { color:var(--dim); font-size:12.5px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .stage { position:relative; margin-bottom:10px; }
+  .stage h3 { margin:0 0 2px; font-size:13px; font-weight:620; }
+  .stage .meta { position:absolute; right:12px; top:10px; font-size:12px; color:var(--dim); font-variant-numeric:tabular-nums; }
+  canvas { display:block; width:100%; height:auto; border-radius:6px; background:#08080b; }
+  .transport { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:12px 0 6px; }
+  button { background:#1e1e24; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:6px 13px; font:inherit; cursor:pointer; }
+  button:hover { background:#26262e; }
+  button.on { background:#3a3a46; }
+  input[type=range] { flex:1 1 260px; min-width:180px; accent-color:#c9c4bc; }
+  .clock { font-variant-numeric:tabular-nums; color:var(--dim); min-width:140px; font-size:13px; }
+  .tl { position:relative; height:34px; margin:6px 0 2px; border-radius:5px; overflow:hidden; background:#111116; cursor:pointer; }
+  .tl .ph { position:absolute; top:0; bottom:14px; font-size:10px; color:#0d0d10; padding:1px 4px; overflow:hidden; white-space:nowrap; border-right:1px solid #0d0d10; }
+  .tl .mo { position:absolute; bottom:0; width:2px; height:12px; background:var(--warn); }
+  .tl .cur { position:absolute; top:0; bottom:0; width:2px; background:#fff; pointer-events:none; }
+  .looks { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
+  .look { font-size:12.5px; color:var(--dim); }
+  .look b { color:var(--ink); font-weight:600; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th,td { text-align:left; padding:6px 10px 6px 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--dim); font-weight:500; }
+  td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; padding-right:18px; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); } .warn { color:var(--warn); }
+  .stills { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:14px; }
+  .still h4 { margin:0 0 4px; font-size:12.5px; font-weight:600; }
+  .still .sub { margin-bottom:6px; }
+  .note { color:var(--dim); font-size:12.5px; max-width:72ch; margin-top:8px; }
+  @media (max-width:640px) { .looks { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The same show on two rigs</h1>
+  <p class="lede" id="lede"></p>
+
+  <div class="panel">
+    <div class="stage" id="stageA"><h3></h3><div class="meta"></div><canvas></canvas></div>
+    <div class="stage" id="stageB"><h3></h3><div class="meta"></div><canvas></canvas></div>
+    <div class="transport">
+      <button id="play">Play</button>
+      <button id="rate">1&times;</button>
+      <input type="range" id="scrub" min="0" max="1000" value="0">
+      <span class="clock" id="clock"></span>
+    </div>
+    <div class="tl" id="tl"><div class="cur" id="cur"></div></div>
+    <div class="looks">
+      <div class="look" id="lookA"></div>
+      <div class="look" id="lookB"></div>
+    </div>
+  </div>
+
+  <h2>The same moments, both rigs</h2>
+  <p class="note">Every weighted moment the score declares, drawn on both rigs at the frame it lands. Same instant, same file, two venues.</p>
+  <div class="stills" id="stills"></div>
+
+  <h2>Does the effect library survive the change of rig</h2>
+  <div id="tEnum"></div>
+
+  <h2>Does the same music land at the same time</h2>
+  <div id="tTime"></div>
+
+  <h2>Does the bigger rig use more of itself</h2>
+  <div id="tUse"></div>
+
+  <h2>Is anything dropped to darkness</h2>
+  <div id="tDark"></div>
+
+  <h2>Does the artist's palette hold</h2>
+  <div id="tPal"></div>
+</div>
+
+<script>
+/*__META__*/
+/*__RIG_A__*/
+/*__RIG_B__*/
+
+/* ---- unpack: 7 bytes per fixture per tick: r g b level pan tilt strobe ------ */
+function unpack(rig) {
+  const bin = atob(rig.data), n = bin.length, a = new Uint8Array(n);
+  for (let i = 0; i < n; i++) a[i] = bin.charCodeAt(i);
+  rig.bytes = a; rig.stride = rig.fixtures.length * 7;
+  return rig;
+}
+unpack(RIG_A); unpack(RIG_B);
+
+const RIGS = [RIG_A, RIG_B];
+const XS = RIGS.flatMap(r => r.fixtures.map(f => f.x));
+const XMIN = Math.min(...XS) - 0.9, XMAX = Math.max(...XS) + 0.9;
+const DUR = Math.max(RIG_A.count / RIG_A.fps, RIG_B.count / RIG_B.fps);
+
+/* ---- one rig, one tick, on a canvas ---------------------------------------- */
+const H = 210, TRUSS = 52, FLOOR = 186;
+function draw(ctx, rig, ti, W) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = "#08080b"; ctx.fillRect(0, 0, W, H);
+  /* the deck */
+  const g = ctx.createLinearGradient(0, FLOOR - 30, 0, H);
+  g.addColorStop(0, "#0e0e12"); g.addColorStop(1, "#141419");
+  ctx.fillStyle = g; ctx.fillRect(0, FLOOR - 4, W, H - FLOOR + 4);
+  /* the truss */
+  ctx.strokeStyle = "#26262e"; ctx.lineWidth = 3;
+  const sx = x => 18 + (x - XMIN) / (XMAX - XMIN) * (W - 36);
+  ctx.beginPath(); ctx.moveTo(sx(XMIN + 0.5), TRUSS); ctx.lineTo(sx(XMAX - 0.5), TRUSS); ctx.stroke();
+
+  if (ti < 0 || ti >= rig.count) return;
+  const base = ti * rig.stride;
+  ctx.globalCompositeOperation = "lighter";
+  rig.fixtures.forEach((f, i) => {
+    const o = base + i * 7;
+    let lvl = rig.bytes[o + 3] / 255;
+    const strobe = rig.bytes[o + 6] / 255;
+    if (strobe > 0 && (ti % 4) < 2) lvl *= 0.15;            /* a fixture strobe, shown as a flicker */
+    const r = rig.bytes[o], gg = rig.bytes[o + 1], b = rig.bytes[o + 2];
+    const col = (a) => "rgba(" + Math.round(r * lvl) + "," + Math.round(gg * lvl) + "," + Math.round(b * lvl) + "," + a + ")";
+    const x = sx(f.x);
+    if (f.type === "head13") {
+      const pan = rig.bytes[o + 4] / 255, tilt = rig.bytes[o + 5] / 255;
+      const tx = sx(XMIN + 0.6 + pan * (XMAX - XMIN - 1.2));
+      const ty = FLOOR - (0.5 - Math.abs(tilt - 0.5)) * 60;
+      if (lvl > 0.02) {
+        ctx.beginPath();
+        ctx.moveTo(x - 6, TRUSS + 12); ctx.lineTo(x + 6, TRUSS + 12);
+        ctx.lineTo(tx + 26, ty); ctx.lineTo(tx - 26, ty); ctx.closePath();
+        const bg = ctx.createLinearGradient(x, TRUSS, tx, ty);
+        bg.addColorStop(0, col(0.55)); bg.addColorStop(1, col(0.04));
+        ctx.fillStyle = bg; ctx.fill();
+        const sp = ctx.createRadialGradient(tx, ty, 1, tx, ty, 40);
+        sp.addColorStop(0, col(0.5)); sp.addColorStop(1, col(0));
+        ctx.fillStyle = sp; ctx.beginPath(); ctx.ellipse(tx, ty, 40, 13, 0, 0, 7); ctx.fill();
+      }
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = "#33333d"; ctx.fillRect(x - 8, TRUSS - 4, 16, 16);
+      ctx.globalCompositeOperation = "lighter";
+      const lens = ctx.createRadialGradient(x, TRUSS + 10, 0, x, TRUSS + 10, 13);
+      lens.addColorStop(0, col(1)); lens.addColorStop(1, col(0));
+      ctx.fillStyle = lens; ctx.beginPath(); ctx.arc(x, TRUSS + 10, 13, 0, 7); ctx.fill();
+    } else {
+      if (lvl > 0.015) {                                   /* the wash on the deck */
+        ctx.beginPath();
+        ctx.moveTo(x - 7, TRUSS + 6); ctx.lineTo(x + 7, TRUSS + 6);
+        ctx.lineTo(x + 34, FLOOR); ctx.lineTo(x - 34, FLOOR); ctx.closePath();
+        const bg = ctx.createLinearGradient(0, TRUSS, 0, FLOOR);
+        bg.addColorStop(0, col(0.42)); bg.addColorStop(1, col(0.05));
+        ctx.fillStyle = bg; ctx.fill();
+        const sp = ctx.createRadialGradient(x, FLOOR, 1, x, FLOOR, 46);
+        sp.addColorStop(0, col(0.42)); sp.addColorStop(1, col(0));
+        ctx.fillStyle = sp; ctx.beginPath(); ctx.ellipse(x, FLOOR, 46, 15, 0, 0, 7); ctx.fill();
+      }
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = "#2b2b33"; ctx.fillRect(x - 7, TRUSS - 3, 14, 12);
+      ctx.globalCompositeOperation = "lighter";
+      const lens = ctx.createRadialGradient(x, TRUSS + 5, 0, x, TRUSS + 5, 15);
+      lens.addColorStop(0, col(1)); lens.addColorStop(0.35, col(0.65)); lens.addColorStop(1, col(0));
+      ctx.fillStyle = lens; ctx.beginPath(); ctx.arc(x, TRUSS + 5, 15, 0, 7); ctx.fill();
+    }
+  });
+  ctx.globalCompositeOperation = "source-over";
+}
+
+/* ---- the two live stages ---------------------------------------------------- */
+function mount(el, rig) {
+  el.querySelector("h3").textContent = rig.rig + " — " + rig.fixtures.length + " fixtures ("
+    + rig.fixtures.filter(f => f.type === "par7").length + " par7 + "
+    + rig.fixtures.filter(f => f.type === "head13").length + " head13)";
+  const c = el.querySelector("canvas");
+  const fit = () => {
+    const W = c.clientWidth || 900, dpr = Math.min(2, window.devicePixelRatio || 1);
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.height = H + "px";
+    const ctx = c.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return ctx;
+  };
+  const o = { el, rig, c, ctx: fit(), W: () => c.clientWidth || 900, refit: () => { o.ctx = fit(); } };
+  return o;
+}
+const SA = mount(document.getElementById("stageA"), RIG_A);
+const SB = mount(document.getElementById("stageB"), RIG_B);
+window.addEventListener("resize", () => { SA.refit(); SB.refit(); render(T); });
+
+const lookAt = (looks, t) => looks.filter(l => l.start <= t && t < l.end);
+function render(t) {
+  for (const S of [SA, SB]) {
+    const ti = Math.round(t * S.rig.fps);
+    draw(S.ctx, S.rig, ti, S.W());
+    let lit = 0;
+    const base = ti * S.rig.stride;
+    if (ti >= 0 && ti < S.rig.count)
+      for (let i = 0; i < S.rig.fixtures.length; i++) if (S.rig.bytes[base + i * 7 + 3] > 2) lit++;
+    S.el.querySelector(".meta").textContent = lit + " / " + S.rig.fixtures.length + " lit";
+  }
+  document.getElementById("clock").textContent = t.toFixed(2) + "s / " + DUR.toFixed(1) + "s";
+  document.getElementById("scrub").value = Math.round(t / DUR * 1000);
+  document.getElementById("cur").style.left = (t / DUR * 100) + "%";
+  const nm = (looks) => lookAt(looks, t).map(l => l.layer + " " + l.seq_id).join("  ·  ") || "—";
+  document.getElementById("lookA").innerHTML = "<b>" + RIG_A.rig + "</b> &nbsp;" + nm(META.looksA);
+  document.getElementById("lookB").innerHTML = "<b>" + RIG_B.rig + "</b> &nbsp;" + nm(META.looksB);
+}
+
+let T = 0, playing = false, rate = 1, last = 0;
+function tick(now) {
+  if (playing) {
+    if (last) T += (now - last) / 1000 * rate;
+    last = now;
+    if (T >= DUR) { T = 0; }
+    render(T);
+  } else last = 0;
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+document.getElementById("play").onclick = e => {
+  playing = !playing; last = 0;
+  e.target.textContent = playing ? "Pause" : "Play";
+  e.target.classList.toggle("on", playing);
+};
+document.getElementById("rate").onclick = e => {
+  rate = rate === 1 ? 0.25 : rate === 0.25 ? 0.5 : 1;
+  e.target.innerHTML = rate + "&times;";
+};
+document.getElementById("scrub").oninput = e => { T = e.target.value / 1000 * DUR; render(T); };
+
+/* ---- the timeline: phase bands and the score's moments ---------------------- */
+{
+  const tl = document.getElementById("tl");
+  const HUE = { intro:"#5b7fa8", verse:"#6d8f6a", break:"#8a7fa8", build:"#c08a4a", drop:"#c05a5a",
+                final_drop:"#d04a4a", outro:"#4a6a7a", silence:"#3a3a44" };
+  for (const p of META.phases) {
+    const d = document.createElement("div"); d.className = "ph";
+    const s = Math.max(0, p.start), e = Math.min(DUR, p.end);
+    d.style.left = (s / DUR * 100) + "%"; d.style.width = ((e - s) / DUR * 100) + "%";
+    d.style.background = HUE[p.phase] || "#555";
+    d.textContent = p.phase; d.title = p.phase + "  " + s.toFixed(1) + "–" + e.toFixed(1) + "s";
+    tl.appendChild(d);
+  }
+  for (const m of META.moments) {
+    const d = document.createElement("div"); d.className = "mo";
+    d.style.left = (m.t / DUR * 100) + "%";
+    d.title = m.kind + " " + (m.what || "") + "  w=" + m.weight + "  @" + m.t + "s";
+    tl.appendChild(d);
+  }
+  tl.onclick = e => {
+    const r = tl.getBoundingClientRect();
+    T = Math.max(0, Math.min(DUR, (e.clientX - r.left) / r.width * DUR)); render(T);
+  };
+}
+
+/* ---- the stills: every moment, both rigs ------------------------------------ */
+{
+  const host = document.getElementById("stills");
+  for (const m of META.moments) {
+    const card = document.createElement("div"); card.className = "still";
+    const peak = (META.peaks || []).find(p => p.t === m.t) || {};
+    card.innerHTML = "<h4>" + m.kind + (m.what ? " — " + m.what : "") + "</h4>"
+      + "<div class='sub'>" + m.t + "s · bar " + m.bar + "." + m.beat + " · weight " + m.weight
+      + " &nbsp;·&nbsp; " + (peak.a != null ? peak.a + "/" + RIG_A.fixtures.length + " vs " + peak.b + "/" + RIG_B.fixtures.length + " lit" : "") + "</div>";
+    RIGS.forEach((rig, k) => {
+      const c = document.createElement("canvas");
+      const dpr = Math.min(2, window.devicePixelRatio || 1), W = 420;
+      c.width = W * dpr; c.height = H * dpr; c.style.width = "100%"; c.style.marginBottom = "4px";
+      const ctx = c.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      /* the widest frame of the moment's own window -- the same frame the count
+         beside the heading is taken from */
+      const f = k === 0 ? peak.frameA : peak.frameB;
+      draw(ctx, rig, f != null ? f : Math.round(m.t * rig.fps) + 2, W);
+      card.appendChild(c);
+    });
+    card.onclick = () => { T = m.t; render(T); window.scrollTo({ top: 0, behavior: "smooth" }); };
+    card.style.cursor = "pointer";
+    host.appendChild(card);
+  }
+}
+
+/* ---- the numbers ------------------------------------------------------------ */
+const yes = v => v ? "<span class='ok'>yes</span>" : "<span class='bad'>no</span>";
+const zero = (n, good) => "<span class='" + (n === 0 ? (good ? "ok" : "") : (good ? "bad" : "warn")) + "'>" + n + "</span>";
+function table(host, rows) {
+  document.getElementById(host).innerHTML = "<table><tbody>" +
+    rows.map(r => "<tr><th>" + r[0] + "</th><td>" + r[1] + "</td></tr>").join("") + "</tbody></table>";
+}
+const E = META.enum, U = META.use, TT = META.timing, D = META.darkness;
+document.getElementById("lede").textContent =
+  "“" + META.score + "”, seed " + META.seed + ", baked twice from one file: once against "
+  + E.a.rig + " (" + U.a.fixtures + " fixtures) and once against " + E.b.rig + " ("
+  + U.b.fixtures + " fixtures). Nothing about the show was edited between the two bakes — each venue re-derived the plan against its own layout.";
+
+table("tEnum", [
+  ["looks in the effect library", E.a.library],
+  ["enumerated onto " + E.a.rig, E.a.llm + " of " + E.a.library + " &nbsp;(+ " + E.a.base + " base = " + E.a.total + " sequences)"],
+  ["enumerated onto " + E.b.rig, E.b.llm + " of " + E.b.library + " &nbsp;(+ " + E.b.base + " base = " + E.b.total + " sequences)"],
+  ["refused on " + E.b.rig, E.b.refused.length === 0 ? "<span class='ok'>none</span>"
+     : E.b.refused.map(x => x.id + " <span class='sub'>(" + x.why + ")</span>").join("<br>")],
+  ["base looks impossible on " + E.b.rig, (E.b.impossible || []).join(", ") || "—"],
+  ["fit scores that the rig actually changed", (META.fitDiff || []).length === 0 ? "none"
+     : META.fitDiff.map(f => f.id + " <span class='sub'>" + f.a + " &rarr; " + f.b + "</span>").join("<br>")],
+]);
+
+table("tTime", [
+  ["the score's moments land at the same seconds", yes(TT.moments)],
+  ["section phases start and end at the same seconds", yes(TT.phases)],
+  ["the per-bar facts the picks were made from", yes(TT.facts) + " <span class='sub'>(identical)</span>"],
+  ["every look occupies the same span on both rigs", yes(TT.spans)],
+  ["looks filled by the same sequence", TT.sameSeq + " / " + TT.looks
+     + (TT.lookDiff.length ? "<br><span class='sub'>" + TT.lookDiff.map(d =>
+         "bar " + d.bar + "&ndash;" + d.to_bar + " " + d.layer + ": " + d.a + " &rarr; " + d.b).join("<br>") + "</span>" : "")],
+  ["over " + META.sweep.seeds + " seeds: plans identical on both rigs", META.sweep.identical + " / " + META.sweep.seeds
+     + " <span class='sub'>&mdash; one seed is one draw; this is the same question asked " + META.sweep.seeds + " times</span>"],
+  ["over those seeds: assignments that moved in TIME", (META.sweep.movedSpans === 0
+     ? "<span class='ok'>none, on any seed</span>" : "<span class='bad'>" + META.sweep.movedSpans + "</span>")],
+  ["over those seeds: picks the rig changed", META.sweep.changed + " / " + META.sweep.picks
+     + " <span class='sub'>(" + (100 * META.sweep.changed / META.sweep.picks).toFixed(1) + "% &mdash; a changed fit score reorders the candidate list, so the seeded draw lands on a different look in the same slot)</span>"],
+]);
+
+table("tUse", [
+  ["fixtures", U.a.fixtures + " &nbsp;vs&nbsp; " + U.b.fixtures],
+  ["lamps lit at the peak", U.a.maxLit + "/" + U.a.fixtures + " &nbsp;vs&nbsp; " + U.b.maxLit + "/" + U.b.fixtures],
+  ["mean lamps lit across the show", U.a.meanLit + "/" + U.a.fixtures + " (" + (100 * U.a.meanLit / U.a.fixtures).toFixed(0) + "%)"
+     + " &nbsp;vs&nbsp; " + U.b.meanLit + "/" + U.b.fixtures + " (" + (100 * U.b.meanLit / U.b.fixtures).toFixed(0) + "%)"],
+  ["distinct PAR states at one instant (mean / max)", U.a.meanDistinct + " / " + U.a.maxDistinct + " &nbsp;vs&nbsp; " + U.b.meanDistinct + " / " + U.b.maxDistinct],
+  ["frames where every PAR is doing the same thing", (100 * U.a.allSame / D.ticks).toFixed(0) + "% &nbsp;vs&nbsp; " + (100 * U.b.allSame / D.ticks).toFixed(0) + "%"],
+  ["frames where every moving head is in unison", U.b.headTicks ? "<span class='warn'>" + U.b.headsInUnison + " / " + U.b.headTicks + "</span> on " + E.b.rig
+     + " <span class='sub'>— frame.js writes one head intent to the whole `head` group, so extra movers copy the first</span>" : "—"],
+]);
+
+table("tDark", [
+  ["frames lit on " + E.a.rig + " but DARK on " + E.b.rig, zero(D.darkOnB, true)
+     + (D.firstDark !== null ? " <span class='sub'>(first at " + D.firstDark + "s)</span>" : "")],
+  ["frames lighting fewer lamps on " + E.b.rig, zero(D.fewerOnB, true)],
+  ["frames dark on both — the show's own holes", D.darkOnBoth + " of " + D.ticks + " <span class='sub'>(" + (100 * D.darkOnBoth / D.ticks).toFixed(1) + "%)</span>"],
+]);
+
+table("tPal", [
+  ["the artist's colours", META.palette.map(p => "<span style='color:rgb(" + p.rgb.map(v => Math.round(v * 255)).join(",") + ")'>&#9632;</span> " + p.name).join(" &nbsp; ") || "unconstrained"],
+  ["lit PAR colours outside them, " + E.a.rig, zero(U.a.offPalette, true)],
+  ["lit PAR colours outside them, " + E.b.rig, zero(U.b.offPalette, true)],
+  ["head colour-wheel slots used", (U.a.headNames.join(" / ") || "—") + " &nbsp;vs&nbsp; " + (U.b.headNames.join(" / ") || "—")],
+]);
+
+render(0);
+</script>
+</body>
+</html>

@@ -467,20 +467,18 @@ module.exports = { enumerate, view, validateSequence, validateAffinity, affinity
                    VOCABULARY, CONTEXTS, FIT_FLOOR, BUDGETS, FACTS };
 
 /* ---- CLI: enumerate a layout, print the taste report, cache the matrix ---
-     node readers/lights/preflight.js [readers/lights/arc4-head.layout.json]      */
+     node readers/lights/preflight.js [readers/lights/arc4-head.layout.json]
+   A layout with no palette of its own is enumerated against the shared effect
+   library (layouts.js): the looks declare capabilities and groups, so the whole
+   point is that a second rig can be held up against the same library.          */
 if (require.main === module) {
-  const fs = require("fs"), path = require("path");
-  const file = process.argv[2] || path.join(__dirname, "arc4-head.layout.json");
-  const layout = JSON.parse(fs.readFileSync(file, "utf8"));
-  const base = path.basename(file).replace(/\.layout\.json$|\.json$/, "");
-
-  /* load the (LLM-generated) palette cache if present, else base-only */
-  let palette = [];
-  try { palette = JSON.parse(fs.readFileSync(path.join(path.dirname(file), base + ".palette.json"), "utf8")); }
-  catch (e) { /* no palette yet -- heuristic base only */ }
+  const fs = require("fs");
+  const rig = require("./layouts.js").resolve(process.argv[2] || null,
+    (process.argv.indexOf("--palette") >= 0) ? process.argv[process.argv.indexOf("--palette") + 1] : null);
+  const layout = rig.layout, palette = rig.palette;
 
   const result = enumerate(layout, { palette });
-  const out = path.join(path.dirname(file), base + ".matrix.json");
+  const out = rig.matrixFile;
   fs.writeFileSync(out, JSON.stringify(result, null, 1));
 
   const r = result.report;

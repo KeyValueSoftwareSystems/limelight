@@ -1,0 +1,21 @@
+{
+ "note": "Effects a creator built by re-dialling a built-in one. Same grammar, so they travel to any rig.",
+ "effects": [
+  {
+   "id": "own_ae683a60",
+   "name": "Wide stab",
+   "blurb": "Stab, re-dialled",
+   "fx": "white_blast",
+   "base": "stab",
+   "own": true,
+   "beats": 2,
+   "params": {
+    "strength": 0.95,
+    "coverage": "ends",
+    "tone": "key",
+    "shape": "travel",
+    "spread": 0.8
+   }
+  }
+ ]
+}

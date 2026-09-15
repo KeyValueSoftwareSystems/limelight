@@ -1,0 +1,211 @@
+{
+ "layout": "0.5",
+ "rig": "club16-2head",
+ "geometry": "line",
+ "frame": "audience",
+ "note": "A small club house rig: a 6.75 m upstage wash bar of 16 par7 at 45 cm centres behind the DJ, with two moving heads outboard on the same bar line. Positions in metres in the audience frame (+x = the audience's right), heights from the floor. TWO THINGS ARE DELIBERATE. The par count is a multiple of four because groupsOf splits inner/outer at floor(n/2) -- at 10 or 14 one mirror pair is split and every paired look comes out lopsided. And everything sits on ONE bar line because the rig model reads only the x position: a real club's front truss and back truss would interleave by x, and a travelling effect would zigzag between them instead of crossing the room. Depth needs a grouping extension before a multi-truss rig can be described honestly.",
+ "fixtures": [
+  {
+   "id": "par_01",
+   "type": "par7",
+   "at": [
+    -3.375,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 1
+  },
+  {
+   "id": "par_02",
+   "type": "par7",
+   "at": [
+    -2.925,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 8
+  },
+  {
+   "id": "par_03",
+   "type": "par7",
+   "at": [
+    -2.475,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 15
+  },
+  {
+   "id": "par_04",
+   "type": "par7",
+   "at": [
+    -2.025,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 22
+  },
+  {
+   "id": "par_05",
+   "type": "par7",
+   "at": [
+    -1.575,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 29
+  },
+  {
+   "id": "par_06",
+   "type": "par7",
+   "at": [
+    -1.125,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 36
+  },
+  {
+   "id": "par_07",
+   "type": "par7",
+   "at": [
+    -0.675,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 43
+  },
+  {
+   "id": "par_08",
+   "type": "par7",
+   "at": [
+    -0.225,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 50
+  },
+  {
+   "id": "par_09",
+   "type": "par7",
+   "at": [
+    0.225,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 57
+  },
+  {
+   "id": "par_10",
+   "type": "par7",
+   "at": [
+    0.675,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 64
+  },
+  {
+   "id": "par_11",
+   "type": "par7",
+   "at": [
+    1.125,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 71
+  },
+  {
+   "id": "par_12",
+   "type": "par7",
+   "at": [
+    1.575,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 78
+  },
+  {
+   "id": "par_13",
+   "type": "par7",
+   "at": [
+    2.025,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 85
+  },
+  {
+   "id": "par_14",
+   "type": "par7",
+   "at": [
+    2.475,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 92
+  },
+  {
+   "id": "par_15",
+   "type": "par7",
+   "at": [
+    2.925,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 99
+  },
+  {
+   "id": "par_16",
+   "type": "par7",
+   "at": [
+    3.375,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 106
+  },
+  {
+   "id": "head_1",
+   "type": "head13",
+   "at": [
+    -2.6,
+    0.0,
+    3.2
+   ],
+   "universe": 0,
+   "address": 113
+  },
+  {
+   "id": "head_2",
+   "type": "head13",
+   "at": [
+    2.6,
+    0.0,
+    3.2
+   ],
+   "universe": 0,
+   "address": 126
+  }
+ ],
+ "limits": {
+  "max_pan_per_frame": 7,
+  "max_tilt_per_frame": 7
+ }
+}

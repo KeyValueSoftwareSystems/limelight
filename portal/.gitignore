@@ -1,0 +1,12 @@
+work/
+__pycache__/
+
+# Cached album art, fetched from iTunes for a local demo. Copyrighted, not ours
+# to redistribute, and regenerable: `python3 portal/covers.py`. A song with no
+# cached cover falls back to the one we draw from its own score, so nothing
+# breaks on a fresh clone.
+covers/
+
+# Venue imagery we did not make. A venue's own logo may be committed with their
+# say-so; somebody else's promotional photograph may not.
+logos/ven_omnia.jpg

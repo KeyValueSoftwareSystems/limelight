@@ -1145,22 +1145,21 @@ function clashes(p) {
   return n;
 }
 
-module.exports = { plan, contextsFor, sectionEnergyMean, energyReader, clashes, carve, factsBlock, majorityVector, paletteOf };
+module.exports = { plan, contextsFor, sectionEnergyMean, energyReader, clashes, carve, factsBlock, majorityVector, paletteOf, appetite };
 
 /* ---- CLI: plan a score and print the show, section by section ------------
-     node readers/lights/arranger.js [score file] [seed]   */
+     node readers/lights/arranger.js [score file] [seed] [--layout FILE] [--palette FILE] */
 if (require.main === module) {
-  const fs = require("fs"), path = require("path");
   const { enumerate } = require("./preflight.js");
-  const scoreFile = process.argv[2] || null;
-  const seed = +(process.argv[3] || 1);
+  const args = process.argv.slice(2);
+  const bare = args.filter((a, i) => !a.startsWith("--") && !(i > 0 && args[i - 1].startsWith("--")));
+  const scoreFile = bare[0] || null;
+  const seed = +(bare[1] || 1);
   const score = require("./fromscore.js").load(scoreFile);
-  const layout = JSON.parse(fs.readFileSync(path.join(__dirname, "arc4-head.layout.json"), "utf8"));
-  let palette = [];
-  try { palette = JSON.parse(fs.readFileSync(path.join(__dirname, "arc4-head.palette.json"), "utf8")); } catch (e) {}
-  const en = enumerate(layout, { palette });
+  const rig = require("./layouts.js").fromArgs(args);
+  const en = enumerate(rig.layout, { palette: rig.palette });
   const p = plan(score, en, seed);
-  console.log(`\n${score.score || "song"} — plan @ seed ${seed}   (${p.assignments.length} assignments over ${score.sections.length} sections, ${en.sequences.length}-sequence palette)`);
+  console.log(`\n${score.score || "song"} — plan @ seed ${seed} on ${rig.rig}   (${p.assignments.length} assignments over ${score.sections.length} sections, ${en.sequences.length}-sequence palette)`);
   const pos = q => q.bar + (q.beat && q.beat !== 1 ? "." + q.beat : "");
   const vec = f => f ? "[" + [f.form, f.doing, (f.presence || []).join("+"), (f.texture || []).join("+"), (f.harmony || []).join("+")].filter(Boolean).join("|") + "]" : "";
   for (const a of p.assignments)

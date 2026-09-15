@@ -1,0 +1,32 @@
+{
+  "note": "The VENUE's ceiling. Set once at setup; no show, fader, edit or bug may exceed it. Every frame that leaves portal/server.py is clamped by this AFTER the live trims are applied, so a trim can only ever ask for less. Where a limit makes an effect impossible the effect is not offered in the palette at all, rather than offered and then quietly clamped.",
+  "venue": "Limelight demo room",
+
+  "max_intensity": {
+    "note": "0..1 per fixture group, applied to the par colour channels and the head dimmer. Heads are the ones that blind people.",
+    "par": 1.0,
+    "head": 0.85
+  },
+
+  "strobe": {
+    "note": "allowed:false removes every strobing effect from the palette and forces the strobe channels to 0. max is the DMX ceiling when it is allowed (rig.py: the par's strobe channel runs to 25 Hz at 255).",
+    "allowed": true,
+    "max": 120
+  },
+
+  "keep_out": [
+    {
+      "note": "Pan angles the head must never light. Degrees from the wall centre, by rig.py's PAN_WALL_CENTRE=169 and PAN_DEG_PER_DMX=540/255. Inside a zone the head's dimmer is forced to 0: the fixture may travel through, it may not throw light there.",
+      "name": "the bar",
+      "pan_from_deg": -150.0,
+      "pan_to_deg": -110.0
+    }
+  ],
+
+  "max_rate": {
+    "note": "Largest change allowed between two consecutive 40 fps frames. Intensity is capped on the way UP only -- going dark fast is never the hazard, and a blackout has to be instant. null means no limit.",
+    "intensity_up_per_frame": 255,
+    "pan_per_frame": 24,
+    "tilt_per_frame": 24
+  }
+}

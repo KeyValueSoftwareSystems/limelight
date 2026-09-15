@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Limelight — portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Newsreader:opsz,wght@6..72,300;6..72,400&display=swap">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body data-role="creator">
+
+<div class="app">
+
+  <header class="topbar">
+    <span class="wordmark">Limelight</span>
+    <nav class="tabs" id="tabs"></nav>
+    <span class="grow"></span>
+    <div class="rig">
+      <span class="pill" id="rigPill" data-state="unknown" title="">checking…</span>
+      <button type="button" class="bigbtn" id="rigBtn">Send to the rig</button>
+    </div>
+    <nav class="roles" id="roles">
+      <button type="button" data-role="creator">Creator</button>
+      <button type="button" data-role="venue">Venue</button>
+    </nav>
+  </header>
+
+  <!-- ── library ─────────────────────────────────────────────────────────── -->
+  <section class="screen pane" id="screen-library" hidden>
+    <div class="pane-head">
+      <div class="row">
+        <div>
+          <div class="display">Library</div>
+          <div class="label" id="libraryMeta">reading the hub…</div>
+        </div>
+        <div class="listform">
+          <label class="label" for="authorName">You are</label>
+          <input type="text" id="authorName" placeholder="your name" autocomplete="off">
+        </div>
+      </div>
+    </div>
+    <div class="songs grid" id="songs"></div>
+  </section>
+
+  <!-- ── saved shows ─────────────────────────────────────────────────────── -->
+  <section class="screen pane" id="screen-shows" hidden>
+    <div class="pane-head">
+      <div class="display">Shows</div>
+      <div class="label" id="showsMeta">reading portal/shows…</div>
+    </div>
+    <div class="shows" id="showList"></div>
+  </section>
+
+  <!-- ── marketplace ─────────────────────────────────────────────────────── -->
+  <section class="screen pane" id="screen-market" hidden>
+    <div class="banner">
+      <b>Surface only — nothing here takes money.</b>
+      No payment integration exists. The licence check the player calls before a
+      paid show is a stub that always says yes and says so.
+    </div>
+    <div class="pane-head">
+      <div class="row">
+        <div>
+          <div class="display">Marketplace</div>
+          <div class="label" id="marketMeta">reading listings…</div>
+        </div>
+        <div class="listform" id="listForm" hidden>
+          <select id="listShow"></select>
+          <select id="listTier"></select>
+          <input type="text" id="listBlurb" class="wide" placeholder="one line about the show" autocomplete="off">
+          <button type="button" class="bigbtn" id="listBtn">List it</button>
+        </div>
+      </div>
+    </div>
+    <div class="market grid" id="listings"></div>
+  </section>
+
+  <!-- ── venues ──────────────────────────────────────────────────────────── -->
+  <section class="screen pane" id="screen-venues" hidden>
+    <div class="pane-head">
+      <div class="row">
+        <div>
+          <div class="display">Venues</div>
+          <div class="label" id="venuesMeta">rooms you can design for</div>
+        </div>
+        <div class="listform">
+          <input type="text" id="venueCatSearch" class="wide" placeholder="search venues by name" autocomplete="off">
+        </div>
+      </div>
+    </div>
+    <div class="venuecat grid" id="venueCat"></div>
+  </section>
+
+  <!-- ── stage / player ──────────────────────────────────────────────────── -->
+  <section class="screen stage" id="screen-stage" hidden>
+
+    <aside class="rail rail-left">
+      <div class="rail-head label">Sections</div>
+      <div class="rail-body" id="sectionList"></div>
+      <div class="rail-foot" id="coloursPanel">
+        <div class="label">The artist's colours</div>
+        <div class="swatches" id="colours"></div>
+        <div class="note" id="coloursWho"></div>
+      </div>
+    </aside>
+
+    <div class="stage-main">
+      <div class="target" id="target">
+        <span class="label">Designing for</span>
+        <button type="button" class="targetbtn" id="targetBtn">
+          <b id="targetName">—</b><span id="targetRig"></span>
+        </button>
+        <span class="grow"></span>
+        <span class="note" id="targetNote"></span>
+      </div>
+
+      <div class="stage-head">
+        <div class="stage-head-song">
+          <div class="display" id="songTitle">—</div>
+          <div class="label" id="songMeta"></div>
+        </div>
+        <div class="stage-head-right">
+          <span class="note" id="rebuildNote"></span>
+          <span class="saverow" id="savePanel">
+            <input type="text" id="showName" placeholder="name this show" autocomplete="off">
+            <button type="button" class="linkbtn" id="saveShow">Save</button>
+          </span>
+          <button type="button" class="linkbtn" id="backBtn">Back</button>
+        </div>
+      </div>
+
+      <div class="stagebox">
+        <canvas id="stage"></canvas>
+        <div class="stagemsg" id="stageMsg">baking the show…</div>
+      </div>
+
+      <div class="transport">
+        <span class="clock mono" id="clock">0:00 / 0:00</span>
+        <div class="scrub" id="scrub">
+          <div class="scrub-rule"></div>
+          <div class="scrub-knob" id="scrubKnob"></div>
+        </div>
+        <div class="tbtns">
+          <button type="button" id="prevBtn">Prev</button>
+          <button type="button" id="playBtn">Play</button>
+          <button type="button" id="nextBtn">Next</button>
+        </div>
+      </div>
+
+      <div class="ribbonrow">
+        <div class="ribbon" id="ribbon">
+          <div class="ribbon-win" id="ribbonWin"></div>
+          <div class="ribbon-head" id="ribbonHead"></div>
+        </div>
+        <span class="label zoomlabel">Zoom</span>
+        <div class="zoom" id="zoom">
+          <button type="button" data-zoom="1">All</button>
+          <button type="button" data-zoom="4">4×</button>
+          <button type="button" data-zoom="16">16×</button>
+          <button type="button" data-zoom="64">64×</button>
+        </div>
+        <span class="note" id="zoomNote"></span>
+      </div>
+
+      <div class="timeline" id="timeline">
+        <div class="bands" id="bands"></div>
+        <div class="lane" id="lane">
+          <div class="ghost" id="ghost" hidden><span></span></div>
+        </div>
+        <div class="playhead" id="playhead"></div>
+      </div>
+
+      <div class="beatline">
+        <span class="label">Bar</span><span class="mono" id="barno">—</span>
+        <span class="label">Beat</span><span class="mono" id="beatno">—</span>
+        <span class="label">Frame</span><span class="mono" id="frameno">—</span>
+        <span class="grow"></span>
+        <span class="note" id="syncNote"></span>
+      </div>
+
+      <div class="convo" id="convo">
+        <div class="label">Conversation</div>
+        <div class="transcript" id="transcript"></div>
+        <input type="text" id="say" autocomplete="off"
+               placeholder="say what you&#39;d change — &#39;warmer in the chorus&#39;, &#39;calmer intro&#39;">
+      </div>
+    </div>
+
+    <aside class="rail rail-right">
+      <!-- the console: live trims. These never write to the show file. -->
+      <div class="rail-pad ruled" id="consolePanel">
+        <div class="label">Console</div>
+        <div class="console">
+          <div class="panic">
+            <button type="button" id="blackoutBtn" class="wide">Blackout</button>
+            <button type="button" id="strobeBtn">Strobe kill</button>
+            <button type="button" id="holdBtn">Take control</button>
+          </div>
+          <div class="fader">
+            <div class="row"><b>Grand master</b><span id="vMaster">100%</span></div>
+            <input type="range" id="fMaster" min="0" max="100" step="1" value="100">
+          </div>
+          <div class="fader">
+            <div class="row"><b>Pars</b><span id="vPar">100%</span></div>
+            <input type="range" id="fPar" min="0" max="100" step="1" value="100">
+          </div>
+          <div class="fader">
+            <div class="row"><b>Heads</b><span id="vHead">100%</span></div>
+            <input type="range" id="fHead" min="0" max="100" step="1" value="100">
+          </div>
+          <div class="fader">
+            <div class="row"><b>How much</b><span id="vWant">—</span></div>
+            <input type="range" id="fWant" min="0" max="100" step="1" value="50">
+            <div class="hint" id="wantHint">restrained → maximal · rebuilds the plan, changes on the next bar</div>
+          </div>
+          <div class="note" id="midiNote"></div>
+        </div>
+      </div>
+
+      <div class="rail-pad ruled" id="rigPanel">
+        <div class="label">Venue</div>
+        <button type="button" class="targetbtn wide" id="venueBtn">
+          <b id="venueName">—</b><span id="venueLay"></span>
+        </button>
+        <div class="label" style="margin-top:18px">Rig</div>
+        <div class="rigpicker" id="rigPicker"></div>
+        <div class="limitsbox" id="rigUse"></div>
+      </div>
+
+      <div class="rail-pad ruled" id="limitsPanel">
+        <div class="label">Venue limits</div>
+        <div class="limitsbox" id="limitsBox"></div>
+      </div>
+
+      <div class="rail-pad ruled" id="nowPanel">
+        <div class="label">Current section</div>
+        <div class="display sm" id="nowName">—</div>
+        <div class="muted" id="nowRange"></div>
+      </div>
+
+      <div class="rail-pad ruled" id="statePanel">
+        <div class="label">Lighting state</div>
+        <div class="state" id="stateRows"></div>
+      </div>
+
+      <div class="rail-pad ruled" id="editPanel">
+        <div class="label">Effects</div>
+        <div class="muted" id="armHint">Pick one, then click the timeline to place it. Drag its edge to lengthen.</div>
+        <div class="palette" id="palette"></div>
+        <div class="label" style="margin-top:22px">Placed</div>
+        <div class="edits" id="editList"></div>
+      </div>
+    </aside>
+  </section>
+
+  <div class="sheet" id="venueSheet" hidden>
+    <div class="sheet-box">
+      <div class="sheet-head">
+        <div>
+          <div class="display">Which venue?</div>
+          <div class="label">Your show is rebuilt against the rig you pick. The show file does not change.</div>
+        </div>
+        <button type="button" class="linkbtn" id="venueClose">Close</button>
+      </div>
+      <input type="text" id="venueSearch" placeholder="search venues by name" autocomplete="off">
+      <div class="venuelist" id="venueList"></div>
+    </div>
+  </div>
+
+  <footer class="footbar">
+    <span id="footL">Limelight / Portal</span>
+    <span id="footR"></span>
+  </footer>
+</div>
+
+<audio id="audio" preload="auto"></audio>
+
+<script src="/protocol/clock.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

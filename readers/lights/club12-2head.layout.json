@@ -1,0 +1,167 @@
+{
+ "layout": "0.5",
+ "rig": "club12-2head",
+ "geometry": "line",
+ "frame": "audience",
+ "note": "2026-09-14: a small-club house rig, written by hand as a second rig for the same shows. Twelve par7 in one straight LINE on the upstage wash bar, 0.5 m apart (the same lamp spacing as arc4-head, twelve of them instead of four), plus two head13 outboard on the downstage truss. Positions are metres in the AUDIENCE frame: +x = the audience right, +y = toward the audience, +z = height above the deck. Addresses run contiguously from 1 (par7 = 7 channels, head13 = 13), so the rig ends at channel 110 of universe 0. Twelve is deliberate: preflight.groupsOf splits the pars into inner/outer at floor(n/2), which is only symmetric when the count is a multiple of four.",
+ "fixtures": [
+  {
+   "id": "par_1",
+   "type": "par7",
+   "at": [
+    -2.75,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 1
+  },
+  {
+   "id": "par_8",
+   "type": "par7",
+   "at": [
+    -2.25,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 8
+  },
+  {
+   "id": "par_15",
+   "type": "par7",
+   "at": [
+    -1.75,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 15
+  },
+  {
+   "id": "par_22",
+   "type": "par7",
+   "at": [
+    -1.25,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 22
+  },
+  {
+   "id": "par_29",
+   "type": "par7",
+   "at": [
+    -0.75,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 29
+  },
+  {
+   "id": "par_36",
+   "type": "par7",
+   "at": [
+    -0.25,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 36
+  },
+  {
+   "id": "par_43",
+   "type": "par7",
+   "at": [
+    0.25,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 43
+  },
+  {
+   "id": "par_50",
+   "type": "par7",
+   "at": [
+    0.75,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 50
+  },
+  {
+   "id": "par_57",
+   "type": "par7",
+   "at": [
+    1.25,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 57
+  },
+  {
+   "id": "par_64",
+   "type": "par7",
+   "at": [
+    1.75,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 64
+  },
+  {
+   "id": "par_71",
+   "type": "par7",
+   "at": [
+    2.25,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 71
+  },
+  {
+   "id": "par_78",
+   "type": "par7",
+   "at": [
+    2.75,
+    0,
+    2.6
+   ],
+   "universe": 0,
+   "address": 78
+  },
+  {
+   "id": "head_l",
+   "type": "head13",
+   "at": [
+    -1.8,
+    1.2,
+    3
+   ],
+   "universe": 0,
+   "address": 85
+  },
+  {
+   "id": "head_r",
+   "type": "head13",
+   "at": [
+    1.8,
+    1.2,
+    3
+   ],
+   "universe": 0,
+   "address": 98
+  }
+ ],
+ "limits": {
+  "max_pan_per_frame": 7,
+  "max_tilt_per_frame": 7
+ }
+}
