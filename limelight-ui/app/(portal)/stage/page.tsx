@@ -22,6 +22,7 @@ import { Sidebar } from "@/components/editor/Sidebar";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { buildClips } from "@/lib/clips";
 import { effectIdForPlanFx } from "@/lib/families";
+import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
 import type { Clip } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -84,6 +85,8 @@ export default function StagePage() {
   const sel = usePortalStore((s) => s.sel);
   const arm = usePortalStore((s) => s.arm);
   const effects = usePortalStore((s) => s.effects);
+  const v2 = usePortalStore((s) => s.v2);
+  const planText = usePortalStore((s) => s.planText);
 
   const setShow = usePortalStore((s) => s.setShow);
   const setFrames = usePortalStore((s) => s.setFrames);
@@ -100,6 +103,9 @@ export default function StagePage() {
   const removeEdit = usePortalStore((s) => s.removeEdit);
   const addEdit = usePortalStore((s) => s.addEdit);
   const updateEdit = usePortalStore((s) => s.updateEdit);
+  const setEdits = usePortalStore((s) => s.setEdits);
+  const setV2 = usePortalStore((s) => s.setV2);
+  const setPlanText = usePortalStore((s) => s.setPlanText);
   const setRoom = usePortalStore((s) => s.setRoom);
   const setLayout = usePortalStore((s) => s.setLayout);
   const author = usePortalStore((s) => s.author);
@@ -132,41 +138,26 @@ export default function StagePage() {
     });
   }, [song, urlParams, setSong, setSeed, setSongs]);
 
-  /* ── bake a show ─────────────────────────────────────────────────────── */
-  const rebuild = useCallback(async () => {
-    if (!song) return;
-    const token = ++rebuildTokenRef.current;
-    setStageMsg("baking the show…");
+  const importInputRef = useRef<HTMLInputElement>(null);
 
-    try {
-      const post = await api.show.bake({
-        song: song.name,
-        seed,
-        edits,
-        appetite: want,
-        layout: layout ?? undefined,
-      });
-
-      if (post.error) { setStageMsg(post.error); return; }
-      setJob(post.job);
-
+  /* Poll a started bake to completion and load its frames/show. Shared by the
+     legacy seed+edits bake and the v2 plan bake — both return the same job. */
+  const pollBake = useCallback(
+    async (job: string, token: number) => {
       let status: Awaited<ReturnType<typeof api.show.status>> | null = null;
       for (let i = 0; i < 300; i++) {
-        status = await api.show.status(post.job);
-        if (token !== rebuildTokenRef.current) return;
+        status = await api.show.status(job);
+        if (token !== rebuildTokenRef.current) return null;
         if (status.state !== "baking") break;
         setStageMsg(`baking the show… ${(i / 4) | 0}s`);
         await new Promise((r) => setTimeout(r, 250));
       }
-
       if (!status || status.state !== "ready") {
         setStageMsg(status?.error ?? "the bake timed out");
-        return;
+        return null;
       }
-
       const buf = await api.show.frames(status.frames_url!);
-      if (token !== rebuildTokenRef.current) return;
-
+      if (token !== rebuildTokenRef.current) return null;
       setFrames(buf);
       setShow(status.show!);
       setApplied(status.applied ?? []);
@@ -174,10 +165,79 @@ export default function StagePage() {
       setNatural(status.show!.appetite_natural ?? null);
       setView(null);
       setStageMsg(null);
+      return status.show!;
+    },
+    [setFrames, setShow, setApplied, setPlace, setNatural, setView],
+  );
+
+  const rigForPlan = useCallback(() => {
+    const l = usePortalStore.getState().layout;
+    return (l ?? "arc4-head.layout.json").replace(".layout.json", "");
+  }, []);
+
+  /* ── bake a show ─────────────────────────────────────────────────────────
+     A v2 show (one imported from a plan) translates its edits back into a plan
+     and renders through the portal baker; the legacy path bakes seed+edits.
+
+     Everything is read LIVE from the store, not from this closure: the edit
+     handlers call removeEdit()/addEdit() and then rebuild() in the same tick, so
+     a closed-over `edits` would still be the pre-edit list and the change would
+     never reach the bake — which is exactly "edits don't affect playback". */
+  const rebuild = useCallback(async () => {
+    const st = usePortalStore.getState();
+    if (!st.song) return;
+    const token = ++rebuildTokenRef.current;
+    setStageMsg("baking the show…");
+    try {
+      let post: Awaited<ReturnType<typeof api.show.bake>>;
+      if (st.v2 && st.show) {
+        const planData = editsToPlan(st.edits, st.show, st.effects, st.planText);
+        post = await api.plan.bake(st.song.name, planData, rigForPlan());
+      } else {
+        post = await api.show.bake({ song: st.song.name, seed: st.seed, edits: st.edits, appetite: st.want, layout: st.layout ?? undefined });
+      }
+      if (post.error) { setStageMsg(post.error); return; }
+      setJob(post.job);
+      await pollBake(post.job, token);
     } catch (e) {
       setStageMsg(e instanceof Error ? e.message : "bake failed");
     }
-  }, [song, seed, edits, want, layout, setShow, setFrames, setApplied, setJob, setPlace, setNatural, setView]);
+  }, [rigForPlan, setJob, pollBake]);
+
+  /* ── import a v2 plan: bake it, then translate it into editable clips ──────
+     The raw plan bakes first (the baker's native input), then the returned
+     show's sections/moments turn the plan into the Edit[] the timeline draws. */
+  const importPlan = useCallback(
+    async (file: File) => {
+      if (!song) return;
+      const token = ++rebuildTokenRef.current;
+      try {
+        const raw = JSON.parse(await file.text()) as Record<string, unknown>;
+        const planData = (
+          raw.states || raw.gestures || raw.bindings
+            ? raw
+            : (raw.plan as Record<string, unknown>)?.states
+              ? raw.plan
+              : raw
+        ) as unknown as V2Plan;
+        if (!planData.states && !planData.gestures && !planData.bindings) {
+          setStageMsg("that file is not a show plan");
+          return;
+        }
+        setStageMsg("baking imported plan…");
+        setV2(true);
+        setPlanText(typeof planData.plan === "string" ? planData.plan : "");
+        const post = await api.plan.bake(song.name, planData, rigForPlan());
+        if (post.error) { setStageMsg(post.error); return; }
+        setJob(post.job);
+        const baked = await pollBake(post.job, token);
+        if (baked) setEdits(planToEdits(planData, baked, usePortalStore.getState().effects));
+      } catch (e) {
+        setStageMsg(e instanceof Error ? "import failed: " + e.message : "import failed");
+      }
+    },
+    [song, rigForPlan, setV2, setPlanText, setJob, setEdits, pollBake],
+  );
 
   /* ── load audio + bake on song change ────────────────────────────────── */
   const rebuildRef = useRef(rebuild);
@@ -391,6 +451,18 @@ export default function StagePage() {
             <div className="flex items-center gap-[var(--spacing-s2)] pt-[6px]">
               {role === "creator" && (
                 <>
+                  <input
+                    ref={importInputRef}
+                    type="file"
+                    accept="application/json,.json"
+                    hidden
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      e.currentTarget.value = "";
+                      if (f) importPlan(f);
+                    }}
+                  />
+                  <Button variant="link" onClick={() => importInputRef.current?.click()}>Import Plan</Button>
                   <Input
                     placeholder="name this show"
                     autoComplete="off"

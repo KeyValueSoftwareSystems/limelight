@@ -817,7 +817,11 @@ class Baker:
                          "phase": x.get("name")}
                         for x in (meta.get("sections") or [])]
         except Exception:
-            sections = show.get("sections") or []
+            # hub unavailable: the baker's own phases already carry name + seconds,
+            # so the editor still gets Section[]-shaped data (not bare start times).
+            sections = [{"name": p.get("phase"), "start": p.get("start"),
+                         "end": p.get("end"), "phase": p.get("phase")}
+                        for p in (show.get("phases") or [])]
 
         return {
             "state": "ready",

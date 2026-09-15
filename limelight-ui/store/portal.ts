@@ -40,6 +40,12 @@ export interface PortalState {
   showId: string | null;
   showVersion: number | null;
 
+  /* v2 plan pipeline: when a plan is imported the edits are translated from it
+     and bakes go through the portal baker (/api/bake-plan) instead of the legacy
+     seed+edits bake. planText is the composer's one-line summary, carried through. */
+  v2: boolean;
+  planText: string;
+
   /* venue mode */
   venue: ShowFile | null;
   entitlement: Entitlement | null;
@@ -97,6 +103,8 @@ export interface PortalActions {
   setJob: (job: string | null) => void;
   setShowId: (id: string | null) => void;
   setShowVersion: (v: number | null) => void;
+  setV2: (v: boolean) => void;
+  setPlanText: (t: string) => void;
   setVenue: (venue: ShowFile | null) => void;
   setEntitlement: (e: Entitlement | null) => void;
   setSecIndex: (i: number) => void;
@@ -151,6 +159,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   job: null,
   showId: null,
   showVersion: null,
+  v2: false,
+  planText: "",
   venue: null,
   entitlement: null,
   secIndex: -1,
@@ -200,6 +210,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   setJob: (job) => set({ job }),
   setShowId: (showId) => set({ showId }),
   setShowVersion: (showVersion) => set({ showVersion }),
+  setV2: (v2) => set({ v2 }),
+  setPlanText: (planText) => set({ planText }),
   setVenue: (venue) => set({ venue }),
   setEntitlement: (entitlement) => set({ entitlement }),
   setSecIndex: (secIndex) => set({ secIndex }),

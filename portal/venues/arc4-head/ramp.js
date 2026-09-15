@@ -1,38 +1,37 @@
 "use strict";
 const H = require("./helpers");
+const { flash, ease, kick, mix } = require("./beat");
 
-/* ramp — rising build GESTURE across a span. Pars climb from near-black to `to`,
-   the colour warms toward amber as it rises, and the head opens up: pan starts
-   narrow at centre and widens into a full sweep, tilt lifts. Tension building.
-   Span length is set by the baker; the frames stretch across it. */
+/* ramp — rising build GESTURE, rendered per frame against the real beat grid.
+   Every beat HITS (scaled by its weight) while the floor rises and the colour
+   whitens across the span (bx.p is progress over the gesture); a strobe
+   accelerates in over the last 30% and the head spirals faster and wider as it
+   climbs. Ported from concert.py's build phase. */
 module.exports = function ramp(params, ctx) {
-  const to = params.to != null ? params.to : 0.3;
-  const ease = H.easeCurve(params.curve || "ease");
-  const cool = H.parseColour(params.colour, [0.3, 0.4, 0.8]);
-  const amber = [1, 0.5, 0.1];
-  const N = Math.max(2, H.framesPerBeat(ctx.bpm) * 8);
+  const to = params.to != null ? params.to : 0.9;
+  const cool = H.parseColour(params.colour, [0.2, 0.4, 0.9]);
 
-  const frames = [];
-  for (let i = 0; i < N; i++) {
-    const t = i / (N - 1);
-    const e = ease(t);
-    const level = 0.02 + (to - 0.02) * e;
-    const c = [cool[0] + (amber[0] - cool[0]) * e,
-               cool[1] + (amber[1] - cool[1]) * e,
-               cool[2] + (amber[2] - cool[2]) * e];
+  function render(bx) {
+    const { beat, bphase, p, weight } = bx;
+    const whiten = ease(p);
+    const floor = 0.15 + (to - 0.15) * p;
+    const strobe = p > 0.7 ? Math.round(30 + 220 * (p - 0.7) / 0.3) : 0;
+    const lvl = floor + (1 - floor) * kick(bphase, 0.08, 0.3) * (0.5 + 0.5 * weight);
+    const c = mix(cool, whiten);
     const f = H.emptyFrame();
-    for (const par of H.PARS) H.setPar(f, par, c, level);
+    for (const par of H.PARS) {
+      H.setPar(f, par, c, Math.min(1, lvl));
+      if (strobe) H.setParStrobe(f, par, (strobe / 255) * 25);
+    }
+    const w = 2 * Math.PI * beat * (0.1 + 0.4 * p);
     H.setHead(f, H.HEADS[0], {
-      level: level * 0.8, colour: c,
-      pan: 0.662 + 0.20 * e * Math.sin(2 * Math.PI * t * 2),   // narrow -> wide sweep
-      tilt: 0.498 + (0.30 - 0.498) * e,                        // lifts toward the room
+      level: (0.5 + 0.5 * p) * (0.6 + 0.4 * flash(bphase, 0.4)), colour: c,
+      pan: H.clamp(0.498 + (0.06 + 0.44 * p) * Math.sin(w), 0, 1),
+      tilt: H.clamp(0.16 + 0.7 * ease(p) * (0.6 + 0.4 * Math.cos(w)), 0, 1),
+      prism: p > 0.85 ? 100 : 0, strobe: p > 0.88 ? 150 : 0,
     });
-    frames.push(f);
+    return f;
   }
 
-  return {
-    frames,
-    loop_beats: 0,
-    per_fixture: H.PAR_IDS.concat(H.HEAD_IDS),
-  };
+  return { beat: true, render, per_fixture: H.PAR_IDS.concat(H.HEAD_IDS) };
 };

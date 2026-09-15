@@ -39,7 +39,8 @@ if (!scoreFile || !planFile || !lightsOut) {
 /* ── load inputs ──────────────────────────────────────────────────────────── */
 
 const { load } = require(path.join(LIGHTS, "fromscore.js"));
-const { frameAt, slew, makeStreamSampler, bindingValueFn } = require("./bakelib.js");
+const { frameAt, slew, makeStreamSampler, bindingValueFn,
+        makeBeatClock, makePerBeatWeight, makeEnergy } = require("./bakelib.js");
 const score = load(scoreFile);
 const plan = JSON.parse(fs.readFileSync(planFile, "utf8"));
 
@@ -69,11 +70,34 @@ const songLen = (score.song && score.song.length_s) || null;
 const dur = songLen ? Math.min(songLen, S.secondsAt(bars + 1, 1)) : S.secondsAt(bars + 1, 1);
 const sections = score.sections || [];
 
-/* gestures that REDUCE light replace the layer under them (they darken); every
-   other gesture is a departure that brightens and must RETURN to the resting
-   look, so it composites OVER the state/binding by max rather than blacking it
-   out when its envelope decays. */
-const REDUCTIVE = new Set(["blackout", "cut", "hush", "strip", "isolate"]);
+/* gestures that OWN the rig — they REPLACE the layer under them rather than
+   accenting over it. Darkeners (blackout/cut/hush/strip/isolate) need this so
+   they can pull the room down; anticipation needs it so the room goes dark
+   BETWEEN its strobe pops instead of the bed filling the gaps. Every other
+   gesture is a departure that brightens and RETURNS to the resting look, so it
+   composites OVER the state/binding by max. */
+const REDUCTIVE = new Set(["blackout", "cut", "hush", "strip", "isolate", "anticipation"]);
+
+/* ── the real beat grid, per-beat weight, and energy curve ──────────────────
+   Beat-locked effects render per frame against these instead of a nominal BPM,
+   so hits land on the song's ACTUAL beats (this song is 89 bpm then 119), scale
+   with the drums, and breathe with the mix. */
+const beatClock = makeBeatClock(score.beats, bpm);
+const perBeat = makePerBeatWeight((score.rhythm && score.rhythm.hits) || [], score.beats);
+const energyCurve = makeEnergy(score);
+
+/* what a beat-locked effect's render(bx) receives each frame */
+function beatCtx(startS, endS, t) {
+  const beat = beatClock.beatAt(t);
+  const bi = Math.floor(beat);
+  const span = (endS || 0) - (startS || 0);
+  return {
+    t, beat, beatIndex: bi, bphase: beat - bi,
+    bar: beatClock.barIndex(bi), downbeat: beatClock.isDownbeat(bi),
+    weight: perBeat.weightAt(beat), energy: energyCurve.energyAt(t),
+    p: span > 0 ? Math.max(0, Math.min(1, (t - startS) / span)) : 0,
+  };
+}
 
 function sectionAt(t) {
   for (let i = sections.length - 1; i >= 0; i--) {
@@ -109,7 +133,16 @@ function resolveGesture(g) {
   if (!edef || !dmxFunctions[eid]) return null;
 
   let startS, endS;
-  if (g.moment != null && g.moment >= 0 && g.moment < moments.length) {
+  if (g.at_s != null) {
+    /* absolute-time anchor — for placing on a computed event (a drop, a gap)
+       that the moment labels don't mark. lead_beats still pulls it earlier. */
+    const leadBeats = g.lead_beats || 0;
+    startS = g.at_s - leadBeats * (60 / bpm);
+    const forBeats = g.for_beats || edef.default_beats || 1;
+    endS = startS + forBeats * (60 / bpm);
+  } else if (g.from_s != null && g.to_s != null) {
+    startS = g.from_s; endS = g.to_s;
+  } else if (g.moment != null && g.moment >= 0 && g.moment < moments.length) {
     const m = moments[g.moment];
     const leadBeats = g.lead_beats || 0;
     startS = (m.time_s || m.at_s || 0) - leadBeats * (60 / bpm);
@@ -125,10 +158,10 @@ function resolveGesture(g) {
     return null;
   }
 
+  const SKIP = new Set(["effect", "moment", "from_moment", "to_moment", "lead_beats", "why", "at_s", "from_s", "to_s"]);
   const params = { ...edef.dials };
   for (const [k, v] of Object.entries(g)) {
-    if (k !== "effect" && k !== "moment" && k !== "from_moment" && k !== "to_moment" &&
-        k !== "lead_beats" && k !== "why") {
+    if (!SKIP.has(k)) {
       if (typeof v === "object" && v !== null && v.default !== undefined) {
         params[k] = v.default;
       } else {
@@ -196,7 +229,9 @@ resolvedBindings.forEach(b => { b.valueAt = bindingValueFn(b, sampler); });
 function generateFrames(entry) {
   const fn = dmxFunctions[entry.eid];
   if (!fn) return null;
-  const ctx = { fps, bpm, layout };
+  /* duration_s lets a span gesture (a build) place beat-locked hits across its
+     own length while its floor rises. */
+  const ctx = { fps, bpm, layout, duration_s: (entry.endS || 0) - (entry.startS || 0) };
   const result = fn(entry.params, ctx);
   return result;
 }
@@ -227,8 +262,23 @@ for (const f of layout.fixtures) {
   };
 }
 
+/* render an effect's 41-channel source frame at time t. A beat-locked effect
+   (beat:true) renders per frame against the real beat grid; a binding renders
+   from its live stream value; anything else plays its fixed looped frames.
+   Cached per frame so an effect driving 5 fixtures renders once, not 5×. */
+function sourceFrame(res, cache) {
+  if (cache.has(res)) return cache.get(res);
+  let f;
+  if (res.dmx.beat && typeof res.dmx.render === "function") f = res.dmx.render(beatCtx(res.startS, res.endS, res._t));
+  else if (res.dmx.binding && typeof res.dmx.render === "function") f = res.dmx.render(res.valueAt(res._t), res._t);
+  else f = frameAt(res.dmx, res._t - res.startS, res.endS - res.startS, bpm);
+  cache.set(res, f);
+  return f;
+}
+
 for (let t = 0; t < dur; t += 1 / fps) {
   const frame = new Array(TOTAL_CH).fill(0);
+  const cache = new Map();
 
   for (const fid of fixtureIds) {
     const fc = fixtureChannels[fid];
@@ -237,24 +287,16 @@ for (let t = 0; t < dur; t += 1 / fps) {
     const isHead = fc.panCh >= 0;
 
     /* base = the resting look for this fixture: an active binding, else the
-       section state (looped so it animates). It always sits under a gesture so
-       a departure has something to return to. */
+       section state. It always sits under a gesture so a departure can return. */
     let base = null;
     for (const b of bindingResults) {
-      if (t < b.startS || t >= b.endS) continue;
-      if (!b.dmx.per_fixture.includes(fid)) continue;
-      /* live stream value + t so a binding can move the head on its own clock */
-      base = (b.dmx.binding && typeof b.dmx.render === "function")
-        ? b.dmx.render(b.valueAt(t), t)
-        : frameAt(b.dmx, t - b.startS, b.endS - b.startS, bpm);
-      break;
+      if (t < b.startS || t >= b.endS || !b.dmx.per_fixture.includes(fid)) continue;
+      b._t = t; base = sourceFrame(b, cache); break;
     }
     if (!base) {
       for (const s of stateResults) {
-        if (t < s.startS || t >= s.endS) continue;
-        if (!s.dmx.per_fixture.includes(fid)) continue;
-        base = frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm);
-        break;
+        if (t < s.startS || t >= s.endS || !s.dmx.per_fixture.includes(fid)) continue;
+        s._t = t; base = sourceFrame(s, cache); break;
       }
     }
 
@@ -267,7 +309,8 @@ for (let t = 0; t < dur; t += 1 / fps) {
       if (!cand.dmx.per_fixture.includes(fid)) continue;
       if (cand.startS >= gStart) { g = cand; gStart = cand.startS; }
     }
-    const gsrc = g ? frameAt(g.dmx, t - g.startS, g.endS - g.startS, bpm) : null;
+    let gsrc = null;
+    if (g) { g._t = t; gsrc = sourceFrame(g, cache); }
 
     /* compose the gesture over the base */
     if (gsrc && REDUCTIVE.has(g.eid)) {
@@ -336,6 +379,16 @@ const show = {
   fps,
   duration: (score.song && score.song.length_s) || +dur.toFixed(3),
   tempo: bpm,
+  /* the full beat grid, so a consumer (e.g. the editor UI) can place clips on
+     the real clock without asking the hub. */
+  grid: {
+    bpm,
+    beats_per_bar: bpb,
+    first_beat_s: score.grid.first_beat_s,
+    first_bar: score.grid.first_bar,
+    bars,
+    tempo: score.grid.tempo,
+  },
   source: (score.score || "song") + ".wav",
   wav: (score.score || "song") + ".wav",
   beats,

@@ -80,6 +80,22 @@ export const show = {
   },
 };
 
+/* ── v2 plan pipeline (portal composer + baker) ──────────────────────────────
+   compose asks the model for a plan; plan.bake renders a plan (ours or one the
+   creator edited) to frames. Both return through the SAME job/status/frames
+   loop as the legacy bake, so `show.status` / `show.frames` are reused as-is. */
+export const compose = {
+  run(song: string, model?: string): Promise<{ plan: unknown; report?: unknown; saved?: string; error?: string }> {
+    return post("/api/compose", { song, ...(model ? { model } : {}) });
+  },
+};
+
+export const plan = {
+  bake(song: string, planData: unknown, rig?: string): Promise<BakeResponse> {
+    return post<BakeResponse>("/api/bake-plan", { song, plan: planData, ...(rig ? { rig } : {}) });
+  },
+};
+
 export const effects = {
   list(): Promise<EffectsResponse> {
     return request<EffectsResponse>("/api/effects");
