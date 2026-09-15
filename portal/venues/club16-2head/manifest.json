@@ -30,12 +30,22 @@
   "flare",
   "spectrum",
   "chase",
-  "sweep"
+  "sweep",
+  "bump",
+  "fade",
+  "breathe",
+  "stutter",
+  "alternate",
+  "ripple",
+  "converge",
+  "bounce",
+  "shift",
+  "texture"
  ],
  "unsupported_effects": [],
  "limits": {
   "isolate_min_fixtures": 3,
-  "note": "all 24 effects are supported on this rig"
+  "note": "all 34 effects are supported on this rig"
  },
  "note": "DMX functions for the KeyCode Stage placeholder rig. 16 par7 (7ch each, addresses 1-112) + 2 head13 (13ch each, addresses 113-138). Generated and tuned for this specific rig."
 }

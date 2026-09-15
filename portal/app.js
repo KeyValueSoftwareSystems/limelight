@@ -1656,13 +1656,13 @@ function drawPar(p, W, H, u, n) {
     const pop = p.strobe > 8 ? 0.32 : 0;
     const air = toWhite(c, Math.min(0.8, Math.max(0, k - 0.72) / 0.28 * 0.45 + pop));
     const splay = (p.x - 0.5) * (dense ? 0.52 : 0.85);
-    const A = 0.026 + 0.105 * k;
-    const Lc = u * (0.28 + 0.34 * k) * (dense ? 0.8 : 1) * (p.scale || 1);
+    const A = (0.026 + 0.105 * k) * (dense ? 0.86 : 1);
+    const Lc = u * (0.28 + 0.34 * k) * (dense ? 0.86 : 1) * (p.scale || 1);
 
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(splay);
-    volume(c, air, A, lr * 1.5, Lc * 0.62, Lc, 5);
+    volume(c, air, A, lr * 1.5, Lc * (dense ? 0.52 : 0.62), Lc, 5);
     ctx.restore();
 
     const fy = H * FLOOR_Y + u * 0.008;
@@ -1671,7 +1671,7 @@ function drawPar(p, W, H, u, n) {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(Math.PI - splay);
-    volume(c, c, A * 0.8, lr * 1.5, drop * 0.86, drop * 1.06, 4);
+    volume(c, c, A * 0.95, lr * 1.5, drop * 0.86, drop * 1.06, 3);
     ctx.restore();
 
     const rx = lr * 0.9 + drop * 0.8, ry = rx * 0.3;
@@ -1714,22 +1714,23 @@ function drawBeam(h, W, H, u, n) {
       ctx.save();
       ctx.rotate(fan[i]);
 
-      volume(c, air, (0.016 + 0.062 * k) * share * (axis ? 1 : 0.68),
-             root * 2.6, L * (axis ? 0.22 : 0.14), L, axis ? 4 : 3);
+      volume(c, air, (0.019 + 0.075 * k) * share * (axis ? 1 : 0.68),
+             root * 2.6, L * (axis ? 0.175 : 0.105), L, axis ? 4 : 2);
 
-      for (const [spread, weight] of [[hard, 0.55], [hard * 0.55, 1]]) {
-        const a = (0.07 + 0.42 * k) * weight * share * (axis ? 1 : 0.62) * (goboOn ? 1.2 : 1);
-        const g = ctx.createLinearGradient(0, 0, 0, -L);
-        g.addColorStop(0, rgba(air, a));
-        g.addColorStop(0.1, rgba(c, a * 0.96));
-        g.addColorStop(0.52, rgba(c, a * 0.52));
-        g.addColorStop(0.88, rgba(c, a * 0.14));
-        g.addColorStop(1, rgba(c, 0));
-        ctx.fillStyle = g;
-        const w0 = root * (spread === hard ? 1 : 0.62);
+      const hg = ctx.createLinearGradient(0, 0, 0, -L);
+      hg.addColorStop(0, rgba(air, 1));
+      hg.addColorStop(0.1, rgba(c, 0.96));
+      hg.addColorStop(0.52, rgba(c, 0.52));
+      hg.addColorStop(0.88, rgba(c, 0.14));
+      hg.addColorStop(1, rgba(c, 0));
+      ctx.fillStyle = hg;
+      const base = (0.07 + 0.42 * k) * share * (axis ? 1 : 0.62) * (goboOn ? 1.2 : 1);
+      for (const [spread, weight, w0] of [[hard, 0.55, root], [hard * 0.55, 1, root * 0.62]]) {
+        ctx.globalAlpha = base * weight;
         if (goboOn) bandedCone(w0, L * spread, L, slices, phase, duty);
         else cone(w0, L * spread, L);
       }
+      ctx.globalAlpha = 1;
 
       const la = (0.16 + 0.66 * k) * share * (axis ? 1 : 0.48);
       const lg = ctx.createLinearGradient(0, 0, 0, -L);
@@ -1785,18 +1786,21 @@ function emitter(x, y, r, c, k) {
 
 function volume(c, air, A, w0, wTop, L, layers) {
   const span = 0.82 / Math.max(1, layers - 1), lo = 0.18;
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, L);
+  g.addColorStop(0, rgba(air, 1));
+  g.addColorStop(0.11, rgba(c, 0.88));
+  g.addColorStop(0.38, rgba(c, 0.31));
+  g.addColorStop(0.7, rgba(c, 0.07));
+  g.addColorStop(1, rgba(c, 0));
+  ctx.fillStyle = g;
   for (let i = 0; i < layers; i++) {
     const f = 1 - i * span;
     const a = A * Math.exp(-3.5 * (f * f - lo * lo));
-    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, L);
-    g.addColorStop(0, rgba(air, a));
-    g.addColorStop(0.12, rgba(c, a * 0.9));
-    g.addColorStop(0.44, rgba(c, a * 0.34));
-    g.addColorStop(0.78, rgba(c, a * 0.08));
-    g.addColorStop(1, rgba(c, 0));
-    ctx.fillStyle = g;
+    if (a < 0.0022) continue;
+    ctx.globalAlpha = a;
     cone(w0 * (0.42 + 0.58 * f), wTop * f, L);
   }
+  ctx.globalAlpha = 1;
 }
 
 function conePath(wBottom, wTop, L) {

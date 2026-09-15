@@ -111,7 +111,7 @@ def format_overview(data):
         fr = s.get("from", {})
         to = s.get("to", {})
         lines.append(f"  [{i}] {name}: bar {fr.get('bar', '?')} → {to.get('bar', '?')}"
-                     + _section_weight(data, sec))
+                     + _section_weight(data, s))
 
     moments = data.get("moments") or []
     lines.append(f"\nMOMENTS ({len(moments)}):")
