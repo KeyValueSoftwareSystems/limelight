@@ -2217,6 +2217,105 @@ function say(text, echo) {
   $("transcript").scrollTop = $("transcript").scrollHeight;
 }
 
+/* ── compose a v2 show ─────────────────────────────────────────────────────
+   Compose → Bake → Load: the LLM generates a show plan, the baker turns it
+   into DMX frames, and the page loads them the same way a v1 bake loads. */
+
+async function composeShow() {
+  if (!S.song) return;
+  const btn = $("composeBtn");
+  btn.disabled = true;
+  btn.textContent = "Composing…";
+  $("stageMsg").hidden = false;
+  $("stageMsg").textContent = "composing show plan with LLM…";
+  $("playBtn").disabled = true;
+
+  try {
+    /* Step 1: compose a plan via the LLM */
+    const comp = await (await fetch("/api/compose", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ song: S.song.name }),
+    })).json();
+
+    if (comp.error) throw new Error(comp.error);
+    const plan = comp.plan;
+    const report = comp.report || [];
+    const errors = report.filter(r => r.level === "error");
+    const warns = report.filter(r => r.level === "warn");
+    say("composed: " + (plan.plan || "—")
+      + " · " + (plan.states || []).length + " states, "
+      + (plan.bindings || []).length + " bindings, "
+      + (plan.gestures || []).length + " gestures"
+      + (errors.length ? " · " + errors.length + " error(s)" : "")
+      + (warns.length ? " · " + warns.length + " warning(s)" : ""));
+
+    /* Step 2: bake the plan into DMX frames */
+    $("stageMsg").textContent = "baking the composed show…";
+    btn.textContent = "Baking…";
+
+    const rig = (S.layout || "arc4-head.layout.json").replace(".layout.json", "");
+    const bake = await (await fetch("/api/bake-plan", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ song: S.song.name, plan, rig }),
+    })).json();
+
+    if (bake.error) throw new Error(bake.error);
+
+    /* Step 3: poll for the bake to complete */
+    let status;
+    for (let i = 0; i < 300; i++) {
+      status = await (await fetch("/api/show?job=" + bake.job)).json();
+      if (status.state !== "baking") break;
+      $("stageMsg").textContent = "baking composed show… " + ((i / 4) | 0) + "s";
+      await new Promise(r => setTimeout(r, 250));
+    }
+    if (!status || status.state !== "ready") throw new Error((status && status.error) || "bake timed out");
+
+    /* Step 4: load the frames into the player */
+    const buf = await (await fetch(status.frames_url)).arrayBuffer();
+    S.frames = new Uint8Array(buf);
+    S.show = status.show;
+    S.applied = status.applied || [];
+    S.job = bake.job;
+    S.place = placeFixtures(S.show);
+    S.natural = S.show.appetite_natural;
+
+    const expect = S.show.frame_count * S.show.channels;
+    if (S.frames.length !== expect) {
+      throw new Error("frames are " + S.frames.length + " bytes, expected " + expect);
+    }
+
+    $("stageMsg").hidden = true;
+    $("playBtn").disabled = false;
+    renderSections(S.show.sections);
+    if (S.view) S.view = null;
+    renderBands(S.show.sections);
+    paintZoom();
+    renderEdits();
+    $("footR").textContent = S.show.frame_count + " frames · " + S.show.fps + " fps · "
+      + S.show.channels + " ch · composed";
+    $("songMeta").textContent = S.song.name + " · " + mmss(S.song.duration_s) + " · "
+      + Math.round(S.song.bpm) + " bpm · " + (S.show.rig || "") + " · composed";
+    rigAnchor(true);
+    paintRig();
+    paintConsole();
+    renderRigPicker();
+    measurePeak();
+    paintRigUse();
+    paintTarget();
+    paint();
+
+    say("show ready — press Play to preview, Send to rig to go live");
+  } catch (e) {
+    $("stageMsg").hidden = false;
+    $("stageMsg").textContent = "compose failed: " + e.message;
+    say("compose failed: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Compose Show";
+  }
+}
+
 /* THE SEAM. A plain-English edit has everything it needs right here: the
    words, the song, where the listener is, and S.edits — which the server
    already turns into real changes to the frames, the way `blackout` does. A
@@ -2387,6 +2486,7 @@ $("listBtn").onclick = listShow;
 
 $("authorName").oninput = e => { S.author = e.target.value.trim(); try { localStorage.setItem("ll.author", S.author); } catch (x) {} };
 $("saveShow").onclick = saveShow;
+$("composeBtn").onclick = composeShow;
 $("say").onkeydown = e => { if (e.key === "Enter") onSay(); };
 audio.addEventListener("ended", () => { $("playBtn").textContent = "Play"; stopLoop(); paint(); });
 audio.addEventListener("error", () => {

@@ -1,101 +1,331 @@
 {
-  "note": "The effect palette. Every tile maps to one of the renderer's typed effects (readers/lights/frame.js) with the dials readers/lights/preflight.js gives it, so a tile is the same thing the arranger would place, chosen by a person instead of by the music. `beats` is only the length it arrives at -- the creator drags it. Nothing here is a parameter form: the dials are the tile's identity.",
-  "effects": [
-    {
-      "id": "blackout",
-      "name": "Blackout",
-      "blurb": "The rig goes dark and stays dark.",
-      "fx": "blackout",
-      "beats": 4,
-      "params": { "strength": 1 }
-    },
-    {
-      "id": "cut",
-      "name": "Cut",
-      "blurb": "The rig drops out for one beat.",
-      "fx": "blackout",
-      "beats": 1,
-      "params": { "strength": 1 }
-    },
-    {
-      "id": "impact",
-      "name": "Impact",
-      "blurb": "The whole rig, white, on the beat.",
-      "fx": "white_blast",
-      "beats": 1,
-      "params": { "strength": 1, "tone": "white" }
-    },
-    {
-      "id": "flash",
-      "name": "Flash",
-      "blurb": "A white flick on the outer pair only.",
-      "fx": "white_blast",
-      "beats": 1,
-      "params": { "strength": 0.9, "coverage": "outer", "tone": "white" }
-    },
-    {
-      "id": "stab",
-      "name": "Stab",
-      "blurb": "A hit on the centre pair, in the song's own colour.",
-      "fx": "white_blast",
-      "beats": 1,
-      "params": { "strength": 0.9, "coverage": "inner", "tone": "key" }
-    },
-    {
-      "id": "cross",
-      "name": "Cross",
-      "blurb": "The hit crosses the room, lamp after lamp.",
-      "fx": "white_blast",
-      "beats": 2,
-      "params": { "strength": 0.9, "shape": "travel", "spread": 0.5, "tone": "white" }
-    },
-    {
-      "id": "swell",
-      "name": "Swell",
-      "blurb": "A wash that blooms and falls away.",
-      "fx": "white_blast",
-      "beats": 4,
-      "params": { "strength": 0.85, "shape": "swell", "tone": "key" }
-    },
-    {
-      "id": "hush",
-      "name": "Hush",
-      "blurb": "Levels fall away and the head sinks toward the wall.",
-      "fx": "pause",
-      "beats": 4,
-      "params": { "strength": 0.7, "still": [] }
-    },
-    {
-      "id": "hook_lift",
-      "name": "Hook lift",
-      "blurb": "Lifts the whole rig and opens the head's prism.",
-      "fx": "hook",
-      "beats": 4,
-      "params": { "strength": 0.9 }
-    },
-    {
-      "id": "riser",
-      "name": "Riser",
-      "blurb": "Colour washes toward white across the span.",
-      "fx": "whiten",
-      "beats": 8,
-      "params": { "amount": 0.7 }
-    },
-    {
-      "id": "fill_flicker",
-      "name": "Fill flicker",
-      "blurb": "The pars strobe on the front of each beat.",
-      "fx": "accent_strobe",
-      "beats": 4,
-      "params": { "strength": 0.9 }
-    },
-    {
-      "id": "exit_dip",
-      "name": "Exit dip",
-      "blurb": "Level and movement ease back together.",
-      "fx": "modulate",
-      "beats": 4,
-      "params": { "gain": 0.7, "motion": -0.3, "doing": "exit" }
-    }
-  ]
+ "note": "The official Limelight effect catalog. Every effect is a change to ONE dimension of light (amount, colour, place, rate). A named effect is a preset: a saved set of values over the four dimensions. Its dials are the creator's interface. The renderer needs no special case for any of them. Derived from the protocol response for raga-of-revenge. See effects.md and architecture.md for the design.",
+ "schema_version": 2,
+ "dimensions": ["amount", "colour", "place", "rate"],
+ "dial_types": {
+  "amount":     { "type": "float", "min": 0, "max": 1, "label": "Amount" },
+  "colour":     { "type": "colour", "label": "Colour" },
+  "colours":    { "type": "colour_pair", "label": "Colours" },
+  "extent":     { "type": "enum", "values": ["all", "inner", "outer", "ends", "left", "right", "single"], "label": "Extent" },
+  "for_beats":  { "type": "int", "min": 1, "max": 64, "label": "Duration (beats)" },
+  "over_beats": { "type": "int", "min": 1, "max": 64, "label": "Over (beats)" },
+  "depth":      { "type": "float", "min": 0, "max": 1, "label": "Depth" },
+  "by":         { "type": "float", "min": 0, "max": 1, "label": "By" },
+  "to":         { "type": "float", "min": 0, "max": 1, "label": "To" },
+  "from":       { "type": "float", "min": 0, "max": 1, "label": "From" },
+  "threshold":  { "type": "float", "min": 0, "max": 1, "label": "Threshold" },
+  "smooth":     { "type": "float", "min": 0, "max": 1, "label": "Smooth" },
+  "rise":       { "type": "float", "min": 0, "max": 1, "label": "Rise" },
+  "rest":       { "type": "float", "min": 0, "max": 1, "label": "Rest level" },
+  "curve":      { "type": "enum", "values": ["linear", "ease", "settle"], "label": "Curve" },
+  "travel":     { "type": "bool", "label": "Travels" },
+  "tilt":       { "type": "float", "min": 0, "max": 1, "label": "Tilt" },
+  "which":      { "type": "fixture", "label": "Which fixture" },
+  "keep":       { "type": "fixture_set", "label": "Keep lit" },
+  "stream":     { "type": "stream", "label": "Stream" },
+  "streams":    { "type": "stream_pair", "label": "Streams" }
+ },
+ "effects": [
+  {
+   "id": "drone",
+   "name": "Drone",
+   "kind": "state",
+   "tier": 1,
+   "blurb": "A few lamps at low level, still. The resting condition of a quiet section.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "amount":  { "default": 0.12, "min": 0.04, "max": 0.25 },
+    "colour":  { "default": [1, 0.75, 0.35] },
+    "extent":  { "default": "inner" }
+   },
+   "fires_on": ["quiet section", "intro", "outro"],
+   "min_fixtures": 1,
+   "requires": ["colour", "level"],
+   "default_beats": 0
+  },
+  {
+   "id": "wash",
+   "name": "Wash",
+   "kind": "state",
+   "tier": 1,
+   "blurb": "All lamps at mid level, one colour. The resting condition of a full section.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "amount":  { "default": 0.55, "min": 0.3, "max": 0.8 },
+    "colour":  { "default": [0.2, 0.4, 1] },
+    "extent":  { "default": "all" }
+   },
+   "fires_on": ["full section", "verse", "drop"],
+   "min_fixtures": 1,
+   "requires": ["colour", "level"],
+   "default_beats": 0
+  },
+  {
+   "id": "impact",
+   "name": "Impact",
+   "kind": "gesture",
+   "tier": 1,
+   "blurb": "Amount to full, step, all fixtures, returns. The biggest gesture available.",
+   "dimension": "amount",
+   "returns": true,
+   "dials": {
+    "colour":     { "default": [1, 1, 1] },
+    "extent":     { "default": "all" },
+    "for_beats":  { "default": 1, "min": 1, "max": 4 }
+   },
+   "fires_on": ["peak"],
+   "min_fixtures": 1,
+   "requires": ["colour", "level"],
+   "default_beats": 1
+  },
+  {
+   "id": "blackout",
+   "name": "Blackout",
+   "kind": "gesture",
+   "tier": 1,
+   "blurb": "Amount to zero, step, all fixtures, returns. Darkness is the strongest gesture.",
+   "dimension": "amount",
+   "returns": true,
+   "dials": {
+    "for_beats":  { "default": 1, "min": 1, "max": 8 }
+   },
+   "fires_on": ["the beat before a peak", "deep exit"],
+   "min_fixtures": 1,
+   "requires": ["level"],
+   "default_beats": 1
+  },
+  {
+   "id": "hush",
+   "name": "Hush",
+   "kind": "gesture",
+   "tier": 1,
+   "blurb": "Amount multiplied by depth, returns. Levels fall away, the room quiets.",
+   "dimension": "amount",
+   "returns": true,
+   "dials": {
+    "depth":      { "default": 0.3, "min": 0, "max": 1 },
+    "for_beats":  { "default": 4, "min": 1, "max": 16 },
+    "keep":       { "default": [] }
+   },
+   "fires_on": ["exit"],
+   "min_fixtures": 1,
+   "requires": ["level"],
+   "default_beats": 4
+  },
+  {
+   "id": "ramp",
+   "name": "Ramp",
+   "kind": "gesture",
+   "tier": 1,
+   "blurb": "Amount rising across a span, arriving at the far end. Started backwards from the build's lead_s.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "to":         { "default": 0.85, "min": 0.3, "max": 1 },
+    "curve":      { "default": "ease" }
+   },
+   "span_anchors": ["from_moment", "to_moment"],
+   "fires_on": ["build"],
+   "min_fixtures": 1,
+   "requires": ["level"],
+   "default_beats": 16
+  },
+  {
+   "id": "stab",
+   "name": "Stab",
+   "kind": "gesture",
+   "tier": 1,
+   "blurb": "Amount up on part of the rig, step, returns. A partial hit.",
+   "dimension": "amount",
+   "returns": true,
+   "dials": {
+    "colour":     { "default": [1, 0.75, 0.35] },
+    "extent":     { "default": "inner" },
+    "for_beats":  { "default": 1, "min": 1, "max": 4 }
+   },
+   "fires_on": ["middling entrance"],
+   "min_fixtures": 2,
+   "requires": ["colour", "level"],
+   "default_beats": 1
+  },
+  {
+   "id": "lift",
+   "name": "Lift",
+   "kind": "gesture",
+   "tier": 1,
+   "blurb": "Amount up, shape settle, holds. The only tier-one effect that does not return — the music went up.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "by":         { "default": 0.35, "min": 0.1, "max": 0.7 },
+    "over_beats": { "default": 4, "min": 1, "max": 16 },
+    "tilt":       { "default": 0.3, "min": 0, "max": 1 }
+   },
+   "fires_on": ["register_shift"],
+   "min_fixtures": 1,
+   "requires": ["level"],
+   "optional": ["move"],
+   "default_beats": 4
+  },
+  {
+   "id": "trade",
+   "name": "Trade",
+   "kind": "gesture",
+   "tier": 2,
+   "blurb": "Place: one half hands to the other, returns. A call and response in light.",
+   "dimension": "place",
+   "returns": true,
+   "dials": {
+    "colours":    { "default": [[1, 0.75, 0.35], [0.2, 0.4, 1]] },
+    "for_beats":  { "default": 2, "min": 1, "max": 8 },
+    "travel":     { "default": true }
+   },
+   "fires_on": ["entrance and exit sharing a timestamp"],
+   "min_fixtures": 4,
+   "requires": ["colour", "level"],
+   "default_beats": 2
+  },
+  {
+   "id": "isolate",
+   "name": "Isolate",
+   "kind": "gesture",
+   "tier": 2,
+   "blurb": "Place to one lamp, holds for its span. Needs at least three lamps to read as isolation.",
+   "dimension": "place",
+   "returns": true,
+   "dials": {
+    "which":      { "default": null },
+    "colour":     { "default": [1, 0.75, 0.35] },
+    "rest":       { "default": 0.06, "min": 0, "max": 0.3 }
+   },
+   "fires_on": ["a named instrument entering alone"],
+   "min_fixtures": 3,
+   "requires": ["colour", "level"],
+   "default_beats": 4
+  },
+  {
+   "id": "strip",
+   "name": "Strip",
+   "kind": "gesture",
+   "tier": 2,
+   "blurb": "Amount down to the state's floor, settle, holds. A controlled pull-back.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "to":         { "default": 0.1, "min": 0, "max": 0.5 },
+    "over_beats": { "default": 4, "min": 1, "max": 16 }
+   },
+   "fires_on": ["breakdown"],
+   "min_fixtures": 1,
+   "requires": ["level"],
+   "default_beats": 4
+  },
+  {
+   "id": "cut",
+   "name": "Cut",
+   "kind": "gesture",
+   "tier": 2,
+   "blurb": "Amount to zero, very short, returns. A momentary silence.",
+   "dimension": "amount",
+   "returns": true,
+   "dials": {
+    "for_beats":  { "default": 1, "min": 1, "max": 2 }
+   },
+   "fires_on": ["rhythm_change where the beat drops away"],
+   "min_fixtures": 1,
+   "requires": ["level"],
+   "default_beats": 1
+  },
+  {
+   "id": "swell",
+   "name": "Swell",
+   "kind": "gesture",
+   "tier": 2,
+   "blurb": "Amount up then down. A bloom that falls away.",
+   "dimension": "amount",
+   "returns": true,
+   "dials": {
+    "colour":     { "default": [0.2, 0.4, 1] },
+    "for_beats":  { "default": 4, "min": 2, "max": 16 },
+    "rise":       { "default": 0.5, "min": 0.1, "max": 0.9 }
+   },
+   "fires_on": ["soft entrance"],
+   "min_fixtures": 1,
+   "requires": ["colour", "level"],
+   "default_beats": 4
+  },
+  {
+   "id": "gear",
+   "name": "Gear",
+   "kind": "gesture",
+   "tier": 2,
+   "blurb": "Rate multiplied by n, holds. The tempo of the lighting shifts.",
+   "dimension": "rate",
+   "returns": false,
+   "dials": {
+    "from":       { "default": 1, "min": 0.25, "max": 2 },
+    "to":         { "default": 2, "min": 0.5, "max": 4 }
+   },
+   "fires_on": ["tempo_change"],
+   "min_fixtures": 1,
+   "requires": ["level"],
+   "default_beats": 0
+  },
+  {
+   "id": "follow",
+   "name": "Follow",
+   "kind": "binding",
+   "tier": 2,
+   "blurb": "Amount follows a named instrument stream. The room breathes with the music.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "stream":     { "default": null },
+    "depth":      { "default": 0.6, "min": 0.1, "max": 1 },
+    "extent":     { "default": "all" },
+    "smooth":     { "default": 0.3, "min": 0, "max": 1 }
+   },
+   "fires_on": ["a section where one instrument leads"],
+   "min_fixtures": 1,
+   "requires": ["level"],
+   "default_beats": 0
+  },
+  {
+   "id": "split",
+   "name": "Split",
+   "kind": "binding",
+   "tier": 2,
+   "blurb": "Place follows two streams, one per half. The room answers the singer.",
+   "dimension": "place",
+   "returns": false,
+   "dials": {
+    "streams":    { "default": [null, null] },
+    "colours":    { "default": [[1, 0.75, 0.35], [0.2, 0.4, 1]] }
+   },
+   "fires_on": ["call and response"],
+   "min_fixtures": 4,
+   "requires": ["colour", "level"],
+   "default_beats": 0
+  },
+  {
+   "id": "accent",
+   "name": "Accent",
+   "kind": "binding",
+   "tier": 2,
+   "blurb": "Amount follows drum onsets above a threshold. Flashes on the real hits, not the grid.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "threshold":  { "default": 0.5, "min": 0.1, "max": 0.9 },
+    "extent":     { "default": "all" },
+    "for_beats":  { "default": 4, "min": 1, "max": 16 }
+   },
+   "fires_on": ["dense drumming"],
+   "min_fixtures": 1,
+   "requires": ["level"],
+   "default_beats": 0
+  }
+ ]
 }

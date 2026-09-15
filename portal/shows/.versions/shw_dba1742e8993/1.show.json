@@ -1,0 +1,33 @@
+{
+ "id": "shw_dba1742e8993",
+ "version": 1,
+ "author": "dj 5nake",
+ "name": "randomshi",
+ "song": "raga-of-revenge",
+ "seed": 1,
+ "edits": [
+  {
+   "type": "blackout",
+   "bar": 22,
+   "beats": 4
+  },
+  {
+   "type": "cross",
+   "bar": 33,
+   "beats": 17
+  },
+  {
+   "type": "swell",
+   "bar": 46,
+   "beats": 27
+  }
+ ],
+ "created": "2026-09-15T16:16:02Z",
+ "updated": "2026-09-15T16:16:02Z",
+ "score_version": 30,
+ "designed_for": {
+  "venue_id": "ven_keycode",
+  "venue_name": "KeyCode Stage",
+  "layout": "club16-2head.layout.json"
+ }
+}

@@ -1,0 +1,20 @@
+{
+ "rig": "club16-2head",
+ "layout_file": "club16-2head.layout.json",
+ "total_channels": 138,
+ "fixtures": {
+  "pars": 16,
+  "heads": 2
+ },
+ "supported_effects": [
+  "drone", "wash", "impact", "blackout", "hush", "ramp", "stab", "lift",
+  "trade", "isolate", "strip", "cut", "swell", "gear",
+  "follow", "split", "accent"
+ ],
+ "unsupported_effects": [],
+ "limits": {
+  "isolate_min_fixtures": 3,
+  "note": "16 pars is well above the isolate threshold; all 17 effects are supported."
+ },
+ "note": "DMX functions for the KeyCode Stage placeholder rig. 16 par7 (7ch each, addresses 1-112) + 2 head13 (13ch each, addresses 113-138). Generated and tuned for this specific rig."
+}

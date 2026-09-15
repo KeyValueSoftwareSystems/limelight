@@ -1,0 +1,20 @@
+{
+ "rig": "arc4-head",
+ "layout_file": "arc4-head.layout.json",
+ "total_channels": 41,
+ "fixtures": {
+  "pars": 4,
+  "heads": 1
+ },
+ "supported_effects": [
+  "drone", "wash", "impact", "blackout", "hush", "ramp", "stab", "lift",
+  "trade", "isolate", "strip", "cut", "swell", "gear",
+  "follow", "split", "accent"
+ ],
+ "unsupported_effects": [],
+ "limits": {
+  "isolate_min_fixtures": 3,
+  "note": "4 pars meets the isolate threshold. All 17 effects are supported."
+ },
+ "note": "DMX functions for the desk rig. 4 par7 (7ch each, addresses 1-28) + 1 head13 (13ch, address 29-41)."
+}

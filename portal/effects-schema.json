@@ -1,0 +1,32 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "Limelight Effect Catalog",
+ "type": "object",
+ "required": ["schema_version", "effects"],
+ "properties": {
+  "schema_version": { "type": "integer", "const": 2 },
+  "effects": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": ["id", "name", "kind", "tier", "blurb", "dimension", "returns", "dials", "fires_on", "min_fixtures", "requires", "default_beats"],
+    "properties": {
+     "id":            { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+     "name":          { "type": "string" },
+     "kind":          { "type": "string", "enum": ["state", "gesture", "binding"] },
+     "tier":          { "type": "integer", "enum": [1, 2] },
+     "blurb":         { "type": "string" },
+     "dimension":     { "type": "string", "enum": ["amount", "colour", "place", "rate"] },
+     "returns":       { "type": "boolean" },
+     "dials":         { "type": "object" },
+     "fires_on":      { "type": "array", "items": { "type": "string" } },
+     "min_fixtures":  { "type": "integer", "minimum": 1 },
+     "requires":      { "type": "array", "items": { "type": "string" } },
+     "optional":      { "type": "array", "items": { "type": "string" } },
+     "default_beats": { "type": "integer", "minimum": 0 },
+     "span_anchors":  { "type": "array", "items": { "type": "string" } }
+    }
+   }
+  }
+ }
+}

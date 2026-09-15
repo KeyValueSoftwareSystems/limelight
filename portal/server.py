@@ -41,6 +41,7 @@ SHOWS = os.path.join(HERE, "shows")
 MARKET = os.path.join(HERE, "market")
 COVERS = os.path.join(HERE, "covers")
 BAKE = os.path.join(HERE, "effects.js")
+BAKE_V2 = os.path.join(HERE, "baker.js")
 CATALOG = os.path.join(HERE, "effects.json")
 CUSTOM = os.path.join(HERE, "custom-effects.json")
 HUB = os.environ.get("HUB_URL", "http://127.0.0.1:8770")
@@ -164,6 +165,12 @@ def grid_clock(grid):
         return at_beat((bar - 1) * bpb + (beat - 1))
 
     return seconds_at, bpb
+
+
+def S_at(grid, bar, beat=1):
+    """Quick seconds_at from a grid dict, for v2 bake results."""
+    sa, _ = grid_clock(grid)
+    return sa(bar, beat)
 
 
 def hub_get(path):
@@ -676,6 +683,107 @@ class Baker:
                 self.jobs.pop(old, None)
         threading.Thread(target=self._run, args=(job_id, song, seed, edits, appetite, layout), daemon=True).start()
         return job_id
+
+    def start_v2(self, song, plan_data, rig_name="club16-2head"):
+        """Bake a show from a v2 plan (states/bindings/gestures) using baker.js."""
+        job_id = uuid.uuid4().hex[:12]
+        with self.lock:
+            self.jobs[job_id] = {"state": "baking", "song": song, "plan": plan_data,
+                                 "rig": rig_name, "started": time.time(), "v2": True}
+            for old in sorted(self.jobs, key=lambda k: self.jobs[k]["started"])[:-16]:
+                self.jobs.pop(old, None)
+        threading.Thread(target=self._run_v2, args=(job_id, song, plan_data, rig_name), daemon=True).start()
+        return job_id
+
+    def _run_v2(self, job_id, song, plan_data, rig_name):
+        try:
+            payload = self._bake_v2(job_id, song, plan_data, rig_name)
+            with self.lock:
+                if job_id in self.jobs:
+                    self.jobs[job_id].update(payload)
+        except BaseException as e:                                # noqa: BLE001
+            import traceback
+            sys.stderr.write("_bake_v2 error: %s\n" % e)
+            sys.stderr.flush()
+            traceback.print_exc()
+            with self.lock:
+                if job_id in self.jobs:
+                    self.jobs[job_id].update({"state": "failed", "error": str(e)})
+
+    def _bake_v2(self, job_id, song, plan_data, rig_name):
+        score = os.path.join(SCORES, song + ".score")
+        if not os.path.isfile(score):
+            raise RuntimeError("no local score for %s" % song)
+
+        venue_dir = os.path.join(HERE, "venues", rig_name)
+        manifest_path = os.path.join(venue_dir, "manifest.json")
+        if not os.path.isfile(manifest_path):
+            raise RuntimeError("no venue manifest for %s" % rig_name)
+
+        os.makedirs(WORK, exist_ok=True)
+        plan_file = os.path.join(WORK, "%s.plan.json" % job_id)
+        with open(plan_file, "w") as fh:
+            json.dump(plan_data, fh)
+
+        cache = os.path.join(WORK, "%s-v2-%s.lights.json" % (song, job_id))
+        node = shutil.which("node")
+        if not node:
+            raise RuntimeError("node is not on PATH")
+
+        cmd = [node, BAKE_V2, score, plan_file, "--rig", rig_name, "--lights", cache]
+        r = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
+        os.unlink(plan_file)
+        if r.returncode != 0:
+            raise RuntimeError("baker.js failed: " + (r.stderr or r.stdout).strip()[-400:])
+
+        with open(cache) as fh:
+            show = json.load(fh)
+
+        rig_manifest = json.load(open(manifest_path))
+        W = rig_manifest["total_channels"]
+        frames = show["frames"]
+        rigmap = Rigmap.of(show)
+        buf = bytearray(len(frames) * W)
+        for i, f in enumerate(frames):
+            row = [max(0, min(255, int(v))) for v in f[:W]] + [0] * max(0, W - len(f))
+            buf[i * W:(i + 1) * W] = LIMITS.apply(row[:W], rigmap, None)
+
+        # Try to get sections from the hub; fall back to baker output
+        grid = show.get("grid") or {}
+        sections = []
+        duration_s = show.get("duration")
+        try:
+            meta = hub_score({"score": song, "fields": ["grid", "song", "sections"]})
+            grid = meta.get("grid") or grid
+            duration_s = duration_s or (meta.get("song") or {}).get("length_s")
+            sections = [{"name": x.get("name"),
+                         "start": round(S_at(grid, x["from"]["bar"], x["from"].get("beat", 1)), 3),
+                         "end": round(S_at(grid, x["to"]["bar"], x["to"].get("beat", 1)), 3),
+                         "phase": x.get("name")}
+                        for x in (meta.get("sections") or [])]
+        except Exception:
+            sections = show.get("sections") or []
+
+        return {
+            "state": "ready",
+            "show": {
+                "song": song,
+                "fps": show.get("fps", 40), "channels": W,
+                "frame_count": len(frames),
+                "duration_s": duration_s,
+                "tempo": show.get("tempo"), "grid": grid,
+                "sections": sections,
+                "downbeats": show.get("downbeats") or [],
+                "key_hue": show.get("key_hue"),
+                "moments": show.get("moments") or [],
+                "rig": rig_name, "layout": show.get("layout") or rig_manifest["layout_file"],
+                "fixtures": show.get("fixtures") or [],
+                "pars": rigmap.pars, "heads": rigmap.heads,
+                "plan": show.get("plan"),
+            },
+            "frames_url": "/api/frames/%s.bin" % job_id,
+            "bytes": bytes(buf),
+        }
 
     def status(self, job_id):
         with self.lock:
@@ -1647,6 +1755,27 @@ def make_handler(library, baker, rig):
                     return self._json({"error": "hub said %s" % e.code}, e.code)
                 except Exception as e:                              # noqa: BLE001
                     return self._json({"error": str(e)}, 502)
+
+            if path == "/api/compose":
+                song = body.get("song")
+                if not song:
+                    return self._json({"error": "which song?"}, 400)
+                try:
+                    sys.path.insert(0, HERE)
+                    from composer import compose, DEFAULT_MODEL
+                    plan, report, overview = compose(song, model=body.get("model", DEFAULT_MODEL))
+                    return self._json({"plan": plan, "report": report})
+                except Exception as e:                              # noqa: BLE001
+                    return self._json({"error": str(e)}, 500)
+
+            if path == "/api/bake-plan":
+                song = body.get("song")
+                plan_data = body.get("plan")
+                rig_name = body.get("rig", "club16-2head")
+                if not song or not plan_data:
+                    return self._json({"error": "need song and plan"}, 400)
+                job = baker.start_v2(song, plan_data, rig_name)
+                return self._json({"job": job, "state": "baking", "song": song, "rig": rig_name})
 
             if path == "/api/entitlement":
                 return self._json(entitlement(body.get("show_id"), body.get("tier", "free")))

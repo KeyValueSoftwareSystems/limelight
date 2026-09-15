@@ -1,0 +1,1725 @@
+{
+ "source": "club.mvr",
+ "fixtures": [
+  {
+   "id": "par_1",
+   "kind": "par",
+   "gdtf": "LED PAR 64 RGBW.gdtf",
+   "mode": "Default",
+   "pos": [
+    0.8,
+    5.2,
+    2.9
+   ],
+   "aim": [
+    0.8,
+    5.2,
+    0.0
+   ],
+   "beam_deg": 60.0,
+   "universe": 1,
+   "address": 1,
+   "channels": [
+    "Dimmer",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [
+    "models/LED_PAR_64_RGBW.gdtf/Body.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Pixel.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "par_2",
+   "kind": "par",
+   "gdtf": "LED PAR 64 RGBW.gdtf",
+   "mode": "Default",
+   "pos": [
+    2.08,
+    5.2,
+    2.9
+   ],
+   "aim": [
+    2.08,
+    5.2,
+    0.0
+   ],
+   "beam_deg": 60.0,
+   "universe": 1,
+   "address": 6,
+   "channels": [
+    "Dimmer",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [
+    "models/LED_PAR_64_RGBW.gdtf/Body.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Pixel.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "par_3",
+   "kind": "par",
+   "gdtf": "LED PAR 64 RGBW.gdtf",
+   "mode": "Default",
+   "pos": [
+    3.36,
+    5.2,
+    2.9
+   ],
+   "aim": [
+    3.36,
+    5.2,
+    0.0
+   ],
+   "beam_deg": 60.0,
+   "universe": 1,
+   "address": 11,
+   "channels": [
+    "Dimmer",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [
+    "models/LED_PAR_64_RGBW.gdtf/Body.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Pixel.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "par_4",
+   "kind": "par",
+   "gdtf": "LED PAR 64 RGBW.gdtf",
+   "mode": "Default",
+   "pos": [
+    4.64,
+    5.2,
+    2.9
+   ],
+   "aim": [
+    4.64,
+    5.2,
+    0.0
+   ],
+   "beam_deg": 60.0,
+   "universe": 1,
+   "address": 16,
+   "channels": [
+    "Dimmer",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [
+    "models/LED_PAR_64_RGBW.gdtf/Body.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Pixel.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "par_5",
+   "kind": "par",
+   "gdtf": "LED PAR 64 RGBW.gdtf",
+   "mode": "Default",
+   "pos": [
+    5.92,
+    5.2,
+    2.9
+   ],
+   "aim": [
+    5.92,
+    5.2,
+    0.0
+   ],
+   "beam_deg": 60.0,
+   "universe": 1,
+   "address": 21,
+   "channels": [
+    "Dimmer",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [
+    "models/LED_PAR_64_RGBW.gdtf/Body.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Pixel.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "par_6",
+   "kind": "par",
+   "gdtf": "LED PAR 64 RGBW.gdtf",
+   "mode": "Default",
+   "pos": [
+    7.2,
+    5.2,
+    2.9
+   ],
+   "aim": [
+    7.2,
+    5.2,
+    0.0
+   ],
+   "beam_deg": 60.0,
+   "universe": 1,
+   "address": 26,
+   "channels": [
+    "Dimmer",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [
+    "models/LED_PAR_64_RGBW.gdtf/Body.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Pixel.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "up_1",
+   "kind": "uplight",
+   "gdtf": "LED PAR 64 RGBW.gdtf",
+   "mode": "Default",
+   "pos": [
+    1.3,
+    5.5,
+    0.15
+   ],
+   "aim": [
+    1.3,
+    5.5,
+    3.4
+   ],
+   "beam_deg": 60.0,
+   "universe": 1,
+   "address": 31,
+   "channels": [
+    "Dimmer",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [
+    "models/LED_PAR_64_RGBW.gdtf/Body.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Pixel.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "up_2",
+   "kind": "uplight",
+   "gdtf": "LED PAR 64 RGBW.gdtf",
+   "mode": "Default",
+   "pos": [
+    3.3,
+    5.5,
+    0.15
+   ],
+   "aim": [
+    3.3,
+    5.5,
+    3.4
+   ],
+   "beam_deg": 60.0,
+   "universe": 1,
+   "address": 36,
+   "channels": [
+    "Dimmer",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [
+    "models/LED_PAR_64_RGBW.gdtf/Body.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Pixel.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "up_3",
+   "kind": "uplight",
+   "gdtf": "LED PAR 64 RGBW.gdtf",
+   "mode": "Default",
+   "pos": [
+    4.7,
+    5.5,
+    0.15
+   ],
+   "aim": [
+    4.7,
+    5.5,
+    3.4
+   ],
+   "beam_deg": 60.0,
+   "universe": 1,
+   "address": 41,
+   "channels": [
+    "Dimmer",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [
+    "models/LED_PAR_64_RGBW.gdtf/Body.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Pixel.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "up_4",
+   "kind": "uplight",
+   "gdtf": "LED PAR 64 RGBW.gdtf",
+   "mode": "Default",
+   "pos": [
+    6.7,
+    5.5,
+    0.15
+   ],
+   "aim": [
+    6.7,
+    5.5,
+    3.4
+   ],
+   "beam_deg": 60.0,
+   "universe": 1,
+   "address": 46,
+   "channels": [
+    "Dimmer",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [
+    "models/LED_PAR_64_RGBW.gdtf/Body.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Pixel.glb",
+    "models/LED_PAR_64_RGBW.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "head_1",
+   "kind": "head",
+   "gdtf": "Martin_Professional@MAC_Aura@20230201NoMeas.gdtf",
+   "mode": "Standard",
+   "pos": [
+    1.6,
+    1.2,
+    3.15
+   ],
+   "aim": [
+    1.6,
+    1.2,
+    0.0
+   ],
+   "beam_deg": 24.0,
+   "universe": 1,
+   "address": 51,
+   "channels": [
+    "Shutter1",
+    "Dimmer",
+    "Zoom",
+    "Pan",
+    "Tilt",
+    "Control1",
+    "Color1",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "CTC"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     6,
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ],
+    [
+     10
+    ],
+    [
+     11
+    ],
+    [
+     12
+    ],
+    [
+     13
+    ],
+    [
+     14
+    ]
+   ],
+   "defaults": [
+    20,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": true
+  },
+  {
+   "id": "head_2",
+   "kind": "head",
+   "gdtf": "Martin_Professional@MAC_Aura@20230201NoMeas.gdtf",
+   "mode": "Standard",
+   "pos": [
+    3.4,
+    1.2,
+    3.15
+   ],
+   "aim": [
+    3.4,
+    1.2,
+    0.0
+   ],
+   "beam_deg": 24.0,
+   "universe": 1,
+   "address": 65,
+   "channels": [
+    "Shutter1",
+    "Dimmer",
+    "Zoom",
+    "Pan",
+    "Tilt",
+    "Control1",
+    "Color1",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "CTC"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     6,
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ],
+    [
+     10
+    ],
+    [
+     11
+    ],
+    [
+     12
+    ],
+    [
+     13
+    ],
+    [
+     14
+    ]
+   ],
+   "defaults": [
+    20,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": true
+  },
+  {
+   "id": "head_3",
+   "kind": "head",
+   "gdtf": "Martin_Professional@MAC_Aura@20230201NoMeas.gdtf",
+   "mode": "Standard",
+   "pos": [
+    4.6,
+    1.2,
+    3.15
+   ],
+   "aim": [
+    4.6,
+    1.2,
+    0.0
+   ],
+   "beam_deg": 24.0,
+   "universe": 1,
+   "address": 79,
+   "channels": [
+    "Shutter1",
+    "Dimmer",
+    "Zoom",
+    "Pan",
+    "Tilt",
+    "Control1",
+    "Color1",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "CTC"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     6,
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ],
+    [
+     10
+    ],
+    [
+     11
+    ],
+    [
+     12
+    ],
+    [
+     13
+    ],
+    [
+     14
+    ]
+   ],
+   "defaults": [
+    20,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": true
+  },
+  {
+   "id": "head_4",
+   "kind": "head",
+   "gdtf": "Martin_Professional@MAC_Aura@20230201NoMeas.gdtf",
+   "mode": "Standard",
+   "pos": [
+    6.4,
+    1.2,
+    3.15
+   ],
+   "aim": [
+    6.4,
+    1.2,
+    0.0
+   ],
+   "beam_deg": 24.0,
+   "universe": 1,
+   "address": 93,
+   "channels": [
+    "Shutter1",
+    "Dimmer",
+    "Zoom",
+    "Pan",
+    "Tilt",
+    "Control1",
+    "Color1",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "CTC"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     6,
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ],
+    [
+     10
+    ],
+    [
+     11
+    ],
+    [
+     12
+    ],
+    [
+     13
+    ],
+    [
+     14
+    ]
+   ],
+   "defaults": [
+    20,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": true
+  },
+  {
+   "id": "head_5",
+   "kind": "head",
+   "gdtf": "Martin_Professional@MAC_Aura@20230201NoMeas.gdtf",
+   "mode": "Standard",
+   "pos": [
+    1.1,
+    4.6,
+    3.3
+   ],
+   "aim": [
+    1.1,
+    4.6,
+    0.0
+   ],
+   "beam_deg": 24.0,
+   "universe": 1,
+   "address": 107,
+   "channels": [
+    "Shutter1",
+    "Dimmer",
+    "Zoom",
+    "Pan",
+    "Tilt",
+    "Control1",
+    "Color1",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "CTC"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     6,
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ],
+    [
+     10
+    ],
+    [
+     11
+    ],
+    [
+     12
+    ],
+    [
+     13
+    ],
+    [
+     14
+    ]
+   ],
+   "defaults": [
+    20,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": true
+  },
+  {
+   "id": "head_6",
+   "kind": "head",
+   "gdtf": "Martin_Professional@MAC_Aura@20230201NoMeas.gdtf",
+   "mode": "Standard",
+   "pos": [
+    3.1,
+    4.6,
+    3.3
+   ],
+   "aim": [
+    3.1,
+    4.6,
+    0.0
+   ],
+   "beam_deg": 24.0,
+   "universe": 1,
+   "address": 121,
+   "channels": [
+    "Shutter1",
+    "Dimmer",
+    "Zoom",
+    "Pan",
+    "Tilt",
+    "Control1",
+    "Color1",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "CTC"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     6,
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ],
+    [
+     10
+    ],
+    [
+     11
+    ],
+    [
+     12
+    ],
+    [
+     13
+    ],
+    [
+     14
+    ]
+   ],
+   "defaults": [
+    20,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": true
+  },
+  {
+   "id": "head_7",
+   "kind": "head",
+   "gdtf": "Martin_Professional@MAC_Aura@20230201NoMeas.gdtf",
+   "mode": "Standard",
+   "pos": [
+    4.9,
+    4.6,
+    3.3
+   ],
+   "aim": [
+    4.9,
+    4.6,
+    0.0
+   ],
+   "beam_deg": 24.0,
+   "universe": 1,
+   "address": 135,
+   "channels": [
+    "Shutter1",
+    "Dimmer",
+    "Zoom",
+    "Pan",
+    "Tilt",
+    "Control1",
+    "Color1",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "CTC"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     6,
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ],
+    [
+     10
+    ],
+    [
+     11
+    ],
+    [
+     12
+    ],
+    [
+     13
+    ],
+    [
+     14
+    ]
+   ],
+   "defaults": [
+    20,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": true
+  },
+  {
+   "id": "head_8",
+   "kind": "head",
+   "gdtf": "Martin_Professional@MAC_Aura@20230201NoMeas.gdtf",
+   "mode": "Standard",
+   "pos": [
+    6.9,
+    4.6,
+    3.3
+   ],
+   "aim": [
+    6.9,
+    4.6,
+    0.0
+   ],
+   "beam_deg": 24.0,
+   "universe": 1,
+   "address": 149,
+   "channels": [
+    "Shutter1",
+    "Dimmer",
+    "Zoom",
+    "Pan",
+    "Tilt",
+    "Control1",
+    "Color1",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "CTC"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     6,
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ],
+    [
+     10
+    ],
+    [
+     11
+    ],
+    [
+     12
+    ],
+    [
+     13
+    ],
+    [
+     14
+    ]
+   ],
+   "defaults": [
+    20,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": true
+  },
+  {
+   "id": "strobe_1",
+   "kind": "strobe",
+   "gdtf": "Martin_Professional@Atomic_3000_DMX@Rev_1.0.gdtf",
+   "mode": "3 Channel",
+   "pos": [
+    0.55,
+    1.2,
+    3.15
+   ],
+   "aim": [
+    0.55,
+    1.2,
+    0.0
+   ],
+   "beam_deg": 82.0,
+   "universe": 1,
+   "address": 163,
+   "channels": [
+    "Dimmer",
+    "StrobeDuration",
+    "StrobeRate"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": true
+  },
+  {
+   "id": "strobe_2",
+   "kind": "strobe",
+   "gdtf": "Martin_Professional@Atomic_3000_DMX@Rev_1.0.gdtf",
+   "mode": "3 Channel",
+   "pos": [
+    7.45,
+    1.2,
+    3.15
+   ],
+   "aim": [
+    7.45,
+    1.2,
+    0.0
+   ],
+   "beam_deg": 82.0,
+   "universe": 1,
+   "address": 166,
+   "channels": [
+    "Dimmer",
+    "StrobeDuration",
+    "StrobeRate"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": true
+  },
+  {
+   "id": "blind_1",
+   "kind": "blinder",
+   "gdtf": "Chauvet_Professional@STRIKE_Array_4@Rev_1.0.5.gdtf",
+   "mode": "1Ch Mode",
+   "pos": [
+    2.6,
+    2.6,
+    2.55
+   ],
+   "aim": [
+    2.6,
+    0.3,
+    0.0
+   ],
+   "beam_deg": 61.5,
+   "universe": 1,
+   "address": 169,
+   "channels": [
+    "Dimmer"
+   ],
+   "offsets": [
+    [
+     1
+    ]
+   ],
+   "defaults": [
+    0
+   ],
+   "models": [
+    "models/Chauvet_Professional_STRIKE_Array_4_Rev_1.0.5.gdtf/Body.glb",
+    "models/Chauvet_Professional_STRIKE_Array_4_Rev_1.0.5.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "blind_2",
+   "kind": "blinder",
+   "gdtf": "Chauvet_Professional@STRIKE_Array_4@Rev_1.0.5.gdtf",
+   "mode": "1Ch Mode",
+   "pos": [
+    5.4,
+    2.6,
+    2.55
+   ],
+   "aim": [
+    5.4,
+    0.3,
+    0.0
+   ],
+   "beam_deg": 61.5,
+   "universe": 1,
+   "address": 170,
+   "channels": [
+    "Dimmer"
+   ],
+   "offsets": [
+    [
+     1
+    ]
+   ],
+   "defaults": [
+    0
+   ],
+   "models": [
+    "models/Chauvet_Professional_STRIKE_Array_4_Rev_1.0.5.gdtf/Body.glb",
+    "models/Chauvet_Professional_STRIKE_Array_4_Rev_1.0.5.gdtf/Yoke.glb"
+   ],
+   "has_3ds": false
+  },
+  {
+   "id": "strip_1",
+   "kind": "strip",
+   "gdtf": "Showtec@Cameleon_PixelBar_18-4_24Ch@Rev_1_4_WORKING.gdtf",
+   "mode": "24 Ch",
+   "pos": [
+    0.5,
+    5.5,
+    0.1
+   ],
+   "aim": [
+    0.5,
+    5.5,
+    3.4
+   ],
+   "beam_deg": 5.0,
+   "universe": 1,
+   "address": 171,
+   "channels": [
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ],
+    [
+     6
+    ],
+    [
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ],
+    [
+     10
+    ],
+    [
+     11
+    ],
+    [
+     12
+    ],
+    [
+     13
+    ],
+    [
+     14
+    ],
+    [
+     15
+    ],
+    [
+     16
+    ],
+    [
+     17
+    ],
+    [
+     18
+    ],
+    [
+     19
+    ],
+    [
+     20
+    ],
+    [
+     21
+    ],
+    [
+     22
+    ],
+    [
+     23
+    ],
+    [
+     24
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": false
+  },
+  {
+   "id": "strip_2",
+   "kind": "strip",
+   "gdtf": "Showtec@Cameleon_PixelBar_18-4_24Ch@Rev_1_4_WORKING.gdtf",
+   "mode": "24 Ch",
+   "pos": [
+    0.5,
+    0.5,
+    0.1
+   ],
+   "aim": [
+    0.5,
+    0.5,
+    3.4
+   ],
+   "beam_deg": 5.0,
+   "universe": 1,
+   "address": 195,
+   "channels": [
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W",
+    "ColorAdd_R",
+    "ColorAdd_G",
+    "ColorAdd_B",
+    "ColorAdd_W"
+   ],
+   "offsets": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ],
+    [
+     6
+    ],
+    [
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ],
+    [
+     10
+    ],
+    [
+     11
+    ],
+    [
+     12
+    ],
+    [
+     13
+    ],
+    [
+     14
+    ],
+    [
+     15
+    ],
+    [
+     16
+    ],
+    [
+     17
+    ],
+    [
+     18
+    ],
+    [
+     19
+    ],
+    [
+     20
+    ],
+    [
+     21
+    ],
+    [
+     22
+    ],
+    [
+     23
+    ],
+    [
+     24
+    ]
+   ],
+   "defaults": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "models": [],
+   "has_3ds": false
+  }
+ ]
+}
