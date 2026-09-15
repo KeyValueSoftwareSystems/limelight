@@ -295,7 +295,7 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
      handful of beats land a slot out; a numbering error puts every beat out,
      not five in five hundred. */
   {
-    const dir = path.join(root, "scores");
+    const dir = path.join(root, "hub", "files", "score");
     const songs = fs.existsSync(dir)
       ? fs.readdirSync(dir).filter(x => x.endsWith(".score")).sort() : [];
     let checked = 0, adrift = [], dupes = [], noOne = [], torn = [], perSong = [];

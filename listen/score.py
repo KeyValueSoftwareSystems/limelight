@@ -493,11 +493,11 @@ def read(path, slug):
 
 
 if __name__ == "__main__":
-    out = Path("scores")
-    out.mkdir(exist_ok=True)
+    out = Path("hub/files/score")
+    out.mkdir(parents=True, exist_ok=True)
     for arg in sys.argv[1:]:
         src = Path(arg)
         score = read(str(src), src.stem)
         (out / f"{src.stem}.score").write_text(
             json.dumps(score, indent=2, allow_nan=False) + "\n")
-        print(f"    -> scores/{src.stem}.score", file=sys.stderr)
+        print(f"    -> hub/files/score/{src.stem}.score", file=sys.stderr)

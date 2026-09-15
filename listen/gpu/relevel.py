@@ -6,7 +6,7 @@ step_beats; this brings scores that were built before that up to date without
 a GPU run, using the same one_level and the same grid assembly so a repaired
 score and a freshly built one agree.
 
-    python3 relevel.py scores/*.score
+    python3 relevel.py hub/files/score/*.score
 """
 import json
 import math

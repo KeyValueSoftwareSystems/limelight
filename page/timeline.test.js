@@ -56,7 +56,7 @@ if (block) {
     return fn(scored, 0, 0, { currentTime: 0 });
   };
 
-  const dir = path.join(root, "scores");
+  const dir = path.join(root, "hub", "files", "score");
   const songs = fs.existsSync(dir)
     ? fs.readdirSync(dir).filter(f => f.endsWith(".score")).sort() : [];
   ok("there are scores to check the timeline against", songs.length > 0,
@@ -104,7 +104,7 @@ if (block) {
    `motion` field the pipeline stopped writing -- so the check reported the
    page as broken for not drawing data that no longer exists. */
 {
-  const dir = path.join(root, "scores");
+  const dir = path.join(root, "hub", "files", "score");
   const songs = fs.existsSync(dir)
     ? fs.readdirSync(dir).filter(f => f.endsWith(".score")).sort() : [];
   const carried = new Set();

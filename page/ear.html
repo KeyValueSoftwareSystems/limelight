@@ -1113,7 +1113,7 @@
     slug = s;
     /* A song can arrive from the hub as easily as from the folder beside this
      page, so the caller may name where its score lives. */
-    SCORE = await (await fetch(scoreUrl || `/scores/${s}.score`)).json();
+    SCORE = await (await fetch(scoreUrl || `/hub/score/${s}.score`)).json();
     TEMPO =
       SCORE.grid.tempo && SCORE.grid.tempo.length
         ? SCORE.grid.tempo

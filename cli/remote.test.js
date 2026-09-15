@@ -16,7 +16,7 @@ const CLI = path.join(REPO, "limelight");
    because exercising a realistic size is worth something, and a deterministic
    blob stands in when there is not. */
 const SCORE = (() => {
-  const built = path.join(REPO, "scores", "levels.score");
+  const built = path.join(REPO, "hub", "files", "score", "levels.score");
   if (fs.existsSync(built)) return fs.readFileSync(built);
   const rows = [];
   for (let i = 0; i < 400; i++) rows.push({ bar: i, beat: 1 + (i % 4), weight: (i % 97) / 97 });

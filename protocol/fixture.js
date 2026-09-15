@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
-const PLACES = ["scores", "hub/files/score", "work/gpu-scores",
+const PLACES = ["hub/files/score", "work/gpu-scores",
                 "readers/lights/panel/scores"];
 
 function scores(root) {

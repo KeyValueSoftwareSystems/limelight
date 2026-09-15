@@ -26,8 +26,7 @@ const { Session } = require("./session.js");
    quietly skips itself when its input is missing is a check that can never
    fail, which is the trap this project keeps catching itself in; a check that
    quietly reads a different, older input is the same trap wearing a hat. */
-const dirs = [path.join(__dirname, "..", "scores"),
-              path.join(__dirname, "..", "hub", "files"),
+const dirs = [path.join(__dirname, "..", "hub", "files", "score"),
               __dirname];
 const files = [];
 for (const d of dirs) {
