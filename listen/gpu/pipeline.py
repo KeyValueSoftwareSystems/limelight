@@ -331,7 +331,7 @@ def found_moments(
     chords=None,
     melody=None,
     rhythm=None,
-    emotion=None,
+    stems=None,
     want=32,
 ):
     """Every kind of moment listen/gpu/moments.py can measure from the score.
@@ -357,7 +357,7 @@ def found_moments(
         spec = importlib.util.spec_from_file_location("limelight_moments", here)
         M = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(M)
-        return M.find(temporal, beats, grid, chords, melody, rhythm, emotion, want=want)
+        return M.find(temporal, beats, grid, chords, melody, rhythm, stems, want=want)
     except Exception as e:
         print(f"    moments: {e}", flush=True)
         return []
@@ -1004,7 +1004,7 @@ def run_pipeline(wav_path):
         score.get("btc_chords_raw"),
         score.get("melody"),
         score.get("rhythm"),
-        score.get("emotion"),
+        score.get("stems"),
     )
     if got:
         score["moments"] = got

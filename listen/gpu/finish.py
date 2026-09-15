@@ -124,7 +124,7 @@ def main(paths):
                          [b["t"] for b in score.get("beats") or [] if "t" in b],
                          score.get("grid"), score.get("btc_chords_raw"),
                          score.get("melody"), score.get("rhythm"),
-                         score.get("emotion"), score.get("stems"))
+                         score.get("stems"))
         except Exception as e:
             print(f"{slug}: moments failed ({type(e).__name__}: {e})")
             got = None

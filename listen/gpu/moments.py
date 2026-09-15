@@ -851,6 +851,84 @@ def _no_contradictions(picked, together):
     return sorted(out, key=lambda x: x["t"])
 
 
+def accents(hits, w, n, tol=4.0, k=8.0, floor=0.10, smooth=5):
+    """Where the onsets themselves start landing harder, or stop.
+
+    Every one of the 23507 onsets in the library carries an `intensity` -
+    librosa's onset strength over that track's maximum - and until now the only
+    thing read off `rhythm.hits` was `t`. How hard a drummer hits is not how
+    often, and the two come apart: these events coincide with an onset-density
+    step only 16-23% of the time and with `rhythm_change` 13%.
+
+    Of the events that carry no other moment, 30.2% land on a section boundary
+    against a per-song chance of 17.3%, a 1.74x that none of three nulls
+    reaches - and the decisive one is a mark shuffle, which keeps every onset
+    time and shuffles only the intensities. It never gets there, so the signal
+    is the loudness of the hits and not their placement.
+
+    NOT EMITTED, and kept here for the next person who has the same idea.
+    Uncapped it looks shippable: 112 events, fresh 30.2% against a 17.3%
+    chance, beating all three nulls at p=0.0020, which clears the p<0.0028
+    Bonferroni bar for eighteen candidates. In the shape it would actually
+    ship in, capped at 3 a song, it does not. 74 events survive the cap, only
+    23 of them carry no other moment, and those 23 score 21.7% against 17.7%
+    - a 1.23x. Adding it also pushed 60 entrance and exit moments out of the
+    32-moment budget, and those score 2.57x and 2.12x.
+
+    The uncapped figure was not wrong, it was measured on a shape that is not
+    the shipping one, which is the same trap the cadence rule fell into at
+    1.19x uncapped and 0.94x capped.
+    """
+    if not hits or not n or n <= 0 or not w:
+        return []
+    total = [0.0] * n
+    count = [0] * n
+    seen = []
+    for h in hits:
+        if not isinstance(h, dict):
+            continue
+        t, hard = h.get("t"), h.get("intensity")
+        if t is None or hard is None:
+            continue
+        i = int(float(t) / w)
+        if 0 <= i < n:
+            total[i] += float(hard)
+            count[i] += 1
+            seen.append(float(hard))
+    if len(seen) < 40 or n < 16:
+        return []
+    held = sum(seen) / len(seen)
+    curve = []
+    for i in range(n):
+        if count[i]:
+            held = total[i] / count[i]
+        curve.append(held)
+    half = smooth // 2
+    lined = []
+    for i in range(n):
+        a, b = max(0, i - half), min(n, i + half + 1)
+        lined.append(sum(curve[a:b]) / (b - a))
+    side = max(2, int(round(tol / w)))
+    if len(lined) < side * 3:
+        return []
+    gate = max(floor, k * _noise_of(lined))
+    out = []
+    for size, i, pre, post in _steps(lined, side, gate):
+        out.append(
+            {
+                "i": i,
+                "type": "accent_change",
+                "size": round(min(1.0, size / 0.4), 3),
+                "description": (
+                    "the hits start landing harder"
+                    if post > pre
+                    else "the hits ease off"
+                ),
+            }
+        )
+    return out
+
+
 def find(
     temporal,
     beats,
@@ -858,7 +936,6 @@ def find(
     chords=None,
     melody=None,
     rhythm=None,
-    emotion=None,
     stems=None,
     want=32,
     together=1.5,
