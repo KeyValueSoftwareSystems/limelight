@@ -9,17 +9,62 @@ Nothing is asked of a language model. MOSS does not claim `moments` as a
 capability and returned nothing parseable for it on apex after 140s.
 """
 
-BRIGHT = ("hh", "cymbals", "crash", "ride", "shaker", "tambourine", "violin",
-          "flute", "piccolo", "synth", "keys", "piano", "digital-piano", "bells")
-PERC = ("drums", "kick", "snare", "hh", "toms", "percussion", "clap", "cymbals",
-        "shaker", "tambourine", "congas", "bongos")
+BRIGHT = (
+    "hh",
+    "cymbals",
+    "crash",
+    "ride",
+    "shaker",
+    "tambourine",
+    "violin",
+    "flute",
+    "piccolo",
+    "synth",
+    "keys",
+    "piano",
+    "digital-piano",
+    "bells",
+)
+PERC = (
+    "drums",
+    "kick",
+    "snare",
+    "hh",
+    "toms",
+    "percussion",
+    "clap",
+    "cymbals",
+    "shaker",
+    "tambourine",
+    "congas",
+    "bongos",
+)
 
-ORDER = ("drop", "stop", "breakdown", "build", "peak", "rhythm_change",
-         "lift", "mood_turn", "tempo_change", "key_change", "entrance", "exit")
-SHAPE = ("drop", "stop", "breakdown", "build", "peak")
-CAP = {"drop": 6, "stop": 4, "breakdown": 4, "build": 4, "peak": 1,
-       "tempo_change": 4, "key_change": 3, "rhythm_change": 4,
-       "lift": 4, "mood_turn": 4}
+ORDER = (
+    "drop",
+    "breakdown",
+    "build",
+    "peak",
+    "rhythm_change",
+    "lift",
+    "mood_turn",
+    "tempo_change",
+    "key_change",
+    "entrance",
+    "exit",
+)
+SHAPE = ("drop", "breakdown", "build", "peak")
+CAP = {
+    "drop": 6,
+    "breakdown": 4,
+    "build": 4,
+    "peak": 1,
+    "tempo_change": 4,
+    "key_change": 3,
+    "rhythm_change": 4,
+    "lift": 4,
+    "mood_turn": 4,
+}
 
 
 def energy_curve(temporal, smooth=3):
@@ -33,8 +78,7 @@ def energy_curve(temporal, smooth=3):
     if not temporal or not temporal.get("stems"):
         return 0.5, [], 1.0
     w = temporal.get("window_s") or 0.5
-    lanes = [v for v in temporal["stems"].values()
-             if isinstance(v, list) and v]
+    lanes = [v for v in temporal["stems"].values() if isinstance(v, list) and v]
     if not lanes:
         return w, [], 1.0
     n = min(len(v) for v in lanes)
@@ -84,44 +128,74 @@ def swings(v, w, noise=0.0):
 
     out = []
     for size, i in peaks(rises):
-        out.append({"i": i, "type": "drop", "size": round(size, 3),
-                    "description": "everything arrives at once"})
+        out.append(
+            {
+                "i": i,
+                "type": "drop",
+                "size": round(size, 3),
+                "description": "everything arrives at once",
+            }
+        )
         back = max(0, i - int(round(10.0 / w)))
         run = v[back:i]
         if len(run) >= 6:
             third = len(run) // 3
             climb = _span(run, len(run) - third, len(run)) - _span(run, 0, third)
             if climb >= 0.15:
-                out.append({"i": back, "type": "build", "size": round(climb, 3),
-                            "description": "a build into the drop"})
+                out.append(
+                    {
+                        "i": back,
+                        "type": "build",
+                        "size": round(climb, 3),
+                        "description": "a build into the drop",
+                    }
+                )
     for size, i in peaks(falls):
-        out.append({"i": i, "type": "breakdown", "size": round(size, 3),
-                    "description": "the track strips back"})
+        out.append(
+            {
+                "i": i,
+                "type": "breakdown",
+                "size": round(size, 3),
+                "description": "the track strips back",
+            }
+        )
     return out
 
 
-def stops(v, w, noise=0.0):
-    """Near-silence that lasts a beat or two and then does not."""
-    if not v:
+def rolls(temporal, w, tol=4.0):
+    if not temporal or not temporal.get("stems"):
         return []
-    gate = max(0.40, 8.0 * noise)
-    lo = max(1, int(round(0.4 / w)))
-    hi = max(lo, int(round(3.0 / w)))
-    edge = max(2, int(round(1.5 / w)))
-    out, i = [], edge
-    while i < len(v) - edge:
-        if v[i] > 0.12:
-            i += 1
+    lanes = [
+        v
+        for k, v in temporal["stems"].items()
+        if isinstance(v, list) and v and any(n in k.lower() for n in PERC)
+    ]
+    if not lanes:
+        return []
+    n = min(len(x) for x in lanes)
+    raw = [sum(x[i] for x in lanes) / len(lanes) for i in range(n)]
+    per = []
+    for i in range(n):
+        a, b = max(0, i - 1), min(n, i + 2)
+        per.append(sum(raw[a:b]) / (b - a))
+    top = max(per)
+    if top <= 0:
+        return []
+    per = [x / top for x in per]
+    side = max(2, int(round(tol / w)))
+    gate = max(0.20, 8.0 * _noise_of(per))
+    out = []
+    for size, i, pre, post in _steps(per, side, gate):
+        if post <= pre:
             continue
-        j = i
-        while j < len(v) - edge and v[j] <= 0.12:
-            j += 1
-        if lo <= j - i <= hi and _span(v, i - edge, i) >= gate \
-                and _span(v, j, j + edge) >= gate:
-            out.append({"i": i, "type": "stop",
-                        "size": round(_span(v, i - edge, i), 3),
-                        "description": "everything cuts out"})
-        i = j + 1
+        out.append(
+            {
+                "i": max(0, i - side),
+                "type": "build",
+                "size": round(min(1.0, size), 3),
+                "description": "the drums thicken into something",
+            }
+        )
     return out
 
 
@@ -129,8 +203,14 @@ def loudest(v):
     if not v:
         return []
     i = max(range(len(v)), key=lambda k: v[k])
-    return [{"i": i, "type": "peak", "size": 1.0,
-             "description": "the loudest the song gets"}]
+    return [
+        {
+            "i": i,
+            "type": "peak",
+            "size": 1.0,
+            "description": "the loudest the song gets",
+        }
+    ]
 
 
 def tempo_changes(grid, w):
@@ -140,18 +220,26 @@ def tempo_changes(grid, w):
         fa, fb = a.get("bpm"), b.get("bpm")
         if not fa or not fb or abs(fb - fa) / fa < 0.02:
             continue
-        out.append({"i": int(round((b.get("at_s") or 0) / w)),
-                    "type": "tempo_change",
-                    "size": round(min(1.0, abs(fb - fa) / fa), 3),
-                    "description": f"tempo moves {fa:.0f} to {fb:.0f} bpm"})
+        out.append(
+            {
+                "i": int(round((b.get("at_s") or 0) / w)),
+                "type": "tempo_change",
+                "size": round(min(1.0, abs(fb - fa) / fa), 3),
+                "description": f"tempo moves {fa:.0f} to {fb:.0f} bpm",
+            }
+        )
     return out
 
 
 def key_changes(chords, w, window_s=30.0, step_s=10.0):
     """The root the harmony sits on, and where it moves and stays moved."""
-    spans = [c for c in (chords or [])
-             if isinstance(c, dict) and str(c.get("chord", "N")) != "N"
-             and isinstance(c.get("start"), (int, float))]
+    spans = [
+        c
+        for c in (chords or [])
+        if isinstance(c, dict)
+        and str(c.get("chord", "N")) != "N"
+        and isinstance(c.get("start"), (int, float))
+    ]
     if len(spans) < 4:
         return []
     end = max(c["end"] for c in spans)
@@ -174,9 +262,15 @@ def key_changes(chords, w, window_s=30.0, step_s=10.0):
             continue
         if out and marks[k][0] - out[-1]["at_s"] < window_s:
             continue
-        out.append({"i": int(round(marks[k][0] / w)), "at_s": marks[k][0],
-                    "type": "key_change", "size": 0.5,
-                    "description": f"the harmony moves from {was} to {now}"})
+        out.append(
+            {
+                "i": int(round(marks[k][0] / w)),
+                "at_s": marks[k][0],
+                "type": "key_change",
+                "size": 0.5,
+                "description": f"the harmony moves from {was} to {now}",
+            }
+        )
     for m in out:
         m.pop("at_s", None)
     return out
@@ -253,9 +347,15 @@ def lifts(melody, w, n, tol=7.0):
     for size, i, pre, post in _steps(v, side, gate):
         up = post > pre
         how = "an octave" if size >= 10.5 else f"{int(round(size))} semitones"
-        out.append({"i": i, "type": "lift", "size": round(min(1.0, size / 12.0), 3),
-                    "description": ("the top line climbs " if up else
-                                    "the top line falls ") + how})
+        out.append(
+            {
+                "i": i,
+                "type": "lift",
+                "size": round(min(1.0, size / 12.0), 3),
+                "description": ("the top line climbs " if up else "the top line falls ")
+                + how,
+            }
+        )
     return out
 
 
@@ -284,8 +384,8 @@ def rhythm_changes(hits, w, n, tol=4.0, z_min=3.0):
     held = side * w
     found = []
     for i in range(side, n - side):
-        pre = sum(count[i - side:i]) / held
-        post = sum(count[i:i + side]) / held
+        pre = sum(count[i - side : i]) / held
+        post = sum(count[i : i + side]) / held
         if pre <= 0 and post <= 0:
             continue
         se = ((pre + post) / held) ** 0.5
@@ -316,8 +416,14 @@ def rhythm_changes(hits, w, n, tol=4.0, z_min=3.0):
             say = "the rhythm thickens"
         else:
             say = "the rhythm thins out"
-        out.append({"i": i, "type": "rhythm_change",
-                    "size": round(min(1.0, z / 20.0), 3), "description": say})
+        out.append(
+            {
+                "i": i,
+                "type": "rhythm_change",
+                "size": round(min(1.0, z / 20.0), 3),
+                "description": say,
+            }
+        )
     return out
 
 
@@ -326,8 +432,11 @@ def mood_turns(emotion, w):
     spans = [e for e in (emotion or []) if isinstance(e, dict) and e.get("measured")]
     if len(spans) < 3:
         return []
-    dims = [d for d in ("energy", "brightness", "groove")
-            if all(isinstance(e.get(d), (int, float)) for e in spans)]
+    dims = [
+        d
+        for d in ("energy", "brightness", "groove")
+        if all(isinstance(e.get(d), (int, float)) for e in spans)
+    ]
     if not dims:
         return []
     moves = []
@@ -337,17 +446,24 @@ def mood_turns(emotion, w):
         moves.append((size, b, gap))
     typical = sorted(m[0] for m in moves)[len(moves) // 2]
     gate = max(2.0, 2.0 * typical)
-    say = {"energy": ("it opens up", "the energy falls away"),
-           "brightness": ("it turns brighter", "it darkens"),
-           "groove": ("the groove takes over", "the groove lets go")}
+    say = {
+        "energy": ("it opens up", "the energy falls away"),
+        "brightness": ("it turns brighter", "it darkens"),
+        "groove": ("the groove takes over", "the groove lets go"),
+    }
     out = []
     for size, b, gap in moves:
         if size < gate:
             continue
         lead = max(gap.items(), key=lambda kv: abs(kv[1]))
-        out.append({"i": int(round(float(b["start"]) / w)), "type": "mood_turn",
-                    "size": round(min(1.0, size / 12.0), 3),
-                    "description": say[lead[0]][0 if lead[1] > 0 else 1]})
+        out.append(
+            {
+                "i": int(round(float(b["start"]) / w)),
+                "type": "mood_turn",
+                "size": round(min(1.0, size / 12.0), 3),
+                "description": say[lead[0]][0 if lead[1] > 0 else 1],
+            }
+        )
     return out
 
 
@@ -369,9 +485,14 @@ def comings(temporal, tol=2.0):
                 continue
             if jump < 0 and post > 0.12:
                 continue
-            found.append({"i": i, "what": name,
-                          "type": "entrance" if jump > 0 else "exit",
-                          "size": round(abs(jump), 3)})
+            found.append(
+                {
+                    "i": i,
+                    "what": name,
+                    "type": "entrance" if jump > 0 else "exit",
+                    "size": round(abs(jump), 3),
+                }
+            )
     found.sort(key=lambda m: -m["size"])
     kept = []
     for m in found:
@@ -381,16 +502,32 @@ def comings(temporal, tol=2.0):
     return kept
 
 
-def find(temporal, beats, grid=None, chords=None, melody=None,
-         rhythm=None, emotion=None, want=32, together=1.5):
+def find(
+    temporal,
+    beats,
+    grid=None,
+    chords=None,
+    melody=None,
+    rhythm=None,
+    emotion=None,
+    want=32,
+    together=1.5,
+):
     """Every kind of moment, ranked, with the rare kinds guaranteed room."""
     w, v, noise = energy_curve(temporal)
     n = len(v)
     hits = (rhythm or {}).get("hits") if isinstance(rhythm, dict) else rhythm
-    cand = (comings(temporal) + swings(v, w, noise) + stops(v, w, noise)
-            + loudest(v) + tempo_changes(grid, w) + key_changes(chords, w)
-            + lifts(melody, w, n) + rhythm_changes(hits, w, n)
-            + mood_turns(emotion, w))
+    cand = (
+        comings(temporal)
+        + swings(v, w, noise)
+        + loudest(v)
+        + rolls(temporal, w)
+        + tempo_changes(grid, w)
+        + key_changes(chords, w)
+        + lifts(melody, w, n)
+        + rhythm_changes(hits, w, n)
+        + mood_turns(emotion, w)
+    )
     if not cand:
         return []
     for m in cand:
@@ -420,21 +557,23 @@ def find(temporal, beats, grid=None, chords=None, melody=None,
     for kind in ORDER:
         if kind not in CAP:
             continue
-        same = sorted([g for g in groups if g["type"] == kind],
-                      key=lambda g: -g["size"])[:CAP[kind]]
+        same = sorted(
+            [g for g in groups if g["type"] == kind], key=lambda g: -g["size"]
+        )[: CAP[kind]]
         picked += same
         taken += same
-    rest = sorted([g for g in groups
-                   if g["type"] not in CAP and not any(g is t for t in taken)],
-                  key=lambda g: -g["size"])
-    picked = picked + rest[:max(0, want - len(picked))]
+    rest = sorted(
+        [g for g in groups if g["type"] not in CAP and not any(g is t for t in taken)],
+        key=lambda g: -g["size"],
+    )
+    picked = picked + rest[: max(0, want - len(picked))]
 
     rank = {k: i for i, k in enumerate(ORDER)}
     thinned = []
     for g in sorted(picked, key=lambda x: rank[x["type"]]):
         if g["type"] in SHAPE and any(
-                k["type"] in SHAPE and abs(k["t"] - g["t"]) <= together * 2
-                for k in thinned):
+            k["type"] in SHAPE and abs(k["t"] - g["t"]) <= together * 2 for k in thinned
+        ):
             continue
         thinned.append(g)
     picked = thinned
@@ -447,8 +586,12 @@ def find(temporal, beats, grid=None, chords=None, melody=None,
         for part in g["parts"]:
             if part.get("what") and part["what"] not in names:
                 names.append(part["what"])
-        item = {"time_s": round(float(g["t"]), 3), "type": g["type"],
-                "intensity": min(1.0, g["size"]), "measured": True}
+        item = {
+            "time_s": round(float(g["t"]), 3),
+            "type": g["type"],
+            "intensity": min(1.0, g["size"]),
+            "measured": True,
+        }
         if names:
             if len(names) == 1:
                 who = names[0]

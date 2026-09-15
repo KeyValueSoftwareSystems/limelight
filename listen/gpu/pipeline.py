@@ -307,60 +307,6 @@ def clean_moments(moments, beats=None, section_bounds=None):
     return cleaned
 
 
-BRIGHT = ("hh", "cymbals", "crash", "ride", "shaker", "tambourine", "violin",
-          "flute", "piccolo", "synth", "keys", "piano", "digital-piano", "bells")
-PERC = ("drums", "kick", "snare", "hh", "toms", "percussion", "clap", "cymbals",
-        "shaker", "tambourine", "congas", "bongos")
-
-
-def raw_feel(temporal, a, b):
-    """Unscaled energy, brightness and groove for one span, off the stem lanes.
-
-    MOSS returns 1 for all six dimensions on every segment of every song, so
-    the three with a physical correlate are measured here instead."""
-    if not temporal or not temporal.get("stems"):
-        return None
-    w = temporal.get("window_s") or 0.5
-    lanes = temporal["stems"]
-    i, j = int(a / w), max(int(a / w) + 1, int(b / w))
-
-    def mean_of(names):
-        got = []
-        for k, v in lanes.items():
-            if names and not any(n in k.lower() for n in names):
-                continue
-            seg = v[i:j]
-            if seg:
-                got.append(sum(seg) / len(seg))
-        return sum(got) / len(got) if got else 0.0
-
-    whole = mean_of(())
-    if whole <= 0:
-        return None
-    return {"energy": whole,
-            "brightness": mean_of(BRIGHT) / max(whole, 1e-6),
-            "groove": mean_of(PERC) / max(whole, 1e-6)}
-
-
-def scale_feel(raws):
-    """Put each dimension on 1-10 against its own song, and say which moved.
-
-    A dimension whose whole-song spread is under 5% of its peak is flat, and
-    stretching that onto 1-10 would draw noise as a curve, so it is left out
-    of both the output and the `measured` list."""
-    out = [{} for _ in raws]
-    moved = []
-    for dim in ("energy", "brightness", "groove"):
-        vals = [r[dim] for r in raws]
-        lo, hi = min(vals), max(vals)
-        if hi - lo < max(0.01, 0.05 * hi):
-            continue
-        moved.append(dim)
-        for i, v in enumerate(vals):
-            out[i][dim] = round(1.0 + 9.0 * (v - lo) / (hi - lo), 1)
-    return out, moved
-
-
 def found_moments(temporal, beats, grid=None, chords=None, melody=None,
                   rhythm=None, emotion=None, want=32):
     """Every kind of moment listen/gpu/moments.py can measure from the score.
@@ -384,66 +330,24 @@ def found_moments(temporal, beats, grid=None, chords=None, melody=None,
         return []
 
 
-def clean_emotion(emotion, duration=None, temporal=None):
-    if not emotion:
+def load_feel():
+    here = next((c for c in (os.path.join(BASE, "feel.py"),
+                             os.path.join(BASE, "..", "feel.py"))
+                 if os.path.exists(c)), None)
+    if not here:
+        return None
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("limelight_feel", here)
+    F = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(F)
+    return F
+
+
+def clean_emotion(emotion, duration=None, temporal=None, sections=None):
+    F = load_feel()
+    if not F:
         return []
-    out = []
-    for e in emotion:
-        try:
-            item = {
-                "start": float(str(e.get("start", e.get("start_s", 0))).rstrip("s")),
-                "end": float(str(e.get("end", e.get("end_s", 0))).rstrip("s")),
-                "energy": float(e.get("energy", 5)),
-                "valence": float(e.get("valence", 5)),
-                "arousal": float(e.get("arousal", 5)),
-                "tension": float(e.get("tension", 5)),
-                "brightness": float(e.get("brightness", 5)),
-                "groove": float(e.get("groove", 5)),
-                "emotion": str(e.get("emotion", "neutral")),
-            }
-            if "description" in e:
-                item["description"] = str(e["description"])
-            if item["start"] < item["end"]:
-                out.append(item)
-        except:
-            pass
-    out.sort(key=lambda x: x["start"])
-
-    filled = []
-    for i, seg in enumerate(out):
-        if filled and seg["start"] > filled[-1]["end"] + 0.5:
-            gap = {**filled[-1], "start": filled[-1]["end"], "end": seg["start"]}
-            filled.append(gap)
-        filled.append(seg)
-
-    if filled:
-        if filled[0]["start"] > 0.5:
-            first = {**filled[0], "start": 0.0, "end": filled[0]["start"]}
-            filled.insert(0, first)
-        if duration and filled[-1]["end"] < duration - 0.5:
-            last = {**filled[-1], "start": filled[-1]["end"], "end": round(duration, 3)}
-            filled.append(last)
-        filled[-1]["end"] = round(duration, 3) if duration else filled[-1]["end"]
-
-    for i in range(len(filled) - 1):
-        filled[i]["end"] = filled[i + 1]["start"]
-
-    raws = [raw_feel(temporal, seg["start"], seg["end"]) for seg in filled]
-    if filled and all(raws):
-        scaled, moved = scale_feel(raws)
-        for seg, got in zip(filled, scaled):
-            seg.update(got)
-            if moved:
-                seg["measured"] = moved
-
-    kept = set(filled[0].get("measured") or ()) if filled else set()
-    for k in ("valence", "arousal", "tension", "energy", "brightness", "groove"):
-        if k in kept:
-            continue
-        if len({seg.get(k) for seg in filled}) < 3:
-            for seg in filled:
-                seg.pop(k, None)
-    return filled
+    return F.clean_emotion(emotion, duration, temporal, sections)
 
 
 def step_duration(wav):
@@ -972,6 +876,7 @@ def run_pipeline(wav_path):
                         score["emotion"] = clean_emotion(
                             raw, duration=score["song"]["length_s"],
                             temporal=score.get("stems_temporal"),
+                            sections=score.get("sections"),
                         )
                     print(
                         f"    {task}: {len(score.get(task, []))} ({time.time() - t:.1f}s)",

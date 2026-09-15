@@ -11,6 +11,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import feel as F
 import moments as M
 
 
@@ -65,6 +66,16 @@ def main(paths):
             continue
         said = envelope(score, slug)
         downs = mark_downbeats(score)
+        feels = ""
+        if not score.get("emotion") and score.get("sections"):
+            got = F.clean_emotion(None, (score.get("song") or {}).get("length_s"),
+                                  score.get("stems_temporal"), score.get("sections"))
+            if got:
+                score["emotion"] = got
+                (score.setdefault("unavailable", {}) or {}).pop("emotion", None)
+                if not score.get("unavailable"):
+                    score.pop("unavailable", None)
+                feels = f"+emotion from {len(got)} sections"
         was = len(score.get("moments") or [])
         got = M.find(score.get("stems_temporal"),
                      [b["t"] for b in score.get("beats") or [] if "t" in b],
@@ -84,6 +95,8 @@ def main(paths):
             note.append("+" + ",".join(said))
         if downs:
             note.append(f"+{downs} downbeats")
+        if feels:
+            note.append(feels)
         print(f"{slug}: moments {was} -> {len(got or [])}  {shape}"
               + (f"   {' '.join(note)}" if note else ""))
 
