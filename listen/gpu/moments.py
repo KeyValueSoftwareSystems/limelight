@@ -654,7 +654,7 @@ def melody_returns(melody, w, most=3, apart=6.0):
         return []
     gaps = [(b - a, a, b) for a, b in zip(ons, ons[1:])]
     spans = sorted(b - a for a, b in zip(ons, ons[1:]))
-    gate = max(1.5, 4.0 * spans[len(spans) // 2])
+    gate = max(2.5, 4.0 * spans[len(spans) // 2])
     kept = []
     for held, left, back in sorted(gaps, key=lambda g: -g[0]):
         if held < gate:
