@@ -599,9 +599,64 @@ EMOTION_PROMPT = (
     "Return ONLY the JSON array."
 )
 
-CAPTION_PROMPT = "Describe this song in one paragraph: genre, mood, instrumentation, production style, and overall vibe. Be specific and concise."
-LYRICS_PROMPT = "Transcribe the lyrics of this song with timestamps. Format each line as:\n[MM:SS] lyric text\n\nIf there are no vocals or lyrics, respond with: [no lyrics]"
-KEY_PROMPT = "What is the musical key and tempo of this song? Include mode (major/minor), any key changes, and time signature. Be concise."
+CAPTION_PROMPT = (
+    "Describe the entire recording in one concise paragraph of approximately 80-120 words.\n\n"
+    "Include, where clearly audible:\n"
+    "- Main style or genre, using a broader description if the subgenre is uncertain.\n"
+    "- Overall mood and how it develops.\n"
+    "- Prominent instruments, vocal delivery and their musical roles.\n"
+    "- Rhythm and feel.\n"
+    "- Audible production characteristics, such as space, layering, distortion, reverb and the balance between acoustic and electronic sounds.\n"
+    "- The most distinctive musical feature or structural contrast.\n\n"
+    "Prioritize characteristics that distinguish this recording. "
+    "Name instruments only as specifically as the audio supports. "
+    "Describe audible production qualities without inventing equipment, recording location, artist identity, release era or production methods. "
+    "Do not invent lyrics or a narrative, and avoid generic praise. "
+    "A stable recording does not require a changing mood or dramatic contrast.\n\n"
+    "Return ONLY the paragraph, overriding the common JSON-output instruction."
+)
+
+LYRICS_PROMPT = (
+    "Transcribe the intelligible sung, rapped or spoken words throughout the recording in their original language and script. Do not translate or paraphrase.\n\n"
+    "Format each lyric line as:\n[MM:SS.s] lyric text\n\n"
+    "Rules:\n"
+    "- Timestamp the audible beginning of each line relative to the supplied audio.\n"
+    "- Split into natural lyrical phrases, not individual words or entire verses.\n"
+    "- Include every audible repetition; do not write 'chorus repeats'.\n"
+    "- Preserve audible wording, including explicit language.\n"
+    "- Do not reconstruct words from familiarity with a song or expected rhymes.\n"
+    "- Mark an unrecoverable word or span as [inaudible] within the line.\n"
+    "- If an entire attempted lyrical phrase is unintelligible, output a timestamped [inaudible] line rather than inventing words.\n"
+    "- Include clearly intelligible backing-vocal words and ad-libs.\n"
+    "- Omit instrumental passages, breaths and purely wordless vocalizations.\n"
+    "- Do not add verse/chorus headings, commentary or an invented speaker identity.\n"
+    "- Order lines by onset. Timestamps are estimates, not guaranteed alignment.\n\n"
+    "If there are no lyrical or spoken words, including recordings with only wordless vocals, return exactly:\n"
+    "[no lyrics]\n\n"
+    "Return ONLY the timestamped transcription or [no lyrics], overriding the common JSON-output instruction."
+)
+
+KEY_PROMPT = (
+    "Analyze the tonal center, tempo and meter across the entire recording.\n\n"
+    "Return concise text using exactly these headings:\nKey:\nTempo:\nTime signature:\nChanges:\n\n"
+    "Key:\n"
+    "- Give the best-supported tonic and mode.\n"
+    "- Do not force major/minor when a modal, ambiguous or non-tonal description fits.\n"
+    "- Distinguish the overall tonal center from individual chords.\n"
+    "- If genuinely ambiguous, state the main plausible alternatives.\n\n"
+    "Tempo:\n"
+    "- Give the best-supported main pulse in BPM.\n"
+    "- Mention a half-time or double-time alternative only when genuinely plausible.\n"
+    "- Describe variable tempo, rubato or free time when a single BPM is misleading.\n\n"
+    "Time signature:\n"
+    "- Give the best-supported meter.\n"
+    "- State uncertainty or free meter rather than forcing 4/4.\n\n"
+    "Changes:\n"
+    "- List clearly supported changes in tonal center, tempo or meter with approximate onset timestamps in [MM:SS.s] format.\n"
+    "- Do not mistake routine chord changes for modulation, or a change in rhythmic density for a tempo change.\n"
+    "- If no clear changes are detected, write 'No clear changes detected.'\n\n"
+    "Return ONLY these four fields as text, overriding the common JSON-output instruction."
+)
 
 
 def make_prompt(task_prompt, duration_s):
@@ -736,7 +791,7 @@ def run_pipeline(wav_path):
         ("lyrics", LYRICS_PROMPT, False),
         ("key_tempo", KEY_PROMPT, False),
     ]:
-        prompt = make_prompt(raw_prompt, dur) if is_json else raw_prompt
+        prompt = make_prompt(raw_prompt, dur)
         t = time.time()
         try:
             if is_json:
