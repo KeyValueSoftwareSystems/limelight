@@ -7,14 +7,35 @@
   "heads": 2
  },
  "supported_effects": [
-  "drone", "wash", "impact", "blackout", "hush", "ramp", "stab", "lift",
-  "trade", "isolate", "strip", "cut", "swell", "gear",
-  "follow", "split", "accent"
+  "drone",
+  "wash",
+  "impact",
+  "blackout",
+  "hush",
+  "ramp",
+  "stab",
+  "lift",
+  "trade",
+  "isolate",
+  "strip",
+  "cut",
+  "swell",
+  "gear",
+  "follow",
+  "split",
+  "accent",
+  "strobe",
+  "pulse",
+  "tint",
+  "flare",
+  "spectrum",
+  "chase",
+  "sweep"
  ],
  "unsupported_effects": [],
  "limits": {
   "isolate_min_fixtures": 3,
-  "note": "16 pars is well above the isolate threshold; all 17 effects are supported."
+  "note": "all 24 effects are supported on this rig"
  },
  "note": "DMX functions for the KeyCode Stage placeholder rig. 16 par7 (7ch each, addresses 1-112) + 2 head13 (13ch each, addresses 113-138). Generated and tuned for this specific rig."
 }

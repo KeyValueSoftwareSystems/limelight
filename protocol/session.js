@@ -55,11 +55,37 @@ function Session(score, opts) {
     while (k + 1 < tempo.length && tempo[k + 1].at_s <= t) k++;
     return tempo[k];
   }
+  /* The tempo map is a fit; the beat list is the measurement. On
+     raga-of-revenge the map's second segment reads 118.77 bpm where the beats
+     themselves run at 119.97, and over 211 beats that 1.2 bpm accumulates to
+     1.07s -- more than two beats late by bar 60, which is a section boundary
+     landing in the wrong place all night. Where a measured beat exists, use it;
+     interpolate between neighbours; fall back to the map past the end. */
+  const struck = (score && Array.isArray(score.beats))
+    ? score.beats.map((b) => (b && b.t != null ? b.t : b))
+                 .filter((x) => typeof x === "number")
+    : [];
   const atBeat = (n) => {
+    if (struck.length > 1 && n >= 0 && n <= struck.length - 1) {
+      const lo = Math.floor(n);
+      const frac = n - lo;
+      if (frac < 1e-9) return struck[lo];
+      if (lo + 1 < struck.length)
+        return struck[lo] + (struck[lo + 1] - struck[lo]) * frac;
+    }
     const s = segAtBeat(n);
     return s.at_s + (n - s.from_beat) * (60 / s.bpm);
   };
   const beatAt = (t) => {
+    if (struck.length > 1 && t >= struck[0] && t <= struck[struck.length - 1]) {
+      let lo = 0, hi = struck.length - 1;
+      while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        if (struck[mid] <= t) lo = mid; else hi = mid;
+      }
+      const span = struck[hi] - struck[lo];
+      return lo + (span > 0 ? (t - struck[lo]) / span : 0);
+    }
     const s = segAtTime(t);
     return s.from_beat + (t - s.at_s) / (60 / s.bpm);
   };

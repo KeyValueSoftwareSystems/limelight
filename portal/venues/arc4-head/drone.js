@@ -16,7 +16,10 @@ module.exports = function drone(params, ctx) {
     const p = i / N;                              // 0..1 over the loop
     const breath = 1 + 0.15 * Math.sin(2 * Math.PI * p);
     const f = H.emptyFrame();
-    for (const par of pars) H.setPar(f, par, colour, amount * breath);
+    for (const par of H.PARS) {
+      const inside = pars.some(q => q.id === par.id);
+      H.setPar(f, par, colour, amount * breath * (inside ? 1 : 0.42));
+    }
     // a slow tilt nod around centre (~±5 DMX), pan essentially parked
     H.setHead(f, H.HEADS[0], {
       level: amount * 0.5 * breath, colour,
@@ -29,6 +32,6 @@ module.exports = function drone(params, ctx) {
   return {
     frames,
     loop_beats: loopBeats,
-    per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS),
+    per_fixture: H.PAR_IDS.concat(H.HEAD_IDS),
   };
 };

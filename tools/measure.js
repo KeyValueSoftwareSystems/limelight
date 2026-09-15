@@ -263,4 +263,14 @@ function measure(opts) {
   return r;
 }
 
-module.exports = { measure, judge, escalation, bakeFrames, changesPerBar, hitsPerBar, unison, motionless, landsOn };
+
+const EFFECTS = {
+  "escalates":    { measure: "each return bigger than the last",         check: "escalates" },
+  "glides":       { measure: "the move is continuous, never a snap",     check: "never-still" },
+  "speed-rises":  { measure: "the rate climbs across the passage",       check: "rising" },
+  "wave":         { measure: "the rig ripples rather than flipping",     check: "below-half" },
+  "lands-on":     { measure: "the hit sits on the beat it names",        check: "hits" },
+};
+
+module.exports = {
+  EFFECTS, measure, judge, escalation, bakeFrames, changesPerBar, hitsPerBar, unison, motionless, landsOn };

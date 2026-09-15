@@ -71,7 +71,7 @@ const EN = enumerate(RIG);
 /* ---- recipes: the list, the effects under test, the errors ------------------- */
 {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "explain-"));
-  const fixture = path.join(__dirname, "..", "..", "protocol", "levels.score");
+  const fixture = require("../../tools/preset.js").findScore("levels");
   fs.writeFileSync(path.join(tmp, "whole-levels.json"), JSON.stringify({ name: "whole-levels", song: "levels", tests: "does it escalate?", find: "whole-song", effects: ["escalates", "speed-rises", "something-new"] }));
   fs.writeFileSync(path.join(tmp, "nowhere.json"), JSON.stringify({ name: "nowhere", song: "no-such-song-xyz", find: "whole-song", effect: "glides" }));
   fs.writeFileSync(path.join(tmp, "bad-finder.json"), JSON.stringify({ name: "bad-finder", song: "levels", find: "nope" }));

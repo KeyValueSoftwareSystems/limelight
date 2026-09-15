@@ -183,6 +183,48 @@ function resolveState(s) {
 }
 
 const resolvedGestures = (plan.gestures || []).map(resolveGesture).filter(Boolean);
+/* A state is a looped frame set, so a section with no binding over it renders
+   the same two seconds for its whole length. Two wrong fixes were tried first
+   and both are recorded here because the numbers said so.
+
+   A beat pulse made the rig tick on every beat regardless of the music: it read
+   as constant pulsating, which is not what a designed show does. Binding every
+   section to its loudest lane was worse - correlation with the mix fell from
+   0.555 to 0.403, because following the backing vocal dims the rig every time
+   the singer rests while the band is at full cry.
+
+   What is left is the part that measured well: the resting look sits where the
+   song's own energy is. energy is measured per bar and already in the score. No
+   pulse, no metronome - the rig is simply brighter where the music is bigger,
+   which is what a designer does by hand. */
+const feel = (score.emotion || []).filter(e => typeof e.energy === "number");
+const feelLo = feel.length ? Math.min(...feel.map(e => e.energy)) : 0;
+const feelHi = feel.length ? Math.max(...feel.map(e => e.energy)) : 1;
+function energyAt(t) {
+  if (feel.length < 2 || feelHi <= feelLo) return 0.5;
+  let lo = 0, hi = feel.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if ((feel[mid].start || 0) <= t) lo = mid; else hi = mid;
+  }
+  const a = feel[lo], b = feel[Math.min(lo + 1, feel.length - 1)];
+  const span = Math.max(1e-6, (b.start || 0) - (a.start || 0));
+  const f = Math.max(0, Math.min(1, (t - (a.start || 0)) / span));
+  const e = a.energy + (b.energy - a.energy) * f;
+  return (e - feelLo) / (feelHi - feelLo);
+}
+function sits(frame, t, width, offset, head) {
+  const k = 0.62 + 0.52 * energyAt(t);
+  const out = frame.slice();
+  const chans = head ? [5] : [1, 2, 3];
+  for (const c of chans) {
+    const at = offset + c;
+    if (c >= width) continue;
+    out[at] = Math.max(0, Math.min(255, Math.round((frame[at] || 0) * k)));
+  }
+  return out;
+}
+
 const resolvedBindings = (plan.bindings || []).map(resolveBinding).filter(Boolean);
 const resolvedStates   = (plan.states || []).map(resolveState).filter(Boolean);
 
@@ -253,7 +295,7 @@ for (let t = 0; t < dur; t += 1 / fps) {
       for (const s of stateResults) {
         if (t < s.startS || t >= s.endS) continue;
         if (!s.dmx.per_fixture.includes(fid)) continue;
-        base = frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm);
+        base = sits(frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm), t, W, o, isHead);
         break;
       }
     }

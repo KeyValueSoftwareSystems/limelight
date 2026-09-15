@@ -1397,6 +1397,19 @@ const toWhite = (c, t) => (t <= 0 ? c : c.map(v => v + (1 - v) * Math.min(1, t))
    eye should see on a screen. */
 const level = v => (v ? Math.pow(v / 255, 1 / GAMMA) : 0);
 
+/* A real lamp told to strobe chops its own output; the emulator used to decode
+   the channel and then draw a steady lamp, so a strobe gesture looked like a
+   wash and the rig on stage did something the screen never showed. The shutter
+   is reproduced here at the fixture's own rate against the frame clock. Same
+   for the head's prism and gobo, which change what the beam looks like. */
+const STROBE_MAX_HZ = 25;
+function shutter(dmx, idx, fps) {
+  if (!dmx) return 1;
+  const hz = Math.max(1, (dmx / 255) * STROBE_MAX_HZ);
+  const period = Math.max(2, (fps || 40) / hz);
+  return (idx % period) < period * 0.5 ? 1 : 0;
+}
+
 function readFixtures(idx) {
   if (!S.frames || !S.show || !S.place) return null;
   const base = idx * S.show.channels;
@@ -1408,7 +1421,7 @@ function readFixtures(idx) {
     const peak = Math.max(r, g, b);
     return {
       ...p, r, g, b, strobe: f[i + PAR.strobe],
-      k: level(peak),
+      k: level(peak) * shutter(f[i + PAR.strobe], idx, (S.show || {}).fps),
       rgb: peak ? [r / peak, g / peak, b / peak] : [0, 0, 0],
     };
   });
@@ -1424,7 +1437,10 @@ function readFixtures(idx) {
   const wheel = wheelAt(f[h + HEAD.colour]);
   return {
     ...H0, panC, tiltC, dim: f[h + HEAD.dim], strobe: f[h + HEAD.strobe],
-    wheel, k: level(f[h + HEAD.dim]), rgb: wheel.rgb,
+    gobo: f[h + HEAD.gobo], prism: f[h + HEAD.prism],
+    wheel,
+    k: level(f[h + HEAD.dim]) * shutter(f[h + HEAD.strobe], idx, (S.show || {}).fps),
+    rgb: wheel.rgb,
     az: az / DEG, el: el / DEG,
     rot: Math.atan2(ax, ay), reach: Math.hypot(ax, ay),
   };
@@ -1588,15 +1604,37 @@ function drawBeam(h, W, H, u, n) {
       [0.17, 0.30, u * 0.022],
       [0.07, 0.52, u * 0.012],
     ];
-    for (const [spread, weight, root] of layers) {
-      const a = (0.10 + 0.62 * k) * weight;
-      const g = ctx.createLinearGradient(0, 0, 0, -L);
-      g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.7) / 0.3), a));
-      g.addColorStop(0.22, rgba(c, a * 0.62));
-      g.addColorStop(0.55, rgba(c, a * 0.24));
-      g.addColorStop(1, rgba(c, 0));
-      ctx.fillStyle = g;
-      cone(root, L * spread, L);
+    /* A prism splits one beam into several that fan out from the same lens.
+       Without this the channel was decoded and thrown away, so the impact
+       gesture - which kicks the prism in on its front - looked identical to a
+       plain hit on screen while the real head threw six beams. */
+    const fan = h.prism > 50 ? [-0.20, -0.10, 0, 0.10, 0.20] : [0];
+    const share = 1 / Math.sqrt(fan.length);
+    for (const off of fan) {
+      ctx.save();
+      ctx.rotate(off);
+      for (const [spread, weight, root] of layers) {
+        const a = (0.10 + 0.62 * k) * weight * share;
+        const g = ctx.createLinearGradient(0, 0, 0, -L);
+        g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.7) / 0.3), a));
+        g.addColorStop(0.22, rgba(c, a * 0.62));
+        g.addColorStop(0.55, rgba(c, a * 0.24));
+        g.addColorStop(1, rgba(c, 0));
+        ctx.fillStyle = g;
+        cone(root, L * spread, L);
+      }
+      ctx.restore();
+    }
+    /* A gobo puts a pattern in the beam: banding across it, not a clean cone. */
+    if (h.gobo > 8) {
+      ctx.globalCompositeOperation = "destination-out";
+      const bands = 7;
+      for (let i = 1; i < bands; i += 2) {
+        const at = (i / bands) * L;
+        ctx.fillStyle = "rgba(0,0,0,0.30)";
+        ctx.fillRect(-L * 0.36, -at - L * 0.022, L * 0.72, L * 0.030);
+      }
+      ctx.globalCompositeOperation = "lighter";
     }
     ctx.restore();
   }

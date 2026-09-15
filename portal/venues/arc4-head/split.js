@@ -9,18 +9,20 @@ module.exports = function split(params, ctx) {
   const cols = H.parseColours(params.colours, [[1, 0.75, 0.35], [0.2, 0.4, 1]]);
   const c0 = cols[0], c1 = cols[1];
   const bpm = ctx.bpm;
+  const restBase = params.rest != null ? params.rest : 0.14;
 
   function render(value, t) {
     const arr = Array.isArray(value) ? value : [value, value];
     const l = H.clamp(arr[0] || 0, 0, 1);
     const r = H.clamp(arr[1] || 0, 0, 1);
     const beat = (t || 0) * bpm / 60;
+    const rest = restBase + 0.26 * Math.max(l, r);
     const f = H.emptyFrame();
-    for (const p of H.LEFT)  H.setPar(f, p, c0, l * 0.9);
-    for (const p of H.RIGHT) H.setPar(f, p, c1, r * 0.9);
+    for (const p of H.LEFT)  H.setPar(f, p, c0, rest + (0.92 - rest) * l);
+    for (const p of H.RIGHT) H.setPar(f, p, c1, rest + (0.92 - rest) * r);
     const balance = r - l;                                  // -1 all-left .. +1 all-right
     H.setHead(f, H.HEADS[0], {
-      level: (l + r) * 0.4,
+      level: rest + (0.85 - rest) * Math.max(l, r),
       colour: l >= r ? c0 : c1,
       pan: 0.60 + 0.20 * H.clamp(balance * 1.5, -1, 1),     // lean toward the louder side
       tilt: 0.32 + 0.05 * Math.sin(2 * Math.PI * beat / 8),

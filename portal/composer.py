@@ -50,8 +50,8 @@ def fetch_overview(song):
     data = hub_score({
         "score": song,
         "fields": ["grid", "song", "sections", "moments", "curves", "key",
-                    "per_beat", "caption", "emotions", "streams", "lanes"],
-        "curves": ["energy"],
+                   "per_beat", "caption", "emotion", "presence", "chords"],
+        "curves": ["energy", "brightness", "groove"],
     })
     return data
 
@@ -93,9 +93,67 @@ def format_overview(data):
     # Emotion spans are prose, not placement data (rule 2: measurement places,
     # prose characterises). Listing all of them blew the context window on small
     # models, so summarise here and let the model pull detail with tools if needed.
-    emotions = data.get("emotions") or []
+    emotions = data.get("emotion") or data.get("emotions") or []
     if emotions:
-        lines.append(f"\nEMOTION SPANS: {len(emotions)} (call section/moment for detail)")
+        dims = ("energy", "brightness", "groove", "mode")
+        span = {}
+        for k in dims:
+            vals = [e[k] for e in emotions if isinstance(e.get(k), (int, float))]
+            if vals:
+                span[k] = (min(vals), max(vals))
+        lines.append(f"\nHOW IT FEELS ({len(emotions)} measured spans)")
+        if span:
+            lines.append("  across this song: " + ", ".join(
+                f"{k} {lo:.1f}..{hi:.1f}" for k, (lo, hi) in span.items()))
+        for i, sec in enumerate(sections):
+            a_s, b_s = sec.get("start"), sec.get("end")
+            if a_s is None or b_s is None:
+                continue
+            inside = [e for e in emotions
+                      if e.get("start") is not None and a_s <= e["start"] < b_s]
+            if not inside:
+                continue
+            bit = []
+            for k in dims:
+                vals = [e[k] for e in inside if isinstance(e.get(k), (int, float))]
+                if vals:
+                    bit.append(f"{k} {sum(vals)/len(vals):.1f}")
+            named = {}
+            for e in inside:
+                n = e.get("emotion")
+                if n:
+                    named[n] = named.get(n, 0) + 1
+            top = max(named, key=named.get) if named else ""
+            lines.append(f"  [{i}] {sec.get('name', '?')}: " + ", ".join(bit)
+                         + (f"  — mostly {top}" if top else ""))
+        lines.append("  energy/brightness/groove are 0..10 within this song; mode is -1 minor "
+                     "to +1 major. They are measured per bar, not written by a model.")
+
+    sc = _score_of(data) if data.get("_song") else {}
+    lanes = ((sc.get("stems_temporal") or {}).get("stems")) or {}
+    loud = sc.get("stems") or {}
+    if lanes:
+        w = (sc.get("stems_temporal") or {}).get("window_s") or 0.5
+        rows = []
+        for nm, v in lanes.items():
+            top = max(v) if v else 0
+            if top < 0.12:
+                continue
+            on = [i for i, x in enumerate(v) if x >= 0.25 * top]
+            if not on:
+                continue
+            db = (loud.get(nm) or {}).get("db")
+            rows.append((db if isinstance(db, (int, float)) else -99, nm, top,
+                         round(on[0] * w, 1), round(on[-1] * w, 1),
+                         len(on) / max(len(v), 1)))
+        rows.sort(key=lambda r: -r[0])
+        lines.append(f"\nWHAT IS PLAYING ({len(rows)} instrument lanes, loudest first)")
+        for db, nm, top, a_s, b_s, share in rows[:26]:
+            when = "throughout" if share > 0.6 else f"{a_s:.0f}s-{b_s:.0f}s"
+            lines.append(f"  {nm:16s} {db:6.1f} dB  peak {top:.2f}  plays {share:.0%} of the song, {when}")
+        if len(rows) > 26:
+            lines.append(f"  ...and {len(rows)-26} quieter lanes; ask `lane <name> <from_s> <to_s>` for any of them")
+        lines.append("  Every one of these is a stream you may bind or point a lamp at.")
 
     streams = data.get("streams") or data.get("lanes") or []
     if streams:
@@ -222,6 +280,44 @@ TOOL_DEFINITIONS = [
 ]
 
 
+_SCORES = {}
+
+
+def _score_of(overview):
+    song = overview.get("_song")
+    if song in _SCORES:
+        return _SCORES[song]
+    base = os.path.join(REPO, "hub", "files", "score")
+    at = os.path.join(base, song + ".score")
+    if not os.path.isfile(at):
+        store = os.path.join(base, ".versions", song + ".score")
+        try:
+            ns = [int(x.split(".")[0]) for x in os.listdir(store)
+                  if x.endswith(".score") and x.split(".")[0].isdigit()]
+            at = os.path.join(store, "%d.score" % max(ns)) if ns else at
+        except OSError:
+            pass
+    try:
+        with open(at) as fh:
+            _SCORES[song] = json.load(fh)
+    except OSError:
+        _SCORES[song] = {}
+    return _SCORES[song]
+
+
+def _sec_of_bar(sc, bar):
+    g = sc.get("grid") or {}
+    bpb = g.get("beats_per_bar") or 4
+    beats = [b.get("t") if isinstance(b, dict) else b for b in (sc.get("beats") or [])]
+    beats = [t for t in beats if isinstance(t, (int, float))]
+    i = max(0, (int(bar) - 1) * bpb)
+    if beats and i < len(beats):
+        return float(beats[i])
+    if beats:
+        return float(beats[-1])
+    return (g.get("first_beat_s") or 0) + (bar - 1) * bpb * 60.0 / (g.get("bpm") or 120)
+
+
 def handle_tool_call(name, args, overview):
     """Handle a tool call from the LLM by forwarding to the hub or reading the overview."""
     sections = overview.get("sections") or []
@@ -239,64 +335,133 @@ def handle_tool_call(name, args, overview):
             return json.dumps(sections[idx])
         return json.dumps({"error": f"section {idx} out of range"})
 
+    sc = _score_of(overview)
+
     if name == "lane":
-        try:
-            data = hub_score({
-                "score": overview["_song"],
-                "fields": ["per_beat"],
-                "lane": args.get("name"),
-                "from_s": args.get("from_s", 0),
-                "to_s": args.get("to_s", 300),
-            })
-            lane_data = data.get("per_beat", {}).get(args.get("name"), {})
-            if not lane_data:
-                return json.dumps({"summary": f"lane '{args.get('name')}' returned no data in range"})
-            return json.dumps({"lane": args.get("name"), "data": lane_data})
-        except Exception as e:
-            return json.dumps({"summary": f"lane '{args.get('name')}': {e}"})
-
-    if name == "onsets":
-        try:
-            data = hub_score({
-                "score": overview["_song"],
-                "fields": ["onsets"],
-                "from_bar": args.get("from_bar", 1),
-                "to_bar": args.get("to_bar", 999),
-                "threshold": args.get("threshold", 0.5),
-            })
-            return json.dumps(data.get("onsets", {"summary": "no onset data"}))
-        except Exception as e:
-            return json.dumps({"summary": f"onsets: {e}"})
-
-    if name == "compare":
+        want = args.get("name")
+        a, b = float(args.get("from_s", 0)), float(args.get("to_s", 1e9))
+        lanes = ((sc.get("stems_temporal") or {}).get("stems")) or {}
+        v = lanes.get(want)
+        if v is None:
+            near = [k for k in lanes if want and want.lower() in k.lower()]
+            return json.dumps({"summary": f"no lane called '{want}'",
+                               "did_you_mean": near[:6] or sorted(lanes)[:12]})
+        w = (sc.get("stems_temporal") or {}).get("window_s") or 0.5
+        i, j = max(0, int(a / w)), min(len(v), int(b / w) + 1)
+        seg = v[i:j]
+        if not seg:
+            return json.dumps({"summary": f"'{want}' has no samples between {a}s and {b}s"})
+        top = max(seg)
+        loud = (sc.get("stems") or {}).get(want) or {}
+        on = [k for k, x in enumerate(seg) if x >= 0.25 * max(top, 1e-9)]
         return json.dumps({
-            "summary": f"compare {args.get('streams', [])} over bars {args.get('from_bar')}-{args.get('to_bar')}: "
-                       f"data requires hub lane analysis (forwarded as-is)"
+            "lane": want, "from_s": a, "to_s": b, "window_s": w,
+            "mean": round(sum(seg) / len(seg), 3), "peak": round(top, 3),
+            "carries_from_s": round(a + on[0] * w, 2) if on else None,
+            "carries_to_s": round(a + on[-1] * w, 2) if on else None,
+            "share_of_span_playing": round(len(on) / len(seg), 3),
+            "db_in_mix": loud.get("db"),
+            "shape": [round(x, 2) for x in seg[:: max(1, len(seg) // 24)]],
         })
 
+    if name == "onsets":
+        hits = ((sc.get("rhythm") or {}).get("hits")) or []
+        thr = float(args.get("threshold", 0.0) or 0.0)
+        a = _sec_of_bar(sc, int(args.get("from_bar", 1)))
+        b = _sec_of_bar(sc, int(args.get("to_bar", 9999)) + 1)
+        got = [h for h in hits
+               if isinstance(h, dict) and h.get("t") is not None
+               and a <= h["t"] < b and (h.get("intensity") or 0) >= thr]
+        if not got:
+            return json.dumps({"summary": f"no onsets above {thr} between {a:.1f}s and {b:.1f}s"})
+        span = max(b - a, 1e-9)
+        return json.dumps({
+            "from_bar": args.get("from_bar"), "to_bar": args.get("to_bar"),
+            "from_s": round(a, 2), "to_s": round(b, 2),
+            "count": len(got), "per_second": round(len(got) / span, 2),
+            "mean_intensity": round(sum(h.get("intensity", 0) for h in got) / len(got), 3),
+            "busiest_second": round(max(
+                ((sum(1 for h in got if t <= h["t"] < t + 1), t)
+                 for t in [a + k for k in range(int(span))]), default=(0, a))[1], 1),
+        })
+
+    if name == "compare":
+        names = args.get("streams") or []
+        a = _sec_of_bar(sc, int(args.get("from_bar", 1)))
+        b = _sec_of_bar(sc, int(args.get("to_bar", 9999)) + 1)
+        stp = sc.get("stems_temporal") or {}
+        lanes = stp.get("stems") or {}
+        w = stp.get("window_s") or 0.5
+        out = {}
+        cut = {}
+        for n in names:
+            v = lanes.get(n)
+            if v is None:
+                out[n] = "no such lane"
+                continue
+            i, j = max(0, int(a / w)), min(len(v), int(b / w) + 1)
+            seg = v[i:j]
+            cut[n] = seg
+            out[n] = {"mean": round(sum(seg) / max(len(seg), 1), 3),
+                      "peak": round(max(seg) if seg else 0, 3)}
+        pair = None
+        keys = [k for k in cut if cut[k]]
+        if len(keys) >= 2:
+            x, y = cut[keys[0]], cut[keys[1]]
+            n = min(len(x), len(y))
+            gate = 0.25
+            both = sum(1 for k in range(n) if x[k] > gate and y[k] > gate)
+            either = sum(1 for k in range(n) if x[k] > gate or y[k] > gate)
+            pair = {"lanes": keys[:2],
+                    "overlap_share": round(both / max(either, 1), 3),
+                    "verdict": ("they alternate" if both / max(either, 1) < 0.35
+                                else "they play together")}
+        return json.dumps({"from_s": round(a, 2), "to_s": round(b, 2),
+                           "lanes": out, "together": pair})
+
     if name == "chords":
-        try:
-            data = hub_score({
-                "score": overview["_song"],
-                "fields": ["chords"],
-                "from_s": args.get("from_s", 0),
-                "to_s": args.get("to_s", 300),
-            })
-            return json.dumps(data.get("chords", {"summary": "no chord data"}))
-        except Exception as e:
-            return json.dumps({"summary": f"chords: {e}"})
+        a, b = float(args.get("from_s", 0)), float(args.get("to_s", 1e9))
+        raw = sc.get("btc_chords_raw") or sc.get("chords") or []
+        spans = []
+        for c in raw:
+            if not isinstance(c, dict):
+                continue
+            st, en = c.get("start"), c.get("end")
+            if st is None or en is None or en <= a or st >= b:
+                continue
+            spans.append({"start": round(float(st), 2), "end": round(float(en), 2),
+                          "chord": c.get("chord") or c.get("label")})
+        if not spans:
+            return json.dumps({"summary": f"no chords between {a}s and {b}s"})
+        turns = len(spans)
+        held = max(spans, key=lambda x: x["end"] - x["start"])
+        return json.dumps({"of": "seconds, absolute in the song",
+                           "from_s": a, "to_s": b, "changes": turns,
+                           "per_minute": round(turns / max((b - a) / 60, 1e-9), 1),
+                           "longest_held": held,
+                           "spans": spans[:40]})
 
     if name == "melody":
-        try:
-            data = hub_score({
-                "score": overview["_song"],
-                "fields": ["melody"],
-                "from_s": args.get("from_s", 0),
-                "to_s": args.get("to_s", 300),
-            })
-            return json.dumps(data.get("melody", {"summary": "no melody data"}))
-        except Exception as e:
-            return json.dumps({"summary": f"melody: {e}"})
+        a, b = float(args.get("from_s", 0)), float(args.get("to_s", 1e9))
+        notes = [n for n in (sc.get("melody") or [])
+                 if isinstance(n, dict) and n.get("start") is not None
+                 and a <= float(n["start"]) < b]
+        if not notes:
+            return json.dumps({"summary": f"no melody notes between {a}s and {b}s"})
+        ps = [n.get("pitch") for n in notes if isinstance(n.get("pitch"), (int, float))]
+        first, last = notes[0], notes[-1]
+        half = max(1, len(ps) // 2)
+        rise = (sum(ps[-half:]) / half) - (sum(ps[:half]) / half) if ps else 0
+        return json.dumps({
+            "of": "seconds, absolute in the song",
+            "from_s": a, "to_s": b, "notes": len(notes),
+            "lowest_midi": min(ps) if ps else None, "highest_midi": max(ps) if ps else None,
+            "contour": "rising" if rise > 1.5 else "falling" if rise < -1.5 else "level",
+            "semitones_moved": round(rise, 1),
+            "first_note_s": round(float(first["start"]), 2),
+            "last_note_s": round(float(last["start"]), 2),
+            "notes_per_second": round(len(notes) / max(b - a, 1e-9), 2),
+        })
 
     return json.dumps({"error": f"unknown tool '{name}'"})
 

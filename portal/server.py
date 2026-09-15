@@ -1745,6 +1745,18 @@ def make_handler(library, baker, rig):
                 seed = int(body.get("seed", 1))
                 edits = body.get("edits") or []
                 appetite = body.get("appetite")
+                composed = os.path.join(WORK, song + ".plan.json")
+                if (not edits and body.get("composed") is not False
+                        and os.path.isfile(composed)):
+                    try:
+                        with open(composed) as fh:
+                            plan_data = json.load(fh)
+                        rig = (body.get("layout") or DEFAULT_LAYOUT).replace(".layout.json", "")
+                        job = baker.start_v2(song, plan_data, rig)
+                        return self._json({"job": job, "state": "baking", "song": song,
+                                           "rig": rig, "source": "composed"})
+                    except Exception as e:                          # noqa: BLE001
+                        sys.stderr.write("composed plan unusable (%s); arranging instead\n" % e)
                 job = baker.start(song, seed, edits,
                                   None if appetite in (None, "") else float(appetite),
                                   body.get("layout"))

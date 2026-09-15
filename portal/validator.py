@@ -9,6 +9,18 @@ removed, and report is a list of issues found.
 import json
 
 
+def _lanes_of(overview):
+    try:
+        import composer as C
+        sc = C._score_of(overview) if overview.get("_song") else {}
+    except Exception:
+        return {}, 0.5
+    stp = sc.get("stems_temporal") or {}
+    lanes = stp.get("stems") or {}
+    live = {k: v for k, v in lanes.items() if isinstance(v, list) and v and max(v) > 0.15}
+    return live, (stp.get("window_s") or 0.5)
+
+
 def validate(plan, catalog, score_overview):
     """Validate a composer's show plan against the catalog and score.
 

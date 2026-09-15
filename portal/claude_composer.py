@@ -15,12 +15,27 @@ import composer as C
 from validator import validate, format_report
 
 WORK = os.path.join(HERE, "work")
-DEFAULT_MODEL = "sonnet"
+DEFAULT_MODEL = "opus"
 BUDGET = 24
+
+
+def score_file(song):
+    base = os.path.join(REPO, "hub", "files", "score")
+    flat = os.path.join(base, song + ".score")
+    if os.path.isfile(flat):
+        return flat
+    store = os.path.join(base, ".versions", song + ".score")
+    try:
+        ns = [int(x.split(".")[0]) for x in os.listdir(store)
+              if x.endswith(".score") and x.split(".")[0].isdigit()]
+    except OSError:
+        return flat
+    return os.path.join(store, "%d.score" % max(ns)) if ns else flat
 
 
 def brief_for(song, overview, effects_block, hub):
     ask = os.path.join(REPO, "portal", "ask.py")
+    SCORE_AT = score_file(song)
     return "\n".join(
         [
             f"Compose the lighting show for `{song}`.",
@@ -46,6 +61,21 @@ def brief_for(song, overview, effects_block, hub):
             "    onsets 40 48                 how busy are the drums into the drop?",
             "    chords 48 82 / melody 48 82  what the harmony and the tune do",
             "    moment 16 / section 2        everything known about one of them",
+            "",
+            "THE SCORE ITSELF",
+            "",
+            "Nothing above is the whole file. The score is on disk and you may read it",
+            "directly for anything these questions do not cover - every beat time, the",
+            "per-bar emotion curves, the chord list, 39 instrument lanes at half-second",
+            "resolution, the melody notes:",
+            "",
+            f"    {SCORE_AT}",
+            "",
+            "    jq '.emotion[] | {start, energy, brightness, groove, mode}' <file>",
+            "    jq '.beats | length' <file>      jq '.stems_temporal.stems | keys' <file>",
+            "",
+            "Beats are measured, not computed from bpm, and this song may change tempo -",
+            "so if you want the instant a bar lands, read the beat rather than multiplying.",
             "",
             "Spend them where a cue depends on the answer. Whether the harp earns its",
             "own lamp depends on the harp's lane; whether two vocals may trade places",

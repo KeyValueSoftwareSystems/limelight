@@ -36,6 +36,7 @@ def main(argv):
     if hub:
         C.HUB = hub.rstrip("/")
     overview = C.fetch_overview(song)
+    overview["_song"] = song
     if what == "overview":
         print(C.format_overview(overview))
         return 0

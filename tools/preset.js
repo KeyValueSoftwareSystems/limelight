@@ -18,32 +18,24 @@ const fs = require("fs"), path = require("path");
 const { execFileSync } = require("child_process");
 const R = path.join(__dirname, "..");
 
-const [cmd, recipePath] = process.argv.slice(2);
-if (!cmd || !recipePath) {
-  console.error("usage: node tools/preset.js build|find presets/<recipe>.json");
-  process.exit(2);
+function findScore(song) {
+  const flat = [path.join(R, "hub", "files", "score", song + ".score"),
+                path.join(R, "scores", song + ".score"),
+                path.join(R, "protocol", song + ".score")].find(p => fs.existsSync(p));
+  if (flat) return flat;
+  const store = path.join(R, "hub", "files", "score", ".versions", song + ".score");
+  let ns = [];
+  try { ns = fs.readdirSync(store).map(x => parseInt(x, 10)).filter(n => n > 0); }
+  catch (e) { return null; }
+  return ns.length ? path.join(store, Math.max(...ns) + ".score") : null;
 }
-const recipe = JSON.parse(fs.readFileSync(recipePath, "utf8"));
 
-/* ---- the score, wherever it lives on this machine ---------------------- */
-const scorePath = [path.join(R, "scores", recipe.song + ".score"),
-                   path.join(R, "hub", "files", "score", recipe.song + ".score"),
-                   path.join(R, "protocol", recipe.song + ".score")]
-  .find(p => fs.existsSync(p));
-if (!scorePath) {
-  console.error(`no score for ${recipe.song} on this machine.`);
-  console.error(`Pull it first: limelight pull ${recipe.song}.score`);
-  process.exit(3);
-}
-const score = JSON.parse(fs.readFileSync(scorePath, "utf8"));
-const g = score.grid;
-const bpb = g.beats_per_bar || 4;
-const beatSec = 60 / g.bpm, barSec = beatSec * bpb;
-/* bar 1 begins on the first downbeat, whatever the score numbers its first bar */
-const secondsAtBar = bar => g.first_beat_s + (bar - 1) * barSec;
-
-/* ---- find the passage the recipe asks for ------------------------------ */
-const FINDERS = {
+function locate(recipe, score) {
+  const g = score.grid;
+  const bpb = g.beats_per_bar || 4;
+  const beatSec = 60 / g.bpm, barSec = beatSec * bpb;
+  const secondsAtBar = bar => g.first_beat_s + (bar - 1) * barSec;
+  const FINDERS = {
   /* the longest announced rise; ties broken by how much it matters */
   "strongest-build": () => {
     const rises = (score.signals || []).filter(s => s.is === "rise" && s.for_beats);
@@ -107,22 +99,55 @@ const FINDERS = {
                      why: `quietest four bars, mean loudness ${best.m.toFixed(2)}` };
   },
 };
+  const finder = FINDERS[recipe.find];
+  if (!finder) throw new Error(`no finder called "${recipe.find}". have: ${Object.keys(FINDERS).join(", ")}`);
+  const found = finder();
+  if (!found) throw new Error(`could not find "${recipe.find}" in ${recipe.song} -- the score does not carry what it needs`);
+  const pad = recipe.pad_bars || 0;
+  const from = Math.max(1, found.from - pad);
+  const bars = found.bars + pad * 2;
+  return { from, bars, pad, why: found.why,
+           startS: secondsAtBar(from), endS: secondsAtBar(from + bars) };
+}
 
-const finder = FINDERS[recipe.find];
-if (!finder) {
-  console.error(`no finder called "${recipe.find}". have: ${Object.keys(FINDERS).join(", ")}`);
+module.exports = { findScore, locate };
+
+if (require.main === module) main();
+
+function main() {
+
+
+const [cmd, recipePath] = process.argv.slice(2);
+if (!cmd || !recipePath) {
+  console.error("usage: node tools/preset.js build|find presets/<recipe>.json");
   process.exit(2);
 }
-const found = finder();
-if (!found) {
-  console.error(`could not find "${recipe.find}" in ${recipe.song} -- the score does not carry what it needs`);
+const recipe = JSON.parse(fs.readFileSync(recipePath, "utf8"));
+
+/* ---- the score, wherever it lives on this machine ---------------------- */
+const scorePath = findScore(recipe.song);
+if (!scorePath) {
+  console.error(`no score for ${recipe.song} on this machine.`);
+  console.error(`Pull it first: limelight pull ${recipe.song}.score`);
   process.exit(3);
 }
+const score = JSON.parse(fs.readFileSync(scorePath, "utf8"));
+const g = score.grid;
+const bpb = g.beats_per_bar || 4;
+const beatSec = 60 / g.bpm, barSec = beatSec * bpb;
+/* bar 1 begins on the first downbeat, whatever the score numbers its first bar */
+const secondsAtBar = bar => g.first_beat_s + (bar - 1) * barSec;
 
-const pad = recipe.pad_bars || 0;
-const from = Math.max(1, found.from - pad);
-const bars = found.bars + pad * 2;
-const startS = secondsAtBar(from), endS = secondsAtBar(from + bars);
+/* ---- find the passage the recipe asks for ------------------------------ */
+let found, from, bars, startS, endS, pad;
+try {
+  const at = locate(recipe, score);
+  ({ from, bars, pad, startS, endS } = at);
+  found = { why: at.why };
+} catch (e) {
+  console.error(e.message);
+  process.exit(3);
+}
 
 console.log(`${recipe.name}`);
 console.log(`  ${found.why}`);
@@ -209,3 +234,5 @@ fs.writeFileSync(path.join(out, "preset.json"), JSON.stringify({
 
 console.log(`  wrote ${path.relative(R, out)}/  (preset.json, response.json${clip ? ", clip.wav" : ""})`);
 console.log(`  upload with: limelight push ${path.relative(R, out)}/*`);
+
+}

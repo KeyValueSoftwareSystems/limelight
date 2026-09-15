@@ -76,6 +76,16 @@ class Session:
             key=lambda x: x["from_beat"],
         )
 
+        # The tempo map is a fit; the beat list is the measurement. Where a
+        # measured beat exists it wins, which keeps this in step with
+        # session.js -- the parity suite compares the two answer for answer.
+        struck = []
+        for b in (score.get("beats") or []) if isinstance(score, dict) else []:
+            t = b.get("t") if isinstance(b, dict) else b
+            if isinstance(t, (int, float)):
+                struck.append(float(t))
+        self._struck = struck
+
         self._wall = now or (lambda: time.monotonic())
         # A real music container already has a clock, and the thing playing the
         # audio knows its position better than we ever will. When one is handed
@@ -125,10 +135,29 @@ class Session:
         return self.tempo[k]
 
     def _at_beat(self, n):
+        k = self._struck
+        if len(k) > 1 and 0 <= n <= len(k) - 1:
+            lo = int(math.floor(n))
+            frac = n - lo
+            if frac < 1e-9:
+                return k[lo]
+            if lo + 1 < len(k):
+                return k[lo] + (k[lo + 1] - k[lo]) * frac
         s = self._seg_at_beat(n)
         return s["at_s"] + (n - s["from_beat"]) * (60.0 / s["bpm"])
 
     def _beat_at(self, t):
+        k = self._struck
+        if len(k) > 1 and k[0] <= t <= k[-1]:
+            lo, hi = 0, len(k) - 1
+            while hi - lo > 1:
+                mid = (lo + hi) // 2
+                if k[mid] <= t:
+                    lo = mid
+                else:
+                    hi = mid
+            span = k[hi] - k[lo]
+            return lo + ((t - k[lo]) / span if span > 0 else 0.0)
         s = self._seg_at_time(t)
         return s["from_beat"] + (t - s["at_s"]) / (60.0 / s["bpm"])
 

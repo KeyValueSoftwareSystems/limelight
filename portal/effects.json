@@ -1,29 +1,135 @@
 {
  "note": "The official Limelight effect catalog. Every effect is a change to ONE dimension of light (amount, colour, place, rate). A named effect is a preset: a saved set of values over the four dimensions. Its dials are the creator's interface. The renderer needs no special case for any of them. Derived from the protocol response for raga-of-revenge. See effects.md and architecture.md for the design.",
  "schema_version": 2,
- "dimensions": ["amount", "colour", "place", "rate"],
+ "dimensions": [
+  "amount",
+  "colour",
+  "place",
+  "rate"
+ ],
  "dial_types": {
-  "amount":     { "type": "float", "min": 0, "max": 1, "label": "Amount" },
-  "colour":     { "type": "colour", "label": "Colour" },
-  "colours":    { "type": "colour_pair", "label": "Colours" },
-  "extent":     { "type": "enum", "values": ["all", "inner", "outer", "ends", "left", "right", "single"], "label": "Extent" },
-  "for_beats":  { "type": "int", "min": 1, "max": 64, "label": "Duration (beats)" },
-  "over_beats": { "type": "int", "min": 1, "max": 64, "label": "Over (beats)" },
-  "depth":      { "type": "float", "min": 0, "max": 1, "label": "Depth" },
-  "by":         { "type": "float", "min": 0, "max": 1, "label": "By" },
-  "to":         { "type": "float", "min": 0, "max": 1, "label": "To" },
-  "from":       { "type": "float", "min": 0, "max": 1, "label": "From" },
-  "threshold":  { "type": "float", "min": 0, "max": 1, "label": "Threshold" },
-  "smooth":     { "type": "float", "min": 0, "max": 1, "label": "Smooth" },
-  "rise":       { "type": "float", "min": 0, "max": 1, "label": "Rise" },
-  "rest":       { "type": "float", "min": 0, "max": 1, "label": "Rest level" },
-  "curve":      { "type": "enum", "values": ["linear", "ease", "settle"], "label": "Curve" },
-  "travel":     { "type": "bool", "label": "Travels" },
-  "tilt":       { "type": "float", "min": 0, "max": 1, "label": "Tilt" },
-  "which":      { "type": "fixture", "label": "Which fixture" },
-  "keep":       { "type": "fixture_set", "label": "Keep lit" },
-  "stream":     { "type": "stream", "label": "Stream" },
-  "streams":    { "type": "stream_pair", "label": "Streams" }
+  "amount": {
+   "type": "float",
+   "min": 0,
+   "max": 1,
+   "label": "Amount"
+  },
+  "colour": {
+   "type": "colour",
+   "label": "Colour"
+  },
+  "colours": {
+   "type": "colour_pair",
+   "label": "Colours"
+  },
+  "extent": {
+   "type": "enum",
+   "values": [
+    "all",
+    "inner",
+    "outer",
+    "ends",
+    "left",
+    "right",
+    "single"
+   ],
+   "label": "Extent"
+  },
+  "for_beats": {
+   "type": "int",
+   "min": 1,
+   "max": 64,
+   "label": "Duration (beats)"
+  },
+  "over_beats": {
+   "type": "int",
+   "min": 1,
+   "max": 64,
+   "label": "Over (beats)"
+  },
+  "depth": {
+   "type": "float",
+   "min": 0,
+   "max": 1,
+   "label": "Depth"
+  },
+  "by": {
+   "type": "float",
+   "min": 0,
+   "max": 1,
+   "label": "By"
+  },
+  "to": {
+   "type": "float",
+   "min": 0,
+   "max": 1,
+   "label": "To"
+  },
+  "from": {
+   "type": "float",
+   "min": 0,
+   "max": 1,
+   "label": "From"
+  },
+  "threshold": {
+   "type": "float",
+   "min": 0,
+   "max": 1,
+   "label": "Threshold"
+  },
+  "smooth": {
+   "type": "float",
+   "min": 0,
+   "max": 1,
+   "label": "Smooth"
+  },
+  "rise": {
+   "type": "float",
+   "min": 0,
+   "max": 1,
+   "label": "Rise"
+  },
+  "rest": {
+   "type": "float",
+   "min": 0,
+   "max": 1,
+   "label": "Rest level"
+  },
+  "curve": {
+   "type": "enum",
+   "values": [
+    "linear",
+    "ease",
+    "settle"
+   ],
+   "label": "Curve"
+  },
+  "travel": {
+   "type": "bool",
+   "label": "Travels"
+  },
+  "tilt": {
+   "type": "float",
+   "min": 0,
+   "max": 1,
+   "label": "Tilt"
+  },
+  "which": {
+   "type": "fixture",
+   "label": "Which fixture"
+  },
+  "keep": {
+   "type": "fixture_set",
+   "label": "Keep lit"
+  },
+  "stream": {
+   "type": "stream",
+   "label": "Stream"
+  },
+  "streams": {
+   "type": "stream_pair",
+   "label": "Streams"
+  }
  },
  "effects": [
   {
@@ -35,13 +141,32 @@
    "dimension": "amount",
    "returns": false,
    "dials": {
-    "amount":  { "default": 0.12, "min": 0.04, "max": 0.25 },
-    "colour":  { "default": [1, 0.75, 0.35] },
-    "extent":  { "default": "inner" }
+    "amount": {
+     "default": 0.12,
+     "min": 0.04,
+     "max": 0.25
+    },
+    "colour": {
+     "default": [
+      1,
+      0.75,
+      0.35
+     ]
+    },
+    "extent": {
+     "default": "inner"
+    }
    },
-   "fires_on": ["quiet section", "intro", "outro"],
+   "fires_on": [
+    "quiet section",
+    "intro",
+    "outro"
+   ],
    "min_fixtures": 1,
-   "requires": ["colour", "level"],
+   "requires": [
+    "colour",
+    "level"
+   ],
    "default_beats": 0
   },
   {
@@ -53,13 +178,32 @@
    "dimension": "amount",
    "returns": false,
    "dials": {
-    "amount":  { "default": 0.55, "min": 0.3, "max": 0.8 },
-    "colour":  { "default": [0.2, 0.4, 1] },
-    "extent":  { "default": "all" }
+    "amount": {
+     "default": 0.55,
+     "min": 0.3,
+     "max": 0.8
+    },
+    "colour": {
+     "default": [
+      0.2,
+      0.4,
+      1
+     ]
+    },
+    "extent": {
+     "default": "all"
+    }
    },
-   "fires_on": ["full section", "verse", "drop"],
+   "fires_on": [
+    "full section",
+    "verse",
+    "drop"
+   ],
    "min_fixtures": 1,
-   "requires": ["colour", "level"],
+   "requires": [
+    "colour",
+    "level"
+   ],
    "default_beats": 0
   },
   {
@@ -71,13 +215,30 @@
    "dimension": "amount",
    "returns": true,
    "dials": {
-    "colour":     { "default": [1, 1, 1] },
-    "extent":     { "default": "all" },
-    "for_beats":  { "default": 1, "min": 1, "max": 4 }
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 1,
+     "min": 1,
+     "max": 4
+    }
    },
-   "fires_on": ["peak"],
+   "fires_on": [
+    "peak"
+   ],
    "min_fixtures": 1,
-   "requires": ["colour", "level"],
+   "requires": [
+    "colour",
+    "level"
+   ],
    "default_beats": 1
   },
   {
@@ -89,11 +250,20 @@
    "dimension": "amount",
    "returns": true,
    "dials": {
-    "for_beats":  { "default": 1, "min": 1, "max": 8 }
+    "for_beats": {
+     "default": 1,
+     "min": 1,
+     "max": 8
+    }
    },
-   "fires_on": ["the beat before a peak", "deep exit"],
+   "fires_on": [
+    "the beat before a peak",
+    "deep exit"
+   ],
    "min_fixtures": 1,
-   "requires": ["level"],
+   "requires": [
+    "level"
+   ],
    "default_beats": 1
   },
   {
@@ -105,13 +275,27 @@
    "dimension": "amount",
    "returns": true,
    "dials": {
-    "depth":      { "default": 0.3, "min": 0, "max": 1 },
-    "for_beats":  { "default": 4, "min": 1, "max": 16 },
-    "keep":       { "default": [] }
+    "depth": {
+     "default": 0.3,
+     "min": 0,
+     "max": 1
+    },
+    "for_beats": {
+     "default": 4,
+     "min": 1,
+     "max": 16
+    },
+    "keep": {
+     "default": []
+    }
    },
-   "fires_on": ["exit"],
+   "fires_on": [
+    "exit"
+   ],
    "min_fixtures": 1,
-   "requires": ["level"],
+   "requires": [
+    "level"
+   ],
    "default_beats": 4
   },
   {
@@ -123,13 +307,26 @@
    "dimension": "amount",
    "returns": false,
    "dials": {
-    "to":         { "default": 0.85, "min": 0.3, "max": 1 },
-    "curve":      { "default": "ease" }
+    "to": {
+     "default": 0.85,
+     "min": 0.3,
+     "max": 1
+    },
+    "curve": {
+     "default": "ease"
+    }
    },
-   "span_anchors": ["from_moment", "to_moment"],
-   "fires_on": ["build"],
+   "span_anchors": [
+    "from_moment",
+    "to_moment"
+   ],
+   "fires_on": [
+    "build"
+   ],
    "min_fixtures": 1,
-   "requires": ["level"],
+   "requires": [
+    "level"
+   ],
    "default_beats": 16
   },
   {
@@ -141,13 +338,30 @@
    "dimension": "amount",
    "returns": true,
    "dials": {
-    "colour":     { "default": [1, 0.75, 0.35] },
-    "extent":     { "default": "inner" },
-    "for_beats":  { "default": 1, "min": 1, "max": 4 }
+    "colour": {
+     "default": [
+      1,
+      0.75,
+      0.35
+     ]
+    },
+    "extent": {
+     "default": "inner"
+    },
+    "for_beats": {
+     "default": 1,
+     "min": 1,
+     "max": 4
+    }
    },
-   "fires_on": ["middling entrance"],
+   "fires_on": [
+    "middling entrance"
+   ],
    "min_fixtures": 2,
-   "requires": ["colour", "level"],
+   "requires": [
+    "colour",
+    "level"
+   ],
    "default_beats": 1
   },
   {
@@ -155,18 +369,36 @@
    "name": "Lift",
    "kind": "gesture",
    "tier": 1,
-   "blurb": "Amount up, shape settle, holds. The only tier-one effect that does not return — the music went up.",
+   "blurb": "Amount up, shape settle, holds. The only tier-one effect that does not return \u2014 the music went up.",
    "dimension": "amount",
    "returns": false,
    "dials": {
-    "by":         { "default": 0.35, "min": 0.1, "max": 0.7 },
-    "over_beats": { "default": 4, "min": 1, "max": 16 },
-    "tilt":       { "default": 0.3, "min": 0, "max": 1 }
+    "by": {
+     "default": 0.35,
+     "min": 0.1,
+     "max": 0.7
+    },
+    "over_beats": {
+     "default": 4,
+     "min": 1,
+     "max": 16
+    },
+    "tilt": {
+     "default": 0.3,
+     "min": 0,
+     "max": 1
+    }
    },
-   "fires_on": ["register_shift"],
+   "fires_on": [
+    "register_shift"
+   ],
    "min_fixtures": 1,
-   "requires": ["level"],
-   "optional": ["move"],
+   "requires": [
+    "level"
+   ],
+   "optional": [
+    "move"
+   ],
    "default_beats": 4
   },
   {
@@ -178,13 +410,37 @@
    "dimension": "place",
    "returns": true,
    "dials": {
-    "colours":    { "default": [[1, 0.75, 0.35], [0.2, 0.4, 1]] },
-    "for_beats":  { "default": 2, "min": 1, "max": 8 },
-    "travel":     { "default": true }
+    "colours": {
+     "default": [
+      [
+       1,
+       0.75,
+       0.35
+      ],
+      [
+       0.2,
+       0.4,
+       1
+      ]
+     ]
+    },
+    "for_beats": {
+     "default": 2,
+     "min": 1,
+     "max": 8
+    },
+    "travel": {
+     "default": true
+    }
    },
-   "fires_on": ["entrance and exit sharing a timestamp"],
+   "fires_on": [
+    "entrance and exit sharing a timestamp"
+   ],
    "min_fixtures": 4,
-   "requires": ["colour", "level"],
+   "requires": [
+    "colour",
+    "level"
+   ],
    "default_beats": 2
   },
   {
@@ -196,13 +452,30 @@
    "dimension": "place",
    "returns": true,
    "dials": {
-    "which":      { "default": null },
-    "colour":     { "default": [1, 0.75, 0.35] },
-    "rest":       { "default": 0.06, "min": 0, "max": 0.3 }
+    "which": {
+     "default": null
+    },
+    "colour": {
+     "default": [
+      1,
+      0.75,
+      0.35
+     ]
+    },
+    "rest": {
+     "default": 0.06,
+     "min": 0,
+     "max": 0.3
+    }
    },
-   "fires_on": ["a named instrument entering alone"],
+   "fires_on": [
+    "a named instrument entering alone"
+   ],
    "min_fixtures": 3,
-   "requires": ["colour", "level"],
+   "requires": [
+    "colour",
+    "level"
+   ],
    "default_beats": 4
   },
   {
@@ -214,12 +487,24 @@
    "dimension": "amount",
    "returns": false,
    "dials": {
-    "to":         { "default": 0.1, "min": 0, "max": 0.5 },
-    "over_beats": { "default": 4, "min": 1, "max": 16 }
+    "to": {
+     "default": 0.1,
+     "min": 0,
+     "max": 0.5
+    },
+    "over_beats": {
+     "default": 4,
+     "min": 1,
+     "max": 16
+    }
    },
-   "fires_on": ["breakdown"],
+   "fires_on": [
+    "breakdown"
+   ],
    "min_fixtures": 1,
-   "requires": ["level"],
+   "requires": [
+    "level"
+   ],
    "default_beats": 4
   },
   {
@@ -231,11 +516,19 @@
    "dimension": "amount",
    "returns": true,
    "dials": {
-    "for_beats":  { "default": 1, "min": 1, "max": 2 }
+    "for_beats": {
+     "default": 1,
+     "min": 1,
+     "max": 2
+    }
    },
-   "fires_on": ["rhythm_change where the beat drops away"],
+   "fires_on": [
+    "rhythm_change where the beat drops away"
+   ],
    "min_fixtures": 1,
-   "requires": ["level"],
+   "requires": [
+    "level"
+   ],
    "default_beats": 1
   },
   {
@@ -247,13 +540,32 @@
    "dimension": "amount",
    "returns": true,
    "dials": {
-    "colour":     { "default": [0.2, 0.4, 1] },
-    "for_beats":  { "default": 4, "min": 2, "max": 16 },
-    "rise":       { "default": 0.5, "min": 0.1, "max": 0.9 }
+    "colour": {
+     "default": [
+      0.2,
+      0.4,
+      1
+     ]
+    },
+    "for_beats": {
+     "default": 4,
+     "min": 2,
+     "max": 16
+    },
+    "rise": {
+     "default": 0.5,
+     "min": 0.1,
+     "max": 0.9
+    }
    },
-   "fires_on": ["soft entrance"],
+   "fires_on": [
+    "soft entrance"
+   ],
    "min_fixtures": 1,
-   "requires": ["colour", "level"],
+   "requires": [
+    "colour",
+    "level"
+   ],
    "default_beats": 4
   },
   {
@@ -265,12 +577,24 @@
    "dimension": "rate",
    "returns": false,
    "dials": {
-    "from":       { "default": 1, "min": 0.25, "max": 2 },
-    "to":         { "default": 2, "min": 0.5, "max": 4 }
+    "from": {
+     "default": 1,
+     "min": 0.25,
+     "max": 2
+    },
+    "to": {
+     "default": 2,
+     "min": 0.5,
+     "max": 4
+    }
    },
-   "fires_on": ["tempo_change"],
+   "fires_on": [
+    "tempo_change"
+   ],
    "min_fixtures": 1,
-   "requires": ["level"],
+   "requires": [
+    "level"
+   ],
    "default_beats": 0
   },
   {
@@ -282,14 +606,30 @@
    "dimension": "amount",
    "returns": false,
    "dials": {
-    "stream":     { "default": null },
-    "depth":      { "default": 0.6, "min": 0.1, "max": 1 },
-    "extent":     { "default": "all" },
-    "smooth":     { "default": 0.3, "min": 0, "max": 1 }
+    "stream": {
+     "default": null
+    },
+    "depth": {
+     "default": 0.6,
+     "min": 0.1,
+     "max": 1
+    },
+    "extent": {
+     "default": "all"
+    },
+    "smooth": {
+     "default": 0.3,
+     "min": 0,
+     "max": 1
+    }
    },
-   "fires_on": ["a section where one instrument leads"],
+   "fires_on": [
+    "a section where one instrument leads"
+   ],
    "min_fixtures": 1,
-   "requires": ["level"],
+   "requires": [
+    "level"
+   ],
    "default_beats": 0
   },
   {
@@ -301,12 +641,35 @@
    "dimension": "place",
    "returns": false,
    "dials": {
-    "streams":    { "default": [null, null] },
-    "colours":    { "default": [[1, 0.75, 0.35], [0.2, 0.4, 1]] }
+    "streams": {
+     "default": [
+      null,
+      null
+     ]
+    },
+    "colours": {
+     "default": [
+      [
+       1,
+       0.75,
+       0.35
+      ],
+      [
+       0.2,
+       0.4,
+       1
+      ]
+     ]
+    }
    },
-   "fires_on": ["call and response"],
+   "fires_on": [
+    "call and response"
+   ],
    "min_fixtures": 4,
-   "requires": ["colour", "level"],
+   "requires": [
+    "colour",
+    "level"
+   ],
    "default_beats": 0
   },
   {
@@ -318,14 +681,383 @@
    "dimension": "amount",
    "returns": false,
    "dials": {
-    "threshold":  { "default": 0.5, "min": 0.1, "max": 0.9 },
-    "extent":     { "default": "all" },
-    "for_beats":  { "default": 4, "min": 1, "max": 16 }
+    "threshold": {
+     "default": 0.5,
+     "min": 0.1,
+     "max": 0.9
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 4,
+     "min": 1,
+     "max": 16
+    }
    },
-   "fires_on": ["dense drumming"],
+   "fires_on": [
+    "dense drumming"
+   ],
    "min_fixtures": 1,
-   "requires": ["level"],
+   "requires": [
+    "level"
+   ],
    "default_beats": 0
+  },
+  {
+   "id": "strobe",
+   "name": "Strobe",
+   "kind": "gesture",
+   "tier": 1,
+   "dimension": "rate",
+   "returns": true,
+   "blurb": "Rate on amount: the rig flashes at a set speed for a span, then returns. The loudest thing a rig can say.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "hz": {
+     "default": 12,
+     "min": 1,
+     "max": 25
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 2,
+     "min": 1,
+     "max": 16
+    }
+   },
+   "fires_on": [
+    "drop",
+    "peak",
+    "climax",
+    "build"
+   ],
+   "min_fixtures": 1,
+   "requires": [
+    "level",
+    "strobe"
+   ],
+   "default_beats": 2
+  },
+  {
+   "id": "pulse",
+   "name": "Pulse",
+   "kind": "gesture",
+   "tier": 2,
+   "dimension": "rate",
+   "returns": true,
+   "blurb": "Amount throbbing once per beat around a level, so the rig breathes in time rather than sitting still.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      0.75,
+      0.35
+     ]
+    },
+    "depth": {
+     "default": 0.55,
+     "min": 0,
+     "max": 1
+    },
+    "top": {
+     "default": 0.8,
+     "min": 0,
+     "max": 1
+    },
+    "per_beat": {
+     "default": 1,
+     "min": 0.5,
+     "max": 4
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 4,
+     "min": 1,
+     "max": 32
+    }
+   },
+   "fires_on": [
+    "build",
+    "rhythm_change",
+    "tempo_change"
+   ],
+   "min_fixtures": 1,
+   "requires": [
+    "level"
+   ],
+   "default_beats": 4
+  },
+  {
+   "id": "tint",
+   "name": "Tint",
+   "kind": "gesture",
+   "tier": 2,
+   "dimension": "colour",
+   "returns": false,
+   "blurb": "The rig crosses from one colour to another over a span and stays there. A key change for the eye.",
+   "dials": {
+    "from": {
+     "default": [
+      1,
+      0.75,
+      0.35
+     ]
+    },
+    "to": {
+     "default": [
+      0.2,
+      0.4,
+      1
+     ]
+    },
+    "level": {
+     "default": 0.5,
+     "min": 0,
+     "max": 1
+    },
+    "extent": {
+     "default": "all"
+    },
+    "over_beats": {
+     "default": 4,
+     "min": 1,
+     "max": 32
+    }
+   },
+   "fires_on": [
+    "register_shift",
+    "harmonic_rhythm",
+    "section"
+   ],
+   "min_fixtures": 1,
+   "requires": [
+    "colour"
+   ],
+   "default_beats": 4
+  },
+  {
+   "id": "flare",
+   "name": "Flare",
+   "kind": "gesture",
+   "tier": 1,
+   "dimension": "colour",
+   "returns": true,
+   "blurb": "A colour slams over the resting look and falls back out of it. Colour's answer to impact.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      0.25,
+      0.1
+     ]
+    },
+    "under": {
+     "default": [
+      1,
+      0.75,
+      0.35
+     ]
+    },
+    "level": {
+     "default": 0.9,
+     "min": 0,
+     "max": 1
+    },
+    "rest": {
+     "default": 0.3,
+     "min": 0,
+     "max": 1
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 2,
+     "min": 1,
+     "max": 8
+    }
+   },
+   "fires_on": [
+    "drop",
+    "climax",
+    "peak",
+    "entrance"
+   ],
+   "min_fixtures": 1,
+   "requires": [
+    "colour",
+    "level"
+   ],
+   "default_beats": 2
+  },
+  {
+   "id": "spectrum",
+   "name": "Spectrum",
+   "kind": "gesture",
+   "tier": 3,
+   "dimension": "colour",
+   "returns": true,
+   "blurb": "Every lamp a different hue, the whole spread rolling across the rig. Use once; it is the loudest colour move there is.",
+   "dials": {
+    "level": {
+     "default": 0.6,
+     "min": 0,
+     "max": 1
+    },
+    "spread": {
+     "default": 0.5,
+     "min": 0.1,
+     "max": 1
+    },
+    "travel": {
+     "default": true
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 8,
+     "min": 2,
+     "max": 64
+    }
+   },
+   "fires_on": [
+    "instrumental",
+    "spotlight",
+    "climax"
+   ],
+   "min_fixtures": 3,
+   "requires": [
+    "colour"
+   ],
+   "default_beats": 8
+  },
+  {
+   "id": "chase",
+   "name": "Chase",
+   "kind": "gesture",
+   "tier": 2,
+   "dimension": "place",
+   "returns": true,
+   "blurb": "One lamp lit at a time, running along the rig in time with the beat. Place moving, which nothing else here does.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      0.75,
+      0.35
+     ]
+    },
+    "level": {
+     "default": 0.85,
+     "min": 0,
+     "max": 1
+    },
+    "rest": {
+     "default": 0.05,
+     "min": 0,
+     "max": 1
+    },
+    "per_beat": {
+     "default": 1,
+     "min": 0.5,
+     "max": 4
+    },
+    "bounce": {
+     "default": false
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 4,
+     "min": 1,
+     "max": 32
+    }
+   },
+   "fires_on": [
+    "rhythm_change",
+    "build",
+    "instrumental"
+   ],
+   "min_fixtures": 3,
+   "requires": [
+    "level"
+   ],
+   "default_beats": 4
+  },
+  {
+   "id": "sweep",
+   "name": "Sweep",
+   "kind": "gesture",
+   "tier": 2,
+   "dimension": "place",
+   "returns": true,
+   "blurb": "The moving head travels across the room while the pars hold back. The one gesture that puts light somewhere new.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "level": {
+     "default": 0.85,
+     "min": 0,
+     "max": 1
+    },
+    "from_pan": {
+     "default": 0.35,
+     "min": 0,
+     "max": 1
+    },
+    "to_pan": {
+     "default": 0.9,
+     "min": 0,
+     "max": 1
+    },
+    "tilt": {
+     "default": 0.4,
+     "min": 0,
+     "max": 1
+    },
+    "bounce": {
+     "default": true
+    },
+    "rest": {
+     "default": 0.08,
+     "min": 0,
+     "max": 1
+    },
+    "for_beats": {
+     "default": 4,
+     "min": 1,
+     "max": 32
+    }
+   },
+   "fires_on": [
+    "spotlight",
+    "breakdown",
+    "instrumental",
+    "melody_resume"
+   ],
+   "min_fixtures": 1,
+   "requires": [
+    "pan"
+   ],
+   "default_beats": 4
   }
  ]
 }
