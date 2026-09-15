@@ -430,16 +430,16 @@ BAD = [
 ]
 
 
-def moss_query(wav, prompt, max_tokens=8192):
+def moss_query(wav, prompt, max_tokens=4096):
     with sglang_lock:
         resp = requests.post(
             f"{SGLANG_URL}/generate",
             json={
                 "text": prompt,
                 "audio_data": wav,
-                "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.05},
+                "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.01},
             },
-            timeout=300,
+            timeout=180,
         )
     resp.raise_for_status()
     text = resp.json()["text"]
@@ -540,14 +540,19 @@ MOMENTS_PROMPT = (
     "- climax: a salient local culmination of intensity or expression — the loudest point, peak of a build; timestamp the culmination, not the start of its buildup\n"
     "- resolution: a clearly audible settling of musical tension — tension dissolves, energy drops to rest; timestamp the settling point\n\n"
     "TYPE DIVERSITY IS CRITICAL:\n"
-    "- You MUST use a variety of types. If your output has more than 40% of any single type, you are doing it wrong.\n"
-    "- A typical recording has: entrances AND exits (instruments come and go), accents (crashes, stabs), "
-    "changes (texture/groove shifts), fills (drum fills, melodic ornaments), arrivals (section landings), "
-    "and at least one climax and resolution.\n"
+    "- You MUST use a variety of types. If your output has more than 30% of any single type, you are doing it wrong.\n"
+    "- A typical 3-minute recording should have 15-25 moments with at least 5 different types.\n"
+    "- Think about what a lighting designer or video editor needs: crashes to flash on (accent), "
+    "drops to slam to (arrival), builds that peak (climax), quiet settling points (resolution), "
+    "fills to accent, texture shifts to color-change on (change), hook returns to highlight (hook_onset).\n"
     "- Do NOT label a texture change, groove shift, or section landing as 'entrance'. "
     "Use 'change' for texture/groove shifts, 'arrival' for section landings, 'accent' for prominent hits.\n"
-    "- 'entrance' is ONLY for when a previously absent instrument/voice literally starts playing.\n"
-    "- A vocal continuing to sing after a brief instrumental break is NOT an entrance — it is a 'resume' or just part of the flow.\n\n"
+    "- 'entrance' is ONLY for when a previously absent instrument/voice literally starts playing for the first time or after a long absence.\n"
+    "- A vocal continuing to sing after a brief instrumental break is NOT an entrance.\n"
+    "- Look for these commonly missed events: drum fills before choruses (fill), "
+    "cymbal crashes on downbeats (accent), filter sweeps or texture shifts (change), "
+    "the moment energy peaks (climax), the moment tension resolves after a bridge or breakdown (resolution), "
+    "recognizable melodic hooks returning (hook_onset).\n\n"
     "Rules:\n"
     "- Sort chronologically; all times must be >= 0 and < the supplied duration.\n"
     "- Do not annotate every kick, snare, chord change, phrase or vocal breath.\n"
