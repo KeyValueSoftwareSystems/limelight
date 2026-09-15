@@ -42,6 +42,7 @@ PERC = (
 
 ORDER = (
     "drop",
+    "climax",
     "breakdown",
     "build",
     "peak",
@@ -706,6 +707,87 @@ def melody_returns(melody, w, most=3, apart=6.0):
     ]
 
 
+def climax(temporal, loud, hold_s=15.0, floor=0.25):
+    """The biggest passage of the song - the whole band at full strength.
+
+    `peak` is the loudest stretch and nothing more, which is why Amal said it
+    "doesn't feel like PEAKKKK". What a listener calls the peak is the fullest
+    passage: everything playing at once, loud, and held. Loudness alone cannot
+    find it because a modern master is flat across its top 5%.
+
+    Fullness is the count of instrument families actually playing, where a
+    family counts once it is over a quarter of its own busy level. The share
+    measure `spotlight` uses is wrong here - it rewards energy spread evenly,
+    so a quiet intro with three soft instruments scores as full, and a first
+    pass built on it put 19 of 29 climaxes in the last 7% of their song.
+    Counting families instead puts the median at 78% with 19 of 29 in the final
+    third and 2 in the first, which is where songs actually peak.
+
+    The window is the one maximising the weaker of fullness and energy, so a
+    loud thin passage and a full quiet one both lose to a full loud one; the
+    instant inside it is that window's loudest. Median 6.5 families, and it
+    lands a median 18.5s away from `peak`, so the two are not the same claim."""
+    if not temporal or not temporal.get("stems") or not loud:
+        return []
+    lanes = temporal["stems"]
+    w = temporal.get("window_s") or 0.5
+    named = [(k, v) for k, v in lanes.items() if isinstance(v, list) and v]
+    if not named:
+        return []
+    n = min(len(v) for _, v in named)
+    span = max(2, int(round(hold_s / w)))
+    if n <= span:
+        return []
+    gain = {k: _heard(loud, k, v) for k, v in named}
+    if not any(gain.values()):
+        return []
+    fam = {}
+    for k, v in named:
+        row = fam.setdefault(family_of(k), [0.0] * n)
+        g = gain[k]
+        for i in range(n):
+            row[i] += v[i] * g
+    playing = [0.0] * n
+    for row in fam.values():
+        ranked = sorted(row)
+        busy = ranked[int(0.90 * len(ranked))]
+        if busy <= 0:
+            continue
+        gate = floor * busy
+        for i in range(n):
+            if row[i] >= gate:
+                playing[i] += 1.0
+    total = [sum(row[i] for row in fam.values()) for i in range(n)]
+
+    def flat(x):
+        lo, hi = min(x), max(x)
+        return [(y - lo) / (hi - lo) for y in x] if hi > lo else [0.0] * len(x)
+
+    P, E = flat(playing), flat(total)
+    best = None
+    for i in range(n - span + 1):
+        p = sum(P[i:i + span]) / span
+        e = sum(E[i:i + span]) / span
+        s = min(p, e)
+        if best is None or s > best[0]:
+            best = (s, i)
+    if best is None or best[0] <= 0:
+        return []
+    i = best[1]
+    seg = total[i:i + span]
+    j = i + max(range(len(seg)), key=lambda k: seg[k])
+    how = round(sum(playing[i:i + span]) / span, 1)
+    return [
+        {
+            "i": j,
+            "type": "climax",
+            "size": round(min(1.0, best[0] + 0.35), 3),
+            "hold_s": round(hold_s, 1),
+            "description": f"the whole band at full strength, {how:.0f} families at once",
+        }
+    ]
+
+
 def spotlight(temporal, loud, hold_s=6.0, ne_max=1.35, base_min=2.0):
     """Where the band drops back and one family of instruments carries alone.
 
@@ -1154,6 +1236,7 @@ def find(
         + shifts(melody, w, n)
         + rhythm_changes(hits, w, n)
         + spotlight(temporal, stems)
+        + climax(temporal, stems)
         + harmonic_rhythm(chords, w, n)
         + voice_gaps(temporal)
         + melody_returns(melody, w)
