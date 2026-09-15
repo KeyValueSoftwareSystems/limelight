@@ -45,7 +45,7 @@ def start_sglang():
             "-m",
             "sglang.launch_server",
             "--model-path",
-            os.path.join(BASE, "moss-thinking"),
+            os.path.join(BASE, "moss"),
             "--host",
             "0.0.0.0",
             "--port",
@@ -53,7 +53,7 @@ def start_sglang():
             "--tp",
             "1",
             "--chat-template",
-            os.path.join(BASE, "moss-thinking/chat_template.jinja"),
+            os.path.join(BASE, "moss/chat_template.jinja"),
             "--trust-remote-code",
         ],
         env=env,
@@ -461,7 +461,7 @@ def moss_query(wav, prompt, max_tokens=4096):
                 "audio_data": wav,
                 "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.0},
             },
-            timeout=180,
+            timeout=300,
         )
     resp.raise_for_status()
     text = resp.json()["text"]
