@@ -63,8 +63,15 @@ CAP = {
 }
 
 
-def energy_curve(temporal, smooth=3):
-    """The song's own loudness shape, plus how much of it is jitter.
+def energy_curve(temporal, smooth=3, loud=None):
+    """How loud the track is over time, and how much of that is jitter.
+
+    The lanes arrive divided by each instrument's own peak, so averaging them
+    raw counts how many instruments are near their personal maximum - six
+    quiet ones outrank a loud two, and drops, peaks and entrances then land
+    off the music. stems[name].peak is the divisor, so multiplying it back
+    recovers the envelope; the peak of the song moves by a median 10.5s, and
+    on 15 of 29 songs by more than ten.
 
     Scaling a curve onto 0-1 against its own range makes a flat lane look
     like a song: shuffle the lanes and the same rules found more drops than
@@ -74,11 +81,15 @@ def energy_curve(temporal, smooth=3):
     if not temporal or not temporal.get("stems"):
         return 0.5, [], 1.0
     w = temporal.get("window_s") or 0.5
-    lanes = [v for v in temporal["stems"].values() if isinstance(v, list) and v]
-    if not lanes:
+    named = [(k, v) for k, v in temporal["stems"].items() if isinstance(v, list) and v]
+    if not named:
         return w, [], 1.0
-    n = min(len(v) for v in lanes)
-    raw = [sum(v[i] for v in lanes) / len(lanes) for i in range(n)]
+    gain = {k: _heard(loud, k) for k, _ in named}
+    if not any(gain.values()):
+        gain = {k: 1.0 for k, _ in named}
+    n = min(len(v) for _, v in named)
+    total = sum(gain.values()) or 1.0
+    raw = [sum(v[i] * gain[k] for k, v in named) / total for i in range(n)]
     half = smooth // 2
     out = []
     for i in range(n):
@@ -91,6 +102,11 @@ def energy_curve(temporal, smooth=3):
     steps = sorted(abs(v[i + 1] - v[i]) for i in range(len(v) - 1))
     noise = steps[len(steps) // 2] if steps else 1.0
     return w, v, noise
+
+
+def _heard(loud, name):
+    at = (loud or {}).get(name)
+    return (at.get("peak") or 0.0) if isinstance(at, dict) else 1.0
 
 
 def _span(v, a, b):
@@ -132,20 +148,6 @@ def swings(v, w, noise=0.0):
                 "description": "everything arrives at once",
             }
         )
-        back = max(0, i - int(round(10.0 / w)))
-        run = v[back:i]
-        if len(run) >= 6:
-            third = len(run) // 3
-            climb = _span(run, len(run) - third, len(run)) - _span(run, 0, third)
-            if climb >= 0.15:
-                out.append(
-                    {
-                        "i": back,
-                        "type": "build",
-                        "size": round(climb, 3),
-                        "description": "a build into the drop",
-                    }
-                )
     for size, i in peaks(falls):
         out.append(
             {
@@ -158,18 +160,22 @@ def swings(v, w, noise=0.0):
     return out
 
 
-def rolls(temporal, w, tol=4.0):
+def rolls(temporal, w, tol=4.0, loud=None):
     if not temporal or not temporal.get("stems"):
         return []
-    lanes = [
-        v
+    named = [
+        (k, v)
         for k, v in temporal["stems"].items()
         if isinstance(v, list) and v and any(n in k.lower() for n in PERC)
     ]
-    if not lanes:
+    if not named:
         return []
-    n = min(len(x) for x in lanes)
-    raw = [sum(x[i] for x in lanes) / len(lanes) for i in range(n)]
+    gain = {k: _heard(loud, k) for k, _ in named}
+    if not any(gain.values()):
+        gain = {k: 1.0 for k, _ in named}
+    n = min(len(x) for _, x in named)
+    total = sum(gain.values()) or 1.0
+    raw = [sum(x[i] * gain[k] for k, x in named) / total for i in range(n)]
     per = []
     for i in range(n):
         a, b = max(0, i - 1), min(n, i + 2)
@@ -370,9 +376,9 @@ def rhythm_changes(hits, w, n, tol=4.0, z_min=3.0):
         elif ratio >= 6.0:
             say = "the beat comes back in"
         elif ratio >= 1.7:
-            say = "the pulse doubles up"
+            say = "twice as many hits"
         elif ratio <= 0.6:
-            say = "the pulse halves"
+            say = "half as many hits"
         elif post > pre:
             say = "the rhythm thickens"
         else:
@@ -388,9 +394,10 @@ def rhythm_changes(hits, w, n, tol=4.0, z_min=3.0):
     return out
 
 
-def comings(temporal, tol=2.0):
+def comings(temporal, tol=2.0, loud=None, floor_db=-40.0):
     if not temporal or not temporal.get("stems"):
         return []
+    gainful = {k: _heard(loud, k) for k in temporal["stems"]}
     w = temporal.get("window_s") or 0.5
     span = max(1, int(round(tol / w)))
     found = []
@@ -412,9 +419,39 @@ def comings(temporal, tol=2.0):
                     "what": name,
                     "type": "entrance" if jump > 0 else "exit",
                     "size": round(abs(jump), 3),
+                    "heard": round(abs(jump) * _heard(loud, name), 5),
                 }
             )
-    found.sort(key=lambda m: -m["size"])
+    if loud:
+        top = max((v.get("db") or -99) for v in loud.values() if isinstance(v, dict))
+        found = [
+            m
+            for m in found
+            if not isinstance(loud.get(m["what"]), dict)
+            or (loud[m["what"]].get("db") or -99) - top >= floor_db
+        ]
+    rank = sorted({k for k in gainful}, key=lambda k: -gainful[k])[:6]
+    firsts = {}
+    lasts = {}
+    for m in found:
+        if m["what"] not in rank:
+            continue
+        if m["type"] == "entrance":
+            if m["what"] not in firsts or m["i"] < firsts[m["what"]]["i"]:
+                firsts[m["what"]] = m
+        else:
+            if m["what"] not in lasts or m["i"] > lasts[m["what"]]["i"]:
+                lasts[m["what"]] = m
+    for m in list(firsts.values()):
+        m["arrival"] = True
+    for m in list(lasts.values()):
+        m["departure"] = True
+    found.sort(
+        key=lambda m: (
+            not (m.get("arrival") or m.get("departure")),
+            -m.get("heard", m["size"]),
+        )
+    )
     kept = []
     for m in found:
         if any(abs(m["i"] - k["i"]) < span and m["what"] == k["what"] for k in kept):
@@ -431,18 +468,19 @@ def find(
     melody=None,
     rhythm=None,
     emotion=None,
+    stems=None,
     want=32,
     together=1.5,
 ):
     """Every kind of moment, ranked, with the rare kinds guaranteed room."""
-    w, v, noise = energy_curve(temporal)
+    w, v, noise = energy_curve(temporal, loud=stems)
     n = len(v)
     hits = (rhythm or {}).get("hits") if isinstance(rhythm, dict) else rhythm
     cand = (
-        comings(temporal)
+        comings(temporal, loud=stems)
         + swings(v, w, noise)
         + loudest(v)
-        + rolls(temporal, w)
+        + rolls(temporal, w, loud=stems)
         + tempo_changes(grid, w)
         + shifts(melody, w, n)
         + rhythm_changes(hits, w, n)
@@ -483,7 +521,10 @@ def find(
         taken += same
     rest = sorted(
         [g for g in groups if g["type"] not in CAP and not any(g is t for t in taken)],
-        key=lambda g: -g["size"],
+        key=lambda g: (
+            not any(p.get("arrival") or p.get("departure") for p in g["parts"]),
+            -g["size"],
+        ),
     )
     picked = picked + rest[: max(0, want - len(picked))]
 

@@ -661,7 +661,7 @@
         <button id="follow" title="Keep view centred on playhead">
           Follow: off
         </button>
-        <span class="dim">scroll to zoom, drag to slide</span>
+        <span class="dim">scroll to zoom · shift-scroll or drag to slide</span>
       </div>
     </div>
   </div>
@@ -902,6 +902,13 @@
 
   function zoomAt(t, by) {
     setView(t - (t - VIEW.a) * by, t + (VIEW.b - t) * by);
+  }
+
+  /* setView keeps the span when it clamps, so sliding past either end stops
+     at the edge instead of squashing the window. */
+  function panBy(fraction) {
+    const d = viewSpan() * fraction;
+    setView(VIEW.a + d, VIEW.b + d);
   }
 
   const mmss = (s) =>
@@ -2541,6 +2548,14 @@
       (e) => {
         if (!SCORE) return;
         e.preventDefault();
+        /* A trackpad sends a sideways gesture as deltaX and a mouse sends
+           shift-wheel as deltaY, so take whichever moved. */
+        const sideways = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
+        if (sideways) {
+          const d = e.deltaX || e.deltaY;
+          if (d) panBy(d > 0 ? 0.12 : -0.12);
+          return;
+        }
         const r = el.getBoundingClientRect();
         const at = fromTime
           ? fromTime((e.clientX - r.left) / r.width)
