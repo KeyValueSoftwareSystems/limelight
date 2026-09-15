@@ -3,7 +3,7 @@ const H = require("./helpers");
 module.exports = function converge(params, ctx) {
   const colour = H.parseColour(params.colour, [1, 1, 1]);
   const level = params.level != null ? params.level : 0.9;
-  const keep = params.rest != null ? params.rest : 0.10;
+  const keep = params.rest != null ? params.rest : 0.28;
   const pan = params.pan != null ? params.pan : 0.662;
   const tilt = params.tilt != null ? params.tilt : 0.30;
   const N = Math.max(2, H.framesPerBeat(ctx.bpm) * (params.for_beats || 4));

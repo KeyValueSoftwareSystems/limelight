@@ -1004,7 +1004,7 @@
    "tier": 2,
    "dimension": "place",
    "returns": true,
-   "blurb": "The moving head travels across the room while the pars hold back. The one gesture that puts light somewhere new.",
+   "blurb": "The moving head travels across the room while the pars hold back. The one gesture that puts light somewhere new. The pars keep the room while the head travels.",
    "dials": {
     "colour": {
      "default": [
@@ -1037,7 +1037,7 @@
      "default": true
     },
     "rest": {
-     "default": 0.08,
+     "default": 0.3,
      "min": 0,
      "max": 1
     },
@@ -1343,7 +1343,7 @@
    "tier": 1,
    "dimension": "place",
    "returns": true,
-   "blurb": "The pars drop back and the head drives to one point, prism in. Everything looks at one place.",
+   "blurb": "The pars drop back and the head drives to one point, prism in. Everything looks at one place. The pars keep the room while the head travels.",
    "dials": {
     "colour": {
      "default": [
@@ -1358,7 +1358,7 @@
      "max": 1
     },
     "rest": {
-     "default": 0.1,
+     "default": 0.28,
      "min": 0,
      "max": 1
     },
@@ -1508,7 +1508,7 @@
    "tier": 2,
    "dimension": "place",
    "returns": true,
-   "blurb": "A gobo in the head's beam with the prism spinning - pattern in the air while the pars hold back.",
+   "blurb": "A gobo in the head's beam with the prism spinning - pattern in the air while the pars hold back. The pars keep the room while the head travels.",
    "dials": {
     "colour": {
      "default": [
@@ -1523,7 +1523,7 @@
      "max": 1
     },
     "rest": {
-     "default": 0.12,
+     "default": 0.3,
      "min": 0,
      "max": 1
     },

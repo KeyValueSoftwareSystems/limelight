@@ -1656,13 +1656,13 @@ function drawPar(p, W, H, u, n) {
     const pop = p.strobe > 8 ? 0.32 : 0;
     const air = toWhite(c, Math.min(0.8, Math.max(0, k - 0.72) / 0.28 * 0.45 + pop));
     const splay = (p.x - 0.5) * (dense ? 0.52 : 0.85);
-    const A = (0.026 + 0.105 * k) * (dense ? 0.86 : 1);
-    const Lc = u * (0.28 + 0.34 * k) * (dense ? 0.86 : 1) * (p.scale || 1);
+    const A = (0.030 + 0.122 * k) * (dense ? 0.84 : 1);
+    const Lc = u * (0.28 + 0.34 * k) * (dense ? 0.82 : 1) * (p.scale || 1);
 
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(splay);
-    volume(c, air, A, lr * 1.5, Lc * (dense ? 0.52 : 0.62), Lc, 5);
+    volume(c, air, A, lr * 1.5, Lc * (dense ? 0.52 : 0.62), Lc, dense ? 4 : 5);
     ctx.restore();
 
     const fy = H * FLOOR_Y + u * 0.008;
@@ -1795,8 +1795,8 @@ function volume(c, air, A, w0, wTop, L, layers) {
   ctx.fillStyle = g;
   for (let i = 0; i < layers; i++) {
     const f = 1 - i * span;
-    const a = A * Math.exp(-3.5 * (f * f - lo * lo));
-    if (a < 0.0022) continue;
+    const a = A * Math.exp(-2.8 * (f * f - lo * lo));
+    if (a < 0.0045) continue;
     ctx.globalAlpha = a;
     cone(w0 * (0.42 + 0.58 * f), wTop * f, L);
   }

@@ -2,7 +2,7 @@
 const H = require("./helpers");
 module.exports = function texture(params, ctx) {
   const colour = H.parseColour(params.colour, [1, 1, 1]);
-  const keep = params.rest != null ? params.rest : 0.12;
+  const keep = params.rest != null ? params.rest : 0.30;
   const level = params.level != null ? params.level : 0.85;
   const gobo = params.gobo != null ? params.gobo : 40;
   const spin = params.spin !== false;

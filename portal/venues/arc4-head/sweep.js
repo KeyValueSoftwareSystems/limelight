@@ -11,7 +11,7 @@ module.exports = function sweep(params, ctx) {
   const overBeats = params.for_beats || 4;
   const N = Math.max(2, H.framesPerBeat(ctx.bpm) * overBeats);
   const pars = H.parsForExtent(params.extent || "all");
-  const keep = H.clamp(params.rest != null ? params.rest : 0.08, 0, 1);
+  const keep = H.clamp(params.rest != null ? params.rest : 0.30, 0, 1);
 
   const frames = [];
   for (let i = 0; i < N; i++) {
