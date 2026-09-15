@@ -441,11 +441,25 @@ def compose(song, model=None, max_retries=1):
         cleaned, report = validate(plan, catalog, overview)
 
         errors = [r for r in report if r["level"] == "error"]
-        if errors and attempt < max_retries:
-            error_text = format_report(errors)
+        # the validator fills uncovered sections; if it had to fill (nearly) all of
+        # them the model gave us essentially no states, which is worth one retry.
+        n_sections = len(overview.get("sections") or [])
+        n_filled = len([r for r in report if r.get("code") == "state_filled"])
+        model_states = max(0, len(cleaned.get("states", [])) - n_filled)
+        too_few_states = n_sections > 0 and model_states < max(1, n_sections // 2)
+
+        if (errors or too_few_states) and attempt < max_retries:
+            parts = []
+            if errors:
+                parts.append(f"Validation found {len(errors)} error(s):\n{format_report(errors)}")
+            if too_few_states:
+                parts.append(
+                    f"You placed a resting state on only {model_states} of {n_sections} sections. "
+                    f"Every section 0..{n_sections-1} MUST have exactly one state, or it renders as "
+                    f"darkness. Add the missing section states (drone for quiet, wash for full) and "
+                    f"return the corrected JSON.")
             messages.append({"role": "assistant", "content": text})
-            messages.append({"role": "user", "content":
-                f"Validation found {len(errors)} error(s). Fix them and return the corrected JSON:\n{error_text}"})
+            messages.append({"role": "user", "content": "\n\n".join(parts)})
             continue
 
         return cleaned, report, overview

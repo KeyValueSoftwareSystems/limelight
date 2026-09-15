@@ -56,6 +56,23 @@ def validate(plan, catalog, score_overview):
             report.append({"level": "warn", "msg": f"state[{i}]: no 'why'"})
         clean_states.append(s)
 
+    # coverage: every section must have a resting state, or it bakes black. Fill
+    # any uncovered section with a deterministic default so a misbehaving model
+    # never means a dark section. See architecture.md ("repair on failure").
+    state_ids = [e["id"] for e in catalog if e.get("kind") == "state"]
+    covered = {s.get("section") for s in clean_states if isinstance(s.get("section"), int)}
+    for i in range(len(sections)):
+        if i in covered:
+            continue
+        fill = _fill_state(i, sections[i], score_overview, state_ids)
+        if fill is None:
+            report.append({"level": "warn", "msg": f"section[{i}] has no state and none could be filled"})
+            continue
+        clean_states.append(fill)
+        report.append({"level": "warn", "code": "state_filled", "section": i,
+                       "msg": f"section[{i}] had no state; filled with {fill['effect']} (amount {fill.get('amount')})"})
+    clean_states.sort(key=lambda s: s.get("section", 0) if isinstance(s.get("section"), int) else 0)
+
     clean_bindings = []
     for i, b in enumerate(plan.get("bindings") or []):
         eid = b.get("effect")
@@ -70,15 +87,21 @@ def validate(plan, catalog, score_overview):
         if sec_idx is None or not isinstance(sec_idx, int) or sec_idx < 0 or sec_idx >= len(sections):
             report.append({"level": "error", "msg": f"binding[{i}]: section index {sec_idx} out of range"})
             continue
-        # check streams
+        # check streams — a binding to an unknown stream would render as a dead
+        # constant (the baker samples 0), so DROP it rather than keep it. The
+        # error also gives the model a chance to fix the name on retry.
+        bad_stream = False
         for key in ("stream", "streams"):
             val = b.get(key)
             if val is None:
                 continue
             names = [val] if isinstance(val, str) else (val if isinstance(val, list) else [])
             for name in names:
-                if name and name not in streams:
-                    report.append({"level": "error", "msg": f"binding[{i}]: stream '{name}' not in overview"})
+                if name and streams and name not in streams:
+                    report.append({"level": "error", "msg": f"binding[{i}]: stream '{name}' not in overview (dropped)"})
+                    bad_stream = True
+        if bad_stream:
+            continue
         if not b.get("why"):
             report.append({"level": "warn", "msg": f"binding[{i}]: no 'why'"})
         clean_bindings.append(b)
@@ -129,6 +152,50 @@ def validate(plan, catalog, score_overview):
 
     errors = [r for r in report if r["level"] == "error"]
     return cleaned, report
+
+
+def _section_energy(section, overview):
+    """Best-effort mean per-bar energy for a section, 0..1-ish, or None."""
+    energy = None
+    curves = overview.get("curves")
+    if isinstance(curves, dict):
+        energy = curves.get("energy")
+    if energy is None:
+        energy = overview.get("energy")
+    if isinstance(energy, dict):
+        energy = energy.get("values")
+    if not isinstance(energy, list) or not energy:
+        return None
+    fb = (section.get("from") or {}).get("bar")
+    tb = (section.get("to") or {}).get("bar")
+    if not isinstance(fb, int) or not isinstance(tb, int):
+        return None
+    lo = max(0, fb - 1)
+    hi = min(len(energy), max(lo + 1, tb - 1))
+    seg = [v for v in energy[lo:hi] if isinstance(v, (int, float))]
+    if not seg:
+        return None
+    return sum(seg) / len(seg)
+
+
+def _fill_state(i, section, overview, state_ids):
+    """A deterministic resting state for an uncovered section: a low drone by
+    default, opening to a wash where the section reads energetic. Never None
+    unless the catalog has no state effect at all."""
+    if not state_ids:
+        return None
+    e = _section_energy(section, overview)
+    lvl = 0.12 if e is None else max(0.08, min(0.55, 0.08 + min(e, 1.0) * 0.45))
+    if lvl >= 0.22 and "wash" in state_ids:
+        return {"section": i, "effect": "wash", "amount": round(lvl, 2),
+                "colour": [0.3, 0.35, 0.6], "extent": "all",
+                "why": "auto-filled: composer left this section without a resting state",
+                "author": "validator"}
+    eff = "drone" if "drone" in state_ids else state_ids[0]
+    return {"section": i, "effect": eff, "amount": round(min(lvl, 0.2), 2),
+            "colour": [1, 0.75, 0.35], "extent": "inner",
+            "why": "auto-filled: composer left this section without a resting state",
+            "author": "validator"}
 
 
 def _detect_collisions(gestures, bindings, states, effects_by_id, moments, sections):

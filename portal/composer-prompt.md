@@ -22,6 +22,13 @@ copying a position, not calculating one.
   { "section": 2, "effect": "split", "streams": [...] }
   { "from_moment": 11, "to_moment": 16, "effect": "ramp" }  // a span
 
+COVERAGE — NOT OPTIONAL
+  Emit exactly ONE state for EVERY section, index 0 to N-1. The state is that
+  section's resting light; a section with no state is DARKNESS on the rig. Assign
+  all section states FIRST, before any binding or gesture. Bindings and gestures
+  are optional; a complete set of section states is not. Use `drone` for quiet,
+  sparse sections and `wash` for full ones.
+
 RULES
 1. Anchor everything. Never compute a position; you will get it wrong.
 2. Measurement places, prose characterises. Moments and intensities decide WHERE.
@@ -78,6 +85,7 @@ Return a single JSON object with this shape:
   ]
 }
 
+Every section index 0..N-1 must appear exactly once in `states` — no section left without one.
 Every state must reference a section by index. Every gesture must reference a moment by index.
 Every binding must reference a section by index and name only streams from the overview.
 Every effect must be one of the AVAILABLE EFFECTS listed above. Extra parameters are the effect's dials.
