@@ -59,6 +59,17 @@ ORDER = (
 )
 SHAPE = ("drop", "breakdown", "build")
 LEADS = ("peak", "drop", "pause")
+
+EXACT = ("peak", "pause")
+"""Kinds whose whole claim is about one instant, so they are never snapped.
+
+Every other moment is pulled to the nearest beat within a second, which is
+right for a drop or an entrance - those land on a beat and a reader firing a
+cue wants the beat. A pause and a peak are not events on the grid, they are
+the quietest and loudest instants there are, and a second of snapping moves
+them off it: afterglow's pause read 0.291 where it was placed and 0.011 at the
+hole 1.2s away, 26 times quieter, and the `peak` on arz-kiya-hai sat at the
+69th percentile of its own loudness curve rather than the top."""
 CAP = {
     "entrance": 8,
     "exit": 8,
@@ -1109,6 +1120,8 @@ def find(
         m["t"] = m["i"] * w
     if beats:
         for m in cand:
+            if m["type"] in EXACT:
+                continue
             near = min(beats, key=lambda b: abs(b - m["t"]))
             if abs(near - m["t"]) < 1.0:
                 m["t"] = near
