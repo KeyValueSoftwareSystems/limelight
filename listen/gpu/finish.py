@@ -77,7 +77,8 @@ def main(paths):
         feels = ""
         if not score.get("emotion") and score.get("sections"):
             got = F.clean_emotion(None, (score.get("song") or {}).get("length_s"),
-                                  score.get("stems_temporal"), score.get("sections"))
+                                  score.get("stems_temporal"), score.get("sections"),
+                                  score.get("stems"))
             if got:
                 score["emotion"] = got
                 (score.setdefault("unavailable", {}) or {}).pop("emotion", None)

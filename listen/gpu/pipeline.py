@@ -407,11 +407,11 @@ def load_feel():
     return F
 
 
-def clean_emotion(emotion, duration=None, temporal=None, sections=None):
+def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=None):
     F = load_feel()
     if not F:
         return []
-    return F.clean_emotion(emotion, duration, temporal, sections)
+    return F.clean_emotion(emotion, duration, temporal, sections, loud)
 
 
 def step_duration(wav):
@@ -945,6 +945,7 @@ def run_pipeline(wav_path):
                             duration=score["song"]["length_s"],
                             temporal=score.get("stems_temporal"),
                             sections=score.get("sections"),
+                            loud=score.get("stems"),
                         )
                     print(
                         f"    {task}: {len(score.get(task, []))} ({time.time() - t:.1f}s)",

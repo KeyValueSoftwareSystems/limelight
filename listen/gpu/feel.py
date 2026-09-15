@@ -13,26 +13,49 @@ PERC = ("drums", "kick", "snare", "hh", "toms", "percussion", "clap", "cymbals",
         "shaker", "tambourine", "congas", "bongos")
 
 
-def raw_feel(temporal, a, b):
+def _envelope_max(loud, name, lane):
+    at = (loud or {}).get(name)
+    if not isinstance(at, dict):
+        return 1.0
+    rms = at.get("rms")
+    if rms and lane:
+        power = sum(x * x for x in lane) / len(lane)
+        if power > 0:
+            return rms / (power ** 0.5)
+    return at.get("peak") or 1.0
+
+
+def raw_feel(temporal, a, b, loud=None):
     """Unscaled energy, brightness and groove for one span, off the stem lanes.
 
     MOSS returns 1 for all six dimensions on every segment of every song, so
-    the three with a physical correlate are measured here instead."""
+    the three with a physical correlate are measured here instead.
+
+    The lanes are divided by each instrument's own envelope max, so averaging
+    them raw counts how many instruments are near their personal maximum and
+    six quiet ones outrank a loud two. Each lane is weighted back up by that
+    divisor, recovered exactly as rms / sqrt(mean(lane^2))."""
     if not temporal or not temporal.get("stems"):
         return None
     w = temporal.get("window_s") or 0.5
     lanes = temporal["stems"]
     i, j = int(a / w), max(int(a / w) + 1, int(b / w))
+    gain = {k: _envelope_max(loud, k, v) for k, v in lanes.items()
+            if isinstance(v, list) and v}
+    if not any(gain.values()):
+        gain = {k: 1.0 for k in gain}
 
     def mean_of(names):
-        got = []
+        got, total = 0.0, 0.0
         for k, v in lanes.items():
             if names and not any(n in k.lower() for n in names):
                 continue
             seg = v[i:j]
             if seg:
-                got.append(sum(seg) / len(seg))
-        return sum(got) / len(got) if got else 0.0
+                g = gain.get(k, 1.0)
+                got += (sum(seg) / len(seg)) * g
+                total += g
+        return got / total if total else 0.0
 
     whole = mean_of(())
     if whole <= 0:
@@ -61,7 +84,7 @@ def scale_feel(raws):
     return out, moved
 
 
-def clean_emotion(emotion, duration=None, temporal=None, sections=None):
+def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=None):
     """The feel of each span, measured, whatever named the spans.
 
     energy, brightness and groove are read off the stem lanes here, so the
@@ -121,7 +144,7 @@ def clean_emotion(emotion, duration=None, temporal=None, sections=None):
     for i in range(len(filled) - 1):
         filled[i]["end"] = filled[i + 1]["start"]
 
-    raws = [raw_feel(temporal, seg["start"], seg["end"]) for seg in filled]
+    raws = [raw_feel(temporal, seg["start"], seg["end"], loud) for seg in filled]
     if filled and all(raws):
         scaled, moved = scale_feel(raws)
         for seg, got in zip(filled, scaled):

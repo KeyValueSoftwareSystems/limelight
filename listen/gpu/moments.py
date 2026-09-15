@@ -45,9 +45,14 @@ ORDER = (
     "breakdown",
     "build",
     "peak",
+    "spotlight",
+    "harmonic_rhythm",
     "rhythm_change",
     "register_shift",
     "tempo_change",
+    "vocal_out",
+    "vocal_return",
+    "melody_resume",
     "entrance",
     "exit",
 )
@@ -57,10 +62,33 @@ CAP = {
     "breakdown": 4,
     "build": 4,
     "peak": 1,
+    "spotlight": 3,
+    "harmonic_rhythm": 2,
     "tempo_change": 4,
     "rhythm_change": 4,
     "register_shift": 4,
+    "vocal_out": 2,
+    "vocal_return": 2,
+    "melody_resume": 3,
 }
+
+VOICE_ON = 0.25
+VOICE_HOLD_S = 2.0
+VOICE_QUIET_S = 16.0
+
+FAMILY = (
+    ("voice", ("vocal", "lead-vocal", "back-vocal")),
+    ("keys", ("piano", "digital-piano", "keys", "harpsichord", "organ", "accordion")),
+    ("guitar", ("guitar", "electric-guitar", "acoustic-guitar", "banjo", "mandolin",
+                "ukulele", "dobro")),
+    ("strings", ("strings", "bowed_strings", "violin", "viola", "cello", "harp")),
+    ("winds", ("wind", "woodwind", "flute", "clarinet", "oboe", "bassoon", "harmonica")),
+    ("brass", ("brass", "trumpet", "trombone", "french-horn", "saxophone", "tuba")),
+    ("low", ("bass", "double-bass")),
+    ("tuned percussion", ("marimba", "glockenspiel", "bells", "wind-chimes", "triangle")),
+    ("drums", ("drums", "kick", "snare", "hh", "toms", "percussion", "congas", "bongos",
+               "cymbals", "shaker", "tambourine", "timpani", "clap")),
+)
 
 
 def energy_curve(temporal, smooth=3, loud=None):
@@ -69,9 +97,12 @@ def energy_curve(temporal, smooth=3, loud=None):
     The lanes arrive divided by each instrument's own peak, so averaging them
     raw counts how many instruments are near their personal maximum - six
     quiet ones outrank a loud two, and drops, peaks and entrances then land
-    off the music. stems[name].peak is the divisor, so multiplying it back
-    recovers the envelope; the peak of the song moves by a median 10.5s, and
-    on 15 of 29 songs by more than ten.
+    off the music. The divisor is the lane's envelope max, not its sample
+    peak: the lanes are equal windows, so sqrt(mean(lane^2)) is that stem's
+    rms on the normalised scale and stems[name].rms is the same quantity
+    absolute, making rms / sqrt(mean(lane^2)) the envelope max exactly.
+    stems[name].peak overshoots it by the crest factor, a median 11.7 dB
+    and 8.4 dB of spread between stems.
 
     Scaling a curve onto 0-1 against its own range makes a flat lane look
     like a song: shuffle the lanes and the same rules found more drops than
@@ -84,7 +115,7 @@ def energy_curve(temporal, smooth=3, loud=None):
     named = [(k, v) for k, v in temporal["stems"].items() if isinstance(v, list) and v]
     if not named:
         return w, [], 1.0
-    gain = {k: _heard(loud, k) for k, _ in named}
+    gain = {k: _heard(loud, k, v) for k, v in named}
     if not any(gain.values()):
         gain = {k: 1.0 for k, _ in named}
     n = min(len(v) for _, v in named)
@@ -104,9 +135,16 @@ def energy_curve(temporal, smooth=3, loud=None):
     return w, v, noise
 
 
-def _heard(loud, name):
+def _heard(loud, name, lane=None):
     at = (loud or {}).get(name)
-    return (at.get("peak") or 0.0) if isinstance(at, dict) else 1.0
+    if not isinstance(at, dict):
+        return 1.0
+    rms = at.get("rms")
+    if rms and isinstance(lane, list) and lane:
+        power = sum(x * x for x in lane) / len(lane)
+        if power > 0:
+            return rms / (power ** 0.5)
+    return at.get("peak") or 0.0
 
 
 def _span(v, a, b):
@@ -170,7 +208,7 @@ def rolls(temporal, w, tol=4.0, loud=None):
     ]
     if not named:
         return []
-    gain = {k: _heard(loud, k) for k, _ in named}
+    gain = {k: _heard(loud, k, v) for k, v in named}
     if not any(gain.values()):
         gain = {k: 1.0 for k, _ in named}
     n = min(len(x) for _, x in named)
@@ -397,7 +435,7 @@ def rhythm_changes(hits, w, n, tol=4.0, z_min=3.0):
 def comings(temporal, tol=2.0, loud=None, floor_db=-40.0):
     if not temporal or not temporal.get("stems"):
         return []
-    gainful = {k: _heard(loud, k) for k in temporal["stems"]}
+    gainful = {k: _heard(loud, k, v) for k, v in temporal["stems"].items()}
     w = temporal.get("window_s") or 0.5
     span = max(1, int(round(tol / w)))
     found = []
@@ -419,7 +457,7 @@ def comings(temporal, tol=2.0, loud=None, floor_db=-40.0):
                     "what": name,
                     "type": "entrance" if jump > 0 else "exit",
                     "size": round(abs(jump), 3),
-                    "heard": round(abs(jump) * _heard(loud, name), 5),
+                    "heard": round(abs(jump) * gainful.get(name, 1.0), 5),
                 }
             )
     if loud:
@@ -460,6 +498,309 @@ def comings(temporal, tol=2.0, loud=None, floor_db=-40.0):
     return kept
 
 
+def family_of(name):
+    for fam, members in FAMILY:
+        if name in members:
+            return fam
+    return name
+
+
+def _voice(temporal):
+    """Every vocal-ish lane at once, scaled against the loudest of them.
+
+    One lane is not enough: under-water's lead-vocal lane is silent for 95%
+    of the track because its chopped vocal lands in `vocal`, and wetwork and
+    strobe have no lead-vocal lane at all."""
+    if not temporal or not temporal.get("stems"):
+        return 0.5, []
+    w = temporal.get("window_s") or 0.5
+    lanes = [
+        v
+        for k, v in temporal["stems"].items()
+        if "vocal" in k.lower() and isinstance(v, list) and v
+    ]
+    if not lanes:
+        return w, []
+    n = min(len(v) for v in lanes)
+    top = [max(v[i] for v in lanes) for i in range(n)]
+    hi = max(top)
+    if hi <= 0:
+        return w, []
+    return w, [x / hi for x in top]
+
+
+def _singing(lane, w, on=VOICE_ON, hold_s=VOICE_HOLD_S):
+    """Stretches where the voice is actually carrying, in seconds.
+
+    `on` is a share of the loudest the voice gets in this song, not a fixed
+    level, because the lanes are normalised per instrument. A 2s hold throws
+    away the blips. Swept against the eleven songs whose first lyric
+    timestamp is trustworthy, on=0.25 hold=2.0s lands within 3s on 10."""
+    if not lane:
+        return []
+    act = [x > on for x in lane]
+    for i in range(1, len(act) - 1):
+        if not act[i] and lane[i - 1] > on and lane[i + 1] > on:
+            act[i] = True
+    need = max(1, int(round(hold_s / w)))
+    out, i = [], 0
+    while i < len(act):
+        if not act[i]:
+            i += 1
+            continue
+        j = i
+        while j < len(act) and act[j]:
+            j += 1
+        if j - i >= need:
+            out.append((i * w, j * w))
+        i = j
+    return out if sum(b - a for a, b in out) >= 10.0 else []
+
+
+def voice_gaps(temporal, quiet_s=VOICE_QUIET_S, most=2):
+    """The long stretches with no voice, and the voice coming back.
+
+    Corroborates a section boundary 52.2% against an exact per-song chance of
+    19.3%, a 2.70x that phase-randomised vocal lanes reach only 1.17x on
+    average and 2.22x at best over 40 runs, p=0.024.
+
+    The first and last time the voice is there was measured too and is not
+    here: it scores 2.90x, but a phase-randomised lane scores 4.00x, because
+    a threshold crossing of any smooth curve lands on a structural swing.
+    74% of them were already an `entrance` naming a vocal lane."""
+    w, lane = _voice(temporal)
+    runs = _singing(lane, w)
+    if len(runs) < 2:
+        return []
+    gaps = [
+        (b[0] - a[1], a[1], b[0])
+        for a, b in zip(runs, runs[1:])
+        if b[0] - a[1] >= quiet_s
+    ]
+    gaps.sort(key=lambda g: -g[0])
+    out = []
+    for held, left, back in sorted(gaps[:most], key=lambda g: g[1]):
+        size = round(min(1.0, held / 60.0), 3)
+        out.append(
+            {
+                "i": int(round(left / w)),
+                "type": "vocal_out",
+                "size": size,
+                "description": f"the voice leaves for {held:.0f} seconds",
+            }
+        )
+        out.append(
+            {
+                "i": int(round(back / w)),
+                "type": "vocal_return",
+                "size": size,
+                "description": "the voice is back",
+            }
+        )
+    return out
+
+
+def melody_returns(melody, w, most=3, apart=6.0):
+    """Where the pitched instruments come back after the biggest holes.
+
+    The hole itself is worth nothing: timed at where the gap opens this sits
+    dead on its null. Timed at where the notes come back it corroborates
+    35.7% against an exact per-song chance of 17.7%, a 2.01x that shuffling
+    the inter-onset intervals reaches 1.03x on average, p=0.024. It is the
+    one candidate that is not already in the file: 8.9% of these land near an
+    existing moment against an 11.8% chance, below it."""
+    if not melody or not w:
+        return []
+    starts = sorted(
+        float(n["start"]) for n in melody if isinstance(n.get("start"), (int, float))
+    )
+    ons = []
+    for t in starts:
+        if not ons or t - ons[-1] > 0.06:
+            ons.append(t)
+    if len(ons) < 30:
+        return []
+    gaps = [(b - a, a, b) for a, b in zip(ons, ons[1:])]
+    spans = sorted(b - a for a, b in zip(ons, ons[1:]))
+    gate = max(1.5, 4.0 * spans[len(spans) // 2])
+    kept = []
+    for held, left, back in sorted(gaps, key=lambda g: -g[0]):
+        if held < gate:
+            break
+        if any(abs(back - k[2]) < apart for k in kept):
+            continue
+        kept.append((held, left, back))
+        if len(kept) >= most:
+            break
+    return [
+        {
+            "i": int(round(back / w)),
+            "type": "melody_resume",
+            "size": round(min(1.0, held / 6.0), 3),
+            "description": "the instruments come back after "
+            + (f"{held:.1f} seconds" if held >= 2 else "a bar of nothing"),
+        }
+        for held, left, back in sorted(kept, key=lambda g: g[2])
+    ]
+
+
+def spotlight(temporal, loud, hold_s=6.0, ne_max=1.35, base_min=2.0):
+    """Where the band drops back and one family of instruments carries alone.
+
+    Energy share per instrument family on absolute levels, fired where the
+    effective family count 1/sum(share^2) holds at or under 1.35 for six
+    seconds in a song whose median is at least 2. Being a share, it is
+    invariant to the mix simply getting louder, which is the property `drop`
+    lacks.
+
+    42 events on 17 of 29 songs; no run of shuffle, phase, circular-shift or
+    AAFT nulls reached that count. Corroborates 45.2% against 17.5%,
+    p=0.0003, and the 21 that carry no other moment corroborate hardest at
+    52.4%. Named at family level: within keys, piano, keys and digital-piano
+    split near-evenly and correlate above 0.99, so the lane name is used only
+    when it holds 60% of its family."""
+    if not temporal or not temporal.get("stems") or not loud:
+        return []
+    w = temporal.get("window_s") or 0.5
+    named = [(k, v) for k, v in temporal["stems"].items() if isinstance(v, list) and v]
+    if not named:
+        return []
+    n = min(len(v) for _, v in named)
+    span = max(4, int(round(hold_s / w)))
+    if n < span + 4:
+        return []
+    gain = {k: _heard(loud, k, v) for k, v in named}
+    if not any(gain.values()):
+        return []
+    power, owner = {}, {}
+    for k, v in named:
+        fam = family_of(k)
+        g = gain[k]
+        row = power.setdefault(fam, [0.0] * n)
+        mine = owner.setdefault(fam, {}).setdefault(k, [0.0] * n)
+        for i in range(n):
+            e = (v[i] * g) ** 2
+            row[i] += e
+            mine[i] = e
+    fams = sorted(power)
+    roll = {f: [0.0] * (n - span + 1) for f in fams}
+    for f in fams:
+        run = sum(power[f][:span])
+        roll[f][0] = run
+        for i in range(1, n - span + 1):
+            run += power[f][i + span - 1] - power[f][i - 1]
+            roll[f][i] = run
+    count, lead = [], []
+    for i in range(n - span + 1):
+        tot = sum(roll[f][i] for f in fams) or 1e-12
+        best, who, acc = 0.0, fams[0], 0.0
+        for f in fams:
+            share = roll[f][i] / tot
+            acc += share * share
+            if share > best:
+                best, who = share, f
+        count.append(1.0 / max(acc, 1e-12))
+        lead.append(who)
+    base = sorted(count)[len(count) // 2] if count else 0.0
+    if base < base_min:
+        return []
+    out, start = [], None
+    for i in range(len(count) + 1):
+        live = i < len(count) and count[i] <= ne_max and lead[i] != "drums"
+        if live and start is None:
+            start = i
+        elif not live and start is not None:
+            a, b = start, i
+            start = None
+            if b - a < max(2, span // 3):
+                continue
+            j = min(range(a, b), key=lambda x: count[x])
+            fam = lead[j]
+            held = {k: sum(v[j : j + span]) for k, v in owner[fam].items()}
+            top = max(held, key=held.get)
+            share = held[top] / max(sum(held.values()), 1e-12)
+            out.append(
+                {
+                    "i": a,
+                    "type": "spotlight",
+                    "size": round(min(1.0, (base - count[j]) / max(base - 1.0, 1e-6)), 3),
+                    "what": top if share >= 0.6 else fam,
+                    "hold_s": round((b - a + span) * w, 1),
+                    "description": "everything drops back behind "
+                    + (top if share >= 0.6 else "the " + fam),
+                }
+            )
+    out.sort(key=lambda m: -m["size"])
+    kept = []
+    for m in out:
+        if any(abs(m["i"] - k["i"]) < span for k in kept):
+            continue
+        kept.append(m)
+    return sorted(kept, key=lambda m: m["i"])
+
+
+def chord_turns(chords, join=0.35):
+    turns = []
+    last = None
+    for c in chords or []:
+        lab = c.get("chord")
+        start = c.get("start")
+        end = c.get("end")
+        if not lab or lab in ("N", "X") or start is None:
+            continue
+        start = float(start)
+        end = float(end) if end is not None else start
+        if last is not None and last[0] == lab and abs(start - last[1]) < join:
+            last = (lab, end)
+            continue
+        turns.append(start)
+        last = (lab, end)
+    return turns
+
+
+def harmonic_rhythm(chords, w, n, tol=8.0, need=6, edge=4.0):
+    """Where the harmony breaks out of one held chord into motion.
+
+    Corroborates 45.0% against 17.6%, p=0.0042, where the identical detector
+    run on a time-rotated chord track reaches 15.4%. Monotone in the
+    threshold - 5 gives 34.5%, 6 gives 45.0%, 7 gives 53.8% - so it is not
+    one lucky cell. Half of them carry another moment, but of entrance,
+    register_shift and exit, not rhythm_change: it is not a second name for
+    the drums getting busier.
+
+    The generic form of this rule, any step in chord rate, is not here: it
+    corroborates 20.0% against 17.6%, which is chance. Only the held-chord
+    side carries. The split was found on these 29 songs, so 45% is the number
+    to confirm on held-out songs, not to quote as settled."""
+    turns = chord_turns(chords)
+    if len(turns) < 6 or not n or n <= 0:
+        return []
+    dur = n * w
+    found = []
+    for t in turns:
+        if t < max(edge, tol) or t > dur - max(edge, tol):
+            continue
+        pre = sum(1 for x in turns if t - tol <= x < t)
+        post = sum(1 for x in turns if t <= x < t + tol)
+        if pre == 0 and post >= need:
+            found.append((post, t))
+    found.sort(key=lambda x: -x[0])
+    kept = []
+    for post, t in found:
+        if any(abs(t - k[1]) < tol for k in kept):
+            continue
+        kept.append((post, t))
+    return [
+        {
+            "i": int(round(t / w)),
+            "type": "harmonic_rhythm",
+            "size": round(min(1.0, post / 12.0), 3),
+            "description": "the harmony breaks out of one held chord",
+        }
+        for post, t in sorted(kept, key=lambda k: k[1])
+    ]
+
+
 def find(
     temporal,
     beats,
@@ -484,6 +825,10 @@ def find(
         + tempo_changes(grid, w)
         + shifts(melody, w, n)
         + rhythm_changes(hits, w, n)
+        + spotlight(temporal, stems)
+        + harmonic_rhythm(chords, w, n)
+        + voice_gaps(temporal)
+        + melody_returns(melody, w)
     )
     if not cand:
         return []
@@ -509,6 +854,18 @@ def find(
     for g in groups:
         g["parts"].sort(key=lambda x: -x["size"])
         g["size"] = g["parts"][0]["size"]
+
+    voiced = [g for g in groups if g["type"] in ("vocal_out", "vocal_return")]
+    if voiced:
+        groups = [
+            g
+            for g in groups
+            if g["type"] not in ("entrance", "exit")
+            or not any(
+                p.get("what") and "vocal" in p["what"].lower() for p in g["parts"]
+            )
+            or not any(abs(g["t"] - h["t"]) <= together for h in voiced)
+        ]
 
     picked, taken = [], []
     for kind in ORDER:
@@ -555,7 +912,13 @@ def find(
         lead = g["parts"][0].get("lead_s")
         if lead:
             item["lead_s"] = lead
-        if names:
+        span = g["parts"][0].get("hold_s")
+        if span:
+            item["hold_s"] = span
+        if names and g["type"] not in one:
+            item["what"] = names[0]
+            item["description"] = g["parts"][0].get("description", g["type"])
+        elif names:
             if len(names) == 1:
                 who = names[0]
             elif len(names) <= 3:

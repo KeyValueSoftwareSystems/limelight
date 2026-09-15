@@ -1302,11 +1302,11 @@
       ${mossChanges ? `<dt>Changes</dt><dd class="dim" style="font-size:11px">${esc(mossChanges)}</dd>` : ""}
     </dl></div>
     <div class="col"><dl>
-      ${mossSections().length ? `<dt>Sections</dt><dd><b style="color:var(--ok)">${mossSections().length} sections</b></dd>` : ""}
+      ${mossSections().length ? `<dt>Sections</dt><dd><b style="color:var(--ok)">${mossSections().length} sections</b>${(SCORE.sections || []).some((x) => x && x.also_heard) ? " · boundaries by SongFormer" : ' <span class="dim" style="font-size:10px">(labels only, no second opinion)</span>'}</dd>` : ""}
       ${SCORE.btc_chords_raw ? `<dt>Chords</dt><dd><b style="color:var(--ok)">${SCORE.btc_chords_raw.length} changes</b> (BTC Transformer)</dd>` : ""}
       ${SCORE.stems ? `<dt>Instruments</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems).length} stems</b> detected (53-stem BS-RoFormer)</dd>` : ""}
-      ${(SCORE.moments || []).length ? `<dt>Moments</dt><dd><b style="color:var(--ok)">${SCORE.moments.length} events</b></dd>` : ""}
-      ${(SCORE.emotion || []).length ? `<dt>Emotion</dt><dd><b style="color:var(--ok)">${SCORE.emotion.length} segments</b> (6 dimensions)</dd>` : ""}
+      ${(SCORE.moments || []).length ? `<dt>Moments</dt><dd><b style="color:var(--ok)">${SCORE.moments.length} events</b> · ${new Set((SCORE.moments || []).map((m) => m.type || m.kind)).size} kinds</dd>` : ""}
+      ${(SCORE.emotion || []).length ? `<dt>Emotion</dt><dd><b style="color:var(--ok)">${SCORE.emotion.length} segments</b> · ${((SCORE.emotion[0] || {}).measured || []).join(", ") || "no dimension held"}</dd>` : ""}
       ${(SCORE.melody || []).length ? `<dt>Melody</dt><dd><b style="color:var(--ok)">${SCORE.melody.length} notes</b> (basic-pitch)</dd>` : ""}
       ${SCORE.rhythm ? `<dt>Rhythm</dt><dd><b style="color:var(--ok)">${(SCORE.rhythm.hits || []).length} onsets</b></dd>` : ""}
       ${SCORE.stems_temporal ? `<dt>Temporal</dt><dd><b style="color:var(--ok)">${Object.keys(SCORE.stems_temporal.stems || {}).length} stems</b> (0.5s windows)</dd>` : ""}
@@ -1314,12 +1314,19 @@
     <div class="col"><dl>
       <dt>Technology</dt>
       <dd class="dim" style="font-size:10px;line-height:1.8">
-        MOSS-Music-8B-Instruct (sections, moments, emotion, lyrics, caption, key)<br>
-        MVSep Mega 53-Stem BS-RoFormer (stem separation + temporal activity)<br>
-        BTC Transformer (chord recognition, 170-chord vocabulary)<br>
-        basic-pitch / ONNX (melody transcription)<br>
-        madmom (beat &amp; downbeat tracking)<br>
-        librosa (rhythm onset detection)
+        SongFormer (ASLP-lab) &mdash; section boundaries, 7 classes<br>
+        MOSS-Music-8B-Instruct &mdash; caption, section labels, lyrics, key/tempo<br>
+        MVSep Mega 53-stem BS-RoFormer &mdash; stems + temporal activity<br>
+        BTC Transformer &mdash; chords, 170-chord vocabulary<br>
+        basic-pitch / ONNX &mdash; melody transcription<br>
+        madmom &mdash; beat &amp; downbeat tracking<br>
+        librosa &mdash; onset detection
+      </dd>
+      <dt>Measured here, not modelled</dt>
+      <dd class="dim" style="font-size:10px;line-height:1.8">
+        moments &mdash; 14 kinds, each read off the lanes, the grid or the chords<br>
+        emotion &mdash; energy, brightness and groove off the stem lanes<br>
+        <span style="opacity:.75">no language model is asked what happens in the song</span>
       </dd>
     </dl></div>`;
 
@@ -2129,6 +2136,11 @@
     build: "#e8a33d",
     peak: "#ffd700",
     register_shift: "#ff6b9d",
+    spotlight: "#f2e4a0",
+    harmonic_rhythm: "#7fd4c1",
+    vocal_out: "#8a7fa8",
+    vocal_return: "#c48ee0",
+    melody_resume: "#9fd67f",
     tempo_change: "#d4a33d",
     rhythm_change: "#6fa8dc",
     entrance: "#5bb98c",
