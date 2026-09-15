@@ -28,7 +28,8 @@ const { Session } = require("./session.js");
    quietly reads a different, older input is the same trap wearing a hat. */
 const dirs = [path.join(__dirname, "..", "hub", "files", "score"),
               __dirname];
-const files = [];
+const fromStore = require("./fixture.js").scores();
+const files = [...fromStore];
 for (const d of dirs) {
   if (!fs.existsSync(d)) continue;
   for (const f of fs.readdirSync(d).sort())

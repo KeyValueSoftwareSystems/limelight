@@ -56,17 +56,42 @@ def numbers(path):
                   if f.endswith(EXT) and f[:-len(EXT)].isdigit())
 
 
+def exists(path):
+    """Whether this score is here, wherever its bytes actually live.
+
+    The store is the score. A top-level file beside .versions/ is no longer
+    written - it was a convenience copy for clients that knew nothing about
+    versions, and having two places holding the same thing meant they could
+    disagree. On 2026-09-15 they did: a rebuild wrote the copy, the hub kept
+    reading the version, and the page showed 28 moments where the file said 14
+    with nothing to say which was right."""
+    return os.path.isfile(path) or bool(numbers(path))
+
+
+def stored_names(dirpath):
+    """Every score name that has a version store under dirpath."""
+    d = os.path.join(dirpath, VDIR)
+    if not os.path.isdir(d):
+        return []
+    out = []
+    for name in sorted(os.listdir(d)):
+        if name.endswith(EXT) and numbers(os.path.join(dirpath, name)):
+            out.append(name)
+    return out
+
+
 def latest(path):
     ns = numbers(path)
     return ns[-1] if ns else None
 
 
 def store(path, data):
-    """Write data as the next version and copy it to the top level. Returns N."""
+    """Write data as the next version. Returns N.
+
+    Nothing is written beside the store any more. One score, one place."""
     os.makedirs(_store(path), exist_ok=True)
     n = (latest(path) or 0) + 1
     _write(version_path(path, n), data)
-    _write(path, data)
     return n
 
 

@@ -56,16 +56,14 @@ if (block) {
     return fn(scored, 0, 0, { currentTime: 0 });
   };
 
-  const dir = path.join(root, "hub", "files", "score");
-  const songs = fs.existsSync(dir)
-    ? fs.readdirSync(dir).filter(f => f.endsWith(".score")).sort() : [];
+  const songs = require("../protocol/fixture.js").scores();
   ok("there are scores to check the timeline against", songs.length > 0,
      songs.length + " songs");
 
   let mapped = 0, worst = 0, worstAt = "";
   for (const f of songs) {
     let sc;
-    try { sc = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")); } catch { continue; }
+    try { sc = JSON.parse(fs.readFileSync(f, "utf8")); } catch { continue; }
     const g = sc.grid;
     if (!Array.isArray(sc.beats) || !g) continue;
     if ((g.tempo || []).length > 1) mapped++;
@@ -104,13 +102,11 @@ if (block) {
    `motion` field the pipeline stopped writing -- so the check reported the
    page as broken for not drawing data that no longer exists. */
 {
-  const dir = path.join(root, "hub", "files", "score");
-  const songs = fs.existsSync(dir)
-    ? fs.readdirSync(dir).filter(f => f.endsWith(".score")).sort() : [];
+  const songs = require("../protocol/fixture.js").scores();
   const carried = new Set();
   for (const f of songs) {
     let sc;
-    try { sc = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")); } catch { continue; }
+    try { sc = JSON.parse(fs.readFileSync(f, "utf8")); } catch { continue; }
     for (const k of ["sections", "moments", "emotion", "melody", "rhythm",
                      "btc_chords_raw", "stems_temporal", "lyrics"])
       if (sc[k] != null) carried.add(k);

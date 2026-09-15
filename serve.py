@@ -24,35 +24,18 @@ WANTED = ("song", "grid", "beats", "sections", "moments", "stems",
 STEADY_LEAST = 0.45
 
 
-def drifted(path):
-    """Whether the file on disk disagrees with the version the hub serves.
-
-    The hub reads a score out of .versions/; the top-level file is a copy
-    store() makes for clients that know nothing about versions. Anything that
-    writes the top-level file directly - finish.py, relevel.py, a stray editor -
-    updates the copy and not the source, and the hub keeps serving the old
-    bytes with nothing to show that it is doing so. That happened on
-    2026-09-15: the file said 14 moments and the page said 28.
-
-    Cheap to check and impossible to miss once it is on the row."""
+def _served(path):
+    """The bytes the hub would hand out for this score."""
     try:
         import versions as V
     except Exception:
-        try:
-            from hub import versions as V
-        except Exception:
-            return None
-    try:
-        n = V.latest(path)
-        if not n:
-            return None
+        from hub import versions as V
+    n = V.latest(path)
+    if n:
         with open(V.version_path(path, n), "rb") as fh:
-            served = fh.read()
-        with open(path, "rb") as fh:
-            here = fh.read()
-        return served != here
-    except Exception:
-        return None
+            return fh.read()
+    with open(path, "rb") as fh:
+        return fh.read()
 
 
 def readiness(path):
@@ -74,13 +57,9 @@ def readiness(path):
     Telugu, outside the ASR model's languages, and the score already says so in
     `unavailable`."""
     try:
-        with open(path) as fh:
-            d = json.load(fh)
+        d = json.loads(_served(path))
     except Exception as e:
         return {"ready": False, "holding": f"unreadable ({type(e).__name__})"}
-    if drifted(path):
-        return {"ready": False,
-                "holding": "the file on disk is not the version the hub serves"}
     short = [k for k in WANTED if not d.get(k)]
     if short:
         return {"ready": False, "holding": "no " + ", ".join(short)}
@@ -184,12 +163,14 @@ class H(http.server.BaseHTTPRequestHandler):
             def add_scores(dirpath, url_prefix):
                 if not os.path.isdir(dirpath):
                     return
-                for name in sorted(os.listdir(dirpath)):
-                    if not name.endswith(".score"):
-                        continue
+                try:
+                    import versions as V
+                except Exception:
+                    from hub import versions as V
+                here = [n for n in sorted(os.listdir(dirpath)) if n.endswith(".score")
+                        and os.path.isfile(os.path.join(dirpath, n))]
+                for name in sorted(set(here) | set(V.stored_names(dirpath))):
                     full = os.path.join(dirpath, name)
-                    if not os.path.isfile(full):
-                        continue
                     slug = name[:-6]  # strip .score
                     if slug in seen:
                         continue
