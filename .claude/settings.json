@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh -i ~/Downloads/keycode-vm.pem *developer@192.168.1.241*)",
+      "Bash(scp -i ~/Downloads/keycode-vm.pem *developer@192.168.1.241*)",
+      "Bash(rsync *developer@192.168.1.241*)"
+    ]
+  }
+}
