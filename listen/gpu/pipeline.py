@@ -37,6 +37,11 @@ def reconcile_tempo(said, score):
     else:
         out["relation"] = "unrelated"
     out["use"] = "grid.bpm"
+    out.pop("model_bpm", None)
+    out.pop("model_says", None)
+    m = re.search(r"Key:\s*([^\n]+)", said)
+    if m:
+        out["model_key"] = m.group(1).strip()
     return out
 
 
@@ -339,6 +344,57 @@ def measured_feel(temporal, a, b):
     return {"energy": scale(whole),
             "brightness": scale(bright / max(whole, 1e-6) * 0.5),
             "groove": scale(perc / max(whole, 1e-6) * 0.5)}
+
+
+def found_moments(temporal, beats, want=24, tol=2.0):
+    """Entrances and exits read off the 53-stem lanes.
+
+    MOSS does not claim `moments` as a capability and returned nothing
+    parseable for it on apex after 140s. A stem arriving or leaving is
+    directly measurable from the separation we already run, so it is measured
+    rather than asked for."""
+    if not temporal or not temporal.get("stems"):
+        return []
+    w = temporal.get("window_s") or 0.5
+    lanes = temporal["stems"]
+    span = max(1, int(round(tol / w)))
+    found = []
+    for name, v in lanes.items():
+        if not isinstance(v, list) or len(v) < span * 3:
+            continue
+        for i in range(span, len(v) - span):
+            pre = sum(v[i - span:i]) / span
+            post = sum(v[i:i + span]) / span
+            jump = post - pre
+            if abs(jump) < 0.25:
+                continue
+            if jump > 0 and pre > 0.12:
+                continue
+            if jump < 0 and post > 0.12:
+                continue
+            found.append({"t": i * w, "what": name,
+                          "type": "entrance" if jump > 0 else "exit",
+                          "size": round(abs(jump), 3)})
+    found.sort(key=lambda m: -m["size"])
+    kept = []
+    for m in found:
+        if any(abs(m["t"] - k["t"]) < tol and m["what"] == k["what"] for k in kept):
+            continue
+        kept.append(m)
+        if len(kept) >= want:
+            break
+    out = []
+    for m in sorted(kept, key=lambda x: x["t"]):
+        t = m["t"]
+        if beats:
+            near = min(beats, key=lambda b: abs(b - t))
+            if abs(near - t) < 1.0:
+                t = near
+        out.append({"time_s": round(float(t), 3), "type": m["type"],
+                    "what": m["what"], "intensity": min(1.0, m["size"]),
+                    "description": f"{m['what']} {'enters' if m['type'] == 'entrance' else 'drops out'}",
+                    "measured": True})
+    return out
 
 
 def clean_emotion(emotion, duration=None, temporal=None):
@@ -879,7 +935,6 @@ def run_pipeline(wav_path):
     absent, asked = {}, []
     for task, raw_prompt, is_json in [
         ("sections", SECTIONS_PROMPT, True),
-        ("moments", MOMENTS_PROMPT, True),
         ("emotion", EMOTION_PROMPT, True),
         ("caption", CAPTION_PROMPT, False),
         ("lyrics", LYRICS_PROMPT, False),
@@ -978,6 +1033,14 @@ def run_pipeline(wav_path):
         except Exception as e:
             print(f"    {task}: FAILED {e}", flush=True)
             absent[task] = f"{type(e).__name__}: {str(e)[:120]}"
+    got = found_moments(score.get("stems_temporal"),
+                        [b["t"] for b in score.get("beats", [])])
+    if got:
+        score["moments"] = got
+        print(f"    moments: {len(got)} measured from stems", flush=True)
+    else:
+        absent["moments"] = "no stem separation to read entrances from"
+
     print(f"  [phase 3] {time.time() - p3:.1f}s", flush=True)
 
     for task in asked:
