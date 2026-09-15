@@ -259,29 +259,45 @@ def rolls(temporal, w, tol=4.0, loud=None):
     return out
 
 
-def loudest(v, straight=None, w=0.5, look=4.0):
-    """The loudest instant, read off the raw curve rather than the smoothed one.
+def loudest(v, straight=None, w=0.5, hold_s=15.0):
+    """The loudest stretch of the song, and the loudest instant inside it.
 
-    `peak` is the argmax of energy_curve, which is smoothed over three windows
-    so that a drop or a build is not chasing single-window spikes. That
-    smoothing moves the maximum: across 29 songs the emitted peak sat at a
-    median 97.8th percentile of the unsmoothed loudness and four songs fell
-    below the 90th, mizhiyoram at the 83rd. Smoothing is right for finding
-    which passage is loudest and wrong for naming the instant inside it, so
-    the argmax picks the passage and the raw curve picks the moment."""
+    `peak` used to be the argmax of the loudness curve, and on a modern master
+    that is close to a coin flip: the top 5% of loudness spans a median 0.03
+    where the distance from the top to the median is 0.15, and a song sits
+    within that hair of its maximum for a median 11 seconds. Choosing one
+    instant out of eleven seconds of equal loudness picks noise. Snapping it to
+    the raw maximum, which is what this did before, picked noise more precisely.
+
+    Integrating over fifteen seconds averages about thirty windows and cuts
+    that noise by root-thirty, so the stretch it names is a real maximum even
+    when the instants inside it are tied. The instant is then read off the raw
+    curve within that stretch, which is the part smoothing would otherwise
+    move.
+
+    Amal heard this before it was measured: "peak doesn't feel like PEAKKKK".
+    It is also not the end of a drop -- only 1 of 28 peaks lands within four
+    seconds of a drop, build or breakdown."""
     if not v:
         return []
-    i = max(range(len(v)), key=lambda k: v[k])
-    if straight and len(straight) == len(v):
-        side = max(1, int(round(look / w)))
-        lo, hi = max(0, i - side), min(len(straight), i + side + 1)
-        i = max(range(lo, hi), key=lambda k: straight[k])
+    ref = straight if (straight and len(straight) == len(v)) else v
+    n = max(1, int(round(hold_s / w)))
+    if len(v) <= n:
+        i = max(range(len(v)), key=lambda k: v[k])
+    else:
+        run = sum(v[:n])
+        best, at = run, 0
+        for k in range(1, len(v) - n + 1):
+            run += v[k + n - 1] - v[k - 1]
+            if run > best:
+                best, at = run, k
+        i = at + max(range(n), key=lambda k: ref[at + k])
     return [
         {
             "i": i,
             "type": "peak",
             "size": 1.0,
-            "description": "the loudest the song gets",
+            "description": "the loudest stretch of the song",
         }
     ]
 
