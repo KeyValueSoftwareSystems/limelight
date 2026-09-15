@@ -361,7 +361,8 @@ def scale_feel(raws):
     return out, moved
 
 
-def found_moments(temporal, beats, grid=None, chords=None, want=28):
+def found_moments(temporal, beats, grid=None, chords=None, melody=None,
+                  rhythm=None, emotion=None, want=32):
     """Every kind of moment listen/gpu/moments.py can measure from the score.
 
     Kept as a wrapper so the pipeline and a re-run over finished scores go
@@ -376,7 +377,8 @@ def found_moments(temporal, beats, grid=None, chords=None, want=28):
         spec = importlib.util.spec_from_file_location("limelight_moments", here)
         M = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(M)
-        return M.find(temporal, beats, grid, chords, want=want)
+        return M.find(temporal, beats, grid, chords, melody, rhythm,
+                      emotion, want=want)
     except Exception as e:
         print(f"    moments: {e}", flush=True)
         return []
@@ -1016,7 +1018,9 @@ def run_pipeline(wav_path):
             absent[task] = f"{type(e).__name__}: {str(e)[:120]}"
     got = found_moments(score.get("stems_temporal"),
                         [b["t"] for b in score.get("beats", [])],
-                        score.get("grid"), score.get("btc_chords_raw"))
+                        score.get("grid"), score.get("btc_chords_raw"),
+                        score.get("melody"), score.get("rhythm"),
+                        score.get("emotion"))
     if got:
         score["moments"] = got
         print(f"    moments: {len(got)} measured from stems", flush=True)

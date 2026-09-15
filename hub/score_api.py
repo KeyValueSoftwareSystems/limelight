@@ -197,11 +197,44 @@ def format_v1(raw):
             for p in raw["parts"]
         ]
 
+    def _bar_energy():
+        temporal = raw.get("stems_temporal") or {}
+        lanes = [v for v in (temporal.get("stems") or {}).values()
+                 if isinstance(v, list) and v]
+        if not lanes or not grid.get("bars"):
+            return None
+        w = temporal.get("window_s") or 0.5
+        n = min(len(v) for v in lanes)
+        mean = [sum(v[i] for v in lanes) / len(lanes) for i in range(n)]
+
+        def _at_beat_n(k):
+            j = 0
+            while j + 1 < len(_tempo) and _tempo[j + 1]["from_beat"] <= k:
+                j += 1
+            seg = _tempo[j]
+            return seg["at_s"] + (k - seg["from_beat"]) * (60.0 / seg["bpm"])
+
+        per = []
+        for b in range(int(grid["bars"])):
+            a = int(_at_beat_n(b * bpb) / w)
+            z = max(a + 1, int(_at_beat_n((b + 1) * bpb) / w))
+            cut = mean[max(0, a):min(n, z)]
+            per.append(sum(cut) / len(cut) if cut else 0.0)
+        top = max(per) if per else 0
+        if not top > 0:
+            return None
+        return [round(v / top, 3) for v in per]
+
     if raw.get("energy"):
         out["energy"] = raw["energy"]
     elif isinstance((raw.get("bars") or {}).get("intensity"), list):
         out["energy"] = {"per": "bar", "from_bar": first_bar,
                          "values": raw["bars"]["intensity"]}
+    else:
+        _per = _bar_energy()
+        if _per:
+            out["energy"] = {"per": "bar", "from_bar": first_bar,
+                             "values": _per, "normalised": "per-song-peak"}
 
     if raw.get("phrases"):
         out["phrases"] = raw["phrases"]
@@ -233,14 +266,17 @@ def format_v1(raw):
     curve_entries = {}
     for name in _CURVE_NAMES:
         if name == "energy":
-            src = (raw.get("energy") or {}).get("values") or bars.get("intensity")
+            src = (out.get("energy") or {}).get("values") or bars.get("intensity")
         else:
             src = bars.get(name)
         if isinstance(src, list):
-            fb = (raw.get("energy") or {}).get("from_bar", first_bar) if name == "energy" else first_bar
+            fb = (out.get("energy") or {}).get("from_bar", first_bar) if name == "energy" else first_bar
             lane = "intensity" if name == "energy" else name
-            curve_entries[name] = {"per": "bar", "from_bar": fb, "values": src,
-                                   "tells": (raw.get("curve_tells") or {}).get(lane)}
+            entry = {"per": "bar", "from_bar": fb, "values": src}
+            tells = (raw.get("curve_tells") or {}).get(lane)
+            if tells is not None:
+                entry["tells"] = tells
+            curve_entries[name] = entry
     if curve_entries:
         out["curves"] = curve_entries
 

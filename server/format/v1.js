@@ -186,10 +186,37 @@ export function format(raw) {
   }
   if (raw.lyrics) out.lyrics = raw.lyrics;
 
+  const barEnergy = () => {
+    const lanes = Object.values(raw.stems_temporal?.stems || {}).filter(
+      (v) => Array.isArray(v) && v.length,
+    );
+    if (!lanes.length || !grid.bars) return null;
+    const w = raw.stems_temporal.window_s || 0.5;
+    const n = Math.min(...lanes.map((v) => v.length));
+    const mean = [];
+    for (let i = 0; i < n; i++)
+      mean.push(lanes.reduce((a, v) => a + v[i], 0) / lanes.length);
+    const per = [];
+    for (let b = 0; b < grid.bars; b++) {
+      const a = Math.floor(atBeat(b * bpb) / w);
+      const z = Math.max(a + 1, Math.floor(atBeat((b + 1) * bpb) / w));
+      const cut = mean.slice(Math.max(0, a), Math.min(n, z));
+      per.push(cut.length ? cut.reduce((x, y) => x + y, 0) / cut.length : 0);
+    }
+    const top = Math.max(...per);
+    if (!(top > 0)) return null;
+    return per.map((v) => +(v / top).toFixed(3));
+  };
+
   if (raw.energy) {
     out.energy = raw.energy;
   } else if (Array.isArray(raw.bars?.intensity)) {
     out.energy = { per: "bar", from_bar: firstBar, values: raw.bars.intensity };
+  } else {
+    const per = barEnergy();
+    if (per)
+      out.energy = { per: "bar", from_bar: firstBar, values: per,
+                     normalised: "per-song-peak" };
   }
   if (out.energy && out.tells && out.tells.energy !== undefined) {
     out.energy.tells = out.tells.energy;
@@ -224,19 +251,20 @@ export function format(raw) {
   const curveEntries = {};
   for (const name of CURVE_NAMES) {
     let src;
-    if (name === "energy") src = raw.energy?.values || bars.intensity;
+    if (name === "energy") src = out.energy?.values || bars.intensity;
     else src = bars[name];
     if (Array.isArray(src)) {
       const lane = name === "energy" ? "intensity" : name;
       curveEntries[name] = {
         per: "bar",
         from_bar:
-          name === "energy" && raw.energy?.from_bar != null
-            ? raw.energy.from_bar
+          name === "energy" && out.energy?.from_bar != null
+            ? out.energy.from_bar
             : firstBar,
         values: src,
-        tells: raw.curve_tells?.[lane],
       };
+      if (raw.curve_tells?.[lane] != null)
+        curveEntries[name].tells = raw.curve_tells[lane];
     }
   }
   if (Object.keys(curveEntries).length) out.curves = curveEntries;

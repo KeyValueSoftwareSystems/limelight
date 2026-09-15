@@ -311,7 +311,7 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
     const dir = path.join(root, "scores");
     const songs = fs.existsSync(dir)
       ? fs.readdirSync(dir).filter(x => x.endsWith(".score")).sort() : [];
-    let checked = 0, adrift = [], dupes = [], noOne = [], torn = [];
+    let checked = 0, adrift = [], dupes = [], noOne = [], torn = [], perSong = [];
     let allBeats = 0, allBumps = 0;
     const firstOf = sc => (sc.grid.first_bar !== undefined && sc.grid.first_bar !== null)
       ? sc.grid.first_bar : null;
@@ -346,6 +346,8 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
       });
       allBeats += got.beats.length;
       allBumps += bumps;
+      if (got.beats.length)
+        perSong.push({ name: f.slice(0, -6), rate: bumps / got.beats.length });
       if (bumps) dupes.push(`${f.slice(0, -6)} ${bumps}`);
       /* Where the tracker lost the beat entirely there is nothing to number.
          Cipher's list has 238 holes wider than a beat and a's 160; a song whose
@@ -371,16 +373,21 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
          : `${checked} songs, ${torn.length} of them with holes in the beat list`);
     /* Two beats land in one grid slot where the tracker heard an extra, and a
        bar with two of them has two beat ones. That is the recording, not the
-       rule: it happens forty-six times in twelve thousand beats, all on songs
-       whose grid the score already doubts. A rule that has come loose does it
-       thousands of times -- the clamp tried before this one put 394 beats out
-       on a single song -- so the guard is the rate across the library, not a
-       threshold invented per song. */
+       rule: a ghazal puts 2.13% of its beats in an occupied slot with an
+       unbroken beat list and a steady grid, and apex 1.70%. A rule that has
+       come loose does it to most of a song -- the clamp tried before this one
+       put 394 beats out on one -- so the guard is the worst single song.
+
+       It used to be the rate across the whole library, which measured how
+       much of the library happened to be on disk: the same unchanged code
+       read 0.38% against twenty-eight songs and 1.26% against the three left
+       during a rebuild. */
     const rate = allBeats ? allBumps / allBeats : 0;
+    const worst = perSong.sort((a, b) => b.rate - a.rate)[0];
     ok("beats collide only where the recording makes them",
-       rate < 0.01,
-       `${allBumps} in ${allBeats} beats (${(rate * 100).toFixed(2)}%)`
-         + (dupes.length ? ` \u00b7 ${dupes.slice(0, 3).join(", ")}` : ""));
+       !worst || worst.rate < 0.05,
+       `worst ${worst ? `${worst.name} ${(worst.rate * 100).toFixed(2)}%` : "none"}`
+         + ` \u00b7 library ${allBumps} in ${allBeats} (${(rate * 100).toFixed(2)}%)`);
     ok("the pickup bar, where a song has one, is numbered from its first beat",
        noOne.length === 0, noOne.slice(0, 4).join(", ") || "clean");
   }

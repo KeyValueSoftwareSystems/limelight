@@ -24,7 +24,9 @@ def main(paths):
         was = len(score.get("moments") or [])
         got = M.find(score.get("stems_temporal"),
                      [b["t"] for b in score.get("beats") or [] if "t" in b],
-                     score.get("grid"), score.get("btc_chords_raw"))
+                     score.get("grid"), score.get("btc_chords_raw"),
+                     score.get("melody"), score.get("rhythm"),
+                     score.get("emotion"))
         if not got:
             print(f"{os.path.basename(path)}: no stem lanes to read, left alone")
             continue

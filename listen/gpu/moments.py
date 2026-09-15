@@ -14,11 +14,12 @@ BRIGHT = ("hh", "cymbals", "crash", "ride", "shaker", "tambourine", "violin",
 PERC = ("drums", "kick", "snare", "hh", "toms", "percussion", "clap", "cymbals",
         "shaker", "tambourine", "congas", "bongos")
 
-ORDER = ("drop", "stop", "breakdown", "build", "peak", "tempo_change",
-         "key_change", "entrance", "exit")
+ORDER = ("drop", "stop", "breakdown", "build", "peak", "rhythm_change",
+         "lift", "mood_turn", "tempo_change", "key_change", "entrance", "exit")
 SHAPE = ("drop", "stop", "breakdown", "build", "peak")
-FLOOR = {"drop": 6, "stop": 4, "breakdown": 4, "build": 4, "peak": 1,
-         "tempo_change": 4, "key_change": 3}
+CAP = {"drop": 6, "stop": 4, "breakdown": 4, "build": 4, "peak": 1,
+       "tempo_change": 4, "key_change": 3, "rhythm_change": 4,
+       "lift": 4, "mood_turn": 4}
 
 
 def energy_curve(temporal, smooth=3):
@@ -181,6 +182,175 @@ def key_changes(chords, w, window_s=30.0, step_s=10.0):
     return out
 
 
+def _noise_of(v):
+    steps = sorted(abs(v[i + 1] - v[i]) for i in range(len(v) - 1))
+    return steps[len(steps) // 2] if steps else 0.0
+
+
+def _steps(v, side, gate):
+    """Where a curve moves to a new level and stays there, biggest first."""
+    found = []
+    for i in range(side, len(v) - side):
+        pre, post = _span(v, i - side, i), _span(v, i, i + side)
+        if abs(post - pre) >= gate:
+            found.append((abs(post - pre), i, pre, post))
+    found.sort(key=lambda x: -x[0])
+    kept = []
+    for size, i, pre, post in found:
+        if any(abs(i - j) < side * 2 for _, j, _, _ in kept):
+            continue
+        kept.append((size, i, pre, post))
+    return kept
+
+
+def topline(melody, w, n):
+    """The highest note sounding in each window, smoothed.
+
+    basic-pitch returns every voice, so this is the top of the texture
+    rather than a transcribed melody - which is what a register change
+    shows up in anyway."""
+    if not melody or n <= 0:
+        return []
+    top = [None] * n
+    for note in melody:
+        try:
+            a = int(note["start"] / w)
+            b = max(a + 1, int((note["start"] + (note.get("duration") or 0)) / w))
+            pitch = float(note["pitch"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        for i in range(max(0, a), min(n, b)):
+            if top[i] is None or pitch > top[i]:
+                top[i] = pitch
+    seed = next((x for x in top if x is not None), None)
+    if seed is None:
+        return []
+    last, filled = seed, []
+    for x in top:
+        if x is not None:
+            last = x
+        filled.append(last)
+    out = []
+    for i in range(len(filled)):
+        a, b = max(0, i - 2), min(len(filled), i + 3)
+        out.append(sum(filled[a:b]) / (b - a))
+    return out
+
+
+def lifts(melody, w, n, tol=7.0):
+    """A register change in the top of the texture, held long enough to hear.
+
+    Sweeping the hold: at 3s the rule finds 29 lifts across three songs and
+    7.6 on the same notes thrown at random times; at 7s it finds 16 against
+    0.2. The shorter window was mostly catching which instrument happened to
+    be on top."""
+    v = topline(melody, w, n)
+    if len(v) < 8:
+        return []
+    side = max(2, int(round(tol / w)))
+    gate = max(5.0, 8.0 * _noise_of(v))
+    out = []
+    for size, i, pre, post in _steps(v, side, gate):
+        up = post > pre
+        how = "an octave" if size >= 10.5 else f"{int(round(size))} semitones"
+        out.append({"i": i, "type": "lift", "size": round(min(1.0, size / 12.0), 3),
+                    "description": ("the top line climbs " if up else
+                                    "the top line falls ") + how})
+    return out
+
+
+def rhythm_changes(hits, w, n, tol=4.0, z_min=3.0):
+    """A half-time turn, a double-time lift, a breakbeat.
+
+    Onsets arrive like a Poisson process, so a stretch of random hits swings
+    its own density around by root-n and a plain ratio test cannot tell that
+    from a real change: on afterglow it found three either way. The gate here
+    is how many standard errors apart the two rates are. Across three songs
+    real onset streams reach 4.69, 3.64 and 2.89 while the same counts thrown
+    at random reach 2.21, 2.60 and 2.47, so the bar is three."""
+    if not hits or n <= 0:
+        return []
+    count = [0.0] * n
+    for h in hits:
+        t = h.get("t") if isinstance(h, dict) else h
+        if t is None:
+            continue
+        i = int(float(t) / w)
+        if 0 <= i < n:
+            count[i] += 1.0
+    if sum(count) <= 0:
+        return []
+    side = max(2, int(round(tol / w)))
+    held = side * w
+    found = []
+    for i in range(side, n - side):
+        pre = sum(count[i - side:i]) / held
+        post = sum(count[i:i + side]) / held
+        if pre <= 0 and post <= 0:
+            continue
+        se = ((pre + post) / held) ** 0.5
+        if se <= 0:
+            continue
+        z = abs(post - pre) / se
+        ratio = post / pre if pre > 1e-6 else 99.0
+        if z < z_min or 0.625 < ratio < 1.6:
+            continue
+        found.append((z, i, pre, post, ratio))
+    found.sort(key=lambda x: -x[0])
+    kept = []
+    for row in found:
+        if any(abs(row[1] - k[1]) < side for k in kept):
+            continue
+        kept.append(row)
+    out = []
+    for z, i, pre, post, ratio in kept:
+        if ratio <= 0.15:
+            say = "the beat drops away"
+        elif ratio >= 6.0:
+            say = "the beat comes back in"
+        elif ratio >= 1.7:
+            say = "the pulse doubles up"
+        elif ratio <= 0.6:
+            say = "the pulse halves"
+        elif post > pre:
+            say = "the rhythm thickens"
+        else:
+            say = "the rhythm thins out"
+        out.append({"i": i, "type": "rhythm_change",
+                    "size": round(min(1.0, z / 20.0), 3), "description": say})
+    return out
+
+
+def mood_turns(emotion, w):
+    """Where the measured feel of one section is not the feel of the last."""
+    spans = [e for e in (emotion or []) if isinstance(e, dict) and e.get("measured")]
+    if len(spans) < 3:
+        return []
+    dims = [d for d in ("energy", "brightness", "groove")
+            if all(isinstance(e.get(d), (int, float)) for e in spans)]
+    if not dims:
+        return []
+    moves = []
+    for a, b in zip(spans, spans[1:]):
+        gap = {d: b[d] - a[d] for d in dims}
+        size = sum(x * x for x in gap.values()) ** 0.5
+        moves.append((size, b, gap))
+    typical = sorted(m[0] for m in moves)[len(moves) // 2]
+    gate = max(2.0, 2.0 * typical)
+    say = {"energy": ("it opens up", "the energy falls away"),
+           "brightness": ("it turns brighter", "it darkens"),
+           "groove": ("the groove takes over", "the groove lets go")}
+    out = []
+    for size, b, gap in moves:
+        if size < gate:
+            continue
+        lead = max(gap.items(), key=lambda kv: abs(kv[1]))
+        out.append({"i": int(round(float(b["start"]) / w)), "type": "mood_turn",
+                    "size": round(min(1.0, size / 12.0), 3),
+                    "description": say[lead[0]][0 if lead[1] > 0 else 1]})
+    return out
+
+
 def comings(temporal, tol=2.0):
     if not temporal or not temporal.get("stems"):
         return []
@@ -211,11 +381,16 @@ def comings(temporal, tol=2.0):
     return kept
 
 
-def find(temporal, beats, grid=None, chords=None, want=28, together=1.5):
+def find(temporal, beats, grid=None, chords=None, melody=None,
+         rhythm=None, emotion=None, want=32, together=1.5):
     """Every kind of moment, ranked, with the rare kinds guaranteed room."""
     w, v, noise = energy_curve(temporal)
+    n = len(v)
+    hits = (rhythm or {}).get("hits") if isinstance(rhythm, dict) else rhythm
     cand = (comings(temporal) + swings(v, w, noise) + stops(v, w, noise)
-            + loudest(v) + tempo_changes(grid, w) + key_changes(chords, w))
+            + loudest(v) + tempo_changes(grid, w) + key_changes(chords, w)
+            + lifts(melody, w, n) + rhythm_changes(hits, w, n)
+            + mood_turns(emotion, w))
     if not cand:
         return []
     for m in cand:
@@ -243,15 +418,16 @@ def find(temporal, beats, grid=None, chords=None, want=28, together=1.5):
 
     picked, taken = [], []
     for kind in ORDER:
-        if kind not in FLOOR:
+        if kind not in CAP:
             continue
         same = sorted([g for g in groups if g["type"] == kind],
-                      key=lambda g: -g["size"])[:FLOOR[kind]]
+                      key=lambda g: -g["size"])[:CAP[kind]]
         picked += same
         taken += same
-    rest = sorted([g for g in groups if not any(g is t for t in taken)],
+    rest = sorted([g for g in groups
+                   if g["type"] not in CAP and not any(g is t for t in taken)],
                   key=lambda g: -g["size"])
-    picked = picked[:want] + rest[:max(0, want - len(picked))]
+    picked = picked + rest[:max(0, want - len(picked))]
 
     rank = {k: i for i, k in enumerate(ORDER)}
     thinned = []
