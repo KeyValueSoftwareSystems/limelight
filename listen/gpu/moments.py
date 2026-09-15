@@ -48,6 +48,7 @@ ORDER = (
     "spotlight",
     "harmonic_rhythm",
     "rhythm_change",
+    "pause",
     "register_shift",
     "tempo_change",
     "vocal_out",
@@ -57,6 +58,7 @@ ORDER = (
     "exit",
 )
 SHAPE = ("drop", "breakdown", "build")
+LEADS = ("peak", "drop", "pause")
 CAP = {
     "entrance": 8,
     "exit": 8,
@@ -82,7 +84,7 @@ FAMILY = (
 )
 
 
-def energy_curve(temporal, smooth=3, loud=None):
+def energy_curve(temporal, smooth=3, loud=None, heard=None):
     """How loud the track is over time, and how much of that is jitter.
 
     The lanes arrive divided by each instrument's own peak, so averaging them
@@ -103,6 +105,19 @@ def energy_curve(temporal, smooth=3, loud=None):
     if not temporal or not temporal.get("stems"):
         return 0.5, [], 1.0
     w = temporal.get("window_s") or 0.5
+    straight = (heard or {}).get("loudness") if isinstance(heard, dict) else None
+    if isinstance(straight, list) and len(straight) > 8:
+        lo, hi = min(straight), max(straight)
+        if hi - lo > 1e-9:
+            v = [(x - lo) / (hi - lo) for x in straight]
+            half = smooth // 2
+            out = []
+            for i in range(len(v)):
+                a, b = max(0, i - half), min(len(v), i + half + 1)
+                out.append(sum(v[a:b]) / (b - a))
+            steps = sorted(abs(out[i + 1] - out[i]) for i in range(len(out) - 1))
+            return (heard.get("window_s") or w, out,
+                    steps[len(steps) // 2] if steps else 1.0)
     named = [(k, v) for k, v in temporal["stems"].items() if isinstance(v, list) and v]
     if not named:
         return w, [], 1.0
@@ -920,6 +935,111 @@ def accents(hits, w, n, tol=4.0, k=8.0, floor=0.10, smooth=5):
     return out
 
 
+def _one_event(picked, rank, apart=2.0):
+    """One thing happening is one moment, however many rules noticed it.
+
+    A band dropping out and a voice being left exposed is a single thing a
+    listener hears, but exit, register_shift, breakdown, spotlight and entrance
+    each fire on it and the score claimed five events inside two seconds.
+    Measured over the library, 680 of 1052 moments sat within 2s of another -
+    65% - in 245 clusters running up to seven deep, and the commonest pairs are
+    just one change seen twice: entrance with exit 85 times, exit with
+    register_shift 52, entrance with register_shift 49.
+
+    A cluster is also bounded end to end, not just gap to gap, or a chain of
+    2s steps swallows events 3s apart - the peak at 3:32 on dont-look-down and
+    the breakdown at 3:34.7 are two things, not one.
+
+    `peak` always leads a cluster it is in: it is the single loudest instant of
+    the song and demoting it to a footnote of a breakdown loses the one moment
+    a reader is most likely to want. Otherwise the strongest reading by ORDER
+    leads, because ORDER is already sorted by
+    how structural a kind is - a drop outranks the entrance that carries it -
+    and ties go to the larger intensity. The rest of the cluster is kept on the
+    moment as `alongside` so nothing measured is thrown away; it stops being a
+    separate cue and becomes detail on the one cue."""
+    if not picked:
+        return picked
+    rows = sorted(picked, key=lambda g: g["t"])
+    groups, run = [], [rows[0]]
+    for g in rows[1:]:
+        near = g["t"] - run[-1]["t"] <= apart
+        held = g["t"] - run[0]["t"] <= apart * 1.5
+        if near and held:
+            run.append(g)
+        else:
+            groups.append(run)
+            run = [g]
+    groups.append(run)
+    out = []
+    for run in groups:
+        run.sort(key=lambda g: (0 if g["type"] in LEADS else 1,
+                                rank.get(g["type"], 99), -g["size"]))
+        lead = run[0]
+        rest = [g["type"] for g in run[1:]]
+        if rest:
+            lead = dict(lead)
+            lead["alongside"] = rest
+        out.append(lead)
+    return out
+
+
+def pauses(heard, floor=0.35, side_s=4.0, most=3):
+    """Holes in the mix: a stretch far quieter than what surrounds it.
+
+    Measured off `acoustic.loudness`, not the stem lanes. An earlier `stop`
+    rule was rejected for scoring 0.9-1.1x against phase surrogates, and that
+    rejection was wrong - it read the peak-normalised lanes, the same broken
+    signal behind the sample-peak gain and the mis-named brightness. On the
+    measured loudness it finds 49 holes across 20 of 29 songs, corroborating a
+    section boundary 2.04x against chance at p=0.0020 over 500 surrogates,
+    where the surrogates fire more often than the real track rather than less.
+
+    Judged like `peak` rather than like a detector. Of the 22 that carry no
+    other moment, boundary agreement is 1.11x - chance - and that is expected,
+    because a pause is a hole inside a section and not a seam between two. The
+    claim is not structural. It is that the track drops to a fraction of its
+    own level here, which is true by measurement: on dont-look-down the hole at
+    180.5s sits at 0.042 against a 0.198 neighbourhood, a fifth of the level
+    around it, and Amal heard it before the score had it."""
+    if not isinstance(heard, dict):
+        return []
+    v = heard.get("loudness")
+    w = heard.get("window_s") or 0.5
+    if not isinstance(v, list) or len(v) < 20:
+        return []
+    mid = sorted(v)[len(v) // 2]
+    if mid <= 0:
+        return []
+    side = max(2, int(round(side_s / w)))
+    found = []
+    for i in range(side, len(v) - side):
+        near = sorted(v[i - side:i] + v[i + 1:i + 1 + side])
+        around = near[len(near) // 2]
+        if around <= 0:
+            continue
+        share = v[i] / around
+        if share < floor and v[i] < mid * floor:
+            found.append((share, i))
+    found.sort()
+    kept = []
+    for share, i in found:
+        if any(abs(i - j) < side for _, j in kept):
+            continue
+        kept.append((share, i))
+        if len(kept) >= most:
+            break
+    return [
+        {
+            "i": i,
+            "type": "pause",
+            "size": round(min(1.0, 1.0 - share), 3),
+            "description": "the track falls away to almost nothing",
+        }
+        for share, i in sorted(kept, key=lambda x: x[1])
+    ]
+
+
 def find(
     temporal,
     beats,
@@ -928,6 +1048,7 @@ def find(
     melody=None,
     rhythm=None,
     stems=None,
+    heard=None,
     want=None,
     together=1.5,
 ):
@@ -965,7 +1086,7 @@ def find(
     2.44x, because what the budget removes is almost entirely those two kinds
     anyway - they fall from 43% of the list to nothing. Capping them is the
     change; the smaller budget is what the cap makes room for."""
-    w, v, noise = energy_curve(temporal, loud=stems)
+    w, v, noise = energy_curve(temporal, loud=stems, heard=heard)
     n = len(v)
     hits = (rhythm or {}).get("hits") if isinstance(rhythm, dict) else rhythm
     cand = (
@@ -980,6 +1101,7 @@ def find(
         + harmonic_rhythm(chords, w, n)
         + voice_gaps(temporal)
         + melody_returns(melody, w)
+        + pauses(heard)
     )
     if not cand:
         return []
@@ -1048,6 +1170,8 @@ def find(
 
     picked = _no_contradictions(picked, together)
 
+    picked = _one_event(picked, rank)
+
     one = {"entrance": "enters", "exit": "drops out"}
     many = {"entrance": "enter", "exit": "drop out"}
     out = []
@@ -1065,6 +1189,8 @@ def find(
         lead = g["parts"][0].get("lead_s")
         if lead:
             item["lead_s"] = lead
+        if g.get("alongside"):
+            item["alongside"] = g["alongside"]
         span = g["parts"][0].get("hold_s")
         if span:
             item["hold_s"] = span

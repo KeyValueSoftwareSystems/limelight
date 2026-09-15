@@ -51,6 +51,7 @@ const FACTS = {
     "build",
     "peak",
     "spotlight",
+    "pause",
     "harmonic_rhythm",
     "vocal_out",
     "vocal_return",

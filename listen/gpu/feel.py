@@ -143,23 +143,36 @@ def raw_feel(temporal, a, b, loud=None):
 
 
 def scale_feel(raws):
-    """Put each dimension on 1-10 against its own song, and say which moved.
+    """Put each dimension on 1-10 against a fixed reference, not its own song.
 
-    A dimension whose whole-song spread is under 5% of its peak is flat, and
-    stretching that onto 1-10 would draw noise as a curve, so it is left out
-    of both the output and the `measured` list."""
+    This used to stretch every dimension across each song's own min and max,
+    so every song came out with a range of exactly 9.0 whatever it actually
+    did. entharo-mahanu moves 47% in loudness and nod-krai 99.7%, and both
+    were drawn edge to edge - the shape was right and the amplitude was
+    fiction, and two songs could not be compared at all.
+
+    The bounds below are absolute and cover the corpus with headroom: over 530
+    spans, loudness runs -51 dB at the 1st percentile to -5.6 at the 99th,
+    log2 centroid 9.3 to 12.3, percussive share 0.11 to 0.65. Values outside
+    are clamped rather than rescaled, so a genuinely quiet song reads quiet and
+    a flat one reads flat."""
+    bounds = {
+        "energy": (-55.0, -3.0),
+        "brightness": (8.45, 12.77),
+        "groove": (0.0, 0.75),
+    }
     out = [{} for _ in raws]
     moved = []
-    for dim in ("energy", "brightness", "groove"):
-        vals = [r[dim] for r in raws]
-        lo, hi = min(vals), max(vals)
-        if hi - lo < max(0.01, 0.05 * hi):
+    for dim, (lo, hi) in bounds.items():
+        vals = [r.get(dim) for r in raws if isinstance(r, dict)]
+        if not vals or any(v is None for v in vals):
             continue
+        for seg, v in zip(out, vals):
+            x = 20.0 * math.log10(max(v, 1e-6)) if dim == "energy" else v
+            t = (x - lo) / (hi - lo) if hi > lo else 0.0
+            seg[dim] = round(1.0 + 9.0 * min(1.0, max(0.0, t)), 1)
         moved.append(dim)
-        for i, v in enumerate(vals):
-            out[i][dim] = round(1.0 + 9.0 * (v - lo) / (hi - lo), 1)
     return out, moved
-
 
 def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=None, heard=None, chords=None):
     """The feel of each span, measured, whatever named the spans.
