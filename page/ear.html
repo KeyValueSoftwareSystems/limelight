@@ -1362,11 +1362,14 @@
         g.fillText(desc.slice(0, 50), lx + 6, 28);
         g.globalAlpha = 1;
       }
-      g.font = "8px ui-monospace,monospace";
-      g.fillStyle = hue;
-      g.globalAlpha = 0.5;
-      g.fillText(mmss(t), lx + 6, h - 6);
-      g.globalAlpha = 1;
+      const what = m.what || "";
+      if (pw > 20 && what) {
+        g.font = "8px ui-monospace,monospace";
+        g.fillStyle = hue;
+        g.globalAlpha = 0.6;
+        g.fillText(what.slice(0, 30), lx + 6, h - 6);
+        g.globalAlpha = 1;
+      }
       g.restore();
     }
   }
