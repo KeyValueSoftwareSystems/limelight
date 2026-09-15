@@ -490,22 +490,32 @@ def comings(temporal, tol=2.0, loud=None, floor_db=-40.0):
     for name, v in temporal["stems"].items():
         if not isinstance(v, list) or len(v) < span * 3:
             continue
+        top = max(v)
+        live = sorted(x for x in v if x > 0.10 * top) if top > 0 else []
+        usual = live[len(live) // 2] if live else 0.0
         for i in range(span, len(v) - span):
             pre, post = _span(v, i - span, i), _span(v, i, i + span)
             jump = post - pre
-            if abs(jump) < 0.25:
+            flat = abs(jump) >= 0.25 and (
+                pre <= 0.12 if jump > 0 else post <= 0.12
+            )
+            turned = False
+            if usual > 0.02 and abs(jump) >= 0.05:
+                if jump > 0:
+                    turned = pre < 0.25 * usual and post > 0.60 * usual
+                else:
+                    turned = post < 0.25 * usual and pre > 0.60 * usual
+            if not (flat or turned):
                 continue
-            if jump > 0 and pre > 0.12:
-                continue
-            if jump < 0 and post > 0.12:
-                continue
+            share = abs(jump) / usual if usual > 0.02 else abs(jump)
+            size = min(1.0, share)
             found.append(
                 {
                     "i": i,
                     "what": name,
                     "type": "entrance" if jump > 0 else "exit",
-                    "size": round(abs(jump), 3),
-                    "heard": round(abs(jump) * gainful.get(name, 1.0), 5),
+                    "size": round(size, 3),
+                    "heard": round(size * gainful.get(name, 1.0), 5),
                 }
             )
     if loud:
