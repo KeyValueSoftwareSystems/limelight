@@ -29,8 +29,13 @@ def reconcile_tempo(said, score):
     out["grid_bpm"] = grid
     ratio = grid / theirs
     out["ratio_to_grid"] = round(ratio, 3)
-    for name, r in (("same", 1.0), ("half", 0.5), ("double", 2.0),
-                    ("two-thirds", 2 / 3), ("three-halves", 1.5)):
+    for name, r in (
+        ("same", 1.0),
+        ("half", 0.5),
+        ("double", 2.0),
+        ("two-thirds", 2 / 3),
+        ("three-halves", 1.5),
+    ):
         if abs(ratio - r) < 0.06 * max(r, 1.0):
             out["relation"] = name
             break
@@ -50,12 +55,22 @@ def tempo_map(beats):
         return None
     try:
         import numpy as _np
-        _here = next((c for c in (os.path.join(BASE, "grid.py"),
-                                  os.path.join(BASE, "..", "grid.py"))
-                      if os.path.exists(c)), None)
+
+        _here = next(
+            (
+                c
+                for c in (
+                    os.path.join(BASE, "grid.py"),
+                    os.path.join(BASE, "..", "grid.py"),
+                )
+                if os.path.exists(c)
+            ),
+            None,
+        )
         if not _here:
             return None
         import importlib.util
+
         spec = importlib.util.spec_from_file_location("limelight_grid", _here)
         G = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(G)
@@ -66,8 +81,7 @@ def tempo_map(beats):
         runs = G.fold(G.tempos(t, G.pieces(t)), period)
         if not runs:
             return None
-        return {"bpm": round(60.0 / period, 3),
-                "tempo": G.ladder(runs, float(t[0]))}
+        return {"bpm": round(60.0 / period, 3), "tempo": G.ladder(runs, float(t[0]))}
     except Exception as e:
         print(f"    tempo_map: {e}", flush=True)
         return None
@@ -89,7 +103,10 @@ def gpu_pids():
     try:
         out = subprocess.run(
             ["nvidia-smi", "--query-compute-apps=pid", "--format=csv,noheader"],
-            capture_output=True, text=True, timeout=20).stdout
+            capture_output=True,
+            text=True,
+            timeout=20,
+        ).stdout
     except Exception:
         return []
     keep = {os.getpid(), os.getppid()}
@@ -307,36 +324,83 @@ def clean_moments(moments, beats=None, section_bounds=None):
     return cleaned
 
 
-def found_moments(temporal, beats, grid=None, chords=None, melody=None,
-                  rhythm=None, emotion=None, want=32):
+def found_moments(
+    temporal,
+    beats,
+    grid=None,
+    chords=None,
+    melody=None,
+    rhythm=None,
+    emotion=None,
+    want=32,
+):
     """Every kind of moment listen/gpu/moments.py can measure from the score.
 
     Kept as a wrapper so the pipeline and a re-run over finished scores go
     through exactly one implementation."""
     try:
-        here = next((c for c in (os.path.join(BASE, "moments.py"),
-                                 os.path.join(BASE, "..", "moments.py"))
-                     if os.path.exists(c)), None)
+        here = next(
+            (
+                c
+                for c in (
+                    os.path.join(BASE, "moments.py"),
+                    os.path.join(BASE, "..", "moments.py"),
+                )
+                if os.path.exists(c)
+            ),
+            None,
+        )
         if not here:
             return []
         import importlib.util
+
         spec = importlib.util.spec_from_file_location("limelight_moments", here)
         M = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(M)
-        return M.find(temporal, beats, grid, chords, melody, rhythm,
-                      emotion, want=want)
+        return M.find(temporal, beats, grid, chords, melody, rhythm, emotion, want=want)
     except Exception as e:
         print(f"    moments: {e}", flush=True)
         return []
 
 
-def load_feel():
-    here = next((c for c in (os.path.join(BASE, "feel.py"),
-                             os.path.join(BASE, "..", "feel.py"))
-                 if os.path.exists(c)), None)
+def load_words():
+    here = next(
+        (
+            c
+            for c in (
+                os.path.join(BASE, "words.py"),
+                os.path.join(BASE, "..", "words.py"),
+            )
+            if os.path.exists(c)
+        ),
+        None,
+    )
     if not here:
         return None
     import importlib.util
+
+    spec = importlib.util.spec_from_file_location("limelight_words", here)
+    W = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(W)
+    return W
+
+
+def load_feel():
+    here = next(
+        (
+            c
+            for c in (
+                os.path.join(BASE, "feel.py"),
+                os.path.join(BASE, "..", "feel.py"),
+            )
+            if os.path.exists(c)
+        ),
+        None,
+    )
+    if not here:
+        return None
+    import importlib.util
+
     spec = importlib.util.spec_from_file_location("limelight_feel", here)
     F = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(F)
@@ -648,7 +712,6 @@ EMOTION_PROMPT = (
     "CRITICAL:\n"
     "- Aim for 10-20 segments. Each section (verse, chorus, bridge, etc.) should be at least one segment.\n"
     "- Consecutive segments MUST differ in at least 2 dimension values. No identical consecutive segments.\n"
-
     "- Cover 0.0 to the supplied duration with no gaps. Each end = next start. Final end = duration.\n"
     "- Use at least 3 different emotion labels.\n\n"
     "Return ONLY the JSON array."
@@ -878,7 +941,8 @@ def run_pipeline(wav_path):
                         )
                     elif task == "emotion":
                         score["emotion"] = clean_emotion(
-                            raw, duration=score["song"]["length_s"],
+                            raw,
+                            duration=score["song"]["length_s"],
                             temporal=score.get("stems_temporal"),
                             sections=score.get("sections"),
                         )
@@ -892,7 +956,8 @@ def run_pipeline(wav_path):
                 raw = moss_query(wav_path, prompt)
                 cleaned = strip_think(raw)
                 if task == "caption" and cleaned and len(cleaned) > 20:
-                    score["caption"] = cleaned
+                    W = load_words()
+                    score["caption"] = W.strip_claims(cleaned) if W else cleaned
                     print(
                         f"    caption: {len(cleaned)}c ({time.time() - t:.1f}s)",
                         flush=True,
@@ -931,18 +996,24 @@ def run_pipeline(wav_path):
         except Exception as e:
             print(f"    {task}: FAILED {e}", flush=True)
             absent[task] = f"{type(e).__name__}: {str(e)[:120]}"
-    got = found_moments(score.get("stems_temporal"),
-                        [b["t"] for b in score.get("beats", [])],
-                        score.get("grid"), score.get("btc_chords_raw"),
-                        score.get("melody"), score.get("rhythm"),
-                        score.get("emotion"))
+    got = found_moments(
+        score.get("stems_temporal"),
+        [b["t"] for b in score.get("beats", [])],
+        score.get("grid"),
+        score.get("btc_chords_raw"),
+        score.get("melody"),
+        score.get("rhythm"),
+        score.get("emotion"),
+    )
     if got:
         score["moments"] = got
         print(f"    moments: {len(got)} measured from stems", flush=True)
     else:
-        absent["moments"] = ("no stem separation to read entrances from"
-                             if not score.get("stems_temporal")
-                             else "the detector found nothing or raised")
+        absent["moments"] = (
+            "no stem separation to read entrances from"
+            if not score.get("stems_temporal")
+            else "the detector found nothing or raised"
+        )
 
     print(f"  [phase 3] {time.time() - p3:.1f}s", flush=True)
 

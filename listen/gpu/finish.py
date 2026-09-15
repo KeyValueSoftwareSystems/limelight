@@ -13,6 +13,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import feel as F
 import moments as M
+import words as W
 
 
 def envelope(score, slug):
@@ -66,6 +67,13 @@ def main(paths):
             continue
         said = envelope(score, slug)
         downs = mark_downbeats(score)
+        capped = ""
+        cap = score.get("caption")
+        if cap:
+            lean = W.strip_claims(cap)
+            if lean != cap:
+                score["caption"] = lean
+                capped = "caption claims stripped"
         feels = ""
         if not score.get("emotion") and score.get("sections"):
             got = F.clean_emotion(None, (score.get("song") or {}).get("length_s"),
@@ -101,6 +109,8 @@ def main(paths):
             note.append(f"+{downs} downbeats")
         if feels:
             note.append(feels)
+        if capped:
+            note.append(capped)
         print(f"{slug}: moments {was} -> {len(got or [])}  {shape}"
               + (f"   {' '.join(note)}" if note else ""))
 

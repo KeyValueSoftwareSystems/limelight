@@ -47,12 +47,11 @@ ORDER = (
     "peak",
     "rhythm_change",
     "register_shift",
-    "mood_turn",
     "tempo_change",
     "entrance",
     "exit",
 )
-SHAPE = ("drop", "breakdown", "build", "peak")
+SHAPE = ("drop", "breakdown", "build")
 CAP = {
     "drop": 6,
     "breakdown": 4,
@@ -61,7 +60,6 @@ CAP = {
     "tempo_change": 4,
     "rhythm_change": 4,
     "register_shift": 4,
-    "mood_turn": 4,
 }
 
 
@@ -212,8 +210,12 @@ def loudest(v):
     ]
 
 
-def tempo_changes(grid, w):
-    segs = (grid or {}).get("tempo") or []
+def tempo_changes(grid, w, steady_min=0.35):
+    grid = grid or {}
+    steady = grid.get("steady")
+    if isinstance(steady, (int, float)) and steady < steady_min:
+        return []
+    segs = grid.get("tempo") or []
     out = []
     for a, b in zip(segs, segs[1:]):
         fa, fb = a.get("bpm"), b.get("bpm")
@@ -386,46 +388,6 @@ def rhythm_changes(hits, w, n, tol=4.0, z_min=3.0):
     return out
 
 
-def mood_turns(emotion, w):
-    """Where the measured feel of one section is not the feel of the last."""
-    spans = [e for e in (emotion or []) if isinstance(e, dict) and e.get("measured")]
-    if len(spans) < 3:
-        return []
-    dims = [
-        d
-        for d in ("energy", "brightness", "groove")
-        if all(isinstance(e.get(d), (int, float)) for e in spans)
-    ]
-    if not dims:
-        return []
-    moves = []
-    for a, b in zip(spans, spans[1:]):
-        gap = {d: b[d] - a[d] for d in dims}
-        size = sum(x * x for x in gap.values()) ** 0.5
-        moves.append((size, b, gap))
-    typical = sorted(m[0] for m in moves)[len(moves) // 2]
-    gate = max(2.0, 2.0 * typical)
-    say = {
-        "energy": ("it opens up", "the energy falls away"),
-        "brightness": ("it turns brighter", "it darkens"),
-        "groove": ("the groove takes over", "the groove lets go"),
-    }
-    out = []
-    for size, b, gap in moves:
-        if size < gate:
-            continue
-        lead = max(gap.items(), key=lambda kv: abs(kv[1]))
-        out.append(
-            {
-                "i": int(round(float(b["start"]) / w)),
-                "type": "mood_turn",
-                "size": round(min(1.0, size / 12.0), 3),
-                "description": say[lead[0]][0 if lead[1] > 0 else 1],
-            }
-        )
-    return out
-
-
 def comings(temporal, tol=2.0):
     if not temporal or not temporal.get("stems"):
         return []
@@ -484,7 +446,6 @@ def find(
         + tempo_changes(grid, w)
         + shifts(melody, w, n)
         + rhythm_changes(hits, w, n)
-        + mood_turns(emotion, w)
     )
     if not cand:
         return []

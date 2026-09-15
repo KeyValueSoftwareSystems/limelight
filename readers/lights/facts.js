@@ -51,8 +51,6 @@ const FACTS = {
     "build",
     "peak",
     "register_shift",
-    "mood_turn",
-    "key_change",
     "tempo_change",
     "rhythm_change",
     "entrance",
