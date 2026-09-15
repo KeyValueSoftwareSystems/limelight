@@ -302,7 +302,46 @@ def clean_moments(moments, beats=None, section_bounds=None):
     return cleaned
 
 
-def clean_emotion(emotion, duration=None):
+BRIGHT = ("hh", "cymbals", "crash", "ride", "shaker", "tambourine", "violin",
+          "flute", "piccolo", "synth", "keys", "piano", "digital-piano", "bells")
+PERC = ("drums", "kick", "snare", "hh", "toms", "percussion", "clap", "cymbals",
+        "shaker", "tambourine", "congas", "bongos")
+
+
+def measured_feel(temporal, a, b):
+    """energy, brightness and groove read off the 53-stem lanes for one span.
+
+    MOSS returns 1 for all six dimensions on every segment of every song, so
+    the three that have a physical correlate are measured here instead. The
+    scale is 1-10 to match what readers already draw."""
+    if not temporal or not temporal.get("stems"):
+        return None
+    w = temporal.get("window_s") or 0.5
+    lanes = temporal["stems"]
+    i, j = int(a / w), max(int(a / w) + 1, int(b / w))
+
+    def mean_of(names):
+        got = []
+        for k, v in lanes.items():
+            if names and not any(n in k.lower() for n in names):
+                continue
+            seg = v[i:j]
+            if seg:
+                got.append(sum(seg) / len(seg))
+        return sum(got) / len(got) if got else 0.0
+
+    whole = mean_of(())
+    if whole <= 0:
+        return None
+    bright = mean_of(BRIGHT)
+    perc = mean_of(PERC)
+    scale = lambda x: max(1.0, min(10.0, round(1.0 + 9.0 * x, 1)))
+    return {"energy": scale(whole),
+            "brightness": scale(bright / max(whole, 1e-6) * 0.5),
+            "groove": scale(perc / max(whole, 1e-6) * 0.5)}
+
+
+def clean_emotion(emotion, duration=None, temporal=None):
     if not emotion:
         return []
     out = []
@@ -346,6 +385,23 @@ def clean_emotion(emotion, duration=None):
     for i in range(len(filled) - 1):
         filled[i]["end"] = filled[i + 1]["start"]
 
+    for seg in filled:
+        got = measured_feel(temporal, seg["start"], seg["end"])
+        if got:
+            seg.update(got)
+            seg["measured"] = ["energy", "brightness", "groove"]
+
+    # A dimension that takes two values across a whole song is a step, not a
+    # curve, and drawn on a chart it reads as data. MOSS returns 1 for every
+    # dimension on every segment; the only other value such a lane ever shows
+    # is 5, which is this function's own default for a key the model omitted.
+    kept = set(filled[0].get("measured") or ()) if filled else set()
+    for k in ("valence", "arousal", "tension", "energy", "brightness", "groove"):
+        if k in kept:
+            continue
+        if len({seg.get(k) for seg in filled}) < 3:
+            for seg in filled:
+                seg.pop(k, None)
     return filled
 
 
@@ -870,7 +926,8 @@ def run_pipeline(wav_path):
                         )
                     elif task == "emotion":
                         score["emotion"] = clean_emotion(
-                            raw, duration=score["song"]["length_s"]
+                            raw, duration=score["song"]["length_s"],
+                            temporal=score.get("stems_temporal"),
                         )
                     print(
                         f"    {task}: {len(score.get(task, []))} ({time.time() - t:.1f}s)",
