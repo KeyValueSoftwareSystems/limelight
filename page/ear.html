@@ -1077,14 +1077,20 @@
 
   async function library() {
     const list = await (await fetch("/library.json")).json();
-    $("song").innerHTML = list
-      .map(
-        (x) =>
-          `<option value="${x.slug}" data-a="${x.audio || ""}" data-score="${x.score || ""}">${x.slug}</option>`,
-      )
-      .join("");
+    const opt = (x) =>
+      `<option value="${x.slug}" data-a="${x.audio || ""}" data-score="${x.score || ""}">${x.slug}${x.ready === false ? " — " + (x.holding || "not finished") : ""}</option>`;
+    const done = list.filter((x) => x.ready !== false);
+    const held = list.filter((x) => x.ready === false);
+    $("song").innerHTML =
+      done.map(opt).join("") +
+      (held.length
+        ? `<optgroup label="still being fixed — ${held.length} not finished">` +
+          held.map(opt).join("") +
+          `</optgroup>`
+        : "");
     const args = new URLSearchParams(location.search);
-    const pick = list.find((x) => x.slug === args.get("song")) || list[0];
+    const pick =
+      list.find((x) => x.slug === args.get("song")) || done[0] || list[0];
     if (pick) {
       $("song").value = pick.slug;
       if (args.get("song") !== pick.slug) {

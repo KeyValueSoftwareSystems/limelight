@@ -19,6 +19,40 @@ PORT = int(os.environ.get("PORT", "8770"))
 HOST = os.environ.get("HOST", "0.0.0.0")
 
 
+WANTED = ("song", "grid", "beats", "sections", "moments", "stems",
+          "stems_temporal", "btc_chords_raw", "melody", "rhythm", "emotion")
+STEADY_LEAST = 0.45
+
+
+def readiness(path):
+    """Whether a score is finished enough to be read as finished.
+
+    Two ways to fail. A capability the pipeline never produced, which means the
+    run did not complete. Or a bar grid fitted from too little of the song:
+    grid.steady is the share of the beat track whose local tempo holds within
+    1.5% of the median, and grid.py's own steady() gives up under 0.45, so a
+    score below that is stating bar numbers it extrapolated. Four songs fail
+    that and the same four fail at 0.35, so the cut is not doing the work of
+    picking a threshold.
+
+    Missing lyrics is not a failure here. Five songs are Malayalam, Tamil or
+    Telugu, outside the ASR model's languages, and the score already says so in
+    `unavailable`."""
+    try:
+        with open(path) as fh:
+            d = json.load(fh)
+    except Exception as e:
+        return {"ready": False, "holding": f"unreadable ({type(e).__name__})"}
+    short = [k for k in WANTED if not d.get(k)]
+    if short:
+        return {"ready": False, "holding": "no " + ", ".join(short)}
+    steady = (d.get("grid") or {}).get("steady")
+    if isinstance(steady, (int, float)) and steady < STEADY_LEAST:
+        return {"ready": False,
+                "holding": f"bar grid fitted from {round(100 * steady)}% of the song"}
+    return {"ready": True, "holding": None}
+
+
 def lan_ip():
     """The address other machines on this network reach us at. No packet is sent."""
     try:
@@ -136,11 +170,13 @@ class H(http.server.BaseHTTPRequestHandler):
                                 if os.path.isfile(candidate):
                                     audio = f"/synth/incoming/{slug}{ext}"
                                     break
-                    out.append({
+                    row = {
                         "slug": slug,
                         "audio": audio,
                         "score": f"{url_prefix}{urllib.parse.quote(slug)}.score",
-                    })
+                    }
+                    row.update(readiness(full))
+                    out.append(row)
 
             # Canonical store only (migrate.py moves root leftovers into score/).
             add_scores(os.path.join(hub.ROOT, "score"), "/hub/score/")
