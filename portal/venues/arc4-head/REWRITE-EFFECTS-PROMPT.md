@@ -1,5 +1,19 @@
 # Rewrite the 17 DMX effect functions for the arc4-head rig
 
+> **Status (updated after the baker fix).** The consumer `portal/baker.js` has been
+> corrected, so this rewrite now actually takes effect. Contract changes to know:
+> - **States must return MULTIPLE frames + a real `loop_beats`** — the baker loops a
+>   state's frames over `loop_beats` beats. A single-frame state is just held (dead).
+> - **Bindings' `render` is now `render(value, t)`** — the baker feeds the live stream
+>   value AND the frame time in seconds (so the head can move on its own clock).
+> - **Do NOT hand-limit pan/tilt per frame** — the baker slew-limits the head centrally
+>   (≤7 DMX/frame, from the fixture profile). Author smooth paths; the baker keeps them safe.
+>
+> 9 modules are already done (drone, wash, impact, blackout, hush, ramp, stab, lift, trade).
+> The remaining 8 are split into two runnable prompts in this folder:
+> **`PROMPT-1-gestures.md`** (isolate, strip, cut, swell, gear) and
+> **`PROMPT-2-bindings.md`** (follow, split, accent).
+
 ## Context
 
 You are rewriting the lighting effect modules in `portal/venues/arc4-head/`. Each effect is a Node.js CommonJS module that produces raw DMX frames for a small lighting rig. The current versions are too static — states are flat single-frame looks, gestures are basic fades, and the moving head is almost always parked. The result looks dead on screen and on the physical rig.
@@ -110,7 +124,9 @@ module.exports = function effectName(params, ctx) {
     per_fixture: ["par_1", ...],    // fixture IDs this effect drives
     // for bindings only:
     binding: true,
-    render: function(laneValue) { ... },  // returns a single frame
+    render: function(laneValue, t) { ... },  // baker calls this per frame:
+                                             // laneValue = live 0..1 (or [l,r] for split),
+                                             // t = seconds into the show. Returns one frame.
   };
 };
 ```
@@ -159,9 +175,9 @@ module.exports = function effectName(params, ctx) {
 
 ## Critical requirements
 
-1. **The head must MOVE in most effects.** Sweep pan sinusoidally, oscillate tilt. Use the beat timing (ctx.bpm, framesPerBeat) to make movement musical. The head is the most visually striking fixture — parking it wastes it.
+1. **The head must MOVE in most effects.** Sweep pan sinusoidally, oscillate tilt. Use the beat timing (ctx.bpm, framesPerBeat) to make movement musical. The head is the most visually striking fixture — parking it wastes it. You do **not** need to respect the 7-DMX/frame limit yourself — the baker slew-limits pan/tilt centrally — but keep paths smooth.
 
-2. **States must NOT be a single frame.** Generate multiple frames that loop. A drone should breathe. A wash should have subtle movement. Generate at least 4 beats of frames for states.
+2. **States must NOT be a single frame.** Return multiple frames AND `loop_beats: N` (the number of beats the frames span). The baker loops them over that window, so a drone breathes and a wash drifts. Generate `framesPerBeat(bpm) * loop_beats` frames (≥4 beats for states).
 
 3. **Gestures should be punchy.** Use the head's strobe, prism, and gobo for impacts. Use snap movements for stabs. Use slow sweeps for ramps and swells.
 
