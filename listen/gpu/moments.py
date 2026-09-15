@@ -1114,11 +1114,28 @@ def _one_event(picked, rank, apart=2.0):
         run.sort(key=lambda g: (0 if g["type"] in LEADS else 1,
                                 rank.get(g["type"], 99), -g["size"]))
         lead = run[0]
-        rest = [g["type"] for g in run[1:]]
+        rest, apart_too = [], []
+        for g in run[1:]:
+            if (g["type"] == "pause" and g["t"] < lead["t"]
+                    and lead["type"] in ("drop", "build", "climax")):
+                apart_too.append(g)
+            else:
+                rest.append(g)
         if rest:
             lead = dict(lead)
-            lead["alongside"] = rest
+            lead["alongside"] = [g["type"] for g in rest]
+            named = []
+            for g in rest:
+                if g["type"] not in ("entrance", "exit"):
+                    continue
+                for part in g["parts"]:
+                    who = part.get("what")
+                    if who and who not in named:
+                        named.append(who)
+            if named:
+                lead["instruments"] = named
         out.append(lead)
+        out.extend(apart_too)
     return out
 
 
@@ -1339,6 +1356,8 @@ def find(
             item["lead_s"] = lead
         if g.get("alongside"):
             item["alongside"] = g["alongside"]
+        if g.get("instruments"):
+            item["instruments"] = [x for x in g["instruments"] if x not in names]
         span = g["parts"][0].get("hold_s")
         if span:
             item["hold_s"] = span
