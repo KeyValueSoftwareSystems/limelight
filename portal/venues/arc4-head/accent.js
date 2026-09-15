@@ -6,20 +6,27 @@ const H = require("./helpers");
    extent's pars flash white and the head pops with a strobe; below it the rig
    sits very dim, so the hits read as sharp accents. */
 module.exports = function accent(params, ctx) {
-  const threshold = params.threshold != null ? params.threshold : 0.4;
+  const threshold = params.threshold != null ? params.threshold : 0.10;
   const extent = params.extent || "all";
   const pars = H.parsForExtent(extent);
+  const rest = params.rest != null ? params.rest : 0.22;
 
   function render(value, t) {
     const v = H.clamp(value || 0, 0, 1);
+    const colour = H.parseColour(params.colour, [1, 1, 1]);
+    const bed = H.parseColour(params.bed_colour, [1, 0.75, 0.35]);
+    const over = v > threshold ? (v - threshold) / Math.max(1e-6, 1 - threshold) : 0;
     const f = H.emptyFrame();
-    if (v > threshold) {
-      const level = H.clamp(0.6 + 0.4 * v, 0, 1);       // punchy flash, scaled by hit strength
-      for (const p of pars) H.setPar(f, p, [1, 1, 1], level);
-      H.setHead(f, H.HEADS[0], { level, colour: [1, 1, 1], strobe: 20 });
-    } else {
-      H.setHead(f, H.HEADS[0], { level: 0 });           // dark between hits so the flashes pop
+    for (const p of pars) {
+      if (over > 0) H.setPar(f, p, colour, H.clamp(rest + (0.98 - rest) * over, 0, 1));
+      else H.setPar(f, p, bed, rest);
     }
+    H.setHead(f, H.HEADS[0], {
+      level: H.clamp(rest * 0.9 + (0.9 - rest) * over, 0, 1),
+      colour: over > 0 ? colour : bed,
+      pan: 0.662, tilt: 0.45,
+      strobe: over > 0.6 ? 18 : 0,
+    });
     return f;
   }
 

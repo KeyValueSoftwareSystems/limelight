@@ -602,7 +602,7 @@
    "name": "Follow",
    "kind": "binding",
    "tier": 2,
-   "blurb": "Amount follows a named instrument stream. The room breathes with the music.",
+   "blurb": "Level rides a named instrument's envelope across the whole lamp range - floor when it rests, near full when it sings. The dial pair is how much range it spends.",
    "dimension": "amount",
    "returns": false,
    "dials": {
@@ -610,8 +610,8 @@
      "default": null
     },
     "depth": {
-     "default": 0.6,
-     "min": 0.1,
+     "default": 0.95,
+     "min": 0,
      "max": 1
     },
     "extent": {
@@ -619,6 +619,11 @@
     },
     "smooth": {
      "default": 0.3,
+     "min": 0,
+     "max": 1
+    },
+    "floor": {
+     "default": 0.16,
      "min": 0,
      "max": 1
     }
@@ -677,14 +682,14 @@
    "name": "Accent",
    "kind": "binding",
    "tier": 2,
-   "blurb": "Amount follows drum onsets above a threshold. Flashes on the real hits, not the grid.",
+   "blurb": "Level flashes above a resting bed on measured drum onsets - the rig answers the hits that were actually struck. The bed keeps the room lit between them. The onset envelope peaks near 0.45, so a threshold above ~0.2 never fires.",
    "dimension": "amount",
    "returns": false,
    "dials": {
     "threshold": {
-     "default": 0.5,
-     "min": 0.1,
-     "max": 0.9
+     "default": 0.1,
+     "min": 0.02,
+     "max": 0.6
     },
     "extent": {
      "default": "all"
@@ -693,6 +698,18 @@
      "default": 4,
      "min": 1,
      "max": 16
+    },
+    "rest": {
+     "default": 0.22,
+     "min": 0,
+     "max": 1
+    },
+    "bed_colour": {
+     "default": [
+      1,
+      0.75,
+      0.35
+     ]
     }
    },
    "fires_on": [

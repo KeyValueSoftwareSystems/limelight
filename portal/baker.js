@@ -183,19 +183,26 @@ function resolveState(s) {
 }
 
 const resolvedGestures = (plan.gestures || []).map(resolveGesture).filter(Boolean);
-/* A state is a looped frame set, so a section with no binding over it holds one
-   still look for its whole length. Two earlier attempts are recorded because
-   both measured worse: a beat pulse read as constant pulsating, and binding
-   every section to its loudest lane dropped correlation with the mix from
-   0.555 to 0.403.
+/* A section change is a change of look, not a cut; a hit is a cut and must
+   stay one. States and bindings cross over STATE_FADE, gestures over a sixth of
+   a second, and the six that are meant to be instant are exempt. */
+const STATE_FADE = 1.1;
+const GESTURE_FADE = 0.18;
+const INSTANT = new Set(["impact", "blackout", "cut", "stab", "strobe", "flare", "bump"]);
+function ease(x) {
+  const u = Math.max(0, Math.min(1, x));
+  return u * u * (3 - 2 * u);
+}
+function mixFrames(from, to, k, offset, width) {
+  const out = to.slice();
+  for (let c = 0; c < width; c++) {
+    const at = offset + c;
+    out[at] = Math.max(0, Math.min(255,
+      Math.round((from[at] || 0) + ((to[at] || 0) - (from[at] || 0)) * k)));
+  }
+  return out;
+}
 
-   What is left ties the resting look to the music that is actually sounding.
-   The composer picks a state from the section's NAME, and on raga-of-revenge
-   that put `drone` at 0.12 over an intro carrying ten instruments and the
-   loudest vocal in the song: the intro is 32% quieter than the chorus and was
-   lit three times darker. The mix curve is measured, per half second, already
-   in the file - so the rig sits in proportion to it and a busy intro stops
-   being treated as silence. */
 /* The venue forbids the head throwing light into certain pan angles, and
    server.py enforces it by forcing the head's dimmer to zero inside a zone. A
    show that aims there is a show with a dark head, which is what was on screen:
@@ -219,68 +226,6 @@ function safePan(dmx) {
     if (v > a && v < b) v = (v - a < b - v) ? Math.floor(a) - 2 : Math.ceil(b) + 2;
   }
   return Math.max(0, Math.min(255, v));
-}
-
-const lanes = ((score.stems_temporal || {}).stems) || {};
-const laneW = (score.stems_temporal || {}).window_s || 0.5;
-const laneNames = Object.keys(lanes);
-const mixCurve = (() => {
-  if (!laneNames.length) return [];
-  const n = Math.min(...laneNames.map(k => lanes[k].length));
-  const out = new Array(n);
-  for (let i = 0; i < n; i++) {
-    let sum = 0;
-    for (const k of laneNames) sum += lanes[k][i];
-    out[i] = sum / laneNames.length;
-  }
-  return out;
-})();
-const mixSorted = mixCurve.slice().sort((a, b) => a - b);
-const mixLo = mixSorted.length ? mixSorted[Math.floor(mixSorted.length * 0.05)] : 0;
-const mixHi = mixSorted.length ? mixSorted[Math.floor(mixSorted.length * 0.95)] : 1;
-function mixAt(t) {
-  if (!mixCurve.length || mixHi <= mixLo) return 0.5;
-  const i = Math.max(0, Math.min(mixCurve.length - 1, Math.round(t / laneW)));
-  return Math.max(0, Math.min(1, (mixCurve[i] - mixLo) / (mixHi - mixLo)));
-}
-const STATE_FADE = 1.1;
-const GESTURE_FADE = 0.18;
-const INSTANT = new Set(["impact", "blackout", "cut", "stab", "strobe", "flare"]);
-function ease(x) {
-  const u = Math.max(0, Math.min(1, x));
-  return u * u * (3 - 2 * u);
-}
-function mixFrames(from, to, k, offset, width) {
-  const out = to.slice();
-  for (let c = 0; c < width; c++) {
-    const at = offset + c;
-    out[at] = Math.max(0, Math.min(255,
-      Math.round((from[at] || 0) + ((to[at] || 0) - (from[at] || 0)) * k)));
-  }
-  return out;
-}
-
-function sits(frame, t, width, offset, head) {
-  const chans = head ? [5] : [1, 2, 3];
-  let now = 0;
-  for (const c of chans) {
-    if (c < width) now = Math.max(now, frame[offset + c] || 0);
-  }
-  if (now <= 0) return frame;
-  /* What this passage is worth in light, from the mix alone. Only ever lifts:
-     a composer who asked for more than the music warrants keeps it, and every
-     gesture is untouched. The cap stops a near-dark state being turned into a
-     wash. */
-  const want = (0.16 + 0.70 * mixAt(t)) * 255;
-  const k = Math.max(1, Math.min(2.8, want / now));
-  if (k <= 1.02) return frame;
-  const out = frame.slice();
-  for (const c of chans) {
-    const at = offset + c;
-    if (c >= width) continue;
-    out[at] = Math.max(0, Math.min(255, Math.round((frame[at] || 0) * k)));
-  }
-  return out;
 }
 
 const resolvedBindings = (plan.bindings || []).map(resolveBinding).filter(Boolean);
@@ -316,6 +261,8 @@ for (const f of layout.fixtures) {
   const offset = f.address - 1;
   const roles = (prof.channels || []).map(c => c.role);
   const panIdx = roles.indexOf("pan"), tiltIdx = roles.indexOf("tilt"), masterIdx = roles.indexOf("master");
+  const wheelIdx = roles.indexOf("colour_wheel") >= 0 ? roles.indexOf("colour_wheel") : roles.indexOf("colour");
+  const goboIdx = roles.indexOf("gobo"), prismIdx = roles.indexOf("prism");
   const lim = prof.limits || {};
   fixtureChannels[f.id] = {
     offset, width: prof.footprint,
@@ -324,6 +271,10 @@ for (const f of layout.fixtures) {
     masterCh: masterIdx >= 0 ? offset + masterIdx : -1,   // for head brighten-compositing
     maxPan:  lim.max_pan_per_frame  > 0 ? lim.max_pan_per_frame  : 7,
     maxTilt: lim.max_tilt_per_frame > 0 ? lim.max_tilt_per_frame : 7,
+    wheelCh: wheelIdx >= 0 ? offset + wheelIdx : -1,
+    goboCh:  goboIdx  >= 0 ? offset + goboIdx  : -1,
+    prismCh: prismIdx >= 0 ? offset + prismIdx : -1,
+    wheelHold: lim.wheel_settle_s > 0 ? lim.wheel_settle_s : 0.22,
   };
 }
 
@@ -339,23 +290,36 @@ for (let t = 0; t < dur; t += 1 / fps) {
     /* base = the resting look for this fixture: an active binding, else the
        section state (looped so it animates). It always sits under a gesture so
        a departure has something to return to. */
+    /* A rig layers. A designer has the wash follow the voice AND the pars answer
+       the kick, and taking only the first binding per fixture made those two
+       mutually exclusive - which is why a composer given three bindings could
+       only ever spend one on a section. Every binding covering this fixture now
+       contributes, brightest-wins per channel, so a bed and its accents live
+       together the way they do on a real desk. */
     let base = null, bindStart = null;
     for (const b of bindingResults) {
       if (t < b.startS || t >= b.endS) continue;
       if (!b.dmx.per_fixture.includes(fid)) continue;
-      /* live stream value + t so a binding can move the head on its own clock */
-      base = (b.dmx.binding && typeof b.dmx.render === "function")
+      const one = (b.dmx.binding && typeof b.dmx.render === "function")
         ? b.dmx.render(b.valueAt(t), t)
         : frameAt(b.dmx, t - b.startS, b.endS - b.startS, bpm);
-      bindStart = b.startS;
-      break;
+      if (!base) {
+        base = one.slice();
+        bindStart = b.startS;
+      } else {
+        for (let c = 0; c < W; c++) {
+          const at = o + c;
+          base[at] = Math.max(base[at] || 0, one[at] || 0);
+        }
+        bindStart = Math.max(bindStart, b.startS);
+      }
     }
     if (!base) {
       for (let si = 0; si < stateResults.length; si++) {
         const s = stateResults[si];
         if (t < s.startS || t >= s.endS) continue;
         if (!s.dmx.per_fixture.includes(fid)) continue;
-        base = sits(frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm), t, W, o, isHead);
+        base = frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm);
         /* A section change is a change of look, not a cut. Holding the previous
            state under the new one for a beat and crossing between them is what a
            person does on a fader; snapping is what a bug does, and on
@@ -364,8 +328,8 @@ for (let t = 0; t < dur; t += 1 / fps) {
         if (into < STATE_FADE && si > 0) {
           const prev = stateResults[si - 1];
           if (prev && prev.dmx.per_fixture.includes(fid)) {
-            const was = sits(frameAt(prev.dmx, Math.max(0, s.startS - prev.startS),
-                                     prev.endS - prev.startS, bpm), t, W, o, isHead);
+            const was = frameAt(prev.dmx, Math.max(0, s.startS - prev.startS),
+                                prev.endS - prev.startS, bpm);
             base = mixFrames(was, base, ease(into / STATE_FADE), o, W);
           }
         }
@@ -380,8 +344,8 @@ for (let t = 0; t < dur; t += 1 / fps) {
       for (const st of stateResults) {
         if (bindStart < st.startS || bindStart >= st.endS) continue;
         if (!st.dmx.per_fixture.includes(fid)) continue;
-        const was = sits(frameAt(st.dmx, bindStart - st.startS,
-                                 st.endS - st.startS, bpm), t, W, o, isHead);
+        const was = frameAt(st.dmx, bindStart - st.startS,
+                            st.endS - st.startS, bpm);
         base = mixFrames(was, base, ease((t - bindStart) / STATE_FADE), o, W);
         break;
       }
@@ -444,6 +408,27 @@ for (const fc of movers) {
     const prev = allFrames[i - 1], cur = allFrames[i];
     cur[fc.panCh] = safePan(slew(prev[fc.panCh], cur[fc.panCh], fc.maxPan));
     if (fc.tiltCh >= 0) cur[fc.tiltCh] = slew(prev[fc.tiltCh], cur[fc.tiltCh], fc.maxTilt);
+  }
+  /* Pan and tilt are motors and were already slewed; a colour wheel, a gobo
+     wheel and a prism are motors too and were not. The show asked this head to
+     change colour 242 times in 131 seconds, 188 of them closer together than
+     0.2s, which no wheel can do - it would blur or simply not arrive. Each
+     holds its position for wheelHold before it may move again, so what the
+     screen shows is what the fixture could actually produce. */
+  for (const key of ["wheelCh", "goboCh", "prismCh"]) {
+    const ch = fc[key];
+    if (ch < 0) continue;
+    const hold = Math.max(1, Math.round((fc.wheelHold || 0.22) * fps));
+    let settled = allFrames.length ? allFrames[0][ch] : 0;
+    let since = hold;
+    for (let i = 0; i < allFrames.length; i++) {
+      if (allFrames[i][ch] !== settled && since >= hold) {
+        settled = allFrames[i][ch];
+        since = 0;
+      }
+      allFrames[i][ch] = settled;
+      since++;
+    }
   }
 }
 

@@ -9,12 +9,25 @@ module.exports = function accent(params, ctx) {
   const pars = H.parsForExtent(extent);
   const driven = pars.map(p => p.id).concat(H.HEAD_IDS);
 
+  const rest = params.rest != null ? params.rest : 0.22;
+  const colour = H.parseColour(params.colour, [1, 1, 1]);
+  const bed = H.parseColour(params.bed_colour, [1, 0.75, 0.35]);
+
   function render(onset_value) {
-    const v = onset_value > threshold ? H.clamp(onset_value, 0, 1) : 0;
-    const env = v > 0 ? 0.9 : 0;
+    const v = H.clamp(onset_value || 0, 0, 1);
+    const over = v > threshold ? (v - threshold) / Math.max(1e-6, 1 - threshold) : 0;
     const frame = H.emptyFrame();
-    for (const p of pars) H.setPar(frame, p, [1, 1, 1], env);
-    for (const h of H.HEADS) H.setHead(frame, h, { level: env * 0.7, colour: [1, 1, 1] });
+    for (const p of pars) {
+      if (over > 0) H.setPar(frame, p, colour, H.clamp(rest + (0.98 - rest) * over, 0, 1));
+      else H.setPar(frame, p, bed, rest);
+    }
+    for (const h of H.HEADS) {
+      H.setHead(frame, h, {
+        level: H.clamp(rest * 0.9 + (0.9 - rest) * over, 0, 1),
+        colour: over > 0 ? colour : bed,
+        strobe: over > 0.6 ? 18 : 0,
+      });
+    }
     return frame;
   }
 

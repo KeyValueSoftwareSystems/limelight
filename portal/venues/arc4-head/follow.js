@@ -6,16 +6,16 @@ const H = require("./helpers");
    The extent's pars ride the level (with a floor so the rig never fully dies),
    the head master follows, and the head pans slowly on its own clock via t. */
 module.exports = function follow(params, ctx) {
-  const depth = params.depth != null ? params.depth : 0.6;
+  const depth = params.depth != null ? params.depth : 0.95;
   const extent = params.extent || "all";
   const colour = H.parseColour(params.colour, [0.9, 0.8, 0.55]);
   const pars = H.parsForExtent(extent);
   const bpm = ctx.bpm;
-  const floor = params.floor != null ? params.floor : 0.20;
+  const floor = params.floor != null ? params.floor : 0.16;
 
   function render(value, t) {
     const v = H.clamp(value || 0, 0, 1);
-    const level = floor + (depth - floor) * (0.10 + 0.90 * v);        // floor keeps it alive at low values
+    const level = H.clamp(floor + (depth - floor) * Math.pow(v, 0.72), 0, 1);        // floor keeps it alive at low values
     const beat = (t || 0) * bpm / 60;
     const f = H.emptyFrame();
     for (const p of pars) H.setPar(f, p, colour, level);

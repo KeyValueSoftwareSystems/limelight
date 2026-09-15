@@ -110,13 +110,23 @@ module.exports = function drone(params, ctx) {
        `left ${leftLit} right ${rightLit}`);
   }
 
-  // accent (section 1): FLASHES — dark most of the time, bright on onsets
+  /* accent used to go to black between hits, which is why a composer reading
+     the measured palette refused it: as a section's continuous layer it left
+     the rig dark. It now flashes ABOVE a resting bed, so what this checks is
+     that the hits stand well clear of a bed that itself never dies. */
   {
     const [a, b] = secRange(show, 1);
-    let zero = 0, lit = 0, maxv = 0;
-    for (let t = a; t < b; t++) { const r = show.frames[t][1]; if (r === 0) zero++; else lit++; if (r > maxv) maxv = r; }
-    ok("accent flashes on onsets (bright sometimes, dark mostly)", maxv > 0 && lit > 0 && zero > lit,
-       `lit ${lit} / dark ${zero}, peak ${maxv}`);
+    let lit = 0, maxv = 0, minv = 255, sum = 0, n = 0;
+    for (let t = a; t < b; t++) {
+      const r = show.frames[t][1];
+      if (r > 0) lit++;
+      if (r > maxv) maxv = r;
+      if (r < minv) minv = r;
+      sum += r; n++;
+    }
+    const mean = sum / Math.max(1, n);
+    ok("accent flashes clear of a bed that never goes dark", minv > 0 && maxv > mean * 1.6,
+       `bed ${minv}, mean ${mean.toFixed(0)}, peak ${maxv}`);
   }
 
   // head slew: across the WHOLE show, pan(28)/tilt(30) never step more than 7

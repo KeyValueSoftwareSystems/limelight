@@ -168,7 +168,7 @@ function placeFixtures(show) {
   const lo = Math.min(...xs), hi = Math.max(...xs);
   const span = (hi - lo) || 1;
   /* keep the rig off the edges, and give a wider rig a wider stage */
-  const L = 0.09, R = 0.91;
+  const L = 0.055, R = 0.945;
   const zs = fx.map(f => (f.at && f.at[2]) || 0);
   const zlo = Math.min(...zs), zhi = Math.max(...zs), zspan = (zhi - zlo) || 1;
   /* y = depth: +y is toward the audience (downstage) */
@@ -186,9 +186,9 @@ function placeFixtures(show) {
     const row = {
       addr: f.address, id: f.id.replace(/_/g, " "), x,
       /* higher fixtures sit higher up the frame; depth adds perspective offset */
-      y: 0.782 - 0.30 * z - depthShift - (zspan > 0.01 ? 0 : 0.02) * Math.abs(x - 0.5) * 2,
+      y: 0.60 - 0.30 * z - depthShift - (zspan > 0.01 ? 0 : 0.02) * Math.abs(x - 0.5) * 2,
       /* closer (downstage) fixtures render slightly larger */
-      scale: 0.85 + 0.15 * yNorm,
+      scale: (0.85 + 0.15 * yNorm) * 1.45,
     };
     (f.type === "head13" ? heads : pars).push(row);
   });
@@ -1449,7 +1449,7 @@ function readFixtures(idx) {
                                             az: 0, el: 0, wheel: { name: "—" }, dim: 0 } };
 }
 
-const FLOOR_Y = 0.79;
+const FLOOR_Y = 0.86;
 
 function paintBlank() {
   sizeCanvas();
@@ -1656,13 +1656,13 @@ function drawPar(p, W, H, u, n) {
     const pop = p.strobe > 8 ? 0.32 : 0;
     const air = toWhite(c, Math.min(0.8, Math.max(0, k - 0.72) / 0.28 * 0.45 + pop));
     const splay = (p.x - 0.5) * (dense ? 0.52 : 0.85);
-    const A = (0.030 + 0.122 * k) * (dense ? 0.84 : 1);
+    const A = (0.045 + 0.10 * k + 0.34 * k * k) * (dense ? 0.72 : 1);
     const Lc = u * (0.28 + 0.34 * k) * (dense ? 0.82 : 1) * (p.scale || 1);
 
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(splay);
-    volume(c, air, A, lr * 1.5, Lc * (dense ? 0.52 : 0.62), Lc, dense ? 4 : 5);
+    volume(c, air, A, lr * 1.5, Lc * 0.66, Lc, 4);
     ctx.restore();
 
     const fy = H * FLOOR_Y + u * 0.008;
@@ -1671,7 +1671,7 @@ function drawPar(p, W, H, u, n) {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(Math.PI - splay);
-    volume(c, c, A * 0.95, lr * 1.5, drop * 0.86, drop * 1.06, 3);
+    volume(c, c, A * 0.95, lr * 1.5, drop * 0.9, drop * 1.06, 2);
     ctx.restore();
 
     const rx = lr * 0.9 + drop * 0.8, ry = rx * 0.3;
@@ -1714,8 +1714,8 @@ function drawBeam(h, W, H, u, n) {
       ctx.save();
       ctx.rotate(fan[i]);
 
-      volume(c, air, (0.019 + 0.075 * k) * share * (axis ? 1 : 0.68),
-             root * 2.6, L * (axis ? 0.175 : 0.105), L, axis ? 4 : 2);
+      volume(c, air, (0.030 + 0.125 * k) * share * (axis ? 1 : 0.68),
+             root * 2.6, L * (axis ? 0.2 : 0.12), L, axis ? 3 : 2);
 
       const hg = ctx.createLinearGradient(0, 0, 0, -L);
       hg.addColorStop(0, rgba(air, 1));
@@ -1785,22 +1785,25 @@ function emitter(x, y, r, c, k) {
 }
 
 function volume(c, air, A, w0, wTop, L, layers) {
-  const span = 0.82 / Math.max(1, layers - 1), lo = 0.18;
-  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, L);
+  const lat = 0.38, R = L * 1.45, span = 0.82 / Math.max(1, layers - 1), lo = 0.18;
+  ctx.save();
+  ctx.scale(lat, 1);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
   g.addColorStop(0, rgba(air, 1));
-  g.addColorStop(0.11, rgba(c, 0.88));
-  g.addColorStop(0.38, rgba(c, 0.31));
+  g.addColorStop(0.1, rgba(c, 0.82));
+  g.addColorStop(0.35, rgba(c, 0.33));
   g.addColorStop(0.7, rgba(c, 0.07));
   g.addColorStop(1, rgba(c, 0));
   ctx.fillStyle = g;
   for (let i = 0; i < layers; i++) {
     const f = 1 - i * span;
-    const a = A * Math.exp(-2.8 * (f * f - lo * lo));
+    const a = A * Math.exp(-3.2 * (f * f - lo * lo));
     if (a < 0.0045) continue;
     ctx.globalAlpha = a;
-    cone(w0 * (0.42 + 0.58 * f), wTop * f, L);
+    cone(w0 * (0.42 + 0.58 * f) / lat, wTop * f / lat, L);
   }
   ctx.globalAlpha = 1;
+  ctx.restore();
 }
 
 function conePath(wBottom, wTop, L) {
