@@ -3,7 +3,7 @@
  "rig": "arc4-head",
  "geometry": "line",
  "frame": "audience",
- "note": "2026-09-13: four PARs in a straight LINE, 0.5 m apart, all facing the same way, head in the middle. Positions in metres in the AUDIENCE frame (+x = the audience's right); seen from behind the rig the right-most lamp is @1, so @1 is at x=-1.0. Hand-edited from the user's description; rig.py (the hardware authority) still describes the old 150 cm arc -- once it is updated, gen_layout.py regenerates this file.",
+ "note": "2026-09-15: four PARs in a straight LINE, 0.5 m apart on an upstage bar at 2.4 m height, head in the middle at 2.6 m, 0.3 m downstage. Positions in metres in the AUDIENCE frame (+x = audience's right, +y = toward audience, +z = height above deck).",
  "fixtures": [
   {
    "id": "par_1",
@@ -11,7 +11,7 @@
    "at": [
     -1.0,
     0.0,
-    0.0
+    2.4
    ],
    "universe": 0,
    "address": 1
@@ -22,7 +22,7 @@
    "at": [
     -0.5,
     0.0,
-    0.0
+    2.4
    ],
    "universe": 0,
    "address": 8
@@ -33,7 +33,7 @@
    "at": [
     0.5,
     0.0,
-    0.0
+    2.4
    ],
    "universe": 0,
    "address": 15
@@ -44,7 +44,7 @@
    "at": [
     1.0,
     0.0,
-    0.0
+    2.4
    ],
    "universe": 0,
    "address": 22
@@ -54,8 +54,8 @@
    "type": "head13",
    "at": [
     0.0,
-    0.0,
-    0.0
+    0.3,
+    2.6
    ],
    "universe": 0,
    "address": 29

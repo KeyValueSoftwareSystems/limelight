@@ -171,14 +171,24 @@ function placeFixtures(show) {
   const L = 0.09, R = 0.91;
   const zs = fx.map(f => (f.at && f.at[2]) || 0);
   const zlo = Math.min(...zs), zhi = Math.max(...zs), zspan = (zhi - zlo) || 1;
+  /* y = depth: +y is toward the audience (downstage) */
+  const ys = fx.map(f => (f.at && f.at[1]) || 0);
+  const ylo = Math.min(...ys), yhi = Math.max(...ys);
+  const yspan = (yhi - ylo) || 1;
   const pars = [], heads = [];
   fx.forEach(f => {
     const x = L + ((((f.at && f.at[0]) || 0) - lo) / span) * (R - L);
     const z = (((f.at && f.at[2]) || 0) - zlo) / zspan;
+    /* depth: 0 = most upstage, 1 = most downstage */
+    const yNorm = yspan > 0.01 ? (((f.at && f.at[1]) || 0) - ylo) / yspan : 0.5;
+    /* deeper (upstage) fixtures shift up on canvas; closer ones shift down */
+    const depthShift = 0.12 * (1 - yNorm);
     const row = {
       addr: f.address, id: f.id.replace(/_/g, " "), x,
-      /* higher fixtures sit higher up the frame; a flat rig stays on the floor line */
-      y: 0.782 - 0.30 * z - (zspan > 0.01 ? 0 : 0.02) * Math.abs(x - 0.5) * 2,
+      /* higher fixtures sit higher up the frame; depth adds perspective offset */
+      y: 0.782 - 0.30 * z - depthShift - (zspan > 0.01 ? 0 : 0.02) * Math.abs(x - 0.5) * 2,
+      /* closer (downstage) fixtures render slightly larger */
+      scale: 0.85 + 0.15 * yNorm,
     };
     (f.type === "head13" ? heads : pars).push(row);
   });
@@ -1464,8 +1474,8 @@ function paintStage(fx) {
      stage, not light. Everything after this point is light, and a fixture at
      DMX 0 adds none of it. */
   const small = fx.pars.length > 6;
-  for (const p of fx.pars) housing(W * p.x, H * p.y, small ? 6 : 9);
-  for (const h of fx.heads) housing(W * h.x, H * h.y, small ? 7 : 10);
+  for (const p of fx.pars) housing(W * p.x, H * p.y, (small ? 6 : 9) * (p.scale || 1));
+  for (const h of fx.heads) housing(W * h.x, H * h.y, (small ? 7 : 10) * (h.scale || 1));
 
   ctx.globalCompositeOperation = "lighter";
 
@@ -1501,7 +1511,7 @@ function housing(x, y, r) {
 }
 
 function drawPar(p, W, H, u, n) {
-  const scale = n > 6 ? 0.55 : 1;   /* a wider rig packs more, smaller pools */
+  const scale = (n > 6 ? 0.55 : 1) * (p.scale || 1);   /* rig density × depth perspective */
   const x = W * p.x, y = H * p.y, c = p.rgb, k = p.k;
 
   if (k > 0.004) {
@@ -1546,7 +1556,7 @@ function drawPar(p, W, H, u, n) {
     ctx.restore();
   }
 
-  emitter(x, y, n > 6 ? 8 : 11, c, k);
+  emitter(x, y, (n > 6 ? 8 : 11) * (p.scale || 1), c, k);
 }
 
 /* The lit face of a lamp. Its brightness is the fixture's level and nothing
@@ -1562,7 +1572,7 @@ function emitter(x, y, r, c, k) {
 }
 
 function drawBeam(h, W, H, u, n) {
-  const scale = n > 1 ? 0.7 : 1;
+  const scale = (n > 1 ? 0.7 : 1) * (h.scale || 1);
   const x = W * h.x, y = H * h.y, c = h.rgb, k = h.k;
   if (k > 0.004) {
     const L = Math.max(u * 0.12, u * 1.7 * scale * h.reach);
@@ -1590,7 +1600,7 @@ function drawBeam(h, W, H, u, n) {
     }
     ctx.restore();
   }
-  emitter(x, y, 12, c, k);
+  emitter(x, y, 12 * (h.scale || 1), c, k);
 }
 
 function cone(wBottom, wTop, L) {
