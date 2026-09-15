@@ -164,9 +164,15 @@ def scale_feel(raws):
     out = [{} for _ in raws]
     moved = []
     for dim, (lo, hi) in bounds.items():
-        vals = [r.get(dim) for r in raws if isinstance(r, dict)]
-        if not vals or any(v is None for v in vals):
+        vals = [r.get(dim) if isinstance(r, dict) else None for r in raws]
+        if not any(v is not None for v in vals):
             continue
+        held = next(v for v in vals if v is not None)
+        for i, v in enumerate(vals):
+            if v is None:
+                vals[i] = held
+            else:
+                held = v
         for seg, v in zip(out, vals):
             x = 20.0 * math.log10(max(v, 1e-6)) if dim == "energy" else v
             t = (x - lo) / (hi - lo) if hi > lo else 0.0
@@ -174,7 +180,47 @@ def scale_feel(raws):
         moved.append(dim)
     return out, moved
 
-def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=None, heard=None, chords=None):
+def bar_spans(beats, sections, duration):
+    """One span per bar, taking its label from the section it sits in.
+
+    A section span is 15 seconds of song averaged into one number, and that
+    throws away most of what happens: measured over the library, the loudness
+    inside a single span swings across 42% of the song's whole range, and 68%
+    on killers-from-the-northside. The graph drew straight lines between
+    sixteen points where the music had a hundred.
+
+    Bars come from the downbeats the tracker actually found rather than from
+    bpm arithmetic, so a song whose tempo drifts still gets bars where its bars
+    are. The section label rides along on each bar, so nothing that MOSS named
+    is lost - the word is just attached to more, smaller pieces."""
+    downs = [b["t"] for b in (beats or []) if b.get("downbeat")]
+    if len(downs) < 8:
+        return None
+    edges = sorted(set(round(float(t), 3) for t in downs))
+    if duration and edges[-1] < duration - 0.5:
+        edges.append(round(float(duration), 3))
+    named = []
+    for a, b in zip(edges, edges[1:]):
+        if b - a < 0.4:
+            continue
+        mid = (a + b) / 2.0
+        word, note = "neutral", None
+        for sec in sections or []:
+            try:
+                if float(sec["start"]) <= mid < float(sec["end"]):
+                    word = sec.get("emotion") or sec.get("label") or "neutral"
+                    note = sec.get("description")
+                    break
+            except (KeyError, TypeError, ValueError):
+                continue
+        row = {"start": a, "end": b, "emotion": str(word)}
+        if note and (not named or named[-1].get("emotion") != word):
+            row["description"] = str(note)
+        named.append(row)
+    return named or None
+
+
+def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=None, heard=None, chords=None, beats=None):
     """The feel of each span, measured, whatever named the spans.
 
     energy, brightness and groove are read off the stem lanes here, so the
@@ -182,7 +228,10 @@ def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=Non
     and a word for it. When it returns nothing usable - six of twenty songs -
     the sections serve as the spans and the curve is the same measurement,
     without the word."""
-    if not emotion and sections:
+    by_bar = bar_spans(beats, emotion or sections, duration)
+    if by_bar:
+        emotion = by_bar
+    elif not emotion and sections:
         emotion = [{"start": x["start"], "end": x["end"],
                     "emotion": x.get("label") or "neutral",
                     "from": "sections"}
