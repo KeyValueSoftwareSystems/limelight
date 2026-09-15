@@ -35,7 +35,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-SCORES = os.path.join(REPO, "scores")
+SCORES = os.path.join(REPO, "hub", "files", "score")
 WORK = os.path.join(HERE, "work")
 SHOWS = os.path.join(HERE, "shows")
 MARKET = os.path.join(HERE, "market")

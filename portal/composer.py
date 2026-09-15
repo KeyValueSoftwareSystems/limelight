@@ -61,6 +61,8 @@ def format_overview(data):
     lines = []
 
     cap = data.get("caption") or data.get("song", {}).get("title", "untitled")
+    if isinstance(cap, str) and len(cap) > 240:
+        cap = cap[:237].rstrip() + "…"        # keep the input small for tight-context models
     lines.append(f"SONG: {cap}")
 
     g = data.get("grid") or {}
@@ -88,11 +90,12 @@ def format_overview(data):
             f"intensity={m.get('intensity', '?')} — {m.get('description', '')}"
         )
 
+    # Emotion spans are prose, not placement data (rule 2: measurement places,
+    # prose characterises). Listing all of them blew the context window on small
+    # models, so summarise here and let the model pull detail with tools if needed.
     emotions = data.get("emotions") or []
     if emotions:
-        lines.append(f"\nEMOTION SPANS ({len(emotions)}):")
-        for i, e in enumerate(emotions):
-            lines.append(f"  [{i}] {e.get('from_s', '?')}s–{e.get('to_s', '?')}s: {e.get('text', '')}")
+        lines.append(f"\nEMOTION SPANS: {len(emotions)} (call section/moment for detail)")
 
     streams = data.get("streams") or data.get("lanes") or []
     if streams:
@@ -373,7 +376,7 @@ def compose(song, model=None, max_retries=1):
         kwargs = dict(
             model=model,
             messages=messages,
-            max_tokens=8192,
+            max_tokens=3072,
             temperature=0.7,
         )
         if tool_calls_used < max_tool_calls:
@@ -403,7 +406,7 @@ def compose(song, model=None, max_retries=1):
             kwargs2 = dict(
                 model=model,
                 messages=messages,
-                max_tokens=8192,
+                max_tokens=3072,
                 temperature=0.7,
             )
             if tool_calls_used < max_tool_calls:

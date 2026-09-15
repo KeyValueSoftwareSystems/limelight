@@ -129,6 +129,44 @@ module.exports = function drone(params, ctx) {
   }
 }
 
+/* ── 3. compositor: gestures pop off the state and return, reductions darken,
+   overlaps resolve by latest start, and the show ends with the song ───────── */
+{
+  const parBri = f => f[1] + f[2] + f[3] + f[8] + f[9] + f[10] + f[15] + f[16] + f[17] + f[22] + f[23] + f[24];
+
+  // wash under a bright impact
+  const show = bake("arc4-head", {
+    states: [{ section: 0, effect: "wash", amount: 0.5, colour: "#3366cc" }], bindings: [],
+    gestures: [{ moment: 0, effect: "impact", colour: "#ffffff", extent: "all", for_beats: 2 }],
+  });
+  const fps = show.fps, m0 = show.moments[0].t;
+  const wash = parBri(show.frames[Math.round((m0 - 1.0) * fps)]);          // plain wash, 1s before
+  const flash = Math.max(...[0, 1, 2, 3].map(k => parBri(show.frames[Math.round(m0 * fps) + k])));
+  const tail = parBri(show.frames[Math.round((m0 + 0.9) * fps)]);          // late in the impact, envelope spent
+  ok("a gesture pops brighter than the state it sits on", flash > wash * 1.5, `flash ${flash} vs wash ${wash}`);
+  ok("a returning gesture goes back to the state, not to black", tail > 0 && tail >= wash * 0.5, `tail ${tail} vs wash ${wash}`);
+
+  // a reductive gesture darkens the state to black
+  const show2 = bake("arc4-head", {
+    states: [{ section: 0, effect: "wash", amount: 0.5, colour: "#3366cc" }], bindings: [],
+    gestures: [{ moment: 0, effect: "blackout", for_beats: 1 }],
+  });
+  ok("a reductive gesture (blackout) darkens the state to 0",
+     parBri(show2.frames[Math.round(show2.moments[0].t * show2.fps) + 2]) === 0);
+
+  // overlap: a blackout landing inside a running ramp wins (latest start)
+  const show3 = bake("arc4-head", {
+    states: [{ section: 0, effect: "wash", amount: 0.5 }], bindings: [],
+    gestures: [{ from_moment: 0, to_moment: 2, effect: "ramp", to: 0.9 }, { moment: 1, effect: "blackout", for_beats: 1 }],
+  });
+  const bAt = parBri(show3.frames[Math.round(show3.moments[1].t * show3.fps) + 2]);
+  ok("an overlapping blackout supersedes the ramp it lands inside (latest start wins)", bAt === 0, `bri ${bAt}`);
+
+  // no dead black tail past the end of the song
+  ok("the show ends with the song, no dead tail",
+     show.frames.length / show.fps <= (show.duration || 1e9) + 1.0, `${(show.frames.length / show.fps).toFixed(1)}s vs ${show.duration}s`);
+}
+
 let bad = 0;
 for (const [pass, name, detail] of out) {
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "  -- " + detail : ""}`);

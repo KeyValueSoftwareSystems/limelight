@@ -63,8 +63,17 @@ const S = Session(score, { now: () => 0 });
 const bpm = score.grid.bpm;
 const bpb = score.grid.beats_per_bar || 4;
 const bars = score.grid.bars || 120;
-const dur = S.secondsAt(bars + 1, 1);
+/* the grid can run a bar or so past the audio; cap at the song length so the show
+   doesn't trail off into dead black frames after the music ends. */
+const songLen = (score.song && score.song.length_s) || null;
+const dur = songLen ? Math.min(songLen, S.secondsAt(bars + 1, 1)) : S.secondsAt(bars + 1, 1);
 const sections = score.sections || [];
+
+/* gestures that REDUCE light replace the layer under them (they darken); every
+   other gesture is a departure that brightens and must RETURN to the resting
+   look, so it composites OVER the state/binding by max rather than blacking it
+   out when its envelope decays. */
+const REDUCTIVE = new Set(["blackout", "cut", "hush", "strip", "isolate"]);
 
 function sectionAt(t) {
   for (let i = sections.length - 1; i >= 0; i--) {
@@ -206,12 +215,13 @@ for (const f of layout.fixtures) {
   const prof = JSON.parse(fs.readFileSync(profPath, "utf8"));
   const offset = f.address - 1;
   const roles = (prof.channels || []).map(c => c.role);
-  const panIdx = roles.indexOf("pan"), tiltIdx = roles.indexOf("tilt");
+  const panIdx = roles.indexOf("pan"), tiltIdx = roles.indexOf("tilt"), masterIdx = roles.indexOf("master");
   const lim = prof.limits || {};
   fixtureChannels[f.id] = {
     offset, width: prof.footprint,
     panCh:  panIdx  >= 0 ? offset + panIdx  : -1,   // for the head slew limit
     tiltCh: tiltIdx >= 0 ? offset + tiltIdx : -1,
+    masterCh: masterIdx >= 0 ? offset + masterIdx : -1,   // for head brighten-compositing
     maxPan:  lim.max_pan_per_frame  > 0 ? lim.max_pan_per_frame  : 7,
     maxTilt: lim.max_tilt_per_frame > 0 ? lim.max_tilt_per_frame : 7,
   };
@@ -223,60 +233,54 @@ for (let t = 0; t < dur; t += 1 / fps) {
   for (const fid of fixtureIds) {
     const fc = fixtureChannels[fid];
     if (!fc) continue;
-    let filled = false;
+    const o = fc.offset, W = fc.width;
+    const isHead = fc.panCh >= 0;
 
-    /* gesture layer (highest priority) */
-    if (!filled) {
-      for (const g of gestureResults) {
-        if (t < g.startS || t >= g.endS) continue;
-        if (!g.dmx.per_fixture.includes(fid)) continue;
-        const src = frameAt(g.dmx, t - g.startS, g.endS - g.startS, bpm);
-        if (src) {
-          for (let c = 0; c < fc.width; c++) {
-            frame[fc.offset + c] = src[fc.offset + c] || 0;
-          }
-          filled = true;
-        }
-        break;
-      }
+    /* base = the resting look for this fixture: an active binding, else the
+       section state (looped so it animates). It always sits under a gesture so
+       a departure has something to return to. */
+    let base = null;
+    for (const b of bindingResults) {
+      if (t < b.startS || t >= b.endS) continue;
+      if (!b.dmx.per_fixture.includes(fid)) continue;
+      /* live stream value + t so a binding can move the head on its own clock */
+      base = (b.dmx.binding && typeof b.dmx.render === "function")
+        ? b.dmx.render(b.valueAt(t), t)
+        : frameAt(b.dmx, t - b.startS, b.endS - b.startS, bpm);
+      break;
     }
-
-    /* binding layer */
-    if (!filled) {
-      for (const b of bindingResults) {
-        if (t < b.startS || t >= b.endS) continue;
-        if (!b.dmx.per_fixture.includes(fid)) continue;
-        /* feed the live stream value the composer bound to, not a constant.
-           t (seconds) is passed too so a binding can move the head on its own
-           clock; a render() that only wants the value simply ignores it. */
-        const src = (b.dmx.binding && typeof b.dmx.render === "function")
-          ? b.dmx.render(b.valueAt(t), t)
-          : frameAt(b.dmx, t - b.startS, b.endS - b.startS, bpm);
-        if (src) {
-          for (let c = 0; c < fc.width; c++) {
-            frame[fc.offset + c] = src[fc.offset + c] || 0;
-          }
-        }
-        filled = true;
-        break;
-      }
-    }
-
-    /* state layer (lowest priority) */
-    if (!filled) {
+    if (!base) {
       for (const s of stateResults) {
         if (t < s.startS || t >= s.endS) continue;
         if (!s.dmx.per_fixture.includes(fid)) continue;
-        /* loop the state's frames over time so an animated state actually plays */
-        const src = frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm);
-        if (src) {
-          for (let c = 0; c < fc.width; c++) {
-            frame[fc.offset + c] = src[fc.offset + c] || 0;
-          }
-        }
-        filled = true;
+        base = frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm);
         break;
       }
+    }
+
+    /* gesture: among those covering this fixture now, the most recently STARTED
+       one wins the overlap — a blackout placed at the drop supersedes the ramp
+       that has been building into it, not whichever was declared first. */
+    let g = null, gStart = -Infinity;
+    for (const cand of gestureResults) {
+      if (t < cand.startS || t >= cand.endS) continue;
+      if (!cand.dmx.per_fixture.includes(fid)) continue;
+      if (cand.startS >= gStart) { g = cand; gStart = cand.startS; }
+    }
+    const gsrc = g ? frameAt(g.dmx, t - g.startS, g.endS - g.startS, bpm) : null;
+
+    /* compose the gesture over the base */
+    if (gsrc && REDUCTIVE.has(g.eid)) {
+      for (let c = 0; c < W; c++) frame[o + c] = gsrc[o + c] || 0;                 // darken: replace the base
+    } else if (gsrc && base && isHead) {
+      for (let c = 0; c < W; c++) frame[o + c] = gsrc[o + c] || 0;                 // gesture drives the head move...
+      if (fc.masterCh >= 0) frame[fc.masterCh] = Math.max(base[fc.masterCh] || 0, gsrc[fc.masterCh] || 0); // ...but never dimmer than the rest
+    } else if (gsrc && base) {
+      for (let c = 0; c < W; c++) frame[o + c] = Math.max(base[o + c] || 0, gsrc[o + c] || 0); // brighten over the wash, return to it as the envelope decays
+    } else if (gsrc) {
+      for (let c = 0; c < W; c++) frame[o + c] = gsrc[o + c] || 0;
+    } else if (base) {
+      for (let c = 0; c < W; c++) frame[o + c] = base[o + c] || 0;
     }
   }
 
