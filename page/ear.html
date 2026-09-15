@@ -1419,62 +1419,114 @@
     }
   }
 
+  function momentSpanSeconds(m) {
+    const held = m.hold_s || m.duration_s || momentSpan(m) || 0;
+    return held > 0 ? held : 0;
+  }
+
   function momentsCanvas() {
     const moms = SCORE.moments || [];
     if (!moms.length) return;
     const canvas = $("moments-canvas");
-    const h = 60;
-    const [g, w] = fit(canvas, h);
     const total = SCORE.song.length_s;
+    const probe = canvas.getBoundingClientRect().width || 1;
 
+    const mg = canvas.getContext("2d");
+    const laid = [];
     for (const m of moms) {
       const t = m.time_s != null ? m.time_s : momentTime(m);
       if (t < 0 || t > total) continue;
-      const len = m.duration_s || momentSpan(m) || 2.0;
-      const x0 = frac(t) * w,
-        x1 = frac(t + len) * w;
-      if (x1 < 0 || x0 > w) continue;
-      const lx = Math.max(0, x0),
-        rx = Math.min(w, x1),
-        pw = rx - lx;
-      if (pw < 2) continue;
+      const held = momentSpanSeconds(m);
+      const x0 = frac(t) * probe;
+      const x1 = held > 0 ? frac(t + held) * probe : x0;
+      if (x1 < -4 || x0 > probe + 4) continue;
+      const type = (m.type || m.is || "?").toUpperCase();
+      const tail = m.what || m.description || "";
+      mg.font = "700 9px ui-monospace,monospace";
+      let ink = mg.measureText(type).width;
+      if (tail) {
+        mg.font = "9px system-ui";
+        ink += 2 + mg.measureText(tail.slice(0, 48)).width;
+      }
+      laid.push({
+        m,
+        t,
+        x0,
+        x1: Math.max(x1, x0 + 3),
+        ink: x0 + 8 + ink,
+      });
+    }
+    if (!laid.length) return;
+    laid.sort((a, b) => a.x0 - b.x0 || b.x1 - a.x1);
 
+    const MAXLANE = 5;
+    const ends = [];
+    for (const it of laid) {
+      const need = Math.max(it.x1, it.ink);
+      let lane = -1;
+      for (let k = 0; k < ends.length; k++) {
+        if (ends[k] <= it.x0 - 6) {
+          lane = k;
+          break;
+        }
+      }
+      if (lane < 0) {
+        if (ends.length < MAXLANE) {
+          lane = ends.length;
+          ends.push(0);
+        } else {
+          lane = 0;
+          for (let k = 1; k < ends.length; k++) {
+            if (ends[k] < ends[lane]) lane = k;
+          }
+        }
+      }
+      ends[lane] = Math.max(ends[lane], need);
+      it.lane = lane;
+    }
+
+    const lanes = Math.max(1, ends.length);
+    const lh = lanes > 2 ? 19 : 26;
+    const h = Math.max(60, lanes * lh);
+    const [g, w] = fit(canvas, h);
+    const scale = w / probe;
+
+    for (const it of laid) {
+      const m = it.m;
+      const lx = Math.max(0, it.x0 * scale),
+        rx = Math.min(w, it.x1 * scale);
+      const pw = Math.max(3, rx - lx);
+      const y = it.lane * lh;
       const type = m.type || m.is || "?";
       const hue = MOMENT_TYPE_COLORS[type] || KIND[m.is] || "#8b93a6";
+      const held = momentSpanSeconds(m);
 
+      if (held > 0) {
+        g.fillStyle = hue;
+        g.globalAlpha = 0.13;
+        g.fillRect(lx, y, pw, lh - 2);
+        g.globalAlpha = 1;
+      }
       g.fillStyle = hue;
-      g.globalAlpha = 0.15;
-      g.fillRect(lx, 0, pw, h);
-      g.globalAlpha = 1;
-
-      g.fillStyle = hue;
-      g.fillRect(lx, 0, 3, h);
+      g.fillRect(lx, y, held > 0 ? 3 : 2, lh - 2);
 
       g.save();
       g.beginPath();
-      g.rect(lx + 5, 0, pw - 7, h);
+      g.rect(lx + 5, y, Math.max(0, w - lx - 6), lh - 2);
       g.clip();
-      if (pw > 30) {
-        g.font = "700 10px ui-monospace,monospace";
-        g.fillStyle = hue;
-        g.fillText(type.toUpperCase(), lx + 6, 14);
-      }
-      if (pw > 60) {
-        const desc = m.description || m.what || "";
+      g.font = "700 9px ui-monospace,monospace";
+      g.fillStyle = hue;
+      const head = type.toUpperCase();
+      g.fillText(head, lx + 6, y + 11);
+      const tail = m.what || m.description || "";
+      if (tail) {
+        const at = lx + 8 + g.measureText(head).width;
         g.font = "9px system-ui";
-        g.fillStyle = hue;
-        g.globalAlpha = 0.7;
-        g.fillText(desc.slice(0, 50), lx + 6, 28);
+        g.globalAlpha = 0.65;
+        g.fillText(tail.slice(0, 48), at, y + 11);
         g.globalAlpha = 1;
       }
-      const what = m.what || "";
-      if (pw > 20 && what) {
-        g.font = "8px ui-monospace,monospace";
-        g.fillStyle = hue;
-        g.globalAlpha = 0.6;
-        g.fillText(what.slice(0, 30), lx + 6, h - 6);
-        g.globalAlpha = 1;
-      }
+      g.globalAlpha = 1;
       g.restore();
     }
   }
@@ -1525,21 +1577,31 @@
     });
 
     wire("moments-canvas", (t) => {
+      const near = [];
       for (const m of SCORE.moments || []) {
         const mt = m.time_s != null ? m.time_s : 0;
-        if (t >= mt && t <= mt + (m.duration_s || 2.0)) {
+        const held = momentSpanSeconds(m);
+        const reach = held > 0 ? held : 1.5;
+        if (t >= mt - 0.4 && t <= mt + reach) near.push(m);
+      }
+      if (!near.length) return "";
+      near.sort((a, b) => (a.time_s || 0) - (b.time_s || 0));
+      return near
+        .slice(0, 4)
+        .map((m) => {
           const type = m.type || "?";
           const col = MOMENT_TYPE_COLORS[type] || "#8b93a6";
+          const held = momentSpanSeconds(m);
           return (
             `<span style="color:${col};font-weight:700">${type.toUpperCase()}</span>` +
             (m.what ? ` · <span style="color:#aab">${m.what}</span>` : "") +
-            `<span style="color:#556"> @ ${mmss(mt)}</span>` +
+            `<span style="color:#556"> @ ${mmss(m.time_s || 0)}${held > 0 ? ` · ${held.toFixed(1)}s` : ""}</span>` +
             (m.description
               ? `<br><span style="color:#889;font-size:10px">${m.description}</span>`
               : "")
           );
-        }
-      }
+        })
+        .join(`<div style="height:1px;background:#334;margin:6px 0"></div>`);
     });
 
     wire("chords-canvas", (t) => {

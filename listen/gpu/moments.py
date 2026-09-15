@@ -653,6 +653,12 @@ def spotlight(temporal, loud, hold_s=6.0, ne_max=1.35, base_min=2.0):
     invariant to the mix simply getting louder, which is the property `drop`
     lacks.
 
+    A span only counts if the band was there to drop back from: the window
+    before it must have carried a full complement. Without that the rule fires
+    on sparse intros, where a lone piano is not the band standing aside - it is
+    the band not having started. That was 7 of 39, five of them naming keys
+    inside the first half-second.
+
     42 events on 17 of 29 songs; no run of shuffle, phase, circular-shift or
     AAFT nulls reached that count. Corroborates 45.2% against 17.5%,
     p=0.0003, and the 21 that carry no other moment corroborate hardest at
@@ -713,6 +719,11 @@ def spotlight(temporal, loud, hold_s=6.0, ne_max=1.35, base_min=2.0):
             a, b = start, i
             start = None
             if b - a < max(2, span // 3):
+                continue
+            if a < span:
+                continue
+            before = count[max(0, a - span) : a]
+            if not before or max(before) < base_min:
                 continue
             j = min(range(a, b), key=lambda x: count[x])
             fam = lead[j]
@@ -799,6 +810,45 @@ def harmonic_rhythm(chords, w, n, tol=8.0, need=6, edge=4.0):
         }
         for post, t in sorted(kept, key=lambda k: k[1])
     ]
+
+
+def _names_of(g):
+    out = []
+    for part in g["parts"]:
+        if part.get("what"):
+            out.append(part["what"])
+    return out
+
+
+def _no_contradictions(picked, together):
+    """Two moments cannot both be true of the same instant.
+
+    A drop and a spotlight at one time say everything arrived and everything
+    stood back. An entrance and an exit of one instrument two seconds apart is
+    a lane flickering over its own threshold, not the player leaving. Measured
+    over 29 songs: 10 same-instrument flickers on 8 songs, and one drop landing
+    on a spotlight."""
+    drop_like = {"drop", "build"}
+    thin_like = {"spotlight", "breakdown"}
+    out = []
+    for g in sorted(picked, key=lambda x: (x["t"], -x["size"])):
+        clash = None
+        for k in out:
+            if abs(k["t"] - g["t"]) > together:
+                continue
+            pair = {k["type"], g["type"]}
+            if len(pair) == 2 and pair & drop_like and pair & thin_like:
+                clash = k
+                break
+            if pair == {"entrance", "exit"}:
+                if set(_names_of(k)) & set(_names_of(g)):
+                    clash = k
+                    break
+        if clash is None:
+            out.append(g)
+        elif g["size"] > clash["size"]:
+            out[out.index(clash)] = g
+    return sorted(out, key=lambda x: x["t"])
 
 
 def find(
@@ -894,6 +944,8 @@ def find(
             continue
         thinned.append(g)
     picked = thinned
+
+    picked = _no_contradictions(picked, together)
 
     one = {"entrance": "enters", "exit": "drops out"}
     many = {"entrance": "enter", "exit": "drop out"}
