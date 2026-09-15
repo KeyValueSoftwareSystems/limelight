@@ -1,40 +1,34 @@
 "use strict";
 const H = require("./helpers");
 
+/* hush — levels fall GESTURE. The pars settle from a mid level down toward
+   depth, the head dims and its tilt drifts down. Eased settle, then held at the
+   floor for the rest of the span. */
 module.exports = function hush(params, ctx) {
-  const depth = params.depth != null ? params.depth : 0.3;
+  const depth = params.depth != null ? params.depth : 0.4;
   const forBeats = params.for_beats || 4;
-  const keep = params.keep || [];
-  const fpb = H.framesPerBeat(ctx.bpm);
-  const total = fpb * forBeats;
-  const keepSet = new Set(keep);
+  const colour = H.parseColour(params.colour, [1, 0.85, 0.6]);
+  const start = 0.6;                       // a nominal "current" to fall from
+  const end = start * depth;
+  const N = Math.max(2, H.framesPerBeat(ctx.bpm) * forBeats);
 
   const frames = [];
-  for (let i = 0; i < total; i++) {
-    const t = i / total;
-    const env = H.easeSettle(t);
-    const level = 1 - (1 - depth) * env;
-    const frame = H.emptyFrame();
-    for (const p of H.PARS) {
-      if (keepSet.has(p.id)) {
-        H.setPar(frame, p, [0.5, 0.5, 0.5], 0.15);
-      } else {
-        H.setPar(frame, p, [0.5, 0.5, 0.5], level * 0.15);
-      }
-    }
-    for (const h of H.HEADS) {
-      H.setHead(frame, h, {
-        level: level * 0.1,
-        pan: 0.5 + (1 - level) * 0.15,
-        tilt: 0.3 + (1 - level) * 0.2,
-      });
-    }
-    frames.push(frame);
+  for (let i = 0; i < N; i++) {
+    const e = H.easeSettle(i / N);
+    const level = start + (end - start) * e;
+    const f = H.emptyFrame();
+    for (const par of H.PARS) H.setPar(f, par, colour, level);
+    H.setHead(f, H.HEADS[0], {
+      level: level * 0.6, colour,
+      pan: 0.60,
+      tilt: 0.498 + (0.40 - 0.498) * e,     // tilt drifts down as it settles
+    });
+    frames.push(f);
   }
 
   return {
     frames,
-    loop_beats: forBeats,
-    per_fixture: H.ALL_FIXTURES.slice(),
+    loop_beats: 0,
+    per_fixture: H.PAR_IDS.concat(H.HEAD_IDS),
   };
 };

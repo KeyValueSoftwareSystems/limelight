@@ -39,8 +39,13 @@ if (!scoreFile || !planFile || !lightsOut) {
 /* ── load inputs ──────────────────────────────────────────────────────────── */
 
 const { load } = require(path.join(LIGHTS, "fromscore.js"));
+const { frameAt, slew, makeStreamSampler, bindingValueFn } = require("./bakelib.js");
 const score = load(scoreFile);
 const plan = JSON.parse(fs.readFileSync(planFile, "utf8"));
+
+/* the sampler turns a binding's stream name + a time into the 0..1 value its
+   render() follows, reading the score's own per-window stems and drum onsets. */
+const sampler = makeStreamSampler(score);
 
 const venueDir = path.join(HERE, "venues", rigName);
 const manifest = JSON.parse(fs.readFileSync(path.join(venueDir, "manifest.json"), "utf8"));
@@ -172,6 +177,11 @@ const resolvedGestures = (plan.gestures || []).map(resolveGesture).filter(Boolea
 const resolvedBindings = (plan.bindings || []).map(resolveBinding).filter(Boolean);
 const resolvedStates   = (plan.states || []).map(resolveState).filter(Boolean);
 
+/* each binding gets a per-frame value function of the right shape for its
+   render() — a scalar for follow, an onset scalar for accent, a [left,right]
+   pair for split. */
+resolvedBindings.forEach(b => { b.valueAt = bindingValueFn(b, sampler); });
+
 /* ── generate DMX frames for each resolved entry ─────────────────────────── */
 
 function generateFrames(entry) {
@@ -194,7 +204,17 @@ const fixtureChannels = {};
 for (const f of layout.fixtures) {
   const profPath = path.join(LIGHTS, "drivers", "profiles", f.type + ".profile.json");
   const prof = JSON.parse(fs.readFileSync(profPath, "utf8"));
-  fixtureChannels[f.id] = { offset: f.address - 1, width: prof.footprint };
+  const offset = f.address - 1;
+  const roles = (prof.channels || []).map(c => c.role);
+  const panIdx = roles.indexOf("pan"), tiltIdx = roles.indexOf("tilt");
+  const lim = prof.limits || {};
+  fixtureChannels[f.id] = {
+    offset, width: prof.footprint,
+    panCh:  panIdx  >= 0 ? offset + panIdx  : -1,   // for the head slew limit
+    tiltCh: tiltIdx >= 0 ? offset + tiltIdx : -1,
+    maxPan:  lim.max_pan_per_frame  > 0 ? lim.max_pan_per_frame  : 7,
+    maxTilt: lim.max_tilt_per_frame > 0 ? lim.max_tilt_per_frame : 7,
+  };
 }
 
 for (let t = 0; t < dur; t += 1 / fps) {
@@ -210,11 +230,7 @@ for (let t = 0; t < dur; t += 1 / fps) {
       for (const g of gestureResults) {
         if (t < g.startS || t >= g.endS) continue;
         if (!g.dmx.per_fixture.includes(fid)) continue;
-        const localT = t - g.startS;
-        const loopDur = g.dmx.loop_beats > 0 ? g.dmx.loop_beats * (60 / bpm) : (g.endS - g.startS);
-        const fi = Math.min(g.dmx.frames.length - 1,
-          Math.floor((localT / loopDur) * g.dmx.frames.length) % g.dmx.frames.length);
-        const src = g.dmx.frames[fi];
+        const src = frameAt(g.dmx, t - g.startS, g.endS - g.startS, bpm);
         if (src) {
           for (let c = 0; c < fc.width; c++) {
             frame[fc.offset + c] = src[fc.offset + c] || 0;
@@ -230,17 +246,15 @@ for (let t = 0; t < dur; t += 1 / fps) {
       for (const b of bindingResults) {
         if (t < b.startS || t >= b.endS) continue;
         if (!b.dmx.per_fixture.includes(fid)) continue;
-        if (b.dmx.binding && b.dmx.render) {
-          const src = b.dmx.render(0.5);
+        /* feed the live stream value the composer bound to, not a constant.
+           t (seconds) is passed too so a binding can move the head on its own
+           clock; a render() that only wants the value simply ignores it. */
+        const src = (b.dmx.binding && typeof b.dmx.render === "function")
+          ? b.dmx.render(b.valueAt(t), t)
+          : frameAt(b.dmx, t - b.startS, b.endS - b.startS, bpm);
+        if (src) {
           for (let c = 0; c < fc.width; c++) {
             frame[fc.offset + c] = src[fc.offset + c] || 0;
-          }
-        } else {
-          const src = b.dmx.frames[0];
-          if (src) {
-            for (let c = 0; c < fc.width; c++) {
-              frame[fc.offset + c] = src[fc.offset + c] || 0;
-            }
           }
         }
         filled = true;
@@ -253,7 +267,8 @@ for (let t = 0; t < dur; t += 1 / fps) {
       for (const s of stateResults) {
         if (t < s.startS || t >= s.endS) continue;
         if (!s.dmx.per_fixture.includes(fid)) continue;
-        const src = s.dmx.frames[0];
+        /* loop the state's frames over time so an animated state actually plays */
+        const src = frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm);
         if (src) {
           for (let c = 0; c < fc.width; c++) {
             frame[fc.offset + c] = src[fc.offset + c] || 0;
@@ -266,6 +281,23 @@ for (let t = 0; t < dur; t += 1 / fps) {
   }
 
   allFrames.push(frame);
+}
+
+/* ── head slew limit ──────────────────────────────────────────────────────
+   The per-effect layers above are stateless and independent, so the head can
+   jump at a seam (a gesture ending, a state resuming). A real moving head can
+   only travel so far per frame; clamp pan/tilt change to the fixture profile's
+   limit so the beam glides. Rig-general: any fixture whose profile declares a
+   pan channel is limited by its own max_*_per_frame. Clamps the coarse channel
+   only — these rigs hold pan_fine/tilt_fine at 0; a 16-bit head would want the
+   combined value slewed (as readers/lights/wire.js does). */
+const movers = fixtureIds.map(id => fixtureChannels[id]).filter(fc => fc && fc.panCh >= 0);
+for (const fc of movers) {
+  for (let i = 1; i < allFrames.length; i++) {
+    const prev = allFrames[i - 1], cur = allFrames[i];
+    cur[fc.panCh] = slew(prev[fc.panCh], cur[fc.panCh], fc.maxPan);
+    if (fc.tiltCh >= 0) cur[fc.tiltCh] = slew(prev[fc.tiltCh], cur[fc.tiltCh], fc.maxTilt);
+  }
 }
 
 /* ── output in the same format the player expects ─────────────────────────── */

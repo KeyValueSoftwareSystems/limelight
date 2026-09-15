@@ -1,33 +1,35 @@
 "use strict";
 const H = require("./helpers");
 
+/* lift — sustained rise GESTURE. Pars brighten by `by` on a settle curve and
+   HOLD at the new level (the last frame is the arrival, not a return). The head
+   tilts up and its level rises with them. Fires on a register shift — the music
+   went up and stayed up. */
 module.exports = function lift(params, ctx) {
   const by = params.by != null ? params.by : 0.35;
-  const overBeats = params.over_beats || 4;
-  const tilt = params.tilt != null ? params.tilt : 0.3;
-  const fpb = H.framesPerBeat(ctx.bpm);
-  const total = fpb * overBeats;
+  const overBeats = params.over_beats || 8;
+  const tiltTo = params.tilt != null ? params.tilt : 0.6;
+  const colour = H.parseColour(params.colour, [1, 0.8, 0.5]);
+  const start = 0.3;
+  const N = Math.max(2, H.framesPerBeat(ctx.bpm) * overBeats);
 
   const frames = [];
-  for (let i = 0; i < total; i++) {
-    const t = i / (total - 1 || 1);
-    const env = H.easeSettle(t);
-    const level = env * by;
-    const frame = H.emptyFrame();
-    for (const p of H.PARS) H.setPar(frame, p, [1, 0.9, 0.7], 0.3 + level);
-    for (const h of H.HEADS) {
-      H.setHead(frame, h, {
-        level: 0.4 + level,
-        colour: [1, 0.9, 0.7],
-        tilt: 0.5 - tilt * env * 0.3,
-      });
-    }
-    frames.push(frame);
+  for (let i = 0; i < N; i++) {
+    const e = H.easeSettle(i / (N - 1));
+    const level = start + by * e;
+    const f = H.emptyFrame();
+    for (const par of H.PARS) H.setPar(f, par, colour, level);
+    H.setHead(f, H.HEADS[0], {
+      level: level * 0.7, colour,
+      pan: 0.60,
+      tilt: 0.498 + (tiltTo - 0.498) * e,     // tilt lifts up and stays
+    });
+    frames.push(f);
   }
 
   return {
     frames,
-    loop_beats: overBeats,
-    per_fixture: H.ALL_FIXTURES.slice(),
+    loop_beats: 0,
+    per_fixture: H.PAR_IDS.concat(H.HEAD_IDS),
   };
 };
