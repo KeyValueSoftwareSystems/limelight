@@ -185,9 +185,6 @@ def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=Non
                 "start": float(str(e.get("start", e.get("start_s", 0))).rstrip("s")),
                 "end": float(str(e.get("end", e.get("end_s", 0))).rstrip("s")),
                 "energy": float(e.get("energy", 5)),
-                "valence": float(e.get("valence", 5)),
-                "arousal": float(e.get("arousal", 5)),
-                "tension": float(e.get("tension", 5)),
                 "brightness": float(e.get("brightness", 5)),
                 "groove": float(e.get("groove", 5)),
                 "emotion": str(e.get("emotion", "neutral")),
@@ -246,8 +243,12 @@ def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=Non
                 got.append("mode")
             seg["measured"] = got
 
+    for seg in filled:
+        for k in ("valence", "arousal", "tension"):
+            seg.pop(k, None)
+
     kept = set(filled[0].get("measured") or ()) if filled else set()
-    for k in ("valence", "arousal", "tension", "energy", "brightness", "groove"):
+    for k in ("energy", "brightness", "groove"):
         if k in kept:
             continue
         if len({seg.get(k) for seg in filled}) < 3:
