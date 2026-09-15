@@ -9,6 +9,68 @@ removed, and report is a list of issues found.
 import json
 
 
+def _as_rgb(c):
+    if isinstance(c, str) and c.startswith("#") and len(c) == 7:
+        try:
+            return [int(c[i:i + 2], 16) / 255.0 for i in (1, 3, 5)]
+        except ValueError:
+            return None
+    if isinstance(c, (list, tuple)) and len(c) == 3:
+        try:
+            return [max(0.0, min(1.0, float(x))) for x in c]
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
+COLOUR_KEYS = ("colour", "under", "to", "from", "bed_colour")
+
+
+def _snap_palette(plan, report):
+    palette = []
+    for entry in (plan.get("palette") or []):
+        rgb = _as_rgb(entry.get("rgb") if isinstance(entry, dict) else entry)
+        if rgb:
+            palette.append((entry.get("name", "?") if isinstance(entry, dict) else "?", rgb))
+    if not palette:
+        return
+    def nearest(rgb):
+        best, bd = None, 9e9
+        for nm, p in palette:
+            d = sum((a - b) ** 2 for a, b in zip(rgb, p))
+            if d < bd:
+                best, bd = (nm, p), d
+        return best, bd
+    moved = 0
+    for key in ("states", "bindings", "gestures"):
+        for e in plan.get(key) or []:
+            for f in COLOUR_KEYS:
+                rgb = _as_rgb(e.get(f))
+                if rgb is None:
+                    continue
+                (nm, p), d = nearest(rgb)
+                if d > 1e-6:
+                    e[f] = [round(x, 3) for x in p]
+                    moved += 1
+            arr = e.get("colours")
+            if isinstance(arr, list):
+                out = []
+                for c in arr:
+                    rgb = _as_rgb(c)
+                    if rgb is None:
+                        out.append(c)
+                        continue
+                    (nm, p), d = nearest(rgb)
+                    if d > 1e-6:
+                        moved += 1
+                    out.append([round(x, 3) for x in p])
+                e["colours"] = out
+    if moved:
+        report.append({"level": "warn", "code": "palette_snapped",
+                       "msg": f"{moved} colour value(s) were not in the declared palette "
+                              f"of {len(palette)} and were snapped to the nearest one"})
+
+
 def _onset_ceiling(overview):
     try:
         import composer as C
@@ -175,6 +237,10 @@ def validate(plan, catalog, score_overview):
 
     # collision detection: same dimension at the same time
     # gestures beat bindings beat states; larger magnitude wins ties
+    _snap_palette({"palette": plan.get("palette"), "states": clean_states,
+                   "palette": plan.get("palette") or [],
+        "bindings": clean_bindings, "gestures": clean_gestures}, report)
+
     collisions = _detect_collisions(clean_gestures, clean_bindings, clean_states,
                                      effects_by_id, moments, sections)
     report.extend(collisions)
