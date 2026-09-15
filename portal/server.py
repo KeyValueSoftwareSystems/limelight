@@ -36,6 +36,19 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 SCORES = os.path.join(REPO, "hub", "files", "score")
+
+
+def score_path(name):
+    flat = os.path.join(SCORES, name + ".score")
+    if os.path.isfile(flat):
+        return flat
+    store = os.path.join(SCORES, ".versions", name + ".score")
+    try:
+        ns = [int(x.split(".")[0]) for x in os.listdir(store)
+              if x.endswith(".score") and x.split(".")[0].isdigit()]
+    except OSError:
+        return flat
+    return os.path.join(store, "%d.score" % max(ns)) if ns else flat
 WORK = os.path.join(HERE, "work")
 SHOWS = os.path.join(HERE, "shows")
 MARKET = os.path.join(HERE, "market")
@@ -221,7 +234,7 @@ class Library:
                 "title": title_of(name),
                 "audio": p.get("audio"),
                 "version": p.get("version"),
-                "bakeable": os.path.isfile(os.path.join(SCORES, name + ".score")),
+                "bakeable": os.path.isfile(score_path(name)),
                 "duration_s": None, "bpm": None, "bars": None,
                 "sections": [], "energy": [], "unavailable": None,
             }
@@ -711,7 +724,7 @@ class Baker:
                     self.jobs[job_id].update({"state": "failed", "error": str(e)})
 
     def _bake_v2(self, job_id, song, plan_data, rig_name):
-        score = os.path.join(SCORES, song + ".score")
+        score = score_path(song)
         if not os.path.isfile(score):
             raise RuntimeError("no local score for %s" % song)
 
@@ -809,7 +822,7 @@ class Baker:
                     self.jobs[job_id].update({"state": "failed", "error": str(e)})
 
     def _bake(self, job_id, song, seed, edits, appetite=None, layout=None):
-        score = os.path.join(SCORES, song + ".score")
+        score = score_path(song)
         if not os.path.isfile(score):
             raise RuntimeError("no local score for %s -- it cannot be baked here" % song)
         edits = validate_edits(edits)
@@ -1812,8 +1825,13 @@ def make_handler(library, baker, rig):
                     return self._json({"error": "which song?"}, 400)
                 try:
                     sys.path.insert(0, HERE)
-                    from composer import compose, DEFAULT_MODEL
-                    plan, report, overview = compose(song, model=body.get("model", DEFAULT_MODEL))
+                    engine = body.get("engine", "claude")
+                    if engine == "claude":
+                        from claude_composer import compose as compose_fn, DEFAULT_MODEL
+                    else:
+                        from composer import compose as compose_fn, DEFAULT_MODEL
+                    got = compose_fn(song, model=body.get("model", DEFAULT_MODEL))
+                    plan, report, overview = got[0], got[1], got[2]
                     # persist the plan so it can be reviewed
                     os.makedirs(WORK, exist_ok=True)
                     ts = time.strftime("%Y%m%d-%H%M%S")
@@ -1821,6 +1839,7 @@ def make_handler(library, baker, rig):
                     with open(plan_path, "w") as fh:
                         json.dump({"song": song, "plan": plan, "report": report,
                                    "model": body.get("model", DEFAULT_MODEL),
+                                   "engine": body.get("engine", "claude"),
                                    "created": ts}, fh, indent=1)
                     sys.stderr.write("composed plan -> %s\n" % plan_path)
                     return self._json({"plan": plan, "report": report, "saved": plan_path})
