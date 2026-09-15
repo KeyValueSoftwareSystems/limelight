@@ -1097,10 +1097,13 @@
       $("play").disabled = true;
     }
     const g = SCORE.grid;
+    const gone = SCORE.unavailable || {};
     const many = (SCORE.moments || []).length;
-    $("facts").textContent =
+    $("facts").innerHTML =
       `${Math.round(g.bpm)} beats a minute · ${g.bars} bars` +
-      ` · ${many} notable moment${many === 1 ? "" : "s"}`;
+      (gone.moments
+        ? ` · <span style="color:var(--bad)">moments unavailable</span>`
+        : ` · ${many} notable moment${many === 1 ? "" : "s"}`);
     BASE = 0;
     try {
       const saved = await (await fetch(`/downbeat/${s}`)).json();

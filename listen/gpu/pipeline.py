@@ -40,6 +40,34 @@ def reconcile_tempo(said, score):
     return out
 
 
+def tempo_map(beats):
+    if not beats or len(beats) < 8:
+        return None
+    try:
+        import numpy as _np
+        _here = next((c for c in (os.path.join(BASE, "grid.py"),
+                                  os.path.join(BASE, "..", "grid.py"))
+                      if os.path.exists(c)), None)
+        if not _here:
+            return None
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("limelight_grid", _here)
+        G = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(G)
+        t = _np.asarray(beats, dtype=float)
+        _, period, _, _ = G.solve(t)
+        if period <= 0:
+            return None
+        runs = G.fold(G.tempos(t, G.pieces(t)), period)
+        if not runs:
+            return None
+        return {"bpm": round(60.0 / period, 3),
+                "tempo": G.ladder(runs, float(t[0]))}
+    except Exception as e:
+        print(f"    tempo_map: {e}", flush=True)
+        return None
+
+
 def grid_steadiness(beats):
     if not beats or len(beats) < 8:
         return None
@@ -728,6 +756,9 @@ def run_pipeline(wav_path):
                 if c in (2, 3, 4, 6, 8):
                     bpb = c
         fb = beats[0] if beats else 0.0
+        refit = tempo_map(beats)
+        if refit:
+            bpm = refit["bpm"]
         bd = (60.0 / bpm) * bpb
         score["grid"] = {
             "bpm": round(bpm, 3),
@@ -736,6 +767,13 @@ def run_pipeline(wav_path):
             "bars": math.ceil((dur - fb) / bd) if bd > 0 else 0,
             "steady": grid_steadiness(beats),
         }
+        pickup = 1 if fb > 0.2 else 0
+        score["grid"]["first_bar"] = 0 if pickup else 1
+        score["grid"]["last_bar"] = score["grid"]["bars"]
+        if refit and refit.get("tempo"):
+            score["grid"]["tempo"] = refit["tempo"]
+            if len(refit["tempo"]) > 1:
+                print(f"    tempo map: {len(refit['tempo'])} segments", flush=True)
     if results.get("melody"):
         score["melody"] = results["melody"]
     if results.get("rhythm"):
@@ -782,6 +820,7 @@ def run_pipeline(wav_path):
     print("  [phase 3] MOSS queries ...", flush=True)
     p3 = time.time()
     dur = score["song"]["length_s"]
+    absent, asked = {}, []
     for task, raw_prompt, is_json in [
         ("sections", SECTIONS_PROMPT, True),
         ("moments", MOMENTS_PROMPT, True),
@@ -790,6 +829,7 @@ def run_pipeline(wav_path):
         ("lyrics", LYRICS_PROMPT, False),
         ("key_tempo", KEY_PROMPT, False),
     ]:
+        asked.append(task)
         prompt = make_prompt(raw_prompt, dur)
         t = time.time()
         try:
@@ -880,11 +920,19 @@ def run_pipeline(wav_path):
                     print(f"    key_tempo ({time.time() - t:.1f}s)", flush=True)
         except Exception as e:
             print(f"    {task}: FAILED {e}", flush=True)
+            absent[task] = f"{type(e).__name__}: {str(e)[:120]}"
     print(f"  [phase 3] {time.time() - p3:.1f}s", flush=True)
+
+    for task in asked:
+        if task not in score and task not in absent:
+            absent[task] = "model returned nothing usable"
 
     for k in list(score.keys()):
         if score[k] is None or score[k] == {} or score[k] == []:
             del score[k]
+
+    if absent:
+        score["unavailable"] = absent
 
     out = os.path.join(SCORE_OUT, f"{slug}.score")
     with open(out, "w") as f:
