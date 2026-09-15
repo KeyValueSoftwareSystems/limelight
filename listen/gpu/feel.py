@@ -7,6 +7,8 @@ them the same way.
 """
 
 
+import math
+
 BRIGHT = ("hh", "cymbals", "crash", "ride", "shaker", "tambourine", "violin",
           "flute", "piccolo", "synth", "keys", "piano", "digital-piano", "bells")
 PERC = ("drums", "kick", "snare", "hh", "toms", "percussion", "clap", "cymbals",
@@ -23,6 +25,30 @@ def _envelope_max(loud, name, lane):
         if power > 0:
             return rms / (power ** 0.5)
     return at.get("peak") or 1.0
+
+
+def measured_feel(heard, a, b):
+    """The three dimensions read off the mix instead of off the lanes.
+
+    Each is the thing its name claims: loudness, spectral centroid, and the
+    percussive share of the spectrum. Over 29 songs the lane versions tracked
+    these at 0.785, -0.083 and 0.345 - brightness was below chance and its
+    sign flipped between songs, so it said opposite things about two tracks."""
+    import acoustic as A
+
+    if not isinstance(heard, dict):
+        return None
+    loud = A.span(heard, "loudness", a, b)
+    if loud is None:
+        return None
+    cen = A.span(heard, "centroid_hz", a, b)
+    perc = A.span(heard, "percussive", a, b)
+    out = {"energy": loud}
+    if cen and cen > 0:
+        out["brightness"] = math.log2(cen)
+    if perc is not None:
+        out["groove"] = perc
+    return out
 
 
 def raw_feel(temporal, a, b, loud=None):
@@ -84,7 +110,7 @@ def scale_feel(raws):
     return out, moved
 
 
-def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=None):
+def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=None, heard=None):
     """The feel of each span, measured, whatever named the spans.
 
     energy, brightness and groove are read off the stem lanes here, so the
@@ -144,7 +170,12 @@ def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=Non
     for i in range(len(filled) - 1):
         filled[i]["end"] = filled[i + 1]["start"]
 
-    raws = [raw_feel(temporal, seg["start"], seg["end"], loud) for seg in filled]
+    raws = []
+    for seg in filled:
+        got = measured_feel(heard, seg["start"], seg["end"])
+        if got is None:
+            got = raw_feel(temporal, seg["start"], seg["end"], loud)
+        raws.append(got)
     if filled and all(raws):
         scaled, moved = scale_feel(raws)
         for seg, got in zip(filled, scaled):

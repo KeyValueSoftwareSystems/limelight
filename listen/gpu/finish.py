@@ -14,6 +14,22 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import feel as F
 import moments as M
 import words as W
+import acoustic as A
+
+
+WAVDIRS = ("work/wav", "wav", "../work/wav")
+
+
+def _wav_for(slug):
+    """The source audio for a slug, if this machine happens to have it."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    roots = [os.path.abspath(os.path.join(here, "..", "..")), os.getcwd()]
+    for root in roots:
+        for d in WAVDIRS:
+            at = os.path.join(root, d, slug + ".wav")
+            if os.path.isfile(at):
+                return at
+    return None
 
 
 def envelope(score, slug):
@@ -74,17 +90,33 @@ def main(paths):
             if lean != cap:
                 score["caption"] = lean
                 capped = "caption claims stripped"
+        sound = ""
+        heard = score.get("acoustic")
+        wav = _wav_for(slug)
+        if wav and not heard:
+            try:
+                heard = A.series(wav, (score.get("stems_temporal") or {}).get("window_s") or 0.5)
+            except Exception as e:
+                print(f"{slug}: acoustic failed ({type(e).__name__}: {e})")
+                heard = None
+            if heard:
+                score["acoustic"] = heard
+                sound = f"+acoustic {len(heard['loudness'])} windows"
         feels = ""
-        if not score.get("emotion") and score.get("sections"):
-            got = F.clean_emotion(None, (score.get("song") or {}).get("length_s"),
+        spans = score.get("emotion") or ([] if not score.get("sections") else None)
+        base = score.get("emotion") or None
+        if base or score.get("sections"):
+            got = F.clean_emotion(base, (score.get("song") or {}).get("length_s"),
                                   score.get("stems_temporal"), score.get("sections"),
-                                  score.get("stems"))
+                                  score.get("stems"), heard)
             if got:
+                before = score.get("emotion") or []
                 score["emotion"] = got
                 (score.setdefault("unavailable", {}) or {}).pop("emotion", None)
                 if not score.get("unavailable"):
                     score.pop("unavailable", None)
-                feels = f"+emotion from {len(got)} sections"
+                feels = (f"+emotion from {len(got)} sections" if not before
+                         else f"emotion remeasured ({len(got)} spans)")
         was = len(score.get("moments") or [])
         try:
             got = M.find(score.get("stems_temporal"),
