@@ -569,9 +569,8 @@ MOMENTS_PROMPT = (
 )
 
 EMOTION_PROMPT = (
-    "Listen to the entire recording and describe its perceived expressive character "
-    "over time. Treat emotion as an interpretation supported by audible musical cues, "
-    "not an objective fact about what every listener feels.\n\n"
+    "Listen to the entire recording and map its emotional arc as it ACTUALLY unfolds. "
+    "You are creating an emotion curve for a light show — every shift in feel matters.\n\n"
     "Return a JSON array of objects with exactly these fields:\n"
     "- start: number, seconds\n"
     "- end: number, seconds\n"
@@ -596,20 +595,33 @@ EMOTION_PROMPT = (
     "wonder, intensity, hope, darkness, dreaminess, power, longing, joy, "
     "tension, release, grandeur, intimacy, rebellion, bliss, unease, "
     "confidence, vulnerability, freedom, neutral, mixed\n\n"
+    "GRANULARITY IS CRITICAL:\n"
+    "- A typical 3-minute song should have 10-20 segments, NOT 4-6.\n"
+    "- Every verse, chorus, bridge, breakdown, build-up, and outro should be its own segment at minimum.\n"
+    "- Within a chorus, if the energy rises from the start to the peak, that is TWO segments, not one.\n"
+    "- A build-up before a drop is a separate segment from the drop itself — tension rises, then releases.\n"
+    "- If you have consecutive segments with identical dimension values, you are NOT listening closely enough.\n"
+    "- Each dimension should vary independently: a quiet verse can have high tension and low energy; "
+    "a loud chorus can have high groove but moderate tension.\n\n"
+    "COMMON MISTAKES TO AVOID:\n"
+    "- Do NOT give the entire main body of the song the same emotion and same values. "
+    "Even within 'euphoria', energy fluctuates, tension builds and releases, groove shifts.\n"
+    "- Do NOT keep tension flat at 2 for an entire song. Builds create tension (6-8), drops release it (2-3), "
+    "bridges create uncertainty (5-7).\n"
+    "- Do NOT keep groove at 1 for an intro that has a clear rhythmic pulse.\n"
+    "- Brightness changes when instruments enter/exit — a piano-only intro is different from a full mix.\n"
+    "- Use the FULL range of 1-10. If all your values cluster around 2 and 8, you are not differentiating.\n\n"
     "Rules:\n"
     "- Cover 0.0 through the supplied duration with no gaps or overlaps.\n"
     "- Every segment must have start < end.\n"
     "- Sort by start; each end must equal the next start.\n"
     "- The final end must equal the supplied duration exactly.\n"
-    "- Split at meaningful, sustained changes in expressive character or dimensions.\n"
-    "- Do not split at fixed intervals, every musical event or every section boundary.\n"
-    "- Stable passages should retain stable values and may retain the same emotion.\n"
-    "- Do not invent an emotional journey or force use of the full rating range.\n"
-    "- A quiet intro and a loud drop may share an emotion while differing in energy.\n"
+    "- Split at audible changes in feel: new instruments, dynamic shifts, rhythmic changes, harmonic turns.\n"
+    "- Use varied emotion labels — a song that goes intro→verse→chorus→verse→chorus→outro "
+    "should have at least 4-5 different emotion labels, not just 'anticipation' and 'euphoria'.\n"
     "- High energy does not imply positive valence; low energy does not imply sadness.\n"
     "- Groove can be strong in quiet music; tension can rise while energy falls.\n"
-    "- Choose mixed for clearly coexisting emotional qualities and neutral when no strong emotional character is supported.\n"
-    "- Describe audible causes: phrasing, harmony, rhythm, register, instrumentation, texture or dynamics. Do not invent lyrics, narrative or performer intentions.\n\n"
+    "- Describe audible causes: phrasing, harmony, rhythm, register, instrumentation, texture or dynamics.\n\n"
     "Return ONLY the JSON array."
 )
 
@@ -673,8 +685,14 @@ KEY_PROMPT = (
 )
 
 
-def make_prompt(task_prompt, duration_s):
-    return f"{COMMON_PROMPT}\n\nAuthoritative audio duration: {duration_s} seconds.\n\n{task_prompt}"
+def make_prompt(task_prompt, duration_s, sections=None):
+    base = f"{COMMON_PROMPT}\n\nAuthoritative audio duration: {duration_s} seconds."
+    if sections:
+        sec_str = "; ".join(
+            f"{s['label']} {s['start']:.1f}-{s['end']:.1f}s" for s in sections
+        )
+        base += f"\n\nStructural sections already identified: [{sec_str}]. Use these boundaries as guides — emotion should shift at or near section changes."
+    return f"{base}\n\n{task_prompt}"
 
 
 def run_pipeline(wav_path):
@@ -805,7 +823,8 @@ def run_pipeline(wav_path):
         ("lyrics", LYRICS_PROMPT, False),
         ("key_tempo", KEY_PROMPT, False),
     ]:
-        prompt = make_prompt(raw_prompt, dur)
+        secs_ctx = score.get("sections") if task == "emotion" else None
+        prompt = make_prompt(raw_prompt, dur, sections=secs_ctx)
         t = time.time()
         try:
             if is_json:
