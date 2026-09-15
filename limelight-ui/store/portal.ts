@@ -1,0 +1,235 @@
+import { create } from "zustand";
+import type {
+  Role,
+  Song,
+  Show,
+  Edit,
+  AppliedEdit,
+  Effect,
+  RigStatus,
+  LimitsSummary,
+  MarketListing,
+  Layout,
+  FixturePlacement,
+  Venue,
+  VenueRoom,
+  TrimState,
+  ShowFile,
+  Entitlement,
+} from "@/lib/types";
+
+/* ── state shape ─────────────────────────────────────────────────────────── */
+
+export interface PortalState {
+  /* identity */
+  role: Role;
+  screen: string | null;
+  author: string;
+
+  /* library */
+  songs: Song[];
+  song: Song | null;
+
+  /* show / bake */
+  show: Show | null;
+  frames: Uint8Array | null;
+  seed: number;
+  edits: Edit[];
+  applied: AppliedEdit[];
+  job: string | null;
+  showId: string | null;
+  showVersion: number | null;
+
+  /* venue mode */
+  venue: ShowFile | null;
+  entitlement: Entitlement | null;
+
+  /* stage */
+  secIndex: number;
+  place: FixturePlacement | null;
+  view: { from: number; to: number } | null;
+  follow: boolean;
+
+  /* appetite */
+  want: number | null;
+  natural: number | null;
+  swapping: boolean;
+
+  /* effects */
+  effects: Effect[];
+  arm: string | null;
+  sel: number;
+
+  /* rig */
+  rig: RigStatus | null;
+  trims: TrimState;
+
+  /* venue / layout */
+  limits: LimitsSummary | null;
+  layout: string | null;
+  layouts: Layout[];
+  room: VenueRoom | null;
+  rooms: Venue[];
+
+  /* marketplace */
+  market: MarketListing[];
+
+  /* colours */
+  colours: string[];
+}
+
+/* ── actions ─────────────────────────────────────────────────────────────── */
+
+export interface PortalActions {
+  setRole: (role: Role) => void;
+  setScreen: (screen: string | null) => void;
+  setAuthor: (author: string) => void;
+  setSongs: (songs: Song[]) => void;
+  setSong: (song: Song | null) => void;
+  setShow: (show: Show | null) => void;
+  setFrames: (frames: Uint8Array | null) => void;
+  setSeed: (seed: number) => void;
+  setEdits: (edits: Edit[]) => void;
+  addEdit: (edit: Edit) => void;
+  removeEdit: (index: number) => void;
+  updateEdit: (index: number, edit: Partial<Edit>) => void;
+  setApplied: (applied: AppliedEdit[]) => void;
+  setJob: (job: string | null) => void;
+  setShowId: (id: string | null) => void;
+  setShowVersion: (v: number | null) => void;
+  setVenue: (venue: ShowFile | null) => void;
+  setEntitlement: (e: Entitlement | null) => void;
+  setSecIndex: (i: number) => void;
+  setPlace: (place: FixturePlacement | null) => void;
+  setView: (view: { from: number; to: number } | null) => void;
+  setFollow: (f: boolean) => void;
+  setWant: (w: number | null) => void;
+  setNatural: (n: number | null) => void;
+  setSwapping: (s: boolean) => void;
+  setEffects: (effects: Effect[]) => void;
+  setArm: (id: string | null) => void;
+  setSel: (i: number) => void;
+  setRig: (rig: RigStatus | null) => void;
+  setTrims: (trims: Partial<TrimState>) => void;
+  setLimits: (limits: LimitsSummary | null) => void;
+  setLayout: (layout: string | null) => void;
+  setLayouts: (layouts: Layout[]) => void;
+  setRoom: (room: VenueRoom | null) => void;
+  setRooms: (rooms: Venue[]) => void;
+  setMarket: (market: MarketListing[]) => void;
+  setColours: (colours: string[]) => void;
+
+  /* compound actions */
+  resetForShow: () => void;
+}
+
+/* ── initial state ───────────────────────────────────────────────────────── */
+
+const initialTrims: TrimState = {
+  master: 1,
+  par: 1,
+  head: 1,
+  blackout: false,
+  strobe_kill: false,
+  hold: false,
+};
+
+/* ── store ───────────────────────────────────────────────────────────────── */
+
+export const usePortalStore = create<PortalState & PortalActions>((set) => ({
+  /* state */
+  role: "creator",
+  screen: null,
+  author: typeof window !== "undefined" ? localStorage.getItem("ll.author") ?? "" : "",
+  songs: [],
+  song: null,
+  show: null,
+  frames: null,
+  seed: 1,
+  edits: [],
+  applied: [],
+  job: null,
+  showId: null,
+  showVersion: null,
+  venue: null,
+  entitlement: null,
+  secIndex: -1,
+  place: null,
+  view: null,
+  follow: true,
+  want: null,
+  natural: null,
+  swapping: false,
+  effects: [],
+  arm: null,
+  sel: -1,
+  rig: null,
+  trims: { ...initialTrims },
+  limits: null,
+  layout: null,
+  layouts: [],
+  room: null,
+  rooms: [],
+  market: [],
+  colours: [],
+
+  /* actions */
+  setRole: (role) => set({ role }),
+  setScreen: (screen) => set({ screen }),
+  setAuthor: (author) => {
+    try { localStorage.setItem("ll.author", author); } catch { /* noop */ }
+    set({ author });
+  },
+  setSongs: (songs) => set({ songs }),
+  setSong: (song) => set({ song }),
+  setShow: (show) => set({ show }),
+  setFrames: (frames) => set({ frames }),
+  setSeed: (seed) => set({ seed }),
+  setEdits: (edits) => set({ edits }),
+  addEdit: (edit) => set((s) => ({ edits: [...s.edits, edit], sel: s.edits.length })),
+  removeEdit: (index) =>
+    set((s) => ({
+      edits: s.edits.filter((_, i) => i !== index),
+      sel: -1,
+    })),
+  updateEdit: (index, edit) =>
+    set((s) => ({
+      edits: s.edits.map((e, i) => (i === index ? { ...e, ...edit } : e)),
+    })),
+  setApplied: (applied) => set({ applied }),
+  setJob: (job) => set({ job }),
+  setShowId: (showId) => set({ showId }),
+  setShowVersion: (showVersion) => set({ showVersion }),
+  setVenue: (venue) => set({ venue }),
+  setEntitlement: (entitlement) => set({ entitlement }),
+  setSecIndex: (secIndex) => set({ secIndex }),
+  setPlace: (place) => set({ place }),
+  setView: (view) => set({ view }),
+  setFollow: (follow) => set({ follow }),
+  setWant: (want) => set({ want }),
+  setNatural: (natural) => set({ natural }),
+  setSwapping: (swapping) => set({ swapping }),
+  setEffects: (effects) => set({ effects }),
+  setArm: (arm) => set({ arm }),
+  setSel: (sel) => set({ sel }),
+  setRig: (rig) => set({ rig }),
+  setTrims: (patch) => set((s) => ({ trims: { ...s.trims, ...patch } })),
+  setLimits: (limits) => set({ limits }),
+  setLayout: (layout) => set({ layout }),
+  setLayouts: (layouts) => set({ layouts }),
+  setRoom: (room) => set({ room }),
+  setRooms: (rooms) => set({ rooms }),
+  setMarket: (market) => set({ market }),
+  setColours: (colours) => set({ colours }),
+
+  resetForShow: () =>
+    set({
+      show: null,
+      frames: null,
+      secIndex: -1,
+      sel: -1,
+      view: null,
+      applied: [],
+      swapping: false,
+    }),
+}));

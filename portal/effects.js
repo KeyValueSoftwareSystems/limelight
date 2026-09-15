@@ -26,6 +26,7 @@ const { enumerate, baseLibrary } = require(path.join(LIGHTS, "preflight.js"));
 const { plan } = require(path.join(LIGHTS, "arranger.js"));
 const { frame } = require(path.join(LIGHTS, "frame.js"));
 const { Session } = require(path.join(__dirname, "..", "protocol", "session.js"));
+const { planFor } = require("./plan.js");
 
 const LAYOUTS = require(path.join(LIGHTS, "layouts.js"));
 /* The built-in palette plus anything a creator has built by re-dialling one.
@@ -89,14 +90,21 @@ const at = q => (q.bar - 1) * bpb + ((q.beat || 1) - 1);
 const edits = editsFile ? JSON.parse(fs.readFileSync(editsFile, "utf8")) : [];
 const applied = [];
 
+/* snapshot first: the loop below removes the arranger's punctuation wherever a
+   placement replaces it, and the page needs to see what was there */
+const arrangerPlan = planFor(p, score.sections, bpb, shift);
+
 for (const e of edits) {
   const spec = BY_ID[e.type];
   if (!spec) { applied.push({ ...e, skipped: "no such effect" }); continue; }
   const beats = Math.max(1, Math.min(256, Math.round(+e.beats || spec.beats)));
   /* the page numbers bars the way protocol/session.js does; the renderer sees
      bake.js's corrected numbering, so cross the same bridge bake.js crosses */
-  const startBeat = (Math.round(e.bar) - shift - 1) * bpb;
-  const params = { ...spec.params };
+  /* a placement may begin on any beat of its bar, not only the downbeat */
+  const beat = Math.max(1, Math.min(bpb, Math.round(+e.beat || 1)));
+  const startBeat = (Math.round(e.bar) - shift - 1) * bpb + (beat - 1);
+  /* the tile's dials are its identity; an edit may re-dial its own copy */
+  const params = { ...spec.params, ...(e.params || {}) };
   if (params.tone === "key") {
     if (keyHue !== null) params.hue = keyHue;         /* else it stays white, which is honest */
   }
@@ -113,8 +121,11 @@ for (const e of edits) {
   p.assignments = p.assignments.filter(x =>
     !(x.type === a.type && x.layer !== "par" && x.layer !== "head"
       && at(x.from) < a1 && a0 < at(x.to)));
-  p.assignments.push(a);
-  applied.push({ type: e.type, bar: Math.round(e.bar), beats,
+  /* `off` clears the arranger's punctuation of this type across the span and
+     puts nothing in its place -- the filter above has already done the clearing */
+  if (!e.off) p.assignments.push(a);
+  applied.push({ type: e.type, bar: Math.round(e.bar), beat, beats,
+                 off: e.off ? true : undefined,
                  from_beat: a0, to_beat: a1, hue: params.hue === undefined ? null : params.hue });
 }
 
@@ -151,6 +162,8 @@ fs.writeFileSync(lightsOut, JSON.stringify({
   tempo: score.grid.bpm, source: (score.score || "song") + ".wav", wav: (score.score || "song") + ".wav",
   beats, downbeats, sections: phases.map(x => x.start), phases,
   moments, key_hue: keyHue, appetite: override === null ? natural : override,
-  appetite_natural: natural, applied, frames,
+  appetite_natural: natural,
+  plan: arrangerPlan,
+  applied, frames,
 }));
 console.log(`baked ${frames.length} frames on ${RIG.rig} (${fixtures.length} fixtures, ${wire.widthOf(layout)}ch, seed ${seed}, ${applied.length} placed) -> ${lightsOut}`);

@@ -7,11 +7,7 @@ const path = require("path");
    suite unrunnable on a fresh clone -- which is how four suites stopped running
    without anything reporting a fault. */
 function scoreFile() {
-  const candidates = [
-    path.join(__dirname, "..", "..", "scores", "levels.score"),        // built by the pipeline here
-    path.join(__dirname, "panel", "scores", "levels.score"),           // imported by the panel
-  ];
-  return candidates.find(c => fs.existsSync(c)) || candidates[candidates.length - 1];
+  return require("../../protocol/fixture.js").pick();
 }
 
 
@@ -19,38 +15,23 @@ function scoreFile() {
    The pipeline emits parts and bars.intensity. One place converts, so the
    reader and its tests read the same shape from the same committed score. */
 function shape(raw) {
-  /* Sections that already carry {from, to} in bar/beat form: nothing to do. */
-  if (Array.isArray(raw.sections) && raw.sections.length &&
-      raw.sections[0].from && typeof raw.sections[0].from.bar === "number") return raw;
+  if (Array.isArray(raw.sections) && raw.sections.length && raw.sections[0].from)
+    return raw;
 
-  /* Sections in {start, end} seconds — convert to {from, to} bar/beat using
-     the grid.  The pipeline's newer scores emit this shape. */
-  if (Array.isArray(raw.sections) && raw.sections.length &&
-      typeof raw.sections[0].start === "number" && raw.grid && raw.grid.bpm) {
-    const g = raw.grid, bpb = g.beats_per_bar || 4;
-    const tempo = (g.tempo && g.tempo.length) ? g.tempo
-      : [{ from_beat: 0, at_s: g.first_beat_s || 0, bpm: g.bpm }];
-    const sorted = tempo.slice().sort((a, b) => a.from_beat - b.from_beat);
-    const beatAtSec = t => {
-      let seg = sorted[0];
-      for (const c of sorted) { if (c.at_s <= t) seg = c; else break; }
-      return seg.from_beat + (t - seg.at_s) * (seg.bpm / 60);
-    };
-    const barBeat = t => {
-      const beat = beatAtSec(t);
-      const bar = Math.floor(beat / bpb) + 1;
-      return { bar, beat: Math.round(((beat % bpb) + bpb) % bpb) + 1 };
-    };
+  if (Array.isArray(raw.sections) && raw.sections.length) {
+    const { format } = require("../../server/format/v1.js");
+    const done = format(raw);
     return {
       ...raw,
-      sections: raw.sections.map(s => ({
-        from: barBeat(s.start),
-        to: barBeat(s.end),
-        name: s.label || s.name,
-        repeat: s.repeat,
-      })),
-      energy: Array.isArray(raw.energy) ? raw.energy
-        : (raw.bars && raw.bars.intensity) || [],
+      sections: done.sections || [],
+      moments: done.moments || raw.moments || [],
+      layers: done.layers || raw.layers,
+      harmony: done.harmony || raw.harmony,
+      chords: done.chords,
+      key: done.key || raw.key,
+      curves: done.curves,
+      instruments_over_time: done.instruments_over_time,
+      energy: (done.energy && done.energy.values) || [],
     };
   }
 

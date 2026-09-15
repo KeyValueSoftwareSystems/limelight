@@ -1,0 +1,83 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { timeToX, xToTime, fit, clampView, zoomAt, panBy, barTicks, beatAtTime } from "./timeline.ts";
+import type { Grid } from "./types";
+
+const DUR = 240;
+const GRID: Grid = { bpm: 120, beats_per_bar: 4, first_beat_s: 0 };
+const W = 1000;
+
+test("fit shows the whole song", () => {
+  assert.deepEqual(fit(DUR), { from: 0, to: DUR });
+});
+
+test("time and pixels round-trip", () => {
+  const v = { from: 60, to: 120 };
+  for (const t of [60, 75, 90, 119.9]) {
+    assert.ok(Math.abs(xToTime(timeToX(t, v, W), v, W) - t) < 1e-9, `round-trip failed at ${t}`);
+  }
+});
+
+test("the left edge is x=0 and the right edge is the full width", () => {
+  const v = { from: 10, to: 20 };
+  assert.equal(timeToX(10, v, W), 0);
+  assert.equal(timeToX(20, v, W), W);
+});
+
+test("a view is never allowed outside the song", () => {
+  assert.deepEqual(clampView({ from: -50, to: 100 }, DUR, 1), { from: 0, to: 150 });
+  assert.deepEqual(clampView({ from: 200, to: 400 }, DUR, 1), { from: 40, to: 240 });
+});
+
+test("a view never shrinks below the minimum span", () => {
+  const v = clampView({ from: 10, to: 10.0001 }, DUR, 2);
+  assert.ok(v.to - v.from >= 2);
+});
+
+test("zoom keeps the anchored time under the same pixel", () => {
+  const v = { from: 0, to: DUR };
+  const anchor = 90;
+  const z = zoomAt(v, anchor, 0.5, DUR, 1);
+  assert.ok(z.to - z.from < v.to - v.from, "did not zoom in");
+  const before = timeToX(anchor, v, W);
+  const after = timeToX(anchor, z, W);
+  assert.ok(Math.abs(before - after) < 0.5, `anchor drifted ${before} -> ${after}`);
+});
+
+test("zooming out past the song just fits it", () => {
+  const z = zoomAt({ from: 100, to: 140 }, 120, 100, DUR, 1);
+  assert.deepEqual(z, { from: 0, to: DUR });
+});
+
+test("panning shifts the window and stops at the ends", () => {
+  assert.deepEqual(panBy({ from: 10, to: 20 }, 5, DUR, 1), { from: 15, to: 25 });
+  assert.deepEqual(panBy({ from: 0, to: 10 }, -5, DUR, 1), { from: 0, to: 10 });
+  assert.deepEqual(panBy({ from: 230, to: 240 }, 5, DUR, 1), { from: 230, to: 240 });
+});
+
+test("beatAtTime is the inverse of the grid", () => {
+  assert.equal(beatAtTime(0, GRID), 0);
+  assert.equal(beatAtTime(2, GRID), 4);
+});
+
+test("bar ticks thin out as the view widens, and never crowd", () => {
+  const wide = barTicks({ from: 0, to: 240 }, GRID, W);
+  const tight = barTicks({ from: 0, to: 8 }, GRID, W);
+  assert.ok(wide.length > 0 && tight.length > 0);
+  assert.ok(wide.every((t, i, a) => i === 0 || t.bar > a[i - 1].bar), "bars not ascending");
+  // at 1000px nothing should be closer than ~40px apart
+  for (const ticks of [wide, tight]) {
+    for (let i = 1; i < ticks.length; i++) {
+      const gap = timeToX(ticks[i].t, { from: 0, to: ticks === wide ? 240 : 8 }, W)
+                - timeToX(ticks[i - 1].t, { from: 0, to: ticks === wide ? 240 : 8 }, W);
+      assert.ok(gap >= 39, `ticks only ${gap.toFixed(1)}px apart`);
+    }
+  }
+});
+
+test("every bar tick is a real downbeat", () => {
+  const ticks = barTicks({ from: 0, to: 16 }, GRID, W);
+  for (const t of ticks) {
+    assert.ok(Math.abs(t.t - (t.bar - 1) * 2) < 1e-9, `bar ${t.bar} at ${t.t}`);
+  }
+});

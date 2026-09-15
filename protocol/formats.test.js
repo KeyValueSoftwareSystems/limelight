@@ -12,8 +12,12 @@
 const fs = require("fs"), path = require("path"), { execFileSync } = require("child_process");
 
 const root = path.join(__dirname, "..");
-const scorePath = path.join(root, "scores", "levels.score");
+
+const scorePath = require("./fixture.js").need("formats");
+const pythons = [path.join(root, "work", "allin1", "bin", "python"), "python3"];
+const python = pythons.find((p) => p === "python3" || fs.existsSync(p));
 const raw = JSON.parse(fs.readFileSync(scorePath, "utf8"));
+console.log(`# formats: ${path.relative(root, scorePath)} via ${path.basename(python)}`);
 
 const out = [];
 const ok = (n, c, d) => out.push([!!c, n, d || ""]);
@@ -24,7 +28,7 @@ const ok = (n, c, d) => out.push([!!c, n, d || ""]);
   const js = fn(raw);
 
   const py = JSON.parse(execFileSync(
-    path.join(root, "work", "allin1", "bin", "python"),
+    python,
     ["-c", `
 import json, sys
 sys.path.insert(0, ${JSON.stringify(path.join(root, "hub"))})
@@ -62,10 +66,34 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
          : `${ja.size} fields`);
   }
 
-  for (const want of ["ticks", "groove", "melody_phrases", "weight", "floor"]) {
+  for (const want of Object.keys(js).filter((k) => js[k] != null)) {
     ok(`${want} reaches a reader from both`, a.has(want) && b.has(want),
        `js ${a.has(want) ? "yes" : "NO"}, py ${b.has(want) ? "yes" : "NO"}`);
   }
+
+  const deep = (x, y, at, into) => {
+    if (into.length > 12 || x === y) return;
+    const t = (v) => (v === null ? "null" : Array.isArray(v) ? "array" : typeof v);
+    if (t(x) !== t(y)) return void into.push(`${at}: js ${t(x)} vs py ${t(y)}`);
+    if (typeof x === "number")
+      return void (Math.abs(x - y) > 1e-6 && into.push(`${at}: js ${x} vs py ${y}`));
+    if (Array.isArray(x)) {
+      if (x.length !== y.length)
+        return void into.push(`${at}: ${x.length} vs ${y.length} entries`);
+      for (let i = 0; i < x.length; i++) deep(x[i], y[i], `${at}[${i}]`, into);
+      return;
+    }
+    if (x && typeof x === "object") {
+      for (const k of new Set([...Object.keys(x), ...Object.keys(y)]))
+        deep(x[k], y[k], `${at}.${k}`, into);
+      return;
+    }
+    if (x !== y) into.push(`${at}: js ${JSON.stringify(x)} vs py ${JSON.stringify(y)}`);
+  };
+  const apart = [];
+  deep(js, py, "", apart);
+  ok("both formatters answer with the same values, not just the same fields",
+     apart.length === 0, apart.slice(0, 6).join(" | ") || "identical");
 
   /* The checks above only compare fields the source score happens to carry, so a
      field neither formatter forwards reads as agreement. Every new field went in
@@ -84,10 +112,39 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
   };
   planted.curve_tells = { intensity: 2.83, brightness: 0.92, noisy: 1.48, sustained: 1.81,
                           weight: 3.02, floor: 2.36 };
+  const nBars = (planted.grid && planted.grid.bars) || 16;
+  const ramp = Array.from({ length: nBars }, (_, i) => +((i % 8) / 8).toFixed(3));
+  planted.bars = Object.assign({ intensity: ramp, brightness: ramp, width: ramp,
+                                 air: ramp, pump: ramp, pace: ramp,
+                                 weight: ramp, floor: ramp,
+                                 chord: ramp.map((_, i) => (i % 2 ? "C" : "A:min")),
+                                 chord_sure: ramp.map(() => 0.8),
+                                 drums: ramp, bass: ramp, vocals: ramp,
+                                 other: ramp, guitar: ramp, piano: ramp },
+                               planted.bars);
+  const barCount = planted.bars.intensity;
   planted.bars = Object.assign({}, planted.bars, {
-    noisy: (planted.bars.intensity || []).map(() => 0.4),
-    sustained: (planted.bars.intensity || []).map(() => 0.6),
+    noisy: barCount.map(() => 0.4),
+    sustained: barCount.map(() => 0.6),
   });
+  planted.caption = "planted caption";
+  planted.emotion = [{ start: 0, end: 4, energy: 3, brightness: 7, groove: 2,
+                       emotion: "planted", measured: ["energy"] }];
+  planted.stems_temporal = { window_s: 0.5, stems: { kazoo: [0, 0.4, 0.9, 0.2] } };
+  planted.stems = Object.assign({}, planted.stems,
+                                { kazoo: { rms: 0.3, peak: 0.9, db: -12 } });
+  planted.btc_chords_raw = [{ start: 0, end: 2, chord: "C" },
+                            { start: 2, end: 4, chord: "A:min" }];
+  planted.sections_second_opinion = { agreed_boundaries: 0.9, agreed_labels: 0.8 };
+  planted.key_tempo = { grid_bpm: 120, relation: "same", use: "grid.bpm" };
+  planted.rhythm = { onset_count: 42 };
+  (planted.sections || []).forEach((sec, i) => {
+    sec.edge = i === 0 ? null : +(1.5 + i).toFixed(2);
+    sec.sudden = i === 0 ? null : +(0.4 + i * 0.3).toFixed(2);
+    sec.confidence = 0.7;
+  });
+  planted.moments = [{ time_s: 3.5, type: "entrance", what: "kazoo",
+                       intensity: 0.7, with: ["banjo"], measured: true }];
   if (Array.isArray(planted.parts) && planted.parts.length) {
     planted.parts.forEach((q, i) => {
       q.edge = i === 0 ? null : 1.5 + i;
@@ -109,7 +166,7 @@ print(json.dumps(format_v1(json.load(open(${JSON.stringify(scorePath)})))))
 
   const js2 = fn(planted);
   const py2 = JSON.parse(execFileSync(
-    path.join(root, "work", "allin1", "bin", "python"),
+    python,
     ["-c", `
 import json, sys
 sys.path.insert(0, ${JSON.stringify(path.join(root, "hub"))})
@@ -117,7 +174,10 @@ from score_api import format_v1
 print(json.dumps(format_v1(json.load(sys.stdin))))
 `], { encoding: "utf8", input: JSON.stringify(planted), maxBuffer: 1 << 28 }));
 
-  for (const want of ["lyrics", "noisy", "sustained", "motion"]) {
+  for (const want of ["lyrics", "noisy", "sustained", "motion", "caption",
+                      "emotion", "instruments", "instruments_over_time",
+                      "sections_second_opinion", "key_tempo", "rhythm",
+                      "chords", "harmony", "key"]) {
     ok(`${want} survives both formatters when the score has it`,
        js2[want] != null && py2[want] != null,
        `js ${js2[want] != null ? "yes" : "NO"}, py ${py2[want] != null ? "yes" : "NO"}`);
@@ -238,7 +298,7 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
     const dir = path.join(root, "scores");
     const songs = fs.existsSync(dir)
       ? fs.readdirSync(dir).filter(x => x.endsWith(".score")).sort() : [];
-    let checked = 0, adrift = [], dupes = [], noOne = [], torn = [];
+    let checked = 0, adrift = [], dupes = [], noOne = [], torn = [], perSong = [];
     let allBeats = 0, allBumps = 0;
     const firstOf = sc => (sc.grid.first_bar !== undefined && sc.grid.first_bar !== null)
       ? sc.grid.first_bar : null;
@@ -273,6 +333,8 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
       });
       allBeats += got.beats.length;
       allBumps += bumps;
+      if (got.beats.length)
+        perSong.push({ name: f.slice(0, -6), rate: bumps / got.beats.length });
       if (bumps) dupes.push(`${f.slice(0, -6)} ${bumps}`);
       /* Where the tracker lost the beat entirely there is nothing to number.
          Cipher's list has 238 holes wider than a beat and a's 160; a song whose
@@ -298,16 +360,21 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
          : `${checked} songs, ${torn.length} of them with holes in the beat list`);
     /* Two beats land in one grid slot where the tracker heard an extra, and a
        bar with two of them has two beat ones. That is the recording, not the
-       rule: it happens forty-six times in twelve thousand beats, all on songs
-       whose grid the score already doubts. A rule that has come loose does it
-       thousands of times -- the clamp tried before this one put 394 beats out
-       on a single song -- so the guard is the rate across the library, not a
-       threshold invented per song. */
+       rule: a ghazal puts 2.13% of its beats in an occupied slot with an
+       unbroken beat list and a steady grid, and apex 1.70%. A rule that has
+       come loose does it to most of a song -- the clamp tried before this one
+       put 394 beats out on one -- so the guard is the worst single song.
+
+       It used to be the rate across the whole library, which measured how
+       much of the library happened to be on disk: the same unchanged code
+       read 0.38% against twenty-eight songs and 1.26% against the three left
+       during a rebuild. */
     const rate = allBeats ? allBumps / allBeats : 0;
+    const worst = perSong.sort((a, b) => b.rate - a.rate)[0];
     ok("beats collide only where the recording makes them",
-       rate < 0.01,
-       `${allBumps} in ${allBeats} beats (${(rate * 100).toFixed(2)}%)`
-         + (dupes.length ? ` \u00b7 ${dupes.slice(0, 3).join(", ")}` : ""));
+       !worst || worst.rate < 0.05,
+       `worst ${worst ? `${worst.name} ${(worst.rate * 100).toFixed(2)}%` : "none"}`
+         + ` \u00b7 library ${allBumps} in ${allBeats} (${(rate * 100).toFixed(2)}%)`);
     ok("the pickup bar, where a song has one, is numbered from its first beat",
        noOne.length === 0, noOne.slice(0, 4).join(", ") || "clean");
   }

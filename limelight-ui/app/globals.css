@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+/* ── one dark system ─────────────────────────────────────────────────────────
+   Hierarchy comes from elevation and hairlines, not drawn boxes. Colour is
+   reserved for meaning: lane identity, song structure, and rig state. Density
+   is a token, not a second skin. */
+
+@theme {
+  --color-bg-sunken: var(--bg-sunken);
+  --color-bg: var(--bg);
+  --color-bg-raised: var(--bg-raised);
+  --color-bg-overlay: var(--bg-overlay);
+
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-ink-dimmer: var(--ink-dimmer);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-focus: var(--focus);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
+  --font-body: var(--ff-body);
+  --font-mono: var(--ff-mono);
+
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+
+  --spacing-s1: 4px;
+  --spacing-s2: 8px;
+  --spacing-s3: 12px;
+  --spacing-s4: 16px;
+  --spacing-s5: 22px;
+  --spacing-s6: 26px;
+  --spacing-s7: 34px;
+  --spacing-s8: 44px;
+}
+
+:root {
+  /* surfaces: a four-step ladder, darkest well to lightest overlay */
+  --bg-sunken: #0a0b0e;
+  --bg: #101216;
+  --bg-raised: #171a20;
+  --bg-overlay: #1e2229;
+
+  --ink: #e6eaf2;
+  --ink-dim: rgba(230, 234, 242, 0.66);
+  --ink-dimmer: rgba(230, 234, 242, 0.42);
+
+  --line: rgba(230, 234, 242, 0.10);
+  --line-strong: rgba(230, 234, 242, 0.22);
+
+  /* state — rig and limits only, never selection or focus */
+  --ok: #4fbf87;
+  --warn: #e0b54a;
+  --danger: #ff5a45;
+
+  /* the one high-contrast neutral: playhead, selection, focus. Never a hue,
+     because it has to win against every family colour underneath it. */
+  /* selection accent — the one warm colour in the editor */
+  --accent: #e8a33d;
+  --accent-soft: rgba(232, 163, 61, 0.16);
+
+  --focus: #ffffff;
+  --playhead: #ffffff;
+  --select: #ffffff;
+
+  /* lane identity, tuned onto a LIGHTNESS ladder rather than by hue alone.
+     Seven hues cannot all stay distinct under deuteranopia — it collapses the
+     red/green axis, so some pair always merges. Spacing them in luminance means
+     the lanes still read as distinguishable bands when hue collapses. Hue stays
+     reinforcement only; every clip and lane header also carries its name. */
+  --fam-hits: #f6cf8d;
+  --fam-darkness: #7e6de5;
+  --fam-strobe: #3ec7db;
+  --fam-lift: #a5d462;
+  --fam-breath: #6194dd;
+  --fam-wash: #e589ba;
+  --fam-dynamics: #5f6670;
+
+  /* song structure. Deliberately low chroma: sections are background, clips
+     are foreground, and the two must never compete. */
+  --phase-intro: rgba(111, 158, 224, 0.13);
+  --phase-drop: rgba(240, 178, 74, 0.15);
+  --phase-silence: rgba(143, 154, 168, 0.10);
+  --phase-break: rgba(139, 124, 232, 0.12);
+  --phase-verse: rgba(70, 201, 220, 0.10);
+  --phase-build: rgba(224, 112, 171, 0.12);
+  --phase-final-drop: rgba(240, 178, 74, 0.22);
+  --phase-outro: rgba(143, 154, 168, 0.13);
+  --phase-unknown: rgba(230, 234, 242, 0.05);
+
+  /* the stage preview's own ground — near-black, so emitted light reads true */
+  --stage: #07090f;
+
+  --ff-body: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ff-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* motion. Nothing the pointer is dragging may be eased. */
+  --dur-state: 120ms;
+  --dur-panel: 180ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* timeline metrics, so ruler, bands, lanes and clips stay aligned */
+  --ruler-h: 22px;
+  --section-h: 30px;
+  --energy-h: 28px;
+  --moments-h: 18px;
+  --lane-gap: 2px;
+  --clip-radius: 3px;
+  --handle-w: 8px;
+  --snap-threshold: 8px;
+}
+
+/* ── density: the same system at arm's length ────────────────────────────────
+   This replaces the old role reskin, where creator/venue silently swapped base
+   size and hit target. Density is now a property, not an identity. */
+:root,
+[data-density="studio"] {
+  --base-size: 13px;
+  --hit: 28px;
+  --lane-h: 28px;
+}
+
+[data-density="booth"] {
+  --base-size: 15px;
+  --hit: 44px;
+  --lane-h: 36px;
+}
+
+/* ── base ────────────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--ff-body);
+  font-size: var(--base-size);
+  line-height: 1.5;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* every number is tabular: digits that change width while counting are
+   genuinely disorienting in a timeline */
+.mono, .tabular, input[type="number"] {
+  font-family: var(--ff-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+button, input, select, textarea { font-family: inherit; color: inherit; font-size: inherit; }
+input::placeholder { color: var(--ink-dimmer); }
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ── the one micro-label ─────────────────────────────────────────────────────
+   The old design applied this treatment to the brand, nav, role toggle, panel
+   headers, section labels and footer at once. It now has exactly one job. */
+.label {
+  font-size: var(--text-2xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

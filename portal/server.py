@@ -889,6 +889,7 @@ class Baker:
                 "appetite_natural": show.get("appetite_natural"),
                 "rig": show.get("rig"), "layout": show.get("layout") or lay,
                 "fixtures": show.get("fixtures") or [],
+                "plan": show.get("plan") or {"punctuation": [], "dynamics": [], "looks": []},
                 "pars": rigmap.pars, "heads": rigmap.heads,
             },
             "applied": applied,
@@ -924,23 +925,31 @@ def custom_effects():
         return []
 
 
-def save_custom(body):
-    base = {e["id"]: e for e in json.load(open(CATALOG))["effects"]}.get(body.get("base"))
-    if not base:
-        return {"error": "no such effect to start from"}
-    allowed = DIALS.get(base["fx"], [])
-    params = dict(base.get("params") or {})
-    for k, v in (body.get("params") or {}).items():
+def dial_filter(fx, params):
+    """Only dials the renderer actually reads, only values it can use. One copy,
+    shared by a saved custom effect and by a single placement's own dials."""
+    allowed = DIALS.get(fx, [])
+    out = {}
+    for k, v in (params or {}).items():
         if k not in allowed:
             continue
         if k in CHOICES:
             if v in CHOICES[k]:
-                params[k] = v
+                out[k] = v
         else:
             try:
-                params[k] = max(0.0, min(1.0, float(v)))
+                out[k] = max(0.0, min(1.0, float(v)))
             except (TypeError, ValueError):
                 pass
+    return out
+
+
+def save_custom(body):
+    base = {e["id"]: e for e in json.load(open(CATALOG))["effects"]}.get(body.get("base"))
+    if not base:
+        return {"error": "no such effect to start from"}
+    params = dict(base.get("params") or {})
+    params.update(dial_filter(base["fx"], body.get("params")))
     if params.get("coverage") == "all":
         params.pop("coverage", None)
     name = (body.get("name") or "").strip()[:40] or "My effect"
@@ -984,8 +993,18 @@ def validate_edits(edits):
         spec = known.get(e.get("type"))
         if not spec:
             continue
-        out.append({"type": e["type"], "bar": int(e["bar"]),
-                    "beats": max(1, min(256, int(round(float(e.get("beats", spec["beats"]))))))})
+        # schema 1 said `beats` and `fx`; schema 2 says `default_beats` and
+        # `dimension`. Accept either, so a catalogue swap cannot break placing.
+        fallback = spec.get("beats", spec.get("default_beats", 1))
+        row = {"type": e["type"], "bar": int(e["bar"]),
+               "beat": max(1, min(16, int(e.get("beat") or 1))),
+               "beats": max(1, min(256, int(round(float(e.get("beats", fallback) or 1)))))}
+        dials = dial_filter(spec.get("fx") or spec.get("dimension"), e.get("params"))
+        if dials:
+            row["params"] = dials
+        if e.get("off"):
+            row["off"] = True
+        out.append(row)
     return out
 
 
@@ -997,9 +1016,10 @@ def describe_edits(applied, fps, seconds_at, bpb, frame_count):
             out.append(a)
             continue
         bar, beats = a["bar"], a["beats"]
-        t0 = seconds_at(bar, 1)
+        beat = a.get("beat", 1)
+        t0 = seconds_at(bar, beat)
         t1 = t0 + beats * (seconds_at(bar, 2) - seconds_at(bar, 1))
-        out.append({"type": a["type"], "bar": bar, "beats": beats,
+        out.append({"type": a["type"], "bar": bar, "beat": beat, "beats": beats,
                     "from_s": round(t0, 3), "to_s": round(t1, 3),
                     "from_frame": max(0, int(round(t0 * fps))),
                     "to_frame": min(frame_count, int(round(t1 * fps))),
@@ -1121,6 +1141,7 @@ class Limits:
     def forbids(self, effect):
         """Whether the venue has ruled an effect out entirely."""
         if not self.strobe_allowed and (effect.get("fx") == "accent_strobe"
+                                        or effect.get("id") in ("gear", "strip")
                                         or (effect.get("params") or {}).get("strobe")):
             return "strobe is off in this venue"
         if self.par_max <= 0 and self.head_max <= 0:
@@ -1518,6 +1539,32 @@ def make_handler(library, baker, rig):
             if args and not str(args[0]).startswith("GET /api/show?"):
                 sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
 
+        # ----- CORS -----
+        CORS_ORIGINS = (
+            "http://localhost:3000", "http://127.0.0.1:3000",
+            "http://localhost:3001", "http://localhost:3002",
+            "http://localhost:3003", "http://localhost:3004",
+        )
+
+        def _cors(self):
+            origin = self.headers.get("Origin") or ""
+            if origin in self.CORS_ORIGINS:
+                self.send_header("Access-Control-Allow-Origin", origin)
+                self.send_header("Access-Control-Allow-Credentials", "true")
+            self.send_header("Vary", "Origin")
+
+        def do_OPTIONS(self):
+            self.send_response(204)
+            origin = self.headers.get("Origin") or ""
+            if origin in self.CORS_ORIGINS:
+                self.send_header("Access-Control-Allow-Origin", origin)
+                self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                self.send_header("Access-Control-Allow-Headers", "Content-Type")
+                self.send_header("Access-Control-Max-Age", "86400")
+                self.send_header("Access-Control-Allow-Credentials", "true")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
         # ----- helpers -----
         def _json(self, obj, code=200):
             body = json.dumps(obj).encode()
@@ -1525,6 +1572,7 @@ def make_handler(library, baker, rig):
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "no-store")
+            self._cors()
             self.end_headers()
             self.wfile.write(body)
 
@@ -1537,6 +1585,7 @@ def make_handler(library, baker, rig):
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(blob)))
             self.send_header("Cache-Control", "no-store")
+            self._cors()
             self.end_headers()
             self.wfile.write(blob)
 
@@ -1564,6 +1613,7 @@ def make_handler(library, baker, rig):
                     if up.headers.get(h):
                         self.send_header(h, up.headers[h])
                 self.send_header("Accept-Ranges", "bytes")
+                self._cors()
                 self.end_headers()
                 while True:
                     chunk = up.read(65536)

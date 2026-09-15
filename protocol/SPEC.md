@@ -386,6 +386,70 @@ section coming back, so a look used for the first can be used again for the
 second. `sections[].sure` is how cleanly that section sits inside its group,
 which is a measurement of the grouping and not a probability.
 
+**What a boundary is.** A section starts where the *arrangement* changes: a
+stem enters or leaves. It does not start where a new vocal phrase starts, and
+the difference is a bar often enough to matter.
+
+The Nights is the case that forced the question. Three things happen in three
+consecutive bars -- the drums leave at 40, the voice enters at 41 over a bass
+that is still playing, and the bass leaves at 42. A listener can defend any of
+them. Having settled on the arrangement, there were still two ways to read it,
+and they were tested against the thirteen boundaries a human confirmed by ear:
+
+    the bar where the most stems change at once     8 of 13
+    the bar where the bass enters or leaves        12 of 13
+
+So the ear does not weight the stems equally. Nine of the thirteen confirmed
+boundaries are a bass entry or exit, and weighting every stem the same loses
+five of them. The bass is what carries a section: when it changes the section
+changes, and when a voice enters over an unchanged bass that is a phrase
+starting, not a section.
+
+The Nights bar 41 is the one miss, and under this definition it is a miss on
+purpose: the voice enters at 41, the bass leaves at 42, and the file says 42.
+
+This is a definition, not a discovery. It is written down here because it was
+being decided by a tie-break that nobody had stated, which is how the same
+detector gave three different answers on three different songs and all of them
+looked equally defensible.
+
+It turns out to be the published convention, which we arrived at independently
+and should have looked up first. Only two annotation guides in the field state a
+rule for this at all, and both say the same thing. SALAMI's ISMIR 2011 paper
+records "a preference to have segment boundaries fall on downbeats, even in the
+presence of pickups" (the rule never made it into the distributed annotator
+guide, which contains no timing convention at all). And the Jazz Structure
+Dataset is almost verbatim what we settled on: boundaries go at "the first
+downbeat in the harmonic schema of the chorus, which implies that the theme or
+solo melody may start earlier (due to pickups) or later". A voice arriving
+early is a pickup. The boundary does not follow it.
+
+Isophonics says only "every segment starts at a bar boundary" and never defines
+pickup handling; RWC/AIST snaps to beats rather than bars and handles ambiguity
+by annotating only "when the music structure is obvious". No dataset
+documentation anywhere says what to do when the drums leave at bar 40, the voice
+enters at 41 and the bass leaves at 42.
+
+**Report a boundary score with its tolerance or it means nothing.** Ours against
+the thirteen confirmed boundaries:
+
+    exact bar      12 of 13     0.923
+    within 0.5 s   12 of 13     0.923
+    within 3 s     13 of 13     1.000
+
+The single miss is 1.90 s, which is inside the tolerance MIREX has used since
+2005 and outside the one it uses alongside it. Those two windows do not measure
+the same ability -- a meta-analysis of the MIREX task found boundary precision
+at 0.5 s does not correlate with precision at 3 s -- and 3 s was chosen as
+roughly one bar at 80 bpm while 0.5 s is roughly one beat.
+
+Two cautions on that table. Thirteen points is a small sample, and they are
+in-sample: they were used to choose the tie-break, so this is a fit, not a
+held-out score. And for scale, two trained annotators on SALAMI agree with each
+other at F1 = 0.665 at 0.5 s and 0.749 at 3 s. The "about 90% human ceiling"
+often quoted is a 3-second figure measured on the Beatles and RWC-Pop, and it
+does not transfer to harder repertoire.
+
 `sections[].role` -- intro, verse, chorus, drop, breakdown and the rest -- is
 the least trustworthy thing in this file, and it is also the most readable, so
 it needs saying plainly. **The boundaries are measured. The names on them are
@@ -401,8 +465,16 @@ Guitar has The Nights as verse / pre-chorus / chorus and this file gives it no
 verse and no pre-chorus at all, and five breakdowns; Holocene is verse/chorus
 three times over and this file puts its one chorus at bar 191 of 209. A
 hook-lyric test -- does the line the sheet music calls the chorus land in a
-section named chorus, drop or post-chorus -- gets 6 of 30. `breakdown` is 21% of
-all sections, the largest class, and it is the fallback branch.
+section named chorus, drop or post-chorus -- gets 6 of 30.
+
+`breakdown` is 19% of all sections, the largest class. An earlier draft of this
+spec called it the fallback branch. That is wrong and worth correcting: it has a
+dedicated rule, and the fallback block accounts for 10% of breakdowns and 6.8%
+of all sections. What makes it a wastebasket is that its rule defines it as the
+peak's negative space -- quieter and thinner than the anchor -- so it absorbs
+whatever the other rules did not claim. Measured, its members are exactly as
+spread out as a random draw of the same size from the same songs (dispersion
+ratio 0.987, p = 0.37). It is a residual, not a category.
 
 So: drive a look off `like`, `edge`, `fullness` and the stem lanes, which are
 measured. Use `role` to put a word on screen for a human. Do not use it to

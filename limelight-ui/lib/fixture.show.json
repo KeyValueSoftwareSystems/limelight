@@ -1,0 +1,1147 @@
+{
+  "song": "levels",
+  "seed": 1,
+  "fps": 40,
+  "channels": 138,
+  "frame_count": 9494,
+  "duration_s": 237.145,
+  "grid": {
+    "bpm": 128.01,
+    "beats_per_bar": 4,
+    "first_beat_s": 4.8609,
+    "bars": 124
+  },
+  "sections": [
+    {
+      "name": "intro",
+      "start": 2.986,
+      "end": 19.86,
+      "phase": "intro"
+    },
+    {
+      "name": "drop",
+      "start": 19.86,
+      "end": 49.857,
+      "phase": "drop"
+    },
+    {
+      "name": "silence",
+      "start": 49.857,
+      "end": 64.856,
+      "phase": "silence"
+    },
+    {
+      "name": "drop",
+      "start": 64.856,
+      "end": 89.229,
+      "phase": "drop"
+    },
+    {
+      "name": "break",
+      "start": 89.229,
+      "end": 98.604,
+      "phase": "break"
+    },
+    {
+      "name": "verse",
+      "start": 98.604,
+      "end": 128.601,
+      "phase": "verse"
+    },
+    {
+      "name": "silence",
+      "start": 128.601,
+      "end": 147.35,
+      "phase": "silence"
+    },
+    {
+      "name": "build",
+      "start": 147.35,
+      "end": 166.098,
+      "phase": "build"
+    },
+    {
+      "name": "build",
+      "start": 166.098,
+      "end": 192.346,
+      "phase": "build"
+    },
+    {
+      "name": "final_drop",
+      "start": 192.346,
+      "end": 229.843,
+      "phase": "final_drop"
+    },
+    {
+      "name": "outro",
+      "start": 229.843,
+      "end": 237.343,
+      "phase": "outro"
+    }
+  ],
+  "downbeats": [
+    4.861, 6.736, 8.611, 10.485, 12.36, 14.235, 16.11, 17.985, 19.86, 21.735,
+    23.609, 25.484, 27.359, 29.234, 31.109, 32.984, 34.859, 36.733, 38.608,
+    40.483, 42.358, 44.233, 46.108, 47.983, 49.857, 51.732, 53.607, 55.482,
+    57.357, 59.232, 61.107, 62.981, 64.856, 66.731, 68.606, 70.481, 72.356,
+    74.23, 76.105, 77.98, 79.855, 81.73, 83.605, 85.48, 87.354, 89.229, 91.104,
+    92.979, 94.854, 96.729, 98.604, 100.478, 102.353, 104.228, 106.103, 107.978,
+    109.853, 111.728, 113.602, 115.477, 117.352, 119.227, 121.102, 122.977,
+    124.852, 126.726, 128.601, 130.476, 132.351, 134.226, 136.101, 137.976,
+    139.85, 141.725, 143.6, 145.475, 147.35, 149.225, 151.099, 152.974, 154.849,
+    156.724, 158.599, 160.474, 162.349, 164.223, 166.098, 167.973, 169.848,
+    171.723, 173.598, 175.473, 177.347, 179.222, 181.097, 182.972, 184.847,
+    186.722, 188.597, 190.471, 192.346, 194.221, 196.096, 197.971, 199.846,
+    201.721, 203.595, 205.47, 207.345, 209.22, 211.095, 212.97, 214.844,
+    216.719, 218.594, 220.469, 222.344, 224.219, 226.094, 227.968, 229.843,
+    231.718, 233.593, 235.468
+  ],
+  "moments": [
+    {
+      "t": 19.86,
+      "bar": 9,
+      "kind": "entrance",
+      "what": "drums",
+      "weight": 0.969
+    },
+    {
+      "t": 49.857,
+      "bar": 25,
+      "kind": "hook",
+      "what": "the riff",
+      "weight": 0.76
+    },
+    {
+      "t": 65.794,
+      "bar": 33,
+      "kind": "release",
+      "what": "tension",
+      "weight": 0.894
+    },
+    {
+      "t": 89.229,
+      "bar": 46,
+      "kind": "hook",
+      "what": "the riff",
+      "weight": 0.705
+    },
+    {
+      "t": 98.604,
+      "bar": 51,
+      "kind": "pause",
+      "what": "everything but bass",
+      "weight": 0.617
+    },
+    {
+      "t": 102.353,
+      "bar": 53,
+      "kind": "entrance",
+      "what": "voice",
+      "weight": 0.485
+    },
+    {
+      "t": 126.726,
+      "bar": 66,
+      "kind": "transition",
+      "what": "a sweep",
+      "weight": 0.523
+    },
+    {
+      "t": 147.35,
+      "bar": 77,
+      "kind": "change",
+      "what": "harmony",
+      "weight": 0.538
+    },
+    {
+      "t": 166.098,
+      "bar": 87,
+      "kind": "rise",
+      "what": "brightness",
+      "weight": 0.529
+    },
+    {
+      "t": 188.597,
+      "bar": 99,
+      "kind": "hook",
+      "what": "the riff from bar 3",
+      "weight": 0.393
+    },
+    {
+      "t": 193.284,
+      "bar": 101,
+      "kind": "release",
+      "what": "tension",
+      "weight": 0.894
+    },
+    {
+      "t": 210.157,
+      "bar": 110,
+      "kind": "release",
+      "what": "tension",
+      "weight": 0.658
+    }
+  ],
+  "key_hue": 0.9167,
+  "appetite": 0.327,
+  "appetite_natural": 0.327,
+  "rig": "club16-2head",
+  "layout": "club16-2head.layout.json",
+  "fixtures": [
+    {
+      "id": "par_01",
+      "type": "par7",
+      "address": 1,
+      "at": [-3.375, 0, 2.9]
+    },
+    {
+      "id": "par_02",
+      "type": "par7",
+      "address": 8,
+      "at": [-2.925, 0, 2.9]
+    },
+    {
+      "id": "par_03",
+      "type": "par7",
+      "address": 15,
+      "at": [-2.475, 0, 2.9]
+    },
+    {
+      "id": "par_04",
+      "type": "par7",
+      "address": 22,
+      "at": [-2.025, 0, 2.9]
+    },
+    {
+      "id": "par_05",
+      "type": "par7",
+      "address": 29,
+      "at": [-1.575, 0, 2.9]
+    },
+    {
+      "id": "par_06",
+      "type": "par7",
+      "address": 36,
+      "at": [-1.125, 0, 2.9]
+    },
+    {
+      "id": "par_07",
+      "type": "par7",
+      "address": 43,
+      "at": [-0.675, 0, 2.9]
+    },
+    {
+      "id": "par_08",
+      "type": "par7",
+      "address": 50,
+      "at": [-0.225, 0, 2.9]
+    },
+    {
+      "id": "par_09",
+      "type": "par7",
+      "address": 57,
+      "at": [0.225, 0, 2.9]
+    },
+    {
+      "id": "par_10",
+      "type": "par7",
+      "address": 64,
+      "at": [0.675, 0, 2.9]
+    },
+    {
+      "id": "par_11",
+      "type": "par7",
+      "address": 71,
+      "at": [1.125, 0, 2.9]
+    },
+    {
+      "id": "par_12",
+      "type": "par7",
+      "address": 78,
+      "at": [1.575, 0, 2.9]
+    },
+    {
+      "id": "par_13",
+      "type": "par7",
+      "address": 85,
+      "at": [2.025, 0, 2.9]
+    },
+    {
+      "id": "par_14",
+      "type": "par7",
+      "address": 92,
+      "at": [2.475, 0, 2.9]
+    },
+    {
+      "id": "par_15",
+      "type": "par7",
+      "address": 99,
+      "at": [2.925, 0, 2.9]
+    },
+    {
+      "id": "par_16",
+      "type": "par7",
+      "address": 106,
+      "at": [3.375, 0, 2.9]
+    },
+    {
+      "id": "head_1",
+      "type": "head13",
+      "address": 113,
+      "at": [-2.6, 0, 3.2]
+    },
+    {
+      "id": "head_2",
+      "type": "head13",
+      "address": 126,
+      "at": [2.6, 0, 3.2]
+    }
+  ],
+  "plan": {
+    "punctuation": [
+      {
+        "id": "p13",
+        "fx": "accent_strobe",
+        "bar": 9,
+        "beat": 1,
+        "beats": 64,
+        "params": {
+          "strength": 0.853
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p14",
+        "fx": "whiten",
+        "bar": 9,
+        "beat": 1,
+        "beats": 64,
+        "params": {
+          "amount": 0.394
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p19",
+        "fx": "whiten",
+        "bar": 25,
+        "beat": 1,
+        "beats": 32,
+        "params": {
+          "amount": 0.675
+        },
+        "context": "silence"
+      },
+      {
+        "id": "p27",
+        "fx": "accent_strobe",
+        "bar": 33,
+        "beat": 1,
+        "beats": 52,
+        "params": {
+          "strength": 0.843
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p28",
+        "fx": "whiten",
+        "bar": 33,
+        "beat": 1,
+        "beats": 52,
+        "params": {
+          "amount": 0.388
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p37",
+        "fx": "whiten",
+        "bar": 51,
+        "beat": 1,
+        "beats": 64,
+        "params": {
+          "amount": 0.504
+        },
+        "context": "verse"
+      },
+      {
+        "id": "p46",
+        "fx": "whiten",
+        "bar": 77,
+        "beat": 1,
+        "beats": 40,
+        "params": {
+          "amount": 0.383
+        },
+        "context": "build"
+      },
+      {
+        "id": "p54",
+        "fx": "whiten",
+        "bar": 87,
+        "beat": 1,
+        "beats": 56,
+        "params": {
+          "amount": 0.8699999999999999
+        },
+        "context": "build"
+      },
+      {
+        "id": "p66",
+        "fx": "accent_strobe",
+        "bar": 101,
+        "beat": 1,
+        "beats": 80,
+        "params": {
+          "strength": 0.901
+        },
+        "context": "final_drop"
+      },
+      {
+        "id": "p82",
+        "fx": "white_blast",
+        "bar": 1,
+        "beat": 1,
+        "beats": 2,
+        "params": {
+          "strength": 0.44,
+          "coverage": "inner",
+          "shape": "swell",
+          "tone": "lane",
+          "hue": 0.95
+        },
+        "context": "intro"
+      },
+      {
+        "id": "p83",
+        "fx": "white_blast",
+        "bar": 8,
+        "beat": 1,
+        "beats": 4,
+        "params": {
+          "strength": 0.64,
+          "shape": "swell",
+          "tone": "key",
+          "hue": 0.9167
+        },
+        "context": "intro"
+      },
+      {
+        "id": "p84",
+        "fx": "blackout",
+        "bar": 8,
+        "beat": 4,
+        "beats": 1,
+        "params": {
+          "strength": 0.969
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p85",
+        "fx": "white_blast",
+        "bar": 9,
+        "beat": 1,
+        "beats": 1,
+        "params": {
+          "strength": 0.969
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p86",
+        "fx": "blackout",
+        "bar": 9,
+        "beat": 3,
+        "beats": 1,
+        "params": {
+          "strength": 0.894
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p87",
+        "fx": "pause",
+        "bar": 16,
+        "beat": 1,
+        "beats": 4,
+        "params": {
+          "strength": 0.664,
+          "still": []
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p88",
+        "fx": "hook",
+        "bar": 25,
+        "beat": 1,
+        "beats": 8,
+        "params": {
+          "strength": 0.76
+        },
+        "context": "silence"
+      },
+      {
+        "id": "p89",
+        "fx": "white_blast",
+        "bar": 32,
+        "beat": 1,
+        "beats": 1,
+        "params": {
+          "strength": 0.623,
+          "coverage": "inner",
+          "tone": "key",
+          "hue": 0.9167
+        },
+        "context": "silence"
+      },
+      {
+        "id": "p90",
+        "fx": "white_blast",
+        "bar": 33,
+        "beat": 1,
+        "beats": 1,
+        "params": {
+          "strength": 0.75,
+          "coverage": "outer",
+          "tone": "white"
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p91",
+        "fx": "blackout",
+        "bar": 33,
+        "beat": 2,
+        "beats": 1,
+        "params": {
+          "strength": 0.894
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p92",
+        "fx": "white_blast",
+        "bar": 33,
+        "beat": 3,
+        "beats": 1,
+        "params": {
+          "strength": 0.894
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p93",
+        "fx": "hook",
+        "bar": 33,
+        "beat": 4,
+        "beats": 5,
+        "params": {
+          "strength": 0.799
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p94",
+        "fx": "pause",
+        "bar": 40,
+        "beat": 1,
+        "beats": 4,
+        "params": {
+          "strength": 0.561,
+          "still": []
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p95",
+        "fx": "blackout",
+        "bar": 45,
+        "beat": 1,
+        "beats": 1,
+        "params": {
+          "strength": 0.624
+        },
+        "context": "drop"
+      },
+      {
+        "id": "p96",
+        "fx": "hook",
+        "bar": 46,
+        "beat": 1,
+        "beats": 28,
+        "params": {
+          "strength": 0.705
+        },
+        "context": "break"
+      },
+      {
+        "id": "p97",
+        "fx": "pause",
+        "bar": 51,
+        "beat": 1,
+        "beats": 8,
+        "params": {
+          "strength": 0.617,
+          "still": ["bass"]
+        },
+        "context": "verse"
+      },
+      {
+        "id": "p98",
+        "fx": "white_blast",
+        "bar": 57,
+        "beat": 3,
+        "beats": 1,
+        "params": {
+          "strength": 0.65,
+          "coverage": "outer",
+          "tone": "white"
+        },
+        "context": "verse"
+      },
+      {
+        "id": "p99",
+        "fx": "blackout",
+        "bar": 65,
+        "beat": 4,
+        "beats": 1,
+        "params": {
+          "strength": 0.642
+        },
+        "context": "verse"
+      },
+      {
+        "id": "p100",
+        "fx": "white_blast",
+        "bar": 66,
+        "beat": 1,
+        "beats": 4,
+        "params": {
+          "strength": 0.523,
+          "shape": "swell",
+          "tone": "key",
+          "hue": 0.9167
+        },
+        "context": "verse"
+      },
+      {
+        "id": "p101",
+        "fx": "white_blast",
+        "bar": 69,
+        "beat": 1,
+        "beats": 3,
+        "params": {
+          "strength": 0.44,
+          "shape": "travel",
+          "spread": 0.75,
+          "tone": "lane",
+          "hue": 0
+        },
+        "context": "silence"
+      },
+      {
+        "id": "p102",
+        "fx": "white_blast",
+        "bar": 77,
+        "beat": 1,
+        "beats": 1,
+        "params": {
+          "strength": 0.538,
+          "coverage": "outer",
+          "tone": "white"
+        },
+        "context": "build"
+      },
+      {
+        "id": "p103",
+        "fx": "white_blast",
+        "bar": 80,
+        "beat": 1,
+        "beats": 3,
+        "params": {
+          "strength": 0.347,
+          "shape": "travel",
+          "spread": 0.75,
+          "tone": "lane",
+          "hue": 0.95
+        },
+        "context": "build"
+      },
+      {
+        "id": "p104",
+        "fx": "whiten",
+        "bar": 87,
+        "beat": 1,
+        "beats": 24,
+        "params": {
+          "strength": 0.529,
+          "amount": 0.465
+        },
+        "context": "build"
+      },
+      {
+        "id": "p105",
+        "fx": "hook",
+        "bar": 87,
+        "beat": 4,
+        "beats": 7,
+        "params": {
+          "strength": 0.518
+        },
+        "context": "build"
+      },
+      {
+        "id": "p106",
+        "fx": "white_blast",
+        "bar": 93,
+        "beat": 1,
+        "beats": 3,
+        "params": {
+          "strength": 0.409,
+          "shape": "travel",
+          "spread": 0.75,
+          "tone": "lane",
+          "hue": 0.95
+        },
+        "context": "build"
+      },
+      {
+        "id": "p107",
+        "fx": "white_blast",
+        "bar": 97,
+        "beat": 1,
+        "beats": 2,
+        "params": {
+          "strength": 0.368,
+          "coverage": "inner",
+          "shape": "swell",
+          "tone": "lane",
+          "hue": 0.8
+        },
+        "context": "build"
+      },
+      {
+        "id": "p108",
+        "fx": "blackout",
+        "bar": 101,
+        "beat": 2,
+        "beats": 1,
+        "params": {
+          "strength": 0.894
+        },
+        "context": "final_drop"
+      },
+      {
+        "id": "p109",
+        "fx": "white_blast",
+        "bar": 101,
+        "beat": 3,
+        "beats": 1,
+        "params": {
+          "strength": 0.894
+        },
+        "context": "final_drop"
+      },
+      {
+        "id": "p110",
+        "fx": "pause",
+        "bar": 108,
+        "beat": 1,
+        "beats": 4,
+        "params": {
+          "strength": 0.529,
+          "still": []
+        },
+        "context": "final_drop"
+      },
+      {
+        "id": "p111",
+        "fx": "hook",
+        "bar": 110,
+        "beat": 1,
+        "beats": 18,
+        "params": {
+          "strength": 0.578
+        },
+        "context": "final_drop"
+      },
+      {
+        "id": "p112",
+        "fx": "blackout",
+        "bar": 110,
+        "beat": 3,
+        "beats": 1,
+        "params": {
+          "strength": 0.658
+        },
+        "context": "final_drop"
+      },
+      {
+        "id": "p113",
+        "fx": "white_blast",
+        "bar": 120,
+        "beat": 1,
+        "beats": 4,
+        "params": {
+          "strength": 0.569,
+          "shape": "swell",
+          "tone": "key",
+          "hue": 0.9167
+        },
+        "context": "final_drop"
+      }
+    ],
+    "dynamics": [
+      {
+        "bar": 0,
+        "beats": 20,
+        "gain": 1.006,
+        "motion": 0,
+        "doing": "establishing"
+      },
+      {
+        "bar": 5,
+        "beats": 16,
+        "gain": 0.996,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 9,
+        "beats": 16,
+        "gain": 1.102,
+        "motion": 0.15,
+        "doing": "expanding"
+      },
+      {
+        "bar": 13,
+        "beats": 16,
+        "gain": 1.014,
+        "motion": -0.2,
+        "doing": "easing"
+      },
+      {
+        "bar": 17,
+        "beats": 16,
+        "gain": 1.013,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 21,
+        "beats": 16,
+        "gain": 1.085,
+        "motion": 0.15,
+        "doing": "peaking"
+      },
+      {
+        "bar": 25,
+        "beats": 16,
+        "gain": 0.962,
+        "motion": -0.2,
+        "doing": "thinning"
+      },
+      {
+        "bar": 29,
+        "beats": 16,
+        "gain": 0.992,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 33,
+        "beats": 16,
+        "gain": 1.137,
+        "motion": 0.15,
+        "doing": "expanding"
+      },
+      {
+        "bar": 37,
+        "beats": 16,
+        "gain": 1.008,
+        "motion": -0.2,
+        "doing": "easing"
+      },
+      {
+        "bar": 41,
+        "beats": 20,
+        "gain": 1.051,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 46,
+        "beats": 20,
+        "gain": 0.963,
+        "motion": -0.1,
+        "doing": "thinning"
+      },
+      {
+        "bar": 51,
+        "beats": 24,
+        "gain": 0.928,
+        "motion": -0.2,
+        "doing": "suspending"
+      },
+      {
+        "bar": 57,
+        "beats": 40,
+        "gain": 0.98,
+        "motion": -0.2,
+        "doing": "suspending"
+      },
+      {
+        "bar": 67,
+        "beats": 24,
+        "gain": 0.96,
+        "motion": -0.2,
+        "doing": "suspending"
+      },
+      {
+        "bar": 73,
+        "beats": 16,
+        "gain": 0.991,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 77,
+        "beats": 16,
+        "gain": 1.012,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 81,
+        "beats": 24,
+        "gain": 1.003,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 87,
+        "beats": 24,
+        "gain": 0.994,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 93,
+        "beats": 16,
+        "gain": 0.949,
+        "motion": -0.2,
+        "doing": "suspending"
+      },
+      {
+        "bar": 97,
+        "beats": 16,
+        "gain": 1.019,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 101,
+        "beats": 16,
+        "gain": 1.065,
+        "motion": 0.25,
+        "doing": "expanding"
+      },
+      {
+        "bar": 105,
+        "beats": 16,
+        "gain": 0.967,
+        "motion": -0.2,
+        "doing": "easing"
+      },
+      {
+        "bar": 109,
+        "beats": 16,
+        "gain": 0.991,
+        "motion": -0.2,
+        "doing": "resolving"
+      },
+      {
+        "bar": 113,
+        "beats": 16,
+        "gain": 1.101,
+        "motion": 0.15,
+        "doing": "peaking"
+      },
+      {
+        "bar": 117,
+        "beats": 16,
+        "gain": 1.035,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 121,
+        "beats": 16,
+        "gain": 0.96,
+        "motion": -0.2,
+        "doing": "thinning"
+      },
+      {
+        "bar": 14,
+        "beats": 16,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 22,
+        "beats": 24,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 28,
+        "beats": 24,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 39,
+        "beats": 32,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 42,
+        "beats": 32,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 63,
+        "beats": 20,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 66,
+        "beats": 16,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 74,
+        "beats": 16,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 82,
+        "beats": 16,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 87,
+        "beats": 24,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 89,
+        "beats": 20,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      },
+      {
+        "bar": 90,
+        "beats": 32,
+        "gain": 1,
+        "motion": 0,
+        "doing": null
+      }
+    ],
+    "looks": [
+      {
+        "section": 0,
+        "par": "hold_indigo",
+        "head": "head_roam_dusk"
+      },
+      {
+        "section": 1,
+        "par": "hit_green",
+        "head": "head_sweep"
+      },
+      {
+        "section": 2,
+        "par": "hold_indigo",
+        "head": "head_roam_dusk"
+      },
+      {
+        "section": 3,
+        "par": "hit_green",
+        "head": "head_sweep"
+      },
+      {
+        "section": 4,
+        "par": "hold_indigo",
+        "head": "head_roam_dusk"
+      },
+      {
+        "section": 5,
+        "par": "chase_rl_amber",
+        "head": "head_warm_walk"
+      },
+      {
+        "section": 6,
+        "par": "xfade_rose_cyan",
+        "head": "head_roam_soft"
+      },
+      {
+        "section": 7,
+        "par": "hold_indigo",
+        "head": "head_roam_dusk"
+      },
+      {
+        "section": 8,
+        "par": "blackout_snap",
+        "head": "head_sweep_colourstep"
+      },
+      {
+        "section": 9,
+        "par": "hit_green",
+        "head": "head_sweep"
+      },
+      {
+        "section": 10,
+        "par": "hold_indigo",
+        "head": "head_roam_dusk"
+      }
+    ]
+  },
+  "energy": [
+    0.105, 0.12, 0.05, 0.066, 0.066, 0.04, 0.069, 0.061, 0.077, 0.928, 0.862,
+    0.836, 0.907, 1.0, 0.9, 0.82, 0.156, 0.746, 0.742, 0.961, 0.78, 0.875,
+    0.842, 0.925, 0.762, 0.195, 0.071, 0.095, 0.066, 0.075, 0.053, 0.078, 0.07,
+    0.889, 0.813, 0.959, 0.891, 0.918, 0.784, 0.796, 0.174, 0.823, 0.805, 0.869,
+    0.779, 0.253, 0.111, 0.1, 0.108, 0.235, 0.036, 0.016, 0.024, 0.183, 0.109,
+    0.043, 0.035, 0.251, 0.197, 0.09, 0.054, 0.156, 0.125, 0.068, 0.055, 0.242,
+    0.202, 0.139, 0.125, 0.183, 0.102, 0.069, 0.062, 0.083, 0.076, 0.086, 0.065,
+    0.264, 0.328, 0.365, 0.338, 0.362, 0.33, 0.333, 0.391, 0.196, 0.22, 0.131,
+    0.125, 0.091, 0.077, 0.06, 0.099, 0.209, 0.071, 0.077, 0.07, 0.165, 0.136,
+    0.121, 0.159, 0.704, 0.763, 0.855, 0.841, 0.843, 0.828, 0.715, 0.194, 0.819,
+    0.833, 0.966, 0.746, 0.829, 0.849, 0.937, 0.822, 0.911, 0.81, 0.855, 0.742,
+    0.074, 0.104, 0.046, 0.005
+  ],
+  "title": "Levels",
+  "bpm": 128.01,
+  "bars": 124
+}

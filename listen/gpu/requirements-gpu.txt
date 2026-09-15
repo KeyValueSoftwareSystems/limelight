@@ -1,0 +1,51 @@
+# GPU pipeline requirements for Limelight score generation.
+# Tested on NVIDIA L40S (46GB VRAM), Python 3.12.
+#
+# Setup:
+#   python3 -m venv venv && source venv/bin/activate
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
+#   pip install -r requirements-gpu.txt
+#
+# External repos (clone into the same directory as pipeline.py):
+#   git clone https://github.com/ZFTurbo/Music-Source-Separation-Training msst
+#   git clone https://github.com/OpenMOSS/MOSS-Music moss-code
+#   cd moss-code/sglang/python && pip install -e .
+#
+# Models (download into the same directory as pipeline.py):
+#   moss/                   — MOSS-Music-8B-Instruct weights + chat_template.jinja
+#   mega53/model.ckpt       — MVSep Mega 53-Stem BS-RoFormer checkpoint
+#   mega53/config.yaml      — MVSep Mega 53-Stem config
+
+# Audio / DSP
+librosa>=0.11.0
+soundfile>=0.13.0
+resampy>=0.4.2,<0.5
+numpy>=2.0,<2.6
+
+# Beat detection
+madmom @ git+https://github.com/CPJKU/madmom.git
+Cython>=3.0
+
+# Melody extraction
+basic-pitch>=0.4.0
+onnxruntime>=1.30.0
+pretty_midi>=0.2.10
+mir_eval>=0.8.0
+
+# Chord recognition (BTC Transformer, auto-downloaded from HuggingFace)
+transformers>=4.50
+huggingface_hub>=0.36
+
+# 53-stem separation (BS-RoFormer)
+ml-collections>=1.1.0
+PyYAML>=6.0
+einops>=0.8.0
+
+# MOSS-Music LLM via SGLang
+requests>=2.30
+
+# Misc
+scipy>=1.18
+scikit-learn>=1.9
+joblib>=1.6
+tqdm>=4.60

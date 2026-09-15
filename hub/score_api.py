@@ -10,6 +10,7 @@ same protocol without a running Node process.
     filter_response(fmt, fields, known)  keep only what was asked for
 """
 import math
+import re
 
 KNOWN = [
     "song", "grid", "beats", "downbeats", "sections", "energy",
@@ -21,16 +22,15 @@ KNOWN = [
     "curves", "stems", "harmony", "chord_changes", "chord_summary",
     "tension", "lift", "releases", "melody", "signals", "made_by",
     "lyrics", "tells", "motion", "recording",
+    "caption", "emotion", "instruments", "instruments_over_time",
+    "key_tempo", "rhythm", "beat_consensus", "sections_second_opinion",
+    "btc_chords_raw", "melody_phrases", "lead", "voice", "unavailable",
 ]
 
-_STEM_NAMES = ["drums", "bass", "vocals", "guitar", "piano", "other"]
+_STEM_NAMES = ["drums", "bass", "vocals", "other", "guitar", "piano"]
 _STEM_FOUR  = ["drums", "bass", "vocals", "other"]
 _CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace",
                 "weight", "floor", "noisy", "sustained"]
-# The personality rides with the score when present, asked for or not: it is how
-# the artist wants this song to look, and a consumer that forgot to ask should
-# still get it. `profile` was the old name and is still sent alongside, so a
-# reader written last week keeps working.
 _ALWAYS = ["score", "version", "window", "grid", "personality", "profile"]
 
 
@@ -39,9 +39,6 @@ def _or(v, d):
     return d if v is None else v
 
 
-# ---------------------------------------------------------------------------
-# format_v1
-# ---------------------------------------------------------------------------
 
 def format_v1(raw):
     out = {}
@@ -54,33 +51,42 @@ def format_v1(raw):
     first_bar_raw = grid.get("first_bar")
     first_bar = first_bar_raw if first_bar_raw is not None else (0 if first_beat_s > 0.2 else 1)
 
-    out["score"] = raw.get("score")
-    out["version"] = raw.get("version")
+    _tempo = grid.get("tempo") or [
+        {"from_beat": 0, "at_s": first_beat_s, "bpm": bpm}]
 
-    # ---- song ----
+    def _beat_of(t):
+        k = 0
+        while k + 1 < len(_tempo) and _tempo[k + 1]["at_s"] <= t:
+            k += 1
+        seg = _tempo[k]
+        return seg["from_beat"] + (t - seg["at_s"]) / (60.0 / seg["bpm"])
+
+    def _place(t):
+        n = int(round(_beat_of(float(t))))
+        return {"bar": max(first_bar, 1 + n // bpb), "beat": 1 + (n % bpb)}
+
+    named = raw.get("score")
+    if named is None:
+        named = (raw.get("song") or {}).get("slug")
+    if named is not None:
+        out["score"] = named
+    out["version"] = _or(raw.get("version"), 0)
+
     if raw.get("song"):
         out["song"] = dict(raw["song"])
-        # The grid counted the bars; deriving them from the length is only a
-        # fallback. Preferring the derivation gave song.bars 127 while grid.bars
-        # said 124 for the same song -- two fields that both mean "how many
-        # bars", disagreeing, with nothing to say which to believe.
         if out["song"].get("bars") is None:
             if grid.get("bars") is not None:
                 out["song"]["bars"] = grid["bars"]
             elif out["song"].get("length_s") and bpm:
                 out["song"]["bars"] = math.ceil((out["song"]["length_s"] - first_beat_s) / bar_sec)
 
-    # ---- grid (with holds_from / holds_to) ----
     if raw.get("grid"):
         out["grid"] = dict(raw["grid"])
         if raw["grid"].get("holds_from_s") is not None:
-            i = (raw["grid"]["holds_from_s"] - first_beat_s) / beat_sec
-            out["grid"]["holds_from"] = {"bar": first_bar + int(i // bpb), "beat": int(i % bpb) + 1}
+            out["grid"]["holds_from"] = _place(raw["grid"]["holds_from_s"])
         if raw["grid"].get("holds_to_s") is not None:
-            i = (raw["grid"]["holds_to_s"] - first_beat_s) / beat_sec
-            out["grid"]["holds_to"] = {"bar": first_bar + int(i // bpb), "beat": int(i % bpb) + 1}
+            out["grid"]["holds_to"] = _place(raw["grid"]["holds_to_s"])
 
-    # ---- beats ----
     if raw.get("beats"):
         if isinstance(raw["beats"], dict) and "list" in raw["beats"]:
             out["beats"] = raw["beats"]
@@ -136,10 +142,11 @@ def format_v1(raw):
     if raw.get("downbeats"):
         out["downbeats"] = raw["downbeats"]
     elif isinstance(out.get("beats"), list) and isinstance(raw.get("beats"), list):
-        out["downbeats"] = [e for e, b in zip(out["beats"], raw["beats"])
-                            if isinstance(b, dict) and b.get("downbeat")]
+        flagged = [e for e, b in zip(out["beats"], raw["beats"])
+                   if isinstance(b, dict) and b.get("downbeat")]
+        out["downbeats"] = flagged or [e for e in out["beats"]
+                                       if e.get("beat") == 1]
 
-    # ---- sections ----
     layers = raw.get("layers") or {}
     form = layers.get("form") or {}
     spans = form.get("spans")
@@ -152,6 +159,28 @@ def format_v1(raw):
                 if sp.get(opt) is not None:
                     sec[opt] = sp[opt]
             out["sections"].append(sec)
+    elif isinstance(raw.get("sections"), list) and raw["sections"]:
+        out["sections"] = []
+        for i, sec in enumerate(raw["sections"]):
+            row = {
+                "from": ({"bar": sec["from_bar"], "beat": 1}
+                         if sec.get("from_bar") is not None else _place(sec["start"])),
+                "to": ({"bar": sec["to_bar"] + 1, "beat": 1}
+                       if sec.get("to_bar") is not None else _place(sec["end"])),
+                "name": sec.get("label"),
+                "start": sec.get("start"),
+                "end": sec.get("end"),
+                "nth": i + 1,
+                "like": sec.get("label"),
+            }
+            if any(o.get("label") == sec.get("label") for o in raw["sections"][:i]):
+                row["repeat"] = sec.get("label")
+            if sec.get("also_heard") is not None:
+                row["also_heard"] = sec["also_heard"]
+            for extra in ("confidence", "edge", "sudden", "sure"):
+                if extra in sec:
+                    row[extra] = sec[extra]
+            out["sections"].append(row)
     elif isinstance(raw.get("parts"), list):
         out["sections"] = [
             {
@@ -175,14 +204,45 @@ def format_v1(raw):
             for p in raw["parts"]
         ]
 
-    # ---- energy (backward compat) ----
+    def _bar_energy():
+        temporal = raw.get("stems_temporal") or {}
+        lanes = [v for v in (temporal.get("stems") or {}).values()
+                 if isinstance(v, list) and v]
+        if not lanes or not grid.get("bars"):
+            return None
+        w = temporal.get("window_s") or 0.5
+        n = min(len(v) for v in lanes)
+        mean = [sum(v[i] for v in lanes) / len(lanes) for i in range(n)]
+
+        def _at_beat_n(k):
+            j = 0
+            while j + 1 < len(_tempo) and _tempo[j + 1]["from_beat"] <= k:
+                j += 1
+            seg = _tempo[j]
+            return seg["at_s"] + (k - seg["from_beat"]) * (60.0 / seg["bpm"])
+
+        per = []
+        for b in range(int(grid["bars"])):
+            a = int(_at_beat_n(b * bpb) / w)
+            z = max(a + 1, int(_at_beat_n((b + 1) * bpb) / w))
+            cut = mean[max(0, a):min(n, z)]
+            per.append(sum(cut) / len(cut) if cut else 0.0)
+        top = max(per) if per else 0
+        if not top > 0:
+            return None
+        return [round(v / top, 3) for v in per]
+
     if raw.get("energy"):
         out["energy"] = raw["energy"]
     elif isinstance((raw.get("bars") or {}).get("intensity"), list):
         out["energy"] = {"per": "bar", "from_bar": first_bar,
                          "values": raw["bars"]["intensity"]}
+    else:
+        _per = _bar_energy()
+        if _per:
+            out["energy"] = {"per": "bar", "from_bar": first_bar,
+                             "values": _per, "normalised": "per-song-peak"}
 
-    # ---- bare per-bar lanes (backward compat) ----
     if raw.get("phrases"):
         out["phrases"] = raw["phrases"]
 
@@ -192,13 +252,9 @@ def format_v1(raw):
             out[lane] = bars[lane]
     if isinstance(bars.get("brightness"), list):
         out["brightness"] = bars["brightness"]
-    # air and brightness are both the top of the spectrum; nothing measured the
-    # bottom, which is most of what a drop feels like.
     for band in ("weight", "floor", "noisy", "sustained"):
         if isinstance(bars.get(band), list):
             out[band] = bars[band]
-    # These three were carried by the JS formatter and not this one, which is
-    # the same drift in the other direction.
     said = {}
     for name, v in (raw.get("curve_tells") or {}).items():
         said["energy" if name == "intensity" else name] = v
@@ -214,22 +270,23 @@ def format_v1(raw):
         if raw.get(whole) is not None:
             out[whole] = raw[whole]
 
-    # ---- curves ----
     curve_entries = {}
     for name in _CURVE_NAMES:
         if name == "energy":
-            src = (raw.get("energy") or {}).get("values") or bars.get("intensity")
+            src = (out.get("energy") or {}).get("values") or bars.get("intensity")
         else:
             src = bars.get(name)
         if isinstance(src, list):
-            fb = (raw.get("energy") or {}).get("from_bar", first_bar) if name == "energy" else first_bar
+            fb = (out.get("energy") or {}).get("from_bar", first_bar) if name == "energy" else first_bar
             lane = "intensity" if name == "energy" else name
-            curve_entries[name] = {"per": "bar", "from_bar": fb, "values": src,
-                                   "tells": (raw.get("curve_tells") or {}).get(lane)}
+            entry = {"per": "bar", "from_bar": fb, "values": src}
+            tells = (raw.get("curve_tells") or {}).get(lane)
+            if tells is not None:
+                entry["tells"] = tells
+            curve_entries[name] = entry
     if curve_entries:
         out["curves"] = curve_entries
 
-    # ---- stems ----
     stem_lanes = {}
     for s in _STEM_NAMES:
         if isinstance(bars.get(s), list):
@@ -238,12 +295,6 @@ def format_v1(raw):
         out["stems"] = {"normalised": "per-stem-peak-within-song",
                         "from_bar": first_bar, "lanes": stem_lanes}
 
-    # ---- moments ----
-    # A moment says where it is as `at: {bar, beat}`, whichever source it came
-    # from. The pipeline writes bar and beat flat at the top of the object and
-    # the events fallback nested them, so the same field arrived in two shapes
-    # depending on which branch fired -- and a consumer reading m["at"] worked
-    # on one score and raised on the next.
     _M_KEYS = ("is", "what", "sure", "weight", "strength",
                "for_beats", "for_bars", "then", "after", "leaves")
     if raw.get("moments"):
@@ -251,6 +302,13 @@ def format_v1(raw):
         for mo in raw["moments"]:
             if mo.get("at"):
                 out["moments"].append(mo)
+                continue
+            if mo.get("time_s") is not None:
+                m = {"at": _place(mo["time_s"])}
+                for k, v in mo.items():
+                    if v is not None:
+                        m[k] = v
+                out["moments"].append(m)
                 continue
             m = {"at": {"bar": mo.get("bar"), "beat": mo.get("beat")}}
             for k, v in mo.items():
@@ -266,14 +324,165 @@ def format_v1(raw):
                     m[k] = ev[k]
             out["moments"].append(m)
 
-    # ---- layers ----
-    # No stem-lane fallback here either: those lanes ship as out["stems"] with
-    # their normalisation stated, and layers means form, subsection and the
-    # rest. Putting raw arrays under the same name made layers.vocals an array
-    # while layers.form was a span list, and the JS formatter dropped it first.
+    _FAMILY = {
+        "drums": ["drums", "kick", "snare", "hh", "toms", "percussion", "clap",
+                  "cymbals", "ride", "crash", "shaker", "tambourine", "congas",
+                  "bongos", "timpani"],
+        "bass": ["bass", "double-bass", "sub"],
+        "vocals": ["vocal", "lead-vocal", "back-vocal", "choir"],
+    }
+
+    def _family_of(name):
+        low = name.lower()
+        for fam, members in _FAMILY.items():
+            if any(low == m or m in low for m in members):
+                return fam
+        return "other"
+
+    def _per_bar_families():
+        temporal = raw.get("stems_temporal") or {}
+        lanes = temporal.get("stems") or {}
+        if not lanes or not grid.get("bars"):
+            return None
+        w = temporal.get("window_s") or 0.5
+        pots = {"drums": [], "bass": [], "vocals": [], "other": []}
+        for name, v in lanes.items():
+            if isinstance(v, list) and v:
+                pots[_family_of(name)].append(v)
+
+        def _at_beat_n(k):
+            j = 0
+            while j + 1 < len(_tempo) and _tempo[j + 1]["from_beat"] <= k:
+                j += 1
+            seg = _tempo[j]
+            return seg["at_s"] + (k - seg["from_beat"]) * (60.0 / seg["bpm"])
+
+        done = {}
+        for fam, group in pots.items():
+            if not group:
+                continue
+            n = min(len(v) for v in group)
+            rows = []
+            for b in range(int(grid["bars"])):
+                a = int(_at_beat_n(b * bpb) / w)
+                z = max(a + 1, int(_at_beat_n((b + 1) * bpb) / w))
+                tot, seen = 0.0, 0
+                for v in group:
+                    for i in range(max(0, a), min(n, z)):
+                        tot += v[i]
+                        seen += 1
+                rows.append(tot / seen if seen else 0.0)
+            top = max(rows) if rows else 0
+            done[fam] = [round(x / top, 6) if top > 0 else round(x, 6)
+                         for x in rows]
+        return done or None
+
     out["layers"] = dict(raw["layers"]) if raw.get("layers") else {}
 
-    # layers.subsection (from phrases)
+    if "presence" not in out["layers"] and not raw.get("presence"):
+        fam = _per_bar_families()
+        if fam:
+            spans = []
+
+            def _state(x):
+                return "full" if x >= 0.55 else ("light" if x >= 0.15 else "out")
+
+            for stem, rows in fam.items():
+                soft = []
+                for i in range(len(rows)):
+                    cut = sorted(rows[max(0, i - 1):i + 2])
+                    soft.append(cut[len(cut) // 2])
+                states = [_state(x) for x in soft]
+                for i in range(1, len(states) - 1):
+                    if states[i] != states[i - 1] and states[i - 1] == states[i + 1]:
+                        states[i] = states[i - 1]
+                run, start = (states[0] if states else None), 0
+                for b in range(1, len(states) + 1):
+                    now = states[b] if b < len(states) else None
+                    if now != run:
+                        if run != "out" and b - start >= 2:
+                            spans.append({"from": {"bar": first_bar + start, "beat": 1},
+                                          "to": {"bar": first_bar + b, "beat": 1},
+                                          "stem": stem, "state": run})
+                        run, start = now, b
+            if spans:
+                out["layers"]["presence"] = {"kind": "sparse",
+                                             "derived_from": "stem lanes",
+                                             "spans": spans}
+
+    if ("subsection" not in out["layers"] and not isinstance(raw.get("phrases"), list)
+            and out.get("sections")
+            and isinstance(raw.get("moments"), list)):
+        lane = (out.get("energy") or {}).get("values") or []
+        _steps = sorted(abs(lane[i] - lane[i - 1]) for i in range(1, len(lane)))
+        _typical = _steps[len(_steps) // 2] if _steps else 0
+        _moved = max(0.03, 2 * _typical)
+        _fam_rows = _per_bar_families() or {}
+
+        def _trend(a, b):
+            cut = lane[max(0, a - first_bar):max(1, b - first_bar)]
+            if len(cut) < 2:
+                return "steady"
+            half = len(cut) // 2 or 1
+            lo = sum(cut[:half]) / half
+            hi = sum(cut[half:]) / (len(cut) - half)
+            if hi - lo > _moved:
+                return "intensifying"
+            if lo - hi > _moved:
+                return "easing"
+            return "sustaining"
+
+        def _word(doing, nth, last, name):
+            if doing != "sustaining":
+                return doing
+            if nth == 1:
+                return "establishing" if name == "intro" else "developing"
+            if nth == last:
+                return "closing" if name == "outro" else "resolving"
+            return "sustaining"
+
+        def _playing_in(a, b):
+            on = []
+            for fam, rows in _fam_rows.items():
+                cut = rows[max(0, a - first_bar):max(1, b - first_bar)]
+                if not cut:
+                    continue
+                if sum(cut) / len(cut) >= 0.15:
+                    on.append(fam)
+            return on
+
+        spans = []
+        for sec in out["sections"]:
+            span = sec["to"]["bar"] - sec["from"]["bar"]
+            phrase = 8 if span >= 16 else 4
+            marks = set(range(sec["from"]["bar"] + phrase,
+                              sec["to"]["bar"] - 1, phrase))
+            for m in raw["moments"]:
+                if m.get("time_s") is None:
+                    continue
+                b = _place(m["time_s"])["bar"]
+                if sec["from"]["bar"] + 1 < b < sec["to"]["bar"] - 1:
+                    marks.add(b)
+            inside = sorted(marks)
+            cuts = [sec["from"]["bar"]]
+            for b in inside:
+                if b - cuts[-1] >= 2:
+                    cuts.append(b)
+            cuts.append(sec["to"]["bar"])
+            for i in range(len(cuts) - 1):
+                spans.append({"from": {"bar": cuts[i], "beat": 1},
+                              "to": {"bar": cuts[i + 1], "beat": 1},
+                              "in": sec.get("name"), "in_nth": sec.get("nth"),
+                              "nth": i + 1,
+                              "doing": _word(_trend(cuts[i], cuts[i + 1]), i + 1,
+                                             len(cuts) - 1, sec.get("name")),
+                              "playing": _playing_in(cuts[i], cuts[i + 1])})
+        if spans:
+            out["layers"]["subsection"] = {
+                "kind": "partition",
+                "derived_from": "moments and the energy lane",
+                "spans": spans}
+
     if "subsection" not in out["layers"] and isinstance(raw.get("phrases"), list):
         out["layers"]["subsection"] = {
             "kind": "sparse",
@@ -292,10 +501,6 @@ def format_v1(raw):
             ],
         }
 
-    # layers.presence -- from the per-bar `presence` spans, never from
-    # parts[].stems. Both described the same fact and disagreed on 15.5% of
-    # vocal bars, because a section's `is` is a bucket of where that stem sits
-    # across the whole section and `presence` is measured bar by bar.
     if "presence" not in out["layers"] and isinstance(raw.get("presence"), dict):
         pres_spans = [
             {"from": {"bar": sp["from_bar"], "beat": 1},
@@ -307,7 +512,6 @@ def format_v1(raw):
         if pres_spans:
             out["layers"]["presence"] = {"kind": "sparse", "spans": pres_spans}
 
-    # layers.phrase (from phrase_grid)
     if "phrase" not in out["layers"] and raw.get("phrase_grid"):
         pg = raw["phrase_grid"]
         out["layers"]["phrase"] = {
@@ -316,10 +520,24 @@ def format_v1(raw):
             "from_bar": pg.get("from_bar"),
         }
 
+    if ("phrase" not in out["layers"] and not raw.get("phrase_grid")
+            and isinstance(out.get("sections"), list) and len(out["sections"]) > 2):
+        edges = [x["from"]["bar"] for x in out["sections"]]
+        start = edges[0]
+        best = None
+        for per in (8, 4):
+            on = sum(1 for b in edges if (b - start) % per == 0) / len(edges)
+            if on >= 0.5:
+                best = per
+                break
+        if best:
+            out["layers"]["phrase"] = {"kind": "rule", "every_bars": best,
+                                       "from_bar": start,
+                                       "derived_from": "where the sections fall"}
+
     if not out["layers"]:
         del out["layers"]
 
-    # ---- harmony ----
     if isinstance(bars.get("chord"), list):
         out["harmony"] = {
             "from_bar": first_bar,
@@ -327,7 +545,6 @@ def format_v1(raw):
             "confidence": bars.get("chord_sure") or [],
         }
 
-    # ---- chord_changes (derived) ----
     if isinstance(bars.get("chord"), list):
         changes = []
         prev = None
@@ -342,7 +559,6 @@ def format_v1(raw):
                 prev = name
         out["chord_changes"] = changes
 
-    # ---- chords (backward compat) ----
     if isinstance(bars.get("chord"), list):
         chord_sure = bars.get("chord_sure") or []
         out["chords"] = [
@@ -352,14 +568,12 @@ def format_v1(raw):
             if name
         ]
 
-    # ---- key ----
     if raw.get("key") or raw.get("chords"):
         out["key"] = dict(raw.get("key") or {})
         chords_obj = raw.get("chords")
         if chords_obj:
             out["key"]["changes_per_beat"] = chords_obj.get("changes_per_beat")
 
-    # ---- chord_summary ----
     if raw.get("chords"):
         out["chord_summary"] = {
             "changes_per_beat": raw["chords"].get("changes_per_beat"),
@@ -370,45 +584,100 @@ def format_v1(raw):
     if raw.get("feel"):
         out["feel"] = raw["feel"]
 
-    # ---- lift ----
-    # `tension` goes out beside it, unchanged, for one release: readers were
-    # built against that name. It never measured tension -- see the spec.
     pull = raw.get("lift") if isinstance(raw.get("lift"), list) else raw.get("tension")
     if isinstance(pull, list):
         out["lift"] = {"per": "beat", "from_bar": first_bar,
                        "from_beat": 1, "values": pull}
         out["tension"] = out["lift"]
 
-    # ---- releases (seconds to positions) ----
     if isinstance(raw.get("releases"), list):
         out["releases"] = []
         for r in raw["releases"]:
             if r.get("bar") is not None and r.get("beat") is not None:
                 at = {"bar": r["bar"], "beat": r["beat"]}
             else:
-                i = (r["at_s"] - first_beat_s) / beat_sec
-                at = {"bar": first_bar + int(i // bpb), "beat": int(i % bpb) + 1}
+                at = _place(r["at_s"])
             one = {"at": at, "jump": r.get("jump", r.get("size"))}
             if r.get("at_s") is not None:
                 one["at_s"] = r["at_s"]
             out["releases"].append(one)
 
-    # ---- melody: the notes of the lead line and the voice ----
     if raw.get("melody"):
         out["melody"] = raw["melody"]
     for k in ("lead", "voice"):
         if raw.get(k):
             out[k] = raw[k]
 
-    # ---- signals: changes the pipeline noticed that are not moments ----
     if raw.get("signals"):
         out["signals"] = raw["signals"]
 
-    # ---- made_by ----
     if raw.get("made_by"):
         out["made_by"] = raw["made_by"]
 
-    # ---- personality: the artist's layer, embedded by the hub on pull ----
+    btc = raw.get("btc_chords_raw")
+    if isinstance(btc, list) and btc:
+        spans = [{"start": c["start"], "end": c["end"], "chord": str(c["chord"])}
+                 for c in btc
+                 if isinstance(c, dict)
+                 and isinstance(c.get("start"), (int, float))
+                 and isinstance(c.get("end"), (int, float))]
+        out["chords"] = {"of": "seconds", "spans": spans}
+        if bar_sec > 0 and grid.get("bars"):
+            per_bar = []
+            for b in range(int(grid["bars"])):
+                a = first_beat_s + b * bar_sec
+                z = a + bar_sec
+                best, best_ov = None, 0.0
+                for c in spans:
+                    ov = min(z, c["end"]) - max(a, c["start"])
+                    if ov > best_ov:
+                        best_ov, best = ov, c["chord"]
+                per_bar.append(best if best and best != "N" else None)
+            out["harmony"] = {"from_bar": first_bar, "chords": per_bar,
+                              "confidence": [1 if c else None for c in per_bar]}
+            seen = {}
+            for c in per_bar:
+                if c:
+                    seen[c] = seen.get(c, 0) + 1
+            if seen:
+                top = max(seen.items(), key=lambda kv: kv[1])[0]
+                m = re.match(r"^([A-G][#b]?)(.*)$", top)
+                if m:
+                    tail = m.group(2)
+                    out["key"] = {"root": m.group(1),
+                                  "scale": "minor" if ("min" in tail or tail.endswith("m")) else "major",
+                                  "from": "most common BTC chord"}
+
+    stems = raw.get("stems")
+    if isinstance(stems, dict):
+        lanes = out.get("stems") if isinstance(out.get("stems"), dict) and out["stems"].get("lanes") else None
+        summary = sorted(
+            ({"name": n, "rms": v.get("rms"), "peak": v.get("peak"), "db": v.get("db")}
+             for n, v in stems.items() if isinstance(v, dict) and "rms" in v),
+            key=lambda x: -(x["rms"] or 0))
+        if summary:
+            out["instruments"] = {"of": "whole recording", "heard": summary}
+        elif not lanes:
+            out["stems"] = stems
+        if lanes:
+            out["stems"] = lanes
+
+    temporal = raw.get("stems_temporal")
+    if isinstance(temporal, dict) and temporal.get("stems"):
+        out["instruments_over_time"] = {
+            "per": "window",
+            "window_s": temporal.get("window_s"),
+            "normalised": "per-instrument-peak-within-song",
+            "lanes": temporal["stems"],
+        }
+
+    if raw.get("unavailable"):
+        out["unavailable"] = raw["unavailable"]
+    for whole in ("caption", "emotion", "rhythm", "key_tempo",
+                  "beat_consensus", "sections_second_opinion"):
+        if raw.get(whole) is not None:
+            out[whole] = raw[whole]
+
     person = raw.get("personality") or raw.get("profile")
     if person:
         out["personality"] = person
@@ -417,9 +686,6 @@ def format_v1(raw):
     return out
 
 
-# ---------------------------------------------------------------------------
-# apply_window
-# ---------------------------------------------------------------------------
 
 def apply_window(out, w, grid):
     bpb = (grid or {}).get("beats_per_bar", 4)
@@ -440,7 +706,6 @@ def apply_window(out, w, grid):
         end = max(start, hi - fb)
         return {**obj, "from_bar": fb + start, "values": obj["values"][start:end]}
 
-    # beats
     if out.get("beats"):
         if isinstance(out["beats"], dict) and "list" in out["beats"]:
             lst = [b for b in out["beats"]["list"] if in_win(b[0])]
@@ -449,10 +714,6 @@ def apply_window(out, w, grid):
         elif isinstance(out["beats"], list):
             out["beats"] = [b for b in out["beats"] if in_win(b.get("bar", 0))]
 
-    # downbeats arrive in two shapes: the wrapped {list: [[bar, beat], ...]} a
-    # score may carry, and the plain list of entries the formatter derives from
-    # beats. Windowing assumed the wrapped one, so any windowed request that
-    # included downbeats raised. The Node half already guarded for both.
     if out.get("downbeats"):
         db = out["downbeats"]
         if isinstance(db, dict) and isinstance(db.get("list"), list):
@@ -473,11 +734,9 @@ def apply_window(out, w, grid):
         out["moments"] = [m for m in out["moments"]
                           if in_win(m.get("at", {}).get("bar", 0))]
 
-    # curves
     if out.get("curves"):
         out["curves"] = {k: slice_per_bar(v) for k, v in out["curves"].items()}
 
-    # stems
     if out.get("stems") and out["stems"].get("lanes"):
         fb = out["stems"].get("from_bar", 0)
         start = max(0, lo - fb)
@@ -487,7 +746,6 @@ def apply_window(out, w, grid):
             sliced[k] = v[start:end] if isinstance(v, list) else v
         out["stems"] = {**out["stems"], "from_bar": fb + start, "lanes": sliced}
 
-    # harmony
     if out.get("harmony"):
         fb = out["harmony"].get("from_bar", 0)
         start = max(0, lo - fb)
@@ -498,11 +756,9 @@ def apply_window(out, w, grid):
             "confidence": out["harmony"]["confidence"][start:end],
         }
 
-    # chord_changes
     if out.get("chord_changes"):
         out["chord_changes"] = [c for c in out["chord_changes"] if in_win(c["at"]["bar"])]
 
-    # lift (and the `tension` alias, which points at the same object)
     for name in ("lift", "tension"):
         row = out.get(name)
         if row and isinstance(row.get("values"), list):
@@ -512,20 +768,16 @@ def apply_window(out, w, grid):
             out[name] = {**row, "from_bar": lo, "from_beat": 1,
                          "values": row["values"][start_beat:end_beat]}
 
-    # releases
     if out.get("releases"):
         out["releases"] = [r for r in out["releases"] if in_win(r["at"]["bar"])]
 
-    # melody — a list of notes, each at its own bar and beat
     if isinstance(out.get("melody"), list):
         out["melody"] = [n for n in out["melody"] if in_win(n.get("bar", 0))]
 
-    # signals — same shape as moments, flat or nested
     if isinstance(out.get("signals"), list):
         out["signals"] = [g for g in out["signals"]
                           if in_win((g.get("at") or g).get("bar", 0))]
 
-    # layers — subsection and presence spans
     if out.get("layers"):
         for name in ("subsection", "presence"):
             layer = out["layers"].get(name)
@@ -538,9 +790,6 @@ def apply_window(out, w, grid):
     return out
 
 
-# ---------------------------------------------------------------------------
-# filter_response
-# ---------------------------------------------------------------------------
 
 def filter_response(formatted, fields=None, known=None):
     if not fields:
@@ -557,9 +806,6 @@ def filter_response(formatted, fields=None, known=None):
     return out
 
 
-# ---------------------------------------------------------------------------
-# handle
-# ---------------------------------------------------------------------------
 
 def handle(body, fetch_score):
     """Process a score protocol request.
@@ -580,8 +826,6 @@ def handle(body, fetch_score):
         if any(not isinstance(f, str) for f in fields):
             raise ValueError('every entry in "fields" must be a string')
 
-    # either spelling on the way in; `profile` was the name until this layer was
-    # called a personality, and a request written last week still has to work
     person = body.get("personality")
     if person is None:
         person = body.get("profile")
@@ -592,7 +836,6 @@ def handle(body, fetch_score):
     try:
         raw = fetch_score(body["score"], person)
     except TypeError:
-        # a fetcher that predates this takes the name alone
         if person is not None:
             raise
         raw = fetch_score(body["score"])
@@ -606,19 +849,16 @@ def handle(body, fetch_score):
 
     formatted = format_v1(raw)
 
-    # selective curves
     req_curves = body.get("curves")
     if req_curves and formatted.get("curves"):
         want = set(req_curves)
         formatted["curves"] = {k: v for k, v in formatted["curves"].items() if k in want}
 
-    # selective stems
     req_stems = body.get("stems")
     if req_stems and formatted.get("stems") and formatted["stems"].get("lanes"):
         want = set(req_stems)
         formatted["stems"]["lanes"] = {k: v for k, v in formatted["stems"]["lanes"].items() if k in want}
 
-    # moments min_weight filter
     req_moments = body.get("moments")
     if isinstance(req_moments, dict) and req_moments.get("min_weight") is not None:
         min_w = req_moments["min_weight"]

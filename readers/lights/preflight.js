@@ -165,7 +165,7 @@ const VOCABULARY = [
     /* the full stop: the whole rig, white, on the beat. A song gets two or three. */
     { id: "impact", fx: "white_blast", slot: "on", dur: 1, bold: "hero", occ: [],
       form: { intro: 0.3, verse: 0.7, break: 0.7, build: 0.8, drop: 1, outro: 0.3, silence: 0.2, final_drop: 1 },
-      moment: { entrance: 1, release: 0.9, accent: 0.7, change: 0.5, transition: 0.6, highlight: 0.6, heavy: 1, firm: 0.7, light: 0.3, _default: 0 } },
+      moment: { drop: 1, peak: 1, entrance: 1, release: 0.9, accent: 0.7, change: 0.5, transition: 0.6, highlight: 0.6, breakdown: 0.2, heavy: 1, firm: 0.7, light: 0.3, _default: 0 } },
     /* the hole before it. Darkness is the cheapest contrast there is. */
     { id: "breath", fx: "blackout", slot: "before", dur: 1, bold: "hero", occ: [],
       form: { intro: 0.2, verse: 0.6, break: 0.7, build: 0.9, drop: 1, outro: 0.2, silence: 0.2, final_drop: 1 },
@@ -173,14 +173,14 @@ const VOCABULARY = [
          at all -- raga's biggest hit is weighted 0.71 and never got its hole.
          Weight is the wrong gate now that boldness is one: a blackout is `hero`,
          so only a peak can draw it, and a peak has earned it by definition. */
-      moment: { entrance: 1, release: 0.9, change: 0.7, transition: 0.7, accent: 0.6, highlight: 0.6,
+      moment: { drop: 1, breakdown: 0.6, build: 0.3, entrance: 1, release: 0.9, change: 0.7, transition: 0.7, accent: 0.6, highlight: 0.6,
                 heavy: 1, firm: 0.9, light: 0.4, _default: 0 } },
     /* a flick at the edges of the room: the outer pair only, so the hit reads as
        punctuation rather than as another wall of white */
     { id: "flash", fx: "white_blast", slot: "on", dur: 1, bold: "accent", occ: [],
       params: { coverage: "outer", tone: "white" },
       form: { intro: 0.4, verse: 0.8, break: 0.8, build: 0.8, drop: 0.7, outro: 0.4, silence: 0.3, final_drop: 0.7 },
-      moment: { entrance: 0.5, accent: 0.9, change: 0.8, highlight: 0.8, release: 0.5, transition: 0.6, light: 1, firm: 0.6, heavy: 0.2, _default: 0 } },
+      moment: { tempo_change: 0.9, register_shift: 0.6, entrance: 0.5, accent: 0.9, change: 0.8, highlight: 0.8, release: 0.5, transition: 0.6, light: 1, firm: 0.6, heavy: 0.2, _default: 0 } },
     /* the same beat in the song's own colour, landing at the centre of the rig */
     { id: "stab", fx: "white_blast", slot: "on", dur: 1, bold: "accent", occ: [],
       params: { coverage: "inner", tone: "key" },
@@ -215,19 +215,19 @@ const VOCABULARY = [
       moment: { handover: 1, light: 1, firm: 1, heavy: 0.8, _default: 0 } },
     { id: "hush", fx: "pause", slot: "span", dur: 4, bold: "accent", occ: [],
       form: { intro: 0.6, verse: 1, break: 1, build: 0.8, drop: 0.8, outro: 0.6, silence: 0.8, final_drop: 0.8 },
-      moment: { pause: 1, heavy: 1, firm: 1, light: 1, _default: 0 } },
+      moment: { breakdown: 1, pause: 1, heavy: 1, firm: 1, light: 1, _default: 0 } },
     { id: "hook_lift", fx: "hook", slot: "span", dur: 4, bold: "accent", occ: [],
       form: { intro: 0.4, verse: 0.9, break: 0.9, build: 0.9, drop: 0.9, outro: 0.4, silence: 0.3, final_drop: 0.9 },
-      moment: { hook: 1, heavy: 1, firm: 1, light: 0.8, _default: 0 } },
+      moment: { register_shift: 1, hook: 1, heavy: 1, firm: 1, light: 0.8, _default: 0 } },
     { id: "riser", fx: "whiten", slot: "span", dur: 8, bold: "accent", occ: [],
       form: { intro: 0.3, verse: 0.7, break: 0.9, build: 1, drop: 0.6, outro: 0.2, silence: 0.3, final_drop: 0.6 },
-      moment: { rise: 1, heavy: 1, firm: 1, light: 0.6, _default: 0 } },
+      moment: { build: 1, rise: 1, heavy: 1, firm: 1, light: 0.6, _default: 0 } },
     { id: "fill_flicker", fx: "accent_strobe", slot: "span", dur: 4, bold: "accent", occ: ["pars:strobe"],
       form: { intro: 0.1, verse: 0.6, break: 0.8, build: 0.9, drop: 1, outro: 0.1, silence: 0, final_drop: 1 },
-      moment: { fill: 1, heavy: 1, firm: 1, light: 0.7, _default: 0 } },
+      moment: { rhythm_change: 1, build: 0.5, fill: 1, heavy: 1, firm: 1, light: 0.7, _default: 0 } },
     { id: "exit_dip", fx: "modulate", slot: "span", dur: 4, bold: "ambient", occ: [], params: { gain: 0.75, motion: -0.2, doing: "exit" },
       form: { intro: 0.5, verse: 0.9, break: 0.9, build: 0.7, drop: 0.7, outro: 0.9, silence: 0.6, final_drop: 0.7 },
-      moment: { exit: 1, heavy: 1, firm: 1, light: 1, _default: 0 } },
+      moment: { exit: 1, breakdown: 0.7, heavy: 1, firm: 1, light: 1, _default: 0 } },
   ].map(o => ({ id: o.id, kind: "oneshot", boldness: o.bold, occupies: o.occ, duration_beats: o.dur,
     gesture: { fx: o.fx, slot: o.slot, ...(o.params ? { params: o.params } : {}) },
     requires: g => g.pars.length >= 1, fit: () => 0.9,

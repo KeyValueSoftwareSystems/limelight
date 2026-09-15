@@ -1,122 +1,122 @@
-/**
- * v1 response formatter — aligned with protocol/respond.js.
- *
- * The formatter builds the full response with all available fields.
- * The filter (called after this) strips fields the consumer did not ask for.
- */
-
 export const KNOWN = [
-  'song', 'grid', 'beats', 'downbeats', 'sections', 'energy', 'ticks', 'per_beat', 'groove', 'melody_phrases',
-  'brightness', 'width', 'air', 'pump', 'pace', 'weight', 'floor', 'noisy', 'sustained',
-  'moments', 'phrases', 'layers', 'chords', 'key', 'loudness', 'feel',
-  'curves', 'stems', 'harmony', 'chord_changes', 'chord_summary',
-  'tension', 'lift', 'releases', 'melody', 'signals', 'made_by', 'lyrics', 'tells',
-  'recording',
-  'motion',
+  "song",
+  "grid",
+  "beats",
+  "downbeats",
+  "sections",
+  "energy",
+  "groove",
+  "melody_phrases",
+  "moments",
+  "chords",
+  "key",
+  "loudness",
+  "feel",
+  "melody",
+  "made_by",
+  "lyrics",
+  "recording",
+  "caption",
+  "btc_chords_raw",
+  "stems",
+  "beat_consensus",
+  "emotion",
+  "sections_second_opinion",
+  "instruments",
+  "instruments_over_time",
+  "harmony",
+  "chord_changes",
+  "chord_summary",
+  "key_tempo",
+  "rhythm",
+  "curves",
+  "signals",
+  "layers",
+  "tells",
+  "motion",
+  "unavailable",
 ];
 
-const STEM_NAMES = ['drums', 'bass', 'vocals', 'guitar', 'piano', 'other'];
-const STEM_FOUR  = ['drums', 'bass', 'vocals', 'other'];
-const CURVE_NAMES = ['energy', 'brightness', 'width', 'air', 'pump', 'pace',
-                     'weight', 'floor', 'noisy', 'sustained'];
+const STEM_NAMES = ["drums", "bass", "vocals", "other", "guitar", "piano"];
+const CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace",
+                     "weight", "floor", "noisy", "sustained"];
 
-/**
- * @param {object} raw  Parsed score file from disk.
- * @returns {object} Response-shaped object with all available fields.
- */
 export function format(raw) {
   const out = {};
   const grid = raw.grid || {};
-  const bpm  = grid.bpm || 120;
-  const bpb  = grid.beats_per_bar || 4;
+  const bpm = grid.bpm || 120;
+  const bpb = grid.beats_per_bar || 4;
   const firstBeatS = grid.first_beat_s || 0;
   const beatSec = 60 / bpm;
-  const barSec  = beatSec * bpb;
-  const firstBar = (grid.first_bar !== undefined && grid.first_bar !== null)
-    ? grid.first_bar
-    : (firstBeatS > 0.2 ? 0 : 1);
+  const barSec = beatSec * bpb;
+  const firstBar =
+    grid.first_bar !== undefined && grid.first_bar !== null
+      ? grid.first_bar
+      : firstBeatS > 0.2
+        ? 0
+        : 1;
 
-  out.score   = raw.score;
-  out.version = raw.version;
+  const tempoMap =
+    Array.isArray(grid.tempo) && grid.tempo.length
+      ? grid.tempo
+      : [{ from_beat: 0, at_s: firstBeatS, bpm }];
+  const beatOf = (t) => {
+    let k = 0;
+    while (k + 1 < tempoMap.length && tempoMap[k + 1].at_s <= t) k++;
+    const seg = tempoMap[k];
+    return seg.from_beat + (t - seg.at_s) / (60 / seg.bpm);
+  };
+  const atBeat = (n) => {
+    let k = 0;
+    while (k + 1 < tempoMap.length && tempoMap[k + 1].from_beat <= n) k++;
+    const seg = tempoMap[k];
+    return seg.at_s + (n - seg.from_beat) * (60 / seg.bpm);
+  };
+  const place = (t) => {
+    const n = Math.round(beatOf(t));
+    return {
+      bar: Math.max(firstBar, 1 + Math.floor(n / bpb)),
+      beat: 1 + (((n % bpb) + bpb) % bpb),
+    };
+  };
 
-  // ---- song ----
+  /* A score that does not name itself is named by its song, and a score with
+     no version is version 0 -- the one the pipeline writes. Leaving these
+     undefined made the protocol answer without an envelope whenever a score
+     was built by a run that predated them. */
+  const named = raw.score != null ? raw.score : (raw.song || {}).slug;
+  if (named != null) out.score = named;
+  out.version = raw.version != null ? raw.version : 0;
+
   if (raw.song) {
     out.song = { ...raw.song };
-    /* The grid counted the bars; deriving from the length is only a fallback.
-       Preferring the derivation gave song.bars 127 while grid.bars said 124 for
-       the same song -- two fields that both mean "how many bars", disagreeing. */
-    if (out.song.bars === undefined && grid.bars !== undefined && grid.bars !== null) {
+    if (
+      out.song.bars === undefined &&
+      grid.bars !== undefined &&
+      grid.bars !== null
+    ) {
       out.song.bars = grid.bars;
     } else if (out.song.bars === undefined && out.song.length_s && bpm) {
       out.song.bars = Math.ceil((out.song.length_s - firstBeatS) / barSec);
     }
   }
 
-  // ---- grid (with holds_from / holds_to) ----
   if (raw.grid) {
     out.grid = { ...raw.grid };
-    /* A song may change tempo, so the beat a second falls on is a walk along
-       grid.tempo, not one division. Dividing by a single beatSec put holds_from
-       in the wrong bar on every song whose tempo moves. */
-    const map = (raw.grid.tempo && raw.grid.tempo.length)
-      ? raw.grid.tempo : [{ from_beat: 0, at_s: firstBeatS, bpm }];
-    const beatOf = t => {
-      let k = 0;
-      while (k + 1 < map.length && map[k + 1].at_s <= t) k++;
-      return map[k].from_beat + (t - map[k].at_s) / (60 / map[k].bpm);
-    };
-    const place = t => {
-      const i = beatOf(t);
-      return { bar: firstBar + Math.floor(i / bpb), beat: Math.floor(((i % bpb) + bpb) % bpb) + 1 };
-    };
-    if (raw.grid.holds_from_s != null) out.grid.holds_from = place(raw.grid.holds_from_s);
-    if (raw.grid.holds_to_s != null) out.grid.holds_to = place(raw.grid.holds_to_s);
+    if (raw.grid.holds_from_s != null)
+      out.grid.holds_from = place(raw.grid.holds_from_s);
+    if (raw.grid.holds_to_s != null)
+      out.grid.holds_to = place(raw.grid.holds_to_s);
   }
 
-  // ---- beats (two formats: protocol {list} or pipeline [{t, weight, sure}]) ----
   if (raw.beats) {
     if (raw.beats.list) {
       out.beats = raw.beats;
     } else if (Array.isArray(raw.beats)) {
-      /* Which bar a beat is in comes from its time, read through the tempo map,
-         because that is how the pipeline decides where a bar starts and it is
-         the only answer that agrees with the sections.
-
-         Two wrong answers came before this one. Counting idx/beats_per_bar
-         assumes the song begins on a downbeat, and thirteen of twenty-eight
-         open with a pickup, which put every bar two beats early on Levels.
-         Walking the tracker's downbeat flags fixes the pickup and then drifts,
-         because the flags are not reliably every fourth beat: on Cipher it
-         produced 274 bars where the grid says 337, so the beats and the
-         sections no longer agreed about what bar 200 was. */
-      const map = (Array.isArray(grid.tempo) && grid.tempo.length)
-        ? grid.tempo
-        : [{ from_beat: 0, at_s: firstBeatS, bpm }];
-      const beatNo = at => {
-        let k = 0;
-        while (k + 1 < map.length && map[k + 1].at_s <= at) k++;
-        const seg = map[k];
-        return seg.from_beat + (at - seg.at_s) / (60 / seg.bpm);
-      };
-      const atBeat = (n) => {
-        if (!map || !map.length) return firstBeatS + n * beatSec;
-        let k = 0;
-        while (k + 1 < map.length && map[k + 1].from_beat <= n) k++;
-        return map[k].at_s + (n - map[k].from_beat) * (60 / map[k].bpm);
-      };
+      const beatNo = beatOf;
       let lead = 0;
       out.beats = raw.beats.map((b, idx) => {
-        /* Nearest grid beat, which is how pulse.py decides what off_ms is
-           measured from. Forcing the numbers to keep increasing was tried and
-           was worse: one early collision on Where Are U Now put `last` ahead of
-           the grid and the next 394 beats inherited the push, where rounding on
-           its own collides 46 times in twelve thousand beats across the
-           library. A collision is the tracker hearing two beats where the grid
-           has one, and off_ms says so. */
-        const n = (b.t != null) ? Math.round(beatNo(b.t)) : idx;
-        /* Before grid beat zero the song is in its pickup, a bar shorter than
-           the others. It is numbered from its own first beat so that every bar
-           in the list, that one included, has a beat one. */
+        const n = b.t != null ? Math.round(beatNo(b.t)) : idx;
         const drift = (t, at) => {
           if (b.off_ms !== undefined) return Math.round(b.off_ms);
           if (t == null) return undefined;
@@ -125,19 +125,21 @@ export function format(raw) {
         if (n < 0) {
           lead += 1;
           const off = drift(b.t, atBeat(n));
-          return Object.assign({ bar: firstBar, beat: lead },
+          return Object.assign(
+            { bar: firstBar, beat: lead },
             b.t !== undefined ? { t: b.t } : {},
             b.weight !== undefined ? { weight: b.weight } : {},
             b.sure !== undefined ? { sure: b.sure } : {},
             off !== undefined ? { off_ms: off } : {},
-            b.downbeat !== undefined ? { downbeat: b.downbeat } : {});
+            b.downbeat !== undefined ? { downbeat: b.downbeat } : {},
+          );
         }
         const bar = Math.max(firstBar, 1 + Math.floor(n / bpb));
         const beat = 1 + (((n % bpb) + bpb) % bpb);
         const entry = { bar, beat };
-        if (b.t      !== undefined) entry.t      = b.t;
+        if (b.t !== undefined) entry.t = b.t;
         if (b.weight !== undefined) entry.weight = b.weight;
-        if (b.sure   !== undefined) entry.sure   = b.sure;
+        if (b.sure !== undefined) entry.sure = b.sure;
         const off = drift(b.t, atBeat(n));
         if (off !== undefined) entry.off_ms = off;
         if (b.downbeat !== undefined) entry.downbeat = b.downbeat;
@@ -145,258 +147,408 @@ export function format(raw) {
       });
     }
   }
-  /* The one request SPEC uses as its example asks for downbeats, and neither
-     formatter ever produced any: a pipeline score has the flag on each beat and
-     no downbeats field, and both only passed a field through. Asking for them
-     got you nothing back. */
   if (raw.downbeats) out.downbeats = raw.downbeats;
-  else if (Array.isArray(out.beats) && Array.isArray(raw.beats))
-    out.downbeats = out.beats.filter((_, i) => raw.beats[i] && raw.beats[i].downbeat);
-
-  // ---- sections (layers.form.spans or parts) ----
-  if (raw.layers?.form?.spans) {
-    out.sections = raw.layers.form.spans.map(span => ({
-      from:   span.from,
-      to:     span.to,
-      name:   span.name,
-      repeat: span.repeat,
-      ...(span.rise     !== undefined ? { rise: span.rise }         : {}),
-      ...(span.playing  !== undefined ? { playing: span.playing }   : {}),
-      ...(span.stems    !== undefined ? { stems: span.stems }       : {}),
-      ...(span.fullness !== undefined ? { fullness: span.fullness } : {}),
-      ...(span.feels    !== undefined ? { feels: span.feels }       : {}),
-    }));
-  } else if (Array.isArray(raw.parts)) {
-    out.sections = raw.parts.map(part => ({
-      from:     { bar: part.from_bar, beat: 1 },
-      to:       { bar: part.to_bar + 1, beat: 1 },
-      name:     part.role,
-      nth:      part.nth,
-      repeat:   part.returns ? part.like : undefined,
-      like:     part.like,
-      feels:    part.feels,
-      playing:  part.playing,
-      fullness: part.fullness,
-      rise:     part.rise,
-      stems:    part.stems,
-      /* Which section this one is a repeat of, how cleanly it sits in that
-         group, and whether it trades back and forth inside itself. A reader
-         that knows a chorus is the chorus it already lit can light it the same
-         way; one that knows a verse turns over every eight bars can swap on
-         the cycle instead of holding one look for thirty-one bars. */
-      /* Whether a model that shares nothing with our detectors heard this
-         boundary too. Null means only we did, which is not the same as wrong. */
-      also_heard: part.also_heard,
-      edge: part.edge,
-      sudden: part.sudden,
-      sure:       part.sure,
-      trades:     part.trades,
-    }));
+  else if (Array.isArray(out.beats) && Array.isArray(raw.beats)) {
+    const flagged = out.beats.filter(
+      (_, i) => raw.beats[i] && raw.beats[i].downbeat,
+    );
+    out.downbeats = flagged.length
+      ? flagged
+      : out.beats.filter((b) => b.beat === 1);
   }
 
-  /* The fast lane. Everything else in this file is per bar or per section, and
-     a light that pulses on the beat cannot be driven from either. */
+  const formSpans = raw.layers && raw.layers.form && raw.layers.form.spans;
+  if (Array.isArray(formSpans) && formSpans.length) {
+    out.sections = formSpans.map((sp) => {
+      const row = { from: sp.from, to: sp.to, name: sp.name, repeat: sp.repeat };
+      for (const extra of ["rise", "playing", "stems", "fullness", "feels"])
+        if (sp[extra] != null) row[extra] = sp[extra];
+      return row;
+    });
+  } else if (Array.isArray(raw.sections) && raw.sections.length) {
+    out.sections = raw.sections.map((s, i) => {
+      const from =
+        s.from_bar != null ? { bar: s.from_bar, beat: 1 } : place(s.start);
+      const to =
+        s.to_bar != null ? { bar: s.to_bar + 1, beat: 1 } : place(s.end);
+      const row = { from, to, name: s.label, start: s.start, end: s.end,
+                    nth: i + 1, like: s.label };
+      if (raw.sections.findIndex((o) => o.label === s.label) < i)
+        row.repeat = s.label;
+      if (s.also_heard) row.also_heard = s.also_heard;
+      for (const extra of ["confidence", "edge", "sudden", "sure"])
+        if (s[extra] !== undefined) row[extra] = s[extra];
+      return row;
+    });
+  } else if (Array.isArray(raw.parts)) {
+    out.sections = raw.parts.map((part) => {
+      const row = {
+        from: { bar: part.from_bar, beat: 1 },
+        to: { bar: part.to_bar + 1, beat: 1 },
+        name: part.role,
+        nth: part.nth,
+        like: part.like,
+        feels: part.feels,
+        playing: part.playing,
+        fullness: part.fullness,
+      };
+      if (part.returns) row.repeat = part.like;
+      for (const extra of ["rise", "sure", "trades", "also_heard", "edge",
+                           "sudden", "stems"])
+        if (part[extra] !== undefined) row[extra] = part[extra];
+      return row;
+    });
+  }
+
   if (raw.ticks) out.ticks = raw.ticks;
   if (raw.per_beat) out.per_beat = raw.per_beat;
-  /* Where the hits fall inside the bar, per stem. pace counts events and
-     throws the pattern away, and the pattern is what a light follows. */
   if (raw.groove) out.groove = raw.groove;
-  if (Array.isArray(raw.melody_phrases)) out.melody_phrases = raw.melody_phrases;
-  /* How much each per-bar lane tells you about this song, beside the lanes
-     themselves rather than inside them: a reader already holding out.weight as
-     an array keeps holding an array, and can look up out.tells.weight to find
-     out whether it is worth following here. curves.<name>.tells says the same
-     thing, but nothing reads curves -- the readers all take the bare lanes. */
+  if (Array.isArray(raw.melody_phrases))
+    out.melody_phrases = raw.melody_phrases;
   if (raw.curve_tells) {
     const said = {};
     for (const [name, v] of Object.entries(raw.curve_tells)) {
-      said[name === 'intensity' ? 'energy' : name] = v;
+      said[name === "intensity" ? "energy" : name] = v;
     }
     if (Object.keys(said).length) out.tells = said;
   }
   if (raw.lyrics) out.lyrics = raw.lyrics;
 
-  // ---- energy (backward compat) ----
+  const barEnergy = () => {
+    const lanes = Object.values(raw.stems_temporal?.stems || {}).filter(
+      (v) => Array.isArray(v) && v.length,
+    );
+    if (!lanes.length || !grid.bars) return null;
+    const w = raw.stems_temporal.window_s || 0.5;
+    const n = Math.min(...lanes.map((v) => v.length));
+    const mean = [];
+    for (let i = 0; i < n; i++)
+      mean.push(lanes.reduce((a, v) => a + v[i], 0) / lanes.length);
+    const per = [];
+    for (let b = 0; b < grid.bars; b++) {
+      const a = Math.floor(atBeat(b * bpb) / w);
+      const z = Math.max(a + 1, Math.floor(atBeat((b + 1) * bpb) / w));
+      const cut = mean.slice(Math.max(0, a), Math.min(n, z));
+      per.push(cut.length ? cut.reduce((x, y) => x + y, 0) / cut.length : 0);
+    }
+    const top = Math.max(...per);
+    if (!(top > 0)) return null;
+    return per.map((v) => +(v / top).toFixed(3));
+  };
+
   if (raw.energy) {
     out.energy = raw.energy;
   } else if (Array.isArray(raw.bars?.intensity)) {
-    out.energy = { per: 'bar', from_bar: firstBar, values: raw.bars.intensity };
+    out.energy = { per: "bar", from_bar: firstBar, values: raw.bars.intensity };
+  } else {
+    const per = barEnergy();
+    if (per)
+      out.energy = { per: "bar", from_bar: firstBar, values: per,
+                     normalised: "per-song-peak" };
   }
-
   if (out.energy && out.tells && out.tells.energy !== undefined) {
     out.energy.tells = out.tells.energy;
   }
 
-  // ---- bare per-bar lanes (backward compat) ----
   if (raw.phrases) out.phrases = raw.phrases;
-  /* The melody layer, the two lines behind it, and the honesty fields. */
   if (raw.melody) out.melody = raw.melody;
-  if (raw.signals) out.signals = raw.signals;
   if (raw.voice) out.voice = raw.voice;
   if (raw.lead) out.lead = raw.lead;
-  { const pull = raw.lift ?? raw.tension;
-    if (pull) out.tension = out.lift = { per: 'beat', values: pull }; }
-  if (raw.releases) out.releases = raw.releases;
+  {
+    const pull = raw.lift ?? raw.tension;
+    if (pull) out.tension = out.lift = { per: "beat", values: pull };
+  }
+  if (Array.isArray(raw.releases)) {
+    out.releases = raw.releases.map((r) => {
+      const at =
+        r.bar != null && r.beat != null ? { bar: r.bar, beat: r.beat } : place(r.at_s);
+      const one = { at, jump: r.jump !== undefined ? r.jump : r.size };
+      if (r.at_s != null) one.at_s = r.at_s;
+      return one;
+    });
+  }
   if (raw.phrase_grid) out.phrase_grid = raw.phrase_grid;
   if (raw.scales) out.scales = raw.scales;
   if (raw.made_by) out.made_by = raw.made_by;
   if (raw.recording) out.recording = raw.recording;
   if (raw.chord_changes) out.chord_changes = raw.chord_changes;
   if (raw.presence) out.presence = raw.presence;
-  if (raw.motion) out.motion = raw.motion;
 
   const bars = raw.bars || {};
-  for (const lane of ['width', 'air', 'pump', 'pace']) {
-    if (Array.isArray(bars[lane])) out[lane] = bars[lane];
-  }
-  if (Array.isArray(bars.brightness)) out.brightness = bars.brightness;
-  /* air and brightness are both the top of the spectrum. weight is the share
-     below 120 Hz and floor below 60 -- a bar can read near silent on energy
-     and still be a third low end, which is a bar that feels like something. */
-  if (Array.isArray(bars.weight)) out.weight = bars.weight;
-  if (Array.isArray(bars.floor)) out.floor = bars.floor;
-  if (Array.isArray(bars.noisy)) out.noisy = bars.noisy;
-  if (Array.isArray(bars.sustained)) out.sustained = bars.sustained;
 
-  // ---- curves (selectable per-bar arrays with metadata) ----
   const curveEntries = {};
   for (const name of CURVE_NAMES) {
     let src;
-    if (name === 'energy') {
-      src = raw.energy?.values || bars.intensity;
-    } else {
-      src = bars[name];
-    }
+    if (name === "energy") src = out.energy?.values || bars.intensity;
+    else src = bars[name];
     if (Array.isArray(src)) {
-      const lane = (name === 'energy') ? 'intensity' : name;
+      const lane = name === "energy" ? "intensity" : name;
       curveEntries[name] = {
-        per: 'bar',
-        from_bar: (name === 'energy' && raw.energy?.from_bar != null)
-          ? raw.energy.from_bar : firstBar,
+        per: "bar",
+        from_bar:
+          name === "energy" && out.energy?.from_bar != null
+            ? out.energy.from_bar
+            : firstBar,
         values: src,
-        tells: raw.curve_tells?.[lane],
       };
+      if (raw.curve_tells?.[lane] != null)
+        curveEntries[name].tells = raw.curve_tells[lane];
     }
   }
   if (Object.keys(curveEntries).length) out.curves = curveEntries;
 
-  // ---- stems (per-bar, with normalisation stated) ----
+  for (const lane of ["width", "air", "pump", "pace", "brightness",
+                      "weight", "floor", "noisy", "sustained"]) {
+    if (Array.isArray(bars[lane])) out[lane] = bars[lane];
+  }
+
   const stemLanes = {};
   for (const s of STEM_NAMES) {
     if (Array.isArray(bars[s])) stemLanes[s] = bars[s];
   }
   if (Object.keys(stemLanes).length) {
-    out.stems = { normalised: 'per-stem-peak-within-song', from_bar: firstBar, lanes: stemLanes };
+    out.stems = {
+      normalised: "per-stem-peak-within-song",
+      from_bar: firstBar,
+      lanes: stemLanes,
+    };
   }
 
-  // ---- moments (pass through with all fields; fallback from events) ----
-  if (raw.moments) {
-    /* A moment says where it is as `at: {bar, beat}`, whichever source it came
-       from. The pipeline writes bar and beat flat and the events fallback nests
-       them, so the same field arrived in two shapes depending on the branch --
-       and a consumer reading m.at worked on one score and threw on the next. */
-    out.moments = raw.moments.map(mo => {
+  if (Array.isArray(raw.moments)) {
+    out.moments = raw.moments.map((mo) => {
       if (mo.at) return mo;
+      if (mo.time_s != null) return { at: place(mo.time_s), ...mo };
       const { bar, beat, ...rest } = mo;
       return { at: { bar, beat }, ...rest };
     });
-  } else if (Array.isArray(raw.events)) {
-    out.moments = raw.events.map(event => {
-      const m = { at: { bar: event.bar, beat: event.beat } };
-      if (event.is       !== undefined) m.is       = event.is;
-      if (event.what     !== undefined) m.what     = event.what;
-      if (event.sure     !== undefined) m.sure     = event.sure;
-      if (event.weight   !== undefined) m.weight   = event.weight;
-      if (event.strength !== undefined) m.strength = event.strength;
-      if (event.for_beats !== undefined) m.for_beats = event.for_beats;
-      if (event.for_bars !== undefined) m.for_bars = event.for_bars;
-      if (event.then     !== undefined) m.then     = event.then;
-      if (event.after    !== undefined) m.after    = event.after;
-      if (event.leaves   !== undefined) m.leaves   = event.leaves;
-      return m;
-    });
   }
 
-  /* ---- layers ----
-     No stem-lane fallback here: those lanes ship as out.stems with their
-     normalisation stated, and layers means form, subsection and the rest.
-     Putting raw arrays under the same name made layers.vocals an array while
-     layers.form was a span list. */
+  const FAMILY = {
+    drums: ["drums", "kick", "snare", "hh", "toms", "percussion", "clap",
+            "cymbals", "ride", "crash", "shaker", "tambourine", "congas",
+            "bongos", "timpani"],
+    bass: ["bass", "double-bass", "sub"],
+    vocals: ["vocal", "lead-vocal", "back-vocal", "choir"],
+  };
+  const familyOf = (name) => {
+    const n = name.toLowerCase();
+    for (const [fam, members] of Object.entries(FAMILY))
+      if (members.some((m) => n === m || n.includes(m))) return fam;
+    return "other";
+  };
+
+  const perBarFamilies = () => {
+    const lanes = raw.stems_temporal?.stems;
+    if (!lanes || !grid.bars) return null;
+    const w = raw.stems_temporal.window_s || 0.5;
+    const pots = { drums: [], bass: [], vocals: [], other: [] };
+    for (const [name, v] of Object.entries(lanes))
+      if (Array.isArray(v) && v.length) pots[familyOf(name)].push(v);
+    const out2 = {};
+    for (const [fam, group] of Object.entries(pots)) {
+      if (!group.length) continue;
+      const n = Math.min(...group.map((v) => v.length));
+      const rows = [];
+      for (let b = 0; b < grid.bars; b++) {
+        const a = Math.floor(atBeat(b * bpb) / w);
+        const z = Math.max(a + 1, Math.floor(atBeat((b + 1) * bpb) / w));
+        let tot = 0, seen = 0;
+        for (const v of group)
+          for (let i = Math.max(0, a); i < Math.min(n, z); i++) {
+            tot += v[i];
+            seen++;
+          }
+        rows.push(seen ? tot / seen : 0);
+      }
+      const top = Math.max(...rows);
+      out2[fam] = rows.map((x) => (top > 0 ? +(x / top).toFixed(6) : +x.toFixed(6)));
+    }
+    return Object.keys(out2).length ? out2 : null;
+  };
+
   if (raw.layers) out.layers = { ...raw.layers };
   if (!out.layers) out.layers = {};
 
-  // layers.subsection (from phrases)
+  if (!out.layers.presence && !raw.presence) {
+    const fam = perBarFamilies();
+    if (fam) {
+      const spans = [];
+      const state = (x) => (x >= 0.55 ? "full" : x >= 0.15 ? "light" : "out");
+      for (const [stem, rows] of Object.entries(fam)) {
+        const soft = rows.map((_, i) => {
+          const cut = rows.slice(Math.max(0, i - 1), i + 2).slice().sort((a, b) => a - b);
+          return cut[Math.floor(cut.length / 2)];
+        });
+        const states = soft.map(state);
+        for (let i = 1; i < states.length - 1; i++)
+          if (states[i] !== states[i - 1] && states[i - 1] === states[i + 1])
+            states[i] = states[i - 1];
+        let run = states[0], from = 0;
+        for (let b = 1; b <= states.length; b++) {
+          const now = b < states.length ? states[b] : null;
+          if (now !== run) {
+            if (run !== "out" && b - from >= 2)
+              spans.push({ from: { bar: firstBar + from, beat: 1 },
+                           to: { bar: firstBar + b, beat: 1 },
+                           stem, state: run });
+            run = now;
+            from = b;
+          }
+        }
+      }
+      if (spans.length)
+        out.layers.presence = { kind: "sparse", derived_from: "stem lanes",
+                                spans };
+    }
+  }
+
+  if (!out.layers.subsection && !Array.isArray(raw.phrases)
+      && Array.isArray(out.sections)
+      && out.sections.length && Array.isArray(raw.moments)) {
+    const lane = out.energy?.values || [];
+    const steps = [];
+    for (let i = 1; i < lane.length; i++) steps.push(Math.abs(lane[i] - lane[i - 1]));
+    steps.sort((a, b) => a - b);
+    const typical = steps.length ? steps[Math.floor(steps.length / 2)] : 0;
+    const moved = Math.max(0.03, 2 * typical);
+    const trend = (a, b) => {
+      const cut = lane.slice(Math.max(0, a - firstBar), Math.max(1, b - firstBar));
+      if (cut.length < 2) return "steady";
+      const half = Math.floor(cut.length / 2) || 1;
+      const lo = cut.slice(0, half).reduce((x, y) => x + y, 0) / half;
+      const hi = cut.slice(half).reduce((x, y) => x + y, 0) / (cut.length - half);
+      if (hi - lo > moved) return "intensifying";
+      if (lo - hi > moved) return "easing";
+      return "sustaining";
+    };
+    const word = (doing, nth, last, name) => {
+      if (doing !== "sustaining") return doing;
+      if (nth === 1) return name === "intro" ? "establishing" : "developing";
+      if (nth === last) return name === "outro" ? "closing" : "resolving";
+      return "sustaining";
+    };
+    const famRows = perBarFamilies() || {};
+    const playingIn = (a, b) => {
+      const on = [];
+      for (const [fam, rows] of Object.entries(famRows)) {
+        const cut = rows.slice(Math.max(0, a - firstBar), Math.max(1, b - firstBar));
+        if (!cut.length) continue;
+        const mean = cut.reduce((x, y) => x + y, 0) / cut.length;
+        if (mean >= 0.15) on.push(fam);
+      }
+      return on;
+    };
+    const spans = [];
+    for (const sec of out.sections) {
+      const span = sec.to.bar - sec.from.bar;
+      const phrase = span >= 16 ? 8 : 4;
+      const marks = new Set();
+      for (let b = sec.from.bar + phrase; b < sec.to.bar - 1; b += phrase)
+        marks.add(b);
+      for (const m of raw.moments) {
+        if (m.time_s == null) continue;
+        const b = place(m.time_s).bar;
+        if (b > sec.from.bar + 1 && b < sec.to.bar - 1) marks.add(b);
+      }
+      const inside = [...marks].sort((a, b) => a - b);
+      const cuts = [sec.from.bar];
+      for (const b of inside) if (b - cuts[cuts.length - 1] >= 2) cuts.push(b);
+      cuts.push(sec.to.bar);
+      for (let i = 0; i < cuts.length - 1; i++)
+        spans.push({ from: { bar: cuts[i], beat: 1 },
+                     to: { bar: cuts[i + 1], beat: 1 },
+                     in: sec.name, in_nth: sec.nth, nth: i + 1,
+                     doing: word(trend(cuts[i], cuts[i + 1]), i + 1,
+                                 cuts.length - 1, sec.name),
+                     playing: playingIn(cuts[i], cuts[i + 1]) });
+    }
+    if (spans.length)
+      out.layers.subsection = { kind: "partition",
+                                derived_from: "moments and the energy lane",
+                                spans };
+  }
+
   if (!out.layers.subsection && Array.isArray(raw.phrases)) {
     out.layers.subsection = {
-      kind: 'sparse',
-      spans: raw.phrases.map(p => ({
-        from:      { bar: p.from_bar, beat: 1 },
-        to:        { bar: p.to_bar + 1, beat: 1 },
-        in:        p.in,
-        in_nth:    p.in_nth,
-        doing:     p.doing,
-        also:      p.also,
-        says:      p.says,
-        energy:    p.energy,
-        rise:      p.rise,
-        playing:   p.playing,
+      kind: "sparse",
+      spans: raw.phrases.map((p) => ({
+        from: { bar: p.from_bar, beat: 1 },
+        to: { bar: p.to_bar + 1, beat: 1 },
+        in: p.in,
+        in_nth: p.in_nth,
+        doing: p.doing,
+        also: p.also || [],
+        says: p.says,
+        energy: p.energy,
+        rise: p.rise,
+        playing: p.playing,
         has_break: p.break != null || !!p.has_break,
         break: p.break,
       })),
     };
   }
 
-  /* layers.presence -- from the per-bar `presence` spans, never from
-     parts[].stems. Both described the same fact and disagreed on 15.5% of
-     vocal bars, because a section's `is` buckets where that stem sits across
-     the whole section and `presence` is measured bar by bar. */
-  if (!out.layers.presence && raw.presence && typeof raw.presence === 'object') {
+  if (
+    !out.layers.presence &&
+    raw.presence &&
+    typeof raw.presence === "object"
+  ) {
     const presSpans = [];
     for (const [stem, spans] of Object.entries(raw.presence)) {
       for (const sp of spans || []) {
-        if (sp.is === 'out') continue;
+        if (sp.is === "out") continue;
         presSpans.push({
-          from:  { bar: sp.from_bar, beat: 1 },
-          to:    { bar: sp.to_bar + 1, beat: 1 },
+          from: { bar: sp.from_bar, beat: 1 },
+          to: { bar: sp.to_bar + 1, beat: 1 },
           stem,
           state: sp.is,
         });
       }
     }
-    if (presSpans.length) {
-      out.layers.presence = { kind: 'sparse', spans: presSpans };
-    }
+    if (presSpans.length)
+      out.layers.presence = { kind: "sparse", spans: presSpans };
   }
 
-  // layers.phrase (from phrase_grid)
   if (!out.layers.phrase && raw.phrase_grid) {
     out.layers.phrase = {
-      kind: 'rule',
-      every_bars:          raw.phrase_grid.every_bars,
-      from_bar:            raw.phrase_grid.from_bar,
+      kind: "rule",
+      every_bars: raw.phrase_grid.every_bars,
+      from_bar: raw.phrase_grid.from_bar,
     };
+  }
+
+  if (!out.layers.phrase && !raw.phrase_grid && Array.isArray(out.sections)
+      && out.sections.length > 2) {
+    const edges = out.sections.map((x) => x.from.bar);
+    const start = edges[0];
+    let best = null;
+    for (const p of [8, 4]) {
+      const on = edges.filter((b) => (b - start) % p === 0).length / edges.length;
+      if (on >= 0.5) { best = p; break; }
+    }
+    if (best)
+      out.layers.phrase = { kind: "rule", every_bars: best, from_bar: start,
+                            derived_from: "where the sections fall" };
   }
 
   if (!Object.keys(out.layers).length) delete out.layers;
 
-  // ---- harmony ----
   if (Array.isArray(bars.chord)) {
     out.harmony = {
-      from_bar:    firstBar,
-      chords:      bars.chord,
-      confidence:  bars.chord_sure || [],
+      from_bar: firstBar,
+      chords: bars.chord,
+      confidence: bars.chord_sure || [],
     };
   }
 
-  // ---- chord_changes (derived) ----
   if (Array.isArray(bars.chord)) {
     const changes = [];
     let prev = null;
     bars.chord.forEach((name, i) => {
       if (name && name !== prev) {
         changes.push({
-          at:         { bar: i + firstBar, beat: 1 },
-          to:         name,
+          at: { bar: i + firstBar, beat: 1 },
+          to: name,
           confidence: bars.chord_sure?.[i] ?? null,
         });
         prev = name;
@@ -405,65 +557,96 @@ export function format(raw) {
     out.chord_changes = changes;
   }
 
-  // ---- chords (backward compat) ----
   if (Array.isArray(bars.chord)) {
-    out.chords = bars.chord.map((name, i) => ({
-      bar:  i + firstBar,
-      name,
-      sure: bars.chord_sure?.[i],
-    })).filter(c => c.name);
+    out.chords = bars.chord
+      .map((name, i) => ({
+        bar: i + firstBar,
+        name,
+        sure: bars.chord_sure?.[i],
+      }))
+      .filter((c) => c.name);
   }
 
-  // ---- key ----
   if (raw.key || raw.chords) {
     out.key = { ...(raw.key ?? {}) };
     if (raw.chords) out.key.changes_per_beat = raw.chords.changes_per_beat;
   }
-
-  // ---- chord_summary ----
-  if (raw.chords) {
+  if (raw.chords)
     out.chord_summary = { changes_per_beat: raw.chords.changes_per_beat };
-  }
-
   if (raw.loudness) out.loudness = raw.loudness;
-  if (raw.feel)     out.feel     = raw.feel;
+  if (raw.feel) out.feel = raw.feel;
 
-  /* the artist's layer: present when the score was pulled with a personality.
-     `profile` was the old name and still goes out beside it, so a reader
-     written before the rename keeps working. */
   const person = raw.personality || raw.profile;
-  if (person) { out.personality = person; out.profile = person; }
-
-  /* ---- lift ----
-     `tension` goes out beside it, the same object, for one release: readers
-     were built against that name. It never measured tension -- see the spec. */
-  {
-  const pull = Array.isArray(raw.lift) ? raw.lift : raw.tension;
-  if (Array.isArray(pull)) {
-    out.lift = { per: 'beat', from_bar: firstBar, from_beat: 1, values: pull };
-    out.tension = out.lift;
-  }
+  if (person) {
+    out.personality = person;
+    out.profile = person;
   }
 
-  // ---- releases (seconds to positions) ----
-  if (Array.isArray(raw.releases)) {
-    out.releases = raw.releases.map(r => {
-      const has = r.bar !== undefined && r.beat !== undefined;
-      const i = (r.at_s - firstBeatS) / beatSec;
-      const at = has ? { bar: r.bar, beat: r.beat }
-                     : { bar: firstBar + Math.floor(i / bpb),
-                         beat: Math.floor(i % bpb) + 1 };
-      const one = { at, jump: r.jump ?? r.size };
-      if (r.at_s !== undefined) one.at_s = r.at_s;
-      return one;
-    });
+  if (Array.isArray(raw.btc_chords_raw) && raw.btc_chords_raw.length) {
+    const spans = raw.btc_chords_raw
+      .filter((c) => c && Number.isFinite(c.start) && Number.isFinite(c.end))
+      .map((c) => ({ start: c.start, end: c.end, chord: String(c.chord) }));
+    out.chords = { of: "seconds", spans };
+
+    const bpb = grid.beats_per_bar || 4;
+    const barSec = beatSec * bpb;
+    if (barSec > 0 && grid.bars) {
+      const perBar = [];
+      for (let b = 0; b < grid.bars; b++) {
+        const a = firstBeatS + b * barSec;
+        const z = a + barSec;
+        let best = null, bestOverlap = 0;
+        for (const c of spans) {
+          const ov = Math.min(z, c.end) - Math.max(a, c.start);
+          if (ov > bestOverlap) { bestOverlap = ov; best = c.chord; }
+        }
+        perBar.push(best && best !== "N" ? best : null);
+      }
+      out.harmony = { from_bar: firstBar, chords: perBar,
+                      confidence: perBar.map((c) => (c ? 1 : null)) };
+      const seen = {};
+      for (const c of perBar) if (c) seen[c] = (seen[c] || 0) + 1;
+      const top = Object.entries(seen).sort((a, b) => b[1] - a[1])[0];
+      if (top) {
+        const m = /^([A-G][#b]?)(.*)$/.exec(top[0]);
+        if (m) out.key = { root: m[1], scale: /min|m$/.test(m[2]) ? "minor" : "major",
+                           from: "most common BTC chord" };
+      }
+    }
   }
 
-  // ---- melody (guard for future pipeline output) ----
-  if (raw.melody) out.melody = raw.melody;
+  if (raw.signals) out.signals = raw.signals;
+  if (raw.caption) out.caption = raw.caption;
 
-  // ---- made_by ----
-  if (raw.made_by) out.made_by = raw.made_by;
+  if (raw.stems && !Array.isArray(raw.stems)) {
+    const lanes = out.stems && out.stems.lanes ? out.stems : null;
+    const summary = Object.entries(raw.stems)
+      .filter(([, v]) => v && typeof v === "object" && "rms" in v)
+      .map(([name, v]) => ({ name, rms: v.rms, peak: v.peak, db: v.db }))
+      .sort((a, b) => b.rms - a.rms);
+    if (summary.length) out.instruments = { of: "whole recording", heard: summary };
+    else if (!lanes) out.stems = raw.stems;
+    if (lanes) out.stems = lanes;
+  }
+
+  if (raw.stems_temporal && raw.stems_temporal.stems) {
+    out.instruments_over_time = {
+      per: "window",
+      window_s: raw.stems_temporal.window_s,
+      normalised: "per-instrument-peak-within-song",
+      lanes: raw.stems_temporal.stems,
+    };
+  }
+
+  if (raw.motion) out.motion = raw.motion;
+  if (raw.unavailable && Object.keys(raw.unavailable).length)
+    out.unavailable = raw.unavailable;
+  if (raw.sections_second_opinion)
+    out.sections_second_opinion = raw.sections_second_opinion;
+  if (raw.rhythm) out.rhythm = raw.rhythm;
+  if (raw.key_tempo) out.key_tempo = raw.key_tempo;
+  if (raw.beat_consensus) out.beat_consensus = raw.beat_consensus;
+  if (raw.emotion) out.emotion = raw.emotion;
 
   return out;
 }
