@@ -49,8 +49,8 @@ export function ClipInspector({
   return (
     <div
       data-clip-inspector
-      className="absolute z-40 w-[248px] rounded-[8px] border border-solid border-line-strong bg-bg-overlay p-[var(--spacing-s3)] shadow-lg"
-      style={{ left: x, top: y }}
+      className="absolute z-40 w-[248px] rounded-[8px] border border-solid border-line-strong bg-bg-overlay p-[var(--spacing-s3)]"
+      style={{ left: x, top: y, boxShadow: "var(--elev-popover)" }}
       onPointerDown={(e) => e.stopPropagation()}
     >
       <div className="flex items-start gap-[8px]">
@@ -69,7 +69,8 @@ export function ClipInspector({
             <span aria-hidden>…</span>
           </button>
           {menu && (
-            <div className="absolute right-0 top-[24px] z-10 min-w-[128px] py-[3px] rounded-[6px] border border-solid border-line-strong bg-bg-overlay">
+            <div className="absolute right-0 top-[24px] z-10 min-w-[128px] py-[3px] rounded-[6px] border border-solid border-line-strong bg-bg-overlay"
+              style={{ boxShadow: "var(--elev-popover)" }}>
               <button
                 type="button"
                 onClick={onRemove}
@@ -113,7 +114,7 @@ export function ClipInspector({
       {hasColour && (
         <div className="mt-[12px]">
           <span className="text-[11px] text-ink-dim">Colour</span>
-          <div className="flex gap-[9px] mt-[7px]">
+          <div className="flex gap-[5px] mt-[5px] -ml-[2px]">
             {SWATCHES.map((s) => {
               const on = sameColour(clip.params.colour ?? dials.colour?.default, s.rgb);
               return (
@@ -122,13 +123,17 @@ export function ClipInspector({
                   type="button"
                   title={s.name}
                   onClick={() => onChange({ colour: s.rgb })}
-                  className="w-[18px] h-[18px] rounded-full border-2 border-solid cursor-pointer transition-transform duration-[var(--dur-state)]"
-                  style={{
-                    background: s.css,
-                    borderColor: on ? "var(--accent)" : "transparent",
-                    transform: on ? "scale(1.1)" : undefined,
-                  }}
+                  className="w-[22px] h-[22px] flex-none inline-flex items-center justify-center rounded-full bg-transparent border-0 cursor-pointer p-0"
                 >
+                  <span
+                    aria-hidden
+                    className="w-[18px] h-[18px] rounded-full border-2 border-solid transition-transform duration-[var(--dur-state)]"
+                    style={{
+                      background: s.css,
+                      borderColor: on ? "var(--accent)" : "transparent",
+                      transform: on ? "scale(1.1)" : undefined,
+                    }}
+                  />
                   <span className="sr-only">{s.name}</span>
                 </button>
               );

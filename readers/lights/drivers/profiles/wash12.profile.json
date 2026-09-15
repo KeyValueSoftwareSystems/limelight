@@ -1,0 +1,101 @@
+{
+ "type": "wash12",
+ "footprint": 12,
+ "brightness": "master",
+ "white": "min",
+ "can": [
+  "colour",
+  "level",
+  "move",
+  "strobe",
+  "zoom"
+ ],
+ "channels": [
+  {
+   "role": "strobe",
+   "default": 0
+  },
+  {
+   "role": "master",
+   "default": 0
+  },
+  {
+   "role": "zoom",
+   "default": 128
+  },
+  {
+   "role": "pan",
+   "default": 0
+  },
+  {
+   "role": "tilt",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "colour.r",
+   "default": 0
+  },
+  {
+   "role": "colour.g",
+   "default": 0
+  },
+  {
+   "role": "colour.b",
+   "default": 0
+  },
+  {
+   "role": "colour.w",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  }
+ ],
+ "strobe_range": {
+  "open": 32,
+  "lo": 50,
+  "hi": 72
+ },
+ "strobe": {
+  "max_hz": 20
+ },
+ "zoom_deg": [
+  12.0,
+  58.0
+ ],
+ "beam": {
+  "angle_deg": 24.0,
+  "field_deg": 35.6,
+  "type": "wash"
+ },
+ "aim": {
+  "pan": [
+   0,
+   128,
+   255
+  ],
+  "tilt": [
+   0,
+   64,
+   255
+  ],
+  "note": "anchors [lo, centre, hi]: 0.5 is the wall, 0/1 the ends of travel."
+ },
+ "park": {
+  "pan": 0.5,
+  "tilt": 0.5,
+  "level": 0
+ },
+ "gdtf": "Martin_Professional@MAC_Aura@20230201NoMeas.gdtf",
+ "mode": "Standard",
+ "note": "channel order read from the GDTF. Shutter1 is both shutter and strobe: strobe 0 opens it (32), above that it runs 50..72. Colour1 and CTC are held at zero -- the RGBW mix is the colour, and a colour wheel on top of it would fight."
+}

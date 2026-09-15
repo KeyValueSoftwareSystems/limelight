@@ -1,3 +1,5 @@
+import type { FixtureKind } from "./profiles";
+
 /* ── data models for the Limelight portal API ────────────────────────────── */
 
 export type Role = "creator" | "venue";
@@ -179,6 +181,12 @@ export interface Edit {
   beats: number;
   params?: Record<string, unknown>;
   off?: true;
+  /** The plan id this edit took over from, when it replaces one of the
+   *  arranger's assignments. Overlap alone could not carry this: moving your
+   *  copy away let the machine's version come back and play underneath it.
+   *  The server builds its rows from a field whitelist, so this never leaves
+   *  the browser. */
+  from?: string;
 }
 
 export interface AppliedEdit {
@@ -324,6 +332,17 @@ export interface VenuesResponse {
   layouts?: Layout[];
 }
 
+export interface LayoutProfile {
+  footprint: number;
+  can: string[];
+  beam?: { angle_deg?: number; field_deg?: number; type?: string };
+  cells?: number;
+  /** no real fixture stands behind this channel map */
+  invented?: boolean;
+  /** the GDTF file the profile was read from, where there is one */
+  gdtf?: string;
+}
+
 export interface Layout {
   file: string;
   rig: string;
@@ -332,7 +351,12 @@ export interface Layout {
   channels: number;
   geometry?: unknown;
   note?: string;
+  placeholder?: boolean;
   default?: boolean;
+  /** every lamp and where it hangs, so the page can draw the rig */
+  fixture_list?: Fixture[];
+  /** what each device type in this rig can do */
+  profiles?: Record<string, LayoutProfile>;
 }
 
 export interface LayoutsResponse {
@@ -473,43 +497,60 @@ export interface ColoursResponse {
 
 /* ── fixture placement (computed on the client) ──────────────────────────── */
 
-export interface FixturePosition {
+/** Where a lamp sits on screen, and what kind of thing it is. */
+export interface LampPosition {
   addr: number;
   id: string;
+  /** the device type, e.g. "spot29" — see lib/profiles.ts */
+  type: string;
+  kind: FixtureKind;
+  /** normalised screen position, 0–1 */
   x: number;
   y: number;
+  /** 0 = furthest from the audience, 1 = nearest */
+  depth: number;
+  /** 0 = floor, 1 = highest trim on this rig */
+  height: number;
+  /** size multiplier from depth */
+  scale: number;
+}
+
+/** A lamp's state in one frame. */
+export interface LampState extends LampPosition {
+  /** intensity, 0–1, gamma undone */
+  k: number;
+  rgb: [number, number, number];
+  /** 0 = shutter simply open, >0 = strobing at that rate */
+  strobe: number;
+  /** beam width in degrees, honouring a zoom channel where fitted */
+  spreadDeg: number;
+  gobo: number;
+  prism: boolean;
+  /** beam direction on screen (movers only) */
+  rot: number;
+  reach: number;
+  az: number;
+  el: number;
+  /** per-cell state on a pixel device */
+  cells?: Array<{ k: number; rgb: [number, number, number] }>;
 }
 
 export interface FixturePlacement {
-  pars: FixturePosition[];
-  heads: FixturePosition[];
+  /** every lamp, sorted back-to-front */
+  lamps: LampPosition[];
+  /** views over `lamps`, kept for the panels that ask by these names */
+  pars: LampPosition[];
+  heads: LampPosition[];
 }
 
-export interface ParState extends FixturePosition {
-  r: number;
-  g: number;
-  b: number;
-  strobe: number;
-  k: number;
-  rgb: [number, number, number];
-}
-
-export interface HeadState extends FixturePosition {
-  panC: number;
-  tiltC: number;
-  dim: number;
-  strobe: number;
-  wheel: { name: string; rgb: [number, number, number] };
-  k: number;
-  rgb: [number, number, number];
-  az: number;
-  el: number;
-  rot: number;
-  reach: number;
-}
+/* `ParState` and `HeadState` are the old names for what is now one lamp state.
+   Kept as aliases so the panels and the marketplace preview keep compiling. */
+export type ParState = LampState;
+export type HeadState = LampState;
 
 export interface FixtureStates {
+  lamps: LampState[];
   pars: ParState[];
   heads: HeadState[];
-  head: HeadState;
+  head: HeadState | null;
 }

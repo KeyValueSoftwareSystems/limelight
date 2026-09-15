@@ -43,9 +43,10 @@ export function Sidebar({ effects }: { effects: Effect[] }) {
         })}
       </div>
 
-      <span className="flex-none h-[var(--spacing-s5)]" />
+      {/* the palette sits at the foot of the rail, flush to the bottom */}
+      <span className="flex-1 min-h-[var(--spacing-s5)]" />
 
-      <div className="flex-1 min-h-0 flex flex-col">
+      <div className="flex-none">
         <PaletteTabs effects={effects} />
       </div>
 

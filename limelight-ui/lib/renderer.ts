@@ -2,12 +2,22 @@
  * Canvas 2D rendering for the Limelight stage preview.
  * All functions are pure — they take a context and data, never global state.
  *
- * Ported from portal/app.js drawing functions.
+ * WHAT CHANGED AND WHY
+ * This used to know two shapes: a par (a glow and a floor pool) and a head (a
+ * three-layer cone). Every rig therefore looked the same, and a rig carrying a
+ * beam, a wash, a blinder and a pixel strip drew as rows of identical dots.
+ *
+ * A lamp is now drawn from what it IS. The cone width comes from the fixture's
+ * real beam angle — read out of its GDTF and carried in lib/profiles.ts — so a
+ * 8° beam is a pencil and a 60° par is a flood, because those are the numbers
+ * the manufacturers publish. Depth comes from the layout's own coordinates, so a
+ * rig with a back truss and a front truss reads as a room instead of a row.
  */
 
-import type { FixtureStates, ParState, HeadState, FixturePlacement } from "./types";
-import { GAMMA, TAU, DEG, PAN_CENTRE, PAN_DEG_PER_DMX, TILT_WALL, TILT_WALL_EL, TILT_DEG_PER_DMX, wheelAt } from "./dmx";
-import { clamp } from "./grid";
+import type { FixtureStates, LampState } from "./types";
+import { GAMMA, TAU, DEG, PAN_CENTRE, PAN_DEG_PER_DMX, TILT_WALL, TILT_WALL_EL, TILT_DEG_PER_DMX, wheelAt } from "./dmx.ts";
+import { clamp } from "./grid.ts";
+import { profileOf, moves } from "./profiles.ts";
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 
@@ -15,12 +25,41 @@ export function rgba(c: number[] | readonly number[], a: number): string {
   return `rgba(${(c[0] * 255) | 0},${(c[1] * 255) | 0},${(c[2] * 255) | 0},${Math.max(0, a).toFixed(3)})`;
 }
 
-function toWhite(c: number[], t: number): number[] {
-  if (t <= 0) return c;
-  return c.map((v) => v + (1 - v) * Math.min(1, t));
+function toWhite(c: number[] | readonly number[], t: number): number[] {
+  if (t <= 0) return [...c];
+  return [...c].map((v) => v + (1 - v) * Math.min(1, t));
 }
 
-/* ── ground: dark stage background ───────────────────────────────────────── */
+/** How much of the frame a beam of this angle covers at the far end of its throw. */
+function spread(deg: number): number {
+  return Math.tan(Math.min(80, deg) * 0.5 * DEG);
+}
+
+/**
+ * A strobing lamp is DARK most of the time — that is what makes it read as a
+ * strobe rather than as a bright lamp. Gating on the frame clock rather than on
+ * the DMX value is the only way a still preview and a running one agree.
+ */
+function strobeGate(l: LampState, t: number): number {
+  if (l.strobe <= 0.001) return 1;
+  const hz = 1 + l.strobe * 22;
+  const phase = (t * hz) % 1;
+  return phase < 0.32 ? 1 : 0.06;
+}
+
+/* ── quality ─────────────────────────────────────────────────────────────── */
+
+export interface PaintOpts {
+  /** seconds, for strobe and laser motion. Defaults to 0 (a still frame). */
+  t?: number;
+  /**
+   * "full" is the stage view. "card" drops the costly passes — reflection,
+   * bloom, per-cone layering — so a page of venue cards stays smooth.
+   */
+  quality?: "full" | "card";
+}
+
+/* ── ground: the room the rig is hanging in ──────────────────────────────── */
 
 export function ground(ctx: CanvasRenderingContext2D, W: number, H: number): void {
   ctx.globalCompositeOperation = "source-over";
@@ -31,7 +70,7 @@ export function ground(ctx: CanvasRenderingContext2D, W: number, H: number): voi
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  const y = H * 0.79;
+  const y = H * FLOOR;
   const fg = ctx.createLinearGradient(0, y, 0, H);
   fg.addColorStop(0, "rgba(9,11,19,0.5)");
   fg.addColorStop(0.7, "rgba(7,9,15,0.94)");
@@ -45,6 +84,43 @@ export function ground(ctx: CanvasRenderingContext2D, W: number, H: number): voi
   hair.addColorStop(1, "rgba(200,210,240,0)");
   ctx.fillStyle = hair;
   ctx.fillRect(0, y, W, 1);
+}
+
+const FLOOR = 0.86;
+
+/* ── truss: the steel the lamps hang off ─────────────────────────────────────
+   Lamps that share a height and a depth are on the same bar. Drawing the bar
+   costs one hairline and is the difference between "a rig" and "some dots". */
+
+function truss(ctx: CanvasRenderingContext2D, lamps: LampState[], W: number, H: number): void {
+  const bars = new Map<string, LampState[]>();
+  for (const l of lamps) {
+    const key = `${l.height.toFixed(3)}:${l.depth.toFixed(3)}`;
+    const b = bars.get(key);
+    if (b) b.push(l); else bars.set(key, [l]);
+  }
+  ctx.globalCompositeOperation = "source-over";
+  for (const bar of bars.values()) {
+    if (bar.length < 2) continue;
+    const xs = bar.map((l) => l.x);
+    const y = H * bar[0].y;
+    const x0 = W * Math.min(...xs);
+    const x1 = W * Math.max(...xs);
+    const a = 0.10 + 0.10 * bar[0].depth;
+    ctx.strokeStyle = `rgba(150,164,196,${a.toFixed(3)})`;
+    ctx.lineWidth = Math.max(1, 2.4 * bar[0].scale);
+    ctx.beginPath();
+    ctx.moveTo(x0 - 10, y);
+    ctx.lineTo(x1 + 10, y);
+    ctx.stroke();
+    /* the chord underneath, so the bar reads as truss rather than as wire */
+    ctx.strokeStyle = `rgba(150,164,196,${(a * 0.45).toFixed(3)})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x0 - 10, y + 4 * bar[0].scale);
+    ctx.lineTo(x1 + 10, y + 4 * bar[0].scale);
+    ctx.stroke();
+  }
 }
 
 /* ── housing: the dark lamp body ─────────────────────────────────────────── */
@@ -62,7 +138,7 @@ export function housing(ctx: CanvasRenderingContext2D, x: number, y: number, r: 
 
 /* ── emitter: the lit face ───────────────────────────────────────────────── */
 
-export function emitter(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, c: number[], k: number): void {
+export function emitter(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, c: number[] | readonly number[], k: number): void {
   if (k <= 0.004) return;
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
   g.addColorStop(0, rgba(toWhite(c, k * 0.75), k));
@@ -74,152 +150,390 @@ export function emitter(ctx: CanvasRenderingContext2D, x: number, y: number, r: 
   ctx.fill();
 }
 
-/* ── drawPar: par wash + floor pool ──────────────────────────────────────── */
-
-export function drawPar(ctx: CanvasRenderingContext2D, p: ParState, W: number, H: number, u: number, n: number): void {
-  const scale = n > 6 ? 0.55 : 1;
-  const x = W * p.x;
-  const y = H * p.y;
-  const c = [...p.rgb];
-  const k = p.k;
-
-  if (k > 0.004) {
-    const cy = y - u * 0.02;
-    const R = u * 0.62 * scale * (0.5 + 0.65 * k);
-    const a = 0.1 + 0.34 * k;
-    let g = ctx.createRadialGradient(x, cy, 0, x, cy, R);
-    g.addColorStop(0, rgba(c, a));
-    g.addColorStop(0.18, rgba(c, a * 0.66));
-    g.addColorStop(0.42, rgba(c, a * 0.3));
-    g.addColorStop(0.7, rgba(c, a * 0.09));
-    g.addColorStop(1, rgba(c, 0));
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(x, cy, R, 0, TAU);
-    ctx.fill();
-
-    const R2 = u * 0.24 * scale * (0.5 + 0.8 * k);
-    const a2 = 0.14 + 0.52 * k;
-    g = ctx.createRadialGradient(x, y, 0, x, y, R2);
-    g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.72) / 0.28), a2));
-    g.addColorStop(0.34, rgba(c, a2 * 0.62));
-    g.addColorStop(0.62, rgba(c, a2 * 0.22));
-    g.addColorStop(1, rgba(c, 0));
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(x, y, R2, 0, TAU);
-    ctx.fill();
-
-    /* floor pool */
-    const ry = u * 0.15 * scale;
-    const rx = u * 0.42 * scale;
-    const fy = y + u * 0.085;
-    g = ctx.createRadialGradient(x, fy, 0, x, fy, rx);
-    const a3 = 0.05 + 0.34 * k;
-    g.addColorStop(0, rgba(c, a3));
-    g.addColorStop(0.3, rgba(c, a3 * 0.44));
-    g.addColorStop(0.62, rgba(c, a3 * 0.14));
-    g.addColorStop(1, rgba(c, 0));
-    ctx.save();
-    ctx.translate(x, fy);
-    ctx.scale(1, ry / rx);
-    ctx.translate(-x, -fy);
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(x, fy, rx, 0, TAU);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  emitter(ctx, x, y, n > 6 ? 8 : 11, c, k);
+/** A bright lens throws a horizontal streak across the lens of the camera. */
+function bloom(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, c: readonly number[], k: number): void {
+  if (k < 0.55) return;
+  const a = (k - 0.55) / 0.45;
+  const g = ctx.createLinearGradient(x - r * 6, y, x + r * 6, y);
+  g.addColorStop(0, rgba(c, 0));
+  g.addColorStop(0.5, rgba(toWhite(c, 0.5), 0.20 * a));
+  g.addColorStop(1, rgba(c, 0));
+  ctx.fillStyle = g;
+  ctx.fillRect(x - r * 6, y - r * 0.22, r * 12, r * 0.44);
 }
 
-/* ── cone helper ─────────────────────────────────────────────────────────── */
+/* ── the floor pool a downward lamp lays on the deck ─────────────────────── */
 
-function cone(ctx: CanvasRenderingContext2D, wBottom: number, wTop: number, L: number): void {
+function pool(ctx: CanvasRenderingContext2D, x: number, yFloor: number, rx: number, c: readonly number[], k: number): void {
+  if (k <= 0.01) return;
+  const ry = rx * 0.32;
+  const g = ctx.createRadialGradient(x, yFloor, 0, x, yFloor, rx);
+  const a = 0.05 + 0.34 * k;
+  g.addColorStop(0, rgba(c, a));
+  g.addColorStop(0.3, rgba(c, a * 0.44));
+  g.addColorStop(0.62, rgba(c, a * 0.14));
+  g.addColorStop(1, rgba(c, 0));
+  ctx.save();
+  ctx.translate(x, yFloor);
+  ctx.scale(1, ry / rx);
+  ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.moveTo(-wBottom, 0);
-  ctx.lineTo(wBottom, 0);
-  ctx.lineTo(wTop, -L);
-  ctx.lineTo(-wTop, -L);
+  ctx.arc(0, 0, rx, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+
+/* ── cone: the lit air between a lamp and whatever it lands on ───────────────
+   THE CONVENTION, because getting it wrong is invisible until a pool lands on the
+   ceiling: a cone is drawn up the -y axis and then rotated by `rot`, so rot = 0
+   points at the top of the frame and rot = PI points at the floor. Everything
+   that needs to know WHERE a beam lands must derive it the same way, which is
+   what `landing()` is for. */
+
+function landing(l: LampState, x: number, y: number, L: number): { x: number; y: number } {
+  return { x: x + Math.sin(l.rot) * L, y: y - Math.cos(l.rot) * L };
+}
+
+/**
+ * How far a beam travels before it lands.
+ *
+ * A shaft that runs off the bottom of the frame reads as a smear; a shaft that
+ * stops on the deck reads as a beam hitting a floor. So the throw is the
+ * distance to the floor plane along the beam, and only a beam pointing at or
+ * above the horizon gets to run to the edge instead.
+ */
+function throwTo(l: LampState, y: number, H: number, max: number): number {
+  const down = -Math.cos(l.rot);
+  if (down <= 0.08) return max;
+  return Math.min(max, Math.max(H * 0.06, (H * FLOOR - y) / down));
+}
+
+function cone(ctx: CanvasRenderingContext2D, wRoot: number, wEnd: number, L: number): void {
+  ctx.beginPath();
+  ctx.moveTo(-wRoot, 0);
+  ctx.lineTo(wRoot, 0);
+  ctx.lineTo(wEnd, -L);
+  ctx.lineTo(-wEnd, -L);
   ctx.closePath();
   ctx.fill();
 }
 
-/* ── drawBeam: moving head beam ──────────────────────────────────────────── */
+/* ── the shapes ──────────────────────────────────────────────────────────────
+   One function per kind. They all take the lamp already gated and trimmed. */
 
-export function drawBeam(ctx: CanvasRenderingContext2D, h: HeadState, W: number, H: number, u: number, n: number): void {
-  const scale = n > 1 ? 0.7 : 1;
-  const x = W * h.x;
-  const y = H * h.y;
-  const c = [...h.rgb];
-  const k = h.k;
+/** A par: no aim, a wide soft wash straight down, and a pool on the deck. */
+function drawPar(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: number, u: number, k: number, full: boolean, d: number): void {
+  const x = W * l.x, y = H * l.y, c = l.rgb;
+  const s = spread(l.spreadDeg) * l.scale;
 
-  if (k > 0.004) {
-    const L = Math.max(u * 0.12, u * 1.7 * scale * h.reach);
+  const R = u * (0.34 + 0.9 * s) * (0.5 + 0.65 * k);
+  const a = (0.09 + 0.30 * k) * d;
+  let g = ctx.createRadialGradient(x, y - u * 0.02, 0, x, y - u * 0.02, R);
+  g.addColorStop(0, rgba(c, a));
+  g.addColorStop(0.18, rgba(c, a * 0.66));
+  g.addColorStop(0.42, rgba(c, a * 0.3));
+  g.addColorStop(0.7, rgba(c, a * 0.09));
+  g.addColorStop(1, rgba(c, 0));
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y - u * 0.02, R, 0, TAU);
+  ctx.fill();
+
+  const R2 = u * 0.2 * l.scale * (0.5 + 0.8 * k);
+  const a2 = (0.14 + 0.5 * k) * d;
+  g = ctx.createRadialGradient(x, y, 0, x, y, R2);
+  g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.72) / 0.28), a2));
+  g.addColorStop(0.34, rgba(c, a2 * 0.62));
+  g.addColorStop(1, rgba(c, 0));
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, R2, 0, TAU);
+  ctx.fill();
+
+  if (full) pool(ctx, x, H * FLOOR, u * (0.14 + 0.55 * s) * (0.6 + 0.6 * k), c, k);
+}
+
+/** A wash: a soft cone whose width is the zoom channel, landing in a big pool. */
+function drawWash(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: number, u: number, k: number, full: boolean, d: number): void {
+  const x = W * l.x, y = H * l.y, c = l.rgb;
+  const L = throwTo(l, y, H, u * 1.45 * l.scale * Math.max(0.28, l.reach));
+  const s = spread(l.spreadDeg);
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(l.rot);
+  /* three soft layers: the wide halo, the body, the denser middle. A wash has no
+     edge, so no layer is allowed a hard boundary. */
+  for (const [wMul, weight, root] of [[1.5, 0.11, 0.042], [1.0, 0.26, 0.03], [0.55, 0.4, 0.018]] as const) {
+    const a = (0.09 + 0.5 * k) * weight * d;
+    const g = ctx.createLinearGradient(0, 0, 0, -L);
+    g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.7) / 0.3), a));
+    g.addColorStop(0.24, rgba(c, a * 0.6));
+    g.addColorStop(0.6, rgba(c, a * 0.2));
+    g.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = g;
+    cone(ctx, u * root * l.scale, L * s * wMul, L);
+  }
+  ctx.restore();
+
+  if (full) {
+    const at = landing(l, x, y, L * 0.9);
+    if (at.y > y) pool(ctx, at.x, Math.min(at.y, H * FLOOR), L * s * 1.3, c, k * 0.8);
+  }
+}
+
+/** A beam: hard edge, bright core, gobo banding, and a prism that splits it. */
+function drawSpot(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: number, u: number, k: number, full: boolean, d: number): void {
+  const x = W * l.x, y = H * l.y, c = l.rgb;
+  const L = throwTo(l, y, H, u * 1.9 * l.scale * Math.max(0.3, l.reach));
+  const s = spread(l.spreadDeg);
+  const arms = l.prism ? [-0.12, 0, 0.12] : [0];
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(l.rot);
+  for (const off of arms) {
     ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(h.rot);
-
-    const layers: [number, number, number][] = [
-      [0.34, 0.13, u * 0.034],
-      [0.17, 0.3, u * 0.022],
-      [0.07, 0.52, u * 0.012],
-    ];
-    for (const [spread, weight, root] of layers) {
-      const a = (0.1 + 0.62 * k) * weight;
+    ctx.rotate(off);
+    const weight = l.prism ? 0.62 : 1;
+    /* the halo, then the body, then a near-white core: the core is what gives a
+       beam its hard edge — a wash never gets one. */
+    for (const [wMul, wt, root] of [[2.6, 0.13, 0.03], [1.25, 0.34, 0.016], [0.5, 0.62, 0.008]] as const) {
+      const a = (0.1 + 0.66 * k) * wt * weight * d;
       const g = ctx.createLinearGradient(0, 0, 0, -L);
-      g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.7) / 0.3), a));
-      g.addColorStop(0.22, rgba(c, a * 0.62));
-      g.addColorStop(0.55, rgba(c, a * 0.24));
+      g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.55) / 0.45), a));
+      g.addColorStop(0.3, rgba(c, a * 0.72));
+      g.addColorStop(0.72, rgba(c, a * 0.3));
       g.addColorStop(1, rgba(c, 0));
       ctx.fillStyle = g;
-      cone(ctx, root, L * spread, L);
+      cone(ctx, u * root * l.scale, Math.max(1, L * s * wMul), L);
+    }
+    /* a gobo breaks the shaft into bands of light and shadow */
+    if (full && l.gobo > 20 && k > 0.1) {
+      const bands = 5 + (l.gobo % 5);
+      ctx.fillStyle = rgba(toWhite(c, 0.3), 0.06 + 0.1 * k);
+      for (let i = 1; i < bands; i += 2) {
+        const d = (i / bands) * L;
+        const w = Math.max(1, L * s * 1.25 * (d / L));
+        ctx.fillRect(-w, -d, w * 2, L / (bands * 2.6));
+      }
     }
     ctx.restore();
   }
+  ctx.restore();
 
-  emitter(ctx, x, y, 12, c, k);
+  if (full) {
+    const at = landing(l, x, y, L);
+    if (at.y > y) pool(ctx, at.x, Math.min(at.y, H * FLOOR), Math.max(u * 0.02, L * s * 2.2), c, k);
+  }
+}
+
+/** A xenon strobe: a flat sheet of white that fills its arc and snaps. */
+function drawStrobe(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: number, u: number, k: number, d: number): void {
+  const x = W * l.x, y = H * l.y, c = l.rgb;
+  const R = u * 1.25 * (0.4 + 0.7 * k);
+  const g = ctx.createRadialGradient(x, y, 0, x, y, R);
+  const a = (0.1 + 0.46 * k) * d;
+  g.addColorStop(0, rgba(toWhite(c, 0.85), a));
+  g.addColorStop(0.16, rgba(toWhite(c, 0.4), a * 0.5));
+  g.addColorStop(0.46, rgba(c, a * 0.16));
+  g.addColorStop(1, rgba(c, 0));
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, R, 0, TAU);
+  ctx.fill();
+}
+
+/** A blinder: pointed at the audience, so it glares at the camera rather than lighting the stage. */
+function drawBlinder(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: number, u: number, k: number, full: boolean, d: number): void {
+  const x = W * l.x, y = H * l.y, c = l.rgb;
+  const w = u * 0.14 * l.scale;
+  const h = u * 0.055 * l.scale;
+
+  /* the four cells of the array, as a lit panel */
+  ctx.fillStyle = rgba(toWhite(c, 0.55 * k), 0.2 + 0.72 * k);
+  for (let i = 0; i < 4; i++) {
+    const cx = x - w * 0.5 + (w / 4) * (i + 0.5);
+    ctx.beginPath();
+    ctx.ellipse(cx, y, w * 0.11, h * 0.5, 0, 0, TAU);
+    ctx.fill();
+  }
+
+  const R = u * 1.5 * (0.3 + 0.8 * k);
+  const g = ctx.createRadialGradient(x, y, 0, x, y, R);
+  const a = (0.06 + 0.4 * k) * d;
+  g.addColorStop(0, rgba(toWhite(c, 0.5), a));
+  g.addColorStop(0.2, rgba(c, a * 0.44));
+  g.addColorStop(0.55, rgba(c, a * 0.13));
+  g.addColorStop(1, rgba(c, 0));
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, R, 0, TAU);
+  ctx.fill();
+
+  /* a blinder at full does not light a room, it takes it over */
+  if (full && k > 0.5) {
+    ctx.fillStyle = rgba(c, (k - 0.5) * 0.12);
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
+/** A pixel strip: one bar, six cells, each its own colour. */
+function drawStrip(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: number, u: number, gate: number): void {
+  const cells = l.cells ?? [{ k: l.k, rgb: l.rgb }];
+  const x = W * l.x;
+  const span = u * 0.42 * l.scale;
+  const y0 = H * l.y - span * 0.5;
+  const step = span / cells.length;
+
+  for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i];
+    const k = cell.k * gate;
+    if (k <= 0.01) continue;
+    const cy = y0 + step * (i + 0.5);
+    const R = u * 0.16 * l.scale * (0.4 + 0.8 * k);
+    const g = ctx.createRadialGradient(x, cy, 0, x, cy, R);
+    const a = 0.1 + 0.44 * k;
+    g.addColorStop(0, rgba(toWhite(cell.rgb, k * 0.6), a));
+    g.addColorStop(0.3, rgba(cell.rgb, a * 0.5));
+    g.addColorStop(1, rgba(cell.rgb, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, cy, R, 0, TAU);
+    ctx.fill();
+    emitter(ctx, x, cy, Math.max(2, step * 0.3), cell.rgb, k);
+  }
+}
+
+/** A laser: no falloff to speak of, so it draws as a line rather than a cone. */
+function drawLaser(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: number, u: number, k: number, t: number, d: number): void {
+  const x = W * l.x, y = H * l.y, c = l.rgb;
+  const L = throwTo(l, y, H, u * 2.2);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(l.rot);
+  /* a scanner is one beam moving fast enough to read as a fan */
+  for (let i = -3; i <= 3; i++) {
+    const a = (0.06 + 0.5 * k) * (1 - Math.abs(i) / 4.5) * d;
+    const off = i * 0.055 + Math.sin(t * 2.1 + i) * 0.02;
+    ctx.save();
+    ctx.rotate(off);
+    const g = ctx.createLinearGradient(0, 0, 0, -L);
+    g.addColorStop(0, rgba(toWhite(c, 0.5), a));
+    g.addColorStop(0.55, rgba(c, a * 0.5));
+    g.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = g;
+    cone(ctx, Math.max(0.6, u * 0.003), Math.max(0.8, u * 0.006), L);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+/* ── one lamp ────────────────────────────────────────────────────────────── */
+
+function drawLamp(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: number, u: number, opts: { t: number; full: boolean; d: number }): void {
+  const gate = strobeGate(l, opts.t);
+  const k = l.k * gate;
+  if (k <= 0.004 && l.kind !== "strip") return;
+  const d = opts.d;
+
+  switch (l.kind) {
+    case "wash":    drawWash(ctx, l, W, H, u, k, opts.full, d); break;
+    case "spot":    drawSpot(ctx, l, W, H, u, k, opts.full, d); break;
+    case "strobe":  drawStrobe(ctx, l, W, H, u, k, d); break;
+    case "blinder": drawBlinder(ctx, l, W, H, u, k, opts.full, d); break;
+    case "strip":   drawStrip(ctx, l, W, H, u, gate); break;
+    case "laser":   drawLaser(ctx, l, W, H, u, k, opts.t, d); break;
+    default:        drawPar(ctx, l, W, H, u, k, opts.full, d); break;
+  }
+
+  if (l.kind !== "strip" && l.kind !== "blinder") {
+    const r = Math.max(3, u * (moves(l.type) ? 0.022 : 0.017) * l.scale);
+    emitter(ctx, W * l.x, H * l.y, r, l.rgb, k);
+    if (opts.full) bloom(ctx, W * l.x, H * l.y, r, l.rgb, k);
+  }
 }
 
 /* ── paintStage: full frame render ───────────────────────────────────────── */
 
-export function paintStage(ctx: CanvasRenderingContext2D, fx: FixtureStates, W: number, H: number, dpr: number): void {
+export function paintStage(
+  ctx: CanvasRenderingContext2D,
+  fx: FixtureStates,
+  W: number,
+  H: number,
+  dpr: number,
+  opts: PaintOpts = {},
+): void {
   const u = H;
+  const t = opts.t ?? 0;
+  const full = opts.quality !== "card";
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ground(ctx, W, H);
 
-  /* housings first (opaque, non-light) */
-  const small = fx.pars.length > 6;
-  for (const p of fx.pars) housing(ctx, W * p.x, H * p.y, small ? 6 : 9);
-  for (const h of fx.heads) housing(ctx, W * h.x, H * h.y, small ? 7 : 10);
+  const lamps = fx.lamps ?? [];
+
+  /* structure first, opaque, so light lands on top of steel rather than under it */
+  truss(ctx, lamps, W, H);
+  for (const l of lamps) {
+    if (l.kind === "strip") continue;                    // a strip has no round body
+    housing(ctx, W * l.x, H * l.y, Math.max(3, u * 0.019 * l.scale));
+  }
 
   ctx.globalCompositeOperation = "lighter";
 
-  const total = fx.pars.reduce((a, p) => a + p.k, 0) / Math.max(1, fx.pars.length);
-  const headK = fx.heads.reduce((a, h) => a + h.k, 0) / Math.max(1, fx.heads.length);
+  /* the air. Haze is what makes a beam visible at all, so it has to answer to how
+     much light is actually in the room. */
+  const lit = lamps.filter((l) => l.k > 0.01);
+  const output = lit.reduce((a, l) => a + l.k, 0) / Math.max(6, lamps.length);
 
-  if (total > 0.01 || headK > 0.01) {
-    const haze = ctx.createRadialGradient(W * 0.5, H * 0.62, 0, W * 0.5, H * 0.62, Math.max(W, H) * 0.6);
-    const a = clamp(total * 0.09 + headK * 0.05, 0, 0.16);
+  /* DENSITY. Light adds, so a 46-lamp arena under `lighter` clips to a white
+     slab and every colour in the rig is lost — the bigger the rig, the less the
+     picture shows. Scaling each lamp's contribution by the square root of how
+     many are burning keeps total output roughly constant while leaving the
+     relative brightnesses intact, so a big rig reads as MORE BEAMS rather than
+     as more white. */
+  const density = clamp(3.4 / Math.sqrt(Math.max(1, lit.length)), 0.3, 1);
+
+  if (output > 0.004) {
+    const haze = ctx.createRadialGradient(W * 0.5, H * 0.58, 0, W * 0.5, H * 0.58, Math.max(W, H) * 0.62);
+    const a = clamp(output * 0.3 * (0.5 + 0.5 * density), 0, 0.13);
     haze.addColorStop(0, `rgba(150,170,230,${a.toFixed(3)})`);
     haze.addColorStop(1, "rgba(150,170,230,0)");
     ctx.fillStyle = haze;
     ctx.fillRect(0, 0, W, H);
   }
 
-  for (const h of fx.heads) drawBeam(ctx, h, W, H, u, fx.heads.length);
-  for (const p of fx.pars) drawPar(ctx, p, W, H, u, fx.pars.length);
+  /* back to front, so a near truss reads in front of a far one */
+  for (const l of lamps) drawLamp(ctx, l, W, H, u, { t, full, d: density });
+
+  /* the deck is not matte: the pools come back up, squashed and dim */
+  if (full) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, H * FLOOR, W, H * (1 - FLOOR));
+    ctx.clip();
+    ctx.translate(0, 2 * H * FLOOR);
+    ctx.scale(1, -0.42);
+    ctx.globalAlpha = 0.3;
+    for (const l of lamps) {
+      if (l.kind === "laser" || l.kind === "blinder") continue;
+      drawLamp(ctx, l, W, H, u, { t, full: false, d: density });
+    }
+    ctx.restore();
+  }
 
   ctx.globalCompositeOperation = "source-over";
-  const top = ctx.createLinearGradient(0, 0, 0, H * 0.34);
-  top.addColorStop(0, "rgba(8,10,18,0.4)");
+  const top = ctx.createLinearGradient(0, 0, 0, H * 0.3);
+  top.addColorStop(0, "rgba(8,10,18,0.42)");
   top.addColorStop(1, "rgba(8,10,18,0)");
   ctx.fillStyle = top;
-  ctx.fillRect(0, 0, W, H * 0.34);
+  ctx.fillRect(0, 0, W, H * 0.3);
 }
 
-/* ── miniFrame: thumbnail render for marketplace live previews ───────────── */
+/* ── miniFrame: thumbnail render for marketplace live previews ───────────────
+   Reads raw DMX rather than a FixtureStates, because the marketplace has frames
+   and a placement but never bakes a full state. Kept on the same profile table,
+   so a listing of a show made on the arena rig draws its real fixtures. */
 
 export function miniFrame(
   ctx: CanvasRenderingContext2D,
@@ -227,7 +541,7 @@ export function miniFrame(
   idx: number,
   frames: Uint8Array,
   channels: number,
-  place: FixturePlacement,
+  place: { lamps: Array<{ addr: number; type: string; x: number; y: number; scale: number; kind: string }> },
 ): void {
   const W = cv.width;
   const H = cv.height;
@@ -238,61 +552,68 @@ export function miniFrame(
   ctx.fillStyle = "#07090f";
   ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = "rgba(9,11,19,0.55)";
-  ctx.fillRect(0, H * 0.8, W, H * 0.2);
+  ctx.fillRect(0, H * 0.82, W, H * 0.18);
   ctx.globalCompositeOperation = "lighter";
 
   const u = H;
-  for (const p of place.pars) {
+  for (const p of place.lamps ?? []) {
+    const prof = profileOf(p.type);
     const i = base + p.addr - 1;
-    const r = f[i + 1];
-    const gg = f[i + 2];
-    const b = f[i + 3];
-    const peak = Math.max(r, gg, b);
-    if (!peak) continue;
-    const k = Math.pow(peak / 255, 1 / GAMMA);
-    const c = [r / peak, gg / peak, b / peak];
-    const x = W * p.x;
-    const y = H * p.y;
-    const R = u * 0.55 * (0.45 + 0.6 * k);
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, R);
-    grad.addColorStop(0, rgba(c, 0.1 + 0.42 * k));
-    grad.addColorStop(0.3, rgba(c, (0.1 + 0.42 * k) * 0.45));
-    grad.addColorStop(1, rgba(c, 0));
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, R, 0, TAU);
-    ctx.fill();
-  }
+    if (i < 0 || i >= f.length) continue;
 
-  for (const h of place.heads) {
-    const i = base + h.addr - 1;
-    const k = Math.pow(f[i + 5] / 255, 1 / GAMMA);
+    let rgbv: [number, number, number] = [1, 1, 1];
+    let k = 0;
+    const a = prof.at;
+    if (a.r !== undefined && a.g !== undefined && a.b !== undefined) {
+      const r = f[i + a.r], g = f[i + a.g], b = f[i + a.b];
+      const peak = Math.max(r, g, b);
+      if (peak) rgbv = [r / peak, g / peak, b / peak];
+      k = prof.brightness === "colour"
+        ? Math.pow(peak / 255, 1 / GAMMA)
+        : Math.pow(f[i + (a.master ?? 0)] / 255, 1 / GAMMA);
+    } else if (a.wheel !== undefined) {
+      rgbv = wheelAt(f[i + a.wheel]).rgb;
+      k = Math.pow(f[i + (a.master ?? 0)] / 255, 1 / GAMMA);
+    } else if (a.c !== undefined && a.m !== undefined && a.y !== undefined) {
+      rgbv = [1 - f[i + a.c] / 255, 1 - f[i + a.m] / 255, 1 - f[i + a.y] / 255];
+      k = Math.pow(f[i + (a.master ?? 0)] / 255, 1 / GAMMA);
+    } else {
+      rgbv = [1, 0.93, 0.82];
+      k = Math.pow(f[i + (a.master ?? 0)] / 255, 1 / GAMMA);
+    }
     if (k < 0.01) continue;
-    const c = wheelAt(f[i + 7]).rgb;
-    const panC = (f[i] * 256 + f[i + 1]) / 256;
-    const tiltC = (f[i + 2] * 256 + f[i + 3]) / 256;
-    const az = (panC - PAN_CENTRE) * PAN_DEG_PER_DMX * DEG;
-    const el = (TILT_WALL_EL + (tiltC - TILT_WALL) * TILT_DEG_PER_DMX) * DEG;
-    const ax = Math.sin(az) * Math.cos(el);
-    const ay = Math.sin(el);
-    const L = u * 1.4 * Math.hypot(ax, ay);
-    const x = W * h.x;
-    const y = H * h.y;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(Math.atan2(ax, ay));
-    const grad = ctx.createLinearGradient(0, 0, 0, -L);
-    grad.addColorStop(0, rgba(c as number[], 0.16 + 0.42 * k));
-    grad.addColorStop(1, rgba(c as number[], 0));
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.moveTo(-u * 0.03, 0);
-    ctx.lineTo(u * 0.03, 0);
-    ctx.lineTo(L * 0.22, -L);
-    ctx.lineTo(-L * 0.22, -L);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
+
+    const x = W * p.x, y = H * p.y;
+
+    if (a.pan !== undefined && a.tilt !== undefined) {
+      const panC = a.panFine !== undefined ? (f[i + a.pan] * 256 + f[i + a.panFine]) / 256 : f[i + a.pan];
+      const tiltC = a.tiltFine !== undefined ? (f[i + a.tilt] * 256 + f[i + a.tiltFine]) / 256 : f[i + a.tilt];
+      const az = (panC - PAN_CENTRE) * PAN_DEG_PER_DMX * DEG;
+      const el = (TILT_WALL_EL + (tiltC - TILT_WALL) * TILT_DEG_PER_DMX) * DEG;
+      const ax = Math.sin(az) * Math.cos(el);
+      const ay = Math.sin(el);
+      const L = u * 1.4 * Math.hypot(ax, ay);
+      const s = spread(prof.beamDeg[0]);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.atan2(ax, ay));
+      const grad = ctx.createLinearGradient(0, 0, 0, -L);
+      grad.addColorStop(0, rgba(rgbv, 0.16 + 0.42 * k));
+      grad.addColorStop(1, rgba(rgbv, 0));
+      ctx.fillStyle = grad;
+      cone(ctx, u * 0.02, Math.max(1, L * s * 1.6), L);
+      ctx.restore();
+    } else {
+      const R = u * (0.3 + 0.9 * spread(prof.beamDeg[0])) * (0.45 + 0.6 * k);
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, R);
+      grad.addColorStop(0, rgba(rgbv, 0.1 + 0.42 * k));
+      grad.addColorStop(0.3, rgba(rgbv, (0.1 + 0.42 * k) * 0.45));
+      grad.addColorStop(1, rgba(rgbv, 0));
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(x, y, R, 0, TAU);
+      ctx.fill();
+    }
   }
 
   ctx.globalCompositeOperation = "source-over";

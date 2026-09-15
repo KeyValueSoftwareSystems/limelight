@@ -1,0 +1,43 @@
+{
+ "type": "par5",
+ "footprint": 5,
+ "brightness": "colour",
+ "white": "min",
+ "can": [
+  "colour",
+  "level"
+ ],
+ "channels": [
+  {
+   "role": "master",
+   "default": 255
+  },
+  {
+   "role": "colour.r",
+   "default": 0
+  },
+  {
+   "role": "colour.g",
+   "default": 0
+  },
+  {
+   "role": "colour.b",
+   "default": 0
+  },
+  {
+   "role": "colour.w",
+   "default": 0
+  }
+ ],
+ "beam": {
+  "angle_deg": 60.0,
+  "field_deg": 90.0,
+  "type": "wash"
+ },
+ "park": {
+  "level": 0
+ },
+ "gdtf": "LED PAR 64 RGBW.gdtf",
+ "mode": "Default",
+ "note": "channel order read from mvr/gdtf/LED PAR 64 RGBW.gdtf. Brightness rides the colour channels and the master is held full, as on par7; the W emitter carries the achromatic part so pastels and open white actually get the fixture's output."
+}

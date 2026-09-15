@@ -117,9 +117,12 @@
   --energy-h: 28px;
   --moments-h: 18px;
   --lane-gap: 2px;
-  --clip-radius: 3px;
-  --handle-w: 8px;
   --snap-threshold: 8px;
+
+  /* elevation. On a near-black ground a grey drop shadow does nothing, so a
+     lifted surface is read from its rim light plus depth beneath it. */
+  --elev-popover: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 10px 28px -6px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* ── density: the same system at arm's length ────────────────────────────────

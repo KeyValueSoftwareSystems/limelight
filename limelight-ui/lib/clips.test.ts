@@ -32,6 +32,7 @@ test("overlap catches partial and full containment either way round", () => {
 });
 
 import { buildClips } from "./clips.ts";
+import { effectIdForPlanFx } from "./families.ts";
 import type { Effect, Grid } from "./types";
 
 const GRID: Grid = { bpm: 120, beats_per_bar: 4, first_beat_s: 0 };
@@ -160,4 +161,52 @@ test("clips come back in time order regardless of source", () => {
   const clips = buildClips(PLAN, [{ type: "stab", bar: 1, beats: 1 }], CATALOGUE, GRID);
   const starts = clips.map((c) => c.startS);
   assert.deepEqual(starts, [...starts].sort((a, b) => a - b));
+});
+
+/* ── schema 2 ────────────────────────────────────────────────────────────────
+   The catalogue above is schema 1: its tiles declare the plan's word as `fx`,
+   so the two vocabularies met on their own. Production is schema 2, where a
+   tile has `dimension` and `default_beats` and no `fx` at all. Every test above
+   passed while the real timeline was broken, because none of them used the
+   shape the server actually serves. These do. */
+
+const CATALOGUE_V2: Effect[] = [
+  { id: "impact", name: "Impact", blurb: "", kind: "gesture", dimension: "amount",
+    default_beats: 1, dials: { amount: { default: 1 } } },
+  { id: "blackout", name: "Blackout", blurb: "", kind: "gesture", dimension: "amount",
+    default_beats: 1, dials: { amount: { default: 0 } } },
+];
+
+test("schema 2: a plan assignment resolves to a catalogue tile", () => {
+  assert.equal(effectIdForPlanFx("white_blast"), "impact");
+  assert.equal(effectIdForPlanFx("blackout"), "blackout");
+  assert.equal(effectIdForPlanFx("not_a_plan_word"), null);
+});
+
+test("schema 2: taking over an arranger clip overrides it", () => {
+  // p0 is a white_blast at bar 2; Impact is the tile that stands in for it.
+  const clips = buildClips(PLAN, [{ type: "impact", bar: 2, beats: 1 }], CATALOGUE_V2, GRID);
+  assert.equal(clips.find((c) => c.planId === "p0")?.overridden, true);
+});
+
+test("schema 2: a different tile at the same place overrides nothing", () => {
+  const clips = buildClips(PLAN, [{ type: "blackout", bar: 2, beats: 1 }], CATALOGUE_V2, GRID);
+  assert.equal(clips.find((c) => c.planId === "p0")?.overridden, false);
+});
+
+test("a taken-over clip stays overridden after the copy is moved away", () => {
+  /* The whole point of `from`. Overlap alone let the machine's version come
+     back the moment you dragged your copy off it — the duplicate-on-move bug. */
+  const moved = buildClips(
+    PLAN, [{ type: "impact", bar: 40, beats: 1, from: "p0" }], CATALOGUE_V2, GRID,
+  );
+  assert.equal(moved.find((c) => c.planId === "p0")?.overridden, true);
+  assert.equal(moved.filter((c) => c.source === "mine").length, 1);
+});
+
+test("schema 2: an edit lands in its real family, not everything in one lane", () => {
+  const [c] = buildClips(null, [{ type: "blackout", bar: 1, beats: 1 }], CATALOGUE_V2, GRID);
+  assert.equal(c.family, "darkness");
+  const [h] = buildClips(null, [{ type: "impact", bar: 1, beats: 1 }], CATALOGUE_V2, GRID);
+  assert.equal(h.family, "hits");
 });

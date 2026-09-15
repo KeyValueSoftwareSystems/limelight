@@ -30,13 +30,23 @@ function toLightsFrames(ticks, layout, opts) {
   const W = opts.width || widthOf(layout), gammaExp = opts.gamma || GAMMA, maxStep = opts.maxStep || 7;
   const addrOf = {};
   for (const f of layout.fixtures) addrOf[f.id] = f.address;
+  /* Which channels carry BRIGHTNESS, and therefore want the gamma curve. Asked of
+     each driver's profile rather than hardcoded per type: on a colour-brightness
+     device (a par) that is the emitter channels, on a master-brightness device (a
+     mover) it is the dimmer. A rig with an RGBW par and a CMY spot on it has both,
+     at offsets neither of the two original types ever used.
+     NB these are 0-based frame indices: address is 1-based, so address - 1 + k. */
   const gammaIdx = new Set();
   for (const f of layout.fixtures) {
-    if (f.type === "par7") { const a = f.address; gammaIdx.add(a); gammaIdx.add(a + 1); gammaIdx.add(a + 2); }
-    if (f.type === "head13") gammaIdx.add(f.address + 4);   // head dimmer channel
+    const prof = drivers.forType(f.type).profile;
+    const chans = prof.channels || [];
+    const bright = (prof.brightness || (chans.some(c => c.role === "colour.r") ? "colour" : "master")) === "colour"
+      ? ["colour.r", "colour.g", "colour.b", "colour.w"]
+      : ["master"];
+    chans.forEach((c, k) => { if (bright.includes(c.role)) gammaIdx.add(f.address - 1 + k); });
   }
   const gamma = v => Math.round(255 * Math.pow(Math.max(0, Math.min(255, v)) / 255, gammaExp));
-  const heads = layout.fixtures.filter(f => f.type === "head13");
+  const heads = layout.fixtures.filter(f => drivers.moves(f.type));
 
   const driven = [];   // per frame, per head: did its intent carry a pan / a tilt?
   const frames = ticks.map(tk => {

@@ -1,0 +1,25 @@
+{
+ "type": "blinder1",
+ "footprint": 1,
+ "brightness": "master",
+ "can": [
+  "level"
+ ],
+ "channels": [
+  {
+   "role": "master",
+   "default": 0
+  }
+ ],
+ "beam": {
+  "angle_deg": 61.5,
+  "field_deg": 100.5,
+  "type": "wash"
+ },
+ "park": {
+  "level": 0
+ },
+ "gdtf": "Chauvet_Professional@STRIKE_Array_4@Rev_1.0.5.gdtf",
+ "mode": "1Ch Mode",
+ "note": "one channel, read from the GDTF. Warm tungsten-emulation blinder pointed at the audience, not the stage. It has no colour and no strobe: the whole device is a single number, and everything it is good for comes from WHEN that number moves."
+}

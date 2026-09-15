@@ -12,7 +12,36 @@
        strobe:{max_hz}, ... }
 
    An intent (device-agnostic, all fields optional):
-     { colour:[r,g,b] 0..1, level 0..1, dim 0..255, strobe 0..1, ... } */
+     { colour:[r,g,b] 0..1, level 0..1, dim 0..255, strobe 0..1, ... }
+
+   ---------------------------------------------------------------------------
+   The GDTF fixtures under mvr/gdtf/ need four things the two rig.py profiles
+   never did, so the roles below are additive -- a profile that does not declare
+   them behaves exactly as before:
+
+     colour.w            a fourth emitter on an RGBW device. `white` says how to
+                         drive it: "min" (the achromatic part of the colour, the
+                         usual LED-par behaviour) or "off".
+     colour.c/.m/.y      a SUBTRACTIVE mixing head: the flags take colour away
+                         from a white lamp, so c = 1 - r. Brightness is the
+                         master, never the flags.
+     zoom/frost/iris/focus   plain 0..1 continuous intents.
+     strobe + strobe_range   one channel that is shutter AND strobe, the way most
+                         real heads wire it: {open, lo, hi} means 0 -> `open`
+                         (shutter simply open) and >0 -> lo..hi. Without a
+                         strobe_range the channel stays linear 0..255. */
+/* The shared colour NAMES. A head gesture names a wheel slot -- "pink" -- because
+   that is all a mechanical wheel can do, and a device with a wheel snaps to it.
+   A device that MIXES has no wheel to snap to, so it needs the name's rgb. These
+   are head13's eight slots, which is where the vocabulary got the names.
+   Without this an RGB device handed a name computed 255 * "pink"[0] and wrote NaN
+   into the frame -- latent for as long as the only mixing device was a par, which
+   is never sent one. A profile may override with its own `colour_names`. */
+const COLOUR_NAMES = {
+  white: [1, 1, 1], red: [1, 0, 0], yellow: [1, 0.85, 0], blue: [0, 0, 1],
+  green: [0, 1, 0], pink: [1, 0, 0.55], orange: [1, 0.3, 0], "light blue": [0, 0.6, 1],
+};
+
 function Driver(profile) {
   const chans = profile.channels || [];
   const footprint = profile.footprint;
@@ -47,11 +76,32 @@ function Driver(profile) {
     const f = base();
     const lvl = intent.level == null ? 1 : intent.level;
 
-    if (intent.colour && has("colour.r")) {
+    /* a mixing device resolves a NAMED colour to its rgb; a wheel device leaves the
+       name alone and snaps to the slot below. */
+    const names = profile.colour_names || COLOUR_NAMES;
+    const rgb = typeof intent.colour === "string"
+      ? (names[intent.colour] || null)
+      : (Array.isArray(intent.colour) ? intent.colour : null);
+
+    if (rgb && has("colour.r")) {
       const s = brightness === "colour" ? lvl : 1;
-      f[first("colour.r")] = clamp255(255 * intent.colour[0] * s);
-      f[first("colour.g")] = clamp255(255 * intent.colour[1] * s);
-      f[first("colour.b")] = clamp255(255 * intent.colour[2] * s);
+      f[first("colour.r")] = clamp255(255 * rgb[0] * s);
+      f[first("colour.g")] = clamp255(255 * rgb[1] * s);
+      f[first("colour.b")] = clamp255(255 * rgb[2] * s);
+      /* RGBW: the white emitter carries the achromatic part of the colour. A
+         saturated hue has none and leaves it dark; a pastel or an open white
+         drives it hard, which is where these fixtures get their output. */
+      if (has("colour.w"))
+        f[first("colour.w")] = profile.white === "off" ? 0
+          : clamp255(255 * Math.min(rgb[0], rgb[1], rgb[2]) * s);
+    }
+    /* a SUBTRACTIVE head: the flags remove colour from a white lamp, so full red
+       is "take out green and blue". Brightness stays on the master -- driving the
+       flags with level would wash the hue out instead of dimming it. */
+    if (rgb && has("colour.c")) {
+      f[first("colour.c")] = clamp255(255 * (1 - rgb[0]));
+      f[first("colour.m")] = clamp255(255 * (1 - rgb[1]));
+      f[first("colour.y")] = clamp255(255 * (1 - rgb[2]));
     }
     /* a mechanical colour wheel: pick the slot nearest the wanted colour, or by
        name. The wheel is discrete, so this is a snap, not a mix. */
@@ -67,8 +117,18 @@ function Driver(profile) {
     if (brightness === "master" && intent.level != null && has("master"))
       f[first("master")] = clamp255(255 * lvl);
     if (intent.dim != null && has("master")) f[first("master")] = clamp255(intent.dim);
-    if (intent.strobe != null && has("strobe")) f[first("strobe")] = clamp255(255 * intent.strobe);
+    /* one channel doing shutter AND strobe, the way most real heads wire it:
+       strobe 0 means "shutter open", not "channel 0" -- which on these fixtures
+       is the shutter CLOSED and the lamp dark. */
+    if (has("strobe")) {
+      const sr = profile.strobe_range;
+      if (sr) f[first("strobe")] = clamp255(!intent.strobe ? sr.open
+                                            : sr.lo + intent.strobe * (sr.hi - sr.lo));
+      else if (intent.strobe != null) f[first("strobe")] = clamp255(255 * intent.strobe);
+    }
     if (intent.speed != null && has("speed")) f[first("speed")] = clamp255(255 * intent.speed);
+    for (const role of ["zoom", "frost", "iris", "focus", "strobe_duration"])
+      if (intent[role] != null && has(role)) f[first(role)] = clamp255(255 * intent[role]);
     if (intent.pan != null && has("pan")) set16(f, "pan", "pan_fine", intent.pan, win && win.pan);
     if (intent.tilt != null && has("tilt")) set16(f, "tilt", "tilt_fine", intent.tilt, win && win.tilt);
 

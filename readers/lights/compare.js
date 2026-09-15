@@ -21,8 +21,17 @@ const fs = require("fs"), path = require("path"), os = require("os");
 const { execFileSync } = require("child_process");
 const { enumerate, validateSequence } = require("./preflight.js");
 const layouts = require("./layouts.js");
+const drivers = require("./drivers/index.js");
 
 const LIT = 0.01;                    /* a lamp is "lit" above this level */
+
+/* The whole point of this file is that the two rigs are DIFFERENT, so it cannot
+   ask "is this a par7" -- it asks the driver what the fixture can do. A mover is
+   anything that aims; a wash is anything that mixes colour and stays put. */
+const moves = type => { try { return drivers.moves(type); } catch (e) { return false; } };
+const isWash = type => {
+  try { return drivers.can(type, "colour") && !drivers.moves(type); } catch (e) { return false; }
+};
 
 /* ---- colour helpers (the same hue/sat reading frame.js palettises with) ---- */
 function rgb2hsv(c) {
@@ -64,7 +73,7 @@ function measure(show, palette) {
     const states = new Set(), heads = [];
     for (const fx of tk.fixtures) {
       const it = fx.intent || {}, lv = it.level || 0;
-      if (fx.type === "head13") heads.push(JSON.stringify(it));
+      if (moves(fx.type)) heads.push(JSON.stringify(it));
       if (lv > LIT) {
         n++;
         if (Array.isArray(it.colour)) {
@@ -72,7 +81,7 @@ function measure(show, palette) {
             offPalette.push({ t: tk.t, id: fx.id, colour: it.colour });
         } else if (typeof it.colour === "string") headNames.add(it.colour);
       }
-      if (fx.type === "par7")
+      if (isWash(fx.type))
         states.add(JSON.stringify([Array.isArray(it.colour) ? it.colour.map(q) : it.colour, q(it.level), q(it.strobe)]));
     }
     if (heads.length > 1) { headTicks++; if (heads.every(h => h === heads[0])) headsInUnison++; }
@@ -82,7 +91,7 @@ function measure(show, palette) {
   return { lit, distinct, headNames: [...headNames].sort(), offPalette,
            headsInUnison, headTicks,
            fixtures: show.fixtures.length,
-           pars: show.fixtures.filter(f => f.type === "par7").length,
+           pars: show.fixtures.filter(f => isWash(f.type)).length,
            maxLit: Math.max(...lit), meanLit: mean(lit),
            maxDistinct: Math.max(...distinct), meanDistinct: mean(distinct),
            allSame: distinct.filter(v => v <= 1).length };
@@ -102,6 +111,8 @@ const peakAt = (show, m, lit) => {
 /* ---- the page's frame data: 7 bytes per fixture per tick -------------------- */
 const WHEEL = Object.fromEntries(
   (require("./drivers/profiles/head13.profile.json").colour_wheel || []).map(s => [s.name, s.rgb]));
+/* NB the wheel above is head13's. It is here to turn a wheel-slot NAME back into an
+   rgb triple for the report; a CMY head never emits one, so it needs no entry. */
 function pack(show) {
   const n = show.ticks.length, m = show.fixtures.length;
   const buf = Buffer.alloc(n * m * 7);

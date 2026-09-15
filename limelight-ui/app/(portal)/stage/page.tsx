@@ -21,6 +21,7 @@ import { StageTimeline } from "@/components/editor/StageTimeline";
 import { Sidebar } from "@/components/editor/Sidebar";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { buildClips } from "@/lib/clips";
+import { effectIdForPlanFx } from "@/lib/families";
 import type { Clip } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -319,14 +320,25 @@ export default function StagePage() {
      struck through, so it is obvious what was replaced and where. */
   const handleMaterialize = useCallback(
     (clip: Clip): number | null => {
+      /* Schema 1 tiles declared the plan's word as `fx`, so they matched it
+         directly. Schema 2 tiles do not, so the plan's word is mapped onto a
+         catalogue id — without this the lookup failed, materialising returned
+         null, and the arranger's clips could not be moved or resized at all. */
+      const mapped = effectIdForPlanFx(clip.fx);
       const tile =
         effects.find((e) => e.fx === clip.fx && e.beats === clip.beats) ??
-        effects.find((e) => e.fx === clip.fx);
+        effects.find((e) => e.fx === clip.fx) ??
+        (mapped ? effects.find((e) => e.id === mapped) : undefined);
       if (!tile) return null;
       /* Read the live count, not a closed-over one: two materialisations in the
          same tick would otherwise both claim the same index. */
       const index = usePortalStore.getState().edits.length;
-      addEdit({ type: tile.id, bar: clip.bar, beat: clip.beat, beats: clip.beats });
+      /* Record which assignment this replaces. Overlap alone could not carry it:
+         moving your copy away let the machine's version play again underneath. */
+      addEdit({
+        type: tile.id, bar: clip.bar, beat: clip.beat, beats: clip.beats,
+        ...(clip.planId ? { from: clip.planId } : {}),
+      });
       return index;
     },
     [effects, addEdit],

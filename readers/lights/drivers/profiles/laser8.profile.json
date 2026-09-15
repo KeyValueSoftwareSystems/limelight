@@ -1,0 +1,67 @@
+{
+ "type": "laser8",
+ "footprint": 8,
+ "brightness": "master",
+ "can": [
+  "laser",
+  "level",
+  "colour",
+  "move"
+ ],
+ "channels": [
+  {
+   "role": "master",
+   "default": 0
+  },
+  {
+   "role": "colour.r",
+   "default": 0
+  },
+  {
+   "role": "colour.g",
+   "default": 0
+  },
+  {
+   "role": "colour.b",
+   "default": 0
+  },
+  {
+   "role": "pan",
+   "default": 0
+  },
+  {
+   "role": "tilt",
+   "default": 0
+  },
+  {
+   "role": "speed",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  }
+ ],
+ "beam": {
+  "angle_deg": 0.2,
+  "field_deg": 30.0,
+  "type": "laser"
+ },
+ "aim": {
+  "pan": [
+   0,
+   128,
+   255
+  ],
+  "tilt": [
+   0,
+   96,
+   255
+  ]
+ },
+ "park": {
+  "level": 0
+ },
+ "invented": true,
+ "note": "THIS PROFILE IS INVENTED. Every other profile in this directory was read out of a real GDTF file under mvr/gdtf/; there is no laser GDTF in this repo, so the channel map below is made up and matches no fixture you can buy. It exists because preflight.js carries a laser_sweep sequence that no rig here could ever run -- nothing declared the `laser` capability -- and a hero look that is permanently unreachable is worse than one behind a gate. The gate is real: the sequence is still withheld unless the layout also declares limits.laser_zones, so a rig that has not stated its safe zones does not get it. Replace this with a profile read from the real fixture's GDTF before anything is pointed at a room with people in it."
+}

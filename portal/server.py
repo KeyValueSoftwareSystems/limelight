@@ -15,6 +15,7 @@ page as raw bytes, not JSON: 41 channels x 40 fps is a megabyte of digits
 otherwise, and the page wants a Uint8Array at the end of it anyway.
 """
 import argparse
+import functools
 import hashlib
 import json
 import mimetypes
@@ -103,6 +104,43 @@ class Rigmap:
                 "fixtures": len(self.fixtures) or len(self.pars) + len(self.heads)}
 
 
+PROFILES_DIR = os.path.join(LAYOUTS_DIR, "drivers", "profiles")
+
+
+@functools.lru_cache(maxsize=1)
+def profiles():
+    """Every device type this box has a driver for, as {type: profile}.
+
+    The drivers are JS and the registry that names them is JS, so this reads the
+    same profile JSON those drivers read rather than keeping a second list in
+    Python. It used to be a literal `13 if head13 else 7`, which quietly
+    mis-measured every rig carrying anything else.
+    """
+    out = {}
+    try:
+        names = sorted(os.listdir(PROFILES_DIR))
+    except OSError:
+        return out
+    for fn in names:
+        if not fn.endswith(".profile.json"):
+            continue
+        try:
+            with open(os.path.join(PROFILES_DIR, fn)) as fh:
+                doc = json.load(fh)
+        except (OSError, ValueError):
+            continue
+        if doc.get("type"):
+            out[doc["type"]] = doc
+    return out
+
+
+def footprint_of(type_):
+    """Channels this device occupies. Unknown types fall back to 7 -- the old
+    default -- so an unrecognised layout is still listed rather than dropped."""
+    p = profiles().get(type_)
+    return (p or {}).get("footprint", 7)
+
+
 def layouts():
     """Every rig this box can render, newest API first: layouts.js is the
     authority on what a layout is, so this only lists the files it would accept."""
@@ -119,10 +157,27 @@ def layouts():
         kinds = {}
         for f in fx:
             kinds[f.get("type")] = kinds.get(f.get("type"), 0) + 1
-        width = max((f["address"] + (13 if f.get("type") == "head13" else 7) - 1) for f in fx) if fx else 0
+        width = max((f["address"] + footprint_of(f.get("type")) - 1) for f in fx) if fx else 0
+        # The page draws the rig, so it needs where each lamp is and what it is --
+        # a count of kinds cannot be drawn. Positions only; nothing here is secret,
+        # and a layout is already public over /api/layouts.
+        shown = [{"id": f.get("id"), "type": f.get("type"), "at": f.get("at"),
+                  "address": f.get("address"), "universe": f.get("universe", 0)}
+                 for f in fx]
+        prof = profiles()
         out.append({"file": fn, "rig": doc.get("rig") or fn[:-len(".layout.json")],
                     "fixtures": len(fx), "kinds": kinds, "channels": width,
                     "geometry": doc.get("geometry"), "note": doc.get("note"),
+                    "placeholder": bool(doc.get("placeholder")),
+                    "fixture_list": shown,
+                    "profiles": {t: {"footprint": p.get("footprint"),
+                                     "can": p.get("can", []),
+                                     "beam": p.get("beam"),
+                                     "cells": p.get("cells"),
+                                     "invented": bool(p.get("invented")),
+                                     "gdtf": p.get("gdtf")}
+                                 for t, p in prof.items()
+                                 if t in kinds},
                     "default": fn == DEFAULT_LAYOUT})
     return out
 

@@ -39,9 +39,17 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
     cv.height = Math.max(1, Math.round(rect.height * dpr));
   }, []);
 
+  /* Setting cv.width CLEARS the canvas, so a resize must be followed by a
+     repaint. Without that the stage goes black and stays black: while paused
+     nothing else paints, so a resize landing after the one-shot paint below
+     wiped the preview until the next bake or trim. The ref is so the observer
+     always calls the CURRENT paint without re-subscribing on every render. */
+  const paintRef = useRef<() => void>(() => {});
+
   useEffect(() => {
-    sizeCanvas();
-    const obs = new ResizeObserver(sizeCanvas);
+    const resize = () => { sizeCanvas(); paintRef.current(); };
+    resize();
+    const obs = new ResizeObserver(resize);
     if (containerRef.current) obs.observe(containerRef.current);
     return () => obs.disconnect();
   }, [sizeCanvas]);
@@ -66,8 +74,12 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
     }
 
     const fx = trimFixtures(raw, trims);
-    paintStage(ctx, fx, W, H, dpr);
+    /* the show's own clock drives the strobe gate, so a paused preview and a
+       running one agree on which half of a flash they are in */
+    paintStage(ctx, fx, W, H, dpr, { t });
   }, [show, frames, place, trims, clockRef]);
+
+  useEffect(() => { paintRef.current = paint; }, [paint]);
 
   useAnimationLoop(paint, playing);
 

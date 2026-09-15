@@ -17,7 +17,7 @@ import { Ruler } from "./Ruler";
 import { SectionBand } from "./SectionBand";
 import { EnergyBand } from "./EnergyBand";
 import { MomentsBand } from "./MomentsBand";
-import { Layer } from "./Layer";
+import { Layer, LayerHeader, LAYER_HEADER_W } from "./Layer";
 import { Playhead } from "./Playhead";
 import { ClipInspector } from "./ClipInspector";
 import { TransportBar } from "./TransportBar";
@@ -48,6 +48,10 @@ interface Props {
 
 const SNAP_RADIUS_BEATS = 0.6;
 const DRAG_THRESHOLD_PX = 3;
+/* ruler + sections + moments, above the layer rows. Each band carries a 1px
+   bottom border on top of its var height, so those count too — without them the
+   popover sat 3px high of the row it belongs to. */
+const BANDS_H = 22 + 1 + 30 + 1 + 18 + 1;
 const ROW_MIN = 26;
 const ROW_MAX = 52;
 
@@ -74,6 +78,7 @@ export function StageTimeline({
 
   const lanesRef = useRef<HTMLDivElement>(null);
   const rowsRef = useRef<HTMLDivElement>(null);
+  const headsRef = useRef<HTMLDivElement>(null);
   const lastSong = useRef<string | null>(null);
 
   const dragEffect = useDrag((s) => s.effect);
@@ -94,6 +99,19 @@ export function StageTimeline({
     ro.observe(el);
     setRowsH(el.getBoundingClientRect().height);
     return () => ro.disconnect();
+  }, [show]);
+
+  /* The gutter scrolls with the lanes. It cannot share their scroller, because
+     the lanes must sit in the timeline's coordinate space and the gutter must
+     sit outside it. */
+  useEffect(() => {
+    const el = rowsRef.current;
+    if (!el) return;
+    const sync = () => {
+      if (headsRef.current) headsRef.current.scrollTop = el.scrollTop;
+    };
+    el.addEventListener("scroll", sync, { passive: true });
+    return () => el.removeEventListener("scroll", sync);
   }, [show]);
 
   useEffect(() => {
@@ -345,7 +363,38 @@ export function StageTimeline({
         onFit={() => setView(fit(duration))}
       />
 
-      <div ref={lanesRef} className="flex-1 min-h-0 relative">
+      <div className="flex-1 min-h-0 flex">
+        {/* The gutter sits outside the timeline so the lanes can fill the
+            timeline's box exactly. Its spacers reuse the bands' own classes,
+            which keeps the two columns aligned without a magic number. */}
+        <div
+          className="flex-none flex flex-col border-r border-solid border-line bg-bg"
+          style={{ width: LAYER_HEADER_W }}
+        >
+          <div className="h-[var(--ruler-h)] flex-none border-b border-solid border-line" />
+          <div className="h-[var(--section-h)] flex-none border-b border-solid border-line" />
+          <div className="h-[var(--moments-h)] flex-none border-b border-solid border-line" />
+          <div ref={headsRef} className="flex-1 min-h-0 overflow-hidden">
+            {byLayer.map((_, i) => (
+              <LayerHeader
+                key={i}
+                index={i}
+                height={rowHeight}
+                hidden={hidden.includes(i)}
+                locked={locked.includes(i)}
+                onToggleHidden={() =>
+                  setHidden((h) => (h.includes(i) ? h.filter((x) => x !== i) : [...h, i]))
+                }
+                onToggleLocked={() =>
+                  setLocked((l) => (l.includes(i) ? l.filter((x) => x !== i) : [...l, i]))
+                }
+              />
+            ))}
+          </div>
+          <div className="h-[var(--energy-h)] flex-none border-b border-solid border-line" />
+        </div>
+
+      <div ref={lanesRef} className="flex-1 min-w-0 min-h-0 relative">
         <Timeline
           view={view}
           duration={duration}
@@ -375,19 +424,11 @@ export function StageTimeline({
               {byLayer.map((rowClips, i) => (
                 <Layer
                   key={i}
-                  index={i}
                   clips={hidden.includes(i) ? [] : rowClips}
                   selection={selection}
                   height={rowHeight}
                   hidden={hidden.includes(i)}
                   locked={locked.includes(i)}
-                  onToggleHidden={() =>
-                    setHidden((h) => (h.includes(i) ? h.filter((x) => x !== i) : [...h, i]))
-                  }
-                  onToggleLocked={() =>
-                    setLocked((l) => (l.includes(i) ? l.filter((x) => x !== i) : [...l, i]))
-                  }
-                  onAdd={() => onSelect("", false)}
                   onSelect={onSelect}
                   onGesture={startGesture}
                   onZoomTo={zoomToClip}
@@ -412,6 +453,7 @@ export function StageTimeline({
             />
           )}
         </Timeline>
+      </div>
       </div>
 
       {dragEffect && ghost && (
@@ -440,14 +482,21 @@ function Popover({
 }) {
   const { view, width } = useTimeline();
   const x = timeToX(clip.startS, view, width);
-  if (x < -240 || x > width + 240) return null;
-  const left = Math.min(Math.max(8, x + 124), Math.max(8, width - 150));
+  if (x < -260 || x > width + 260) return null;
+
+  /* Anchored under the clip's row and clamped to the timeline, so the card never
+     sits over the clip's own trim handles — which is what made resizing a
+     selected clip impossible. */
+  const PANEL_W = 248;
+  const left = Math.min(Math.max(8, x), Math.max(8, width - PANEL_W - 8));
+  const top = BANDS_H + (row + 1) * rowHeight + 8;
+
   return (
     <ClipInspector
       clip={clip}
       effect={effect}
       x={left}
-      y={Math.min(90 + row * rowHeight, 160)}
+      y={top}
       onChange={onChange}
       onRemove={onRemove}
     />
