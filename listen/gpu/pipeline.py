@@ -692,6 +692,7 @@ def make_prompt(task_prompt, duration_s):
 def run_pipeline(wav_path):
     slug = os.path.splitext(os.path.basename(wav_path))[0]
     score = {"score": slug, "version": 0, "song": {"slug": slug}}
+    absent, asked = {}, []
     t_total = time.time()
 
     t = time.time()
@@ -737,6 +738,7 @@ def run_pipeline(wav_path):
 
                 traceback.print_exc()
                 results[name] = None
+                absent[name] = f"{type(e).__name__}: {str(e)[:120]}"
     print(f"  [phase 1] {time.time() - p1:.1f}s", flush=True)
 
     if results.get("beats"):
@@ -801,6 +803,8 @@ def run_pipeline(wav_path):
         import traceback
 
         traceback.print_exc()
+        absent["stems"] = f"{type(e).__name__}: {str(e)[:120]}"
+        absent["stems_temporal"] = absent["stems"]
 
     print("  [phase 2] chords (BTC GPU) ...", flush=True)
     t = time.time()
@@ -810,6 +814,7 @@ def run_pipeline(wav_path):
         print(f"    chords: {len(chords)} ({time.time() - t:.1f}s)", flush=True)
     except Exception as e:
         print(f"    chords: FAILED {e}", flush=True)
+        absent["btc_chords_raw"] = f"{type(e).__name__}: {str(e)[:120]}"
 
     global _btc_model
     if _btc_model is not None:
@@ -825,7 +830,6 @@ def run_pipeline(wav_path):
     print("  [phase 3] MOSS queries ...", flush=True)
     p3 = time.time()
     dur = score["song"]["length_s"]
-    absent, asked = {}, []
     for task, raw_prompt, is_json in [
         ("sections", SECTIONS_PROMPT, True),
         ("emotion", EMOTION_PROMPT, True),
@@ -936,7 +940,9 @@ def run_pipeline(wav_path):
         score["moments"] = got
         print(f"    moments: {len(got)} measured from stems", flush=True)
     else:
-        absent["moments"] = "no stem separation to read entrances from"
+        absent["moments"] = ("no stem separation to read entrances from"
+                             if not score.get("stems_temporal")
+                             else "the detector found nothing or raised")
 
     print(f"  [phase 3] {time.time() - p3:.1f}s", flush=True)
 

@@ -24,7 +24,7 @@ KNOWN = [
     "lyrics", "tells", "motion", "recording",
     "caption", "emotion", "instruments", "instruments_over_time",
     "key_tempo", "rhythm", "beat_consensus", "sections_second_opinion",
-    "btc_chords_raw", "melody_phrases", "lead", "voice", "phrases",
+    "btc_chords_raw", "melody_phrases", "lead", "voice", "unavailable",
 ]
 
 _STEM_NAMES = ["drums", "bass", "vocals", "other", "guitar", "piano"]
@@ -671,6 +671,8 @@ def format_v1(raw):
             "lanes": temporal["stems"],
         }
 
+    if raw.get("unavailable"):
+        out["unavailable"] = raw["unavailable"]
     for whole in ("caption", "emotion", "rhythm", "key_tempo",
                   "beat_consensus", "sections_second_opinion"):
         if raw.get(whole) is not None:

@@ -77,11 +77,15 @@ def main(paths):
                     score.pop("unavailable", None)
                 feels = f"+emotion from {len(got)} sections"
         was = len(score.get("moments") or [])
-        got = M.find(score.get("stems_temporal"),
-                     [b["t"] for b in score.get("beats") or [] if "t" in b],
-                     score.get("grid"), score.get("btc_chords_raw"),
-                     score.get("melody"), score.get("rhythm"),
-                     score.get("emotion"))
+        try:
+            got = M.find(score.get("stems_temporal"),
+                         [b["t"] for b in score.get("beats") or [] if "t" in b],
+                         score.get("grid"), score.get("btc_chords_raw"),
+                         score.get("melody"), score.get("rhythm"),
+                         score.get("emotion"))
+        except Exception as e:
+            print(f"{slug}: moments failed ({type(e).__name__}: {e})")
+            got = None
         if got:
             score["moments"] = got
         with open(path, "w") as fh:

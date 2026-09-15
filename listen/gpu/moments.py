@@ -49,7 +49,6 @@ ORDER = (
     "lift",
     "mood_turn",
     "tempo_change",
-    "key_change",
     "entrance",
     "exit",
 )
@@ -60,7 +59,6 @@ CAP = {
     "build": 4,
     "peak": 1,
     "tempo_change": 4,
-    "key_change": 3,
     "rhythm_change": 4,
     "lift": 4,
     "mood_turn": 4,
@@ -190,9 +188,10 @@ def rolls(temporal, w, tol=4.0):
             continue
         out.append(
             {
-                "i": max(0, i - side),
+                "i": i,
                 "type": "build",
                 "size": round(min(1.0, size), 3),
+                "lead_s": round(side * w, 2),
                 "description": "the drums thicken into something",
             }
         )
@@ -228,51 +227,6 @@ def tempo_changes(grid, w):
                 "description": f"tempo moves {fa:.0f} to {fb:.0f} bpm",
             }
         )
-    return out
-
-
-def key_changes(chords, w, window_s=30.0, step_s=10.0):
-    """The root the harmony sits on, and where it moves and stays moved."""
-    spans = [
-        c
-        for c in (chords or [])
-        if isinstance(c, dict)
-        and str(c.get("chord", "N")) != "N"
-        and isinstance(c.get("start"), (int, float))
-    ]
-    if len(spans) < 4:
-        return []
-    end = max(c["end"] for c in spans)
-    marks = []
-    t = 0.0
-    while t + window_s <= end + step_s:
-        held = {}
-        for c in spans:
-            ov = min(t + window_s, c["end"]) - max(t, c["start"])
-            if ov > 0:
-                root = str(c["chord"]).split(":")[0].rstrip("m")
-                held[root] = held.get(root, 0.0) + ov
-        if held:
-            marks.append((t, max(held.items(), key=lambda kv: kv[1])[0]))
-        t += step_s
-    out = []
-    for k in range(1, len(marks) - 1):
-        was, now = marks[k - 1][1], marks[k][1]
-        if now == was or marks[k + 1][1] != now:
-            continue
-        if out and marks[k][0] - out[-1]["at_s"] < window_s:
-            continue
-        out.append(
-            {
-                "i": int(round(marks[k][0] / w)),
-                "at_s": marks[k][0],
-                "type": "key_change",
-                "size": 0.5,
-                "description": f"the harmony moves from {was} to {now}",
-            }
-        )
-    for m in out:
-        m.pop("at_s", None)
     return out
 
 
@@ -523,7 +477,6 @@ def find(
         + loudest(v)
         + rolls(temporal, w)
         + tempo_changes(grid, w)
-        + key_changes(chords, w)
         + lifts(melody, w, n)
         + rhythm_changes(hits, w, n)
         + mood_turns(emotion, w)
@@ -592,6 +545,9 @@ def find(
             "intensity": min(1.0, g["size"]),
             "measured": True,
         }
+        lead = g["parts"][0].get("lead_s")
+        if lead:
+            item["lead_s"] = lead
         if names:
             if len(names) == 1:
                 who = names[0]

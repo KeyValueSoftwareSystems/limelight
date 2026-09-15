@@ -34,6 +34,7 @@ export const KNOWN = [
   "layers",
   "tells",
   "motion",
+  "unavailable",
 ];
 
 const STEM_NAMES = ["drums", "bass", "vocals", "other", "guitar", "piano"];
@@ -638,6 +639,8 @@ export function format(raw) {
   }
 
   if (raw.motion) out.motion = raw.motion;
+  if (raw.unavailable && Object.keys(raw.unavailable).length)
+    out.unavailable = raw.unavailable;
   if (raw.sections_second_opinion)
     out.sections_second_opinion = raw.sections_second_opinion;
   if (raw.rhythm) out.rhythm = raw.rhythm;

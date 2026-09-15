@@ -24,6 +24,7 @@ guessing stops. Nothing else in this file changes.
     s.now()          -> {"position": {"bar":..,"beat":..}, "phase":.., ...}
     s.next(2000)     -> [{"bar":..,"beat":..,"accent":..,"in_ms":..}, ...]
 """
+
 import json
 import math
 import time
@@ -64,16 +65,16 @@ class Session:
         # pipeline, and in any conversation about the song.
         self.first_bar = _or(g.get("first_bar"), 1)
 
-        self.beat_s = 60.0 / self.bpm          # song seconds per beat, never scaled
+        self.beat_s = 60.0 / self.bpm  # song seconds per beat, never scaled
         self.bar_s = self.beat_s * self.bpb
         # A song may change tempo. grid.tempo is the map: from beat `from_beat`
         # onward, which lands at `at_s`, the tempo is `bpm`. A score without one
         # is a song that never changes tempo, which is a map of length one -- so
         # everything walks the map and there is no second path to keep in step.
-        self.tempo = sorted(g.get("tempo") or
-                            [{"from_beat": 0, "at_s": self.first, "bpm": self.bpm}],
-                            key=lambda x: x["from_beat"])
-
+        self.tempo = sorted(
+            g.get("tempo") or [{"from_beat": 0, "at_s": self.first, "bpm": self.bpm}],
+            key=lambda x: x["from_beat"],
+        )
 
         self._wall = now or (lambda: time.monotonic())
         # A real music container already has a clock, and the thing playing the
@@ -87,7 +88,7 @@ class Session:
 
         self.playing = False
         self._rate = 1.0
-        self._held = 0.0                        # song seconds, while paused
+        self._held = 0.0  # song seconds, while paused
         self._since = self._wall()
 
     # ---- song seconds. The only place rate appears. ------------------------
@@ -133,9 +134,11 @@ class Session:
 
     def position_at(self, t):
         i = self._snap(self._beat_at(t))
-        return {"bar": 1 + int(math.floor(i / self.bpb)),
-                "beat": _fx(_mod(i, self.bpb) + 1, 4),
-                "before_first_beat": t < self.first}
+        return {
+            "bar": 1 + int(math.floor(i / self.bpb)),
+            "beat": _fx(_mod(i, self.bpb) + 1, 4),
+            "before_first_beat": t < self.first,
+        }
 
     def seconds_at(self, bar, beat=1):
         # Bar 1 begins on the first downbeat. With first_bar 0 that bar is the
@@ -146,8 +149,7 @@ class Session:
         return self._snap(self._beat_at(t))
 
     def _from_index(self, i):
-        return {"bar": 1 + int(math.floor(i / self.bpb)),
-                "beat": _mod(i, self.bpb) + 1}
+        return {"bar": 1 + int(math.floor(i / self.bpb)), "beat": _mod(i, self.bpb) + 1}
 
     # ---- sections, in layers ----------------------------------------------
     def _at(self, q):
@@ -172,13 +174,17 @@ class Session:
                     "index": i + 1,
                     "from": {"bar": frm + i * n, "beat": 1},
                     "to": {"bar": frm + (i + 1) * n, "beat": 1},
-                    "through": _fx((((pos["bar"] - frm) % n)
-                                    + (pos["beat"] - 1) / self.bpb) / n, 4)}
+                    "through": _fx(
+                        (((pos["bar"] - frm) % n) + (pos["beat"] - 1) / self.bpb) / n, 4
+                    ),
+                }
                 continue
             hit = [sp for sp in (L.get("spans") or []) if self._covers(sp, x)]
             # a partition can only be in one place at a time; everything else is
             # a list, because overlap is the point of having layers at all
-            found[name] = (hit[0] if hit else None) if L.get("kind") == "partition" else hit
+            found[name] = (
+                (hit[0] if hit else None) if L.get("kind") == "partition" else hit
+            )
         return found
 
     def until(self, layer, pos=None):
@@ -188,9 +194,12 @@ class Session:
         if not sp or not sp.get("to"):
             return None
         left = self._at(sp["to"]) - self._at(q)
-        return {"name": sp.get("name"), "ends_at": sp["to"],
-                "bars": _fx(left / self.bpb, 3),
-                "in_ms": round(left * self.beat_s / self._rate * 1000)}
+        return {
+            "name": sp.get("name"),
+            "ends_at": sp["to"],
+            "bars": _fx(left / self.bpb, 3),
+            "in_ms": round(left * self.beat_s / self._rate * 1000),
+        }
 
     # ---- energy: one number per bar, interpolated here ---------------------
     def energy_at(self, pos):
@@ -209,12 +218,18 @@ class Session:
     # ---- the two questions a container actually asks -----------------------
     def now(self):
         t = self.seconds()
-        within = _mod(self._index(t), 1)          # 0 exactly on the beat
+        within = _mod(self._index(t), 1)  # 0 exactly on the beat
         pos = self.position_at(t)
-        return {"playing": self.playing, "rate": self._rate, "seconds": _fx(t, 4),
-                "position": pos, "phase": _fx(within, 4),
-                "to_next_beat_ms": round((1 - within) * self.beat_s / self._rate * 1000),
-                "energy": self.energy_at(pos), "sections": self.sections_at(pos)}
+        return {
+            "playing": self.playing,
+            "rate": self._rate,
+            "seconds": _fx(t, 4),
+            "position": pos,
+            "phase": _fx(within, 4),
+            "to_next_beat_ms": round((1 - within) * self.beat_s / self._rate * 1000),
+            "energy": self.energy_at(pos),
+            "sections": self.sections_at(pos),
+        }
 
     def next(self, lead_ms):
         """What is coming in the next stretch of the CALLER'S time.
@@ -228,14 +243,23 @@ class Session:
         out = []
         for i in range(int(math.ceil(i0)), int(math.ceil(i1))):
             p = self._from_index(i)
-            out.append({"bar": p["bar"], "beat": p["beat"], "accent": p["beat"] == 1,
-                        "in_ms": round((self.seconds_at(p["bar"], p["beat"]) - t)
-                                       / self._rate * 1000)})
+            out.append(
+                {
+                    "bar": p["bar"],
+                    "beat": p["beat"],
+                    "accent": p["beat"] == 1,
+                    "in_ms": round(
+                        (self.seconds_at(p["bar"], p["beat"]) - t) / self._rate * 1000
+                    ),
+                }
+            )
         p0, p1 = self.position_at(t), self.position_at(t + ahead)
         a0, a1 = self._at(p0), self._at(p1)
 
         def ms(q):
-            return round((self.seconds_at(q["bar"], q.get("beat", 1)) - t) / self._rate * 1000)
+            return round(
+                (self.seconds_at(q["bar"], q.get("beat", 1)) - t) / self._rate * 1000
+            )
 
         def inside(q):
             return a0 <= self._at(q) < a1
@@ -245,24 +269,45 @@ class Session:
         for name, L in self.layers.items():
             if L.get("kind") == "rule":
                 continue
-            for sp in (L.get("spans") or []):
+            for sp in L.get("spans") or []:
                 if inside(sp["from"]):
-                    out.append({"what": name + " starts", "layer": name,
-                                "name": sp.get("name"), "bar": sp["from"]["bar"],
-                                "beat": sp["from"]["beat"], "in_ms": ms(sp["from"])})
+                    out.append(
+                        {
+                            "what": name + " starts",
+                            "layer": name,
+                            "name": sp.get("name"),
+                            "bar": sp["from"]["bar"],
+                            "beat": sp["from"]["beat"],
+                            "in_ms": ms(sp["from"]),
+                        }
+                    )
                 if inside(sp["to"]):
-                    out.append({"what": name + " ends", "layer": name,
-                                "name": sp.get("name"), "bar": sp["to"]["bar"],
-                                "beat": sp["to"]["beat"], "in_ms": ms(sp["to"])})
-        for mo in (self.score.get("moments") or []):
+                    out.append(
+                        {
+                            "what": name + " ends",
+                            "layer": name,
+                            "name": sp.get("name"),
+                            "bar": sp["to"]["bar"],
+                            "beat": sp["to"]["beat"],
+                            "in_ms": ms(sp["to"]),
+                        }
+                    )
+        for mo in self.score.get("moments") or []:
             at = mo.get("at")
             if not at:
                 continue
             if inside(at):
                 what = mo.get("kind") or mo.get("type")
-                out.append({"what": what, "layer": "moment", "name": what,
-                            "bar": at["bar"], "beat": at["beat"],
-                            "in_ms": ms(at)})
+                out.append(
+                    {
+                        "what": what,
+                        "layer": "moment",
+                        "name": what,
+                        "bar": at["bar"],
+                        "beat": at["beat"],
+                        "in_ms": ms(at),
+                    }
+                )
         out.sort(key=lambda x: x["in_ms"])
         return out
 
@@ -302,13 +347,14 @@ class Session:
 def _position_of(sc, t):
     g = sc["grid"]
     n = _or(g.get("beats_per_bar"), 4)
-    fb = _or(g.get("first_bar"), 1)
-    tempo = g.get("tempo") or [{"from_beat": 0, "at_s": g["first_beat_s"], "bpm": g["bpm"]}]
+    tempo = g.get("tempo") or [
+        {"from_beat": 0, "at_s": g["first_beat_s"], "bpm": g["bpm"]}
+    ]
     k = 0
     while k + 1 < len(tempo) and tempo[k + 1]["at_s"] <= t:
         k += 1
     b = (tempo[k]["from_beat"] + (t - tempo[k]["at_s"]) / (60.0 / tempo[k]["bpm"])) / n
-    return {"bar": fb + int(math.floor(b)), "beat": _fx(_mod(b, 1) * n + 1, 3)}
+    return {"bar": 1 + int(math.floor(b)), "beat": _fx(_mod(b, 1) * n + 1, 3)}
 
 
 def _adapt(sc):
@@ -320,14 +366,23 @@ def _adapt(sc):
     without anything failing.
     """
     secs = sc.get("sections") if sc else None
-    if (sc and isinstance(secs, list) and secs and not secs[0].get("from")
-            and not (sc.get("layers") or {}).get("form")):
+    if (
+        sc
+        and isinstance(secs, list)
+        and secs
+        and not secs[0].get("from")
+        and not (sc.get("layers") or {}).get("form")
+    ):
         grid = sc.get("grid") or {}
         per = grid.get("beats_per_bar") or 4
         base = _or(grid.get("first_bar"), 1)
-        tempo = grid.get("tempo") or [{"from_beat": 0,
-                                       "at_s": grid.get("first_beat_s") or 0,
-                                       "bpm": grid.get("bpm") or 120}]
+        tempo = grid.get("tempo") or [
+            {
+                "from_beat": 0,
+                "at_s": grid.get("first_beat_s") or 0,
+                "bpm": grid.get("bpm") or 120,
+            }
+        ]
 
         def _put(t):
             k = 0
@@ -339,48 +394,111 @@ def _adapt(sc):
 
         sc = dict(sc)
         layers = dict(sc.get("layers") or {})
-        layers["form"] = {"kind": "partition",
-                          "note": "from `sections`, placed on the tempo map.",
-                          "spans": [{"from": _put(x["start"]), "to": _put(x["end"]),
-                                     "name": x.get("label"), "nth": i + 1,
-                                     "like": x.get("label")}
-                                    for i, x in enumerate(secs)]}
+        layers["form"] = {
+            "kind": "partition",
+            "note": "from `sections`, placed on the tempo map.",
+            "spans": [
+                {
+                    "from": _put(x["start"]),
+                    "to": _put(x["end"]),
+                    "name": x.get("label"),
+                    "nth": i + 1,
+                    "like": x.get("label"),
+                }
+                for i, x in enumerate(secs)
+            ],
+        }
         sc["layers"] = layers
+
+    moments = (sc.get("moments") or []) if sc else []
+    if moments and not (moments[0].get("at")):
+        sc = dict(sc)
+        sc["moments"] = [
+            {
+                "at": (
+                    _position_of(sc, m["time_s"])
+                    if m.get("time_s") is not None
+                    else {"bar": m.get("bar"), "beat": m.get("beat")}
+                ),
+                "kind": m.get("is") if m.get("is") is not None else m.get("type"),
+                "what": m.get("what"),
+                "weight": (
+                    m.get("weight")
+                    if m.get("weight") is not None
+                    else m.get("intensity")
+                ),
+                "sure": m.get("sure"),
+                **({"description": m["description"]} if m.get("description") else {}),
+                **({"with": m["with"]} if m.get("with") else {}),
+                **({"for_beats": m["for_beats"]} if m.get("for_beats") else {}),
+                **({"back_at": m["back_at"]} if m.get("back_at") is not None else {}),
+                **(
+                    {"into_bar": m["into_bar"]} if m.get("into_bar") is not None else {}
+                ),
+            }
+            for m in moments
+        ]
+
     if not sc or sc.get("layers") or not sc.get("parts"):
         return sc
     out = dict(sc)
-    out["layers"] = {"form": {
-        "kind": "partition",
-        "note": "from `parts`. Bars are not renumbered -- grid.first_bar says "
-                "where they start. `to_bar` is inclusive, so the half-open end is +1.",
-        "spans": [{"from": {"bar": p["from_bar"], "beat": 1},
-                   "to": {"bar": p["to_bar"] + 1, "beat": 1},
-                   # role is the bare word and `nth` carries the occurrence.
-                   # Matching on the role string used to miss every drop after
-                   # the first, because the string was "drop 2". Keep them apart.
-                   "name": p.get("role"), "nth": p.get("nth"), "like": p.get("like"),
-                   "returns": p.get("returns"), "feels": p.get("feels"),
-                   "fullness": p.get("fullness")} for p in sc["parts"]]}}
+    out["layers"] = {
+        "form": {
+            "kind": "partition",
+            "note": "from `parts`. Bars are not renumbered -- grid.first_bar says "
+            "where they start. `to_bar` is inclusive, so the half-open end is +1.",
+            "spans": [
+                {
+                    "from": {"bar": p["from_bar"], "beat": 1},
+                    "to": {"bar": p["to_bar"] + 1, "beat": 1},
+                    # role is the bare word and `nth` carries the occurrence.
+                    # Matching on the role string used to miss every drop after
+                    # the first, because the string was "drop 2". Keep them apart.
+                    "name": p.get("role"),
+                    "nth": p.get("nth"),
+                    "like": p.get("like"),
+                    "returns": p.get("returns"),
+                    "feels": p.get("feels"),
+                    "fullness": p.get("fullness"),
+                }
+                for p in sc["parts"]
+            ],
+        }
+    }
     inten = (sc.get("bars") or {}).get("intensity")
     if inten:
-        out["energy"] = {"per": "bar", "from_bar": _or((sc.get("grid") or {}).get("first_bar"), 1),
-                         "values": inten, "note": "from `bars.intensity`"}
+        out["energy"] = {
+            "per": "bar",
+            "from_bar": _or((sc.get("grid") or {}).get("first_bar"), 1),
+            "values": inten,
+            "note": "from `bars.intensity`",
+        }
     # The weighted moments are the real ones. Mapping releases over the top
     # discarded every one of them before a reader saw it -- the same bug the
     # JS half had, and the reason the two halves disagreed on how many events
     # are coming.
     moments = sc.get("moments") or []
     if moments and not (moments[0].get("at")):
-        out["moments"] = [{"at": {"bar": m.get("bar"), "beat": m.get("beat")},
-                           "kind": m.get("is"), "what": m.get("what"),
-                           "weight": m.get("weight"), "sure": m.get("sure"),
-                           **({"for_beats": m["for_beats"]} if m.get("for_beats") else {}),
-                           **({"back_at": m["back_at"]} if m.get("back_at") is not None else {}),
-                           **({"into_bar": m["into_bar"]} if m.get("into_bar") is not None else {})}
-                          for m in moments]
+        out["moments"] = [
+            {
+                "at": {"bar": m.get("bar"), "beat": m.get("beat")},
+                "kind": m.get("is"),
+                "what": m.get("what"),
+                "weight": m.get("weight"),
+                "sure": m.get("sure"),
+                **({"for_beats": m["for_beats"]} if m.get("for_beats") else {}),
+                **({"back_at": m["back_at"]} if m.get("back_at") is not None else {}),
+                **(
+                    {"into_bar": m["into_bar"]} if m.get("into_bar") is not None else {}
+                ),
+            }
+            for m in moments
+        ]
     elif sc.get("releases"):
-        out["moments"] = [{"at": _position_of(sc, r["at_s"]), "kind": "drop",
-                           "size": r.get("size")} for r in sc["releases"]]
+        out["moments"] = [
+            {"at": _position_of(sc, r["at_s"]), "kind": "drop", "size": r.get("size")}
+            for r in sc["releases"]
+        ]
     return out
 
 

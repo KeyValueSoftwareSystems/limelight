@@ -11,13 +11,65 @@
    the matrix stays rig-independent. Pure; no I/O. */
 
 const FACTS = {
-  form: ["intro", "verse", "break", "build", "drop", "outro", "silence", "final_drop"],
+  form: [
+    "intro",
+    "verse",
+    "break",
+    "build",
+    "drop",
+    "outro",
+    "silence",
+    "final_drop",
+  ],
   /* the spec's eight, plus the pipeline's other words -- the scores emit them */
-  doing: ["establishing", "developing", "sustaining", "expanding", "intensifying", "peaking",
-          "easing", "thinning", "resolving", "suspending", "transitioning", "closing", "holding"],
-  presence: ["drums:in", "drums:out", "bass:in", "bass:out", "vocals:in", "vocals:out"],
-  moment: ["entrance", "release", "hook", "pause", "fill", "rise", "exit", "accent", "change",
-           "transition", "highlight", "light", "firm", "heavy"],
+  doing: [
+    "establishing",
+    "developing",
+    "sustaining",
+    "expanding",
+    "intensifying",
+    "peaking",
+    "easing",
+    "thinning",
+    "resolving",
+    "suspending",
+    "transitioning",
+    "closing",
+    "holding",
+  ],
+  presence: [
+    "drums:in",
+    "drums:out",
+    "bass:in",
+    "bass:out",
+    "vocals:in",
+    "vocals:out",
+  ],
+  moment: [
+    "drop",
+    "breakdown",
+    "build",
+    "peak",
+    "lift",
+    "mood_turn",
+    "key_change",
+    "tempo_change",
+    "rhythm_change",
+    "entrance",
+    "release",
+    "hook",
+    "pause",
+    "fill",
+    "rise",
+    "exit",
+    "accent",
+    "change",
+    "transition",
+    "highlight",
+    "light",
+    "firm",
+    "heavy",
+  ],
   texture: ["narrow", "wide", "sparse", "busy", "dull", "bright"],
   harmony: ["minor", "major", "changing"],
 };
@@ -32,7 +84,9 @@ function toVector(ctx) {
     if (fam === "form") continue;
     const x = ctx[fam];
     if (x === undefined || x === null) continue;
-    v[fam] = (Array.isArray(x) ? x : [x]).filter(f => f !== null && f !== undefined);
+    v[fam] = (Array.isArray(x) ? x : [x]).filter(
+      (f) => f !== null && f !== undefined,
+    );
   }
   return v;
 }
@@ -42,23 +96,27 @@ function toVector(ctx) {
 function cellFor(affinity, fitK, vector) {
   const v = toVector(vector);
   if (!v.form) return 0;
-  if (!affinity || !affinity.form) return 0;                  /* no form table: nothing to stand on */
-  let logs = 0, n = 0;
+  if (!affinity || !affinity.form)
+    return 0; /* no form table: nothing to stand on */
+  let logs = 0,
+    n = 0;
   for (const fam of FAMILIES) {
     const table = affinity && affinity[fam];
-    if (!table) continue;                                   /* unmentioned family: neutral */
-    const facts = fam === "form" ? [v.form] : (v[fam] || []);
+    if (!table) continue; /* unmentioned family: neutral */
+    const facts = fam === "form" ? [v.form] : v[fam] || [];
     for (const f of facts) {
       let a = table[f];
       if (a === undefined) {
-        if (fam === "form") return 0;                        /* a form the table doesn't name is a veto, not a shrug */
+        if (fam === "form")
+          return 0; /* a form the table doesn't name is a veto, not a shrug */
         a = table._default !== undefined ? table._default : 0.5;
       }
-      if (!(a > 0)) return 0;                                /* a veto */
-      logs += Math.log(Math.min(1, a)); n++;
+      if (!(a > 0)) return 0; /* a veto */
+      logs += Math.log(Math.min(1, a));
+      n++;
     }
   }
-  if (!n) return 0;                                         /* belt and braces: a form table always
+  if (!n) return 0; /* belt and braces: a form table always
                                                                scores the form fact above, so n > 0 */
   return +(fitK * Math.exp(logs / n)).toFixed(4);
 }

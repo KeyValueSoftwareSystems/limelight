@@ -11,28 +11,22 @@ HERE="$PWD"
 echo "== pipeline venv =="
 python3 -m venv venv
 ./venv/bin/pip -q install --upgrade pip wheel
-./venv/bin/pip -q install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
-./venv/bin/pip -q install -r requirements-gpu.txt
-# numpy 2 wheels need x86-64-v2; not every GPU host exposes it. Pin the pair
-# that is known to import cleanly together.
-./venv/bin/pip -q install "numpy==1.26.4" "scipy<1.13"
+./venv/bin/pip -q install "torch==2.9.1" "torchaudio==2.9.1" --index-url https://download.pytorch.org/whl/cu124
+./venv/bin/pip -q install -r requirements-gpu.lock.txt
 ./venv/bin/python -c "import numpy,scipy.sparse,librosa,madmom,torch; \
   print('  pipeline ok: numpy',numpy.__version__,'cuda',torch.cuda.is_available())"
 
 echo "== songformer venv =="
 python3 -m venv sfvenv
 ./sfvenv/bin/pip -q install --upgrade pip wheel
-./sfvenv/bin/pip -q install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
-./sfvenv/bin/pip -q install "numpy<2" scipy librosa soundfile einops \
-  "transformers==4.51.1" "tokenizers<0.22" accelerate huggingface-hub safetensors \
-  omegaconf muq x_transformers ema_pytorch loguru msaf
-./sfvenv/bin/pip -q install "numpy<2"
+./sfvenv/bin/pip -q install "torch==2.6.0+cu124" "torchaudio==2.6.0+cu124" --index-url https://download.pytorch.org/whl/cu124
+./sfvenv/bin/pip -q install -r requirements-songformer.lock.txt
 # msaf reaches for scipy.inf, removed in scipy 1.12. Only evaluation code
 # touches it and inference never calls that path.
 SP="$(./sfvenv/bin/python -c 'import sysconfig;print(sysconfig.get_paths()["purelib"])')"
 grep -rl "from scipy import inf" "$SP/msaf/" 2>/dev/null | while read -r f; do
   sed -i 's/from scipy import inf/from numpy import inf/' "$f"
-done
+done || true
 ./sfvenv/bin/python -c "import muq,x_transformers,msaf,numpy; \
   print('  songformer ok: numpy',numpy.__version__)"
 

@@ -56,6 +56,8 @@ const KNOWN = [
   "recording",
   "groove",
   "melody_phrases",
+  "unavailable",
+  "layers",
 ];
 
 /* The pipeline writes parts and bars.intensity; the protocol says sections and
@@ -308,6 +310,9 @@ function respond(req) {
   const out = {
     score: s.score,
     version: s.version,
+    ...(s.unavailable && Object.keys(s.unavailable).length
+      ? { unavailable: s.unavailable }
+      : {}),
     window: w ? { from_bar: w.from_bar, bars: w.bars } : "whole song",
   };
 
