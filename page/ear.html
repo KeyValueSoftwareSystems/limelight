@@ -1636,7 +1636,7 @@
             const v = e[ln.key];
             if (v != null)
               dims.push(
-                `<span style="color:${ln.color}">${ln.label}: ${v}</span>`,
+                `<span style="color:${ln.color}">${ln.label}: ${emoSay(ln, v)}</span>`,
               );
           }
           if (dims.length)
@@ -1947,7 +1947,17 @@
     { key: "tension", color: "#c8a2ff", label: "Tension" },
     { key: "brightness", color: "#8fd0ff", label: "Bright" },
     { key: "groove", color: "#f2c14e", label: "Groove" },
+    {
+      key: "mode",
+      color: "#b9a0ff",
+      label: "Mode",
+      plot: (v) => ((v + 1) / 2) * 10,
+      say: (v) =>
+        `${v > 0.15 ? "major" : v < -0.15 ? "minor" : "mixed"} (${v.toFixed(2)})`,
+    },
   ];
+  const emoPlot = (ln, v) => (ln.plot ? ln.plot(v) : v);
+  const emoSay = (ln, v) => (ln.say ? ln.say(v) : v);
 
   function emotionTimeline() {
     const emo = SCORE.emotion;
@@ -1962,8 +1972,9 @@
       for (const ln of EMO_LINES) {
         const v = e[ln.key];
         if (v != null) {
-          lo = Math.min(lo, v);
-          hi = Math.max(hi, v);
+          const p = emoPlot(ln, v);
+          lo = Math.min(lo, p);
+          hi = Math.max(hi, p);
         }
       }
     }
@@ -2027,7 +2038,7 @@
       for (let ei = 0; ei < emo.length; ei++) {
         const e = emo[ei],
           v = typeof e[ln.key] === "number" ? e[ln.key] : null,
-          y = Y(v == null ? 5 : v);
+          y = Y(v == null ? 5 : emoPlot(ln, v));
         if (v == null) continue;
         if (ei === 0) {
           g.moveTo(Math.max(0, X(e.start)), y);

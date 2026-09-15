@@ -407,11 +407,11 @@ def load_feel():
     return F
 
 
-def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=None):
+def clean_emotion(emotion, duration=None, temporal=None, sections=None, loud=None, heard=None, chords=None):
     F = load_feel()
     if not F:
         return []
-    return F.clean_emotion(emotion, duration, temporal, sections, loud)
+    return F.clean_emotion(emotion, duration, temporal, sections, loud, heard, chords)
 
 
 def step_duration(wav):

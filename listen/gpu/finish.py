@@ -108,7 +108,8 @@ def main(paths):
         if base or score.get("sections"):
             got = F.clean_emotion(base, (score.get("song") or {}).get("length_s"),
                                   score.get("stems_temporal"), score.get("sections"),
-                                  score.get("stems"), heard)
+                                  score.get("stems"), heard,
+                                  score.get("btc_chords_raw"))
             if got:
                 before = score.get("emotion") or []
                 score["emotion"] = got
