@@ -313,12 +313,11 @@ PERC = ("drums", "kick", "snare", "hh", "toms", "percussion", "clap", "cymbals",
         "shaker", "tambourine", "congas", "bongos")
 
 
-def measured_feel(temporal, a, b):
-    """energy, brightness and groove read off the 53-stem lanes for one span.
+def raw_feel(temporal, a, b):
+    """Unscaled energy, brightness and groove for one span, off the stem lanes.
 
     MOSS returns 1 for all six dimensions on every segment of every song, so
-    the three that have a physical correlate are measured here instead. The
-    scale is 1-10 to match what readers already draw."""
+    the three with a physical correlate are measured here instead."""
     if not temporal or not temporal.get("stems"):
         return None
     w = temporal.get("window_s") or 0.5
@@ -338,63 +337,49 @@ def measured_feel(temporal, a, b):
     whole = mean_of(())
     if whole <= 0:
         return None
-    bright = mean_of(BRIGHT)
-    perc = mean_of(PERC)
-    scale = lambda x: max(1.0, min(10.0, round(1.0 + 9.0 * x, 1)))
-    return {"energy": scale(whole),
-            "brightness": scale(bright / max(whole, 1e-6) * 0.5),
-            "groove": scale(perc / max(whole, 1e-6) * 0.5)}
+    return {"energy": whole,
+            "brightness": mean_of(BRIGHT) / max(whole, 1e-6),
+            "groove": mean_of(PERC) / max(whole, 1e-6)}
 
 
-def found_moments(temporal, beats, want=24, tol=2.0):
-    """Entrances and exits read off the 53-stem lanes.
+def scale_feel(raws):
+    """Put each dimension on 1-10 against its own song, and say which moved.
 
-    MOSS does not claim `moments` as a capability and returned nothing
-    parseable for it on apex after 140s. A stem arriving or leaving is
-    directly measurable from the separation we already run, so it is measured
-    rather than asked for."""
-    if not temporal or not temporal.get("stems"):
+    A dimension whose whole-song spread is under 5% of its peak is flat, and
+    stretching that onto 1-10 would draw noise as a curve, so it is left out
+    of both the output and the `measured` list."""
+    out = [{} for _ in raws]
+    moved = []
+    for dim in ("energy", "brightness", "groove"):
+        vals = [r[dim] for r in raws]
+        lo, hi = min(vals), max(vals)
+        if hi - lo < max(0.01, 0.05 * hi):
+            continue
+        moved.append(dim)
+        for i, v in enumerate(vals):
+            out[i][dim] = round(1.0 + 9.0 * (v - lo) / (hi - lo), 1)
+    return out, moved
+
+
+def found_moments(temporal, beats, grid=None, chords=None, want=28):
+    """Every kind of moment listen/gpu/moments.py can measure from the score.
+
+    Kept as a wrapper so the pipeline and a re-run over finished scores go
+    through exactly one implementation."""
+    try:
+        here = next((c for c in (os.path.join(BASE, "moments.py"),
+                                 os.path.join(BASE, "..", "moments.py"))
+                     if os.path.exists(c)), None)
+        if not here:
+            return []
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("limelight_moments", here)
+        M = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(M)
+        return M.find(temporal, beats, grid, chords, want=want)
+    except Exception as e:
+        print(f"    moments: {e}", flush=True)
         return []
-    w = temporal.get("window_s") or 0.5
-    lanes = temporal["stems"]
-    span = max(1, int(round(tol / w)))
-    found = []
-    for name, v in lanes.items():
-        if not isinstance(v, list) or len(v) < span * 3:
-            continue
-        for i in range(span, len(v) - span):
-            pre = sum(v[i - span:i]) / span
-            post = sum(v[i:i + span]) / span
-            jump = post - pre
-            if abs(jump) < 0.25:
-                continue
-            if jump > 0 and pre > 0.12:
-                continue
-            if jump < 0 and post > 0.12:
-                continue
-            found.append({"t": i * w, "what": name,
-                          "type": "entrance" if jump > 0 else "exit",
-                          "size": round(abs(jump), 3)})
-    found.sort(key=lambda m: -m["size"])
-    kept = []
-    for m in found:
-        if any(abs(m["t"] - k["t"]) < tol and m["what"] == k["what"] for k in kept):
-            continue
-        kept.append(m)
-        if len(kept) >= want:
-            break
-    out = []
-    for m in sorted(kept, key=lambda x: x["t"]):
-        t = m["t"]
-        if beats:
-            near = min(beats, key=lambda b: abs(b - t))
-            if abs(near - t) < 1.0:
-                t = near
-        out.append({"time_s": round(float(t), 3), "type": m["type"],
-                    "what": m["what"], "intensity": min(1.0, m["size"]),
-                    "description": f"{m['what']} {'enters' if m['type'] == 'entrance' else 'drops out'}",
-                    "measured": True})
-    return out
 
 
 def clean_emotion(emotion, duration=None, temporal=None):
@@ -441,16 +426,14 @@ def clean_emotion(emotion, duration=None, temporal=None):
     for i in range(len(filled) - 1):
         filled[i]["end"] = filled[i + 1]["start"]
 
-    for seg in filled:
-        got = measured_feel(temporal, seg["start"], seg["end"])
-        if got:
+    raws = [raw_feel(temporal, seg["start"], seg["end"]) for seg in filled]
+    if filled and all(raws):
+        scaled, moved = scale_feel(raws)
+        for seg, got in zip(filled, scaled):
             seg.update(got)
-            seg["measured"] = ["energy", "brightness", "groove"]
+            if moved:
+                seg["measured"] = moved
 
-    # A dimension that takes two values across a whole song is a step, not a
-    # curve, and drawn on a chart it reads as data. MOSS returns 1 for every
-    # dimension on every segment; the only other value such a lane ever shows
-    # is 5, which is this function's own default for a key the model omitted.
     kept = set(filled[0].get("measured") or ()) if filled else set()
     for k in ("valence", "arousal", "tension", "energy", "brightness", "groove"):
         if k in kept:
@@ -628,14 +611,12 @@ def step_chords(wav):
         )
     chords = _btc_model.predict(wav)
     raw = [{"start": c["start"], "end": c["end"], "chord": c["chord"]} for c in chords]
-    # Fill N-chords with previous real chord so there are no gaps
     prev = None
     for c in raw:
         if c["chord"] != "N":
             prev = c["chord"]
         elif prev:
             c["chord"] = prev
-    # Remove any remaining leading N-chords
     return [c for c in raw if c["chord"] != "N"]
 
 
@@ -1034,7 +1015,8 @@ def run_pipeline(wav_path):
             print(f"    {task}: FAILED {e}", flush=True)
             absent[task] = f"{type(e).__name__}: {str(e)[:120]}"
     got = found_moments(score.get("stems_temporal"),
-                        [b["t"] for b in score.get("beats", [])])
+                        [b["t"] for b in score.get("beats", [])],
+                        score.get("grid"), score.get("btc_chords_raw"))
     if got:
         score["moments"] = got
         print(f"    moments: {len(got)} measured from stems", flush=True)

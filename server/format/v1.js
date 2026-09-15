@@ -21,6 +21,19 @@ export const KNOWN = [
   "stems",
   "beat_consensus",
   "emotion",
+  "sections_second_opinion",
+  "instruments",
+  "instruments_over_time",
+  "harmony",
+  "chord_changes",
+  "chord_summary",
+  "key_tempo",
+  "rhythm",
+  "curves",
+  "signals",
+  "layers",
+  "tells",
+  "motion",
 ];
 
 const STEM_NAMES = ["drums", "bass", "vocals", "other", "guitar", "piano"];
@@ -42,8 +55,32 @@ export function format(raw) {
         ? 0
         : 1;
 
-  out.score = raw.score;
-  out.version = raw.version;
+  const tempoMap =
+    Array.isArray(grid.tempo) && grid.tempo.length
+      ? grid.tempo
+      : [{ from_beat: 0, at_s: firstBeatS, bpm }];
+  const beatOf = (t) => {
+    let k = 0;
+    while (k + 1 < tempoMap.length && tempoMap[k + 1].at_s <= t) k++;
+    const seg = tempoMap[k];
+    return seg.from_beat + (t - seg.at_s) / (60 / seg.bpm);
+  };
+  const atBeat = (n) => {
+    let k = 0;
+    while (k + 1 < tempoMap.length && tempoMap[k + 1].from_beat <= n) k++;
+    const seg = tempoMap[k];
+    return seg.at_s + (n - seg.from_beat) * (60 / seg.bpm);
+  };
+  const place = (t) => {
+    const n = Math.round(beatOf(t));
+    return {
+      bar: Math.max(firstBar, 1 + Math.floor(n / bpb)),
+      beat: 1 + (((n % bpb) + bpb) % bpb),
+    };
+  };
+
+  if (raw.score != null) out.score = raw.score;
+  if (raw.version != null) out.version = raw.version;
 
   if (raw.song) {
     out.song = { ...raw.song };
@@ -60,22 +97,6 @@ export function format(raw) {
 
   if (raw.grid) {
     out.grid = { ...raw.grid };
-    const map =
-      raw.grid.tempo && raw.grid.tempo.length
-        ? raw.grid.tempo
-        : [{ from_beat: 0, at_s: firstBeatS, bpm }];
-    const beatOf = (t) => {
-      let k = 0;
-      while (k + 1 < map.length && map[k + 1].at_s <= t) k++;
-      return map[k].from_beat + (t - map[k].at_s) / (60 / map[k].bpm);
-    };
-    const place = (t) => {
-      const i = beatOf(t);
-      return {
-        bar: firstBar + Math.floor(i / bpb),
-        beat: Math.floor(((i % bpb) + bpb) % bpb) + 1,
-      };
-    };
     if (raw.grid.holds_from_s != null)
       out.grid.holds_from = place(raw.grid.holds_from_s);
     if (raw.grid.holds_to_s != null)
@@ -86,22 +107,7 @@ export function format(raw) {
     if (raw.beats.list) {
       out.beats = raw.beats;
     } else if (Array.isArray(raw.beats)) {
-      const map =
-        Array.isArray(grid.tempo) && grid.tempo.length
-          ? grid.tempo
-          : [{ from_beat: 0, at_s: firstBeatS, bpm }];
-      const beatNo = (at) => {
-        let k = 0;
-        while (k + 1 < map.length && map[k + 1].at_s <= at) k++;
-        const seg = map[k];
-        return seg.from_beat + (at - seg.at_s) / (60 / seg.bpm);
-      };
-      const atBeat = (n) => {
-        if (!map || !map.length) return firstBeatS + n * beatSec;
-        let k = 0;
-        while (k + 1 < map.length && map[k + 1].from_beat <= n) k++;
-        return map[k].at_s + (n - map[k].from_beat) * (60 / map[k].bpm);
-      };
+      const beatNo = beatOf;
       let lead = 0;
       out.beats = raw.beats.map((b, idx) => {
         const n = b.t != null ? Math.round(beatNo(b.t)) : idx;
@@ -142,13 +148,17 @@ export function format(raw) {
     );
 
   if (Array.isArray(raw.sections) && raw.sections.length) {
-    out.sections = raw.sections.map((s) => ({
-      from: { bar: s.from_bar || 0, beat: 1 },
-      to: { bar: (s.to_bar || 0) + 1, beat: 1 },
-      name: s.label,
-      start: s.start,
-      end: s.end,
-    }));
+    out.sections = raw.sections.map((s, i) => {
+      const from =
+        s.from_bar != null ? { bar: s.from_bar, beat: 1 } : place(s.start);
+      const to =
+        s.to_bar != null ? { bar: s.to_bar + 1, beat: 1 } : place(s.end);
+      const row = { from, to, name: s.label, start: s.start, end: s.end, nth: i + 1 };
+      if (s.also_heard) row.also_heard = s.also_heard;
+      for (const extra of ["confidence", "edge", "sudden", "sure"])
+        if (s[extra] !== undefined) row[extra] = s[extra];
+      return row;
+    });
   } else if (Array.isArray(raw.parts)) {
     out.sections = raw.parts.map((part) => ({
       from: { bar: part.from_bar, beat: 1 },
@@ -193,7 +203,15 @@ export function format(raw) {
     const pull = raw.lift ?? raw.tension;
     if (pull) out.tension = out.lift = { per: "beat", values: pull };
   }
-  if (raw.releases) out.releases = raw.releases;
+  if (Array.isArray(raw.releases)) {
+    out.releases = raw.releases.map((r) => {
+      const at =
+        r.bar != null && r.beat != null ? { bar: r.bar, beat: r.beat } : place(r.at_s);
+      const one = { at, jump: r.jump !== undefined ? r.jump : r.size };
+      if (r.at_s != null) one.at_s = r.at_s;
+      return one;
+    });
+  }
   if (raw.phrase_grid) out.phrase_grid = raw.phrase_grid;
   if (raw.scales) out.scales = raw.scales;
   if (raw.made_by) out.made_by = raw.made_by;
@@ -223,6 +241,11 @@ export function format(raw) {
   }
   if (Object.keys(curveEntries).length) out.curves = curveEntries;
 
+  for (const lane of ["width", "air", "pump", "pace", "brightness",
+                      "weight", "floor", "noisy", "sustained"]) {
+    if (Array.isArray(bars[lane])) out[lane] = bars[lane];
+  }
+
   const stemLanes = {};
   for (const s of STEM_NAMES) {
     if (Array.isArray(bars[s])) stemLanes[s] = bars[s];
@@ -235,9 +258,10 @@ export function format(raw) {
     };
   }
 
-  if (raw.moments) {
+  if (Array.isArray(raw.moments)) {
     out.moments = raw.moments.map((mo) => {
       if (mo.at) return mo;
+      if (mo.time_s != null) return { at: place(mo.time_s), ...mo };
       const { bar, beat, ...rest } = mo;
       return { at: { bar, beat }, ...rest };
     });
@@ -346,9 +370,6 @@ export function format(raw) {
     out.profile = person;
   }
 
-  /* BTC emits chords as timed spans. Readers ask for them per bar, plus a
-     key -- the same shape the old Essentia path produced -- so give them both
-     rather than the model's raw output under an internal name. */
   if (Array.isArray(raw.btc_chords_raw) && raw.btc_chords_raw.length) {
     const spans = raw.btc_chords_raw
       .filter((c) => c && Number.isFinite(c.start) && Number.isFinite(c.end))
@@ -385,10 +406,6 @@ export function format(raw) {
   if (raw.signals) out.signals = raw.signals;
   if (raw.caption) out.caption = raw.caption;
 
-  /* the 53-stem summary is a different fact from the per-bar lanes above:
-     one is "how loud is this instrument across the whole record", the other
-     is "where is it bar by bar". Merging them under one key made the summary
-     silently delete the lanes every reader asks for. */
   if (raw.stems && !Array.isArray(raw.stems)) {
     const lanes = out.stems && out.stems.lanes ? out.stems : null;
     const summary = Object.entries(raw.stems)
@@ -400,9 +417,6 @@ export function format(raw) {
     if (lanes) out.stems = lanes;
   }
 
-  /* per-instrument level over time -- 53-stem separation at half-second
-     resolution. This is the finest-grained thing in the file and nothing
-     was carrying it to a reader. */
   if (raw.stems_temporal && raw.stems_temporal.stems) {
     out.instruments_over_time = {
       per: "window",
@@ -412,6 +426,9 @@ export function format(raw) {
     };
   }
 
+  if (raw.motion) out.motion = raw.motion;
+  if (raw.sections_second_opinion)
+    out.sections_second_opinion = raw.sections_second_opinion;
   if (raw.rhythm) out.rhythm = raw.rhythm;
   if (raw.key_tempo) out.key_tempo = raw.key_tempo;
   if (raw.beat_consensus) out.beat_consensus = raw.beat_consensus;
