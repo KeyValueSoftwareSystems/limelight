@@ -182,7 +182,9 @@ def swings(v, w, noise=0.0):
         if post - pre >= gate and post >= 0.60:
             rises.append((post - pre, i))
         if pre - post >= gate and post <= 0.45 and _span(v, i, i + hold) <= 0.50:
-            falls.append((pre - post, i))
+            rest = v[i + hold:]
+            if rest and max(rest) >= 0.5 * pre:
+                falls.append((pre - post, i))
 
     def peaks(cand):
         cand.sort(key=lambda x: -x[0])
@@ -257,10 +259,23 @@ def rolls(temporal, w, tol=4.0, loud=None):
     return out
 
 
-def loudest(v):
+def loudest(v, straight=None, w=0.5, look=4.0):
+    """The loudest instant, read off the raw curve rather than the smoothed one.
+
+    `peak` is the argmax of energy_curve, which is smoothed over three windows
+    so that a drop or a build is not chasing single-window spikes. That
+    smoothing moves the maximum: across 29 songs the emitted peak sat at a
+    median 97.8th percentile of the unsmoothed loudness and four songs fell
+    below the 90th, mizhiyoram at the 83rd. Smoothing is right for finding
+    which passage is loudest and wrong for naming the instant inside it, so
+    the argmax picks the passage and the raw curve picks the moment."""
     if not v:
         return []
     i = max(range(len(v)), key=lambda k: v[k])
+    if straight and len(straight) == len(v):
+        side = max(1, int(round(look / w)))
+        lo, hi = max(0, i - side), min(len(straight), i + side + 1)
+        i = max(range(lo, hi), key=lambda k: straight[k])
     return [
         {
             "i": i,
@@ -1107,7 +1122,7 @@ def find(
     cand = (
         comings(temporal, loud=stems)
         + swings(v, w, noise)
-        + loudest(v)
+        + loudest(v, (heard or {}).get("loudness") if isinstance(heard, dict) else None, w)
         + rolls(temporal, w, loud=stems)
         + tempo_changes(grid, w)
         + shifts(melody, w, n)
@@ -1144,6 +1159,7 @@ def find(
     for g in groups:
         g["parts"].sort(key=lambda x: -x["size"])
         g["size"] = g["parts"][0]["size"]
+        g["t"] = g["parts"][0]["t"]
         rings = [p["heard"] for p in g["parts"] if p.get("heard") is not None]
         g["heard"] = max(rings) if rings else None
 
