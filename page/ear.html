@@ -1456,8 +1456,7 @@
       if (x1 < -4 || x0 > probe + 4) continue;
       const type = (m.type || m.is || "?").toUpperCase();
       const played = playersOf(m);
-      const tail =
-        m.what || (played.length ? played.slice(0, 3).join(", ") : "") || m.description || "";
+      const tail = m.what || m.description || played.slice(0, 3).join(", ") || "";
       mg.font = "700 9px ui-monospace,monospace";
       let ink = mg.measureText(type).width;
       if (tail) {
@@ -1501,6 +1500,22 @@
       it.lane = lane;
     }
 
+    /* A label may only draw up to where the next one in its lane begins.
+       With five lanes full the layout drops a label into the least busy lane
+       anyway, and without this the text runs straight through its neighbour -
+       on dont-look-down the climax at 2:45 was overwritten by the drop. */
+    const byLane = new Map();
+    for (const it of laid) {
+      if (!byLane.has(it.lane)) byLane.set(it.lane, []);
+      byLane.get(it.lane).push(it);
+    }
+    for (const row of byLane.values()) {
+      row.sort((a, b) => a.x0 - b.x0);
+      for (let k = 0; k < row.length; k++) {
+        row[k].stop = k + 1 < row.length ? row[k + 1].x0 - 3 : probe;
+      }
+    }
+
     const lanes = Math.max(1, ends.length);
     const lh = lanes > 2 ? 19 : 26;
     const h = Math.max(60, lanes * lh);
@@ -1528,7 +1543,8 @@
 
       g.save();
       g.beginPath();
-      g.rect(lx + 5, y, Math.max(0, w - lx - 6), lh - 2);
+      const edge = Math.min(w, (it.stop == null ? probe : it.stop) * scale);
+      g.rect(lx + 5, y, Math.max(0, edge - lx - 6), lh - 2);
       g.clip();
       g.font = "700 9px ui-monospace,monospace";
       g.fillStyle = hue;
