@@ -2316,6 +2316,100 @@ async function composeShow() {
   }
 }
 
+/* ── import a plan JSON file ───────────────────────────────────────────────
+   Load a .plan.json from disk, bake it, and load the result. */
+
+async function importPlan() {
+  const file = $("importPlanFile").files[0];
+  $("importPlanFile").value = "";
+  if (!file || !S.song) return;
+
+  const btn = $("importPlanBtn");
+  btn.disabled = true;
+  btn.textContent = "Loading…";
+  $("stageMsg").hidden = false;
+  $("stageMsg").textContent = "reading plan file…";
+  $("playBtn").disabled = true;
+
+  try {
+    const text = await file.text();
+    let raw = JSON.parse(text);
+
+    /* accept both bare plans and wrapped {song, plan, report} */
+    const plan = raw.plan && raw.plan.states ? raw.plan : raw;
+    if (!plan.states && !plan.gestures && !plan.bindings) {
+      throw new Error("file doesn't look like a show plan (no states/bindings/gestures)");
+    }
+
+    say("imported plan: " + (plan.plan || "—") + " · "
+      + (plan.states || []).length + "s/" + (plan.bindings || []).length + "b/"
+      + (plan.gestures || []).length + "g from " + file.name);
+
+    /* bake the imported plan */
+    $("stageMsg").textContent = "baking imported plan…";
+    btn.textContent = "Baking…";
+
+    const rig = (S.layout || "arc4-head.layout.json").replace(".layout.json", "");
+    const bake = await (await fetch("/api/bake-plan", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ song: S.song.name, plan, rig }),
+    })).json();
+
+    if (bake.error) throw new Error(bake.error);
+
+    let status;
+    for (let i = 0; i < 300; i++) {
+      status = await (await fetch("/api/show?job=" + bake.job)).json();
+      if (status.state !== "baking") break;
+      $("stageMsg").textContent = "baking imported plan… " + ((i / 4) | 0) + "s";
+      await new Promise(r => setTimeout(r, 250));
+    }
+    if (!status || status.state !== "ready") throw new Error((status && status.error) || "bake timed out");
+
+    const buf = await (await fetch(status.frames_url)).arrayBuffer();
+    S.frames = new Uint8Array(buf);
+    S.show = status.show;
+    S.applied = status.applied || [];
+    S.job = bake.job;
+    S.place = placeFixtures(S.show);
+    S.natural = S.show.appetite_natural;
+
+    const expect = S.show.frame_count * S.show.channels;
+    if (S.frames.length !== expect) {
+      throw new Error("frames are " + S.frames.length + " bytes, expected " + expect);
+    }
+
+    $("stageMsg").hidden = true;
+    $("playBtn").disabled = false;
+    renderSections(S.show.sections);
+    if (S.view) S.view = null;
+    renderBands(S.show.sections);
+    paintZoom();
+    renderEdits();
+    $("footR").textContent = S.show.frame_count + " frames · " + S.show.fps + " fps · "
+      + S.show.channels + " ch · imported";
+    $("songMeta").textContent = S.song.name + " · " + mmss(S.song.duration_s) + " · "
+      + Math.round(S.song.bpm) + " bpm · " + (S.show.rig || "") + " · imported";
+    rigAnchor(true);
+    paintRig();
+    paintConsole();
+    renderRigPicker();
+    measurePeak();
+    paintRigUse();
+    paintTarget();
+    paint();
+
+    say("imported show ready — press Play to preview, Send to rig to go live");
+  } catch (e) {
+    $("stageMsg").hidden = false;
+    $("stageMsg").textContent = "import failed: " + e.message;
+    say("import failed: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Import Plan";
+  }
+}
+
 /* THE SEAM. A plain-English edit has everything it needs right here: the
    words, the song, where the listener is, and S.edits — which the server
    already turns into real changes to the frames, the way `blackout` does. A
@@ -2487,6 +2581,8 @@ $("listBtn").onclick = listShow;
 $("authorName").oninput = e => { S.author = e.target.value.trim(); try { localStorage.setItem("ll.author", S.author); } catch (x) {} };
 $("saveShow").onclick = saveShow;
 $("composeBtn").onclick = composeShow;
+$("importPlanBtn").onclick = () => $("importPlanFile").click();
+$("importPlanFile").onchange = importPlan;
 $("say").onkeydown = e => { if (e.key === "Enter") onSay(); };
 audio.addEventListener("ended", () => { $("playBtn").textContent = "Play"; stopLoop(); paint(); });
 audio.addEventListener("error", () => {
