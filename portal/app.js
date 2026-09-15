@@ -1460,17 +1460,17 @@ function paintBlank() {
 
 function ground(W, H) {
   ctx.globalCompositeOperation = "source-over";
-  const bg = ctx.createRadialGradient(W * 0.5, H * 0.96, 0, W * 0.5, H * 0.96, Math.max(W, H) * 1.05);
-  bg.addColorStop(0, "#111627");
-  bg.addColorStop(0.62, "#080a11");
-  bg.addColorStop(1, "#05060b");
+  const bg = ctx.createRadialGradient(W * 0.5, H * 0.98, 0, W * 0.5, H * 0.98, Math.max(W, H) * 1.05);
+  bg.addColorStop(0, "#101527");
+  bg.addColorStop(0.7, "#07090f");
+  bg.addColorStop(1, "#07090f");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  const y = H * FLOOR_Y;
+  const y = H * 0.79;
   const fg = ctx.createLinearGradient(0, y, 0, H);
-  fg.addColorStop(0, "rgba(9,11,19,0.55)");
-  fg.addColorStop(0.7, "rgba(6,8,13,0.95)");
+  fg.addColorStop(0, "rgba(9,11,19,0.5)");
+  fg.addColorStop(0.7, "rgba(7,9,15,0.94)");
   ctx.fillStyle = fg;
   ctx.fillRect(0, y, W, H - y);
 
@@ -1488,29 +1488,35 @@ function paintStage(fx) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ground(W, H);
 
-  const dense = fx.pars.length > 6;
-  const pr = f => (dense ? 7.4 : 10.5) * (f.scale || 1);
-  const hr = f => (dense ? 9.5 : 13) * (f.scale || 1);
-
-  ctx.globalCompositeOperation = "source-over";
-  rigging(fx.pars.map(p => ({ x: p.x, y: p.y, r: pr(p), top: pr(p) * 1.15 }))
-    .concat(fx.heads.map(h => ({ x: h.x, y: h.y, r: hr(h), top: hr(h) * 3.05 }))), W, H);
-  for (const p of fx.pars) housing(W * p.x, H * p.y, pr(p));
-  for (const h of fx.heads) headBody(W * h.x, H * h.y, hr(h), h.rot);
+  /* The lamp bodies are painted first and opaquely: they are objects on a dark
+     stage, not light. Everything after this point is light, and a fixture at
+     DMX 0 adds none of it. */
+  const small = fx.pars.length > 6;
+  for (const p of fx.pars) housing(W * p.x, H * p.y, (small ? 6 : 9) * (p.scale || 1));
+  for (const h of fx.heads) housing(W * h.x, H * h.y, (small ? 7 : 10) * (h.scale || 1));
 
   ctx.globalCompositeOperation = "lighter";
-  for (const p of fx.pars) drawPar(p, W, H, u, fx.pars.length);
+
+  const total = fx.pars.reduce((a, p) => a + p.k, 0) / Math.max(1, fx.pars.length);
+  const headK = fx.heads.reduce((a, h) => a + h.k, 0) / Math.max(1, fx.heads.length);
+  if (total > 0.01 || headK > 0.01) {
+    const haze = ctx.createRadialGradient(W * 0.5, H * 0.62, 0, W * 0.5, H * 0.62, Math.max(W, H) * 0.6);
+    const a = clamp(total * 0.09 + headK * 0.05, 0, 0.16);
+    haze.addColorStop(0, "rgba(150,170,230," + a.toFixed(3) + ")");
+    haze.addColorStop(1, "rgba(150,170,230,0)");
+    ctx.fillStyle = haze;
+    ctx.fillRect(0, 0, W, H);
+  }
+
   for (const h of fx.heads) drawBeam(h, W, H, u, fx.heads.length);
+  for (const p of fx.pars) drawPar(p, W, H, u, fx.pars.length);
 
   ctx.globalCompositeOperation = "source-over";
-  for (const p of fx.pars) bezel(W * p.x, H * p.y, pr(p), p.k);
-  for (const h of fx.heads) bezel(W * h.x, H * h.y, hr(h) * 0.9, h.k);
-
-  const top = ctx.createLinearGradient(0, 0, 0, H * 0.3);
-  top.addColorStop(0, "rgba(8,10,18,0.42)");
+  const top = ctx.createLinearGradient(0, 0, 0, H * 0.34);
+  top.addColorStop(0, "rgba(8,10,18,0.4)");
   top.addColorStop(1, "rgba(8,10,18,0)");
   ctx.fillStyle = top;
-  ctx.fillRect(0, 0, W, H * 0.3);
+  ctx.fillRect(0, 0, W, H * 0.34);
 }
 
 function rigging(items, W, H) {
@@ -1535,58 +1541,13 @@ function rigging(items, W, H) {
   });
 }
 
-function trussBar(x0, x1, y, d) {
-  const g = ctx.createLinearGradient(0, y - d, 0, y + d);
-  g.addColorStop(0, "#414a61");
-  g.addColorStop(0.5, "#1c2130");
-  g.addColorStop(1, "#0a0c13");
-  ctx.strokeStyle = g;
-  ctx.lineWidth = Math.max(1.6, d * 0.5);
-  ctx.beginPath();
-  ctx.moveTo(x0, y - d); ctx.lineTo(x1, y - d);
-  ctx.moveTo(x0, y + d); ctx.lineTo(x1, y + d);
-  ctx.stroke();
-
-  ctx.strokeStyle = "rgba(58,67,90,0.7)";
-  ctx.lineWidth = Math.max(1, d * 0.3);
-  ctx.beginPath();
-  const step = Math.max(8, d * 2);
-  let up = true;
-  for (let px = x0; px < x1; px += step) {
-    ctx.moveTo(px, up ? y - d : y + d);
-    ctx.lineTo(Math.min(x1, px + step), up ? y + d : y - d);
-    up = !up;
-  }
-  ctx.stroke();
-}
-
 function housing(x, y, r) {
-  ctx.strokeStyle = "rgba(60,69,92,0.95)";
-  ctx.lineWidth = Math.max(1.2, r * 0.22);
-  ctx.beginPath();
-  ctx.arc(x, y, r * 1.22, Math.PI * 1.02, Math.PI * 1.98);
-  ctx.stroke();
-
-  const body = ctx.createLinearGradient(x - r * 0.75, y - r * 0.9, x + r * 0.6, y + r);
-  body.addColorStop(0, "#39415a");
-  body.addColorStop(0.42, "#1b2130");
-  body.addColorStop(1, "#07090e");
-  ctx.fillStyle = body;
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, "#0d0f18");
+  g.addColorStop(0.72, "#141722");
+  g.addColorStop(1, "rgba(30,34,48,0.85)");
+  ctx.fillStyle = g;
   ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
-
-  ctx.strokeStyle = "rgba(152,167,204,0.34)";
-  ctx.lineWidth = Math.max(0.8, r * 0.1);
-  ctx.beginPath(); ctx.arc(x, y, r * 0.95, Math.PI * 1.12, Math.PI * 1.78); ctx.stroke();
-
-  ctx.fillStyle = "rgba(96,107,138,0.9)";
-  ctx.beginPath(); ctx.arc(x - r * 1.22, y, Math.max(1, r * 0.19), 0, TAU); ctx.fill();
-  ctx.beginPath(); ctx.arc(x + r * 1.22, y, Math.max(1, r * 0.19), 0, TAU); ctx.fill();
-
-  const bore = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x, y, r * 0.78);
-  bore.addColorStop(0, "#0b0e16");
-  bore.addColorStop(1, "#030408");
-  ctx.fillStyle = bore;
-  ctx.beginPath(); ctx.arc(x, y, r * 0.78, 0, TAU); ctx.fill();
 }
 
 function headBody(x, y, r, rot) {
@@ -1647,172 +1608,116 @@ function bezel(x, y, r, k) {
 }
 
 function drawPar(p, W, H, u, n) {
-  const dense = n > 6;
-  const s = (dense ? 0.68 : 1) * (p.scale || 1);
+  const scale = (n > 6 ? 0.55 : 1) * (p.scale || 1);   /* rig density × depth perspective */
   const x = W * p.x, y = H * p.y, c = p.rgb, k = p.k;
-  const lr = u * 0.020 * s;
 
   if (k > 0.004) {
-    const pop = p.strobe > 8 ? 0.32 : 0;
-    const air = toWhite(c, Math.min(0.8, Math.max(0, k - 0.72) / 0.28 * 0.45 + pop));
-    const splay = (p.x - 0.5) * (dense ? 0.52 : 0.85);
-    const A = (0.045 + 0.10 * k + 0.34 * k * k) * (dense ? 0.72 : 1);
-    const Lc = u * (0.28 + 0.34 * k) * (dense ? 0.82 : 1) * (p.scale || 1);
+    const cy = y - u * 0.02;
+    const R = u * 0.62 * scale * (0.5 + 0.65 * k);
+    const a = 0.10 + 0.34 * k;
+    let g = ctx.createRadialGradient(x, cy, 0, x, cy, R);
+    g.addColorStop(0, rgba(c, a));
+    g.addColorStop(0.18, rgba(c, a * 0.66));
+    g.addColorStop(0.42, rgba(c, a * 0.30));
+    g.addColorStop(0.70, rgba(c, a * 0.09));
+    g.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, cy, R, 0, TAU); ctx.fill();
 
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(splay);
-    volume(c, air, A, lr * 1.5, Lc * 0.66, Lc, 4);
-    ctx.restore();
+    /* The hot middle stays the lamp's own colour until it is genuinely near
+       full: washing white in early flatters the render and lies about the
+       colour the rig is making. */
+    const R2 = u * 0.24 * scale * (0.5 + 0.8 * k);
+    const a2 = 0.14 + 0.52 * k;
+    g = ctx.createRadialGradient(x, y, 0, x, y, R2);
+    g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.72) / 0.28), a2));
+    g.addColorStop(0.34, rgba(c, a2 * 0.62));
+    g.addColorStop(0.62, rgba(c, a2 * 0.22));
+    g.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, R2, 0, TAU); ctx.fill();
 
-    const fy = H * FLOOR_Y + u * 0.008;
-    const drop = Math.max(u * 0.05, fy - y);
-
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(Math.PI - splay);
-    volume(c, c, A * 0.95, lr * 1.5, drop * 0.9, drop * 1.06, 2);
-    ctx.restore();
-
-    const rx = lr * 0.9 + drop * 0.8, ry = rx * 0.3;
-    const sx = x + drop * splay * 0.9, pa = 0.05 + 0.36 * k;
-    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
-    g.addColorStop(0, rgba(toWhite(c, k * 0.2), pa));
-    g.addColorStop(0.32, rgba(c, pa * 0.52));
-    g.addColorStop(0.66, rgba(c, pa * 0.17));
+    /* the pool the lamp throws on the floor in front of it */
+    const ry = u * 0.15 * scale, rx = u * 0.42 * scale;
+    const fy = y + u * 0.085;
+    g = ctx.createRadialGradient(x, fy, 0, x, fy, rx);
+    const a3 = 0.05 + 0.34 * k;
+    g.addColorStop(0, rgba(c, a3));
+    g.addColorStop(0.30, rgba(c, a3 * 0.44));
+    g.addColorStop(0.62, rgba(c, a3 * 0.14));
     g.addColorStop(1, rgba(c, 0));
     ctx.save();
-    ctx.translate(sx, fy); ctx.scale(1, ry / rx);
+    ctx.translate(x, fy); ctx.scale(1, ry / rx); ctx.translate(-x, -fy);
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(0, 0, rx, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, fy, rx, 0, TAU); ctx.fill();
     ctx.restore();
   }
 
-  emitter(x, y, lr, c, k);
+  emitter(x, y, (n > 6 ? 8 : 11) * (p.scale || 1), c, k);
 }
 
 function drawBeam(h, W, H, u, n) {
-  const s = (n > 1 ? 0.8 : 1) * (h.scale || 1);
+  const scale = (n > 1 ? 0.7 : 1) * (h.scale || 1);
   const x = W * h.x, y = H * h.y, c = h.rgb, k = h.k;
-  const lr = u * 0.019 * s;
-
   if (k > 0.004) {
-    const L = Math.max(u * 0.16, u * 1.75 * s * h.reach);
-    const goboOn = h.gobo > 8;
-    const fan = h.prism > 50 ? [-0.165, -0.082, 0, 0.082, 0.165] : [0];
-    const share = 1 / Math.pow(fan.length, 0.6);
-    const air = toWhite(c, Math.min(0.85, Math.max(0, k - 0.5) / 0.5 * 0.62));
-    const root = lr * 0.6;
-    const slices = 7, phase = (h.gobo % 24) / 24, duty = 0.54;
-
+    const L = Math.max(u * 0.12, u * 1.7 * scale * h.reach);
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(h.rot);
-    for (let i = 0; i < fan.length; i++) {
-      const axis = i === (fan.length - 1) / 2;
-      const hard = axis ? 0.052 : 0.036;
+
+    /* Three nested cones instead of one: the widest is nearly transparent and
+       the narrowest is the hot core, which is how a beam in haze falls off
+       sideways. One filled wedge reads as a slab of colour, not light. */
+    const layers = [
+      [0.34, 0.13, u * 0.034],
+      [0.17, 0.30, u * 0.022],
+      [0.07, 0.52, u * 0.012],
+    ];
+    /* A prism splits one beam into several that fan out from the same lens.
+       Without this the channel was decoded and thrown away, so the impact
+       gesture - which kicks the prism in on its front - looked identical to a
+       plain hit on screen while the real head threw six beams. */
+    const fan = h.prism > 50 ? [-0.20, -0.10, 0, 0.10, 0.20] : [0];
+    const share = 1 / Math.sqrt(fan.length);
+    for (const off of fan) {
       ctx.save();
-      ctx.rotate(fan[i]);
-
-      volume(c, air, (0.030 + 0.125 * k) * share * (axis ? 1 : 0.68),
-             root * 2.6, L * (axis ? 0.2 : 0.12), L, axis ? 3 : 2);
-
-      const hg = ctx.createLinearGradient(0, 0, 0, -L);
-      hg.addColorStop(0, rgba(air, 1));
-      hg.addColorStop(0.1, rgba(c, 0.96));
-      hg.addColorStop(0.52, rgba(c, 0.52));
-      hg.addColorStop(0.88, rgba(c, 0.14));
-      hg.addColorStop(1, rgba(c, 0));
-      ctx.fillStyle = hg;
-      const base = (0.07 + 0.42 * k) * share * (axis ? 1 : 0.62) * (goboOn ? 1.2 : 1);
-      for (const [spread, weight, w0] of [[hard, 0.55, root], [hard * 0.55, 1, root * 0.62]]) {
-        ctx.globalAlpha = base * weight;
-        if (goboOn) bandedCone(w0, L * spread, L, slices, phase, duty);
-        else cone(w0, L * spread, L);
+      ctx.rotate(off);
+      for (const [spread, weight, root] of layers) {
+        const a = (0.10 + 0.62 * k) * weight * share;
+        const g = ctx.createLinearGradient(0, 0, 0, -L);
+        g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.7) / 0.3), a));
+        g.addColorStop(0.22, rgba(c, a * 0.62));
+        g.addColorStop(0.55, rgba(c, a * 0.24));
+        g.addColorStop(1, rgba(c, 0));
+        ctx.fillStyle = g;
+        cone(root, L * spread, L);
       }
-      ctx.globalAlpha = 1;
-
-      const la = (0.16 + 0.66 * k) * share * (axis ? 1 : 0.48);
-      const lg = ctx.createLinearGradient(0, 0, 0, -L);
-      lg.addColorStop(0, rgba(toWhite(c, 0.72), la));
-      lg.addColorStop(0.38, rgba(toWhite(c, 0.3), la * 0.55));
-      lg.addColorStop(0.86, rgba(c, la * 0.12));
-      lg.addColorStop(1, rgba(c, 0));
-      ctx.strokeStyle = lg;
-      ctx.lineWidth = Math.max(1, lr * (axis ? 0.46 : 0.26));
-      if (goboOn) {
-        ctx.setLineDash([L * duty / slices, L * (1 - duty) / slices]);
-        ctx.lineDashOffset = -L * phase / slices;
-      }
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -L); ctx.stroke();
-      ctx.setLineDash([]);
       ctx.restore();
+    }
+    /* A gobo puts a pattern in the beam: banding across it, not a clean cone. */
+    if (h.gobo > 8) {
+      ctx.globalCompositeOperation = "destination-out";
+      const bands = 7;
+      for (let i = 1; i < bands; i += 2) {
+        const at = (i / bands) * L;
+        ctx.fillStyle = "rgba(0,0,0,0.30)";
+        ctx.fillRect(-L * 0.36, -at - L * 0.022, L * 0.72, L * 0.030);
+      }
+      ctx.globalCompositeOperation = "lighter";
     }
     ctx.restore();
   }
-
-  emitter(x, y, lr, c, k);
+  emitter(x, y, 12 * (h.scale || 1), c, k);
 }
 
 function emitter(x, y, r, c, k) {
   if (k <= 0.004) return;
-  const ba = 0.09 + 0.32 * k, bloom = r * (1.9 + 3.4 * k);
-  let g = ctx.createRadialGradient(x, y, r * 0.45, x, y, bloom);
-  g.addColorStop(0, rgba(c, ba));
-  g.addColorStop(0.26, rgba(c, ba * 0.44));
-  g.addColorStop(0.62, rgba(c, ba * 0.13));
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, rgba(toWhite(c, k * 0.75), k));
+  g.addColorStop(0.46, rgba(c, k));
   g.addColorStop(1, rgba(c, 0));
   ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(x, y, bloom, 0, TAU); ctx.fill();
-
-  g = ctx.createRadialGradient(x, y, 0, x, y, r * 0.8);
-  g.addColorStop(0, rgba(toWhite(c, Math.min(1, k * 0.85)), Math.min(1, 0.4 + 0.6 * k)));
-  g.addColorStop(0.5, rgba(toWhite(c, Math.min(1, k * 0.45)), Math.min(1, 0.34 + 0.6 * k)));
-  g.addColorStop(0.86, rgba(c, 0.3 + 0.5 * k));
-  g.addColorStop(1, rgba(c, 0));
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(x, y, r * 0.8, 0, TAU); ctx.fill();
-
-  if (k > 0.3) {
-    const sw = r * (2 + 5 * k), sh = Math.max(0.7, r * 0.1);
-    const s = ctx.createLinearGradient(x - sw, y, x + sw, y);
-    s.addColorStop(0, rgba(c, 0));
-    s.addColorStop(0.5, rgba(toWhite(c, 0.45), 0.22 * k));
-    s.addColorStop(1, rgba(c, 0));
-    ctx.fillStyle = s;
-    ctx.fillRect(x - sw, y - sh, sw * 2, sh * 2);
-  }
-}
-
-function volume(c, air, A, w0, wTop, L, layers) {
-  const lat = 0.38, R = L * 1.45, span = 0.82 / Math.max(1, layers - 1), lo = 0.18;
-  ctx.save();
-  ctx.scale(lat, 1);
-  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
-  g.addColorStop(0, rgba(air, 1));
-  g.addColorStop(0.1, rgba(c, 0.82));
-  g.addColorStop(0.35, rgba(c, 0.33));
-  g.addColorStop(0.7, rgba(c, 0.07));
-  g.addColorStop(1, rgba(c, 0));
-  ctx.fillStyle = g;
-  for (let i = 0; i < layers; i++) {
-    const f = 1 - i * span;
-    const a = A * Math.exp(-3.2 * (f * f - lo * lo));
-    if (a < 0.0045) continue;
-    ctx.globalAlpha = a;
-    cone(w0 * (0.42 + 0.58 * f) / lat, wTop * f / lat, L);
-  }
-  ctx.globalAlpha = 1;
-  ctx.restore();
-}
-
-function conePath(wBottom, wTop, L) {
-  ctx.beginPath();
-  ctx.moveTo(-wBottom, 0);
-  ctx.lineTo(wBottom, 0);
-  ctx.lineTo(wTop, -L);
-  ctx.lineTo(-wTop, -L);
-  ctx.closePath();
+  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
 }
 
 function bandedCone(wBottom, wTop, L, n, phase, duty) {
@@ -1832,7 +1737,12 @@ function bandedCone(wBottom, wTop, L, n, phase, duty) {
 }
 
 function cone(wBottom, wTop, L) {
-  conePath(wBottom, wTop, L);
+  ctx.beginPath();
+  ctx.moveTo(-wBottom, 0);
+  ctx.lineTo(wBottom, 0);
+  ctx.lineTo(wTop, -L);
+  ctx.lineTo(-wTop, -L);
+  ctx.closePath();
   ctx.fill();
 }
 
