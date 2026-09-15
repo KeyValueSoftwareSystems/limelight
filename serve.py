@@ -28,12 +28,16 @@ def readiness(path):
     """Whether a score is finished enough to be read as finished.
 
     Two ways to fail. A capability the pipeline never produced, which means the
-    run did not complete. Or a bar grid fitted from too little of the song:
-    grid.steady is the share of the beat track whose local tempo holds within
-    1.5% of the median, and grid.py's own steady() gives up under 0.45, so a
-    score below that is stating bar numbers it extrapolated. Four songs fail
-    that and the same four fail at 0.35, so the cut is not doing the work of
-    picking a threshold.
+    run did not complete. Or a beat grid whose intervals do not hold together:
+    grid.steady is 1 minus the 90th percentile of |gap - median| / median over
+    the beat list, so 0.0 means the slowest tenth of intervals are twice the
+    median - the signature of a tracker that fell into half time for part of
+    the song and stated bar numbers that drift out by a factor of two.
+
+    The four songs that used to fail this were all that case, and relevel.py
+    repaired them by putting the track back on one metrical level, so nothing
+    is held back today. The check stays because the failure is silent: the
+    grid still looks like a grid.
 
     Missing lyrics is not a failure here. Five songs are Malayalam, Tamil or
     Telugu, outside the ASR model's languages, and the score already says so in
