@@ -16,6 +16,30 @@ sglang_lock = threading.Lock()
 import subprocess, signal
 
 
+def reconcile_tempo(said, score):
+    out = {"model_says": said}
+    m = re.search(r"Tempo:\s*([0-9.]+)", said)
+    if not m:
+        return out
+    theirs = float(m.group(1))
+    out["model_bpm"] = theirs
+    grid = (score.get("grid") or {}).get("bpm")
+    if not grid or theirs <= 0:
+        return out
+    out["grid_bpm"] = grid
+    ratio = grid / theirs
+    out["ratio_to_grid"] = round(ratio, 3)
+    for name, r in (("same", 1.0), ("half", 0.5), ("double", 2.0),
+                    ("two-thirds", 2 / 3), ("three-halves", 1.5)):
+        if abs(ratio - r) < 0.06 * max(r, 1.0):
+            out["relation"] = name
+            break
+    else:
+        out["relation"] = "unrelated"
+    out["use"] = "grid.bpm"
+    return out
+
+
 def grid_steadiness(beats):
     if not beats or len(beats) < 8:
         return None
@@ -852,7 +876,7 @@ def run_pipeline(wav_path):
                         flush=True,
                     )
                 elif task == "key_tempo" and cleaned and len(cleaned) > 5:
-                    score["key_tempo"] = cleaned
+                    score["key_tempo"] = reconcile_tempo(cleaned, score)
                     print(f"    key_tempo ({time.time() - t:.1f}s)", flush=True)
         except Exception as e:
             print(f"    {task}: FAILED {e}", flush=True)
