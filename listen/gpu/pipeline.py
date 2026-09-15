@@ -16,6 +16,18 @@ sglang_lock = threading.Lock()
 import subprocess, signal
 
 
+def grid_steadiness(beats):
+    if not beats or len(beats) < 8:
+        return None
+    gaps = [beats[i + 1] - beats[i] for i in range(len(beats) - 1)]
+    mid = sorted(gaps)[len(gaps) // 2]
+    if mid <= 0:
+        return None
+    off = [abs(g - mid) / mid for g in gaps]
+    off.sort()
+    return round(1.0 - off[int(0.9 * (len(off) - 1))], 3)
+
+
 def gpu_pids():
     try:
         out = subprocess.run(
@@ -475,7 +487,7 @@ BAD = [
 ]
 
 
-def moss_query(wav, prompt, max_tokens=4096):
+def moss_query(wav, prompt, max_tokens=2048):
     with sglang_lock:
         resp = requests.post(
             f"{SGLANG_URL}/generate",
@@ -525,8 +537,7 @@ SECTIONS_PROMPT = (
     "- label: one allowed label\n"
     "- start: number, seconds\n"
     "- end: number, seconds\n\n"
-    "Allowed labels: intro, verse, pre-chorus, chorus, post-chorus, bridge, "
-    "instrumental, solo, breakdown, drop, build, interlude, outro, other\n\n"
+    "Allowed labels: intro, verse, pre-chorus, chorus, bridge, inst, outro, silence\n\n"
     "Rules:\n"
     "- Cover 0.0 to the supplied duration with NO gaps or overlaps.\n"
     "- Sort by start. Each end equals the next start. Final end = duration.\n"
@@ -586,7 +597,7 @@ EMOTION_PROMPT = (
     "CRITICAL:\n"
     "- Aim for 10-20 segments. Each section (verse, chorus, bridge, etc.) should be at least one segment.\n"
     "- Consecutive segments MUST differ in at least 2 dimension values. No identical consecutive segments.\n"
-    "- Use the full 1-10 range. Vary all 6 dimensions independently.\n"
+
     "- Cover 0.0 to the supplied duration with no gaps. Each end = next start. Final end = duration.\n"
     "- Use at least 3 different emotion labels.\n\n"
     "Return ONLY the JSON array."
@@ -602,7 +613,7 @@ CAPTION_PROMPT = (
 
 LYRICS_PROMPT = (
     "Transcribe all sung, rapped or spoken words in the original language.\n\n"
-    "Format: [MM:SS.s] lyric text\n\n"
+    "Format: [12.34]lyric text[16.78] with times in seconds to two decimals.\n\n"
     "Rules:\n"
     "- One natural phrase per line, timestamped at its onset.\n"
     "- Include every repetition. Do not write 'chorus repeats'.\n"
@@ -699,7 +710,7 @@ def run_pipeline(wav_path):
             "beats_per_bar": bpb,
             "first_beat_s": round(fb, 4),
             "bars": math.ceil((dur - fb) / bd) if bd > 0 else 0,
-            "sure": True,
+            "steady": grid_steadiness(beats),
         }
     if results.get("melody"):
         score["melody"] = results["melody"]
