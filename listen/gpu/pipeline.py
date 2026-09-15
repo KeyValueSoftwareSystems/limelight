@@ -18,14 +18,20 @@ import subprocess, signal
 
 def stop_sglang():
     print("    [stopping SGLang to free GPU...]", flush=True)
-    os.system('pkill -f "sglang.launch_server" 2>/dev/null')
+    os.system('pkill -9 -f "sglang" 2>/dev/null')
     import time as _t
 
-    _t.sleep(3)
+    _t.sleep(2)
+    os.system('pkill -9 -f "sglang" 2>/dev/null')
+    _t.sleep(2)
+    os.system("fuser -k /dev/nvidia* 2>/dev/null")
+    _t.sleep(2)
     import torch
 
     torch.cuda.empty_cache()
     gc.collect()
+    free = torch.cuda.mem_get_info()[0] / 1e9
+    print(f"    [GPU free: {free:.1f} GB]", flush=True)
 
 
 def start_sglang():
@@ -424,7 +430,7 @@ BAD = [
 ]
 
 
-def moss_query(wav, prompt, max_tokens=16384):
+def moss_query(wav, prompt, max_tokens=8192):
     with sglang_lock:
         resp = requests.post(
             f"{SGLANG_URL}/generate",
@@ -433,14 +439,18 @@ def moss_query(wav, prompt, max_tokens=16384):
                 "audio_data": wav,
                 "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.05},
             },
-            timeout=600,
+            timeout=300,
         )
     resp.raise_for_status()
     text = resp.json()["text"]
     text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
     if "<think>" in text:
         idx = text.find("[")
-        text = text[idx:] if idx >= 0 else ""
+        if idx >= 0:
+            text = text[idx:]
+        else:
+            idx = text.find("{")
+            text = text[idx:] if idx >= 0 else ""
     return text.strip()
 
 
@@ -485,28 +495,26 @@ SECTIONS_PROMPT = (
 )
 
 MOMENTS_PROMPT = (
-    "You are a music production analyst. Listen to this song and identify ONLY actual musical events — "
-    "specific instants where something audibly changes in the mix.\n\n"
+    "Listen to this song and identify every distinct musical event — "
+    "specific instants where something audibly changes.\n\n"
     "Return ONLY a JSON array:\n"
-    '[{"time_s": float, "type": "...", "what": "kick drum / lead synth / vocal etc", '
-    '"intensity": 0.0-1.0, "description": "what specifically happens at this instant"}, ...]\n\n'
-    "Valid types (these are EVENTS, not sections):\n"
-    "  drop — bass/beat suddenly hits after silence or buildup\n"
-    "  build — energy starts rising (risers, snare rolls, filters opening)\n"
-    "  breakdown — instruments strip away, energy drops suddenly\n"
-    "  fill — drum fill, snare roll, or transition element\n"
-    "  entrance — a new instrument or voice appears for the first time\n"
-    "  exit — an instrument or voice disappears from the mix\n"
-    "  accent — a stab, hit, or impact sound\n"
-    "  silence — everything stops or nearly stops\n"
-    "  key_change — the key or tonality shifts\n"
-    "  tempo_change — the tempo audibly changes\n"
-    "  solo — an instrument takes a solo\n"
-    "  surprise — something unexpected happens in the production\n\n"
-    "DO NOT use types like intro, verse, chorus, outro, hook — those are sections, not moments.\n"
-    "DO NOT describe what section is playing — describe what SOUND EVENT happens at that instant.\n\n"
-    "Timestamps must be precise, not rounded to 5 or 10 seconds. "
-    "Output ONLY the JSON array."
+    '[{"time_s": float, "type": "...", "what": "instrument or element", '
+    '"intensity": 0.0-1.0, "description": "what happens"}, ...]\n\n'
+    "Use ONLY these types:\n"
+    "  entrance — a voice, instrument or musical layer begins\n"
+    "  exit — a voice, instrument or layer ends\n"
+    "  accent — a prominent hit, chord or note\n"
+    "  fill — a short rhythmic or melodic embellishment\n"
+    "  stop — an abrupt interruption of musical activity\n"
+    "  resume — music restarts after an interruption\n"
+    "  change — a distinct switch in rhythm, harmony or texture\n"
+    "  arrival — a new phrase, theme or section lands\n"
+    "  hook_onset — a recognisable recurring motif begins\n"
+    "  climax — a local peak of intensity or expression\n"
+    "  resolution — musical tension audibly settles\n\n"
+    "Timestamps must be precise, not rounded. "
+    "Name the specific instrument or sound in 'what'. "
+    "Output ONLY the JSON array, no explanation."
 )
 
 EMOTION_PROMPT = (
