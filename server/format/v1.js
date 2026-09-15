@@ -153,23 +153,33 @@ export function format(raw) {
         s.from_bar != null ? { bar: s.from_bar, beat: 1 } : place(s.start);
       const to =
         s.to_bar != null ? { bar: s.to_bar + 1, beat: 1 } : place(s.end);
-      const row = { from, to, name: s.label, start: s.start, end: s.end, nth: i + 1 };
+      const row = { from, to, name: s.label, start: s.start, end: s.end,
+                    nth: i + 1, like: s.label };
+      if (raw.sections.findIndex((o) => o.label === s.label) < i)
+        row.repeat = s.label;
       if (s.also_heard) row.also_heard = s.also_heard;
       for (const extra of ["confidence", "edge", "sudden", "sure"])
         if (s[extra] !== undefined) row[extra] = s[extra];
       return row;
     });
   } else if (Array.isArray(raw.parts)) {
-    out.sections = raw.parts.map((part) => ({
-      from: { bar: part.from_bar, beat: 1 },
-      to: { bar: part.to_bar + 1, beat: 1 },
-      name: part.role,
-      nth: part.nth,
-      like: part.like,
-      feels: part.feels,
-      playing: part.playing,
-      fullness: part.fullness,
-    }));
+    out.sections = raw.parts.map((part) => {
+      const row = {
+        from: { bar: part.from_bar, beat: 1 },
+        to: { bar: part.to_bar + 1, beat: 1 },
+        name: part.role,
+        nth: part.nth,
+        like: part.like,
+        feels: part.feels,
+        playing: part.playing,
+        fullness: part.fullness,
+      };
+      if (part.returns) row.repeat = part.like;
+      for (const extra of ["rise", "sure", "trades", "also_heard", "edge",
+                           "sudden", "stems"])
+        if (part[extra] !== undefined) row[extra] = part[extra];
+      return row;
+    });
   }
 
   if (raw.ticks) out.ticks = raw.ticks;
@@ -295,8 +305,150 @@ export function format(raw) {
     });
   }
 
+  const FAMILY = {
+    drums: ["drums", "kick", "snare", "hh", "toms", "percussion", "clap",
+            "cymbals", "ride", "crash", "shaker", "tambourine", "congas",
+            "bongos", "timpani"],
+    bass: ["bass", "double-bass", "sub"],
+    vocals: ["vocal", "lead-vocal", "back-vocal", "choir"],
+  };
+  const familyOf = (name) => {
+    const n = name.toLowerCase();
+    for (const [fam, members] of Object.entries(FAMILY))
+      if (members.some((m) => n === m || n.includes(m))) return fam;
+    return "other";
+  };
+
+  const perBarFamilies = () => {
+    const lanes = raw.stems_temporal?.stems;
+    if (!lanes || !grid.bars) return null;
+    const w = raw.stems_temporal.window_s || 0.5;
+    const pots = { drums: [], bass: [], vocals: [], other: [] };
+    for (const [name, v] of Object.entries(lanes))
+      if (Array.isArray(v) && v.length) pots[familyOf(name)].push(v);
+    const out2 = {};
+    for (const [fam, group] of Object.entries(pots)) {
+      if (!group.length) continue;
+      const n = Math.min(...group.map((v) => v.length));
+      const rows = [];
+      for (let b = 0; b < grid.bars; b++) {
+        const a = Math.floor(atBeat(b * bpb) / w);
+        const z = Math.max(a + 1, Math.floor(atBeat((b + 1) * bpb) / w));
+        let tot = 0, seen = 0;
+        for (const v of group)
+          for (let i = Math.max(0, a); i < Math.min(n, z); i++) {
+            tot += v[i];
+            seen++;
+          }
+        rows.push(seen ? tot / seen : 0);
+      }
+      const top = Math.max(...rows);
+      out2[fam] = rows.map((x) => (top > 0 ? +(x / top).toFixed(6) : +x.toFixed(6)));
+    }
+    return Object.keys(out2).length ? out2 : null;
+  };
+
   if (raw.layers) out.layers = { ...raw.layers };
   if (!out.layers) out.layers = {};
+
+  if (!out.layers.presence && !raw.presence) {
+    const fam = perBarFamilies();
+    if (fam) {
+      const spans = [];
+      const state = (x) => (x >= 0.55 ? "full" : x >= 0.15 ? "light" : "out");
+      for (const [stem, rows] of Object.entries(fam)) {
+        const soft = rows.map((_, i) => {
+          const cut = rows.slice(Math.max(0, i - 1), i + 2).slice().sort((a, b) => a - b);
+          return cut[Math.floor(cut.length / 2)];
+        });
+        const states = soft.map(state);
+        for (let i = 1; i < states.length - 1; i++)
+          if (states[i] !== states[i - 1] && states[i - 1] === states[i + 1])
+            states[i] = states[i - 1];
+        let run = states[0], from = 0;
+        for (let b = 1; b <= states.length; b++) {
+          const now = b < states.length ? states[b] : null;
+          if (now !== run) {
+            if (run !== "out" && b - from >= 2)
+              spans.push({ from: { bar: firstBar + from, beat: 1 },
+                           to: { bar: firstBar + b, beat: 1 },
+                           stem, state: run });
+            run = now;
+            from = b;
+          }
+        }
+      }
+      if (spans.length)
+        out.layers.presence = { kind: "sparse", derived_from: "stem lanes",
+                                spans };
+    }
+  }
+
+  if (!out.layers.subsection && !Array.isArray(raw.phrases)
+      && Array.isArray(out.sections)
+      && out.sections.length && Array.isArray(raw.moments)) {
+    const lane = out.energy?.values || [];
+    const steps = [];
+    for (let i = 1; i < lane.length; i++) steps.push(Math.abs(lane[i] - lane[i - 1]));
+    steps.sort((a, b) => a - b);
+    const typical = steps.length ? steps[Math.floor(steps.length / 2)] : 0;
+    const moved = Math.max(0.03, 2 * typical);
+    const trend = (a, b) => {
+      const cut = lane.slice(Math.max(0, a - firstBar), Math.max(1, b - firstBar));
+      if (cut.length < 2) return "steady";
+      const half = Math.floor(cut.length / 2) || 1;
+      const lo = cut.slice(0, half).reduce((x, y) => x + y, 0) / half;
+      const hi = cut.slice(half).reduce((x, y) => x + y, 0) / (cut.length - half);
+      if (hi - lo > moved) return "intensifying";
+      if (lo - hi > moved) return "easing";
+      return "sustaining";
+    };
+    const word = (doing, nth, last, name) => {
+      if (doing !== "sustaining") return doing;
+      if (nth === 1) return name === "intro" ? "establishing" : "developing";
+      if (nth === last) return name === "outro" ? "closing" : "resolving";
+      return "sustaining";
+    };
+    const famRows = perBarFamilies() || {};
+    const playingIn = (a, b) => {
+      const on = [];
+      for (const [fam, rows] of Object.entries(famRows)) {
+        const cut = rows.slice(Math.max(0, a - firstBar), Math.max(1, b - firstBar));
+        if (!cut.length) continue;
+        const mean = cut.reduce((x, y) => x + y, 0) / cut.length;
+        if (mean >= 0.15) on.push(fam);
+      }
+      return on;
+    };
+    const spans = [];
+    for (const sec of out.sections) {
+      const span = sec.to.bar - sec.from.bar;
+      const phrase = span >= 16 ? 8 : 4;
+      const marks = new Set();
+      for (let b = sec.from.bar + phrase; b < sec.to.bar - 1; b += phrase)
+        marks.add(b);
+      for (const m of raw.moments) {
+        if (m.time_s == null) continue;
+        const b = place(m.time_s).bar;
+        if (b > sec.from.bar + 1 && b < sec.to.bar - 1) marks.add(b);
+      }
+      const inside = [...marks].sort((a, b) => a - b);
+      const cuts = [sec.from.bar];
+      for (const b of inside) if (b - cuts[cuts.length - 1] >= 2) cuts.push(b);
+      cuts.push(sec.to.bar);
+      for (let i = 0; i < cuts.length - 1; i++)
+        spans.push({ from: { bar: cuts[i], beat: 1 },
+                     to: { bar: cuts[i + 1], beat: 1 },
+                     in: sec.name, in_nth: sec.nth, nth: i + 1,
+                     doing: word(trend(cuts[i], cuts[i + 1]), i + 1,
+                                 cuts.length - 1, sec.name),
+                     playing: playingIn(cuts[i], cuts[i + 1]) });
+    }
+    if (spans.length)
+      out.layers.subsection = { kind: "partition",
+                                derived_from: "moments and the energy lane",
+                                spans };
+  }
 
   if (!out.layers.subsection && Array.isArray(raw.phrases)) {
     out.layers.subsection = {

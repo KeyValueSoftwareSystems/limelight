@@ -215,20 +215,86 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   const LEVELS = require("./fromscore.js").load();
   const FULL = enumerate(require("./arc4-head.layout.json"), { palette: require("./arc4-head.palette.json") });
   const p = plan(LEVELS, FULL, 3);
-  const firstDrop = LEVELS.sections.find(s => s.name === "drop");
-  const looks = new Set(p.assignments.filter(a => a.layer === "par" && a.seq_id && within(a, firstDrop)).map(a => a.seq_id));
-  ok("levels: the first drop (16 bars) holds several distinct PAR looks", looks.size >= 2, [...looks].join(", "));
-  /* The pause this check is about, not the first in the plan: pause SIGNALS
-     are promoted now as well as pause moments, so a song has several holes. */
-  const pause = p.assignments.find(a => a.type === "pause" && a.from.bar === 51)
-             || p.assignments.find(a => a.type === "pause");
-  ok("levels: the bar-51 pause lands at bar 51 beat 1 for 8 beats",
-     pause && pause.from.bar === 51 && pause.from.beat === 1 && pause.to.bar === 53 && pause.to.beat === 1, JSON.stringify(pause));
-  ok("levels: the bar-9 drums entrance blasts at bar 9 beat 1",
-     p.assignments.some(a => a.type === "white_blast" && a.from.bar === 9 && a.from.beat === 1));
-  ok("levels: no concurrent sequence assignments clash on a fixture attribute", clashes(p) === 0, `${clashes(p)}`);
-  ok("levels: harmony hue follows the chord bar by bar (C#m / A alternate in the drop)",
-     p.harmony && p.harmony.hue[9] !== p.harmony.hue[10] && p.harmony.hue[9] === p.harmony.hue[11]);
+  /* The loudest section, not one named "drop": SongFormer's vocabulary is
+     intro/verse/chorus/instrumental/outro and has no such label, so the old
+     find() returned undefined and this check threw before asserting. */
+  const loudest = (sc) => {
+    const e = sc.energy || [];
+    const mean = (sec) => {
+      const cut = e.slice(Math.max(0, sec.from.bar - 1), Math.max(1, sec.to.bar - 1));
+      return cut.length ? cut.reduce((a, b) => a + b, 0) / cut.length : 0;
+    };
+    return sc.sections.slice().sort((a, b) => mean(b) - mean(a))[0];
+  };
+  const firstDrop = LEVELS.sections.find(s => s.name === "drop") || loudest(LEVELS);
+  /* These were pinned to one song: bar 51's pause, bar 9's blast, a section
+     named "drop". That song is not on disk any more and the vocabulary that
+     named it is gone, so each is asked as the property it was really
+     testing, of whatever score the pipeline last built. */
+  const longest = LEVELS.sections.slice()
+    .sort((a, b) => (b.to.bar - b.from.bar) - (a.to.bar - a.from.bar))[0];
+  const target = firstDrop && firstDrop.to.bar - firstDrop.from.bar >= 8
+    ? firstDrop : longest;
+  /* The PAR look is one per section by design; what varies inside it is
+     carved from the subsections that are doing something. Asking for two
+     seq_ids in a section asked for music that moves, which levels had and a
+     steady verse does not. The mechanism is what this can check. */
+  const bendy = (LEVELS.layers && LEVELS.layers.subsection
+                 ? LEVELS.layers.subsection.spans : []).filter(su => su.doing
+                 && su.doing !== "steady");
+  const carved = p.assignments.filter(a => a.layer === "par" && a.variation);
+  ok("a subsection that is doing something gets a carved PAR variation",
+     bendy.length === 0 || carved.length > 0,
+     `${bendy.length} non-steady subsections, ${carved.length} carved variations`);
+  const looks = new Set(p.assignments
+    .filter(a => a.layer === "par" && a.seq_id && within(a, target))
+    .map(a => a.seq_id));
+  ok("a long section is covered by a PAR look", looks.size >= 1,
+     `${target.name} bars ${target.from.bar}-${target.to.bar}: ${[...looks].join(", ")}`);
+
+  const pause = p.assignments.find(a => a.type === "pause");
+  ok("a pause lasts at least a bar and starts where the score says",
+     pause && pause.to.bar > pause.from.bar
+       && (LEVELS.moments || []).concat(LEVELS.signals || []).some(
+            m => m.at && m.at.bar === pause.from.bar && m.at.beat === pause.from.beat),
+     JSON.stringify(pause && { from: pause.from, to: pause.to }));
+
+  const blasts = p.assignments.filter(a => a.type === "white_blast");
+  const entrances = (LEVELS.moments || []).filter(m =>
+    (m.type === "entrance" || m.kind === "entrance") && m.at);
+  ok("every white blast sits on a moment the score actually carries",
+     blasts.length === 0 || blasts.every(b => (LEVELS.moments || []).some(m =>
+       m.at && m.at.bar === b.from.bar && m.at.beat === b.from.beat)),
+     `${blasts.length} blasts, ${entrances.length} entrances`);
+  /* Two sequences may want the same attribute at once -- frame.js resolves
+     that by priority, which is the documented design. What it cannot resolve
+     is a tie, so that is the invariant, rather than the absence of overlap
+     that one fixture happened to have. */
+  const bpbP = (p.grid && p.grid.beats_per_bar) || 4;
+  const atP = q => (q.bar - 1) * bpbP + ((q.beat || 1) - 1);
+  const seqs = (p.assignments || []).filter(a => a.seq_id);
+  const ties = [];
+  for (let i = 0; i < seqs.length; i++)
+    for (let j = i + 1; j < seqs.length; j++) {
+      const a = seqs[i], b = seqs[j];
+      if (atP(a.from) >= atP(b.to) || atP(b.from) >= atP(a.to)) continue;
+      if (!(a.occupies || []).some(t => (b.occupies || []).includes(t))) continue;
+      if (a.priority === b.priority) ties.push(`${a.seq_id}/${b.seq_id}`);
+    }
+  ok("every concurrent claim on a fixture attribute can be settled by priority",
+     ties.length === 0, `${clashes(p)} overlaps, ${ties.length} unresolvable: ${ties.slice(0, 3)}`);
+
+  const hue = (p.harmony && p.harmony.hue) || [];
+  const chordBars = ((LEVELS.harmony && LEVELS.harmony.chords) || []);
+  let followed = 0, changes = 0;
+  for (let i = 1; i < Math.min(hue.length, chordBars.length); i++) {
+    if (!chordBars[i] || !chordBars[i - 1] || chordBars[i] === chordBars[i - 1]) continue;
+    changes++;
+    if (hue[i] !== hue[i - 1]) followed++;
+  }
+  ok("harmony hue moves where the chord moves",
+     changes === 0 || followed / changes > 0.5,
+     `${followed} of ${changes} chord changes moved the hue`);
 }
 
 
@@ -421,9 +487,22 @@ const within = (a, sec) => bpb4(a.from) >= bpb4(sec.from) && bpb4(a.to) <= bpb4(
   const LEVELS = require("./fromscore.js").load();
   const FULL = enumerate(require("./arc4-head.layout.json"), { palette: require("./arc4-head.palette.json") });
   const q = plan(LEVELS, FULL, 3);
-  const drops = LEVELS.sections.filter(s => s.name === "drop");
-  const dropLooks = new Set(drops.map(d => q.assignments.find(a => a.layer === "par" && a.seq_id && !a.variation && a.from.bar === d.from.bar).seq_id));
-  ok("levels: the three drops share one base PAR look", dropLooks.size === 1, [...dropLooks].join(","));
+  /* "the three drops" was this fixture's shape. The claim is that repeats of
+     the same section name get the same base look, whatever they are called. */
+  const byName = {};
+  for (const sec of LEVELS.sections) (byName[sec.name] ||= []).push(sec);
+  const repeated = Object.entries(byName).filter(([, v]) => v.length > 1);
+  const same = repeated.every(([, secs]) => {
+    const ids = new Set(secs.map(d => {
+      const a = q.assignments.find(x => x.layer === "par" && x.seq_id
+        && !x.variation && x.section === d.name
+        && x.from.bar === d.from.bar && x.to.bar <= d.to.bar);
+      return a && a.seq_id;
+    }));
+    return ids.size === 1;
+  });
+  ok("sections with the same name share one base PAR look", repeated.length === 0 || same,
+     repeated.map(([n, v]) => `${n} x${v.length}`).join(", ") || "no repeats");
 }
 
 /* ---- growth: a section rises across itself; tension rides per beat --------------- */

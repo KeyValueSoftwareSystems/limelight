@@ -62,8 +62,76 @@ const KNOWN = [
    energy. server/format/v1.js does the same mapping for the HTTP path, which is
    ESM and cannot be required from here. */
 function adapt(s) {
-  if (Array.isArray(s.sections)) return s;
+  const shaped =
+    Array.isArray(s.sections) && (!s.sections.length || s.sections[0].from);
+  if (shaped && !Array.isArray(s.beats) && s.energy) return s;
   const out = { ...s };
+  const g = s.grid || {};
+  const per = g.beats_per_bar || 4;
+  const base = g.first_bar !== undefined && g.first_bar !== null ? g.first_bar : 1;
+  const map =
+    Array.isArray(g.tempo) && g.tempo.length
+      ? g.tempo
+      : [{ from_beat: 0, at_s: g.first_beat_s || 0, bpm: g.bpm || 120 }];
+  const beatNo = (at) => {
+    let k = 0;
+    while (k + 1 < map.length && map[k + 1].at_s <= at) k++;
+    const seg = map[k];
+    return seg.from_beat + (at - seg.at_s) / (60 / seg.bpm);
+  };
+  const place = (t) => {
+    const n = Math.round(beatNo(t));
+    return {
+      bar: Math.max(base, 1 + Math.floor(n / per)),
+      beat: 1 + (((n % per) + per) % per),
+    };
+  };
+  if (Array.isArray(s.sections) && s.sections.length && !s.sections[0].from) {
+    out.sections = s.sections.map((sec, i) => ({
+      from: sec.from_bar != null ? { bar: sec.from_bar, beat: 1 } : place(sec.start),
+      to: sec.to_bar != null ? { bar: sec.to_bar + 1, beat: 1 } : place(sec.end),
+      name: sec.label,
+      nth: i + 1,
+      start: sec.start,
+      end: sec.end,
+      also_heard: sec.also_heard,
+    }));
+  }
+  if (!s.energy && s.stems_temporal && s.stems_temporal.stems && g.bars) {
+    const atBeat = (n) => {
+      let k = 0;
+      while (k + 1 < map.length && map[k + 1].from_beat <= n) k++;
+      const seg = map[k];
+      return seg.at_s + (n - seg.from_beat) * (60 / seg.bpm);
+    };
+    const lanes = Object.values(s.stems_temporal.stems).filter(
+      (v) => Array.isArray(v) && v.length,
+    );
+    if (lanes.length) {
+      const w = s.stems_temporal.window_s || 0.5;
+      const n = Math.min(...lanes.map((v) => v.length));
+      const mean = [];
+      for (let i = 0; i < n; i++)
+        mean.push(lanes.reduce((a, v) => a + v[i], 0) / lanes.length);
+      const rows = [];
+      for (let b = 0; b < g.bars; b++) {
+        const a = Math.floor(atBeat(b * per) / w);
+        const z = Math.max(a + 1, Math.floor(atBeat((b + 1) * per) / w));
+        const cut = mean.slice(Math.max(0, a), Math.min(n, z));
+        rows.push(cut.length ? cut.reduce((x, y) => x + y, 0) / cut.length : 0);
+      }
+      const top = Math.max(...rows);
+      if (top > 0)
+        out.energy = { per: "bar", from_bar: base,
+                       values: rows.map((v) => +(v / top).toFixed(3)),
+                       normalised: "per-song-peak" };
+    }
+  }
+  if (Array.isArray(s.moments) && s.moments.length && !s.moments[0].at) {
+    out.moments = s.moments.map((mo) =>
+      mo.time_s != null ? { at: place(mo.time_s), ...mo } : mo,
+    );
+  }
   if (Array.isArray(s.parts)) {
     out.sections = s.parts.map((p) => ({
       from: { bar: p.from_bar, beat: 1 },
@@ -79,23 +147,6 @@ function adapt(s) {
      [bar, beat] pairs. Bars advance on the detected downbeat rather than on a
      count, so a pickup bar stays a pickup bar. */
   if (Array.isArray(s.beats) && s.grid) {
-    /* Bar 1 is the first downbeat, matching session.js. Numbering from
-       grid.first_bar put a pickup score's beats a bar out. */
-    const per = s.grid.beats_per_bar || 4;
-    const base =
-      s.grid.first_bar !== undefined && s.grid.first_bar !== null
-        ? s.grid.first_bar
-        : 1;
-    const map =
-      Array.isArray(s.grid.tempo) && s.grid.tempo.length
-        ? s.grid.tempo
-        : [{ from_beat: 0, at_s: s.grid.first_beat_s, bpm: s.grid.bpm }];
-    const beatNo = (at) => {
-      let k = 0;
-      while (k + 1 < map.length && map[k + 1].at_s <= at) k++;
-      const seg = map[k];
-      return seg.from_beat + (at - seg.at_s) / (60 / seg.bpm);
-    };
     let lead = 0;
     const pairs = s.beats.map((b, i) => {
       const n = b.t != null ? Math.round(beatNo(b.t)) : i;

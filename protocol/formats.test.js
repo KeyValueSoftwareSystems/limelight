@@ -13,20 +13,7 @@ const fs = require("fs"), path = require("path"), { execFileSync } = require("ch
 
 const root = path.join(__dirname, "..");
 
-const pickScore = () => {
-  const dirs = [path.join(root, "scores"), path.join(root, "hub", "files", "score")];
-  for (const d of dirs) {
-    if (!fs.existsSync(d)) continue;
-    const hit = fs.readdirSync(d).filter((f) => f.endsWith(".score")).sort();
-    if (hit.length) return path.join(d, hit[0]);
-  }
-  return null;
-};
-const scorePath = pickScore();
-if (!scorePath) {
-  console.log("SKIP formats: no .score anywhere; build one first (listen/gpu/run.sh)");
-  process.exit(0);
-}
+const scorePath = require("./fixture.js").need("formats");
 const pythons = [path.join(root, "work", "allin1", "bin", "python"), "python3"];
 const python = pythons.find((p) => p === "python3" || fs.existsSync(p));
 const raw = JSON.parse(fs.readFileSync(scorePath, "utf8"));

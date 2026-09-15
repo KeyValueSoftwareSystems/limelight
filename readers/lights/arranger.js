@@ -209,12 +209,31 @@ function partRise(sec, score) {
 
 /* ---- energy + arc -> a lighting context (a matrix column) --------------- */
 const HIGH = 0.5, VLOW = 0.1;
+/* SongFormer names a section verse / chorus / bridge; this rig's phases are
+   intro / verse / break / build / drop / outro. Only the words the energy
+   heuristic cannot infer are mapped here -- a section already named in the
+   rig's own vocabulary is left to it, so the older scores plan as they did.
+   Without this a second chorus was lit as a break, and DYN.verse was
+   unreachable. */
+const NAMED = {
+  verse: "verse", chorus: "drop", refrain: "drop",
+  bridge: "build", prechorus: "build", "pre-chorus": "build",
+};
+
 function contextsFor(sections, energyAt, score) {
   const means = sections.map(s => sectionEnergyMean(s, energyAt));
   const highIdx = means.map((m, j) => [j, m]).filter(x => x[1] >= HIGH).map(x => x[0]);
   const lastHigh = highIdx.length ? highIdx[highIdx.length - 1] : -1;
+  const named = sections.map(sec =>
+    NAMED[String(sec.name || "").toLowerCase().replace(/[ _]/g, "-")] || null);
+  const nDrops = named.filter(x => x === "drop").length;
+  const lastNamedDrop = nDrops > 1 ? named.lastIndexOf("drop") : -1;
   return sections.map((sec, i) => {
     const e = means[i], first = i === 0, last = i === sections.length - 1;
+    if (named[i]) {
+      if (named[i] === "drop" && i === lastNamedDrop) return "final_drop";
+      return named[i];
+    }
     if (e >= HIGH) return i === lastHigh ? "final_drop" : "drop";
     if (first) return "intro";
     if (last) return "outro";
@@ -688,7 +707,8 @@ function plan(scoreIn, enumResult, seed) {
     });
 
     if (par) {
-      const pieces = carve(secFrom, secTo, variations.map(v => [v.f, v.t]));
+      const pieces = carve(secFrom, secTo, variations.map(v => [v.f, v.t]))
+        .filter(pc => pc[1] > pc[0]);
       pieces.forEach((pc, k) => assignments.push({
         from: fromBeat(pc[0]), to: fromBeat(pc[1]), seq_id: par.id, context, layer: "par", priority: 0,
         ...(pieces.length > 1 ? { piece: k, origin: sec.from } : {}),   /* so a scripted compound keeps its clock */

@@ -7,11 +7,7 @@ const path = require("path");
    suite unrunnable on a fresh clone -- which is how four suites stopped running
    without anything reporting a fault. */
 function scoreFile() {
-  const candidates = [
-    path.join(__dirname, "..", "..", "scores", "levels.score"),        // built by the pipeline here
-    path.join(__dirname, "panel", "scores", "levels.score"),           // imported by the panel
-  ];
-  return candidates.find(c => fs.existsSync(c)) || candidates[candidates.length - 1];
+  return require("../../protocol/fixture.js").pick();
 }
 
 
@@ -19,7 +15,25 @@ function scoreFile() {
    The pipeline emits parts and bars.intensity. One place converts, so the
    reader and its tests read the same shape from the same committed score. */
 function shape(raw) {
-  if (Array.isArray(raw.sections)) return raw;
+  if (Array.isArray(raw.sections) && raw.sections.length && raw.sections[0].from)
+    return raw;
+
+  if (Array.isArray(raw.sections) && raw.sections.length) {
+    const { format } = require("../../server/format/v1.js");
+    const done = format(raw);
+    return {
+      ...raw,
+      sections: done.sections || [],
+      moments: done.moments || raw.moments || [],
+      layers: done.layers || raw.layers,
+      harmony: done.harmony || raw.harmony,
+      chords: done.chords,
+      key: done.key || raw.key,
+      curves: done.curves,
+      instruments_over_time: done.instruments_over_time,
+      energy: (done.energy && done.energy.values) || [],
+    };
+  }
 
   if (raw.layers && raw.layers.form && Array.isArray(raw.layers.form.spans)) {
     return {

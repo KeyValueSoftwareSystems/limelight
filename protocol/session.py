@@ -255,10 +255,14 @@ class Session:
                                 "name": sp.get("name"), "bar": sp["to"]["bar"],
                                 "beat": sp["to"]["beat"], "in_ms": ms(sp["to"])})
         for mo in (self.score.get("moments") or []):
-            if inside(mo["at"]):
-                out.append({"what": mo["kind"], "layer": "moment", "name": mo["kind"],
-                            "bar": mo["at"]["bar"], "beat": mo["at"]["beat"],
-                            "in_ms": ms(mo["at"])})
+            at = mo.get("at")
+            if not at:
+                continue
+            if inside(at):
+                what = mo.get("kind") or mo.get("type")
+                out.append({"what": what, "layer": "moment", "name": what,
+                            "bar": at["bar"], "beat": at["beat"],
+                            "in_ms": ms(at)})
         out.sort(key=lambda x: x["in_ms"])
         return out
 

@@ -10,14 +10,8 @@ const { Session } = require("./session.js");
    sample goes stale the first time the pipeline changes. */
 const { adapt } = require("./respond.js");
 const fs_ = require("fs"), path_ = require("path");
-/* The built score when the pipeline has run on this machine, and the committed
-   fixture otherwise. A bare path into scores/ makes the suite unrunnable on a
-   fresh clone, which is how four suites stopped running with nothing red. */
-function scoreFile() {
-  const built = path_.join(__dirname, "..", "scores", "levels.score");
-  return built;
-}
-const score = adapt(JSON.parse(fs_.readFileSync(scoreFile(), "utf8")));
+const score = adapt(JSON.parse(
+  fs_.readFileSync(require("./fixture.js").need("session"), "utf8")));
 /* Every timing expectation comes from the score's own grid. Hardcoding 128.0
    and 0.2233 pinned this suite to a fixture that no longer exists. */
 const BEAT_S = 60 / score.grid.bpm;
@@ -217,13 +211,19 @@ const at = p => (p.bar - 1) * bpb + ((p.beat || 1) - 1);
      carries.length + " of " + (score.moments || []).length);
 
   /* several layers answer at once, and that is not a bug */
-  const at78 = s.sectionsAt({ bar: 78, beat: 1 });
-  /* The pipeline has no build layer. form, subsection, presence and phrase are
-     the four it does have, and they answer together, which is the claim. */
-  ok("at bar 78, four layers have something to say",
-     !!at78.form && !!at78.subsection && at78.presence.length > 0 && !!at78.phrase,
-     `form ${at78.form && at78.form.name} · doing ${at78.subsection && at78.subsection.name}` +
-     ` · presence ${at78.presence.map(x=>x.name)} · phrase ${at78.phrase && at78.phrase.index}`);
+  /* This named bar 78 and the four layers one pipeline happened to emit.
+     The claim underneath is that every layer the score carries answers
+     together at a point inside the song, whichever layers those are. */
+  const mid = score.sections[Math.floor(score.sections.length / 2)];
+  const here = s.sectionsAt({ bar: mid.from.bar, beat: 1 });
+  const carried = Object.keys(score.layers || {});
+  const answered = carried.filter(name => {
+    const v = here[name];
+    return Array.isArray(v) ? v.length > 0 : v != null;
+  });
+  ok("every layer the score carries answers at a point inside the song",
+     carried.length > 0 && answered.length === carried.length,
+     `carried ${carried.join(", ")} · answered ${answered.join(", ") || "none"}`);
 
   /* rule 8: the voice has one writer */
   const vocalInPresence = (L.presence.spans || []).some(sp => sp.name === "vocals");

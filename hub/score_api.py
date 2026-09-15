@@ -167,7 +167,10 @@ def format_v1(raw):
                 "start": sec.get("start"),
                 "end": sec.get("end"),
                 "nth": i + 1,
+                "like": sec.get("label"),
             }
+            if any(o.get("label") == sec.get("label") for o in raw["sections"][:i]):
+                row["repeat"] = sec.get("label")
             if sec.get("also_heard") is not None:
                 row["also_heard"] = sec["also_heard"]
             for extra in ("confidence", "edge", "sudden", "sure"):
@@ -317,7 +320,164 @@ def format_v1(raw):
                     m[k] = ev[k]
             out["moments"].append(m)
 
+    _FAMILY = {
+        "drums": ["drums", "kick", "snare", "hh", "toms", "percussion", "clap",
+                  "cymbals", "ride", "crash", "shaker", "tambourine", "congas",
+                  "bongos", "timpani"],
+        "bass": ["bass", "double-bass", "sub"],
+        "vocals": ["vocal", "lead-vocal", "back-vocal", "choir"],
+    }
+
+    def _family_of(name):
+        low = name.lower()
+        for fam, members in _FAMILY.items():
+            if any(low == m or m in low for m in members):
+                return fam
+        return "other"
+
+    def _per_bar_families():
+        temporal = raw.get("stems_temporal") or {}
+        lanes = temporal.get("stems") or {}
+        if not lanes or not grid.get("bars"):
+            return None
+        w = temporal.get("window_s") or 0.5
+        pots = {"drums": [], "bass": [], "vocals": [], "other": []}
+        for name, v in lanes.items():
+            if isinstance(v, list) and v:
+                pots[_family_of(name)].append(v)
+
+        def _at_beat_n(k):
+            j = 0
+            while j + 1 < len(_tempo) and _tempo[j + 1]["from_beat"] <= k:
+                j += 1
+            seg = _tempo[j]
+            return seg["at_s"] + (k - seg["from_beat"]) * (60.0 / seg["bpm"])
+
+        done = {}
+        for fam, group in pots.items():
+            if not group:
+                continue
+            n = min(len(v) for v in group)
+            rows = []
+            for b in range(int(grid["bars"])):
+                a = int(_at_beat_n(b * bpb) / w)
+                z = max(a + 1, int(_at_beat_n((b + 1) * bpb) / w))
+                tot, seen = 0.0, 0
+                for v in group:
+                    for i in range(max(0, a), min(n, z)):
+                        tot += v[i]
+                        seen += 1
+                rows.append(tot / seen if seen else 0.0)
+            top = max(rows) if rows else 0
+            done[fam] = [round(x / top, 6) if top > 0 else round(x, 6)
+                         for x in rows]
+        return done or None
+
     out["layers"] = dict(raw["layers"]) if raw.get("layers") else {}
+
+    if "presence" not in out["layers"] and not raw.get("presence"):
+        fam = _per_bar_families()
+        if fam:
+            spans = []
+
+            def _state(x):
+                return "full" if x >= 0.55 else ("light" if x >= 0.15 else "out")
+
+            for stem, rows in fam.items():
+                soft = []
+                for i in range(len(rows)):
+                    cut = sorted(rows[max(0, i - 1):i + 2])
+                    soft.append(cut[len(cut) // 2])
+                states = [_state(x) for x in soft]
+                for i in range(1, len(states) - 1):
+                    if states[i] != states[i - 1] and states[i - 1] == states[i + 1]:
+                        states[i] = states[i - 1]
+                run, start = (states[0] if states else None), 0
+                for b in range(1, len(states) + 1):
+                    now = states[b] if b < len(states) else None
+                    if now != run:
+                        if run != "out" and b - start >= 2:
+                            spans.append({"from": {"bar": first_bar + start, "beat": 1},
+                                          "to": {"bar": first_bar + b, "beat": 1},
+                                          "stem": stem, "state": run})
+                        run, start = now, b
+            if spans:
+                out["layers"]["presence"] = {"kind": "sparse",
+                                             "derived_from": "stem lanes",
+                                             "spans": spans}
+
+    if ("subsection" not in out["layers"] and not isinstance(raw.get("phrases"), list)
+            and out.get("sections")
+            and isinstance(raw.get("moments"), list)):
+        lane = (out.get("energy") or {}).get("values") or []
+        _steps = sorted(abs(lane[i] - lane[i - 1]) for i in range(1, len(lane)))
+        _typical = _steps[len(_steps) // 2] if _steps else 0
+        _moved = max(0.03, 2 * _typical)
+        _fam_rows = _per_bar_families() or {}
+
+        def _trend(a, b):
+            cut = lane[max(0, a - first_bar):max(1, b - first_bar)]
+            if len(cut) < 2:
+                return "steady"
+            half = len(cut) // 2 or 1
+            lo = sum(cut[:half]) / half
+            hi = sum(cut[half:]) / (len(cut) - half)
+            if hi - lo > _moved:
+                return "intensifying"
+            if lo - hi > _moved:
+                return "easing"
+            return "sustaining"
+
+        def _word(doing, nth, last, name):
+            if doing != "sustaining":
+                return doing
+            if nth == 1:
+                return "establishing" if name == "intro" else "developing"
+            if nth == last:
+                return "closing" if name == "outro" else "resolving"
+            return "sustaining"
+
+        def _playing_in(a, b):
+            on = []
+            for fam, rows in _fam_rows.items():
+                cut = rows[max(0, a - first_bar):max(1, b - first_bar)]
+                if not cut:
+                    continue
+                if sum(cut) / len(cut) >= 0.15:
+                    on.append(fam)
+            return on
+
+        spans = []
+        for sec in out["sections"]:
+            span = sec["to"]["bar"] - sec["from"]["bar"]
+            phrase = 8 if span >= 16 else 4
+            marks = set(range(sec["from"]["bar"] + phrase,
+                              sec["to"]["bar"] - 1, phrase))
+            for m in raw["moments"]:
+                if m.get("time_s") is None:
+                    continue
+                b = _place(m["time_s"])["bar"]
+                if sec["from"]["bar"] + 1 < b < sec["to"]["bar"] - 1:
+                    marks.add(b)
+            inside = sorted(marks)
+            cuts = [sec["from"]["bar"]]
+            for b in inside:
+                if b - cuts[-1] >= 2:
+                    cuts.append(b)
+            cuts.append(sec["to"]["bar"])
+            for i in range(len(cuts) - 1):
+                spans.append({"from": {"bar": cuts[i], "beat": 1},
+                              "to": {"bar": cuts[i + 1], "beat": 1},
+                              "in": sec.get("name"), "in_nth": sec.get("nth"),
+                              "nth": i + 1,
+                              "doing": _word(_trend(cuts[i], cuts[i + 1]), i + 1,
+                                             len(cuts) - 1, sec.get("name")),
+                              "playing": _playing_in(cuts[i], cuts[i + 1])})
+        if spans:
+            out["layers"]["subsection"] = {
+                "kind": "partition",
+                "derived_from": "moments and the energy lane",
+                "spans": spans}
 
     if "subsection" not in out["layers"] and isinstance(raw.get("phrases"), list):
         out["layers"]["subsection"] = {
