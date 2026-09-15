@@ -14,6 +14,20 @@
  "default_venue": "ven_desk",
  "venues": [
   {
+   "id": "ven_desk",
+   "name": "Desk Rig",
+   "example": false,
+   "access": "public",
+   "note": "The default development rig: four PAR7s in a line with a moving head in the centre.",
+   "layouts": [
+    {
+     "name": "4 PAR + head",
+     "file": "arc4-head.layout.json"
+    }
+   ],
+   "default": "arc4-head.layout.json"
+  },
+  {
    "id": "ven_keycode",
    "name": "KeyCode Stage",
    "example": false,
