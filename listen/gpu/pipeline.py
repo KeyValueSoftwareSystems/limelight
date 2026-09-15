@@ -215,7 +215,7 @@ def clean_moments(moments, beats=None, section_bounds=None):
     return cleaned
 
 
-def clean_emotion(emotion):
+def clean_emotion(emotion, duration=None):
     if not emotion:
         return []
     out = []
@@ -234,10 +234,32 @@ def clean_emotion(emotion):
             }
             if "description" in e:
                 item["description"] = str(e["description"])
-            out.append(item)
+            if item["start"] < item["end"]:
+                out.append(item)
         except:
             pass
-    return out
+    out.sort(key=lambda x: x["start"])
+
+    filled = []
+    for i, seg in enumerate(out):
+        if filled and seg["start"] > filled[-1]["end"] + 0.5:
+            gap = {**filled[-1], "start": filled[-1]["end"], "end": seg["start"]}
+            filled.append(gap)
+        filled.append(seg)
+
+    if filled:
+        if filled[0]["start"] > 0.5:
+            first = {**filled[0], "start": 0.0, "end": filled[0]["start"]}
+            filled.insert(0, first)
+        if duration and filled[-1]["end"] < duration - 0.5:
+            last = {**filled[-1], "start": filled[-1]["end"], "end": round(duration, 3)}
+            filled.append(last)
+        filled[-1]["end"] = round(duration, 3) if duration else filled[-1]["end"]
+
+    for i in range(len(filled) - 1):
+        filled[i]["end"] = filled[i + 1]["start"]
+
+    return filled
 
 
 def step_duration(wav):
@@ -437,7 +459,7 @@ def moss_query(wav, prompt, max_tokens=4096):
             json={
                 "text": prompt,
                 "audio_data": wav,
-                "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.01},
+                "sampling_params": {"max_new_tokens": max_tokens, "temperature": 0.0},
             },
             timeout=180,
         )
@@ -863,7 +885,9 @@ def run_pipeline(wav_path):
                             section_bounds=sorted(set(sec_bounds)),
                         )
                     elif task == "emotion":
-                        score["emotion"] = clean_emotion(raw)
+                        score["emotion"] = clean_emotion(
+                            raw, duration=score["song"]["length_s"]
+                        )
                     print(
                         f"    {task}: {len(score.get(task, []))} ({time.time() - t:.1f}s)",
                         flush=True,
