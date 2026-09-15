@@ -602,7 +602,7 @@
    "name": "Follow",
    "kind": "binding",
    "tier": 2,
-   "blurb": "Level rides a named instrument's envelope across the whole lamp range - floor when it rests, near full when it sings. The dial pair is how much range it spends.",
+   "blurb": "Level rides a named instrument's envelope across the whole lamp range - floor when it rests, near full when it sings. The dial pair is how much range it spends. spread makes the wash travel across the lamps instead of blinking as one block; lean tips it toward one side as the stream rises.",
    "dimension": "amount",
    "returns": false,
    "dials": {
@@ -624,6 +624,16 @@
     },
     "floor": {
      "default": 0.16,
+     "min": 0,
+     "max": 1
+    },
+    "spread": {
+     "default": 0.35,
+     "min": 0,
+     "max": 1
+    },
+    "lean": {
+     "default": 0.22,
      "min": 0,
      "max": 1
     }

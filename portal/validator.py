@@ -9,6 +9,18 @@ removed, and report is a list of issues found.
 import json
 
 
+def _onset_ceiling(overview):
+    try:
+        import composer as C
+        sc = C._score_of(overview) if overview.get("_song") else {}
+    except Exception:
+        return 0.0
+    hits = ((sc.get("rhythm") or {}).get("hits")) or []
+    forces = [h.get("intensity") for h in hits
+              if isinstance(h, dict) and isinstance(h.get("intensity"), (int, float))]
+    return max(forces) if forces else 0.0
+
+
 def _lanes_of(overview):
     try:
         import composer as C
@@ -116,6 +128,18 @@ def validate(plan, catalog, score_overview):
             continue
         if not b.get("why"):
             report.append({"level": "warn", "msg": f"binding[{i}]: no 'why'"})
+        if eid == "accent":
+            thr = b.get("threshold")
+            top = _onset_ceiling(score_overview)
+            if isinstance(thr, (int, float)) and top > 0 and thr > top * 0.55:
+                was = thr
+                b = dict(b)
+                b["threshold"] = round(top * 0.25, 3)
+                report.append({
+                    "level": "warn", "code": "threshold_unreachable",
+                    "msg": f"binding[{i}]: accent threshold {was} is above what the onset "
+                           f"envelope reaches ({top:.2f}); it would never fire. "
+                           f"Lowered to {b['threshold']}."})
         clean_bindings.append(b)
 
     clean_gestures = []

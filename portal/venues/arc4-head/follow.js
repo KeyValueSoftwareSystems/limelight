@@ -13,12 +13,20 @@ module.exports = function follow(params, ctx) {
   const bpm = ctx.bpm;
   const floor = params.floor != null ? params.floor : 0.16;
 
+  const spread = params.spread != null ? params.spread : 0.35;
+  const lean = params.lean != null ? params.lean : 0.22;
+
   function render(value, t) {
     const v = H.clamp(value || 0, 0, 1);
     const level = H.clamp(floor + (depth - floor) * Math.pow(v, 0.72), 0, 1);        // floor keeps it alive at low values
     const beat = (t || 0) * bpm / 60;
     const f = H.emptyFrame();
-    for (const p of pars) H.setPar(f, p, colour, level);
+    pars.forEach((p, k) => {
+      const across = pars.length > 1 ? k / (pars.length - 1) : 0.5;
+      const wave = 1 - spread * 0.5 + spread * Math.sin(2 * Math.PI * (v * 0.75 + across));
+      const tip = 1 + lean * (across - 0.5) * (v * 2 - 1);
+      H.setPar(f, p, colour, H.clamp(level * wave * tip, 0, 1));
+    });
     H.setHead(f, H.HEADS[0], {
       level: Math.max(0.18, level * 0.85), colour,
       pan: 0.60 + 0.15 * Math.sin(2 * Math.PI * beat / 8),   // slow sweep, 8-beat period
