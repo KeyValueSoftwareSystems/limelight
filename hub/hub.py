@@ -136,9 +136,20 @@ def _listing(urlpath, path):
     # audio/ is playback-only; .mp3 never appears beside scores in the UI.
     names = [n for n in os.listdir(path)
              if n != V.VDIR and n != AUDIO and not n.lower().endswith(".mp3")]
+    # A score lives in .versions/ and nowhere else, so the listing has to look
+    # there as well as at what is sitting in the folder.
+    for n in V.stored_names(path):
+        if n not in names:
+            names.append(n)
     for name in sorted(names, key=lambda n: (not os.path.isdir(os.path.join(path, n)), n.lower())):
         full = os.path.join(path, name)
-        st = os.stat(full)
+        try:
+            st = os.stat(full)
+        except FileNotFoundError:
+            n = V.latest(full)
+            if not n:
+                continue
+            st = os.stat(V.version_path(full, n))
         row = {
             "path_type": "Dir" if os.path.isdir(full) else "File",
             "name": name,
@@ -303,7 +314,7 @@ def handle(h, method):
             def fetch(name, person=None):
                 base = name if name.endswith(".score") else name + ".score"
                 fpath = os.path.join(score_dir(), os.path.basename(base))
-                if not os.path.isfile(fpath):
+                if not V.exists(fpath):
                     raise FileNotFoundError(f"no score: {name}")
                 if V.is_versioned(fpath) and V.numbers(fpath):
                     n = V.resolve_version(fpath, "")
@@ -382,7 +393,7 @@ def handle(h, method):
         # generate path names a score after its mp3, which is how the same song
         # ended up on the hub twice under two spellings.
         if "audio" in query and path.endswith(".score"):
-            if not os.path.isfile(path):
+            if not V.exists(path):
                 return _send(h, 404, f"no score {os.path.basename(path)} to attach audio to")
             # `body` was already read at the top of the PUT handler; reading it
             # again would block forever waiting for bytes that are gone.

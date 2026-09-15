@@ -17,7 +17,9 @@ const { execFileSync } = require("child_process");
 
 const HERE = __dirname;
 const REPO = path.dirname(HERE);
-const SCORE = path.join(REPO, "hub", "files", "score", "raga-of-revenge.score");
+const SCORE =
+  require(path.join(REPO, "protocol", "fixture.js")).pick("raga-of-revenge") ||
+  path.join(REPO, "hub", "files", "score", "raga-of-revenge.score");
 
 const out = [];
 const ok = (name, cond, detail) => out.push([!!cond, name, detail || ""]);

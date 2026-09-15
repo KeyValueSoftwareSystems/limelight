@@ -34,6 +34,21 @@ _CURVE_NAMES = ["energy", "brightness", "width", "air", "pump", "pace",
 _ALWAYS = ["score", "version", "window", "grid", "personality", "profile"]
 
 
+def _moment_weight(m):
+    """How strong a moment is, whatever the field ended up being called.
+
+    This read `weight` alone and fell back to 1 when it was missing. No moment
+    has ever carried `weight` - the score writes `intensity` - so every moment
+    scored 1 and min_weight silently returned the whole list at any threshold.
+    A reader asking for only the biggest events got all of them and no error.
+    """
+    for key in ("weight", "intensity", "strength", "size"):
+        v = m.get(key)
+        if isinstance(v, (int, float)):
+            return float(v)
+    return 1.0
+
+
 def _or(v, d):
     """Default on absence, never on falsiness. 0 and False are real values."""
     return d if v is None else v
@@ -864,8 +879,7 @@ def handle(body, fetch_score):
         min_w = req_moments["min_weight"]
         if formatted.get("moments"):
             formatted["moments"] = [
-                m for m in formatted["moments"]
-                if (m.get("weight") if m.get("weight") is not None else 1) >= min_w
+                m for m in formatted["moments"] if _moment_weight(m) >= min_w
             ]
 
     w = body.get("window")

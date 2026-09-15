@@ -16,8 +16,14 @@ const CLI = path.join(REPO, "limelight");
    because exercising a realistic size is worth something, and a deterministic
    blob stands in when there is not. */
 const SCORE = (() => {
-  const built = path.join(REPO, "scores", "levels.score");
-  if (fs.existsSync(built)) return fs.readFileSync(built);
+  const store = path.join(REPO, "hub", "files", "score", ".versions", "levels.score");
+  const built = (() => {
+    let ns = [];
+    try { ns = fs.readdirSync(store).map(x => parseInt(x, 10)).filter(n => n > 0); }
+    catch (e) { return null; }
+    return ns.length ? path.join(store, Math.max(...ns) + ".score") : null;
+  })();
+  if (built && fs.existsSync(built)) return fs.readFileSync(built);
   const rows = [];
   for (let i = 0; i < 400; i++) rows.push({ bar: i, beat: 1 + (i % 4), weight: (i % 97) / 97 });
   return Buffer.from(JSON.stringify({ score: "stand-in", version: 0, beats: rows }));
@@ -59,10 +65,19 @@ async function startHub(extraEnv = {}) {
     if (i === 99) throw new Error("serve.py never answered\n" + stderr);
   }
   const score = path.join(root, "score");
+  const at = n => {
+    const flat = path.join(score, n);
+    if (!n.endsWith(".score") || fs.existsSync(flat)) return flat;
+    const store = path.join(score, ".versions", n);
+    let ns = [];
+    try { ns = fs.readdirSync(store).map(x => parseInt(x, 10)).filter(v => v > 0); }
+    catch (e) { return flat; }
+    return ns.length ? path.join(store, Math.max(...ns) + ".score") : flat;
+  };
   const files = {
     clear: () => fs.rmSync(score, { recursive: true, force: true }),
-    has: n => fs.existsSync(path.join(score, n)),
-    get: n => fs.readFileSync(path.join(score, n)),
+    has: n => fs.existsSync(at(n)),
+    get: n => fs.readFileSync(at(n)),
     set: (n, b) => { fs.mkdirSync(score, { recursive: true }); fs.writeFileSync(path.join(score, n), b); },
   };
   return { origin, url: origin + "/hub/score", root, score, files,
@@ -128,7 +143,8 @@ async function startHub(extraEnv = {}) {
     r = await fetch(url + "?v=7");
     ok("a version that does not exist is 404 and says so", r.status === 404 && /no version 7/.test(await r.text()));
     ok("identical bytes again are still a new version", (await json(await put(url, v3))).version === 4);
-    ok("the top-level file is a copy of the latest", fake.files.get("v.score").equals(v3));
+    ok("the store is the only copy; no top-level file is written",
+       !fs.existsSync(path.join(fake.score, "v.score")));
 
     const listing = await json(await fetch(fake.url + "/?json"));
     ok(".versions is hidden from the listing", !listing.paths.some(p => p.name === ".versions"), JSON.stringify(listing.paths.map(p => p.name)));

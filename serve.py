@@ -19,6 +19,57 @@ PORT = int(os.environ.get("PORT", "8770"))
 HOST = os.environ.get("HOST", "0.0.0.0")
 
 
+WANTED = ("song", "grid", "beats", "sections", "moments", "stems",
+          "stems_temporal", "btc_chords_raw", "melody", "rhythm", "emotion")
+STEADY_LEAST = 0.45
+
+
+def _served(path):
+    """The bytes the hub would hand out for this score."""
+    try:
+        import versions as V
+    except Exception:
+        from hub import versions as V
+    n = V.latest(path)
+    if n:
+        with open(V.version_path(path, n), "rb") as fh:
+            return fh.read()
+    with open(path, "rb") as fh:
+        return fh.read()
+
+
+def readiness(path):
+    """Whether a score is finished enough to be read as finished.
+
+    Two ways to fail. A capability the pipeline never produced, which means the
+    run did not complete. Or a beat grid whose intervals do not hold together:
+    grid.steady is 1 minus the 90th percentile of |gap - median| / median over
+    the beat list, so 0.0 means the slowest tenth of intervals are twice the
+    median - the signature of a tracker that fell into half time for part of
+    the song and stated bar numbers that drift out by a factor of two.
+
+    The four songs that used to fail this were all that case, and relevel.py
+    repaired them by putting the track back on one metrical level, so nothing
+    is held back today. The check stays because the failure is silent: the
+    grid still looks like a grid.
+
+    Missing lyrics is not a failure here. Five songs are Malayalam, Tamil or
+    Telugu, outside the ASR model's languages, and the score already says so in
+    `unavailable`."""
+    try:
+        d = json.loads(_served(path))
+    except Exception as e:
+        return {"ready": False, "holding": f"unreadable ({type(e).__name__})"}
+    short = [k for k in WANTED if not d.get(k)]
+    if short:
+        return {"ready": False, "holding": "no " + ", ".join(short)}
+    steady = (d.get("grid") or {}).get("steady")
+    if isinstance(steady, (int, float)) and steady < STEADY_LEAST:
+        return {"ready": False,
+                "holding": f"bar grid fitted from {round(100 * steady)}% of the song"}
+    return {"ready": True, "holding": None}
+
+
 def lan_ip():
     """The address other machines on this network reach us at. No packet is sent."""
     try:
@@ -112,12 +163,14 @@ class H(http.server.BaseHTTPRequestHandler):
             def add_scores(dirpath, url_prefix):
                 if not os.path.isdir(dirpath):
                     return
-                for name in sorted(os.listdir(dirpath)):
-                    if not name.endswith(".score"):
-                        continue
+                try:
+                    import versions as V
+                except Exception:
+                    from hub import versions as V
+                here = [n for n in sorted(os.listdir(dirpath)) if n.endswith(".score")
+                        and os.path.isfile(os.path.join(dirpath, n))]
+                for name in sorted(set(here) | set(V.stored_names(dirpath))):
                     full = os.path.join(dirpath, name)
-                    if not os.path.isfile(full):
-                        continue
                     slug = name[:-6]  # strip .score
                     if slug in seen:
                         continue
@@ -136,11 +189,13 @@ class H(http.server.BaseHTTPRequestHandler):
                                 if os.path.isfile(candidate):
                                     audio = f"/synth/incoming/{slug}{ext}"
                                     break
-                    out.append({
+                    row = {
                         "slug": slug,
                         "audio": audio,
                         "score": f"{url_prefix}{urllib.parse.quote(slug)}.score",
-                    })
+                    }
+                    row.update(readiness(full))
+                    out.append(row)
 
             # Canonical store only (migrate.py moves root leftovers into score/).
             add_scores(os.path.join(hub.ROOT, "score"), "/hub/score/")

@@ -295,16 +295,14 @@ print(json.dumps(format_v1(json.load(sys.stdin))))
      handful of beats land a slot out; a numbering error puts every beat out,
      not five in five hundred. */
   {
-    const dir = path.join(root, "scores");
-    const songs = fs.existsSync(dir)
-      ? fs.readdirSync(dir).filter(x => x.endsWith(".score")).sort() : [];
+    const songs = require("./fixture.js").scores();
     let checked = 0, adrift = [], dupes = [], noOne = [], torn = [], perSong = [];
     let allBeats = 0, allBumps = 0;
     const firstOf = sc => (sc.grid.first_bar !== undefined && sc.grid.first_bar !== null)
       ? sc.grid.first_bar : null;
     for (const f of songs) {
       let sc;
-      try { sc = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")); } catch { continue; }
+      try { sc = JSON.parse(fs.readFileSync(f, "utf8")); } catch { continue; }
       if (!Array.isArray(sc.beats) || !sc.beats.length || !sc.grid) continue;
       const got = fn(sc);
       if (!Array.isArray(got.beats)) continue;

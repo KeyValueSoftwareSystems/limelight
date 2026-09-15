@@ -267,7 +267,8 @@ function respond(req) {
      A committed sample goes stale the first time the pipeline changes, and then
      the protocol is tested against something nothing produces any more. */
   const dir =
-    process.env.LIMELIGHT_SCORES || path.join(__dirname, "..", "scores");
+    process.env.LIMELIGHT_SCORES ||
+    path.join(__dirname, "..", "hub", "files", "score");
   /* scores/ is the live source; __dirname lets a test write one beside this
      file without reaching into the pipeline's output directory. */
   const tries = [
