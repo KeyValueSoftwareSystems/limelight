@@ -646,6 +646,10 @@ def melody_returns(melody, w, most=3, apart=6.0):
             break
         if any(abs(back - k[2]) < apart for k in kept):
             continue
+        if sum(1 for t in ons if back <= t < back + apart) < 4:
+            continue
+        if ons[-1] - back < apart:
+            continue
         kept.append((held, left, back))
         if len(kept) >= most:
             break
@@ -654,7 +658,7 @@ def melody_returns(melody, w, most=3, apart=6.0):
             "i": int(round(back / w)),
             "type": "melody_resume",
             "size": round(min(1.0, held / 6.0), 3),
-            "description": "the instruments come back after "
+            "description": "the melody comes back after "
             + (f"{held:.1f} seconds" if held >= 2 else "a bar of nothing"),
         }
         for held, left, back in sorted(kept, key=lambda g: g[2])
@@ -1140,6 +1144,8 @@ def find(
     for g in groups:
         g["parts"].sort(key=lambda x: -x["size"])
         g["size"] = g["parts"][0]["size"]
+        rings = [p["heard"] for p in g["parts"] if p.get("heard") is not None]
+        g["heard"] = max(rings) if rings else None
 
     voiced = [g for g in groups if g["type"] in ("vocal_out", "vocal_return")]
     if voiced:
@@ -1158,7 +1164,11 @@ def find(
         if kind not in CAP:
             continue
         same = sorted(
-            [g for g in groups if g["type"] == kind], key=lambda g: -g["size"]
+            [g for g in groups if g["type"] == kind],
+            key=lambda g: (
+                not any(p.get("arrival") or p.get("departure") for p in g["parts"]),
+                -(g["heard"] if g.get("heard") is not None else g["size"]),
+            ),
         )[: CAP[kind]]
         picked += same
         taken += same
