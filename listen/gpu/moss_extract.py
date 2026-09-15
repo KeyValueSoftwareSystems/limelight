@@ -149,7 +149,7 @@ if __name__ == "__main__":
             if not ok:
                 print(f"  {task}: SKIPPED", flush=True)
 
-        results["_model"] = "MOSS-Music-8B-Thinking"
+        results["_model"] = "MOSS-Music-8B-Instruct"
         results["_engine"] = "sglang-generate"
         results["_time_s"] = round(time.time() - t0, 1)
         with open(out_path, "w", encoding="utf-8") as f:

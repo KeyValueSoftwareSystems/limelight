@@ -30,7 +30,7 @@ cd moss-code/sglang/python && pip install -e . && cd ../../..
 
 Download models into the same dir as pipeline.py:
 
-- `moss-thinking/` — MOSS-Music-8B-Thinking weights + chat_template.jinja
+- `moss/` — MOSS-Music-8B-Instruct weights + chat_template.jinja
 - `mega53/model.ckpt` — MVSep Mega 53-Stem BS-RoFormer checkpoint
 - `mega53/config.yaml` — MVSep Mega 53-Stem config
 
@@ -41,9 +41,9 @@ Place WAV files in `wav/`.
 ```bash
 export SGLANG_DISABLE_CUDNN_CHECK=1
 python -m sglang.launch_server \
-  --model-path moss-thinking \
+  --model-path moss \
   --host 0.0.0.0 --port 30000 --tp 1 \
-  --chat-template moss-thinking/chat_template.jinja \
+  --chat-template moss/chat_template.jinja \
   --trust-remote-code &
 
 python pipeline.py wav/afterglow.wav

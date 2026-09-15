@@ -12,7 +12,7 @@
 #   cd moss-code/sglang/python && pip install -e .
 #
 # Models (download into the same directory as pipeline.py):
-#   moss-thinking/          — MOSS-Music-8B-Thinking weights + chat_template.jinja
+#   moss/                   — MOSS-Music-8B-Instruct weights + chat_template.jinja
 #   mega53/model.ckpt       — MVSep Mega 53-Stem BS-RoFormer checkpoint
 #   mega53/config.yaml      — MVSep Mega 53-Stem config
 
