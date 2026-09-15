@@ -46,7 +46,7 @@ ORDER = (
     "build",
     "peak",
     "rhythm_change",
-    "lift",
+    "register_shift",
     "mood_turn",
     "tempo_change",
     "entrance",
@@ -60,7 +60,7 @@ CAP = {
     "peak": 1,
     "tempo_change": 4,
     "rhythm_change": 4,
-    "lift": 4,
+    "register_shift": 4,
     "mood_turn": 4,
 }
 
@@ -252,46 +252,51 @@ def _steps(v, side, gate):
 
 
 def topline(melody, w, n):
-    """The highest note sounding in each window, smoothed.
-
-    basic-pitch returns every voice, so this is the top of the texture
-    rather than a transcribed melody - which is what a register change
-    shows up in anyway."""
     if not melody or n <= 0:
         return []
-    top = [None] * n
+    live = [[] for _ in range(n)]
     for note in melody:
         try:
             a = int(note["start"] / w)
             b = max(a + 1, int((note["start"] + (note.get("duration") or 0)) / w))
             pitch = float(note["pitch"])
+            weight = float(note.get("velocity") or 0.5) * max(
+                float(note.get("duration") or 0), 0.05
+            )
         except (KeyError, TypeError, ValueError):
             continue
         for i in range(max(0, a), min(n, b)):
-            if top[i] is None or pitch > top[i]:
-                top[i] = pitch
-    seed = next((x for x in top if x is not None), None)
+            live[i].append((pitch, weight))
+    out, last = [], None
+    for cell in live:
+        if not cell:
+            out.append(last)
+            continue
+        cell.sort()
+        total = sum(c[1] for c in cell)
+        run, mid = 0.0, cell[-1][0]
+        for pitch, weight in cell:
+            run += weight
+            if run >= total / 2:
+                mid = pitch
+                break
+        out.append(mid)
+        last = mid
+    seed = next((x for x in out if x is not None), None)
     if seed is None:
         return []
     last, filled = seed, []
-    for x in top:
+    for x in out:
         if x is not None:
             last = x
         filled.append(last)
-    out = []
-    for i in range(len(filled)):
-        a, b = max(0, i - 2), min(len(filled), i + 3)
-        out.append(sum(filled[a:b]) / (b - a))
-    return out
+    return [
+        sum(filled[max(0, i - 2) : i + 3]) / len(filled[max(0, i - 2) : i + 3])
+        for i in range(len(filled))
+    ]
 
 
-def lifts(melody, w, n, tol=7.0):
-    """A register change in the top of the texture, held long enough to hear.
-
-    Sweeping the hold: at 3s the rule finds 29 lifts across three songs and
-    7.6 on the same notes thrown at random times; at 7s it finds 16 against
-    0.2. The shorter window was mostly catching which instrument happened to
-    be on top."""
+def shifts(melody, w, n, tol=7.0):
     v = topline(melody, w, n)
     if len(v) < 8:
         return []
@@ -304,9 +309,9 @@ def lifts(melody, w, n, tol=7.0):
         out.append(
             {
                 "i": i,
-                "type": "lift",
+                "type": "register_shift",
                 "size": round(min(1.0, size / 12.0), 3),
-                "description": ("the top line climbs " if up else "the top line falls ")
+                "description": ("the music moves up " if up else "the music drops ")
                 + how,
             }
         )
@@ -477,7 +482,7 @@ def find(
         + loudest(v)
         + rolls(temporal, w)
         + tempo_changes(grid, w)
-        + lifts(melody, w, n)
+        + shifts(melody, w, n)
         + rhythm_changes(hits, w, n)
         + mood_turns(emotion, w)
     )

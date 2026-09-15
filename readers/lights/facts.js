@@ -50,7 +50,7 @@ const FACTS = {
     "breakdown",
     "build",
     "peak",
-    "lift",
+    "register_shift",
     "mood_turn",
     "key_change",
     "tempo_change",

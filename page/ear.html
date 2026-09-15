@@ -1124,11 +1124,31 @@
     const g = SCORE.grid;
     const gone = SCORE.unavailable || {};
     const many = (SCORE.moments || []).length;
+    const kt = SCORE.key_tempo || {};
+    /* A bar number is only as good as the beat track under it. Four songs in
+       the library score below 0.35 and their bars are wrong everywhere; the
+       page used to state them in the same voice as a song that is certain. */
+    const steady = typeof g.steady === "number" ? g.steady : null;
+    const shaky = steady != null && steady < 0.35;
+    const missing = Object.keys(gone);
     $("facts").innerHTML =
       `${Math.round(g.bpm)} beats a minute · ${g.bars} bars` +
+      (shaky
+        ? ` · <span class="warn" title="grid.steady ${steady.toFixed(3)} — the beat tracker never settled, so every bar number on this song is unreliable">bar numbers unreliable (${steady.toFixed(2)})</span>`
+        : "") +
+      (!shaky && kt.relation && kt.relation !== "same"
+        ? ` · <span class="warn" title="the model heard a ${kt.relation} tempo; the grid is being used">tempo disputed (${kt.relation})</span>`
+        : "") +
       (gone.moments
-        ? ` · <span style="color:var(--bad)">moments unavailable</span>`
-        : ` · ${many} notable moment${many === 1 ? "" : "s"}`);
+        ? ` · <span class="warn">moments unavailable</span>`
+        : ` · ${many} notable moment${many === 1 ? "" : "s"}`) +
+      (missing.length
+        ? ` · <span class="warn" title="${missing
+            .map((k) => `${k}: ${gone[k]}`)
+            .join(" — ")}">${missing.length} field${
+            missing.length === 1 ? "" : "s"
+          } the model could not produce: ${missing.join(", ")}</span>`
+        : "");
     BASE = 0;
     try {
       const saved = await (await fetch(`/downbeat/${s}`)).json();
@@ -2101,7 +2121,7 @@
     breakdown: "#39414f",
     build: "#e8a33d",
     peak: "#ffd700",
-    lift: "#ff6b9d",
+    register_shift: "#ff6b9d",
     mood_turn: "#c8a2ff",
     key_change: "#4ecdc4",
     tempo_change: "#d4a33d",
@@ -2408,8 +2428,13 @@
       const ms = mossAt(t);
       const secs = mossSections();
 
-      $("nowtime").textContent =
-        `${mmss(t)} · bar ${Math.max(0, bar)} of ${SCORE.grid.bars}`;
+      const gsteady = SCORE.grid.steady;
+      const doubted = typeof gsteady === "number" && gsteady < 0.35;
+      $("nowtime").innerHTML =
+        `${mmss(t)} · bar ${Math.max(0, bar)} of ${SCORE.grid.bars}` +
+        (doubted
+          ? ` <span class="warn" title="grid.steady ${gsteady.toFixed(3)}">?</span>`
+          : "");
       if (ms) {
         LIVE = secs.indexOf(ms);
         const s53 = SCORE.stems || {};
