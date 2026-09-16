@@ -299,9 +299,8 @@ def validate(plan, catalog, score_overview):
 
     # collision detection: same dimension at the same time
     # gestures beat bindings beat states; larger magnitude wins ties
-    _snap_palette({"palette": plan.get("palette"), "states": clean_states,
-                   "palette": plan.get("palette") or [],
-        "bindings": clean_bindings, "gestures": clean_gestures}, report)
+    _snap_palette({"palette": plan.get("palette") or [], "states": clean_states,
+                   "bindings": clean_bindings, "gestures": clean_gestures}, report)
 
     collisions = _detect_collisions(clean_gestures, clean_bindings, clean_states,
                                      effects_by_id, moments, sections)
@@ -329,6 +328,9 @@ def validate(plan, catalog, score_overview):
         "bindings": clean_bindings,
         "gestures": clean_gestures,
     }
+    for carried in ("palette", "effects"):
+        if plan.get(carried):
+            cleaned[carried] = plan[carried]
 
     errors = [r for r in report if r["level"] == "error"]
     return cleaned, report
