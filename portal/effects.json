@@ -211,7 +211,7 @@
    "name": "Drive",
    "kind": "state",
    "tier": 1,
-   "blurb": "Every beat hits: the two pairs call and respond, downbeats flash white, the head sweeps the room. The bed for a chorus or drop. stagger delays each lamp by a fraction of a beat across the rig, so the figure arrives left to right instead of all at once; 0 is together, 0.25 is a quarter beat apart",
+   "blurb": "Every beat hits: the two pairs call and respond, downbeats flash white, the head sweeps the room. The bed for a chorus or drop. stagger delays each lamp by a fraction of a beat across the rig, so the figure arrives left to right instead of all at once; 0 is together, 0.25 is a quarter beat apart. Hits and alternates its pairs once per beat unless `every_beats` says otherwise; on a slow or devotional song the bar is usually the right rate and the beat reads as frantic",
    "dimension": "amount",
    "returns": false,
    "dials": {
@@ -251,6 +251,9 @@
      "default": 0,
      "min": 0,
      "max": 0.9
+    },
+    "every_beats": {
+     "default": 1
     }
    },
    "fires_on": [

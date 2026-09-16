@@ -16,13 +16,17 @@ module.exports = function drive(params, ctx) {
   const peakDial = params.peak != null ? params.peak : 1.0;
 
   const stagger = params.stagger != null ? Math.max(0, Math.min(0.9, Number(params.stagger))) : 0;
+  const every = params.every_beats != null ? Math.max(0.25, Number(params.every_beats)) : 1;
 
   function render(bx) {
-    const { bphase, beatIndex, bar, downbeat, weight, energy } = bx;
+    const { beatIndex, bar, downbeat, weight, energy } = bx;
+    const bphase = every === 1 ? bx.bphase
+                 : ((((beatIndex + bx.bphase) / every) % 1) + 1) % 1;
     const f = H.emptyFrame();
     const floorNow = H.clamp(floorDial * (0.55 + 0.75 * energy), 0.08, peakDial);
     const flip = Math.floor(bar / 2) % 2;
-    const innerActive = (beatIndex + flip) % 2 === 0;
+    const step = every === 1 ? beatIndex : Math.floor(beatIndex / every);
+    const innerActive = (step + flip) % 2 === 0;
     const col = cols[bar % cols.length], col2 = cols[(bar + 1) % cols.length];
     const pop = downbeat && bphase < 0.2 && weight > 0.35;
     const hitAmp = flash(bphase, 0.55) * (0.45 + 0.55 * weight);
