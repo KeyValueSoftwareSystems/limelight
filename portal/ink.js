@@ -1,6 +1,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const RIG = require("./rig.js");
 
 const HERE = __dirname;
 
@@ -15,6 +16,7 @@ function measure(rigName) {
     restColour: [1, 0.75, 0.35],
     beatAt: (t) => (t || 0) * bpm / 60,
   };
+  const geom = RIG.fixtures(rigName);
   const rows = [];
   const catIds = (() => {
     try {
@@ -62,21 +64,15 @@ function measure(rigName) {
       for (const f of dmx.frames) frames.push(f);
     }
     if (!frames.length) continue;
-    const lampsOf = (f) => {
-      const out = [];
-      for (let i = 0; i < 4; i++) {
-        const b = i * 7;
-        out.push(Math.max(f[b + 1] || 0, f[b + 2] || 0, f[b + 3] || 0));
-      }
-      return out;
-    };
+    const lampsOf = (f) =>
+      geom.lampOffsets.map((o) => Math.max(f[o + 1] || 0, f[o + 2] || 0, f[o + 3] || 0));
     let ink = 0, differ = 0, sum = 0, peak = 0, dark = 0;
     for (const f of frames) {
       const L = lampsOf(f);
       const lit = L.filter((x) => x > 12).length;
-      ink += lit / 4;
+      ink += lit / Math.max(1, L.length);
       if (Math.max(...L) > 12 && Math.max(...L) - Math.min(...L) > 20) differ++;
-      sum += L.reduce((a, b) => a + b, 0) / 4 / 255;
+      sum += L.reduce((a, b) => a + b, 0) / Math.max(1, L.length) / 255;
       peak = Math.max(peak, Math.max(...L) / 255);
       if (Math.max(...L) <= 12) dark++;
     }
