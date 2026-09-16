@@ -10,8 +10,10 @@ module.exports = function accent(params, ctx) {
   const driven = pars.map(p => p.id).concat(H.HEAD_IDS);
 
   const rest = params.rest != null ? params.rest : 0.22;
-  const colour = H.parseColour(params.colour, [1, 1, 1]);
-  const bed = H.parseColour(params.bed_colour, [1, 0.75, 0.35]);
+  const bedC = H.parseColour(params.bed_colour,
+      (ctx && ctx.restColour) || [1, 0.75, 0.35]);
+    const colour = H.parseColour(params.colour, bedC);
+  const bed = bedC;
 
   function render(onset_value) {
     const v = H.clamp(onset_value || 0, 0, 1);

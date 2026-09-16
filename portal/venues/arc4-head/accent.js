@@ -13,8 +13,10 @@ module.exports = function accent(params, ctx) {
 
   function render(value, t) {
     const v = H.clamp(value || 0, 0, 1);
-    const colour = H.parseColour(params.colour, [1, 1, 1]);
-    const bed = H.parseColour(params.bed_colour, [1, 0.75, 0.35]);
+    const bedC = H.parseColour(params.bed_colour,
+      (ctx && ctx.restColour) || [1, 0.75, 0.35]);
+    const colour = H.parseColour(params.colour, bedC);
+    const bed = bedC;
     const raw = v > threshold ? (v - threshold) / Math.max(1e-6, 1 - threshold) : 0;
     const over = raw * raw * (3 - 2 * raw);
     const f = H.emptyFrame();

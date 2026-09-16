@@ -8,7 +8,7 @@ const H = require("./helpers");
 module.exports = function follow(params, ctx) {
   const depth = params.depth != null ? params.depth : 0.95;
   const extent = params.extent || "all";
-  const colour = H.parseColour(params.colour, [0.9, 0.8, 0.55]);
+  const colour = H.parseColour(params.colour, (ctx && ctx.restColour) || [0.9, 0.8, 0.55]);
   const pars = H.parsForExtent(extent);
   const bpm = ctx.bpm;
   const floor = params.floor != null ? params.floor : 0.16;

@@ -185,7 +185,7 @@ function resolveBinding(b) {
       params[k] = typeof v === "object" && v !== null && v.default !== undefined ? v.default : v;
     }
   }
-  return { eid, startS, endS, params, kind: "binding", streams: b.streams || b.stream };
+  return { eid, startS, endS, params, kind: "binding", section: secIdx, streams: b.streams || b.stream };
 }
 
 function resolveState(s) {
@@ -263,10 +263,17 @@ resolvedBindings.forEach(b => { b.valueAt = bindingValueFn(b, sampler); });
 
 /* ── generate DMX frames for each resolved entry ─────────────────────────── */
 
+function stateColourFor(secIdx) {
+  for (const s of plan.states || []) {
+    if (s.section === secIdx && s.colour) return s.colour;
+  }
+  return null;
+}
+
 function generateFrames(entry) {
   const fn = dmxFunctions[entry.eid];
   if (!fn) return null;
-  const ctx = { fps, bpm, layout };
+  const ctx = { fps, bpm, layout, restColour: entry.restColour || null };
   const result = fn(entry.params, ctx);
   return result;
 }
@@ -274,7 +281,9 @@ function generateFrames(entry) {
 /* ── bake: compose layers per frame ───────────────────────────────────────── */
 
 const stateResults = resolvedStates.map(s => ({ ...s, dmx: generateFrames(s) })).filter(r => r.dmx);
-const bindingResults = resolvedBindings.map(b => ({ ...b, dmx: generateFrames(b) })).filter(r => r.dmx);
+const bindingResults = resolvedBindings
+  .map(b => ({ ...b, restColour: stateColourFor(b.section) }))
+  .map(b => ({ ...b, dmx: generateFrames(b) })).filter(r => r.dmx);
 const gestureResults = resolvedGestures.map(g => ({ ...g, dmx: generateFrames(g) })).filter(r => r.dmx);
 
 const allFrames = [];
