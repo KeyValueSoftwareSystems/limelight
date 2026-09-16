@@ -18,7 +18,7 @@ module.exports = function breakdown(params, ctx) {
     const bphase0 = bx.bphase;
     const swap = bar % 2;
     const floorNow = H.clamp(floorDial * (0.5 + energy), 0.04, 0.4);
-    const hitAmp = kick(bphase, 0.08, 0.3) * (0.4 + 0.6 * weight);
+    const hitAmp = kick(bphase0, 0.08, 0.3) * (0.4 + 0.6 * weight);
     const f = H.emptyFrame();
     for (const par of H.PARS) {
       const isInner = H.INNER.some(p => p.id === par.id) ? 1 : 0;
@@ -33,9 +33,9 @@ module.exports = function breakdown(params, ctx) {
       H.setPar(f, par, c, Math.min(1, lvl));
     }
     H.setHead(f, H.HEADS[0], {
-      level: 0.3 + 0.7 * flash(bphase, 0.4), colour: swap ? cols[0] : cols[1],
+      level: 0.3 + 0.7 * flash(bphase0, 0.4), colour: swap ? cols[0] : cols[1],
       pan: H.clamp(0.498 + 0.45 * Math.sin(bar * 2.4), 0, 1),
-      tilt: H.clamp(0.27 + 0.47 * (Math.floor(bar / 2) % 2) + 0.16 * kick(bphase, 0.3, 0.3), 0, 1),
+      tilt: H.clamp(0.27 + 0.47 * (Math.floor(bar / 2) % 2) + 0.16 * kick(bphase0, 0.3, 0.3), 0, 1),
     });
     return f;
   }
