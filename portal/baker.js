@@ -194,7 +194,13 @@ function resolveGesture(g) {
     return null;
   }
 
-  const SKIP = new Set(["effect", "moment", "from_moment", "to_moment", "lead_beats", "why", "at_s", "from_s", "to_s"]);
+  /* Anchors are not dials. at_bar and friends were not in this list, so every
+     bar-anchored gesture handed the effect an `at_bar` parameter it never asked
+     for -- harmless so far, and exactly the kind of thing that later gets read
+     by accident. */
+  const SKIP = new Set(["effect", "moment", "from_moment", "to_moment", "lead_beats", "why",
+                        "at_s", "from_s", "to_s", "at", "id",
+                        "at_bar", "at_beat", "from_bar", "from_beat", "to_bar", "to_beat"]);
   const params = { ...edef.dials };
   for (const [k, v] of Object.entries(g)) {
     if (!SKIP.has(k)) {
