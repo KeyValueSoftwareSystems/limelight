@@ -20,6 +20,39 @@ dropped; `tools/monitor.sh` samples every 10s into `/tmp/monitor.log`.
 | lamps act apart          | median lamp-pair correlation over 0.75                                    | 0.50      |
 | colour carries the form  | one colour over 72% of lit time                                           | 64%       |
 
+## The central finding: layering is why nothing goes dark
+
+Bindings composite brighter-per-lamp, so a lamp is lit whenever ANY binding
+over it is lit. With three or four continuous bindings on a section the chance
+all of them are quiet at once is almost nil, and the rig can never breathe.
+Same plan, same gestures, changing only the number of bindings per section:
+
+| | lamp off | lamp-pair correlation |
+| --- | --- | --- |
+| reference (hand-built) | 27.1% | 0.50 |
+| 3-4 bindings per section | 8.4% | 0.70 |
+| **1 binding per section** | **26.7%** | **0.31** |
+
+One binding matches the reference on darkness and beats it on independence.
+Nothing else came close: floors to zero moved 3.0% to 8.1%, making follow's
+response linear moved 8.1% to 8.4%, marking fade reductive moved 3.0% to 3.4%.
+
+This was self-inflicted. Every complaint got answered by adding a layer -
+travelling bindings when the lamps moved as one body, accent when it looked
+static - and each addition raised the floor and removed darkness. The show kept
+feeling flat whatever else was fixed.
+
+Continuous response was the right idea; making it the whole show was the error.
+The reference's 117 assignments are discrete looks that change often, not 117
+continuous streams. A binding is for the one continuous thing a section is
+about. Anything else in that section should be a gesture, which ends and gives
+the lamp back.
+
+Also worth keeping: the emulator applies gamma 1.6, so DMX 12 draws at 14%
+brightness, not black. Per-lamp measurements matter more than rig averages -
+`goes dark` passed at 4.7% on the rig average while no single lamp was ever
+out.
+
 ## Bugs found and fixed, 2026-09-16
 
 Every one degraded every show, and none were visible in the finished output.
