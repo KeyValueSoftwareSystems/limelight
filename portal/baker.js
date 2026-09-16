@@ -112,7 +112,7 @@ function beatSecond(i) {
   return beatTimes[i];
 }
 
-const REDUCTIVE = new Set(["blackout", "cut", "hush", "strip", "isolate"]);
+const REDUCTIVE = new Set(["blackout", "cut", "hush", "strip", "isolate", "fade"]);
 
 function sectionAt(t) {
   for (let i = sections.length - 1; i >= 0; i--) {
