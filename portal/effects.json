@@ -620,6 +620,9 @@
     },
     "travel": {
      "default": true
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -1015,7 +1018,7 @@
    "name": "Beam",
    "kind": "gesture",
    "tier": 2,
-   "blurb": "Drives only the moving head \u2014 a room-wide sweep, figure-8 or corner-snap \u2014 while the pars hold. For a solo where the beam tells the story.",
+   "blurb": "The moving head as an instrument: stations snap to a new wall on every downbeat, snap goes wall to wall on the beat, sweep crosses once a bar. Drives only the head.",
    "dimension": "place",
    "returns": true,
    "dials": {
@@ -1028,6 +1031,20 @@
       1,
       1
      ]
+    },
+    "amount": {
+     "default": 0.85,
+     "min": 0,
+     "max": 1
+    },
+    "prism": {
+     "default": 0
+    },
+    "strobe": {
+     "default": 0
+    },
+    "strobe_on": {
+     "default": "downbeat"
     },
     "gobo": {
      "default": 0
@@ -1121,6 +1138,14 @@
     },
     "for_beats": {
      "default": 4
+    },
+    "amount": {
+     "default": 0.9,
+     "min": 0,
+     "max": 1
+    },
+    "head": {
+     "default": true
     }
    },
    "name": "Chase",
@@ -1214,6 +1239,14 @@
     },
     "for_beats": {
      "default": 2
+    },
+    "amount": {
+     "default": 1.0,
+     "min": 0,
+     "max": 1
+    },
+    "head": {
+     "default": true
     }
    },
    "name": "Glare",

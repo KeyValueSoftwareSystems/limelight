@@ -13,11 +13,17 @@ const H = require("./helpers");
  * direction: "lr" (default) or "rl".
  */
 module.exports = function chase(params, ctx) {
+  /* head: false -- drive the pars only and leave the moving head to whichever
+     cue owns it. Without this a row cue that starts later than a beam cue takes
+     the head with it (latest start wins a fixture), parks it, and kills its
+     strobe -- so the head could never be the soloist over a moving row. */
   const colour = H.parseColour(params.colour, [1, 1, 1]);
   const pars = String(params.direction || "lr").toLowerCase() === "rl"
     ? H.parsForExtent(params.extent || "all").slice().reverse()
     : H.parsForExtent(params.extent || "all");
-  const level = H.clamp(params.level != null ? params.level : 0.85, 0, 1);
+  /* `amount` is the dial the editor's intensity slider writes; `level` is kept for
+     files that already say it. amount wins when both are present. */
+  const level = H.clamp(params.amount != null ? params.amount : (params.level != null ? params.level : 0.85), 0, 1);
   const rest = H.clamp(params.rest != null ? params.rest : 0, 0, 1);
   const perBeat = params.per_beat != null ? params.per_beat : 1;
   const back = params.bounce === true;
@@ -42,8 +48,9 @@ module.exports = function chase(params, ctx) {
       H.setPar(f, pars[k], colour, H.clamp(rest + (level - rest) * glow, 0, 1));
     }
     for (const head of H.HEADS)
+      if (params.head !== false) 
       H.setHead(f, head, { level: level * 0.5, colour, pan: 0.40 + 0.40 * pos, tilt: 0.42 });
     frames.push(f);
   }
-  return { frames, loop_beats: 0, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
+  return { frames, loop_beats: 0, per_fixture: pars.map(p => p.id).concat(params.head === false ? [] : H.HEAD_IDS) };
 };

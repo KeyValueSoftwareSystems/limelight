@@ -1,6 +1,8 @@
 "use strict";
 const H = require("./helpers");
-const { kick } = require("./beat");
+/* club16 has no beat.js; the kick shape is small enough to live here. A sharp
+   attack on the beat that falls away over its first third. */
+const kick = (phase, len = 0.33) => (phase < len ? 1 - phase / len : 0);
 
 /* beam — the moving head as an INSTRUMENT. Drives only the head; the pars keep
    whatever state is underneath, so this layers over a bed.
@@ -56,12 +58,15 @@ module.exports = function beam(params, ctx) {
     }
     const fire = strobeHz > 0 && (strobeOn === "always" || (strobeOn === "beat" && bphase < 0.35) || (strobeOn === "downbeat" && isDown && bphase < 0.5));
     const f = H.emptyFrame();
-    H.setHead(f, H.HEADS[0], {
+    /* two heads: the second mirrors the first across the room, so a snap to the
+       left wall on one is a snap to the right on the other and the pair reads
+       as one gesture rather than two lamps doing the same thing. */
+    H.HEADS.forEach((head, i) => H.setHead(f, head, {
       level: amount * (0.85 + 0.15 * energy), colour,
-      pan: H.clamp(pan, 0, 1), tilt: H.clamp(tilt, 0, 1),
+      pan: H.clamp(i % 2 ? 1 - pan : pan, 0, 1), tilt: H.clamp(tilt, 0, 1),
       gobo: params.gobo != null ? params.gobo : 0, prism,
       strobe: fire ? strobeHz : 0,
-    });
+    }));
     return f;
   }
   return { beat: true, render, per_fixture: H.HEAD_IDS };

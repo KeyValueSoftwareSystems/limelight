@@ -14,6 +14,10 @@ const H = require("./helpers");
  * direction: "lr" (default) or "rl".
  */
 module.exports = function trade(params, ctx) {
+  /* head: false -- drive the pars only and leave the moving head to whichever
+     cue owns it. Without this a row cue that starts later than a beam cue takes
+     the head with it (latest start wins a fixture), parks it, and kills its
+     strobe -- so the head could never be the soloist over a moving row. */
   const cols = H.parseColours(params.colours, [[1, 0.75, 0.35], [0.2, 0.4, 1]]);
   const c0 = cols[0], c1 = cols[1];
   const forBeats = params.for_beats || 2;
@@ -45,16 +49,18 @@ module.exports = function trade(params, ctx) {
       }
       /* both heads ride the bump, a little apart, so the move reads from the
          truss as well as from the wash bar */
+      if (params.head !== false) 
       H.setHead(f, H.HEADS[0], { level: 0.55, colour: c0, pan: 0.25 + 0.5 * pos, tilt: 0.4 });
+      if (params.head !== false) 
       H.setHead(f, H.HEADS[1], { level: 0.55, colour: c0, pan: 0.35 + 0.5 * pos, tilt: 0.4 });
       frames.push(f);
     }
-    return { frames, loop_beats: 0, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
+    return { frames, loop_beats: 0, per_fixture: pars.map(p => p.id).concat(params.head === false ? [] : H.HEAD_IDS) };
   }
 
   const half = Math.floor(total / 2);
   const A = rl ? H.RIGHT : H.LEFT, B = rl ? H.LEFT : H.RIGHT;
-  const driven = H.PAR_IDS.concat(H.HEAD_IDS);
+  const driven = H.PAR_IDS.concat(params.head === false ? [] : H.HEAD_IDS);
   for (let i = 0; i < total; i++) {
     const frame = H.emptyFrame();
     const inFirst = i < half;
@@ -64,7 +70,9 @@ module.exports = function trade(params, ctx) {
     const aLv = inFirst ? 0.7 * env : 0.2, bLv = inFirst ? 0.2 : 0.7 * env;
     for (const p of A) H.setPar(frame, p, aCol, aLv);
     for (const p of B) H.setPar(frame, p, bCol, bLv);
+    if (params.head !== false) 
     H.setHead(frame, H.HEADS[0], { level: aLv, colour: aCol, pan: rl ? 0.7 : 0.3 });
+    if (params.head !== false) 
     H.setHead(frame, H.HEADS[1], { level: bLv, colour: bCol, pan: rl ? 0.3 : 0.7 });
     frames.push(frame);
   }

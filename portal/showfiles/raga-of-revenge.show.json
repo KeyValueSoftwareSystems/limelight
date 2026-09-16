@@ -152,7 +152,7 @@
   {
    "effect": "drone",
    "amount": 0.21,
-   "colour": "#8659c4",
+   "colour": "#2f5bff",
    "extent": "all",
    "why": "intro, establishing, drums none \u2014 D:min. Level 0.30.",
    "id": "s0",
@@ -168,7 +168,7 @@
   {
    "effect": "drone",
    "amount": 0.21,
-   "colour": "#8659c4",
+   "colour": "#2f5bff",
    "extent": "all",
    "why": "intro, intensifying, drums none \u2014 F. Level 0.30.",
    "id": "s1",
@@ -184,7 +184,7 @@
   {
    "effect": "drone",
    "amount": 0.21,
-   "colour": "#8659c4",
+   "colour": "#2f5bff",
    "extent": "all",
    "why": "intro, sustaining, drums none \u2014 A#. Level 0.30.",
    "id": "s2",
@@ -200,7 +200,7 @@
   {
    "effect": "drone",
    "amount": 0.21,
-   "colour": "#8659c4",
+   "colour": "#2f5bff",
    "extent": "all",
    "why": "intro, easing, drums none \u2014 A. Level 0.30.",
    "id": "s3",
@@ -216,7 +216,7 @@
   {
    "effect": "drone",
    "amount": 0.21,
-   "colour": "#8659c4",
+   "colour": "#2f5bff",
    "extent": "all",
    "why": "intro, resolving, drums none \u2014 C. Level 0.30.",
    "id": "s4",
@@ -230,25 +230,9 @@
    }
   },
   {
-   "effect": "drone",
-   "amount": 0.21,
-   "colour": "#8659c4",
-   "extent": "all",
-   "why": "intro, resolving, drums none \u2014 C. Level 0.30.",
-   "id": "s5",
-   "section": 1,
-   "from_s": 25.56,
-   "to_s": 25.78,
-   "at": {
-    "bar": 10,
-    "beat": 4,
-    "beats": 1
-   }
-  },
-  {
    "effect": "pulse",
    "amount": 0.3,
-   "colour": "#8659c4",
+   "colour": "#2f5bff",
    "extent": "all",
    "floor": 0.16,
    "peak": 0.95,
@@ -264,11 +248,11 @@
    }
   },
   {
-   "effect": "drone",
-   "amount": 0.21,
-   "colour": "#8659c4",
+   "effect": "wash",
+   "amount": 0.14,
+   "colour": "#2f5bff",
    "extent": "all",
-   "why": "instrumental, intensifying, drums none \u2014 A:7. Level 0.30.",
+   "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
    "id": "s7",
    "section": 1,
    "from_s": 31.78,
@@ -280,13 +264,11 @@
    }
   },
   {
-   "effect": "pulse",
-   "amount": 0.1,
-   "colour": "#8659c4",
+   "effect": "wash",
+   "amount": 0.14,
+   "colour": "#2f5bff",
    "extent": "all",
-   "floor": 0.04,
-   "peak": 0.95,
-   "why": "instrumental, resolving, drums light \u2014 D:min. Level 0.55. Pulled down for the build: a wave is one lamp lit against three dark ones and cannot be seen over a lit bed.",
+   "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
    "id": "s8",
    "section": 1,
    "from_s": 41.75,
@@ -298,13 +280,11 @@
    }
   },
   {
-   "effect": "pulse",
-   "amount": 0.1,
-   "colour": "#8659c4",
+   "effect": "wash",
+   "amount": 0.14,
+   "colour": "#2f5bff",
    "extent": "all",
-   "floor": 0.04,
-   "peak": 0.95,
-   "why": "instrumental, developing, drums light \u2014 C. Level 0.55. Pulled down for the build: a wave is one lamp lit against three dark ones and cannot be seen over a lit bed.",
+   "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
    "id": "s9",
    "section": 1,
    "from_s": 47.74,
@@ -316,17 +296,15 @@
    }
   },
   {
-   "effect": "pulse",
-   "amount": 0.1,
-   "colour": "#8659c4",
+   "effect": "wash",
+   "amount": 0.14,
+   "colour": "#2f5bff",
    "extent": "all",
-   "floor": 0.04,
-   "peak": 0.95,
-   "why": "instrumental, developing, drums light \u2014 C. Level 0.55. Pulled down for the build: a wave is one lamp lit against three dark ones and cannot be seen over a lit bed.",
+   "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
    "id": "s10",
    "section": 2,
    "from_s": 48.24,
-   "to_s": 51.76,
+   "to_s": 49.75,
    "at": {
     "bar": 22,
     "beat": 1,
@@ -335,15 +313,34 @@
   },
   {
    "effect": "drive",
-   "amount": 0.826,
+   "extent": "all",
+   "why": "From the downbeat of the drop: a red core in a blue frame -- drive's two pairs call and respond, inner red, outer blue, flipping on the beat. The first red the room has seen. (Split from the state that straddled 49.75, whose first bar was sitting on the dim build bed.) Floor 0.72 so the frame is brighter than the build it answers.",
+   "id": "s10",
+   "section": 2,
+   "from_s": 49.75,
+   "to_s": 51.76,
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 7
+   },
    "colours": [
-    "#b4e62e",
-    "#8659c4"
+    "#e01313",
+    "#2f5bff"
+   ],
+   "floor": 0.72,
+   "peak": 1.0
+  },
+  {
+   "effect": "drive",
+   "colours": [
+    "#e01313",
+    "#2f5bff"
    ],
    "extent": "all",
-   "floor": 0.62,
+   "floor": 0.72,
    "peak": 1.0,
-   "why": "chorus, sustaining, drums full \u2014 D:min. Level 0.83. Floor lifted so the drop beats its own build: eight bars of the row blazing and collapsing is a big picture, and the payoff cannot be smaller than the run-up.",
+   "why": "A red core in a blue frame: drive's two pairs call and respond, inner in red and outer in blue, flipping on the beat. The room keeps moving through the drop without a chase on top, and this is the first red the room has seen. Floor 0.72 so the frame is brighter than the build it answers.",
    "id": "s11",
    "section": 2,
    "from_s": 51.76,
@@ -355,13 +352,11 @@
    }
   },
   {
-   "effect": "pulse",
-   "amount": 0.699,
-   "colour": "#b4e62e",
+   "effect": "drive",
    "extent": "all",
-   "floor": 0.62,
+   "floor": 0.76,
    "peak": 1.0,
-   "why": "chorus, intensifying, drums full \u2014 A:min. Level 0.70. Floor lifted so the drop beats its own build: eight bars of the row blazing and collapsing is a big picture, and the payoff cannot be smaller than the run-up.",
+   "why": "chorus, intensifying, drums full \u2014 A:min. Level 0.70. Floor lifted so the drop beats its own build: eight bars of the row blazing and collapsing is a big picture, and the payoff cannot be smaller than the run-up. Second drop: the same red-in-blue frame as the first, one step brighter (0.76 against 0.72). Three drops in this song and each has to be bigger than the last, or the second reads as the show losing interest.",
    "id": "s12",
    "section": 2,
    "from_s": 63.76,
@@ -370,16 +365,18 @@
     "bar": 30,
     "beat": 1,
     "beats": 16
-   }
+   },
+   "colours": [
+    "#e01313",
+    "#2f5bff"
+   ]
   },
   {
-   "effect": "pulse",
-   "amount": 0.62,
-   "colour": "#b4e62e",
+   "effect": "drive",
    "extent": "all",
-   "floor": 0.224,
-   "peak": 0.95,
-   "why": "chorus, resolving, drums light \u2014 A#. Level 0.62.",
+   "floor": 0.76,
+   "peak": 1.0,
+   "why": "chorus, resolving, drums light \u2014 A#. Level 0.62. Second drop: the same red-in-blue frame as the first, one step brighter (0.76 against 0.72). Three drops in this song and each has to be bigger than the last, or the second reads as the show losing interest.",
    "id": "s13",
    "section": 2,
    "from_s": 71.76,
@@ -388,30 +385,16 @@
     "bar": 34,
     "beat": 1,
     "beats": 19
-   }
+   },
+   "colours": [
+    "#e01313",
+    "#2f5bff"
+   ]
   },
   {
    "effect": "pulse",
    "amount": 0.62,
-   "colour": "#b4e62e",
-   "extent": "all",
-   "floor": 0.224,
-   "peak": 0.95,
-   "why": "chorus, developing, drums light \u2014 A#. Level 0.62.",
-   "id": "s14",
-   "section": 2,
-   "from_s": 81.76,
-   "to_s": 81.77,
-   "at": {
-    "bar": 39,
-    "beat": 1,
-    "beats": 1
-   }
-  },
-  {
-   "effect": "pulse",
-   "amount": 0.62,
-   "colour": "#b4e62e",
+   "colour": "#e01313",
    "extent": "all",
    "floor": 0.224,
    "peak": 0.95,
@@ -430,8 +413,8 @@
    "effect": "breakdown",
    "amount": 0.805,
    "colours": [
-    "#b4e62e",
-    "#8659c4"
+    "#e01313",
+    "#2f5bff"
    ],
    "floor": 0.157,
    "peak": 1,
@@ -449,7 +432,6 @@
   {
    "effect": "drive",
    "amount": 0.62,
-   "colour": "#b4e62e",
    "extent": "all",
    "why": "chorus, sustaining, drums light \u2014 A:min. Level 0.62. Given movement: the room held ONE unchanging picture here for four and a half seconds, in the loudest part of the song.",
    "id": "s17",
@@ -462,7 +444,11 @@
     "beats": 3
    },
    "floor": 0.45,
-   "peak": 1.0
+   "peak": 1.0,
+   "colours": [
+    "#e01313",
+    "#2f5bff"
+   ]
   },
   {
    "effect": "drive",
@@ -481,16 +467,16 @@
    "floor": 0.55,
    "peak": 1.0,
    "colours": [
-    "#b4e62e",
-    "#8659c4"
+    "#e01313",
+    "#2f5bff"
    ]
   },
   {
    "effect": "breakdown",
    "amount": 0.887,
    "colours": [
-    "#b4e62e",
-    "#8659c4"
+    "#e01313",
+    "#2f5bff"
    ],
    "floor": 0.166,
    "peak": 1,
@@ -506,29 +492,9 @@
    }
   },
   {
-   "effect": "breakdown",
-   "amount": 0.887,
-   "colours": [
-    "#b4e62e",
-    "#8659c4"
-   ],
-   "floor": 0.166,
-   "peak": 1,
-   "why": "chorus, resolving, drums full \u2014 C. Level 0.89.",
-   "id": "s20",
-   "section": 5,
-   "from_s": 109.64,
-   "to_s": 109.76,
-   "at": {
-    "bar": 52,
-    "beat": 4,
-    "beats": 1
-   }
-  },
-  {
    "effect": "pulse",
    "amount": 0.45,
-   "colour": "#b4e62e",
+   "colour": "#e01313",
    "extent": "all",
    "why": "outro, sustaining, drums none \u2014 G. Level 0.34. Moving, not held: the room sat on one unchanging picture here for nearly three seconds.",
    "id": "s21",
@@ -546,7 +512,7 @@
   {
    "effect": "pulse",
    "amount": 0.4,
-   "colour": "#b4e62e",
+   "colour": "#e01313",
    "extent": "all",
    "why": "outro, sustaining, drums none \u2014 D:min. Level 0.34. A wash holds one picture by definition, and eight seconds of one picture is eight seconds of nothing happening. pulse keeps the room alive at the same level.",
    "id": "s22",
@@ -564,7 +530,7 @@
   {
    "effect": "drone",
    "amount": 0.23,
-   "colour": "#b4e62e",
+   "colour": "#e01313",
    "extent": "all",
    "why": "outro, easing, drums none \u2014 D. Level 0.34.",
    "id": "s23",
@@ -580,7 +546,7 @@
   {
    "effect": "drone",
    "amount": 0.173,
-   "colour": "#b4e62e",
+   "colour": "#e01313",
    "extent": "all",
    "why": "outro, developing, drums none \u2014 E:7. Level 0.23.",
    "id": "s24",
@@ -596,7 +562,7 @@
   {
    "effect": "drone",
    "amount": 0.173,
-   "colour": "#b4e62e",
+   "colour": "#e01313",
    "extent": "all",
    "why": "outro, developing, drums none \u2014 E:7. Level 0.23.",
    "id": "s25",
@@ -611,60 +577,6 @@
   }
  ],
  "bindings": [
-  {
-   "effect": "follow",
-   "stream": "bass",
-   "depth": 0.85,
-   "extent": "all",
-   "smooth": 0.1,
-   "why": "the bass riff IS this section, so the room breathes with the bass itself",
-   "id": "b0",
-   "section": 1,
-   "from_s": 41.75,
-   "to_s": 47.74,
-   "at": {
-    "bar": 19,
-    "beat": 1,
-    "beats": 12
-   },
-   "colour": "#8659c4"
-  },
-  {
-   "effect": "follow",
-   "stream": "bass",
-   "depth": 0.85,
-   "extent": "all",
-   "smooth": 0.1,
-   "why": "the bass riff IS this section, so the room breathes with the bass itself",
-   "id": "b1",
-   "section": 1,
-   "from_s": 47.74,
-   "to_s": 48.24,
-   "at": {
-    "bar": 22,
-    "beat": 1,
-    "beats": 1
-   },
-   "colour": "#8659c4"
-  },
-  {
-   "effect": "follow",
-   "stream": "bass",
-   "depth": 0.85,
-   "extent": "all",
-   "smooth": 0.1,
-   "why": "the bass riff IS this section, so the room breathes with the bass itself",
-   "id": "b2",
-   "section": 2,
-   "from_s": 48.24,
-   "to_s": 51.76,
-   "at": {
-    "bar": 22,
-    "beat": 1,
-    "beats": 7
-   },
-   "colour": "#8659c4"
-  },
   {
    "effect": "accent",
    "threshold": 0.28,
@@ -681,8 +593,8 @@
     "beat": 1,
     "beats": 11
    },
-   "colour": "#b4e62e",
-   "bed_colour": "#b4e62e"
+   "colour": "#e01313",
+   "bed_colour": "#e01313"
   },
   {
    "effect": "accent",
@@ -700,8 +612,8 @@
     "beat": 4,
     "beats": 1
    },
-   "colour": "#b4e62e",
-   "bed_colour": "#b4e62e"
+   "colour": "#e01313",
+   "bed_colour": "#e01313"
   }
  ],
  "gestures": [
@@ -710,7 +622,7 @@
    "to_s": 10.012,
    "effect": "beam",
    "pattern": "snap",
-   "colour": "#8659c4",
+   "colour": "#ffffff",
    "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
    "id": "g0",
    "at": {
@@ -718,14 +630,15 @@
     "beat": 1,
     "beats": 16
    },
-   "start_s": 1.76
+   "start_s": 1.76,
+   "fade_ms": 0
   },
   {
    "from_s": 10.012,
    "to_s": 18.265,
    "effect": "beam",
    "pattern": "sweep",
-   "colour": "#8659c4",
+   "colour": "#ffffff",
    "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
    "id": "g1",
    "at": {
@@ -733,7 +646,8 @@
     "beat": 1,
     "beats": 16
    },
-   "start_s": 10.012
+   "start_s": 10.012,
+   "fade_ms": 0
   },
   {
    "at_s": 13.83,
@@ -769,7 +683,7 @@
    "to_s": 26.517,
    "effect": "beam",
    "pattern": "snap",
-   "colour": "#8659c4",
+   "colour": "#ffffff",
    "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
    "id": "g4",
    "at": {
@@ -777,7 +691,8 @@
     "beat": 2,
     "beats": 16
    },
-   "start_s": 18.265
+   "start_s": 18.265,
+   "fade_ms": 0
   },
   {
    "at_s": 21.8,
@@ -799,7 +714,7 @@
    "to_s": 33.75,
    "effect": "beam",
    "pattern": "sweep",
-   "colour": "#8659c4",
+   "colour": "#ffffff",
    "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
    "id": "g6",
    "at": {
@@ -807,7 +722,8 @@
     "beat": 2,
     "beats": 14
    },
-   "start_s": 26.517
+   "start_s": 26.517,
+   "fade_ms": 0
   },
   {
    "from_s": 32.718,
@@ -840,450 +756,307 @@
    "start_s": 33
   },
   {
+   "effect": "beam",
+   "pattern": "stations",
+   "colour": "#ffffff",
+   "amount": 0.9,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 33.75,
+   "to_s": 41.75,
+   "why": "THE BASS RIFF. Bass and strings, no drums, no voice: the one fixture that can point becomes the soloist. Clean white beam, no prism, snapping to a new wall on every downbeat -- four bars, four places -- and drifting across each bar with the bass. The row stays a dim blue field underneath so the beam cuts.",
+   "fade_ms": 0
+  },
+  {
+   "effect": "trade",
+   "travel": true,
+   "direction": "lr",
+   "runs": 1,
+   "rest": 0.3,
+   "peak": 1.0,
+   "colours": [
+    "#ff1616",
+    "#2f5bff"
+   ],
+   "for_beats": 1,
+   "fade_ms": 0,
+   "from_s": 35.2575,
+   "to_s": 35.76,
+   "why": "Bar 15, beat 4 only: a RED SPARK runs across the blue row -- left to right -- one crossing in one beat. The row stays lit at 0.30, so what travels is a hot colour over a cold field, not a lamp switching on. The one thing the row does per bar, so the head stays the story.",
+   "head": false
+  },
+  {
+   "effect": "trade",
+   "travel": true,
+   "direction": "rl",
+   "runs": 1,
+   "rest": 0.3,
+   "peak": 1.0,
+   "colours": [
+    "#ff1616",
+    "#3b5bff"
+   ],
+   "for_beats": 1,
+   "fade_ms": 0,
+   "from_s": 37.26,
+   "to_s": 37.76,
+   "why": "Bar 16, beat 4 only: a RED SPARK runs across the blue row -- right to left -- one crossing in one beat. The row stays lit at 0.30, so what travels is a hot colour over a cold field, not a lamp switching on. The one thing the row does per bar, so the head stays the story.",
+   "head": false
+  },
+  {
+   "effect": "trade",
+   "travel": true,
+   "direction": "lr",
+   "runs": 1,
+   "rest": 0.3,
+   "peak": 1.0,
+   "colours": [
+    "#ff1616",
+    "#485dff"
+   ],
+   "for_beats": 1,
+   "fade_ms": 0,
+   "from_s": 39.26,
+   "to_s": 39.76,
+   "why": "Bar 17, beat 4 only: a RED SPARK runs across the blue row -- left to right -- one crossing in one beat. The row stays lit at 0.30, so what travels is a hot colour over a cold field, not a lamp switching on. The one thing the row does per bar, so the head stays the story.",
+   "head": false
+  },
+  {
    "effect": "glare",
-   "colour": "#8659c4",
-   "level": 0.55,
+   "colour": "#565dff",
+   "amount": 0.6,
+   "extent": "all",
+   "for_beats": 1,
+   "fade_ms": 0,
+   "at_s": 39.76,
+   "why": "Bar 18: the borrowed major turns MINOR at 40.0s. One beat of the whole row lifting in blue-violet on the downbeat, the first time the row has spoken at full since the riff began. The head snaps at the same instant.",
+   "head": false
+  },
+  {
+   "effect": "trade",
+   "travel": true,
+   "direction": "rl",
+   "runs": 1,
+   "rest": 0.3,
+   "peak": 1.0,
+   "colours": [
+    "#ff1616",
+    "#565dff"
+   ],
+   "for_beats": 1,
+   "fade_ms": 0,
+   "from_s": 41.2525,
+   "to_s": 41.75,
+   "why": "Bar 18, beat 4 only: a RED SPARK runs across the blue row -- right to left -- one crossing in one beat. The row stays lit at 0.30, so what travels is a hot colour over a cold field, not a lamp switching on. The one thing the row does per bar, so the head stays the story.",
+   "head": false
+  },
+  {
+   "effect": "beam",
+   "pattern": "stations",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "prism": 0,
+   "strobe": 10,
+   "strobe_on": "downbeat",
+   "from_s": 41.75,
+   "to_s": 48.24,
+   "why": "Second phrase, drums creeping in: the head keeps its stations but now STROBES on every downbeat -- the first strobe of the show, white, a burst at the top of each bar. Rhythm from the fixture that can do it.",
+   "fade_ms": 0
+  },
+  {
+   "effect": "glare",
+   "colour": "#655eff",
+   "amount": 0.62,
    "extent": "all",
    "for_beats": 2,
-   "why": "Bar 15, beats 1 and 2: the whole row blazes. This is the half of the bar that carries the weight, and it is what the run in the second half falls out of -- a single lamp half a second after the room was full reads far harder than the same lamp in a room that was already dark. Level 0.55, escalating bar by bar so eight repeats of one figure still build.",
-   "from_s": 33.748,
-   "to_s": 34.74,
-   "at": {
-    "bar": 15,
-    "beat": 1
-   },
-   "fade_ms": 0
+   "fade_ms": 0,
+   "from_s": 41.75,
+   "to_s": 42.754999999999995,
+   "why": "Bar 19, beats 1-2: the whole row BLAZES for two beats -- and it has warmed again: 20% toward red. Nobody in the room notices the drift; they will at the drop.",
+   "head": false
   },
   {
    "effect": "chase",
    "direction": "rl",
    "per_beat": 1,
-   "colour": "#8659c4",
-   "level": 1.0,
+   "colour": "#655eff",
+   "amount": 1.0,
    "rest": 0.0,
    "extent": "all",
    "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 34.74,
-   "to_s": 35.241,
-   "at": {
-    "bar": 15,
-    "beat": 3
-   },
-   "fade_ms": 0
+   "fade_ms": 0,
+   "from_s": 42.754999999999995,
+   "to_s": 43.2575,
+   "why": "Beat 3: the row collapses to ONE lamp running right to left in a single beat, everything else dark. Half a second after the whole row was blazing, one lamp reads as urgent.",
+   "head": false
   },
   {
    "effect": "chase",
    "direction": "lr",
    "per_beat": 1,
-   "colour": "#8659c4",
-   "level": 1.0,
+   "colour": "#655eff",
+   "amount": 1.0,
    "rest": 0.0,
    "extent": "all",
    "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 35.241,
-   "to_s": 35.741,
-   "at": {
-    "bar": 15,
-    "beat": 4
-   },
-   "fade_ms": 0
+   "fade_ms": 0,
+   "from_s": 43.2575,
+   "to_s": 43.76,
+   "why": "Beat 4: and straight back the other way.",
+   "head": false
   },
   {
    "effect": "glare",
-   "colour": "#8659c4",
-   "level": 0.64,
+   "colour": "#7f60ff",
+   "amount": 0.76,
    "extent": "all",
    "for_beats": 2,
-   "why": "Bar 16, beats 1 and 2: the whole row blazes. This is the half of the bar that carries the weight, and it is what the run in the second half falls out of -- a single lamp half a second after the room was full reads far harder than the same lamp in a room that was already dark. Level 0.64, escalating bar by bar so eight repeats of one figure still build.",
-   "from_s": 35.741,
-   "to_s": 36.742,
-   "at": {
-    "bar": 16,
-    "beat": 1
-   },
-   "fade_ms": 0
+   "fade_ms": 0,
+   "from_s": 43.76,
+   "to_s": 44.76,
+   "why": "Bar 20, beats 1-2: the whole row BLAZES for two beats -- and it has warmed again: 27% toward red. Nobody in the room notices the drift; they will at the drop.",
+   "head": false
+  },
+  {
+   "effect": "chase",
+   "direction": "lr",
+   "per_beat": 1,
+   "colour": "#7f60ff",
+   "amount": 1.0,
+   "rest": 0.0,
+   "extent": "all",
+   "for_beats": 1,
+   "fade_ms": 0,
+   "from_s": 44.76,
+   "to_s": 45.26,
+   "why": "Beat 3: the row collapses to ONE lamp running left to right in a single beat, everything else dark. Half a second after the whole row was blazing, one lamp reads as urgent.",
+   "head": false
   },
   {
    "effect": "chase",
    "direction": "rl",
    "per_beat": 1,
-   "colour": "#8659c4",
-   "level": 1.0,
+   "colour": "#7f60ff",
+   "amount": 1.0,
    "rest": 0.0,
    "extent": "all",
    "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 36.742,
-   "to_s": 37.242,
-   "at": {
-    "bar": 16,
-    "beat": 3
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#8659c4",
-   "level": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 37.242,
-   "to_s": 37.743,
-   "at": {
-    "bar": 16,
-    "beat": 4
-   },
-   "fade_ms": 0
+   "fade_ms": 0,
+   "from_s": 45.26,
+   "to_s": 45.76,
+   "why": "Beat 4: and straight back the other way.",
+   "head": false
   },
   {
    "effect": "glare",
-   "colour": "#8659c4",
-   "level": 0.73,
+   "colour": "#9c62ff",
+   "amount": 0.9,
    "extent": "all",
    "for_beats": 2,
-   "why": "Bar 17, beats 1 and 2: the whole row blazes. This is the half of the bar that carries the weight, and it is what the run in the second half falls out of -- a single lamp half a second after the room was full reads far harder than the same lamp in a room that was already dark. Level 0.73, escalating bar by bar so eight repeats of one figure still build.",
-   "from_s": 37.743,
-   "to_s": 38.743,
-   "at": {
-    "bar": 17,
-    "beat": 1
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "rl",
-   "per_beat": 1,
-   "colour": "#8659c4",
-   "level": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 38.743,
-   "to_s": 39.244,
-   "at": {
-    "bar": 17,
-    "beat": 3
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#8659c4",
-   "level": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 39.244,
-   "to_s": 39.744,
-   "at": {
-    "bar": 17,
-    "beat": 4
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "glare",
-   "colour": "#b4e62e",
-   "level": 0.8,
-   "extent": "all",
-   "for_beats": 2,
-   "why": "Bar 18, beats 1 and 2: the whole row blazes. This is the half of the bar that carries the weight, and it is what the run in the second half falls out of -- a single lamp half a second after the room was full reads far harder than the same lamp in a room that was already dark. Level 0.80, escalating bar by bar so eight repeats of one figure still build.",
-   "from_s": 39.744,
-   "to_s": 40.745,
-   "at": {
-    "bar": 18,
-    "beat": 1
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "rl",
-   "per_beat": 1,
-   "colour": "#b4e62e",
-   "level": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 40.745,
-   "to_s": 41.245,
-   "at": {
-    "bar": 18,
-    "beat": 3
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#b4e62e",
-   "level": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 41.245,
-   "to_s": 41.746,
-   "at": {
-    "bar": 18,
-    "beat": 4
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "glare",
-   "colour": "#b4e62e",
-   "level": 0.86,
-   "extent": "all",
-   "for_beats": 2,
-   "why": "Bar 19, beats 1 and 2: the whole row blazes. This is the half of the bar that carries the weight, and it is what the run in the second half falls out of -- a single lamp half a second after the room was full reads far harder than the same lamp in a room that was already dark. Level 0.86, escalating bar by bar so eight repeats of one figure still build.",
-   "from_s": 41.746,
-   "to_s": 42.747,
-   "at": {
-    "bar": 19,
-    "beat": 1
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#b4e62e",
-   "level": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs LEFT TO RIGHT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 42.747,
-   "to_s": 43.247,
-   "at": {
-    "bar": 19,
-    "beat": 3
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "rl",
-   "per_beat": 1,
-   "colour": "#b4e62e",
-   "level": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, RIGHT TO LEFT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 43.247,
-   "to_s": 43.747,
-   "at": {
-    "bar": 19,
-    "beat": 4
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "glare",
-   "colour": "#b4e62e",
-   "level": 0.92,
-   "extent": "all",
-   "for_beats": 2,
-   "why": "Bar 20, beats 1 and 2: the whole row blazes. This is the half of the bar that carries the weight, and it is what the run in the second half falls out of -- a single lamp half a second after the room was full reads far harder than the same lamp in a room that was already dark. Level 0.92, escalating bar by bar so eight repeats of one figure still build.",
-   "from_s": 43.747,
-   "to_s": 44.748,
-   "at": {
-    "bar": 20,
-    "beat": 1
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#b4e62e",
-   "level": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs LEFT TO RIGHT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 44.748,
-   "to_s": 45.248,
-   "at": {
-    "bar": 20,
-    "beat": 3
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "rl",
-   "per_beat": 1,
-   "colour": "#b4e62e",
-   "level": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, RIGHT TO LEFT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 45.248,
-   "to_s": 45.749,
-   "at": {
-    "bar": 20,
-    "beat": 4
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "glare",
-   "colour": "#b4e62e",
-   "level": 0.88,
-   "extent": "all",
-   "for_beats": 2,
-   "why": "Bar 21, beats 1 and 2: the whole row blazes. This is the half of the bar that carries the weight, and it is what the run in the second half falls out of -- a single lamp half a second after the room was full reads far harder than the same lamp in a room that was already dark. Level 0.97, escalating bar by bar so eight repeats of one figure still build. Green, not white: white is what a HIT is in this show, and the last two bars of the build were spending it before the drop arrived -- which made the brightest moment of the whole show a bar where the band is quieter than three quarters of the song.",
-   "from_s": 45.749,
+   "fade_ms": 0,
+   "from_s": 45.76,
    "to_s": 46.75,
-   "at": {
-    "bar": 21,
-    "beat": 1
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#b4e62e",
-   "level": 1.0,
-   "rest": 0.0,
-   "extent": "all",
-   "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs LEFT TO RIGHT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. Green, not white: white is what a HIT is in this show, and the last two bars of the build were spending it before the drop arrived -- which made the brightest moment of the whole show a bar where the band is quieter than three quarters of the song. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 46.75,
-   "to_s": 47.25,
-   "at": {
-    "bar": 21,
-    "beat": 3
-   },
-   "fade_ms": 0
+   "why": "Bar 21, beats 1-2: the whole row BLAZES for two beats -- and it has warmed again: 34% toward red. Nobody in the room notices the drift; they will at the drop.",
+   "head": false
   },
   {
    "effect": "chase",
    "direction": "rl",
    "per_beat": 1,
-   "colour": "#b4e62e",
-   "level": 1.0,
+   "colour": "#9c62ff",
+   "amount": 1.0,
    "rest": 0.0,
    "extent": "all",
    "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, RIGHT TO LEFT. The turn inside the bar is what makes the room rock rather than just flicker. Green, not white: white is what a HIT is in this show, and the last two bars of the build were spending it before the drop arrived -- which made the brightest moment of the whole show a bar where the band is quieter than three quarters of the song. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 47.25,
-   "to_s": 47.75,
-   "at": {
-    "bar": 21,
-    "beat": 4
-   },
-   "fade_ms": 0
+   "fade_ms": 0,
+   "from_s": 46.75,
+   "to_s": 47.245000000000005,
+   "why": "Beat 3: the row collapses to ONE lamp running right to left in a single beat, everything else dark. Half a second after the whole row was blazing, one lamp reads as urgent.",
+   "head": false
+  },
+  {
+   "effect": "chase",
+   "direction": "lr",
+   "per_beat": 1,
+   "colour": "#9c62ff",
+   "amount": 1.0,
+   "rest": 0.0,
+   "extent": "all",
+   "for_beats": 1,
+   "fade_ms": 0,
+   "from_s": 47.245000000000005,
+   "to_s": 47.74,
+   "why": "Beat 4: and straight back the other way.",
+   "head": false
   },
   {
    "effect": "glare",
-   "colour": "#b4e62e",
-   "level": 0.88,
+   "colour": "#c664ff",
+   "amount": 0.85,
    "extent": "all",
    "for_beats": 2,
-   "why": "Bar 22, beats 1 and 2: the whole row blazes. This is the half of the bar that carries the weight, and it is what the run in the second half falls out of -- a single lamp half a second after the room was full reads far harder than the same lamp in a room that was already dark. Level 1.00, escalating bar by bar so eight repeats of one figure still build. Green, not white: white is what a HIT is in this show, and the last two bars of the build were spending it before the drop arrived -- which made the brightest moment of the whole show a bar where the band is quieter than three quarters of the song.",
-   "from_s": 47.75,
-   "to_s": 48.75,
-   "at": {
-    "bar": 22,
-    "beat": 1
-   },
-   "fade_ms": 0
+   "fade_ms": 0,
+   "from_s": 47.74,
+   "to_s": 48.745000000000005,
+   "why": "Bar 22, the C-major lift before the drop: the row at FULL in violet -- as far toward red as the build ever gets -- for two beats. Held at 0.85, not full: the last bar of the build was the brightest two seconds in the whole show, and the drop has to be bigger than the thing that led into it.",
+   "head": false
   },
   {
    "effect": "blackout",
-   "why": "THE DROP. Two beats of NOTHING after eight bars of the row running -- the room has been moving without pause and then stops dead. This is the single biggest moment in the show and it has to land in an empty room.",
-   "from_s": 48.75,
-   "to_s": 49.75,
-   "at": {
-    "bar": 22,
-    "beat": 3
-   },
-   "fade_ms": 0
+   "from_s": 48.745000000000005,
+   "to_s": 49.72,
+   "fade_ms": 0,
+   "why": "Then NOTHING for two beats, head included. Eight bars of the room warming and moving, and it stops dead. This silence is what makes the next beat enormous."
   },
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "level": 1.0,
+   "amount": 1.0,
    "extent": "all",
-   "for_beats": 2,
-   "rise": -0.35,
-   "why": "THE DROP. Two beats of absolute black before it, then the entire rig at FULL WHITE and held, not a flash that decays inside a tenth of a second. The build spends the whole bar before this at full glare and then vanishes; this is what the room comes back as. fade_ms 0: the rig now fades 180ms between cues by default, which is right almost everywhere and wrong here -- the drop was arriving at a quarter brightness on the downbeat because it was still ramping up. A hit has no attack.",
-   "at_s": 49.75,
-   "at": {
-    "bar": 23,
-    "beat": 1
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#ffffff",
-   "level": 1.0,
-   "rest": 0.1,
-   "extent": "all",
-   "from_s": 50.25,
-   "to_s": 51.26,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
-   "why": "The drop answers the build in its own language. The build ends with ONE lamp lit against three dark ones -- the widest picture in the show -- so a drop that settles into an even bed reads as smaller than the run-up that led to it. The row keeps crossing for two beats out of the blast."
+   "at_s": 49.75,
+   "why": "49.75s, THE DROP. Every lamp to full WHITE for one beat, snapped, no fade. The room has been blue for fifty seconds; this is the first white and the drums arriving.",
+   "head": false
   },
   {
-   "effect": "chase",
-   "direction": "lr",
-   "per_beat": 1,
-   "colour": "#ffffff",
-   "level": 1.0,
-   "rest": 0.1,
-   "extent": "all",
-   "for_beats": 2,
-   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 50.75,
-   "to_s": 51.75,
-   "at": {
-    "bar": 23,
-    "beat": 3
-   },
+   "effect": "beam",
+   "pattern": "snap",
+   "colour": "#e01313",
+   "amount": 1.0,
+   "prism": 100,
+   "strobe": 0,
+   "from_s": 49.75,
+   "to_s": 57.76,
+   "why": "The head goes RED with the PRISM for the first time all night: one red beam becomes six red rays, snapping wall to wall on every beat over a row that is now red and blue. The prism was withheld for fifty seconds so that this reads as an arrival.",
    "fade_ms": 0
   },
   {
-   "at_s": 52.76,
    "effect": "impact",
    "colour": "#ffffff",
    "extent": "all",
-   "for_beats": 2,
-   "why": "52.8s \u2014 the whole band at full strength, 6 families at once",
-   "id": "g23",
-   "at": {
-    "bar": 24,
-    "beat": 3,
-    "beats": 2
-   },
-   "start_s": 52.76,
-   "fade_ms": 0
+   "for_beats": 1,
+   "fade_ms": 0,
+   "at_s": 52.76,
+   "why": "52.76s: the whole band at full strength, six families at once. One white hit on the beat."
+  },
+  {
+   "effect": "trade",
+   "travel": true,
+   "direction": "lr",
+   "runs": 2,
+   "rest": 0.92,
+   "peak": 1.0,
+   "colours": [
+    "#ffffff",
+    "#e01313"
+   ],
+   "for_beats": 4,
+   "fade_ms": 0,
+   "from_s": 55.76,
+   "to_s": 57.76,
+   "why": "Bar 26: a COLOUR WAVE. The row stays at full the whole bar; what travels is a white position across red, twice. Nothing gets brighter or darker, only the hue moves -- a look four cheap pars are not supposed to be able to do. Once, so it stays a surprise.",
+   "head": false
   },
   {
    "effect": "blackout",
@@ -1317,22 +1090,17 @@
    "fade_ms": 0
   },
   {
-   "effect": "chase",
-   "direction": "rl",
-   "per_beat": 1,
-   "colour": "#b4e62e",
-   "level": 1.0,
-   "rest": 0.1,
-   "extent": "all",
-   "for_beats": 2,
-   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
-   "from_s": 66.75,
-   "to_s": 67.75,
-   "at": {
-    "bar": 31,
-    "beat": 3
-   },
-   "fade_ms": 0
+   "effect": "beam",
+   "pattern": "snap",
+   "colour": "#e01313",
+   "amount": 1.0,
+   "prism": 100,
+   "strobe": 8,
+   "strobe_on": "downbeat",
+   "fade_ms": 0,
+   "from_s": 65.76,
+   "to_s": 73.76,
+   "why": "Second drop: the head snaps side to side in red with the prism again, and now strobes on the downbeats too -- the thing it did not do at the first drop, so this one is recognisably the same move escalated."
   },
   {
    "at_s": 72.25,
@@ -1412,7 +1180,7 @@
    "effect": "chase",
    "direction": "lr",
    "per_beat": 1,
-   "colour": "#b4e62e",
+   "colour": "#e01313",
    "level": 1.0,
    "rest": 0.1,
    "extent": "all",
@@ -1530,13 +1298,13 @@
   },
   {
    "effect": "glare",
-   "colour": "#ffffff",
+   "colour": "#e01313",
    "level": 1.0,
    "extent": "all",
    "at_s": 102.76,
-   "for_beats": 3,
+   "for_beats": 4,
    "rise": -0.5,
-   "why": "THE LOUDEST KICK IN THE SONG at 102.76s -- full strength in the kick lane, the top of four consecutive bars that hold the four hardest hits on the record. Whole rig, full white, held for three beats. This is the peak of the show and it is placed on the hit rather than on a bar line.",
+   "why": "THE LOUDEST KICK IN THE SONG at 102.76s -- full strength in the kick lane, the top of four consecutive bars that hold the four hardest hits on the record. Whole rig, full white, held for three beats. This is the peak of the show and it is placed on the hit rather than on a bar line. Four beats: this is the loudest kick in the song and the show's brightest moment lives here, not in the build.",
    "fade_ms": 0
   },
   {

@@ -2,13 +2,19 @@
 const H = require("./helpers");
 
 module.exports = function chase(params, ctx) {
+  /* head: false -- drive the pars only and leave the moving head to whichever
+     cue owns it. Without this a row cue that starts later than a beam cue takes
+     the head with it (latest start wins a fixture), parks it, and kills its
+     strobe -- so the head could never be the soloist over a moving row. */
   const colour = H.parseColour(params.colour, (ctx && ctx.restColour) || [1, 0.75, 0.35]);
   /* direction: "lr" (default) or "rl". A wave that can only run one way is
      half an effect -- the room reads a return sweep as a different move. */
   const pars = String(params.direction || "lr").toLowerCase() === "rl"
     ? H.parsForExtent(params.extent || "all").slice().reverse()
     : H.parsForExtent(params.extent || "all");
-  const level = H.clamp(params.level != null ? params.level : 0.85, 0, 1);
+  /* `amount` is the dial the editor's intensity slider writes; `level` is kept for
+     files that already say it. amount wins when both are present. */
+  const level = H.clamp(params.amount != null ? params.amount : (params.level != null ? params.level : 0.85), 0, 1);
   const rest = H.clamp(params.rest != null ? params.rest : 0, 0, 1);
   const perBeat = params.per_beat != null ? params.per_beat : 1;
   const back = params.bounce === true;
@@ -36,6 +42,7 @@ module.exports = function chase(params, ctx) {
       const glow = d === 0 ? 1 : d === 1 ? 0.35 * (1 - within) : 0;
       H.setPar(f, par, colour, (rest + (level - rest) * glow) * gain);
     });
+    if (params.head !== false) 
     H.setHead(f, H.HEADS[0], {
       level: level * 0.5 * gain, colour,
       pan: 0.40 + 0.40 * (head / Math.max(1, n - 1)), tilt: 0.42,
@@ -70,6 +77,6 @@ module.exports = function chase(params, ctx) {
      it to a stream. */
   return {
     render, frames, loop_beats: loopBeats,
-    per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS),
+    per_fixture: pars.map(p => p.id).concat(params.head === false ? [] : H.HEAD_IDS),
   };
 };

@@ -18,6 +18,10 @@ const { PARX } = require("./beat");
  * direction: "lr" (default) or "rl".
  */
 module.exports = function trade(params, ctx) {
+  /* head: false -- drive the pars only and leave the moving head to whichever
+     cue owns it. Without this a row cue that starts later than a beam cue takes
+     the head with it (latest start wins a fixture), parks it, and kills its
+     strobe -- so the head could never be the soloist over a moving row. */
   const cols = H.parseColours(params.colours, [[0.2, 0.4, 1], [1, 0.55, 0.2]]);
   const c0 = cols[0], c1 = cols[1];
   const forBeats = params.for_beats || 4;
@@ -50,6 +54,7 @@ module.exports = function trade(params, ctx) {
         const col = [0, 1, 2].map(j => c1[j] + (c0[j] - c1[j]) * mix);
         H.setPar(f, pars[k], col, H.clamp(lvl, 0, 1));
       }
+      if (params.head !== false) 
       H.setHead(f, H.HEADS[0], {
         level: 0.55,
         colour: c0,
@@ -58,7 +63,7 @@ module.exports = function trade(params, ctx) {
       });
       frames.push(f);
     }
-    return { frames, loop_beats: 0, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
+    return { frames, loop_beats: 0, per_fixture: pars.map(p => p.id).concat(params.head === false ? [] : H.HEAD_IDS) };
   }
 
   const dim = 0.15, hot = 0.9;
@@ -69,6 +74,7 @@ module.exports = function trade(params, ctx) {
     const f = H.emptyFrame();
     for (const par of A)  H.setPar(f, par, c0, hot - (hot - dim) * over);
     for (const par of Bs) H.setPar(f, par, c1, dim + (hot - dim) * over);
+    if (params.head !== false) 
     H.setHead(f, H.HEADS[0], {
       level: 0.5,
       colour: over < 0.5 ? c0 : c1,
@@ -77,5 +83,5 @@ module.exports = function trade(params, ctx) {
     });
     frames.push(f);
   }
-  return { frames, loop_beats: 0, per_fixture: H.PAR_IDS.concat(H.HEAD_IDS) };
+  return { frames, loop_beats: 0, per_fixture: H.PAR_IDS.concat(params.head === false ? [] : H.HEAD_IDS) };
 };

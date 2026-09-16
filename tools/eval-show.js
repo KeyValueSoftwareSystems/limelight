@@ -407,7 +407,11 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
     for (let t = a; t < b; t += 1 / fps) {
       const i = Math.round(t * fps); if (i < 0 || i >= F.length) continue;
       const f = F[i], v = parLv(f);
-      lv += Math.max(...v); sp += Math.max(...v) - Math.min(...v);
+      /* spread is how DIFFERENT the lamps look, not only how different their
+         levels are. Two pairs at the same brightness in red and blue is a
+         strongly varied picture and used to score as flat. */
+      const hueSpread = (() => { const hs = PARS.map(p => { if (p.r < 0) return 0; const r = f[p.off + p.r], g = f[p.off + p.r + 1], b = f[p.off + p.r + 2]; const m = Math.max(r, g, b) || 1; return m < 25 ? null : (r - b) / m; }).filter(x => x != null); return hs.length ? Math.max(...hs) - Math.min(...hs) : 0; })();
+      lv += Math.max(...v); sp += Math.max(Math.max(...v) - Math.min(...v), 0.5 * hueSpread);
       const hp = HEADS.length && HEADS[0].roles.indexOf("pan") >= 0 ? f[HEADS[0].off + HEADS[0].roles.indexOf("pan")] : 0;
       if (prev != null) mv += Math.abs(hp - prev);
       prev = hp; n++;
