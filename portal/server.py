@@ -2146,6 +2146,26 @@ def make_handler(library, baker, rig):
                 return self._json({"saved": song, "cues": sum(
                     len(plan.get(k) or []) for k in ("states", "bindings", "gestures"))})
 
+            if path == "/api/recolour":
+                song = os.path.basename(str(body.get("song") or ""))
+                palette = body.get("palette")
+                show_data = body.get("show")
+                if not palette or not isinstance(palette, list):
+                    return self._json({"error": "need a palette (list of {name, rgb})"}, 400)
+                if show_data and isinstance(show_data, dict):
+                    show = show_data
+                elif song:
+                    full = os.path.join(SHOWFILES, song + ".show.json")
+                    if not os.path.isfile(full):
+                        return self._json({"error": f"no showfile for '{song}'"}, 404)
+                    with open(full) as fh:
+                        show = json.load(fh)
+                else:
+                    return self._json({"error": "need a song name or an inline show"}, 400)
+                from recolour import recolour
+                recoloured, mapping = recolour(show, palette)
+                return self._json({"showfile": recoloured, "mapping": mapping})
+
             if path == "/api/bake-plan":
                 song = body.get("song")
                 plan_data = body.get("plan")
