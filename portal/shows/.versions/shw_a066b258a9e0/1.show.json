@@ -1,0 +1,864 @@
+{
+ "id": "shw_a066b258a9e0",
+ "version": 1,
+ "author": "unknown",
+ "name": "ror v1",
+ "song": "raga-of-revenge",
+ "seed": 1,
+ "edits": [
+  {
+   "type": "drone",
+   "bar": 1,
+   "beat": 2,
+   "beats": 39,
+   "params": {
+    "amount": 0.04,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "extent": "inner"
+   }
+  },
+  {
+   "type": "drone",
+   "bar": 10,
+   "beat": 4,
+   "beats": 43,
+   "params": {
+    "amount": 0.06,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "extent": "all"
+   }
+  },
+  {
+   "type": "drive",
+   "bar": 22,
+   "beat": 4,
+   "beats": 64,
+   "params": {
+    "amount": 0.72,
+    "extent": "all"
+   }
+  },
+  {
+   "type": "drive",
+   "bar": 39,
+   "beat": 1,
+   "beats": 31,
+   "params": {
+    "amount": 0.86,
+    "extent": "all"
+   }
+  },
+  {
+   "type": "drive",
+   "bar": 46,
+   "beat": 4,
+   "beats": 25,
+   "params": {
+    "amount": 0.96,
+    "extent": "all"
+   }
+  },
+  {
+   "type": "pulse",
+   "bar": 53,
+   "beat": 1,
+   "beats": 37,
+   "params": {
+    "amount": 0.4,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "extent": "all"
+   }
+  },
+  {
+   "type": "drone",
+   "bar": 62,
+   "beat": 1,
+   "beats": 7,
+   "params": {
+    "amount": 0.04,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "extent": "inner"
+   }
+  },
+  {
+   "type": "beam",
+   "bar": 1,
+   "beat": 3,
+   "beats": 8,
+   "params": {
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ]
+   }
+  },
+  {
+   "type": "beam",
+   "bar": 4,
+   "beat": 1,
+   "beats": 8,
+   "params": {
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ]
+   }
+  },
+  {
+   "type": "beam",
+   "bar": 8,
+   "beat": 3,
+   "beats": 8,
+   "params": {
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ]
+   }
+  },
+  {
+   "type": "beam",
+   "bar": 10,
+   "beat": 4,
+   "beats": 8,
+   "params": {
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ]
+   }
+  },
+  {
+   "type": "blackout",
+   "bar": 1,
+   "beat": 1,
+   "beats": 4
+  },
+  {
+   "type": "blackout",
+   "bar": 3,
+   "beat": 1,
+   "beats": 5
+  },
+  {
+   "type": "blackout",
+   "bar": 5,
+   "beat": 4,
+   "beats": 8
+  },
+  {
+   "type": "blackout",
+   "bar": 9,
+   "beat": 1,
+   "beats": 7
+  },
+  {
+   "type": "blackout",
+   "bar": 12,
+   "beat": 1,
+   "beats": 8
+  },
+  {
+   "type": "blackout",
+   "bar": 52,
+   "beat": 4,
+   "beats": 5
+  },
+  {
+   "type": "blackout",
+   "bar": 43,
+   "beat": 4,
+   "beats": 2
+  },
+  {
+   "type": "impact",
+   "bar": 44,
+   "beat": 2,
+   "beats": 2,
+   "params": {
+    "colour": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "extent": "all"
+   }
+  },
+  {
+   "type": "beam",
+   "bar": 44,
+   "beat": 2,
+   "beats": 8,
+   "params": {
+    "colour": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "type": "impact",
+   "bar": 54,
+   "beat": 1,
+   "beats": 2,
+   "params": {
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "extent": "all"
+   }
+  },
+  {
+   "type": "gear",
+   "bar": 7,
+   "beat": 1,
+   "beats": 1,
+   "params": {
+    "from": 1.0,
+    "to": 2.0
+   }
+  },
+  {
+   "type": "ramp",
+   "bar": 37,
+   "beat": 4,
+   "beats": 8,
+   "params": {
+    "to": 0.92,
+    "curve": "ease"
+   }
+  },
+  {
+   "type": "ramp",
+   "bar": 46,
+   "beat": 4,
+   "beats": 8,
+   "params": {
+    "to": 0.92,
+    "curve": "ease"
+   }
+  },
+  {
+   "type": "strip",
+   "bar": 55,
+   "beat": 4,
+   "beats": 4,
+   "params": {
+    "to": 0.08,
+    "over_beats": 4
+   }
+  },
+  {
+   "type": "swell",
+   "bar": 58,
+   "beat": 2,
+   "beats": 8,
+   "params": {
+    "colour": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "rise": 0.7
+   }
+  },
+  {
+   "type": "gear",
+   "bar": 61,
+   "beat": 3,
+   "beats": 1,
+   "params": {
+    "from": 1.0,
+    "to": 2.0
+   }
+  },
+  {
+   "type": "strobe",
+   "bar": 42,
+   "beat": 4,
+   "beats": 2,
+   "params": {
+    "colour": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "extent": "all"
+   }
+  },
+  {
+   "type": "chase",
+   "bar": 20,
+   "beat": 2,
+   "beats": 1,
+   "params": {
+    "colour": [
+     1.0,
+     0.64,
+     0.24
+    ]
+   }
+  },
+  {
+   "type": "chase",
+   "bar": 21,
+   "beat": 2,
+   "beats": 2,
+   "params": {
+    "colour": [
+     0.2,
+     0.4,
+     1.0
+    ]
+   }
+  },
+  {
+   "type": "chase",
+   "bar": 24,
+   "beat": 1,
+   "beats": 2
+  },
+  {
+   "type": "chase",
+   "bar": 19,
+   "beat": 3,
+   "beats": 2,
+   "params": {
+    "colour": [
+     0.2,
+     0.4,
+     1.0
+    ]
+   }
+  },
+  {
+   "type": "blackout",
+   "bar": 22,
+   "beat": 1,
+   "beats": 4
+  },
+  {
+   "type": "impact",
+   "bar": 22,
+   "beat": 4,
+   "beats": 1,
+   "params": {
+    "colour": [
+     1.0,
+     0.2,
+     0.8
+    ]
+   }
+  },
+  {
+   "type": "bounce",
+   "bar": 22,
+   "beat": 4,
+   "beats": 4
+  },
+  {
+   "type": "glare",
+   "bar": 14,
+   "beat": 4,
+   "beats": 2
+  },
+  {
+   "type": "glare",
+   "bar": 16,
+   "beat": 1,
+   "beats": 2
+  },
+  {
+   "type": "glare",
+   "bar": 17,
+   "beat": 1,
+   "beats": 2
+  },
+  {
+   "type": "glare",
+   "bar": 18,
+   "beat": 1,
+   "beats": 2
+  },
+  {
+   "type": "glare",
+   "bar": 19,
+   "beat": 1,
+   "beats": 2
+  },
+  {
+   "type": "glare",
+   "bar": 20,
+   "beat": 1,
+   "beats": 2
+  },
+  {
+   "type": "chase",
+   "bar": 21,
+   "beat": 3,
+   "beats": 2,
+   "params": {
+    "colour": [
+     0.2,
+     0.4,
+     1.0
+    ]
+   }
+  },
+  {
+   "type": "glare",
+   "bar": 21,
+   "beat": 1,
+   "beats": 2
+  },
+  {
+   "type": "chase",
+   "bar": 18,
+   "beat": 3,
+   "beats": 2,
+   "params": {
+    "colour": [
+     0.2,
+     0.4,
+     1.0
+    ]
+   }
+  }
+ ],
+ "created": "2026-09-16T19:41:43Z",
+ "updated": "2026-09-16T19:41:43Z",
+ "plan": {
+  "plan": "Something is assembled in the dark, piece by piece, and once it is whole it does not stop. Steel until the turn at 48s, blood after it, white twice.",
+  "states": [
+   {
+    "effect": "drone",
+    "section": 0,
+    "amount": 0.04,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "extent": "inner"
+   },
+   {
+    "effect": "drone",
+    "section": 1,
+    "amount": 0.06,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "extent": "all"
+   },
+   {
+    "effect": "drive",
+    "section": 2,
+    "amount": 0.72,
+    "colours": [
+     [
+      0.11,
+      0.776,
+      0.063
+     ],
+     [
+      0.11,
+      0.776,
+      0.063
+     ]
+    ],
+    "extent": "all",
+    "floor": 0.34,
+    "peak": 0.95
+   },
+   {
+    "effect": "drive",
+    "section": 3,
+    "amount": 0.86,
+    "colours": [
+     [
+      0.11,
+      0.776,
+      0.063
+     ],
+     [
+      1,
+      1,
+      1
+     ]
+    ],
+    "extent": "all",
+    "floor": 0.46,
+    "peak": 1
+   },
+   {
+    "effect": "drive",
+    "section": 4,
+    "amount": 0.96,
+    "colours": [
+     [
+      0.11,
+      0.776,
+      0.063
+     ],
+     [
+      1,
+      1,
+      1
+     ]
+    ],
+    "extent": "all",
+    "floor": 0.6,
+    "peak": 1
+   },
+   {
+    "effect": "pulse",
+    "section": 5,
+    "amount": 0.4,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "extent": "all",
+    "floor": 0.1,
+    "peak": 0.7
+   },
+   {
+    "effect": "drone",
+    "section": 6,
+    "amount": 0.04,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "extent": "inner"
+   }
+  ],
+  "bindings": [],
+  "gestures": [
+   {
+    "effect": "beam",
+    "from_s": 3.83,
+    "to_s": 9.203,
+    "pattern": "snap",
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ]
+   },
+   {
+    "effect": "beam",
+    "from_s": 9.75,
+    "to_s": 15.123,
+    "pattern": "sweep",
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ]
+   },
+   {
+    "effect": "beam",
+    "from_s": 20.79,
+    "to_s": 24.791,
+    "pattern": "snap",
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ]
+   },
+   {
+    "effect": "beam",
+    "from_s": 25.29,
+    "to_s": 29.291,
+    "pattern": "sweep",
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ]
+   },
+   {
+    "effect": "blackout",
+    "at_s": 1.861,
+    "for_beats": 4
+   },
+   {
+    "effect": "blackout",
+    "at_s": 7.271,
+    "for_beats": 5
+   },
+   {
+    "effect": "blackout",
+    "at_s": 14.632,
+    "for_beats": 8
+   },
+   {
+    "effect": "blackout",
+    "at_s": 21.877,
+    "for_beats": 7
+   },
+   {
+    "effect": "blackout",
+    "at_s": 27.914,
+    "for_beats": 8
+   },
+   {
+    "effect": "blackout",
+    "at_s": 109.555,
+    "for_beats": 5
+   },
+   {
+    "effect": "blackout",
+    "at_s": 91.49,
+    "for_beats": 2
+   },
+   {
+    "effect": "impact",
+    "at_s": 92.5,
+    "colour": [
+     1,
+     1,
+     1
+    ],
+    "extent": "all",
+    "for_beats": 2
+   },
+   {
+    "effect": "beam",
+    "from_s": 92.5,
+    "to_s": 96.501,
+    "pattern": "snap",
+    "colour": [
+     1,
+     1,
+     1
+    ]
+   },
+   {
+    "effect": "impact",
+    "at_s": 111.99,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "extent": "all",
+    "for_beats": 2
+   },
+   {
+    "effect": "gear",
+    "at_s": 17.75,
+    "from": 1,
+    "to": 2,
+    "for_beats": 0.001
+   },
+   {
+    "effect": "ramp",
+    "from_s": 79.26,
+    "to_s": 83.261,
+    "to": 0.92,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "curve": "ease"
+   },
+   {
+    "effect": "ramp",
+    "from_s": 97.25,
+    "to_s": 101.251,
+    "to": 0.92,
+    "colour": [
+     0.11,
+     0.776,
+     0.063
+    ],
+    "curve": "ease"
+   },
+   {
+    "effect": "strip",
+    "at_s": 115.29,
+    "to": 0.08,
+    "over_beats": 4,
+    "for_beats": 4.012
+   },
+   {
+    "effect": "swell",
+    "at_s": 120.29,
+    "colour": [
+     1,
+     1,
+     1
+    ],
+    "rise": 0.7,
+    "for_beats": 8.026
+   },
+   {
+    "effect": "gear",
+    "at_s": 126.71,
+    "from": 1,
+    "to": 2,
+    "for_beats": 0.001
+   },
+   {
+    "effect": "strobe",
+    "at_s": 89.469,
+    "hz": 18,
+    "colour": [
+     1,
+     1,
+     1
+    ],
+    "intensity": 0.8,
+    "extent": "all",
+    "for_beats": 2
+   },
+   {
+    "effect": "chase",
+    "at_s": 44.598,
+    "colour": [
+     1,
+     0.64,
+     0.24
+    ],
+    "for_beats": 1.3
+   },
+   {
+    "effect": "chase",
+    "at_s": 46.696,
+    "colour": [
+     0.2,
+     0.4,
+     1
+    ],
+    "for_beats": 1.732
+   },
+   {
+    "effect": "chase",
+    "at_s": 51.75,
+    "for_beats": 1.732
+   },
+   {
+    "effect": "chase",
+    "at_s": 42.747,
+    "colour": [
+     0.2,
+     0.4,
+     1
+    ],
+    "for_beats": 2.001
+   },
+   {
+    "effect": "blackout",
+    "at_s": 47.795,
+    "for_beats": 3.52
+   },
+   {
+    "effect": "impact",
+    "at_s": 49.65,
+    "colour": [
+     1,
+     0.2,
+     0.8
+    ],
+    "for_beats": 1.206
+   },
+   {
+    "effect": "bounce",
+    "at_s": 49.65,
+    "for_beats": 4.206
+   },
+   {
+    "effect": "glare",
+    "at_s": 33.678,
+    "for_beats": 2
+   },
+   {
+    "effect": "glare",
+    "at_s": 35.741,
+    "for_beats": 2
+   },
+   {
+    "effect": "glare",
+    "at_s": 37.743,
+    "for_beats": 2
+   },
+   {
+    "effect": "glare",
+    "at_s": 39.744,
+    "for_beats": 2
+   },
+   {
+    "effect": "glare",
+    "at_s": 41.746,
+    "for_beats": 2
+   },
+   {
+    "effect": "glare",
+    "at_s": 43.747,
+    "for_beats": 2
+   },
+   {
+    "effect": "chase",
+    "at_s": 46.75,
+    "colour": [
+     0.2,
+     0.4,
+     1
+    ],
+    "for_beats": 1.808
+   },
+   {
+    "effect": "glare",
+    "at_s": 45.749,
+    "for_beats": 2
+   },
+   {
+    "effect": "chase",
+    "at_s": 40.745,
+    "colour": [
+     0.2,
+     0.4,
+     1
+    ],
+    "for_beats": 2.001
+   }
+  ]
+ },
+ "plan_text": "Something is assembled in the dark, piece by piece, and once it is whole it does not stop. Steel until the turn at 48s, blood after it, white twice.",
+ "designed_for": {
+  "venue_id": "ven_desk",
+  "venue_name": "Desk Rig",
+  "layout": "arc4-head.layout.json"
+ }
+}
