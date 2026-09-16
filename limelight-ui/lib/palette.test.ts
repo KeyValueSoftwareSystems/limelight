@@ -84,3 +84,57 @@ test("colourName still names a washed-out but real hue", () => {
   assert.equal(colourName("#d4a373"), "amber");
   assert.equal(colourName("#6a4c93"), "violet");
 });
+
+/* ── the client's mirror of portal/recolour.py:extract_palette ──────────────
+   A show declares no palette until it has been recoloured once, so the editor
+   has to derive the colours it already uses in order to show them. The server
+   derives the same set to map FROM, and the two disagreeing would mean the
+   swatches described one palette while the remap read another — so this reads
+   the real showfile off disk and pins the answer to what the Python produces.
+   The expectation below is `extract_palette` run against this same file. */
+import fs from "node:fs";
+import path from "node:path";
+import { extractPalette } from "./palette.ts";
+
+const SHOWFILE = path.join(
+  import.meta.dirname, "..", "..", "portal", "showfiles", "raga-of-revenge.show.json",
+);
+
+test("extractPalette derives what portal/recolour.py derives", () => {
+  const show = JSON.parse(fs.readFileSync(SHOWFILE, "utf8"));
+  const got = extractPalette(show).map((c) => c.hex);
+  assert.deepEqual(got, [
+    rgb01ToHex([1.0, 0.52, 0.12]),
+    rgb01ToHex([0.85, 0.16, 0.04]),
+    rgb01ToHex([1.0, 0.78, 0.34]),
+    rgb01ToHex([1.0, 1.0, 1.0]),
+  ]);
+});
+
+test("extractPalette prefers a palette the show declares over one it infers", () => {
+  const show = {
+    palette: [{ name: "red", rgb: [1, 0, 0] }, { name: "blue", rgb: [0, 0, 1] }],
+    states: [{ effect: "wash", colour: [0, 1, 0] }],
+  };
+  assert.deepEqual(extractPalette(show).map((c) => c.hex), ["#ff0000", "#0000ff"]);
+});
+
+test("extractPalette reads a hex colour as readily as a triple", () => {
+  const show = { gestures: [{ effect: "stab", colour: "#ff0000" }, { effect: "stab", colour: [0, 0, 1] }] };
+  assert.deepEqual(new Set(extractPalette(show).map((c) => c.hex)), new Set(["#ff0000", "#0000ff"]));
+});
+
+test("extractPalette keeps whites last so they do not take a colour's slot", () => {
+  const show = {
+    states: [
+      { effect: "wash", colour: [1, 1, 1] }, { effect: "wash", colour: [1, 1, 1] },
+      { effect: "wash", colour: [1, 1, 1] }, { effect: "drone", colour: [0, 0, 1] },
+    ],
+  };
+  assert.deepEqual(extractPalette(show).map((c) => c.hex), ["#0000ff", "#ffffff"]);
+});
+
+test("extractPalette on a show with no colours is empty, not a crash", () => {
+  assert.deepEqual(extractPalette({}), []);
+  assert.deepEqual(extractPalette({ states: [{ effect: "wash" }] }), []);
+});

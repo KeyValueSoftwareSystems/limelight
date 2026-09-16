@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PaletteTabs } from "./PaletteTabs";
 import { PalettePanel } from "./PalettePanel";
-import type { Effect } from "@/lib/types";
+import type { Effect, PaletteColour } from "@/lib/types";
 
 /* The rail. Three equal thirds — where you are, what colours the room works in,
    and what you can put on the timeline — and it never scrolls with the editor.
@@ -31,11 +31,11 @@ const THIRD = "flex-1 basis-0 min-h-0 flex flex-col";
 
 interface SidebarProps {
   effects: Effect[];
-  /** rebake the show — an edit to the room's colours changes every cue */
-  onPaletteChange: () => void;
+  /** send the show through /api/recolour — a colour change rewrites every cue */
+  onRecolour: (colours: PaletteColour[]) => void;
 }
 
-export function Sidebar({ effects, onPaletteChange }: SidebarProps) {
+export function Sidebar({ effects, onRecolour }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -69,7 +69,7 @@ export function Sidebar({ effects, onPaletteChange }: SidebarProps) {
 
       {/* ── what colours the room works in ──────────────────────────────── */}
       <div className={`${THIRD} bg-bg border-t border-solid border-line`}>
-        <PalettePanel onChange={onPaletteChange} />
+        <PalettePanel onRecolour={onRecolour} />
       </div>
 
       {/* ── what you can put on the timeline ────────────────────────────── */}

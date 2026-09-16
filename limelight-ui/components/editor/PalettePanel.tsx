@@ -3,84 +3,62 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePortalStore } from "@/store/portal";
 import { colourName, nextColour } from "@/lib/palette";
-import * as api from "@/lib/api";
 import type { PaletteColour } from "@/lib/types";
 
 /**
- * The room's colours.
+ * The colours this show is spending.
  *
- * A venue ships a palette and a creator spends it; the baker snaps every cue to
- * the nearest entry, so this set is what stops a show being a bag of hues. The
- * venue's is the starting point, not a cage — an edit here is the creator's and
- * regenerates the show.
+ * A venue arrives with a palette and a creator spends it; portal/recolour.py
+ * maps the show's existing colours onto whatever is set here, positionally, and
+ * rewrites every cue. Nothing else about the show moves — an edit here changes
+ * what the room looks like, never what it does.
  *
- * Every change is local the instant it happens and the show is rebuilt once the
+ * Every change is local the instant it happens and the show is remade once the
  * hand comes off, the same rule the timeline uses for a clip drag: a picker
- * fires continuously while it is dragged, and a bake behind each tick would
- * mean a queue of dead shows and a UI that stutters under the pointer.
+ * fires continuously while it is dragged, and a round trip behind each tick
+ * would mean a queue of dead shows and a UI that stutters under the pointer.
  */
 
-/** how long the palette has to be still before it is worth regenerating */
+/** how long the palette has to be still before it is worth remaking the show */
 const SETTLE_MS = 450;
 
-const MAX = 8;
+/* Five. The mapping is positional and a show carries a handful of roles —
+   primary, secondary, accent, highlight — so a sixth entry has nothing to map
+   onto and the ones past the end wrap back around to the start. */
+const MAX = 5;
+const MIN = 2;
 
 interface PalettePanelProps {
-  /** rebake the show — the same call the timeline makes when a clip lands */
-  onChange: () => void;
+  /** hand the new set to /api/recolour and rebake what comes back */
+  onRecolour: (colours: PaletteColour[]) => void;
 }
 
-export function PalettePanel({ onChange }: PalettePanelProps) {
+export function PalettePanel({ onRecolour }: PalettePanelProps) {
   const room = usePortalStore((s) => s.room);
   const palette = usePortalStore((s) => s.palette);
+  const base = usePortalStore((s) => s.paletteBase);
   const setPalette = usePortalStore((s) => s.setPalette);
 
   const [selected, setSelected] = useState<string | null>(null);
-  const [dirty, setDirty] = useState(false);
-  const [venueDefault, setVenueDefault] = useState<PaletteColour[]>([]);
 
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  /* the callbacks are read at fire time, not closed over: the settle timer
-     outlives the render that started it */
+  /* read at fire time, not closed over: the settle timer outlives the render
+     that started it */
   const commitRef = useRef<() => void>(null);
 
-  /* ── the venue's own palette, whenever the room changes ─────────────── */
   useEffect(() => {
-    if (!room) return;
-    let live = true;
-    api.palette.get(room.id, room.name).then((d) => {
-      if (!live) return;
-      setPalette(d.palette.colours);
-      setVenueDefault(d.palette.colours);
-      setDirty(false);
-    }).catch(() => {});
-    return () => { live = false; };
-  }, [room, setPalette]);
-
-  /* ── save, then regenerate ──────────────────────────────────────────── */
-  useEffect(() => {
-    commitRef.current = () => {
-      const st = usePortalStore.getState();
-      if (!st.room) return;
-      api.palette.save(st.room.id, st.palette, st.room.name).catch(() => {});
-      onChange();
-    };
+    commitRef.current = () => onRecolour(usePortalStore.getState().palette);
   });
-
-  const settle = useCallback(() => {
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => commitRef.current?.(), SETTLE_MS);
-  }, []);
 
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
   const edit = useCallback(
     (next: PaletteColour[]) => {
       setPalette(next);
-      setDirty(true);
-      settle();
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => commitRef.current?.(), SETTLE_MS);
     },
-    [setPalette, settle],
+    [setPalette],
   );
 
   const recolour = useCallback(
@@ -101,9 +79,9 @@ export function PalettePanel({ onChange }: PalettePanelProps) {
   const remove = useCallback(
     (id: string) => {
       const cur = usePortalStore.getState().palette;
-      /* a palette of nothing is not a palette; the baker would have nothing to
-         snap to and every cue would keep whatever colour it was given */
-      if (cur.length <= 2) return;
+      /* A palette of one is not a palette: every cue in the show would map onto
+         the same colour and the whole thing would come back monochrome. */
+      if (cur.length <= MIN) return;
       edit(cur.filter((c) => c.id !== id));
       setSelected(null);
     },
@@ -111,17 +89,20 @@ export function PalettePanel({ onChange }: PalettePanelProps) {
   );
 
   const reset = useCallback(() => {
-    edit(venueDefault);
+    edit(base);
     setSelected(null);
-    setDirty(false);
-  }, [edit, venueDefault]);
+  }, [edit, base]);
+
+  const dirty =
+    base.length > 0 &&
+    (palette.length !== base.length || palette.some((c, i) => c.hex !== base[i]?.hex));
 
   return (
     <div className="h-full min-h-0 flex flex-col">
       <div className="flex-none flex items-baseline gap-[var(--spacing-s2)] px-[var(--spacing-s4)] pt-[var(--spacing-s3)] pb-[var(--spacing-s2)]">
         <span className="label">Room colours</span>
         <span className="flex-1" />
-        {dirty && venueDefault.length > 0 && (
+        {dirty && (
           <button
             type="button"
             onClick={reset}
@@ -133,24 +114,28 @@ export function PalettePanel({ onChange }: PalettePanelProps) {
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto px-[var(--spacing-s4)] pb-[var(--spacing-s3)]">
-        {!room ? (
+        {!palette.length ? (
           <p className="m-0 text-[10px] text-ink-dimmer leading-[1.5]">
-            Pick a room and its colours appear here.
+            {room ? "This show declares no colours yet." : "Pick a room and its colours appear here."}
           </p>
         ) : (
           <>
-            <p className="m-0 text-[10px] text-ink-dimmer leading-[1.5] truncate" title={room.name}>
-              {dirty ? `${room.name} · edited` : room.name}
+            <p className="m-0 text-[10px] text-ink-dimmer leading-[1.5] truncate" title={room?.name}>
+              {room?.name ?? "—"}{dirty ? " · edited" : ""}
             </p>
 
-            <div className="flex flex-wrap gap-[6px] mt-[var(--spacing-s3)]">
+            {/* Chips, not squares in boxes. A colour is the only thing on this
+                panel worth looking at, so nothing is drawn around it that is not
+                doing work: the ring is the selection and the rim is the edge
+                against a near-black ground. */}
+            <div className="flex flex-wrap items-center gap-[8px] mt-[var(--spacing-s3)]">
               {palette.map((c) => {
                 const on = selected === c.id;
                 return (
-                  <div key={c.id} className="relative">
-                    {/* The swatch IS the picker: a colour input painted over by
-                        its own value, so the thing you click is the thing you
-                        are changing rather than a proxy for it. */}
+                  <div key={c.id} className="relative leading-none">
+                    {/* The chip IS the picker: a colour input painted by its own
+                        value, so the thing you click is the thing you are
+                        changing rather than a proxy for it. */}
                     <input
                       type="color"
                       value={c.hex}
@@ -158,18 +143,22 @@ export function PalettePanel({ onChange }: PalettePanelProps) {
                       title={`${colourName(c.hex)} · ${c.hex}`}
                       onFocus={() => setSelected(c.id)}
                       onChange={(e) => recolour(c.id, e.target.value)}
-                      className={`w-[30px] h-[30px] p-0 rounded-full cursor-pointer appearance-none bg-transparent border-2 border-solid transition-colors duration-[var(--dur-state)] ${
-                        on ? "border-ink" : "border-line-strong hover:border-ink-dimmer"
-                      }`}
-                      style={{ backgroundColor: c.hex }}
+                      className="block w-[34px] h-[34px] p-0 border-0 rounded-full bg-transparent cursor-pointer transition-transform duration-[var(--dur-state)] hover:scale-105"
+                      style={{
+                        /* rim, then the ring when it is the selected one — both
+                           as shadows so neither one resizes the chip */
+                        boxShadow: on
+                          ? "inset 0 0 0 1px rgba(0,0,0,0.45), 0 0 0 2px var(--bg), 0 0 0 4px var(--ink)"
+                          : "inset 0 0 0 1px rgba(0,0,0,0.45), 0 0 0 1px var(--line-strong)",
+                      }}
                     />
-                    {on && palette.length > 2 && (
+                    {on && palette.length > MIN && (
                       <button
                         type="button"
                         onClick={() => remove(c.id)}
                         aria-label={`remove ${colourName(c.hex)}`}
                         title="remove this colour"
-                        className="absolute -top-[4px] -right-[4px] w-[14px] h-[14px] flex items-center justify-center rounded-full border border-solid border-line-strong bg-bg-overlay text-ink-dim text-[9px] leading-none cursor-pointer hover:text-danger hover:border-danger"
+                        className="absolute -top-[5px] -right-[5px] w-[15px] h-[15px] flex items-center justify-center rounded-full border border-solid border-line-strong bg-bg-overlay text-ink-dim text-[10px] leading-none cursor-pointer hover:text-danger hover:border-danger transition-colors duration-[var(--dur-state)]"
                       >
                         ×
                       </button>
@@ -184,18 +173,31 @@ export function PalettePanel({ onChange }: PalettePanelProps) {
                   onClick={add}
                   aria-label="add a colour"
                   title="add a colour"
-                  className="w-[30px] h-[30px] rounded-full border border-dashed border-line-strong bg-transparent text-ink-dimmer text-[14px] leading-none cursor-pointer hover:text-ink hover:border-ink-dimmer transition-colors duration-[var(--dur-state)]"
+                  className="w-[34px] h-[34px] flex items-center justify-center rounded-full border border-dashed border-line-strong bg-transparent text-ink-dimmer text-[15px] leading-none cursor-pointer hover:text-ink hover:border-ink-dimmer transition-colors duration-[var(--dur-state)]"
                 >
                   +
                 </button>
               )}
             </div>
 
-            <p className="m-0 mt-[var(--spacing-s3)] text-[10px] text-ink-dimmer leading-[1.5]">
-              {selected
-                ? colourName(palette.find((c) => c.id === selected)?.hex ?? "")
-                : `${palette.length} colours · every cue snaps to one`}
-            </p>
+            {/* One line that says what is under the pointer, or what the set is.
+                It is a fixed height so naming a colour cannot shunt the chips. */}
+            <div className="mt-[var(--spacing-s3)] h-[14px] flex items-baseline gap-[var(--spacing-s2)] text-[10px] leading-[14px]">
+              {selected ? (
+                <>
+                  <span className="text-ink-dim">
+                    {colourName(palette.find((c) => c.id === selected)?.hex ?? "")}
+                  </span>
+                  <span className="mono text-ink-dimmer tabular-nums">
+                    {palette.find((c) => c.id === selected)?.hex}
+                  </span>
+                </>
+              ) : (
+                <span className="text-ink-dimmer">
+                  {palette.length} of {MAX} · every cue maps onto one
+                </span>
+              )}
+            </div>
           </>
         )}
       </div>

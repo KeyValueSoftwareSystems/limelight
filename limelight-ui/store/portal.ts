@@ -97,10 +97,12 @@ export interface PortalState {
   /* colours */
   colours: string[];
 
-  /* The room's palette. It belongs to the venue, not the show, but a creator
-     may spend it differently — so the edited set lives here and rides along
-     with every bake. */
+  /* The colours this show is spending, and the set it was opened with. The
+     baseline is what `reset` returns to: a show declares its palette once it
+     has been recoloured, and before that lib/palette.ts derives one from the
+     colours its cues already use. */
   palette: PaletteColour[];
+  paletteBase: PaletteColour[];
 }
 
 /* ── actions ─────────────────────────────────────────────────────────────── */
@@ -149,6 +151,7 @@ export interface PortalActions {
   setMarket: (market: MarketListing[]) => void;
   setColours: (colours: string[]) => void;
   setPalette: (palette: PaletteColour[]) => void;
+  setPaletteBase: (paletteBase: PaletteColour[]) => void;
 
   /* compound actions */
   resetForShow: () => void;
@@ -209,6 +212,7 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   market: [],
   colours: [],
   palette: [],
+  paletteBase: [],
 
   /* actions */
   setRole: (role) => set({ role }),
@@ -264,6 +268,7 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   setMarket: (market) => set({ market }),
   setColours: (colours) => set({ colours }),
   setPalette: (palette) => set({ palette }),
+  setPaletteBase: (paletteBase) => set({ paletteBase }),
 
   /* Called before opening anything — a song from the library, a show from the
      list. Both callers set what they know straight after, so everything cleared

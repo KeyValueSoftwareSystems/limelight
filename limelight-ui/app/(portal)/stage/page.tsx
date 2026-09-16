@@ -8,7 +8,7 @@ import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { placeFixtures } from "@/lib/fixtures";
 import { mmss, clamp } from "@/lib/grid";
-import { colourName, hexToRgb01 } from "@/lib/palette";
+import { colourName, hexToRgb01, extractPalette } from "@/lib/palette";
 import * as api from "@/lib/api";
 
 import { StagePreview } from "@/components/stage/StagePreview";
@@ -25,7 +25,7 @@ import { ChatPanel } from "@/components/editor/ChatPanel";
 import { buildClips } from "@/lib/clips";
 import { effectIdForPlanFx } from "@/lib/families";
 import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
-import type { Clip } from "@/lib/types";
+import type { Clip, PaletteColour } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import type { Venue } from "@/lib/types";
 
@@ -113,6 +113,8 @@ export default function StagePage() {
   const setEdits = usePortalStore((s) => s.setEdits);
   const setV2 = usePortalStore((s) => s.setV2);
   const setPlanText = usePortalStore((s) => s.setPlanText);
+  const setPalette = usePortalStore((s) => s.setPalette);
+  const setPaletteBase = usePortalStore((s) => s.setPaletteBase);
   const setRoom = usePortalStore((s) => s.setRoom);
   const setLayout = usePortalStore((s) => s.setLayout);
   const showId = usePortalStore((s) => s.showId);
@@ -247,6 +249,14 @@ export default function StagePage() {
         setStageMsg(`baking ${what}…`);
         setV2(true);
         setPlanText(typeof planData.plan === "string" ? planData.plan : "");
+        /* The palette arrives with the plan: declared, once the show has been
+           recoloured once, and otherwise derived from the colours its cues
+           already use — the same derivation portal/recolour.py maps FROM. The
+           baseline is set here too, because `reset` means "back to the show I
+           opened", not "back to some venue's idea of it". */
+        const opened = extractPalette(planData);
+        setPalette(opened);
+        setPaletteBase(opened);
         const post = await api.plan.bake(song.name, planData, rigForPlan());
         if (post.error) { setStageMsg(post.error); return; }
         setJob(post.job);
@@ -256,7 +266,7 @@ export default function StagePage() {
         setStageMsg(e instanceof Error ? `${what} failed: ` + e.message : `${what} failed`);
       }
     },
-    [song, rigForPlan, setV2, setPlanText, setJob, setEdits, pollBake],
+    [song, rigForPlan, setV2, setPlanText, setJob, setEdits, pollBake, setPalette, setPaletteBase],
   );
 
   /* A show file may be nested under `plan`, or be the plan itself. */
@@ -266,6 +276,31 @@ export default function StagePage() {
       : (raw.plan as Record<string, unknown>)?.states
         ? raw.plan
         : raw) as unknown as V2Plan;
+
+  /* ── recolouring ─────────────────────────────────────────────────────────
+     The show as it stands goes to portal/recolour.py with the colours wanted;
+     it maps the show's existing palette onto them positionally, rewrites every
+     cue, and hands back a plan. That plan is then applied like any other, which
+     is what regenerates the show — one round trip, not two. */
+  const handleRecolour = useCallback(
+    async (colours: PaletteColour[]) => {
+      const st = usePortalStore.getState();
+      if (!st.song || !st.show || colours.length < 2) return;
+      setStageMsg("recolouring…");
+      try {
+        const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
+        const out = await api.recolour.apply(
+          plan,
+          colours.map((c) => ({ name: colourName(c.hex), rgb: hexToRgb01(c.hex) })),
+        );
+        if (out.error) { setStageMsg(out.error); return; }
+        await applyPlan(asPlan(out.showfile), "recolour");
+      } catch (e) {
+        setStageMsg(e instanceof Error ? "recolour failed: " + e.message : "recolour failed");
+      }
+    },
+    [applyPlan],
+  );
 
   const importPlan = useCallback(
     async (file: File) => {
@@ -570,7 +605,7 @@ export default function StagePage() {
       <div className="flex flex-1 min-h-0 overflow-hidden bg-bg text-ink">
         {/* ── rail: navigation and the palettes, independent of the editor ── */}
         <div className="flex-none w-[248px] min-w-[212px]">
-          <Sidebar effects={effects} onPaletteChange={rebuild} />
+          <Sidebar effects={effects} onRecolour={handleRecolour} />
         </div>
 
         {/* ── the work area ─────────────────────────────────────────────── */}

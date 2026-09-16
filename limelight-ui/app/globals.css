@@ -185,6 +185,19 @@ body {
 button, input, select, textarea { font-family: inherit; color: inherit; font-size: inherit; }
 input::placeholder { color: var(--ink-dimmer); }
 
+/* A colour input is not a box with a colour in it, it IS the colour. The
+   browser disagrees: it draws an inset swatch inside a padded wrapper, so a
+   round chip came out as a square sitting in a circle. Those two parts are
+   shadow DOM and no utility class can reach them, which is why this is here and
+   not on the element. */
+input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border: 0; }
+input[type="color"]::-webkit-color-swatch { border: 0; border-radius: inherit; }
+input[type="color"]::-moz-color-swatch { border: 0; border-radius: inherit; }
+
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;

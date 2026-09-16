@@ -519,29 +519,30 @@ export interface ColoursResponse {
   personalities: Personality[];
 }
 
-/* ── the venue's colour palette ──────────────────────────────────────────────
-   Not the same thing as the artist colours above: those are a tag on a person,
-   this is the set of colours a ROOM works in. The venue ships one, a creator
-   spends it, and portal/validator.py snaps every cue's colour to the nearest
-   entry — which is the whole point of declaring it. `name` is never sent by the
-   client: lib/palette.ts derives it from the hex so it cannot go stale. */
+/* ── a show's colour palette ────────────────────────────────────────────────
+   The set of colours a show is allowed to spend. A show declares one once it
+   has been recoloured; before that portal/recolour.py (and lib/palette.ts,
+   which mirrors it) derives one from the colours its cues already use. `name`
+   is never carried beside the hex — lib/palette.ts derives it, so it cannot go
+   stale when someone drags a swatch to another hue. */
 export interface PaletteColour {
   id: string;
   hex: string;
 }
 
-export interface VenuePalette {
-  venue_id: string;
-  venue_name: string;
-  /** false where the venue has fixed its palette and will not take an edit */
-  editable: boolean;
-  colours: PaletteColour[];
+/** portal/recolour.py's account of one old-colour-to-new-colour substitution. */
+export interface RecolourMapping {
+  old: [number, number, number];
+  old_name: string;
+  new: [number, number, number];
+  new_name: string;
 }
 
-export interface PaletteResponse {
-  palette: VenuePalette;
-  /** true while the client is reading a stand-in rather than the venue's own */
-  mocked?: boolean;
+export interface RecolourResponse {
+  /** the show, rewritten — a limelight.show/1 plan with a declared `palette` */
+  showfile: Record<string, unknown>;
+  mapping: RecolourMapping[];
+  error?: string;
 }
 
 /* ── fixture placement (computed on the client) ──────────────────────────── */
