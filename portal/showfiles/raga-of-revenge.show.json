@@ -1,453 +1,843 @@
 {
  "schema": "limelight.show/1",
  "song": "raga-of-revenge",
- "plan": "A bhajan lit as one lamp becoming a congregation and going out again: the room rests near-dark on a single saffron flame, turns white the instant the harmony goes D-minor to D-major at bar 15, splits into leader and responders through the call-and-response at bars 31-38, burns brightest across bars 45-48 where the recording itself is loudest, and then empties - the void at bar 54 held on one lamp for one voice, the octave lift at bar 58 where the music finally goes major and the light rises and stays, and three bars of real darkness to finish.",
+ "duration_s": 131.286,
+ "grid": {
+  "bpm": 118.77,
+  "beats_per_bar": 4,
+  "first_beat_s": 1.76,
+  "bars": 65,
+  "steady": 0.88,
+  "first_bar": 1,
+  "last_bar": 65,
+  "tempo": [
+   {
+    "from_beat": -2,
+    "at_s": 0.37,
+    "bpm": 90.909
+   },
+   {
+    "from_beat": -1,
+    "at_s": 1.03,
+    "bpm": 82.192
+   },
+   {
+    "from_beat": 0,
+    "at_s": 1.76,
+    "bpm": 89.552
+   },
+   {
+    "from_beat": 1,
+    "at_s": 2.43,
+    "bpm": 81.081
+   },
+   {
+    "from_beat": 2,
+    "at_s": 3.17,
+    "bpm": 90.226
+   },
+   {
+    "from_beat": 8,
+    "at_s": 7.16,
+    "bpm": 90.226
+   },
+   {
+    "from_beat": 10,
+    "at_s": 8.49,
+    "bpm": 95.238
+   },
+   {
+    "from_beat": 12,
+    "at_s": 9.75,
+    "bpm": 86.331
+   },
+   {
+    "from_beat": 14,
+    "at_s": 11.14,
+    "bpm": 93.75
+   },
+   {
+    "from_beat": 15,
+    "at_s": 11.78,
+    "bpm": 86.331
+   },
+   {
+    "from_beat": 17,
+    "at_s": 13.17,
+    "bpm": 88.235
+   },
+   {
+    "from_beat": 22,
+    "at_s": 16.57,
+    "bpm": 92.308
+   },
+   {
+    "from_beat": 23,
+    "at_s": 17.22,
+    "bpm": 113.924
+   },
+   {
+    "from_beat": 26,
+    "at_s": 18.8,
+    "bpm": 121.457
+   },
+   {
+    "from_beat": 31,
+    "at_s": 21.27,
+    "bpm": 118.421
+   },
+   {
+    "from_beat": 34,
+    "at_s": 22.79,
+    "bpm": 120.267
+   },
+   {
+    "from_beat": 43,
+    "at_s": 27.28,
+    "bpm": 116.129
+   },
+   {
+    "from_beat": 46,
+    "at_s": 28.83,
+    "bpm": 121.996
+   },
+   {
+    "from_beat": 57,
+    "at_s": 34.24,
+    "bpm": 119.908
+   },
+   {
+    "from_beat": 83,
+    "at_s": 47.25,
+    "bpm": 120
+   },
+   {
+    "from_beat": 216,
+    "at_s": 113.75,
+    "bpm": 116.883
+   },
+   {
+    "from_beat": 219,
+    "at_s": 115.29,
+    "bpm": 120.361
+   },
+   {
+    "from_beat": 239,
+    "at_s": 125.26,
+    "bpm": 124.138
+   },
+   {
+    "from_beat": 242,
+    "at_s": 126.71,
+    "bpm": 133.333
+   }
+  ],
+  "refit": {
+   "tolerance_s": 0.03,
+   "segments": 24,
+   "mean_err_ms": 9.4,
+   "max_err_ms": 29.6,
+   "note": "beat 0 is the first FLAGGED downbeat; beats before it are the pickup in bar 0"
+  },
+  "pickup": {
+   "count": 2,
+   "before_bar_1": [
+    0.37,
+    1.03
+   ]
+  }
+ },
+ "built_from": "the whole protocol response: both segmentations, layers.subsection, layers.presence, chords, energy, moments, rhythm",
  "states": [
   {
-   "section": 0,
    "effect": "drone",
-   "amount": 0.16,
-   "colour": "#8659c4",
-   "extent": "left",
-   "why": "The rig is at true zero until bar 1 - the show starts from black, not from a bed. Bars 1-2 are 36-37% loud with lead-vocal and cello alone: one flame on the left pair, par_15 and par_22 genuinely off. Floor raised: the room was falling to true black seven times across the opening while lead-vocal and cello were playing. Held back is a level; absent is a decision, and it is made with a blackout.",
-   "from_s": 0,
-   "to_s": 25.56
-  },
-  {
-   "section": 0,
-   "effect": "drone",
-   "amount": 0.16,
-   "colour": "#8659c4",
-   "extent": "inner",
-   "why": "Bar 2 is where vocal and bass join the lead (5 onsets against 3). The flame steps inward and up a little - the resting look changes on the bar line rather than holding one dim state across the whole opening. Floor raised: the room was falling to true black seven times across the opening while lead-vocal and cello were playing. Held back is a level; absent is a decision, and it is made with a blackout.",
-   "from_s": 0,
-   "to_s": 25.56
-  },
-  {
-   "section": 0,
-   "effect": "drone",
-   "amount": 0.16,
-   "colour": "#8659c4",
-   "extent": "right",
-   "why": "Bar 3 is the song's quietest bar (25%, french-horn) and bar 4 is percussion and congas at 43% with 7 hits - moment 0, the drums thickening. The flame crosses to the right pair, so by bar 5 every lamp has been alone at least once. Extended to bar 5: the resting layer had a 1.4s hole here and the rig went to true black in the middle of a verse, with lead-vocal and cello still playing. A hole in the base is not a blackout; it is nothing being asked for. Floor raised: the room was falling to true black seven times across the opening while lead-vocal and cello were playing. Held back is a level; absent is a decision, and it is made with a blackout.",
-   "from_s": 0,
-   "to_s": 25.56
-  },
-  {
-   "section": 0,
-   "effect": "drone",
-   "amount": 0.16,
+   "amount": 0.21,
    "colour": "#8659c4",
    "extent": "all",
-   "why": "Moment 1 (intensity 1.00) is synth and back-vocal entering at bar 5 beat 3 - and the two beats before it have no state at all, so the room is fully dark when they arrive. The room then opens from two lamps to four and turns indigo; drone gives every lamp its own breathing phase, so four lamps widen without the rig reading as one body. Floor raised: the room was falling to true black seven times across the opening while lead-vocal and cello were playing. Held back is a level; absent is a decision, and it is made with a blackout.",
+   "why": "intro, establishing, drums none \u2014 D:min. Level 0.30.",
+   "id": "s0",
+   "section": 0,
    "from_s": 0,
-   "to_s": 25.56
+   "to_s": 7.16,
+   "at": {
+    "bar": 1,
+    "beat": 1,
+    "beats": 14
+   }
   },
   {
+   "effect": "drone",
+   "amount": 0.21,
+   "colour": "#8659c4",
+   "extent": "all",
+   "why": "intro, intensifying, drums none \u2014 F. Level 0.30.",
+   "id": "s1",
    "section": 0,
+   "from_s": 7.16,
+   "to_s": 12.5,
+   "at": {
+    "bar": 3,
+    "beat": 1,
+    "beats": 10
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.21,
+   "colour": "#8659c4",
+   "extent": "all",
+   "why": "intro, sustaining, drums none \u2014 A#. Level 0.30.",
+   "id": "s2",
+   "section": 0,
+   "from_s": 12.5,
+   "to_s": 17.75,
+   "at": {
+    "bar": 5,
+    "beat": 1,
+    "beats": 10
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.21,
+   "colour": "#8659c4",
+   "extent": "all",
+   "why": "intro, easing, drums none \u2014 A. Level 0.30.",
+   "id": "s3",
+   "section": 0,
+   "from_s": 17.75,
+   "to_s": 21.8,
+   "at": {
+    "bar": 7,
+    "beat": 1,
+    "beats": 8
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.21,
+   "colour": "#8659c4",
+   "extent": "all",
+   "why": "intro, resolving, drums none \u2014 C. Level 0.30.",
+   "id": "s4",
+   "section": 0,
+   "from_s": 21.8,
+   "to_s": 25.56,
+   "at": {
+    "bar": 9,
+    "beat": 1,
+    "beats": 7
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.21,
+   "colour": "#8659c4",
+   "extent": "all",
+   "why": "intro, resolving, drums none \u2014 C. Level 0.30.",
+   "id": "s5",
+   "section": 1,
+   "from_s": 25.56,
+   "to_s": 25.78,
+   "at": {
+    "bar": 10,
+    "beat": 4,
+    "beats": 1
+   }
+  },
+  {
    "effect": "pulse",
-   "amount": 0.62,
+   "amount": 0.3,
    "colour": "#8659c4",
    "extent": "all",
-   "floor": 0.22,
-   "why": "Moment 2: the tempo settles from 89 to 119 bpm at bar 7 and loudness jumps to 59%, the loudest bars of the intro (tuba, wind, brass). First bed of the show that actually travels, and the brightest thing so far - which is what gives moment 3's spotlight two bars later something to fall from. Floor raised: the room was falling to true black seven times across the opening while lead-vocal and cello were playing. Held back is a level; absent is a decision, and it is made with a blackout.",
-   "from_s": 0,
-   "to_s": 25.56
+   "floor": 0.16,
+   "peak": 0.95,
+   "why": "instrumental, developing, drums light \u2014 A:min7. Level 0.30.",
+   "id": "s6",
+   "section": 1,
+   "from_s": 25.78,
+   "to_s": 31.78,
+   "at": {
+    "bar": 11,
+    "beat": 1,
+    "beats": 12
+   }
   },
   {
-   "section": 0,
    "effect": "drone",
-   "amount": 0.16,
-   "colour": "#8659c4",
-   "extent": "inner",
-   "why": "Bars 9-10 sit under the isolate; this is the ember it returns to if anything slips at the seam. Floor raised: the room was falling to true black seven times across the opening while lead-vocal and cello were playing. Held back is a level; absent is a decision, and it is made with a blackout.",
-   "from_s": 0,
-   "to_s": 25.56
-  },
-  {
-   "section": 1,
-   "effect": "pulse",
-   "amount": 0.46,
+   "amount": 0.21,
    "colour": "#8659c4",
    "extent": "all",
-   "floor": 0.1,
-   "why": "Bars 11-13 are violin, timpani and viola over a D-minor/A-minor cycle - moving but not loud (43-55%). Indigo keeps the minor mode; par_1 and par_22 are held by the accent binding, so this bed shows on the inner pair only and the rig is genuinely split. Floor raised: the room was falling to true black seven times across the opening while lead-vocal and cello were playing. Held back is a level; absent is a decision, and it is made with a blackout.",
-   "from_s": 25.56,
-   "to_s": 48.24
+   "why": "instrumental, intensifying, drums none \u2014 A:7. Level 0.30.",
+   "id": "s7",
+   "section": 1,
+   "from_s": 31.78,
+   "to_s": 41.75,
+   "at": {
+    "bar": 14,
+    "beat": 1,
+    "beats": 19
+   }
   },
   {
-   "section": 1,
-   "effect": "breakdown",
-   "colours": [
-    "#8659c4",
-    "#b4e62e"
-   ],
-   "floor": 0.1,
-   "why": "The hinge of the first half: D:min becomes D at 33.80s, drum hits jump 0 to 12 in a bar, and guitar, strings and acoustic-guitar all enter. Marigold on the major chord, and a bed where every beat lands hard from a low floor - what a dholak entering actually sounds like. Pulled down to almost nothing for the build: a wave is one lamp lit against three dark ones, and it cannot be seen at all over a lit bed. The room is the wave here, not a bed with a wave on top. Floor raised: the room was falling to true black seven times across the opening while lead-vocal and cello were playing. Held back is a level; absent is a decision, and it is made with a blackout.",
-   "amount": 0.16,
-   "from_s": 25.56,
-   "to_s": 48.24
-  },
-  {
-   "section": 1,
    "effect": "pulse",
-   "amount": 0.16,
+   "amount": 0.1,
    "colour": "#8659c4",
    "extent": "all",
-   "floor": 0.1,
-   "why": "Bar 18 is double-bass, bass and guitar - the low end takes over from the drum entry. The bump starts travelling across the lamps again, same marigold, so the bed follows who is leading rather than holding four bars of one look. Pulled down to almost nothing for the build: a wave is one lamp lit against three dark ones, and it cannot be seen at all over a lit bed. The room is the wave here, not a bed with a wave on top. Floor raised: the room was falling to true black seven times across the opening while lead-vocal and cello were playing. Held back is a level; absent is a decision, and it is made with a blackout.",
-   "from_s": 25.56,
-   "to_s": 48.24
-  },
-  {
+   "floor": 0.04,
+   "peak": 0.95,
+   "why": "instrumental, resolving, drums light \u2014 D:min. Level 0.55. Pulled down for the build: a wave is one lamp lit against three dark ones and cannot be seen over a lit bed.",
+   "id": "s8",
    "section": 1,
-   "effect": "drive",
-   "colours": [
-    "#8659c4",
-    "#b4e62e"
-   ],
-   "floor": 0.1,
-   "peak": 1,
-   "why": "Bars 19-21 are 63/61/68% - the instrumental's own peak, and the loudest thing so far. First time every beat hits and the downbeat flashes white. Ends at bar 22 and nothing replaces it. Pulled down to almost nothing for the build: a wave is one lamp lit against three dark ones, and it cannot be seen at all over a lit bed. The room is the wave here, not a bed with a wave on top. Floor raised: the room was falling to true black seven times across the opening while lead-vocal and cello were playing. Held back is a level; absent is a decision, and it is made with a blackout.",
-   "amount": 0.16,
-   "from_s": 25.56,
-   "to_s": 48.24
+   "from_s": 41.75,
+   "to_s": 47.74,
+   "at": {
+    "bar": 19,
+    "beat": 1,
+    "beats": 12
+   }
   },
   {
+   "effect": "pulse",
+   "amount": 0.1,
+   "colour": "#8659c4",
+   "extent": "all",
+   "floor": 0.04,
+   "peak": 0.95,
+   "why": "instrumental, developing, drums light \u2014 C. Level 0.55. Pulled down for the build: a wave is one lamp lit against three dark ones and cannot be seen over a lit bed.",
+   "id": "s9",
+   "section": 1,
+   "from_s": 47.74,
+   "to_s": 48.24,
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 1
+   }
+  },
+  {
+   "effect": "pulse",
+   "amount": 0.1,
+   "colour": "#8659c4",
+   "extent": "all",
+   "floor": 0.04,
+   "peak": 0.95,
+   "why": "instrumental, developing, drums light \u2014 C. Level 0.55. Pulled down for the build: a wave is one lamp lit against three dark ones and cannot be seen over a lit bed.",
+   "id": "s10",
    "section": 2,
+   "from_s": 48.24,
+   "to_s": 51.76,
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 7
+   }
+  },
+  {
    "effect": "drive",
+   "amount": 0.826,
    "colours": [
     "#b4e62e",
     "#8659c4"
    ],
+   "extent": "all",
    "floor": 0.62,
    "peak": 1.0,
-   "why": "Bar 22 is the producer's own dropout (39%, ukulele and sitar) and gets no state - the rig empties to a single lamp, par_15, still breathing with the voice on the binding. Bar 23 is where the chorus really lands (73%, kick and electric-guitar in). Marigold against rose: the congregation. Floor lifted from 0.34 to 0.62: the eight bars of build before this ran at 0.75 with the row wide open, and the payoff was landing at 0.45 with the lamps nearly level. A drop that is dimmer than its own build reads as the lights giving up exactly where the song does not.",
-   "from_s": 48.24,
-   "to_s": 81.77
+   "why": "chorus, sustaining, drums full \u2014 D:min. Level 0.83. Floor lifted so the drop beats its own build: eight bars of the row blazing and collapsing is a big picture, and the payoff cannot be smaller than the run-up.",
+   "id": "s11",
+   "section": 2,
+   "from_s": 51.76,
+   "to_s": 63.76,
+   "at": {
+    "bar": 24,
+    "beat": 1,
+    "beats": 23
+   }
   },
   {
-   "section": 2,
    "effect": "pulse",
-   "amount": 0.48,
-   "colour": "#b4e62e",
-   "extent": "outer",
-   "floor": 0.06,
-   "why": "Bar 30 dips to 48% between bars at 74% and 82% - one of only two places this 33-second section can breathe. The room halves rather than dimming: the inner pair goes out and the two edge lamps carry the vocal line alone.",
-   "from_s": 48.24,
-   "to_s": 81.77
-  },
-  {
-   "section": 2,
-   "effect": "pulse",
-   "amount": 0.64,
+   "amount": 0.699,
    "colour": "#b4e62e",
    "extent": "all",
-   "floor": 0.44,
-   "why": "Bars 31-34 are where lead-vocal and back-vocal actually trade (correlation -0.75 measured over exactly this span; back-vocal does not exist before bar 31). A travelling bump per beat is the sway of a kirtan, and the trades ride on top of it. Floor 0.50: enough that the drop at bar 31 beats its build, not so much that the show peaks here -- the band's heaviest stretch is forty seconds later and the room should be biggest there.",
+   "floor": 0.62,
    "peak": 1.0,
-   "from_s": 48.24,
-   "to_s": 81.77
-  },
-  {
+   "why": "chorus, intensifying, drums full \u2014 A:min. Level 0.70. Floor lifted so the drop beats its own build: eight bars of the row blazing and collapsing is a big picture, and the payoff cannot be smaller than the run-up.",
+   "id": "s12",
    "section": 2,
-   "effect": "drive",
-   "colours": [
-    "#b4e62e",
-    "#8659c4"
-   ],
-   "floor": 0.66,
-   "peak": 1.0,
-   "why": "Bars 35-37 are the loudest of the whole chorus (87/84/85%). The phrase escalates into drive for its last three bars rather than repeating - a second chorus that sounds bigger should look bigger, and every beat now hits. Floor lifted from 0.42 to 0.72: the eight bars of build before this ran at 0.75 with the row wide open, and the payoff was landing at 0.45 with the lamps nearly level. A drop that is dimmer than its own build reads as the lights giving up exactly where the song does not.",
-   "from_s": 48.24,
-   "to_s": 81.77
+   "from_s": 63.76,
+   "to_s": 71.76,
+   "at": {
+    "bar": 30,
+    "beat": 1,
+    "beats": 16
+   }
   },
   {
+   "effect": "pulse",
+   "amount": 0.62,
+   "colour": "#b4e62e",
+   "extent": "all",
+   "floor": 0.224,
+   "peak": 0.95,
+   "why": "chorus, resolving, drums light \u2014 A#. Level 0.62.",
+   "id": "s13",
+   "section": 2,
+   "from_s": 71.76,
+   "to_s": 81.76,
+   "at": {
+    "bar": 34,
+    "beat": 1,
+    "beats": 19
+   }
+  },
+  {
+   "effect": "pulse",
+   "amount": 0.62,
+   "colour": "#b4e62e",
+   "extent": "all",
+   "floor": 0.224,
+   "peak": 0.95,
+   "why": "chorus, developing, drums light \u2014 A#. Level 0.62.",
+   "id": "s14",
+   "section": 2,
+   "from_s": 81.76,
+   "to_s": 81.77,
+   "at": {
+    "bar": 39,
+    "beat": 1,
+    "beats": 1
+   }
+  },
+  {
+   "effect": "pulse",
+   "amount": 0.62,
+   "colour": "#b4e62e",
+   "extent": "all",
+   "floor": 0.224,
+   "peak": 0.95,
+   "why": "chorus, developing, drums light \u2014 A#. Level 0.62.",
+   "id": "s15",
    "section": 3,
-   "effect": "drive",
-   "colours": [
-    "#8659c4",
-    "#b4e62e"
-   ],
-   "floor": 0.7,
-   "peak": 1.0,
-   "why": "Section 3 is the same chorus a third time, so it gets the same bed in a different pair of colours - rose against indigo, the two coldest things in the palette, because back-vocal has taken over from the lead here (back-vocal mean 0.63, lead-vocal 0.08). Floor 0.38 -> 0.70: this span carries the third and hardest drop at 83.8s, and it was landing at 0.49 against a build of 0.65. The last drop in the song was the smallest thing in the show.",
    "from_s": 81.77,
-   "to_s": 97.29
+   "to_s": 89.75,
+   "at": {
+    "bar": 39,
+    "beat": 1,
+    "beats": 15
+   }
   },
   {
+   "effect": "breakdown",
+   "amount": 0.805,
+   "colours": [
+    "#b4e62e",
+    "#8659c4"
+   ],
+   "floor": 0.157,
+   "peak": 1,
+   "why": "chorus, resolving, drums full \u2014 C. Level 0.81.",
+   "id": "s16",
    "section": 3,
-   "effect": "drive",
-   "colours": [
-    "#b4e62e",
-    "#8659c4"
-   ],
-   "floor": 0.6,
-   "peak": 1,
-   "why": "Bars 43-46 are 89/88/85/90% with toms and drums leading, and the recording's loudest five seconds centre at 97.0s. The floor comes up to 0.60 - the highest resting level anywhere in the show. This is where the rig stops breathing and starts burning.",
-   "from_s": 81.77,
-   "to_s": 97.29
+   "from_s": 89.75,
+   "to_s": 95.76,
+   "at": {
+    "bar": 43,
+    "beat": 1,
+    "beats": 12
+   }
   },
   {
+   "effect": "drive",
+   "amount": 0.62,
+   "colour": "#b4e62e",
+   "extent": "all",
+   "why": "chorus, sustaining, drums light \u2014 A:min. Level 0.62. Given movement: the room held ONE unchanging picture here for four and a half seconds, in the loudest part of the song.",
+   "id": "s17",
+   "section": 3,
+   "from_s": 95.76,
+   "to_s": 97.29,
+   "at": {
+    "bar": 46,
+    "beat": 1,
+    "beats": 3
+   },
+   "floor": 0.45,
+   "peak": 1.0
+  },
+  {
+   "effect": "drive",
+   "amount": 0.62,
+   "extent": "all",
+   "why": "chorus, sustaining, drums light \u2014 A:min. Level 0.62. Moving, not held: the room sat on one unchanging picture for three seconds inside the loudest stretch of the record.",
+   "id": "s18",
    "section": 4,
-   "effect": "drive",
+   "from_s": 97.29,
+   "to_s": 103.76,
+   "at": {
+    "bar": 46,
+    "beat": 4,
+    "beats": 13
+   },
+   "floor": 0.55,
+   "peak": 1.0,
    "colours": [
-    "#8659c4",
-    "#b4e62e"
+    "#b4e62e",
+    "#8659c4"
+   ]
+  },
+  {
+   "effect": "breakdown",
+   "amount": 0.887,
+   "colours": [
+    "#b4e62e",
+    "#8659c4"
    ],
-   "floor": 0.6,
+   "floor": 0.166,
    "peak": 1,
-   "why": "No from_bar, so this starts at the section boundary (97.29s) rather than at bar 47 - the half second between them is dead centre of the song's loudest five-second window and must not be dark. Bar 47 is the single loudest bar of the song at 92%, so it keeps the same 0.60 floor.",
-   "from_s": 97.29,
-   "to_s": 109.64
-  },
-  {
+   "why": "chorus, resolving, drums full \u2014 C. Level 0.89.",
+   "id": "s19",
    "section": 4,
-   "effect": "drive",
+   "from_s": 103.76,
+   "to_s": 109.64,
+   "at": {
+    "bar": 50,
+    "beat": 1,
+    "beats": 11
+   }
+  },
+  {
+   "effect": "breakdown",
+   "amount": 0.887,
    "colours": [
     "#b4e62e",
     "#8659c4"
    ],
-   "floor": 0.8,
-   "why": "The harmony turns to G:min at 101.4s and bar 51 is woodwind, harmonica and flute - the reed break. Still 83-84% loud, so not a retreat: a hard hit on every beat from a low floor, which is the same energy with completely different texture, and it gives bar 53's collapse something to fall from. Floor lifted to 0.74: this is where the band is heaviest in the whole song -- six families at once -- and it was sitting on 0.20, so the show was peaking thirty-five seconds away from the music. Changed from breakdown to drive: breakdown hits from a very low floor by design, and this is the loudest stretch of the record -- the four hardest kicks in the song are inside it. It was making the biggest part of the music the dimmest part of the show.",
-   "peak": 1.0,
-   "from_s": 97.29,
-   "to_s": 109.64
-  },
-  {
+   "floor": 0.166,
+   "peak": 1,
+   "why": "chorus, resolving, drums full \u2014 C. Level 0.89.",
+   "id": "s20",
    "section": 5,
-   "effect": "drone",
-   "amount": 0.09,
-   "colour": "#8659c4",
-   "extent": "outer",
-   "why": "Bar 53 is 37% loud with zero drum hits. Back to the saffron flame the show opened on, now on the two edge lamps - par_15 belongs to the strings binding for the whole outro.",
    "from_s": 109.64,
-   "to_s": 128.28
+   "to_s": 109.76,
+   "at": {
+    "bar": 52,
+    "beat": 4,
+    "beats": 1
+   }
   },
   {
-   "section": 5,
-   "effect": "wash",
-   "amount": 0.58,
-   "colour": "#b4e62e",
-   "extent": "all",
-   "why": "Bar 54 deliberately has NO state - the void (12% loud, the quietest instant in the song at 113.0s). Bar 55 is where bass and acoustic-guitar come back; a plain held indigo fill at the level the hush four beats later falls FROM, so that exit reads as a pure fall and not a bump followed by one.",
-   "floor": 0.86,
-   "peak": 1.0,
-   "from_s": 109.64,
-   "to_s": 128.28
-  },
-  {
-   "section": 5,
-   "effect": "drone",
-   "amount": 0.1,
-   "colour": "#b4e62e",
-   "extent": "outer",
-   "why": "Moment 13 took the lead-vocal, tambourine and vocal out; bar 56 is harp, banjo and tambourine at 32%. Two lamps at the edges, the middle of the room empty.",
-   "floor": 0.86,
-   "peak": 1.0,
-   "from_s": 109.64,
-   "to_s": 128.28
-  },
-  {
-   "section": 5,
    "effect": "pulse",
-   "amount": 0.44,
+   "amount": 0.45,
    "colour": "#b4e62e",
    "extent": "all",
-   "floor": 0.86,
-   "why": "Strings and double-bass return at bar 57 (54%) and the outro starts moving again. Still indigo - the harmony is D:min into D:7, not resolved yet.",
-   "peak": 1.0,
-   "from_s": 109.64,
-   "to_s": 128.28
+   "why": "outro, sustaining, drums none \u2014 G. Level 0.34. Moving, not held: the room sat on one unchanging picture here for nearly three seconds.",
+   "id": "s21",
+   "section": 5,
+   "from_s": 109.76,
+   "to_s": 117.77,
+   "at": {
+    "bar": 53,
+    "beat": 1,
+    "beats": 16
+   },
+   "floor": 0.16,
+   "peak": 0.9
   },
   {
-   "section": 5,
    "effect": "pulse",
-   "amount": 0.56,
+   "amount": 0.4,
    "colour": "#b4e62e",
    "extent": "all",
-   "floor": 0.86,
-   "why": "The chord goes to D major at 120.00s, at the same instant as the octave shift. The bed turns marigold underneath the lift so that when the lift's span ends the room stays warm rather than snapping back to night.",
-   "peak": 1.0,
-   "from_s": 109.64,
-   "to_s": 128.28
-  },
-  {
+   "why": "outro, sustaining, drums none \u2014 D:min. Level 0.34. A wash holds one picture by definition, and eight seconds of one picture is eight seconds of nothing happening. pulse keeps the room alive at the same level.",
+   "id": "s22",
    "section": 5,
-   "effect": "drive",
-   "colours": [
-    "#b4e62e",
-    "#8659c4"
-   ],
-   "floor": 0.86,
-   "peak": 1.0,
-   "why": "Bar 60 is the outro's summit: lead-vocal and vocal re-enter, strings 0.97, cello 1.00, dobro 1.00. The only place in the outro every beat hits, and a floor high enough that the swell blooming out of it does not leave a hole. Ends at bar 62, so the last half-bar of the section is already going dark.",
-   "from_s": 109.64,
-   "to_s": 128.28
+   "from_s": 117.77,
+   "to_s": 123.77,
+   "at": {
+    "bar": 57,
+    "beat": 1,
+    "beats": 12
+   },
+   "floor": 0.18,
+   "peak": 0.85
   },
   {
+   "effect": "drone",
+   "amount": 0.23,
+   "colour": "#b4e62e",
+   "extent": "all",
+   "why": "outro, easing, drums none \u2014 D. Level 0.34.",
+   "id": "s23",
+   "section": 5,
+   "from_s": 123.77,
+   "to_s": 127.61,
+   "at": {
+    "bar": 60,
+    "beat": 1,
+    "beats": 7
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.173,
+   "colour": "#b4e62e",
+   "extent": "all",
+   "why": "outro, developing, drums none \u2014 E:7. Level 0.23.",
+   "id": "s24",
+   "section": 5,
+   "from_s": 127.61,
+   "to_s": 128.28,
+   "at": {
+    "bar": 62,
+    "beat": 1,
+    "beats": 1
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.173,
+   "colour": "#b4e62e",
+   "extent": "all",
+   "why": "outro, developing, drums none \u2014 E:7. Level 0.23.",
+   "id": "s25",
    "section": 6,
-   "to_s": 129.6,
-   "effect": "drone",
-   "amount": 0.04,
-   "colour": "#8659c4",
-   "extent": "inner",
-   "why": "Every one of the 39 lanes measures 0.00 in this section. One ember for a second and a half, then no state at all to the end of the file - the show finishes in real darkness, not in a bed held over silence.",
-   "from_s": 128.28
+   "from_s": 128.28,
+   "to_s": 131.286,
+   "at": {
+    "bar": 62,
+    "beat": 2,
+    "beats": 6
+   }
   }
  ],
  "bindings": [
   {
-   "section": 1,
-   "effect": "accent",
-   "threshold": 0.14,
-   "rest": 0,
-   "extent": "single",
-   "colour": "#8659c4",
-   "bed_colour": "#8659c4",
-   "why": "This section's whole story is the drums arriving: 3, 1, 0, 0 hits in bars 11-14, then 11-13 hits a bar from bar 15 on. Bound to the real onsets rather than the grid, on par_15 alone with rest 0 - so that lamp does not exist until the drums do, while the other three carry the state. Threshold 0.14 measured to leave it dark about 60% of the section.",
-   "from_s": 25.56,
-   "to_s": 48.24
-  },
-  {
-   "section": 2,
    "effect": "follow",
-   "stream": "vocal",
+   "stream": "bass",
    "depth": 0.85,
-   "floor": 0,
-   "response": 2.4,
-   "smooth": 0.3,
-   "extent": "single",
-   "colour": "#8659c4",
-   "why": "Across the 33-second chorus the voice is the only thing continuously present (vocal median 0.32, carrying 72.5% of the span) - and in a kirtan the room drives while one person sings. par_15 breathes with the singer for the whole section and drops to black between phrases; response 2.4 is what makes it drop rather than hover.",
-   "from_s": 48.24,
-   "to_s": 81.77
+   "extent": "all",
+   "smooth": 0.1,
+   "why": "the bass riff IS this section, so the room breathes with the bass itself",
+   "id": "b0",
+   "section": 1,
+   "from_s": 41.75,
+   "to_s": 47.74,
+   "at": {
+    "bar": 19,
+    "beat": 1,
+    "beats": 12
+   },
+   "colour": "#8659c4"
   },
   {
-   "section": 5,
    "effect": "follow",
-   "stream": "strings",
-   "depth": 0.9,
-   "floor": 0,
-   "response": 2.2,
-   "smooth": 0.25,
-   "extent": "single",
-   "colour": "#8659c4",
-   "why": "Strings are the one lane that genuinely carries the outro - mean 0.65 and present 81.5% of 113-128s. One lamp (par_15) breathes with the string line for the whole outro and goes fully out between phrases; the other three stay on the cue list. response 2.2 is what makes it drop to black between phrases instead of hovering.",
+   "stream": "bass",
+   "depth": 0.85,
+   "extent": "all",
+   "smooth": 0.1,
+   "why": "the bass riff IS this section, so the room breathes with the bass itself",
+   "id": "b1",
+   "section": 1,
+   "from_s": 47.74,
+   "to_s": 48.24,
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 1
+   },
+   "colour": "#8659c4"
+  },
+  {
+   "effect": "follow",
+   "stream": "bass",
+   "depth": 0.85,
+   "extent": "all",
+   "smooth": 0.1,
+   "why": "the bass riff IS this section, so the room breathes with the bass itself",
+   "id": "b2",
+   "section": 2,
+   "from_s": 48.24,
+   "to_s": 51.76,
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 7
+   },
+   "colour": "#8659c4"
+  },
+  {
+   "effect": "accent",
+   "threshold": 0.28,
+   "extent": "all",
+   "rest": 0.3,
+   "for_beats": 1,
+   "why": "the hardest span in the song \u2014 here the drums themselves are the light",
+   "id": "b3",
+   "section": 4,
+   "from_s": 103.76,
+   "to_s": 109.64,
+   "at": {
+    "bar": 50,
+    "beat": 1,
+    "beats": 11
+   },
+   "colour": "#b4e62e",
+   "bed_colour": "#b4e62e"
+  },
+  {
+   "effect": "accent",
+   "threshold": 0.28,
+   "extent": "all",
+   "rest": 0.3,
+   "for_beats": 1,
+   "why": "the hardest span in the song \u2014 here the drums themselves are the light",
+   "id": "b4",
+   "section": 5,
    "from_s": 109.64,
-   "to_s": 128.28
+   "to_s": 109.76,
+   "at": {
+    "bar": 52,
+    "beat": 4,
+    "beats": 1
+   },
+   "colour": "#b4e62e",
+   "bed_colour": "#b4e62e"
   }
  ],
  "gestures": [
   {
-   "effect": "stab",
-   "colour": "#ffffff",
-   "extent": "inner",
-   "for_beats": 1,
-   "why": "Moment 0: the drums thicken into something - bar 4 jumps to 7 onsets from 1 in bar 3. A single saffron tap on the inner pair, which the state has left dark. Small, because the moment is intensity 0.235.",
-   "at_s": 9.75,
+   "from_s": 1.76,
+   "to_s": 10.012,
+   "effect": "beam",
+   "pattern": "snap",
+   "colour": "#8659c4",
+   "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
+   "id": "g0",
+   "at": {
+    "bar": 1,
+    "beat": 1,
+    "beats": 16
+   },
+   "start_s": 1.76
+  },
+  {
+   "from_s": 10.012,
+   "to_s": 18.265,
+   "effect": "beam",
+   "pattern": "sweep",
+   "colour": "#8659c4",
+   "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
+   "id": "g1",
    "at": {
     "bar": 4,
-    "beat": 1
+    "beat": 1,
+    "beats": 16
    },
-   "fade_ms": 0
+   "start_s": 10.012
   },
   {
-   "effect": "stab",
-   "colour": "#ffffff",
-   "extent": "right",
-   "for_beats": 2,
-   "why": "Moment 1, intensity 1.00: synth and back-vocal enter. The two lamps that have been at zero since the first bar snap on. A stab and not an impact because the bar is only 41% loud - the event is big for this point in the song, not big for the song.",
-   "at_s": 13.85,
+   "at_s": 13.83,
+   "effect": "lift",
+   "by": 0.35,
+   "over_beats": 8,
+   "tilt": 0.4,
+   "why": "13.8s \u2014 synth and back-vocal enter",
+   "id": "g2",
    "at": {
     "bar": 5,
-    "beat": 3
+    "beat": 2,
+    "beats": 8
    },
-   "fade_ms": 0
+   "start_s": 13.83
   },
   {
+   "at_s": 17.75,
    "effect": "gear",
    "from": 1,
-   "to": 1.33,
-   "for_beats": 3,
-   "why": "Moment 2 is a real tempo change, 89.3 to 118.8 bpm - a ratio of 1.33, which is exactly what the lighting rate is multiplied by. The one place in the song a rate gesture is literally true. Colour named explicitly: gear paints the whole row and falls back to a warm default, which was the only non-house colour left in the show.",
-   "colour": "#8659c4",
-   "at_s": 17.747,
+   "to": 2,
+   "why": "17.8s \u2014 tempo moves 89 to 119 bpm",
+   "id": "g3",
    "at": {
     "bar": 7,
-    "beat": 1
-   }
-  },
-  {
-   "lead_beats": 1,
-   "effect": "blackout",
-   "for_beats": 1,
-   "why": "One beat of black on the last beat of bar 8, so moment 3's spotlight is found rather than switched to. Same grammar as the hole before bar 15, at a fraction of the scale - one beat instead of three, a single lamp instead of the whole rig - so the show has a vocabulary rather than a habit.",
-   "at_s": 21.777,
-   "at": {
-    "bar": 9,
-    "beat": 1
+    "beat": 1,
+    "beats": 2
    },
-   "fade_ms": 0
+   "start_s": 17.75
   },
   {
+   "from_s": 18.265,
+   "to_s": 26.517,
+   "effect": "beam",
+   "pattern": "snap",
+   "colour": "#8659c4",
+   "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
+   "id": "g4",
+   "at": {
+    "bar": 7,
+    "beat": 2,
+    "beats": 16
+   },
+   "start_s": 18.265
+  },
+  {
+   "at_s": 21.8,
    "effect": "isolate",
-   "which": "par_15",
+   "which": 2,
    "colour": "#ffffff",
    "rest": 0,
-   "why": "Moment 3 (0.93): everything drops back behind lead-vocal. One lamp lit, three at true black, the head turned to face it. Held two bars because the spotlight is a passage, not a hit.",
-   "from_s": 21.777,
-   "to_s": 25.783,
+   "why": "21.8s \u2014 everything drops back behind lead-vocal",
+   "id": "g5",
    "at": {
     "bar": 9,
-    "beat": 1
-   }
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 21.8
   },
   {
+   "from_s": 26.517,
+   "to_s": 33.75,
+   "effect": "beam",
+   "pattern": "sweep",
+   "colour": "#8659c4",
+   "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
+   "id": "g6",
+   "at": {
+    "bar": 11,
+    "beat": 2,
+    "beats": 14
+   },
+   "start_s": 26.517
+  },
+  {
+   "from_s": 32.718,
+   "to_s": 33.72,
    "effect": "blackout",
-   "for_beats": 1,
-   "why": "First of three stacked beats of black before the major chord at bar 15. Bar 14 is 26% loud with zero drum hits - the emptiest bar of the first half, and the producer has already done most of this.",
-   "at_s": 32.273,
+   "why": "two beats of nothing, so the riff has something to arrive into",
+   "id": "g7",
    "at": {
     "bar": 14,
-    "beat": 2
+    "beat": 2,
+    "beats": 2
    },
+   "start_s": 32.718,
    "fade_ms": 0
   },
   {
-   "effect": "blackout",
-   "for_beats": 1,
-   "why": "Second beat of the hole. Moment 4's pause reads at 33.0s, inside this.",
-   "at_s": 32.765,
-   "at": {
-    "bar": 14,
-    "beat": 3
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "blackout",
-   "for_beats": 1,
-   "why": "Third beat, abutting bar 15 beat 1 so the white lands out of nothing. Stacked single beats rather than one long blackout because that is what holds a real hole on this rig.",
-   "at_s": 33.256,
-   "at": {
-    "bar": 14,
-    "beat": 4
-   },
-   "fade_ms": 0
-  },
-  {
-   "effect": "impact",
-   "colour": "#ffffff",
-   "extent": "all",
+   "from_s": 33,
+   "to_s": 33.72,
+   "effect": "hush",
+   "depth": 0.12,
+   "keep": "inner",
    "for_beats": 2,
-   "why": "D:min becomes D at 33.80s, drum hits go 0 to 12, guitar and strings and acoustic-guitar all enter on the same downbeat. The first of the show's white arrivals. Nothing else starts on this anchor - a tier-one hit needs its downbeat to itself or it gets cancelled.",
-   "at_s": 33.748,
+   "why": "33.0s \u2014 the track falls away, so the room does too",
+   "id": "g8",
    "at": {
-    "bar": 15,
-    "beat": 1
+    "bar": 14,
+    "beat": 3,
+    "beats": 1
    },
-   "fade_ms": 0
+   "start_s": 33
   },
   {
    "effect": "glare",
@@ -499,19 +889,6 @@
     "beat": 4
    },
    "fade_ms": 0
-  },
-  {
-   "effect": "beam",
-   "pattern": "sweep",
-   "colour": "#8659c4",
-   "gobo": 0,
-   "why": "Three bars where the head alone sweeps the room over the new gold bed. Starts at bar 16, not 15, so it does not take the head away from the impact.",
-   "from_s": 35.741,
-   "to_s": 41.746,
-   "at": {
-    "bar": 16,
-    "beat": 1
-   }
   },
   {
    "effect": "glare",
@@ -868,6 +1245,20 @@
    "level": 1.0,
    "rest": 0.1,
    "extent": "all",
+   "from_s": 50.25,
+   "to_s": 51.26,
+   "for_beats": 2,
+   "fade_ms": 0,
+   "why": "The drop answers the build in its own language. The build ends with ONE lamp lit against three dark ones -- the widest picture in the show -- so a drop that settles into an even bed reads as smaller than the run-up that led to it. The row keeps crossing for two beats out of the blast."
+  },
+  {
+   "effect": "chase",
+   "direction": "lr",
+   "per_beat": 1,
+   "colour": "#ffffff",
+   "level": 1.0,
+   "rest": 0.1,
+   "extent": "all",
    "for_beats": 2,
    "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen.",
    "from_s": 50.75,
@@ -879,29 +1270,19 @@
    "fade_ms": 0
   },
   {
+   "at_s": 52.76,
    "effect": "impact",
    "colour": "#ffffff",
    "extent": "all",
    "for_beats": 2,
-   "why": "Moment 6, intensity 1.00: the climax, the whole band at full strength with six instrument families at once. The fullest passage of the song gets the white flash; the loudest passage gets something else, twenty seconds later.",
-   "at_s": 52.75,
+   "why": "52.8s \u2014 the whole band at full strength, 6 families at once",
+   "id": "g23",
    "at": {
     "bar": 24,
-    "beat": 3
+    "beat": 3,
+    "beats": 2
    },
-   "fade_ms": 0
-  },
-  {
-   "effect": "stab",
-   "colour": "#ffffff",
-   "extent": "inner",
-   "for_beats": 1,
-   "why": "The harmony turns to C at 57.87s and bar 27 is the tambourine's loudest bar (78%). A partial hit on the inner pair - different effect, different extent and different colour from the impact three bars earlier, so two neighbouring cues do not read as one habit.",
-   "at_s": 57.75,
-   "at": {
-    "bar": 27,
-    "beat": 1
-   },
+   "start_s": 52.76,
    "fade_ms": 0
   },
   {
@@ -954,76 +1335,34 @@
    "fade_ms": 0
   },
   {
-   "effect": "trade",
-   "colours": [
-    "#b4e62e",
-    "#8659c4"
-   ],
-   "for_beats": 4,
-   "travel": true,
-   "why": "The call and response is real and it lives here: lead-vocal against back-vocal correlates -0.75 over bars 31-39, and back-vocal does not exist before bar 31. Saffron left hands to rose right - the leader calls and the room answers. Trade is the only effect on this rig that is both full-rig and genuinely per-lamp. Contrast raised: the sections after the drop now sit on a high floor, and a bump cannot be seen against a bright bed unless it starts from near nothing.",
-   "runs": 2,
-   "rest": 0.04,
-   "peak": 1.0,
-   "at_s": 67.75,
-   "at": {
-    "bar": 32,
-    "beat": 1
-   }
-  },
-  {
-   "effect": "trade",
-   "colours": [
-    "#b4e62e",
-    "#8659c4"
-   ],
-   "for_beats": 4,
-   "travel": true,
-   "why": "Moment 7: lead-vocal enters. The handoff is placed on the entrance itself rather than on the bar line. Contrast raised: the sections after the drop now sit on a high floor, and a bump cannot be seen against a bright bed unless it starts from near nothing.",
-   "runs": 2,
-   "rest": 0.04,
-   "peak": 1.0,
    "at_s": 72.25,
+   "effect": "lift",
+   "by": 0.35,
+   "over_beats": 8,
+   "tilt": 0.4,
+   "why": "72.3s \u2014 lead-vocal enters",
+   "id": "g24",
    "at": {
     "bar": 34,
-    "beat": 2
-   }
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 72.25
   },
   {
-   "effect": "trade",
-   "colours": [
-    "#b4e62e",
-    "#8659c4"
-   ],
-   "for_beats": 4,
-   "travel": true,
-   "why": "Third exchange, bars 35-37 being the loudest of the chorus (87/84/85%). Contrast raised: the sections after the drop now sit on a high floor, and a bump cannot be seen against a bright bed unless it starts from near nothing.",
-   "runs": 2,
-   "rest": 0.04,
-   "peak": 1.0,
-   "at_s": 75.75,
-   "at": {
-    "bar": 36,
-    "beat": 1
-   }
-  },
-  {
-   "effect": "trade",
-   "colours": [
-    "#b4e62e",
-    "#8659c4"
-   ],
-   "for_beats": 4,
-   "travel": true,
-   "why": "Fourth and last exchange, colours reversed so the answer comes back the other way before the section drops out. Contrast raised: the sections after the drop now sit on a high floor, and a bump cannot be seen against a bright bed unless it starts from near nothing.",
-   "runs": 2,
-   "rest": 0.04,
-   "peak": 1.0,
-   "at_s": 78.75,
+   "from_s": 79.26,
+   "to_s": 83.26,
+   "effect": "ramp",
+   "to": 0.9,
+   "curve": "ease",
+   "why": "83.3s \u2014 a build, run-up measured at 4s",
+   "id": "g25",
    "at": {
     "bar": 37,
-    "beat": 3
-   }
+    "beat": 4,
+    "beats": 8
+   },
+   "start_s": 79.26
   },
   {
    "effect": "blackout",
@@ -1057,19 +1396,6 @@
    "fade_ms": 0
   },
   {
-   "effect": "beam",
-   "pattern": "snap",
-   "colour": "#b4e62e",
-   "gobo": 0,
-   "why": "Corner-to-corner head snaps over the drive while toms and drums take the front of the mix. Head only - it costs the pars nothing at the loudest point of the show.",
-   "from_s": 83.75,
-   "to_s": 89.75,
-   "at": {
-    "bar": 40,
-    "beat": 1
-   }
-  },
-  {
    "effect": "impact",
    "colour": "#ffffff",
    "extent": "all",
@@ -1101,31 +1427,99 @@
    "fade_ms": 0
   },
   {
-   "effect": "strobe",
-   "hz": 18,
+   "at_s": 85.76,
+   "effect": "impact",
    "colour": "#ffffff",
-   "intensity": 1,
    "extent": "all",
-   "why": "Moment 9, intensity 1.00, and the loudest half-second in the recording (92.5s). Half a second of hardware strobe - sharper than any framed flash, and deliberately a different gesture from the two impacts so the biggest three events of the show are three different things.",
-   "from_s": 92.25,
-   "to_s": 92.75,
+   "for_beats": 2,
+   "why": "the drums arrive at 85.76s",
+   "id": "g27",
    "at": {
-    "bar": 44,
-    "beat": 2
+    "bar": 41,
+    "beat": 1,
+    "beats": 2
    },
+   "start_s": 85.76,
    "fade_ms": 0
   },
   {
-   "effect": "swell",
+   "from_s": 89.697,
+   "to_s": 90.728,
+   "effect": "anticipation",
+   "for_beats": 2,
    "colour": "#ffffff",
-   "for_beats": 16,
-   "rise": 0.4,
-   "why": "The recording's loudest five-second window centres at 97.00s, not at the 92.5s headline. This swell starts at 93.76s and crests at 96.99s, so the show's brightest sustained passage sits exactly on the song's. Bars 45-49 are left clear of every other gesture because a short cue placed inside a long one replaces it rather than layering over it.",
-   "at_s": 93.75,
+   "intensity": 1,
+   "why": "white strobes accelerating into the peak",
+   "id": "g28",
    "at": {
-    "bar": 45,
-    "beat": 1
-   }
+    "bar": 42,
+    "beat": 4,
+    "beats": 2
+   },
+   "start_s": 89.697,
+   "fade_ms": 0
+  },
+  {
+   "from_s": 90.728,
+   "to_s": 91.73,
+   "effect": "blackout",
+   "why": "and then two beats of nothing",
+   "id": "g29",
+   "at": {
+    "bar": 43,
+    "beat": 2,
+    "beats": 2
+   },
+   "start_s": 90.728,
+   "fade_ms": 0
+  },
+  {
+   "at_s": 91.76,
+   "effect": "impact",
+   "colour": "#ffffff",
+   "extent": "all",
+   "for_beats": 2,
+   "why": "THE PEAK at 91.76s \u2014 the loudest stretch of the song",
+   "id": "g30",
+   "at": {
+    "bar": 44,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 91.76,
+   "fade_ms": 0
+  },
+  {
+   "from_s": 91.81,
+   "to_s": 95.886,
+   "effect": "strobe",
+   "hz": 12,
+   "colour": "#ffffff",
+   "intensity": 0.75,
+   "extent": "outer",
+   "why": "the outer pair holds a hard strobe through the peak",
+   "id": "g31",
+   "at": {
+    "bar": 44,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 91.81,
+   "fade_ms": 0
+  },
+  {
+   "from_s": 100.728,
+   "to_s": 101.73,
+   "effect": "blackout",
+   "why": "two beats of nothing \u2014 the drums go full at 101.76s and the room must be empty first",
+   "id": "g32",
+   "at": {
+    "bar": 48,
+    "beat": 2,
+    "beats": 2
+   },
+   "start_s": 100.728,
+   "fade_ms": 0
   },
   {
    "effect": "blackout",
@@ -1146,101 +1540,122 @@
    "fade_ms": 0
   },
   {
+   "from_s": 109.76,
+   "to_s": 111.823,
    "effect": "strip",
-   "to": 0.06,
-   "over_beats": 6,
-   "why": "Moment 11: the track strips back. A controlled pull-back that empties the rig from the edges inward across the section boundary and lands exactly at bar 54, the void. Six beats, so it is still falling when the section changes - holds at the floor rather than returning, because the band does not come back.",
-   "for_beats": 6,
-   "at_s": 108.75,
+   "to": 0.1,
+   "over_beats": 4,
+   "why": "109.8s \u2014 the track strips back",
+   "id": "g34",
    "at": {
-    "bar": 52,
-    "beat": 3
-   }
-  },
-  {
-   "effect": "isolate",
-   "which": "par_8",
-   "colour": "#ffffff",
-   "rest": 0,
-   "why": "The one honest isolate in the song. At 112.0-112.75s lead-vocal reads 0.40 and vocal 0.28 with all 37 other lanes between 0.00 and 0.02 - a single voice alone. One saffron lamp, three at true black, and not the lamp that has been breathing with the strings all outro.",
-   "from_s": 112.25,
-   "to_s": 113.25,
-   "at": {
-    "bar": 54,
-    "beat": 2
-   }
-  },
-  {
-   "effect": "blackout",
-   "for_beats": 2,
-   "why": "Moment 12 (0.85): 113.0s is the quietest instant in the whole song, loudness 0.022. The flame goes out. Darkness is the strongest gesture available and this is the place to spend it.",
-   "at_s": 113.25,
-   "at": {
-    "bar": 54,
-    "beat": 4
+    "bar": 53,
+    "beat": 1,
+    "beats": 4
    },
-   "fade_ms": 0
+   "start_s": 109.76
   },
   {
+   "from_s": 113,
+   "to_s": 113.72,
    "effect": "hush",
    "depth": 0.12,
-   "for_beats": 4,
-   "why": "Moment 13, intensity 1.00: lead-vocal, tambourine and vocal all drop out at 115.29s - confirmed in the lanes, all three go from 0.4-0.6 to 0.00 within two windows. The room quiets with them and settles into bar 56's two edge lamps.",
-   "at_s": 115.29,
+   "keep": "inner",
+   "for_beats": 2,
+   "why": "113.0s \u2014 the track falls away, so the room does too",
+   "id": "g35",
+   "at": {
+    "bar": 54,
+    "beat": 3,
+    "beats": 1
+   },
+   "start_s": 113
+  },
+  {
+   "from_s": 115.29,
+   "to_s": 117.353,
+   "effect": "strip",
+   "to": 0.14,
+   "over_beats": 4,
+   "why": "115.3s \u2014 lead-vocal, tambourine and vocal drop out",
+   "id": "g36",
    "at": {
     "bar": 55,
-    "beat": 4
-   }
+    "beat": 4,
+    "beats": 4
+   },
+   "start_s": 115.29
   },
   {
-   "effect": "beam",
-   "pattern": "figure8",
-   "colour": "#b4e62e",
-   "gobo": 0,
-   "why": "Strings and double-bass rebuild through bar 57 with the pars low; the head carries the motion on its own until the lift takes it.",
-   "from_s": 117.783,
-   "to_s": 120.275,
-   "at": {
-    "bar": 57,
-    "beat": 1
-   }
-  },
-  {
-   "effect": "lift",
-   "by": 0.34,
-   "over_beats": 7,
-   "tilt": 0.75,
-   "why": "Moment 14, intensity 1.00, and the emotional resolution of the whole piece: the music moves up an octave at 120.29s and the chord turns to D major at 120.00s after two minutes of D minor. Seven beats, so the rise runs right up to bar 60 beat 1 and hands straight to the swell - it arrives and stays arrived, with no sag back to the bed. Only +0.34 though: bar 58 is 42% loud against bar 47's 92%, and a register shift is an emotional event, not a loud one. It must not out-shine the peak.",
-   "for_beats": 7,
-   "at_s": 120.275,
+   "at_s": 120.29,
+   "effect": "spin",
+   "beats_per_turn": 2,
+   "why": "120.3s \u2014 the music moves up an octave, and the room turns with it",
+   "id": "g37",
    "at": {
     "bar": 58,
-    "beat": 2
-   }
+    "beat": 2,
+    "beats": 2
+   },
+   "start_s": 120.29
   },
   {
+   "from_s": 121.322,
+   "to_s": 124.416,
    "effect": "swell",
    "colour": "#ffffff",
-   "for_beats": 4,
-   "rise": 0.3,
-   "why": "Moment 15, intensity 1.00: lead-vocal and vocal return at 123.77s and strings, cello and dobro all peak within the next second (0.97, 1.00, 1.00). The crest lands at 124.4s on that spike and is gone again in two - a bloom, not a plateau, so the outro stays the outro. Marigold, not white: this is warmth arriving, not a hit.",
-   "at_s": 123.765,
+   "rise": 0.8,
+   "for_beats": 6,
+   "why": "and blooms after it",
+   "id": "g38",
    "at": {
-    "bar": 60,
-    "beat": 1
-   }
+    "bar": 58,
+    "beat": 4,
+    "beats": 6
+   },
+   "start_s": 121.322
   },
   {
-   "effect": "cut",
-   "for_beats": 1,
-   "why": "Moment 16: the beat drops away at 126.71s. Half a second of nothing, and then the show is already in its last dark bar. A small gesture for a 0.18 moment - most moments in this song get nothing at all.",
+   "at_s": 123.77,
+   "effect": "lift",
+   "by": 0.35,
+   "over_beats": 8,
+   "tilt": 0.4,
+   "why": "123.8s \u2014 lead-vocal and vocal enter",
+   "id": "g39",
+   "at": {
+    "bar": 60,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 123.77
+  },
+  {
    "at_s": 126.71,
+   "effect": "gear",
+   "from": 1,
+   "to": 2,
+   "why": "126.7s \u2014 the beat drops away",
+   "id": "g40",
    "at": {
     "bar": 61,
-    "beat": 3
+    "beat": 3,
+    "beats": 2
    },
+   "start_s": 126.71
+  },
+  {
+   "at_s": 127.226,
+   "effect": "cut",
+   "for_beats": 1,
+   "why": "and one beat of nothing where the beat drops away",
+   "id": "g41",
+   "at": {
+    "bar": 61,
+    "beat": 4,
+    "beats": 1
+   },
+   "start_s": 127.226,
    "fade_ms": 0
   }
- ],
- "anchored": "every cue carries the time it happens at. Bars are provenance only: the baker reads at_bar BEFORE at_s, so a cue with both is really a bar cue wearing a timestamp, and the two drift apart the moment the grid is refitted."
+ ]
 }

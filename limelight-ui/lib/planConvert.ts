@@ -207,12 +207,28 @@ export function editsToPlan(edits: Edit[], show: Show, catalogue: Effect[], plan
     const endS = secondsAtBeatIndex(startIdx + e.beats);
     const params = { ...(e.params ?? {}) };
 
-    if (kind === "state") {
-      /* a state/binding fills a section; map by the span's MIDPOINT so a start
-         time rounded to the nearest beat cannot fall into the section before. */
-      states.push({ effect: e.type, section: sectionIndexAt((startS + endS) / 2, sections), ...params });
-    } else if (kind === "binding") {
-      bindings.push({ effect: e.type, section: sectionIndexAt((startS + endS) / 2, sections), ...params });
+    if (kind === "state" || kind === "binding") {
+      /* A state names the section it sits in AND the exact span it occupies.
+         Writing only the section was destructive: the baker takes
+         max(section start, from_s) and min(section end, to_s), so a look written
+         for four bars inside a twenty-two-second section came back meaning the
+         whole section. Twenty-five looks collapsed into seven, several of them
+         stacked on the same span where only the first is ever seen -- and since
+         Download and Save write through here, opening a show in the editor and
+         saving it FLATTENED it. The show a person reviewed was not the show that
+         had been written.
+
+         The midpoint picks the section, so a start rounded to the nearest beat
+         cannot fall into the section before. */
+      const round3 = (x: number) => Math.round(x * 1000) / 1000;
+      const entry: V2Entry = {
+        effect: e.type,
+        section: sectionIndexAt((startS + endS) / 2, sections),
+        from_s: round3(startS),
+        to_s: round3(endS),
+        ...params,
+      };
+      (kind === "state" ? states : bindings).push(entry);
     } else {
       /* Emit ABSOLUTE-SECONDS anchors (the baker supports at_s / from_s+to_s).
          Seconds are exact, so a clip round-trips to the same time with no

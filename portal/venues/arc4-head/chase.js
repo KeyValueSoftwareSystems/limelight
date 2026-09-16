@@ -60,8 +60,16 @@ module.exports = function chase(params, ctx) {
   const frames = [];
   for (let i = 0; i < N; i++) frames.push(at((i / H.framesPerBeat(ctx.bpm)) * perBeat, 1));
 
+  /* NOT binding:true.
+     As a binding this rendered from ABSOLUTE time -- beatOf(t) counts from the
+     top of the song -- so a one-beat run placed at bar 15 caught whatever slice
+     of the crossing cycle happened to be passing, and the light did not cross
+     the row so much as flicker somewhere in the middle of it. Returning frames
+     alone makes the baker play them from the cue's own start, which is what a
+     run placed on a beat has to do. `render` stays available for anyone binding
+     it to a stream. */
   return {
-    binding: true, render, frames, loop_beats: loopBeats,
+    render, frames, loop_beats: loopBeats,
     per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS),
   };
 };

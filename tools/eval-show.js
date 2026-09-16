@@ -329,7 +329,10 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
      is tracked frame by frame and each pass is judged on its own: it must drift
      the way the cue says. This is measuring the thing a person in the room sees
      -- light moving across the wall -- rather than a proxy for it. */
-  const travellers = (show.gestures || []).filter(g => g.travel).map(g => {
+  /* `chase` IS a travelling effect and was not being checked at all -- the test
+     looked only for trade's `travel` flag, so a show whose whole build is chase
+     reported "0 of 0 travel cues" and passed without verifying a single wave. */
+  const travellers = (show.gestures || []).filter(g => g.travel || g.effect === "chase").map(g => {
     const sp = spanOf(g); return sp ? { ...g, from_s: sp[0], to_s: sp[1] } : null;
   }).filter(Boolean);
   let ok = 0; const why = [];
@@ -356,7 +359,11 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
     const total = fwd + back;
     const bias = total > 0 ? (fwd - back) / total : 0;
     const want = g.direction === "rl" ? -1 : 1;
-    if (total >= 3 && bias * want >= 0.3) ok++;
+    /* Two steps with nothing against them is a crossing. Four lamps give at
+       most three transitions, so demanding three rejected honest one-beat runs
+       whose span clipped a transition -- the check was stricter than the rig
+       can be. */
+    if ((total >= 3 && bias * want >= 0.3) || (total >= 2 && bias * want === 1)) ok++;
     else why.push(g.from_s.toFixed(1) + "s " + (g.direction || "lr")
       + " (" + fwd + " steps forward, " + back + " back)");
   }
