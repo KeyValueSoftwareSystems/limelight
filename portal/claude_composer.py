@@ -146,6 +146,15 @@ def stream_table(song):
     return rows
 
 
+def filmstrip(rig="arc4-head"):
+    try:
+        r = subprocess.run(["node", os.path.join(REPO, "portal", "filmstrip.js"), rig, "32"],
+                           capture_output=True, text=True, timeout=120)
+        return [ln for ln in (r.stdout or "").splitlines() if ln.strip()]
+    except Exception:
+        return []
+
+
 def ink_table(rig="arc4-head"):
     try:
         r = subprocess.run(["node", os.path.join(REPO, "portal", "ink.js"), rig],
@@ -268,6 +277,15 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "different things from each other, peak is the brightest any lamp gets.",
             "",
             *ink_table(rig),
+            "",
+            "WHAT EACH ONE LOOKS LIKE",
+            "",
+            "Each strip is four beats of that effect on the four pars and the head,",
+            "left to right, at its default dials. ' ' is off and '@' is full. This is",
+            "the effect itself, not a guess at it - a travelling bump reads as a",
+            "diagonal, a unison flash as a vertical edge, a breather as a slow swell.",
+            "",
+            *filmstrip(rig),
             "",
             "Read the two columns together and the shape of the catalog is plain:",
             "almost nothing is both bright and varied. Everything at ink 1.00 moves",

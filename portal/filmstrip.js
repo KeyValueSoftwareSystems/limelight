@@ -33,9 +33,17 @@ function strip(rigName, width) {
   const ctx = { fps, bpm, layout: manifest, restColour: [1, 0.75, 0.35],
                 beatAt: (t) => (t || 0) * bpm / 60 };
   const out = [];
+  const catIds = (() => {
+    try {
+      const c = JSON.parse(fs.readFileSync(path.join(HERE, "effects.json"), "utf8"));
+      const eff = Array.isArray(c) ? c : c.effects;
+      return new Set(eff.map((e) => e.id));
+    } catch (e) { return null; }
+  })();
   for (const file of fs.readdirSync(venueDir).sort()) {
     if (!file.endsWith(".js") || file === "helpers.js") continue;
     const eid = file.replace(/\.js$/, "");
+    if (catIds && !catIds.has(eid)) continue;
     let mod, dmx;
     try { mod = require(path.join(venueDir, file)); } catch (e) { continue; }
     if (typeof mod !== "function") continue;
@@ -43,10 +51,20 @@ function strip(rigName, width) {
     if (!dmx) continue;
 
     const frames = [];
+    const beatCtx = (i, n) => {
+      const beat = (i / n) * 4;
+      const bi = Math.floor(beat);
+      return { t: i / fps, beat, beatIndex: bi, bphase: beat - bi,
+               bar: Math.floor(bi / 4), downbeat: bi % 4 === 0,
+               weight: 0.5 + 0.5 * Math.cos((bi % 4) * Math.PI / 2),
+               energy: 0.7, p: i / n };
+    };
     if (typeof dmx.render === "function") {
       for (let i = 0; i < width; i++) {
         const v = 0.5 + 0.5 * Math.sin((i / width) * Math.PI * 2);
-        try { frames.push(dmx.render(v, i / fps)); } catch (e) { }
+        try {
+          frames.push(dmx.beat ? dmx.render(beatCtx(i, width)) : dmx.render(v, i / fps));
+        } catch (e) { }
       }
     } else if (Array.isArray(dmx.frames) && dmx.frames.length) {
       for (let i = 0; i < width; i++) {

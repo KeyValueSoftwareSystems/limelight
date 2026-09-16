@@ -16,9 +16,17 @@ function measure(rigName) {
     beatAt: (t) => (t || 0) * bpm / 60,
   };
   const rows = [];
+  const catIds = (() => {
+    try {
+      const c = JSON.parse(fs.readFileSync(path.join(HERE, "effects.json"), "utf8"));
+      const eff = Array.isArray(c) ? c : c.effects;
+      return new Set(eff.map((e) => e.id));
+    } catch (e) { return null; }
+  })();
   for (const file of fs.readdirSync(venueDir)) {
     if (!file.endsWith(".js") || file === "helpers.js") continue;
     const eid = file.replace(/\.js$/, "");
+    if (catIds && !catIds.has(eid)) continue;
     let mod;
     try {
       mod = require(path.join(venueDir, file));
@@ -34,11 +42,21 @@ function measure(rigName) {
     }
     if (!dmx) continue;
     const frames = [];
+    const beatCtx = (i, n) => {
+      const beat = (i / n) * 4;
+      const bi = Math.floor(beat);
+      return { t: i / fps, beat, beatIndex: bi, bphase: beat - bi,
+               bar: Math.floor(bi / 4), downbeat: bi % 4 === 0,
+               weight: 0.5 + 0.5 * Math.cos((bi % 4) * Math.PI / 2),
+               energy: 0.7, p: i / n };
+    };
     if (typeof dmx.render === "function") {
       for (let i = 0; i < 80; i++) {
         const t = i / fps;
         const v = 0.5 + 0.5 * Math.sin((i / 80) * Math.PI * 2);
-        try { frames.push(dmx.render(v, t)); } catch (e) { }
+        try {
+          frames.push(dmx.beat ? dmx.render(beatCtx(i, 80)) : dmx.render(v, t));
+        } catch (e) { }
       }
     } else if (Array.isArray(dmx.frames)) {
       for (const f of dmx.frames) frames.push(f);
