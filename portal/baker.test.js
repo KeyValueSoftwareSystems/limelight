@@ -69,64 +69,33 @@ module.exports = function drone(params, ctx) {
   }
 }
 
-/* ── 2 & 3. live bindings + head slew on the real arc4-head rig ───────────── */
+/* ── 2. motion cues on the real arc4-head rig, and head slew ──────────────
+   follow, split and accent were removed from the catalogue: they rendered from
+   an audio envelope every frame, which is a reactive rig rather than a cue, and
+   their tests went with them. What replaces them is the same rig driven by
+   motion cues placed over bar spans. */
 {
   const plan = {
-    states: [],
-    bindings: [
-      { section: 2, effect: "follow", stream: "vocal", depth: 0.7, extent: "all" },
-      { section: 4, effect: "split", streams: ["lead-vocal", "back-vocal"] },
-      { section: 1, effect: "accent", threshold: 0.4, extent: "all" },
+    states: [{ section: 0, effect: "wash", amount: 0.4, colour: "#3366cc" }],
+    bindings: [],
+    gestures: [
+      { effect: "chase", from_bar: 5, to_bar: 12, per_beat: 1, why: "motion" },
+      { effect: "ripple", from_bar: 13, to_bar: 20, per_beat: 1, why: "motion" },
+      { effect: "alternate", from_bar: 21, to_bar: 28, per_beat: 1, why: "motion" },
     ],
-    gestures: [],
   };
   const show = bake("arc4-head", plan);
 
-  // follow (section 2): the driven pars must VARY (old code: flat constant)
   {
-    const [a, b] = secRange(show, 2);
-    const red = distinct(show, a, b, 1); // par_1 red
-    ok("follow varies with the vocal stream (not a flat constant)", red.size >= 3, `${red.size} distinct par levels`);
-    // and it should track the stream: a louder-vocal frame is brighter than a quieter one
-    const { makeStreamSampler } = require("./bakelib.js");
-    const score = require(path.join(REPO, "readers", "lights", "fromscore.js")).load(SCORE);
-    const s = makeStreamSampler(score);
-    let hi = { v: -1, t: 0 }, lo = { v: 2, t: 0 };
-    for (let t = a; t < b; t++) { const v = s.sampleStem("vocal", t / show.fps); if (v > hi.v) hi = { v, t }; if (v < lo.v) lo = { v, t }; }
-    ok("follow is brighter where the vocal is louder",
-       show.frames[hi.t][1] >= show.frames[lo.t][1], `hi-vocal red ${show.frames[hi.t][1]} vs lo ${show.frames[lo.t][1]}`);
-  }
-
-  // split (section 4): BOTH sides light at least once (old code rendered black)
-  {
-    const [a, b] = secRange(show, 4);
-    let leftLit = false, rightLit = false;
-    for (let t = a; t < b; t++) {
+    const lv = [];
+    for (let t = 0; t < show.frames.length; t++) {
       const f = show.frames[t];
-      if (f[1] || f[2] || f[3]) leftLit = true;      // par_1 = left
-      if (f[22] || f[23] || f[24]) rightLit = true;  // par_22 = right
+      lv.push([1, 8, 15, 22].map(o => Math.max(f[o], f[o + 1], f[o + 2])));
     }
-    ok("split lights both the left and right pars (render got an array, not 0.5)", leftLit && rightLit,
-       `left ${leftLit} right ${rightLit}`);
-  }
-
-  /* accent used to go to black between hits, which is why a composer reading
-     the measured palette refused it: as a section's continuous layer it left
-     the rig dark. It now flashes ABOVE a resting bed, so what this checks is
-     that the hits stand well clear of a bed that itself never dies. */
-  {
-    const [a, b] = secRange(show, 1);
-    let lit = 0, maxv = 0, minv = 255, sum = 0, n = 0;
-    for (let t = a; t < b; t++) {
-      const r = show.frames[t][1];
-      if (r > 0) lit++;
-      if (r > maxv) maxv = r;
-      if (r < minv) minv = r;
-      sum += r; n++;
-    }
-    const mean = sum / Math.max(1, n);
-    ok("accent flashes clear of a bed that never goes dark", minv > 0 && maxv > mean * 1.6,
-       `bed ${minv}, mean ${mean.toFixed(0)}, peak ${maxv}`);
+    let apart = 0;
+    for (const r of lv) if (Math.max(...r) > 12 && Math.max(...r) - Math.min(...r) > 20) apart++;
+    ok("a chase placed on bars makes the lamps differ from each other",
+       apart > lv.length * 0.05, `${(apart / lv.length * 100).toFixed(1)}% of frames`);
   }
 
   // head slew: across the WHOLE show, pan(28)/tilt(30) never step more than 7
