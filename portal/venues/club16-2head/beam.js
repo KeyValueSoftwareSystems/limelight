@@ -49,7 +49,12 @@ module.exports = function beam(params, ctx) {
     let pan, tilt;
     /* how close are we to an accent? 1 on it, falling to 0 over a third of a beat */
     const hit = accents.reduce((m, a) => { const d = beatInBar + 1 - a; return (d >= 0 && d < 0.34) ? Math.max(m, 1 - d / 0.34) : m; }, 0);
-    if (pattern === "stations") {
+    if (pattern === "hold") {
+      /* a still pin on the wall. Where it points is the cue's to say (pan, tilt
+         0..1); it does not move, does not kick, does not flash. The head at rest
+         is what makes its first movement an event. */
+      pan = params.pan != null ? params.pan : 0.66; tilt = params.tilt != null ? params.tilt : 0.42;
+    } else if (pattern === "stations") {
       /* the station for THIS bar -- or, from beat 4, for the NEXT bar, so the
          head is already travelling and arrives on the downbeat instead of
          leaving on it */
@@ -70,7 +75,7 @@ module.exports = function beam(params, ctx) {
     } else {
       const w = 2 * Math.PI * beat / 4; pan = 0.498 + 0.47 * Math.sin(w); tilt = 0.498 + 0.4 * Math.sin(2 * w);
     }
-    const fire = strobeHz > 0 && (strobeOn === "always" || (strobeOn === "beat" && bphase < 0.35) || (strobeOn === "downbeat" && isDown && bphase < 0.5) || hit > 0.4);
+    const fire = pattern !== "hold" && strobeHz > 0 && (strobeOn === "always" || (strobeOn === "beat" && bphase < 0.35) || (strobeOn === "downbeat" && isDown && bphase < 0.5) || hit > 0.4);
     const prismNow = prismOn === "beat" ? (bphase < 0.4 ? prism : 0) : prism;
     const f = H.emptyFrame();
     /* two heads: the second mirrors the first across the room, so a snap to the

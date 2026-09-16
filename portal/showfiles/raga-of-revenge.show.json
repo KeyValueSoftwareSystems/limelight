@@ -150,120 +150,6 @@
  "built_from": "the whole protocol response: both segmentations, layers.subsection, layers.presence, chords, energy, moments, rhythm",
  "states": [
   {
-   "effect": "drone",
-   "amount": 0.21,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "why": "intro, establishing, drums none \u2014 D:min. Level 0.30.",
-   "id": "s0",
-   "section": 0,
-   "from_s": 0,
-   "to_s": 7.16,
-   "at": {
-    "bar": 1,
-    "beat": 1,
-    "beats": 14
-   }
-  },
-  {
-   "effect": "drone",
-   "amount": 0.21,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "why": "intro, intensifying, drums none \u2014 F. Level 0.30.",
-   "id": "s1",
-   "section": 0,
-   "from_s": 7.16,
-   "to_s": 12.5,
-   "at": {
-    "bar": 3,
-    "beat": 1,
-    "beats": 10
-   }
-  },
-  {
-   "effect": "drone",
-   "amount": 0.21,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "why": "intro, sustaining, drums none \u2014 A#. Level 0.30.",
-   "id": "s2",
-   "section": 0,
-   "from_s": 12.5,
-   "to_s": 17.75,
-   "at": {
-    "bar": 5,
-    "beat": 1,
-    "beats": 10
-   }
-  },
-  {
-   "effect": "drone",
-   "amount": 0.21,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "why": "intro, easing, drums none \u2014 A. Level 0.30.",
-   "id": "s3",
-   "section": 0,
-   "from_s": 17.75,
-   "to_s": 21.8,
-   "at": {
-    "bar": 7,
-    "beat": 1,
-    "beats": 8
-   }
-  },
-  {
-   "effect": "drone",
-   "amount": 0.21,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "why": "intro, resolving, drums none \u2014 C. Level 0.30.",
-   "id": "s4",
-   "section": 0,
-   "from_s": 21.8,
-   "to_s": 25.56,
-   "at": {
-    "bar": 9,
-    "beat": 1,
-    "beats": 7
-   }
-  },
-  {
-   "effect": "pulse",
-   "amount": 0.3,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "floor": 0.16,
-   "peak": 0.95,
-   "why": "instrumental, developing, drums light \u2014 A:min7. Level 0.30.",
-   "id": "s6",
-   "section": 1,
-   "from_s": 25.78,
-   "to_s": 31.78,
-   "at": {
-    "bar": 11,
-    "beat": 1,
-    "beats": 12
-   }
-  },
-  {
-   "effect": "wash",
-   "amount": 0.14,
-   "colour": "#2f5bff",
-   "extent": "all",
-   "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
-   "id": "s7",
-   "section": 1,
-   "from_s": 31.78,
-   "to_s": 41.75,
-   "at": {
-    "bar": 14,
-    "beat": 1,
-    "beats": 19
-   }
-  },
-  {
    "effect": "wash",
    "amount": 0.14,
    "colour": "#2f5bff",
@@ -575,6 +461,55 @@
     "beat": 2,
     "beats": 6
    }
+  },
+  {
+   "effect": "drone",
+   "section": 0,
+   "from_s": 0.0,
+   "to_s": 9.11,
+   "amount": 0.14,
+   "colour": "#2f5bff",
+   "extent": "outer",
+   "fade_ms": 400,
+   "why": "Voice and almost nothing else. The outer pair holds a very low blue bed; the inner pair is not here -- it belongs to the singer (see the binding). The head is a still white pin. Nothing moves that the song has not moved.",
+   "head": false
+  },
+  {
+   "effect": "drone",
+   "section": 0,
+   "from_s": 9.11,
+   "to_s": 17.75,
+   "amount": 0.22,
+   "colour": "#2f5bff",
+   "extent": "all",
+   "fade_ms": 600,
+   "why": "9.11s, the score's 'drums thicken' moment: the whole row comes into the bed, a little brighter. Still blue, still still.",
+   "head": false
+  },
+  {
+   "effect": "pulse",
+   "section": 0,
+   "from_s": 17.75,
+   "to_s": 25.56,
+   "amount": 0.3,
+   "colour": "#2f5bff",
+   "extent": "all",
+   "floor": 0.14,
+   "peak": 0.7,
+   "why": "17.75s: the tempo lifts from 89 to 119 and the song starts to walk. The room starts to walk with it -- a slow blue pulse on the new beat. The first rhythm the row has shown.",
+   "head": false
+  },
+  {
+   "effect": "drone",
+   "section": 1,
+   "from_s": 25.56,
+   "to_s": 33.75,
+   "amount": 0.16,
+   "colour": "#2f5bff",
+   "extent": "inner",
+   "fade_ms": 600,
+   "why": "The voice at its loudest before the riff: the OUTER pair now follows it (binding) and the inner pair holds low, the reverse of the opening -- the same idea, turned round, so the section reads as new without spending anything.",
+   "head": false
   }
  ],
  "bindings": [
@@ -615,55 +550,71 @@
    },
    "colour": "#e01313",
    "bed_colour": "#e01313"
+  },
+  {
+   "effect": "follow",
+   "section": 0,
+   "from_s": 0.0,
+   "to_s": 17.75,
+   "stream": "vocal",
+   "depth": 0.9,
+   "smooth": 0.25,
+   "extent": "inner",
+   "colour": "#2f5bff",
+   "why": "The inner pair breathes with the SINGER: every sung phrase swells the two middle lamps, in blue, and they fall away between phrases. The room is doing what the voice is doing, which is the difference between quiet and bland."
+  },
+  {
+   "effect": "follow",
+   "section": 1,
+   "from_s": 25.56,
+   "to_s": 32.7,
+   "stream": "vocal",
+   "depth": 0.9,
+   "smooth": 0.25,
+   "extent": "outer",
+   "colour": "#2f5bff",
+   "why": "Before the riff the voice is at its loudest, so the OUTER pair follows it now -- the opening's figure turned round."
   }
  ],
  "gestures": [
   {
-   "from_s": 1.76,
-   "to_s": 10.012,
    "effect": "beam",
-   "pattern": "snap",
+   "pattern": "hold",
+   "pan": 0.3,
+   "tilt": 0.38,
    "colour": "#ffffff",
-   "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
-   "id": "g0",
-   "at": {
-    "bar": 1,
-    "beat": 1,
-    "beats": 16
-   },
-   "start_s": 1.76,
-   "fade_ms": 0
+   "amount": 0.35,
+   "prism": 0,
+   "strobe": 0,
+   "fade_ms": 0,
+   "from_s": 0.0,
+   "to_s": 13.83,
+   "why": "The head is a still white pin on the left wall, low, for the whole opening. It does not move. Its first movement will be an event because of these fourteen seconds."
   },
   {
-   "from_s": 10.012,
-   "to_s": 18.265,
-   "effect": "beam",
-   "pattern": "sweep",
+   "effect": "glare",
    "colour": "#ffffff",
-   "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
-   "id": "g1",
-   "at": {
-    "bar": 4,
-    "beat": 1,
-    "beats": 16
-   },
-   "start_s": 10.012,
-   "fade_ms": 0
-  },
-  {
+   "amount": 0.9,
+   "extent": "all",
+   "head": false,
+   "for_beats": 1,
+   "fade_ms": 0,
    "at_s": 13.83,
-   "effect": "lift",
-   "by": 0.35,
-   "over_beats": 8,
-   "tilt": 0.4,
-   "why": "13.8s \u2014 synth and back-vocal enter",
-   "id": "g2",
-   "at": {
-    "bar": 5,
-    "beat": 2,
-    "beats": 8
-   },
-   "start_s": 13.83
+   "why": "13.83s: synth and backing voices enter -- the strongest moment in the intro. One beat of white across the row, the first hit of the show."
+  },
+  {
+   "effect": "beam",
+   "pattern": "hold",
+   "pan": 0.72,
+   "tilt": 0.44,
+   "colour": "#ffffff",
+   "amount": 0.4,
+   "prism": 0,
+   "strobe": 0,
+   "fade_ms": 0,
+   "from_s": 13.83,
+   "to_s": 25.56,
+   "why": "And the head's FIRST movement: one glide from the left wall to the right, on the entrance, then still again. One move in half a minute, so it is seen."
   },
   {
    "at_s": 17.75,
@@ -677,23 +628,8 @@
     "beat": 1,
     "beats": 2
    },
-   "start_s": 17.75
-  },
-  {
-   "from_s": 18.265,
-   "to_s": 26.517,
-   "effect": "beam",
-   "pattern": "snap",
-   "colour": "#ffffff",
-   "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
-   "id": "g4",
-   "at": {
-    "bar": 7,
-    "beat": 2,
-    "beats": 16
-   },
-   "start_s": 18.265,
-   "fade_ms": 0
+   "start_s": 17.75,
+   "head": false
   },
   {
    "at_s": 21.8,
@@ -708,23 +644,22 @@
     "beat": 1,
     "beats": 2
    },
-   "start_s": 21.8
+   "start_s": 21.8,
+   "head": false
   },
   {
-   "from_s": 26.517,
-   "to_s": 33.75,
    "effect": "beam",
-   "pattern": "sweep",
+   "pattern": "hold",
+   "pan": 0.72,
+   "tilt": 0.44,
    "colour": "#ffffff",
-   "why": "the head leads the opening \u2014 no drums here, so the room is one moving beam and a low wash",
-   "id": "g6",
-   "at": {
-    "bar": 11,
-    "beat": 2,
-    "beats": 14
-   },
-   "start_s": 26.517,
-   "fade_ms": 0
+   "amount": 0.22,
+   "prism": 0,
+   "strobe": 0,
+   "fade_ms": 900,
+   "from_s": 25.56,
+   "to_s": 32.72,
+   "why": "Towards the riff the pin dims, so the black at 32.72 is arrived at rather than cut to, and the white hit at 33.75 lands in a room that had been going quiet."
   },
   {
    "from_s": 32.718,

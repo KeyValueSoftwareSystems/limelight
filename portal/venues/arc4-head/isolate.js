@@ -6,6 +6,10 @@ const H = require("./helpers");
    (pan tracks its horizontal position). Holds for its span with a faint breath so
    it isn't a dead frame. Needs >=3 lamps to read; 4 pars is fine. */
 module.exports = function isolate(params, ctx) {
+  /* head: false -- leave the moving head to whichever cue owns it. A state that
+     lights the head cannot be dimmed by a gesture (the baker never lets a
+     gesture make the head darker than its bed), so a still low pin over a
+     pulse state came out at the pulse's brightness, not the pin's. */
   const colour = H.parseColour(params.colour, [1, 0.8, 0.4]);
   const rest = params.rest != null ? params.rest : 0.03;
 
@@ -39,6 +43,6 @@ module.exports = function isolate(params, ctx) {
   return {
     frames,
     loop_beats: loopBeats,
-    per_fixture: H.PAR_IDS.concat(H.HEAD_IDS),
+    per_fixture: H.PAR_IDS.concat(params.head === false ? [] : H.HEAD_IDS),
   };
 };

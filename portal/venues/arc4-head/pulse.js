@@ -7,6 +7,10 @@ const { flash, bump, PARX } = require("./beat");
    beat carries more weight), direction flipping each bar; the head runs a slow
    room-wide figure on its own continuous clock. floor breathes with energy. */
 module.exports = function pulse(params, ctx) {
+  /* head: false -- leave the moving head to whichever cue owns it. A state that
+     lights the head cannot be dimmed by a gesture (the baker never lets a
+     gesture make the head darker than its bed), so a still low pin over a
+     pulse state came out at the pulse's brightness, not the pin's. */
   const colour = H.parseColour(params.colour, [0.15, 0.5, 1]);
   const extent = params.extent || "all";
   const pars = H.parsForExtent(extent);
@@ -27,7 +31,7 @@ module.exports = function pulse(params, ctx) {
         + 0.15 * bump(bphase, 0.5 + 0.25 * (1 - pos), 0.06);
       H.setPar(f, par, colour, Math.min(1, lvl));
     }
-    H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHead(f, H.HEADS[0], {
       level: 0.5 + 0.35 * energy + 0.15 * flash(bphase, 0.5), colour,
       pan: 0.498 + 0.45 * Math.sin(2 * Math.PI * beat / 10.5),
       tilt: 0.42 + 0.33 * Math.sin(2 * Math.PI * beat / 7.3),
@@ -35,5 +39,5 @@ module.exports = function pulse(params, ctx) {
     return f;
   }
 
-  return { beat: true, render, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
+  return { beat: true, render, per_fixture: pars.map(p => p.id).concat(params.head === false ? [] : H.HEAD_IDS) };
 };

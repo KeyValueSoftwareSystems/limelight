@@ -5,6 +5,10 @@ const H = require("./helpers");
    feel): the pars pulse on a sine, the head oscillates its pan faster than the
    pars. This is a rhythm change, so it LOOPS — the frames tile a short window. */
 module.exports = function gear(params, ctx) {
+  /* head: false -- leave the moving head to whichever cue owns it. A state that
+     lights the head cannot be dimmed by a gesture (the baker never lets a
+     gesture make the head darker than its bed), so a still low pin over a
+     pulse state came out at the pulse's brightness, not the pin's. */
   const from = params.from > 0 ? params.from : 1;
   const to = params.to > 0 ? params.to : 2;
   const rate = to / from;                          // pulses per beat, roughly
@@ -21,7 +25,7 @@ module.exports = function gear(params, ctx) {
     const level = 0.25 + 0.6 * pulse;
     const f = H.emptyFrame();
     for (const par of H.PARS) H.setPar(f, par, colour, level);
-    H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHead(f, H.HEADS[0], {
       level: 0.3 + 0.4 * pulse, colour,
       pan: 0.60 + 0.20 * Math.sin(2 * Math.PI * p * pulses * 1.5),  // head runs faster than the pars
       tilt: 0.34 + 0.10 * Math.sin(2 * Math.PI * p * pulses),
@@ -32,6 +36,6 @@ module.exports = function gear(params, ctx) {
   return {
     frames,
     loop_beats: loopBeats,
-    per_fixture: H.PAR_IDS.concat(H.HEAD_IDS),
+    per_fixture: H.PAR_IDS.concat(params.head === false ? [] : H.HEAD_IDS),
   };
 };
