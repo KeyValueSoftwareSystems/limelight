@@ -197,3 +197,25 @@ Open, reported by the composer and NOT yet verified by me:
   Found by bisecting one gesture at a time. Needs reproducing.
 - An orphaned composer process from a killed run rewrote the workings file
   roughly once a minute mid-session. Kill the process group, not the parent.
+
+## 12 of 12 on the honest referee, 2026-09-16 15:52
+
+Span-capable states did what floors, layering rules and dial tuning could not.
+
+                        7-state show   16-state show   reference
+  all four lit             89.3%          74.3%          60.7%
+  lamp at true black        9.5%          15.2%          24.5%
+  lamp correlation          0.72           0.43           0.50
+  peak on peak            106.3s          96.6s          92.3s
+  loudest at the peak        65%            99%            77%
+
+Lamp correlation 0.43 beats the reference's 0.50 -- the number that had not
+moved all session through floors, layering limits or response curves. Letting a
+state be shorter than its section fixed it, because lamps take turns being out
+instead of all dimming together.
+
+Still short: the rig clears DMX 200 in 7.9% of frames against the reference's
+20.3%. The composer's own diagnosis, not yet verified: `accent` cannot reach
+the top because its flash is scaled by an onset envelope peaking at 0.45, so
+its hottest hit renders about 100 DMX. If true that is the same class of bug as
+the binding floors -- a ceiling in an effect that no plan can lift.
