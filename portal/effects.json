@@ -211,7 +211,7 @@
    "name": "Drive",
    "kind": "state",
    "tier": 1,
-   "blurb": "Every beat hits: the two pairs call and respond, downbeats flash white, the head sweeps the room. The bed for a chorus or drop.",
+   "blurb": "Every beat hits: the two pairs call and respond, downbeats flash white, the head sweeps the room. The bed for a chorus or drop. stagger delays each lamp by a fraction of a beat across the rig, so the figure arrives left to right instead of all at once; 0 is together, 0.25 is a quarter beat apart",
    "dimension": "amount",
    "returns": false,
    "dials": {
@@ -246,6 +246,11 @@
      "default": 1.0,
      "min": 0.4,
      "max": 1.0
+    },
+    "stagger": {
+     "default": 0,
+     "min": 0,
+     "max": 0.9
     }
    },
    "fires_on": [
@@ -317,7 +322,7 @@
    "name": "Breakdown",
    "kind": "state",
    "tier": 1,
-   "blurb": "A hard hit on every beat from a very low floor, pairs swapping colour each bar. The bed for a come-down where each beat still lands.",
+   "blurb": "A hard hit on every beat from a very low floor, pairs swapping colour each bar. The bed for a come-down where each beat still lands. stagger delays each lamp by a fraction of a beat across the rig, so the figure arrives left to right instead of all at once; 0 is together, 0.25 is a quarter beat apart",
    "dimension": "amount",
    "returns": false,
    "dials": {
@@ -349,6 +354,11 @@
      "default": 1.0,
      "min": 0.4,
      "max": 1.0
+    },
+    "stagger": {
+     "default": 0,
+     "min": 0,
+     "max": 0.9
     }
    },
    "fires_on": [
