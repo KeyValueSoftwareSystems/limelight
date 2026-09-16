@@ -762,11 +762,27 @@
    "colour": "#ffffff",
    "amount": 0.9,
    "prism": 0,
-   "strobe": 0,
+   "strobe": 12,
    "from_s": 33.75,
    "to_s": 41.75,
-   "why": "THE BASS RIFF. Bass and strings, no drums, no voice: the one fixture that can point becomes the soloist. Clean white beam, no prism, snapping to a new wall on every downbeat -- four bars, four places -- and drifting across each bar with the bass. The row stays a dim blue field underneath so the beam cuts.",
-   "fade_ms": 0
+   "why": "THE BASS RIFF. Bass and strings, no drums, no voice: the one fixture that can point becomes the soloist. Clean white beam, no prism, snapping to a new wall on every downbeat -- four bars, four places -- and drifting across each bar with the bass. The row stays a dim blue field underneath so the beam cuts. Now: it NODS hard and FLASHES on beats 2 and 2-and-a-half, where the riff punches, from the very first bar -- and each turn to a new wall begins a beat early so the head arrives on the downbeat instead of leaving on it.",
+   "fade_ms": 0,
+   "accents": [
+    2,
+    2.5
+   ],
+   "strobe_on": "accent"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "head": false,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "at_s": 33.75,
+   "why": "33.75s: bass and strings arrive together out of a one-second black. ONE beat of the whole row in white -- the row's single big statement in this phrase -- and then it drops to the blue bed and the head takes over. This was the biggest arrival in the first half of the song and it had been getting a dim bed fading in."
   },
   {
    "effect": "trade",
@@ -781,9 +797,9 @@
    ],
    "for_beats": 1,
    "fade_ms": 0,
-   "from_s": 35.2575,
-   "to_s": 35.76,
-   "why": "Bar 15, beat 4 only: a RED SPARK runs across the blue row -- left to right -- one crossing in one beat. The row stays lit at 0.30, so what travels is a hot colour over a cold field, not a lamp switching on. The one thing the row does per bar, so the head stays the story.",
+   "from_s": 34.252,
+   "to_s": 34.504,
+   "why": "Bar 15: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Left to right.",
    "head": false
   },
   {
@@ -799,9 +815,9 @@
    ],
    "for_beats": 1,
    "fade_ms": 0,
-   "from_s": 37.26,
-   "to_s": 37.76,
-   "why": "Bar 16, beat 4 only: a RED SPARK runs across the blue row -- right to left -- one crossing in one beat. The row stays lit at 0.30, so what travels is a hot colour over a cold field, not a lamp switching on. The one thing the row does per bar, so the head stays the story.",
+   "from_s": 36.26,
+   "to_s": 36.51,
+   "why": "Bar 16: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Right to left.",
    "head": false
   },
   {
@@ -817,9 +833,9 @@
    ],
    "for_beats": 1,
    "fade_ms": 0,
-   "from_s": 39.26,
-   "to_s": 39.76,
-   "why": "Bar 17, beat 4 only: a RED SPARK runs across the blue row -- left to right -- one crossing in one beat. The row stays lit at 0.30, so what travels is a hot colour over a cold field, not a lamp switching on. The one thing the row does per bar, so the head stays the story.",
+   "from_s": 38.26,
+   "to_s": 38.51,
+   "why": "Bar 17: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Left to right.",
    "head": false
   },
   {
@@ -846,9 +862,9 @@
    ],
    "for_beats": 1,
    "fade_ms": 0,
-   "from_s": 41.2525,
-   "to_s": 41.75,
-   "why": "Bar 18, beat 4 only: a RED SPARK runs across the blue row -- right to left -- one crossing in one beat. The row stays lit at 0.30, so what travels is a hot colour over a cold field, not a lamp switching on. The one thing the row does per bar, so the head stays the story.",
+   "from_s": 40.258,
+   "to_s": 40.506,
+   "why": "Bar 18: the red spark leaves on beat 2 and ARRIVES on the 'and' of 2 -- which is where this riff actually punches, every bar. A run is read when it lands, not when it starts, so it is aimed to land on the hit and takes a quarter of a second, not a whole beat. Right to left.",
    "head": false
   },
   {
@@ -857,12 +873,16 @@
    "colour": "#ffffff",
    "amount": 1.0,
    "prism": 0,
-   "strobe": 10,
-   "strobe_on": "downbeat",
+   "strobe": 12,
+   "strobe_on": "accent",
    "from_s": 41.75,
    "to_s": 48.24,
-   "why": "Second phrase, drums creeping in: the head keeps its stations but now STROBES on every downbeat -- the first strobe of the show, white, a burst at the top of each bar. Rhythm from the fixture that can do it.",
-   "fade_ms": 0
+   "why": "Second phrase, drums creeping in: the head keeps its stations but now STROBES on every downbeat -- the first strobe of the show, white, a burst at the top of each bar. Rhythm from the fixture that can do it. Now: it NODS hard and FLASHES on beats 2 and 2-and-a-half, where the riff punches, from the very first bar -- and each turn to a new wall begins a beat early so the head arrives on the downbeat instead of leaving on it.",
+   "fade_ms": 0,
+   "accents": [
+    2,
+    2.5
+   ]
   },
   {
    "effect": "glare",
@@ -1029,8 +1049,16 @@
    "strobe": 0,
    "from_s": 49.75,
    "to_s": 57.76,
-   "why": "The head goes RED with the PRISM for the first time all night: one red beam becomes six red rays, snapping wall to wall on every beat over a row that is now red and blue. The prism was withheld for fifty seconds so that this reads as an arrival.",
-   "fade_ms": 0
+   "why": "The head goes RED with the PRISM for the first time all night: one red beam becomes six red rays, snapping wall to wall on every beat over a row that is now red and blue. The prism was withheld for fifty seconds so that this reads as an arrival. The prism PULSES on the front of every beat rather than sitting on, the tilt kicks on every beat, and each turn leaves a beat early so it lands on the beat.",
+   "fade_ms": 0,
+   "accents": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "prism_on": "beat",
+   "anticipate": true
   },
   {
    "effect": "glare",

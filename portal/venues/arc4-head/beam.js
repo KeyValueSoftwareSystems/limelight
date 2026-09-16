@@ -24,6 +24,14 @@ module.exports = function beam(params, ctx) {
   const prism = params.prism != null ? params.prism : 0;
   const strobeHz = params.strobe != null ? Math.min(25, Math.max(0, params.strobe)) : 0;
   const strobeOn = params.strobe_on || "downbeat";
+  /* accents: where the MUSIC punches inside the bar, as beat positions (1 = the
+     downbeat, 2.5 = the "and" of two). On each one the head kicks its tilt and
+     fires its strobe -- the two things it can do instantly. Turning is slow on
+     this fixture (7 units a frame, a full beat wall to wall), so rhythm has to
+     live in the nod and the flash, not in the turn. */
+  const accents = Array.isArray(params.accents) ? params.accents.map(Number) : [];
+  const anticipate = params.anticipate !== false;     // start a turn a beat early so the ARRIVAL lands on the beat
+  const prismOn = params.prism_on || "always";         // "always" | "beat": pulse it on the front of each beat
   const STATIONS = [[0.12, 0.30], [0.86, 0.34], [0.30, 0.70], [0.70, 0.66]];   // pan, tilt
 
   function render(bx) {
@@ -37,29 +45,36 @@ module.exports = function beam(params, ctx) {
     const bi = isDown ? 0 : (((beatIndex % 4) + 4) % 4 || 1);
     const beatInBar = bi + bphase;
     let pan, tilt;
+    /* how close are we to an accent? 1 on it, falling to 0 over a third of a beat */
+    const hit = accents.reduce((m, a) => { const d = beatInBar + 1 - a; return (d >= 0 && d < 0.34) ? Math.max(m, 1 - d / 0.34) : m; }, 0);
     if (pattern === "stations") {
-      const [p0, t0] = STATIONS[((barIdx % 4) + 4) % 4];
+      /* the station for THIS bar -- or, from beat 4, for the NEXT bar, so the
+         head is already travelling and arrives on the downbeat instead of
+         leaving on it */
+      const which = (anticipate && beatInBar >= 3.0) ? barIdx + 1 : barIdx;
+      const [p0, t0] = STATIONS[((which % 4) + 4) % 4];
       const drift = 0.10 * (beatInBar / 4) * (barIdx % 2 ? -1 : 1);          // the bar-long drift
-      pan = p0 + drift; tilt = t0 + 0.12 * kick(bphase);                    // the kick on the beat
+      pan = p0 + drift; tilt = t0 + 0.06 * kick(bphase) + 0.24 * hit;        // small nod each beat, a big one on the accents
     } else if (pattern === "snap") {
       /* Every TWO beats, 0.15 to 0.85. Wall to wall on every beat asked this head
          to cross 255 pan units in half a second, and its slew limit is 7 units a
          frame -- so it never arrived anywhere and hovered at mid-pan through the
          whole drop. 180 units in a second lands with room to spare and reads as
          a decision, not a shiver. */
-      const side = Math.floor(beatIndex / 2) % 2;
-      pan = side ? 0.85 : 0.15; tilt = 0.30 + 0.36 * (Math.floor(beatIndex / 4) % 2) + 0.12 * kick(bphase);
+      const side = Math.floor((beatIndex + (anticipate ? 1 : 0)) / 2) % 2;   // leave a beat early, arrive on the beat
+      pan = side ? 0.80 : 0.20; tilt = 0.30 + 0.30 * (Math.floor(beatIndex / 4) % 2) + 0.10 * kick(bphase) + 0.22 * hit;
     } else if (pattern === "sweep") {
       const s = 1 - Math.abs(2 * (beatInBar / 4) - 1); pan = 0.02 + 0.96 * s; tilt = 0.16 + 0.72 * kick(bphase);
     } else {
       const w = 2 * Math.PI * beat / 4; pan = 0.498 + 0.47 * Math.sin(w); tilt = 0.498 + 0.4 * Math.sin(2 * w);
     }
-    const fire = strobeHz > 0 && (strobeOn === "always" || (strobeOn === "beat" && bphase < 0.35) || (strobeOn === "downbeat" && isDown && bphase < 0.5));
+    const fire = strobeHz > 0 && (strobeOn === "always" || (strobeOn === "beat" && bphase < 0.35) || (strobeOn === "downbeat" && isDown && bphase < 0.5) || hit > 0.4);
+    const prismNow = prismOn === "beat" ? (bphase < 0.4 ? prism : 0) : prism;
     const f = H.emptyFrame();
     H.setHead(f, H.HEADS[0], {
       level: amount * (0.85 + 0.15 * energy), colour,
       pan: H.clamp(pan, 0, 1), tilt: H.clamp(tilt, 0, 1),
-      gobo: params.gobo != null ? params.gobo : 0, prism,
+      gobo: params.gobo != null ? params.gobo : 0, prism: prismNow,
       strobe: fire ? strobeHz : 0,
     });
     return f;

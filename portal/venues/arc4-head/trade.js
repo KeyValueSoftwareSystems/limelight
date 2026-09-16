@@ -42,7 +42,11 @@ module.exports = function trade(params, ctx) {
 
     for (let i = 0; i < N; i++) {
       const t = i / (N - 1 || 1);
-      let pos = (t * runs) % 1;
+      /* (t*runs) % 1 is 0 when t is exactly 1, so the FINAL frame of a run snapped
+         the light back to where it started -- and the release fade then held that
+         wrong frame for 180ms. A run must end where it was going. */
+      const cyc = t * runs;
+      let pos = cyc >= runs - 1e-9 ? 1 : cyc % 1;
       if (rl) pos = 1 - pos;
       const f = H.emptyFrame();
       for (let k = 0; k < n; k++) {

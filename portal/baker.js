@@ -439,6 +439,12 @@ for (let t = 0; t < dur; t += 1 / fps) {
           : (baseRes && baseRes.params && baseRes.params.fade_ms != null) ? baseRes.params.fade_ms : cueFadeMs);
       const n = Math.round((ms / 1000) * fps);
       if (n > 0) { fadeFrom[fid] = lastOut[fid].slice(); fadeLeft[fid] = n; fadeSpan[fid] = n; }
+      /* A cue that asks for NO fade arrives now, whatever was mid-fade before
+         it. Without this a hit landing three frames after a blackout ended was
+         blended into the tail of the bed's 180ms fade-up and came in as a
+         six-frame ramp -- the loudest arrival in the first half of the song
+         reading as a slow swell. */
+      else fadeLeft[fid] = 0;
     }
     drivenBy[fid] = nowDriven;
 
