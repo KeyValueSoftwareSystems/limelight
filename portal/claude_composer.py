@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -725,16 +726,71 @@ def run_claude(work, brief, system_prompt, model, turns):
         str(turns),
         "--model",
         model,
+        "--output-format",
+        "stream-json",
+        "--verbose",
     ]
-    r = subprocess.run(
-        cmd,
-        cwd=work,
-        capture_output=True,
-        text=True,
-        timeout=5400,
-        stdin=subprocess.DEVNULL,
-    )
-    return r.returncode, (r.stdout or "").strip(), (r.stderr or "").strip()
+    t0 = time.time()
+    events = os.path.join(work, "events.jsonl")
+    out_lines, text_out = [], []
+    with open(events, "w") as log:
+        proc = subprocess.Popen(cmd, cwd=work, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, text=True,
+                                stdin=subprocess.DEVNULL, bufsize=1)
+        try:
+            for line in proc.stdout:
+                log.write("%.3f %s" % (time.time() - t0, line))
+                log.flush()
+                out_lines.append(line)
+                try:
+                    ev = json.loads(line)
+                except Exception:
+                    continue
+                if ev.get("type") == "result" and ev.get("result"):
+                    text_out.append(str(ev["result"]))
+            proc.wait(timeout=5400)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            return 124, "\n".join(text_out), "timed out"
+    err = proc.stderr.read() if proc.stderr else ""
+    return proc.returncode, ("\n".join(text_out) or "".join(out_lines)).strip(), (err or "").strip()
+
+
+def timing_report(work):
+    """Where the wall clock went: one line per tool, plus the turn count."""
+    at = os.path.join(work, "events.jsonl")
+    if not os.path.isfile(at):
+        return []
+    turns, tools, last = 0, {}, 0.0
+    gaps = []
+    for line in open(at):
+        try:
+            stamp, rest = line.split(" ", 1)
+            t = float(stamp)
+            ev = json.loads(rest)
+        except Exception:
+            continue
+        if ev.get("type") == "assistant":
+            turns += 1
+            gaps.append(t - last)
+            last = t
+        for blk in (ev.get("message") or {}).get("content") or []:
+            if isinstance(blk, dict) and blk.get("type") == "tool_use":
+                nm = blk.get("name", "?")
+                cmd = ((blk.get("input") or {}).get("command") or "")[:40]
+                key = nm + (":" + cmd.split()[0] if nm == "Bash" and cmd else "")
+                tools[key] = tools.get(key, 0) + 1
+        if ev.get("type") == "result":
+            last = t
+    lines = ["  turns: %d over %.0fs" % (turns, last)]
+    if gaps:
+        gaps_sorted = sorted(gaps)
+        lines.append("  per-turn wall: median %.1fs  p90 %.1fs  max %.1fs"
+                     % (gaps_sorted[len(gaps_sorted) // 2],
+                        gaps_sorted[int(len(gaps_sorted) * 0.9)], gaps_sorted[-1]))
+    for k, v in sorted(tools.items(), key=lambda kv: -kv[1])[:10]:
+        lines.append("  %-28s %d calls" % (k, v))
+    return lines
 
 
 def read_plan(work):
@@ -820,6 +876,11 @@ def main():
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w") as f:
         json.dump(plan, f, indent=1)
+    rep = timing_report(work)
+    if rep:
+        print("\nwhere the time went:")
+        for line in rep:
+            print(line)
     print(f"\nwrote -> {out}\nworkings in {work}")
 
 
