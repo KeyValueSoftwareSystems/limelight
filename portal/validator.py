@@ -110,7 +110,7 @@ def validate(plan, catalog, score_overview):
     effects_by_id = {e["id"]: e for e in catalog}
     sections = score_overview.get("sections") or []
     moments = score_overview.get("moments") or []
-    streams = set()
+    streams = {"beat", "downbeat", "bar"}
     for s in (score_overview.get("streams") or score_overview.get("lanes") or []):
         if isinstance(s, str):
             streams.add(s)

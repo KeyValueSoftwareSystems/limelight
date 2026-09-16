@@ -84,7 +84,38 @@ function makeStreamSampler(score, opts) {
   /* Linear interpolation between window centres. Window i is the average over
      [i*win, (i+1)*win), so its centre is (i+0.5)*win; x = t/win - 0.5 lands on
      window i when t is that centre. Clamped at both ends. */
+  const beatList = (score && Array.isArray(score.beats) ? score.beats : [])
+    .map((b) => (b && b.t != null ? b.t : b))
+    .filter((x) => typeof x === "number");
+  const downList = (score && Array.isArray(score.beats) ? score.beats : [])
+    .filter((b) => b && b.downbeat && typeof b.t === "number")
+    .map((b) => b.t);
+  const gridOf = { beat: beatList, downbeat: downList, bar: downList };
+  const gaps = [];
+  for (let i = 1; i < beatList.length; i++) gaps.push(beatList[i] - beatList[i - 1]);
+  gaps.sort((a, b) => a - b);
+  const beatGap = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 0.5;
+
+  function samplePulse(times, t, fall) {
+    if (!times.length || fall <= 0) return 0;
+    let lo = 0, hi = times.length - 1, at = -1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (times[mid] <= t) { at = mid; lo = mid + 1; } else hi = mid - 1;
+    }
+    if (at < 0) return 0;
+    const dt = t - times[at];
+    if (dt >= fall) return 0;
+    const u = 1 - dt / fall;
+    return clamp01(u * u);
+  }
+
   function sampleStem(name, t) {
+    const grid = String(name == null ? "" : name).toLowerCase().trim();
+    if (gridOf[grid]) {
+      const fall = grid === "beat" ? beatGap * 0.9 : beatGap * 3.6;
+      return samplePulse(gridOf[grid], t, fall);
+    }
     const resolved = resolveStemName(name);
     if (resolved === null) return 0;
     const series = stems[resolved];
@@ -108,7 +139,7 @@ function makeStreamSampler(score, opts) {
   let maxI = 0;
   for (const h of hits) { const v = h.intensity != null ? h.intensity : 1; if (v > maxI) maxI = v; }
   const norm = maxI > 0 ? maxI : 1;
-  const decay = opts.onset_decay_s > 0 ? opts.onset_decay_s : 0.12;
+    const decay = opts.onset_decay_s > 0 ? opts.onset_decay_s : 0.34;
 
   function sampleOnset(t) {
     let v = 0;

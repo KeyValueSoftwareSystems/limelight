@@ -168,7 +168,7 @@ function placeFixtures(show) {
   const lo = Math.min(...xs), hi = Math.max(...xs);
   const span = (hi - lo) || 1;
   /* keep the rig off the edges, and give a wider rig a wider stage */
-  const L = 0.055, R = 0.945;
+  const L = 0.075, R = 0.925;
   const zs = fx.map(f => (f.at && f.at[2]) || 0);
   const zlo = Math.min(...zs), zhi = Math.max(...zs), zspan = (zhi - zlo) || 1;
   /* y = depth: +y is toward the audience (downstage) */
@@ -186,9 +186,9 @@ function placeFixtures(show) {
     const row = {
       addr: f.address, id: f.id.replace(/_/g, " "), x,
       /* higher fixtures sit higher up the frame; depth adds perspective offset */
-      y: 0.60 - 0.30 * z - depthShift - (zspan > 0.01 ? 0 : 0.02) * Math.abs(x - 0.5) * 2,
+      y: 0.70 - 0.30 * z - depthShift - (zspan > 0.01 ? 0 : 0.02) * Math.abs(x - 0.5) * 2,
       /* closer (downstage) fixtures render slightly larger */
-      scale: (0.85 + 0.15 * yNorm) * 1.45,
+      scale: (0.85 + 0.15 * yNorm) * 1.12,
     };
     (f.type === "head13" ? heads : pars).push(row);
   });
@@ -1449,7 +1449,7 @@ function readFixtures(idx) {
                                             az: 0, el: 0, wheel: { name: "—" }, dim: 0 } };
 }
 
-const FLOOR_Y = 0.86;
+const FLOOR_Y = 0.82;
 
 function paintBlank() {
   sizeCanvas();

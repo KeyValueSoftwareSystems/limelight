@@ -15,7 +15,8 @@ module.exports = function accent(params, ctx) {
     const v = H.clamp(value || 0, 0, 1);
     const colour = H.parseColour(params.colour, [1, 1, 1]);
     const bed = H.parseColour(params.bed_colour, [1, 0.75, 0.35]);
-    const over = v > threshold ? (v - threshold) / Math.max(1e-6, 1 - threshold) : 0;
+    const raw = v > threshold ? (v - threshold) / Math.max(1e-6, 1 - threshold) : 0;
+    const over = raw * raw * (3 - 2 * raw);
     const f = H.emptyFrame();
     for (const p of pars) {
       if (over > 0) H.setPar(f, p, colour, H.clamp(rest + (0.98 - rest) * over, 0, 1));

@@ -73,6 +73,30 @@ const sections = score.sections || [];
    other gesture is a departure that brightens and must RETURN to the resting
    look, so it composites OVER the state/binding by max rather than blacking it
    out when its envelope decays. */
+const beatTimes = (score.beats || [])
+  .map((b) => (b && b.t != null ? b.t : b))
+  .filter((x) => typeof x === "number");
+
+function nearestBeat(t) {
+  if (!beatTimes.length) return 0;
+  let lo = 0, hi = beatTimes.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (beatTimes[mid] < t) lo = mid + 1; else hi = mid;
+  }
+  const prev = Math.max(0, lo - 1);
+  return Math.abs(beatTimes[prev] - t) <= Math.abs(beatTimes[lo] - t) ? prev : lo;
+}
+
+function beatSecond(i) {
+  if (!beatTimes.length) return 0;
+  const step = 60 / bpm;
+  if (i < 0) return beatTimes[0] + i * step;
+  if (i >= beatTimes.length)
+    return beatTimes[beatTimes.length - 1] + (i - beatTimes.length + 1) * step;
+  return beatTimes[i];
+}
+
 const REDUCTIVE = new Set(["blackout", "cut", "hush", "strip", "isolate"]);
 
 function sectionAt(t) {
@@ -112,15 +136,16 @@ function resolveGesture(g) {
   if (g.moment != null && g.moment >= 0 && g.moment < moments.length) {
     const m = moments[g.moment];
     const leadBeats = g.lead_beats || 0;
-    startS = (m.time_s || m.at_s || 0) - leadBeats * (60 / bpm);
     const forBeats = g.for_beats || edef.default_beats || 1;
-    endS = startS + forBeats * (60 / bpm);
+    const fire = nearestBeat(m.time_s || m.at_s || 0) - leadBeats;
+    startS = beatSecond(fire);
+    endS = beatSecond(fire + forBeats);
   } else if (g.from_moment != null && g.to_moment != null) {
     const fm = moments[g.from_moment];
     const tm = moments[g.to_moment];
     if (!fm || !tm) return null;
-    startS = fm.time_s || fm.at_s || 0;
-    endS = tm.time_s || tm.at_s || 0;
+    startS = beatSecond(nearestBeat(fm.time_s || fm.at_s || 0));
+    endS = beatSecond(nearestBeat(tm.time_s || tm.at_s || 0));
   } else {
     return null;
   }
