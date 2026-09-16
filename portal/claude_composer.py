@@ -97,10 +97,14 @@ def bar_table(song):
     st = sc.get("stems_temporal") or {}
     lanes = st.get("stems") or {}
     lw = st.get("window_s") or 0.5
+    flags = [i for i, b in enumerate(sc.get("beats") or [])
+             if isinstance(b, dict) and b.get("downbeat")]
+    phase = (flags[0] % bpb) if flags else 0
     rows = []
-    for bar in range(len(beats) // bpb):
-        t0 = beats[bar * bpb]
-        t1 = beats[min(len(beats) - 1, (bar + 1) * bpb)]
+    for bar in range((len(beats) - phase) // bpb):
+        i0 = phase + bar * bpb
+        t0 = beats[i0]
+        t1 = beats[min(len(beats) - 1, i0 + bpb)]
         if t1 <= t0:
             continue
         seg = loud[int(t0 / w):max(int(t0 / w) + 1, int(t1 / w))]
@@ -139,6 +143,15 @@ def stream_table(song):
         rows.append((name, p50, p90, peak, above))
     rows.sort(key=lambda r: -r[4])
     return rows
+
+
+def ink_table(rig="arc4-head"):
+    try:
+        r = subprocess.run(["node", os.path.join(REPO, "portal", "ink.js"), rig],
+                           capture_output=True, text=True, timeout=120)
+        return [ln for ln in (r.stdout or "").splitlines() if ln.strip()]
+    except Exception:
+        return []
 
 
 def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
@@ -193,6 +206,37 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "",
             *[f"  {nm:18s} median {a:.2f}  p90 {b:.2f}  peak {c:.2f}  above.5 {d:4.1f}%"
               for nm, a, b, c, d in stream_table(song)[:18]],
+            "",
+            "WHAT EACH EFFECT PUTS ON THE RIG",
+            "",
+            "Measured by rendering every effect on its own at default dials. ink is",
+            "the share of lamps it lights, differ is how often the lamps are doing",
+            "different things from each other, peak is the brightest any lamp gets.",
+            "",
+            *ink_table(rig),
+            "",
+            "Read the two columns together and the shape of the catalog is plain:",
+            "almost nothing is both bright and varied. Everything at ink 1.00 moves",
+            "the rig as one body (differ 0%), and everything that genuinely differs",
+            "lights at most 42% of it. trade is the one exception, ink 1.00 at differ",
+            "98%. So a loud section wanting texture needs TWO layers - a full-ink bed",
+            "carrying the room and a varied pattern over it - while a quiet section",
+            "wants one. A chase on a 4-lamp rig is one lit lamp: at the climax that",
+            "empties the room, and in a quiet passage it is the whole idea.",
+            "",
+            "HOW BIG A GESTURE HAS TO BE",
+            "",
+            "States and gestures are not the same instrument. A state is the resting",
+            "look and should leave headroom; a gesture is the departure, and it is the",
+            "only thing that should reach the top of the rig.",
+            "",
+            "The last show got above 200 of 255 in 2.2% of its frames. The hand-built",
+            "reference does it in about 20% - fourteen times more often - and that gap",
+            "is most of why one reads as alive and the other as flat. The cause was in",
+            "the plan, not the renderer: the explicit gesture levels were 0.34, 0.40,",
+            "0.42, 0.45, 0.70, 0.72, 0.72, 0.80, 0.85, 0.85, 0.85, a median of 0.72,",
+            "and 17 of 28 gestures set no level at all. A gesture at 0.72 is a state",
+            "with a start time. If a moment is worth marking, mark it at the top.",
             "",
             "ASKING THE SCORE FOR MORE",
             "",

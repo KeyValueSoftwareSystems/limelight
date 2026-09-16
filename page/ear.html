@@ -1693,8 +1693,9 @@
         const idx = beats.indexOf(closest);
         const down =
           (((idx - (SHIFT - BASE)) % per) + per) % per === firstIndex();
-        const bar = Math.floor(idx / per) + 1;
-        const beat = (idx % per) + 1;
+        const phase = firstIndex();
+        const bar = Math.floor((idx - phase) / per) + 1;
+        const beat = ((((idx - phase) % per) + per) % per) + 1;
         return (
           `<span style="color:${down ? "#fff" : "#e8a33d"};font-weight:700">${down ? "▼ Downbeat" : "Beat"}</span>` +
           `<span style="color:#7b8599"> · Bar ${bar}, Beat ${beat}</span>` +
@@ -1910,19 +1911,20 @@
   }
 
   function firstIndex() {
+    const per = SCORE.grid.beats_per_bar;
+    const beats = SCORE.beats || [];
+    const flagged = beats.findIndex((bt) => bt && bt.downbeat);
+    if (flagged >= 0) return ((flagged % per) + per) % per;
     let best = 0,
       gap = 1e9;
-    (SCORE.beats || []).forEach((bt, i) => {
+    beats.forEach((bt, i) => {
       const d = Math.abs(bt.t - SCORE.grid.first_beat_s);
       if (d < gap) {
         gap = d;
         best = i;
       }
     });
-    return (
-      ((best % SCORE.grid.beats_per_bar) + SCORE.grid.beats_per_bar) %
-      SCORE.grid.beats_per_bar
-    );
+    return ((best % per) + per) % per;
   }
 
   const MSEC_COLORS = [
