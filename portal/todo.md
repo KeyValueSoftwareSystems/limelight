@@ -1,102 +1,86 @@
 # Show quality: what is measured, what is left
 
-Referee for every claim below: `raga-of-revenge`, rig `arc4-head`, compared against the
-teammate's known-good show in `~/Downloads/limelight-show-method`, same song, same rig,
-same 41-channel 40fps frame format.
+Referee: `tools/shape.js`, ten checks, calibrated so the teammate's hand-built show
+in `~/Downloads/limelight-show-method` answers all ten. Run it on any baked lights
+file. `tools/watch.sh` shows what the composer decided and anything the validator
+dropped; `tools/monitor.sh` samples every 10s into `/tmp/monitor.log`.
 
-|                                            | teammate (good)           | ours, 2026-09-16 |
-| ------------------------------------------ | ------------------------- | ---------------- |
-| light rises within 60ms of a measured beat | 69.6% (+2.6 sd over null) | 30.6% (+0.8 sd)  |
-| single-frame jumps > 30 DMX                | 838                       | 305              |
-| dark frames                                | 14.4%                     | 3.0%             |
-| frames in the middling band                | 37.2%                     | 76.5%            |
-| frames where lamps differ from each other  | 68.8%                     | 39.9%            |
+## The ten checks
 
-The headline: **their show jumps ~3x more than ours and still reads as designed.**
-Jump count is not the defect. Jumps that miss the beat are. Reducing jump count was the
-wrong target and cost the show energy without fixing what was visible.
+| check                    | what fails it                                                             | reference |
+| ------------------------ | ------------------------------------------------------------------------- | --------- |
+| on the grid              | rises not within 60ms of a measured beat, 2 sd over a circular-shift null | +2.6 sd   |
+| goes dark                | under 4% or over 30% of frames below 12 DMX                               | 14.4%     |
+| held back                | over 55% of frames mid-level                                              | 37.2%     |
+| not a wall               | under 45% of frames with lamps differing by 20 DMX                        | 68.8%     |
+| never parks              | any unchanging stretch over 6s                                            | 4.7s      |
+| peak on peak             | brightest 5s where the song is under 85% of its loudness range            | 90%+      |
+| loudest where it matters | that stretch under 75% of the show's own maximum                          | 77%       |
+| the strong moments land  | under 60% of moments at 0.70+ get a visible change                        | 10 of 11  |
+| lamps act apart          | median lamp-pair correlation over 0.75                                    | 0.50      |
+| colour carries the form  | one colour over 72% of lit time                                           | 64%       |
 
----
+## Bugs found and fixed, 2026-09-16
 
-## Validated 2026-09-16
+Every one degraded every show, and none were visible in the finished output.
 
-`tools/shape.js` is the referee, nine checks, calibrated so the teammate's hand-built
-show answers 9 of 9 and ours answered 3 of 9. Two checks were wrong when first written
-and both showed as a failure on a show known to be good: peak-on-peak took a
-single-frame argmax of a plateau, and the colour count bucketed brightness as hue.
-Both now measure over a 5s stretch with brightness divided out.
+- **`follow` rendered in a hard-coded cream** `[0.9, 0.8, 0.55]`, saturation exactly
+  0.39 — the median measured across the whole show — and `colour` was not a declared
+  dial, so no plan could set it. Every show ever baked used that one colour.
+- **`accent` flashed white** by the same route, on about a third of frames.
+- **Only `split` was a continuous place binding.** chase, ripple, alternate and the
+  rest were one-shot gestures, so a section's continuous layer could only ever be
+  follow or accent, both of which drive every lamp with the same number. No plan
+  could have made the lamps move independently.
+- **The crossfade interpolated the colour wheel.** A move from slot 4 to 52 dragged
+  the gel carrier through every gel between; the show sat on 16 values where the
+  wheel has 8 slots. Channels that pick a position are now stepped, by profile role
+  name, so a future fixture inherits it without touching the baker.
+- **`smooth` was declared and never implemented.** The composer set it on every
+  follow binding since the beginning and it did nothing.
+- **`S.beatAt` does not exist** — Session exposes positionAt, secondsAt, sectionsAt,
+  energyAt. Every bake using a travelling binding crashed on it.
+- **My own `streams` regression deleted a third of all bindings.** Seeding the set
+  with three grid names switched on a check that had been inert, so every real
+  instrument lane was rejected. `_lanes_of` returns a tuple, and reading it as a list
+  would have done the same thing a second time.
 
-Binding `follow` to the new `beat` stream, nothing else changed, moves on-grid from
-33.9% (+1.3 sd) to **63.7% (+3.4 sd)** against the teammate's 69.6%. The mechanism
-works. It also dropped lamps-differ 40.3% to 31.3%, because four pars pulsing in
-unison is a wall — which is why bed-plus-pattern layering has to come with it.
+## Referees that were wrong
 
-## A. Sync — the show is not on the grid
+- **peak-on-peak took a single-frame argmax of a plateau.** `levels` is brick-walled:
+  its two candidate peaks differ by 1.5% RMS and the audio itself flips between them
+  depending on a 5s or 15s window. I nearly "fixed" a detector that was correct. It
+  now asks how loud the song is where the show is brightest.
+- **"not a wall" passed at 62.6% while all four lamps moved as one body**, because
+  `spread` offsets their levels by a constant. It measured whether lamps differ,
+  never whether they do different things. Hence `lamps act apart`.
+- **The hue cap was making the show blander.** The composer said so itself: "Per my
+  notes on the hue cap I avoided spectrum, shift, trade, ramp, swell, fade, ripple
+  and breathe." A rule against thirteen shades of one orange was suppressing colour
+  variety — the exact fault being reported. Removed; colour is unrestricted and only
+  `colour carries the form` remains, which is a floor, not a cap.
 
-- [ ] **A1. Snap look/state changes to bar lines.** Teammate measured 66 of 66 looks
-      starting on a bar line. Ours crossfade on section seconds.
-- [ ] **A2. Snap gestures to the nearer beat, not the floor.** A cue written at 49.79
-      currently fires on the beat before it.
-- [ ] **A3. Expose the beat grid as bindable streams** (`beat`, `downbeat`, `bar`) so the
-      designer chooses when the rig moves with the pulse. Must stay a designer decision,
-      not baker behaviour — a baker-imposed metronome was already tried and rejected.
-- [ ] **A4. Re-measure rises-on-beat against the circular-shift null after A1–A3.**
-      Target: clear +2 sd. Anything under that is not synced, whatever it looks like.
+## Measured facts worth keeping
 
-Confirmed NOT the cause: there is no audio/frame offset. Cross-correlating light change
-against the 499 measured hits gives a best lag of exactly 0 frames.
+- Baking 5,252 frames takes **0.26s**, scoring **0.06s**. All show-creation time is
+  the model deciding, not the machinery.
+- Each travelling binding alone over a 0.25 wash: chase 98.8% on-grid (+3.5 sd),
+  correlation 0.10; ripple 100% (+3.2 sd), 0.14; alternate 100% (+3.0 sd), -0.72.
+  All three beat the reference's 69.6%.
+- `accent` rides onsets, which land on a beat **36%** of the time; a grid stream puts
+  **63.7%** on a beat. accent is not a substitute for one.
+- `stems_fine` at 0.05s exists for raga-of-revenge (2625 windows against 262). It does
+  NOT improve how well the light tracks the music — correlation with mix loudness
+  0.501 coarse against 0.472 fine — but it triples the jumps. Useful with `smooth`,
+  not a free win. A GPU run for the rest was started on the L40S at ~16-34s a song.
+- The composer now bakes and scores its own plan mid-compose. First draft it caught
+  itself: 5 of 10.
 
-## B. Dynamics — the show lives in the middle
+## Left
 
-- [ ] **B1. Compress the energy curve, do not copy it.** States floor at 0.34, cap at 0.92.
-      Only a gesture reaches 255. Fixes middling 76.5% and dark 3.0%.
-- [ ] **B2. Ink tracks energy.** A chase lights ~6% of the rig; never put one on the climax.
-      Above three quarters, layer a full-ink bed under a half-ink pattern.
-- [ ] **B3. Repeats rhyme.** Look follows section identity, not a rotating list, so the three
-      choruses are recognisably the same thing.
-- [ ] **B4. Fix lamps-differ 39.9%.** Follows from B2.
-
-## C. Upstream — the score cannot express rhythm per instrument
-
-- [ ] **C1. `stems_temporal.window_s = 0.5`** (`listen/gpu/pipeline.py:584`), a
-      non-overlapping block RMS. At this song's median beat of 0.500s that is exactly one
-      number per beat, linearly ramped — the continuous bindings physically cannot land on
-      a beat. The separated audio is full-rate in `accum` and is discarded at 0.5s.
-      Needs a pipeline re-run (BS-Roformer, GPU). No cached stem audio exists
-      (`work/gpu-stems` empty, `work/stems` holds no files). Local GPU is a Quadro T1000
-      with 3.7GB free; the VM key is not on this machine.
-- [ ] **C2. Verify `moments[].peak`.** Teammate reports it disagrees with the energy curve,
-      the emotion segments and the recording on their score version (52.26s vs ~105.8s).
-      Our score is a different version and this session changed `loudest()`. Re-measure on
-      ours before accepting or dismissing.
-- [ ] **C3. `acoustic.loudness` exists at 0.5s** with `centroid_hz` and `percussive` and is
-      not currently offered to the composer. Check it is not noise, then expose it.
-
-## D. Referee
-
-- [ ] **D1. Write `tools/shape.js`.** The nine-question scorer the teammate's README scores
-      against does not exist on any branch here. Without it every quality claim is ad hoc.
-      Note their own warning: two of the nine were wrong when written (peak-on-peak read the
-      wrong signal; strong-moments-land only rewarded more light, when an exit should darken).
-      It is a floor, not a target.
-
-## E. Known bugs, carried
-
-- [ ] **E1. `portal/effects.js` is still schema-1** — placed edits bake with `type: undefined`.
-- [ ] **E2. `portal/server.py:save_custom` raises KeyError on schema-2.**
-- [ ] **E3. `portal/app.js` label work is gone and NOT recoverable.** `git log -S playersOf`
-      returns nothing on any branch, so it was never committed — it lived only in a working
-      state that a later rewrite overwrote. Rebuild from scratch if wanted; do not go
-      looking for it in history.
-- [ ] **E4. Nothing pushed since the merge.** `limelight-portal` is local-only.
-- [ ] **E5. Recompose all 29 songs** once A and B land. 16 existing plans were built on the
-      old 24-effect catalogue and the old brief.
-
-## F. Reverted or rejected, with the reason
-
-- Baker-imposed beat pulse on states — rejected: pulsed regardless of the music. Note it ran
-  on the drifting tempo map, a bug since fixed; a designer-chosen beat binding is not the
-  same thing.
-- Auto-binding every section to its loudest lane — correlation fell 0.555 to 0.403.
-- Softening `accent` to cut jumps 597 to 305 — wrong target, see the headline above.
-  Re-evaluate after A lands.
+- [ ] raga to 10 of 10, verified by looking at the rendered strip, not only the score
+- [ ] the other 27 songs
+- [ ] `portal/effects.js` is still schema-1; placed edits bake with `type: undefined`
+- [ ] `portal/server.py:save_custom` raises KeyError on schema-2
+- [ ] `playersOf()` in app.js is unrecoverable — `git log -S` finds it on no branch
+- [ ] nothing pushed; `limelight-portal` is local-only
