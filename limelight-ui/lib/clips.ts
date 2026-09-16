@@ -109,3 +109,26 @@ export function buildClips(
 
   return [...auto, ...mine].sort((a, b) => a.startS - b.startS);
 }
+
+/**
+ * The catalogue tile a clip came from — the one thing you need to make a clip
+ * again, whether you are taking over one of the arranger's or pasting a copy of
+ * your own.
+ *
+ * Four vocabularies have to meet here. `tile` is the answer where it is set: a
+ * show file names its cues by catalogue id and buildClips has already resolved
+ * it. Everything below speaks the ARRANGER's words (`stab`, `gear`, `trade`),
+ * which a file cue never uses — so the fx match, then the fx match ignoring
+ * length, then the plan-word mapping, in that order. A schema-2 tile carries no
+ * `fx` at all, which is why the mapping is last rather than first.
+ */
+export function tileForClip(clip: Clip, catalogue: Effect[]): Effect | null {
+  const mapped = effectIdForPlanFx(clip.fx);
+  return (
+    (clip.tile ? catalogue.find((e) => e.id === clip.tile) : undefined) ??
+    catalogue.find((e) => e.fx === clip.fx && e.beats === clip.beats) ??
+    catalogue.find((e) => e.fx === clip.fx) ??
+    (mapped ? catalogue.find((e) => e.id === mapped) : undefined) ??
+    null
+  );
+}

@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spanOf, overlaps } from "./clips.ts";
+import { spanOf, overlaps, tileForClip } from "./clips.ts";
+import type { Clip } from "./types";
 
 test("bar 1 beat 1 is beat index 0", () => {
   assert.deepEqual(spanOf(1, 1, 4, 4), { from: 0, to: 4 });
@@ -209,4 +210,54 @@ test("schema 2: an edit lands in its real family, not everything in one lane", (
   assert.equal(c.family, "darkness");
   const [h] = buildClips(null, [{ type: "impact", bar: 1, beats: 1 }], CATALOGUE_V2, GRID);
   assert.equal(h.family, "hits");
+});
+
+/* ── clip -> the catalogue tile it came from ───────────────────────────────────
+   Four vocabularies meet in tileForClip, and getting it wrong is silent: a null
+   means the clip cannot be taken over, moved, resized or copied, and nothing
+   says so. That is exactly the bug that froze every cue in a show file. */
+
+const clip = (over: Partial<Clip>): Clip => ({
+  key: "k", source: "auto", editIndex: null, planId: null, family: "hits",
+  tile: null, fx: "white_blast", name: "n", bar: 1, beat: 1, beats: 1,
+  startS: 0, endS: 1, params: {}, overridden: false, ...over,
+});
+
+/* Schema 2: the catalogue id IS the identity, and no tile carries `fx`. */
+const SCHEMA2: Effect[] = [
+  { id: "impact", name: "Impact", blurb: "", kind: "gesture", dimension: "amount", default_beats: 1 },
+  { id: "stab", name: "Stab", blurb: "", kind: "gesture", dimension: "amount", default_beats: 1 },
+];
+/* Schema 1: tiles name the renderer type directly. */
+const SCHEMA1: Effect[] = [
+  { id: "impact", name: "Impact", blurb: "", fx: "white_blast", beats: 1 },
+  { id: "impact_long", name: "Impact (long)", blurb: "", fx: "white_blast", beats: 4 },
+];
+
+test("a clip that names its tile is resolved by that, first", () => {
+  assert.equal(tileForClip(clip({ tile: "stab", fx: "white_blast" }), SCHEMA2)?.id, "stab");
+});
+
+test("an arranger clip on a schema-2 catalogue resolves through the plan word", () => {
+  /* No tile, no `fx` on any tile to match: the plan-word mapping is the only
+     route left, and without it not one of the arranger's clips could be moved. */
+  assert.equal(tileForClip(clip({ fx: "white_blast" }), SCHEMA2)?.id, "impact");
+});
+
+test("on a schema-1 catalogue the fx match wins, and length breaks the tie", () => {
+  assert.equal(tileForClip(clip({ fx: "white_blast", beats: 4 }), SCHEMA1)?.id, "impact_long");
+  assert.equal(tileForClip(clip({ fx: "white_blast", beats: 1 }), SCHEMA1)?.id, "impact");
+  /* A length nothing offers still resolves, rather than falling through. */
+  assert.equal(tileForClip(clip({ fx: "white_blast", beats: 3 }), SCHEMA1)?.id, "impact");
+});
+
+test("a tile the catalogue has never heard of is null, not a wrong guess", () => {
+  assert.equal(tileForClip(clip({ fx: "not_an_effect" }), SCHEMA2), null);
+  assert.equal(tileForClip(clip({ tile: "gone", fx: "also_gone" }), SCHEMA2), null);
+});
+
+test("a stale tile id still resolves if the clip's fx is known", () => {
+  /* `tile` is a preference, not a veto: a show file written against an older
+     catalogue must not leave its cues frozen. */
+  assert.equal(tileForClip(clip({ tile: "retired", fx: "white_blast" }), SCHEMA1)?.id, "impact");
 });

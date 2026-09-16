@@ -13,7 +13,11 @@ function MomentsBandBase({ moments }: { moments: Moment[] }) {
   const { view, width } = useTimeline();
 
   return (
-    <div className="relative h-[var(--moments-h)] flex-none border-b border-solid border-line">
+    /* No bottom rule: this is the last band inside the song map, and the map
+       draws the boundary itself. Drawn here too it was a --line hairline sitting
+       directly on the group's --line-strong edge, which reads as one muddy 2px
+       rule rather than as the one edge that matters. */
+    <div className="relative h-[var(--moments-h)] flex-none">
       {moments.map((m, i) => {
         const x = timeToX(m.t, view, width);
         if (x < -40 || x > width + 40) return null;

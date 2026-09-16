@@ -283,7 +283,7 @@ function makeClock() {
 /* ── screens ───────────────────────────────────────────────────────────── */
 
 const TABS = {
-  creator: [["library", "Library"], ["venues", "Venues"], ["market", "Marketplace"]],
+  creator: [["library", "My-Library"], ["venues", "Venues"], ["market", "Marketplace"]],
   venue: [["shows", "Shows"], ["venues", "Venues"], ["market", "Marketplace"]],
 };
 

@@ -1,0 +1,25 @@
+services:
+  limelight:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: limelight
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      # Persistent data — survives container rebuilds
+      - limelight-hub:/app/hub/files
+      - limelight-shows:/app/portal/shows
+      - limelight-work:/app/portal/work
+      - limelight-market:/app/portal/market
+      - limelight-showfiles:/app/portal/showfiles
+    environment:
+      - NODE_ENV=production
+
+volumes:
+  limelight-hub:
+  limelight-shows:
+  limelight-work:
+  limelight-market:
+  limelight-showfiles:

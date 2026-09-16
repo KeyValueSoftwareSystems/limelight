@@ -1,10 +1,11 @@
 "use client";
 
 import { familyHue } from "@/lib/tokens";
-import { mmss, positionAt } from "@/lib/grid";
+import { beatsLabel, mmss, mmssms, positionAt } from "@/lib/grid";
 import type { Clip, Grid } from "@/lib/types";
 import type { SnapStrength } from "@/lib/snap";
 import { Menu } from "@/components/primitives/Menu";
+import { GUIDES, type GuideKind } from "./Guides";
 
 /* One control system for the whole bar. Before this it carried five text sizes
    and eight button styles, so nothing read as more or less important than
@@ -16,6 +17,13 @@ const BASE =
   `inline-flex items-center justify-center ${H} rounded-[4px] border border-solid ` +
   `cursor-pointer whitespace-nowrap transition-colors duration-[var(--dur-state)] ` +
   `disabled:cursor-default disabled:opacity-40`;
+
+/** ⌘ on a Mac, Ctrl everywhere else. A shortcut list that names the wrong key
+ *  is worse than none: it teaches the chord that does not work. */
+const MOD =
+  typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.userAgent)
+    ? "⌘"
+    : "Ctrl+";
 
 function Btn({
   children,
@@ -67,11 +75,19 @@ export function TransportBar({
   onRemove,
   onClearSelection,
   baking,
+  note,
   clipCount,
   snap,
   onSetSnap,
+  guides,
+  onToggleGuide,
   follow,
   onToggleFollow,
+  onCopy,
+  onCut,
+  onPaste,
+  onDuplicate,
+  canPaste,
   onZoomIn,
   onZoomOut,
   onFit,
@@ -86,17 +102,27 @@ export function TransportBar({
   onRemove: () => void;
   onClearSelection: () => void;
   baking: string | null;
+  /** A short-lived receipt for a keystroke that leaves no mark on screen. */
+  note: string | null;
   clipCount: number;
   snap: SnapStrength;
   onSetSnap: (snap: SnapStrength) => void;
+  guides: GuideKind[];
+  onToggleGuide: (kind: GuideKind) => void;
   follow: boolean;
   onToggleFollow: () => void;
+  onCopy: () => void;
+  onCut: () => void;
+  onPaste: () => void;
+  onDuplicate: () => void;
+  canPaste: boolean;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onFit: () => void;
 }) {
   const pos = positionAt(currentTime, grid);
   const one = selected.length === 1 ? selected[0] : null;
+  const has = selected.length > 0;
 
   return (
     <div className="flex-none flex items-center gap-[var(--spacing-s3)] px-[var(--spacing-s3)] h-[38px] border-b border-solid border-line bg-bg">
@@ -106,8 +132,12 @@ export function TransportBar({
         <span className="sr-only">{playing ? "Pause" : "Play"}</span>
       </Btn>
 
-      <span className={`mono ${LABEL} tabular-nums text-ink`}>
-        {mmss(currentTime)}
+      {/* Milliseconds on the playhead and whole seconds on the length. The
+          playhead is the thing you are placing AGAINST, so it is read at the
+          resolution you can place at; the song's length is just how far there
+          is to go. */}
+      <span className={`mono ${LABEL} tabular-nums text-ink`} title="Playhead · song length">
+        {mmssms(currentTime)}
         <span className="text-ink-dimmer"> / {mmss(duration)}</span>
       </span>
 
@@ -120,16 +150,22 @@ export function TransportBar({
 
       <span className="flex-1 min-w-0" />
 
-      {/* what is selected, or what the timeline is showing */}
-      {selected.length > 0 ? (
+      {/* A copy, a cut, a paste and a fine nudge all leave nothing visible on a
+          38px bar, and a keystroke with no answer reads as a dead key. The
+          receipt gets its own slot rather than sharing the one below, which
+          only shows when NOTHING is selected — where a copy never is. */}
+      {note && <span className={`${LABEL} text-ink flex-none`}>{note}</span>}
+
+      {/* what is selected, or what the timeline is doing */}
+      {has ? (
         <span className="flex items-center gap-[var(--spacing-s2)] min-w-0">
           <span
             className="w-[7px] h-[7px] rounded-full flex-none"
             style={{ background: familyHue(selected[0].family) }}
           />
-          <span className={`${LABEL} text-ink truncate`}>
+          <span className={`${LABEL} text-ink truncate`} title={one ? `${one.name} at ${mmssms(one.startS)}` : undefined}>
             {one
-              ? `${one.name} · bar ${one.bar}${one.beat > 1 ? "·" + one.beat : ""} · ${one.beats}b`
+              ? `${one.name} · ${mmssms(one.startS)} · ${beatsLabel(one.beats)}b`
               : `${selected.length} selected`}
           </span>
           <Btn
@@ -159,7 +195,68 @@ export function TransportBar({
 
       <Rule />
 
+      {/* Edit. Also the only place the keyboard half of this editor is written
+          down — a shortcut nobody can discover is a shortcut nobody has. */}
+      <Menu
+        align="right"
+        trigger={
+          <span
+            className={`${BASE} border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-bg-raised px-[8px] ${LABEL}`}
+            title="Copy, paste and nudge the selection"
+          >
+            edit ▾
+          </span>
+        }
+        items={[
+          { id: "copy", label: "Copy", hint: `${MOD}C`, disabled: !has },
+          { id: "cut", label: "Cut", hint: `${MOD}X`, disabled: removableCount === 0 },
+          { id: "paste", label: "Paste at playhead", hint: `${MOD}V`, disabled: !canPaste },
+          { id: "duplicate", label: "Duplicate", hint: `${MOD}D`, disabled: !has },
+          { id: "-nudge", label: "Move by a beat", hint: "← →", disabled: true },
+          { id: "-bar", label: "…by a bar", hint: "⇧← →", disabled: true },
+          { id: "-fine", label: "…by 10ms", hint: "⌥← →", disabled: true },
+          { id: "-len", label: "Shorter / longer", hint: "[ ]", disabled: true },
+          { id: "-del", label: "Remove", hint: "⌫", disabled: true },
+        ]}
+        onPick={(id) => {
+          if (id === "copy") onCopy();
+          else if (id === "cut") onCut();
+          else if (id === "paste") onPaste();
+          else if (id === "duplicate") onDuplicate();
+        }}
+      />
+
       {/* view controls */}
+
+      {/* What the editor is ruled against. A toggle list rather than a choice:
+          bars AND the drop is the pair you actually work between, and making
+          that two trips to the same button would be absurd. */}
+      <Menu
+        align="right"
+        keepOpen
+        trigger={
+          <span
+            className={`${BASE} ${
+              guides.length
+                ? "border-line-strong bg-bg-raised text-ink"
+                : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-bg-raised"
+            } px-[8px] ${LABEL}`}
+            title="Rule vertical lines through the timeline"
+          >
+            grid: {guides.length === 0 ? "off" : guides.length === 1
+              ? (GUIDES.find((g) => g.id === guides[0])?.label.toLowerCase() ?? "on")
+              : guides.length} ▾
+          </span>
+        }
+        items={GUIDES.map((g) => ({
+          id: g.id,
+          label: g.label,
+          hint: g.hint,
+          checked: guides.includes(g.id),
+        }))}
+        onPick={(id) => onToggleGuide(id as GuideKind)}
+      />
+
       <Menu
         align="right"
         trigger={
@@ -177,11 +274,12 @@ export function TransportBar({
         items={[
           { id: "bar", label: "Bar", hint: "and drops, sections" },
           { id: "beat", label: "Beat", hint: "finer" },
-          /* Not "exactly where you drop": the renderer is beat-locked (readers/
-             lights/frame.js) and the bake rounds the beat, so a clip drawn
-             between two beats would be a picture of something the lights cannot
-             do. Free means the nearest beat with nothing pulling at it. */
-          { id: "off", label: "Free", hint: "nearest beat, no pull" },
+          /* Free is now genuinely free. The renderer is beat-locked in what it
+             DRAWS — an effect's envelope is a function of the musical beat — but
+             the baker takes a gesture's window in absolute seconds, so where a
+             cue starts and how long it runs are exact. Rounding to the nearest
+             beat here was giving away precision the show could already keep. */
+          { id: "off", label: "Free", hint: "exact, to the ms" },
         ]}
         onPick={(id) => onSetSnap(id as SnapStrength)}
       />
@@ -196,7 +294,7 @@ export function TransportBar({
         <span aria-hidden>−</span>
         <span className="sr-only">Zoom out</span>
       </Btn>
-      <Btn onClick={onZoomIn} icon title="Zoom in">
+      <Btn onClick={onZoomIn} icon title="Zoom in (⌘-scroll over the timeline)">
         <span aria-hidden>+</span>
         <span className="sr-only">Zoom in</span>
       </Btn>
