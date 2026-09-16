@@ -465,7 +465,7 @@ for (let t = 0; t < dur; t += 1 / fps) {
       if (!b.dmx.per_fixture.includes(fid)) continue;
       const one = (b.dmx.binding && typeof b.dmx.render === "function")
         ? b.dmx.render(b.valueAt(t), t)
-        : frameAt(b.dmx, t - b.startS, b.endS - b.startS, bpm);
+        : frameAt(b.dmx, t - b.startS, b.endS - b.startS, bpm, measuredBeatAt(t) - measuredBeatAt(b.startS));
       if (!base) {
         base = one.slice();
         bindStart = b.startS;
@@ -482,7 +482,7 @@ for (let t = 0; t < dur; t += 1 / fps) {
         const s = stateResults[si];
         if (t < s.startS || t >= s.endS) continue;
         if (!s.dmx.per_fixture.includes(fid)) continue;
-        base = frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm);
+        base = frameAt(s.dmx, t - s.startS, s.endS - s.startS, bpm, measuredBeatAt(t) - measuredBeatAt(s.startS));
         /* A section change is a change of look, not a cut. Holding the previous
            state under the new one for a beat and crossing between them is what a
            person does on a fader; snapping is what a bug does, and on
@@ -541,7 +541,7 @@ for (let t = 0; t < dur; t += 1 / fps) {
       if (!cand.dmx.per_fixture.includes(fid)) continue;
       if (cand.startS >= gStart) { g = cand; gStart = cand.startS; }
     }
-    let gsrc = g ? frameAt(g.dmx, t - g.startS, g.endS - g.startS, bpm) : null;
+    let gsrc = g ? frameAt(g.dmx, t - g.startS, g.endS - g.startS, bpm, measuredBeatAt(t) - measuredBeatAt(g.startS)) : null;
     /* A hit is meant to be instant; a sweep, a lift, a tint are not, and they
        were snapping on because a gesture simply replaced the base on its first
        frame. On raga-of-revenge the head jumped 50 to 179 in a single frame at

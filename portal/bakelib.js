@@ -18,10 +18,15 @@
    beats and repeat; loop_beats==0 means they play once across the whole span.
    This is the fix for the baker rendering only frames[0] for states — a drone
    that breathes over four beats now actually breathes. */
-function frameAt(dmx, localT, spanDur, bpm) {
+function frameAt(dmx, localT, spanDur, bpm, beatsIn) {
   const frames = dmx && dmx.frames;
   if (!frames || !frames.length) return null;
   if (frames.length === 1) return frames[0];
+  if (dmx.loop_beats > 0 && typeof beatsIn === "number" && isFinite(beatsIn)) {
+    const turn = beatsIn / dmx.loop_beats;
+    const idx2 = Math.floor(turn * frames.length);
+    return frames[((idx2 % frames.length) + frames.length) % frames.length];
+  }
   const loopDur = dmx.loop_beats > 0 ? dmx.loop_beats * (60 / bpm) : spanDur;
   if (!(loopDur > 0)) return frames[0];
   const idx = Math.floor((localT / loopDur) * frames.length);

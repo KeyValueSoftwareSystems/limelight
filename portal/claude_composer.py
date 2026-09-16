@@ -191,46 +191,6 @@ def peak_table(song):
     return rows
 
 
-def second_table(song):
-    try:
-        import composer as C
-        sc = C._score_of({"_song": song})
-    except Exception:
-        return []
-    ac = sc.get("acoustic") or {}
-    loud = ac.get("loudness") or []
-    w = ac.get("window_s") or 0.5
-    if not loud:
-        return []
-    lo, hi = min(loud), max(loud)
-    rng = (hi - lo) or 1.0
-    hits = [h.get("t") for h in ((sc.get("rhythm") or {}).get("hits") or [])
-            if isinstance(h, dict) and isinstance(h.get("t"), (int, float))]
-    fine = sc.get("stems_fine") or sc.get("stems_temporal") or {}
-    lanes = fine.get("stems") or {}
-    lw = fine.get("window_s") or 0.5
-    beats = [b.get("t") for b in (sc.get("beats") or []) if isinstance(b, dict)]
-    downs = [b.get("t") for b in (sc.get("beats") or [])
-             if isinstance(b, dict) and b.get("downbeat")]
-    dur = int((sc.get("song") or {}).get("length_s") or 0)
-    rows = []
-    for t in range(dur):
-        seg = loud[int(t / w):max(int(t / w) + 1, int((t + 1) / w))]
-        pct = int(round(((sum(seg) / len(seg)) - lo) / rng * 100)) if seg else 0
-        n = sum(1 for h in hits if t <= h < t + 1)
-        nb = sum(1 for b in beats if t <= b < t + 1)
-        nd = sum(1 for b in downs if t <= b < t + 1)
-        here = []
-        for name, ser in lanes.items():
-            a0, a1 = int(t / lw), max(int(t / lw) + 1, int((t + 1) / lw))
-            part = ser[a0:a1]
-            if part and max(part) > 0.4:
-                here.append((max(part), name))
-        here.sort(reverse=True)
-        rows.append((t, pct, n, nb, nd, [nm for _v, nm in here[:3]]))
-    return rows
-
-
 def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
     EFFECT_BEHAVIOUR = effect_behaviour(rig)
     RIG_FACTS = rig_facts(rig)
@@ -352,15 +312,27 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "and 17 of 28 gestures set no level at all. A gesture at 0.72 is a state",
             "with a start time. If a moment is worth marking, mark it at the top.",
             "",
-            "THE SONG SECOND BY SECOND",
+            "HOW THIS IS DONE ON A REAL DESK",
             "",
-            "loud is that second as a percentage of the song's own range, hits is drum",
-            "onsets struck in it, b is beats and d is downbeats falling inside it, then",
-            "the lanes that are actually sounding. Every second of the show is yours to",
-            "decide; this is what is underneath each one.",
+            "Not a rule - the working practice, for whatever it is worth to you.",
             "",
-            *[f"  {t:4d}s  loud {p:3d}%  hits {n:2d}  b{nb} d{nd}  {', '.join(names)}"
-              for t, p, n, nb, nd, names in second_table(song)],
+            "A designer builds a CUE LIST against the song's landmarks: intro, verse,",
+            "pre, chorus, bridge, breakdown, drop, outro. Each cue is a look with a",
+            "fade time and a trigger. Cues carry the architecture - arrivals,",
+            "transitions, blackouts - and CHASES carry motion and energy inside them.",
+            "A chase is parameter-driven and runs at a musical rate; it is not the",
+            "audio turned into brightness.",
+            "",
+            "Coherence comes from PALETTES. A designer fixes a handful of colours,",
+            "positions and beam looks at the start and reuses them all night, so when",
+            "a chorus comes round again it is recognisably the same chorus. Picking a",
+            "fresh colour for every cue is what makes a show look arbitrary. Decide",
+            "your palette for this song first, then spend it.",
+            "",
+            "Energy is shaped, not tracked: builds climb, breakdowns empty the room,",
+            "the drop is where everything arrives at once. You cannot be loud",
+            "throughout - the big look only reads as big if the room was smaller a",
+            "moment ago.",
             "",
             "ASKING THE SCORE FOR MORE",
             "",
