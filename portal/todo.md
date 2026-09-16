@@ -164,3 +164,36 @@ Open: the metre period is still assumed, not measured. It comes from the median
 gap between the fabricated flags, which were every 4 by construction, so a song in
 7 or 8 would never be spotted. A joint period/phase search scores higher at longer
 periods purely because they test fewer beats.
+
+## raga-of-revenge reaches 11 of 11, 2026-09-16
+
+First show to pass every check on an independent bake.
+
+                 before   now    reference (hand-built)
+  goes dark        6.2%  14.7%      14.4%
+  held back       60.0%  44.5%      37.2%
+  not a wall      52.9%  63.6%      68.8%
+  peak at          106s   94.4s     92.3s
+  loudest@peak      65%    90%        77%
+  lamp imbalance    4.9    1.6        0.9
+  commonest hue     52%    29%        64%
+
+Traceable causes, both brief additions rather than code:
+
+- The peak table (where each signal says the song is loudest, and that they
+  disagree) moved the climax to within 2s of the recording's own peak.
+- The ink table (each effect's share of lamps lit, and how often lamps differ)
+  halved the lamp imbalance, and the gesture-level measurement got gestures to
+  reach the rail at all.
+
+Still short: lamps reach full 5.8% of the show against the reference's 20.3%,
+four times better than the 1.4% before the gesture note but not there. Lamp
+correlation 0.72 against 0.50. Both are the same underlying thing -- our rig
+still dims where the reference switches.
+
+Open, reported by the composer and NOT yet verified by me:
+- `bump` at for_beats 0.5 appears to latch: one gesture reportedly produced
+  five seconds of all four pars at 255, leaking across later gaps in the outro.
+  Found by bisecting one gesture at a time. Needs reproducing.
+- An orphaned composer process from a killed run rewrote the workings file
+  roughly once a minute mid-session. Kill the process group, not the parent.
