@@ -14,13 +14,13 @@ function RulerBase({ grid }: { grid: Grid }) {
   /* the beats inside each bar, drawn faint, and only once they are far enough
      apart to read. Without them a cue can only be placed by eye against a bar
      line four beats wide. */
-  const beats = beatTicks(view, grid, width).filter((b) => !b.down);
+  const beats = beatTicks(view, grid, width).filter((b) => !b.strong);
 
   return (
     <div className="relative h-[var(--ruler-h)] flex-none border-b border-solid border-line cursor-ew-resize">
       {beats.map((b) => (
         <span
-          key={"b" + b.bar + "." + b.beat}
+          key={"b" + b.t.toFixed(3)}
           className="absolute bottom-0 h-[6px] w-px bg-line pointer-events-none"
           style={{ left: timeToX(b.t, view, width) }}
         />
