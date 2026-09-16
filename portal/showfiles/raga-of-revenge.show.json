@@ -392,13 +392,11 @@
    ]
   },
   {
-   "effect": "pulse",
-   "amount": 0.62,
-   "colour": "#e01313",
+   "effect": "drive",
    "extent": "all",
-   "floor": 0.224,
-   "peak": 0.95,
-   "why": "chorus, developing, drums light \u2014 A#. Level 0.62.",
+   "floor": 0.8,
+   "peak": 1.0,
+   "why": "chorus, developing, drums light \u2014 A#. Level 0.62. Third and hardest drop: the same red-in-blue frame, brightest of the three (0.80). This is the section with the four hardest kicks on the record.",
    "id": "s15",
    "section": 3,
    "from_s": 81.77,
@@ -407,18 +405,21 @@
     "bar": 39,
     "beat": 1,
     "beats": 15
-   }
+   },
+   "colours": [
+    "#e01313",
+    "#2f5bff"
+   ]
   },
   {
-   "effect": "breakdown",
-   "amount": 0.805,
+   "effect": "drive",
    "colours": [
     "#e01313",
     "#2f5bff"
    ],
-   "floor": 0.157,
-   "peak": 1,
-   "why": "chorus, resolving, drums full \u2014 C. Level 0.81.",
+   "floor": 0.8,
+   "peak": 1.0,
+   "why": "chorus, resolving, drums full \u2014 C. Level 0.81. Third and hardest drop: the same red-in-blue frame, brightest of the three (0.80). This is the section with the four hardest kicks on the record.",
    "id": "s16",
    "section": 3,
    "from_s": 89.75,
@@ -1032,13 +1033,15 @@
    "fade_ms": 0
   },
   {
-   "effect": "impact",
+   "effect": "glare",
    "colour": "#ffffff",
    "extent": "all",
    "for_beats": 1,
    "fade_ms": 0,
    "at_s": 52.76,
-   "why": "52.76s: the whole band at full strength, six families at once. One white hit on the beat."
+   "why": "52.76s: the whole band at full strength, six families at once. One full BEAT of white across the row, held, not an 80ms flash -- the head keeps snapping red underneath it.",
+   "amount": 1.0,
+   "head": false
   },
   {
    "effect": "trade",
@@ -1175,6 +1178,19 @@
     "beat": 1
    },
    "fade_ms": 0
+  },
+  {
+   "effect": "beam",
+   "pattern": "snap",
+   "colour": "#e01313",
+   "amount": 1.0,
+   "prism": 100,
+   "strobe": 12,
+   "strobe_on": "beat",
+   "fade_ms": 0,
+   "from_s": 83.76,
+   "to_s": 91.76,
+   "why": "Third drop: the head's move a third time, escalated once more -- red, prism, and now strobing on EVERY beat, not just the downbeat. Same figure each drop, bigger each time, so the room learns it and then feels it grow."
   },
   {
    "effect": "chase",
