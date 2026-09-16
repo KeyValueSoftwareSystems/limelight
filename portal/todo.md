@@ -219,3 +219,33 @@ Still short: the rig clears DMX 200 in 7.9% of frames against the reference's
 the top because its flash is scaled by an onset envelope peaking at 0.45, so
 its hottest hit renders about 100 DMX. If true that is the same class of bug as
 the binding floors -- a ceiling in an effect that no plan can lift.
+
+## Grid placement, 2026-09-16 16:39
+
+A gesture could only be anchored to a measured moment. raga has 17 of them, so
+a two-minute show had at most 17 places to put a cue and everything else had to
+be a continuous binding following an audio envelope. That is a reactive rig.
+Gestures and states now take at_bar/at_beat/from_bar/to_bar.
+
+The composer went from 42 cues to 111, 58 of them on bar lines, 21 stabs and 5
+blackouts among them.
+
+                    rises  on-beat  downbeat  p90 jump  all-lit  black
+  as written         194    51.5%    23.7%       42      74.6%   15.5%
+  bindings stripped  133    65.4%    36.1%       53      54.1%   28.7%
+  reference          224    81.3%    22.3%       94      60.7%   24.5%
+
+Bindings cost 14 points of beat alignment and 13 of darkness even at six in a
+plan of 111. The live plan has them stripped by hand; the brief should stop the
+composer writing them.
+
+Still behind: on-beat 61.7% against 81.3%, p90 jump 53 against 94 (our cues are
+softer), and one lamp is lit 13.4 points more than the quietest against the
+reference's 0.9.
+
+Also fixed: beatSecond returned undefined for a fractional beat index, so any
+gesture with a fractional for_beats never ended. 55 test bumps held the rig at
+255 for 90.5% of the show.
+
+Ruled out by measurement: STATE_FADE (1.1s to 0.06s changes nothing), and
+removing bindings alone without grid placement (359 changing frames, static).
