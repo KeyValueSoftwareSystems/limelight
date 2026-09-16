@@ -16,7 +16,7 @@ from validator import validate, format_report
 
 WORK = os.path.join(HERE, "work")
 DEFAULT_MODEL = "opus"
-BUDGET = 24
+BUDGET = 11
 
 
 def score_file(song):
@@ -347,7 +347,7 @@ def run_claude(work, brief, system_prompt, model, turns):
         cwd=work,
         capture_output=True,
         text=True,
-        timeout=1800,
+        timeout=3300,
         stdin=subprocess.DEVNULL,
     )
     return r.returncode, (r.stdout or "").strip(), (r.stderr or "").strip()
@@ -361,7 +361,7 @@ def read_plan(work):
     return None
 
 
-def compose(song, model=None, hub=None, turns=60, keep=False):
+def compose(song, model=None, hub=None, turns=38, keep=False):
     model = model or DEFAULT_MODEL
     if hub:
         C.HUB = hub.rstrip("/")
@@ -408,7 +408,7 @@ def main():
     ap.add_argument("song")
     ap.add_argument("--hub", default=C.HUB)
     ap.add_argument("--model", default=DEFAULT_MODEL)
-    ap.add_argument("--turns", type=int, default=60)
+    ap.add_argument("--turns", type=int, default=38)
     ap.add_argument("--out", default=None)
     ap.add_argument("--keep", action="store_true")
     args = ap.parse_args()

@@ -2003,7 +2003,7 @@ function renderPalette() {
 function paint() {
   if (!S.show || !S.frames) return;
   const t = S.clock ? S.clock.position() : 0;
-  const idx = clamp(Math.floor(t * S.show.fps), 0, S.show.frame_count - 1);
+  const idx = clamp(Math.round(t * S.show.fps), 0, S.show.frame_count - 1);
   const raw = readFixtures(idx);
   if (!raw) return;
   const fx = trimFixtures(raw);
