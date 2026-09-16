@@ -61,12 +61,6 @@ def _snap_palette(plan, report):
         if rgb:
             palette.append((entry.get("name", "?") if isinstance(entry, dict) else "?", rgb))
     if not palette:
-        palette = _derive_palette(plan)
-        if palette:
-            report.append({"level": "info",
-                           "msg": f"no palette declared; derived {len(palette)} "
-                                  "colours from the ones the plan already used"})
-    if not palette:
         return
     def nearest(rgb):
         best, bd = None, 9e9
