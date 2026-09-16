@@ -43,13 +43,22 @@ export function buildClips(
 
   /* Every span a person has claimed, whether it draws a clip or suppresses one.
      Both kinds take the beat away from the arranger. */
+  const dropped = new Set<string>();
   const claims: { fx: string; span: BeatSpan }[] = [];
   const replaced = new Set(edits.map((e) => e.from).filter(Boolean) as string[]);
   const mine: Clip[] = [];
 
   edits.forEach((edit, i) => {
+    /* An edit naming no known tile is dropped, because the baker drops it too:
+       resolveGesture refuses any effect the catalogue does not carry, so drawing
+       it would promise a clip that will never play.
+
+       But the drop is worth SAYING. The catalogue load swallows its own failure,
+       so one slow or restarted portal at page-load time leaves the catalogue
+       empty and every imported clip disappears with no message anywhere -- which
+       looks exactly like "the import did nothing". */
     const spec = byId.get(edit.type);
-    if (!spec) return;
+    if (!spec) { dropped.add(edit.type); return; }
     /* Schema 2 dropped `fx`; the family is found through the tile itself, so an
        unmapped effect still draws rather than vanishing. */
     const family = familyOfEffect(spec) ?? "hits";
@@ -106,6 +115,13 @@ export function buildClips(
         claims.some((c) => c.fx === planKey(p.fx) && overlaps(c.span, span)),
     });
   }
+
+  if (dropped.size && typeof console !== "undefined")
+    console.warn(
+      "limelight: " + dropped.size + " effect(s) are not in the loaded catalogue, so their clips are not drawn: "
+      + [...dropped].join(", ")
+      + (catalogue.length ? "" : " — the catalogue is EMPTY, which usually means the portal was unreachable when this page loaded."),
+    );
 
   return [...auto, ...mine].sort((a, b) => a.startS - b.startS);
 }
