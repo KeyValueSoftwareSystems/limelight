@@ -637,7 +637,7 @@
    "name": "Isolate",
    "kind": "gesture",
    "tier": 2,
-   "blurb": "Place to one lamp, holds for its span. Needs at least three lamps to read as isolation.",
+   "blurb": "Place to one lamp, holds for its span. Needs at least three lamps to read as isolation. By default the moving head carries it and all the PARs drop together, so the row stays symmetric; naming a lamp with `which` puts the whole isolate on one PAR instead, which on a symmetric row reads as three broken lamps rather than one chosen one if it is held",
    "dimension": "place",
    "returns": true,
    "dials": {
