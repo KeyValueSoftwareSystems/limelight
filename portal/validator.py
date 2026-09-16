@@ -136,6 +136,15 @@ def validate(plan, catalog, score_overview):
     """
     report = []
     effects_by_id = {e["id"]: e for e in catalog}
+    for d in (plan.get("effects") or []) if isinstance(plan, dict) else []:
+        if isinstance(d, dict) and d.get("id") and d.get("body"):
+            effects_by_id.setdefault(d["id"], {
+                "id": d["id"],
+                "kind": d.get("kind", "gesture"),
+                "dimension": d.get("dimension", "amount"),
+                "dials": d.get("dials") or {},
+                "also_gesture": True,
+            })
     sections = score_overview.get("sections") or []
     moments = score_overview.get("moments") or []
     GRID_STREAMS = {"beat", "downbeat", "bar"}

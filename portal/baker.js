@@ -18,6 +18,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 
 const HERE = path.join(__dirname);
 const REPO = path.dirname(HERE);
@@ -134,6 +135,45 @@ for (const eid of manifest.supported_effects) {
   const fpath = path.join(venueDir, eid + ".js");
   if (fs.existsSync(fpath)) {
     dmxFunctions[eid] = require(fpath);
+  }
+}
+
+/* A plan may bring its own effects. The catalogue is a vocabulary, not a
+   ceiling: a designer who wants a move nobody wrote a word for writes the
+   module itself, and it is registered beside the built-ins so states,
+   bindings and gestures can name it, the validator accepts it, and the editor
+   sees a named effect with dials rather than a wall of DMX. The body is
+   evaluated with the venue's own helpers in scope, so it addresses extents and
+   fixtures rather than channel numbers and stays portable across rigs. */
+if (Array.isArray(plan.effects) && plan.effects.length) {
+  const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), "limelight-fx-"));
+  for (const def of plan.effects) {
+    if (!def || !def.id || typeof def.body !== "string") continue;
+    if (dmxFunctions[def.id]) {
+      console.error(`custom effect '${def.id}' shadows a built-in; skipped`);
+      continue;
+    }
+    const file = path.join(tmpdir, def.id + ".js");
+    fs.writeFileSync(file,
+      '"use strict";\n' +
+      "const H = require(" + JSON.stringify(path.join(venueDir, "helpers.js")) + ");\n" +
+      "module.exports = " + def.body + ";\n");
+    try {
+      const fn = require(file);
+      if (typeof fn !== "function") throw new Error("body is not a function");
+      dmxFunctions[def.id] = fn;
+      catalogById[def.id] = {
+        id: def.id,
+        kind: def.kind || "gesture",
+        dimension: def.dimension || "amount",
+        dials: def.dials || {},
+        also_gesture: true,
+        custom: true,
+      };
+      console.error(`custom effect '${def.id}' registered (${catalogById[def.id].kind})`);
+    } catch (e) {
+      console.error(`custom effect '${def.id}' failed to load: ${e.message}`);
+    }
   }
 }
 
