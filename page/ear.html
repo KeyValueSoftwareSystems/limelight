@@ -2508,6 +2508,8 @@
   }
 
   let LIVE = -1;
+  let lastInfo = -1;
+
   function tick() {
     if (SCORE) {
       const t = aud.currentTime,
@@ -2541,18 +2543,21 @@
       }
       zoom();
       if (clicking && ctx && !aud.paused) {
-        for (const bt of SCORE.beats || []) {
-          if (bt.t <= sent || bt.t < t || bt.t > t + 0.35) continue;
+        const bl = SCORE.beats || [];
+        for (let i = 0; i < bl.length; i++) {
+          const bt = bl[i];
+          if (bt.t <= sent || bt.t < t) continue;
+          if (bt.t > t + 0.35) break;
           sent = bt.t;
-          const i = SCORE.beats.indexOf(bt),
-            per = SCORE.grid.beats_per_bar;
+          const per = SCORE.grid.beats_per_bar;
           click(
             ctx.currentTime + (bt.t - t),
             (((i - (SHIFT - BASE)) % per) + per) % per === firstIndex(),
           );
         }
       }
-      const bar = barAtTime(t);
+      if (t - lastInfo >= 0.1 || t < lastInfo) {
+        const bar = barAtTime(t);
       const ms = mossAt(t);
       const secs = mossSections();
 
@@ -2602,6 +2607,7 @@
               )
               .join(" · ")
           : `<span class="dim">—</span>`;
+      }
       }
     }
     requestAnimationFrame(tick);
