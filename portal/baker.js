@@ -88,6 +88,20 @@ function nearestBeat(t) {
   return Math.abs(beatTimes[prev] - t) <= Math.abs(beatTimes[lo] - t) ? prev : lo;
 }
 
+/* Where a time sits on the MEASURED beat grid, as a fractional beat index.
+   The travelling bindings step off this rather than t * bpm / 60, so a chase
+   keeps time with a performance that breathes instead of drifting away from
+   it over the song. Session does not expose a beat index - positionAt returns
+   bar and beat - so it is read off the beat list the score carries. */
+function measuredBeatAt(t) {
+  if (!beatTimes.length) return (t || 0) * bpm / 60;
+  const at = nearestBeat(t);
+  const here = beatTimes[at];
+  const step = at + 1 < beatTimes.length ? beatTimes[at + 1] - here
+             : (at > 0 ? here - beatTimes[at - 1] : 60 / bpm);
+  return at + (step > 0 ? (t - here) / step : 0);
+}
+
 function beatSecond(i) {
   if (!beatTimes.length) return 0;
   const step = 60 / bpm;
@@ -289,7 +303,7 @@ function generateFrames(entry) {
   const fn = dmxFunctions[entry.eid];
   if (!fn) return null;
   const ctx = { fps, bpm, layout, restColour: entry.restColour || null,
-                beatAt: (t) => S.beatAt(t) };
+                beatAt: measuredBeatAt };
   const result = fn(entry.params, ctx);
   return result;
 }
