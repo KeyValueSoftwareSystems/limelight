@@ -643,7 +643,6 @@ def run_claude(work, brief, system_prompt, model, turns):
         str(turns),
         "--model",
         model,
-        "--restricted",
         "--output-format",
         "stream-json",
         "--verbose",
