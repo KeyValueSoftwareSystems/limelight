@@ -15,10 +15,21 @@ module.exports = function chase(params, ctx) {
   const loopBeats = Math.max(1, Math.round(params.for_beats || 4));
   const n = pars.length;
 
-  function at(step, gain) {
-    let head = Math.floor(step) % (back ? Math.max(1, 2 * n - 2) : n);
-    if (back && head >= n) head = 2 * n - 2 - head;
-    const within = step - Math.floor(step);
+  /* `per_beat` is CROSSINGS PER BEAT, not lamps per beat.
+     Stepping one lamp per step made the same cue mean different things on
+     different rigs: a run that crossed the four-lamp desk rig in a beat only
+     got a quarter of the way along the sixteen-lamp club rig in the same beat,
+     which is exactly the kind of drift a show file is supposed to make
+     impossible. Position along the ROW is the unit; how many lamps that is
+     belongs to the venue. */
+  function at(beats, gain) {
+    const span = back ? 2 : 1;
+    let pos = (beats * span) % 1;
+    if (back && pos > 0.5) pos = 1 - pos;
+    else if (back) pos = pos;
+    const exact = H.clamp(pos * span, 0, 1) * (n - 1);
+    let head = Math.floor(exact);
+    const within = exact - head;
     const f = H.emptyFrame();
     pars.forEach((par, k) => {
       const d = Math.abs(k - head);

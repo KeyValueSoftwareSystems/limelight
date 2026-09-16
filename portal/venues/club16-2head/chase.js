@@ -1,10 +1,19 @@
 "use strict";
 const H = require("./helpers");
 
+/* chase — one lamp at a time runs the row, the rest dark. The wave.
+ *
+ * `per_beat` is CROSSINGS PER BEAT, not lamps per beat. Stepping one lamp per
+ * step made the same cue mean different things on different rigs: a run that
+ * crossed the four-lamp desk rig in a beat only got a quarter of the way along
+ * this sixteen-lamp row in the same beat. Position along the ROW is the unit;
+ * how many lamps that is belongs to the venue. More lamps buy a smoother wave,
+ * never a slower one.
+ *
+ * direction: "lr" (default) or "rl".
+ */
 module.exports = function chase(params, ctx) {
-  const colour = H.parseColour(params.colour, [1, 0.75, 0.35]);
-  /* direction: "lr" (default) or "rl". A wave that can only run one way is
-     half an effect -- the room reads a return sweep as a different move. */
+  const colour = H.parseColour(params.colour, [1, 1, 1]);
   const pars = String(params.direction || "lr").toLowerCase() === "rl"
     ? H.parsForExtent(params.extent || "all").slice().reverse()
     : H.parsForExtent(params.extent || "all");
@@ -12,27 +21,29 @@ module.exports = function chase(params, ctx) {
   const rest = H.clamp(params.rest != null ? params.rest : 0, 0, 1);
   const perBeat = params.per_beat != null ? params.per_beat : 1;
   const back = params.bounce === true;
-  const loopBeats = Math.max(1, Math.round(params.for_beats || 4));
-  const N = Math.max(2, H.framesPerBeat(ctx.bpm) * loopBeats);
+  const forBeats = Math.max(1, params.for_beats || 4);
+  const fpb = H.framesPerBeat(ctx.bpm);
+  const N = Math.max(2, Math.round(fpb * forBeats));
   const n = pars.length;
+  /* the bump is a fixed fraction of the ROW wide, so it looks the same size on
+     a four-lamp bar and a sixteen-lamp one */
+  const width = (params.width != null ? params.width : 0.14);
 
   const frames = [];
   for (let i = 0; i < N; i++) {
-    const step = (i / H.framesPerBeat(ctx.bpm)) * perBeat;
-    let head = Math.floor(step) % (back ? Math.max(1, 2 * n - 2) : n);
-    if (back && head >= n) head = 2 * n - 2 - head;
-    const within = step - Math.floor(step);
+    const beats = (i / fpb) * perBeat;
+    let pos = beats % 1;
+    if (back) pos = pos < 0.5 ? pos * 2 : (1 - pos) * 2;
     const f = H.emptyFrame();
-    pars.forEach((par, k) => {
-      const d = Math.abs(k - head);
-      const glow = d === 0 ? 1 : d === 1 ? 0.35 * (1 - within) : 0;
-      H.setPar(f, par, colour, rest + (level - rest) * glow);
-    });
-    H.setHead(f, H.HEADS[0], {
-      level: level * 0.5, colour,
-      pan: 0.40 + 0.40 * (head / Math.max(1, n - 1)), tilt: 0.42,
-    });
+    for (let k = 0; k < n; k++) {
+      const x = n > 1 ? k / (n - 1) : 0.5;
+      const d = x - pos;
+      const glow = Math.exp(-(d * d) / (2 * width * width));
+      H.setPar(f, pars[k], colour, H.clamp(rest + (level - rest) * glow, 0, 1));
+    }
+    for (const head of H.HEADS)
+      H.setHead(f, head, { level: level * 0.5, colour, pan: 0.40 + 0.40 * pos, tilt: 0.42 });
     frames.push(f);
   }
-  return { frames, loop_beats: loopBeats, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
+  return { frames, loop_beats: 0, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
 };

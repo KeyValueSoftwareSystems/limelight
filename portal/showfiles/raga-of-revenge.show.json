@@ -418,7 +418,7 @@
   {
    "effect": "chase",
    "direction": "rl",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#8659c4",
    "level": 1.0,
    "rest": 0.0,
@@ -428,12 +428,12 @@
    "to_bar": 15,
    "to_beat": 4,
    "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving."
+   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "chase",
    "direction": "lr",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#8659c4",
    "level": 1.0,
    "rest": 0.0,
@@ -443,7 +443,7 @@
    "to_bar": 16,
    "to_beat": 1,
    "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker."
+   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "from_bar": 16,
@@ -469,7 +469,7 @@
   {
    "effect": "chase",
    "direction": "rl",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#8659c4",
    "level": 1.0,
    "rest": 0.0,
@@ -479,12 +479,12 @@
    "to_bar": 16,
    "to_beat": 4,
    "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving."
+   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "chase",
    "direction": "lr",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#8659c4",
    "level": 1.0,
    "rest": 0.0,
@@ -494,7 +494,7 @@
    "to_bar": 17,
    "to_beat": 1,
    "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker."
+   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "glare",
@@ -511,7 +511,7 @@
   {
    "effect": "chase",
    "direction": "rl",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#8659c4",
    "level": 1.0,
    "rest": 0.0,
@@ -521,12 +521,12 @@
    "to_bar": 17,
    "to_beat": 4,
    "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving."
+   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "chase",
    "direction": "lr",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#8659c4",
    "level": 1.0,
    "rest": 0.0,
@@ -536,7 +536,7 @@
    "to_bar": 18,
    "to_beat": 1,
    "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker."
+   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "glare",
@@ -553,7 +553,7 @@
   {
    "effect": "chase",
    "direction": "rl",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#b4e62e",
    "level": 1.0,
    "rest": 0.0,
@@ -563,12 +563,12 @@
    "to_bar": 18,
    "to_beat": 4,
    "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving."
+   "why": "Beat 3: the row collapses to ONE lamp and it runs RIGHT TO LEFT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "chase",
    "direction": "lr",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#b4e62e",
    "level": 1.0,
    "rest": 0.0,
@@ -578,7 +578,7 @@
    "to_bar": 19,
    "to_beat": 1,
    "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker."
+   "why": "Beat 4: and straight back the other way, LEFT TO RIGHT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "glare",
@@ -595,7 +595,7 @@
   {
    "effect": "chase",
    "direction": "lr",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#b4e62e",
    "level": 1.0,
    "rest": 0.0,
@@ -605,12 +605,12 @@
    "to_bar": 19,
    "to_beat": 4,
    "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs LEFT TO RIGHT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving."
+   "why": "Beat 3: the row collapses to ONE lamp and it runs LEFT TO RIGHT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "chase",
    "direction": "rl",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#b4e62e",
    "level": 1.0,
    "rest": 0.0,
@@ -620,7 +620,7 @@
    "to_bar": 20,
    "to_beat": 1,
    "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, RIGHT TO LEFT. The turn inside the bar is what makes the room rock rather than just flicker."
+   "why": "Beat 4: and straight back the other way, RIGHT TO LEFT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "glare",
@@ -637,7 +637,7 @@
   {
    "effect": "chase",
    "direction": "lr",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#b4e62e",
    "level": 1.0,
    "rest": 0.0,
@@ -647,12 +647,12 @@
    "to_bar": 20,
    "to_beat": 4,
    "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs LEFT TO RIGHT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving."
+   "why": "Beat 3: the row collapses to ONE lamp and it runs LEFT TO RIGHT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "chase",
    "direction": "rl",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#b4e62e",
    "level": 1.0,
    "rest": 0.0,
@@ -662,7 +662,7 @@
    "to_bar": 21,
    "to_beat": 1,
    "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, RIGHT TO LEFT. The turn inside the bar is what makes the room rock rather than just flicker."
+   "why": "Beat 4: and straight back the other way, RIGHT TO LEFT. The turn inside the bar is what makes the room rock rather than just flicker. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "glare",
@@ -679,7 +679,7 @@
   {
    "effect": "chase",
    "direction": "lr",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#b4e62e",
    "level": 1.0,
    "rest": 0.0,
@@ -689,12 +689,12 @@
    "to_bar": 21,
    "to_beat": 4,
    "for_beats": 1,
-   "why": "Beat 3: the row collapses to ONE lamp and it runs LEFT TO RIGHT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. Green, not white: white is what a HIT is in this show, and the last two bars of the build were spending it before the drop arrived -- which made the brightest moment of the whole show a bar where the band is quieter than three quarters of the song."
+   "why": "Beat 3: the row collapses to ONE lamp and it runs LEFT TO RIGHT across all four in a single beat -- about 125 milliseconds a lamp. Everything else is at zero, so there is one light in the room and it is moving. Green, not white: white is what a HIT is in this show, and the last two bars of the build were spending it before the drop arrived -- which made the brightest moment of the whole show a bar where the band is quieter than three quarters of the song. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "chase",
    "direction": "rl",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#b4e62e",
    "level": 1.0,
    "rest": 0.0,
@@ -704,7 +704,7 @@
    "to_bar": 22,
    "to_beat": 1,
    "for_beats": 1,
-   "why": "Beat 4: and straight back the other way, RIGHT TO LEFT. The turn inside the bar is what makes the room rock rather than just flicker. Green, not white: white is what a HIT is in this show, and the last two bars of the build were spending it before the drop arrived -- which made the brightest moment of the whole show a bar where the band is quieter than three quarters of the song."
+   "why": "Beat 4: and straight back the other way, RIGHT TO LEFT. The turn inside the bar is what makes the room rock rather than just flicker. Green, not white: white is what a HIT is in this show, and the last two bars of the build were spending it before the drop arrived -- which made the brightest moment of the whole show a bar where the band is quieter than three quarters of the song. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "effect": "glare",
@@ -729,7 +729,7 @@
   {
    "effect": "chase",
    "direction": "lr",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#ffffff",
    "level": 1.0,
    "rest": 0.1,
@@ -738,7 +738,7 @@
    "from_beat": 3,
    "to_bar": 24,
    "for_beats": 2,
-   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor."
+   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "at_bar": 24,
@@ -778,7 +778,7 @@
   {
    "effect": "chase",
    "direction": "rl",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#b4e62e",
    "level": 1.0,
    "rest": 0.1,
@@ -787,7 +787,7 @@
    "from_beat": 3,
    "to_bar": 32,
    "for_beats": 2,
-   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor."
+   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "at_bar": 32,
@@ -888,7 +888,7 @@
   {
    "effect": "chase",
    "direction": "lr",
-   "per_beat": 4,
+   "per_beat": 1,
    "colour": "#b4e62e",
    "level": 1.0,
    "rest": 0.1,
@@ -897,7 +897,7 @@
    "from_beat": 3,
    "to_bar": 41,
    "for_beats": 2,
-   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor."
+   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor. per_beat is crossings per beat now, so one means the light crosses the whole row once in the beat -- and it means the same thing on four lamps or sixteen."
   },
   {
    "from_bar": 44,
