@@ -76,6 +76,26 @@ Every one degraded every show, and none were visible in the finished output.
 - The composer now bakes and scores its own plan mid-compose. First draft it caught
   itself: 5 of 10.
 
+## Next experiment: composer-defined effects
+
+Agreed with Amal after measuring whether the catalogue constrains it. It does
+not, yet: the show uses 25 of 34 effects, sets 94% of available dials (175 of
+186), and mentions a limitation once across 40 cues. It is choreographing
+within the vocabulary - "two travelling place bindings at deliberately
+different periods, with the lower one's level under the higher one's crest so
+neither erases the other".
+
+So this is the next thing to try rather than a fix for something broken. A
+plan carries its own effect definitions, parameterised, registered like the
+built-ins. Unlimited vocabulary while the editor still shows named effects a
+person could have dragged in, and the same plan still renders on club16.
+
+Raw DMX was considered and rejected: 5,252 frames x 41 channels is 215,000
+numbers, so the model would have to emit code rather than frames, and that
+loses the editor (the teammate's README: "a show written as raw primitives
+cannot be drawn in the editor"), loses rig portability, and hands it the
+keep-out zone and fixture profiles to get wrong silently.
+
 ## Left
 
 - [ ] raga to 10 of 10, verified by looking at the rendered strip, not only the score
