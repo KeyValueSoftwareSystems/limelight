@@ -2,6 +2,8 @@
 const H = require("./helpers");
 
 module.exports = function follow(params, ctx) {
+  /* head: false -- a binding on the row must not also light the head; the still
+     pin over the opening was reading at the binding's level, not its own. */
   const depth = params.depth != null ? params.depth : 0.95;
   const extent = params.extent || "all";
   const colour = H.parseColour(params.colour, (ctx && ctx.restColour) || [0.9, 0.8, 0.55]);
@@ -25,7 +27,7 @@ module.exports = function follow(params, ctx) {
       const tip = 1 + lean * (across - 0.5) * (v - 0.5) * 2;
       H.setPar(f, p, colour, H.clamp(level * wave * tip, 0, 1));
     });
-    H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHead(f, H.HEADS[0], {
       level: level * 0.85, colour,
       pan: 0.5 + travel * (v - 0.5) * 2,
       tilt: 0.28 + 0.14 * v,
@@ -38,7 +40,7 @@ module.exports = function follow(params, ctx) {
     render,
     frames: [render(0.3, 0)],
     loop_beats: 0,
-    per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS),
+    per_fixture: pars.map(p => p.id).concat(params.head === false ? [] : H.HEAD_IDS),
     smooth: params.smooth != null ? params.smooth : 0.3,
   };
 };

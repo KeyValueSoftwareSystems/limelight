@@ -6,6 +6,8 @@ const H = require("./helpers");
    pars carry colour[1] at `right`, and the head pans toward whichever side is
    louder and takes that side's colour. Call and response, driven by the music. */
 module.exports = function split(params, ctx) {
+  /* head: false -- a binding on the row must not also light the head; the still
+     pin over the opening was reading at the binding's level, not its own. */
   const cols = H.parseColours(params.colours, [[1, 0.75, 0.35], [0.2, 0.4, 1]]);
   const c0 = cols[0], c1 = cols[1];
   const bpm = ctx.bpm;
@@ -21,7 +23,7 @@ module.exports = function split(params, ctx) {
     for (const p of H.LEFT)  H.setPar(f, p, c0, rest + (0.92 - rest) * l);
     for (const p of H.RIGHT) H.setPar(f, p, c1, rest + (0.92 - rest) * r);
     const balance = r - l;                                  // -1 all-left .. +1 all-right
-    H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHead(f, H.HEADS[0], {
       level: rest + (0.85 - rest) * Math.max(l, r),
       colour: l >= r ? c0 : c1,
       pan: 0.60 + 0.20 * H.clamp(balance * 1.5, -1, 1),     // lean toward the louder side
@@ -35,6 +37,6 @@ module.exports = function split(params, ctx) {
     render,
     frames: [render([0.5, 0.5], 0)],
     loop_beats: 0,
-    per_fixture: H.PAR_IDS.concat(H.HEAD_IDS),
+    per_fixture: H.PAR_IDS.concat(params.head === false ? [] : H.HEAD_IDS),
   };
 };

@@ -2,11 +2,13 @@
 const H = require("./helpers");
 
 module.exports = function follow(params, ctx) {
+  /* head: false -- a binding on the row must not also light the head; the still
+     pin over the opening was reading at the binding's level, not its own. */
   const depth = params.depth != null ? params.depth : 0.95;
   const extent = params.extent || "all";
   const smooth = params.smooth != null ? params.smooth : 0.3;
   const pars = H.parsForExtent(extent);
-  const driven = pars.map(p => p.id).concat(H.HEAD_IDS);
+  const driven = pars.map(p => p.id).concat(params.head === false ? [] : H.HEAD_IDS);
   const floor = params.floor != null ? params.floor : 0;
   const response = params.response != null ? params.response : 1;
   const spread = params.spread != null ? params.spread : 0.35;
