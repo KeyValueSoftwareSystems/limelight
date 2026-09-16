@@ -191,6 +191,46 @@ def peak_table(song):
     return rows
 
 
+def second_table(song):
+    try:
+        import composer as C
+        sc = C._score_of({"_song": song})
+    except Exception:
+        return []
+    ac = sc.get("acoustic") or {}
+    loud = ac.get("loudness") or []
+    w = ac.get("window_s") or 0.5
+    if not loud:
+        return []
+    lo, hi = min(loud), max(loud)
+    rng = (hi - lo) or 1.0
+    hits = [h.get("t") for h in ((sc.get("rhythm") or {}).get("hits") or [])
+            if isinstance(h, dict) and isinstance(h.get("t"), (int, float))]
+    fine = sc.get("stems_fine") or sc.get("stems_temporal") or {}
+    lanes = fine.get("stems") or {}
+    lw = fine.get("window_s") or 0.5
+    beats = [b.get("t") for b in (sc.get("beats") or []) if isinstance(b, dict)]
+    downs = [b.get("t") for b in (sc.get("beats") or [])
+             if isinstance(b, dict) and b.get("downbeat")]
+    dur = int((sc.get("song") or {}).get("length_s") or 0)
+    rows = []
+    for t in range(dur):
+        seg = loud[int(t / w):max(int(t / w) + 1, int((t + 1) / w))]
+        pct = int(round(((sum(seg) / len(seg)) - lo) / rng * 100)) if seg else 0
+        n = sum(1 for h in hits if t <= h < t + 1)
+        nb = sum(1 for b in beats if t <= b < t + 1)
+        nd = sum(1 for b in downs if t <= b < t + 1)
+        here = []
+        for name, ser in lanes.items():
+            a0, a1 = int(t / lw), max(int(t / lw) + 1, int((t + 1) / lw))
+            part = ser[a0:a1]
+            if part and max(part) > 0.4:
+                here.append((max(part), name))
+        here.sort(reverse=True)
+        rows.append((t, pct, n, nb, nd, [nm for _v, nm in here[:3]]))
+    return rows
+
+
 def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
     EFFECT_BEHAVIOUR = effect_behaviour(rig)
     RIG_FACTS = rig_facts(rig)
@@ -199,6 +239,26 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
     return "\n".join(
         [
             f"Compose the lighting show for `{song}`.",
+            "",
+            "You are designing every second of this song. Not a rule applied over a",
+            "section, not a pattern repeated because it fits - a decision about what",
+            "this room should look like at each moment, and why that serves the music.",
+            "A show is judged the way a person watches it: a few dead seconds and it",
+            "is gone, however good the average is.",
+            "",
+            "Nothing below is a rule. Everything below is something that was measured,",
+            "usually because a previous show got it wrong and someone watching said so.",
+            "The mechanics sections describe what the hardware and the renderer will",
+            "actually do with what you write, so that you are not surprised. The taste",
+            "is entirely yours: which effects, which colours, how often, how still, how",
+            "violent. If a measurement here points one way and the song points another,",
+            "follow the song and say why in the `why` field.",
+            "",
+            "What has gone wrong before, in the words of the person watching: the lights",
+            "flash with no meaning, they do not coordinate, nothing lands on the beat,",
+            "there is no tempo or rhythm to it, it feels like a machine following rules,",
+            "and a broken streetlight would be no worse. Every one of those was true of",
+            "a show that passed every automated check.",
             "",
             "THE SONG, AS MEASURED",
             "",
@@ -291,6 +351,16 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "0.42, 0.45, 0.70, 0.72, 0.72, 0.80, 0.85, 0.85, 0.85, a median of 0.72,",
             "and 17 of 28 gestures set no level at all. A gesture at 0.72 is a state",
             "with a start time. If a moment is worth marking, mark it at the top.",
+            "",
+            "THE SONG SECOND BY SECOND",
+            "",
+            "loud is that second as a percentage of the song's own range, hits is drum",
+            "onsets struck in it, b is beats and d is downbeats falling inside it, then",
+            "the lanes that are actually sounding. Every second of the show is yours to",
+            "decide; this is what is underneath each one.",
+            "",
+            *[f"  {t:4d}s  loud {p:3d}%  hits {n:2d}  b{nb} d{nd}  {', '.join(names)}"
+              for t, p, n, nb, nd, names in second_table(song)],
             "",
             "ASKING THE SCORE FOR MORE",
             "",
@@ -594,24 +664,16 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "Mechanics, not taste. These are things the hardware and the baker do,",
             "measured by rendering them, and knowing them saves you a surprise.",
             "",
-            "  ONE BINDING PER SECTION. This is the single most important thing in",
-            "  this brief. A binding is continuous - it drives its lamps every frame -",
-            "  and layers take the BRIGHTER value, so two bindings over the same lamps",
-            "  means the lamp is lit whenever EITHER is lit, and three means it is",
-            "  almost never dark. Measured on the same plan, same gestures, changing",
-            "  nothing but the number of bindings per section:",
+            "  A binding renders every frame from an audio envelope, so it moves when",
+            "  the waveform moves rather than when the music does. Six of them in a",
+            "  plan of 111 cost 14 points of beat alignment and 13 points of darkness:",
             "",
-            "      3-4 bindings   lamp off  8.4% of the show, lamp correlation 0.70",
-            "      1 binding      lamp off 26.7% of the show, lamp correlation 0.31",
+            "      with 6 bindings   51.5% of changes on a beat, lamps all lit 74.6%",
+            "      with none         65.4% on a beat, all lit 54.1%",
+            "      hand-built ref    81.3% on a beat, all lit 60.7%",
             "",
-            "  A hand-built show for this song sits at 27.1% and 0.50. One binding per",
-            "  section matches it; three do not come close, and no amount of tuning",
-            "  floors or levels recovers it - that was tried and moved 8.1% to 8.4%.",
-            "",
-            "  A rig that is never dark reads as broken however good the cues are. If",
-            "  you want two things happening at once in a section, make one of them a",
-            "  GESTURE - bounded, it ends, and the lamp is free again afterwards.",
-            "  Bindings are for the one continuous thing the section is about.",
+            "  That is what a binding is and what it costs. Whether a moment in this",
+            "  song wants something genuinely continuous under it is yours to judge.",
             "",
             "  FLOORS ACCUMULATE, AND THIS IS THE TRAP. Every binding holds its lamps",
             "  at some resting level - follow has `floor`, accent/chase/ripple/alternate",
