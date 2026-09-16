@@ -404,18 +404,36 @@ for (let t = 0; t < dur; t += 1 / fps) {
       }
     }
 
-    /* A binding takes over from the section's resting look, and taking over is
-       still a change of look. Without this the rig jumped at 47.8s and 81.3s,
-       where a split binding starts, for no reason an audience could hear. */
+    /* A binding takes over from whatever was lit a moment ago, and taking over
+       is still a change of look. It used to cross only from the section STATE,
+       so binding-to-binding at a section edge - the common case, since every
+       section carries one - had no crossfade at all and cut hard: 108 DMX in a
+       single frame at 81.8s, 66 at 48.2s. The outgoing bindings are held at
+       their last value and crossed from instead, falling back to the state
+       when a section genuinely had none. */
     if (base && bindStart != null && t - bindStart < STATE_FADE) {
-      for (const st of stateResults) {
-        if (bindStart < st.startS || bindStart >= st.endS) continue;
-        if (!st.dmx.per_fixture.includes(fid)) continue;
-        const was = frameAt(st.dmx, bindStart - st.startS,
-                            st.endS - st.startS, bpm);
-        base = mixFrames(was, base, ease((t - bindStart) / STATE_FADE), o, W);
-        break;
+      let was = null;
+      for (const b2 of bindingResults) {
+        if (b2.endS > bindStart || b2.endS <= bindStart - 0.05) continue;
+        if (!b2.dmx.per_fixture.includes(fid)) continue;
+        const held = (b2.dmx.binding && typeof b2.dmx.render === "function")
+          ? b2.dmx.render(b2.valueAt(b2.endS - 0.001), b2.endS - 0.001)
+          : frameAt(b2.dmx, b2.endS - b2.startS - 0.001,
+                    b2.endS - b2.startS, bpm);
+        if (!was) was = held.slice();
+        else for (let c = 0; c < W; c++)
+          was[o + c] = Math.max(was[o + c] || 0, held[o + c] || 0);
       }
+      if (!was) {
+        for (const st of stateResults) {
+          if (bindStart < st.startS || bindStart >= st.endS) continue;
+          if (!st.dmx.per_fixture.includes(fid)) continue;
+          was = frameAt(st.dmx, bindStart - st.startS,
+                        st.endS - st.startS, bpm);
+          break;
+        }
+      }
+      if (was) base = mixFrames(was, base, ease((t - bindStart) / STATE_FADE), o, W);
     }
 
     /* gesture: among those covering this fixture now, the most recently STARTED
