@@ -154,6 +154,42 @@ def ink_table(rig="arc4-head"):
         return []
 
 
+def peak_table(song):
+    try:
+        import composer as C
+        sc = C._score_of({"_song": song})
+    except Exception:
+        return []
+    rows = []
+    ac = sc.get("acoustic") or {}
+    loud = ac.get("loudness") or []
+    w = ac.get("window_s") or 0.5
+    if loud:
+        i = max(range(len(loud)), key=lambda k: loud[k])
+        rows.append(("the recording itself", i * w, "loudest 0.5s window"))
+        top = sorted(range(len(loud)), key=lambda k: -loud[k])[:8]
+        lo, hi = min(top) * w, max(top) * w
+        rows.append(("  its loudest 8 windows", None, f"{lo:.0f}s to {hi:.0f}s"))
+    em = sc.get("emotion") or []
+    best = None
+    for e in em:
+        if isinstance(e, dict) and isinstance(e.get("energy"), (int, float)):
+            if best is None or e["energy"] > best["energy"]:
+                best = e
+    if best:
+        t = best.get("t", best.get("start"))
+        if isinstance(t, (int, float)):
+            rows.append(("measured emotion", t, f"energy {best['energy']}"))
+    for m in (sc.get("moments") or []):
+        if not isinstance(m, dict):
+            continue
+        k = str(m.get("kind", "")).lower()
+        if "peak" in k or "climax" in k or "drop" in k:
+            if isinstance(m.get("t"), (int, float)):
+                rows.append((f"moments[] {k}", m["t"], m.get("what", "")))
+    return rows
+
+
 def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
     EFFECT_BEHAVIOUR = effect_behaviour(rig)
     RIG_FACTS = rig_facts(rig)
@@ -223,6 +259,23 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "carrying the room and a varied pattern over it - while a quiet section",
             "wants one. A chase on a 4-lamp rig is one lit lamp: at the climax that",
             "empties the room, and in a quiet passage it is the whole idea.",
+            "",
+            "WHERE THIS SONG IS LOUDEST, AND WHERE THE SIGNALS DISAGREE",
+            "",
+            *[f"  {nm:24s} {'' if t is None else f'{t:7.1f}s'}  {note}"
+              for nm, t, note in peak_table(song)],
+            "",
+            "These are separate measurements of the same question and they do not",
+            "always agree. When they disagree, the recording's own loudness is the one",
+            "to trust for deciding when the rig should be brightest - it is the thing",
+            "an audience is standing in front of. A previous show put its brightest",
+            "moment 14 seconds after the recording's peak and reached only 65% of its",
+            "own maximum where the song was loudest; the hand-built reference put the",
+            "climax within a second of that peak and reached 77%.",
+            "",
+            "moments[] is still the best thing in the score for saying WHAT an event",
+            "is - an entrance, an exit, a register shift. Use it for that. Do not use",
+            "it alone to decide when the show should be bright.",
             "",
             "HOW BIG A GESTURE HAS TO BE",
             "",
