@@ -1675,10 +1675,10 @@ def make_handler(library, baker, rig):
                 sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
 
         # ----- CORS -----
-        CORS_ORIGINS = (
-            "http://localhost:3000", "http://127.0.0.1:3000",
-            "http://localhost:3001", "http://localhost:3002",
-            "http://localhost:3003", "http://localhost:3004",
+        CORS_ORIGINS = tuple(
+            "http://%s:%d" % (host, port)
+            for host in ("localhost", "127.0.0.1")
+            for port in (3000, 3001, 3002, 3003, 3004, 4000, 4001, 5173, 8080)
         )
 
         def _cors(self):
@@ -2029,10 +2029,10 @@ def make_handler(library, baker, rig):
                     try:
                         with open(composed) as fh:
                             plan_data = json.load(fh)
-                        rig = (body.get("layout") or DEFAULT_LAYOUT).replace(".layout.json", "")
-                        job = baker.start_v2(song, plan_data, rig)
+                        rig_name = (body.get("layout") or DEFAULT_LAYOUT).replace(".layout.json", "")
+                        job = baker.start_v2(song, plan_data, rig_name)
                         return self._json({"job": job, "state": "baking", "song": song,
-                                           "rig": rig, "source": "composed"})
+                                           "rig": rig_name, "source": "composed"})
                     except Exception as e:                          # noqa: BLE001
                         sys.stderr.write("composed plan unusable (%s); arranging instead\n" % e)
                 job = baker.start(song, seed, edits,

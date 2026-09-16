@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { timeToX, xToTime, fit, clampView, zoomAt, panBy, barTicks, beatAtTime, beatsAcross } from "./timeline.ts";
+import { timeToX, xToTime, fit, clampView, zoomAt, panBy, barTicks, beatTicks, timeTicks, energyPeaks, beatAtTime, beatsAcross } from "./timeline.ts";
 import type { Grid } from "./types";
 
 const DUR = 240;
@@ -108,4 +108,58 @@ test("the radius is measured at the pointer, so a tempo change is respected", ()
   const slow = beatsAcross(100, 10, v, W, changing);   // inside the 60bpm stretch
   const fast = beatsAcross(900, 10, v, W, changing);   // inside the 120bpm stretch
   assert.ok(Math.abs(fast - slow * 2) < 1e-9, `${slow} then ${fast}`);
+});
+
+/* ── vertical guides ──────────────────────────────────────────────────────── */
+
+test("beat ticks land on every beat, downbeats marked", () => {
+  /* 120bpm: a beat is 0.5s. Four seconds across 1000px is 125px a beat. */
+  const ticks = beatTicks({ from: 0, to: 4 }, GRID, W);
+  assert.deepEqual(ticks.map((t) => t.t), [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4]);
+  assert.deepEqual(ticks.filter((t) => t.strong).map((t) => t.t), [0, 2, 4]);
+});
+
+test("beat ticks give up rather than draw a hatch nobody can count", () => {
+  /* The whole song across 1000px is 2px a beat. */
+  assert.deepEqual(beatTicks({ from: 0, to: DUR }, GRID, W), []);
+  assert.deepEqual(beatTicks({ from: 0, to: 4 }, GRID, 0), []);
+  assert.deepEqual(beatTicks({ from: 4, to: 4 }, GRID, W), []);
+});
+
+test("the time ladder picks a step a person would say out loud", () => {
+  /* 240s across 1000px wants >=62px a tick, so >=14.9s: the ladder's 15. */
+  assert.equal(timeTicks({ from: 0, to: DUR }, W)[1].t - timeTicks({ from: 0, to: DUR }, W)[0].t, 15);
+  /* Half a second across the same width wants >=31ms: the ladder's 50ms, and
+     the label switches to milliseconds because the step is under a second. */
+  const close = timeTicks({ from: 10, to: 10.5 }, W);
+  assert.equal(Math.round((close[1].t - close[0].t) * 1000), 50);
+  assert.equal(close[0].label, "0:10.000");
+});
+
+test("time ticks stay on whole steps instead of drifting off a float sum", () => {
+  const ticks = timeTicks({ from: 0, to: 3 }, 2000);
+  /* 0.1 added to itself thirty times is 3.0000000000000004, which formats as
+     an impossible time and puts the line a pixel out. */
+  for (const tk of ticks) assert.equal(tk.t, Math.round(tk.t * 1000) / 1000);
+  assert.ok(ticks.every((tk) => tk.t >= 0 && tk.t <= 3));
+});
+
+test("time ticks never start before the view", () => {
+  assert.ok(timeTicks({ from: 61, to: 121 }, W).every((t) => t.t >= 61));
+});
+
+test("energy peaks are the bars the song turns over on", () => {
+  //            bar 1   2    3    4    5    6
+  const energy = [0.2, 0.6, 0.3, 0.9, 0.9, 0.1];
+  const peaks = energyPeaks(energy, GRID);
+  /* bar 2 (index 1) and the FIRST bar of the 0.9 plateau (index 3) — a plateau
+     is one lift, not two. Bar 2 starts at 2s, bar 4 at 6s. */
+  assert.deepEqual(peaks.map((p) => p.t), [2, 6]);
+  assert.deepEqual(peaks.map((p) => p.strong), [false, true]);
+});
+
+test("energy peaks skip holes in the score rather than reading them as zero", () => {
+  assert.deepEqual(energyPeaks([0.2, null, 0.3, null, 0.9], GRID), []);
+  assert.deepEqual(energyPeaks([], GRID), []);
+  assert.deepEqual(energyPeaks([0.9], GRID), []);
 });

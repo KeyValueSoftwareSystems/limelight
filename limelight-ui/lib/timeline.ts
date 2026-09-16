@@ -1,11 +1,19 @@
 import type { Grid } from "./types";
-import { makeGridClock, beatIndexAt, clamp } from "./grid.ts";
+import { makeGridClock, beatIndexAt, clamp, mmss, mmssms } from "./grid.ts";
 
 /** A window onto the song, in seconds. Never extends past the song. */
 export interface View {
   from: number;
   to: number;
 }
+
+/** The narrowest window the editor will show.
+ *
+ *  It used to be a whole second, which is about four beats — so the closest you
+ *  could ever look was still too wide to see a millisecond, let alone place
+ *  one. At 0.2s across a ~1000px editor a pixel is a fifth of a millisecond,
+ *  which is finer than anything the ear or the wire can tell apart. */
+export const MIN_SPAN_S = 0.2;
 
 export function fit(duration: number): View {
   return { from: 0, to: duration };
@@ -141,4 +149,84 @@ export function beatsAcross(
   const a = beatAtTime(xToTime(x, view, width), grid);
   const b = beatAtTime(xToTime(x + px, view, width), grid);
   return Math.abs(b - a);
+}
+
+/* ── vertical guides ──────────────────────────────────────────────────────────
+   Everything the editor can rule a line at. Each ladder answers the same
+   question — "how far apart are these on screen?" — and returns nothing rather
+   than a hatch when the answer is "closer than you could read". A grid you
+   cannot count is not a grid, it is a texture. */
+
+export interface Tick {
+  t: number;
+  /** Shown under the line. Omitted where the band above already names it. */
+  label?: string;
+  /** A stronger line: a downbeat among beats, every fifth among times. */
+  strong?: boolean;
+}
+
+/** Below this, beats are a hatch rather than a count. */
+const MIN_BEAT_PX = 7;
+
+/** Every beat in view, downbeats marked, or nothing if they are too close. */
+export function beatTicks(view: View, grid: Grid, width: number): Tick[] {
+  const span = view.to - view.from;
+  if (span <= 0 || width <= 0 || !grid.bpm) return [];
+  const { secondsAtBar, bpb } = makeGridClock(grid);
+  if (((60 / grid.bpm) / span) * width < MIN_BEAT_PX) return [];
+
+  const out: Tick[] = [];
+  for (let n = Math.max(0, Math.floor(beatAtTime(view.from, grid))); out.length <= 2048; n++) {
+    const t = secondsAtBar(Math.floor(n / bpb) + 1, (n % bpb) + 1);
+    if (t > view.to) break;
+    if (t >= view.from) out.push({ t, strong: n % bpb === 0 });
+  }
+  return out;
+}
+
+/* A ladder a person counts in. 0.4s steps exist arithmetically and nobody has
+   ever thought in them; these run milliseconds to minutes and every rung is a
+   number you would say out loud. */
+const TIME_STEPS = [
+  0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.25, 0.5,
+  1, 2, 5, 10, 15, 30, 60, 120, 300, 600,
+];
+/** Wide enough for "0:42.375" plus air. */
+const MIN_TIME_PX = 62;
+
+/** Clock time across the view, at whatever resolution the zoom can show —
+ *  minutes when the whole song is on screen, milliseconds when it is not. */
+export function timeTicks(view: View, width: number): Tick[] {
+  const span = view.to - view.from;
+  if (span <= 0 || width <= 0) return [];
+  const step =
+    TIME_STEPS.find((s) => (s / span) * width >= MIN_TIME_PX) ?? TIME_STEPS[TIME_STEPS.length - 1];
+
+  const first = Math.ceil(view.from / step);
+  const out: Tick[] = [];
+  for (let i = 0; out.length <= 512; i++) {
+    /* Counted in whole steps and rounded to the millisecond, because adding
+       0.1 to itself thirty times does not give 3. */
+    const t = Math.round((first + i) * step * 1000) / 1000;
+    if (t > view.to) break;
+    out.push({ t, label: step < 1 ? mmssms(t) : mmss(t), strong: (first + i) % 5 === 0 });
+  }
+  return out;
+}
+
+/** The bars where the score's own intensity turns over — where the song lifts.
+ *  Energy is one value per bar, so a peak is a bar, not an instant. */
+export function energyPeaks(energy: (number | null)[], grid: Grid): Tick[] {
+  const { secondsAtBar } = makeGridClock(grid);
+  const out: Tick[] = [];
+  for (let i = 1; i < energy.length - 1; i++) {
+    const v = energy[i], before = energy[i - 1], after = energy[i + 1];
+    if (v == null || before == null || after == null) continue;
+    /* Strictly above what came before, at least level with what follows: the
+       first bar of a plateau is the peak, not every bar of it. */
+    if (v > before && v >= after) {
+      out.push({ t: secondsAtBar(i + 1), label: `${Math.round(v * 100)}%`, strong: v >= 0.8 });
+    }
+  }
+  return out;
 }

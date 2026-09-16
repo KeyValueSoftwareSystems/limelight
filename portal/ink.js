@@ -1,6 +1,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const RIG = require("./rig.js");
 
 const HERE = __dirname;
 
@@ -15,10 +16,19 @@ function measure(rigName) {
     restColour: [1, 0.75, 0.35],
     beatAt: (t) => (t || 0) * bpm / 60,
   };
+  const geom = RIG.fixtures(rigName);
   const rows = [];
+  const catIds = (() => {
+    try {
+      const c = JSON.parse(fs.readFileSync(path.join(HERE, "effects.json"), "utf8"));
+      const eff = Array.isArray(c) ? c : c.effects;
+      return new Set(eff.map((e) => e.id));
+    } catch (e) { return null; }
+  })();
   for (const file of fs.readdirSync(venueDir)) {
     if (!file.endsWith(".js") || file === "helpers.js") continue;
     const eid = file.replace(/\.js$/, "");
+    if (catIds && !catIds.has(eid)) continue;
     let mod;
     try {
       mod = require(path.join(venueDir, file));
@@ -34,33 +44,41 @@ function measure(rigName) {
     }
     if (!dmx) continue;
     const frames = [];
+    const beatCtx = (i, n) => {
+      const beat = (i / n) * 4;
+      const bi = Math.floor(beat);
+      return { t: i / fps, beat, beatIndex: bi, bphase: beat - bi,
+               bar: Math.floor(bi / 4), downbeat: bi % 4 === 0,
+               weight: 0.5 + 0.5 * Math.cos((bi % 4) * Math.PI / 2),
+               energy: 0.7, p: i / n };
+    };
     if (typeof dmx.render === "function") {
       for (let i = 0; i < 80; i++) {
         const t = i / fps;
         const v = 0.5 + 0.5 * Math.sin((i / 80) * Math.PI * 2);
-        try { frames.push(dmx.render(v, t)); } catch (e) { }
+        try {
+          frames.push(dmx.beat ? dmx.render(beatCtx(i, 80)) : dmx.render(v, t));
+        } catch (e) { }
       }
     } else if (Array.isArray(dmx.frames)) {
       for (const f of dmx.frames) frames.push(f);
     }
     if (!frames.length) continue;
-    const lampsOf = (f) => {
-      const out = [];
-      for (let i = 0; i < 4; i++) {
-        const b = i * 7;
-        out.push(Math.max(f[b + 1] || 0, f[b + 2] || 0, f[b + 3] || 0));
-      }
-      return out;
-    };
-    let ink = 0, differ = 0, sum = 0, peak = 0, dark = 0;
+    const lampsOf = (f) =>
+      geom.lampOffsets.map((o) => Math.max(f[o + 1] || 0, f[o + 2] || 0, f[o + 3] || 0));
+    let ink = 0, differ = 0, sum = 0, peak = 0, dark = 0, rigRises = 0;
+    let prevRig = null;
     for (const f of frames) {
       const L = lampsOf(f);
       const lit = L.filter((x) => x > 12).length;
-      ink += lit / 4;
+      ink += lit / Math.max(1, L.length);
       if (Math.max(...L) > 12 && Math.max(...L) - Math.min(...L) > 20) differ++;
-      sum += L.reduce((a, b) => a + b, 0) / 4 / 255;
+      sum += L.reduce((a, b) => a + b, 0) / Math.max(1, L.length) / 255;
       peak = Math.max(peak, Math.max(...L) / 255);
       if (Math.max(...L) <= 12) dark++;
+      const now = Math.max(...L);
+      if (prevRig !== null && now - prevRig > 30) rigRises++;
+      prevRig = now;
     }
     const n = frames.length;
     rows.push({
@@ -71,6 +89,7 @@ function measure(rigName) {
       mean: sum / n,
       peak,
       dark: dark / n,
+      perBeat: rigRises / Math.max(1, n / (fps * 0.5)),
     });
   }
   rows.sort((a, b) => b.ink - a.ink || b.differ - a.differ);
@@ -87,7 +106,8 @@ function table(rigName) {
       "  differ " + (r.differ * 100).toFixed(0).padStart(3) + "%" +
       "  mean " + r.mean.toFixed(2) +
       "  peak " + r.peak.toFixed(2) +
-      "  dark " + (r.dark * 100).toFixed(0).padStart(3) + "%"
+      "  dark " + (r.dark * 100).toFixed(0).padStart(3) + "%" +
+      "  rig-lifts/beat " + r.perBeat.toFixed(1)
     );
   }
   return out;

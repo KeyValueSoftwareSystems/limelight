@@ -1,0 +1,40 @@
+# Node
+node_modules/
+limelight-ui/.next/
+limelight-ui/node_modules/
+server/node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.venv-panel/
+
+# Heavy or regenerable
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.aac
+*.pt
+*.pth
+*.safetensors
+*.npy
+*.f16
+synth/
+models/
+assets/
+renders/
+work/
+tools/
+.git/
+logs/
+docs/
+
+# Portal work files (data goes via volume mount)
+portal/work/
+
+# Dev files
+.start.pids
+listen/
+llm-bruteforce/

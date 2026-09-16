@@ -6,7 +6,7 @@ import { usePortalStore } from "@/store/portal";
 
 const TABS = {
   creator: [
-    { id: "library", label: "Library", href: "/library" },
+    { id: "library", label: "My-Library", href: "/library" },
     { id: "venues", label: "Venues", href: "/venues" },
     { id: "marketplace", label: "Marketplace", href: "/marketplace" },
   ],

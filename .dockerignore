@@ -1,0 +1,48 @@
+# Ignore these from the Docker build context (build context is limelight/)
+
+# Node build artifacts (rebuilt inside Docker)
+node_modules/
+limelight-ui/.next/
+limelight-ui/node_modules/
+server/node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.venv-panel/
+
+# Heavy files
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.aac
+*.pt
+*.pth
+*.safetensors
+*.npy
+*.f16
+
+# Directories not needed at runtime
+synth/
+models/
+assets/
+renders/
+work/
+tools/
+.git/
+logs/
+docs/
+listen/
+llm-bruteforce/
+
+# Portal runtime data (goes via volume mount)
+portal/work/
+hub/files/
+
+# Dev files
+.start.pids
+*.score
+*.score.json
+files.zip

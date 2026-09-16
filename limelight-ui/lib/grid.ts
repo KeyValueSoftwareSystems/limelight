@@ -99,3 +99,43 @@ export function mmss(s: number): string {
 export function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v));
 }
+
+/**
+ * Format seconds as m:ss.mmm.
+ *
+ * m:ss is enough to find a section; it is not enough to place an effect against
+ * a hit, which is a few tens of milliseconds wide — at m:ss a cue and the snare
+ * it is meant to land on read as the same instant. Rounding happens once, on
+ * the total, so 59.9996s reads "1:00.000" rather than "0:60.000".
+ */
+export function mmssms(s: number): string {
+  if (!isFinite(s)) return "—";
+  const sign = s < 0 ? "-" : "";
+  const ms = Math.round(Math.abs(s) * 1000);
+  const m = Math.floor(ms / 60000);
+  const sec = Math.floor((ms % 60000) / 1000);
+  return `${sign}${m}:${String(sec).padStart(2, "0")}.${String(ms % 1000).padStart(3, "0")}`;
+}
+
+/**
+ * Read a time back out of a typed field: "1:02.375" and "62.375" are the same
+ * instant, and both are things a person types. Returns null for anything that
+ * is not a time, so the field can put back what it had instead of jumping to
+ * zero on a stray keystroke.
+ */
+export function parseTime(text: string): number | null {
+  const m = /^(-)?(?:(\d+):)?(\d+(?:\.\d+)?)$/.exec(text.trim());
+  if (!m) return null;
+  const v = (m[2] ? Number(m[2]) * 60 : 0) + Number(m[3]);
+  return isFinite(v) ? (m[1] ? -v : v) : null;
+}
+
+/**
+ * A beat count as a person would say it: "2", not "2.0000000004"; "1.5", not
+ * "1.4999999". Beats stop being whole the moment anything is nudged by a
+ * millisecond, and a readout that shows twelve digits of float noise makes a
+ * correct number look like a broken one.
+ */
+export function beatsLabel(b: number): string {
+  return String(Math.round(b * 100) / 100);
+}

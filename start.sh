@@ -57,8 +57,12 @@ HUB_PID=$!
 echo "hub=$HUB_PID" >> "$PIDFILE"
 
 # ── portal (:8800) ──────────────────────────────────────────────────────────
-echo -e "${CYN}starting portal${RST} on :8800 …"
-python3 portal/server.py --no-net > logs/portal.log 2>&1 &
+# Art-Net output is off by default (safe on a shared box); PORTAL_NET=1 ./start.sh
+# opens the socket so "Send to the rig" can arm. Nothing leaves the wire until armed.
+NET_FLAG=--no-net
+[ -n "$PORTAL_NET" ] && NET_FLAG=
+echo -e "${CYN}starting portal${RST} on :8800 …${PORTAL_NET:+ ${GRN}(Art-Net enabled)${RST}}"
+python3 portal/server.py $NET_FLAG > logs/portal.log 2>&1 &
 PORTAL_PID=$!
 echo "portal=$PORTAL_PID" >> "$PIDFILE"
 

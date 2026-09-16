@@ -4,6 +4,7 @@ import { memo } from "react";
 
 import Image from "next/image";
 import { timeToX } from "@/lib/timeline";
+import { beatsLabel, mmssms } from "@/lib/grid";
 import { effectIcon } from "@/lib/effectIcons";
 import { useTimeline } from "./Timeline";
 import type { Clip as ClipModel } from "@/lib/types";
@@ -72,7 +73,15 @@ function ClipBase({
           : "bg-bg-raised border-line-strong hover:border-ink-dimmer"
       }`}
       style={{ left: x0, width: w, top, height, zIndex: selected ? 20 : 1 }}
-      title={`${clip.name} · bar ${clip.bar}${clip.beat > 1 ? "." + clip.beat : ""} · ${clip.beats} beat${clip.beats === 1 ? "" : "s"} · double-click to zoom to it`}
+      /* Time first, because that is what is being placed, and every number
+         rounded to something a person would say. Once a clip can be nudged by
+         ten milliseconds its beat stops being whole, and the raw float read
+         "bar 15.2.682696860000007" — which looks like a bug in the clip, not
+         like a clip a third of the way into a beat. */
+      title={
+        `${clip.name} · ${mmssms(clip.startS)} · ${beatsLabel(clip.beats)} beat${clip.beats === 1 ? "" : "s"}` +
+        ` · bar ${clip.bar}\u00b7${beatsLabel(clip.beat)} · double-click to zoom to it`
+      }
     >
       <span
         className="absolute inset-0 flex items-center gap-[5px] px-[7px] pointer-events-none overflow-hidden"

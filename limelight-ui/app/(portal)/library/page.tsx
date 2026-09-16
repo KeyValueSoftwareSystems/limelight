@@ -50,7 +50,7 @@ export default function LibraryPage() {
       <div className="flex-none px-[var(--spacing-s5)] pt-[var(--spacing-s4)] pb-[var(--spacing-s3)] border-b border-solid border-line">
         <div className="flex items-end justify-between gap-[var(--spacing-s4)]">
           <div>
-            <div className="display">Library</div>
+            <div className="display">My-Library</div>
             <div className="label mt-[3px]">{meta}</div>
           </div>
           <div className="flex items-center gap-[var(--spacing-s3)] flex-wrap">

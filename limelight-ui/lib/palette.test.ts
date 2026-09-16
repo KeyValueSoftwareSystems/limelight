@@ -97,7 +97,7 @@ import path from "node:path";
 import { extractPalette } from "./palette.ts";
 
 const SHOWFILE = path.join(
-  import.meta.dirname, "..", "..", "portal", "showfiles", "raga-of-revenge.show.json",
+  import.meta.dirname, "fixtures", "raga-of-revenge.show.json",
 );
 
 test("extractPalette derives what portal/recolour.py derives", () => {

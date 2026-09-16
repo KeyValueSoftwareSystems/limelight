@@ -1,6 +1,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const RIG = require("./rig.js");
 
 const HERE = __dirname;
 const SHADE = [" ", ".", ":", "-", "=", "+", "*", "#", "%", "@"];
@@ -32,10 +33,19 @@ function strip(rigName, width) {
   const bpm = 120, fps = 40;
   const ctx = { fps, bpm, layout: manifest, restColour: [1, 0.75, 0.35],
                 beatAt: (t) => (t || 0) * bpm / 60 };
+  const geom = RIG.fixtures(rigName);
   const out = [];
+  const catIds = (() => {
+    try {
+      const c = JSON.parse(fs.readFileSync(path.join(HERE, "effects.json"), "utf8"));
+      const eff = Array.isArray(c) ? c : c.effects;
+      return new Set(eff.map((e) => e.id));
+    } catch (e) { return null; }
+  })();
   for (const file of fs.readdirSync(venueDir).sort()) {
     if (!file.endsWith(".js") || file === "helpers.js") continue;
     const eid = file.replace(/\.js$/, "");
+    if (catIds && !catIds.has(eid)) continue;
     let mod, dmx;
     try { mod = require(path.join(venueDir, file)); } catch (e) { continue; }
     if (typeof mod !== "function") continue;
@@ -43,10 +53,20 @@ function strip(rigName, width) {
     if (!dmx) continue;
 
     const frames = [];
+    const beatCtx = (i, n) => {
+      const beat = (i / n) * 4;
+      const bi = Math.floor(beat);
+      return { t: i / fps, beat, beatIndex: bi, bphase: beat - bi,
+               bar: Math.floor(bi / 4), downbeat: bi % 4 === 0,
+               weight: 0.5 + 0.5 * Math.cos((bi % 4) * Math.PI / 2),
+               energy: 0.7, p: i / n };
+    };
     if (typeof dmx.render === "function") {
       for (let i = 0; i < width; i++) {
         const v = 0.5 + 0.5 * Math.sin((i / width) * Math.PI * 2);
-        try { frames.push(dmx.render(v, i / fps)); } catch (e) { }
+        try {
+          frames.push(dmx.beat ? dmx.render(beatCtx(i, width)) : dmx.render(v, i / fps));
+        } catch (e) { }
       }
     } else if (Array.isArray(dmx.frames) && dmx.frames.length) {
       for (let i = 0; i < width; i++) {
@@ -56,20 +76,19 @@ function strip(rigName, width) {
     if (!frames.length) continue;
 
     const rows = [];
-    for (let lamp = 0; lamp < 4; lamp++) {
-      const b = lamp * 7;
-      rows.push(frames.map((f) => shade(Math.max(f[b + 1] || 0, f[b + 2] || 0, f[b + 3] || 0))).join(""));
+    for (const off of geom.lampOffsets) {
+      rows.push(frames.map((f) => shade(Math.max(f[off + 1] || 0, f[off + 2] || 0, f[off + 3] || 0))).join(""));
     }
-    const head = frames.map((f) => shade(f[28] || 0)).join("");
+    const headOff = geom.headOffsets.length ? geom.headOffsets[0] : null;
+    const head = headOff == null ? "" : frames.map((f) => shade(f[headOff] || 0)).join("");
     const hues = new Set();
     for (const f of frames) {
-      for (let lamp = 0; lamp < 4; lamp++) {
-        const b = lamp * 7;
-        const h = hueName(f[b + 1] || 0, f[b + 2] || 0, f[b + 3] || 0);
+      for (const off of geom.lampOffsets) {
+        const h = hueName(f[off + 1] || 0, f[off + 2] || 0, f[off + 3] || 0);
         if (h) hues.add(h);
       }
     }
-    out.push({ eid, rows, head, hues: [...hues], kind: dmx.binding ? "binding" : (typeof dmx.render === "function" ? "binding" : "frames") });
+    out.push({ eid, rows, head, names: geom.lamps.map((l) => l.id), hues: [...hues], kind: dmx.binding ? "binding" : (typeof dmx.render === "function" ? "binding" : "frames") });
   }
   return out;
 }
@@ -78,8 +97,9 @@ function render(rigName, width) {
   const lines = [];
   for (const e of strip(rigName, width)) {
     lines.push(`  ${e.eid}${e.hues.length ? "  [" + e.hues.join(" ") + "]" : ""}`);
-    e.rows.forEach((r, i) => lines.push(`    par${i + 1} |${r}|`));
-    lines.push(`    head |${e.head}|`);
+    const w = Math.max(4, ...e.names.map((n) => n.length));
+    e.rows.forEach((r, i) => lines.push(`    ${e.names[i].padEnd(w)} |${r}|`));
+    if (e.head) lines.push(`    ${"head".padEnd(w)} |${e.head}|`);
   }
   return lines;
 }
