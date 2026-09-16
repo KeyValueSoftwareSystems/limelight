@@ -203,3 +203,16 @@ export function extractPalette(show: unknown, keep = 5): PaletteColour[] {
 
   return [...chromatic, ...whites].map((rgb, i) => ({ id: `c${i}`, hex: rgb01ToHex(rgb) }));
 }
+
+/** True when the palette has been explicitly edited away from its baseline. */
+export function paletteChanged(
+  palette: PaletteColour[],
+  base: PaletteColour[],
+): boolean {
+  return (
+    palette.length > 0 &&
+    base.length > 0 &&
+    (palette.length !== base.length ||
+     palette.some((c, i) => c.hex !== base[i]?.hex))
+  );
+}

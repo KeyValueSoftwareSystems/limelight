@@ -8,7 +8,7 @@ import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { placeFixtures } from "@/lib/fixtures";
 import { mmss, clamp } from "@/lib/grid";
-import { colourName, hexToRgb01, extractPalette } from "@/lib/palette";
+import { colourName, hexToRgb01, extractPalette, paletteChanged } from "@/lib/palette";
 import * as api from "@/lib/api";
 
 import { StagePreview } from "@/components/stage/StagePreview";
@@ -189,16 +189,29 @@ export default function StagePage() {
       }
       const buf = await api.show.frames(status.frames_url!);
       if (token !== rebuildTokenRef.current) return null;
+      const baked = status.show!;
       setFrames(buf);
-      setShow(status.show!);
+      setShow(baked);
       setApplied(status.applied ?? []);
-      setPlace(placeFixtures(status.show!));
-      setNatural(status.show!.appetite_natural ?? null);
+      setPlace(placeFixtures(baked));
+      setNatural(baked.appetite_natural ?? null);
       setView(null);
       setStageMsg(null);
-      return status.show!;
+
+      /* Seed the palette swatches from the bake result when the user has not
+         explicitly edited them. This covers the legacy seed+edits path (no show
+         file) where applyPlan is never called, and keeps the swatches in step
+         with the show's actual colours after every rebuild. */
+      const cur = usePortalStore.getState();
+      if (!paletteChanged(cur.palette, cur.paletteBase)) {
+        const derived = extractPalette(baked.plan ?? baked);
+        setPalette(derived);
+        setPaletteBase(derived);
+      }
+
+      return baked;
     },
-    [setFrames, setShow, setApplied, setPlace, setNatural, setView],
+    [setFrames, setShow, setApplied, setPlace, setNatural, setView, setPalette, setPaletteBase],
   );
 
   const rigForPlan = useCallback(() => {
@@ -220,6 +233,18 @@ export default function StagePage() {
     const token = ++rebuildTokenRef.current;
     setStageMsg("baking the show…");
     try {
+      /* Only override the show's colours when the user has explicitly edited the
+         palette. An untouched palette (palette === paletteBase) means "keep the
+         show's own colours", so nothing is sent and the baker uses whatever the
+         plan or song already declares. */
+      const dirty = paletteChanged(st.palette, st.paletteBase);
+      const palettePayload = dirty
+        ? st.palette.map((c) => ({
+            name: colourName(c.hex),
+            rgb: hexToRgb01(c.hex),
+          }))
+        : undefined;
+
       let post: Awaited<ReturnType<typeof api.show.bake>>;
       if (st.v2 && st.show) {
         const planData = editsToPlan(
@@ -228,14 +253,8 @@ export default function StagePage() {
           st.effects,
           st.planText,
         );
-        /* Declared at the top of the plan, which is where the validator looks
-           for it. Both bake paths have to carry the room's colours or an edit
-           would regenerate a show that never heard about it. */
-        if (st.palette.length) {
-          planData.palette = st.palette.map((c) => ({
-            name: colourName(c.hex),
-            rgb: hexToRgb01(c.hex),
-          }));
+        if (palettePayload) {
+          planData.palette = palettePayload;
         }
         post = await api.plan.bake(st.song.name, planData, rigForPlan());
       } else {
@@ -245,14 +264,7 @@ export default function StagePage() {
           edits: st.edits,
           appetite: st.want,
           layout: st.layout ?? undefined,
-          /* The room's colours ride with every bake. The name is derived rather
-             than stored, so it can never disagree with the value beside it. */
-          palette: st.palette.length
-            ? st.palette.map((c) => ({
-                name: colourName(c.hex),
-                rgb: hexToRgb01(c.hex),
-              }))
-            : undefined,
+          palette: palettePayload,
         });
       }
       if (post.error) {
