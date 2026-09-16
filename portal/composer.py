@@ -338,12 +338,18 @@ def _score_of(overview):
     return _SCORES[song]
 
 
+def _bar_phase(sc, bpb):
+    flags = [i for i, b in enumerate(sc.get("beats") or [])
+             if isinstance(b, dict) and b.get("downbeat")]
+    return (flags[0] % bpb) if flags else 0
+
+
 def _sec_of_bar(sc, bar):
     g = sc.get("grid") or {}
     bpb = g.get("beats_per_bar") or 4
     beats = [b.get("t") if isinstance(b, dict) else b for b in (sc.get("beats") or [])]
     beats = [t for t in beats if isinstance(t, (int, float))]
-    i = max(0, (int(bar) - 1) * bpb)
+    i = max(0, _bar_phase(sc, bpb) + (int(bar) - 1) * bpb)
     if beats and i < len(beats):
         return float(beats[i])
     if beats:
