@@ -1041,7 +1041,16 @@
     "for_beats": {
      "default": 4
     }
-   }
+   },
+   "name": "Chase",
+   "dimension": "place",
+   "tier": 2,
+   "default_beats": 4,
+   "returns": true,
+   "min_fixtures": 3,
+   "fires_on": [
+    "a bar where the row should read as one travelling light"
+   ]
   },
   {
    "id": "ripple",
@@ -1061,7 +1070,16 @@
     "for_beats": {
      "default": 4
     }
-   }
+   },
+   "name": "Ripple",
+   "dimension": "place",
+   "tier": 2,
+   "default_beats": 4,
+   "returns": true,
+   "min_fixtures": 4,
+   "fires_on": [
+    "a moment that should open outwards from the middle"
+   ]
   },
   {
    "id": "bounce",
@@ -1081,7 +1099,16 @@
     "for_beats": {
      "default": 4
     }
-   }
+   },
+   "name": "Bounce",
+   "dimension": "place",
+   "tier": 2,
+   "default_beats": 4,
+   "returns": true,
+   "min_fixtures": 3,
+   "fires_on": [
+    "a figure that goes and comes back inside one bar"
+   ]
   },
   {
    "id": "glare",
@@ -1107,7 +1134,16 @@
     "for_beats": {
      "default": 2
     }
-   }
+   },
+   "name": "Glare",
+   "dimension": "amount",
+   "tier": 1,
+   "default_beats": 2,
+   "returns": true,
+   "min_fixtures": 1,
+   "fires_on": [
+    "the half of a bar that carries the weight"
+   ]
   }
  ]
 }

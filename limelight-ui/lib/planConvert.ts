@@ -91,6 +91,7 @@ export function planToEdits(plan: V2Plan, show: Show, catalogue: Effect[] = []):
   const byId = new Map(catalogue.map((e) => [e.id, e]));
   const edits: Edit[] = [];
   const beatDur = 60 / (grid.bpm || 120);
+  const { secondsAtBar } = makeGridClock(grid);
   /* a point gesture's span is for_beats, else the effect's default_beats — NOT
      over_beats, which is an animation dial the baker does not use for the span. */
   const pointBeats = (g: V2Entry) => (g.for_beats as number) ?? byId.get(g.effect)?.default_beats ?? 1;
@@ -131,8 +132,21 @@ export function planToEdits(plan: V2Plan, show: Show, catalogue: Effect[] = []):
     push(b.effect, sp.a, beatSpan(grid, sp.a, sp.b), dials(b, false));
   }
   for (const g of plan.gestures ?? []) {
-    /* anchors, in the baker's own precedence: absolute seconds, then moments */
-    if (g.from_s != null && g.to_s != null) {
+    /* Anchors, in the baker's own precedence: seconds, then BARS, then moments.
+       Bars were missing entirely, and a gesture the editor cannot place is a
+       gesture that never reaches the bake -- so every bar-anchored cue was being
+       dropped on the way to the emulator and the room simply did not do it. The
+       baker has always accepted at_bar/from_bar; this is the half of the trip
+       that did not. */
+    if (g.from_bar != null && (g.to_bar != null || g.to_beat != null)) {
+      const a = secondsAtBar(g.from_bar as number, (g.from_beat as number) ?? 1);
+      const b = secondsAtBar((g.to_bar as number) ?? g.from_bar, (g.to_beat as number) ?? 1);
+      if (b > a) push(g.effect, a, beatSpan(grid, a, b), dials(g, true));
+    } else if (g.at_bar != null) {
+      const a = secondsAtBar(g.at_bar as number, (g.at_beat as number) ?? 1)
+        - ((g.lead_beats as number) ?? 0) * beatDur;
+      push(g.effect, a, pointBeats(g), dials(g, true));
+    } else if (g.from_s != null && g.to_s != null) {
       push(g.effect, g.from_s, beatSpan(grid, g.from_s, g.to_s), dials(g, true));
     } else if (g.at_s != null) {
       const startS = g.at_s - (g.lead_beats ?? 0) * beatDur;
