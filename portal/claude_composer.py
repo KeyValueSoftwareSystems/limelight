@@ -224,6 +224,19 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "  threshold around 0.10 fires on roughly a third of the track and a",
             "  threshold above 0.2 never fires at all.",
             "",
+            "  MEASURED, SO YOU DO NOT HAVE TO GUESS: `accent` rides drum ONSETS, and",
+            "  onsets are not beats - a show driven by accent alone put only 35.8% of",
+            "  its brightness rises on a measured beat, barely above the 22% you get by",
+            "  chance. The same show driven by a grid stream put 63.7% on a beat. If you",
+            "  want the rig to look locked to the song, a grid stream is the thing that",
+            "  does it, and accent is not a substitute for one.",
+            "",
+            "  `accent` also flashes THE WHOLE RIG AT ONCE. Six accent bindings and",
+            "  nothing else drove `lamps doing different things` from 78% down to 2.7% -",
+            "  a rig blinking in unison is the definition of a wall. Never let one",
+            "  binding effect carry every section: pair any whole-rig binding with a",
+            "  place binding (`split`) or a narrower `extent` so the lamps can disagree.",
+            "",
             "  Bindings LAYER. A section may carry several and they combine, so the",
             "  designer's normal move is available: the wash follows the voice while",
             "  the pars answer the kick. One binding per section is a thin section.",
@@ -361,7 +374,7 @@ def read_plan(work):
     return None
 
 
-def compose(song, model=None, hub=None, turns=38, keep=False):
+def compose(song, model=None, hub=None, turns=38, keep=False, notes=None):
     model = model or DEFAULT_MODEL
     if hub:
         C.HUB = hub.rstrip("/")
@@ -381,6 +394,8 @@ def compose(song, model=None, hub=None, turns=38, keep=False):
     os.makedirs(work, exist_ok=True)
 
     brief = brief_for(song, overview, C.build_effects_block(catalog), hub)
+    if notes:
+        brief = brief + "\n\n" + notes
     with open(os.path.join(work, "brief.md"), "w") as f:
         f.write(brief)
 
@@ -409,13 +424,15 @@ def main():
     ap.add_argument("--hub", default=C.HUB)
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--turns", type=int, default=38)
+    ap.add_argument("--notes", default=None)
     ap.add_argument("--out", default=None)
     ap.add_argument("--keep", action="store_true")
     args = ap.parse_args()
 
     print(f"composing '{args.song}' with claude ({args.model})...", flush=True)
     plan, report, overview, said, work = compose(
-        args.song, model=args.model, hub=args.hub, turns=args.turns, keep=args.keep
+        args.song, model=args.model, hub=args.hub, turns=args.turns, keep=args.keep,
+        notes=(open(args.notes).read() if args.notes and os.path.exists(args.notes) else None)
     )
 
     print(format_report(report))
