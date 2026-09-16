@@ -21,7 +21,6 @@ import { StageTimeline } from "@/components/editor/StageTimeline";
 import { Sidebar } from "@/components/editor/Sidebar";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { buildClips } from "@/lib/clips";
-import { resolve as resolveShowFile, toClips as showFileClips, type ShowFile } from "@/lib/showfile";
 import { effectIdForPlanFx } from "@/lib/families";
 import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
 import type { Clip } from "@/lib/types";
@@ -64,9 +63,6 @@ export default function StagePage() {
     window.addEventListener("pointerup", up);
   }, []);
   const rehydratedRef = useRef(false);
-  /* a hand-authored show file, kept WITH the song it was fetched for: keying it
-     that way means a stale file can never be drawn over a new song */
-  const [loadedFile, setLoadedFile] = useState<{ song: string; file: ShowFile | null } | null>(null);
 
   /* read URL params once on mount (safe for SSR since guarded by typeof window) */
   const urlParams = useMemo(() => {
@@ -215,24 +211,16 @@ export default function StagePage() {
   /* ── import a v2 plan: bake it, then translate it into editable clips ──────
      The raw plan bakes first (the baker's native input), then the returned
      show's sections/moments turn the plan into the Edit[] the timeline draws. */
-  const importPlan = useCallback(
-    async (file: File) => {
+  const applyPlan = useCallback(
+    async (planData: V2Plan, what: string) => {
       if (!song) return;
       const token = ++rebuildTokenRef.current;
       try {
-        const raw = JSON.parse(await file.text()) as Record<string, unknown>;
-        const planData = (
-          raw.states || raw.gestures || raw.bindings
-            ? raw
-            : (raw.plan as Record<string, unknown>)?.states
-              ? raw.plan
-              : raw
-        ) as unknown as V2Plan;
         if (!planData.states && !planData.gestures && !planData.bindings) {
-          setStageMsg("that file is not a show plan");
+          setStageMsg(`that ${what} is not a show plan`);
           return;
         }
-        setStageMsg("baking imported plan…");
+        setStageMsg(`baking ${what}…`);
         setV2(true);
         setPlanText(typeof planData.plan === "string" ? planData.plan : "");
         const post = await api.plan.bake(song.name, planData, rigForPlan());
@@ -241,25 +229,51 @@ export default function StagePage() {
         const baked = await pollBake(post.job, token);
         if (baked) setEdits(planToEdits(planData, baked, usePortalStore.getState().effects));
       } catch (e) {
-        setStageMsg(e instanceof Error ? "import failed: " + e.message : "import failed");
+        setStageMsg(e instanceof Error ? `${what} failed: ` + e.message : `${what} failed`);
       }
     },
     [song, rigForPlan, setV2, setPlanText, setJob, setEdits, pollBake],
   );
 
-  /* ── a hand-authored show file for this song, if there is one ─────────── */
+  /* A show file may be nested under `plan`, or be the plan itself. */
+  const asPlan = (raw: Record<string, unknown>): V2Plan =>
+    (raw.states || raw.gestures || raw.bindings
+      ? raw
+      : (raw.plan as Record<string, unknown>)?.states
+        ? raw.plan
+        : raw) as unknown as V2Plan;
+
+  const importPlan = useCallback(
+    async (file: File) => {
+      try {
+        await applyPlan(asPlan(JSON.parse(await file.text())), "imported plan");
+      } catch (e) {
+        setStageMsg(e instanceof Error ? "import failed: " + e.message : "import failed");
+      }
+    },
+    [applyPlan],
+  );
+
+  /* ── the song's own show file, if the hub has one ──────────────────────────
+     Authored show files are the point of the v2 baker, so one is loaded the
+     moment its song is: it should not take a file picker to see the show that
+     already exists for this track. Loaded once per song; placing a clip after
+     that edits what was loaded rather than re-fetching over the top of it. */
+  const loadedForRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!song) return;
+    if (!song || loadedForRef.current === song.name) return;
     const name = song.name;
+    loadedForRef.current = name;
     let live = true;
     api.showfile
       .get(name)
-      .then((d) => { if (live) setLoadedFile({ song: name, file: (d.showfile as ShowFile) ?? null }); })
-      .catch(() => { if (live) setLoadedFile({ song: name, file: null }); });
+      .then((d) => {
+        if (!live || !d.showfile) return;
+        applyPlan(asPlan(d.showfile as Record<string, unknown>), "show file");
+      })
+      .catch(() => { /* no file for this song is the normal case */ });
     return () => { live = false; };
-  }, [song]);
-
-  const showFile = song && loadedFile?.song === song.name ? loadedFile.file : null;
+  }, [song, applyPlan]);
 
   /* ── load audio + bake on song change ────────────────────────────────── */
   const rebuildRef = useRef(rebuild);
@@ -348,19 +362,12 @@ export default function StagePage() {
      place, so showing both would just be the same effect twice. */
   const clips = useMemo(() => {
     if (!show) return [];
-    const mine = buildClips(show.plan ?? null, edits, effects, show.grid).filter((c) => !c.overridden);
-    if (!showFile) return mine;
-    /* A show file REPLACES the arranger's punctuation rather than sitting on top
-       of it: it is a complete description of the show, states and all, so
-       drawing both would show every cue twice. */
-    const r = resolveShowFile(showFile, {
-      grid: show.grid,
-      sections: show.sections ?? [],
-      moments: show.moments ?? [],
-      duration_s: show.duration_s,
-    });
-    return [...showFileClips(r, effects), ...mine.filter((c) => c.source === "mine")];
-  }, [show, edits, effects, showFile]);
+    /* One path, not two. A show file arrives as Edit[] through planToEdits, so
+       by the time it gets here it is indistinguishable from a clip dropped from
+       the palette — which is exactly what makes the file editable rather than
+       just viewable. */
+    return buildClips(show.plan ?? null, edits, effects, show.grid).filter((c) => !c.overridden);
+  }, [show, edits, effects]);
 
   /* A reveal request brings a clip into view. The list that raised them is gone
      for now, but the timeline still honours them — the chat rail will want it. */
@@ -419,6 +426,15 @@ export default function StagePage() {
          null, and the arranger's clips could not be moved or resized at all. */
       const mapped = effectIdForPlanFx(clip.fx);
       const tile =
+        /* A show file names its cues by catalogue id, and showfile.toClips has
+           already resolved that into `tile`. Where it is set it IS the answer.
+           Everything below it speaks the ARRANGER's vocabulary, which a file
+           cue never uses: `stab`, `gear`, `trade` are catalogue ids, not plan
+           words, so effectIdForPlanFx returned null for all of them and no
+           schema-2 tile carries `fx` to match on either. Materialising handed
+           back null and startGesture stopped on the next line — which is why
+           not one cue in a show file could be moved or resized. */
+        (clip.tile ? effects.find((e) => e.id === clip.tile) : undefined) ??
         effects.find((e) => e.fx === clip.fx && e.beats === clip.beats) ??
         effects.find((e) => e.fx === clip.fx) ??
         (mapped ? effects.find((e) => e.id === mapped) : undefined);
@@ -436,6 +452,24 @@ export default function StagePage() {
     },
     [effects, addEdit],
   );
+
+  /* ── write the show file back ──────────────────────────────────────────────
+     The palette's drops are Edit[], and editsToPlan turns those back into the
+     same states/bindings/gestures shape the file arrived in — so a cue placed by
+     hand and a cue authored in the file are the same thing by the time they are
+     saved. That is what makes the file the one source of truth rather than a
+     read-only import. */
+  const savePlan = useCallback(async () => {
+    const st = usePortalStore.getState();
+    if (!st.song || !st.show) return;
+    try {
+      const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
+      const r = await api.showfile.save(st.song.name, plan);
+      setStageMsg(r.error ? r.error : `saved ${r.cues ?? 0} cues to the show file`);
+    } catch (e) {
+      setStageMsg(e instanceof Error ? "save failed: " + e.message : "save failed");
+    }
+  }, []);
 
   /* ── venue picker ────────────────────────────────────────────────────── */
   const handlePickVenue = useCallback(
@@ -496,6 +530,7 @@ export default function StagePage() {
                     }}
                   />
                   <Button variant="link" onClick={() => importInputRef.current?.click()}>Import Plan</Button>
+                  <Button variant="link" onClick={savePlan}>Save Plan</Button>
                   <Input
                     placeholder="name this show"
                     autoComplete="off"

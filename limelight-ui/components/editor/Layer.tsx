@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { Clip, type Gesture } from "./Clip";
 import type { Clip as ClipModel } from "@/lib/types";
 
@@ -13,7 +15,7 @@ import type { Clip as ClipModel } from "@/lib/types";
    timeline's box exactly, which is also the coordinate space clips are drawn in
    — so the pointer and the clips agree about what time it is. */
 
-export function Layer({
+function LayerBase({
   clips,
   selection,
   height,
@@ -48,3 +50,7 @@ export function Layer({
     </div>
   );
 }
+
+/* Memoised. Same reasoning as Clip: a lane's contents do not change because the playhead moved.
+ */
+export const Layer = memo(LayerBase);

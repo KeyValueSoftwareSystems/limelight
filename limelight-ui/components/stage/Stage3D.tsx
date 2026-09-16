@@ -16,6 +16,7 @@ import { usePortalStore } from "@/store/portal";
 import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { readFixtures, trimFixtures } from "@/lib/fixtures";
 import { clamp } from "@/lib/grid";
+import { frameFor } from "@/lib/sync";
 import { profileOf } from "@/lib/profiles";
 import {
   worldOf, aimOf, throwOf, landingOf, roomOf, cameraOf, barsOf, bodyOf, type Deck,
@@ -243,6 +244,9 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
   const frames = usePortalStore((s) => s.frames);
   const place = usePortalStore((s) => s.place);
   const trims = usePortalStore((s) => s.trims);
+  const syncLatency = usePortalStore((s) => s.syncLatency);
+  const syncNudge = usePortalStore((s) => s.syncNudge);
+  const syncOffset = syncLatency + syncNudge;
 
   /* ── build the room and the rig, once per layout ───────────────────────── */
   useEffect(() => {
@@ -559,7 +563,8 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     if (!show || !frames || !place) { gl.render(scene, cam); return; }
 
     const t = clockRef.current?.position() ?? 0;
-    const idx = clamp(Math.floor(t * show.fps), 0, show.frame_count - 1);
+    /* what the listener is hearing NOW is t minus the output latency */
+    const idx = frameFor(t, show.fps, show.frame_count, syncOffset);
     const raw = readFixtures(idx, frames, show, place);
     if (!raw) { gl.render(scene, cam); return; }
     const fx = trimFixtures(raw, trims);
@@ -587,7 +592,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     for (const rig of rigsRef.current) updateRig(rig, byId, t, d);
 
     gl.render(scene, cam);
-  }, [show, frames, place, trims, clockRef]);
+  }, [show, frames, place, trims, syncOffset, clockRef]);
 
   useEffect(() => { paintRef.current = paint; }, [paint]);
 

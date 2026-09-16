@@ -69,6 +69,13 @@ export interface PortalState {
   /* rig */
   rig: RigStatus | null;
   trims: TrimState;
+  /* Seconds the LIGHTS wait for the SOUND. `audio.currentTime` is the decoder's
+     position, not what has left the speakers, so without this the preview runs
+     ahead of the music by the output buffer. Auto-detected from the audio
+     device; `syncNudge` is the person's correction on top, because a device's
+     reported latency and its real one are not always the same thing. */
+  syncLatency: number;
+  syncNudge: number;
 
   /* venue / layout */
   limits: LimitsSummary | null;
@@ -119,6 +126,8 @@ export interface PortalActions {
   setSel: (i: number) => void;
   setRig: (rig: RigStatus | null) => void;
   setTrims: (trims: Partial<TrimState>) => void;
+  setSyncLatency: (s: number) => void;
+  setSyncNudge: (s: number) => void;
   setLimits: (limits: LimitsSummary | null) => void;
   setLayout: (layout: string | null) => void;
   setLayouts: (layouts: Layout[]) => void;
@@ -175,6 +184,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   sel: -1,
   rig: null,
   trims: { ...initialTrims },
+  syncLatency: 0,
+  syncNudge: 0,
   limits: null,
   layout: null,
   layouts: [],
@@ -225,6 +236,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   setArm: (arm) => set({ arm }),
   setSel: (sel) => set({ sel }),
   setRig: (rig) => set({ rig }),
+  setSyncLatency: (syncLatency) => set({ syncLatency }),
+  setSyncNudge: (syncNudge) => set({ syncNudge }),
   setTrims: (patch) => set((s) => ({ trims: { ...s.trims, ...patch } })),
   setLimits: (limits) => set({ limits }),
   setLayout: (layout) => set({ layout }),

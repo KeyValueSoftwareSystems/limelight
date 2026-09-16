@@ -59,6 +59,90 @@ export interface PaintOpts {
   quality?: "full" | "card";
 }
 
+
+/* ── glow sprites ────────────────────────────────────────────────────────────
+   THE HOT PATH. Every soft round thing in here — a par's halo, its core, a
+   floor pool, a lens, a strobe flash, a blinder's bloom, a strip cell — used to
+   be a fresh `createRadialGradient` plus `arc` plus `fill`. Measured on the
+   46-fixture arena that is 515 gradients and 1841 addColorStop calls PER FRAME:
+   about 31,000 gradient objects a second at 60fps, each one allocating and
+   rebuilding a colour ramp that is identical to the last.
+
+   A gradient's SHAPE never changes — only its colour and its overall strength.
+   So each shape is rendered once into an offscreen canvas, tinted per colour on
+   first use, and afterwards drawn with one `drawImage`. Strength rides on
+   globalAlpha, which is free.
+
+   Falls back to real gradients where there is no DOM (tests, SSR). */
+
+type Ramp = "halo" | "core" | "pool" | "lens" | "flash";
+
+/** stop positions and alphas that describe each shape, baked once */
+const RAMPS: Record<Ramp, Array<[number, number]>> = {
+  halo:  [[0, 1], [0.18, 0.66], [0.42, 0.30], [0.70, 0.09], [1, 0]],
+  core:  [[0, 1], [0.34, 0.62], [0.62, 0.22], [1, 0]],
+  pool:  [[0, 1], [0.30, 0.44], [0.62, 0.14], [1, 0]],
+  lens:  [[0, 1], [0.46, 0.86], [1, 0]],
+  flash: [[0, 1], [0.16, 0.50], [0.46, 0.16], [1, 0]],
+};
+
+const SPRITE = 128;
+const sprites = new Map<string, HTMLCanvasElement>();
+
+function canDraw(): boolean {
+  return typeof document !== "undefined";
+}
+
+/** the shape, in one colour. Cached; the key quantises colour to 16 levels. */
+function sprite(ramp: Ramp, c: readonly number[]): HTMLCanvasElement | null {
+  if (!canDraw()) return null;
+  const q = (v: number) => Math.max(0, Math.min(15, Math.round(v * 15)));
+  const key = `${ramp}:${q(c[0])},${q(c[1])},${q(c[2])}`;
+  const hit = sprites.get(key);
+  if (hit) return hit;
+
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = SPRITE;
+  const g2 = cv.getContext("2d");
+  if (!g2) return null;
+  const r = SPRITE / 2;
+  const g = g2.createRadialGradient(r, r, 0, r, r, r);
+  for (const [at, a] of RAMPS[ramp]) g.addColorStop(at, rgba(c, a));
+  g2.fillStyle = g;
+  g2.fillRect(0, 0, SPRITE, SPRITE);
+
+  /* a runaway cache is a leak; colours repeat heavily, so a small cap is plenty */
+  if (sprites.size > 384) sprites.clear();
+  sprites.set(key, cv);
+  return cv;
+}
+
+/**
+ * One soft round light. `a` is the peak alpha; the shape comes from `ramp`.
+ * `squash` flattens it into the ellipse a floor pool makes.
+ */
+function glow(
+  ctx: CanvasRenderingContext2D, ramp: Ramp,
+  x: number, y: number, r: number,
+  c: readonly number[], a: number, squash = 1,
+): void {
+  if (a <= 0.002 || r <= 0.4) return;
+  const sp = sprite(ramp, c);
+  if (!sp) {                                   // no DOM: the old path, still correct
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    for (const [at, al] of RAMPS[ramp]) g.addColorStop(at, rgba(c, al * a));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.ellipse(x, y, r, r * squash, 0, 0, TAU);
+    ctx.fill();
+    return;
+  }
+  const prev = ctx.globalAlpha;
+  ctx.globalAlpha = Math.min(1, a);
+  ctx.drawImage(sp, x - r, y - r * squash, r * 2, r * 2 * squash);
+  ctx.globalAlpha = prev;
+}
+
 /* ── ground: the room the rig is hanging in ──────────────────────────────── */
 
 export function ground(ctx: CanvasRenderingContext2D, W: number, H: number): void {
@@ -140,14 +224,7 @@ export function housing(ctx: CanvasRenderingContext2D, x: number, y: number, r: 
 
 export function emitter(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, c: number[] | readonly number[], k: number): void {
   if (k <= 0.004) return;
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, rgba(toWhite(c, k * 0.75), k));
-  g.addColorStop(0.46, rgba(c, k));
-  g.addColorStop(1, rgba(c, 0));
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, TAU);
-  ctx.fill();
+  glow(ctx, "lens", x, y, r, toWhite(c, k * 0.55), k);
 }
 
 /** A bright lens throws a horizontal streak across the lens of the camera. */
@@ -166,21 +243,7 @@ function bloom(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, c
 
 function pool(ctx: CanvasRenderingContext2D, x: number, yFloor: number, rx: number, c: readonly number[], k: number): void {
   if (k <= 0.01) return;
-  const ry = rx * 0.32;
-  const g = ctx.createRadialGradient(x, yFloor, 0, x, yFloor, rx);
-  const a = 0.05 + 0.34 * k;
-  g.addColorStop(0, rgba(c, a));
-  g.addColorStop(0.3, rgba(c, a * 0.44));
-  g.addColorStop(0.62, rgba(c, a * 0.14));
-  g.addColorStop(1, rgba(c, 0));
-  ctx.save();
-  ctx.translate(x, yFloor);
-  ctx.scale(1, ry / rx);
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(0, 0, rx, 0, TAU);
-  ctx.fill();
-  ctx.restore();
+  glow(ctx, "pool", x, yFloor, rx, c, 0.05 + 0.34 * k, 0.32);
 }
 
 /* ── cone: the lit air between a lamp and whatever it lands on ───────────────
@@ -216,6 +279,84 @@ function cone(ctx: CanvasRenderingContext2D, wRoot: number, wEnd: number, L: num
   ctx.lineTo(-wEnd, -L);
   ctx.closePath();
   ctx.fill();
+}
+
+
+/* ── beam sprites ────────────────────────────────────────────────────────────
+   Same trick as the glows, for the shafts. A cone is three nested trapezoids
+   with a lengthwise ramp, and the SHAPE is identical every frame — only the
+   colour, the length and the strength change. So the three layers are baked
+   once into a unit sprite (apex at the bottom, far end at the top) and then
+   stretched to whatever length and spread the beam needs.
+
+   `hard` is the difference between a beam and a wash: a wash has no edge, a
+   beam has a bright core and a sharp one. */
+const beams = new Map<string, HTMLCanvasElement>();
+const BEAM_W = 96;
+const BEAM_H = 192;
+
+function beamSprite(c: readonly number[], hard: boolean): HTMLCanvasElement | null {
+  if (!canDraw()) return null;
+  const q = (v: number) => Math.max(0, Math.min(15, Math.round(v * 15)));
+  const key = `${hard ? "b" : "w"}:${q(c[0])},${q(c[1])},${q(c[2])}`;
+  const hit = beams.get(key);
+  if (hit) return hit;
+
+  const cv = document.createElement("canvas");
+  cv.width = BEAM_W;
+  cv.height = BEAM_H;
+  const g2 = cv.getContext("2d");
+  if (!g2) return null;
+  g2.globalCompositeOperation = "lighter";
+
+  const layers: Array<[number, number]> = hard
+    ? [[1.0, 0.13], [0.48, 0.34], [0.19, 0.62]]    // halo, body, core
+    : [[1.0, 0.11], [0.67, 0.26], [0.37, 0.40]];
+  const mid = BEAM_W / 2;
+  for (const [wMul, weight] of layers) {
+    const g = g2.createLinearGradient(0, BEAM_H, 0, 0);   // apex -> far end
+    g.addColorStop(0, rgba(c, weight));
+    g.addColorStop(0.22, rgba(c, weight * 0.62));
+    g.addColorStop(0.55, rgba(c, weight * 0.24));
+    g.addColorStop(1, rgba(c, 0));
+    g2.fillStyle = g;
+    const half = mid * wMul;
+    g2.beginPath();
+    g2.moveTo(mid - 1.5, BEAM_H);
+    g2.lineTo(mid + 1.5, BEAM_H);
+    g2.lineTo(mid + half, 0);
+    g2.lineTo(mid - half, 0);
+    g2.closePath();
+    g2.fill();
+  }
+
+  if (beams.size > 192) beams.clear();
+  beams.set(key, cv);
+  return cv;
+}
+
+/** A shaft from (x, y) along `rot`, `L` long, `wEnd` wide at the far end. */
+function shaft(
+  ctx: CanvasRenderingContext2D, x: number, y: number, rot: number,
+  L: number, wEnd: number, c: readonly number[], a: number, hard: boolean,
+): void {
+  if (a <= 0.002 || L <= 1) return;
+  const sp = beamSprite(c, hard);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+  if (sp) {
+    ctx.globalAlpha = Math.min(1, a);
+    ctx.drawImage(sp, -wEnd, -L, wEnd * 2, L);
+  } else {
+    const g = ctx.createLinearGradient(0, 0, 0, -L);
+    g.addColorStop(0, rgba(c, a));
+    g.addColorStop(0.5, rgba(c, a * 0.4));
+    g.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = g;
+    cone(ctx, Math.max(1, wEnd * 0.05), wEnd, L);
+  }
+  ctx.restore();
 }
 
 /* ── the shapes ──────────────────────────────────────────────────────────────
@@ -259,22 +400,8 @@ function drawWash(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: num
   const L = throwTo(l, y, H, u * 1.45 * l.scale * Math.max(0.28, l.reach));
   const s = spread(l.spreadDeg);
 
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(l.rot);
-  /* three soft layers: the wide halo, the body, the denser middle. A wash has no
-     edge, so no layer is allowed a hard boundary. */
-  for (const [wMul, weight, root] of [[1.5, 0.11, 0.042], [1.0, 0.26, 0.03], [0.55, 0.4, 0.018]] as const) {
-    const a = (0.09 + 0.5 * k) * weight * d;
-    const g = ctx.createLinearGradient(0, 0, 0, -L);
-    g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.7) / 0.3), a));
-    g.addColorStop(0.24, rgba(c, a * 0.6));
-    g.addColorStop(0.6, rgba(c, a * 0.2));
-    g.addColorStop(1, rgba(c, 0));
-    ctx.fillStyle = g;
-    cone(ctx, u * root * l.scale, L * s * wMul, L);
-  }
-  ctx.restore();
+  shaft(ctx, x, y, l.rot, L, Math.max(1, L * s), toWhite(c, Math.max(0, k - 0.7) / 0.3),
+        (0.09 + 0.5 * k) * d, false);
 
   if (full) {
     const at = landing(l, x, y, L * 0.9);
@@ -296,18 +423,8 @@ function drawSpot(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: num
     ctx.save();
     ctx.rotate(off);
     const weight = l.prism ? 0.62 : 1;
-    /* the halo, then the body, then a near-white core: the core is what gives a
-       beam its hard edge — a wash never gets one. */
-    for (const [wMul, wt, root] of [[2.6, 0.13, 0.03], [1.25, 0.34, 0.016], [0.5, 0.62, 0.008]] as const) {
-      const a = (0.1 + 0.66 * k) * wt * weight * d;
-      const g = ctx.createLinearGradient(0, 0, 0, -L);
-      g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.55) / 0.45), a));
-      g.addColorStop(0.3, rgba(c, a * 0.72));
-      g.addColorStop(0.72, rgba(c, a * 0.3));
-      g.addColorStop(1, rgba(c, 0));
-      ctx.fillStyle = g;
-      cone(ctx, u * root * l.scale, Math.max(1, L * s * wMul), L);
-    }
+    shaft(ctx, 0, 0, 0, L, Math.max(1, L * s * 1.6),
+          toWhite(c, Math.max(0, k - 0.55) / 0.45), (0.1 + 0.66 * k) * weight * d, true);
     /* a gobo breaks the shaft into bands of light and shadow */
     if (full && l.gobo > 20 && k > 0.1) {
       const bands = 5 + (l.gobo % 5);
@@ -332,16 +449,7 @@ function drawSpot(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: num
 function drawStrobe(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: number, u: number, k: number, d: number): void {
   const x = W * l.x, y = H * l.y, c = l.rgb;
   const R = u * 1.25 * (0.4 + 0.7 * k);
-  const g = ctx.createRadialGradient(x, y, 0, x, y, R);
-  const a = (0.1 + 0.46 * k) * d;
-  g.addColorStop(0, rgba(toWhite(c, 0.85), a));
-  g.addColorStop(0.16, rgba(toWhite(c, 0.4), a * 0.5));
-  g.addColorStop(0.46, rgba(c, a * 0.16));
-  g.addColorStop(1, rgba(c, 0));
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(x, y, R, 0, TAU);
-  ctx.fill();
+  glow(ctx, "flash", x, y, R, toWhite(c, 0.6), (0.1 + 0.46 * k) * d);
 }
 
 /** A blinder: pointed at the audience, so it glares at the camera rather than lighting the stage. */
@@ -360,16 +468,7 @@ function drawBlinder(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: 
   }
 
   const R = u * 1.5 * (0.3 + 0.8 * k);
-  const g = ctx.createRadialGradient(x, y, 0, x, y, R);
-  const a = (0.06 + 0.4 * k) * d;
-  g.addColorStop(0, rgba(toWhite(c, 0.5), a));
-  g.addColorStop(0.2, rgba(c, a * 0.44));
-  g.addColorStop(0.55, rgba(c, a * 0.13));
-  g.addColorStop(1, rgba(c, 0));
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(x, y, R, 0, TAU);
-  ctx.fill();
+  glow(ctx, "flash", x, y, R, toWhite(c, 0.4), (0.06 + 0.4 * k) * d);
 
   /* a blinder at full does not light a room, it takes it over */
   if (full && k > 0.5) {
@@ -392,15 +491,7 @@ function drawStrip(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: nu
     if (k <= 0.01) continue;
     const cy = y0 + step * (i + 0.5);
     const R = u * 0.16 * l.scale * (0.4 + 0.8 * k);
-    const g = ctx.createRadialGradient(x, cy, 0, x, cy, R);
-    const a = 0.1 + 0.44 * k;
-    g.addColorStop(0, rgba(toWhite(cell.rgb, k * 0.6), a));
-    g.addColorStop(0.3, rgba(cell.rgb, a * 0.5));
-    g.addColorStop(1, rgba(cell.rgb, 0));
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(x, cy, R, 0, TAU);
-    ctx.fill();
+    glow(ctx, "core", x, cy, R, toWhite(cell.rgb, k * 0.6), 0.1 + 0.44 * k);
     emitter(ctx, x, cy, Math.max(2, step * 0.3), cell.rgb, k);
   }
 }

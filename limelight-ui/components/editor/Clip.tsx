@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import Image from "next/image";
 import { timeToX } from "@/lib/timeline";
 import { effectIcon } from "@/lib/effectIcons";
@@ -16,7 +18,7 @@ const HANDLES_FIT_PX = 44;
 
 /* Clips are plain. Colour in the timeline means selection and nothing else, so
    the one thing that is highlighted is the thing you are working on. */
-export function Clip({
+function ClipBase({
   clip,
   selected,
   top,
@@ -169,3 +171,12 @@ function Grip({
     </span>
   );
 }
+
+/* Memoised. The playhead moves 60 times a second and it is pushed through React state,
+   so the whole editor re-renders on every animation frame. A clip's props do
+   not change between those frames -- the arrays and callbacks above it are all
+   memoised -- so without this every clip on the timeline was rebuilt 60 times a
+   second to draw the same rectangle. This is the single biggest saving in the
+   editor, because clips are the most numerous thing on screen.
+ */
+export const Clip = memo(ClipBase);

@@ -5,6 +5,7 @@ import { usePortalStore } from "@/store/portal";
 import { Fader } from "@/components/ui/Fader";
 import { Button } from "@/components/ui/Button";
 import * as api from "@/lib/api";
+import { SYNC_NUDGE_LIMIT } from "@/lib/sync";
 
 export function ConsolePanel() {
   const trims = usePortalStore((s) => s.trims);
@@ -13,6 +14,9 @@ export function ConsolePanel() {
   const want = usePortalStore((s) => s.want);
   const natural = usePortalStore((s) => s.natural);
   const swapping = usePortalStore((s) => s.swapping);
+  const syncLatency = usePortalStore((s) => s.syncLatency);
+  const syncNudge = usePortalStore((s) => s.syncNudge);
+  const setSyncNudge = usePortalStore((s) => s.setSyncNudge);
   const trimAtRef = useRef(0);
 
   const pushTrim = useCallback(
@@ -94,6 +98,24 @@ export function ConsolePanel() {
           value={Math.round(trims.head * 100)}
           displayValue={pct(trims.head)}
           onChange={(v) => setTrimValue({ head: v / 100 })}
+        />
+        {/* The lights are drawn for what you HEAR, not for where the decoder
+            is — those differ by the output buffer, which is tens of
+            milliseconds wired and can be a third of a second over Bluetooth.
+            The device is asked, but plenty of them under-report or say nothing,
+            so this is the ear's correction on top. */}
+        <Fader
+          label="Sync"
+          value={Math.round(syncNudge * 1000)}
+          min={-Math.round(SYNC_NUDGE_LIMIT * 1000)}
+          max={Math.round(SYNC_NUDGE_LIMIT * 1000)}
+          displayValue={`${syncNudge >= 0 ? "+" : ""}${Math.round(syncNudge * 1000)} ms`}
+          hint={
+            syncLatency > 0
+              ? `device reports ${Math.round(syncLatency * 1000)} ms; this nudges on top · + holds the lights back`
+              : "your device does not report its latency · + holds the lights back"
+          }
+          onChange={(v) => setSyncNudge(v / 1000)}
         />
         <Fader
           label="How much"

@@ -5,7 +5,7 @@ import { usePortalStore } from "@/store/portal";
 import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { readFixtures, trimFixtures } from "@/lib/fixtures";
 import { paintStage, ground } from "@/lib/renderer";
-import { clamp } from "@/lib/grid";
+import { frameFor } from "@/lib/sync";
 import type { AnchoredClock } from "@/hooks/useAnchoredClock";
 
 interface StageCanvasProps {
@@ -27,6 +27,9 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
   const frames = usePortalStore((s) => s.frames);
   const place = usePortalStore((s) => s.place);
   const trims = usePortalStore((s) => s.trims);
+  const syncLatency = usePortalStore((s) => s.syncLatency);
+  const syncNudge = usePortalStore((s) => s.syncNudge);
+  const syncOffset = syncLatency + syncNudge;
 
   const sizeCanvas = useCallback(() => {
     const cv = canvasRef.current;
@@ -65,7 +68,8 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
     const H = cv.height / dpr;
 
     const t = clockRef.current?.position() ?? 0;
-    const idx = clamp(Math.floor(t * show.fps), 0, show.frame_count - 1);
+    /* what the listener is hearing NOW is t minus the output latency */
+    const idx = frameFor(t, show.fps, show.frame_count, syncOffset);
     const raw = readFixtures(idx, frames, show, place);
     if (!raw) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -77,7 +81,7 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
     /* the show's own clock drives the strobe gate, so a paused preview and a
        running one agree on which half of a flash they are in */
     paintStage(ctx, fx, W, H, dpr, { t });
-  }, [show, frames, place, trims, clockRef]);
+  }, [show, frames, place, trims, syncOffset, clockRef]);
 
   useEffect(() => { paintRef.current = paint; }, [paint]);
 

@@ -127,6 +127,11 @@ export const showfile = {
   get(song: string): Promise<{ showfile: unknown | null }> {
     return request(`/api/showfile?song=${encodeURIComponent(song)}`);
   },
+
+  /** Write the plan back to this song's show file. */
+  save(song: string, plan: unknown): Promise<{ saved?: string; cues?: number; error?: string }> {
+    return post("/api/showfile", { song, plan });
+  },
 };
 
 export const layouts = {

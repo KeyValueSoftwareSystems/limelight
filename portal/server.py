@@ -2044,6 +2044,25 @@ def make_handler(library, baker, rig):
                     import traceback; traceback.print_exc()
                     return self._json({"error": str(e)}, 500)
 
+            if path == "/api/showfile":
+                # Write a plan back to the song's show file. The plan the page
+                # sends is what editsToPlan() produced, so a file edited on the
+                # timeline and saved comes back as the same shape it arrived in.
+                song = os.path.basename(str(body.get("song") or ""))
+                plan = body.get("plan")
+                if not song or not isinstance(plan, dict):
+                    return self._json({"error": "need a song and a plan"}, 400)
+                os.makedirs(SHOWFILES, exist_ok=True)
+                full = os.path.join(SHOWFILES, song + ".show.json")
+                doc = {"schema": "limelight.show/1", "song": song, **plan}
+                tmp = full + ".partial"
+                with open(tmp, "w") as fh:
+                    json.dump(doc, fh, indent=1, ensure_ascii=False)
+                    fh.write("\n")
+                os.replace(tmp, full)
+                return self._json({"saved": song, "cues": sum(
+                    len(plan.get(k) or []) for k in ("states", "bindings", "gestures"))})
+
             if path == "/api/bake-plan":
                 song = body.get("song")
                 plan_data = body.get("plan")
