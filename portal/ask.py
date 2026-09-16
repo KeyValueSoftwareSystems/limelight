@@ -63,6 +63,11 @@ def main(argv):
     except (IndexError, ValueError):
         print(USAGE)
         return 2
+    try:
+        with open(os.environ.get("ASK_LOG", "/tmp/ask.log"), "a") as fh:
+            fh.write(f"{song}  {what}  {' '.join(str(x) for x in rest)}\n")
+    except OSError:
+        pass
     out = C.handle_tool_call(what, args, overview)
     print(out if isinstance(out, str) else json.dumps(out, indent=1))
     return 0
