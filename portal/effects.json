@@ -266,7 +266,7 @@
    "name": "Pulse",
    "kind": "state",
    "tier": 1,
-   "blurb": "A bump travels across the lamps once per beat, direction flipping each bar. The bed for a verse or moving instrumental.",
+   "blurb": "A bump travels across the lamps once per beat, direction flipping each bar. The bed for a verse or moving instrumental. every_beats stretches the travelling figure over more than one beat: at 1 it lifts the rig about 5 times a beat, at 2 about twice, at 4 almost not at all",
    "dimension": "amount",
    "returns": false,
    "dials": {
@@ -294,6 +294,11 @@
      "default": 1.0,
      "min": 0.4,
      "max": 1.0
+    },
+    "every_beats": {
+     "default": 1,
+     "min": 0.25,
+     "max": 8
     }
    },
    "fires_on": [

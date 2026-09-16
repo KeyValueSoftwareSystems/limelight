@@ -11,9 +11,11 @@ module.exports = function pulse(params, ctx) {
   const extent = params.extent || "all";
   const pars = H.parsForExtent(extent);
   const floorDial = params.floor != null ? params.floor : 0.24;
+  const every = params.every_beats != null ? Math.max(0.25, Number(params.every_beats)) : 1;
 
   function render(bx) {
-    const { beat, bphase, bar, weight, energy } = bx;
+    const { beat, bar, weight, energy } = bx;
+    const bphase = every === 1 ? bx.bphase : ((beat / every) % 1 + 1) % 1;
     const dir = bar % 2 === 0 ? 1 : -1;
     const floorNow = H.clamp(floorDial * (0.6 + 0.9 * energy), 0.05, 0.7);
     const f = H.emptyFrame();
