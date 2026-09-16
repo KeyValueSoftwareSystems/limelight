@@ -218,10 +218,25 @@ function ease(x) {
   const u = Math.max(0, Math.min(1, x));
   return u * u * (3 - 2 * u);
 }
+/* Channels that pick a POSITION rather than set a level must never be
+   interpolated. A colour wheel crossfaded from slot 4 to slot 52 drags the
+   gel carrier through every gel between them; the show had the head sitting
+   on 16 wheel values where the wheel only has 8 slots, landing on 6, 7, 34,
+   41, 46 - between gels, which is a physical smear, not a colour. Gobo and
+   prism are the same kind of channel, and so is any wheel a future fixture
+   arrives with, which is why this reads the profile's role names rather than
+   naming this head's channels. */
+const STEP_ROLE = /wheel|gobo|prism|macro|function|control|speed/i;
+const STEP_CHANNEL = new Set();
+
 function mixFrames(from, to, k, offset, width) {
   const out = to.slice();
   for (let c = 0; c < width; c++) {
     const at = offset + c;
+    if (STEP_CHANNEL.has(at)) {
+      out[at] = k < 0.5 ? (from[at] || 0) : (to[at] || 0);
+      continue;
+    }
     out[at] = Math.max(0, Math.min(255,
       Math.round((from[at] || 0) + ((to[at] || 0) - (from[at] || 0)) * k)));
   }
@@ -295,6 +310,9 @@ for (const f of layout.fixtures) {
   const prof = JSON.parse(fs.readFileSync(profPath, "utf8"));
   const offset = f.address - 1;
   const roles = (prof.channels || []).map(c => c.role);
+  roles.forEach((role, i) => {
+    if (role && STEP_ROLE.test(role)) STEP_CHANNEL.add(offset + i);
+  });
   const panIdx = roles.indexOf("pan"), tiltIdx = roles.indexOf("tilt"), masterIdx = roles.indexOf("master");
   const wheelIdx = roles.indexOf("colour_wheel") >= 0 ? roles.indexOf("colour_wheel") : roles.indexOf("colour");
   const goboIdx = roles.indexOf("gobo"), prismIdx = roles.indexOf("prism");
