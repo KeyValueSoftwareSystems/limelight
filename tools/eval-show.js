@@ -421,27 +421,35 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
                : drops.length + " drops all land bigger than the build before them");
 }
 
-/* 7c. climax — the show's biggest moment is the song's biggest moment ----
-   Measured as: where is the show brightest over eight seconds, and where is the
-   band? If those are far apart the show is peaking somewhere the music is not,
-   which reads to an audience as the lights not listening. */
+/* 7c. climax — the show's biggest moment sits where the music's is ------
+   Measured as: find the show's brightest couple of seconds, then ask how heavy
+   the band is right there, as a rank against the rest of the song.
+
+   This started as "compare the brightest eight seconds to the heaviest eight
+   seconds" and that was wrong in a way worth recording: two beats of blackout
+   in front of the biggest hit in the song drag that window's AVERAGE down, so
+   the check punished the show for preparing its own climax properly. A peak is
+   a moment, not an average, and the question is only whether the lights are
+   biggest where the music is. */
 {
-  const wsec = 8, step = 1;
+  const win = 2.0;
   let bestT = 0, bestV = -1;
-  for (let t = 0; t + wsec < DUR; t += step) {
+  for (let t = 0; t + win < DUR; t += 0.25) {
     let v = 0, n = 0;
-    for (let u = t; u < t + wsec; u += 1 / fps) { const i = Math.round(u * fps); if (i < F.length) { v += rigLv(F[i]); n++; } }
+    for (let u = t; u < t + win; u += 1 / fps) { const i = Math.round(u * fps); if (i < F.length) { v += rigLv(F[i]); n++; } }
     if (n && v / n > bestV) { bestV = v / n; bestT = t; }
   }
-  let bandT = 0, bandV = -1;
-  for (let t = 0; t + wsec < DUR; t += step) {
-    let v = 0, n = 0;
-    for (let u = t; u < t + wsec; u += 0.25) { v += weightAt(u); n++; }
-    if (n && v / n > bandV) { bandV = v / n; bandT = t; }
-  }
-  const apart = Math.abs(bestT - bandT);
-  check("climax", apart <= 20,
-    "show peaks at " + bestT.toFixed(0) + "s, the band peaks at " + bandT.toFixed(0) + "s (" + apart.toFixed(0) + "s apart, limit 20s)");
+  /* how heavy is the band there, ranked against every other moment? */
+  const all = [];
+  for (let t = 0; t < DUR; t += 0.5) all.push(weightAt(t));
+  const sorted = [...all].sort((x, y) => x - y);
+  let hereW = 0, n2 = 0;
+  for (let u = bestT; u < bestT + win; u += 0.5) { hereW += weightAt(u); n2++; }
+  hereW /= (n2 || 1);
+  const rank = sorted.filter(v => v <= hereW).length / sorted.length;
+  check("climax", rank >= 0.6,
+    "the show is biggest at " + bestT.toFixed(0) + "s, where the band is heavier than "
+    + (100 * rank).toFixed(0) + "% of the song (want 60%+)");
 }
 
 /* 8. unstuck — nothing frozen ------------------------------------------- */
