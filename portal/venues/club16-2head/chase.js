@@ -3,7 +3,11 @@ const H = require("./helpers");
 
 module.exports = function chase(params, ctx) {
   const colour = H.parseColour(params.colour, [1, 0.75, 0.35]);
-  const pars = H.parsForExtent(params.extent || "all");
+  /* direction: "lr" (default) or "rl". A wave that can only run one way is
+     half an effect -- the room reads a return sweep as a different move. */
+  const pars = String(params.direction || "lr").toLowerCase() === "rl"
+    ? H.parsForExtent(params.extent || "all").slice().reverse()
+    : H.parsForExtent(params.extent || "all");
   const level = H.clamp(params.level != null ? params.level : 0.85, 0, 1);
   const rest = H.clamp(params.rest != null ? params.rest : 0, 0, 1);
   const perBeat = params.per_beat != null ? params.per_beat : 1;

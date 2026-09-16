@@ -1007,6 +1007,81 @@
     "strobe"
    ],
    "default_beats": 1
+  },
+  {
+   "id": "chase",
+   "kind": "gesture",
+   "blurb": "One lamp at a time runs the row, the others dark. The wave: hard edges, a single travelling light, direction and rate you set.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "extent": {
+     "default": "all"
+    },
+    "level": {
+     "default": 0.9
+    },
+    "rest": {
+     "default": 0.0
+    },
+    "per_beat": {
+     "default": 1
+    },
+    "direction": {
+     "default": "lr"
+    },
+    "bounce": {
+     "default": false
+    },
+    "for_beats": {
+     "default": 4
+    }
+   }
+  },
+  {
+   "id": "ripple",
+   "kind": "gesture",
+   "blurb": "A wave spreading out from the middle of the row to both ends.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 4
+    }
+   }
+  },
+  {
+   "id": "bounce",
+   "kind": "gesture",
+   "blurb": "A single light running to one end of the row and back.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 4
+    }
+   }
   }
  ]
 }

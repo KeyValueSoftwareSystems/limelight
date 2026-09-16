@@ -353,7 +353,13 @@ function sourceFrame(res, cache) {
   if (cache.has(res)) return cache.get(res);
   let f;
   if (res.dmx.beat && typeof res.dmx.render === "function") f = res.dmx.render(beatCtx(res.startS, res.endS, res._t));
-  else if (res.dmx.binding && typeof res.dmx.render === "function") f = res.dmx.render(res.valueAt(res._t), res._t);
+  else if (res.dmx.binding && typeof res.dmx.render === "function")
+    /* A binding-style effect placed as a GESTURE has no stream to follow, so it
+       renders at full value. Without this the baker threw on res.valueAt being
+       undefined, which is why fifteen effects that exist in every venue --
+       chase, ripple, bounce, sweep, converge and the rest -- could only ever be
+       used as bindings and were left out of the catalogue entirely. */
+    f = res.dmx.render(typeof res.valueAt === "function" ? res.valueAt(res._t) : 1, res._t);
   else f = frameAt(res.dmx, res._t - res.startS, res.endS - res.startS, bpm);
   cache.set(res, f);
   return f;

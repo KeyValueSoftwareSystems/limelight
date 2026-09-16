@@ -8,7 +8,7 @@
    "to_bar": 2,
    "effect": "drone",
    "amount": 0.09,
-   "colour": "#ff9410",
+   "colour": "#8659c4",
    "extent": "left",
    "why": "The rig is at true zero until bar 1 - the show starts from black, not from a bed. Bars 1-2 are 36-37% loud with lead-vocal and cello alone: one flame on the left pair, par_15 and par_22 genuinely off.",
    "from_bar": 1
@@ -19,7 +19,7 @@
    "to_bar": 3,
    "effect": "drone",
    "amount": 0.13,
-   "colour": "#ff9410",
+   "colour": "#8659c4",
    "extent": "inner",
    "why": "Bar 2 is where vocal and bass join the lead (5 onsets against 3). The flame steps inward and up a little - the resting look changes on the bar line rather than holding one dim state across the whole opening."
   },
@@ -29,7 +29,7 @@
    "to_bar": 5,
    "effect": "drone",
    "amount": 0.15,
-   "colour": "#ff9410",
+   "colour": "#8659c4",
    "extent": "right",
    "why": "Bar 3 is the song's quietest bar (25%, french-horn) and bar 4 is percussion and congas at 43% with 7 hits - moment 0, the drums thickening. The flame crosses to the right pair, so by bar 5 every lamp has been alone at least once. Extended to bar 5: the resting layer had a 1.4s hole here and the rig went to true black in the middle of a verse, with lead-vocal and cello still playing. A hole in the base is not a blackout; it is nothing being asked for."
   },
@@ -40,7 +40,7 @@
    "to_bar": 7,
    "effect": "drone",
    "amount": 0.15,
-   "colour": "#1d2ca8",
+   "colour": "#8659c4",
    "extent": "all",
    "why": "Moment 1 (intensity 1.00) is synth and back-vocal entering at bar 5 beat 3 - and the two beats before it have no state at all, so the room is fully dark when they arrive. The room then opens from two lamps to four and turns indigo; drone gives every lamp its own breathing phase, so four lamps widen without the rig reading as one body."
   },
@@ -50,7 +50,7 @@
    "to_bar": 9,
    "effect": "pulse",
    "amount": 0.62,
-   "colour": "#1d2ca8",
+   "colour": "#8659c4",
    "extent": "all",
    "floor": 0.22,
    "why": "Moment 2: the tempo settles from 89 to 119 bpm at bar 7 and loudness jumps to 59%, the loudest bars of the intro (tuba, wind, brass). First bed of the show that actually travels, and the brightest thing so far - which is what gives moment 3's spotlight two bars later something to fall from."
@@ -60,7 +60,7 @@
    "from_bar": 9,
    "effect": "drone",
    "amount": 0.07,
-   "colour": "#ff9410",
+   "colour": "#8659c4",
    "extent": "inner",
    "why": "Bars 9-10 sit under the isolate; this is the ember it returns to if anything slips at the seam."
   },
@@ -69,7 +69,7 @@
    "to_bar": 14,
    "effect": "pulse",
    "amount": 0.46,
-   "colour": "#1d2ca8",
+   "colour": "#8659c4",
    "extent": "all",
    "floor": 0.07,
    "why": "Bars 11-13 are violin, timpani and viola over a D-minor/A-minor cycle - moving but not loud (43-55%). Indigo keeps the minor mode; par_1 and par_22 are held by the accent binding, so this bed shows on the inner pair only and the rig is genuinely split."
@@ -80,22 +80,23 @@
    "to_bar": 17,
    "effect": "breakdown",
    "colours": [
-    "#ffbe3c",
-    "#ff9410"
+    "#8659c4",
+    "#b4e62e"
    ],
-   "floor": 0.16,
-   "why": "The hinge of the first half: D:min becomes D at 33.80s, drum hits jump 0 to 12 in a bar, and guitar, strings and acoustic-guitar all enter. Marigold on the major chord, and a bed where every beat lands hard from a low floor - what a dholak entering actually sounds like."
+   "floor": 0.04,
+   "why": "The hinge of the first half: D:min becomes D at 33.80s, drum hits jump 0 to 12 in a bar, and guitar, strings and acoustic-guitar all enter. Marigold on the major chord, and a bed where every beat lands hard from a low floor - what a dholak entering actually sounds like. Pulled down to almost nothing for the build: a wave is one lamp lit against three dark ones, and it cannot be seen at all over a lit bed. The room is the wave here, not a bed with a wave on top.",
+   "amount": 0.1
   },
   {
    "section": 1,
    "from_bar": 17,
    "to_bar": 19,
    "effect": "pulse",
-   "amount": 0.58,
-   "colour": "#ffbe3c",
+   "amount": 0.1,
+   "colour": "#8659c4",
    "extent": "all",
-   "floor": 0.12,
-   "why": "Bar 18 is double-bass, bass and guitar - the low end takes over from the drum entry. The bump starts travelling across the lamps again, same marigold, so the bed follows who is leading rather than holding four bars of one look."
+   "floor": 0.04,
+   "why": "Bar 18 is double-bass, bass and guitar - the low end takes over from the drum entry. The bump starts travelling across the lamps again, same marigold, so the bed follows who is leading rather than holding four bars of one look. Pulled down to almost nothing for the build: a wave is one lamp lit against three dark ones, and it cannot be seen at all over a lit bed. The room is the wave here, not a bed with a wave on top."
   },
   {
    "section": 1,
@@ -103,12 +104,13 @@
    "to_bar": 22,
    "effect": "drive",
    "colours": [
-    "#ffbe3c",
-    "#e02a58"
+    "#8659c4",
+    "#b4e62e"
    ],
-   "floor": 0.3,
+   "floor": 0.04,
    "peak": 1,
-   "why": "Bars 19-21 are 63/61/68% - the instrumental's own peak, and the loudest thing so far. First time every beat hits and the downbeat flashes white. Ends at bar 22 and nothing replaces it."
+   "why": "Bars 19-21 are 63/61/68% - the instrumental's own peak, and the loudest thing so far. First time every beat hits and the downbeat flashes white. Ends at bar 22 and nothing replaces it. Pulled down to almost nothing for the build: a wave is one lamp lit against three dark ones, and it cannot be seen at all over a lit bed. The room is the wave here, not a bed with a wave on top.",
+   "amount": 0.1
   },
   {
    "section": 2,
@@ -116,8 +118,8 @@
    "to_bar": 30,
    "effect": "drive",
    "colours": [
-    "#ffbe3c",
-    "#e02a58"
+    "#b4e62e",
+    "#8659c4"
    ],
    "floor": 0.62,
    "peak": 1.0,
@@ -129,7 +131,7 @@
    "to_bar": 31,
    "effect": "pulse",
    "amount": 0.48,
-   "colour": "#e02a58",
+   "colour": "#b4e62e",
    "extent": "outer",
    "floor": 0.06,
    "why": "Bar 30 dips to 48% between bars at 74% and 82% - one of only two places this 33-second section can breathe. The room halves rather than dimming: the inner pair goes out and the two edge lamps carry the vocal line alone."
@@ -140,7 +142,7 @@
    "to_bar": 35,
    "effect": "pulse",
    "amount": 0.64,
-   "colour": "#e02a58",
+   "colour": "#b4e62e",
    "extent": "all",
    "floor": 0.44,
    "why": "Bars 31-34 are where lead-vocal and back-vocal actually trade (correlation -0.75 measured over exactly this span; back-vocal does not exist before bar 31). A travelling bump per beat is the sway of a kirtan, and the trades ride on top of it. Floor 0.50: enough that the drop at bar 31 beats its build, not so much that the show peaks here -- the band's heaviest stretch is forty seconds later and the room should be biggest there.",
@@ -152,8 +154,8 @@
    "to_bar": 38,
    "effect": "drive",
    "colours": [
-    "#e02a58",
-    "#ff9410"
+    "#b4e62e",
+    "#8659c4"
    ],
    "floor": 0.66,
    "peak": 1.0,
@@ -164,8 +166,8 @@
    "to_bar": 43,
    "effect": "drive",
    "colours": [
-    "#e02a58",
-    "#1d2ca8"
+    "#8659c4",
+    "#b4e62e"
    ],
    "floor": 0.7,
    "peak": 1.0,
@@ -176,8 +178,8 @@
    "from_bar": 43,
    "effect": "drive",
    "colours": [
-    "#ffbe3c",
-    "#e02a58"
+    "#b4e62e",
+    "#8659c4"
    ],
    "floor": 0.6,
    "peak": 1,
@@ -188,8 +190,8 @@
    "to_bar": 50,
    "effect": "drive",
    "colours": [
-    "#ffbe3c",
-    "#e02a58"
+    "#8659c4",
+    "#b4e62e"
    ],
    "floor": 0.6,
    "peak": 1,
@@ -200,8 +202,8 @@
    "from_bar": 50,
    "effect": "breakdown",
    "colours": [
-    "#1d2ca8",
-    "#e02a58"
+    "#b4e62e",
+    "#8659c4"
    ],
    "floor": 0.86,
    "why": "The harmony turns to G:min at 101.4s and bar 51 is woodwind, harmonica and flute - the reed break. Still 83-84% loud, so not a retreat: a hard hit on every beat from a low floor, which is the same energy with completely different texture, and it gives bar 53's collapse something to fall from. Floor lifted to 0.74: this is where the band is heaviest in the whole song -- six families at once -- and it was sitting on 0.20, so the show was peaking thirty-five seconds away from the music.",
@@ -212,7 +214,7 @@
    "to_bar": 54,
    "effect": "drone",
    "amount": 0.09,
-   "colour": "#ff9410",
+   "colour": "#8659c4",
    "extent": "outer",
    "why": "Bar 53 is 37% loud with zero drum hits. Back to the saffron flame the show opened on, now on the two edge lamps - par_15 belongs to the strings binding for the whole outro."
   },
@@ -222,7 +224,7 @@
    "to_bar": 56,
    "effect": "wash",
    "amount": 0.58,
-   "colour": "#1d2ca8",
+   "colour": "#b4e62e",
    "extent": "all",
    "why": "Bar 54 deliberately has NO state - the void (12% loud, the quietest instant in the song at 113.0s). Bar 55 is where bass and acoustic-guitar come back; a plain held indigo fill at the level the hush four beats later falls FROM, so that exit reads as a pure fall and not a bump followed by one.",
    "floor": 0.86,
@@ -234,7 +236,7 @@
    "to_bar": 57,
    "effect": "drone",
    "amount": 0.1,
-   "colour": "#1d2ca8",
+   "colour": "#b4e62e",
    "extent": "outer",
    "why": "Moment 13 took the lead-vocal, tambourine and vocal out; bar 56 is harp, banjo and tambourine at 32%. Two lamps at the edges, the middle of the room empty.",
    "floor": 0.86,
@@ -246,7 +248,7 @@
    "to_bar": 58,
    "effect": "pulse",
    "amount": 0.44,
-   "colour": "#1d2ca8",
+   "colour": "#b4e62e",
    "extent": "all",
    "floor": 0.86,
    "why": "Strings and double-bass return at bar 57 (54%) and the outro starts moving again. Still indigo - the harmony is D:min into D:7, not resolved yet.",
@@ -258,7 +260,7 @@
    "to_bar": 60,
    "effect": "pulse",
    "amount": 0.56,
-   "colour": "#ffbe3c",
+   "colour": "#b4e62e",
    "extent": "all",
    "floor": 0.86,
    "why": "The chord goes to D major at 120.00s, at the same instant as the octave shift. The bed turns marigold underneath the lift so that when the lift's span ends the room stays warm rather than snapping back to night.",
@@ -270,8 +272,8 @@
    "to_bar": 62,
    "effect": "drive",
    "colours": [
-    "#ffbe3c",
-    "#e02a58"
+    "#b4e62e",
+    "#8659c4"
    ],
    "floor": 0.86,
    "peak": 1.0,
@@ -282,7 +284,7 @@
    "to_s": 129.6,
    "effect": "drone",
    "amount": 0.04,
-   "colour": "#ff9410",
+   "colour": "#8659c4",
    "extent": "inner",
    "why": "Every one of the 39 lanes measures 0.00 in this section. One ember for a second and a half, then no state at all to the end of the file - the show finishes in real darkness, not in a bed held over silence."
   }
@@ -294,8 +296,8 @@
    "threshold": 0.14,
    "rest": 0,
    "extent": "single",
-   "colour": "#ffbe3c",
-   "bed_colour": "#ffbe3c",
+   "colour": "#8659c4",
+   "bed_colour": "#8659c4",
    "why": "This section's whole story is the drums arriving: 3, 1, 0, 0 hits in bars 11-14, then 11-13 hits a bar from bar 15 on. Bound to the real onsets rather than the grid, on par_15 alone with rest 0 - so that lamp does not exist until the drums do, while the other three carry the state. Threshold 0.14 measured to leave it dark about 60% of the section."
   },
   {
@@ -307,7 +309,7 @@
    "response": 2.4,
    "smooth": 0.3,
    "extent": "single",
-   "colour": "#ff9410",
+   "colour": "#8659c4",
    "why": "Across the 33-second chorus the voice is the only thing continuously present (vocal median 0.32, carrying 72.5% of the span) - and in a kirtan the room drives while one person sings. par_15 breathes with the singer for the whole section and drops to black between phrases; response 2.4 is what makes it drop rather than hover."
   },
   {
@@ -319,7 +321,7 @@
    "response": 2.2,
    "smooth": 0.25,
    "extent": "single",
-   "colour": "#ff9410",
+   "colour": "#8659c4",
    "why": "Strings are the one lane that genuinely carries the outro - mean 0.65 and present 81.5% of 113-128s. One lamp (par_15) breathes with the string line for the whole outro and goes fully out between phrases; the other three stay on the cue list. response 2.2 is what makes it drop to black between phrases instead of hovering."
   }
  ],
@@ -328,7 +330,7 @@
    "at_bar": 4,
    "at_beat": 1,
    "effect": "stab",
-   "colour": "#ff9410",
+   "colour": "#ffffff",
    "extent": "inner",
    "for_beats": 1,
    "why": "Moment 0: the drums thicken into something - bar 4 jumps to 7 onsets from 1 in bar 3. A single saffron tap on the inner pair, which the state has left dark. Small, because the moment is intensity 0.235."
@@ -337,7 +339,7 @@
    "at_bar": 5,
    "at_beat": 3,
    "effect": "stab",
-   "colour": "#1d2ca8",
+   "colour": "#ffffff",
    "extent": "right",
    "for_beats": 2,
    "why": "Moment 1, intensity 1.00: synth and back-vocal enter. The two lamps that have been at zero since the first bar snap on. A stab and not an impact because the bar is only 41% loud - the event is big for this point in the song, not big for the song."
@@ -349,7 +351,8 @@
    "from": 1,
    "to": 1.33,
    "for_beats": 3,
-   "why": "Moment 2 is a real tempo change, 89.3 to 118.8 bpm - a ratio of 1.33, which is exactly what the lighting rate is multiplied by. The one place in the song a rate gesture is literally true."
+   "why": "Moment 2 is a real tempo change, 89.3 to 118.8 bpm - a ratio of 1.33, which is exactly what the lighting rate is multiplied by. The one place in the song a rate gesture is literally true. Colour named explicitly: gear paints the whole row and falls back to a warm default, which was the only non-house colour left in the show.",
+   "colour": "#8659c4"
   },
   {
    "at_bar": 9,
@@ -366,7 +369,7 @@
    "to_beat": 1,
    "effect": "isolate",
    "which": "par_15",
-   "colour": "#ff9410",
+   "colour": "#ffffff",
    "rest": 0,
    "why": "Moment 3 (0.93): everything drops back behind lead-vocal. One lamp lit, three at true black, the head turned to face it. Held two bars because the spotlight is a passage, not a hit."
   },
@@ -401,126 +404,118 @@
    "why": "D:min becomes D at 33.80s, drum hits go 0 to 12, guitar and strings and acoustic-guitar all enter on the same downbeat. The first of the show's white arrivals. Nothing else starts on this anchor - a tier-one hit needs its downbeat to itself or it gets cancelled."
   },
   {
+   "effect": "chase",
+   "direction": "lr",
+   "per_beat": 1,
+   "colour": "#8659c4",
+   "level": 0.55,
+   "rest": 0.0,
+   "extent": "all",
+   "from_bar": 15,
+   "to_bar": 16,
+   "for_beats": 4,
+   "why": "Bass riff enters. One lamp at a time crosses the row, LEFT TO RIGHT, a lamp per beat -- a slow wave across a dark room."
+  },
+  {
    "from_bar": 16,
    "to_bar": 19,
    "effect": "beam",
    "pattern": "sweep",
-   "colour": "#ffbe3c",
+   "colour": "#8659c4",
    "gobo": 0,
    "why": "Three bars where the head alone sweeps the room over the new gold bed. Starts at bar 16, not 15, so it does not take the head away from the impact."
   },
   {
-   "effect": "trade",
-   "travel": true,
-   "direction": "lr",
-   "runs": 2,
-   "colours": [
-    "#4d7dff",
-    "#bcd4ff"
-   ],
-   "rest": 0.05,
-   "peak": 0.85,
+   "effect": "chase",
+   "direction": "rl",
+   "per_beat": 1,
+   "colour": "#8659c4",
+   "level": 0.62,
+   "rest": 0.0,
+   "extent": "all",
    "from_bar": 16,
    "to_bar": 17,
    "for_beats": 4,
-   "why": "Bass riff, bar 1 of the run: the row crosses LEFT TO RIGHT once, slowly and cold. The riff has just entered and the room should feel it arrive, not shout. (Two crossings minimum: one per bar is slower than the pulse state underneath, which is itself a travelling bump, and the run got lost inside it.)"
+   "why": "And back, RIGHT TO LEFT, still a lamp per beat. The room starts to rock."
   },
   {
-   "effect": "trade",
-   "travel": true,
-   "direction": "rl",
-   "runs": 3,
-   "colours": [
-    "#4d7dff",
-    "#bcd4ff"
-   ],
-   "rest": 0.05,
-   "peak": 0.85,
+   "effect": "chase",
+   "direction": "lr",
+   "per_beat": 2,
+   "colour": "#8659c4",
+   "level": 0.7,
+   "rest": 0.0,
+   "extent": "all",
    "from_bar": 17,
    "to_bar": 18,
    "for_beats": 4,
-   "why": "And back, RIGHT TO LEFT, twice. The rocking starts here -- this is the groove, one crossing per two beats. (Two crossings minimum: one per bar is slower than the pulse state underneath, which is itself a travelling bump, and the run got lost inside it.)"
+   "why": "LEFT TO RIGHT, twice as fast: the wave now crosses in two beats."
   },
   {
-   "effect": "trade",
-   "travel": true,
-   "direction": "lr",
-   "runs": 2,
-   "colours": [
-    "#bcd4ff",
-    "#4d7dff"
-   ],
-   "rest": 0.1,
-   "peak": 0.85,
+   "effect": "chase",
+   "direction": "rl",
+   "per_beat": 2,
+   "colour": "#b4e62e",
+   "level": 0.78,
+   "rest": 0.0,
+   "extent": "all",
    "from_bar": 18,
    "to_bar": 19,
    "for_beats": 4,
-   "why": "LEFT TO RIGHT again. The borrowed major turns minor inside this bar, so the run carries the colour change rather than a flash stopping it."
+   "why": "RIGHT TO LEFT. The borrowed major turns minor in this bar and the wave turns green with it."
   },
   {
-   "effect": "trade",
-   "travel": true,
-   "direction": "rl",
-   "runs": 2,
-   "colours": [
-    "#bcd4ff",
-    "#4d7dff"
-   ],
-   "rest": 0.09,
-   "peak": 0.88,
+   "effect": "chase",
+   "direction": "lr",
+   "per_beat": 2,
+   "colour": "#b4e62e",
+   "level": 0.84,
+   "rest": 0.0,
+   "extent": "all",
    "from_bar": 19,
    "to_bar": 20,
    "for_beats": 4,
-   "why": "RIGHT TO LEFT. Second phrase of the riff begins; same rate, brighter, so the room reads it as the same figure getting more serious."
+   "why": "Second phrase. LEFT TO RIGHT, same rate, brighter."
   },
   {
-   "effect": "trade",
-   "travel": true,
-   "direction": "lr",
-   "runs": 3,
-   "colours": [
-    "#bcd4ff",
-    "#ff5a0a"
-   ],
-   "rest": 0.08,
-   "peak": 0.92,
+   "effect": "chase",
+   "direction": "rl",
+   "per_beat": 3,
+   "colour": "#b4e62e",
+   "level": 0.9,
+   "rest": 0.0,
+   "extent": "all",
    "from_bar": 20,
    "to_bar": 21,
    "for_beats": 4,
-   "why": "LEFT TO RIGHT, three crossings in the bar. The rate steps up for the first time and the colour starts to warm."
+   "why": "RIGHT TO LEFT, three lamps a beat. The wave is outrunning the bar now."
   },
   {
-   "effect": "trade",
-   "travel": true,
-   "direction": "rl",
-   "runs": 4,
-   "colours": [
-    "#ffffff",
-    "#ff5a0a"
-   ],
-   "rest": 0.07,
-   "peak": 0.96,
+   "effect": "chase",
+   "direction": "lr",
+   "per_beat": 4,
+   "colour": "#ffffff",
+   "level": 0.96,
+   "rest": 0.0,
+   "extent": "all",
    "from_bar": 21,
    "to_bar": 22,
    "for_beats": 4,
-   "why": "RIGHT TO LEFT, four crossings -- one per beat. This is the fastest the row has moved all song."
+   "why": "LEFT TO RIGHT, a lamp every quarter beat -- the fastest the row moves all song, and the first white."
   },
   {
-   "effect": "trade",
-   "travel": true,
-   "direction": "lr",
-   "runs": 4,
-   "colours": [
-    "#ffffff",
-    "#eb0a08"
-   ],
-   "rest": 0.05,
-   "peak": 1.0,
+   "effect": "chase",
+   "direction": "rl",
+   "per_beat": 4,
+   "colour": "#ffffff",
+   "level": 1.0,
+   "rest": 0.0,
+   "extent": "all",
    "from_bar": 22,
    "to_bar": 23,
    "for_beats": 2,
-   "to_beat": 3,
-   "why": "LEFT TO RIGHT, one crossing per beat, full contrast, red arriving. Two beats only: the rest of this bar is darkness."
+   "why": "RIGHT TO LEFT at full speed for two beats. Then nothing.",
+   "to_beat": 3
   },
   {
    "effect": "blackout",
@@ -540,21 +535,18 @@
    "why": "Bar 23 lands. The build was kept cold on purpose so this is the first white the room sees."
   },
   {
-   "effect": "trade",
-   "travel": true,
+   "effect": "chase",
    "direction": "lr",
-   "runs": 4,
-   "colours": [
-    "#ffffff",
-    "#eb0a08"
-   ],
-   "rest": 0.16,
-   "peak": 1.0,
+   "per_beat": 4,
+   "colour": "#ffffff",
+   "level": 1.0,
+   "rest": 0.1,
+   "extent": "all",
    "from_bar": 23,
    "from_beat": 3,
-   "to_bar": 25,
-   "for_beats": 6,
-   "why": "Straight out of the blackout the row keeps running, one crossing per beat, from a high floor. The drop used to become a resting bed within a beat of landing; this keeps the room moving through it. (Floor dropped to 0.16: on a 0.30 bed the bump had nothing to stand out from and the run stopped reading.)"
+   "to_bar": 24,
+   "for_beats": 2,
+   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor."
   },
   {
    "at_bar": 24,
@@ -569,7 +561,7 @@
    "at_bar": 27,
    "at_beat": 1,
    "effect": "stab",
-   "colour": "#ffbe3c",
+   "colour": "#ffffff",
    "extent": "inner",
    "for_beats": 1,
    "why": "The harmony turns to C at 57.87s and bar 27 is the tambourine's loudest bar (78%). A partial hit on the inner pair - different effect, different extent and different colour from the impact three bars earlier, so two neighbouring cues do not read as one habit."
@@ -586,35 +578,32 @@
    "effect": "impact",
    "at_bar": 31,
    "at_beat": 1,
-   "colour": "#eb0a08",
+   "colour": "#ffffff",
    "extent": "all",
    "for_beats": 2,
    "why": "Bar 31 lands. The build was kept cold on purpose so this is the first white the room sees."
   },
   {
-   "effect": "trade",
-   "travel": true,
+   "effect": "chase",
    "direction": "rl",
-   "runs": 4,
-   "colours": [
-    "#ff5a0a",
-    "#eb0a08"
-   ],
-   "rest": 0.04,
-   "peak": 1.0,
+   "per_beat": 4,
+   "colour": "#b4e62e",
+   "level": 1.0,
+   "rest": 0.1,
+   "extent": "all",
    "from_bar": 31,
    "from_beat": 3,
    "to_bar": 32,
    "for_beats": 2,
-   "why": "Straight out of the blackout the row keeps running, one crossing per beat, from a high floor. The drop used to become a resting bed within a beat of landing; this keeps the room moving through it. (Floor dropped to 0.16: on a 0.30 bed the bump had nothing to stand out from and the run stopped reading.) (Shortened to one bar: it was running into the section's own call-and-response exchanges and neither figure read.) Contrast raised: the sections after the drop now sit on a high floor, and a bump cannot be seen against a bright bed unless it starts from near nothing."
+   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor."
   },
   {
    "at_bar": 32,
    "at_beat": 1,
    "effect": "trade",
    "colours": [
-    "#ff9410",
-    "#e02a58"
+    "#b4e62e",
+    "#8659c4"
    ],
    "for_beats": 4,
    "travel": true,
@@ -628,8 +617,8 @@
    "at_beat": 2,
    "effect": "trade",
    "colours": [
-    "#ff9410",
-    "#e02a58"
+    "#b4e62e",
+    "#8659c4"
    ],
    "for_beats": 4,
    "travel": true,
@@ -643,8 +632,8 @@
    "at_beat": 1,
    "effect": "trade",
    "colours": [
-    "#ff9410",
-    "#e02a58"
+    "#b4e62e",
+    "#8659c4"
    ],
    "for_beats": 4,
    "travel": true,
@@ -658,8 +647,8 @@
    "at_beat": 3,
    "effect": "trade",
    "colours": [
-    "#e02a58",
-    "#ff9410"
+    "#b4e62e",
+    "#8659c4"
    ],
    "for_beats": 4,
    "travel": true,
@@ -691,7 +680,7 @@
    "to_bar": 43,
    "effect": "beam",
    "pattern": "snap",
-   "colour": "#e02a58",
+   "colour": "#b4e62e",
    "gobo": 0,
    "why": "Corner-to-corner head snaps over the drive while toms and drums take the front of the mix. Head only - it costs the pars nothing at the loudest point of the show."
   },
@@ -699,27 +688,24 @@
    "effect": "impact",
    "at_bar": 40,
    "at_beat": 1,
-   "colour": "#eb0a08",
+   "colour": "#ffffff",
    "extent": "all",
    "for_beats": 2,
    "why": "Bar 40 lands. The build was kept cold on purpose so this is the first white the room sees."
   },
   {
-   "effect": "trade",
-   "travel": true,
+   "effect": "chase",
    "direction": "lr",
-   "runs": 4,
-   "colours": [
-    "#ff5a0a",
-    "#eb0a08"
-   ],
-   "rest": 0.04,
-   "peak": 1.0,
+   "per_beat": 4,
+   "colour": "#b4e62e",
+   "level": 1.0,
+   "rest": 0.1,
+   "extent": "all",
    "from_bar": 40,
    "from_beat": 3,
    "to_bar": 41,
    "for_beats": 2,
-   "why": "Straight out of the blackout the row keeps running, one crossing per beat, from a high floor. The drop used to become a resting bed within a beat of landing; this keeps the room moving through it. (Floor dropped to 0.16: on a 0.30 bed the bump had nothing to stand out from and the run stopped reading.) (Shortened to one bar: it was running into the section's own call-and-response exchanges and neither figure read.) Contrast raised: the sections after the drop now sit on a high floor, and a bump cannot be seen against a bright bed unless it starts from near nothing."
+   "why": "The wave carries straight through the drop rather than stopping at it. The build ends with one lamp lit against three dark ones, which is a huge picture; if the drop settles into an even bed it reads as smaller than the run-up that led to it. So the row keeps crossing, a lamp per quarter beat, off a small floor."
   },
   {
    "from_bar": 44,
@@ -748,7 +734,6 @@
    "effect": "strip",
    "to": 0.06,
    "over_beats": 6,
-   "colour": "#ff9410",
    "why": "Moment 11: the track strips back. A controlled pull-back that empties the rig from the edges inward across the section boundary and lands exactly at bar 54, the void. Six beats, so it is still falling when the section changes - holds at the floor rather than returning, because the band does not come back.",
    "for_beats": 6
   },
@@ -759,7 +744,7 @@
    "to_beat": 4,
    "effect": "isolate",
    "which": "par_8",
-   "colour": "#ff9410",
+   "colour": "#ffffff",
    "rest": 0,
    "why": "The one honest isolate in the song. At 112.0-112.75s lead-vocal reads 0.40 and vocal 0.28 with all 37 other lanes between 0.00 and 0.02 - a single voice alone. One saffron lamp, three at true black, and not the lamp that has been breathing with the strings all outro."
   },
@@ -776,7 +761,6 @@
    "effect": "hush",
    "depth": 0.12,
    "for_beats": 4,
-   "colour": "#ff9410",
    "why": "Moment 13, intensity 1.00: lead-vocal, tambourine and vocal all drop out at 115.29s - confirmed in the lanes, all three go from 0.4-0.6 to 0.00 within two windows. The room quiets with them and settles into bar 56's two edge lamps."
   },
   {
@@ -786,7 +770,7 @@
    "to_beat": 2,
    "effect": "beam",
    "pattern": "figure8",
-   "colour": "#1d2ca8",
+   "colour": "#b4e62e",
    "gobo": 0,
    "why": "Strings and double-bass rebuild through bar 57 with the pars low; the head carries the motion on its own until the lift takes it."
   },
@@ -797,7 +781,6 @@
    "by": 0.34,
    "over_beats": 7,
    "tilt": 0.75,
-   "colour": "#ffbe3c",
    "why": "Moment 14, intensity 1.00, and the emotional resolution of the whole piece: the music moves up an octave at 120.29s and the chord turns to D major at 120.00s after two minutes of D minor. Seven beats, so the rise runs right up to bar 60 beat 1 and hands straight to the swell - it arrives and stays arrived, with no sag back to the bed. Only +0.34 though: bar 58 is 42% loud against bar 47's 92%, and a register shift is an emotional event, not a loud one. It must not out-shine the peak.",
    "for_beats": 7
   },
@@ -805,7 +788,7 @@
    "at_bar": 60,
    "at_beat": 1,
    "effect": "swell",
-   "colour": "#ffbe3c",
+   "colour": "#ffffff",
    "for_beats": 4,
    "rise": 0.3,
    "why": "Moment 15, intensity 1.00: lead-vocal and vocal return at 123.77s and strings, cello and dobro all peak within the next second (0.97, 1.00, 1.00). The crest lands at 124.4s on that spike and is gone again in two - a bloom, not a plateau, so the outro stays the outro. Marigold, not white: this is warmth arriving, not a hit."
