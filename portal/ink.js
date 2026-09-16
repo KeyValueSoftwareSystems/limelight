@@ -66,7 +66,8 @@ function measure(rigName) {
     if (!frames.length) continue;
     const lampsOf = (f) =>
       geom.lampOffsets.map((o) => Math.max(f[o + 1] || 0, f[o + 2] || 0, f[o + 3] || 0));
-    let ink = 0, differ = 0, sum = 0, peak = 0, dark = 0;
+    let ink = 0, differ = 0, sum = 0, peak = 0, dark = 0, rigRises = 0;
+    let prevRig = null;
     for (const f of frames) {
       const L = lampsOf(f);
       const lit = L.filter((x) => x > 12).length;
@@ -75,6 +76,9 @@ function measure(rigName) {
       sum += L.reduce((a, b) => a + b, 0) / Math.max(1, L.length) / 255;
       peak = Math.max(peak, Math.max(...L) / 255);
       if (Math.max(...L) <= 12) dark++;
+      const now = Math.max(...L);
+      if (prevRig !== null && now - prevRig > 30) rigRises++;
+      prevRig = now;
     }
     const n = frames.length;
     rows.push({
@@ -85,6 +89,7 @@ function measure(rigName) {
       mean: sum / n,
       peak,
       dark: dark / n,
+      perBeat: rigRises / Math.max(1, n / (fps * 0.5)),
     });
   }
   rows.sort((a, b) => b.ink - a.ink || b.differ - a.differ);
@@ -101,7 +106,8 @@ function table(rigName) {
       "  differ " + (r.differ * 100).toFixed(0).padStart(3) + "%" +
       "  mean " + r.mean.toFixed(2) +
       "  peak " + r.peak.toFixed(2) +
-      "  dark " + (r.dark * 100).toFixed(0).padStart(3) + "%"
+      "  dark " + (r.dark * 100).toFixed(0).padStart(3) + "%" +
+      "  rig-lifts/beat " + r.perBeat.toFixed(1)
     );
   }
   return out;
