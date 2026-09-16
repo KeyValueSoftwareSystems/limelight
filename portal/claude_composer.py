@@ -770,6 +770,10 @@ def compose(song, model=None, hub=None, turns=90, keep=False, notes=None):
     os.makedirs(work, exist_ok=True)
 
     brief = brief_for(song, overview, C.build_effects_block(catalog), hub)
+    if notes is None:
+        standing = os.path.join(REPO, "portal", "notes", f"{song}.md")
+        if os.path.isfile(standing):
+            notes = open(standing).read()
     if notes:
         brief = brief + "\n\n" + notes
     with open(os.path.join(work, "brief.md"), "w") as f:
