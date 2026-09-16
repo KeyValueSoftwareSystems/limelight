@@ -1022,7 +1022,8 @@
       "requires": [
         "level"
       ],
-      "default_beats": 4
+      "default_beats": 4,
+      "also_gesture": true
     },
     {
       "id": "sweep",
@@ -1310,7 +1311,8 @@
       "requires": [
         "level"
       ],
-      "default_beats": 4
+      "default_beats": 4,
+      "also_gesture": true
     },
     {
       "id": "ripple",
@@ -1355,7 +1357,8 @@
       "requires": [
         "level"
       ],
-      "default_beats": 4
+      "default_beats": 4,
+      "also_gesture": true
     },
     {
       "id": "converge",

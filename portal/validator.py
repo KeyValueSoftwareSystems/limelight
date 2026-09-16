@@ -42,7 +42,8 @@ def _derive_palette(plan, keep=5, near=0.06):
                 for one in vals:
                     rgb = _as_rgb(one)
                     if rgb:
-                        seen[rgb] = seen.get(rgb, 0) + 1
+                        key = tuple(round(float(x), 4) for x in rgb)
+                        seen[key] = seen.get(key, 0) + 1
     out = []
     pool = sorted(seen.items(), key=lambda kv: -kv[1])
     while pool and len(out) < keep:
@@ -143,12 +144,16 @@ def validate(plan, catalog, score_overview):
     effects_by_id = {e["id"]: e for e in catalog}
     sections = score_overview.get("sections") or []
     moments = score_overview.get("moments") or []
-    streams = {"beat", "downbeat", "bar"}
+    GRID_STREAMS = {"beat", "downbeat", "bar"}
+    streams = set()
     for s in (score_overview.get("streams") or score_overview.get("lanes") or []):
         if isinstance(s, str):
             streams.add(s)
         elif isinstance(s, dict):
             streams.add(s.get("name", s.get("id", "")))
+    if not streams:
+        lanes, _w = _lanes_of(score_overview)
+        streams = set((lanes or {}).keys())
 
     if not isinstance(plan, dict):
         return {"plan": "", "states": [], "bindings": [], "gestures": []}, \
@@ -216,7 +221,7 @@ def validate(plan, catalog, score_overview):
                 continue
             names = [val] if isinstance(val, str) else (val if isinstance(val, list) else [])
             for name in names:
-                if name and streams and name not in streams:
+                if name and streams and name not in streams and name not in GRID_STREAMS:
                     report.append({"level": "error", "msg": f"binding[{i}]: stream '{name}' not in overview (dropped)"})
                     bad_stream = True
         if bad_stream:
@@ -244,7 +249,7 @@ def validate(plan, catalog, score_overview):
             report.append({"level": "error", "msg": f"gesture[{i}]: unknown effect '{eid}'"})
             continue
         edef = effects_by_id[eid]
-        if edef["kind"] not in ("gesture",):
+        if edef["kind"] not in ("gesture",) and not edef.get("also_gesture"):
             report.append({"level": "error", "msg": f"gesture[{i}]: '{eid}' is a {edef['kind']}, not a gesture"})
             continue
         # check moment references
