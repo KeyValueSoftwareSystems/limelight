@@ -16,6 +16,8 @@ import type {
   ColoursResponse,
   Entitlement,
   TrimState,
+  UploadResponse,
+  UploadStatus,
 } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8800";
@@ -80,6 +82,22 @@ export const show = {
   },
 };
 
+/* ── v2 plan pipeline (portal composer + baker) ──────────────────────────────
+   compose asks the model for a plan; plan.bake renders a plan (ours or one the
+   creator edited) to frames. Both return through the SAME job/status/frames
+   loop as the legacy bake, so `show.status` / `show.frames` are reused as-is. */
+export const compose = {
+  run(song: string, model?: string): Promise<{ plan: unknown; report?: unknown; saved?: string; error?: string }> {
+    return post("/api/compose", { song, ...(model ? { model } : {}) });
+  },
+};
+
+export const plan = {
+  bake(song: string, planData: unknown, rig?: string): Promise<BakeResponse> {
+    return post<BakeResponse>("/api/bake-plan", { song, plan: planData, ...(rig ? { rig } : {}) });
+  },
+};
+
 export const effects = {
   list(): Promise<EffectsResponse> {
     return request<EffectsResponse>("/api/effects");
@@ -101,6 +119,18 @@ export const venues = {
 
   use(venueId: string): Promise<{ ok: boolean; why?: string; note?: string; locked?: boolean }> {
     return post("/api/venue/use", { venue_id: venueId });
+  },
+};
+
+export const showfile = {
+  /** A hand-authored show file for this song, or null where there is none. */
+  get(song: string): Promise<{ showfile: unknown | null }> {
+    return request(`/api/showfile?song=${encodeURIComponent(song)}`);
+  },
+
+  /** Write the plan back to this song's show file. */
+  save(song: string, plan: unknown): Promise<{ saved?: string; cues?: number; error?: string }> {
+    return post("/api/showfile", { song, plan });
   },
 };
 
@@ -171,6 +201,48 @@ export const market = {
 export const entitlement = {
   check(showId: string, tier: string): Promise<Entitlement> {
     return post<Entitlement>("/api/entitlement", { show_id: showId, tier });
+  },
+};
+
+export const upload = {
+  send(
+    file: File,
+    onProgress?: (pct: number) => void,
+  ): Promise<UploadResponse> {
+    const form = new FormData();
+    form.append("file", file);
+    return new Promise<UploadResponse>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total);
+      });
+      xhr.addEventListener("load", () => {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(data as UploadResponse);
+          } else {
+            reject(new ApiError(xhr.status, data.error || "upload failed"));
+          }
+        } catch {
+          reject(new ApiError(xhr.status, "invalid response"));
+        }
+      });
+      xhr.addEventListener("error", () =>
+        reject(new ApiError(0, "network error during upload")),
+      );
+      xhr.addEventListener("abort", () =>
+        reject(new ApiError(0, "upload cancelled")),
+      );
+      xhr.open("POST", `${BASE}/api/upload`);
+      xhr.send(form);
+    });
+  },
+
+  status(jobId: string): Promise<UploadStatus> {
+    return request<UploadStatus>(
+      `/api/upload/status?job=${encodeURIComponent(jobId)}`,
+    );
   },
 };
 

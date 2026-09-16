@@ -24,28 +24,18 @@
   "follow",
   "split",
   "accent",
-  "strobe",
+  "drive",
   "pulse",
-  "tint",
-  "flare",
-  "spectrum",
-  "chase",
-  "sweep",
-  "bump",
-  "fade",
-  "breathe",
-  "stutter",
-  "alternate",
-  "ripple",
-  "converge",
-  "bounce",
-  "shift",
-  "texture"
+  "breakdown",
+  "anticipation",
+  "spin",
+  "beam",
+  "strobe"
  ],
  "unsupported_effects": [],
  "limits": {
   "isolate_min_fixtures": 3,
-  "note": "all 34 effects are supported on this rig"
+  "note": "4 pars meets the isolate threshold. All 17 effects are supported."
  },
  "note": "DMX functions for the desk rig. 4 par7 (7ch each, addresses 1-28) + 1 head13 (13ch, address 29-41)."
 }

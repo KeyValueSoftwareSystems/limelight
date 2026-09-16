@@ -69,20 +69,18 @@ module.exports = function drone(params, ctx) {
   }
 }
 
-/* ── 2. motion cues on the real arc4-head rig, and head slew ──────────────
-   follow, split and accent were removed from the catalogue: they rendered from
-   an audio envelope every frame, which is a reactive rig rather than a cue, and
-   their tests went with them. What replaces them is the same rig driven by
-   motion cues placed over bar spans. */
+/* ── 2. a beat-locked state over a bar span, and head slew ────────────────
+   pulse renders per frame against the real beat grid, and from_bar/to_bar puts
+   it over part of a section rather than all of it. Together those are what make
+   the lamps disagree with each other; the old follow/split/accent tests went
+   with the envelope-driven effects they covered. */
 {
   const plan = {
-    states: [{ section: 0, effect: "wash", amount: 0.4, colour: "#3366cc" }],
-    bindings: [],
-    gestures: [
-      { effect: "chase", from_bar: 5, to_bar: 12, per_beat: 1, why: "motion" },
-      { effect: "ripple", from_bar: 13, to_bar: 20, per_beat: 1, why: "motion" },
-      { effect: "alternate", from_bar: 21, to_bar: 28, per_beat: 1, why: "motion" },
+    states: [
+      { section: 0, effect: "pulse", from_bar: 5, to_bar: 12, why: "beat-locked motion over a bar span" },
     ],
+    bindings: [],
+    gestures: [],
   };
   const show = bake("arc4-head", plan);
 
@@ -94,7 +92,7 @@ module.exports = function drone(params, ctx) {
     }
     let apart = 0;
     for (const r of lv) if (Math.max(...r) > 12 && Math.max(...r) - Math.min(...r) > 20) apart++;
-    ok("a chase placed on bars makes the lamps differ from each other",
+    ok("a beat-locked state over a bar span makes the lamps differ",
        apart > lv.length * 0.05, `${(apart / lv.length * 100).toFixed(1)}% of frames`);
   }
 

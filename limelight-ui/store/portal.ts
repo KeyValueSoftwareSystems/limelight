@@ -40,6 +40,12 @@ export interface PortalState {
   showId: string | null;
   showVersion: number | null;
 
+  /* v2 plan pipeline: when a plan is imported the edits are translated from it
+     and bakes go through the portal baker (/api/bake-plan) instead of the legacy
+     seed+edits bake. planText is the composer's one-line summary, carried through. */
+  v2: boolean;
+  planText: string;
+
   /* venue mode */
   venue: ShowFile | null;
   entitlement: Entitlement | null;
@@ -63,6 +69,13 @@ export interface PortalState {
   /* rig */
   rig: RigStatus | null;
   trims: TrimState;
+  /* Seconds the LIGHTS wait for the SOUND. `audio.currentTime` is the decoder's
+     position, not what has left the speakers, so without this the preview runs
+     ahead of the music by the output buffer. Auto-detected from the audio
+     device; `syncNudge` is the person's correction on top, because a device's
+     reported latency and its real one are not always the same thing. */
+  syncLatency: number;
+  syncNudge: number;
 
   /* venue / layout */
   limits: LimitsSummary | null;
@@ -97,6 +110,8 @@ export interface PortalActions {
   setJob: (job: string | null) => void;
   setShowId: (id: string | null) => void;
   setShowVersion: (v: number | null) => void;
+  setV2: (v: boolean) => void;
+  setPlanText: (t: string) => void;
   setVenue: (venue: ShowFile | null) => void;
   setEntitlement: (e: Entitlement | null) => void;
   setSecIndex: (i: number) => void;
@@ -111,6 +126,8 @@ export interface PortalActions {
   setSel: (i: number) => void;
   setRig: (rig: RigStatus | null) => void;
   setTrims: (trims: Partial<TrimState>) => void;
+  setSyncLatency: (s: number) => void;
+  setSyncNudge: (s: number) => void;
   setLimits: (limits: LimitsSummary | null) => void;
   setLayout: (layout: string | null) => void;
   setLayouts: (layouts: Layout[]) => void;
@@ -151,6 +168,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   job: null,
   showId: null,
   showVersion: null,
+  v2: false,
+  planText: "",
   venue: null,
   entitlement: null,
   secIndex: -1,
@@ -165,6 +184,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   sel: -1,
   rig: null,
   trims: { ...initialTrims },
+  syncLatency: 0,
+  syncNudge: 0,
   limits: null,
   layout: null,
   layouts: [],
@@ -200,6 +221,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   setJob: (job) => set({ job }),
   setShowId: (showId) => set({ showId }),
   setShowVersion: (showVersion) => set({ showVersion }),
+  setV2: (v2) => set({ v2 }),
+  setPlanText: (planText) => set({ planText }),
   setVenue: (venue) => set({ venue }),
   setEntitlement: (entitlement) => set({ entitlement }),
   setSecIndex: (secIndex) => set({ secIndex }),
@@ -213,6 +236,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   setArm: (arm) => set({ arm }),
   setSel: (sel) => set({ sel }),
   setRig: (rig) => set({ rig }),
+  setSyncLatency: (syncLatency) => set({ syncLatency }),
+  setSyncNudge: (syncNudge) => set({ syncNudge }),
   setTrims: (patch) => set((s) => ({ trims: { ...s.trims, ...patch } })),
   setLimits: (limits) => set({ limits }),
   setLayout: (layout) => set({ layout }),

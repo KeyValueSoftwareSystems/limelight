@@ -205,4 +205,84 @@ function bindingValueFn(binding, sampler) {
   return t => f(sampler.sampleStem(single, t), t);
 }
 
-module.exports = { frameAt, slew, makeStreamSampler, bindingValueFn, clamp01 };
+/* ── the real beat grid ─────────────────────────────────────────────────────
+   Beat-locked effects must phase off the song's ACTUAL beat times, not a nominal
+   BPM — this song is 89 bpm for its first ~17s then 119, so a constant-BPM grid
+   drifts through the intro. Ported from concert.py's BeatList: a fractional beat
+   index at any time, extrapolated with the median interval past the ends. Each
+   beat also knows if it's a downbeat, so a bar index comes for free. */
+function _median(a) { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+
+function makeBeatClock(beats, fallbackBpm) {
+  const arr = (beats || []).filter(b => b && typeof b.t === "number").sort((a, b) => a.t - b.t);
+  const times = arr.map(b => b.t);
+  const isDb = arr.map(b => !!b.downbeat);
+  const step = times.length > 1 ? _median(times.slice(1).map((t, i) => t - times[i])) : (60 / (fallbackBpm || 120));
+  // cumulative bar index per beat (each downbeat starts a new bar)
+  const barOfBeat = []; let bar = -1;
+  for (let i = 0; i < arr.length; i++) { if (isDb[i] || i === 0) bar++; barOfBeat.push(Math.max(0, bar)); }
+
+  function beatAt(t) {
+    if (!times.length) return t / step;
+    let lo = 0, hi = times.length;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (times[m] <= t) lo = m + 1; else hi = m; }
+    const i = lo - 1;
+    if (i < 0) return (t - times[0]) / step;                                   // before the first beat
+    if (i >= times.length - 1) return (times.length - 1) + (t - times[times.length - 1]) / step;
+    return i + (t - times[i]) / (times[i + 1] - times[i]);
+  }
+  const isDownbeat = idx => (idx >= 0 && idx < isDb.length ? isDb[idx] : (idx % 4 === 0));
+  const barIndex = idx => (idx >= 0 && idx < barOfBeat.length ? barOfBeat[idx] : Math.floor(Math.max(0, idx) / 4));
+  return { beatAt, isDownbeat, barIndex, beatStep: step, count: times.length };
+}
+
+/* ── per-beat weight ────────────────────────────────────────────────────────
+   How hard each beat lands, 0..1, from the measured drum onsets in that beat's
+   window (normalised to the song's loudest onset). This is what lets a hit follow
+   the track's own dynamics instead of a uniform grid. */
+function makePerBeatWeight(hits, beats) {
+  const bt = (beats || []).filter(b => b && typeof b.t === "number").map(b => b.t).sort((a, b) => a - b);
+  const hh = (hits || []).filter(h => h && typeof h.t === "number").sort((a, b) => a.t - b.t);
+  let maxI = 0; for (const h of hh) { const v = h.intensity != null ? h.intensity : 1; if (v > maxI) maxI = v; }
+  const norm = maxI > 0 ? maxI : 1;
+  const w = new Array(Math.max(1, bt.length)).fill(0);
+  let j = 0;
+  for (let i = 0; i < bt.length; i++) {
+    const lo = bt[i], hi = i + 1 < bt.length ? bt[i + 1] : lo + (i > 0 ? bt[i] - bt[i - 1] : 0.5);
+    while (j < hh.length && hh[j].t < lo) j++;
+    let m = 0;
+    for (let k = j; k < hh.length && hh[k].t < hi; k++) { const v = (hh[k].intensity != null ? hh[k].intensity : 1) / norm; if (v > m) m = v; }
+    w[i] = m;
+  }
+  return { weightAt: beatFrac => w[Math.max(0, Math.min(w.length - 1, Math.floor(beatFrac)))] || 0, weights: w };
+}
+
+/* ── energy curve ───────────────────────────────────────────────────────────
+   A dense 0..1 loudness proxy: the summed stem activity at time t (0.5s windows,
+   linearly interpolated), normalised to the song's peak. Drives a section's
+   floor/peak so the room breathes with the mix. */
+function makeEnergy(score) {
+  const st = (score && score.stems_temporal) || {};
+  const win = st.window_s > 0 ? st.window_s : 0.5;
+  const stems = st.stems || {};
+  const names = Object.keys(stems);
+  const nwin = names.length ? stems[names[0]].length : 0;
+  const total = new Array(nwin).fill(0);
+  for (const n of names) { const s = stems[n]; for (let i = 0; i < nwin; i++) total[i] += (s[i] || 0); }
+  let mx = 0; for (const v of total) if (v > mx) mx = v; const norm = mx > 0 ? mx : 1;
+  function energyAt(t) {
+    if (!nwin) return 0.5;
+    const x = t / win - 0.5;
+    if (x <= 0) return total[0] / norm;
+    const i = Math.floor(x);
+    if (i >= nwin - 1) return total[nwin - 1] / norm;
+    const f = x - i;
+    return (total[i] * (1 - f) + total[i + 1] * f) / norm;
+  }
+  return { energyAt };
+}
+
+module.exports = {
+  frameAt, slew, makeStreamSampler, bindingValueFn, clamp01,
+  makeBeatClock, makePerBeatWeight, makeEnergy,
+};

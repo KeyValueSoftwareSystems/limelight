@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { timeToX } from "@/lib/timeline";
 import { useTimeline } from "./Timeline";
 import type { Moment } from "@/lib/types";
@@ -7,7 +9,7 @@ import type { Moment } from "@/lib/types";
 /* The events the score itself found — where the drums enter, where the riff
    lands, where tension releases. The strongest "put something here" hints the
    product has, and snap targets once placing arrives. */
-export function MomentsBand({ moments }: { moments: Moment[] }) {
+function MomentsBandBase({ moments }: { moments: Moment[] }) {
   const { view, width } = useTimeline();
 
   return (
@@ -35,3 +37,7 @@ export function MomentsBand({ moments }: { moments: Moment[] }) {
     </div>
   );
 }
+
+/* Memoised. Moments do not change while a show plays.
+ */
+export const MomentsBand = memo(MomentsBandBase);

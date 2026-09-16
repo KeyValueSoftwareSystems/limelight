@@ -1,12 +1,14 @@
 "use client";
 
+import { memo } from "react";
+
 import { barTicks, timeToX } from "@/lib/timeline";
 import { mmss } from "@/lib/grid";
 import { useTimeline } from "./Timeline";
 import type { Grid } from "@/lib/types";
 
 /* Bars are the unit a musician counts in, so they lead. Time is secondary. */
-export function Ruler({ grid }: { grid: Grid }) {
+function RulerBase({ grid }: { grid: Grid }) {
   const { view, width } = useTimeline();
   const ticks = barTicks(view, grid, width);
 
@@ -29,3 +31,7 @@ export function Ruler({ grid }: { grid: Grid }) {
     </div>
   );
 }
+
+/* Memoised. The ruler is a function of the grid alone; the playhead is drawn over it.
+ */
+export const Ruler = memo(RulerBase);

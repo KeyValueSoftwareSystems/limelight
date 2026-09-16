@@ -1,5 +1,5 @@
 {
- "note": "The venue catalogue. A VENUE is a name with one or more named LAYOUTS under it, because a room reconfigures and each configuration is a different rig. The layout file is the rig; the venue is who owns it and what they call that configuration. This belongs on the hub beside the scores eventually; it is here so the shape gets settled in one place first.",
+ "note": "The venue catalogue. A VENUE is a name with one or more named LAYOUTS under it, because a room reconfigures and each configuration is a different rig. The layout file is the rig; the venue is who owns it and what they call that configuration. This belongs on the hub beside the scores eventually; it is here so the shape gets settled in one place first. A venue may carry more than one layout because a room reconfigures; KeyCode Arena carries both its own rig and the smaller stage rig, and they are different rigs under one name.",
  "shape": {
   "id": "stable, survives renaming",
   "name": "what people search for",
@@ -32,19 +32,46 @@
    "name": "KeyCode Stage",
    "example": false,
    "access": "public",
-   "note": "Our own event, and the only venue here anyone may design for and play.",
+   "note": "Our own event, and the only venue here anyone may design for and play. Two rigs under one name because the room reconfigures: the basic bar for a quiet night, the main stage for a full one.",
    "logo": "ven_keycode.png",
    "logo_note": "Drop the supplied KeyCode logo at portal/logos/ven_keycode.svg (or .png) and it replaces the drawn monogram with no code change.",
    "rig_placeholder": true,
    "rig_placeholder_note": "We have not been given KeyCode's fixture list. The rig below is a stand-in so the demo runs; it is NOT what is hanging at KeyCode, and it is marked as such wherever it appears. Replace it when the real list arrives.",
    "layouts": [
     {
-     "name": "Main stage (placeholder rig)",
+     "name": "Basic (beam + 4 par)",
+     "file": "keycode-basic.layout.json"
+    },
+    {
+     "name": "Main stage",
      "file": "club16-2head.layout.json",
      "placeholder": true
     }
    ],
-   "default": "club16-2head.layout.json"
+   "default": "keycode-basic.layout.json"
+  },
+  {
+   "id": "ven_keycode_arena",
+   "name": "KeyCode Arena",
+   "example": false,
+   "access": "public",
+   "note": "The big room. Same event as KeyCode Stage, a rig with about six times as much on it -- a wash bar upstage, beams on the mid truss, zooming washes out front, audience blinders with a strobe outboard of each end, lasers, and a pixel strip framing each side.",
+   "logo": "ven_keycode_arena.png",
+   "rig_placeholder": true,
+   "rig_placeholder_note": "A designed rig, not a measured one. Every device type on it except the laser was read out of a real GDTF file in this repo, so the channel counts and beam angles are the manufacturers' own -- but the plot, the trim heights and the addresses are ours, not KeyCode's. Replace it when the real list arrives.",
+   "layouts": [
+    {
+     "name": "Arena (full rig)",
+     "file": "keycode-arena.layout.json",
+     "placeholder": true
+    },
+    {
+     "name": "Main stage",
+     "file": "club16-2head.layout.json",
+     "placeholder": true
+    }
+   ],
+   "default": "keycode-arena.layout.json"
   },
   {
    "id": "ven_omnia",

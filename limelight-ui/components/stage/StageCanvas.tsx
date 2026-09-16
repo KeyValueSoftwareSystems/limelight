@@ -5,7 +5,7 @@ import { usePortalStore } from "@/store/portal";
 import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { readFixtures, trimFixtures } from "@/lib/fixtures";
 import { paintStage, ground } from "@/lib/renderer";
-import { clamp } from "@/lib/grid";
+import { frameFor } from "@/lib/sync";
 import type { AnchoredClock } from "@/hooks/useAnchoredClock";
 
 interface StageCanvasProps {
@@ -27,6 +27,9 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
   const frames = usePortalStore((s) => s.frames);
   const place = usePortalStore((s) => s.place);
   const trims = usePortalStore((s) => s.trims);
+  const syncLatency = usePortalStore((s) => s.syncLatency);
+  const syncNudge = usePortalStore((s) => s.syncNudge);
+  const syncOffset = syncLatency + syncNudge;
 
   const sizeCanvas = useCallback(() => {
     const cv = canvasRef.current;
@@ -39,9 +42,17 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
     cv.height = Math.max(1, Math.round(rect.height * dpr));
   }, []);
 
+  /* Setting cv.width CLEARS the canvas, so a resize must be followed by a
+     repaint. Without that the stage goes black and stays black: while paused
+     nothing else paints, so a resize landing after the one-shot paint below
+     wiped the preview until the next bake or trim. The ref is so the observer
+     always calls the CURRENT paint without re-subscribing on every render. */
+  const paintRef = useRef<() => void>(() => {});
+
   useEffect(() => {
-    sizeCanvas();
-    const obs = new ResizeObserver(sizeCanvas);
+    const resize = () => { sizeCanvas(); paintRef.current(); };
+    resize();
+    const obs = new ResizeObserver(resize);
     if (containerRef.current) obs.observe(containerRef.current);
     return () => obs.disconnect();
   }, [sizeCanvas]);
@@ -57,7 +68,8 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
     const H = cv.height / dpr;
 
     const t = clockRef.current?.position() ?? 0;
-    const idx = clamp(Math.floor(t * show.fps), 0, show.frame_count - 1);
+    /* what the listener is hearing NOW is t minus the output latency */
+    const idx = frameFor(t, show.fps, show.frame_count, syncOffset);
     const raw = readFixtures(idx, frames, show, place);
     if (!raw) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -66,8 +78,12 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
     }
 
     const fx = trimFixtures(raw, trims);
-    paintStage(ctx, fx, W, H, dpr);
-  }, [show, frames, place, trims, clockRef]);
+    /* the show's own clock drives the strobe gate, so a paused preview and a
+       running one agree on which half of a flash they are in */
+    paintStage(ctx, fx, W, H, dpr, { t });
+  }, [show, frames, place, trims, syncOffset, clockRef]);
+
+  useEffect(() => { paintRef.current = paint; }, [paint]);
 
   useAnimationLoop(paint, playing);
 
@@ -78,20 +94,11 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
     if (show && frames && place) paint();
   }, [show, frames, place, trims, currentTime, playing, paint]);
 
+  /* The frame, the toggle and the "select a song" overlay belong to
+     StagePreview, which owns the box this and Stage3D take turns filling. */
   return (
-    <div
-      ref={containerRef}
-      className="relative flex-1 min-h-[150px] mx-[var(--spacing-s6)] rounded-lg overflow-hidden bg-[#07090f]"
-    >
-      <canvas
-        ref={canvasRef}
-        className="block w-full h-full"
-      />
-      {(!show || !frames) && (
-        <div className="absolute inset-x-0 bottom-1/2 text-center text-[length:var(--text-xs)] tracking-[0.18em] uppercase text-[rgba(215,222,240,0.6)] pointer-events-none">
-          {show ? "baking the show…" : "select a song"}
-        </div>
-      )}
+    <div ref={containerRef} className="absolute inset-0">
+      <canvas ref={canvasRef} className="block w-full h-full" />
     </div>
   );
 }

@@ -13,6 +13,7 @@
    name; level/pan/tilt/strobe/gobo/prism/spin); the drivers turn them into channels.
    The display gamma is applied later, at the wire, exactly once. */
 const { groupsOf } = require("./preflight.js");
+const drivers = require("./drivers/index.js");
 
 function resolveGroups(layout) {
   const g = groupsOf(layout);
@@ -659,7 +660,20 @@ function frame(position, plan, ctx) {
     .filter(a => at(a.from) <= here && here < at(a.to))
     .sort((x, y) => (x.priority || 0) - (y.priority || 0));
 
-  const isHead = f => f.type === "head13" || f.type === "head";
+  /* "a head" is anything that can AIM, asked of the driver rather than of a list
+     of type names -- a rig with a spot and a wash on it has four kinds of mover
+     and none of them is called head13. The two literals stay as a fallback for
+     layouts written before the registry knew every type. */
+  const isHead = f => {
+    try { return drivers.moves(f.type); }
+    catch (e) { return f.type === "head13" || f.type === "head"; }
+  };
+  /* the static colour wash: everything that mixes colour and does NOT aim. This
+     is what the bar's tint, its gain and the accent strobe ride on. */
+  const isWash = f => {
+    try { return drivers.can(f.type, "colour") && !drivers.moves(f.type); }
+    catch (e) { return f.type === "par7"; }
+  };
 
   const clamp01 = v => Math.max(0, Math.min(1, v));
   const top = type => active.filter(a => a.type === type).sort((x, y) => (y.priority || 0) - (x.priority || 0))[0] || null;
@@ -750,7 +764,7 @@ function frame(position, plan, ctx) {
       if (pause && fx.intent.tilt != null) fx.intent.tilt = +(fx.intent.tilt * Math.max(0, 1 - 1.6 * strengthOf(pause))).toFixed(3);
       continue;
     }
-    if (fx.type !== "par7") continue;
+    if (!isWash(fx)) continue;
     if (Array.isArray(fx.intent.colour)) {
       fx.intent.colour = tint(fx.intent.colour, mod.hue, tintAmt, mod.minor === true);
       if (whitenAmt > 0) fx.intent.colour = fx.intent.colour.map(c => +(c + (1 - c) * whitenAmt).toFixed(3));

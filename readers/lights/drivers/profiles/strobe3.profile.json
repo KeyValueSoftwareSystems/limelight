@@ -1,0 +1,37 @@
+{
+ "type": "strobe3",
+ "footprint": 3,
+ "brightness": "master",
+ "can": [
+  "level",
+  "strobe"
+ ],
+ "channels": [
+  {
+   "role": "master",
+   "default": 0
+  },
+  {
+   "role": "strobe_duration",
+   "default": 128
+  },
+  {
+   "role": "strobe",
+   "default": 0
+  }
+ ],
+ "strobe": {
+  "max_hz": 25
+ },
+ "beam": {
+  "angle_deg": 82.0,
+  "field_deg": 135.0,
+  "type": "wash"
+ },
+ "park": {
+  "level": 0
+ },
+ "gdtf": "Martin_Professional@Atomic_3000_DMX@Rev_1.0.gdtf",
+ "mode": "3 Channel",
+ "note": "channel order read from the GDTF. A white xenon strobe: no colour at all, which is the point -- it is the one fixture on the rig that cannot be tinted, so it always reads as a hit rather than as a look."
+}

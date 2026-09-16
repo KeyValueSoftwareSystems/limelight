@@ -1,5 +1,5 @@
 import type { Clip, Edit, Effect, Grid, ShowPlan } from "./types";
-import { familyOfFx, acceptsClips, FAMILY_AUTO_LABEL } from "./families.ts";
+import { familyOfFx, familyOfEffect, acceptsClips, effectIdForPlanFx, FAMILY_AUTO_LABEL } from "./families.ts";
 import { makeGridClock } from "./grid.ts";
 
 /** A half-open range of beat indices. Beat indices are 0-based; the bars and
@@ -33,21 +33,30 @@ export function buildClips(
   const secondsAtBeatIndex = (i: number) =>
     secondsAtBar(Math.floor(i / bpb) + 1, (i % bpb) + 1);
 
+  /* Schema 1 tiles named the renderer type directly as `fx`; schema 2 tiles do
+     not, so the catalogue id is the identity and the plan's word is mapped onto
+     it. Comparing the two vocabularies raw meant a takeover never matched what
+     it replaced, and both were drawn. */
+  const speaksFx = catalogue.some((e) => e.fx);
+  const planKey = (fx: string) =>
+    speaksFx ? fx : (effectIdForPlanFx(fx) ?? fx);
+
   /* Every span a person has claimed, whether it draws a clip or suppresses one.
      Both kinds take the beat away from the arranger. */
   const claims: { fx: string; span: BeatSpan }[] = [];
+  const replaced = new Set(edits.map((e) => e.from).filter(Boolean) as string[]);
   const mine: Clip[] = [];
 
   edits.forEach((edit, i) => {
     const spec = byId.get(edit.type);
     if (!spec) return;
-    /* Schema 2 dropped `fx`; a clip's lane no longer depends on it, so an
+    /* Schema 2 dropped `fx`; the family is found through the tile itself, so an
        unmapped effect still draws rather than vanishing. */
-    const family = familyOfFx(spec.fx) ?? "hits";
+    const family = familyOfEffect(spec) ?? "hits";
 
     const beat = edit.beat ?? 1;
     const span = spanOf(edit.bar, beat, edit.beats, bpb);
-    claims.push({ fx: spec.fx ?? spec.dimension ?? spec.id, span });
+    claims.push({ fx: spec.fx ?? spec.id, span });
     if (edit.off) return;
 
     mine.push({
@@ -92,7 +101,9 @@ export function buildClips(
       startS: secondsAtBeatIndex(span.from),
       endS: secondsAtBeatIndex(span.to),
       params: p.params,
-      overridden: claims.some((c) => c.fx === p.fx && overlaps(c.span, span)),
+      overridden:
+        replaced.has(p.id) ||
+        claims.some((c) => c.fx === planKey(p.fx) && overlaps(c.span, span)),
     });
   }
 

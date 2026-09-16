@@ -45,7 +45,8 @@ export function Menu({ trigger, items, onPick, align = "left" }: MenuProps) {
       {open && (
         <div
           role="menu"
-          className={`absolute top-[calc(100%+4px)] z-50 min-w-[180px] py-[var(--spacing-s1)] bg-bg-overlay border border-solid border-line-strong rounded-[7px] shadow-lg ${
+          style={{ boxShadow: "var(--elev-popover)" }}
+          className={`absolute top-[calc(100%+4px)] z-50 min-w-[180px] py-[var(--spacing-s1)] bg-bg-overlay border border-solid border-line-strong rounded-[7px] ${
             align === "right" ? "right-0" : "left-0"
           }`}
         >

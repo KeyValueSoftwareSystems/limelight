@@ -1,0 +1,360 @@
+{
+ "schema": "limelight.show/1",
+ "song": "raga-of-revenge",
+ "plan": "A devotional line lit warm and held back, so the one place the room goes white is the bar the song is loudest.",
+ "states": [
+  {
+   "section": 0,
+   "effect": "drone",
+   "amount": 0.18,
+   "colour": [
+    0.85,
+    0.16,
+    0.04
+   ],
+   "extent": "inner",
+   "why": "establish. One sung line and almost nothing else, so the rig is barely on and there is somewhere to go. Target 0.28 of this song's range."
+  },
+  {
+   "section": 1,
+   "effect": "wash",
+   "amount": 0.3,
+   "colour": [
+    1,
+    0.52,
+    0.12
+   ],
+   "extent": "all",
+   "why": "lift. The band assembles: the room comes up to amber but does not yet move. Target 0.34."
+  },
+  {
+   "section": 2,
+   "effect": "pulse",
+   "amount": 0.52,
+   "colour": [
+    1,
+    0.52,
+    0.12
+   ],
+   "extent": "all",
+   "floor": 0.18,
+   "peak": 0.88,
+   "why": "first chorus. It must sit above the instrumental that leads into it and below the two choruses that follow. A pulse spends most of its time at its floor, so the floor is the dial that decides how big a chorus feels, not the amount."
+  },
+  {
+   "section": 3,
+   "effect": "drive",
+   "amount": 0.85,
+   "colours": [
+    [
+     1,
+     0.52,
+     0.12
+    ],
+    [
+     0.85,
+     0.16,
+     0.04
+    ]
+   ],
+   "extent": "all",
+   "floor": 0.4,
+   "peak": 1.0,
+   "why": "second chorus. It has to READ as bigger than the first and at first it did not: drive alternates its pairs while pulse peaks on every lamp, so the same nominal amount came out dimmer. The floor is what fixes it, not the amount."
+  },
+  {
+   "section": 4,
+   "effect": "drive",
+   "amount": 1.0,
+   "colours": [
+    [
+     1,
+     0.78,
+     0.34
+    ],
+    [
+     1,
+     0.52,
+     0.12
+    ]
+   ],
+   "extent": "all",
+   "floor": 0.62,
+   "peak": 1.0,
+   "why": "climax. Bar 51 at 105.8s is the loudest bar in the song on the per-bar energy curve. It sits high between hits, not just on them, so the section reads as the biggest thing in the show even before the white lands."
+  },
+  {
+   "section": 5,
+   "effect": "drone",
+   "amount": 0.15,
+   "colour": [
+    0.85,
+    0.16,
+    0.04
+   ],
+   "extent": "all",
+   "why": "resolve. Lands under where the song began, or it is not an ending. Target 0.26, held below the intro."
+  },
+  {
+   "section": 6,
+   "effect": "drone",
+   "amount": 0.05,
+   "colour": [
+    0.85,
+    0.16,
+    0.04
+   ],
+   "extent": "inner",
+   "why": "the three-second tail. Almost out."
+  }
+ ],
+ "bindings": [
+  {
+   "section": 5,
+   "effect": "follow",
+   "stream": "vocal",
+   "depth": 0.26,
+   "colour": [
+    0.85,
+    0.16,
+    0.04
+   ],
+   "extent": "inner",
+   "smooth": 0.5,
+   "why": "the outro is voice alone. A binding paints its own frame rather than riding the state underneath, so this one IS the resting condition here: inner pair, ember, dim."
+  }
+ ],
+ "gestures": [
+  {
+   "moment": 1,
+   "effect": "stab",
+   "colour": [
+    1,
+    0.52,
+    0.12
+   ],
+   "extent": "inner",
+   "for_beats": 1,
+   "why": "9.8s the first drums enter. Punctuation is small and never the whole rig.",
+   "at_s": 9.8
+  },
+  {
+   "moment": 4,
+   "effect": "gear",
+   "from": 1,
+   "to": 2,
+   "why": "17.8s the score records the tempo moving 89 to 119 bpm. The lighting changes gear with it.",
+   "at_s": 17.8
+  },
+  {
+   "moment": 7,
+   "effect": "trade",
+   "colours": [
+    [
+     1,
+     0.52,
+     0.12
+    ],
+    [
+     0.85,
+     0.16,
+     0.04
+    ]
+   ],
+   "for_beats": 2,
+   "travel": true,
+   "why": "23.8s violin and congas enter. A bhajan is call and response, so the rig answers itself.",
+   "at_s": 23.8
+  },
+  {
+   "moment": 8,
+   "effect": "hush",
+   "depth": 0.25,
+   "for_beats": 4,
+   "why": "25.8s seven instruments drop out at once. Light goes away with them.",
+   "at_s": 25.8
+  },
+  {
+   "moment": 10,
+   "effect": "swell",
+   "colour": [
+    1,
+    0.78,
+    0.34
+   ],
+   "for_beats": 4,
+   "rise": 0.5,
+   "why": "33.3s the group answers. Measured: the band stops dead at 33.1s, so this blooms out of a real silence.",
+   "at_s": 33.3
+  },
+  {
+   "moment": 11,
+   "effect": "gear",
+   "from": 2,
+   "to": 4,
+   "why": "34.2s the beat comes back in. The row doubles its rate: the melody runs three notes to the beat through here.",
+   "at_s": 34.2
+  },
+  {
+   "moment": 13,
+   "effect": "ramp",
+   "to": 0.9,
+   "curve": "ease",
+   "why": "47.7s the wind-up into the drop, in amber rather than ramp's default blue.",
+   "colour": [
+    1,
+    0.52,
+    0.12
+   ],
+   "for_beats": 4,
+   "at_s": 47.7
+  },
+  {
+   "moment": 14,
+   "lead_beats": 3,
+   "effect": "blackout",
+   "for_beats": 3,
+   "why": "THE DROP, part one. Dark from where the band actually stops, right up to the hit. Nothing lit in between, warm or white, or the hit has nothing to announce.",
+   "at_s": 49.8
+  },
+  {
+   "moment": 14,
+   "effect": "impact",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "for_beats": 2,
+   "why": "THE DROP, part two. 49.8s: the whole rig, white, out of silence. One of only two full-rig moments in the show.",
+   "at_s": 49.8
+  },
+  {
+   "moment": 16,
+   "effect": "stab",
+   "colour": [
+    1,
+    0.78,
+    0.34
+   ],
+   "extent": "outer",
+   "for_beats": 1,
+   "why": "52.3s the moment list calls this the peak. The energy curve rates it 0.83 and puts the real maximum at 105.8s, so it gets an accent, not the rig.",
+   "at_s": 52.3
+  },
+  {
+   "moment": 17,
+   "effect": "hush",
+   "depth": 0.3,
+   "for_beats": 3,
+   "why": "63.3s guitar and strings drop out mid-chorus",
+   "at_s": 63.3
+  },
+  {
+   "moment": 18,
+   "effect": "cut",
+   "for_beats": 1,
+   "why": "79.8s the biggest exit before the second chorus: a momentary hole to separate them",
+   "at_s": 79.8
+  },
+  {
+   "moment": 20,
+   "effect": "lift",
+   "by": 0.3,
+   "over_beats": 8,
+   "tilt": 0.4,
+   "why": "82.8s the drums thicken. The second chorus climbs rather than arriving flat.",
+   "at_s": 82.8
+  },
+  {
+   "moment": 21,
+   "effect": "ramp",
+   "to": 0.95,
+   "curve": "ease",
+   "why": "101.2s the last build, into bar 51. ramp defaults to BLUE and paints every par, so it is given the section's own gold and a span that stops before the climax it is building to.",
+   "colour": [
+    1,
+    0.78,
+    0.34
+   ],
+   "for_beats": 8,
+   "at_s": 101.2
+  },
+  {
+   "moment": 23,
+   "effect": "anticipation",
+   "for_beats": 4,
+   "colour": [
+    1,
+    0.78,
+    0.34
+   ],
+   "intensity": 0.6,
+   "why": "108.8s ten instruments leave. The room tightens before the floor drops out.",
+   "at_s": 108.8
+  },
+  {
+   "moment": 24,
+   "effect": "hush",
+   "depth": 0.08,
+   "for_beats": 8,
+   "why": "109.8s the track strips back. Measured: bar 54 at 111.7s is the quietest bar in the song at 0.081, and the recording is near silent from 111.0 to 113.6.",
+   "at_s": 109.8
+  },
+  {
+   "moment": 26,
+   "effect": "isolate",
+   "colour": [
+    1,
+    0.78,
+    0.34
+   ],
+   "rest": 0.04,
+   "why": "115.3s harp, tambourine and ukulele enter alone. One lamp for them, the rest of the room almost out.",
+   "at_s": 115.3
+  },
+  {
+   "moment": 27,
+   "effect": "swell",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "for_beats": 8,
+   "rise": 0.7,
+   "why": "120.3s the music moves up an octave. A register shift is a RISE, not a hit, so it blooms and falls rather than snapping.",
+   "at_s": 120.3
+  },
+  {
+   "moment": 29,
+   "effect": "cut",
+   "for_beats": 2,
+   "why": "125.3s twelve instruments leave at once — the biggest exit in the song",
+   "at_s": 125.3
+  },
+  {
+   "moment": 30,
+   "effect": "hush",
+   "depth": 0.12,
+   "for_beats": 6,
+   "why": "125.8s the last breakdown, into the ending",
+   "at_s": 125.8
+  },
+  {
+   "moment": 23,
+   "lead_beats": 6,
+   "effect": "impact",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "for_beats": 2,
+   "why": "THE CLIMAX at 105.8s — bar 51, the loudest bar in the song. No moment sits near it, so it is anchored to the 108.8s exit and pulled six beats earlier. The second and last full-rig moment in the show.",
+   "at_s": 105.8
+  }
+ ]
+}

@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import Image from "next/image";
 import { timeToX } from "@/lib/timeline";
 import { effectIcon } from "@/lib/effectIcons";
@@ -16,7 +18,7 @@ const HANDLES_FIT_PX = 44;
 
 /* Clips are plain. Colour in the timeline means selection and nothing else, so
    the one thing that is highlighted is the thing you are working on. */
-export function Clip({
+function ClipBase({
   clip,
   selected,
   top,
@@ -42,7 +44,13 @@ export function Clip({
   const editable = !!onGesture;
   const showTrim = editable && (selected || w >= HANDLES_FIT_PX);
   const roomy = w >= HANDLES_FIT_PX;
-  const grip = roomy ? { w: 9, out: 0 } : { w: 12, out: 8 };
+  const grip = roomy ? { w: 9, out: 0 } : { w: 13, out: 13 };
+  /* Too narrow to hold its handles: the grips sit outside and butt against the
+     body, so the three parts have to compose into one capsule. The body goes
+     square-cornered and the grips carry the rounding at the outer ends —
+     otherwise the body's own corners cut notches at both joins. */
+  const capsule = showTrim && !roomy;
+  const radius = capsule ? 0 : 5;
 
   return (
     <div
@@ -51,23 +59,25 @@ export function Clip({
         onSelect?.(clip.key, e.shiftKey);
         if (editable) onGesture!(clip, "move", e);
       }}
+      onPointerEnter={(e) => { (e.currentTarget as HTMLElement).style.zIndex = "15"; }}
+      onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.zIndex = selected ? "20" : "1"; }}
       onDoubleClick={(e) => {
         e.stopPropagation();
         onZoomTo?.(clip);
       }}
-      className={`absolute rounded-[5px] border border-solid touch-none transition-colors duration-[var(--dur-state)] ${
+      className={`absolute border border-solid touch-none transition-colors duration-[var(--dur-state)] ${
         editable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
       } ${
         selected
           ? "bg-accent border-accent"
           : "bg-bg-raised border-line-strong hover:border-ink-dimmer"
       }`}
-      style={{ left: x0, width: w, top, height }}
+      style={{ left: x0, width: w, top, height, borderRadius: radius, zIndex: selected ? 20 : 1 }}
       title={`${clip.name} · bar ${clip.bar}${clip.beat > 1 ? "." + clip.beat : ""} · ${clip.beats} beat${clip.beats === 1 ? "" : "s"} · double-click to zoom to it`}
     >
       <span
-        className="absolute inset-0 flex items-center gap-[5px] px-[7px] pointer-events-none overflow-hidden rounded-[5px]"
-        style={{ opacity: selected ? 1 : 0.92 }}
+        className="absolute inset-0 flex items-center gap-[5px] px-[7px] pointer-events-none overflow-hidden"
+        style={{ borderRadius: radius, opacity: selected ? 1 : 0.92 }}
       >
         {w > 34 && (
           <Image
@@ -91,28 +101,82 @@ export function Clip({
 
       {showTrim && (
         <>
-          <span
+          <Grip
+            side="start"
+            width={grip.w}
+            out={grip.out}
+            cap={capsule}
             onPointerDown={(e) => {
               e.stopPropagation();
               onSelect?.(clip.key, false);
               onGesture!(clip, "trim-start", e);
             }}
-            className="absolute top-0 bottom-0 cursor-ew-resize rounded-[2px]"
-            style={{ left: -grip.out, width: grip.w, background: roomy ? "rgba(0,0,0,0.25)" : "var(--accent)" }}
-            title="Trim the start"
           />
-          <span
+          <Grip
+            side="end"
+            width={grip.w}
+            out={grip.out}
+            cap={capsule}
             onPointerDown={(e) => {
               e.stopPropagation();
               onSelect?.(clip.key, false);
               onGesture!(clip, "trim-end", e);
             }}
-            className="absolute top-0 bottom-0 cursor-ew-resize rounded-[2px]"
-            style={{ right: -grip.out, width: grip.w, background: roomy ? "rgba(0,0,0,0.25)" : "var(--accent)" }}
-            title="Trim the end — drag right to make it last longer"
           />
         </>
       )}
     </div>
   );
 }
+
+/** An end-cap on the selection, not a separate object: it butts against the
+ *  clip body and carries a grip mark, so the whole thing reads as one bar you
+ *  can take hold of at either end. */
+function Grip({
+  side,
+  width,
+  out,
+  cap,
+  onPointerDown,
+}: {
+  side: "start" | "end";
+  width: number;
+  out: number;
+  cap: boolean;
+  onPointerDown: (e: React.PointerEvent) => void;
+}) {
+  const outer = side === "start" ? { left: -out } : { right: -out };
+  const r = cap ? 5 : 3;
+  return (
+    <span
+      onPointerDown={onPointerDown}
+      title={side === "start" ? "Drag to change where it starts" : "Drag to change how long it lasts"}
+      className="absolute top-0 bottom-0 flex items-center justify-center cursor-ew-resize"
+      style={{
+        ...outer,
+        width,
+        zIndex: 22,
+        background: "var(--accent)",
+        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.28)",
+        borderTopLeftRadius: side === "start" ? r : 0,
+        borderBottomLeftRadius: side === "start" ? r : 0,
+        borderTopRightRadius: side === "end" ? r : 0,
+        borderBottomRightRadius: side === "end" ? r : 0,
+      }}
+    >
+      <span
+        aria-hidden
+        style={{ width: 2, height: "42%", borderLeft: "1px solid rgba(0,0,0,0.5)", borderRight: "1px solid rgba(0,0,0,0.5)" }}
+      />
+    </span>
+  );
+}
+
+/* Memoised. The playhead moves 60 times a second and it is pushed through React state,
+   so the whole editor re-renders on every animation frame. A clip's props do
+   not change between those frames -- the arrays and callbacks above it are all
+   memoised -- so without this every clip on the timeline was rebuilt 60 times a
+   second to draw the same rectangle. This is the single biggest saving in the
+   editor, because clips are the most numerous thing on screen.
+ */
+export const Clip = memo(ClipBase);

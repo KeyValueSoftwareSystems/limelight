@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { timeToX } from "@/lib/timeline";
 import { makeGridClock } from "@/lib/grid";
 import { useTimeline } from "./Timeline";
@@ -7,7 +9,7 @@ import type { Grid } from "@/lib/types";
 
 /* The score's per-bar intensity as a filled area. The closest thing this product
    has to a waveform, and where a creator's eye goes to find the lift. */
-export function EnergyBand({ energy, grid }: { energy: (number | null)[]; grid: Grid }) {
+function EnergyBandBase({ energy, grid }: { energy: (number | null)[]; grid: Grid }) {
   const { view, width } = useTimeline();
   const { secondsAtBar } = makeGridClock(grid);
   const H = 28;
@@ -39,3 +41,7 @@ export function EnergyBand({ energy, grid }: { energy: (number | null)[]; grid: 
     </div>
   );
 }
+
+/* Memoised. The energy curve is fixed for the song.
+ */
+export const EnergyBand = memo(EnergyBandBase);

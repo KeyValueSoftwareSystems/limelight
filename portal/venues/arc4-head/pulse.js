@@ -1,26 +1,37 @@
 "use strict";
 const H = require("./helpers");
+const { flash, bump, PARX } = require("./beat");
 
+/* pulse — the verse / moving-instrumental STATE, rendered per frame against the
+   real beat grid. A bump travels across the lamps once per beat (bigger when the
+   beat carries more weight), direction flipping each bar; the head runs a slow
+   room-wide figure on its own continuous clock. floor breathes with energy. */
 module.exports = function pulse(params, ctx) {
-  const colour = H.parseColour(params.colour, [1, 0.75, 0.35]);
-  const pars = H.parsForExtent(params.extent || "all");
-  const depth = H.clamp(params.depth != null ? params.depth : 0.55, 0, 1);
-  const top = H.clamp(params.top != null ? params.top : 0.8, 0, 1);
-  const perBeat = params.per_beat != null ? params.per_beat : 1;
-  const loopBeats = Math.max(1, Math.round(params.for_beats || 4));
-  const N = Math.max(2, H.framesPerBeat(ctx.bpm) * loopBeats);
+  const colour = H.parseColour(params.colour, [0.15, 0.5, 1]);
+  const extent = params.extent || "all";
+  const pars = H.parsForExtent(extent);
+  const floorDial = params.floor != null ? params.floor : 0.24;
 
-  const frames = [];
-  for (let i = 0; i < N; i++) {
-    const phase = ((i / H.framesPerBeat(ctx.bpm)) * perBeat) % 1;
-    const env = Math.pow(1 - phase, 1.8);
+  function render(bx) {
+    const { beat, bphase, bar, weight, energy } = bx;
+    const dir = bar % 2 === 0 ? 1 : -1;
+    const floorNow = H.clamp(floorDial * (0.6 + 0.9 * energy), 0.05, 0.7);
     const f = H.emptyFrame();
-    for (const par of pars) H.setPar(f, par, colour, top * (1 - depth + depth * env));
+    for (const par of pars) {
+      const pos = ((PARX[par.id] || 0) * dir + 1) / 2;
+      const delay = 0.08 + 0.55 * pos;
+      const lvl = floorNow
+        + (0.72 * (0.5 + 0.5 * weight)) * bump(bphase, delay, 0.08)
+        + 0.15 * bump(bphase, 0.5 + 0.25 * (1 - pos), 0.06);
+      H.setPar(f, par, colour, Math.min(1, lvl));
+    }
     H.setHead(f, H.HEADS[0], {
-      level: top * (1 - depth + depth * env) * 0.7, colour,
-      pan: 0.662, tilt: 0.47,
+      level: 0.5 + 0.35 * energy + 0.15 * flash(bphase, 0.5), colour,
+      pan: 0.498 + 0.45 * Math.sin(2 * Math.PI * beat / 10.5),
+      tilt: 0.42 + 0.33 * Math.sin(2 * Math.PI * beat / 7.3),
     });
-    frames.push(f);
+    return f;
   }
-  return { frames, loop_beats: loopBeats, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
+
+  return { beat: true, render, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
 };

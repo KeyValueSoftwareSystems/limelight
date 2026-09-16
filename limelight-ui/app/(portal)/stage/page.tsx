@@ -10,7 +10,7 @@ import { placeFixtures } from "@/lib/fixtures";
 import { mmss, clamp } from "@/lib/grid";
 import * as api from "@/lib/api";
 
-import { StageCanvas } from "@/components/stage/StageCanvas";
+import { StagePreview } from "@/components/stage/StagePreview";
 import { TargetLine } from "@/components/stage/TargetLine";
 import { ConsolePanel } from "@/components/stage/ConsolePanel";
 import { RigPanel } from "@/components/stage/RigPanel";
@@ -21,6 +21,8 @@ import { StageTimeline } from "@/components/editor/StageTimeline";
 import { Sidebar } from "@/components/editor/Sidebar";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { buildClips } from "@/lib/clips";
+import { effectIdForPlanFx } from "@/lib/families";
+import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
 import type { Clip } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -64,9 +66,12 @@ export default function StagePage() {
 
   /* read URL params once on mount (safe for SSR since guarded by typeof window) */
   const urlParams = useMemo(() => {
-    if (typeof window === "undefined") return { song: null, seed: null };
+    if (typeof window === "undefined") return { song: null, seed: null, layout: null };
     const sp = new URLSearchParams(window.location.search);
-    return { song: sp.get("song"), seed: sp.get("seed") };
+    /* `layout` makes a rig deep-linkable, the same way song and seed already are:
+       a show is {score, seed, edits} and the RIG is the venue's, so being able to
+       say "this song, on that rig" in a URL is how you compare two rooms. */
+    return { song: sp.get("song"), seed: sp.get("seed"), layout: sp.get("layout") };
   }, []);
 
   const song = usePortalStore((s) => s.song);
@@ -83,6 +88,8 @@ export default function StagePage() {
   const sel = usePortalStore((s) => s.sel);
   const arm = usePortalStore((s) => s.arm);
   const effects = usePortalStore((s) => s.effects);
+  const v2 = usePortalStore((s) => s.v2);
+  const planText = usePortalStore((s) => s.planText);
 
   const setShow = usePortalStore((s) => s.setShow);
   const setFrames = usePortalStore((s) => s.setFrames);
@@ -99,6 +106,9 @@ export default function StagePage() {
   const removeEdit = usePortalStore((s) => s.removeEdit);
   const addEdit = usePortalStore((s) => s.addEdit);
   const updateEdit = usePortalStore((s) => s.updateEdit);
+  const setEdits = usePortalStore((s) => s.setEdits);
+  const setV2 = usePortalStore((s) => s.setV2);
+  const setPlanText = usePortalStore((s) => s.setPlanText);
   const setRoom = usePortalStore((s) => s.setRoom);
   const setLayout = usePortalStore((s) => s.setLayout);
   const author = usePortalStore((s) => s.author);
@@ -116,6 +126,7 @@ export default function StagePage() {
     rehydratedRef.current = true;
 
     if (seedParam) setSeed(Number(seedParam));
+    if (urlParams.layout) setLayout(urlParams.layout);
     queueMicrotask(() => setStageMsg("loading song\u2026"));
 
     api.songs.list().then((d) => {
@@ -129,43 +140,28 @@ export default function StagePage() {
     }).catch(() => {
       setStageMsg("failed to load songs");
     });
-  }, [song, urlParams, setSong, setSeed, setSongs]);
+  }, [song, urlParams, setSong, setSeed, setSongs, setLayout]);
 
-  /* ── bake a show ─────────────────────────────────────────────────────── */
-  const rebuild = useCallback(async () => {
-    if (!song) return;
-    const token = ++rebuildTokenRef.current;
-    setStageMsg("baking the show…");
+  const importInputRef = useRef<HTMLInputElement>(null);
 
-    try {
-      const post = await api.show.bake({
-        song: song.name,
-        seed,
-        edits,
-        appetite: want,
-        layout: layout ?? undefined,
-      });
-
-      if (post.error) { setStageMsg(post.error); return; }
-      setJob(post.job);
-
+  /* Poll a started bake to completion and load its frames/show. Shared by the
+     legacy seed+edits bake and the v2 plan bake — both return the same job. */
+  const pollBake = useCallback(
+    async (job: string, token: number) => {
       let status: Awaited<ReturnType<typeof api.show.status>> | null = null;
       for (let i = 0; i < 300; i++) {
-        status = await api.show.status(post.job);
-        if (token !== rebuildTokenRef.current) return;
+        status = await api.show.status(job);
+        if (token !== rebuildTokenRef.current) return null;
         if (status.state !== "baking") break;
         setStageMsg(`baking the show… ${(i / 4) | 0}s`);
         await new Promise((r) => setTimeout(r, 250));
       }
-
       if (!status || status.state !== "ready") {
         setStageMsg(status?.error ?? "the bake timed out");
-        return;
+        return null;
       }
-
       const buf = await api.show.frames(status.frames_url!);
-      if (token !== rebuildTokenRef.current) return;
-
+      if (token !== rebuildTokenRef.current) return null;
       setFrames(buf);
       setShow(status.show!);
       setApplied(status.applied ?? []);
@@ -173,10 +169,111 @@ export default function StagePage() {
       setNatural(status.show!.appetite_natural ?? null);
       setView(null);
       setStageMsg(null);
+      return status.show!;
+    },
+    [setFrames, setShow, setApplied, setPlace, setNatural, setView],
+  );
+
+  const rigForPlan = useCallback(() => {
+    const l = usePortalStore.getState().layout;
+    return (l ?? "arc4-head.layout.json").replace(".layout.json", "");
+  }, []);
+
+  /* ── bake a show ─────────────────────────────────────────────────────────
+     A v2 show (one imported from a plan) translates its edits back into a plan
+     and renders through the portal baker; the legacy path bakes seed+edits.
+
+     Everything is read LIVE from the store, not from this closure: the edit
+     handlers call removeEdit()/addEdit() and then rebuild() in the same tick, so
+     a closed-over `edits` would still be the pre-edit list and the change would
+     never reach the bake — which is exactly "edits don't affect playback". */
+  const rebuild = useCallback(async () => {
+    const st = usePortalStore.getState();
+    if (!st.song) return;
+    const token = ++rebuildTokenRef.current;
+    setStageMsg("baking the show…");
+    try {
+      let post: Awaited<ReturnType<typeof api.show.bake>>;
+      if (st.v2 && st.show) {
+        const planData = editsToPlan(st.edits, st.show, st.effects, st.planText);
+        post = await api.plan.bake(st.song.name, planData, rigForPlan());
+      } else {
+        post = await api.show.bake({ song: st.song.name, seed: st.seed, edits: st.edits, appetite: st.want, layout: st.layout ?? undefined });
+      }
+      if (post.error) { setStageMsg(post.error); return; }
+      setJob(post.job);
+      await pollBake(post.job, token);
     } catch (e) {
       setStageMsg(e instanceof Error ? e.message : "bake failed");
     }
-  }, [song, seed, edits, want, layout, setShow, setFrames, setApplied, setJob, setPlace, setNatural, setView]);
+  }, [rigForPlan, setJob, pollBake]);
+
+  /* ── import a v2 plan: bake it, then translate it into editable clips ──────
+     The raw plan bakes first (the baker's native input), then the returned
+     show's sections/moments turn the plan into the Edit[] the timeline draws. */
+  const applyPlan = useCallback(
+    async (planData: V2Plan, what: string) => {
+      if (!song) return;
+      const token = ++rebuildTokenRef.current;
+      try {
+        if (!planData.states && !planData.gestures && !planData.bindings) {
+          setStageMsg(`that ${what} is not a show plan`);
+          return;
+        }
+        setStageMsg(`baking ${what}…`);
+        setV2(true);
+        setPlanText(typeof planData.plan === "string" ? planData.plan : "");
+        const post = await api.plan.bake(song.name, planData, rigForPlan());
+        if (post.error) { setStageMsg(post.error); return; }
+        setJob(post.job);
+        const baked = await pollBake(post.job, token);
+        if (baked) setEdits(planToEdits(planData, baked, usePortalStore.getState().effects));
+      } catch (e) {
+        setStageMsg(e instanceof Error ? `${what} failed: ` + e.message : `${what} failed`);
+      }
+    },
+    [song, rigForPlan, setV2, setPlanText, setJob, setEdits, pollBake],
+  );
+
+  /* A show file may be nested under `plan`, or be the plan itself. */
+  const asPlan = (raw: Record<string, unknown>): V2Plan =>
+    (raw.states || raw.gestures || raw.bindings
+      ? raw
+      : (raw.plan as Record<string, unknown>)?.states
+        ? raw.plan
+        : raw) as unknown as V2Plan;
+
+  const importPlan = useCallback(
+    async (file: File) => {
+      try {
+        await applyPlan(asPlan(JSON.parse(await file.text())), "imported plan");
+      } catch (e) {
+        setStageMsg(e instanceof Error ? "import failed: " + e.message : "import failed");
+      }
+    },
+    [applyPlan],
+  );
+
+  /* ── the song's own show file, if the hub has one ──────────────────────────
+     Authored show files are the point of the v2 baker, so one is loaded the
+     moment its song is: it should not take a file picker to see the show that
+     already exists for this track. Loaded once per song; placing a clip after
+     that edits what was loaded rather than re-fetching over the top of it. */
+  const loadedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!song || loadedForRef.current === song.name) return;
+    const name = song.name;
+    loadedForRef.current = name;
+    let live = true;
+    api.showfile
+      .get(name)
+      .then((d) => {
+        if (!live || !d.showfile) return;
+        applyPlan(asPlan(d.showfile as Record<string, unknown>), "show file");
+      })
+      .catch(() => { /* no file for this song is the normal case */ });
+    return () => { live = false; };
+  }, [song, applyPlan]);
 
   /* ── load audio + bake on song change ────────────────────────────────── */
   const rebuildRef = useRef(rebuild);
@@ -265,6 +362,10 @@ export default function StagePage() {
      place, so showing both would just be the same effect twice. */
   const clips = useMemo(() => {
     if (!show) return [];
+    /* One path, not two. A show file arrives as Edit[] through planToEdits, so
+       by the time it gets here it is indistinguishable from a clip dropped from
+       the palette — which is exactly what makes the file editable rather than
+       just viewable. */
     return buildClips(show.plan ?? null, edits, effects, show.grid).filter((c) => !c.overridden);
   }, [show, edits, effects]);
 
@@ -319,18 +420,56 @@ export default function StagePage() {
      struck through, so it is obvious what was replaced and where. */
   const handleMaterialize = useCallback(
     (clip: Clip): number | null => {
+      /* Schema 1 tiles declared the plan's word as `fx`, so they matched it
+         directly. Schema 2 tiles do not, so the plan's word is mapped onto a
+         catalogue id — without this the lookup failed, materialising returned
+         null, and the arranger's clips could not be moved or resized at all. */
+      const mapped = effectIdForPlanFx(clip.fx);
       const tile =
+        /* A show file names its cues by catalogue id, and showfile.toClips has
+           already resolved that into `tile`. Where it is set it IS the answer.
+           Everything below it speaks the ARRANGER's vocabulary, which a file
+           cue never uses: `stab`, `gear`, `trade` are catalogue ids, not plan
+           words, so effectIdForPlanFx returned null for all of them and no
+           schema-2 tile carries `fx` to match on either. Materialising handed
+           back null and startGesture stopped on the next line — which is why
+           not one cue in a show file could be moved or resized. */
+        (clip.tile ? effects.find((e) => e.id === clip.tile) : undefined) ??
         effects.find((e) => e.fx === clip.fx && e.beats === clip.beats) ??
-        effects.find((e) => e.fx === clip.fx);
+        effects.find((e) => e.fx === clip.fx) ??
+        (mapped ? effects.find((e) => e.id === mapped) : undefined);
       if (!tile) return null;
       /* Read the live count, not a closed-over one: two materialisations in the
          same tick would otherwise both claim the same index. */
       const index = usePortalStore.getState().edits.length;
-      addEdit({ type: tile.id, bar: clip.bar, beat: clip.beat, beats: clip.beats });
+      /* Record which assignment this replaces. Overlap alone could not carry it:
+         moving your copy away let the machine's version play again underneath. */
+      addEdit({
+        type: tile.id, bar: clip.bar, beat: clip.beat, beats: clip.beats,
+        ...(clip.planId ? { from: clip.planId } : {}),
+      });
       return index;
     },
     [effects, addEdit],
   );
+
+  /* ── write the show file back ──────────────────────────────────────────────
+     The palette's drops are Edit[], and editsToPlan turns those back into the
+     same states/bindings/gestures shape the file arrived in — so a cue placed by
+     hand and a cue authored in the file are the same thing by the time they are
+     saved. That is what makes the file the one source of truth rather than a
+     read-only import. */
+  const savePlan = useCallback(async () => {
+    const st = usePortalStore.getState();
+    if (!st.song || !st.show) return;
+    try {
+      const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
+      const r = await api.showfile.save(st.song.name, plan);
+      setStageMsg(r.error ? r.error : `saved ${r.cues ?? 0} cues to the show file`);
+    } catch (e) {
+      setStageMsg(e instanceof Error ? "save failed: " + e.message : "save failed");
+    }
+  }, []);
 
   /* ── venue picker ────────────────────────────────────────────────────── */
   const handlePickVenue = useCallback(
@@ -379,6 +518,19 @@ export default function StagePage() {
             <div className="flex items-center gap-[var(--spacing-s2)] pt-[6px]">
               {role === "creator" && (
                 <>
+                  <input
+                    ref={importInputRef}
+                    type="file"
+                    accept="application/json,.json"
+                    hidden
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      e.currentTarget.value = "";
+                      if (f) importPlan(f);
+                    }}
+                  />
+                  <Button variant="link" onClick={() => importInputRef.current?.click()}>Import Plan</Button>
+                  <Button variant="link" onClick={savePlan}>Save Plan</Button>
                   <Input
                     placeholder="name this show"
                     autoComplete="off"
@@ -399,7 +551,7 @@ export default function StagePage() {
           </div>
 
           {/* live preview */}
-          <StageCanvas clockRef={clockRef} playing={isPlaying} currentTime={currentTime} />
+          <StagePreview clockRef={clockRef} playing={isPlaying} currentTime={currentTime} />
           {stageMsg && (
             <div className="flex-none text-center text-[length:var(--text-xs)] text-ink-dimmer py-[4px]">
               {stageMsg}

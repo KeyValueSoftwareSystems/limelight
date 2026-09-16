@@ -81,7 +81,7 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
   const arm = useDrag((s) => s.arm);
 
   return (
-    <div className="flex flex-col min-h-0">
+    <div className="flex flex-col">
       <div className="flex-none flex gap-[var(--spacing-s4)] px-[var(--spacing-s4)] border-b border-solid border-line">
         {(["effects", "styles"] as const).map((t) => (
           <button
@@ -97,7 +97,7 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
         ))}
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-[var(--spacing-s3)] py-[var(--spacing-s3)]">
+      <div className="px-[var(--spacing-s3)] pt-[var(--spacing-s3)] pb-0">
         {tab === "effects" ? (
           <div className="grid grid-cols-5 gap-[7px]">
             {effects.map((fx) => (
@@ -128,12 +128,12 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
       </div>
 
       {tab === "effects" && armed && (
-        <div className="flex-none px-[var(--spacing-s4)] pb-[var(--spacing-s3)] text-[10px] text-accent">
+        <div className="px-[var(--spacing-s4)] py-[var(--spacing-s2)] text-[10px] text-accent">
           {armed.name} armed — click the timeline to place it
         </div>
       )}
       {tab === "styles" && (
-        <div className="flex-none px-[var(--spacing-s4)] pb-[var(--spacing-s3)] text-[10px] text-ink-dimmer">
+        <div className="px-[var(--spacing-s4)] py-[var(--spacing-s2)] text-[10px] text-ink-dimmer">
           Styles aren&apos;t wired to the baker yet.
         </div>
       )}

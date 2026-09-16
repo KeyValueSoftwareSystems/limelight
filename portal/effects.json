@@ -207,6 +207,156 @@
    "default_beats": 0
   },
   {
+   "id": "drive",
+   "name": "Drive",
+   "kind": "state",
+   "tier": 1,
+   "blurb": "Every beat hits: the two pairs call and respond, downbeats flash white, the head sweeps the room. The bed for a chorus or drop.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "amount": {
+     "default": 0.85,
+     "min": 0.5,
+     "max": 1.0
+    },
+    "colours": {
+     "default": [
+      [
+       0.1,
+       0.55,
+       1
+      ],
+      [
+       1,
+       0.3,
+       0.55
+      ]
+     ]
+    },
+    "extent": {
+     "default": "all"
+    },
+    "floor": {
+     "default": 0.5,
+     "min": 0.02,
+     "max": 0.7
+    },
+    "peak": {
+     "default": 1.0,
+     "min": 0.4,
+     "max": 1.0
+    }
+   },
+   "fires_on": [
+    "drop",
+    "chorus",
+    "anthem",
+    "full section"
+   ],
+   "min_fixtures": 2,
+   "requires": [
+    "colour",
+    "level"
+   ],
+   "default_beats": 0
+  },
+  {
+   "id": "pulse",
+   "name": "Pulse",
+   "kind": "state",
+   "tier": 1,
+   "blurb": "A bump travels across the lamps once per beat, direction flipping each bar. The bed for a verse or moving instrumental.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "amount": {
+     "default": 0.5,
+     "min": 0.3,
+     "max": 0.8
+    },
+    "colour": {
+     "default": [
+      0.15,
+      0.5,
+      1
+     ]
+    },
+    "extent": {
+     "default": "all"
+    },
+    "floor": {
+     "default": 0.24,
+     "min": 0.02,
+     "max": 0.7
+    },
+    "peak": {
+     "default": 1.0,
+     "min": 0.4,
+     "max": 1.0
+    }
+   },
+   "fires_on": [
+    "verse",
+    "instrumental"
+   ],
+   "min_fixtures": 2,
+   "requires": [
+    "colour",
+    "level"
+   ],
+   "default_beats": 0
+  },
+  {
+   "id": "breakdown",
+   "name": "Breakdown",
+   "kind": "state",
+   "tier": 1,
+   "blurb": "A hard hit on every beat from a very low floor, pairs swapping colour each bar. The bed for a come-down where each beat still lands.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "amount": {
+     "default": 0.5,
+     "min": 0.3,
+     "max": 0.8
+    },
+    "colours": {
+     "default": [
+      [
+       0,
+       0,
+       1
+      ],
+      [
+       1,
+       0,
+       0.55
+      ]
+     ]
+    },
+    "floor": {
+     "default": 0.1,
+     "min": 0.02,
+     "max": 0.7
+    },
+    "peak": {
+     "default": 1.0,
+     "min": 0.4,
+     "max": 1.0
+    }
+   },
+   "fires_on": [
+    "breakdown"
+   ],
+   "min_fixtures": 2,
+   "requires": [
+    "colour",
+    "level"
+   ],
+   "default_beats": 0
+  },
+  {
    "id": "impact",
    "name": "Impact",
    "kind": "gesture",
@@ -598,14 +748,126 @@
    "default_beats": 0
   },
   {
-   "id": "strobe",
-   "name": "Strobe",
+   "id": "follow",
+   "name": "Follow",
+   "kind": "binding",
+   "tier": 2,
+   "blurb": "Amount follows a named instrument stream. The room breathes with the music.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "stream": {
+     "default": null
+    },
+    "depth": {
+     "default": 0.6,
+     "min": 0.1,
+     "max": 1
+    },
+    "extent": {
+     "default": "all"
+    },
+    "smooth": {
+     "default": 0.3,
+     "min": 0,
+     "max": 1
+    }
+   },
+   "fires_on": [
+    "a section where one instrument leads"
+   ],
+   "min_fixtures": 1,
+   "requires": [
+    "level"
+   ],
+   "default_beats": 0
+  },
+  {
+   "id": "split",
+   "name": "Split",
+   "kind": "binding",
+   "tier": 2,
+   "blurb": "Place follows two streams, one per half. The room answers the singer.",
+   "dimension": "place",
+   "returns": false,
+   "dials": {
+    "streams": {
+     "default": [
+      null,
+      null
+     ]
+    },
+    "colours": {
+     "default": [
+      [
+       1,
+       0.75,
+       0.35
+      ],
+      [
+       0.2,
+       0.4,
+       1
+      ]
+     ]
+    }
+   },
+   "fires_on": [
+    "call and response"
+   ],
+   "min_fixtures": 4,
+   "requires": [
+    "colour",
+    "level"
+   ],
+   "default_beats": 0
+  },
+  {
+   "id": "accent",
+   "name": "Accent",
+   "kind": "binding",
+   "tier": 2,
+   "blurb": "Amount follows drum onsets above a threshold. Flashes on the real hits, not the grid.",
+   "dimension": "amount",
+   "returns": false,
+   "dials": {
+    "threshold": {
+     "default": 0.5,
+     "min": 0.1,
+     "max": 0.9
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 4,
+     "min": 1,
+     "max": 16
+    }
+   },
+   "fires_on": [
+    "dense drumming"
+   ],
+   "min_fixtures": 1,
+   "requires": [
+    "level"
+   ],
+   "default_beats": 0
+  },
+  {
+   "id": "anticipation",
+   "name": "Anticipation",
    "kind": "gesture",
-   "tier": 1,
+   "tier": 2,
+   "blurb": "Quick, seemingly-random white strobes that accelerate into a frantic burst \u2014 a pre-show riser that builds tension right before a drop.",
    "dimension": "rate",
    "returns": true,
-   "blurb": "Rate on amount: the rig flashes at a set speed for a span, then returns. The loudest thing a rig can say.",
    "dials": {
+    "for_beats": {
+     "default": 8,
+     "min": 2,
+     "max": 32
+    },
     "colour": {
      "default": [
       1,
@@ -613,828 +875,133 @@
       1
      ]
     },
-    "hz": {
-     "default": 12,
-     "min": 1,
-     "max": 25
-    },
-    "extent": {
-     "default": "all"
-    },
-    "for_beats": {
-     "default": 2,
-     "min": 1,
-     "max": 16
+    "intensity": {
+     "default": 1,
+     "min": 0.3,
+     "max": 1
     }
    },
    "fires_on": [
-    "drop",
-    "peak",
-    "climax",
-    "build"
+    "show start",
+    "pre-show",
+    "build",
+    "before a drop"
    ],
    "min_fixtures": 1,
    "requires": [
     "level",
     "strobe"
    ],
-   "default_beats": 2
-  },
-  {
-   "id": "pulse",
-   "name": "Pulse",
-   "kind": "gesture",
-   "tier": 2,
-   "dimension": "rate",
-   "returns": true,
-   "blurb": "Amount throbbing once per beat around a level, so the rig breathes in time rather than sitting still.",
-   "dials": {
-    "colour": {
-     "default": [
-      1,
-      0.75,
-      0.35
-     ]
-    },
-    "depth": {
-     "default": 0.55,
-     "min": 0,
-     "max": 1
-    },
-    "top": {
-     "default": 0.8,
-     "min": 0,
-     "max": 1
-    },
-    "per_beat": {
-     "default": 1,
-     "min": 0.5,
-     "max": 4
-    },
-    "extent": {
-     "default": "all"
-    },
-    "for_beats": {
-     "default": 4,
-     "min": 1,
-     "max": 32
-    }
-   },
-   "fires_on": [
-    "build",
-    "rhythm_change",
-    "tempo_change"
-   ],
-   "min_fixtures": 1,
-   "requires": [
-    "level"
-   ],
-   "default_beats": 4
-  },
-  {
-   "id": "tint",
-   "name": "Tint",
-   "kind": "gesture",
-   "tier": 2,
-   "dimension": "colour",
-   "returns": false,
-   "blurb": "The rig crosses from one colour to another over a span and stays there. A key change for the eye.",
-   "dials": {
-    "from": {
-     "default": [
-      1,
-      0.75,
-      0.35
-     ]
-    },
-    "to": {
-     "default": [
-      0.2,
-      0.4,
-      1
-     ]
-    },
-    "level": {
-     "default": 0.5,
-     "min": 0,
-     "max": 1
-    },
-    "extent": {
-     "default": "all"
-    },
-    "over_beats": {
-     "default": 4,
-     "min": 1,
-     "max": 32
-    }
-   },
-   "fires_on": [
-    "register_shift",
-    "harmonic_rhythm",
-    "section"
-   ],
-   "min_fixtures": 1,
-   "requires": [
-    "colour"
-   ],
-   "default_beats": 4
-  },
-  {
-   "id": "flare",
-   "name": "Flare",
-   "kind": "gesture",
-   "tier": 1,
-   "dimension": "colour",
-   "returns": true,
-   "blurb": "A colour slams over the resting look and falls back out of it. Colour's answer to impact.",
-   "dials": {
-    "colour": {
-     "default": [
-      1,
-      0.25,
-      0.1
-     ]
-    },
-    "under": {
-     "default": [
-      1,
-      0.75,
-      0.35
-     ]
-    },
-    "level": {
-     "default": 0.9,
-     "min": 0,
-     "max": 1
-    },
-    "rest": {
-     "default": 0.3,
-     "min": 0,
-     "max": 1
-    },
-    "extent": {
-     "default": "all"
-    },
-    "for_beats": {
-     "default": 2,
-     "min": 1,
-     "max": 8
-    }
-   },
-   "fires_on": [
-    "drop",
-    "climax",
-    "peak",
-    "entrance"
-   ],
-   "min_fixtures": 1,
-   "requires": [
-    "colour",
-    "level"
-   ],
-   "default_beats": 2
-  },
-  {
-   "id": "spectrum",
-   "name": "Spectrum",
-   "kind": "gesture",
-   "tier": 3,
-   "dimension": "colour",
-   "returns": true,
-   "blurb": "Every lamp a different hue, the whole spread rolling across the rig. Use once; it is the loudest colour move there is.",
-   "dials": {
-    "level": {
-     "default": 0.6,
-     "min": 0,
-     "max": 1
-    },
-    "spread": {
-     "default": 0.5,
-     "min": 0.1,
-     "max": 1
-    },
-    "travel": {
-     "default": true
-    },
-    "extent": {
-     "default": "all"
-    },
-    "for_beats": {
-     "default": 8,
-     "min": 2,
-     "max": 64
-    }
-   },
-   "fires_on": [
-    "instrumental",
-    "spotlight",
-    "climax"
-   ],
-   "min_fixtures": 3,
-   "requires": [
-    "colour"
-   ],
    "default_beats": 8
   },
   {
-   "id": "chase",
-   "name": "Chase",
+   "id": "spin",
+   "name": "Spin",
    "kind": "gesture",
    "tier": 2,
-   "dimension": "place",
+   "blurb": "A rainbow flourish: the pars cycle hue and the head's colour wheel spins. Spend-once, to close a section.",
+   "dimension": "colour",
    "returns": true,
-   "blurb": "One lamp lit at a time, running along the rig in time with the beat. Place moving, which nothing else here does.",
    "dials": {
-    "colour": {
-     "default": [
-      1,
-      0.75,
-      0.35
-     ]
-    },
-    "level": {
-     "default": 0.85,
-     "min": 0,
-     "max": 1
-    },
-    "rest": {
-     "default": 0.05,
-     "min": 0,
-     "max": 1
-    },
-    "per_beat": {
-     "default": 1,
-     "min": 0.5,
-     "max": 4
-    },
-    "bounce": {
-     "default": false
-    },
-    "extent": {
-     "default": "all"
-    },
-    "for_beats": {
+    "beats_per_turn": {
      "default": 4,
-     "min": 1,
-     "max": 32
-    },
-    "stream": null
-   },
-   "fires_on": "a section that should travel across the lamps",
-   "min_fixtures": 3,
-   "requires": [
-    "level"
-   ],
-   "default_beats": 4
-  },
-  {
-   "id": "sweep",
-   "name": "Sweep",
-   "kind": "gesture",
-   "tier": 2,
-   "dimension": "place",
-   "returns": true,
-   "blurb": "The moving head travels across the room while the pars hold back. The one gesture that puts light somewhere new. The pars keep the room while the head travels.",
-   "dials": {
-    "colour": {
-     "default": [
-      1,
-      1,
-      1
-     ]
-    },
-    "level": {
-     "default": 0.85,
-     "min": 0,
-     "max": 1
-    },
-    "from_pan": {
-     "default": 0.35,
-     "min": 0,
-     "max": 1
-    },
-    "to_pan": {
-     "default": 0.9,
-     "min": 0,
-     "max": 1
-    },
-    "tilt": {
-     "default": 0.4,
-     "min": 0,
-     "max": 1
-    },
-    "bounce": {
-     "default": true
-    },
-    "rest": {
-     "default": 0.3,
-     "min": 0,
-     "max": 1
-    },
-    "for_beats": {
-     "default": 4,
-     "min": 1,
-     "max": 32
-    }
-   },
-   "fires_on": [
-    "spotlight",
-    "breakdown",
-    "instrumental",
-    "melody_resume"
-   ],
-   "min_fixtures": 1,
-   "requires": [
-    "pan"
-   ],
-   "default_beats": 4
-  },
-  {
-   "id": "bump",
-   "name": "Bump",
-   "kind": "gesture",
-   "tier": 1,
-   "dimension": "amount",
-   "returns": true,
-   "blurb": "One frame of everything, gone again. Tighter than impact - a punctuation mark, not a statement.",
-   "dials": {
-    "colour": {
-     "default": [
-      1,
-      1,
-      1
-     ]
-    },
-    "extent": {
-     "default": "all"
-    },
-    "for_beats": {
-     "default": 0.5,
-     "min": 0.25,
-     "max": 2
-    }
-   },
-   "fires_on": [
-    "drop",
-    "peak",
-    "rhythm_change"
-   ],
-   "min_fixtures": 1,
-   "requires": [
-    "level"
-   ],
-   "default_beats": 1
-  },
-  {
-   "id": "fade",
-   "name": "Fade",
-   "kind": "gesture",
-   "tier": 2,
-   "dimension": "amount",
-   "returns": false,
-   "blurb": "The room goes down over a span and stays there. How a song ends, or how a section hands over.",
-   "dials": {
-    "colour": {
-     "default": [
-      1,
-      0.75,
-      0.35
-     ]
-    },
-    "from": {
-     "default": 0.7,
-     "min": 0,
-     "max": 1
-    },
-    "to": {
-     "default": 0.05,
-     "min": 0,
-     "max": 1
-    },
-    "extent": {
-     "default": "all"
-    },
-    "over_beats": {
-     "default": 8,
-     "min": 2,
-     "max": 64
-    }
-   },
-   "fires_on": [
-    "breakdown",
-    "outro",
-    "exit"
-   ],
-   "min_fixtures": 1,
-   "requires": [
-    "level"
-   ],
-   "default_beats": 8
-  },
-  {
-   "id": "breathe",
-   "name": "Breathe",
-   "kind": "gesture",
-   "tier": 3,
-   "dimension": "rate",
-   "returns": true,
-   "blurb": "A slow swell in and out across bars. The rig alive without anything happening - for a held passage.",
-   "dials": {
-    "colour": {
-     "default": [
-      1,
-      0.75,
-      0.35
-     ]
-    },
-    "level": {
-     "default": 0.45,
-     "min": 0,
-     "max": 1
-    },
-    "depth": {
-     "default": 0.3,
-     "min": 0,
-     "max": 0.6
-    },
-    "over_bars": {
-     "default": 2,
-     "min": 1,
-     "max": 8
-    },
-    "extent": {
-     "default": "all"
-    }
-   },
-   "fires_on": [
-    "instrumental",
-    "spotlight",
-    "intro"
-   ],
-   "min_fixtures": 1,
-   "requires": [
-    "level"
-   ],
-   "default_beats": 8
-  },
-  {
-   "id": "stutter",
-   "name": "Stutter",
-   "kind": "gesture",
-   "tier": 1,
-   "dimension": "rate",
-   "returns": true,
-   "blurb": "Gated on a subdivision - sixteenths by default - so the rig chops in time rather than flashing free.",
-   "dials": {
-    "colour": {
-     "default": [
-      1,
-      1,
-      1
-     ]
-    },
-    "per_beat": {
-     "default": 4,
-     "min": 1,
-     "max": 8
-    },
-    "level": {
-     "default": 0.9,
-     "min": 0,
-     "max": 1
-    },
-    "extent": {
-     "default": "all"
-    },
-    "for_beats": {
-     "default": 2,
      "min": 1,
      "max": 16
     }
    },
    "fires_on": [
-    "build",
-    "rhythm_change",
-    "drop"
+    "last bar of a drop",
+    "section end",
+    "flourish"
    ],
-   "min_fixtures": 1,
-   "requires": [
-    "level"
-   ],
-   "default_beats": 2
-  },
-  {
-   "id": "alternate",
-   "name": "Alternate",
-   "kind": "gesture",
-   "tier": 2,
-   "dimension": "place",
-   "returns": true,
-   "blurb": "Odd lamps then even lamps, flipping on the beat. Reads as movement on a rig too small to chase.",
-   "dials": {
-    "colours": {
-     "default": [
-      [
-       1,
-       0.75,
-       0.35
-      ],
-      [
-       0.25,
-       0.45,
-       1
-      ]
-     ]
-    },
-    "level": {
-     "default": 0.8,
-     "min": 0,
-     "max": 1
-    },
-    "rest": {
-     "default": 0.12,
-     "min": 0,
-     "max": 1
-    },
-    "per_beat": {
-     "default": 1,
-     "min": 0.5,
-     "max": 4
-    },
-    "for_beats": {
-     "default": 4,
-     "min": 1,
-     "max": 32
-    },
-    "stream": null
-   },
-   "fires_on": "a section that should travel across the lamps",
    "min_fixtures": 2,
    "requires": [
-    "level"
+    "colour"
    ],
-   "default_beats": 4
+   "default_beats": 4,
+   "span_anchors": [
+    "from_moment",
+    "to_moment"
+   ]
   },
   {
-   "id": "ripple",
-   "name": "Ripple",
+   "id": "beam",
+   "name": "Beam",
    "kind": "gesture",
    "tier": 2,
+   "blurb": "Drives only the moving head \u2014 a room-wide sweep, figure-8 or corner-snap \u2014 while the pars hold. For a solo where the beam tells the story.",
    "dimension": "place",
    "returns": true,
-   "blurb": "A soft wave travelling along the rig, each lamp peaking as it passes. Chase with the edges blurred.",
    "dials": {
-    "colour": {
-     "default": [
-      1,
-      0.75,
-      0.35
-     ]
+    "pattern": {
+     "default": "figure8"
     },
-    "level": {
-     "default": 0.85,
-     "min": 0,
-     "max": 1
-    },
-    "rest": {
-     "default": 0.15,
-     "min": 0,
-     "max": 1
-    },
-    "width": {
-     "default": 1.2,
-     "min": 0.5,
-     "max": 4
-    },
-    "for_beats": {
-     "default": 4,
-     "min": 1,
-     "max": 32
-    },
-    "stream": null
-   },
-   "fires_on": "a section that should travel across the lamps",
-   "min_fixtures": 3,
-   "requires": [
-    "level"
-   ],
-   "default_beats": 4
-  },
-  {
-   "id": "converge",
-   "name": "Converge",
-   "kind": "gesture",
-   "tier": 1,
-   "dimension": "place",
-   "returns": true,
-   "blurb": "The pars drop back and the head drives to one point, prism in. Everything looks at one place. The pars keep the room while the head travels.",
-   "dials": {
     "colour": {
      "default": [
       1,
       1,
       1
      ]
-    },
-    "level": {
-     "default": 0.9,
-     "min": 0,
-     "max": 1
-    },
-    "rest": {
-     "default": 0.28,
-     "min": 0,
-     "max": 1
-    },
-    "pan": {
-     "default": 0.662,
-     "min": 0,
-     "max": 1
-    },
-    "tilt": {
-     "default": 0.3,
-     "min": 0,
-     "max": 1
-    },
-    "for_beats": {
-     "default": 4,
-     "min": 1,
-     "max": 16
-    }
-   },
-   "fires_on": [
-    "climax",
-    "peak",
-    "spotlight",
-    "entrance"
-   ],
-   "min_fixtures": 1,
-   "requires": [
-    "pan"
-   ],
-   "default_beats": 4
-  },
-  {
-   "id": "bounce",
-   "name": "Bounce",
-   "kind": "gesture",
-   "tier": 2,
-   "dimension": "colour",
-   "returns": true,
-   "blurb": "Two colours trading on the beat across the whole rig. The cheapest way to make a groove visible.",
-   "dials": {
-    "colours": {
-     "default": [
-      [
-       1,
-       0.35,
-       0.15
-      ],
-      [
-       0.2,
-       0.5,
-       1
-      ]
-     ]
-    },
-    "level": {
-     "default": 0.7,
-     "min": 0,
-     "max": 1
-    },
-    "per_beat": {
-     "default": 1,
-     "min": 0.5,
-     "max": 4
-    },
-    "extent": {
-     "default": "all"
-    },
-    "for_beats": {
-     "default": 4,
-     "min": 1,
-     "max": 32
-    }
-   },
-   "fires_on": [
-    "rhythm_change",
-    "chorus",
-    "build"
-   ],
-   "min_fixtures": 1,
-   "requires": [
-    "colour"
-   ],
-   "default_beats": 4
-  },
-  {
-   "id": "shift",
-   "name": "Shift",
-   "kind": "gesture",
-   "tier": 3,
-   "dimension": "colour",
-   "returns": true,
-   "blurb": "The rig walks slowly through a sequence of colours across a long span. Colour as a journey, not an event.",
-   "dials": {
-    "colours": {
-     "default": [
-      [
-       1,
-       0.75,
-       0.35
-      ],
-      [
-       1,
-       0.35,
-       0.2
-      ],
-      [
-       0.5,
-       0.3,
-       0.9
-      ],
-      [
-       0.2,
-       0.5,
-       1
-      ]
-     ]
-    },
-    "level": {
-     "default": 0.55,
-     "min": 0,
-     "max": 1
-    },
-    "extent": {
-     "default": "all"
-    },
-    "over_beats": {
-     "default": 16,
-     "min": 4,
-     "max": 128
-    }
-   },
-   "fires_on": [
-    "instrumental",
-    "harmonic_rhythm",
-    "register_shift"
-   ],
-   "min_fixtures": 1,
-   "requires": [
-    "colour"
-   ],
-   "default_beats": 16
-  },
-  {
-   "id": "texture",
-   "name": "Texture",
-   "kind": "gesture",
-   "tier": 2,
-   "dimension": "place",
-   "returns": true,
-   "blurb": "A gobo in the head's beam with the prism spinning - pattern in the air while the pars hold back. The pars keep the room while the head travels.",
-   "dials": {
-    "colour": {
-     "default": [
-      1,
-      1,
-      1
-     ]
-    },
-    "level": {
-     "default": 0.85,
-     "min": 0,
-     "max": 1
-    },
-    "rest": {
-     "default": 0.3,
-     "min": 0,
-     "max": 1
     },
     "gobo": {
-     "default": 40,
-     "min": 0,
-     "max": 255
-    },
-    "spin": {
-     "default": true
-    },
-    "for_beats": {
-     "default": 8,
-     "min": 2,
-     "max": 32
+     "default": 0
     }
    },
    "fires_on": [
+    "solo",
     "instrumental",
-    "breakdown",
-    "spotlight"
+    "the beam leads"
    ],
    "min_fixtures": 1,
    "requires": [
-    "gobo"
+    "move"
    ],
-   "default_beats": 8
+   "default_beats": 8,
+   "span_anchors": [
+    "from_moment",
+    "to_moment"
+   ]
+  },
+  {
+   "id": "strobe",
+   "name": "Strobe",
+   "kind": "gesture",
+   "tier": 2,
+   "blurb": "A placed hardware-strobe burst on a span \u2014 sharper than any framed flash. An accent you drop where you want it.",
+   "dimension": "rate",
+   "returns": true,
+   "dials": {
+    "hz": {
+     "default": 20,
+     "min": 1,
+     "max": 25
+    },
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "intensity": {
+     "default": 1,
+     "min": 0.3,
+     "max": 1
+    },
+    "extent": {
+     "default": "all"
+    }
+   },
+   "fires_on": [
+    "accent",
+    "hit",
+    "finale"
+   ],
+   "min_fixtures": 1,
+   "requires": [
+    "strobe"
+   ],
+   "default_beats": 1
   }
  ]
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePortalStore } from "@/store/portal";
+import { rigSummary } from "@/lib/profiles";
 
 interface TargetLineProps {
   onOpenVenuePicker: () => void;
@@ -20,11 +21,11 @@ export function TargetLine({ onOpenVenuePicker }: TargetLineProps) {
   const venue = rooms.find((v) => v.id === room?.id);
   const lname = venue?.layouts.find((l) => l.file === (show.layout || room?.layout))?.name;
 
-  const rigText = rig
-    ? Object.entries(rig.kinds)
-        .map(([k, n]) => `${n} ${k === "par7" ? "par" : "head"}${n === 1 ? "" : "s"}`)
-        .join(", ")
-    : "";
+  /* Count by what a device DOES, not by its type name. The old form asked
+     `k === "par7" ? "par" : "head"`, which called a blinder, a strobe, a pixel
+     bar and a laser all "heads" the moment a rig carried anything but the
+     original two devices. The picker says this the same way, from lib/profiles. */
+  const rigText = rig ? rigSummary(rig.kinds, ", ") : "";
 
   return (
     <div className="flex-none flex items-baseline gap-[var(--spacing-s3)] px-[var(--spacing-s6)] pt-[var(--spacing-s2)]">

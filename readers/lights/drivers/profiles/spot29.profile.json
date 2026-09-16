@@ -1,0 +1,182 @@
+{
+ "type": "spot29",
+ "footprint": 29,
+ "brightness": "master",
+ "can": [
+  "colour",
+  "level",
+  "move",
+  "strobe",
+  "gobo",
+  "prism",
+  "zoom",
+  "frost",
+  "iris"
+ ],
+ "channels": [
+  {
+   "role": "pan",
+   "default": 0
+  },
+  {
+   "role": "tilt",
+   "default": 0
+  },
+  {
+   "role": "speed",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "colour.c",
+   "default": 0
+  },
+  {
+   "role": "colour.m",
+   "default": 0
+  },
+  {
+   "role": "colour.y",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "gobo",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "prism",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "frost",
+   "default": 0
+  },
+  {
+   "role": "iris",
+   "default": 0
+  },
+  {
+   "role": "zoom",
+   "default": 0
+  },
+  {
+   "role": "focus",
+   "default": 128
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "keep_zero",
+   "default": 0
+  },
+  {
+   "role": "strobe",
+   "default": 0
+  },
+  {
+   "role": "master",
+   "default": 0
+  }
+ ],
+ "gobo": {
+  "open": 0,
+  "flower": 40,
+  "breakup": 70,
+  "dots": 100
+ },
+ "prism": {
+  "off": 0,
+  "six": 60
+ },
+ "strobe_range": {
+  "open": 32,
+  "lo": 64,
+  "hi": 95
+ },
+ "strobe": {
+  "max_hz": 25
+ },
+ "zoom_deg": [
+  8.0,
+  55.0
+ ],
+ "beam": {
+  "angle_deg": 8.0,
+  "field_deg": 55.0,
+  "type": "spot"
+ },
+ "aim": {
+  "pan": [
+   0,
+   128,
+   255
+  ],
+  "tilt": [
+   0,
+   64,
+   255
+  ],
+  "note": "anchors [lo, centre, hi]: 0.5 is the wall, 0/1 the ends of travel."
+ },
+ "park": {
+  "pan": 0.5,
+  "tilt": 0.5,
+  "level": 0
+ },
+ "gdtf": "Robe_Lighting@Robin_MMX_Spot@2025-11-10__Personality_RDM_number_revision.gdtf",
+ "mode": "Mode 3 - 8 bit",
+ "note": "channel order read from the GDTF's 8-bit mode. SUBTRACTIVE colour: the CMY flags take colour out of a white lamp, so brightness is the master and never the flags. Color1 is held OPEN rather than driven -- this head mixes with CMY, and snapping a dichroic in as well would put red through red. Zoom 8-55 deg is what makes this the beam fixture on the rig: at the tight end it is a pencil, at the wide end a soft spot."
+}

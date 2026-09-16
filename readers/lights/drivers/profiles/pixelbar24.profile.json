@@ -1,0 +1,122 @@
+{
+ "type": "pixelbar24",
+ "footprint": 24,
+ "brightness": "colour",
+ "white": "min",
+ "can": [
+  "colour",
+  "level",
+  "pixel"
+ ],
+ "channels": [
+  {
+   "role": "colour.r",
+   "default": 0
+  },
+  {
+   "role": "colour.g",
+   "default": 0
+  },
+  {
+   "role": "colour.b",
+   "default": 0
+  },
+  {
+   "role": "colour.w",
+   "default": 0
+  },
+  {
+   "role": "colour.r",
+   "default": 0
+  },
+  {
+   "role": "colour.g",
+   "default": 0
+  },
+  {
+   "role": "colour.b",
+   "default": 0
+  },
+  {
+   "role": "colour.w",
+   "default": 0
+  },
+  {
+   "role": "colour.r",
+   "default": 0
+  },
+  {
+   "role": "colour.g",
+   "default": 0
+  },
+  {
+   "role": "colour.b",
+   "default": 0
+  },
+  {
+   "role": "colour.w",
+   "default": 0
+  },
+  {
+   "role": "colour.r",
+   "default": 0
+  },
+  {
+   "role": "colour.g",
+   "default": 0
+  },
+  {
+   "role": "colour.b",
+   "default": 0
+  },
+  {
+   "role": "colour.w",
+   "default": 0
+  },
+  {
+   "role": "colour.r",
+   "default": 0
+  },
+  {
+   "role": "colour.g",
+   "default": 0
+  },
+  {
+   "role": "colour.b",
+   "default": 0
+  },
+  {
+   "role": "colour.w",
+   "default": 0
+  },
+  {
+   "role": "colour.r",
+   "default": 0
+  },
+  {
+   "role": "colour.g",
+   "default": 0
+  },
+  {
+   "role": "colour.b",
+   "default": 0
+  },
+  {
+   "role": "colour.w",
+   "default": 0
+  }
+ ],
+ "cells": 6,
+ "cell_footprint": 4,
+ "beam": {
+  "angle_deg": 5.0,
+  "field_deg": 5.1,
+  "type": "spot"
+ },
+ "park": {
+  "level": 0
+ },
+ "gdtf": "Showtec@Cameleon_PixelBar_18-4_24Ch@Rev_1_4_WORKING.gdtf",
+ "mode": "24 Ch",
+ "note": "six RGBW cells in a row, read from the GDTF. The shared runtime drives all six as one lamp, which is what every capability-driven look wants; per-cell addressing is what `pixel` advertises for a look that asks for it."
+}

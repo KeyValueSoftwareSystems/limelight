@@ -184,20 +184,26 @@ def validate(plan, catalog, score_overview):
         clean_states.append(s)
 
     # coverage: every section must have a resting state, or it bakes black. Fill
-    # any uncovered section with a deterministic default so a misbehaving model
-    # never means a dark section. See architecture.md ("repair on failure").
+    # any uncovered section with an ENERGY-appropriate bed, varied from its
+    # neighbour, so a misbehaving model never means a dark OR monotonous show.
     state_ids = [e["id"] for e in catalog if e.get("kind") == "state"]
-    covered = {s.get("section") for s in clean_states if isinstance(s.get("section"), int)}
+    covered = {s.get("section"): s for s in clean_states if isinstance(s.get("section"), int)}
+    energies = [_section_energy(sec, score_overview) for sec in sections]
+    emax = max([e for e in energies if e is not None], default=None)
+    def _norm(e):
+        return 0.4 if (e is None or not emax) else max(0.0, min(1.0, e / emax))
     for i in range(len(sections)):
         if i in covered:
             continue
-        fill = _fill_state(i, sections[i], score_overview, state_ids)
+        prev = covered.get(i - 1)
+        fill = _fill_state(i, _norm(energies[i]), state_ids, prev.get("effect") if prev else None)
         if fill is None:
             report.append({"level": "warn", "msg": f"section[{i}] has no state and none could be filled"})
             continue
+        covered[i] = fill
         clean_states.append(fill)
         report.append({"level": "warn", "code": "state_filled", "section": i,
-                       "msg": f"section[{i}] had no state; filled with {fill['effect']} (amount {fill.get('amount')})"})
+                       "msg": f"section[{i}] had no state; filled with {fill['effect']}"})
     clean_states.sort(key=lambda s: s.get("section", 0) if isinstance(s.get("section"), int) else 0)
 
     clean_bindings = []
@@ -301,6 +307,22 @@ def validate(plan, catalog, score_overview):
                                      effects_by_id, moments, sections)
     report.extend(collisions)
 
+    # variety: neighbouring beds shouldn't match, and the same gesture shouldn't
+    # cluster in time. Warnings, not errors — the prompt prevents these; this
+    # surfaces any that slip through. Generic, no song-specific rule.
+    ss = sorted(clean_states, key=lambda s: s.get("section", 0) if isinstance(s.get("section"), int) else 0)
+    for a, b in zip(ss, ss[1:]):
+        if isinstance(a.get("section"), int) and b.get("section") == a.get("section") + 1 \
+                and a.get("effect") == b.get("effect"):
+            report.append({"level": "warn", "code": "repeat_bed",
+                           "msg": f"sections {a['section']} & {b['section']} share bed '{a['effect']}' — vary it"})
+    gg = sorted(clean_gestures, key=lambda g: _gesture_time(g, moments))
+    for a, b in zip(gg, gg[1:]):
+        if a.get("effect") == b.get("effect") \
+                and abs(_gesture_time(b, moments) - _gesture_time(a, moments)) < 3.5:
+            report.append({"level": "warn", "code": "cluster",
+                           "msg": f"two '{a['effect']}' within 3.5s — alternate the effect, colour or extent"})
+
     cleaned = {
         "plan": plan.get("plan", ""),
         "states": clean_states,
@@ -336,24 +358,51 @@ def _section_energy(section, overview):
     return sum(seg) / len(seg)
 
 
-def _fill_state(i, section, overview, state_ids):
-    """A deterministic resting state for an uncovered section: a low drone by
-    default, opening to a wash where the section reads energetic. Never None
-    unless the catalog has no state effect at all."""
+def _gesture_time(g, moments):
+    """When a gesture fires, in seconds — for the cluster check."""
+    if g.get("at_s") is not None:
+        return g["at_s"]
+    if g.get("from_s") is not None:
+        return g["from_s"]
+    for k in ("moment", "from_moment"):
+        mi = g.get(k)
+        if isinstance(mi, int) and 0 <= mi < len(moments):
+            return moments[mi].get("time_s") or moments[mi].get("at_s") or 0
+    return 0
+
+
+def _fill_state(i, e01, state_ids, avoid=None):
+    """A resting bed for an uncovered section, chosen by its normalised energy
+    (0..1) and nudged off the neighbour's bed so fills don't repeat. Generic —
+    energy tiers, not a per-song rule. None only if the catalog has no state."""
     if not state_ids:
         return None
-    e = _section_energy(section, overview)
-    lvl = 0.12 if e is None else max(0.08, min(0.55, 0.08 + min(e, 1.0) * 0.45))
-    if lvl >= 0.22 and "wash" in state_ids:
-        return {"section": i, "effect": "wash", "amount": round(lvl, 2),
-                "colour": [0.3, 0.35, 0.6], "extent": "all",
-                "why": "auto-filled: composer left this section without a resting state",
-                "author": "validator"}
-    eff = "drone" if "drone" in state_ids else state_ids[0]
-    return {"section": i, "effect": eff, "amount": round(min(lvl, 0.2), 2),
-            "colour": [1, 0.75, 0.35], "extent": "inner",
-            "why": "auto-filled: composer left this section without a resting state",
-            "author": "validator"}
+    order = [n for n in ("drone", "pulse", "wash", "drive") if n in state_ids] or list(state_ids)
+    thr = {"drone": 0.0, "pulse": 0.28, "wash": 0.5, "drive": 0.72}
+    pick = order[0]
+    for n in order:
+        if e01 >= thr.get(n, 0):
+            pick = n
+    if pick == avoid and len(order) > 1:
+        idx = order.index(pick)
+        pick = order[idx - 1] if idx > 0 else order[idx + 1]
+    return _state_entry(i, pick, e01)
+
+
+def _state_entry(i, eff, e01):
+    base = {"section": i, "effect": eff, "author": "validator",
+            "why": "auto-filled: composer left this section without a resting state"}
+    if eff == "pulse":
+        base.update(amount=round(0.35 + 0.25 * e01, 2), colour=[0.2, 0.45, 1], extent="all", floor=round(0.14 + 0.1 * e01, 2))
+    elif eff == "wash":
+        base.update(amount=round(0.40 + 0.30 * e01, 2), colour=[0.3, 0.35, 0.6], extent="all")
+    elif eff == "drive":
+        base.update(amount=round(0.70 + 0.30 * e01, 2), colours=[[0.2, 0.4, 1], [1, 0.4, 0.6]], floor=round(0.45 + 0.15 * e01, 2))
+    elif eff == "breakdown":
+        base.update(amount=round(0.40 + 0.20 * e01, 2), colours=[[0, 0, 1], [1, 0, 0.55]], floor=0.1)
+    else:  # drone
+        base.update(amount=round(0.08 + 0.12 * e01, 2), colour=[1, 0.75, 0.35], extent="inner")
+    return base
 
 
 def _detect_collisions(gestures, bindings, states, effects_by_id, moments, sections):

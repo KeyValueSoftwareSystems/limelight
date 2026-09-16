@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { timeToX } from "@/lib/timeline";
 import { phaseTint } from "@/lib/tokens";
 import { useTimeline } from "./Timeline";
@@ -7,7 +9,7 @@ import type { Section } from "@/lib/types";
 
 /* Tinted from the score's own phase context, at low chroma on purpose: sections
    are background, clips are foreground, and they must never compete. */
-export function SectionBand({ sections }: { sections: Section[] }) {
+function SectionBandBase({ sections }: { sections: Section[] }) {
   const { view, width } = useTimeline();
 
   return (
@@ -31,3 +33,7 @@ export function SectionBand({ sections }: { sections: Section[] }) {
     </div>
   );
 }
+
+/* Memoised. Sections do not change while a show plays.
+ */
+export const SectionBand = memo(SectionBandBase);
