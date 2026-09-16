@@ -914,7 +914,7 @@
    "name": "Spin",
    "kind": "gesture",
    "tier": 2,
-   "blurb": "A rainbow flourish: the pars cycle hue and the head's colour wheel spins. Spend-once, to close a section.",
+   "blurb": "A rainbow flourish: the pars cycle hue and the head's colour wheel spins. Spend-once, to close a section. Without `colours` it turns the full hue wheel and ignores the show's palette entirely, which against a chosen palette reads as a fault rather than a flourish; give it `colours` to turn through the palette instead",
    "dimension": "colour",
    "returns": true,
    "dials": {
@@ -922,6 +922,9 @@
      "default": 4,
      "min": 1,
      "max": 16
+    },
+    "colours": {
+     "default": null
     }
    },
    "fires_on": [
