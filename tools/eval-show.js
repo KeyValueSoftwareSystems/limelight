@@ -367,7 +367,10 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
 
 /* 7. prepared — every drop has darkness in front of it -------------------- */
 {
-  const drops = dropTimes.map(t => DOWN.find(x => x >= t - 0.05) ?? t);
+  /* the nearest downbeat, not the next one: a drop detected at 49.9s belongs to
+     the downbeat at 49.75s, and looking forward found 51.7s and measured the
+     wrong bar entirely. */
+  const drops = dropTimes.map(t => DOWN.reduce((a, x) => Math.abs(x - t) < Math.abs(a - t) ? x : a, DOWN[0]));
   let ready = 0;
   for (const d of drops) {
     let minBefore = 1;
