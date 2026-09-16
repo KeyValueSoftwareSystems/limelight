@@ -356,12 +356,34 @@ def handle_tool_call(name, args, overview):
     sections = overview.get("sections") or []
     moments = overview.get("moments") or []
 
-    if name == "moment":
-        idx = args.get("index", 0)
-        if 0 <= idx < len(moments):
-            return json.dumps(moments[idx])
-        return json.dumps({"error": f"moment {idx} out of range (0..{len(moments)-1})"})
-
+    def _turn_at(ov, t, look=2.5, top=6):
+        try:
+            sc = _score_of(ov)
+        except Exception:
+            return {}
+        st = sc.get("stems_temporal") or {}
+        lanes = st.get("stems") or {}
+        w = st.get("window_s") or 0.5
+        summ = sc.get("stems") or {}
+        b0, b1 = int(max(0, t - look) / w), int(t / w)
+        a0, a1 = int(t / w), int((t + look) / w)
+        rows = []
+        for lane, ser in lanes.items():
+            pre = ser[b0:b1] or [0]
+            post = ser[a0:a1] or [0]
+            mb, ma = sum(pre) / len(pre), sum(post) / len(post)
+            if max(mb, ma) < 0.12:
+                continue
+            rows.append((ma - mb, lane, round(mb, 2), round(ma, 2),
+                         (summ.get(lane) or {}).get("db")))
+        rows.sort(key=lambda r: -abs(r[0]))
+        arriving = [{"lane": l, "before": b, "after": a, "db_in_mix": d}
+                    for chg, l, b, a, d in rows if chg > 0.08][:top]
+        leaving = [{"lane": l, "before": b, "after": a, "db_in_mix": d}
+                   for chg, l, b, a, d in rows if chg < -0.08][:top]
+        return {"window_s": look, "arriving": arriving, "leaving": leaving,
+                "verdict": ("light should arrive" if len(arriving) > len(leaving)
+                            else "light should leave" if leaving else "no clear turn")}
     def _playing_in(ov, t0, t1, top=10):
         try:
             sc = _score_of(ov)
@@ -388,6 +410,18 @@ def handle_tool_call(name, args, overview):
                          "db_in_mix": db})
         rows.sort(key=lambda r: (-r["peak"], -r["coverage"]))
         return rows[:top]
+
+    if name == "moment":
+        idx = args.get("index", 0)
+        if 0 <= idx < len(moments):
+            m = dict(moments[idx])
+            t = m.get("time_s")
+            if isinstance(t, (int, float)):
+                m["what_changes"] = _turn_at(overview, t)
+            return json.dumps(m)
+        return json.dumps({"error": f"moment {idx} out of range (0..{len(moments)-1})"})
+
+
 
     if name == "section":
         idx = args.get("index", 0)
