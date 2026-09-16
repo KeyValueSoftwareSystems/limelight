@@ -26,12 +26,45 @@ def _as_rgb(c):
 COLOUR_KEYS = ("colour", "under", "to", "from", "bed_colour")
 
 
+def _derive_palette(plan, keep=5, near=0.06):
+    """The colours the designer actually used, merged down to a handful.
+
+    A plan that declares no palette gets one built from its own cues rather
+    than a set invented here: every colour is counted, the commonest becomes an
+    entry, and everything within `near` of it is folded in. That consolidates
+    the designer's choices instead of overriding them."""
+    seen = {}
+    for key in ("states", "bindings", "gestures"):
+        for e in plan.get(key) or []:
+            for f in COLOUR_KEYS:
+                v = e.get(f)
+                vals = v if isinstance(v, list) and v and isinstance(v[0], (list, str)) else [v]
+                for one in vals:
+                    rgb = _as_rgb(one)
+                    if rgb:
+                        seen[rgb] = seen.get(rgb, 0) + 1
+    out = []
+    pool = sorted(seen.items(), key=lambda kv: -kv[1])
+    while pool and len(out) < keep:
+        rgb, _ = pool.pop(0)
+        out.append((f"c{len(out) + 1}", rgb))
+        pool = [(c, n) for c, n in pool
+                if sum((a - b) ** 2 for a, b in zip(c, rgb)) > near]
+    return out
+
+
 def _snap_palette(plan, report):
     palette = []
     for entry in (plan.get("palette") or []):
         rgb = _as_rgb(entry.get("rgb") if isinstance(entry, dict) else entry)
         if rgb:
             palette.append((entry.get("name", "?") if isinstance(entry, dict) else "?", rgb))
+    if not palette:
+        palette = _derive_palette(plan)
+        if palette:
+            report.append({"level": "info",
+                           "msg": f"no palette declared; derived {len(palette)} "
+                                  "colours from the ones the plan already used"})
     if not palette:
         return
     def nearest(rgb):
