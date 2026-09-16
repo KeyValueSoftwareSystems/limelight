@@ -3,7 +3,7 @@ const H = require("./helpers");
 module.exports = function alternate(params, ctx) {
   const cols = H.parseColours(params.colours, [[1, 0.75, 0.35], [0.25, 0.45, 1]]);
   const level = params.level != null ? params.level : 0.8;
-  const rest = params.rest != null ? params.rest : 0.12;
+  const rest = params.rest != null ? params.rest : 0;
   const per = params.per_beat != null ? params.per_beat : 1;
   const loop = Math.max(1, Math.round(params.for_beats || 4));
   const fpb = H.framesPerBeat(ctx.bpm);

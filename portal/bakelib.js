@@ -64,6 +64,7 @@ function makeStreamSampler(score, opts) {
   const names = Object.keys(stems);
   const byLower = new Map(names.map(n => [n.toLowerCase(), n]));
 
+
   /* Map a composer-supplied stream name to an actual stem. Exact first, then
      separator-normalised ("lead vocal" -> "lead-vocal"), then substring either
      way (shortest wins) so "vocal" resolves even if only "lead-vocal" exists. */
@@ -112,6 +113,8 @@ function makeStreamSampler(score, opts) {
     return clamp01(u * u);
   }
 
+  const warned = new Set();
+
   function sampleStem(name, t) {
     const grid = String(name == null ? "" : name).toLowerCase().trim();
     if (gridOf[grid]) {
@@ -119,7 +122,13 @@ function makeStreamSampler(score, opts) {
       return samplePulse(gridOf[grid], t, fall);
     }
     const resolved = resolveStemName(name);
-    if (resolved === null) return 0;
+    if (resolved === null) {
+      if (!warned.has(grid)) {
+        warned.add(grid);
+        process.stderr.write(`bakelib: no stem named "${name}" — this binding renders black. Known: ${names.slice(0, 8).join(", ")}...\n`);
+      }
+      return 0;
+    }
     const series = stems[resolved];
     if (!Array.isArray(series) || series.length === 0) return 0;
     const x = t / win - 0.5;

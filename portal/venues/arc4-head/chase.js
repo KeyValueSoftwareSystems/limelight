@@ -5,7 +5,7 @@ module.exports = function chase(params, ctx) {
   const colour = H.parseColour(params.colour, (ctx && ctx.restColour) || [1, 0.75, 0.35]);
   const pars = H.parsForExtent(params.extent || "all");
   const level = H.clamp(params.level != null ? params.level : 0.85, 0, 1);
-  const rest = H.clamp(params.rest != null ? params.rest : 0.05, 0, 1);
+  const rest = H.clamp(params.rest != null ? params.rest : 0, 0, 1);
   const perBeat = params.per_beat != null ? params.per_beat : 1;
   const back = params.bounce === true;
   const loopBeats = Math.max(1, Math.round(params.for_beats || 4));
@@ -38,7 +38,7 @@ module.exports = function chase(params, ctx) {
 
   function render(value, t) {
     const v = H.clamp(value == null ? 1 : value, 0, 1);
-    return at(beatOf(t) * perBeat, 0.35 + 0.65 * v);
+    return at(beatOf(t) * perBeat, v);
   }
 
   const N = Math.max(2, H.framesPerBeat(ctx.bpm) * loopBeats);

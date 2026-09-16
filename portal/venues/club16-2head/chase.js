@@ -5,7 +5,7 @@ module.exports = function chase(params, ctx) {
   const colour = H.parseColour(params.colour, [1, 0.75, 0.35]);
   const pars = H.parsForExtent(params.extent || "all");
   const level = H.clamp(params.level != null ? params.level : 0.85, 0, 1);
-  const rest = H.clamp(params.rest != null ? params.rest : 0.05, 0, 1);
+  const rest = H.clamp(params.rest != null ? params.rest : 0, 0, 1);
   const perBeat = params.per_beat != null ? params.per_beat : 1;
   const back = params.bounce === true;
   const loopBeats = Math.max(1, Math.round(params.for_beats || 4));

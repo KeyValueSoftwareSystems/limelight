@@ -1,17 +1,13 @@
 "use strict";
 const H = require("./helpers");
 
-/* follow — amount BINDING. render(value, t) is called once per frame by the
-   baker with the bound stream's live 0..1 level and the show time in seconds.
-   The extent's pars ride the level (with a floor so the rig never fully dies),
-   the head master follows, and the head pans slowly on its own clock via t. */
 module.exports = function follow(params, ctx) {
   const depth = params.depth != null ? params.depth : 0.95;
   const extent = params.extent || "all";
   const colour = H.parseColour(params.colour, (ctx && ctx.restColour) || [0.9, 0.8, 0.55]);
   const pars = H.parsForExtent(extent);
   const bpm = ctx.bpm;
-  const floor = params.floor != null ? params.floor : 0.16;
+  const floor = params.floor != null ? params.floor : 0;
   const response = params.response != null ? params.response : 1;
 
   const spread = params.spread != null ? params.spread : 0.35;
@@ -20,7 +16,7 @@ module.exports = function follow(params, ctx) {
 
   function render(value, t) {
     const v = H.clamp(value || 0, 0, 1);
-    const level = H.clamp(floor + (depth - floor) * Math.pow(v, response), 0, 1);        // floor keeps it alive at low values
+    const level = H.clamp(floor + (depth - floor) * Math.pow(v, response), 0, 1);
     const beat = (t || 0) * bpm / 60;
     const f = H.emptyFrame();
     pars.forEach((p, k) => {
@@ -30,7 +26,7 @@ module.exports = function follow(params, ctx) {
       H.setPar(f, p, colour, H.clamp(level * wave * tip, 0, 1));
     });
     H.setHead(f, H.HEADS[0], {
-      level: Math.max(0.18, level * 0.85), colour,
+      level: level * 0.85, colour,
       pan: 0.5 + travel * (v - 0.5) * 2,
       tilt: 0.28 + 0.14 * v,
     });

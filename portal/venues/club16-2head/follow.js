@@ -1,15 +1,13 @@
 "use strict";
 const H = require("./helpers");
 
-/* Binding: amount follows a named stream. The baker calls this once per frame
-   with lane_value set to the stream's current level (0..1). */
 module.exports = function follow(params, ctx) {
   const depth = params.depth != null ? params.depth : 0.95;
   const extent = params.extent || "all";
   const smooth = params.smooth != null ? params.smooth : 0.3;
   const pars = H.parsForExtent(extent);
   const driven = pars.map(p => p.id).concat(H.HEAD_IDS);
-  const floor = params.floor != null ? params.floor : 0.16;
+  const floor = params.floor != null ? params.floor : 0;
   const response = params.response != null ? params.response : 1;
   const spread = params.spread != null ? params.spread : 0.35;
   const lean = params.lean != null ? params.lean : 0;

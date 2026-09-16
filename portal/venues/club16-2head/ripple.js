@@ -3,7 +3,7 @@ const H = require("./helpers");
 module.exports = function ripple(params, ctx) {
   const colour = H.parseColour(params.colour, [1, 0.75, 0.35]);
   const level = params.level != null ? params.level : 0.85;
-  const rest = params.rest != null ? params.rest : 0.15;
+  const rest = params.rest != null ? params.rest : 0;
   const width = params.width != null ? params.width : 1.2;
   const loop = Math.max(1, Math.round(params.for_beats || 4));
   const N = Math.max(4, H.framesPerBeat(ctx.bpm) * loop);
