@@ -75,7 +75,8 @@ module.exports = function beam(params, ctx) {
     } else {
       const w = 2 * Math.PI * beat / 4; pan = 0.498 + 0.47 * Math.sin(w); tilt = 0.498 + 0.4 * Math.sin(2 * w);
     }
-    const fire = pattern !== "hold" && strobeHz > 0 && (strobeOn === "always" || (strobeOn === "beat" && bphase < 0.35) || (strobeOn === "downbeat" && isDown && bphase < 0.5) || hit > 0.4);
+    const fire = strobeHz > 0 &&   /* a pin with strobe 0 never fires; one asked to flash, flashes */
+      (strobeOn === "always" || (strobeOn === "beat" && bphase < 0.35) || (strobeOn === "downbeat" && isDown && bphase < 0.5) || hit > 0.4);
     const prismNow = prismOn === "beat" ? (bphase < 0.4 ? prism : 0) : prism;
     const f = H.emptyFrame();
     /* two heads: the second mirrors the first across the room, so a snap to the

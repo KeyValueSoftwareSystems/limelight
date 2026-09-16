@@ -35,7 +35,7 @@ module.exports = function anticipation(params, ctx) {
 
     if (finale) {
       for (const par of H.PARS) { H.setPar(f, par, colour, level); H.setParStrobe(f, par, 24); }
-      H.setHead(f, H.HEADS[0], { level, colour, pan: 0.5, tilt: 0.45, strobe: 25 });
+      if (params.head !== false) H.setHead(f, H.HEADS[0], { level, colour, pan: 0.5, tilt: 0.45, strobe: 25 });
       frames.push(f);
       continue;
     }
@@ -50,14 +50,14 @@ module.exports = function anticipation(params, ctx) {
     if (pop) {
       const hit = rnd() > 0.35 ? H.PARS : GROUPS[Math.floor(rnd() * GROUPS.length) % GROUPS.length];
       for (const par of hit) H.setPar(f, par, colour, level);
-      H.setHead(f, H.HEADS[0], { level, colour, pan: 0.5, tilt: 0.45 });
+      if (params.head !== false) H.setHead(f, H.HEADS[0], { level, colour, pan: 0.5, tilt: 0.45 });
     } else {
       const floor = p > 0.85 ? 0.06 : 0;            // a faint glow just before the finale
       if (floor) for (const par of H.PARS) H.setPar(f, par, colour, floor);
-      H.setHead(f, H.HEADS[0], { level: floor, colour, pan: 0.5, tilt: 0.45 });
+      if (params.head !== false) H.setHead(f, H.HEADS[0], { level: floor, colour, pan: 0.5, tilt: 0.45 });
     }
     frames.push(f);
   }
 
-  return { frames, loop_beats: 0, per_fixture: H.PAR_IDS.concat(H.HEAD_IDS) };
+  return { frames, loop_beats: 0, per_fixture: H.PAR_IDS.concat(params.head === false ? [] : H.HEAD_IDS) };
 };

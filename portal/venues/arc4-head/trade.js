@@ -55,7 +55,12 @@ module.exports = function trade(params, ctx) {
         const lvl = rest + (peak - rest) * Math.exp(-(d * d) / (2 * width * width));
         /* the bump carries colour[0], the row it leaves behind sits in colour[1] */
         const mix = H.clamp((lvl - rest) / Math.max(1e-6, peak - rest), 0, 1);
-        const col = [0, 1, 2].map(j => c1[j] + (c0[j] - c1[j]) * mix);
+        /* normalised so the brightest channel stays full through the mix: between
+           blue and red the raw blend passes through a dim purple, and the lamp the
+           eye is following visibly sagged halfway across. */
+        const raw = [0, 1, 2].map(j => c1[j] + (c0[j] - c1[j]) * mix);
+        const mxc = Math.max(...raw) || 1;
+        const col = raw.map(x => x / mxc);
         H.setPar(f, pars[k], col, H.clamp(lvl, 0, 1));
       }
       if (params.head !== false) 

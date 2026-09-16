@@ -344,12 +344,23 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
        row left to right scored a backward bias. The brightest lamp has no tail.
        A step of more than one lamp is the bump wrapping round to start again,
        which is not travel in either direction, so it is not counted. */
+    /* Follow the ODD LAMP OUT, not the brightest lamp. In a colour wave the
+       brightness is nearly constant by design -- what travels is a hue -- so
+       "brightest" flickered to whichever untouched lamp happened to peak while
+       the moving colour was between two lamps, and a wave that visibly crossed
+       the row scored as going nowhere. The eye follows the lamp that is unlike
+       its neighbours; so does this. For a plain brightness run the odd one out
+       IS the brightest, so nothing is lost. */
     let fwd = 0, back = 0, prev = null;
     for (let t = g.from_s; t < g.to_s; t += 1 / fps) {
-      const v = parLv(F[Math.round(t * fps)]);
-      const mx = Math.max(...v);
-      if (mx < 0.12) { prev = null; continue; }
-      const at = v.indexOf(mx);
+      const f = F[Math.round(t * fps)];
+      const rgb = PARS.map(p => p.r >= 0 ? [f[p.off + p.r], f[p.off + p.r + 1], f[p.off + p.r + 2]] : [0, 0, 0]);
+      const v = parLv(f);
+      if (Math.max(...v) < 0.12) { prev = null; continue; }
+      const med = [0, 1, 2].map(c => { const xs = rgb.map(x => x[c]).sort((a, b) => a - b); return (xs[1] + xs[2]) / 2; });
+      const dist = rgb.map(x => Math.hypot(x[0] - med[0], x[1] - med[1], x[2] - med[2]));
+      const at = dist.indexOf(Math.max(...dist));
+      if (Math.max(...dist) < 40) { prev = null; continue; }   // no lamp stands out: nothing is travelling this frame
       if (prev != null) {
         const d = at - prev;
         if (d === 1) fwd++; else if (d === -1) back++;
@@ -454,9 +465,14 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
   const all = [];
   for (let t = 0; t < DUR; t += 0.5) all.push(weightAt(t));
   const sorted = [...all].sort((x, y) => x - y);
-  let hereW = 0, n2 = 0;
-  for (let u = bestT; u < bestT + win; u += 0.5) { hereW += weightAt(u); n2++; }
-  hereW /= (n2 || 1);
+  /* The band's weight at its heaviest within three seconds either side of the
+     show's brightest moment. A designer lands the climax a hair EARLY -- the
+     room is already blazing when the biggest kick arrives -- and the exact two
+     seconds of peak light can sit a beat or two before the exact two seconds of
+     peak sound without anyone in the room feeling a mismatch. Demanding the
+     same two seconds punished the right instinct. */
+  let hereW = 0;
+  for (let u = bestT - 3; u < bestT + win + 3; u += 0.5) hereW = Math.max(hereW, weightAt(Math.max(0, u)));
   const rank = sorted.filter(v => v <= hereW).length / sorted.length;
   check("climax", rank >= 0.6,
     "the show is biggest at " + bestT.toFixed(0) + "s, where the band is heavier than "
