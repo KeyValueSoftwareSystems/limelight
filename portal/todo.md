@@ -137,3 +137,30 @@ keep-out zone and fixture profiles to get wrong silently.
 - [ ] `portal/server.py:save_custom` raises KeyError on schema-2
 - [ ] `playersOf()` in app.js is unrecoverable — `git log -S` finds it on no branch
 - [ ] nothing pushed; `limelight-portal` is local-only
+
+## Downbeat phase, 2026-09-16
+
+Downbeat flags were fabricated: every score had `beats[0]` flagged and the rest
+every Nth beat from it. All 28 songs had first downbeat at index 0, which no real
+tracker produces. `listen/downbeat_phase.py` re-phases; `listen/downbeat_audit.py`
+audits. 9 applied, 2 vetoed by the onset gate, 17 already right.
+
+Which referee to trust, in order:
+
+1. A listener. Decisive, and the only thing that settled raga-of-revenge.
+2. Drum onset density (`rhythm.hits` within 60ms). Independent of the chord
+   detector, and caught 2 of 11 chord-driven calls wrong.
+3. Chord changes (`btc_chords_raw`). Finds the phase, but cannot verify its own
+   answer, and BTC is trained on Western pop so it is least reliable on exactly
+   the non-Western songs. entharo-mahanu is Carnatic and it got that one wrong.
+4. Low-end energy. Uninformative wherever every beat carries a kick.
+
+raga-of-revenge is at phase 1 by ear. Its four referees gave three different
+answers on margins of a few percent (onsets tie 1 and 2, onset strength prefers 0,
+low-end and chords prefer 2). Provenance records "decided_by: listener" rather
+than implying a measurement chose it.
+
+Open: the metre period is still assumed, not measured. It comes from the median
+gap between the fabricated flags, which were every 4 by construction, so a song in
+7 or 8 would never be spotted. A joint period/phase search scores higher at longer
+periods purely because they test fewer beats.
