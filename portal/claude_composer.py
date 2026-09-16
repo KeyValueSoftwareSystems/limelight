@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 import time
 import sys
 
@@ -600,6 +601,7 @@ def run_claude(work, brief, system_prompt, model, turns):
         str(turns),
         "--model",
         model,
+        "--restricted",
         "--output-format",
         "stream-json",
         "--verbose",
@@ -689,7 +691,15 @@ def compose(song, model=None, hub=None, turns=90, keep=False, notes=None):
     )
     overview = C.fetch_overview(song)
 
-    work = os.path.join(WORK, f"{song}.claude")
+    # The composer works OUTSIDE the repository. Claude Code keys its memory and
+    # project settings to the working directory, so a cwd inside this tree hands
+    # the composer sixteen files of one engineer's notes -- head keep-outs, check
+    # definitions, things learned while debugging the baker -- as its starting
+    # context. Those are not a lighting designer's context, and reading them cost
+    # the first forty seconds of every run. From outside the tree it starts clean
+    # and is told what it needs by the brief.
+    work = os.environ.get("LL_COMPOSER_DIR") or os.path.join(
+        tempfile.gettempdir(), "limelight-compose", f"{song}.claude")
     if os.path.isdir(work) and not keep:
         shutil.rmtree(work)
     os.makedirs(work, exist_ok=True)
