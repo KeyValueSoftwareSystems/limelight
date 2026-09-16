@@ -1,5 +1,6 @@
 "use strict";
 const H = require("./helpers");
+const GROUPS = ["outer", "inner", "left", "right"].map((e) => H.parsForExtent(e));
 
 /* anticipation — a pre-show riser GESTURE. Quick white strobes fire in a
    seemingly-random pattern that grows denser and faster as it runs, then breaks
@@ -47,8 +48,8 @@ module.exports = function anticipation(params, ctx) {
     if (cooldown <= 0 && rnd() < prob) { pop = true; cooldown = minGap + 1; } else { cooldown--; }
 
     if (pop) {
-      const whole = rnd() > 0.35;                   // mostly the whole rig, sometimes a random subset
-      for (const par of H.PARS) if (whole || rnd() > 0.5) H.setPar(f, par, colour, level);
+      const hit = rnd() > 0.35 ? H.PARS : GROUPS[Math.floor(rnd() * GROUPS.length) % GROUPS.length];
+      for (const par of hit) H.setPar(f, par, colour, level);
       H.setHead(f, H.HEADS[0], { level, colour, pan: 0.5, tilt: 0.45 });
     } else {
       const floor = p > 0.85 ? 0.06 : 0;            // a faint glow just before the finale

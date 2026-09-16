@@ -30,6 +30,7 @@ const planFile = args[1] && !args[1].startsWith("--") ? args[1] : null;
 const rigName = opt("--rig", "club16-2head");
 const lightsOut = opt("--lights", null);
 const fps = +opt("--fps", 40);
+const LIT_ROLE = /^(master|colour\.[a-z])$/;
 
 if (!scoreFile || !planFile || !lightsOut) {
   console.error("usage: baker.js <score> <plan.json> --rig <rig> --lights <out>");
@@ -300,6 +301,8 @@ for (const f of layout.fixtures) {
   const offset = f.address - 1;
   const roles = (prof.channels || []).map(c => c.role);
   const panIdx = roles.indexOf("pan"), tiltIdx = roles.indexOf("tilt"), masterIdx = roles.indexOf("master");
+  const resp = prof.response || {};
+  const perFrame = (ms) => (ms > 0 ? Math.max(1, Math.round(255 / ((ms / 1000) * fps))) : 0);
   const lim = prof.limits || {};
   fixtureChannels[f.id] = {
     offset, width: prof.footprint,
@@ -308,6 +311,9 @@ for (const f of layout.fixtures) {
     masterCh: masterIdx >= 0 ? offset + masterIdx : -1,   // for head brighten-compositing
     maxPan:  lim.max_pan_per_frame  > 0 ? lim.max_pan_per_frame  : 7,
     maxTilt: lim.max_tilt_per_frame > 0 ? lim.max_tilt_per_frame : 7,
+    lightChs: roles.map((r, i) => (LIT_ROLE.test(r) ? offset + i : -1)).filter((i) => i >= 0),
+    maxRise: perFrame(resp.rise_ms),
+    maxFall: perFrame(resp.fall_ms),
   };
 }
 
@@ -393,6 +399,17 @@ for (const fc of movers) {
     const prev = allFrames[i - 1], cur = allFrames[i];
     cur[fc.panCh] = slew(prev[fc.panCh], cur[fc.panCh], fc.maxPan);
     if (fc.tiltCh >= 0) cur[fc.tiltCh] = slew(prev[fc.tiltCh], cur[fc.tiltCh], fc.maxTilt);
+  }
+}
+
+for (const fc of fixtureIds.map((id) => fixtureChannels[id])) {
+  if (!fc || (!fc.maxFall && !fc.maxRise)) continue;
+  for (let i = 1; i < allFrames.length; i++) {
+    const prev = allFrames[i - 1], cur = allFrames[i];
+    for (const ch of fc.lightChs) {
+      if (cur[ch] < prev[ch] && fc.maxFall) cur[ch] = Math.max(cur[ch], prev[ch] - fc.maxFall);
+      else if (cur[ch] > prev[ch] && fc.maxRise) cur[ch] = Math.min(cur[ch], prev[ch] + fc.maxRise);
+    }
   }
 }
 
