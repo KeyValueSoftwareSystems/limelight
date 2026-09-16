@@ -362,10 +362,42 @@ def handle_tool_call(name, args, overview):
             return json.dumps(moments[idx])
         return json.dumps({"error": f"moment {idx} out of range (0..{len(moments)-1})"})
 
+    def _playing_in(ov, t0, t1, top=10):
+        try:
+            sc = _score_of(ov)
+        except Exception:
+            return []
+        st = sc.get("stems_temporal") or {}
+        lanes = st.get("stems") or {}
+        w = st.get("window_s") or 0.5
+        summ = sc.get("stems") or {}
+        a0, a1 = int(t0 / w), max(int(t0 / w) + 1, int(t1 / w))
+        rows = []
+        for lane, ser in lanes.items():
+            part = ser[a0:a1]
+            if not part:
+                continue
+            pk = max(part)
+            if pk < 0.12:
+                continue
+            cov = sum(1 for x in part if x > 0.15) / len(part)
+            db = (summ.get(lane) or {}).get("db")
+            rows.append({"lane": lane, "peak": round(pk, 2),
+                         "coverage": round(cov, 2),
+                         "mean": round(sum(part) / len(part), 2),
+                         "db_in_mix": db})
+        rows.sort(key=lambda r: (-r["peak"], -r["coverage"]))
+        return rows[:top]
+
     if name == "section":
         idx = args.get("index", 0)
         if 0 <= idx < len(sections):
-            return json.dumps(sections[idx])
+            sec = dict(sections[idx])
+            t0 = sec.get("start")
+            t1 = sec.get("end")
+            if isinstance(t0, (int, float)) and isinstance(t1, (int, float)):
+                sec["playing"] = _playing_in(overview, t0, t1)
+            return json.dumps(sec)
         return json.dumps({"error": f"section {idx} out of range"})
 
     sc = _score_of(overview)
