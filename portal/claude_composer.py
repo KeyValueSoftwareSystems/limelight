@@ -16,7 +16,7 @@ from validator import validate, format_report
 
 WORK = os.path.join(HERE, "work")
 DEFAULT_MODEL = "opus"
-BUDGET = 11
+BUDGET = 7
 
 
 def score_file(song):
@@ -89,7 +89,8 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "",
             "THE EFFECT CATALOG",
             "",
-            effects_block,
+            "THE EFFECT CATALOG is in your system prompt, with every dial and its",
+            "range. It is not repeated here.",
             "",
             "ASKING THE SCORE FOR MORE",
             "",
@@ -397,7 +398,7 @@ def read_plan(work):
     return None
 
 
-def compose(song, model=None, hub=None, turns=38, keep=False, notes=None):
+def compose(song, model=None, hub=None, turns=24, keep=False, notes=None):
     model = model or DEFAULT_MODEL
     if hub:
         C.HUB = hub.rstrip("/")
@@ -446,7 +447,7 @@ def main():
     ap.add_argument("song")
     ap.add_argument("--hub", default=C.HUB)
     ap.add_argument("--model", default=DEFAULT_MODEL)
-    ap.add_argument("--turns", type=int, default=38)
+    ap.add_argument("--turns", type=int, default=24)
     ap.add_argument("--notes", default=None)
     ap.add_argument("--out", default=None)
     ap.add_argument("--keep", action="store_true")
