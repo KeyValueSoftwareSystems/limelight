@@ -22,6 +22,7 @@ import { StageTimeline } from "@/components/editor/StageTimeline";
 import { SaveShowDialog } from "@/components/editor/SaveShowDialog";
 import { Sidebar } from "@/components/editor/Sidebar";
 import { ChatPanel } from "@/components/editor/ChatPanel";
+import { RigControl } from "@/components/portal/RigControl";
 import { buildClips } from "@/lib/clips";
 import { effectIdForPlanFx } from "@/lib/families";
 import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
@@ -117,6 +118,7 @@ export default function StagePage() {
   const setPaletteBase = usePortalStore((s) => s.setPaletteBase);
   const setRoom = usePortalStore((s) => s.setRoom);
   const setLayout = usePortalStore((s) => s.setLayout);
+  const setRig = usePortalStore((s) => s.setRig);
   const showId = usePortalStore((s) => s.showId);
 
   /* seed, layout, want, author, room, v2 and planText are deliberately NOT
@@ -312,6 +314,37 @@ export default function StagePage() {
     },
     [applyPlan],
   );
+
+  /* Send-to-rig lives on this page too. Arming needs the baked frames to be ON
+     the rig first: /api/rig/at loads them, and without that hand-over the server
+     refuses with "no show loaded". So on arm we post the current bake at the
+     audio position, THEN arm. The layout polls rig status into the store every
+     second, so the pill stays fresh. */
+  const handleRigToggle = useCallback(async () => {
+    const st = usePortalStore.getState();
+    const current = st.rig;
+    if (!current) return;
+    const want = !current.armed;
+    try {
+      if (want && st.job) await api.rig.at(st.job, position());
+      const result = await api.rig.arm(want);
+      if (result.error) { setStageMsg(`rig: ${result.error}`); return; }
+      setRig(result);
+    } catch { /* noop */ }
+  }, [setRig, position]);
+
+  /* While armed, keep the rig anchored to the audio: it parks itself STALE_S
+     (0.4s) after the last position it heard, so a show only follows playback if
+     we re-post where we are. Responses are dropped on purpose — the 1s status
+     poll owns the pill, and setting rig state at 7 Hz would re-render the whole
+     editor for nothing. The interval is idle (one getState check) when disarmed. */
+  useEffect(() => {
+    const id = setInterval(() => {
+      const st = usePortalStore.getState();
+      if (st.rig?.armed && st.job) api.rig.at(st.job, position()).catch(() => {});
+    }, 150);
+    return () => clearInterval(id);
+  }, [position]);
 
   /* ── the song's own show file, if the hub has one ──────────────────────────
      Authored show files are the point of the v2 baker, so one is loaded the
@@ -624,20 +657,24 @@ export default function StagePage() {
             </div>
             <span className="flex-1" />
             <div className="flex items-center gap-[var(--spacing-s2)] pt-[6px]">
+              {/* Import and send-to-rig are available in every role: a venue
+                  operator loads the authored show file and takes it live from
+                  this same page. Save stays the creator's, below. */}
+              <input
+                ref={importInputRef}
+                type="file"
+                accept="application/json,.json"
+                hidden
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.currentTarget.value = "";
+                  if (f) importPlan(f);
+                }}
+              />
+              <Button variant="ghost" onClick={() => importInputRef.current?.click()}>Import show file</Button>
+              <RigControl onToggle={handleRigToggle} />
               {role === "creator" && (
                 <>
-                  <input
-                    ref={importInputRef}
-                    type="file"
-                    accept="application/json,.json"
-                    hidden
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      e.currentTarget.value = "";
-                      if (f) importPlan(f);
-                    }}
-                  />
-                  <Button variant="ghost" onClick={() => importInputRef.current?.click()}>Import plan</Button>
                   <div className="w-px h-[var(--hit)] bg-line mx-[2px]" />
                   {/* The name is asked for in the dialog this opens, not typed
                       into the header beforehand. */}

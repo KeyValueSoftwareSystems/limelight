@@ -2029,10 +2029,10 @@ def make_handler(library, baker, rig):
                     try:
                         with open(composed) as fh:
                             plan_data = json.load(fh)
-                        rig = (body.get("layout") or DEFAULT_LAYOUT).replace(".layout.json", "")
-                        job = baker.start_v2(song, plan_data, rig)
+                        rig_name = (body.get("layout") or DEFAULT_LAYOUT).replace(".layout.json", "")
+                        job = baker.start_v2(song, plan_data, rig_name)
                         return self._json({"job": job, "state": "baking", "song": song,
-                                           "rig": rig, "source": "composed"})
+                                           "rig": rig_name, "source": "composed"})
                     except Exception as e:                          # noqa: BLE001
                         sys.stderr.write("composed plan unusable (%s); arranging instead\n" % e)
                 job = baker.start(song, seed, edits,
