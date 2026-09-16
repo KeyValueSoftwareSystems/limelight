@@ -381,7 +381,17 @@ export default function StagePage() {
   const importPlan = useCallback(
     async (file: File) => {
       try {
-        await applyPlan(asPlan(JSON.parse(await file.text())), "imported plan");
+        const raw = JSON.parse(await file.text()) as Record<string, unknown>;
+        const plan = asPlan(raw);
+        /* Say what was loaded. Two files with the same name in two folders can
+           differ by two thirds of their cues, and the only way to tell which one
+           the dialog handed over is to count what came in. */
+        const n = (k: string) => ((plan as Record<string, unknown>)[k] as unknown[] | undefined)?.length ?? 0;
+        setStageMsg(
+          `importing ${file.name} (${(file.size / 1024).toFixed(1)} KB): ` +
+          `${n("states")} looks, ${n("bindings")} bindings, ${n("gestures")} cues…`,
+        );
+        await applyPlan(plan, `imported ${file.name} — ${n("states")}/${n("bindings")}/${n("gestures")}`);
       } catch (e) {
         setStageMsg(
           e instanceof Error ? "import failed: " + e.message : "import failed",
