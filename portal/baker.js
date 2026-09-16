@@ -103,13 +103,27 @@ function measuredBeatAt(t) {
   return at + (step > 0 ? (t - here) / step : 0);
 }
 
+const barPhase = (() => {
+  const flags = (score.beats || []).map((b, i) => (b && b.downbeat ? i : -1)).filter(i => i >= 0);
+  const per = (score.grid && score.grid.beats_per_bar) || 4;
+  return flags.length ? ((flags[0] % per) + per) % per : 0;
+})();
+
+function beatIndexOfBar(bar, beat) {
+  const per = (score.grid && score.grid.beats_per_bar) || 4;
+  return barPhase + (Math.round(bar) - 1) * per + (Math.round(beat || 1) - 1);
+}
+
 function beatSecond(i) {
   if (!beatTimes.length) return 0;
   const step = 60 / bpm;
   if (i < 0) return beatTimes[0] + i * step;
-  if (i >= beatTimes.length)
+  if (i >= beatTimes.length - 1)
     return beatTimes[beatTimes.length - 1] + (i - beatTimes.length + 1) * step;
-  return beatTimes[i];
+  const lo = Math.floor(i);
+  const frac = i - lo;
+  if (frac === 0) return beatTimes[lo];
+  return beatTimes[lo] + (beatTimes[lo + 1] - beatTimes[lo]) * frac;
 }
 
 const REDUCTIVE = new Set(["blackout", "cut", "hush", "strip", "isolate", "fade"]);
@@ -187,7 +201,15 @@ function resolveGesture(g) {
   if (!edef || !dmxFunctions[eid]) return null;
 
   let startS, endS;
-  if (g.moment != null && g.moment >= 0 && g.moment < moments.length) {
+  if (g.at_bar != null && isFinite(g.at_bar)) {
+    const forBeats = g.for_beats || edef.default_beats || 1;
+    const fire = beatIndexOfBar(g.at_bar, g.at_beat) - (g.lead_beats || 0);
+    startS = beatSecond(fire);
+    endS = beatSecond(fire + forBeats);
+  } else if (g.from_bar != null && g.to_bar != null) {
+    startS = beatSecond(beatIndexOfBar(g.from_bar, g.from_beat));
+    endS = beatSecond(beatIndexOfBar(g.to_bar, g.to_beat));
+  } else if (g.moment != null && g.moment >= 0 && g.moment < moments.length) {
     const m = moments[g.moment];
     const leadBeats = g.lead_beats || 0;
     const forBeats = g.for_beats || edef.default_beats || 1;
@@ -207,7 +229,9 @@ function resolveGesture(g) {
   const params = { ...edef.dials };
   for (const [k, v] of Object.entries(g)) {
     if (k !== "effect" && k !== "moment" && k !== "from_moment" && k !== "to_moment" &&
-        k !== "lead_beats" && k !== "why") {
+        k !== "lead_beats" && k !== "why" &&
+        k !== "at_bar" && k !== "at_beat" && k !== "from_bar" && k !== "to_bar" &&
+        k !== "from_beat" && k !== "to_beat") {
       if (typeof v === "object" && v !== null && v.default !== undefined) {
         params[k] = v.default;
       } else {
@@ -265,6 +289,14 @@ function resolveState(s) {
     const a = anchor(s.to_moment);
     if (a != null) endS = Math.min(endS, a);
   }
+  if (s.from_bar != null && isFinite(s.from_bar)) {
+    const a = beatSecond(beatIndexOfBar(s.from_bar, s.from_beat));
+    if (isFinite(a)) startS = Math.max(startS, a);
+  }
+  if (s.to_bar != null && isFinite(s.to_bar)) {
+    const a = beatSecond(beatIndexOfBar(s.to_bar, s.to_beat));
+    if (isFinite(a)) endS = Math.min(endS, a);
+  }
   if (s.after_beats != null && isFinite(s.after_beats)) {
     startS = Math.min(endS, beatSecond(nearestBeat(startS) + Number(s.after_beats)));
   }
@@ -277,7 +309,8 @@ function resolveState(s) {
   for (const [k, v] of Object.entries(s)) {
     if (k !== "effect" && k !== "section" && k !== "why" &&
         k !== "from_moment" && k !== "to_moment" &&
-        k !== "after_beats" && k !== "for_beats") {
+        k !== "after_beats" && k !== "for_beats" &&
+        k !== "from_bar" && k !== "to_bar" && k !== "from_beat" && k !== "to_beat") {
       params[k] = typeof v === "object" && v !== null && v.default !== undefined ? v.default : v;
     }
   }

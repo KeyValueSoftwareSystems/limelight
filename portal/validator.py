@@ -255,8 +255,21 @@ def validate(plan, catalog, score_overview):
         if edef["kind"] not in ("gesture",) and not edef.get("also_gesture"):
             report.append({"level": "error", "msg": f"gesture[{i}]: '{eid}' is a {edef['kind']}, not a gesture"})
             continue
-        # check moment references
-        if "moment" in g:
+        # check anchors: a bar/beat position on the grid, or a measured moment
+        bars = (score_overview.get("grid") or {}).get("bars")
+        if "at_bar" in g or ("from_bar" in g and "to_bar" in g):
+            vals = [g.get(k) for k in ("at_bar", "from_bar", "to_bar") if k in g]
+            bad = [v for v in vals if not isinstance(v, (int, float)) or v < 1]
+            if bad:
+                report.append({"level": "error", "msg": f"gesture[{i}]: bar {bad[0]} is not a bar number"})
+                continue
+            if isinstance(bars, int) and bars > 0:
+                over = [v for v in vals if v > bars]
+                if over:
+                    report.append({"level": "error",
+                                   "msg": f"gesture[{i}]: bar {over[0]} is past the end of the song ({bars} bars)"})
+                    continue
+        elif "moment" in g:
             mi = g["moment"]
             if not isinstance(mi, int) or mi < 0 or mi >= len(moments):
                 report.append({"level": "error", "msg": f"gesture[{i}]: moment {mi} out of range (0..{len(moments)-1})"})
@@ -270,7 +283,9 @@ def validate(plan, catalog, score_overview):
                 report.append({"level": "error", "msg": f"gesture[{i}]: to_moment {tm} out of range"})
                 continue
         else:
-            report.append({"level": "error", "msg": f"gesture[{i}]: no moment or from_moment/to_moment anchor"})
+            report.append({"level": "error",
+                           "msg": f"gesture[{i}]: no anchor - give it at_bar (with an optional at_beat), "
+                                  f"from_bar/to_bar, a moment, or from_moment/to_moment"})
             continue
         if not g.get("why"):
             report.append({"level": "warn", "msg": f"gesture[{i}]: no 'why'"})
