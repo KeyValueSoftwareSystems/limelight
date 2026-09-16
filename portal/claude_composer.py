@@ -74,6 +74,49 @@ def rig_facts(rig):
     return "\n".join(bits) or "  (rig unknown)"
 
 
+def bar_table(song):
+    try:
+        import composer as C
+        sc = C._score_of({"_song": song})
+    except Exception:
+        return []
+    beats = [b.get("t") if isinstance(b, dict) else b for b in (sc.get("beats") or [])]
+    beats = [t for t in beats if isinstance(t, (int, float))]
+    if not beats:
+        return []
+    bpb = int(((sc.get("grid") or {}).get("beats_per_bar")) or 4)
+    ac = sc.get("acoustic") or {}
+    loud = ac.get("loudness") or []
+    w = ac.get("window_s") or 0.5
+    if not loud:
+        return []
+    lo, hi = min(loud), max(loud)
+    rng = (hi - lo) or 1.0
+    hits = [h.get("t") for h in ((sc.get("rhythm") or {}).get("hits") or [])
+            if isinstance(h, dict) and isinstance(h.get("t"), (int, float))]
+    st = sc.get("stems_temporal") or {}
+    lanes = st.get("stems") or {}
+    lw = st.get("window_s") or 0.5
+    rows = []
+    for bar in range(len(beats) // bpb):
+        t0 = beats[bar * bpb]
+        t1 = beats[min(len(beats) - 1, (bar + 1) * bpb)]
+        if t1 <= t0:
+            continue
+        seg = loud[int(t0 / w):max(int(t0 / w) + 1, int(t1 / w))]
+        pct = int(round(((sum(seg) / len(seg)) - lo) / rng * 100)) if seg else 0
+        n = sum(1 for h in hits if t0 <= h < t1)
+        top = []
+        for name, ser in lanes.items():
+            a0, a1 = int(t0 / lw), max(int(t0 / lw) + 1, int(t1 / lw))
+            part = ser[a0:a1]
+            if part and max(part) > 0.45:
+                top.append((max(part), name))
+        top.sort(reverse=True)
+        rows.append((bar + 1, t0, pct, n, [n2 for _v, n2 in top[:3]]))
+    return rows
+
+
 def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
     EFFECT_BEHAVIOUR = effect_behaviour(rig)
     RIG_FACTS = rig_facts(rig)
@@ -91,6 +134,16 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "",
             "THE EFFECT CATALOG is in your system prompt, with every dial and its",
             "range. It is not repeated here.",
+            "",
+            "THE SONG BAR BY BAR",
+            "",
+            "loud is that bar's mean loudness as a percentage of this song's own",
+            "range, hits is how many drum onsets were struck in it, and the names are",
+            "the lanes running loudest. This is where the highs and lows are. A",
+            "section is an average of these; the show does not have to be.",
+            "",
+            *[f"  bar {b:3d}  {t:6.1f}s  loud {p:3d}%  hits {n:2d}  {', '.join(names)}"
+              for b, t, p, n, names in bar_table(song)],
             "",
             "ASKING THE SCORE FOR MORE",
             "",
