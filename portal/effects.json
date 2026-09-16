@@ -637,7 +637,8 @@
           "min": 0,
           "max": 1
         },
-        "colour": null
+        "colour": null,
+        "travel": 0.22
       },
       "fires_on": [
         "a section where one instrument leads"
@@ -975,7 +976,7 @@
     {
       "id": "chase",
       "name": "Chase",
-      "kind": "gesture",
+      "kind": "binding",
       "tier": 2,
       "dimension": "place",
       "returns": true,
@@ -1013,13 +1014,10 @@
           "default": 4,
           "min": 1,
           "max": 32
-        }
+        },
+        "stream": null
       },
-      "fires_on": [
-        "rhythm_change",
-        "build",
-        "instrumental"
-      ],
+      "fires_on": "a section that should travel across the lamps",
       "min_fixtures": 3,
       "requires": [
         "level"
@@ -1265,7 +1263,7 @@
     {
       "id": "alternate",
       "name": "Alternate",
-      "kind": "gesture",
+      "kind": "binding",
       "tier": 2,
       "dimension": "place",
       "returns": true,
@@ -1304,13 +1302,10 @@
           "default": 4,
           "min": 1,
           "max": 32
-        }
+        },
+        "stream": null
       },
-      "fires_on": [
-        "rhythm_change",
-        "build",
-        "chorus"
-      ],
+      "fires_on": "a section that should travel across the lamps",
       "min_fixtures": 2,
       "requires": [
         "level"
@@ -1320,7 +1315,7 @@
     {
       "id": "ripple",
       "name": "Ripple",
-      "kind": "gesture",
+      "kind": "binding",
       "tier": 2,
       "dimension": "place",
       "returns": true,
@@ -1352,13 +1347,10 @@
           "default": 4,
           "min": 1,
           "max": 32
-        }
+        },
+        "stream": null
       },
-      "fires_on": [
-        "instrumental",
-        "melody_resume",
-        "harmonic_rhythm"
-      ],
+      "fires_on": "a section that should travel across the lamps",
       "min_fixtures": 3,
       "requires": [
         "level"

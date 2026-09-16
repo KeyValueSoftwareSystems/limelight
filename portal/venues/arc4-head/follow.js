@@ -15,6 +15,7 @@ module.exports = function follow(params, ctx) {
 
   const spread = params.spread != null ? params.spread : 0.35;
   const lean = params.lean != null ? params.lean : 0;
+  const travel = params.travel != null ? params.travel : 0.22;
 
   function render(value, t) {
     const v = H.clamp(value || 0, 0, 1);
@@ -29,8 +30,8 @@ module.exports = function follow(params, ctx) {
     });
     H.setHead(f, H.HEADS[0], {
       level: Math.max(0.18, level * 0.85), colour,
-      pan: 0.60 + 0.15 * Math.sin(2 * Math.PI * beat / 8),   // slow sweep, 8-beat period
-      tilt: 0.30 + 0.06 * Math.sin(2 * Math.PI * beat / 6),
+      pan: 0.5 + travel * (v - 0.5) * 2,
+      tilt: 0.28 + 0.14 * v,
     });
     return f;
   }

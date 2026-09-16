@@ -273,7 +273,8 @@ function stateColourFor(secIdx) {
 function generateFrames(entry) {
   const fn = dmxFunctions[entry.eid];
   if (!fn) return null;
-  const ctx = { fps, bpm, layout, restColour: entry.restColour || null };
+  const ctx = { fps, bpm, layout, restColour: entry.restColour || null,
+                beatAt: (t) => S.beatAt(t) };
   const result = fn(entry.params, ctx);
   return result;
 }
