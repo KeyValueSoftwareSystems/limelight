@@ -57,8 +57,10 @@ function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 function makeStreamSampler(score, opts) {
   opts = opts || {};
   const st = (score && score.stems_temporal) || {};
-  const win = st.window_s > 0 ? st.window_s : 0.5;
-  const stems = st.stems || {};
+  const fine = (score && score.stems_fine) || null;
+  const useFine = fine && fine.window_s > 0 && fine.stems && Object.keys(fine.stems).length;
+  const win = useFine ? fine.window_s : (st.window_s > 0 ? st.window_s : 0.5);
+  const stems = useFine ? fine.stems : (st.stems || {});
   const names = Object.keys(stems);
   const byLower = new Map(names.map(n => [n.toLowerCase(), n]));
 
@@ -161,14 +163,32 @@ function makeStreamSampler(score, opts) {
    accent rides onsets (a scalar). A binding naming two streams (split) gets a
    [left, right] pair. Anything else (follow) gets a single stream's scalar. The
    shape has to match what the effect module's render() destructures. */
+function smoother(binding, sampler) {
+  const params = (binding && binding.params) || {};
+  const k = params.smooth != null ? Number(params.smooth) : 0;
+  if (!(k > 0)) return (v) => v;
+  const tau = 0.02 + k * 0.45;
+  let prev = null, last = null;
+  return (v, t) => {
+    if (prev === null || last === null || t < last) { prev = v; last = t; return v; }
+    const dt = Math.max(0, t - last);
+    const a = 1 - Math.exp(-dt / tau);
+    prev = prev + (v - prev) * a;
+    last = t;
+    return prev;
+  };
+}
+
 function bindingValueFn(binding, sampler) {
   const streams = binding && binding.streams;
   if (binding && binding.eid === "accent") return t => sampler.sampleOnset(t);
   if (Array.isArray(streams) && streams.length >= 2) {
-    return t => streams.map(s => sampler.sampleStem(s, t));
+    const fs = streams.map(() => smoother(binding, sampler));
+    return t => streams.map((s, i) => fs[i](sampler.sampleStem(s, t), t));
   }
   const single = Array.isArray(streams) ? streams[0] : streams;
-  return t => sampler.sampleStem(single, t);
+  const f = smoother(binding, sampler);
+  return t => f(sampler.sampleStem(single, t), t);
 }
 
 module.exports = { frameAt, slew, makeStreamSampler, bindingValueFn, clamp01 };
