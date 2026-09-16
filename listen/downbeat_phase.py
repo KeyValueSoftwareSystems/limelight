@@ -46,9 +46,19 @@ def analyse(sg,audio):
         nulls.append(100*float(np.mean([near(t,ch,0.10) for t in ts])))
     nm,nsd=float(np.mean(nulls)),max(0.5,float(np.std(nulls)))
     sd=(chord[best]-nm)/nsd
+    hits=[h.get("t") for h in ((sc.get("rhythm") or {}).get("hits") or []) if isinstance(h,dict)]
+    hits=np.array(sorted(h for h in hits if isinstance(h,(int,float))))
+    def onset_density(ph):
+        if len(hits)<20: return None
+        ts=bt[[i for i in range(len(bt)) if i%period==ph]]
+        if not len(ts): return None
+        return float(sum(np.sum((hits>=t-0.06)&(hits<=t+0.06)) for t in ts))/len(ts)
+    d_best,d_cur=onset_density(best),onset_density(cur)
+    onset_contradicts=(d_best is not None and d_cur is not None and d_cur>d_best*1.08)
     return dict(sp=sp,sc=sc,B=B,period=period,cur=cur,best=best,chord=chord,low=lowe,
                 margin=margin,sd=sd,off=(best-cur)%period,
-                low_agrees=(max(lowe,key=lowe.get)==best))
+                low_agrees=(max(lowe,key=lowe.get)==best),
+                d_best=d_best,d_cur=d_cur,onset_contradicts=onset_contradicts)
 
 apply="--apply" in sys.argv
 songs=[a for a in sys.argv[1:] if not a.startswith("--")]
@@ -60,12 +70,18 @@ for sg in songs:
     try: r=analyse(sg,audio)
     except Exception as e: print(f"{sg:30s} ERR {e}"); continue
     if not r: print(f"{sg:30s} insufficient data"); continue
-    ok = r["off"]!=0 and r["margin"]>=MARGIN_MIN and r["sd"]>=SD_MIN
+    ok = (r["off"]!=0 and r["margin"]>=MARGIN_MIN and r["sd"]>=SD_MIN
+          and not r["onset_contradicts"])
     agree = "low-end agrees" if r["low_agrees"] else "low-end DISAGREES"
-    status = "RE-PHASE" if ok else ("ok" if r["off"]==0 else "weak, left alone")
+    if ok: status="RE-PHASE"
+    elif r["off"]==0: status="ok"
+    elif r["onset_contradicts"]: status="ONSETS CONTRADICT, left alone"
+    else: status="weak, left alone"
     print(f"{sg:30s} metre {r['period']} phase {r['cur']}->{r['best']} (+{r['off']})  "
           f"chord {r['chord'][r['cur']]:.1f}%->{r['chord'][r['best']]:.1f}%  "
-          f"margin {r['margin']:.1f} sd {r['sd']:.1f}  {agree}  [{status}]")
+          f"margin {r['margin']:.1f} sd {r['sd']:.1f}  {agree}  "
+          f"onsets {r['d_cur'] if r['d_cur'] is None else round(r['d_cur'],2)}"
+          f"->{r['d_best'] if r['d_best'] is None else round(r['d_best'],2)}  [{status}]")
     if ok and apply:
         shutil.copy2(r["sp"], r["sp"]+f".bak-{stamp}")
         B=r["B"]; period=r["period"]; best=r["best"]
@@ -79,7 +95,10 @@ for sg in songs:
             "chord_hit_before":round(r["chord"][r["cur"]],1),
             "chord_hit_after":round(r["chord"][best],1),
             "margin":round(r["margin"],1),"sd":round(r["sd"],1),
-            "low_end_agrees":bool(r["low_agrees"]),"tool":"tools/fixdownbeats.py"}
+            "low_end_agrees":bool(r["low_agrees"]),
+            "onset_density_before":None if r["d_cur"] is None else round(r["d_cur"],3),
+            "onset_density_after":None if r["d_best"] is None else round(r["d_best"],3),
+            "tool":"listen/downbeat_phase.py"}
         json.dump(r["sc"],open(r["sp"],"w"))
         changed.append(sg)
 if apply: print(f"\nrewrote {len(changed)}: "+", ".join(changed))
