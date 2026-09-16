@@ -452,6 +452,13 @@
     },
     "keep": {
      "default": []
+    },
+    "colour": {
+     "default": [
+      1,
+      0.85,
+      0.6
+     ]
     }
    },
    "fires_on": [
@@ -479,6 +486,13 @@
     },
     "curve": {
      "default": "ease"
+    },
+    "colour": {
+     "default": [
+      0.2,
+      0.4,
+      0.9
+     ]
     }
    },
    "span_anchors": [
@@ -552,6 +566,13 @@
      "default": 0.3,
      "min": 0,
      "max": 1
+    },
+    "colour": {
+     "default": [
+      1,
+      0.8,
+      0.5
+     ]
     }
    },
    "fires_on": [
@@ -661,6 +682,13 @@
      "default": 4,
      "min": 1,
      "max": 16
+    },
+    "colour": {
+     "default": [
+      0.8,
+      0.7,
+      0.5
+     ]
     }
    },
    "fires_on": [
@@ -751,6 +779,13 @@
      "default": 2,
      "min": 0.5,
      "max": 4
+    },
+    "colour": {
+     "default": [
+      0.9,
+      0.6,
+      0.3
+     ]
     }
    },
    "fires_on": [
@@ -786,6 +821,24 @@
      "default": 0.3,
      "min": 0,
      "max": 1
+    },
+    "colour": {
+     "default": null
+    },
+    "floor": {
+     "default": 0
+    },
+    "lean": {
+     "default": 0
+    },
+    "response": {
+     "default": 1
+    },
+    "spread": {
+     "default": 0.35
+    },
+    "travel": {
+     "default": 0.22
     }
    },
    "fires_on": [
@@ -825,6 +878,9 @@
        1
       ]
      ]
+    },
+    "rest": {
+     "default": 0.14
     }
    },
    "fires_on": [
@@ -858,6 +914,15 @@
      "default": 4,
      "min": 1,
      "max": 16
+    },
+    "bed_colour": {
+     "default": null
+    },
+    "colour": {
+     "default": null
+    },
+    "rest": {
+     "default": 0.22
     }
    },
    "fires_on": [
