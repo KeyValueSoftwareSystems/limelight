@@ -1,312 +1,1584 @@
 {
  "schema": "limelight.show/1",
  "song": "raga-of-revenge",
- "plan": "A devotional line lit warm and held back, so the one place the room goes white is the bar the song is loudest.",
+ "duration_s": 131.286,
+ "grid": {
+  "bpm": 118.77,
+  "beats_per_bar": 4,
+  "first_beat_s": 1.76,
+  "bars": 65,
+  "steady": 0.88,
+  "first_bar": 1,
+  "last_bar": 65,
+  "tempo": [
+   {
+    "from_beat": -2,
+    "at_s": 0.37,
+    "bpm": 90.909
+   },
+   {
+    "from_beat": -1,
+    "at_s": 1.03,
+    "bpm": 82.192
+   },
+   {
+    "from_beat": 0,
+    "at_s": 1.76,
+    "bpm": 89.552
+   },
+   {
+    "from_beat": 1,
+    "at_s": 2.43,
+    "bpm": 81.081
+   },
+   {
+    "from_beat": 2,
+    "at_s": 3.17,
+    "bpm": 90.226
+   },
+   {
+    "from_beat": 8,
+    "at_s": 7.16,
+    "bpm": 90.226
+   },
+   {
+    "from_beat": 10,
+    "at_s": 8.49,
+    "bpm": 95.238
+   },
+   {
+    "from_beat": 12,
+    "at_s": 9.75,
+    "bpm": 86.331
+   },
+   {
+    "from_beat": 14,
+    "at_s": 11.14,
+    "bpm": 93.75
+   },
+   {
+    "from_beat": 15,
+    "at_s": 11.78,
+    "bpm": 86.331
+   },
+   {
+    "from_beat": 17,
+    "at_s": 13.17,
+    "bpm": 88.235
+   },
+   {
+    "from_beat": 22,
+    "at_s": 16.57,
+    "bpm": 92.308
+   },
+   {
+    "from_beat": 23,
+    "at_s": 17.22,
+    "bpm": 113.924
+   },
+   {
+    "from_beat": 26,
+    "at_s": 18.8,
+    "bpm": 121.457
+   },
+   {
+    "from_beat": 31,
+    "at_s": 21.27,
+    "bpm": 118.421
+   },
+   {
+    "from_beat": 34,
+    "at_s": 22.79,
+    "bpm": 120.267
+   },
+   {
+    "from_beat": 43,
+    "at_s": 27.28,
+    "bpm": 116.129
+   },
+   {
+    "from_beat": 46,
+    "at_s": 28.83,
+    "bpm": 121.996
+   },
+   {
+    "from_beat": 57,
+    "at_s": 34.24,
+    "bpm": 119.908
+   },
+   {
+    "from_beat": 83,
+    "at_s": 47.25,
+    "bpm": 120
+   },
+   {
+    "from_beat": 216,
+    "at_s": 113.75,
+    "bpm": 116.883
+   },
+   {
+    "from_beat": 219,
+    "at_s": 115.29,
+    "bpm": 120.361
+   },
+   {
+    "from_beat": 239,
+    "at_s": 125.26,
+    "bpm": 124.138
+   },
+   {
+    "from_beat": 242,
+    "at_s": 126.71,
+    "bpm": 133.333
+   }
+  ],
+  "refit": {
+   "tolerance_s": 0.03,
+   "segments": 24,
+   "mean_err_ms": 9.4,
+   "max_err_ms": 29.6,
+   "note": "beat 0 is the first FLAGGED downbeat; beats before it are the pickup in bar 0"
+  },
+  "pickup": {
+   "count": 2,
+   "before_bar_1": [
+    0.37,
+    1.03
+   ]
+  }
+ },
+ "built_from": "the whole protocol response: both segmentations, layers.subsection, layers.presence, chords, energy, moments, rhythm",
  "states": [
   {
    "effect": "drone",
-   "section": 0,
-   "amount": 0.18,
+   "amount": 0.21,
    "colour": [
-    0.85,
-    0.16,
-    0.04
+    0.75,
+    0.15,
+    0.35
    ],
-   "extent": "inner"
+   "extent": "all",
+   "why": "intro, establishing, drums none — D:min. Level 0.30.",
+   "id": "s0",
+   "section": 0,
+   "from_s": 0,
+   "to_s": 7.16,
+   "at": {
+    "bar": 1,
+    "beat": 1,
+    "beats": 14
+   }
   },
   {
-   "effect": "wash",
-   "section": 2,
-   "amount": 0.3,
+   "effect": "drone",
+   "amount": 0.21,
    "colour": [
-    1,
-    0.52,
-    0.12
+    0.4,
+    0.62,
+    1
    ],
-   "extent": "all"
+   "extent": "all",
+   "why": "intro, intensifying, drums none — F. Level 0.30.",
+   "id": "s1",
+   "section": 0,
+   "from_s": 7.16,
+   "to_s": 12.5,
+   "at": {
+    "bar": 3,
+    "beat": 1,
+    "beats": 10
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.21,
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "extent": "all",
+   "why": "intro, sustaining, drums none — A#. Level 0.30.",
+   "id": "s2",
+   "section": 0,
+   "from_s": 12.5,
+   "to_s": 17.75,
+   "at": {
+    "bar": 5,
+    "beat": 1,
+    "beats": 10
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.21,
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "extent": "all",
+   "why": "intro, easing, drums none — A. Level 0.30.",
+   "id": "s3",
+   "section": 0,
+   "from_s": 17.75,
+   "to_s": 21.8,
+   "at": {
+    "bar": 7,
+    "beat": 1,
+    "beats": 8
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.21,
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "extent": "all",
+   "why": "intro, resolving, drums none — C. Level 0.30.",
+   "id": "s4",
+   "section": 0,
+   "from_s": 21.8,
+   "to_s": 25.56,
+   "at": {
+    "bar": 9,
+    "beat": 1,
+    "beats": 7
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.21,
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "extent": "all",
+   "why": "intro, resolving, drums none — C. Level 0.30.",
+   "id": "s5",
+   "section": 1,
+   "from_s": 25.56,
+   "to_s": 25.78,
+   "at": {
+    "bar": 10,
+    "beat": 4,
+    "beats": 1
+   }
   },
   {
    "effect": "pulse",
+   "amount": 0.3,
+   "colour": [
+    0.75,
+    0.15,
+    0.35
+   ],
+   "extent": "all",
+   "floor": 0.16,
+   "peak": 0.95,
+   "why": "instrumental, developing, drums light — A:min7. Level 0.30.",
+   "id": "s6",
+   "section": 1,
+   "from_s": 25.78,
+   "to_s": 31.78,
+   "at": {
+    "bar": 11,
+    "beat": 1,
+    "beats": 12
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.21,
+   "colour": [
+    0.55,
+    0.45,
+    0.85
+   ],
+   "extent": "all",
+   "why": "instrumental, intensifying, drums none — A:7. Level 0.30.",
+   "id": "s7",
+   "section": 1,
+   "from_s": 31.78,
+   "to_s": 41.75,
+   "at": {
+    "bar": 14,
+    "beat": 1,
+    "beats": 19
+   }
+  },
+  {
+   "effect": "pulse",
+   "amount": 0.55,
+   "colour": [
+    0.75,
+    0.15,
+    0.35
+   ],
+   "extent": "all",
+   "floor": 0.21,
+   "peak": 0.95,
+   "why": "instrumental, resolving, drums light — D:min. Level 0.55.",
+   "id": "s8",
+   "section": 1,
+   "from_s": 41.75,
+   "to_s": 47.74,
+   "at": {
+    "bar": 19,
+    "beat": 1,
+    "beats": 12
+   }
+  },
+  {
+   "effect": "pulse",
+   "amount": 0.55,
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "extent": "all",
+   "floor": 0.21,
+   "peak": 0.95,
+   "why": "instrumental, developing, drums light — C. Level 0.55.",
+   "id": "s9",
+   "section": 1,
+   "from_s": 47.74,
+   "to_s": 48.24,
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 1
+   }
+  },
+  {
+   "effect": "pulse",
+   "amount": 0.55,
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "extent": "all",
+   "floor": 0.21,
+   "peak": 0.95,
+   "why": "instrumental, developing, drums light — C. Level 0.55.",
+   "id": "s10",
    "section": 2,
-   "amount": 0.52,
+   "from_s": 48.24,
+   "to_s": 51.76,
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 7
+   }
+  },
+  {
+   "effect": "drive",
+   "amount": 0.826,
+   "colours": [
+    [
+     0.92,
+     0.04,
+     0.03
+    ],
+    [
+     1,
+     1,
+     1
+    ]
+   ],
+   "extent": "all",
+   "floor": 0.588,
+   "peak": 1,
+   "why": "chorus, sustaining, drums full — D:min. Level 0.83.",
+   "id": "s11",
+   "section": 2,
+   "from_s": 51.76,
+   "to_s": 63.76,
+   "at": {
+    "bar": 24,
+    "beat": 1,
+    "beats": 23
+   }
+  },
+  {
+   "effect": "pulse",
+   "amount": 0.699,
+   "colour": [
+    0.92,
+    0.04,
+    0.03
+   ],
+   "extent": "all",
+   "floor": 0.24,
+   "peak": 0.95,
+   "why": "chorus, intensifying, drums full — A:min. Level 0.70.",
+   "id": "s12",
+   "section": 2,
+   "from_s": 63.76,
+   "to_s": 71.76,
+   "at": {
+    "bar": 30,
+    "beat": 1,
+    "beats": 16
+   }
+  },
+  {
+   "effect": "pulse",
+   "amount": 0.62,
    "colour": [
     1,
-    0.52,
-    0.12
+    1,
+    1
    ],
    "extent": "all",
-   "floor": 0.18,
-   "peak": 0.88
+   "floor": 0.224,
+   "peak": 0.95,
+   "why": "chorus, resolving, drums light — A#. Level 0.62.",
+   "id": "s13",
+   "section": 2,
+   "from_s": 71.76,
+   "to_s": 81.76,
+   "at": {
+    "bar": 34,
+    "beat": 1,
+    "beats": 19
+   }
   },
   {
-   "effect": "drive",
+   "effect": "pulse",
+   "amount": 0.62,
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "floor": 0.224,
+   "peak": 0.95,
+   "why": "chorus, developing, drums light — A#. Level 0.62.",
+   "id": "s14",
+   "section": 2,
+   "from_s": 81.76,
+   "to_s": 81.77,
+   "at": {
+    "bar": 39,
+    "beat": 1,
+    "beats": 1
+   }
+  },
+  {
+   "effect": "pulse",
+   "amount": 0.62,
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "floor": 0.224,
+   "peak": 0.95,
+   "why": "chorus, developing, drums light — A#. Level 0.62.",
+   "id": "s15",
    "section": 3,
-   "amount": 0.85,
+   "from_s": 81.77,
+   "to_s": 89.75,
+   "at": {
+    "bar": 39,
+    "beat": 1,
+    "beats": 15
+   }
+  },
+  {
+   "effect": "breakdown",
+   "amount": 0.805,
    "colours": [
     [
      1,
-     0.52,
-     0.12
+     1,
+     1
     ],
     [
-     0.85,
-     0.16,
-     0.04
+     1,
+     1,
+     1
     ]
    ],
-   "extent": "all",
-   "floor": 0.4,
-   "peak": 1
+   "floor": 0.157,
+   "peak": 1,
+   "why": "chorus, resolving, drums full — C. Level 0.81.",
+   "id": "s16",
+   "section": 3,
+   "from_s": 89.75,
+   "to_s": 95.76,
+   "at": {
+    "bar": 43,
+    "beat": 1,
+    "beats": 12
+   }
   },
   {
-   "effect": "drive",
+   "effect": "wash",
+   "amount": 0.62,
+   "colour": [
+    0.92,
+    0.04,
+    0.03
+   ],
+   "extent": "all",
+   "why": "chorus, sustaining, drums light — A:min. Level 0.62.",
+   "id": "s17",
+   "section": 3,
+   "from_s": 95.76,
+   "to_s": 97.29,
+   "at": {
+    "bar": 46,
+    "beat": 1,
+    "beats": 3
+   }
+  },
+  {
+   "effect": "wash",
+   "amount": 0.62,
+   "colour": [
+    0.92,
+    0.04,
+    0.03
+   ],
+   "extent": "all",
+   "why": "chorus, sustaining, drums light — A:min. Level 0.62.",
+   "id": "s18",
    "section": 4,
-   "amount": 1,
+   "from_s": 97.29,
+   "to_s": 103.76,
+   "at": {
+    "bar": 46,
+    "beat": 4,
+    "beats": 13
+   }
+  },
+  {
+   "effect": "breakdown",
+   "amount": 0.887,
    "colours": [
     [
      1,
-     0.78,
-     0.34
+     1,
+     1
     ],
     [
      1,
-     0.52,
-     0.12
+     1,
+     1
     ]
    ],
-   "extent": "all",
-   "floor": 0.62,
-   "peak": 1
+   "floor": 0.166,
+   "peak": 1,
+   "why": "chorus, resolving, drums full — C. Level 0.89.",
+   "id": "s19",
+   "section": 4,
+   "from_s": 103.76,
+   "to_s": 109.64,
+   "at": {
+    "bar": 50,
+    "beat": 1,
+    "beats": 11
+   }
   },
   {
-   "effect": "drone",
+   "effect": "breakdown",
+   "amount": 0.887,
+   "colours": [
+    [
+     1,
+     1,
+     1
+    ],
+    [
+     1,
+     1,
+     1
+    ]
+   ],
+   "floor": 0.166,
+   "peak": 1,
+   "why": "chorus, resolving, drums full — C. Level 0.89.",
+   "id": "s20",
    "section": 5,
-   "amount": 0.15,
+   "from_s": 109.64,
+   "to_s": 109.76,
+   "at": {
+    "bar": 52,
+    "beat": 4,
+    "beats": 1
+   }
+  },
+  {
+   "effect": "wash",
+   "amount": 0.34,
    "colour": [
-    0.85,
-    0.16,
-    0.04
+    1,
+    1,
+    1
    ],
-   "extent": "all"
+   "extent": "all",
+   "why": "outro, sustaining, drums none — G. Level 0.34.",
+   "id": "s21",
+   "section": 5,
+   "from_s": 109.76,
+   "to_s": 117.77,
+   "at": {
+    "bar": 53,
+    "beat": 1,
+    "beats": 16
+   }
+  },
+  {
+   "effect": "wash",
+   "amount": 0.34,
+   "colour": [
+    0.92,
+    0.04,
+    0.03
+   ],
+   "extent": "all",
+   "why": "outro, sustaining, drums none — D:min. Level 0.34.",
+   "id": "s22",
+   "section": 5,
+   "from_s": 117.77,
+   "to_s": 123.77,
+   "at": {
+    "bar": 57,
+    "beat": 1,
+    "beats": 12
+   }
   },
   {
    "effect": "drone",
-   "section": 6,
-   "amount": 0.05,
+   "amount": 0.23,
    "colour": [
-    0.85,
-    0.16,
-    0.04
+    1,
+    1,
+    1
    ],
-   "extent": "inner"
+   "extent": "all",
+   "why": "outro, easing, drums none — D. Level 0.34.",
+   "id": "s23",
+   "section": 5,
+   "from_s": 123.77,
+   "to_s": 127.61,
+   "at": {
+    "bar": 60,
+    "beat": 1,
+    "beats": 7
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.173,
+   "colour": [
+    0.95,
+    0.35,
+    0.05
+   ],
+   "extent": "all",
+   "why": "outro, developing, drums none — E:7. Level 0.23.",
+   "id": "s24",
+   "section": 5,
+   "from_s": 127.61,
+   "to_s": 128.28,
+   "at": {
+    "bar": 62,
+    "beat": 1,
+    "beats": 1
+   }
+  },
+  {
+   "effect": "drone",
+   "amount": 0.173,
+   "colour": [
+    0.95,
+    0.35,
+    0.05
+   ],
+   "extent": "all",
+   "why": "outro, developing, drums none — E:7. Level 0.23.",
+   "id": "s25",
+   "section": 6,
+   "from_s": 128.28,
+   "to_s": 131.286,
+   "at": {
+    "bar": 62,
+    "beat": 2,
+    "beats": 6
+   }
   }
  ],
  "bindings": [
   {
    "effect": "follow",
+   "stream": "bass",
+   "depth": 0.85,
+   "extent": "all",
+   "smooth": 0.1,
+   "why": "the bass riff IS this section, so the room breathes with the bass itself",
+   "id": "b0",
+   "section": 1,
+   "from_s": 41.75,
+   "to_s": 47.74,
+   "at": {
+    "bar": 19,
+    "beat": 1,
+    "beats": 12
+   }
+  },
+  {
+   "effect": "follow",
+   "stream": "bass",
+   "depth": 0.85,
+   "extent": "all",
+   "smooth": 0.1,
+   "why": "the bass riff IS this section, so the room breathes with the bass itself",
+   "id": "b1",
+   "section": 1,
+   "from_s": 47.74,
+   "to_s": 48.24,
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 1
+   }
+  },
+  {
+   "effect": "follow",
+   "stream": "bass",
+   "depth": 0.85,
+   "extent": "all",
+   "smooth": 0.1,
+   "why": "the bass riff IS this section, so the room breathes with the bass itself",
+   "id": "b2",
+   "section": 2,
+   "from_s": 48.24,
+   "to_s": 51.76,
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 7
+   }
+  },
+  {
+   "effect": "accent",
+   "threshold": 0.28,
+   "extent": "all",
+   "rest": 0.3,
+   "for_beats": 1,
+   "why": "the hardest span in the song — here the drums themselves are the light",
+   "id": "b3",
+   "section": 4,
+   "from_s": 103.76,
+   "to_s": 109.64,
+   "at": {
+    "bar": 50,
+    "beat": 1,
+    "beats": 11
+   }
+  },
+  {
+   "effect": "accent",
+   "threshold": 0.28,
+   "extent": "all",
+   "rest": 0.3,
+   "for_beats": 1,
+   "why": "the hardest span in the song — here the drums themselves are the light",
+   "id": "b4",
    "section": 5,
-   "stream": "vocal",
-   "depth": 0.26,
-   "colour": [
-    0.85,
-    0.16,
-    0.04
-   ],
-   "extent": "inner",
-   "smooth": 0.5
+   "from_s": 109.64,
+   "to_s": 109.76,
+   "at": {
+    "bar": 52,
+    "beat": 4,
+    "beats": 1
+   }
   }
  ],
  "gestures": [
   {
-   "effect": "stab",
-   "at_s": 9.8,
+   "from_s": 1.76,
+   "to_s": 10.012,
+   "effect": "beam",
+   "pattern": "snap",
    "colour": [
-    1,
-    0.52,
-    0.12
+    0.4,
+    0.62,
+    1
    ],
-   "extent": "inner",
-   "for_beats": 1
+   "why": "the head leads the opening — no drums here, so the room is one moving beam and a low wash",
+   "id": "g0",
+   "at": {
+    "bar": 1,
+    "beat": 1,
+    "beats": 16
+   },
+   "start_s": 1.76
   },
   {
+   "from_s": 10.012,
+   "to_s": 18.265,
+   "effect": "beam",
+   "pattern": "sweep",
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "why": "the head leads the opening — no drums here, so the room is one moving beam and a low wash",
+   "id": "g1",
+   "at": {
+    "bar": 4,
+    "beat": 1,
+    "beats": 16
+   },
+   "start_s": 10.012
+  },
+  {
+   "at_s": 13.83,
+   "effect": "lift",
+   "by": 0.35,
+   "over_beats": 8,
+   "tilt": 0.4,
+   "why": "13.8s — synth and back-vocal enter",
+   "id": "g2",
+   "at": {
+    "bar": 5,
+    "beat": 2,
+    "beats": 8
+   },
+   "start_s": 13.83
+  },
+  {
+   "at_s": 17.75,
    "effect": "gear",
-   "at_s": 17.8,
    "from": 1,
    "to": 2,
-   "for_beats": 0.001
+   "why": "17.8s — tempo moves 89 to 119 bpm",
+   "id": "g3",
+   "at": {
+    "bar": 7,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 17.75
   },
   {
+   "from_s": 18.265,
+   "to_s": 26.517,
+   "effect": "beam",
+   "pattern": "snap",
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "why": "the head leads the opening — no drums here, so the room is one moving beam and a low wash",
+   "id": "g4",
+   "at": {
+    "bar": 7,
+    "beat": 2,
+    "beats": 16
+   },
+   "start_s": 18.265
+  },
+  {
+   "at_s": 21.8,
+   "effect": "isolate",
+   "which": 2,
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "rest": 0,
+   "why": "21.8s — everything drops back behind lead-vocal",
+   "id": "g5",
+   "at": {
+    "bar": 9,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 21.8
+  },
+  {
+   "from_s": 26.517,
+   "to_s": 33.75,
+   "effect": "beam",
+   "pattern": "sweep",
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "why": "the head leads the opening — no drums here, so the room is one moving beam and a low wash",
+   "id": "g6",
+   "at": {
+    "bar": 11,
+    "beat": 2,
+    "beats": 14
+   },
+   "start_s": 26.517
+  },
+  {
+   "from_s": 32.718,
+   "to_s": 33.72,
+   "effect": "blackout",
+   "why": "two beats of nothing, so the riff has something to arrive into",
+   "id": "g7",
+   "at": {
+    "bar": 14,
+    "beat": 2,
+    "beats": 2
+   },
+   "start_s": 32.718
+  },
+  {
+   "from_s": 33,
+   "to_s": 33.72,
+   "effect": "hush",
+   "depth": 0.12,
+   "keep": "inner",
+   "for_beats": 2,
+   "why": "33.0s — the track falls away, so the room does too",
+   "id": "g8",
+   "at": {
+    "bar": 14,
+    "beat": 3,
+    "beats": 1
+   },
+   "start_s": 33
+  },
+  {
+   "from_s": 33.75,
+   "to_s": 37.76,
+   "effect": "ramp",
+   "to": 0.68,
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "curve": "ease",
+   "why": "phrase 1, first melody stretched over two bars — the room only climbs",
+   "id": "g9",
+   "at": {
+    "bar": 15,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 33.75
+  },
+  {
+   "at_s": 33.75,
+   "effect": "impact",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "for_beats": 2,
+   "why": "THE BASS RIFF ENTERS at 33.75s — the whole opening has been saving for this",
+   "id": "g10",
+   "at": {
+    "bar": 15,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 33.75
+  },
+  {
+   "at_s": 35.25,
+   "effect": "stab",
+   "colour": [
+    0.55,
+    0.45,
+    0.85
+   ],
+   "extent": "outer",
+   "for_beats": 1,
+   "why": "the chord moves to D:7 — the harmony rocks, so the row rocks with it",
+   "id": "g11",
+   "at": {
+    "bar": 15,
+    "beat": 3,
+    "beats": 1
+   },
+   "start_s": 35.25
+  },
+  {
+   "at_s": 35.76,
+   "effect": "stab",
+   "colour": [
+    0.4,
+    0.62,
+    1
+   ],
+   "extent": "outer",
+   "for_beats": 1,
+   "why": "the chord moves to D — the harmony rocks, so the row rocks with it",
+   "id": "g12",
+   "at": {
+    "bar": 16,
+    "beat": 1,
+    "beats": 1
+   },
+   "start_s": 35.76
+  },
+  {
+   "at_s": 36.77,
+   "effect": "stab",
+   "colour": [
+    0.55,
+    0.45,
+    0.85
+   ],
+   "extent": "outer",
+   "for_beats": 1,
+   "why": "the chord moves to D:7 — the harmony rocks, so the row rocks with it",
+   "id": "g13",
+   "at": {
+    "bar": 16,
+    "beat": 3,
+    "beats": 1
+   },
+   "start_s": 36.77
+  },
+  {
+   "from_s": 37.76,
+   "to_s": 39.76,
    "effect": "trade",
-   "at_s": 23.8,
+   "colours": [
+    [
+     0.4,
+     0.62,
+     1
+    ],
+    [
+     0.55,
+     0.45,
+     0.85
+    ]
+   ],
+   "for_beats": 4,
+   "travel": true,
+   "direction": "lr",
+   "runs": 2,
+   "rest": 0.08,
+   "peak": 0.85,
+   "why": "phrase 1, second melody, one bar — a single bump RUNS LEFT TO RIGHT across the four lamps, twice in the bar",
+   "id": "g14",
+   "at": {
+    "bar": 17,
+    "beat": 1,
+    "beats": 4
+   },
+   "start_s": 37.76
+  },
+  {
+   "from_s": 39.76,
+   "to_s": 41.75,
+   "effect": "trade",
    "colours": [
     [
      1,
-     0.52,
-     0.12
+     1,
+     1
     ],
     [
-     0.85,
-     0.16,
-     0.04
+     0.92,
+     0.04,
+     0.03
     ]
    ],
+   "for_beats": 4,
    "travel": true,
-   "for_beats": 2
+   "direction": "rl",
+   "runs": 2,
+   "rest": 0.06,
+   "peak": 1,
+   "why": "phrase 1, third melody — and back, RIGHT TO LEFT across the four lamps, once through the bar — and the borrowed major turns MINOR inside this bar, so the run itself turns red",
+   "id": "g15",
+   "at": {
+    "bar": 18,
+    "beat": 1,
+    "beats": 4
+   },
+   "start_s": 39.76
   },
   {
-   "effect": "hush",
-   "at_s": 25.8,
-   "depth": 0.25,
-   "for_beats": 4
-  },
-  {
-   "effect": "swell",
-   "at_s": 33.3,
-   "colour": [
-    1,
-    0.78,
-    0.34
-   ],
-   "rise": 0.5,
-   "for_beats": 4
-  },
-  {
-   "effect": "gear",
-   "at_s": 34.2,
-   "from": 2,
-   "to": 4,
-   "for_beats": 0.001
-  },
-  {
+   "from_s": 41.75,
+   "to_s": 45.76,
    "effect": "ramp",
-   "from_s": 47.7,
-   "to_s": 49.7,
    "to": 0.9,
+   "colour": [
+    0.75,
+    0.15,
+    0.35
+   ],
    "curve": "ease",
+   "why": "phrase 2, first melody stretched over two bars — the room only climbs",
+   "id": "g16",
+   "at": {
+    "bar": 19,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 41.75
+  },
+  {
+   "from_s": 45.76,
+   "to_s": 47.74,
+   "effect": "trade",
+   "colours": [
+    [
+     1,
+     1,
+     1
+    ],
+    [
+     0.75,
+     0.15,
+     0.35
+    ]
+   ],
+   "for_beats": 4,
+   "travel": true,
+   "direction": "lr",
+   "runs": 4,
+   "rest": 0.08,
+   "peak": 1,
+   "why": "phrase 2, second melody, one bar — a single bump RUNS LEFT TO RIGHT across the four lamps, four times in the bar",
+   "id": "g17",
+   "at": {
+    "bar": 21,
+    "beat": 1,
+    "beats": 4
+   },
+   "start_s": 45.76
+  },
+  {
+   "from_s": 47.74,
+   "to_s": 48.772,
+   "effect": "trade",
+   "colours": [
+    [
+     0.92,
+     0.04,
+     0.03
+    ],
+    [
+     1,
+     1,
+     1
+    ]
+   ],
+   "for_beats": 2,
+   "travel": true,
+   "direction": "rl",
+   "runs": 4,
+   "rest": 0.06,
+   "peak": 1,
+   "why": "phrase 2, third melody — and back, RIGHT TO LEFT across the four lamps, two beats of it, fast",
+   "id": "g18",
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 47.74
+  },
+  {
+   "from_s": 48,
+   "to_s": 49.72,
+   "effect": "hush",
+   "depth": 0.12,
+   "keep": "inner",
+   "for_beats": 2,
+   "why": "48.0s — the track falls away, so the room does too",
+   "id": "g19",
+   "at": {
+    "bar": 22,
+    "beat": 1,
+    "beats": 3
+   },
+   "start_s": 48
+  },
+  {
+   "from_s": 48.772,
+   "to_s": 49.234,
+   "effect": "anticipation",
+   "for_beats": 1,
    "colour": [
     1,
-    0.52,
-    0.12
-   ]
+    1,
+    1
+   ],
+   "intensity": 1,
+   "why": "one beat of accelerating white — the last thing before the room empties",
+   "id": "g20",
+   "at": {
+    "bar": 22,
+    "beat": 3,
+    "beats": 1
+   },
+   "start_s": 48.772
   },
   {
+   "from_s": 49.234,
+   "to_s": 49.72,
    "effect": "blackout",
-   "at_s": 48.3,
-   "for_beats": 3
+   "why": "and one beat of NOTHING. The biggest drop in the song lands in an empty room.",
+   "id": "g21",
+   "at": {
+    "bar": 22,
+    "beat": 3,
+    "beats": 1
+   },
+   "start_s": 49.234
   },
   {
+   "at_s": 49.75,
    "effect": "impact",
-   "at_s": 49.8,
+   "colour": [
+    0.92,
+    0.04,
+    0.03
+   ],
+   "extent": "all",
+   "for_beats": 2,
+   "why": "THE DROP at 49.75s — the drums arrive full and the room goes red",
+   "id": "g22",
+   "at": {
+    "bar": 23,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 49.75
+  },
+  {
+   "at_s": 52.76,
+   "effect": "impact",
    "colour": [
     1,
     1,
     1
    ],
    "extent": "all",
-   "for_beats": 2
+   "for_beats": 2,
+   "why": "52.8s — the whole band at full strength, 6 families at once",
+   "id": "g23",
+   "at": {
+    "bar": 24,
+    "beat": 3,
+    "beats": 2
+   },
+   "start_s": 52.76
   },
   {
-   "effect": "stab",
-   "at_s": 52.3,
-   "colour": [
-    1,
-    0.78,
-    0.34
-   ],
-   "extent": "outer",
-   "for_beats": 1
-  },
-  {
-   "effect": "hush",
-   "at_s": 63.3,
-   "depth": 0.3,
-   "for_beats": 3
-  },
-  {
-   "effect": "cut",
-   "at_s": 79.8,
-   "for_beats": 1
-  },
-  {
+   "at_s": 72.25,
    "effect": "lift",
-   "at_s": 82.8,
-   "by": 0.3,
+   "by": 0.35,
    "over_beats": 8,
    "tilt": 0.4,
-   "for_beats": 4
+   "why": "72.3s — lead-vocal enters",
+   "id": "g24",
+   "at": {
+    "bar": 34,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 72.25
   },
   {
+   "from_s": 79.26,
+   "to_s": 83.26,
    "effect": "ramp",
-   "from_s": 101.2,
-   "to_s": 105.201,
-   "to": 0.95,
-   "curve": "ease",
-   "colour": [
-    1,
-    0.78,
-    0.34
-   ]
-  },
-  {
-   "effect": "anticipation",
-   "at_s": 108.8,
-   "colour": [
-    1,
-    0.78,
-    0.34
-   ],
-   "intensity": 0.6,
-   "for_beats": 4
-  },
-  {
-   "effect": "hush",
-   "at_s": 109.8,
-   "depth": 0.08,
-   "for_beats": 8
-  },
-  {
-   "effect": "isolate",
-   "at_s": 115.3,
-   "colour": [
-    1,
-    0.78,
-    0.34
-   ],
-   "rest": 0.04,
-   "for_beats": 4
-  },
-  {
-   "effect": "swell",
-   "at_s": 120.3,
+   "to": 0.9,
    "colour": [
     1,
     1,
     1
    ],
-   "rise": 0.7,
-   "for_beats": 8
+   "curve": "ease",
+   "why": "83.3s — a build, run-up measured at 4s",
+   "id": "g25",
+   "at": {
+    "bar": 37,
+    "beat": 4,
+    "beats": 8
+   },
+   "start_s": 79.26
   },
   {
-   "effect": "cut",
-   "at_s": 125.3,
-   "for_beats": 2
+   "from_s": 84.728,
+   "to_s": 85.73,
+   "effect": "blackout",
+   "why": "two beats of nothing — the drums go full at 85.76s and the room must be empty first",
+   "id": "g26",
+   "at": {
+    "bar": 40,
+    "beat": 2,
+    "beats": 2
+   },
+   "start_s": 84.728
   },
   {
-   "effect": "hush",
-   "at_s": 125.8,
-   "depth": 0.12,
-   "for_beats": 6
-  },
-  {
+   "at_s": 85.76,
    "effect": "impact",
-   "at_s": 102.8,
    "colour": [
     1,
     1,
     1
    ],
    "extent": "all",
-   "for_beats": 2
+   "for_beats": 2,
+   "why": "the drums arrive at 85.76s",
+   "id": "g27",
+   "at": {
+    "bar": 41,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 85.76
+  },
+  {
+   "from_s": 89.697,
+   "to_s": 90.728,
+   "effect": "anticipation",
+   "for_beats": 2,
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "intensity": 1,
+   "why": "white strobes accelerating into the peak",
+   "id": "g28",
+   "at": {
+    "bar": 42,
+    "beat": 4,
+    "beats": 2
+   },
+   "start_s": 89.697
+  },
+  {
+   "from_s": 90.728,
+   "to_s": 91.73,
+   "effect": "blackout",
+   "why": "and then two beats of nothing",
+   "id": "g29",
+   "at": {
+    "bar": 43,
+    "beat": 2,
+    "beats": 2
+   },
+   "start_s": 90.728
+  },
+  {
+   "at_s": 91.76,
+   "effect": "impact",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "for_beats": 2,
+   "why": "THE PEAK at 91.76s — the loudest stretch of the song",
+   "id": "g30",
+   "at": {
+    "bar": 44,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 91.76
+  },
+  {
+   "from_s": 91.81,
+   "to_s": 95.886,
+   "effect": "strobe",
+   "hz": 12,
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "intensity": 0.75,
+   "extent": "outer",
+   "why": "the outer pair holds a hard strobe through the peak",
+   "id": "g31",
+   "at": {
+    "bar": 44,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 91.81
+  },
+  {
+   "from_s": 100.728,
+   "to_s": 101.73,
+   "effect": "blackout",
+   "why": "two beats of nothing — the drums go full at 101.76s and the room must be empty first",
+   "id": "g32",
+   "at": {
+    "bar": 48,
+    "beat": 2,
+    "beats": 2
+   },
+   "start_s": 100.728
+  },
+  {
+   "at_s": 101.76,
+   "effect": "impact",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "for_beats": 2,
+   "why": "the drums arrive at 101.76s",
+   "id": "g33",
+   "at": {
+    "bar": 49,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 101.76
+  },
+  {
+   "from_s": 109.76,
+   "to_s": 111.823,
+   "effect": "strip",
+   "to": 0.1,
+   "over_beats": 4,
+   "why": "109.8s — the track strips back",
+   "id": "g34",
+   "at": {
+    "bar": 53,
+    "beat": 1,
+    "beats": 4
+   },
+   "start_s": 109.76
+  },
+  {
+   "from_s": 113,
+   "to_s": 113.72,
+   "effect": "hush",
+   "depth": 0.12,
+   "keep": "inner",
+   "for_beats": 2,
+   "why": "113.0s — the track falls away, so the room does too",
+   "id": "g35",
+   "at": {
+    "bar": 54,
+    "beat": 3,
+    "beats": 1
+   },
+   "start_s": 113
+  },
+  {
+   "from_s": 115.29,
+   "to_s": 117.353,
+   "effect": "strip",
+   "to": 0.14,
+   "over_beats": 4,
+   "why": "115.3s — lead-vocal, tambourine and vocal drop out",
+   "id": "g36",
+   "at": {
+    "bar": 55,
+    "beat": 4,
+    "beats": 4
+   },
+   "start_s": 115.29
+  },
+  {
+   "at_s": 120.29,
+   "effect": "spin",
+   "beats_per_turn": 2,
+   "why": "120.3s — the music moves up an octave, and the room turns with it",
+   "id": "g37",
+   "at": {
+    "bar": 58,
+    "beat": 2,
+    "beats": 2
+   },
+   "start_s": 120.29
+  },
+  {
+   "from_s": 121.322,
+   "to_s": 124.416,
+   "effect": "swell",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "rise": 0.8,
+   "for_beats": 6,
+   "why": "and blooms after it",
+   "id": "g38",
+   "at": {
+    "bar": 58,
+    "beat": 4,
+    "beats": 6
+   },
+   "start_s": 121.322
+  },
+  {
+   "at_s": 123.77,
+   "effect": "lift",
+   "by": 0.35,
+   "over_beats": 8,
+   "tilt": 0.4,
+   "why": "123.8s — lead-vocal and vocal enter",
+   "id": "g39",
+   "at": {
+    "bar": 60,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 123.77
+  },
+  {
+   "at_s": 126.71,
+   "effect": "gear",
+   "from": 1,
+   "to": 2,
+   "why": "126.7s — the beat drops away",
+   "id": "g40",
+   "at": {
+    "bar": 61,
+    "beat": 3,
+    "beats": 2
+   },
+   "start_s": 126.71
+  },
+  {
+   "at_s": 127.226,
+   "effect": "cut",
+   "for_beats": 1,
+   "why": "and one beat of nothing where the beat drops away",
+   "id": "g41",
+   "at": {
+    "bar": 61,
+    "beat": 4,
+    "beats": 1
+   },
+   "start_s": 127.226
   }
  ]
 }

@@ -1,0 +1,312 @@
+{
+ "schema": "limelight.show/1",
+ "song": "raga-of-revenge",
+ "plan": "A devotional line lit warm and held back, so the one place the room goes white is the bar the song is loudest.",
+ "states": [
+  {
+   "effect": "drone",
+   "section": 0,
+   "amount": 0.18,
+   "colour": [
+    0.85,
+    0.16,
+    0.04
+   ],
+   "extent": "inner"
+  },
+  {
+   "effect": "wash",
+   "section": 2,
+   "amount": 0.3,
+   "colour": [
+    1,
+    0.52,
+    0.12
+   ],
+   "extent": "all"
+  },
+  {
+   "effect": "pulse",
+   "section": 2,
+   "amount": 0.52,
+   "colour": [
+    1,
+    0.52,
+    0.12
+   ],
+   "extent": "all",
+   "floor": 0.18,
+   "peak": 0.88
+  },
+  {
+   "effect": "drive",
+   "section": 3,
+   "amount": 0.85,
+   "colours": [
+    [
+     1,
+     0.52,
+     0.12
+    ],
+    [
+     0.85,
+     0.16,
+     0.04
+    ]
+   ],
+   "extent": "all",
+   "floor": 0.4,
+   "peak": 1
+  },
+  {
+   "effect": "drive",
+   "section": 4,
+   "amount": 1,
+   "colours": [
+    [
+     1,
+     0.78,
+     0.34
+    ],
+    [
+     1,
+     0.52,
+     0.12
+    ]
+   ],
+   "extent": "all",
+   "floor": 0.62,
+   "peak": 1
+  },
+  {
+   "effect": "drone",
+   "section": 5,
+   "amount": 0.15,
+   "colour": [
+    0.85,
+    0.16,
+    0.04
+   ],
+   "extent": "all"
+  },
+  {
+   "effect": "drone",
+   "section": 6,
+   "amount": 0.05,
+   "colour": [
+    0.85,
+    0.16,
+    0.04
+   ],
+   "extent": "inner"
+  }
+ ],
+ "bindings": [
+  {
+   "effect": "follow",
+   "section": 5,
+   "stream": "vocal",
+   "depth": 0.26,
+   "colour": [
+    0.85,
+    0.16,
+    0.04
+   ],
+   "extent": "inner",
+   "smooth": 0.5
+  }
+ ],
+ "gestures": [
+  {
+   "effect": "stab",
+   "at_s": 9.8,
+   "colour": [
+    1,
+    0.52,
+    0.12
+   ],
+   "extent": "inner",
+   "for_beats": 1
+  },
+  {
+   "effect": "gear",
+   "at_s": 17.8,
+   "from": 1,
+   "to": 2,
+   "for_beats": 0.001
+  },
+  {
+   "effect": "trade",
+   "at_s": 23.8,
+   "colours": [
+    [
+     1,
+     0.52,
+     0.12
+    ],
+    [
+     0.85,
+     0.16,
+     0.04
+    ]
+   ],
+   "travel": true,
+   "for_beats": 2
+  },
+  {
+   "effect": "hush",
+   "at_s": 25.8,
+   "depth": 0.25,
+   "for_beats": 4
+  },
+  {
+   "effect": "swell",
+   "at_s": 33.3,
+   "colour": [
+    1,
+    0.78,
+    0.34
+   ],
+   "rise": 0.5,
+   "for_beats": 4
+  },
+  {
+   "effect": "gear",
+   "at_s": 34.2,
+   "from": 2,
+   "to": 4,
+   "for_beats": 0.001
+  },
+  {
+   "effect": "ramp",
+   "from_s": 47.7,
+   "to_s": 49.7,
+   "to": 0.9,
+   "curve": "ease",
+   "colour": [
+    1,
+    0.52,
+    0.12
+   ]
+  },
+  {
+   "effect": "blackout",
+   "at_s": 48.3,
+   "for_beats": 3
+  },
+  {
+   "effect": "impact",
+   "at_s": 49.8,
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "for_beats": 2
+  },
+  {
+   "effect": "stab",
+   "at_s": 52.3,
+   "colour": [
+    1,
+    0.78,
+    0.34
+   ],
+   "extent": "outer",
+   "for_beats": 1
+  },
+  {
+   "effect": "hush",
+   "at_s": 63.3,
+   "depth": 0.3,
+   "for_beats": 3
+  },
+  {
+   "effect": "cut",
+   "at_s": 79.8,
+   "for_beats": 1
+  },
+  {
+   "effect": "lift",
+   "at_s": 82.8,
+   "by": 0.3,
+   "over_beats": 8,
+   "tilt": 0.4,
+   "for_beats": 4
+  },
+  {
+   "effect": "ramp",
+   "from_s": 101.2,
+   "to_s": 105.201,
+   "to": 0.95,
+   "curve": "ease",
+   "colour": [
+    1,
+    0.78,
+    0.34
+   ]
+  },
+  {
+   "effect": "anticipation",
+   "at_s": 108.8,
+   "colour": [
+    1,
+    0.78,
+    0.34
+   ],
+   "intensity": 0.6,
+   "for_beats": 4
+  },
+  {
+   "effect": "hush",
+   "at_s": 109.8,
+   "depth": 0.08,
+   "for_beats": 8
+  },
+  {
+   "effect": "isolate",
+   "at_s": 115.3,
+   "colour": [
+    1,
+    0.78,
+    0.34
+   ],
+   "rest": 0.04,
+   "for_beats": 4
+  },
+  {
+   "effect": "swell",
+   "at_s": 120.3,
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "rise": 0.7,
+   "for_beats": 8
+  },
+  {
+   "effect": "cut",
+   "at_s": 125.3,
+   "for_beats": 2
+  },
+  {
+   "effect": "hush",
+   "at_s": 125.8,
+   "depth": 0.12,
+   "for_beats": 6
+  },
+  {
+   "effect": "impact",
+   "at_s": 102.8,
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "for_beats": 2
+  }
+ ]
+}

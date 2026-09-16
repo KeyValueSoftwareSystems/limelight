@@ -21,7 +21,12 @@ import type {
   UploadStatus,
 } from "./types";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8800";
+/* Empty means SAME ORIGIN. The portal and this page are served from one
+   address, so the normal case is a relative path -- hence `??`, not `||`:
+   an empty string is a deliberate choice and must not fall through to a
+   hard-coded port. Set NEXT_PUBLIC_API_URL only to aim at a portal that is
+   genuinely somewhere else. */
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 class ApiError extends Error {
   constructor(

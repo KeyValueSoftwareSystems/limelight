@@ -106,16 +106,29 @@ export function planToEdits(plan: V2Plan, show: Show, catalogue: Effect[] = []):
     edits.push({ type, bar, beat, beats: Math.max(0.001, beats), params });
   };
 
+  /* A state names the song section it sits in AND may narrow itself with
+     from_s/to_s -- the baker reads both, taking max(section start, from_s) and
+     min(section end, to_s). Reading only the section drew a state across the
+     whole section, so several looks inside one section landed on top of each
+     other and the timeline showed one where the show has four. */
+  const spanOfCue = (c: V2Entry) => {
+    const sec = sections[c.section ?? -1];
+    let a = sec ? sec.start : (c.from_s as number);
+    let b = sec ? sec.end : (c.to_s as number);
+    if (c.from_s != null) a = sec ? Math.max(a, c.from_s as number) : (c.from_s as number);
+    if (c.to_s != null) b = sec ? Math.min(b, c.to_s as number) : (c.to_s as number);
+    return a != null && b != null && b > a ? { a, b } : null;
+  };
   for (const s of plan.states ?? []) {
-    const sec = sections[s.section ?? -1];
-    if (!sec) continue;
-    push(s.effect, sec.start, beatSpan(grid, sec.start, sec.end), dials(s, false));
+    const sp = spanOfCue(s);
+    if (!sp) continue;
+    push(s.effect, sp.a, beatSpan(grid, sp.a, sp.b), dials(s, false));
   }
   for (const b of plan.bindings ?? []) {
-    const sec = sections[b.section ?? -1];
-    if (!sec) continue;
-    /* a binding fills its section; a dial like accent's for_beats stays a dial */
-    push(b.effect, sec.start, beatSpan(grid, sec.start, sec.end), dials(b, false));
+    const sp = spanOfCue(b);
+    if (!sp) continue;
+    /* a binding fills its span; a dial like accent's for_beats stays a dial */
+    push(b.effect, sp.a, beatSpan(grid, sp.a, sp.b), dials(b, false));
   }
   for (const g of plan.gestures ?? []) {
     /* anchors, in the baker's own precedence: absolute seconds, then moments */

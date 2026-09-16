@@ -212,6 +212,18 @@ function resolveGesture(g) {
   return { eid, startS: Math.max(0, startS), endS, params: resolvedParams, kind: "gesture" };
 }
 
+/* A section's own seconds beat a bar label converted back into seconds.
+   Expressing 0.00s as a bar lands on "bar 1 beat 2" = 2.43s, so re-deriving the
+   boundary from the label moved the start of the show forward by two and a half
+   seconds and nothing could be placed there. The response anchors every section
+   in seconds; read those. */
+const secStart = sec => (sec.from_s != null ? sec.from_s
+                      : sec.start != null ? sec.start
+                      : S.secondsAt(sec.from.bar, sec.from.beat || 1));
+const secEnd = sec => (sec.to_s != null ? sec.to_s
+                    : sec.end != null ? sec.end
+                    : S.secondsAt(sec.to.bar, sec.to.beat || 1));
+
 function resolveBinding(b) {
   const eid = b.effect;
   const edef = catalogById[eid];
@@ -219,12 +231,34 @@ function resolveBinding(b) {
   const secIdx = b.section;
   if (secIdx == null || secIdx < 0 || secIdx >= sections.length) return null;
   const sec = sections[secIdx];
-  const startS = S.secondsAt(sec.from.bar, sec.from.beat || 1);
-  const endS = S.secondsAt(sec.to.bar, sec.to.beat || 1);
+  let startS = secStart(sec);
+  let endS = secEnd(sec);
+
+  /* A BINDING NARROWS ITSELF THE SAME WAY A STATE DOES.
+     resolveState has always honoured from_s/to_s; this did not, so every
+     binding silently spanned its whole song section no matter what it said. A
+     bass follow written for the eight bars of the riff (41.8-51.8s) actually
+     rendered across the entire chorus to 81.8s and held the room at one percent
+     through the biggest thirty seconds of the record; a 0.12s accent spanned
+     nineteen seconds. Nothing reported it, because the cue was doing exactly
+     what it was asked -- over a span nobody had asked for. */
+  if (b.from_bar != null && isFinite(b.from_bar)) {
+    const a = secondAtBeat(beatIndexOfBar(b.from_bar, b.from_beat));
+    if (isFinite(a)) startS = Math.max(startS, a);
+  }
+  if (b.to_bar != null && isFinite(b.to_bar)) {
+    const a = secondAtBeat(beatIndexOfBar(b.to_bar, b.to_beat));
+    if (isFinite(a)) endS = Math.min(endS, a);
+  }
+  if (b.from_s != null && isFinite(b.from_s)) startS = Math.max(startS, b.from_s);
+  if (b.to_s != null && isFinite(b.to_s)) endS = Math.min(endS, b.to_s);
+  if (!(endS > startS)) return null;
 
   const params = {};
   for (const [k, v] of Object.entries(b)) {
-    if (k !== "effect" && k !== "section" && k !== "why") {
+    if (k !== "effect" && k !== "section" && k !== "why" &&
+        k !== "from_bar" && k !== "to_bar" && k !== "from_beat" && k !== "to_beat" &&
+        k !== "from_s" && k !== "to_s") {
       params[k] = typeof v === "object" && v !== null && v.default !== undefined ? v.default : v;
     }
   }
@@ -238,8 +272,8 @@ function resolveState(s) {
   const secIdx = s.section;
   if (secIdx == null || secIdx < 0 || secIdx >= sections.length) return null;
   const sec = sections[secIdx];
-  let startS = S.secondsAt(sec.from.bar, sec.from.beat || 1);
-  let endS = S.secondsAt(sec.to.bar, sec.to.beat || 1);
+  let startS = secStart(sec);
+  let endS = secEnd(sec);
 
   if (s.from_bar != null && isFinite(s.from_bar)) {
     const a = secondAtBeat(beatIndexOfBar(s.from_bar, s.from_beat));

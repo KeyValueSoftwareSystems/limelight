@@ -80,6 +80,58 @@ def format_v1(raw):
         n = int(round(_beat_of(float(t))))
         return {"bar": max(first_bar, 1 + n // bpb), "beat": 1 + (n % bpb)}
 
+    _length = float(((raw.get("song") or {}).get("length_s")) or 1e9)
+
+    def _seconds_of(bar, beat=1):
+        n = (int(bar) - 1) * bpb + (int(beat) - 1)
+        seg = _tempo[0]
+        for cand in _tempo:
+            if cand["from_beat"] <= n:
+                seg = cand
+            else:
+                break
+        return seg["at_s"] + (n - seg["from_beat"]) * (60.0 / seg["bpm"])
+
+    def _stamp(node):
+        """Give every addressed thing an absolute time.
+
+        A bar-and-beat is a musician's name for a position, not the position.
+        It only means something against one particular fitted grid, so anything
+        addressed in bars alone detaches the moment that grid is refitted --
+        which is how `layers` came to describe a song it no longer covered while
+        every test still passed. Seconds are the anchor and survive a refit; bar
+        and beat travel alongside as the supporting evidence, for musicians and
+        for editors that want to snap. Both, on everything, always."""
+        if isinstance(node, list):
+            return [_stamp(x) for x in node]
+        if not isinstance(node, dict):
+            return node
+        out_n = {k: _stamp(v) for k, v in node.items()}
+
+        def _clamp(x):
+            return round(max(0.0, min(float(x), _length)), 3)
+
+        pos = out_n.get("bar")
+        if isinstance(pos, (int, float)) and isinstance(out_n.get("beat"), (int, float)) \
+           and "t" not in out_n and "at_s" not in out_n:
+            out_n["at_s"] = _clamp(_seconds_of(out_n["bar"], out_n["beat"]))
+        # A thing that already knows its own time is the authority on it. Deriving
+        # the time back out of the bar label would round it to the grid and, for
+        # anything starting before bar 1, produce a negative second.
+        known = {"from_s": ("start",), "to_s": ("end",), "at_s": ("time_s", "t")}
+        for key, name in (("from", "from_s"), ("to", "to_s"), ("at", "at_s")):
+            if name in out_n:
+                continue
+            src = next((out_n[k] for k in known[name]
+                        if isinstance(out_n.get(k), (int, float))), None)
+            if src is not None:
+                out_n[name] = _clamp(src)
+                continue
+            v = out_n.get(key)
+            if isinstance(v, dict) and isinstance(v.get("bar"), (int, float)):
+                out_n[name] = _clamp(_seconds_of(v["bar"], v.get("beat", 1)))
+        return out_n
+
     named = raw.get("score")
     if named is None:
         named = (raw.get("song") or {}).get("slug")
@@ -176,20 +228,28 @@ def format_v1(raw):
             out["sections"].append(sec)
     elif isinstance(raw.get("sections"), list) and raw["sections"]:
         out["sections"] = []
+        def _label(sec):
+            # A score that has already been through this formatter once carries
+            # the section name under "name"; a raw one carries it under "label".
+            # Reading only "label" silently dropped every section name on the
+            # second pass -- seven unnamed sections, and nothing failed.
+            return sec.get("label") if sec.get("label") is not None else sec.get("name")
+
         for i, sec in enumerate(raw["sections"]):
+            label = _label(sec)
             row = {
                 "from": ({"bar": sec["from_bar"], "beat": 1}
                          if sec.get("from_bar") is not None else _place(sec["start"])),
                 "to": ({"bar": sec["to_bar"] + 1, "beat": 1}
                        if sec.get("to_bar") is not None else _place(sec["end"])),
-                "name": sec.get("label"),
+                "name": label,
                 "start": sec.get("start"),
                 "end": sec.get("end"),
                 "nth": i + 1,
-                "like": sec.get("label"),
+                "like": label,
             }
-            if any(o.get("label") == sec.get("label") for o in raw["sections"][:i]):
-                row["repeat"] = sec.get("label")
+            if any(_label(o) == label for o in raw["sections"][:i]):
+                row["repeat"] = label
             if sec.get("also_heard") is not None:
                 row["also_heard"] = sec["also_heard"]
             for extra in ("confidence", "edge", "sudden", "sure"):
@@ -629,6 +689,15 @@ def format_v1(raw):
     if raw.get("made_by"):
         out["made_by"] = raw["made_by"]
 
+    # A score that has already been through this formatter carries the chord
+    # spans under "chords" as {of: "seconds", spans: [...]}; only a raw one has
+    # btc_chords_raw. Building solely from the raw field dropped the whole chord
+    # track on the second pass -- and the chords are where a lighting designer
+    # reads the major-to-minor turn that the loudness curve cannot show.
+    _pre = raw.get("chords")
+    if isinstance(_pre, dict) and isinstance(_pre.get("spans"), list) and _pre["spans"]:
+        out["chords"] = {"of": _pre.get("of", "seconds"), "spans": _pre["spans"]}
+
     btc = raw.get("btc_chords_raw")
     if isinstance(btc, list) and btc:
         spans = [{"start": c["start"], "end": c["end"], "chord": str(c["chord"])}
@@ -697,6 +766,18 @@ def format_v1(raw):
     if person:
         out["personality"] = person
         out["profile"] = person        # the old name, until everyone has moved
+
+    for name in ("sections", "moments", "layers", "phrases", "harmony", "chords"):
+        if out.get(name) is not None:
+            out[name] = _stamp(out[name])
+
+    en = out.get("energy")
+    if isinstance(en, dict) and isinstance(en.get("values"), list) and "times" not in en:
+        fb = en.get("from_bar", first_bar)
+        en["from_s"] = round(max(0.0, _seconds_of(fb)), 3)
+        en["times"] = [round(max(0.0, min(_seconds_of(fb + i), _length)), 3)
+                       for i in range(len(en["values"]))]
+        en["anchored"] = "one time per value, so the curve can be read without the grid"
 
     return out
 

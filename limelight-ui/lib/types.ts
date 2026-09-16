@@ -71,6 +71,14 @@ export interface Grid {
   bars?: number;
   sure?: number;
   tempo?: TempoChange[];
+  /* The MEASURED grid, when the score carries one. `beats` is every beat's own
+     time and `downbeats` the subset the tracker flagged as bar ones. When these
+     are present nothing below is allowed to compute a bar position from bpm
+     arithmetic: a constant-tempo map puts the line in the wrong place as soon as
+     the tempo moves, which on this catalogue it does. */
+  beats?: number[];
+  downbeats?: number[];
+  measured?: boolean;
 }
 
 export interface TempoChange {

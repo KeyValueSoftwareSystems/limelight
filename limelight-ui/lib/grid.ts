@@ -8,6 +8,22 @@ import type { Grid, TempoChange } from "./types";
 export function makeGridClock(grid: Grid) {
   const bpb = grid.beats_per_bar ?? 4;
   const first = grid.first_beat_s ?? 0;
+  /* Measured first. Bar N begins on the Nth FLAGGED downbeat, read out of the
+     table, so a bar line sits on the beat the band plays and the counter reads
+     1 where a musician counts 1. */
+  const down = grid.downbeats;
+  if (down && down.length > 1) {
+    const barLen = (down[down.length - 1] - down[0]) / (down.length - 1);
+    return {
+      bpb,
+      secondsAtBar(bar: number, beat = 1): number {
+        const i = bar - 1;
+        const lo = i < down.length ? down[i] : down[down.length - 1] + (i - down.length + 1) * barLen;
+        const hi = i + 1 < down.length ? down[i + 1] : lo + barLen;
+        return lo + ((beat - 1) / bpb) * (hi - lo);
+      },
+    };
+  }
   const tempo: TempoChange[] =
     grid.tempo && grid.tempo.length
       ? [...grid.tempo].sort((a, b) => a.from_beat - b.from_beat)
@@ -34,6 +50,16 @@ export function makeGridClock(grid: Grid) {
  */
 export function beatIndexAt(t: number, grid: Grid): number | null {
   if (!grid) return null;
+  const down = grid.downbeats;
+  if (down && down.length > 1) {
+    const bpb = grid.beats_per_bar ?? 4;
+    const barLen = (down[down.length - 1] - down[0]) / (down.length - 1);
+    let i = 0;
+    for (let k = 0; k < down.length; k++) if (down[k] <= t + 0.005) i = k; else break;
+    const lo = down[i];
+    const hi = i + 1 < down.length ? down[i + 1] : lo + barLen;
+    return i * bpb + ((t - lo) / (hi - lo)) * bpb;
+  }
   const tempo: TempoChange[] =
     grid.tempo && grid.tempo.length
       ? grid.tempo

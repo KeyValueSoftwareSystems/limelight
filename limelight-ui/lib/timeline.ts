@@ -57,6 +57,61 @@ export interface BarTick {
 const BAR_STEPS = [1, 2, 4, 8, 16, 32, 64, 128];
 const MIN_TICK_PX = 40;
 
+export interface BeatTick {
+  t: number;
+  bar: number;
+  beat: number;
+  down: boolean;
+}
+
+/* Every beat in view, once there is room to draw them.
+   A bar ruler alone tells you where a bar starts and nothing about the four
+   beats inside it, so placing a cue on beat 3 is guesswork. This is the grid a
+   music editor draws: bar lines strong, beat lines faint, and nothing at all
+   when the view is too wide for the lines to mean anything. Beats come from the
+   measured table when the score has one, so the lines sit on the music rather
+   than on an average tempo. */
+const MIN_BEAT_PX = 9;
+
+export function beatTicks(view: View, grid: Grid, width: number): BeatTick[] {
+  const bpb = grid.beats_per_bar ?? 4;
+  const beats = grid.beats;
+  const span = view.to - view.from;
+  if (span <= 0) return [];
+
+  const out: BeatTick[] = [];
+  const down = grid.downbeats ?? [];
+  const isDown = new Set(down.map((t) => Math.round(t * 1000)));
+
+  if (beats && beats.length > 1) {
+    const pxPerBeat = (((beats[beats.length - 1] - beats[0]) / (beats.length - 1)) / span) * width;
+    if (pxPerBeat < MIN_BEAT_PX) return [];
+    let bar = 0, beat = 0;
+    for (const t of beats) {
+      const d = isDown.has(Math.round(t * 1000));
+      if (d) { bar += 1; beat = 1; } else { beat += 1; }
+      if (t >= view.from && t <= view.to && bar >= 1) out.push({ t, bar, beat, down: d });
+      if (out.length > 4096) break;
+    }
+    return out;
+  }
+
+  const { secondsAtBar } = makeGridClock(grid);
+  const pxPerBeat = ((60 / grid.bpm) / span) * width;
+  if (pxPerBeat < MIN_BEAT_PX) return [];
+  const firstBar = Math.max(1, Math.floor(beatAtTime(view.from, grid) / bpb) + 1);
+  for (let bar = firstBar; ; bar += 1) {
+    let past = false;
+    for (let beat = 1; beat <= bpb; beat++) {
+      const t = secondsAtBar(bar, beat);
+      if (t > view.to) { past = true; break; }
+      if (t >= view.from) out.push({ t, bar, beat, down: beat === 1 });
+    }
+    if (past || out.length > 4096) break;
+  }
+  return out;
+}
+
 export function barTicks(view: View, grid: Grid, width: number): BarTick[] {
   const { secondsAtBar, bpb } = makeGridClock(grid);
   const secPerBar = (60 / grid.bpm) * bpb;
