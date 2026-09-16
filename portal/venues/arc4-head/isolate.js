@@ -17,6 +17,7 @@ module.exports = function isolate(params, ctx) {
     if (found >= 0) idx = found;
   }
   const target = H.PARS[idx];
+  const pointer = H.HEADS.length > 0 && params.which == null;
   const panAim = 0.40 + 0.40 * (idx / (H.PARS.length - 1)); // leftmost -> low pan, rightmost -> high
 
   const loopBeats = 2;
@@ -26,10 +27,12 @@ module.exports = function isolate(params, ctx) {
     const breath = 1 + 0.08 * Math.sin(2 * Math.PI * (i / N));
     const f = H.emptyFrame();
     for (const par of H.PARS) {
-      if (par.id === target.id) H.setPar(f, par, colour, 0.7 * breath);
+      if (pointer) H.setPar(f, par, [0.6, 0.6, 0.6], rest);
+      else if (par.id === target.id) H.setPar(f, par, colour, 0.7 * breath);
       else H.setPar(f, par, [0.6, 0.6, 0.6], rest);
     }
-    H.setHead(f, H.HEADS[0], { level: 0.6 * breath, colour, pan: panAim, tilt: 0.30 });
+    if (pointer) H.setHead(f, H.HEADS[0], { level: 0.85 * breath, colour, pan: panAim, tilt: 0.30 });
+    else if (H.HEADS.length) H.setHead(f, H.HEADS[0], { level: 0.6 * breath, colour, pan: panAim, tilt: 0.30 });
     frames.push(f);
   }
 

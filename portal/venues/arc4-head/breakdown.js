@@ -18,9 +18,6 @@ module.exports = function breakdown(params, ctx) {
     const bphase0 = bx.bphase;
     const swap = bar % 2;
     const floorNow = H.clamp(floorDial * (0.5 + energy), 0.04, 0.4);
-    /* bphase0, not bphase: the per-lamp `bphase` is declared inside the loop
-       below, so naming it here reached a variable that does not exist yet and
-       threw on the first frame -- every show using breakdown failed to bake. */
     const hitAmp = kick(bphase0, 0.08, 0.3) * (0.4 + 0.6 * weight);
     const f = H.emptyFrame();
     for (const par of H.PARS) {

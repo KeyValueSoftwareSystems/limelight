@@ -78,6 +78,9 @@ const sections = score.sections || [];
    gesture is a departure that brightens and RETURNS to the resting look, so it
    composites OVER the state/binding by max. */
 const REDUCTIVE = new Set(["blackout", "cut", "hush", "strip", "isolate", "anticipation"]);
+const SNAP = new Set(["impact", "stab", "bump", "blackout", "cut", "strobe", "accent", "flare"]);
+const cueFadeMs = (layout.limits && layout.limits.cue_fade_ms != null) ? layout.limits.cue_fade_ms : 180;
+const fadeFrom = {}, fadeLeft = {}, fadeSpan = {}, drivenBy = {}, lastOut = {};
 
 /* ── the real beat grid, per-beat weight, and energy curve ──────────────────
    Beat-locked effects render per frame against these instead of a nominal BPM,
@@ -386,18 +389,19 @@ for (let t = 0; t < dur; t += 1 / fps) {
     if (!fc) continue;
     const o = fc.offset, W = fc.width;
     const isHead = fc.panCh >= 0;
+    const wasDriven = drivenBy[fid];
 
     /* base = the resting look for this fixture: an active binding, else the
        section state. It always sits under a gesture so a departure can return. */
-    let base = null;
+    let base = null, baseRes = null;
     for (const b of bindingResults) {
       if (t < b.startS || t >= b.endS || !b.dmx.per_fixture.includes(fid)) continue;
-      b._t = t; base = sourceFrame(b, cache); break;
+      b._t = t; base = sourceFrame(b, cache); baseRes = b; break;
     }
     if (!base) {
       for (const s of stateResults) {
         if (t < s.startS || t >= s.endS || !s.dmx.per_fixture.includes(fid)) continue;
-        s._t = t; base = sourceFrame(s, cache); break;
+        s._t = t; base = sourceFrame(s, cache); baseRes = s; break;
       }
     }
 
@@ -426,6 +430,28 @@ for (let t = 0; t < dur; t += 1 / fps) {
     } else if (base) {
       for (let c = 0; c < W; c++) frame[o + c] = base[o + c] || 0;
     }
+
+    const nowDriven = (baseRes ? baseRes.eid + "@" + baseRes.startS : "-") + "/" + (g ? g.eid + "@" + g.startS : "-");
+    if (wasDriven !== undefined && nowDriven !== wasDriven && lastOut[fid]) {
+      const snap = g && SNAP.has(g.eid) && g.startS >= t - 1 / fps;
+      const ms = snap ? 0
+        : ((g && g.params && g.params.fade_ms != null) ? g.params.fade_ms
+          : (baseRes && baseRes.params && baseRes.params.fade_ms != null) ? baseRes.params.fade_ms : cueFadeMs);
+      const n = Math.round((ms / 1000) * fps);
+      if (n > 0) { fadeFrom[fid] = lastOut[fid].slice(); fadeLeft[fid] = n; fadeSpan[fid] = n; }
+    }
+    drivenBy[fid] = nowDriven;
+
+    if (fadeLeft[fid] > 0) {
+      const p = 1 - fadeLeft[fid] / (fadeSpan[fid] + 1);
+      const from = fadeFrom[fid];
+      for (let c = 0; c < W; c++) {
+        if (c === fc.panCh - o || c === fc.tiltCh - o) continue;
+        frame[o + c] = Math.round(from[c] * (1 - p) + frame[o + c] * p);
+      }
+      fadeLeft[fid]--;
+    }
+    lastOut[fid] = frame.slice(o, o + W);
   }
 
   allFrames.push(frame);

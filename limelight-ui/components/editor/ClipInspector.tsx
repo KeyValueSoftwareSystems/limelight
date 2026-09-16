@@ -4,20 +4,15 @@ import Image from "next/image";
 import { useState } from "react";
 import { effectIcon } from "@/lib/effectIcons";
 import { beatsLabel, mmssms, parseTime } from "@/lib/grid";
+import { colourName, hexToRgb01, rgb01ToHex } from "@/lib/palette";
+import { usePortalStore } from "@/store/portal";
 import type { Clip, Effect } from "@/lib/types";
+import type { Rgb01 } from "@/lib/palette";
 
 /* The popover that appears on the selected clip. Its controls come from the
    effect's own dials, so a clip only offers what the renderer will actually
    read — an Impact has no `amount`, and pretending otherwise would give a
    creator a slider that changes nothing. */
-
-const SWATCHES: { name: string; rgb: [number, number, number]; css: string }[] = [
-  { name: "Warm", rgb: [1, 0.64, 0.24], css: "#e8a33d" },
-  { name: "White", rgb: [1, 1, 1], css: "#f2f4f8" },
-  { name: "Blue", rgb: [0.2, 0.4, 1], css: "#3366ff" },
-  { name: "Magenta", rgb: [1, 0.2, 0.8], css: "#ff33cc" },
-  { name: "Cyan", rgb: [0.2, 0.85, 0.9], css: "#33d9e6" },
-];
 
 /** One press of a stepper, in seconds. Ten milliseconds is about a frame and a
  *  half of the 40fps light stream — the smallest move that changes what you
@@ -29,8 +24,15 @@ const STEP_S = 0.01;
  *  this number is a card that thinks it fits somewhere it does not. */
 export const INSPECTOR_W = 212;
 
-function sameColour(a: unknown, b: [number, number, number]) {
+function sameColour(a: unknown, b: Rgb01) {
   return Array.isArray(a) && a.length === 3 && a.every((v, i) => Math.abs(Number(v) - b[i]) < 0.02);
+}
+
+/** The current colour of the clip as a hex string for the native picker. */
+function currentHex(clip: Clip, fallback: unknown): string {
+  const v = clip.params.colour ?? fallback;
+  if (Array.isArray(v) && v.length === 3) return rgb01ToHex(v.map(Number) as Rgb01);
+  return "#ffffff";
 }
 
 /** A stepper pair. Small, because it sits inside a 248px card, but still a real
@@ -72,6 +74,77 @@ function TimeField({ value, onCommit, title }: {
       }}
       className="mono flex-1 min-w-0 h-[20px] px-[5px] rounded-[4px] border border-solid border-line bg-bg text-[11px] text-ink tabular-nums focus:border-line-strong"
     />
+  );
+}
+
+/* ── the colour section ────────────────────────────────────────────────────
+   The show's palette as quick-pick chips, plus a native colour picker for
+   anything outside it. The chips are the colours the show is spending —
+   the same set the sidebar shows — so picking one keeps the show coherent,
+   and the picker is the escape hatch for when none of them are right. */
+function ClipColourPicker({
+  clip,
+  defaultColour,
+  onChange,
+}: {
+  clip: Clip;
+  defaultColour: unknown;
+  onChange: (patch: Record<string, unknown>) => void;
+}) {
+  const palette = usePortalStore((s) => s.palette);
+  const hex = currentHex(clip, defaultColour);
+
+  return (
+    <div className="mt-[10px]">
+      <span className="text-[11px] text-ink-dim">Colour</span>
+      <div className="flex flex-wrap items-center gap-[6px] mt-[5px]">
+        {/* Show palette swatches when available */}
+        {palette.map((c) => {
+          const rgb = hexToRgb01(c.hex);
+          const on = sameColour(clip.params.colour ?? defaultColour, rgb);
+          return (
+            <button
+              key={c.id}
+              type="button"
+              title={`${colourName(c.hex)} · ${c.hex}`}
+              onClick={() => onChange({ colour: [...rgb] })}
+              className="w-[22px] h-[22px] flex-none rounded-full border-0 bg-transparent cursor-pointer p-0"
+            >
+              <span
+                aria-hidden
+                className="block w-[22px] h-[22px] rounded-full transition-transform duration-[var(--dur-state)]"
+                style={{
+                  background: c.hex,
+                  boxShadow: on
+                    ? "inset 0 0 0 1px rgba(0,0,0,0.45), 0 0 0 2px var(--bg), 0 0 0 3px var(--ink)"
+                    : "inset 0 0 0 1px rgba(0,0,0,0.45)",
+                  transform: on ? "scale(1.1)" : undefined,
+                }}
+              />
+            </button>
+          );
+        })}
+
+        {/* Native colour picker for any colour outside the palette */}
+        <input
+          type="color"
+          value={hex}
+          aria-label="Pick a custom colour"
+          title={`Custom · ${hex}`}
+          onChange={(e) => onChange({ colour: [...hexToRgb01(e.target.value)] })}
+          className="w-[22px] h-[22px] p-0 border-0 rounded-full bg-transparent cursor-pointer"
+          style={{
+            boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.45), 0 0 0 1px var(--line-strong)",
+          }}
+        />
+      </div>
+
+      {/* Name of the current colour */}
+      <div className="mt-[4px] h-[14px] text-[10px] leading-[14px]">
+        <span className="text-ink-dimmer">{colourName(hex)} · </span>
+        <span className="mono text-ink-dimmer tabular-nums">{hex}</span>
+      </div>
+    </div>
   );
 }
 
@@ -225,36 +298,11 @@ export function ClipInspector({
         </p>
       )}
 
-      {hasColour && (
-        <div className="mt-[10px]">
-          <span className="text-[11px] text-ink-dim">Colour</span>
-          <div className="flex gap-[5px] mt-[5px] -ml-[2px]">
-            {SWATCHES.map((s) => {
-              const on = sameColour(clip.params.colour ?? dials.colour?.default, s.rgb);
-              return (
-                <button
-                  key={s.name}
-                  type="button"
-                  title={s.name}
-                  onClick={() => onChange({ colour: s.rgb })}
-                  className="w-[22px] h-[22px] flex-none inline-flex items-center justify-center rounded-full bg-transparent border-0 cursor-pointer p-0"
-                >
-                  <span
-                    aria-hidden
-                    className="w-[18px] h-[18px] rounded-full border-2 border-solid transition-transform duration-[var(--dur-state)]"
-                    style={{
-                      background: s.css,
-                      borderColor: on ? "var(--accent)" : "transparent",
-                      transform: on ? "scale(1.1)" : undefined,
-                    }}
-                  />
-                  <span className="sr-only">{s.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {hasColour && <ClipColourPicker
+        clip={clip}
+        defaultColour={dials.colour?.default}
+        onChange={onChange}
+      />}
     </div>
   );
 }

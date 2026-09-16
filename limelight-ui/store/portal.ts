@@ -290,5 +290,7 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
       v2: false,
       planText: "",
       pendingPlan: null,
+      palette: [],
+      paletteBase: [],
     }),
 }));

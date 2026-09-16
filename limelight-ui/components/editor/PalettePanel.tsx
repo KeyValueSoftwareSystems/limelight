@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePortalStore } from "@/store/portal";
-import { colourName, nextColour } from "@/lib/palette";
+import { colourName, nextColour, paletteChanged } from "@/lib/palette";
 import type { PaletteColour } from "@/lib/types";
 
 /**
@@ -93,9 +93,7 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
     setSelected(null);
   }, [edit, base]);
 
-  const dirty =
-    base.length > 0 &&
-    (palette.length !== base.length || palette.some((c, i) => c.hex !== base[i]?.hex));
+  const dirty = paletteChanged(palette, base);
 
   return (
     <div className="h-full min-h-0 flex flex-col">
