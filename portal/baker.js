@@ -249,12 +249,35 @@ function resolveState(s) {
   const secIdx = s.section;
   if (secIdx == null || secIdx < 0 || secIdx >= sections.length) return null;
   const sec = sections[secIdx];
-  const startS = S.secondsAt(sec.from.bar, sec.from.beat || 1);
-  const endS = S.secondsAt(sec.to.bar, sec.to.beat || 1);
+  let startS = S.secondsAt(sec.from.bar, sec.from.beat || 1);
+  let endS = S.secondsAt(sec.to.bar, sec.to.beat || 1);
+
+  const anchor = (idx) => {
+    const m = moments[idx];
+    if (!m) return null;
+    return beatSecond(nearestBeat(m.time_s || m.at_s || 0));
+  };
+  if (s.from_moment != null) {
+    const a = anchor(s.from_moment);
+    if (a != null) startS = Math.max(startS, a);
+  }
+  if (s.to_moment != null) {
+    const a = anchor(s.to_moment);
+    if (a != null) endS = Math.min(endS, a);
+  }
+  if (s.after_beats != null && isFinite(s.after_beats)) {
+    startS = Math.min(endS, beatSecond(nearestBeat(startS) + Number(s.after_beats)));
+  }
+  if (s.for_beats != null && isFinite(s.for_beats)) {
+    endS = Math.min(endS, beatSecond(nearestBeat(startS) + Number(s.for_beats)));
+  }
+  if (!(endS > startS)) return null;
 
   const params = {};
   for (const [k, v] of Object.entries(s)) {
-    if (k !== "effect" && k !== "section" && k !== "why") {
+    if (k !== "effect" && k !== "section" && k !== "why" &&
+        k !== "from_moment" && k !== "to_moment" &&
+        k !== "after_beats" && k !== "for_beats") {
       params[k] = typeof v === "object" && v !== null && v.default !== undefined ? v.default : v;
     }
   }
