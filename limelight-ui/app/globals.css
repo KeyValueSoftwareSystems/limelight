@@ -193,8 +193,18 @@ input::placeholder { color: var(--ink-dimmer); }
 input[type="color"] {
   -webkit-appearance: none;
   appearance: none;
+  /* the last word on the shape: whatever the pseudo-elements below do, nothing
+     paints outside the chip */
+  overflow: hidden;
 }
-input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border: 0; }
+/* `inherit` has to be passed down the whole chain. The swatch's parent is the
+   WRAPPER, not the input, so setting it on the swatch alone inherited the
+   wrapper's square 0 — which is the square that showed up inside the chip. */
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+}
 input[type="color"]::-webkit-color-swatch { border: 0; border-radius: inherit; }
 input[type="color"]::-moz-color-swatch { border: 0; border-radius: inherit; }
 

@@ -23,16 +23,16 @@ import { SaveShowDialog } from "@/components/editor/SaveShowDialog";
 import { Sidebar } from "@/components/editor/Sidebar";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { RigControl } from "@/components/portal/RigControl";
-import { buildClips } from "@/lib/clips";
-import { effectIdForPlanFx } from "@/lib/families";
+import { buildClips, tileForClip } from "@/lib/clips";
 import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
-import type { Clip, PaletteColour } from "@/lib/types";
+import type { Clip, Edit, PaletteColour } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import type { Venue } from "@/lib/types";
 
 export default function StagePage() {
   const router = useRouter();
-  const { clockRef, load, pause, seek, toggle, position, playing } = useAudioPlayer();
+  const { clockRef, load, pause, seek, toggle, position, playing } =
+    useAudioPlayer();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [stageMsg, setStageMsg] = useState<string | null>("select a song");
@@ -63,7 +63,9 @@ export default function StagePage() {
       const box = columnRef.current?.getBoundingClientRect();
       if (!box) return;
       const next = box.bottom - ev.clientY;
-      setEditorH(Math.max(MIN_EDITOR, Math.min(next, box.height - MIN_PREVIEW)));
+      setEditorH(
+        Math.max(MIN_EDITOR, Math.min(next, box.height - MIN_PREVIEW)),
+      );
     };
     const up = () => {
       window.removeEventListener("pointermove", move);
@@ -76,12 +78,17 @@ export default function StagePage() {
 
   /* read URL params once on mount (safe for SSR since guarded by typeof window) */
   const urlParams = useMemo(() => {
-    if (typeof window === "undefined") return { song: null, seed: null, layout: null };
+    if (typeof window === "undefined")
+      return { song: null, seed: null, layout: null };
     const sp = new URLSearchParams(window.location.search);
     /* `layout` makes a rig deep-linkable, the same way song and seed already are:
        a show is {score, seed, edits} and the RIG is the venue's, so being able to
        say "this song, on that rig" in a URL is how you compare two rooms. */
-    return { song: sp.get("song"), seed: sp.get("seed"), layout: sp.get("layout") };
+    return {
+      song: sp.get("song"),
+      seed: sp.get("seed"),
+      layout: sp.get("layout"),
+    };
   }, []);
 
   const song = usePortalStore((s) => s.song);
@@ -129,28 +136,37 @@ export default function StagePage() {
   /* ── rehydrate song from URL params on page refresh ──────────────────── */
   useEffect(() => {
     if (rehydratedRef.current) return;
-    if (song) { rehydratedRef.current = true; return; }
+    if (song) {
+      rehydratedRef.current = true;
+      return;
+    }
 
     const songParam = urlParams.song;
     const seedParam = urlParams.seed;
-    if (!songParam) { rehydratedRef.current = true; return; }
+    if (!songParam) {
+      rehydratedRef.current = true;
+      return;
+    }
     rehydratedRef.current = true;
 
     if (seedParam) setSeed(Number(seedParam));
     if (urlParams.layout) setLayout(urlParams.layout);
     queueMicrotask(() => setStageMsg("loading song\u2026"));
 
-    api.songs.list().then((d) => {
-      setSongs(d.songs);
-      const found = d.songs.find((s) => s.name === songParam);
-      if (found) {
-        setSong(found);
-      } else {
-        setStageMsg(`song "${songParam}" not found`);
-      }
-    }).catch(() => {
-      setStageMsg("failed to load songs");
-    });
+    api.songs
+      .list()
+      .then((d) => {
+        setSongs(d.songs);
+        const found = d.songs.find((s) => s.name === songParam);
+        if (found) {
+          setSong(found);
+        } else {
+          setStageMsg(`song "${songParam}" not found`);
+        }
+      })
+      .catch(() => {
+        setStageMsg("failed to load songs");
+      });
   }, [song, urlParams, setSong, setSeed, setSongs, setLayout]);
 
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -206,12 +222,20 @@ export default function StagePage() {
     try {
       let post: Awaited<ReturnType<typeof api.show.bake>>;
       if (st.v2 && st.show) {
-        const planData = editsToPlan(st.edits, st.show, st.effects, st.planText);
+        const planData = editsToPlan(
+          st.edits,
+          st.show,
+          st.effects,
+          st.planText,
+        );
         /* Declared at the top of the plan, which is where the validator looks
            for it. Both bake paths have to carry the room's colours or an edit
            would regenerate a show that never heard about it. */
         if (st.palette.length) {
-          planData.palette = st.palette.map((c) => ({ name: colourName(c.hex), rgb: hexToRgb01(c.hex) }));
+          planData.palette = st.palette.map((c) => ({
+            name: colourName(c.hex),
+            rgb: hexToRgb01(c.hex),
+          }));
         }
         post = await api.plan.bake(st.song.name, planData, rigForPlan());
       } else {
@@ -224,11 +248,17 @@ export default function StagePage() {
           /* The room's colours ride with every bake. The name is derived rather
              than stored, so it can never disagree with the value beside it. */
           palette: st.palette.length
-            ? st.palette.map((c) => ({ name: colourName(c.hex), rgb: hexToRgb01(c.hex) }))
+            ? st.palette.map((c) => ({
+                name: colourName(c.hex),
+                rgb: hexToRgb01(c.hex),
+              }))
             : undefined,
         });
       }
-      if (post.error) { setStageMsg(post.error); return; }
+      if (post.error) {
+        setStageMsg(post.error);
+        return;
+      }
       setJob(post.job);
       await pollBake(post.job, token);
     } catch (e) {
@@ -260,15 +290,35 @@ export default function StagePage() {
         setPalette(opened);
         setPaletteBase(opened);
         const post = await api.plan.bake(song.name, planData, rigForPlan());
-        if (post.error) { setStageMsg(post.error); return; }
+        if (post.error) {
+          setStageMsg(post.error);
+          return;
+        }
         setJob(post.job);
         const baked = await pollBake(post.job, token);
-        if (baked) setEdits(planToEdits(planData, baked, usePortalStore.getState().effects));
+        if (baked)
+          setEdits(
+            planToEdits(planData, baked, usePortalStore.getState().effects),
+          );
       } catch (e) {
-        setStageMsg(e instanceof Error ? `${what} failed: ` + e.message : `${what} failed`);
+        setStageMsg(
+          e instanceof Error
+            ? `${what} failed: ` + e.message
+            : `${what} failed`,
+        );
       }
     },
-    [song, rigForPlan, setV2, setPlanText, setJob, setEdits, pollBake, setPalette, setPaletteBase],
+    [
+      song,
+      rigForPlan,
+      setV2,
+      setPlanText,
+      setJob,
+      setEdits,
+      pollBake,
+      setPalette,
+      setPaletteBase,
+    ],
   );
 
   /* A show file may be nested under `plan`, or be the plan itself. */
@@ -293,12 +343,22 @@ export default function StagePage() {
         const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
         const out = await api.recolour.apply(
           plan,
-          colours.map((c) => ({ name: colourName(c.hex), rgb: hexToRgb01(c.hex) })),
+          colours.map((c) => ({
+            name: colourName(c.hex),
+            rgb: hexToRgb01(c.hex),
+          })),
         );
-        if (out.error) { setStageMsg(out.error); return; }
+        if (out.error) {
+          setStageMsg(out.error);
+          return;
+        }
         await applyPlan(asPlan(out.showfile), "recolour");
       } catch (e) {
-        setStageMsg(e instanceof Error ? "recolour failed: " + e.message : "recolour failed");
+        setStageMsg(
+          e instanceof Error
+            ? "recolour failed: " + e.message
+            : "recolour failed",
+        );
       }
     },
     [applyPlan],
@@ -309,7 +369,9 @@ export default function StagePage() {
       try {
         await applyPlan(asPlan(JSON.parse(await file.text())), "imported plan");
       } catch (e) {
-        setStageMsg(e instanceof Error ? "import failed: " + e.message : "import failed");
+        setStageMsg(
+          e instanceof Error ? "import failed: " + e.message : "import failed",
+        );
       }
     },
     [applyPlan],
@@ -328,9 +390,14 @@ export default function StagePage() {
     try {
       if (want && st.job) await api.rig.at(st.job, position());
       const result = await api.rig.arm(want);
-      if (result.error) { setStageMsg(`rig: ${result.error}`); return; }
+      if (result.error) {
+        setStageMsg(`rig: ${result.error}`);
+        return;
+      }
       setRig(result);
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
   }, [setRig, position]);
 
   /* While armed, keep the rig anchored to the audio: it parks itself STALE_S
@@ -341,7 +408,8 @@ export default function StagePage() {
   useEffect(() => {
     const id = setInterval(() => {
       const st = usePortalStore.getState();
-      if (st.rig?.armed && st.job) api.rig.at(st.job, position()).catch(() => {});
+      if (st.rig?.armed && st.job)
+        api.rig.at(st.job, position()).catch(() => {});
     }, 150);
     return () => clearInterval(id);
   }, [position]);
@@ -380,7 +448,9 @@ export default function StagePage() {
          the show-file path below only gets away with the same call by sitting
          inside a .then. */
       planBakesRef.current = true;
-      queueMicrotask(() => applyPlan(asPlan(handed as Record<string, unknown>), "saved show"));
+      queueMicrotask(() =>
+        applyPlan(asPlan(handed as Record<string, unknown>), "saved show"),
+      );
       return;
     }
 
@@ -391,13 +461,19 @@ export default function StagePage() {
         if (!live || !d.showfile) return;
         applyPlan(asPlan(d.showfile as Record<string, unknown>), "show file");
       })
-      .catch(() => { /* no file for this song is the normal case */ });
-    return () => { live = false; };
+      .catch(() => {
+        /* no file for this song is the normal case */
+      });
+    return () => {
+      live = false;
+    };
   }, [song, applyPlan]);
 
   /* ── load audio + bake on song change ────────────────────────────────── */
   const rebuildRef = useRef(rebuild);
-  useEffect(() => { rebuildRef.current = rebuild; });
+  useEffect(() => {
+    rebuildRef.current = rebuild;
+  });
   useEffect(() => {
     if (!song) return;
     load(song.name);
@@ -444,12 +520,10 @@ export default function StagePage() {
       if (arm) setArm(null);
       else if (sel >= 0) setSel(-1);
     },
-    onDelete: () => {
-      if (sel >= 0 && role === "creator") {
-        removeEdit(sel);
-        rebuild();
-      }
-    },
+    /* Delete is NOT handled here. The timeline owns the selection, and it
+       removes what is selected; this used to remove the store's `sel` as well,
+       so one press of ⌫ took two clips away — the one you meant and whichever
+       was placed last. */
   });
 
   /* ── save ─────────────────────────────────────────────────────────────────
@@ -463,48 +537,62 @@ export default function StagePage() {
      loads when you open the song by itself) and the show record (what Shows
      lists). The record carries the plan with it, so opening it from that list
      reconstructs this timeline rather than a bake of {seed, edits}. */
-  const handleSave = useCallback(async (name: string) => {
-    const st = usePortalStore.getState();
-    if (!st.show || !st.song) return;
-    setSaving(true);
-    setSaveError(null);
-    try {
-      const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
-      /* The show file is a convenience, not the record. A hub that will not take
+  const handleSave = useCallback(
+    async (name: string) => {
+      const st = usePortalStore.getState();
+      if (!st.show || !st.song) return;
+      setSaving(true);
+      setSaveError(null);
+      try {
+        const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
+        /* The show file is a convenience, not the record. A hub that will not take
          it must not cost the creator the save they actually asked for. */
-      const filed = await api.showfile.save(st.song.name, plan).catch(() => null);
+        const filed = await api.showfile
+          .save(st.song.name, plan)
+          .catch(() => null);
 
-      const d = await api.shows.save({
-        id: st.showId,
-        song: st.song.name,
-        seed: st.seed,
-        edits: st.edits,
-        name,
-        author: st.author || "unknown",
-        appetite: st.want,
-        score_version: st.song.version,
-        plan,
-        plan_text: st.planText,
-        designed_for: st.room
-          ? { venue_id: st.room.id, venue_name: st.room.name, layout: st.layout ?? undefined }
-          : null,
-      });
-      if (d.error) { setSaveError(d.error); return; }
+        const d = await api.shows.save({
+          id: st.showId,
+          song: st.song.name,
+          seed: st.seed,
+          edits: st.edits,
+          name,
+          author: st.author || "unknown",
+          appetite: st.want,
+          score_version: st.song.version,
+          plan,
+          plan_text: st.planText,
+          designed_for: st.room
+            ? {
+                venue_id: st.room.id,
+                venue_name: st.room.name,
+                layout: st.layout ?? undefined,
+              }
+            : null,
+        });
+        if (d.error) {
+          setSaveError(d.error);
+          return;
+        }
 
-      setShowId(d.id);
-      setShowVersion(d.version);
-      setSavedName(d.name ?? name);
-      setSaveOpen(false);
-      setStageMsg(
-        `saved “${d.name ?? name}” to Shows · v${d.version}`
-        + (filed?.cues !== undefined ? ` · ${filed.cues} cues in the show file` : ""),
-      );
-    } catch (e) {
-      setSaveError(e instanceof Error ? e.message : "save failed");
-    } finally {
-      setSaving(false);
-    }
-  }, [setShowId, setShowVersion]);
+        setShowId(d.id);
+        setShowVersion(d.version);
+        setSavedName(d.name ?? name);
+        setSaveOpen(false);
+        setStageMsg(
+          `saved “${d.name ?? name}” to Shows · v${d.version}` +
+            (filed?.cues !== undefined
+              ? ` · ${filed.cues} cues in the show file`
+              : ""),
+        );
+      } catch (e) {
+        setSaveError(e instanceof Error ? e.message : "save failed");
+      } finally {
+        setSaving(false);
+      }
+    },
+    [setShowId, setShowVersion],
+  );
 
   /* The timeline and the effects panel both read these, so they live on the
      page rather than inside either one. */
@@ -518,7 +606,9 @@ export default function StagePage() {
        by the time it gets here it is indistinguishable from a clip dropped from
        the palette — which is exactly what makes the file editable rather than
        just viewable. */
-    return buildClips(show.plan ?? null, edits, effects, show.grid).filter((c) => !c.overridden);
+    return buildClips(show.plan ?? null, edits, effects, show.grid).filter(
+      (c) => !c.overridden,
+    );
   }, [show, edits, effects]);
 
   /* A reveal request brings a clip into view. The list that raised them is gone
@@ -542,11 +632,20 @@ export default function StagePage() {
      bake lands. Blocking the timeline on a 1-3s round trip would make placing
      feel broken even though nothing is wrong. */
   const handlePlace = useCallback(
-    (edit: Parameters<typeof addEdit>[0]) => {
-      addEdit(edit);
+    (edit: Edit | Edit[]): number[] => {
+      const list = Array.isArray(edit) ? edit : [edit];
+      if (!list.length) return [];
+      /* Appended in ONE write, off the live list. A paste of four clips through
+         addEdit would be four store writes and four rebakes of the same show,
+         and the indices handed back would be stale by the second one. */
+      const st = usePortalStore.getState();
+      const at = st.edits.length;
+      setEdits([...st.edits, ...list]);
+      setSel(at + list.length - 1);
       rebuild();
+      return list.map((_, i) => at + i);
     },
-    [addEdit, rebuild],
+    [setEdits, setSel, rebuild],
   );
 
   const handleRemove = useCallback(
@@ -561,11 +660,14 @@ export default function StagePage() {
      the cursor; the bake fires once, on release. Re-baking mid-drag would stall
      the gesture behind a 1-3s round trip for no benefit. */
   const handleUpdateLive = useCallback(
-    (index: number, patch: Parameters<typeof updateEdit>[1]) => updateEdit(index, patch),
+    (index: number, patch: Parameters<typeof updateEdit>[1]) =>
+      updateEdit(index, patch),
     [updateEdit],
   );
 
-  const handleCommit = useCallback(() => { rebuild(); }, [rebuild]);
+  const handleCommit = useCallback(() => {
+    rebuild();
+  }, [rebuild]);
 
   /* Taking over one of the arranger's clips: copy what it does into an edit of
      your own at the same place. The machine's version stays on the timeline,
@@ -576,20 +678,7 @@ export default function StagePage() {
          directly. Schema 2 tiles do not, so the plan's word is mapped onto a
          catalogue id — without this the lookup failed, materialising returned
          null, and the arranger's clips could not be moved or resized at all. */
-      const mapped = effectIdForPlanFx(clip.fx);
-      const tile =
-        /* A show file names its cues by catalogue id, and showfile.toClips has
-           already resolved that into `tile`. Where it is set it IS the answer.
-           Everything below it speaks the ARRANGER's vocabulary, which a file
-           cue never uses: `stab`, `gear`, `trade` are catalogue ids, not plan
-           words, so effectIdForPlanFx returned null for all of them and no
-           schema-2 tile carries `fx` to match on either. Materialising handed
-           back null and startGesture stopped on the next line — which is why
-           not one cue in a show file could be moved or resized. */
-        (clip.tile ? effects.find((e) => e.id === clip.tile) : undefined) ??
-        effects.find((e) => e.fx === clip.fx && e.beats === clip.beats) ??
-        effects.find((e) => e.fx === clip.fx) ??
-        (mapped ? effects.find((e) => e.id === mapped) : undefined);
+      const tile = tileForClip(clip, effects);
       if (!tile) return null;
       /* Read the live count, not a closed-over one: two materialisations in the
          same tick would otherwise both claim the same index. */
@@ -597,7 +686,10 @@ export default function StagePage() {
       /* Record which assignment this replaces. Overlap alone could not carry it:
          moving your copy away let the machine's version play again underneath. */
       addEdit({
-        type: tile.id, bar: clip.bar, beat: clip.beat, beats: clip.beats,
+        type: tile.id,
+        bar: clip.bar,
+        beat: clip.beat,
+        beats: clip.beats,
         ...(clip.planId ? { from: clip.planId } : {}),
       });
       return index;
@@ -615,7 +707,12 @@ export default function StagePage() {
   /* ── venue picker ────────────────────────────────────────────────────── */
   const handlePickVenue = useCallback(
     (v: Venue, layoutFile: string) => {
-      setRoom({ id: v.id, name: v.name, layout: layoutFile, example: v.example });
+      setRoom({
+        id: v.id,
+        name: v.name,
+        layout: layoutFile,
+        example: v.example,
+      });
       setLayout(layoutFile);
       setVenuePickerOpen(false);
       rebuild();
@@ -642,7 +739,10 @@ export default function StagePage() {
         </div>
 
         {/* ── the work area ─────────────────────────────────────────────── */}
-        <div ref={columnRef} className="flex-1 min-w-0 flex flex-col min-h-0 overflow-hidden">
+        <div
+          ref={columnRef}
+          className="flex-1 min-w-0 flex flex-col min-h-0 overflow-hidden"
+        >
           {/* header */}
           <header className="flex-none flex items-start gap-[var(--spacing-s4)] px-[var(--spacing-s5)] pt-[var(--spacing-s4)] pb-[var(--spacing-s3)]">
             <div className="min-w-0">
@@ -671,7 +771,12 @@ export default function StagePage() {
                   if (f) importPlan(f);
                 }}
               />
-              <Button variant="ghost" onClick={() => importInputRef.current?.click()}>Import show file</Button>
+              <Button
+                variant="ghost"
+                onClick={() => importInputRef.current?.click()}
+              >
+                Import show file
+              </Button>
               <RigControl onToggle={handleRigToggle} />
               {role === "creator" && (
                 <>
@@ -681,13 +786,18 @@ export default function StagePage() {
                   <Button
                     variant="primary"
                     disabled={!show || !song}
-                    onClick={() => { setSaveError(null); setSaveOpen(true); }}
+                    onClick={() => {
+                      setSaveError(null);
+                      setSaveOpen(true);
+                    }}
                   >
                     {showId ? "Save show" : "Save show…"}
                   </Button>
                 </>
               )}
-              <Button variant="link" onClick={handleBack}>Back</Button>
+              <Button variant="link" onClick={handleBack}>
+                Back
+              </Button>
             </div>
           </header>
 
@@ -696,7 +806,11 @@ export default function StagePage() {
           </div>
 
           {/* live preview */}
-          <StagePreview clockRef={clockRef} playing={isPlaying} currentTime={currentTime} />
+          <StagePreview
+            clockRef={clockRef}
+            playing={isPlaying}
+            currentTime={currentTime}
+          />
           {stageMsg && (
             <div className="flex-none text-center text-[length:var(--text-xs)] text-ink-dimmer py-[4px]">
               {stageMsg}
@@ -712,7 +826,10 @@ export default function StagePage() {
             className="flex-none h-[7px] cursor-row-resize border-y border-solid border-line hover:bg-bg-raised transition-colors duration-[var(--dur-state)]"
           />
 
-          <section style={{ height: editorH }} className="flex-none min-h-0 overflow-hidden">
+          <section
+            style={{ height: editorH }}
+            className="flex-none min-h-0 overflow-hidden"
+          >
             <StageTimeline
               show={show}
               energy={song?.energy ?? []}
@@ -765,7 +882,9 @@ export default function StagePage() {
           saving={saving}
           error={saveError}
           existing={!!showId}
-          onCancel={() => { if (!saving) setSaveOpen(false); }}
+          onCancel={() => {
+            if (!saving) setSaveOpen(false);
+          }}
           onSave={handleSave}
         />
       )}

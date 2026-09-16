@@ -21,7 +21,7 @@ import type {
   UploadStatus,
 } from "./types";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8800";
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8800";
 
 class ApiError extends Error {
   constructor(
