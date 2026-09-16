@@ -115,6 +115,8 @@ export interface BakeRequest {
   edits: Edit[];
   appetite?: number | null;
   layout?: string;
+  /** the room's colours, as rgb 0..1 — the vocabulary portal/validator.py snaps to */
+  palette?: { name: string; rgb: [number, number, number] }[];
 }
 
 export interface BakeResponse {
@@ -285,7 +287,27 @@ export interface ShowFile {
   score_version?: number | null;
   designed_for?: { venue_id: string; venue_name: string; layout?: string } | null;
   invalid?: string;
+  /* The v2 plan this show was saved from, where there is one. A saved show is
+     otherwise just {seed, edits}, which only reconstructs on the legacy bake —
+     a show built from a plan needs the plan back to open into the same
+     timeline, and carrying it here is what makes the entry in Shows the whole
+     show rather than a bookmark. */
+  plan?: V2PlanDoc | null;
+  plan_text?: string;
 }
+
+/* The plan as it is STORED. Its interior belongs to lib/planConvert (V2Plan) and
+   nothing outside that module reads into it, so the entries stay opaque — but
+   the four keys are named, because a show file is also read by the portal and
+   by hand. A type alias rather than an interface on purpose: aliases carry an
+   implicit index signature, so this stays interchangeable with the
+   Record<string, unknown> the plan travels as. */
+export type V2PlanDoc = {
+  plan?: unknown;
+  states?: unknown[];
+  bindings?: unknown[];
+  gestures?: unknown[];
+};
 
 export interface ShowsResponse {
   shows: ShowFile[];
@@ -301,6 +323,8 @@ export interface SaveShowRequest {
   appetite?: number | null;
   score_version?: number | null;
   designed_for?: { venue_id: string; venue_name: string; layout?: string } | null;
+  plan?: V2PlanDoc | null;
+  plan_text?: string;
 }
 
 /* ── venues / layouts ────────────────────────────────────────────────────── */
@@ -493,6 +517,31 @@ export interface Personality {
 export interface ColoursResponse {
   colours: ColourSwatch[];
   personalities: Personality[];
+}
+
+/* ── the venue's colour palette ──────────────────────────────────────────────
+   Not the same thing as the artist colours above: those are a tag on a person,
+   this is the set of colours a ROOM works in. The venue ships one, a creator
+   spends it, and portal/validator.py snaps every cue's colour to the nearest
+   entry — which is the whole point of declaring it. `name` is never sent by the
+   client: lib/palette.ts derives it from the hex so it cannot go stale. */
+export interface PaletteColour {
+  id: string;
+  hex: string;
+}
+
+export interface VenuePalette {
+  venue_id: string;
+  venue_name: string;
+  /** false where the venue has fixed its palette and will not take an edit */
+  editable: boolean;
+  colours: PaletteColour[];
+}
+
+export interface PaletteResponse {
+  palette: VenuePalette;
+  /** true while the client is reading a stand-in rather than the venue's own */
+  mocked?: boolean;
 }
 
 /* ── fixture placement (computed on the client) ──────────────────────────── */

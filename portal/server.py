@@ -564,6 +564,16 @@ class Shows:
         # built against version 8" before anything depends on it.
         if body.get("score_version") is not None:
             doc["score_version"] = body["score_version"]
+        # THE PLAN, where the show was built from one. A record of {seed, edits}
+        # only reconstructs through the legacy bake; a show made from a plan
+        # needs the plan back or it opens as a different show. Carrying it here
+        # is what makes an entry in this list the show itself rather than a
+        # pointer at the song's shared show file -- two shows for one song have
+        # one file between them, so the file cannot tell them apart.
+        if isinstance(body.get("plan"), dict):
+            doc["plan"] = body["plan"]
+        if body.get("plan_text"):
+            doc["plan_text"] = str(body["plan_text"])
         dv = body.get("designed_for")
         if dv and dv.get("venue_id"):
             doc["designed_for"] = {"venue_id": dv.get("venue_id"),

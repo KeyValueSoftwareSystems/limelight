@@ -53,10 +53,16 @@ interface Props {
    nowhere near. */
 const SNAP_RADIUS_PX = 10;
 const DRAG_THRESHOLD_PX = 3;
+/* The trench between the song map and the lanes. The map describes the TRACK
+   (bars, sections, the score's own moments); the lanes are what has been PLACED
+   on it. Fused into one box, separated by the same hairline that divides one
+   band from the next, "INTERLUDE" read as a clip sitting on the top lane. */
+const MAP_GAP = 6;
 /* ruler + sections + moments, above the layer rows. Each band carries a 1px
    bottom border on top of its var height, so those count too — without them the
-   popover sat 3px high of the row it belongs to. */
-const BANDS_H = 22 + 1 + 30 + 1 + 18 + 1;
+   popover sat 3px high of the row it belongs to. The trench and its own closing
+   edge stand between the map and row 0, so they count as well. */
+const BANDS_H = 22 + 1 + 30 + 1 + 18 + 1 + MAP_GAP + 1;
 const ROW_MIN = 26;
 const ROW_MAX = 52;
 
@@ -446,9 +452,23 @@ export function StageTimeline({
           onPan={(dt) => { setFollow(false); setView(panBy(view, dt, duration, 1)); }}
         >
           <div className="absolute inset-0 flex flex-col">
-            <Ruler grid={show.grid} />
-            <SectionBand sections={show.sections} />
-            <MomentsBand moments={show.moments} />
+            {/* The song map. Raised off the well the clips sit in, because it is
+                a header for the track rather than something placed on it: bars,
+                the sections the score found, the moments inside them. z-10 puts
+                it under the playhead (z-20), which has to cross everything. */}
+            <div className="flex-none relative z-10 bg-bg-raised">
+              <Ruler grid={show.grid} />
+              <SectionBand sections={show.sections} />
+              <MomentsBand moments={show.moments} />
+            </div>
+
+            {/* The trench. A hairline was not separation — it is the same rule
+                that divides the ruler from the sections, so the eye read six
+                bands rather than a map and a timeline. */}
+            <div
+              style={{ height: MAP_GAP }}
+              className="flex-none bg-bg-sunken border-b border-solid border-line-strong shadow-[inset_0_2px_3px_-2px_rgba(0,0,0,0.9)]"
+            />
 
             <div ref={rowsRef} className="flex-1 min-h-0 overflow-y-auto">
               {byLayer.map((rowClips, i) => (

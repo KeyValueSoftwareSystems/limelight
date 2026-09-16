@@ -17,6 +17,8 @@ export default function ShowsPage() {
   const setShowId = usePortalStore((s) => s.setShowId);
   const setShowVersion = usePortalStore((s) => s.setShowVersion);
   const setWant = usePortalStore((s) => s.setWant);
+  const setPendingPlan = usePortalStore((s) => s.setPendingPlan);
+  const setPlanText = usePortalStore((s) => s.setPlanText);
   const resetForShow = usePortalStore((s) => s.resetForShow);
   const songs = usePortalStore((s) => s.songs);
   const setSongs = usePortalStore((s) => s.setSongs);
@@ -41,9 +43,15 @@ export default function ShowsPage() {
       setShowId(sf.id);
       setShowVersion(sf.version);
       setWant(sf.appetite ?? null);
+      /* Hand the show's OWN plan to the stage. Without it the stage falls back
+         to the song's show file, which is shared by every show made from that
+         song — so two different saved shows opened as the same one. */
+      setPendingPlan(sf.plan ?? null);
+      setPlanText(sf.plan_text ?? "");
       router.push(`/stage?song=${encodeURIComponent(sf.song)}&seed=${sf.seed}`);
     },
-    [resetForShow, songs, setSong, setSeed, setEdits, setVenue, setShowId, setShowVersion, setWant, router],
+    [resetForShow, songs, setSong, setSeed, setEdits, setVenue, setShowId, setShowVersion, setWant,
+     setPendingPlan, setPlanText, router],
   );
 
   return (

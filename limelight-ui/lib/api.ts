@@ -14,6 +14,8 @@ import type {
   MarketResponse,
   ListShowRequest,
   ColoursResponse,
+  PaletteResponse,
+  PaletteColour,
   Entitlement,
   TrimState,
   UploadResponse,
@@ -147,6 +149,80 @@ export const colours = {
 
   set(song: string, who: string, colourNames: string[]): Promise<{ ok: boolean; code?: number; error?: string; who?: string }> {
     return post("/api/colours", { song, who, colours: colourNames });
+  },
+};
+
+/* ── the venue's colour palette ──────────────────────────────────────────────
+   These two endpoints are what the backend is being written against:
+
+     GET  /api/venue/palette?venue_id=…   -> { palette: VenuePalette }
+     POST /api/venue/palette              <- { venue_id, colours: [{id, hex}] }
+                                          -> { palette: VenuePalette }
+
+   Neither exists on the server yet, so both fall back to a stand-in keyed by
+   venue id and the editor works end to end today. Everything above the fallback
+   is the real client — when the backend lands, delete `orMock`, `MOCK` and the
+   `mocked` flag and no other file has to change. */
+
+const MOCK: Record<string, string[]> = {
+  /* the development rig: four pars and a head, so a small warm set */
+  ven_desk: ["#ff5a45", "#ffb300", "#e6eaf2", "#3ec7db"],
+  /* a club bar: deep and saturated, nothing that washes the room out */
+  ven_keycode: ["#e8443d", "#ff8a1f", "#7c4dff", "#00c2ff"],
+  /* the arena carries lasers and pixel bars, so it declares more */
+  ven_keycode_arena: ["#ff2d55", "#ff9500", "#ffd60a", "#32d74b", "#0a84ff", "#bf5af2"],
+  ven_omnia: ["#f5f0e6", "#d4a373", "#6a4c93", "#1b4965"],
+};
+const MOCK_DEFAULT = ["#e8443d", "#ffb300", "#4fbf87", "#0a84ff", "#bf5af2"];
+
+/** what the client keeps while the backend is not there yet */
+const mocked = new Map<string, PaletteColour[]>();
+
+function mockPalette(venueId: string, venueName: string): PaletteResponse {
+  if (!mocked.has(venueId)) {
+    mocked.set(
+      venueId,
+      (MOCK[venueId] ?? MOCK_DEFAULT).map((hex, i) => ({ id: `${venueId}-${i}`, hex })),
+    );
+  }
+  return {
+    palette: {
+      venue_id: venueId,
+      venue_name: venueName,
+      editable: true,
+      colours: mocked.get(venueId)!,
+    },
+    mocked: true,
+  };
+}
+
+async function orMock<T extends PaletteResponse>(
+  call: () => Promise<T>,
+  fallback: () => PaletteResponse,
+): Promise<PaletteResponse> {
+  try {
+    return await call();
+  } catch {
+    return fallback();
+  }
+}
+
+export const palette = {
+  get(venueId: string, venueName = ""): Promise<PaletteResponse> {
+    return orMock(
+      () => request<PaletteResponse>(`/api/venue/palette?venue_id=${encodeURIComponent(venueId)}`),
+      () => mockPalette(venueId, venueName),
+    );
+  },
+
+  save(venueId: string, colours: PaletteColour[], venueName = ""): Promise<PaletteResponse> {
+    return orMock(
+      () => post<PaletteResponse>("/api/venue/palette", { venue_id: venueId, colours }),
+      () => {
+        mocked.set(venueId, colours);
+        return mockPalette(venueId, venueName);
+      },
+    );
   },
 };
 

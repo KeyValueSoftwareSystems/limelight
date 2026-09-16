@@ -15,6 +15,13 @@
   --color-ink-dim: var(--ink-dim);
   --color-ink-dimmer: var(--ink-dimmer);
 
+  /* Short aliases. The codebase reaches for text-dim/text-dimmer/bg-panel far
+     more often than the ink-* spelling; without these the utilities compile to
+     nothing and every secondary label silently renders at full --ink. */
+  --color-dim: var(--ink-dim);
+  --color-dimmer: var(--ink-dimmer);
+  --color-panel: var(--bg-raised);
+
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
 
@@ -24,6 +31,8 @@
   --color-focus: var(--focus);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
+  --color-select: var(--select);
+  --color-select-soft: var(--select-soft);
 
   --font-body: var(--ff-body);
   --font-mono: var(--ff-mono);
@@ -65,15 +74,20 @@
   --warn: #e0b54a;
   --danger: #ff5a45;
 
-  /* the one high-contrast neutral: playhead, selection, focus. Never a hue,
-     because it has to win against every family colour underneath it. */
-  /* selection accent — the one warm colour in the editor */
+  /* accent — the one warm colour. Its job is intent: where a drag will land,
+     and the primary action in a header. It is deliberately NOT selection. */
   --accent: #e8a33d;
   --accent-soft: rgba(232, 163, 61, 0.16);
 
+  /* selection: a high-contrast neutral, never a hue, because it has to win
+     against every family colour underneath it without competing with the
+     accent's "about to happen" meaning. Swap these two lines back to the
+     accent values to return to the warm selection. */
+  --select: #ccd2dd;
+  --select-soft: rgba(204, 210, 221, 0.16);
+
   --focus: #ffffff;
   --playhead: #ffffff;
-  --select: #ffffff;
 
   /* lane identity, tuned onto a LIGHTNESS ladder rather than by hue alone.
      Seven hues cannot all stay distinct under deuteranopia — it collapses the
@@ -185,6 +199,17 @@ input::placeholder { color: var(--ink-dimmer); }
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-dim);
+}
+
+/* ── page title ──────────────────────────────────────────────────────────────
+   The counterpart to .label, and the only type in the product allowed to be
+   large. Three pages ask for it; without a rule they rendered at body size. */
+.display {
+  font-size: var(--text-xl);
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--ink);
 }
 
 /* ── upload progress pulse ────────────────────────────────────────────────── */
