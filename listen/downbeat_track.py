@@ -74,41 +74,42 @@ def apply(song, write, stamp):
 
     phases = [j % per for j in matched] if per > 1 else [0]
     vals, counts = np.unique(phases, return_counts=True)
-    phase = int(vals[int(np.argmax(counts))])
     agree = float(counts.max()) / len(phases)
 
-    old = [i for i, b in enumerate(B) if isinstance(b, dict) and b.get("downbeat")]
-    old_phase = (old[0] % per) if old and per > 1 else None
+    before = {i for i, b in enumerate(B) if isinstance(b, dict) and b.get("downbeat")}
+    after = set(matched)
+    moved = len(after ^ before)
 
-    tag = "same" if old_phase == phase else f"{old_phase}->{phase}"
+    drift = "" if agree > 0.97 else f", grid drifts (one phase fits only {agree * 100:.0f}%)"
     line = (
-        f"{song:28s} metre {per}  phase {tag:9s} "
-        f"madmom {len(downs):3d} downbeats, {len(matched)} on a score beat, "
-        f"{unmatched} adrift, phase agreement {agree * 100:.0f}%"
+        f"{song:28s} metre {per}  madmom {len(downs):3d} downbeats, "
+        f"{len(matched)} on a score beat, {unmatched} adrift, "
+        f"{moved} flags change{drift}"
     )
 
     if not write:
         return line
-    if agree < 0.75:
-        return line + "  [UNSTABLE, not written]"
+    if len(matched) < 0.9 * len(downs):
+        return line + "  [too many adrift, not written]"
 
     shutil.copy2(sp, sp + f".bak-madmom-{stamp}")
     for i, b in enumerate(B):
         if not isinstance(b, dict):
             continue
-        if i % per == phase:
+        if i in after:
             b["downbeat"] = True
         elif "downbeat" in b:
             del b["downbeat"]
     sc["beats"] = B
     sc.setdefault("provenance", {})["downbeat_phase"] = {
-        "to": phase,
         "metre": per,
         "decided_by": "madmom RNNDownBeatProcessor + DBNDownBeatTrackingProcessor",
         "downbeats_found": len(downs),
         "landed_on_a_score_beat": len(matched),
         "adrift": unmatched,
         "phase_agreement": round(agree, 3),
+        "flags_changed": moved,
+        "written_as": "madmom downbeat times mapped to the nearest score beat",
         "tool": "listen/downbeat_track.py",
     }
     json.dump(sc, open(sp, "w"))
