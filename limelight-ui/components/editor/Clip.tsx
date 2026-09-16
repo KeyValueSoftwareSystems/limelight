@@ -65,6 +65,12 @@ function ClipBase({
         e.stopPropagation();
         onZoomTo?.(clip);
       }}
+      /* The handle the inspector finds this clip by. It positions itself against
+         the clip's MEASURED rectangle rather than recomputing one from the row
+         index and the scroll offset, which drifted by a border here and a stale
+         scroll position there — and a card whose idea of the clip is 75px out is
+         a card sitting on top of it. */
+      data-clip-key={clip.key}
       className={`absolute border border-solid touch-none transition-colors duration-[var(--dur-state)] ${
         editable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
       } ${

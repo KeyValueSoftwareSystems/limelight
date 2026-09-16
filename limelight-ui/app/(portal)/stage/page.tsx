@@ -25,6 +25,8 @@ import { ChatPanel } from "@/components/editor/ChatPanel";
 import { RigControl } from "@/components/portal/RigControl";
 import { buildClips, tileForClip } from "@/lib/clips";
 import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
+import { buildShowFile, serializeShowFile, showFileName } from "@/lib/showfile";
+import { downloadText } from "@/lib/download";
 import type { Clip, Edit, PaletteColour } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import type { Venue } from "@/lib/types";
@@ -388,6 +390,36 @@ export default function StagePage() {
     },
     [applyPlan],
   );
+
+  /* The other half of import. Saving already writes this exact document to the
+     hub, but the copy it leaves is the hub's — so a show could be imported from
+     a file and never got back out as one.
+
+     The timeline is the source, not the last save: editsToPlan() is the same
+     call handleSave makes, off the same store, so what lands in Downloads is
+     what is on screen — edits you have not saved included. No round trip, and
+     nothing here needs a show to have been named or saved first. */
+  const handleDownload = useCallback(() => {
+    const st = usePortalStore.getState();
+    if (!st.show || !st.song) return;
+    const name = showFileName(st.song.name);
+    try {
+      const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
+      const doc = buildShowFile(st.song.name, plan);
+      downloadText(name, serializeShowFile(doc));
+      const cues =
+        (doc.states?.length ?? 0) +
+        (doc.bindings?.length ?? 0) +
+        (doc.gestures?.length ?? 0);
+      setStageMsg(`downloaded ${name} · ${cues} cues`);
+    } catch (e) {
+      setStageMsg(
+        e instanceof Error
+          ? "download failed: " + e.message
+          : "download failed",
+      );
+    }
+  }, []);
 
   /* Send-to-rig lives on this page too. Arming needs the baked frames to be ON
      the rig first: /api/rig/at loads them, and without that hand-over the server
@@ -788,6 +820,17 @@ export default function StagePage() {
                 onClick={() => importInputRef.current?.click()}
               >
                 Import show file
+              </Button>
+              {/* Export sits beside import, in every role and on the same side
+                  of the divider, because taking a copy of the file is a read —
+                  the same reasoning that puts import here. Save, which writes to
+                  the hub, stays the creator's below. */}
+              <Button
+                variant="ghost"
+                disabled={!show || !song}
+                onClick={handleDownload}
+              >
+                Download show file
               </Button>
               <RigControl onToggle={handleRigToggle} />
               {role === "creator" && (
