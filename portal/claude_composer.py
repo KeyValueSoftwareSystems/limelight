@@ -149,7 +149,9 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "",
             "The brief above is structure. Detail is a shell command away, and you",
             "are expected to use it - a show written from the summary alone is a show",
-            f"that could have been written for any song. Budget about {BUDGET} calls.",
+            "that could have been written for any song. Ask as many as you need -",
+            "there is no budget. A question costs a fraction of a second and the",
+            "answer is measured; guessing costs the show.",
             "",
             f"    HUB_URL={hub} python3 {ask} {song} <question> [args]",
             "",
@@ -486,7 +488,7 @@ def run_claude(work, brief, system_prompt, model, turns):
         cwd=work,
         capture_output=True,
         text=True,
-        timeout=3300,
+        timeout=5400,
         stdin=subprocess.DEVNULL,
     )
     return r.returncode, (r.stdout or "").strip(), (r.stderr or "").strip()
@@ -500,7 +502,7 @@ def read_plan(work):
     return None
 
 
-def compose(song, model=None, hub=None, turns=24, keep=False, notes=None):
+def compose(song, model=None, hub=None, turns=90, keep=False, notes=None):
     model = model or DEFAULT_MODEL
     if hub:
         C.HUB = hub.rstrip("/")
@@ -549,7 +551,7 @@ def main():
     ap.add_argument("song")
     ap.add_argument("--hub", default=C.HUB)
     ap.add_argument("--model", default=DEFAULT_MODEL)
-    ap.add_argument("--turns", type=int, default=24)
+    ap.add_argument("--turns", type=int, default=90)
     ap.add_argument("--notes", default=None)
     ap.add_argument("--out", default=None)
     ap.add_argument("--keep", action="store_true")
