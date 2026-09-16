@@ -16,6 +16,8 @@ import type {
   ColoursResponse,
   Entitlement,
   TrimState,
+  UploadResponse,
+  UploadStatus,
 } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8800";
@@ -120,6 +122,13 @@ export const venues = {
   },
 };
 
+export const showfile = {
+  /** A hand-authored show file for this song, or null where there is none. */
+  get(song: string): Promise<{ showfile: unknown | null }> {
+    return request(`/api/showfile?song=${encodeURIComponent(song)}`);
+  },
+};
+
 export const layouts = {
   list(): Promise<LayoutsResponse> {
     return request<LayoutsResponse>("/api/layouts");
@@ -187,6 +196,48 @@ export const market = {
 export const entitlement = {
   check(showId: string, tier: string): Promise<Entitlement> {
     return post<Entitlement>("/api/entitlement", { show_id: showId, tier });
+  },
+};
+
+export const upload = {
+  send(
+    file: File,
+    onProgress?: (pct: number) => void,
+  ): Promise<UploadResponse> {
+    const form = new FormData();
+    form.append("file", file);
+    return new Promise<UploadResponse>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total);
+      });
+      xhr.addEventListener("load", () => {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(data as UploadResponse);
+          } else {
+            reject(new ApiError(xhr.status, data.error || "upload failed"));
+          }
+        } catch {
+          reject(new ApiError(xhr.status, "invalid response"));
+        }
+      });
+      xhr.addEventListener("error", () =>
+        reject(new ApiError(0, "network error during upload")),
+      );
+      xhr.addEventListener("abort", () =>
+        reject(new ApiError(0, "upload cancelled")),
+      );
+      xhr.open("POST", `${BASE}/api/upload`);
+      xhr.send(form);
+    });
+  },
+
+  status(jobId: string): Promise<UploadStatus> {
+    return request<UploadStatus>(
+      `/api/upload/status?job=${encodeURIComponent(jobId)}`,
+    );
   },
 };
 

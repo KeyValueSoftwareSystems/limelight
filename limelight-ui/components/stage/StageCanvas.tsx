@@ -90,20 +90,11 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
     if (show && frames && place) paint();
   }, [show, frames, place, trims, currentTime, playing, paint]);
 
+  /* The frame, the toggle and the "select a song" overlay belong to
+     StagePreview, which owns the box this and Stage3D take turns filling. */
   return (
-    <div
-      ref={containerRef}
-      className="relative flex-1 min-h-[150px] mx-[var(--spacing-s6)] rounded-lg overflow-hidden bg-[#07090f]"
-    >
-      <canvas
-        ref={canvasRef}
-        className="block w-full h-full"
-      />
-      {(!show || !frames) && (
-        <div className="absolute inset-x-0 bottom-1/2 text-center text-[length:var(--text-xs)] tracking-[0.18em] uppercase text-[rgba(215,222,240,0.6)] pointer-events-none">
-          {show ? "baking the show…" : "select a song"}
-        </div>
-      )}
+    <div ref={containerRef} className="absolute inset-0">
+      <canvas ref={canvasRef} className="block w-full h-full" />
     </div>
   );
 }

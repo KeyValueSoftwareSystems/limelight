@@ -187,6 +187,15 @@ input::placeholder { color: var(--ink-dimmer); }
   color: var(--ink-dim);
 }
 
+/* ── upload progress pulse ────────────────────────────────────────────────── */
+@keyframes pulse-bar {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.animate-pulse-bar {
+  animation: pulse-bar 1.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

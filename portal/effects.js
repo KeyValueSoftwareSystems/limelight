@@ -40,6 +40,65 @@ const BY_ID = Object.fromEntries(CATALOG.map(e => [e.id, e]));
    placement outranks the arranger's own at the same type. */
 const FX_PRIORITY = { white_blast: 9, blackout: 9, pause: 8, hook: 7, accent_strobe: 5, modulate: 4, whiten: 3 };
 
+/* THE BRIDGE. The catalogue is schema 2: a tile is named by what it DOES to a
+   dimension of light (`blackout`, `impact`, `accent`) and carries no `fx`. The
+   renderer speaks its own older vocabulary -- the six words below are every
+   punctuation type frame.js branches on. Reading `spec.fx` straight off a
+   schema-2 tile gave `undefined`, so every placement became an assignment of
+   type `undefined`, frame.js matched none of them, and the bake came back
+   byte-identical to one with no edits at all -- while `applied` still reported
+   each edit as placed, so the page drew the clip and nothing happened in the
+   room. A no-op that reports success is the worst kind.
+
+   The page keeps the same table in lib/families.ts as PLAN_FX_TO_EFFECT, read
+   the other way round. If one moves, move both. */
+const EFFECT_TO_FX = {
+  /* the six the page already knew about */
+  impact: "white_blast",
+  blackout: "blackout",
+  accent: "accent_strobe",
+  lift: "hook",
+  hush: "pause",
+  wash: "whiten",
+
+  /* six more that the renderer can already express, once their dials are put in
+     its words. `ramp` and `modulate` are spans rather than hits: modulate scales
+     the look that is already playing, ramp grows across its own length. */
+  stab: "white_blast",     /* a hit, but short and usually on the inner pair    */
+  drone: "modulate",       /* a low bed under everything                        */
+  strip: "modulate",       /* take the rig back to a fraction of itself         */
+  cut: "modulate",         /* gain 0 for a beat -- a hole, not a fade           */
+  ramp: "ramp",            /* grow toward full across the span                  */
+  swell: "ramp",           /* the same rise, dialled by `rise` instead of `to`  */
+};
+
+/* The catalogue names a tile's controls in the language of the DIMENSION it
+   changes; the renderer names them in its own. Everything a dial cannot reach
+   is left alone rather than invented. */
+const clamp01 = v => Math.max(0, Math.min(1, +v));
+const PARAMS_FOR = {
+  wash: d => ({ amount: d.amount != null ? clamp01(d.amount) : undefined }),
+  impact: d => ({ strength: 1, coverage: d.extent, colour: d.colour }),
+  stab: d => ({ strength: 0.85, coverage: d.extent || "inner", colour: d.colour }),
+  /* a drone sits UNDER the show: it scales what is playing down to its own
+     level rather than adding a layer on top of it */
+  drone: d => ({ gain: d.amount != null ? clamp01(d.amount) : 0.12 }),
+  strip: d => ({ gain: d.to != null ? clamp01(d.to) : 0.1 }),
+  cut: () => ({ gain: 0 }),
+  ramp: d => ({ weight: d.to != null ? clamp01(d.to) : 0.85 }),
+  swell: d => ({ weight: d.rise != null ? clamp01(d.rise) : 0.5 }),
+};
+
+/* schema 1 said so outright; schema 2 is looked up; anything else has no
+   renderer behind it yet and must say so rather than pretend */
+const fxOf = spec => spec.fx || EFFECT_TO_FX[spec.id] || null;
+
+/* schema 2 puts a tile's defaults in `dials`, not in `params` */
+const dialDefaults = spec => Object.fromEntries(
+  Object.entries(spec.dials || {})
+    .map(([k, d]) => [k, d && typeof d === "object" ? d.default : d])
+    .filter(([, v]) => v !== undefined && v !== null));
+
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
 const scoreFile = args[0];
@@ -97,21 +156,38 @@ const arrangerPlan = planFor(p, score.sections, bpb, shift);
 for (const e of edits) {
   const spec = BY_ID[e.type];
   if (!spec) { applied.push({ ...e, skipped: "no such effect" }); continue; }
-  const beats = Math.max(1, Math.min(256, Math.round(+e.beats || spec.beats)));
+  const fx = fxOf(spec);
+  if (!fx) {
+    /* honest refusal: the tile exists in the catalogue but nothing downstream
+       renders it, so placing it would change nothing in the room */
+    applied.push({ ...e, skipped: "no renderer for this effect yet" });
+    continue;
+  }
+  /* schema 2 has no `beats`; without the fallback this was NaN whenever the
+     placement did not carry its own length */
+  const fallback = +spec.beats || +spec.default_beats || 1;
+  const beats = Math.max(1, Math.min(256, Math.round(+e.beats || fallback)));
   /* the page numbers bars the way protocol/session.js does; the renderer sees
      bake.js's corrected numbering, so cross the same bridge bake.js crosses */
   /* a placement may begin on any beat of its bar, not only the downbeat */
   const beat = Math.max(1, Math.min(bpb, Math.round(+e.beat || 1)));
   const startBeat = (Math.round(e.bar) - shift - 1) * bpb + (beat - 1);
   /* the tile's dials are its identity; an edit may re-dial its own copy */
-  const params = { ...spec.params, ...(e.params || {}) };
+  const dials = { ...dialDefaults(spec), ...(e.params || {}) };
+  /* the tile's dials, said in the renderer's words; anything with no translation
+     passes its dials straight through, which is what schema 1 always did */
+  const translate = PARAMS_FOR[spec.id];
+  const spoken = translate ? translate(dials) : null;
+  const params = { ...spec.params, ...dials,
+                   ...(spoken ? Object.fromEntries(
+                        Object.entries(spoken).filter(([, v]) => v !== undefined)) : {}) };
   if (params.tone === "key") {
     if (keyHue !== null) params.hue = keyHue;         /* else it stays white, which is honest */
   }
   const a = {
     from: fromBeat(startBeat), to: fromBeat(startBeat + beats),
-    type: spec.fx, layer: spec.fx === "modulate" ? "modulate" : "fx",
-    priority: (FX_PRIORITY[spec.fx] || 6) + 1,
+    type: fx, layer: fx === "modulate" ? "modulate" : "fx",
+    priority: (FX_PRIORITY[fx] || 6) + 1,
     params, occupies: [], placed: e.type,
   };
   /* an explicit placement replaces the arranger's punctuation of the same type

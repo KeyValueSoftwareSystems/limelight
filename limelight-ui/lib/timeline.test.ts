@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { timeToX, xToTime, fit, clampView, zoomAt, panBy, barTicks, beatAtTime } from "./timeline.ts";
+import { timeToX, xToTime, fit, clampView, zoomAt, panBy, barTicks, beatAtTime, beatsAcross } from "./timeline.ts";
 import type { Grid } from "./types";
 
 const DUR = 240;
@@ -80,4 +80,32 @@ test("every bar tick is a real downbeat", () => {
   for (const t of ticks) {
     assert.ok(Math.abs(t.t - (t.bar - 1) * 2) < 1e-9, `bar ${t.bar} at ${t.t}`);
   }
+});
+
+/* The snap magnet has to reach the same distance on screen at every zoom. When
+   its radius was a number of BEATS, zooming in grew it: at the zoom you place
+   at, 0.6 beats was 23px of pull, so a drop halfway through a bar was dragged
+   onto a bar line it was nowhere near. */
+test("a pixel radius is the same pixels, whatever the zoom", () => {
+  const wide = { from: 0, to: DUR };
+  const close = { from: 60, to: 66 };
+  const rWide = beatsAcross(500, 10, wide, W, GRID);
+  const rClose = beatsAcross(500, 10, close, W, GRID);
+  // 120bpm in 4/4 is two beats a second
+  assert.ok(Math.abs(rWide - (10 / W) * DUR * 2) < 1e-9, `wide radius ${rWide}`);
+  assert.ok(Math.abs(rClose - (10 / W) * 6 * 2) < 1e-9, `close radius ${rClose}`);
+  assert.ok(rWide > rClose, "zooming in must shrink the radius in beats");
+});
+
+test("the radius is measured at the pointer, so a tempo change is respected", () => {
+  const changing: Grid = {
+    bpm: 60,
+    beats_per_bar: 4,
+    first_beat_s: 0,
+    tempo: [{ from_beat: 0, at_s: 0, bpm: 60 }, { from_beat: 60, at_s: 60, bpm: 120 }],
+  };
+  const v = { from: 0, to: 120 };
+  const slow = beatsAcross(100, 10, v, W, changing);   // inside the 60bpm stretch
+  const fast = beatsAcross(900, 10, v, W, changing);   // inside the 120bpm stretch
+  assert.ok(Math.abs(fast - slow * 2) < 1e-9, `${slow} then ${fast}`);
 });

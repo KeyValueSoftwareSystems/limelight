@@ -177,7 +177,11 @@ export function TransportBar({
         items={[
           { id: "bar", label: "Bar", hint: "and drops, sections" },
           { id: "beat", label: "Beat", hint: "finer" },
-          { id: "off", label: "Free", hint: "exactly where you drop" },
+          /* Not "exactly where you drop": the renderer is beat-locked (readers/
+             lights/frame.js) and the bake rounds the beat, so a clip drawn
+             between two beats would be a picture of something the lights cannot
+             do. Free means the nearest beat with nothing pulling at it. */
+          { id: "off", label: "Free", hint: "nearest beat, no pull" },
         ]}
         onPick={(id) => onSetSnap(id as SnapStrength)}
       />

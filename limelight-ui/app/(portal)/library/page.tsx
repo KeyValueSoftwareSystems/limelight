@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
 import { SongCard } from "@/components/library/SongCard";
+import { UploadButton } from "@/components/library/UploadButton";
 import { Input } from "@/components/ui/Input";
 import type { Song } from "@/lib/types";
 
@@ -52,7 +53,9 @@ export default function LibraryPage() {
             <div className="display">Library</div>
             <div className="label mt-[7px]">{meta}</div>
           </div>
-          <div className="flex items-center gap-[var(--spacing-s2)] flex-wrap">
+          <div className="flex items-center gap-[var(--spacing-s3)] flex-wrap">
+            <UploadButton />
+            <div className="w-px h-[var(--hit)] bg-line self-center" />
             <label className="label" htmlFor="authorName">
               You are
             </label>

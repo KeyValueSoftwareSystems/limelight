@@ -8,7 +8,7 @@ import { test } from "node:test";
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
-import { PROFILES, profileOf, kindOf, moves } from "./profiles.ts";
+import { PROFILES, profileOf, kindOf, moves, rigSummary } from "./profiles.ts";
 
 const DIR = path.join(import.meta.dirname, "..", "..", "readers", "lights", "drivers", "profiles");
 
@@ -115,4 +115,32 @@ test("an unknown device type still draws rather than vanishing", () => {
 test("moves() is true exactly for the devices that aim", () => {
   const movers = Object.keys(PROFILES).filter(moves).sort();
   assert.deepEqual(movers, ["head13", "laser8", "spot29", "wash12"]);
+});
+
+/* The rig line is the only place a person reads a rig before choosing it, so it
+   has to count by what a device DOES and stay in the order a lighting person
+   would say it — movers, then washes, then everything that only hits. */
+test("rigSummary counts a rig by kind, in the order a lighting person says it", () => {
+  assert.equal(
+    rigSummary({ par5: 22, wash12: 6, spot29: 8, blinder1: 4, strobe3: 2, laser8: 2, pixelbar24: 2 }),
+    "8 beams \u00b7 6 washes \u00b7 22 pars \u00b7 2 strips \u00b7 4 blinders \u00b7 2 strobes \u00b7 2 lasers",
+  );
+});
+
+test("rigSummary merges device types that do the same job", () => {
+  /* par7 and par5 are different fixtures and one rig line: both are pars. */
+  assert.equal(rigSummary({ par7: 4, par5: 2 }), "6 pars");
+});
+
+test("rigSummary says one of a thing in the singular", () => {
+  assert.equal(rigSummary({ par7: 4, head13: 1 }), "1 beam \u00b7 4 pars");
+});
+
+test("rigSummary takes the separator its caller reads in", () => {
+  assert.equal(rigSummary({ par7: 4, head13: 1 }, ", "), "1 beam, 4 pars");
+});
+
+test("rigSummary on a rig it cannot count is empty, not a crash", () => {
+  assert.equal(rigSummary(undefined), "");
+  assert.equal(rigSummary({}), "");
 });

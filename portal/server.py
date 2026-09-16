@@ -49,6 +49,7 @@ HUB = os.environ.get("HUB_URL", "http://127.0.0.1:8770")
 PANEL = os.environ.get("PANEL_URL", "http://127.0.0.1:8766")
 LIMITS_FILE = os.path.join(HERE, "limits.json")
 VENUES_FILE = os.path.join(HERE, "venues.json")
+SHOWFILES = os.path.join(HERE, "showfiles")
 LOGOS = os.path.join(HERE, "logos")
 LIMITS = None
 
@@ -1639,6 +1640,19 @@ def make_handler(library, baker, rig):
             n = int(self.headers.get("Content-Length") or 0)
             return json.loads(self.rfile.read(n) or b"{}") if n else {}
 
+        def _raw_body(self):
+            n = int(self.headers.get("Content-Length") or 0)
+            if not n:
+                return b""
+            chunks, remaining = [], n
+            while remaining > 0:
+                chunk = self.rfile.read(min(remaining, 1 << 20))
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                remaining -= len(chunk)
+            return b"".join(chunks)
+
         def _bytes(self, blob, ctype):
             self.send_response(200)
             self.send_header("Content-Type", ctype)
@@ -1680,6 +1694,112 @@ def make_handler(library, baker, rig):
                         break
                     self.wfile.write(chunk)
 
+        # ----- upload -----
+        MAX_UPLOAD = 100 * 1024 * 1024  # 100 MB
+
+        def _handle_upload(self):
+            ctype = self.headers.get("Content-Type", "")
+            length = int(self.headers.get("Content-Length") or 0)
+            if length > self.MAX_UPLOAD:
+                self._raw_body()  # drain so the connection stays clean
+                return self._json({"error": "file too large (max 100 MB)"}, 413)
+            if "multipart/form-data" not in ctype:
+                return self._json({"error": "expected multipart/form-data"}, 400)
+            # extract boundary from Content-Type header
+            boundary = None
+            for part in ctype.split(";"):
+                part = part.strip()
+                if part.startswith("boundary="):
+                    boundary = part[len("boundary="):]
+                    break
+            if not boundary:
+                return self._json({"error": "no boundary in Content-Type"}, 400)
+            raw = self._raw_body()
+            if not raw:
+                return self._json({"error": "empty body"}, 400)
+
+            # parse multipart: find the file part
+            sep = ("--" + boundary).encode()
+            parts = raw.split(sep)
+            file_data, filename = None, None
+            for p in parts:
+                if b"Content-Disposition:" not in p and b"content-disposition:" not in p:
+                    continue
+                # find headers vs body (split on double CRLF)
+                header_end = p.find(b"\r\n\r\n")
+                if header_end < 0:
+                    continue
+                headers_block = p[:header_end].decode("utf-8", errors="replace")
+                body_bytes = p[header_end + 4:]
+                # strip trailing \r\n before next boundary
+                if body_bytes.endswith(b"\r\n"):
+                    body_bytes = body_bytes[:-2]
+                # parse filename from Content-Disposition
+                for line in headers_block.split("\r\n"):
+                    low = line.lower()
+                    if "content-disposition:" in low and 'filename="' in low:
+                        idx = low.index('filename="')
+                        rest = line[idx + len('filename="'):]
+                        filename = rest.split('"')[0]
+                        break
+                    if "content-disposition:" in low and "filename=" in low:
+                        idx = low.index("filename=")
+                        rest = line[idx + len("filename="):]
+                        filename = rest.strip().strip('"').split('"')[0]
+                        break
+                if filename:
+                    file_data = body_bytes
+                    break
+
+            if not filename or file_data is None:
+                return self._json({"error": "no file found in the upload"}, 400)
+            if not filename.lower().endswith(".mp3"):
+                return self._json({"error": "only .mp3 files are accepted"}, 400)
+
+            # sanitise: keep only safe characters in the filename
+            safe = "".join(c if (c.isalnum() or c in "-_. ") else "_" for c in filename).strip()
+            if not safe.lower().endswith(".mp3"):
+                safe += ".mp3"
+
+            # forward to hub: PUT /hub/score/<name>.mp3
+            put_url = "%s/hub/score/%s" % (HUB, urllib.parse.quote(safe))
+            try:
+                req = urllib.request.Request(put_url, data=file_data, method="PUT")
+                req.add_header("Content-Type", "application/octet-stream")
+                req.add_header("Content-Length", str(len(file_data)))
+                with urllib.request.urlopen(req, timeout=120) as r:
+                    r.read()
+            except urllib.error.HTTPError as e:
+                return self._json({"error": "hub upload failed: %s" % e.code}, 502)
+            except (urllib.error.URLError, OSError) as e:
+                return self._json({"error": "hub unreachable: %s" % e}, 502)
+
+            # trigger generation: POST /hub/score/<name>.mp3?generate
+            gen_url = "%s/hub/score/%s?generate" % (HUB, urllib.parse.quote(safe))
+            try:
+                req = urllib.request.Request(gen_url, data=b"", method="POST")
+                req.add_header("Content-Length", "0")
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    result = json.load(r)
+                job = result.get("job") or {}
+                return self._json({
+                    "job_id": job.get("id", ""),
+                    "name": job.get("name", safe),
+                    "status": job.get("status", "queued"),
+                })
+            except urllib.error.HTTPError as e:
+                code = e.code
+                try:
+                    err_body = e.read().decode()
+                except Exception:
+                    err_body = ""
+                if code == 409:
+                    return self._json({"error": "score generation already in progress for this file",
+                                       "name": safe}, 409)
+                return self._json({"error": "hub generate failed: %s %s" % (code, err_body)}, 502)
+            except (urllib.error.URLError, OSError) as e:
+                return self._json({"error": "hub unreachable for generation: %s" % e}, 502)
+
         # ----- routes -----
         def do_GET(self):
             u = urlparse(self.path)
@@ -1707,6 +1827,25 @@ def make_handler(library, baker, rig):
                     return self._json({"error": "the hub at %s is not answering (%s)" % (HUB, e)}, 502)
                 return self._json({"hub": HUB, "songs": songs})
 
+            if path == "/api/upload/status":
+                job_id = (q.get("job") or [""])[0]
+                if not job_id:
+                    return self._json({"error": "job id required"}, 400)
+                try:
+                    data = hub_get("/hub/score/?jobs")
+                except (urllib.error.URLError, OSError) as e:
+                    return self._json({"error": "hub unreachable: %s" % e}, 502)
+                for j in (data.get("jobs") or []):
+                    if j.get("id") == job_id:
+                        return self._json({
+                            "id": j["id"],
+                            "name": j.get("name", ""),
+                            "status": j.get("status", "unknown"),
+                            "error": j.get("error"),
+                            "version": j.get("version"),
+                        })
+                return self._json({"error": "no such job"}, 404)
+
             if path == "/api/show":
                 job = (q.get("job") or [""])[0]
                 st = baker.status(job)
@@ -1719,6 +1858,20 @@ def make_handler(library, baker, rig):
                 if blob is None:
                     return self._json({"error": "frames expired; ask for the show again"}, 404)
                 return self._bytes(blob, "application/octet-stream")
+
+            if path == "/api/showfile":
+                # A hand-authored show file for one song: states, bindings and
+                # gestures, drawn by the timeline. Absent is normal, not an error
+                # -- most songs have none and the page falls back to the plan.
+                name = os.path.basename((q.get("song") or [""])[0])
+                full = os.path.join(SHOWFILES, name + ".show.json")
+                if not name or not os.path.isfile(full):
+                    return self._json({"showfile": None})
+                try:
+                    with open(full) as fh:
+                        return self._json({"showfile": json.load(fh)})
+                except (OSError, ValueError) as e:                  # noqa: BLE001
+                    return self._json({"showfile": None, "error": str(e)})
 
             if path == "/api/effects":
                 return self._json({"effects": catalog(LIMITS), "dials": DIALS, "choices": CHOICES,
@@ -1782,6 +1935,10 @@ def make_handler(library, baker, rig):
 
         def do_POST(self):
             path = unquote(urlparse(self.path).path)
+
+            if path == "/api/upload":
+                return self._handle_upload()
+
             body = self._body()
 
             if path == "/api/show":

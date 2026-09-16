@@ -554,3 +554,19 @@ export interface FixtureStates {
   heads: HeadState[];
   head: HeadState | null;
 }
+
+/* ── upload ──────────────────────────────────────────────────────────────── */
+
+export interface UploadResponse {
+  job_id: string;
+  name: string;
+  status: string;
+}
+
+export interface UploadStatus {
+  id: string;
+  name: string;
+  status: "queued" | "generating" | "storing" | "done" | "error";
+  error: string | null;
+  version: number | null;
+}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Venue, Layout, VenueLayout } from "@/lib/types";
 import { RigPreview } from "./RigPreview";
-import { kindOf } from "@/lib/profiles";
+import { rigSummary } from "@/lib/profiles";
 import * as api from "@/lib/api";
 
 interface VenueCardProps {
@@ -11,36 +11,6 @@ interface VenueCardProps {
   /** every rig this box can render, keyed by layout file */
   layouts: Record<string, Layout>;
   onDesign: (venue: Venue, layoutFile: string) => void;
-}
-
-/* The words a lighting person would use, in the order a rig is usually counted:
-   what moves, then what washes, then what hits. */
-const KIND_ORDER = ["spot", "wash", "par", "strip", "blinder", "strobe", "laser"] as const;
-const KIND_LABEL: Record<string, [string, string]> = {
-  spot: ["beam", "beams"],
-  wash: ["wash", "washes"],
-  par: ["par", "pars"],
-  strip: ["strip", "strips"],
-  blinder: ["blinder", "blinders"],
-  strobe: ["strobe", "strobes"],
-  laser: ["laser", "lasers"],
-};
-
-/** "8 beams · 6 washes · 22 pars" — the rig in the language of the room. */
-function rigLine(layout: Layout | undefined): string {
-  if (!layout) return "";
-  const counts = new Map<string, number>();
-  for (const [type, n] of Object.entries(layout.kinds ?? {})) {
-    const k = kindOf(type);
-    counts.set(k, (counts.get(k) ?? 0) + n);
-  }
-  return KIND_ORDER
-    .filter((k) => counts.has(k))
-    .map((k) => {
-      const n = counts.get(k)!;
-      return `${n} ${KIND_LABEL[k][n === 1 ? 0 : 1]}`;
-    })
-    .join(" · ");
 }
 
 export function VenueCard({ venue, layouts, onDesign }: VenueCardProps) {
@@ -92,7 +62,7 @@ export function VenueCard({ venue, layouts, onDesign }: VenueCardProps) {
         </div>
 
         <p className="m-0 text-[length:var(--text-sm)] text-dim tabular-nums">
-          {rigLine(layout)}
+          {rigSummary(layout?.kinds)}
         </p>
         <p className="m-0 text-[length:var(--text-xs)] text-dimmer tabular-nums">
           {layout ? `${layout.fixtures} fixtures · ${layout.channels} channels` : "rig unavailable"}

@@ -73,3 +73,17 @@ export function barTicks(view: View, grid: Grid, width: number): BarTick[] {
   }
   return out;
 }
+
+/** How many beats `px` screen pixels cover, measured at `x` in the same view.
+ *
+ *  A magnet whose radius is a fixed number of beats reaches further across the
+ *  screen the further you zoom in, which is backwards: the closer you look, the
+ *  finer you mean to place. Measuring at `x` rather than dividing by bpm also
+ *  keeps it honest across a tempo change. */
+export function beatsAcross(
+  x: number, px: number, view: View, width: number, grid: Grid,
+): number {
+  const a = beatAtTime(xToTime(x, view, width), grid);
+  const b = beatAtTime(xToTime(x + px, view, width), grid);
+  return Math.abs(b - a);
+}

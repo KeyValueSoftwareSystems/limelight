@@ -1,0 +1,68 @@
+{
+ "layout": "0.5",
+ "rig": "keycode-basic",
+ "geometry": "line",
+ "frame": "audience",
+ "note": "KeyCode Stage, stripped back: one beam in the middle with two pars either side of it, all on a single 3.6 m bar at 2.9 m. This is the shape the room runs on a quiet night, and it is the smallest rig here that can still do something with POSITION -- four pars split two inner and two outer, so a mirrored look has a real pair to work with, and the beam in the centre gives the bar a middle to answer.\n\nPositions in metres in the AUDIENCE frame: at = [x, depth, height], +x = the audience's right. The par is the GDTF LED PAR 64 RGBW and the beam is the Robe Robin MMX Spot, the same two devices the bigger arena rig uses -- so a show made here plays there without a single edit, which is the whole point of the layout being a property of the venue rather than of the show.",
+ "fixtures": [
+  {
+   "id": "par_1",
+   "type": "par5",
+   "at": [
+    -1.8,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 1
+  },
+  {
+   "id": "par_2",
+   "type": "par5",
+   "at": [
+    -0.9,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 6
+  },
+  {
+   "id": "spot_1",
+   "type": "spot29",
+   "at": [
+    0.0,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 11
+  },
+  {
+   "id": "par_3",
+   "type": "par5",
+   "at": [
+    0.9,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 40
+  },
+  {
+   "id": "par_4",
+   "type": "par5",
+   "at": [
+    1.8,
+    0.0,
+    2.9
+   ],
+   "universe": 0,
+   "address": 45
+  }
+ ],
+ "limits": {
+  "max_pan_per_frame": 7,
+  "max_tilt_per_frame": 7
+ }
+}

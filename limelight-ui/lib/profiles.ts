@@ -114,3 +114,34 @@ export function moves(type: string): boolean {
   const a = profileOf(type).at;
   return a.pan !== undefined && a.tilt !== undefined;
 }
+
+/* ── counting a rig out loud ────────────────────────────────────────────────
+   A rig is read by what its devices DO, never by their type names: par7 and
+   par5 are two fixtures and one line, and a blinder is not "a head" because it
+   is not a par. Both the target line and the venue picker say this, so it is
+   said once here. */
+
+/** the words a lighting person counts a rig in, in the order they would say them */
+const KIND_ORDER: readonly FixtureKind[] =
+  ["spot", "wash", "par", "strip", "blinder", "strobe", "laser"];
+
+const KIND_WORD: Record<FixtureKind, [string, string]> = {
+  spot: ["beam", "beams"], wash: ["wash", "washes"], par: ["par", "pars"],
+  strip: ["strip", "strips"], blinder: ["blinder", "blinders"],
+  strobe: ["strobe", "strobes"], laser: ["laser", "lasers"],
+};
+
+/** "8 beams · 6 washes · 22 pars" — a rig in the language of the room. */
+export function rigSummary(
+  kinds: Record<string, number> | undefined,
+  sep = " · ",
+): string {
+  const n = new Map<FixtureKind, number>();
+  for (const [type, count] of Object.entries(kinds ?? {})) {
+    const k = kindOf(type);
+    n.set(k, (n.get(k) ?? 0) + count);
+  }
+  return KIND_ORDER.filter((k) => n.has(k))
+    .map((k) => `${n.get(k)} ${KIND_WORD[k][n.get(k) === 1 ? 0 : 1]}`)
+    .join(sep);
+}

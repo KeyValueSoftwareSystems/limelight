@@ -10,7 +10,7 @@ import { placeFixtures } from "@/lib/fixtures";
 import { mmss, clamp } from "@/lib/grid";
 import * as api from "@/lib/api";
 
-import { StageCanvas } from "@/components/stage/StageCanvas";
+import { StagePreview } from "@/components/stage/StagePreview";
 import { TargetLine } from "@/components/stage/TargetLine";
 import { ConsolePanel } from "@/components/stage/ConsolePanel";
 import { RigPanel } from "@/components/stage/RigPanel";
@@ -21,6 +21,7 @@ import { StageTimeline } from "@/components/editor/StageTimeline";
 import { Sidebar } from "@/components/editor/Sidebar";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { buildClips } from "@/lib/clips";
+import { resolve as resolveShowFile, toClips as showFileClips, type ShowFile } from "@/lib/showfile";
 import { effectIdForPlanFx } from "@/lib/families";
 import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
 import type { Clip } from "@/lib/types";
@@ -63,12 +64,18 @@ export default function StagePage() {
     window.addEventListener("pointerup", up);
   }, []);
   const rehydratedRef = useRef(false);
+  /* a hand-authored show file, kept WITH the song it was fetched for: keying it
+     that way means a stale file can never be drawn over a new song */
+  const [loadedFile, setLoadedFile] = useState<{ song: string; file: ShowFile | null } | null>(null);
 
   /* read URL params once on mount (safe for SSR since guarded by typeof window) */
   const urlParams = useMemo(() => {
-    if (typeof window === "undefined") return { song: null, seed: null };
+    if (typeof window === "undefined") return { song: null, seed: null, layout: null };
     const sp = new URLSearchParams(window.location.search);
-    return { song: sp.get("song"), seed: sp.get("seed") };
+    /* `layout` makes a rig deep-linkable, the same way song and seed already are:
+       a show is {score, seed, edits} and the RIG is the venue's, so being able to
+       say "this song, on that rig" in a URL is how you compare two rooms. */
+    return { song: sp.get("song"), seed: sp.get("seed"), layout: sp.get("layout") };
   }, []);
 
   const song = usePortalStore((s) => s.song);
@@ -123,6 +130,7 @@ export default function StagePage() {
     rehydratedRef.current = true;
 
     if (seedParam) setSeed(Number(seedParam));
+    if (urlParams.layout) setLayout(urlParams.layout);
     queueMicrotask(() => setStageMsg("loading song\u2026"));
 
     api.songs.list().then((d) => {
@@ -136,7 +144,7 @@ export default function StagePage() {
     }).catch(() => {
       setStageMsg("failed to load songs");
     });
-  }, [song, urlParams, setSong, setSeed, setSongs]);
+  }, [song, urlParams, setSong, setSeed, setSongs, setLayout]);
 
   const importInputRef = useRef<HTMLInputElement>(null);
 
@@ -239,6 +247,20 @@ export default function StagePage() {
     [song, rigForPlan, setV2, setPlanText, setJob, setEdits, pollBake],
   );
 
+  /* ── a hand-authored show file for this song, if there is one ─────────── */
+  useEffect(() => {
+    if (!song) return;
+    const name = song.name;
+    let live = true;
+    api.showfile
+      .get(name)
+      .then((d) => { if (live) setLoadedFile({ song: name, file: (d.showfile as ShowFile) ?? null }); })
+      .catch(() => { if (live) setLoadedFile({ song: name, file: null }); });
+    return () => { live = false; };
+  }, [song]);
+
+  const showFile = song && loadedFile?.song === song.name ? loadedFile.file : null;
+
   /* ── load audio + bake on song change ────────────────────────────────── */
   const rebuildRef = useRef(rebuild);
   useEffect(() => { rebuildRef.current = rebuild; });
@@ -326,8 +348,19 @@ export default function StagePage() {
      place, so showing both would just be the same effect twice. */
   const clips = useMemo(() => {
     if (!show) return [];
-    return buildClips(show.plan ?? null, edits, effects, show.grid).filter((c) => !c.overridden);
-  }, [show, edits, effects]);
+    const mine = buildClips(show.plan ?? null, edits, effects, show.grid).filter((c) => !c.overridden);
+    if (!showFile) return mine;
+    /* A show file REPLACES the arranger's punctuation rather than sitting on top
+       of it: it is a complete description of the show, states and all, so
+       drawing both would show every cue twice. */
+    const r = resolveShowFile(showFile, {
+      grid: show.grid,
+      sections: show.sections ?? [],
+      moments: show.moments ?? [],
+      duration_s: show.duration_s,
+    });
+    return [...showFileClips(r, effects), ...mine.filter((c) => c.source === "mine")];
+  }, [show, edits, effects, showFile]);
 
   /* A reveal request brings a clip into view. The list that raised them is gone
      for now, but the timeline still honours them — the chat rail will want it. */
@@ -483,7 +516,7 @@ export default function StagePage() {
           </div>
 
           {/* live preview */}
-          <StageCanvas clockRef={clockRef} playing={isPlaying} currentTime={currentTime} />
+          <StagePreview clockRef={clockRef} playing={isPlaying} currentTime={currentTime} />
           {stageMsg && (
             <div className="flex-none text-center text-[length:var(--text-xs)] text-ink-dimmer py-[4px]">
               {stageMsg}
