@@ -117,6 +117,30 @@ def bar_table(song):
     return rows
 
 
+def stream_table(song):
+    try:
+        import composer as C
+        sc = C._score_of({"_song": song})
+    except Exception:
+        return []
+    fine = sc.get("stems_fine") or sc.get("stems_temporal") or {}
+    lanes = fine.get("stems") or {}
+    rows = []
+    for name, ser in lanes.items():
+        vals = [v for v in (ser or []) if isinstance(v, (int, float))]
+        if not vals:
+            continue
+        vals_sorted = sorted(vals)
+        n = len(vals_sorted)
+        p50 = vals_sorted[n // 2]
+        p90 = vals_sorted[min(n - 1, int(n * 0.90))]
+        peak = vals_sorted[-1]
+        above = 100.0 * sum(1 for v in vals if v > 0.5) / n
+        rows.append((name, p50, p90, peak, above))
+    rows.sort(key=lambda r: -r[4])
+    return rows
+
+
 def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
     EFFECT_BEHAVIOUR = effect_behaviour(rig)
     RIG_FACTS = rig_facts(rig)
@@ -144,6 +168,22 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "",
             *[f"  bar {b:3d}  {t:6.1f}s  loud {p:3d}%  hits {n:2d}  {', '.join(names)}"
               for b, t, p, n, names in bar_table(song)],
+            "",
+            "WHAT EACH STREAM CAN ACTUALLY DRIVE",
+            "",
+            "A binding's brightness IS its stream's value, so a lane's shape is the",
+            "show's shape. Every lane touches 1.00 at least once, so peak tells you",
+            "nothing; median and above.5 are what decide whether a lane can carry the",
+            "light. A lane with median 0.01 and above.5 of 0.8% is silent almost all",
+            "the time - bind the amount of light to it and you get a near-black show",
+            "that reads as a bug, however you set the dials. Those lanes are still",
+            "worth having: they are precise, so they are good for accents, for colour",
+            "changes, or for picking which lamp moves. Lanes with a high median can",
+            "carry continuous brightness. A name not on this list does not exist, and",
+            "a binding on it renders black for the whole song.",
+            "",
+            *[f"  {nm:18s} median {a:.2f}  p90 {b:.2f}  peak {c:.2f}  above.5 {d:4.1f}%"
+              for nm, a, b, c, d in stream_table(song)[:18]],
             "",
             "ASKING THE SCORE FOR MORE",
             "",
