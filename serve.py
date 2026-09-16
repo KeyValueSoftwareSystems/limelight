@@ -104,6 +104,30 @@ def read_verdicts():
 class H(http.server.BaseHTTPRequestHandler):
     def log_message(self, *a): pass
 
+    CORS_ORIGINS = tuple(
+        "http://%s:%d" % (host, port)
+        for host in ("localhost", "127.0.0.1")
+        for port in (3000, 3001, 3002, 3003, 3004, 4000, 4001, 5173, 8080)
+    )
+
+    def end_headers(self):
+        origin = self.headers.get("Origin")
+        if origin in self.CORS_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Access-Control-Allow-Credentials", "true")
+        self.send_header("Vary", "Origin")
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        origin = self.headers.get("Origin")
+        self.send_response(204)
+        if origin in self.CORS_ORIGINS:
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.send_header("Access-Control-Max-Age", "86400")
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
     def _file(self, rel):
         path = os.path.normpath(os.path.join(ROOT, rel.lstrip("/")))
         if not path.startswith(ROOT) or not os.path.isfile(path):
