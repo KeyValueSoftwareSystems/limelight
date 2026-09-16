@@ -14,6 +14,7 @@ import type {
   MarketResponse,
   ListShowRequest,
   ColoursResponse,
+  RecolourResponse,
   Entitlement,
   TrimState,
   UploadResponse,
@@ -147,6 +148,24 @@ export const colours = {
 
   set(song: string, who: string, colourNames: string[]): Promise<{ ok: boolean; code?: number; error?: string; who?: string }> {
     return post("/api/colours", { song, who, colours: colourNames });
+  },
+};
+
+/* ── recolouring a show ──────────────────────────────────────────────────────
+   portal/recolour.py. Hand it the show as it stands and the palette you want,
+   and it derives the palette the show is CURRENTLY using — its declared one, or
+   the colours its cues add up to — maps old entries onto new ones positionally,
+   and rewrites every colour value in the plan. Nothing else moves: effects,
+   timing, amounts, extents and the why text all come back untouched.
+
+   `mapping` is its account of what it did, one entry per substitution. */
+
+export const recolour = {
+  apply(
+    show: unknown,
+    palette: { name: string; rgb: [number, number, number] }[],
+  ): Promise<RecolourResponse> {
+    return post<RecolourResponse>("/api/recolour", { show, palette });
   },
 };
 

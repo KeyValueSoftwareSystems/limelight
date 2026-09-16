@@ -33,6 +33,10 @@ export interface V2Plan {
   states?: V2Entry[];
   bindings?: V2Entry[];
   gestures?: V2Entry[];
+  /* The colours this show is allowed to spend. portal/validator.py reads it
+     off the top of the plan and snaps every cue to the nearest entry, so a
+     plan that declares one is a plan that stays one show. */
+  palette?: { name: string; rgb: [number, number, number] }[];
 }
 
 /* keys that are anchors/meta, not dials the creator turns */

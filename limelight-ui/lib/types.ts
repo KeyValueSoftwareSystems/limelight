@@ -115,6 +115,8 @@ export interface BakeRequest {
   edits: Edit[];
   appetite?: number | null;
   layout?: string;
+  /** the room's colours, as rgb 0..1 — the vocabulary portal/validator.py snaps to */
+  palette?: { name: string; rgb: [number, number, number] }[];
 }
 
 export interface BakeResponse {
@@ -285,7 +287,27 @@ export interface ShowFile {
   score_version?: number | null;
   designed_for?: { venue_id: string; venue_name: string; layout?: string } | null;
   invalid?: string;
+  /* The v2 plan this show was saved from, where there is one. A saved show is
+     otherwise just {seed, edits}, which only reconstructs on the legacy bake —
+     a show built from a plan needs the plan back to open into the same
+     timeline, and carrying it here is what makes the entry in Shows the whole
+     show rather than a bookmark. */
+  plan?: V2PlanDoc | null;
+  plan_text?: string;
 }
+
+/* The plan as it is STORED. Its interior belongs to lib/planConvert (V2Plan) and
+   nothing outside that module reads into it, so the entries stay opaque — but
+   the four keys are named, because a show file is also read by the portal and
+   by hand. A type alias rather than an interface on purpose: aliases carry an
+   implicit index signature, so this stays interchangeable with the
+   Record<string, unknown> the plan travels as. */
+export type V2PlanDoc = {
+  plan?: unknown;
+  states?: unknown[];
+  bindings?: unknown[];
+  gestures?: unknown[];
+};
 
 export interface ShowsResponse {
   shows: ShowFile[];
@@ -301,6 +323,8 @@ export interface SaveShowRequest {
   appetite?: number | null;
   score_version?: number | null;
   designed_for?: { venue_id: string; venue_name: string; layout?: string } | null;
+  plan?: V2PlanDoc | null;
+  plan_text?: string;
 }
 
 /* ── venues / layouts ────────────────────────────────────────────────────── */
@@ -493,6 +517,32 @@ export interface Personality {
 export interface ColoursResponse {
   colours: ColourSwatch[];
   personalities: Personality[];
+}
+
+/* ── a show's colour palette ────────────────────────────────────────────────
+   The set of colours a show is allowed to spend. A show declares one once it
+   has been recoloured; before that portal/recolour.py (and lib/palette.ts,
+   which mirrors it) derives one from the colours its cues already use. `name`
+   is never carried beside the hex — lib/palette.ts derives it, so it cannot go
+   stale when someone drags a swatch to another hue. */
+export interface PaletteColour {
+  id: string;
+  hex: string;
+}
+
+/** portal/recolour.py's account of one old-colour-to-new-colour substitution. */
+export interface RecolourMapping {
+  old: [number, number, number];
+  old_name: string;
+  new: [number, number, number];
+  new_name: string;
+}
+
+export interface RecolourResponse {
+  /** the show, rewritten — a limelight.show/1 plan with a declared `palette` */
+  showfile: Record<string, unknown>;
+  mapping: RecolourMapping[];
+  error?: string;
 }
 
 /* ── fixture placement (computed on the client) ──────────────────────────── */

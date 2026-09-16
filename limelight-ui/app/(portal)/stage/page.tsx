@@ -8,6 +8,7 @@ import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { placeFixtures } from "@/lib/fixtures";
 import { mmss, clamp } from "@/lib/grid";
+import { colourName, hexToRgb01, extractPalette } from "@/lib/palette";
 import * as api from "@/lib/api";
 
 import { StagePreview } from "@/components/stage/StagePreview";
@@ -18,14 +19,14 @@ import { LimitsPanel } from "@/components/stage/LimitsPanel";
 import { StatePanel } from "@/components/stage/StatePanel";
 import { VenuePicker } from "@/components/venues/VenuePicker";
 import { StageTimeline } from "@/components/editor/StageTimeline";
+import { SaveShowDialog } from "@/components/editor/SaveShowDialog";
 import { Sidebar } from "@/components/editor/Sidebar";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { buildClips } from "@/lib/clips";
 import { effectIdForPlanFx } from "@/lib/families";
 import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
-import type { Clip } from "@/lib/types";
+import type { Clip, PaletteColour } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import type { Venue } from "@/lib/types";
 
 export default function StagePage() {
@@ -35,8 +36,16 @@ export default function StagePage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [stageMsg, setStageMsg] = useState<string | null>("select a song");
   const rebuildTokenRef = useRef(0);
-  const [showNameInput, setShowNameInput] = useState("");
   const [venuePickerOpen, setVenuePickerOpen] = useState(false);
+
+  /* Saving asks for the name in a dialog rather than reading it off a box in
+     the header — see SaveShowDialog. `savedName` is what the last save called
+     this show; until there is one, the name comes from the record it was opened
+     from, so re-saving prefills instead of starting blank. */
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedName, setSavedName] = useState<string | null>(null);
 
   /* The editor's height is the creator's to choose: pull it up while placing
      clips, push it down while judging the look. A fixed ratio is always wrong
@@ -79,17 +88,12 @@ export default function StagePage() {
   const setSeed = usePortalStore((s) => s.setSeed);
   const setSongs = usePortalStore((s) => s.setSongs);
   const show = usePortalStore((s) => s.show);
-  const seed = usePortalStore((s) => s.seed);
   const edits = usePortalStore((s) => s.edits);
   const venue = usePortalStore((s) => s.venue);
   const role = usePortalStore((s) => s.role);
-  const layout = usePortalStore((s) => s.layout);
-  const want = usePortalStore((s) => s.want);
   const sel = usePortalStore((s) => s.sel);
   const arm = usePortalStore((s) => s.arm);
   const effects = usePortalStore((s) => s.effects);
-  const v2 = usePortalStore((s) => s.v2);
-  const planText = usePortalStore((s) => s.planText);
 
   const setShow = usePortalStore((s) => s.setShow);
   const setFrames = usePortalStore((s) => s.setFrames);
@@ -109,11 +113,16 @@ export default function StagePage() {
   const setEdits = usePortalStore((s) => s.setEdits);
   const setV2 = usePortalStore((s) => s.setV2);
   const setPlanText = usePortalStore((s) => s.setPlanText);
+  const setPalette = usePortalStore((s) => s.setPalette);
+  const setPaletteBase = usePortalStore((s) => s.setPaletteBase);
   const setRoom = usePortalStore((s) => s.setRoom);
   const setLayout = usePortalStore((s) => s.setLayout);
-  const author = usePortalStore((s) => s.author);
-  const room = usePortalStore((s) => s.room);
   const showId = usePortalStore((s) => s.showId);
+
+  /* seed, layout, want, author, room, v2 and planText are deliberately NOT
+     subscribed here. handleSave and rebuild read them off the store at the
+     moment they run — a subscription would re-render this page, and with it the
+     whole editor, every time any of them changed. */
 
   /* ── rehydrate song from URL params on page refresh ──────────────────── */
   useEffect(() => {
@@ -196,9 +205,26 @@ export default function StagePage() {
       let post: Awaited<ReturnType<typeof api.show.bake>>;
       if (st.v2 && st.show) {
         const planData = editsToPlan(st.edits, st.show, st.effects, st.planText);
+        /* Declared at the top of the plan, which is where the validator looks
+           for it. Both bake paths have to carry the room's colours or an edit
+           would regenerate a show that never heard about it. */
+        if (st.palette.length) {
+          planData.palette = st.palette.map((c) => ({ name: colourName(c.hex), rgb: hexToRgb01(c.hex) }));
+        }
         post = await api.plan.bake(st.song.name, planData, rigForPlan());
       } else {
-        post = await api.show.bake({ song: st.song.name, seed: st.seed, edits: st.edits, appetite: st.want, layout: st.layout ?? undefined });
+        post = await api.show.bake({
+          song: st.song.name,
+          seed: st.seed,
+          edits: st.edits,
+          appetite: st.want,
+          layout: st.layout ?? undefined,
+          /* The room's colours ride with every bake. The name is derived rather
+             than stored, so it can never disagree with the value beside it. */
+          palette: st.palette.length
+            ? st.palette.map((c) => ({ name: colourName(c.hex), rgb: hexToRgb01(c.hex) }))
+            : undefined,
+        });
       }
       if (post.error) { setStageMsg(post.error); return; }
       setJob(post.job);
@@ -223,6 +249,14 @@ export default function StagePage() {
         setStageMsg(`baking ${what}…`);
         setV2(true);
         setPlanText(typeof planData.plan === "string" ? planData.plan : "");
+        /* The palette arrives with the plan: declared, once the show has been
+           recoloured once, and otherwise derived from the colours its cues
+           already use — the same derivation portal/recolour.py maps FROM. The
+           baseline is set here too, because `reset` means "back to the show I
+           opened", not "back to some venue's idea of it". */
+        const opened = extractPalette(planData);
+        setPalette(opened);
+        setPaletteBase(opened);
         const post = await api.plan.bake(song.name, planData, rigForPlan());
         if (post.error) { setStageMsg(post.error); return; }
         setJob(post.job);
@@ -232,7 +266,7 @@ export default function StagePage() {
         setStageMsg(e instanceof Error ? `${what} failed: ` + e.message : `${what} failed`);
       }
     },
-    [song, rigForPlan, setV2, setPlanText, setJob, setEdits, pollBake],
+    [song, rigForPlan, setV2, setPlanText, setJob, setEdits, pollBake, setPalette, setPaletteBase],
   );
 
   /* A show file may be nested under `plan`, or be the plan itself. */
@@ -242,6 +276,31 @@ export default function StagePage() {
       : (raw.plan as Record<string, unknown>)?.states
         ? raw.plan
         : raw) as unknown as V2Plan;
+
+  /* ── recolouring ─────────────────────────────────────────────────────────
+     The show as it stands goes to portal/recolour.py with the colours wanted;
+     it maps the show's existing palette onto them positionally, rewrites every
+     cue, and hands back a plan. That plan is then applied like any other, which
+     is what regenerates the show — one round trip, not two. */
+  const handleRecolour = useCallback(
+    async (colours: PaletteColour[]) => {
+      const st = usePortalStore.getState();
+      if (!st.song || !st.show || colours.length < 2) return;
+      setStageMsg("recolouring…");
+      try {
+        const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
+        const out = await api.recolour.apply(
+          plan,
+          colours.map((c) => ({ name: colourName(c.hex), rgb: hexToRgb01(c.hex) })),
+        );
+        if (out.error) { setStageMsg(out.error); return; }
+        await applyPlan(asPlan(out.showfile), "recolour");
+      } catch (e) {
+        setStageMsg(e instanceof Error ? "recolour failed: " + e.message : "recolour failed");
+      }
+    },
+    [applyPlan],
+  );
 
   const importPlan = useCallback(
     async (file: File) => {
@@ -260,10 +319,38 @@ export default function StagePage() {
      already exists for this track. Loaded once per song; placing a clip after
      that edits what was loaded rather than re-fetching over the top of it. */
   const loadedForRef = useRef<string | null>(null);
+  /* Set when a plan has taken the initial bake for itself. The legacy seed+edits
+     bake fires on the same song change, and whichever of the two landed second
+     won — so opening a saved show showed its plan or the seed's arrangement
+     depending on which round trip was slower. */
+  const planBakesRef = useRef(false);
   useEffect(() => {
     if (!song || loadedForRef.current === song.name) return;
     const name = song.name;
     loadedForRef.current = name;
+    planBakesRef.current = false;
+
+    /* A show opened from the Shows list carries its own plan, and that plan IS
+       the show. It has to beat the song's show file, which is per-song: without
+       this, every saved show for one song opened as whatever that song's file
+       happened to hold, and the edits restored from the record were overwritten
+       a moment later by planToEdits on the wrong plan. */
+    /* Not cleared here: resetForShow() owns that, and it runs before every open
+       from the library and from the list — which are the only two ways the song
+       changes. Clearing it from inside the effect would be a store write in an
+       effect body to no one's benefit, since nothing renders off it. */
+    const handed = usePortalStore.getState().pendingPlan;
+    if (handed) {
+      /* The flag is set NOW — the effect that would fire the legacy bake runs
+         immediately after this one and reads it synchronously. The bake itself
+         is deferred a microtask, because applyPlan sets state on its way in and
+         the show-file path below only gets away with the same call by sitting
+         inside a .then. */
+      planBakesRef.current = true;
+      queueMicrotask(() => applyPlan(asPlan(handed as Record<string, unknown>), "saved show"));
+      return;
+    }
+
     let live = true;
     api.showfile
       .get(name)
@@ -281,6 +368,9 @@ export default function StagePage() {
   useEffect(() => {
     if (!song) return;
     load(song.name);
+    /* The effect above runs first and may already have claimed the bake for a
+       handed-over plan. Firing the seed+edits bake as well would only race it. */
+    if (planBakesRef.current) return;
     const timer = setTimeout(() => rebuildRef.current(), 0);
     return () => clearTimeout(timer);
   }, [song, load]);
@@ -329,30 +419,59 @@ export default function StagePage() {
     },
   });
 
-  /* ── save show ───────────────────────────────────────────────────────── */
-  const handleSave = useCallback(async () => {
-    if (!show || !song) return;
-    const name = showNameInput.trim();
-    if (!name) return;
+  /* ── save ─────────────────────────────────────────────────────────────────
+     ONE save, landing in two places, because the creator only ever meant one
+     thing by it. Saving used to be two buttons: "Save plan" wrote the song's
+     show file, "Save show" wrote a record — so the obvious button wrote a file
+     that never appeared in Shows, and the show you had just saved was nowhere
+     to be found.
+
+     The plan is built once and written to both: the song's show file (what
+     loads when you open the song by itself) and the show record (what Shows
+     lists). The record carries the plan with it, so opening it from that list
+     reconstructs this timeline rather than a bake of {seed, edits}. */
+  const handleSave = useCallback(async (name: string) => {
+    const st = usePortalStore.getState();
+    if (!st.show || !st.song) return;
+    setSaving(true);
+    setSaveError(null);
     try {
+      const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
+      /* The show file is a convenience, not the record. A hub that will not take
+         it must not cost the creator the save they actually asked for. */
+      const filed = await api.showfile.save(st.song.name, plan).catch(() => null);
+
       const d = await api.shows.save({
-        id: showId,
-        song: song.name,
-        seed,
-        edits,
+        id: st.showId,
+        song: st.song.name,
+        seed: st.seed,
+        edits: st.edits,
         name,
-        author: author || "unknown",
-        appetite: want,
-        score_version: song.version,
-        designed_for: room ? { venue_id: room.id, venue_name: room.name, layout: layout ?? undefined } : null,
+        author: st.author || "unknown",
+        appetite: st.want,
+        score_version: st.song.version,
+        plan,
+        plan_text: st.planText,
+        designed_for: st.room
+          ? { venue_id: st.room.id, venue_name: st.room.name, layout: st.layout ?? undefined }
+          : null,
       });
-      if (!d.error) {
-        setShowId(d.id);
-        setShowVersion(d.version);
-        setShowNameInput("");
-      }
-    } catch { /* noop */ }
-  }, [show, song, showNameInput, showId, seed, edits, author, want, room, layout, setShowId, setShowVersion]);
+      if (d.error) { setSaveError(d.error); return; }
+
+      setShowId(d.id);
+      setShowVersion(d.version);
+      setSavedName(d.name ?? name);
+      setSaveOpen(false);
+      setStageMsg(
+        `saved “${d.name ?? name}” to Shows · v${d.version}`
+        + (filed?.cues !== undefined ? ` · ${filed.cues} cues in the show file` : ""),
+      );
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "save failed");
+    } finally {
+      setSaving(false);
+    }
+  }, [setShowId, setShowVersion]);
 
   /* The timeline and the effects panel both read these, so they live on the
      page rather than inside either one. */
@@ -453,23 +572,12 @@ export default function StagePage() {
     [effects, addEdit],
   );
 
-  /* ── write the show file back ──────────────────────────────────────────────
+  /* The show file is written by handleSave, alongside the record Shows lists.
      The palette's drops are Edit[], and editsToPlan turns those back into the
      same states/bindings/gestures shape the file arrived in — so a cue placed by
      hand and a cue authored in the file are the same thing by the time they are
      saved. That is what makes the file the one source of truth rather than a
      read-only import. */
-  const savePlan = useCallback(async () => {
-    const st = usePortalStore.getState();
-    if (!st.song || !st.show) return;
-    try {
-      const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
-      const r = await api.showfile.save(st.song.name, plan);
-      setStageMsg(r.error ? r.error : `saved ${r.cues ?? 0} cues to the show file`);
-    } catch (e) {
-      setStageMsg(e instanceof Error ? "save failed: " + e.message : "save failed");
-    }
-  }, []);
 
   /* ── venue picker ────────────────────────────────────────────────────── */
   const handlePickVenue = useCallback(
@@ -497,7 +605,7 @@ export default function StagePage() {
       <div className="flex flex-1 min-h-0 overflow-hidden bg-bg text-ink">
         {/* ── rail: navigation and the palettes, independent of the editor ── */}
         <div className="flex-none w-[248px] min-w-[212px]">
-          <Sidebar effects={effects} />
+          <Sidebar effects={effects} onRecolour={handleRecolour} />
         </div>
 
         {/* ── the work area ─────────────────────────────────────────────── */}
@@ -529,17 +637,17 @@ export default function StagePage() {
                       if (f) importPlan(f);
                     }}
                   />
-                  <Button variant="link" onClick={() => importInputRef.current?.click()}>Import Plan</Button>
-                  <Button variant="link" onClick={savePlan}>Save Plan</Button>
-                  <Input
-                    placeholder="name this show"
-                    autoComplete="off"
-                    className="w-[132px]"
-                    value={showNameInput}
-                    onChange={(e) => setShowNameInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                  />
-                  <Button variant="link" onClick={handleSave}>Save</Button>
+                  <Button variant="ghost" onClick={() => importInputRef.current?.click()}>Import plan</Button>
+                  <div className="w-px h-[var(--hit)] bg-line mx-[2px]" />
+                  {/* The name is asked for in the dialog this opens, not typed
+                      into the header beforehand. */}
+                  <Button
+                    variant="primary"
+                    disabled={!show || !song}
+                    onClick={() => { setSaveError(null); setSaveOpen(true); }}
+                  >
+                    {showId ? "Save show" : "Save show…"}
+                  </Button>
                 </>
               )}
               <Button variant="link" onClick={handleBack}>Back</Button>
@@ -610,6 +718,20 @@ export default function StagePage() {
         onClose={() => setVenuePickerOpen(false)}
         onPick={handlePickVenue}
       />
+
+      {/* Mounted only while open, so each time it opens it starts from the
+          show's current name rather than from whatever was typed and abandoned
+          last time — no reset effect to keep in step. */}
+      {saveOpen && (
+        <SaveShowDialog
+          initialName={savedName ?? venue?.name ?? ""}
+          saving={saving}
+          error={saveError}
+          existing={!!showId}
+          onCancel={() => { if (!saving) setSaveOpen(false); }}
+          onSave={handleSave}
+        />
+      )}
     </>
   );
 }

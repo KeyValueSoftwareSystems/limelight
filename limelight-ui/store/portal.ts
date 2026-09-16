@@ -10,12 +10,14 @@ import type {
   LimitsSummary,
   MarketListing,
   Layout,
+  PaletteColour,
   FixturePlacement,
   Venue,
   VenueRoom,
   TrimState,
   ShowFile,
   Entitlement,
+  V2PlanDoc,
 } from "@/lib/types";
 
 /* ── state shape ─────────────────────────────────────────────────────────── */
@@ -45,6 +47,11 @@ export interface PortalState {
      seed+edits bake. planText is the composer's one-line summary, carried through. */
   v2: boolean;
   planText: string;
+  /* A plan handed over by the Shows list, to be baked instead of the song's own
+     show file. Opening a saved show restored its edits and then the per-song
+     show file loaded over the top of them, so the show you opened was not the
+     show you got. Whoever consumes this clears it. */
+  pendingPlan: V2PlanDoc | null;
 
   /* venue mode */
   venue: ShowFile | null;
@@ -89,6 +96,13 @@ export interface PortalState {
 
   /* colours */
   colours: string[];
+
+  /* The colours this show is spending, and the set it was opened with. The
+     baseline is what `reset` returns to: a show declares its palette once it
+     has been recoloured, and before that lib/palette.ts derives one from the
+     colours its cues already use. */
+  palette: PaletteColour[];
+  paletteBase: PaletteColour[];
 }
 
 /* ── actions ─────────────────────────────────────────────────────────────── */
@@ -112,6 +126,7 @@ export interface PortalActions {
   setShowVersion: (v: number | null) => void;
   setV2: (v: boolean) => void;
   setPlanText: (t: string) => void;
+  setPendingPlan: (p: V2PlanDoc | null) => void;
   setVenue: (venue: ShowFile | null) => void;
   setEntitlement: (e: Entitlement | null) => void;
   setSecIndex: (i: number) => void;
@@ -135,6 +150,8 @@ export interface PortalActions {
   setRooms: (rooms: Venue[]) => void;
   setMarket: (market: MarketListing[]) => void;
   setColours: (colours: string[]) => void;
+  setPalette: (palette: PaletteColour[]) => void;
+  setPaletteBase: (paletteBase: PaletteColour[]) => void;
 
   /* compound actions */
   resetForShow: () => void;
@@ -170,6 +187,7 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   showVersion: null,
   v2: false,
   planText: "",
+  pendingPlan: null,
   venue: null,
   entitlement: null,
   secIndex: -1,
@@ -193,6 +211,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   rooms: [],
   market: [],
   colours: [],
+  palette: [],
+  paletteBase: [],
 
   /* actions */
   setRole: (role) => set({ role }),
@@ -223,6 +243,7 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   setShowVersion: (showVersion) => set({ showVersion }),
   setV2: (v2) => set({ v2 }),
   setPlanText: (planText) => set({ planText }),
+  setPendingPlan: (pendingPlan) => set({ pendingPlan }),
   setVenue: (venue) => set({ venue }),
   setEntitlement: (entitlement) => set({ entitlement }),
   setSecIndex: (secIndex) => set({ secIndex }),
@@ -246,7 +267,15 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   setRooms: (rooms) => set({ rooms }),
   setMarket: (market) => set({ market }),
   setColours: (colours) => set({ colours }),
+  setPalette: (palette) => set({ palette }),
+  setPaletteBase: (paletteBase) => set({ paletteBase }),
 
+  /* Called before opening anything — a song from the library, a show from the
+     list. Both callers set what they know straight after, so everything cleared
+     here is something the NEXT thing opened must not inherit from the last one.
+     showId is the sharpest of those: left standing, opening a fresh song from
+     the library and saving it wrote a new version over whichever saved show
+     happened to be open before it. */
   resetForShow: () =>
     set({
       show: null,
@@ -256,5 +285,10 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
       view: null,
       applied: [],
       swapping: false,
+      showId: null,
+      showVersion: null,
+      v2: false,
+      planText: "",
+      pendingPlan: null,
     }),
 }));

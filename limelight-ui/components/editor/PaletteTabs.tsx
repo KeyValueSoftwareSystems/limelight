@@ -6,9 +6,15 @@ import { effectIcon } from "@/lib/effectIcons";
 import { beginPaletteDrag, useDrag } from "@/store/drag";
 import type { Effect } from "@/lib/types";
 
-/* The palette: one tabbed section, five across, every tile labelled. An unnamed
+/* The palette: one tabbed section, four across, every tile labelled. An unnamed
    icon grid makes a creator guess what "the wavy one" does; the name is what
-   makes the set usable. */
+   makes the set usable.
+
+   Four across rather than five: at five the tile was 39px in a 248px rail, which
+   is smaller than the pointer aiming at it and left the mark inside it too small
+   to tell one effect from another. Four gives 50px, and the list scrolls — a
+   palette is a drawer to reach into, not a diagram that has to fit on screen. */
+const GRID = "grid grid-cols-4 gap-[8px]";
 
 const STYLES: { id: string; name: string }[] = [
   { id: "club", name: "Club" },
@@ -44,7 +50,7 @@ function Tile({
       onPointerDown={onPointerDown}
       onClick={onClick}
       aria-pressed={active}
-      className="flex flex-col items-center gap-[5px] bg-transparent border-0 p-0 cursor-grab active:cursor-grabbing touch-none group"
+      className="flex flex-col items-center gap-[6px] bg-transparent border-0 p-0 cursor-grab active:cursor-grabbing touch-none group"
     >
       <span
         className={`w-full aspect-square flex items-center justify-center rounded-[7px] border border-solid transition-colors duration-[var(--dur-state)] ${
@@ -56,14 +62,14 @@ function Tile({
         <Image
           src={src}
           alt=""
-          width={22}
-          height={22}
+          width={28}
+          height={28}
           className="pointer-events-none"
           style={{ opacity: active ? 1 : 0.85 }}
         />
       </span>
       <span
-        className={`text-[9px] leading-[11px] truncate max-w-full transition-colors duration-[var(--dur-state)] ${
+        className={`text-[10px] leading-[12px] truncate max-w-full transition-colors duration-[var(--dur-state)] ${
           active ? "text-accent" : "text-ink-dim"
         }`}
       >
@@ -81,8 +87,8 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
   const arm = useDrag((s) => s.arm);
 
   return (
-    <div className="flex flex-col">
-      <div className="flex-none flex gap-[var(--spacing-s4)] px-[var(--spacing-s4)] border-b border-solid border-line">
+    <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+      <div className="flex-none flex gap-[var(--spacing-s4)] px-[var(--spacing-s4)] pt-[var(--spacing-s3)] border-b border-solid border-line">
         {(["effects", "styles"] as const).map((t) => (
           <button
             key={t}
@@ -97,9 +103,10 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
         ))}
       </div>
 
-      <div className="px-[var(--spacing-s3)] pt-[var(--spacing-s3)] pb-0">
+      {/* the only thing in the rail that scrolls */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-[var(--spacing-s3)] py-[var(--spacing-s3)]">
         {tab === "effects" ? (
-          <div className="grid grid-cols-5 gap-[7px]">
+          <div className={GRID}>
             {effects.map((fx) => (
               <Tile
                 key={fx.id}
@@ -113,7 +120,7 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-5 gap-[7px]">
+          <div className={GRID}>
             {STYLES.map((s) => (
               <Tile
                 key={s.id}
@@ -127,16 +134,19 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
         )}
       </div>
 
-      {tab === "effects" && armed && (
-        <div className="px-[var(--spacing-s4)] py-[var(--spacing-s2)] text-[10px] text-accent">
-          {armed.name} armed — click the timeline to place it
-        </div>
-      )}
-      {tab === "styles" && (
-        <div className="px-[var(--spacing-s4)] py-[var(--spacing-s2)] text-[10px] text-ink-dimmer">
-          Styles aren&apos;t wired to the baker yet.
-        </div>
-      )}
+      {/* One line, always here, empty or not. A note that appeared only when
+          something was armed took its height out of the tiles above it, so the
+          grid jumped the moment you picked an effect — under the pointer that
+          was already aiming at it. */}
+      <div className="flex-none h-[26px] flex items-center px-[var(--spacing-s4)] border-t border-solid border-line text-[10px]">
+        {tab === "styles" ? (
+          <span className="truncate text-ink-dimmer">Styles aren&apos;t wired to the baker yet.</span>
+        ) : armed ? (
+          <span className="truncate text-accent" title={`${armed.name} armed — click the timeline to place it`}>
+            {armed.name} armed — click to place
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -47,11 +47,11 @@ export default function LibraryPage() {
 
   return (
     <div className="flex flex-col overflow-hidden flex-1">
-      <div className="flex-none px-[var(--spacing-s6)] pt-[var(--spacing-s5)] pb-[var(--spacing-s4)] border-b border-solid border-line">
+      <div className="flex-none px-[var(--spacing-s5)] pt-[var(--spacing-s4)] pb-[var(--spacing-s3)] border-b border-solid border-line">
         <div className="flex items-end justify-between gap-[var(--spacing-s4)]">
           <div>
             <div className="display">Library</div>
-            <div className="label mt-[7px]">{meta}</div>
+            <div className="label mt-[3px]">{meta}</div>
           </div>
           <div className="flex items-center gap-[var(--spacing-s3)] flex-wrap">
             <UploadButton />
@@ -69,9 +69,12 @@ export default function LibraryPage() {
           </div>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto grid grid-cols-[repeat(auto-fill,minmax(248px,1fr))] auto-rows-max gap-[var(--spacing-s4)] px-[var(--spacing-s6)] pt-[var(--spacing-s5)] pb-[var(--spacing-s7)] content-start">
+      {/* Covers are the index here, so they stay a grid — but at 168px a row
+          holds five or six songs instead of two, which is the difference
+          between scanning a library and scrolling one. */}
+      <div className="flex-1 overflow-y-auto grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] auto-rows-max gap-[var(--spacing-s3)] px-[var(--spacing-s5)] pt-[var(--spacing-s4)] pb-[var(--spacing-s7)] content-start">
         {songs.length === 0 && (
-          <div className="col-span-full text-dim text-center py-8">
+          <div className="col-span-full text-dim text-center py-[var(--spacing-s8)]">
             reading the hub…
           </div>
         )}

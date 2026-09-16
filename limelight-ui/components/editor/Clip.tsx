@@ -45,12 +45,11 @@ function ClipBase({
   const showTrim = editable && (selected || w >= HANDLES_FIT_PX);
   const roomy = w >= HANDLES_FIT_PX;
   const grip = roomy ? { w: 9, out: 0 } : { w: 13, out: 13 };
-  /* Too narrow to hold its handles: the grips sit outside and butt against the
-     body, so the three parts have to compose into one capsule. The body goes
-     square-cornered and the grips carry the rounding at the outer ends —
-     otherwise the body's own corners cut notches at both joins. */
-  const capsule = showTrim && !roomy;
-  const radius = capsule ? 0 : 5;
+  /* Square corners, everywhere. A clip is a span of bars, and a rounded end
+     reads as slack about where that span actually stops — at one-beat widths
+     the radius was eating most of the clip. Squareness also lets the outboard
+     grips butt flush against the body, so a trimmed clip stays one solid bar
+     instead of three chips with notches at the joins. */
 
   return (
     <div
@@ -69,15 +68,15 @@ function ClipBase({
         editable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
       } ${
         selected
-          ? "bg-accent border-accent"
+          ? "bg-select border-select"
           : "bg-bg-raised border-line-strong hover:border-ink-dimmer"
       }`}
-      style={{ left: x0, width: w, top, height, borderRadius: radius, zIndex: selected ? 20 : 1 }}
+      style={{ left: x0, width: w, top, height, zIndex: selected ? 20 : 1 }}
       title={`${clip.name} · bar ${clip.bar}${clip.beat > 1 ? "." + clip.beat : ""} · ${clip.beats} beat${clip.beats === 1 ? "" : "s"} · double-click to zoom to it`}
     >
       <span
         className="absolute inset-0 flex items-center gap-[5px] px-[7px] pointer-events-none overflow-hidden"
-        style={{ borderRadius: radius, opacity: selected ? 1 : 0.92 }}
+        style={{ opacity: selected ? 1 : 0.92 }}
       >
         {w > 34 && (
           <Image
@@ -105,7 +104,7 @@ function ClipBase({
             side="start"
             width={grip.w}
             out={grip.out}
-            cap={capsule}
+            selected={selected}
             onPointerDown={(e) => {
               e.stopPropagation();
               onSelect?.(clip.key, false);
@@ -116,7 +115,7 @@ function ClipBase({
             side="end"
             width={grip.w}
             out={grip.out}
-            cap={capsule}
+            selected={selected}
             onPointerDown={(e) => {
               e.stopPropagation();
               onSelect?.(clip.key, false);
@@ -136,17 +135,21 @@ function Grip({
   side,
   width,
   out,
-  cap,
+  selected,
   onPointerDown,
 }: {
   side: "start" | "end";
   width: number;
   out: number;
-  cap: boolean;
+  selected: boolean;
   onPointerDown: (e: React.PointerEvent) => void;
 }) {
   const outer = side === "start" ? { left: -out } : { right: -out };
-  const r = cap ? 5 : 3;
+  /* On the selected clip the grip is part of the bar and carries its colour.
+     On the others it is only an offer, so it stays a muted neutral — at full
+     selection brightness every wide clip on the lane looked selected. */
+  const fill = selected ? "var(--select)" : "var(--line-strong)";
+  const mark = selected ? "rgba(0,0,0,0.5)" : "rgba(230,234,242,0.55)";
   return (
     <span
       onPointerDown={onPointerDown}
@@ -156,17 +159,13 @@ function Grip({
         ...outer,
         width,
         zIndex: 22,
-        background: "var(--accent)",
-        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.28)",
-        borderTopLeftRadius: side === "start" ? r : 0,
-        borderBottomLeftRadius: side === "start" ? r : 0,
-        borderTopRightRadius: side === "end" ? r : 0,
-        borderBottomRightRadius: side === "end" ? r : 0,
+        background: fill,
+        boxShadow: selected ? "inset 0 0 0 1px rgba(0,0,0,0.28)" : "none",
       }}
     >
       <span
         aria-hidden
-        style={{ width: 2, height: "42%", borderLeft: "1px solid rgba(0,0,0,0.5)", borderRight: "1px solid rgba(0,0,0,0.5)" }}
+        style={{ width: 2, height: "42%", borderLeft: `1px solid ${mark}`, borderRight: `1px solid ${mark}` }}
       />
     </span>
   );
