@@ -17,6 +17,9 @@ function hsv(h) {                                  // h 0..1 -> [r,g,b] 0..1, fu
 
 module.exports = function spin(params, ctx) {
   const beatsPerTurn = params.beats_per_turn != null ? params.beats_per_turn : 4;
+  const ring = Array.isArray(params.colours) && params.colours.length
+    ? params.colours.map((c) => H.parseColour(c, [1, 1, 1]))
+    : null;
 
   function render(bx) {
     const { beat, energy } = bx;
@@ -24,7 +27,10 @@ module.exports = function spin(params, ctx) {
     const level = 0.6 + 0.4 * energy;
     for (let i = 0; i < H.PARS.length; i++) {
       const hue = ((beat / beatsPerTurn) + i / H.PARS.length) % 1;   // a moving rainbow across the line
-      H.setPar(f, H.PARS[i], hsv((hue + 1) % 1), level);
+      const col = ring
+        ? ring[Math.floor(((hue % 1) + 1) % 1 * ring.length) % ring.length]
+        : hsv((hue + 1) % 1);
+      H.setPar(f, H.PARS[i], col, level);
     }
     H.setHead(f, H.HEADS[0], { level: 0.85, colour: [1, 1, 1], pan: 0.498 + 0.3 * Math.sin(2 * Math.PI * beat / 6), tilt: 0.45, prism: 100 });
     f[H.HEADS[0].offset + H.HEAD.colour] = 170;    // raw wheel value >=150 = continuous spin

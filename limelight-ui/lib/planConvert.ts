@@ -1,5 +1,5 @@
 import type { Edit, Effect, Show } from "./types";
-import { makeGridClock, beatIndexAt } from "./grid";
+import { makeGridClock, beatIndexAt } from "./grid.ts";
 
 /* ── v2 plan <-> the editor's Edit[] ──────────────────────────────────────────
    The portal composer/baker speak a v2 plan { plan, states[], bindings[],
@@ -23,6 +23,14 @@ interface V2Entry {
   at_s?: number;
   from_s?: number;
   to_s?: number;
+  /* what a composed show file actually anchors gestures with — baker.js reads
+     these before at_s */
+  at_bar?: number;
+  at_beat?: number;
+  from_bar?: number;
+  from_beat?: number;
+  to_bar?: number;
+  to_beat?: number;
   lead_beats?: number;
   why?: string;
   [dial: string]: unknown;
@@ -41,7 +49,13 @@ export interface V2Plan {
 
 /* keys that are anchors/meta, not dials the creator turns */
 const META = new Set(["effect", "section", "moment", "from_moment", "to_moment",
-  "at_s", "from_s", "to_s", "lead_beats", "why"]);
+  "at_s", "from_s", "to_s", "lead_beats", "why",
+  /* Bar anchors are anchors too. Without them here a bar-anchored gesture kept
+     `at_bar` as a DIAL, so the inspector offered to turn it and editsToPlan
+     wrote it back beside the at_s it had just derived — two anchors in one cue,
+     and baker.js:163 prefers at_bar, so the clip jumped back to where it was
+     dragged from. */
+  "at_bar", "at_beat", "from_bar", "from_beat", "to_bar", "to_beat"]);
 /* Only `for_beats` is the baker's gesture SPAN, carried by the clip length, so it
    is not shown as a dial. `over_beats` is a different thing — an effect's internal
    animation length (lift/strip) — and stays a normal dial. */
@@ -91,6 +105,8 @@ export function planToEdits(plan: V2Plan, show: Show, catalogue: Effect[] = []):
   const byId = new Map(catalogue.map((e) => [e.id, e]));
   const edits: Edit[] = [];
   const beatDur = 60 / (grid.bpm || 120);
+  /* the same clock editsToPlan writes with, so a bar anchor read here and a bar
+     written there land on the same second */
   const { secondsAtBar } = makeGridClock(grid);
   /* a point gesture's span is for_beats, else the effect's default_beats — NOT
      over_beats, which is an animation dial the baker does not use for the span. */
@@ -110,8 +126,8 @@ export function planToEdits(plan: V2Plan, show: Show, catalogue: Effect[] = []):
   /* A state names the song section it sits in AND may narrow itself with
      from_s/to_s -- the baker reads both, taking max(section start, from_s) and
      min(section end, to_s). Reading only the section drew a state across the
-     whole section, so several looks inside one section landed on top of each
-     other and the timeline showed one where the show has four. */
+     whole section, so several looks inside one section landed on top of one
+     another and the timeline showed one where the show has four. */
   const spanOfCue = (c: V2Entry) => {
     const sec = sections[c.section ?? -1];
     let a = sec ? sec.start : (c.from_s as number);
@@ -132,20 +148,23 @@ export function planToEdits(plan: V2Plan, show: Show, catalogue: Effect[] = []):
     push(b.effect, sp.a, beatSpan(grid, sp.a, sp.b), dials(b, false));
   }
   for (const g of plan.gestures ?? []) {
-    /* Anchors, in the baker's own precedence: seconds, then BARS, then moments.
-       Bars were missing entirely, and a gesture the editor cannot place is a
-       gesture that never reaches the bake -- so every bar-anchored cue was being
-       dropped on the way to the emulator and the room simply did not do it. The
-       baker has always accepted at_bar/from_bar; this is the half of the trip
-       that did not. */
-    if (g.from_bar != null && (g.to_bar != null || g.to_beat != null)) {
-      const a = secondsAtBar(g.from_bar as number, (g.from_beat as number) ?? 1);
-      const b = secondsAtBar((g.to_bar as number) ?? g.from_bar, (g.to_beat as number) ?? 1);
-      if (b > a) push(g.effect, a, beatSpan(grid, a, b), dials(g, true));
-    } else if (g.at_bar != null) {
-      const a = secondsAtBar(g.at_bar as number, (g.at_beat as number) ?? 1)
-        - ((g.lead_beats as number) ?? 0) * beatDur;
-      push(g.effect, a, pointBeats(g), dials(g, true));
+    /* anchors, in the baker's own precedence: bars, then absolute seconds, then
+       moments.
+
+       Bars come first because that is the order baker.js reads them in (it tests
+       at_bar before at_s), and because they were missing entirely: a composed
+       show file anchors every gesture to at_bar/at_beat, so loading one dropped
+       all of them on the floor. The timeline showed the states and bindings —
+       which anchor by `section` and so survived — and looked plausible while
+       being half a show. Saving then wrote that half back over the file. */
+    if (g.at_bar != null) {
+      const startS = secondsAtBar(g.at_bar, g.at_beat ?? 1)
+        - (g.lead_beats ?? 0) * beatDur;
+      push(g.effect, startS, pointBeats(g), dials(g, true));
+    } else if (g.from_bar != null && g.to_bar != null) {
+      const a = secondsAtBar(g.from_bar, g.from_beat ?? 1);
+      const b = secondsAtBar(g.to_bar, g.to_beat ?? 1);
+      push(g.effect, a, beatSpan(grid, a, b), dials(g, true));
     } else if (g.from_s != null && g.to_s != null) {
       push(g.effect, g.from_s, beatSpan(grid, g.from_s, g.to_s), dials(g, true));
     } else if (g.at_s != null) {

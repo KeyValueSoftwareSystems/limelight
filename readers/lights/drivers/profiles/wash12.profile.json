@@ -97,5 +97,9 @@
  },
  "gdtf": "Martin_Professional@MAC_Aura@20230201NoMeas.gdtf",
  "mode": "Standard",
- "note": "channel order read from the GDTF. Shutter1 is both shutter and strobe: strobe 0 opens it (32), above that it runs 50..72. Colour1 and CTC are held at zero -- the RGBW mix is the colour, and a colour wheel on top of it would fight."
+ "note": "channel order read from the GDTF. Shutter1 is both shutter and strobe: strobe 0 opens it (32), above that it runs 50..72. Colour1 and CTC are held at zero -- the RGBW mix is the colour, and a colour wheel on top of it would fight.",
+ "response": {
+  "rise_ms": 0,
+  "fall_ms": 110
+ }
 }

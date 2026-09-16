@@ -1,6 +1,6 @@
 "use strict";
 const H = require("./helpers");
-const { flash, bump, kick } = require("./beat");
+const { PARX, flash, bump, kick } = require("./beat");
 
 /* drive — the energetic-section STATE (chorus / drop / anthem), rendered per
    frame against the REAL beat grid. Every beat hits, scaled by that beat's
@@ -14,6 +14,8 @@ module.exports = function drive(params, ctx) {
   const amount = params.amount != null ? params.amount : 0.85;
   const floorDial = params.floor != null ? params.floor : 0.42 + 0.14 * amount;
   const peakDial = params.peak != null ? params.peak : 1.0;
+
+  const stagger = params.stagger != null ? Math.max(0, Math.min(0.9, Number(params.stagger))) : 0;
 
   function render(bx) {
     const { bphase, beatIndex, bar, downbeat, weight, energy } = bx;
@@ -29,8 +31,11 @@ module.exports = function drive(params, ctx) {
       const isInner = H.INNER.some(p => p.id === par.id);
       const onPair = isInner === innerActive;
       const hit = (onPair || downbeat) ? 1 : 0;
-      const ghost = onPair ? 0 : 0.3 * weight * bump(bphase, 0.5, 0.05);
-      const lvl = floorNow + (peakDial - floorNow) * hit * hitAmp + ghost;
+      const across = (PARX[par.id] + 1) / 2;
+      const bph = stagger === 0 ? bphase : ((bphase - stagger * across) % 1 + 1) % 1;
+      const hitAmpL = stagger === 0 ? hitAmp : flash(bph, 0.55) * (0.45 + 0.55 * weight);
+      const ghost = onPair ? 0 : 0.3 * weight * bump(bph, 0.5, 0.05);
+      const lvl = floorNow + (peakDial - floorNow) * hit * hitAmpL + ghost;
       let c = onPair ? col : col2;
       if (downbeat && bphase < 0.15) c = [1, 1, 1];
       H.setPar(f, par, c, Math.min(1, lvl));

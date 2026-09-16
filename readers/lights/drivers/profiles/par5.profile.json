@@ -39,5 +39,9 @@
  },
  "gdtf": "LED PAR 64 RGBW.gdtf",
  "mode": "Default",
- "note": "channel order read from mvr/gdtf/LED PAR 64 RGBW.gdtf. Brightness rides the colour channels and the master is held full, as on par7; the W emitter carries the achromatic part so pastels and open white actually get the fixture's output."
+ "note": "channel order read from mvr/gdtf/LED PAR 64 RGBW.gdtf. Brightness rides the colour channels and the master is held full, as on par7; the W emitter carries the achromatic part so pastels and open white actually get the fixture's output.",
+ "response": {
+  "rise_ms": 0,
+  "fall_ms": 90
+ }
 }

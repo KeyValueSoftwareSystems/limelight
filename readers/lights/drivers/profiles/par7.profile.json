@@ -43,5 +43,9 @@
  "park": {
   "level": 0
  },
- "note": "generated from rig.py; brightness scales the colour channels, master held full"
+ "note": "generated from rig.py; brightness scales the colour channels, master held full",
+ "response": {
+  "rise_ms": 0,
+  "fall_ms": 90
+ }
 }

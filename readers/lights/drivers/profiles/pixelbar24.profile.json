@@ -118,5 +118,9 @@
  },
  "gdtf": "Showtec@Cameleon_PixelBar_18-4_24Ch@Rev_1_4_WORKING.gdtf",
  "mode": "24 Ch",
- "note": "six RGBW cells in a row, read from the GDTF. The shared runtime drives all six as one lamp, which is what every capability-driven look wants; per-cell addressing is what `pixel` advertises for a look that asks for it."
+ "note": "six RGBW cells in a row, read from the GDTF. The shared runtime drives all six as one lamp, which is what every capability-driven look wants; per-cell addressing is what `pixel` advertises for a look that asks for it.",
+ "response": {
+  "rise_ms": 0,
+  "fall_ms": 70
+ }
 }

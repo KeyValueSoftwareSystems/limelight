@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 import time
 import sys
 
@@ -215,6 +216,7 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
     EFFECT_BEHAVIOUR = effect_behaviour(rig)
     RIG_FACTS = rig_facts(rig)
     ask = os.path.join(REPO, "portal", "ask.py")
+    look = os.path.join(REPO, "portal", "look.js")
     SCORE_AT = score_file(song)
     return "\n".join(
         [
@@ -298,6 +300,22 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "",
             *filmstrip(rig),
             "",
+            "Two things measured on the last show, both of which a person watching",
+            "named before any number did:",
+            "",
+            "  NOTHING TRAVELLED. Every neighbouring pair of lamps moved at a lag of",
+            "  exactly 0.000s - the whole rig rising and falling at the same instant",
+            "  all show. Symmetry was there (the outer pair matched 82% of the time)",
+            "  but flow was not, and four lamps flashing in lockstep reads as one lamp",
+            "  however many there are. `stagger` on drive and breakdown delays each",
+            "  lamp by a fraction of a beat across the rig, and pulse travels already.",
+            "",
+            "  NOTHING RESTED. Colour on a lamp held for a median of 0.42s, 220",
+            "  separate holds in a two-minute song. A look that is never kept cannot",
+            "  be recognised, and a change means nothing when the last one was half a",
+            "  second ago. Hold a look across a phrase and change it when the music",
+            "  does.",
+            "",
             "rig-lifts/beat is how many times a second of that effect raises the WHOLE",
             "rig by more than 30 of 255. It is the difference between a room that",
             "breathes and a room that flickers. A hand-built show for a two-minute song",
@@ -345,9 +363,12 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "A designer treats the lamps as groups rather than as one row, and moves",
             "light across them - a figure that starts at one end and arrives at the",
             "other, one group answering another, the head leading or following. `extent`",
-            "selects a group: all, inner, outer, left, right, ends, single. Lamps doing",
-            "unrelated things is not coordination, and neither is all of them doing the",
-            "same thing.",
+            "selects a group: all, inner, outer, left, right, ends, single - where",
+            "single is the rig's centre, one lamp if the count is odd and the middle",
+            "pair if it is even. Lamps doing unrelated things is not coordination, and",
+            "neither is all of them doing the same thing. On a symmetric row a lamp",
+            "acting alone reads as a fault rather than a choice, so it is worth",
+            "spending deliberately and briefly.",
             "",
             "A designer builds a CUE LIST against the song's landmarks: intro, verse,",
             "pre, chorus, bridge, breakdown, drop, outro. Each cue is a look with a",
@@ -382,6 +403,23 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "    onsets 40 48                 how busy are the drums into the drop?",
             "    chords 48 82 / melody 48 82  what the harmony and the tune do",
             "    moment 16 / section 2        everything known about one of them",
+            "",
+            "STANDING IN THE ROOM",
+            "",
+            "A designer does not hand over a plot they have never seen run. Once the",
+            "plan file has something in it, bake it and look:",
+            "",
+            f"    node {look} {song}",
+            "",
+            "It prints what the rig actually does: how often the look changes, every",
+            "full blackout with its timestamp, the mean and peak brightness of each",
+            "section as an arc down the page, how many hard lifts land on a beat, and",
+            "whether any one lamp is off on its own. Nothing in it passes or fails.",
+            "It is the room, and you are the one deciding whether that is the show you",
+            "meant. Read the arc especially: if every section peaks at the same number",
+            "the loud part has nothing left to be, and if the changes come faster than",
+            "the song turns you are watching equipment, not design. Change the plan",
+            "and look again as many times as you want.",
             "",
             "THE SCORE ITSELF",
             "",
@@ -540,8 +578,29 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "",
             "One state per section is one look held for a whole section, and a rig",
             "that never goes out reads as broken however good the cues are. A designer",
-            "changes the resting look far more often than that, and a good share of",
-            "those looks have part of the rig dark.",
+            "changes the resting look more often than that, and a good share of those",
+            "looks have part of the rig dark.",
+            "",
+            "But the resting look changes on the song's own joints, not on a timer.",
+            "Inside a section the motion comes from the chase already running, not",
+            "from a new look every few bars. A designer is not busy: the reason a",
+            "change reads as a change is that the thing before it was allowed to",
+            "settle. Cues arriving faster than the music turns reads as equipment",
+            "misbehaving, not as design, and it is the single most common way a show",
+            "of good individual cues ends up feeling random.",
+            "",
+            "A FULL blackout is punctuation and its whole power is rarity. One or two",
+            "in a song, landing on a silence the music actually has, is a lot. Part",
+            "of the rig going out is a different thing entirely and can happen all",
+            "the time. If the room keeps dropping to nothing, none of the drops mean",
+            "anything.",
+            "",
+            "Match the rate of change to the music's rate of change. Where the song",
+            "climbs slowly, the light climbs slowly and holds its nerve - answering a",
+            "long build with fast movement throws the build away. Fades belong where",
+            "the music is smooth and snaps belong where it hits; the transition is a",
+            "decision, not a default. And full is spent once: the biggest look in the",
+            "show only lands if nothing earlier was allowed to be that big.",
             "",
             "One more thing the gamma hides: DMX 12 is not off. The emulator draws it",
             "at 15% brightness, which reads as a lit lamp. Off means 0.",
@@ -584,6 +643,7 @@ def run_claude(work, brief, system_prompt, model, turns):
         str(turns),
         "--model",
         model,
+        "--restricted",
         "--output-format",
         "stream-json",
         "--verbose",
@@ -673,7 +733,15 @@ def compose(song, model=None, hub=None, turns=90, keep=False, notes=None):
     )
     overview = C.fetch_overview(song)
 
-    work = os.path.join(WORK, f"{song}.claude")
+    # The composer works OUTSIDE the repository. Claude Code keys its memory and
+    # project settings to the working directory, so a cwd inside this tree hands
+    # the composer sixteen files of one engineer's notes -- head keep-outs, check
+    # definitions, things learned while debugging the baker -- as its starting
+    # context. Those are not a lighting designer's context, and reading them cost
+    # the first forty seconds of every run. From outside the tree it starts clean
+    # and is told what it needs by the brief.
+    work = os.environ.get("LL_COMPOSER_DIR") or os.path.join(
+        tempfile.gettempdir(), "limelight-compose", f"{song}.claude")
     if os.path.isdir(work) and not keep:
         shutil.rmtree(work)
     os.makedirs(work, exist_ok=True)

@@ -51,6 +51,10 @@ const LEFT  = PARS.slice(0, 2);           // par_1, par_8
 const RIGHT = PARS.slice(2, 4);           // par_15, par_22
 const ENDS  = [PARS[0], PARS[3]];         // par_1, par_22
 
+const CENTRE = PARS.length % 2
+  ? [PARS[(PARS.length - 1) / 2]]
+  : PARS.slice(PARS.length / 2 - 1, PARS.length / 2 + 1);
+
 function parsForExtent(extent) {
   switch (extent) {
     case "inner":  return INNER;
@@ -58,7 +62,7 @@ function parsForExtent(extent) {
     case "left":   return LEFT;
     case "right":  return RIGHT;
     case "ends":   return ENDS;
-    case "single": return [PARS[Math.floor(PARS.length / 2)]];
+    case "single": return CENTRE;
     case "all": default: return PARS;
   }
 }

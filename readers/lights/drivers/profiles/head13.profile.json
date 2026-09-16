@@ -170,5 +170,9 @@
   "max_pan_per_frame": 7,
   "max_tilt_per_frame": 7
  },
- "note": "generated from rig.py; the real-rig bridge parks via rig.park_frame()"
+ "note": "generated from rig.py; the real-rig bridge parks via rig.park_frame()",
+ "response": {
+  "rise_ms": 0,
+  "fall_ms": 90
+ }
 }
