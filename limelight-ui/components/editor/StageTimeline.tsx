@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { packRows } from "@/lib/pack";
 import { beatAtTime, beatsAcross, fit, panBy, timeToX, xToTime, zoomAt, MIN_SPAN_S } from "@/lib/timeline";
 import type { View } from "@/lib/timeline";
@@ -21,7 +21,7 @@ import { MomentsBand } from "./MomentsBand";
 import { Layer } from "./Layer";
 import { Guides, type GuideKind } from "./Guides";
 import { Playhead } from "./Playhead";
-import { ClipInspector } from "./ClipInspector";
+import { ClipInspector, INSPECTOR_W } from "./ClipInspector";
 import { TransportBar } from "./TransportBar";
 
 /* The editor under the live stage. Layers are stacking rows, not categories:
@@ -110,7 +110,6 @@ export function StageTimeline({
   const [guides, setGuides] = useState<GuideKind[]>(["bar"]);
   const [follow, setFollow] = useState(true);
   const [rowsH, setRowsH] = useState(0);
-  const [rowsScroll, setRowsScroll] = useState(0);
   const [ghost, setGhost] = useState<{ x: number; y: number } | null>(null);
   const [hover, setHover] = useState<{ bar: number; beat: number; target: SnapTarget | null } | null>(null);
   /* A one-line receipt for the things that leave no mark on screen — copying,
@@ -121,6 +120,11 @@ export function StageTimeline({
      it holds anything IS drawn (the paste item greys out), so that one bit is
      state beside it rather than a read of the ref during render. */
   const [canPaste, setCanPaste] = useState(false);
+  /* The clip whose card has been put away. Held as the KEY rather than a
+     boolean so "is it dismissed" is answered by comparing it with what is
+     selected now — no effect to reset it, and selecting anything (including
+     the same clip again) brings the card straight back. */
+  const [dismissed, setDismissed] = useState<string | null>(null);
 
   const lanesRef = useRef<HTMLDivElement>(null);
   const rowsRef = useRef<HTMLDivElement>(null);
@@ -147,6 +151,15 @@ export function StageTimeline({
   }, []);
   useEffect(() => () => { if (noteTimer.current) clearTimeout(noteTimer.current); }, []);
 
+  /* Every selection in this editor goes through here so that choosing anything
+     — including the clip whose card you just closed — undismisses the card.
+     Without it, closing one was permanent until you picked something else, and
+     there was no way back to a clip's exact timing. */
+  const select = useCallback((key: string, additive: boolean) => {
+    setDismissed(null);
+    onSelect(key, additive);
+  }, [onSelect]);
+
   useEffect(() => {
     if (!show || lastSong.current === show.song) return;
     lastSong.current = show.song;
@@ -162,17 +175,11 @@ export function StageTimeline({
     return () => ro.disconnect();
   }, [show]);
 
-  /* Anything floating over the lanes is positioned in the TIMELINE's coordinate
-     space, and the lanes scroll inside it. Without this the inspector stayed
-     where the clip used to be the moment the rows moved under it. */
-  useEffect(() => {
-    const el = rowsRef.current;
-    if (!el) return;
-    const sync = () => setRowsScroll(el.scrollTop);
-    el.addEventListener("scroll", sync, { passive: true });
-    sync();
-    return () => el.removeEventListener("scroll", sync);
-  }, [show]);
+  /* The lanes scroll inside the timeline's coordinate space, so the inspector
+     — which is positioned in that space — has to know when they move. It reads
+     the scroller itself through [data-lane-rows] rather than having the offset
+     mirrored into state here: mirroring it re-ran the whole editor on every
+     scroll frame to move one card. */
 
   /* `view` was both an input and the output here, and the output was always a
      fresh object, so every scroll re-armed the effect that caused it. Deciding
@@ -349,11 +356,11 @@ export function StageTimeline({
       if (!el) return;
       if (el.closest?.("[data-clip-inspector]")) return;
       if (lanesRef.current?.contains(el)) return;
-      onSelect("", false);
+      select("", false);
     };
     window.addEventListener("pointerdown", away);
     return () => window.removeEventListener("pointerdown", away);
-  }, [onSelect]);
+  }, [select]);
 
   /** An arranger clip becomes yours the moment you touch it. Returns the edit
    *  index to act on, or null if the catalogue has nothing to make it from. */
@@ -361,10 +368,10 @@ export function StageTimeline({
     (clip: ClipModel): number | null => {
       if (clip.editIndex !== null) return clip.editIndex;
       const idx = onMaterialize(clip);
-      if (idx !== null) onSelect(`mine:${idx}`, false);
+      if (idx !== null) select(`mine:${idx}`, false);
       return idx;
     },
-    [onMaterialize, onSelect],
+    [onMaterialize, select],
   );
 
   const startGesture = useCallback(
@@ -384,7 +391,7 @@ export function StageTimeline({
           moved = true;
           if (idx === null) {
             idx = onMaterialize(clip);
-            if (idx !== null) onSelect(`mine:${idx}`, false);
+            if (idx !== null) select(`mine:${idx}`, false);
           }
         }
         if (idx === null) return;
@@ -407,7 +414,7 @@ export function StageTimeline({
       window.addEventListener("pointermove", move);
       window.addEventListener("pointerup", up);
     },
-    [show, beatAtX, beatOf, toBarBeat, minBeats, onUpdateLive, onMaterialize, onSelect, onCommit],
+    [show, beatAtX, beatOf, toBarBeat, minBeats, onUpdateLive, onMaterialize, select, onCommit],
   );
 
   const removeSelection = useCallback(() => {
@@ -446,10 +453,10 @@ export function StageTimeline({
          selection is re-pointed at what it became. Doing it per clip inside the
          loop would collapse a multi-selection to whichever was taken over last,
          and the next arrow press would move only that one. */
-      keys.forEach((k, n) => onSelect(k, n > 0));
+      keys.forEach((k, n) => select(k, n > 0));
       onCommit();
     },
-    [show, selected, onMaterialize, onSelect, beatOf, toBarBeat, onUpdateLive, onCommit],
+    [show, selected, onMaterialize, select, beatOf, toBarBeat, onUpdateLive, onCommit],
   );
 
   /** Absolute placement, in seconds — what the inspector's fields write. */
@@ -512,10 +519,10 @@ export function StageTimeline({
           ...(Object.keys(s.params).length ? { params: s.params } : {}),
         })),
       );
-      made.forEach((i, n) => onSelect(`mine:${i}`, n > 0));
+      made.forEach((i, n) => select(`mine:${i}`, n > 0));
       return made.length;
     },
-    [onPlace, toBarBeat, onSelect],
+    [onPlace, toBarBeat, select],
   );
 
   const paste = useCallback(() => {
@@ -603,7 +610,7 @@ export function StageTimeline({
         return;
       }
 
-      if (e.key === "Escape") { setArmed(null); onSelect("", false); return; }
+      if (e.key === "Escape") { setArmed(null); select("", false); return; }
 
       if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
         e.preventDefault();
@@ -635,7 +642,7 @@ export function StageTimeline({
       removeSelection();
     },
     [
-      selected, removable, removeSelection, onSelect, setArmed, onSeek, duration,
+      selected, removable, removeSelection, select, setArmed, onSeek, duration,
       nudge, beatsIn, bpb, copySelection, paste, duplicate, say,
     ],
   );
@@ -679,7 +686,7 @@ export function StageTimeline({
         selected={selected}
         removableCount={removable.length}
         onRemove={removeSelection}
-        onClearSelection={() => onSelect("", false)}
+        onClearSelection={() => select("", false)}
         baking={baking}
         note={note}
         clipCount={clips.length}
@@ -717,7 +724,7 @@ export function StageTimeline({
                 return true;
               }
             }
-            onSelect("", false);
+            select("", false);
             return false;
           }}
           onZoom={(anchorT, factor) => { setFollow(false); setView(zoomAt(view, anchorT, factor, duration, MIN_SPAN_S)); }}
@@ -768,14 +775,14 @@ export function StageTimeline({
               <MomentsBand moments={show.moments} />
             </div>
 
-            <div ref={rowsRef} className="flex-1 min-h-0 overflow-y-auto">
+            <div ref={rowsRef} data-lane-rows className="flex-1 min-h-0 overflow-y-auto">
               {byLayer.map((rowClips, i) => (
                 <Layer
                   key={i}
                   clips={rowClips}
                   selection={selection}
                   height={rowHeight}
-                  onSelect={onSelect}
+                  onSelect={select}
                   onGesture={startGesture}
                   onZoomTo={zoomToClip}
                 />
@@ -790,16 +797,14 @@ export function StageTimeline({
           )}
           <Playhead t={currentTime} />
 
-          {one && (
+          {one && dismissed !== one.key && (
             <Popover
               clip={one}
               effect={effects.find((e) => e.id === (one.tile ?? one.fx))}
-              row={oneRow}
-              rowHeight={rowHeight}
-              scrollTop={rowsScroll}
               onChange={(patch) => changeDials(one, patch)}
               onRetime={(patch) => retime(one, patch)}
               onRemove={removeSelection}
+              onClose={() => setDismissed(one.key)}
             />
           )}
         </Timeline>
@@ -821,77 +826,150 @@ export function StageTimeline({
 
 /** Positions the inspector against the selected clip, inside the shared mapping
  *  AND inside the editor's own box. */
+/** Breathing room between the clip and the card, on whichever side wins. */
+const GAP = 8;
+/** Under this the card is too short to be worth a side; try another one. */
+const MIN_CARD_H = 132;
+/** The last-resort ceiling. It may cover the song map, because covering the MAP
+ *  is recoverable and covering the clip is not. */
+const ROOF = 4;
+
 function Popover({
-  clip, effect, row, rowHeight, scrollTop, onChange, onRetime, onRemove,
+  clip, effect, onChange, onRetime, onRemove, onClose,
 }: {
   clip: ClipModel;
   effect: Effect | undefined;
-  row: number;
-  rowHeight: number;
-  /** How far the lanes have scrolled under the timeline's coordinate space. */
-  scrollTop: number;
   onChange: (patch: Record<string, unknown>) => void;
   onRetime: (patch: { startS?: number; lengthS?: number }) => void;
   onRemove: () => void;
+  onClose: () => void;
 }) {
-  const { view, width, height } = useTimeline();
   const ref = useRef<HTMLDivElement>(null);
-  const [h, setH] = useState(0);
 
-  /* Measured, not assumed. The card's height depends on what the effect offers
-     — a colour row, an intensity slider, a blurb of unknown length — so the
-     only way to know whether it fits below the clip is to ask it. */
-  useEffect(() => {
+  /* THE CARD MAY NEVER COVER THE CLIP. The clip is the thing you are holding —
+     its body drags it, its two ends trim it — and the card is how you read what
+     the drag did. Covering it put the fix on top of the thing being fixed.
+
+     Position is computed from the clip's MEASURED rectangle and written straight
+     to the DOM. It used to be modelled instead, as BANDS_H + row * rowHeight −
+     scrollTop, and the model drifted from the truth: a lane border it did not
+     know about, and a scroll offset that arrived a render late. On the bottom
+     lanes that was 75px of error, which put the card exactly where it was never
+     supposed to be. Measuring cannot drift, and it deletes three inputs.
+
+     Laying out in an effect rather than in state is also the honest shape for
+     this: the answer depends on where the browser actually put things, so it can
+     only be known after layout, and writing it back to the node is precisely
+     what effects are for. */
+  const place = useCallback(() => {
     const el = ref.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setH(el.offsetHeight));
-    ro.observe(el);
-    setH(el.offsetHeight);
-    return () => ro.disconnect();
+    const host = el?.offsetParent as HTMLElement | null;
+    if (!el || !host) return;
+    const target = host.querySelector<HTMLElement>(
+      `[data-clip-key="${CSS.escape(clip.key)}"]`,
+    );
+    if (!target) return;
+
+    const hb = host.getBoundingClientRect();
+    const cb = target.getBoundingClientRect();
+    const clipL = cb.left - hb.left;
+    const clipR = cb.right - hb.left;
+    const clipT = cb.top - hb.top;
+    const clipB = cb.bottom - hb.top;
+
+    const boxL = 8;
+    const boxR = hb.width - 8;
+    const boxT = BANDS_H + 4;
+    const boxB = hb.height - ENERGY_H - 6;
+
+    /* scrollHeight, not offsetHeight: the card may already be capped from the
+       last placement, and what decides the next one is how tall it WANTS to be. */
+    const want = Math.max(el.scrollHeight, MIN_CARD_H);
+
+    const clampL = (v: number) =>
+      Math.min(Math.max(boxL, v), Math.max(boxL, boxR - INSPECTOR_W));
+    const clampT = (v: number, ch: number) =>
+      Math.min(Math.max(boxT, v), Math.max(boxT, boxB - ch));
+
+    /* What each side actually has. The vertical sides are measured in height —
+       the card can always slide along x to fit — the horizontal ones in width. */
+    const roomBelow = boxB - (clipB + GAP);
+    const roomAbove = (clipT - GAP) - boxT;
+    const roomRight = boxR - (clipR + GAP);
+    const roomLeft = (clipL - GAP) - boxL;
+    const midY = (clipT + clipB) / 2;
+
+    let left: number;
+    let top: number;
+    let cap: number;
+
+    if (roomBelow >= Math.min(want, MIN_CARD_H)) {
+      cap = roomBelow;
+      left = clampL(clipL);
+      top = clipB + GAP;
+    } else if (roomAbove >= Math.min(want, MIN_CARD_H)) {
+      cap = roomAbove;
+      left = clampL(clipL);
+      top = clipT - GAP - Math.min(want, cap);
+    } else if (roomRight >= INSPECTOR_W) {
+      cap = boxB - boxT;
+      left = clipR + GAP;
+      top = clampT(midY - Math.min(want, cap) / 2, Math.min(want, cap));
+    } else if (roomLeft >= INSPECTOR_W) {
+      cap = boxB - boxT;
+      left = clipL - GAP - INSPECTOR_W;
+      top = clampT(midY - Math.min(want, cap) / 2, Math.min(want, cap));
+    } else {
+      /* A short editor with the clip stranded in the middle: nowhere clears it
+         with room to spare. Give up card HEIGHT — it scrolls — rather than give
+         up the clip, taking the taller of the two vertical gaps. */
+      const roof = (clipT - GAP) - ROOF;
+      if (roof > roomBelow) {
+        cap = Math.max(48, roof);
+        left = clampL(clipL);
+        top = Math.max(ROOF, clipT - GAP - Math.min(want, cap));
+      } else {
+        cap = Math.max(48, roomBelow);
+        left = clampL(clipL);
+        top = clipB + GAP;
+      }
+    }
+
+    el.style.left = `${Math.round(left)}px`;
+    el.style.top = `${Math.round(top)}px`;
+    el.style.maxHeight = `${Math.round(cap)}px`;
+    el.style.visibility = "visible";
+  }, [clip.key]);
+
+  /* After every render, because everything that moves a clip — zoom, pan, a
+     drag, the lanes resizing — renders this component with it. */
+  const placeRef = useRef(place);
+  useLayoutEffect(() => { placeRef.current = place; place(); });
+
+  /* And on the movements that do NOT render it: scrolling the lanes under the
+     card, and the editor being dragged taller or shorter. */
+  useLayoutEffect(() => {
+    const run = () => placeRef.current();
+    const host = ref.current?.offsetParent as HTMLElement | null;
+    const rows = host?.querySelector<HTMLElement>("[data-lane-rows]");
+    rows?.addEventListener("scroll", run, { passive: true });
+    const ro = new ResizeObserver(run);
+    if (host) ro.observe(host);
+    return () => {
+      rows?.removeEventListener("scroll", run);
+      ro.disconnect();
+    };
   }, []);
-
-  const x = timeToX(clip.startS, view, width);
-  if (x < -260 || x > width + 260) return null;
-
-  /* Anchored under the clip's row and clamped to the timeline, so the card never
-     sits over the clip's own trim handles — which is what made resizing a
-     selected clip impossible. */
-  const PANEL_W = 248;
-  const left = Math.min(Math.max(8, x), Math.max(8, width - PANEL_W - 8));
-
-  /* Below the row if it fits, above it if not, and pinned inside the editor —
-     over the song map if that is the only room left — when neither works. On
-     the LAST layer "below" is off the bottom of the screen, so the card, which
-     is the only place a clip's exact timing can be read or typed, was sitting
-     somewhere nobody could reach.
-
-     The editor's height is the creator's to drag, so "no room" is a state this
-     has to handle rather than design around: past the cap the card scrolls. */
-  const ROOF = 4;
-  const floor = height - ENERGY_H - 6;
-  const room = Math.max(80, floor - ROOF);
-  const cap = Math.min(h || room, room);
-
-  const rowTop = BANDS_H + row * rowHeight - scrollTop;
-  const below = rowTop + rowHeight + 8;
-  const above = rowTop - cap - 8;
-  const top =
-    h === 0 ? below
-      : below + cap <= floor ? below
-        : above >= BANDS_H + 4 ? above
-          : Math.max(ROOF, floor - cap);
 
   return (
     <ClipInspector
       ref={ref}
       clip={clip}
       effect={effect}
-      x={left}
-      y={top}
-      maxHeight={room}
       onChange={onChange}
       onRetime={onRetime}
       onRemove={onRemove}
+      onClose={onClose}
     />
   );
 }

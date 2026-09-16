@@ -24,6 +24,11 @@ const SWATCHES: { name: string; rgb: [number, number, number]; css: string }[] =
  *  see rather than what the number says. */
 const STEP_S = 0.01;
 
+/** The card's width, exported because the timeline has to know it to decide
+ *  whether the card clears the clip to the left or the right. Two copies of
+ *  this number is a card that thinks it fits somewhere it does not. */
+export const INSPECTOR_W = 212;
+
 function sameColour(a: unknown, b: [number, number, number]) {
   return Array.isArray(a) && a.length === 3 && a.every((v, i) => Math.abs(Number(v) - b[i]) < 0.02);
 }
@@ -73,27 +78,23 @@ function TimeField({ value, onCommit, title }: {
 export function ClipInspector({
   clip,
   effect,
-  x,
-  y,
-  maxHeight,
   onChange,
   onRetime,
   onRemove,
+  onClose,
   ref,
 }: {
   clip: Clip;
   effect: Effect | undefined;
-  x: number;
-  y: number;
-  /** The tallest the card may be here. Past it the card scrolls rather than
-   *  hanging off the bottom of the editor, which on a short editor is off the
-   *  bottom of the screen. */
-  maxHeight?: number;
   onChange: (patch: Record<string, unknown>) => void;
   /** Absolute placement, in seconds. Every conversion back into bars and beats
    *  happens in the timeline, which owns the grid. */
   onRetime: (patch: { startS?: number; lengthS?: number }) => void;
   onRemove: () => void;
+  /** Put the card away WITHOUT letting go of the clip. Dismissing it by
+   *  deselecting meant the only way to see the clip you were working on was to
+   *  stop working on it. */
+  onClose: () => void;
   ref?: React.Ref<HTMLDivElement>;
 }) {
   const [menu, setMenu] = useState(false);
@@ -110,14 +111,17 @@ export function ClipInspector({
     <div
       ref={ref}
       data-clip-inspector
-      className="absolute z-40 w-[248px] rounded-[8px] border border-solid border-line-strong bg-bg-overlay p-[var(--spacing-s3)] overflow-y-auto overscroll-contain"
-      style={{ left: x, top: y, maxHeight, boxShadow: "var(--elev-popover)" }}
+      className="absolute z-40 rounded-[8px] border border-solid border-line-strong bg-bg-overlay p-[10px] overflow-y-auto overscroll-contain"
+      /* left/top/maxHeight are written by the timeline after layout — it is the
+         only thing that can see where the clip ended up. Hidden until it has,
+         so the card is never painted at 0,0 on its way to the right place. */
+      style={{ width: INSPECTOR_W, visibility: "hidden", boxShadow: "var(--elev-popover)" }}
       onPointerDown={(e) => e.stopPropagation()}
     >
-      <div className="flex items-start gap-[8px]">
-        <Image src={effectIcon({ id: clip.tile ?? clip.fx })} alt="" width={18} height={18} className="mt-[1px] flex-none" />
+      <div className="flex items-start gap-[6px]">
+        <Image src={effectIcon({ id: clip.tile ?? clip.fx })} alt="" width={16} height={16} className="mt-[1px] flex-none" />
         <div className="flex-1 min-w-0">
-          <div className="text-[14px] text-ink leading-[17px]">{clip.name}</div>
+          <div className="text-[13px] text-ink leading-[16px] truncate">{clip.name}</div>
         </div>
         <div className="relative flex-none">
           <button
@@ -125,12 +129,12 @@ export function ClipInspector({
             onClick={() => setMenu((m) => !m)}
             aria-label="Clip actions"
             aria-expanded={menu}
-            className="w-[22px] h-[22px] rounded bg-transparent border-0 cursor-pointer text-ink-dim hover:text-ink text-[14px] leading-none"
+            className="w-[20px] h-[20px] rounded bg-transparent border-0 cursor-pointer text-ink-dim hover:text-ink text-[13px] leading-none"
           >
             <span aria-hidden>…</span>
           </button>
           {menu && (
-            <div className="absolute right-0 top-[24px] z-10 min-w-[128px] py-[3px] rounded-[6px] border border-solid border-line-strong bg-bg-overlay"
+            <div className="absolute right-0 top-[22px] z-10 min-w-[128px] py-[3px] rounded-[6px] border border-solid border-line-strong bg-bg-overlay"
               style={{ boxShadow: "var(--elev-popover)" }}>
               <button
                 type="button"
@@ -142,6 +146,15 @@ export function ClipInspector({
             </div>
           )}
         </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          title="Close — the clip stays selected"
+          className="flex-none w-[20px] h-[20px] rounded bg-transparent border-0 cursor-pointer text-ink-dim hover:text-ink text-[14px] leading-none"
+        >
+          <span aria-hidden>×</span>
+        </button>
       </div>
 
       {/* ── where it is, exactly ──────────────────────────────────────────────
@@ -149,9 +162,9 @@ export function ClipInspector({
           Both fields are absolute, so the number you read is the number the
           baker gets — bar·beat is the musician's name for the same instant and
           sits underneath as context, not as the thing being edited. */}
-      <div className="mt-[10px] pt-[10px] border-t border-solid border-line">
-        <div className="flex items-center gap-[8px]">
-          <span className="text-[11px] text-ink-dim flex-none w-[40px]">Start</span>
+      <div className="mt-[8px] pt-[8px] border-t border-solid border-line">
+        <div className="flex items-center gap-[6px]">
+          <span className="text-[11px] text-ink-dim flex-none w-[38px]">Start</span>
           <TimeField
             value={mmssms(clip.startS)}
             title="When it starts — m:ss.mmm, or plain seconds"
@@ -164,8 +177,8 @@ export function ClipInspector({
           />
         </div>
 
-        <div className="flex items-center gap-[8px] mt-[5px]">
-          <span className="text-[11px] text-ink-dim flex-none w-[40px]">Length</span>
+        <div className="flex items-center gap-[6px] mt-[5px]">
+          <span className="text-[11px] text-ink-dim flex-none w-[38px]">Length</span>
           <TimeField
             value={lengthS.toFixed(3)}
             title="How long it lasts, in seconds"
@@ -183,14 +196,15 @@ export function ClipInspector({
         </p>
       </div>
 
-      {effect?.blurb && (
-        <p className="text-[11px] text-ink-dim leading-[16px] mt-[10px]">{effect.blurb}</p>
-      )}
+      {/* No blurb. It is the tallest thing the card could hold and its height
+          varies per effect, so it was what pushed the card over the clip — and
+          what an effect DOES is already read in the palette, at the moment you
+          choose it. Here you are adjusting one you have already chosen. */}
 
       {amount ? (
-        <div className="mt-[12px]">
-          <div className="flex items-center gap-[10px]">
-            <span className="text-[11px] text-ink-dim flex-none w-[52px]">Intensity</span>
+        <div className="mt-[10px]">
+          <div className="flex items-center gap-[8px]">
+            <span className="text-[11px] text-ink-dim flex-none w-[50px]">Intensity</span>
             <input
               type="range"
               min={Math.round(min * 100)}
@@ -206,13 +220,13 @@ export function ClipInspector({
           </div>
         </div>
       ) : (
-        <p className="text-[10px] text-ink-dimmer mt-[12px]">
+        <p className="text-[10px] text-ink-dimmer mt-[10px]">
           This effect has no intensity of its own.
         </p>
       )}
 
       {hasColour && (
-        <div className="mt-[12px]">
+        <div className="mt-[10px]">
           <span className="text-[11px] text-ink-dim">Colour</span>
           <div className="flex gap-[5px] mt-[5px] -ml-[2px]">
             {SWATCHES.map((s) => {
