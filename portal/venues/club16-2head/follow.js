@@ -10,12 +10,13 @@ module.exports = function follow(params, ctx) {
   const pars = H.parsForExtent(extent);
   const driven = pars.map(p => p.id).concat(H.HEAD_IDS);
   const floor = params.floor != null ? params.floor : 0.16;
+  const response = params.response != null ? params.response : 1;
   const spread = params.spread != null ? params.spread : 0.35;
   const lean = params.lean != null ? params.lean : 0;
 
   function render(lane_value) {
     const v = H.clamp(lane_value, 0, 1);
-    const level = H.clamp(floor + (depth - floor) * Math.pow(v, 0.72), 0, 1);
+    const level = H.clamp(floor + (depth - floor) * Math.pow(v, response), 0, 1);
     const frame = H.emptyFrame();
     pars.forEach((p, k) => {
       const across = pars.length > 1 ? k / (pars.length - 1) : 0.5;
