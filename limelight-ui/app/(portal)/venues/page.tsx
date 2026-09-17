@@ -6,6 +6,7 @@ import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
 import { VenueCard } from "@/components/venues/VenueCard";
 import { CardSkeleton } from "@/components/ui";
+import { NewShowDialog } from "@/components/shows/NewShowDialog";
 import { Field, SegmentedControl } from "@/components/ui";
 import { Search } from "lucide-react";
 import type { Venue, Layout } from "@/lib/types";
@@ -27,6 +28,14 @@ export default function VenuesPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [layouts, setLayouts] = useState<Record<string, Layout>>({});
   const [loaded, setLoaded] = useState(false);
+  const [picking, setPicking] = useState<{ venue: string; layout: string } | null>(null);
+  const songs = usePortalStore((s) => s.songs);
+  const setSong = usePortalStore((s) => s.setSong);
+  const setSeed = usePortalStore((s) => s.setSeed);
+  const setEdits = usePortalStore((s) => s.setEdits);
+  const setWant = usePortalStore((s) => s.setWant);
+  const setSetlist = usePortalStore((s) => s.setSetlist);
+  const resetForShow = usePortalStore((s) => s.resetForShow);
   const router = useRouter();
 
   useEffect(() => {
@@ -47,13 +56,35 @@ export default function VenuesPage() {
     return () => { live = false; };
   }, [q, setRooms]);
 
+  /* Designing for a room starts the same way designing anything does: by
+     choosing the songs. The room is already decided, so the picker opens here
+     rather than bouncing through the shows index. */
   const handleDesign = useCallback(
     (venue: Venue, layoutFile: string) => {
       setRoom({ id: venue.id, name: venue.name, layout: layoutFile, example: venue.example });
       setLayout(layoutFile);
-      router.push("/library");
+      setPicking({ venue: venue.name, layout: layoutFile });
     },
-    [setRoom, setLayout, router],
+    [setRoom, setLayout],
+  );
+
+  const startShow = useCallback(
+    (names: string[]) => {
+      if (!names.length) return;
+      const first = songs.find((s) => s.name === names[0]);
+      resetForShow();
+      setSetlist(names);
+      if (first) setSong(first);
+      setSeed(1);
+      setEdits([]);
+      setWant(null);
+      const layoutQ = picking?.layout ? `&layout=${encodeURIComponent(picking.layout)}` : "";
+      const listQ = names.length > 1 ? `&songs=${names.map(encodeURIComponent).join(",")}` : "";
+      router.push(
+        `/stage?song=${encodeURIComponent(names[0])}&seed=1${layoutQ}${listQ}`,
+      );
+    },
+    [songs, picking, resetForShow, setSetlist, setSong, setSeed, setEdits, setWant, router],
   );
 
   const shown = useMemo(
@@ -65,6 +96,13 @@ export default function VenuesPage() {
 
   return (
     <div className="flex flex-col overflow-hidden flex-1">
+      <NewShowDialog
+        open={!!picking}
+        onClose={() => setPicking(null)}
+        onCreate={startShow}
+        forRoom={picking?.venue}
+      />
+
       <header className="flex-none px-[28px] pt-[24px] pb-[18px]">
         <div className="flex items-center gap-[20px] flex-wrap">
           <div className="min-w-0">

@@ -90,13 +90,22 @@ function ClipBase({
         ` \u00b7 bar ${clip.bar}\u00b7${beatsLabel(clip.beat)}`
       }
     >
-      <span className="absolute inset-0 flex items-center gap-[4px] px-[4px] pointer-events-none overflow-hidden">
-        {w > 14 && (
+      {/* Centred in the clip, and centred in the part of it you can SEE: a bed
+          that runs off both sides of the view would otherwise carry its name at
+          a midpoint three bars off screen. */}
+      <span
+        className="absolute inset-y-0 flex items-center justify-center gap-[5px] px-[6px] pointer-events-none overflow-hidden"
+        style={{
+          left: Math.max(0, -x0),
+          right: Math.max(0, x0 + w - width),
+        }}
+      >
+        {w > 12 && (
           <Image
             src={effectIcon({ id: clip.tile ?? clip.fx })}
             alt=""
-            width={15}
-            height={15}
+            width={18}
+            height={18}
             className="flex-none"
             style={
               selected
@@ -107,7 +116,7 @@ function ClipBase({
         )}
         {w > 44 && (
           <span
-            className="text-[10px] truncate font-medium leading-[12px] tracking-[0.005em]"
+            className="text-[11px] truncate font-medium leading-[13px] tracking-[0.004em]"
             style={{ color: selected ? "var(--bg)" : "var(--ink)", opacity: selected ? 1 : 0.85 }}
           >
             {clip.name}

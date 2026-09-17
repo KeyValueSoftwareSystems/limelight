@@ -13,10 +13,13 @@ export function NewShowDialog({
   open,
   onClose,
   onCreate,
+  forRoom,
 }: {
   open: boolean;
   onClose: () => void;
   onCreate: (names: string[]) => void;
+  /** Set when the room is already chosen, so the dialog says so. */
+  forRoom?: string;
 }) {
   const songs = usePortalStore((s) => s.songs);
   const setSongs = usePortalStore((s) => s.setSongs);
@@ -70,10 +73,12 @@ export function NewShowDialog({
         <div className="flex-none flex items-start gap-[14px] px-[22px] pt-[20px] pb-[14px]">
           <div className="min-w-0 flex-1">
             <h2 className="text-[19px] font-semibold tracking-[-0.02em] m-0 text-ink leading-[1.2]">
-              New show
+              {forRoom ? `New show for ${forRoom}` : "New show"}
             </h2>
             <p className="text-[13px] text-ink-dim mt-[5px] m-0">
-              Choose the songs this show plays, in order.
+              {forRoom
+                ? "The room is set. Choose the songs it plays, in order."
+                : "Choose the songs this show plays, in order."}
             </p>
           </div>
           <button
@@ -155,7 +160,9 @@ export function NewShowDialog({
         >
           <span className="text-[13px] text-ink-dim min-w-0 truncate">
             {chosen.length === 0 ? (
-              "Pick one song, or several for a setlist."
+              forRoom
+                ? `Pick one song, or several for a setlist at ${forRoom}.`
+                : "Pick one song, or several for a setlist."
             ) : (
               <>
                 <span className="text-ink font-medium">
@@ -184,7 +191,13 @@ export function NewShowDialog({
             onClick={() => onCreate(chosen)}
             className="liquid liquid-key liquid-accent flex-none inline-flex items-center h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-default"
           >
-            {chosen.length > 1 ? `Design ${chosen.length} songs` : "Design this show"}
+            {forRoom
+              ? chosen.length > 1
+                ? `Design ${chosen.length} songs for ${forRoom}`
+                : `Design for ${forRoom}`
+              : chosen.length > 1
+                ? `Design ${chosen.length} songs`
+                : "Design this show"}
           </button>
         </div>
       </div>

@@ -13,10 +13,27 @@ const STATUS_LABELS: Record<string, string> = {
   storing: "Storing\u2026",
 };
 
+/* The hub reports a phase, never a percentage, so the bar is honest about what
+   it knows: the upload's real byte progress, then one step per phase the hub
+   actually names. The filled portion keeps a slow shimmer while a phase is
+   running, which says "working" without inventing a number. */
+const PHASE_AT: Record<string, number> = {
+  queued: 0.42,
+  generating: 0.58,
+  storing: 0.88,
+  done: 1,
+};
+
+function trackProgress(uploaded: number, status: string | null): number {
+  if (!status) return uploaded * 0.38;
+  return PHASE_AT[status] ?? 0.5;
+}
+
 export function UploadButton() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState(0);
+  const statusRef = useRef<string | null>(null);
   const [genLabel, setGenLabel] = useState("Queued\u2026");
   const [errorMsg, setErrorMsg] = useState("");
   const jobRef = useRef<string | null>(null);
@@ -53,6 +70,7 @@ export function UploadButton() {
     pollRef.current = setInterval(async () => {
       try {
         const st = await api.upload.status(jobId);
+        statusRef.current = st.status;
         setGenLabel(STATUS_LABELS[st.status] ?? st.status);
         if (st.status === "done") {
           cleanup();
@@ -104,33 +122,31 @@ export function UploadButton() {
     );
   }
 
-  if (phase === "uploading") {
-    const pct = Math.round(progress * 100);
+  if (phase === "uploading" || phase === "generating") {
+    const working = phase === "generating";
+    const frac = trackProgress(progress, working ? statusRef.current : null);
+    const pct = Math.round(frac * 100);
+    const label = working ? genLabel : "Uploading\u2026";
     return (
-      <div className="flex items-center gap-[10px] min-w-[180px]">
+      <div className="flex items-center gap-[10px] min-w-[230px]">
         <input ref={inputRef} type="file" accept=".mp3,audio/mpeg" className="hidden" onChange={onInputChange} />
         <div className="flex-1">
-          <div className="flex items-center justify-between mb-[4px]">
-            <span className="text-[11px] font-medium text-ink-dim">Uploading…</span>
+          <div className="flex items-center justify-between mb-[5px]">
+            <span className="flex items-center gap-[6px] text-[11px] font-medium text-ink-dim">
+              {working && <Loader2 size={11} className="animate-spin flex-none" />}
+              {label}
+            </span>
             <span className="mono text-[11px] text-ink-dimmer tabular-nums">{pct}%</span>
           </div>
-          <div className="h-[3px] w-full rounded-full bg-white/[0.06] overflow-hidden">
+          <div className="liquid-well h-[5px] w-full rounded-full overflow-hidden">
             <div
-              className="h-full rounded-full transition-[width] duration-200 ease-[var(--ease-out)]"
-              style={{ width: `${pct}%`, background: "var(--grad-primary)" }}
+              className={`h-full rounded-full transition-[width] duration-500 ease-[var(--ease-out)] ${
+                working ? "progress-working" : ""
+              }`}
+              style={{ width: `${Math.max(3, pct)}%`, background: "var(--accent)" }}
             />
           </div>
         </div>
-      </div>
-    );
-  }
-
-  if (phase === "generating") {
-    return (
-      <div className="flex items-center gap-[8px] min-w-[180px]">
-        <input ref={inputRef} type="file" accept=".mp3,audio/mpeg" className="hidden" onChange={onInputChange} />
-        <Loader2 size={14} className="text-accent animate-spin flex-none" />
-        <span className="text-[12px] font-medium text-ink-dim">{genLabel}</span>
       </div>
     );
   }
