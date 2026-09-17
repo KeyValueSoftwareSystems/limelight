@@ -278,6 +278,24 @@ function render(cueFile, score, rigName, opts) {
         }
         state = out;
       }
+      if (cue.head && cue.head.move && E.HEAD_MOVES[cue.head.move]) {
+        const per = E.effectPeriod({ rate: cue.head.every || { bars: 2 } }, grid);
+        const ph = per > 0 ? ((t - cue._t) / per) % 1 : 0;
+        const m = E.HEAD_MOVES[cue.head.move](ph < 0 ? ph + 1 : ph);
+        const sp = E.safePanSpan(rig);
+        const tlo = cue.head.tilt_lo != null ? +cue.head.tilt_lo : 0.22;
+        const thi = cue.head.tilt_hi != null ? +cue.head.tilt_hi : 0.52;
+        const moved = { ...state };
+        for (const h of rig.movers) {
+          const s0 = moved[h.id];
+          if (!s0) continue;
+          const nx = { ...s0 };
+          if (m.pan != null) nx.pan = sp[0] + (sp[1] - sp[0]) * Math.max(0, Math.min(1, m.pan));
+          if (m.tilt != null) nx.tilt = tlo + (thi - tlo) * Math.max(0, Math.min(1, m.tilt));
+          moved[h.id] = nx;
+        }
+        state = moved;
+      }
       if (((rig.limits && rig.limits.pan_keep_out) || []).length) {
         const sp = E.safePanSpan(rig);
         const steered = { ...state };

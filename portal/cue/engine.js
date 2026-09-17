@@ -35,6 +35,19 @@ function evenOut(c) {
   return Math.max(0.35, Math.min(1.9, REF_LUM / l));
 }
 
+const HEAD_MOVES = {
+  park: () => ({}),
+  sweep: (x) => ({ pan: x < 0.5 ? x * 2 : 2 - x * 2 }),
+  arc: (x) => ({ pan: x < 0.5 ? x * 2 : 2 - x * 2, tilt: Math.sin(Math.PI * x) }),
+  circle: (x) => ({ pan: 0.5 + 0.5 * Math.cos(2 * Math.PI * x),
+                    tilt: 0.5 + 0.5 * Math.sin(2 * Math.PI * x) }),
+  nod: (x) => ({ tilt: Math.abs(Math.sin(2 * Math.PI * x)) }),
+  dip: (x) => ({ tilt: 1 - Math.abs(Math.sin(Math.PI * x)) }),
+  snap: (x) => ({ pan: x < 0.5 ? 0 : 1 }),
+  drift: (x) => ({ pan: 0.5 + 0.5 * Math.sin(2 * Math.PI * x),
+                   tilt: 0.5 + 0.5 * Math.sin(4 * Math.PI * x) }),
+};
+
 const COLOUR_FIGURES = {
   hold: (n, step) => new Array(n).fill(0),
   flip: (n, step) => new Array(n).fill(step),
@@ -534,4 +547,4 @@ function chaseStepTimes(chase, grid, startS, endS) {
   return out.length ? out : [startS];
 }
 
-module.exports = { loadRig, safePanSpan, COLOUR_FIGURES, evenOut, lumOfRgb, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes, noteStepsIn, FORMS, effectValue, effectPeriod };
+module.exports = { loadRig, safePanSpan, COLOUR_FIGURES, HEAD_MOVES, evenOut, lumOfRgb, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes, noteStepsIn, FORMS, effectValue, effectPeriod };

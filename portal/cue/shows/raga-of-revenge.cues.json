@@ -63,7 +63,13 @@
      "colour_figure": "halves",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 1,
@@ -103,7 +109,13 @@
      "colour_every": 8,
      "reverse": true
     }
-   ]
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
   },
   {
    "id": 1,
@@ -143,7 +155,13 @@
      "colour_every": 8,
      "reverse": false
     }
-   ]
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
   },
   {
    "id": 2,
@@ -188,6 +206,12 @@
     "from": 0.82,
     "to": 0.836,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -232,6 +256,12 @@
     "from": 0.868,
     "to": 0.88,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -271,7 +301,13 @@
      "colour_figure": "halves",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 4,
@@ -311,7 +347,13 @@
      "colour_every": 4,
      "reverse": true
     }
-   ]
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
+   }
   },
   {
    "id": 0,
@@ -364,6 +406,12 @@
     "from": 0.926,
     "to": 0.936,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -408,6 +456,12 @@
     "from": 0.952,
     "to": 0.964,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -453,6 +507,12 @@
     "from": 0.961,
     "to": 0.974,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -498,6 +558,12 @@
     "from": 0.972,
     "to": 0.986,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -543,6 +609,12 @@
     "from": 0.985,
     "to": 1.0,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -597,6 +669,12 @@
     "from": 0.84,
     "to": 1.0,
     "curve": 1.6
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -676,7 +754,13 @@
      "colour_figure": "walk",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
+   }
   },
   {
    "id": 12,
@@ -716,7 +800,13 @@
      "colour_figure": "flip",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
   },
   {
    "id": 13,
@@ -756,7 +846,13 @@
      "colour_figure": "walk",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
   },
   {
    "id": 14,
@@ -795,7 +891,13 @@
      "colour_figure": "alternate",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 14,
@@ -835,7 +937,13 @@
      "colour_every": 4,
      "reverse": true
     }
-   ]
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 15,
@@ -874,7 +982,13 @@
      "colour_figure": "alternate",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 15,
@@ -914,7 +1028,13 @@
      "colour_every": 8,
      "reverse": true
     }
-   ]
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 16,
@@ -958,6 +1078,12 @@
     "from": 0.82,
     "to": 0.836,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -1003,6 +1129,12 @@
     "from": 0.835,
     "to": 0.85,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -1047,6 +1179,12 @@
     "from": 0.84,
     "to": 1.0,
     "curve": 1.6
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -1131,6 +1269,12 @@
     "from": 0.945,
     "to": 0.958,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -1176,6 +1320,12 @@
     "from": 0.985,
     "to": 1.0,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -1221,6 +1371,12 @@
     "from": 1.0,
     "to": 1.0,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -1261,7 +1417,13 @@
      "colour_figure": "alternate",
      "colour_every": 5
     }
-   ]
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 24,
@@ -1301,7 +1463,13 @@
      "colour_figure": "walk",
      "colour_every": 5
     }
-   ]
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
   },
   {
    "id": 0,
@@ -1392,7 +1560,13 @@
      "colour_figure": "walk",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
   },
   {
    "id": 25,
@@ -1431,7 +1605,13 @@
      "colour_figure": "halves",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 25,
@@ -1471,7 +1651,13 @@
      "colour_every": 4,
      "reverse": true
     }
-   ]
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 26,
@@ -1510,7 +1696,13 @@
      "colour_figure": "walk",
      "colour_every": 5
     }
-   ]
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
   },
   {
    "id": 0,
@@ -1558,7 +1750,13 @@
      "colour_figure": "walk",
      "colour_every": 5
     }
-   ]
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
   },
   {
    "id": 26,

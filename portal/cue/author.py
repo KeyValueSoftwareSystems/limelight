@@ -1040,6 +1040,17 @@ def author(song, out_path=None):
         "oddeven": "flip", "poles": "alternate", "room": "walk",
     }
 
+    HEAD_FOR = {
+        "travel": ("sweep", 2), "grow": ("arc", 2), "halves": ("nod", 1),
+        "oddeven": ("nod", 1), "poles": ("dip", 2), "room": ("circle", 4),
+    }
+
+    def steer(cue, fam, climbing=False):
+        move, bars = HEAD_FOR.get(fam, ("drift", 4))
+        if climbing:
+            move, bars = "nod", 1
+        cue["head"] = {"move": move, "every": {"bars": bars}}
+
     def dress(chase, fam, pair):
         if not pair or len(pair) < 2:
             return
@@ -1293,6 +1304,7 @@ def author(song, out_path=None):
                 ch["every"] = {"beats": fit[0]}
                 ch["cycles"] = fit[1]
                 dress(ch, fam0, pair)
+                steer(c, fam0, climbing)
             seen_recent = (seen_recent + [ch["figure"]])[-4:]
             for k, (at_t, on_hit) in enumerate(cuts, start=1):
                 seg = bounds[k + 1] - bounds[k]
@@ -1325,6 +1337,7 @@ def author(song, out_path=None):
                 vch["every"] = {"beats": vfit[0]}
                 vch["cycles"] = vfit[1]
                 dress(vch, pick_fam, pair)
+                steer(var, pick_fam, climbing)
                 var["why"] = ("%s answers %s, a whole %d cycles%s"
                               % (nxt, ch["figure"], (vfit[1] if vfit else 1),
                                  (", landing on the hit at %.2fs with a new colour" % at_t)

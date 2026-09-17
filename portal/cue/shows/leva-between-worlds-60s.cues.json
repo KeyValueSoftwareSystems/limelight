@@ -59,6 +59,12 @@
     "from": 0.82,
     "to": 0.85,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -104,6 +110,12 @@
     "from": 0.94,
     "to": 0.97,
     "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -183,7 +195,13 @@
      "colour_figure": "walk",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
+   }
   },
   {
    "id": 4,
@@ -223,7 +241,13 @@
      "colour_figure": "alternate",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 5,
@@ -268,6 +292,12 @@
     "from": 0.84,
     "to": 1.0,
     "curve": 1.6
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -351,6 +381,12 @@
     "from": 0.84,
     "to": 1.0,
     "curve": 1.6
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -430,7 +466,13 @@
      "colour_figure": "poles",
      "colour_every": 8
     }
-   ]
+   ],
+   "head": {
+    "move": "arc",
+    "every": {
+     "bars": 2
+    }
+   }
   },
   {
    "id": 0,
