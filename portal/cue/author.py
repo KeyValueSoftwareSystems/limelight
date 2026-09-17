@@ -320,6 +320,24 @@ def author(song, out_path=None):
         k = min(chord_edges, key=lambda x: abs(x - t))
         return k if abs(k - t) <= tol else t
     Emax = max(r["E"] for r in rows) or 1.0
+    # When the music thins, the show thins with it. Onset density is the arc
+    # this song actually has - it runs from nothing at all through the intro to
+    # six a second in the body - where MOSS's own energy field is a plateau from
+    # 6.2 to 9.2 and says nothing. A stretch with no drums is the music
+    # breathing, and the lights have to breathe with it rather than carry on.
+    def onsets_per_s(a0, b0):
+        if b0 <= a0:
+            return 0.0
+        return sum(1 for t0, i0 in hits if a0 <= t0 < b0 and i0 >= 0.25) / (b0 - a0)
+
+    for r in rows:
+        r["_dens"] = onsets_per_s(r["t"], r["end"])
+    _d = sorted(r["_dens"] for r in rows)
+    _busy = _d[int(len(_d) * 0.62)] if _d else 1.0
+    QUIET = max(0.9, _busy * 0.42)
+    for r in rows:
+        r["_quiet"] = r["_dens"] < QUIET
+
     E_ranked = sorted(r["E"] for r in rows)
     E_mid = E_ranked[len(E_ranked) // 2] if E_ranked else 1.0
 
@@ -689,6 +707,7 @@ def author(song, out_path=None):
                 "tilt": tilt,
             }
             in_build = bar in rising
+            quiet_here = bool(r.get("_quiet"))
             direction = ph["dir"] if ph is not None else "holds"
             melodic = top_fam in ("voices", "strings", "winds", "keys", "guitars")
             percussive = top_fam in ("drums", "brass")
@@ -721,6 +740,14 @@ def author(song, out_path=None):
                 reverse_it = not reverse_it
 
             deep = 0.20 if level < 0.38 else (0.30 if dens >= 6 else 0.38)
+            if quiet_here:
+                # nothing travels and nothing steps: one slow breath, the head
+                # still, and the room left alone until the music comes back
+                want_fam = "room"
+                fig = "breathe"
+                every = {"beats": float(per)}
+                deep = 0.72
+                moves = False
             moves = want_fam in ("travel", "grow")
             if sings and want_fam == "travel":
                 every = {"notes": 1}
@@ -754,6 +781,8 @@ def author(song, out_path=None):
             add_layers = layers
 
         add(bar, fade, look, chase, why, add_layers)
+        if cues and r.get("_quiet"):
+            cues[-1]["_hold"] = True
         if (bar in rising and cues[-1].get("look")
                 and kind not in ("peak", "climax", "drop", "pause", "exit", "spotlight", "breakdown")):
             run = sorted(q for q in rising if abs(q - bar) < 12)
@@ -903,6 +932,9 @@ def author(song, out_path=None):
         if t - last_t < step * 0.98:
             continue
         if any(abs(t - p0) < one_bar * 0.75 for p0 in punched):
+            continue
+        row_q = next((rr for rr in rows if rr["t"] <= t < rr["end"]), None)
+        if row_q is not None and row_q.get("_quiet"):
             continue
         last_t = t
         big = lift >= 1.9 or t in named
@@ -1325,6 +1357,20 @@ def author(song, out_path=None):
         for i, c in enumerate(cues):
             ch = (c.get("chases") or [None])[0]
             if not ch or not ch.get("figure"):
+                continue
+            if c.get("_hold"):
+                # the music is thin here; it was given one slow breath on
+                # purpose and nothing downstream gets to make it busy again
+                ch["figure"] = "breathe"
+                ch["every"] = {"beats": float(per)}
+                ch["low"] = 0.72
+                ch["move_head"] = False
+                ch.pop("cycles", None)
+                ch.pop("colours", None)
+                ch["colour_figure"] = "hold"
+                c["head"] = {"move": "park", "every": {"bars": 8}}
+                c["why"] = (c.get("why") or "").split(" - ")[0] + (
+                    " - the drums have stopped, so the room just breathes until they return")
                 continue
             end = cues[i + 1]["_t"] if i + 1 < len(cues) else song_end
             span = end - c.get("_t", 0)

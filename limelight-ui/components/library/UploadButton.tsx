@@ -95,7 +95,11 @@ export function UploadButton() {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex items-center gap-[7px] h-[34px] px-[14px] rounded-[var(--radius-sm)] border-0 bg-accent text-[13px] font-semibold text-[#0A0B0E] cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.15)] hover:brightness-110 active:scale-[0.97] transition-all duration-[var(--dur-state)]"
+          className="flex items-center gap-[7px] h-[36px] px-[16px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold text-[#0C0D12] cursor-pointer hover:brightness-110 active:scale-[0.97] transition-all duration-200"
+          style={{
+            background: "linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%)",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2)",
+          }}
         >
           <Upload size={14} strokeWidth={2.5} />
           Add a song
@@ -114,10 +118,10 @@ export function UploadButton() {
             <span className="text-[11px] font-medium text-ink-dim">Uploading…</span>
             <span className="mono text-[11px] text-ink-dimmer tabular-nums">{pct}%</span>
           </div>
-          <div className="h-[3px] w-full rounded-full bg-bg-raised overflow-hidden">
+          <div className="h-[3px] w-full rounded-full bg-white/[0.06] overflow-hidden">
             <div
-              className="h-full rounded-full bg-accent transition-[width] duration-200 ease-[var(--ease-out)]"
-              style={{ width: `${pct}%` }}
+              className="h-full rounded-full transition-[width] duration-200 ease-[var(--ease-out)]"
+              style={{ width: `${pct}%`, background: "linear-gradient(90deg, #F59E0B, #FBBF24)" }}
             />
           </div>
         </div>
@@ -139,7 +143,9 @@ export function UploadButton() {
     return (
       <div className="flex items-center gap-[7px] animate-in">
         <input ref={inputRef} type="file" accept=".mp3,audio/mpeg" className="hidden" onChange={onInputChange} />
-        <Check size={14} className="text-ok" strokeWidth={2.5} />
+        <div className="w-[20px] h-[20px] rounded-full bg-ok/20 flex items-center justify-center">
+          <Check size={12} className="text-ok" strokeWidth={2.5} />
+        </div>
         <span className="text-[12px] font-semibold text-ok">Ready</span>
       </div>
     );

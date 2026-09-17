@@ -974,6 +974,40 @@ moment are skipped.
 cue, which reads as a colour leaving and coming straight back. Colour now holds unless
 the cue has room for two full colour periods, not one.
 
+## 7y. When the music thins, the show thins with it
+
+Amal: "what I feel while listening to the music is entirely different from what I feel
+while watching the show." Every metric used until then measured activity - changes a
+second, brightness, correlation with bar energy - and none of them measure that. Asked
+directly, he named three faults: pacing, the intensity curve, and that the show never
+lets the music breathe. He did **not** name colour, so the palette was left alone.
+
+**Do not trust the caption.** The score's MOSS caption calls this song "a spiritually
+charged Indian devotional piece... a heartfelt invocation to Lord Krishna". Amal's
+answer: "it's not a devotional song, that caption is wrong." It is a model's guess and
+it is confidently wrong. The engine reads no part of it.
+
+**MOSS's `energy` is a plateau**, 6.2 to 9.2 across this whole song. It is not an arc
+and cannot drive one.
+
+**Onset density is the arc the song actually has.** It runs from 0.00 a second through
+the intro to 6.03 in the body. And there is a ten-second stretch, 22.8 to 32.7, with no
+drum onsets at all. Through it the show was running three different figures stepping
+every beat, three different head moves and two flashes. The music stops and the lights
+carry on regardless: that is what "never lets it breathe" means, literally.
+
+A row whose onset density is under 42% of the song's busy level is now **quiet**. A
+quiet row gets one slow breath at one step per bar, a floor of 0.72 so the whole rig
+stays lit, the head parked, colour held, and no accent - there is nothing to mark. The
+cue is flagged `_hold` so the later passes, which choose a figure from the span and
+split long cues, leave it alone; without that flag they made it busy again and the fix
+looked like it had failed.
+
+The result: light changes run 0.00 a second through the first twenty seconds and 4.5 in
+the body, correlating 0.56 with how busy the music is. The intro is not dead - the room
+still swings from 34 to 191 across the quiet stretch - it simply does not step or
+travel.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the

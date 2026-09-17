@@ -24,24 +24,28 @@ export function Sidebar({ effects, onRecolour }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="h-full flex flex-col min-h-0 border-r border-solid border-line">
-      <div className={`${THIRD} bg-bg-sunken overflow-y-auto`}>
+    <nav className="h-full flex flex-col min-h-0">
+      <div className={`${THIRD} overflow-y-auto`} style={{ background: "linear-gradient(180deg, rgba(7,8,11,0.95) 0%, rgba(12,13,18,1) 100%)" }}>
         <div className="flex-none px-[16px] pt-[14px] pb-[10px]">
           <span className="text-[13px] font-bold tracking-[-0.01em] text-ink">Limelight</span>
         </div>
 
-        <div className="flex-none flex flex-col gap-[1px] px-[8px]">
+        <div className="flex-none flex flex-col gap-[2px] px-[8px]">
           {NAV.map((n) => {
             const on = pathname === n.href;
             return (
               <Link
                 key={n.href}
                 href={n.href}
-                className={`flex items-center gap-[10px] px-[10px] py-[8px] no-underline rounded-[var(--radius-sm)] transition-all duration-[var(--dur-state)] ease-[var(--ease)] ${
-                  on ? "text-ink bg-bg-raised" : "text-ink-dimmer hover:text-ink hover:bg-bg-raised/50"
+                className={`flex items-center gap-[10px] px-[10px] py-[7px] no-underline rounded-[var(--radius-sm)] transition-all duration-200 ease-[var(--ease)] ${
+                  on ? "text-ink" : "text-ink-dimmer hover:text-ink-dim hover:bg-white/[0.04]"
                 }`}
+                style={on ? {
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+                } : undefined}
               >
-                <n.Icon size={15} strokeWidth={on ? 2 : 1.5} className="flex-none" />
+                <n.Icon size={15} strokeWidth={on ? 2 : 1.5} className={`flex-none ${on ? "text-accent" : ""}`} />
                 <span className="text-[12px] font-medium">{n.label}</span>
               </Link>
             );
@@ -49,11 +53,11 @@ export function Sidebar({ effects, onRecolour }: SidebarProps) {
         </div>
       </div>
 
-      <div className={`${THIRD} bg-bg border-t border-solid border-line`}>
+      <div className={`${THIRD} border-t border-solid border-white/[0.05]`} style={{ background: "var(--bg)" }}>
         <PalettePanel onRecolour={onRecolour} />
       </div>
 
-      <div className={`${THIRD} bg-bg-raised border-t border-solid border-line`}>
+      <div className={`${THIRD} border-t border-solid border-white/[0.05]`} style={{ background: "linear-gradient(180deg, var(--bg-raised) 0%, var(--bg) 100%)" }}>
         <PaletteTabs effects={effects} />
       </div>
     </nav>

@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-/* The conversation rail. What a creator types here is meant to become edits —
-   that needs a model on the other end, which does not exist yet, so the panel
-   is honest about it rather than faking a reply. */
+import { Send } from "lucide-react";
 
 export interface ChatChange {
   label: string;
@@ -50,13 +47,13 @@ export function ChatPanel() {
 
   return (
     <div className="h-full flex flex-col min-h-0">
-      <div className="flex-none px-[var(--spacing-s4)] py-[var(--spacing-s3)] border-b border-solid border-line">
-        <span className="label">Conversation</span>
+      <div className="flex-none px-[16px] py-[12px] border-b border-solid border-white/[0.05]">
+        <span className="text-[11px] font-semibold tracking-[0.04em] uppercase text-ink-dimmer">Conversation</span>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-[var(--spacing-s4)] py-[var(--spacing-s4)] flex flex-col gap-[var(--spacing-s4)]">
+      <div className="flex-1 min-h-0 overflow-y-auto px-[16px] py-[16px] flex flex-col gap-[16px]">
         {turns.length === 0 && (
-          <p className="text-[11px] text-ink-dimmer leading-[16px]">
+          <p className="text-[12px] text-ink-dimmer leading-[1.6] m-0">
             Ask for a change in plain English — &ldquo;warmer in the chorus&rdquo;,
             &ldquo;calmer intro&rdquo;. Not wired up yet.
           </p>
@@ -65,16 +62,17 @@ export function ChatPanel() {
         {turns.map((t) => (
           <div key={t.id} className="flex flex-col gap-[5px]">
             <div className="flex items-baseline gap-[7px]">
-              <span className="text-[11px] text-ink">{t.who === "you" ? "You" : "Limelight"}</span>
+              <span className="text-[11px] font-medium text-ink">{t.who === "you" ? "You" : "Limelight"}</span>
               <span className="mono text-[9px] text-ink-dimmer">{t.at}</span>
             </div>
 
             {t.who === "you" ? (
-              <div className="self-end max-w-[86%] rounded-[8px] bg-accent-soft border border-solid border-line px-[10px] py-[7px] text-[12px] text-ink leading-[17px]">
+              <div className="self-end max-w-[86%] rounded-[10px] px-[12px] py-[8px] text-[12px] text-ink leading-[1.5]"
+                style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.06) 100%)", border: "1px solid rgba(245,158,11,0.12)" }}>
                 {t.text}
               </div>
             ) : (
-              <div className="text-[12px] text-ink-dim leading-[17px]">{t.text}</div>
+              <div className="text-[12px] text-ink-dim leading-[1.5]">{t.text}</div>
             )}
 
             {t.changes && t.changes.length > 0 && (
@@ -82,7 +80,7 @@ export function ChatPanel() {
                 {t.changes.map((c) => (
                   <span
                     key={c.label}
-                    className="px-[9px] py-[3px] rounded-full border border-solid border-line text-[10px] text-ink-dim"
+                    className="px-[9px] py-[3px] rounded-full border border-solid border-white/[0.08] text-[10px] text-ink-dim bg-white/[0.02]"
                   >
                     {c.label}
                   </span>
@@ -90,7 +88,7 @@ export function ChatPanel() {
                 {t.undoable && (
                   <button
                     type="button"
-                    className="px-[9px] py-[3px] rounded-full border border-solid border-line text-[10px] text-ink-dim hover:text-ink hover:border-line-strong bg-transparent cursor-pointer transition-colors duration-[var(--dur-state)]"
+                    className="px-[9px] py-[3px] rounded-full border border-solid border-white/[0.08] text-[10px] text-ink-dim hover:text-ink hover:border-white/[0.15] hover:bg-white/[0.04] bg-transparent cursor-pointer transition-all duration-200"
                   >
                     Undo
                   </button>
@@ -102,7 +100,7 @@ export function ChatPanel() {
         <div ref={endRef} />
       </div>
 
-      <div className="flex-none p-[var(--spacing-s3)] border-t border-solid border-line">
+      <div className="flex-none p-[12px] border-t border-solid border-white/[0.05]">
         <div className="relative">
           <textarea
             value={draft}
@@ -115,17 +113,17 @@ export function ChatPanel() {
             }}
             rows={2}
             placeholder="say what you'd change…"
-            className="w-full resize-none rounded-[7px] bg-bg-sunken border border-solid border-line-strong outline-none focus:border-ink-dimmer text-[12px] text-ink px-[10px] py-[8px] pr-[38px] transition-colors duration-[var(--dur-state)]"
+            className="w-full resize-none rounded-[var(--radius-sm)] bg-white/[0.03] border border-solid border-white/[0.06] outline-none focus:border-accent/40 focus:bg-white/[0.05] focus:shadow-[0_0_0_2px_rgba(245,158,11,0.06)] text-[12px] text-ink px-[12px] py-[9px] pr-[40px] transition-all duration-200 placeholder:text-ink-dimmer"
           />
           <button
             type="button"
             onClick={send}
             disabled={!draft.trim()}
             aria-label="Send"
-            className="absolute right-[7px] bottom-[9px] w-[26px] h-[26px] rounded-[5px] border-0 cursor-pointer disabled:cursor-default disabled:opacity-30 text-[12px] transition-opacity duration-[var(--dur-state)]"
-            style={{ background: "var(--accent)", color: "var(--bg)" }}
+            className="absolute right-[8px] bottom-[10px] w-[28px] h-[28px] rounded-[var(--radius-sm)] border-0 cursor-pointer disabled:cursor-default disabled:opacity-30 flex items-center justify-center transition-all duration-200 hover:brightness-110"
+            style={{ background: "linear-gradient(135deg, #FBBF24, #F59E0B)", color: "#0C0D12" }}
           >
-            <span aria-hidden>➤</span>
+            <Send size={13} />
           </button>
         </div>
       </div>

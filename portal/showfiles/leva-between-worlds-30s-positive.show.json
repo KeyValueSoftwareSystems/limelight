@@ -38,7 +38,7 @@
    "section": 0,
    "from_s": 10.403,
    "to_s": 11.285,
-   "why": "and back, the instant the audio returns - split instead, the only shape that finishes in 0.5 bars"
+   "why": "and back, the instant the audio returns - the drums have stopped, so the room just breathes until they return"
   },
   {
    "effect": "wash",
@@ -158,7 +158,7 @@
    "section": 2,
    "from_s": 45.023,
    "to_s": 46.324,
-   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - hocket in scarlet"
+   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return"
   }
  ],
  "gestures": [
@@ -186,17 +186,6 @@
    "why": "and back on the look it is arriving at, the instant the audio returns - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance"
   },
   {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "at_s": 6.618,
-   "for_beats": 2,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
    "effect": "blackout",
    "extent": "all",
    "head": true,
@@ -207,7 +196,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "nod",
+   "pattern": "park",
    "pan": 0.5,
    "tilt": 0.25,
    "colour": "#1040ff",
@@ -217,7 +206,7 @@
    "from_s": 10.403,
    "to_s": 11.285,
    "fade_ms": 0,
-   "why": "and back, the instant the audio returns - split instead, the only shape that finishes in 0.5 bars"
+   "why": "and back, the instant the audio returns - the drums have stopped, so the room just breathes until they return"
   },
   {
    "effect": "blackout",
@@ -559,7 +548,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "nod",
+   "pattern": "park",
    "pan": 0.5,
    "tilt": 0.29,
    "colour": "#e00020",
@@ -569,18 +558,7 @@
    "from_s": 45.023,
    "to_s": 46.324,
    "fade_ms": 240,
-   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - hocket in scarlet"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "at_s": 45.023,
-   "for_beats": 2,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
+   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return"
   },
   {
    "effect": "blackout",
@@ -665,23 +643,18 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "alternate",
+     "figure": "breathe",
      "every": {
-      "beats": 1.0
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.2,
+     "low": 0.72,
      "move_head": false,
      "reverse": true,
-     "cycles": 3,
-     "colours": [
-      "indigo",
-      "blood"
-     ],
-     "colour_every": 8,
      "colour_figure": "hold"
     }
    ],
+   "_hold": true,
    "head": {
     "move": "park",
     "every": {
@@ -709,7 +682,7 @@
     "second": 10.403
    },
    "fade": 0.0,
-   "why": "and back, the instant the audio returns - split instead, the only shape that finishes in 0.5 bars",
+   "why": "and back, the instant the audio returns - the drums have stopped, so the room just breathes until they return",
    "look": {
     "lamps": {
      "c": "indigo",
@@ -725,27 +698,22 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "split",
+     "figure": "breathe",
      "every": {
-      "beats": 1.0
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.2,
+     "low": 0.72,
      "move_head": false,
      "reverse": true,
-     "cycles": 1,
-     "colours": [
-      "indigo",
-      "blood"
-     ],
-     "colour_every": 8,
      "colour_figure": "hold"
     }
    ],
+   "_hold": true,
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
    }
   },
@@ -1230,7 +1198,7 @@
     "second": 45.023
    },
    "fade": 0.24,
-   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - hocket in scarlet",
+   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return",
    "look": {
     "lamps": {
      "c": "blood",
@@ -1246,26 +1214,21 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "hocket",
+     "figure": "breathe",
      "every": {
-      "beats": 1.5
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.2,
+     "low": 0.72,
      "move_head": false,
-     "cycles": 1,
-     "colours": [
-      "indigo",
-      "blood"
-     ],
-     "colour_every": 5,
      "colour_figure": "hold"
     }
    ],
+   "_hold": true,
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
    }
   },
@@ -1281,13 +1244,6 @@
  ],
  "rig": "arc4-head",
  "accents": [
-  {
-   "t": 6.618,
-   "l": 1.0,
-   "decay": 0.96,
-   "hold": 0.72,
-   "on": "lamps"
-  },
   {
    "t": 17.786,
    "l": 0.46,
@@ -1398,13 +1354,6 @@
    "l": 0.77,
    "decay": 0.36,
    "hold": 0.22,
-   "on": "lamps"
-  },
-  {
-   "t": 45.023,
-   "l": 1.0,
-   "decay": 0.96,
-   "hold": 0.72,
    "on": "lamps"
   }
  ],

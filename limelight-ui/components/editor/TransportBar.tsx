@@ -45,8 +45,8 @@ function Btn({
   const tone = danger
     ? "border-danger text-danger bg-transparent hover:bg-danger hover:text-bg disabled:hover:bg-transparent disabled:hover:text-danger"
     : active
-      ? "border-line-strong bg-bg-raised text-ink"
-      : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-bg-raised";
+      ? "border-white/[0.08] text-ink"
+      : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-white/[0.04]";
   return (
     <button
       type="button"
@@ -62,7 +62,7 @@ function Btn({
 }
 
 /** A hairline between groups of controls, so the bar reads in zones. */
-const Rule = () => <span className="w-px h-[14px] bg-line flex-none" />;
+const Rule = () => <span className="w-px h-[14px] bg-white/[0.06] flex-none" />;
 
 export function TransportBar({
   currentTime,
@@ -133,7 +133,7 @@ export function TransportBar({
   const has = selected.length > 0;
 
   return (
-    <div className="flex-none flex items-center gap-[var(--spacing-s3)] px-[var(--spacing-s3)] h-[38px] border-b border-solid border-line bg-bg">
+    <div className="flex-none flex items-center gap-[var(--spacing-s3)] px-[var(--spacing-s3)] h-[38px] border-b border-solid border-white/[0.05] bg-bg">
       {/* playback */}
       <Btn onClick={onToggle} icon active={playing} title={playing ? "Pause (space)" : "Play (space)"}>
         <span aria-hidden>{playing ? "❚❚" : "▶"}</span>
@@ -259,8 +259,8 @@ export function TransportBar({
           <span
             className={`${BASE} ${
               guides.length
-                ? "border-line-strong bg-bg-raised text-ink"
-                : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-bg-raised"
+                ? "border-white/[0.08] text-ink"
+                : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-white/[0.04]"
             } px-[8px] ${LABEL}`}
             title="Rule vertical lines through the timeline"
           >
@@ -284,8 +284,8 @@ export function TransportBar({
           <span
             className={`${BASE} ${
               snap !== "off"
-                ? "border-line-strong bg-bg-raised text-ink"
-                : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-bg-raised"
+                ? "border-white/[0.08] text-ink"
+                : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-white/[0.04]"
             } px-[8px] ${LABEL}`}
             title="Where a clip lands when you drop or drag it"
           >

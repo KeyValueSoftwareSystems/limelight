@@ -2,7 +2,7 @@
 
 import { useEffect, useCallback, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
 import { SongCard } from "@/components/library/SongCard";
@@ -68,31 +68,34 @@ export default function LibraryPage() {
   const playable = songs.filter((s) => s.audio && s.bakeable).length;
 
   return (
-    <div className="flex flex-col overflow-hidden flex-1 animate-in">
-      <div className="flex-none px-[20px] pt-[20px] pb-[16px]">
+    <div className="flex flex-col overflow-hidden flex-1 surface-glow animate-in">
+      <div className="flex-none px-[24px] pt-[24px] pb-[18px]">
         <div className="flex items-end justify-between gap-[16px]">
           <div>
-            <h1 className="text-[28px] font-semibold tracking-[-0.02em] m-0 leading-[1.1]">Library</h1>
+            <h1 className="text-[28px] font-bold tracking-[-0.03em] m-0 leading-[1.1] bg-clip-text"
+              style={{ background: "linear-gradient(180deg, #EDEEF3 30%, #8E93A3 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              Library
+            </h1>
             <p className="text-[13px] text-ink-dimmer mt-[6px] m-0">
-              {loaded ? (songs.length ? `${songs.length} songs · ${playable} ready to play` : "No songs yet") : "Loading…"}
+              {loaded ? (songs.length ? `${songs.length} songs · ${playable} ready` : "No songs yet") : "Loading…"}
             </p>
           </div>
           <UploadButton />
         </div>
 
-        <div className="flex items-center gap-[8px] mt-[16px]">
-          <div className="relative flex-1 max-w-[320px]">
-            <Search size={14} className="absolute left-[10px] top-1/2 -translate-y-1/2 text-ink-dimmer pointer-events-none" />
+        <div className="flex items-center gap-[10px] mt-[18px]">
+          <div className="relative flex-1 max-w-[340px]">
+            <Search size={14} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-ink-dimmer pointer-events-none" />
             <input
               type="text"
               placeholder="Search by name, key, or tempo…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-[34px] pl-[32px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-line bg-bg-raised/60 text-[13px] text-ink outline-none focus:border-accent focus:bg-bg-raised transition-all duration-[var(--dur-state)] placeholder:text-ink-dimmer"
+              className="w-full h-[36px] pl-[34px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[13px] text-ink outline-none focus:border-accent/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)] transition-all duration-200 placeholder:text-ink-dimmer"
             />
           </div>
 
-          <div className="flex h-[34px] rounded-[var(--radius-sm)] bg-bg-raised/40 border border-solid border-line p-[3px]">
+          <div className="flex h-[36px] rounded-[var(--radius-sm)] bg-white/[0.02] border border-solid border-white/[0.05] p-[3px]">
             {(
               [
                 { id: "name", label: "A–Z" },
@@ -105,11 +108,15 @@ export default function LibraryPage() {
                 key={s.id}
                 type="button"
                 onClick={() => setSort(s.id)}
-                className={`px-[10px] rounded-[4px] border-0 text-[11px] font-medium cursor-pointer transition-all duration-[var(--dur-state)] ease-[var(--ease)] ${
+                className={`px-[10px] rounded-[6px] border-0 text-[11px] font-medium cursor-pointer transition-all duration-200 ease-[var(--ease)] ${
                   sort === s.id
-                    ? "bg-bg-overlay text-ink shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
+                    ? "text-ink"
                     : "bg-transparent text-ink-dimmer hover:text-ink-dim"
                 }`}
+                style={sort === s.id ? {
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)",
+                } : undefined}
               >
                 {s.label}
               </button>
@@ -118,14 +125,14 @@ export default function LibraryPage() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-[20px] pb-[48px]">
+      <div className="flex-1 overflow-y-auto px-[24px] pb-[48px]">
         {!loaded && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-[12px] pt-[4px]">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-[14px] pt-[4px]">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="rounded-[var(--radius-md)] overflow-hidden" style={{ animationDelay: `${i * 60}ms` }}>
-                <div className="aspect-square skeleton" />
-                <div className="p-[10px]">
-                  <div className="h-[14px] w-[80%] skeleton mb-[6px]" />
+              <div key={i} className="rounded-[var(--radius-md)] overflow-hidden border border-solid border-white/[0.04]" style={{ animationDelay: `${i * 60}ms` }}>
+                <div className="aspect-[4/3] skeleton" />
+                <div className="p-[12px]">
+                  <div className="h-[14px] w-[80%] skeleton mb-[8px]" />
                   <div className="h-[10px] w-[50%] skeleton" />
                 </div>
               </div>
@@ -134,9 +141,9 @@ export default function LibraryPage() {
         )}
 
         {loaded && filtered.length > 0 && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-[12px] pt-[4px]">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-[14px] pt-[4px]">
             {filtered.map((song, i) => (
-              <div key={song.name} className="animate-in" style={{ animationDelay: `${Math.min(i * 30, 300)}ms` }}>
+              <div key={song.name} className="animate-in" style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}>
                 <SongCard song={song} onOpen={handleOpen} />
               </div>
             ))}
@@ -144,13 +151,16 @@ export default function LibraryPage() {
         )}
 
         {loaded && filtered.length === 0 && songs.length > 0 && (
-          <div className="flex flex-col items-center justify-center py-[60px] animate-in">
-            <Search size={32} className="text-ink-dimmer/30 mb-[12px]" />
-            <p className="text-[14px] text-ink-dim m-0">No songs match &ldquo;{query}&rdquo;</p>
+          <div className="flex flex-col items-center justify-center py-[80px] animate-in">
+            <div className="w-[48px] h-[48px] rounded-full bg-white/[0.03] flex items-center justify-center mb-[16px] border border-solid border-white/[0.06]">
+              <Search size={20} className="text-ink-dimmer" />
+            </div>
+            <p className="text-[15px] font-medium text-ink m-0">No results for &ldquo;{query}&rdquo;</p>
+            <p className="text-[13px] text-ink-dimmer mt-[4px] m-0">Try searching by name, key, or tempo</p>
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="mt-[8px] text-[13px] text-accent border-0 bg-transparent cursor-pointer hover:underline"
+              className="mt-[12px] text-[13px] text-accent border-0 bg-transparent cursor-pointer hover:underline font-medium"
             >
               Clear search
             </button>
@@ -158,17 +168,18 @@ export default function LibraryPage() {
         )}
 
         {loaded && songs.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-[80px] animate-in">
-            <div className="w-[56px] h-[56px] rounded-[var(--radius-lg)] bg-accent/10 flex items-center justify-center mb-[16px]">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-accent">
+          <div className="flex flex-col items-center justify-center py-[100px] animate-in">
+            <div className="w-[64px] h-[64px] rounded-[var(--radius-lg)] flex items-center justify-center mb-[20px]"
+              style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(124,58,237,0.08) 100%)", border: "1px solid rgba(245,158,11,0.15)" }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-accent">
                 <path d="M9 18V5l12-2v13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.5" />
                 <circle cx="18" cy="16" r="3" stroke="currentColor" strokeWidth="1.5" />
               </svg>
             </div>
-            <p className="text-[16px] font-medium text-ink m-0">Your library is empty</p>
-            <p className="text-[13px] text-ink-dimmer mt-[6px] m-0 text-center max-w-[280px] leading-[1.5]">
-              Upload an MP3 to get started. We&apos;ll analyse the track and prepare it for lighting.
+            <p className="text-[17px] font-semibold text-ink m-0">Your library is empty</p>
+            <p className="text-[13px] text-ink-dimmer mt-[8px] m-0 text-center max-w-[300px] leading-[1.6]">
+              Upload an MP3 to get started. We&apos;ll analyse the track and prepare it for lighting design.
             </p>
           </div>
         )}

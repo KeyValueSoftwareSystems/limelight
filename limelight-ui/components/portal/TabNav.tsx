@@ -14,20 +14,24 @@ export function TabNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center gap-[2px] h-[32px] rounded-[var(--radius-sm)] bg-bg-raised/50 p-[2px]">
+    <nav className="flex items-center gap-[2px] h-[36px] rounded-[10px] bg-white/[0.03] border border-solid border-white/[0.04] p-[3px]">
       {TABS.map((tab) => {
         const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
         return (
           <Link
             key={tab.id}
             href={tab.href}
-            className={`flex items-center gap-[6px] h-full px-[12px] rounded-[4px] no-underline text-[13px] font-medium transition-all duration-[var(--dur-state)] ease-[var(--ease)] ${
+            className={`relative flex items-center gap-[6px] h-full px-[14px] rounded-[var(--radius-sm)] no-underline text-[13px] font-medium transition-all duration-200 ease-[var(--ease)] ${
               active
-                ? "bg-bg-overlay text-ink shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
+                ? "text-ink"
                 : "text-ink-dimmer hover:text-ink-dim"
             }`}
+            style={active ? {
+              background: "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+            } : undefined}
           >
-            <tab.Icon size={14} strokeWidth={active ? 2 : 1.5} />
+            <tab.Icon size={14} strokeWidth={active ? 2 : 1.5} className={active ? "text-accent" : ""} />
             {tab.label}
           </Link>
         );

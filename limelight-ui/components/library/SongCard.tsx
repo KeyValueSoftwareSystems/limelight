@@ -28,16 +28,12 @@ export function SongCard({ song, onOpen }: SongCardProps) {
         ? "no audio"
         : "";
 
-  const face = [q?.key, song.bpm ? `${Math.round(song.bpm)}` : null]
-    .filter(Boolean)
-    .join(" · ");
+  const lockLevel = q?.lock?.level ?? "unknown";
+  const lockSays = q?.lock?.says;
 
   const detail: string[] = [];
   if (q?.bars) detail.push(`${q.bars} bars`);
   if (q?.moments) detail.push(`${q.moments} moments`);
-
-  const lockLevel = q?.lock?.level ?? "unknown";
-  const lockSays = q?.lock?.says;
 
   return (
     <Card
@@ -45,57 +41,58 @@ export function SongCard({ song, onOpen }: SongCardProps) {
       disabled={!playable}
       title={[song.title, detail.join(" · "), lockSays].filter(Boolean).join("\n")}
     >
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden aspect-[4/3]">
         <CoverCanvas song={song} />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.5)] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--dur-panel)]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
         {playable && (
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-[var(--dur-panel)]">
-            <div className="w-[36px] h-[36px] rounded-full bg-accent/90 backdrop-blur-sm flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.3)] scale-90 group-hover:scale-100 transition-transform duration-[var(--dur-panel)] ease-[var(--ease-spring)]">
-              <Play size={16} fill="#0A0B0E" stroke="#0A0B0E" className="ml-[2px]" />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
+            <div className="w-[40px] h-[40px] rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.4)] scale-90 group-hover:scale-100 transition-transform duration-300 ease-[var(--ease-spring)]"
+              style={{ background: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)" }}>
+              <Play size={18} fill="#0C0D12" stroke="#0C0D12" className="ml-[2px]" />
             </div>
           </div>
         )}
 
         {song.duration_s != null && (
-          <span className="mono absolute right-[6px] top-[6px] px-[5px] py-[1px] rounded-[4px] bg-[rgba(0,0,0,0.6)] backdrop-blur-sm text-[10px] text-white/80 tabular-nums">
+          <span className="mono absolute right-[8px] top-[8px] px-[6px] py-[2px] rounded-[6px] bg-black/60 backdrop-blur-md text-[10px] text-white/90 tabular-nums font-medium">
             {mmss(song.duration_s)}
           </span>
         )}
 
         {!playable && why && (
-          <span className="absolute left-[6px] bottom-[6px] flex items-center gap-[4px] px-[6px] py-[2px] rounded-[4px] bg-[rgba(0,0,0,0.7)] backdrop-blur-sm text-[10px] text-ink-dim">
+          <span className="absolute left-[8px] bottom-[8px] flex items-center gap-[4px] px-[8px] py-[3px] rounded-[6px] bg-black/60 backdrop-blur-md text-[10px] text-white/70">
             <AlertCircle size={10} />
             {why}
           </span>
         )}
       </div>
 
-      <div className="px-[10px] pt-[8px] pb-[8px] min-w-0">
+      <div className="px-[12px] pt-[10px] pb-[10px] min-w-0">
         <div className="flex items-center gap-[5px]">
-          <span className="flex-1 min-w-0 block text-[13px] font-medium tracking-[-0.01em] truncate">
+          <span className="flex-1 min-w-0 block text-[13px] font-medium tracking-[-0.01em] truncate text-ink">
             {song.title}
           </span>
           {lockSays && (
             <span
               aria-label={`Beat grid: ${lockLevel}`}
-              className="flex-none w-[5px] h-[5px] rounded-full"
+              className="flex-none w-[6px] h-[6px] rounded-full"
               style={{ background: LOCK_COLOUR[lockLevel] ?? "var(--ink-dimmer)" }}
             />
           )}
         </div>
 
-        <div className="flex items-center gap-[6px] mt-[2px]">
+        <div className="flex items-center gap-[6px] mt-[3px]">
           {song.bpm && (
-            <span className="mono text-[10px] text-ink-dimmer tabular-nums">
+            <span className="mono text-[10px] text-ink-dimmer tabular-nums font-medium">
               {Math.round(song.bpm)} BPM
             </span>
           )}
           {q?.key && (
             <>
-              <span className="w-[2px] h-[2px] rounded-full bg-ink-dimmer/50 flex-none" />
-              <span className="mono text-[10px] text-ink-dimmer">{q.key}</span>
+              <span className="w-[2px] h-[2px] rounded-full bg-white/20 flex-none" />
+              <span className="mono text-[10px] text-ink-dimmer font-medium">{q.key}</span>
             </>
           )}
         </div>

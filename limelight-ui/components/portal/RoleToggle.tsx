@@ -28,7 +28,7 @@ export function RoleToggle() {
 
   return (
     <div
-      className="flex h-[32px] rounded-[var(--radius-sm)] bg-bg-raised/50 p-[2px]"
+      className="flex h-[34px] rounded-[10px] bg-white/[0.03] border border-solid border-white/[0.04] p-[3px]"
       role="radiogroup"
       aria-label="Mode"
     >
@@ -41,13 +41,15 @@ export function RoleToggle() {
             role="radio"
             aria-checked={active}
             onClick={() => handleRole(r.id)}
-            className={`flex items-center gap-[5px] px-[10px] rounded-[4px] border-0 text-[12px] font-medium cursor-pointer transition-all duration-[var(--dur-state)] ease-[var(--ease)] ${
-              active
-                ? "bg-bg-overlay text-ink shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
-                : "bg-transparent text-ink-dimmer hover:text-ink-dim"
+            className={`flex items-center gap-[5px] px-[11px] rounded-[var(--radius-sm)] border-0 text-[12px] font-medium cursor-pointer transition-all duration-200 ease-[var(--ease)] ${
+              active ? "text-ink" : "bg-transparent text-ink-dimmer hover:text-ink-dim"
             }`}
+            style={active ? {
+              background: "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+            } : undefined}
           >
-            <r.Icon size={12} strokeWidth={active ? 2 : 1.5} />
+            <r.Icon size={12} strokeWidth={active ? 2 : 1.5} className={active ? "text-accent" : ""} />
             {r.label}
           </button>
         );

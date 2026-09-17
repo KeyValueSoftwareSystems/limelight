@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Radio, AlertTriangle, CheckCircle2, XCircle, ChevronDown, RefreshCw, ExternalLink } from "lucide-react";
+import { Radio, AlertTriangle, CheckCircle2, XCircle, ChevronDown, RefreshCw } from "lucide-react";
 import { usePortalStore } from "@/store/portal";
 import type { RigStatus } from "@/lib/types";
 
@@ -12,6 +12,8 @@ interface RigInfo {
   icon: typeof Radio;
   colour: string;
   bgColour: string;
+  borderColour: string;
+  textColour: string;
   headline: string;
   detail: string;
   remedy: string | null;
@@ -21,7 +23,7 @@ function diagnose(r: RigStatus | null, hasShow: boolean): RigInfo {
   if (!r)
     return {
       state: "unreachable", icon: XCircle,
-      colour: "var(--danger)", bgColour: "rgba(248, 113, 113, 0.08)",
+      colour: "#EF4444", bgColour: "rgba(239,68,68,0.06)", borderColour: "rgba(239,68,68,0.2)", textColour: "#FCA5A5",
       headline: "Portal unreachable",
       detail: "Cannot connect to the lighting server.",
       remedy: "Check that the portal process is running.",
@@ -30,7 +32,7 @@ function diagnose(r: RigStatus | null, hasShow: boolean): RigInfo {
   if (!r.can_send)
     return {
       state: "unreachable", icon: AlertTriangle,
-      colour: "var(--warn)", bgColour: "rgba(251, 191, 36, 0.08)",
+      colour: "#F59E0B", bgColour: "rgba(245,158,11,0.06)", borderColour: "rgba(245,158,11,0.2)", textColour: "#FCD34D",
       headline: "No output",
       detail: r.why_not ?? "The Art-Net socket is not open.",
       remedy: r.why_not ? null : "Check the cable and the network interface.",
@@ -39,7 +41,7 @@ function diagnose(r: RigStatus | null, hasShow: boolean): RigInfo {
   if (r.sending)
     return {
       state: "sending", icon: Radio,
-      colour: "var(--ok)", bgColour: "rgba(52, 211, 153, 0.08)",
+      colour: "#10B981", bgColour: "rgba(16,185,129,0.06)", borderColour: "rgba(16,185,129,0.2)", textColour: "#6EE7B7",
       headline: `Sending · ${r.frames_sent.toLocaleString()} frames`,
       detail: `40 fps → Art-Net ${r.gateway} universe ${r.universe}`,
       remedy: null,
@@ -49,14 +51,14 @@ function diagnose(r: RigStatus | null, hasShow: boolean): RigInfo {
     if (r.last_error)
       return {
         state: "unreachable", icon: XCircle,
-        colour: "var(--danger)", bgColour: "rgba(248, 113, 113, 0.08)",
+        colour: "#EF4444", bgColour: "rgba(239,68,68,0.06)", borderColour: "rgba(239,68,68,0.2)", textColour: "#FCA5A5",
         headline: "Send failing",
         detail: r.last_error,
         remedy: "Check the rig connection and retry.",
       };
     return {
       state: "ready", icon: CheckCircle2,
-      colour: "var(--ok)", bgColour: "rgba(52, 211, 153, 0.08)",
+      colour: "#10B981", bgColour: "rgba(16,185,129,0.06)", borderColour: "rgba(16,185,129,0.2)", textColour: "#6EE7B7",
       headline: `Armed · ${r.frames_sent.toLocaleString()} sent`,
       detail: `Socket open to ${r.gateway} universe ${r.universe}`,
       remedy: null,
@@ -64,8 +66,8 @@ function diagnose(r: RigStatus | null, hasShow: boolean): RigInfo {
   }
 
   return {
-    state: "ready", icon: Radio,
-    colour: "var(--ink-dimmer)", bgColour: "transparent",
+    state: "off", icon: Radio,
+    colour: "#555A6B", bgColour: "rgba(255,255,255,0.02)", borderColour: "rgba(255,255,255,0.06)", textColour: "#8E93A3",
     headline: `Universe ${r.universe} · via ${r.route_via ?? r.gateway}`,
     detail: r.conflict ? r.conflict : "Standby",
     remedy: null,
@@ -92,16 +94,16 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
 
   const handleRetry = useCallback(() => { onToggle(); }, [onToggle]);
 
-  const _showStatus = info.state !== "off" as string || info.state === ("ready" as string);
+  const label = isSending ? "Live" : info.state === "unreachable" ? "Offline" : info.state === "ready" ? "Armed" : "Standby";
 
   return (
     <div className="relative" ref={ref}>
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-[7px] h-[32px] px-[10px] rounded-[var(--radius-sm)] border border-solid cursor-pointer transition-all duration-[var(--dur-state)] hover:bg-bg-raised"
+        className="flex items-center gap-[7px] h-[30px] px-[10px] rounded-full cursor-pointer transition-all duration-200 hover:brightness-110"
         style={{
-          borderColor: info.colour === "var(--ink-dimmer)" ? "var(--line)" : `color-mix(in srgb, ${info.colour} 30%, transparent)`,
+          border: `1px solid ${info.borderColour}`,
           background: info.bgColour,
         }}
       >
@@ -109,16 +111,16 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
           className={`w-[6px] h-[6px] rounded-full flex-none ${isSending ? "animate-sending" : ""}`}
           style={{ background: info.colour }}
         />
-        <span className="text-[12px] font-medium" style={{ color: info.colour === "var(--ink-dimmer)" ? "var(--ink-dim)" : info.colour }}>
-          {info.state === "sending" ? "Live" : info.state === "unreachable" ? "Offline" : info.state === "ready" && rig?.armed ? "Armed" : "Standby"}
+        <span className="text-[11px] font-semibold" style={{ color: info.textColour }}>
+          {label}
         </span>
-        <ChevronDown size={11} className="text-ink-dimmer" />
+        <ChevronDown size={10} style={{ color: info.textColour, opacity: 0.6 }} />
       </button>
 
       {expanded && (
         <div
-          className="absolute right-0 top-[calc(100%+6px)] z-50 w-[320px] rounded-[var(--radius-md)] bg-bg-overlay p-0 overflow-hidden animate-scale-in"
-          style={{ boxShadow: "var(--elev-popover)" }}
+          className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] rounded-[var(--radius-md)] overflow-hidden animate-scale-in"
+          style={{ background: "linear-gradient(180deg, #1C1D28 0%, #14151D 100%)", boxShadow: "var(--elev-popover)" }}
         >
           <div className="p-[16px]" style={{ background: info.bgColour }}>
             <div className="flex items-start gap-[10px]">
@@ -131,14 +133,14 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
           </div>
 
           {info.remedy && (
-            <div className="px-[16px] py-[12px] border-t border-solid border-line">
+            <div className="px-[16px] py-[12px] border-t border-solid border-white/[0.06]">
               <p className="m-0 text-[12px] text-ink-dim leading-[1.6]">
                 {info.remedy}
               </p>
               <button
                 type="button"
                 onClick={handleRetry}
-                className="flex items-center gap-[6px] mt-[8px] h-[28px] px-[12px] rounded-[var(--radius-sm)] border border-solid border-line-strong bg-bg-raised text-[12px] font-medium text-ink cursor-pointer hover:bg-bg-overlay transition-all duration-[var(--dur-state)] active:scale-[0.98]"
+                className="flex items-center gap-[6px] mt-[8px] h-[28px] px-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.08] bg-white/[0.04] text-[12px] font-medium text-ink cursor-pointer hover:bg-white/[0.08] transition-all duration-200 active:scale-[0.98]"
               >
                 <RefreshCw size={12} />
                 Retry
@@ -147,7 +149,7 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
           )}
 
           {rig && (
-            <div className="px-[16px] py-[12px] border-t border-solid border-line">
+            <div className="px-[16px] py-[12px] border-t border-solid border-white/[0.06]">
               <div className="grid grid-cols-[auto_1fr] gap-x-[16px] gap-y-[6px] text-[11px]">
                 {([
                   ["Gateway", rig.gateway],
@@ -164,12 +166,12 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
             </div>
           )}
 
-          <div className="px-[16px] py-[10px] border-t border-solid border-line flex justify-end">
+          <div className="px-[16px] py-[10px] border-t border-solid border-white/[0.06] flex justify-end">
             {rig?.armed ? (
               <button
                 type="button"
                 onClick={() => { onToggle(); setExpanded(false); }}
-                className="h-[30px] px-[14px] rounded-[var(--radius-sm)] border border-solid border-danger/40 bg-danger/10 text-[12px] font-semibold text-danger cursor-pointer hover:bg-danger/20 transition-all duration-[var(--dur-state)] active:scale-[0.97]"
+                className="h-[30px] px-[14px] rounded-[var(--radius-sm)] border border-solid border-danger/40 bg-danger/[0.08] text-[12px] font-semibold text-danger cursor-pointer hover:bg-danger/[0.15] transition-all duration-200 active:scale-[0.97]"
               >
                 Stop sending
               </button>
@@ -178,7 +180,8 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
                 type="button"
                 onClick={() => { onToggle(); setExpanded(false); }}
                 disabled={!rig?.can_send || !show}
-                className="h-[30px] px-[14px] rounded-[var(--radius-sm)] border-0 bg-accent text-[12px] font-semibold text-[#0A0B0E] cursor-pointer hover:brightness-110 transition-all duration-[var(--dur-state)] active:scale-[0.97] disabled:opacity-35 disabled:pointer-events-none"
+                className="h-[30px] px-[14px] rounded-[var(--radius-sm)] border-0 text-[12px] font-semibold text-[#0C0D12] cursor-pointer hover:brightness-110 transition-all duration-200 active:scale-[0.97] disabled:opacity-35 disabled:pointer-events-none"
+                style={{ background: "linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%)", boxShadow: "0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15)" }}
               >
                 Send to the rig
               </button>

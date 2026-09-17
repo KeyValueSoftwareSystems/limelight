@@ -66,22 +66,26 @@ export function EffectPalette({ effects }: { effects: Effect[] }) {
             placeholder="Search effects…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full h-[28px] pl-[26px] pr-[8px] rounded-[var(--radius-sm)] border border-solid border-line bg-bg-sunken text-[12px] text-ink outline-none focus:border-accent/60 transition-colors duration-[var(--dur-state)] placeholder:text-ink-dimmer"
+            className="w-full h-[28px] pl-[26px] pr-[8px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[12px] text-ink outline-none focus:border-accent/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_2px_rgba(245,158,11,0.06)] transition-all duration-200 placeholder:text-ink-dimmer"
           />
         </div>
       </div>
 
-      <div className="flex-none flex gap-[1px] px-[8px] pb-[6px] overflow-x-auto scrollbar-none">
+      <div className="flex-none flex gap-[2px] px-[8px] pb-[6px] overflow-x-auto scrollbar-none">
         {FAMILIES.map((f) => (
           <button
             key={f.id}
             type="button"
             onClick={() => setFamily(f.id)}
-            className={`px-[7px] h-[22px] rounded-[4px] border-0 text-[10px] font-medium whitespace-nowrap cursor-pointer transition-all duration-[var(--dur-state)] ease-[var(--ease)] ${
+            className={`px-[7px] h-[22px] rounded-[6px] border-0 text-[10px] font-medium whitespace-nowrap cursor-pointer transition-all duration-200 ease-[var(--ease)] ${
               family === f.id
-                ? "bg-bg-overlay text-ink shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
-                : "bg-transparent text-ink-dimmer hover:text-ink-dim hover:bg-bg-raised/50"
+                ? "text-ink"
+                : "bg-transparent text-ink-dimmer hover:text-ink-dim hover:bg-white/[0.04]"
             }`}
+            style={family === f.id ? {
+              background: "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.04)",
+            } : undefined}
           >
             {f.label}
           </button>
@@ -105,11 +109,21 @@ export function EffectPalette({ effects }: { effects: Effect[] }) {
                     type="button"
                     title={fx.blurb}
                     onPointerDown={(e) => beginPaletteDrag(fx, e)}
-                    className={`group/fx flex items-center gap-[8px] px-[8px] py-[6px] rounded-[var(--radius-sm)] border border-solid bg-transparent cursor-grab active:cursor-grabbing touch-none transition-all duration-[var(--dur-state)] ease-[var(--ease)] text-left ${
+                    className={`group/fx flex items-center gap-[8px] px-[8px] py-[6px] rounded-[var(--radius-sm)] border border-solid cursor-grab active:cursor-grabbing touch-none transition-all duration-200 ease-[var(--ease)] text-left ${
                       active
-                        ? "border-accent/40 bg-accent/8 scale-[1.02]"
-                        : "border-transparent hover:border-line hover:bg-bg-raised/70"
+                        ? "border-accent/40 scale-[1.02]"
+                        : "border-transparent hover:border-white/[0.06] bg-transparent"
                     }`}
+                    style={active
+                      ? { background: "rgba(245,158,11,0.06)" }
+                      : undefined
+                    }
+                    onMouseEnter={(e) => {
+                      if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
+                    }}
                   >
                     <GripVertical size={10} className="text-ink-dimmer/0 group-hover/fx:text-ink-dimmer/60 transition-opacity flex-none" />
                     <Image
