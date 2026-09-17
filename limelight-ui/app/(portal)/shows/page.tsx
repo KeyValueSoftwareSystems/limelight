@@ -67,23 +67,27 @@ export default function ShowsPage() {
   return (
     <div className="flex flex-col overflow-hidden flex-1 surface-glow animate-in">
       <div className="flex-none px-[28px] pt-[28px] pb-[20px]">
-        <h1 className="text-[32px] font-bold tracking-[-0.03em] m-0 leading-[1.1]"
-          style={{ background: "linear-gradient(180deg, #ECEEF6 20%, #9095AD 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          Shows
-        </h1>
-        <p className="text-[13px] text-ink-dimmer mt-[8px] m-0">
-          {loading ? "Loading saved shows\u2026" : `${showList.length} saved show${showList.length === 1 ? "" : "s"}`}
-        </p>
+        <div className="flex items-end justify-between gap-[16px]">
+          <div>
+            <h1 className="text-[32px] font-bold tracking-[-0.03em] m-0 leading-[1.1]"
+              style={{ background: "linear-gradient(180deg, #ECEEF6 20%, #9095AD 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              Shows
+            </h1>
+            <p className="text-[14px] text-ink-dimmer mt-[8px] m-0 font-medium">
+              {loading ? "Loading saved shows\u2026" : `${showList.length} saved show${showList.length === 1 ? "" : "s"}`}
+            </p>
+          </div>
+        </div>
 
         {showList.length > 0 && (
           <div className="mt-[20px] relative max-w-[360px]">
-            <Search size={14} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-ink-dimmer pointer-events-none" />
+            <Search size={15} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-ink-dimmer pointer-events-none" />
             <input
               type="text"
               placeholder="Search by name or author"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-[36px] pl-[34px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[13px] text-ink outline-none focus:border-accent/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.1)] transition-all duration-200 placeholder:text-ink-dimmer"
+              className="w-full h-[38px] pl-[36px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[14px] font-medium text-ink outline-none focus:border-accent/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.1)] transition-all duration-200 placeholder:text-ink-dimmer placeholder:font-normal"
             />
           </div>
         )}
@@ -94,10 +98,10 @@ export default function ShowsPage() {
           <div className="flex flex-col gap-[24px] pt-[8px]">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="animate-in" style={{ animationDelay: `${i * 80}ms` }}>
-                <div className="h-[14px] w-[120px] skeleton mb-[12px]" />
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-[10px]">
-                  <div className="h-[88px] skeleton rounded-[var(--radius-md)]" />
-                  <div className="h-[88px] skeleton rounded-[var(--radius-md)]" />
+                <div className="h-[14px] w-[140px] skeleton mb-[12px]" />
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-[10px]">
+                  <div className="h-[76px] skeleton rounded-[var(--radius-md)]" />
+                  <div className="h-[76px] skeleton rounded-[var(--radius-md)]" />
                 </div>
               </div>
             ))}
@@ -107,26 +111,26 @@ export default function ShowsPage() {
         {!loading && grouped.map(([songName, shows], gi) => {
           const s = songForName(songName);
           return (
-            <div key={songName} className="mb-[32px] animate-in" style={{ animationDelay: `${Math.min(gi * 50, 200)}ms` }}>
-              <div className="flex items-center gap-[10px] mb-[12px]">
-                <div className="w-[24px] h-[24px] rounded-[6px] flex items-center justify-center flex-none"
+            <div key={songName} className="mb-[28px] animate-in" style={{ animationDelay: `${Math.min(gi * 50, 200)}ms` }}>
+              <div className="flex items-center gap-[10px] mb-[10px]">
+                <div className="w-[22px] h-[22px] rounded-[6px] flex items-center justify-center flex-none"
                   style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(99,102,241,0.12) 100%)", border: "1px solid rgba(139,92,246,0.15)" }}>
-                  <Music size={12} className="text-accent" />
+                  <Music size={11} className="text-accent" />
                 </div>
-                <h2 className="text-[15px] font-semibold m-0 truncate text-ink">{s?.title ?? songName}</h2>
-                {s?.bpm && <span className="mono text-[11px] text-ink-dimmer tabular-nums flex-none">{Math.round(s.bpm)} BPM</span>}
-                <span className="text-[11px] text-ink-dimmer flex-none rounded-full px-[8px] py-[1px]"
+                <h2 className="text-[15px] font-bold m-0 truncate text-ink tracking-[-0.01em]">{s?.title ?? songName}</h2>
+                {s?.bpm && <span className="mono text-[11px] text-ink-dimmer tabular-nums flex-none font-medium">{Math.round(s.bpm)} BPM</span>}
+                <span className="text-[11px] text-ink-dimmer flex-none rounded-full px-[8px] py-[1px] font-semibold"
                   style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.08)" }}>
                   {shows.length} show{shows.length > 1 ? "s" : ""}
                 </span>
               </div>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-[10px]">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-[10px]">
                 {shows.map((sf, si) => (
                   <button
                     key={sf.id}
                     type="button"
                     onClick={() => handleOpen(sf)}
-                    className="group text-left p-[16px] rounded-[var(--radius-md)] border border-solid border-white/[0.06] cursor-pointer transition-all duration-200 ease-[var(--ease)] hover:border-accent/25 hover:-translate-y-[1px] active:scale-[0.995] animate-in"
+                    className="group text-left h-[76px] p-[14px] rounded-[var(--radius-md)] border border-solid border-white/[0.06] cursor-pointer transition-all duration-200 ease-[var(--ease)] hover:border-accent/25 hover:-translate-y-[1px] active:scale-[0.995] overflow-hidden animate-in"
                     style={{
                       background: "linear-gradient(180deg, rgba(139,92,246,0.04) 0%, rgba(139,92,246,0.01) 100%)",
                       boxShadow: "var(--elev-card)",
@@ -136,26 +140,20 @@ export default function ShowsPage() {
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "var(--elev-card)"; }}
                   >
                     <div className="flex items-start justify-between gap-[8px]">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-medium m-0 truncate text-ink group-hover:text-accent transition-colors duration-200">
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <p className="text-[13px] font-semibold m-0 truncate text-ink group-hover:text-accent transition-colors duration-200">
                           {sf.name}
                         </p>
-                        <p className="mono text-[11px] text-ink-dimmer m-0 mt-[5px] tabular-nums leading-[1.5]">
+                        <p className="mono text-[11px] text-ink-dimmer m-0 mt-[4px] tabular-nums leading-[1.5] truncate">
                           v{sf.version} \u00b7 {sf.author} \u00b7 {sf.edits.length} edit{sf.edits.length === 1 ? "" : "s"}
+                          {sf.designed_for ? ` \u00b7 ${sf.designed_for.venue_name}` : ""}
                         </p>
                       </div>
                       <ChevronRight size={14} className="text-ink-dimmer group-hover:text-accent flex-none mt-[2px] transition-all duration-200 group-hover:translate-x-[2px]" />
                     </div>
-                    {sf.designed_for && (
-                      <p className="text-[11px] text-ink-dimmer m-0 mt-[10px] flex items-center gap-[4px]">
-                        <span className="w-[3px] h-[3px] rounded-full bg-accent/30 flex-none" />
-                        {sf.designed_for.venue_name}
-                        {sf.designed_for.layout ? ` \u00b7 ${sf.designed_for.layout}` : ""}
-                      </p>
-                    )}
                     {sf.invalid && (
-                      <p className="text-[11px] text-warn m-0 mt-[8px] flex items-center gap-[4px]">
-                        <AlertTriangle size={10} />
+                      <p className="text-[11px] text-warn m-0 mt-[6px] flex items-center gap-[4px] truncate font-medium">
+                        <AlertTriangle size={10} className="flex-none" />
                         {sf.invalid}
                       </p>
                     )}
@@ -175,9 +173,9 @@ export default function ShowsPage() {
                 <path d="M10 8l6 4-6 4V8z" fill="currentColor" opacity="0.4" />
               </svg>
             </div>
-            <p className="text-[17px] font-semibold text-ink m-0">No saved shows yet</p>
-            <p className="text-[13px] text-ink-dimmer mt-[8px] m-0 text-center max-w-[300px] leading-[1.6]">
-              Open a track from the Library, design your light show, and save it here.
+            <p className="text-[18px] font-bold text-ink m-0">No saved shows yet</p>
+            <p className="text-[14px] text-ink-dimmer mt-[8px] m-0 text-center max-w-[320px] leading-[1.6] font-medium">
+              Design a light show for any track, then save it here.
             </p>
           </div>
         )}
@@ -188,9 +186,9 @@ export default function ShowsPage() {
               style={{ background: "rgba(139,92,246,0.06)" }}>
               <Search size={20} className="text-ink-dimmer" />
             </div>
-            <p className="text-[15px] font-medium text-ink m-0">No results for &ldquo;{query}&rdquo;</p>
-            <p className="text-[13px] text-ink-dimmer mt-[4px] m-0">Try a different search term.</p>
-            <button type="button" onClick={() => setQuery("")} className="mt-[12px] text-[13px] text-accent border-0 bg-transparent cursor-pointer hover:underline font-medium">
+            <p className="text-[16px] font-semibold text-ink m-0">No results for &ldquo;{query}&rdquo;</p>
+            <p className="text-[13px] text-ink-dimmer mt-[6px] m-0 font-medium">Try a different search term.</p>
+            <button type="button" onClick={() => setQuery("")} className="mt-[12px] text-[13px] text-accent border-0 bg-transparent cursor-pointer hover:underline font-semibold">
               Clear search
             </button>
           </div>

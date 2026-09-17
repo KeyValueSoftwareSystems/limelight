@@ -74,9 +74,9 @@ export default function LibraryPage() {
           <div>
             <h1 className="text-[32px] font-bold tracking-[-0.03em] m-0 leading-[1.1]"
               style={{ background: "linear-gradient(180deg, #ECEEF6 20%, #9095AD 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Library
+              Songs
             </h1>
-            <p className="text-[13px] text-ink-dimmer mt-[8px] m-0">
+            <p className="text-[14px] text-ink-dimmer mt-[8px] m-0 font-medium">
               {!loaded ? "Loading your tracks\u2026" : songs.length ? `${songs.length} track${songs.length > 1 ? "s" : ""}, ${playable} ready` : "No tracks yet"}
             </p>
           </div>
@@ -85,17 +85,17 @@ export default function LibraryPage() {
 
         <div className="flex items-center gap-[10px] mt-[20px]">
           <div className="relative flex-1 max-w-[360px]">
-            <Search size={14} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-ink-dimmer pointer-events-none" />
+            <Search size={15} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-ink-dimmer pointer-events-none" />
             <input
               type="text"
               placeholder="Search by name, key, or tempo"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-[36px] pl-[34px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[13px] text-ink outline-none focus:border-accent/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.1)] transition-all duration-200 placeholder:text-ink-dimmer"
+              className="w-full h-[38px] pl-[36px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[14px] font-medium text-ink outline-none focus:border-accent/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.1)] transition-all duration-200 placeholder:text-ink-dimmer placeholder:font-normal"
             />
           </div>
 
-          <div className="flex h-[36px] rounded-[var(--radius-sm)] p-[3px]"
+          <div className="flex h-[38px] rounded-[var(--radius-sm)] p-[3px]"
             style={{ background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.06)" }}>
             {(
               [
@@ -109,7 +109,7 @@ export default function LibraryPage() {
                 key={s.id}
                 type="button"
                 onClick={() => setSort(s.id)}
-                className={`px-[10px] rounded-[6px] border-0 text-[11px] font-medium cursor-pointer transition-all duration-200 ease-[var(--ease)] ${
+                className={`px-[12px] rounded-[6px] border-0 text-[12px] font-semibold cursor-pointer transition-all duration-200 ease-[var(--ease)] ${
                   sort === s.id ? "text-ink" : "bg-transparent text-ink-dimmer hover:text-ink-dim"
                 }`}
                 style={sort === s.id ? {
@@ -126,12 +126,12 @@ export default function LibraryPage() {
 
       <div className="flex-1 overflow-y-auto px-[28px] pb-[48px]">
         {!loaded && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-[16px] pt-[4px]">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="rounded-[var(--radius-md)] overflow-hidden glow-border" style={{ animationDelay: `${i * 60}ms` }}>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[14px] pt-[4px]">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="rounded-[var(--radius-md)] overflow-hidden glow-border" style={{ animationDelay: `${i * 50}ms` }}>
                 <div className="aspect-[4/3] skeleton" />
-                <div className="p-[12px]">
-                  <div className="h-[14px] w-[75%] skeleton mb-[8px]" />
+                <div className="h-[48px] p-[10px]">
+                  <div className="h-[12px] w-[75%] skeleton mb-[6px]" />
                   <div className="h-[10px] w-[45%] skeleton" />
                 </div>
               </div>
@@ -140,9 +140,9 @@ export default function LibraryPage() {
         )}
 
         {loaded && filtered.length > 0 && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-[16px] pt-[4px]">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[14px] pt-[4px]">
             {filtered.map((song, i) => (
-              <div key={song.name} className="animate-in" style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}>
+              <div key={song.name} className="animate-in" style={{ animationDelay: `${Math.min(i * 30, 400)}ms` }}>
                 <SongCard song={song} onOpen={handleOpen} />
               </div>
             ))}
@@ -155,12 +155,12 @@ export default function LibraryPage() {
               style={{ background: "rgba(139,92,246,0.06)" }}>
               <Search size={20} className="text-ink-dimmer" />
             </div>
-            <p className="text-[15px] font-medium text-ink m-0">No results for &ldquo;{query}&rdquo;</p>
-            <p className="text-[13px] text-ink-dimmer mt-[4px] m-0">Try a different search term.</p>
+            <p className="text-[16px] font-semibold text-ink m-0">No results for &ldquo;{query}&rdquo;</p>
+            <p className="text-[13px] text-ink-dimmer mt-[6px] m-0 font-medium">Try a different search term.</p>
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="mt-[12px] text-[13px] text-accent border-0 bg-transparent cursor-pointer hover:underline font-medium"
+              className="mt-[12px] text-[13px] text-accent border-0 bg-transparent cursor-pointer hover:underline font-semibold"
             >
               Clear search
             </button>
@@ -177,8 +177,8 @@ export default function LibraryPage() {
                 <circle cx="18" cy="16" r="3" stroke="currentColor" strokeWidth="1.5" />
               </svg>
             </div>
-            <p className="text-[17px] font-semibold text-ink m-0">Your library is empty</p>
-            <p className="text-[13px] text-ink-dimmer mt-[8px] m-0 text-center max-w-[300px] leading-[1.6]">
+            <p className="text-[18px] font-bold text-ink m-0">Your library is empty</p>
+            <p className="text-[14px] text-ink-dimmer mt-[8px] m-0 text-center max-w-[320px] leading-[1.6] font-medium">
               Upload an MP3 to get started. Limelight will analyse the track and prepare it for lighting design.
             </p>
           </div>

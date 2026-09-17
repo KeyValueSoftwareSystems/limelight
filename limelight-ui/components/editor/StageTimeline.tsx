@@ -1092,7 +1092,7 @@ export function StageTimeline({
   if (!show) {
     return (
       <div className="h-full flex items-center justify-center text-[13px] text-ink-dimmer" style={{ background: "linear-gradient(180deg, rgba(139,92,246,0.03) 0%, var(--bg-sunken) 100%)" }}>
-        Open a track from the Library to start designing
+        Open a track to start designing
       </div>
     );
   }

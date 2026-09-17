@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Music, Layers } from "lucide-react";
 
 const TABS = [
-  { id: "library", label: "Library", href: "/library", Icon: Music },
+  { id: "library", label: "Songs", href: "/library", Icon: Music },
   { id: "shows", label: "Shows", href: "/shows", Icon: Layers },
 ];
 
@@ -21,7 +21,7 @@ export function TabNav() {
           <Link
             key={tab.id}
             href={tab.href}
-            className={`relative flex items-center gap-[6px] h-full px-[14px] rounded-[var(--radius-sm)] no-underline text-[13px] font-medium transition-all duration-200 ease-[var(--ease)] ${
+            className={`relative flex items-center gap-[6px] h-full px-[14px] rounded-[var(--radius-sm)] no-underline text-[13px] font-semibold transition-all duration-200 ease-[var(--ease)] ${
               active ? "text-ink" : "text-ink-dimmer hover:text-ink-dim"
             }`}
             style={active ? {
