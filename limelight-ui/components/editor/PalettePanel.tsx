@@ -71,9 +71,16 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
   const add = useCallback(() => {
     const cur = usePortalStore.getState().palette;
     if (cur.length >= MAX) return;
-    const c = { id: `c${Date.now().toString(36)}`, hex: nextColour(cur.map((x) => x.hex)) };
-    edit([...cur, c]);
-    setSelected(c.id);
+    const mint = (taken: string[]) => ({
+      id: `c${Date.now().toString(36)}${taken.length}`,
+      hex: nextColour(taken),
+    });
+    const first = mint(cur.map((x) => x.hex));
+    const next = cur.length >= MIN - 1
+      ? [...cur, first]
+      : [...cur, first, mint([...cur.map((x) => x.hex), first.hex])];
+    edit(next);
+    setSelected(first.id);
   }, [edit]);
 
   const remove = useCallback(
@@ -106,20 +113,17 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
             onClick={reset}
             className="bg-transparent border-0 p-0 cursor-pointer text-[10px] text-ink-dimmer hover:text-ink transition-colors duration-[var(--dur-state)]"
           >
-            reset
+            Reset
           </button>
         )}
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto px-[var(--spacing-s4)] pb-[var(--spacing-s3)]">
-        {!palette.length ? (
-          <p className="m-0 text-[10px] text-ink-dimmer leading-[1.5]">
-            {room ? "No colours declared yet." : "Pick a room to load its palette."}
-          </p>
-        ) : (
-          <>
+        <>
             <p className="m-0 text-[10px] text-ink-dimmer leading-[1.5] truncate" title={room?.name}>
-              {room?.name ?? "—"}{dirty ? " · edited" : ""}
+              {palette.length
+                ? `${room?.name ?? "Custom palette"}${dirty ? " \u00b7 edited" : ""}`
+                : "Add colours and every cue in the show maps onto them."}
             </p>
 
             {/* Chips, not squares in boxes. A colour is the only thing on this
@@ -154,8 +158,8 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
                       <button
                         type="button"
                         onClick={() => remove(c.id)}
-                        aria-label={`remove ${colourName(c.hex)}`}
-                        title="remove this colour"
+                        aria-label={`Remove ${colourName(c.hex)}`}
+                        title="Remove this colour"
                         className="absolute -top-[5px] -right-[5px] w-[15px] h-[15px] flex items-center justify-center rounded-full border border-solid border-white/[0.1] bg-bg-overlay text-ink-dim text-[10px] leading-none cursor-pointer hover:text-danger hover:border-danger transition-colors duration-[var(--dur-state)]"
                       >
                         ×
@@ -169,8 +173,8 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
                 <button
                   type="button"
                   onClick={add}
-                  aria-label="add a colour"
-                  title="add a colour"
+                  aria-label="Add a colour"
+                  title="Add a colour"
                   className="w-[34px] h-[34px] flex items-center justify-center rounded-full border border-dashed border-white/[0.1] bg-transparent text-ink-dimmer text-[15px] leading-none cursor-pointer hover:text-ink hover:border-ink-dimmer transition-colors duration-[var(--dur-state)]"
                 >
                   +
@@ -192,12 +196,13 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
                 </>
               ) : (
                 <span className="text-ink-dimmer">
-                  {palette.length} of {MAX} · every cue maps onto one
+                  {palette.length
+                    ? `${palette.length} of ${MAX} \u00b7 every cue maps onto one`
+                    : `Up to ${MAX} colours`}
                 </span>
               )}
             </div>
           </>
-        )}
       </div>
     </div>
   );

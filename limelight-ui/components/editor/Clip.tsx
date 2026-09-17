@@ -74,7 +74,7 @@ function ClipBase({
         top: top + 1,
         height: height - 2,
         zIndex: selected ? 20 : 1,
-        borderRadius: "4px",
+        borderRadius: "2px",
         background: selected
           ? "var(--select)"
           : `color-mix(in srgb, ${famColour} ${Math.round(10 + opacity * 16)}%, var(--bg-raised))`,
@@ -139,7 +139,7 @@ function Grip({
       className="absolute top-0 bottom-0 flex items-center justify-center cursor-ew-resize"
       style={{
         ...outer, width, zIndex: 22, background: fill,
-        borderRadius: side === "start" ? "4px 0 0 4px" : "0 4px 4px 0",
+        borderRadius: side === "start" ? "2px 0 0 2px" : "0 2px 2px 0",
       }}
     >
       <span aria-hidden style={{ width: 2, height: "40%", borderLeft: `1px solid ${mark}`, borderRight: `1px solid ${mark}` }} />
