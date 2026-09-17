@@ -18,6 +18,7 @@
      intentional  every dark stretch is either a darkening cue or a real hole in
      breath       a blackout on loud music is one beat, never two
      smooth       the room does not switch off and on outside a designed hit
+     head         the head is still, lands its moves on downbeats, and never outshines the row except at the climax
                   the music. Blackouts were firing over a vocal at full voice,
                   because "silence" had been measured as gaps between drum hits.
      contained    a cue changes nothing outside its own span. `follow` darkened
@@ -328,6 +329,47 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
   check("smooth", dips.length <= LIMIT,
     dips.length + " off-and-on dips outside a darkening cue (limit " + LIMIT + ")" +
     (dips.length ? "; first at " + dips.slice(0, 6).map(t => t.toFixed(1) + "s").join(", ") : ""));
+}
+
+/* 3d. head — still, deliberate, landing on downbeats, never the brightest thing except at the climax --- */
+{
+  /* Renjith: "moving in all sorts of directions and has no stable rhythm ...
+     sinking the pars' chases into non-existence". So: the head is STILL for at
+     least 85% of the frames in which it is lit; every visible move ends within
+     a sixth of a beat before a beat; and outside the climax and the impact
+     beats its level stays at or under 75%. Motion in the dark is not counted --
+     a head parking itself during a blackout is invisible. */
+  const head = HEADS[0];
+  if (!head) { check("head", true, "no moving head on this rig"); }
+  else {
+    const panCh = head.off + head.roles.indexOf("pan"), tiltCh = head.off + head.roles.indexOf("tilt");
+    const lit = f => headLv(f)[0] > 0.05;
+    let litN = 0, moving = 0, badLand = 0, segs = 0, bright = 0;
+    const CLIMAX = [97.76, 109.76];
+    const impactSpans = cues.filter(c => c.effect === "impact").map(spanOf).filter(Boolean).map(([a, b]) => [a - 0.05, b + 0.05]);
+    let inMove = false, moveStart = 0;
+    for (let i = 1; i < F.length; i++) {
+      const t = i / fps;
+      if (!lit(F[i])) { inMove = false; continue; }
+      litN++;
+      const dm = Math.abs(F[i][panCh] - F[i - 1][panCh]) + Math.abs(F[i][tiltCh] - F[i - 1][tiltCh]);
+      const mv = dm > 1 && lit(F[i - 1]);
+      if (mv) moving++;
+      if (mv && !inMove) moveStart = t;
+      if (inMove && !mv && t - moveStart >= 0.1) {   /* a move just ended (a shorter twitch is a parked head settling): the next beat must be close ahead */
+        segs++;
+        const nextBeat = BEATS.find(x => x >= t - 0.06);
+        if (nextBeat == null || nextBeat - t > (60 / ((score.key_tempo && score.key_tempo.grid_bpm) || 120)) / 6) badLand++;
+      }
+      inMove = mv;
+      const inClimax = t >= CLIMAX[0] && t < CLIMAX[1];
+      const inImpact = impactSpans.some(([a, b]) => t >= a && t <= b);
+      if (!inClimax && !inImpact && headLv(F[i])[0] > 0.76) bright++;
+    }
+    const stillPct = litN ? 100 * (1 - moving / litN) : 100, brightPct = litN ? 100 * bright / litN : 0;
+    check("head", stillPct >= 85 && badLand === 0 && brightPct <= 2,
+      "still " + stillPct.toFixed(0) + "% of its lit frames (want >= 85%); " + segs + " visible moves, " + badLand + " not landing on a beat; over 75% outside the climax and impacts in " + brightPct.toFixed(1) + "% of lit frames (want <= 2%)");
+  }
 }
 
 /* 4. contained — a cue changes nothing outside its own span ---------------- */

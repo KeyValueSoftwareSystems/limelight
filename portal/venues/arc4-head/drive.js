@@ -53,7 +53,7 @@ module.exports = function drive(params, ctx) {
     if (pat === 0) { const sweep = 1 - Math.abs(2 * (beatInBar / 4) - 1); pan = 0.02 + 0.96 * sweep; tilt = 0.16 + 0.72 * kick(bphase); }
     else if (pat === 1) { pan = (beatIndex % 2 === 0) ? 0.12 : 0.88; tilt = 0.24 + 0.5 * (Math.floor(beatIndex / 2) % 2) + 0.12 * kick(bphase); }
     else { const w = 2 * Math.PI * (beatInBar / 4); pan = 0.498 + 0.47 * Math.sin(w); tilt = 0.498 + 0.37 * Math.sin(2 * w); }
-    H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHead(f, H.HEADS[0], {
       level: (0.7 + 0.3 * energy) * (0.72 + 0.28 * flash(bphase, 0.5)), colour: col,
       pan: H.clamp(pan, 0, 1), tilt: H.clamp(tilt, 0, 1),
       gobo: (bar % 2) * 80, prism: 100, strobe: pop ? 200 : 0,
@@ -61,5 +61,5 @@ module.exports = function drive(params, ctx) {
     return f;
   }
 
-  return { beat: true, render, per_fixture: H.PAR_IDS.concat(H.HEAD_IDS) };
+  return { beat: true, render, per_fixture: params.head === false ? H.PAR_IDS : H.PAR_IDS.concat(H.HEAD_IDS) };
 };
