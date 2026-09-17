@@ -37,6 +37,25 @@ import type { Venue } from "@/lib/types";
  *  sharing a token collapse into a single step. */
 const LIVE = "live";
 
+/** A generator failure is a Python traceback. Show the one line that says what
+ *  went wrong, and say what to do about it - never the last 600 characters of
+ *  stderr, which is how an energy curve ended up in an alert box. */
+function readableGenerateError(raw: string): string {
+  if (/no score|score not found|FileNotFoundError.*\.score/i.test(raw)) {
+    return "That track has no score yet. Wait for the analysis to finish, then generate.";
+  }
+  if (/beats|downbeats|grid/i.test(raw) && /empty|missing|none/i.test(raw)) {
+    return "The score has no beat grid, so there is nothing to build against.";
+  }
+  const line = raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .reverse()
+    .find((l) => /Error|Exception/.test(l));
+  return line ? `Could not build the show: ${line.slice(0, 160)}` : "Could not build the show.";
+}
+
 export default function StagePage() {
   const router = useRouter();
   const { clockRef, load, pause, seek, toggle, position, playing } =
@@ -545,20 +564,25 @@ export default function StagePage() {
   const handleGenerate = useCallback(async () => {
     if (!song) return;
     setGenerating(true);
+    setStageMsg("Building the show\u2026");
     try {
       const res = await fetch("/api/compose", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ song, engine: "cue" }),
+        /* song.name, not song. The whole Song object was going over the wire and
+           the server took os.path.basename(str(song)) of it, so the "song name"
+           it looked for was a Python dict repr - which is why the failure came
+           back as a wall of energy values. */
+        body: JSON.stringify({ song: song.name, engine: "cue" }),
       });
       const out = await res.json();
       if (out?.error) {
-        window.alert("Could not generate: " + out.error);
+        setStageMsg(readableGenerateError(String(out.error)));
         return;
       }
       window.location.reload();
-    } catch (e) {
-      window.alert("Could not generate: " + String(e));
+    } catch {
+      setStageMsg("Could not reach the server. Check it is running and try again.");
     } finally {
       setGenerating(false);
     }
