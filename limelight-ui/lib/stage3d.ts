@@ -170,11 +170,11 @@ export function roomOf(fixtures: Fixture[]): RoomBounds {
  */
 export function cameraOf(room: RoomBounds, aspect: number): { position: Vec3; target: Vec3; fov: number } {
   const fov = 42;
-  const need = Math.max(room.width / Math.max(aspect, 0.5), room.maxY + 2);
+  const need = Math.max(room.width / Math.max(aspect, 0.5), room.maxY * 1.2 + 0.5);
   const back = (need / 2) / Math.tan(fov * 0.5 * DEG);
   return {
-    position: [room.centreX, Math.min(3.2, room.maxY * 0.45 + 1.1), room.maxZ + Math.max(5, back * 1.15)],
-    target: [room.centreX, room.maxY * 0.42, room.centreZ],
+    position: [room.centreX, Math.min(3.2, room.maxY * 0.45 + 0.9), room.maxZ + Math.max(2.6, back * 1.04)],
+    target: [room.centreX, room.maxY * 0.46, room.centreZ],
     fov,
   };
 }

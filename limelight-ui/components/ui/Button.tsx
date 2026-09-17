@@ -30,11 +30,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       .join(" ");
 
     const activeStyle = active
-      ? { background: "var(--lit-face)", borderColor: "transparent", color: "var(--lit-ink)", boxShadow: "var(--lit-edge), var(--lit-halo)" }
+      ? { background: "var(--lit-face)", borderColor: "transparent", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo)" }
       : undefined;
 
     const primaryStyle = variant === "primary" && !active
-      ? { background: "var(--lit-face)", color: "var(--lit-ink)", boxShadow: "var(--lit-edge), var(--lit-halo)" }
+      ? { background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo)" }
       : undefined;
 
     return (

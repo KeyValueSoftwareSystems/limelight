@@ -142,7 +142,7 @@ export default function ShowsPage() {
             className="flex-none inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer transition-[filter,transform] duration-200 hover:brightness-[1.06] active:scale-[0.98]"
             style={{
               background: "var(--lit-face)",
-              color: "var(--lit-ink)",
+              color: "var(--lit-ink-on)",
               boxShadow: "var(--lit-edge), var(--lit-halo)",
             }}
           >
@@ -217,7 +217,7 @@ export default function ShowsPage() {
               type="button"
               onClick={() => setPicking(true)}
               className="mt-[18px] inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer hover:brightness-[1.06] active:scale-[0.98] transition-[filter,transform] duration-200"
-              style={{ background: "var(--lit-face)", color: "var(--lit-ink)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}
+              style={{ background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}
             >
               <Plus size={15} strokeWidth={2.4} />
               New show

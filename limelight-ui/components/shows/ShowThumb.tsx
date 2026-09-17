@@ -83,57 +83,44 @@ export function ShowThumb({
     const W = r.width;
     const H = r.height;
 
-    ctx.fillStyle = "#06070E";
+    ctx.fillStyle = "#04050B";
     ctx.fillRect(0, 0, W, H);
 
     const found = bandsOf(show);
     const bands = found.length ? found : fallbackBands(show, song);
-    const trussY = H * 0.2;
-
-    const lamps = 9;
+    const trussY = Math.round(H * 0.26) + 0.5;
+    const lamps = 5;
     const gap = W / (lamps + 1);
 
     ctx.globalCompositeOperation = "lighter";
     for (let i = 0; i < lamps; i++) {
       const b = bands[i % bands.length];
-      const x = gap * (i + 1);
-      const amp = 0.25 + b.amount * 0.75;
+      const x = Math.round(gap * (i + 1));
+      const amp = 0.2 + b.amount * 0.5;
       const [rr, gg, bb] = b.rgb.map((v) => Math.round(Math.min(1, Math.max(0, v)) * 255));
 
-      const spread = gap * 1.5;
-      const beam = ctx.createLinearGradient(0, trussY, 0, H);
-      beam.addColorStop(0, `rgba(${rr},${gg},${bb},${0.5 * amp})`);
+      const beam = ctx.createLinearGradient(0, trussY, 0, H * 0.92);
+      beam.addColorStop(0, `rgba(${rr},${gg},${bb},${0.17 * amp})`);
       beam.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
       ctx.fillStyle = beam;
       ctx.beginPath();
       ctx.moveTo(x, trussY);
-      ctx.lineTo(x + spread, H);
-      ctx.lineTo(x - spread, H);
+      ctx.lineTo(x + gap * 0.62, H * 0.92);
+      ctx.lineTo(x - gap * 0.62, H * 0.92);
       ctx.closePath();
       ctx.fill();
 
-      const glow = ctx.createRadialGradient(x, trussY, 0, x, trussY, gap * 0.85);
-      glow.addColorStop(0, `rgba(${rr},${gg},${bb},${0.95 * amp})`);
-      glow.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
-      ctx.fillStyle = glow;
-      ctx.fillRect(x - gap, trussY - gap, gap * 2, gap * 2);
+      ctx.fillStyle = `rgba(${rr},${gg},${bb},${0.5 + amp * 0.4})`;
+      ctx.fillRect(x - 1.5, trussY - 1.5, 3, 3);
     }
     ctx.globalCompositeOperation = "source-over";
 
-    ctx.strokeStyle = "rgba(255,255,255,0.13)";
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(gap * 0.5, trussY);
-    ctx.lineTo(W - gap * 0.5, trussY);
+    ctx.moveTo(gap * 0.6, trussY);
+    ctx.lineTo(W - gap * 0.6, trussY);
     ctx.stroke();
-
-    const cues = gestureCount(show) || show.edits.length;
-    const ticks = Math.min(28, Math.max(4, Math.round(cues / 3)));
-    ctx.fillStyle = "rgba(255,255,255,0.14)";
-    for (let i = 0; i < ticks; i++) {
-      const x = ((i + 0.5) / ticks) * W;
-      ctx.fillRect(x, H - 5, 1, 3);
-    }
   }, [show, song]);
 
   useEffect(() => {

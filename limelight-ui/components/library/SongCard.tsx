@@ -68,7 +68,7 @@ export function SongCard({ song, onOpen, position = null }: SongCardProps) {
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
             <div className="w-[38px] h-[38px] rounded-full flex items-center justify-center scale-90 group-hover:scale-100 transition-transform duration-300 ease-[var(--ease-spring)]"
               style={{ background: "var(--lit-face)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}>
-              <Play size={16} fill="var(--lit-ink)" stroke="var(--lit-ink)" className="ml-[1px]" />
+              <Play size={16} fill="var(--lit-ink-on)" stroke="var(--lit-ink-on)" className="ml-[1px]" />
             </div>
           </div>
         )}
@@ -76,7 +76,7 @@ export function SongCard({ song, onOpen, position = null }: SongCardProps) {
         {position != null && (
           <span
             className="absolute left-[6px] top-[6px] w-[20px] h-[20px] rounded-full flex items-center justify-center text-[11px] font-semibold tabular-nums leading-none z-10"
-            style={{ background: "var(--lit-face)", color: "var(--lit-ink)", boxShadow: "var(--lit-edge), var(--lit-halo-soft)" }}
+            style={{ background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo-soft)" }}
           >
             {position}
           </span>

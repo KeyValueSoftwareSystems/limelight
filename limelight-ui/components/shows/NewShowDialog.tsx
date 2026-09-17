@@ -135,7 +135,7 @@ export function NewShowDialog({
                   className="flex-none flex items-center justify-center w-[22px] h-[22px] rounded-full text-[11px] font-semibold tabular-nums"
                   style={
                     on
-                      ? { background: "var(--lit-face)", color: "var(--lit-ink)", boxShadow: "var(--lit-edge), var(--lit-halo-soft)" }
+                      ? { background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo-soft)" }
                       : { boxShadow: "inset 0 0 0 1px var(--edge-strong)", color: "transparent" }
                   }
                 >
@@ -185,7 +185,7 @@ export function NewShowDialog({
             disabled={chosen.length === 0}
             onClick={() => onCreate(chosen)}
             className="flex-none inline-flex items-center h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer transition-[filter,transform] duration-200 hover:brightness-[1.06] active:scale-[0.98] disabled:opacity-40 disabled:cursor-default"
-            style={{ background: "var(--lit-face)", color: "var(--lit-ink)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}
+            style={{ background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}
           >
             {chosen.length > 1 ? `Design ${chosen.length} songs` : "Design this show"}
           </button>

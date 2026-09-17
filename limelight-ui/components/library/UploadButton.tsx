@@ -98,7 +98,7 @@ export function UploadButton() {
           className="flex items-center gap-[7px] h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer hover:brightness-[1.06] active:scale-[0.98] transition-all duration-200"
           style={{
             background: "var(--lit-face)",
-            color: "var(--lit-ink)",
+            color: "var(--lit-ink-on)",
             boxShadow: "var(--lit-edge), var(--lit-halo)",
           }}
         >

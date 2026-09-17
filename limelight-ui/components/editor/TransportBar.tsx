@@ -143,7 +143,7 @@ export function TransportBar({
         className="flex-none inline-flex items-center justify-center w-[32px] h-[32px] rounded-full border-0 cursor-pointer transition-[background-color,transform] duration-[var(--dur-state)] active:scale-[0.94]"
         style={
           playing
-            ? { background: "var(--lit-face)", color: "var(--lit-ink)", boxShadow: "var(--lit-edge), var(--lit-halo)" }
+            ? { background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo)" }
             : { background: "var(--key-face)", color: "var(--ink)", boxShadow: "var(--key-edge), var(--key-lift)" }
         }
       >

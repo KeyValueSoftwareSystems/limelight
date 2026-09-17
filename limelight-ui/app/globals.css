@@ -65,9 +65,9 @@
   --warn: #FBBF24;
   --danger: #F87171;
 
-  --accent: #3BE3FF;
-  --accent-soft: rgba(59, 227, 255, 0.10);
-  --accent-glow: rgba(59, 227, 255, 0.42);
+  --accent: #5CCBE0;
+  --accent-soft: rgba(92, 203, 224, 0.09);
+  --accent-glow: rgba(92, 203, 224, 0.22);
 
   --accent2: #FF4D9D;
   --accent2-soft: rgba(255, 77, 157, 0.10);
@@ -76,7 +76,7 @@
   --neon-blue: #C9CEDC;
   --neon-cyan: #9BA4BD;
   --neon-pink: #F2B457;
-  --neon-amber: #3BE3FF;
+  --neon-amber: #5CCBE0;
 
   --select: #CBD5E1;
   --select-soft: rgba(203, 213, 225, 0.08);
@@ -93,15 +93,15 @@
 
   --edge: rgba(255, 255, 255, 0.07);
   --edge-strong: rgba(255, 255, 255, 0.13);
-  --edge-accent: rgba(59, 227, 255, 0.30);
+  --edge-accent: rgba(92, 203, 224, 0.24);
 
   --elev-1: 0 1px 2px rgba(0, 0, 0, 0.28);
   --elev-2: 0 2px 8px rgba(0, 0, 0, 0.34), 0 1px 2px rgba(0, 0, 0, 0.22);
   --elev-3: 0 8px 28px rgba(0, 0, 0, 0.44), 0 2px 6px rgba(0, 0, 0, 0.26);
   --inset-hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 
-  --focus: rgba(59, 227, 255, 0.60);
-  --focus-ring: rgba(59, 227, 255, 0.15);
+  --focus: rgba(92, 203, 224, 0.5);
+  --focus-ring: rgba(92, 203, 224, 0.12);
   --playhead: #FFFFFF;
 
   --fam-hits: #FFFFFF;
@@ -141,10 +141,10 @@
   --lane-gap: 2px;
   --snap-threshold: 8px;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 
   --elev-popover: 0 0 0 1px rgba(59, 227, 255, 0.09),
     0 4px 6px -1px rgba(0, 0, 0, 0.4),
@@ -157,12 +157,12 @@
     0 8px 24px -4px rgba(0, 0, 0, 0.5),
     0 0 28px -6px rgba(59, 227, 255, 0.12);
 
-  --lit: #3BE3FF;
-  --lit-ink: #021018;
-  --lit-hover: #6DEDFF;
+  --lit: #5CCBE0;
+  --lit-ink: #A8E9F6;
+  --lit-hover: #C6F2FB;
   --grad-primary: var(--lit);
   --grad-warm: var(--lit);
-  --neon-ring: 0 0 0 1px rgba(59, 227, 255, 0.5), 0 0 16px -2px rgba(59, 227, 255, 0.45);
+  --neon-ring: 0 0 0 1px rgba(92, 203, 224, 0.35), 0 0 12px -4px rgba(92, 203, 224, 0.3);
 
   --key-face: linear-gradient(180deg, #191E2B 0%, #0D1018 100%);
   --key-face-hover: linear-gradient(180deg, #212736 0%, #12161F 100%);
@@ -175,14 +175,16 @@
   --well-edge: inset 0 2px 6px rgba(0, 0, 0, 0.72), inset 0 -1px 0 rgba(255, 255, 255, 0.04),
     inset 0 0 0 1px rgba(0, 0, 0, 0.55);
 
-  --lit-face: linear-gradient(180deg, #7DEDFF 0%, #22C6EA 100%);
-  --lit-edge: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 5px rgba(0, 58, 78, 0.4);
-  --lit-halo: 0 0 20px -3px rgba(59, 227, 255, 0.6), 0 2px 5px rgba(0, 0, 0, 0.5);
-  --lit-halo-soft: 0 0 12px -3px rgba(59, 227, 255, 0.45), 0 1px 3px rgba(0, 0, 0, 0.45);
+  --lit-face: linear-gradient(180deg, #16303A 0%, #0D1F27 100%);
+  --lit-ink-on: #8FE2F2;
+  --lit-edge: inset 0 1px 0 rgba(143, 226, 242, 0.22), inset 0 0 0 1px rgba(92, 203, 224, 0.26),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  --lit-halo: 0 1px 0 rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.45), 0 0 14px -6px rgba(92, 203, 224, 0.5);
+  --lit-halo-soft: 0 1px 3px rgba(0, 0, 0, 0.45), 0 0 10px -6px rgba(92, 203, 224, 0.4);
 
-  --key-on-face: linear-gradient(180deg, #0B2430 0%, #071A24 100%);
-  --key-on-edge: inset 0 2px 5px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(59, 227, 255, 0.22),
-    inset 0 -1px 0 rgba(59, 227, 255, 0.10);
+  --key-on-face: linear-gradient(180deg, #0D1C23 0%, #08141A 100%);
+  --key-on-edge: inset 0 2px 5px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(92, 203, 224, 0.16),
+    inset 0 -1px 0 rgba(92, 203, 224, 0.07);
   --grad-surface: linear-gradient(180deg, rgba(59, 227, 255, 0.035) 0%, transparent 50%);
   --grad-glow: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 227, 255, 0.10), transparent);
 }

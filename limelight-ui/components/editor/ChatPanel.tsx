@@ -121,7 +121,7 @@ export function ChatPanel() {
             disabled={!draft.trim()}
             aria-label="Send"
             className="absolute right-[8px] bottom-[10px] w-[28px] h-[28px] rounded-[var(--radius-sm)] border-0 cursor-pointer disabled:cursor-default disabled:opacity-30 flex items-center justify-center transition-all duration-200 hover:brightness-110"
-            style={{ background: "var(--lit-face)", color: "var(--lit-ink)", boxShadow: "var(--lit-edge), var(--lit-halo-soft)" }}
+            style={{ background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo-soft)" }}
           >
             <Send size={13} />
           </button>
