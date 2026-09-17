@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useCallback } from "react";
-import type { ShowFile } from "@/lib/types";
+import type { ShowFile, Song } from "@/lib/types";
 
 type Band = { rgb: [number, number, number]; amount: number };
 
@@ -23,12 +23,48 @@ function bandsOf(show: ShowFile): Band[] {
   return out;
 }
 
+const FALLBACK: Array<[number, number, number]> = [
+  [0.23, 0.89, 1.0],
+  [0.62, 0.95, 1.0],
+  [0.34, 0.62, 0.86],
+  [0.85, 0.94, 1.0],
+  [0.18, 0.72, 0.9],
+];
+
+function hash(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return Math.abs(h);
+}
+
+function fallbackBands(show: ShowFile, song?: Song): Band[] {
+  const e = (song?.energy ?? []).filter((v): v is number => typeof v === "number");
+  const seed = hash(show.id || show.name);
+  const n = 5;
+  const out: Band[] = [];
+  for (let i = 0; i < n; i++) {
+    const amount = e.length
+      ? Math.min(1, Math.max(0.18, e[Math.floor(((i + 0.5) / n) * e.length)] ?? 0.5))
+      : 0.3 + ((seed >> (i * 3)) % 7) / 10;
+    out.push({ rgb: FALLBACK[(seed + i) % FALLBACK.length], amount });
+  }
+  return out;
+}
+
 function gestureCount(show: ShowFile): number {
   const plan = show.plan as unknown as { gestures?: unknown[] } | null | undefined;
   return plan?.gestures?.length ?? 0;
 }
 
-export function ShowThumb({ show, className = "" }: { show: ShowFile; className?: string }) {
+export function ShowThumb({
+  show,
+  song,
+  className = "",
+}: {
+  show: ShowFile;
+  song?: Song;
+  className?: string;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
 
@@ -50,18 +86,9 @@ export function ShowThumb({ show, className = "" }: { show: ShowFile; className?
     ctx.fillStyle = "#06070E";
     ctx.fillRect(0, 0, W, H);
 
-    const bands = bandsOf(show);
+    const found = bandsOf(show);
+    const bands = found.length ? found : fallbackBands(show, song);
     const trussY = H * 0.2;
-
-    if (!bands.length) {
-      ctx.strokeStyle = "rgba(255,255,255,0.07)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(W * 0.1, trussY);
-      ctx.lineTo(W * 0.9, trussY);
-      ctx.stroke();
-      return;
-    }
 
     const lamps = 9;
     const gap = W / (lamps + 1);
@@ -107,7 +134,7 @@ export function ShowThumb({ show, className = "" }: { show: ShowFile; className?
       const x = ((i + 0.5) / ticks) * W;
       ctx.fillRect(x, H - 5, 1, 3);
     }
-  }, [show]);
+  }, [show, song]);
 
   useEffect(() => {
     paint();

@@ -46,14 +46,14 @@ export function SongCard({ song, onOpen, position = null }: SongCardProps) {
           : "cursor-default opacity-40"
       }`}
       style={{
-        background: "linear-gradient(180deg, rgba(239, 231, 215, 0.04) 0%, rgba(239, 231, 215, 0.01) 100%)",
-        boxShadow: "var(--elev-card)",
+        background: "var(--key-face)",
+        boxShadow: "var(--key-edge), var(--key-lift)",
       }}
       onMouseEnter={(e) => {
-        if (playable) (e.currentTarget as HTMLElement).style.boxShadow = "var(--elev-card-hover)";
+        if (playable) (e.currentTarget as HTMLElement).style.boxShadow = "var(--key-edge), var(--key-lift), var(--lit-halo-soft)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow = "var(--elev-card)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "var(--key-edge), var(--key-lift)";
       }}
     >
       {/* Cover: fixed aspect ratio via padding-bottom trick for bulletproof sizing */}
@@ -67,7 +67,7 @@ export function SongCard({ song, onOpen, position = null }: SongCardProps) {
         {playable && (
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
             <div className="w-[38px] h-[38px] rounded-full flex items-center justify-center scale-90 group-hover:scale-100 transition-transform duration-300 ease-[var(--ease-spring)]"
-              style={{ background: "var(--lit)", boxShadow: "0 0 22px -2px var(--accent-glow)" }}>
+              style={{ background: "var(--lit-face)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}>
               <Play size={16} fill="var(--lit-ink)" stroke="var(--lit-ink)" className="ml-[1px]" />
             </div>
           </div>
@@ -76,7 +76,7 @@ export function SongCard({ song, onOpen, position = null }: SongCardProps) {
         {position != null && (
           <span
             className="absolute left-[6px] top-[6px] w-[20px] h-[20px] rounded-full flex items-center justify-center text-[11px] font-semibold tabular-nums leading-none z-10"
-            style={{ background: "var(--lit)", color: "var(--lit-ink)", boxShadow: "0 0 14px -2px var(--accent-glow)" }}
+            style={{ background: "var(--lit-face)", color: "var(--lit-ink)", boxShadow: "var(--lit-edge), var(--lit-halo-soft)" }}
           >
             {position}
           </span>

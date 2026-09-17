@@ -2,8 +2,9 @@
 
 import { useEffect, useCallback, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Plus, ArrowLeft } from "lucide-react";
-import { SongPicker } from "@/components/library/SongPicker";
+import { Search, Plus } from "lucide-react";
+import { NewShowDialog } from "@/components/shows/NewShowDialog";
+import { Field, SegmentedControl } from "@/components/ui";
 import { ShowCard } from "@/components/shows/ShowCard";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
@@ -17,7 +18,6 @@ export default function ShowsPage() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("recent");
   const [picking, setPicking] = useState(false);
-  const [chosen, setChosen] = useState<string[]>([]);
   const setSong = usePortalStore((s) => s.setSong);
   const setSeed = usePortalStore((s) => s.setSeed);
   const setEdits = usePortalStore((s) => s.setEdits);
@@ -35,12 +35,6 @@ export default function ShowsPage() {
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("new") === "1") setPicking(true);
-  }, []);
-
-  const toggleChoice = useCallback((song: Song) => {
-    setChosen((cur) =>
-      cur.includes(song.name) ? cur.filter((n) => n !== song.name) : [...cur, song.name],
-    );
   }, []);
 
   const startShow = useCallback(
@@ -125,79 +119,6 @@ export default function ShowsPage() {
     { id: "room", label: "Room" },
   ];
 
-  if (picking) {
-    return (
-      <div className="flex flex-col overflow-hidden flex-1 animate-in">
-        <div className="flex-none px-[28px] pt-[26px] pb-[4px]">
-          <button
-            type="button"
-            onClick={() => setPicking(false)}
-            className="inline-flex items-center gap-[6px] mb-[12px] p-0 border-0 bg-transparent text-[13px] text-ink-dim hover:text-ink cursor-pointer transition-colors duration-200"
-          >
-            <ArrowLeft size={14} />
-            All shows
-          </button>
-          <h1 className="text-[30px] font-semibold tracking-[-0.028em] m-0 leading-[1.1] text-ink">
-            New show
-          </h1>
-          <p className="text-[13px] text-ink-dim mt-[7px] mb-[18px]">
-            Pick the songs this show plays, in order. You choose the room on the next screen.
-          </p>
-        </div>
-        <div className="flex-1 min-h-0 flex flex-col px-[28px]">
-          <SongPicker
-            multi
-            chosen={chosen}
-            onToggle={toggleChoice}
-            onPick={(s) => startShow([s.name])}
-          />
-        </div>
-
-        <div
-          className="flex-none flex items-center gap-[14px] px-[28px] h-[62px] border-t border-solid border-[var(--edge)]"
-          style={{ background: "var(--bg-raised)" }}
-        >
-          <span className="text-[13px] text-ink-dim min-w-0 truncate">
-            {chosen.length === 0 ? (
-              "Pick one song, or several to build a setlist."
-            ) : (
-              <>
-                <span className="text-ink font-medium">
-                  {chosen.length} song{chosen.length === 1 ? "" : "s"}
-                </span>
-                <span className="text-ink-dimmer">
-                  {" \u00b7 "}
-                  {chosen
-                    .map((n) => songs.find((s) => s.name === n)?.title ?? n)
-                    .join(" \u2192 ")}
-                </span>
-              </>
-            )}
-          </span>
-          <span className="flex-1" />
-          {chosen.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setChosen([])}
-              className="flex-none p-0 border-0 bg-transparent text-[13px] text-ink-dim hover:text-ink cursor-pointer transition-colors duration-200"
-            >
-              Clear
-            </button>
-          )}
-          <button
-            type="button"
-            disabled={chosen.length === 0}
-            onClick={() => startShow(chosen)}
-            className="flex-none inline-flex items-center h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer transition-[filter,transform] duration-200 hover:brightness-[1.06] active:scale-[0.98] disabled:opacity-40 disabled:cursor-default"
-            style={{ background: "var(--lit)", color: "var(--lit-ink)" }}
-          >
-            {chosen.length > 1 ? `Design ${chosen.length} songs` : "Design this show"}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col overflow-hidden flex-1 animate-in">
       <div className="flex-none px-[28px] pt-[26px] pb-[16px]">
@@ -220,9 +141,9 @@ export default function ShowsPage() {
             onClick={() => setPicking(true)}
             className="flex-none inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer transition-[filter,transform] duration-200 hover:brightness-[1.06] active:scale-[0.98]"
             style={{
-              background: "var(--lit)",
+              background: "var(--lit-face)",
               color: "var(--lit-ink)",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.35), 0 0 18px -6px var(--accent-glow)",
+              boxShadow: "var(--lit-edge), var(--lit-halo)",
             }}
           >
             <Plus size={15} strokeWidth={2.4} />
@@ -232,49 +153,32 @@ export default function ShowsPage() {
 
         {showList.length > 0 && (
           <div className="mt-[18px] flex items-center gap-[20px] flex-wrap">
-            <div className="relative w-[300px] max-w-full">
-              <Search
-                size={15}
-                className="absolute left-[12px] top-1/2 -translate-y-1/2 text-ink-dimmer pointer-events-none"
-              />
-              <input
+            <div className="w-[300px] max-w-full">
+              <Field
+                icon={<Search size={15} />}
                 type="text"
                 placeholder="Search shows, songs, rooms or people"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full h-[var(--control-h)] pl-[35px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-[var(--edge)] bg-[var(--surface-1)] text-[13px] text-ink outline-none transition-colors duration-200 placeholder:text-ink-dimmer"
+                aria-label="Search shows"
               />
             </div>
 
-            <div role="tablist" aria-label="Sort shows" className="inline-flex items-stretch gap-[18px] h-[var(--control-h)]">
-              {SORTS.map((s) => {
-                const on = s.id === sort;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={on}
-                    onClick={() => setSort(s.id)}
-                    className={`group relative h-full border-0 bg-transparent px-0 cursor-pointer text-[13px] font-medium transition-colors duration-[var(--dur-state)] ${
-                      on ? "text-ink" : "text-ink-dimmer hover:text-ink-dim"
-                    }`}
-                  >
-                    {s.label}
-                    <span
-                      aria-hidden
-                      className={`absolute left-0 right-0 bottom-[7px] h-[2px] rounded-full transition-opacity duration-[var(--dur-state)] ${
-                        on ? "opacity-100" : "opacity-0 group-hover:opacity-40"
-                      }`}
-                      style={{ background: "var(--accent)", boxShadow: "0 -5px 12px -2px var(--accent-glow)" }}
-                    />
-                  </button>
-                );
-              })}
-            </div>
+            <SegmentedControl
+              aria-label="Sort shows"
+              value={sort}
+              onChange={setSort}
+              segments={SORTS}
+            />
           </div>
         )}
       </div>
+
+      <NewShowDialog
+        open={picking}
+        onClose={() => setPicking(false)}
+        onCreate={startShow}
+      />
 
       <div className="flex-1 overflow-y-auto px-[28px] pb-[48px]">
         {loading && (
@@ -313,7 +217,7 @@ export default function ShowsPage() {
               type="button"
               onClick={() => setPicking(true)}
               className="mt-[18px] inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer hover:brightness-[1.06] active:scale-[0.98] transition-[filter,transform] duration-200"
-              style={{ background: "var(--lit)", color: "var(--lit-ink)" }}
+              style={{ background: "var(--lit-face)", color: "var(--lit-ink)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}
             >
               <Plus size={15} strokeWidth={2.4} />
               New show

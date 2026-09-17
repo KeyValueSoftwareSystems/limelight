@@ -13,7 +13,7 @@ const styles: Record<State, { bg: string; border: string; dot: string; text: str
   ready: { bg: "rgba(129,140,248,0.08)", border: "rgba(129,140,248,0.25)", dot: "#818CF8", text: "#A5B4FC" },
   warn: { bg: "rgba(251,191,36,0.08)", border: "rgba(251,191,36,0.25)", dot: "#FBBF24", text: "#FDE68A" },
   error: { bg: "rgba(248,113,113,0.08)", border: "rgba(248,113,113,0.25)", dot: "#F87171", text: "#FCA5A5" },
-  off: { bg: "rgba(239, 231, 215, 0.04)", border: "rgba(239, 231, 215, 0.1)", dot: "#5A5F78", text: "#9095AD" },
+  off: { bg: "rgba(59, 227, 255, 0.04)", border: "rgba(59, 227, 255, 0.1)", dot: "#5A5F78", text: "#9095AD" },
   sending: { bg: "rgba(52,211,153,0.06)", border: "rgba(52,211,153,0.2)", dot: "#34D399", text: "#6EE7B7" },
 };
 

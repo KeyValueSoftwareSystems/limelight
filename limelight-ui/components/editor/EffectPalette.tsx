@@ -66,7 +66,7 @@ export function EffectPalette({ effects }: { effects: Effect[] }) {
             placeholder="Search effects…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full h-[28px] pl-[26px] pr-[8px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[12px] text-ink outline-none focus:border-accent/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_2px_rgba(239, 231, 215, 0.08)] transition-all duration-200 placeholder:text-ink-dimmer"
+            className="w-full h-[28px] pl-[26px] pr-[8px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[12px] text-ink outline-none focus:border-accent/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_2px_rgba(59, 227, 255, 0.08)] transition-all duration-200 placeholder:text-ink-dimmer"
           />
         </div>
       </div>
@@ -115,7 +115,7 @@ export function EffectPalette({ effects }: { effects: Effect[] }) {
                         : "border-transparent hover:border-white/[0.06] bg-transparent"
                     }`}
                     style={active
-                      ? { background: "rgba(239, 231, 215, 0.08)" }
+                      ? { background: "rgba(59, 227, 255, 0.08)" }
                       : undefined
                     }
                     onMouseEnter={(e) => {

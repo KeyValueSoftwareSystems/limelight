@@ -22,7 +22,11 @@ export function TabNav() {
   const tabs = TABS[role] ?? TABS.creator;
 
   return (
-    <nav className="flex items-stretch gap-[22px] h-full" aria-label="Sections">
+    <nav
+      className="flex items-stretch gap-[3px] h-[var(--control-h)] p-[3px] rounded-[9px]"
+      style={{ background: "var(--well-face)", boxShadow: "var(--well-edge)" }}
+      aria-label="Sections"
+    >
       {tabs.map((tab) => {
         const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
         return (
@@ -30,17 +34,24 @@ export function TabNav() {
             key={tab.id}
             href={tab.href}
             aria-current={active ? "page" : undefined}
-            className={`group relative flex items-center h-full no-underline text-[13px] font-medium
-              tracking-[-0.006em] transition-colors duration-[var(--dur-state)]
+            className={`relative flex items-center h-full px-[14px] rounded-[6px] no-underline
+              text-[12.5px] font-medium tracking-[-0.004em]
+              transition-[color,box-shadow,background] duration-[var(--dur-state)]
               ${active ? "text-ink" : "text-ink-dimmer hover:text-ink-dim"}`}
+            style={
+              active
+                ? { background: "var(--key-on-face)", boxShadow: "var(--key-on-edge)" }
+                : undefined
+            }
           >
+            {active && (
+              <span
+                aria-hidden
+                className="absolute left-[10px] right-[10px] top-[4px] h-[2px] rounded-full"
+                style={{ background: "var(--accent)", boxShadow: "0 0 8px 0 var(--accent-glow)" }}
+              />
+            )}
             {tab.label}
-            <span
-              aria-hidden
-              className={`absolute left-0 right-0 bottom-0 h-[2px] rounded-full transition-opacity duration-[var(--dur-state)]
-                ${active ? "opacity-100" : "opacity-0 group-hover:opacity-40"}`}
-              style={{ background: "var(--accent)", boxShadow: "0 -5px 12px -2px var(--accent-glow)" }}
-            />
           </Link>
         );
       })}

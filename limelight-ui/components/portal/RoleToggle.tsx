@@ -27,7 +27,8 @@ export function RoleToggle() {
 
   return (
     <div
-      className="flex items-center h-[30px] gap-[3px] rounded-[9px] bg-white/[0.03] border border-solid border-white/[0.05] p-[3px]"
+      className="flex items-center h-[var(--control-h)] gap-[3px] rounded-[9px] p-[3px]"
+      style={{ background: "var(--well-face)", boxShadow: "var(--well-edge)" }}
       role="radiogroup"
       aria-label="Mode"
     >
@@ -44,7 +45,7 @@ export function RoleToggle() {
             className={`flex items-center gap-[6px] h-full px-[10px] rounded-[6px] border-0 text-[12px] font-medium cursor-pointer transition-colors duration-200 ease-[var(--ease)] ${
               active ? "text-ink" : "bg-transparent text-ink-dimmer hover:text-ink-dim"
             }`}
-            style={active ? { background: "var(--surface-3)" } : undefined}
+            style={active ? { background: "var(--key-on-face)", boxShadow: "var(--key-on-edge)" } : undefined}
           >
             <r.Icon size={12} strokeWidth={active ? 2 : 1.5} style={active ? { color: "var(--accent)" } : undefined} />
             {r.label}

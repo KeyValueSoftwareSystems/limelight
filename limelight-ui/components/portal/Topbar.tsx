@@ -41,7 +41,7 @@ function IdentityControl() {
         className="flex items-center gap-[6px] h-[34px] pl-[4px] pr-[10px] rounded-full border-0 bg-transparent cursor-pointer hover:bg-white/[0.04] transition-all duration-200"
       >
         <span className="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[10px] font-bold flex-none"
-          style={{ background: "var(--surface-3)", color: "var(--ink)", boxShadow: "inset 0 0 0 1px var(--edge-strong)" }}>
+          style={{ background: "var(--key-face)", color: "var(--ink)", boxShadow: "var(--key-edge), var(--key-lift)" }}>
           {initials || <User size={12} />}
         </span>
         <ChevronDown size={11} className="text-ink-dimmer" />
@@ -75,17 +75,17 @@ function Beam() {
   return (
     <span
       className="relative w-[24px] h-[24px] rounded-[7px] flex-none overflow-hidden"
-      style={{ background: "#0D0E18", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
+      style={{ background: "#03070E", boxShadow: "inset 0 0 0 1px rgba(59,227,255,0.22), 0 0 14px -4px var(--accent-glow)" }}
     >
       <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden className="absolute inset-0">
         <defs>
           <linearGradient id="lml-beam" x1="12" y1="7" x2="12" y2="22" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="#FBF4E6" stopOpacity="0.92" />
-            <stop offset="1" stopColor="#FBF4E6" stopOpacity="0" />
+            <stop offset="0" stopColor="#8FF3FF" stopOpacity="0.92" />
+            <stop offset="1" stopColor="#8FF3FF" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d="M12 7.5 L19 21.5 H5 Z" fill="url(#lml-beam)" />
-        <rect x="8.5" y="3.5" width="7" height="4.2" rx="1.4" fill="#FBF4E6" />
+        <rect x="8.5" y="3.5" width="7" height="4.2" rx="1.4" fill="#C9F9FF" />
       </svg>
     </span>
   );

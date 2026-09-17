@@ -95,11 +95,11 @@ export function UploadButton() {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex items-center gap-[7px] h-[36px] px-[16px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold text-white cursor-pointer hover:brightness-110 active:scale-[0.97] transition-all duration-200"
+          className="flex items-center gap-[7px] h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer hover:brightness-[1.06] active:scale-[0.98] transition-all duration-200"
           style={{
-            background: "var(--lit)",
+            background: "var(--lit-face)",
             color: "var(--lit-ink)",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.3), 0 0 16px -2px rgba(239, 231, 215, 0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
+            boxShadow: "var(--lit-edge), var(--lit-halo)",
           }}
         >
           <Upload size={14} strokeWidth={2.5} />

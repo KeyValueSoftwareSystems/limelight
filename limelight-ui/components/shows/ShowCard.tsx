@@ -21,13 +21,13 @@ export function ShowCard({
       onClick={() => onOpen(show)}
       title={show.name}
       className="group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden border border-solid border-white/[0.06] cursor-pointer transition-all duration-200 ease-[var(--ease)] w-full hover:border-accent/25 hover:-translate-y-[1px]"
-      style={{ background: "var(--surface-1)", boxShadow: "var(--elev-card)" }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "var(--elev-card-hover)"; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "var(--elev-card)"; }}
+      style={{ background: "var(--key-face)", boxShadow: "var(--key-edge), var(--key-lift)" }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "var(--key-edge), var(--key-lift), var(--lit-halo-soft)"; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "var(--key-edge), var(--key-lift)"; }}
     >
       <div className="relative w-full overflow-hidden" style={{ paddingBottom: "62%" }}>
         <div className="absolute inset-0">
-          <ShowThumb show={show} className="absolute inset-0" />
+          <ShowThumb show={show} song={song} className="absolute inset-0" />
         </div>
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
@@ -35,7 +35,7 @@ export function ShowCard({
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <span
             className="w-[36px] h-[36px] rounded-full flex items-center justify-center scale-90 group-hover:scale-100 transition-transform duration-300 ease-[var(--ease-spring)]"
-            style={{ background: "var(--lit)", boxShadow: "0 0 22px -2px var(--accent-glow)" }}
+            style={{ background: "var(--lit-face)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}
           >
             <Play size={15} fill="var(--lit-ink)" stroke="var(--lit-ink)" className="ml-[1px]" />
           </span>

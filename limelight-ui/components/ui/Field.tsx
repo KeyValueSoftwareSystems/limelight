@@ -25,8 +25,8 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(
           rounded-[var(--radius-sm)] border border-solid text-[13px] font-medium text-ink
           transition-[background-color,border-color] duration-150 ease-[var(--ease)]
           placeholder:text-ink-dimmer placeholder:font-normal
-          hover:border-[var(--edge-strong)] ${className}`}
-        style={{ background: "var(--surface-1)", borderColor: "var(--edge)" }}
+          ${className}`}
+        style={{ background: "var(--well-face)", borderColor: "transparent", boxShadow: "var(--well-edge)" }}
         {...props}
       />
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { PaletteTabs } from "./PaletteTabs";
+import { SetlistPanel } from "./SetlistPanel";
 import { PalettePanel } from "./PalettePanel";
 import type { Effect, PaletteColour } from "@/lib/types";
 
@@ -14,6 +15,8 @@ interface SidebarProps {
 export function Sidebar({ effects, onRecolour }: SidebarProps) {
   return (
     <nav className="h-full flex flex-col min-h-0">
+      <SetlistPanel />
+
       <div className={`${PANEL} flex-none max-h-[38%] border-b border-solid border-white/[0.05]`} style={{ background: "var(--bg)" }}>
         <PalettePanel onRecolour={onRecolour} />
       </div>

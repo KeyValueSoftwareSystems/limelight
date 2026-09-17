@@ -107,11 +107,17 @@ export function Timeline({
       const span = view.to - view.from;
       const px = (d: number) => wheelPx(d, e.deltaMode, box.width);
 
-      if (e.ctrlKey || e.metaKey) {
+      const wantsZoom =
+        e.ctrlKey ||
+        e.metaKey ||
+        (!e.shiftKey && Math.abs(e.deltaY) > Math.abs(e.deltaX));
+
+      if (wantsZoom) {
         if (!onZoom) return;
         e.preventDefault();
         const anchorT = view.from + ((e.clientX - r.left) / box.width) * span;
-        onZoom(anchorT, e.deltaY > 0 ? 1.15 : 0.87);
+        const step = Math.min(2.5, 1 + Math.abs(px(e.deltaY)) / 320);
+        onZoom(anchorT, e.deltaY > 0 ? step : 1 / step);
         return;
       }
       if (!onPan) return;

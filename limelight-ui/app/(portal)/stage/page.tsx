@@ -21,7 +21,6 @@ import { VenuePicker } from "@/components/venues/VenuePicker";
 import { StageTimeline } from "@/components/editor/StageTimeline";
 import { SaveShowDialog } from "@/components/editor/SaveShowDialog";
 import { Sidebar } from "@/components/editor/Sidebar";
-import { ChatPanel } from "@/components/editor/ChatPanel";
 import { RigControl } from "@/components/portal/RigControl";
 import { buildClips, tileForClip } from "@/lib/clips";
 import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
@@ -59,11 +58,11 @@ export default function StagePage() {
   /* The editor's height is the creator's to choose: pull it up while placing
      clips, push it down while judging the look. A fixed ratio is always wrong
      for one of those. */
-  const [editorH, setEditorH] = useState(300);
+  const [editorH, setEditorH] = useState(360);
   const columnRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLElement>(null);
 
-  const MIN_EDITOR = 160;
+  const MIN_EDITOR = 220;
   const MIN_PREVIEW = 150;
 
   const startResize = useCallback((e: React.PointerEvent) => {
@@ -94,7 +93,7 @@ export default function StagePage() {
   /* read URL params once on mount (safe for SSR since guarded by typeof window) */
   const urlParams = useMemo(() => {
     if (typeof window === "undefined")
-      return { song: null, seed: null, layout: null };
+      return { song: null, seed: null, layout: null, show: null, songs: null };
     const sp = new URLSearchParams(window.location.search);
     /* `layout` makes a rig deep-linkable, the same way song and seed already are:
        a show is {score, seed, edits} and the RIG is the venue's, so being able to
@@ -104,6 +103,7 @@ export default function StagePage() {
       seed: sp.get("seed"),
       layout: sp.get("layout"),
       show: sp.get("show"),
+      songs: sp.get("songs"),
     };
   }, []);
 
@@ -195,6 +195,14 @@ export default function StagePage() {
           setPlanText(sf.plan_text ?? "");
         })
         .catch(() => setStageMsg("Could not load that show. Check your connection and try again."));
+    }
+    const listParam = urlParams.songs;
+    if (listParam) {
+      const names = listParam
+        .split(",")
+        .map((n: string) => decodeURIComponent(n))
+        .filter(Boolean);
+      if (names.length) usePortalStore.getState().setSetlist(names);
     }
     queueMicrotask(() => setStageMsg("Loading track\u2026"));
 
@@ -1121,18 +1129,16 @@ export default function StagePage() {
           </section>
         </div>
 
-        <aside className="flex-none w-[280px] min-w-[220px] border-l border-solid border-white/[0.05] overflow-hidden">
-          {isDesigner ? (
-            <ChatPanel />
-          ) : (
+        {isOperator && (
+          <aside className="flex-none w-[280px] min-w-[220px] border-l border-solid border-white/[0.05] overflow-hidden">
             <div className="h-full overflow-y-auto">
               <ConsolePanel />
               <RigPanel />
               <LimitsPanel />
               <StatePanel />
             </div>
-          )}
-        </aside>
+          </aside>
+        )}
       </div>
 
       <VenuePicker
