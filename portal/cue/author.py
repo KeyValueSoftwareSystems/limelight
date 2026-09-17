@@ -1,4 +1,5 @@
 import collections
+import bisect
 import json
 import os
 import subprocess
@@ -311,6 +312,13 @@ def author(song, out_path=None):
         k = min(chord_edges, key=lambda x: abs(x - t))
         return k if abs(k - t) <= tol else t
     Emax = max(r["E"] for r in rows) or 1.0
+    E_ranked = sorted(r["E"] for r in rows)
+
+    def spread(E):
+        lo = bisect.bisect_left(E_ranked, E)
+        hi = bisect.bisect_right(E_ranked, E)
+        mid = (lo + hi - 1) / 2.0
+        return mid / max(1, len(E_ranked) - 1)
     peak_t = None
     for t, kind, w in moments:
         if kind == "peak":
@@ -321,9 +329,9 @@ def author(song, out_path=None):
 
     def arc(t):
         if t <= peak_t:
-            return 0.60 + 0.40 * (t / peak_t if peak_t else 1.0) ** 0.75
+            return 0.80 + 0.20 * (t / peak_t if peak_t else 1.0) ** 0.75
         tail = (t - peak_t) / max(1e-6, span - peak_t)
-        return 1.0 - 0.62 * tail ** 0.8
+        return 1.0 - 0.36 * tail ** 0.8
 
     def bar_at(t):
         for r in rows:
@@ -489,12 +497,12 @@ def author(song, out_path=None):
         pi, pk, pn = phrase_of.get(bar, (None, 0, 1))
         ph = phrases[pi] if pi is not None else None
         if ph is not None:
-            band = (0.12 + 0.80 * ((ph["E"] / Emax) ** 0.8)) * arc(ph["t"])
+            band = (0.10 + 0.87 * (spread(ph["E"]) ** 0.85)) * arc(ph["t"])
             pos = pk / max(1, pn - 1) if pn > 1 else 1.0
             level = round(min(0.97, band * (ph["a0"] + (ph["a1"] - ph["a0"]) * pos)), 2)
         else:
-            e = r["E"] / Emax
-            level = round(min(0.97, (0.12 + 0.80 * (e**0.8)) * arc(r["t"])), 2)
+            e = spread(r["E"])
+            level = round(min(0.99, (0.10 + 0.87 * (e**0.85)) * arc(r["t"])), 2)
 
         is_edge = any(abs(s["start"] - r["t"]) < step for s in sections)
         phrase_start = ph is not None and pk == 0
@@ -718,9 +726,9 @@ def author(song, out_path=None):
                 layers[0]["reverse"] = True
 
             chase = None
-            fade = 0.35 if not fam_changed else 0.15
+            fade = 0.0 if not fam_changed else 0.12
             if in_build:
-                fade = 0.6
+                fade = 0.3
             why = "bars %s, the phrase %s: %s leads, E %.2f, %d hits, mode %s - %s in %s%s" % (
                 ("%d-%d" % (ph["bars"][0], ph["bars"][-1])) if ph else str(bar),
                 ph["word"] if ph else "holds",
@@ -980,11 +988,11 @@ def author(song, out_path=None):
         beats_in = span_s / step if step > 0 else 0
         if beats_in <= 0 or steps <= 0:
             return None
-        cycles = max(1, int(round(beats_in / (steps * 2.0))))
-        while cycles > 1 and beats_in / (steps * cycles) < 1.0:
+        cycles = max(1, int(round(beats_in / (steps * 1.0))))
+        while cycles > 1 and beats_in / (steps * cycles) < 0.55:
             cycles -= 1
         sb = beats_in / (steps * cycles)
-        if sb < 0.95:
+        if sb < 0.55:
             return None
         return round(sb, 3), cycles
 
@@ -1009,6 +1017,42 @@ def author(song, out_path=None):
                 k = list(fam_shades).index(name)
                 return fam_shades[(k + 1) % len(fam_shades)]
         return name
+
+    def lum_of(name):
+        h = PALETTE.get(name, "#000000").lstrip("#")
+        r, g, b_ = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+        return (0.299 * r + 0.587 * g + 0.114 * b_) / 255.0
+
+    BRIGHT = sorted(PALETTE, key=lambda n: -lum_of(n))
+
+    def open_up(name, want):
+        here = lum_of(name)
+        if here * want >= 0.42:
+            return name
+        for fam_shades in FAMILY_SHADES.values():
+            if name in fam_shades:
+                best = max(fam_shades, key=lum_of)
+                if lum_of(best) > here:
+                    return best
+        for cand in BRIGHT:
+            if lum_of(cand) > here:
+                return cand
+        return name
+
+    for c in cues:
+        lamps = (c.get("look") or {}).get("lamps")
+        if not isinstance(lamps, dict) or lamps.get("l") is None or not lamps.get("c"):
+            continue
+        if lamps["l"] < 0.68:
+            continue
+        opened = open_up(lamps["c"], lamps["l"])
+        if opened != lamps["c"]:
+            was = lamps["c"]
+            for v in (c.get("look") or {}).values():
+                if isinstance(v, dict) and v.get("c") == was:
+                    v["c"] = opened
+            c["why"] = (c.get("why") or "") + (
+                " - opened from %s to %s so the level can be seen" % (was, opened))
 
     if bar_s > 0:
         target = bar_s * 2.0
@@ -1057,7 +1101,7 @@ def author(song, out_path=None):
                 var = json.loads(json.dumps({x: y for x, y in c.items() if x != "_t"}))
                 var["at"] = {"second": round(at_t, 3)}
                 var["_t"] = at_t
-                var["fade"] = 0.18
+                var["fade"] = 0.0
                 var.pop("swell", None)
                 vch = (var.get("chases") or [{}])[0]
                 vch["figure"] = nxt

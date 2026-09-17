@@ -697,6 +697,20 @@ Watch it stay near there.
 
 ## 8. Traps — mistakes already made here, do not repeat
 
+- **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the
+  declared bpm is 118.77, a beat of 0.50518s, while the beat list averages 0.51724s —
+  2.4% apart. `makeGrid` and `author.py` both use the beat list, so the show is
+  consistent; but any check written with `60 / bpm` reads a true 4-cycle fit as 4.10
+  cycles and declares a bug that is not there. This cost a round trip. Measure beats
+  the way the renderer does.
+- **Two generators now write shows for the same song.** Upstream's
+  `tools/build-raga-of-revenge.js` writes `portal/showfiles/*.show.json` directly with
+  gestures and effects; this engine writes `portal/cue/shows/*.cues.json` and
+  `server.py` bakes from that when it exists. Whichever ran last wins the editor's
+  timeline, so a show with 191 effects and Wash/Beam/Drive lanes is upstream's, and one
+  with 0 gestures and 3 effects is this one. Amal hit exactly this confusion and nearly
+  credited the wrong engine. Decide with him which one ships.
+
 - **The emulator did not read the show file either.** `POST /api/show` baked from
   `portal/work/<song>.plan.json` and never opened `portal/showfiles/`. Fixing
   `publish.py` was therefore not enough: the emulator went on baking a stale plan.

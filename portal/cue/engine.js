@@ -368,7 +368,7 @@ function fillGaps(out, grid, chase, startS, endS) {
 }
 
 function gateSteps(out, grid, chase) {
-  const sub = chase.min_step_beats != null ? +chase.min_step_beats : 1.0;
+  const sub = chase.min_step_beats != null ? +chase.min_step_beats : 0.5;
   const floor = Math.max(0.22, grid.beatSeconds * sub * 0.92);
   const kept = [];
   for (const t of out) if (!kept.length || t - kept[kept.length - 1] >= floor) kept.push(t);

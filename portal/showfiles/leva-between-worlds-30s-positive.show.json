@@ -70,11 +70,11 @@
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.25
+     "l": 0.21
     },
     "heads": {
      "c": "indigo",
-     "l": 0.17,
+     "l": 0.15,
      "pan": 0.5,
      "tilt": 0.25
     }
@@ -82,13 +82,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "hocket",
+     "figure": "sweep",
      "every": {
-      "beats": 2.83
+      "beats": 0.943
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false,
+     "move_head": true,
      "reverse": true,
      "cycles": 1
     }
@@ -113,11 +113,11 @@
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.25
+     "l": 0.21
     },
     "heads": {
      "c": "indigo",
-     "l": 0.17,
+     "l": 0.15,
      "pan": 0.5,
      "tilt": 0.25
     }
@@ -125,14 +125,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "hocket",
      "every": {
-      "beats": 2
+      "beats": 0.919
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true,
-     "reverse": true
+     "move_head": false,
+     "reverse": true,
+     "cycles": 1
     }
    ]
   },
@@ -155,11 +156,11 @@
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.46
+     "l": 0.39
     },
     "heads": {
      "c": "indigo",
-     "l": 0.32,
+     "l": 0.27,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -169,12 +170,12 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "beats": 1.596
+      "beats": 0.798
      },
-     "fill_beats": 2,
+     "fill_beats": 1,
      "low": 0.4,
      "move_head": false,
-     "cycles": 1
+     "cycles": 2
     }
    ]
   },
@@ -197,11 +198,11 @@
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.46
+     "l": 0.39
     },
     "heads": {
      "c": "indigo",
-     "l": 0.32,
+     "l": 0.27,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -211,12 +212,12 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "beats": 2.153
+      "beats": 1.076
      },
-     "fill_beats": 2,
+     "fill_beats": 1,
      "low": 0.4,
      "move_head": false,
-     "cycles": 2
+     "cycles": 4
     }
    ]
   },
@@ -235,15 +236,15 @@
     "second": 21.478
    },
    "fade": 0.06,
-   "why": "and back on the look it is arriving at, the instant the audio returns",
+   "why": "and back on the look it is arriving at, the instant the audio returns - opened from indigo to violet so the level can be seen",
    "look": {
     "lamps": {
-     "c": "indigo",
-     "l": 0.73
+     "c": "violet",
+     "l": 0.8
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.51,
+     "l": 0.56,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -301,12 +302,12 @@
    "at": {
     "bar": 13
    },
-   "fade": 0.35,
+   "fade": 0.0,
    "why": "bars 13-16, the phrase travels across: drums leads, E 6.71, 2 hits, mode +1.00 - handover in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
-     "l": 0.59
+     "l": 0.58
     },
     "heads": {
      "c": "scarlet",
@@ -335,12 +336,12 @@
    "at": {
     "second": 33.019
    },
-   "fade": 0.18,
+   "fade": 0.0,
    "why": "sweep answers handover, a whole 1 cycles, landing on the hit at 33.02s with a new colour",
    "look": {
     "lamps": {
      "c": "amber",
-     "l": 0.59
+     "l": 0.58
     },
     "heads": {
      "c": "amber",
@@ -369,16 +370,16 @@
    "at": {
     "bar": 17
    },
-   "fade": 0.35,
+   "fade": 0.0,
    "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - alternate in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
-     "l": 0.49
+     "l": 0.55
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.34,
+     "l": 0.39,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -388,13 +389,13 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "beats": 2.269
+      "beats": 0.908
      },
      "fill_beats": 2,
      "low": 0.4,
      "move_head": false,
      "reverse": true,
-     "cycles": 2
+     "cycles": 5
     }
    ]
   },
@@ -403,16 +404,16 @@
    "at": {
     "second": 41.657
    },
-   "fade": 0.18,
+   "fade": 0.0,
    "why": "wave answers alternate, a whole 1 cycles, landing on the hit at 41.66s with a new colour",
    "look": {
     "lamps": {
      "c": "amber",
-     "l": 0.49
+     "l": 0.55
     },
     "heads": {
      "c": "amber",
-     "l": 0.34,
+     "l": 0.39,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -437,16 +438,16 @@
    "at": {
     "bar": 21
    },
-   "fade": 0.35,
+   "fade": 0.0,
    "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - comet in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
-     "l": 0.19
+     "l": 0.2
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.13,
+     "l": 0.14,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -484,11 +485,11 @@
    "look": {
     "lamps": {
      "c": "scarlet",
-     "l": 0.19
+     "l": 0.2
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.13,
+     "l": 0.14,
      "pan": 0.5,
      "tilt": 0.29
     }
