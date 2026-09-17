@@ -75,11 +75,12 @@
      "on": "lamps",
      "figure": "build",
      "every": {
-      "beats": 2
+      "beats": 1.458
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -121,12 +122,13 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "beats": 2
+      "beats": 2.644
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -157,13 +159,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "hocket",
      "every": {
-      "beats": 2
+      "beats": 1.481
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -205,11 +208,12 @@
      "on": "lamps",
      "figure": "build",
      "every": {
-      "beats": 2
+      "beats": 0.996
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -251,11 +255,12 @@
      "on": "lamps",
      "figure": "unbuild",
      "every": {
-      "beats": 2
+      "beats": 1.305
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -288,11 +293,46 @@
      "on": "lamps",
      "figure": "handover",
      "every": {
-      "notes": 1
+      "beats": 1.492
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "at": {
+    "second": 26.9
+   },
+   "fade": 0.18,
+   "why": "hocket answers handover, a whole 2 cycles, landing on the hit at 26.90s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.22
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.15,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 1.765
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
     }
    ]
   },
@@ -320,12 +360,13 @@
      "on": "lamps",
      "figure": "cascade",
      "every": {
-      "beats": 2
+      "beats": 1.142
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -333,6 +374,40 @@
     "to": 0.971,
     "curve": 1.15
    }
+  },
+  {
+   "id": 5,
+   "at": {
+    "second": 33.745
+   },
+   "fade": 0.18,
+   "why": "converge answers cascade, a whole 2 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.24
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 1.998
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
+    }
+   ]
   },
   {
    "id": 6,
@@ -387,11 +462,46 @@
      "on": "lamps",
      "figure": "wave",
      "every": {
-      "hits": 1
+      "beats": 1.226
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "at": {
+    "second": 47.996
+   },
+   "fade": 0.18,
+   "why": "sweep answers wave, a whole 1 cycles, landing on the hit at 48.00s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.42
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.29,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "beats": 1.442
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
     }
    ]
   },
@@ -419,12 +529,47 @@
      "on": "lamps",
      "figure": "split",
      "every": {
-      "beats": 2
+      "beats": 1.654
      },
      "fill_beats": 1,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "at": {
+    "second": 54.938
+   },
+   "fade": 0.18,
+   "why": "hocket answers split, a whole 1 cycles, landing on the hit at 54.94s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.41
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.29,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 2.685
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 1
     }
    ]
   },
@@ -450,14 +595,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "handover",
+     "figure": "hocket",
      "every": {
-      "beats": 2
+      "beats": 2.001
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": true,
-     "reverse": true
+     "move_head": false,
+     "reverse": true,
+     "cycles": 1
     }
    ]
   },
@@ -485,11 +631,46 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "hits": 1
+      "beats": 1.767
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "at": {
+    "second": 62.415
+   },
+   "fade": 0.18,
+   "why": "alternate answers hocket, a whole 2 cycles, landing on the hit at 62.41s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.47
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.33,
+     "pan": 0.5,
+     "tilt": 0.34
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "beats": 2.229
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
     }
    ]
   },
@@ -517,12 +698,13 @@
      "on": "lamps",
      "figure": "build",
      "every": {
-      "hits": 1
+      "beats": 2.021
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -530,6 +712,40 @@
     "to": 1.0,
     "curve": 1.15
    }
+  },
+  {
+   "id": 11,
+   "at": {
+    "second": 70.147
+   },
+   "fade": 0.18,
+   "why": "converge answers build, a whole 2 cycles, landing on the hit at 70.15s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.53
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.37,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 1.981
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
+    }
+   ]
   },
   {
    "id": 12,
@@ -555,11 +771,12 @@
      "on": "lamps",
      "figure": "wave",
      "every": {
-      "hits": 1
+      "beats": 1.33
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -621,12 +838,13 @@
      "on": "lamps",
      "figure": "pulse",
      "every": {
-      "hits": 3
+      "beats": 1.996
      },
      "fill_beats": 2,
      "low": 0.4,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
     }
    ]
   },
@@ -654,12 +872,13 @@
      "on": "lamps",
      "figure": "pulse",
      "every": {
-      "hits": 3
+      "beats": 2.001
      },
      "fill_beats": 2,
      "low": 0.4,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
     }
    ]
   },
@@ -687,12 +906,13 @@
      "on": "lamps",
      "figure": "split",
      "every": {
-      "hits": 2
+      "beats": 2.001
      },
      "fill_beats": 2,
      "low": 0.4,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
     }
    ]
   },
@@ -720,11 +940,46 @@
      "on": "lamps",
      "figure": "sweep",
      "every": {
-      "notes": 1
+      "beats": 0.976
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "at": {
+    "second": 90.953
+   },
+   "fade": 0.18,
+   "why": "converge answers sweep, a whole 2 cycles, landing on the hit at 90.95s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.37
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.26,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 1.538
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
     }
    ]
   },
@@ -752,11 +1007,12 @@
      "on": "lamps",
      "figure": "build",
      "every": {
-      "beats": 2
+      "beats": 0.995
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ]
   },
@@ -784,11 +1040,46 @@
      "on": "lamps",
      "figure": "comet",
      "every": {
-      "notes": 1
+      "beats": 1.179
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "at": {
+    "second": 98.778
+   },
+   "fade": 0.18,
+   "why": "wave answers comet, a whole 1 cycles, landing on the hit at 98.78s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.47
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.33,
+     "pan": 0.5,
+     "tilt": 0.34
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "beats": 1.489
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
     }
    ]
   },
@@ -816,12 +1107,47 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "beats": 2
+      "beats": 2.273
      },
      "fill_beats": 1,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "at": {
+    "second": 106.974
+   },
+   "fade": 0.18,
+   "why": "handover answers hocket, a whole 1 cycles, landing on the hit at 106.97s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.4
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.28,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "beats": 1.149
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1
     }
    ]
   },
@@ -849,11 +1175,46 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 1
+      "beats": 2.909
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 21,
+   "at": {
+    "second": 112.756
+   },
+   "fade": 0.18,
+   "why": "unbuild answers diverge, a whole 1 cycles, landing on the hit at 112.76s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.39
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 1.34
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
     }
    ]
   },
@@ -890,12 +1251,13 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "hits": 1
+      "beats": 2.097
      },
      "fill_beats": 1,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
     }
    ]
   },
@@ -923,12 +1285,47 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "hits": 1
+      "beats": 2.015
      },
      "fill_beats": 1,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 22,
+   "at": {
+    "second": 121.046
+   },
+   "fade": 0.18,
+   "why": "pulse answers alternate, a whole 2 cycles, landing on the hit at 121.05s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.44
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.31,
+     "pan": 0.5,
+     "tilt": 0.41
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 1.987
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -956,12 +1353,47 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 1
+      "beats": 1.766
      },
      "fill_beats": 1,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 23,
+   "at": {
+    "second": 127.872
+   },
+   "fade": 0.18,
+   "why": "converge answers diverge, a whole 2 cycles, landing on the hit at 127.87s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.43
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.3,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 2.231
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -989,12 +1421,47 @@
      "on": "lamps",
      "figure": "pulse",
      "every": {
-      "hits": 1
+      "beats": 2.02
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 24,
+   "at": {
+    "second": 135.605
+   },
+   "fade": 0.18,
+   "why": "handover answers pulse, a whole 1 cycles, landing on the hit at 135.60s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.6
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.42,
+     "pan": 0.5,
+     "tilt": 0.42
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "beats": 1.314
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1
     }
    ]
   },
@@ -1022,12 +1489,47 @@
      "on": "lamps",
      "figure": "handover",
      "every": {
-      "notes": 1
+      "beats": 1.349
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "at": {
+    "second": 142.872
+   },
+   "fade": 0.18,
+   "why": "alternate answers handover, a whole 2 cycles, landing on the hit at 142.87s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.33
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.23,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "beats": 1.978
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -1055,12 +1557,47 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "beats": 2
+      "beats": 1.775
      },
      "fill_beats": 1,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 26,
+   "at": {
+    "second": 149.699
+   },
+   "fade": 0.18,
+   "why": "split answers hocket, a whole 2 cycles, landing on the hit at 149.70s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.39
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "beats": 2.227
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -1088,11 +1625,12 @@
      "on": "lamps",
      "figure": "build",
      "every": {
-      "hits": 1
+      "beats": 2.139
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -1100,6 +1638,40 @@
     "to": 0.873,
     "curve": 1.15
    }
+  },
+  {
+   "id": 27,
+   "at": {
+    "second": 157.64
+   },
+   "fade": 0.18,
+   "why": "converge answers build, a whole 2 cycles, landing on the hit at 157.64s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.45
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.32,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 1.858
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 28,
@@ -1125,12 +1697,47 @@
      "on": "lamps",
      "figure": "wave",
      "every": {
-      "notes": 1
+      "beats": 1.165
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 28,
+   "at": {
+    "second": 164.2
+   },
+   "fade": 0.18,
+   "why": "pulse answers wave, a whole 2 cycles, landing on the hit at 164.20s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.5
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.35,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 2.248
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -1158,11 +1765,46 @@
      "on": "lamps",
      "figure": "handover",
      "every": {
-      "notes": 1
+      "beats": 1.475
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 29,
+   "at": {
+    "second": 172.315
+   },
+   "fade": 0.18,
+   "why": "sweep answers handover, a whole 1 cycles, landing on the hit at 172.31s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.37
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.26,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "beats": 1.193
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
     }
    ]
   },
@@ -1190,11 +1832,12 @@
      "on": "lamps",
      "figure": "build",
      "every": {
-      "beats": 2
+      "beats": 1.998
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -1202,6 +1845,40 @@
     "to": 0.848,
     "curve": 1.15
    }
+  },
+  {
+   "id": 30,
+   "at": {
+    "second": 179.205
+   },
+   "fade": 0.18,
+   "why": "wave answers build, a whole 1 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.33
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.23,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "beats": 1.332
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 31,
@@ -1227,11 +1904,46 @@
      "on": "lamps",
      "figure": "comet",
      "every": {
-      "notes": 1
+      "beats": 1.33
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 31,
+   "at": {
+    "second": 186.47
+   },
+   "fade": 0.18,
+   "why": "alternate answers comet, a whole 2 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.31
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.22,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "beats": 1.996
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
     }
    ]
   },
@@ -1259,11 +1971,12 @@
      "on": "lamps",
      "figure": "unbuild",
      "every": {
-      "beats": 2
+      "beats": 2.004
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -1271,6 +1984,40 @@
     "to": 0.821,
     "curve": 1.15
    }
+  },
+  {
+   "id": 32,
+   "at": {
+    "second": 193.745
+   },
+   "fade": 0.18,
+   "why": "hocket answers unbuild, a whole 2 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.31
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.22,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 2.004
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 33,
@@ -1296,12 +2043,47 @@
      "on": "lamps",
      "figure": "handover",
      "every": {
-      "notes": 1
+      "beats": 1.332
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 33,
+   "at": {
+    "second": 201.025
+   },
+   "fade": 0.18,
+   "why": "converge answers handover, a whole 2 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.21
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.15,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 1.998
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -1329,11 +2111,12 @@
      "on": "lamps",
      "figure": "cascade",
      "every": {
-      "beats": 2
+      "beats": 1.014
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -1341,6 +2124,40 @@
     "to": 1.0,
     "curve": 1.15
    }
+  },
+  {
+   "id": 34,
+   "at": {
+    "second": 207.888
+   },
+   "fade": 0.18,
+   "why": "pulse answers cascade, a whole 2 cycles, landing on the hit at 207.89s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.2,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 2.222
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 35,
@@ -1366,12 +2183,47 @@
      "on": "lamps",
      "figure": "comet",
      "every": {
-      "notes": 1
+      "beats": 1.182
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 35,
+   "at": {
+    "second": 215.156
+   },
+   "fade": 0.18,
+   "why": "sweep answers comet, a whole 1 cycles, landing on the hit at 215.16s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.22
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.15,
+     "pan": 0.5,
+     "tilt": 0.34
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "beats": 1.482
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1
     }
    ]
   },
@@ -1399,12 +2251,47 @@
      "on": "lamps",
      "figure": "build",
      "every": {
-      "beats": 2
+      "beats": 1.772
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 36,
+   "at": {
+    "second": 222.424
+   },
+   "fade": 0.18,
+   "why": "handover answers build, a whole 1 cycles, landing on the hit at 222.42s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.29
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.2,
+     "pan": 0.5,
+     "tilt": 0.36
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "beats": 1.487
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1
     }
    ]
   },
@@ -1432,12 +2319,47 @@
      "on": "lamps",
      "figure": "handover",
      "every": {
-      "notes": 1
+      "beats": 0.973
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 37,
+   "at": {
+    "second": 229.135
+   },
+   "fade": 0.18,
+   "why": "alternate answers handover, a whole 2 cycles, landing on the hit at 229.13s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.27
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "beats": 1.537
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -1465,11 +2387,12 @@
      "on": "lamps",
      "figure": "unbuild",
      "every": {
-      "hits": 1
+      "beats": 1.998
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -1477,6 +2400,40 @@
     "to": 0.683,
     "curve": 1.15
    }
+  },
+  {
+   "id": 38,
+   "at": {
+    "second": 235.565
+   },
+   "fade": 0.18,
+   "why": "hocket answers unbuild, a whole 2 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.24
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 1.998
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 39,
@@ -1502,12 +2459,47 @@
      "on": "lamps",
      "figure": "comet",
      "every": {
-      "notes": 1
+      "beats": 0.975
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 39,
+   "at": {
+    "second": 241.859
+   },
+   "fade": 0.18,
+   "why": "converge answers comet, a whole 3 cycles, landing on the hit at 241.86s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.23
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.16,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 1.694
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 3
     }
    ]
   },
@@ -1535,11 +2527,12 @@
      "on": "lamps",
      "figure": "cascade",
      "every": {
-      "beats": 2
+      "beats": 1.298
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -1547,6 +2540,40 @@
     "to": 0.937,
     "curve": 1.15
    }
+  },
+  {
+   "id": 40,
+   "at": {
+    "second": 250.613
+   },
+   "fade": 0.18,
+   "why": "pulse answers cascade, a whole 2 cycles, landing on the hit at 250.61s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.2
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.14,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 1.725
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 41,
@@ -1572,12 +2599,47 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 1
+      "beats": 1.773
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 41,
+   "at": {
+    "second": 256.975
+   },
+   "fade": 0.18,
+   "why": "converge answers diverge, a whole 2 cycles, landing on the hit at 256.98s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.26
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.18,
+     "pan": 0.5,
+     "tilt": 0.34
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 2.224
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -1603,13 +2665,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "hocket",
      "every": {
-      "notes": 1
+      "beats": 2.001
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false,
+     "cycles": 1
     }
    ]
   },
@@ -1637,11 +2700,46 @@
      "on": "lamps",
      "figure": "split",
      "every": {
-      "beats": 2
+      "beats": 1.754
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false
+     "move_head": false,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 43,
+   "at": {
+    "second": 266.03
+   },
+   "fade": 0.18,
+   "why": "unbuild answers split, a whole 1 cycles, landing on the hit at 266.03s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.16
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.11,
+     "pan": 0.5,
+     "tilt": 0.34
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 2.237
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
     }
    ]
   },
@@ -1669,12 +2767,47 @@
      "on": "lamps",
      "figure": "wave",
      "every": {
-      "beats": 2
+      "beats": 1.349
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 44,
+   "at": {
+    "second": 273.78
+   },
+   "fade": 0.18,
+   "why": "hocket answers wave, a whole 2 cycles, landing on the hit at 273.78s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.09
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.06,
+     "pan": 0.5,
+     "tilt": 0.41
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 2.212
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -1711,11 +2844,12 @@
      "on": "lamps",
      "figure": "sweep",
      "every": {
-      "beats": 2
+      "beats": 1.312
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ]
   },

@@ -41,11 +41,46 @@
      "on": "lamps",
      "figure": "sweep",
      "every": {
-      "beats": 2
+      "beats": 1.022
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "at": {
+    "second": 2.345
+   },
+   "fade": 0.18,
+   "why": "cascade answers sweep, a whole 1 cycles, landing on the hit at 2.35s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.15
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.1,
+     "pan": 0.5,
+     "tilt": 0.34
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "cascade",
+     "every": {
+      "beats": 1.415
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
     }
    ]
   },
@@ -73,12 +108,47 @@
      "on": "lamps",
      "figure": "split",
      "every": {
-      "hits": 1
+      "beats": 2.019
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 8.545
+   },
+   "fade": 0.18,
+   "why": "build answers split, a whole 1 cycles, landing on the hit at 8.54s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.16
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.11,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "build",
+     "every": {
+      "beats": 1.976
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1
     }
    ]
   },
@@ -106,12 +176,13 @@
      "on": "lamps",
      "figure": "unbuild",
      "every": {
-      "hits": 1
+      "beats": 1.52
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -119,6 +190,40 @@
     "to": 0.729,
     "curve": 1.15
    }
+  },
+  {
+   "id": 3,
+   "at": {
+    "second": 13.367
+   },
+   "fade": 0.18,
+   "why": "hocket answers unbuild, a whole 2 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.23
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.16,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 1.52
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
+    }
+   ]
   },
   {
    "id": 0,
@@ -153,12 +258,47 @@
      "on": "lamps",
      "figure": "handover",
      "every": {
-      "notes": 1
+      "beats": 1.111
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "at": {
+    "second": 18.901
+   },
+   "fade": 0.18,
+   "why": "pulse answers handover, a whole 2 cycles, landing on the hit at 18.90s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.23
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.16,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 1.768
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -195,11 +335,12 @@
      "on": "lamps",
      "figure": "cascade",
      "every": {
-      "beats": 2
+      "beats": 1.155
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -207,6 +348,40 @@
     "to": 0.905,
     "curve": 1.15
    }
+  },
+  {
+   "id": 5,
+   "at": {
+    "second": 25.032
+   },
+   "fade": 0.18,
+   "why": "comet answers cascade, a whole 1 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.35
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.24,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "beats": 1.347
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 6,
@@ -232,11 +407,12 @@
      "on": "lamps",
      "figure": "unbuild",
      "every": {
-      "hits": 1
+      "beats": 1.783
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -244,6 +420,40 @@
     "to": 1.0,
     "curve": 1.15
    }
+  },
+  {
+   "id": 6,
+   "at": {
+    "second": 30.279
+   },
+   "fade": 0.18,
+   "why": "alternate answers unbuild, a whole 2 cycles, landing on the hit at 30.28s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.37
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.26,
+     "pan": 0.5,
+     "tilt": 0.28
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "beats": 2.219
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 7,
@@ -269,11 +479,12 @@
      "on": "lamps",
      "figure": "converge",
      "every": {
-      "hits": 1
+      "beats": 2.001
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "cycles": 2
     }
    ]
   },
@@ -301,11 +512,12 @@
      "on": "lamps",
      "figure": "pulse",
      "every": {
-      "hits": 1
+      "beats": 2.001
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "cycles": 2
     }
    ]
   },
@@ -333,12 +545,47 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 2
+      "beats": 1.775
      },
      "fill_beats": 2,
      "low": 0.4,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "at": {
+    "second": 41.308
+   },
+   "fade": 0.18,
+   "why": "pulse answers diverge, a whole 2 cycles, landing on the hit at 41.31s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.55
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.39,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 2.22
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -366,12 +613,47 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "hits": 1
+      "beats": 2.275
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "at": {
+    "second": 47.508
+   },
+   "fade": 0.18,
+   "why": "split answers alternate, a whole 2 cycles, landing on the hit at 47.51s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.64
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.45,
+     "pan": 0.5,
+     "tilt": 0.36
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "beats": 1.727
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -399,12 +681,13 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 1
+      "beats": 1.657
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
     }
    ],
    "swell": {
@@ -412,6 +695,40 @@
     "to": 1.0,
     "curve": 1.6
    }
+  },
+  {
+   "id": 11,
+   "at": {
+    "second": 52.175
+   },
+   "fade": 0.18,
+   "why": "hocket answers diverge, a whole 1 cycles, landing on the hit at 52.17s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.59
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.41,
+     "pan": 0.5,
+     "tilt": 0.4
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 2.69
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 1
+    }
+   ]
   },
   {
    "id": 12,
@@ -466,11 +783,46 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "hits": 1
+      "beats": 2.549
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "at": {
+    "second": 57.168
+   },
+   "fade": 0.18,
+   "why": "alternate answers hocket, a whole 2 cycles, landing on the hit at 57.17s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "saffron",
+     "l": 0.59
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.41,
+     "pan": 0.5,
+     "tilt": 0.39
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "beats": 1.72
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
     }
    ]
   },
@@ -498,11 +850,12 @@
      "on": "lamps",
      "figure": "converge",
      "every": {
-      "hits": 1
+      "beats": 2.001
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "cycles": 1
     }
    ]
   },
@@ -530,12 +883,47 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 1
+      "beats": 1.774
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "at": {
+    "second": 63.367
+   },
+   "fade": 0.18,
+   "why": "pulse answers diverge, a whole 2 cycles, landing on the hit at 63.37s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.58
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.41,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 2.228
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -563,12 +951,47 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "hits": 1
+      "beats": 2.031
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "at": {
+    "second": 69.242
+   },
+   "fade": 0.18,
+   "why": "split answers alternate, a whole 2 cycles, landing on the hit at 69.24s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.55
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.39,
+     "pan": 0.5,
+     "tilt": 0.4
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "beats": 1.971
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -596,11 +1019,46 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 1
+      "beats": 1.767
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "at": {
+    "second": 74.397
+   },
+   "fade": 0.18,
+   "why": "handover answers diverge, a whole 1 cycles, landing on the hit at 74.40s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.46
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.32,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "beats": 1.49
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
     }
    ]
   },
@@ -628,12 +1086,47 @@
      "on": "lamps",
      "figure": "wave",
      "every": {
-      "beats": 2
+      "beats": 1.336
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "at": {
+    "second": 80.245
+   },
+   "fade": 0.18,
+   "why": "alternate answers wave, a whole 2 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.45
+    },
+    "heads": {
+     "c": "teal",
+     "l": 0.32,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "beats": 2.005
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -661,12 +1154,47 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "beats": 2
+      "beats": 1.994
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "at": {
+    "second": 85.76
+   },
+   "fade": 0.18,
+   "why": "split answers diverge, a whole 2 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.33
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.23,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "beats": 1.994
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -692,14 +1220,49 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "hocket",
      "every": {
-      "notes": 1
+      "beats": 2.801
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true,
-     "reverse": true
+     "move_head": false,
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "at": {
+    "second": 90.442
+   },
+   "fade": 0.18,
+   "why": "converge answers hocket, a whole 2 cycles, landing on the hit at 90.44s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.33
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.23,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 1.734
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -736,12 +1299,13 @@
      "on": "lamps",
      "figure": "unbuild",
      "every": {
-      "hits": 1
+      "beats": 2.054
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -749,6 +1313,40 @@
     "to": 0.683,
     "curve": 1.15
    }
+  },
+  {
+   "id": 21,
+   "at": {
+    "second": 96.525
+   },
+   "fade": 0.18,
+   "why": "build answers unbuild, a whole 1 cycles, landing on the hit at 96.53s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.2,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "build",
+     "every": {
+      "beats": 2.193
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1
+    }
+   ]
   },
   {
    "id": 22,
@@ -774,11 +1372,12 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "hits": 1
+      "beats": 1.997
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "cycles": 2
     }
    ],
    "swell": {
@@ -786,6 +1385,40 @@
     "to": 0.762,
     "curve": 1.15
    }
+  },
+  {
+   "id": 22,
+   "at": {
+    "second": 102.305
+   },
+   "fade": 0.18,
+   "why": "comet answers alternate, a whole 1 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.38
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "beats": 1.332
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 23,
@@ -811,11 +1444,46 @@
      "on": "lamps",
      "figure": "handover",
      "every": {
-      "beats": 2
+      "beats": 1.334
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 23,
+   "at": {
+    "second": 107.82
+   },
+   "fade": 0.18,
+   "why": "split answers handover, a whole 2 cycles, mid-phrase",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.36
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.25,
+     "pan": 0.5,
+     "tilt": 0.28
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "beats": 2.001
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
     }
    ]
   },
@@ -843,11 +1511,12 @@
      "on": "lamps",
      "figure": "unbuild",
      "every": {
-      "hits": 1
+      "beats": 1.78
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -855,6 +1524,40 @@
     "to": 0.946,
     "curve": 1.15
    }
+  },
+  {
+   "id": 24,
+   "at": {
+    "second": 113.035
+   },
+   "fade": 0.18,
+   "why": "hocket answers unbuild, a whole 2 cycles, landing on the hit at 113.03s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.44
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.31,
+     "pan": 0.5,
+     "tilt": 0.38
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 2.222
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 25,
@@ -880,12 +1583,47 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 1
+      "beats": 1.768
      },
      "fill_beats": 1,
      "low": 0.5,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "at": {
+    "second": 118.538
+   },
+   "fade": 0.18,
+   "why": "hocket answers diverge, a whole 2 cycles, landing on the hit at 118.54s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.43
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.3,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 2.227
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -913,11 +1651,12 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "hits": 1
+      "beats": 2.001
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false
+     "move_head": false,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -979,12 +1718,47 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 2
+      "beats": 1.531
      },
      "fill_beats": 1,
      "low": 0.4,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 28,
+   "at": {
+    "second": 129.242
+   },
+   "fade": 0.18,
+   "why": "handover answers diverge, a whole 1 cycles, landing on the hit at 129.24s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.39
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.39
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "beats": 1.647
+     },
+     "fill_beats": 1,
+     "low": 0.4,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1
     }
    ]
   },
@@ -1012,11 +1786,46 @@
      "on": "lamps",
      "figure": "pulse",
      "every": {
-      "hits": 1
+      "beats": 1.772
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 29,
+   "at": {
+    "second": 135.094
+   },
+   "fade": 0.18,
+   "why": "unbuild answers pulse, a whole 1 cycles, landing on the hit at 135.09s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.39
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 2.23
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
     }
    ]
   },
@@ -1044,12 +1853,47 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 2
+      "beats": 2.029
      },
      "fill_beats": 1,
      "low": 0.4,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 30,
+   "at": {
+    "second": 140.968
+   },
+   "fade": 0.18,
+   "why": "split answers diverge, a whole 2 cycles, landing on the hit at 140.97s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.38
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "beats": 1.966
+     },
+     "fill_beats": 1,
+     "low": 0.4,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -1077,11 +1921,46 @@
      "on": "lamps",
      "figure": "unbuild",
      "every": {
-      "hits": 1
+      "beats": 2.001
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 31,
+   "at": {
+    "second": 146.44
+   },
+   "fade": 0.18,
+   "why": "converge answers unbuild, a whole 2 cycles, landing on the hit at 146.44s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.37
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.26,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 2.001
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "cycles": 2,
+     "reverse": true
     }
    ]
   },
@@ -1109,12 +1988,47 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "hits": 1
+      "beats": 2.029
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 32,
+   "at": {
+    "second": 151.998
+   },
+   "fade": 0.18,
+   "why": "pulse answers diverge, a whole 2 cycles, landing on the hit at 152.00s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.31
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.22,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 1.973
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -1142,11 +2056,46 @@
      "on": "lamps",
      "figure": "sweep",
      "every": {
-      "notes": 1
+      "beats": 1.334
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 33,
+   "at": {
+    "second": 157.48
+   },
+   "fade": 0.18,
+   "why": "comet answers sweep, a whole 1 cycles, landing on the hit at 157.48s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.27
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.34
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "beats": 1.334
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
     }
    ]
   },
@@ -1174,11 +2123,46 @@
      "on": "lamps",
      "figure": "comet",
      "every": {
-      "notes": 1
+      "beats": 1.334
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 34,
+   "at": {
+    "second": 163.0
+   },
+   "fade": 0.18,
+   "why": "cascade answers comet, a whole 1 cycles, landing on the hit at 163.00s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.29
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.2,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "cascade",
+     "every": {
+      "beats": 1.435
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
     }
    ]
   },
@@ -1215,12 +2199,13 @@
      "on": "lamps",
      "figure": "handover",
      "every": {
-      "beats": 2
+      "beats": 1.29
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
     }
    ]
   },

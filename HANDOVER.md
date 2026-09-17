@@ -664,6 +664,37 @@ and the chase rate follows onsets 57% of the time against a fixed beat grid 27%,
 inversion of what it was. When adding a figure, ask first which of the five gestures it
 actually is; a sixth name for a travelling point adds nothing.
 
+## 7o. A figure must finish its journey, and change on a hit
+
+Amal, watching: a handover runs left to right to left three times and then "the effect
+is cut off mid-way and it becomes another effect, that causes a jerk in the show." The
+arithmetic says he had to be right. A travel figure on four lamps is a six-step cycle
+(`2n - 2`, down and back). At `every: {beats: 2}` that is twelve beats, exactly three
+bars. The phrase is four bars. **Sixteen beats is not a multiple of twelve, so a
+travelling figure can never complete inside a phrase** — it is always chopped mid-pass.
+`cascade` is worse at seven steps, three and a half bars.
+
+Choosing the rate to suit the hold fixes it. For a hold of `H` beats and a figure of
+`S` steps, `every.beats = H / (S * cycles)` makes the figure complete exactly `cycles`
+journeys and land on the boundary. `cycles` is picked to keep the step near two beats
+and never below one, because `gateSteps` drops anything faster. Where no rate fits — a
+hold too short for even one cycle — the figure is swapped for a two-step one
+(`hocket`, `alternate`, `converge`, `pulse`), which is what a designer does with a
+short hold anyway. 32 of 35 chase cues now complete; the three that do not are outro
+cues under a bar long.
+
+The same pass splits a hold longer than about two bars and gives the second half a
+different gesture, so no idea outstays its welcome. **The split snaps to a real hit**:
+score moments and the top 28% of rhythm onsets are anchors, and a split within 0.6 bars
+of one moves onto it and changes colour there too. Amal spotted the case that proved
+this necessary — a `build` moment at 9.11s, "the drums thicken into something", with
+the show changing at 8.90s instead and keeping its colour. It now lands on 9.11s, in a
+new figure and a new shade. Eight changes in `raga-of-revenge` land on scored hits.
+
+Unpatterned rises to 1.0-2.4% from 0.6-0.8% and that is expected: two thirds of the
+extra samples are inside crossfade windows, which is more cue changes doing their job.
+Watch it stay near there.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **The emulator did not read the show file either.** `POST /api/show` baked from

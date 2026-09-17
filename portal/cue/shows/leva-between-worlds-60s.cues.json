@@ -41,11 +41,12 @@
      "on": "lamps",
      "figure": "build",
      "every": {
-      "hits": 3
+      "beats": 2.08
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -53,6 +54,40 @@
     "to": 0.683,
     "curve": 1.15
    }
+  },
+  {
+   "id": 1,
+   "at": {
+    "second": 4.18
+   },
+   "fade": 0.18,
+   "why": "comet answers build, a whole 1 cycles, landing on the hit at 4.18s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.19
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.13,
+     "pan": 0.5,
+     "tilt": 0.45
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "beats": 1.28
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "cycles": 1,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 2,
@@ -78,12 +113,13 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "hits": 3
+      "beats": 1.517
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
     }
    ],
    "swell": {
@@ -91,6 +127,40 @@
     "to": 0.937,
     "curve": 1.15
    }
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 11.053
+   },
+   "fade": 0.18,
+   "why": "cascade answers hocket, a whole 1 cycles, landing on the hit at 11.05s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.34
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.24,
+     "pan": 0.5,
+     "tilt": 0.45
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "cascade",
+     "every": {
+      "beats": 1.419
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1
+    }
+   ]
   },
   {
    "id": 3,
@@ -145,12 +215,47 @@
      "on": "lamps",
      "figure": "pulse",
      "every": {
-      "hits": 3
+      "beats": 2.015
      },
      "fill_beats": 1,
      "low": 0.4,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "at": {
+    "second": 28.05
+   },
+   "fade": 0.18,
+   "why": "hocket answers pulse, a whole 2 cycles, landing on the hit at 28.05s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.4
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.28,
+     "pan": 0.5,
+     "tilt": 0.45
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 1.985
+     },
+     "fill_beats": 1,
+     "low": 0.4,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
     }
    ]
   },
@@ -178,12 +283,13 @@
      "on": "lamps",
      "figure": "sweep",
      "every": {
-      "notes": 1
+      "beats": 1.262
      },
      "fill_beats": 2,
      "low": 0.4,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -191,6 +297,40 @@
     "to": 1.0,
     "curve": 1.6
    }
+  },
+  {
+   "id": 5,
+   "at": {
+    "second": 35.805
+   },
+   "fade": 0.18,
+   "why": "pulse answers sweep, a whole 2 cycles, landing on the hit at 35.80s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.64
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.45,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 2.108
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 2
+    }
+   ]
   },
   {
    "id": 6,
@@ -243,13 +383,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "hocket",
      "every": {
-      "notes": 1
+      "beats": 2.0
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": true
+     "move_head": false,
+     "cycles": 1
     }
    ],
    "swell": {

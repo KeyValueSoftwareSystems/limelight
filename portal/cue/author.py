@@ -82,6 +82,27 @@ GESTURES = {
     "room": ("pulse",),
 }
 RHYTHMIC = ("room", "halves", "oddeven")
+
+
+def lamp_count(rig="arc4-head"):
+    try:
+        man = json.load(open(os.path.join(REPO, "portal", "venues", rig, "manifest.json")))
+        lay = json.load(open(os.path.join(REPO, "readers", "lights", man["layout_file"])))
+        return sum(1 for f in lay["fixtures"] if f["type"].startswith("par")) or 4
+    except Exception:
+        return 4
+
+
+def cycle_steps(fig, n):
+    if fig in ("sweep", "bounce", "wave", "comet", "handover"):
+        return max(1, 2 * n - 2)
+    if fig == "cascade":
+        return max(1, 2 * n - 1)
+    if fig in ("build", "unbuild"):
+        return max(1, n)
+    if fig in ("converge", "diverge"):
+        return max(1, n // 2)
+    return 2
 COUNTER = {
     "brass": "indigo", "strings": "amber", "guitars": "teal", "keys": "ember",
     "winds": "violet", "voices": "indigo", "drums": "teal",
@@ -943,6 +964,128 @@ def author(song, out_path=None):
             continue
         held = here
         last_change = t
+
+    FAM_OF = {}
+    for _fam, _figs in GESTURES.items():
+        for _f in _figs:
+            FAM_OF[_f] = _fam
+
+    bar_s = step * per
+    song_end = sc["song"]["length_s"]
+
+    n_lamps = lamp_count()
+
+    def fit_rate(fig, span_s):
+        steps = cycle_steps(fig, n_lamps)
+        beats_in = span_s / step if step > 0 else 0
+        if beats_in <= 0 or steps <= 0:
+            return None
+        cycles = max(1, int(round(beats_in / (steps * 2.0))))
+        while cycles > 1 and beats_in / (steps * cycles) < 1.0:
+            cycles -= 1
+        sb = beats_in / (steps * cycles)
+        if sb < 0.95:
+            return None
+        return round(sb, 3), cycles
+
+    strong = []
+    if hits:
+        hi = sorted(i for _, i in hits)
+        cut = hi[int(len(hi) * 0.72)] if hi else 0
+        strong = [t for t, i in hits if i >= cut]
+    anchors = sorted(set([t for t, _, _ in moments] + strong))
+
+    def snap(t0, window):
+        best, bd = None, window
+        for a in anchors:
+            d = abs(a - t0)
+            if d < bd:
+                best, bd = a, d
+        return best
+
+    def shift_colour(name):
+        for fam_shades in FAMILY_SHADES.values():
+            if name in fam_shades:
+                k = list(fam_shades).index(name)
+                return fam_shades[(k + 1) % len(fam_shades)]
+        return name
+
+    if bar_s > 0:
+        target = bar_s * 2.0
+        cues.sort(key=lambda c: c.get("_t", 0))
+        extra = []
+        seen_recent = []
+        for i, c in enumerate(cues):
+            ch = (c.get("chases") or [None])[0]
+            if not ch or not ch.get("figure"):
+                continue
+            end = cues[i + 1]["_t"] if i + 1 < len(cues) else song_end
+            span = end - c.get("_t", 0)
+            parts = 1
+            if span >= target * 1.3:
+                parts = max(2, min(3, int(round(span / target))))
+            cuts = []
+            for k in range(1, parts):
+                at_t = c["_t"] + span * k / parts
+                hit_t = snap(at_t, bar_s * 0.6)
+                if (hit_t is not None and hit_t > c["_t"] + bar_s * 0.4
+                        and hit_t < end - bar_s * 0.4):
+                    cuts.append((hit_t, True))
+                else:
+                    cuts.append((at_t, False))
+            bounds = [c["_t"]] + [t for t, _ in cuts] + [end]
+            here_fam = FAM_OF.get(ch["figure"], "travel")
+            fam_ring = [here_fam] + [f for f in GESTURES if f != here_fam]
+            fit = fit_rate(ch["figure"], bounds[1] - bounds[0])
+            if not fit:
+                for alt in ("hocket", "alternate", "converge", "pulse"):
+                    fit = fit_rate(alt, bounds[1] - bounds[0])
+                    if fit:
+                        ch["figure"] = alt
+                        ch["move_head"] = False
+                        break
+            if fit:
+                ch["every"] = {"beats": fit[0]}
+                ch["cycles"] = fit[1]
+            seen_recent = (seen_recent + [ch["figure"]])[-4:]
+            for k, (at_t, on_hit) in enumerate(cuts, start=1):
+                seg = bounds[k + 1] - bounds[k]
+                pick_fam = fam_ring[(i + k) % len(fam_ring)]
+                opts = [f for f in GESTURES[pick_fam] if f not in seen_recent] or list(GESTURES[pick_fam])
+                nxt = opts[(i + k) % len(opts)]
+                seen_recent = (seen_recent + [nxt])[-4:]
+                var = json.loads(json.dumps({x: y for x, y in c.items() if x != "_t"}))
+                var["at"] = {"second": round(at_t, 3)}
+                var["_t"] = at_t
+                var["fade"] = 0.18
+                var.pop("swell", None)
+                vch = (var.get("chases") or [{}])[0]
+                vch["figure"] = nxt
+                vch["reverse"] = (not ch.get("reverse", False)) if k % 2 else ch.get("reverse", False)
+                vch["move_head"] = pick_fam in ("travel", "grow")
+                if on_hit:
+                    for v in (var.get("look") or {}).values():
+                        if isinstance(v, dict) and v.get("c"):
+                            v["c"] = shift_colour(v["c"])
+                vfit = fit_rate(nxt, seg)
+                if not vfit:
+                    for alt in ("hocket", "alternate", "converge", "pulse"):
+                        vfit = fit_rate(alt, seg)
+                        if vfit:
+                            nxt = alt
+                            vch["figure"] = alt
+                            vch["move_head"] = False
+                            break
+                if vfit:
+                    vch["every"] = {"beats": vfit[0]}
+                    vch["cycles"] = vfit[1]
+                var["why"] = ("%s answers %s, a whole %d cycles%s"
+                              % (nxt, ch["figure"], (vfit[1] if vfit else 1),
+                                 (", landing on the hit at %.2fs with a new colour" % at_t)
+                                 if on_hit else ", mid-phrase"))
+                extra.append(var)
+        cues.extend(extra)
+        cues.sort(key=lambda c: c.get("_t", 0))
 
     for c in cues:
         c.pop("_t", None)

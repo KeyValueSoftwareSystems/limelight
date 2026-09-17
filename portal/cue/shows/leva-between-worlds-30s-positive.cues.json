@@ -48,14 +48,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "hocket",
      "every": {
-      "beats": 2
+      "beats": 2.83
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true,
-     "reverse": true
+     "move_head": false,
+     "reverse": true,
+     "cycles": 1
     }
    ]
   },
@@ -134,11 +135,12 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "hits": 3
+      "beats": 1.596
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "cycles": 1
     }
    ]
   },
@@ -175,11 +177,12 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "hits": 3
+      "beats": 2.153
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "cycles": 2
     }
    ]
   },
@@ -216,11 +219,12 @@
      "on": "lamps",
      "figure": "unbuild",
      "every": {
-      "hits": 2
+      "beats": 1.24
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": true
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -282,12 +286,47 @@
      "on": "lamps",
      "figure": "handover",
      "every": {
-      "hits": 1
+      "beats": 1.177
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": true,
-     "reverse": true
+     "reverse": true,
+     "cycles": 1
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "at": {
+    "second": 33.019
+   },
+   "fade": 0.18,
+   "why": "sweep answers handover, a whole 1 cycles, landing on the hit at 33.02s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.59
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.41,
+     "pan": 0.5,
+     "tilt": 0.41
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "beats": 1.486
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1
     }
    ]
   },
@@ -315,12 +354,47 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "hits": 2
+      "beats": 2.269
      },
      "fill_beats": 2,
      "low": 0.4,
      "move_head": false,
-     "reverse": true
+     "reverse": true,
+     "cycles": 2
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "at": {
+    "second": 41.657
+   },
+   "fade": 0.18,
+   "why": "wave answers alternate, a whole 1 cycles, landing on the hit at 41.66s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.49
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.34,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "beats": 1.154
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1
     }
    ]
   },
@@ -346,13 +420,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "hocket",
      "every": {
-      "beats": 2
+      "beats": 1.4
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false,
+     "cycles": 1
     }
    ]
   },
