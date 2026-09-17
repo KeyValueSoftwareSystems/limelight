@@ -858,19 +858,27 @@ def author(song, out_path=None):
     sec_ref = {k: (sorted(v)[int(len(v) * 0.7)] if v else 1.0) for k, v in sec_peak.items()}
 
     last_t = -9.0
-    for bar in sorted(by_bar):
-        t, inten, row = by_bar[bar]
+    every_hit = []
+    for t0, i0 in hits:
+        row0 = None
+        for rr in rows:
+            if rr["t"] <= t0 < rr["end"]:
+                row0 = rr
+                break
+        if row0 is not None:
+            every_hit.append((row0["bar"], t0, i0, row0))
+    for bar, t, inten, row in sorted(every_hit, key=lambda x: x[1]):
         lab = None
         for sx in sections:
             if sx["start"] - step <= row["t"] < sx["end"]:
                 lab = sx.get("label", "?") + str(round(sx["start"]))
                 break
         ref = sec_ref.get(lab, 0.34) or 0.34
-        if inten < max(0.16, ref * 0.62):
+        if inten < max(0.14, ref * 0.48):
             continue
         if any(a - 0.1 <= t <= b + 0.1 for a, b in hole_spans):
             continue
-        if t - last_t < 2.2:
+        if t - last_t < step * 0.98:
             continue
         last_t = t
         climbing = bar in rising
@@ -1295,6 +1303,21 @@ def author(song, out_path=None):
                          if abs(lum_of(w) - lum_of(lead0)) <= 0.16 and hue_gap(lead0, w) >= 60]
                 if mates:
                     pair = [lead0, max(mates, key=lambda w: hue_gap(lead0, w))]
+            def lock_to_rhythm(chase, fam, span_s):
+                if fam not in RHYTHMIC:
+                    return False
+                n_hits = sum(1 for t0, i0 in hits
+                             if c["_t"] <= t0 < c["_t"] + span_s and i0 >= 0.3)
+                if n_hits < 4:
+                    return False
+                per_step = span_s / n_hits
+                n = 1 if per_step >= step * 0.75 else 2
+                chase["every"] = {"hits": n}
+                chase["min_intensity"] = 0.3
+                chase["fill_beats"] = 2
+                return True
+
+            pair = [working[0], working[1]] if len(working) > 1 else None
             fig0, fit, fam0 = choose_figure(bounds[1] - bounds[0], here_fam, seen_recent)
             if fig0:
                 if fig0 != ch["figure"]:
@@ -1305,6 +1328,8 @@ def author(song, out_path=None):
                         % (fig0, (bounds[1] - bounds[0]) / bar_s))
                 ch["every"] = {"beats": fit[0]}
                 ch["cycles"] = fit[1]
+                if lock_to_rhythm(ch, fam0, bounds[1] - bounds[0]):
+                    ch.pop("cycles", None)
                 dress(ch, fam0, pair, bounds[1] - bounds[0])
                 steer(c, fam0, climbing)
             seen_recent = (seen_recent + [ch["figure"]])[-4:]
@@ -1338,6 +1363,8 @@ def author(song, out_path=None):
                 vfit = vfit0
                 vch["every"] = {"beats": vfit[0]}
                 vch["cycles"] = vfit[1]
+                if lock_to_rhythm(vch, pick_fam, seg):
+                    vch.pop("cycles", None)
                 dress(vch, pick_fam, pair, seg)
                 steer(var, pick_fam, climbing)
                 var["why"] = ("%s answers %s, a whole %d cycles%s"
