@@ -91,12 +91,25 @@ function applyChase(rig, base, chase, step, palette, ctx) {
     for (const id of ids) { want += (base[id] || { l: 0 }).l; got += raw[id]; }
     if (got > 1e-6 && want > 1e-6) gain = Math.max(0.6, Math.min(2.2, want / got));
   }
+  const cfName = chase.colour_figure || (ring ? "walk" : null);
+  const cf = cfName && E.COLOUR_FIGURES[cfName] ? E.COLOUR_FIGURES[cfName] : null;
+  const cevery = Math.max(1, Math.round(+chase.colour_every || 1));
+  const cstep = Math.floor(step / cevery);
+  const cidx = ring && cf ? cf(ids.length, cstep) : null;
   ids.forEach((id, i) => {
     const b = base[id] || { l: 0, c: [1, 1, 1] };
     const w = weights[id];
+    let col = b.c;
+    if (ring) {
+      const k = cidx ? cidx[i] : i + cstep;
+      col = ring[((k % ring.length) + ring.length) % ring.length];
+    } else if (w > 0.5 && hiCol) {
+      col = hiCol;
+    }
+    const even = ring ? E.evenOut(col) / E.evenOut(b.c) : 1;
     out[id] = {
-      l: Math.max(0, Math.min(1, raw[id] * gain)),
-      c: ring ? ring[(i + step) % ring.length] : (w > 0.5 && hiCol ? hiCol : b.c),
+      l: Math.max(0, Math.min(1, raw[id] * gain * even)),
+      c: col,
       pan: b.pan, tilt: b.tilt, strobe: b.strobe, prism: b.prism,
     };
   });

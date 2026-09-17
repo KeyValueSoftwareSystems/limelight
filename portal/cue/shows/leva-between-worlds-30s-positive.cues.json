@@ -56,7 +56,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -99,7 +105,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -141,7 +153,13 @@
      "fill_beats": 2,
      "low": 0.55,
      "move_head": false,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_figure": "flip",
+     "colour_every": 5
     }
    ]
   },
@@ -183,7 +201,13 @@
      "fill_beats": 2,
      "low": 0.55,
      "move_head": false,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_figure": "flip",
+     "colour_every": 5
     }
    ]
   },
@@ -209,8 +233,8 @@
      "l": 0.83
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.41,
+     "c": "blood",
+     "l": 0.58,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -225,7 +249,13 @@
      "fill_beats": 2,
      "low": 0.55,
      "move_head": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 5
     }
    ],
    "swell": {
@@ -282,12 +312,12 @@
    "why": "bars 13-16, the phrase travels across: drums leads, E 6.71, 2 hits, mode +1.00 - split in scarlet - alternate instead, the only shape that finishes in 2.2 bars",
    "look": {
     "lamps": {
-     "c": "saffron",
+     "c": "blood",
      "l": 0.66
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.325,
+     "c": "blood",
+     "l": 0.46,
      "pan": 0.5,
      "tilt": 0.41
     }
@@ -303,7 +333,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 5
     }
    ]
   },
@@ -312,7 +348,7 @@
    "at": {
     "second": 33.971
    },
-   "fade": 0.12,
+   "fade": 0.24,
    "why": "build answers alternate, a whole 1 cycles, landing on the hit at 33.97s with a new colour",
    "look": {
     "lamps": {
@@ -337,7 +373,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": false,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 5
     }
    ]
   },
@@ -350,12 +392,12 @@
    "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - alternate in scarlet - split instead, the only shape that finishes in 2.2 bars",
    "look": {
     "lamps": {
-     "c": "saffron",
+     "c": "blood",
      "l": 0.63
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.311,
+     "c": "blood",
+     "l": 0.44,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -371,7 +413,13 @@
      "low": 0.55,
      "move_head": false,
      "reverse": true,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 5
     }
    ]
   },
@@ -384,12 +432,12 @@
    "why": "unbuild answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour",
    "look": {
     "lamps": {
-     "c": "bone",
+     "c": "saffron",
      "l": 0.63
     },
     "heads": {
-     "c": "bone",
-     "l": 0.242,
+     "c": "saffron",
+     "l": 0.311,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -405,7 +453,13 @@
      "low": 0.55,
      "move_head": true,
      "reverse": false,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 5
     }
    ]
   },
@@ -418,12 +472,12 @@
    "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - hocket in scarlet",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.247
+     "c": "blood",
+     "l": 0.35
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.17,
+     "c": "blood",
+     "l": 0.24,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -438,7 +492,13 @@
      "fill_beats": 1,
      "low": 0.4,
      "move_head": false,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_figure": "flip",
+     "colour_every": 5
     }
    ]
   },
@@ -460,12 +520,12 @@
    "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.247
+     "c": "blood",
+     "l": 0.35
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.17,
+     "c": "blood",
+     "l": 0.24,
      "pan": 0.5,
      "tilt": 0.29
     }

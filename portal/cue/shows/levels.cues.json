@@ -46,7 +46,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 8
     }
    ]
   },
@@ -59,12 +65,12 @@
    "why": "build answers sweep, a whole 1 cycles, landing on the hit at 8.89s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.396
+     "c": "ember",
+     "l": 0.56
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.276,
+     "c": "ember",
+     "l": 0.39,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -80,6 +86,12 @@
      "low": 0.62,
      "move_head": true,
      "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 5,
      "reverse": true
     }
    ]
@@ -113,7 +125,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 5
     }
    ]
   },
@@ -126,7 +144,7 @@
    "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 14.98s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
+     "c": "ember",
      "l": 0.66
     },
     "heads": {
@@ -147,6 +165,12 @@
      "low": 0.62,
      "move_head": true,
      "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 8,
      "reverse": true
     }
    ]
@@ -199,12 +223,12 @@
    "why": "bars 9-12, the phrase travels across: keys leads, E 7.70, 5 hits, mode +0.43 - alternate in violet",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.396
+     "c": "ember",
+     "l": 0.56
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.276,
+     "c": "ember",
+     "l": 0.39,
      "pan": 0.5,
      "tilt": 0.41
     }
@@ -219,7 +243,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -228,7 +258,7 @@
    "at": {
     "second": 23.429
    },
-   "fade": 0.117,
+   "fade": 0.234,
    "why": "pulse answers alternate, a whole 4 cycles, landing on the hit at 23.43s with a new colour",
    "look": {
     "lamps": {
@@ -253,6 +283,12 @@
      "low": 0.62,
      "move_head": false,
      "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8,
      "reverse": true
     }
    ]
@@ -287,7 +323,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 5
     }
    ]
   },
@@ -321,7 +363,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 8
     }
    ]
   },
@@ -355,7 +403,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -389,7 +443,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 8
     }
    ]
   },
@@ -422,7 +482,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 5
     }
    ]
   },
@@ -435,8 +501,8 @@
    "why": "twin answers alternate, a whole 1 cycles, landing on the hit at 38.89s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.431
+     "c": "ember",
+     "l": 0.61
     },
     "heads": {
      "c": "bone",
@@ -456,6 +522,12 @@
      "low": 0.62,
      "move_head": false,
      "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 4,
      "reverse": true
     }
    ]
@@ -473,8 +545,8 @@
      "l": 0.64
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.318,
+     "c": "ember",
+     "l": 0.45,
      "pan": 0.5,
      "tilt": 0.42
     }
@@ -489,7 +561,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 8
     }
    ]
   },
@@ -502,12 +580,12 @@
    "why": "pulse answers sweep, a whole 2 cycles, landing on the hit at 46.39s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
+     "c": "ember",
      "l": 0.64
     },
     "heads": {
-     "c": "bone",
-     "l": 0.248,
+     "c": "saffron",
+     "l": 0.318,
      "pan": 0.5,
      "tilt": 0.42
     }
@@ -523,6 +601,12 @@
      "low": 0.62,
      "move_head": false,
      "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 4,
      "reverse": true
     }
    ]
@@ -556,7 +640,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 5
+     "cycles": 5,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -569,12 +659,12 @@
    "why": "alternate answers split, a whole 3 cycles, landing on the hit at 54.59s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.354
+     "c": "ember",
+     "l": 0.5
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.247,
+     "c": "ember",
+     "l": 0.35,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -590,6 +680,12 @@
      "low": 0.62,
      "move_head": false,
      "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8,
      "reverse": true
     }
    ]
@@ -623,7 +719,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -645,8 +747,8 @@
      "l": 0.6
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.297,
+     "c": "ember",
+     "l": 0.42,
      "pan": 0.5,
      "tilt": 0.41
     }
@@ -661,7 +763,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 5
     }
    ],
    "swell": {
@@ -699,7 +807,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -721,8 +835,8 @@
      "l": 0.49
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.24,
+     "c": "ember",
+     "l": 0.34,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -738,7 +852,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 5
     }
    ]
   },
@@ -751,12 +871,12 @@
    "why": "converge answers split, a whole 2 cycles, landing on the hit at 83.89s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.346
+     "c": "ember",
+     "l": 0.49
     },
     "heads": {
-     "c": "bone",
-     "l": 0.187,
+     "c": "saffron",
+     "l": 0.24,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -772,7 +892,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": false,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 4
     }
    ]
   },
@@ -805,7 +931,13 @@
      "fill_beats": 1,
      "low": 0.62,
      "move_head": false,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 8
     }
    ]
   },
@@ -818,8 +950,8 @@
    "why": "pulse answers diverge, a whole 3 cycles, landing on the hit at 90.44s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.29
+     "c": "ember",
+     "l": 0.41
     },
     "heads": {
      "c": "bone",
@@ -839,6 +971,12 @@
      "low": 0.62,
      "move_head": false,
      "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 5,
      "reverse": true
     }
    ]
@@ -873,7 +1011,13 @@
      "low": 0.4,
      "move_head": false,
      "reverse": true,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 5
     }
    ]
   },
@@ -1000,7 +1144,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -1039,7 +1189,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -1078,7 +1234,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -1117,7 +1279,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -1139,8 +1307,8 @@
      "l": 0.66
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.325,
+     "c": "ember",
+     "l": 0.46,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -1156,7 +1324,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -1178,8 +1352,8 @@
      "l": 0.308
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.276,
+     "c": "ember",
+     "l": 0.39,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -1194,7 +1368,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 8
     }
    ]
   },
@@ -1211,8 +1391,8 @@
      "l": 0.308
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.276,
+     "c": "ember",
+     "l": 0.39,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -1228,6 +1408,12 @@
      "low": 0.62,
      "move_head": false,
      "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8,
      "reverse": true
     }
    ]
@@ -1261,7 +1447,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 8
     }
    ]
   },
@@ -1295,6 +1487,12 @@
      "low": 0.62,
      "move_head": false,
      "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 8,
      "reverse": true
     }
    ]
@@ -1329,7 +1527,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 8
     }
    ]
   },
@@ -1363,7 +1567,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": false,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 5
     }
    ]
   },
@@ -1397,7 +1607,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -1431,7 +1647,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": false,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 8
     }
    ]
   },
@@ -1448,8 +1670,8 @@
      "l": 0.6
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.297,
+     "c": "ember",
+     "l": 0.42,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -1465,7 +1687,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 5
     }
    ],
    "swell": {
@@ -1487,8 +1715,8 @@
      "l": 0.68
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.339,
+     "c": "ember",
+     "l": 0.48,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -1504,7 +1732,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -1542,7 +1776,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -1555,12 +1795,12 @@
    "why": "breathe answers split, a whole 4 cycles, landing on the hit at 151.14s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.382
+     "c": "ember",
+     "l": 0.54
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.269,
+     "c": "ember",
+     "l": 0.38,
      "pan": 0.5,
      "tilt": 0.41
     }
@@ -1576,6 +1816,12 @@
      "low": 0.62,
      "move_head": false,
      "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8,
      "reverse": true
     }
    ]
@@ -1610,7 +1856,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 8
     }
    ]
   },
@@ -1623,12 +1875,12 @@
    "why": "build answers zigzag, a whole 1 cycles, landing on the hit at 157.71s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.325
+     "c": "ember",
+     "l": 0.46
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.226,
+     "c": "ember",
+     "l": 0.32,
      "pan": 0.5,
      "tilt": 0.39
     }
@@ -1644,7 +1896,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": false,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 4
     }
    ]
   },
@@ -1678,7 +1936,13 @@
      "low": 0.4,
      "move_head": true,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -1717,7 +1981,13 @@
      "low": 0.4,
      "move_head": true,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 5
     }
    ]
   },
@@ -1730,12 +2000,12 @@
    "why": "alternate answers unbuild, a whole 4 cycles, landing on the hit at 173.60s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.141
+     "c": "ember",
+     "l": 0.2
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.099,
+     "c": "ember",
+     "l": 0.14,
      "pan": 0.5,
      "tilt": 0.26
     }
@@ -1751,7 +2021,13 @@
      "low": 0.4,
      "move_head": false,
      "reverse": false,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -1785,7 +2061,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 5
     }
    ],
    "swell": {
@@ -1823,7 +2105,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 8
     }
    ]
   },
@@ -1836,12 +2124,12 @@
    "why": "converge answers zigzag, a whole 3 cycles, landing on the hit at 187.92s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
+     "c": "ember",
      "l": 0.65
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.318,
+     "c": "ember",
+     "l": 0.45,
      "pan": 0.5,
      "tilt": 0.32
     }
@@ -1857,6 +2145,12 @@
      "low": 0.62,
      "move_head": false,
      "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 8,
      "reverse": true
     }
    ]
@@ -1874,8 +2168,8 @@
      "l": 0.82
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.403,
+     "c": "ember",
+     "l": 0.57,
      "pan": 0.5,
      "tilt": 0.37
     }
@@ -1890,7 +2184,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 8
     }
    ]
   },
@@ -1907,8 +2207,8 @@
      "l": 0.82
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.403,
+     "c": "ember",
+     "l": 0.57,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -1924,7 +2224,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -1958,7 +2264,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": false,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -1992,7 +2304,13 @@
      "low": 0.55,
      "move_head": false,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 5
     }
    ]
   },
@@ -2026,7 +2344,13 @@
      "low": 0.55,
      "move_head": true,
      "reverse": false,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 8
     }
    ]
   },
@@ -2043,8 +2367,8 @@
      "l": 0.68
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.339,
+     "c": "ember",
+     "l": 0.48,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -2060,7 +2384,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -2077,8 +2407,8 @@
      "l": 0.64
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.318,
+     "c": "ember",
+     "l": 0.45,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -2094,7 +2424,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -2216,7 +2552,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 8
     }
    ]
   },
@@ -2250,7 +2592,13 @@
      "low": 0.62,
      "move_head": true,
      "reverse": false,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 5
     }
    ]
   },
@@ -2284,7 +2632,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -2297,8 +2651,8 @@
    "why": "split answers pulse, a whole 2 cycles, landing on the hit at 232.92s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.269
+     "c": "ember",
+     "l": 0.38
     },
     "heads": {
      "c": "violet",
@@ -2318,7 +2672,13 @@
      "low": 0.62,
      "move_head": false,
      "reverse": false,
-     "cycles": 2
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 5
     }
    ]
   },

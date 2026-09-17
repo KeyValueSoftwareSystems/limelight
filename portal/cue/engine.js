@@ -22,6 +22,28 @@ function panKeepOut() {
   }).filter((z) => z[1] > 0 && z[0] < 1);
 }
 
+const REF_LUM = 0.55;
+
+function lumOfRgb(c) {
+  if (!c) return 1;
+  return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
+}
+
+function evenOut(c) {
+  const l = lumOfRgb(c);
+  if (l <= 0.02) return 1;
+  return Math.max(0.35, Math.min(1.9, REF_LUM / l));
+}
+
+const COLOUR_FIGURES = {
+  hold: (n, step) => new Array(n).fill(0),
+  flip: (n, step) => new Array(n).fill(step),
+  alternate: (n, step) => Array.from({ length: n }, (_, i) => i + step),
+  halves: (n, step) => Array.from({ length: n }, (_, i) => Math.floor(i / Math.ceil(n / 2)) + step),
+  poles: (n, step) => Array.from({ length: n }, (_, i) => (i === 0 || i === n - 1 ? 0 : 1) + step),
+  walk: (n, step) => Array.from({ length: n }, (_, i) => (i === (((step % n) + n) % n) ? 1 : 0)),
+};
+
 function safePanSpan(rig) {
   const zones = ((rig.limits && rig.limits.pan_keep_out) || [])
     .slice().sort((a, b) => a[0] - b[0]);
@@ -512,4 +534,4 @@ function chaseStepTimes(chase, grid, startS, endS) {
   return out.length ? out : [startS];
 }
 
-module.exports = { loadRig, safePanSpan, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes, noteStepsIn, FORMS, effectValue, effectPeriod };
+module.exports = { loadRig, safePanSpan, COLOUR_FIGURES, evenOut, lumOfRgb, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes, noteStepsIn, FORMS, effectValue, effectPeriod };

@@ -46,7 +46,13 @@
      "fill_beats": 1,
      "low": 0.4,
      "move_head": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "crimson",
+      "indigo"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 5
     }
    ],
    "swell": {
@@ -68,8 +74,8 @@
      "l": 0.45
     },
     "heads": {
-     "c": "teal",
-     "l": 0.275,
+     "c": "indigo",
+     "l": 0.32,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -85,7 +91,13 @@
      "low": 0.55,
      "move_head": false,
      "reverse": true,
-     "cycles": 3
+     "cycles": 3,
+     "colours": [
+      "crimson",
+      "indigo"
+     ],
+     "colour_figure": "flip",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -163,7 +175,13 @@
      "low": 0.55,
      "move_head": false,
      "reverse": true,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "crimson",
+      "indigo"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 8
     }
    ]
   },
@@ -176,12 +194,12 @@
    "why": "converge answers pulse, a whole 4 cycles, landing on the hit at 28.05s with a new colour",
    "look": {
     "lamps": {
-     "c": "teal",
-     "l": 0.429
+     "c": "indigo",
+     "l": 0.5
     },
     "heads": {
-     "c": "teal",
-     "l": 0.3,
+     "c": "indigo",
+     "l": 0.35,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -197,7 +215,13 @@
      "low": 0.55,
      "move_head": false,
      "reverse": false,
-     "cycles": 4
+     "cycles": 4,
+     "colours": [
+      "crimson",
+      "indigo"
+     ],
+     "colour_figure": "alternate",
+     "colour_every": 8
     }
    ]
   },
@@ -231,7 +255,13 @@
      "low": 0.55,
      "move_head": true,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "crimson",
+      "indigo"
+     ],
+     "colour_figure": "halves",
+     "colour_every": 8
     }
    ],
    "swell": {
@@ -308,7 +338,13 @@
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "crimson",
+      "indigo"
+     ],
+     "colour_figure": "walk",
+     "colour_every": 5
     }
    ],
    "swell": {
@@ -386,7 +422,13 @@
      "low": 0.55,
      "move_head": true,
      "reverse": true,
-     "cycles": 1
+     "cycles": 1,
+     "colours": [
+      "crimson",
+      "indigo"
+     ],
+     "colour_figure": "poles",
+     "colour_every": 8
     }
    ]
   },

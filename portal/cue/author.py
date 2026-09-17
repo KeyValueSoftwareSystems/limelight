@@ -1035,6 +1035,18 @@ def author(song, out_path=None):
     n_lamps = lamp_count()
 
     TRAVELS_HOME = ("travel", "grow")
+    COLOUR_FOR = {
+        "travel": "halves", "grow": "poles", "halves": "walk",
+        "oddeven": "flip", "poles": "alternate", "room": "walk",
+    }
+
+    def dress(chase, fam, pair):
+        if not pair or len(pair) < 2:
+            return
+        rate = float((chase.get("every") or {}).get("beats") or 1.0)
+        chase["colours"] = list(pair)
+        chase["colour_figure"] = COLOUR_FOR.get(fam, "halves")
+        chase["colour_every"] = max(1, int(round(per * 2.0 / max(0.25, rate))))
 
     MUSICAL = (0.5, 1.0, 1.5, 2.0, 3.0, 4.0)
 
@@ -1147,8 +1159,11 @@ def author(song, out_path=None):
         return min(d, 360.0 - d)
 
     vivid = [n for n in PALETTE
-             if n != "bone" and lum_of(n) >= 0.30 and hue_of_name(n) is not None]
-    counter_name = max(vivid, key=lambda n: hue_gap(lead_colour, n)) if vivid else "indigo"
+             if n != "bone" and lum_of(n) >= 0.22 and hue_of_name(n) is not None]
+    counter_name = max(
+        vivid,
+        key=lambda n: hue_gap(lead_colour, n) - 260.0 * abs(lum_of(n) - lum_of(lead_colour))
+    ) if vivid else "indigo"
     warm = max(("amber", "saffron", "ember"), key=lum_of)
     working = []
     for name in (lead_colour, counter_name, warm, "bone"):
@@ -1260,6 +1275,13 @@ def author(song, out_path=None):
                 if isinstance(pl, dict):
                     prev_col = pl.get("c")
             climbing = bool(c.get("swell"))
+            pair = None
+            if len(working) > 1:
+                lead0 = working[0]
+                mates = [w for w in working[1:]
+                         if abs(lum_of(w) - lum_of(lead0)) <= 0.16 and hue_gap(lead0, w) >= 60]
+                if mates:
+                    pair = [lead0, max(mates, key=lambda w: hue_gap(lead0, w))]
             fig0, fit, fam0 = choose_figure(bounds[1] - bounds[0], here_fam, seen_recent)
             if fig0:
                 if fig0 != ch["figure"]:
@@ -1270,6 +1292,7 @@ def author(song, out_path=None):
                         % (fig0, (bounds[1] - bounds[0]) / bar_s))
                 ch["every"] = {"beats": fit[0]}
                 ch["cycles"] = fit[1]
+                dress(ch, fam0, pair)
             seen_recent = (seen_recent + [ch["figure"]])[-4:]
             for k, (at_t, on_hit) in enumerate(cuts, start=1):
                 seg = bounds[k + 1] - bounds[k]
@@ -1301,6 +1324,7 @@ def author(song, out_path=None):
                 vfit = vfit0
                 vch["every"] = {"beats": vfit[0]}
                 vch["cycles"] = vfit[1]
+                dress(vch, pick_fam, pair)
                 var["why"] = ("%s answers %s, a whole %d cycles%s"
                               % (nxt, ch["figure"], (vfit[1] if vfit else 1),
                                  (", landing on the hit at %.2fs with a new colour" % at_t)
