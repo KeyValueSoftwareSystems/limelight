@@ -56,6 +56,7 @@ MARKET = os.path.join(HERE, "market")
 COVERS = os.path.join(HERE, "covers")
 BAKE = os.path.join(HERE, "effects.js")
 BAKE_V2 = os.path.join(HERE, "baker.js")
+BAKE_CUES = os.path.join(HERE, "cue", "bake.js")
 CATALOG = os.path.join(HERE, "effects.json")
 CUSTOM = os.path.join(HERE, "custom-effects.json")
 HUB = os.environ.get("HUB_URL", "http://127.0.0.1:8770")
@@ -809,7 +810,10 @@ class Baker:
         if not node:
             raise RuntimeError("node is not on PATH")
 
-        cmd = [node, BAKE_V2, score, plan_file, "--rig", rig_name, "--lights", cache]
+        if isinstance(plan_data, dict) and isinstance(plan_data.get("cues"), list):
+            cmd = [node, BAKE_CUES, song, "--cues", plan_file, "--rig", rig_name, "--out", cache]
+        else:
+            cmd = [node, BAKE_V2, score, plan_file, "--rig", rig_name, "--lights", cache]
         r = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
         os.unlink(plan_file)
         if r.returncode != 0:

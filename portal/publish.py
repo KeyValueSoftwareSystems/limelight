@@ -7,7 +7,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 WORK = os.path.join(HERE, "work")
 SHOWFILES = os.path.join(HERE, "showfiles")
 SCHEMA = "limelight.show/1"
-CARRY = ("plan", "palette", "states", "bindings", "gestures", "effects")
+CARRY = ("plan", "palette", "states", "bindings", "gestures", "effects", "cues", "rig")
 
 
 def publish(song, plan_path=None, out_dir=None):

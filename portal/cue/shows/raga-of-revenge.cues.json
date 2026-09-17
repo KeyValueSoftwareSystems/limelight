@@ -1,0 +1,128 @@
+{
+ "schema": "limelight.cuelist/1",
+ "song": "raga-of-revenge",
+ "rig": "arc4-head",
+ "palette": {
+  "oxblood": "#2a0206",
+  "ember": "#6e0f07",
+  "blood": "#a3081c",
+  "crimson": "#c8102e",
+  "scarlet": "#f01a10",
+  "flame": "#ff5a0a",
+  "goldfire": "#ffa016",
+  "bone": "#ffffff",
+  "cold": "#1a2a5e"
+ },
+ "cues": [
+  { "id": 1, "at": { "bar": 1 }, "fade": 2.5, "why": "the room is not empty, but nothing has happened yet",
+    "look": { "ends": { "c": "oxblood", "l": 0.22 } } },
+
+  { "id": 2, "at": { "bar": 3 }, "fade": 2.0, "why": "build at 9.1s, the faintest lift",
+    "look": { "lamps": { "c": "oxblood", "l": 0.28 } } },
+
+  { "id": 3, "at": { "bar": 5 }, "fade": 0.5, "why": "entrance, weight 1.00 at 13.8s - the first real arrival",
+    "look": { "lamps": { "c": "ember", "l": 0.55 }, "heads": { "c": "ember", "l": 0.3, "pan": 0.5, "tilt": 0.34 } } },
+
+  { "id": 4, "at": { "bar": 7 }, "fade": 1.6, "why": "tempo change, the outer pair steps back",
+    "look": { "inner": { "c": "blood", "l": 0.5 }, "outer": { "c": "oxblood", "l": 0.2 },
+              "heads": { "c": "ember", "l": 0.25, "pan": 0.5, "tilt": 0.34 } } },
+
+  { "id": 5, "at": { "bar": 9 }, "fade": 0.8, "why": "spotlight, weight 0.93 at 21.8s - the head does the pointing, the row stays level",
+    "look": { "lamps": { "c": "oxblood", "l": 0.12 },
+              "heads": { "c": "crimson", "l": 0.85, "pan": 0.5, "tilt": 0.28 } } },
+
+  { "id": 6, "at": { "bar": 10 }, "fade": 1.8, "why": "instrumental opens; one figure crossing the row, once a bar",
+    "look": { "lamps": { "c": "ember", "l": 0.42 }, "heads": { "l": 0 } },
+    "chase": { "on": "lamps", "figure": "sweep", "every": { "bars": 1 }, "low": 0.35, "c": "blood", "fade": 0.25 } },
+
+  { "id": 7, "at": { "bar": 14 }, "fade": 0.9, "why": "pause, weight 0.73 at 33.0s - the room empties and stays empty",
+    "look": { "lamps": { "c": "oxblood", "l": 0.14 } } },
+
+  { "id": 8, "at": { "bar": 16 }, "fade": 1.2, "why": "back in, pairs trading once a bar",
+    "look": { "lamps": { "c": "blood", "l": 0.5 } },
+    "chase": { "on": "lamps", "figure": "pairs", "every": { "bars": 1 }, "low": 0.45, "fade": 0.3 } },
+
+  { "id": 9, "at": { "bar": 20 }, "fade": 2.0, "why": "two bars of climb into the chorus, nothing moving",
+    "look": { "lamps": { "c": "crimson", "l": 0.62 } } },
+
+  { "id": 10, "at": { "bar": 22 }, "fade": 0.0, "why": "pause, weight 0.77 at 48.0s - a hole, so the chorus has somewhere to land",
+    "look": {} },
+
+  { "id": 11, "at": { "bar": 22, "beat": 3 }, "fade": 0.0, "why": "the chorus lands",
+    "look": { "lamps": { "c": "crimson", "l": 0.85 },
+              "heads": { "c": "crimson", "l": 0.5, "pan": 0.5, "tilt": 0.32 } } },
+
+  { "id": 12, "at": { "bar": 24 }, "fade": 0.0, "why": "climax, weight 1.00 at 52.8s - big, but not the biggest; 92.5s is",
+    "look": { "lamps": { "c": "scarlet", "l": 0.92 },
+              "heads": { "c": "scarlet", "l": 0.6, "pan": 0.5, "tilt": 0.3 } } },
+
+  { "id": 13, "at": { "bar": 26 }, "fade": 1.4, "why": "settle and let the pairs answer each other on the bar",
+    "look": { "lamps": { "c": "crimson", "l": 0.7 }, "heads": { "l": 0 } },
+    "chase": { "on": "lamps", "figure": "alternate", "every": { "bars": 1 }, "low": 0.55, "fade": 0.35 } },
+
+  { "id": 14, "at": { "bar": 31 }, "fade": 1.6, "why": "the congregation answers from bar 31 - inner leads, outer replies",
+    "look": { "inner": { "c": "blood", "l": 0.68 }, "outer": { "c": "oxblood", "l": 0.3 } },
+    "chase": { "on": "inner", "figure": "alternate", "every": { "bars": 2 }, "low": 0.6, "fade": 0.4 } },
+
+  { "id": 15, "at": { "bar": 34 }, "fade": 0.4, "why": "entrance, weight 0.70 at 72.3s - the lead is back",
+    "look": { "lamps": { "c": "crimson", "l": 0.8 },
+              "heads": { "c": "blood", "l": 0.4, "pan": 0.5, "tilt": 0.33 } } },
+
+  { "id": 16, "at": { "bar": 36 }, "fade": 1.5, "why": "hold the chorus out; the only motion is a slow trade",
+    "look": { "lamps": { "c": "crimson", "l": 0.72 } },
+    "chase": { "on": "lamps", "figure": "pairs", "every": { "bars": 1 }, "low": 0.58, "fade": 0.4 } },
+
+  { "id": 17, "at": { "bar": 39 }, "fade": 1.8, "why": "build at 83.3s - the fires come up, one lamp added each bar",
+    "look": { "lamps": { "c": "flame", "l": 0.72 } },
+    "chase": { "on": "lamps", "figure": "build", "every": { "bars": 1 }, "low": 0.3, "fade": 0.5 } },
+
+  { "id": 18, "at": { "bar": 42 }, "fade": 2.2, "why": "the last two bars before the peak climb and stop moving",
+    "look": { "lamps": { "c": "flame", "l": 0.88 },
+              "heads": { "c": "flame", "l": 0.5, "pan": 0.5, "tilt": 0.3 } } },
+
+  { "id": 19, "at": { "bar": 44 }, "fade": 0.0, "why": "PEAK, weight 1.00 at 92.5s - the loudest instant in the recording. The only white in the show, and the only full look",
+    "look": { "lamps": { "c": "bone", "l": 1.0 },
+              "heads": { "c": "bone", "l": 1.0, "pan": 0.5, "tilt": 0.26 } } },
+
+  { "id": 20, "at": { "bar": 45 }, "fade": 1.0, "why": "off the white, back into the fire",
+    "look": { "lamps": { "c": "scarlet", "l": 0.88 }, "heads": { "l": 0 } } },
+
+  { "id": 21, "at": { "bar": 46 }, "fade": 1.4, "why": "third chorus, gold - warmer and one step down from the peak",
+    "look": { "lamps": { "c": "goldfire", "l": 0.7 } } },
+
+  { "id": 22, "at": { "bar": 48 }, "fade": 1.1, "why": "build at 101.3s",
+    "look": { "lamps": { "c": "flame", "l": 0.78 } },
+    "chase": { "on": "lamps", "figure": "alternate", "every": { "bars": 1 }, "low": 0.6, "fade": 0.4 } },
+
+  { "id": 23, "at": { "bar": 51 }, "fade": 1.8, "why": "let go of the chorus",
+    "look": { "lamps": { "c": "crimson", "l": 0.6 } } },
+
+  { "id": 24, "at": { "bar": 53 }, "fade": 1.2, "why": "breakdown at 109.8s - the outer pair leaves",
+    "look": { "inner": { "c": "ember", "l": 0.32 } } },
+
+  { "id": 25, "at": { "bar": 54 }, "fade": 0.7, "why": "pause, weight 0.85 at 113.0s - the quietest instant in the song",
+    "look": { "lamps": { "c": "oxblood", "l": 0.09 } } },
+
+  { "id": 26, "at": { "bar": 55 }, "fade": 0.0, "why": "exit, weight 1.00 at 115.3s. The one blackout in the show, so it means something",
+    "look": {} },
+
+  { "id": 27, "at": { "bar": 56, "beat": 3 }, "fade": 3.0, "why": "back from nothing, slowly",
+    "look": { "ends": { "c": "oxblood", "l": 0.2 } } },
+
+  { "id": 28, "at": { "bar": 58 }, "fade": 1.2, "why": "register shift, weight 1.00 at 120.3s - the one cold colour in the show, so the reds read hotter after it",
+    "look": { "lamps": { "c": "cold", "l": 0.34 } } },
+
+  { "id": 29, "at": { "bar": 60 }, "fade": 0.5, "why": "entrance, weight 1.00 at 123.8s - the lead returns and the red comes back",
+    "look": { "lamps": { "c": "blood", "l": 0.62 },
+              "heads": { "c": "blood", "l": 0.35, "pan": 0.5, "tilt": 0.33 } } },
+
+  { "id": 30, "at": { "bar": 61, "beat": 3 }, "fade": 1.6, "why": "rhythm change at 126.7s, easing out",
+    "look": { "lamps": { "c": "ember", "l": 0.3 } } },
+
+  { "id": 31, "at": { "bar": 62, "beat": 3 }, "fade": 2.5, "why": "down to the ends, where it started",
+    "look": { "ends": { "c": "oxblood", "l": 0.13 } } },
+
+  { "id": 32, "at": { "bar": 64 }, "fade": 2.0, "why": "out",
+    "look": {} }
+ ]
+}
