@@ -6,3 +6,5 @@ export { Card } from "./Card";
 export { Sheet } from "./Sheet";
 export { Fader } from "./Fader";
 export { Badge } from "./Badge";
+export { Field } from "./Field";
+export { SegmentedControl } from "./SegmentedControl";

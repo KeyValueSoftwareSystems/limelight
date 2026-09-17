@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { Field, SegmentedControl } from "@/components/ui";
 import { Search } from "lucide-react";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
@@ -84,43 +85,27 @@ export default function LibraryPage() {
         </div>
 
         <div className="flex items-center gap-[10px] mt-[20px]">
-          <div className="relative flex-1 max-w-[360px]">
-            <Search size={15} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-ink-dimmer pointer-events-none" />
-            <input
+          <div className="flex-1 max-w-[360px]">
+            <Field
+              icon={<Search size={15} />}
               type="text"
               placeholder="Search by name, key, or tempo"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-[38px] pl-[36px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[14px] font-medium text-ink outline-none focus:border-accent/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.1)] transition-all duration-200 placeholder:text-ink-dimmer placeholder:font-normal"
+              aria-label="Search tracks"
             />
           </div>
-
-          <div className="flex h-[38px] rounded-[var(--radius-sm)] p-[3px]"
-            style={{ background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.06)" }}>
-            {(
-              [
-                { id: "name", label: "A\u2013Z" },
-                { id: "bpm", label: "BPM" },
-                { id: "duration", label: "Length" },
-                { id: "recent", label: "Recent" },
-              ] as { id: SortKey; label: string }[]
-            ).map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setSort(s.id)}
-                className={`px-[12px] rounded-[6px] border-0 text-[12px] font-semibold cursor-pointer transition-all duration-200 ease-[var(--ease)] ${
-                  sort === s.id ? "text-ink" : "bg-transparent text-ink-dimmer hover:text-ink-dim"
-                }`}
-                style={sort === s.id ? {
-                  background: "linear-gradient(180deg, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.08) 100%)",
-                  boxShadow: "0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(139,92,246,0.1)",
-                } : undefined}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            aria-label="Sort tracks"
+            value={sort}
+            onChange={setSort}
+            segments={[
+              { id: "name" as SortKey, label: "A\u2013Z" },
+              { id: "bpm" as SortKey, label: "BPM" },
+              { id: "duration" as SortKey, label: "Length" },
+              { id: "recent" as SortKey, label: "Recent" },
+            ]}
+          />
         </div>
       </div>
 

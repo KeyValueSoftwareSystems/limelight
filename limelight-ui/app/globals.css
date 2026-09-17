@@ -81,7 +81,27 @@
   --select: #CBD5E1;
   --select-soft: rgba(203, 213, 225, 0.08);
 
-  --focus: rgba(139, 92, 246, 0.6);
+  /* Surfaces. Every panel in the app was hand-typing rgba(139,92,246,0.04)
+     and friends; naming the four steps is what keeps them consistent. */
+  --control-h: 38px;
+  --surface-1: rgba(255, 255, 255, 0.025);
+  --surface-2: rgba(255, 255, 255, 0.045);
+  --surface-3: rgba(255, 255, 255, 0.07);
+  --surface-accent: rgba(167, 139, 250, 0.06);
+  --surface-accent-2: rgba(167, 139, 250, 0.11);
+  --surface-accent-3: rgba(167, 139, 250, 0.17);
+
+  --edge: rgba(255, 255, 255, 0.07);
+  --edge-strong: rgba(255, 255, 255, 0.13);
+  --edge-accent: rgba(167, 139, 250, 0.28);
+
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --elev-2: 0 2px 8px rgba(0, 0, 0, 0.34), 0 1px 2px rgba(0, 0, 0, 0.22);
+  --elev-3: 0 8px 28px rgba(0, 0, 0, 0.44), 0 2px 6px rgba(0, 0, 0, 0.26);
+  --inset-hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+
+  --focus: rgba(167, 139, 250, 0.55);
+  --focus-ring: rgba(167, 139, 250, 0.16);
   --playhead: #FFFFFF;
 
   --fam-hits: #FBBF24;
@@ -197,10 +217,25 @@ input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border: 0; borde
 input[type="color"]::-webkit-color-swatch { border: 0; border-radius: inherit; }
 input[type="color"]::-moz-color-swatch { border: 0; border-radius: inherit; }
 
+/* A hard outline offset from the element draws a second ring around anything
+   that already has a border, which is what made every focused input look like
+   a cheap double box. A soft ring sitting tight on the edge, with the border
+   itself brightening, is what a focused field should read as. */
 :focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--focus), 0 0 0 4px var(--focus-ring);
+  border-color: var(--focus) !important;
+}
+:focus:not(:focus-visible) { outline: none; }
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  box-shadow: 0 0 0 1px var(--focus), 0 0 0 4px var(--focus-ring);
+}
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--focus);
 }
 
 .label {
