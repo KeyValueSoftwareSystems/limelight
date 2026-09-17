@@ -983,16 +983,17 @@ def author(song, out_path=None):
 
     n_lamps = lamp_count()
 
-    def fit_rate(fig, span_s):
+    def fit_rate(fig, span_s, push=1):
         steps = cycle_steps(fig, n_lamps)
         beats_in = span_s / step if step > 0 else 0
         if beats_in <= 0 or steps <= 0:
             return None
-        cycles = max(1, int(round(beats_in / (steps * 1.0))))
-        while cycles > 1 and beats_in / (steps * cycles) < 0.55:
+        cycles = max(1, int(round(beats_in / (steps * 1.0)))) * max(1, push)
+        floor_beats = max(0.55, 0.26 / step if step > 0 else 0.55)
+        while cycles > 1 and beats_in / (steps * cycles) < floor_beats:
             cycles -= 1
         sb = beats_in / (steps * cycles)
-        if sb < 0.55:
+        if sb < floor_beats:
             return None
         return round(sb, 3), cycles
 
@@ -1011,12 +1012,10 @@ def author(song, out_path=None):
                 best, bd = a, d
         return best
 
-    def shift_colour(name):
-        for fam_shades in FAMILY_SHADES.values():
-            if name in fam_shades:
-                k = list(fam_shades).index(name)
-                return fam_shades[(k + 1) % len(fam_shades)]
-        return name
+
+    def rgb_of(name):
+        h = PALETTE.get(name, "#000000").lstrip("#")
+        return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
 
     def lum_of(name):
         h = PALETTE.get(name, "#000000").lstrip("#")
@@ -1029,15 +1028,81 @@ def author(song, out_path=None):
         here = lum_of(name)
         if here * want >= 0.42:
             return name
-        for fam_shades in FAMILY_SHADES.values():
-            if name in fam_shades:
-                best = max(fam_shades, key=lum_of)
-                if lum_of(best) > here:
-                    return best
-        for cand in BRIGHT:
-            if lum_of(cand) > here:
+        for cand in sorted(working, key=lum_of, reverse=True):
+            if lum_of(cand) * want >= 0.42:
                 return cand
+        return max(working, key=lum_of) if working else name
+
+    fam_seen = collections.Counter()
+    for c in cues:
+        for v in (c.get("look") or {}).values():
+            if isinstance(v, dict) and v.get("c"):
+                fam_seen[v["c"]] += 1
+    lead_colour = fam_seen.most_common(1)[0][0] if fam_seen else "ember"
+    lead_fam = None
+    for fam, shades in FAMILY_SHADES.items():
+        if lead_colour in shades:
+            lead_fam = fam
+            break
+    counter_name = COUNTER.get(lead_fam or "", "indigo")
+    warm = max(("amber", "saffron", "ember"), key=lum_of)
+    working = []
+    for name in (lead_colour, counter_name, warm, "bone"):
+        if name in PALETTE and name not in working:
+            working.append(name)
+
+    def shift_colour(name):
+        if name in working and len(working) > 1:
+            k = working.index(name)
+            return working[(k + 1) % len(working)]
         return name
+
+    def nearest(name):
+        if name in working:
+            return name
+        r0, g0, b0 = rgb_of(name)
+        return min(working, key=lambda w: sum(
+            (a - c) ** 2 for a, c in zip(rgb_of(w), (r0, g0, b0))))
+
+    for c in cues:
+        for v in (c.get("look") or {}).values():
+            if isinstance(v, dict) and v.get("c"):
+                v["c"] = nearest(v["c"])
+        for ch0 in (c.get("chases") or []):
+            if ch0.get("c"):
+                ch0["c"] = nearest(ch0["c"])
+            if ch0.get("colours"):
+                ch0["colours"] = [nearest(x) for x in ch0["colours"]]
+
+    punches = []
+    for c in cues:
+        w = c.get("why") or ""
+        if not any(k in w for k in ("PEAK", "climax", "drop at", "drop -", "the drop")):
+            continue
+        punches.append(c)
+        for v in (c.get("look") or {}).values():
+            if isinstance(v, dict) and v.get("l") is not None:
+                v["c"] = "bone"
+                v["l"] = round(min(1.0, max(v["l"], 0.9)), 2)
+        c["why"] = w + " - white, because only white carries a hit"
+        heads = (c.get("look") or {}).get("heads")
+        if isinstance(heads, dict):
+            heads["strobe"] = 0.5
+            heads["prism"] = 0.6
+
+    dark = []
+    for c in punches:
+        t0 = c.get("_t")
+        if t0 is None or t0 <= step:
+            continue
+        near = min((abs(t0 - o.get("_t", -9)) for o in cues if o is not c), default=9)
+        if near < step * 0.9:
+            continue
+        dark.append({"id": 0, "at": {"second": round(t0 - step, 3)}, "_t": t0 - step,
+                     "fade": 0.0, "look": {},
+                     "why": "one beat of black, so the hit that follows has somewhere to land"})
+    cues.extend(dark)
+    cues.sort(key=lambda c: c.get("_t", 0))
 
     for c in cues:
         lamps = (c.get("look") or {}).get("lamps")
@@ -1080,6 +1145,12 @@ def author(song, out_path=None):
             bounds = [c["_t"]] + [t for t, _ in cuts] + [end]
             here_fam = FAM_OF.get(ch["figure"], "travel")
             fam_ring = [here_fam] + [f for f in GESTURES if f != here_fam]
+            prev_col = None
+            if i > 0:
+                pl = (cues[i - 1].get("look") or {}).get("lamps")
+                if isinstance(pl, dict):
+                    prev_col = pl.get("c")
+            climbing = bool(c.get("swell"))
             fit = fit_rate(ch["figure"], bounds[1] - bounds[0])
             if not fit:
                 for alt in ("hocket", "alternate", "converge", "pulse"):
@@ -1094,7 +1165,10 @@ def author(song, out_path=None):
             seen_recent = (seen_recent + [ch["figure"]])[-4:]
             for k, (at_t, on_hit) in enumerate(cuts, start=1):
                 seg = bounds[k + 1] - bounds[k]
-                pick_fam = fam_ring[(i + k) % len(fam_ring)]
+                if climbing:
+                    pick_fam = "room" if k > 1 else "halves"
+                else:
+                    pick_fam = fam_ring[(i + k) % len(fam_ring)]
                 opts = [f for f in GESTURES[pick_fam] if f not in seen_recent] or list(GESTURES[pick_fam])
                 nxt = opts[(i + k) % len(opts)]
                 seen_recent = (seen_recent + [nxt])[-4:]
@@ -1107,11 +1181,13 @@ def author(song, out_path=None):
                 vch["figure"] = nxt
                 vch["reverse"] = (not ch.get("reverse", False)) if k % 2 else ch.get("reverse", False)
                 vch["move_head"] = pick_fam in ("travel", "grow")
-                if on_hit:
+                if on_hit and seg >= bar_s and not climbing:
                     for v in (var.get("look") or {}).values():
                         if isinstance(v, dict) and v.get("c"):
-                            v["c"] = shift_colour(v["c"])
-                vfit = fit_rate(nxt, seg)
+                            nc = shift_colour(v["c"])
+                            if nc != prev_col:
+                                v["c"] = nc
+                vfit = fit_rate(nxt, seg, 2 ** k if climbing else 1)
                 if not vfit:
                     for alt in ("hocket", "alternate", "converge", "pulse"):
                         vfit = fit_rate(alt, seg)
@@ -1126,10 +1202,21 @@ def author(song, out_path=None):
                 var["why"] = ("%s answers %s, a whole %d cycles%s"
                               % (nxt, ch["figure"], (vfit[1] if vfit else 1),
                                  (", landing on the hit at %.2fs with a new colour" % at_t)
-                                 if on_hit else ", mid-phrase"))
+                                 if on_hit else ", mid-phrase")
+                              + (", twice the rate - the build is accelerating" if climbing else ""))
                 extra.append(var)
         cues.extend(extra)
         cues.sort(key=lambda c: c.get("_t", 0))
+
+    for c in cues:
+        for v in (c.get("look") or {}).values():
+            if isinstance(v, dict) and v.get("c"):
+                v["c"] = nearest(v["c"])
+        for ch0 in (c.get("chases") or []):
+            if ch0.get("c"):
+                ch0["c"] = nearest(ch0["c"])
+            if ch0.get("colours"):
+                ch0["colours"] = [nearest(x) for x in ch0["colours"]]
 
     for c in cues:
         c.pop("_t", None)

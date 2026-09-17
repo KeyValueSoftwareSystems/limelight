@@ -695,6 +695,50 @@ Unpatterned rises to 1.0-2.4% from 0.6-0.8% and that is expected: two thirds of 
 extra samples are inside crossfade windows, which is more cue changes doing their job.
 Watch it stay near there.
 
+## 7p. What was taken from Renjith's show, and why it is not a merge
+
+Renjith Baby wrote `tools/build-raga-of-revenge.js` and eleven commits around it, and
+Amal was right that it looks better. It is worth being exact about why: **it is a
+hand-authored show for one song.** The output path is hardcoded, the anchors are
+hardcoded (52.76, 91.76, 92.26, 94.26, 96.26, 98.26), and each of its 160 gestures
+carries a `why` a person wrote after listening. It reads the score for beats and
+sections, but the dramaturgy is placed by hand. It will beat a generator on this song
+and does not exist for the other thirty, or for `club16-2head`.
+
+So nothing was merged. What was taken is the vocabulary, as generic rules:
+
+- **Four colours, not twelve.** His palette is red 71, white 46, blue 19, orange 11.
+  Ours was ten colours with a long tail, which reads as noise rather than design. Each
+  show now picks a working set — the dominant family colour, its counter, the brightest
+  warm, and `bone` — and every colour in every cue and chase snaps to it. `open_up` and
+  `shift_colour` choose from the same set, and a final pass guarantees it.
+- **White carries a hit.** White is his second most-used colour and the only one with
+  luminance 1.0. Peak, climax and drop cues are now `bone` at `l >= 0.9`. The climax
+  went from 122 of 255 to 255.
+- **A beat of black before the punch.** One beat, snapped, so the hit has somewhere to
+  land.
+- **Prism and strobe on the head at the biggest moments.** The engine could not write
+  prism at all; `ch.prism` and `state.prism` now exist.
+- **A build is an acceleration.** His words: "the whole row pulsing, quarters to
+  eighths to sixteenths". Each successive segment of a rising cue doubles its rate.
+
+**The row must be pulsing, and that is not a detail.** Accelerating a *travelling*
+figure makes the brightest lamp change every 200ms, which is the churn Amal reported at
+the very start of this work; afterglow threw 25 lead-churn faults the moment
+acceleration went in. A room-wide gesture has no lead to churn. Climbing segments are
+forced to `halves` then `room` for that reason.
+
+**The step floor has to be absolute, not just in beats.** `afterglow` runs at 174bpm,
+so a 0.55-beat floor is 0.19s, under the 0.22s churn threshold. `fit_rate` now floors
+at `max(0.55 beats, 0.26s)`.
+
+**One scanner change, declared:** `dark-on-loud` used to flag the black beat, because a
+dark room over loud music is exactly what it looks for. It now ignores a blackout cue
+that is followed within 1.2s by a cue at `l >= 0.7` — a black *before a punch*. Any
+other dark-over-loud still fails. This is a referee change made to accept a deliberate
+effect, and it is the kind of change that can hide a real bug, so it was kept as narrow
+as possible.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the

@@ -236,14 +236,14 @@
     "second": 21.478
    },
    "fade": 0.06,
-   "why": "and back on the look it is arriving at, the instant the audio returns - opened from indigo to violet so the level can be seen",
+   "why": "and back on the look it is arriving at, the instant the audio returns - opened from indigo to bone so the level can be seen",
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "bone",
      "l": 0.8
     },
     "heads": {
-     "c": "scarlet",
+     "c": "amber",
      "l": 0.56,
      "pan": 0.5,
      "tilt": 0.29
@@ -254,7 +254,7 @@
      "on": "lamps",
      "figure": "unbuild",
      "every": {
-      "beats": 1.24
+      "beats": 0.99
      },
      "fill_beats": 2,
      "low": 0.4,
@@ -269,12 +269,21 @@
    }
   },
   {
+   "id": 0,
+   "at": {
+    "second": 23.38
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "one beat of black, so the hit that follows has somewhere to land"
+  },
+  {
    "id": 4,
    "at": {
     "bar": 10
    },
    "fade": 0.0,
-   "why": "PEAK at 25.0s - the loudest instant in the recording. Full blast, the only white",
+   "why": "PEAK at 25.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit",
    "look": {
     "lamps": {
      "c": "bone",
@@ -285,7 +294,8 @@
      "l": 1.0,
      "pan": 0.5,
      "tilt": 0.26,
-     "strobe": 0.75
+     "strobe": 0.5,
+     "prism": 0.6
     }
    },
    "chase": {
@@ -306,11 +316,11 @@
    "why": "bars 13-16, the phrase travels across: drums leads, E 6.71, 2 hits, mode +1.00 - handover in scarlet",
    "look": {
     "lamps": {
-     "c": "scarlet",
+     "c": "amber",
      "l": 0.58
     },
     "heads": {
-     "c": "scarlet",
+     "c": "amber",
      "l": 0.41,
      "pan": 0.5,
      "tilt": 0.41
@@ -337,14 +347,14 @@
     "second": 33.019
    },
    "fade": 0.0,
-   "why": "sweep answers handover, a whole 1 cycles, landing on the hit at 33.02s with a new colour",
+   "why": "cascade answers handover, a whole 1 cycles, landing on the hit at 33.02s with a new colour",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "saffron",
      "l": 0.58
     },
     "heads": {
-     "c": "amber",
+     "c": "saffron",
      "l": 0.41,
      "pan": 0.5,
      "tilt": 0.41
@@ -353,9 +363,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "cascade",
      "every": {
-      "beats": 1.486
+      "beats": 1.274
      },
      "fill_beats": 2,
      "low": 0.5,
@@ -374,11 +384,11 @@
    "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - alternate in scarlet",
    "look": {
     "lamps": {
-     "c": "scarlet",
+     "c": "amber",
      "l": 0.55
     },
     "heads": {
-     "c": "scarlet",
+     "c": "amber",
      "l": 0.39,
      "pan": 0.5,
      "tilt": 0.29
@@ -405,14 +415,14 @@
     "second": 41.657
    },
    "fade": 0.0,
-   "why": "wave answers alternate, a whole 1 cycles, landing on the hit at 41.66s with a new colour",
+   "why": "build answers alternate, a whole 2 cycles, landing on the hit at 41.66s with a new colour",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "saffron",
      "l": 0.55
     },
     "heads": {
-     "c": "amber",
+     "c": "saffron",
      "l": 0.39,
      "pan": 0.5,
      "tilt": 0.29
@@ -421,15 +431,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "wave",
+     "figure": "build",
      "every": {
-      "beats": 1.154
+      "beats": 0.865
      },
      "fill_beats": 2,
      "low": 0.4,
      "move_head": true,
      "reverse": false,
-     "cycles": 1
+     "cycles": 2
     }
    ]
   },
@@ -442,11 +452,11 @@
    "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - comet in scarlet",
    "look": {
     "lamps": {
-     "c": "scarlet",
+     "c": "amber",
      "l": 0.2
     },
     "heads": {
-     "c": "scarlet",
+     "c": "amber",
      "l": 0.14,
      "pan": 0.5,
      "tilt": 0.29
@@ -484,11 +494,11 @@
    "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
-     "c": "scarlet",
+     "c": "amber",
      "l": 0.2
     },
     "heads": {
-     "c": "scarlet",
+     "c": "amber",
      "l": 0.14,
      "pan": 0.5,
      "tilt": 0.29

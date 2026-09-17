@@ -35,11 +35,11 @@
    "why": "and back on the look it is arriving at, the instant the audio returns",
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.15
     },
     "heads": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.1,
      "pan": 0.5,
      "tilt": 0.35
@@ -68,11 +68,11 @@
    "why": "alternate answers sweep, a whole 4 cycles, mid-phrase",
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.15
     },
     "heads": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.1,
      "pan": 0.5,
      "tilt": 0.35
@@ -102,11 +102,11 @@
    "why": "hocket answers sweep, a whole 3 cycles, landing on the hit at 9.11s with a new colour",
    "look": {
     "lamps": {
-     "c": "indigo",
+     "c": "saffron",
      "l": 0.15
     },
     "heads": {
-     "c": "indigo",
+     "c": "saffron",
      "l": 0.1,
      "pan": 0.5,
      "tilt": 0.35
@@ -136,11 +136,11 @@
    "why": "bars 5-8, the phrase opens out: brass leads, E 5.92, 0 hits, mode +0.93 - cascade in violet",
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.29
     },
     "heads": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.2,
      "pan": 0.5,
      "tilt": 0.32
@@ -172,7 +172,7 @@
     "second": 17.75
    },
    "fade": 0.0,
-   "why": "hocket answers cascade, a whole 4 cycles, landing on the hit at 17.75s with a new colour",
+   "why": "split answers cascade, a whole 7 cycles, landing on the hit at 17.75s with a new colour, twice the rate - the build is accelerating",
    "look": {
     "lamps": {
      "c": "indigo",
@@ -188,15 +188,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "hocket",
+     "figure": "split",
      "every": {
-      "beats": 0.979
+      "beats": 0.559
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": false,
      "reverse": false,
-     "cycles": 4
+     "cycles": 7
     }
    ]
   },
@@ -206,14 +206,14 @@
     "bar": 9
    },
    "fade": 0.3,
-   "why": "bars 9-10, the phrase travels across: brass leads, E 10.65, 1 hits, mode +0.55 - converge in violet against amber inside - opened from violet to teal so the level can be seen",
+   "why": "bars 9-10, the phrase travels across: brass leads, E 10.65, 1 hits, mode +0.55 - converge in violet against amber inside - opened from indigo to bone so the level can be seen",
    "look": {
     "lamps": {
-     "c": "teal",
+     "c": "bone",
      "l": 0.72
     },
     "heads": {
-     "c": "amber",
+     "c": "ember",
      "l": 0.5,
      "pan": 0.5,
      "tilt": 0.33
@@ -247,11 +247,11 @@
    "why": "bars 11-14, the phrase closes down: strings leads, E 10.09, 2 hits, mode +0.32 - handover in oxblood against scarlet inside",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "ember",
      "l": 0.24
     },
     "heads": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.17,
      "pan": 0.5,
      "tilt": 0.36
@@ -280,11 +280,11 @@
    "why": "pulse answers handover, a whole 4 cycles, mid-phrase",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "ember",
      "l": 0.24
     },
     "heads": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.17,
      "pan": 0.5,
      "tilt": 0.36
@@ -323,11 +323,11 @@
    "why": "and back on the look it is arriving at, the instant the audio returns",
    "look": {
     "lamps": {
-     "c": "oxblood",
+     "c": "indigo",
      "l": 0.21
     },
     "heads": {
-     "c": "oxblood",
+     "c": "indigo",
      "l": 0.15,
      "pan": 0.5,
      "tilt": 0.37
@@ -358,14 +358,14 @@
     "second": 37.779
    },
    "fade": 0.0,
-   "why": "comet answers cascade, a whole 1 cycles, landing on the hit at 37.78s with a new colour",
+   "why": "split answers cascade, a whole 6 cycles, landing on the hit at 37.78s with a new colour, twice the rate - the build is accelerating",
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.21
     },
     "heads": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.15,
      "pan": 0.5,
      "tilt": 0.37
@@ -374,14 +374,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "split",
      "every": {
-      "beats": 1.28
+      "beats": 0.64
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true,
-     "cycles": 1,
+     "move_head": false,
+     "cycles": 6,
      "reverse": true
     }
    ]
@@ -395,11 +395,11 @@
    "why": "bars 19-22, the phrase opens out: guitars leads, E 7.01, 6 hits, mode -0.26 - unbuild in oxblood",
    "look": {
     "lamps": {
-     "c": "oxblood",
+     "c": "indigo",
      "l": 0.5
     },
     "heads": {
-     "c": "oxblood",
+     "c": "indigo",
      "l": 0.35,
      "pan": 0.5,
      "tilt": 0.35
@@ -434,11 +434,11 @@
    "why": "bars 19-22, the phrase opens out: guitars leads, E 8.94, 9 hits, mode -0.62 - unbuild in oxblood",
    "look": {
     "lamps": {
-     "c": "oxblood",
+     "c": "indigo",
      "l": 0.58
     },
     "heads": {
-     "c": "oxblood",
+     "c": "indigo",
      "l": 0.41,
      "pan": 0.5,
      "tilt": 0.37
@@ -479,14 +479,14 @@
     "second": 48.437
    },
    "fade": 0.06,
-   "why": "and back, the instant the audio returns - opened from ember to saffron so the level can be seen",
+   "why": "and back, the instant the audio returns - opened from ember to bone so the level can be seen",
    "look": {
     "lamps": {
-     "c": "saffron",
+     "c": "bone",
      "l": 0.71
     },
     "heads": {
-     "c": "oxblood",
+     "c": "indigo",
      "l": 0.5,
      "pan": 0.5,
      "tilt": 0.31
@@ -497,7 +497,7 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "beats": 1.071
+      "beats": 0.904
      },
      "fill_beats": 2,
      "low": 0.4,
@@ -513,23 +513,33 @@
    }
   },
   {
+   "id": 0,
+   "at": {
+    "second": 51.243
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "one beat of black, so the hit that follows has somewhere to land"
+  },
+  {
    "id": 9,
    "at": {
     "bar": 24
    },
    "fade": 0.0,
-   "why": "climax at 52.8s - everything arrives at once - opened from scarlet to amber so the level can be seen",
+   "why": "climax at 52.8s - everything arrives at once - white, because only white carries a hit",
    "look": {
     "lamps": {
-     "c": "amber",
-     "l": 0.9199999999999999
+     "c": "bone",
+     "l": 0.92
     },
     "heads": {
-     "c": "amber",
-     "l": 0.6,
+     "c": "bone",
+     "l": 0.9,
      "pan": 0.5,
      "tilt": 0.3,
-     "strobe": 0.5
+     "strobe": 0.5,
+     "prism": 0.6
     }
    },
    "chase": {
@@ -581,14 +591,14 @@
     "second": 58.793
    },
    "fade": 0.0,
-   "why": "comet answers pulse, a whole 2 cycles, landing on the hit at 58.79s with a new colour",
+   "why": "build answers pulse, a whole 2 cycles, landing on the hit at 58.79s with a new colour",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "indigo",
      "l": 0.56
     },
     "heads": {
-     "c": "amber",
+     "c": "indigo",
      "l": 0.39,
      "pan": 0.5,
      "tilt": 0.38
@@ -597,9 +607,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "build",
      "every": {
-      "beats": 0.8
+      "beats": 1.2
      },
      "fill_beats": 2,
      "low": 0.4,
@@ -648,14 +658,14 @@
     "second": 68.011
    },
    "fade": 0.0,
-   "why": "unbuild answers converge, a whole 2 cycles, landing on the hit at 68.01s with a new colour",
+   "why": "split answers converge, a whole 4 cycles, landing on the hit at 68.01s with a new colour",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "indigo",
      "l": 0.46
     },
     "heads": {
-     "c": "amber",
+     "c": "indigo",
      "l": 0.32,
      "pan": 0.5,
      "tilt": 0.34
@@ -664,14 +674,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "unbuild",
+     "figure": "split",
      "every": {
       "beats": 0.906
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": true,
-     "cycles": 2,
+     "move_head": false,
+     "cycles": 4,
      "reverse": true
     }
    ]
@@ -689,7 +699,7 @@
      "l": 0.46
     },
     "heads": {
-     "c": "crimson",
+     "c": "ember",
      "l": 0.32,
      "pan": 0.5,
      "tilt": 0.34
@@ -715,14 +725,14 @@
     "second": 75.76
    },
    "fade": 0.0,
-   "why": "hocket answers split, a whole 4 cycles, mid-phrase",
+   "why": "diverge answers split, a whole 4 cycles, mid-phrase",
    "look": {
     "lamps": {
      "c": "ember",
      "l": 0.46
     },
     "heads": {
-     "c": "crimson",
+     "c": "ember",
      "l": 0.32,
      "pan": 0.5,
      "tilt": 0.34
@@ -731,7 +741,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "hocket",
+     "figure": "diverge",
      "every": {
       "beats": 0.967
      },
@@ -826,14 +836,14 @@
     "second": 85.798
    },
    "fade": 0.0,
-   "why": "pulse answers unbuild, a whole 4 cycles, landing on the hit at 85.80s with a new colour",
+   "why": "alternate answers unbuild, a whole 6 cycles, landing on the hit at 85.80s with a new colour, twice the rate - the build is accelerating",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "ember",
      "l": 0.47
     },
     "heads": {
-     "c": "amber",
+     "c": "ember",
      "l": 0.33,
      "pan": 0.5,
      "tilt": 0.34
@@ -842,15 +852,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "alternate",
      "every": {
-      "beats": 0.955
+      "beats": 0.637
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": false,
      "reverse": false,
-     "cycles": 4
+     "cycles": 6
     }
    ]
   },
@@ -878,12 +888,12 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "beats": 0.972
+      "beats": 1.443
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": false,
-     "cycles": 2
+     "cycles": 1
     }
    ],
    "swell": {
@@ -893,12 +903,21 @@
    }
   },
   {
+   "id": 0,
+   "at": {
+    "second": 91.243
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "one beat of black, so the hit that follows has somewhere to land"
+  },
+  {
    "id": 16,
    "at": {
     "bar": 44
    },
    "fade": 0.0,
-   "why": "PEAK at 92.5s - the loudest instant in the recording. Full blast, the only white",
+   "why": "PEAK at 92.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit",
    "look": {
     "lamps": {
      "c": "bone",
@@ -909,7 +928,8 @@
      "l": 1.0,
      "pan": 0.5,
      "tilt": 0.26,
-     "strobe": 0.75
+     "strobe": 0.5,
+     "prism": 0.6
     }
    },
    "chase": {
@@ -934,7 +954,7 @@
      "l": 0.66
     },
     "heads": {
-     "c": "scarlet",
+     "c": "ember",
      "l": 0.46,
      "pan": 0.5,
      "tilt": 0.31
@@ -966,14 +986,14 @@
     "second": 100.798
    },
    "fade": 0.0,
-   "why": "split answers cascade, a whole 3 cycles, landing on the hit at 100.80s with a new colour",
+   "why": "split answers cascade, a whole 5 cycles, landing on the hit at 100.80s with a new colour, twice the rate - the build is accelerating",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "ember",
      "l": 0.66
     },
     "heads": {
-     "c": "amber",
+     "c": "ember",
      "l": 0.46,
      "pan": 0.5,
      "tilt": 0.31
@@ -984,13 +1004,13 @@
      "on": "lamps",
      "figure": "split",
      "every": {
-      "beats": 0.954
+      "beats": 0.573
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": false,
      "reverse": false,
-     "cycles": 3
+     "cycles": 5
     }
    ]
   },
@@ -1039,14 +1059,14 @@
     "bar": 51
    },
    "fade": 0.3,
-   "why": "bars 51-52, the phrase closes down: drums leads, E 12.79, 3 hits, mode +0.83 - unbuild in ember - opened from ember to saffron so the level can be seen",
+   "why": "bars 51-52, the phrase closes down: drums leads, E 12.79, 3 hits, mode +0.83 - unbuild in ember - opened from ember to bone so the level can be seen",
    "look": {
     "lamps": {
-     "c": "saffron",
+     "c": "bone",
      "l": 0.77
     },
     "heads": {
-     "c": "saffron",
+     "c": "bone",
      "l": 0.54,
      "pan": 0.5,
      "tilt": 0.39
@@ -1239,7 +1259,7 @@
      "l": 0.38
     },
     "heads": {
-     "c": "violet",
+     "c": "indigo",
      "l": 0.27,
      "pan": 0.5,
      "tilt": 0.36
@@ -1265,14 +1285,14 @@
     "second": 121.812
    },
    "fade": 0.0,
-   "why": "diverge answers pulse, a whole 4 cycles, landing on the hit at 121.81s with a new colour",
+   "why": "comet answers pulse, a whole 1 cycles, landing on the hit at 121.81s with a new colour",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "indigo",
      "l": 0.38
     },
     "heads": {
-     "c": "indigo",
+     "c": "saffron",
      "l": 0.27,
      "pan": 0.5,
      "tilt": 0.36
@@ -1281,14 +1301,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "diverge",
+     "figure": "comet",
      "every": {
-      "beats": 0.952
+      "beats": 1.269
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": false,
-     "cycles": 4,
+     "move_head": true,
+     "cycles": 1,
      "reverse": true
     }
    ]
@@ -1377,7 +1397,7 @@
    "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
-     "c": "oxblood",
+     "c": "indigo",
      "l": 0.11
     },
     "heads": {

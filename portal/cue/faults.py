@@ -81,6 +81,23 @@ def scan(song, lights):
     def planned(t):
         return any(a <= t <= b for a, b in deliberate)
 
+    cl = sorted((show.get("cuelist") or []), key=lambda c: float(c.get("t", 0)))
+    punch_blacks = []
+    for i, c in enumerate(cl):
+        if c.get("look"):
+            continue
+        nxt = cl[i + 1] if i + 1 < len(cl) else None
+        if not nxt or not nxt.get("look"):
+            continue
+        gap = float(nxt["t"]) - float(c["t"])
+        lv = max((v.get("l") or 0) for v in nxt["look"].values()
+                 if isinstance(v, dict)) if nxt["look"] else 0
+        if gap <= 1.2 and lv >= 0.7:
+            punch_blacks.append((float(c["t"]) - 0.05, float(nxt["t"]) + 0.05))
+
+    def before_a_punch(a, b):
+        return any(not (b < x or a > y) for x, y in punch_blacks)
+
     def add(t, kind, text):
         faults.append((round(t, 2), kind, text))
 
@@ -273,7 +290,7 @@ def scan(song, lights):
             if not seg:
                 continue
             m = sum(seg) / len(seg)
-            if e / hi > 0.55 and m < 12:
+            if e / hi > 0.55 and m < 12 and not before_a_punch(w * win, (w + 1) * win):
                 add(
                     w * win,
                     "dark-on-loud",

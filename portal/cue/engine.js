@@ -54,6 +54,7 @@ function loadRig(rigName) {
         r: roles.indexOf("colour.r"), g: roles.indexOf("colour.g"), b: roles.indexOf("colour.b"),
         w: roles.indexOf("colour.w"),
         pan: roles.indexOf("pan"), tilt: roles.indexOf("tilt"), strobe: roles.indexOf("strobe"),
+        prism: roles.indexOf("prism"),
       },
       movable: roles.indexOf("pan") >= 0,
       defaults: (prof.channels || []).map((c) => c.default || 0),

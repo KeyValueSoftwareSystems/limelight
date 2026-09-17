@@ -31,6 +31,7 @@ function writeFixture(frame, fx, state) {
   if (ch.pan >= 0 && state.pan != null) frame[fx.offset + ch.pan] = Math.round(Math.max(0, Math.min(1, state.pan)) * 255);
   if (ch.tilt >= 0 && state.tilt != null) frame[fx.offset + ch.tilt] = Math.round(Math.max(0, Math.min(1, state.tilt)) * 255);
   if (ch.strobe >= 0) frame[fx.offset + ch.strobe] = state.strobe ? Math.round(Math.max(0, Math.min(1, state.strobe)) * 255) : 0;
+  if (ch.prism >= 0) frame[fx.offset + ch.prism] = state.prism ? Math.round(Math.max(0, Math.min(1, state.prism)) * 255) : 0;
 }
 
 function resolveLook(rig, look, palette) {
@@ -48,6 +49,7 @@ function resolveLook(rig, look, palette) {
         pan: spec.pan != null ? +spec.pan : prev.pan,
         tilt: spec.tilt != null ? +spec.tilt : prev.tilt,
         strobe: spec.strobe != null ? +spec.strobe : prev.strobe,
+        prism: spec.prism != null ? +spec.prism : prev.prism,
       };
     }
   }
@@ -95,7 +97,7 @@ function applyChase(rig, base, chase, step, palette, ctx) {
     out[id] = {
       l: Math.max(0, Math.min(1, raw[id] * gain)),
       c: ring ? ring[(i + step) % ring.length] : (w > 0.5 && hiCol ? hiCol : b.c),
-      pan: b.pan, tilt: b.tilt, strobe: b.strobe,
+      pan: b.pan, tilt: b.tilt, strobe: b.strobe, prism: b.prism,
     };
   });
   if (chase.move_head) {
