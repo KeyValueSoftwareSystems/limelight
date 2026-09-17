@@ -1276,3 +1276,106 @@ Shows / Songs / Venues (Shows first), an operator gets Shows / Rooms.
   rig" page. It currently borrows the designer's Shows list.
 - The 3D stage preview is a large dark void; the rig draws small and dim in it.
 - The chat panel is inert ("not connected yet") and holds a full column.
+
+---
+
+## 2026-09-18 — overrides, the rig map, uploads, the venue builder
+
+### `Rigmap` only knew two fixture types
+
+`portal/server.py`'s `Rigmap` matched `type == "par7"` and `type == "head13"`
+and carried their channel offsets as literals. On every rig built from anything
+else it found **zero** level channels, so Blackout, the master/par/head faders
+and strobe kill were silent no-ops that reported nothing. Level channels found,
+before → after:
+
+| layout | before | after |
+|---|---|---|
+| halo-portal | 0 | 214 |
+| keycode-arena | 0 | 158 |
+| keycode-basic | 0 | 17 |
+| arc4-head / club12 / club16 / echostage | 13 / 38 / 50 / 64 | unchanged |
+
+It now reads the same `*.profile.json` the drivers read: every channel is named,
+and `brightness` says whether it rides the master or the colour channels.
+
+**Still narrow:** `Limits.apply` (the venue brightness ceiling and the head
+keep-out) *also* walks `rigmap.pars` / `rigmap.heads` with par7/head13 offsets.
+Those two lists were deliberately left alone, because widening them would apply
+par7 offsets to a par5 and corrupt frames. So the ceiling and the keep-out are
+still no-ops on halo-portal, keycode-arena and keycode-basic. That is the next
+thing to generalise, and it is a safety feature.
+
+### Full on
+
+A latch beside Blackout, not a one-shot. Blackout wins ties. The whiteout is
+per fixture — a spot29 mixes **subtractive**, so its CMY flags go to 0 to open
+the lamp, not to 255 which would close it; gobo and prism go to their open
+slots, a colour wheel to its white one. Applied on the screen too
+(`trimFixtures`), because an operator reading a rig that disagrees with the
+sender is worse than no readout.
+
+Measured on halo against real baked frames: blackout 0/214 lit, full on 214/214
+at exactly 255, master at 50% halving the mean (116.1 → 58.0).
+
+### Halo is the default rig
+
+`DEFAULT_LAYOUT`, `start_v2`'s `rig_name`, `/api/bake-plan`'s fallback and the
+stage's label fallback were `arc4-head` / `club16-2head`. All now `halo-portal`.
+It is also in `bakeCache`'s `RIGS` rotation for card previews.
+
+### Uploads over 10 MB (`invalid response`)
+
+Not a size limit of ours. **Next's dev rewrite proxy stalls on a request body
+over 10,000,000 bytes**, gives up at its 30 s `proxyTimeout` and returns the
+plain string `Internal Server Error`; `JSON.parse` threw and the UI said
+"invalid response". Same file, each path:
+
+| path | 6 MB | 9 MB | 12 MB | 52 MB |
+|---|---|---|---|---|
+| via `:3000` proxy | 0.08s 200 | 0.09s 200 | **30.03s 500** | 500 |
+| straight to `:8800` | — | — | 0.097s 200 | 200 |
+
+The file was never the problem — the failing 10,485,603-byte upload reached the
+hub and generated its score. Only the answer was lost.
+
+Fix: the client slices anything over 6 MB to `/api/upload/chunk`, then
+`/api/upload/finish` assembles and runs the same hub handoff. 35 MB from the
+browser: 0.57s, 6 parts, byte-exact. Under 6 MB takes the old single request.
+
+### The venue builder edits the designer's view
+
+`RigPlan` (an abstract diagram) is gone. `StagePlan` renders the real thing —
+same `placeFixtures` projection, same `paintStage` — with draggable handles.
+
+That required **a room**. Without one a rig's extent is the span of its own
+fixtures, so dragging one rescales the others under the pointer and the
+projection has no inverse. A venue now states its room in metres (across, up,
+deep — all editable), which pins the extent and makes `unplaceFixture` exact.
+Round-trip tested to 1e-9; a control confirms a fixture moves >0.2 of the frame
+without a room.
+
+Existing layouts declare no room and keep their derived extent byte for byte.
+**Consequence:** opening an older venue in the builder derives a room around its
+fixtures, and saving makes it explicit — so a rig hung at 2.4 m in a 7 m room
+sits lower in frame than before. Honest, but a change.
+
+### Hover previews never ran
+
+`MediaCard`'s play badge is an `absolute inset-0` layer with no
+`pointer-events-none`, so it sat over the preview and swallowed every
+`pointerenter`. Measured headlessly: still at rest, animating on hover, back to
+the same rest frame on leave.
+
+### `npm test` was lying
+
+The script could not load a single `.ts` file without
+`--experimental-strip-types` and reported 19 phantom failures. With the flag:
+318 pass.
+
+### Two traps that bit again
+
+- **`pkill -f <pattern>`** matches this shell's own command line when the
+  pattern appears in it. Kill by PID.
+- **Zero comments in code is hook-enforced.** A `PreToolUse` hook rejects
+  docstrings and banner comments outright. Reasoning goes in the commit message.
