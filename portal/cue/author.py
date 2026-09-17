@@ -626,13 +626,7 @@ def author(song, out_path=None):
                 split_look = held_split
             if split_look:
                 counter = FAMILY_COLOUR.get(second_fam, counter)
-            if split_look:
-                look = {
-                    "inner": {"c": main, "l": level},
-                    "outer": {"c": counter, "l": round(level * 0.86, 2)},
-                }
-            else:
-                look = {"lamps": {"c": main, "l": level}}
+            look = {"lamps": {"c": main, "l": level}}
             here_notes = notes_in(r["t"], r["end"])
             if here_notes:
                 mp = sum(p for _, p, _ in here_notes) / len(here_notes)
@@ -686,7 +680,6 @@ def author(song, out_path=None):
             melodic = top_fam in ("voices", "strings", "winds", "keys", "guitars")
             sings = len(here_notes) >= 7 and melodic and not in_build
             if sings:
-                fig = "pitch"
                 every = {"notes": 1}
             partner = fam[(fam.index(fig) + 1) % len(fam)] if fam and fig in fam else "wave"
 
@@ -698,16 +691,6 @@ def author(song, out_path=None):
             if reverse_it:
                 layers[0]["reverse"] = True
 
-            layers.append({
-                "attr": "__none__", "on": "lamps", "figure": partner,
-                "every": {"bars": 2}, "low": 0.97, "reverse": not reverse_it,
-            })
-
-            if dens >= 6 and level > 0.5:
-                layers.append({
-                    "on": "lamps", "figure": "pulse", "every": {"bars": 2},
-                    "low": 0.82,
-                })
             chase = None
             fade = 0.35 if not fam_changed else 0.15
             if in_build:
@@ -940,8 +923,8 @@ def author(song, out_path=None):
 
     show_effects = [
         {"attr": "intensity", "on": "lamps", "form": "sine",
-         "size": 0.12, "rate": {"bars": 6}, "phase": 160,
-         "why": "a slow breath across the row, always running, so the rig is never dead still"},
+         "size": 0.12, "rate": {"bars": 6}, "phase": 0,
+         "why": "a slow breath on the submaster, the whole row together, so the rig is never dead still"},
         {"attr": "pan", "on": "heads", "form": "sine",
          "size": 0.16, "rate": {"bars": 8}, "phase": 0,
          "why": "the beam drifts across the room over eight bars"},

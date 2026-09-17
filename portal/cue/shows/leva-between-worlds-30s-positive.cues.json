@@ -55,16 +55,6 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ]
   },
@@ -106,16 +96,6 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ]
   },
@@ -157,16 +137,6 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ]
   },
@@ -208,16 +178,6 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ]
   },
@@ -259,16 +219,6 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ]
   },
@@ -307,7 +257,7 @@
     "bar": 13
    },
    "fade": 0.35,
-   "why": "bars 13-16, the phrase travels across: drums leads, E 6.71, 2 hits, mode +1.00 - wave in scarlet against teal inside",
+   "why": "bars 13-16, the phrase travels across: drums leads, E 6.71, 2 hits, mode +1.00 - wave in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -331,16 +281,6 @@
      "low": 0.5,
      "move_head": true,
      "reverse": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "handover",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": false
     }
    ]
   },
@@ -350,7 +290,7 @@
     "bar": 17
    },
    "fade": 0.35,
-   "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - alternate in scarlet against teal inside",
+   "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - alternate in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -373,16 +313,6 @@
      "fill_beats": 2,
      "low": 0.4,
      "move_head": false
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ]
   },
@@ -392,7 +322,7 @@
     "bar": 21
    },
    "fade": 0.35,
-   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - comet in scarlet against teal inside",
+   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - comet in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -415,16 +345,6 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ]
   },
@@ -466,16 +386,6 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ]
   }
@@ -545,8 +455,8 @@
    "rate": {
     "bars": 6
    },
-   "phase": 160,
-   "why": "a slow breath across the row, always running, so the rig is never dead still"
+   "phase": 0,
+   "why": "a slow breath on the submaster, the whole row together, so the rig is never dead still"
   },
   {
    "attr": "pan",

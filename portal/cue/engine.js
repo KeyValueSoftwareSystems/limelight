@@ -168,8 +168,11 @@ const FIGURES = {
   handover(ids, step) {
     const n = ids.length;
     if (n < 2) return ids.slice();
-    const a = ((step % n) + n) % n;
-    const b = (a + 1) % n;
+    const span = Math.max(1, 2 * n - 2);
+    let a = ((step % span) + span) % span;
+    let dir = 1;
+    if (a >= n) { a = span - a; dir = -1; }
+    const b = Math.max(0, Math.min(n - 1, a + dir));
     const out = {};
     for (let k = 0; k < n; k++) out[ids[k]] = k === a ? 1 : k === b ? 0.65 : 0.1;
     return out;
@@ -259,11 +262,6 @@ const FIGURES = {
       const d = Math.abs(k - at);
       out[ids[k]] = d <= 1 ? Math.max(0.08, 1 - d * 0.78) : 0.08;
     }
-    return out;
-  },
-  rotate(ids, step) {
-    const out = {};
-    ids.forEach((id, i) => { out[id] = 1; });
     return out;
   },
 };

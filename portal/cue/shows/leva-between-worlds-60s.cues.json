@@ -23,7 +23,7 @@
     "bar": 1
    },
    "fade": 0.6,
-   "why": "bars 1-4, the phrase opens out: guitars leads, E 1.46, 9 hits, mode ? - handover in ember against teal inside",
+   "why": "bars 1-4, the phrase opens out: guitars leads, E 1.46, 9 hits, mode ? - handover in ember",
    "look": {
     "lamps": {
      "c": "ember",
@@ -46,16 +46,6 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ],
    "swell": {
@@ -72,13 +62,9 @@
    "fade": 0.6,
    "why": "bars 5-8, the phrase travels across: guitars leads, E 2.31, 11 hits, mode ? - wave in ember against teal inside",
    "look": {
-    "inner": {
+    "lamps": {
      "c": "ember",
      "l": 0.34
-    },
-    "outer": {
-     "c": "ember",
-     "l": 0.29
     },
     "heads": {
      "c": "teal",
@@ -97,16 +83,6 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ],
    "swell": {
@@ -150,7 +126,7 @@
     "bar": 13
    },
    "fade": 0.35,
-   "why": "bars 13-16, the phrase travels across: drums leads, E 3.11, 9 hits, mode ? - wave in ember against teal inside",
+   "why": "bars 13-16, the phrase travels across: drums leads, E 3.11, 9 hits, mode ? - wave in ember",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -174,16 +150,6 @@
      "low": 0.4,
      "move_head": true,
      "reverse": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "handover",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": false
     }
    ]
   },
@@ -193,7 +159,7 @@
     "bar": 17
    },
    "fade": 0.15,
-   "why": "bars 17-20, the phrase closes down: keys leads, E 5.18, 6 hits, mode -1.00 - pitch in crimson against ember inside",
+   "why": "bars 17-20, the phrase closes down: keys leads, E 5.18, 6 hits, mode -1.00 - wave in crimson",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -209,7 +175,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pitch",
+     "figure": "wave",
      "every": {
       "notes": 1
      },
@@ -217,24 +183,6 @@
      "low": 0.4,
      "move_head": true,
      "reverse": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": false
-    },
-    {
-     "on": "lamps",
-     "figure": "pulse",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.82
     }
    ],
    "swell": {
@@ -278,7 +226,7 @@
     "bar": 24
    },
    "fade": 0.35,
-   "why": "bars 21-24, the phrase closes down: keys leads, E 3.26, 0 hits, mode +1.00 - pitch in crimson against ember inside",
+   "why": "bars 21-24, the phrase closes down: keys leads, E 3.26, 0 hits, mode +1.00 - handover in crimson",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -294,23 +242,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pitch",
+     "figure": "handover",
      "every": {
       "notes": 1
      },
      "fill_beats": 2,
      "low": 0.5,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "wave",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ],
    "swell": {
@@ -386,16 +324,6 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true
-    },
-    {
-     "attr": "__none__",
-     "on": "lamps",
-     "figure": "handover",
-     "every": {
-      "bars": 2
-     },
-     "low": 0.97,
-     "reverse": true
     }
    ]
   }
@@ -495,8 +423,8 @@
    "rate": {
     "bars": 6
    },
-   "phase": 160,
-   "why": "a slow breath across the row, always running, so the rig is never dead still"
+   "phase": 0,
+   "why": "a slow breath on the submaster, the whole row together, so the rig is never dead still"
   },
   {
    "attr": "pan",
