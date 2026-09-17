@@ -57,7 +57,15 @@ const layout = JSON.parse(fs.readFileSync(layoutFile, "utf8"));
 
 const TOTAL_CH = manifest.total_channels;
 const catalog = JSON.parse(fs.readFileSync(path.join(HERE, "effects.json"), "utf8")).effects;
-const catalogById = Object.fromEntries(catalog.map(e => [e.id, e]));
+/* creator-built effects (custom-effects.json) are PRESETS over a base primitive:
+   they carry a `base` and a set of `dials`, but no DMX function of their own. Fold
+   them into the catalogue so a plan can name one; the base fallback below gives it
+   a renderer, and the resolvers seed its dials. Purely additive — an effect with no
+   `base` behaves exactly as before. */
+let customEffects = [];
+try { customEffects = (JSON.parse(fs.readFileSync(path.join(HERE, "custom-effects.json"), "utf8")).effects) || []; }
+catch (e) { customEffects = []; }
+const catalogById = Object.fromEntries(catalog.concat(customEffects).map(e => [e.id, e]));
 
 /* ── score clock ──────────────────────────────────────────────────────────── */
 
@@ -126,6 +134,10 @@ for (const eid of manifest.supported_effects) {
   if (fs.existsSync(fpath)) {
     dmxFunctions[eid] = require(fpath);
   }
+}
+/* a preset effect renders through its base primitive's DMX function */
+for (const e of customEffects) {
+  if (e.base && !dmxFunctions[e.id] && dmxFunctions[e.base]) dmxFunctions[e.id] = dmxFunctions[e.base];
 }
 
 /* ── resolve plan entries to timed spans ──────────────────────────────────── */
@@ -270,7 +282,7 @@ function resolveBinding(b) {
   if (b.to_s != null && isFinite(b.to_s)) endS = Math.min(endS, b.to_s);
   if (!(endS > startS)) return null;
 
-  const params = {};
+  const params = edef.base ? { ...(edef.dials || {}) } : {};
   for (const [k, v] of Object.entries(b)) {
     if (k !== "effect" && k !== "section" && k !== "why" && k !== "layer" &&
         k !== "from_bar" && k !== "to_bar" && k !== "from_beat" && k !== "to_beat" &&
@@ -304,7 +316,7 @@ function resolveState(s) {
   if (s.to_s != null && isFinite(s.to_s)) endS = Math.min(endS, s.to_s);
   if (!(endS > startS)) return null;
 
-  const params = {};
+  const params = edef.base ? { ...(edef.dials || {}) } : {};
   for (const [k, v] of Object.entries(s)) {
     if (k !== "effect" && k !== "section" && k !== "why" && k !== "layer" &&
         k !== "from_bar" && k !== "to_bar" && k !== "from_beat" && k !== "to_beat" &&
