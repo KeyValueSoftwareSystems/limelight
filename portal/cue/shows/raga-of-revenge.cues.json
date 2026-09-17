@@ -32,7 +32,7 @@
     "bar": 1
    },
    "fade": 0.15,
-   "why": "bar 1: strings leads, E 3.70, 1 hits, mode -0.31 - sweep in violet",
+   "why": "bar 1: strings leads, E 3.70, 1 hits, mode -0.31 - pitch in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -42,15 +42,15 @@
      "c": "violet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.29
+     "tilt": 0.35
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -64,7 +64,7 @@
     "bar": 2
    },
    "fade": 0.15,
-   "why": "bar 2: voices leads, E 3.38, 0 hits, mode -0.04 - bounce in crimson",
+   "why": "bar 2: voices leads, E 3.38, 0 hits, mode -0.04 - pitch in crimson",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -74,15 +74,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -105,7 +105,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -139,15 +139,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -251,7 +251,7 @@
      "c": "scarlet",
      "l": 0.31,
      "pan": 0.5,
-     "tilt": 0.22
+     "tilt": 0.32
     }
    },
    "chases": [
@@ -310,7 +310,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -344,15 +344,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -375,7 +375,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -437,15 +437,15 @@
      "c": "amber",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -469,7 +469,7 @@
      "c": "amber",
      "l": 0.32,
      "pan": 0.5,
-     "tilt": 0.22
+     "tilt": 0.32
     }
    },
    "chases": [
@@ -525,7 +525,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -549,7 +549,7 @@
     "bar": 11
    },
    "fade": 0.15,
-   "why": "bar 11: strings leads, E 10.09, 2 hits, mode +0.32 - sweep in oxblood against scarlet inside",
+   "why": "bar 11: strings leads, E 10.09, 2 hits, mode +0.32 - pitch in oxblood against scarlet inside",
    "look": {
     "outer": {
      "c": "crimson",
@@ -563,15 +563,15 @@
      "c": "crimson",
      "l": 0.41,
      "pan": 0.5,
-     "tilt": 0.42
+     "tilt": 0.36
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 2,
      "low": 0.5,
@@ -595,15 +595,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -617,7 +617,7 @@
     "bar": 12
    },
    "fade": 0.15,
-   "why": "bar 12: voices leads, E 4.51, 0 hits, mode +0.32 - bounce in crimson",
+   "why": "bar 12: voices leads, E 4.51, 0 hits, mode +0.32 - pitch in crimson",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -627,15 +627,15 @@
      "c": "crimson",
      "l": 0.24,
      "pan": 0.5,
-     "tilt": 0.22
+     "tilt": 0.31
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -658,7 +658,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -692,15 +692,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -728,7 +728,7 @@
      "c": "violet",
      "l": 0.27,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.28
     }
    },
    "chases": [
@@ -791,7 +791,7 @@
      "c": "scarlet",
      "l": 0.3,
      "pan": 0.5,
-     "tilt": 0.42
+     "tilt": 0.37
     }
    },
    "chases": [
@@ -827,7 +827,7 @@
      "c": "scarlet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -861,15 +861,15 @@
      "c": "scarlet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -892,7 +892,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -926,15 +926,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -980,7 +980,7 @@
      "c": "crimson",
      "l": 0.34,
      "pan": 0.5,
-     "tilt": 0.42
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -1016,7 +1016,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -1050,15 +1050,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -1082,7 +1082,7 @@
      "c": "ember",
      "l": 0.52,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.31
     }
    },
    "chases": [
@@ -1135,7 +1135,7 @@
     "bar": 23
    },
    "fade": 0.35,
-   "why": "bar 23: guitars leads, E 7.97, 8 hits, mode -0.47 - handover in ember against ember inside",
+   "why": "bar 23: guitars leads, E 7.97, 8 hits, mode -0.47 - pitch in ember against ember inside",
    "look": {
     "outer": {
      "c": "scarlet",
@@ -1149,15 +1149,15 @@
      "c": "scarlet",
      "l": 0.39,
      "pan": 0.5,
-     "tilt": 0.42
+     "tilt": 0.39
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "handover",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 2,
      "low": 0.4,
@@ -1189,7 +1189,7 @@
      "c": "scarlet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -1223,15 +1223,15 @@
      "c": "scarlet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -1310,7 +1310,7 @@
      "c": "scarlet",
      "l": 0.43,
      "pan": 0.5,
-     "tilt": 0.29
+     "tilt": 0.36
     }
    },
    "chases": [
@@ -1351,7 +1351,7 @@
      "c": "scarlet",
      "l": 0.46,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.38
     }
    },
    "chases": [
@@ -1391,7 +1391,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -1425,15 +1425,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -1478,7 +1478,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -1512,15 +1512,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -1548,7 +1548,7 @@
      "c": "crimson",
      "l": 0.43,
      "pan": 0.5,
-     "tilt": 0.29
+     "tilt": 0.38
     }
    },
    "chases": [
@@ -1629,7 +1629,7 @@
      "c": "ember",
      "l": 0.38,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.32
     }
    },
    "chases": [
@@ -1697,7 +1697,7 @@
      "c": "ember",
      "l": 0.45,
      "pan": 0.5,
-     "tilt": 0.22
+     "tilt": 0.37
     }
    },
    "chases": [
@@ -1793,7 +1793,7 @@
      "c": "scarlet",
      "l": 0.45,
      "pan": 0.5,
-     "tilt": 0.42
+     "tilt": 0.31
     }
    },
    "chases": [
@@ -1829,7 +1829,7 @@
      "c": "scarlet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -1863,15 +1863,15 @@
      "c": "scarlet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -1931,7 +1931,7 @@
      "c": "teal",
      "l": 0.49,
      "pan": 0.5,
-     "tilt": 0.29
+     "tilt": 0.43
     }
    },
    "chases": [
@@ -1968,7 +1968,7 @@
      "c": "teal",
      "l": 0.45,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.36
     }
    },
    "chases": [
@@ -2005,7 +2005,7 @@
      "c": "ember",
      "l": 0.37,
      "pan": 0.5,
-     "tilt": 0.22
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -2050,7 +2050,7 @@
      "c": "scarlet",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -2084,15 +2084,15 @@
      "c": "scarlet",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -2177,7 +2177,7 @@
     "bar": 55
    },
    "fade": 0.15,
-   "why": "bar 55: guitars leads, E 7.45, 1 hits, mode +0.55 - converge in scarlet",
+   "why": "bar 55: guitars leads, E 7.45, 1 hits, mode +0.55 - pitch in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -2187,15 +2187,15 @@
      "c": "scarlet",
      "l": 0.27,
      "pan": 0.5,
-     "tilt": 0.42
+     "tilt": 0.34
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "converge",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.5,
@@ -2218,7 +2218,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -2252,15 +2252,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -2274,7 +2274,7 @@
     "bar": 56
    },
    "fade": 0.35,
-   "why": "bar 56: guitars leads, E 9.22, 4 hits, mode +0.55 - diverge in scarlet against violet inside",
+   "why": "bar 56: guitars leads, E 9.22, 4 hits, mode +0.55 - pitch in scarlet against violet inside",
    "look": {
     "outer": {
      "c": "crimson",
@@ -2288,15 +2288,15 @@
      "c": "crimson",
      "l": 0.3,
      "pan": 0.5,
-     "tilt": 0.22
+     "tilt": 0.36
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "diverge",
+     "figure": "pitch",
      "every": {
-      "hits": 1
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.5,
@@ -2310,7 +2310,7 @@
     "bar": 57
    },
    "fade": 0.35,
-   "why": "bar 57: guitars leads, E 6.44, 3 hits, mode +0.55 - split in scarlet against violet inside",
+   "why": "bar 57: guitars leads, E 6.44, 3 hits, mode +0.55 - pitch in scarlet against violet inside",
    "look": {
     "outer": {
      "c": "crimson",
@@ -2324,15 +2324,15 @@
      "c": "crimson",
      "l": 0.22,
      "pan": 0.5,
-     "tilt": 0.29
+     "tilt": 0.36
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "split",
+     "figure": "pitch",
      "every": {
-      "hits": 1
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -2355,7 +2355,7 @@
      "c": "crimson",
      "l": 0.19,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
@@ -2389,15 +2389,15 @@
      "c": "crimson",
      "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "pitch",
      "every": {
-      "hits": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -2521,7 +2521,7 @@
      "c": "ember",
      "l": 0.04,
      "pan": 0.5,
-     "tilt": 0.35
+     "tilt": 0.33
     }
    },
    "chases": [

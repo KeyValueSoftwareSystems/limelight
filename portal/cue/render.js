@@ -51,14 +51,14 @@ function resolveLook(rig, look, palette) {
   return out;
 }
 
-function applyChase(rig, base, chase, step, palette) {
+function applyChase(rig, base, chase, step, palette, ctx) {
   if (!chase) return base;
   let ids = (chase.on ? [].concat(chase.on) : ["lamps"])
     .reduce((acc, k) => acc.concat(E.expandTargets(rig, k)), []);
   if (!ids.length) return base;
   if (chase.reverse) ids = ids.slice().reverse();
   const figure = E.FIGURES[chase.figure] || E.FIGURES.alternate;
-  const res = figure(ids, step);
+  const res = figure(ids, step, ctx);
   const weights = {};
   if (Array.isArray(res)) {
     const lit = new Set(res);
@@ -117,6 +117,8 @@ function render(cueFile, score, rigName, opts) {
     const layers = cues[i].chases || (cues[i].chase ? [cues[i].chase] : []);
     cues[i]._layers = layers;
     cues[i]._steps = layers.map((ch) => E.chaseStepTimes(ch, grid, cues[i]._t, cues[i]._end));
+    cues[i]._notes = layers.map((ch) => (ch.figure === "pitch"
+      ? E.noteStepsIn(grid, cues[i]._t, cues[i]._end, (ch.every || {}).notes || 1) : null));
   }
 
   const total = Math.max(1, Math.round(duration * fps));
@@ -150,7 +152,16 @@ function render(cueFile, score, rigName, opts) {
         liveCue = ci; liveStep = stepKey;
       }
       let state = cue._look;
-      cue._layers.forEach((ch, li) => { state = applyChase(rig, state, ch, steps[li], palette); });
+      cue._layers.forEach((ch, li) => {
+        const seq = cue._notes[li];
+        let cx = null;
+        if (seq && seq.length) {
+          const nn = seq[Math.min(seq.length - 1, steps[li])];
+          const ps = seq.map((x) => x.p);
+          cx = { pitch: nn ? nn.p : null, lo: Math.min(...ps), hi: Math.max(...ps) };
+        }
+        state = applyChase(rig, state, ch, steps[li], palette, cx);
+      });
       if (cue.swell) {
         const span = Math.max(1e-6, cue._end - cue._t);
         const p = Math.max(0, Math.min(1, (t - cue._t) / span));

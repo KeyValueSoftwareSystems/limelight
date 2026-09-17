@@ -211,6 +211,22 @@ const FIGURES = {
     ids.forEach((id, i) => { out[id] = (i < h) === (step % 2 === 0) ? 1 : 0.22; });
     return out;
   },
+  pitch(ids, step, ctx) {
+    const n = ids.length;
+    if (!n) return {};
+    const p = ctx && ctx.pitch != null ? ctx.pitch : null;
+    if (p == null) return FIGURES.sweep(ids, step);
+    const lo = ctx.lo != null ? ctx.lo : 30;
+    const hi = ctx.hi != null ? ctx.hi : 90;
+    const x = Math.max(0, Math.min(1, (p - lo) / Math.max(1, hi - lo)));
+    const at = x * (n - 1);
+    const out = {};
+    for (let k = 0; k < n; k++) {
+      const d = Math.abs(k - at);
+      out[ids[k]] = d <= 1 ? Math.max(0.08, 1 - d * 0.78) : 0.08;
+    }
+    return out;
+  },
   rotate(ids, step) {
     const out = {};
     ids.forEach((id, i) => { out[id] = 1; });
@@ -223,6 +239,14 @@ function chaseStepSeconds(chase, grid) {
   if (every.bars != null) return grid.barSeconds * Math.max(0.25, +every.bars);
   if (every.beats != null) return grid.beatSeconds * Math.max(0.25, +every.beats);
   return grid.barSeconds;
+}
+
+function noteStepsIn(grid, startS, endS, n) {
+  const step = Math.max(1, Math.round(n || 1));
+  const picked = (grid.notes || []).filter((x) => x.t >= startS - 1e-6 && x.t < endS - 1e-6);
+  const out = [];
+  for (let k = 0; k < picked.length; k += step) out.push(picked[k]);
+  return out;
 }
 
 function chaseStepTimes(chase, grid, startS, endS) {
@@ -291,4 +315,4 @@ function chaseStepTimes(chase, grid, startS, endS) {
   return out.length ? out : [startS];
 }
 
-module.exports = { loadRig, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes };
+module.exports = { loadRig, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes, noteStepsIn };

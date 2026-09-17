@@ -217,6 +217,13 @@ def author(song, out_path=None):
                 line[-1] = (line[-1][0], n["pitch"], max(line[-1][2], n.get("velocity", 0)))
         else:
             line.append((n["start"], n["pitch"], n.get("velocity", 0)))
+    all_p = [p for _, p, _ in line]
+    p_lo = min(all_p) if all_p else 30
+    p_hi = max(all_p) if all_p else 90
+
+    def notes_in(a, b):
+        return [(t, p, v) for t, p, v in line if a <= t < b]
+
     runs = []
     i = 0
     while i < len(line) - 3:
@@ -469,11 +476,17 @@ def author(song, out_path=None):
                 }
             else:
                 look = {"lamps": {"c": main, "l": level}}
+            here_notes = notes_in(r["t"], r["end"])
+            if here_notes:
+                mp = sum(p for _, p, _ in here_notes) / len(here_notes)
+                tilt = round(0.46 - 0.26 * max(0.0, min(1.0, (mp - p_lo) / max(1, p_hi - p_lo))), 2)
+            else:
+                tilt = round(0.22 + 0.2 * ((bar % 4) / 3.0), 2)
             look["heads"] = {
                 "c": counter if split_look else main,
                 "l": round(min(0.85, level * 0.7), 2),
                 "pan": 0.5,
-                "tilt": round(0.22 + 0.2 * ((bar % 4) / 3.0), 2),
+                "tilt": tilt,
             }
             in_build = bar in rising
             busy = ["handover", "wave", "hocket", "cascade", "comet", "alternate"]
@@ -497,6 +510,11 @@ def author(song, out_path=None):
             if dens >= 6 and level > 0.45:
                 smooth_pick = ["wave", "comet", "handover", "split"]
                 fig = smooth_pick[len(cues) % len(smooth_pick)] if fig in ("pulse", "hocket") else fig
+            melodic = top_fam in ("voices", "strings", "winds", "keys", "guitars")
+            sings = len(here_notes) >= 7 and melodic and not in_build
+            if sings:
+                fig = "pitch"
+                every = {"notes": 1}
             layers = [{"on": "lamps", "figure": fig, "every": every,
                        "fill_beats": 1 if level < 0.45 else 2,
                        "low": deep, "move_head": moves}]

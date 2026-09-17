@@ -96,10 +96,17 @@ hold**. There is nowhere to put a per-frame function, which is the point.
   measured percussive onsets; `fill_beats` fills in with beats where the percussion
   drops out, or the chase goes dead in quiet passages.
 - `chases` is a list — layers. `chase` (singular) still works.
-- `figure` is one of 15: `alternate hocket sweep bounce wave comet handover
-  converge diverge build unbuild cascade pulse pairs split rotate`. A figure may
-  return **weights** rather than on/off, which is what makes a comet tail or a
-  handover *overlap* possible.
+- `figure` is one of 16: `alternate hocket sweep bounce wave comet handover
+  converge diverge build unbuild cascade pulse pairs split rotate pitch`. A figure
+  may return **weights** rather than on/off, which is what makes a comet tail or a
+  handover *overlap* possible. `pitch` turns the row into a pitch ladder — the lit
+  position tracks the melodic line, verified at r=+0.76 against a shuffled null.
+- `every` also takes `{notes:n}`, stepping on the melody's top voice.
+- `reverse` runs a figure right-to-left, used so a descending run sweeps downward.
+- A chase step eases over 60ms by default. Sweeping that fade showed 0 to 0.07
+  costs no sync (92-93% of rises on a hit) and cuts the p99 per-frame jump from
+  49.6 to 33.5; at 0.11 sync falls to 86%. Accents, cue snaps and blackouts still
+  snap deliberately.
 - `move_head` pans the head to whichever lamp the figure is lighting.
 - `swell` ramps the cue's own level across its span.
 - `accents` are punches on the strongest measured hits, composited with `max` so

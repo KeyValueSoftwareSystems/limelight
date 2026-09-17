@@ -68,7 +68,8 @@ const show = {
   accents: cueFile.accents || [],
   cuelist: res.cues.map((c) => ({
     id: c.id, at: c.at, t: +c._t.toFixed(3), fade: c.fade || 0,
-    look: c.look, chase: c.chase || null, why: c.why || "",
+    look: c.look, chase: c.chase || null, chases: c.chases || null,
+    swell: c.swell || null, why: c.why || "",
   })),
 };
 
