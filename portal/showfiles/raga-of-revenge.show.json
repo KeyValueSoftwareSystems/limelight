@@ -151,10 +151,10 @@
   "states": [
     {
       "effect": "wash",
-      "amount": 0.14,
+      "amount": 0.38,
       "colour": "#2f5bff",
       "extent": "all",
-      "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
+      "why": "Bars 19-22: a steady blue floor under the second phrase of the riff, so the glares and chases rise out of a lit room and fall back into one.",
       "id": "s8",
       "section": 1,
       "from_s": 41.75,
@@ -167,10 +167,10 @@
     },
     {
       "effect": "wash",
-      "amount": 0.14,
+      "amount": 0.38,
       "colour": "#2f5bff",
       "extent": "all",
-      "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
+      "why": "Bars 19-22: a steady blue floor under the second phrase of the riff, so the glares and chases rise out of a lit room and fall back into one.",
       "id": "s9",
       "section": 1,
       "from_s": 47.74,
@@ -183,10 +183,10 @@
     },
     {
       "effect": "wash",
-      "amount": 0.14,
+      "amount": 0.38,
       "colour": "#2f5bff",
       "extent": "all",
-      "why": "The bed under the build: the whole row held on in dim blue, so the runs and the head have a cold field to cut through rather than a black one. Level 0.14 -- present, not seen.",
+      "why": "Bars 19-22: a steady blue floor under the second phrase of the riff, so the glares and chases rise out of a lit room and fall back into one.",
       "id": "s10",
       "section": 2,
       "from_s": 48.24,
@@ -321,7 +321,7 @@
       "amount": 0.45,
       "colour": "#ff8a1a",
       "extent": "all",
-      "why": "outro, sustaining, drums none — G. Level 0.34. Moving, not held: the room sat on one unchanging picture here for nearly three seconds. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
+      "why": "The come-down: amber breathes between a third and nine tenths.",
       "id": "s21",
       "section": 5,
       "from_s": 109.76,
@@ -331,7 +331,7 @@
         "beat": 1,
         "beats": 16
       },
-      "floor": 0.16,
+      "floor": 0.36,
       "peak": 0.9,
       "head": false
     },
@@ -350,13 +350,13 @@
         "beat": 1,
         "beats": 12
       },
-      "floor": 0.18,
+      "floor": 0.34,
       "peak": 0.85,
       "head": false
     },
     {
       "effect": "drone",
-      "amount": 0.23,
+      "amount": 0.3,
       "colour": "#ff8a1a",
       "extent": "all",
       "why": "outro, easing, drums none — D. Level 0.34. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
@@ -373,7 +373,7 @@
     },
     {
       "effect": "drone",
-      "amount": 0.173,
+      "amount": 0.22,
       "colour": "#ff8a1a",
       "extent": "all",
       "why": "outro, developing, drums none — E:7. Level 0.23. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
@@ -390,7 +390,7 @@
     },
     {
       "effect": "drone",
-      "amount": 0.173,
+      "amount": 0.22,
       "colour": "#ff8a1a",
       "extent": "all",
       "why": "outro, developing, drums none — E:7. Level 0.23. AMBER, the fourth colour, appearing for the first time here: the song resolves and warmth reads as release after ninety seconds of blue and red.",
@@ -410,11 +410,11 @@
       "section": 0,
       "from_s": 0,
       "to_s": 9.11,
-      "amount": 0.14,
+      "amount": 0.26,
       "colour": "#2f5bff",
       "extent": "outer",
       "fade_ms": 400,
-      "why": "Voice and almost nothing else. The outer pair holds a very low blue bed; the inner pair is not here -- it belongs to the singer (see the binding). The head is a still white pin. Nothing moves that the song has not moved.",
+      "why": "The room is never black once the song starts: the outer pair holds a low blue so the first cue lifts a lit room instead of switching on a dark one.",
       "head": false
     },
     {
@@ -422,11 +422,11 @@
       "section": 0,
       "from_s": 9.11,
       "to_s": 17.75,
-      "amount": 0.22,
+      "amount": 0.34,
       "colour": "#2f5bff",
       "extent": "all",
       "fade_ms": 600,
-      "why": "9.11s, the score's 'drums thicken' moment: the whole row comes into the bed, a little brighter. Still blue, still still.",
+      "why": "Bars 4-6: the blue bed comes up a step as the voice settles in.",
       "head": false
     },
     {
@@ -437,9 +437,9 @@
       "amount": 0.3,
       "colour": "#2f5bff",
       "extent": "all",
-      "floor": 0.14,
-      "peak": 0.7,
-      "why": "17.75s: the tempo lifts from 89 to 119 and the song starts to walk. The room starts to walk with it -- a slow blue pulse on the new beat. The first rhythm the row has shown.",
+      "floor": 0.34,
+      "peak": 0.75,
+      "why": "Bars 7-10: the pulse breathes between a third and three quarters -- a lit room that leans on the beat, not a lamp switching on and off. The amber brass flashes sit on the outer pair above it.",
       "head": false
     },
     {
@@ -447,11 +447,11 @@
       "section": 1,
       "from_s": 25.56,
       "to_s": 33.75,
-      "amount": 0.16,
+      "amount": 0.36,
       "colour": "#2f5bff",
       "extent": "inner",
       "fade_ms": 600,
-      "why": "The voice at its loudest before the riff: the OUTER pair now follows it (binding) and the inner pair holds low, the reverse of the opening -- the same idea, turned round, so the section reads as new without spending anything.",
+      "why": "Bars 11-14: the inner pair holds blue under the voice alone; the outer pair follows the singer.",
       "head": false
     },
     {
@@ -459,11 +459,11 @@
       "section": 2,
       "from_s": 73.76,
       "to_s": 81.76,
-      "amount": 0.12,
+      "amount": 0.36,
       "colour": "#2f5bff",
       "extent": "all",
       "head": false,
-      "why": "A low blue bed under the exchange; the picture here is the binding."
+      "why": "The exchange: a blue bed under the two singers, high enough that the split follows them as brighter and dimmer, never on and off."
     },
     {
       "effect": "drive",
@@ -485,11 +485,11 @@
       "section": 3,
       "from_s": 91.76,
       "to_s": 97.76,
-      "amount": 0.16,
+      "amount": 0.4,
       "colour": "#2f5bff",
       "extent": "all",
       "head": false,
-      "why": "A quiet blue bed under the colour wave and nothing else. The wave had been sitting on the drop's red/blue frame and the two blended into a grey near-white -- the brightest thing in the show by accident, and the travel unreadable. A wave needs a still field to cross."
+      "why": "The resolve: a blue bed under the colour wave, the brightest bed so far -- the song is at its heaviest stretch and the room stays lit between waves."
     },
     {
       "effect": "drive",

@@ -17,6 +17,7 @@
                   held the rig at 1% through the whole first chorus.
      intentional  every dark stretch is either a darkening cue or a real hole in
      breath       a blackout on loud music is one beat, never two
+     smooth       the room does not switch off and on outside a designed hit
                   the music. Blackouts were firing over a vocal at full voice,
                   because "silence" had been measured as gaps between drum hits.
      contained    a cue changes nothing outside its own span. `follow` darkened
@@ -302,6 +303,31 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
   check("breath", bad === 0,
     bad ? bad + " blackout(s) on loud music run longer than a beat (first at " + firstAt.toFixed(1) + "s, longest " + longest.toFixed(2) + "s; limit " + LIMIT.toFixed(2) + "s)"
         : "every blackout on loud music is a beat or less");
+}
+
+/* 3c. smooth — the room does not switch off and on outside a designed hit ----- */
+{
+  /* Renjith: "sudden shutting down and immediate re-lighting of lights". A DIP
+     is the row losing more than 45% of its light within 100ms and having it
+     back within 0.7s. Inside a darkening cue that is the design; anywhere else
+     it is a seam -- a cue ending into a dim bed, a bed that flickers on the
+     beat, an acceleration flicking on and off -- and it reads as a fault. */
+  const DARKENERS = new Set(["blackout", "hush", "cut", "strip"]);
+  const dk = cues.filter(c => DARKENERS.has(c.effect)).map(spanOf).filter(Boolean).map(([a, b]) => [a - 0.15, b + 0.35]);
+  const rowLight = f => { const v = parLv(f); return v.reduce((x, y) => x + y, 0) / (v.length || 1); };
+  const dips = [];
+  for (let i = 4; i < F.length - 30; i++) {
+    const before = rowLight(F[i - 4]), now = rowLight(F[i]);
+    if (before > 0.2 && now < before * 0.55) {
+      let rec = -1;
+      for (let j = i + 1; j < i + 28 && j < F.length; j++) if (rowLight(F[j]) >= before * 0.7) { rec = j; break; }
+      if (rec > 0) { const t = i / fps; if (!dk.some(([a, b]) => t >= a && t <= b)) dips.push(t); i = rec; }
+    }
+  }
+  const LIMIT = 8;
+  check("smooth", dips.length <= LIMIT,
+    dips.length + " off-and-on dips outside a darkening cue (limit " + LIMIT + ")" +
+    (dips.length ? "; first at " + dips.slice(0, 6).map(t => t.toFixed(1) + "s").join(", ") : ""));
 }
 
 /* 4. contained — a cue changes nothing outside its own span ---------------- */
