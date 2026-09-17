@@ -36,13 +36,52 @@ function spanOf(values: number[]): { lo: number; span: number } {
  * sits higher on the screen, draws smaller and gets more air in front of it.
  * That is what lets a trussed rig read as a room rather than as a row.
  */
-export function placeFixtures(show: Show | null): FixturePlacement {
+/** A world extent to lay out against, instead of the one the fixtures imply. */
+export interface WorldBounds {
+  x: { lo: number; span: number };
+  depth: { lo: number; span: number };
+  height: { lo: number; span: number };
+}
+
+/** Where the screen band sits, which depends only on the rig's geometry. */
+export function bandOf(geometry: string | null | undefined) {
+  const arch = geometry === "arch";
+  return { yTop: arch ? 0.06 : 0.40, yBase: arch ? 0.88 : 0.80 };
+}
+
+/**
+ * The inverse of the placement below, for a rig laid out against FIXED bounds.
+ *
+ * A venue being edited cannot use the bounds the fixtures imply: those are
+ * derived from the span of the fixtures, so dragging one rescales every other
+ * one under the pointer. Pin the extent and the map is linear per axis, which
+ * makes it invertible - and an editor that inverts the real projection is
+ * editing the same picture the designer sees, rather than a second drawing of
+ * the same rig.
+ */
+export function unplaceFixture(
+  screen: { x: number; y: number },
+  depth: number,
+  bounds: WorldBounds,
+  geometry?: string | null,
+): { x: number; height: number } {
+  const { yTop, yBase } = bandOf(geometry);
+  const perspective = 0.86 + 0.14 * depth;
+  const t = ((screen.x - 0.5) / perspective + 0.5 - L_EDGE) / (R_EDGE - L_EDGE);
+  const h = (yBase + 0.06 * depth - screen.y) / (yBase - yTop);
+  return {
+    x: bounds.x.lo + t * bounds.x.span,
+    height: bounds.height.lo + h * bounds.height.span,
+  };
+}
+
+export function placeFixtures(show: Show | null, bounds?: WorldBounds): FixturePlacement {
   const fx = show?.fixtures ?? [];
   if (!fx.length) return { lamps: [], pars: [], heads: [] };
 
-  const X = spanOf(fx.map((f: Fixture) => f.at?.[0] ?? 0));
-  const D = spanOf(fx.map((f: Fixture) => f.at?.[1] ?? 0));
-  const H = spanOf(fx.map((f: Fixture) => f.at?.[2] ?? 0));
+  const X = bounds?.x ?? spanOf(fx.map((f: Fixture) => f.at?.[0] ?? 0));
+  const D = bounds?.depth ?? spanOf(fx.map((f: Fixture) => f.at?.[1] ?? 0));
+  const H = bounds?.height ?? spanOf(fx.map((f: Fixture) => f.at?.[2] ?? 0));
   /* a rig with one truss has no depth and no height to read; keep it on the old
      single-line geometry rather than dividing by a span that is really zero */
   const flatDepth = D.span < 0.01;
@@ -55,8 +94,7 @@ export function placeFixtures(show: Show | null): FixturePlacement {
      reads as a portal standing around the stage; a line rig keeps the old
      constants exactly, because every existing layout is tuned against them. */
   const arch = show?.geometry === "arch";
-  const yTop = arch ? 0.06 : 0.40;
-  const yBase = arch ? 0.88 : 0.80;
+  const { yTop, yBase } = bandOf(show?.geometry);
 
   /* WHICH STRUCTURE EACH FIXTURE IS ON, decided once, here, from the real world
      positions. The renderer must not work this out again from screen
@@ -252,6 +290,21 @@ function withViews(lamps: LampState[]): FixtureStates {
  */
 export function trimFixtures(fx: FixtureStates, trims: TrimState): FixtureStates {
   const g = (k: number) => (k <= 0 ? 0 : Math.pow(k, 1 / GAMMA));
+
+  /* Full on is the inverse of blackout, and like blackout it happens HERE
+     rather than in the show: the screen has to agree with what the sender is
+     putting on the lamps, or the operator is reading a picture of a rig that
+     is doing something else. Blackout still wins - the safe state wins ties. */
+  if (trims.full_on && !trims.blackout) {
+    const WHITE: [number, number, number] = [1, 1, 1];
+    return withViews(fx.lamps.map((l) => ({
+      ...l,
+      k: 1,
+      rgb: WHITE,
+      cells: l.cells?.map((c) => ({ ...c, k: 1, rgb: WHITE })),
+    })));
+  }
+
   const parK = trims.blackout ? 0 : trims.master * trims.par;
   const headK = trims.blackout ? 0 : trims.master * trims.head;
 

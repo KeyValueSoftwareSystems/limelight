@@ -76,7 +76,7 @@ LIMITS = None
 sys.path.insert(0, os.path.join(REPO, "readers", "lights", "panel"))
 
 LAYOUTS_DIR = os.path.join(REPO, "readers", "lights")
-DEFAULT_LAYOUT = "arc4-head.layout.json"
+DEFAULT_LAYOUT = "halo-portal.layout.json"
 
 
 class Rigmap:
@@ -93,6 +93,9 @@ class Rigmap:
     HEAD = {"pan": 0, "pan_fine": 1, "tilt": 2, "tilt_fine": 3, "speed": 4,
             "dim": 5, "strobe": 6, "colour": 7, "footprint": 13}
 
+    ADDITIVE = ("colour.r", "colour.g", "colour.b", "colour.w")
+    SUBTRACTIVE = ("colour.c", "colour.m", "colour.y")
+
     def __init__(self, fixtures, channels):
         self.fixtures = fixtures or []
         self.channels = int(channels or 41)
@@ -100,26 +103,98 @@ class Rigmap:
         self.heads = [f["address"] for f in self.fixtures if f.get("type") == "head13"]
         if not self.fixtures:                       # a show baked before layouts
             self.pars, self.heads, self.channels = [1, 8, 15, 22], [29], 41
+        self.roles = self._read_roles()
+
+    def _read_roles(self):
+        """Which absolute channel carries what, read from the same profile JSON
+        the drivers read.
+
+        The PAR/HEAD tables below are par7 and head13 offsets, and for a long
+        time they were the whole map: a rig of par5s and spot29s answered every
+        level query with an empty list, so blackout, the trim faders and strobe
+        kill were all no-ops on it and said nothing. A profile already names
+        every channel and says whether brightness rides the master or the colour
+        channels, so ask it.
+        """
+        pro = profiles()
+        out = []
+        for f in self.fixtures:
+            p = pro.get(f.get("type"))
+            if not p:
+                continue
+            base = int(f.get("address") or 1) - 1
+            idx = {}
+            for i, ch in enumerate(p.get("channels") or []):
+                at = base + i
+                if at < self.channels:
+                    idx.setdefault(ch.get("role"), []).append(at)
+            by_master = p.get("brightness") == "master"
+            level = idx.get("master", []) if by_master else [
+                i for r in self.ADDITIVE for i in idx.get(r, [])]
+            out.append({"type": f.get("type"), "base": base, "idx": idx,
+                        "level": level, "strobe": idx.get("strobe", []),
+                        "moves": "move" in (p.get("can") or []),
+                        "white": self._white(p, idx, by_master)})
+        return out
+
+    def _white(self, p, idx, by_master):
+        """What a whiteout has to write to this fixture to make it open white.
+
+        Not simply 255 everywhere: a spot29 mixes SUBTRACTIVE, so its CMY flags
+        go to zero to let the lamp through, and a gobo left in the gate is not a
+        whiteout either.
+        """
+        out = [(i, 255) for i in (idx.get("master", []) if by_master else [])]
+        for r in self.ADDITIVE:
+            out += [(i, 255) for i in idx.get(r, [])]
+        for r in self.SUBTRACTIVE:
+            out += [(i, 0) for i in idx.get(r, [])]
+        white = next((w for w in (p.get("colour_wheel") or [])
+                      if w.get("name") == "white"), None)
+        if white is not None:
+            out += [(i, int(white.get("value", 0))) for i in idx.get("colour_wheel", [])]
+        out += [(i, int((p.get("gobo") or {}).get("open", 0))) for i in idx.get("gobo", [])]
+        out += [(i, int((p.get("prism") or {}).get("off", 0))) for i in idx.get("prism", [])]
+        return out
 
     @classmethod
     def of(cls, show):
         return cls(show.get("fixtures"), show.get("channels"))
 
+    def _group(self, key, moving):
+        return [i for r in self.roles if r["moves"] == moving for i in r[key]]
+
     def par_level_idx(self):
-        return [a - 1 + o for a in self.pars for o in (self.PAR["r"], self.PAR["g"], self.PAR["b"])]
+        if not self.roles:
+            return [a - 1 + o for a in self.pars for o in (self.PAR["r"], self.PAR["g"], self.PAR["b"])]
+        return self._group("level", False)
 
     def par_strobe_idx(self):
-        return [a - 1 + self.PAR["strobe"] for a in self.pars]
+        if not self.roles:
+            return [a - 1 + self.PAR["strobe"] for a in self.pars]
+        return self._group("strobe", False)
 
     def head_dim_idx(self):
-        return [a - 1 + self.HEAD["dim"] for a in self.heads]
+        if not self.roles:
+            return [a - 1 + self.HEAD["dim"] for a in self.heads]
+        return self._group("level", True)
 
     def head_strobe_idx(self):
-        return [a - 1 + self.HEAD["strobe"] for a in self.heads]
+        if not self.roles:
+            return [a - 1 + self.HEAD["strobe"] for a in self.heads]
+        return self._group("strobe", True)
+
+    def full_on_writes(self):
+        """(index, value) pairs that put the whole rig on open white."""
+        if not self.roles:
+            return [(i, 255) for i in self.par_level_idx() + self.head_dim_idx()]
+        return [pair for r in self.roles for pair in r["white"]]
 
     def summary(self):
         return {"channels": self.channels, "pars": len(self.pars), "heads": len(self.heads),
-                "fixtures": len(self.fixtures) or len(self.pars) + len(self.heads)}
+                "fixtures": len(self.fixtures) or len(self.pars) + len(self.heads),
+                "mapped": len(self.roles),
+                "level_channels": len(self.par_level_idx()) + len(self.head_dim_idx())}
 
 
 PROFILES_DIR = os.path.join(LAYOUTS_DIR, "drivers", "profiles")
@@ -1116,7 +1191,7 @@ class Baker:
         threading.Thread(target=self._run, args=(job_id, song, seed, edits, appetite, layout), daemon=True).start()
         return job_id
 
-    def start_v2(self, song, plan_data, rig_name="club16-2head"):
+    def start_v2(self, song, plan_data, rig_name="halo-portal"):
         """Bake a show from a v2 plan (states/bindings/gestures) using baker.js."""
         job_id = uuid.uuid4().hex[:12]
         with self.lock:
@@ -1660,6 +1735,10 @@ class Trims:
         self.par = 1.0
         self.head = 1.0
         self.blackout = False
+        # The exact inverse of blackout: every lamp held at full white until it
+        # is released. Blackout still wins if both are somehow set - the safe
+        # state is the one that wins ties.
+        self.full_on = False
         self.strobe_kill = False
         self.hold = False
         # milliseconds the lamps are sent EARLY. A par lights a frame or two after
@@ -1671,7 +1750,7 @@ class Trims:
         for k in ("master", "par", "head"):
             if k in body:
                 setattr(self, k, max(0.0, min(1.0, float(body[k]))))
-        for k in ("blackout", "strobe_kill", "hold"):
+        for k in ("blackout", "full_on", "strobe_kill", "hold"):
             if k in body:
                 setattr(self, k, bool(body[k]))
         if "lead_ms" in body:
@@ -1680,7 +1759,8 @@ class Trims:
 
     def state(self):
         return {"master": self.master, "par": self.par, "head": self.head,
-                "blackout": self.blackout, "strobe_kill": self.strobe_kill, "hold": self.hold,
+                "blackout": self.blackout, "full_on": self.full_on,
+                "strobe_kill": self.strobe_kill, "hold": self.hold,
                 "lead_ms": self.lead_ms}
 
     def apply(self, frame, rigmap):
@@ -1689,6 +1769,16 @@ class Trims:
         if self.blackout:
             for idx in rigmap.par_level_idx() + rigmap.head_dim_idx():
                 f[idx] = 0
+            return f
+        if self.full_on:
+            # Open white, per fixture - not 255 written blindly over every
+            # level channel, which on a subtractive head is the colour flags
+            # closed rather than the lamp opened.
+            for idx, v in rigmap.full_on_writes():
+                f[idx] = v
+            if self.strobe_kill:
+                for idx in rigmap.par_strobe_idx() + rigmap.head_strobe_idx():
+                    f[idx] = 0
             return f
         par_k = self.master * self.par
         head_k = self.master * self.head
@@ -2581,7 +2671,7 @@ def make_handler(library, baker, rig):
             if path == "/api/bake-plan":
                 song = body.get("song")
                 plan_data = body.get("plan")
-                rig_name = body.get("rig", "club16-2head")
+                rig_name = body.get("rig", "halo-portal")
                 if not song or not plan_data:
                     return self._json({"error": "need song and plan"}, 400)
                 job = baker.start_v2(song, plan_data, rig_name)

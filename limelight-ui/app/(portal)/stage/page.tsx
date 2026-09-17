@@ -58,8 +58,9 @@ function readableGenerateError(raw: string): string {
 
 export default function StagePage() {
   const router = useRouter();
-  const { clockRef, load, pause, seek, toggle, position, playing } =
+  const { clockRef, load, pause, seek, toggle, position, playing, setRate } =
     useAudioPlayer();
+  const [rate, setRateValue] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [stageMsg, setStageMsg] = useState<string | null>(null);
@@ -320,7 +321,7 @@ export default function StagePage() {
 
   const rigForPlan = useCallback(() => {
     const l = usePortalStore.getState().layout;
-    return (l ?? "arc4-head.layout.json").replace(".layout.json", "");
+    return (l ?? "halo-portal.layout.json").replace(".layout.json", "");
   }, []);
 
   /* ── bake a show ─────────────────────────────────────────────────────────
@@ -1204,6 +1205,9 @@ export default function StagePage() {
           >
             {isOperator ? (
               <OperatorConsole
+                rate={rate}
+                onRate={(r) => { setRateValue(r); setRate(r); }}
+                onRecolour={handleRecolour}
                 currentTime={currentTime}
                 duration={show?.duration_s ?? song?.duration_s ?? 0}
                 grid={show?.grid ?? null}

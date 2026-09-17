@@ -192,6 +192,7 @@ const initialTrims: TrimState = {
   par: 1,
   head: 1,
   blackout: false,
+  full_on: false,
   strobe_kill: false,
   hold: false,
   lead_ms: 40,

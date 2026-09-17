@@ -13,10 +13,14 @@ interface LivePreviewProps {
     seed: number;
     edits: Array<{ type: string; bar: number; beats: number }>;
   };
+  /** Bake it. Cached, so a grid can prepare itself while you read it. */
   visible: boolean;
+  /** Run it. Thirty animating cards at once is noise, not information, so a
+   *  card holds one lit frame until you point at it. */
+  running?: boolean;
 }
 
-export function LivePreview({ show: intent, visible }: LivePreviewProps) {
+export function LivePreview({ show: intent, visible, running = true }: LivePreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const showRef = useRef<Show | null>(null);
   const framesRef = useRef<Uint8Array | null>(null);
@@ -47,12 +51,23 @@ export function LivePreview({ show: intent, visible }: LivePreviewProps) {
     return () => { live = false; };
   }, [visible, intent]);
 
-  /* Animation loop */
+  /* Animation loop. Baked is not the same as playing. */
   useEffect(() => {
-    if (!visible || !loaded) {
+    if (!visible || !loaded || !running) {
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
+      }
+      /* Hold one frame from a lit part of the show rather than the intro, so a
+         resting card is a picture of the show and not of its silence. */
+      const cv = canvasRef.current;
+      const sh = showRef.current;
+      const fr = framesRef.current;
+      const pl = placeRef.current;
+      const ctx = cv?.getContext("2d");
+      if (loaded && cv && sh && fr && pl && ctx) {
+        idxRef.current = Math.floor(sh.frame_count * 0.45);
+        miniFrame(ctx, cv, idxRef.current, fr, sh.channels, pl);
       }
       return;
     }
@@ -76,7 +91,7 @@ export function LivePreview({ show: intent, visible }: LivePreviewProps) {
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, [visible, loaded]);
+  }, [visible, loaded, running]);
 
   return (
     <canvas

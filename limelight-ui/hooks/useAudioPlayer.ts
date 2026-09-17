@@ -29,6 +29,11 @@ class BufferPlayer implements AnchoredClock {
   private _playing = false;
   private pendingPlay = false;
   private loadId = 0;
+  /* How fast the song runs. The frames are indexed by SONG time, so scaling the
+     clock is all it takes for the lights to follow - they are not re-baked and
+     they do not drift, they simply arrive earlier or later together with the
+     sound they were written against. */
+  private _rate = 1;
   private onLatency: (s: number) => void;
 
   constructor(ctx: AudioContext, onLatency: (s: number) => void) {
@@ -45,8 +50,20 @@ class BufferPlayer implements AnchoredClock {
 
   position(): number {
     if (!this._playing) return this.offset;
-    const t = this.offset + Math.max(0, this.ctx.currentTime - this.startedAt);
+    const t = this.offset + Math.max(0, this.ctx.currentTime - this.startedAt) * this._rate;
     return this.buffer ? Math.min(t, this.buffer.duration) : t;
+  }
+
+  get rate(): number { return this._rate; }
+
+  /** Change speed without losing the place: re-anchor, then start again. */
+  setRate(r: number): void {
+    const next = Math.max(0.5, Math.min(2, r));
+    if (next === this._rate) return;
+    const at = this.position();
+    this._rate = next;
+    if (this._playing) this.play(at);
+    else this.offset = at;
   }
 
   /* A file the browser cannot decode - a bad upload, a container it does not
@@ -95,6 +112,7 @@ class BufferPlayer implements AnchoredClock {
     this.stopSource();
     const s = this.ctx.createBufferSource();
     s.buffer = this.buffer;
+    s.playbackRate.value = this._rate;
     s.connect(this.ctx.destination);
     /* start a hair in the future so `startedAt` is the moment the first sample
        actually leaves the graph, not "sometime after this call returns" */
@@ -182,5 +200,9 @@ export function useAudioPlayer() {
   const position = useCallback(() => playerRef.current?.position() ?? 0, []);
   const playing = useCallback(() => playerRef.current?.playing ?? false, []);
 
-  return { audioRef, clockRef, load, play, pause, seek, toggle, position, playing };
+  const setRate = useCallback((r: number) => {
+    playerRef.current?.setRate(r);
+  }, []);
+
+  return { audioRef, clockRef, load, play, pause, seek, toggle, position, playing, setRate };
 }

@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { usePortalStore } from "@/store/portal";
 import { Fader } from "@/components/ui/Fader";
 import { TransportPill } from "@/components/editor/TransportPill";
 import * as api from "@/lib/api";
 import { SYNC_NUDGE_LIMIT } from "@/lib/sync";
 import { OperatorTimeline } from "./OperatorTimeline";
-import type { Grid, TrimState } from "@/lib/types";
+import type { Grid, TrimState, PaletteColour } from "@/lib/types";
+import { colourName } from "@/lib/palette";
 
 /** A momentary key: full while held, back to where it was on release. */
 function Bump({
@@ -58,6 +59,9 @@ export function OperatorConsole({
   playing,
   onToggle,
   onSeek,
+  rate,
+  onRate,
+  onRecolour,
 }: {
   currentTime: number;
   duration: number;
@@ -65,6 +69,9 @@ export function OperatorConsole({
   playing: boolean;
   onToggle: () => void;
   onSeek: (t: number) => void;
+  rate: number;
+  onRate: (r: number) => void;
+  onRecolour: (colours: PaletteColour[]) => void;
 }) {
   const trims = usePortalStore((s) => s.trims);
   const setTrims = usePortalStore((s) => s.setTrims);
@@ -73,6 +80,8 @@ export function OperatorConsole({
   const syncLatency = usePortalStore((s) => s.syncLatency);
   const syncNudge = usePortalStore((s) => s.syncNudge);
   const setSyncNudge = usePortalStore((s) => s.setSyncNudge);
+  const palette = usePortalStore((s) => s.palette);
+  const setPalette = usePortalStore((s) => s.setPalette);
   const trimAtRef = useRef(0);
   const heldRef = useRef<Partial<TrimState> | null>(null);
 
@@ -111,8 +120,32 @@ export function OperatorConsole({
     heldRef.current = null;
   }, [set]);
 
+  /* A fade is a real fade: the master walks down over its own time rather than
+     snapping, because a snap to black and a fade to black are different cues
+     and an operator reaches for one or the other on purpose. */
+  const fadeRef = useRef<number | null>(null);
+  const stopFade = useCallback(() => {
+    if (fadeRef.current !== null) cancelAnimationFrame(fadeRef.current);
+    fadeRef.current = null;
+  }, []);
+  const fadeTo = useCallback(
+    (target: number, seconds: number) => {
+      stopFade();
+      const from = usePortalStore.getState().trims.master;
+      const t0 = performance.now();
+      const step = () => {
+        const p = Math.min(1, (performance.now() - t0) / (seconds * 1000));
+        set({ master: from + (target - from) * p });
+        if (p < 1) fadeRef.current = requestAnimationFrame(step);
+        else { fadeRef.current = null; set({ master: target }, true); }
+      };
+      fadeRef.current = requestAnimationFrame(step);
+    },
+    [set, stopFade],
+  );
+  useEffect(() => stopFade, [stopFade]);
+
   const pct = (v: number) => Math.round(v * 100) + "%";
-  const sections = show?.sections ?? [];
 
   return (
     <div className="h-full flex flex-col min-h-0" style={{ background: "var(--bg)" }}>
@@ -137,7 +170,7 @@ export function OperatorConsole({
           <div className="flex items-center gap-[8px]">
             <button
               type="button"
-              onClick={() => set({ blackout: !trims.blackout }, true)}
+              onClick={() => set({ blackout: !trims.blackout, full_on: false }, true)}
               aria-pressed={trims.blackout}
               title="Take every lamp to zero"
               className={`h-[34px] px-[18px] rounded-[var(--radius-sm)] border-0 text-[12.5px] font-semibold cursor-pointer transition-colors duration-150 ${
@@ -147,6 +180,19 @@ export function OperatorConsole({
               }`}
             >
               {trims.blackout ? "Blackout on" : "Blackout"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { stopFade(); set({ full_on: !trims.full_on, blackout: false }, true); }}
+              aria-pressed={trims.full_on}
+              title="Hold every lamp at full white until it is released"
+              className={`h-[34px] px-[18px] rounded-[var(--radius-sm)] border-0 text-[12.5px] font-semibold cursor-pointer transition-colors duration-150 ${
+                trims.full_on
+                  ? "bg-danger text-[#140406]"
+                  : "liquid liquid-key text-danger"
+              }`}
+            >
+              {trims.full_on ? "Full on held" : "Full on"}
             </button>
             <button
               type="button"
@@ -173,6 +219,43 @@ export function OperatorConsole({
           </div>
         </Group>
 
+        <Group title="Override" span="col-span-12 lg:col-span-4">
+          <div className="flex items-center gap-[8px] flex-wrap">
+            <button
+              type="button"
+              onClick={() => { stopFade(); set({ master: 1, par: 1, head: 1 }, true); }}
+              title="Master, pars and heads back to 100%"
+              className="liquid liquid-key h-[34px] px-[14px] rounded-[var(--radius-sm)] text-[12.5px] font-semibold text-ink cursor-pointer"
+            >
+              Levels to 100%
+            </button>
+            <button
+              type="button"
+              onClick={() => { stopFade(); set({ master: 0.5 }, true); }}
+              title="Master to half"
+              className="liquid liquid-key h-[34px] px-[12px] rounded-[var(--radius-sm)] text-[12px] font-medium text-ink-dim cursor-pointer"
+            >
+              Half
+            </button>
+            <button
+              type="button"
+              onClick={() => fadeTo(0, 3)}
+              title="Walk the master down to nothing over three seconds"
+              className="liquid liquid-key h-[34px] px-[12px] rounded-[var(--radius-sm)] text-[12px] font-medium text-ink-dim cursor-pointer"
+            >
+              Fade out
+            </button>
+            <button
+              type="button"
+              onClick={() => fadeTo(1, 3)}
+              title="Walk the master back up over three seconds"
+              className="liquid liquid-key h-[34px] px-[12px] rounded-[var(--radius-sm)] text-[12px] font-medium text-ink-dim cursor-pointer"
+            >
+              Fade in
+            </button>
+          </div>
+        </Group>
+
         <Group title="Flash" span="col-span-12 lg:col-span-4">
           <div className="flex items-center gap-[8px] flex-wrap">
             <Bump label="Pars" onDown={() => flashDown({ par: 1 })} onUp={flashUp} />
@@ -185,7 +268,7 @@ export function OperatorConsole({
           </div>
         </Group>
 
-        <Group title="Levels" span="col-span-12 lg:col-span-7">
+        <Group title="Levels" span="col-span-12 lg:col-span-8">
           <div className="grid grid-cols-3 gap-x-[18px] gap-y-[10px]">
             <Fader
               label="Grand master"
@@ -237,6 +320,56 @@ export function OperatorConsole({
             />
           </div>
         </Group>
+
+
+        <Group title="Speed" span="col-span-12 lg:col-span-4">
+          <div className="flex flex-col gap-[7px]">
+            <Fader
+              label="Tempo"
+              min={70}
+              max={130}
+              value={Math.round(rate * 100)}
+              displayValue={`${rate.toFixed(2)}\u00d7`}
+              hint="The song and the lights together. The show is not rebuilt; it runs faster or slower."
+              onChange={(v) => onRate(v / 100)}
+            />
+            {rate !== 1 && (
+              <button
+                type="button"
+                onClick={() => onRate(1)}
+                className="liquid liquid-key self-start h-[26px] px-[10px] rounded-[var(--radius-sm)] text-[11.5px] text-ink-dim cursor-pointer"
+              >
+                Back to 1.00×
+              </button>
+            )}
+          </div>
+        </Group>
+
+        {palette.length > 0 && (
+          <Group title="Colour" span="col-span-12 lg:col-span-8">
+            <div className="flex items-center gap-[10px] flex-wrap">
+              {palette.map((c) => (
+                <input
+                  key={c.id}
+                  type="color"
+                  value={c.hex}
+                  aria-label={`${colourName(c.hex)} \u2014 change this colour`}
+                  title={`${colourName(c.hex)} \u00b7 ${c.hex}`}
+                  onChange={(e) =>
+                    setPalette(palette.map((p) => (p.id === c.id ? { ...p, hex: e.target.value } : p)))
+                  }
+                  onBlur={() => onRecolour(usePortalStore.getState().palette)}
+                  className="block w-[30px] h-[30px] p-0 border-0 rounded-full bg-transparent cursor-pointer flex-none"
+                  style={{ boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.45), 0 0 0 1px var(--edge-strong)" }}
+                />
+              ))}
+              <span className="text-[11px] text-ink-dimmer max-w-[280px] leading-[1.5]">
+                Every cue maps onto these. Changing one rebuilds the show and
+                lands on the next bar.
+              </span>
+            </div>
+          </Group>
+        )}
 
         </div>
       </div>

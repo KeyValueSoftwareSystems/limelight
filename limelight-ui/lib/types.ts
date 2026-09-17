@@ -435,6 +435,8 @@ export interface TrimState {
   par: number;
   head: number;
   blackout: boolean;
+  /** the inverse of blackout: every lamp latched at full white until released */
+  full_on: boolean;
   strobe_kill: boolean;
   hold: boolean;
   /** milliseconds the lamps are sent EARLY, to cover their own response time */

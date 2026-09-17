@@ -58,10 +58,19 @@ export function ConsolePanel() {
             variant="panic"
             wide
             active={trims.blackout}
-            onClick={() => setTrimValue({ blackout: !trims.blackout }, true)}
+            onClick={() => setTrimValue({ blackout: !trims.blackout, full_on: false }, true)}
             className={`col-span-2 ${trims.blackout ? "!bg-danger !border-danger !text-white" : "!border-danger !text-danger"}`}
           >
             {trims.blackout ? "Blackout — on" : "Blackout"}
+          </Button>
+          <Button
+            variant="panic"
+            wide
+            active={trims.full_on}
+            onClick={() => setTrimValue({ full_on: !trims.full_on, blackout: false }, true)}
+            className={`col-span-2 ${trims.full_on ? "!bg-danger !border-danger !text-white" : "!border-danger !text-danger"}`}
+          >
+            {trims.full_on ? "Full on — held" : "Full on"}
           </Button>
           <Button
             variant="panic"

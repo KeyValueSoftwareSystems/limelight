@@ -30,6 +30,7 @@ interface Intent {
    product. Chosen per show, not at random per render, so a card looks the same
    every time you come back to it. */
 const RIGS = [
+  "halo-portal.layout.json",
   "arc4-head.layout.json",
   "club12-2head.layout.json",
   "club16-2head.layout.json",

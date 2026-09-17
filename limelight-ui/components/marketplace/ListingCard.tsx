@@ -30,6 +30,7 @@ export function ListingCard({
   const { show } = listing;
   const boxRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  const [hover, setHover] = useState(false);
 
   /* Same as a show card: the artwork is there at once and the rig fades in over
      it once its bake lands. Only what you can see asks for one. */
@@ -50,8 +51,13 @@ export function ListingCard({
       media={
         <>
           {song ? <CoverCanvas song={song} /> : <div className="absolute inset-0 bg-[#05070C]" />}
-          <div ref={boxRef} className="absolute inset-0">
-            <LivePreview show={show} visible={visible} />
+          <div
+            ref={boxRef}
+            className="absolute inset-0"
+            onPointerEnter={() => setHover(true)}
+            onPointerLeave={() => setHover(false)}
+          >
+            <LivePreview show={show} visible={visible} running={hover} />
           </div>
         </>
       }

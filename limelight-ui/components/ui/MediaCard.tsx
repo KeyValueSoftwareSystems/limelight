@@ -63,7 +63,7 @@ export function MediaCard({
         {media}
 
         {live && (
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 flex items-center justify-center">
+          <div className="absolute inset-0 pointer-events-none bg-black/0 group-hover:bg-black/30 transition-colors duration-200 flex items-center justify-center">
             <span
               className="w-[34px] h-[34px] rounded-full flex items-center justify-center opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250 ease-[var(--ease-spring)]"
               style={{
