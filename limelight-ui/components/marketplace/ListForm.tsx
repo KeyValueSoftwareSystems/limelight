@@ -33,9 +33,9 @@ export function ListForm({ onListed }: ListFormProps) {
   }, [selectedShowId, tier, blurb, onListed]);
 
   return (
-    <div className="flex flex-col gap-[var(--spacing-s3)] p-[var(--spacing-s5)] border border-solid border-line rounded-lg bg-panel">
-      <div className="label">List a show</div>
-      <Select value={selectedShowId} onChange={(e) => setSelectedShowId(e.target.value)}>
+    <div className="panel flex flex-col gap-[12px] p-[18px] rounded-[var(--radius-lg)] max-w-[760px]">
+      <div className="text-[13px] font-medium text-ink">List a show</div>
+      <Select value={selectedShowId} onChange={(e) => setSelectedShowId(e.target.value)} aria-label="Show to list">
         <option value="">Pick a show</option>
         {shows.map((sf) => (
           <option key={sf.id} value={sf.id}>
@@ -43,7 +43,7 @@ export function ListForm({ onListed }: ListFormProps) {
           </option>
         ))}
       </Select>
-      <Select value={tier} onChange={(e) => setTier(e.target.value)}>
+      <Select value={tier} onChange={(e) => setTier(e.target.value)} aria-label="Price">
         <option value="free">Free</option>
         <option value="paid">Paid</option>
       </Select>
@@ -52,9 +52,11 @@ export function ListForm({ onListed }: ListFormProps) {
         value={blurb}
         onChange={(e) => setBlurb(e.target.value)}
       />
-      <Button variant="big" onClick={handleList} disabled={!selectedShowId || submitting}>
-        {submitting ? "Listing…" : "List"}
-      </Button>
+      <div className="flex">
+        <Button variant="big" onClick={handleList} disabled={!selectedShowId || submitting}>
+          {submitting ? "Listing…" : "List this show"}
+        </Button>
+      </div>
     </div>
   );
 }

@@ -1199,34 +1199,44 @@ is the real design document — read the last ~10 commits before changing the en
 
 ### The visual system
 
-Colour in the UI encodes **light**, not category. There is one ramp, tungsten to
-dark, and value carries the meaning:
+Researched, not invented — the commits carry the sources.
 
-    --fam-hits     #FFF4DF   the biggest flash
-    --fam-strobe   #EDE6DA
-    --fam-wash     #C6C2BC
-    --fam-lift     #9C9AA6
-    --fam-breath   #6B7086
-    --fam-dynamics #4C5167
-    --fam-darkness #343A52   amount to zero
+**Glass is for chrome only.** Topbar, menus, popovers, dialogs: `blur(26px)
+saturate(175%)` over a translucent ground, with a specular rim drawn as a
+masked gradient border, brightest where the light lands. The 2026 guidance is
+explicit that primary content stays solid, because readability comes before the
+effect. The ground is opaque enough to diffuse what is behind it rather than
+let it read through.
 
-It replaced seven saturated hues (amber/violet/cyan/emerald/indigo/pink/slate)
-that encoded nothing, and which mixed into a muddy magenta-and-gold wash at clip
-opacity. Family identity now comes from the icon and the name, which every clip
-already carries. Phase tints on the section band are neutral alphas on the same
-principle, so the band reads as an energy shape.
+**Content is a solid elevated panel** (`.panel`): a slow gradient, a hairline
+top highlight, a drop shadow whose only job is to say how high it floats.
+Hover raises it 2px. Elevation is the hierarchy.
 
-The accent is tungsten `#FFD9A3` on cool near-black grounds — warm light on a
-cool room. Every purple (`#8B5CF6`, `#A78BFA`, `#6366F1`) is gone. Primary
-buttons are a **lit key**: solid `--lit` with `--lit-ink` text, never a gradient
-fill. Selection in chrome is shown by **illumination** — a warm 2px bar with
-spill — not by a filled pill; that is what `TabNav` and `SegmentedControl` do,
-and new controls should follow it.
+**Keys travel.** `.liquid-key` moves 1px on `:active` with the shadows flipping
+inward. `:active` belongs to the class, never to an inline style — that is why
+the keys had no press state for most of this work.
 
-`--select` stays cool (`#CBD5E1`) so a selected clip reads against the warm ramp.
+**One accent per surface.** `#6E97CE` steel blue; the primary key is a deeper
+`#4C82CB → #3A6AAE` with white text. Amber read cheap, bone read flat, cyan read
+neon, pale blue read washed out.
+
+**The room.** `.room` carries a slow wash of light behind everything, because a
+translucent layer with nothing behind it comes back flat grey.
+
+**Focus rings live inside the control.** A recessed field keeps its well and
+lights up from within; the old rule painted a 4px halo AND wiped the well's
+shadow, which is what read as a stray outline.
+
+Clip colour in the timeline is a separate system and stays neutral grey: value
+encodes what the effect does to the room, and family identity comes from the
+icon and the name. Amal compared it against the old build and the hard neutral
+clips won.
+
+Type is Geist and Geist Mono.
 
 Do not reintroduce: per-item random hues, gradient-filled buttons, uppercase
-labels, or a raised chip for "active".
+labels, underline-only selection, glass on content, or a raised chip for
+"active".
 
 ### Things that were broken and how
 

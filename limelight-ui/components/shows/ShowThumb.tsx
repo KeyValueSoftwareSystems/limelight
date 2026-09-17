@@ -60,10 +60,12 @@ export function ShowThumb({
   show,
   song,
   className = "",
+  transparent = false,
 }: {
   show: ShowFile;
   song?: Song;
   className?: string;
+  transparent?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -83,8 +85,11 @@ export function ShowThumb({
     const W = r.width;
     const H = r.height;
 
-    ctx.fillStyle = "#04050B";
-    ctx.fillRect(0, 0, W, H);
+    ctx.clearRect(0, 0, W, H);
+    if (!transparent) {
+      ctx.fillStyle = "#04050B";
+      ctx.fillRect(0, 0, W, H);
+    }
 
     const found = bandsOf(show);
     const bands = found.length ? found : fallbackBands(show, song);
@@ -121,7 +126,7 @@ export function ShowThumb({
     ctx.moveTo(gap * 0.6, trussY);
     ctx.lineTo(W - gap * 0.6, trussY);
     ctx.stroke();
-  }, [show, song]);
+  }, [show, song, transparent]);
 
   useEffect(() => {
     paint();
@@ -131,7 +136,7 @@ export function ShowThumb({
   }, [paint]);
 
   return (
-    <div ref={boxRef} className={`relative overflow-hidden bg-[#06070E] ${className}`}>
+    <div ref={boxRef} className={`relative overflow-hidden ${transparent ? "pointer-events-none" : "bg-[#06070E]"} ${className}`}>
       <canvas ref={canvasRef} className="block w-full h-full" aria-hidden="true" />
     </div>
   );

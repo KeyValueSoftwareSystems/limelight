@@ -64,20 +64,24 @@ export default function VenuesPage() {
 
   return (
     <div className="flex flex-col overflow-hidden flex-1">
-      <header className="flex-none px-[28px] pt-[26px] pb-[16px]">
-        <h1 className="text-[30px] font-semibold tracking-[-0.028em] m-0 leading-[1.1] text-ink">
-          Venues
-        </h1>
-        <p className="text-[13px] text-ink-dim mt-[7px] m-0">
-          {rooms.length} {rooms.length === 1 ? "room" : "rooms"} · {openCount} you can design for
-        </p>
+      <header className="flex-none px-[28px] pt-[24px] pb-[18px]">
+        <div className="flex items-center gap-[20px] flex-wrap">
+          <div className="min-w-0">
+            <h1 className="text-[26px] font-semibold tracking-[-0.025em] m-0 leading-[1.15] text-ink">
+              Venues
+            </h1>
+            <p className="text-[12.5px] text-ink-dimmer mt-[4px] m-0 leading-[1.3]">
+              {rooms.length} {rooms.length === 1 ? "room" : "rooms"} · {openCount} you can design for
+            </p>
+          </div>
 
-        <div className="mt-[18px] flex items-center gap-[20px] flex-wrap">
-          <div className="w-[300px] max-w-full">
+          <span className="flex-1 min-w-[16px]" />
+
+          <div className="w-[240px] max-w-full">
             <Field
-              icon={<Search size={15} />}
+              icon={<Search size={14} />}
               type="text"
-              placeholder="Search rooms and rigs"
+              placeholder="Search rooms"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               autoComplete="off"

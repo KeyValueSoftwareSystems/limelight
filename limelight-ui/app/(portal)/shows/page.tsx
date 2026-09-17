@@ -4,7 +4,7 @@ import { useEffect, useCallback, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Plus } from "lucide-react";
 import { NewShowDialog } from "@/components/shows/NewShowDialog";
-import { Field } from "@/components/ui";
+import { Field, Button } from "@/components/ui";
 import { ShowCard } from "@/components/shows/ShowCard";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
@@ -117,45 +117,41 @@ export default function ShowsPage() {
 
   return (
     <div className="flex flex-col overflow-hidden flex-1 animate-in">
-      <div className="flex-none px-[28px] pt-[26px] pb-[16px]">
-        <div className="flex items-start justify-between gap-[16px]">
+      <div className="flex-none px-[28px] pt-[24px] pb-[18px]">
+        <div className="flex items-center gap-[20px] flex-wrap">
           <div className="min-w-0">
-            <h1 className="text-[30px] font-semibold tracking-[-0.028em] m-0 leading-[1.1] text-ink">
+            <h1 className="text-[26px] font-semibold tracking-[-0.025em] m-0 leading-[1.15] text-ink">
               Shows
             </h1>
-            <p className="text-[13px] text-ink-dim mt-[7px] m-0">
+            <p className="text-[12.5px] text-ink-dimmer mt-[4px] m-0 leading-[1.3]">
               {loading
-                ? "Loading…"
+                ? "Loading\u2026"
                 : showList.length === 0
                   ? "A show is one song, lit for one room."
-                  : `${showList.length} show${showList.length === 1 ? "" : "s"} · ${songCount} song${songCount === 1 ? "" : "s"}${roomCount ? ` · ${roomCount} room${roomCount === 1 ? "" : "s"}` : ""}`}
+                  : `${showList.length} show${showList.length === 1 ? "" : "s"} \u00b7 ${songCount} song${songCount === 1 ? "" : "s"}${roomCount ? ` \u00b7 ${roomCount} room${roomCount === 1 ? "" : "s"}` : ""}`}
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setPicking(true)}
-            className="liquid liquid-key liquid-accent flex-none inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
-          >
-            <Plus size={15} strokeWidth={2.4} />
-            New show
-          </button>
-        </div>
+          <span className="flex-1 min-w-[16px]" />
 
-        {showList.length > 0 && (
-          <div className="mt-[18px] flex items-center gap-[20px] flex-wrap">
-            <div className="w-[300px] max-w-full">
+          {showList.length > 0 && (
+            <div className="w-[260px] max-w-full">
               <Field
-                icon={<Search size={15} />}
+                icon={<Search size={14} />}
                 type="text"
-                placeholder="Search shows, songs, rooms or people"
+                placeholder="Search shows"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search shows"
               />
             </div>
-          </div>
-        )}
+          )}
+
+          <Button variant="primary" onClick={() => setPicking(true)}>
+            <Plus size={15} strokeWidth={2.5} className="mr-[6px] -ml-[2px]" />
+            New show
+          </Button>
+        </div>
       </div>
 
       <NewShowDialog
@@ -166,7 +162,7 @@ export default function ShowsPage() {
 
       <div className="flex-1 overflow-y-auto px-[28px] pb-[48px]">
         {loading && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-[14px] pt-[4px]">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(184px,1fr))] gap-[16px] pt-[4px]">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="rounded-[var(--radius-md)] overflow-hidden" style={{ animationDelay: `${i * 50}ms` }}>
                 <div className="aspect-[210/130] skeleton" />
@@ -177,7 +173,7 @@ export default function ShowsPage() {
         )}
 
         {!loading && rows.length > 0 && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-[14px] pt-[4px]">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(184px,1fr))] gap-[16px] pt-[4px]">
             {rows.map((sf, i) => (
               <div
                 key={sf.id}

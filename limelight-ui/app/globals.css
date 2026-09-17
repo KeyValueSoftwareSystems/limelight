@@ -83,7 +83,7 @@
 
   /* Surfaces. Every panel in the app was hand-typing rgba(59, 227, 255, 0.04)
      and friends; naming the four steps is what keeps them consistent. */
-  --control-h: 38px;
+  --control-h: 34px;
   --surface-1: rgba(255, 255, 255, 0.025);
   --surface-2: rgba(255, 255, 255, 0.045);
   --surface-3: rgba(255, 255, 255, 0.07);
@@ -349,19 +349,21 @@ input[type="color"]::-moz-color-swatch { border: 0; border-radius: inherit; }
    itself brightening, is what a focused field should read as. */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 1px var(--focus), 0 0 0 4px var(--focus-ring);
-  border-color: var(--focus) !important;
+  box-shadow: 0 0 0 1px var(--focus);
 }
 :focus:not(:focus-visible) { outline: none; }
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  box-shadow: 0 0 0 1px var(--focus), 0 0 0 4px var(--focus-ring);
+
+/* A recessed field keeps its well when focused - the ring is drawn INSIDE the
+   edge, so the control lights up rather than growing a halo around itself. */
+.liquid-well:focus-visible,
+.liquid-well:focus-within {
+  box-shadow: inset 0 0 0 1px var(--focus), inset 0 1px 3px rgba(0, 0, 0, 0.62),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06);
 }
 button:focus-visible,
 a:focus-visible,
 [role="button"]:focus-visible {
-  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--focus);
+  box-shadow: 0 0 0 1px var(--bg), 0 0 0 3px var(--focus);
 }
 
 .label {
@@ -591,7 +593,7 @@ a:focus-visible,
    contact shadow, and the 1px travel on press. */
 .liquid {
   position: relative;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.075) 0%, rgba(255, 255, 255, 0.028) 100%);
+  background: linear-gradient(180deg, rgba(30, 35, 46, 0.88) 0%, rgba(19, 23, 31, 0.92) 100%);
   backdrop-filter: blur(26px) saturate(175%);
   -webkit-backdrop-filter: blur(26px) saturate(175%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 2px rgba(0, 0, 0, 0.42),
@@ -617,26 +619,36 @@ a:focus-visible,
 
 .liquid-key { cursor: pointer; }
 .liquid-key:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.115) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(180deg, rgba(42, 48, 61, 0.92) 0%, rgba(28, 33, 43, 0.94) 100%);
 }
 .liquid-key:active:not(:disabled) {
   transform: translateY(1px);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.06) 100%);
+  background: linear-gradient(180deg, rgba(18, 21, 28, 0.94) 0%, rgba(26, 30, 39, 0.94) 100%);
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.42), 0 1px 1px rgba(0, 0, 0, 0.3);
 }
 
 .liquid-accent {
-  background: linear-gradient(180deg, rgba(138, 176, 232, 0.92) 0%, rgba(96, 136, 192, 0.86) 100%);
-  color: #08121F;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4),
-    0 10px 28px rgba(96, 136, 192, 0.3);
+  background: linear-gradient(180deg, #4C82CB 0%, #3A6AAE 100%);
+  color: #FFFFFF;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.5),
+    0 3px 10px rgba(0, 0, 0, 0.34);
 }
 .liquid-accent:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(154, 189, 240, 0.96) 0%, rgba(112, 152, 208, 0.9) 100%);
+  background: linear-gradient(180deg, #5A8ED3 0%, #4576B9 100%);
 }
 .liquid-accent:active:not(:disabled) {
   transform: translateY(1px);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.28), 0 1px 1px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(180deg, #3A6AAE 0%, #4579BE 100%);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.32), 0 1px 1px rgba(0, 0, 0, 0.32);
+}
+.liquid-accent:disabled {
+  background: linear-gradient(180deg, #232935 0%, #1B2029 100%);
+  color: var(--ink-dimmer);
+  text-shadow: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.4);
+  opacity: 1;
 }
 
 .liquid-well {

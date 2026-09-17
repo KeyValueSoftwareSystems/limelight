@@ -11,7 +11,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <input
         ref={ref}
-        className={`h-[var(--hit)] px-[var(--spacing-s2)] text-[length:var(--text-md)] bg-panel border border-solid border-line-strong rounded outline-none text-inherit focus:border-accent ${wide ? "flex-1 min-w-0" : ""} ${className}`}
+        className={`liquid-well h-[var(--control-h)] px-[11px] rounded-[var(--radius-sm)]
+          text-[13px] text-ink outline-none placeholder:text-ink-dimmer
+          ${wide ? "flex-1 min-w-0" : ""} ${className}`}
         {...props}
       />
     );

@@ -95,7 +95,7 @@ export function UploadButton() {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="liquid liquid-key liquid-accent flex items-center gap-[7px] h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
+          className="liquid liquid-key flex items-center gap-[7px] h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
         >
           <Upload size={14} strokeWidth={2.5} />
           Upload track
