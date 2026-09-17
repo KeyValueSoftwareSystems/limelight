@@ -68,7 +68,7 @@ export function ChatPanel() {
 
             {t.who === "you" ? (
               <div className="self-end max-w-[86%] rounded-[10px] px-[12px] py-[8px] text-[12px] text-ink leading-[1.5]"
-                style={{ background: "linear-gradient(135deg, rgba(255, 217, 163,0.12) 0%, rgba(255, 217, 163,0.08) 100%)", border: "1px solid rgba(255, 217, 163,0.15)" }}>
+                style={{ background: "linear-gradient(135deg, rgba(239, 231, 215, 0.12) 0%, rgba(239, 231, 215, 0.08) 100%)", border: "1px solid rgba(239, 231, 215, 0.15)" }}>
                 {t.text}
               </div>
             ) : (

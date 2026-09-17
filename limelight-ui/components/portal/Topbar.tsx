@@ -80,12 +80,12 @@ function Beam() {
       <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden className="absolute inset-0">
         <defs>
           <linearGradient id="lml-beam" x1="12" y1="7" x2="12" y2="22" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="#FFF4DF" stopOpacity="0.92" />
-            <stop offset="1" stopColor="#FFF4DF" stopOpacity="0" />
+            <stop offset="0" stopColor="#FBF4E6" stopOpacity="0.92" />
+            <stop offset="1" stopColor="#FBF4E6" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d="M12 7.5 L19 21.5 H5 Z" fill="url(#lml-beam)" />
-        <rect x="8.5" y="3.5" width="7" height="4.2" rx="1.4" fill="#FFF4DF" />
+        <rect x="8.5" y="3.5" width="7" height="4.2" rx="1.4" fill="#FBF4E6" />
       </svg>
     </span>
   );
@@ -97,8 +97,8 @@ export function Topbar({ onRigToggle }: TopbarProps) {
   return (
     <header className="flex-none flex items-center gap-[16px] px-[16px] h-[52px] glass border-b border-solid border-white/[0.05] z-40">
       <Link
-        href="/library"
-        aria-label="Limelight \u2014 go to your library"
+        href="/shows"
+        aria-label="Limelight \u2014 your shows"
         className="group flex items-center gap-[9px] mr-[6px] h-[34px] pl-[5px] pr-[10px] -ml-[5px] rounded-[9px] no-underline transition-colors duration-200 hover:bg-white/[0.04]"
       >
         <Beam />

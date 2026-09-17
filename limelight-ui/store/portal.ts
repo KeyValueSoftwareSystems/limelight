@@ -31,6 +31,8 @@ export interface PortalState {
   /* library */
   songs: Song[];
   song: Song | null;
+  setlist: string[];
+  setlistName: string;
 
   /* show / bake */
   show: Show | null;
@@ -128,6 +130,8 @@ export interface PortalActions {
   setAuthor: (author: string) => void;
   setSongs: (songs: Song[]) => void;
   setSong: (song: Song | null) => void;
+  setSetlist: (names: string[]) => void;
+  setSetlistName: (name: string) => void;
   setShow: (show: Show | null) => void;
   setFrames: (frames: Uint8Array | null) => void;
   setSeed: (seed: number) => void;
@@ -223,6 +227,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   author: typeof window !== "undefined" ? localStorage.getItem("ll.author") ?? "" : "",
   songs: [],
   song: null,
+  setlist: [],
+  setlistName: "",
   show: null,
   frames: null,
   seed: 1,
@@ -265,6 +271,8 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
 
   /* actions */
   setRole: (role) => set({ role }),
+  setSetlist: (names) => set({ setlist: names }),
+  setSetlistName: (name) => set({ setlistName: name }),
   setScreen: (screen) => set({ screen }),
   setAuthor: (author) => {
     try { localStorage.setItem("ll.author", author); } catch { /* noop */ }

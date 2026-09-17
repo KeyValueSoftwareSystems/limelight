@@ -65,9 +65,9 @@
   --warn: #FBBF24;
   --danger: #F87171;
 
-  --accent: #FFD9A3;
-  --accent-soft: rgba(255, 217, 163, 0.10);
-  --accent-glow: rgba(255, 217, 163, 0.30);
+  --accent: #EFE7D7;
+  --accent-soft: rgba(239, 231, 215, 0.10);
+  --accent-glow: rgba(239, 231, 215, 0.26);
 
   --accent2: #8FA3C8;
   --accent2-soft: rgba(143, 163, 200, 0.10);
@@ -76,32 +76,32 @@
   --neon-blue: #C9CEDC;
   --neon-cyan: #9BA4BD;
   --neon-pink: #F2B457;
-  --neon-amber: #FFD9A3;
+  --neon-amber: #EFE7D7;
 
   --select: #CBD5E1;
   --select-soft: rgba(203, 213, 225, 0.08);
 
-  /* Surfaces. Every panel in the app was hand-typing rgba(255, 217, 163,0.04)
+  /* Surfaces. Every panel in the app was hand-typing rgba(239, 231, 215, 0.04)
      and friends; naming the four steps is what keeps them consistent. */
   --control-h: 38px;
   --surface-1: rgba(255, 255, 255, 0.025);
   --surface-2: rgba(255, 255, 255, 0.045);
   --surface-3: rgba(255, 255, 255, 0.07);
-  --surface-accent: rgba(255, 217, 163, 0.055);
-  --surface-accent-2: rgba(255, 217, 163, 0.10);
-  --surface-accent-3: rgba(255, 217, 163, 0.16);
+  --surface-accent: rgba(239, 231, 215, 0.055);
+  --surface-accent-2: rgba(239, 231, 215, 0.10);
+  --surface-accent-3: rgba(239, 231, 215, 0.16);
 
   --edge: rgba(255, 255, 255, 0.07);
   --edge-strong: rgba(255, 255, 255, 0.13);
-  --edge-accent: rgba(255, 217, 163, 0.30);
+  --edge-accent: rgba(239, 231, 215, 0.30);
 
   --elev-1: 0 1px 2px rgba(0, 0, 0, 0.28);
   --elev-2: 0 2px 8px rgba(0, 0, 0, 0.34), 0 1px 2px rgba(0, 0, 0, 0.22);
   --elev-3: 0 8px 28px rgba(0, 0, 0, 0.44), 0 2px 6px rgba(0, 0, 0, 0.26);
   --inset-hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 
-  --focus: rgba(255, 217, 163, 0.60);
-  --focus-ring: rgba(255, 217, 163, 0.15);
+  --focus: rgba(239, 231, 215, 0.60);
+  --focus-ring: rgba(239, 231, 215, 0.15);
   --playhead: #FFFFFF;
 
   --fam-hits: #FFFFFF;
@@ -124,8 +124,8 @@
 
   --stage: #060810;
 
-  --ff-body: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --ff-mono: var(--font-mono-face), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --ff-body: var(--font-sans-face), "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ff-mono: var(--font-mono-face), "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --dur-state: 150ms;
   --dur-panel: 220ms;
@@ -146,24 +146,24 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  --elev-popover: 0 0 0 1px rgba(255, 217, 163, 0.09),
+  --elev-popover: 0 0 0 1px rgba(239, 231, 215, 0.09),
     0 4px 6px -1px rgba(0, 0, 0, 0.4),
     0 16px 32px -8px rgba(0, 0, 0, 0.6);
-  --elev-modal: 0 0 0 1px rgba(255, 217, 163, 0.11),
+  --elev-modal: 0 0 0 1px rgba(239, 231, 215, 0.11),
     0 24px 48px -12px rgba(0, 0, 0, 0.7);
   --elev-card: 0 1px 3px rgba(0, 0, 0, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.04);
-  --elev-card-hover: 0 0 0 1px rgba(255, 217, 163, 0.22),
+  --elev-card-hover: 0 0 0 1px rgba(239, 231, 215, 0.22),
     0 8px 24px -4px rgba(0, 0, 0, 0.5),
-    0 0 28px -6px rgba(255, 217, 163, 0.12);
+    0 0 28px -6px rgba(239, 231, 215, 0.12);
 
-  --lit: #FFE6C0;
-  --lit-ink: #17151A;
-  --lit-hover: #FFF1D9;
+  --lit: #F3ECDE;
+  --lit-ink: #15141B;
+  --lit-hover: #FBF6EC;
   --grad-primary: var(--lit);
   --grad-warm: var(--lit);
-  --grad-surface: linear-gradient(180deg, rgba(255, 217, 163, 0.035) 0%, transparent 50%);
-  --grad-glow: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 217, 163, 0.10), transparent);
+  --grad-surface: linear-gradient(180deg, rgba(239, 231, 215, 0.035) 0%, transparent 50%);
+  --grad-glow: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(239, 231, 215, 0.10), transparent);
 }
 
 :root,
@@ -206,10 +206,10 @@ body {
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 217, 163, 0.15);
+  background: rgba(239, 231, 215, 0.15);
   border-radius: 5px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 217, 163, 0.25); }
+::-webkit-scrollbar-thumb:hover { background: rgba(239, 231, 215, 0.25); }
 ::-webkit-scrollbar-track { background: transparent; }
 
 button, input, select, textarea { font-family: inherit; color: inherit; font-size: inherit; }
@@ -258,13 +258,13 @@ a:focus-visible,
 
 .surface-glow {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 217, 163, 0.1), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 0%, rgba(255, 217, 163, 0.06), transparent),
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(239, 231, 215, 0.1), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 0%, rgba(239, 231, 215, 0.06), transparent),
     var(--bg);
 }
 
 .surface-warm {
-  background: linear-gradient(180deg, rgba(255, 217, 163, 0.03) 0%, transparent 40%), var(--bg);
+  background: linear-gradient(180deg, rgba(239, 231, 215, 0.03) 0%, transparent 40%), var(--bg);
 }
 
 .glass {
@@ -274,7 +274,7 @@ a:focus-visible,
 }
 
 .glow-border {
-  border: 1px solid rgba(255, 217, 163, 0.12);
+  border: 1px solid rgba(239, 231, 215, 0.12);
 }
 
 @keyframes pulse-bar {
@@ -292,9 +292,9 @@ a:focus-visible,
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255, 217, 163, 0.04) 25%,
-    rgba(255, 217, 163, 0.08) 50%,
-    rgba(255, 217, 163, 0.04) 75%
+    rgba(239, 231, 215, 0.04) 25%,
+    rgba(239, 231, 215, 0.08) 50%,
+    rgba(239, 231, 215, 0.04) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;

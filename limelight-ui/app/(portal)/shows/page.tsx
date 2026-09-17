@@ -2,21 +2,22 @@
 
 import { useEffect, useCallback, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Search, AlertTriangle, Plus } from "lucide-react";
+import { Search, Plus, ArrowLeft } from "lucide-react";
+import { SongPicker } from "@/components/library/SongPicker";
+import { ShowCard } from "@/components/shows/ShowCard";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
 import type { ShowFile, Song } from "@/lib/types";
 
 type SortKey = "recent" | "name" | "song" | "room";
 
-const COLS =
-  "grid grid-cols-[minmax(0,2.2fr)_minmax(0,1.6fr)_minmax(0,1.2fr)_64px_minmax(0,1fr)_74px] gap-[16px] items-center";
-
 export default function ShowsPage() {
   const [showList, setShowList] = useState<ShowFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("recent");
+  const [picking, setPicking] = useState(false);
+  const [chosen, setChosen] = useState<string[]>([]);
   const setSong = usePortalStore((s) => s.setSong);
   const setSeed = usePortalStore((s) => s.setSeed);
   const setEdits = usePortalStore((s) => s.setEdits);
@@ -29,7 +30,35 @@ export default function ShowsPage() {
   const resetForShow = usePortalStore((s) => s.resetForShow);
   const songs = usePortalStore((s) => s.songs);
   const setSongs = usePortalStore((s) => s.setSongs);
+  const setSetlist = usePortalStore((s) => s.setSetlist);
   const router = useRouter();
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("new") === "1") setPicking(true);
+  }, []);
+
+  const toggleChoice = useCallback((song: Song) => {
+    setChosen((cur) =>
+      cur.includes(song.name) ? cur.filter((n) => n !== song.name) : [...cur, song.name],
+    );
+  }, []);
+
+  const startShow = useCallback(
+    (names: string[]) => {
+      if (!names.length) return;
+      const first = songs.find((s) => s.name === names[0]);
+      resetForShow();
+      setSetlist(names);
+      if (first) setSong(first);
+      setSeed(1);
+      setEdits([]);
+      setVenue(null);
+      setWant(null);
+      const q = names.length > 1 ? `&songs=${names.map(encodeURIComponent).join(",")}` : "";
+      router.push(`/stage?song=${encodeURIComponent(names[0])}&seed=1${q}`);
+    },
+    [songs, resetForShow, setSetlist, setSong, setSeed, setEdits, setVenue, setWant, router],
+  );
 
   useEffect(() => {
     api.shows.list().then((d) => { setShowList(d.shows); setLoading(false); }).catch(() => setLoading(false));
@@ -96,6 +125,79 @@ export default function ShowsPage() {
     { id: "room", label: "Room" },
   ];
 
+  if (picking) {
+    return (
+      <div className="flex flex-col overflow-hidden flex-1 animate-in">
+        <div className="flex-none px-[28px] pt-[26px] pb-[4px]">
+          <button
+            type="button"
+            onClick={() => setPicking(false)}
+            className="inline-flex items-center gap-[6px] mb-[12px] p-0 border-0 bg-transparent text-[13px] text-ink-dim hover:text-ink cursor-pointer transition-colors duration-200"
+          >
+            <ArrowLeft size={14} />
+            All shows
+          </button>
+          <h1 className="text-[30px] font-semibold tracking-[-0.028em] m-0 leading-[1.1] text-ink">
+            New show
+          </h1>
+          <p className="text-[13px] text-ink-dim mt-[7px] mb-[18px]">
+            Pick the songs this show plays, in order. You choose the room on the next screen.
+          </p>
+        </div>
+        <div className="flex-1 min-h-0 flex flex-col px-[28px]">
+          <SongPicker
+            multi
+            chosen={chosen}
+            onToggle={toggleChoice}
+            onPick={(s) => startShow([s.name])}
+          />
+        </div>
+
+        <div
+          className="flex-none flex items-center gap-[14px] px-[28px] h-[62px] border-t border-solid border-[var(--edge)]"
+          style={{ background: "var(--bg-raised)" }}
+        >
+          <span className="text-[13px] text-ink-dim min-w-0 truncate">
+            {chosen.length === 0 ? (
+              "Pick one song, or several to build a setlist."
+            ) : (
+              <>
+                <span className="text-ink font-medium">
+                  {chosen.length} song{chosen.length === 1 ? "" : "s"}
+                </span>
+                <span className="text-ink-dimmer">
+                  {" \u00b7 "}
+                  {chosen
+                    .map((n) => songs.find((s) => s.name === n)?.title ?? n)
+                    .join(" \u2192 ")}
+                </span>
+              </>
+            )}
+          </span>
+          <span className="flex-1" />
+          {chosen.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setChosen([])}
+              className="flex-none p-0 border-0 bg-transparent text-[13px] text-ink-dim hover:text-ink cursor-pointer transition-colors duration-200"
+            >
+              Clear
+            </button>
+          )}
+          <button
+            type="button"
+            disabled={chosen.length === 0}
+            onClick={() => startShow(chosen)}
+            className="flex-none inline-flex items-center h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer transition-[filter,transform] duration-200 hover:brightness-[1.06] active:scale-[0.98] disabled:opacity-40 disabled:cursor-default"
+            style={{ background: "var(--lit)", color: "var(--lit-ink)" }}
+          >
+            {chosen.length > 1 ? `Design ${chosen.length} songs` : "Design this show"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col overflow-hidden flex-1 animate-in">
       <div className="flex-none px-[28px] pt-[26px] pb-[16px]">
@@ -115,7 +217,7 @@ export default function ShowsPage() {
 
           <button
             type="button"
-            onClick={() => router.push("/library")}
+            onClick={() => setPicking(true)}
             className="flex-none inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer transition-[filter,transform] duration-200 hover:brightness-[1.06] active:scale-[0.98]"
             style={{
               background: "var(--lit)",
@@ -176,71 +278,27 @@ export default function ShowsPage() {
 
       <div className="flex-1 overflow-y-auto px-[28px] pb-[48px]">
         {loading && (
-          <div className="flex flex-col gap-[2px] pt-[10px]">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-[46px] skeleton rounded-[6px]" style={{ animationDelay: `${i * 60}ms` }} />
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-[14px] pt-[4px]">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="rounded-[var(--radius-md)] overflow-hidden" style={{ animationDelay: `${i * 50}ms` }}>
+                <div className="aspect-[210/130] skeleton" />
+                <div className="h-[34px] skeleton mt-px" />
+              </div>
             ))}
           </div>
         )}
 
         {!loading && rows.length > 0 && (
-          <div className="min-w-[680px]">
-            <div
-              className={`${COLS} h-[28px] px-[12px] text-[11px] font-medium text-ink-dimmer border-b border-solid border-[var(--edge)] sticky top-0 z-10`}
-              style={{ background: "var(--bg)" }}
-            >
-              <span>Show</span>
-              <span>Song</span>
-              <span>Room</span>
-              <span className="text-right">Version</span>
-              <span>Designer</span>
-              <span className="text-right">Edits</span>
-            </div>
-
-            {rows.map((sf, i) => {
-              const s = songForName(sf.song);
-              return (
-                <button
-                  key={sf.id}
-                  type="button"
-                  onClick={() => handleOpen(sf)}
-                  className={`${COLS} group relative w-full text-left h-[46px] px-[12px] border-0 border-b border-solid border-[var(--edge)] bg-transparent cursor-pointer transition-colors duration-150 hover:bg-[var(--surface-1)] animate-in`}
-                  style={{ animationDelay: `${Math.min(i * 22, 260)}ms` }}
-                >
-                  <span
-                    aria-hidden
-                    className="absolute left-0 top-[6px] bottom-[6px] w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-                    style={{ background: "var(--accent)", boxShadow: "0 0 10px -1px var(--accent-glow)" }}
-                  />
-                  <span className="min-w-0 flex items-center gap-[7px]">
-                    <span className="text-[13px] font-medium text-ink truncate">{sf.name}</span>
-                    {sf.invalid && (
-                      <AlertTriangle
-                        size={12}
-                        className="text-warn flex-none"
-                        aria-label={sf.invalid}
-                      />
-                    )}
-                  </span>
-                  <span className="min-w-0 flex items-baseline gap-[7px]">
-                    <span className="text-[13px] text-ink-dim truncate">{s?.title ?? sf.song}</span>
-                    {s?.bpm != null && (
-                      <span className="mono text-[11px] text-ink-dimmer tabular-nums flex-none">
-                        {Math.round(s.bpm)}
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-[13px] text-ink-dim truncate">
-                    {sf.designed_for?.venue_name ?? <span className="text-ink-dimmer">Any rig</span>}
-                  </span>
-                  <span className="mono text-[11px] text-ink-dimmer tabular-nums text-right">v{sf.version}</span>
-                  <span className="text-[13px] text-ink-dim truncate">{sf.author || "Unknown"}</span>
-                  <span className="mono text-[11px] text-ink-dimmer tabular-nums text-right">
-                    {sf.edits.length}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-[14px] pt-[4px]">
+            {rows.map((sf, i) => (
+              <div
+                key={sf.id}
+                className="animate-in overflow-hidden"
+                style={{ animationDelay: `${Math.min(i * 26, 360)}ms` }}
+              >
+                <ShowCard show={sf} song={songForName(sf.song)} onOpen={handleOpen} />
+              </div>
+            ))}
           </div>
         )}
 
@@ -253,7 +311,7 @@ export default function ShowsPage() {
             </p>
             <button
               type="button"
-              onClick={() => router.push("/library")}
+              onClick={() => setPicking(true)}
               className="mt-[18px] inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer hover:brightness-[1.06] active:scale-[0.98] transition-[filter,transform] duration-200"
               style={{ background: "var(--lit)", color: "var(--lit-ink)" }}
             >

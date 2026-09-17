@@ -1095,7 +1095,7 @@ export function StageTimeline({
     return (
       <div
         className="h-full flex flex-col items-center justify-center gap-[10px] px-[24px] text-center"
-        style={{ background: "linear-gradient(180deg, rgba(255, 217, 163,0.03) 0%, var(--bg-sunken) 100%)" }}
+        style={{ background: "linear-gradient(180deg, rgba(239, 231, 215, 0.03) 0%, var(--bg-sunken) 100%)" }}
       >
         {onGenerate ? (
           <>

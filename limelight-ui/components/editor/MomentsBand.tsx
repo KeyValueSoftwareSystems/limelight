@@ -9,7 +9,7 @@ import type { Moment } from "@/lib/types";
 const LEAD = 0;
 const CLEAR = 16;
 const MAX_CHARS = 42;
-const FONT = "10px Inter, system-ui, sans-serif";
+const FONT = "10px Geist, system-ui, sans-serif";
 
 let pen: CanvasRenderingContext2D | null = null;
 function textWidth(s: string): number {

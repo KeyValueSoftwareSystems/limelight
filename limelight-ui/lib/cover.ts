@@ -85,7 +85,7 @@ export function drawMonogram(cv: HTMLCanvasElement, name: string): void {
   g.lineWidth = 2;
   g.strokeRect(10.5, 10.5, W - 21, H - 21);
   g.fillStyle = `hsl(${h},40%,78%)`;
-  g.font = `500 ${Math.round(H * 0.34)}px Inter, sans-serif`;
+  g.font = `500 ${Math.round(H * 0.34)}px Geist, Inter, sans-serif`;
   g.textAlign = "center";
   g.textBaseline = "middle";
   g.fillText(initials, W / 2, H / 2 + 1);

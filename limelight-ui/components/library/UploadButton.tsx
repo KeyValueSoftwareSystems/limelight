@@ -99,7 +99,7 @@ export function UploadButton() {
           style={{
             background: "var(--lit)",
             color: "var(--lit-ink)",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.3), 0 0 16px -2px rgba(255, 217, 163,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.3), 0 0 16px -2px rgba(239, 231, 215, 0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
           }}
         >
           <Upload size={14} strokeWidth={2.5} />

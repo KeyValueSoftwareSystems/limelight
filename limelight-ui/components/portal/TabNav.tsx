@@ -8,7 +8,6 @@ import type { Role } from "@/lib/types";
 const TABS: Record<Role, { id: string; label: string; href: string }[]> = {
   creator: [
     { id: "shows", label: "Shows", href: "/shows" },
-    { id: "library", label: "Songs", href: "/library" },
     { id: "venues", label: "Venues", href: "/venues" },
   ],
   venue: [

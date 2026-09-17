@@ -8,6 +8,7 @@ import { mmss } from "@/lib/grid";
 interface SongCardProps {
   song: Song;
   onOpen: (song: Song) => void;
+  position?: number | null;
 }
 
 const LOCK_COLOUR: Record<string, string> = {
@@ -16,7 +17,7 @@ const LOCK_COLOUR: Record<string, string> = {
   unreliable: "var(--danger)",
 };
 
-export function SongCard({ song, onOpen }: SongCardProps) {
+export function SongCard({ song, onOpen, position = null }: SongCardProps) {
   const playable = !!(song.audio && song.bakeable);
   const q = song.quality;
   const why = song.unavailable
@@ -36,13 +37,16 @@ export function SongCard({ song, onOpen }: SongCardProps) {
       onClick={playable ? () => onOpen(song) : undefined}
       disabled={!playable}
       title={song.title}
-      className={`song-card group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden border border-solid border-white/[0.06] transition-all duration-200 ease-[var(--ease)] w-full ${
+      aria-pressed={position != null ? true : undefined}
+      className={`song-card group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden border border-solid transition-all duration-200 ease-[var(--ease)] w-full ${
+        position != null ? "border-[var(--edge-accent)]" : "border-white/[0.06]"
+      } ${
         playable
           ? "cursor-pointer hover:border-accent/25 hover:-translate-y-[1px]"
           : "cursor-default opacity-40"
       }`}
       style={{
-        background: "linear-gradient(180deg, rgba(255, 217, 163,0.04) 0%, rgba(255, 217, 163,0.01) 100%)",
+        background: "linear-gradient(180deg, rgba(239, 231, 215, 0.04) 0%, rgba(239, 231, 215, 0.01) 100%)",
         boxShadow: "var(--elev-card)",
       }}
       onMouseEnter={(e) => {
@@ -67,6 +71,15 @@ export function SongCard({ song, onOpen }: SongCardProps) {
               <Play size={16} fill="var(--lit-ink)" stroke="var(--lit-ink)" className="ml-[1px]" />
             </div>
           </div>
+        )}
+
+        {position != null && (
+          <span
+            className="absolute left-[6px] top-[6px] w-[20px] h-[20px] rounded-full flex items-center justify-center text-[11px] font-semibold tabular-nums leading-none z-10"
+            style={{ background: "var(--lit)", color: "var(--lit-ink)", boxShadow: "0 0 14px -2px var(--accent-glow)" }}
+          >
+            {position}
+          </span>
         )}
 
         {song.duration_s != null && (

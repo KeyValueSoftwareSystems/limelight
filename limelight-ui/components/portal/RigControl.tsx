@@ -67,7 +67,7 @@ function diagnose(r: RigStatus | null, _hasShow: boolean): RigInfo {
 
   return {
     state: "off", icon: Radio,
-    colour: "#5A5F78", bgColour: "rgba(255, 217, 163,0.04)", borderColour: "rgba(255, 217, 163,0.1)", textColour: "#9095AD",
+    colour: "#5A5F78", bgColour: "rgba(239, 231, 215, 0.04)", borderColour: "rgba(239, 231, 215, 0.1)", textColour: "#9095AD",
     headline: `Universe ${r.universe} \u00b7 via ${r.route_via ?? r.gateway}`,
     detail: r.conflict ? r.conflict : "Standby",
     remedy: null,
@@ -179,7 +179,7 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
                 onClick={() => { onToggle(); setExpanded(false); }}
                 disabled={!rig?.can_send || !show}
                 className="h-[30px] px-[14px] rounded-[var(--radius-sm)] border-0 text-[12px] font-semibold text-white cursor-pointer hover:brightness-110 transition-all duration-200 active:scale-[0.97] disabled:opacity-35 disabled:pointer-events-none"
-                style={{ background: "var(--grad-primary)", boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 0 12px -2px rgba(255, 217, 163,0.3)" }}
+                style={{ background: "var(--grad-primary)", boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 0 12px -2px rgba(239, 231, 215, 0.3)" }}
               >
                 Send to rig
               </button>

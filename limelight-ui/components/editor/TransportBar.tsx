@@ -11,10 +11,10 @@ import { GUIDES, type GuideKind } from "./Guides";
    and eight button styles, so nothing read as more or less important than
    anything else. */
 
-const H = "h-[24px]";
-const LABEL = "text-[11px] tracking-[0.06em]";
+const H = "h-[26px]";
+const LABEL = "text-[11.5px] tracking-[0.005em]";
 const BASE =
-  `inline-flex items-center justify-center ${H} rounded-[4px] border border-solid ` +
+  `inline-flex items-center justify-center ${H} rounded-[5px] border-0 ` +
   `cursor-pointer whitespace-nowrap transition-colors duration-[var(--dur-state)] ` +
   `disabled:cursor-default disabled:opacity-40`;
 
@@ -43,10 +43,10 @@ function Btn({
   disabled?: boolean;
 }) {
   const tone = danger
-    ? "border-danger text-danger bg-transparent hover:bg-danger hover:text-bg disabled:hover:bg-transparent disabled:hover:text-danger"
+    ? "text-danger bg-transparent hover:bg-danger/[0.14] disabled:hover:bg-transparent"
     : active
-      ? "text-ink"
-      : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-white/[0.04]";
+      ? "text-ink bg-[var(--surface-3)]"
+      : "bg-transparent text-ink-dim hover:text-ink hover:bg-[var(--surface-2)]";
   return (
     <button
       type="button"
@@ -62,7 +62,7 @@ function Btn({
 }
 
 /** A hairline between groups of controls, so the bar reads in zones. */
-const Rule = () => <span className="w-px h-[14px] bg-white/[0.06] flex-none" />;
+const Rule = () => <span className="w-px h-[16px] bg-[var(--edge)] flex-none mx-[3px]" />;
 
 export function TransportBar({
   currentTime,
@@ -133,28 +133,48 @@ export function TransportBar({
   const has = selected.length > 0;
 
   return (
-    <div className="flex-none flex items-center gap-[var(--spacing-s3)] px-[var(--spacing-s3)] h-[38px] border-b border-solid border-white/[0.05] bg-bg">
-      {/* playback */}
-      <Btn onClick={onToggle} icon active={playing} title={playing ? "Pause (space)" : "Play (space)"}>
-        <span aria-hidden>{playing ? "❚❚" : "▶"}</span>
+    <div className="flex-none flex items-center gap-[10px] px-[12px] h-[46px] border-b border-solid border-[var(--edge)] bg-bg">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-pressed={playing}
+        title={playing ? "Pause (space)" : "Play (space)"}
+        className="flex-none inline-flex items-center justify-center w-[32px] h-[32px] rounded-full border-0 cursor-pointer transition-[background-color,transform] duration-[var(--dur-state)] active:scale-[0.94]"
+        style={
+          playing
+            ? { background: "var(--lit)", color: "var(--lit-ink)", boxShadow: "0 0 18px -4px var(--accent-glow)" }
+            : { background: "var(--surface-3)", color: "var(--ink)" }
+        }
+      >
+        <svg width="13" height="13" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+          {playing ? (
+            <>
+              <rect x="2" y="1.5" width="3" height="9" rx="1" />
+              <rect x="7" y="1.5" width="3" height="9" rx="1" />
+            </>
+          ) : (
+            <path d="M3 1.8v8.4a.6.6 0 0 0 .93.5l6.3-4.2a.6.6 0 0 0 0-1L3.93 1.3A.6.6 0 0 0 3 1.8z" />
+          )}
+        </svg>
         <span className="sr-only">{playing ? "Pause" : "Play"}</span>
-      </Btn>
+      </button>
 
       {/* Milliseconds on the playhead and whole seconds on the length. The
           playhead is the thing you are placing AGAINST, so it is read at the
           resolution you can place at; the song's length is just how far there
           is to go. */}
-      <span className={`mono ${LABEL} tabular-nums text-ink`} title="Playhead · song length">
-        {mmssms(currentTime)}
-        <span className="text-ink-dimmer"> / {mmss(duration)}</span>
+      <span className="flex-none flex flex-col leading-none gap-[3px]" title="Playhead \u00b7 song length">
+        <span className="mono text-[13px] tabular-nums text-ink leading-none">
+          {mmssms(currentTime)}
+          <span className="text-ink-dimmer text-[11px]"> / {mmss(duration)}</span>
+        </span>
+        <span className="mono text-[10px] tabular-nums text-ink-dimmer leading-none">
+          Bar <span className="text-ink-dim">{pos ? pos.bar : "\u2014"}</span>
+          <span className="text-ink-dimmer">\u00b7{pos ? pos.beat : "\u2014"}</span>
+        </span>
       </span>
 
       <Rule />
-
-      <span className={`mono ${LABEL} tabular-nums text-ink-dim`}>
-        bar <span className="text-ink">{pos ? pos.bar : "—"}</span>
-        <span className="text-ink-dimmer">·{pos ? pos.beat : "—"}</span>
-      </span>
 
       <span className="flex-1 min-w-0" />
 
