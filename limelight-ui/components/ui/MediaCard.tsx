@@ -111,7 +111,7 @@ export function MediaCard({
         )}
 
         {footer && (
-          <span className="mono text-[10.5px] text-ink-dimmer tabular-nums truncate mt-auto pt-[1px]">
+          <span className="mono flex items-baseline text-[11px] text-ink-dimmer tabular-nums truncate mt-auto pt-[1px]">
             {footer}
           </span>
         )}
