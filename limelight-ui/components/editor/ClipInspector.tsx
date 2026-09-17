@@ -86,10 +86,14 @@ function ClipColourPicker({
   clip,
   defaultColour,
   onChange,
+  onChangeLive,
+  onChangeDone,
 }: {
   clip: Clip;
   defaultColour: unknown;
   onChange: (patch: Record<string, unknown>) => void;
+  onChangeLive: (patch: Record<string, unknown>) => void;
+  onChangeDone: () => void;
 }) {
   const palette = usePortalStore((s) => s.palette);
   const hex = currentHex(clip, defaultColour);
@@ -131,7 +135,11 @@ function ClipColourPicker({
           value={hex}
           aria-label="Pick a custom colour"
           title={`Custom · ${hex}`}
-          onChange={(e) => onChange({ colour: [...hexToRgb01(e.target.value)] })}
+          /* The OS picker streams a value the whole time it is open, so it is
+             a drag like the slider: paint it live, and settle it — one bake,
+             one undo step — when the picker gives the focus back. */
+          onChange={(e) => onChangeLive({ colour: [...hexToRgb01(e.target.value)] })}
+          onBlur={onChangeDone}
           className="w-[22px] h-[22px] p-0 border-0 rounded-full bg-transparent cursor-pointer"
           style={{
             boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.45), 0 0 0 1px var(--line-strong)",
@@ -152,6 +160,8 @@ export function ClipInspector({
   clip,
   effect,
   onChange,
+  onChangeLive,
+  onChangeDone,
   onRetime,
   onRemove,
   onClose,
@@ -159,7 +169,13 @@ export function ClipInspector({
 }: {
   clip: Clip;
   effect: Effect | undefined;
+  /** A change that is finished the moment it is made — a palette chip. */
   onChange: (patch: Record<string, unknown>) => void;
+  /** A change still under the pointer. Paints, but does not bake or close the
+   *  undo step: a slider sweep is ONE thing you did, not thirty. */
+  onChangeLive: (patch: Record<string, unknown>) => void;
+  /** The sweep is over: bake it, and close the step. */
+  onChangeDone: () => void;
   /** Absolute placement, in seconds. Every conversion back into bars and beats
    *  happens in the timeline, which owns the grid. */
   onRetime: (patch: { startS?: number; lengthS?: number }) => void;
@@ -283,7 +299,14 @@ export function ClipInspector({
               min={Math.round(min * 100)}
               max={Math.round(max * 100)}
               value={Math.round(current * 100)}
-              onChange={(e) => onChange({ amount: Number(e.target.value) / 100 })}
+              onChange={(e) => onChangeLive({ amount: Number(e.target.value) / 100 })}
+              /* Every one of these ends the sweep, because a slider can be
+                 driven by the pointer, by the arrow keys, or by the tab that
+                 takes the focus away mid-drag. Ending one that never started
+                 costs nothing. */
+              onPointerUp={onChangeDone}
+              onKeyUp={onChangeDone}
+              onBlur={onChangeDone}
               className="flex-1 min-w-0"
               style={{ accentColor: "var(--accent)" }}
             />
@@ -302,6 +325,8 @@ export function ClipInspector({
         clip={clip}
         defaultColour={dials.colour?.default}
         onChange={onChange}
+        onChangeLive={onChangeLive}
+        onChangeDone={onChangeDone}
       />}
     </div>
   );

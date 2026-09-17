@@ -31,8 +31,18 @@ function LayerBase({
   onZoomTo?: (clip: ClipModel) => void;
 }) {
   return (
+    /* A lane clips its own clips. A clip runs from its start to its end whether
+       or not the window is looking at both, so at any zoom there is a clip
+       hanging off one side or the other — and an absolutely positioned child
+       hanging off the side still counts as scrollable width to the lanes'
+       scroller above. That handed the lanes a horizontal scroll position of
+       their own, which is one more than the timeline has: the ruler, the
+       sections and the playhead are drawn outside that box, so a scroller at 18
+       meant every clip sat 18px earlier in the song than it said it did.
+       Clipping here leaves nothing to scroll to, so there is nothing to be out
+       of step with. */
     <div
-      className="relative border-b border-solid border-line"
+      className="relative overflow-hidden border-b border-solid border-line"
       style={{ height }}
     >
       {clips.map((c) => (

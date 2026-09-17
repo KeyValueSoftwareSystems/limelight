@@ -37,6 +37,21 @@ export interface PortalState {
   frames: Uint8Array | null;
   seed: number;
   edits: Edit[];
+  /* ── undo ──────────────────────────────────────────────────────────────
+     `Edit[]` is the only truth on the timeline: every clip, every length and
+     every dial is derived from it. So history is a stack of whole-list
+     snapshots rather than a log of inverses — edits are small, and snapshotting
+     makes each mutation undoable BY CONSTRUCTION instead of by whoever wrote it
+     remembering to describe how to take it back.
+
+     `editGroup` is what stops a drag becoming two hundred undo steps. A gesture
+     writes on every pointer move; while they all carry the same token only the
+     first records, so one drag, one trim, one slider sweep is one step. The
+     token is dropped at the end of the gesture (endEditGroup), which is what
+     keeps the NEXT drag of the same clip from folding into this one. */
+  past: Edit[][];
+  future: Edit[][];
+  editGroup: string | null;
   applied: AppliedEdit[];
   job: string | null;
   showId: string | null;
@@ -116,10 +131,19 @@ export interface PortalActions {
   setShow: (show: Show | null) => void;
   setFrames: (frames: Uint8Array | null) => void;
   setSeed: (seed: number) => void;
-  setEdits: (edits: Edit[]) => void;
-  addEdit: (edit: Edit) => void;
-  removeEdit: (index: number) => void;
-  updateEdit: (index: number, edit: Partial<Edit>) => void;
+  /** `history` says what this replacement MEANS. "reset" is a different show
+   *  arriving and wipes the stack — there is nothing behind it to go back to.
+   *  "push" is the creator placing something and is undoable. */
+  setEdits: (edits: Edit[], history?: "reset" | "push") => void;
+  addEdit: (edit: Edit, group?: string) => void;
+  removeEdit: (index: number, group?: string) => void;
+  updateEdit: (index: number, edit: Partial<Edit>, group?: string) => void;
+
+  undo: () => void;
+  redo: () => void;
+  /** The gesture is over. The next change starts a fresh undo step even if it
+   *  carries the same token. */
+  endEditGroup: () => void;
   setApplied: (applied: AppliedEdit[]) => void;
   setJob: (job: string | null) => void;
   setShowId: (id: string | null) => void;
@@ -168,6 +192,27 @@ const initialTrims: TrimState = {
   hold: false,
 };
 
+/* Deep enough to cover a working session, shallow enough that the stack is
+   never the reason a tab is holding memory. */
+const MAX_HISTORY = 200;
+
+/** The snapshot half of a mutation: what to merge in so it can be taken back.
+ *
+ *  A `group` that matches the one already open returns the fields UNCHANGED,
+ *  which is how a whole gesture collapses into a single step — the first write
+ *  records, the two hundred after it do not. */
+function record(s: PortalState, group?: string): Pick<PortalState, "past" | "future" | "editGroup"> {
+  if (group !== undefined && group === s.editGroup) {
+    return { past: s.past, future: s.future, editGroup: s.editGroup };
+  }
+  return {
+    past: [...s.past, s.edits].slice(-MAX_HISTORY),
+    /* Anything redone from here is a branch nobody can reach any more. */
+    future: [],
+    editGroup: group ?? null,
+  };
+}
+
 /* ── store ───────────────────────────────────────────────────────────────── */
 
 export const usePortalStore = create<PortalState & PortalActions>((set) => ({
@@ -181,6 +226,9 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   frames: null,
   seed: 1,
   edits: [],
+  past: [],
+  future: [],
+  editGroup: null,
   applied: [],
   job: null,
   showId: null,
@@ -226,17 +274,55 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
   setShow: (show) => set({ show }),
   setFrames: (frames) => set({ frames }),
   setSeed: (seed) => set({ seed }),
-  setEdits: (edits) => set({ edits }),
-  addEdit: (edit) => set((s) => ({ edits: [...s.edits, edit], sel: s.edits.length })),
-  removeEdit: (index) =>
+  setEdits: (edits, history = "reset") =>
+    set((s) =>
+      history === "push"
+        ? { ...record(s), edits }
+        : { edits, past: [], future: [], editGroup: null },
+    ),
+  addEdit: (edit, group) =>
+    set((s) => ({ ...record(s, group), edits: [...s.edits, edit], sel: s.edits.length })),
+  removeEdit: (index, group) =>
     set((s) => ({
+      ...record(s, group),
       edits: s.edits.filter((_, i) => i !== index),
       sel: -1,
     })),
-  updateEdit: (index, edit) =>
+  updateEdit: (index, edit, group) =>
     set((s) => ({
+      ...record(s, group),
       edits: s.edits.map((e, i) => (i === index ? { ...e, ...edit } : e)),
     })),
+
+  /* Stepping either way closes the group: an undo in the middle of a drag would
+     otherwise have the rest of that drag written on top of the step it just
+     took back. `sel` is dropped because it is an INDEX into the list being
+     replaced — kept, it would point at whatever edit now happens to sit there. */
+  undo: () =>
+    set((s) =>
+      s.past.length === 0
+        ? s
+        : {
+            edits: s.past[s.past.length - 1],
+            past: s.past.slice(0, -1),
+            future: [s.edits, ...s.future],
+            editGroup: null,
+            sel: -1,
+          },
+    ),
+  redo: () =>
+    set((s) =>
+      s.future.length === 0
+        ? s
+        : {
+            edits: s.future[0],
+            past: [...s.past, s.edits],
+            future: s.future.slice(1),
+            editGroup: null,
+            sel: -1,
+          },
+    ),
+  endEditGroup: () => set((s) => (s.editGroup === null ? s : { editGroup: null })),
   setApplied: (applied) => set({ applied }),
   setJob: (job) => set({ job }),
   setShowId: (showId) => set({ showId }),
@@ -280,6 +366,9 @@ export const usePortalStore = create<PortalState & PortalActions>((set) => ({
     set({
       show: null,
       frames: null,
+      past: [],
+      future: [],
+      editGroup: null,
       secIndex: -1,
       sel: -1,
       view: null,

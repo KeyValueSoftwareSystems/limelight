@@ -55,3 +55,47 @@ test("input order does not change the packing", () => {
 test("an empty lane still reports one row, so it keeps its height", () => {
   assert.equal(packRows([]).rows, 1);
 });
+
+/* ── the pin: the clip you are holding keeps its row ─────────────────────── */
+
+test("a pinned clip stays on its row when the packer would have moved it up", () => {
+  /* `b` earned row 1 by overlapping `a`. Dragged clear of `a`, the greedy pass
+     would hand it row 0 — the lane jump that happens under the pointer. */
+  const bare = packRows([clip("a", 0, 4), clip("b", 6, 10)]);
+  assert.equal(bare.items.find((i) => i.clip.key === "b")!.row, 0);
+
+  const pinned = packRows([clip("a", 0, 4), clip("b", 6, 10)], { key: "b", row: 1 });
+  assert.equal(pinned.items.find((i) => i.clip.key === "b")!.row, 1);
+  assert.equal(pinned.items.find((i) => i.clip.key === "a")!.row, 0);
+});
+
+test("the others give way: an overlapping clip moves rather than the pinned one", () => {
+  const p = packRows([clip("a", 0, 8), clip("b", 2, 10)], { key: "b", row: 0 });
+  assert.equal(p.items.find((i) => i.clip.key === "b")!.row, 0);
+  assert.equal(p.items.find((i) => i.clip.key === "a")!.row, 1);
+});
+
+test("a pinned clip does not push anything off a row it leaves room on", () => {
+  /* Pinned late in the song on row 0; an earlier clip that clears it still
+     takes row 0, because a row is free wherever the pin is not. */
+  const p = packRows([clip("a", 0, 4), clip("b", 6, 10)], { key: "b", row: 0 });
+  assert.equal(p.rows, 1);
+  assert.ok(p.items.every((i) => i.row === 0));
+});
+
+test("a pin nobody claims is ignored", () => {
+  const p = packRows([clip("a", 0, 4), clip("b", 2, 6)], { key: "gone", row: 3 });
+  assert.equal(p.rows, 2);
+});
+
+test("collision is read off time, so a lonely pinned clip is not flagged", () => {
+  const p = packRows([clip("a", 0, 4), clip("b", 6, 10)], { key: "b", row: 2 });
+  assert.ok(p.items.every((i) => !i.collides), "nothing overlaps, so nothing collides");
+  assert.equal(p.rows, 3, "the pinned row exists even with empty lanes above it");
+});
+
+test("pinning still reports every clip exactly once, in start order", () => {
+  const clips = [clip("a", 0, 4), clip("b", 2, 6), clip("c", 8, 9)];
+  const p = packRows(clips, { key: "b", row: 1 });
+  assert.deepEqual(p.items.map((i) => i.clip.key), ["a", "b", "c"]);
+});

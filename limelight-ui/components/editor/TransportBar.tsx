@@ -83,6 +83,10 @@ export function TransportBar({
   onToggleGuide,
   follow,
   onToggleFollow,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
   onCopy,
   onCut,
   onPaste,
@@ -111,6 +115,10 @@ export function TransportBar({
   onToggleGuide: (kind: GuideKind) => void;
   follow: boolean;
   onToggleFollow: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
   onCopy: () => void;
   onCut: () => void;
   onPaste: () => void;
@@ -208,9 +216,15 @@ export function TransportBar({
           </span>
         }
         items={[
+          /* Undo leads. It is the item people open this menu looking for, and
+             the only one here that is worth reaching for when NOTHING is
+             selected — which is also when the keyboard half of the editor is
+             least likely to have been discovered. */
+          { id: "undo", label: "Undo", hint: `${MOD}Z`, disabled: !canUndo },
+          { id: "redo", label: "Redo", hint: `${MOD}\u21e7Z`, disabled: !canRedo },
           { id: "copy", label: "Copy", hint: `${MOD}C`, disabled: !has },
           { id: "cut", label: "Cut", hint: `${MOD}X`, disabled: removableCount === 0 },
-          { id: "paste", label: "Paste at playhead", hint: `${MOD}V`, disabled: !canPaste },
+          { id: "paste", label: "Paste where you clicked", hint: `${MOD}V`, disabled: !canPaste },
           { id: "duplicate", label: "Duplicate", hint: `${MOD}D`, disabled: !has },
           { id: "-nudge", label: "Move by a beat", hint: "← →", disabled: true },
           { id: "-bar", label: "…by a bar", hint: "⇧← →", disabled: true },
@@ -219,7 +233,9 @@ export function TransportBar({
           { id: "-del", label: "Remove", hint: "⌫", disabled: true },
         ]}
         onPick={(id) => {
-          if (id === "copy") onCopy();
+          if (id === "undo") onUndo();
+          else if (id === "redo") onRedo();
+          else if (id === "copy") onCopy();
           else if (id === "cut") onCut();
           else if (id === "paste") onPaste();
           else if (id === "duplicate") onDuplicate();

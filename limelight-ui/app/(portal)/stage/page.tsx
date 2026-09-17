@@ -31,6 +31,11 @@ import type { Clip, Edit, PaletteColour } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import type { Venue } from "@/lib/types";
 
+/** The undo token every part of one gesture carries — a drag, a trim, a slider
+ *  sweep, and the take-over that may start one. See store/portal.ts: writes
+ *  sharing a token collapse into a single step. */
+const LIVE = "live";
+
 export default function StagePage() {
   const router = useRouter();
   const { clockRef, load, pause, seek, toggle, position, playing } =
@@ -55,6 +60,7 @@ export default function StagePage() {
      for one of those. */
   const [editorH, setEditorH] = useState(300);
   const columnRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<HTMLElement>(null);
 
   const MIN_EDITOR = 160;
   const MIN_PREVIEW = 150;
@@ -69,7 +75,13 @@ export default function StagePage() {
         Math.max(MIN_EDITOR, Math.min(next, box.height - MIN_PREVIEW)),
       );
     };
+    /* The column decides what the editor actually got — see the section below.
+       Taking that back as the new height keeps the number honest, so a later
+       window resize does not suddenly inflate the editor to a height the
+       creator never dragged it to. */
     const up = () => {
+      const got = editorRef.current?.getBoundingClientRect().height;
+      if (got) setEditorH(Math.round(got));
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
     };
@@ -118,6 +130,11 @@ export default function StagePage() {
   const setArm = usePortalStore((s) => s.setArm);
   const setSel = usePortalStore((s) => s.setSel);
   const removeEdit = usePortalStore((s) => s.removeEdit);
+  const undo = usePortalStore((s) => s.undo);
+  const redo = usePortalStore((s) => s.redo);
+  const endEditGroup = usePortalStore((s) => s.endEditGroup);
+  const canUndo = usePortalStore((s) => s.past.length > 0);
+  const canRedo = usePortalStore((s) => s.future.length > 0);
   const addEdit = usePortalStore((s) => s.addEdit);
   const updateEdit = usePortalStore((s) => s.updateEdit);
   const setEdits = usePortalStore((s) => s.setEdits);
@@ -694,7 +711,7 @@ export default function StagePage() {
          and the indices handed back would be stale by the second one. */
       const st = usePortalStore.getState();
       const at = st.edits.length;
-      setEdits([...st.edits, ...list]);
+      setEdits([...st.edits, ...list], "push");
       setSel(at + list.length - 1);
       rebuild();
       return list.map((_, i) => at + i);
@@ -715,13 +732,41 @@ export default function StagePage() {
      the gesture behind a 1-3s round trip for no benefit. */
   const handleUpdateLive = useCallback(
     (index: number, patch: Parameters<typeof updateEdit>[1]) =>
-      updateEdit(index, patch),
+      /* All of them carry the same token, so the store records the state
+         BEFORE the gesture once and nothing after it. Undo then takes back the
+         drag, not the last pixel of it. */
+      updateEdit(index, patch, LIVE),
     [updateEdit],
   );
 
+  /* The gesture is over: bake what it produced, and close the undo step so the
+     next drag of the same clip is a step of its own rather than more of this
+     one. */
   const handleCommit = useCallback(() => {
+    endEditGroup();
     rebuild();
-  }, [rebuild]);
+  }, [endEditGroup, rebuild]);
+
+  /* Stepping through history rebakes, because the lights are derived from the
+     edits and a show that looks undone but still plays the old cues is worse
+     than no undo at all. */
+  const handleUndo = useCallback(() => {
+    const before = usePortalStore.getState().edits;
+    undo();
+    if (usePortalStore.getState().edits === before) return false;
+    setSelection([]);
+    rebuild();
+    return true;
+  }, [undo, rebuild]);
+
+  const handleRedo = useCallback(() => {
+    const before = usePortalStore.getState().edits;
+    redo();
+    if (usePortalStore.getState().edits === before) return false;
+    setSelection([]);
+    rebuild();
+    return true;
+  }, [redo, rebuild]);
 
   /* Taking over one of the arranger's clips: copy what it does into an edit of
      your own at the same place. The machine's version stays on the timeline,
@@ -739,13 +784,16 @@ export default function StagePage() {
       const index = usePortalStore.getState().edits.length;
       /* Record which assignment this replaces. Overlap alone could not carry it:
          moving your copy away let the machine's version play again underneath. */
+      /* Under the gesture's own token: taking a clip over is the first half of
+         the drag that took it over, so one undo takes back both rather than
+         leaving a copy of the arranger's clip behind with nothing done to it. */
       addEdit({
         type: tile.id,
         bar: clip.bar,
         beat: clip.beat,
         beats: clip.beats,
         ...(clip.planId ? { from: clip.planId } : {}),
-      });
+      }, LIVE);
       return index;
     },
     [effects, addEdit],
@@ -891,9 +939,25 @@ export default function StagePage() {
             className="flex-none h-[7px] cursor-row-resize border-y border-solid border-line hover:bg-bg-raised transition-colors duration-[var(--dur-state)]"
           />
 
+          {/* The dragged height is what the editor ASKS for, not what it takes.
+              `flex-none` made it take it: the clamp above only knew the column
+              and the preview's floor, not the header, the target line, the
+              status line and the divider above it, so ~120px of the drag went
+              straight past the bottom of the column — and since the column hides
+              its overflow, the editor's own bottom edge went with it. What lives
+              down there is the energy band and the lanes' scrollbar, so the
+              timeline lost the two things at its foot exactly when it was made
+              bigger.
+
+              `flex-initial` keeps the height as the request and lets the column
+              shrink it to what is left. The preview's own min-height stops the
+              shrink coming out of the picture instead, so the divider simply
+              stops where there is no more room — which is what a divider that
+              has run out of room should do. */}
           <section
-            style={{ height: editorH }}
-            className="flex-none min-h-0 overflow-hidden"
+            ref={editorRef}
+            style={{ height: editorH, minHeight: MIN_EDITOR }}
+            className="flex-initial overflow-hidden"
           >
             <StageTimeline
               show={show}
@@ -911,6 +975,10 @@ export default function StagePage() {
               onUpdateLive={handleUpdateLive}
               onMaterialize={handleMaterialize}
               onCommit={handleCommit}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              canUndo={canUndo}
+              canRedo={canRedo}
               reveal={reveal}
               baking={stageMsg}
             />

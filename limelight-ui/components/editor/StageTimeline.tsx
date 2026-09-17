@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { packRows } from "@/lib/pack";
+import type { Pin } from "@/lib/pack";
 import { beatAtTime, beatsAcross, fit, panBy, timeToX, xToTime, zoomAt, MIN_SPAN_S } from "@/lib/timeline";
 import type { View } from "@/lib/timeline";
 import { resolveSnap } from "@/lib/snap";
 import type { SnapContext, SnapStrength, SnapTarget } from "@/lib/snap";
-import { clamp, makeGridClock } from "@/lib/grid";
+import { clamp, makeGridClock, mmssms } from "@/lib/grid";
+import { placementBeats } from "@/lib/place";
 import { tileForClip } from "@/lib/clips";
 import { effectBeats } from "@/lib/types";
 import { useDrag } from "@/store/drag";
@@ -23,6 +25,7 @@ import { Guides, type GuideKind } from "./Guides";
 import { Playhead } from "./Playhead";
 import { ClipInspector, INSPECTOR_W } from "./ClipInspector";
 import { TransportBar } from "./TransportBar";
+import { TimelineScrollbar, SCROLLBAR_H } from "./TimelineScrollbar";
 
 /* The editor under the live stage. Layers are stacking rows, not categories:
    anything overlapping in time moves down a row, so nothing hides behind
@@ -46,6 +49,11 @@ interface Props {
   onUpdateLive: (editIndex: number, patch: Partial<Edit>) => void;
   onMaterialize: (clip: ClipModel) => number | null;
   onCommit: () => void;
+  /** Step the edit history. Returns false when there was nothing to step. */
+  onUndo: () => boolean;
+  onRedo: () => boolean;
+  canUndo: boolean;
+  canRedo: boolean;
   reveal: { key: string; n: number } | null;
   baking: string | null;
 }
@@ -98,7 +106,7 @@ function clampToSong(v: View, duration: number): View {
 export function StageTimeline({
   show, energy, clips, effects, currentTime, playing, selection,
   onSelect, onSeek, onToggle, onPlace, onRemove, onUpdateLive, onMaterialize,
-  onCommit, reveal, baking,
+  onCommit, onUndo, onRedo, canUndo, canRedo, reveal, baking,
 }: Props) {
   const duration = show?.duration_s ?? 0;
   const bpb = show?.grid.beats_per_bar ?? 4;
@@ -125,6 +133,17 @@ export function StageTimeline({
      selected now — no effect to reset it, and selecting anything (including
      the same clip again) brings the card straight back. */
   const [dismissed, setDismissed] = useState<string | null>(null);
+  /* The row the clip in hand is not allowed to leave. Held here rather than
+     inside the drag, because the keyboard moves clips too — an arrow press is
+     the same edit as a drag, and it re-packed the same way. */
+  const [pin, setPin] = useState<Pin | null>(null);
+  /* Where the last press landed, in seconds: the point a paste goes to.
+     The playhead used to be that point, and it is the wrong one as soon as the
+     song is playing — you press copy, click where you want it, and by the time
+     you press paste the playhead has run on somewhere else. A press is a
+     statement about a PLACE; the playhead is a statement about a MOMENT, and
+     they stop agreeing the instant anything moves. */
+  const [caret, setCaret] = useState<number | null>(null);
 
   const lanesRef = useRef<HTMLDivElement>(null);
   const rowsRef = useRef<HTMLDivElement>(null);
@@ -151,12 +170,53 @@ export function StageTimeline({
   }, []);
   useEffect(() => () => { if (noteTimer.current) clearTimeout(noteTimer.current); }, []);
 
+  /* One packing across every clip, so a layer means the same thing everywhere.
+     `pin` is the one exception, and the reason it exists: see lib/pack. Which
+     row a clip lands on is a function of where it STARTS, so carrying a clip
+     past the end of its neighbour re-packed it onto a different row halfway
+     through the drag — the thing under the pointer changed lane while it was
+     being held, and the lane it went to depended on clips nowhere near the
+     pointer. Pinning fixes the clip the creator has hold of and makes the rest
+     of the timeline move instead.
+
+     It sits up here, above everything that reads it, because `select` decides
+     the pin from it. */
+  const packed = useMemo(() => packRows(clips, pin), [clips, pin]);
+
+  /* What `select` reads to decide a pin, one render behind the press it is read
+     from — which is exactly right: the row it must hand back is the row that is
+     on screen when the creator reaches for the clip. */
+  const rowOfRef = useRef<(key: string) => number | undefined>(null);
+  useEffect(() => {
+    rowOfRef.current = (key) => packed.items.find((i) => i.clip.key === key)?.row;
+  });
+
   /* Every selection in this editor goes through here so that choosing anything
      — including the clip whose card you just closed — undismisses the card.
      Without it, closing one was permanent until you picked something else, and
      there was no way back to a clip's exact timing. */
   const select = useCallback((key: string, additive: boolean) => {
     setDismissed(null);
+    /* Reaching for a clip is also the moment its row is decided. Which lane a
+       clip sits on is a function of where it STARTS, so moving it re-packed it
+       mid-gesture and the thing under the pointer changed lane while it was
+       being carried. Taking the pin HERE — at the press, off the packing that
+       is on screen — fixes it to the row you reached for; everything that then
+       overlaps it gives way instead. See lib/pack.
+
+       Read through a ref so this callback stays stable: it is passed down to
+       every Clip, and rebuilding it whenever the packing changed would undo
+       their memo on every edit. Letting go of the selection unpins, which is
+       the one moment the timeline may settle without surprising anyone. */
+    setPin((cur) => {
+      if (!key) return null;
+      if (cur?.key === key) return cur;
+      const row = rowOfRef.current?.(key);
+      /* No row yet means the clip is one tick old — an arranger's clip taken
+         over mid-drag, renamed auto:3 → mine:7 before the re-pack. It is at
+         the same place by construction, so it inherits the same pin. */
+      return { key, row: row ?? cur?.row ?? 0 };
+    });
     onSelect(key, additive);
   }, [onSelect]);
 
@@ -200,8 +260,6 @@ export function StageTimeline({
     return () => cancelAnimationFrame(id);
   }, [currentTime, playing, follow, duration]);
 
-  /* One packing across every clip, so a layer means the same thing everywhere. */
-  const packed = useMemo(() => packRows(clips), [clips]);
   const layerCount = Math.max(packed.rows, 1);
   const rowHeight = useMemo(() => {
     if (rowsH === 0) return ROW_MIN + 8;
@@ -221,6 +279,7 @@ export function StageTimeline({
     () => (one ? (packed.items.find((i) => i.clip.key === one.key)?.row ?? 0) : 0),
     [one, packed],
   );
+
 
   /* A selected clip on a row scrolled out of the lanes cannot be read, trimmed
      or inspected, and its card would be drawn against the wrong row — which is
@@ -283,6 +342,19 @@ export function StageTimeline({
     [show, songCtx, view, snap],
   );
 
+  /** Remember where a press landed. In SECONDS rather than beats, because the
+   *  playhead it stands in for is in seconds and the two are drawn against the
+   *  same ruler — converting once, here, keeps one of them from rounding. */
+  const markCaret = useCallback(
+    (clientX: number) => {
+      const box = lanesRef.current?.getBoundingClientRect();
+      if (!box || box.width <= 0) return;
+      const x = clamp(clientX, box.left, box.right) - box.left;
+      setCaret(xToTime(x, view, box.width));
+    },
+    [view],
+  );
+
   const toBarBeat = useCallback(
     (beatIndex: number) => ({
       bar: Math.floor(beatIndex / bpb) + 1,
@@ -294,6 +366,31 @@ export function StageTimeline({
   /** Where a clip sits, as a beat index. The one conversion both directions use. */
   const beatOf = useCallback((c: ClipModel) => (c.bar - 1) * bpb + (c.beat - 1), [bpb]);
 
+  const clock = useMemo(() => (show ? makeGridClock(show.grid) : null), [show]);
+
+  /** A beat index back into seconds — the inverse of beatAtX, and how the paste
+   *  receipt names the place it just put something. */
+  const secondsAtBeat = useCallback(
+    (beatIndex: number) =>
+      clock ? clock.secondsAtBar(Math.floor(beatIndex / bpb) + 1, (beatIndex % bpb) + 1) : 0,
+    [clock, bpb],
+  );
+
+  /** How long a NEW effect is when it lands at `beatIndex`. See lib/place: a
+   *  state declares no length because it is a section's bed, so reading
+   *  default_beats straight through put nine of the twenty-five tiles on the
+   *  timeline with none. Both ways in — the drop and the armed click — and the
+   *  guide that previews them go through here, so what the guide draws is what
+   *  the drop makes. */
+  const lengthFor = useCallback(
+    (effect: Effect, beatIndex: number) => {
+      if (!show || !clock) return effectBeats(effect);
+      const { bar, beat } = toBarBeat(beatIndex);
+      return placementBeats(effect, clock.secondsAtBar(bar, beat), show.grid, show.sections);
+    },
+    [show, clock, toBarBeat],
+  );
+
   /** How many beats `dt` seconds are, starting at `t` — exact across a tempo
    *  change, which a flat bpm division would not be. */
   const beatsIn = useCallback(
@@ -303,6 +400,12 @@ export function StageTimeline({
 
   /** The floor on a clip's length, which is what snap actually means. */
   const minBeats = snap === "off" ? FREE_MIN_BEATS : 1;
+
+  /* Scrolling is navigation, and navigation is the creator taking the wheel —
+     so it lets go of auto-scroll the same way zoom and pan already do. Leaving
+     follow on meant the playhead hauled the window back the moment you let go
+     of the bar, which reads as the scrollbar not working. */
+  const onScrollView = useCallback((v: View) => { setFollow(false); setView(v); }, []);
 
   /* The drop zone is the editor's whole width, gutter included. The gutter is
      118px of the only approach from the palette, and a release over it used to
@@ -330,7 +433,7 @@ export function StageTimeline({
       if (!isOverTimeline(x, y)) return;
       const hit = beatAtX(x);
       if (!hit) return;
-      onPlace({ type: effect.id, ...toBarBeat(hit.beat), beats: effectBeats(effect) });
+      onPlace({ type: effect.id, ...toBarBeat(hit.beat), beats: lengthFor(effect, hit.beat) });
     };
     onDragMoveRef.current = (d) => {
       if (!d.effect) { setGhost(null); setHover(null); return; }
@@ -339,7 +442,7 @@ export function StageTimeline({
       const hit = beatAtX(d.x);
       setHover(hit ? { ...toBarBeat(hit.beat), target: hit.target } : null);
     };
-  }, [isOverTimeline, beatAtX, toBarBeat, onPlace]);
+  }, [isOverTimeline, beatAtX, toBarBeat, onPlace, lengthFor]);
 
   useEffect(() => {
     setOnDrop((effect, x, y) => onDropRef.current?.(effect, x, y));
@@ -378,6 +481,11 @@ export function StageTimeline({
     (clip: ClipModel, mode: Gesture, e: React.PointerEvent) => {
       if (!show) return;
       e.preventDefault();
+      /* A press on a clip is a press on the timeline. It does not move the
+         playhead — grabbing something must not also make the song jump — so
+         without this the paste point went stale the moment you reached for a
+         clip, which is exactly the press before a copy. */
+      markCaret(e.clientX);
       const startBeat = beatOf(clip);
       const endBeat = startBeat + clip.beats;
       const grabbed = beatAtX(e.clientX)?.beat ?? startBeat;
@@ -414,7 +522,7 @@ export function StageTimeline({
       window.addEventListener("pointermove", move);
       window.addEventListener("pointerup", up);
     },
-    [show, beatAtX, beatOf, toBarBeat, minBeats, onUpdateLive, onMaterialize, select, onCommit],
+    [show, markCaret, beatAtX, beatOf, toBarBeat, minBeats, onUpdateLive, onMaterialize, select, onCommit],
   );
 
   const removeSelection = useCallback(() => {
@@ -423,11 +531,14 @@ export function StageTimeline({
 
   /** Changing a dial on an arranger clip takes it over first. */
   const changeDials = useCallback(
-    (clip: ClipModel, patch: Record<string, unknown>) => {
+    (clip: ClipModel, patch: Record<string, unknown>, live = false) => {
       const idx = takeOver(clip);
       if (idx === null) return;
       onUpdateLive(idx, { params: { ...clip.params, ...patch } });
-      onCommit();
+      /* A slider under the pointer is mid-gesture: painting it is the point,
+         baking it thirty times on the way is not, and neither is thirty undo
+         steps for one sweep. The release does both, once. */
+      if (!live) onCommit();
     },
     [takeOver, onUpdateLive, onCommit],
   );
@@ -528,15 +639,18 @@ export function StageTimeline({
   const paste = useCallback(() => {
     if (!show) return;
     if (!clipboard.current.length) { say("nothing copied yet"); return; }
-    /* The playhead is the paste point, because it is the one place in the
-       editor you have already told it you care about. Snap applies, so a paste
-       lands on the bar line you can see rather than wherever the song happened
-       to be when you pressed the key. */
-    const raw = beatAtTime(timeRef.current, show.grid);
+    /* Where you last pressed, and only the playhead if you have not pressed
+       anything yet. Pointing at a place is the act that says where; the
+       playhead answers a different question — where the song is now — and while
+       a song plays that is somewhere else sixty times a second. Snap still
+       applies, so a paste lands on the bar line you can see rather than a
+       fraction off it. */
+    const atS = caret ?? timeRef.current;
+    const raw = beatAtTime(atS, show.grid);
     const at = snap === "off" ? raw : snap === "bar" ? Math.round(raw / bpb) * bpb : Math.round(raw);
     const n = dropSnips(clipboard.current, Math.max(0, at));
-    if (n) say(`pasted ${n}`);
-  }, [show, snap, bpb, dropSnips, say]);
+    if (n) say(`pasted ${n} at ${mmssms(Math.max(0, secondsAtBeat(at)))}`);
+  }, [show, caret, snap, bpb, dropSnips, say, secondsAtBeat]);
 
   const duplicate = useCallback(() => {
     const cut = snip(selected);
@@ -595,6 +709,16 @@ export function StageTimeline({
 
       if (e.ctrlKey || e.metaKey) {
         const k = e.key.toLowerCase();
+        /* Undo comes first, and takes the chord whether or not anything is
+           selected — it is a statement about the SHOW, not about the clip. */
+        if (k === "z") {
+          e.preventDefault();
+          const stepped = e.shiftKey ? onRedo() : onUndo();
+          say(stepped ? (e.shiftKey ? "redone" : "undone") : e.shiftKey ? "nothing to redo" : "nothing to undo");
+          return;
+        }
+        /* Ctrl+Y as well, because that is the one half the world reaches for. */
+        if (k === "y") { e.preventDefault(); say(onRedo() ? "redone" : "nothing to redo"); return; }
         if (k === "c") { const n = copySelection(); if (n) { e.preventDefault(); say(`copied ${n}`); } return; }
         if (k === "x") {
           const n = copySelection();
@@ -643,7 +767,7 @@ export function StageTimeline({
     },
     [
       selected, removable, removeSelection, select, setArmed, onSeek, duration,
-      nudge, beatsIn, bpb, copySelection, paste, duplicate, say,
+      nudge, beatsIn, bpb, copySelection, paste, duplicate, say, onUndo, onRedo,
     ],
   );
 
@@ -671,7 +795,11 @@ export function StageTimeline({
   const dropSpan = (() => {
     if (!hover) return null;
     const start = (hover.bar - 1) * bpb + (hover.beat - 1);
-    const end = toBarBeat(start + (dragEffect ? effectBeats(dragEffect) : 1));
+    /* Through lengthFor, the same as the drop itself — a guide that promises a
+       beat and delivers a section is worse than no guide. `armed` counts too:
+       the click-to-place path draws this guide on hover as well. */
+    const placing = dragEffect ?? armed;
+    const end = toBarBeat(start + (placing ? lengthFor(placing, start) : 1));
     return { from: secondsAtBar(hover.bar, hover.beat), to: secondsAtBar(end.bar, end.beat) };
   })();
 
@@ -696,6 +824,10 @@ export function StageTimeline({
         onToggleGuide={toggleGuide}
         follow={follow}
         onToggleFollow={() => setFollow((f) => !f)}
+        onUndo={() => say(onUndo() ? "undone" : "nothing to undo")}
+        onRedo={() => say(onRedo() ? "redone" : "nothing to redo")}
+        canUndo={canUndo}
+        canRedo={canRedo}
         onCopy={() => { const n = copySelection(); if (n) say(`copied ${n}`); }}
         onCut={() => { const n = copySelection(); if (n) { removeSelection(); say(`cut ${n}`); } }}
         onPaste={paste}
@@ -706,20 +838,37 @@ export function StageTimeline({
         onFit={() => setView(fit(duration))}
       />
 
-      <div className="flex-1 min-h-0 flex">
-      <div ref={lanesRef} className="flex-1 min-w-0 min-h-0 relative">
+      {/* A gutter each side, on the OUTSIDE of the timeline's box. The song
+          starts at x=0 of that box, so the first clip was drawn hard against
+          the panel's edge — and a clip running back past the start of the
+          window is cut there, which read as the clip bleeding into the border
+          rather than as the window ending.
+
+          It has to be here, wrapping the measured box, rather than as padding
+          on the box itself: `lanesRef` is what beatAtX reads the pointer
+          against and what Timeline measures its width from, so padding INSIDE
+          it would put the mapping and the drawing 12px out of step with each
+          other. Out here the box simply gets narrower, and the ruler, the
+          sections, the clips, the guides and the playhead stay in the
+          agreement they were already in.
+
+          --spacing-s3, the transport bar's own padding, so the two line up as
+          one column rather than as two panels that nearly match. */}
+      <div className="flex-1 min-h-0 flex px-[var(--spacing-s3)]">
+      <div ref={lanesRef} id="stage-timeline-lanes" className="flex-1 min-w-0 min-h-0 relative">
         <Timeline
           view={view}
           duration={duration}
           onScrub={onSeek}
           onBackground={(clientX) => {
+            markCaret(clientX);
             /* An armed tile turns a press on the timeline into a placement, and
                CLAIMS it, so the playhead does not jump to where you placed. Any
                other press is a seek, and lets go of the selection on the way. */
             if (armed) {
               const hit = beatAtX(clientX);
               if (hit) {
-                onPlace({ type: armed.id, ...toBarBeat(hit.beat), beats: effectBeats(armed) });
+                onPlace({ type: armed.id, ...toBarBeat(hit.beat), beats: lengthFor(armed, hit.beat) });
                 setArmed(null);
                 return true;
               }
@@ -775,7 +924,23 @@ export function StageTimeline({
               <MomentsBand moments={show.moments} />
             </div>
 
-            <div ref={rowsRef} data-lane-rows className="flex-1 min-h-0 overflow-y-auto">
+            {/* The lanes scroll DOWN and only down. `overflow-y-auto` alone was
+                not saying that: CSS computes the other axis to `auto` the moment
+                one axis is not `visible`, so the lanes quietly became a
+                horizontal scroller too. Any clip running past the right edge of
+                the window — one is always about to, that is what a window IS —
+                gave them scrollable width, and with it a 9px scrollbar that ate
+                a lane's worth of height and, once the editor was dragged tall
+                enough to clip its own bottom, sat below the fold where it could
+                not be grabbed.
+
+                Worse than the bar was what it did: the ruler, the sections, the
+                guides and the playhead are drawn OUTSIDE this box, so scrolling
+                it slid every clip left of the time it was actually at. The
+                timeline's horizontal position is `view`, and `view` is moved by
+                zoom, pan and drag. There is no second answer to where we are in
+                the song. */}
+            <div ref={rowsRef} data-lane-rows className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto">
               {byLayer.map((rowClips, i) => (
                 <Layer
                   key={i}
@@ -790,11 +955,28 @@ export function StageTimeline({
             </div>
 
             <EnergyBand energy={energy} grid={show.grid} />
+
+            {/* Where you are in the song, and the only control that says how
+                much of it is off screen. It writes `view` like every other
+                navigation here does, so the lanes, the ruler and the playhead
+                move together — see TimelineScrollbar for why it cannot be a
+                real scroller. */}
+            <TimelineScrollbar
+              view={view}
+              duration={duration}
+              onView={onScrollView}
+              controls="stage-timeline-lanes"
+            />
           </div>
 
           {hover && dropSpan && (
             <DropGuide from={dropSpan.from} to={dropSpan.to} label={hover.target?.label ?? null} />
           )}
+          {/* Where a paste will land. Only drawn when it is somewhere other
+              than the playhead — when they agree, the playhead is already
+              saying it, and two marks on one line would just be a question
+              about which of them is which. */}
+          {caret !== null && Math.abs(caret - currentTime) > 0.02 && <Caret t={caret} />}
           <Playhead t={currentTime} />
 
           {one && dismissed !== one.key && (
@@ -802,6 +984,8 @@ export function StageTimeline({
               clip={one}
               effect={effects.find((e) => e.id === (one.tile ?? one.fx))}
               onChange={(patch) => changeDials(one, patch)}
+              onChangeLive={(patch) => changeDials(one, patch, true)}
+              onChangeDone={onCommit}
               onRetime={(patch) => retime(one, patch)}
               onRemove={removeSelection}
               onClose={() => setDismissed(one.key)}
@@ -835,11 +1019,13 @@ const MIN_CARD_H = 132;
 const ROOF = 4;
 
 function Popover({
-  clip, effect, onChange, onRetime, onRemove, onClose,
+  clip, effect, onChange, onChangeLive, onChangeDone, onRetime, onRemove, onClose,
 }: {
   clip: ClipModel;
   effect: Effect | undefined;
   onChange: (patch: Record<string, unknown>) => void;
+  onChangeLive: (patch: Record<string, unknown>) => void;
+  onChangeDone: () => void;
   onRetime: (patch: { startS?: number; lengthS?: number }) => void;
   onRemove: () => void;
   onClose: () => void;
@@ -880,7 +1066,7 @@ function Popover({
     const boxL = 8;
     const boxR = hb.width - 8;
     const boxT = BANDS_H + 4;
-    const boxB = hb.height - ENERGY_H - 6;
+    const boxB = hb.height - ENERGY_H - SCROLLBAR_H - 6;
 
     /* scrollHeight, not offsetHeight: the card may already be capped from the
        last placement, and what decides the next one is how tall it WANTS to be. */
@@ -967,10 +1153,44 @@ function Popover({
       clip={clip}
       effect={effect}
       onChange={onChange}
+      onChangeLive={onChangeLive}
+      onChangeDone={onChangeDone}
       onRetime={onRetime}
       onRemove={onRemove}
       onClose={onClose}
     />
+  );
+}
+
+/** The paste point: quiet, and unmistakably not the playhead. A hairline in
+ *  the ink colour at low opacity with a cap at the top, against the playhead's
+ *  solid full-height rule. */
+function Caret({ t }: { t: number }) {
+  const { view, width } = useTimeline();
+  const x = timeToX(t, view, width);
+  if (x < 0 || x > width) return null;
+  return (
+    <div
+      className="absolute top-0 bottom-0 z-[15] pointer-events-none"
+      style={{ left: x }}
+      title="Where a paste will land"
+    >
+      {/* Dashed, against the playhead's solid rule. Weight and brightness alone
+          would make it read as a dimmer playhead — a second one, which is a
+          worse thing to say than nothing. A broken line is a different KIND of
+          line, and needs no legend. */}
+      <span
+        className="absolute top-0 bottom-0 w-px"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(to bottom, var(--line-strong) 0 3px, transparent 3px 6px)",
+        }}
+      />
+      <span
+        className="absolute top-0 w-[5px] h-[5px] -translate-x-1/2"
+        style={{ background: "var(--ink-dim)", clipPath: "polygon(0 0, 100% 0, 50% 100%)" }}
+      />
+    </div>
   );
 }
 
