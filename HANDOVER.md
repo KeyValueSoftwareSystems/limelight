@@ -765,6 +765,45 @@ This was a wrong definition of "complete" in the checker as much as in the autho
 old metric reported these spans as completing, because it counted cycles rather than
 asking whether the beam got home.
 
+## 7r. Every frame of every fixture, accounted for
+
+Amal's standard, verbatim: "I dont wanna see a single light/moving head movement
+without it being correlated with a pattern or a meaning... Every single milli-second of
+every single fixture must make sense. And we should verify it. It's just maths."
+
+`portal/cue/pattern.py` was too weak for that. It sampled every 100ms, looked only at
+the lamps, and never checked transitions. `portal/cue/strict.py` is the real check:
+
+```
+cd portal/cue && python3 strict.py <song> /tmp/<song>.cuelights.json
+```
+
+It walks **every frame** — 25ms at 40fps — and admits a frame on one of three grounds:
+
+1. The lamp vector is a **named shape**: flat, solo, half, inner, outer, alternate,
+   three, ramp, mirror, halves, peak, dark.
+2. It is a named shape **with one lamp bumped**, which is an accent riding a look and is
+   one of the most ordinary things a designer does. Accents are declared in the show
+   file, so this is checked, not assumed: inside a declared accent window the brightest
+   lamp is removed and the remainder must still be a named shape.
+3. It is a **monotonic transition** between the shape before and the shape after. Every
+   lamp must move one way across the crossfade, within a tolerance of
+   `max(3.0, 6% of that lamp's travel)` — below anything visible, and well under the 9
+   that the fault scanner treats as a direction reversal.
+
+The head is held to the same standard: no frame may move pan or tilt by more than the
+layout's declared per-frame limit, and no reversal may happen more than three times in
+under a second.
+
+All seven songs report **zero unaccounted stretches and zero head movements without a
+pattern**. The 0.00-0.15% of frames that are not themselves a named shape all sit
+inside clean transitions. Treat any non-zero unaccounted count as a bug.
+
+**One real fault it caught.** An accent took its lift back from the other lamps using a
+per-fixture factor, `1 - share / peak`, so each lamp was scaled differently and the
+shape was destroyed: a flat rig at 114.6 became 124 / 43 / 76 / 43. One shared factor
+across the other fixtures preserves the ratios and therefore the pattern.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the

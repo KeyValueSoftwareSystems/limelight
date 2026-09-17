@@ -377,21 +377,25 @@ function render(cueFile, score, rigName, opts) {
         }
       }
       if (!rest.length || added <= 0) continue;
-      const share = added / rest.length;
+      let restTotal = 0;
+      for (const fx of rest) {
+        const ch = fx.ch;
+        restTotal += fx.brightness === "colour"
+          ? Math.max(frames[i][fx.offset + (ch.r >= 0 ? ch.r : 0)],
+                     frames[i][fx.offset + (ch.g >= 0 ? ch.g : 0)],
+                     frames[i][fx.offset + (ch.b >= 0 ? ch.b : 0)])
+          : (ch.master >= 0 ? frames[i][fx.offset + ch.master] : 0);
+      }
+      if (restTotal <= 0) continue;
+      const k = Math.max(0.55, Math.min(1, 1 - added / restTotal));
       for (const fx of rest) {
         const ch = fx.ch;
         if (fx.brightness === "colour") {
-          const peak = Math.max(frames[i][fx.offset + (ch.r >= 0 ? ch.r : 0)],
-                                frames[i][fx.offset + (ch.g >= 0 ? ch.g : 0)],
-                                frames[i][fx.offset + (ch.b >= 0 ? ch.b : 0)]);
-          if (peak <= 0) continue;
-          const k = Math.max(0.55, Math.min(1, 1 - share / Math.max(1, peak)));
           for (const c of [ch.r, ch.g, ch.b]) {
             if (c >= 0) frames[i][fx.offset + c] = Math.round(frames[i][fx.offset + c] * k);
           }
         } else if (ch.master >= 0) {
-          const v = frames[i][fx.offset + ch.master];
-          if (v > 0) frames[i][fx.offset + ch.master] = Math.round(Math.max(v * 0.55, v - share));
+          frames[i][fx.offset + ch.master] = Math.round(frames[i][fx.offset + ch.master] * k);
         }
       }
     }
