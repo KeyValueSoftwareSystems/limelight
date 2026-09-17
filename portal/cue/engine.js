@@ -261,6 +261,36 @@ const FIGURES = {
   },
 };
 
+const FORMS = {
+  sine: (x) => Math.sin(2 * Math.PI * x),
+  cosine: (x) => Math.cos(2 * Math.PI * x),
+  ramp: (x) => 2 * (x - Math.floor(x)) - 1,
+  saw: (x) => 1 - 2 * (x - Math.floor(x)),
+  triangle: (x) => 4 * Math.abs(x - Math.floor(x + 0.5)) - 1,
+  step: (x) => ((x - Math.floor(x)) < 0.5 ? 1 : -1),
+  swell: (x) => {
+    const f = x - Math.floor(x);
+    return f < 0.25 ? f / 0.25 : (1 - (f - 0.25) / 0.75);
+  },
+};
+
+function effectPeriod(fx, grid) {
+  const r = fx.rate || { bars: 1 };
+  if (r.bars != null) return Math.max(0.2, grid.barSeconds * +r.bars);
+  if (r.beats != null) return Math.max(0.2, grid.beatSeconds * +r.beats);
+  if (r.seconds != null) return Math.max(0.2, +r.seconds);
+  return grid.barSeconds;
+}
+
+function effectValue(fx, grid, t, index, count) {
+  const form = FORMS[fx.form] || FORMS.sine;
+  const period = effectPeriod(fx, grid);
+  const spread = fx.phase != null ? +fx.phase : 0;
+  const per = count > 1 ? (spread / 360) * (index / (count - 1)) : 0;
+  const dir = fx.reverse ? -1 : 1;
+  return form(dir * (t / period) + per + (fx.offset != null ? +fx.offset : 0));
+}
+
 function chaseStepSeconds(chase, grid) {
   const every = chase.every || { bars: 1 };
   if (every.bars != null) return grid.barSeconds * Math.max(0.25, +every.bars);
@@ -375,4 +405,4 @@ function chaseStepTimes(chase, grid, startS, endS) {
   return out.length ? out : [startS];
 }
 
-module.exports = { loadRig, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes, noteStepsIn };
+module.exports = { loadRig, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes, noteStepsIn, FORMS, effectValue, effectPeriod };

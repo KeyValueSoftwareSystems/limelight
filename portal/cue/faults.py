@@ -97,8 +97,14 @@ def scan(song, lights):
     for i in range(1, n):
         if lead[i] == lead[i - 1] or max(L[i]) <= 12:
             continue
-        if all(lead[j] == lead[i] for j in range(i, min(n, i + hold_n))):
-            sw.append(i)
+        if not all(lead[j] == lead[i] for j in range(i, min(n, i + hold_n))):
+            continue
+        jump = 0.0
+        for j in range(max(1, i - 2), min(n, i + 3)):
+            jump = max(jump, max(abs(L[j][k] - L[j - 1][k]) for k in range(len(OFF))))
+        if jump < 6:
+            continue
+        sw.append(i)
     for a, b in zip(sw, sw[1:]):
         if (b - a) / fps < 0.22 and not planned(a / fps) and not planned(b / fps):
             add(

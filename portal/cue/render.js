@@ -235,6 +235,30 @@ function render(cueFile, score, rigName, opts) {
         for (const id of Object.keys(state)) scaled[id] = { ...state[id], l: state[id].l * g };
         state = scaled;
       }
+      const fxs = (cueFile.effects || []).map((e) => ({ ...e, __abs: true }))
+        .concat(cue.effects || []);
+      if (fxs.length) {
+        const out = {};
+        for (const id of Object.keys(state)) out[id] = { ...state[id] };
+        for (const ef of fxs) {
+          const ids = [].concat(ef.on || "lamps")
+            .reduce((a, k) => a.concat(E.expandTargets(rig, k)), []);
+          const size = ef.size != null ? +ef.size : 0.3;
+          ids.forEach((id, i) => {
+            const st0 = out[id];
+            if (!st0) return;
+            const v = E.effectValue(ef, grid, ef.__abs ? t : t - cue._t, i, ids.length);
+            if (ef.attr === "pan" && st0.pan != null) {
+              st0.pan = Math.max(0, Math.min(1, st0.pan + size * v));
+            } else if (ef.attr === "tilt" && st0.tilt != null) {
+              st0.tilt = Math.max(0, Math.min(1, st0.tilt + size * v));
+            } else {
+              st0.l = Math.max(0, Math.min(1, st0.l * (1 + size * v)));
+            }
+          });
+        }
+        state = out;
+      }
       for (const fx of rig.fixtures) writeFixture(frame, fx, state[fx.id] || { l: 0 });
     }
 

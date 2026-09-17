@@ -66,6 +66,7 @@ const show = {
   frames: res.frames,
   palette: cueFile.palette || {},
   accents: cueFile.accents || [],
+  effects: cueFile.effects || [],
   cuelist: res.cues.map((c) => ({
     id: c.id, at: c.at, t: +c._t.toFixed(3), fade: c.fade || 0,
     look: c.look, chase: c.chase || null, chases: c.chases || null,

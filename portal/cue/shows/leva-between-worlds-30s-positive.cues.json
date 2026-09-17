@@ -39,15 +39,26 @@
      "l": 0.25
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.4,
+     "move_head": true
     },
-    "low": 0.4,
-    "move_head": true
-   }
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 0,
@@ -71,15 +82,26 @@
      "l": 0.25
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.4,
+     "move_head": true
     },
-    "low": 0.4,
-    "move_head": true
-   }
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 0,
@@ -103,15 +125,26 @@
      "l": 0.21
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.45,
+     "move_head": true
     },
-    "low": 0.45,
-    "move_head": true
-   }
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 1,
@@ -126,15 +159,26 @@
      "l": 0.25
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.4,
+     "move_head": true
     },
-    "low": 0.4,
-    "move_head": true
-   }
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 0,
@@ -158,15 +202,26 @@
      "l": 0.25
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.4,
+     "move_head": true
     },
-    "low": 0.4,
-    "move_head": true
-   }
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 7,
@@ -181,15 +236,26 @@
     }
    },
    "why": "the harmony turns here - mode +1.00, anticipation. Colour moves to violet on the chord change",
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.4,
+     "move_head": true
     },
-    "low": 0.4,
-    "move_head": true
-   }
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 8,
@@ -197,7 +263,7 @@
     "bar": 8
    },
    "fade": 0.6,
-   "why": "bars 5-8, the phrase closes down: drums leads, E 3.36, 8 hits, mode +1.00 - hocket in teal",
+   "why": "bars 5-8, the phrase closes down: drums leads, E 3.36, 8 hits, mode +1.00 - hocket in teal against teal inside",
    "look": {
     "lamps": {
      "c": "indigo",
@@ -220,6 +286,15 @@
      "fill_beats": 1,
      "low": 0.4,
      "move_head": false
+    },
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
     }
    ]
   },
@@ -245,15 +320,26 @@
      "l": 0.25
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.4,
+     "move_head": true
     },
-    "low": 0.4,
-    "move_head": true
-   },
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
+    }
+   ],
    "swell": {
     "from": 0.72,
     "to": 1.0,
@@ -295,7 +381,8 @@
      "c": "bone",
      "l": 1.0,
      "pan": 0.5,
-     "tilt": 0.26
+     "tilt": 0.26,
+     "strobe": 0.75
     }
    },
    "chase": {
@@ -320,15 +407,26 @@
      "l": 0.59
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.4,
+     "move_head": true
     },
-    "low": 0.4,
-    "move_head": true
-   }
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
+    }
+   ]
   },
   {
    "id": 0,
@@ -376,12 +474,13 @@
      "reverse": true
     },
     {
-     "on": "inner",
-     "figure": "hocket",
+     "on": "lamps",
+     "figure": "converge",
      "every": {
-      "hits": 3
+      "bars": 2
      },
-     "low": 0.55
+     "low": 0.86,
+     "reverse": false
     }
    ]
   },
@@ -417,12 +516,13 @@
      "reverse": true
     },
     {
-     "on": "inner",
-     "figure": "hocket",
+     "on": "lamps",
+     "figure": "converge",
      "every": {
-      "hits": 3
+      "bars": 2
      },
-     "low": 0.55
+     "low": 0.86,
+     "reverse": false
     }
    ]
   },
@@ -432,7 +532,7 @@
     "bar": 21
    },
    "fade": 0.35,
-   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - converge in teal",
+   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - converge in teal against teal inside",
    "look": {
     "lamps": {
      "c": "teal",
@@ -455,6 +555,15 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": false
+    },
+    {
+     "on": "lamps",
+     "figure": "diverge",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
     }
    ]
   },
@@ -480,15 +589,26 @@
      "l": 0.25
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.4,
+     "move_head": true
     },
-    "low": 0.4,
-    "move_head": true
-   }
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "bars": 2
+     },
+     "low": 0.86,
+     "reverse": true
+    }
+   ]
   }
  ],
  "accents": [
@@ -552,6 +672,41 @@
    "decay": 0.2,
    "on": "lamps",
    "c": "bone"
+  }
+ ],
+ "effects": [
+  {
+   "attr": "intensity",
+   "on": "lamps",
+   "form": "sine",
+   "size": 0.12,
+   "rate": {
+    "bars": 6
+   },
+   "phase": 160,
+   "why": "a slow breath across the row, always running, so the rig is never dead still"
+  },
+  {
+   "attr": "pan",
+   "on": "heads",
+   "form": "sine",
+   "size": 0.16,
+   "rate": {
+    "bars": 8
+   },
+   "phase": 0,
+   "why": "the beam drifts across the room over eight bars"
+  },
+  {
+   "attr": "tilt",
+   "on": "heads",
+   "form": "triangle",
+   "size": 0.07,
+   "rate": {
+    "bars": 6
+   },
+   "phase": 0,
+   "why": "and lifts and settles on a slower cycle, so the two never line up"
   }
  ]
 }

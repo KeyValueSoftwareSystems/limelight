@@ -327,6 +327,49 @@ If he says fluctuation again, move **down** this curve (fewer accents, longer
 spacing in `author.py`'s accent loop). If he says lazy, move up. Do not reach
 for per-frame smoothing; it is not the variable.
 
+## 7i. The effects engine — how a real console actually works
+
+Amal asked for a redesign based on how a lighting designer really works, so I
+researched it instead of guessing. Two findings changed the architecture.
+
+**A console does not have a library of named figures.** It has an effects engine:
+`form x size x rate x phase`, applied **per attribute**, deviating from a base
+look. A chase is a sine on intensity with 270 degrees of phase spread across the
+fixtures. A slow colour drift is a ramp on hue at 8 bars. Because they act on
+DIFFERENT attributes they genuinely coexist — that is the layering, and it is
+why a figure library can only ever do one thing at a time.
+
+**An LD keeps a home state up that never goes down**, so "the stage never goes
+dark when you clear everything else", and layers by having different cue lists
+change different parameters.
+
+So `portal/cue/engine.js` now has `FORMS` (sine, cosine, ramp, saw, triangle,
+step, swell), `effectPeriod` and `effectValue`, and a cue file carries:
+
+```json
+"effects": [
+  {"attr":"intensity","on":"lamps","form":"sine","size":0.12,"rate":{"bars":6},"phase":160},
+  {"attr":"pan","on":"heads","form":"sine","size":0.16,"rate":{"bars":8}},
+  {"attr":"tilt","on":"heads","form":"triangle","size":0.07,"rate":{"bars":6}}
+]
+```
+
+Top-level `effects` are the home state: they run on the show's absolute clock so
+they never restart at a cue, exactly like a submaster that stays up. Per-cue
+`effects` run on the cue's own clock.
+
+These are NOT the per-frame oscillators the old engine died of. The difference
+is that a period is musical and long (6 to 8 bars), the size is a bounded
+deviation from a base that holds, and the phase spread is what creates travel.
+Adding all three moved the head from 23% to 34% of frames in motion and cut
+frozen stretches, with wobble unchanged at 8.4%.
+
+Sources:
+  https://help.malighting.com/grandMA3/2.0/HTML/phaser.html
+  https://www.limelightwired.com/post/introduction-to-programming-lighting-effects
+  https://www.onstagelighting.co.uk/band-lighting/using-submasters-busking-band-lighting/
+  https://jasonjolson.com/articles/2024/04/mastering-the-art-of-dynamic-concert-lighting-a-guide-to-rocking-the-stage-with-busking-and-cue-stacks/
+
 ## 7h. Accents must be judged locally, and moment cues must not hardcode a figure
 
 Amal: three handovers in the first 20 seconds, and not much happening on the

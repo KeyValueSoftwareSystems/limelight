@@ -480,6 +480,22 @@ def author(song, out_path=None):
         fam_now = MOVEMENT.get(sig_move.get(lab_now, ""))
         pidx = phrase_of.get(bar, (0, 0, 1))[0] or 0
 
+        def pair(fig_main, every_main, low_main, move=False, rev=False):
+            fam_l = fam_now or ("wave", "comet", "handover")
+            try:
+                nxt = fam_l[(fam_l.index(fig_main) + 1) % len(fam_l)]
+            except ValueError:
+                nxt = fam_l[0]
+            near = "inner" if (pidx % 2 == 0) else "outer"
+            far = "outer" if (pidx % 2 == 0) else "inner"
+            a = {"on": "lamps", "figure": fig_main, "every": every_main,
+                 "low": low_main, "move_head": move}
+            if rev:
+                a["reverse"] = True
+            b = {"on": "lamps", "figure": nxt, "every": {"bars": 2},
+                 "low": 0.86, "reverse": not rev}
+            return [a, b]
+
         def from_family(role):
             if not fam_now:
                 return {"grow": "build", "travel": "comet", "pass": "handover"}.get(role, "wave")
@@ -507,10 +523,11 @@ def author(song, out_path=None):
         elif kind == "peak":
             look = {
                 "lamps": {"c": "bone", "l": 1.0},
-                "heads": {"c": "bone", "l": 1.0, "pan": 0.5, "tilt": 0.26},
+                "heads": {"c": "bone", "l": 1.0, "pan": 0.5, "tilt": 0.26, "strobe": 0.75},
             }
             fade = 0.0
             chase = {"on": "lamps", "figure": "pulse", "every": {"hits": 1}, "low": 0.6}
+            add_layers = None
             why = (
                 "PEAK at %.1fs - the loudest instant in the recording. Full blast, the only white"
                 % mom[0]
@@ -518,7 +535,7 @@ def author(song, out_path=None):
         elif kind in ("climax", "drop"):
             look = {
                 "lamps": {"c": "scarlet", "l": min(0.98, level + 0.2)},
-                "heads": {"c": "scarlet", "l": 0.6, "pan": 0.5, "tilt": 0.3},
+                "heads": {"c": "scarlet", "l": 0.6, "pan": 0.5, "tilt": 0.3, "strobe": 0.5},
             }
             fade = 0.0
             chase = {
@@ -534,13 +551,14 @@ def author(song, out_path=None):
             why = "breakdown at %.1fs - the room empties to the middle" % mom[0]
         elif kind in ("build",):
             look = {"lamps": {"c": colour, "l": level}}
-            chase = {"on": "lamps", "figure": from_family("grow"), "every": {"hits": 1}, "low": 0.35}
+            add_layers = pair(from_family("grow"), {"hits": 1}, 0.35)
+            chase = None
             fade = 0.3
             why = "build at %.1fs, E %.2f - one lamp added at a time" % (mom[0], r["E"])
         elif kind in ("entrance", "vocal_return", "melody_resume"):
             look = {"lamps": {"c": colour, "l": level}}
-            chase = {"on": "lamps", "figure": from_family("pass"), "every": {"hits": 1},
-                     "low": 0.45, "move_head": True}
+            add_layers = pair(from_family("pass"), {"hits": 1}, 0.45, move=True)
+            chase = None
             fade = 0.12
             why = "%s at %.1fs - %s lead, E %.2f" % (kind, mom[0], top_fam, r["E"])
         elif kind in (
@@ -555,8 +573,8 @@ def author(song, out_path=None):
                     "l": level,
                 }
             }
-            chase = {"on": "lamps", "figure": from_family("travel"), "every": {"hits": 1},
-                     "low": 0.4, "move_head": True}
+            add_layers = pair(from_family("travel"), {"hits": 1}, 0.4, move=True)
+            chase = None
             fade = 0.5
             why = "%s at %.1fs - the figure changes with the music" % (kind, mom[0])
         elif kind == "spotlight":
@@ -669,14 +687,26 @@ def author(song, out_path=None):
             if sings:
                 fig = "pitch"
                 every = {"notes": 1}
-            layers = [{"on": "lamps", "figure": fig, "every": every,
-                       "fill_beats": 1 if level < 0.45 else 2,
-                       "low": deep, "move_head": moves}]
+            partner = fam[(fam.index(fig) + 1) % len(fam)] if fam and fig in fam else "wave"
+
+            layers = [{
+                "on": "lamps", "figure": fig, "every": every,
+                "fill_beats": 1 if level < 0.45 else 2,
+                "low": deep, "move_head": moves,
+            }]
             if reverse_it:
                 layers[0]["reverse"] = True
-            if dens >= 5 and level > 0.4 and not in_build:
-                layers.append({"on": "inner", "figure": "hocket",
-                               "every": {"hits": 3}, "low": 0.55})
+
+            layers.append({
+                "on": "lamps", "figure": partner, "every": {"bars": 2},
+                "low": 0.86, "reverse": not reverse_it,
+            })
+
+            if dens >= 6 and level > 0.5:
+                layers.append({
+                    "on": "lamps", "figure": "pulse", "every": {"bars": 2},
+                    "low": 0.82,
+                })
             chase = None
             fade = 0.35 if not fam_changed else 0.15
             if in_build:
@@ -1040,6 +1070,18 @@ def author(song, out_path=None):
     for c in cues:
         c.pop("_t", None)
 
+    show_effects = [
+        {"attr": "intensity", "on": "lamps", "form": "sine",
+         "size": 0.12, "rate": {"bars": 6}, "phase": 160,
+         "why": "a slow breath across the row, always running, so the rig is never dead still"},
+        {"attr": "pan", "on": "heads", "form": "sine",
+         "size": 0.16, "rate": {"bars": 8}, "phase": 0,
+         "why": "the beam drifts across the room over eight bars"},
+        {"attr": "tilt", "on": "heads", "form": "triangle",
+         "size": 0.07, "rate": {"bars": 6}, "phase": 0,
+         "why": "and lifts and settles on a slower cycle, so the two never line up"},
+    ]
+
     doc = {
         "schema": "limelight.cuelist/1",
         "song": song,
@@ -1047,6 +1089,7 @@ def author(song, out_path=None):
         "palette": PALETTE,
         "cues": cues,
         "accents": accents,
+        "effects": show_effects,
     }
     out_path = out_path or os.path.join(HERE, "shows", "%s.cues.json" % song)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)

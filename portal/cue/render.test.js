@@ -138,5 +138,24 @@ const palette = { red: "#ff0000", blue: "#0000ff", white: "#ffffff" };
   ok("the head still cannot teleport across the bar", jump <= 8, String(jump));
 }
 
+{
+  const out = R.render({ palette, effects: [
+    { attr: "intensity", on: "lamps", form: "sine", size: 0.5, rate: { bars: 1 }, phase: 270 },
+  ], cues: [
+    { at: { bar: 1 }, fade: 0, look: { lamps: { c: "white", l: 0.6 } } },
+  ] }, score, "arc4-head");
+  const g = E.makeGrid(score);
+  const t = g.secondsAt(2, 1) + 0.25;
+  const v = OFF.map((o) => lum(out.frames[Math.round(t * 40)], o));
+  ok("an effect spreads across the row rather than moving it together",
+    Math.max(...v) - Math.min(...v) > 20, v.map((x) => x.toFixed(0)).join(","));
+  let same = 0;
+  for (let i = 1; i < out.frames.length; i++) {
+    if (Math.abs(lum(out.frames[i], OFF[0]) - lum(out.frames[i - 1], OFF[0])) < 0.01) same++;
+  }
+  ok("and it is continuous, not stepped", same < out.frames.length * 0.6, String(same));
+}
+
 console.log(fail === 0 ? `  all ${pass} checks pass` : `  ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
+
