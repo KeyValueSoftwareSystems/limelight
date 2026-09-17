@@ -327,6 +327,36 @@ If he says fluctuation again, move **down** this curve (fewer accents, longer
 spacing in `author.py`'s accent loop). If he says lazy, move up. Do not reach
 for per-frame smoothing; it is not the variable.
 
+## 7g. Cues need room, and each section needs its own movement
+
+Amal: from 0:06 to 0:10 every effect must hold and be consistent, not randomly
+fluctuate. Measured, the median gap between cues was **0.77s and half of all
+gaps were under 0.8s** — 6.39 to 7.16 alone carried three different figures
+(comet, pitch, build) inside 0.77 seconds. No look existed long enough to read.
+
+Cues now need 0.95s of room. When two collide the more important one wins, on a
+fixed priority: blackouts and their returns and the big moments outrank phrase
+cues, which outrank entrances and builds, which outrank harmonic colour turns,
+which outrank ordinary bar cues. A swish also needs 1.6s of clear air or it is
+skipped. 84 cues became 47, median gap 0.77s became 2.06s.
+
+Then variety, because holding a look made the sameness obvious: only 8 of the
+16 figures were being used and build/comet/handover were most of them. Each
+SECTION LABEL now owns a movement family, the way it already owns a colour:
+
+  travel  sweep comet wave      trade  alternate pairs hocket
+  grow    build cascade unbuild meet   converge diverge split
+  pass    handover bounce rotate
+
+Families are handed out so no two labels share one, biased by hit density. The
+phrase direction then picks a variant INSIDE the family — rises takes the first,
+falls takes the second reversed, holds takes the third — so a chorus always
+moves like that chorus while still answering what the music is doing.
+
+Fourteen cues carry no movement at all and that is correct: seven blackouts,
+five anticipation dips (the breath before an arrival is meant to be still), the
+spotlight, and the breakdown.
+
 ## 7f. A figure must be allowed to finish
 
 Amal liked the build sweep at 0:10-0:12 and called 0:05-0:10 random. Measuring

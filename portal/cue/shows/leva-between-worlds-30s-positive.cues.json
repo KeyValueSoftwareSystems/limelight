@@ -27,29 +27,6 @@
    "why": "the audio falls to 20% of its median for 0.28s - a real hole, so the room goes with it"
   },
   {
-   "id": 1,
-   "at": {
-    "bar": 1
-   },
-   "fade": 0.5,
-   "why": "register_shift at 7.0s - the figure changes with the music",
-   "look": {
-    "lamps": {
-     "c": "indigo",
-     "l": 0.25
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "comet",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.4,
-    "move_head": true
-   }
-  },
-  {
    "id": 0,
    "at": {
     "second": 7.5
@@ -71,52 +48,6 @@
      "l": 0.25
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "comet",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.4,
-    "move_head": true
-   }
-  },
-  {
-   "id": 2,
-   "at": {
-    "bar": 3
-   },
-   "fade": 0.5,
-   "why": "rhythm_change at 10.9s - the figure changes with the music",
-   "look": {
-    "lamps": {
-     "c": "indigo",
-     "l": 0.22
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "comet",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.4,
-    "move_head": true
-   }
-  },
-  {
-   "id": 3,
-   "at": {
-    "second": 10.42
-   },
-   "fade": 0.55,
-   "look": {
-    "lamps": {
-     "c": "indigo",
-     "l": 0.36
-    }
-   },
-   "why": "the harmony turns here - mode -0.50, anticipation. Colour moves to indigo on the chord change",
    "chase": {
     "on": "lamps",
     "figure": "comet",
@@ -183,46 +114,6 @@
    }
   },
   {
-   "id": 5,
-   "at": {
-    "bar": 5
-   },
-   "fade": 0.15,
-   "why": "bars 5-8, the phrase closes down: keys leads, E 4.03, 12 hits, mode +0.22 - unbuild in teal against ember inside",
-   "look": {
-    "lamps": {
-     "c": "indigo",
-     "l": 0.46
-    },
-    "heads": {
-     "c": "teal",
-     "l": 0.32,
-     "pan": 0.5,
-     "tilt": 0.29
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "unbuild",
-     "every": {
-      "hits": 3
-     },
-     "fill_beats": 2,
-     "low": 0.4,
-     "move_head": false
-    },
-    {
-     "on": "inner",
-     "figure": "hocket",
-     "every": {
-      "hits": 3
-     },
-     "low": 0.55
-    }
-   ]
-  },
-  {
    "id": 0,
    "at": {
     "second": 15.766
@@ -255,29 +146,6 @@
    }
   },
   {
-   "id": 6,
-   "at": {
-    "bar": 7
-   },
-   "fade": 0.12,
-   "why": "melody_resume at 18.1s - drums lead, E 5.58",
-   "look": {
-    "lamps": {
-     "c": "indigo",
-     "l": 0.41
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.45,
-    "move_head": true
-   }
-  },
-  {
    "id": 7,
    "at": {
     "second": 18.1
@@ -306,14 +174,14 @@
     "bar": 8
    },
    "fade": 0.6,
-   "why": "bars 5-8, the phrase closes down: drums leads, E 3.36, 8 hits, mode +1.00 - unbuild in teal",
+   "why": "bars 5-8, the phrase closes down: drums leads, E 3.36, 8 hits, mode +1.00 - pairs in teal",
    "look": {
     "lamps": {
      "c": "indigo",
      "l": 0.38
     },
     "heads": {
-     "c": "indigo",
+     "c": "teal",
      "l": 0.27,
      "pan": 0.5,
      "tilt": 0.25
@@ -322,13 +190,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "unbuild",
+     "figure": "pairs",
      "every": {
       "beats": 2
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -370,33 +239,6 @@
    }
   },
   {
-   "id": 9,
-   "at": {
-    "bar": 9
-   },
-   "fade": 0.3,
-   "why": "build at 22.4s, E 6.50 - one lamp added at a time",
-   "look": {
-    "lamps": {
-     "c": "scarlet",
-     "l": 0.73
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "build",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.35
-   },
-   "swell": {
-    "from": 0.747,
-    "to": 0.873,
-    "curve": 1.15
-   }
-  },
-  {
    "id": 0,
    "at": {
     "second": 22.9
@@ -404,7 +246,7 @@
    "fade": 0.5,
    "look": {
     "lamps": {
-     "c": "scarlet",
+     "c": "indigo",
      "l": 0.31
     }
    },
@@ -481,35 +323,12 @@
    "why": "two beats before the entrance at 36.8s the room draws back, so the arrival has somewhere to arrive from"
   },
   {
-   "id": 12,
-   "at": {
-    "bar": 16
-   },
-   "fade": 0.12,
-   "why": "entrance at 36.8s - drums lead, E 6.13",
-   "look": {
-    "lamps": {
-     "c": "scarlet",
-     "l": 0.63
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.45,
-    "move_head": true
-   }
-  },
-  {
    "id": 13,
    "at": {
     "bar": 17
    },
    "fade": 0.35,
-   "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - unbuild in teal against teal inside",
+   "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - diverge in teal against teal inside",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -525,13 +344,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "unbuild",
+     "figure": "diverge",
      "every": {
       "hits": 2
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     },
     {
      "on": "inner",
@@ -549,7 +369,7 @@
     "bar": 19
    },
    "fade": 0.35,
-   "why": "bars 17-20, the phrase closes down: drums leads, E 6.10, 6 hits, mode +1.00 - unbuild in teal against teal inside",
+   "why": "bars 17-20, the phrase closes down: drums leads, E 6.10, 6 hits, mode +1.00 - diverge in teal against teal inside",
    "look": {
     "lamps": {
      "c": "teal",
@@ -565,13 +385,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "unbuild",
+     "figure": "diverge",
      "every": {
       "hits": 2
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     },
     {
      "on": "inner",
@@ -589,7 +410,7 @@
     "bar": 21
    },
    "fade": 0.35,
-   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - unbuild in teal",
+   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - diverge in teal",
    "look": {
     "lamps": {
      "c": "teal",
@@ -605,13 +426,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "unbuild",
+     "figure": "diverge",
      "every": {
       "hits": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },

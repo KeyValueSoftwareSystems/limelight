@@ -73,6 +73,13 @@ FAMILY_TEMPERATURE = {
     "voices": ("indigo", "blood", "crimson", "scarlet"),
     "drums": ("blood", "crimson", "scarlet", "ember"),
 }
+MOVEMENT = {
+    "travel": ("sweep", "comet", "wave"),
+    "trade": ("alternate", "pairs", "hocket"),
+    "grow": ("build", "cascade", "unbuild"),
+    "meet": ("converge", "diverge", "split"),
+    "pass": ("handover", "bounce", "rotate"),
+}
 COUNTER = {
     "brass": "indigo", "strings": "amber", "guitars": "teal", "keys": "ember",
     "winds": "violet", "voices": "indigo", "drums": "teal",
@@ -350,6 +357,30 @@ def author(song, out_path=None):
     total_inst = dict(seen)
 
     sig_colour = {}
+    labels_in_order = []
+    for sx in sections:
+        lab = sx.get("label", "?")
+        if lab not in labels_in_order:
+            labels_in_order.append(lab)
+    fam_names = list(MOVEMENT)
+    sig_move = {}
+    for idx, lab in enumerate(labels_in_order):
+        bars_here = [rr for rr in rows if any(
+            sx.get("label", "?") == lab and sx["start"] - step <= rr["t"] < sx["end"]
+            for sx in sections)]
+        dens_here = 0.0
+        if bars_here:
+            dens_here = sum(
+                sum(1 for t, i in hits if rr["t"] <= t < rr["end"] and i >= 0.28)
+                for rr in bars_here) / len(bars_here)
+        pref = ["grow", "travel", "pass", "trade", "meet"] if dens_here < 4 else \
+               ["trade", "pass", "meet", "travel", "grow"]
+        for cand in pref:
+            if cand not in sig_move.values():
+                sig_move[lab] = cand
+                break
+        else:
+            sig_move[lab] = fam_names[idx % len(fam_names)]
 
     phrases = []
     for sx in sections:
@@ -584,8 +615,21 @@ def author(song, out_path=None):
             mid = ["pairs", "converge", "diverge", "split", "handover", "wave"]
             calm = ["sweep", "bounce", "comet", "converge"]
             climb = ["build", "cascade", "converge", "build"]
-            pick = climb if in_build else (busy if dens >= 6 else mid if dens >= 3 else calm)
-            fig = ph["fig"] if ph is not None else pick[len(cues) % len(pick)]
+            lab_here = sec_of.get(bar, (None, 1))[0]
+            fam = MOVEMENT.get(sig_move.get(lab_here, ""))
+            direction = ph["dir"] if ph is not None else "holds"
+            reverse_it = False
+            if fam:
+                if direction == "rises":
+                    fig = fam[0]
+                elif direction == "falls":
+                    fig = fam[min(1, len(fam) - 1)]
+                    reverse_it = True
+                else:
+                    fig = fam[min(2, len(fam) - 1)]
+            else:
+                pick = busy if dens >= 6 else mid if dens >= 3 else calm
+                fig = pick[len(cues) % len(pick)]
             deep = 0.22 if level < 0.38 else (0.4 if dens >= 6 else 0.5)
             moves = fig in ("sweep", "bounce", "wave", "comet", "handover", "cascade")
             if in_build:
@@ -609,6 +653,8 @@ def author(song, out_path=None):
             layers = [{"on": "lamps", "figure": fig, "every": every,
                        "fill_beats": 1 if level < 0.45 else 2,
                        "low": deep, "move_head": moves}]
+            if reverse_it:
+                layers[0]["reverse"] = True
             if dens >= 5 and level > 0.4 and not in_build:
                 layers.append({"on": "inner", "figure": "hocket",
                                "every": {"hits": 3}, "low": 0.55})
@@ -758,6 +804,10 @@ def author(song, out_path=None):
     for run in runs:
         if run["a"] - last_swish < 3.0 or run["rate"] < 5.0:
             continue
+        room = min((c.get("_t", 9e9) for c in cues
+                    if c.get("_t", 0) > run["a"] + 0.05 and c.get("look")), default=9e9)
+        if room - run["a"] < 1.6:
+            continue
         prior = [c for c in cues if c.get("_t", 0) <= run["a"] + 1e-6 and c.get("look")]
         if not prior:
             continue
@@ -849,6 +899,39 @@ def author(song, out_path=None):
         w = (nxt.get("why") or "")
         if w.startswith("PEAK") or w.startswith("climax") or w.startswith("build"):
             c["swell"] = {"from": 0.72, "to": 1.0, "curve": 1.6}
+
+    def rank(c):
+        w = c.get("why") or ""
+        if not c.get("look"):
+            return 5
+        for tag in ("PEAK", "climax", "drop", "and back", "the audio falls",
+                    "pause", "exit", "breakdown", "draws back", "lands at"):
+            if tag in w:
+                return 5
+        if "the phrase" in w:
+            return 4
+        if "register_shift" in w or "entrance" in w or "spotlight" in w or "build at" in w:
+            return 3
+        if "the harmony turns" in w:
+            return 2
+        return 1
+
+    MIN_GAP = 0.95
+    cues.sort(key=lambda c: (c.get("_t", 0), -rank(c)))
+    kept = []
+    for c in cues:
+        if not kept:
+            kept.append(c)
+            continue
+        last = kept[-1]
+        if c.get("_t", 0) - last.get("_t", 0) >= MIN_GAP:
+            kept.append(c)
+            continue
+        if rank(c) > rank(last):
+            kept[-1] = c
+        elif rank(c) == rank(last) == 5:
+            kept.append(c)
+    cues = kept
 
     MOMENT_OWNED = ("PEAK", "climax", "drop", "register_shift", "breakdown",
                     "the audio falls", "draws back")
