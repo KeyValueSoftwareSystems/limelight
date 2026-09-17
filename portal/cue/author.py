@@ -497,12 +497,12 @@ def author(song, out_path=None):
         pi, pk, pn = phrase_of.get(bar, (None, 0, 1))
         ph = phrases[pi] if pi is not None else None
         if ph is not None:
-            band = (0.10 + 0.87 * (spread(ph["E"]) ** 0.85)) * arc(ph["t"])
+            band = (0.34 + 0.64 * (spread(ph["E"]) ** 0.75)) * arc(ph["t"])
             pos = pk / max(1, pn - 1) if pn > 1 else 1.0
             level = round(min(0.97, band * (ph["a0"] + (ph["a1"] - ph["a0"]) * pos)), 2)
         else:
             e = spread(r["E"])
-            level = round(min(0.99, (0.10 + 0.87 * (e**0.85)) * arc(r["t"])), 2)
+            level = round(min(0.99, (0.34 + 0.64 * (e**0.75)) * arc(r["t"])), 2)
 
         is_edge = any(abs(s["start"] - r["t"]) < step for s in sections)
         phrase_start = ph is not None and pk == 0
@@ -704,7 +704,7 @@ def author(song, out_path=None):
             if (pi or 0) % 2 == 1:
                 reverse_it = not reverse_it
 
-            deep = 0.22 if level < 0.38 else (0.4 if dens >= 6 else 0.5)
+            deep = 0.40 if level < 0.38 else (0.55 if dens >= 6 else 0.62)
             moves = want_fam in ("travel", "grow")
             if sings and want_fam == "travel":
                 every = {"notes": 1}
@@ -745,8 +745,8 @@ def author(song, out_path=None):
             span_n = max(1, hi_b - lo_b)
             p0 = (bar - lo_b) / span_n
             p1 = min(1.0, (bar + 1 - lo_b) / span_n)
-            cues[-1]["swell"] = {"from": round(0.62 + 0.38 * p0, 3),
-                                 "to": round(0.62 + 0.38 * p1, 3), "curve": 1.15}
+            cues[-1]["swell"] = {"from": round(0.82 + 0.18 * p0, 3),
+                                 "to": round(0.82 + 0.18 * p1, 3), "curve": 1.15}
         add_layers = None
         prev_fam, prev_level, prev_set = top_fam, level, here
 
@@ -873,7 +873,7 @@ def author(song, out_path=None):
             continue
         w = (nxt.get("why") or "")
         if w.startswith("PEAK") or w.startswith("climax") or w.startswith("build"):
-            c["swell"] = {"from": 0.72, "to": 1.0, "curve": 1.6}
+            c["swell"] = {"from": 0.84, "to": 1.0, "curve": 1.6}
 
     def rank(c):
         w = c.get("why") or ""
@@ -983,19 +983,32 @@ def author(song, out_path=None):
 
     n_lamps = lamp_count()
 
-    def fit_rate(fig, span_s, push=1):
+    TRAVELS_HOME = ("travel", "grow")
+
+    def fit_rate(fig, span_s, push=1, fam=None):
         steps = cycle_steps(fig, n_lamps)
         beats_in = span_s / step if step > 0 else 0
         if beats_in <= 0 or steps <= 0:
             return None
+        home = 1 if (fam in TRAVELS_HOME or FAM_OF.get(fig) in TRAVELS_HOME) else 0
         cycles = max(1, int(round(beats_in / (steps * 1.0)))) * max(1, push)
         floor_beats = max(0.55, 0.26 / step if step > 0 else 0.55)
-        while cycles > 1 and beats_in / (steps * cycles) < floor_beats:
+        while cycles > 1 and beats_in / (steps * cycles + home) < floor_beats:
             cycles -= 1
-        sb = beats_in / (steps * cycles)
-        if sb < floor_beats:
+        sb = beats_in / (steps * cycles + home)
+        if sb < floor_beats or sb > 3.0:
             return None
         return round(sb, 3), cycles
+
+    def choose_figure(span_s, want_fam, avoid, push=1):
+        order = [want_fam] + [f for f in GESTURES if f != want_fam]
+        for fam in order:
+            opts = [f for f in GESTURES[fam] if f not in avoid] or list(GESTURES[fam])
+            for fig in opts:
+                fit = fit_rate(fig, span_s, push, fam)
+                if fit:
+                    return fig, fit, fam
+        return None, None, want_fam
 
     strong = []
     if hits:
@@ -1151,15 +1164,14 @@ def author(song, out_path=None):
                 if isinstance(pl, dict):
                     prev_col = pl.get("c")
             climbing = bool(c.get("swell"))
-            fit = fit_rate(ch["figure"], bounds[1] - bounds[0])
-            if not fit:
-                for alt in ("hocket", "alternate", "converge", "pulse"):
-                    fit = fit_rate(alt, bounds[1] - bounds[0])
-                    if fit:
-                        ch["figure"] = alt
-                        ch["move_head"] = False
-                        break
-            if fit:
+            fig0, fit, fam0 = choose_figure(bounds[1] - bounds[0], here_fam, seen_recent)
+            if fig0:
+                if fig0 != ch["figure"]:
+                    ch["figure"] = fig0
+                    ch["move_head"] = fam0 in ("travel", "grow")
+                    c["why"] = (c.get("why") or "") + (
+                        " - %s instead, the only shape that finishes in %.1f bars"
+                        % (fig0, (bounds[1] - bounds[0]) / bar_s))
                 ch["every"] = {"beats": fit[0]}
                 ch["cycles"] = fit[1]
             seen_recent = (seen_recent + [ch["figure"]])[-4:]
@@ -1169,8 +1181,10 @@ def author(song, out_path=None):
                     pick_fam = "room" if k > 1 else "halves"
                 else:
                     pick_fam = fam_ring[(i + k) % len(fam_ring)]
-                opts = [f for f in GESTURES[pick_fam] if f not in seen_recent] or list(GESTURES[pick_fam])
-                nxt = opts[(i + k) % len(opts)]
+                nxt, vfit0, pick_fam = choose_figure(
+                    seg, pick_fam, seen_recent, 2 ** k if climbing else 1)
+                if not nxt:
+                    continue
                 seen_recent = (seen_recent + [nxt])[-4:]
                 var = json.loads(json.dumps({x: y for x, y in c.items() if x != "_t"}))
                 var["at"] = {"second": round(at_t, 3)}
@@ -1181,24 +1195,16 @@ def author(song, out_path=None):
                 vch["figure"] = nxt
                 vch["reverse"] = (not ch.get("reverse", False)) if k % 2 else ch.get("reverse", False)
                 vch["move_head"] = pick_fam in ("travel", "grow")
+                vch["figure"] = nxt
                 if on_hit and seg >= bar_s and not climbing:
                     for v in (var.get("look") or {}).values():
                         if isinstance(v, dict) and v.get("c"):
                             nc = shift_colour(v["c"])
                             if nc != prev_col:
                                 v["c"] = nc
-                vfit = fit_rate(nxt, seg, 2 ** k if climbing else 1)
-                if not vfit:
-                    for alt in ("hocket", "alternate", "converge", "pulse"):
-                        vfit = fit_rate(alt, seg)
-                        if vfit:
-                            nxt = alt
-                            vch["figure"] = alt
-                            vch["move_head"] = False
-                            break
-                if vfit:
-                    vch["every"] = {"beats": vfit[0]}
-                    vch["cycles"] = vfit[1]
+                vfit = vfit0
+                vch["every"] = {"beats": vfit[0]}
+                vch["cycles"] = vfit[1]
                 var["why"] = ("%s answers %s, a whole %d cycles%s"
                               % (nxt, ch["figure"], (vfit[1] if vfit else 1),
                                  (", landing on the hit at %.2fs with a new colour" % at_t)

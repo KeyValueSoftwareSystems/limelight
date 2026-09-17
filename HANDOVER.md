@@ -739,6 +739,32 @@ other dark-over-loud still fails. This is a referee change made to accept a deli
 effect, and it is the kind of change that can hide a real bug, so it was kept as narrow
 as possible.
 
+## 7q. Choose the figure from the span, not the span from the figure
+
+Amal: "if it can't complete it, it shouldn't have chosen, it must look ahead not just
+current." He is describing the order of operations, and he is right. The author used to
+pick a figure from what the music was doing, then try to find a rate that made it fit.
+When nothing fit it fell back to a short-cycle figure, but only on some paths, so a
+travel figure could still be chosen for a span it could never finish.
+
+`choose_figure(span_s, want_fam, avoid)` inverts it. The span is known first, by looking
+ahead to where the next cue lands, and only figures that complete inside it are
+candidates. The music still picks the preferred family; it no longer picks a figure the
+clock cannot honour. When the preference cannot be satisfied the cue says so in its
+`why`: "sweep instead, the only shape that finishes in 2.0 bars".
+
+**A journey has to land home, and the cycle length alone does not say that.** A travel
+figure on four lamps has a six-step cycle, `1 2 3 4 3 2`. A "complete" cycle by that
+count ends on lamp 2 and the beam never returns to lamp 1 before the figure changes,
+which is what Amal saw at 0:06 and called an incomplete handover. Travel and grow
+figures now take `cycles * steps + 1`, so a sweep runs seven steps, `1 2 3 4 3 2 1`, and
+lands where it started. 37 of 39 journeys land home; the two that do not are outro cues
+under a bar.
+
+This was a wrong definition of "complete" in the checker as much as in the author: the
+old metric reported these spans as completing, because it counted cycles rather than
+asking whether the beam got home.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the
