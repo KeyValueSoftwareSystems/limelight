@@ -13,6 +13,7 @@ import * as api from "@/lib/api";
 
 import { StagePreview } from "@/components/stage/StagePreview";
 import { RoleToggle } from "@/components/portal/RoleToggle";
+import { OperatorRail } from "@/components/editor/OperatorRail";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { TargetLine } from "@/components/stage/TargetLine";
 import { ConsolePanel } from "@/components/stage/ConsolePanel";
@@ -1013,20 +1014,26 @@ export default function StagePage() {
   return (
     <>
       <div className="flex flex-1 min-h-0 overflow-hidden bg-bg text-ink">
-        {isDesigner && (
-          <>
-            <div className="flex-none overflow-hidden" style={{ width: railW }}>
+        {/* Both rails stay mounted in both roles, at the same widths. Swapping
+            a whole rail in and out moved every column on the page, so changing
+            role read as a navigation rather than as a change of view. Only the
+            contents cross-fade. */}
+        <div className="flex-none overflow-hidden" style={{ width: railW }}>
+          <div key={role} className="h-full rail-swap">
+            {isDesigner ? (
               <Sidebar effects={effects} onRecolour={handleRecolour} />
-            </div>
-            <div
-              onPointerDown={startRail("left")}
-              role="separator"
-              aria-orientation="vertical"
-              aria-label="Resize the palette"
-              className="flex-none w-[4px] cursor-col-resize border-x border-solid border-white/[0.04] hover:border-accent/25 hover:bg-accent/[0.05] transition-colors duration-200"
-            />
-          </>
-        )}
+            ) : (
+              <OperatorRail />
+            )}
+          </div>
+        </div>
+        <div
+          onPointerDown={startRail("left")}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize the left panel"
+          className="flex-none w-[4px] cursor-col-resize border-x border-solid border-white/[0.04] hover:border-accent/25 hover:bg-accent/[0.05] transition-colors duration-200"
+        />
 
         <div
           ref={columnRef}
@@ -1060,7 +1067,7 @@ export default function StagePage() {
 
             <RoleToggle />
 
-            <RigControl onToggle={handleRigToggle} />
+            {isOperator && <RigControl onToggle={handleRigToggle} />}
 
             {isDesigner && (
               <>
@@ -1070,6 +1077,17 @@ export default function StagePage() {
                   onClick={handleGenerate}
                 >
                   {generating ? "Generating\u2026" : "Generate"}
+                </Button>
+
+                <Button
+                  variant="primary"
+                  disabled={!show || !song}
+                  onClick={() => {
+                    setSaveError(null);
+                    setSaveOpen(true);
+                  }}
+                >
+                  {showId ? "Save" : "Save show"}
                 </Button>
 
                 <div className="relative" ref={moreRef}>
@@ -1086,10 +1104,7 @@ export default function StagePage() {
                     </svg>
                   </button>
                   {moreOpen && (
-                    <div
-                      className="absolute right-0 top-[calc(100%+6px)] z-50 w-[210px] rounded-[var(--radius-md)] py-[4px] animate-scale-in"
-                      style={{ background: "linear-gradient(180deg, #1A1B2E 0%, #12131F 100%)", boxShadow: "var(--elev-popover)" }}
-                    >
+                    <div className="liquid absolute right-0 top-[calc(100%+6px)] z-50 w-[210px] rounded-[var(--radius-md)] py-[4px] animate-scale-in">
                       <input
                         ref={importInputRef}
                         type="file"
@@ -1102,26 +1117,25 @@ export default function StagePage() {
                           setMoreOpen(false);
                         }}
                       />
-                      <button type="button" onClick={() => { importInputRef.current?.click(); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-accent/[0.08] hover:text-ink transition-all duration-150 rounded-[var(--radius-sm)] m-[2px] mx-[4px] w-[calc(100%-8px)]">
+                      <button
+                        type="button"
+                        onClick={() => { importInputRef.current?.click(); }}
+                        className="block w-[calc(100%-8px)] mx-[4px] text-left px-[10px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-white/[0.05] hover:text-ink transition-colors duration-150 rounded-[var(--radius-sm)]"
+                      >
                         Import show file
                       </button>
-                      <button type="button" disabled={!show || !song} onClick={() => { handleDownload(); setMoreOpen(false); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-accent/[0.08] hover:text-ink transition-all duration-150 rounded-[var(--radius-sm)] disabled:opacity-35 disabled:cursor-default m-[2px] mx-[4px] w-[calc(100%-8px)]">
+                      <button
+                        type="button"
+                        disabled={!show || !song}
+                        onClick={() => { handleDownload(); setMoreOpen(false); }}
+                        className="block w-[calc(100%-8px)] mx-[4px] text-left px-[10px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-white/[0.05] hover:text-ink transition-colors duration-150 rounded-[var(--radius-sm)] disabled:opacity-35 disabled:cursor-default"
+                      >
                         Download show file
                       </button>
                     </div>
                   )}
                 </div>
 
-                <Button
-                  variant="primary"
-                  disabled={!show || !song}
-                  onClick={() => {
-                    setSaveError(null);
-                    setSaveOpen(true);
-                  }}
-                >
-                  {showId ? "Save" : "Save show"}
-                </Button>
               </>
             )}
 
@@ -1222,16 +1236,18 @@ export default function StagePage() {
         />
 
         <aside className="flex-none overflow-hidden" style={{ width: asideW }}>
-          {isOperator ? (
-            <div className="h-full overflow-y-auto">
-              <ConsolePanel />
-              <RigPanel />
-              <LimitsPanel />
-              <StatePanel />
-            </div>
-          ) : (
-            <ChatPanel />
-          )}
+          <div key={role} className="h-full rail-swap">
+            {isOperator ? (
+              <div className="h-full overflow-y-auto">
+                <ConsolePanel />
+                <RigPanel />
+                <LimitsPanel />
+                <StatePanel />
+              </div>
+            ) : (
+              <ChatPanel />
+            )}
+          </div>
         </aside>
       </div>
 

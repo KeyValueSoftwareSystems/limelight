@@ -760,3 +760,72 @@ button:focus:not(:focus-visible) {
 @media (prefers-reduced-motion: reduce) {
   .progress-working { animation: none; }
 }
+
+/* Changing role changes what is IN the rails, never their geometry, so the swap
+   is a cross-fade rather than a relayout. */
+.rail-swap { animation: rail-swap var(--dur-panel) var(--ease) both; }
+@keyframes rail-swap {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail-swap { animation: none; }
+}
+
+/* Faders. A console fader is a slot with a cap in it: the track is recessed,
+   the travelled part is lit, and the cap is a raised key that presses. The
+   native control is a bright blue system widget and belonged to no design. */
+input[type="range"].fader {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 18px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"].fader::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--accent) 0%,
+    var(--accent) var(--fill, 50%),
+    rgba(0, 0, 0, 0.45) var(--fill, 50%),
+    rgba(0, 0, 0, 0.45) 100%
+  );
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+input[type="range"].fader::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+input[type="range"].fader::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+input[type="range"].fader::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #2F3542 0%, #1D2129 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 1px 2px rgba(0, 0, 0, 0.55),
+    0 2px 5px rgba(0, 0, 0, 0.35);
+}
+input[type="range"].fader::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #2F3542 0%, #1D2129 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+input[type="range"].fader:active::-webkit-slider-thumb {
+  background: linear-gradient(180deg, #1D2129 0%, #262C36 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}

@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { User, ChevronDown } from "lucide-react";
 import { TabNav } from "./TabNav";
-import { RigControl } from "./RigControl";
 import { usePortalStore } from "@/store/portal";
 
 interface TopbarProps {
@@ -90,7 +89,6 @@ function Beam() {
 }
 
 export function Topbar({ onRigToggle }: TopbarProps) {
-  const role = usePortalStore((s) => s.role);
 
   return (
     <header className="liquid liquid-flush flex-none flex items-center gap-[16px] px-[20px] h-[62px] z-40">
@@ -108,8 +106,6 @@ export function Topbar({ onRigToggle }: TopbarProps) {
       <TabNav />
 
       <span className="flex-1" />
-
-      {role === "venue" && <RigControl onToggle={onRigToggle} />}
 
       <IdentityControl />
     </header>
