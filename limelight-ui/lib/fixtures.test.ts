@@ -240,3 +240,20 @@ test("meanColour weights by brightness", () => {
   assert.deepEqual(c, [1, 0, 0]);
   assert.equal(meanColour([{ k: 0, rgb: [1, 1, 1] }]), null);
 });
+
+/* placeFixtures and drawPar are shared by EVERY rig. The arch band and the halo
+   cap are safe to land only because these pin what a line rig does. */
+test("REGRESSION: a line rig keeps the old screen band", () => {
+  const DESK = [
+    { id: "par_1", type: "par7", address: 1, at: [-1, 0, 2.4] as [number, number, number] },
+    { id: "par_8", type: "par7", address: 8, at: [-0.5, 0, 2.4] as [number, number, number] },
+    { id: "par_15", type: "par7", address: 15, at: [0.5, 0, 2.4] as [number, number, number] },
+    { id: "par_22", type: "par7", address: 22, at: [1, 0, 2.4] as [number, number, number] },
+    { id: "head", type: "head13", address: 29, at: [0, 0.3, 2.6] as [number, number, number] },
+  ];
+  const p = placeFixtures({ fixtures: DESK } as never);
+  const ys = p.lamps.map((l) => l.y);
+  assert.ok(Math.min(...ys) >= 0.38, `top lamp at ${Math.min(...ys)}`);
+  assert.ok(Math.max(...ys) <= 0.82, `bottom lamp at ${Math.max(...ys)}`);
+  assert.ok(p.lamps.every((l) => l.spacing > 0 && l.spacing <= 1));
+});

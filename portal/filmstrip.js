@@ -29,7 +29,13 @@ function hueName(r, g, b) {
 function strip(rigName, width) {
   width = width || 32;
   const venueDir = path.join(HERE, "venues", rigName);
-  const manifest = JSON.parse(fs.readFileSync(path.join(venueDir, "manifest.json"), "utf8"));
+  let manifest;
+  try {
+    manifest = JSON.parse(fs.readFileSync(path.join(venueDir, "manifest.json"), "utf8"));
+  } catch (e) {
+    console.error(`no effect library for rig "${rigName}": expected ${path.join(venueDir, "manifest.json")}`);
+    process.exit(3);
+  }
   const bpm = 120, fps = 40;
   const ctx = { fps, bpm, layout: manifest, restColour: [1, 0.75, 0.35],
                 beatAt: (t) => (t || 0) * bpm / 60 };

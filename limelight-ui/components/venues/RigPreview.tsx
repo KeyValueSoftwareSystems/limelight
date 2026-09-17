@@ -10,6 +10,8 @@ interface RigPreviewProps {
   /** dims the whole canvas for a venue you cannot design for */
   dimmed?: boolean;
   className?: string;
+  /** "line" | "arch" — how the rig is laid out, from the layout file */
+  geometry?: string | null;
 }
 
 /**
@@ -19,7 +21,7 @@ interface RigPreviewProps {
  * screen, it paints at the card quality tier, and it honours a reduced-motion
  * preference by painting one frame and stopping.
  */
-export function RigPreview({ fixtures, dimmed, className = "" }: RigPreviewProps) {
+export function RigPreview({ fixtures, dimmed, className = "", geometry }: RigPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -38,8 +40,8 @@ export function RigPreview({ fixtures, dimmed, className = "" }: RigPreviewProps
       ground(ctx, W, H);
       return;
     }
-    paintStage(ctx, demoStates(fixtures, t) as never, W, H, dpr, { t, quality: "card" });
-  }, [fixtures]);
+    paintStage(ctx, demoStates(fixtures, t, geometry) as never, W, H, dpr, { t, quality: "card" });
+  }, [fixtures, geometry]);
 
   const size = useCallback(() => {
     const cv = canvasRef.current;

@@ -11,6 +11,7 @@ import type {
 } from "./types";
 import { GAMMA, level, wheelAt, PAN_CENTRE, PAN_DEG_PER_DMX, TILT_WALL, TILT_WALL_EL, TILT_DEG_PER_DMX, DEG } from "./dmx.ts";
 import { profileOf, moves, type Profile } from "./profiles.ts";
+import { groupStructures } from "./structures.ts";
 
 /* ── placement ───────────────────────────────────────────────────────────────
    A layout's `at` is [x, depth, height] in metres in the audience frame: +x is
@@ -47,7 +48,26 @@ export function placeFixtures(show: Show | null): FixturePlacement {
   const flatDepth = D.span < 0.01;
   const flatHeight = H.span < 0.01;
 
-  const lamps: LampPosition[] = fx.map((f: Fixture) => {
+  /* HOW MUCH OF THE SCREEN THE RIG GETS.
+     The band used to be a constant 0.40 whatever the rig was, so a 7.8 m portal
+     was squashed into the same strip as a 0.2 m desk bar — which is why every
+     rig read as a row of lights near the top. An arch rig gets the frame, so it
+     reads as a portal standing around the stage; a line rig keeps the old
+     constants exactly, because every existing layout is tuned against them. */
+  const arch = show?.geometry === "arch";
+  const yTop = arch ? 0.06 : 0.40;
+  const yBase = arch ? 0.88 : 0.80;
+
+  /* WHICH STRUCTURE EACH FIXTURE IS ON, decided once, here, from the real world
+     positions. The renderer must not work this out again from screen
+     coordinates: screen y folds in depth and the flat-rig nudge, so it would
+     group differently from Stage3D, which reads the same fixtures in metres. */
+  const byIndex = new Map<number, { key: string; kind: "bar" | "curve" }>();
+  for (const g of groupStructures(fx)) {
+    for (const i of g.members) byIndex.set(i, { key: g.key, kind: g.kind });
+  }
+
+  const lamps: LampPosition[] = fx.map((f: Fixture, i: number) => {
     const prof = profileOf(f.type);
     const xm = f.at?.[0] ?? 0;
     const depth = flatDepth ? 0 : ((f.at?.[1] ?? 0) - D.lo) / D.span;
@@ -56,7 +76,7 @@ export function placeFixtures(show: Show | null): FixturePlacement {
     /* nearer the audience = lower on screen and larger */
     const perspective = 0.86 + 0.14 * depth;
     const x = 0.5 + ((L_EDGE + ((xm - X.lo) / X.span) * (R_EDGE - L_EDGE)) - 0.5) * perspective;
-    const y = 0.80 - 0.40 * height + 0.06 * depth
+    const y = yBase - (yBase - yTop) * height + 0.06 * depth
       - (flatHeight && flatDepth ? 0.02 * Math.abs(x - 0.5) * 2 : 0);
 
     return {
@@ -69,8 +89,42 @@ export function placeFixtures(show: Show | null): FixturePlacement {
       depth,
       height,
       scale: 0.72 + 0.46 * depth,
+      structureKey: byIndex.get(i)?.key ?? null,
+      structureKind: byIndex.get(i)?.kind ?? null,
+      spacing: 1,                       // filled in below, once every x,y is known
     };
   });
+
+  /* HOW CLOSE THE NEAREST OTHER LAMP IS, in screen units.
+     renderer.ts caps a lamp's halo at a multiple of this. A par5 at 60 degrees
+     has a halo radius of ~0.99 canvas heights at full — one lamp covers the
+     frame, which is right for a four-lamp desk rig and is a white field once
+     twenty-four of them blend additively. exposure.ts scales alpha by density
+     but never touches radius, so the cap has to live here, where the geometry
+     is.
+
+     THE CAP IS OPT-IN PER RIG, declared by `geometry`, exactly like the screen
+     band above — and for the same reason: every existing layout is tuned
+     against the uncapped radius. It was tempting to say "on a sparse rig the
+     gap is large so the cap never binds", but that is measurably false:
+     club16-2head packs 16 pars at 0.45 m centres, giving a nearest-neighbour
+     gap of 0.049 — DENSER than the arches' 0.093 — so a flat cap bound on all
+     18 of its lamps and on 4 of arc4-head's 5. Leaving `spacing` at 1 for a
+     line rig makes the cap a no-op there by construction rather than by luck.
+
+     A future dense line rig that wants the cap asks for it by declaring its
+     geometry; nothing here has to guess on its behalf. */
+  if (arch) {
+    for (let i = 0; i < lamps.length; i++) {
+      let best = Infinity;
+      for (let j = 0; j < lamps.length; j++) {
+        if (i === j) continue;
+        const d = Math.hypot(lamps[i].x - lamps[j].x, lamps[i].y - lamps[j].y);
+        if (d < best) best = d;
+      }
+      lamps[i].spacing = Number.isFinite(best) ? Math.max(0.005, best) : 1;
+    }
+  }
 
   /* draw back-to-front so a near truss overlaps a far one */
   lamps.sort((a, b) => a.depth - b.depth);

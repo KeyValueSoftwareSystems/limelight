@@ -21,6 +21,7 @@ import json
 import mimetypes
 import os
 import shutil
+import re
 import subprocess
 import sys
 import socket
@@ -157,6 +158,74 @@ def footprint_of(type_):
     return (p or {}).get("footprint", 7)
 
 
+VENUES_DIR = os.path.join(HERE, "venues")
+
+
+def _render_width(rig, effect):
+    """Call one effect module and return the width of the frame it produces.
+
+    THIS IS THE ONLY CHECK THAT WORKS. portal/venues/keycode-arena/ is a
+    byte-for-byte copy of club16-2head whose manifest honestly declares 488
+    channels, matching its layout exactly -- the lie lives inside its helpers.js,
+    which emits 138. Comparing declarations passes it; running a module does not.
+
+    checklists/limelight.rig.md states the standard this follows: "checked by
+    behaviour, not by reading the source, because a variable can exist and do
+    nothing."
+    """
+    mod = os.path.join(VENUES_DIR, rig, effect + ".js")
+    if not os.path.isfile(mod):
+        return None
+    # process.stdout.write of a STRING, not console.log of a number: node
+    # colourises inspected numbers, so console.log emitted "\x1b[33m41\x1b[39m"
+    # and int() threw on every rig -- which read as "no rig is live".
+    script = ("const m=require(process.argv[1]);"
+              "const r=m({},{bpm:120,fps:40});"
+              "process.stdout.write(String((r.frames&&r.frames[0]||[]).length));")
+    try:
+        r = subprocess.run(["node", "-e", script, mod],
+                           capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if r.returncode != 0:
+        return None
+    try:
+        return int(re.sub(r"\x1b\[[0-9;]*m", "", r.stdout).strip())
+    except ValueError:
+        return None
+
+
+@functools.lru_cache(maxsize=32)
+def rig_live(rig, width):
+    """True when this rig's effect library can actually be played at `width`.
+
+    Four things must hold, and the fourth is the one that matters:
+      1. portal/venues/<rig>/manifest.json exists and parses
+      2. its layout_file resolves under readers/lights/
+      3. every id in supported_effects has a module file on disk
+      4. a probe module RENDERS at the rig's own channel width
+
+    Checks 1-3 are cheap and catch keycode-basic, which has no library at all.
+    Only check 4 catches keycode-arena, whose declarations are all truthful.
+    """
+    d = os.path.join(VENUES_DIR, rig)
+    try:
+        with open(os.path.join(d, "manifest.json")) as fh:
+            man = json.load(fh)
+    except (OSError, ValueError):
+        return False
+    lf = man.get("layout_file")
+    if not lf or not os.path.isfile(os.path.join(LAYOUTS_DIR, lf)):
+        return False
+    supported = man.get("supported_effects") or []
+    if not supported:
+        return False
+    if not all(os.path.isfile(os.path.join(d, e + ".js")) for e in supported):
+        return False
+    probe = "wash" if "wash" in supported else supported[0]
+    return _render_width(rig, probe) == width
+
+
 def layouts():
     """Every rig this box can render, newest API first: layouts.js is the
     authority on what a layout is, so this only lists the files it would accept."""
@@ -178,6 +247,7 @@ def layouts():
         # a count of kinds cannot be drawn. Positions only; nothing here is secret,
         # and a layout is already public over /api/layouts.
         shown = [{"id": f.get("id"), "type": f.get("type"), "at": f.get("at"),
+                  "group": f.get("group"),
                   "address": f.get("address"), "universe": f.get("universe", 0)}
                  for f in fx]
         prof = profiles()
@@ -194,6 +264,7 @@ def layouts():
                                      "gdtf": p.get("gdtf")}
                                  for t, p in prof.items()
                                  if t in kinds},
+                    "live": rig_live(doc.get("rig") or fn[:-len(".layout.json")], width),
                     "default": fn == DEFAULT_LAYOUT})
     return out
 
@@ -392,7 +463,12 @@ class Venues:
     @classmethod
     def all(cls):
         d = cls._doc()
-        known = {r["file"] for r in layouts()}
+        # A rig is KNOWN when its layout parses AND its effect library actually
+        # renders at that layout's width. The old test -- "the .layout.json
+        # exists" -- has never once fired: all five exist. The thing that decides
+        # whether a pick works is portal/venues/<rig>/, and nothing checked it,
+        # so picking keycode-basic died with a raw ENOENT at bake time.
+        known = {r["file"] for r in layouts() if r.get("live")}
         out = []
         for v in d.get("venues", []):
             lay = [l for l in v.get("layouts", []) if l.get("file") in known]

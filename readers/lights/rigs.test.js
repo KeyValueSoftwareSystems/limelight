@@ -195,6 +195,95 @@ function tick(layout, intents) {
   fs.rmSync(tmp, { recursive: true, force: true });
 }
 
+/* ---- halo-portal: the concert portal rig ------------------------------------ */
+{
+  const HALO = path.join(__dirname, "halo-portal.layout.json");
+  const L = JSON.parse(fs.readFileSync(HALO, "utf8"));
+  const by = t => L.fixtures.filter(f => f.type === t);
+
+  ok("every fixture names a device type that has a driver",
+     L.fixtures.every(f => { try { return !!drivers.forType(f.type); } catch (e) { return false; } }),
+     [...new Set(L.fixtures.map(f => f.type))].join(","));
+
+  ok("the concert count: 24 par5, 4 pixelbar24, 6 spot29, 6 wash12, 6 blinder1, 2 strobe3, 2 laser8",
+     by("par5").length === 24 && by("pixelbar24").length === 4 &&
+     by("spot29").length === 6 && by("wash12").length === 6 &&
+     by("blinder1").length === 6 && by("strobe3").length === 2 &&
+     by("laser8").length === 2 && L.fixtures.length === 50,
+     String(L.fixtures.length) + " fixtures");
+
+  const spans = L.fixtures
+    .map(f => ({ id: f.id, a: f.address, b: f.address + drivers.forType(f.type).footprint - 1 }))
+    .sort((x, y) => x.a - y.a);
+  const overlap = spans.filter((s, i) => i > 0 && s.a <= spans[i - 1].b).map(s => s.id);
+  ok("no two fixtures share a DMX channel", overlap.length === 0, overlap.join(","));
+  ok("the whole rig is inside ONE 512-channel universe",
+     spans[0].a >= 1 && spans[spans.length - 1].b <= 512 && L.fixtures.every(f => f.universe === 0),
+     `1..${spans[spans.length - 1].b}`);
+  ok("the channel count is what the drivers say it is",
+     spans[spans.length - 1].b === 490, String(spans[spans.length - 1].b));
+
+  ok("it states its frame of reference and its arch geometry",
+     L.frame === "audience" && L.geometry === "arch", String(L.geometry));
+
+  /* Each arch satisfies the parametric rule it was generated from, to a
+     millimetre, and is mirror-symmetric about centre. Checking the RULE rather
+     than a table of numbers is what makes the generator the source of truth. */
+  const Z0 = 1.2;
+  for (const [g, R, H, y, lo, hi, n] of [
+    ["arch_a", 7.0, 9.0, 3.0, 18, 162, 10],
+    ["arch_b", 5.6, 7.6, 1.5, 22.5, 157.5, 8],
+    ["arch_c", 4.2, 6.2, 0.0, 27, 153, 6],
+  ]) {
+    const arc = L.fixtures.filter(f => f.group === g);
+    ok(`${g} has ${n} pars, all at depth ${y}`,
+       arc.length === n && arc.every(f => Math.abs(f.at[1] - y) < 1e-9), String(arc.length));
+    const onRule = arc.every((f, i) => {
+      const th = ((lo + ((hi - lo) * i) / (n - 1)) * Math.PI) / 180;
+      return Math.abs(f.at[0] - R * Math.cos(th)) < 1e-3 &&
+             Math.abs(f.at[2] - (Z0 + (H - Z0) * Math.sin(th))) < 1e-3;
+    });
+    ok(`${g} sits on x=R*cos(t), z=${Z0}+(H-${Z0})*sin(t) to the millimetre`, onRule);
+    const xs = arc.map(f => f.at[0]);
+    ok(`${g} is mirror-symmetric about centre`,
+       xs.every((x, i) => Math.abs(x + xs[xs.length - 1 - i]) < 1e-3), JSON.stringify(xs));
+    ok(`${g} rises to its apex and comes back down`,
+       arc[0].at[2] < arc[Math.floor(n / 2)].at[2] && arc[n - 1].at[2] < arc[Math.floor(n / 2)].at[2]);
+  }
+
+  ok("the arches nest: A is widest and tallest, C is narrowest and shortest",
+     Math.max(...L.fixtures.filter(f => f.group === "arch_a").map(f => f.at[0])) >
+     Math.max(...L.fixtures.filter(f => f.group === "arch_b").map(f => f.at[0])) &&
+     Math.max(...L.fixtures.filter(f => f.group === "arch_b").map(f => f.at[0])) >
+     Math.max(...L.fixtures.filter(f => f.group === "arch_c").map(f => f.at[0])));
+
+  /* groupsOf's "pars" bucket is CAPABILITY-based -- colour and level and not
+     move -- so it holds the 4 pixelbar24 as well as the 24 par5: 28 fixtures,
+     split 14/14. That is not something to route around. The property
+     club16-2head's note cares about is that NO MIRROR PAIR IS SPLIT, which
+     needs the bucket to be a multiple of four AND symmetric about centre. Both
+     hold here, and the pixelbars are placed symmetrically so they keep holding
+     -- which is exactly what these three checks defend. */
+  const g = groupsOf(L);
+  ok("groupsOf sees 28 colour-and-level fixtures: the 24 arch pars plus the 4 pixelbars",
+     g.pars.length === 28, String(g.pars.length));
+  ok("it splits them 14/14 -- a multiple of four, so no mirror pair is broken",
+     g.inner.length === 14 && g.outer.length === 14, `${g.inner.length}/${g.outer.length}`);
+  const symmetric = a => {
+    const xs = a.map(p => p.x).sort((u, v) => u - v);
+    return xs.every((x, i) => Math.abs(x + xs[xs.length - 1 - i]) < 1e-3);
+  };
+  ok("inner and outer are each mirror-symmetric about centre",
+     symmetric(g.inner) && symmetric(g.outer));
+
+  ok("it declares its laser zones, so preflight can offer laser_sweep",
+     L.limits && L.limits.laser_zones === 2, String(L.limits && L.limits.laser_zones));
+  ok("it carries the mover slew limits", L.limits.max_pan_per_frame === 7 && L.limits.max_tilt_per_frame === 7);
+
+  const en = enumerate(L, { palette: [] });
+  ok("the rig enumerates a non-empty effect library", Array.isArray(en) ? en.length > 0 : Object.keys(en).length > 0);
+}
+
 for (const [pass, name, detail] of out)
   console.log(`  ${pass ? "pass" : "FAIL"}  ${name}${detail ? "   -- " + detail : ""}`);
 const bad = out.filter(r => !r[0]).length;

@@ -7,7 +7,13 @@ const HERE = __dirname;
 
 function measure(rigName) {
   const venueDir = path.join(HERE, "venues", rigName);
-  const manifest = JSON.parse(fs.readFileSync(path.join(venueDir, "manifest.json"), "utf8"));
+  let manifest;
+  try {
+    manifest = JSON.parse(fs.readFileSync(path.join(venueDir, "manifest.json"), "utf8"));
+  } catch (e) {
+    console.error(`no effect library for rig "${rigName}": expected ${path.join(venueDir, "manifest.json")}`);
+    process.exit(3);
+  }
   const bpm = 120;
   const fps = 40;
   const ctx = {
