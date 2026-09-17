@@ -289,6 +289,17 @@ def author(song, out_path=None):
             }
         )
 
+    rising = set()
+    for k in range(len(rows)):
+        run = 0
+        j = k
+        while j + 1 < len(rows) and rows[j + 1]["E"] >= rows[j]["E"] * 0.92:
+            j += 1
+            run += 1
+        if run >= 3 and rows[j]["E"] >= rows[k]["E"] * 1.25:
+            for q in range(k, j + 1):
+                rising.add(rows[q]["bar"])
+
     prev_fam = None
     prev_level = 0.0
     prev_set = set()
@@ -411,52 +422,72 @@ def author(song, out_path=None):
                 "pan": 0.5,
                 "tilt": round(0.22 + 0.2 * ((bar % 4) / 3.0), 2),
             }
+            in_build = bar in rising
             busy = ["handover", "wave", "hocket", "cascade", "comet", "alternate"]
             mid = ["pairs", "converge", "diverge", "split", "handover", "wave"]
             calm = ["sweep", "bounce", "comet", "converge"]
-            pick = busy if dens >= 6 else mid if dens >= 3 else calm
+            climb = ["build", "cascade", "converge", "build"]
+            pick = climb if in_build else (busy if dens >= 6 else mid if dens >= 3 else calm)
             fig = pick[len(cues) % len(pick)]
             deep = 0.22 if level < 0.38 else (0.4 if dens >= 6 else 0.5)
             moves = fig in ("sweep", "bounce", "wave", "comet", "handover", "cascade")
-            layers = [{"on": "lamps", "figure": fig,
-                       "every": {"hits": 1 if dens >= 3 else 2},
+            if in_build:
+                every = {"beats": 2}
+            elif dens >= 9:
+                every = {"hits": 3}
+            elif dens >= 5:
+                every = {"hits": 2}
+            elif dens >= 3:
+                every = {"hits": 1}
+            else:
+                every = {"hits": 2}
+            layers = [{"on": "lamps", "figure": fig, "every": every,
                        "fill_beats": 1 if level < 0.45 else 2,
                        "low": deep, "move_head": moves}]
-            if dens >= 5 and level > 0.4:
+            if dens >= 5 and level > 0.4 and not in_build:
                 layers.append({"on": "inner", "figure": "hocket",
-                               "every": {"hits": 2}, "low": 0.55,
+                               "every": {"hits": 3}, "low": 0.55,
                                "c": counter})
             chase = None
             fade = 0.35 if not fam_changed else 0.15
-            why = "bar %d: %s leads, E %.2f, %d hits, mode %s - %s in %s%s" % (
-                bar, top_fam, r["E"], dens,
+            if in_build:
+                fade = 0.6
+            why = "bar %d%s: %s leads, E %.2f, %d hits, mode %s - %s in %s%s" % (
+                bar, " (climbing)" if in_build else "",
+                top_fam, r["E"], dens,
                 ("%+.2f" % mode) if mode is not None else "?", fig, main,
                 (" against %s inside" % counter) if (split_look or len(layers) > 1) else "")
             add_layers = layers
 
         add(bar, fade, look, chase, why, add_layers)
+        if (bar in rising and cues[-1].get("look")
+                and kind not in ("peak", "climax", "drop", "pause", "exit", "spotlight", "breakdown")):
+            run = sorted(q for q in rising if abs(q - bar) < 12)
+            lo_b, hi_b = (min(run), max(run)) if run else (bar, bar)
+            span_n = max(1, hi_b - lo_b)
+            p0 = (bar - lo_b) / span_n
+            p1 = min(1.0, (bar + 1 - lo_b) / span_n)
+            cues[-1]["swell"] = {"from": round(0.62 + 0.38 * p0, 3),
+                                 "to": round(0.62 + 0.38 * p1, 3), "curve": 1.15}
         add_layers = None
         prev_fam, prev_level, prev_set = top_fam, level, here
 
     for a, b, depth in holes:
         if a < 0.4:
             continue
-        prior = [c for c in cues if c.get("_t", 0) <= a + 1e-6]
+        prior = [c for c in cues if c.get("_t", 0) <= a + 1e-6 and c.get("look")]
         cues.append({"id": 0, "at": {"second": round(a, 3)}, "_t": a, "fade": 0.0,
                      "look": {},
                      "why": "the audio falls to %d%% of its median for %.2fs - a real hole, so the room goes with it"
                             % (round(depth * 100), b - a)})
         if prior:
-            back = dict(prior[-1])
+            back = json.loads(json.dumps({k: v for k, v in prior[-1].items() if k != "_t"}))
             back["at"] = {"second": round(b, 3)}
             back["_t"] = b
             back["fade"] = 0.06
             back["why"] = "and back, the instant the audio returns"
             cues.append(back)
     cues.sort(key=lambda c: c.get("_t", 0))
-    for n, c in enumerate(cues):
-        c["id"] = n + 1
-        c.pop("_t", None)
 
     prev_mode = None
     for e in emo:
@@ -492,9 +523,16 @@ def author(song, out_path=None):
         if col == was:
             continue
         look = json.loads(json.dumps(base.get("look") or {}))
+        e_here = row["E"] / Emax
+        lvl_here = round(min(0.97, (0.12 + 0.80 * (e_here ** 0.8)) * arc(row["t"])), 2)
         for k, v in look.items():
-            if isinstance(v, dict) and v.get("c") == was:
+            if not isinstance(v, dict):
+                continue
+            if v.get("c") == was:
                 v["c"] = col
+            if v.get("l") is not None:
+                share = 1.0 if k in ("lamps", "outer") else (0.8 if k == "inner" else 0.7)
+                v["l"] = round(min(0.97, lvl_here * share), 2)
         nc = {"id": 0, "at": {"second": round(t, 3)}, "_t": t, "fade": 0.55,
               "look": look,
               "why": "the harmony turns here - mode %+.2f, %s. Colour moves to %s on the chord change"
@@ -505,18 +543,43 @@ def author(song, out_path=None):
             nc["chase"] = json.loads(json.dumps(base["chase"]))
         cues.append(nc)
     cues.sort(key=lambda c: c.get("_t", 0))
+    for n, c in enumerate(cues):
+        c["id"] = n + 1
 
     accents = []
-    strong = sorted(hits, key=lambda h: -h[1])[:60]
     hole_spans = [(a, b) for a, b, _ in holes]
-    for t, inten in sorted(strong):
-        if inten < 0.42:
+    by_bar = {}
+    for t, inten in hits:
+        row = None
+        for rr in rows:
+            if rr["t"] <= t < rr["end"]:
+                row = rr
+                break
+        if row is None:
+            continue
+        cur = by_bar.get(row["bar"])
+        if cur is None or inten > cur[1]:
+            by_bar[row["bar"]] = (t, inten, row)
+    last_t = -9.0
+    for bar in sorted(by_bar):
+        t, inten, row = by_bar[bar]
+        if inten < 0.34:
             continue
         if any(a - 0.1 <= t <= b + 0.1 for a, b in hole_spans):
             continue
+        if t - last_t < 0.62:
+            continue
+        last_t = t
+        climbing = bar in rising
+        amp = min(1.0, 0.5 + inten * 0.6)
+        if climbing:
+            run = [q for q in sorted(rising) if abs(q - bar) < 12]
+            if run:
+                pos = (bar - min(run)) / max(1, (max(run) - min(run)))
+                amp = min(1.0, 0.45 + 0.5 * pos + inten * 0.25)
         group = "lamps" if inten >= 0.6 else ("outer" if len(accents) % 2 else "inner")
-        accents.append({"t": round(t, 3), "l": round(min(1.0, 0.55 + inten * 0.6), 2),
-                        "decay": 0.18 if inten >= 0.6 else 0.14,
+        accents.append({"t": round(t, 3), "l": round(amp, 2),
+                        "decay": 0.2 if inten >= 0.6 else 0.15,
                         "on": group, "c": "bone" if inten >= 0.7 else "saffron"})
 
     for n, c in enumerate(cues):
@@ -526,6 +589,9 @@ def author(song, out_path=None):
         w = (nxt.get("why") or "")
         if w.startswith("PEAK") or w.startswith("climax") or w.startswith("build"):
             c["swell"] = {"from": 0.72, "to": 1.0, "curve": 1.6}
+
+    for c in cues:
+        c.pop("_t", None)
 
     doc = {
         "schema": "limelight.cuelist/1",
