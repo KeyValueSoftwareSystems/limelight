@@ -57,19 +57,44 @@ function applyChase(rig, base, chase, step, palette) {
     .reduce((acc, k) => acc.concat(E.expandTargets(rig, k)), []);
   if (!ids.length) return base;
   const figure = E.FIGURES[chase.figure] || E.FIGURES.alternate;
-  const lit = new Set(figure(ids, step));
+  const res = figure(ids, step);
+  const weights = {};
+  if (Array.isArray(res)) {
+    const lit = new Set(res);
+    for (const id of ids) weights[id] = lit.has(id) ? 1 : 0;
+  } else {
+    for (const id of ids) weights[id] = res[id] != null ? +res[id] : 0;
+  }
   const low = chase.low != null ? +chase.low : 0;
   const hiCol = E.parseColour(chase.c != null ? chase.c : chase.colour, palette);
+  const ring = Array.isArray(chase.colours)
+    ? chase.colours.map((c) => E.parseColour(c, palette)).filter(Boolean) : null;
   const out = {};
   for (const id of Object.keys(base)) out[id] = base[id];
-  for (const id of ids) {
+  ids.forEach((id, i) => {
     const b = base[id] || { l: 0, c: [1, 1, 1] };
-    const on = lit.has(id);
+    const w = weights[id];
+    const top = chase.high != null ? +chase.high : b.l;
     out[id] = {
-      l: on ? (chase.high != null ? +chase.high : b.l) : b.l * low,
-      c: on && hiCol ? hiCol : b.c,
+      l: b.l * low + (top - b.l * low) * Math.max(0, Math.min(1, w)),
+      c: ring ? ring[(i + step) % ring.length] : (w > 0.5 && hiCol ? hiCol : b.c),
       pan: b.pan, tilt: b.tilt, strobe: b.strobe,
     };
+  });
+  if (chase.move_head) {
+    const lampIds = rig.lamps.map((f) => f.id);
+    let bestId = null, bestW = -1;
+    for (const id of lampIds) if (weights[id] != null && weights[id] > bestW) { bestW = weights[id]; bestId = id; }
+    const lamp = rig.lamps.find((f) => f.id === bestId);
+    if (lamp) {
+      const xs = rig.lamps.map((f) => f.x);
+      const lo = Math.min(...xs), hi = Math.max(...xs);
+      const pan = hi > lo ? 0.5 + 0.42 * ((lamp.x - lo) / (hi - lo) - 0.5) * 2 : 0.5;
+      for (const h of rig.movers) {
+        const hb = out[h.id] || { l: 0, c: [1, 1, 1] };
+        out[h.id] = { ...hb, pan: Math.max(0, Math.min(1, pan)) };
+      }
+    }
   }
   return out;
 }

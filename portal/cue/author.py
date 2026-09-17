@@ -68,6 +68,35 @@ PALETTE = {
 }
 
 
+def holes_in(song, floor=0.30, min_len=0.14):
+    import numpy as np
+    import librosa
+
+    path = os.path.join(REPO, "hub", "files", "audio", "%s.mp3" % song)
+    if not os.path.isfile(path):
+        return []
+    y, sr = librosa.load(path, sr=22050, mono=True)
+    hop = 512
+    rms = librosa.feature.rms(y=y, hop_length=hop)[0]
+    t = librosa.times_like(rms, sr=sr, hop_length=hop)
+    med = float(np.median(rms)) or 1.0
+    thr = med * floor
+    out = []
+    i = 0
+    while i < len(rms):
+        if rms[i] < thr:
+            j = i
+            while j < len(rms) and rms[j] < thr:
+                j += 1
+            b = float(t[min(j, len(t) - 1)])
+            if b - float(t[i]) >= min_len:
+                out.append((float(t[i]), b, float(rms[i:j].min()) / med))
+            i = j
+        else:
+            i += 1
+    return out
+
+
 def score_for(song):
     out = (
         subprocess.check_output(
@@ -158,6 +187,7 @@ def author(song, out_path=None):
         )
     )
     sections = sc.get("sections") or []
+    holes = holes_in(song)
     Emax = max(r["E"] for r in rows) or 1.0
     peak_t = None
     for t, kind, w in moments:
@@ -169,7 +199,7 @@ def author(song, out_path=None):
 
     def arc(t):
         if t <= peak_t:
-            return 0.46 + 0.54 * (t / peak_t if peak_t else 1.0) ** 0.75
+            return 0.60 + 0.40 * (t / peak_t if peak_t else 1.0) ** 0.75
         tail = (t - peak_t) / max(1e-6, span - peak_t)
         return 1.0 - 0.62 * tail ** 0.8
 
@@ -203,6 +233,7 @@ def author(song, out_path=None):
             {
                 "id": len(cues) + 1,
                 "at": {"bar": bar},
+                "_t": at(bar),
                 "fade": round(fade, 2),
                 "why": why,
                 "look": look,
@@ -272,22 +303,13 @@ def author(song, out_path=None):
             why = "breakdown at %.1fs - the room empties to the middle" % mom[0]
         elif kind in ("build",):
             look = {"lamps": {"c": colour, "l": level}}
-            chase = {
-                "on": "lamps",
-                "figure": "build",
-                "every": {"hits": 1},
-                "low": 0.35,
-            }
+            chase = {"on": "lamps", "figure": "build", "every": {"hits": 1}, "low": 0.35}
             fade = 0.3
             why = "build at %.1fs, E %.2f - one lamp added at a time" % (mom[0], r["E"])
         elif kind in ("entrance", "vocal_return", "melody_resume"):
             look = {"lamps": {"c": colour, "l": level}}
-            chase = {
-                "on": "lamps",
-                "figure": "alternate",
-                "every": {"hits": 2},
-                "low": 0.5,
-            }
+            chase = {"on": "lamps", "figure": "handover", "every": {"hits": 1},
+                     "low": 0.45, "move_head": True}
             fade = 0.12
             why = "%s at %.1fs - %s lead, E %.2f" % (kind, mom[0], top_fam, r["E"])
         elif kind in (
@@ -302,12 +324,8 @@ def author(song, out_path=None):
                     "l": level,
                 }
             }
-            chase = {
-                "on": "lamps",
-                "figure": "sweep",
-                "every": {"hits": 1},
-                "low": 0.42,
-            }
+            chase = {"on": "lamps", "figure": "comet", "every": {"hits": 1},
+                     "low": 0.4, "move_head": True}
             fade = 0.5
             why = "%s at %.1fs - the figure changes with the music" % (kind, mom[0])
         elif kind == "spotlight":
@@ -318,33 +336,48 @@ def author(song, out_path=None):
             fade = 0.6
             why = "spotlight at %.1fs - the head points, the row stays level" % mom[0]
         else:
-            look = {"lamps": {"c": colour, "l": level}}
-            if dens >= 6:
-                chase = {
-                    "on": "lamps",
-                    "figure": "alternate",
-                    "every": {"hits": 1},
-                    "low": 0.45,
-                }
-            elif dens >= 3:
-                chase = {
-                    "on": "lamps",
-                    "figure": "pairs",
-                    "every": {"hits": 1},
-                    "low": 0.52,
-                }
-            elif dens >= 1:
-                chase = {
-                    "on": "lamps",
-                    "figure": "sweep",
-                    "every": {"hits": 2},
-                    "low": 0.55,
-                }
+            look = {
+                "lamps": {"c": colour, "l": level},
+                "heads": {"c": colour, "l": round(min(0.8, level * 0.62), 2),
+                          "pan": 0.5, "tilt": round(0.24 + 0.16 * ((bar % 3) / 2.0), 2)},
+            }
+            busy = ["handover", "wave", "alternate", "hocket", "cascade", "comet"]
+            mid = ["pairs", "converge", "diverge", "split", "handover", "wave"]
+            calm = ["sweep", "bounce", "comet", "converge"]
+            pick = busy if dens >= 6 else mid if dens >= 3 else calm
+            fig = pick[len(cues) % len(pick)]
+            deep = 0.22 if level < 0.38 else (0.42 if dens >= 6 else 0.5)
+            chase = {"on": "lamps", "figure": fig,
+                     "every": {"hits": 1 if dens >= 3 else 2},
+                     "fill_beats": 1 if level < 0.45 else 2,
+                     "low": deep,
+                     "move_head": fig in ("sweep", "bounce", "wave", "comet", "handover", "cascade")}
             fade = 0.35 if not fam_changed else 0.15
-            why = "bar %d: %s leads, E %.2f, %d hits" % (bar, top_fam, r["E"], dens)
+            why = "bar %d: %s leads, E %.2f, %d hits - %s across the row" % (
+                bar, top_fam, r["E"], dens, fig)
 
         add(bar, fade, look, chase, why)
         prev_fam, prev_level, prev_set = top_fam, level, here
+
+    for a, b, depth in holes:
+        if a < 0.4:
+            continue
+        prior = [c for c in cues if c.get("_t", 0) <= a + 1e-6]
+        cues.append({"id": 0, "at": {"second": round(a, 3)}, "_t": a, "fade": 0.0,
+                     "look": {},
+                     "why": "the audio falls to %d%% of its median for %.2fs - a real hole, so the room goes with it"
+                            % (round(depth * 100), b - a)})
+        if prior:
+            back = dict(prior[-1])
+            back["at"] = {"second": round(b, 3)}
+            back["_t"] = b
+            back["fade"] = 0.06
+            back["why"] = "and back, the instant the audio returns"
+            cues.append(back)
+    cues.sort(key=lambda c: c.get("_t", 0))
+    for n, c in enumerate(cues):
+        c["id"] = n + 1
+        c.pop("_t", None)
 
     doc = {
         "schema": "limelight.cuelist/1",
