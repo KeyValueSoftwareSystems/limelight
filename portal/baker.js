@@ -51,7 +51,14 @@ const plan = JSON.parse(fs.readFileSync(planFile, "utf8"));
 const sampler = makeStreamSampler(score);
 
 const venueDir = path.join(HERE, "venues", rigName);
-const manifest = JSON.parse(fs.readFileSync(path.join(venueDir, "manifest.json"), "utf8"));
+let manifest;
+try {
+  manifest = JSON.parse(fs.readFileSync(path.join(venueDir, "manifest.json"), "utf8"));
+} catch (e) {
+  console.error(`no effect library for rig "${rigName}": expected ${path.join(venueDir, "manifest.json")}`);
+  console.error("portal/server.py's Venues.all() should not have offered it -- a rig is only listed once a probe module renders at the layout's width.");
+  process.exit(3);
+}
 const layoutFile = path.join(LIGHTS, manifest.layout_file);
 const layout = JSON.parse(fs.readFileSync(layoutFile, "utf8"));
 
@@ -554,11 +561,16 @@ const phases = sections.map(sec => ({
 
 const fixtures = layout.fixtures.map(f => ({
   id: f.id, type: f.type, address: f.address, at: f.at || [0, 0, 0],
+  /* which drawn structure this fixture belongs to. The renderer groups on it to
+     stroke an arch; a layout that does not say keeps the old height+depth bar
+     rule. See limelight-ui/lib/structures.ts. */
+  group: f.group || null,
 }));
 
 const show = {
   rig: rigName,
   layout: manifest.layout_file,
+  geometry: layout.geometry || "line",
   channels: TOTAL_CH,
   fixtures,
   style: "limelight-v2",

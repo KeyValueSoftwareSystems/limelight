@@ -92,6 +92,8 @@ export interface Fixture {
   type: string;
   address: number;
   at?: [number, number, number];
+  /** which drawn structure this fixture belongs to — see lib/structures.ts */
+  group?: string | null;
 }
 
 export interface Show {
@@ -111,6 +113,8 @@ export interface Show {
   appetite_natural: number | null;
   rig: string | null;
   layout: string | null;
+  /** "line" | "arch" — how the rig is laid out, from the layout file */
+  geometry?: string | null;
   fixtures: Fixture[];
   plan?: ShowPlan;
   pars: number[];
@@ -594,6 +598,17 @@ export interface LampPosition {
   height: number;
   /** size multiplier from depth */
   scale: number;
+  /**
+   * Which drawn structure this lamp belongs to, and what shape that structure
+   * is. Both are computed ONCE in placeFixtures from the fixture's real world
+   * position, via lib/structures.ts — the renderer must never re-derive them
+   * from screen coordinates, because screen y folds in depth and the flat-rig
+   * nudge and would group differently from the 3D view.
+   */
+  structureKey: string | null;
+  structureKind: "bar" | "curve" | null;
+  /** screen distance to the nearest other lamp, 0–1; caps the halo radius */
+  spacing: number;
 }
 
 /** A lamp's state in one frame. */

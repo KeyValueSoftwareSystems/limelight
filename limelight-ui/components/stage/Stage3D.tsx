@@ -476,6 +476,26 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     /* ── the steel ── */
     const trussMat = new THREE.MeshBasicMaterial({ color: 0x39435a });
     for (const bar of barsOf(fixtures)) {
+      if (bar.kind === "curve") {
+        /* An arch is one short box per consecutive pair, each turned onto its
+           own segment. A single x0..x1 box — all a straight bar needs — would
+           cut the chord and read as a girder through the middle of the arch. */
+        for (let i = 1; i < bar.points.length; i++) {
+          const a = bar.points[i - 1], b = bar.points[i];
+          const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
+          const segLen = Math.hypot(dx, dy, dz);
+          if (segLen < 1e-6) continue;
+          const seg = new THREE.Mesh(new THREE.BoxGeometry(segLen, 0.09, 0.09), trussMat);
+          seg.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
+          /* the box's long axis is +x, so rotate that onto the segment */
+          seg.quaternion.setFromUnitVectors(
+            new THREE.Vector3(1, 0, 0),
+            new THREE.Vector3(dx, dy, dz).normalize(),
+          );
+          scene.add(seg);
+        }
+        continue;
+      }
       const len = bar.x1 - bar.x0 + 0.9;
       const chord = new THREE.Mesh(new THREE.BoxGeometry(len, 0.07, 0.07), trussMat);
       /* two chords and a gap reads as truss; one bar reads as wire */

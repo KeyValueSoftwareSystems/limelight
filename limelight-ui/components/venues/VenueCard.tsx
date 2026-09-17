@@ -34,6 +34,10 @@ export function VenueCard({ venue, layouts, onDesign }: VenueCardProps) {
         <>
           <RigPreview
             fixtures={layout?.fixture_list ?? []}
+            /* without this an arch rig draws its arches squashed into the line
+               band, so the catalogue card and the stage disagree about the
+               same rig */
+            geometry={layout?.geometry as string | null | undefined}
             dimmed={locked}
             className="absolute inset-0"
           />

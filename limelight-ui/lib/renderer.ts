@@ -173,38 +173,79 @@ export function ground(ctx: CanvasRenderingContext2D, W: number, H: number): voi
 
 const FLOOR = 0.86;
 
-/* ── truss: the steel the lamps hang off ─────────────────────────────────────
-   Lamps that share a height and a depth are on the same bar. Drawing the bar
-   costs one hairline and is the difference between "a rig" and "some dots". */
+/** how many nearest-neighbour gaps a lamp's halo may reach — see drawPar */
+const HALO_BETA = 1.6;
 
-function truss(ctx: CanvasRenderingContext2D, lamps: LampState[], W: number, H: number): void {
-  const bars = new Map<string, LampState[]>();
+/* ── structure: the steel the lamps hang off ─────────────────────────────────
+   Which fixtures form one structure is decided in lib/fixtures.ts via
+   lib/structures.ts, from the real world positions — Stage3D reads the same
+   answer, and the two views must not each work it out. Screen y folds in depth
+   and the flat-rig nudge, so re-deriving it here would silently disagree.
+
+   This function only draws: a `bar` is a straight hairline with a chord under
+   it, a `curve` is a smooth line through every member, which is what makes an
+   arch read as an arch rather than as beads floating in a void.
+
+   Drawn before the compositing switches to "lighter", so it is opaque steel
+   with light landing on top of it — and so the arches are still there in a
+   blackout, which is most of the point of drawing them. */
+
+function structure(ctx: CanvasRenderingContext2D, lamps: LampState[], W: number, H: number): void {
+  const groups = new Map<string, LampState[]>();
   for (const l of lamps) {
-    const key = `${l.height.toFixed(3)}:${l.depth.toFixed(3)}`;
-    const b = bars.get(key);
-    if (b) b.push(l); else bars.set(key, [l]);
+    if (!l.structureKey) continue;
+    const g = groups.get(l.structureKey);
+    if (g) g.push(l); else groups.set(l.structureKey, [l]);
   }
+
   ctx.globalCompositeOperation = "source-over";
-  for (const bar of bars.values()) {
-    if (bar.length < 2) continue;
-    const xs = bar.map((l) => l.x);
-    const y = H * bar[0].y;
-    const x0 = W * Math.min(...xs);
-    const x1 = W * Math.max(...xs);
-    const a = 0.10 + 0.10 * bar[0].depth;
+
+  for (const members of groups.values()) {
+    if (members.length < 2) continue;
+    members.sort((a, b) => a.x - b.x);
+    const pts = members.map((l) => ({ x: W * l.x, y: H * l.y, l }));
+    const a = 0.10 + 0.10 * pts[0].l.depth;
+    const lw = Math.max(1, 2.4 * pts[0].l.scale);
+
+    if (pts[0].l.structureKind === "bar") {
+      const y = pts[0].y;
+      const x0 = pts[0].x, x1 = pts[pts.length - 1].x;
+      ctx.strokeStyle = `rgba(150,164,196,${a.toFixed(3)})`;
+      ctx.lineWidth = lw;
+      ctx.beginPath();
+      ctx.moveTo(x0 - 10, y);
+      ctx.lineTo(x1 + 10, y);
+      ctx.stroke();
+      /* the chord underneath, so the bar reads as truss rather than as wire */
+      ctx.strokeStyle = `rgba(150,164,196,${(a * 0.45).toFixed(3)})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x0 - 10, y + 4 * pts[0].l.scale);
+      ctx.lineTo(x1 + 10, y + 4 * pts[0].l.scale);
+      ctx.stroke();
+      continue;
+    }
+
+    /* a curve: quadratic segments through the midpoints, so the arch is smooth
+       rather than a chain of chords with a visible corner at every lamp */
+    const trace = () => {
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length - 1; i++) {
+        const mx = (pts[i].x + pts[i + 1].x) / 2;
+        const my = (pts[i].y + pts[i + 1].y) / 2;
+        ctx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
+      }
+      ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+      ctx.stroke();
+    };
     ctx.strokeStyle = `rgba(150,164,196,${a.toFixed(3)})`;
-    ctx.lineWidth = Math.max(1, 2.4 * bar[0].scale);
-    ctx.beginPath();
-    ctx.moveTo(x0 - 10, y);
-    ctx.lineTo(x1 + 10, y);
-    ctx.stroke();
-    /* the chord underneath, so the bar reads as truss rather than as wire */
-    ctx.strokeStyle = `rgba(150,164,196,${(a * 0.45).toFixed(3)})`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x0 - 10, y + 4 * bar[0].scale);
-    ctx.lineTo(x1 + 10, y + 4 * bar[0].scale);
-    ctx.stroke();
+    ctx.lineWidth = lw;
+    trace();
+    /* a wider, fainter pass under it so the arch reads as depth, not as wire */
+    ctx.strokeStyle = `rgba(150,164,196,${(a * 0.4).toFixed(3)})`;
+    ctx.lineWidth = Math.max(1, lw * 2.6);
+    trace();
   }
 }
 
@@ -368,7 +409,17 @@ function drawPar(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: numb
   const x = W * l.x, y = H * l.y, c = l.rgb;
   const s = spread(l.spreadDeg) * l.scale;
 
-  const R = u * (0.34 + 0.9 * s) * (0.5 + 0.65 * k);
+  /* THE CAP. A par5 at 60 degrees has an uncapped radius of ~0.99 canvas heights
+     at full: one lamp covers the frame. That is the intent on a four-lamp desk
+     rig, where "the room fills with colour" is the look. Twenty-four of them on
+     three arches, blended additively, is a white field — and exposure.ts cannot
+     help, because it scales alpha and never radius.
+
+     So a halo may reach about one and a half gaps to its nearest neighbour. It
+     is a CAP, not a rescale: on a sparse rig the gap is large, the cap never
+     binds, and arc4-head and club16-2head draw exactly as they always did. */
+  const uncapped = u * (0.34 + 0.9 * s) * (0.5 + 0.65 * k);
+  const R = Math.min(uncapped, HALO_BETA * l.spacing * Math.max(W, H));
   const a = (0.09 + 0.30 * k) * d;
   let g = ctx.createRadialGradient(x, y - u * 0.02, 0, x, y - u * 0.02, R);
   g.addColorStop(0, rgba(c, a));
@@ -381,7 +432,7 @@ function drawPar(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: numb
   ctx.arc(x, y - u * 0.02, R, 0, TAU);
   ctx.fill();
 
-  const R2 = u * 0.2 * l.scale * (0.5 + 0.8 * k);
+  const R2 = Math.min(u * 0.2 * l.scale * (0.5 + 0.8 * k), HALO_BETA * 0.6 * l.spacing * Math.max(W, H));
   const a2 = (0.14 + 0.5 * k) * d;
   g = ctx.createRadialGradient(x, y, 0, x, y, R2);
   g.addColorStop(0, rgba(toWhite(c, Math.max(0, k - 0.72) / 0.28), a2));
@@ -483,17 +534,25 @@ function drawStrip(ctx: CanvasRenderingContext2D, l: LampState, W: number, H: nu
   const cells = l.cells ?? [{ k: l.k, rgb: l.rgb }];
   const x = W * l.x;
   const span = u * 0.42 * l.scale;
-  const y0 = H * l.y - span * 0.5;
-  const step = span / cells.length;
+  /* A pixelbar on an arch leg is angled, not upright: lean it away from centre
+     so it follows the leg it is mounted beside. */
+  const tilt = l.structureKey && /^pix/.test(l.structureKey) ? (l.x - 0.5) * 0.9 : 0;
+  const dx = Math.sin(tilt) * span;
+  const dy = Math.cos(tilt) * span;
+  const x0 = x - dx * 0.5;
+  const y0 = H * l.y - dy * 0.5;
+  const stepX = dx / cells.length;
+  const stepY = dy / cells.length;
 
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
     const k = cell.k * gate;
     if (k <= 0.01) continue;
-    const cy = y0 + step * (i + 0.5);
+    const cx = x0 + stepX * (i + 0.5);
+    const cy = y0 + stepY * (i + 0.5);
     const R = u * 0.16 * l.scale * (0.4 + 0.8 * k);
-    glow(ctx, "core", x, cy, R, toWhite(cell.rgb, k * 0.6), 0.1 + 0.44 * k);
-    emitter(ctx, x, cy, Math.max(2, step * 0.3), cell.rgb, k);
+    glow(ctx, "core", cx, cy, R, toWhite(cell.rgb, k * 0.6), 0.1 + 0.44 * k);
+    emitter(ctx, cx, cy, Math.max(2, Math.hypot(stepX, stepY) * 0.3), cell.rgb, k);
   }
 }
 
@@ -565,7 +624,7 @@ export function paintStage(
   const lamps = fx.lamps ?? [];
 
   /* structure first, opaque, so light lands on top of steel rather than under it */
-  truss(ctx, lamps, W, H);
+  structure(ctx, lamps, W, H);
   for (const l of lamps) {
     if (l.kind === "strip") continue;                    // a strip has no round body
     housing(ctx, W * l.x, H * l.y, Math.max(3, u * 0.019 * l.scale));
@@ -587,8 +646,13 @@ export function paintStage(
     ctx.fillRect(0, 0, W, H);
   }
 
-  /* back to front, so a near truss reads in front of a far one */
-  for (const l of lamps) drawLamp(ctx, l, W, H, u, { t, full, d: density });
+  /* back to front, so a near truss reads in front of a far one — and a far one
+     reads FAINTER, so three nested arches do not all compete at equal weight */
+  for (const l of lamps) {
+    ctx.globalAlpha = 0.55 + 0.45 * l.depth;
+    drawLamp(ctx, l, W, H, u, { t, full, d: density });
+  }
+  ctx.globalAlpha = 1;
 
   /* the deck is not matte: the pools come back up, squashed and dim */
   if (full) {

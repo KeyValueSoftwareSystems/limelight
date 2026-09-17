@@ -28,6 +28,20 @@
    "default": "arc4-head.layout.json"
   },
   {
+   "id": "ven_halo",
+   "name": "Halo",
+   "example": false,
+   "access": "public",
+   "note": "Our own concert stage: three nested arches receding upstage, a portal over the band. The rig is designed rather than measured, but it is ours and it is complete -- every fixture on it has a driver, an address inside one universe, and an effect module that drives it. No rig_placeholder flag: this one is not standing in for somebody else's room.",
+   "layouts": [
+    {
+     "name": "Portal (3 arches)",
+     "file": "halo-portal.layout.json"
+    }
+   ],
+   "default": "halo-portal.layout.json"
+  },
+  {
    "id": "ven_keycode",
    "name": "KeyCode Stage",
    "example": false,
@@ -41,11 +55,6 @@
     {
      "name": "Basic (beam + 4 par)",
      "file": "keycode-basic.layout.json"
-    },
-    {
-     "name": "Main stage",
-     "file": "club16-2head.layout.json",
-     "placeholder": true
     }
    ],
    "default": "keycode-basic.layout.json"
@@ -63,11 +72,6 @@
     {
      "name": "Arena (full rig)",
      "file": "keycode-arena.layout.json",
-     "placeholder": true
-    },
-    {
-     "name": "Main stage",
-     "file": "club16-2head.layout.json",
      "placeholder": true
     }
    ],

@@ -49,8 +49,8 @@ function colourAt(bar: number): [number, number, number] {
  * `fixtures` is the layout's own list, so the loop lands on whatever the room
  * actually has: a rig with no blinder simply never gets the blinder stab.
  */
-export function demoStates(fixtures: Fixture[], t: number): { lamps: LampState[] } {
-  const place = placeFixtures({ fixtures } as never);
+export function demoStates(fixtures: Fixture[], t: number, geometry?: string | null): { lamps: LampState[] } {
+  const place = placeFixtures({ fixtures, geometry } as never);
   if (!place.lamps.length) return { lamps: [] };
 
   const time = ((t % LOOP) + LOOP) % LOOP;
