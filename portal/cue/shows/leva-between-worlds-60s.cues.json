@@ -27,11 +27,11 @@
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.618
+     "l": 0.36
     },
     "heads": {
      "c": "crimson",
-     "l": 0.429,
+     "l": 0.257,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -44,15 +44,15 @@
       "beats": 1.5
      },
      "fill_beats": 1,
-     "low": 0.46,
+     "low": 0.12,
      "move_head": true,
      "cycles": 1,
      "colours": [
       "crimson",
       "indigo"
      ],
-     "colour_figure": "poles",
-     "colour_every": 11
+     "colour_every": 11,
+     "colour_figure": "hold"
     }
    ],
    "swell": {
@@ -77,11 +77,11 @@
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.841
+     "l": 0.566
     },
     "heads": {
      "c": "indigo",
-     "l": 0.668,
+     "l": 0.452,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -93,8 +93,8 @@
      "every": {
       "beats": 1.0
      },
-     "fill_beats": 2,
-     "low": 0.6,
+     "fill_beats": 1,
+     "low": 0.12,
      "move_head": false,
      "reverse": true,
      "cycles": 3,
@@ -102,8 +102,8 @@
       "crimson",
       "indigo"
      ],
-     "colour_figure": "halves",
-     "colour_every": 16
+     "colour_every": 16,
+     "colour_figure": "hold"
     }
    ],
    "swell": {
@@ -137,7 +137,7 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.95
+     "l": 0.9
     },
     "heads": {
      "c": "bone",
@@ -167,11 +167,11 @@
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.91
+     "l": 0.704
     },
     "heads": {
      "c": "crimson",
-     "l": 0.635,
+     "l": 0.498,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -183,8 +183,8 @@
      "every": {
       "beats": 1.0
      },
-     "fill_beats": 2,
-     "low": 0.6,
+     "fill_beats": 1,
+     "low": 0.22,
      "move_head": false,
      "reverse": true,
      "cycles": 4,
@@ -192,8 +192,8 @@
       "crimson",
       "indigo"
      ],
-     "colour_figure": "flip",
-     "colour_every": 16
+     "colour_every": 16,
+     "colour_figure": "hold"
     }
    ],
    "head": {
@@ -213,11 +213,11 @@
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 1.0
+     "l": 0.805
     },
     "heads": {
      "c": "indigo",
-     "l": 0.727,
+     "l": 0.569,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -229,8 +229,8 @@
      "every": {
       "beats": 1.0
      },
-     "fill_beats": 2,
-     "low": 0.6,
+     "fill_beats": 1,
+     "low": 0.22,
      "move_head": false,
      "reverse": false,
      "cycles": 4,
@@ -238,8 +238,8 @@
       "crimson",
       "indigo"
      ],
-     "colour_figure": "halves",
-     "colour_every": 16
+     "colour_every": 16,
+     "colour_figure": "hold"
     }
    ],
    "head": {
@@ -259,11 +259,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.446
+     "l": 0.28
     },
     "heads": {
      "c": "bone",
-     "l": 0.314,
+     "l": 0.28,
      "pan": 0.5,
      "tilt": 0.3
     }
@@ -276,7 +276,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.6,
+     "low": 0.22,
      "move_head": true,
      "reverse": true,
      "cycles": 1,
@@ -284,8 +284,8 @@
       "crimson",
       "indigo"
      ],
-     "colour_figure": "halves",
-     "colour_every": 16
+     "colour_every": 16,
+     "colour_figure": "hold"
     }
    ],
    "swell": {
@@ -345,15 +345,15 @@
     "second": 46.02
    },
    "fade": 0.0,
-   "why": "bars 21-24, the phrase closes down: keys leads, E 3.26, 0 hits, mode +1.00 - march in crimson - opened from crimson to bone so the level can be seen - alternate instead, the only shape that finishes in 0.8 bars",
+   "why": "bars 21-24, the phrase closes down: keys leads, E 3.26, 0 hits, mode +1.00 - march in crimson - alternate instead, the only shape that finishes in 0.8 bars",
    "look": {
     "lamps": {
-     "c": "bone",
-     "l": 0.385
+     "c": "crimson",
+     "l": 0.874
     },
     "heads": {
-     "c": "bone",
-     "l": 0.27,
+     "c": "crimson",
+     "l": 0.772,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -366,15 +366,15 @@
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.68,
+     "low": 0.3,
      "move_head": false,
      "cycles": 1,
      "colours": [
       "crimson",
       "indigo"
      ],
-     "colour_figure": "poles",
-     "colour_every": 11
+     "colour_every": 11,
+     "colour_figure": "hold"
     }
    ],
    "swell": {
@@ -408,7 +408,7 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.96
+     "l": 0.9
     },
     "heads": {
      "c": "bone",
@@ -429,52 +429,6 @@
    }
   },
   {
-   "id": 9,
-   "at": {
-    "second": 54.056
-   },
-   "fade": 0.25,
-   "why": "bars 25-28, the phrase closes down: keys leads, E 3.14, 8 hits, mode -0.50 - cascade in crimson against crimson inside - build instead, the only shape that finishes in 1.5 bars",
-   "look": {
-    "lamps": {
-     "c": "crimson",
-     "l": 1.0
-    },
-    "heads": {
-     "c": "crimson",
-     "l": 0.738,
-     "pan": 0.5,
-     "tilt": 0.3
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "build",
-     "every": {
-      "beats": 1.0
-     },
-     "fill_beats": 2,
-     "low": 0.6,
-     "move_head": true,
-     "reverse": true,
-     "cycles": 1,
-     "colours": [
-      "crimson",
-      "indigo"
-     ],
-     "colour_figure": "poles",
-     "colour_every": 16
-    }
-   ],
-   "head": {
-    "move": "arc",
-    "every": {
-     "bars": 2
-    }
-   }
-  },
-  {
    "id": 0,
    "at": {
     "second": 56.959
@@ -484,7 +438,7 @@
    "why": "the audio falls to 0% of its median for 3.07s - a real hole, so the room goes with it"
   },
   {
-   "id": 10,
+   "id": 9,
    "at": {
     "second": 60.024
    },
@@ -493,11 +447,11 @@
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.687
+     "l": 0.412
     },
     "heads": {
      "c": "crimson",
-     "l": 0.481,
+     "l": 0.292,
      "pan": 0.5,
      "tilt": 0.24
     }
@@ -510,7 +464,7 @@
       "beats": 2
      },
      "fill_beats": 1,
-     "low": 0.68,
+     "low": 0.12,
      "move_head": false
     }
    ]

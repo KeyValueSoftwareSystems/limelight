@@ -91,6 +91,20 @@ function applyChase(rig, base, chase, step, palette, ctx) {
     for (const id of ids) { want += (base[id] || { l: 0 }).l; got += raw[id]; }
     if (got > 1e-6 && want > 1e-6) gain = Math.max(0.6, Math.min(2.2, want / got));
   }
+  let overflow = 1;
+  if (ring) {
+    const cfN0 = chase.colour_figure || "walk";
+    const cf0 = E.COLOUR_FIGURES[cfN0] || E.COLOUR_FIGURES.walk;
+    const ce0 = Math.max(1, Math.round(+chase.colour_every || 1));
+    const ci0 = cf0(ids.length, Math.floor(step / ce0));
+    ids.forEach((id, i) => {
+      const b0 = base[id] || { l: 0, c: [1, 1, 1] };
+      const k = ci0 ? ci0[i] : i;
+      const col0 = ring[((k % ring.length) + ring.length) % ring.length];
+      const want = raw[id] * gain * (E.evenOut(col0) / E.evenOut(b0.c));
+      if (want > overflow) overflow = want;
+    });
+  }
   const cfName = chase.colour_figure || (ring ? "walk" : null);
   const cf = cfName && E.COLOUR_FIGURES[cfName] ? E.COLOUR_FIGURES[cfName] : null;
   const cevery = Math.max(1, Math.round(+chase.colour_every || 1));
@@ -108,7 +122,7 @@ function applyChase(rig, base, chase, step, palette, ctx) {
     }
     const even = ring ? E.evenOut(col) / E.evenOut(b.c) : 1;
     out[id] = {
-      l: Math.max(0, Math.min(1, raw[id] * gain * even)),
+      l: Math.max(0, Math.min(1, (raw[id] * gain * even) / overflow)),
       c: col,
       pan: b.pan, tilt: b.tilt, strobe: b.strobe, prism: b.prism,
     };

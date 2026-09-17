@@ -512,12 +512,12 @@ def author(song, out_path=None):
         pi, pk, pn = phrase_of.get(bar, (None, 0, 1))
         ph = phrases[pi] if pi is not None else None
         if ph is not None:
-            band = (0.40 + 0.59 * (spread(ph["E"]) ** 0.70)) * arc(ph["t"]) * hush(ph["E"])
+            band = (0.16 + 0.83 * (spread(ph["E"]) ** 0.85)) * arc(ph["t"]) * hush(ph["E"])
             pos = pk / max(1, pn - 1) if pn > 1 else 1.0
             level = round(min(0.97, band * (ph["a0"] + (ph["a1"] - ph["a0"]) * pos)), 2)
         else:
             e = spread(r["E"])
-            level = round(min(0.99, (0.40 + 0.59 * (e**0.70)) * arc(r["t"]) * hush(r["E"])), 2)
+            level = round(min(0.99, (0.16 + 0.83 * (e**0.85)) * arc(r["t"]) * hush(r["E"])), 2)
 
         is_edge = any(abs(s["start"] - r["t"]) < step for s in sections)
         phrase_start = ph is not None and pk == 0
@@ -720,7 +720,7 @@ def author(song, out_path=None):
             if (pi or 0) % 2 == 1:
                 reverse_it = not reverse_it
 
-            deep = 0.46 if level < 0.38 else (0.60 if dens >= 6 else 0.68)
+            deep = 0.12 if level < 0.38 else (0.22 if dens >= 6 else 0.30)
             moves = want_fam in ("travel", "grow")
             if sings and want_fam == "travel":
                 every = {"notes": 1}
@@ -1051,13 +1051,15 @@ def author(song, out_path=None):
             move, bars = "nod", 1
         cue["head"] = {"move": move, "every": {"bars": bars}}
 
-    def dress(chase, fam, pair):
+    def dress(chase, fam, pair, span_s=None):
         if not pair or len(pair) < 2:
             return
         rate = float((chase.get("every") or {}).get("beats") or 1.0)
+        every = max(1, int(round(per * 4.0 / max(0.25, rate))))
         chase["colours"] = list(pair)
-        chase["colour_figure"] = COLOUR_FOR.get(fam, "halves")
-        chase["colour_every"] = max(1, int(round(per * 4.0 / max(0.25, rate))))
+        chase["colour_every"] = every
+        holds = span_s is not None and span_s < every * rate * step * 1.25
+        chase["colour_figure"] = "hold" if holds else COLOUR_FOR.get(fam, "halves")
 
     MUSICAL = (0.5, 1.0, 1.5, 2.0, 3.0, 4.0)
 
@@ -1303,7 +1305,7 @@ def author(song, out_path=None):
                         % (fig0, (bounds[1] - bounds[0]) / bar_s))
                 ch["every"] = {"beats": fit[0]}
                 ch["cycles"] = fit[1]
-                dress(ch, fam0, pair)
+                dress(ch, fam0, pair, bounds[1] - bounds[0])
                 steer(c, fam0, climbing)
             seen_recent = (seen_recent + [ch["figure"]])[-4:]
             for k, (at_t, on_hit) in enumerate(cuts, start=1):
@@ -1336,7 +1338,7 @@ def author(song, out_path=None):
                 vfit = vfit0
                 vch["every"] = {"beats": vfit[0]}
                 vch["cycles"] = vfit[1]
-                dress(vch, pick_fam, pair)
+                dress(vch, pick_fam, pair, seg)
                 steer(var, pick_fam, climbing)
                 var["why"] = ("%s answers %s, a whole %d cycles%s"
                               % (nxt, ch["figure"], (vfit[1] if vfit else 1),
@@ -1361,13 +1363,21 @@ def author(song, out_path=None):
     for c in cues:
         if "only white carries a hit" in (c.get("why") or ""):
             continue
+        in_play = set()
+        for ch0 in (c.get("chases") or []):
+            in_play.update(ch0.get("colours") or [])
+        for v in (c.get("look") or {}).values():
+            if isinstance(v, dict) and v.get("c"):
+                in_play.add(v["c"])
+        floor_lum = min([lum_of(x) for x in in_play] or [REF_LUM])
         for v in (c.get("look") or {}).values():
             if not isinstance(v, dict) or v.get("l") is None or not v.get("c"):
                 continue
             lv = lum_of(v["c"])
             if lv <= 0.01:
                 continue
-            v["l"] = round(max(0.02, min(1.0, v["l"] * REF_LUM / lv)), 3)
+            target = min(v["l"] * REF_LUM, floor_lum)
+            v["l"] = round(max(0.02, min(1.0, target / lv)), 3)
 
     SUDDEN = ("only white carries a hit", "one beat of black", "a real hole",
               "and back", "PEAK", "climax", "the drop")
