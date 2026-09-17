@@ -39,9 +39,9 @@ export function ShowCard({
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-200 flex items-center justify-center">
           <span
             className="w-[36px] h-[36px] rounded-full flex items-center justify-center opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250 ease-[var(--ease-spring)]"
-            style={{ background: "var(--mat-accent)", boxShadow: "var(--mat-accent-edge), var(--mat-accent-shadow)" }}
+            style={{ background: "rgba(236,238,246,0.95)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 10px rgba(0,0,0,0.45)" }}
           >
-            <Play size={15} fill="#08121F" stroke="#08121F" className="ml-[1px]" />
+            <Play size={15} fill="#0B0E15" stroke="#0B0E15" className="ml-[1px]" />
           </span>
         </div>
 

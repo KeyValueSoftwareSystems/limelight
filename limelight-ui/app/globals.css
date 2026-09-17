@@ -627,27 +627,32 @@ a:focus-visible,
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.42), 0 1px 1px rgba(0, 0, 0, 0.3);
 }
 
+/* Every button is the same key. The primary one leads with a brighter rim and
+   full-strength ink, not with a colour fill - a coloured slab was the loudest
+   thing on every page it appeared on. */
 .liquid-accent {
-  background: linear-gradient(180deg, #4C82CB 0%, #3A6AAE 100%);
-  color: #FFFFFF;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.22);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.5),
+  background: linear-gradient(180deg, rgba(38, 44, 57, 0.92) 0%, rgba(24, 28, 37, 0.94) 100%);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.20),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.10), 0 1px 2px rgba(0, 0, 0, 0.5),
     0 3px 10px rgba(0, 0, 0, 0.34);
 }
 .liquid-accent:hover:not(:disabled) {
-  background: linear-gradient(180deg, #5A8ED3 0%, #4576B9 100%);
+  background: linear-gradient(180deg, rgba(50, 57, 72, 0.94) 0%, rgba(33, 38, 49, 0.95) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14), 0 1px 2px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.36);
 }
 .liquid-accent:active:not(:disabled) {
   transform: translateY(1px);
-  background: linear-gradient(180deg, #3A6AAE 0%, #4579BE 100%);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.32), 0 1px 1px rgba(0, 0, 0, 0.32);
+  background: linear-gradient(180deg, rgba(20, 24, 31, 0.95) 0%, rgba(28, 33, 43, 0.95) 100%);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.46), inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 1px 1px rgba(0, 0, 0, 0.32);
 }
 .liquid-accent:disabled {
-  background: linear-gradient(180deg, #232935 0%, #1B2029 100%);
   color: var(--ink-dimmer);
-  text-shadow: none;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.4);
   opacity: 1;
 }
 
@@ -697,4 +702,13 @@ a:focus-visible,
 @media (prefers-reduced-motion: reduce) {
   .panel { transition: none; }
   .panel-lift:hover { transform: none; }
+}
+
+/* A full-bleed bar is not a floating panel: it has no left or right edge for
+   light to catch, so it takes the glass without the rim and closes with a
+   single hairline underneath. */
+.liquid-flush::before { display: none; }
+.liquid-flush {
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06), 0 1px 0 rgba(0, 0, 0, 0.5),
+    0 8px 24px rgba(0, 0, 0, 0.28);
 }

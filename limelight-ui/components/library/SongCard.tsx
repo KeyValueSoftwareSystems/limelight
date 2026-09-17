@@ -58,8 +58,8 @@ export function SongCard({ song, onOpen, position = null }: SongCardProps) {
         {playable && (
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
             <div className="w-[38px] h-[38px] rounded-full flex items-center justify-center scale-90 group-hover:scale-100 transition-transform duration-300 ease-[var(--ease-spring)]"
-              style={{ background: "var(--mat-accent)", boxShadow: "var(--mat-accent-edge), var(--mat-accent-shadow)" }}>
-              <Play size={16} fill="var(--lit-ink-on)" stroke="var(--lit-ink-on)" className="ml-[1px]" />
+              style={{ background: "rgba(236,238,246,0.95)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 10px rgba(0,0,0,0.45)" }}>
+              <Play size={16} fill="#0B0E15" stroke="#0B0E15" className="ml-[1px]" />
             </div>
           </div>
         )}

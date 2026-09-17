@@ -94,7 +94,7 @@ export function Topbar({ onRigToggle }: TopbarProps) {
   const role = usePortalStore((s) => s.role);
 
   return (
-    <header className="liquid flex-none flex items-center gap-[16px] px-[16px] h-[54px] border-b border-solid border-white/[0.05] z-40">
+    <header className="liquid liquid-flush flex-none flex items-center gap-[16px] px-[16px] h-[54px] z-40">
       <Link
         href="/shows"
         aria-label="Limelight \u2014 your shows"
