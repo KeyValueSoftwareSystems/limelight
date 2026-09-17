@@ -1,0 +1,181 @@
+{
+ "layout": "0.5",
+ "rig": "echostage",
+ "geometry": "trussed",
+ "frame": "audience",
+ "note": "Echostage: a big-room rig arranged in a crown pattern. 20 par7 across five zones — a sweeping 8-lamp upstage arc that peaks at centre and drops at the wings, 4 side-pillar pars on diagonal mounts giving the room its width, 4 front-wash pars on a V-truss (outer high, centre low), and 4 floor uplights on the deck — plus 4 head13 moving heads in a diamond (an outer pair crowning the arc and an inner pair centred below it). Par count is a multiple of four so groupsOf splits cleanly. The layout has real depth: upstage at y=0, sides at y=1..2, front truss at y=3.8, so travelling effects cross the room. Positions in metres in the AUDIENCE frame: at = [x, depth, height], +x = audience's right, depth grows toward audience, height from floor.",
+ "fixtures": [
+  {
+   "id": "par_01",
+   "type": "par7",
+   "at": [-4.5, 0.0, 5.8],
+   "universe": 0,
+   "address": 1
+  },
+  {
+   "id": "par_02",
+   "type": "par7",
+   "at": [-3.2, 0.0, 6.5],
+   "universe": 0,
+   "address": 8
+  },
+  {
+   "id": "par_03",
+   "type": "par7",
+   "at": [-1.8, 0.0, 7.0],
+   "universe": 0,
+   "address": 15
+  },
+  {
+   "id": "par_04",
+   "type": "par7",
+   "at": [-0.6, 0.0, 7.2],
+   "universe": 0,
+   "address": 22
+  },
+  {
+   "id": "par_05",
+   "type": "par7",
+   "at": [0.6, 0.0, 7.2],
+   "universe": 0,
+   "address": 29
+  },
+  {
+   "id": "par_06",
+   "type": "par7",
+   "at": [1.8, 0.0, 7.0],
+   "universe": 0,
+   "address": 36
+  },
+  {
+   "id": "par_07",
+   "type": "par7",
+   "at": [3.2, 0.0, 6.5],
+   "universe": 0,
+   "address": 43
+  },
+  {
+   "id": "par_08",
+   "type": "par7",
+   "at": [4.5, 0.0, 5.8],
+   "universe": 0,
+   "address": 50
+  },
+  {
+   "id": "par_09",
+   "type": "par7",
+   "at": [-5.8, 1.0, 4.2],
+   "universe": 0,
+   "address": 57
+  },
+  {
+   "id": "par_10",
+   "type": "par7",
+   "at": [-5.4, 2.2, 2.4],
+   "universe": 0,
+   "address": 64
+  },
+  {
+   "id": "par_11",
+   "type": "par7",
+   "at": [5.8, 1.0, 4.2],
+   "universe": 0,
+   "address": 71
+  },
+  {
+   "id": "par_12",
+   "type": "par7",
+   "at": [5.4, 2.2, 2.4],
+   "universe": 0,
+   "address": 78
+  },
+  {
+   "id": "par_13",
+   "type": "par7",
+   "at": [-4.2, 3.8, 4.8],
+   "universe": 0,
+   "address": 85
+  },
+  {
+   "id": "par_14",
+   "type": "par7",
+   "at": [-1.8, 3.8, 3.2],
+   "universe": 0,
+   "address": 92
+  },
+  {
+   "id": "par_15",
+   "type": "par7",
+   "at": [1.8, 3.8, 3.2],
+   "universe": 0,
+   "address": 99
+  },
+  {
+   "id": "par_16",
+   "type": "par7",
+   "at": [4.2, 3.8, 4.8],
+   "universe": 0,
+   "address": 106
+  },
+  {
+   "id": "par_17",
+   "type": "par7",
+   "at": [-3.5, 0.5, 0.3],
+   "universe": 0,
+   "address": 113
+  },
+  {
+   "id": "par_18",
+   "type": "par7",
+   "at": [-1.2, 0.8, 0.3],
+   "universe": 0,
+   "address": 120
+  },
+  {
+   "id": "par_19",
+   "type": "par7",
+   "at": [1.2, 0.8, 0.3],
+   "universe": 0,
+   "address": 127
+  },
+  {
+   "id": "par_20",
+   "type": "par7",
+   "at": [3.5, 0.5, 0.3],
+   "universe": 0,
+   "address": 134
+  },
+  {
+   "id": "head_1",
+   "type": "head13",
+   "at": [-3.2, 1.0, 8.5],
+   "universe": 0,
+   "address": 141
+  },
+  {
+   "id": "head_2",
+   "type": "head13",
+   "at": [3.2, 1.0, 8.5],
+   "universe": 0,
+   "address": 154
+  },
+  {
+   "id": "head_3",
+   "type": "head13",
+   "at": [-1.2, 0.3, 5.2],
+   "universe": 0,
+   "address": 167
+  },
+  {
+   "id": "head_4",
+   "type": "head13",
+   "at": [1.2, 0.3, 5.2],
+   "universe": 0,
+   "address": 180
+  }
+ ],
+ "limits": {
+  "max_pan_per_frame": 7,
+  "max_tilt_per_frame": 7
+ }
+}
