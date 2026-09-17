@@ -1,0 +1,266 @@
+# Limelight — handover
+
+You are picking up the lighting-show pipeline. Read this before touching anything;
+the most important part is *Why the old engine was thrown away*, because everything
+else follows from it.
+
+Amal is the person you are working for. His standard is that the show should look
+like a real lighting designer made it, and he judges it by watching, not by reading
+numbers. When he says something feels wrong, he has been right every single time —
+measure what he describes before you decide he is not.
+
+---
+
+## 1. Working rules (from Amal, non-negotiable)
+
+- **Zero comments in code. There is no exception clause.** Reasoning goes in the
+  commit message instead. Commit messages here are long and explain *why*; match that.
+- **Run every command in the background** so problems surface early.
+- **Never open a browser.** Tell him the URL and let him open it. Headless
+  screenshots are fine.
+- **No audio in git, ever.** `hub/files/` is gitignored; keep it that way.
+- **Do not push without his say-so.** As of this handover there are ~10 local
+  commits on `limelight-portal` that he has asked to review first. Check with him.
+- Teammates push to the same branch. Pull and rebase often; the generated file
+  `portal/showfiles/raga-of-revenge.show.json` conflicts routinely — take either
+  side and regenerate.
+- Don't touch `/home/actions-runner` (a live CI runner on this machine).
+
+---
+
+## 2. Why the old engine was thrown away
+
+The old pipeline had a Claude "composer" write a `plan.json` of states, bindings and
+gestures, which `portal/baker.js` rendered. Every effect was a **function of beat
+phase evaluated per frame**, so a "cue" was an oscillator, not a look.
+
+The measurement that settled it — how often the *rendered output* changes by a
+clearly visible amount:
+
+```
+  old engine, best version   920 changes in 131s  = a new look every 0.14s
+  a teammate's reference     759 changes in 131s  = every 0.17s
+```
+
+The plan declared 39 cues; the render had 920 visual states. That gap is the whole
+reason the show felt random, had no flow, no coordination and rough transitions —
+five complaints, one cause. It also explains why months of parameter tuning
+(release times, stagger, `every_beats`, crossfades) improved numbers without
+improving the show.
+
+**The old engine still exists and still works** (`portal/baker.js` + `portal/venues/`).
+Nothing was deleted. The portal routes a plan containing `cues` to the new engine and
+anything else to the old one, so both run side by side.
+
+---
+
+## 3. The new engine — three rules
+
+`portal/cue/` is a cue-list renderer. A show is an ordered list of **looks that
+hold**. There is nowhere to put a per-frame function, which is the point.
+
+1. A cue is live from its trigger until the next cue's trigger. **Between triggers
+   the output is constant.** Stillness is structural, not a parameter.
+2. A trigger crossfades from the previous rendered output over the cue's `fade`
+   seconds. `fade: 0` snaps.
+3. A **chase** modulates only the fixtures it names, only while its cue is live, and
+   **steps** on a declared musical rate. Stepped, never continuous — so a chase
+   cannot become an oscillator.
+
+### The cue file
+
+```json
+{ "schema": "limelight.cuelist/1", "song": "...", "rig": "arc4-head",
+  "palette": { "crimson": "#c8102e", "...": "..." },
+  "accents": [ { "t": 42.5, "l": 0.96, "decay": 0.2, "on": "lamps", "c": "bone" } ],
+  "cues": [
+    { "id": 12, "at": { "bar": 23, "beat": 1 }, "fade": 0.8,
+      "why": "why this cue exists, in the music",
+      "look": { "outer": {"c":"crimson","l":0.7}, "inner": {"c":"teal","l":0.5},
+                "heads": {"c":"crimson","l":0.5,"pan":0.5,"tilt":0.3} },
+      "swell": { "from": 0.82, "to": 1.0, "curve": 1.3 },
+      "chases": [
+        { "on":"lamps", "figure":"handover", "every":{"hits":1}, "low":0.42,
+          "fill_beats":2, "move_head":true },
+        { "on":"inner", "figure":"hocket",  "every":{"hits":3}, "low":0.55, "c":"teal" }
+      ] } ] }
+```
+
+- `at` takes `{bar, beat}` or `{second}`.
+- A look names **groups** or fixture ids. Groups come from rig geometry:
+  `all lamps left right inner outer ends centre heads`. A fixture absent from a
+  look is dark; an empty look `{}` is a blackout.
+- `centre` is one lamp on an odd row, the **middle pair** on an even row. This
+  matters: a single lamp alone on a symmetric row reads as three broken lamps.
+- `every` takes `{bars:n}`, `{beats:n}` or `{hits:n}`. `hits` steps on the score's
+  measured percussive onsets; `fill_beats` fills in with beats where the percussion
+  drops out, or the chase goes dead in quiet passages.
+- `chases` is a list — layers. `chase` (singular) still works.
+- `figure` is one of 15: `alternate hocket sweep bounce wave comet handover
+  converge diverge build unbuild cascade pulse pairs split rotate`. A figure may
+  return **weights** rather than on/off, which is what makes a comet tail or a
+  handover *overlap* possible.
+- `move_head` pans the head to whichever lamp the figure is lighting.
+- `swell` ramps the cue's own level across its span.
+- `accents` are punches on the strongest measured hits, composited with `max` so
+  they read as hits on top of the show rather than replacing it.
+
+---
+
+## 4. Files
+
+| file | what it does |
+| --- | --- |
+| `portal/cue/engine.js` | rig loading from profiles, groups, grid, colour parsing, the 15 figures, chase step times |
+| `portal/cue/render.js` | the three rules: hold, crossfade, stepped chases. Plus swells, accents, head slew |
+| `portal/cue/bake.js` | CLI: cue file + score -> the frames envelope the UI reads |
+| `portal/cue/author.py` | **writes the cue list from the score.** This is where the design lives |
+| `portal/cue/bars.py` | prints what is playing bar by bar, what entered, what left. Run this first on any new song |
+| `portal/cue/render.test.js` | 19 checks, including "a single cue never moves after it lands" |
+| `portal/cue/shows/<song>.cues.json` | the generated cue list |
+| `portal/look.js` | bakes the current plan and prints the room: cue rate, blackouts, the arc, on-beat share |
+| `tools/contact.py` | one frame per second as an image strip. This is how you *see* a show |
+
+Rig geometry, channel roles and slew limits all come from
+`readers/lights/drivers/profiles/*.profile.json` and the layout files, so nothing
+is hardcoded to four lamps.
+
+---
+
+## 5. Running it
+
+```bash
+./start.sh                      # hub :8770, portal :8800, ui :3000  (needs PORTAL_NET set)
+PORTAL_NET="" ./start.sh        # what actually works, set -u bites otherwise
+
+work/allin1/bin/python portal/cue/bars.py <song>          # read the song first
+work/allin1/bin/python portal/cue/author.py <song>        # write the cue list
+cp portal/cue/shows/<song>.cues.json portal/work/<song>.plan.json
+node portal/cue/bake.js <song> --out /tmp/x.json          # render
+work/allin1/bin/python portal/publish.py <song>           # into the UI
+node portal/look.js <song>                                # look at it
+python3 tools/contact.py /tmp/x.json "$(node -e "console.log(require('./protocol/fixture.js').pick('<song>'))")" /tmp/x.png arc4-head
+node portal/cue/render.test.js                            # 19 checks
+```
+
+The portal bakes from `portal/work/<song>.plan.json`. A plan carrying `cues` goes to
+the new engine; anything else to the old one.
+
+---
+
+## 6. What "good" means here, with current numbers
+
+These are the measurements that actually track Amal's judgement. Re-measure after
+any change; several of them contradict intuition.
+
+| measure | now (raga-of-revenge) | why it matters |
+| --- | --- | --- |
+| rises landing on a measured percussive hit | 92% | the show hits with the music |
+| colour changes | 27, one every 4.9s, median hold 4.5s | colour churn reads as random |
+| longest idle stretch | 3.9s | he calls idle "lazy" |
+| changes per second inside a build | 3.0 | a build must accumulate, not accelerate |
+| one-frame flashes | 0 | a 25ms flash reads as a broken lamp |
+| blackout | 5.6s, all on measured audio holes | rarity is what makes one mean something |
+| peak | reaches 255, once, at the loudest instant | full is spent once |
+
+Verified across six songs and both rigs:
+
+```
+  song                      rises  on hit  colour  hold   idle   black  flash
+  raga-of-revenge              52     92%      27  4.5s   3.9s   5.6s      0
+  afterglow                   101     98%      28  5.5s   4.7s   4.7s      0
+  levels                       87     93%      33  5.6s   6.8s   6.5s      0
+  the-nights                   27     89%      34  4.8s   5.0s   4.5s      0
+  nebulakal                    87     98%      52  4.8s   8.7s  21.9s      0
+  leva-between-worlds-60s      49     98%      10  4.0s   1.9s   1.2s      0
+```
+
+`the-nights` has few rises because it has 0.49 strong hits/second — that is the
+song. `nebulakal` blacks out for 21.9s because it genuinely opens with 16s of
+near-silence. Both are correct, not bugs.
+
+Rig-generic: the same cue list bakes on `club16-2head` (16 lamps + 2 heads)
+unchanged.
+
+---
+
+## 7. How the author decides things
+
+Read `portal/cue/author.py` alongside this.
+
+- **A cue appears** where the music does something: a moment, a decisive change of
+  leading instrument family, or 7+ stems entering/leaving in a bar. **Section edges
+  deliberately do not force a cue** — Amal's instruction: a section is one place a
+  change might belong, not a place one must happen.
+- **Level** = measured bar energy × an arc that climbs to the song's peak moment and
+  releases after it. Mapping level straight onto energy gives a flat show on songs
+  whose energy is constant; a designer shapes the arc.
+- **Colour** comes from the leading instrument family's cool→warm ramp, indexed by
+  the **harmonic mode** of the emotion span under the cue, nudged by its brightness.
+  Minor pulls toward indigo and violet, major toward amber and saffron.
+- **Colour discipline**: a family must beat the incumbent by 30% to take the lead
+  (it was flipping on 1.8% margins); harmonic colour cues need 6s between them; and
+  a final pass holds any colour for 4s unless a peak, climax, drop, breakdown,
+  register shift or blackout asks otherwise.
+- **The moment type picks the treatment**: pause/exit → blackout, peak → full white
+  with a pulse on the hits, climax/drop → full blast, build → accumulate, breakdown
+  → empty to the middle, entrance → snap and hand over, spotlight → the head points
+  and the row stays level.
+- **Blackouts come from the audio**, not the score: `holes_in()` finds every stretch
+  below 30% of median RMS lasting 140ms+. A half-second hole inside a loud bar is
+  invisible at bar resolution — this is how 0:48 in raga was found.
+- **Builds are detected** (3+ bars of rising energy ending 25% up) and treated as a
+  unit: figures step every 2 beats rather than on every hit, and the swell spans the
+  whole run rather than resetting each bar.
+
+---
+
+## 8. Traps — mistakes already made here, do not repeat
+
+- **The wrong referee.** This is the recurring failure. Examples that cost real
+  time: measuring the odd lamp on the **dimmer** channel when a par7 profile carries
+  brightness in the **colour** channels with master pinned at 255; calling the beat
+  grid unaligned because librosa's onset strength peaks *after* the transient and I
+  sampled one 23ms frame; reading sync as *worse* after adding accents because the
+  raw change count counts an accent's **decay** as a second change (measure rises).
+- **Chord boundaries are not on the beat** — median 143ms off, only 30% within 80ms.
+  That is the recogniser's frame grid. Quantise chord edges to beats before using them.
+- **`pkill -f "claude_composer.py ..."` matches your own shell** and kills it. Use PIDs.
+- **`setsid nohup cmd &` makes `$!` the setsid PID**, not the child's. Killing `$!`
+  leaves the real process alive, and orphans then overwrite files mid-run.
+- **Emulator judder is arithmetic, not slowness.** A 40fps show on a 60Hz display
+  holds each frame 1 refresh then 2. Both renderers now blend the two frames either
+  side of the playhead (`blendedFrame` in `limelight-ui/lib/sync.ts`). Do not
+  "optimise" that away.
+- **Post-passes in `author.py` are order-sensitive.** Holes must run *last*; when
+  they ran first, a hole's "and back" cue restored the pre-hole colour and reverted
+  a later harmonic colour change. Also don't strip `_t` before the final pass — that
+  bug made every cue read as t=0 and inherit the last cue of the song.
+- **Anything chosen by `len(cues) % n` is a bug.** Two of these shipped and both
+  read to Amal as randomness. A choice needs a reason in the music.
+
+---
+
+## 9. Open items
+
+- **The composer is not wired to the new engine.** `portal/claude_composer.py` still
+  writes old-model plans against a 37KB brief describing the dead model. Cue lists
+  are currently written by `author.py`, which is deterministic — it has no judgement
+  about which of several valid treatments suits a song. Teaching the composer to
+  author cue lists is the biggest remaining piece.
+- **29 other songs are untouched.** `author.py` runs on them (verified on five), but
+  nobody has watched those shows.
+- The head still only pans and dims. It has tilt, strobe, gobo, prism and a colour
+  wheel doing nothing.
+- Accents are only `bone` and `saffron`; they could take palette colours.
+- `nebulakal` has an 8.7s idle stretch worth a look.
+- The old composer path, `portal/venues/*` effects and `portal/baker.js` are all
+  still live. Decide with Amal whether to retire them.
+
+---
+
+## 10. Where the reasoning is
+
+Every change in this work is committed with a message explaining the measurement
+that motivated it and the numbers before and after. `git log` on `limelight-portal`
+is the real design document — read the last ~10 commits before changing the engine.

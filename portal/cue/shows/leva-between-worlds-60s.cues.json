@@ -1,0 +1,878 @@
+{
+ "schema": "limelight.cuelist/1",
+ "song": "leva-between-worlds-60s",
+ "rig": "arc4-head",
+ "palette": {
+  "ink": "#140a12",
+  "oxblood": "#3d0812",
+  "blood": "#a3081c",
+  "crimson": "#c8102e",
+  "scarlet": "#f01a10",
+  "ember": "#ff5a0a",
+  "amber": "#ffa016",
+  "saffron": "#ffd166",
+  "violet": "#6a2ca0",
+  "indigo": "#2a3f9e",
+  "teal": "#0e8a8a",
+  "bone": "#ffffff"
+ },
+ "cues": [
+  {
+   "id": 1,
+   "at": {
+    "bar": 1
+   },
+   "fade": 0.6,
+   "why": "bar 1 (climbing): guitars leads, E 1.46, 9 hits, mode ? - build in ember",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.23
+    },
+    "heads": {
+     "c": "ember",
+     "l": 0.16,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "build",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ],
+   "swell": {
+    "from": 0.62,
+    "to": 0.658,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 2,
+   "at": {
+    "bar": 6
+   },
+   "fade": 0.12,
+   "why": "melody_resume at 10.0s - guitars lead, E 2.51",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.38
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "handover",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45,
+    "move_head": true
+   },
+   "swell": {
+    "from": 0.81,
+    "to": 0.848,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 3,
+   "at": {
+    "bar": 9
+   },
+   "fade": 0.0,
+   "why": "drop at 16.0s - everything arrives at once",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.72
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.6,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  },
+  {
+   "id": 4,
+   "at": {
+    "second": 26.02
+   },
+   "fade": 0.55,
+   "look": {
+    "lamps": {
+     "c": "blood",
+     "l": 0.53
+    },
+    "heads": {
+     "c": "blood",
+     "l": 0.37,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "why": "the harmony turns here - mode -1.00, anticipation. Colour moves to blood on the chord change",
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  },
+  {
+   "id": 5,
+   "at": {
+    "bar": 16
+   },
+   "fade": 0.5,
+   "why": "register_shift at 30.0s - the figure changes with the music",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.52
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
+   "id": 6,
+   "at": {
+    "bar": 17
+   },
+   "fade": 0.15,
+   "why": "bar 17: keys leads, E 5.18, 6 hits, mode -1.00 - comet in indigo against ember inside",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.77
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.54,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": true
+    },
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 3
+     },
+     "low": 0.55,
+     "c": "ember"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "at": {
+    "bar": 18
+   },
+   "fade": 0.35,
+   "why": "bar 18: keys leads, E 3.10, 7 hits, mode -1.00 - alternate in indigo against teal inside",
+   "look": {
+    "outer": {
+     "c": "indigo",
+     "l": 0.56
+    },
+    "inner": {
+     "c": "teal",
+     "l": 0.45
+    },
+    "heads": {
+     "c": "teal",
+     "l": 0.39,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": false
+    },
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 3
+     },
+     "low": 0.55,
+     "c": "teal"
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "at": {
+    "bar": 19
+   },
+   "fade": 0.35,
+   "why": "bar 19: keys leads, E 5.64, 6 hits, mode -0.60 - handover in indigo against ember inside",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.84
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.59,
+     "pan": 0.5,
+     "tilt": 0.42
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": true
+    },
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 3
+     },
+     "low": 0.55,
+     "c": "ember"
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "at": {
+    "second": 36.02
+   },
+   "fade": 0.55,
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.84
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.59,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "why": "the harmony turns here - mode -0.60, anticipation. Colour moves to indigo on the chord change",
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  },
+  {
+   "id": 10,
+   "at": {
+    "bar": 20
+   },
+   "fade": 0.35,
+   "why": "bar 20: keys leads, E 3.63, 6 hits, mode -0.20 - wave in indigo against ember inside",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.63
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.44,
+     "pan": 0.5,
+     "tilt": 0.22
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": true
+    },
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 3
+     },
+     "low": 0.55,
+     "c": "ember"
+    }
+   ],
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
+   }
+  },
+  {
+   "id": 11,
+   "at": {
+    "bar": 21
+   },
+   "fade": 0.0,
+   "why": "PEAK at 40.5s - the loudest instant in the recording. Full blast, the only white",
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 1.0
+    },
+    "heads": {
+     "c": "bone",
+     "l": 1.0,
+     "pan": 0.5,
+     "tilt": 0.26
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.6
+   }
+  },
+  {
+   "id": 12,
+   "at": {
+    "second": 42.02
+   },
+   "fade": 0.55,
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 0.85
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.59,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "why": "the harmony turns here - mode +0.60, anticipation. Colour moves to scarlet on the chord change",
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  },
+  {
+   "id": 13,
+   "at": {
+    "bar": 23
+   },
+   "fade": 0.35,
+   "why": "bar 23: keys leads, E 5.29, 0 hits, mode +1.00 - bounce in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.71
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.5,
+     "pan": 0.5,
+     "tilt": 0.42
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "at": {
+    "bar": 24
+   },
+   "fade": 0.35,
+   "why": "bar 24: keys leads, E 3.26, 0 hits, mode +1.00 - comet in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.48
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.34,
+     "pan": 0.5,
+     "tilt": 0.22
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ],
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
+   }
+  },
+  {
+   "id": 15,
+   "at": {
+    "bar": 25
+   },
+   "fade": 0.0,
+   "why": "climax at 48.0s - everything arrives at once",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.8400000000000001
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.6,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  },
+  {
+   "id": 16,
+   "at": {
+    "second": 48.02
+   },
+   "fade": 0.55,
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.64
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.45,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "why": "the harmony turns here - mode +0.60, anticipation. Colour moves to violet on the chord change",
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  },
+  {
+   "id": 17,
+   "at": {
+    "bar": 26
+   },
+   "fade": 0.12,
+   "why": "entrance at 51.5s - keys lead, E 3.31",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.41
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "handover",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45,
+    "move_head": true
+   }
+  },
+  {
+   "id": 18,
+   "at": {
+    "bar": 27
+   },
+   "fade": 0.35,
+   "why": "bar 27: keys leads, E 5.73, 1 hits, mode -0.20 - bounce in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.55
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.39,
+     "pan": 0.5,
+     "tilt": 0.42
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "at": {
+    "bar": 28
+   },
+   "fade": 0.5,
+   "why": "rhythm_change at 55.5s - the figure changes with the music",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.34
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
+   "id": 20,
+   "at": {
+    "second": 56.52
+   },
+   "fade": 0.55,
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.2,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "why": "the harmony turns here - mode -0.99, anticipation. Colour moves to indigo on the chord change",
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 56.959
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 0% of its median for 3.07s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 21,
+   "at": {
+    "bar": 30
+   },
+   "fade": 0.35,
+   "why": "bar 30: keys leads, E 0.19, 0 hits, mode -0.99 - converge in indigo",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.08
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.06,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "at": {
+    "second": 60.024
+   },
+   "fade": 0.06,
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.2,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "why": "and back, the instant the audio returns",
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  }
+ ],
+ "accents": [
+  {
+   "t": 1.556,
+   "l": 0.55,
+   "decay": 0.15,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 3.553,
+   "l": 0.62,
+   "decay": 0.15,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 4.807,
+   "l": 0.67,
+   "decay": 0.15,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 6.803,
+   "l": 0.72,
+   "decay": 0.15,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 8.8,
+   "l": 0.77,
+   "decay": 0.15,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 10.054,
+   "l": 0.81,
+   "decay": 0.15,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 17.554,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "saffron"
+  },
+  {
+   "t": 19.551,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 20.55,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 22.547,
+   "l": 0.98,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 25.054,
+   "l": 0.98,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 27.051,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 28.05,
+   "l": 0.97,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 31.045,
+   "l": 0.93,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 32.044,
+   "l": 0.9,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "saffron"
+  },
+  {
+   "t": 34.551,
+   "l": 0.92,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "saffron"
+  },
+  {
+   "t": 36.548,
+   "l": 0.76,
+   "decay": 0.15,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 39.056,
+   "l": 0.8,
+   "decay": 0.15,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 40.054,
+   "l": 0.82,
+   "decay": 0.15,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 42.051,
+   "l": 0.73,
+   "decay": 0.15,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 51.316,
+   "l": 0.71,
+   "decay": 0.15,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 55.31,
+   "l": 0.76,
+   "decay": 0.15,
+   "on": "outer",
+   "c": "saffron"
+  }
+ ]
+}
