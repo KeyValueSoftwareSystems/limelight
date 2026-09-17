@@ -1563,11 +1563,11 @@
       "effect": "impact",
       "colour": "#ffffff",
       "extent": "all",
-      "at_s": 49.75,
+      "at_s": 49.69,
       "for_beats": 2,
       "fade_ms": 0,
       "head": false,
-      "why": "Drop 1 lands: the impact."
+      "why": "Drop 1 lands: the impact -- 60 ms ahead of the grid beat, where it felt right in the room."
     },
     {
       "effect": "beam",
@@ -1579,7 +1579,7 @@
       "prism": 100,
       "strobe": 20,
       "strobe_on": "always",
-      "from_s": 49.75,
+      "from_s": 49.69,
       "to_s": 50.26,
       "fade_ms": 0,
       "why": "…and the head at full, white, strobing, for that beat."
@@ -1589,7 +1589,7 @@
       "colour": "#ffffff",
       "amount": 1,
       "extent": "all",
-      "from_s": 49.753,
+      "from_s": 49.693,
       "to_s": 50.26,
       "fade_ms": 0,
       "head": false,

@@ -125,7 +125,7 @@ black(bar(22), 49.75, "Bar 22: the whole band falls away at 47.7 (the score's pa
 flicks(syll[0] - 0.001, 49.75, "\"pa da ni sa ri\": a hard white flick on each of the six syllables the score hears at " + syll.map(t => t.toFixed(2)).join(", ") + " -- the sudden transitions -- with black between them, then the drop.");
 parked();
 /* ======================= DROP 1 (bars 23-29, 49.75-63.76) ======================= */
-land(49.75, "Drop 1 lands: the impact.");
+land(49.75 - 0.06, "Drop 1 lands: the impact -- 60 ms ahead of the grid beat, where it felt right in the room.");
 drive(49.75, bar(26), 0.80, [RED, BLUE], "Bars 23-25: the drop arrives. Red and blue trade bars on a high floor, a hit on every beat by its measured weight.");
 hit(WHITE, 52.76, 1, "52.76, the score's climax moment: one white beat.");
 glide(beatAfter(50.0), bar(25), [L, 0.50], RED, 0.70, DROPHEAD, "Drop 1: the head glides from one side of the room to the other over two bars -- a slow pendulum on the bar grid, prism on, a strobe pop on each downbeat. The same pendulum in every drop.");
