@@ -164,34 +164,38 @@
   --grad-warm: var(--lit);
   --neon-ring: 0 0 0 1px rgba(110, 151, 206, 0.35), 0 0 12px -4px rgba(110, 151, 206, 0.3);
 
-  --mat-raised: linear-gradient(180deg, #2C3140 0%, #212634 45%, #191D28 100%);
-  --mat-raised-hover: linear-gradient(180deg, #353B4C 0%, #282E3D 45%, #1F2430 100%);
-  --mat-raised-press: linear-gradient(180deg, #1B1F2A 0%, #20242F 100%);
-  --mat-raised-edge: inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.38);
-  --mat-raised-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  --mat-raised: linear-gradient(180deg, #262B36 0%, #20242E 50%, #1B1F28 100%);
+  --mat-raised-hover: linear-gradient(180deg, #2F3441 0%, #272C37 50%, #22262F 100%);
+  --mat-raised-press: linear-gradient(180deg, #1A1E27 0%, #1F232C 100%);
+  --mat-raised-edge: inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+  --mat-raised-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), 0 6px 18px rgba(0, 0, 0, 0.3);
   --mat-pressed: inset 0 2px 5px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(0, 0, 0, 0.45);
 
   --mat-recessed: linear-gradient(180deg, #070910 0%, #0B0E16 55%, #10131C 100%);
   --mat-recessed-edge: inset 0 2px 5px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(0, 0, 0, 0.5),
     inset 0 -1px 0 rgba(255, 255, 255, 0.06);
 
-  --mat-accent: linear-gradient(180deg, #8AACDC 0%, #6E97CE 45%, #587FB6 100%);
-  --mat-accent-hover: linear-gradient(180deg, #99B8E4 0%, #7CA3D6 45%, #668CC1 100%);
-  --mat-accent-press: linear-gradient(180deg, #5C82B8 0%, #6B93C8 100%);
-  --mat-accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.2);
-  --mat-accent-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.26);
+  --mat-accent: linear-gradient(180deg, #7FA4D8 0%, #6E97CE 50%, #6088C0 100%);
+  --mat-accent-hover: linear-gradient(180deg, #8CAFDF 0%, #7BA1D5 50%, #6E94C8 100%);
+  --mat-accent-press: linear-gradient(180deg, #6088C0 0%, #6E97CE 100%);
+  --mat-accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07), inset 0 -1px 2px rgba(0, 0, 0, 0.16);
+  --mat-accent-shadow: 0 1px 1px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(96, 136, 192, 0.22);
 
   --mat-on: linear-gradient(180deg, #141922 0%, #1A2029 100%);
   --mat-on-edge: inset 0 2px 5px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(0, 0, 0, 0.45),
     inset 0 -1px 0 rgba(255, 255, 255, 0.07);
 
-  --deboss: 0 -1px 0 rgba(0, 0, 0, 0.55);
+  --deboss: 0 1px 0 rgba(0, 0, 0, 0.4);
   --emboss-dark: 0 1px 0 rgba(255, 255, 255, 0.28);
 
-  --gloss: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%,
-    rgba(255, 255, 255, 0.035) 48%, rgba(255, 255, 255, 0) 49%);
+  --gloss: linear-gradient(180deg, rgba(255, 255, 255, 0.075) 0%,
+    rgba(255, 255, 255, 0.022) 52%, rgba(255, 255, 255, 0) 53%);
+  --glass-face: rgba(26, 30, 40, 0.62);
+  --glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 1px 1px rgba(0, 0, 0, 0.4), 0 10px 34px rgba(0, 0, 0, 0.42);
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
 
   --key-face: var(--mat-raised);
@@ -553,4 +557,18 @@ a:focus-visible,
 @media (prefers-reduced-motion: reduce) {
   .mat-key, .mat-accent-key { transition: none; }
   .mat-key:active:not(:disabled), .mat-accent-key:active:not(:disabled) { transform: none; }
+}
+
+/* Glass, for chrome that floats over the room: translucent, blurred, with a
+   specular hairline on the top edge where the light would catch. */
+.mat-glass {
+  background: var(--glass-face);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
+  border: 0;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .mat-glass { background: #161A23; }
 }

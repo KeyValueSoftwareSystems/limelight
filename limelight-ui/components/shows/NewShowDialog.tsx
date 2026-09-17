@@ -65,8 +65,7 @@ export function NewShowDialog({
       aria-label="New show"
     >
       <div
-        className="flex flex-col w-full max-w-[760px] max-h-[82vh] rounded-[var(--radius-md)] overflow-hidden animate-scale-in"
-        style={{ background: "var(--bg-raised)", boxShadow: "var(--elev-modal)" }}
+        className="mat-glass flex flex-col w-full max-w-[760px] max-h-[82vh] rounded-[var(--radius-xl)] overflow-hidden animate-scale-in"
       >
         <div className="flex-none flex items-start gap-[14px] px-[22px] pt-[20px] pb-[14px]">
           <div className="min-w-0 flex-1">

@@ -45,7 +45,7 @@ function Btn({
   const tone = danger
     ? "text-danger bg-transparent hover:bg-danger/[0.14] disabled:hover:bg-transparent"
     : active
-      ? "text-ink"
+      ? "mat-on text-ink"
       : "bg-transparent text-ink-dim hover:text-ink hover:bg-[var(--surface-2)]";
   return (
     <button
@@ -55,7 +55,6 @@ function Btn({
       disabled={disabled}
       aria-pressed={active}
       className={`${BASE} ${tone} ${icon ? "w-[26px]" : "px-[9px]"} ${LABEL}`}
-      style={active && !danger ? { background: "var(--key-on-face)", boxShadow: "var(--key-on-edge)" } : undefined}
     >
       {children}
     </button>
@@ -140,12 +139,7 @@ export function TransportBar({
         onClick={onToggle}
         aria-pressed={playing}
         title={playing ? "Pause (space)" : "Play (space)"}
-        className="flex-none inline-flex items-center justify-center w-[32px] h-[32px] rounded-full border-0 cursor-pointer transition-[background-color,transform] duration-[var(--dur-state)] active:scale-[0.94]"
-        style={
-          playing
-            ? { background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo)" }
-            : { background: "var(--key-face)", color: "var(--ink)", boxShadow: "var(--key-edge), var(--key-lift)" }
-        }
+        className={`${playing ? "mat-accent-key" : "mat-key"} gloss flex-none inline-flex items-center justify-center w-[32px] h-[32px] rounded-full cursor-pointer`}
       >
         <svg width="13" height="13" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
           {playing ? (
@@ -336,10 +330,7 @@ export function TransportBar({
 
       <Rule />
 
-      <span
-        className="inline-flex items-center gap-px rounded-[6px] p-px"
-        style={{ background: "var(--surface-1)" }}
-      >
+      <span className="mat-well inline-flex items-center gap-px rounded-[7px] p-[2px]">
         <Btn onClick={onZoomOut} icon title="Zoom out (scroll down over the timeline)">
           <span aria-hidden>−</span>
           <span className="sr-only">Zoom out</span>

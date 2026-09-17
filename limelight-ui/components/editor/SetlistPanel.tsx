@@ -43,9 +43,8 @@ export function SetlistPanel() {
                 );
               }}
               className={`w-full flex items-center gap-[9px] px-[8px] py-[6px] rounded-[6px] border-0 text-left cursor-pointer transition-colors duration-150 ${
-                on ? "" : "bg-transparent hover:bg-[var(--surface-1)]"
+                on ? "mat-on" : "bg-transparent hover:bg-[var(--surface-1)]"
               }`}
-              style={on ? { background: "var(--key-on-face)", boxShadow: "var(--key-on-edge)" } : undefined}
             >
               <span
                 className="mono flex-none w-[14px] text-[10px] tabular-nums text-right"
