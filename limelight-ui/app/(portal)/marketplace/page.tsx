@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
 import { ListingCard } from "@/components/marketplace/ListingCard";
 import { ListForm } from "@/components/marketplace/ListForm";
+import { Button } from "@/components/ui";
 
 export default function MarketplacePage() {
   const market = usePortalStore((s) => s.market);
   const setMarket = usePortalStore((s) => s.setMarket);
   const role = usePortalStore((s) => s.role);
+  const [listing, setListing] = useState(false);
 
   const fetchMarket = useCallback(() => {
     api.market.list().then((d) => setMarket(d.listings)).catch(() => {});
@@ -21,29 +23,52 @@ export default function MarketplacePage() {
 
   return (
     <div className="flex flex-col overflow-hidden flex-1">
-      <div className="flex-none px-[var(--spacing-s6)] pt-[var(--spacing-s5)] pb-[var(--spacing-s4)] border-b border-solid border-line">
-        <div className="display">Marketplace</div>
-        <div className="label mt-[7px]">
-          {market.length} listing{market.length === 1 ? "" : "s"}
-        </div>
-        <div className="muted mt-[var(--spacing-s2)]">
-          Surface only — no payments or licences are exchanged yet.
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto px-[var(--spacing-s6)] pt-[var(--spacing-s5)] pb-[var(--spacing-s7)]">
-        {role === "creator" && (
-          <div className="mb-[var(--spacing-s5)]">
-            <ListForm onListed={fetchMarket} />
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="liquid liquid-flush sticky top-0 z-30 px-[28px] pt-[20px] pb-[16px]">
+          <div className="flex items-center gap-[20px] flex-wrap">
+            <div className="min-w-0">
+              <h1 className="text-[26px] font-semibold tracking-[-0.025em] m-0 leading-[1.15] text-ink">
+                Marketplace
+              </h1>
+              <p className="text-[12.5px] text-ink-dimmer mt-[4px] m-0 leading-[1.3]">
+                {market.length} listing{market.length === 1 ? "" : "s"}
+                {" · "}
+                shows other designers have published. No payments are exchanged yet.
+              </p>
+            </div>
+
+            <span className="flex-1 min-w-[16px]" />
+
+            {role === "creator" && (
+              <Button variant="primary" onClick={() => setListing((v) => !v)}>
+                {listing ? "Close" : "List a show"}
+              </Button>
+            )}
           </div>
-        )}
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[var(--spacing-s4)]">
-          {market.map((listing) => (
-            <ListingCard key={listing.show_id} listing={listing} />
-          ))}
         </div>
-        {!market.length && (
-          <div className="text-dim text-center py-[var(--spacing-s7)]">No listings yet</div>
-        )}
+
+        <div className="px-[28px] pt-[18px] pb-[48px]">
+          {role === "creator" && listing && (
+            <div className="mb-[22px]">
+              <ListForm onListed={() => { fetchMarket(); setListing(false); }} />
+            </div>
+          )}
+
+          {market.length > 0 ? (
+            <div className="card-grid">
+              {market.map((l) => (
+                <ListingCard key={l.show_id} listing={l} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-[92px]">
+              <p className="text-[17px] font-semibold text-ink m-0">Nothing listed yet</p>
+              <p className="text-[13px] text-ink-dim mt-[8px] mb-0 text-center max-w-[380px] leading-[1.6]">
+                Publish a show here and any room running Limelight can pick it up.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

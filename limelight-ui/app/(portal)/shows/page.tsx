@@ -117,7 +117,14 @@ export default function ShowsPage() {
 
   return (
     <div className="flex flex-col overflow-hidden flex-1 animate-in">
-      <div className="flex-none px-[28px] pt-[24px] pb-[18px]">
+      <NewShowDialog
+        open={picking}
+        onClose={() => setPicking(false)}
+        onCreate={startShow}
+      />
+
+      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="liquid liquid-flush sticky top-0 z-30 flex-none px-[28px] pt-[20px] pb-[16px]">
         <div className="flex items-center gap-[20px] flex-wrap">
           <div className="min-w-0">
             <h1 className="text-[26px] font-semibold tracking-[-0.025em] m-0 leading-[1.15] text-ink">
@@ -154,15 +161,9 @@ export default function ShowsPage() {
         </div>
       </div>
 
-      <NewShowDialog
-        open={picking}
-        onClose={() => setPicking(false)}
-        onCreate={startShow}
-      />
-
-      <div className="flex-1 overflow-y-auto px-[28px] pb-[48px]">
+        <div className="px-[28px] pt-[18px] pb-[48px]">
         {loading && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(184px,1fr))] gap-[16px] pt-[4px]">
+          <div className="card-grid pt-[4px]">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="rounded-[var(--radius-md)] overflow-hidden" style={{ animationDelay: `${i * 50}ms` }}>
                 <div className="aspect-[210/130] skeleton" />
@@ -173,7 +174,7 @@ export default function ShowsPage() {
         )}
 
         {!loading && rows.length > 0 && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(184px,1fr))] gap-[16px] pt-[4px]">
+          <div className="card-grid pt-[4px]">
             {rows.map((sf, i) => (
               <div
                 key={sf.id}
@@ -221,6 +222,7 @@ export default function ShowsPage() {
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

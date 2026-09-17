@@ -97,7 +97,7 @@ export default function VenuesPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] auto-rows-max gap-[var(--spacing-s4)] px-[var(--spacing-s6)] pt-[var(--spacing-s5)] pb-[var(--spacing-s7)] content-start">
+      <div className="flex-1 overflow-y-auto card-grid px-[28px] pt-[18px] pb-[48px]">
         {shown.map((v) => (
           <VenueCard key={v.id} venue={v} layouts={layouts} onDesign={handleDesign} />
         ))}

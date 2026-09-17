@@ -2,12 +2,22 @@
 
 import { useRef, useState, useEffect } from "react";
 import type { MarketListing } from "@/lib/types";
-import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { LivePreview } from "./LivePreview";
 
 interface ListingCardProps {
   listing: MarketListing;
+}
+
+function Tag({ children, tone = "plain" }: { children: React.ReactNode; tone?: "plain" | "warn" }) {
+  return (
+    <span
+      className={`liquid-well px-[7px] py-[2px] rounded-full text-[10.5px] leading-[15px] flex-none ${
+        tone === "warn" ? "text-warn" : "text-ink-dim"
+      }`}
+    >
+      {children}
+    </span>
+  );
 }
 
 export function ListingCard({ listing }: ListingCardProps) {
@@ -29,34 +39,45 @@ export function ListingCard({ listing }: ListingCardProps) {
   const tel = listing.telemetry;
 
   return (
-    <Card>
-      <div ref={containerRef} className="aspect-video bg-[#07090f]">
+    <article className="panel panel-lift flex flex-col rounded-[var(--radius-lg)] overflow-hidden">
+      <div ref={containerRef} className="aspect-[3/2] bg-[#05070C]">
         <LivePreview listing={listing} visible={visible} />
       </div>
-      <div className="px-[var(--spacing-s3)] pt-[var(--spacing-s3)] pb-[var(--spacing-s2)]">
-        <b className="block text-[length:var(--text-lg)] font-medium truncate">{show.name}</b>
-        <span className="block mt-1 text-[length:var(--text-sm)] text-dim">
-          by {show.author} · {show.song} · seed {show.seed}
-        </span>
+
+      <div className="flex flex-col gap-[7px] px-[14px] pt-[12px] pb-[13px]">
+        <div className="min-w-0">
+          <span className="block text-[14px] font-semibold tracking-[-0.012em] text-ink truncate">
+            {show.name}
+          </span>
+          <span className="block mt-[3px] text-[11.5px] text-ink-dim truncate">
+            {show.song} · by {show.author}
+          </span>
+        </div>
+
         {listing.blurb && (
-          <p className="mt-[var(--spacing-s2)] text-[length:var(--text-sm)] text-dim leading-[1.5] m-0">
+          <p
+            className="m-0 text-[12px] text-ink-dim leading-[1.5] overflow-hidden"
+            style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", minHeight: "36px" }}
+          >
             {listing.blurb}
           </p>
         )}
-        <div className="flex items-center gap-[var(--spacing-s2)] mt-[var(--spacing-s3)]">
-          <Badge>{listing.tier}</Badge>
-          <Badge>{listing.kind}</Badge>
-          {listing.stand_in && <Badge variant="warn">stand-in</Badge>}
-          {listing.example && <Badge variant="accent">example</Badge>}
+
+        <div className="flex items-center gap-[5px] flex-wrap">
+          <Tag>{listing.tier === "free" ? "Free" : "Paid"}</Tag>
+          <Tag>{listing.kind.charAt(0).toUpperCase() + listing.kind.slice(1)}</Tag>
+          {listing.stand_in && <Tag tone="warn">Stand-in rig</Tag>}
+          {listing.example && <Tag>Example</Tag>}
         </div>
-        {tel.measured && (
-          <span className="block mt-[var(--spacing-s2)] text-[length:var(--text-xs)] text-dimmer">
-            {tel.plays != null ? `${tel.plays} plays` : "no telemetry"}
-            {tel.took_control ? ` · took control ${tel.took_control}×` : ""}
-            {tel.blackout ? ` · blacked out ${tel.blackout}×` : ""}
-          </span>
-        )}
+
+        <span className="mono text-[10.5px] text-ink-dimmer tabular-nums">
+          {tel.measured
+            ? `${tel.plays ?? 0} play${tel.plays === 1 ? "" : "s"}` +
+              (tel.took_control ? ` · took control ${tel.took_control}×` : "") +
+              (tel.blackout ? ` · blacked out ${tel.blackout}×` : "")
+            : "No telemetry yet"}
+        </span>
       </div>
-    </Card>
+    </article>
   );
 }

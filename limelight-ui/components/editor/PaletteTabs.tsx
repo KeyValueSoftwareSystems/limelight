@@ -66,10 +66,8 @@ function Tile({
       className="flex flex-col items-center gap-[6px] bg-transparent border-0 p-0 cursor-grab active:cursor-grabbing touch-none group"
     >
       <span
-        className={`w-full aspect-square flex items-center justify-center rounded-[7px] border border-solid transition-colors duration-[var(--dur-state)] ${
-          active
-            ? "border-accent bg-accent/10"
-            : "border-line group-hover:border-line-strong group-hover:bg-bg-raised"
+        className={`w-full aspect-square flex items-center justify-center rounded-[var(--radius-sm)] transition-[background,box-shadow] duration-[var(--dur-state)] ${
+          active ? "liquid-well" : "liquid liquid-key"
         }`}
       >
         <Image
@@ -83,7 +81,7 @@ function Tile({
       </span>
       <span
         className={`text-[10px] leading-[12px] truncate max-w-full transition-colors duration-[var(--dur-state)] ${
-          active ? "text-accent" : "text-ink-dim"
+          active ? "text-ink" : "text-ink-dim"
         }`}
       >
         {label}
@@ -115,19 +113,26 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
 
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col">
-      <div className="flex-none flex gap-[16px] px-[16px] pt-[12px] border-b border-solid border-white/[0.05]">
-        {(["effects", "styles"] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setTab(t)}
-            className={`pb-[8px] bg-transparent border-0 border-b-2 border-solid cursor-pointer text-[12px] font-semibold tracking-[0.01em] capitalize transition-colors duration-200 ${
-              tab === t ? "text-ink border-b-accent" : "text-ink-dimmer border-b-transparent hover:text-ink-dim"
-            }`}
-          >
-            {t}
-          </button>
-        ))}
+      <div className="flex-none px-[12px] pt-[12px] pb-[10px]">
+        <div className="liquid-well flex items-stretch gap-[2px] h-[30px] p-[2px] rounded-[7px]" role="tablist">
+          {(["effects", "styles"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              role="tab"
+              aria-selected={tab === t}
+              onClick={() => setTab(t)}
+              className={`flex-1 rounded-[5px] border-0 cursor-pointer text-[12px] capitalize
+                transition-colors duration-[var(--dur-state)] ${
+                tab === t
+                  ? "liquid liquid-key font-medium text-ink"
+                  : "bg-transparent font-normal text-ink-dim hover:text-ink"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* the only thing in the rail that scrolls */}

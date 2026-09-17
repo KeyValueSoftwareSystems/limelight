@@ -9,10 +9,12 @@ const TABS: Record<Role, { id: string; label: string; href: string }[]> = {
   creator: [
     { id: "shows", label: "Shows", href: "/shows" },
     { id: "venues", label: "Venues", href: "/venues" },
+    { id: "marketplace", label: "Marketplace", href: "/marketplace" },
   ],
   venue: [
     { id: "shows", label: "Shows", href: "/shows" },
     { id: "venues", label: "Rooms", href: "/venues" },
+    { id: "marketplace", label: "Marketplace", href: "/marketplace" },
   ],
 };
 

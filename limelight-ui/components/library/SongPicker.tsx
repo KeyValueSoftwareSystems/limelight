@@ -84,7 +84,7 @@ export function SongPicker({
 
       <div className="flex-1 min-h-0 overflow-y-auto pb-[48px]">
         {!loaded && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[14px] pt-[4px]">
+          <div className="card-grid pt-[4px]">
             {Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="rounded-[var(--radius-md)] overflow-hidden" style={{ animationDelay: `${i * 50}ms` }}>
                 <div className="aspect-[4/3] skeleton" />
@@ -98,7 +98,7 @@ export function SongPicker({
         )}
 
         {loaded && filtered.length > 0 && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[14px] pt-[4px]">
+          <div className="card-grid pt-[4px]">
             {filtered.map((song, i) => (
               <div key={song.name} className="animate-in overflow-hidden" style={{ animationDelay: `${Math.min(i * 26, 360)}ms` }}>
                 <SongCard

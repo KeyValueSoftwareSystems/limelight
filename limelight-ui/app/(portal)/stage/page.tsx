@@ -12,6 +12,7 @@ import { colourName, hexToRgb01, extractPalette, paletteChanged } from "@/lib/pa
 import * as api from "@/lib/api";
 
 import { StagePreview } from "@/components/stage/StagePreview";
+import { TransportPill } from "@/components/editor/TransportPill";
 import { TargetLine } from "@/components/stage/TargetLine";
 import { ConsolePanel } from "@/components/stage/ConsolePanel";
 import { RigPanel } from "@/components/stage/RigPanel";
@@ -1067,11 +1068,22 @@ export default function StagePage() {
             <TargetLine onOpenVenuePicker={() => setVenuePickerOpen(true)} />
           </div>
 
-          <StagePreview
-            clockRef={clockRef}
-            playing={isPlaying}
-            currentTime={currentTime}
-          />
+          <div className="relative flex-1 min-h-0 flex flex-col">
+            <StagePreview
+              clockRef={clockRef}
+              playing={isPlaying}
+              currentTime={currentTime}
+            />
+            {song && (
+              <TransportPill
+                currentTime={currentTime}
+                duration={show?.duration_s ?? song.duration_s ?? 0}
+                grid={show?.grid ?? null}
+                playing={isPlaying}
+                onToggle={handleToggle}
+              />
+            )}
+          </div>
 
           {isBaking ? (
             <div className="flex-none px-[16px] py-[8px]">

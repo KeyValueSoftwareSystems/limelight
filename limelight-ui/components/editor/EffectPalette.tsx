@@ -109,21 +109,9 @@ export function EffectPalette({ effects }: { effects: Effect[] }) {
                     type="button"
                     title={fx.blurb}
                     onPointerDown={(e) => beginPaletteDrag(fx, e)}
-                    className={`group/fx flex items-center gap-[8px] px-[8px] py-[6px] rounded-[var(--radius-sm)] border border-solid cursor-grab active:cursor-grabbing touch-none transition-all duration-200 ease-[var(--ease)] text-left ${
-                      active
-                        ? "border-accent/30 scale-[1.02]"
-                        : "border-transparent hover:border-white/[0.06] bg-transparent"
+                    className={`group/fx flex items-center gap-[8px] px-[8px] py-[6px] rounded-[var(--radius-sm)] border-0 cursor-grab active:cursor-grabbing touch-none text-left transition-colors duration-200 ease-[var(--ease)] ${
+                      active ? "liquid liquid-key" : "bg-transparent hover:bg-white/[0.035]"
                     }`}
-                    style={active
-                      ? { background: "rgba(59, 227, 255, 0.08)" }
-                      : undefined
-                    }
-                    onMouseEnter={(e) => {
-                      if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
-                    }}
                   >
                     <GripVertical size={10} className="text-ink-dimmer/0 group-hover/fx:text-ink-dimmer/60 transition-opacity flex-none" />
                     <Image
