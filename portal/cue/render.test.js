@@ -73,11 +73,21 @@ const palette = { red: "#ff0000", blue: "#0000ff", white: "#ffffff" };
   const lit = (t) => OFF.map((o) => lum(out.frames[Math.round(t * 40)], o) > 20).filter(Boolean).length;
   eq("a sweep lights one lamp at a time", lit(g.secondsAt(1, 1) + 0.1), 1);
   eq("still one a bar later", lit(g.secondsAt(2, 1) + 0.1), 1);
-  let steps = 0;
+  let steps = 0, quiet = 99;
   for (let i = 1; i < out.frames.length; i++) {
-    if (OFF.some((o) => Math.abs(lum(out.frames[i], o) - lum(out.frames[i - 1], o)) > 20)) steps++;
+    const moved = OFF.some((o) => Math.abs(lum(out.frames[i], o) - lum(out.frames[i - 1], o)) > 20);
+    if (moved && quiet >= 4) steps++;
+    quiet = moved ? 0 : quiet + 1;
   }
   ok("a 1-bar sweep over 20s steps about 9 times, not 800", steps >= 6 && steps <= 12, String(steps));
+
+  let eased = 0;
+  for (let i = 2; i < out.frames.length; i++) {
+    const a = lum(out.frames[i - 1], OFF[0]) - lum(out.frames[i - 2], OFF[0]);
+    const b = lum(out.frames[i], OFF[0]) - lum(out.frames[i - 1], OFF[0]);
+    if (Math.abs(a) > 8 && Math.abs(b) > 8 && a * b > 0) eased++;
+  }
+  ok("a chase step eases rather than snapping", eased > 0, String(eased));
 }
 
 {

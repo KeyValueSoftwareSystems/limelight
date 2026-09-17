@@ -88,6 +88,71 @@
      "low": 0.22,
      "move_head": true
     }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 6.389
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 4-note run up the scale at 8 notes a second, 6.39s to 6.90s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 6.98
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
    ],
    "swell": {
     "from": 0.72,
@@ -231,6 +296,104 @@
    }
   },
   {
+   "id": 0,
+   "at": {
+    "second": 13.638
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 5-note run up the scale at 13 notes a second, 13.64s to 14.03s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 14.114
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 17.019
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": true,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 7-note run down the scale at 7 notes a second, 17.02s to 18.05s - the row travels with it"
+  },
+  {
    "id": 7,
    "at": {
     "bar": 7
@@ -257,6 +420,38 @@
     "to": 0.708,
     "curve": 1.15
    }
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 18.133
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "amber",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 8,
@@ -316,6 +511,39 @@
    }
   },
   {
+   "id": 0,
+   "at": {
+    "second": 25.302
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": true,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 4-note run down the scale at 7 notes a second, 25.30s to 25.86s - the row travels with it"
+  },
+  {
    "id": 10,
    "at": {
     "bar": 11
@@ -324,15 +552,15 @@
    "why": "bar 11: strings leads, E 10.09, 2 hits, mode +0.32 - sweep in oxblood against scarlet inside",
    "look": {
     "outer": {
-     "c": "oxblood",
+     "c": "crimson",
      "l": 0.58
     },
     "inner": {
-     "c": "scarlet",
+     "c": "crimson",
      "l": 0.46
     },
     "heads": {
-     "c": "scarlet",
+     "c": "crimson",
      "l": 0.41,
      "pan": 0.5,
      "tilt": 0.42
@@ -352,6 +580,38 @@
    ]
   },
   {
+   "id": 2,
+   "at": {
+    "second": 25.941
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
+  },
+  {
    "id": 11,
    "at": {
     "bar": 12
@@ -360,14 +620,79 @@
    "why": "bar 12: voices leads, E 4.51, 0 hits, mode +0.32 - bounce in crimson",
    "look": {
     "lamps": {
-     "c": "oxblood",
+     "c": "crimson",
      "l": 0.35
     },
     "heads": {
-     "c": "oxblood",
+     "c": "crimson",
      "l": 0.24,
      "pan": 0.5,
      "tilt": 0.22
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 30.228
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 4-note run up the scale at 14 notes a second, 30.23s to 30.51s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 30.587
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
     }
    },
    "chases": [
@@ -488,6 +813,136 @@
    }
   },
   {
+   "id": 0,
+   "at": {
+    "second": 34.039
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 4-note run up the scale at 9 notes a second, 34.04s to 34.48s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 34.56
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 39.487
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": true,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 5-note run down the scale at 8 notes a second, 39.49s to 40.15s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 40.23
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
+  },
+  {
    "id": 14,
    "at": {
     "second": 41.26
@@ -495,7 +950,7 @@
    "fade": 0.55,
    "look": {
     "lamps": {
-     "c": "ember",
+     "c": "crimson",
      "l": 0.49
     }
    },
@@ -518,11 +973,11 @@
    "why": "bar 19 (climbing): guitars leads, E 7.01, 6 hits, mode -0.26 - build in amber",
    "look": {
     "lamps": {
-     "c": "ember",
+     "c": "crimson",
      "l": 0.49
     },
     "heads": {
-     "c": "ember",
+     "c": "crimson",
      "l": 0.34,
      "pan": 0.5,
      "tilt": 0.42
@@ -545,6 +1000,71 @@
     "to": 0.946,
     "curve": 1.15
    }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 42.984
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 4-note run up the scale at 6 notes a second, 42.98s to 43.61s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 43.691
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 16,
@@ -615,7 +1135,7 @@
     "bar": 23
    },
    "fade": 0.35,
-   "why": "bar 23: guitars leads, E 7.97, 8 hits, mode -0.47 - hocket in ember against ember inside",
+   "why": "bar 23: guitars leads, E 7.97, 8 hits, mode -0.47 - handover in ember against ember inside",
    "look": {
     "outer": {
      "c": "scarlet",
@@ -635,7 +1155,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "hocket",
+     "figure": "handover",
      "every": {
       "hits": 2
      },
@@ -651,6 +1171,71 @@
      },
      "low": 0.55,
      "c": "ember"
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 49.932
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 6-note run up the scale at 7 notes a second, 49.93s to 50.74s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 50.824
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
     }
    ]
   },
@@ -792,6 +1377,71 @@
    ]
   },
   {
+   "id": 0,
+   "at": {
+    "second": 59.946
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 4-note run up the scale at 10 notes a second, 59.95s to 60.35s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 60.432
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
+  },
+  {
    "id": 22,
    "at": {
     "second": 63.26
@@ -812,6 +1462,71 @@
     },
     "low": 0.35
    }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 64.105
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 6-note run up the scale at 7 notes a second, 64.11s to 64.94s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 65.021
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 23,
@@ -1094,6 +1809,76 @@
     }
    ],
    "swell": {
+    "from": 0.883,
+    "to": 0.912,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 98.783
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 4-note run up the scale at 7 notes a second, 98.78s to 99.39s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 99.468
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ],
+   "swell": {
     "from": 0.72,
     "to": 1.0,
     "curve": 1.6
@@ -1253,6 +2038,71 @@
   {
    "id": 0,
    "at": {
+    "second": 110.04
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": true,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 4-note run down the scale at 16 notes a second, 110.04s to 110.30s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 110.376
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
     "second": 110.852
    },
    "fade": 0.0,
@@ -1354,6 +2204,71 @@
    ]
   },
   {
+   "id": 0,
+   "at": {
+    "second": 113.839
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 4-note run up the scale at 16 notes a second, 113.84s to 114.09s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 114.175
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
+  },
+  {
    "id": 39,
    "at": {
     "bar": 56
@@ -1362,15 +2277,15 @@
    "why": "bar 56: guitars leads, E 9.22, 4 hits, mode +0.55 - diverge in scarlet against violet inside",
    "look": {
     "outer": {
-     "c": "scarlet",
+     "c": "crimson",
      "l": 0.43
     },
     "inner": {
-     "c": "violet",
+     "c": "crimson",
      "l": 0.34
     },
     "heads": {
-     "c": "violet",
+     "c": "crimson",
      "l": 0.3,
      "pan": 0.5,
      "tilt": 0.22
@@ -1398,15 +2313,15 @@
    "why": "bar 57: guitars leads, E 6.44, 3 hits, mode +0.55 - split in scarlet against violet inside",
    "look": {
     "outer": {
-     "c": "scarlet",
+     "c": "crimson",
      "l": 0.32
     },
     "inner": {
-     "c": "violet",
+     "c": "crimson",
      "l": 0.26
     },
     "heads": {
-     "c": "violet",
+     "c": "crimson",
      "l": 0.22,
      "pan": 0.5,
      "tilt": 0.29
@@ -1422,6 +2337,71 @@
      "fill_beats": 1,
      "low": 0.22,
      "move_head": false
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 118.962
+   },
+   "fade": 0.12,
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "notes": 1
+     },
+     "low": 0.3,
+     "reverse": false,
+     "move_head": true,
+     "fade": 0.05
+    }
+   ],
+   "why": "a 4-note run up the scale at 8 notes a second, 118.96s to 119.47s - the row travels with it"
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 119.554
+   },
+   "fade": 0.35,
+   "why": "the run lands; back to the look it left",
+   "look": {
+    "lamps": {
+     "c": "crimson",
+     "l": 0.25
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
     }
    ]
   },

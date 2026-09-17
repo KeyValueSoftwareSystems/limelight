@@ -210,6 +210,36 @@ def author(song, out_path=None):
     )
     sections = sc.get("sections") or []
     holes = holes_in(song)
+    line = []
+    for n in sorted(sc.get("melody") or [], key=lambda x: x["start"]):
+        if line and n["start"] - line[-1][0] < 0.055:
+            if n["pitch"] > line[-1][1]:
+                line[-1] = (line[-1][0], n["pitch"], max(line[-1][2], n.get("velocity", 0)))
+        else:
+            line.append((n["start"], n["pitch"], n.get("velocity", 0)))
+    runs = []
+    i = 0
+    while i < len(line) - 3:
+        d = 0
+        j = i
+        while j + 1 < len(line) and line[j + 1][0] - line[j][0] <= 0.30:
+            step_p = line[j + 1][1] - line[j][1]
+            if step_p == 0:
+                j += 1
+                continue
+            sgn = 1 if step_p > 0 else -1
+            if d == 0:
+                d = sgn
+            elif sgn != d:
+                break
+            j += 1
+        n_notes = j - i + 1
+        span = line[j][0] - line[i][0]
+        if n_notes >= 4 and span > 0.15 and abs(line[j][1] - line[i][1]) >= 7:
+            runs.append({"a": line[i][0], "b": line[j][0], "n": n_notes, "dir": d,
+                         "rate": n_notes / span,
+                         "vel": max(v for _, _, v in line[i:j + 1])})
+        i = max(j, i + 1)
     chords = sc.get("btc_chords_raw") or []
     _beats = [b["t"] for b in sc.get("beats", [])]
 
@@ -464,6 +494,9 @@ def author(song, out_path=None):
                 every = {"hits": 1}
             else:
                 every = {"hits": 2}
+            if dens >= 6 and level > 0.45:
+                smooth_pick = ["wave", "comet", "handover", "split"]
+                fig = smooth_pick[len(cues) % len(smooth_pick)] if fig in ("pulse", "hocket") else fig
             layers = [{"on": "lamps", "figure": fig, "every": every,
                        "fill_beats": 1 if level < 0.45 else 2,
                        "low": deep, "move_head": moves}]
@@ -555,6 +588,39 @@ def author(song, out_path=None):
     cues.sort(key=lambda c: c.get("_t", 0))
     for n, c in enumerate(cues):
         c["id"] = n + 1
+
+    last_swish = -9.0
+    for run in runs:
+        if run["a"] - last_swish < 3.0 or run["rate"] < 5.0:
+            continue
+        prior = [c for c in cues if c.get("_t", 0) <= run["a"] + 1e-6 and c.get("look")]
+        if not prior:
+            continue
+        base = prior[-1]
+        if any(a - 0.15 <= run["a"] <= b + 0.15 for a, b, _ in holes):
+            continue
+        last_swish = run["a"]
+        look = json.loads(json.dumps(base.get("look") or {}))
+        for v in look.values():
+            if isinstance(v, dict) and v.get("l") is not None:
+                v["l"] = round(min(0.97, v["l"] * 1.12), 2)
+        swish = {"id": 0, "at": {"second": round(run["a"], 3)}, "_t": run["a"],
+                 "fade": 0.12, "look": look,
+                 "chases": [{"on": "lamps", "figure": "comet",
+                             "every": {"notes": 1}, "low": 0.3,
+                             "reverse": run["dir"] < 0, "move_head": True,
+                             "fade": 0.05}],
+                 "why": "a %d-note run %s the scale at %.0f notes a second, %.2fs to %.2fs - the row travels with it"
+                        % (run["n"], "up" if run["dir"] > 0 else "down",
+                           run["rate"], run["a"], run["b"])}
+        cues.append(swish)
+        back = json.loads(json.dumps({k: v for k, v in base.items() if k != "_t"}))
+        back["at"] = {"second": round(run["b"] + 0.08, 3)}
+        back["_t"] = run["b"] + 0.08
+        back["fade"] = 0.35
+        back["why"] = "the run lands; back to the look it left"
+        cues.append(back)
+    cues.sort(key=lambda c: c.get("_t", 0))
 
     for a, b, depth in holes:
         if a < 0.4:

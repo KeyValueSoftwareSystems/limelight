@@ -53,9 +53,10 @@ function resolveLook(rig, look, palette) {
 
 function applyChase(rig, base, chase, step, palette) {
   if (!chase) return base;
-  const ids = (chase.on ? [].concat(chase.on) : ["lamps"])
+  let ids = (chase.on ? [].concat(chase.on) : ["lamps"])
     .reduce((acc, k) => acc.concat(E.expandTargets(rig, k)), []);
   if (!ids.length) return base;
+  if (chase.reverse) ids = ids.slice().reverse();
   const figure = E.FIGURES[chase.figure] || E.FIGURES.alternate;
   const res = figure(ids, step);
   const weights = {};
@@ -143,7 +144,7 @@ function render(cueFile, score, rigName, opts) {
         const isCueChange = ci !== liveCue;
         const f = isCueChange
           ? (cue.fade != null ? +cue.fade : 0)
-          : (cue._layers[0] && cue._layers[0].fade != null ? +cue._layers[0].fade : 0);
+          : (cue._layers[0] && cue._layers[0].fade != null ? +cue._layers[0].fade : 0.06);
         if (prevOut && f > 0) { fadeFrom = prevOut.slice(); fadeStart = t; fadeSecs = f; }
         else { fadeFrom = null; fadeSecs = 0; }
         liveCue = ci; liveStep = stepKey;
