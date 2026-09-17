@@ -75,6 +75,14 @@ module.exports = function beam(params, ctx) {
          is invisible, and an eased tail slows before the beat and reads as late. */
       const e = H.clamp(bx.p != null ? bx.p : 0, 0, 1);
       pan = p0 + (p1 - p0) * e; tilt = t0 + (t1 - t0) * e;
+      /* a glide can still keep time: `nod` lifts the tilt over the last part of each
+         beat and drops it on the beat, the same lean the pars have, without
+         interrupting the travel. */
+      if (params.nod) {
+        const lead = params.nod_lead != null ? Math.max(0.05, Math.min(0.5, Number(params.nod_lead))) : 0.25;
+        const shape = bphase >= 1 - lead ? (bphase - (1 - lead)) / lead : Math.max(0, 1 - bphase / 0.3);
+        tilt += Number(params.nod) * shape;
+      }
     } else if (pattern === "hold") {
       /* a still pin on the wall. Where it points is the cue's to say (pan, tilt
          0..1); it does not move, does not kick, does not flash. The head at rest
@@ -110,6 +118,10 @@ module.exports = function beam(params, ctx) {
       pan: H.clamp(pan, 0, 1), tilt: H.clamp(tilt, 0, 1),
       gobo: params.gobo != null ? params.gobo : 0, prism: prismNow,
       strobe: fire ? strobeHz : 0,
+      /* the two dimensions the show never used: how hard the motors drive (0 snaps,
+         1 glides) and the colour wheel spinning free instead of sitting on a slot */
+      speed: params.speed != null ? Number(params.speed) : undefined,
+      spin: params.spin != null ? Number(params.spin) : undefined,
     });
     return f;
   }

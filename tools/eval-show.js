@@ -383,7 +383,12 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
       if (dir && lastDir && dir !== lastDir) { if (t - lastRev < beatS) shiver++; lastRev = t; }
       if (dir) lastDir = dir;
       if (mv && !inMove) { moveStart = t; panAtStart = F[i - 1][panCh]; }
-      if (mv) { inMove = true; moveEnd = t; panAtEnd = F[i][panCh]; }
+      /* a move ENDS at its last real step. The final unit or two of drift, as the
+         fixture settles, is invisible and must not decide whether it landed. */
+      /* a move ENDS when the TRAVEL stops. The tilt nod is a designed rhythmic
+         release that lands on the beat and falls away after it; judging the move by
+         it would call every nodding glide late. */
+      if (mv) { inMove = true; panAtEnd = F[i][panCh]; if (Math.abs(dp) >= 2) moveEnd = t; }
       else if (inMove && stillRun >= 3) {
         inMove = false;
         /* a crawl of a few units (a six-second glide across a quarter of the room) is not a move anyone sees */

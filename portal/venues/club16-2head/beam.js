@@ -115,6 +115,10 @@ module.exports = function beam(params, ctx) {
       pan: H.clamp(i % 2 ? 1 - pan : pan, 0, 1), tilt: H.clamp(tilt, 0, 1),
       gobo: params.gobo != null ? params.gobo : 0, prism: prismNow,
       strobe: fire ? strobeHz : 0,
+      /* the two dimensions the show never used: how hard the motors drive (0 snaps,
+         1 glides) and the colour wheel spinning free instead of sitting on a slot */
+      speed: params.speed != null ? Number(params.speed) : undefined,
+      spin: params.spin != null ? Number(params.spin) : undefined,
     }));
     return f;
   }

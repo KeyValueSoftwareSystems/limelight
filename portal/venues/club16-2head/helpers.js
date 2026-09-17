@@ -28,6 +28,8 @@ const COLOUR_WHEEL = [
 ];
 
 const HEAD_PARK = { pan: 169, tilt: 127, speed: 200, level: 0 };
+/* the colour wheel turns continuously at and above this value (rig.py: COLOUR_SPIN_MIN) */
+const SPIN_MIN = 150;
 
 /* Fixture layout: 16 pars, 2 heads. Addresses are 1-based in the layout but
    DMX frame arrays are 0-based, so par_01 at address 1 starts at index 0. */
