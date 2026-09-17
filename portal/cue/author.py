@@ -50,29 +50,29 @@ FAMILY = {
 FAMILY_COLOUR = {
     "brass": "amber",
     "strings": "violet",
-    "guitars": "ember",
+    "guitars": "scarlet",
     "keys": "teal",
     "winds": "saffron",
     "voices": "crimson",
-    "drums": "scarlet",
+    "drums": "crimson",
 }
 FAMILY_SHADES = {
     "brass": ("amber", "saffron", "ember"),
     "strings": ("violet", "indigo", "crimson"),
-    "guitars": ("ember", "scarlet", "amber"),
+    "guitars": ("scarlet", "crimson", "amber"),
     "keys": ("teal", "indigo", "violet"),
     "winds": ("saffron", "amber", "bone"),
     "voices": ("crimson", "blood", "scarlet"),
     "drums": ("scarlet", "ember", "crimson"),
 }
 FAMILY_TEMPERATURE = {
-    "brass": ("violet", "ember", "amber", "saffron"),
-    "strings": ("indigo", "violet", "oxblood", "amber"),
-    "guitars": ("oxblood", "ember", "scarlet", "amber"),
+    "brass": ("violet", "crimson", "amber", "saffron"),
+    "strings": ("indigo", "violet", "crimson", "amber"),
+    "guitars": ("indigo", "crimson", "scarlet", "amber"),
     "keys": ("indigo", "teal", "violet", "saffron"),
     "winds": ("teal", "saffron", "amber", "bone"),
-    "voices": ("indigo", "blood", "crimson", "scarlet"),
-    "drums": ("blood", "crimson", "scarlet", "ember"),
+    "voices": ("indigo", "crimson", "scarlet", "bone"),
+    "drums": ("indigo", "crimson", "scarlet", "bone"),
 }
 GESTURES = {
     "travel": ("sweep", "comet", "wave"),
@@ -105,21 +105,21 @@ def cycle_steps(fig, n):
         return max(1, n // 2)
     return 2
 COUNTER = {
-    "brass": "indigo", "strings": "amber", "guitars": "teal", "keys": "ember",
-    "winds": "violet", "voices": "indigo", "drums": "teal",
+    "brass": "indigo", "strings": "amber", "guitars": "indigo", "keys": "crimson",
+    "winds": "violet", "voices": "indigo", "drums": "indigo",
 }
 PALETTE = {
-    "ink": "#1a0a10",
-    "oxblood": "#8c0a1e",
-    "blood": "#d4102a",
-    "crimson": "#ff1428",
-    "scarlet": "#ff2010",
-    "ember": "#ff6a10",
-    "amber": "#ffa016",
-    "saffron": "#ffd166",
-    "violet": "#a038ff",
-    "indigo": "#2f5bff",
-    "teal": "#00c8d8",
+    "ink": "#1a0008",
+    "oxblood": "#a00018",
+    "blood": "#e00020",
+    "crimson": "#ff0030",
+    "scarlet": "#ff0a1e",
+    "ember": "#ff2a00",
+    "amber": "#ff9500",
+    "saffron": "#ffd000",
+    "violet": "#b026ff",
+    "indigo": "#1040ff",
+    "teal": "#00e5ff",
     "bone": "#ffffff",
 }
 
@@ -873,7 +873,8 @@ def author(song, out_path=None):
                 pos = (bar - min(run)) / max(1, (max(run) - min(run)))
                 amp = min(1.0, 0.45 + 0.5 * pos + inten * 0.25)
         accents.append({"t": round(t, 3), "l": round(amp, 2),
-                        "decay": 0.2 if inten >= 0.6 else 0.15, "on": "auto"})
+                        "decay": round(step * (0.5 if inten >= 0.6 else 0.25), 3),
+                        "on": "auto"})
 
     for n, c in enumerate(cues):
         nxt = cues[n + 1] if n + 1 < len(cues) else None
@@ -1027,20 +1028,37 @@ def author(song, out_path=None):
 
     TRAVELS_HOME = ("travel", "grow")
 
+    MUSICAL = (0.5, 1.0, 1.5, 2.0, 3.0, 4.0)
+
     def fit_rate(fig, span_s, push=1, fam=None):
         steps = cycle_steps(fig, n_lamps)
         beats_in = span_s / step if step > 0 else 0
         if beats_in <= 0 or steps <= 0:
             return None
         home = 1 if (fam in TRAVELS_HOME or FAM_OF.get(fig) in TRAVELS_HOME) else 0
-        cycles = max(1, int(round(beats_in / (steps * 1.0)))) * max(1, push)
-        floor_beats = max(0.55, 0.26 / step if step > 0 else 0.55)
-        while cycles > 1 and beats_in / (steps * cycles + home) < floor_beats:
-            cycles -= 1
-        sb = beats_in / (steps * cycles + home)
-        if sb < floor_beats or sb > 3.0:
+        floor_beats = max(0.5, 0.26 / step if step > 0 else 0.5)
+        best = None
+        for rate in MUSICAL:
+            if rate < floor_beats - 1e-6:
+                continue
+            per_cycle = steps * rate
+            cycles = int(round((beats_in - home * rate) / per_cycle))
+            if push > 1:
+                cycles = max(cycles, 1) * push
+            if cycles < 1:
+                continue
+            used = cycles * per_cycle + home * rate
+            if used > beats_in + rate * 0.5:
+                continue
+            miss = abs(beats_in - used)
+            if miss > max(rate, beats_in * 0.25):
+                continue
+            score = (miss, abs(rate - 1.0))
+            if best is None or score < best[0]:
+                best = (score, rate, cycles)
+        if best is None:
             return None
-        return round(sb, 3), cycles
+        return best[1], best[2]
 
     recent_fams = []
 
@@ -1099,12 +1117,30 @@ def author(song, out_path=None):
             if isinstance(v, dict) and v.get("c"):
                 fam_seen[v["c"]] += 1
     lead_colour = fam_seen.most_common(1)[0][0] if fam_seen else "ember"
-    lead_fam = None
-    for fam, shades in FAMILY_SHADES.items():
-        if lead_colour in shades:
-            lead_fam = fam
-            break
-    counter_name = COUNTER.get(lead_fam or "", "indigo")
+    def hue_of_name(name):
+        r, g, b_ = rgb_of(name)
+        mx, mn = max(r, g, b_), min(r, g, b_)
+        if mx == mn:
+            return None
+        d = float(mx - mn)
+        if mx == r:
+            h = ((g - b_) / d) % 6
+        elif mx == g:
+            h = (b_ - r) / d + 2
+        else:
+            h = (r - g) / d + 4
+        return h * 60.0
+
+    def hue_gap(a, b2):
+        ha, hb = hue_of_name(a), hue_of_name(b2)
+        if ha is None or hb is None:
+            return 0.0
+        d = abs(ha - hb) % 360.0
+        return min(d, 360.0 - d)
+
+    vivid = [n for n in PALETTE
+             if n != "bone" and lum_of(n) >= 0.30 and hue_of_name(n) is not None]
+    counter_name = max(vivid, key=lambda n: hue_gap(lead_colour, n)) if vivid else "indigo"
     warm = max(("amber", "saffron", "ember"), key=lum_of)
     working = []
     for name in (lead_colour, counter_name, warm, "bone"):
@@ -1307,11 +1343,17 @@ def author(song, out_path=None):
             b2 = {k: (v.get("c"), v.get("l")) for k, v in (c.get("look") or {}).items()
                   if isinstance(v, dict)}
             changed_look = a != b2
-        want = step * (0.5 if changed_look else 0.25)
+        want_beats = 0.5 if changed_look else 0.25
         ch1 = (c.get("chases") or [None])[0]
         if ch1 and (ch1.get("every") or {}).get("beats"):
-            want = min(want, step * float(ch1["every"]["beats"]) * 0.7)
-        c["fade"] = round(max(0.04, want), 3)
+            room_beats = float(ch1["every"]["beats"]) * 0.7
+            for cand in (0.5, 0.25, 0.125):
+                if cand <= room_beats:
+                    want_beats = min(want_beats, cand)
+                    break
+            else:
+                want_beats = 0.125
+        c["fade"] = round(step * want_beats, 3)
 
     for c in cues:
         c.pop("_t", None)

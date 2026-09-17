@@ -3,17 +3,17 @@
  "song": "leva-between-worlds-30s-positive",
  "rig": "arc4-head",
  "palette": {
-  "ink": "#1a0a10",
-  "oxblood": "#8c0a1e",
-  "blood": "#d4102a",
-  "crimson": "#ff1428",
-  "scarlet": "#ff2010",
-  "ember": "#ff6a10",
-  "amber": "#ffa016",
-  "saffron": "#ffd166",
-  "violet": "#a038ff",
-  "indigo": "#2f5bff",
-  "teal": "#00c8d8",
+  "ink": "#1a0008",
+  "oxblood": "#a00018",
+  "blood": "#e00020",
+  "crimson": "#ff0030",
+  "scarlet": "#ff0a1e",
+  "ember": "#ff2a00",
+  "amber": "#ff9500",
+  "saffron": "#ffd000",
+  "violet": "#b026ff",
+  "indigo": "#1040ff",
+  "teal": "#00e5ff",
   "bone": "#ffffff"
  },
  "cues": [
@@ -50,7 +50,7 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "beats": 0.943
+      "beats": 1.0
      },
      "fill_beats": 1,
      "low": 0.62,
@@ -93,7 +93,7 @@
      "on": "lamps",
      "figure": "split",
      "every": {
-      "beats": 0.919
+      "beats": 1.0
      },
      "fill_beats": 1,
      "low": 0.62,
@@ -136,12 +136,12 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "beats": 0.798
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.55,
      "move_head": false,
-     "cycles": 2
+     "cycles": 1
     }
    ]
   },
@@ -178,12 +178,12 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "beats": 1.076
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.55,
      "move_head": false,
-     "cycles": 4
+     "cycles": 3
     }
    ]
   },
@@ -202,15 +202,15 @@
     "second": 21.478
    },
    "fade": 0.0,
-   "why": "and back on the look it is arriving at, the instant the audio returns - opened from indigo to bone so the level can be seen - build instead, the only shape that finishes in 1.0 bars",
+   "why": "and back on the look it is arriving at, the instant the audio returns - opened from indigo to bone so the level can be seen - alternate instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
      "l": 0.83
     },
     "heads": {
-     "c": "amber",
-     "l": 0.471,
+     "c": "saffron",
+     "l": 0.41,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -218,14 +218,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "alternate",
      "every": {
-      "beats": 0.806
+      "beats": 1.0
      },
      "fill_beats": 2,
      "low": 0.55,
-     "move_head": true,
-     "cycles": 1
+     "move_head": false,
+     "cycles": 2
     }
    ],
    "swell": {
@@ -282,12 +282,12 @@
    "why": "bars 13-16, the phrase travels across: drums leads, E 6.71, 2 hits, mode +1.00 - split in scarlet - alternate instead, the only shape that finishes in 2.2 bars",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "saffron",
      "l": 0.66
     },
     "heads": {
-     "c": "amber",
-     "l": 0.374,
+     "c": "saffron",
+     "l": 0.325,
      "pan": 0.5,
      "tilt": 0.41
     }
@@ -297,13 +297,13 @@
      "on": "lamps",
      "figure": "alternate",
      "every": {
-      "beats": 1.125
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
      "reverse": true,
-     "cycles": 4
+     "cycles": 3
     }
    ]
   },
@@ -312,7 +312,7 @@
    "at": {
     "second": 33.971
    },
-   "fade": 0.24,
+   "fade": 0.12,
    "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 33.97s with a new colour",
    "look": {
     "lamps": {
@@ -321,7 +321,7 @@
     },
     "heads": {
      "c": "saffron",
-     "l": 0.306,
+     "l": 0.325,
      "pan": 0.5,
      "tilt": 0.41
     }
@@ -331,7 +331,7 @@
      "on": "lamps",
      "figure": "sweep",
      "every": {
-      "beats": 1.002
+      "beats": 1.0
      },
      "fill_beats": 2,
      "low": 0.62,
@@ -350,12 +350,12 @@
    "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - alternate in scarlet - split instead, the only shape that finishes in 2.2 bars",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "saffron",
      "l": 0.63
     },
     "heads": {
-     "c": "amber",
-     "l": 0.357,
+     "c": "saffron",
+     "l": 0.311,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -365,13 +365,13 @@
      "on": "lamps",
      "figure": "split",
      "every": {
-      "beats": 1.125
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.55,
      "move_head": false,
      "reverse": true,
-     "cycles": 4
+     "cycles": 3
     }
    ]
   },
@@ -381,15 +381,15 @@
     "second": 41.657
    },
    "fade": 0.24,
-   "why": "cascade answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour",
+   "why": "build answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour",
    "look": {
     "lamps": {
-     "c": "saffron",
+     "c": "bone",
      "l": 0.63
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.293,
+     "c": "bone",
+     "l": 0.242,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -397,9 +397,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "cascade",
+     "figure": "build",
      "every": {
-      "beats": 0.877
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.55,
@@ -418,12 +418,12 @@
    "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - hocket in scarlet",
    "look": {
     "lamps": {
-     "c": "amber",
-     "l": 0.284
+     "c": "saffron",
+     "l": 0.247
     },
     "heads": {
-     "c": "amber",
-     "l": 0.195,
+     "c": "saffron",
+     "l": 0.17,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -433,7 +433,7 @@
      "on": "lamps",
      "figure": "hocket",
      "every": {
-      "beats": 1.355
+      "beats": 1.5
      },
      "fill_beats": 1,
      "low": 0.4,
@@ -460,12 +460,12 @@
    "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
-     "c": "amber",
-     "l": 0.284
+     "c": "saffron",
+     "l": 0.247
     },
     "heads": {
-     "c": "amber",
-     "l": 0.195,
+     "c": "saffron",
+     "l": 0.17,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -488,55 +488,55 @@
   {
    "t": 17.786,
    "l": 0.89,
-   "decay": 0.2,
+   "decay": 0.24,
    "on": "auto"
   },
   {
    "t": 20.062,
    "l": 0.58,
-   "decay": 0.15,
+   "decay": 0.12,
    "on": "auto"
   },
   {
    "t": 22.941,
    "l": 0.81,
-   "decay": 0.2,
+   "decay": 0.24,
    "on": "auto"
   },
   {
    "t": 25.333,
    "l": 1.0,
-   "decay": 0.2,
+   "decay": 0.24,
    "on": "auto"
   },
   {
    "t": 28.7,
    "l": 1.0,
-   "decay": 0.2,
+   "decay": 0.24,
    "on": "auto"
   },
   {
    "t": 31.092,
    "l": 0.95,
-   "decay": 0.2,
+   "decay": 0.24,
    "on": "auto"
   },
   {
    "t": 34.458,
    "l": 0.98,
-   "decay": 0.2,
+   "decay": 0.24,
    "on": "auto"
   },
   {
    "t": 38.777,
    "l": 0.98,
-   "decay": 0.2,
+   "decay": 0.24,
    "on": "auto"
   },
   {
    "t": 41.657,
    "l": 1.0,
-   "decay": 0.2,
+   "decay": 0.24,
    "on": "auto"
   }
  ],
