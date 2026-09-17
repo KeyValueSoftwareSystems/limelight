@@ -49,7 +49,7 @@ const HEAD_MOVES = {
 };
 
 const COLOUR_FIGURES = {
-  hold: (n, step) => new Array(n).fill(0),
+  hold: (n) => Array.from({ length: n }, (_, i) => Math.floor(i / Math.ceil(n / 2))),
   flip: (n, step) => new Array(n).fill(step),
   alternate: (n, step) => Array.from({ length: n }, (_, i) => i + step),
   halves: (n, step) => Array.from({ length: n }, (_, i) => Math.floor(i / Math.ceil(n / 2)) + step),

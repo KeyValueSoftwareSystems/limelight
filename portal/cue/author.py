@@ -720,7 +720,7 @@ def author(song, out_path=None):
             if (pi or 0) % 2 == 1:
                 reverse_it = not reverse_it
 
-            deep = 0.62 if level < 0.38 else (0.72 if dens >= 6 else 0.78)
+            deep = 0.20 if level < 0.38 else (0.30 if dens >= 6 else 0.38)
             moves = want_fam in ("travel", "grow")
             if sings and want_fam == "travel":
                 every = {"notes": 1}
@@ -1063,7 +1063,7 @@ def author(song, out_path=None):
         if not pair or len(pair) < 2:
             return
         rate = float((chase.get("every") or {}).get("beats") or 1.0)
-        every = max(1, int(round(per * 4.0 / max(0.25, rate))))
+        every = max(1, int(round(per * 2.0 / max(0.25, rate))))
         chase["colours"] = list(pair)
         chase["colour_every"] = every
         holds = span_s is not None and span_s < every * rate * step * 1.25

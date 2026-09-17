@@ -93,7 +93,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.62,
+     "low": 0.2,
      "move_head": false,
      "reverse": true,
      "cycles": 3,
@@ -101,7 +101,7 @@
       "indigo",
       "blood"
      ],
-     "colour_every": 16,
+     "colour_every": 8,
      "colour_figure": "hold"
     }
    ],
@@ -153,7 +153,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.62,
+     "low": 0.2,
      "move_head": false,
      "reverse": true,
      "cycles": 1,
@@ -161,7 +161,7 @@
       "indigo",
       "blood"
      ],
-     "colour_every": 16,
+     "colour_every": 8,
      "colour_figure": "hold"
     }
    ],
@@ -208,14 +208,14 @@
       "hits": 2
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.2,
      "move_head": false,
      "min_intensity": 0.3,
      "colours": [
       "indigo",
       "blood"
      ],
-     "colour_every": 16,
+     "colour_every": 8,
      "colour_figure": "hold"
     }
    ],
@@ -262,14 +262,14 @@
       "hits": 2
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.2,
      "move_head": false,
      "min_intensity": 0.3,
      "colours": [
       "indigo",
       "blood"
      ],
-     "colour_every": 16,
+     "colour_every": 8,
      "colour_figure": "hold"
     }
    ],
@@ -316,14 +316,14 @@
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.72,
+     "low": 0.3,
      "move_head": true,
      "cycles": 1,
      "colours": [
       "indigo",
       "blood"
      ],
-     "colour_every": 11,
+     "colour_every": 5,
      "colour_figure": "hold"
     }
    ],
@@ -405,7 +405,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.78,
+     "low": 0.38,
      "move_head": false,
      "reverse": true,
      "min_intensity": 0.3,
@@ -413,7 +413,7 @@
       "indigo",
       "blood"
      ],
-     "colour_every": 16,
+     "colour_every": 8,
      "colour_figure": "hold"
     }
    ],
@@ -451,7 +451,7 @@
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.78,
+     "low": 0.38,
      "move_head": true,
      "reverse": false,
      "min_intensity": 0.3,
@@ -459,7 +459,7 @@
       "indigo",
       "blood"
      ],
-     "colour_every": 11,
+     "colour_every": 5,
      "colour_figure": "hold",
      "cycles": 1
     }
@@ -498,7 +498,7 @@
       "hits": 2
      },
      "fill_beats": 2,
-     "low": 0.72,
+     "low": 0.3,
      "move_head": false,
      "reverse": true,
      "min_intensity": 0.3,
@@ -506,7 +506,7 @@
       "indigo",
       "blood"
      ],
-     "colour_every": 16,
+     "colour_every": 8,
      "colour_figure": "hold"
     }
    ],
@@ -544,7 +544,7 @@
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.72,
+     "low": 0.3,
      "move_head": true,
      "reverse": false,
      "min_intensity": 0.3,
@@ -552,7 +552,7 @@
       "indigo",
       "blood"
      ],
-     "colour_every": 11,
+     "colour_every": 5,
      "colour_figure": "hold",
      "cycles": 1
     }
@@ -591,14 +591,14 @@
       "beats": 1.5
      },
      "fill_beats": 1,
-     "low": 0.62,
+     "low": 0.2,
      "move_head": false,
      "cycles": 1,
      "colours": [
       "indigo",
       "blood"
      ],
-     "colour_every": 11,
+     "colour_every": 5,
      "colour_figure": "hold"
     }
    ],
@@ -645,7 +645,7 @@
       "beats": 2
      },
      "fill_beats": 1,
-     "low": 0.62,
+     "low": 0.2,
      "move_head": false
     }
    ]
