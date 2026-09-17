@@ -1,412 +1,1610 @@
 {
  "schema": "limelight.show/1",
  "song": "afterglow",
- "plan": "Bass is the story: the rig is amber wherever bass and synth are absent (intro, both verses, the sung finale) and azure wherever they are present (both choruses, both instrumentals), and the whole show is built to put its single loudest instant on moment 6 at 54.5s, its colour answer on the climax at 123.34s, and its darkness on the exit at 163.0s.",
- "states": [
+ "palette": {
+  "ink": "#140a12",
+  "oxblood": "#3d0812",
+  "blood": "#a3081c",
+  "crimson": "#c8102e",
+  "scarlet": "#f01a10",
+  "ember": "#ff5a0a",
+  "amber": "#ffa016",
+  "saffron": "#ffd166",
+  "violet": "#6a2ca0",
+  "indigo": "#2a3f9e",
+  "teal": "#0e8a8a",
+  "bone": "#ffffff"
+ },
+ "effects": [
   {
-   "section": 0,
-   "effect": "wash",
-   "amount": 0.36,
-   "colour": [
-    1,
-    0.72,
-    0.3
-   ],
-   "extent": "all",
-   "why": "Only keys 0.47, piano 0.48 and digital-piano 0.10 sound here, all at 100% coverage - no drums, no bass, no voice. Brightness 4.3 is the song's floor so this is the show's floor too, but the piano is continuously audible and a drone at 0.12 over it would read as a fault. Amber because bass is absent."
+   "attr": "intensity",
+   "on": "lamps",
+   "form": "sine",
+   "size": 0.12,
+   "rate": {
+    "bars": 6
+   },
+   "phase": 0,
+   "why": "a slow breath on the submaster, the whole row together, so the rig is never dead still"
   },
   {
-   "section": 1,
-   "effect": "wash",
-   "amount": 0.48,
-   "colour": [
-    1,
-    0.72,
-    0.3
-   ],
-   "extent": "all",
-   "why": "lead-vocal 0.54/98% and vocal 0.59 over piano 0.37, and bass is exactly 0.00 for the whole section. Energy 8.4 but the arrangement is thin, so this sits well below the choruses. Still amber - same family as the intro it grew out of."
+   "attr": "pan",
+   "on": "heads",
+   "form": "sine",
+   "size": 0.16,
+   "rate": {
+    "bars": 8
+   },
+   "phase": 0,
+   "why": "the beam drifts across the room over eight bars"
   },
   {
-   "section": 2,
-   "effect": "wash",
-   "amount": 0.66,
-   "colour": [
-    0.16,
-    0.5,
-    1
-   ],
-   "extent": "all",
-   "why": "The real arrival: bass 0.54/100% and synth 0.54/100% start here, kick 0.63/98%, double-bass 0.31/100% - eleven stems change at 33.24s. Energy 9.1, the song's top band. First azure of the show."
-  },
-  {
-   "section": 3,
-   "effect": "wash",
-   "amount": 0.6,
-   "colour": [
-    0.16,
-    0.5,
-    1
-   ],
-   "extent": "all",
-   "why": "Same full band as section 2 (bass 0.54, synth 0.54, kick 0.65) but lead-vocal falls to 0.15/43% - this is the band's section, not the singer's. One notch under the chorus it follows, same colour because the same instruments carry it."
-  },
-  {
-   "section": 4,
-   "effect": "wash",
-   "amount": 0.42,
-   "colour": [
-    1,
-    0.72,
-    0.3
-   ],
-   "extent": "all",
-   "why": "The most stripped sung stretch in the song: bass 0.00, synth 0.02/20%, kick 0.13/36%. Moment 9's spotlight holds for 30s from 82.66s and covers most of it. Rhymes with verse [1] in colour and kind, a notch darker because it is a notch emptier - this is where the show spends its low end."
-  },
-  {
-   "section": 5,
-   "effect": "wash",
-   "amount": 0.66,
-   "colour": [
-    0.16,
-    0.5,
-    1
-   ],
-   "extent": "all",
-   "why": "Identical in kind to chorus [2] - bass 0.53, synth 0.53, kick 0.65/100%, snare 0.31/100%, energy 9.1 - so it gets the identical state. The choruses rhyme; the climax inside this one is won by gesture, not by raising the bed."
-  },
-  {
-   "section": 6,
-   "effect": "wash",
-   "amount": 0.62,
-   "colour": [
-    0.16,
-    0.5,
-    1
-   ],
-   "extent": "all",
-   "why": "The busiest drumming in the song - snare 0.40/100%, drums 0.13/98%, kick 0.68/98%, 6.39 onsets per second measured over bars 97-112. Same azure and near-identical level to instrumental [3]: the two instrumentals are the same thing."
-  },
-  {
-   "section": 7,
-   "effect": "wash",
-   "amount": 0.48,
-   "colour": [
-    1,
-    0.72,
-    0.3
-   ],
-   "extent": "all",
-   "why": "Labelled chorus, but the numbers say otherwise and the numbers win: kick 0.02/15%, drums 0.02/4%, synth 0.07/27% - the drums have gone. keys 0.65, digital-piano 0.61, bowed_strings 0.22 and both vocals carry it, and moment 17's spotlight holds 14s to the end of the track. The second segmenter calls this boundary `outro` at 154.566s, 0.036s off. Lit as the sung finale, amber like the verses, not as a third chorus."
-  },
-  {
-   "section": 8,
-   "effect": "drone",
-   "amount": 0.05,
-   "colour": [
-    1,
-    0.72,
-    0.3
-   ],
-   "extent": "inner",
-   "why": "Every stem reads 0.00 after 167.54s - there is nothing left to answer, so this is the one section with no binding and that is deliberate. The fade anchored at moment 19 runs across it and carries the rig down through this level to black."
+   "attr": "tilt",
+   "on": "heads",
+   "form": "triangle",
+   "size": 0.07,
+   "rate": {
+    "bars": 6
+   },
+   "phase": 0,
+   "why": "and lifts and settles on a slower cycle, so the two never line up"
   }
  ],
- "bindings": [
+ "cues": [
   {
-   "section": 0,
-   "effect": "follow",
-   "stream": "downbeat",
-   "depth": 0.5,
-   "floor": 0.2,
-   "smooth": 0.05,
-   "extent": "outer",
-   "why": "There are no drums in the intro, so accent has nothing to answer. Binding the measured downbeat instead puts the rises on the song's own bar lines from the first second."
+   "id": 1,
+   "at": {
+    "bar": 1
+   },
+   "fade": 0.15,
+   "why": "bars 1-4, the phrase travels across: keys leads, E 1.07, 1 hits, mode +0.49 - unbuild in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.15
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.1,
+     "pan": 0.5,
+     "tilt": 0.34
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   },
   {
-   "section": 1,
-   "effect": "accent",
-   "threshold": 0.08,
-   "extent": "ends",
-   "rest": 0.18,
-   "for_beats": 3,
-   "bed_colour": [
-    1,
-    0.72,
-    0.3
+   "id": 2,
+   "at": {
+    "bar": 5
+   },
+   "fade": 0.35,
+   "why": "bars 5-8, the phrase opens out: keys leads, E 1.19, 2 hits, mode +0.22 - cascade in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.16
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.11,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "cascade",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": true
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "at": {
+    "bar": 9
+   },
+   "fade": 0.6,
+   "why": "bars 9-12, the phrase closes down: voices leads, E 2.68, 3 hits, mode +1.00 - sweep in scarlet",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.23
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.16,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": true
+    }
    ],
-   "why": "kick 0.16/39% and snare 0.16/41% - the drums are here but intermittent, so a low threshold catches the hits that were actually struck. On the ends so the outer pair answers the kit while the follow carries the middle."
+   "swell": {
+    "from": 0.701,
+    "to": 0.729,
+    "curve": 1.15
+   }
   },
   {
-   "section": 2,
-   "effect": "accent",
-   "threshold": 0.12,
-   "extent": "inner",
-   "rest": 0.16,
-   "for_beats": 2,
-   "bed_colour": [
-    0.16,
-    0.5,
-    1
+   "id": 0,
+   "at": {
+    "second": 15.464
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 17% of its median for 1.14s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 4,
+   "at": {
+    "second": 16.602
+   },
+   "fade": 0.06,
+   "why": "and back on the look it is arriving at, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.23
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.16,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": true
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 21.339
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 21% of its median for 0.91s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 5,
+   "at": {
+    "second": 22.245
+   },
+   "fade": 0.06,
+   "why": "and back on the look it is arriving at, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.35
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.24,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
    ],
-   "why": "kick 0.63/98% and snare 0.26/100%. The onset envelope peaks near 0.45 and averages 0.353 over bars 36-44, so 0.12 is selective rather than constant. Rest kept low so the flash reads over the wash."
+   "swell": {
+    "from": 0.81,
+    "to": 0.827,
+    "curve": 1.15
+   }
   },
   {
-   "section": 3,
-   "effect": "accent",
-   "threshold": 0.12,
-   "extent": "all",
-   "rest": 0.18,
-   "for_beats": 2,
-   "bed_colour": [
-    0.16,
-    0.5,
-    1
+   "id": 6,
+   "at": {
+    "bar": 21
+   },
+   "fade": 0.6,
+   "why": "bars 21-24, the phrase closes down: voices leads, E 4.39, 4 hits, mode +0.35 - sweep in scarlet",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.37
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.26,
+     "pan": 0.5,
+     "tilt": 0.28
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
    ],
-   "why": "split is a place binding with no brightness swing at all, so it needs an amount layer over it. kick 0.65/98% supplies one."
+   "swell": {
+    "from": 0.754,
+    "to": 0.776,
+    "curve": 1.15
+   }
   },
   {
-   "section": 4,
-   "effect": "accent",
-   "threshold": 0.06,
-   "extent": "ends",
-   "rest": 0.12,
-   "for_beats": 3,
-   "bed_colour": [
-    1,
-    0.72,
-    0.3
+   "id": 7,
+   "at": {
+    "bar": 25
+   },
+   "fade": 0.6,
+   "why": "bars 25-28, the phrase opens out: keys leads, E 6.86, 5 hits, mode +0.11 - pairs in violet against scarlet inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.46
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.32,
+     "pan": 0.5,
+     "tilt": 0.36
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false
+    }
    ],
-   "why": "kick 0.13/36%, snare 0.10/30% - sparse. Threshold dropped to 0.06 so the few hits that exist still land, which is what keeps this section's rises on the measured beat rather than on the vocal's smooth envelope."
+   "swell": {
+    "from": 0.831,
+    "to": 0.852,
+    "curve": 1.15
+   }
   },
   {
-   "section": 5,
-   "effect": "accent",
-   "threshold": 0.12,
-   "extent": "inner",
-   "rest": 0.16,
-   "for_beats": 2,
-   "bed_colour": [
-    0.16,
-    0.5,
-    1
+   "id": 8,
+   "at": {
+    "bar": 27
+   },
+   "fade": 0.6,
+   "why": "bars 25-28, the phrase opens out: keys leads, E 7.13, 4 hits, mode -0.20 - converge in violet against crimson inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.54
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.38,
+     "pan": 0.5,
+     "tilt": 0.37
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false
+    }
    ],
-   "why": "kick 0.65/100%, snare 0.31/100%. Same pairing as chorus [2] for the same reason."
+   "swell": {
+    "from": 0.866,
+    "to": 0.888,
+    "curve": 1.15
+   }
   },
   {
-   "section": 6,
-   "effect": "accent",
-   "threshold": 0.15,
-   "extent": "all",
-   "rest": 0.2,
-   "for_beats": 2,
-   "bed_colour": [
-    0.16,
-    0.5,
-    1
+   "id": 9,
+   "at": {
+    "bar": 29
+   },
+   "fade": 0.6,
+   "why": "bars 29-32, the phrase travels across: keys leads, E 7.53, 6 hits, mode +0.60 - wave in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.55
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.39,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": false
+    }
    ],
-   "why": "6.39 onsets per second, the densest in the song, so the threshold goes up to 0.15 to stay selective - at 0.08 this would fire almost continuously and stop reading as accents at all. No split here: unlike section 3 the two vocal lanes both run at 100% coverage, so nothing is trading."
+   "swell": {
+    "from": 0.899,
+    "to": 0.924,
+    "curve": 1.15
+   }
   },
   {
-   "section": 7,
-   "effect": "follow",
-   "stream": "downbeat",
-   "depth": 0.45,
-   "floor": 0.18,
-   "smooth": 0.05,
-   "extent": "outer",
-   "why": "drums are 0.02/4% here so accent has nothing left to answer - the same problem as the intro and the same answer. Binding the measured downbeat keeps the finale's rises on the grid instead of drifting with the vocal envelope."
+   "id": 10,
+   "at": {
+    "bar": 33
+   },
+   "fade": 0.6,
+   "why": "bars 33-36, the phrase closes down: drums leads, E 8.98, 4 hits, mode +0.20 - split in violet against teal inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.64
+    },
+    "heads": {
+     "c": "teal",
+     "l": 0.45,
+     "pan": 0.5,
+     "tilt": 0.36
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false
+    }
+   ],
+   "swell": {
+    "from": 0.81,
+    "to": 0.827,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 11,
+   "at": {
+    "bar": 37
+   },
+   "fade": 0.15,
+   "why": "bars 37-40, the phrase travels across: keys leads, E 7.38, 4 hits, mode +0.57 - handover in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.59
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.41,
+     "pan": 0.5,
+     "tilt": 0.4
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ],
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
+   }
+  },
+  {
+   "id": 12,
+   "at": {
+    "bar": 40
+   },
+   "fade": 0.0,
+   "why": "PEAK at 54.5s - the loudest instant in the recording. Full blast, the only white",
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 1.0
+    },
+    "heads": {
+     "c": "bone",
+     "l": 1.0,
+     "pan": 0.5,
+     "tilt": 0.26,
+     "strobe": 0.75
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.6
+   }
+  },
+  {
+   "id": 13,
+   "at": {
+    "bar": 41
+   },
+   "fade": 0.35,
+   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - handover in violet against teal inside",
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 0.59
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.41,
+     "pan": 0.5,
+     "tilt": 0.39
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "at": {
+    "bar": 44
+   },
+   "fade": 0.6,
+   "why": "bars 41-44, the phrase travels across: keys leads, E 7.49, 5 hits, mode +0.18 - handover in violet against scarlet inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.64
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.45,
+     "pan": 0.5,
+     "tilt": 0.39
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ],
+   "swell": {
+    "from": 0.881,
+    "to": 0.905,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 15,
+   "at": {
+    "bar": 45
+   },
+   "fade": 0.6,
+   "why": "bars 45-48, the phrase travels across: keys leads, E 7.77, 4 hits, mode +0.57 - bounce in violet against scarlet inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.58
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.41,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true,
+     "reverse": true
+    }
+   ],
+   "swell": {
+    "from": 0.783,
+    "to": 0.837,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 16,
+   "at": {
+    "bar": 49
+   },
+   "fade": 0.6,
+   "why": "bars 49-52, the phrase closes down: drums leads, E 9.07, 5 hits, mode +0.21 - bounce in violet against teal inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.55
+    },
+    "heads": {
+     "c": "teal",
+     "l": 0.39,
+     "pan": 0.5,
+     "tilt": 0.4
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true,
+     "reverse": true
+    }
+   ],
+   "swell": {
+    "from": 1.0,
+    "to": 1.0,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 17,
+   "at": {
+    "bar": 53
+   },
+   "fade": 0.15,
+   "why": "bars 53-56, the phrase closes down: voices leads, E 5.52, 4 hits, mode +0.53 - wave in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.46
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.32,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "at": {
+    "bar": 57
+   },
+   "fade": 0.15,
+   "why": "bars 57-60, the phrase closes down: drums leads, E 5.24, 0 hits, mode +0.12 - sweep in scarlet against teal inside",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.45
+    },
+    "heads": {
+     "c": "teal",
+     "l": 0.32,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true,
+     "reverse": true
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "at": {
+    "bar": 61
+   },
+   "fade": 0.15,
+   "why": "bars 61-64, the phrase opens out: keys leads, E 3.74, 0 hits, mode +0.47 - sweep in scarlet",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.33
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.23,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": true
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "at": {
+    "bar": 65
+   },
+   "fade": 0.35,
+   "why": "bars 65-68, the phrase closes down: keys leads, E 3.47, 3 hits, mode +0.41 - wave in scarlet against teal inside",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.33
+    },
+    "heads": {
+     "c": "teal",
+     "l": 0.23,
+     "pan": 0.5,
+     "tilt": 0.33
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": true
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 92.833
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 21% of its median for 0.86s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 21,
+   "at": {
+    "second": 93.693
+   },
+   "fade": 0.06,
+   "why": "and back on the look it is arriving at, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.28
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.2,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": true
+    }
+   ],
+   "swell": {
+    "from": 0.652,
+    "to": 0.683,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 22,
+   "at": {
+    "bar": 73
+   },
+   "fade": 0.6,
+   "why": "bars 73-76, the phrase travels across: voices leads, E 4.56, 2 hits, mode +0.04 - wave in scarlet",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.38
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": true
+    }
+   ],
+   "swell": {
+    "from": 0.739,
+    "to": 0.762,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 23,
+   "at": {
+    "bar": 77
+   },
+   "fade": 0.35,
+   "why": "bars 77-80, the phrase closes down: voices leads, E 4.50, 1 hits, mode -0.64 - wave in scarlet",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.36
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.25,
+     "pan": 0.5,
+     "tilt": 0.28
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 24,
+   "at": {
+    "bar": 81
+   },
+   "fade": 0.6,
+   "why": "bars 81-84, the phrase travels across: keys leads, E 7.13, 5 hits, mode +0.18 - wave in violet against crimson inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.44
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.31,
+     "pan": 0.5,
+     "tilt": 0.38
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": true
+    }
+   ],
+   "swell": {
+    "from": 0.919,
+    "to": 0.946,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 25,
+   "at": {
+    "bar": 85
+   },
+   "fade": 0.35,
+   "why": "bars 85-88, the phrase travels across: keys leads, E 7.47, 5 hits, mode +0.55 - pairs in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.43
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.3,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": false
+    }
+   ]
+  },
+  {
+   "id": 26,
+   "at": {
+    "bar": 89
+   },
+   "fade": 0.35,
+   "why": "bars 89-92, the phrase opens out: keys leads, E 7.18, 5 hits, mode +0.22 - converge in violet against crimson inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.35
+    },
+    "heads": {
+     "c": "crimson",
+     "l": 0.24,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ],
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
+   }
+  },
+  {
+   "id": 27,
+   "at": {
+    "bar": 90
+   },
+   "fade": 0.0,
+   "why": "climax at 123.3s - everything arrives at once",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.61
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.6,
+     "pan": 0.5,
+     "tilt": 0.3,
+     "strobe": 0.5
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  },
+  {
+   "id": 28,
+   "at": {
+    "bar": 93
+   },
+   "fade": 0.35,
+   "why": "bars 93-96, the phrase travels across: keys leads, E 8.23, 6 hits, mode +0.52 - cascade in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.39
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.39
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "cascade",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.4,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 29,
+   "at": {
+    "bar": 97
+   },
+   "fade": 0.35,
+   "why": "bars 97-100, the phrase travels across: keys leads, E 7.30, 3 hits, mode +0.20 - wave in violet against scarlet inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.39
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 30,
+   "at": {
+    "bar": 101
+   },
+   "fade": 0.35,
+   "why": "bars 101-104, the phrase travels across: keys leads, E 7.91, 6 hits, mode +0.58 - handover in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.38
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.4,
+     "move_head": true,
+     "reverse": true
+    }
+   ]
+  },
+  {
+   "id": 31,
+   "at": {
+    "bar": 105
+   },
+   "fade": 0.6,
+   "why": "bars 105-108, the phrase travels across: keys leads, E 8.94, 5 hits, mode +0.25 - bounce in violet against teal inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.37
+    },
+    "heads": {
+     "c": "teal",
+     "l": 0.26,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ],
+   "swell": {
+    "from": 1.0,
+    "to": 1.0,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 32,
+   "at": {
+    "bar": 109
+   },
+   "fade": 0.35,
+   "why": "bars 109-112, the phrase opens out: keys leads, E 7.90, 5 hits, mode +0.61 - handover in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.31
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.22,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true,
+     "reverse": true
+    }
+   ]
+  },
+  {
+   "id": 33,
+   "at": {
+    "bar": 113
+   },
+   "fade": 0.35,
+   "why": "bars 113-116, the phrase opens out: keys leads, E 7.40, 0 hits, mode +0.26 - sweep in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.27
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.19,
+     "pan": 0.5,
+     "tilt": 0.34
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
+  },
+  {
+   "id": 34,
+   "at": {
+    "bar": 117
+   },
+   "fade": 0.35,
+   "why": "bars 117-120, the phrase closes down: keys leads, E 6.84, 3 hits, mode +0.57 - split in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.29
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.2,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 166.464
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 0% of its median for 4.71s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 36,
+   "at": {
+    "bar": 123
+   },
+   "fade": 0.35,
+   "why": "bars 123-124, the phrase travels across: keys leads, E 0.00, 0 hits, mode +1.00 - converge in violet",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.04
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.03,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
+  },
+  {
+   "id": 35,
+   "at": {
+    "second": 171.178
+   },
+   "fade": 0.06,
+   "why": "and back, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.14
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.1,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
   }
  ],
- "gestures": [
+ "rig": "arc4-head",
+ "accents": [
   {
-   "moment": 6,
-   "lead_beats": 1,
-   "effect": "blackout",
-   "for_beats": 1,
-   "why": "One beat of nothing immediately before the loudest stretch in the song. Darkness is the strongest thing available and it is what makes the next cue land."
+   "t": 11.308,
+   "l": 0.73,
+   "decay": 0.2,
+   "on": "auto"
   },
   {
-   "moment": 6,
-   "effect": "impact",
-   "colour": [
-    1,
-    1,
-    1
-   ],
-   "extent": "all",
-   "for_beats": 4,
-   "why": "Moment 6 is intensity 1.00 and described as the loudest stretch of the song. The biggest gesture in the catalogue, at full, on the whole rig, and nowhere else in the show."
+   "t": 13.723,
+   "l": 0.71,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
-   "moment": 6,
-   "effect": "strobe",
-   "colour": [
-    1,
-    1,
-    1
-   ],
-   "hz": 14,
-   "extent": "all",
-   "for_beats": 4,
-   "why": "The only strobe in the show, kept short and stacked on the impact so the show's loudest five seconds sits on the recording's. Moment 6 also carries an exit alongside the peak - the loudest instant is the one the track leaves on."
+   "t": 16.927,
+   "l": 0.82,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
-   "moment": 13,
-   "lead_beats": 1,
-   "effect": "blackout",
-   "for_beats": 2,
-   "why": "The other intensity 1.00 moment gets the same preparation as the first. The two biggest events in the song rhyme in how they are set up."
+   "t": 19.992,
+   "l": 0.79,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
-   "moment": 13,
-   "effect": "flare",
-   "colour": [
-    1,
-    1,
-    1
-   ],
-   "under": [
-    0.16,
-    0.5,
-    1
-   ],
-   "level": 0.9,
-   "rest": 0.34,
-   "for_beats": 4,
-   "why": "The climax is six instrument families at once, but it is not the loudest stretch - moment 6 is. So the climax is answered in colour rather than in a second white peak: white slams over the chorus azure and falls back into it."
+   "t": 23.731,
+   "l": 0.8,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
-   "moment": 13,
-   "effect": "pulse",
-   "colour": [
-    0.16,
-    0.5,
-    1
-   ],
-   "depth": 0.5,
-   "top": 0.8,
-   "per_beat": 1,
-   "for_beats": 12,
-   "why": "Moment 13 holds for 15s. Rather than let the rig sit at the state through the fullest passage in the song, it breathes once per measured beat for the first twelve of them."
+   "t": 26.819,
+   "l": 0.82,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
-   "moment": 18,
-   "effect": "blackout",
-   "for_beats": 7,
-   "why": "Intensity 1.00 on an exit: bowed_strings and back-vocal drop out at 163.0s. At an exit, light going away is the correct answer, and this is the longest darkness in the show."
+   "t": 30.279,
+   "l": 0.75,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
-   "moment": 1,
-   "effect": "blackout",
-   "for_beats": 4,
-   "why": "First of the song's three pauses - the track falls away to almost nothing, with a harmonic_rhythm change alongside. All three pauses get darkness; that is the show's one repeating idea."
+   "t": 32.856,
+   "l": 0.91,
+   "decay": 0.2,
+   "on": "auto"
   },
   {
-   "moment": 5,
-   "effect": "lift",
-   "by": 0.28,
-   "over_beats": 6,
-   "tilt": 0.3,
-   "why": "The music drops 7 semitones at 50.92s and the loudest stretch of the song arrives 3.58s later. The pitch goes down and the light goes up, because that is what the measurement says happens next."
+   "t": 36.479,
+   "l": 0.9,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
-   "moment": 7,
-   "effect": "converge",
-   "colour": [
-    1,
-    1,
-    1
-   ],
-   "level": 0.85,
-   "rest": 0.28,
-   "for_beats": 6,
-   "why": "lead-vocal re-enters at 71.96s at intensity 0.956 in a section where it otherwise sits at 0.15/43%. The pars drop back and the head drives to one point - the room looks at the singer. Kept in the head so this does not compete with the peak for brightness."
+   "t": 39.242,
+   "l": 0.99,
+   "decay": 0.2,
+   "on": "auto"
   },
   {
-   "moment": 9,
-   "effect": "sweep",
-   "colour": [
-    1,
-    1,
-    1
-   ],
-   "level": 0.8,
-   "from_pan": 0.35,
-   "to_pan": 0.85,
-   "tilt": 0.42,
-   "rest": 0.26,
-   "bounce": true,
-   "for_beats": 12,
-   "why": "Everything drops back behind lead-vocal and holds for 30s. The pars hold the room low while the head travels - second of the three head gestures, one for each measured moment where the voice is alone. Bounded at twelve beats rather than left to hold the full 30s."
+   "t": 42.005,
+   "l": 0.86,
+   "decay": 0.2,
+   "on": "auto"
   },
   {
-   "moment": 10,
-   "effect": "blackout",
-   "for_beats": 5,
-   "why": "Second pause, intensity 0.752, and the deepest point of the stripped verse. Longer than the first because there is less underneath it to lose."
+   "t": 45.441,
+   "l": 0.85,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
-   "from_moment": 11,
-   "to_moment": 12,
-   "effect": "ramp",
-   "to": 0.9,
-   "curve": "ease",
-   "why": "Two measured builds, 99.55s to 109.89s, ending half a second before the chorus boundary at 110.4s. The last ten seconds of the emptiest verse in the song rise into the fullest chorus - the one long continuous move in the show."
+   "t": 48.205,
+   "l": 0.85,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
-   "moment": 14,
-   "effect": "bounce",
-   "colours": [
-    [
-     1.0,
-     0.72,
-     0.3
-    ],
-    [
-     0.16,
-     0.5,
-     1.0
-    ]
-   ],
-   "level": 0.72,
-   "per_beat": 1,
-   "for_beats": 12,
-   "why": "Both voices enter at 146.44s over the densest drumming in the track. The two palette colours trade on the measured beat, which makes that groove visible without adding a third bright amount gesture."
+   "t": 50.968,
+   "l": 0.91,
+   "decay": 0.2,
+   "on": "auto"
   },
   {
-   "moment": 16,
-   "effect": "cut",
-   "for_beats": 2,
-   "why": "Low intensity at 0.189, but it is the moment the kit leaves: half as many hits at 155.08s, and drums measure 0.02/4% for the rest of the section. Placed on the measurement, not on the intensity."
+   "t": 55.101,
+   "l": 0.98,
+   "decay": 0.2,
+   "on": "auto"
   },
   {
-   "moment": 17,
-   "effect": "texture",
-   "colour": [
-    1,
-    1,
-    1
-   ],
-   "level": 0.8,
-   "rest": 0.28,
-   "gobo": 40,
-   "spin": true,
-   "for_beats": 8,
-   "why": "The last spotlight, holding 14s to the end of the track. Third head gesture: pattern in the air over a room the drums have left, while the pars stay back at 0.28."
+   "t": 59.234,
+   "l": 0.93,
+   "decay": 0.2,
+   "on": "auto"
   },
   {
-   "moment": 19,
-   "effect": "fade",
-   "colour": [
-    1,
-    0.72,
-    0.3
-   ],
-   "from": 0.5,
-   "to": 0.02,
-   "over_beats": 12,
-   "why": "Third and last pause, at 166.5s, one bar before the outro. The fade runs across the whole outro to arrive at black roughly where the stems do - the song ends amber, the colour it started in."
+   "t": 61.997,
+   "l": 0.85,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 66.13,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 68.894,
+   "l": 0.95,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 73.027,
+   "l": 0.88,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 75.79,
+   "l": 0.86,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 82.175,
+   "l": 0.72,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 87.841,
+   "l": 0.69,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 90.442,
+   "l": 0.81,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 93.901,
+   "l": 0.59,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 97.222,
+   "l": 0.65,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 99.498,
+   "l": 0.69,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 102.702,
+   "l": 0.77,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 106.138,
+   "l": 0.81,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 110.272,
+   "l": 0.99,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 113.035,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 117.168,
+   "l": 0.92,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 121.301,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 124.064,
+   "l": 0.89,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 126.827,
+   "l": 0.92,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 129.242,
+   "l": 0.82,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 133.724,
+   "l": 0.97,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 137.857,
+   "l": 0.87,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 140.62,
+   "l": 0.67,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 144.753,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 147.516,
+   "l": 0.89,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 151.65,
+   "l": 0.93,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 154.413,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "auto"
+  },
+  {
+   "t": 158.894,
+   "l": 0.78,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 162.331,
+   "l": 0.79,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 165.094,
+   "l": 0.68,
+   "decay": 0.15,
+   "on": "auto"
   }
- ]
+ ],
+ "states": [],
+ "bindings": [],
+ "gestures": []
 }

@@ -593,7 +593,43 @@ a lit base — the most ordinary look in lighting. With the correct test the rea
 starting figure was 4.8%. This is the wrong-referee error for about the ninth time in
 this project. Before believing any scanner, hand-check the frames it flags most.
 
+## 7l. An accent is a bump, not a level
+
+`render.js` drove accents to an absolute target, `255 * l * w`. The look already says
+how loud the room should be, so an absolute accent screams in a quiet passage and
+disappears in a loud one — exactly backwards. At 0:06 in `raga-of-revenge` the room sat
+at `l 0.24` and an `l 0.64` accent put one par at 2.5x the rest of the rig for 120ms,
+with the other three untouched. Amal read that as "the third lamp flashes for no
+reason", and he was right: one lamp spiking while three hold still is a fault however
+real the onset behind it.
+
+The onset *was* real but unremarkable — 89th percentile, and not even the largest in
+its own 4-10s neighbourhood. The score was not at fault. The treatment was.
+
+Accents are now proportional: `target = before * (1 + l * w)`, clipped at full. Across
+`raga-of-revenge` the median accent is unchanged at 1.30x the look, so they still
+register, but the maximum fell from 2.20x to 1.54x and all four over-2x spikes are
+gone. When an accent looks wrong, check its size against the look before doubting the
+score.
+
 ## 8. Traps — mistakes already made here, do not repeat
+
+- **`publish.py` did not read the cue file, and nothing said so.** It defaulted to
+  `portal/work/<song>.plan.json`, which for a cue-list show is whatever the old
+  composer last left there. Every fix in this session was measured against a local
+  bake in `/tmp` and was correct, while the editor kept serving a showfile from hours
+  earlier — Amal watched an unchanged show and said so. `publish.py` now prefers
+  `portal/cue/shows/<song>.cues.json` when it exists and prints the source it used.
+  **Read that line.** After publishing, the check that actually proves it:
+
+  ```
+  python3 - <<'EOF'
+  import json
+  a=json.load(open("portal/showfiles/<song>.show.json"))
+  b=json.load(open("portal/cue/shows/<song>.cues.json"))
+  print(json.dumps(a.get("cues"))==json.dumps(b["cues"]))
+  EOF
+  ```
 
 - **The wrong referee.** This is the recurring failure. Examples that cost real
   time: measuring the odd lamp on the **dimmer** channel when a par7 profile carries

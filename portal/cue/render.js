@@ -342,7 +342,7 @@ function render(cueFile, score, rigName, opts) {
           const before = Math.max(frames[i][fx.offset + (ch.r >= 0 ? ch.r : 0)],
                                 frames[i][fx.offset + (ch.g >= 0 ? ch.g : 0)],
                                 frames[i][fx.offset + (ch.b >= 0 ? ch.b : 0)]);
-          const target = Math.round(255 * amp);
+          const target = Math.min(255, Math.round(before * (1 + amp)));
           if (target > before) added += target - before;
           if (col) {
             if (ch.r >= 0) frames[i][fx.offset + ch.r] = Math.max(frames[i][fx.offset + ch.r], Math.round(col[0] * amp * 255));
@@ -355,7 +355,8 @@ function render(cueFile, score, rigName, opts) {
             }
           }
         } else if (ch.master >= 0) {
-          frames[i][fx.offset + ch.master] = Math.max(frames[i][fx.offset + ch.master], Math.round(amp * 255));
+          const held = frames[i][fx.offset + ch.master];
+          frames[i][fx.offset + ch.master] = Math.min(255, Math.round(held * (1 + amp)));
         }
       }
       if (!rest.length || added <= 0) continue;
