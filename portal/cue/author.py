@@ -301,6 +301,9 @@ def author(song, out_path=None):
                 rising.add(rows[q]["bar"])
 
     prev_fam = None
+    held_fam = None
+    held_colour = None
+    held_warmth = 0.0
     prev_level = 0.0
     prev_set = set()
     add_layers = None
@@ -310,7 +313,16 @@ def author(song, out_path=None):
         kind = mom[1] if mom else ""
         here = set(r["playing"])
         churn = len(here ^ prev_set)
-        top_fam = max(r["fam"], key=lambda f: r["fam"][f]) if r["fam"] else "voices"
+        lead = max(r["fam"], key=lambda f: r["fam"][f]) if r["fam"] else "voices"
+        if held_fam is None:
+            top_fam = lead
+        elif lead == held_fam:
+            top_fam = held_fam
+        else:
+            challenger = r["fam"].get(lead, 0.0)
+            incumbent = r["fam"].get(held_fam, 0.0)
+            top_fam = lead if challenger > incumbent * 1.30 else held_fam
+        held_fam = top_fam
         fam_changed = top_fam != prev_fam
         e = r["E"] / Emax
         level = round(min(0.97, (0.12 + 0.80 * (e**0.8)) * arc(r["t"])), 2)
@@ -406,9 +418,20 @@ def author(song, out_path=None):
                 warmth = max(0.0, min(1.0, (float(mode) + 1.0) / 2.0))
             if bright is not None:
                 warmth = max(0.0, min(1.0, warmth * 0.72 + (float(bright) / 10.0) * 0.28))
-            main = ramp[min(len(ramp) - 1, int(warmth * len(ramp)))]
+            want = ramp[min(len(ramp) - 1, int(warmth * len(ramp)))]
+            big = kind in ("peak", "climax", "drop", "breakdown", "register_shift")
+            if held_colour is None or fam_changed or big or abs(warmth - held_warmth) >= 0.45:
+                main = want
+                held_colour, held_warmth = want, warmth
+            else:
+                main = held_colour
             counter = COUNTER.get(top_fam, "indigo")
-            split_look = (len(cues) % 3 == 1) and level > 0.3
+            order = sorted(r["fam"].items(), key=lambda kv: -kv[1])
+            second_fam = order[1][0] if len(order) > 1 else None
+            second_share = (order[1][1] / order[0][1]) if len(order) > 1 and order[0][1] else 0.0
+            split_look = second_share >= 0.62 and level > 0.3 and second_fam is not None
+            if split_look:
+                counter = FAMILY_COLOUR.get(second_fam, counter)
             if split_look:
                 look = {
                     "outer": {"c": main, "l": level},
@@ -472,24 +495,8 @@ def author(song, out_path=None):
         add_layers = None
         prev_fam, prev_level, prev_set = top_fam, level, here
 
-    for a, b, depth in holes:
-        if a < 0.4:
-            continue
-        prior = [c for c in cues if c.get("_t", 0) <= a + 1e-6 and c.get("look")]
-        cues.append({"id": 0, "at": {"second": round(a, 3)}, "_t": a, "fade": 0.0,
-                     "look": {},
-                     "why": "the audio falls to %d%% of its median for %.2fs - a real hole, so the room goes with it"
-                            % (round(depth * 100), b - a)})
-        if prior:
-            back = json.loads(json.dumps({k: v for k, v in prior[-1].items() if k != "_t"}))
-            back["at"] = {"second": round(b, 3)}
-            back["_t"] = b
-            back["fade"] = 0.06
-            back["why"] = "and back, the instant the audio returns"
-            cues.append(back)
-    cues.sort(key=lambda c: c.get("_t", 0))
-
     prev_mode = None
+    last_harm = -9.0
     for e in emo:
         m = e.get("mode")
         if m is None:
@@ -522,6 +529,9 @@ def author(song, out_path=None):
                 break
         if col == was:
             continue
+        if t - last_harm < 6.0:
+            continue
+        last_harm = t
         look = json.loads(json.dumps(base.get("look") or {}))
         e_here = row["E"] / Emax
         lvl_here = round(min(0.97, (0.12 + 0.80 * (e_here ** 0.8)) * arc(row["t"])), 2)
@@ -545,6 +555,23 @@ def author(song, out_path=None):
     cues.sort(key=lambda c: c.get("_t", 0))
     for n, c in enumerate(cues):
         c["id"] = n + 1
+
+    for a, b, depth in holes:
+        if a < 0.4:
+            continue
+        prior = [c for c in cues if c.get("_t", 0) <= a + 1e-6 and c.get("look")]
+        cues.append({"id": 0, "at": {"second": round(a, 3)}, "_t": a, "fade": 0.0,
+                     "look": {},
+                     "why": "the audio falls to %d%% of its median for %.2fs - a real hole, so the room goes with it"
+                            % (round(depth * 100), b - a)})
+        if prior:
+            back = json.loads(json.dumps({k: v for k, v in prior[-1].items() if k != "_t"}))
+            back["at"] = {"second": round(b, 3)}
+            back["_t"] = b
+            back["fade"] = 0.06
+            back["why"] = "and back, the instant the audio returns"
+            cues.append(back)
+    cues.sort(key=lambda c: c.get("_t", 0))
 
     accents = []
     hole_spans = [(a, b) for a, b, _ in holes]
@@ -589,6 +616,30 @@ def author(song, out_path=None):
         w = (nxt.get("why") or "")
         if w.startswith("PEAK") or w.startswith("climax") or w.startswith("build"):
             c["swell"] = {"from": 0.72, "to": 1.0, "curve": 1.6}
+
+    BIG = ("PEAK", "climax", "drop", "breakdown", "register_shift", "the audio falls")
+    last_change = -9.0
+    held = None
+    for c in cues:
+        look = c.get("look") or {}
+        cols = [v for v in look.values() if isinstance(v, dict) and v.get("c")]
+        if not cols:
+            continue
+        here = tuple(sorted({v["c"] for v in cols}))
+        why = c.get("why") or ""
+        big = any(b in why for b in BIG) or "and back" in why
+        t = c.get("_t", 0)
+        if held is None or here == held:
+            held = here
+            last_change = t if held != here else last_change
+            continue
+        if not big and t - last_change < 4.0:
+            swap = dict(zip(here, held)) if len(here) == len(held) else {k: held[0] for k in here}
+            for v in cols:
+                v["c"] = swap.get(v["c"], held[0])
+            continue
+        held = here
+        last_change = t
 
     for c in cues:
         c.pop("_t", None)
