@@ -19,7 +19,7 @@ export function TransportPill({
   const pos = grid ? positionAt(currentTime, grid) : null;
 
   return (
-    <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-[14px] z-20">
+    <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-[4px] z-20">
       <div className="liquid pointer-events-auto flex items-center gap-[12px] h-[52px] pl-[7px] pr-[18px] rounded-full">
         <button
           type="button"
