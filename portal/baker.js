@@ -345,6 +345,22 @@ function generateFrames(entry) {
      own length while its floor rises. */
   const ctx = { fps, bpm, layout, duration_s: (entry.endS || 0) - (entry.startS || 0) };
   const result = fn(entry.params, ctx);
+  /* A venue's effects and its manifest have to agree on how wide a frame is.
+     keycode-arena shipped as a copy of club16-2head, so its helpers built
+     138-channel frames for a rig the manifest declares at 488: every cue landed
+     outside the real fixtures and the room baked perfectly black, with nothing
+     anywhere saying why. A silent blackout is the worst failure this baker has,
+     so it is an error now rather than an empty show. */
+  const width = result && result.frames && result.frames[0] && result.frames[0].length;
+  if (width && width !== TOTAL_CH) {
+    console.error(
+      `${rigName}/${entry.eid}.js returns ${width}-channel frames but ` +
+      `${rigName}/manifest.json declares total_channels ${TOTAL_CH}. ` +
+      `Every cue from this venue would address the wrong channels and the show ` +
+      `would bake black. Fix TOTAL_CH in ${rigName}/helpers.js, or the manifest.`,
+    );
+    process.exit(3);
+  }
   return result;
 }
 

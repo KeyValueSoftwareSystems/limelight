@@ -1,18 +1,69 @@
 "use strict";
-/* Shared helpers for the club16-2head DMX effect functions.
-   Rig: 16 × par7 (7ch each, addresses 1-112) + 2 × head13 (13ch each, addresses 113-138).
-   Total: 138 DMX channels, universe 0. */
+/* Shared helpers for the KeyCode Arena DMX effect functions.
 
-const TOTAL_CH = 138;
+   This venue shipped as a copy of club16-2head, helpers and all, so it built
+   138-channel frames for a rig its own manifest declares at 488. Every cue
+   addressed channels the arena does not have and the whole show baked black,
+   with nothing anywhere saying why.
+
+   The rig is not hardcoded any more. It is read from the layout the manifest
+   points at and the fixture profiles that layout names, so the channel map
+   cannot drift from the rig again: add a fixture to the layout and the effects
+   see it. */
+
+const fs = require("fs");
+const path = require("path");
+
+const HERE = __dirname;
+const REPO = path.dirname(path.dirname(path.dirname(HERE)));
+const LIGHTS = path.join(REPO, "readers", "lights");
+
+const manifest = JSON.parse(fs.readFileSync(path.join(HERE, "manifest.json"), "utf8"));
+const layout = JSON.parse(fs.readFileSync(path.join(LIGHTS, manifest.layout_file), "utf8"));
+
 const FPS = 40;
 
-/* par7 channel offsets (within a 7-channel block):
-   0=master 1=R 2=G 3=B 4=strobe 5=keep_zero 6=keep_zero */
-const PAR = { master: 0, r: 1, g: 2, b: 3, strobe: 4 };
+/** A fixture type's channel roles, by index, from its own profile. */
+function roles(type) {
+  const p = path.join(LIGHTS, "drivers", "profiles", type + ".profile.json");
+  const prof = JSON.parse(fs.readFileSync(p, "utf8"));
+  const list = prof.channels;
+  const out = {};
+  const n = Array.isArray(list) ? list.length : Number(list) || 0;
+  if (Array.isArray(list)) {
+    list.forEach((c, i) => {
+      const role = typeof c === "string" ? c : c && (c.role || c.name);
+      if (role && out[role] === undefined) out[role] = i;
+    });
+  }
+  return { n, ...out };
+}
 
-/* head13 channel offsets (within a 13-channel block):
-   0=pan 1=pan_fine 2=tilt 3=tilt_fine 4=speed 5=master 6=strobe
-   7=colour_wheel 8=gobo 9=prism 10..12=keep_zero */
+const ROLES = {};
+for (const t of new Set(layout.fixtures.map((f) => f.type))) ROLES[t] = roles(t);
+
+const TOTAL_CH = manifest.total_channels;
+
+/* Addresses are 1-based in the layout; a DMX frame is a 0-based array. */
+const of = (f) => ({ id: f.id, type: f.type, offset: f.address - 1, x: f.at[0] });
+
+/* Anything that makes flat colour is a "par" to an effect: the 22 par5 cans and
+   the 6 wash12 movers, which the effects drive as colour rather than as heads.
+   Ordered left to right, because every extent below is a slice of a ROW. */
+const PARS = layout.fixtures
+  .filter((f) => f.type === "par5" || f.type === "wash12")
+  .sort((a, b) => a.at[0] - b.at[0] || a.address - b.address)
+  .map(of);
+
+/* The spot29 movers are the heads. */
+const HEADS = layout.fixtures
+  .filter((f) => f.type === "spot29")
+  .sort((a, b) => a.at[0] - b.at[0] || a.address - b.address)
+  .map(of);
+
+/* Kept so effects written against the club16 names still read: these are the
+   par5 offsets, and setPar() resolves the right ones per fixture type. */
+const PAR = { master: 0, r: 1, g: 2, b: 3, strobe: 4 };
 const HEAD = { pan: 0, panFine: 1, tilt: 2, tiltFine: 3, speed: 4,
                master: 5, strobe: 6, colour: 7, gobo: 8, prism: 9 };
 
@@ -28,27 +79,20 @@ const COLOUR_WHEEL = [
 ];
 
 const HEAD_PARK = { pan: 169, tilt: 127, speed: 200, level: 0 };
-/* the colour wheel turns continuously at and above this value (rig.py: COLOUR_SPIN_MIN) */
 const SPIN_MIN = 150;
 
-/* Fixture layout: 16 pars, 2 heads. Addresses are 1-based in the layout but
-   DMX frame arrays are 0-based, so par_01 at address 1 starts at index 0. */
-const PARS = [];
-for (let i = 0; i < 16; i++) PARS.push({ id: "par_" + String(i + 1).padStart(2, "0"), offset: i * 7 });
-const HEADS = [
-  { id: "head_1", offset: 112 },
-  { id: "head_2", offset: 125 },
-];
-const ALL_FIXTURES = PARS.map(p => p.id).concat(HEADS.map(h => h.id));
-const PAR_IDS = PARS.map(p => p.id);
-const HEAD_IDS = HEADS.map(h => h.id);
+const ALL_FIXTURES = PARS.map((p) => p.id).concat(HEADS.map((h) => h.id));
+const PAR_IDS = PARS.map((p) => p.id);
+const HEAD_IDS = HEADS.map((h) => h.id);
 
-/* Grouping helpers matching preflight.js's groupsOf semantics. */
-const INNER = PARS.slice(4, 12);
-const OUTER = PARS.slice(0, 4).concat(PARS.slice(12, 16));
-const LEFT  = PARS.slice(0, 8);
-const RIGHT = PARS.slice(8, 16);
-const ENDS  = [PARS[0], PARS[15]];
+/* Grouping helpers matching preflight.js's groupsOf semantics, as fractions of
+   the row rather than fixed indices - this row is 28 wide, not 16. */
+const q = (a, b) => PARS.slice(Math.round(PARS.length * a), Math.round(PARS.length * b));
+const INNER = q(0.25, 0.75);
+const OUTER = q(0, 0.25).concat(q(0.75, 1));
+const LEFT  = q(0, 0.5);
+const RIGHT = q(0.5, 1);
+const ENDS  = [PARS[0], PARS[PARS.length - 1]].filter(Boolean);
 
 const CENTRE = PARS.length % 2
   ? [PARS[(PARS.length - 1) / 2]]
@@ -63,9 +107,6 @@ function parsForExtent(extent) {
     case "ends":   return ENDS;
     case "single": return CENTRE;
     case "all": default: {
-      /* "lamp3": one lamp by its place in the row, 1 = leftmost. A cue that wants
-         to mark the lamp AHEAD of a walker needs to name a single lamp, and the
-         pairs cannot say that. */
       const m = /^lamp(\d+)$/.exec(String(extent || ""));
       if (m) { const p = PARS[Number(m[1]) - 1]; return p ? [p] : []; }
       return PARS;
@@ -74,7 +115,7 @@ function parsForExtent(extent) {
 }
 
 function fixtureIdsForExtent(extent) {
-  return parsForExtent(extent).map(p => p.id);
+  return parsForExtent(extent).map((p) => p.id);
 }
 
 function emptyFrame() { return new Array(TOTAL_CH).fill(0); }
@@ -129,51 +170,68 @@ function nearestWheelColour(rgb) {
   return best;
 }
 
-/* Set a par's colour and level in a frame. Level is 0..1, colour is [r,g,b] 0..1. */
+/* Set a par's colour and level. par5 carries master + RGB; wash12 is a mover
+   whose colour sits further into its block, so the roles come from the profile
+   rather than from one hardcoded offset table. */
 function setPar(frame, par, colour, level) {
+  const r = ROLES[par.type] || ROLES.par5;
   const o = par.offset;
   const l = clamp(level, 0, 1);
   const c = rgb255(colour);
-  frame[o + PAR.master] = 255;
-  frame[o + PAR.r] = clamp(Math.round(c[0] * l), 0, 255);
-  frame[o + PAR.g] = clamp(Math.round(c[1] * l), 0, 255);
-  frame[o + PAR.b] = clamp(Math.round(c[2] * l), 0, 255);
+  if (r.master !== undefined) frame[o + r.master] = 255;
+  if (r["colour.r"] !== undefined) {
+    frame[o + r["colour.r"]] = clamp(Math.round(c[0] * l), 0, 255);
+    frame[o + r["colour.g"]] = clamp(Math.round(c[1] * l), 0, 255);
+    frame[o + r["colour.b"]] = clamp(Math.round(c[2] * l), 0, 255);
+  }
 }
 
 function setParStrobe(frame, par, hz) {
-  const o = par.offset;
-  frame[o + PAR.strobe] = hz > 0 ? clamp(Math.round((hz / 25) * 255), 1, 255) : 0;
+  const r = ROLES[par.type] || ROLES.par5;
+  if (r.strobe === undefined) return;
+  frame[par.offset + r.strobe] = hz > 0 ? clamp(Math.round((hz / 25) * 255), 1, 255) : 0;
 }
 
-/* Set a head's state in a frame. Level 0..1, colour as [r,g,b], pan/tilt 0..1. */
+/* Set a head's state. The arena's heads are spot29: subtractive CMY rather than
+   a colour wheel, master at the far end of the block, and no fine channels. */
 function setHead(frame, head, opts) {
+  const r = ROLES[head.type] || ROLES.spot29;
   const o = head.offset;
   const level = clamp(opts.level != null ? opts.level : 0, 0, 1);
-  frame[o + HEAD.master] = clamp(Math.round(level * 255), 0, 255);
-  frame[o + HEAD.speed] = HEAD_PARK.speed;
+
+  if (r.master !== undefined) frame[o + r.master] = clamp(Math.round(level * 255), 0, 255);
+  if (r.speed !== undefined) frame[o + r.speed] = HEAD_PARK.speed;
 
   if (opts.colour) {
-    const wc = nearestWheelColour(opts.colour);
-    frame[o + HEAD.colour] = wc.value;
+    const c = opts.colour;
+    if (r["colour.c"] !== undefined) {
+      frame[o + r["colour.c"]] = clamp(Math.round((1 - c[0]) * 255), 0, 255);
+      frame[o + r["colour.m"]] = clamp(Math.round((1 - c[1]) * 255), 0, 255);
+      frame[o + r["colour.y"]] = clamp(Math.round((1 - c[2]) * 255), 0, 255);
+    } else if (r["colour.r"] !== undefined) {
+      const v = rgb255(c);
+      frame[o + r["colour.r"]] = v[0];
+      frame[o + r["colour.g"]] = v[1];
+      frame[o + r["colour.b"]] = v[2];
+    } else if (r.colour !== undefined) {
+      frame[o + r.colour] = nearestWheelColour(c).value;
+    }
   }
-  if (opts.pan != null) {
-    const pv = clamp(Math.round(opts.pan * 255), 0, 255);
-    frame[o + HEAD.pan] = pv;
-    frame[o + HEAD.panFine] = 0;
-  } else {
-    frame[o + HEAD.pan] = HEAD_PARK.pan;
+
+  if (r.pan !== undefined) {
+    frame[o + r.pan] = opts.pan != null
+      ? clamp(Math.round(opts.pan * 255), 0, 255)
+      : HEAD_PARK.pan;
   }
-  if (opts.tilt != null) {
-    const tv = clamp(Math.round(opts.tilt * 255), 0, 255);
-    frame[o + HEAD.tilt] = tv;
-    frame[o + HEAD.tiltFine] = 0;
-  } else {
-    frame[o + HEAD.tilt] = HEAD_PARK.tilt;
+  if (r.tilt !== undefined) {
+    frame[o + r.tilt] = opts.tilt != null
+      ? clamp(Math.round(opts.tilt * 255), 0, 255)
+      : HEAD_PARK.tilt;
   }
-  if (opts.gobo != null) frame[o + HEAD.gobo] = opts.gobo;
-  if (opts.prism != null) frame[o + HEAD.prism] = opts.prism;
-  if (opts.strobe != null) {
-    frame[o + HEAD.strobe] = opts.strobe > 0 ? clamp(Math.round((opts.strobe / 25) * 255), 1, 255) : 0;
+  if (opts.gobo != null && r.gobo !== undefined) frame[o + r.gobo] = opts.gobo;
+  if (opts.prism != null && r.prism !== undefined) frame[o + r.prism] = opts.prism;
+  if (opts.strobe != null && r.strobe !== undefined) {
+    frame[o + r.strobe] = opts.strobe > 0 ? clamp(Math.round((opts.strobe / 25) * 255), 1, 255) : 0;
   }
 }
 
@@ -199,9 +257,9 @@ function swellEnv(t, rise) {
 }
 
 module.exports = {
-  TOTAL_CH, FPS, PAR, HEAD, COLOUR_WHEEL, HEAD_PARK,
+  TOTAL_CH, FPS, PAR, HEAD, COLOUR_WHEEL, HEAD_PARK, SPIN_MIN, ROLES,
   PARS, HEADS, ALL_FIXTURES, PAR_IDS, HEAD_IDS,
-  INNER, OUTER, LEFT, RIGHT, ENDS,
+  INNER, OUTER, LEFT, RIGHT, ENDS, CENTRE,
   parsForExtent, fixtureIdsForExtent,
   emptyFrame, clamp, rgb255, nearestWheelColour,
   parseColour, parseColours,
