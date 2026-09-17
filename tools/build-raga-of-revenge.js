@@ -26,6 +26,16 @@ const drive = (a, b, floor, colours, why, extra = {}) => bed(a, b, "drive", { co
 const row = (colour, amount, extent, from_s, to_s, extra, why) => G.push({ effect: "glare", colour, amount, extent, from_s: r2(from_s), to_s: r2(to_s), fade_ms: 450, head: false, ...extra, why });
 const hit = (colour, at_s, beats, why, amount = 1) => G.push({ effect: "glare", colour, amount, extent: "all", at_s: r2(at_s + 0.005), for_beats: beats, fade_ms: 0, head: false, why });
 const impact = (at_s, why) => G.push({ effect: "impact", colour: WHITE, extent: "all", at_s: r2(at_s), for_beats: 2, fade_ms: 0, head: false, why });
+/* a drop LANDS when it is the brightest thing in the sequence and stays for a beat:
+   the impact's burst, a full white beat held under it, and the head at full,
+   strobing, from the spot the blackout parked it. Everything before it (the
+   flicks) is dimmer on purpose. */
+const land = (at_s, why) => {
+  impact(at_s, why);
+  G.push({ effect: "glare", colour: WHITE, amount: 1, extent: "all", from_s: r2(at_s + 0.003), to_s: r2(beatAfter(at_s + 0.3)), fade_ms: 0, head: false, why: "…held full white for the whole first beat." });
+  G.push({ effect: "beam", pattern: "hold", pan: PARK[0], tilt: PARK[1], colour: WHITE, amount: 1, prism: 100, strobe: 20, strobe_on: "always", from_s: r2(at_s), to_s: r2(beatAfter(at_s + 0.3)), fade_ms: 0, why: "…and the head at full, white, strobing, for that beat." });
+  hp = PARK.slice();
+};
 const black = (a, b, why) => G.push({ effect: "blackout", from_s: r2(a), to_s: r2(b), fade_ms: 0, why });
 const run = (t, dir, why) => G.push({ effect: "trade", travel: true, direction: dir, runs: 1, rest: 0.3, peak: 1, colours: [RED, BLUE], from_s: r2(t), to_s: r2(t + 0.5), for_beats: 1, fade_ms: 0, head: false, why });
 const walk = (a, b, dir, why) => G.push({ effect: "chase", direction: dir, per_beat: 0.25, step: true, colour: RED, amount: 1, rest: 0, extent: "all", from_s: r2(a), to_s: r2(b), fade_ms: 0, head: false, why });
@@ -35,8 +45,8 @@ const flicks = (a, b, why) => {
     .filter((t, i, arr) => i === 0 || t - arr[i - 1] >= 0.1);
   if (ts.length < 3) { ts = []; for (let t = beatAfter(a); t < b - 0.1; t += 0) { ts.push(t); const nb = B.find(x => x > t + 0.01); if (!nb) break; ts.push((t + nb) / 2); t = nb; } ts = ts.filter(t => t >= a && t < b - 0.1); }
   ts.forEach((t, i) => {
-    G.push({ effect: "glare", colour: WHITE, amount: 1, extent: "all", from_s: r2(t), to_s: r2(t + 0.12), fade_ms: 0, head: false, why: i === 0 ? why : "…" });
-    G.push({ effect: "beam", pattern: "hold", pan: PARK[0], tilt: PARK[1], colour: WHITE, amount: 0.9, prism: 0, strobe: 0, from_s: r2(t), to_s: r2(t + 0.12), fade_ms: 0, why: i === 0 ? "The head flicks with the row, from where the blackout parked it." : "…" });
+    G.push({ effect: "glare", colour: WHITE, amount: 0.7, extent: "all", from_s: r2(t), to_s: r2(t + 0.10), fade_ms: 0, head: false, why: i === 0 ? why : "…" });
+    G.push({ effect: "beam", pattern: "hold", pan: PARK[0], tilt: PARK[1], colour: WHITE, amount: 0.6, prism: 0, strobe: 0, from_s: r2(t), to_s: r2(t + 0.10), fade_ms: 0, why: i === 0 ? "The head flicks with the row, from where the blackout parked it." : "…" });
   });
   return ts;
 };
@@ -115,10 +125,10 @@ black(bar(22), 49.75, "Bar 22: the whole band falls away at 47.7 (the score's pa
 flicks(syll[0] - 0.001, 49.75, "\"pa da ni sa ri\": a hard white flick on each of the six syllables the score hears at " + syll.map(t => t.toFixed(2)).join(", ") + " -- the sudden transitions -- with black between them, then the drop.");
 parked();
 /* ======================= DROP 1 (bars 23-29, 49.75-63.76) ======================= */
-impact(49.75, "Drop 1 lands: the impact.");
-drive(49.75, bar(26), 0.72, [RED, BLUE], "Bars 23-25: the drop arrives. Red and blue trade bars on a high floor, a hit on every beat by its measured weight.");
+land(49.75, "Drop 1 lands: the impact.");
+drive(49.75, bar(26), 0.80, [RED, BLUE], "Bars 23-25: the drop arrives. Red and blue trade bars on a high floor, a hit on every beat by its measured weight.");
 hit(WHITE, 52.76, 1, "52.76, the score's climax moment: one white beat.");
-glide(49.75, bar(25), [L, 0.50], RED, 0.70, DROPHEAD, "Drop 1: the head glides from one side of the room to the other over two bars -- a slow pendulum on the bar grid, prism on, a strobe pop on each downbeat. The same pendulum in every drop.");
+glide(beatAfter(50.0), bar(25), [L, 0.50], RED, 0.70, DROPHEAD, "Drop 1: the head glides from one side of the room to the other over two bars -- a slow pendulum on the bar grid, prism on, a strobe pop on each downbeat. The same pendulum in every drop.");
 glide(bar(25), bar(26), [C, 0.50], RED, 0.70, DROPHEAD, "…and to the centre for the singer.");
 drive(bar(26), bar(29), 0.66, [BLUE, BLUE], "Bars 26-28: the bass drops out and the singer leads. The room turns blue and the pairs swap at half speed.", { every_beats: 2 });
 hit(WHITE, bar(26), 1, "Bar 26, beat 1: one white beat marks the singer's entrance.");
@@ -132,9 +142,9 @@ black(bar(30), 65.75, "Bar 30: the drums stop dead -- blackout for the first two
 flicks(before(65.75, 2), 65.75, "Bar 30, beats 3-4: white flicks on the voice's notes (the score's melody), then drop 2.");
 parked();
 /* ======================= DROP 2 + BACKBEAT + SILENT BAR (bars 31-39, 65.75-83.75) ======================= */
-impact(65.75, "Drop 2 lands.");
+land(65.75, "Drop 2 lands.");
 drive(65.75, before(73.75, 2), 0.76, [RED, BLUE], "Bars 31-34: drop 2. Red home, blue kicks, high floor.");
-glide(65.75, bar(32), [L, 0.50], RED, 0.70, DROPHEAD, "Drop 2: the pendulum again, two bars a side.");
+glide(beatAfter(66.0), bar(32), [L, 0.50], RED, 0.70, DROPHEAD, "Drop 2: the pendulum again, two bars a side.");
 glide(bar(32), bar(34), [R, 0.50], RED, 0.70, DROPHEAD, "…");
 glide(bar(34), bar(35), [C, 0.50], RED, 0.70, DROPHEAD, "…to the centre for the backbeat section.");
 drive(before(73.75, 2), bar(35), 0.60, [RED, BLUE], "Bar 34, beats 3-4: the floor comes down a step on the way into the backbeat bars.");
@@ -151,10 +161,10 @@ black(before(83.75, 2), 83.75, "Bar 39, beat 3: blackout as the score's build mo
 flicks(before(83.75, 1), 83.75, "Bar 39, beat 4: white flicks, then drop 3.");
 parked();
 /* ======================= DROP 3, BAR 45, RESOLVE (bars 40-48, 83.75-97.76) ======================= */
-impact(83.75, "Drop 3 lands.");
+land(83.75, "Drop 3 lands.");
 drive(83.75, bar(43), 0.80, [RED, BLUE], "Bars 40-42: drop 3, the highest floor of the three.");
 hit(WHITE, 85.76, 1, "Bar 41, beat 1: one white beat.");
-glide(83.75, bar(41), [L, 0.50], RED, 0.70, DROPHEAD, "Drop 3: the pendulum.");
+glide(beatAfter(84.0), bar(41), [L, 0.50], RED, 0.70, DROPHEAD, "Drop 3: the pendulum.");
 glide(bar(41), bar(42), [R, 0.50], RED, 0.70, DROPHEAD, "…");
 glide(bar(42), bar(43), PARK, RED, 0.70, DROPHEAD, "…to the parked spot before bar 43.");
 wash(bar(43), 91.76, 0.38, BLUE, "Bar 43: the drums stop; a plain floor under the white climb.", 300);
