@@ -249,6 +249,14 @@ function noteStepsIn(grid, startS, endS, n) {
   return out;
 }
 
+function gateSteps(out, grid, chase) {
+  const sub = chase.min_step_beats != null ? +chase.min_step_beats : 1.0;
+  const floor = Math.max(0.12, grid.beatSeconds * sub * 0.92);
+  const kept = [];
+  for (const t of out) if (!kept.length || t - kept[kept.length - 1] >= floor) kept.push(t);
+  return kept.length ? kept : out.slice(0, 1);
+}
+
 function chaseStepTimes(chase, grid, startS, endS) {
   const every = chase.every || { bars: 1 };
   if (every.notes != null) {
@@ -258,7 +266,7 @@ function chaseStepTimes(chase, grid, startS, endS) {
       .map((x) => x.t);
     const out = [];
     for (let k = 0; k < picked.length; k += n) out.push(Math.max(startS, picked[k]));
-    return out.length ? out : [startS];
+    return gateSteps(out.length ? out : [startS], grid, chase);
   }
   if (every.hits != null) {
     const n = Math.max(1, Math.round(+every.hits));
@@ -288,7 +296,7 @@ function chaseStepTimes(chase, grid, startS, endS) {
     merged.sort((a, b) => a - b);
     const out = [];
     for (const t of merged) if (!out.length || t - out[out.length - 1] > 0.05) out.push(t);
-    return out.length ? out : [startS];
+    return gateSteps(out.length ? out : [startS], grid, chase);
   }
   const nBeats = every.beats != null
     ? Math.max(0.25, +every.beats)

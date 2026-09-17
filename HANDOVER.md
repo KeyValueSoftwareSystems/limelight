@@ -248,6 +248,38 @@ phrase plan at r=+0.43 both times. The chases and accents dominate the measured
 brightness, not the cue levels. If he says "reactive" again, the lever is
 probably the chase behaviour inside a phrase, not the phrase levels.
 
+## 7c. The step-rate floor — the actual cause of "voltage fluctuation"
+
+Amal said "watch from 0:04 and you'll understand". Dumping those frames was
+worth more than every aggregate metric in this document put together.
+
+From 4.3s to 5.4s the lamps swapped which one was brightest every 50-150ms with
+no pattern. The TOTAL held steady at ~191 (conservation works), so the wobble
+metric said 19% and looked acceptable — but the **distribution** was churning at
+5-10 Hz. That is what he has been calling voltage fluctuation all along.
+
+The cause: chases stepping on `{notes: 1}`, and **the median gap between melody
+notes in this song is 0.104s**. A note-stepped chase steps ten times a second.
+
+`gateSteps()` in engine.js now refuses any chase step closer than
+`min_step_beats` (default **1.0**) to the previous one, for every chase,
+whatever it steps on. Measured:
+
+```
+  floor        lead changes   median hold   wobble   rises   on hit
+  none              260          0.18s      19.3%     38      89%
+  half a beat       154          0.38s      16.3%     33      88%
+  one beat          110          0.60s      16.2%     32      88%
+```
+
+A full beat costs nothing and triples how long a position holds.
+
+**The metric that finally saw it** is "how often does the brightest lamp
+change" — not per-frame jump, not total wobble. Add that to any future
+investigation: the eye tracks *which lamp leads*, and if that changes faster
+than about twice a second it reads as electrical noise no matter how steady the
+total is.
+
 ## 7b. The activity / fluctuation trade-off — read this before adding anything
 
 Amal's most persistent complaint is that the show "feels like voltage
