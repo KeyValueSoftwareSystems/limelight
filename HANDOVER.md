@@ -327,6 +327,31 @@ If he says fluctuation again, move **down** this curve (fewer accents, longer
 spacing in `author.py`'s accent loop). If he says lazy, move up. Do not reach
 for per-frame smoothing; it is not the variable.
 
+## 7f. A figure must be allowed to finish
+
+Amal liked the build sweep at 0:10-0:12 and called 0:05-0:10 random. Measuring
+the two windows the same way says exactly why:
+
+```
+  5-10s   step spread 0.60   order [1,4,1,2,1,2,1,2]   ping-pong
+  10-12s  step spread 0.27   order [2,3,4]             travel
+```
+
+A pattern reads as a pattern when its timing is regular AND it keeps a
+direction. The cause of the ping-pong was that **every derived cue restarted its
+chase at step 0**. A harmonic colour cue, a swish return, an anticipation dip --
+each inherits the running chase, and each snapped the figure back to its first
+lamp. A build would reach lamp 2 and start again. Figures never finished.
+
+A chase carried into the next cue now continues its step count, keyed on
+figure + targets + rate + direction. Reversals in 5-10s went 6 to 3 and the
+window now ends on a clean 1-2-3-4 sweep. Lamp lead evened out to 42/24/19/15
+and lit share to 74/81/81/74.
+
+Two other things tried here that did NOT help, so do not retry: smoothing the
+pitch targets with a median of neighbours (spread went back up), and mapping
+pitch by rank or by percentile (lamp 1 to 80%, then lamp 3 to 0%).
+
 ## 7e. Two things the scanner cannot see
 
 It reports zero on all seven songs, and Amal still found two faults by watching

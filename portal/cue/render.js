@@ -132,6 +132,7 @@ function render(cueFile, score, rigName, opts) {
     cues[i]._look = resolveLook(rig, cues[i].look, palette);
     let layers = cues[i].chases || (cues[i].chase ? [cues[i].chase] : []);
     layers = layers.map((ch) => {
+      if (ch && ch.figure === "pitch") return { ...ch, every: { beats: 1 } };
       if (!ch || !ch.every || ch.every.notes == null) return ch;
       const span = Math.max(0.01, cues[i]._end - cues[i]._t);
       const inside = (grid.notes || []).filter((x) => x.t >= cues[i]._t && x.t < cues[i]._end);
@@ -143,6 +144,15 @@ function render(cueFile, score, rigName, opts) {
     });
     cues[i]._layers = layers;
     cues[i]._steps = layers.map((ch) => E.chaseStepTimes(ch, grid, cues[i]._t, cues[i]._end));
+    const sig = (ch) => (ch ? [ch.figure, JSON.stringify(ch.on || "lamps"),
+                               JSON.stringify(ch.every || {}), ch.reverse ? 1 : 0].join("|") : "");
+    cues[i]._phase = layers.map((ch, li) => {
+      if (!ch || ch.figure === "pitch" || i === 0) return 0;
+      const prev = cues[i - 1];
+      const pl = (prev._layers || [])[li];
+      if (!pl || sig(pl) !== sig(ch)) return 0;
+      return (prev._phase ? prev._phase[li] : 0) + ((prev._steps || [])[li] || []).length;
+    });
     if (cues[i]._steps.length > 1) {
       const lead = cues[i]._steps[0];
       for (let li = 1; li < cues[i]._steps.length; li++) {
@@ -153,8 +163,29 @@ function render(cueFile, score, rigName, opts) {
         }).filter((t, k, arr) => k === 0 || t !== arr[k - 1]);
       }
     }
-    cues[i]._notes = layers.map((ch) => (ch.figure === "pitch"
-      ? E.noteStepsIn(grid, cues[i]._t, cues[i]._end, (ch.every || {}).notes || 1) : null));
+    cues[i]._notes = layers.map((ch, li) => {
+      if (ch.figure !== "pitch") return null;
+      const times = cues[i]._steps[li] || [];
+      const notes = grid.notes || [];
+      const span = notes.filter((x) => x.t >= cues[i]._t - 0.4 && x.t < cues[i]._end + 0.4);
+      if (!span.length) return null;
+      const ps = span.map((x) => x.p).sort((a, b) => a - b);
+      const lo = ps[Math.floor(ps.length * 0.12)];
+      const hi = ps[Math.ceil(ps.length * 0.88) - 1];
+      const lamps = E.expandTargets(rig, [].concat(ch.on || "lamps")[0]).length || 4;
+      const targets = times.map((t) => {
+        let best = span[0], d = Infinity;
+        for (const x of span) { const q = Math.abs(x.t - t); if (q < d) { d = q; best = x; } }
+        const f = hi > lo ? (best.p - lo) / (hi - lo) : 0.5;
+        return Math.max(0, Math.min(lamps - 1, Math.round(f * (lamps - 1))));
+      });
+      const spread = new Set(targets).size;
+      if (spread < 3) {
+        layers[li] = { ...ch, figure: "comet", every: { beats: 1 } };
+        return null;
+      }
+      return { targets };
+    });
   }
 
   const total = Math.max(1, Math.round(duration * fps));
@@ -189,14 +220,10 @@ function render(cueFile, score, rigName, opts) {
       }
       let state = cue._look;
       cue._layers.forEach((ch, li) => {
+        const phase = (cue._phase || [])[li] || 0;
         const seq = cue._notes[li];
-        let cx = null;
-        if (seq && seq.length) {
-          const nn = seq[Math.min(seq.length - 1, steps[li])];
-          const ps = seq.map((x) => x.p);
-          cx = { pitch: nn ? nn.p : null, lo: Math.min(...ps), hi: Math.max(...ps), all: ps };
-        }
-        state = applyChase(rig, state, ch, steps[li], palette, cx);
+        const cx = seq && seq.targets ? { targets: seq.targets } : null;
+        state = applyChase(rig, state, ch, steps[li] + phase, palette, cx);
       });
       if (cue.swell) {
         const span = Math.max(1e-6, cue._end - cue._t);

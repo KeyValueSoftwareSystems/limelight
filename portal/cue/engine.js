@@ -220,6 +220,21 @@ const FIGURES = {
   pitch(ids, step, ctx) {
     const n = ids.length;
     if (!n) return {};
+    if (ctx && Array.isArray(ctx.targets) && ctx.targets.length) {
+      const tg = ctx.targets;
+      let at = tg[0];
+      for (let k = 1; k <= step && k < tg.length; k++) {
+        if (tg[k] > at) at += 1;
+        else if (tg[k] < at) at -= 1;
+      }
+      at = Math.max(0, Math.min(n - 1, at));
+      const out = {};
+      for (let k = 0; k < n; k++) {
+        const d = Math.abs(k - at);
+        out[ids[k]] = d === 0 ? 1 : (d === 1 ? 0.42 : 0.1);
+      }
+      return out;
+    }
     const p = ctx && ctx.pitch != null ? ctx.pitch : null;
     if (p == null) return FIGURES.sweep(ids, step);
     let lo = ctx.lo != null ? ctx.lo : 30;
