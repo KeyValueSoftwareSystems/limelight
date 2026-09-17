@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Palette, Radio } from "lucide-react";
 import { usePortalStore } from "@/store/portal";
 import type { Role } from "@/lib/types";
@@ -14,16 +13,16 @@ const ROLES: { id: Role; label: string; Icon: typeof Palette }[] = [
 export function RoleToggle() {
   const role = usePortalStore((s) => s.role);
   const setRole = usePortalStore((s) => s.setRole);
-  const router = useRouter();
 
   useEffect(() => {
     document.body.dataset.role = role === "creator" ? "designer" : "operator";
   }, [role]);
 
-  const handleRole = (r: Role) => {
-    setRole(r);
-    router.push("/shows");
-  };
+  /* Switching role no longer navigates. It is a view of the SAME stage - a
+     designer sees the palette and the chat, an operator sees the console and
+     the rig - so sending them back to the shows index threw away the show they
+     were looking at. */
+  const handleRole = (r: Role) => setRole(r);
 
   return (
     <div

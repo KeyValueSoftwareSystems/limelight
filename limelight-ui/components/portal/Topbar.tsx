@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { User, ChevronDown } from "lucide-react";
 import { TabNav } from "./TabNav";
-import { RoleToggle } from "./RoleToggle";
 import { RigControl } from "./RigControl";
 import { usePortalStore } from "@/store/portal";
 
@@ -111,8 +110,6 @@ export function Topbar({ onRigToggle }: TopbarProps) {
       <span className="flex-1" />
 
       {role === "venue" && <RigControl onToggle={onRigToggle} />}
-
-      <RoleToggle />
 
       <IdentityControl />
     </header>

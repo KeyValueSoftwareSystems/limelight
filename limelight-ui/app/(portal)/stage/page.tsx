@@ -12,6 +12,7 @@ import { colourName, hexToRgb01, extractPalette, paletteChanged } from "@/lib/pa
 import * as api from "@/lib/api";
 
 import { StagePreview } from "@/components/stage/StagePreview";
+import { RoleToggle } from "@/components/portal/RoleToggle";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { TargetLine } from "@/components/stage/TargetLine";
 import { ConsolePanel } from "@/components/stage/ConsolePanel";
@@ -988,6 +989,12 @@ export default function StagePage() {
     router.push(venue ? "/shows" : "/library");
   }, [pause, venue, router]);
 
+  const liveRig = usePortalStore((s) => s.rig);
+  /* Nowhere to send means the button has nothing to do: a primary action that
+     fails the moment you press it is worse than one that says why it is off. */
+  const rigOffline = !liveRig || !liveRig.can_send;
+  const rigSending = !!liveRig?.sending;
+
   const isDesigner = role === "creator";
   const isOperator = role === "venue";
   const isBaking = stageMsg?.startsWith("Building");
@@ -1050,6 +1057,8 @@ export default function StagePage() {
                 </span>
               </div>
             </div>
+
+            <RoleToggle />
 
             <RigControl onToggle={handleRigToggle} />
 
@@ -1119,10 +1128,17 @@ export default function StagePage() {
             {isOperator && (
               <Button
                 variant="primary"
-                disabled={!show || !song}
+                disabled={!show || !song || rigOffline}
                 onClick={handleRigToggle}
+                title={
+                  rigOffline
+                    ? "The rig is not reachable, so there is nowhere to send to."
+                    : rigSending
+                      ? "Stop sending to the rig"
+                      : "Start sending this show to the rig"
+                }
               >
-                {usePortalStore.getState().rig?.armed ? "Stop sending" : "Send to the rig"}
+                {rigOffline ? "Rig offline" : rigSending ? "Stop sending" : "Go live"}
               </Button>
             )}
           </header>
