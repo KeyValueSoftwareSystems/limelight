@@ -1198,47 +1198,6 @@
   {
    "id": 0,
    "at": {
-    "second": 98.592
-   },
-   "fade": 0.0,
-   "look": {},
-   "why": "the audio falls to 27% of its median for 0.26s - a real hole, so the room goes with it"
-  },
-  {
-   "id": 1,
-   "at": {
-    "second": 98.847
-   },
-   "fade": 0.06,
-   "why": "and back, the instant the audio returns",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.38
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.27,
-     "pan": 0.5,
-     "tilt": 0.36
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "pitch",
-     "every": {
-      "notes": 1
-     },
-     "fill_beats": 1,
-     "low": 0.5,
-     "move_head": false
-    }
-   ]
-  },
-  {
-   "id": 0,
-   "at": {
     "second": 99.033
    },
    "fade": 0.0,
@@ -2962,8 +2921,7 @@
      "every": {
       "hits": 3
      },
-     "low": 0.55,
-     "c": "teal"
+     "low": 0.55
     }
    ]
   },
@@ -3227,29 +3185,6 @@
    "why": "the audio falls to 0% of its median for 1.74s - a real hole, so the room goes with it"
   },
   {
-   "id": 54,
-   "at": {
-    "bar": 124
-   },
-   "fade": 0.5,
-   "why": "rhythm_change at 4.4s - the figure changes with the music",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.21
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "comet",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.4,
-    "move_head": true
-   }
-  },
-  {
    "id": 1,
    "at": {
     "second": 237.145
@@ -3287,15 +3222,13 @@
    "t": 5.828,
    "l": 0.85,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 10.286,
    "l": 0.72,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 15.441,
@@ -3308,8 +3241,7 @@
    "t": 19.18,
    "l": 0.61,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 22.941,
@@ -3322,8 +3254,7 @@
    "t": 26.68,
    "l": 0.83,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 30.441,
@@ -3336,22 +3267,19 @@
    "t": 34.087,
    "l": 0.79,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 37.941,
    "l": 0.76,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 41.68,
    "l": 0.8,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 45.441,
@@ -3364,197 +3292,169 @@
    "t": 49.203,
    "l": 0.83,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 54.59,
    "l": 0.8,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 58.329,
    "l": 0.71,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 62.322,
    "l": 0.72,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 67.942,
    "l": 0.89,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 72.168,
    "l": 0.97,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 77.067,
    "l": 0.81,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 82.942,
    "l": 0.72,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 90.442,
    "l": 0.73,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 105.442,
    "l": 0.67,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 110.829,
    "l": 0.76,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 114.799,
    "l": 0.81,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 120.674,
    "l": 0.8,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 125.829,
    "l": 0.79,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 150.674,
    "l": 0.72,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 155.365,
    "l": 0.71,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 180.442,
    "l": 1.0,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 184.181,
    "l": 0.88,
    "decay": 0.2,
-   "on": "lamps",
-   "c": "saffron"
+   "on": "lamps"
   },
   {
    "t": 188.407,
    "l": 0.75,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 195.442,
    "l": 0.73,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 199.181,
    "l": 0.84,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 203.407,
    "l": 0.73,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 210.442,
    "l": 0.77,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 214.181,
    "l": 0.88,
    "decay": 0.2,
-   "on": "lamps",
-   "c": "saffron"
+   "on": "lamps"
   },
   {
    "t": 218.407,
    "l": 0.75,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 223.306,
    "l": 0.74,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 227.068,
    "l": 0.87,
    "decay": 0.2,
-   "on": "lamps",
-   "c": "saffron"
+   "on": "lamps"
   },
   {
    "t": 231.062,
    "l": 0.71,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   }
  ]
 }

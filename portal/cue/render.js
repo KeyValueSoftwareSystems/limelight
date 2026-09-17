@@ -133,6 +133,16 @@ function render(cueFile, score, rigName, opts) {
     const layers = cues[i].chases || (cues[i].chase ? [cues[i].chase] : []);
     cues[i]._layers = layers;
     cues[i]._steps = layers.map((ch) => E.chaseStepTimes(ch, grid, cues[i]._t, cues[i]._end));
+    if (cues[i]._steps.length > 1) {
+      const lead = cues[i]._steps[0];
+      for (let li = 1; li < cues[i]._steps.length; li++) {
+        cues[i]._steps[li] = cues[i]._steps[li].map((t) => {
+          let best = lead[0], d = Infinity;
+          for (const x of lead) { const q = Math.abs(x - t); if (q < d) { d = q; best = x; } }
+          return d <= grid.beatSeconds ? best : t;
+        }).filter((t, k, arr) => k === 0 || t !== arr[k - 1]);
+      }
+    }
     cues[i]._notes = layers.map((ch) => (ch.figure === "pitch"
       ? E.noteStepsIn(grid, cues[i]._t, cues[i]._end, (ch.every || {}).notes || 1) : null));
   }
@@ -225,9 +235,28 @@ function render(cueFile, score, rigName, opts) {
     if (!(ta >= 0)) continue;
     const decay = acc.decay != null ? +acc.decay : 0.22;
     const lvl = acc.l != null ? +acc.l : 1;
-    const col = E.parseColour(acc.c, palette) || [1, 1, 1];
-    const ids = (acc.on ? [].concat(acc.on) : ["lamps"])
-      .reduce((a, k) => a.concat(E.expandTargets(rig, k)), []);
+    const col = acc.c ? E.parseColour(acc.c, palette) : null;
+    let ids;
+    if (acc.on === "auto") {
+      const i0 = Math.max(0, Math.min(frames.length - 1, Math.round(ta * fps)));
+      const score = (key) => {
+        const g = E.expandTargets(rig, key);
+        let m = 0;
+        for (const id of g) {
+          const fx = rig.fixtures.find((f) => f.id === id);
+          if (!fx) continue;
+          const c = fx.ch;
+          m += Math.max(frames[i0][fx.offset + (c.r >= 0 ? c.r : 0)],
+                        frames[i0][fx.offset + (c.g >= 0 ? c.g : 0)],
+                        frames[i0][fx.offset + (c.b >= 0 ? c.b : 0)]);
+        }
+        return g.length ? m / g.length : 0;
+      };
+      ids = E.expandTargets(rig, score("outer") >= score("inner") ? "outer" : "inner");
+    } else {
+      ids = (acc.on ? [].concat(acc.on) : ["lamps"])
+        .reduce((a, k) => a.concat(E.expandTargets(rig, k)), []);
+    }
     const hit = new Set(ids);
     const rest = rig.lamps.filter((f) => !hit.has(f.id));
     const i0 = Math.round(ta * fps), i1 = Math.min(frames.length, Math.round((ta + decay) * fps) + 1);
@@ -245,9 +274,16 @@ function render(cueFile, score, rigName, opts) {
                                 frames[i][fx.offset + (ch.b >= 0 ? ch.b : 0)]);
           const target = Math.round(255 * amp);
           if (target > before) added += target - before;
-          if (ch.r >= 0) frames[i][fx.offset + ch.r] = Math.max(frames[i][fx.offset + ch.r], Math.round(col[0] * amp * 255));
-          if (ch.g >= 0) frames[i][fx.offset + ch.g] = Math.max(frames[i][fx.offset + ch.g], Math.round(col[1] * amp * 255));
-          if (ch.b >= 0) frames[i][fx.offset + ch.b] = Math.max(frames[i][fx.offset + ch.b], Math.round(col[2] * amp * 255));
+          if (col) {
+            if (ch.r >= 0) frames[i][fx.offset + ch.r] = Math.max(frames[i][fx.offset + ch.r], Math.round(col[0] * amp * 255));
+            if (ch.g >= 0) frames[i][fx.offset + ch.g] = Math.max(frames[i][fx.offset + ch.g], Math.round(col[1] * amp * 255));
+            if (ch.b >= 0) frames[i][fx.offset + ch.b] = Math.max(frames[i][fx.offset + ch.b], Math.round(col[2] * amp * 255));
+          } else if (before > 0 && target > before) {
+            const g = target / before;
+            for (const c of [ch.r, ch.g, ch.b]) {
+              if (c >= 0) frames[i][fx.offset + c] = Math.min(255, Math.round(frames[i][fx.offset + c] * g));
+            }
+          }
         } else if (ch.master >= 0) {
           frames[i][fx.offset + ch.master] = Math.max(frames[i][fx.offset + ch.master], Math.round(amp * 255));
         }
@@ -261,13 +297,13 @@ function render(cueFile, score, rigName, opts) {
                                 frames[i][fx.offset + (ch.g >= 0 ? ch.g : 0)],
                                 frames[i][fx.offset + (ch.b >= 0 ? ch.b : 0)]);
           if (peak <= 0) continue;
-          const k = Math.max(0, Math.min(1, 1 - share / Math.max(1, peak)));
+          const k = Math.max(0.55, Math.min(1, 1 - share / Math.max(1, peak)));
           for (const c of [ch.r, ch.g, ch.b]) {
             if (c >= 0) frames[i][fx.offset + c] = Math.round(frames[i][fx.offset + c] * k);
           }
         } else if (ch.master >= 0) {
           const v = frames[i][fx.offset + ch.master];
-          if (v > 0) frames[i][fx.offset + ch.master] = Math.round(Math.max(0, v - share));
+          if (v > 0) frames[i][fx.offset + ch.master] = Math.round(Math.max(v * 0.55, v - share));
         }
       }
     }

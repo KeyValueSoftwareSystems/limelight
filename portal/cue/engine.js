@@ -251,7 +251,7 @@ function noteStepsIn(grid, startS, endS, n) {
 
 function gateSteps(out, grid, chase) {
   const sub = chase.min_step_beats != null ? +chase.min_step_beats : 1.0;
-  const floor = Math.max(0.12, grid.beatSeconds * sub * 0.92);
+  const floor = Math.max(0.22, grid.beatSeconds * sub * 0.92);
   const kept = [];
   for (const t of out) if (!kept.length || t - kept[kept.length - 1] >= floor) kept.push(t);
   return kept.length ? kept : out.slice(0, 1);

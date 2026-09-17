@@ -93,7 +93,7 @@ PALETTE = {
 }
 
 
-def holes_in(song, floor=0.30, min_len=0.14):
+def holes_in(song, floor=0.30, min_len=0.26):
     import numpy as np
     import librosa
 
@@ -213,6 +213,10 @@ def author(song, out_path=None):
     )
     sections = sc.get("sections") or []
     holes = holes_in(song)
+    _t0 = (sc.get("stems_temporal") or {})
+    _lanes = _t0.get("stems", {})
+    _n = max((len(v) for v in _lanes.values()), default=0)
+    lanes_total = [sum((v[w] if w < len(v) else 0) for v in _lanes.values()) for w in range(_n)]
     line = []
     for n in sorted(sc.get("melody") or [], key=lambda x: x["start"]):
         if line and n["start"] - line[-1][0] < 0.055:
@@ -303,7 +307,10 @@ def author(song, out_path=None):
 
     def moment_at(bar):
         best = None
+        here = at(bar)
         for t, kind, w in moments:
+            if abs(t - here) > 2.5 * step * per:
+                continue
             if bar_at(t) == bar and (best is None or w > best[2]):
                 best = (t, kind, w)
         return best
@@ -399,6 +406,8 @@ def author(song, out_path=None):
     held_fam = None
     held_colour = None
     held_warmth = 0.0
+    held_split = False
+    split_since = -9.0
     prev_level = 0.0
     prev_set = set()
     add_layers = None
@@ -541,7 +550,14 @@ def author(song, out_path=None):
             order = sorted(r["fam"].items(), key=lambda kv: -kv[1])
             second_fam = order[1][0] if len(order) > 1 else None
             second_share = (order[1][1] / order[0][1]) if len(order) > 1 and order[0][1] else 0.0
-            split_look = second_share >= 0.62 and level > 0.3 and second_fam is not None
+            wants_split = second_share >= 0.62 and level > 0.3 and second_fam is not None
+            if wants_split == held_split:
+                split_look = held_split
+            elif r["t"] - split_since >= 5.0:
+                split_look = wants_split
+                held_split, split_since = wants_split, r["t"]
+            else:
+                split_look = held_split
             if split_look:
                 counter = FAMILY_COLOUR.get(second_fam, counter)
             if split_look:
@@ -595,8 +611,7 @@ def author(song, out_path=None):
                        "low": deep, "move_head": moves}]
             if dens >= 5 and level > 0.4 and not in_build:
                 layers.append({"on": "inner", "figure": "hocket",
-                               "every": {"hits": 3}, "low": 0.55,
-                               "c": counter})
+                               "every": {"hits": 3}, "low": 0.55})
             chase = None
             fade = 0.35 if not fam_changed else 0.15
             if in_build:
@@ -682,6 +697,34 @@ def author(song, out_path=None):
     cues.sort(key=lambda c: c.get("_t", 0))
     for n, c in enumerate(cues):
         c["id"] = n + 1
+
+    first = min((c for c in cues if c.get("look")), key=lambda c: c.get("_t", 9e9), default=None)
+    if first is not None and first.get("_t", 0) > 0.35:
+        w0 = 0
+        if lanes_total:
+            hi_all = max(lanes_total) or 1
+            win_s = (sc.get("stems_temporal") or {}).get("window_s", 0.5)
+            upto = max(1, int(first.get("_t", 0) / win_s))
+            w0 = max(lanes_total[:upto]) / hi_all
+        if w0 > 0.12:
+            opener = json.loads(json.dumps({k: v for k, v in first.items() if k != "_t"}))
+            win_s = (sc.get("stems_temporal") or {}).get("window_s", 0.5)
+            hi_all = max(lanes_total) or 1
+            onset = 0.0
+            for w, v in enumerate(lanes_total):
+                if v / hi_all > 0.10:
+                    onset = max(0.0, w * win_s)
+                    break
+            opener["at"] = {"second": round(onset, 3)}
+            opener["_t"] = onset
+            opener["fade"] = 0.0
+            for v in (opener.get("look") or {}).values():
+                if isinstance(v, dict) and v.get("l") is not None:
+                    v["l"] = round(max(0.06, v["l"] * 0.8), 2)
+            opener["why"] = ("the song is already playing at %.0f%% when it starts, "
+                             "so the room is not dark for it" % (w0 * 100))
+            cues.append(opener)
+            cues.sort(key=lambda c: c.get("_t", 0))
 
     big_moments = [(t, k, w) for t, k, w in moments
                    if k in ("peak", "climax", "drop", "entrance") and w >= 0.6]
@@ -792,10 +835,12 @@ def author(song, out_path=None):
             if run:
                 pos = (bar - min(run)) / max(1, (max(run) - min(run)))
                 amp = min(1.0, 0.45 + 0.5 * pos + inten * 0.25)
-        group = "lamps" if inten >= 0.6 else ("outer" if len(accents) % 2 else "inner")
-        accents.append({"t": round(t, 3), "l": round(amp, 2),
-                        "decay": 0.2 if inten >= 0.6 else 0.15,
-                        "on": group, "c": "bone" if inten >= 0.7 else "saffron"})
+        group = "lamps" if inten >= 0.6 else "auto"
+        acc = {"t": round(t, 3), "l": round(amp, 2),
+               "decay": 0.2 if inten >= 0.6 else 0.15, "on": group}
+        if inten >= 0.72:
+            acc["c"] = "bone"
+        accents.append(acc)
 
     for n, c in enumerate(cues):
         nxt = cues[n + 1] if n + 1 < len(cues) else None

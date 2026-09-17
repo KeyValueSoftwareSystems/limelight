@@ -1,0 +1,693 @@
+{
+ "schema": "limelight.cuelist/1",
+ "song": "leva-between-worlds-30s-positive",
+ "rig": "arc4-head",
+ "palette": {
+  "ink": "#140a12",
+  "oxblood": "#3d0812",
+  "blood": "#a3081c",
+  "crimson": "#c8102e",
+  "scarlet": "#f01a10",
+  "ember": "#ff5a0a",
+  "amber": "#ffa016",
+  "saffron": "#ffd166",
+  "violet": "#6a2ca0",
+  "indigo": "#2a3f9e",
+  "teal": "#0e8a8a",
+  "bone": "#ffffff"
+ },
+ "cues": [
+  {
+   "id": 0,
+   "at": {
+    "second": 4.505
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 20% of its median for 0.28s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 1,
+   "at": {
+    "bar": 1
+   },
+   "fade": 0.5,
+   "why": "register_shift at 7.0s - the figure changes with the music",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.25
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 7.5
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 8% of its median for 2.90s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 1,
+   "at": {
+    "second": 10.403
+   },
+   "fade": 0.06,
+   "why": "and back, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.25
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
+   "id": 2,
+   "at": {
+    "bar": 3
+   },
+   "fade": 0.5,
+   "why": "rhythm_change at 10.9s - the figure changes with the music",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.22
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
+   "id": 3,
+   "at": {
+    "second": 10.42
+   },
+   "fade": 0.55,
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.36
+    }
+   },
+   "why": "the harmony turns here - mode -0.50, anticipation. Colour moves to indigo on the chord change",
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 11.285
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 12% of its median for 2.95s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 4,
+   "at": {
+    "bar": 4
+   },
+   "fade": 0.12,
+   "why": "entrance at 13.8s - drums lead, E 1.01",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.21
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "handover",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45,
+    "move_head": true
+   }
+  },
+  {
+   "id": 1,
+   "at": {
+    "second": 14.234
+   },
+   "fade": 0.06,
+   "why": "and back, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.25
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
+   "id": 5,
+   "at": {
+    "bar": 5
+   },
+   "fade": 0.15,
+   "why": "bars 5-8, the phrase closes down: keys leads, E 4.03, 12 hits, mode +0.22 - unbuild in teal against ember inside",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.46
+    },
+    "heads": {
+     "c": "teal",
+     "l": 0.32,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "hits": 3
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": false
+    },
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 3
+     },
+     "low": 0.55
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 15.766
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 19% of its median for 1.16s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 1,
+   "at": {
+    "second": 16.927
+   },
+   "fade": 0.06,
+   "why": "and back, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.25
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
+   "id": 6,
+   "at": {
+    "bar": 7
+   },
+   "fade": 0.12,
+   "why": "melody_resume at 18.1s - drums lead, E 5.58",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.41
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "handover",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45,
+    "move_head": true
+   }
+  },
+  {
+   "id": 7,
+   "at": {
+    "second": 18.1
+   },
+   "fade": 0.55,
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.63
+    }
+   },
+   "why": "the harmony turns here - mode +1.00, anticipation. Colour moves to violet on the chord change",
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
+   "id": 8,
+   "at": {
+    "bar": 8
+   },
+   "fade": 0.6,
+   "why": "bars 5-8, the phrase closes down: drums leads, E 3.36, 8 hits, mode +1.00 - unbuild in teal",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.38
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.27,
+     "pan": 0.5,
+     "tilt": 0.25
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.4,
+     "move_head": false
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 21.06
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 11% of its median for 0.42s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 1,
+   "at": {
+    "second": 21.478
+   },
+   "fade": 0.06,
+   "why": "and back, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.25
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   },
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
+   }
+  },
+  {
+   "id": 9,
+   "at": {
+    "bar": 9
+   },
+   "fade": 0.3,
+   "why": "build at 22.4s, E 6.50 - one lamp added at a time",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.73
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "build",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.35
+   },
+   "swell": {
+    "from": 0.747,
+    "to": 0.873,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 22.9
+   },
+   "fade": 0.5,
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.31
+    }
+   },
+   "why": "two beats before the peak at 25.0s the room draws back, so the arrival has somewhere to arrive from",
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
+   }
+  },
+  {
+   "id": 10,
+   "at": {
+    "bar": 10
+   },
+   "fade": 0.0,
+   "why": "PEAK at 25.0s - the loudest instant in the recording. Full blast, the only white",
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 1.0
+    },
+    "heads": {
+     "c": "bone",
+     "l": 1.0,
+     "pan": 0.5,
+     "tilt": 0.26
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.6
+   }
+  },
+  {
+   "id": 11,
+   "at": {
+    "bar": 13
+   },
+   "fade": 0.5,
+   "why": "register_shift at 30.1s - the figure changes with the music",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.59
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 34.72
+   },
+   "fade": 0.5,
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.18
+    }
+   },
+   "why": "two beats before the entrance at 36.8s the room draws back, so the arrival has somewhere to arrive from"
+  },
+  {
+   "id": 12,
+   "at": {
+    "bar": 16
+   },
+   "fade": 0.12,
+   "why": "entrance at 36.8s - drums lead, E 6.13",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.63
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "handover",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45,
+    "move_head": true
+   }
+  },
+  {
+   "id": 13,
+   "at": {
+    "bar": 17
+   },
+   "fade": 0.35,
+   "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - unbuild in teal against teal inside",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.64
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.44,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": false
+    },
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 3
+     },
+     "low": 0.55
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "at": {
+    "bar": 19
+   },
+   "fade": 0.35,
+   "why": "bars 17-20, the phrase closes down: drums leads, E 6.10, 6 hits, mode +1.00 - unbuild in teal against teal inside",
+   "look": {
+    "lamps": {
+     "c": "teal",
+     "l": 0.43
+    },
+    "heads": {
+     "c": "teal",
+     "l": 0.3,
+     "pan": 0.5,
+     "tilt": 0.42
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.4,
+     "move_head": false
+    },
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 3
+     },
+     "low": 0.55
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "at": {
+    "bar": 21
+   },
+   "fade": 0.35,
+   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - unbuild in teal",
+   "look": {
+    "lamps": {
+     "c": "teal",
+     "l": 0.19
+    },
+    "heads": {
+     "c": "teal",
+     "l": 0.13,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 46.324
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 0% of its median for 1.70s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 1,
+   "at": {
+    "second": 48.019
+   },
+   "fade": 0.06,
+   "why": "and back, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "teal",
+     "l": 0.25
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  }
+ ],
+ "accents": [
+  {
+   "t": 17.786,
+   "l": 0.89,
+   "decay": 0.2,
+   "on": "lamps"
+  },
+  {
+   "t": 22.941,
+   "l": 0.81,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 27.26,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 31.092,
+   "l": 0.95,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 36.13,
+   "l": 0.78,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 40.217,
+   "l": 0.99,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  }
+ ]
+}

@@ -122,6 +122,7 @@ hold**. There is nowhere to put a per-frame function, which is the point.
 | `portal/cue/render.js` | the three rules: hold, crossfade, stepped chases. Plus swells, accents, head slew |
 | `portal/cue/bake.js` | CLI: cue file + score -> the frames envelope the UI reads |
 | `portal/cue/author.py` | **writes the cue list from the score.** This is where the design lives |
+| `portal/cue/faults.py` | **scans a baked show for named defects with timestamps. Run it after every change; all seven songs are at zero.** |
 | `portal/cue/bars.py` | prints what is playing bar by bar, what entered, what left. Run this first on any new song |
 | `portal/cue/render.test.js` | 19 checks, including "a single cue never moves after it lands" |
 | `portal/cue/shows/<song>.cues.json` | the generated cue list |
@@ -325,6 +326,34 @@ and you need to look at frames or ask him.
 If he says fluctuation again, move **down** this curve (fewer accents, longer
 spacing in `author.py`'s accent loop). If he says lazy, move up. Do not reach
 for per-frame smoothing; it is not the variable.
+
+## 7d. The fault scanner
+
+`portal/cue/faults.py <song> <lights.json>` walks every second and reports named
+defects: `lead-churn`, `blip`, `ping-pong`, `colour-flipflop`, `flicker-out`,
+`lamp-idle`, `head-jitter`, `dark-on-loud`, `bright-on-silence`, `pinned`.
+
+**All seven songs currently scan at zero.** Keep it that way: bake, scan, and
+only then look at anything else.
+
+Three scanner bugs were found while building it, and each one nearly sent me to
+fix the show instead of the tool. Watch for the same shape:
+
+- Hue was bucketed as `channel * 12 // (max + 1)`, which changes with
+  BRIGHTNESS, so a lamp fading through one colour registered as several. It
+  reported 155 colour-flipflops that did not exist. Hue is an angle now.
+- The scanner flagged every deliberate accent as churn, because an accent on a
+  subset necessarily changes the leading lamp twice. It now excludes windows the
+  plan asked for (`planned()`), widened to 2.5x an accent's decay.
+- `argmax` over near-equal lamps flips on rounding: it reported "lead changes
+  after 25ms" where the top two lamps differed by 0.62 of 255. A lead change now
+  needs an 8/255 margin and must hold 100ms.
+
+Real faults it did find, all now fixed: an accent driving the other lamps to
+zero; `the-nights` and others opening dark over music that had already started;
+a moment at 4.4s placing a cue at 235.47s in `levels` (moment-to-bar mapping,
+now guarded to 2.5 bars); and two layered chases interleaving so that each was a
+beat apart but together they stepped every 175ms.
 
 ## 8. Traps — mistakes already made here, do not repeat
 

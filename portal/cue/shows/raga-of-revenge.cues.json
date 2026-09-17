@@ -175,37 +175,6 @@
   {
    "id": 0,
    "at": {
-    "second": 9.334
-   },
-   "fade": 0.0,
-   "look": {},
-   "why": "the audio falls to 27% of its median for 0.16s - a real hole, so the room goes with it"
-  },
-  {
-   "id": 3,
-   "at": {
-    "second": 9.497
-   },
-   "fade": 0.06,
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.44
-    }
-   },
-   "why": "and back, the instant the audio returns",
-   "chase": {
-    "on": "lamps",
-    "figure": "build",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.35
-   }
-  },
-  {
-   "id": 0,
-   "at": {
     "second": 11.73
    },
    "fade": 0.5,
@@ -631,26 +600,36 @@
    "why": "the audio falls to 15% of its median for 0.46s - a real hole, so the room goes with it"
   },
   {
-   "id": 3,
+   "id": 8,
    "at": {
     "second": 33.599
    },
    "fade": 0.06,
+   "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.44
+     "l": 0.3
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.21,
+     "pan": 0.5,
+     "tilt": 0.28
     }
    },
-   "why": "and back, the instant the audio returns",
-   "chase": {
-    "on": "lamps",
-    "figure": "build",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.35
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 9,
@@ -665,7 +644,7 @@
      "l": 0.32
     },
     "heads": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.22,
      "pan": 0.5,
      "tilt": 0.37
@@ -697,11 +676,11 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.27
     },
     "heads": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.19,
      "pan": 0.5,
      "tilt": 0.35
@@ -731,11 +710,11 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.24
     },
     "heads": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.17,
      "pan": 0.5,
      "tilt": 0.35
@@ -888,14 +867,18 @@
     "bar": 19
    },
    "fade": 0.6,
-   "why": "bars 19-22, the phrase opens out: guitars leads, E 7.01, 6 hits, mode -0.26 - build in oxblood",
+   "why": "bars 19-22, the phrase opens out: guitars leads, E 7.01, 6 hits, mode -0.26 - build in oxblood against violet inside",
    "look": {
-    "lamps": {
+    "outer": {
      "c": "violet",
      "l": 0.4
     },
+    "inner": {
+     "c": "violet",
+     "l": 0.32
+    },
     "heads": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.28,
      "pan": 0.5,
      "tilt": 0.35
@@ -927,11 +910,11 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.27
     },
     "heads": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.19,
      "pan": 0.5,
      "tilt": 0.35
@@ -961,11 +944,11 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.24
     },
     "heads": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.17,
      "pan": 0.5,
      "tilt": 0.35
@@ -1063,26 +1046,36 @@
    "why": "the audio falls to 9% of its median for 0.56s - a real hole, so the room goes with it"
   },
   {
-   "id": 3,
+   "id": 8,
    "at": {
     "second": 48.437
    },
    "fade": 0.06,
+   "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.44
+     "l": 0.3
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.21,
+     "pan": 0.5,
+     "tilt": 0.28
     }
    },
-   "why": "and back, the instant the audio returns",
-   "chase": {
-    "on": "lamps",
-    "figure": "build",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.35
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 0,
@@ -1092,11 +1085,11 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.27
     },
     "heads": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.19,
      "pan": 0.5,
      "tilt": 0.35
@@ -1254,8 +1247,7 @@
      "every": {
       "hits": 3
      },
-     "low": 0.55,
-     "c": "teal"
+     "low": 0.55
     }
    ]
   },
@@ -1961,26 +1953,36 @@
    "look": {}
   },
   {
-   "id": 3,
+   "id": 8,
    "at": {
     "second": 111.99
    },
    "fade": 0.06,
+   "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.44
+     "l": 0.3
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.21,
+     "pan": 0.5,
+     "tilt": 0.28
     }
    },
-   "why": "and back, the instant the audio returns",
-   "chase": {
-    "on": "lamps",
-    "figure": "build",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.35
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 0,
@@ -1992,26 +1994,36 @@
    "why": "the audio falls to 1% of its median for 0.84s - a real hole, so the room goes with it"
   },
   {
-   "id": 3,
+   "id": 8,
    "at": {
     "second": 113.546
    },
    "fade": 0.06,
+   "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.44
+     "l": 0.3
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.21,
+     "pan": 0.5,
+     "tilt": 0.28
     }
    },
-   "why": "and back, the instant the audio returns",
-   "chase": {
-    "on": "lamps",
-    "figure": "build",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.35
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 32,
@@ -2026,7 +2038,7 @@
      "l": 0.36
     },
     "heads": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.25,
      "pan": 0.5,
      "tilt": 0.34
@@ -2053,11 +2065,11 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.27
     },
     "heads": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.19,
      "pan": 0.5,
      "tilt": 0.35
@@ -2087,11 +2099,11 @@
    "why": "the run lands; back to the look it left",
    "look": {
     "lamps": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.24
     },
     "heads": {
-     "c": "violet",
+     "c": "saffron",
      "l": 0.17,
      "pan": 0.5,
      "tilt": 0.35
@@ -2354,26 +2366,36 @@
    ]
   },
   {
-   "id": 3,
+   "id": 8,
    "at": {
     "second": 131.286
    },
    "fade": 0.06,
+   "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.44
+     "l": 0.3
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.21,
+     "pan": 0.5,
+     "tilt": 0.28
     }
    },
-   "why": "and back, the instant the audio returns",
-   "chase": {
-    "on": "lamps",
-    "figure": "build",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.35
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   }
  ],
  "accents": [
@@ -2381,22 +2403,19 @@
    "t": 20.828,
    "l": 0.65,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 35.503,
    "l": 0.88,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 40.496,
    "l": 0.96,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 45.79,
@@ -2409,85 +2428,73 @@
    "t": 50.805,
    "l": 0.78,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 55.798,
    "l": 0.81,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 60.79,
    "l": 0.71,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 64.482,
    "l": 0.81,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 69.799,
    "l": 0.77,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 77.787,
    "l": 0.71,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 82.802,
    "l": 0.61,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 86.982,
    "l": 0.69,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 90.79,
    "l": 0.74,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 96.479,
    "l": 0.86,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 100.798,
    "l": 0.95,
    "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 108.298,
    "l": 0.7,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 112.222,
@@ -2500,15 +2507,13 @@
    "t": 117.33,
    "l": 0.71,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
+   "on": "auto"
   },
   {
    "t": 121.812,
    "l": 0.93,
    "decay": 0.2,
-   "on": "lamps",
-   "c": "bone"
+   "on": "lamps"
   }
  ]
 }
