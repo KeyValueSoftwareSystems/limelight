@@ -28,6 +28,12 @@ module.exports = function chase(params, ctx) {
      beat on this rig -- a walk that lands on beats, not a wave that arrives
      late at every lamp after the first. */
   const step = params.step === true;
+  /* anticipate: in step mode the NEXT lamp starts to glow through the last third
+     of the current step, so the walk leans into each beat instead of switching
+     on it -- the groove lives in the lean. mirror: a second walker from the far
+     end, so the two meet in the middle and cross. */
+  const anticipate = params.anticipate === true;
+  const mirror = params.mirror === true;
   const loopBeats = Math.max(1, Math.round(params.for_beats || 4));
   const n = pars.length;
 
@@ -48,9 +54,17 @@ module.exports = function chase(params, ctx) {
     const within = step ? 1 : exact - head;
     const f = H.emptyFrame();
     const restNow = rest + (restTo - rest) * H.clamp((beats / perBeat) / loopBeats, 0, 1);   // `beats` arrives already scaled by per_beat
+    const frac = step ? (H.clamp(pos * span, 0, 1) * n) - head : 0;            // how far through the current step, 0..1
+    const lean = step && anticipate ? H.clamp((frac - 0.66) / 0.34, 0, 1) * 0.55 : 0;
+    const heads = mirror ? [head, n - 1 - head] : [head];
     pars.forEach((par, k) => {
-      const d = Math.abs(k - head);
-      const glow = d === 0 ? 1 : d === 1 ? 0.35 * (1 - within) : 0;
+      let glow = 0;
+      for (const hd of heads) {
+        const d = Math.abs(k - hd);
+        glow = Math.max(glow, d === 0 ? 1 : d === 1 ? 0.35 * (1 - within) : 0);
+        if (lean > 0 && k === hd + 1 && hd + 1 < n) glow = Math.max(glow, lean);          // the lamp ahead of the walker leans in
+        if (lean > 0 && mirror && k === hd - 1 && hd - 1 >= 0) glow = Math.max(glow, lean);
+      }
       if (glow > 0) H.setPar(f, par, colour, (restNow + (level - restNow) * glow) * gain);
       else H.setPar(f, par, restColour, restNow * gain);
     });

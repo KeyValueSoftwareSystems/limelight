@@ -446,7 +446,8 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
   /* `chase` IS a travelling effect and was not being checked at all -- the test
      looked only for trade's `travel` flag, so a show whose whole build is chase
      reported "0 of 0 travel cues" and passed without verifying a single wave. */
-  const travellers = (show.gestures || []).filter(g => g.travel || g.effect === "chase").map(g => {
+  /* a mirrored walk sends two lamps in opposite directions on purpose; it has no single "way" to cross */
+  const travellers = (show.gestures || []).filter(g => (g.travel || g.effect === "chase") && g.mirror !== true).map(g => {
     const sp = spanOf(g); return sp ? { ...g, from_s: sp[0], to_s: sp[1] } : null;
   }).filter(Boolean);
   let ok = 0; const why = [];

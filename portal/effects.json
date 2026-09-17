@@ -1203,6 +1203,12 @@
     },
     "rest_to": {
      "default": null
+    },
+    "anticipate": {
+     "default": false
+    },
+    "mirror": {
+     "default": false
     }
    },
    "name": "Chase",

@@ -689,8 +689,9 @@
       "to_s": 35.76,
       "fade_ms": 0,
       "head": false,
-      "why": "The riff is an eighth-note bass line with its heaviest note on beat 1 of every bar. The row WALKS it: one red lamp per beat, landing on each beat, crossing the row once per bar and turning round every bar. The same walk for the whole build, so the build is one idea.",
-      "for_beats": 4
+      "why": "Bars 15-16, the pulse: one red lamp per beat walks the row, crossing once a bar and turning round every bar. The next lamp begins to glow through the last third of each beat, so the walk leans into the beat rather than switching on it.",
+      "for_beats": 4,
+      "anticipate": true
     },
     {
       "effect": "beam",
@@ -734,7 +735,8 @@
       "fade_ms": 0,
       "head": false,
       "why": "…",
-      "for_beats": 4
+      "for_beats": 4,
+      "anticipate": true
     },
     {
       "effect": "chase",
@@ -749,8 +751,53 @@
       "to_s": 39.76,
       "fade_ms": 0,
       "head": false,
-      "why": "…",
-      "for_beats": 4
+      "why": "Bars 17-18: the walk continues and the off-beats join it.",
+      "for_beats": 4,
+      "anticipate": true
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 0.8,
+      "extent": "lamp2",
+      "from_s": 38.097,
+      "to_s": 38.227,
+      "fade_ms": 0,
+      "head": false,
+      "why": "The pushed off-beats the score hears (around 0.56 of the beat): a red pop on the lamp AHEAD of the walker, so the walk starts to skip."
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 0.8,
+      "extent": "lamp3",
+      "from_s": 38.469,
+      "to_s": 38.599,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 0.8,
+      "extent": "lamp4",
+      "from_s": 38.956,
+      "to_s": 39.086,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 0.8,
+      "extent": "lamp4",
+      "from_s": 39.119,
+      "to_s": 39.249,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
     },
     {
       "effect": "chase",
@@ -765,10 +812,66 @@
       "to_s": 41.02,
       "fade_ms": 0,
       "head": false,
-      "why": "Bar 18, the minor turn: the walk continues for three beats while a red glow grows under it, so the join steps rise out of red.",
+      "why": "Bar 18, the minor turn: the walk goes on for three beats while a red glow grows under it into the join steps.",
       "for_beats": 4,
+      "anticipate": true,
       "rest_colour": "#e01313",
       "rest_to": 0.45
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 0.8,
+      "extent": "lamp3",
+      "from_s": 39.932,
+      "to_s": 40.062,
+      "fade_ms": 0,
+      "head": false,
+      "why": "The pushed off-beats the score hears (around 0.56 of the beat): a red pop on the lamp AHEAD of the walker, so the walk starts to skip."
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 0.8,
+      "extent": "lamp3",
+      "from_s": 40.094,
+      "to_s": 40.224,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 0.8,
+      "extent": "lamp2",
+      "from_s": 40.466,
+      "to_s": 40.596,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 0.8,
+      "extent": "lamp2",
+      "from_s": 40.628,
+      "to_s": 40.758,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 0.8,
+      "extent": "lamp1",
+      "from_s": 40.93,
+      "to_s": 41.06,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
     },
     {
       "effect": "glare",
@@ -816,8 +919,10 @@
       "to_s": 43.76,
       "fade_ms": 0,
       "head": false,
-      "why": "Phrase two: the same walk, one red lamp per beat, over a blue bed that swells through each bar into the next downbeat.",
+      "why": "Bars 19-20: a second walker starts from the far end -- the two meet in the middle on beats 2-3 and cross -- over a blue bed that swells through each bar into the next downbeat.",
       "for_beats": 4,
+      "anticipate": true,
+      "mirror": true,
       "rest_colour": "#2f5bff",
       "rest_to": 0.72
     },
@@ -829,14 +934,14 @@
       "pan_to": 0.663,
       "tilt_to": 0.498,
       "colour": "#ffffff",
-      "amount": 0.45,
+      "amount": 0.5,
       "prism": 0,
       "strobe": 12,
       "from_s": 41.75,
-      "to_s": 47.74,
+      "to_s": 45.76,
       "fade_ms": 0,
       "strobe_on": "downbeat",
-      "why": "Riff phrase two: the head glides back the other way over the phrase, a little brighter, popping on each downbeat."
+      "why": "Riff phrase two: the head glides back over two bars to the spot the blackout will hold, brighter, popping on each downbeat."
     },
     {
       "effect": "glare",
@@ -844,10 +949,10 @@
       "amount": 0.9,
       "extent": "all",
       "at_s": 41.755,
-      "for_beats": 1,
+      "for_beats": 0.5,
       "fade_ms": 0,
       "head": false,
-      "why": "Downbeat of each bar in phrase two: one white beat on the heaviest note of the riff."
+      "why": "Downbeat of each bar in phrase two: half a beat of white on the heaviest note of the riff."
     },
     {
       "effect": "chase",
@@ -864,6 +969,8 @@
       "head": false,
       "why": "…",
       "for_beats": 4,
+      "anticipate": true,
+      "mirror": true,
       "rest_colour": "#2f5bff",
       "rest_to": 0.72
     },
@@ -873,7 +980,7 @@
       "amount": 0.9,
       "extent": "all",
       "at_s": 43.765,
-      "for_beats": 1,
+      "for_beats": 0.5,
       "fade_ms": 0,
       "head": false,
       "why": "…"
@@ -885,16 +992,33 @@
       "step": true,
       "colour": "#e01313",
       "amount": 1,
-      "rest": 0.38,
+      "rest": 0.5,
       "extent": "all",
       "from_s": 45.76,
       "to_s": 47.74,
       "fade_ms": 0,
       "head": false,
-      "why": "…",
+      "why": "Bar 21: both walkers, and the bed swells to full.",
       "for_beats": 4,
+      "anticipate": true,
+      "mirror": true,
       "rest_colour": "#2f5bff",
-      "rest_to": 0.72
+      "rest_to": 1
+    },
+    {
+      "effect": "beam",
+      "pattern": "hold",
+      "pan": 0.663,
+      "tilt": 0.498,
+      "colour": "#ffffff",
+      "amount": 0.6,
+      "prism": 0,
+      "strobe": 12,
+      "from_s": 45.76,
+      "to_s": 47.74,
+      "fade_ms": 0,
+      "strobe_on": "beat",
+      "why": "Bar 21: the head holds as everything peaks, popping on every beat."
     },
     {
       "effect": "glare",
@@ -902,7 +1026,95 @@
       "amount": 0.9,
       "extent": "all",
       "at_s": 45.765,
-      "for_beats": 1,
+      "for_beats": 0.5,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 1,
+      "extent": "inner",
+      "from_s": 46.085,
+      "to_s": 46.235,
+      "fade_ms": 0,
+      "head": false,
+      "why": "Bar 21: a pop on every eighth the score hears, inner pair red and outer pair blue in turn, over the swelling walk."
+    },
+    {
+      "effect": "glare",
+      "colour": "#2f5bff",
+      "amount": 1,
+      "extent": "outer",
+      "from_s": 46.271,
+      "to_s": 46.421,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 1,
+      "extent": "inner",
+      "from_s": 46.456,
+      "to_s": 46.606,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#2f5bff",
+      "amount": 1,
+      "extent": "outer",
+      "from_s": 46.758,
+      "to_s": 46.908,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 1,
+      "extent": "inner",
+      "from_s": 46.967,
+      "to_s": 47.117,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#2f5bff",
+      "amount": 1,
+      "extent": "outer",
+      "from_s": 47.13,
+      "to_s": 47.28,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#e01313",
+      "amount": 1,
+      "extent": "inner",
+      "from_s": 47.269,
+      "to_s": 47.419,
+      "fade_ms": 0,
+      "head": false,
+      "why": "…"
+    },
+    {
+      "effect": "glare",
+      "colour": "#2f5bff",
+      "amount": 1,
+      "extent": "outer",
+      "from_s": 47.478,
+      "to_s": 47.628,
       "fade_ms": 0,
       "head": false,
       "why": "…"
@@ -1401,22 +1613,54 @@
       "pattern": "glide",
       "pan": 0.5,
       "tilt": 0.5,
-      "pan_to": 0.5,
-      "tilt_to": 0.4,
+      "pan_to": 0.25,
+      "tilt_to": 0.62,
       "colour": "#ffffff",
       "amount": 0.3,
       "prism": 0,
       "strobe": 0,
       "from_s": 73.75,
+      "to_s": 75.76,
+      "fade_ms": 0,
+      "why": "Bars 35-37: a slow figure through the backbeat bars -- down to the left, across and up to the right, back to the centre -- one bar a side, dim white."
+    },
+    {
+      "effect": "beam",
+      "pattern": "glide",
+      "pan": 0.25,
+      "tilt": 0.62,
+      "pan_to": 0.75,
+      "tilt_to": 0.38,
+      "colour": "#ffffff",
+      "amount": 0.3,
+      "prism": 0,
+      "strobe": 0,
+      "from_s": 75.76,
+      "to_s": 77.76,
+      "fade_ms": 0,
+      "why": "…"
+    },
+    {
+      "effect": "beam",
+      "pattern": "glide",
+      "pan": 0.75,
+      "tilt": 0.38,
+      "pan_to": 0.5,
+      "tilt_to": 0.5,
+      "colour": "#ffffff",
+      "amount": 0.3,
+      "prism": 0,
+      "strobe": 0,
+      "from_s": 77.76,
       "to_s": 79.76,
       "fade_ms": 0,
-      "why": "Bars 35-37: centre, white, dim, drifting down slowly."
+      "why": "…"
     },
     {
       "effect": "beam",
       "pattern": "glide",
       "pan": 0.5,
-      "tilt": 0.4,
+      "tilt": 0.5,
       "pan_to": 0.5,
       "tilt_to": 0.58,
       "colour": "#ffffff",
@@ -1880,16 +2124,16 @@
       "pattern": "glide",
       "pan": 0.5,
       "tilt": 0.5,
-      "pan_to": 0.5,
-      "tilt_to": 0.74,
+      "pan_to": 0.1,
+      "tilt_to": 0.56,
       "colour": "#ff8a1a",
       "amount": 0.3,
       "prism": 0,
       "strobe": 0,
       "from_s": 109.76,
-      "to_s": 123.77,
+      "to_s": 116.76,
       "fade_ms": 600,
-      "why": "The outro: amber, dim, the head rising slowly towards the ceiling over fourteen seconds."
+      "why": "The outro: one wide, slow sweep of the room in amber -- seven seconds to the far left..."
     },
     {
       "effect": "glare",
@@ -1902,6 +2146,22 @@
       "head": false,
       "rise": 1,
       "why": "The strings enter at 113.75 and swell for six seconds; the room swells amber with them up to the register shift at 120.29."
+    },
+    {
+      "effect": "beam",
+      "pattern": "glide",
+      "pan": 0.1,
+      "tilt": 0.56,
+      "pan_to": 0.9,
+      "tilt_to": 0.62,
+      "colour": "#ff8a1a",
+      "amount": 0.3,
+      "prism": 0,
+      "strobe": 0,
+      "from_s": 116.76,
+      "to_s": 123.77,
+      "fade_ms": 0,
+      "why": "...seven seconds across to the far right as the strings swell..."
     },
     {
       "effect": "glare",
@@ -1929,9 +2189,11 @@
     },
     {
       "effect": "beam",
-      "pattern": "hold",
-      "pan": 0.5,
-      "tilt": 0.74,
+      "pattern": "glide",
+      "pan": 0.9,
+      "tilt": 0.62,
+      "pan_to": 0.5,
+      "tilt_to": 0.7,
       "colour": "#ff8a1a",
       "amount": 0.35,
       "prism": 0,
@@ -1939,7 +2201,7 @@
       "from_s": 123.77,
       "to_s": 127.23,
       "fade_ms": 0,
-      "why": "The last entrance: held high, a touch brighter; off with the black beat at 127.23, and it stays off."
+      "why": "...and home to the centre, a touch brighter, for the last entrance. Off with the black beat at 127.23, and it stays off."
     },
     {
       "effect": "blackout",

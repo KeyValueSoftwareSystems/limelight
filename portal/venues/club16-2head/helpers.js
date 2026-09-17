@@ -60,7 +60,14 @@ function parsForExtent(extent) {
     case "right":  return RIGHT;
     case "ends":   return ENDS;
     case "single": return CENTRE;
-    case "all": default: return PARS;
+    case "all": default: {
+      /* "lamp3": one lamp by its place in the row, 1 = leftmost. A cue that wants
+         to mark the lamp AHEAD of a walker needs to name a single lamp, and the
+         pairs cannot say that. */
+      const m = /^lamp(\d+)$/.exec(String(extent || ""));
+      if (m) { const p = PARS[Number(m[1]) - 1]; return p ? [p] : []; }
+      return PARS;
+    }
   }
 }
 

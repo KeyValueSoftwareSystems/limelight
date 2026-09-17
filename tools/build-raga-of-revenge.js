@@ -72,23 +72,56 @@ row(WHITE, 0.6, "all", before(33.75, 3), before(33.75, 1), { rise: 0.9, fade_ms:
 black(before(33.75, 1), 33.75, "One beat of nothing before the riff lands.");
 headHold(25.56, before(33.75, 1), WHITE, 0.22, { fade_ms: 900 }, "Bars 11-14: dimming to a glow under the voice alone; off in the black beat.");
 parked();
-/* ======================= THE BUILD (bars 15-22, 33.75-49.75) ======================= */
+/* ======================= THE BUILD (bars 15-22, 33.75-49.75) =======================
+   The riff is an eighth-note bass line: heaviest note on beat 1, and its off-beats
+   pushed late (the score's onsets sit at 0.56 of the beat, not 0.50). The build
+   thickens with it, one layer every two bars, every layer placed on the onsets the
+   score actually hears -- and everything that moves leans INTO its beat. */
 hit(WHITE, 33.75, 1, "The riff lands: one white beat.");
-const walkTo = (a, b, dir, restPatch, why) => { walk(a, b, dir, why); Object.assign(G[G.length - 1], { for_beats: 4, ...restPatch }); };
-for (let b = 15; b <= 17; b++) walkTo(bar(b), bar(b + 1), b % 2 ? "lr" : "rl", {},
-  b === 15 ? "The riff is an eighth-note bass line with its heaviest note on beat 1 of every bar. The row WALKS it: one red lamp per beat, landing on each beat, crossing the row once per bar and turning round every bar. The same walk for the whole build, so the build is one idea."
-  : "…");
-walkTo(bar(18), 41.02, "rl", { rest_colour: RED, rest: 0, rest_to: 0.45 }, "Bar 18, the minor turn: the walk continues for three beats while a red glow grows under it, so the join steps rise out of red.");
+const barLen = b => bar(b + 1) - bar(b);
+const onsets = (b, lo, hi) => sc.rhythm.hits
+  .filter(h => h.t >= bar(b) && h.t < bar(b + 1) && (h.intensity ?? 0) >= 0.2)
+  .map(h => ({ t: h.t, pos: (h.t - bar(b)) / barLen(b) * 4 }))
+  .filter(o => { const f = o.pos % 1; return f >= lo && f <= hi; });
+const walkTo = (a, b, dir, patch, why) => { walk(a, b, dir, why); Object.assign(G[G.length - 1], { for_beats: 4, anticipate: true, ...patch }); };
+/* bars 15-16: the pulse */
+for (const b of [15, 16]) walkTo(bar(b), bar(b + 1), b % 2 ? "lr" : "rl", {},
+  b === 15 ? "Bars 15-16, the pulse: one red lamp per beat walks the row, crossing once a bar and turning round every bar. The next lamp begins to glow through the last third of each beat, so the walk leans into the beat rather than switching on it." : "…");
+/* bars 17-18: the "and"s arrive */
+for (const b of [17, 18]) {
+  const dir = b % 2 ? "lr" : "rl";
+  walkTo(bar(b), b === 18 ? 41.02 : bar(b + 1), dir, b === 18 ? { rest_colour: RED, rest: 0, rest_to: 0.45 } : {},
+    b === 17 ? "Bars 17-18: the walk continues and the off-beats join it." : "Bar 18, the minor turn: the walk goes on for three beats while a red glow grows under it into the join steps.");
+  let first = true;
+  for (const o of onsets(b, 0.4, 0.85)) {
+    if (o.t > 41.0) continue;
+    const walker = dir === "lr" ? Math.floor(o.pos) : 3 - Math.floor(o.pos);
+    const ahead = dir === "lr" ? walker + 1 : walker - 1;
+    if (ahead < 0 || ahead > 3) continue;
+    G.push({ effect: "glare", colour: RED, amount: 0.8, extent: "lamp" + (ahead + 1), from_s: r2(o.t - 0.03), to_s: r2(o.t + 0.10), fade_ms: 0, head: false,
+      why: first ? "The pushed off-beats the score hears (around 0.56 of the beat): a red pop on the lamp AHEAD of the walker, so the walk starts to skip." : "…" });
+    first = false;
+  }
+}
 row(RED, 0.35, "all", 41.00, 41.75, { fade_ms: 0 }, "The glow holds under the two join steps.");
 row(RED, 1, "outer", 41.02, 41.30, { fade_ms: 0 }, "The joining piece: F at 41.02 -- the outer pair, red.");
 row(RED, 1, "inner", 41.30, 41.75, { fade_ms: 0 }, "E at 41.30 -- the inner pair, red. The steps close inwards and phrase two lands on 41.76.");
+/* bars 19-20: two walkers over a swelling bed */
 wash(41.75, bar(22), 0.38, BLUE, "Bars 19-21: a steady blue floor under the second phrase.");
-for (let b = 19; b <= 21; b++) {
-  walkTo(bar(b), bar(b + 1), b % 2 ? "lr" : "rl", { rest_colour: BLUE, rest: 0.38, rest_to: 0.72 }, b === 19 ? "Phrase two: the same walk, one red lamp per beat, over a blue bed that swells through each bar into the next downbeat." : "…");
-  hit(WHITE, bar(b), 1, b === 19 ? "Downbeat of each bar in phrase two: one white beat on the heaviest note of the riff." : "…", 0.9);
+for (const b of [19, 20]) {
+  walkTo(bar(b), bar(b + 1), b % 2 ? "lr" : "rl", { mirror: true, rest_colour: BLUE, rest: 0.38, rest_to: 0.72 },
+    b === 19 ? "Bars 19-20: a second walker starts from the far end -- the two meet in the middle on beats 2-3 and cross -- over a blue bed that swells through each bar into the next downbeat." : "…");
+  hit(WHITE, bar(b), 0.5, b === 19 ? "Downbeat of each bar in phrase two: half a beat of white on the heaviest note of the riff." : "…", 0.9);
 }
+/* bar 21: everything at once */
+walkTo(bar(21), bar(22), "lr", { mirror: true, rest_colour: BLUE, rest: 0.5, rest_to: 1.0 }, "Bar 21: both walkers, and the bed swells to full.");
+hit(WHITE, bar(21), 0.5, "…", 0.9);
+onsets(21, 0, 1).filter(o => o.pos >= 0.3).forEach((o, i) => G.push({ effect: "glare", colour: i % 2 ? BLUE : RED, amount: 1, extent: i % 2 ? "outer" : "inner", from_s: r2(o.t - 0.03), to_s: r2(o.t + 0.12), fade_ms: 0, head: false,
+  why: i === 0 ? "Bar 21: a pop on every eighth the score hears, inner pair red and outer pair blue in turn, over the swelling walk." : "…" }));
+/* the head across the build */
 glide(33.75, 41.75, [L, 0.45], WHITE, 0.40, { strobe: 12, strobe_on: "downbeat" }, "Riff phrase one: the head glides slowly across the room over the whole phrase (8 seconds), at 40% so the walk on the row is the picture, with a strobe pop on each downbeat as the walk turns round.");
-glide(41.75, bar(22), PARK, WHITE, 0.45, { strobe: 12, strobe_on: "downbeat" }, "Riff phrase two: the head glides back the other way over the phrase, a little brighter, popping on each downbeat.");
+glide(41.75, bar(21), PARK, WHITE, 0.50, { strobe: 12, strobe_on: "downbeat" }, "Riff phrase two: the head glides back over two bars to the spot the blackout will hold, brighter, popping on each downbeat.");
+headHold(bar(21), bar(22), WHITE, 0.60, { strobe: 12, strobe_on: "beat" }, "Bar 21: the head holds as everything peaks, popping on every beat.");
 /* bar 22: the volume collapses, then "pa da ni sa ri", then the drop */
 const syll = sc.melody.filter(n => n.start > 48.3 && n.start < 49.6 && n.velocity >= 0.4).map(n => n.start).sort((a, b) => a - b);
 black(bar(22), 49.75, "Bar 22: the whole band falls away at 47.7 (the score's pause at 48.0) -- full blackout, head included, as the volume shrinks.");
@@ -119,7 +152,9 @@ glide(bar(32), bar(34), [R, 0.50], RED, 0.70, DROPHEAD, "…");
 glide(bar(34), bar(35), [C, 0.50], RED, 0.70, DROPHEAD, "…to the centre for the backbeat section.");
 drive(before(73.75, 2), bar(35), 0.60, [RED, BLUE], "Bar 34, beats 3-4: the floor comes down a step on the way into the backbeat bars.");
 drive(bar(35), bar(38), 0.45, [RED, BLUE], "Bars 35-37: the score shows a kick on every beat, heaviest on 2 and 4, drums thickening in bar 36, strings held. The same drive at a lower floor -- the drop breathing.");
-glide(bar(35), bar(38), [C, 0.40], WHITE, 0.30, {}, "Bars 35-37: centre, white, dim, drifting down slowly.");
+glide(bar(35), bar(36), [0.25, 0.62], WHITE, 0.30, {}, "Bars 35-37: a slow figure through the backbeat bars -- down to the left, across and up to the right, back to the centre -- one bar a side, dim white.");
+glide(bar(36), bar(37), [0.75, 0.38], WHITE, 0.30, {}, "…");
+glide(bar(37), bar(38), [C, 0.50], WHITE, 0.30, {}, "…");
 wash(bar(38), bar(39), 0.30, BLUE, "Bar 38: the whole band stops -- only the voice. A low blue floor.", 300);
 row(WHITE, 0.6, "all", beatAfter(80.2), bar(39), { rise: 0.9, fade_ms: 0 }, "Bar 38 from beat 2, where the voice re-enters alone: the row climbs white for three beats and lands on the band's return at 81.76.");
 glide(bar(38), bar(39), [C, 0.58], WHITE, 0.30, {}, "Bar 38: the head rises with the white climb.");
@@ -171,8 +206,9 @@ wash(123.77, 127.61, 0.30, AMBER, "The last entrance: amber settles a step.", 60
 wash(127.61, 128.28, 0.22, AMBER, "The beat has gone; the room settles again.", 600);
 black(127.23, 127.75, "One beat of nothing where the beat drops away, as the score marks the rhythm change.");
 wash(128.28, 131.29, 0.06, AMBER, "The song ends in silence; the room fades to black with it.", 2500);
-glide(109.76, 123.77, [C, 0.74], AMBER, 0.30, { fade_ms: 600 }, "The outro: amber, dim, the head rising slowly towards the ceiling over fourteen seconds.");
-headHold(123.77, 127.23, AMBER, 0.35, {}, "The last entrance: held high, a touch brighter; off with the black beat at 127.23, and it stays off.");
+glide(109.76, 116.76, [0.10, 0.56], AMBER, 0.30, { fade_ms: 600 }, "The outro: one wide, slow sweep of the room in amber -- seven seconds to the far left...");
+glide(116.76, 123.77, [0.90, 0.62], AMBER, 0.30, {}, "...seven seconds across to the far right as the strings swell...");
+glide(123.77, 127.23, [C, 0.70], AMBER, 0.35, {}, "...and home to the centre, a touch brighter, for the last entrance. Off with the black beat at 127.23, and it stays off.");
 
 /* ---- write ---- */
 const start = g => g.at_s ?? g.from_s;
