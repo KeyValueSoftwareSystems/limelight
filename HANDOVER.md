@@ -804,6 +804,52 @@ per-fixture factor, `1 - share / peak`, so each lamp was scaled differently and 
 shape was destroyed: a flat rig at 114.6 became 124 / 43 / 76 / 43. One shared factor
 across the other fixtures preserves the ratios and therefore the pattern.
 
+## 7s. Transitions land on hits, blend by default, and snap only when they must
+
+Amal: "The transitions must happen on hits only, and it must be smooth, now its not,
+the transitions are not blended when it should be, it can be sudden only when it needs
+to be." Three rules, and the middle one reverses what was done earlier for "lag" - the
+fix then was to snap almost everything, which went too far.
+
+**On a hit.** Every cue time is snapped to the nearest rhythm hit within half a beat,
+falling back to the nearest beat, before the rate fitting runs so spans stay honest.
+Variation cuts inside the split pass snap the same way. The only cues left off the grid
+are hole blackouts and their returns, which follow the audio and must not be quantised.
+
+**Blended by default.** A cue fades over half a beat when the look changes and a
+quarter beat when only the figure does. Median fade is 0.20s.
+
+**Sudden only where it must be**, which is 17 of 49 cues: hole blackouts and returns,
+the one-beat blacks, and the white punches at climax and peak.
+
+**A fade must finish before the next chase step.** A step landing mid-crossfade restarts
+the blend and the transition stops being monotonic, which `strict.py` catches. Fades are
+capped at 70% of the chase's step interval.
+
+**Known limit:** one 100ms stretch in `levels` still fails, 0.04% of that show. The
+cause is in `render.js`: a chase step during a crossfade replaces `fadeFrom` with the
+current output and starts a fresh 0.06s fade rather than composing with the fade already
+running. Fixing it properly means letting the two blends compose.
+
+## 7t. The palette is bright, and `l` means perceived level
+
+The old palette was muted - `oxblood #3d0812`, `indigo #2a3f9e`, `ink #140a12` - and
+that is part of why the show read dark. It is now vivid: `crimson #ff1428`,
+`indigo #2f5bff`, `violet #a038ff`, `teal #00c8d8`, close to the reds and blues in
+Renjith's show.
+
+Brightening it exposed a real confusion. `l` was raw drive, not perceived brightness, so
+`bone` at `l 0.30` renders at 118 of 255 while `indigo` at the same `l` renders at 70.
+`nebulakal` went bright-on-silence because a near-silent bar was authored at `l 0.30` in
+white. Levels below 0.62 are now normalised against the colour's luminance toward a
+reference of 0.55, downward only, so a quiet passage in white is genuinely quiet. Above
+0.62 nothing is scaled, because that is where `open_up` is deliberately reaching for the
+top of the range; compensating there cost `>200` frames 12.1% to 5.0% before the guard
+went in.
+
+Also `hush`: a bar under 28% of the song's median energy scales down toward 0.12, so
+silence stays dark however high the floor is raised.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the

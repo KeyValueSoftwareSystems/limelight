@@ -58,7 +58,7 @@ FAMILY_COLOUR = {
 }
 FAMILY_SHADES = {
     "brass": ("amber", "saffron", "ember"),
-    "strings": ("violet", "indigo", "oxblood"),
+    "strings": ("violet", "indigo", "crimson"),
     "guitars": ("ember", "scarlet", "amber"),
     "keys": ("teal", "indigo", "violet"),
     "winds": ("saffron", "amber", "bone"),
@@ -75,7 +75,7 @@ FAMILY_TEMPERATURE = {
     "drums": ("blood", "crimson", "scarlet", "ember"),
 }
 GESTURES = {
-    "travel": ("sweep", "comet", "wave", "handover"),
+    "travel": ("sweep", "comet", "wave"),
     "grow": ("build", "cascade", "unbuild"),
     "halves": ("alternate", "split"),
     "oddeven": ("hocket",),
@@ -109,17 +109,17 @@ COUNTER = {
     "winds": "violet", "voices": "indigo", "drums": "teal",
 }
 PALETTE = {
-    "ink": "#140a12",
-    "oxblood": "#3d0812",
-    "blood": "#a3081c",
-    "crimson": "#c8102e",
-    "scarlet": "#f01a10",
-    "ember": "#ff5a0a",
+    "ink": "#1a0a10",
+    "oxblood": "#8c0a1e",
+    "blood": "#d4102a",
+    "crimson": "#ff1428",
+    "scarlet": "#ff2010",
+    "ember": "#ff6a10",
     "amber": "#ffa016",
     "saffron": "#ffd166",
-    "violet": "#6a2ca0",
-    "indigo": "#2a3f9e",
-    "teal": "#0e8a8a",
+    "violet": "#a038ff",
+    "indigo": "#2f5bff",
+    "teal": "#00c8d8",
     "bone": "#ffffff",
 }
 
@@ -313,6 +313,13 @@ def author(song, out_path=None):
         return k if abs(k - t) <= tol else t
     Emax = max(r["E"] for r in rows) or 1.0
     E_ranked = sorted(r["E"] for r in rows)
+    E_mid = E_ranked[len(E_ranked) // 2] if E_ranked else 1.0
+
+    def hush(E):
+        if E_mid <= 0:
+            return 1.0
+        q = E / (0.28 * E_mid)
+        return 1.0 if q >= 1 else max(0.12, q ** 0.7)
 
     def spread(E):
         lo = bisect.bisect_left(E_ranked, E)
@@ -497,12 +504,12 @@ def author(song, out_path=None):
         pi, pk, pn = phrase_of.get(bar, (None, 0, 1))
         ph = phrases[pi] if pi is not None else None
         if ph is not None:
-            band = (0.34 + 0.64 * (spread(ph["E"]) ** 0.75)) * arc(ph["t"])
+            band = (0.34 + 0.64 * (spread(ph["E"]) ** 0.75)) * arc(ph["t"]) * hush(ph["E"])
             pos = pk / max(1, pn - 1) if pn > 1 else 1.0
             level = round(min(0.97, band * (ph["a0"] + (ph["a1"] - ph["a0"]) * pos)), 2)
         else:
             e = spread(r["E"])
-            level = round(min(0.99, (0.34 + 0.64 * (e**0.75)) * arc(r["t"])), 2)
+            level = round(min(0.99, (0.34 + 0.64 * (e**0.75)) * arc(r["t"]) * hush(r["E"])), 2)
 
         is_edge = any(abs(s["start"] - r["t"]) < step for s in sections)
         phrase_start = ph is not None and pk == 0
@@ -692,11 +699,12 @@ def author(song, out_path=None):
             elif dens >= 3:
                 want_fam = "poles"
             else:
-                want_fam = "travel"
+                want_fam = "halves"
 
-            order = list(GESTURES)
-            if want_fam == held_gesture:
-                want_fam = order[(order.index(want_fam) + 1 + (pi or 0)) % len(order)]
+            order = [g for g in GESTURES if g != "travel" or sings]
+            if want_fam == held_gesture and order:
+                want_fam = order[(order.index(want_fam) + 1 + (pi or 0)) % len(order)] \
+                    if want_fam in order else order[(pi or 0) % len(order)]
             held_gesture = want_fam
             opts = GESTURES[want_fam]
             fig = opts[(pi or 0) % len(opts)]
@@ -973,6 +981,40 @@ def author(song, out_path=None):
         held = here
         last_change = t
 
+    beat_times = sorted(x["t"] for x in sc.get("beats", []))
+    hit_times = sorted(t for t, _ in hits)
+    HOLD_WHY = ("a real hole", "and back")
+
+    def nearest_of(t0, xs, tol):
+        best, bd = None, tol
+        for x in xs:
+            d = abs(x - t0)
+            if d < bd:
+                best, bd = x, d
+        return best
+
+    cues.sort(key=lambda c: c.get("_t", 0))
+    for c in cues:
+        t0 = c.get("_t")
+        if t0 is None or t0 <= 0:
+            continue
+        if any(k in (c.get("why") or "") for k in HOLD_WHY):
+            continue
+        snapped = nearest_of(t0, hit_times, step * 0.55)
+        if snapped is None:
+            snapped = nearest_of(t0, beat_times, step * 0.55)
+        if snapped is None or snapped <= 0:
+            continue
+        c["_t"] = snapped
+        c["at"] = {"second": round(snapped, 3)}
+    cues.sort(key=lambda c: c.get("_t", 0))
+    keep = []
+    for c in cues:
+        if keep and abs(c.get("_t", 0) - keep[-1].get("_t", 0)) < 1e-6:
+            continue
+        keep.append(c)
+    cues = keep
+
     FAM_OF = {}
     for _fam, _figs in GESTURES.items():
         for _f in _figs:
@@ -1000,13 +1042,18 @@ def author(song, out_path=None):
             return None
         return round(sb, 3), cycles
 
+    recent_fams = []
+
     def choose_figure(span_s, want_fam, avoid, push=1):
         order = [want_fam] + [f for f in GESTURES if f != want_fam]
+        if recent_fams[-3:].count("travel") >= 1:
+            order = [f for f in order if f != "travel"] + ["travel"]
         for fam in order:
             opts = [f for f in GESTURES[fam] if f not in avoid] or list(GESTURES[fam])
             for fig in opts:
                 fit = fit_rate(fig, span_s, push, fam)
                 if fit:
+                    recent_fams.append(fam)
                     return fig, fit, fam
         return None, None, want_fam
 
@@ -1149,12 +1196,17 @@ def author(song, out_path=None):
             cuts = []
             for k in range(1, parts):
                 at_t = c["_t"] + span * k / parts
+                lo_t, hi_t = c["_t"] + bar_s * 0.4, end - bar_s * 0.4
                 hit_t = snap(at_t, bar_s * 0.6)
-                if (hit_t is not None and hit_t > c["_t"] + bar_s * 0.4
-                        and hit_t < end - bar_s * 0.4):
+                if hit_t is not None and lo_t < hit_t < hi_t:
                     cuts.append((hit_t, True))
-                else:
-                    cuts.append((at_t, False))
+                    continue
+                on_hit_t = nearest_of(at_t, hit_times, step * 0.9)
+                if on_hit_t is not None and lo_t < on_hit_t < hi_t:
+                    cuts.append((on_hit_t, True))
+                    continue
+                bt = nearest_of(at_t, beat_times, step * 0.9)
+                cuts.append(((bt if bt is not None and lo_t < bt < hi_t else at_t), False))
             bounds = [c["_t"]] + [t for t, _ in cuts] + [end]
             here_fam = FAM_OF.get(ch["figure"], "travel")
             fam_ring = [here_fam] + [f for f in GESTURES if f != here_fam]
@@ -1223,6 +1275,43 @@ def author(song, out_path=None):
                 ch0["c"] = nearest(ch0["c"])
             if ch0.get("colours"):
                 ch0["colours"] = [nearest(x) for x in ch0["colours"]]
+
+    REF_LUM = 0.55
+    for c in cues:
+        if "only white carries a hit" in (c.get("why") or ""):
+            continue
+        for v in (c.get("look") or {}).values():
+            if not isinstance(v, dict) or v.get("l") is None or not v.get("c"):
+                continue
+            lv = lum_of(v["c"])
+            if lv <= 0.01 or v["l"] >= 0.62:
+                continue
+            adj = v["l"] * REF_LUM / lv
+            if adj < v["l"]:
+                v["l"] = round(max(0.02, adj), 3)
+
+    SUDDEN = ("only white carries a hit", "one beat of black", "a real hole",
+              "and back", "PEAK", "climax", "the drop")
+    cues.sort(key=lambda c: c.get("_t", 0))
+    for n, c in enumerate(cues):
+        w = c.get("why") or ""
+        nxt_w = (cues[n + 1].get("why") or "") if n + 1 < len(cues) else ""
+        if any(k in w for k in SUDDEN) or "one beat of black" in nxt_w:
+            c["fade"] = 0.0
+            continue
+        prev = cues[n - 1] if n else None
+        changed_look = True
+        if prev is not None:
+            a = {k: (v.get("c"), v.get("l")) for k, v in (prev.get("look") or {}).items()
+                 if isinstance(v, dict)}
+            b2 = {k: (v.get("c"), v.get("l")) for k, v in (c.get("look") or {}).items()
+                  if isinstance(v, dict)}
+            changed_look = a != b2
+        want = step * (0.5 if changed_look else 0.25)
+        ch1 = (c.get("chases") or [None])[0]
+        if ch1 and (ch1.get("every") or {}).get("beats"):
+            want = min(want, step * float(ch1["every"]["beats"]) * 0.7)
+        c["fade"] = round(max(0.04, want), 3)
 
     for c in cues:
         c.pop("_t", None)
