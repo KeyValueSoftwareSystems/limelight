@@ -512,12 +512,12 @@ def author(song, out_path=None):
         pi, pk, pn = phrase_of.get(bar, (None, 0, 1))
         ph = phrases[pi] if pi is not None else None
         if ph is not None:
-            band = (0.34 + 0.64 * (spread(ph["E"]) ** 0.75)) * arc(ph["t"]) * hush(ph["E"])
+            band = (0.40 + 0.59 * (spread(ph["E"]) ** 0.70)) * arc(ph["t"]) * hush(ph["E"])
             pos = pk / max(1, pn - 1) if pn > 1 else 1.0
             level = round(min(0.97, band * (ph["a0"] + (ph["a1"] - ph["a0"]) * pos)), 2)
         else:
             e = spread(r["E"])
-            level = round(min(0.99, (0.34 + 0.64 * (e**0.75)) * arc(r["t"]) * hush(r["E"])), 2)
+            level = round(min(0.99, (0.40 + 0.59 * (e**0.70)) * arc(r["t"]) * hush(r["E"])), 2)
 
         is_edge = any(abs(s["start"] - r["t"]) < step for s in sections)
         phrase_start = ph is not None and pk == 0
@@ -720,7 +720,7 @@ def author(song, out_path=None):
             if (pi or 0) % 2 == 1:
                 reverse_it = not reverse_it
 
-            deep = 0.40 if level < 0.38 else (0.55 if dens >= 6 else 0.62)
+            deep = 0.46 if level < 0.38 else (0.60 if dens >= 6 else 0.68)
             moves = want_fam in ("travel", "grow")
             if sings and want_fam == "travel":
                 every = {"notes": 1}
@@ -1036,8 +1036,8 @@ def author(song, out_path=None):
 
     TRAVELS_HOME = ("travel", "grow")
     COLOUR_FOR = {
-        "travel": "halves", "grow": "poles", "halves": "walk",
-        "oddeven": "flip", "poles": "alternate", "room": "walk",
+        "travel": "halves", "grow": "poles", "halves": "poles",
+        "oddeven": "halves", "poles": "halves", "room": "flip",
     }
 
     HEAD_FOR = {
@@ -1057,7 +1057,7 @@ def author(song, out_path=None):
         rate = float((chase.get("every") or {}).get("beats") or 1.0)
         chase["colours"] = list(pair)
         chase["colour_figure"] = COLOUR_FOR.get(fam, "halves")
-        chase["colour_every"] = max(1, int(round(per * 2.0 / max(0.25, rate))))
+        chase["colour_every"] = max(1, int(round(per * 4.0 / max(0.25, rate))))
 
     MUSICAL = (0.5, 1.0, 1.5, 2.0, 3.0, 4.0)
 
@@ -1365,11 +1365,9 @@ def author(song, out_path=None):
             if not isinstance(v, dict) or v.get("l") is None or not v.get("c"):
                 continue
             lv = lum_of(v["c"])
-            if lv <= 0.01 or v["l"] >= 0.62:
+            if lv <= 0.01:
                 continue
-            adj = v["l"] * REF_LUM / lv
-            if adj < v["l"]:
-                v["l"] = round(max(0.02, adj), 3)
+            v["l"] = round(max(0.02, min(1.0, v["l"] * REF_LUM / lv)), 3)
 
     SUDDEN = ("only white carries a hit", "one beat of black", "a real hole",
               "and back", "PEAK", "climax", "the drop")

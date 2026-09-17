@@ -61,11 +61,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.262
+     "l": 0.283
     },
     "heads": {
      "c": "saffron",
-     "l": 0.184,
+     "l": 0.198,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -78,7 +78,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "reverse": true,
      "cycles": 1
@@ -101,11 +101,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.325
+     "l": 0.354
     },
     "heads": {
      "c": "saffron",
-     "l": 0.226,
+     "l": 0.247,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -118,7 +118,7 @@
       "beats": 2.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "reverse": true,
      "cycles": 2
@@ -141,11 +141,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.253
+     "l": 0.275
     },
     "heads": {
      "c": "bone",
-     "l": 0.176,
+     "l": 0.193,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -158,7 +158,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "reverse": false,
      "cycles": 2
@@ -177,15 +177,15 @@
     "second": 10.31
    },
    "fade": 0.238,
-   "why": "bars 5-8, the phrase travels across: guitars leads, E 5.46, 1 hits, mode -0.37 - comet in crimson - sweep instead, the only shape that finishes in 2.0 bars",
+   "why": "bars 5-8, the phrase travels across: guitars leads, E 5.46, 1 hits, mode -0.37 - comet in crimson against scarlet inside - sweep instead, the only shape that finishes in 2.0 bars",
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.205
+     "l": 0.24
     },
     "heads": {
      "c": "saffron",
-     "l": 0.141,
+     "l": 0.17,
      "pan": 0.5,
      "tilt": 0.35
     }
@@ -198,7 +198,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.46,
      "move_head": true,
      "reverse": true,
      "cycles": 1
@@ -221,11 +221,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.16
+     "l": 0.187
     },
     "heads": {
      "c": "bone",
-     "l": 0.11,
+     "l": 0.132,
      "pan": 0.5,
      "tilt": 0.35
     }
@@ -238,7 +238,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.46,
      "move_head": false,
      "reverse": false,
      "cycles": 4
@@ -261,11 +261,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.375
+     "l": 0.389
     },
     "heads": {
      "c": "saffron",
-     "l": 0.262,
+     "l": 0.276,
      "pan": 0.5,
      "tilt": 0.38
     }
@@ -278,7 +278,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "cycles": 1
     }
@@ -305,11 +305,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.63
+     "l": 0.453
     },
     "heads": {
-     "c": "bone",
-     "l": 0.242,
+     "c": "saffron",
+     "l": 0.318,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -322,7 +322,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "cycles": 4
     }
@@ -349,11 +349,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.417
+     "l": 0.424
     },
     "heads": {
-     "c": "bone",
-     "l": 0.226,
+     "c": "saffron",
+     "l": 0.297,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -366,7 +366,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "reverse": true,
      "cycles": 1
@@ -389,11 +389,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.69
+     "l": 0.502
     },
     "heads": {
-     "c": "bone",
-     "l": 0.264,
+     "c": "saffron",
+     "l": 0.354,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -406,7 +406,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "reverse": true,
      "cycles": 4
@@ -429,11 +429,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.264
+     "l": 0.286
     },
     "heads": {
      "c": "bone",
-     "l": 0.187,
+     "l": 0.198,
      "pan": 0.5,
      "tilt": 0.37
     }
@@ -446,7 +446,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "cycles": 1
     }
@@ -468,11 +468,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.264
+     "l": 0.286
     },
     "heads": {
      "c": "bone",
-     "l": 0.187,
+     "l": 0.198,
      "pan": 0.5,
      "tilt": 0.37
     }
@@ -485,7 +485,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "cycles": 5,
      "reverse": true
@@ -508,11 +508,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.231
+     "l": 0.259
     },
     "heads": {
      "c": "saffron",
-     "l": 0.205,
+     "l": 0.233,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -524,8 +524,8 @@
      "every": {
       "beats": 1.0
      },
-     "fill_beats": 1,
-     "low": 0.62,
+     "fill_beats": 2,
+     "low": 0.68,
      "move_head": true,
      "cycles": 1
     }
@@ -547,11 +547,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.297
+     "l": 0.332
     },
     "heads": {
      "c": "saffron",
-     "l": 0.205,
+     "l": 0.233,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -563,8 +563,8 @@
      "every": {
       "beats": 1.0
      },
-     "fill_beats": 1,
-     "low": 0.62,
+     "fill_beats": 2,
+     "low": 0.68,
      "move_head": false,
      "cycles": 4,
      "reverse": true
@@ -583,15 +583,15 @@
     "second": 48.414
    },
    "fade": 0.238,
-   "why": "bars 25-28, the phrase travels across: winds leads, E 9.08, 1 hits, mode +0.77 - cascade in bone against teal inside",
+   "why": "bars 25-28, the phrase travels across: winds leads, E 9.08, 1 hits, mode +0.77 - cascade in bone against teal inside - alternate instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.7
+     "l": 0.391
     },
     "heads": {
      "c": "bone",
-     "l": 0.27,
+     "l": 0.275,
      "pan": 0.5,
      "tilt": 0.37
     }
@@ -599,14 +599,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "cascade",
+     "figure": "alternate",
      "every": {
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
-     "move_head": true,
-     "cycles": 1
+     "low": 0.68,
+     "move_head": false,
+     "cycles": 2
     }
    ],
    "swell": {
@@ -624,20 +624,20 @@
   {
    "id": 10,
    "at": {
-    "second": 52.222
+    "second": 50.318
    },
    "fade": 0.238,
-   "why": "bars 25-28, the phrase travels across: winds leads, E 11.01, 0 hits, mode +0.71 - hocket in bone against scarlet inside",
+   "why": "bars 25-28, the phrase travels across: winds leads, E 9.91, 0 hits, mode +0.54 - hocket in bone against teal inside",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.73
+     "l": 0.402
     },
     "heads": {
      "c": "bone",
      "l": 0.281,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.32
     }
    },
    "chases": [
@@ -648,14 +648,14 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "cycles": 2
     }
    ],
    "swell": {
-    "from": 0.955,
-    "to": 1.0,
+    "from": 0.91,
+    "to": 0.955,
     "curve": 1.15
    },
    "head": {
@@ -668,37 +668,37 @@
   {
    "id": 11,
    "at": {
-    "second": 54.126
+    "second": 52.222
    },
    "fade": 0.238,
-   "why": "bars 25-28, the phrase travels across: winds leads, E 10.28, 0 hits, mode +0.77 - cascade in bone against scarlet inside - pendulum instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 25-28, the phrase travels across: winds leads, E 11.01, 0 hits, mode +0.71 - cascade in bone against scarlet inside - build instead, the only shape that finishes in 2.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.75
+     "l": 0.413
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.368,
+     "c": "bone",
+     "l": 0.286,
      "pan": 0.5,
-     "tilt": 0.31
+     "tilt": 0.33
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "pendulum",
+     "figure": "build",
      "every": {
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "cycles": 1
     }
    ],
    "swell": {
-    "from": 1.0,
+    "from": 0.955,
     "to": 1.0,
     "curve": 1.15
    },
@@ -715,15 +715,15 @@
     "second": 56.0
    },
    "fade": 0.0,
-   "why": "bars 29-32, the phrase travels across: winds leads, E 5.67, 0 hits, mode +0.77 - sweep in bone - build instead, the only shape that finishes in 1.3 bars",
+   "why": "bars 29-32, the phrase travels across: winds leads, E 5.67, 0 hits, mode +0.77 - sweep in bone - zigzag instead, the only shape that finishes in 1.3 bars",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.33
+     "l": 0.352
     },
     "heads": {
      "c": "bone",
-     "l": 0.231,
+     "l": 0.248,
      "pan": 0.5,
      "tilt": 0.28
     }
@@ -731,12 +731,12 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "zigzag",
      "every": {
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "reverse": true,
      "cycles": 1
@@ -799,15 +799,15 @@
     "second": 63.646
    },
    "fade": 0.238,
-   "why": "bars 33-36, the phrase travels across: drums leads, E 5.73, 1 hits, mode +0.63 - alternate in bone against crimson inside",
+   "why": "bars 33-36, the phrase travels across: drums leads, E 5.73, 1 hits, mode +0.63 - alternate in bone against crimson inside - split instead, the only shape that finishes in 2.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.314
+     "l": 0.33
     },
     "heads": {
-     "c": "bone",
-     "l": 0.22,
+     "c": "saffron",
+     "l": 0.297,
      "pan": 0.5,
      "tilt": 0.4
     }
@@ -815,12 +815,12 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "alternate",
+     "figure": "split",
      "every": {
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "cycles": 4
     }
@@ -838,15 +838,15 @@
     "second": 67.454
    },
    "fade": 0.238,
-   "why": "converge answers alternate, a whole 4 cycles, landing on the hit at 67.45s with a new colour",
+   "why": "converge answers split, a whole 4 cycles, landing on the hit at 67.45s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.403
+     "l": 0.424
     },
     "heads": {
      "c": "saffron",
-     "l": 0.283,
+     "l": 0.297,
      "pan": 0.5,
      "tilt": 0.4
     }
@@ -859,7 +859,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "cycles": 4,
      "reverse": true
@@ -878,15 +878,15 @@
     "second": 71.262
    },
    "fade": 0.238,
-   "why": "bars 37-40, the phrase opens out: keys leads, E 5.87, 0 hits, mode +0.79 - wave in bone against scarlet inside - zigzag instead, the only shape that finishes in 1.5 bars",
+   "why": "bars 37-40, the phrase opens out: keys leads, E 5.87, 0 hits, mode +0.79 - wave in bone against scarlet inside - unbuild instead, the only shape that finishes in 1.5 bars",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.292
+     "l": 0.308
     },
     "heads": {
      "c": "saffron",
-     "l": 0.262,
+     "l": 0.276,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -894,19 +894,19 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "zigzag",
+     "figure": "unbuild",
      "every": {
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "reverse": true,
      "cycles": 1
     }
    ],
    "head": {
-    "move": "sweep",
+    "move": "arc",
     "every": {
      "bars": 2
     }
@@ -918,15 +918,15 @@
     "second": 74.118
    },
    "fade": 0.238,
-   "why": "pulse answers zigzag, a whole 3 cycles, landing on the hit at 74.12s with a new colour",
+   "why": "pulse answers unbuild, a whole 3 cycles, landing on the hit at 74.12s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.375
+     "l": 0.396
     },
     "heads": {
      "c": "saffron",
-     "l": 0.262,
+     "l": 0.276,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -939,7 +939,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "reverse": false,
      "cycles": 3
@@ -962,11 +962,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.66
+     "l": 0.385
     },
     "heads": {
      "c": "saffron",
-     "l": 0.325,
+     "l": 0.346,
      "pan": 0.5,
      "tilt": 0.35
     }
@@ -979,7 +979,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "reverse": true,
      "cycles": 2
@@ -998,15 +998,15 @@
     "second": 78.85
    },
    "fade": 0.238,
-   "why": "bars 41-44, the phrase closes down: keys leads, E 7.16, 0 hits, mode +0.24 - zigzag in bone against teal inside - build instead, the only shape that finishes in 2.1 bars",
+   "why": "bars 41-44, the phrase closes down: keys leads, E 7.16, 0 hits, mode +0.24 - zigzag in bone against teal inside - sweep instead, the only shape that finishes in 2.1 bars",
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.63
+     "l": 0.474
     },
     "heads": {
      "c": "bone",
-     "l": 0.242,
+     "l": 0.259,
      "pan": 0.5,
      "tilt": 0.38
     }
@@ -1014,19 +1014,19 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "sweep",
      "every": {
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "reverse": true,
-     "cycles": 2
+     "cycles": 1
     }
    ],
    "head": {
-    "move": "arc",
+    "move": "sweep",
     "every": {
      "bars": 2
     }
@@ -1038,15 +1038,15 @@
     "second": 82.942
    },
    "fade": 0.238,
-   "why": "unbuild answers build, a whole 1 cycles, landing on the hit at 82.94s with a new colour",
+   "why": "build answers sweep, a whole 1 cycles, landing on the hit at 82.94s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.63
+     "l": 0.474
     },
     "heads": {
      "c": "saffron",
-     "l": 0.311,
+     "l": 0.332,
      "pan": 0.5,
      "tilt": 0.38
     }
@@ -1054,12 +1054,12 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "unbuild",
+     "figure": "build",
      "every": {
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "reverse": false,
      "cycles": 1
@@ -1078,15 +1078,15 @@
     "second": 86.494
    },
    "fade": 0.238,
-   "why": "bars 45-48, the phrase opens out: voices leads, E 5.84, 2 hits, mode -0.41 - cascade in crimson against scarlet inside - stack instead, the only shape that finishes in 1.6 bars",
+   "why": "bars 45-48, the phrase opens out: voices leads, E 5.84, 2 hits, mode -0.41 - cascade in crimson against scarlet inside - unbuild instead, the only shape that finishes in 1.6 bars",
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.375
+     "l": 0.396
     },
     "heads": {
      "c": "saffron",
-     "l": 0.262,
+     "l": 0.276,
      "pan": 0.5,
      "tilt": 0.32
     }
@@ -1094,12 +1094,12 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "stack",
+     "figure": "unbuild",
      "every": {
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "reverse": true,
      "cycles": 1
@@ -1127,11 +1127,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.67
+     "l": 0.495
     },
     "heads": {
      "c": "saffron",
-     "l": 0.332,
+     "l": 0.346,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -1144,7 +1144,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "reverse": true,
      "cycles": 2
@@ -1168,15 +1168,15 @@
     "second": 94.134
    },
    "fade": 0.238,
-   "why": "bars 49-52, the phrase opens out: voices leads, E 6.42, 1 hits, mode +0.41 - unbuild in crimson against crimson inside - sweep instead, the only shape that finishes in 1.7 bars",
+   "why": "bars 49-52, the phrase opens out: voices leads, E 6.42, 1 hits, mode +0.41 - unbuild in crimson against crimson inside - stack instead, the only shape that finishes in 1.7 bars",
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.403
+     "l": 0.417
     },
     "heads": {
      "c": "saffron",
-     "l": 0.283,
+     "l": 0.29,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -1184,12 +1184,12 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "stack",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "cycles": 1
     }
@@ -1216,11 +1216,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.71
+     "l": 0.523
     },
     "heads": {
      "c": "saffron",
-     "l": 0.354,
+     "l": 0.368,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -1233,7 +1233,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "cycles": 2
     }
@@ -1256,15 +1256,15 @@
     "second": 101.75
    },
    "fade": 0.0,
-   "why": "bars 53-56, the phrase opens out: guitars leads, E 8.56, 4 hits, mode +0.61 - pendulum in crimson - build instead, the only shape that finishes in 1.7 bars",
+   "why": "bars 53-56, the phrase opens out: guitars leads, E 8.56, 4 hits, mode +0.61 - pendulum in crimson - sweep instead, the only shape that finishes in 1.7 bars",
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.424
+     "l": 0.438
     },
     "heads": {
      "c": "saffron",
-     "l": 0.297,
+     "l": 0.304,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -1272,12 +1272,12 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "sweep",
      "every": {
-      "beats": 1.5
+      "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "reverse": true,
      "cycles": 1
@@ -1314,7 +1314,7 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.9
+     "l": 0.92
     },
     "heads": {
      "c": "bone",
@@ -1344,11 +1344,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.247
+     "l": 0.283
     },
     "heads": {
      "c": "saffron",
-     "l": 0.17,
+     "l": 0.198,
      "pan": 0.5,
      "tilt": 0.38
     }
@@ -1361,7 +1361,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.68,
      "move_head": false,
      "cycles": 4
     }
@@ -1383,11 +1383,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.247
+     "l": 0.283
     },
     "heads": {
      "c": "saffron",
-     "l": 0.17,
+     "l": 0.198,
      "pan": 0.5,
      "tilt": 0.38
     }
@@ -1400,7 +1400,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.68,
      "move_head": false,
      "cycles": 4,
      "reverse": true
@@ -1419,15 +1419,15 @@
     "second": 116.912
    },
    "fade": 0.238,
-   "why": "bars 61-64, the phrase travels across: keys leads, E 5.70, 0 hits, mode +0.65 - build in bone against crimson inside - cascade instead, the only shape that finishes in 1.9 bars",
+   "why": "bars 61-64, the phrase travels across: keys leads, E 5.70, 0 hits, mode +0.65 - build in bone against crimson inside",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.242
+     "l": 0.259
     },
     "heads": {
      "c": "saffron",
-     "l": 0.219,
+     "l": 0.233,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -1435,12 +1435,12 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "cascade",
+     "figure": "build",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
-     "fill_beats": 1,
-     "low": 0.62,
+     "fill_beats": 2,
+     "low": 0.68,
      "move_head": true,
      "reverse": true,
      "cycles": 1
@@ -1468,11 +1468,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.62
+     "l": 0.347
     },
     "heads": {
      "c": "bone",
-     "l": 0.237,
+     "l": 0.242,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -1485,7 +1485,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "cycles": 4
     }
@@ -1512,11 +1512,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.171
+     "l": 0.198
     },
     "heads": {
      "c": "bone",
-     "l": 0.121,
+     "l": 0.138,
      "pan": 0.5,
      "tilt": 0.27
     }
@@ -1529,7 +1529,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.46,
      "move_head": true,
      "cycles": 1
     }
@@ -1547,15 +1547,15 @@
     "second": 135.04
    },
    "fade": 0.238,
-   "why": "build answers zigzag, a whole 1 cycles, landing on the hit at 135.04s with a new colour",
+   "why": "cascade answers zigzag, a whole 1 cycles, landing on the hit at 135.04s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.219
+     "l": 0.255
     },
     "heads": {
      "c": "saffron",
-     "l": 0.156,
+     "l": 0.177,
      "pan": 0.5,
      "tilt": 0.27
     }
@@ -1563,12 +1563,12 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "cascade",
      "every": {
-      "beats": 2.0
+      "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.46,
      "move_head": true,
      "cycles": 1,
      "reverse": true
@@ -1591,11 +1591,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.242
+     "l": 0.264
     },
     "heads": {
      "c": "saffron",
-     "l": 0.219,
+     "l": 0.24,
      "pan": 0.5,
      "tilt": 0.4
     }
@@ -1607,8 +1607,8 @@
      "every": {
       "beats": 1.0
      },
-     "fill_beats": 1,
-     "low": 0.62,
+     "fill_beats": 2,
+     "low": 0.68,
      "move_head": true,
      "cycles": 2
     }
@@ -1631,15 +1631,15 @@
     "second": 147.47
    },
    "fade": 0.238,
-   "why": "bars 77-80, the phrase closes down: keys leads, E 5.37, 1 hits, mode +0.79 - march in bone against crimson inside - cascade instead, the only shape that finishes in 2.1 bars",
+   "why": "bars 77-80, the phrase closes down: keys leads, E 5.37, 1 hits, mode +0.79 - march in bone against crimson inside - build instead, the only shape that finishes in 2.1 bars",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.209
+     "l": 0.231
     },
     "heads": {
      "c": "saffron",
-     "l": 0.191,
+     "l": 0.205,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -1647,12 +1647,12 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "cascade",
+     "figure": "build",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 1,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "cycles": 1
     }
@@ -1670,15 +1670,15 @@
     "second": 151.51
    },
    "fade": 0.238,
-   "why": "alternate answers cascade, a whole 2 cycles, landing on the hit at 151.51s with a new colour",
+   "why": "alternate answers build, a whole 2 cycles, landing on the hit at 151.51s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.269
+     "l": 0.297
     },
     "heads": {
      "c": "saffron",
-     "l": 0.191,
+     "l": 0.205,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -1691,7 +1691,7 @@
       "beats": 2.0
      },
      "fill_beats": 1,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "cycles": 2,
      "reverse": true
@@ -1714,11 +1714,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.286
+     "l": 0.292
     },
     "heads": {
      "c": "saffron",
-     "l": 0.255,
+     "l": 0.262,
      "pan": 0.5,
      "tilt": 0.35
     }
@@ -1731,7 +1731,7 @@
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": true,
      "cycles": 1
     }
@@ -1758,11 +1758,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.275
+     "l": 0.281
     },
     "heads": {
      "c": "saffron",
-     "l": 0.247,
+     "l": 0.255,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -1775,7 +1775,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "reverse": true,
      "cycles": 4
@@ -1798,11 +1798,11 @@
    "look": {
     "lamps": {
      "c": "saffron",
-     "l": 0.354
+     "l": 0.361
     },
     "heads": {
      "c": "saffron",
-     "l": 0.247,
+     "l": 0.255,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -1815,7 +1815,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "reverse": false,
      "cycles": 4
@@ -1838,11 +1838,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.132
+     "l": 0.154
     },
     "heads": {
      "c": "bone",
-     "l": 0.094,
+     "l": 0.11,
      "pan": 0.5,
      "tilt": 0.39
     }
@@ -1855,7 +1855,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.46,
      "move_head": false,
      "reverse": true,
      "cycles": 2
@@ -1904,7 +1904,7 @@
       "beats": 1.5
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.46,
      "move_head": false,
      "reverse": true,
      "cycles": 1
@@ -1927,11 +1927,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.132
+     "l": 0.154
     },
     "heads": {
      "c": "bone",
-     "l": 0.094,
+     "l": 0.11,
      "pan": 0.5,
      "tilt": 0.39
     }
@@ -1944,7 +1944,7 @@
       "beats": 2
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.46,
      "move_head": false,
      "reverse": true
     }

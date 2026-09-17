@@ -61,11 +61,11 @@
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.32
+     "l": 0.618
     },
     "heads": {
      "c": "crimson",
-     "l": 0.22,
+     "l": 0.429,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -78,7 +78,7 @@
       "beats": 1.5
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.46,
      "move_head": true,
      "cycles": 1,
      "colours": [
@@ -86,7 +86,7 @@
       "indigo"
      ],
      "colour_figure": "poles",
-     "colour_every": 5
+     "colour_every": 11
     }
    ],
    "swell": {
@@ -111,11 +111,11 @@
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.45
+     "l": 0.841
     },
     "heads": {
      "c": "indigo",
-     "l": 0.32,
+     "l": 0.668,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -128,7 +128,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.55,
+     "low": 0.6,
      "move_head": false,
      "reverse": true,
      "cycles": 3,
@@ -136,8 +136,8 @@
       "crimson",
       "indigo"
      ],
-     "colour_figure": "flip",
-     "colour_every": 8
+     "colour_figure": "halves",
+     "colour_every": 16
     }
    ],
    "swell": {
@@ -171,7 +171,7 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.92
+     "l": 0.95
     },
     "heads": {
      "c": "bone",
@@ -201,11 +201,11 @@
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.5
+     "l": 0.91
     },
     "heads": {
      "c": "crimson",
-     "l": 0.35,
+     "l": 0.635,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -218,7 +218,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.55,
+     "low": 0.6,
      "move_head": false,
      "reverse": true,
      "cycles": 4,
@@ -226,8 +226,8 @@
       "crimson",
       "indigo"
      ],
-     "colour_figure": "walk",
-     "colour_every": 8
+     "colour_figure": "flip",
+     "colour_every": 16
     }
    ],
    "head": {
@@ -247,11 +247,11 @@
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.5
+     "l": 1.0
     },
     "heads": {
      "c": "indigo",
-     "l": 0.35,
+     "l": 0.727,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -264,7 +264,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.55,
+     "low": 0.6,
      "move_head": false,
      "reverse": false,
      "cycles": 4,
@@ -272,8 +272,8 @@
       "crimson",
       "indigo"
      ],
-     "colour_figure": "alternate",
-     "colour_every": 8
+     "colour_figure": "halves",
+     "colour_every": 16
     }
    ],
    "head": {
@@ -293,11 +293,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.78
+     "l": 0.446
     },
     "heads": {
      "c": "bone",
-     "l": 0.303,
+     "l": 0.314,
      "pan": 0.5,
      "tilt": 0.3
     }
@@ -310,7 +310,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.55,
+     "low": 0.6,
      "move_head": true,
      "reverse": true,
      "cycles": 1,
@@ -319,7 +319,7 @@
       "indigo"
      ],
      "colour_figure": "halves",
-     "colour_every": 8
+     "colour_every": 16
     }
    ],
    "swell": {
@@ -383,11 +383,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.68
+     "l": 0.385
     },
     "heads": {
      "c": "bone",
-     "l": 0.264,
+     "l": 0.27,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -400,15 +400,15 @@
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.62,
+     "low": 0.68,
      "move_head": false,
      "cycles": 1,
      "colours": [
       "crimson",
       "indigo"
      ],
-     "colour_figure": "walk",
-     "colour_every": 5
+     "colour_figure": "poles",
+     "colour_every": 11
     }
    ],
    "swell": {
@@ -442,7 +442,7 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.94
+     "l": 0.96
     },
     "heads": {
      "c": "bone",
@@ -472,11 +472,11 @@
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.6
+     "l": 1.0
     },
     "heads": {
      "c": "crimson",
-     "l": 0.42,
+     "l": 0.738,
      "pan": 0.5,
      "tilt": 0.3
     }
@@ -489,7 +489,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.55,
+     "low": 0.6,
      "move_head": true,
      "reverse": true,
      "cycles": 1,
@@ -498,7 +498,7 @@
       "indigo"
      ],
      "colour_figure": "poles",
-     "colour_every": 8
+     "colour_every": 16
     }
    ],
    "head": {
@@ -527,11 +527,11 @@
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.36
+     "l": 0.687
     },
     "heads": {
      "c": "crimson",
-     "l": 0.25,
+     "l": 0.481,
      "pan": 0.5,
      "tilt": 0.24
     }
@@ -544,7 +544,7 @@
       "beats": 2
      },
      "fill_beats": 1,
-     "low": 0.4,
+     "low": 0.68,
      "move_head": false
     }
    ]
