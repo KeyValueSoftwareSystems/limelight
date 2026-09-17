@@ -16,6 +16,9 @@
      alive        no long dead stretch while the band plays. A `follow` binding
                   held the rig at 1% through the whole first chorus.
      intentional  every dark stretch is either a darkening cue or a real hole in
+     breath       a blackout on loud music is one beat, never two
+     smooth       the room does not switch off and on outside a designed hit
+     head         the head glides (never snaps or shivers), ends its moves on beats, and never outshines the row except at the climax
                   the music. Blackouts were firing over a vocal at full voice,
                   because "silence" had been measured as gaps between drum hits.
      contained    a cue changes nothing outside its own span. `follow` darkened
@@ -274,6 +277,117 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
         : total + " dark stretches, every one deliberate");
 }
 
+/* 3b. breath — a blackout on loud music is one beat, never two ------------- */
+{
+  /* Renjith heard "false blacks": stretches where the band is playing at full
+     weight and the room is black for two beats. Every one of them was a cue we
+     wrote on purpose, so `intentional` passed -- but the ear is right: when
+     the music never goes quiet, a breath is one beat and anything longer reads
+     as a fault. A dark stretch is allowed to run long only when the band is
+     genuinely quiet under it. */
+  const beatS = 60 / ((score.key_tempo && score.key_tempo.bpm) || 120);
+  const LIMIT = 1.25 * beatS;
+  let bad = 0, firstAt = null, longest = 0;
+  let run = 0, start = 0;
+  const judge = () => {
+    if (run < 0.3) return;
+    let sum = 0, n = 0;
+    for (let u = start; u < start + run; u += 0.05) { sum += bandAt(u); n++; }
+    const loud = n && sum / n > 0.45;
+    if (loud && run > LIMIT) { bad++; if (firstAt == null) firstAt = start; longest = Math.max(longest, run); }
+  };
+  for (let i = 0; i < F.length; i++) {
+    if (rigLv(F[i]) < 0.06) { if (run === 0) start = i / fps; run += 1 / fps; }
+    else { judge(); run = 0; }
+  }
+  judge();
+  check("breath", bad === 0,
+    bad ? bad + " blackout(s) on loud music run longer than a beat (first at " + firstAt.toFixed(1) + "s, longest " + longest.toFixed(2) + "s; limit " + LIMIT.toFixed(2) + "s)"
+        : "every blackout on loud music is a beat or less");
+}
+
+/* 3c. smooth — the room does not switch off and on outside a designed hit ----- */
+{
+  /* Renjith: "sudden shutting down and immediate re-lighting of lights". A DIP
+     is the row losing more than 45% of its light within 100ms and having it
+     back within 0.7s. Inside a darkening cue that is the design; anywhere else
+     it is a seam -- a cue ending into a dim bed, a bed that flickers on the
+     beat, an acceleration flicking on and off -- and it reads as a fault. */
+  const DARKENERS = new Set(["blackout", "hush", "cut", "strip"]);
+  const dk = cues.filter(c => DARKENERS.has(c.effect)).map(spanOf).filter(Boolean).map(([a, b]) => [a - 0.15, b + 0.35]);
+  const rowLight = f => { const v = parLv(f); return v.reduce((x, y) => x + y, 0) / (v.length || 1); };
+  const dips = [];
+  for (let i = 4; i < F.length - 30; i++) {
+    const before = rowLight(F[i - 4]), now = rowLight(F[i]);
+    if (before > 0.2 && now < before * 0.55) {
+      let rec = -1;
+      for (let j = i + 1; j < i + 28 && j < F.length; j++) if (rowLight(F[j]) >= before * 0.7) { rec = j; break; }
+      if (rec > 0) { const t = i / fps; if (!dk.some(([a, b]) => t >= a && t <= b)) dips.push(t); i = rec; }
+    }
+  }
+  const LIMIT = 8;
+  check("smooth", dips.length <= LIMIT,
+    dips.length + " off-and-on dips outside a darkening cue (limit " + LIMIT + ")" +
+    (dips.length ? "; first at " + dips.slice(0, 6).map(t => t.toFixed(1) + "s").join(", ") : ""));
+}
+
+/* 3d. head — smooth, deliberate, landing on beats, never the brightest thing except at the climax --- */
+{
+  /* Renjith, twice: first "moving in all sorts of directions and has no stable
+     rhythm", then, after it was made still, "completely bland ... what we want
+     to avoid is jittery movements, it just has to be cohesive and smooth". So
+     the head may move as much as the music asks, but: it never turns faster
+     than 5 of its 7 units a frame (a glide, never a snap), it never reverses
+     direction twice inside one beat (no shiver), every visible move ends within
+     a sixth of a beat before a beat, and outside the climax and the impacts its
+     level stays at or under 75%. Motion in the dark is not counted. */
+  const head = HEADS[0];
+  if (!head) { check("head", true, "no moving head on this rig"); }
+  else {
+    const panCh = head.off + head.roles.indexOf("pan"), tiltCh = head.off + head.roles.indexOf("tilt");
+    const lit = f => headLv(f)[0] > 0.05;
+    const beatS = 60 / ((score.key_tempo && score.key_tempo.grid_bpm) || 120);
+    const CLIMAX = [97.76, 109.76];
+    const impactSpans = cues.filter(c => c.effect === "impact").map(spanOf).filter(Boolean).map(([a, b]) => [a - 0.05, b + 0.05]);
+    let litN = 0, fast = 0, shiver = 0, badLand = 0, segs = 0, bright = 0, moving = 0;
+    let inMove = false, moveStart = 0, lastDir = 0, lastRev = -9, stillRun = 0, moveEnd = 0, panAtStart = 0, panAtEnd = 0;
+    for (let i = 1; i < F.length; i++) {
+      const t = i / fps;
+      if (!lit(F[i]) || !lit(F[i - 1])) { inMove = false; lastDir = 0; stillRun = 0; continue; }
+      litN++;
+      const dp = F[i][panCh] - F[i - 1][panCh], dm = Math.abs(dp) + Math.abs(F[i][tiltCh] - F[i - 1][tiltCh]);
+      /* any change is motion; a glide at two units a frame rounds to a one-unit step
+         now and then and must not read as a stop. A move has ENDED only after
+         three unchanged frames. */
+      const mv = dm >= 1;
+      if (mv) moving++;
+      if (dm > 5.5) fast++;
+      stillRun = mv ? 0 : stillRun + 1;
+      const dir = dp > 0 ? 1 : dp < 0 ? -1 : 0;
+      if (dir && lastDir && dir !== lastDir) { if (t - lastRev < beatS) shiver++; lastRev = t; }
+      if (dir) lastDir = dir;
+      if (mv && !inMove) { moveStart = t; panAtStart = F[i - 1][panCh]; }
+      if (mv) { inMove = true; moveEnd = t; panAtEnd = F[i][panCh]; }
+      else if (inMove && stillRun >= 3) {
+        inMove = false;
+        /* a crawl of a few units (a six-second glide across a quarter of the room) is not a move anyone sees */
+        if (moveEnd - moveStart >= 0.1 && Math.abs(panAtEnd - panAtStart) >= 6) {
+          segs++;
+          const nextBeat = BEATS.find(x => x >= moveEnd - 0.06);
+          if (nextBeat == null || nextBeat - moveEnd > beatS / 6) badLand++;
+        }
+      }
+      const inClimax = t >= CLIMAX[0] && t < CLIMAX[1];
+      const inImpact = impactSpans.some(([a, b]) => t >= a && t <= b);
+      if (!inClimax && !inImpact && headLv(F[i])[0] > 0.76) bright++;
+    }
+    const brightPct = litN ? 100 * bright / litN : 0, movPct = litN ? 100 * moving / litN : 0;
+    check("head", fast === 0 && shiver === 0 && badLand === 0 && brightPct <= 2,
+      "moving " + movPct.toFixed(0) + "% of its lit time; " + fast + " frames at snap speed (want 0); " + shiver + " reversals within a beat of the last (want 0); " +
+      segs + " moves, " + badLand + " not ending on a beat; over 75% outside the climax and impacts in " + brightPct.toFixed(1) + "% of lit frames (want <= 2%)");
+  }
+}
+
 /* 4. contained — a cue changes nothing outside its own span ---------------- */
 {
   const suspects = (show.bindings || []).map((c, i) => ({ c, i, list: "bindings" }))
@@ -332,7 +446,8 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
   /* `chase` IS a travelling effect and was not being checked at all -- the test
      looked only for trade's `travel` flag, so a show whose whole build is chase
      reported "0 of 0 travel cues" and passed without verifying a single wave. */
-  const travellers = (show.gestures || []).filter(g => g.travel || g.effect === "chase").map(g => {
+  /* a mirrored walk sends two lamps in opposite directions on purpose; it has no single "way" to cross */
+  const travellers = (show.gestures || []).filter(g => (g.travel || g.effect === "chase") && g.mirror !== true).map(g => {
     const sp = spanOf(g); return sp ? { ...g, from_s: sp[0], to_s: sp[1] } : null;
   }).filter(Boolean);
   let ok = 0; const why = [];

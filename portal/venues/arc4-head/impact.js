@@ -16,7 +16,7 @@ module.exports = function impact(params, ctx) {
     const env = H.hitEnv(i / N);
     const f = H.emptyFrame();
     for (const par of pars) H.setPar(f, par, colour, env);
-    H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHead(f, H.HEADS[0], {
       level: env, colour,
       pan: 0.662, tilt: 0.498,                 // snap toward the wall centre
       strobe: i < 2 ? 15 : 0,                  // strobe burst on the very front
@@ -28,6 +28,6 @@ module.exports = function impact(params, ctx) {
   return {
     frames,
     loop_beats: 0,
-    per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS),
+    per_fixture: params.head === false ? pars.map(p => p.id) : pars.map(p => p.id).concat(H.HEAD_IDS),
   };
 };

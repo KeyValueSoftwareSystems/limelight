@@ -20,6 +20,18 @@ export function useTimeline(): TimelineCtx {
   return c;
 }
 
+/** A wheel notch reported in LINES rather than pixels — Firefox does this on
+ *  some platforms, and a delta of 3 across a 1000px editor is indistinguishable
+ *  from the gesture not working. Pages (deltaMode 2) are rarer still, and are a
+ *  screenful by definition. */
+const LINE_PX = 16;
+
+function wheelPx(delta: number, mode: number, pagePx: number): number {
+  if (mode === 1) return delta * LINE_PX;
+  if (mode === 2) return delta * pagePx;
+  return delta;
+}
+
 /** Owns the one time→pixel mapping every band shares. If a band computed its
  *  own, the picture would drift out of agreement with itself. */
 export function Timeline({
@@ -35,8 +47,10 @@ export function Timeline({
   duration: number;
   onScrub?: (t: number) => void;
   /** Fired on a press that did not land on a clip. Return true to CLAIM that
-   *  press — an armed tile does, because that press is a placement, not a seek. */
-  onBackground?: (clientX: number) => boolean | void;
+   *  press — an armed tile does, because that press is a placement, not a seek.
+   *  It gets the y as well as the x: a placement needs a LANE, and the lane is
+   *  the only thing that says which of two overlapping effects will play. */
+  onBackground?: (clientX: number, clientY: number) => boolean | void;
   onZoom?: (anchorT: number, factor: number) => void;
   onPan?: (dt: number) => void;
   children: React.ReactNode;
@@ -63,7 +77,7 @@ export function Timeline({
      reaching here already means the press landed on empty timeline: there is
      nothing under it for a seek to take away. */
   const scrub = (e: React.PointerEvent) => {
-    if (onBackground?.(e.clientX)) return;
+    if (onBackground?.(e.clientX, e.clientY)) return;
     if (!onScrub || box.width === 0) return;
     const r = ref.current?.getBoundingClientRect();
     if (!r) return;
@@ -81,24 +95,47 @@ export function Timeline({
     window.addEventListener("pointerup", up);
   };
 
-  /* Ctrl/Cmd-scroll zooms about the cursor; a plain horizontal scroll pans.
-     Both continuous — four fixed zoom steps made close work impossible. */
+  /* Ctrl/Cmd-scroll zooms about the cursor; shift-scroll and a horizontal
+     trackpad swipe pan. Both continuous — four fixed zoom steps made close work
+     impossible. A plain vertical scroll is left alone, so it still scrolls the
+     lanes underneath. */
   useEffect(() => {
     const el = ref.current;
     if (!el || box.width === 0) return;
     const onWheel = (e: WheelEvent) => {
       const r = el.getBoundingClientRect();
+      const span = view.to - view.from;
+      const px = (d: number) => wheelPx(d, e.deltaMode, box.width);
+
       if (e.ctrlKey || e.metaKey) {
         if (!onZoom) return;
         e.preventDefault();
-        const anchorT = view.from + ((e.clientX - r.left) / box.width) * (view.to - view.from);
+        const anchorT = view.from + ((e.clientX - r.left) / box.width) * span;
         onZoom(anchorT, e.deltaY > 0 ? 1.15 : 0.87);
-      } else if (onPan && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        e.preventDefault();
-        onPan((e.deltaX / box.width) * (view.to - view.from));
+        return;
       }
+      if (!onPan) return;
+
+      /* Shift-scroll is the web's horizontal scroll, but the browser only does
+         it for a REAL scroller — and this is deliberately not one. Where the
+         timeline is in the song is `view`, not a scrollLeft, so there was
+         nothing for the browser to scroll and the gesture did nothing at all.
+
+         Which axis the delta arrives on is not agreed between platforms
+         either: some browsers swap shift-scroll onto deltaX for you, others
+         leave it on deltaY and only set shiftKey. Take whichever is moving
+         rather than betting on one. */
+      const dx = e.shiftKey
+        ? (e.deltaX || e.deltaY)
+        : Math.abs(e.deltaX) > Math.abs(e.deltaY)
+          ? e.deltaX
+          : 0;
+      if (!dx) return;
+      e.preventDefault();
+      onPan((px(dx) / box.width) * span);
     };
-    /* Not passive: zooming must be able to cancel the browser's page zoom. */
+    /* Not passive: zooming must be able to cancel the browser's page zoom, and
+       panning must be able to cancel its back-swipe. */
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, [view, box.width, onZoom, onPan]);

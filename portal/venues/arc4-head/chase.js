@@ -16,8 +16,24 @@ module.exports = function chase(params, ctx) {
      files that already say it. amount wins when both are present. */
   const level = H.clamp(params.amount != null ? params.amount : (params.level != null ? params.level : 0.85), 0, 1);
   const rest = H.clamp(params.rest != null ? params.rest : 0, 0, 1);
+  /* the lamps NOT being walked: their own colour, and a rest level that can rise
+     across the cue (rest -> rest_to), so one walk cue also carries the bed's
+     swell under it instead of fighting a second full-row cue for the lamps. */
+  const restColour = params.rest_colour ? H.parseColour(params.rest_colour, colour) : colour;
+  const restTo = params.rest_to != null ? H.clamp(params.rest_to, 0, 1) : rest;
   const perBeat = params.per_beat != null ? params.per_beat : 1;
   const back = params.bounce === true;
+  /* step: one lamp at a time, each held for an equal share of the crossing, no
+     half-glow on the neighbour. With per_beat = 1/lamps that is one lamp per
+     beat on this rig -- a walk that lands on beats, not a wave that arrives
+     late at every lamp after the first. */
+  const step = params.step === true;
+  /* anticipate: in step mode the NEXT lamp starts to glow through the last third
+     of the current step, so the walk leans into each beat instead of switching
+     on it -- the groove lives in the lean. mirror: a second walker from the far
+     end, so the two meet in the middle and cross. */
+  const anticipate = params.anticipate === true;
+  const mirror = params.mirror === true;
   const loopBeats = Math.max(1, Math.round(params.for_beats || 4));
   const n = pars.length;
 
@@ -34,13 +50,23 @@ module.exports = function chase(params, ctx) {
     if (back && pos > 0.5) pos = 1 - pos;
     else if (back) pos = pos;
     const exact = H.clamp(pos * span, 0, 1) * (n - 1);
-    let head = Math.floor(exact);
-    const within = exact - head;
+    let head = step ? Math.min(n - 1, Math.floor(H.clamp(pos * span, 0, 1) * n)) : Math.floor(exact);
+    const within = step ? 1 : exact - head;
     const f = H.emptyFrame();
+    const restNow = rest + (restTo - rest) * H.clamp((beats / perBeat) / loopBeats, 0, 1);   // `beats` arrives already scaled by per_beat
+    const frac = step ? (H.clamp(pos * span, 0, 1) * n) - head : 0;            // how far through the current step, 0..1
+    const lean = step && anticipate ? H.clamp((frac - 0.66) / 0.34, 0, 1) * 0.55 : 0;
+    const heads = mirror ? [head, n - 1 - head] : [head];
     pars.forEach((par, k) => {
-      const d = Math.abs(k - head);
-      const glow = d === 0 ? 1 : d === 1 ? 0.35 * (1 - within) : 0;
-      H.setPar(f, par, colour, (rest + (level - rest) * glow) * gain);
+      let glow = 0;
+      for (const hd of heads) {
+        const d = Math.abs(k - hd);
+        glow = Math.max(glow, d === 0 ? 1 : d === 1 ? 0.35 * (1 - within) : 0);
+        if (lean > 0 && k === hd + 1 && hd + 1 < n) glow = Math.max(glow, lean);          // the lamp ahead of the walker leans in
+        if (lean > 0 && mirror && k === hd - 1 && hd - 1 >= 0) glow = Math.max(glow, lean);
+      }
+      if (glow > 0) H.setPar(f, par, colour, (restNow + (level - restNow) * glow) * gain);
+      else H.setPar(f, par, restColour, restNow * gain);
     });
     if (params.head !== false) 
     H.setHead(f, H.HEADS[0], {

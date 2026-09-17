@@ -1090,6 +1090,12 @@
     },
     "tilt": {
      "default": 0.42
+    },
+    "pan_to": {
+     "default": null
+    },
+    "tilt_to": {
+     "default": null
     }
    },
    "fires_on": [
@@ -1188,6 +1194,21 @@
     },
     "head": {
      "default": true
+    },
+    "step": {
+     "default": false
+    },
+    "rest_colour": {
+     "default": null
+    },
+    "rest_to": {
+     "default": null
+    },
+    "anticipate": {
+     "default": false
+    },
+    "mirror": {
+     "default": false
     }
    },
    "name": "Chase",

@@ -16,12 +16,12 @@ module.exports = function strobe(params, ctx) {
     const on = (i % period) < duty;
     const fade = 1 - 0.35 * (i / N);
     for (const par of pars) H.setPar(f, par, colour, on ? fade : 0);
-    H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHead(f, H.HEADS[0], {
       level: on ? fade : 0, colour,
       pan: 0.662, tilt: 0.42,
       strobe: hz,
     });
     frames.push(f);
   }
-  return { frames, loop_beats: 0, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
+  return { frames, loop_beats: 0, per_fixture: params.head === false ? pars.map(p => p.id) : pars.map(p => p.id).concat(H.HEAD_IDS) };
 };

@@ -21,6 +21,9 @@ import type { NextConfig } from "next";
 const PORTAL = process.env.PORTAL_URL || "http://127.0.0.1:8800";
 
 const nextConfig: NextConfig = {
+  /* the page is opened as 127.0.0.1 or localhost or the LAN address; without
+     this Next dev blocks the hot-reload socket for every name but its own. */
+  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.1.45", "2.0.0.10"],
   env: {
     /* empty = same origin as the page. The one place this must NOT be a URL. */
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? "",

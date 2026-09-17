@@ -84,6 +84,11 @@ export function buildClips(
       endS: secondsAtBeatIndex(span.to),
       params: { ...(spec.params ?? {}), ...(edit.params ?? {}) },
       overridden: false,
+      /* Undefined where an edit has not been seeded yet — lib/layers does that
+         on the way in. packRows reads it as "no lane claimed" and packs it,
+         which is the same picture the timeline drew before lanes were stored. */
+      layer: edit.layer,
+      kind: spec.kind ?? "gesture",
     });
   });
 
@@ -113,6 +118,10 @@ export function buildClips(
       overridden:
         replaced.has(p.id) ||
         claims.some((c) => c.fx === planKey(p.fx) && overlaps(c.span, span)),
+      /* No lane of its own: it packs into whatever is left beside the clips
+         that claim one, and takes that lane the moment it is taken over.
+         Punctuation is the arranger's gestures. */
+      kind: "gesture",
     });
   }
 

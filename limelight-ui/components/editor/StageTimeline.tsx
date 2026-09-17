@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { packRows } from "@/lib/pack";
-import type { Pin } from "@/lib/pack";
+import { clampLayerDelta, resolveLanes, type LaneItem } from "@/lib/layers";
 import { beatAtTime, beatsAcross, fit, panBy, timeToX, xToTime, zoomAt, MIN_SPAN_S } from "@/lib/timeline";
 import type { View } from "@/lib/timeline";
 import { resolveSnap } from "@/lib/snap";
@@ -43,8 +43,10 @@ interface Props {
   onSeek: (t: number) => void;
   onToggle: () => void;
   /** Takes one placement or a whole batch, and hands back the edit indices it
-   *  made — a paste of four clips is ONE rebake, not four. */
-  onPlace: (edit: Edit | Edit[]) => number[];
+   *  made — a paste of four clips is ONE rebake, not four. `displaced` maps an
+   *  edit index to the lane it has to step down to, so an insert and the clips
+   *  it pushed out of the way are one write, one undo step and one bake. */
+  onPlace: (edit: Edit | Edit[], displaced?: Map<number, number>) => number[];
   onRemove: (editIndex: number) => void;
   onUpdateLive: (editIndex: number, patch: Partial<Edit>) => void;
   onMaterialize: (clip: ClipModel) => number | null;
@@ -95,6 +97,10 @@ interface Snip {
   offsetBeats: number;
   beats: number;
   params: Record<string, unknown>;
+  /** The lane it was copied from. A paste that carried no lane was drawn
+   *  wherever the packer put it and baked as though it were on the top one —
+   *  the picture and the show disagreeing about which cue wins. */
+  layer: number;
 }
 
 function clampToSong(v: View, duration: number): View {
@@ -119,7 +125,9 @@ export function StageTimeline({
   const [follow, setFollow] = useState(true);
   const [rowsH, setRowsH] = useState(0);
   const [ghost, setGhost] = useState<{ x: number; y: number } | null>(null);
-  const [hover, setHover] = useState<{ bar: number; beat: number; target: SnapTarget | null } | null>(null);
+  const [hover, setHover] = useState<
+    { bar: number; beat: number; target: SnapTarget | null; layer: number; top: number } | null
+  >(null);
   /* A one-line receipt for the things that leave no mark on screen — copying,
      pasting, a nudge that moved a clip by less than a pixel. Without it the
      keyboard half of this editor is indistinguishable from a dead key. */
@@ -133,10 +141,6 @@ export function StageTimeline({
      selected now — no effect to reset it, and selecting anything (including
      the same clip again) brings the card straight back. */
   const [dismissed, setDismissed] = useState<string | null>(null);
-  /* The row the clip in hand is not allowed to leave. Held here rather than
-     inside the drag, because the keyboard moves clips too — an arrow press is
-     the same edit as a drag, and it re-packed the same way. */
-  const [pin, setPin] = useState<Pin | null>(null);
   /* Where the last press landed, in seconds: the point a paste goes to.
      The playhead used to be that point, and it is the wrong one as soon as the
      song is playing — you press copy, click where you want it, and by the time
@@ -158,6 +162,12 @@ export function StageTimeline({
   const timeRef = useRef(currentTime);
   useEffect(() => { timeRef.current = currentTime; }, [currentTime]);
 
+  /* The clips as they are NOW, for the closures that outlive the render they
+     were made in — a drag reads this on release to work out who it landed on,
+     and `clips` captured at pointerdown is a picture of before the drag. */
+  const clipsRef = useRef(clips);
+  useEffect(() => { clipsRef.current = clips; }, [clips]);
+
   const dragEffect = useDrag((s) => s.effect);
   const armed = useDrag((s) => s.armed);
   const setArmed = useDrag((s) => s.arm);
@@ -170,26 +180,12 @@ export function StageTimeline({
   }, []);
   useEffect(() => () => { if (noteTimer.current) clearTimeout(noteTimer.current); }, []);
 
-  /* One packing across every clip, so a layer means the same thing everywhere.
-     `pin` is the one exception, and the reason it exists: see lib/pack. Which
-     row a clip lands on is a function of where it STARTS, so carrying a clip
-     past the end of its neighbour re-packed it onto a different row halfway
-     through the drag — the thing under the pointer changed lane while it was
-     being held, and the lane it went to depended on clips nowhere near the
-     pointer. Pinning fixes the clip the creator has hold of and makes the rest
-     of the timeline move instead.
-
-     It sits up here, above everything that reads it, because `select` decides
-     the pin from it. */
-  const packed = useMemo(() => packRows(clips, pin), [clips, pin]);
-
-  /* What `select` reads to decide a pin, one render behind the press it is read
-     from — which is exactly right: the row it must hand back is the row that is
-     on screen when the creator reaches for the clip. */
-  const rowOfRef = useRef<(key: string) => number | undefined>(null);
-  useEffect(() => {
-    rowOfRef.current = (key) => packed.items.find((i) => i.clip.key === key)?.row;
-  });
+  /* One packing across every clip. A clip carries its own lane now, so packing
+     only places the arranger's — which have no Edit to store one on — around
+     the lanes everything else has claimed. The mid-drag re-pack that the old
+     `pin` existed to prevent cannot happen any more: a clip's lane is its own
+     property, so moving it in time cannot move it sideways. */
+  const packed = useMemo(() => packRows(clips), [clips]);
 
   /* Every selection in this editor goes through here so that choosing anything
      — including the clip whose card you just closed — undismisses the card.
@@ -197,26 +193,6 @@ export function StageTimeline({
      there was no way back to a clip's exact timing. */
   const select = useCallback((key: string, additive: boolean) => {
     setDismissed(null);
-    /* Reaching for a clip is also the moment its row is decided. Which lane a
-       clip sits on is a function of where it STARTS, so moving it re-packed it
-       mid-gesture and the thing under the pointer changed lane while it was
-       being carried. Taking the pin HERE — at the press, off the packing that
-       is on screen — fixes it to the row you reached for; everything that then
-       overlaps it gives way instead. See lib/pack.
-
-       Read through a ref so this callback stays stable: it is passed down to
-       every Clip, and rebuilding it whenever the packing changed would undo
-       their memo on every edit. Letting go of the selection unpins, which is
-       the one moment the timeline may settle without surprising anyone. */
-    setPin((cur) => {
-      if (!key) return null;
-      if (cur?.key === key) return cur;
-      const row = rowOfRef.current?.(key);
-      /* No row yet means the clip is one tick old — an arranger's clip taken
-         over mid-drag, renamed auto:3 → mine:7 before the re-pack. It is at
-         the same place by construction, so it inherits the same pin. */
-      return { key, row: row ?? cur?.row ?? 0 };
-    });
     onSelect(key, additive);
   }, [onSelect]);
 
@@ -260,11 +236,61 @@ export function StageTimeline({
     return () => cancelAnimationFrame(id);
   }, [currentTime, playing, follow, duration]);
 
-  const layerCount = Math.max(packed.rows, 1);
+  /* Every used lane, any empty ones between them, and ONE SPARE at the bottom.
+     The spare is what a drop aims at to make a new lane, and what the down
+     arrow always has somewhere to go into. Empty lanes in between are left
+     alone: closing them up would shift every clip below them a lane, which
+     would change the priority of clips nobody touched. */
+  const layerCount = Math.max(packed.rows, 1) + 1;
   const rowHeight = useMemo(() => {
     if (rowsH === 0) return ROW_MIN + 8;
     return clamp(Math.floor(rowsH / layerCount) - 1, ROW_MIN, ROW_MAX);
   }, [rowsH, layerCount]);
+
+  /** Which lane a point on screen is over. The drop and the vertical half of a
+   *  drag both ask this; it is the y half of `beatAtX`. Clamped to the spare
+   *  lane, so a release below the last one lands in the new lane rather than
+   *  nowhere. */
+  const layerAtY = useCallback(
+    (clientY: number) => {
+      const el = rowsRef.current;
+      if (!el || rowHeight <= 0) return 0;
+      const r = el.getBoundingClientRect();
+      /* Plus scrollTop, because the lanes scroll under a fixed viewport and the
+         pointer is reported against the viewport. */
+      const y = clientY - r.top + el.scrollTop;
+      return clamp(Math.floor(y / rowHeight), 0, layerCount - 1);
+    },
+    [rowHeight, layerCount],
+  );
+
+  /** Where a lane's top edge sits in the timeline's own coordinate space: the
+   *  song map's height, then the lane, less however far the lanes are scrolled.
+   *
+   *  Sampled in the handler that moved the pointer rather than during render.
+   *  The scroll offset belongs to the moment the pointer was at that position,
+   *  and a render can happen long after — reading it later would draw the guide
+   *  against a scroll position the creator was never pointing at. */
+  const laneTop = useCallback(
+    (layer: number) => {
+      const el = rowsRef.current;
+      return BANDS_H + layer * rowHeight - (el?.scrollTop ?? 0);
+    },
+    [rowHeight],
+  );
+
+  /** The lane a clip is ON. Its own where it owns one; for the arranger's
+   *  clips, the row the packer put it on — which is the lane the creator can
+   *  see, and so the one an arrow press has to count from. Reading `layer ?? 0`
+   *  would send an arranger clip sitting on row 3 up to lane 1 on a press of
+   *  DOWN. */
+  const laneOf = useCallback(
+    (c: ClipModel) =>
+      typeof c.layer === "number"
+        ? c.layer
+        : (packed.items.find((i) => i.clip.key === c.key)?.row ?? 0),
+    [packed],
+  );
 
   const byLayer = useMemo(() => {
     const out: ClipModel[][] = Array.from({ length: layerCount }, () => []);
@@ -336,7 +362,22 @@ export function StageTimeline({
         playheadBeat: beatAtTime(timeRef.current, show.grid),
       };
       const target = resolveSnap(ctx, raw, radius, snap);
-      const beat = target ? target.beat : snap === "off" ? raw : Math.round(raw);
+      /* A MAGNET, not a quantiser. This used to fall back to Math.round(raw)
+         whenever snap was on, so a drag that was nowhere near a landmark was
+         still dropped onto the nearest whole beat — you could not put a cue
+         between two beats at any zoom, and the clip moved in visible steps
+         under a pointer that was moving smoothly. resolveSnap already answers
+         "is anything within reach" and returns nothing when the answer is no;
+         when it is no, the honest position is the one the pointer is at.
+
+         Snap is still snap: within SNAP_RADIUS_PX of a bar line, a section, a
+         moment or the playhead the clip is taken there. And because the radius
+         is measured in PIXELS, the setting scales itself — zoomed out, beats
+         are a few pixels apart so the magnet catches everything and a drag is
+         effectively quantised; zoomed in to place a millisecond, the same
+         magnet reaches almost nothing and the drag is free. That is the
+         behaviour the zoom was always promising. */
+      const beat = target ? target.beat : raw;
       return { beat: Math.max(0, beat), target };
     },
     [show, songCtx, view, snap],
@@ -398,8 +439,11 @@ export function StageTimeline({
     [show],
   );
 
-  /** The floor on a clip's length, which is what snap actually means. */
-  const minBeats = snap === "off" ? FREE_MIN_BEATS : 1;
+  /** The floor on a clip's length. A thirty-second of a beat whatever the snap
+   *  setting says: with placement free, a whole beat was a floor that stopped
+   *  you shortening a cue to the length you could hear it needed, and the
+   *  magnet still takes a trim to a bar line when you drag near one. */
+  const minBeats = FREE_MIN_BEATS;
 
   /* Scrolling is navigation, and navigation is the creator taking the wheel —
      so it lets go of auto-scroll the same way zoom and pan already do. Leaving
@@ -421,6 +465,120 @@ export function StageTimeline({
     );
   }, []);
 
+  /* ── inserting into a lane ─────────────────────────────────────────────────
+     Landing on an occupied lane is an INSERT, not a stack: whatever was already
+     there at that moment steps down, and whatever that lands on steps down in
+     turn — a person joining the front of a queue moves everyone behind them
+     back one. Without it the newcomer simply covers the occupant, and covering
+     is exactly what a lane is supposed to make impossible. */
+
+  /** The clips a cascade can move: the ones that own a lane. The arranger's
+   *  carry none and packRows packs them around whatever has claimed one, so
+   *  they give way on their own and must not be dragged into this. */
+  const laneItems = useCallback(
+    (list: ClipModel[]): LaneItem[] =>
+      list.flatMap((c) =>
+        typeof c.layer === "number"
+          ? [{ key: c.key, startS: c.startS, endS: c.endS, layer: c.layer }]
+          : [],
+      ),
+    [],
+  );
+
+  /** Write a cascade out as edits. Used by the paths that are already inside a
+   *  gesture's undo group — a drag's release and an arrow press — so the clips
+   *  that stepped aside are part of the same step as the clip that moved. */
+  const applyDisplacement = useCallback(
+    (moved: Map<string, number>, list: ClipModel[]) => {
+      for (const [key, layer] of moved) {
+        const clip = list.find((c) => c.key === key);
+        if (!clip || clip.editIndex === null) continue;
+        onUpdateLive(clip.editIndex, { layer });
+      }
+    },
+    [onUpdateLive],
+  );
+
+  /** The same cascade as edit indices, for the placement path — which cannot
+   *  use onUpdateLive without making one drop two undo steps, so it hands the
+   *  lane changes to onPlace to write alongside the new clip. */
+  const displacedIndices = useCallback(
+    (moved: Map<string, number>, list: ClipModel[]) => {
+      const out = new Map<number, number>();
+      for (const [key, layer] of moved) {
+        const clip = list.find((c) => c.key === key);
+        if (clip && clip.editIndex !== null) out.set(clip.editIndex, layer);
+      }
+      return out;
+    },
+    [],
+  );
+
+  /** Keep the lane's one-at-a-time rule after a gesture that changed WHEN or
+   *  HOW LONG a clip is, not just which lane it is on.
+   *
+   *  Growing a clip over its neighbour is the same event as dropping one on top
+   *  of it: the lane now has two things in it and one of them cannot be seen.
+   *  Every path that moves, trims, retimes or pastes calls this with the spans
+   *  its clips ended up with, so nothing can ever end up behind anything else.
+   *
+   *  `movers` carry their FINAL spans, worked out by the caller rather than
+   *  read back from `clips` — the last onUpdateLive may not have rendered yet,
+   *  and the whole answer depends on exactly where the gesture came to rest. */
+  const resolveLane = useCallback(
+    (movers: LaneItem[]) => {
+      if (!movers.length) return;
+      const list = clipsRef.current;
+      const keys = new Set(movers.map((m) => m.key));
+      const displaced = resolveLanes(
+        [...laneItems(list).filter((i) => !keys.has(i.key)), ...movers],
+        keys,
+      );
+      applyDisplacement(displaced, list);
+    },
+    [laneItems, applyDisplacement],
+  );
+
+  /** Take over an arranger clip, keeping the lane it was drawn on.
+   *
+   *  Without the lane the new edit carries none, so it would be drawn wherever
+   *  the packer happened to put it while baking as though it sat on the top
+   *  lane — the picture and the show disagreeing about its priority. */
+  const materialize = useCallback(
+    (clip: ClipModel) => onMaterialize({ ...clip, layer: laneOf(clip) }),
+    [onMaterialize, laneOf],
+  );
+
+  /** Place a new clip, pushing aside whatever is already on the lane it lands
+   *  on. Both ways in — the palette drag and the armed click — go through here,
+   *  so a drop and a click place the same way. */
+  const placeInserting = useCallback(
+    (edit: Edit, startBeat: number, beats: number, layer: number) => {
+      const list = clipsRef.current;
+      const INCOMING = "\u0000incoming";
+      const moved = resolveLanes(
+        [
+          ...laneItems(list),
+          {
+            key: INCOMING,
+            startS: secondsAtBeat(startBeat),
+            endS: secondsAtBeat(startBeat + beats),
+            layer,
+          },
+        ],
+        new Set([INCOMING]),
+      );
+      /* The lane it actually settled on. A single mover always keeps the lane
+         it asked for, but reading it back rather than assuming keeps this
+         honest if it ever stops being the only one. */
+      onPlace(
+        { ...edit, layer: moved.get(INCOMING) ?? layer },
+        displacedIndices(moved, list),
+      );
+    },
+    [laneItems, secondsAtBeat, displacedIndices, onPlace],
+  );
+
   /* Both of these used to be keyed on `beatAtX`, so each re-registered itself on
      every render: two writes into the drag store and a resubscribe per animation
      frame while a song played. They are registered once now and reach the
@@ -433,16 +591,26 @@ export function StageTimeline({
       if (!isOverTimeline(x, y)) return;
       const hit = beatAtX(x);
       if (!hit) return;
-      onPlace({ type: effect.id, ...toBarBeat(hit.beat), beats: lengthFor(effect, hit.beat) });
+      /* The lane you released over, not the lowest one free. Which lane a clip
+         lands on is the whole question the drop answers, because the lane is
+         what decides whether this effect or the one under it is the one heard. */
+      const layer = layerAtY(y);
+      const beats = lengthFor(effect, hit.beat);
+      placeInserting(
+        { type: effect.id, ...toBarBeat(hit.beat), beats, layer },
+        hit.beat, beats, layer,
+      );
     };
     onDragMoveRef.current = (d) => {
       if (!d.effect) { setGhost(null); setHover(null); return; }
       setGhost({ x: d.x, y: d.y });
       if (!isOverTimeline(d.x, d.y)) { setHover(null); return; }
       const hit = beatAtX(d.x);
-      setHover(hit ? { ...toBarBeat(hit.beat), target: hit.target } : null);
+      if (!hit) { setHover(null); return; }
+      const layer = layerAtY(d.y);
+      setHover({ ...toBarBeat(hit.beat), target: hit.target, layer, top: laneTop(layer) });
     };
-  }, [isOverTimeline, beatAtX, toBarBeat, onPlace, lengthFor]);
+  }, [isOverTimeline, beatAtX, toBarBeat, placeInserting, lengthFor, layerAtY, laneTop]);
 
   useEffect(() => {
     setOnDrop((effect, x, y) => onDropRef.current?.(effect, x, y));
@@ -470,11 +638,11 @@ export function StageTimeline({
   const takeOver = useCallback(
     (clip: ClipModel): number | null => {
       if (clip.editIndex !== null) return clip.editIndex;
-      const idx = onMaterialize(clip);
+      const idx = materialize(clip);
       if (idx !== null) select(`mine:${idx}`, false);
       return idx;
     },
-    [onMaterialize, select],
+    [materialize, select],
   );
 
   const startGesture = useCallback(
@@ -492,13 +660,26 @@ export function StageTimeline({
       const startX = e.clientX;
       let idx = clip.editIndex;
       let moved = false;
+      /* Where the drag actually ended. Read on release to work out who it
+         landed on: `clips` cannot be trusted for this, because the last
+         onUpdateLive may not have rendered yet, and the answer depends on
+         exactly where the clip came to rest. */
+      let restBeat = startBeat;
+      let restBeats = clip.beats;
+      let restLayer = laneOf(clip);
 
+      const startY = e.clientY;
       const move = (ev: PointerEvent) => {
-        if (!moved && Math.abs(ev.clientX - startX) < DRAG_THRESHOLD_PX) return;
+        /* Either axis starts the drag. Dragging straight down to another lane
+           is a real gesture and moves the pointer not at all horizontally, so
+           testing x alone meant it never began. */
+        if (!moved &&
+            Math.abs(ev.clientX - startX) < DRAG_THRESHOLD_PX &&
+            Math.abs(ev.clientY - startY) < DRAG_THRESHOLD_PX) return;
         if (!moved) {
           moved = true;
           if (idx === null) {
-            idx = onMaterialize(clip);
+            idx = materialize(clip);
             if (idx !== null) select(`mine:${idx}`, false);
           }
         }
@@ -506,23 +687,50 @@ export function StageTimeline({
         const hit = beatAtX(ev.clientX);
         if (!hit) return;
         if (mode === "move") {
-          onUpdateLive(idx, toBarBeat(Math.max(0, startBeat + (hit.beat - grabbed))));
+          restBeat = Math.max(0, startBeat + (hit.beat - grabbed));
+          restLayer = layerAtY(ev.clientY);
+          /* Time and lane in ONE patch: they are one gesture, and two writes
+             would be two entries in the undo history for one drag. */
+          onUpdateLive(idx, { ...toBarBeat(restBeat), layer: restLayer });
         } else if (mode === "trim-end") {
-          onUpdateLive(idx, { beats: Math.max(minBeats, hit.beat - startBeat) });
+          restBeats = Math.max(minBeats, hit.beat - startBeat);
+          onUpdateLive(idx, { beats: restBeats });
         } else {
           const next = Math.min(endBeat - minBeats, Math.max(0, hit.beat));
-          onUpdateLive(idx, { ...toBarBeat(next), beats: endBeat - next });
+          restBeat = next;
+          restBeats = endBeat - next;
+          onUpdateLive(idx, { ...toBarBeat(next), beats: restBeats });
         }
       };
       const up = () => {
         window.removeEventListener("pointermove", move);
         window.removeEventListener("pointerup", up);
-        if (moved) onCommit();
+        if (!moved) return;
+        /* Whatever the gesture was. A trim that grows a clip over its neighbour
+           puts two things in one lane exactly as a drop on top of it would, and
+           the neighbour is just as invisible either way — so all three modes
+           end the same, by pushing aside whatever the clip now covers.
+
+           Worked out once, here, rather than on every pointer move: cascading
+           mid-drag would shove a clip a lane further down with each wiggle of
+           the pointer. */
+        if (idx !== null) {
+          resolveLane([{
+            key: `mine:${idx}`,
+            startS: secondsAtBeat(restBeat),
+            endS: secondsAtBeat(restBeat + restBeats),
+            layer: restLayer,
+          }]);
+        }
+        onCommit();
       };
       window.addEventListener("pointermove", move);
       window.addEventListener("pointerup", up);
     },
-    [show, markCaret, beatAtX, beatOf, toBarBeat, minBeats, onUpdateLive, onMaterialize, select, onCommit],
+    [
+      show, markCaret, beatAtX, beatOf, toBarBeat, minBeats, layerAtY, laneOf,
+      resolveLane, secondsAtBeat, onUpdateLive, materialize, select, onCommit,
+    ],
   );
 
   const removeSelection = useCallback(() => {
@@ -549,17 +757,29 @@ export function StageTimeline({
     (mode: "move" | "length", deltaBeats: number) => {
       if (!show || !selected.length) return;
       const keys: string[] = [];
+      const movers: LaneItem[] = [];
       for (const clip of selected) {
-        const idx = clip.editIndex ?? onMaterialize(clip);
+        const idx = clip.editIndex ?? materialize(clip);
         if (idx === null) continue;
         keys.push(`mine:${idx}`);
-        if (mode === "move") {
-          onUpdateLive(idx, toBarBeat(Math.max(0, beatOf(clip) + deltaBeats)));
-        } else {
-          onUpdateLive(idx, { beats: Math.max(FREE_MIN_BEATS, clip.beats + deltaBeats) });
-        }
+        const startBeat = mode === "move"
+          ? Math.max(0, beatOf(clip) + deltaBeats)
+          : beatOf(clip);
+        const beats = mode === "move"
+          ? clip.beats
+          : Math.max(FREE_MIN_BEATS, clip.beats + deltaBeats);
+        onUpdateLive(idx, mode === "move" ? toBarBeat(startBeat) : { beats });
+        movers.push({
+          key: `mine:${idx}`,
+          startS: secondsAtBeat(startBeat),
+          endS: secondsAtBeat(startBeat + beats),
+          layer: laneOf(clip),
+        });
       }
       if (!keys.length) return;
+      /* The keyboard grows a clip over its neighbour just as a trim does, so it
+         pushes the neighbour aside the same way — in the same undo step. */
+      resolveLane(movers);
       /* Taking one of the arranger's clips over changes its key, so the whole
          selection is re-pointed at what it became. Doing it per clip inside the
          loop would collapse a multi-selection to whichever was taken over last,
@@ -567,7 +787,55 @@ export function StageTimeline({
       keys.forEach((k, n) => select(k, n > 0));
       onCommit();
     },
-    [show, selected, onMaterialize, select, beatOf, toBarBeat, onUpdateLive, onCommit],
+    [
+      show, selected, materialize, select, beatOf, toBarBeat, secondsAtBeat,
+      laneOf, resolveLane, onUpdateLive, onCommit,
+    ],
+  );
+
+  /** Move the selection up or down the lanes — the keyboard's half of a
+   *  vertical drag, and the only way to say which of two overlapping effects
+   *  the show should play without touching either one's timing. */
+  const nudgeLayer = useCallback(
+    (delta: number) => {
+      if (!show || !selected.length) return;
+      /* The whole selection stops when its HIGHEST clip reaches the top, so a
+         group keeps the spacing it was arranged with rather than collapsing
+         onto lane 0 one clip at a time. */
+      const d = clampLayerDelta(selected.map(laneOf), delta);
+      if (d === 0) { say("already on top"); return; }
+
+      /* Worked out BEFORE anything moves, off the lanes on screen. An arrow
+         press lands on a lane the same way a drop does, so it pushes what is
+         there aside the same way. */
+      const movers = selected.map((c) => ({
+        key: c.key, startS: c.startS, endS: c.endS, layer: Math.max(0, laneOf(c) + d),
+      }));
+      const moverKeys = new Set(movers.map((m) => m.key));
+      const list = clipsRef.current;
+      const displaced = resolveLanes(
+        [...laneItems(list).filter((i) => !moverKeys.has(i.key)), ...movers],
+        moverKeys,
+      );
+
+      const keys: string[] = [];
+      for (const clip of selected) {
+        const idx = clip.editIndex ?? materialize(clip);
+        if (idx === null) continue;
+        keys.push(`mine:${idx}`);
+        onUpdateLive(idx, { layer: Math.max(0, laneOf(clip) + d) });
+      }
+      if (!keys.length) return;
+      /* Same undo group as the movers, so one press of the arrow is one press
+         of undo however many clips had to step aside. */
+      applyDisplacement(displaced, list);
+      /* Same reason as `nudge`: taking over an arranger's clip changes its key,
+         so the whole selection is re-pointed at what it became. */
+      keys.forEach((k, n) => select(k, n > 0));
+      onCommit();
+      say(d < 0 ? "moved up a layer" : "moved down a layer");
+    },
+    [show, selected, laneOf, laneItems, applyDisplacement, materialize, select, onUpdateLive, onCommit, say],
   );
 
   /** Absolute placement, in seconds — what the inspector's fields write. */
@@ -585,9 +853,17 @@ export function StageTimeline({
         next.beats = Math.max(FREE_MIN_BEATS, beatsIn(startS, Math.max(0.001, patch.lengthS)));
       }
       onUpdateLive(idx, next);
+      /* Typing a length into the card is the same edit as dragging the clip's
+         end, so it has to give way the same way. */
+      const lengthS = patch.lengthS !== undefined
+        ? Math.max(0.001, patch.lengthS)
+        : clip.endS - clip.startS;
+      resolveLane([{
+        key: `mine:${idx}`, startS, endS: startS + lengthS, layer: laneOf(clip),
+      }]);
       onCommit();
     },
-    [show, duration, takeOver, toBarBeat, beatsIn, onUpdateLive, onCommit],
+    [show, duration, takeOver, toBarBeat, beatsIn, laneOf, resolveLane, onUpdateLive, onCommit],
   );
 
   /* ── copy, cut, paste, duplicate ───────────────────────────────────────────
@@ -602,11 +878,14 @@ export function StageTimeline({
       return list.flatMap((c) => {
         const tile = tileForClip(c, effects);
         return tile
-          ? [{ type: tile.id, offsetBeats: beatOf(c) - base, beats: c.beats, params: { ...c.params } }]
+          ? [{
+              type: tile.id, offsetBeats: beatOf(c) - base, beats: c.beats,
+              params: { ...c.params }, layer: laneOf(c),
+            }]
           : [];
       });
     },
-    [beatOf, effects],
+    [beatOf, effects, laneOf],
   );
 
   const copySelection = useCallback(() => {
@@ -622,18 +901,39 @@ export function StageTimeline({
   const dropSnips = useCallback(
     (cut: Snip[], atBeat: number) => {
       if (!cut.length) return 0;
+      const starts = cut.map((s) => Math.max(0, atBeat + s.offsetBeats));
+      /* A paste lands on the lanes it was copied from, and pushes aside what is
+         already there — the same rule as a drop, worked out for the whole batch
+         at once so the pasted clips give way to nothing but each other. */
+      const list = clipsRef.current;
+      const incoming: LaneItem[] = cut.map((snipped, n) => ({
+        key: `\u0000paste:${n}`,
+        startS: secondsAtBeat(starts[n]),
+        endS: secondsAtBeat(starts[n] + snipped.beats),
+        layer: snipped.layer,
+      }));
+      const displaced = resolveLanes(
+        [...laneItems(list), ...incoming],
+        new Set(incoming.map((i) => i.key)),
+      );
       const made = onPlace(
-        cut.map((s) => ({
-          type: s.type,
-          ...toBarBeat(Math.max(0, atBeat + s.offsetBeats)),
-          beats: s.beats,
-          ...(Object.keys(s.params).length ? { params: s.params } : {}),
+        cut.map((snipped, n) => ({
+          type: snipped.type,
+          ...toBarBeat(starts[n]),
+          beats: snipped.beats,
+          /* Read back per clip: a paste puts several clips down at once, and
+             two of them landing on one lane at one moment would bury one of
+             their own — the settle moves the second one down, and the edit has
+             to say so. */
+          layer: displaced.get(incoming[n].key) ?? snipped.layer,
+          ...(Object.keys(snipped.params).length ? { params: snipped.params } : {}),
         })),
+        displacedIndices(displaced, list),
       );
       made.forEach((i, n) => select(`mine:${i}`, n > 0));
       return made.length;
     },
-    [onPlace, toBarBeat, select],
+    [onPlace, toBarBeat, select, secondsAtBeat, laneItems, displacedIndices],
   );
 
   const paste = useCallback(() => {
@@ -697,6 +997,7 @@ export function StageTimeline({
      every animation frame the song plays through.
 
        ←/→            move the selection one beat   ·  nothing selected: seek
+       ↑/↓            up / down a layer             ·  nothing selected: scroll
        ⇧←/→           one bar                       ·  nothing selected: 5s
        ⌥←/→           10 milliseconds
        [ / ]          shorter / longer by a beat (⇧ a bar, ⌥ 10ms)
@@ -751,6 +1052,15 @@ export function StageTimeline({
         return;
       }
 
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        /* Nothing picked leaves them to the lanes, which scroll. Claiming the
+           key to do nothing would break the one thing it already did. */
+        if (!selected.length) return;
+        e.preventDefault();
+        nudgeLayer(e.key === "ArrowDown" ? 1 : -1);
+        return;
+      }
+
       if (e.key === "[" || e.key === "]") {
         const target = selected[0];
         if (!target) return;
@@ -767,7 +1077,7 @@ export function StageTimeline({
     },
     [
       selected, removable, removeSelection, select, setArmed, onSeek, duration,
-      nudge, beatsIn, bpb, copySelection, paste, duplicate, say, onUndo, onRedo,
+      nudge, nudgeLayer, beatsIn, bpb, copySelection, paste, duplicate, say, onUndo, onRedo,
     ],
   );
 
@@ -800,7 +1110,13 @@ export function StageTimeline({
        the click-to-place path draws this guide on hover as well. */
     const placing = dragEffect ?? armed;
     const end = toBarBeat(start + (placing ? lengthFor(placing, start) : 1));
-    return { from: secondsAtBar(hover.bar, hover.beat), to: secondsAtBar(end.bar, end.beat) };
+    return {
+      from: secondsAtBar(hover.bar, hover.beat),
+      to: secondsAtBar(end.bar, end.beat),
+      /* Sampled when the pointer moved — see laneTop. */
+      top: hover.top,
+      height: rowHeight,
+    };
   })();
 
   return (
@@ -860,7 +1176,7 @@ export function StageTimeline({
           view={view}
           duration={duration}
           onScrub={onSeek}
-          onBackground={(clientX) => {
+          onBackground={(clientX, clientY) => {
             markCaret(clientX);
             /* An armed tile turns a press on the timeline into a placement, and
                CLAIMS it, so the playhead does not jump to where you placed. Any
@@ -868,7 +1184,12 @@ export function StageTimeline({
             if (armed) {
               const hit = beatAtX(clientX);
               if (hit) {
-                onPlace({ type: armed.id, ...toBarBeat(hit.beat), beats: lengthFor(armed, hit.beat) });
+                const layer = layerAtY(clientY);
+                const beats = lengthFor(armed, hit.beat);
+                placeInserting(
+                  { type: armed.id, ...toBarBeat(hit.beat), beats, layer },
+                  hit.beat, beats, layer,
+                );
                 setArmed(null);
                 return true;
               }
@@ -970,7 +1291,13 @@ export function StageTimeline({
           </div>
 
           {hover && dropSpan && (
-            <DropGuide from={dropSpan.from} to={dropSpan.to} label={hover.target?.label ?? null} />
+            <DropGuide
+              from={dropSpan.from}
+              to={dropSpan.to}
+              top={dropSpan.top}
+              height={dropSpan.height}
+              label={hover.target?.label ?? null}
+            />
           )}
           {/* Where a paste will land. Only drawn when it is somewhere other
               than the playhead — when they agree, the playhead is already
@@ -1194,7 +1521,24 @@ function Caret({ t }: { t: number }) {
   );
 }
 
-function DropGuide({ from, to, label }: { from: number; to: number; label: string | null }) {
+/* What the drop will claim: the beats, and THE LANE. It used to run the full
+   height of the editor, which said where in the song a clip would land but not
+   which lane it would land on — and the lane is what decides whether this
+   effect or the one under it is the one heard. A band the height of one lane
+   answers both at once, so nothing has to be placed to find out.
+
+   The full-height hairline stays, because the lane band alone is a floating
+   rectangle: the line is what ties it to the ruler, the sections and every
+   other clip's start. */
+function DropGuide({
+  from, to, top, height, label,
+}: {
+  from: number;
+  to: number;
+  top: number;
+  height: number;
+  label: string | null;
+}) {
   const { view, width } = useTimeline();
   const x = timeToX(from, view, width);
   const x1 = timeToX(to, view, width);
@@ -1202,14 +1546,20 @@ function DropGuide({ from, to, label }: { from: number; to: number; label: strin
   return (
     <div className="absolute top-0 bottom-0 z-30 pointer-events-none" style={{ left: x }}>
       <span
-        className="absolute top-0 bottom-0"
-        style={{ width: Math.max(2, x1 - x), background: "var(--accent-soft)" }}
+        className="absolute rounded-[3px]"
+        style={{
+          top,
+          height,
+          width: Math.max(2, x1 - x),
+          background: "var(--accent-soft)",
+          outline: "1px solid var(--accent)",
+        }}
       />
       <span className="absolute top-0 bottom-0 w-px" style={{ background: "var(--accent)" }} />
       {label && (
         <span
-          className="absolute top-[2px] left-[3px] text-[8px] px-[3px] rounded whitespace-nowrap"
-          style={{ background: "var(--bg-overlay)", color: "var(--ink)" }}
+          className="absolute left-[3px] text-[8px] px-[3px] rounded whitespace-nowrap"
+          style={{ top: Math.max(2, top - 10), background: "var(--bg-overlay)", color: "var(--ink)" }}
         >
           {label}
         </span>

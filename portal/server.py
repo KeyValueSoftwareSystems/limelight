@@ -1311,6 +1311,10 @@ class Trims:
         self.blackout = False
         self.strobe_kill = False
         self.hold = False
+        # milliseconds the lamps are sent EARLY. A par lights a frame or two after
+        # the packet arrives and the head's dimmer later still; without this every
+        # hit landed a hair after the sound. Set per room, by ear.
+        self.lead_ms = 40.0
 
     def set(self, body):
         for k in ("master", "par", "head"):
@@ -1319,11 +1323,14 @@ class Trims:
         for k in ("blackout", "strobe_kill", "hold"):
             if k in body:
                 setattr(self, k, bool(body[k]))
+        if "lead_ms" in body:
+            self.lead_ms = max(-300.0, min(300.0, float(body["lead_ms"])))
         return self.state()
 
     def state(self):
         return {"master": self.master, "par": self.par, "head": self.head,
-                "blackout": self.blackout, "strobe_kill": self.strobe_kill, "hold": self.hold}
+                "blackout": self.blackout, "strobe_kill": self.strobe_kill, "hold": self.hold,
+                "lead_ms": self.lead_ms}
 
     def apply(self, frame, rigmap):
         f = list(frame)
@@ -1605,7 +1612,7 @@ class Rig:
                     self._park(2)
                     was_live = False
                 continue
-            pos = anchor + age
+            pos = anchor + age + self.trims.lead_ms / 1000.0   # the lamps are sent early by their own response time
             with self.lock:
                 if self.pending and self.swap_at is not None and pos >= self.swap_at:
                     self.job, self.frames, self.fps, self.frame_count = self.pending

@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore, useRef, useCallback } from "react";
 import { usePortalStore } from "@/store/portal";
 import { Stage3D, webglAvailable } from "./Stage3D";
 import { StageCanvas } from "./StageCanvas";
+import { StageHud } from "./StageHud";
 import type { AnchoredClock } from "@/hooks/useAnchoredClock";
 
 interface StagePreviewProps {
@@ -66,6 +67,10 @@ export function StagePreview({ clockRef, playing, currentTime }: StagePreviewPro
         ? <Stage3D clockRef={clockRef} playing={playing} currentTime={currentTime} onHome={takeHome} />
         : <StageCanvas clockRef={clockRef} playing={playing} currentTime={currentTime} />}
 
+      {/* Above whichever view is showing, so the readout can never report one
+          thing while the picture shows another. */}
+      <StageHud clockRef={clockRef} playing={playing} currentTime={currentTime} />
+
       {live && (
         <button
           type="button"
@@ -78,7 +83,7 @@ export function StagePreview({ clockRef, playing, currentTime }: StagePreviewPro
       )}
 
       {live && (
-        <p className="absolute left-[var(--spacing-s3)] bottom-[var(--spacing-s3)] m-0 text-[length:var(--text-2xs)] text-dimmer pointer-events-none select-none">
+        <p className="absolute right-[var(--spacing-s3)] bottom-[var(--spacing-s3)] m-0 text-[length:var(--text-2xs)] text-dimmer pointer-events-none select-none">
           Drag to look around · scroll to zoom
         </p>
       )}

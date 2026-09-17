@@ -301,7 +301,45 @@ function makeEnergy(score) {
   return { energyAt };
 }
 
+/* ── which of the overlapping gestures plays ────────────────────────────────
+   Lower `layer` wins: that is the lane the creator stacked it on in the
+   timeline, and the whole point of stacking is to say which effect survives an
+   overlap. Within one lane the most recently STARTED wins, which is the rule
+   that has always applied here — a blackout placed at the drop supersedes the
+   ramp that has been building into it, not whichever was declared first.
+
+   A plan written before lanes existed carries none, so every candidate reads as
+   layer 0, they all compare equal, and the start-time rule is the whole rule
+   again. Such a plan bakes to the frames it always did. */
+function pickGesture(candidates) {
+  let best = null;
+  let bestLayer = 0;
+  for (const c of candidates) {
+    const layer = typeof c.layer === "number" && isFinite(c.layer) ? c.layer : 0;
+    if (!best) { best = c; bestLayer = layer; continue; }
+    if (layer < bestLayer) { best = c; bestLayer = layer; continue; }
+    if (layer === bestLayer && c.startS >= best.startS) { best = c; bestLayer = layer; }
+  }
+  return best;
+}
+
+/* Lane order for the BASE layer. baker.js takes the first binding (else the
+   first state) covering a fixture and stops, so sorting here is what makes the
+   lane decide it. Stable, so entries sharing a lane keep plan order — which is
+   what decided it before lanes existed. */
+function byLayer(entries) {
+  return entries
+    .map((e, i) => [e, i])
+    .sort((a, b) => {
+      const al = typeof a[0].layer === "number" && isFinite(a[0].layer) ? a[0].layer : 0;
+      const bl = typeof b[0].layer === "number" && isFinite(b[0].layer) ? b[0].layer : 0;
+      return al - bl || a[1] - b[1];
+    })
+    .map((p) => p[0]);
+}
+
 module.exports = {
   frameAt, slew, makeStreamSampler, bindingValueFn, clamp01,
   makeBeatClock, makePerBeatWeight, makeEnergy,
+  pickGesture, byLayer,
 };

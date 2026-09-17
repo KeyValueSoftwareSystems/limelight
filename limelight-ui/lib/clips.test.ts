@@ -220,7 +220,7 @@ test("schema 2: an edit lands in its real family, not everything in one lane", (
 const clip = (over: Partial<Clip>): Clip => ({
   key: "k", source: "auto", editIndex: null, planId: null, family: "hits",
   tile: null, fx: "white_blast", name: "n", bar: 1, beat: 1, beats: 1,
-  startS: 0, endS: 1, params: {}, overridden: false, ...over,
+  startS: 0, endS: 1, params: {}, overridden: false, kind: "gesture", ...over,
 });
 
 /* Schema 2: the catalogue id IS the identity, and no tile carries `fx`. */
