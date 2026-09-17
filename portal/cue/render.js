@@ -1,5 +1,8 @@
 "use strict";
 const E = require("./engine.js");
+const TRAVELS = new Set(["sweep", "bounce", "wave", "comet", "handover", "cascade",
+                         "pitch", "converge", "diverge", "split", "rotate",
+                         "alternate", "pairs", "hocket"]);
 
 function blankFrame(rig) {
   const f = new Array(rig.channels).fill(0);
@@ -72,12 +75,25 @@ function applyChase(rig, base, chase, step, palette, ctx) {
     ? chase.colours.map((c) => E.parseColour(c, palette)).filter(Boolean) : null;
   const out = {};
   for (const id of Object.keys(base)) out[id] = base[id];
-  ids.forEach((id, i) => {
+  const raw = {};
+  ids.forEach((id) => {
     const b = base[id] || { l: 0, c: [1, 1, 1] };
     const w = weights[id];
     const top = chase.high != null ? +chase.high : b.l;
+    raw[id] = b.l * low + (top - b.l * low) * Math.max(0, Math.min(1, w));
+  });
+  const conserve = chase.conserve != null ? !!chase.conserve : TRAVELS.has(chase.figure);
+  let gain = 1;
+  if (conserve) {
+    let want = 0, got = 0;
+    for (const id of ids) { want += (base[id] || { l: 0 }).l; got += raw[id]; }
+    if (got > 1e-6 && want > 1e-6) gain = Math.max(0.6, Math.min(2.2, want / got));
+  }
+  ids.forEach((id, i) => {
+    const b = base[id] || { l: 0, c: [1, 1, 1] };
+    const w = weights[id];
     out[id] = {
-      l: b.l * low + (top - b.l * low) * Math.max(0, Math.min(1, w)),
+      l: Math.max(0, Math.min(1, raw[id] * gain)),
       c: ring ? ring[(i + step) % ring.length] : (w > 0.5 && hiCol ? hiCol : b.c),
       pan: b.pan, tilt: b.tilt, strobe: b.strobe,
     };
@@ -212,20 +228,46 @@ function render(cueFile, score, rigName, opts) {
     const col = E.parseColour(acc.c, palette) || [1, 1, 1];
     const ids = (acc.on ? [].concat(acc.on) : ["lamps"])
       .reduce((a, k) => a.concat(E.expandTargets(rig, k)), []);
+    const hit = new Set(ids);
+    const rest = rig.lamps.filter((f) => !hit.has(f.id));
     const i0 = Math.round(ta * fps), i1 = Math.min(frames.length, Math.round((ta + decay) * fps) + 1);
     for (let i = Math.max(0, i0); i < i1; i++) {
       const w = Math.pow(1 - (i - i0) / Math.max(1, i1 - i0), 2);
+      let added = 0;
       for (const id of ids) {
         const fx = rig.fixtures.find((f) => f.id === id);
         if (!fx) continue;
         const ch = fx.ch;
         const amp = lvl * w;
         if (fx.brightness === "colour") {
+          const before = Math.max(frames[i][fx.offset + (ch.r >= 0 ? ch.r : 0)],
+                                frames[i][fx.offset + (ch.g >= 0 ? ch.g : 0)],
+                                frames[i][fx.offset + (ch.b >= 0 ? ch.b : 0)]);
+          const target = Math.round(255 * amp);
+          if (target > before) added += target - before;
           if (ch.r >= 0) frames[i][fx.offset + ch.r] = Math.max(frames[i][fx.offset + ch.r], Math.round(col[0] * amp * 255));
           if (ch.g >= 0) frames[i][fx.offset + ch.g] = Math.max(frames[i][fx.offset + ch.g], Math.round(col[1] * amp * 255));
           if (ch.b >= 0) frames[i][fx.offset + ch.b] = Math.max(frames[i][fx.offset + ch.b], Math.round(col[2] * amp * 255));
         } else if (ch.master >= 0) {
           frames[i][fx.offset + ch.master] = Math.max(frames[i][fx.offset + ch.master], Math.round(amp * 255));
+        }
+      }
+      if (!rest.length || added <= 0) continue;
+      const share = added / rest.length;
+      for (const fx of rest) {
+        const ch = fx.ch;
+        if (fx.brightness === "colour") {
+          const peak = Math.max(frames[i][fx.offset + (ch.r >= 0 ? ch.r : 0)],
+                                frames[i][fx.offset + (ch.g >= 0 ? ch.g : 0)],
+                                frames[i][fx.offset + (ch.b >= 0 ? ch.b : 0)]);
+          if (peak <= 0) continue;
+          const k = Math.max(0, Math.min(1, 1 - share / Math.max(1, peak)));
+          for (const c of [ch.r, ch.g, ch.b]) {
+            if (c >= 0) frames[i][fx.offset + c] = Math.round(frames[i][fx.offset + c] * k);
+          }
+        } else if (ch.master >= 0) {
+          const v = frames[i][fx.offset + ch.master];
+          if (v > 0) frames[i][fx.offset + ch.master] = Math.round(Math.max(0, v - share));
         }
       }
     }

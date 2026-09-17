@@ -733,7 +733,7 @@ def author(song, out_path=None):
             continue
         if any(a - 0.1 <= t <= b + 0.1 for a, b in hole_spans):
             continue
-        if t - last_t < 0.62:
+        if t - last_t < 1.7:
             continue
         last_t = t
         climbing = bar in rising

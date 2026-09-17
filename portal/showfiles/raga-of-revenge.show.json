@@ -2672,13 +2672,6 @@
    "c": "saffron"
   },
   {
-   "t": 36.502,
-   "l": 0.96,
-   "decay": 0.2,
-   "on": "lamps",
-   "c": "bone"
-  },
-  {
    "t": 38.499,
    "l": 0.99,
    "decay": 0.2,
@@ -2689,22 +2682,15 @@
    "t": 40.496,
    "l": 0.96,
    "decay": 0.15,
-   "on": "inner",
+   "on": "outer",
    "c": "saffron"
   },
   {
    "t": 42.493,
    "l": 0.96,
    "decay": 0.15,
-   "on": "outer",
+   "on": "inner",
    "c": "saffron"
-  },
-  {
-   "t": 43.793,
-   "l": 1.0,
-   "decay": 0.2,
-   "on": "lamps",
-   "c": "bone"
   },
   {
    "t": 45.79,
@@ -2721,36 +2707,22 @@
    "c": "saffron"
   },
   {
-   "t": 51.804,
-   "l": 0.78,
-   "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
-  },
-  {
    "t": 53.801,
    "l": 0.78,
    "decay": 0.15,
-   "on": "inner",
+   "on": "outer",
    "c": "saffron"
   },
   {
    "t": 55.798,
    "l": 0.81,
    "decay": 0.15,
-   "on": "outer",
+   "on": "inner",
    "c": "saffron"
   },
   {
    "t": 60.79,
    "l": 0.71,
-   "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
-  },
-  {
-   "t": 62.137,
-   "l": 0.74,
    "decay": 0.15,
    "on": "outer",
    "c": "saffron"
@@ -2770,31 +2742,24 @@
    "c": "saffron"
   },
   {
-   "t": 68.011,
-   "l": 0.75,
-   "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
-  },
-  {
    "t": 69.799,
    "l": 0.77,
    "decay": 0.15,
-   "on": "outer",
+   "on": "inner",
    "c": "saffron"
   },
   {
    "t": 72.005,
    "l": 0.76,
    "decay": 0.15,
-   "on": "inner",
+   "on": "outer",
    "c": "saffron"
   },
   {
    "t": 77.787,
    "l": 0.71,
    "decay": 0.15,
-   "on": "outer",
+   "on": "inner",
    "c": "saffron"
   },
   {
@@ -2808,13 +2773,6 @@
    "t": 82.802,
    "l": 0.61,
    "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
-  },
-  {
-   "t": 83.801,
-   "l": 0.64,
-   "decay": 0.15,
    "on": "inner",
    "c": "saffron"
   },
@@ -2826,64 +2784,50 @@
    "c": "saffron"
   },
   {
-   "t": 88.305,
-   "l": 0.7,
-   "decay": 0.15,
-   "on": "inner",
-   "c": "saffron"
-  },
-  {
    "t": 90.79,
    "l": 0.74,
    "decay": 0.15,
-   "on": "outer",
+   "on": "inner",
    "c": "saffron"
   },
   {
    "t": 92.508,
    "l": 0.78,
    "decay": 0.15,
-   "on": "inner",
+   "on": "outer",
    "c": "saffron"
   },
   {
    "t": 94.296,
    "l": 0.82,
    "decay": 0.15,
-   "on": "outer",
+   "on": "inner",
    "c": "saffron"
   },
   {
    "t": 96.479,
    "l": 0.86,
    "decay": 0.15,
-   "on": "inner",
+   "on": "outer",
    "c": "saffron"
   },
   {
    "t": 98.801,
    "l": 0.91,
    "decay": 0.15,
-   "on": "outer",
+   "on": "inner",
    "c": "saffron"
   },
   {
    "t": 100.798,
    "l": 0.95,
    "decay": 0.15,
-   "on": "inner",
+   "on": "outer",
    "c": "saffron"
   },
   {
    "t": 102.795,
    "l": 0.98,
-   "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
-  },
-  {
-   "t": 104.304,
-   "l": 1.0,
    "decay": 0.15,
    "on": "inner",
    "c": "saffron"
@@ -2903,32 +2847,18 @@
    "c": "bone"
   },
   {
-   "t": 113.778,
-   "l": 0.84,
-   "decay": 0.15,
-   "on": "outer",
-   "c": "saffron"
-  },
-  {
    "t": 117.33,
    "l": 0.71,
    "decay": 0.15,
-   "on": "inner",
+   "on": "outer",
    "c": "saffron"
   },
   {
    "t": 120.837,
    "l": 0.82,
    "decay": 0.15,
-   "on": "outer",
+   "on": "inner",
    "c": "saffron"
-  },
-  {
-   "t": 121.812,
-   "l": 0.93,
-   "decay": 0.2,
-   "on": "lamps",
-   "c": "bone"
   },
   {
    "t": 124.482,

@@ -162,6 +162,7 @@ any change; several of them contradict intuition.
 
 | measure | now (raga-of-revenge) | why it matters |
 | --- | --- | --- |
+| **total room output swing within a second** | **21.7%** | **this is what Amal calls "voltage fluctuation" — see below** |
 | rises landing on a measured percussive hit | 92% | the show hits with the music |
 | colour changes | 27, one every 4.9s, median hold 4.5s | colour churn reads as random |
 | longest idle stretch | 3.9s | he calls idle "lazy" |
@@ -221,6 +222,43 @@ Read `portal/cue/author.py` alongside this.
   whole run rather than resetting each bar.
 
 ---
+
+## 7b. The activity / fluctuation trade-off — read this before adding anything
+
+Amal's most persistent complaint is that the show "feels like voltage
+fluctuation". Per-frame smoothness does **not** measure it — p99 per-frame jump
+sat at 33 while he still saw flicker. What tracks his perception is how much the
+**total light in the room** swings within a second. Measured by removing one
+feature at a time:
+
+```
+  everything on      34.2%      no swells         35.9%   (no effect)
+  no accents         12.3%      no build/pulse    34.8%   (no effect)
+  no chases at all   17.7%      the version he liked 2.7%
+```
+
+Accents dominate. They are room-wide brightness spikes, and a spike every few
+seconds reads as electrical rather than musical. But the version with a 2.7%
+swing has only **3 rises in the whole show** — it is nearly static, and he
+rejected that as "lazy" too. The two complaints are the same dial seen from
+opposite ends:
+
+```
+  accents   wobble   rises
+     40      30.7%      54
+     20      17.3%      36     <- roughly where it sits now (30 accents, 21.7%)
+     13      16.5%      30
+      0      12.3%      18
+```
+
+Two things already tried that did NOT help: raising the chase floor to 0.75
+(29.7% vs 30.7%), and making chases conserve total output (40% -> 34%). The
+conservation is still in and is correct in principle — a travelling figure
+redistributes light rather than removing it — it just is not what dominates.
+
+If he says fluctuation again, move **down** this curve (fewer accents, longer
+spacing in `author.py`'s accent loop). If he says lazy, move up. Do not reach
+for per-frame smoothing; it is not the variable.
 
 ## 8. Traps — mistakes already made here, do not repeat
 
