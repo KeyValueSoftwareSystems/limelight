@@ -43,7 +43,12 @@ export default function ShowsPage() {
       setWant(sf.appetite ?? null);
       setPendingPlan(sf.plan ?? null);
       setPlanText(sf.plan_text ?? "");
-      router.push(`/stage?song=${encodeURIComponent(sf.song)}&seed=${sf.seed}`);
+      /* The show's id goes in the URL. Without it a saved show had no address:
+         opening one and then refreshing silently swapped it for the song's own
+         generated show - 44 edits became 112 and nothing said so. */
+      router.push(
+        `/stage?song=${encodeURIComponent(sf.song)}&seed=${sf.seed}&show=${encodeURIComponent(sf.id)}`,
+      );
     },
     [resetForShow, songs, setSong, setSeed, setEdits, setVenue, setShowId, setShowVersion, setWant, setPendingPlan, setPlanText, router],
   );
@@ -145,8 +150,8 @@ export default function ShowsPage() {
                           {sf.name}
                         </p>
                         <p className="mono text-[11px] text-ink-dimmer m-0 mt-[4px] tabular-nums leading-[1.5] truncate">
-                          v{sf.version} \u00b7 {sf.author} \u00b7 {sf.edits.length} edit{sf.edits.length === 1 ? "" : "s"}
-                          {sf.designed_for ? ` \u00b7 ${sf.designed_for.venue_name}` : ""}
+                          v{sf.version} · {sf.author} · {sf.edits.length} edit{sf.edits.length === 1 ? "" : "s"}
+                          {sf.designed_for ? ` · ${sf.designed_for.venue_name}` : ""}
                         </p>
                       </div>
                       <ChevronRight size={14} className="text-ink-dimmer group-hover:text-accent flex-none mt-[2px] transition-all duration-200 group-hover:translate-x-[2px]" />

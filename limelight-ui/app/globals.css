@@ -165,11 +165,14 @@ body {
   color: var(--ink);
   font-family: var(--ff-body);
   font-size: var(--base-size);
+  font-weight: 500;
   line-height: 1.5;
+  letter-spacing: -0.01em;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "ss02", "cv01";
 }
 
 .mono, .tabular, input[type="number"] {

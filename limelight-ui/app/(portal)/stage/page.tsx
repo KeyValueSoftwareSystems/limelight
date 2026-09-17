@@ -103,6 +103,7 @@ export default function StagePage() {
       song: sp.get("song"),
       seed: sp.get("seed"),
       layout: sp.get("layout"),
+      show: sp.get("show"),
     };
   }, []);
 
@@ -141,6 +142,7 @@ export default function StagePage() {
   const setEdits = usePortalStore((s) => s.setEdits);
   const setV2 = usePortalStore((s) => s.setV2);
   const setPlanText = usePortalStore((s) => s.setPlanText);
+  const setPendingPlan = usePortalStore((s) => s.setPendingPlan);
   const setPalette = usePortalStore((s) => s.setPalette);
   const setPaletteBase = usePortalStore((s) => s.setPaletteBase);
   const setRoom = usePortalStore((s) => s.setRoom);
@@ -171,6 +173,29 @@ export default function StagePage() {
 
     if (seedParam) setSeed(Number(seedParam));
     if (urlParams.layout) setLayout(urlParams.layout);
+
+    /* A saved show is addressable. Reopening or refreshing ?show=<id> restores
+       the record itself rather than falling back to whatever the song would
+       generate on its own. */
+    const showParam = urlParams.show;
+    if (showParam && !usePortalStore.getState().pendingPlan) {
+      api.shows
+        .list()
+        .then((d) => {
+          const sf = (d.shows || []).find((x) => x.id === showParam);
+          if (!sf) {
+            setStageMsg(`That saved show is no longer in the library.`);
+            return;
+          }
+          setSeed(sf.seed);
+          setEdits(sf.edits);
+          setShowId(sf.id);
+          setShowVersion(sf.version);
+          setPendingPlan(sf.plan ?? null);
+          setPlanText(sf.plan_text ?? "");
+        })
+        .catch(() => setStageMsg("Could not load that saved show."));
+    }
     queueMicrotask(() => setStageMsg("loading song\u2026"));
 
     api.songs
@@ -187,7 +212,7 @@ export default function StagePage() {
       .catch(() => {
         setStageMsg("Failed to load tracks.");
       });
-  }, [song, urlParams, setSong, setSeed, setSongs, setLayout]);
+  }, [song, urlParams, setSong, setSeed, setSongs, setLayout, setEdits, setShowId, setShowVersion, setPendingPlan, setPlanText]);
 
   const importInputRef = useRef<HTMLInputElement>(null);
 
@@ -922,7 +947,7 @@ export default function StagePage() {
               type="button"
               onClick={handleBack}
               className="flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] border-0 bg-transparent text-ink-dimmer cursor-pointer hover:text-ink hover:bg-accent/[0.08] transition-all duration-200 active:scale-[0.95]"
-              title="Back to library"
+              title="Back to songs"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M10 12L6 8l4-4" />

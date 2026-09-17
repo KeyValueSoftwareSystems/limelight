@@ -36,7 +36,7 @@ export function SongCard({ song, onOpen }: SongCardProps) {
       onClick={playable ? () => onOpen(song) : undefined}
       disabled={!playable}
       title={song.title}
-      className={`group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden border border-solid border-white/[0.06] transition-all duration-200 ease-[var(--ease)] ${
+      className={`song-card group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden border border-solid border-white/[0.06] transition-all duration-200 ease-[var(--ease)] w-full ${
         playable
           ? "cursor-pointer hover:border-accent/25 hover:-translate-y-[1px]"
           : "cursor-default opacity-40"
@@ -52,8 +52,11 @@ export function SongCard({ song, onOpen }: SongCardProps) {
         (e.currentTarget as HTMLElement).style.boxShadow = "var(--elev-card)";
       }}
     >
-      <div className="relative w-full overflow-hidden aspect-[4/3]">
-        <CoverCanvas song={song} />
+      {/* Cover: fixed aspect ratio via padding-bottom trick for bulletproof sizing */}
+      <div className="relative w-full overflow-hidden" style={{ paddingBottom: "75%" }}>
+        <div className="absolute inset-0">
+          <CoverCanvas song={song} />
+        </div>
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
@@ -80,9 +83,10 @@ export function SongCard({ song, onOpen }: SongCardProps) {
         )}
       </div>
 
-      <div className="h-[48px] px-[10px] pt-[8px] pb-[8px] overflow-hidden">
-        <div className="flex items-center gap-[4px] h-[18px]">
-          <span className="flex-1 min-w-0 text-[13px] font-semibold tracking-[-0.01em] truncate text-ink leading-[18px]">
+      {/* Info: fixed height, overflow clipped */}
+      <div className="h-[46px] px-[10px] flex flex-col justify-center overflow-hidden flex-none">
+        <div className="flex items-center gap-[4px]">
+          <span className="flex-1 min-w-0 text-[13px] font-semibold tracking-[-0.01em] text-ink leading-[18px] whitespace-nowrap overflow-hidden text-ellipsis">
             {song.title}
           </span>
           {lockSays && (
@@ -94,7 +98,7 @@ export function SongCard({ song, onOpen }: SongCardProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-[5px] mt-[2px] h-[14px]">
+        <div className="flex items-center gap-[5px] h-[14px]">
           {song.bpm && (
             <span className="mono text-[11px] text-ink-dimmer tabular-nums leading-[14px]">
               {Math.round(song.bpm)} BPM

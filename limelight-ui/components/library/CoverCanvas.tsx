@@ -22,7 +22,7 @@ export function CoverCanvas({ song }: CoverCanvasProps) {
   const hasPhoto = cov?.state === "cached" && cov.file;
 
   return (
-    <div className="relative block aspect-square bg-[#0d1018]">
+    <div className="absolute inset-0 bg-[#0d1018]">
       <canvas
         ref={canvasRef}
         width={320}

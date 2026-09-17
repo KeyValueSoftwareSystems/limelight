@@ -142,7 +142,7 @@ export default function LibraryPage() {
         {loaded && filtered.length > 0 && (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[14px] pt-[4px]">
             {filtered.map((song, i) => (
-              <div key={song.name} className="animate-in" style={{ animationDelay: `${Math.min(i * 30, 400)}ms` }}>
+              <div key={song.name} className="animate-in overflow-hidden" style={{ animationDelay: `${Math.min(i * 30, 400)}ms` }}>
                 <SongCard song={song} onOpen={handleOpen} />
               </div>
             ))}
