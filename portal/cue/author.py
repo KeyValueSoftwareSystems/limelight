@@ -1,7 +1,10 @@
+import collections
 import json
 import os
 import subprocess
 import sys
+
+collections_Counter = collections.Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -326,6 +329,21 @@ def author(song, out_path=None):
             }
         )
 
+    inst = {}
+    sec_of = {}
+    seen = collections_Counter()
+    for sx in sections:
+        lab = sx.get("label", "?")
+        seen[lab] += 1
+        inst.setdefault(lab, 0)
+        inst[lab] = seen[lab]
+        for rr in rows:
+            if sx["start"] - step <= rr["t"] < sx["end"]:
+                sec_of[rr["bar"]] = (lab, seen[lab])
+    total_inst = dict(seen)
+
+    sig_colour = {}
+
     rising = set()
     for k in range(len(rows)):
         run = 0
@@ -456,6 +474,15 @@ def author(song, out_path=None):
             if bright is not None:
                 warmth = max(0.0, min(1.0, warmth * 0.72 + (float(bright) / 10.0) * 0.28))
             want = ramp[min(len(ramp) - 1, int(warmth * len(ramp)))]
+            lab, which = sec_of.get(bar, (None, 1))
+            if lab is not None:
+                if lab not in sig_colour:
+                    sig_colour[lab] = want
+                elif not kind:
+                    want = sig_colour[lab]
+                n_inst = total_inst.get(lab, 1)
+                if n_inst > 1:
+                    level = round(min(0.97, level * (0.86 + 0.14 * (which - 1) / (n_inst - 1))), 2)
             big = kind in ("peak", "climax", "drop", "breakdown", "register_shift")
             if held_colour is None or fam_changed or big or abs(warmth - held_warmth) >= 0.45:
                 main = want
@@ -607,6 +634,34 @@ def author(song, out_path=None):
     for n, c in enumerate(cues):
         c["id"] = n + 1
 
+    big_moments = [(t, k, w) for t, k, w in moments
+                   if k in ("peak", "climax", "drop", "entrance") and w >= 0.6]
+    for t, kind_m, w in big_moments:
+        lead = 2.1
+        t0 = t - lead
+        if t0 < 1.0:
+            continue
+        if any(a - 0.2 <= t0 <= b + 0.2 for a, b, _ in holes):
+            continue
+        prior = [c for c in cues if c.get("_t", 0) <= t0 + 1e-6 and c.get("look")]
+        if not prior:
+            continue
+        base = prior[-1]
+        look = json.loads(json.dumps(base.get("look") or {}))
+        for k2, v in look.items():
+            if isinstance(v, dict) and v.get("l") is not None:
+                v["l"] = round(max(0.05, v["l"] * (0.42 if w >= 0.9 else 0.58)), 2)
+        cues.append({"id": 0, "at": {"second": round(t0, 3)}, "_t": t0, "fade": 0.5,
+                     "look": look,
+                     "why": "two beats before the %s at %.1fs the room draws back, so the arrival has somewhere to arrive from"
+                            % (kind_m, t)})
+        arrivals = [c for c in cues if 0 <= c.get("_t", -9) - t < 1.4 and c.get("look")]
+        for c in arrivals:
+            for v in c["look"].values():
+                if isinstance(v, dict) and v.get("l") is not None:
+                    v["l"] = round(min(0.99, v["l"] * 1.3), 2)
+    cues.sort(key=lambda c: c.get("_t", 0))
+
     last_swish = -9.0
     for run in runs:
         if run["a"] - last_swish < 3.0 or run["rate"] < 5.0:
@@ -700,6 +755,45 @@ def author(song, out_path=None):
         w = (nxt.get("why") or "")
         if w.startswith("PEAK") or w.startswith("climax") or w.startswith("build"):
             c["swell"] = {"from": 0.72, "to": 1.0, "curve": 1.6}
+
+    MOMENT_OWNED = ("PEAK", "climax", "drop", "register_shift", "breakdown",
+                    "the audio falls", "draws back")
+    by_label = {}
+    for c in cues:
+        t = c.get("_t", 0)
+        lab = None
+        for sx in sections:
+            if sx["start"] - step <= t < sx["end"]:
+                lab = sx.get("label", "?")
+                break
+        if lab is None or not c.get("look"):
+            continue
+        why = c.get("why") or ""
+        if any(m in why for m in MOMENT_OWNED):
+            continue
+        for v in c["look"].values():
+            if isinstance(v, dict) and v.get("c"):
+                by_label.setdefault(lab, collections.Counter())[v["c"]] += 1
+    signature = {lab: cnt.most_common(1)[0][0] for lab, cnt in by_label.items()}
+    for c in cues:
+        t = c.get("_t", 0)
+        lab = None
+        for sx in sections:
+            if sx["start"] - step <= t < sx["end"]:
+                lab = sx.get("label", "?")
+                break
+        if lab is None or lab not in signature or not c.get("look"):
+            continue
+        why = c.get("why") or ""
+        if any(m in why for m in MOMENT_OWNED):
+            continue
+        main_c = signature[lab]
+        keys = [k for k, v in c["look"].items() if isinstance(v, dict) and v.get("c")]
+        if not keys:
+            continue
+        lead = [k for k in keys if k in ("lamps", "outer", "ends")] or keys[:1]
+        for k in lead:
+            c["look"][k]["c"] = main_c
 
     BIG = ("PEAK", "climax", "drop", "breakdown", "register_shift", "the audio falls")
     last_change = -9.0
