@@ -52,6 +52,19 @@ FAMILY_COLOUR = {
     "voices": "crimson",
     "drums": "scarlet",
 }
+FAMILY_SHADES = {
+    "brass": ("amber", "saffron", "ember"),
+    "strings": ("violet", "indigo", "oxblood"),
+    "guitars": ("ember", "scarlet", "amber"),
+    "keys": ("teal", "indigo", "violet"),
+    "winds": ("saffron", "amber", "bone"),
+    "voices": ("crimson", "blood", "scarlet"),
+    "drums": ("scarlet", "ember", "crimson"),
+}
+COUNTER = {
+    "brass": "indigo", "strings": "amber", "guitars": "teal", "keys": "ember",
+    "winds": "violet", "voices": "indigo", "drums": "teal",
+}
 PALETTE = {
     "ink": "#140a12",
     "oxblood": "#3d0812",
@@ -228,7 +241,7 @@ def author(song, out_path=None):
 
     cues = []
 
-    def add(bar, fade, look, chase=None, why=""):
+    def add(bar, fade, look, chase=None, why="", layers=None):
         cues.append(
             {
                 "id": len(cues) + 1,
@@ -237,13 +250,14 @@ def author(song, out_path=None):
                 "fade": round(fade, 2),
                 "why": why,
                 "look": look,
-                **({"chase": chase} if chase else {}),
+                **({"chases": layers} if layers else ({"chase": chase} if chase else {})),
             }
         )
 
     prev_fam = None
     prev_level = 0.0
     prev_set = set()
+    add_layers = None
     for r in rows:
         bar = r["bar"]
         mom = moment_at(bar)
@@ -336,27 +350,47 @@ def author(song, out_path=None):
             fade = 0.6
             why = "spotlight at %.1fs - the head points, the row stays level" % mom[0]
         else:
-            look = {
-                "lamps": {"c": colour, "l": level},
-                "heads": {"c": colour, "l": round(min(0.8, level * 0.62), 2),
-                          "pan": 0.5, "tilt": round(0.24 + 0.16 * ((bar % 3) / 2.0), 2)},
+            shades = FAMILY_SHADES.get(top_fam, ("crimson", "blood", "scarlet"))
+            main = shades[len(cues) % len(shades)]
+            counter = COUNTER.get(top_fam, "indigo")
+            split_look = (len(cues) % 3 == 1) and level > 0.3
+            if split_look:
+                look = {
+                    "outer": {"c": main, "l": level},
+                    "inner": {"c": counter, "l": round(level * 0.8, 2)},
+                }
+            else:
+                look = {"lamps": {"c": main, "l": level}}
+            look["heads"] = {
+                "c": counter if split_look else main,
+                "l": round(min(0.85, level * 0.7), 2),
+                "pan": 0.5,
+                "tilt": round(0.22 + 0.2 * ((bar % 4) / 3.0), 2),
             }
-            busy = ["handover", "wave", "alternate", "hocket", "cascade", "comet"]
+            busy = ["handover", "wave", "hocket", "cascade", "comet", "alternate"]
             mid = ["pairs", "converge", "diverge", "split", "handover", "wave"]
             calm = ["sweep", "bounce", "comet", "converge"]
             pick = busy if dens >= 6 else mid if dens >= 3 else calm
             fig = pick[len(cues) % len(pick)]
-            deep = 0.22 if level < 0.38 else (0.42 if dens >= 6 else 0.5)
-            chase = {"on": "lamps", "figure": fig,
-                     "every": {"hits": 1 if dens >= 3 else 2},
-                     "fill_beats": 1 if level < 0.45 else 2,
-                     "low": deep,
-                     "move_head": fig in ("sweep", "bounce", "wave", "comet", "handover", "cascade")}
+            deep = 0.22 if level < 0.38 else (0.4 if dens >= 6 else 0.5)
+            moves = fig in ("sweep", "bounce", "wave", "comet", "handover", "cascade")
+            layers = [{"on": "lamps", "figure": fig,
+                       "every": {"hits": 1 if dens >= 3 else 2},
+                       "fill_beats": 1 if level < 0.45 else 2,
+                       "low": deep, "move_head": moves}]
+            if dens >= 5 and level > 0.4:
+                layers.append({"on": "inner", "figure": "hocket",
+                               "every": {"hits": 2}, "low": 0.55,
+                               "c": counter})
+            chase = None
             fade = 0.35 if not fam_changed else 0.15
-            why = "bar %d: %s leads, E %.2f, %d hits - %s across the row" % (
-                bar, top_fam, r["E"], dens, fig)
+            why = "bar %d: %s leads, E %.2f, %d hits - %s in %s%s" % (
+                bar, top_fam, r["E"], dens, fig, main,
+                (" against %s inside" % counter) if (split_look or len(layers) > 1) else "")
+            add_layers = layers
 
-        add(bar, fade, look, chase, why)
+        add(bar, fade, look, chase, why, add_layers)
+        add_layers = None
         prev_fam, prev_level, prev_set = top_fam, level, here
 
     for a, b, depth in holes:
@@ -379,12 +413,34 @@ def author(song, out_path=None):
         c["id"] = n + 1
         c.pop("_t", None)
 
+    accents = []
+    strong = sorted(hits, key=lambda h: -h[1])[:60]
+    hole_spans = [(a, b) for a, b, _ in holes]
+    for t, inten in sorted(strong):
+        if inten < 0.42:
+            continue
+        if any(a - 0.1 <= t <= b + 0.1 for a, b in hole_spans):
+            continue
+        group = "lamps" if inten >= 0.6 else ("outer" if len(accents) % 2 else "inner")
+        accents.append({"t": round(t, 3), "l": round(min(1.0, 0.55 + inten * 0.6), 2),
+                        "decay": 0.18 if inten >= 0.6 else 0.14,
+                        "on": group, "c": "bone" if inten >= 0.7 else "saffron"})
+
+    for n, c in enumerate(cues):
+        nxt = cues[n + 1] if n + 1 < len(cues) else None
+        if not nxt or not c.get("look"):
+            continue
+        w = (nxt.get("why") or "")
+        if w.startswith("PEAK") or w.startswith("climax") or w.startswith("build"):
+            c["swell"] = {"from": 0.72, "to": 1.0, "curve": 1.6}
+
     doc = {
         "schema": "limelight.cuelist/1",
         "song": song,
         "rig": "arc4-head",
         "palette": PALETTE,
         "cues": cues,
+        "accents": accents,
     }
     out_path = out_path or os.path.join(HERE, "shows", "%s.cues.json" % song)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)

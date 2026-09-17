@@ -32,7 +32,7 @@
     "bar": 1
    },
    "fade": 0.15,
-   "why": "bar 1: strings leads, E 3.70, 1 hits - sweep across the row",
+   "why": "bar 1: strings leads, E 3.70, 1 hits - sweep in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -40,21 +40,23 @@
     },
     "heads": {
      "c": "violet",
-     "l": 0.15,
+     "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.29
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "sweep",
-    "every": {
-     "hits": 2
-    },
-    "fill_beats": 1,
-    "low": 0.22,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 3,
@@ -62,28 +64,35 @@
     "bar": 2
    },
    "fade": 0.15,
-   "why": "bar 2: voices leads, E 3.38, 0 hits - bounce across the row",
+   "why": "bar 2: voices leads, E 3.38, 0 hits - bounce in blood",
    "look": {
     "lamps": {
-     "c": "crimson",
+     "c": "blood",
      "l": 0.25
     },
     "heads": {
-     "c": "crimson",
-     "l": 0.15,
+     "c": "blood",
+     "l": 0.17,
      "pan": 0.5,
-     "tilt": 0.4
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "bounce",
-    "every": {
-     "hits": 2
-    },
-    "fill_beats": 1,
-    "low": 0.22,
-    "move_head": true
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ],
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
    }
   },
   {
@@ -132,7 +141,7 @@
     "bar": 4
    },
    "fade": 0.15,
-   "why": "bar 4: drums leads, E 7.96, 3 hits - split across the row",
+   "why": "bar 4: drums leads, E 7.96, 3 hits - split in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -140,21 +149,23 @@
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.27,
+     "l": 0.31,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.22
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "split",
-    "every": {
-     "hits": 1
-    },
-    "fill_beats": 1,
-    "low": 0.5,
-    "move_head": false
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 8,
@@ -208,7 +219,7 @@
     "bar": 8
    },
    "fade": 0.35,
-   "why": "bar 8: brass leads, E 7.28, 1 hits - comet across the row",
+   "why": "bar 8: brass leads, E 7.28, 1 hits - comet in amber",
    "look": {
     "lamps": {
      "c": "amber",
@@ -216,21 +227,23 @@
     },
     "heads": {
      "c": "amber",
-     "l": 0.28,
+     "l": 0.32,
      "pan": 0.5,
-     "tilt": 0.4
+     "tilt": 0.22
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "comet",
-    "every": {
-     "hits": 2
-    },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 11,
@@ -258,29 +271,31 @@
     "bar": 10
    },
    "fade": 0.15,
-   "why": "bar 10: drums leads, E 12.08, 2 hits - sweep across the row",
+   "why": "bar 10: drums leads, E 12.08, 2 hits - sweep in crimson",
    "look": {
     "lamps": {
-     "c": "scarlet",
+     "c": "crimson",
      "l": 0.64
     },
     "heads": {
-     "c": "scarlet",
-     "l": 0.4,
+     "c": "crimson",
+     "l": 0.45,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "sweep",
-    "every": {
-     "hits": 2
-    },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 13,
@@ -288,7 +303,7 @@
     "bar": 11
    },
    "fade": 0.15,
-   "why": "bar 11: strings leads, E 10.09, 2 hits - bounce across the row",
+   "why": "bar 11: strings leads, E 10.09, 2 hits - bounce in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -296,21 +311,23 @@
     },
     "heads": {
      "c": "violet",
-     "l": 0.36,
+     "l": 0.41,
      "pan": 0.5,
-     "tilt": 0.4
+     "tilt": 0.42
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "bounce",
-    "every": {
-     "hits": 2
-    },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 14,
@@ -318,29 +335,35 @@
     "bar": 12
    },
    "fade": 0.15,
-   "why": "bar 12: voices leads, E 4.51, 0 hits - comet across the row",
+   "why": "bar 12: voices leads, E 4.51, 0 hits - comet in blood against indigo inside",
    "look": {
-    "lamps": {
-     "c": "crimson",
+    "outer": {
+     "c": "blood",
      "l": 0.35
     },
+    "inner": {
+     "c": "indigo",
+     "l": 0.28
+    },
     "heads": {
-     "c": "crimson",
-     "l": 0.22,
+     "c": "indigo",
+     "l": 0.24,
      "pan": 0.5,
-     "tilt": 0.24
+     "tilt": 0.22
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "comet",
-    "every": {
-     "hits": 2
-    },
-    "fill_beats": 1,
-    "low": 0.22,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 15,
@@ -348,29 +371,31 @@
     "bar": 14
    },
    "fade": 0.15,
-   "why": "bar 14: brass leads, E 5.01, 0 hits - converge across the row",
+   "why": "bar 14: brass leads, E 5.01, 0 hits - converge in ember",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "ember",
      "l": 0.38
     },
     "heads": {
-     "c": "amber",
-     "l": 0.24,
+     "c": "ember",
+     "l": 0.27,
      "pan": 0.5,
-     "tilt": 0.4
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "converge",
-    "every": {
-     "hits": 2
-    },
-    "fill_beats": 1,
-    "low": 0.5,
-    "move_head": false
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 16,
@@ -396,7 +421,7 @@
     "bar": 15
    },
    "fade": 0.15,
-   "why": "bar 15: guitars leads, E 5.92, 8 hits - handover across the row",
+   "why": "bar 15: guitars leads, E 5.92, 8 hits - handover in ember against teal inside",
    "look": {
     "lamps": {
      "c": "ember",
@@ -404,21 +429,32 @@
     },
     "heads": {
      "c": "ember",
-     "l": 0.27,
+     "l": 0.3,
      "pan": 0.5,
-     "tilt": 0.24
+     "tilt": 0.42
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 1,
+     "low": 0.4,
+     "move_head": true
     },
-    "fill_beats": 1,
-    "low": 0.42,
-    "move_head": true
-   }
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "c": "teal"
+    }
+   ]
   },
   {
    "id": 19,
@@ -426,29 +462,44 @@
     "bar": 19
    },
    "fade": 0.35,
-   "why": "bar 19: guitars leads, E 7.01, 6 hits - wave across the row",
+   "why": "bar 19: guitars leads, E 7.01, 6 hits - wave in scarlet against teal inside",
    "look": {
-    "lamps": {
-     "c": "ember",
+    "outer": {
+     "c": "scarlet",
      "l": 0.49
     },
+    "inner": {
+     "c": "teal",
+     "l": 0.39
+    },
     "heads": {
-     "c": "ember",
-     "l": 0.3,
+     "c": "teal",
+     "l": 0.34,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.42
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "wave",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": true
     },
-    "fill_beats": 2,
-    "low": 0.42,
-    "move_head": true
-   }
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "c": "teal"
+    }
+   ]
   },
   {
    "id": 20,
@@ -456,29 +507,40 @@
     "bar": 22
    },
    "fade": 0.35,
-   "why": "bar 22: guitars leads, E 12.39, 6 hits - alternate across the row",
+   "why": "bar 22: guitars leads, E 12.39, 6 hits - hocket in amber against teal inside",
    "look": {
     "lamps": {
-     "c": "ember",
+     "c": "amber",
      "l": 0.74
     },
     "heads": {
-     "c": "ember",
-     "l": 0.46,
+     "c": "amber",
+     "l": 0.52,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": false
     },
-    "fill_beats": 2,
-    "low": 0.42,
-    "move_head": false
-   }
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "c": "teal"
+    }
+   ]
   },
   {
    "id": 21,
@@ -504,7 +566,7 @@
     "bar": 23
    },
    "fade": 0.15,
-   "why": "bar 23: drums leads, E 7.97, 8 hits - hocket across the row",
+   "why": "bar 23: drums leads, E 7.97, 8 hits - cascade in scarlet against teal inside",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -512,20 +574,36 @@
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.35,
+     "l": 0.39,
      "pan": 0.5,
-     "tilt": 0.4
+     "tilt": 0.42
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "hocket",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "cascade",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": true
     },
-    "fill_beats": 2,
-    "low": 0.42,
-    "move_head": false
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "c": "teal"
+    }
+   ],
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
    }
   },
   {
@@ -562,29 +640,40 @@
     "bar": 25
    },
    "fade": 0.35,
-   "why": "bar 25: drums leads, E 9.10, 5 hits - wave across the row",
+   "why": "bar 25: drums leads, E 9.10, 5 hits - wave in crimson against teal inside",
    "look": {
     "lamps": {
-     "c": "scarlet",
+     "c": "crimson",
      "l": 0.62
     },
     "heads": {
-     "c": "scarlet",
-     "l": 0.38,
+     "c": "crimson",
+     "l": 0.43,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.29
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "wave",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
     },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": true
-   }
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "c": "teal"
+    }
+   ]
   },
   {
    "id": 26,
@@ -592,7 +681,7 @@
     "bar": 26
    },
    "fade": 0.35,
-   "why": "bar 26: drums leads, E 9.80, 10 hits - handover across the row",
+   "why": "bar 26: drums leads, E 9.80, 10 hits - handover in scarlet against teal inside",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -600,21 +689,32 @@
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.41,
+     "l": 0.46,
      "pan": 0.5,
-     "tilt": 0.4
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": true
     },
-    "fill_beats": 2,
-    "low": 0.42,
-    "move_head": true
-   }
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "c": "teal"
+    }
+   ]
   },
   {
    "id": 27,
@@ -622,29 +722,35 @@
     "bar": 33
    },
    "fade": 0.35,
-   "why": "bar 33: drums leads, E 8.12, 3 hits - converge across the row",
+   "why": "bar 33: drums leads, E 8.12, 3 hits - converge in ember against teal inside",
    "look": {
-    "lamps": {
-     "c": "scarlet",
+    "outer": {
+     "c": "ember",
      "l": 0.61
     },
+    "inner": {
+     "c": "teal",
+     "l": 0.49
+    },
     "heads": {
-     "c": "scarlet",
-     "l": 0.38,
+     "c": "teal",
+     "l": 0.43,
      "pan": 0.5,
-     "tilt": 0.24
+     "tilt": 0.29
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "converge",
-    "every": {
-     "hits": 1
-    },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": false
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 28,
@@ -675,7 +781,7 @@
     "bar": 36
    },
    "fade": 0.15,
-   "why": "bar 36: guitars leads, E 7.45, 4 hits - split across the row",
+   "why": "bar 36: guitars leads, E 7.45, 4 hits - split in ember",
    "look": {
     "lamps": {
      "c": "ember",
@@ -683,21 +789,23 @@
     },
     "heads": {
      "c": "ember",
-     "l": 0.37,
+     "l": 0.41,
      "pan": 0.5,
-     "tilt": 0.24
+     "tilt": 0.22
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "split",
-    "every": {
-     "hits": 1
-    },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": false
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 30,
@@ -705,28 +813,39 @@
     "bar": 38
    },
    "fade": 0.15,
-   "why": "bar 38: voices leads, E 6.26, 4 hits - handover across the row",
+   "why": "bar 38: voices leads, E 6.26, 4 hits - handover in blood against indigo inside",
    "look": {
-    "lamps": {
-     "c": "crimson",
+    "outer": {
+     "c": "blood",
      "l": 0.54
     },
+    "inner": {
+     "c": "indigo",
+     "l": 0.43
+    },
     "heads": {
-     "c": "crimson",
-     "l": 0.33,
+     "c": "indigo",
+     "l": 0.38,
      "pan": 0.5,
-     "tilt": 0.4
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
-    },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": true
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ],
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
    }
   },
   {
@@ -757,7 +876,7 @@
     "bar": 43
    },
    "fade": 0.35,
-   "why": "bar 43: drums leads, E 8.35, 3 hits - pairs across the row",
+   "why": "bar 43: drums leads, E 8.35, 3 hits - pairs in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -765,20 +884,27 @@
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.42,
+     "l": 0.47,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.42
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "pairs",
-    "every": {
-     "hits": 1
-    },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": false
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false
+    }
+   ],
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
    }
   },
   {
@@ -815,28 +941,44 @@
     "bar": 46
    },
    "fade": 0.15,
-   "why": "bar 46: keys leads, E 8.89, 6 hits - alternate across the row",
+   "why": "bar 46: keys leads, E 8.89, 6 hits - hocket in violet against ember inside",
    "look": {
     "lamps": {
-     "c": "teal",
+     "c": "violet",
      "l": 0.64
     },
     "heads": {
-     "c": "teal",
-     "l": 0.4,
+     "c": "violet",
+     "l": 0.45,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "hits": 1
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.4,
+     "move_head": false
     },
-    "fill_beats": 2,
-    "low": 0.42,
-    "move_head": false
+    {
+     "on": "inner",
+     "figure": "hocket",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "c": "ember"
+    }
+   ],
+   "swell": {
+    "from": 0.72,
+    "to": 1.0,
+    "curve": 1.6
    }
   },
   {
@@ -867,29 +1009,35 @@
     "bar": 49
    },
    "fade": 0.15,
-   "why": "bar 49: drums leads, E 12.20, 4 hits - handover across the row",
+   "why": "bar 49: drums leads, E 12.20, 4 hits - handover in ember against teal inside",
    "look": {
-    "lamps": {
-     "c": "scarlet",
+    "outer": {
+     "c": "ember",
      "l": 0.7
     },
+    "inner": {
+     "c": "teal",
+     "l": 0.56
+    },
     "heads": {
-     "c": "scarlet",
-     "l": 0.43,
+     "c": "teal",
+     "l": 0.49,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.29
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
-    },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 37,
@@ -897,29 +1045,31 @@
     "bar": 51
    },
    "fade": 0.35,
-   "why": "bar 51: drums leads, E 12.79, 3 hits - wave across the row",
+   "why": "bar 51: drums leads, E 12.79, 3 hits - wave in crimson",
    "look": {
     "lamps": {
-     "c": "scarlet",
+     "c": "crimson",
      "l": 0.67
     },
     "heads": {
-     "c": "scarlet",
-     "l": 0.42,
+     "c": "crimson",
+     "l": 0.47,
      "pan": 0.5,
-     "tilt": 0.24
+     "tilt": 0.42
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "wave",
-    "every": {
-     "hits": 1
-    },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 38,
@@ -927,7 +1077,7 @@
     "bar": 52
    },
    "fade": 0.35,
-   "why": "bar 52: drums leads, E 9.66, 3 hits - pairs across the row",
+   "why": "bar 52: drums leads, E 9.66, 3 hits - pairs in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -935,21 +1085,23 @@
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.33,
+     "l": 0.37,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.22
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "pairs",
-    "every": {
-     "hits": 1
-    },
-    "fill_beats": 2,
-    "low": 0.5,
-    "move_head": false
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pairs",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.5,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 39,
@@ -1016,7 +1168,7 @@
     "bar": 55
    },
    "fade": 0.15,
-   "why": "bar 55: guitars leads, E 7.45, 1 hits - bounce across the row",
+   "why": "bar 55: guitars leads, E 7.45, 1 hits - bounce in ember",
    "look": {
     "lamps": {
      "c": "ember",
@@ -1024,21 +1176,23 @@
     },
     "heads": {
      "c": "ember",
-     "l": 0.24,
+     "l": 0.27,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.42
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "bounce",
-    "every": {
-     "hits": 2
-    },
-    "fill_beats": 1,
-    "low": 0.5,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "bounce",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 46,
@@ -1046,29 +1200,35 @@
     "bar": 56
    },
    "fade": 0.35,
-   "why": "bar 56: guitars leads, E 9.22, 4 hits - handover across the row",
+   "why": "bar 56: guitars leads, E 9.22, 4 hits - handover in scarlet against teal inside",
    "look": {
-    "lamps": {
-     "c": "ember",
+    "outer": {
+     "c": "scarlet",
      "l": 0.43
     },
+    "inner": {
+     "c": "teal",
+     "l": 0.34
+    },
     "heads": {
-     "c": "ember",
-     "l": 0.27,
+     "c": "teal",
+     "l": 0.3,
      "pan": 0.5,
-     "tilt": 0.4
+     "tilt": 0.22
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
-    },
-    "fill_beats": 1,
-    "low": 0.5,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "handover",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 1,
+     "low": 0.5,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 47,
@@ -1076,29 +1236,31 @@
     "bar": 57
    },
    "fade": 0.35,
-   "why": "bar 57: guitars leads, E 6.44, 3 hits - wave across the row",
+   "why": "bar 57: guitars leads, E 6.44, 3 hits - wave in amber",
    "look": {
     "lamps": {
-     "c": "ember",
+     "c": "amber",
      "l": 0.32
     },
     "heads": {
-     "c": "ember",
-     "l": 0.2,
+     "c": "amber",
+     "l": 0.22,
      "pan": 0.5,
-     "tilt": 0.24
+     "tilt": 0.29
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "wave",
-    "every": {
-     "hits": 1
-    },
-    "fill_beats": 1,
-    "low": 0.22,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "wave",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 48,
@@ -1184,7 +1346,7 @@
     "bar": 62
    },
    "fade": 0.15,
-   "why": "bar 62: voices leads, E 0.18, 0 hits - converge across the row",
+   "why": "bar 62: voices leads, E 0.18, 0 hits - converge in crimson",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -1194,19 +1356,21 @@
      "c": "crimson",
      "l": 0.04,
      "pan": 0.5,
-     "tilt": 0.4
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "converge",
-    "every": {
-     "hits": 2
-    },
-    "fill_beats": 1,
-    "low": 0.22,
-    "move_head": false
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 53,
@@ -1214,29 +1378,31 @@
     "bar": 63
    },
    "fade": 0.15,
-   "why": "bar 63: brass leads, E 0.00, 0 hits - sweep across the row",
+   "why": "bar 63: brass leads, E 0.00, 0 hits - sweep in saffron",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "saffron",
      "l": 0.05
     },
     "heads": {
-     "c": "amber",
+     "c": "saffron",
      "l": 0.03,
      "pan": 0.5,
-     "tilt": 0.24
+     "tilt": 0.42
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "sweep",
-    "every": {
-     "hits": 2
-    },
-    "fill_beats": 1,
-    "low": 0.22,
-    "move_head": true
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": true
+    }
+   ]
   },
   {
    "id": 54,
@@ -1246,6 +1412,421 @@
    "fade": 0.06,
    "look": {},
    "why": "and back, the instant the audio returns"
+  }
+ ],
+ "accents": [
+  {
+   "t": 34.505,
+   "l": 0.85,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 35.294,
+   "l": 0.88,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 35.503,
+   "l": 0.88,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 35.782,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 36.13,
+   "l": 0.9,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 36.293,
+   "l": 0.85,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 36.502,
+   "l": 0.99,
+   "decay": 0.18,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 36.78,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 37.291,
+   "l": 0.9,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 37.5,
+   "l": 0.84,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 38.127,
+   "l": 0.95,
+   "decay": 0.18,
+   "on": "lamps",
+   "c": "saffron"
+  },
+  {
+   "t": 38.29,
+   "l": 1.0,
+   "decay": 0.18,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 38.499,
+   "l": 1.0,
+   "decay": 0.18,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 38.777,
+   "l": 0.82,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 39.149,
+   "l": 0.85,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 39.288,
+   "l": 0.91,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 40.124,
+   "l": 0.88,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 40.496,
+   "l": 0.9,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 40.774,
+   "l": 0.81,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 42.493,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 43.793,
+   "l": 1.0,
+   "decay": 0.18,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 44.118,
+   "l": 0.81,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 44.304,
+   "l": 0.82,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 45.79,
+   "l": 1.0,
+   "decay": 0.18,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 46.115,
+   "l": 0.9,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 46.301,
+   "l": 0.84,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 46.788,
+   "l": 0.86,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 47.299,
+   "l": 0.86,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 47.508,
+   "l": 0.81,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 48.971,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 50.805,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 51.502,
+   "l": 0.81,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 51.804,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 52.129,
+   "l": 0.82,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 52.64,
+   "l": 0.81,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 53.801,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 55.798,
+   "l": 0.86,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 56.494,
+   "l": 0.81,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 64.482,
+   "l": 0.86,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 64.969,
+   "l": 0.81,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 69.799,
+   "l": 0.82,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 72.005,
+   "l": 0.81,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 80.271,
+   "l": 0.82,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 80.48,
+   "l": 0.92,
+   "decay": 0.18,
+   "on": "lamps",
+   "c": "saffron"
+  },
+  {
+   "t": 82.802,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 83.801,
+   "l": 0.82,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 86.796,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 86.982,
+   "l": 0.86,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 98.801,
+   "l": 0.81,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 100.798,
+   "l": 0.82,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 104.304,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 112.222,
+   "l": 1.0,
+   "decay": 0.18,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 112.385,
+   "l": 0.91,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 112.594,
+   "l": 0.83,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 113.778,
+   "l": 0.89,
+   "decay": 0.14,
+   "on": "inner",
+   "c": "saffron"
+  },
+  {
+   "t": 120.837,
+   "l": 0.87,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 121.812,
+   "l": 0.98,
+   "decay": 0.18,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 122.996,
+   "l": 0.85,
+   "decay": 0.14,
+   "on": "outer",
+   "c": "saffron"
+  },
+  {
+   "t": 124.482,
+   "l": 0.93,
+   "decay": 0.18,
+   "on": "lamps",
+   "c": "saffron"
   }
  ]
 }

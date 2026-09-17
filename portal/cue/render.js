@@ -113,8 +113,9 @@ function render(cueFile, score, rigName, opts) {
   for (let i = 0; i < cues.length; i++) {
     cues[i]._end = i + 1 < cues.length ? cues[i + 1]._t : duration;
     cues[i]._look = resolveLook(rig, cues[i].look, palette);
-    cues[i]._steps = cues[i].chase
-      ? E.chaseStepTimes(cues[i].chase, grid, cues[i]._t, cues[i]._end) : null;
+    const layers = cues[i].chases || (cues[i].chase ? [cues[i].chase] : []);
+    cues[i]._layers = layers;
+    cues[i]._steps = layers.map((ch) => E.chaseStepTimes(ch, grid, cues[i]._t, cues[i]._end));
   }
 
   const total = Math.max(1, Math.round(duration * fps));
@@ -131,23 +132,34 @@ function render(cueFile, score, rigName, opts) {
     const frame = blankFrame(rig);
     if (ci >= 0) {
       const cue = cues[ci];
-      let step = 0;
-      if (cue._steps) {
+      const steps = cue._steps.map((list) => {
         let k = 0;
-        while (k + 1 < cue._steps.length && cue._steps[k + 1] <= t + 1e-9) k++;
-        step = k;
-      }
-      const changed = ci !== liveCue || step !== liveStep;
+        while (k + 1 < list.length && list[k + 1] <= t + 1e-9) k++;
+        return k;
+      });
+      const stepKey = steps.join(",");
+      const changed = ci !== liveCue || stepKey !== liveStep;
       if (changed) {
         const isCueChange = ci !== liveCue;
         const f = isCueChange
           ? (cue.fade != null ? +cue.fade : 0)
-          : (cue.chase && cue.chase.fade != null ? +cue.chase.fade : 0);
+          : (cue._layers[0] && cue._layers[0].fade != null ? +cue._layers[0].fade : 0);
         if (prevOut && f > 0) { fadeFrom = prevOut.slice(); fadeStart = t; fadeSecs = f; }
         else { fadeFrom = null; fadeSecs = 0; }
-        liveCue = ci; liveStep = step;
+        liveCue = ci; liveStep = stepKey;
       }
-      const state = applyChase(rig, cue._look, cue.chase, step, palette);
+      let state = cue._look;
+      cue._layers.forEach((ch, li) => { state = applyChase(rig, state, ch, steps[li], palette); });
+      if (cue.swell) {
+        const span = Math.max(1e-6, cue._end - cue._t);
+        const p = Math.max(0, Math.min(1, (t - cue._t) / span));
+        const a = cue.swell.from != null ? +cue.swell.from : 1;
+        const b = cue.swell.to != null ? +cue.swell.to : 1;
+        const g = a + (b - a) * Math.pow(p, cue.swell.curve != null ? +cue.swell.curve : 1);
+        const scaled = {};
+        for (const id of Object.keys(state)) scaled[id] = { ...state[id], l: state[id].l * g };
+        state = scaled;
+      }
       for (const fx of rig.fixtures) writeFixture(frame, fx, state[fx.id] || { l: 0 });
     }
 
@@ -178,6 +190,33 @@ function render(cueFile, score, rigName, opts) {
 
     prevOut = frame;
     frames.push(frame);
+  }
+
+  for (const acc of cueFile.accents || []) {
+    const ta = +acc.t;
+    if (!(ta >= 0)) continue;
+    const decay = acc.decay != null ? +acc.decay : 0.22;
+    const lvl = acc.l != null ? +acc.l : 1;
+    const col = E.parseColour(acc.c, palette) || [1, 1, 1];
+    const ids = (acc.on ? [].concat(acc.on) : ["lamps"])
+      .reduce((a, k) => a.concat(E.expandTargets(rig, k)), []);
+    const i0 = Math.round(ta * fps), i1 = Math.min(frames.length, Math.round((ta + decay) * fps) + 1);
+    for (let i = Math.max(0, i0); i < i1; i++) {
+      const w = Math.pow(1 - (i - i0) / Math.max(1, i1 - i0), 2);
+      for (const id of ids) {
+        const fx = rig.fixtures.find((f) => f.id === id);
+        if (!fx) continue;
+        const ch = fx.ch;
+        const amp = lvl * w;
+        if (fx.brightness === "colour") {
+          if (ch.r >= 0) frames[i][fx.offset + ch.r] = Math.max(frames[i][fx.offset + ch.r], Math.round(col[0] * amp * 255));
+          if (ch.g >= 0) frames[i][fx.offset + ch.g] = Math.max(frames[i][fx.offset + ch.g], Math.round(col[1] * amp * 255));
+          if (ch.b >= 0) frames[i][fx.offset + ch.b] = Math.max(frames[i][fx.offset + ch.b], Math.round(col[2] * amp * 255));
+        } else if (ch.master >= 0) {
+          frames[i][fx.offset + ch.master] = Math.max(frames[i][fx.offset + ch.master], Math.round(amp * 255));
+        }
+      }
+    }
   }
 
   return { frames, fps, rig, grid, cues };
