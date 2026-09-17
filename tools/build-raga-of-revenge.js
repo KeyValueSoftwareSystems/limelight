@@ -39,14 +39,14 @@ const land = (at_s, why) => {
 const black = (a, b, why) => G.push({ effect: "blackout", from_s: r2(a), to_s: r2(b), fade_ms: 0, why });
 const run = (t, dir, why) => G.push({ effect: "trade", travel: true, direction: dir, runs: 1, rest: 0.3, peak: 1, colours: [RED, BLUE], from_s: r2(t), to_s: r2(t + 0.5), for_beats: 1, fade_ms: 0, head: false, why });
 const walk = (a, b, dir, why) => G.push({ effect: "chase", direction: dir, per_beat: 0.25, step: true, colour: RED, amount: 1, rest: 0, extent: "all", from_s: r2(a), to_s: r2(b), fade_ms: 0, head: false, why });
-/* the sudden transition: a hard white flick on every syllable / note the score gives in [a, b), or on the eighth notes if the voice is not there */
+/* the sudden transition: a hard RED flick on every syllable / note the score gives -- red on black, so the white impact that follows reads as the explosion in [a, b), or on the eighth notes if the voice is not there */
 const flicks = (a, b, why) => {
   let ts = sc.melody.filter(n => n.start >= a && n.start < b - 0.1 && n.velocity >= 0.3).map(n => n.start).sort((x, y) => x - y)
     .filter((t, i, arr) => i === 0 || t - arr[i - 1] >= 0.1);
   if (ts.length < 3) { ts = []; for (let t = beatAfter(a); t < b - 0.1; t += 0) { ts.push(t); const nb = B.find(x => x > t + 0.01); if (!nb) break; ts.push((t + nb) / 2); t = nb; } ts = ts.filter(t => t >= a && t < b - 0.1); }
   ts.forEach((t, i) => {
-    G.push({ effect: "glare", colour: WHITE, amount: 0.7, extent: "all", from_s: r2(t), to_s: r2(t + 0.10), fade_ms: 0, head: false, why: i === 0 ? why : "…" });
-    G.push({ effect: "beam", pattern: "hold", pan: PARK[0], tilt: PARK[1], colour: WHITE, amount: 0.6, prism: 0, strobe: 0, from_s: r2(t), to_s: r2(t + 0.10), fade_ms: 0, why: i === 0 ? "The head flicks with the row, from where the blackout parked it." : "…" });
+    G.push({ effect: "glare", colour: RED, amount: 0.9, extent: "all", from_s: r2(t), to_s: r2(t + 0.10), fade_ms: 0, head: false, why: i === 0 ? why : "…" });
+    G.push({ effect: "beam", pattern: "hold", pan: PARK[0], tilt: PARK[1], colour: RED, amount: 0.8, prism: 0, strobe: 0, from_s: r2(t), to_s: r2(t + 0.10), fade_ms: 0, why: i === 0 ? "The head flicks with the row, from where the blackout parked it." : "…" });
   });
   return ts;
 };
