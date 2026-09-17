@@ -21,7 +21,7 @@ export function Card({ children, onClick, disabled, className = "", title }: Car
           : ""
       } ${disabled ? "cursor-default opacity-40" : ""} ${className}`}
       style={{
-        background: "linear-gradient(180deg, rgba(139,92,246,0.04) 0%, rgba(139,92,246,0.01) 100%)",
+        background: "linear-gradient(180deg, rgba(255, 217, 163,0.04) 0%, rgba(255, 217, 163,0.01) 100%)",
         boxShadow: "var(--elev-card)",
       }}
       onMouseEnter={(e) => {

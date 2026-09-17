@@ -137,7 +137,7 @@ export default function LibraryPage() {
         {loaded && filtered.length === 0 && songs.length > 0 && (
           <div className="flex flex-col items-center justify-center py-[80px] animate-in">
             <div className="w-[48px] h-[48px] rounded-full flex items-center justify-center mb-[16px] glow-border"
-              style={{ background: "rgba(139,92,246,0.06)" }}>
+              style={{ background: "rgba(255, 217, 163,0.06)" }}>
               <Search size={20} className="text-ink-dimmer" />
             </div>
             <p className="text-[16px] font-semibold text-ink m-0">No results for &ldquo;{query}&rdquo;</p>
@@ -155,7 +155,7 @@ export default function LibraryPage() {
         {loaded && songs.length === 0 && (
           <div className="flex flex-col items-center justify-center py-[100px] animate-in">
             <div className="w-[64px] h-[64px] rounded-[var(--radius-lg)] flex items-center justify-center mb-[20px]"
-              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(99,102,241,0.1) 100%)", border: "1px solid rgba(139,92,246,0.15)" }}>
+              style={{ background: "linear-gradient(135deg, rgba(255, 217, 163,0.15) 0%, rgba(255, 217, 163,0.1) 100%)", border: "1px solid rgba(255, 217, 163,0.15)" }}>
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-accent">
                 <path d="M9 18V5l12-2v13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.5" />

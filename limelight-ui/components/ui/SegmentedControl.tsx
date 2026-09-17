@@ -12,9 +12,6 @@ interface Props<T extends string> {
   "aria-label"?: string;
 }
 
-/* A segmented control, one implementation. The selected segment is a raised
-   surface rather than a colour wash, so the group reads as one object with one
-   piece pushed forward instead of four buttons that happen to sit together. */
 export function SegmentedControl<T extends string>({
   segments,
   value,
@@ -25,8 +22,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="tablist"
       aria-label={rest["aria-label"]}
-      className="inline-flex h-[var(--control-h)] items-center rounded-[var(--radius-sm)] p-[3px] gap-[2px]"
-      style={{ background: "var(--surface-1)", border: "1px solid var(--edge)" }}
+      className="inline-flex h-[var(--control-h)] items-stretch gap-[20px]"
     >
       {segments.map((s) => {
         const on = s.id === value;
@@ -37,12 +33,18 @@ export function SegmentedControl<T extends string>({
             role="tab"
             aria-selected={on}
             onClick={() => onChange(s.id)}
-            className={`h-full px-[13px] rounded-[5px] border-0 text-[12px] font-semibold cursor-pointer
-              transition-[color,background-color,box-shadow] duration-150 ease-[var(--ease)]
-              ${on ? "text-ink" : "bg-transparent text-ink-dimmer hover:text-ink-dim"}`}
-            style={on ? { background: "var(--surface-3)", boxShadow: "var(--elev-1), var(--inset-hi)" } : undefined}
+            className={`group relative h-full border-0 bg-transparent px-0 cursor-pointer
+              text-[13px] font-medium tracking-[-0.006em]
+              transition-colors duration-[var(--dur-state)]
+              ${on ? "text-ink" : "text-ink-dimmer hover:text-ink-dim"}`}
           >
             {s.label}
+            <span
+              aria-hidden
+              className={`absolute left-0 right-0 bottom-[7px] h-[2px] rounded-full transition-opacity duration-[var(--dur-state)]
+                ${on ? "opacity-100" : "opacity-0 group-hover:opacity-40"}`}
+              style={{ background: "var(--accent)", boxShadow: "0 -5px 12px -2px var(--accent-glow)" }}
+            />
           </button>
         );
       })}

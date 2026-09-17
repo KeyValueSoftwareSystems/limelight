@@ -1192,3 +1192,77 @@ rather than as blazing, that is the number to move.
 Every change in this work is committed with a message explaining the measurement
 that motivated it and the numbers before and after. `git log` on `limelight-portal`
 is the real design document — read the last ~10 commits before changing the engine.
+
+---
+
+## 11. The front end (2026-09-18)
+
+### The visual system
+
+Colour in the UI encodes **light**, not category. There is one ramp, tungsten to
+dark, and value carries the meaning:
+
+    --fam-hits     #FFF4DF   the biggest flash
+    --fam-strobe   #EDE6DA
+    --fam-wash     #C6C2BC
+    --fam-lift     #9C9AA6
+    --fam-breath   #6B7086
+    --fam-dynamics #4C5167
+    --fam-darkness #343A52   amount to zero
+
+It replaced seven saturated hues (amber/violet/cyan/emerald/indigo/pink/slate)
+that encoded nothing, and which mixed into a muddy magenta-and-gold wash at clip
+opacity. Family identity now comes from the icon and the name, which every clip
+already carries. Phase tints on the section band are neutral alphas on the same
+principle, so the band reads as an energy shape.
+
+The accent is tungsten `#FFD9A3` on cool near-black grounds — warm light on a
+cool room. Every purple (`#8B5CF6`, `#A78BFA`, `#6366F1`) is gone. Primary
+buttons are a **lit key**: solid `--lit` with `--lit-ink` text, never a gradient
+fill. Selection in chrome is shown by **illumination** — a warm 2px bar with
+spill — not by a filled pill; that is what `TabNav` and `SegmentedControl` do,
+and new controls should follow it.
+
+`--select` stays cool (`#CBD5E1`) so a selected clip reads against the warm ramp.
+
+Do not reintroduce: per-item random hues, gradient-filled buttons, uppercase
+labels, or a raised chip for "active".
+
+### Things that were broken and how
+
+- **Opening a song left the timeline empty.** The show-file effect depended on
+  `applyPlan`, which is rebuilt most renders; the effect re-ran, its cleanup set
+  `live = false` and discarded the in-flight fetch, and the re-run was blocked by
+  `loadedForRef`. `/api/bake-plan` was never called. Held in `applyPlanRef` so
+  the effect depends only on the song.
+- **Moment labels stacked into unreadable mush.** `MomentsBand` positioned every
+  label absolutely with `whitespace-nowrap` and no collision check. Now: dots on
+  one row, labels on a row beneath (so a dot can never land on a label), greedy
+  placement strongest-first, width from `canvas.measureText` rather than a
+  character-count estimate.
+- **"Show" overlapped "Room / Plot".** `StageHud` pinned its toggle at
+  `right-[104px]`, a magic number guessing the view group's width. Both now
+  render into one flex row via `#stage-hud-slot`.
+- **The sidebar gave Colours a hard 50%.** `flex-1 basis-0` on both halves meant
+  an empty Colours panel ate ~490px while the effect palette truncated its
+  labels. Colours is `flex-none max-h-[38%]`, the palette takes the rest.
+- **`BANDS_H` hardcodes the band heights** (`22 + 30 + 22 + 1`). It is what the
+  clip inspector anchors off, so changing `--moments-h` / `--section-h` /
+  `--ruler-h` without changing it puts every popover out by the difference.
+
+### Roles
+
+`Role` was `creator | venue | designer | operator`; the last two were never
+assigned. Narrowed to `creator | venue`. `RoleToggle` existed but was never
+mounted — it is now in the topbar, and `TabNav` is role-aware: a designer gets
+Shows / Songs / Venues (Shows first), an operator gets Shows / Rooms.
+
+### Still open
+
+- A show is `Song × Venue` in the model (`SaveShowRequest`), but Amal wants a
+  show to hold **several** songs as a setlist, with the stage's left panel as the
+  setlist editor. That needs the hub's show model to change, not just the UI.
+- The operator flow has no home of its own — no "tonight / what is loaded on the
+  rig" page. It currently borrows the designer's Shows list.
+- The 3D stage preview is a large dark void; the rig draws small and dim in it.
+- The chat panel is inert ("not connected yet") and holds a full column.

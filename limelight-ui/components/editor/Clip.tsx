@@ -77,11 +77,11 @@ function ClipBase({
         borderRadius: "4px",
         background: selected
           ? "var(--select)"
-          : `color-mix(in srgb, ${famColour} ${Math.round(opacity * 55)}%, var(--bg-raised))`,
-        borderLeft: selected ? "none" : `2px solid color-mix(in srgb, ${famColour} ${Math.round(opacity * 80)}%, transparent)`,
+          : `color-mix(in srgb, ${famColour} ${Math.round(10 + opacity * 16)}%, var(--bg-raised))`,
+        borderLeft: selected ? "none" : `3px solid color-mix(in srgb, ${famColour} ${Math.round(55 + opacity * 40)}%, transparent)`,
         boxShadow: selected
           ? "0 0 0 1px var(--select), 0 2px 4px rgba(0,0,0,0.2)"
-          : `0 0 0 1px color-mix(in srgb, ${famColour} 15%, transparent)`,
+          : "0 0 0 1px rgba(255,255,255,0.05)",
         opacity: clip.overridden ? 0.3 : 1,
         transition: "box-shadow 150ms ease, opacity 150ms ease",
       }}
@@ -101,9 +101,9 @@ function ClipBase({
             style={selected ? { filter: "brightness(0) saturate(0)" } : { opacity: 0.85 }}
           />
         )}
-        {w > 52 && (
+        {w > 44 && (
           <span
-            className="text-[10px] truncate font-medium leading-[12px]"
+            className="text-[10px] truncate font-medium leading-[12px] tracking-[0.005em]"
             style={{ color: selected ? "var(--bg)" : "var(--ink)", opacity: selected ? 1 : 0.85 }}
           >
             {clip.name}

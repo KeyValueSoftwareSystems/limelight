@@ -58,6 +58,8 @@ interface Props {
   canRedo: boolean;
   reveal: { key: string; n: number } | null;
   baking: string | null;
+  onGenerate?: () => void;
+  generating?: boolean;
 }
 
 /* The magnet reaches a fixed distance on SCREEN, not a fixed number of beats.
@@ -73,7 +75,7 @@ const DRAG_THRESHOLD_PX = 3;
    border-box }` already puts each border INSIDE its --*-h. Only the map's own
    closing border is extra, since the map sets no height of its own. The popover
    anchors off this, so 2px too many is 2px low on every clip. */
-const BANDS_H = 22 + 30 + 18 + 1;
+const BANDS_H = 22 + 30 + 22 + 1;
 /** --energy-h. The popover stops above the energy band rather than over it. */
 const ENERGY_H = 28;
 const ROW_MIN = 26;
@@ -112,7 +114,7 @@ function clampToSong(v: View, duration: number): View {
 export function StageTimeline({
   show, energy, clips, effects, currentTime, playing, selection,
   onSelect, onSeek, onToggle, onPlace, onRemove, onUpdateLive, onMaterialize,
-  onCommit, onUndo, onRedo, canUndo, canRedo, reveal, baking,
+  onCommit, onUndo, onRedo, canUndo, canRedo, reveal, baking, onGenerate, generating,
 }: Props) {
   const duration = show?.duration_s ?? 0;
   const bpb = show?.grid.beats_per_bar ?? 4;
@@ -1091,8 +1093,28 @@ export function StageTimeline({
 
   if (!show) {
     return (
-      <div className="h-full flex items-center justify-center text-[13px] text-ink-dimmer" style={{ background: "linear-gradient(180deg, rgba(139,92,246,0.03) 0%, var(--bg-sunken) 100%)" }}>
-        Open a track to start designing
+      <div
+        className="h-full flex flex-col items-center justify-center gap-[10px] px-[24px] text-center"
+        style={{ background: "linear-gradient(180deg, rgba(255, 217, 163,0.03) 0%, var(--bg-sunken) 100%)" }}
+      >
+        {onGenerate ? (
+          <>
+            <p className="m-0 text-[13px] font-medium text-ink">No show on this track yet</p>
+            <p className="m-0 text-[12px] leading-[1.55] text-ink-dim max-w-[380px]">
+              Generate one from the score, then shape it on the timeline.
+            </p>
+            <button
+              type="button"
+              onClick={onGenerate}
+              disabled={generating}
+              className="mt-[2px] h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] border border-solid border-[var(--edge-accent)] bg-[var(--surface-accent-2)] text-[12px] font-medium text-ink cursor-pointer transition-colors duration-200 hover:bg-[var(--surface-accent-3)] disabled:opacity-50 disabled:cursor-default"
+            >
+              {generating ? "Generating\u2026" : "Generate a show"}
+            </button>
+          </>
+        ) : (
+          <p className="m-0 text-[13px] text-ink-dimmer">Open a track to start designing</p>
+        )}
       </div>
     );
   }
@@ -1261,7 +1283,25 @@ export function StageTimeline({
                 timeline's horizontal position is `view`, and `view` is moved by
                 zoom, pan and drag. There is no second answer to where we are in
                 the song. */}
-            <div ref={rowsRef} data-lane-rows className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto">
+            <div ref={rowsRef} data-lane-rows className="relative flex-1 min-h-0 overflow-x-hidden overflow-y-auto">
+              {clips.length === 0 && !baking && (
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-[10px] px-[24px] text-center">
+                  <p className="m-0 text-[13px] font-medium text-ink">No show on this track yet</p>
+                  <p className="m-0 text-[12px] leading-[1.55] text-ink-dim max-w-[340px]">
+                    Generate one from the score, or drag an effect from the palette onto a lane to start by hand.
+                  </p>
+                  {onGenerate && (
+                    <button
+                      type="button"
+                      onClick={onGenerate}
+                      disabled={generating}
+                      className="mt-[2px] h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] border border-solid border-[var(--edge-accent)] bg-[var(--surface-accent-2)] text-[12px] font-medium text-ink cursor-pointer transition-colors duration-200 hover:bg-[var(--surface-accent-3)] disabled:opacity-50 disabled:cursor-default"
+                    >
+                      {generating ? "Generating\u2026" : "Generate a show"}
+                    </button>
+                  )}
+                </div>
+              )}
               {byLayer.map((rowClips, i) => (
                 <Layer
                   key={i}

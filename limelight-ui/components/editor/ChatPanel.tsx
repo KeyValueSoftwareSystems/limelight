@@ -68,7 +68,7 @@ export function ChatPanel() {
 
             {t.who === "you" ? (
               <div className="self-end max-w-[86%] rounded-[10px] px-[12px] py-[8px] text-[12px] text-ink leading-[1.5]"
-                style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(99,102,241,0.08) 100%)", border: "1px solid rgba(139,92,246,0.15)" }}>
+                style={{ background: "linear-gradient(135deg, rgba(255, 217, 163,0.12) 0%, rgba(255, 217, 163,0.08) 100%)", border: "1px solid rgba(255, 217, 163,0.15)" }}>
                 {t.text}
               </div>
             ) : (
@@ -121,7 +121,7 @@ export function ChatPanel() {
             disabled={!draft.trim()}
             aria-label="Send"
             className="absolute right-[8px] bottom-[10px] w-[28px] h-[28px] rounded-[var(--radius-sm)] border-0 cursor-pointer disabled:cursor-default disabled:opacity-30 flex items-center justify-center transition-all duration-200 hover:brightness-110"
-            style={{ background: "var(--grad-primary)", color: "white" }}
+            style={{ background: "var(--lit)", color: "var(--lit-ink)" }}
           >
             <Send size={13} />
           </button>

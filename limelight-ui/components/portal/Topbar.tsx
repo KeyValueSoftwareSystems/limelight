@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { User, ChevronDown } from "lucide-react";
 import { TabNav } from "./TabNav";
+import { RoleToggle } from "./RoleToggle";
 import { RigControl } from "./RigControl";
 import { usePortalStore } from "@/store/portal";
 
@@ -39,7 +41,7 @@ function IdentityControl() {
         className="flex items-center gap-[6px] h-[34px] pl-[4px] pr-[10px] rounded-full border-0 bg-transparent cursor-pointer hover:bg-white/[0.04] transition-all duration-200"
       >
         <span className="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[10px] font-bold flex-none"
-          style={{ background: "var(--grad-primary)", color: "white" }}>
+          style={{ background: "var(--surface-3)", color: "var(--ink)", boxShadow: "inset 0 0 0 1px var(--edge-strong)" }}>
           {initials || <User size={12} />}
         </span>
         <ChevronDown size={11} className="text-ink-dimmer" />
@@ -69,29 +71,49 @@ function IdentityControl() {
   );
 }
 
+function Beam() {
+  return (
+    <span
+      className="relative w-[24px] h-[24px] rounded-[7px] flex-none overflow-hidden"
+      style={{ background: "#0D0E18", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden className="absolute inset-0">
+        <defs>
+          <linearGradient id="lml-beam" x1="12" y1="7" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#FFF4DF" stopOpacity="0.92" />
+            <stop offset="1" stopColor="#FFF4DF" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d="M12 7.5 L19 21.5 H5 Z" fill="url(#lml-beam)" />
+        <rect x="8.5" y="3.5" width="7" height="4.2" rx="1.4" fill="#FFF4DF" />
+      </svg>
+    </span>
+  );
+}
+
 export function Topbar({ onRigToggle }: TopbarProps) {
   const role = usePortalStore((s) => s.role);
 
   return (
     <header className="flex-none flex items-center gap-[16px] px-[16px] h-[52px] glass border-b border-solid border-white/[0.05] z-40">
-      <div className="flex items-center gap-[8px] mr-[4px]">
-        <div className="w-[26px] h-[26px] rounded-[7px] flex items-center justify-center"
-          style={{ background: "var(--grad-primary)" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-            <path d="M12 2L2 7l10 5 10-5-10-5z" opacity="0.6" />
-            <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          </svg>
-        </div>
-        <span className="text-[15px] font-bold tracking-[-0.02em] text-ink">
+      <Link
+        href="/library"
+        aria-label="Limelight \u2014 go to your library"
+        className="group flex items-center gap-[9px] mr-[6px] h-[34px] pl-[5px] pr-[10px] -ml-[5px] rounded-[9px] no-underline transition-colors duration-200 hover:bg-white/[0.04]"
+      >
+        <Beam />
+        <span className="text-[16px] font-semibold tracking-[-0.021em] text-ink transition-colors duration-200">
           Limelight
         </span>
-      </div>
+      </Link>
 
       <TabNav />
 
       <span className="flex-1" />
 
       {role === "venue" && <RigControl onToggle={onRigToggle} />}
+
+      <RoleToggle />
 
       <IdentityControl />
     </header>

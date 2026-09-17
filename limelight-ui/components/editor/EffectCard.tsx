@@ -101,7 +101,7 @@ export function EffectCard({ effect, anchor }: {
       <p className="m-0 mt-[7px] text-[11px] leading-[15px] text-ink-dim">{effect.blurb}</p>
 
       <div className="mt-[9px] pt-[8px] border-t border-solid border-line">
-        <span className="text-[9px] uppercase tracking-[0.14em] text-ink-dimmer">Editable</span>
+        <span className="text-[9px] tracking-[0.01em] text-ink-dimmer">Editable</span>
         <ul className="list-none m-0 mt-[5px] p-0 text-[11px]">
           {editable.map((d) => (
             <Row key={d.id} label={d.label} value={d.value} editable swatches={d.swatches} />
@@ -116,7 +116,7 @@ export function EffectCard({ effect, anchor }: {
 
       {preset.length > 0 && (
         <div className="mt-[8px]">
-          <span className="text-[9px] uppercase tracking-[0.14em] text-ink-dimmer">
+          <span className="text-[9px] tracking-[0.01em] text-ink-dimmer">
             Set by the effect
           </span>
           <ul className="list-none m-0 mt-[5px] p-0 text-[11px]">

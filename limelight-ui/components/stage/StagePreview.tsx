@@ -38,6 +38,7 @@ function readRemembered(): View | null {
  */
 export function StagePreview({ clockRef, playing, currentTime }: StagePreviewProps) {
   const show = usePortalStore((s) => s.show);
+  const song = usePortalStore((s) => s.song);
   const frames = usePortalStore((s) => s.frames);
 
   /* Two client-only facts, each read once: whether this browser has WebGL at
@@ -88,9 +89,11 @@ export function StagePreview({ clockRef, playing, currentTime }: StagePreviewPro
         </p>
       )}
 
-      {can3d && (
+      <div className="absolute top-[var(--spacing-s3)] right-[var(--spacing-s3)] z-10 flex items-center gap-[6px]">
+        <div id="stage-hud-slot" className="flex items-center" />
+        {can3d && (
         <div
-          className="absolute top-[var(--spacing-s3)] right-[var(--spacing-s3)] flex gap-px rounded-full border border-solid border-white/[0.08] bg-[rgba(10,11,20,0.75)] p-px backdrop-blur-md"
+          className="flex gap-px rounded-full border border-solid border-white/[0.08] bg-[rgba(10,11,20,0.75)] p-px backdrop-blur-md"
           role="group"
           aria-label="Stage view"
         >
@@ -108,11 +111,12 @@ export function StagePreview({ clockRef, playing, currentTime }: StagePreviewPro
             </button>
           ))}
         </div>
-      )}
+        )}
+      </div>
 
       {(!show || !frames) && (
         <div className="absolute inset-x-0 bottom-1/2 text-center text-[13px] tracking-[0.02em] text-ink-dimmer pointer-events-none">
-          {show ? "Building show…" : "Open a track to begin"}
+          {show ? "Building show\u2026" : song ? "Nothing to light yet" : "Open a track to begin"}
         </div>
       )}
     </div>

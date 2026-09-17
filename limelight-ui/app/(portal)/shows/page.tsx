@@ -92,7 +92,7 @@ export default function ShowsPage() {
               placeholder="Search by name or author"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-[38px] pl-[36px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[14px] font-medium text-ink outline-none focus:border-accent/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.1)] transition-all duration-200 placeholder:text-ink-dimmer placeholder:font-normal"
+              className="w-full h-[38px] pl-[36px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[14px] font-medium text-ink outline-none focus:border-accent/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(255, 217, 163,0.1)] transition-all duration-200 placeholder:text-ink-dimmer placeholder:font-normal"
             />
           </div>
         )}
@@ -119,13 +119,13 @@ export default function ShowsPage() {
             <div key={songName} className="mb-[28px] animate-in" style={{ animationDelay: `${Math.min(gi * 50, 200)}ms` }}>
               <div className="flex items-center gap-[10px] mb-[10px]">
                 <div className="w-[22px] h-[22px] rounded-[6px] flex items-center justify-center flex-none"
-                  style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(99,102,241,0.12) 100%)", border: "1px solid rgba(139,92,246,0.15)" }}>
+                  style={{ background: "linear-gradient(135deg, rgba(255, 217, 163,0.18) 0%, rgba(255, 217, 163,0.12) 100%)", border: "1px solid rgba(255, 217, 163,0.15)" }}>
                   <Music size={11} className="text-accent" />
                 </div>
                 <h2 className="text-[15px] font-bold m-0 truncate text-ink tracking-[-0.01em]">{s?.title ?? songName}</h2>
                 {s?.bpm && <span className="mono text-[11px] text-ink-dimmer tabular-nums flex-none font-medium">{Math.round(s.bpm)} BPM</span>}
                 <span className="text-[11px] text-ink-dimmer flex-none rounded-full px-[8px] py-[1px] font-semibold"
-                  style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.08)" }}>
+                  style={{ background: "rgba(255, 217, 163,0.06)", border: "1px solid rgba(255, 217, 163,0.08)" }}>
                   {shows.length} show{shows.length > 1 ? "s" : ""}
                 </span>
               </div>
@@ -137,7 +137,7 @@ export default function ShowsPage() {
                     onClick={() => handleOpen(sf)}
                     className="group text-left h-[76px] p-[14px] rounded-[var(--radius-md)] border border-solid border-white/[0.06] cursor-pointer transition-all duration-200 ease-[var(--ease)] hover:border-accent/25 hover:-translate-y-[1px] active:scale-[0.995] overflow-hidden animate-in"
                     style={{
-                      background: "linear-gradient(180deg, rgba(139,92,246,0.04) 0%, rgba(139,92,246,0.01) 100%)",
+                      background: "linear-gradient(180deg, rgba(255, 217, 163,0.04) 0%, rgba(255, 217, 163,0.01) 100%)",
                       boxShadow: "var(--elev-card)",
                       animationDelay: `${Math.min((gi * 3 + si) * 40, 300)}ms`,
                     }}
@@ -172,7 +172,7 @@ export default function ShowsPage() {
         {!loading && !showList.length && (
           <div className="flex flex-col items-center justify-center py-[100px] animate-in">
             <div className="w-[64px] h-[64px] rounded-[var(--radius-lg)] flex items-center justify-center mb-[20px]"
-              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(99,102,241,0.1) 100%)", border: "1px solid rgba(139,92,246,0.12)" }}>
+              style={{ background: "linear-gradient(135deg, rgba(255, 217, 163,0.15) 0%, rgba(255, 217, 163,0.1) 100%)", border: "1px solid rgba(255, 217, 163,0.12)" }}>
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-accent">
                 <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.5" />
                 <path d="M10 8l6 4-6 4V8z" fill="currentColor" opacity="0.4" />
@@ -188,7 +188,7 @@ export default function ShowsPage() {
         {!loading && showList.length > 0 && grouped.length === 0 && (
           <div className="flex flex-col items-center justify-center py-[80px] animate-in">
             <div className="w-[48px] h-[48px] rounded-full flex items-center justify-center mb-[16px] glow-border"
-              style={{ background: "rgba(139,92,246,0.06)" }}>
+              style={{ background: "rgba(255, 217, 163,0.06)" }}>
               <Search size={20} className="text-ink-dimmer" />
             </div>
             <p className="text-[16px] font-semibold text-ink m-0">No results for &ldquo;{query}&rdquo;</p>

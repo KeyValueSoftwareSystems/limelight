@@ -35,7 +35,7 @@ function EnergyBandBase({ energy, grid }: { energy: (number | null)[]; grid: Gri
           <polyline points={pts.join(" ")} fill="none" stroke="var(--ink)" strokeOpacity="0.38" strokeWidth="1" />
         </svg>
       )}
-      <span className="absolute left-[6px] top-[2px] text-[9px] uppercase tracking-[0.12em] text-ink-dimmer pointer-events-none">
+      <span className="absolute left-[6px] top-[2px] text-[9px] tracking-[0.01em] text-ink-dimmer pointer-events-none">
         Energy
       </span>
     </div>

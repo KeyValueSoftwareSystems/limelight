@@ -65,62 +65,62 @@
   --warn: #FBBF24;
   --danger: #F87171;
 
-  --accent: #A78BFA;
-  --accent-soft: rgba(167, 139, 250, 0.1);
-  --accent-glow: rgba(167, 139, 250, 0.3);
+  --accent: #FFD9A3;
+  --accent-soft: rgba(255, 217, 163, 0.10);
+  --accent-glow: rgba(255, 217, 163, 0.30);
 
-  --accent2: #F59E0B;
-  --accent2-soft: rgba(245, 158, 11, 0.1);
+  --accent2: #8FA3C8;
+  --accent2-soft: rgba(143, 163, 200, 0.10);
 
-  --neon-violet: #8B5CF6;
-  --neon-blue: #6366F1;
-  --neon-cyan: #22D3EE;
-  --neon-pink: #F472B6;
-  --neon-amber: #FBBF24;
+  --neon-violet: #FFE9C6;
+  --neon-blue: #C9CEDC;
+  --neon-cyan: #9BA4BD;
+  --neon-pink: #F2B457;
+  --neon-amber: #FFD9A3;
 
   --select: #CBD5E1;
   --select-soft: rgba(203, 213, 225, 0.08);
 
-  /* Surfaces. Every panel in the app was hand-typing rgba(139,92,246,0.04)
+  /* Surfaces. Every panel in the app was hand-typing rgba(255, 217, 163,0.04)
      and friends; naming the four steps is what keeps them consistent. */
   --control-h: 38px;
   --surface-1: rgba(255, 255, 255, 0.025);
   --surface-2: rgba(255, 255, 255, 0.045);
   --surface-3: rgba(255, 255, 255, 0.07);
-  --surface-accent: rgba(167, 139, 250, 0.06);
-  --surface-accent-2: rgba(167, 139, 250, 0.11);
-  --surface-accent-3: rgba(167, 139, 250, 0.17);
+  --surface-accent: rgba(255, 217, 163, 0.055);
+  --surface-accent-2: rgba(255, 217, 163, 0.10);
+  --surface-accent-3: rgba(255, 217, 163, 0.16);
 
   --edge: rgba(255, 255, 255, 0.07);
   --edge-strong: rgba(255, 255, 255, 0.13);
-  --edge-accent: rgba(167, 139, 250, 0.28);
+  --edge-accent: rgba(255, 217, 163, 0.30);
 
   --elev-1: 0 1px 2px rgba(0, 0, 0, 0.28);
   --elev-2: 0 2px 8px rgba(0, 0, 0, 0.34), 0 1px 2px rgba(0, 0, 0, 0.22);
   --elev-3: 0 8px 28px rgba(0, 0, 0, 0.44), 0 2px 6px rgba(0, 0, 0, 0.26);
   --inset-hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 
-  --focus: rgba(167, 139, 250, 0.55);
-  --focus-ring: rgba(167, 139, 250, 0.16);
+  --focus: rgba(255, 217, 163, 0.60);
+  --focus-ring: rgba(255, 217, 163, 0.15);
   --playhead: #FFFFFF;
 
-  --fam-hits: #FBBF24;
-  --fam-darkness: #A78BFA;
-  --fam-strobe: #22D3EE;
-  --fam-lift: #34D399;
-  --fam-breath: #818CF8;
-  --fam-wash: #F472B6;
-  --fam-dynamics: #64748B;
+  --fam-hits: #FFF4DF;
+  --fam-strobe: #EDE6DA;
+  --fam-wash: #C6C2BC;
+  --fam-lift: #9C9AA6;
+  --fam-breath: #6B7086;
+  --fam-dynamics: #4C5167;
+  --fam-darkness: #343A52;
 
-  --phase-intro: rgba(96, 165, 250, 0.06);
-  --phase-drop: rgba(251, 191, 36, 0.08);
-  --phase-silence: rgba(100, 116, 139, 0.05);
-  --phase-break: rgba(167, 139, 250, 0.06);
-  --phase-verse: rgba(103, 232, 249, 0.05);
-  --phase-build: rgba(249, 168, 212, 0.06);
-  --phase-final-drop: rgba(251, 191, 36, 0.12);
-  --phase-outro: rgba(100, 116, 139, 0.06);
-  --phase-unknown: rgba(255, 255, 255, 0.02);
+  --phase-silence: rgba(255, 255, 255, 0.008);
+  --phase-intro: rgba(255, 255, 255, 0.018);
+  --phase-outro: rgba(255, 255, 255, 0.018);
+  --phase-break: rgba(255, 255, 255, 0.024);
+  --phase-verse: rgba(255, 255, 255, 0.032);
+  --phase-build: rgba(255, 255, 255, 0.048);
+  --phase-drop: rgba(255, 255, 255, 0.068);
+  --phase-final-drop: rgba(255, 255, 255, 0.090);
+  --phase-unknown: rgba(255, 255, 255, 0.022);
 
   --stage: #060810;
 
@@ -137,7 +137,7 @@
   --ruler-h: 22px;
   --section-h: 30px;
   --energy-h: 28px;
-  --moments-h: 18px;
+  --moments-h: 22px;
   --lane-gap: 2px;
   --snap-threshold: 8px;
 
@@ -146,21 +146,24 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  --elev-popover: 0 0 0 1px rgba(139, 92, 246, 0.08),
+  --elev-popover: 0 0 0 1px rgba(255, 217, 163, 0.09),
     0 4px 6px -1px rgba(0, 0, 0, 0.4),
     0 16px 32px -8px rgba(0, 0, 0, 0.6);
-  --elev-modal: 0 0 0 1px rgba(139, 92, 246, 0.1),
+  --elev-modal: 0 0 0 1px rgba(255, 217, 163, 0.11),
     0 24px 48px -12px rgba(0, 0, 0, 0.7);
   --elev-card: 0 1px 3px rgba(0, 0, 0, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.04);
-  --elev-card-hover: 0 0 0 1px rgba(139, 92, 246, 0.2),
+  --elev-card-hover: 0 0 0 1px rgba(255, 217, 163, 0.22),
     0 8px 24px -4px rgba(0, 0, 0, 0.5),
-    0 0 24px -4px rgba(139, 92, 246, 0.1);
+    0 0 28px -6px rgba(255, 217, 163, 0.12);
 
-  --grad-primary: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
-  --grad-warm: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
-  --grad-surface: linear-gradient(180deg, rgba(139, 92, 246, 0.04) 0%, transparent 50%);
-  --grad-glow: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(139, 92, 246, 0.12), transparent);
+  --lit: #FFE6C0;
+  --lit-ink: #17151A;
+  --lit-hover: #FFF1D9;
+  --grad-primary: var(--lit);
+  --grad-warm: var(--lit);
+  --grad-surface: linear-gradient(180deg, rgba(255, 217, 163, 0.035) 0%, transparent 50%);
+  --grad-glow: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 217, 163, 0.10), transparent);
 }
 
 :root,
@@ -203,10 +206,10 @@ body {
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.15);
+  background: rgba(255, 217, 163, 0.15);
   border-radius: 5px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.25); }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 217, 163, 0.25); }
 ::-webkit-scrollbar-track { background: transparent; }
 
 button, input, select, textarea { font-family: inherit; color: inherit; font-size: inherit; }
@@ -240,9 +243,8 @@ a:focus-visible,
 
 .label {
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.005em;
   color: var(--ink-dimmer);
 }
 
@@ -256,13 +258,13 @@ a:focus-visible,
 
 .surface-glow {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(139, 92, 246, 0.1), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 0%, rgba(99, 102, 241, 0.06), transparent),
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 217, 163, 0.1), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 0%, rgba(255, 217, 163, 0.06), transparent),
     var(--bg);
 }
 
 .surface-warm {
-  background: linear-gradient(180deg, rgba(139, 92, 246, 0.03) 0%, transparent 40%), var(--bg);
+  background: linear-gradient(180deg, rgba(255, 217, 163, 0.03) 0%, transparent 40%), var(--bg);
 }
 
 .glass {
@@ -272,7 +274,7 @@ a:focus-visible,
 }
 
 .glow-border {
-  border: 1px solid rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(255, 217, 163, 0.12);
 }
 
 @keyframes pulse-bar {
@@ -290,9 +292,9 @@ a:focus-visible,
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(139, 92, 246, 0.04) 25%,
-    rgba(139, 92, 246, 0.08) 50%,
-    rgba(139, 92, 246, 0.04) 75%
+    rgba(255, 217, 163, 0.04) 25%,
+    rgba(255, 217, 163, 0.08) 50%,
+    rgba(255, 217, 163, 0.04) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;

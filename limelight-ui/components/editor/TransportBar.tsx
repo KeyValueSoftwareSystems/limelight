@@ -199,8 +199,9 @@ export function TransportBar({
           <span className={`${LABEL} text-accent`}>Building…</span>
         </span>
       ) : clipCount > 0 ? (
-        <span className={`${LABEL} text-ink-dimmer`}>
-          {clipCount} effect{clipCount === 1 ? "" : "s"}
+        <span className={`${LABEL} text-ink-dim`}>
+          <span className="tabular-nums text-ink font-medium">{clipCount}</span>{" "}
+          effect{clipCount === 1 ? "" : "s"}
         </span>
       ) : (
         <span className={`${LABEL} text-ink-dimmer`}>—</span>
@@ -217,7 +218,7 @@ export function TransportBar({
             className={`${BASE} border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-bg-raised px-[8px] ${LABEL}`}
             title="Copy, paste and nudge the selection"
           >
-            edit ▾
+            Edit ▾
           </span>
         }
         items={[
@@ -264,7 +265,7 @@ export function TransportBar({
             } px-[8px] ${LABEL}`}
             title="Rule vertical lines through the timeline"
           >
-            grid: {guides.length === 0 ? "off" : guides.length === 1
+            Grid: {guides.length === 0 ? "off" : guides.length === 1
               ? (GUIDES.find((g) => g.id === guides[0])?.label.toLowerCase() ?? "on")
               : guides.length} ▾
           </span>
@@ -289,7 +290,7 @@ export function TransportBar({
             } px-[8px] ${LABEL}`}
             title="Where a clip lands when you drop or drag it"
           >
-            snap: {snap === "off" ? "free" : snap} ▾
+            Snap: {snap === "off" ? "free" : snap} ▾
           </span>
         }
         items={[
@@ -309,7 +310,7 @@ export function TransportBar({
         active={follow}
         title="Scroll the timeline to keep the playhead in view while the song plays"
       >
-        auto-scroll
+        Auto-scroll
       </Btn>
       <Btn onClick={onZoomOut} icon title="Zoom out">
         <span aria-hidden>−</span>
@@ -320,7 +321,7 @@ export function TransportBar({
         <span className="sr-only">Zoom in</span>
       </Btn>
       <Btn onClick={onFit} title="Fit the whole song">
-        fit
+        Fit
       </Btn>
     </div>
   );

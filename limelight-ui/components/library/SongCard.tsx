@@ -42,7 +42,7 @@ export function SongCard({ song, onOpen }: SongCardProps) {
           : "cursor-default opacity-40"
       }`}
       style={{
-        background: "linear-gradient(180deg, rgba(139,92,246,0.04) 0%, rgba(139,92,246,0.01) 100%)",
+        background: "linear-gradient(180deg, rgba(255, 217, 163,0.04) 0%, rgba(255, 217, 163,0.01) 100%)",
         boxShadow: "var(--elev-card)",
       }}
       onMouseEnter={(e) => {
@@ -63,8 +63,8 @@ export function SongCard({ song, onOpen }: SongCardProps) {
         {playable && (
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
             <div className="w-[38px] h-[38px] rounded-full flex items-center justify-center scale-90 group-hover:scale-100 transition-transform duration-300 ease-[var(--ease-spring)]"
-              style={{ background: "var(--grad-primary)", boxShadow: "0 0 20px rgba(139,92,246,0.4)" }}>
-              <Play size={16} fill="white" stroke="white" className="ml-[1px]" />
+              style={{ background: "var(--lit)", boxShadow: "0 0 22px -2px var(--accent-glow)" }}>
+              <Play size={16} fill="var(--lit-ink)" stroke="var(--lit-ink)" className="ml-[1px]" />
             </div>
           </div>
         )}

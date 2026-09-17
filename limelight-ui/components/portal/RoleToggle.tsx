@@ -22,13 +22,12 @@ export function RoleToggle() {
 
   const handleRole = (r: Role) => {
     setRole(r);
-    if (r === "creator") router.push("/library");
-    else router.push("/shows");
+    router.push("/shows");
   };
 
   return (
     <div
-      className="flex h-[34px] rounded-[10px] bg-white/[0.03] border border-solid border-white/[0.04] p-[3px]"
+      className="flex items-center h-[30px] gap-[3px] rounded-[9px] bg-white/[0.03] border border-solid border-white/[0.05] p-[3px]"
       role="radiogroup"
       aria-label="Mode"
     >
@@ -41,15 +40,13 @@ export function RoleToggle() {
             role="radio"
             aria-checked={active}
             onClick={() => handleRole(r.id)}
-            className={`flex items-center gap-[5px] px-[11px] rounded-[var(--radius-sm)] border-0 text-[12px] font-medium cursor-pointer transition-all duration-200 ease-[var(--ease)] ${
+            title={r.id === "creator" ? "Design shows from songs" : "Play shows to a room"}
+            className={`flex items-center gap-[6px] h-full px-[10px] rounded-[6px] border-0 text-[12px] font-medium cursor-pointer transition-colors duration-200 ease-[var(--ease)] ${
               active ? "text-ink" : "bg-transparent text-ink-dimmer hover:text-ink-dim"
             }`}
-            style={active ? {
-              background: "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
-            } : undefined}
+            style={active ? { background: "var(--surface-3)" } : undefined}
           >
-            <r.Icon size={12} strokeWidth={active ? 2 : 1.5} className={active ? "text-accent" : ""} />
+            <r.Icon size={12} strokeWidth={active ? 2 : 1.5} style={active ? { color: "var(--accent)" } : undefined} />
             {r.label}
           </button>
         );

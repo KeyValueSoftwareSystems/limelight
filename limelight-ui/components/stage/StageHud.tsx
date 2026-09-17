@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { usePortalStore } from "@/store/portal";
 import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { readFixtures, trimFixtures } from "@/lib/fixtures";
@@ -72,6 +73,8 @@ export function StageHud({ clockRef, playing, currentTime }: StageHudProps) {
   const open = chosen ?? remembered ?? true;
 
   const [tall, setTall] = useState(true);
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => { setSlot(document.getElementById("stage-hud-slot")); }, []);
 
   const boxRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
@@ -194,14 +197,23 @@ export function StageHud({ clockRef, playing, currentTime }: StageHudProps) {
 
   return (
     <div ref={boxRef} className="absolute inset-0 pointer-events-none">
-      <button
-        type="button"
-        onClick={toggle}
-        aria-pressed={open}
-        className="pointer-events-auto absolute top-[var(--spacing-s3)] right-[104px] h-[22px] px-[8px] rounded-full border border-solid border-white/[0.08] bg-[rgba(10,11,20,0.75)] text-[10px] text-ink-dimmer hover:text-ink-dim cursor-pointer backdrop-blur-md transition-all duration-200"
-      >
-        {open ? "Hide" : "Show"}
-      </button>
+      {slot &&
+        createPortal(
+          <button
+            type="button"
+            onClick={toggle}
+            aria-pressed={open}
+            title={open ? "Hide the readout" : "Show the readout"}
+            className={`pointer-events-auto h-[24px] px-[10px] rounded-full border border-solid cursor-pointer backdrop-blur-md transition-colors duration-200 text-[10px] ${
+              open
+                ? "border-[var(--edge-accent)] bg-[var(--surface-accent-2)] text-ink"
+                : "border-white/[0.08] bg-[rgba(10,11,20,0.75)] text-ink-dimmer hover:text-ink-dim"
+            }`}
+          >
+            Readout
+          </button>,
+          slot,
+        )}
 
       {open && (
         <>

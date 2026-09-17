@@ -43,7 +43,7 @@ export default function StagePage() {
     useAudioPlayer();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [stageMsg, setStageMsg] = useState<string | null>("Open a track to begin");
+  const [stageMsg, setStageMsg] = useState<string | null>(null);
   const rebuildTokenRef = useRef(0);
   const [venuePickerOpen, setVenuePickerOpen] = useState(false);
 
@@ -184,7 +184,7 @@ export default function StagePage() {
         .then((d) => {
           const sf = (d.shows || []).find((x) => x.id === showParam);
           if (!sf) {
-            setStageMsg(`That saved show is no longer in the library.`);
+            setStageMsg("That show is no longer in the library.");
             return;
           }
           setSeed(sf.seed);
@@ -194,9 +194,9 @@ export default function StagePage() {
           setPendingPlan(sf.plan ?? null);
           setPlanText(sf.plan_text ?? "");
         })
-        .catch(() => setStageMsg("Could not load that saved show."));
+        .catch(() => setStageMsg("Could not load that show. Check your connection and try again."));
     }
-    queueMicrotask(() => setStageMsg("loading song\u2026"));
+    queueMicrotask(() => setStageMsg("Loading track\u2026"));
 
     api.songs
       .list()
@@ -206,11 +206,11 @@ export default function StagePage() {
         if (found) {
           setSong(found);
         } else {
-          setStageMsg(`Track "${songParam}" not found.`);
+          setStageMsg(`No track called \u201c${songParam}\u201d is in the library.`);
         }
       })
       .catch(() => {
-        setStageMsg("Failed to load tracks.");
+        setStageMsg("Could not reach the library. Check your connection and try again.");
       });
   }, [song, urlParams, setSong, setSeed, setSongs, setLayout, setEdits, setShowId, setShowVersion, setPendingPlan, setPlanText]);
 
@@ -225,11 +225,11 @@ export default function StagePage() {
         status = await api.show.status(job);
         if (token !== rebuildTokenRef.current) return null;
         if (status.state !== "baking") break;
-        setStageMsg(`baking the show… ${(i / 4) | 0}s`);
+        setStageMsg(`Building the show\u2026 ${(i / 4) | 0}s`);
         await new Promise((r) => setTimeout(r, 250));
       }
       if (!status || status.state !== "ready") {
-        setStageMsg(status?.error ?? "Build timed out.");
+        setStageMsg(status?.error ?? "The build timed out. Try generating again.");
         return null;
       }
       const buf = await api.show.frames(status.frames_url!);
@@ -276,7 +276,7 @@ export default function StagePage() {
     const st = usePortalStore.getState();
     if (!st.song) return;
     const token = ++rebuildTokenRef.current;
-    setStageMsg("baking the show…");
+    setStageMsg("Building the show\u2026");
     try {
       /* Only override the show's colours when the user has explicitly edited the
          palette. An untouched palette (palette === paletteBase) means "keep the
@@ -319,7 +319,7 @@ export default function StagePage() {
       setJob(post.job);
       await pollBake(post.job, token);
     } catch (e) {
-      setStageMsg(e instanceof Error ? e.message : "Build failed.");
+      setStageMsg(e instanceof Error ? e.message : "The build failed.");
     }
   }, [rigForPlan, setJob, pollBake]);
 
@@ -335,7 +335,7 @@ export default function StagePage() {
           setStageMsg(`That ${what} is not a show plan.`);
           return;
         }
-        setStageMsg(`baking ${what}…`);
+        setStageMsg(`Building ${what}\u2026`);
         setV2(true);
         setPlanText(typeof planData.plan === "string" ? planData.plan : "");
         /* The palette arrives with the plan: declared, once the show has been
@@ -368,8 +368,8 @@ export default function StagePage() {
       } catch (e) {
         setStageMsg(
           e instanceof Error
-            ? `${what} failed: ` + e.message
-            : `${what} failed`,
+            ? `Could not build ${what}: ${e.message}`
+            : `Could not build ${what}.`,
         );
       }
     },
@@ -403,7 +403,7 @@ export default function StagePage() {
     async (colours: PaletteColour[]) => {
       const st = usePortalStore.getState();
       if (!st.song || !st.show || colours.length < 2) return;
-      setStageMsg("recolouring…");
+      setStageMsg("Recolouring\u2026");
       try {
         const plan = editsToPlan(st.edits, st.show, st.effects, st.planText);
         const out = await api.recolour.apply(
@@ -439,8 +439,8 @@ export default function StagePage() {
            the dialog handed over is to count what came in. */
         const n = (k: string) => ((plan as Record<string, unknown>)[k] as unknown[] | undefined)?.length ?? 0;
         setStageMsg(
-          `importing ${file.name} (${(file.size / 1024).toFixed(1)} KB): ` +
-          `${n("states")} looks, ${n("bindings")} bindings, ${n("gestures")} cues…`,
+          `Importing ${file.name} \u00b7 ${n("states")} looks, ` +
+          `${n("bindings")} bindings, ${n("gestures")} cues\u2026`,
         );
         await applyPlan(plan, `imported ${file.name} — ${n("states")}/${n("bindings")}/${n("gestures")}`);
       } catch (e) {
@@ -472,7 +472,7 @@ export default function StagePage() {
         (doc.states?.length ?? 0) +
         (doc.bindings?.length ?? 0) +
         (doc.gestures?.length ?? 0);
-      setStageMsg(`downloaded ${name} · ${cues} cues`);
+      setStageMsg(`Downloaded ${name} \u00b7 ${cues} cues.`);
     } catch (e) {
       setStageMsg(
         e instanceof Error
@@ -568,6 +568,10 @@ export default function StagePage() {
      won — so opening a saved show showed its plan or the seed's arrangement
      depending on which round trip was slower. */
   const planBakesRef = useRef(false);
+  const applyPlanRef = useRef(applyPlan);
+  useEffect(() => {
+    applyPlanRef.current = applyPlan;
+  });
   useEffect(() => {
     if (!song || loadedForRef.current === song.name) return;
     const name = song.name;
@@ -592,25 +596,32 @@ export default function StagePage() {
          inside a .then. */
       planBakesRef.current = true;
       queueMicrotask(() =>
-        applyPlan(asPlan(handed as Record<string, unknown>), "saved show"),
+        applyPlanRef.current(asPlan(handed as Record<string, unknown>), "saved show"),
       );
       return;
     }
 
-    let live = true;
+    /* Claim the bake before going to the network. Without this the seed bake
+       below also fires, bumps the rebuild token, and the show file's own bake
+       is thrown away as stale - which is why opening a song from the library
+       left the timeline empty while typing the same URL did not. */
+    planBakesRef.current = true;
     api.showfile
       .get(name)
       .then((d) => {
-        if (!live || !d.showfile) return;
-        applyPlan(asPlan(d.showfile as Record<string, unknown>), "show file");
+        if (!d.showfile) {
+          planBakesRef.current = false;
+          setStageMsg("");
+          return;
+        }
+        applyPlanRef.current(asPlan(d.showfile as Record<string, unknown>), "show file");
       })
       .catch(() => {
-        /* no file for this song is the normal case */
+        /* no file for this song is the normal case; release the claim so the
+           seed bake can still draw something */
+        planBakesRef.current = false;
       });
-    return () => {
-      live = false;
-    };
-  }, [song, applyPlan]);
+  }, [song]);
 
   /* ── load audio + bake on song change ────────────────────────────────── */
   const rebuildRef = useRef(rebuild);
@@ -723,13 +734,13 @@ export default function StagePage() {
         setSavedName(d.name ?? name);
         setSaveOpen(false);
         setStageMsg(
-          `saved “${d.name ?? name}” to Shows · v${d.version}` +
+          `Saved \u201c${d.name ?? name}\u201d to Shows \u00b7 v${d.version}` +
             (filed?.cues !== undefined
               ? ` · ${filed.cues} cues in the show file`
               : ""),
         );
       } catch (e) {
-        setSaveError(e instanceof Error ? e.message : "save failed");
+        setSaveError(e instanceof Error ? e.message : "Could not save. Check your connection and try again.");
       } finally {
         setSaving(false);
       }
@@ -916,7 +927,7 @@ export default function StagePage() {
 
   const isDesigner = role === "creator";
   const isOperator = role === "venue";
-  const isBaking = stageMsg?.startsWith("baking");
+  const isBaking = stageMsg?.startsWith("Building");
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
@@ -961,7 +972,8 @@ export default function StagePage() {
                 </h1>
                 <span className="mono text-[11px] text-ink-dimmer tabular-nums flex-none">
                   {song
-                    ? `${mmss(song.duration_s ?? 0)} \u00b7 ${Math.round(song.bpm ?? 0)} BPM \u00b7 ${show?.grid.bars ?? "\u2014"} bars`
+                    ? `${mmss(song.duration_s ?? 0)} \u00b7 ${Math.round(song.bpm ?? 0)} BPM` +
+                      (show ? ` \u00b7 ${show.grid.bars} bars` : "")
                     : ""}
                 </span>
               </div>
@@ -1082,6 +1094,8 @@ export default function StagePage() {
             className="flex-initial overflow-hidden"
           >
             <StageTimeline
+              onGenerate={song ? handleGenerate : undefined}
+              generating={generating}
               show={show}
               energy={song?.energy ?? []}
               clips={clips}

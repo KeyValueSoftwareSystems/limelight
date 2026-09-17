@@ -102,7 +102,7 @@ export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
                     <div className="flex items-baseline gap-[var(--spacing-s2)]">
                       <span className="text-[length:var(--text-sm)]">{l.name}</span>
                       {live && (
-                        <span className="text-[length:var(--text-2xs)] text-accent uppercase tracking-[0.08em]">
+                        <span className="text-[length:var(--text-2xs)] text-accent tracking-[0.01em]">
                           designing for
                         </span>
                       )}

@@ -42,7 +42,7 @@ function SectionBandBase({ sections }: { sections: Section[] }) {
             style={{ left: x0, width: w, background: phaseTint(s.phase) }}
           >
             <span
-              className="absolute top-[7px] text-[9px] uppercase tracking-[0.12em] text-ink whitespace-nowrap pointer-events-none"
+              className="absolute top-[8px] text-[10px] font-medium tracking-[0.01em] text-ink-dim whitespace-nowrap pointer-events-none"
               style={{ left: labelX }}
             >
               {s.name || "—"}
