@@ -709,24 +709,6 @@ export default function StagePage() {
     setIsPlaying(playing());
   }, [toggle, playing]);
 
-  /* Space plays and pauses anywhere on this page. It used to live in the
-     timeline, which does not mount in operator mode and bails early on a track
-     with no show, so the shortcut was dead in both. */
-  const toggleRef = useRef(handleToggle);
-  useEffect(() => { toggleRef.current = handleToggle; });
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== " " && e.code !== "Space") return;
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
-      const el = document.activeElement as HTMLElement | null;
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
-      e.preventDefault();
-      (el as HTMLButtonElement | null)?.blur?.();
-      toggleRef.current();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   const handleSeek = useCallback(
     (t: number) => {
@@ -752,6 +734,10 @@ export default function StagePage() {
   }, true);
 
   /* ── keyboard shortcuts ──────────────────────────────────────────────── */
+  /* Space lives here, in the one keyboard hook, and nowhere else. It was ALSO
+     bound in the timeline and then again on this page, so two handlers toggled
+     playback against each other on a single press and it looked like the key
+     did nothing. */
   useKeyboardShortcuts({
     onSpace: handleToggle,
     onEscape: () => {

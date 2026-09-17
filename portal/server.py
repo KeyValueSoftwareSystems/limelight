@@ -20,6 +20,7 @@ import hashlib
 import json
 import mimetypes
 import os
+import re
 import shutil
 import re
 import subprocess
@@ -431,6 +432,271 @@ def covers_index():
         return {}
 
 
+# ---- building a venue -------------------------------------------------------
+
+PROFILES_DIR = os.path.join(REPO, "readers", "lights", "drivers", "profiles")
+VENUE_DIR = os.path.join(HERE, "venues")
+
+# Which devices an effect treats as a "head" (it pans and tilts and carries a
+# gobo) and which it treats as a colour source. Everything else is patched and
+# addressed, but the stock effect modules do not aim it.
+HEAD_TYPES = {"spot29", "head13"}
+
+# Where a kind of fixture hangs, in metres, in the audience frame.
+#   +x audience right, +y toward the audience, +z height above the deck
+ROWS = {
+    "par5":       {"z": 2.4, "y": 0.0, "spread": 0.75},
+    "par7":       {"z": 2.4, "y": 0.0, "spread": 0.75},
+    "wash12":     {"z": 3.0, "y": 0.4, "spread": 1.10},
+    "spot29":     {"z": 3.6, "y": 0.2, "spread": 1.30},
+    "head13":     {"z": 3.6, "y": 0.2, "spread": 1.30},
+    "blinder1":   {"z": 2.0, "y": 0.6, "spread": 1.60},
+    "strobe3":    {"z": 2.8, "y": 0.6, "spread": 2.00},
+    "laser8":     {"z": 1.2, "y": 0.8, "spread": 2.40},
+    "pixelbar24": {"z": 1.0, "y": 0.2, "spread": 6.40},
+}
+
+PREFIX = {
+    "par5": "par", "par7": "par", "wash12": "wash", "spot29": "spot",
+    "head13": "head", "blinder1": "blinder", "strobe3": "strobe",
+    "laser8": "laser", "pixelbar24": "strip",
+}
+
+
+def profile_channels(kind):
+    """How many DMX channels one fixture of this type occupies."""
+    path = os.path.join(PROFILES_DIR, kind + ".profile.json")
+    with open(path) as fh:
+        prof = json.load(fh)
+    ch = prof.get("channels")
+    return len(ch) if isinstance(ch, list) else int(ch or 0)
+
+
+def venue_slug(name):
+    slug = re.sub(r"[^a-z0-9]+", "-", str(name).strip().lower()).strip("-")
+    return slug or "venue"
+
+
+def patch(fixtures):
+    """Give a list of placed fixtures their DMX addresses, in order, from 1."""
+    addr = 1
+    out = []
+    for f in fixtures:
+        kind = f["type"]
+        out.append({**f, "universe": 0, "address": addr})
+        addr += profile_channels(kind)
+    return out, addr - 1
+
+
+def build_placed(slug, placed):
+    """Patch a rig the person positioned themselves.
+
+    `placed` is [{"type": "par5", "at": [x, y, z]}, ...] in the order they should
+    be addressed. Sorting is the caller's business: the row order IS the fixture
+    order every effect's extents read left to right.
+    """
+    fixtures = []
+    for i, f in enumerate(placed):
+        kind = str(f.get("type") or "")
+        if kind not in ROWS:
+            raise ValueError("unknown fixture type: %s" % kind)
+        at = f.get("at") or [0, 0, 2.4]
+        if len(at) != 3:
+            raise ValueError("a fixture needs an [x, y, z] position")
+        fixtures.append({
+            "id": str(f.get("id") or "%s_%02d" % (PREFIX[kind], i + 1)),
+            "type": kind,
+            "at": [round(float(v), 3) for v in at],
+        })
+    if not fixtures:
+        raise ValueError("a rig needs at least one fixture")
+
+    # Left to right within each kind, because every extent - inner, outer, ends,
+    # left, right - is a slice of a ROW, and a row the effects cannot read in
+    # order is a row they cannot light in order.
+    fixtures.sort(key=lambda f: (list(ROWS).index(f["type"]), f["at"][0]))
+    seen = {}
+    for f in fixtures:
+        kind = f["type"]
+        seen[kind] = seen.get(kind, 0) + 1
+        f["id"] = "%s_%02d" % (PREFIX[kind], seen[kind])
+
+    fixtures, total = patch(fixtures)
+    if total > 512:
+        raise ValueError("that rig needs %d channels; one universe holds 512" % total)
+
+    counts = {}
+    for f in fixtures:
+        counts[f["type"]] = counts.get(f["type"], 0) + 1
+    summary = ", ".join("%d x %s" % (v, k) for k, v in counts.items())
+
+    return {
+        "layout": "0.5",
+        "rig": slug,
+        "geometry": "line",
+        "frame": "audience",
+        "note": "Built in the venue builder: %s, %d DMX channels in universe 0. "
+                "Positions in metres in the AUDIENCE frame "
+                "(+x = audience's right, +y = toward audience, +z = height above deck)."
+                % (summary, total),
+        "fixtures": fixtures,
+        "limits": {"max_pan_per_frame": 7, "max_tilt_per_frame": 7},
+    }, total, counts
+
+
+def build_layout(slug, wanted):
+    """Lay a rig out in rows and patch it from address 1.
+
+    `wanted` is [{"type": "par5", "count": 12}, ...]. Fixtures of a kind share a
+    row, centred on the middle of the stage, so a rig reads left to right the
+    way every effect's extents assume. This is the STARTING point the builder
+    shows; once the person drags anything, build_placed takes over.
+    """
+    fixtures = []
+    addr = 1
+    for entry in wanted:
+        kind = str(entry.get("type") or "")
+        if kind not in ROWS:
+            raise ValueError("unknown fixture type: %s" % kind)
+        n = max(0, min(64, int(entry.get("count") or 0)))
+        if not n:
+            continue
+        width = profile_channels(kind)
+        row = ROWS[kind]
+        span = row["spread"] * (n - 1)
+        for i in range(n):
+            x = 0.0 if n == 1 else round(-span / 2 + row["spread"] * i, 3)
+            fixtures.append({
+                "id": "%s_%02d" % (PREFIX[kind], i + 1),
+                "type": kind,
+                "at": [x, row["y"], row["z"]],
+                "universe": 0,
+                "address": addr,
+            })
+            addr += width
+    if not fixtures:
+        raise ValueError("a rig needs at least one fixture")
+    total = addr - 1
+    if total > 512:
+        raise ValueError("that rig needs %d channels; one universe holds 512" % total)
+
+    counts = {}
+    for f in fixtures:
+        counts[f["type"]] = counts.get(f["type"], 0) + 1
+    summary = ", ".join("%d x %s" % (v, k) for k, v in counts.items())
+
+    return {
+        "layout": "0.5",
+        "rig": slug,
+        "geometry": "line",
+        "frame": "audience",
+        "note": "Built in the venue builder: %s, %d DMX channels in universe 0. "
+                "Positions in metres in the AUDIENCE frame "
+                "(+x = audience's right, +y = toward audience, +z = height above deck)."
+                % (summary, total),
+        "fixtures": fixtures,
+        "limits": {"max_pan_per_frame": 7, "max_tilt_per_frame": 7},
+    }, total, counts
+
+
+def write_venue_modules(slug, layout_file, total, counts):
+    """Give the new rig the stock effect modules.
+
+    Every module works through helpers.js, and helpers.js reads the rig from the
+    layout the manifest names, so the same modules drive any rig built out of
+    known fixture types. keycode-arena is the source because its helpers were
+    rewritten to derive rather than hardcode.
+    """
+    src = os.path.join(VENUE_DIR, "keycode-arena")
+    dst = os.path.join(VENUE_DIR, slug)
+    os.makedirs(dst, exist_ok=True)
+    for fn in os.listdir(src):
+        if fn.endswith(".js"):
+            shutil.copyfile(os.path.join(src, fn), os.path.join(dst, fn))
+
+    effects = sorted(fn[:-3] for fn in os.listdir(dst)
+                     if fn.endswith(".js") and fn not in ("helpers.js", "beat.js"))
+    manifest = {
+        "rig": slug,
+        "layout_file": layout_file,
+        "total_channels": total,
+        "fixtures": counts,
+        "supported_effects": effects,
+        "unsupported_effects": [],
+        "limits": {"isolate_min_fixtures": 3},
+        "note": "Built in the venue builder. helpers.js derives the channel map "
+                "from %s and the fixture profiles it names." % layout_file,
+    }
+    with open(os.path.join(dst, "manifest.json"), "w") as fh:
+        json.dump(manifest, fh, indent=2)
+        fh.write("\n")
+    return effects
+
+
+def create_venue(body):
+    name = str(body.get("name") or "").strip()
+    if not name:
+        raise ValueError("a venue needs a name")
+    wanted = body.get("fixtures") or []
+
+    with open(VENUES_FILE) as fh:
+        book = json.load(fh)
+
+    # Editing an existing room keeps its slug, because the slug is the folder
+    # its effect modules live in and the file every saved show names. Renaming a
+    # venue renames the room, not the rig on disk.
+    edit_id = str(body.get("id") or "").strip()
+    existing = next((v for v in book.get("venues", []) if v.get("id") == edit_id), None) if edit_id else None
+    if edit_id and not existing:
+        raise ValueError("no venue with id %s" % edit_id)
+    slug = (existing["default"].replace(".layout.json", "") if existing
+            else venue_slug(name))
+
+    # A dry run patches the rig and hands it back without writing anything, so
+    # the builder previews the layout the server would actually produce rather
+    # than a second copy of these rules living in the page.
+    placed = body.get("placed")
+    if body.get("dry"):
+        layout, total, counts = (build_placed(slug, placed) if placed
+                                 else build_layout(slug, wanted))
+        return {"dry": True, "layout": layout, "total_channels": total,
+                "fixtures": counts, "slug": slug}
+
+    if not existing and any(v.get("id") == "ven_" + slug for v in book.get("venues", [])):
+        raise ValueError("a venue called %s already exists" % name)
+
+    layout, total, counts = (build_placed(slug, placed) if placed
+                             else build_layout(slug, wanted))
+    layout_file = slug + ".layout.json"
+    with open(os.path.join(LAYOUTS_DIR, layout_file), "w") as fh:
+        json.dump(layout, fh, indent=1)
+        fh.write("\n")
+
+    write_venue_modules(slug, layout_file, total, counts)
+
+    entry = {
+        **(existing or {}),
+        "id": existing["id"] if existing else "ven_" + slug,
+        "name": name,
+        "example": (existing or {}).get("example", False),
+        "access": (existing or {}).get("access", "public"),
+        "note": str(body.get("note") or "").strip() or (existing or {}).get("note"),
+        "layouts": [{"name": str(body.get("rig_name") or "House rig"), "file": layout_file}],
+        "default": layout_file,
+    }
+    if existing:
+        book["venues"] = [entry if v.get("id") == entry["id"] else v
+                          for v in book.get("venues", [])]
+    else:
+        book.setdefault("venues", []).append(entry)
+    with open(VENUES_FILE, "w") as fh:
+        json.dump(book, fh, indent=2)
+        fh.write("\n")
+
+    return {"venue": entry, "layout_file": layout_file,
+            "total_channels": total, "fixtures": counts}
+
+
 def lock_words(sure):
     """grid.sure in a creator's language. The bottom of the range is a warning,
     not a shrug: a show built on a grid this loose will drift against the music
@@ -579,7 +845,9 @@ class Shows:
             return None
 
     @classmethod
-    def list(cls):
+    def list(cls, include_market=False):
+        """Your shows. A market show belongs to somebody else's catalogue, so it
+        is not in your library and only Market.list() asks for it."""
         out = []
         if not os.path.isdir(SHOWS):
             return out
@@ -595,12 +863,14 @@ class Shows:
             doc.setdefault("id", fn[:-len(".show.json")])
             doc.setdefault("version", 1)
             doc.setdefault("author", "unknown")
+            if doc.get("market_only") and not include_market:
+                continue
             out.append({"file": fn, **doc})
         return out
 
     @classmethod
     def get(cls, sid):
-        for row in cls.list():
+        for row in cls.list(include_market=True):
             if row.get("id") == sid:
                 return row
         return None
@@ -744,7 +1014,12 @@ class Market:
         cuts = [{"title": str(c.get("title", ""))[:160], "artist": str(c.get("artist", ""))[:120],
                  **({"at": float(c["at"])} if c.get("at") is not None else {})}
                 for c in (body.get("cuts") or [])][:200]
-        common = {"kind": kind, "tier": tier, "cuts": cuts,
+        price = body.get("price_usd")
+        try:
+            price = round(float(price), 2) if price is not None else None
+        except (TypeError, ValueError):
+            price = None
+        common = {"kind": kind, "tier": tier, "cuts": cuts, "price_usd": price,
                   # Where the track list came from, and -- when the tracks are not
                   # in this library -- the fact that what plays is a stand-in.
                   "cuts_source": (body.get("cuts_source") or "").strip()[:160] or None,
@@ -2103,6 +2378,15 @@ def make_handler(library, baker, rig):
                 return self._handle_upload()
 
             body = self._body()
+
+            if path == "/api/venues":
+                try:
+                    made = create_venue(body)
+                except ValueError as e:
+                    return self._json({"error": str(e)}, 400)
+                except OSError as e:
+                    return self._json({"error": "could not write the venue: %s" % e}, 500)
+                return self._json(made)
 
             if path == "/api/show":
                 song = body.get("song")

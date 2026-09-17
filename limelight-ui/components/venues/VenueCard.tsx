@@ -27,7 +27,7 @@ export function VenueCard({ venue, layouts, onDesign }: VenueCardProps) {
   return (
     <MediaCard
       title={venue.name}
-      hint={locked ? venue.locked_because ?? "This rig is not open to you" : `Design for ${venue.name}`}
+      hint={locked ? venue.locked_because ?? "This rig is not open to you" : `Open ${venue.name}'s rig`}
       disabled={locked}
       onOpen={() => onDesign(venue, chosen)}
       media={

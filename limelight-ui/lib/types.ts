@@ -491,6 +491,8 @@ export interface Telemetry {
 }
 
 export interface MarketListing {
+  /** What it costs, in whole dollars. 0 is free. */
+  price_usd?: number | null;
   show_id: string;
   show: {
     id: string;

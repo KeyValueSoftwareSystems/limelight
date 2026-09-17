@@ -6,11 +6,9 @@ interface SheetProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
-  /** widen the panel for content that benefits from more horizontal room */
-  wide?: boolean;
 }
 
-export function Sheet({ open, onClose, children, wide }: SheetProps) {
+export function Sheet({ open, onClose, children }: SheetProps) {
   const handleBackdrop = useCallback(
     (e: React.MouseEvent) => {
       if (e.target === e.currentTarget) onClose();
@@ -34,7 +32,7 @@ export function Sheet({ open, onClose, children, wide }: SheetProps) {
       role="dialog"
       aria-modal="true"
     >
-      <div className={`liquid ${wide ? "w-[min(960px,100%)]" : "w-[min(760px,100%)]"} max-h-[82vh] flex flex-col rounded-[var(--radius-xl)] overflow-hidden animate-scale-in`}>
+      <div className="liquid w-[min(760px,100%)] max-h-[82vh] flex flex-col rounded-[var(--radius-xl)] overflow-hidden animate-scale-in">
         {children}
       </div>
     </div>

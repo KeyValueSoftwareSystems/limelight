@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import Image from "next/image";
 
 import { effectIcon } from "@/lib/effectIcons";
@@ -84,10 +85,10 @@ export function EffectCard({ effect, anchor }: {
   const viewportH = typeof window === "undefined" ? 800 : window.innerHeight;
   const top = Math.max(EDGE, Math.min(anchor.top - 8, viewportH - height - EDGE));
 
-  return (
+  return createPortal(
     <div
       role="tooltip"
-      className="fixed z-50 pointer-events-none rounded-[8px] border border-solid border-line-strong bg-bg-overlay p-[10px]"
+      className="fixed z-[100] pointer-events-none rounded-[8px] border border-solid border-line-strong bg-bg-overlay p-[10px]"
       style={{ left: anchor.right + GAP, top, width: CARD_W, boxShadow: "var(--elev-popover)" }}
     >
       <div className="flex items-start gap-[7px]">
@@ -126,6 +127,7 @@ export function EffectCard({ effect, anchor }: {
           </ul>
         </div>
       )}
-    </div>
+    </div>,
+    document.body,
   );
 }
