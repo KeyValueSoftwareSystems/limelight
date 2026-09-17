@@ -88,6 +88,8 @@ function render(cueFile, score, rigName, opts) {
   for (let i = 0; i < cues.length; i++) {
     cues[i]._end = i + 1 < cues.length ? cues[i + 1]._t : duration;
     cues[i]._look = resolveLook(rig, cues[i].look, palette);
+    cues[i]._steps = cues[i].chase
+      ? E.chaseStepTimes(cues[i].chase, grid, cues[i]._t, cues[i]._end) : null;
   }
 
   const total = Math.max(1, Math.round(duration * fps));
@@ -105,9 +107,10 @@ function render(cueFile, score, rigName, opts) {
     if (ci >= 0) {
       const cue = cues[ci];
       let step = 0;
-      if (cue.chase) {
-        const secs = E.chaseStepSeconds(cue.chase, grid);
-        step = Math.floor((t - cue._t) / secs + 1e-9);
+      if (cue._steps) {
+        let k = 0;
+        while (k + 1 < cue._steps.length && cue._steps[k + 1] <= t + 1e-9) k++;
+        step = k;
       }
       const changed = ci !== liveCue || step !== liveStep;
       if (changed) {

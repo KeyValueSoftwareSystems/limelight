@@ -144,4 +144,31 @@ function chaseStepSeconds(chase, grid) {
   return grid.barSeconds;
 }
 
-module.exports = { loadRig, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds };
+function chaseStepTimes(chase, grid, startS, endS) {
+  const every = chase.every || { bars: 1 };
+  const nBeats = every.beats != null
+    ? Math.max(0.25, +every.beats)
+    : Math.max(0.25, +(every.bars != null ? every.bars : 1)) * grid.perBar;
+  const beats = grid.beats;
+  if (!beats.length) return [startS];
+  let i0 = 0;
+  while (i0 + 1 < beats.length && beats[i0 + 1] <= startS + 1e-6) i0++;
+  const at = (x) => {
+    const lo = Math.floor(x), frac = x - lo;
+    if (lo >= beats.length - 1) {
+      const step = beats.length > 1 ? beats[beats.length - 1] - beats[beats.length - 2] : 0.5;
+      return beats[beats.length - 1] + (x - (beats.length - 1)) * step;
+    }
+    return frac === 0 ? beats[lo] : beats[lo] + (beats[lo + 1] - beats[lo]) * frac;
+  };
+  const out = [];
+  for (let k = 0; ; k++) {
+    const t = at(i0 + k * nBeats);
+    if (t >= endS - 1e-6) break;
+    out.push(Math.max(startS, t));
+    if (out.length > 4096) break;
+  }
+  return out.length ? out : [startS];
+}
+
+module.exports = { loadRig, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes };
