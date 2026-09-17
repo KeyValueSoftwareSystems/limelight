@@ -98,7 +98,7 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
   return (
     <div className="h-full min-h-0 flex flex-col">
       <div className="flex-none flex items-baseline gap-[var(--spacing-s2)] px-[var(--spacing-s4)] pt-[var(--spacing-s3)] pb-[var(--spacing-s2)]">
-        <span className="label">Room colours</span>
+        <span className="text-[11px] font-semibold tracking-[0.02em] text-ink-dimmer">Colours</span>
         <span className="flex-1" />
         {dirty && (
           <button
@@ -114,7 +114,7 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
       <div className="flex-1 min-h-0 overflow-y-auto px-[var(--spacing-s4)] pb-[var(--spacing-s3)]">
         {!palette.length ? (
           <p className="m-0 text-[10px] text-ink-dimmer leading-[1.5]">
-            {room ? "This show declares no colours yet." : "Pick a room and its colours appear here."}
+            {room ? "No colours declared yet." : "Pick a room to load its palette."}
           </p>
         ) : (
           <>
@@ -156,7 +156,7 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
                         onClick={() => remove(c.id)}
                         aria-label={`remove ${colourName(c.hex)}`}
                         title="remove this colour"
-                        className="absolute -top-[5px] -right-[5px] w-[15px] h-[15px] flex items-center justify-center rounded-full border border-solid border-line-strong bg-bg-overlay text-ink-dim text-[10px] leading-none cursor-pointer hover:text-danger hover:border-danger transition-colors duration-[var(--dur-state)]"
+                        className="absolute -top-[5px] -right-[5px] w-[15px] h-[15px] flex items-center justify-center rounded-full border border-solid border-white/[0.1] bg-bg-overlay text-ink-dim text-[10px] leading-none cursor-pointer hover:text-danger hover:border-danger transition-colors duration-[var(--dur-state)]"
                       >
                         ×
                       </button>
@@ -171,7 +171,7 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
                   onClick={add}
                   aria-label="add a colour"
                   title="add a colour"
-                  className="w-[34px] h-[34px] flex items-center justify-center rounded-full border border-dashed border-line-strong bg-transparent text-ink-dimmer text-[15px] leading-none cursor-pointer hover:text-ink hover:border-ink-dimmer transition-colors duration-[var(--dur-state)]"
+                  className="w-[34px] h-[34px] flex items-center justify-center rounded-full border border-dashed border-white/[0.1] bg-transparent text-ink-dimmer text-[15px] leading-none cursor-pointer hover:text-ink hover:border-ink-dimmer transition-colors duration-[var(--dur-state)]"
                 >
                   +
                 </button>

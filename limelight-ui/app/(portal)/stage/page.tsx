@@ -43,7 +43,7 @@ export default function StagePage() {
     useAudioPlayer();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [stageMsg, setStageMsg] = useState<string | null>("select a song");
+  const [stageMsg, setStageMsg] = useState<string | null>("Open a track to begin");
   const rebuildTokenRef = useRef(0);
   const [venuePickerOpen, setVenuePickerOpen] = useState(false);
 
@@ -181,11 +181,11 @@ export default function StagePage() {
         if (found) {
           setSong(found);
         } else {
-          setStageMsg(`song "${songParam}" not found`);
+          setStageMsg(`Track "${songParam}" not found.`);
         }
       })
       .catch(() => {
-        setStageMsg("failed to load songs");
+        setStageMsg("Failed to load tracks.");
       });
   }, [song, urlParams, setSong, setSeed, setSongs, setLayout]);
 
@@ -204,7 +204,7 @@ export default function StagePage() {
         await new Promise((r) => setTimeout(r, 250));
       }
       if (!status || status.state !== "ready") {
-        setStageMsg(status?.error ?? "the bake timed out");
+        setStageMsg(status?.error ?? "Build timed out.");
         return null;
       }
       const buf = await api.show.frames(status.frames_url!);
@@ -294,7 +294,7 @@ export default function StagePage() {
       setJob(post.job);
       await pollBake(post.job, token);
     } catch (e) {
-      setStageMsg(e instanceof Error ? e.message : "bake failed");
+      setStageMsg(e instanceof Error ? e.message : "Build failed.");
     }
   }, [rigForPlan, setJob, pollBake]);
 
@@ -307,7 +307,7 @@ export default function StagePage() {
       const token = ++rebuildTokenRef.current;
       try {
         if (!planData.states && !planData.gestures && !planData.bindings) {
-          setStageMsg(`that ${what} is not a show plan`);
+          setStageMsg(`That ${what} is not a show plan.`);
           return;
         }
         setStageMsg(`baking ${what}…`);
@@ -396,8 +396,8 @@ export default function StagePage() {
       } catch (e) {
         setStageMsg(
           e instanceof Error
-            ? "recolour failed: " + e.message
-            : "recolour failed",
+            ? "Recolour failed: " + e.message
+            : "Recolour failed.",
         );
       }
     },
@@ -420,7 +420,7 @@ export default function StagePage() {
         await applyPlan(plan, `imported ${file.name} — ${n("states")}/${n("bindings")}/${n("gestures")}`);
       } catch (e) {
         setStageMsg(
-          e instanceof Error ? "import failed: " + e.message : "import failed",
+          e instanceof Error ? "Import failed: " + e.message : "Import failed.",
         );
       }
     },
@@ -451,8 +451,8 @@ export default function StagePage() {
     } catch (e) {
       setStageMsg(
         e instanceof Error
-          ? "download failed: " + e.message
-          : "download failed",
+          ? "Download failed: " + e.message
+          : "Download failed.",
       );
     }
   }, []);
@@ -509,7 +509,7 @@ export default function StagePage() {
       if (want && st.job) await api.rig.at(st.job, heard());
       const result = await api.rig.arm(want);
       if (result.error) {
-        setStageMsg(`rig: ${result.error}`);
+        setStageMsg(`Rig: ${result.error}`);
         return;
       }
       setRig(result);
@@ -951,7 +951,7 @@ export default function StagePage() {
                   disabled={!song || generating}
                   onClick={handleGenerate}
                 >
-                  {generating ? "Generating\u2026" : "Generate show"}
+                  {generating ? "Generating\u2026" : "Generate"}
                 </Button>
 
                 <div className="relative" ref={moreRef}>
@@ -1002,7 +1002,7 @@ export default function StagePage() {
                     setSaveOpen(true);
                   }}
                 >
-                  {showId ? "Save" : "Save show\u2026"}
+                  {showId ? "Save" : "Save show"}
                 </Button>
               </>
             )}

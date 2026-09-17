@@ -954,10 +954,21 @@ def author(song, out_path=None):
         amp = round(0.30 + 0.62 * (spread_l ** 0.8) + 0.08 * inten, 3)
         if t in named:
             amp = min(1.0, amp + 0.18)
-        accents.append({"t": round(t, 3), "l": round(amp, 2),
-                        "decay": round(beat_at(t) * (2.0 if big else 0.75), 3),
-                        "hold": 0.72 if big else 0.22,
-                        "on": "lamps"})
+        if big:
+            # The whole row held flat and high, then gone. It is the other half
+            # of a travelling figure: the collapse out of a blaze is what makes
+            # the run afterwards read as movement rather than a small light in a
+            # dark room.
+            # A blaze has to be a bright colour or it is not a blaze: a glare
+            # at full in crimson, luminance 0.32, tops out at 130 of 255, so the
+            # colour and not the fader is the ceiling.
+            accents.append({"t": round(t, 3), "l": round(min(1.0, amp + 0.22), 2),
+                            "decay": round(beat_at(t) * 1.0, 3),
+                            "mode": "glare", "c": "bone", "on": "lamps"})
+        else:
+            accents.append({"t": round(t, 3), "l": round(amp, 2),
+                            "decay": round(beat_at(t) * 0.75, 3),
+                            "hold": 0.22, "on": "lamps"})
 
     for n, c in enumerate(cues):
         nxt = cues[n + 1] if n + 1 < len(cues) else None

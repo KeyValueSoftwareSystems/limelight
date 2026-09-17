@@ -62,7 +62,7 @@ export function StagePreview({ clockRef, playing, currentTime }: StagePreviewPro
   const takeHome = useCallback((fn: () => void) => { homeRef.current = fn; }, []);
 
   return (
-    <div className="relative flex-1 min-h-[150px] mx-[var(--spacing-s6)] rounded-lg overflow-hidden bg-[var(--stage)]">
+    <div className="relative flex-1 min-h-[150px] mx-[12px] rounded-[var(--radius-md)] overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(6,8,16,1) 0%, rgba(10,11,20,1) 100%)" }}>
       {live
         ? <Stage3D clockRef={clockRef} playing={playing} currentTime={currentTime} onHome={takeHome} />
         : <StageCanvas clockRef={clockRef} playing={playing} currentTime={currentTime} />}
@@ -90,7 +90,7 @@ export function StagePreview({ clockRef, playing, currentTime }: StagePreviewPro
 
       {can3d && (
         <div
-          className="absolute top-[var(--spacing-s3)] right-[var(--spacing-s3)] flex gap-px rounded-full border border-solid border-line bg-[rgba(8,10,16,0.72)] p-px backdrop-blur-sm"
+          className="absolute top-[var(--spacing-s3)] right-[var(--spacing-s3)] flex gap-px rounded-full border border-solid border-white/[0.08] bg-[rgba(10,11,20,0.75)] p-px backdrop-blur-md"
           role="group"
           aria-label="Stage view"
         >
@@ -111,8 +111,8 @@ export function StagePreview({ clockRef, playing, currentTime }: StagePreviewPro
       )}
 
       {(!show || !frames) && (
-        <div className="absolute inset-x-0 bottom-1/2 text-center text-[length:var(--text-xs)] tracking-[0.18em] uppercase text-[rgba(215,222,240,0.6)] pointer-events-none">
-          {show ? "baking the show…" : "select a song"}
+        <div className="absolute inset-x-0 bottom-1/2 text-center text-[13px] tracking-[0.02em] text-ink-dimmer pointer-events-none">
+          {show ? "Building show…" : "Open a track to begin"}
         </div>
       )}
     </div>

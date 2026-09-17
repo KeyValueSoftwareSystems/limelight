@@ -66,7 +66,7 @@ export function EffectPalette({ effects }: { effects: Effect[] }) {
             placeholder="Search effects…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full h-[28px] pl-[26px] pr-[8px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[12px] text-ink outline-none focus:border-accent/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_2px_rgba(245,158,11,0.06)] transition-all duration-200 placeholder:text-ink-dimmer"
+            className="w-full h-[28px] pl-[26px] pr-[8px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.03] text-[12px] text-ink outline-none focus:border-accent/50 focus:bg-white/[0.05] focus:shadow-[0_0_0_2px_rgba(139,92,246,0.08)] transition-all duration-200 placeholder:text-ink-dimmer"
           />
         </div>
       </div>
@@ -111,11 +111,11 @@ export function EffectPalette({ effects }: { effects: Effect[] }) {
                     onPointerDown={(e) => beginPaletteDrag(fx, e)}
                     className={`group/fx flex items-center gap-[8px] px-[8px] py-[6px] rounded-[var(--radius-sm)] border border-solid cursor-grab active:cursor-grabbing touch-none transition-all duration-200 ease-[var(--ease)] text-left ${
                       active
-                        ? "border-accent/40 scale-[1.02]"
+                        ? "border-accent/30 scale-[1.02]"
                         : "border-transparent hover:border-white/[0.06] bg-transparent"
                     }`}
                     style={active
-                      ? { background: "rgba(245,158,11,0.06)" }
+                      ? { background: "rgba(139,92,246,0.08)" }
                       : undefined
                     }
                     onMouseEnter={(e) => {

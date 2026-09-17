@@ -392,6 +392,11 @@ function render(cueFile, score, rigName, opts) {
     const hit = new Set(ids);
     const rest = rig.lamps.filter((f) => !hit.has(f.id));
     const wholeRig = rest.length === 0 && ids.length > 1;
+    /* A glare is not a lift. It is the whole row held flat at a level, which is
+       the other half of a travelling figure: the room blazes, then collapses to
+       one lamp, and the collapse is what makes the travel read. A proportional
+       accent can never do this because it preserves the shape it is scaling. */
+    const blaze = acc.mode === "glare" && wholeRig;
     const i0 = Math.round(ta * fps), i1 = Math.min(frames.length, Math.round((ta + decay) * fps) + 1);
     for (let i = Math.max(0, i0); i < i1; i++) {
       /* A flash is held and then released, not a spike that decays from the
@@ -400,7 +405,11 @@ function render(cueFile, score, rigName, opts) {
          against his 23%. */
       const through = (i - i0) / Math.max(1, i1 - i0);
       const hold = acc.hold != null ? +acc.hold : 0.3;
-      const w = through <= hold ? 1 : Math.pow(1 - (through - hold) / (1 - hold), 0.45);
+      /* a glare holds flat for its whole length and then simply stops - the
+         collapse is the event, so it must not be faded away */
+      const w = acc.mode === "glare"
+        ? 1
+        : (through <= hold ? 1 : Math.pow(1 - (through - hold) / (1 - hold), 0.45));
       let added = 0;
       let rigGain = 0;
       if (wholeRig) {
@@ -422,6 +431,28 @@ function render(cueFile, score, rigName, opts) {
         if (!fx) continue;
         const ch = fx.ch;
         const amp = lvl * w;
+        if (blaze) {
+          const flat = Math.round(255 * lvl * (w > 0 ? 1 : 0));
+          if (flat > 0) {
+            if (fx.brightness === "colour") {
+              let bc = col;
+              if (!bc) {
+                const r0 = ch.r >= 0 ? frames[i][fx.offset + ch.r] : 0;
+                const g0 = ch.g >= 0 ? frames[i][fx.offset + ch.g] : 0;
+                const b0 = ch.b >= 0 ? frames[i][fx.offset + ch.b] : 0;
+                const mx = Math.max(r0, g0, b0);
+                bc = mx > 4 ? [r0 / mx, g0 / mx, b0 / mx] : [1, 1, 1];
+              }
+              if (ch.r >= 0) frames[i][fx.offset + ch.r] = Math.round(bc[0] * flat);
+              if (ch.g >= 0) frames[i][fx.offset + ch.g] = Math.round(bc[1] * flat);
+              if (ch.b >= 0) frames[i][fx.offset + ch.b] = Math.round(bc[2] * flat);
+              if (ch.master >= 0) frames[i][fx.offset + ch.master] = 255;
+            } else if (ch.master >= 0) {
+              frames[i][fx.offset + ch.master] = flat;
+            }
+          }
+          continue;
+        }
         if (fx.brightness === "colour") {
           const before = Math.max(frames[i][fx.offset + (ch.r >= 0 ? ch.r : 0)],
                                 frames[i][fx.offset + (ch.g >= 0 ? ch.g : 0)],

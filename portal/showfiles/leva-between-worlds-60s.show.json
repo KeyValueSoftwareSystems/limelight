@@ -216,7 +216,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 10.054,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -264,7 +264,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 20.55,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -286,10 +286,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.99,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 27.051,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -314,7 +314,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 30.047,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -322,10 +322,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.98,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 31.045,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -350,7 +350,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 34.04,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -358,10 +358,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.98,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 34.551,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -1072,50 +1072,57 @@
   {
    "t": 10.054,
    "l": 1.0,
-   "decay": 0.98,
-   "hold": 0.72,
+   "decay": 0.49,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 20.55,
    "l": 1.0,
-   "decay": 1.0,
-   "hold": 0.72,
+   "decay": 0.5,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 27.051,
-   "l": 0.99,
-   "decay": 1.0,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.5,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 30.047,
    "l": 1.0,
-   "decay": 1.0,
-   "hold": 0.72,
+   "decay": 0.5,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 31.045,
-   "l": 0.98,
-   "decay": 1.0,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.5,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 34.04,
    "l": 1.0,
-   "decay": 1.0,
-   "hold": 0.72,
+   "decay": 0.5,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 34.551,
-   "l": 0.98,
-   "decay": 1.0,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.5,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {

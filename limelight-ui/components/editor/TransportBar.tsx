@@ -45,7 +45,7 @@ function Btn({
   const tone = danger
     ? "border-danger text-danger bg-transparent hover:bg-danger hover:text-bg disabled:hover:bg-transparent disabled:hover:text-danger"
     : active
-      ? "border-white/[0.08] text-ink"
+      ? "text-ink"
       : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-white/[0.04]";
   return (
     <button
@@ -259,7 +259,7 @@ export function TransportBar({
           <span
             className={`${BASE} ${
               guides.length
-                ? "border-white/[0.08] text-ink"
+                ? "text-ink"
                 : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-white/[0.04]"
             } px-[8px] ${LABEL}`}
             title="Rule vertical lines through the timeline"
@@ -284,7 +284,7 @@ export function TransportBar({
           <span
             className={`${BASE} ${
               snap !== "off"
-                ? "border-white/[0.08] text-ink"
+                ? "text-ink"
                 : "border-transparent bg-transparent text-ink-dim hover:text-ink hover:bg-white/[0.04]"
             } px-[8px] ${LABEL}`}
             title="Where a clip lands when you drop or drag it"

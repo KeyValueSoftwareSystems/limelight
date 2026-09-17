@@ -19,11 +19,11 @@ interface RigInfo {
   remedy: string | null;
 }
 
-function diagnose(r: RigStatus | null, hasShow: boolean): RigInfo {
+function diagnose(r: RigStatus | null, _hasShow: boolean): RigInfo {
   if (!r)
     return {
       state: "unreachable", icon: XCircle,
-      colour: "#EF4444", bgColour: "rgba(239,68,68,0.06)", borderColour: "rgba(239,68,68,0.2)", textColour: "#FCA5A5",
+      colour: "#F87171", bgColour: "rgba(248,113,113,0.06)", borderColour: "rgba(248,113,113,0.2)", textColour: "#FCA5A5",
       headline: "Portal unreachable",
       detail: "Cannot connect to the lighting server.",
       remedy: "Check that the portal process is running.",
@@ -32,18 +32,18 @@ function diagnose(r: RigStatus | null, hasShow: boolean): RigInfo {
   if (!r.can_send)
     return {
       state: "unreachable", icon: AlertTriangle,
-      colour: "#F59E0B", bgColour: "rgba(245,158,11,0.06)", borderColour: "rgba(245,158,11,0.2)", textColour: "#FCD34D",
+      colour: "#FBBF24", bgColour: "rgba(251,191,36,0.06)", borderColour: "rgba(251,191,36,0.2)", textColour: "#FDE68A",
       headline: "No output",
       detail: r.why_not ?? "The Art-Net socket is not open.",
-      remedy: r.why_not ? null : "Check the cable and the network interface.",
+      remedy: r.why_not ? null : "Check the cable and network interface.",
     };
 
   if (r.sending)
     return {
       state: "sending", icon: Radio,
-      colour: "#10B981", bgColour: "rgba(16,185,129,0.06)", borderColour: "rgba(16,185,129,0.2)", textColour: "#6EE7B7",
-      headline: `Sending · ${r.frames_sent.toLocaleString()} frames`,
-      detail: `40 fps → Art-Net ${r.gateway} universe ${r.universe}`,
+      colour: "#34D399", bgColour: "rgba(52,211,153,0.06)", borderColour: "rgba(52,211,153,0.2)", textColour: "#6EE7B7",
+      headline: `Sending \u00b7 ${r.frames_sent.toLocaleString()} frames`,
+      detail: `40 fps \u2192 Art-Net ${r.gateway} universe ${r.universe}`,
       remedy: null,
     };
 
@@ -51,15 +51,15 @@ function diagnose(r: RigStatus | null, hasShow: boolean): RigInfo {
     if (r.last_error)
       return {
         state: "unreachable", icon: XCircle,
-        colour: "#EF4444", bgColour: "rgba(239,68,68,0.06)", borderColour: "rgba(239,68,68,0.2)", textColour: "#FCA5A5",
+        colour: "#F87171", bgColour: "rgba(248,113,113,0.06)", borderColour: "rgba(248,113,113,0.2)", textColour: "#FCA5A5",
         headline: "Send failing",
         detail: r.last_error,
         remedy: "Check the rig connection and retry.",
       };
     return {
       state: "ready", icon: CheckCircle2,
-      colour: "#10B981", bgColour: "rgba(16,185,129,0.06)", borderColour: "rgba(16,185,129,0.2)", textColour: "#6EE7B7",
-      headline: `Armed · ${r.frames_sent.toLocaleString()} sent`,
+      colour: "#34D399", bgColour: "rgba(52,211,153,0.06)", borderColour: "rgba(52,211,153,0.2)", textColour: "#6EE7B7",
+      headline: `Armed \u00b7 ${r.frames_sent.toLocaleString()} sent`,
       detail: `Socket open to ${r.gateway} universe ${r.universe}`,
       remedy: null,
     };
@@ -67,8 +67,8 @@ function diagnose(r: RigStatus | null, hasShow: boolean): RigInfo {
 
   return {
     state: "off", icon: Radio,
-    colour: "#555A6B", bgColour: "rgba(255,255,255,0.02)", borderColour: "rgba(255,255,255,0.06)", textColour: "#8E93A3",
-    headline: `Universe ${r.universe} · via ${r.route_via ?? r.gateway}`,
+    colour: "#5A5F78", bgColour: "rgba(139,92,246,0.04)", borderColour: "rgba(139,92,246,0.1)", textColour: "#9095AD",
+    headline: `Universe ${r.universe} \u00b7 via ${r.route_via ?? r.gateway}`,
     detail: r.conflict ? r.conflict : "Standby",
     remedy: null,
   };
@@ -91,8 +91,6 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
     window.addEventListener("pointerdown", close);
     return () => window.removeEventListener("pointerdown", close);
   }, [expanded]);
-
-  const handleRetry = useCallback(() => { onToggle(); }, [onToggle]);
 
   const label = isSending ? "Live" : info.state === "unreachable" ? "Offline" : info.state === "ready" ? "Armed" : "Standby";
 
@@ -120,7 +118,7 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
       {expanded && (
         <div
           className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] rounded-[var(--radius-md)] overflow-hidden animate-scale-in"
-          style={{ background: "linear-gradient(180deg, #1C1D28 0%, #14151D 100%)", boxShadow: "var(--elev-popover)" }}
+          style={{ background: "linear-gradient(180deg, #1A1B2E 0%, #12131F 100%)", boxShadow: "var(--elev-popover)" }}
         >
           <div className="p-[16px]" style={{ background: info.bgColour }}>
             <div className="flex items-start gap-[10px]">
@@ -139,8 +137,8 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
               </p>
               <button
                 type="button"
-                onClick={handleRetry}
-                className="flex items-center gap-[6px] mt-[8px] h-[28px] px-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.08] bg-white/[0.04] text-[12px] font-medium text-ink cursor-pointer hover:bg-white/[0.08] transition-all duration-200 active:scale-[0.98]"
+                onClick={() => { onToggle(); setExpanded(false); }}
+                className="flex items-center gap-[6px] mt-[8px] h-[28px] px-[12px] rounded-[var(--radius-sm)] border border-solid border-white/[0.08] bg-white/[0.04] text-[12px] font-medium text-ink cursor-pointer hover:bg-accent/[0.08] hover:border-accent/20 transition-all duration-200 active:scale-[0.98]"
               >
                 <RefreshCw size={12} />
                 Retry
@@ -154,7 +152,7 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
                 {([
                   ["Gateway", rig.gateway],
                   ["Universe", String(rig.universe)],
-                  ["Route", rig.route_via ?? "—"],
+                  ["Route", rig.route_via ?? "\u2014"],
                   ["Frames", rig.frames_sent.toLocaleString()],
                 ] as [string, string][]).map(([k, v]) => (
                   <div key={k} className="contents">
@@ -173,17 +171,17 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
                 onClick={() => { onToggle(); setExpanded(false); }}
                 className="h-[30px] px-[14px] rounded-[var(--radius-sm)] border border-solid border-danger/40 bg-danger/[0.08] text-[12px] font-semibold text-danger cursor-pointer hover:bg-danger/[0.15] transition-all duration-200 active:scale-[0.97]"
               >
-                Stop sending
+                Stop
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => { onToggle(); setExpanded(false); }}
                 disabled={!rig?.can_send || !show}
-                className="h-[30px] px-[14px] rounded-[var(--radius-sm)] border-0 text-[12px] font-semibold text-[#0C0D12] cursor-pointer hover:brightness-110 transition-all duration-200 active:scale-[0.97] disabled:opacity-35 disabled:pointer-events-none"
-                style={{ background: "linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%)", boxShadow: "0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15)" }}
+                className="h-[30px] px-[14px] rounded-[var(--radius-sm)] border-0 text-[12px] font-semibold text-white cursor-pointer hover:brightness-110 transition-all duration-200 active:scale-[0.97] disabled:opacity-35 disabled:pointer-events-none"
+                style={{ background: "var(--grad-primary)", boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 0 12px -2px rgba(139,92,246,0.3)" }}
               >
-                Send to the rig
+                Send to rig
               </button>
             )}
           </div>

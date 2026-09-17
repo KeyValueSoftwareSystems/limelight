@@ -68,7 +68,7 @@ function Tile({
       <span
         className={`w-full aspect-square flex items-center justify-center rounded-[7px] border border-solid transition-colors duration-[var(--dur-state)] ${
           active
-            ? "border-accent bg-accent-soft"
+            ? "border-accent bg-accent/10"
             : "border-line group-hover:border-line-strong group-hover:bg-bg-raised"
         }`}
       >
@@ -115,14 +115,14 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
 
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col">
-      <div className="flex-none flex gap-[var(--spacing-s4)] px-[var(--spacing-s4)] pt-[var(--spacing-s3)] border-b border-solid border-line">
+      <div className="flex-none flex gap-[16px] px-[16px] pt-[12px] border-b border-solid border-white/[0.05]">
         {(["effects", "styles"] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setTab(t)}
-            className={`pb-[8px] bg-transparent border-0 border-b-2 border-solid cursor-pointer text-[11px] tracking-[0.16em] uppercase transition-colors duration-[var(--dur-state)] ${
-              tab === t ? "text-ink border-b-accent" : "text-ink-dimmer border-b-transparent hover:text-ink"
+            className={`pb-[8px] bg-transparent border-0 border-b-2 border-solid cursor-pointer text-[12px] font-semibold tracking-[0.01em] capitalize transition-colors duration-200 ${
+              tab === t ? "text-ink border-b-accent" : "text-ink-dimmer border-b-transparent hover:text-ink-dim"
             }`}
           >
             {t}

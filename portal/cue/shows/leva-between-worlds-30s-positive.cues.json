@@ -291,7 +291,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 22.454,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -339,7 +339,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 27.26,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -347,10 +347,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.99,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 28.7,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -375,7 +375,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 30.14,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -386,7 +386,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 31.579,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -394,10 +394,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.99,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 33.019,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -419,10 +419,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.98,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 34.458,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -430,10 +430,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.79,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 36.13,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -444,7 +444,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 36.85,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -466,10 +466,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.83,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 38.777,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -477,10 +477,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.98,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 40.217,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -502,10 +502,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.98,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 41.657,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -516,7 +516,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 42.144,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -1227,92 +1227,105 @@
   {
    "t": 22.454,
    "l": 1.0,
-   "decay": 0.96,
-   "hold": 0.72,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 27.26,
    "l": 1.0,
-   "decay": 0.96,
-   "hold": 0.72,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 28.7,
-   "l": 0.99,
-   "decay": 0.96,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 30.14,
    "l": 1.0,
-   "decay": 0.96,
-   "hold": 0.72,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 31.579,
    "l": 1.0,
-   "decay": 0.96,
-   "hold": 0.72,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 33.019,
-   "l": 0.99,
-   "decay": 0.96,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 34.458,
-   "l": 0.98,
-   "decay": 0.96,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 36.13,
-   "l": 0.79,
-   "decay": 0.94,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.47,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 36.85,
    "l": 1.0,
-   "decay": 0.96,
-   "hold": 0.72,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 38.777,
-   "l": 0.83,
-   "decay": 0.96,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 40.217,
-   "l": 0.98,
-   "decay": 0.96,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 41.657,
-   "l": 0.98,
-   "decay": 0.96,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 42.144,
    "l": 1.0,
-   "decay": 0.96,
-   "hold": 0.72,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {

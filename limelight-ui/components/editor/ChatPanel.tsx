@@ -48,14 +48,14 @@ export function ChatPanel() {
   return (
     <div className="h-full flex flex-col min-h-0">
       <div className="flex-none px-[16px] py-[12px] border-b border-solid border-white/[0.05]">
-        <span className="text-[11px] font-semibold tracking-[0.04em] uppercase text-ink-dimmer">Conversation</span>
+        <span className="text-[12px] font-semibold tracking-[0.01em] text-ink-dim">Chat</span>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto px-[16px] py-[16px] flex flex-col gap-[16px]">
         {turns.length === 0 && (
           <p className="text-[12px] text-ink-dimmer leading-[1.6] m-0">
-            Ask for a change in plain English — &ldquo;warmer in the chorus&rdquo;,
-            &ldquo;calmer intro&rdquo;. Not wired up yet.
+            Describe a change in plain English — &ldquo;warmer in the chorus&rdquo;,
+            &ldquo;calmer intro&rdquo;. This feature is not connected yet.
           </p>
         )}
 
@@ -68,7 +68,7 @@ export function ChatPanel() {
 
             {t.who === "you" ? (
               <div className="self-end max-w-[86%] rounded-[10px] px-[12px] py-[8px] text-[12px] text-ink leading-[1.5]"
-                style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.06) 100%)", border: "1px solid rgba(245,158,11,0.12)" }}>
+                style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(99,102,241,0.08) 100%)", border: "1px solid rgba(139,92,246,0.15)" }}>
                 {t.text}
               </div>
             ) : (
@@ -112,7 +112,7 @@ export function ChatPanel() {
               }
             }}
             rows={2}
-            placeholder="say what you'd change…"
+            placeholder="Describe a change…"
             className="w-full resize-none rounded-[var(--radius-sm)] bg-white/[0.03] border border-solid border-white/[0.06] outline-none focus:border-accent/40 focus:bg-white/[0.05] focus:shadow-[0_0_0_2px_rgba(245,158,11,0.06)] text-[12px] text-ink px-[12px] py-[9px] pr-[40px] transition-all duration-200 placeholder:text-ink-dimmer"
           />
           <button
@@ -121,7 +121,7 @@ export function ChatPanel() {
             disabled={!draft.trim()}
             aria-label="Send"
             className="absolute right-[8px] bottom-[10px] w-[28px] h-[28px] rounded-[var(--radius-sm)] border-0 cursor-pointer disabled:cursor-default disabled:opacity-30 flex items-center justify-center transition-all duration-200 hover:brightness-110"
-            style={{ background: "linear-gradient(135deg, #FBBF24, #F59E0B)", color: "#0C0D12" }}
+            style={{ background: "var(--grad-primary)", color: "white" }}
           >
             <Send size={13} />
           </button>

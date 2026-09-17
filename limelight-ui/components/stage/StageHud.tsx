@@ -198,9 +198,9 @@ export function StageHud({ clockRef, playing, currentTime }: StageHudProps) {
         type="button"
         onClick={toggle}
         aria-pressed={open}
-        className="pointer-events-auto absolute top-[var(--spacing-s3)] right-[104px] h-[24px] px-[10px] rounded-full border border-solid border-line bg-[rgba(8,10,16,0.72)] text-[length:var(--text-2xs)] text-dimmer hover:text-ink cursor-pointer backdrop-blur-sm transition-colors duration-[var(--dur-state)]"
+        className="pointer-events-auto absolute top-[var(--spacing-s3)] right-[104px] h-[22px] px-[8px] rounded-full border border-solid border-white/[0.08] bg-[rgba(10,11,20,0.75)] text-[10px] text-ink-dimmer hover:text-ink-dim cursor-pointer backdrop-blur-md transition-all duration-200"
       >
-        {open ? "Hide readout" : "Readout"}
+        {open ? "Hide" : "Show"}
       </button>
 
       {open && (

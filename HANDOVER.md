@@ -1049,6 +1049,37 @@ and those are tolerances rather than placements.
 **Check any new song for this.** A track with a tempo change will silently mistime
 everything the author computes in seconds unless it goes through `beat_at`.
 
+## 7aa. A glare is a blaze, not a lift, and the collapse is the point
+
+Amal: "We're not using Glare properly at all." He is right, and the reason it matters is
+written in `portal/venues/arc4-head/glare.js` by whoever built it:
+
+> glare - the whole row HELD on... `impact` is a flash with a hard decay, `wash` is a
+> resting state... there was no gesture that simply holds every lamp up for two beats.
+> **That is the other half of a wave: the room blazes, then collapses to one travelling
+> lamp, and the collapse is what makes the travel read. Without the blaze the run is
+> just a small light in a dark room.**
+
+Our accents were proportional lifts. They scale whatever shape is underneath and
+therefore preserve it, so they can never blaze - and that is exactly why the travelling
+figures read as a small light in a dark room.
+
+`mode: "glare"` on an accent now sets every lamp flat at an absolute level, holds it for
+its whole length, and stops. No envelope: the collapse is the event and must not be
+faded away. The strongest accents - the ones already judged structural - use it.
+
+**A blaze must be a bright colour or it is not a blaze.** A glare at full in crimson,
+luminance 0.32, tops out at 130 of 255: the colour is the ceiling, not the fader. Glares
+are `bone`. That alone moved p99 from 160 to 255.
+
+Time spent above 1.3x the bed went from 10.0% to 21.1% in the window Amal endorsed,
+against Renjith's 22.9%, with p10 34 against his 30 and p50 83 against his 81.
+
+**One number is still off in the other direction:** our lifts last a median 0.50s and a
+p90 of 2.85s where his are 0.10s and 0.78s. Ours are now longer than his, because a
+glare holds a full beat and consecutive ones merge. If the room reads as merely bright
+rather than as blazing, that is the number to move.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the

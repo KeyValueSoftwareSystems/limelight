@@ -6,7 +6,7 @@ export function Footer() {
   const song = usePortalStore((s) => s.song);
   const show = usePortalStore((s) => s.show);
 
-  const left = song ? song.title : "Limelight";
+  const left = song?.title ?? "Limelight";
   const right = show
     ? `${show.frame_count.toLocaleString()} frames · ${show.fps} fps · ${show.channels} ch`
     : "";

@@ -433,10 +433,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.94,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 4.598,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -469,10 +469,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.99,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 9.567,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -494,10 +494,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.91,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 12.214,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -519,10 +519,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.75,
+   "amount": 0.97,
    "extent": "all",
    "at_s": 14.35,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -544,7 +544,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 17.461,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -588,10 +588,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.74,
+   "amount": 0.96,
    "extent": "all",
    "at_s": 21.966,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -674,10 +674,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.83,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 29.559,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -820,10 +820,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.84,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 81.966,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -903,10 +903,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.85,
+   "amount": 1.0,
    "extent": "all",
    "at_s": 97.454,
-   "for_beats": 2,
+   "for_beats": 1,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -2669,9 +2669,10 @@
  "accents": [
   {
    "t": 4.598,
-   "l": 0.94,
-   "decay": 0.96,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
@@ -2683,23 +2684,26 @@
   },
   {
    "t": 9.567,
-   "l": 0.99,
-   "decay": 0.94,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.47,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 12.214,
-   "l": 0.91,
-   "decay": 0.98,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.49,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 14.35,
-   "l": 0.75,
-   "decay": 0.94,
-   "hold": 0.72,
+   "l": 0.97,
+   "decay": 0.47,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
@@ -2712,8 +2716,9 @@
   {
    "t": 17.461,
    "l": 1.0,
-   "decay": 0.94,
-   "hold": 0.72,
+   "decay": 0.47,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
@@ -2732,9 +2737,10 @@
   },
   {
    "t": 21.966,
-   "l": 0.74,
-   "decay": 0.96,
-   "hold": 0.72,
+   "l": 0.96,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
@@ -2760,16 +2766,18 @@
   },
   {
    "t": 29.559,
-   "l": 0.83,
-   "decay": 0.96,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.48,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
    "t": 81.966,
-   "l": 0.84,
-   "decay": 0.98,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.49,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
@@ -2802,9 +2810,10 @@
   },
   {
    "t": 97.454,
-   "l": 0.85,
-   "decay": 0.94,
-   "hold": 0.72,
+   "l": 1.0,
+   "decay": 0.47,
+   "mode": "glare",
+   "c": "bone",
    "on": "lamps"
   },
   {
