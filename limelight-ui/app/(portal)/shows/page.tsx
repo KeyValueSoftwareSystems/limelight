@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
@@ -23,6 +23,51 @@ export default function ShowsPage() {
   const songs = usePortalStore((s) => s.songs);
   const setSongs = usePortalStore((s) => s.setSongs);
   const router = useRouter();
+
+  /* Adding a song belongs here, in the portal. The hub is internal and nobody
+     outside the team should have to open it; /api/upload already PUTs the mp3
+     there and starts the score job, so this only has to show progress. */
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [addState, setAddState] = useState<string | null>(null);
+
+  const pollScore = useCallback(async (jobId: string, name: string) => {
+    for (let i = 0; i < 600; i++) {
+      await new Promise((r) => setTimeout(r, 2000));
+      try {
+        const st = await api.upload.status(jobId);
+        const phase = String(st.status || "");
+        if (phase === "done" || phase === "ready") {
+          setAddState(`${name}: score ready — open it and press Generate show`);
+          api.songs.list().then((d) => setSongs(d.songs)).catch(() => {});
+          return;
+        }
+        if (phase === "failed" || phase === "error") {
+          setAddState(`${name}: score failed — ${st.error || "see the hub log"}`);
+          return;
+        }
+        setAddState(`${name}: ${phase || "working"}…`);
+      } catch {
+        setAddState(`${name}: lost track of the job`);
+        return;
+      }
+    }
+    setAddState(`${name}: still going after 20 minutes`);
+  }, [setSongs]);
+
+  const handleAdd = useCallback(async (f: File) => {
+    setAddState(`${f.name}: uploading…`);
+    try {
+      const res = await api.upload.send(f, () => {});
+      if (!res?.job_id) {
+        setAddState(`${f.name}: ${(res as { error?: string })?.error || "upload refused"}`);
+        return;
+      }
+      setAddState(`${f.name}: building the score on the GPU…`);
+      pollScore(res.job_id, res.name || f.name);
+    } catch (e) {
+      setAddState(`${f.name}: ${String(e)}`);
+    }
+  }, [pollScore]);
 
   useEffect(() => {
     api.shows.list().then((d) => {
@@ -60,6 +105,25 @@ export default function ShowsPage() {
         <div className="display">Shows</div>
         <div className="label mt-[7px]">
           {loading ? "loading…" : `${showList.length} saved show${showList.length === 1 ? "" : "s"}`}
+        </div>
+        <div className="mt-[var(--spacing-s4)] flex items-center gap-[var(--spacing-s4)]">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".mp3,audio/mpeg"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              e.currentTarget.value = "";
+              if (f) handleAdd(f);
+            }}
+          />
+          <Button variant="ghost" onClick={() => fileRef.current?.click()}>
+            Add a song
+          </Button>
+          {addState && (
+            <span className="text-[length:var(--text-sm)] text-dim">{addState}</span>
+          )}
         </div>
       </div>
       <div className="flex-1 overflow-y-auto pb-[var(--spacing-s7)]">
