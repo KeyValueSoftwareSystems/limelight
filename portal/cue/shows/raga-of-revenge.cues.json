@@ -22,99 +22,77 @@
    "at": {
     "bar": 1
    },
-   "fade": 1.2,
-   "why": "bar 1 already carries lead-vocal, cello, double-bass and strings - E 3.70. The room is not empty",
+   "fade": 0.15,
+   "why": "bar 1: strings leads, E 3.70, 1 hits",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.38
-    },
-    "inner": {
-     "c": "crimson",
-     "l": 0.46
+     "l": 0.2
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "alternate",
+    "figure": "sweep",
     "every": {
-     "beats": 2
-    },
-    "low": 0.68
-   }
-  },
-  {
-   "id": 2,
-   "at": {
-    "bar": 3
-   },
-   "fade": 0.6,
-   "why": "trombone and tuba in, french-horn 0.72 - brass takes the outer pair",
-   "look": {
-    "outer": {
-     "c": "amber",
-     "l": 0.55
-    },
-    "inner": {
-     "c": "crimson",
-     "l": 0.52
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 2
+     "hits": 2
     },
     "low": 0.55
    }
   },
   {
-   "id": 3,
+   "id": 2,
    "at": {
-    "bar": 4
+    "bar": 2
    },
-   "fade": 0.0,
-   "why": "congas and percussion both 1.00, kick snare timpani toms all in at once - E 3.70 to 7.96",
+   "fade": 0.15,
+   "why": "bar 2: voices leads, E 3.38, 0 hits",
    "look": {
     "lamps": {
-     "c": "scarlet",
-     "l": 0.86
-    },
-    "heads": {
-     "c": "scarlet",
-     "l": 0.45,
-     "pan": 0.5,
-     "tilt": 0.32
+     "c": "crimson",
+     "l": 0.2
+    }
+   }
+  },
+  {
+   "id": 3,
+   "at": {
+    "bar": 3
+   },
+   "fade": 0.3,
+   "why": "build at 9.1s, E 4.71 - one lamp added at a time",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.25
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "pulse",
+    "figure": "build",
     "every": {
-     "beats": 1
+     "hits": 1
     },
-    "low": 0.46
+    "low": 0.35
    }
   },
   {
    "id": 4,
    "at": {
-    "bar": 5
+    "bar": 4
    },
-   "fade": 0.4,
-   "why": "percussion leaves, french-horn 1.00, back-vocal enters",
+   "fade": 0.15,
+   "why": "bar 4: drums leads, E 7.96, 3 hits",
    "look": {
     "lamps": {
-     "c": "amber",
-     "l": 0.62
+     "c": "scarlet",
+     "l": 0.37
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "alternate",
+    "figure": "pairs",
     "every": {
-     "beats": 2
+     "hits": 1
     },
     "low": 0.52
    }
@@ -122,23 +100,23 @@
   {
    "id": 5,
    "at": {
-    "bar": 6
+    "bar": 5
    },
-   "fade": 0.3,
-   "why": "brass, trombone and wind all at 1.00",
+   "fade": 0.12,
+   "why": "entrance at 13.8s - brass lead, E 5.92",
    "look": {
     "lamps": {
      "c": "amber",
-     "l": 0.86
+     "l": 0.31
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "pairs",
+    "figure": "alternate",
     "every": {
-     "beats": 2
+     "hits": 2
     },
-    "low": 0.56
+    "low": 0.5
    }
   },
   {
@@ -146,25 +124,21 @@
    "at": {
     "bar": 7
    },
-   "fade": 0.3,
-   "why": "tuba 1.00 against back-vocal 0.81 - brass outside, voice inside",
+   "fade": 0.5,
+   "why": "tempo_change at 17.8s - the figure changes with the music",
    "look": {
-    "outer": {
+    "lamps": {
      "c": "amber",
-     "l": 0.8
-    },
-    "inner": {
-     "c": "crimson",
-     "l": 0.8
+     "l": 0.4
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "alternate",
+    "figure": "sweep",
     "every": {
-     "beats": 1
+     "hits": 1
     },
-    "low": 0.5
+    "low": 0.42
    }
   },
   {
@@ -172,27 +146,21 @@
    "at": {
     "bar": 8
    },
-   "fade": 0.25,
-   "why": "drums and kick arrive",
+   "fade": 0.35,
+   "why": "bar 8: brass leads, E 7.28, 1 hits",
    "look": {
     "lamps": {
      "c": "amber",
-     "l": 0.8
-    },
-    "heads": {
-     "c": "amber",
-     "l": 0.4,
-     "pan": 0.5,
-     "tilt": 0.32
+     "l": 0.39
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "pulse",
+    "figure": "sweep",
     "every": {
-     "beats": 1
+     "hits": 2
     },
-    "low": 0.38
+    "low": 0.55
    }
   },
   {
@@ -200,22 +168,19 @@
    "at": {
     "bar": 9
    },
-   "fade": 0.0,
-   "why": "viola and violin to 1.00, sitar and mandolin in - strings take the room, E 10.65",
+   "fade": 0.6,
+   "why": "spotlight at 21.8s - the head points, the row stays level",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.9
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "sweep",
-    "every": {
-     "beats": 1
+     "l": 0.153
     },
-    "low": 0.42,
-    "c": "amber"
+    "heads": {
+     "c": "violet",
+     "l": 0.85,
+     "pan": 0.5,
+     "tilt": 0.28
+    }
    }
   },
   {
@@ -223,27 +188,21 @@
    "at": {
     "bar": 10
    },
-   "fade": 0.0,
-   "why": "E 12.08, the busiest bar of the opening - drums, snare and tambourine on top",
+   "fade": 0.15,
+   "why": "bar 10: drums leads, E 12.08, 2 hits",
    "look": {
     "lamps": {
      "c": "scarlet",
-     "l": 0.95
-    },
-    "heads": {
-     "c": "scarlet",
-     "l": 0.55,
-     "pan": 0.5,
-     "tilt": 0.3
+     "l": 0.57
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "alternate",
+    "figure": "sweep",
     "every": {
-     "beats": 1
+     "hits": 2
     },
-    "low": 0.52
+    "low": 0.55
    }
   },
   {
@@ -251,21 +210,21 @@
    "at": {
     "bar": 11
    },
-   "fade": 0.4,
-   "why": "timpani and violin 1.00 into the section edge",
+   "fade": 0.15,
+   "why": "bar 11: strings leads, E 10.09, 2 hits",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.85
+     "l": 0.51
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "build",
+    "figure": "sweep",
     "every": {
-     "beats": 2
+     "hits": 2
     },
-    "low": 0.42
+    "low": 0.55
    }
   },
   {
@@ -273,255 +232,229 @@
    "at": {
     "bar": 12
    },
-   "fade": 0.8,
-   "why": "the floor drops out - E 10.09 to 4.51, drums kick congas timpani all leave, lead-vocal 0.83 alone",
+   "fade": 0.15,
+   "why": "bar 12: voices leads, E 4.51, 0 hits",
    "look": {
-    "inner": {
+    "lamps": {
      "c": "crimson",
-     "l": 0.58
-    },
-    "outer": {
-     "c": "ink",
-     "l": 0.1
+     "l": 0.31
     }
    }
   },
   {
    "id": 12,
    "at": {
-    "bar": 13
+    "bar": 14
    },
-   "fade": 0.4,
-   "why": "lead-vocal 1.00, the quietest thing in the show carrying it",
+   "fade": 0.15,
+   "why": "bar 14: brass leads, E 5.01, 0 hits",
    "look": {
-    "inner": {
-     "c": "crimson",
-     "l": 0.72
-    },
-    "outer": {
-     "c": "oxblood",
-     "l": 0.16
+    "lamps": {
+     "c": "amber",
+     "l": 0.34
     }
-   },
-   "chase": {
-    "on": "inner",
-    "figure": "alternate",
-    "every": {
-     "beats": 2
-    },
-    "low": 0.7
    }
   },
   {
    "id": 13,
    "at": {
-    "bar": 14
+    "bar": 15
    },
-   "fade": 0.5,
-   "why": "synth 0.75 - the one cool colour the keys get",
+   "fade": 0.15,
+   "why": "bar 15: guitars leads, E 5.92, 8 hits",
    "look": {
     "lamps": {
-     "c": "teal",
-     "l": 0.44
+     "c": "ember",
+     "l": 0.39
     }
    },
    "chase": {
     "on": "lamps",
     "figure": "alternate",
     "every": {
-     "bars": 1
+     "hits": 1
     },
-    "low": 0.6
+    "low": 0.45
    }
   },
   {
    "id": 14,
    "at": {
-    "bar": 15
+    "bar": 19
    },
-   "fade": 0.0,
-   "why": "the whole brass family leaves and the guitars arrive - guitar 0.97",
+   "fade": 0.35,
+   "why": "bar 19: guitars leads, E 7.01, 6 hits",
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.62
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "sweep",
-    "every": {
-     "beats": 2
-    },
-    "low": 0.42
-   }
-  },
-  {
-   "id": 15,
-   "at": {
-    "bar": 16
-   },
-   "fade": 0.3,
-   "why": "both vocals out; this is instrumental proper",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.7
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "pairs",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.46
-   }
-  },
-  {
-   "id": 16,
-   "at": {
-    "bar": 18
-   },
-   "fade": 0.5,
-   "why": "double-bass 1.00, congas mandolin and sitar in",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.74
-    },
-    "inner": {
-     "c": "amber",
-     "l": 0.74
+     "l": 0.46
     }
    },
    "chase": {
     "on": "lamps",
     "figure": "alternate",
     "every": {
-     "beats": 1
+     "hits": 1
     },
-    "low": 0.5
+    "low": 0.45
+   }
+  },
+  {
+   "id": 15,
+   "at": {
+    "bar": 22
+   },
+   "fade": 0.35,
+   "why": "bar 22: guitars leads, E 12.39, 6 hits",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.69
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "alternate",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  },
+  {
+   "id": 16,
+   "at": {
+    "bar": 23
+   },
+   "fade": 0.15,
+   "why": "bar 23: drums leads, E 7.97, 8 hits",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.52
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "alternate",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
    }
   },
   {
    "id": 17,
    "at": {
-    "bar": 20
-   },
-   "fade": 0.4,
-   "why": "bass 1.00 and the drums return",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.82
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "pulse",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.42
-   }
-  },
-  {
-   "id": 18,
-   "at": {
-    "bar": 21
-   },
-   "fade": 0.3,
-   "why": "strings 1.00, timpani and tuba - the last bar before the chorus",
-   "look": {
-    "lamps": {
-     "c": "amber",
-     "l": 0.88
-    },
-    "heads": {
-     "c": "amber",
-     "l": 0.5,
-     "pan": 0.5,
-     "tilt": 0.32
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "build",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.46
-   }
-  },
-  {
-   "id": 19,
-   "at": {
-    "bar": 22
+    "bar": 24
    },
    "fade": 0.0,
-   "why": "the chorus lands - E 12.39, sitar mandolin and ukulele all 1.00",
+   "why": "climax at 52.8s - everything arrives at once",
    "look": {
     "lamps": {
-     "c": "crimson",
-     "l": 0.92
+     "c": "scarlet",
+     "l": 0.94
     },
     "heads": {
-     "c": "crimson",
-     "l": 0.55,
+     "c": "scarlet",
+     "l": 0.6,
      "pan": 0.5,
      "tilt": 0.3
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.56
-   }
-  },
-  {
-   "id": 20,
-   "at": {
-    "bar": 24
-   },
-   "fade": 0.0,
-   "why": "climax moment at 52.8s, flute harmonica violin and tuba in. Big, but 92.5s is bigger",
-   "look": {
-    "lamps": {
-     "c": "scarlet",
-     "l": 0.95
-    }
-   },
-   "chase": {
-    "on": "lamps",
     "figure": "pulse",
     "every": {
-     "beats": 1
+     "hits": 1
     },
-    "low": 0.5
+    "low": 0.45
    }
   },
   {
-   "id": 21,
+   "id": 18,
    "at": {
     "bar": 25
    },
-   "fade": 0.3,
-   "why": "snare 0.81 tambourine 0.74 kick 0.67 - the backbeat carries it",
+   "fade": 0.35,
+   "why": "bar 25: drums leads, E 9.10, 5 hits",
    "look": {
     "lamps": {
-     "c": "crimson",
-     "l": 0.86
+     "c": "scarlet",
+     "l": 0.59
     }
    },
    "chase": {
     "on": "lamps",
     "figure": "pairs",
     "every": {
-     "beats": 1
+     "hits": 1
+    },
+    "low": 0.52
+   }
+  },
+  {
+   "id": 19,
+   "at": {
+    "bar": 26
+   },
+   "fade": 0.35,
+   "why": "bar 26: drums leads, E 9.80, 10 hits",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.62
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "alternate",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   }
+  },
+  {
+   "id": 20,
+   "at": {
+    "bar": 33
+   },
+   "fade": 0.35,
+   "why": "bar 33: drums leads, E 8.12, 3 hits",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.59
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pairs",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.52
+   }
+  },
+  {
+   "id": 21,
+   "at": {
+    "bar": 34
+   },
+   "fade": 0.12,
+   "why": "entrance at 72.2s - drums lead, E 8.31",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.61
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "alternate",
+    "every": {
+     "hits": 2
     },
     "low": 0.5
    }
@@ -529,324 +462,98 @@
   {
    "id": 22,
    "at": {
-    "bar": 26
+    "bar": 36
    },
-   "fade": 0.3,
-   "why": "tambourine 1.00 congas 0.92, keys and piano enter inside",
-   "look": {
-    "lamps": {
-     "c": "crimson",
-     "l": 0.88
-    },
-    "inner": {
-     "c": "teal",
-     "l": 0.7
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.5
-   }
-  },
-  {
-   "id": 23,
-   "at": {
-    "bar": 27
-   },
-   "fade": 0.4,
-   "why": "keys and piano leave again, E down to 7.60 - the room eases",
-   "look": {
-    "lamps": {
-     "c": "blood",
-     "l": 0.72
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 2
-    },
-    "low": 0.58
-   }
-  },
-  {
-   "id": 24,
-   "at": {
-    "bar": 29
-   },
-   "fade": 0.0,
-   "why": "guitar 0.90 and electric-guitar 0.85 with kick 0.85",
+   "fade": 0.15,
+   "why": "bar 36: guitars leads, E 7.45, 4 hits",
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.86
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "sweep",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.46
-   }
-  },
-  {
-   "id": 25,
-   "at": {
-    "bar": 30
-   },
-   "fade": 0.4,
-   "why": "back to the voice, E 7.57",
-   "look": {
-    "lamps": {
-     "c": "crimson",
-     "l": 0.74
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 2
-    },
-    "low": 0.6
-   }
-  },
-  {
-   "id": 26,
-   "at": {
-    "bar": 31
-   },
-   "fade": 0.3,
-   "why": "back-vocal enters - from here the congregation answers the leader, so inner answers outer",
-   "look": {
-    "outer": {
-     "c": "crimson",
-     "l": 0.55
-    },
-    "inner": {
-     "c": "blood",
-     "l": 0.82
-    }
-   },
-   "chase": {
-    "on": "inner",
-    "figure": "alternate",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.5
-   }
-  },
-  {
-   "id": 27,
-   "at": {
-    "bar": 33
-   },
-   "fade": 0.3,
-   "why": "vocal 0.86 and back-vocal 0.83 together - the answer becomes unison",
-   "look": {
-    "lamps": {
-     "c": "crimson",
-     "l": 0.86
+     "l": 0.58
     }
    },
    "chase": {
     "on": "lamps",
     "figure": "pairs",
     "every": {
-     "beats": 1
+     "hits": 1
     },
-    "low": 0.56
+    "low": 0.52
    }
   },
   {
-   "id": 28,
-   "at": {
-    "bar": 35
-   },
-   "fade": 0.3,
-   "why": "guitar 0.86, keys and piano back",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.8
-    },
-    "inner": {
-     "c": "teal",
-     "l": 0.66
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.5
-   }
-  },
-  {
-   "id": 29,
-   "at": {
-    "bar": 36
-   },
-   "fade": 0.0,
-   "why": "electric-guitar and guitar both 1.00",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.95
-    },
-    "heads": {
-     "c": "ember",
-     "l": 0.5,
-     "pan": 0.5,
-     "tilt": 0.32
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "pulse",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.46
-   }
-  },
-  {
-   "id": 30,
+   "id": 23,
    "at": {
     "bar": 38
    },
-   "fade": 0.5,
-   "why": "synth 0.84 with woodwind in, E easing to 6.26",
+   "fade": 0.15,
+   "why": "bar 38: voices leads, E 6.26, 4 hits",
    "look": {
     "lamps": {
-     "c": "teal",
-     "l": 0.62
-    },
-    "ends": {
-     "c": "saffron",
-     "l": 0.6
+     "c": "crimson",
+     "l": 0.53
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "alternate",
+    "figure": "pairs",
     "every": {
-     "beats": 2
+     "hits": 1
     },
-    "low": 0.56
+    "low": 0.52
    }
   },
   {
-   "id": 31,
+   "id": 24,
    "at": {
     "bar": 39
    },
-   "fade": 0.4,
-   "why": "section edge - french-horn and timpani in, back-vocal 0.59",
+   "fade": 0.3,
+   "why": "build at 83.3s, E 7.11 - one lamp added at a time",
    "look": {
     "lamps": {
-     "c": "amber",
-     "l": 0.72
+     "c": "scarlet",
+     "l": 0.58
     }
    },
    "chase": {
     "on": "lamps",
     "figure": "build",
     "every": {
-     "beats": 2
+     "hits": 1
     },
-    "low": 0.46
+    "low": 0.35
    }
   },
   {
-   "id": 32,
-   "at": {
-    "bar": 40
-   },
-   "fade": 0.3,
-   "why": "toms 0.67 and kick 0.57 with cello keys sitar ukulele - it turns percussive",
-   "look": {
-    "lamps": {
-     "c": "scarlet",
-     "l": 0.8
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "pulse",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.44
-   }
-  },
-  {
-   "id": 33,
-   "at": {
-    "bar": 42
-   },
-   "fade": 0.3,
-   "why": "bass in, E 7.70",
-   "look": {
-    "lamps": {
-     "c": "crimson",
-     "l": 0.84
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.5
-   }
-  },
-  {
-   "id": 34,
+   "id": 25,
    "at": {
     "bar": 43
    },
-   "fade": 0.2,
-   "why": "toms 0.91 back-vocal 0.89 and the lead drops out entirely - the congregation alone",
+   "fade": 0.35,
+   "why": "bar 43: drums leads, E 8.35, 3 hits",
    "look": {
     "lamps": {
-     "c": "blood",
-     "l": 0.88
-    },
-    "heads": {
-     "c": "blood",
-     "l": 0.5,
-     "pan": 0.5,
-     "tilt": 0.32
+     "c": "scarlet",
+     "l": 0.67
     }
    },
    "chase": {
     "on": "lamps",
     "figure": "pairs",
     "every": {
-     "beats": 1
+     "hits": 1
     },
-    "low": 0.5
+    "low": 0.52
    }
   },
   {
-   "id": 35,
+   "id": 26,
    "at": {
     "bar": 44
    },
    "fade": 0.0,
-   "why": "PEAK at 92.5s - drums 1.00 and toms 1.00, the loudest instant in the recording. The only white and the only full look",
+   "why": "PEAK at 92.5s - the loudest instant in the recording. Full blast, the only white",
    "look": {
     "lamps": {
      "c": "bone",
@@ -863,47 +570,65 @@
     "on": "lamps",
     "figure": "pulse",
     "every": {
-     "beats": 1
+     "hits": 1
     },
-    "low": 0.58
+    "low": 0.6
    }
   },
   {
-   "id": 36,
+   "id": 27,
    "at": {
-    "bar": 45
+    "bar": 46
    },
-   "fade": 0.5,
-   "why": "off the white",
+   "fade": 0.15,
+   "why": "bar 46: keys leads, E 8.89, 6 hits",
    "look": {
     "lamps": {
-     "c": "scarlet",
-     "l": 0.88
+     "c": "teal",
+     "l": 0.64
     }
    },
    "chase": {
     "on": "lamps",
     "figure": "alternate",
     "every": {
-     "beats": 1
+     "hits": 1
     },
-    "low": 0.5
+    "low": 0.45
    }
   },
   {
-   "id": 37,
+   "id": 28,
    "at": {
-    "bar": 46
+    "bar": 48
    },
    "fade": 0.3,
-   "why": "back-vocal 1.00 keys 0.93 kick 0.91, the lead returns",
+   "why": "build at 101.2s, E 10.18 - one lamp added at a time",
    "look": {
     "lamps": {
-     "c": "crimson",
-     "l": 0.86
-    },
-    "inner": {
      "c": "teal",
+     "l": 0.65
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "build",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.35
+   }
+  },
+  {
+   "id": 29,
+   "at": {
+    "bar": 49
+   },
+   "fade": 0.15,
+   "why": "bar 49: drums leads, E 12.20, 4 hits",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
      "l": 0.7
     }
    },
@@ -911,55 +636,206 @@
     "on": "lamps",
     "figure": "pairs",
     "every": {
-     "beats": 1
+     "hits": 1
     },
-    "low": 0.5
+    "low": 0.52
    }
   },
   {
-   "id": 38,
+   "id": 30,
    "at": {
-    "bar": 47
+    "bar": 51
    },
-   "fade": 0.0,
-   "why": "section edge - synth 1.00 kick 0.98 keys 0.94 digital-piano 0.93. The keys own this stretch",
+   "fade": 0.35,
+   "why": "bar 51: drums leads, E 12.79, 3 hits",
    "look": {
     "lamps": {
-     "c": "teal",
-     "l": 0.86
+     "c": "scarlet",
+     "l": 0.67
     }
    },
    "chase": {
     "on": "lamps",
-    "figure": "alternate",
+    "figure": "pairs",
     "every": {
-     "beats": 1
+     "hits": 1
     },
-    "low": 0.46
+    "low": 0.52
    }
   },
   {
-   "id": 39,
+   "id": 31,
    "at": {
-    "bar": 48
+    "bar": 52
    },
-   "fade": 0.3,
-   "why": "digital-piano, keys and piano all 1.00",
+   "fade": 0.35,
+   "why": "bar 52: drums leads, E 9.66, 3 hits",
    "look": {
     "lamps": {
-     "c": "teal",
-     "l": 0.9
+     "c": "scarlet",
+     "l": 0.53
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pairs",
+    "every": {
+     "hits": 1
     },
-    "ends": {
-     "c": "saffron",
-     "l": 0.8
+    "low": 0.52
+   }
+  },
+  {
+   "id": 32,
+   "at": {
+    "bar": 53
+   },
+   "fade": 0.8,
+   "why": "breakdown at 109.8s - the room empties to the middle",
+   "look": {
+    "inner": {
+     "c": "scarlet",
+     "l": 0.231
+    }
+   }
+  },
+  {
+   "id": 33,
+   "at": {
+    "bar": 54
+   },
+   "fade": 0.0,
+   "why": "pause at 113.0s, E 1.27 - the music stops, so the light stops",
+   "look": {}
+  },
+  {
+   "id": 34,
+   "at": {
+    "bar": 55
+   },
+   "fade": 0.15,
+   "why": "bar 55: guitars leads, E 7.45, 1 hits",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.39
     }
    },
    "chase": {
     "on": "lamps",
     "figure": "sweep",
     "every": {
-     "beats": 1
+     "hits": 2
+    },
+    "low": 0.55
+   }
+  },
+  {
+   "id": 35,
+   "at": {
+    "bar": 56
+   },
+   "fade": 0.35,
+   "why": "bar 56: guitars leads, E 9.22, 4 hits",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.43
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pairs",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.52
+   }
+  },
+  {
+   "id": 36,
+   "at": {
+    "bar": 57
+   },
+   "fade": 0.35,
+   "why": "bar 57: guitars leads, E 6.44, 3 hits",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.32
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pairs",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.52
+   }
+  },
+  {
+   "id": 37,
+   "at": {
+    "bar": 58
+   },
+   "fade": 0.5,
+   "why": "register_shift at 120.3s - the figure changes with the music",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.33
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "sweep",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.42
+   }
+  },
+  {
+   "id": 38,
+   "at": {
+    "bar": 60
+   },
+   "fade": 0.12,
+   "why": "entrance at 123.8s - guitars lead, E 10.98",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.39
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "alternate",
+    "every": {
+     "hits": 2
+    },
+    "low": 0.5
+   }
+  },
+  {
+   "id": 39,
+   "at": {
+    "bar": 61
+   },
+   "fade": 0.5,
+   "why": "rhythm_change at 126.7s - the figure changes with the music",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.23
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "sweep",
+    "every": {
+     "hits": 1
     },
     "low": 0.42
    }
@@ -967,325 +843,30 @@
   {
    "id": 40,
    "at": {
-    "bar": 49
+    "bar": 62
    },
-   "fade": 0.0,
-   "why": "the brass family comes back all at once - brass french-horn trombone tuba, E 12.20",
+   "fade": 0.15,
+   "why": "bar 62: voices leads, E 0.18, 0 hits",
    "look": {
     "lamps": {
-     "c": "amber",
-     "l": 0.95
-    },
-    "heads": {
-     "c": "amber",
-     "l": 0.55,
-     "pan": 0.5,
-     "tilt": 0.32
+     "c": "crimson",
+     "l": 0.06
     }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "build",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.46
    }
   },
   {
    "id": 41,
    "at": {
-    "bar": 50
-   },
-   "fade": 0.3,
-   "why": "toms and back-vocal over a 0.78 kick",
-   "look": {
-    "lamps": {
-     "c": "scarlet",
-     "l": 0.86
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "pulse",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.46
-   }
-  },
-  {
-   "id": 42,
-   "at": {
-    "bar": 51
-   },
-   "fade": 0.0,
-   "why": "E 12.79 - the busiest bar in the whole song. flute, harmonica and woodwind all at 1.00",
-   "look": {
-    "lamps": {
-     "c": "saffron",
-     "l": 0.95
-    },
-    "heads": {
-     "c": "saffron",
-     "l": 0.55,
-     "pan": 0.5,
-     "tilt": 0.32
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.5
-   }
-  },
-  {
-   "id": 43,
-   "at": {
-    "bar": 52
-   },
-   "fade": 0.4,
-   "why": "the woodwinds leave, congas and percussion take over",
-   "look": {
-    "lamps": {
-     "c": "crimson",
-     "l": 0.8
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "pairs",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.5
-   }
-  },
-  {
-   "id": 44,
-   "at": {
-    "bar": 53
-   },
-   "fade": 0.6,
-   "why": "outro edge, E 7.30 and falling",
-   "look": {
-    "lamps": {
-     "c": "amber",
-     "l": 0.52
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "bars": 1
-    },
-    "low": 0.58
-   }
-  },
-  {
-   "id": 45,
-   "at": {
-    "bar": 54
-   },
-   "fade": 0.0,
-   "why": "THE HOLE at 111.7s - E 7.30 to 1.27, twenty-four stems leave in one bar. Nothing moves here",
-   "look": {
-    "inner": {
-     "c": "oxblood",
-     "l": 0.13
-    }
-   }
-  },
-  {
-   "id": 46,
-   "at": {
-    "bar": 55
-   },
-   "fade": 0.0,
-   "why": "and fourteen come back at once - bass, acoustic-guitar, guitar, strings",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.76
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "sweep",
-    "every": {
-     "beats": 2
-    },
-    "low": 0.46
-   }
-  },
-  {
-   "id": 47,
-   "at": {
-    "bar": 56
-   },
-   "fade": 0.2,
-   "why": "banjo 1.00 harp 1.00 with tambourine, percussion, snare and toms",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.86
-    },
-    "inner": {
-     "c": "amber",
-     "l": 0.8
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "pairs",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.5
-   }
-  },
-  {
-   "id": 48,
-   "at": {
-    "bar": 57
-   },
-   "fade": 0.5,
-   "why": "the percussion leaves again, back-vocal and violin in - strings take it back",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.62
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "bars": 1
-    },
-    "low": 0.6
-   }
-  },
-  {
-   "id": 49,
-   "at": {
-    "bar": 58
-   },
-   "fade": 0.4,
-   "why": "register shift at 120.3s, strings 0.84",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.7
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 2
-    },
-    "low": 0.6
-   }
-  },
-  {
-   "id": 50,
-   "at": {
-    "bar": 59
-   },
-   "fade": 0.5,
-   "why": "every vocal leaves - the one cold stretch in the show, so the red return reads hot",
-   "look": {
-    "lamps": {
-     "c": "indigo",
-     "l": 0.56
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "sweep",
-    "every": {
-     "bars": 1
-    },
-    "low": 0.52
-   }
-  },
-  {
-   "id": 51,
-   "at": {
-    "bar": 60
-   },
-   "fade": 0.0,
-   "why": "E 10.98 - acoustic-guitar, bowed_strings, cello and dobro all 1.00 and every voice back at once",
-   "look": {
-    "lamps": {
-     "c": "crimson",
-     "l": 0.95
-    },
-    "heads": {
-     "c": "crimson",
-     "l": 0.55,
-     "pan": 0.5,
-     "tilt": 0.3
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 1
-    },
-    "low": 0.5
-   }
-  },
-  {
-   "id": 52,
-   "at": {
-    "bar": 61
-   },
-   "fade": 0.4,
-   "why": "E 5.27, letting go",
-   "look": {
-    "lamps": {
-     "c": "blood",
-     "l": 0.62
-    }
-   },
-   "chase": {
-    "on": "lamps",
-    "figure": "alternate",
-    "every": {
-     "beats": 2
-    },
-    "low": 0.62
-   }
-  },
-  {
-   "id": 53,
-   "at": {
-    "bar": 62
-   },
-   "fade": 1.4,
-   "why": "E 0.18 - there is almost nothing left to light",
-   "look": {
-    "ends": {
-     "c": "oxblood",
-     "l": 0.16
-    }
-   }
-  },
-  {
-   "id": 54,
-   "at": {
     "bar": 63
    },
-   "fade": 1.6,
-   "why": "out",
-   "look": {}
+   "fade": 0.15,
+   "why": "bar 63: brass leads, E 0.00, 0 hits",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.05
+    }
+   }
   }
  ]
 }

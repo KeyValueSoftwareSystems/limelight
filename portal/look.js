@@ -21,9 +21,13 @@ const planPath = opt("--plan", fs.existsSync(draft) ? draft : path.join(ROOT, "p
 const scorePath = require(path.join(ROOT, "protocol", "fixture.js")).pick(song);
 const out = path.join(require("os").tmpdir(), "look-" + process.pid + ".json");
 
+const planDoc = JSON.parse(fs.readFileSync(planPath, "utf8"));
+const isCues = Array.isArray(planDoc.cues);
 try {
   execFileSync(process.execPath,
-    [path.join(ROOT, "portal", "baker.js"), scorePath, planPath, "--rig", rigName, "--lights", out],
+    isCues
+      ? [path.join(ROOT, "portal", "cue", "bake.js"), song, "--cues", planPath, "--rig", rigName, "--out", out]
+      : [path.join(ROOT, "portal", "baker.js"), scorePath, planPath, "--rig", rigName, "--lights", out],
     { stdio: ["ignore", "ignore", "pipe"] });
 } catch (e) {
   console.error("the baker could not render " + planPath + ":");
@@ -46,14 +50,17 @@ const L = frames.map((f) => OFF.map((o) => lum(f, o)));
 const rigL = L.map((r) => r.reduce((a, b) => a + b, 0) / r.length);
 
 const plan = JSON.parse(fs.readFileSync(planPath, "utf8"));
-const nCue = (plan.states || []).length + (plan.bindings || []).length + (plan.gestures || []).length;
+const nCue = Array.isArray(plan.cues) ? plan.cues.length
+  : (plan.states || []).length + (plan.bindings || []).length + (plan.gestures || []).length;
 
 const out_ = [];
 const say = (s) => out_.push(s);
 
 say(`LOOK AT THE SHOW  ${song}  ${dur.toFixed(0)}s  ${R.lamps.length} lamps + ${R.heads.length} head`);
 say("");
-say(`  ${(plan.states || []).length} states, ${(plan.bindings || []).length} bindings, ` +
+say(Array.isArray(plan.cues)
+  ? `  ${nCue} cues, one every ${(dur / nCue).toFixed(1)}s, ${plan.cues.filter((c) => c.chase).length} carrying a chase`
+  : `  ${(plan.states || []).length} states, ${(plan.bindings || []).length} bindings, ` +
     `${(plan.gestures || []).length} gestures = ${nCue} cues, one every ${(dur / nCue).toFixed(1)}s`);
 
 const secs = score.sections || [];

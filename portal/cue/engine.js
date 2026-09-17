@@ -95,7 +95,10 @@ function makeGrid(score) {
   }
   const step = beats.length > 1
     ? (beats[beats.length - 1] - beats[0]) / (beats.length - 1) : 0.5;
-  return { beats, perBar, phase, secondsAt, beatSeconds: step, barSeconds: step * perBar };
+  const hits = (((score.rhythm || {}).hits) || [])
+    .map((h) => ({ t: +h.t, i: +h.intensity || 0 }))
+    .sort((a, b) => a.t - b.t);
+  return { beats, perBar, phase, secondsAt, hits, beatSeconds: step, barSeconds: step * perBar };
 }
 
 function cueSeconds(cue, grid) {
@@ -146,6 +149,16 @@ function chaseStepSeconds(chase, grid) {
 
 function chaseStepTimes(chase, grid, startS, endS) {
   const every = chase.every || { bars: 1 };
+  if (every.hits != null) {
+    const n = Math.max(1, Math.round(+every.hits));
+    const floor = chase.min_intensity != null ? +chase.min_intensity : 0.3;
+    const picked = grid.hits
+      .filter((h) => h.t >= startS - 1e-6 && h.t < endS - 1e-6 && h.i >= floor)
+      .map((h) => h.t);
+    const out = [];
+    for (let k = 0; k < picked.length; k += n) out.push(Math.max(startS, picked[k]));
+    return out.length ? out : [startS];
+  }
   const nBeats = every.beats != null
     ? Math.max(0.25, +every.beats)
     : Math.max(0.25, +(every.bars != null ? every.bars : 1)) * grid.perBar;
