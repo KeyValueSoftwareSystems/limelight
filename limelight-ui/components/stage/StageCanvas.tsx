@@ -5,7 +5,7 @@ import { usePortalStore } from "@/store/portal";
 import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { readFixtures, trimFixtures } from "@/lib/fixtures";
 import { paintStage, ground } from "@/lib/renderer";
-import { frameFor } from "@/lib/sync";
+import { blendedFrame } from "@/lib/sync";
 import type { AnchoredClock } from "@/hooks/useAnchoredClock";
 
 interface StageCanvasProps {
@@ -57,6 +57,8 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
     return () => obs.disconnect();
   }, [sizeCanvas]);
 
+  const blendRef = useRef<Uint8Array | null>(null);
+
   const paint = useCallback(() => {
     const cv = canvasRef.current;
     if (!cv || !show || !frames || !place) return;
@@ -69,8 +71,9 @@ export function StageCanvas({ clockRef, playing, currentTime }: StageCanvasProps
 
     const t = clockRef.current?.position() ?? 0;
     /* what the listener is hearing NOW is t minus the output latency */
-    const idx = frameFor(t, show.fps, show.frame_count, syncOffset);
-    const raw = readFixtures(idx, frames, show, place);
+    const { src, at } = blendedFrame(
+      frames, show.channels, t, show.fps, show.frame_count, syncOffset, blendRef);
+    const raw = readFixtures(at, src, show, place);
     if (!raw) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ground(ctx, W, H);

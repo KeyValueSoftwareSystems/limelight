@@ -9,7 +9,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert";
-import { frameFor, outputLatencyOf, SYNC_NUDGE_LIMIT } from "./sync.ts";
+import { frameFor, framePairFor, outputLatencyOf, SYNC_NUDGE_LIMIT } from "./sync.ts";
 
 const FPS = 40;
 const COUNT = 5252;                 // raga-of-revenge, 131.3s at 40fps
@@ -87,4 +87,24 @@ test("an absurd reported latency is not trusted", () => {
 
 test("the manual nudge is bounded", () => {
   assert.ok(SYNC_NUDGE_LIMIT > 0 && SYNC_NUDGE_LIMIT <= 0.5);
+});
+
+test("framePairFor blends between neighbouring frames", () => {
+  const a = framePairFor(1.0, FPS, COUNT, 0);
+  assert.equal(a.i0, 40);
+  assert.equal(a.f, 0);
+  const b = framePairFor(1.0 + 0.5 / FPS, FPS, COUNT, 0);
+  assert.equal(b.i0, 40);
+  assert.equal(b.i1, 41);
+  assert.ok(Math.abs(b.f - 0.5) < 1e-6, `f ${b.f}`);
+});
+
+test("framePairFor clamps at both ends", () => {
+  const s = framePairFor(-5, FPS, COUNT, 0);
+  assert.equal(s.i0, 0);
+  assert.equal(s.i1, 0);
+  const e = framePairFor(1e6, FPS, COUNT, 0);
+  assert.equal(e.i0, COUNT - 1);
+  assert.equal(e.i1, COUNT - 1);
+  assert.equal(e.f, 0);
 });

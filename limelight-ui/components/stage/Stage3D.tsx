@@ -16,7 +16,7 @@ import { usePortalStore } from "@/store/portal";
 import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { readFixtures, trimFixtures } from "@/lib/fixtures";
 import { clamp } from "@/lib/grid";
-import { frameFor } from "@/lib/sync";
+import { blendedFrame } from "@/lib/sync";
 import { profileOf } from "@/lib/profiles";
 import {
   worldOf, aimOf, throwOf, landingOf, roomOf, cameraOf, barsOf, bodyOf, type Deck,
@@ -226,6 +226,7 @@ interface Stage3DProps {
 
 export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps) {
   const boxRef = useRef<HTMLDivElement>(null);
+  const blendRef = useRef<Uint8Array | null>(null);
   const glRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const camRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -564,8 +565,9 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
 
     const t = clockRef.current?.position() ?? 0;
     /* what the listener is hearing NOW is t minus the output latency */
-    const idx = frameFor(t, show.fps, show.frame_count, syncOffset);
-    const raw = readFixtures(idx, frames, show, place);
+    const { src, at } = blendedFrame(
+      frames, show.channels, t, show.fps, show.frame_count, syncOffset, blendRef);
+    const raw = readFixtures(at, src, show, place);
     if (!raw) { gl.render(scene, cam); return; }
     const fx = trimFixtures(raw, trims);
 
