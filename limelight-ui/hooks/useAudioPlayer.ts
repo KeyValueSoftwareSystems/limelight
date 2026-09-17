@@ -40,23 +40,51 @@ class BufferPlayer implements AnchoredClock {
 
   get playing(): boolean { return this._playing; }
 
+  /** Set when the last load failed; null when audio is fine. */
+  loadError: string | null = null;
+
   position(): number {
     if (!this._playing) return this.offset;
     const t = this.offset + Math.max(0, this.ctx.currentTime - this.startedAt);
     return this.buffer ? Math.min(t, this.buffer.duration) : t;
   }
 
+  /* A file the browser cannot decode - a bad upload, a container it does not
+     support, a truncated fetch - used to throw an unhandled EncodingError and
+     put a red runtime overlay over the whole editor. The show still draws
+     without audio, so a failed load leaves the player empty and says so rather
+     than taking the page down with it. */
   async load(url: string): Promise<void> {
     const id = ++this.loadId;
     this.stopSource();
     this._playing = false;
     this.offset = 0;
     this.buffer = null;
-    const bytes = await (await fetch(url)).arrayBuffer();
-    const buf = await this.ctx.decodeAudioData(bytes);
-    if (id !== this.loadId) return;          // a newer load has taken over
-    this.buffer = buf;
-    if (this.pendingPlay) { this.pendingPlay = false; this.play(); }
+    this.loadError = null;
+
+    let bytes: ArrayBuffer;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      bytes = await res.arrayBuffer();
+    } catch (e) {
+      if (id === this.loadId) {
+        this.loadError = e instanceof Error ? e.message : "could not be fetched";
+        this.pendingPlay = false;
+      }
+      return;
+    }
+
+    try {
+      const buf = await this.ctx.decodeAudioData(bytes);
+      if (id !== this.loadId) return;        // a newer load has taken over
+      this.buffer = buf;
+      if (this.pendingPlay) { this.pendingPlay = false; this.play(); }
+    } catch {
+      if (id !== this.loadId) return;
+      this.loadError = "this file could not be decoded";
+      this.pendingPlay = false;
+    }
   }
 
   play(at?: number): void {

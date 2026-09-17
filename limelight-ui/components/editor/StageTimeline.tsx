@@ -1013,13 +1013,6 @@ export function StageTimeline({
       const el = document.activeElement as HTMLElement | null;
       if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
 
-      if ((e.key === " " || e.code === "Space") && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        e.preventDefault();
-        (el as HTMLButtonElement | null)?.blur?.();
-        onToggle();
-        return;
-      }
-
       if (e.ctrlKey || e.metaKey) {
         const k = e.key.toLowerCase();
         /* Undo comes first, and takes the chord whether or not anything is

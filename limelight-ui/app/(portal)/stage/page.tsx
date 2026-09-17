@@ -14,12 +14,10 @@ import * as api from "@/lib/api";
 import { StagePreview } from "@/components/stage/StagePreview";
 import { RoleToggle } from "@/components/portal/RoleToggle";
 import { OperatorRail } from "@/components/editor/OperatorRail";
+import { OperatorConsole } from "@/components/stage/OperatorConsole";
+import { OperatorStatus } from "@/components/stage/OperatorStatus";
 import { ChatPanel } from "@/components/editor/ChatPanel";
 import { TargetLine } from "@/components/stage/TargetLine";
-import { ConsolePanel } from "@/components/stage/ConsolePanel";
-import { RigPanel } from "@/components/stage/RigPanel";
-import { LimitsPanel } from "@/components/stage/LimitsPanel";
-import { StatePanel } from "@/components/stage/StatePanel";
 import { VenuePicker } from "@/components/venues/VenuePicker";
 import { StageTimeline } from "@/components/editor/StageTimeline";
 import { SaveShowDialog } from "@/components/editor/SaveShowDialog";
@@ -275,6 +273,7 @@ export default function StagePage() {
   }, [song, urlParams, setSong, setSeed, setSongs, setLayout, setEdits, setShowId, setShowVersion, setPendingPlan, setPlanText]);
 
   const importInputRef = useRef<HTMLInputElement>(null);
+
 
   /* Poll a started bake to completion and load its frames/show. Shared by the
      legacy seed+edits bake and the v2 plan bake — both return the same job. */
@@ -590,6 +589,7 @@ export default function StagePage() {
     }
   }, [song]);
 
+
   const handleRigToggle = useCallback(async () => {
     const st = usePortalStore.getState();
     const current = st.rig;
@@ -708,6 +708,25 @@ export default function StagePage() {
     toggle();
     setIsPlaying(playing());
   }, [toggle, playing]);
+
+  /* Space plays and pauses anywhere on this page. It used to live in the
+     timeline, which does not mount in operator mode and bails early on a track
+     with no show, so the shortcut was dead in both. */
+  const toggleRef = useRef(handleToggle);
+  useEffect(() => { toggleRef.current = handleToggle; });
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== " " && e.code !== "Space") return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      e.preventDefault();
+      (el as HTMLButtonElement | null)?.blur?.();
+      toggleRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const handleSeek = useCallback(
     (t: number) => {
@@ -1023,7 +1042,7 @@ export default function StagePage() {
             {isDesigner ? (
               <Sidebar effects={effects} onRecolour={handleRecolour} />
             ) : (
-              <OperatorRail />
+              <OperatorRail onPickRig={handlePickVenue} />
             )}
           </div>
         </div>
@@ -1194,9 +1213,19 @@ export default function StagePage() {
 
           <section
             ref={editorRef}
-            style={{ height: editorH, minHeight: MIN_EDITOR }}
+            style={{ height: isOperator ? 300 : editorH, minHeight: MIN_EDITOR }}
             className="flex-initial overflow-hidden"
           >
+            {isOperator ? (
+              <OperatorConsole
+                currentTime={currentTime}
+                duration={show?.duration_s ?? song?.duration_s ?? 0}
+                grid={show?.grid ?? null}
+                playing={isPlaying}
+                onToggle={handleToggle}
+                onSeek={handleSeek}
+              />
+            ) : (
             <StageTimeline
               onNaturalHeight={fitEditor}
               onGenerate={song ? handleGenerate : undefined}
@@ -1223,6 +1252,7 @@ export default function StagePage() {
               reveal={reveal}
               baking={stageMsg}
             />
+            )}
           </section>
 
         </div>
@@ -1238,12 +1268,11 @@ export default function StagePage() {
         <aside className="flex-none overflow-hidden" style={{ width: asideW }}>
           <div key={role} className="h-full rail-swap">
             {isOperator ? (
-              <div className="h-full overflow-y-auto">
-                <ConsolePanel />
-                <RigPanel />
-                <LimitsPanel />
-                <StatePanel />
-              </div>
+              <OperatorStatus
+                clockRef={clockRef}
+                playing={isPlaying}
+                currentTime={currentTime}
+              />
             ) : (
               <ChatPanel />
             )}

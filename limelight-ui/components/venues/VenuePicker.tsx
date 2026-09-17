@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePortalStore } from "@/store/portal";
 import { Sheet } from "@/components/ui/Sheet";
 import { Input } from "@/components/ui/Input";
+import { RigPreview } from "./RigPreview";
 import { rigSummary } from "@/lib/profiles";
 import * as api from "@/lib/api";
 import type { Venue } from "@/lib/types";
@@ -104,6 +105,13 @@ export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
                           : "cursor-pointer hover:bg-white/[0.045]"
                     }`}
                   >
+                    <div className="flex items-center gap-[10px]">
+                    <RigPreview
+                      fixtures={rig?.fixture_list ?? []}
+                      dimmed={v.locked}
+                      className="w-[58px] h-[34px] rounded-[4px] flex-none"
+                    />
+                    <div className="min-w-0 flex-1">
                     <div className="flex items-baseline gap-[var(--spacing-s2)]">
                       <span className="text-[13px] font-medium">{l.name}</span>
                       {live && (
@@ -124,7 +132,9 @@ export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
                       )}
                     </div>
                     <div className="text-[11.5px] text-ink-dim tabular-nums mt-[3px]">
-                      {rig ? rigSummary(rig.kinds) : "rig unavailable"}
+                      {rig ? rigSummary(rig.kinds) : "Rig unavailable"}
+                    </div>
+                    </div>
                     </div>
                   </button>
                 );
