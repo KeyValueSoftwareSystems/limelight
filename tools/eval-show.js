@@ -18,7 +18,7 @@
      intentional  every dark stretch is either a darkening cue or a real hole in
      breath       a blackout on loud music is one beat, never two
      smooth       the room does not switch off and on outside a designed hit
-     head         the head is still, lands its moves on downbeats, and never outshines the row except at the climax
+     head         the head glides (never snaps or shivers), ends its moves on beats, and never outshines the row except at the climax
                   the music. Blackouts were firing over a vocal at full voice,
                   because "silence" had been measured as gaps between drum hits.
      contained    a cue changes nothing outside its own span. `follow` darkened
@@ -331,44 +331,60 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
     (dips.length ? "; first at " + dips.slice(0, 6).map(t => t.toFixed(1) + "s").join(", ") : ""));
 }
 
-/* 3d. head — still, deliberate, landing on downbeats, never the brightest thing except at the climax --- */
+/* 3d. head — smooth, deliberate, landing on beats, never the brightest thing except at the climax --- */
 {
-  /* Renjith: "moving in all sorts of directions and has no stable rhythm ...
-     sinking the pars' chases into non-existence". So: the head is STILL for at
-     least 85% of the frames in which it is lit; every visible move ends within
-     a sixth of a beat before a beat; and outside the climax and the impact
-     beats its level stays at or under 75%. Motion in the dark is not counted --
-     a head parking itself during a blackout is invisible. */
+  /* Renjith, twice: first "moving in all sorts of directions and has no stable
+     rhythm", then, after it was made still, "completely bland ... what we want
+     to avoid is jittery movements, it just has to be cohesive and smooth". So
+     the head may move as much as the music asks, but: it never turns faster
+     than 5 of its 7 units a frame (a glide, never a snap), it never reverses
+     direction twice inside one beat (no shiver), every visible move ends within
+     a sixth of a beat before a beat, and outside the climax and the impacts its
+     level stays at or under 75%. Motion in the dark is not counted. */
   const head = HEADS[0];
   if (!head) { check("head", true, "no moving head on this rig"); }
   else {
     const panCh = head.off + head.roles.indexOf("pan"), tiltCh = head.off + head.roles.indexOf("tilt");
     const lit = f => headLv(f)[0] > 0.05;
-    let litN = 0, moving = 0, badLand = 0, segs = 0, bright = 0;
+    const beatS = 60 / ((score.key_tempo && score.key_tempo.grid_bpm) || 120);
     const CLIMAX = [97.76, 109.76];
     const impactSpans = cues.filter(c => c.effect === "impact").map(spanOf).filter(Boolean).map(([a, b]) => [a - 0.05, b + 0.05]);
-    let inMove = false, moveStart = 0;
+    let litN = 0, fast = 0, shiver = 0, badLand = 0, segs = 0, bright = 0, moving = 0;
+    let inMove = false, moveStart = 0, lastDir = 0, lastRev = -9, stillRun = 0, moveEnd = 0, panAtStart = 0, panAtEnd = 0;
     for (let i = 1; i < F.length; i++) {
       const t = i / fps;
-      if (!lit(F[i])) { inMove = false; continue; }
+      if (!lit(F[i]) || !lit(F[i - 1])) { inMove = false; lastDir = 0; stillRun = 0; continue; }
       litN++;
-      const dm = Math.abs(F[i][panCh] - F[i - 1][panCh]) + Math.abs(F[i][tiltCh] - F[i - 1][tiltCh]);
-      const mv = dm > 1 && lit(F[i - 1]);
+      const dp = F[i][panCh] - F[i - 1][panCh], dm = Math.abs(dp) + Math.abs(F[i][tiltCh] - F[i - 1][tiltCh]);
+      /* any change is motion; a glide at two units a frame rounds to a one-unit step
+         now and then and must not read as a stop. A move has ENDED only after
+         three unchanged frames. */
+      const mv = dm >= 1;
       if (mv) moving++;
-      if (mv && !inMove) moveStart = t;
-      if (inMove && !mv && t - moveStart >= 0.1) {   /* a move just ended (a shorter twitch is a parked head settling): the next beat must be close ahead */
-        segs++;
-        const nextBeat = BEATS.find(x => x >= t - 0.06);
-        if (nextBeat == null || nextBeat - t > (60 / ((score.key_tempo && score.key_tempo.grid_bpm) || 120)) / 6) badLand++;
+      if (dm > 5.5) fast++;
+      stillRun = mv ? 0 : stillRun + 1;
+      const dir = dp > 0 ? 1 : dp < 0 ? -1 : 0;
+      if (dir && lastDir && dir !== lastDir) { if (t - lastRev < beatS) shiver++; lastRev = t; }
+      if (dir) lastDir = dir;
+      if (mv && !inMove) { moveStart = t; panAtStart = F[i - 1][panCh]; }
+      if (mv) { inMove = true; moveEnd = t; panAtEnd = F[i][panCh]; }
+      else if (inMove && stillRun >= 3) {
+        inMove = false;
+        /* a crawl of a few units (a six-second glide across a quarter of the room) is not a move anyone sees */
+        if (moveEnd - moveStart >= 0.1 && Math.abs(panAtEnd - panAtStart) >= 6) {
+          segs++;
+          const nextBeat = BEATS.find(x => x >= moveEnd - 0.06);
+          if (nextBeat == null || nextBeat - moveEnd > beatS / 6) badLand++;
+        }
       }
-      inMove = mv;
       const inClimax = t >= CLIMAX[0] && t < CLIMAX[1];
       const inImpact = impactSpans.some(([a, b]) => t >= a && t <= b);
       if (!inClimax && !inImpact && headLv(F[i])[0] > 0.76) bright++;
     }
-    const stillPct = litN ? 100 * (1 - moving / litN) : 100, brightPct = litN ? 100 * bright / litN : 0;
-    check("head", stillPct >= 85 && badLand === 0 && brightPct <= 2,
-      "still " + stillPct.toFixed(0) + "% of its lit frames (want >= 85%); " + segs + " visible moves, " + badLand + " not landing on a beat; over 75% outside the climax and impacts in " + brightPct.toFixed(1) + "% of lit frames (want <= 2%)");
+    const brightPct = litN ? 100 * bright / litN : 0, movPct = litN ? 100 * moving / litN : 0;
+    check("head", fast === 0 && shiver === 0 && badLand === 0 && brightPct <= 2,
+      "moving " + movPct.toFixed(0) + "% of its lit time; " + fast + " frames at snap speed (want 0); " + shiver + " reversals within a beat of the last (want 0); " +
+      segs + " moves, " + badLand + " not ending on a beat; over 75% outside the climax and impacts in " + brightPct.toFixed(1) + "% of lit frames (want <= 2%)");
   }
 }
 

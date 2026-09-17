@@ -16,8 +16,18 @@ module.exports = function chase(params, ctx) {
      files that already say it. amount wins when both are present. */
   const level = H.clamp(params.amount != null ? params.amount : (params.level != null ? params.level : 0.85), 0, 1);
   const rest = H.clamp(params.rest != null ? params.rest : 0, 0, 1);
+  /* the lamps NOT being walked: their own colour, and a rest level that can rise
+     across the cue (rest -> rest_to), so one walk cue also carries the bed's
+     swell under it instead of fighting a second full-row cue for the lamps. */
+  const restColour = params.rest_colour ? H.parseColour(params.rest_colour, colour) : colour;
+  const restTo = params.rest_to != null ? H.clamp(params.rest_to, 0, 1) : rest;
   const perBeat = params.per_beat != null ? params.per_beat : 1;
   const back = params.bounce === true;
+  /* step: one lamp at a time, each held for an equal share of the crossing, no
+     half-glow on the neighbour. With per_beat = 1/lamps that is one lamp per
+     beat on this rig -- a walk that lands on beats, not a wave that arrives
+     late at every lamp after the first. */
+  const step = params.step === true;
   const loopBeats = Math.max(1, Math.round(params.for_beats || 4));
   const n = pars.length;
 
@@ -34,13 +44,15 @@ module.exports = function chase(params, ctx) {
     if (back && pos > 0.5) pos = 1 - pos;
     else if (back) pos = pos;
     const exact = H.clamp(pos * span, 0, 1) * (n - 1);
-    let head = Math.floor(exact);
-    const within = exact - head;
+    let head = step ? Math.min(n - 1, Math.floor(H.clamp(pos * span, 0, 1) * n)) : Math.floor(exact);
+    const within = step ? 1 : exact - head;
     const f = H.emptyFrame();
+    const restNow = rest + (restTo - rest) * H.clamp((beats / perBeat) / loopBeats, 0, 1);   // `beats` arrives already scaled by per_beat
     pars.forEach((par, k) => {
       const d = Math.abs(k - head);
       const glow = d === 0 ? 1 : d === 1 ? 0.35 * (1 - within) : 0;
-      H.setPar(f, par, colour, (rest + (level - rest) * glow) * gain);
+      if (glow > 0) H.setPar(f, par, colour, (restNow + (level - restNow) * glow) * gain);
+      else H.setPar(f, par, restColour, restNow * gain);
     });
     if (params.head !== false) 
     H.setHead(f, H.HEADS[0], {

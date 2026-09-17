@@ -49,7 +49,19 @@ module.exports = function beam(params, ctx) {
     let pan, tilt;
     /* how close are we to an accent? 1 on it, falling to 0 over a third of a beat */
     const hit = accents.reduce((m, a) => { const d = beatInBar + 1 - a; return (d >= 0 && d < 0.34) ? Math.max(m, 1 - d / 0.34) : m; }, 0);
-    if (pattern === "hold") {
+    if (pattern === "glide") {
+      /* one continuous, even move from (pan, tilt) to (pan_to, tilt_to) across the
+         WHOLE cue. Its
+         speed is therefore set by the cue's length -- by the music -- and a glide
+         of a bar or more is always slower than the fixture's own turning limit,
+         so it cannot stutter. No nod, no kick: the strobe carries the rhythm. */
+      const p0 = params.pan != null ? params.pan : 0.66, t0 = params.tilt != null ? params.tilt : 0.42;
+      const p1 = params.pan_to != null ? params.pan_to : p0, t1 = params.tilt_to != null ? params.tilt_to : t0;
+      /* linear, not eased: at these speeds (a bar or more per crossing) the start
+         is invisible, and an eased tail slows before the beat and reads as late. */
+      const e = H.clamp(bx.p != null ? bx.p : 0, 0, 1);
+      pan = p0 + (p1 - p0) * e; tilt = t0 + (t1 - t0) * e;
+    } else if (pattern === "hold") {
       /* a still pin on the wall. Where it points is the cue's to say (pan, tilt
          0..1); it does not move, does not kick, does not flash. The head at rest
          is what makes its first movement an event. */
