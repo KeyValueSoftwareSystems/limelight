@@ -96,8 +96,7 @@ export function NewShowDialog({
               placeholder="Search songs"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-[var(--control-h)] pl-[35px] pr-[12px] rounded-[var(--radius-sm)] border-0 text-[13px] text-ink outline-none placeholder:text-ink-dimmer"
-              style={{ background: "var(--well-face)", boxShadow: "var(--well-edge)" }}
+              className="mat-well w-full h-[var(--control-h)] pl-[35px] pr-[12px] rounded-[var(--radius-sm)] text-[13px] text-ink outline-none placeholder:text-ink-dimmer"
             />
           </div>
           <UploadButton />
@@ -135,7 +134,7 @@ export function NewShowDialog({
                   className="flex-none flex items-center justify-center w-[22px] h-[22px] rounded-full text-[11px] font-semibold tabular-nums"
                   style={
                     on
-                      ? { background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo-soft)" }
+                      ? { background: "var(--mat-accent)", color: "var(--lit-ink-on)", boxShadow: "var(--mat-accent-edge)" }
                       : { boxShadow: "inset 0 0 0 1px var(--edge-strong)", color: "transparent" }
                   }
                 >
@@ -184,8 +183,7 @@ export function NewShowDialog({
             type="button"
             disabled={chosen.length === 0}
             onClick={() => onCreate(chosen)}
-            className="flex-none inline-flex items-center h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer transition-[filter,transform] duration-200 hover:brightness-[1.06] active:scale-[0.98] disabled:opacity-40 disabled:cursor-default"
-            style={{ background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}
+            className="mat-accent-key gloss flex-none inline-flex items-center h-[var(--control-h)] px-[16px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-default"
           >
             {chosen.length > 1 ? `Design ${chosen.length} songs` : "Design this show"}
           </button>

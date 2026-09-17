@@ -23,8 +23,7 @@ export function TabNav() {
 
   return (
     <nav
-      className="flex items-stretch gap-[3px] h-[var(--control-h)] p-[3px] rounded-[9px]"
-      style={{ background: "var(--well-face)", boxShadow: "var(--well-edge)" }}
+      className="mat-well flex items-stretch gap-[2px] h-[30px] p-[2px] rounded-[7px]"
       aria-label="Sections"
     >
       {tabs.map((tab) => {
@@ -34,23 +33,10 @@ export function TabNav() {
             key={tab.id}
             href={tab.href}
             aria-current={active ? "page" : undefined}
-            className={`relative flex items-center h-full px-[14px] rounded-[6px] no-underline
-              text-[12.5px] font-medium tracking-[-0.004em]
-              transition-[color,box-shadow,background] duration-[var(--dur-state)]
-              ${active ? "text-ink" : "text-ink-dimmer hover:text-ink-dim"}`}
-            style={
-              active
-                ? { background: "var(--key-on-face)", boxShadow: "var(--key-on-edge)" }
-                : undefined
-            }
+            className={`flex items-center h-full px-[15px] rounded-[5px] no-underline
+              text-[12.5px] tracking-[-0.004em] transition-colors duration-[var(--dur-state)]
+              ${active ? "mat-key gloss font-medium text-ink" : "font-normal text-ink-dim hover:text-ink"}`}
           >
-            {active && (
-              <span
-                aria-hidden
-                className="absolute left-[10px] right-[10px] top-[4px] h-[2px] rounded-full"
-                style={{ background: "var(--accent)", boxShadow: "0 0 8px 0 var(--accent-glow)" }}
-              />
-            )}
             {tab.label}
           </Link>
         );

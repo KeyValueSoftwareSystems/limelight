@@ -21,12 +21,10 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(
       )}
       <input
         ref={ref}
-        className={`w-full h-[var(--control-h)] ${icon ? "pl-[36px]" : "pl-[12px]"} pr-[12px]
-          rounded-[var(--radius-sm)] border border-solid text-[13px] font-medium text-ink
-          transition-[background-color,border-color] duration-150 ease-[var(--ease)]
+        className={`mat-well w-full h-[var(--control-h)] ${icon ? "pl-[36px]" : "pl-[12px]"} pr-[12px]
+          rounded-[var(--radius-sm)] text-[13px] font-medium text-ink
           placeholder:text-ink-dimmer placeholder:font-normal
           ${className}`}
-        style={{ background: "var(--well-face)", borderColor: "transparent", boxShadow: "var(--well-edge)" }}
         {...props}
       />
     </div>

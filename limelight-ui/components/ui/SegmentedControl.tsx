@@ -22,8 +22,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="tablist"
       aria-label={rest["aria-label"]}
-      className="inline-flex h-[var(--control-h)] items-stretch gap-[3px] p-[3px] rounded-[9px]"
-      style={{ background: "var(--well-face)", boxShadow: "var(--well-edge)" }}
+      className="mat-well inline-flex h-[var(--control-h)] items-stretch gap-[2px] p-[2px] rounded-[7px]"
     >
       {segments.map((s) => {
         const on = s.id === value;
@@ -34,23 +33,10 @@ export function SegmentedControl<T extends string>({
             role="tab"
             aria-selected={on}
             onClick={() => onChange(s.id)}
-            className={`relative h-full px-[13px] rounded-[6px] border-0 cursor-pointer
-              text-[12.5px] font-medium tracking-[-0.004em]
-              transition-[color,box-shadow,background] duration-[var(--dur-state)]
-              ${on ? "text-ink" : "text-ink-dimmer hover:text-ink-dim"}`}
-            style={
-              on
-                ? { background: "var(--key-on-face)", boxShadow: "var(--key-on-edge)" }
-                : { background: "transparent" }
-            }
+            className={`h-full px-[14px] rounded-[5px] border-0 cursor-pointer
+              text-[12.5px] tracking-[-0.004em] transition-colors duration-[var(--dur-state)]
+              ${on ? "mat-key gloss font-medium text-ink" : "bg-transparent font-normal text-ink-dim hover:text-ink"}`}
           >
-            {on && (
-              <span
-                aria-hidden
-                className="absolute left-[9px] right-[9px] top-[4px] h-[2px] rounded-full"
-                style={{ background: "var(--accent)", boxShadow: "0 0 8px 0 var(--accent-glow)" }}
-              />
-            )}
             {s.label}
           </button>
         );

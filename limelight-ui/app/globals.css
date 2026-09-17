@@ -65,9 +65,9 @@
   --warn: #FBBF24;
   --danger: #F87171;
 
-  --accent: #5CCBE0;
-  --accent-soft: rgba(92, 203, 224, 0.09);
-  --accent-glow: rgba(92, 203, 224, 0.22);
+  --accent: #6E97CE;
+  --accent-soft: rgba(110, 151, 206, 0.10);
+  --accent-glow: rgba(110, 151, 206, 0.22);
 
   --accent2: #FF4D9D;
   --accent2-soft: rgba(255, 77, 157, 0.10);
@@ -76,7 +76,7 @@
   --neon-blue: #C9CEDC;
   --neon-cyan: #9BA4BD;
   --neon-pink: #F2B457;
-  --neon-amber: #5CCBE0;
+  --neon-amber: #6E97CE;
 
   --select: #CBD5E1;
   --select-soft: rgba(203, 213, 225, 0.08);
@@ -93,15 +93,15 @@
 
   --edge: rgba(255, 255, 255, 0.07);
   --edge-strong: rgba(255, 255, 255, 0.13);
-  --edge-accent: rgba(92, 203, 224, 0.24);
+  --edge-accent: rgba(110, 151, 206, 0.26);
 
   --elev-1: 0 1px 2px rgba(0, 0, 0, 0.28);
   --elev-2: 0 2px 8px rgba(0, 0, 0, 0.34), 0 1px 2px rgba(0, 0, 0, 0.22);
   --elev-3: 0 8px 28px rgba(0, 0, 0, 0.44), 0 2px 6px rgba(0, 0, 0, 0.26);
   --inset-hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 
-  --focus: rgba(92, 203, 224, 0.5);
-  --focus-ring: rgba(92, 203, 224, 0.12);
+  --focus: rgba(110, 151, 206, 0.55);
+  --focus-ring: rgba(110, 151, 206, 0.16);
   --playhead: #FFFFFF;
 
   --fam-hits: #FFFFFF;
@@ -141,10 +141,10 @@
   --lane-gap: 2px;
   --snap-threshold: 8px;
 
-  --radius-sm: 5px;
-  --radius-md: 7px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
+  --radius-sm: 6px;
+  --radius-md: 9px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
   --elev-popover: 0 0 0 1px rgba(59, 227, 255, 0.09),
     0 4px 6px -1px rgba(0, 0, 0, 0.4),
@@ -157,12 +157,108 @@
     0 8px 24px -4px rgba(0, 0, 0, 0.5),
     0 0 28px -6px rgba(59, 227, 255, 0.12);
 
-  --lit: #5CCBE0;
-  --lit-ink: #A8E9F6;
-  --lit-hover: #C6F2FB;
+  --lit: #6E97CE;
+  --lit-ink: #EAF1FB;
+  --lit-hover: #8FB0DE;
   --grad-primary: var(--lit);
   --grad-warm: var(--lit);
-  --neon-ring: 0 0 0 1px rgba(92, 203, 224, 0.35), 0 0 12px -4px rgba(92, 203, 224, 0.3);
+  --neon-ring: 0 0 0 1px rgba(110, 151, 206, 0.35), 0 0 12px -4px rgba(110, 151, 206, 0.3);
+
+  --mat-raised: linear-gradient(180deg, #2C3140 0%, #212634 45%, #191D28 100%);
+  --mat-raised-hover: linear-gradient(180deg, #353B4C 0%, #282E3D 45%, #1F2430 100%);
+  --mat-raised-press: linear-gradient(180deg, #1B1F2A 0%, #20242F 100%);
+  --mat-raised-edge: inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.38);
+  --mat-raised-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  --mat-pressed: inset 0 2px 5px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(0, 0, 0, 0.45);
+
+  --mat-recessed: linear-gradient(180deg, #070910 0%, #0B0E16 55%, #10131C 100%);
+  --mat-recessed-edge: inset 0 2px 5px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+
+  --mat-accent: linear-gradient(180deg, #8AACDC 0%, #6E97CE 45%, #587FB6 100%);
+  --mat-accent-hover: linear-gradient(180deg, #99B8E4 0%, #7CA3D6 45%, #668CC1 100%);
+  --mat-accent-press: linear-gradient(180deg, #5C82B8 0%, #6B93C8 100%);
+  --mat-accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.2);
+  --mat-accent-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.26);
+
+  --mat-on: linear-gradient(180deg, #141922 0%, #1A2029 100%);
+  --mat-on-edge: inset 0 2px 5px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(0, 0, 0, 0.45),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.07);
+
+  --deboss: 0 -1px 0 rgba(0, 0, 0, 0.55);
+  --emboss-dark: 0 1px 0 rgba(255, 255, 255, 0.28);
+
+  --gloss: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.035) 48%, rgba(255, 255, 255, 0) 49%);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+
+  --key-face: var(--mat-raised);
+  --key-face-hover: var(--mat-raised-hover);
+  --key-edge: var(--mat-raised-edge);
+  --key-lift: var(--mat-raised-shadow);
+  --key-press: var(--mat-pressed);
+  --well-face: var(--mat-recessed);
+  --well-edge: var(--mat-recessed-edge);
+  --lit-face: var(--mat-accent);
+  --lit-edge: var(--mat-accent-edge);
+  --lit-halo: var(--mat-accent-shadow);
+  --lit-halo-soft: var(--mat-accent-shadow);
+  --key-on-face: var(--mat-on);
+  --key-on-edge: var(--mat-on-edge);
+
+  --phase-silence: rgba(255, 255, 255, 0.008);
+  --phase-intro: rgba(255, 255, 255, 0.018);
+  --phase-outro: rgba(255, 255, 255, 0.018);
+  --phase-break: rgba(255, 255, 255, 0.024);
+  --phase-verse: rgba(255, 255, 255, 0.032);
+  --phase-build: rgba(255, 255, 255, 0.048);
+  --phase-drop: rgba(255, 255, 255, 0.068);
+  --phase-final-drop: rgba(255, 255, 255, 0.090);
+  --phase-unknown: rgba(255, 255, 255, 0.022);
+
+  --stage: #010207;
+
+  --ff-body: var(--font-sans-face), "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ff-mono: var(--font-mono-face), "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --dur-state: 150ms;
+  --dur-panel: 220ms;
+  --dur-page: 350ms;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --ruler-h: 22px;
+  --section-h: 30px;
+  --energy-h: 28px;
+  --moments-h: 22px;
+  --lane-gap: 2px;
+  --snap-threshold: 8px;
+
+  --radius-sm: 6px;
+  --radius-md: 9px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --elev-popover: 0 0 0 1px rgba(59, 227, 255, 0.09),
+    0 4px 6px -1px rgba(0, 0, 0, 0.4),
+    0 16px 32px -8px rgba(0, 0, 0, 0.6);
+  --elev-modal: 0 0 0 1px rgba(59, 227, 255, 0.11),
+    0 24px 48px -12px rgba(0, 0, 0, 0.7);
+  --elev-card: 0 1px 3px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  --elev-card-hover: 0 0 0 1px rgba(59, 227, 255, 0.22),
+    0 8px 24px -4px rgba(0, 0, 0, 0.5),
+    0 0 28px -6px rgba(59, 227, 255, 0.12);
+
+  --lit: #6E97CE;
+  --lit-ink: #EAF1FB;
+  --lit-hover: #8FB0DE;
+  --grad-primary: var(--lit);
+  --grad-warm: var(--lit);
+  --neon-ring: 0 0 0 1px rgba(110, 151, 206, 0.35), 0 0 12px -4px rgba(110, 151, 206, 0.3);
 
   --key-face: linear-gradient(180deg, #191E2B 0%, #0D1018 100%);
   --key-face-hover: linear-gradient(180deg, #212736 0%, #12161F 100%);
@@ -176,15 +272,15 @@
     inset 0 0 0 1px rgba(0, 0, 0, 0.55);
 
   --lit-face: linear-gradient(180deg, #16303A 0%, #0D1F27 100%);
-  --lit-ink-on: #8FE2F2;
-  --lit-edge: inset 0 1px 0 rgba(143, 226, 242, 0.22), inset 0 0 0 1px rgba(92, 203, 224, 0.26),
+  --lit-ink-on: #F2F6FC;
+  --lit-edge: inset 0 1px 0 rgba(143, 226, 242, 0.22), inset 0 0 0 1px rgba(110, 151, 206, 0.26),
     inset 0 -1px 0 rgba(0, 0, 0, 0.5);
-  --lit-halo: 0 1px 0 rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.45), 0 0 14px -6px rgba(92, 203, 224, 0.5);
-  --lit-halo-soft: 0 1px 3px rgba(0, 0, 0, 0.45), 0 0 10px -6px rgba(92, 203, 224, 0.4);
+  --lit-halo: 0 1px 0 rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.45), 0 0 14px -6px rgba(110, 151, 206, 0.5);
+  --lit-halo-soft: 0 1px 3px rgba(0, 0, 0, 0.45), 0 0 10px -6px rgba(110, 151, 206, 0.4);
 
   --key-on-face: linear-gradient(180deg, #0D1C23 0%, #08141A 100%);
-  --key-on-edge: inset 0 2px 5px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(92, 203, 224, 0.16),
-    inset 0 -1px 0 rgba(92, 203, 224, 0.07);
+  --key-on-edge: inset 0 2px 5px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(110, 151, 206, 0.16),
+    inset 0 -1px 0 rgba(110, 151, 206, 0.07);
   --grad-surface: linear-gradient(180deg, rgba(59, 227, 255, 0.035) 0%, transparent 50%);
   --grad-glow: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 227, 255, 0.10), transparent);
 }
@@ -384,4 +480,77 @@ a:focus-visible,
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Materials, to the Aqua recipe: a three-stop gradient with the light on top,
+   a four-layer shadow stack (contact and ambient outside, bevel and shade
+   inside), and a key that physically travels 1px when pressed. */
+.mat-key {
+  background: var(--mat-raised);
+  box-shadow: var(--mat-raised-edge), var(--mat-raised-shadow);
+  text-shadow: var(--deboss);
+  border: 0;
+  transition: background var(--dur-state) var(--ease), box-shadow var(--dur-state) var(--ease),
+    transform var(--dur-state) var(--ease);
+}
+.mat-key:hover:not(:disabled) { background: var(--mat-raised-hover); }
+.mat-key:active:not(:disabled) {
+  background: var(--mat-raised-press);
+  box-shadow: var(--mat-pressed);
+  transform: translateY(1px);
+}
+
+.mat-accent-key {
+  background: var(--mat-accent);
+  color: var(--lit-ink-on);
+  box-shadow: var(--mat-accent-edge), var(--mat-accent-shadow);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+  border: 0;
+  transition: background var(--dur-state) var(--ease), box-shadow var(--dur-state) var(--ease),
+    transform var(--dur-state) var(--ease);
+}
+.mat-accent-key:hover:not(:disabled) { background: var(--mat-accent-hover); }
+.mat-accent-key:active:not(:disabled) {
+  background: var(--mat-accent-press);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(0, 0, 0, 0.22);
+  transform: translateY(1px);
+}
+
+.mat-well {
+  background: var(--mat-recessed);
+  box-shadow: var(--mat-recessed-edge);
+  border: 0;
+}
+
+.mat-on {
+  background: var(--mat-on);
+  box-shadow: var(--mat-on-edge);
+  text-shadow: var(--deboss);
+  border: 0;
+}
+
+/* The Aqua sheen: a soft top half cut off sharply at the midline, over a grain
+   fine enough to read as a surface rather than as dirt. */
+.gloss { position: relative; }
+.gloss::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--gloss);
+  pointer-events: none;
+}
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--grain);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mat-key, .mat-accent-key { transition: none; }
+  .mat-key:active:not(:disabled), .mat-accent-key:active:not(:disabled) { transform: none; }
 }

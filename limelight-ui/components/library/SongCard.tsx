@@ -38,23 +38,14 @@ export function SongCard({ song, onOpen, position = null }: SongCardProps) {
       disabled={!playable}
       title={song.title}
       aria-pressed={position != null ? true : undefined}
-      className={`song-card group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden border border-solid transition-all duration-200 ease-[var(--ease)] w-full ${
-        position != null ? "border-[var(--edge-accent)]" : "border-white/[0.06]"
+      className={`song-card mat-key group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden w-full ${
+        position != null ? "ring-1 ring-[var(--edge-accent)]" : ""
       } ${
         playable
-          ? "cursor-pointer hover:border-accent/25 hover:-translate-y-[1px]"
+          ? "cursor-pointer"
           : "cursor-default opacity-40"
       }`}
-      style={{
-        background: "var(--key-face)",
-        boxShadow: "var(--key-edge), var(--key-lift)",
-      }}
-      onMouseEnter={(e) => {
-        if (playable) (e.currentTarget as HTMLElement).style.boxShadow = "var(--key-edge), var(--key-lift), var(--lit-halo-soft)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow = "var(--key-edge), var(--key-lift)";
-      }}
+
     >
       {/* Cover: fixed aspect ratio via padding-bottom trick for bulletproof sizing */}
       <div className="relative w-full overflow-hidden" style={{ paddingBottom: "75%" }}>
@@ -67,7 +58,7 @@ export function SongCard({ song, onOpen, position = null }: SongCardProps) {
         {playable && (
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
             <div className="w-[38px] h-[38px] rounded-full flex items-center justify-center scale-90 group-hover:scale-100 transition-transform duration-300 ease-[var(--ease-spring)]"
-              style={{ background: "var(--lit-face)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}>
+              style={{ background: "var(--mat-accent)", boxShadow: "var(--mat-accent-edge), var(--mat-accent-shadow)" }}>
               <Play size={16} fill="var(--lit-ink-on)" stroke="var(--lit-ink-on)" className="ml-[1px]" />
             </div>
           </div>
@@ -76,7 +67,7 @@ export function SongCard({ song, onOpen, position = null }: SongCardProps) {
         {position != null && (
           <span
             className="absolute left-[6px] top-[6px] w-[20px] h-[20px] rounded-full flex items-center justify-center text-[11px] font-semibold tabular-nums leading-none z-10"
-            style={{ background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo-soft)" }}
+            style={{ background: "var(--mat-accent)", color: "var(--lit-ink-on)", boxShadow: "var(--mat-accent-edge)" }}
           >
             {position}
           </span>

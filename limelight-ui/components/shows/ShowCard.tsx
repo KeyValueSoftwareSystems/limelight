@@ -20,10 +20,8 @@ export function ShowCard({
       type="button"
       onClick={() => onOpen(show)}
       title={show.name}
-      className="group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden border border-solid border-white/[0.06] cursor-pointer transition-all duration-200 ease-[var(--ease)] w-full hover:border-accent/25 hover:-translate-y-[1px]"
-      style={{ background: "var(--key-face)", boxShadow: "var(--key-edge), var(--key-lift)" }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "var(--key-edge), var(--key-lift), var(--lit-halo-soft)"; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "var(--key-edge), var(--key-lift)"; }}
+      className="mat-key group flex flex-col text-left p-0 rounded-[var(--radius-md)] overflow-hidden cursor-pointer w-full"
+
     >
       <div className="relative w-full overflow-hidden" style={{ paddingBottom: "62%" }}>
         <div className="absolute inset-0">
@@ -35,7 +33,7 @@ export function ShowCard({
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <span
             className="w-[36px] h-[36px] rounded-full flex items-center justify-center scale-90 group-hover:scale-100 transition-transform duration-300 ease-[var(--ease-spring)]"
-            style={{ background: "var(--lit-face)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}
+            style={{ background: "var(--mat-accent)", boxShadow: "var(--mat-accent-edge), var(--mat-accent-shadow)" }}
           >
             <Play size={15} fill="var(--lit-ink-on)" stroke="var(--lit-ink-on)" className="ml-[1px]" />
           </span>

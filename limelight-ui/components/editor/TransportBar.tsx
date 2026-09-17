@@ -171,7 +171,7 @@ export function TransportBar({
         </span>
         <span className="mono text-[10px] tabular-nums text-ink-dimmer leading-none">
           Bar <span className="text-ink-dim">{pos ? pos.bar : "\u2014"}</span>
-          <span className="text-ink-dimmer">\u00b7{pos ? pos.beat : "\u2014"}</span>
+          <span className="text-ink-dimmer">{"\u00b7"}{pos ? pos.beat : "\u2014"}</span>
         </span>
       </span>
 

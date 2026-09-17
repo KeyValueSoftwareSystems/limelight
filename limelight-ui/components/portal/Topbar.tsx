@@ -41,7 +41,7 @@ function IdentityControl() {
         className="flex items-center gap-[6px] h-[34px] pl-[4px] pr-[10px] rounded-full border-0 bg-transparent cursor-pointer hover:bg-white/[0.04] transition-all duration-200"
       >
         <span className="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[10px] font-bold flex-none"
-          style={{ background: "var(--key-face)", color: "var(--ink)", boxShadow: "var(--key-edge), var(--key-lift)" }}>
+          style={{ background: "var(--mat-raised)", color: "var(--ink)", boxShadow: "var(--mat-raised-edge), var(--mat-raised-shadow)" }}>
           {initials || <User size={12} />}
         </span>
         <ChevronDown size={11} className="text-ink-dimmer" />

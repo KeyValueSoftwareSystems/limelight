@@ -4,7 +4,7 @@ import { useEffect, useCallback, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Plus } from "lucide-react";
 import { NewShowDialog } from "@/components/shows/NewShowDialog";
-import { Field, SegmentedControl } from "@/components/ui";
+import { Field } from "@/components/ui";
 import { ShowCard } from "@/components/shows/ShowCard";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
@@ -16,7 +16,7 @@ export default function ShowsPage() {
   const [showList, setShowList] = useState<ShowFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortKey>("recent");
+  const sort: SortKey = "recent";
   const [picking, setPicking] = useState(false);
   const setSong = usePortalStore((s) => s.setSong);
   const setSeed = usePortalStore((s) => s.setSeed);
@@ -34,7 +34,10 @@ export default function ShowsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("new") === "1") setPicking(true);
+    if (new URLSearchParams(window.location.search).get("new") === "1") {
+      setPicking(true);
+      window.history.replaceState(null, "", "/shows");
+    }
   }, []);
 
   const startShow = useCallback(
@@ -112,13 +115,6 @@ export default function ShowsPage() {
     [showList],
   );
 
-  const SORTS: { id: SortKey; label: string }[] = [
-    { id: "recent", label: "Recent" },
-    { id: "name", label: "Name" },
-    { id: "song", label: "Song" },
-    { id: "room", label: "Room" },
-  ];
-
   return (
     <div className="flex flex-col overflow-hidden flex-1 animate-in">
       <div className="flex-none px-[28px] pt-[26px] pb-[16px]">
@@ -139,12 +135,7 @@ export default function ShowsPage() {
           <button
             type="button"
             onClick={() => setPicking(true)}
-            className="flex-none inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer transition-[filter,transform] duration-200 hover:brightness-[1.06] active:scale-[0.98]"
-            style={{
-              background: "var(--lit-face)",
-              color: "var(--lit-ink-on)",
-              boxShadow: "var(--lit-edge), var(--lit-halo)",
-            }}
+            className="mat-accent-key gloss flex-none inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
           >
             <Plus size={15} strokeWidth={2.4} />
             New show
@@ -163,13 +154,6 @@ export default function ShowsPage() {
                 aria-label="Search shows"
               />
             </div>
-
-            <SegmentedControl
-              aria-label="Sort shows"
-              value={sort}
-              onChange={setSort}
-              segments={SORTS}
-            />
           </div>
         )}
       </div>
@@ -216,8 +200,7 @@ export default function ShowsPage() {
             <button
               type="button"
               onClick={() => setPicking(true)}
-              className="mt-[18px] inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold cursor-pointer hover:brightness-[1.06] active:scale-[0.98] transition-[filter,transform] duration-200"
-              style={{ background: "var(--lit-face)", color: "var(--lit-ink-on)", boxShadow: "var(--lit-edge), var(--lit-halo)" }}
+              className="mat-accent-key gloss mt-[18px] inline-flex items-center gap-[7px] h-[var(--control-h)] px-[15px] rounded-[var(--radius-sm)] text-[13px] font-semibold cursor-pointer"
             >
               <Plus size={15} strokeWidth={2.4} />
               New show
