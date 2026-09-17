@@ -25,23 +25,53 @@ module.exports = function drive(params, ctx) {
     const f = H.emptyFrame();
     const floorNow = H.clamp(floorDial * (0.55 + 0.75 * energy), 0.08, peakDial);
     const flip = Math.floor(bar / 2) % 2;
-    const step = every === 1 ? beatIndex : Math.floor(beatIndex / every);
+    /* the pair swap runs on the same early clock as the pump, or the lamp that
+       pumped early is cut off at the grid beat */
+    const biLead = (bphase + (params.lean != null ? Math.max(0, Math.min(0.4, Number(params.lean))) : 0)) >= 1 ? beatIndex + 1 : beatIndex;
+    const step = every === 1 ? biLead : Math.floor(biLead / every);
     const innerActive = (step + flip) % 2 === 0;
     const col = cols[bar % cols.length], col2 = cols[(bar + 1) % cols.length];
-    const pop = downbeat && bphase < 0.2 && weight > 0.35;
-    const hitAmp = flash(bphase, 0.55) * (0.45 + 0.55 * weight);
+    /* pop: the downbeat strobe burst. Off under a landing, where a held white cue
+       sits on top and the burst leaks through it as a flicker. */
+    const pop = params.pop !== false && downbeat && bphase < 0.2 && weight > 0.35;
+    /* flash_every / flash_bar: the downbeat white flash on every Nth bar only, counted
+       from the score's bar number flash_bar -- so a drop can flash on its own bar and
+       every other bar after, and not on every downbeat. */
+    const flashEvery = params.flash_every != null ? Math.max(1, Math.round(params.flash_every)) : 1;
+    const anchor = params.flash_bar != null ? Math.round(params.flash_bar) : 0;
+    const flashLen = params.flash_len != null ? Math.max(0.05, Math.min(1, Number(params.flash_len))) : 0.15;   // how long the downbeat white holds, in beats
+    const flashBar = flashEvery === 1 || (((bar - anchor) % flashEvery) + flashEvery) % flashEvery === 0;
+    /* lean: the pump fires this much BEFORE the grid beat, so the eye reads it
+       as on the beat (light lags sound in the room); decay: how fast it falls back
+       to the floor, in beats -- shorter is punchier. */
+    const leadB = params.lean != null ? Math.max(0, Math.min(0.4, Number(params.lean))) : 0;
+    const decay = params.decay != null ? Math.max(0.15, Math.min(0.9, Number(params.decay))) : 0.55;
+    /* the pump RISES into the beat over lead_beats and peaks exactly on it, then
+       falls over `decay`. A peak before the beat reads as a dull early flash; a
+       rise that arrives on the beat reads as together with the music. */
+    const pumpShape = ph => (leadB > 0 && ph >= 1 - leadB) ? (ph - (1 - leadB)) / leadB : flash(ph, decay);
+    /* punch: how much of the peak every beat is guaranteed, the rest following the
+       beat's measured weight. 0.45 breathes with the drums; 0.85 pumps. */
+    const punch = params.punch != null ? Math.max(0, Math.min(1, Number(params.punch))) : 0.45;
+    const hitAmp = pumpShape(bphase) * (punch + (1 - punch) * weight);
 
     for (const par of H.PARS) {
       const isInner = H.INNER.some(p => p.id === par.id);
-      const onPair = isInner === innerActive;
+      /* pairs:false -- the whole row pumps together on every beat instead of the two
+         pairs taking turns; twice the visible movement */
+      /* split:"sides" -- the LEFT half and the RIGHT half take turns beat by beat,
+         instead of the inner and outer pairs. Same pump, a different room. */
+      const isLeft = PARX[par.id] < 0;
+      const mine = params.split === "sides" ? isLeft : isInner;
+      const onPair = params.pairs === false ? true : mine === innerActive;
       const hit = (onPair || downbeat) ? 1 : 0;
       const across = (PARX[par.id] + 1) / 2;
       const bph = stagger === 0 ? bphase : ((bphase - stagger * across) % 1 + 1) % 1;
-      const hitAmpL = stagger === 0 ? hitAmp : flash(bph, 0.55) * (0.45 + 0.55 * weight);
+      const hitAmpL = stagger === 0 ? hitAmp : pumpShape(bph) * (punch + (1 - punch) * weight);
       const ghost = onPair ? 0 : 0.3 * weight * bump(bph, 0.5, 0.05);
-      const lvl = floorNow + (peakDial - floorNow) * hit * hitAmpL + ghost;
+      let lvl = floorNow + (peakDial - floorNow) * hit * hitAmpL + ghost;
       let c = onPair ? col : col2;
-      if (downbeat && bphase < 0.15) c = [1, 1, 1];
+      if (flashBar && downbeat && bphase < flashLen) { c = [1, 1, 1]; lvl = peakDial; }   // the downbeat white holds at full for its whole length
       H.setPar(f, par, c, Math.min(1, lvl));
       if (pop) H.setParStrobe(f, par, 20);
     }

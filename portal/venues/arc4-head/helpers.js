@@ -28,6 +28,8 @@ const COLOUR_WHEEL = [
 ];
 
 const HEAD_PARK = { pan: 169, tilt: 127, speed: 200, level: 0 };
+/* the colour wheel turns continuously at and above this value (rig.py: COLOUR_SPIN_MIN) */
+const SPIN_MIN = 150;
 
 /* Fixture layout: 4 pars, 1 head. Addresses are 1-based in the layout but
    DMX frame arrays are 0-based. */
@@ -146,8 +148,17 @@ function setHead(frame, head, opts) {
   const o = head.offset;
   const level = clamp(opts.level != null ? opts.level : 0, 0, 1);
   frame[o + HEAD.master] = clamp(Math.round(level * 255), 0, 255);
-  frame[o + HEAD.speed] = HEAD_PARK.speed;
-  if (opts.colour) {
+  /* motor speed: 0 is the fixture's fastest move, 255 its smoothest. Parked value
+     unless a cue asks, so every existing cue behaves exactly as before. */
+  frame[o + HEAD.speed] = opts.speed != null
+    ? clamp(Math.round(clamp(opts.speed, 0, 1) * 255), 0, 255)
+    : HEAD_PARK.speed;
+  /* spin: at and above the wheel's spin threshold the colour wheel turns
+     continuously instead of resting on a slot -- the fixture's rainbow. 0..1 maps
+     the spin range, so `spin: 0` is the slowest turn and `spin: 1` the fastest. */
+  if (opts.spin != null) {
+    frame[o + HEAD.colour] = clamp(Math.round(SPIN_MIN + clamp(opts.spin, 0, 1) * (255 - SPIN_MIN)), SPIN_MIN, 255);
+  } else if (opts.colour) {
     const wc = nearestWheelColour(opts.colour);
     frame[o + HEAD.colour] = wc.value;
   }

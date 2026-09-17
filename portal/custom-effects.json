@@ -16,6 +16,726 @@
     "shape": "travel",
     "spread": 0.8
    }
+  },
+  {
+   "id": "still_glow",
+   "name": "Still glow",
+   "blurb": "A low warm glow that breathes so slowly it reads as stillness — calm, not empty. Replaces the flat drone.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "wash",
+   "dimension": "amount",
+   "kind": "state",
+   "dials": {
+    "amount": 0.18,
+    "colour": "#b00808",
+    "extent": "all",
+    "head": false,
+    "fade_ms": 2400
+   }
+  },
+  {
+   "id": "slow_swell",
+   "name": "Slow swell",
+   "blurb": "A gentle bloom that rises and falls away over two bars — a single calm breath.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "swell",
+   "dimension": "amount",
+   "kind": "gesture",
+   "dials": {
+    "colour": "#e01313",
+    "for_beats": 8,
+    "rise": 0.35
+   }
+  },
+  {
+   "id": "wound_breath",
+   "name": "Wound breath",
+   "blurb": "The pars breathe red in and out — pain that will not settle.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "wash",
+   "dimension": "amount",
+   "kind": "state",
+   "dials": {
+    "amount": 0.34,
+    "colour": "#e01313",
+    "extent": "all",
+    "head": false,
+    "fade_ms": 900
+   }
+  },
+  {
+   "id": "plea_flick",
+   "name": "Plea flick",
+   "blurb": "A hard red flick on a sung syllable — the cry for help.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "glare",
+   "dimension": "amount",
+   "kind": "gesture",
+   "dials": {
+    "colour": "#e01313",
+    "amount": 0.92,
+    "extent": "all",
+    "fade_ms": 0,
+    "head": false
+   }
+  },
+  {
+   "id": "mercy_gold",
+   "name": "Mercy spark (gold)",
+   "blurb": "A single gold tap sprinkled into the red — a glimpse of an answer.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "stab",
+   "dimension": "amount",
+   "kind": "gesture",
+   "dials": {
+    "colour": "#ffcf3c",
+    "extent": "inner",
+    "for_beats": 1
+   }
+  },
+  {
+   "id": "mercy_green",
+   "name": "Mercy spark (green)",
+   "blurb": "A rarer green tap in the red — the other colour of hope.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "stab",
+   "dimension": "amount",
+   "kind": "gesture",
+   "dials": {
+    "colour": "#33c86e",
+    "extent": "ends",
+    "for_beats": 1
+   }
+  },
+  {
+   "id": "slow_drift",
+   "name": "Slow drift",
+   "blurb": "The head drifts across the wall over a whole phrase — motion so slow it reads as breath.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "glide",
+    "amount": 0.3,
+    "colour": "#e01313",
+    "prism": 0,
+    "strobe": 0,
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "glide",
+    "amount": 0.3,
+    "colour": "#e01313",
+    "prism": 0,
+    "strobe": 0
+   }
+  },
+  {
+   "id": "cry_sweep",
+   "name": "Cry sweep",
+   "blurb": "The head goes wild — a fast criss-cross that answers the call for help.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "swing",
+    "amount": 0.7,
+    "colour": "#e01313",
+    "prism": 0,
+    "strobe": 0,
+    "swing_beats": 2,
+    "nod": 0.06,
+    "nod_lead": 0.25,
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "swing",
+    "amount": 0.7,
+    "colour": "#e01313",
+    "prism": 0,
+    "strobe": 0,
+    "swing_beats": 2,
+    "nod": 0.06,
+    "nod_lead": 0.25
+   }
+  },
+  {
+   "id": "vocal_nod",
+   "name": "Vocal nod",
+   "blurb": "The head swings and nods to the vocal rhythm — sa ri sa ri sa ga.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "swing",
+    "amount": 0.5,
+    "colour": "#ff8a1a",
+    "prism": 0,
+    "strobe": 0,
+    "swing_beats": 2,
+    "nod": 0.09,
+    "nod_lead": 0.2,
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "swing",
+    "amount": 0.5,
+    "colour": "#ff8a1a",
+    "prism": 0,
+    "strobe": 0,
+    "swing_beats": 2,
+    "nod": 0.09,
+    "nod_lead": 0.2
+   }
+  },
+  {
+   "id": "hero_pulse",
+   "name": "Hero pulse",
+   "blurb": "A blue bump travels the row once a beat — the hero, arriving.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "pulse",
+   "dimension": "amount",
+   "kind": "state",
+   "dials": {
+    "colour": "#2f5bff",
+    "extent": "all",
+    "floor": 0.06,
+    "peak": 0.55,
+    "every_beats": 2,
+    "head": false
+   }
+  },
+  {
+   "id": "hero_rise",
+   "name": "Hero rise",
+   "blurb": "The hero pulse, a step brighter and whiter — the energy climbing to the drop.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "pulse",
+   "dimension": "amount",
+   "kind": "state",
+   "dials": {
+    "colour": "#bcd0ff",
+    "extent": "all",
+    "floor": 0.12,
+    "peak": 0.8,
+    "every_beats": 2,
+    "head": false
+   }
+  },
+  {
+   "id": "slant_nod",
+   "name": "Slant nod",
+   "blurb": "The head glides on a slant across a bar and twitches at the bar line, on the beat.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "swing",
+    "amount": 0.5,
+    "colour": "#2f5bff",
+    "prism": 0,
+    "strobe": 10,
+    "strobe_on": "downbeat",
+    "swing_beats": 4,
+    "nod": 0.1,
+    "nod_lead": 0.22,
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "swing",
+    "amount": 0.5,
+    "colour": "#2f5bff",
+    "prism": 0,
+    "strobe": 10,
+    "strobe_on": "downbeat",
+    "swing_beats": 4,
+    "nod": 0.1,
+    "nod_lead": 0.22
+   }
+  },
+  {
+   "id": "slant_break",
+   "name": "Slant break",
+   "blurb": "The fourth-bar variant — the head STOPS and strobes, breaking the slant so the phrase reads as four.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "hold",
+    "amount": 0.6,
+    "colour": "#bcd0ff",
+    "prism": 0,
+    "strobe": 12,
+    "strobe_on": "beat",
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "hold",
+    "amount": 0.6,
+    "colour": "#bcd0ff",
+    "prism": 0,
+    "strobe": 12,
+    "strobe_on": "beat"
+   }
+  },
+  {
+   "id": "predrop_riser",
+   "name": "Pre-drop riser",
+   "blurb": "White strobes that accelerate into a burst — the drop is coming.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "anticipation",
+   "dimension": "rate",
+   "kind": "gesture",
+   "dials": {
+    "colour": "#ffffff",
+    "intensity": 0.9,
+    "head": false
+   }
+  },
+  {
+   "id": "reckoning_strobe",
+   "name": "Reckoning strobe",
+   "blurb": "A white hardware strobe to the wild percussion — the last breath before the drop.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "strobe",
+   "dimension": "rate",
+   "kind": "gesture",
+   "dials": {
+    "hz": 14,
+    "colour": "#ffffff",
+    "intensity": 1,
+    "extent": "all",
+    "head": false
+   }
+  },
+  {
+   "id": "vengeance_land",
+   "name": "Vengeance land",
+   "blurb": "The whole rig white on the drop — the blow lands. The head is left to its own cue so it never dwells at the park (vertical).",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "impact",
+   "dimension": "amount",
+   "kind": "gesture",
+   "dials": {
+    "colour": "#ffffff",
+    "extent": "all",
+    "for_beats": 2,
+    "head": false
+   }
+  },
+  {
+   "id": "vengeance_bed",
+   "name": "Vengeance bed",
+   "blurb": "The drop's engine: two pairs call and answer red/blue. No white blink — the punch is the pump and the head, not a downbeat flash.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "drive",
+   "dimension": "amount",
+   "kind": "state",
+   "dials": {
+    "colours": [
+     "#e01313",
+     "#2f5bff"
+    ],
+    "floor": 0.42,
+    "peak": 1,
+    "every_beats": 1,
+    "flash_every": 200,
+    "flash_bar": 100,
+    "pop": false,
+    "head": false
+   }
+  },
+  {
+   "id": "vengeance_swing",
+   "name": "Vengeance swing",
+   "blurb": "The head swings wall to wall and nods into every beat, red prism — the drop's motion.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "swing",
+    "amount": 0.75,
+    "colour": "#e01313",
+    "prism": 100,
+    "strobe": 0,
+    "swing_beats": 4,
+    "nod": 0.09,
+    "nod_lead": 0.25,
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "swing",
+    "amount": 0.75,
+    "colour": "#e01313",
+    "prism": 100,
+    "strobe": 0,
+    "swing_beats": 4,
+    "nod": 0.09,
+    "nod_lead": 0.25
+   }
+  },
+  {
+   "id": "vengeance_snap",
+   "name": "Vengeance snap",
+   "blurb": "The drop head at its hardest: fast wall-to-wall swings, white, strobing every beat.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "swing",
+    "amount": 0.85,
+    "colour": "#ffffff",
+    "prism": 100,
+    "strobe": 16,
+    "strobe_on": "beat",
+    "swing_beats": 2,
+    "nod": 0.06,
+    "nod_lead": 0.2,
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "swing",
+    "amount": 0.85,
+    "colour": "#ffffff",
+    "prism": 100,
+    "strobe": 16,
+    "strobe_on": "beat",
+    "swing_beats": 2,
+    "nod": 0.06,
+    "nod_lead": 0.2
+   }
+  },
+  {
+   "id": "head_solo",
+   "name": "Head solo",
+   "blurb": "In the gap, the pars are dark and only the head runs — a high-speed criss-cross.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "swing",
+    "amount": 0.9,
+    "colour": "#ffffff",
+    "prism": 100,
+    "strobe": 0,
+    "swing_beats": 2,
+    "nod": 0.05,
+    "nod_lead": 0.2,
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "swing",
+    "amount": 0.9,
+    "colour": "#ffffff",
+    "prism": 100,
+    "strobe": 0,
+    "swing_beats": 2,
+    "nod": 0.05,
+    "nod_lead": 0.2
+   }
+  },
+  {
+   "id": "horizon_spin",
+   "name": "Horizon spin",
+   "blurb": "The head spins fast and flat across the horizon a few times, then rises — a lift-off into what comes next.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "swing",
+    "amount": 0.85,
+    "colour": "#ffffff",
+    "prism": 100,
+    "strobe": 0,
+    "swing_beats": 1,
+    "nod": 0.03,
+    "nod_lead": 0.2,
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "swing",
+    "amount": 0.85,
+    "colour": "#ffffff",
+    "prism": 100,
+    "strobe": 0,
+    "swing_beats": 1,
+    "nod": 0.03,
+    "nod_lead": 0.2
+   }
+  },
+  {
+   "id": "answer_trade",
+   "name": "Answer trade",
+   "blurb": "The row runs left to right, one lamp at a time — the call, red into blue.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "trade",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "colours": [
+     "#e01313",
+     "#2f5bff"
+    ],
+    "for_beats": 4,
+    "travel": true,
+    "direction": "lr",
+    "head": false
+   }
+  },
+  {
+   "id": "reverse_trade",
+   "name": "Reverse trade",
+   "blurb": "Answer trade run the other way — the row runs right to left, the response, blue into red.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "trade",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "colours": [
+     "#2f5bff",
+     "#e01313"
+    ],
+    "for_beats": 4,
+    "travel": true,
+    "direction": "rl",
+    "head": false
+   }
+  },
+  {
+   "id": "drop_chase",
+   "name": "Drop chase",
+   "blurb": "A single hard light runs the row — the wave through the drop.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "chase",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "colour": "#ffffff",
+    "extent": "all",
+    "per_beat": 0.5,
+    "step": true,
+    "amount": 1,
+    "rest": 0,
+    "head": false
+   }
+  },
+  {
+   "id": "drop_ripple",
+   "name": "Drop ripple",
+   "blurb": "A wave spreads from the middle to both ends — a softer drop figure.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "ripple",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "colour": "#bcd0ff",
+    "extent": "all",
+    "for_beats": 4
+   }
+  },
+  {
+   "id": "vox_follow",
+   "name": "Voice follow",
+   "blurb": "The pars breathe with the lead vocal — the room answers the singer.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "follow",
+   "dimension": "amount",
+   "kind": "binding",
+   "dials": {
+    "stream": "lead-vocal",
+    "depth": 0.9,
+    "floor": 0.05,
+    "colour": "#e01313",
+    "extent": "all",
+    "head": false
+   }
+  },
+  {
+   "id": "drum_accent",
+   "name": "Drum accent",
+   "blurb": "The pars flash on the real drum hits, not the grid.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "accent",
+   "dimension": "amount",
+   "kind": "binding",
+   "dials": {
+    "threshold": 0.16,
+    "extent": "all",
+    "rest": 0.05,
+    "colour": "#ffffff",
+    "bed_colour": "#2f5bff",
+    "head": false
+   }
+  },
+  {
+   "id": "bg_roam",
+   "name": "Background roam",
+   "blurb": "The head roams with the music's body, brightening as it swells.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "swing",
+    "amount": 0.7,
+    "colour": "#2f5bff",
+    "prism": 0,
+    "strobe": 8,
+    "strobe_on": "downbeat",
+    "swing_beats": 4,
+    "nod": 0.07,
+    "nod_lead": 0.25,
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "swing",
+    "amount": 0.7,
+    "colour": "#2f5bff",
+    "prism": 0,
+    "strobe": 8,
+    "strobe_on": "downbeat",
+    "swing_beats": 4,
+    "nod": 0.07,
+    "nod_lead": 0.25
+   }
+  },
+  {
+   "id": "ascension_whiteout",
+   "name": "Ascension whiteout",
+   "blurb": "All lamps full white — the register lifts an octave and the room goes to light.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "glare",
+   "dimension": "amount",
+   "kind": "gesture",
+   "dials": {
+    "colour": "#ffffff",
+    "amount": 1,
+    "extent": "all",
+    "rise": 0.3,
+    "head": false
+   }
+  },
+  {
+   "id": "ascension_head",
+   "name": "Ascension head",
+   "blurb": "The head rises up and down from the horizontal, matching the pars' breath.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "beam",
+   "dimension": "place",
+   "kind": "gesture",
+   "dials": {
+    "pattern": "glide",
+    "amount": 0.8,
+    "colour": "#ffffff",
+    "prism": 0,
+    "strobe": 0,
+    "pan": 0.2,
+    "pan_to": 0.8,
+    "tilt": 0.167,
+    "tilt_to": 0.167
+   },
+   "head": {
+    "pattern": "glide",
+    "amount": 0.8,
+    "colour": "#ffffff",
+    "prism": 0,
+    "strobe": 0
+   }
+  },
+  {
+   "id": "fade_out",
+   "name": "Fade out",
+   "blurb": "The room pulls back to almost nothing — the come-down.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "strip",
+   "dimension": "amount",
+   "kind": "gesture",
+   "dials": {
+    "to": 0.04,
+    "over_beats": 4,
+    "colour": "#e01313"
+   }
+  },
+  {
+   "id": "go_black",
+   "name": "Go black",
+   "blurb": "Darkness — the strongest gesture there is.",
+   "own": true,
+   "for_song": "raga-of-revenge",
+   "base": "blackout",
+   "dimension": "amount",
+   "kind": "gesture",
+   "dials": {}
   }
  ]
 }
