@@ -33,7 +33,7 @@ export function UploadButton() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState(0);
-  const statusRef = useRef<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [genLabel, setGenLabel] = useState("Queued\u2026");
   const [errorMsg, setErrorMsg] = useState("");
   const jobRef = useRef<string | null>(null);
@@ -70,7 +70,7 @@ export function UploadButton() {
     pollRef.current = setInterval(async () => {
       try {
         const st = await api.upload.status(jobId);
-        statusRef.current = st.status;
+        setStatus(st.status);
         setGenLabel(STATUS_LABELS[st.status] ?? st.status);
         if (st.status === "done") {
           cleanup();
@@ -124,7 +124,7 @@ export function UploadButton() {
 
   if (phase === "uploading" || phase === "generating") {
     const working = phase === "generating";
-    const frac = trackProgress(progress, working ? statusRef.current : null);
+    const frac = trackProgress(progress, working ? status : null);
     const pct = Math.round(frac * 100);
     const label = working ? genLabel : "Uploading\u2026";
     return (
