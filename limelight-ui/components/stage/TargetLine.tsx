@@ -28,18 +28,19 @@ export function TargetLine({ onOpenVenuePicker }: TargetLineProps) {
   const rigText = rig ? rigSummary(rig.kinds, ", ") : "";
 
   return (
-    <div className="flex-none flex items-baseline gap-[var(--spacing-s3)] px-[var(--spacing-s6)] pt-[var(--spacing-s2)]">
-      <span className="label">Designing for</span>
+    <div className="flex-none flex items-center gap-[10px] px-[16px] py-[8px]">
+      <span className="text-[11px] text-ink-dimmer flex-none">Designing for</span>
       <button
         type="button"
         onClick={onOpenVenuePicker}
-        className="flex items-baseline gap-[var(--spacing-s2)] px-2 py-[2px] pb-[3px] border border-solid border-line rounded bg-transparent cursor-pointer text-inherit hover:border-accent"
+        title="Choose the room this show is for"
+        className="liquid liquid-key flex items-center gap-[8px] h-[28px] px-[11px] rounded-[var(--radius-sm)] cursor-pointer min-w-0"
       >
-        <b className="text-[length:var(--text-md)] font-medium">
-          {room?.name ?? "—"}
-          {lname && venue && venue.layouts.length > 1 ? ` · ${lname}` : ""}
-        </b>
-        <span className="text-[length:var(--text-sm)] text-dim">{rigText}</span>
+        <span className="text-[12.5px] font-medium text-ink truncate">
+          {room?.name ?? "\u2014"}
+          {lname && venue && venue.layouts.length > 1 ? ` \u00b7 ${lname}` : ""}
+        </span>
+        <span className="text-[11px] text-ink-dim truncate">{rigText}</span>
       </button>
       <span className="flex-1" />
     </div>

@@ -38,9 +38,9 @@ function IdentityControl() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-[6px] h-[34px] pl-[4px] pr-[10px] rounded-full border-0 bg-transparent cursor-pointer hover:bg-white/[0.04] transition-all duration-200"
+        className="flex items-center gap-[6px] h-[36px] pl-[4px] pr-[10px] rounded-full border-0 bg-transparent cursor-pointer hover:bg-white/[0.04] transition-all duration-200"
       >
-        <span className="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[10px] font-bold flex-none"
+        <span className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-[10.5px] font-bold flex-none"
           style={{ background: "var(--mat-raised)", color: "var(--ink)", boxShadow: "var(--mat-raised-edge), var(--mat-raised-shadow)" }}>
           {initials || <User size={12} />}
         </span>
@@ -73,10 +73,10 @@ function IdentityControl() {
 function Beam() {
   return (
     <span
-      className="relative w-[24px] h-[24px] rounded-[7px] flex-none overflow-hidden"
+      className="relative w-[28px] h-[28px] rounded-[8px] flex-none overflow-hidden"
       style={{ background: "#03070E", boxShadow: "inset 0 0 0 1px rgba(59,227,255,0.22), 0 0 14px -4px var(--accent-glow)" }}
     >
-      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden className="absolute inset-0">
+      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden className="absolute inset-0">
         <defs>
           <linearGradient id="lml-beam" x1="12" y1="7" x2="12" y2="22" gradientUnits="userSpaceOnUse">
             <stop offset="0" stopColor="#8FF3FF" stopOpacity="0.92" />
@@ -94,14 +94,14 @@ export function Topbar({ onRigToggle }: TopbarProps) {
   const role = usePortalStore((s) => s.role);
 
   return (
-    <header className="liquid liquid-flush flex-none flex items-center gap-[16px] px-[16px] h-[54px] z-40">
+    <header className="liquid liquid-flush flex-none flex items-center gap-[16px] px-[20px] h-[62px] z-40">
       <Link
         href="/shows"
         aria-label="Limelight \u2014 your shows"
-        className="group flex items-center gap-[9px] mr-[6px] h-[34px] pl-[5px] pr-[10px] -ml-[5px] rounded-[9px] no-underline transition-colors duration-200 hover:bg-white/[0.04]"
+        className="group flex items-center gap-[10px] mr-[10px] h-[38px] pl-[6px] pr-[12px] -ml-[6px] rounded-[10px] no-underline transition-colors duration-200 hover:bg-white/[0.04]"
       >
         <Beam />
-        <span className="text-[16px] font-semibold tracking-[-0.021em] text-ink transition-colors duration-200">
+        <span className="text-[17px] font-semibold tracking-[-0.022em] text-ink transition-colors duration-200">
           Limelight
         </span>
       </Link>

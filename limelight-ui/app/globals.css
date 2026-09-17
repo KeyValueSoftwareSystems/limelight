@@ -348,9 +348,13 @@ input[type="color"]::-moz-color-swatch { border: 0; border-radius: inherit; }
    that already has a border, which is what made every focused input look like
    a cheap double box. A soft ring sitting tight on the edge, with the border
    itself brightening, is what a focused field should read as. */
+/* Keyboard focus is drawn INSIDE the control. An outer ring reads as a stray
+   border sitting on top of the material, which is what it looked like after a
+   click. Pointer focus never draws one at all - that is what :focus-visible is
+   for - and this keeps the keyboard indicator without the halo. */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 1px var(--focus);
+  box-shadow: inset 0 0 0 1.5px var(--focus);
 }
 :focus:not(:focus-visible) { outline: none; }
 
@@ -364,7 +368,11 @@ input[type="color"]::-moz-color-swatch { border: 0; border-radius: inherit; }
 button:focus-visible,
 a:focus-visible,
 [role="button"]:focus-visible {
-  box-shadow: 0 0 0 1px var(--bg), 0 0 0 3px var(--focus);
+  box-shadow: inset 0 0 0 1.5px var(--focus);
+}
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible) {
+  box-shadow: none;
 }
 
 .label {

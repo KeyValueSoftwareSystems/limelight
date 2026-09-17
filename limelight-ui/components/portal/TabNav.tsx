@@ -25,7 +25,7 @@ export function TabNav() {
 
   return (
     <nav
-      className="liquid-well flex items-stretch gap-[2px] h-[30px] p-[2px] rounded-[7px]"
+      className="liquid-well flex items-stretch gap-[2px] h-[34px] p-[3px] rounded-[9px]"
       aria-label="Sections"
     >
       {tabs.map((tab) => {
@@ -35,8 +35,8 @@ export function TabNav() {
             key={tab.id}
             href={tab.href}
             aria-current={active ? "page" : undefined}
-            className={`flex items-center h-full px-[15px] rounded-[5px] no-underline
-              text-[12.5px] tracking-[-0.004em] transition-colors duration-[var(--dur-state)]
+            className={`flex items-center h-full px-[16px] rounded-[6px] no-underline
+              text-[13px] tracking-[-0.004em] transition-colors duration-[var(--dur-state)]
               ${active ? "liquid liquid-key font-medium text-ink" : "font-normal text-ink-dim hover:text-ink"}`}
           >
             {tab.label}

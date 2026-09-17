@@ -962,11 +962,11 @@ export default function StagePage() {
           ref={columnRef}
           className="flex-1 min-w-0 flex flex-col min-h-0 overflow-hidden"
         >
-          <header className="flex-none flex items-center gap-[12px] px-[16px] h-[48px] glass border-b border-solid border-white/[0.05]">
+          <header className="liquid liquid-flush flex-none flex items-center gap-[12px] px-[16px] h-[50px] z-20">
             <button
               type="button"
               onClick={handleBack}
-              className="flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] border-0 bg-transparent text-ink-dimmer cursor-pointer hover:text-ink hover:bg-accent/[0.08] transition-all duration-200 active:scale-[0.95]"
+              className="liquid liquid-key flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] text-ink-dim cursor-pointer hover:text-ink"
               title="Back to songs"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1004,7 +1004,7 @@ export default function StagePage() {
                   <button
                     type="button"
                     onClick={() => setMoreOpen(!moreOpen)}
-                    className="flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.02] text-ink-dimmer cursor-pointer hover:text-ink hover:bg-accent/[0.08] hover:border-accent/20 transition-all duration-200 active:scale-[0.95]"
+                    className="liquid liquid-key flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] text-ink-dim cursor-pointer hover:text-ink"
                     title="More actions"
                   >
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">

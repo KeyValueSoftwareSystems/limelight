@@ -99,20 +99,16 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-[7px] h-[30px] px-[10px] rounded-full cursor-pointer transition-all duration-200 hover:brightness-110"
-        style={{
-          border: `1px solid ${info.borderColour}`,
-          background: info.bgColour,
-        }}
+        className="liquid liquid-key flex items-center gap-[7px] h-[30px] px-[11px] rounded-full cursor-pointer"
       >
         <span
           className={`w-[6px] h-[6px] rounded-full flex-none ${isSending ? "animate-sending" : ""}`}
           style={{ background: info.colour }}
         />
-        <span className="text-[11px] font-semibold" style={{ color: info.textColour }}>
+        <span className="text-[11.5px] font-medium" style={{ color: info.textColour }}>
           {label}
         </span>
-        <ChevronDown size={10} style={{ color: info.textColour, opacity: 0.6 }} />
+        <ChevronDown size={10} className="text-ink-dimmer" />
       </button>
 
       {expanded && (

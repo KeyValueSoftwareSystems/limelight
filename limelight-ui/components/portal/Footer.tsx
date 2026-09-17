@@ -11,7 +11,7 @@ export function Footer() {
     : "";
 
   return (
-    <footer className="flex-none flex items-center justify-between gap-[16px] px-[20px] h-[28px] border-t border-solid border-white/[0.04] glass">
+    <footer className="liquid liquid-flush flex-none flex items-center justify-between gap-[16px] px-[20px] h-[28px]">
       <span className="text-[11px] text-ink-dimmer truncate font-medium">
         {song?.title ?? "Limelight"}
       </span>

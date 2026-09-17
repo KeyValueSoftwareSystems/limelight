@@ -48,10 +48,15 @@ export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
 
   return (
     <Sheet open={open} onClose={onClose}>
-      <div className="flex items-center gap-[var(--spacing-s3)] p-[var(--spacing-s5)] border-b border-solid border-line">
-        <div className="label">Design for</div>
+      <div className="flex-none px-[22px] pt-[20px] pb-[14px]">
+        <h2 className="text-[19px] font-semibold tracking-[-0.02em] m-0 text-ink leading-[1.2]">
+          Design for
+        </h2>
+        <p className="text-[13px] text-ink-dim mt-[5px] mb-[14px]">
+          Pick the room, and the rig in it, that this show is built for.
+        </p>
         <Input
-          placeholder="search venues"
+          placeholder="Search rooms and rigs"
           wide
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -65,14 +70,14 @@ export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
         {filtered.map((v) => (
           <div
             key={v.id}
-            className={`px-[var(--spacing-s5)] py-[var(--spacing-s3)] border-b border-solid border-line ${
+            className={`px-[22px] py-[14px] border-b border-solid border-[var(--edge)] ${
               v.locked ? "opacity-60" : ""
             }`}
           >
             <div className="flex items-baseline gap-[var(--spacing-s2)]">
-              <b className="text-[length:var(--text-md)] font-medium">{v.name}</b>
+              <b className="text-[14px] font-semibold tracking-[-0.012em] text-ink">{v.name}</b>
               {v.locked && (
-                <span className="text-[length:var(--text-xs)] text-warn">locked</span>
+                <span className="liquid-well px-[7px] py-[2px] rounded-full text-[10.5px] text-warn leading-[15px]">Locked</span>
               )}
             </div>
 
@@ -91,34 +96,34 @@ export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
                     onClick={() => {
                       if (!v.locked) onPick(v, l.file);
                     }}
-                    className={`w-full text-left px-[var(--spacing-s3)] py-[var(--spacing-s2)] border border-solid rounded-[5px] bg-transparent text-ink transition-colors duration-[var(--dur-state)] ${
+                    className={`w-full text-left px-[11px] py-[9px] rounded-[var(--radius-sm)] text-ink border-0 transition-colors duration-[var(--dur-state)] ${
                       v.locked
-                        ? "border-line cursor-default"
+                        ? "cursor-default opacity-55"
                         : live
-                          ? "border-accent bg-accent-soft cursor-pointer"
-                          : "border-line cursor-pointer hover:border-line-strong hover:bg-bg-raised"
+                          ? "liquid liquid-key cursor-pointer"
+                          : "cursor-pointer hover:bg-white/[0.045]"
                     }`}
                   >
                     <div className="flex items-baseline gap-[var(--spacing-s2)]">
-                      <span className="text-[length:var(--text-sm)]">{l.name}</span>
+                      <span className="text-[13px] font-medium">{l.name}</span>
                       {live && (
-                        <span className="text-[length:var(--text-2xs)] text-accent tracking-[0.01em]">
-                          designing for
+                        <span className="text-[10.5px] text-ink-dim">
+                          Designing for
                         </span>
                       )}
                       <span className="flex-1" />
                       {(l.placeholder || rig?.placeholder) && (
-                        <span className="flex-none text-[length:var(--text-2xs)] text-warn">
+                        <span className="flex-none text-[10.5px] text-warn">
                           stand-in rig
                         </span>
                       )}
                       {rig && (
-                        <span className="flex-none text-[length:var(--text-2xs)] text-ink-dimmer tabular-nums">
+                        <span className="mono flex-none text-[10.5px] text-ink-dimmer tabular-nums">
                           {rig.fixtures} fixtures · {rig.channels} channels
                         </span>
                       )}
                     </div>
-                    <div className="text-[length:var(--text-xs)] text-ink-dim tabular-nums mt-[2px]">
+                    <div className="text-[11.5px] text-ink-dim tabular-nums mt-[3px]">
                       {rig ? rigSummary(rig.kinds) : "rig unavailable"}
                     </div>
                   </button>
@@ -127,14 +132,14 @@ export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
             </div>
 
             {v.locked && (
-              <span className="text-[length:var(--text-xs)] text-warn mt-[var(--spacing-s2)] block">
+              <span className="text-[11.5px] text-warn mt-[8px] block leading-[1.5]">
                 {v.locked_because || "locked"}
               </span>
             )}
           </div>
         ))}
         {!filtered.length && (
-          <div className="text-ink-dim text-center py-[var(--spacing-s7)]">No venues found</div>
+          <div className="text-[13px] text-ink-dim text-center py-[40px]">No rooms match that search.</div>
         )}
       </div>
     </Sheet>

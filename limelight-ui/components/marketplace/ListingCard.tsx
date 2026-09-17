@@ -8,6 +8,11 @@ interface ListingCardProps {
   listing: MarketListing;
 }
 
+function sentence(v: string | null | undefined): string | null {
+  const t = (v ?? "").trim();
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : null;
+}
+
 function Tag({ children, tone = "plain" }: { children: React.ReactNode; tone?: "plain" | "warn" }) {
   return (
     <span
@@ -50,7 +55,8 @@ export function ListingCard({ listing }: ListingCardProps) {
             {show.name}
           </span>
           <span className="block mt-[3px] text-[11.5px] text-ink-dim truncate">
-            {show.song} · by {show.author}
+            {show.song}
+            {show.author ? ` · by ${show.author}` : ""}
           </span>
         </div>
 
@@ -64,8 +70,8 @@ export function ListingCard({ listing }: ListingCardProps) {
         )}
 
         <div className="flex items-center gap-[5px] flex-wrap">
-          <Tag>{listing.tier === "free" ? "Free" : "Paid"}</Tag>
-          <Tag>{listing.kind.charAt(0).toUpperCase() + listing.kind.slice(1)}</Tag>
+          {sentence(listing.tier) && <Tag>{listing.tier === "free" ? "Free" : "Paid"}</Tag>}
+          {sentence(listing.kind) && <Tag>{sentence(listing.kind)}</Tag>}
           {listing.stand_in && <Tag tone="warn">Stand-in rig</Tag>}
           {listing.example && <Tag>Example</Tag>}
         </div>

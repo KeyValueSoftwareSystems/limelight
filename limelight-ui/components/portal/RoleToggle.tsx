@@ -27,7 +27,7 @@ export function RoleToggle() {
 
   return (
     <div
-      className="liquid-well flex items-center h-[30px] gap-[2px] rounded-[7px] p-[2px]"
+      className="liquid-well flex items-center h-[34px] gap-[2px] rounded-[9px] p-[3px]"
       role="radiogroup"
       aria-label="Mode"
     >
@@ -41,7 +41,7 @@ export function RoleToggle() {
             aria-checked={active}
             onClick={() => handleRole(r.id)}
             title={r.id === "creator" ? "Design shows from songs" : "Play shows to a room"}
-            className={`flex items-center gap-[6px] h-full px-[11px] rounded-[5px] border-0 text-[12px] cursor-pointer transition-colors duration-200 ease-[var(--ease)] ${
+            className={`flex items-center gap-[6px] h-full px-[12px] rounded-[6px] border-0 text-[12.5px] cursor-pointer transition-colors duration-200 ease-[var(--ease)] ${
               active ? "liquid liquid-key font-medium text-ink" : "bg-transparent font-normal text-ink-dim hover:text-ink"
             }`}
           >

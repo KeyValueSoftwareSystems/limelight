@@ -26,10 +26,13 @@ export function Sheet({ open, onClose, children }: SheetProps) {
        modal that leaves its own trigger legible underneath is a modal you have
        to read twice. */
     <div
-      className="fixed inset-0 z-40 bg-[rgba(10,11,14,0.82)] backdrop-blur-[3px] flex items-start justify-center pt-[7vh] px-[var(--spacing-s5)] pb-[var(--spacing-s5)]"
+      className="fixed inset-0 z-[80] flex items-start justify-center pt-[7vh] px-[20px] pb-[20px]"
+      style={{ background: "rgba(2,3,8,0.72)", backdropFilter: "blur(6px)" }}
       onClick={handleBackdrop}
+      role="dialog"
+      aria-modal="true"
     >
-      <div className="w-[min(720px,100%)] max-h-[80vh] flex flex-col bg-bg-raised border border-solid border-line-strong rounded-lg overflow-hidden shadow-[var(--elev-popover)]">
+      <div className="liquid w-[min(760px,100%)] max-h-[82vh] flex flex-col rounded-[var(--radius-xl)] overflow-hidden animate-scale-in">
         {children}
       </div>
     </div>
