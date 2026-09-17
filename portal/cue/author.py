@@ -75,12 +75,12 @@ FAMILY_TEMPERATURE = {
     "drums": ("indigo", "crimson", "scarlet", "bone"),
 }
 GESTURES = {
-    "travel": ("sweep", "comet", "wave"),
-    "grow": ("build", "cascade", "unbuild"),
+    "travel": ("sweep", "comet", "wave", "zigzag", "tail", "march", "pendulum"),
+    "grow": ("build", "cascade", "unbuild", "wipe", "stack"),
     "halves": ("alternate", "split"),
     "oddeven": ("hocket",),
-    "poles": ("converge", "diverge"),
-    "room": ("pulse",),
+    "poles": ("converge", "diverge", "twin"),
+    "room": ("pulse", "breathe", "blink"),
 }
 RHYTHMIC = ("room", "halves", "oddeven")
 
@@ -95,12 +95,20 @@ def lamp_count(rig="arc4-head"):
 
 
 def cycle_steps(fig, n):
-    if fig in ("sweep", "bounce", "wave", "comet", "handover"):
+    if fig in ("sweep", "bounce", "wave", "comet", "handover", "tail"):
         return max(1, 2 * n - 2)
     if fig == "cascade":
         return max(1, 2 * n - 1)
-    if fig in ("build", "unbuild"):
+    if fig in ("build", "unbuild", "zigzag", "stack"):
         return max(1, n)
+    if fig == "wipe":
+        return max(1, 2 * n)
+    if fig == "march":
+        return max(1, 2 * (n - 1) - 1)
+    if fig == "blink":
+        return max(2, 2 * n)
+    if fig == "twin":
+        return max(2, n)
     if fig in ("converge", "diverge"):
         return max(1, n // 2)
     return 2

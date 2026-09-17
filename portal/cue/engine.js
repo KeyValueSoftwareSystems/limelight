@@ -166,14 +166,6 @@ const FIGURES = {
     if (i >= n) i = span - i;
     return [ids[i]];
   },
-  bounce(ids, step) {
-    const n = ids.length;
-    if (!n) return [];
-    const span = Math.max(1, 2 * n - 2);
-    let i = ((step % span) + span) % span;
-    if (i >= n) i = span - i;
-    return [ids[i]];
-  },
   wave(ids, step) {
     const n = ids.length;
     if (!n) return {};
@@ -250,13 +242,91 @@ const FIGURES = {
   pulse(ids, step) {
     return step % 2 === 0 ? ids.slice() : [];
   },
-  pairs(ids, step) {
-    return ids.filter((_, i) => Math.floor(i / 2) % 2 === step % 2);
-  },
   split(ids, step) {
     const h = Math.ceil(ids.length / 2);
     const out = {};
     ids.forEach((id, i) => { out[id] = (i < h) === (step % 2 === 0) ? 1 : 0.22; });
+    return out;
+  },
+  zigzag(ids, step) {
+    const n = ids.length;
+    if (!n) return [];
+    const order = [];
+    for (let k = 0; k < n; k += 2) order.push(k);
+    for (let k = 1; k < n; k += 2) order.push(k);
+    return [ids[order[((step % order.length) + order.length) % order.length]]];
+  },
+  pendulum(ids, step) {
+    const n = ids.length;
+    if (n < 2) return ids.slice();
+    return [step % 2 === 0 ? ids[0] : ids[n - 1]];
+  },
+  tail(ids, step) {
+    const n = ids.length;
+    if (!n) return {};
+    const span = Math.max(1, 2 * n - 2);
+    let h = ((step % span) + span) % span;
+    if (h >= n) h = span - h;
+    const out = {};
+    for (let k = 0; k < n; k++) {
+      const d = Math.abs(k - h);
+      out[ids[k]] = d === 0 ? 1 : d === 1 ? 0.7 : d === 2 ? 0.35 : 0.1;
+    }
+    return out;
+  },
+  march(ids, step) {
+    const n = ids.length;
+    if (n < 2) return ids.slice();
+    const span = Math.max(1, 2 * (n - 1) - 1);
+    let a = ((step % span) + span) % span;
+    if (a >= n - 1) a = span - a - 1;
+    return [ids[a], ids[Math.min(n - 1, a + 1)]];
+  },
+  blink(ids, step) {
+    const n = ids.length;
+    if (!n) return {};
+    const who = Math.floor(step / 2) % n;
+    const out = {};
+    for (let k = 0; k < n; k++) out[ids[k]] = step % 2 === 0 ? (k === who ? 1 : 0.45) : 0.45;
+    return out;
+  },
+  wipe(ids, step) {
+    const n = ids.length;
+    if (!n) return {};
+    const span = 2 * n;
+    const i = ((step % span) + span) % span;
+    const up = i < n;
+    const edge = up ? i : span - 1 - i;
+    const out = {};
+    for (let k = 0; k < n; k++) out[ids[k]] = k <= edge ? 1 : 0.15;
+    return out;
+  },
+  stack(ids, step) {
+    const n = ids.length;
+    if (!n) return {};
+    const t = ((step % n) + n) % n;
+    const out = {};
+    for (let k = 0; k < n; k++) {
+      const x = n > 1 ? k / (n - 1) : 0;
+      out[ids[k]] = t % 2 === 0 ? 0.2 + 0.8 * x : 1.0 - 0.8 * x;
+    }
+    return out;
+  },
+  breathe(ids, step) {
+    const n = ids.length;
+    if (!n) return {};
+    const lv = step % 2 === 0 ? 1 : 0.4;
+    const out = {};
+    for (let k = 0; k < n; k++) out[ids[k]] = lv;
+    return out;
+  },
+  twin(ids, step) {
+    const n = ids.length;
+    if (n < 4) return ids.slice();
+    const a = ((step % n) + n) % n;
+    const b2 = (n - 1) - a;
+    const out = {};
+    for (let k = 0; k < n; k++) out[ids[k]] = (k === a || k === b2) ? 1 : 0.15;
     return out;
   },
   pitch(ids, step, ctx) {

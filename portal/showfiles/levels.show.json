@@ -297,7 +297,7 @@
     "second": 27.4
    },
    "fade": 0.234,
-   "why": "bars 13-16, the phrase opens out: keys leads, E 7.39, 3 hits, mode +0.31 - sweep in violet - split instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 13-16, the phrase opens out: keys leads, E 7.39, 3 hits, mode +0.31 - zigzag in violet - pendulum instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -313,15 +313,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "split",
+     "figure": "pendulum",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.62,
-     "move_head": false,
+     "move_head": true,
      "reverse": true,
-     "cycles": 2
+     "cycles": 1
     }
    ]
   },
@@ -331,7 +331,7 @@
     "second": 29.28
    },
    "fade": 0.234,
-   "why": "bars 13-16, the phrase opens out: keys leads, E 8.14, 3 hits, mode +0.49 - diverge in violet - converge instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 13-16, the phrase opens out: keys leads, E 8.14, 3 hits, mode +0.49 - converge in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -365,7 +365,7 @@
     "second": 31.138
    },
    "fade": 0.234,
-   "why": "bars 13-16, the phrase opens out: keys leads, E 7.62, 4 hits, mode +0.30 - sweep in violet - alternate instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 13-16, the phrase opens out: keys leads, E 7.62, 4 hits, mode +0.30 - zigzag in violet - split instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -381,7 +381,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "alternate",
+     "figure": "split",
      "every": {
       "beats": 1.0
      },
@@ -399,7 +399,7 @@
     "second": 33.019
    },
    "fade": 0.234,
-   "why": "bars 13-16, the phrase opens out: keys leads, E 9.00, 2 hits, mode +0.50 - diverge in violet against teal inside",
+   "why": "bars 13-16, the phrase opens out: keys leads, E 9.00, 2 hits, mode +0.50 - converge in violet against teal inside - diverge instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -466,7 +466,7 @@
     "second": 38.893
    },
    "fade": 0.234,
-   "why": "converge answers alternate, a whole 2 cycles, landing on the hit at 38.89s with a new colour",
+   "why": "twin answers alternate, a whole 1 cycles, landing on the hit at 38.89s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -482,14 +482,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "converge",
+     "figure": "twin",
      "every": {
       "beats": 2.0
      },
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 2,
+     "cycles": 1,
      "reverse": true
     }
    ]
@@ -500,7 +500,7 @@
     "second": 42.4
    },
    "fade": 0.234,
-   "why": "bars 21-24, the phrase closes down: keys leads, E 7.82, 3 hits, mode +0.31 - wave in violet against crimson inside - sweep instead, the only shape that finishes in 2.1 bars",
+   "why": "bars 21-24, the phrase closes down: keys leads, E 7.82, 3 hits, mode +0.31 - march in violet against crimson inside - sweep instead, the only shape that finishes in 2.1 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -634,7 +634,7 @@
     "second": 57.4
    },
    "fade": 0.234,
-   "why": "bars 29-32, the phrase closes down: keys leads, E 6.83, 2 hits, mode +0.50 - cascade in violet - build instead, the only shape that finishes in 1.6 bars",
+   "why": "bars 29-32, the phrase closes down: keys leads, E 6.83, 2 hits, mode +0.50 - unbuild in violet - build instead, the only shape that finishes in 1.6 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -672,7 +672,7 @@
     "second": 64.9
    },
    "fade": 0.234,
-   "why": "bars 33-36, the phrase travels across: keys leads, E 7.01, 2 hits, mode +0.36 - pulse in violet against crimson inside",
+   "why": "bars 33-36, the phrase travels across: keys leads, E 7.01, 2 hits, mode +0.36 - blink in violet against crimson inside - breathe instead, the only shape that finishes in 2.1 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -688,7 +688,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "breathe",
      "every": {
       "beats": 1.5
      },
@@ -710,7 +710,7 @@
     "second": 72.4
    },
    "fade": 0.234,
-   "why": "bars 37-40, the phrase closes down: keys leads, E 7.12, 4 hits, mode +0.33 - build in violet against teal inside - cascade instead, the only shape that finishes in 2.1 bars",
+   "why": "bars 37-40, the phrase closes down: keys leads, E 7.12, 4 hits, mode +0.33 - stack in violet against teal inside - cascade instead, the only shape that finishes in 2.1 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -816,7 +816,7 @@
     "second": 87.4
    },
    "fade": 0.234,
-   "why": "bars 45-48, the phrase closes down: keys leads, E 5.32, 1 hits, mode +0.78 - diverge in violet against teal inside",
+   "why": "bars 45-48, the phrase closes down: keys leads, E 5.32, 1 hits, mode +0.78 - twin in violet against teal inside - diverge instead, the only shape that finishes in 1.6 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1010,11 +1010,50 @@
     "second": 100.682
    },
    "fade": 0.0,
-   "why": "and back on the look it is arriving at, the instant the audio returns - split instead, the only shape that finishes in 0.9 bars",
+   "why": "and back on the look it is arriving at, the instant the audio returns - pendulum instead, the only shape that finishes in 0.9 bars",
    "look": {
     "lamps": {
      "c": "violet",
      "l": 0.53
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.37,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pendulum",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 2,
+     "low": 0.62,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1
+    }
+   ],
+   "swell": {
+    "from": 0.892,
+    "to": 0.928,
+    "curve": 1.15
+   }
+  },
+  {
+   "id": 18,
+   "at": {
+    "second": 102.4
+   },
+   "fade": 0.234,
+   "why": "bars 53-56, the phrase opens out: voices leads, E 5.57, 1 hits, mode +0.62 - wipe in bone against violet inside - split instead, the only shape that finishes in 1.0 bars",
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 0.292
     },
     "heads": {
      "c": "violet",
@@ -1044,51 +1083,12 @@
    }
   },
   {
-   "id": 18,
-   "at": {
-    "second": 102.4
-   },
-   "fade": 0.234,
-   "why": "bars 53-56, the phrase opens out: voices leads, E 5.57, 1 hits, mode +0.62 - cascade in bone against violet inside - alternate instead, the only shape that finishes in 1.0 bars",
-   "look": {
-    "lamps": {
-     "c": "bone",
-     "l": 0.292
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.37,
-     "pan": 0.5,
-     "tilt": 0.3
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "alternate",
-     "every": {
-      "beats": 1.0
-     },
-     "fill_beats": 2,
-     "low": 0.62,
-     "move_head": false,
-     "reverse": true,
-     "cycles": 2
-    }
-   ],
-   "swell": {
-    "from": 0.892,
-    "to": 0.928,
-    "curve": 1.15
-   }
-  },
-  {
    "id": 19,
    "at": {
     "second": 104.281
    },
    "fade": 0.234,
-   "why": "bars 53-56, the phrase opens out: strings leads, E 7.92, 2 hits, mode +0.60 - pulse in bone against scarlet inside",
+   "why": "bars 53-56, the phrase opens out: strings leads, E 7.92, 2 hits, mode +0.60 - breathe in bone against scarlet inside - pulse instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -1127,7 +1127,7 @@
     "second": 106.138
    },
    "fade": 0.234,
-   "why": "bars 53-56, the phrase opens out: strings leads, E 7.81, 2 hits, mode +0.44 - cascade in bone against scarlet inside - alternate instead, the only shape that finishes in 0.9 bars",
+   "why": "bars 53-56, the phrase opens out: strings leads, E 7.81, 2 hits, mode +0.44 - wipe in bone against scarlet inside - alternate instead, the only shape that finishes in 0.9 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -1166,7 +1166,7 @@
     "second": 107.787
    },
    "fade": 0.234,
-   "why": "bars 53-56, the phrase opens out: strings leads, E 8.08, 0 hits, mode +0.43 - pulse in bone against scarlet inside",
+   "why": "bars 53-56, the phrase opens out: strings leads, E 8.08, 0 hits, mode +0.43 - breathe in bone against scarlet inside",
    "look": {
     "lamps": {
      "c": "bone",
@@ -1182,7 +1182,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "breathe",
      "every": {
       "beats": 1.0
      },
@@ -1205,7 +1205,7 @@
     "second": 109.85
    },
    "fade": 0.234,
-   "why": "bars 57-60, the phrase travels across: strings leads, E 7.19, 2 hits, mode +0.39 - wave in bone against crimson inside - sweep instead, the only shape that finishes in 2.0 bars",
+   "why": "bars 57-60, the phrase travels across: strings leads, E 7.19, 2 hits, mode +0.39 - sweep in bone against crimson inside",
    "look": {
     "lamps": {
      "c": "bone",
@@ -1238,7 +1238,7 @@
     "second": 113.6
    },
    "fade": 0.117,
-   "why": "pulse answers sweep, a whole 4 cycles, mid-phrase",
+   "why": "blink answers sweep, a whole 1 cycles, mid-phrase",
    "look": {
     "lamps": {
      "c": "bone",
@@ -1254,14 +1254,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "blink",
      "every": {
       "beats": 1.0
      },
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 4,
+     "cycles": 1,
      "reverse": true
     }
    ]
@@ -1272,7 +1272,7 @@
     "second": 117.377
    },
    "fade": 0.234,
-   "why": "bars 61-64, the phrase closes down: voices leads, E 7.53, 1 hits, mode +0.37 - diverge in bone against teal inside - converge instead, the only shape that finishes in 2.0 bars",
+   "why": "bars 61-64, the phrase closes down: voices leads, E 7.53, 1 hits, mode +0.37 - converge in bone against teal inside",
    "look": {
     "lamps": {
      "c": "bone",
@@ -1339,7 +1339,7 @@
     "second": 124.877
    },
    "fade": 0.234,
-   "why": "bars 65-68, the phrase closes down: voices leads, E 4.89, 2 hits, mode +0.35 - comet in bone",
+   "why": "bars 65-68, the phrase closes down: voices leads, E 4.89, 2 hits, mode +0.35 - wave in bone - comet instead, the only shape that finishes in 2.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -1475,7 +1475,7 @@
     "second": 137.99
    },
    "fade": 0.234,
-   "why": "bars 69-72, the phrase opens out: strings leads, E 8.76, 0 hits, mode +0.52 - unbuild in violet against scarlet inside - split instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 69-72, the phrase opens out: strings leads, E 8.76, 0 hits, mode +0.52 - unbuild in violet against scarlet inside - pendulum instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1491,15 +1491,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "split",
+     "figure": "pendulum",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.62,
-     "move_head": false,
+     "move_head": true,
      "reverse": true,
-     "cycles": 2
+     "cycles": 1
     }
    ],
    "swell": {
@@ -1553,7 +1553,7 @@
     "second": 147.377
    },
    "fade": 0.234,
-   "why": "bars 77-80, the phrase closes down: strings leads, E 5.38, 0 hits, mode +0.47 - split in violet - alternate instead, the only shape that finishes in 2.0 bars",
+   "why": "bars 77-80, the phrase closes down: strings leads, E 5.38, 0 hits, mode +0.47 - split in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1569,7 +1569,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "alternate",
+     "figure": "split",
      "every": {
       "beats": 1.0
      },
@@ -1586,7 +1586,7 @@
     "second": 151.139
    },
    "fade": 0.234,
-   "why": "pulse answers alternate, a whole 4 cycles, landing on the hit at 151.14s with a new colour",
+   "why": "breathe answers split, a whole 4 cycles, landing on the hit at 151.14s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -1602,7 +1602,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "breathe",
      "every": {
       "beats": 1.0
      },
@@ -1620,7 +1620,7 @@
     "second": 154.877
    },
    "fade": 0.234,
-   "why": "bars 81-84, the phrase closes down: strings leads, E 4.19, 3 hits, mode +0.33 - wave in violet - build instead, the only shape that finishes in 1.5 bars",
+   "why": "bars 81-84, the phrase closes down: strings leads, E 4.19, 3 hits, mode +0.33 - pendulum in violet - zigzag instead, the only shape that finishes in 1.5 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1636,7 +1636,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "zigzag",
      "every": {
       "beats": 1.0
      },
@@ -1654,7 +1654,7 @@
     "second": 157.71
    },
    "fade": 0.234,
-   "why": "sweep answers build, a whole 1 cycles, landing on the hit at 157.71s with a new colour",
+   "why": "build answers zigzag, a whole 1 cycles, landing on the hit at 157.71s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -1670,9 +1670,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "build",
      "every": {
-      "beats": 1.5
+      "beats": 2.0
      },
      "fill_beats": 2,
      "low": 0.62,
@@ -1688,7 +1688,7 @@
     "second": 162.35
    },
    "fade": 0.234,
-   "why": "bars 85-88, the phrase opens out: keys leads, E 1.55, 0 hits, mode -0.20 - build in violet against teal inside - cascade instead, the only shape that finishes in 2.0 bars",
+   "why": "bars 85-88, the phrase opens out: keys leads, E 1.55, 0 hits, mode -0.20 - cascade in violet against teal inside",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1795,7 +1795,7 @@
     "second": 177.35
    },
    "fade": 0.234,
-   "why": "bars 93-96, the phrase opens out: keys leads, E 3.09, 0 hits, mode -0.35 - unbuild in violet - build instead, the only shape that finishes in 1.9 bars",
+   "why": "bars 93-96, the phrase opens out: keys leads, E 3.09, 0 hits, mode -0.35 - wipe in violet - stack instead, the only shape that finishes in 1.9 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1811,7 +1811,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "stack",
      "every": {
       "beats": 1.5
      },
@@ -1834,7 +1834,7 @@
     "second": 184.9
    },
    "fade": 0.234,
-   "why": "bars 97-100, the phrase opens out: keys leads, E 6.43, 4 hits, mode +0.43 - sweep in violet - build instead, the only shape that finishes in 1.6 bars",
+   "why": "bars 97-100, the phrase opens out: keys leads, E 6.43, 4 hits, mode +0.43 - zigzag in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1850,7 +1850,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "zigzag",
      "every": {
       "beats": 1.0
      },
@@ -1867,7 +1867,7 @@
     "second": 187.919
    },
    "fade": 0.234,
-   "why": "converge answers build, a whole 3 cycles, landing on the hit at 187.92s with a new colour",
+   "why": "converge answers zigzag, a whole 3 cycles, landing on the hit at 187.92s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -2002,7 +2002,7 @@
     "second": 199.877
    },
    "fade": 0.234,
-   "why": "bars 105-108, the phrase closes down: drums leads, E 8.24, 6 hits, mode +0.35 - converge in violet against teal inside - opened from violet to bone so the level can be seen",
+   "why": "bars 105-108, the phrase closes down: drums leads, E 8.24, 6 hits, mode +0.35 - twin in violet against teal inside - opened from violet to bone so the level can be seen",
    "look": {
     "lamps": {
      "c": "bone",
@@ -2018,15 +2018,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "converge",
+     "figure": "twin",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.55,
      "move_head": false,
      "reverse": true,
-     "cycles": 3
+     "cycles": 1
     }
    ]
   },
@@ -2036,7 +2036,7 @@
     "second": 202.919
    },
    "fade": 0.234,
-   "why": "build answers converge, a whole 1 cycles, landing on the hit at 202.92s with a new colour",
+   "why": "zigzag answers twin, a whole 1 cycles, landing on the hit at 202.92s with a new colour",
    "look": {
     "lamps": {
      "c": "violet",
@@ -2052,7 +2052,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "zigzag",
      "every": {
       "beats": 1.0
      },
@@ -2070,7 +2070,7 @@
     "second": 205.52
    },
    "fade": 0.234,
-   "why": "bars 105-108, the phrase closes down: drums leads, E 5.86, 3 hits, mode +0.42 - unbuild in violet against crimson inside - opened from violet to bone so the level can be seen - alternate instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 105-108, the phrase closes down: drums leads, E 5.86, 3 hits, mode +0.42 - cascade in violet against crimson inside - opened from violet to bone so the level can be seen - alternate instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -2226,7 +2226,7 @@
     "second": 222.378
    },
    "fade": 0.234,
-   "why": "bars 117-120, the phrase travels across: keys leads, E 5.38, 4 hits, mode +0.33 - diverge in violet against crimson inside",
+   "why": "bars 117-120, the phrase travels across: keys leads, E 5.38, 4 hits, mode +0.33 - twin in violet against crimson inside - converge instead, the only shape that finishes in 1.9 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -2242,7 +2242,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "diverge",
+     "figure": "converge",
      "every": {
       "beats": 1.0
      },
@@ -2260,7 +2260,7 @@
     "second": 225.907
    },
    "fade": 0.234,
-   "why": "cascade answers diverge, a whole 1 cycles, landing on the hit at 225.91s with a new colour",
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 225.91s with a new colour",
    "look": {
     "lamps": {
      "c": "violet",
@@ -2276,9 +2276,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "cascade",
+     "figure": "build",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.62,

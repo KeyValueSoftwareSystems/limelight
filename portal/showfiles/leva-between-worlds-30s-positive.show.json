@@ -236,7 +236,7 @@
     "second": 21.478
    },
    "fade": 0.0,
-   "why": "and back on the look it is arriving at, the instant the audio returns - opened from indigo to bone so the level can be seen - alternate instead, the only shape that finishes in 1.0 bars",
+   "why": "and back on the look it is arriving at, the instant the audio returns - opened from indigo to bone so the level can be seen - pendulum instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -252,14 +252,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "alternate",
+     "figure": "pendulum",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.55,
-     "move_head": false,
-     "cycles": 2
+     "move_head": true,
+     "cycles": 1
     }
    ],
    "swell": {
@@ -347,7 +347,7 @@
     "second": 33.971
    },
    "fade": 0.12,
-   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 33.97s with a new colour",
+   "why": "build answers alternate, a whole 1 cycles, landing on the hit at 33.97s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -363,9 +363,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "build",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.62,
@@ -415,7 +415,7 @@
     "second": 41.657
    },
    "fade": 0.24,
-   "why": "build answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour",
+   "why": "unbuild answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour",
    "look": {
     "lamps": {
      "c": "bone",
@@ -431,7 +431,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "unbuild",
      "every": {
       "beats": 1.5
      },

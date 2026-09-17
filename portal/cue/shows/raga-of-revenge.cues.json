@@ -172,7 +172,7 @@
     "second": 21.827
    },
    "fade": 0.259,
-   "why": "bars 9-10, the phrase travels across: brass leads, E 10.65, 1 hits, mode +0.55 - converge in violet against amber inside - opened from crimson to bone so the level can be seen",
+   "why": "bars 9-10, the phrase travels across: brass leads, E 10.65, 1 hits, mode +0.55 - twin in violet against amber inside - opened from crimson to bone so the level can be seen - converge instead, the only shape that finishes in 1.9 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -210,7 +210,7 @@
     "second": 25.774
    },
    "fade": 0.259,
-   "why": "bars 11-14, the phrase closes down: strings leads, E 10.09, 2 hits, mode +0.32 - sweep in crimson against crimson inside",
+   "why": "bars 11-14, the phrase closes down: strings leads, E 10.09, 2 hits, mode +0.32 - zigzag in crimson against crimson inside - sweep instead, the only shape that finishes in 1.7 bars",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -324,7 +324,7 @@
     "second": 39.776
    },
    "fade": 0.259,
-   "why": "bars 15-18, the phrase opens out: guitars leads, E 7.58, 10 hits, mode +0.14 - cascade in crimson against violet inside - alternate instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 15-18, the phrase opens out: guitars leads, E 7.58, 10 hits, mode +0.14 - stack in crimson against violet inside - alternate instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -401,7 +401,7 @@
     "second": 43.793
    },
    "fade": 0.259,
-   "why": "bars 19-22, the phrase opens out: guitars leads, E 8.55, 5 hits, mode -0.39 - unbuild in crimson against violet inside - alternate instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 19-22, the phrase opens out: guitars leads, E 8.55, 5 hits, mode -0.39 - build in crimson against violet inside - pendulum instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -417,15 +417,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "alternate",
+     "figure": "pendulum",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.62,
-     "move_head": false,
+     "move_head": true,
      "reverse": true,
-     "cycles": 2
+     "cycles": 1
     }
    ],
    "swell": {
@@ -488,7 +488,7 @@
     "second": 48.437
    },
    "fade": 0.0,
-   "why": "and back, the instant the audio returns - opened from crimson to bone so the level can be seen",
+   "why": "and back, the instant the audio returns - opened from crimson to bone so the level can be seen - build instead, the only shape that finishes in 1.4 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -566,7 +566,7 @@
     "second": 55.798
    },
    "fade": 0.259,
-   "why": "bars 26-29, the phrase travels across: drums leads, E 9.80, 10 hits, mode +0.46 - pulse in crimson",
+   "why": "bars 26-29, the phrase travels across: drums leads, E 9.80, 10 hits, mode +0.46 - breathe in crimson - pulse instead, the only shape that finishes in 1.4 bars",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -668,7 +668,7 @@
     "second": 63.646
    },
    "fade": 0.259,
-   "why": "bars 30-33, the phrase travels across: drums leads, E 7.57, 3 hits, mode -0.50 - converge in crimson against scarlet inside",
+   "why": "bars 30-33, the phrase travels across: drums leads, E 7.57, 3 hits, mode -0.50 - twin in crimson against scarlet inside - converge instead, the only shape that finishes in 2.1 bars",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -735,7 +735,7 @@
     "second": 71.796
    },
    "fade": 0.259,
-   "why": "bars 34-37, the phrase closes down: drums leads, E 8.31, 3 hits, mode +0.45 - diverge in crimson against crimson inside - converge instead, the only shape that finishes in 1.9 bars",
+   "why": "bars 34-37, the phrase closes down: drums leads, E 8.31, 3 hits, mode +0.45 - converge in crimson against crimson inside - twin instead, the only shape that finishes in 1.9 bars",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -751,14 +751,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "converge",
+     "figure": "twin",
      "every": {
       "beats": 1.0
      },
      "fill_beats": 2,
      "low": 0.62,
      "move_head": false,
-     "cycles": 4
+     "cycles": 2
     }
    ]
   },
@@ -768,7 +768,7 @@
     "second": 75.79
    },
    "fade": 0.259,
-   "why": "sweep answers converge, a whole 1 cycles, landing on the hit at 75.79s with a new colour",
+   "why": "sweep answers twin, a whole 1 cycles, landing on the hit at 75.79s with a new colour",
    "look": {
     "lamps": {
      "c": "teal",
@@ -802,7 +802,7 @@
     "second": 79.807
    },
    "fade": 0.259,
-   "why": "bars 38-39, the phrase travels across: voices leads, E 6.26, 4 hits, mode +0.17 - cascade in crimson against scarlet inside - alternate instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 38-39, the phrase travels across: voices leads, E 6.26, 4 hits, mode +0.17 - build in crimson against scarlet inside - alternate instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -879,7 +879,7 @@
     "second": 89.792
    },
    "fade": 0.0,
-   "why": "bars 43-46, the phrase travels across: drums leads, E 8.35, 3 hits, mode +1.00 - build in crimson against scarlet inside - opened from crimson to bone so the level can be seen - split instead, the only shape that finishes in 0.7 bars",
+   "why": "bars 43-46, the phrase travels across: drums leads, E 8.35, 3 hits, mode +1.00 - unbuild in crimson against scarlet inside - opened from crimson to bone so the level can be seen - split instead, the only shape that finishes in 0.7 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -956,7 +956,7 @@
     "second": 97.802
    },
    "fade": 0.259,
-   "why": "bars 47-50, the phrase opens out: keys leads, E 9.49, 1 hits, mode +0.50 - pulse in crimson against crimson inside - opened from crimson to bone so the level can be seen",
+   "why": "bars 47-50, the phrase opens out: keys leads, E 9.49, 1 hits, mode +0.50 - breathe in crimson against crimson inside - opened from crimson to bone so the level can be seen - pulse instead, the only shape that finishes in 1.4 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -995,7 +995,7 @@
     "second": 103.793
    },
    "fade": 0.259,
-   "why": "bars 47-50, the phrase opens out: drums leads, E 11.37, 4 hits, mode +0.76 - cascade in crimson - opened from crimson to bone so the level can be seen - alternate instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 47-50, the phrase opens out: drums leads, E 11.37, 4 hits, mode +0.76 - wipe in crimson - opened from crimson to bone so the level can be seen - pendulum instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -1011,15 +1011,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "alternate",
+     "figure": "pendulum",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.62,
-     "move_head": false,
+     "move_head": true,
      "reverse": true,
-     "cycles": 2
+     "cycles": 1
     }
    ],
    "swell": {
@@ -1034,7 +1034,7 @@
     "second": 105.79
    },
    "fade": 0.259,
-   "why": "bars 51-52, the phrase closes down: drums leads, E 12.79, 3 hits, mode +0.83 - unbuild in crimson - opened from crimson to bone so the level can be seen - alternate instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 51-52, the phrase closes down: drums leads, E 12.79, 3 hits, mode +0.83 - stack in crimson - opened from crimson to bone so the level can be seen - alternate instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -1073,7 +1073,7 @@
     "second": 107.787
    },
    "fade": 0.259,
-   "why": "bars 51-52, the phrase closes down: drums leads, E 9.66, 3 hits, mode +0.85 - converge in crimson",
+   "why": "bars 51-52, the phrase closes down: drums leads, E 9.66, 3 hits, mode +0.85 - twin in crimson - converge instead, the only shape that finishes in 0.8 bars",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -1226,7 +1226,7 @@
     "second": 117.795
    },
    "fade": 0.259,
-   "why": "bars 57-60, the phrase opens out: guitars leads, E 6.44, 3 hits, mode +0.55 - comet in bone against violet inside - sweep instead, the only shape that finishes in 1.9 bars",
+   "why": "bars 57-60, the phrase opens out: guitars leads, E 6.44, 3 hits, mode +0.55 - wave in bone against violet inside - sweep instead, the only shape that finishes in 1.9 bars",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -1335,7 +1335,7 @@
     "bar": 63
    },
    "fade": 0.259,
-   "why": "bars 63-63, the phrase travels across: voices leads, E 0.00, 0 hits, mode +0.84 - build in crimson - split instead, the only shape that finishes in 0.8 bars",
+   "why": "bars 63-63, the phrase travels across: voices leads, E 0.00, 0 hits, mode +0.84 - wipe in crimson - split instead, the only shape that finishes in 0.8 bars",
    "look": {
     "lamps": {
      "c": "bone",

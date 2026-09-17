@@ -850,6 +850,41 @@ went in.
 Also `hush`: a bar under 28% of the song's median energy scales down toward 0.12, so
 silence stays dark however high the floor is raised.
 
+## 7u. Everything is a fraction of a beat, and the vocabulary is 22 distinct figures
+
+**The rate must be musical and the span must adapt, not the reverse.** Solving for a
+rate that made a cycle exactly fill its span produced 0.552 beats, 0.683, 1.102 — only
+3 of 39 rates were a musical subdivision, and a chase stepping every 1.102 beats drifts
+against the grid forever. That is what Amal meant by "it's not hitting the beats and bar
+and all. Or even the downbeat." `fit_rate` now searches 0.5, 1, 1.5, 2, 3 and 4 beats,
+takes the cycle count that best fills the span, and breaks ties toward one beat.
+
+Then: everything must be musical. Fades are an eighth, a quarter or a half beat. Accent
+decays are a quarter or a half beat, not a fixed 0.15s. Cue times were already snapped
+to hits and beats. On `raga-of-revenge` that is 45 of 45 fades, 32 of 32 accent decays
+and 35 of 35 chase rates. The only times not on a hit or a beat are the audio holes,
+which follow the recording and must not be quantised to a grid the audio is ignoring.
+
+**The vocabulary is 22 figures and every one is visually distinct**, verified by
+generating twelve steps of each on four lamps and comparing the signatures:
+
+```
+node -e 'const E=require("./portal/cue/engine.js"); ...'   # see the commit for the check
+```
+
+Nine were added — `zigzag`, `pendulum`, `tail`, `march`, `blink`, `wipe`, `stack`,
+`breathe`, `twin` — and three were removed for being byte-identical to something that
+already existed: `bookend` was `converge`, `bounce` was `sweep`, `pairs` was
+`alternate`. **Check any new figure against that signature test before adding it.** This
+project has twice ended up with one gesture wearing several names, and the second time
+it was 92% of the show.
+
+22 figures times two directions is 44 base effects, and times the six musical rates is
+264 combinations. Amal asked for 100; the honest answer is that four pars and one head
+cannot produce 100 *visually distinguishable* effects, and padding the count is how the
+five-gestures-in-fifteen-names problem happened. Songs now use 6 to 16 distinct figures
+each.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the
