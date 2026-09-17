@@ -120,7 +120,7 @@ export function PalettePanel({ onRecolour }: PalettePanelProps) {
 
       <div className="flex-1 min-h-0 overflow-y-auto px-[var(--spacing-s4)] pb-[var(--spacing-s3)]">
         <>
-            <p className="m-0 text-[10px] text-ink-dimmer leading-[1.5] truncate" title={room?.name}>
+            <p className="m-0 text-[10.5px] text-ink-dimmer leading-[1.45]" title={room?.name}>
               {palette.length
                 ? `${room?.name ?? "Custom palette"}${dirty ? " \u00b7 edited" : ""}`
                 : "Add colours and every cue in the show maps onto them."}

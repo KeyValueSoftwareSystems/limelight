@@ -15,7 +15,7 @@ import type { Effect } from "@/lib/types";
    is smaller than the pointer aiming at it and left the mark inside it too small
    to tell one effect from another. Four gives 50px, and the list scrolls — a
    palette is a drawer to reach into, not a diagram that has to fit on screen. */
-const GRID = "grid grid-cols-4 gap-[8px]";
+const GRID = "grid grid-cols-3 gap-[9px]";
 
 const STYLES: { id: string; name: string }[] = [
   { id: "club", name: "Club" },

@@ -474,7 +474,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     }
 
     /* ── the steel ── */
-    const trussMat = new THREE.MeshBasicMaterial({ color: 0x242c3c });
+    const trussMat = new THREE.MeshBasicMaterial({ color: 0x39435a });
     for (const bar of barsOf(fixtures)) {
       const len = bar.x1 - bar.x0 + 0.9;
       const chord = new THREE.Mesh(new THREE.BoxGeometry(len, 0.07, 0.07), trussMat);
@@ -492,7 +492,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     }
 
     /* ── one rig entry per fixture ── */
-    const bodyMat = new THREE.MeshBasicMaterial({ color: 0x11151f });
+    const bodyMat = new THREE.MeshBasicMaterial({ color: 0x1d2432 });
     const rigs: Rig[] = [];
     const maxThrow = Math.max(14, room.depth + room.maxY + 12);
 

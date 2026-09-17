@@ -59,7 +59,7 @@ export default function StagePage() {
   /* The editor's height is the creator's to choose: pull it up while placing
      clips, push it down while judging the look. A fixed ratio is always wrong
      for one of those. */
-  const [editorH, setEditorH] = useState(360);
+  const [editorH, setEditorH] = useState(430);
   const columnRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLElement>(null);
 
@@ -953,7 +953,7 @@ export default function StagePage() {
     <>
       <div className="flex flex-1 min-h-0 overflow-hidden bg-bg text-ink">
         {isDesigner && (
-          <div className="flex-none w-[220px] min-w-[180px] border-r border-solid border-white/[0.05]">
+          <div className="flex-none w-[244px] min-w-[210px] border-r border-solid border-white/[0.05]">
             <Sidebar effects={effects} onRecolour={handleRecolour} />
           </div>
         )}
