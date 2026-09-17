@@ -2126,6 +2126,35 @@ def make_handler(library, baker, rig):
                 song = body.get("song")
                 if not song:
                     return self._json({"error": "which song?"}, 400)
+                if body.get("engine", "cue") == "cue":
+                    song = os.path.basename(str(song))
+                    py = sys.executable
+                    venv = os.path.join(REPO, "work", "allin1", "bin", "python")
+                    if os.access(venv, os.X_OK):
+                        py = venv
+                    steps = [
+                        ("author", [py, os.path.join(HERE, "cue", "author.py"), song]),
+                        ("publish", [py, os.path.join(HERE, "publish.py"), song]),
+                    ]
+                    log = []
+                    for name, cmd in steps:
+                        r = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
+                        log.append("%s: %s" % (name, (r.stdout or r.stderr or "").strip()[-400:]))
+                        if r.returncode != 0:
+                            return self._json({"error": "%s failed: %s"
+                                               % (name, (r.stderr or r.stdout or "").strip()[-600:]),
+                                               "log": log}, 500)
+                    cues_path = os.path.join(CUESHOWS, song + ".cues.json")
+                    try:
+                        with open(cues_path) as fh:
+                            doc = json.load(fh)
+                    except OSError as e:
+                        return self._json({"error": "authored but unreadable: %s" % e}, 500)
+                    return self._json({"song": song, "engine": "cue",
+                                       "cues": len(doc.get("cues") or []),
+                                       "states": len(doc.get("states") or []),
+                                       "gestures": len(doc.get("gestures") or []),
+                                       "saved": cues_path, "log": log})
                 try:
                     sys.path.insert(0, HERE)
                     engine = body.get("engine", "claude")

@@ -473,6 +473,33 @@ export default function StagePage() {
     return position() - st.syncLatency - st.syncNudge;
   }, [position]);
 
+  /* Score to show, from the page. The chain was upload -> score in the hub and
+     show -> lamps here, with the middle step only ever run by hand on a
+     terminal. /api/compose with the cue engine authors and publishes, then the
+     page reloads so the timeline and the lamps both pick up the new file. */
+  const [generating, setGenerating] = useState(false);
+  const handleGenerate = useCallback(async () => {
+    if (!song) return;
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/compose", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ song, engine: "cue" }),
+      });
+      const out = await res.json();
+      if (out?.error) {
+        window.alert("Could not generate: " + out.error);
+        return;
+      }
+      window.location.reload();
+    } catch (e) {
+      window.alert("Could not generate: " + String(e));
+    } finally {
+      setGenerating(false);
+    }
+  }, [song]);
+
   const handleRigToggle = useCallback(async () => {
     const st = usePortalStore.getState();
     const current = st.rig;
@@ -922,6 +949,13 @@ export default function StagePage() {
                 onClick={handleDownload}
               >
                 Download show file
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={!song || generating}
+                onClick={handleGenerate}
+              >
+                {generating ? "Generating…" : "Generate show"}
               </Button>
               <RigControl onToggle={handleRigToggle} />
               {role === "creator" && (
