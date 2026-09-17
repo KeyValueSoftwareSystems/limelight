@@ -1509,8 +1509,80 @@ def author(song, out_path=None):
          "why": "and lifts and settles on a slower cycle, so the two never line up"},
     ]
 
+    def cue_seconds_of(c):
+        a = c.get("at")
+        if not isinstance(a, dict):
+            return None
+        if "second" in a:
+            return float(a["second"])
+        if "bar" in a:
+            return float(at(int(a["bar"]), int(a.get("beat", 1))))
+        return None
+
+    def hex_of(name):
+        return PALETTE.get(name, "#ffffff")
+
+    def section_of(t0):
+        for n, sx in enumerate(sections):
+            if sx["start"] - 1e-6 <= t0 < sx["end"]:
+                return n
+        return max(0, len(sections) - 1)
+
+    ordered = sorted(cues, key=lambda c: (cue_seconds_of(c) if cue_seconds_of(c) is not None else 0.0))
+    states, gestures = [], []
+    for n, c in enumerate(ordered):
+        t0 = cue_seconds_of(c)
+        if t0 is None:
+            continue
+        t1 = None
+        for later in ordered[n + 1:]:
+            t1 = cue_seconds_of(later)
+            if t1 is not None and t1 > t0:
+                break
+            t1 = None
+        if t1 is None:
+            t1 = song_end
+        look = c.get("look") or {}
+        fade_ms = int(round(float(c.get("fade") or 0) * 1000))
+        why = (c.get("why") or "")[:180]
+        if not look:
+            gestures.append({"effect": "blackout", "extent": "all", "head": True,
+                             "from_s": round(t0, 3), "to_s": round(t1, 3),
+                             "fade_ms": fade_ms, "why": why})
+            continue
+        lamps = look.get("lamps") or look.get("all")
+        if isinstance(lamps, dict) and lamps.get("l") is not None:
+            states.append({"effect": "wash", "extent": "all", "head": False,
+                           "amount": round(float(lamps["l"]), 3),
+                           "colour": hex_of(lamps.get("c")),
+                           "fade_ms": fade_ms, "section": section_of(t0),
+                           "from_s": round(t0, 3), "to_s": round(t1, 3), "why": why})
+        heads = look.get("heads")
+        if isinstance(heads, dict) and heads.get("l") is not None:
+            mv = (c.get("head") or {}).get("move", "hold")
+            gestures.append({"effect": "beam", "pattern": mv,
+                             "pan": round(float(heads.get("pan", 0.5)), 3),
+                             "tilt": round(float(heads.get("tilt", 0.35)), 3),
+                             "colour": hex_of(heads.get("c")),
+                             "amount": round(float(heads["l"]), 3),
+                             "prism": int(round(float(heads.get("prism") or 0) * 100)),
+                             "strobe": int(round(float(heads.get("strobe") or 0) * 100)),
+                             "from_s": round(t0, 3), "to_s": round(t1, 3),
+                             "fade_ms": fade_ms, "why": why})
+    for a in accents:
+        beats = max(1, int(round(float(a.get("decay") or step) / step)))
+        gestures.append({"effect": "glare", "colour": hex_of("bone"),
+                         "amount": round(float(a.get("l") or 1), 3), "extent": "all",
+                         "at_s": round(float(a["t"]), 3), "for_beats": beats,
+                         "fade_ms": 0, "head": False,
+                         "why": "a flash on the hit, the whole row lifted together"})
+    gestures.sort(key=lambda g: g.get("from_s", g.get("at_s", 0)))
+
     doc = {
         "schema": "limelight.cuelist/1",
+        "states": states,
+        "bindings": [],
+        "gestures": gestures,
         "song": song,
         "rig": "arc4-head",
         "palette": PALETTE,
