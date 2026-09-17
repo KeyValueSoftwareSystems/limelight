@@ -15,7 +15,7 @@ module.exports = function swell(params, ctx) {
     const env = H.swellEnv(i / N, rise);      // 0 -> 1 over `rise`, then 1 -> 0
     const f = H.emptyFrame();
     for (const par of H.PARS) H.setPar(f, par, colour, env);
-    H.setHead(f, H.HEADS[0], {
+    H.setHeadsMirror(f, {
       level: env, colour,
       pan: 0.60 + 0.10 * Math.sin(2 * Math.PI * (i / N)),
       tilt: 0.34 + 0.14 * env,                // rides up with the bloom, back down as it fades

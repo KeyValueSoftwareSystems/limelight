@@ -41,7 +41,7 @@ module.exports = function pulse(params, ctx) {
         + 0.15 * bump(bphase, 0.5 + 0.25 * (1 - pos), 0.06);
       H.setPar(f, par, colour, Math.min(1, lvl));
     }
-    if (params.head !== false) H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHeadsMirror(f, {
       level: 0.5 + 0.35 * energy + 0.15 * flash(bphase, 0.5), colour,
       pan: 0.498 + 0.45 * Math.sin(2 * Math.PI * beat / 10.5),
       tilt: 0.42 + 0.33 * Math.sin(2 * Math.PI * beat / 7.3),

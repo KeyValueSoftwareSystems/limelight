@@ -26,7 +26,7 @@ module.exports = function accent(params, ctx) {
       if (over > 0) H.setPar(f, p, colour, H.clamp(rest + (0.98 - rest) * over, 0, 1));
       else H.setPar(f, p, bed, rest);
     }
-    if (params.head !== false) H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHeadsMirror(f, {
       level: H.clamp(rest * 0.9 + (0.9 - rest) * over, 0, 1),
       colour: over > 0 ? colour : bed,
       pan: 0.662, tilt: 0.45,

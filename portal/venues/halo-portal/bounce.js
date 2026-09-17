@@ -16,7 +16,7 @@ module.exports = function bounce(params, ctx) {
     const k = level * (0.75 + 0.25 * (1 - into));
     const f = H.emptyFrame();
     for (const p of pars) H.setPar(f, p, c, k);
-    H.setHead(f, H.HEADS[0], { level: k * 0.8, colour: c, pan: 0.662, tilt: 0.45 });
+    H.setHeadsAll(f, { level: k * 0.8, colour: c, pan: 0.662, tilt: 0.45 });
     frames.push(f);
   }
   return { frames, loop_beats: loop, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };

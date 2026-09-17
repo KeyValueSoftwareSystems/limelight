@@ -21,7 +21,7 @@ module.exports = function ripple(params, ctx) {
     });
     const step = Math.round(head);
     for (const bar of H.PIXELS) H.setPixel(f, bar, ((step % 6) + 6) % 6, colour, level * gain);
-    H.setHead(f, H.HEADS[0], {
+    H.setHeadsMirror(f, {
       level: level * 0.55 * gain, colour,
       pan: 0.45 + 0.42 * H.clamp(head / Math.max(1, n - 1), 0, 1), tilt: 0.44,
     });

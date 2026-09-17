@@ -39,7 +39,7 @@ module.exports = function spin(params, ctx) {
        only way these heads can show colour: feeding the moving hue itself into
        setHead's real CMY/RGBW mix. */
     const headHue = (beat / beatsPerTurn) % 1;
-    H.setHead(f, H.HEADS[0], { level: 0.85, colour: hsv((headHue + 1) % 1), pan: 0.498 + 0.3 * Math.sin(2 * Math.PI * beat / 6), tilt: 0.45, prism: 100 });
+    H.setHeadsMirror(f, { level: 0.85, colour: hsv((headHue + 1) % 1), pan: 0.498 + 0.3 * Math.sin(2 * Math.PI * beat / 6), tilt: 0.45, prism: 100 });
     return f;
   }
 

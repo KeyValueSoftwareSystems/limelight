@@ -17,7 +17,7 @@ module.exports = function impact(params, ctx) {
     const f = H.emptyFrame();
     for (const par of pars) H.setPar(f, par, colour, env);
     for (const b of H.BLINDS) H.setBlinder(f, b, env);
-    if (params.head !== false) H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHeadsMirror(f, {
       level: env, colour,
       pan: 0.662, tilt: 0.498,                 // snap toward the wall centre
       strobe: i < 2 ? 15 : 0,                  // strobe burst on the very front

@@ -19,7 +19,7 @@ module.exports = function lift(params, ctx) {
     const level = start + by * e;
     const f = H.emptyFrame();
     for (const par of H.PARS) H.setPar(f, par, colour, level);
-    H.setHead(f, H.HEADS[0], {
+    H.setHeadsMirror(f, {
       level: level * 0.7, colour,
       pan: 0.60,
       tilt: 0.498 + (tiltTo - 0.498) * e,     // tilt lifts up and stays

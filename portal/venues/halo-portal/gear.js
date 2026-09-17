@@ -25,7 +25,7 @@ module.exports = function gear(params, ctx) {
     const level = 0.25 + 0.6 * pulse;
     const f = H.emptyFrame();
     for (const par of H.PARS) H.setPar(f, par, colour, level);
-    if (params.head !== false) H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHeadsMirror(f, {
       level: 0.3 + 0.4 * pulse, colour,
       pan: 0.60 + 0.20 * Math.sin(2 * Math.PI * p * pulses * 1.5),  // head runs faster than the pars
       tilt: 0.34 + 0.10 * Math.sin(2 * Math.PI * p * pulses),

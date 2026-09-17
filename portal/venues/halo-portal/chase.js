@@ -70,7 +70,7 @@ module.exports = function chase(params, ctx) {
     });
     for (const bar of H.PIXELS) H.setPixel(f, bar, head % 6, colour, level * gain);
     if (params.head !== false)
-    H.setHead(f, H.HEADS[0], {
+    H.setHeadsAll(f, {
       level: level * 0.5 * gain, colour,
       pan: 0.40 + 0.40 * (head / Math.max(1, n - 1)), tilt: 0.42,
     });
