@@ -7,8 +7,8 @@ import * as api from "@/lib/api";
 import { VenueCard } from "@/components/venues/VenueCard";
 import { CardSkeleton } from "@/components/ui";
 import { NewShowDialog } from "@/components/shows/NewShowDialog";
-import { Field, SegmentedControl } from "@/components/ui";
-import { Search } from "lucide-react";
+import { Field, SegmentedControl, Button } from "@/components/ui";
+import { Search, Plus } from "lucide-react";
 import type { Venue, Layout } from "@/lib/types";
 
 type Filter = "all" | "open" | "locked";
@@ -59,13 +59,13 @@ export default function VenuesPage() {
   /* Designing for a room starts the same way designing anything does: by
      choosing the songs. The room is already decided, so the picker opens here
      rather than bouncing through the shows index. */
+  /* Opening a room opens its rig. Designing a show for it starts from Shows,
+     where every other show starts. */
   const handleDesign = useCallback(
-    (venue: Venue, layoutFile: string) => {
-      setRoom({ id: venue.id, name: venue.name, layout: layoutFile, example: venue.example });
-      setLayout(layoutFile);
-      setPicking({ venue: venue.name, layout: layoutFile });
+    (venue: Venue) => {
+      router.push(`/venues/${encodeURIComponent(venue.id)}`);
     },
-    [setRoom, setLayout],
+    [router],
   );
 
   const startShow = useCallback(
@@ -133,6 +133,10 @@ export default function VenuesPage() {
             onChange={setFilter}
             segments={FILTERS}
           />
+          <Button variant="primary" onClick={() => router.push("/venues/new")}>
+            <Plus size={15} strokeWidth={2.5} className="mr-[6px] -ml-[2px]" />
+            New venue
+          </Button>
         </div>
       </header>
 

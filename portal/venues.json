@@ -1,110 +1,110 @@
 {
- "note": "The venue catalogue. A VENUE is a name with one or more named LAYOUTS under it, because a room reconfigures and each configuration is a different rig. The layout file is the rig; the venue is who owns it and what they call that configuration. This belongs on the hub beside the scores eventually; it is here so the shape gets settled in one place first. A venue may carry more than one layout because a room reconfigures; KeyCode Arena carries both its own rig and the smaller stage rig, and they are different rigs under one name.",
- "shape": {
-  "id": "stable, survives renaming",
-  "name": "what people search for",
-  "example": "true when the venue itself is invented",
-  "access": "public | locked -- a venue owns its rig and says who may target it",
-  "locked_because": "what the person is actually missing, in plain words",
-  "logo": "a file under portal/logos/. Missing is fine: the page draws a monogram.",
-  "layouts": "[{name, file, placeholder}] -- file is a *.layout.json in readers/lights/",
-  "default": "which of those layouts is live unless someone says otherwise"
- },
- "logos_dir": "portal/logos",
- "default_venue": "ven_desk",
- "venues": [
-  {
-   "id": "ven_desk",
-   "name": "Desk Rig",
-   "example": false,
-   "access": "public",
-   "note": "The default development rig: four PAR7s in a line with a moving head in the centre.",
-   "layouts": [
-    {
-     "name": "4 PAR + head",
-     "file": "arc4-head.layout.json"
-    }
-   ],
-   "default": "arc4-head.layout.json"
+  "note": "The venue catalogue. A VENUE is a name with one or more named LAYOUTS under it, because a room reconfigures and each configuration is a different rig. The layout file is the rig; the venue is who owns it and what they call that configuration. This belongs on the hub beside the scores eventually; it is here so the shape gets settled in one place first. A venue may carry more than one layout because a room reconfigures; KeyCode Arena carries both its own rig and the smaller stage rig, and they are different rigs under one name.",
+  "shape": {
+    "id": "stable, survives renaming",
+    "name": "what people search for",
+    "example": "true when the venue itself is invented",
+    "access": "public | locked -- a venue owns its rig and says who may target it",
+    "locked_because": "what the person is actually missing, in plain words",
+    "logo": "a file under portal/logos/. Missing is fine: the page draws a monogram.",
+    "layouts": "[{name, file, placeholder}] -- file is a *.layout.json in readers/lights/",
+    "default": "which of those layouts is live unless someone says otherwise"
   },
-  {
-   "id": "ven_keycode",
-   "name": "KeyCode Stage",
-   "example": false,
-   "access": "public",
-   "note": "Our own event, and the only venue here anyone may design for and play. Two rigs under one name because the room reconfigures: the basic bar for a quiet night, the main stage for a full one.",
-   "logo": "ven_keycode.png",
-   "logo_note": "Drop the supplied KeyCode logo at portal/logos/ven_keycode.svg (or .png) and it replaces the drawn monogram with no code change.",
-   "rig_placeholder": true,
-   "rig_placeholder_note": "We have not been given KeyCode's fixture list. The rig below is a stand-in so the demo runs; it is NOT what is hanging at KeyCode, and it is marked as such wherever it appears. Replace it when the real list arrives.",
-   "layouts": [
+  "logos_dir": "portal/logos",
+  "default_venue": "ven_desk",
+  "venues": [
     {
-     "name": "Basic (beam + 4 par)",
-     "file": "keycode-basic.layout.json"
+      "id": "ven_desk",
+      "name": "Desk Rig",
+      "example": false,
+      "access": "public",
+      "note": "The default development rig: four PAR7s in a line with a moving head in the centre.",
+      "layouts": [
+        {
+          "name": "4 PAR + head",
+          "file": "arc4-head.layout.json"
+        }
+      ],
+      "default": "arc4-head.layout.json"
     },
     {
-     "name": "Main stage",
-     "file": "club16-2head.layout.json",
-     "placeholder": true
-    }
-   ],
-   "default": "keycode-basic.layout.json"
-  },
-  {
-   "id": "ven_keycode_arena",
-   "name": "KeyCode Arena",
-   "example": false,
-   "access": "public",
-   "note": "The big room. Same event as KeyCode Stage, a rig with about six times as much on it -- a wash bar upstage, beams on the mid truss, zooming washes out front, audience blinders with a strobe outboard of each end, lasers, and a pixel strip framing each side.",
-   "logo": "ven_keycode_arena.png",
-   "rig_placeholder": true,
-   "rig_placeholder_note": "A designed rig, not a measured one. Every device type on it except the laser was read out of a real GDTF file in this repo, so the channel counts and beam angles are the manufacturers' own -- but the plot, the trim heights and the addresses are ours, not KeyCode's. Replace it when the real list arrives.",
-   "layouts": [
-    {
-     "name": "Arena (full rig)",
-     "file": "keycode-arena.layout.json",
-     "placeholder": true
+      "id": "ven_keycode",
+      "name": "KeyCode Stage",
+      "example": false,
+      "access": "public",
+      "note": "Our own event, and the only venue here anyone may design for and play. Two rigs under one name because the room reconfigures: the basic bar for a quiet night, the main stage for a full one.",
+      "logo": "ven_keycode.png",
+      "logo_note": "Drop the supplied KeyCode logo at portal/logos/ven_keycode.svg (or .png) and it replaces the drawn monogram with no code change.",
+      "rig_placeholder": true,
+      "rig_placeholder_note": "We have not been given KeyCode's fixture list. The rig below is a stand-in so the demo runs; it is NOT what is hanging at KeyCode, and it is marked as such wherever it appears. Replace it when the real list arrives.",
+      "layouts": [
+        {
+          "name": "Basic (beam + 4 par)",
+          "file": "keycode-basic.layout.json"
+        },
+        {
+          "name": "Main stage",
+          "file": "club16-2head.layout.json",
+          "placeholder": true
+        }
+      ],
+      "default": "keycode-basic.layout.json"
     },
     {
-     "name": "Main stage",
-     "file": "club16-2head.layout.json",
-     "placeholder": true
-    }
-   ],
-   "default": "keycode-arena.layout.json"
-  },
-  {
-   "id": "ven_omnia",
-   "name": "OMNIA",
-   "example": false,
-   "access": "locked",
-   "locked_because": "This venue has not granted your account access to its rig. Access is granted by the venue to named designers; nothing in this build can request it.",
-   "logo": "ven_omnia.jpg",
-   "layouts": [
+      "id": "ven_keycode_arena",
+      "name": "KeyCode Arena",
+      "example": false,
+      "access": "public",
+      "note": "The big room. Same event as KeyCode Stage, a rig with about six times as much on it -- a wash bar upstage, beams on the mid truss, zooming washes out front, audience blinders with a strobe outboard of each end, lasers, and a pixel strip framing each side.",
+      "logo": "ven_keycode_arena.png",
+      "rig_placeholder": true,
+      "rig_placeholder_note": "A designed rig, not a measured one. Every device type on it except the laser was read out of a real GDTF file in this repo, so the channel counts and beam angles are the manufacturers' own -- but the plot, the trim heights and the addresses are ours, not KeyCode's. Replace it when the real list arrives.",
+      "layouts": [
+        {
+          "name": "Arena (full rig)",
+          "file": "keycode-arena.layout.json",
+          "placeholder": true
+        },
+        {
+          "name": "Main stage",
+          "file": "club16-2head.layout.json",
+          "placeholder": true
+        }
+      ],
+      "default": "keycode-arena.layout.json"
+    },
     {
-     "name": "House rig",
-     "file": "club16-2head.layout.json"
-    }
-   ],
-   "default": "club16-2head.layout.json",
-   "note": "A real nightclub, here to show what a venue-controlled rig looks like. We have no relationship with it and no access to its rig.",
-   "rig_note": "We do not have OMNIA's fixture list. The rig shown is a stand-in so the catalogue renders; it is NOT what is hanging there."
-  },
-  {
-   "id": "ven_echostage",
-   "name": "Echostage",
-   "example": false,
-   "access": "public",
-   "logo": "ven_echostage.jpg",
-   "layouts": [
+      "id": "ven_omnia",
+      "name": "OMNIA",
+      "example": false,
+      "access": "locked",
+      "locked_because": "This venue has not granted your account access to its rig. Access is granted by the venue to named designers; nothing in this build can request it.",
+      "logo": "ven_omnia.jpg",
+      "layouts": [
+        {
+          "name": "House rig",
+          "file": "club16-2head.layout.json"
+        }
+      ],
+      "default": "club16-2head.layout.json",
+      "note": "A real nightclub, here to show what a venue-controlled rig looks like. We have no relationship with it and no access to its rig.",
+      "rig_note": "We do not have OMNIA's fixture list. The rig shown is a stand-in so the catalogue renders; it is NOT what is hanging there."
+    },
     {
-     "name": "House rig",
-     "file": "echostage.layout.json"
+      "id": "ven_echostage",
+      "name": "Echostage",
+      "example": false,
+      "access": "public",
+      "logo": "ven_echostage.jpg",
+      "layouts": [
+        {
+          "name": "House rig",
+          "file": "echostage.layout.json"
+        }
+      ],
+      "default": "echostage.layout.json",
+      "note": "A real nightclub in Washington DC, here to show what a public venue entry looks like. We have no relationship with it and no access to its rig.",
+      "rig_note": "We do not have Echostage's fixture list. The rig shown is a designed stand-in \u2014 20 pars across four zones (back arc, side towers, front wash, floor uplights) plus 4 moving heads \u2014 so the catalogue renders with a more interesting layout than a straight line."
     }
-   ],
-   "default": "echostage.layout.json",
-   "note": "A real nightclub in Washington DC, here to show what a public venue entry looks like. We have no relationship with it and no access to its rig.",
-   "rig_note": "We do not have Echostage's fixture list. The rig shown is a designed stand-in — 20 pars across four zones (back arc, side towers, front wash, floor uplights) plus 4 moving heads — so the catalogue renders with a more interesting layout than a straight line."
-  }
- ]
+  ]
 }
