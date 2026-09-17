@@ -2,6 +2,8 @@
 
 import { AlertTriangle } from "lucide-react";
 import { MediaCard, CardTag } from "@/components/ui";
+import { useEffect, useRef, useState } from "react";
+import { LivePreview } from "@/components/marketplace/LivePreview";
 import { CoverCanvas } from "@/components/library/CoverCanvas";
 import { showColours } from "./showColours";
 import type { ShowFile, Song } from "@/lib/types";
@@ -16,6 +18,17 @@ export function ShowCard({
   onOpen: (show: ShowFile) => void;
 }) {
   const colours = showColours(show);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  /* Only the cards you can see run their show. */
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.1 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   return (
     <MediaCard
@@ -24,7 +37,12 @@ export function ShowCard({
       onOpen={() => onOpen(show)}
       media={
         <>
+          {/* The song's artwork is there at once; the rig fades in over it when
+              its bake lands, so a card is never a black hole while it waits. */}
           {song ? <CoverCanvas song={song} /> : <div className="absolute inset-0 bg-[#0B0E15]" />}
+          <div ref={boxRef} className="absolute inset-0">
+            <LivePreview show={show} visible={visible} />
+          </div>
           <span className="absolute inset-x-0 bottom-0 flex items-center gap-[3px] px-[10px] pb-[9px] z-10" aria-hidden>
             {colours.map((c, i) => (
               <span

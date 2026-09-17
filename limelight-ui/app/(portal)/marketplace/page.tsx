@@ -6,6 +6,8 @@ import * as api from "@/lib/api";
 import { ListingCard } from "@/components/marketplace/ListingCard";
 import { ListForm } from "@/components/marketplace/ListForm";
 import { Button, CardSkeleton } from "@/components/ui";
+import { ListingDialog } from "@/components/marketplace/ListingDialog";
+import type { MarketListing } from "@/lib/types";
 
 export default function MarketplacePage() {
   const market = usePortalStore((s) => s.market);
@@ -13,6 +15,14 @@ export default function MarketplacePage() {
   const role = usePortalStore((s) => s.role);
   const [listing, setListing] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [open, setOpen] = useState<MarketListing | null>(null);
+  const songs = usePortalStore((s) => s.songs);
+  const setSongs = usePortalStore((s) => s.setSongs);
+
+  useEffect(() => {
+    if (songs.length) return;
+    api.songs.list().then((d) => setSongs(d.songs)).catch(() => {});
+  }, [songs.length, setSongs]);
 
   const fetchMarket = useCallback(() => {
     api.market
@@ -27,6 +37,8 @@ export default function MarketplacePage() {
 
   return (
     <div className="flex flex-col overflow-hidden flex-1">
+      <ListingDialog listing={open} onClose={() => setOpen(null)} />
+
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="liquid liquid-flush sticky top-0 z-30 px-[28px] pt-[20px] pb-[16px]">
           <div className="flex items-center gap-[20px] flex-wrap">
@@ -68,7 +80,11 @@ export default function MarketplacePage() {
                   className="animate-in h-full"
                   style={{ animationDelay: `${Math.min(i * 40, 320)}ms` }}
                 >
-                  <ListingCard listing={l} />
+                  <ListingCard
+                    listing={l}
+                    song={songs.find((s) => s.name === l.show.song)}
+                    onOpen={setOpen}
+                  />
                 </div>
               ))}
             </div>

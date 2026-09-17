@@ -178,16 +178,16 @@ export default function EditVenuePage() {
               <p className="text-[12.5px] text-ink-dimmer mt-[4px] m-0 leading-[1.3]">
                 {locked
                   ? "This rig is not open to you, so changes cannot be saved."
-                  : "Add fixtures, then drag them where they hang."}
+                  : "Drag a fixture to move it, or add and remove them below."}
               </p>
             </div>
             <span className="flex-1 min-w-[16px]" />
             <Button
               variant="primary"
-              disabled={!name.trim() || !placed.length || over || saving}
+              disabled={!name.trim() || !placed.length || over || saving || locked}
               onClick={save}
             >
-              {saving ? "Creating…" : "Create venue"}
+              {saving ? "Saving\u2026" : "Save rig"}
             </Button>
           </div>
         </div>

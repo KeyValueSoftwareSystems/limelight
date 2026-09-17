@@ -845,7 +845,9 @@ class Shows:
             return None
 
     @classmethod
-    def list(cls):
+    def list(cls, include_market=False):
+        """Your shows. A market show belongs to somebody else's catalogue, so it
+        is not in your library and only Market.list() asks for it."""
         out = []
         if not os.path.isdir(SHOWS):
             return out
@@ -861,12 +863,14 @@ class Shows:
             doc.setdefault("id", fn[:-len(".show.json")])
             doc.setdefault("version", 1)
             doc.setdefault("author", "unknown")
+            if doc.get("market_only") and not include_market:
+                continue
             out.append({"file": fn, **doc})
         return out
 
     @classmethod
     def get(cls, sid):
-        for row in cls.list():
+        for row in cls.list(include_market=True):
             if row.get("id") == sid:
                 return row
         return None
@@ -1010,7 +1014,12 @@ class Market:
         cuts = [{"title": str(c.get("title", ""))[:160], "artist": str(c.get("artist", ""))[:120],
                  **({"at": float(c["at"])} if c.get("at") is not None else {})}
                 for c in (body.get("cuts") or [])][:200]
-        common = {"kind": kind, "tier": tier, "cuts": cuts,
+        price = body.get("price_usd")
+        try:
+            price = round(float(price), 2) if price is not None else None
+        except (TypeError, ValueError):
+            price = None
+        common = {"kind": kind, "tier": tier, "cuts": cuts, "price_usd": price,
                   # Where the track list came from, and -- when the tracks are not
                   # in this library -- the fact that what plays is a stand-in.
                   "cuts_source": (body.get("cuts_source") or "").strip()[:160] or None,
