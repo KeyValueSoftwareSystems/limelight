@@ -115,6 +115,8 @@ export interface Show {
   layout: string | null;
   /** "line" | "arch" — how the rig is laid out, from the layout file */
   geometry?: string | null;
+  /** the room in metres, when the layout states one rather than implying it */
+  room?: Room | null;
   fixtures: Fixture[];
   plan?: ShowPlan;
   pars: number[];
@@ -407,6 +409,7 @@ export interface Layout {
   kinds: Record<string, number>;
   channels: number;
   geometry?: unknown;
+  room?: Room | null;
   note?: string;
   placeholder?: boolean;
   default?: boolean;
@@ -594,6 +597,13 @@ export interface RecolourResponse {
 /* ── fixture placement (computed on the client) ──────────────────────────── */
 
 /** Where a lamp sits on screen, and what kind of thing it is. */
+/** A room in metres, as the venue builder draws it. */
+export interface Room {
+  width: number;
+  depth: number;
+  height: number;
+}
+
 export interface LampPosition {
   addr: number;
   id: string;

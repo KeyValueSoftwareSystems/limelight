@@ -228,11 +228,42 @@ export const entitlement = {
   },
 };
 
+const PROXY_SAFE_BYTES = 6 * 1024 * 1024;
+
+async function sendInChunks(
+  file: File,
+  onProgress?: (pct: number) => void,
+): Promise<UploadResponse> {
+  const id = (crypto.randomUUID?.() ?? String(Math.random()).slice(2)).replace(/-/g, "");
+  let sent = 0;
+  for (let seq = 0; sent < file.size; seq++) {
+    const end = Math.min(file.size, sent + PROXY_SAFE_BYTES);
+    const res = await fetch(`${BASE}/api/upload/chunk`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "X-Upload-Id": id,
+        "X-Upload-Seq": String(seq),
+      },
+      body: file.slice(sent, end),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: res.statusText }));
+      throw new ApiError(res.status, body.error || res.statusText);
+    }
+    sent = end;
+    if (onProgress) onProgress(sent / file.size);
+  }
+  return post<UploadResponse>("/api/upload/finish", { id, name: file.name });
+}
+
 export const upload = {
   send(
     file: File,
     onProgress?: (pct: number) => void,
   ): Promise<UploadResponse> {
+    if (file.size > PROXY_SAFE_BYTES) return sendInChunks(file, onProgress);
+
     const form = new FormData();
     form.append("file", file);
     return new Promise<UploadResponse>((resolve, reject) => {
@@ -249,7 +280,15 @@ export const upload = {
             reject(new ApiError(xhr.status, data.error || "upload failed"));
           }
         } catch {
-          reject(new ApiError(xhr.status, "invalid response"));
+          const body = (xhr.responseText || "").trim().slice(0, 120);
+          reject(new ApiError(
+            xhr.status,
+            xhr.status === 500 && /internal server error/i.test(body)
+              ? "the server could not take a file that large"
+              : xhr.status
+                ? `the server answered ${xhr.status}${body ? ": " + body : ""}`
+                : "the connection dropped before the upload finished",
+          ));
         }
       });
       xhr.addEventListener("error", () =>

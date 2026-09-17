@@ -1,0 +1,337 @@
+{
+ "layout": "0.5",
+ "rig": "ultra-sunburn",
+ "geometry": "line",
+ "frame": "audience",
+ "note": "Built in the venue builder: 5 x par5, 5 x wash12, 5 x spot29, 5 x blinder1, 4 x strobe3, 3 x laser8, 2 x pixelbar24, 319 DMX channels in universe 0. Positions in metres in the AUDIENCE frame (+x = audience's right, +y = toward audience, +z = height above deck).",
+ "fixtures": [
+  {
+   "id": "par_01",
+   "type": "par5",
+   "at": [
+    -5.7,
+    0.0,
+    2.05
+   ],
+   "universe": 0,
+   "address": 1
+  },
+  {
+   "id": "par_02",
+   "type": "par5",
+   "at": [
+    -3.0,
+    0.0,
+    2.95
+   ],
+   "universe": 0,
+   "address": 6
+  },
+  {
+   "id": "par_03",
+   "type": "par5",
+   "at": [
+    -1.5,
+    0.0,
+    7.0
+   ],
+   "universe": 0,
+   "address": 11
+  },
+  {
+   "id": "par_04",
+   "type": "par5",
+   "at": [
+    0.75,
+    0.0,
+    2.4
+   ],
+   "universe": 0,
+   "address": 16
+  },
+  {
+   "id": "par_05",
+   "type": "par5",
+   "at": [
+    1.15,
+    0.0,
+    2.4
+   ],
+   "universe": 0,
+   "address": 21
+  },
+  {
+   "id": "wash_01",
+   "type": "wash12",
+   "at": [
+    -0.7,
+    0.4,
+    7.0
+   ],
+   "universe": 0,
+   "address": 26
+  },
+  {
+   "id": "wash_02",
+   "type": "wash12",
+   "at": [
+    0.45,
+    0.4,
+    4.0
+   ],
+   "universe": 0,
+   "address": 38
+  },
+  {
+   "id": "wash_03",
+   "type": "wash12",
+   "at": [
+    1.65,
+    0.4,
+    3.0
+   ],
+   "universe": 0,
+   "address": 50
+  },
+  {
+   "id": "wash_04",
+   "type": "wash12",
+   "at": [
+    4.85,
+    0.4,
+    3.4
+   ],
+   "universe": 0,
+   "address": 62
+  },
+  {
+   "id": "wash_05",
+   "type": "wash12",
+   "at": [
+    6.45,
+    0.4,
+    7.0
+   ],
+   "universe": 0,
+   "address": 74
+  },
+  {
+   "id": "spot_01",
+   "type": "spot29",
+   "at": [
+    -7.0,
+    0.2,
+    7.0
+   ],
+   "universe": 0,
+   "address": 86
+  },
+  {
+   "id": "spot_02",
+   "type": "spot29",
+   "at": [
+    -5.25,
+    0.2,
+    4.35
+   ],
+   "universe": 0,
+   "address": 115
+  },
+  {
+   "id": "spot_03",
+   "type": "spot29",
+   "at": [
+    -3.25,
+    0.2,
+    0.0
+   ],
+   "universe": 0,
+   "address": 144
+  },
+  {
+   "id": "spot_04",
+   "type": "spot29",
+   "at": [
+    -2.55,
+    0.2,
+    7.0
+   ],
+   "universe": 0,
+   "address": 173
+  },
+  {
+   "id": "spot_05",
+   "type": "spot29",
+   "at": [
+    4.9,
+    0.2,
+    7.0
+   ],
+   "universe": 0,
+   "address": 202
+  },
+  {
+   "id": "blinder_01",
+   "type": "blinder1",
+   "at": [
+    -2.8,
+    0.6,
+    3.6
+   ],
+   "universe": 0,
+   "address": 231
+  },
+  {
+   "id": "blinder_02",
+   "type": "blinder1",
+   "at": [
+    -0.95,
+    0.6,
+    2.7
+   ],
+   "universe": 0,
+   "address": 232
+  },
+  {
+   "id": "blinder_03",
+   "type": "blinder1",
+   "at": [
+    2.75,
+    0.6,
+    3.25
+   ],
+   "universe": 0,
+   "address": 233
+  },
+  {
+   "id": "blinder_04",
+   "type": "blinder1",
+   "at": [
+    6.45,
+    0.6,
+    3.2
+   ],
+   "universe": 0,
+   "address": 234
+  },
+  {
+   "id": "blinder_05",
+   "type": "blinder1",
+   "at": [
+    8.0,
+    0.6,
+    1.85
+   ],
+   "universe": 0,
+   "address": 235
+  },
+  {
+   "id": "strobe_01",
+   "type": "strobe3",
+   "at": [
+    -1.15,
+    0.6,
+    4.0
+   ],
+   "universe": 0,
+   "address": 236
+  },
+  {
+   "id": "strobe_02",
+   "type": "strobe3",
+   "at": [
+    1.8,
+    0.6,
+    4.0
+   ],
+   "universe": 0,
+   "address": 239
+  },
+  {
+   "id": "strobe_03",
+   "type": "strobe3",
+   "at": [
+    6.65,
+    0.6,
+    4.0
+   ],
+   "universe": 0,
+   "address": 242
+  },
+  {
+   "id": "strobe_04",
+   "type": "strobe3",
+   "at": [
+    8.0,
+    0.6,
+    4.0
+   ],
+   "universe": 0,
+   "address": 245
+  },
+  {
+   "id": "laser_01",
+   "type": "laser8",
+   "at": [
+    -4.5,
+    0.8,
+    4.0
+   ],
+   "universe": 0,
+   "address": 248
+  },
+  {
+   "id": "laser_02",
+   "type": "laser8",
+   "at": [
+    -3.2,
+    0.8,
+    2.55
+   ],
+   "universe": 0,
+   "address": 256
+  },
+  {
+   "id": "laser_03",
+   "type": "laser8",
+   "at": [
+    4.2,
+    0.8,
+    4.0
+   ],
+   "universe": 0,
+   "address": 264
+  },
+  {
+   "id": "strip_01",
+   "type": "pixelbar24",
+   "at": [
+    0.0,
+    0.2,
+    1.0
+   ],
+   "universe": 0,
+   "address": 272
+  },
+  {
+   "id": "strip_02",
+   "type": "pixelbar24",
+   "at": [
+    4.25,
+    0.2,
+    4.0
+   ],
+   "universe": 0,
+   "address": 296
+  }
+ ],
+ "limits": {
+  "max_pan_per_frame": 7,
+  "max_tilt_per_frame": 7
+ },
+ "room": {
+  "width": 16.0,
+  "depth": 6.0,
+  "height": 4.0
+ }
+}

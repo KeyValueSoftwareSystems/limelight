@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react";
 import { Field, Button } from "@/components/ui";
 import { RigPreview } from "@/components/venues/RigPreview";
-import { RigPlan, type Placed } from "@/components/venues/RigPlan";
-import type { Fixture } from "@/lib/types";
+import { StagePlan, type Placed } from "@/components/venues/StagePlan";
+import { RoomFields, DEFAULT_ROOM } from "@/components/venues/RoomFields";
+import type { Fixture, Room } from "@/lib/types";
 
 const KINDS: { id: string; label: string; blurb: string; z: number; y: number }[] = [
   { id: "par5", label: "PAR", blurb: "Flat colour wash, 5 channels", z: 2.4, y: 0 },
@@ -30,6 +31,7 @@ export default function NewVenuePage() {
   const [name, setName] = useState("");
   const [rigName, setRigName] = useState("House rig");
   const [placed, setPlaced] = useState<Placed[]>([]);
+  const [room, setRoom] = useState<Room>(DEFAULT_ROOM);
   const [selected, setSelected] = useState<string | null>(null);
   const [preview, setPreview] = useState<Fixture[]>([]);
   const [channels, setChannels] = useState(0);
@@ -44,8 +46,8 @@ export default function NewVenuePage() {
   }, [placed]);
 
   const body = useMemo(
-    () => JSON.stringify(placed.map((f) => ({ type: f.type, at: f.at }))),
-    [placed],
+    () => JSON.stringify({ placed: placed.map((f) => ({ type: f.type, at: f.at })), room }),
+    [placed, room],
   );
 
   /* The patch and the preview both come from the server, so what is drawn is
@@ -56,7 +58,7 @@ export default function NewVenuePage() {
     fetch("/api/venues", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ dry: true, name: name || "Preview", placed: JSON.parse(body) }),
+      body: JSON.stringify({ dry: true, name: name || "Preview", ...JSON.parse(body) }),
     })
       .then((r) => r.json())
       .then((d) => {
@@ -104,6 +106,7 @@ export default function NewVenuePage() {
         body: JSON.stringify({
           name,
           rig_name: rigName,
+          room,
           placed: placed.map((f) => ({ type: f.type, at: f.at })),
         }),
       });
@@ -115,7 +118,7 @@ export default function NewVenuePage() {
     } finally {
       setSaving(false);
     }
-  }, [name, rigName, placed, router]);
+  }, [name, rigName, room, placed, router]);
 
   const over = channels > UNIVERSE;
   const chosen = placed.find((f) => f.key === selected);
@@ -176,9 +179,9 @@ export default function NewVenuePage() {
             </div>
 
             <div className="panel rounded-[var(--radius-lg)] p-[14px] flex flex-col gap-[10px]">
-              <div className="flex items-baseline gap-[8px]">
-                <span className="text-[11px] font-medium text-ink-dimmer">Plan</span>
-                <span className="flex-1" />
+              <div className="flex items-end gap-[12px] flex-wrap">
+                <RoomFields room={room} onChange={setRoom} />
+                <span className="flex-1 min-w-[8px]" />
                 <span className="mono text-[11px] text-ink-dimmer tabular-nums">
                   {chosen
                     ? `${chosen.at[0].toFixed(2)} m across · ${chosen.at[2].toFixed(2)} m up`
@@ -198,8 +201,9 @@ export default function NewVenuePage() {
                   </button>
                 )}
               </div>
-              <RigPlan
-                fixtures={placed}
+              <StagePlan
+                placed={placed}
+                room={room}
                 selected={selected}
                 onMove={moveOne}
                 onSelect={setSelected}
@@ -253,7 +257,7 @@ export default function NewVenuePage() {
           </section>
 
           <aside className="panel rounded-[var(--radius-lg)] overflow-hidden lg:sticky lg:top-[92px]">
-            <RigPreview fixtures={preview} className="w-full aspect-[3/2]" />
+            <RigPreview fixtures={preview} room={room} className="w-full aspect-[3/2]" />
             <div className="px-[14px] py-[13px] flex flex-col gap-[7px]">
               <span className="text-[13px] font-semibold text-ink">
                 {name.trim() || "Untitled venue"}

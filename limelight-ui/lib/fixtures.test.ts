@@ -10,7 +10,7 @@ import { test } from "node:test";
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
-import { placeFixtures, readFixtures, trimFixtures, meanColour } from "./fixtures.ts";
+import { placeFixtures, readFixtures, trimFixtures, meanColour, unplaceFixture, roomBounds } from "./fixtures.ts";
 import { profileOf } from "./profiles.ts";
 import type { Fixture, Show, TrimState } from "./types.ts";
 
@@ -257,4 +257,47 @@ test("REGRESSION: a line rig keeps the old screen band", () => {
   assert.ok(Math.min(...ys) >= 0.38, `top lamp at ${Math.min(...ys)}`);
   assert.ok(Math.max(...ys) <= 0.82, `bottom lamp at ${Math.max(...ys)}`);
   assert.ok(p.lamps.every((l) => l.spacing > 0 && l.spacing <= 1));
+});
+
+test("a fixture dragged on the stage lands where it was dropped", () => {
+  const room = { width: 14, depth: 6, height: 7 };
+  const bounds = roomBounds(room)!;
+  assert.ok(bounds);
+
+  const at: Array<[number, number, number]> = [
+    [-6.2, 0, 1.1], [-2.5, 1.4, 3.2], [0, 3.0, 6.4], [3.75, 5.9, 2.0], [6.5, 4.2, 5.55],
+  ];
+  const fixtures = at.map((a, i) => ({
+    id: `f${i}`, type: "par5", at: a, universe: 0, address: i * 5 + 1,
+  }));
+
+  const place = placeFixtures({ fixtures, geometry: "line" } as never, bounds);
+  assert.equal(place.lamps.length, at.length);
+
+  for (const l of place.lamps) {
+    const i = Number(l.id.replace(/\D/g, ""));
+    const back = unplaceFixture({ x: l.x, y: l.y }, l.depth, bounds, "line");
+    assert.ok(Math.abs(back.x - at[i][0]) < 1e-9, `x ${back.x} vs ${at[i][0]}`);
+    assert.ok(Math.abs(back.height - at[i][2]) < 1e-9, `z ${back.height} vs ${at[i][2]}`);
+  }
+});
+
+test("a declared room pins the extent, so adding a fixture does not move the others", () => {
+  const room = { width: 14, depth: 6, height: 7 };
+  const fx = (id: string, x: number, y: number, z: number, addr: number) => ({
+    id, type: "par5", at: [x, y, z] as [number, number, number], universe: 0, address: addr,
+  });
+  const before = [fx("a", -3, 0, 3, 1), fx("c", 3, 0, 3, 6)];
+  const after = [...before, fx("b", 8, 0, 3, 11)];
+  const xOf = (list: unknown[], id: string, r?: unknown) =>
+    placeFixtures({ fixtures: list, room: r } as never).lamps.find((l) => l.id === id)!.x;
+
+  assert.ok(
+    Math.abs(xOf(before, "c") - xOf(after, "c")) > 0.2,
+    "without a room the rig rescales around whatever it happens to span",
+  );
+  assert.ok(
+    Math.abs(xOf(before, "c", room) - xOf(after, "c", room)) < 1e-9,
+    "with a room declared, a fixture stays where it hangs",
+  );
 });

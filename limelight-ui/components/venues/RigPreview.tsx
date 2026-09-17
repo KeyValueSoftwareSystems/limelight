@@ -3,7 +3,8 @@
 import { useRef, useEffect, useCallback } from "react";
 import { demoStates } from "@/lib/rigdemo";
 import { paintStage, ground } from "@/lib/renderer";
-import type { Fixture } from "@/lib/types";
+import { roomBounds } from "@/lib/fixtures";
+import type { Fixture, Room } from "@/lib/types";
 
 interface RigPreviewProps {
   fixtures: Fixture[];
@@ -12,6 +13,8 @@ interface RigPreviewProps {
   className?: string;
   /** "line" | "arch" — how the rig is laid out, from the layout file */
   geometry?: string | null;
+  /** the room the layout states, when it states one */
+  room?: Room | null;
 }
 
 /**
@@ -21,7 +24,7 @@ interface RigPreviewProps {
  * screen, it paints at the card quality tier, and it honours a reduced-motion
  * preference by painting one frame and stopping.
  */
-export function RigPreview({ fixtures, dimmed, className = "", geometry }: RigPreviewProps) {
+export function RigPreview({ fixtures, dimmed, className = "", geometry, room }: RigPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -40,8 +43,8 @@ export function RigPreview({ fixtures, dimmed, className = "", geometry }: RigPr
       ground(ctx, W, H);
       return;
     }
-    paintStage(ctx, demoStates(fixtures, t, geometry) as never, W, H, dpr, { t, quality: "card" });
-  }, [fixtures, geometry]);
+    paintStage(ctx, demoStates(fixtures, t, geometry, roomBounds(room)) as never, W, H, dpr, { t, quality: "card" });
+  }, [fixtures, geometry, room]);
 
   const size = useCallback(() => {
     const cv = canvasRef.current;

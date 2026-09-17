@@ -329,7 +329,8 @@ def layouts():
         prof = profiles()
         out.append({"file": fn, "rig": doc.get("rig") or fn[:-len(".layout.json")],
                     "fixtures": len(fx), "kinds": kinds, "channels": width,
-                    "geometry": doc.get("geometry"), "note": doc.get("note"),
+                    "geometry": doc.get("geometry"), "room": doc.get("room"),
+                    "note": doc.get("note"),
                     "placeholder": bool(doc.get("placeholder")),
                     "fixture_list": shown,
                     "profiles": {t: {"footprint": p.get("footprint"),
@@ -563,7 +564,21 @@ def patch(fixtures):
     return out, addr - 1
 
 
-def build_placed(slug, placed):
+def clean_room(room):
+    if not isinstance(room, dict):
+        return None
+    try:
+        out = {"width": round(float(room.get("width")), 3),
+               "depth": round(float(room.get("depth")), 3),
+               "height": round(float(room.get("height")), 3)}
+    except (TypeError, ValueError):
+        return None
+    if not (0 < out["width"] <= 80 and 0 < out["height"] <= 40 and 0 < out["depth"] <= 60):
+        return None
+    return out
+
+
+def build_placed(slug, placed, room=None):
     """Patch a rig the person positioned themselves.
 
     `placed` is [{"type": "par5", "at": [x, y, z]}, ...] in the order they should
@@ -605,7 +620,7 @@ def build_placed(slug, placed):
         counts[f["type"]] = counts.get(f["type"], 0) + 1
     summary = ", ".join("%d x %s" % (v, k) for k, v in counts.items())
 
-    return {
+    doc = {
         "layout": "0.5",
         "rig": slug,
         "geometry": "line",
@@ -616,7 +631,11 @@ def build_placed(slug, placed):
                 % (summary, total),
         "fixtures": fixtures,
         "limits": {"max_pan_per_frame": 7, "max_tilt_per_frame": 7},
-    }, total, counts
+    }
+    clean = clean_room(room)
+    if clean:
+        doc["room"] = clean
+    return doc, total, counts
 
 
 def build_layout(slug, wanted):
@@ -731,8 +750,9 @@ def create_venue(body):
     # the builder previews the layout the server would actually produce rather
     # than a second copy of these rules living in the page.
     placed = body.get("placed")
+    room = body.get("room")
     if body.get("dry"):
-        layout, total, counts = (build_placed(slug, placed) if placed
+        layout, total, counts = (build_placed(slug, placed, room) if placed
                                  else build_layout(slug, wanted))
         return {"dry": True, "layout": layout, "total_channels": total,
                 "fixtures": counts, "slug": slug}
@@ -740,7 +760,7 @@ def create_venue(body):
     if not existing and any(v.get("id") == "ven_" + slug for v in book.get("venues", [])):
         raise ValueError("a venue called %s already exists" % name)
 
-    layout, total, counts = (build_placed(slug, placed) if placed
+    layout, total, counts = (build_placed(slug, placed, room) if placed
                              else build_layout(slug, wanted))
     layout_file = slug + ".layout.json"
     with open(os.path.join(LAYOUTS_DIR, layout_file), "w") as fh:
@@ -2225,6 +2245,46 @@ def make_handler(library, baker, rig):
         # ----- upload -----
         MAX_UPLOAD = 100 * 1024 * 1024  # 100 MB
 
+        CHUNK_DIR = os.path.join(WORK, "uploads")
+
+        def _chunk_path(self, upload_id):
+            if not re.fullmatch(r"[0-9a-f]{8,64}", upload_id or ""):
+                return None
+            return os.path.join(self.CHUNK_DIR, upload_id + ".part")
+
+        def _handle_chunk(self):
+            part = self._chunk_path(self.headers.get("X-Upload-Id", ""))
+            if not part:
+                return self._json({"error": "bad upload id"}, 400)
+            data = self._raw_body()
+            if not data:
+                return self._json({"error": "empty chunk"}, 400)
+            os.makedirs(self.CHUNK_DIR, exist_ok=True)
+            first = self.headers.get("X-Upload-Seq", "") == "0"
+            have = 0 if first else (os.path.getsize(part) if os.path.isfile(part) else 0)
+            if have + len(data) > self.MAX_UPLOAD:
+                if os.path.isfile(part):
+                    os.remove(part)
+                return self._json({"error": "file too large (max 100 MB)"}, 413)
+            with open(part, "wb" if first else "ab") as fh:
+                fh.write(data)
+            return self._json({"received": have + len(data)})
+
+        def _handle_finish(self):
+            body = self._body()
+            part = self._chunk_path(str(body.get("id") or ""))
+            if not part or not os.path.isfile(part):
+                return self._json({"error": "no upload with that id"}, 404)
+            try:
+                with open(part, "rb") as fh:
+                    data = fh.read()
+            finally:
+                try:
+                    os.remove(part)
+                except OSError:
+                    pass
+            return self._store_upload(str(body.get("name") or ""), data)
+
         def _handle_upload(self):
             ctype = self.headers.get("Content-Type", "")
             length = int(self.headers.get("Content-Length") or 0)
@@ -2281,6 +2341,9 @@ def make_handler(library, baker, rig):
 
             if not filename or file_data is None:
                 return self._json({"error": "no file found in the upload"}, 400)
+            return self._store_upload(filename, file_data)
+
+        def _store_upload(self, filename, file_data):
             if not filename.lower().endswith(".mp3"):
                 return self._json({"error": "only .mp3 files are accepted"}, 400)
 
@@ -2466,6 +2529,12 @@ def make_handler(library, baker, rig):
 
             if path == "/api/upload":
                 return self._handle_upload()
+
+            if path == "/api/upload/chunk":
+                return self._handle_chunk()
+
+            if path == "/api/upload/finish":
+                return self._handle_finish()
 
             body = self._body()
 
