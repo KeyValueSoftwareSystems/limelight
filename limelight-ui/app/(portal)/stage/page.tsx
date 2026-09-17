@@ -12,6 +12,7 @@ import { colourName, hexToRgb01, extractPalette, paletteChanged } from "@/lib/pa
 import * as api from "@/lib/api";
 
 import { StagePreview } from "@/components/stage/StagePreview";
+import { ChatPanel } from "@/components/editor/ChatPanel";
 import { TransportPill } from "@/components/editor/TransportPill";
 import { TargetLine } from "@/components/stage/TargetLine";
 import { ConsolePanel } from "@/components/stage/ConsolePanel";
@@ -1141,16 +1142,18 @@ export default function StagePage() {
           </section>
         </div>
 
-        {isOperator && (
-          <aside className="flex-none w-[280px] min-w-[220px] border-l border-solid border-white/[0.05] overflow-hidden">
+        <aside className="flex-none w-[288px] min-w-[230px] border-l border-solid border-white/[0.05] overflow-hidden">
+          {isOperator ? (
             <div className="h-full overflow-y-auto">
               <ConsolePanel />
               <RigPanel />
               <LimitsPanel />
               <StatePanel />
             </div>
-          </aside>
-        )}
+          ) : (
+            <ChatPanel />
+          )}
+        </aside>
       </div>
 
       <VenuePicker
