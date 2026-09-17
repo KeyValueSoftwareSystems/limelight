@@ -741,9 +741,16 @@ def author(song, out_path=None):
             cues.append(opener)
             cues.sort(key=lambda c: c.get("_t", 0))
 
+    def bar_energy_at(tt):
+        for rr in rows:
+            if rr["t"] <= tt < rr["end"]:
+                return rr["E"]
+        return None
+
     for a, b, depth in holes:
         if a < 0.4:
             continue
+        cues.sort(key=lambda c: c.get("_t", 0))
         prior = [c for c in cues if c.get("_t", 0) <= a + 1e-6 and c.get("look")]
         if not prior:
             later = [c for c in cues if c.get("_t", 0) > b - 1e-6 and c.get("look")]
@@ -754,11 +761,25 @@ def author(song, out_path=None):
                      "why": "the audio falls to %d%% of its median for %.2fs - a real hole, so the room goes with it"
                             % (round(depth * 100), b - a)})
         if prior:
-            back = json.loads(json.dumps({k: v for k, v in prior[-1].items() if k != "_t"}))
+            ahead = [c for c in cues if b - 1e-6 < c.get("_t", 0) <= b + 2.0 and c.get("look")]
+            src = ahead[0] if ahead else prior[-1]
+            back = json.loads(json.dumps({k: v for k, v in src.items() if k != "_t"}))
+            e_out, e_in = bar_energy_at(a - 0.05), bar_energy_at(b + 0.05)
+            why = "and back, the instant the audio returns"
+            if not ahead and e_out and e_in and e_in > e_out * 1.15:
+                lift = min(1.9, (e_in / e_out) ** 0.7)
+                for v in (back.get("look") or {}).values():
+                    if isinstance(v, dict) and v.get("l") is not None:
+                        v["l"] = round(min(0.97, v["l"] * lift), 2)
+                why = ("and back brighter, the instant the audio returns - "
+                       "the bar it returns into is %.0f%% louder than the one it left"
+                       % ((e_in / e_out - 1) * 100))
+            elif ahead:
+                why = "and back on the look it is arriving at, the instant the audio returns"
             back["at"] = {"second": round(b, 3)}
             back["_t"] = b
             back["fade"] = 0.06
-            back["why"] = "and back, the instant the audio returns"
+            back["why"] = why
             cues.append(back)
     cues.sort(key=lambda c: c.get("_t", 0))
 

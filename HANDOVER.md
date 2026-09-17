@@ -544,6 +544,55 @@ a moment at 4.4s placing a cue at 235.47s in `levels` (moment-to-bar mapping,
 now guarded to 2.5 bars); and two layered chases interleaving so that each was a
 beat apart but together they stepped every 175ms.
 
+## 7k. Every lamp must be in a shape a designer could name
+
+Amal's standard, in his words: "every single light and moving head should follow a
+pattern, always, every time, no compromise in that." `portal/cue/pattern.py` is the
+check. It samples the baked show every 100ms and asks of each frame: how many
+distinct levels are on stage, and is the group at the top a nameable set? A frame is
+`flat`, `solo`, `half`, `inner`, `outer`, `alternate`, `three`, `ramp`, `mirror`,
+`halves`, `peak`, `dark` — or `UNPATTERNED`, which is a bug.
+
+```
+python3 portal/cue/pattern.py <song> /tmp/<song>.cuelights.json
+```
+
+All seven songs now sit at or under 0.8% unpatterned, and every remaining sample is
+mid-crossfade between two patterns, which is legitimate. Treat any rise as a
+regression.
+
+Four things were found by this check, and all four were one mistake wearing different
+clothes: a second geometry laid over a first. The product of two patterns is not a
+pattern.
+
+- **The always-on breath carried a 160 degree phase spread.** It gave every lamp its
+  own multiplier, so a flat look went in and four different levels came out, forever.
+  This alone is what Amal kept reporting as "the 2nd light is lit but less lit" and
+  "one light is always faulty". A breath belongs on a submaster — one fader over the
+  whole group, `phase: 0` — so the geometry survives and only the level moves.
+- **The base look split the rig inner/outer while a chase ran a different figure over
+  all four.** `inner: oxblood 0.40 / outer: violet 0.34` under an `alternate` chase
+  renders `76.8 / 42.6 / 24.0 / 43.8`. A designer is in a static split look *or*
+  running a chase over a uniform base, never both. The look under a chase is now flat.
+- **A chase colour ring is not a substitute for that split.** Trying it took
+  unpatterned from 6.2% to 22.6%, and the reason is worth keeping: violet and amber at
+  the same DMX level are not the same brightness. Colour is an intensity lever.
+  Contrast across a row is a deliberate look and can never be a default.
+- **`handover` wrapped from the last lamp to the first** while every other travel
+  figure bounces on `span = 2n - 2`, so the beam teleported across the room once per
+  cycle. On a straight row a pass goes down and back. `build` and `unbuild` still
+  restart, and should: accumulation figures reset by nature.
+
+Also removed: the `pitch` figure, which mapped note pitch to a *continuous* lamp
+position and so could not produce a nameable shape at all, and `rotate`, which
+returned all ones and did nothing.
+
+**The first measurement said 76% unpatterned and was wrong.** The classifier demanded
+that a `solo` have its neighbours near dark, so it threw out every chase running over
+a lit base — the most ordinary look in lighting. With the correct test the real
+starting figure was 4.8%. This is the wrong-referee error for about the ninth time in
+this project. Before believing any scanner, hand-check the frames it flags most.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **The wrong referee.** This is the recurring failure. Examples that cost real
@@ -577,12 +626,26 @@ beat apart but together they stepped every 175ms.
   are currently written by `author.py`, which is deterministic — it has no judgement
   about which of several valid treatments suits a song. Teaching the composer to
   author cue lists is the biggest remaining piece.
+- **A blackout used to return to the past.** The holes pass appended to `cues` inside
+  its own loop but only sorted afterwards, so `prior[-1]` could be an earlier hole's
+  return cue rather than the look actually on stage — the 47.88s blackout in
+  `raga-of-revenge` came back on a look from 1.6s into the song, at `l 0.24`. Fixed by
+  sorting inside the loop. The return now also takes the *arriving* look when a cue
+  starts within 2s after the hole, and lifts its level when the bar it returns into is
+  louder than the one it left. That lift does not fire when a hole sits inside a single
+  bar, which is correct: both sides are the same bar.
 - **29 other songs are untouched.** `author.py` runs on them (verified on five), but
   nobody has watched those shows.
 - The head still only pans and dims. It has tilt, strobe, gobo, prism and a colour
   wheel doing nothing.
 - Accents are only `bone` and `saffron`; they could take palette colours.
 - `nebulakal` has an 8.7s idle stretch worth a look.
+- Per-lamp brightness across the row is even to within 4.9 of 255 on `raga-of-revenge`,
+  down from 11.0. What remains is honest: no lamp is a leader — "the head" of a chase
+  is wherever the figure currently sits, and it moves — but the figures are
+  directional, so `build` and `sweep` start at lamp 1 and put it at the head more often
+  than lamp 4 over a whole show. Do not "fix" that by balancing levels; it would
+  destroy the figures.
 - The old composer path, `portal/venues/*` effects and `portal/baker.js` are all
   still live. Decide with Amal whether to retire them.
 

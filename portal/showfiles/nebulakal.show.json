@@ -1,0 +1,267 @@
+{
+ "schema": "limelight.show/1",
+ "song": "nebulakal",
+ "plan": "A voice comes out of eight seconds of silence, spends itself in one cry at bar 41 and leaves \u2014 the band plays the rest of the song around the hole where it was, brightening as it goes, until it goes out too.",
+ "states": [
+  {
+   "section": 0,
+   "effect": "drone",
+   "amount": 0.06,
+   "colour": "#2b3a7d",
+   "extent": "inner",
+   "why": "Every lane reads 0.0 until t=8.5s; the intro is literal silence, then one low voice at 0.11-0.26. Near the floor, cold \u2014 mode -0.1, the coolest reading before the instrumentals."
+  },
+  {
+   "section": 1,
+   "effect": "wash",
+   "amount": 0.42,
+   "colour": "#c8863c",
+   "extent": "all",
+   "why": "Energy 8.3, mode +0.7: the band and the voice are both in. Warm, but held back \u2014 brightness 6.1 is mid-range and this verse is not the song's argument."
+  },
+  {
+   "section": 2,
+   "effect": "wash",
+   "amount": 0.5,
+   "colour": "#2f4aa0",
+   "extent": "all",
+   "why": "Energy jumps to 9.1 but mode turns to -0.3 and brightness falls to 5.5: full band, no voice, minor. Cold blue is the measurement, not a mood choice."
+  },
+  {
+   "section": 3,
+   "effect": "wash",
+   "amount": 0.5,
+   "colour": "#c07c38",
+   "extent": "all",
+   "why": "Brightness 5.2, the darkest full section in the song, with mode back to +0.7. Warm but deliberately low so the peak at its far end has somewhere to go."
+  },
+  {
+   "section": 4,
+   "effect": "wash",
+   "amount": 0.62,
+   "colour": "#d69a52",
+   "extent": "all",
+   "why": "Labelled chorus, and brightness 6.7 / energy 9.1 say light it bright \u2014 but lead-vocal measures mean 0.036 across the whole 29s. The band is at full tilt with nobody singing."
+  },
+  {
+   "section": 5,
+   "effect": "wash",
+   "amount": 0.52,
+   "colour": "#24337f",
+   "extent": "all",
+   "why": "Mode -0.7, the most minor stretch in the song, carried by sitar and dobro (overlap 0.933). The coldest colour in the show belongs to the coldest measured bars."
+  },
+  {
+   "section": 6,
+   "effect": "wash",
+   "amount": 0.52,
+   "colour": "#3a5aa8",
+   "extent": "all",
+   "why": "Mode climbs -0.7 to +0.1 while energy holds at 9.0. Same level as section 5, thawed one step toward blue \u2014 the room is coming back up out of the minor."
+  },
+  {
+   "section": 7,
+   "effect": "wash",
+   "amount": 0.55,
+   "colour": "#c98a44",
+   "extent": "all",
+   "why": "Fifty seconds, the longest section, mode +0.6 and the lead vocal back in front. Warm again, and mid-level so the binding and the hush inside it have room to move."
+  },
+  {
+   "section": 8,
+   "effect": "wash",
+   "amount": 0.58,
+   "colour": "#d19350",
+   "extent": "all",
+   "why": "Brightness 6.7, up from 6.4. The second reader calls this a bridge rather than a verse; either way it is one step brighter than what precedes it and I light the step."
+  },
+  {
+   "section": 9,
+   "effect": "wash",
+   "amount": 0.66,
+   "colour": "#e0a862",
+   "extent": "all",
+   "why": "Brightness 7.3 \u2014 the song has been climbing since the intro and this is where it clears everything before it."
+  },
+  {
+   "section": 10,
+   "effect": "wash",
+   "amount": 0.68,
+   "colour": "#e6ae68",
+   "extent": "all",
+   "why": "Brightness 7.4. A hair above its twin, because the measurement is a hair above; two identical choruses would be a lie about a song that keeps rising."
+  },
+  {
+   "section": 11,
+   "effect": "wash",
+   "amount": 0.7,
+   "colour": "#edb873",
+   "extent": "all",
+   "why": "Brightness 7.5, the brightest bars in the song. The top of the show sits here, on an instrumental \u2014 not on the chorus, because that is not what was measured."
+  },
+  {
+   "section": 12,
+   "effect": "wash",
+   "amount": 0.68,
+   "colour": "#e8b06c",
+   "extent": "all",
+   "why": "Brightness 7.4, energy still 9.0. The descent has started but has not arrived; one notch down from the peak state."
+  },
+  {
+   "section": 13,
+   "effect": "wash",
+   "amount": 0.38,
+   "colour": "#b8803c",
+   "extent": "all",
+   "why": "Brightness falls hard, 7.4 to 5.6, and energy 9.0 to 7.8 \u2014 the biggest single drop between sections in the song. Mode is +1.0 here, fully major, so it stays warm as it goes low."
+  },
+  {
+   "section": 14,
+   "effect": "drone",
+   "amount": 0.04,
+   "colour": "#241c3a",
+   "extent": "inner",
+   "why": "Four and a half seconds the second reader labels silence; every lane measures zero from t=274. The floor of the rig, and the song ends there."
+  }
+ ],
+ "bindings": [
+  {
+   "section": 7,
+   "effect": "follow",
+   "stream": "lead-vocal",
+   "depth": 0.6,
+   "extent": "all",
+   "smooth": 0.35,
+   "why": "Fifty seconds led by one voice at -11.3 dB, the loudest lane in the song. Binding here is what makes the nine-second hole at moment 15 read as absence rather than as a cue."
+  },
+  {
+   "section": 4,
+   "effect": "accent",
+   "threshold": 0.5,
+   "extent": "all",
+   "for_beats": 8,
+   "why": "Lead vocal measures 0.036 through this chorus while onsets run 6.01/s with mean intensity 0.29. With the singer gone the drums are the subject, so the room answers the real hits and not the grid."
+  },
+  {
+   "section": 9,
+   "effect": "split",
+   "streams": [
+    "lead-vocal",
+    "back-vocal"
+   ],
+   "colours": [
+    "#e8a85c",
+    "#4a6fd0"
+   ],
+   "why": "Measured overlap 0.302 across bars 110-126, verdict 'they alternate'. Call and response is in the data, so the two halves of the rig take a voice each."
+  },
+  {
+   "section": 6,
+   "effect": "follow",
+   "stream": "sitar",
+   "depth": 0.55,
+   "extent": "all",
+   "smooth": 0.4,
+   "why": "Sitar peaks at 1.00 through this instrumental and plays with dobro at 0.933 overlap. The one place the song's South Asian melodic line leads outright, so it drives the lamps."
+  }
+ ],
+ "gestures": [
+  {
+   "moment": 9,
+   "effect": "impact",
+   "colour": "#ffffff",
+   "extent": "all",
+   "for_beats": 2,
+   "why": "Intensity 1.0, typed peak and carrying climax, register_shift and exit at once \u2014 the loudest stretch of the song. The largest gesture in the catalogue belongs here and nowhere else."
+  },
+  {
+   "moment": 9,
+   "lead_beats": 1,
+   "effect": "blackout",
+   "for_beats": 1,
+   "why": "One beat of nothing so the impact lands on something. The lane shows lead-vocal already falling 0.49 to 0.01 across these two seconds; the darkness is the voice going, the impact is the band left holding it."
+  },
+  {
+   "moment": 21,
+   "effect": "blackout",
+   "for_beats": 8,
+   "why": "Typed register_shift but flagged alongside exit, and bass and back-vocal both measure 0.33 to 0.01 within one second here. It is the last sound in the song, so it gets the longest darkness."
+  },
+  {
+   "moment": 15,
+   "effect": "hush",
+   "depth": 0.3,
+   "for_beats": 16,
+   "keep": "#c98a44",
+   "why": "Intensity 1.0, eight instruments out, and the lane confirms lead-vocal at exactly 0.0 for nine seconds after. Synth and kick keep running, so the room quiets rather than empties \u2014 keep holds the warm."
+  },
+  {
+   "moment": 18,
+   "effect": "sweep",
+   "colour": "#ffe0b0",
+   "level": 0.8,
+   "from_pan": 0.2,
+   "to_pan": 0.85,
+   "tilt": 0.45,
+   "bounce": true,
+   "rest": 0.1,
+   "for_beats": 16,
+   "why": "Six instruments out at intensity 1.0, including the lead vocal's last appearance in the body of the song \u2014 and it happens across the brightest bars measured. The voice leaves, so the light goes somewhere it has not been."
+  },
+  {
+   "moment": 14,
+   "effect": "lift",
+   "by": 0.28,
+   "over_beats": 8,
+   "tilt": 0.35,
+   "why": "Intensity 1.0 register_shift upward, and the point where the voice returns after twenty-nine seconds of instrumental. The music went up and stayed up, so the light does the same."
+  },
+  {
+   "moment": 12,
+   "effect": "pulse",
+   "colour": "#3f63b4",
+   "depth": 0.55,
+   "top": 0.72,
+   "per_beat": 1,
+   "extent": "all",
+   "for_beats": 16,
+   "why": "Intensity 1.0: bass, double-bass, percussion, timpani and congas all enter together. Five rhythm instruments arriving is the rig starting to breathe in time, not a flash."
+  },
+  {
+   "moment": 5,
+   "effect": "chase",
+   "colour": "#5a7fd8",
+   "level": 0.8,
+   "rest": 0.08,
+   "per_beat": 1,
+   "bounce": false,
+   "extent": "all",
+   "for_beats": 8,
+   "why": "Intensity 1.0, synth and bass entering \u2014 the song's engine starting, inside an instrumental. Place moving is the only thing the rig has not yet done, and the groove arrives here."
+  },
+  {
+   "moment": 2,
+   "effect": "tint",
+   "from": "#c8863c",
+   "to": "#6a63a8",
+   "level": 0.42,
+   "extent": "all",
+   "over_beats": 8,
+   "why": "Intensity 1.0 and the only 1.0 in the first forty seconds, mid-section so nothing else marks it. The music drops an octave; the room drops with it and stays there, into the pause and the cold instrumental."
+  },
+  {
+   "moment": 1,
+   "effect": "swell",
+   "colour": "#e8b070",
+   "for_beats": 8,
+   "rise": 0.65,
+   "why": "The first voice in the song, arriving out of a drone at 0.06 \u2014 the lane goes 0.10 to 0.80 in a second. Intensity 0.403 is middling, so it blooms and falls into the verse rather than announcing itself."
+  },
+  {
+   "moment": 3,
+   "effect": "cut",
+   "for_beats": 2,
+   "why": "Measured pause at 0.706 \u2014 'the track falls away to almost nothing' \u2014 exactly two beats before the drop that opens the instrumental. Two beats of black, then the room is a different colour."
+  }
+ ]
+}

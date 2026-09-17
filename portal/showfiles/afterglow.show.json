@@ -1,0 +1,412 @@
+{
+ "schema": "limelight.show/1",
+ "song": "afterglow",
+ "plan": "Bass is the story: the rig is amber wherever bass and synth are absent (intro, both verses, the sung finale) and azure wherever they are present (both choruses, both instrumentals), and the whole show is built to put its single loudest instant on moment 6 at 54.5s, its colour answer on the climax at 123.34s, and its darkness on the exit at 163.0s.",
+ "states": [
+  {
+   "section": 0,
+   "effect": "wash",
+   "amount": 0.36,
+   "colour": [
+    1,
+    0.72,
+    0.3
+   ],
+   "extent": "all",
+   "why": "Only keys 0.47, piano 0.48 and digital-piano 0.10 sound here, all at 100% coverage - no drums, no bass, no voice. Brightness 4.3 is the song's floor so this is the show's floor too, but the piano is continuously audible and a drone at 0.12 over it would read as a fault. Amber because bass is absent."
+  },
+  {
+   "section": 1,
+   "effect": "wash",
+   "amount": 0.48,
+   "colour": [
+    1,
+    0.72,
+    0.3
+   ],
+   "extent": "all",
+   "why": "lead-vocal 0.54/98% and vocal 0.59 over piano 0.37, and bass is exactly 0.00 for the whole section. Energy 8.4 but the arrangement is thin, so this sits well below the choruses. Still amber - same family as the intro it grew out of."
+  },
+  {
+   "section": 2,
+   "effect": "wash",
+   "amount": 0.66,
+   "colour": [
+    0.16,
+    0.5,
+    1
+   ],
+   "extent": "all",
+   "why": "The real arrival: bass 0.54/100% and synth 0.54/100% start here, kick 0.63/98%, double-bass 0.31/100% - eleven stems change at 33.24s. Energy 9.1, the song's top band. First azure of the show."
+  },
+  {
+   "section": 3,
+   "effect": "wash",
+   "amount": 0.6,
+   "colour": [
+    0.16,
+    0.5,
+    1
+   ],
+   "extent": "all",
+   "why": "Same full band as section 2 (bass 0.54, synth 0.54, kick 0.65) but lead-vocal falls to 0.15/43% - this is the band's section, not the singer's. One notch under the chorus it follows, same colour because the same instruments carry it."
+  },
+  {
+   "section": 4,
+   "effect": "wash",
+   "amount": 0.42,
+   "colour": [
+    1,
+    0.72,
+    0.3
+   ],
+   "extent": "all",
+   "why": "The most stripped sung stretch in the song: bass 0.00, synth 0.02/20%, kick 0.13/36%. Moment 9's spotlight holds for 30s from 82.66s and covers most of it. Rhymes with verse [1] in colour and kind, a notch darker because it is a notch emptier - this is where the show spends its low end."
+  },
+  {
+   "section": 5,
+   "effect": "wash",
+   "amount": 0.66,
+   "colour": [
+    0.16,
+    0.5,
+    1
+   ],
+   "extent": "all",
+   "why": "Identical in kind to chorus [2] - bass 0.53, synth 0.53, kick 0.65/100%, snare 0.31/100%, energy 9.1 - so it gets the identical state. The choruses rhyme; the climax inside this one is won by gesture, not by raising the bed."
+  },
+  {
+   "section": 6,
+   "effect": "wash",
+   "amount": 0.62,
+   "colour": [
+    0.16,
+    0.5,
+    1
+   ],
+   "extent": "all",
+   "why": "The busiest drumming in the song - snare 0.40/100%, drums 0.13/98%, kick 0.68/98%, 6.39 onsets per second measured over bars 97-112. Same azure and near-identical level to instrumental [3]: the two instrumentals are the same thing."
+  },
+  {
+   "section": 7,
+   "effect": "wash",
+   "amount": 0.48,
+   "colour": [
+    1,
+    0.72,
+    0.3
+   ],
+   "extent": "all",
+   "why": "Labelled chorus, but the numbers say otherwise and the numbers win: kick 0.02/15%, drums 0.02/4%, synth 0.07/27% - the drums have gone. keys 0.65, digital-piano 0.61, bowed_strings 0.22 and both vocals carry it, and moment 17's spotlight holds 14s to the end of the track. The second segmenter calls this boundary `outro` at 154.566s, 0.036s off. Lit as the sung finale, amber like the verses, not as a third chorus."
+  },
+  {
+   "section": 8,
+   "effect": "drone",
+   "amount": 0.05,
+   "colour": [
+    1,
+    0.72,
+    0.3
+   ],
+   "extent": "inner",
+   "why": "Every stem reads 0.00 after 167.54s - there is nothing left to answer, so this is the one section with no binding and that is deliberate. The fade anchored at moment 19 runs across it and carries the rig down through this level to black."
+  }
+ ],
+ "bindings": [
+  {
+   "section": 0,
+   "effect": "follow",
+   "stream": "downbeat",
+   "depth": 0.5,
+   "floor": 0.2,
+   "smooth": 0.05,
+   "extent": "outer",
+   "why": "There are no drums in the intro, so accent has nothing to answer. Binding the measured downbeat instead puts the rises on the song's own bar lines from the first second."
+  },
+  {
+   "section": 1,
+   "effect": "accent",
+   "threshold": 0.08,
+   "extent": "ends",
+   "rest": 0.18,
+   "for_beats": 3,
+   "bed_colour": [
+    1,
+    0.72,
+    0.3
+   ],
+   "why": "kick 0.16/39% and snare 0.16/41% - the drums are here but intermittent, so a low threshold catches the hits that were actually struck. On the ends so the outer pair answers the kit while the follow carries the middle."
+  },
+  {
+   "section": 2,
+   "effect": "accent",
+   "threshold": 0.12,
+   "extent": "inner",
+   "rest": 0.16,
+   "for_beats": 2,
+   "bed_colour": [
+    0.16,
+    0.5,
+    1
+   ],
+   "why": "kick 0.63/98% and snare 0.26/100%. The onset envelope peaks near 0.45 and averages 0.353 over bars 36-44, so 0.12 is selective rather than constant. Rest kept low so the flash reads over the wash."
+  },
+  {
+   "section": 3,
+   "effect": "accent",
+   "threshold": 0.12,
+   "extent": "all",
+   "rest": 0.18,
+   "for_beats": 2,
+   "bed_colour": [
+    0.16,
+    0.5,
+    1
+   ],
+   "why": "split is a place binding with no brightness swing at all, so it needs an amount layer over it. kick 0.65/98% supplies one."
+  },
+  {
+   "section": 4,
+   "effect": "accent",
+   "threshold": 0.06,
+   "extent": "ends",
+   "rest": 0.12,
+   "for_beats": 3,
+   "bed_colour": [
+    1,
+    0.72,
+    0.3
+   ],
+   "why": "kick 0.13/36%, snare 0.10/30% - sparse. Threshold dropped to 0.06 so the few hits that exist still land, which is what keeps this section's rises on the measured beat rather than on the vocal's smooth envelope."
+  },
+  {
+   "section": 5,
+   "effect": "accent",
+   "threshold": 0.12,
+   "extent": "inner",
+   "rest": 0.16,
+   "for_beats": 2,
+   "bed_colour": [
+    0.16,
+    0.5,
+    1
+   ],
+   "why": "kick 0.65/100%, snare 0.31/100%. Same pairing as chorus [2] for the same reason."
+  },
+  {
+   "section": 6,
+   "effect": "accent",
+   "threshold": 0.15,
+   "extent": "all",
+   "rest": 0.2,
+   "for_beats": 2,
+   "bed_colour": [
+    0.16,
+    0.5,
+    1
+   ],
+   "why": "6.39 onsets per second, the densest in the song, so the threshold goes up to 0.15 to stay selective - at 0.08 this would fire almost continuously and stop reading as accents at all. No split here: unlike section 3 the two vocal lanes both run at 100% coverage, so nothing is trading."
+  },
+  {
+   "section": 7,
+   "effect": "follow",
+   "stream": "downbeat",
+   "depth": 0.45,
+   "floor": 0.18,
+   "smooth": 0.05,
+   "extent": "outer",
+   "why": "drums are 0.02/4% here so accent has nothing left to answer - the same problem as the intro and the same answer. Binding the measured downbeat keeps the finale's rises on the grid instead of drifting with the vocal envelope."
+  }
+ ],
+ "gestures": [
+  {
+   "moment": 6,
+   "lead_beats": 1,
+   "effect": "blackout",
+   "for_beats": 1,
+   "why": "One beat of nothing immediately before the loudest stretch in the song. Darkness is the strongest thing available and it is what makes the next cue land."
+  },
+  {
+   "moment": 6,
+   "effect": "impact",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "for_beats": 4,
+   "why": "Moment 6 is intensity 1.00 and described as the loudest stretch of the song. The biggest gesture in the catalogue, at full, on the whole rig, and nowhere else in the show."
+  },
+  {
+   "moment": 6,
+   "effect": "strobe",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "hz": 14,
+   "extent": "all",
+   "for_beats": 4,
+   "why": "The only strobe in the show, kept short and stacked on the impact so the show's loudest five seconds sits on the recording's. Moment 6 also carries an exit alongside the peak - the loudest instant is the one the track leaves on."
+  },
+  {
+   "moment": 13,
+   "lead_beats": 1,
+   "effect": "blackout",
+   "for_beats": 2,
+   "why": "The other intensity 1.00 moment gets the same preparation as the first. The two biggest events in the song rhyme in how they are set up."
+  },
+  {
+   "moment": 13,
+   "effect": "flare",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "under": [
+    0.16,
+    0.5,
+    1
+   ],
+   "level": 0.9,
+   "rest": 0.34,
+   "for_beats": 4,
+   "why": "The climax is six instrument families at once, but it is not the loudest stretch - moment 6 is. So the climax is answered in colour rather than in a second white peak: white slams over the chorus azure and falls back into it."
+  },
+  {
+   "moment": 13,
+   "effect": "pulse",
+   "colour": [
+    0.16,
+    0.5,
+    1
+   ],
+   "depth": 0.5,
+   "top": 0.8,
+   "per_beat": 1,
+   "for_beats": 12,
+   "why": "Moment 13 holds for 15s. Rather than let the rig sit at the state through the fullest passage in the song, it breathes once per measured beat for the first twelve of them."
+  },
+  {
+   "moment": 18,
+   "effect": "blackout",
+   "for_beats": 7,
+   "why": "Intensity 1.00 on an exit: bowed_strings and back-vocal drop out at 163.0s. At an exit, light going away is the correct answer, and this is the longest darkness in the show."
+  },
+  {
+   "moment": 1,
+   "effect": "blackout",
+   "for_beats": 4,
+   "why": "First of the song's three pauses - the track falls away to almost nothing, with a harmonic_rhythm change alongside. All three pauses get darkness; that is the show's one repeating idea."
+  },
+  {
+   "moment": 5,
+   "effect": "lift",
+   "by": 0.28,
+   "over_beats": 6,
+   "tilt": 0.3,
+   "why": "The music drops 7 semitones at 50.92s and the loudest stretch of the song arrives 3.58s later. The pitch goes down and the light goes up, because that is what the measurement says happens next."
+  },
+  {
+   "moment": 7,
+   "effect": "converge",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "level": 0.85,
+   "rest": 0.28,
+   "for_beats": 6,
+   "why": "lead-vocal re-enters at 71.96s at intensity 0.956 in a section where it otherwise sits at 0.15/43%. The pars drop back and the head drives to one point - the room looks at the singer. Kept in the head so this does not compete with the peak for brightness."
+  },
+  {
+   "moment": 9,
+   "effect": "sweep",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "level": 0.8,
+   "from_pan": 0.35,
+   "to_pan": 0.85,
+   "tilt": 0.42,
+   "rest": 0.26,
+   "bounce": true,
+   "for_beats": 12,
+   "why": "Everything drops back behind lead-vocal and holds for 30s. The pars hold the room low while the head travels - second of the three head gestures, one for each measured moment where the voice is alone. Bounded at twelve beats rather than left to hold the full 30s."
+  },
+  {
+   "moment": 10,
+   "effect": "blackout",
+   "for_beats": 5,
+   "why": "Second pause, intensity 0.752, and the deepest point of the stripped verse. Longer than the first because there is less underneath it to lose."
+  },
+  {
+   "from_moment": 11,
+   "to_moment": 12,
+   "effect": "ramp",
+   "to": 0.9,
+   "curve": "ease",
+   "why": "Two measured builds, 99.55s to 109.89s, ending half a second before the chorus boundary at 110.4s. The last ten seconds of the emptiest verse in the song rise into the fullest chorus - the one long continuous move in the show."
+  },
+  {
+   "moment": 14,
+   "effect": "bounce",
+   "colours": [
+    [
+     1.0,
+     0.72,
+     0.3
+    ],
+    [
+     0.16,
+     0.5,
+     1.0
+    ]
+   ],
+   "level": 0.72,
+   "per_beat": 1,
+   "for_beats": 12,
+   "why": "Both voices enter at 146.44s over the densest drumming in the track. The two palette colours trade on the measured beat, which makes that groove visible without adding a third bright amount gesture."
+  },
+  {
+   "moment": 16,
+   "effect": "cut",
+   "for_beats": 2,
+   "why": "Low intensity at 0.189, but it is the moment the kit leaves: half as many hits at 155.08s, and drums measure 0.02/4% for the rest of the section. Placed on the measurement, not on the intensity."
+  },
+  {
+   "moment": 17,
+   "effect": "texture",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "level": 0.8,
+   "rest": 0.28,
+   "gobo": 40,
+   "spin": true,
+   "for_beats": 8,
+   "why": "The last spotlight, holding 14s to the end of the track. Third head gesture: pattern in the air over a room the drums have left, while the pars stay back at 0.28."
+  },
+  {
+   "moment": 19,
+   "effect": "fade",
+   "colour": [
+    1,
+    0.72,
+    0.3
+   ],
+   "from": 0.5,
+   "to": 0.02,
+   "over_beats": 12,
+   "why": "Third and last pause, at 166.5s, one bar before the outro. The fade runs across the whole outro to arrive at black roughly where the stems do - the song ends amber, the colour it started in."
+  }
+ ]
+}

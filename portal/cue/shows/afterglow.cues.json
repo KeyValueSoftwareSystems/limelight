@@ -130,12 +130,12 @@
    "why": "the audio falls to 17% of its median for 1.14s - a real hole, so the room goes with it"
   },
   {
-   "id": 3,
+   "id": 4,
    "at": {
     "second": 16.602
    },
    "fade": 0.06,
-   "why": "and back, the instant the audio returns",
+   "why": "and back on the look it is arriving at, the instant the audio returns",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -145,27 +145,22 @@
      "c": "scarlet",
      "l": 0.16,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.31
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "wave",
      "every": {
-      "beats": 2
+      "notes": 1
      },
      "fill_beats": 1,
      "low": 0.22,
      "move_head": true,
      "reverse": true
     }
-   ],
-   "swell": {
-    "from": 0.701,
-    "to": 0.729,
-    "curve": 1.15
-   }
+   ]
   },
   {
    "id": 0,
@@ -177,22 +172,22 @@
    "why": "the audio falls to 21% of its median for 0.91s - a real hole, so the room goes with it"
   },
   {
-   "id": 3,
+   "id": 5,
    "at": {
     "second": 22.245
    },
    "fade": 0.06,
-   "why": "and back, the instant the audio returns",
+   "why": "and back on the look it is arriving at, the instant the audio returns",
    "look": {
     "lamps": {
      "c": "scarlet",
-     "l": 0.23
+     "l": 0.35
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.16,
+     "l": 0.24,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.3
     }
    },
    "chases": [
@@ -204,13 +199,12 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true,
-     "reverse": true
+     "move_head": true
     }
    ],
    "swell": {
-    "from": 0.701,
-    "to": 0.729,
+    "from": 0.81,
+    "to": 0.827,
     "curve": 1.15
    }
   },
@@ -751,28 +745,28 @@
    "why": "the audio falls to 21% of its median for 0.86s - a real hole, so the room goes with it"
   },
   {
-   "id": 3,
+   "id": 21,
    "at": {
     "second": 93.693
    },
    "fade": 0.06,
-   "why": "and back, the instant the audio returns",
+   "why": "and back on the look it is arriving at, the instant the audio returns",
    "look": {
     "lamps": {
      "c": "scarlet",
-     "l": 0.23
+     "l": 0.28
     },
     "heads": {
      "c": "scarlet",
-     "l": 0.16,
+     "l": 0.2,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.31
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "comet",
      "every": {
       "beats": 2
      },
@@ -783,8 +777,8 @@
     }
    ],
    "swell": {
-    "from": 0.701,
-    "to": 0.729,
+    "from": 0.652,
+    "to": 0.683,
     "curve": 1.15
    }
   },
@@ -1265,7 +1259,7 @@
    ]
   },
   {
-   "id": 3,
+   "id": 35,
    "at": {
     "second": 171.178
    },
@@ -1274,33 +1268,27 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.23
+     "l": 0.14
     },
     "heads": {
-     "c": "scarlet",
-     "l": 0.16,
+     "c": "violet",
+     "l": 0.1,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.3
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "comet",
      "every": {
-      "beats": 2
+      "hits": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true,
-     "reverse": true
+     "move_head": true
     }
-   ],
-   "swell": {
-    "from": 0.701,
-    "to": 0.729,
-    "curve": 1.15
-   }
+   ]
   }
  ],
  "accents": [
