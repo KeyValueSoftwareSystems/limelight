@@ -12,6 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   worldOf, norm, staticAim, aimOf, throwOf, landingOf, roomOf, cameraOf, barsOf, bodyOf,
+  deckOf, towersOf, boothOf, screensOf,
   type Deck, type Vec3,
 } from "./stage3d.ts";
 import type { Fixture, LampState } from "./types.ts";
@@ -194,6 +195,82 @@ test("a body is sized by what the device is", () => {
   for (const t of ["par5", "spot29", "wash12", "blinder1", "strobe3", "pixelbar24", "laser8"]) {
     const b = bodyOf(t);
     assert.ok(b.radius > 0 && b.length > 0, `${t} has no size`);
+  }
+});
+
+/* ── the stage set: deck, towers, booth ──────────────────────────────────── */
+
+test("the deck is a raised stage, wider than the rig, under the upstage truss", () => {
+  const room = roomOf(arena.fixtures);
+  const d = deckOf(room);
+  assert.ok(d.top >= 0.8, `a real stage is raised off the floor, got ${d.top}`);
+  assert.ok(d.minX < room.minX && d.maxX > room.maxX, "the deck extends past the outermost fixtures");
+  assert.ok(d.minZ <= room.minZ && d.maxZ >= room.minZ, "the upstage truss line stands over the deck");
+  assert.ok(d.width > room.width && d.depth > 0, "the deck has a real footprint");
+  assert.equal(d.frontZ, d.maxZ, "the front of the deck is its downstage edge");
+  assert.ok(Math.abs(d.centreX - (d.minX + d.maxX) / 2) < 1e-9, "centreX is the middle of the deck");
+});
+
+test("the deck is a valid landing surface for a downward beam", () => {
+  const d = deckOf(roomOf(arena.fixtures));
+  const at = landingOf([d.centreX, 6, (d.minZ + d.maxZ) / 2], norm([0, -1, 0]), 50, d);
+  assert.ok(at, "a beam over the deck lands somewhere");
+  assert.equal(at![1], d.top, "and it lands on the deck top, not the floor");
+});
+
+test("every bar gets a tower at each end, standing from the truss down to the floor", () => {
+  const bars = barsOf(arena.fixtures).filter((b) => b.y > 1);
+  const towers = towersOf(bars);
+  assert.ok(towers.length > 0, "an arena has goalpost towers");
+  assert.ok(towers.length <= bars.length * 2, "at most two per bar, shared ends deduped");
+  for (const t of towers) {
+    assert.ok(t.yTop > t.yBottom, "a tower has height");
+    assert.ok(Math.abs(t.yBottom) < 1e-9, "it reaches the floor");
+    assert.ok(Number.isFinite(t.x) && Number.isFinite(t.z));
+  }
+  const back = bars.find((b) => Math.abs(b.z) < 0.01)!;
+  assert.ok(
+    towers.some((t) => Math.abs(t.x - back.x0) < 1e-9 && Math.abs(t.z - back.z) < 1e-9),
+    "a tower stands at the end of the back truss",
+  );
+});
+
+test("two bars sharing an end make one tower there, not two", () => {
+  const bars = [
+    { kind: "bar" as const, points: [], y: 5, z: 0, x0: -4, x1: 4, vertical: false },
+    { kind: "bar" as const, points: [], y: 5, z: 0, x0: -4, x1: 4, vertical: false },
+  ];
+  const towers = towersOf(bars);
+  assert.equal(towers.length, 2, "the duplicate ends collapse to two towers");
+});
+
+test("the DJ booth sits centred on the deck, raised above it, within its footprint", () => {
+  const d = deckOf(roomOf(arena.fixtures));
+  const b = boothOf(d);
+  assert.ok(Math.abs(b.x - d.centreX) < 1e-9, "the booth is centred left-to-right");
+  assert.ok(b.w > 0 && b.d > 0 && b.h > 0, "the booth has a body");
+  assert.ok(b.top > d.top, "the booth stands proud of the deck");
+  assert.ok(b.x - b.w / 2 >= d.minX && b.x + b.w / 2 <= d.maxX, "it stays within the deck width");
+  assert.ok(b.z - b.d / 2 >= d.minZ && b.z + b.d / 2 <= d.maxZ, "and within the deck depth");
+});
+
+test("the LED wall stands upstage, centred and above the deck", () => {
+  const room = roomOf(arena.fixtures);
+  const s = screensOf(room, deckOf(room));
+  assert.ok(Math.abs(s.wall.x - room.centreX) < 1e-9, "the wall is centred");
+  assert.ok(s.wall.w > 0 && s.wall.h > 0, "the wall has size");
+  assert.ok(s.wall.z <= room.minZ, "the wall is upstage of the rig");
+  assert.ok(s.wall.y - s.wall.h / 2 >= 0, "the wall does not sink through the floor");
+});
+
+test("there are two side pillars, symmetric, taller than they are wide, out at the edges", () => {
+  const room = roomOf(arena.fixtures);
+  const s = screensOf(room, deckOf(room));
+  assert.equal(s.pillars.length, 2, "a pillar each side");
+  assert.ok(Math.abs((s.pillars[0].x + s.pillars[1].x) - 2 * room.centreX) < 1e-9, "symmetric about centre");
+  for (const p of s.pillars) {
+    assert.ok(p.h > p.w, "a pillar is a column, not a panel");
+    assert.ok(Math.abs(p.x - room.centreX) >= room.width / 2, "pillars flank the rig");
   }
 });
 
