@@ -219,6 +219,109 @@ export function barsOf(fixtures: Fixture[]): Bar[] {
   });
 }
 
+/* ── the stage set: deck, goalpost towers, DJ booth ──────────────────────────
+   The rig used to hang over a low riser box in an otherwise empty room, which is
+   why it read as "bars floating above the floor". A real gig has a raised deck to
+   stand on, steel towers holding the overhead truss up, and — for the club/EDM
+   rooms this drives — a booth downstage-centre. The geometry is inferred from the
+   rig the same way the room is, because the venue files carry fixtures, not sets. */
+
+export interface StageDeck extends Deck {
+  centreX: number; centreZ: number;
+  width: number; depth: number; height: number;
+  /** the downstage edge, where the deck meets the floor toward the crowd */
+  frontZ: number;
+}
+
+/** A raised performance deck, wider than the rig and sat under the upstage truss. */
+export function deckOf(room: RoomBounds): StageDeck {
+  /* A rig that hangs in the air stands on a raised deck; a floor rig (every
+     fixture on the ground) gets a flush deck so its fixtures sit on the ground
+     plane rather than being buried inside a one-metre riser. */
+  const height = room.maxY > 1.5 ? 1.0 : 0.0;     // a stage you stand on, not a 0.6 kerb
+  const width = room.width + 6;                    // extends past the outermost fixtures
+  const depth = Math.max(3.5, room.depth * 0.6);
+  const centreX = room.centreX;
+  const minZ = room.minZ - 0.6;                    // a little behind the back truss
+  const maxZ = minZ + depth;
+  return {
+    top: height, height,
+    minX: centreX - width / 2, maxX: centreX + width / 2,
+    minZ, maxZ, frontZ: maxZ,
+    centreX, centreZ: (minZ + maxZ) / 2, width, depth,
+  };
+}
+
+/** A vertical truss tower standing from the floor up to a horizontal truss. */
+export interface Tower { x: number; z: number; yTop: number; yBottom: number; }
+
+/**
+ * A tower at each end of every overhead bar, floor to truss. Ends shared by two
+ * bars collapse to one tower, which then reaches the taller of them — otherwise a
+ * back truss and a mid truss at the same corner would draw two towers in one spot.
+ */
+export function towersOf(bars: Bar[]): Tower[] {
+  const by = new Map<string, Tower>();
+  for (const bar of bars) {
+    for (const x of [bar.x0, bar.x1]) {
+      const key = `${x.toFixed(3)}:${bar.z.toFixed(3)}`;
+      const cur = by.get(key);
+      if (cur) cur.yTop = Math.max(cur.yTop, bar.y);
+      else by.set(key, { x, z: bar.z, yTop: bar.y, yBottom: 0 });
+    }
+  }
+  return [...by.values()];
+}
+
+/** The DJ booth: a raised block downstage-of-centre, on the deck, facing the crowd. */
+export interface Booth { x: number; z: number; w: number; d: number; h: number; top: number; }
+
+export function boothOf(deck: StageDeck): Booth {
+  const w = Math.min(3.0, deck.width * 0.28);
+  const d = Math.min(1.8, deck.depth * 0.4);
+  const h = 1.1;
+  return {
+    x: deck.centreX,
+    z: deck.maxZ - d / 2 - 0.5,                    // toward the downstage edge
+    w, d, h,
+    top: deck.top + h,
+  };
+}
+
+/* ── the video screens ────────────────────────────────────────────────────── */
+
+/** A flat LED surface, centred at (x,y,z), w wide and h tall, facing the crowd. */
+export interface Screen { x: number; y: number; z: number; w: number; h: number; }
+export interface Screens { wall: Screen; pillars: Screen[]; }
+
+/**
+ * The screens a real stage carries: one big LED wall upstage behind the band,
+ * and a tall LED pillar flanking each side. Sized off the room so a club and an
+ * arena both get a wall in proportion. They face the crowd (+Z).
+ */
+export function screensOf(room: RoomBounds, deck: StageDeck): Screens {
+  const wallH = Math.max(3, room.maxY * 0.78);
+  const wallW = Math.min(deck.width * 0.82, room.width + 4);
+  const wall: Screen = {
+    x: room.centreX,
+    y: deck.top + 0.4 + wallH / 2,          // sits just above the deck
+    z: room.minZ - 2.2,                       // upstage, in front of the back wall
+    w: wallW, h: wallH,
+  };
+
+  const pillarH = Math.max(3.5, room.maxY * 0.92);
+  const pillarW = 0.5;
+  const outer = room.width / 2 + 1.2;
+  const pillars: Screen[] = [-1, 1].map((sx) => ({
+    x: room.centreX + sx * outer,
+    y: pillarH / 2,
+    z: room.minZ - 0.3,
+    w: pillarW, h: pillarH,
+  }));
+
+  return { wall, pillars };
+}
+
 /* ── how big a lamp body is ──────────────────────────────────────────────── */
 
 /** Rough real sizes in metres, so a par is not the same object as a 29ch spot. */

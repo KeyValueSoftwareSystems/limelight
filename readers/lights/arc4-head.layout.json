@@ -3,15 +3,15 @@
  "rig": "arc4-head",
  "geometry": "line",
  "frame": "audience",
- "note": "2026-09-15: four PARs in a straight LINE, 0.5 m apart on an upstage bar at 2.4 m height, head in the middle at 2.6 m, 0.3 m downstage. Positions in metres in the AUDIENCE frame (+x = audience's right, +y = toward audience, +z = height above deck).",
+ "note": "2026-09-18: a floor setup — four PAR7 uplighters in a straight LINE on the deck facing up, with a moving head (Sharpy) on the floor in the CENTRE between them. No overhead truss. Positions in metres in the AUDIENCE frame (+x = audience's right, +y = toward audience, +z = height above deck).",
  "fixtures": [
   {
    "id": "par_1",
    "type": "par7",
    "at": [
-    -1.0,
+    -2.0,
     0.0,
-    2.4
+    0.0
    ],
    "universe": 0,
    "address": 1
@@ -20,9 +20,9 @@
    "id": "par_8",
    "type": "par7",
    "at": [
-    -0.5,
+    -1.0,
     0.0,
-    2.4
+    0.0
    ],
    "universe": 0,
    "address": 8
@@ -31,9 +31,9 @@
    "id": "par_15",
    "type": "par7",
    "at": [
-    0.5,
+    1.0,
     0.0,
-    2.4
+    0.0
    ],
    "universe": 0,
    "address": 15
@@ -42,9 +42,9 @@
    "id": "par_22",
    "type": "par7",
    "at": [
-    1.0,
+    2.0,
     0.0,
-    2.4
+    0.0
    ],
    "universe": 0,
    "address": 22
@@ -54,8 +54,8 @@
    "type": "head13",
    "at": [
     0.0,
-    0.3,
-    2.6
+    0.0,
+    0.0
    ],
    "universe": 0,
    "address": 29

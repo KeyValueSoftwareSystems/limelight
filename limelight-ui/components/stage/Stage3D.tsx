@@ -19,11 +19,14 @@ import { usePortalStore } from "@/store/portal";
 import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { readFixtures, trimFixtures } from "@/lib/fixtures";
 import { frameFor } from "@/lib/sync";
-import { profileOf } from "@/lib/profiles";
+import { profileOf, moves } from "@/lib/profiles";
+import { DEG } from "@/lib/dmx";
 import { frameLight, roomAmbient } from "@/lib/exposure";
 import {
-  worldOf, aimOf, throwOf, landingOf, roomOf, cameraOf, barsOf, bodyOf, type Deck,
+  worldOf, aimOf, throwOf, landingOf, roomOf, cameraOf, barsOf, bodyOf, staticAim,
+  deckOf, towersOf, boothOf, screensOf, type Deck,
 } from "@/lib/stage3d";
+import { buildFixture, fixtureMaterials } from "@/lib/fixtureMesh";
 import type { AnchoredClock } from "@/hooks/useAnchoredClock";
 import type { LampState, Fixture } from "@/lib/types";
 
@@ -93,15 +96,25 @@ const BEAM_FRAG = /* glsl */ `
     float head_on = abs(dot(normalize(uAxis), normalize(vV)));
     float facing = 1.0 - 0.78 * pow(head_on, 3.0);
 
-    float a = uIntensity * (mix(0.04, 0.12, uSoft) + edge * 1.05)
-            * fall * root * mix(0.72, 1.0, haze) * facing;
+    /* A shaft reads as a solid cone of lit air, but only just: pushed too hard,
+       a rig with forty beams up adds to a flat white blob and every shaft loses
+       its shape. The base term fills the middle of the cone (the volume you see
+       in haze); edge is the hot rim where you look down its length. The haze
+       term now falls off much harder with distance, so a long throw or a far
+       camera dims the way real light does through air rather than staying full. */
+    /* The base term is the flat fill that reads as fog and stacks to a white wash
+       when many beams overlap; kept low so the room stays dark. The edge term is
+       the defined silhouette of the shaft and carries most of the look, so it
+       stays strong — what makes a beam read as a punchy shaft rather than haze. */
+    float a = uIntensity * (mix(0.02, 0.048, uSoft) + edge * 1.0)
+            * fall * root * mix(0.4, 1.0, haze) * facing;
 
     /* SOFT CLIP. Hard clamping is what turned a bright beam into a flat wedge of
        paint: everything past 1.0 became the same value, so the shaft lost its
        shading all at once and read as a solid object. Rolling off exponentially
        keeps the gradient at the top end, the way film shoulders a highlight
        instead of blowing it. */
-    a = 1.0 - exp(-a * 1.7);
+    a = 1.0 - exp(-a * 1.15);
     gl_FragColor = vec4(uColour, clamp(a, 0.0, 1.0));
   }
 `;
@@ -151,6 +164,11 @@ const ROOM_FRAG = /* glsl */ `
 /** One lamp's drawable parts, kept so a frame is an update rather than a rebuild. */
 interface Rig {
   lamp: { id: string; type: string; kind: string; world: [number, number, number] };
+  /** the panning yoke and tilting head of a mover, so the body follows the beam */
+  yoke: THREE.Object3D | null;
+  head: THREE.Object3D | null;
+  /** true for a mover standing on the deck (barrel up at rest) vs hung (barrel down) */
+  floorHead: boolean;
   beam: THREE.Mesh;
   beamMat: THREE.ShaderMaterial;
   lens: THREE.Sprite;
@@ -180,6 +198,24 @@ function discTexture(): THREE.Texture {
   return tex;
 }
 
+/** One LED pixel cell: a lit face with a dark gutter, tiled to make a video wall. */
+function ledGridTexture(): THREE.Texture {
+  const s = 32;
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = s;
+  const ctx = cv.getContext("2d")!;
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, s, s);
+  /* the emitting pixel, inset so a dark grid shows between cells */
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(2, 2, s - 4, s - 4);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.magFilter = THREE.NearestFilter;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 
 /* ── one lamp, one frame ─────────────────────────────────────────────────────
    Deliberately outside the component. Everything below mutates three.js objects
@@ -199,6 +235,19 @@ function updateRig(rig: Rig, byId: Map<string, LampState>, t: number, d: number)
   }
 
   const dir = aimOf(l, rig.lamp.world[1]);
+
+  /* THE BODY FOLLOWS THE BEAM. A mover's yoke pans and its head tilts to the same
+     pan/tilt the beam is aimed by, so the lamp visibly points where the light
+     goes instead of hanging as a static can. The head is modelled pointing down
+     -Y, so straight-down is tilt 0 and the horizon is a quarter-turn from it. */
+  if (rig.yoke && rig.head) {
+    const el = (l.el ?? 0) * DEG;
+    rig.yoke.rotation.y = (l.az ?? 0) * DEG;
+    /* a hung head is modelled barrel-down (straight down = tilt 0); a floor head
+       is modelled barrel-up, so its tilt is the mirror of that */
+    rig.head.rotation.x = rig.floorHead ? (Math.PI / 2 - el) : -(Math.PI / 2 + el);
+  }
+
   const len = throwOf(rig.lamp.world, dir, rig.maxThrow, rig.deck);
   /* zoom is live, so the cone is rescaled every frame, not just aimed */
   const spread = Math.tan(Math.min(70, l.spreadDeg) * 0.5 * Math.PI / 180);
@@ -208,7 +257,13 @@ function updateRig(rig: Rig, byId: Map<string, LampState>, t: number, d: number)
   rig.beam.scale.set(r, len, r);
   rig.beamMat.uniforms.uLength.value = len;
   (rig.beamMat.uniforms.uAxis.value as THREE.Vector3).set(dir[0], dir[1], dir[2]);
-  rig.beamMat.uniforms.uIntensity.value = k * d;
+  /* density is applied TWICE for the beams. Once (in `d`) it keeps total output
+     roughly constant as the rig grows; but additive cones that OVERLAP still sum
+     toward white, and a 46-fixture arena all pointing at the deck is nothing but
+     overlap. The second factor bites only when many lamps are up (d is near 1 for
+     a small rig, so it leaves the desk rig alone) and is what stops a dense rig
+     washing to a white blob. */
+  rig.beamMat.uniforms.uIntensity.value = k * d * d;
   (rig.beamMat.uniforms.uColour.value as THREE.Color).setRGB(l.rgb[0], l.rgb[1], l.rgb[2]);
 
   /* the cone is modelled down -Y, so point that at the aim vector */
@@ -216,7 +271,7 @@ function updateRig(rig: Rig, byId: Map<string, LampState>, t: number, d: number)
   AIM_TO.set(dir[0], dir[1], dir[2]);
   rig.beam.quaternion.setFromUnitVectors(AIM_FROM, AIM_TO);
 
-  rig.lensMat.opacity = Math.min(1, k * (0.5 + 0.65 * d));
+  rig.lensMat.opacity = Math.min(0.55, k * (0.28 + 0.4 * d));
   /* the same whitening the flat renderer's emitter() applies, so a hot lamp
      reads the same colour in both views */
   const w = Math.min(1, k * 0.75);
@@ -237,11 +292,13 @@ function updateRig(rig: Rig, byId: Map<string, LampState>, t: number, d: number)
   if (rig.pool && rig.poolMat) {
     const at = landingOf(rig.lamp.world, dir, rig.maxThrow, rig.deck);
     if (at && k > 0.01) {
-      const pr = Math.max(0.5, r * 2.4);
+      const pr = Math.max(0.55, r * 2.5);
       rig.pool.visible = true;
       rig.pool.position.set(at[0], at[1] + 0.02, at[2]);
       rig.pool.scale.set(pr, pr, 1);
-      rig.poolMat.opacity = Math.min(0.85, k * 0.5 * (0.45 + 0.55 * d));
+      /* same overlap problem as the beams: twenty-two pars' pools converge on the
+         deck centre and stack to white, so density is folded in here too */
+      rig.poolMat.opacity = Math.min(0.32, k * 0.32 * d * (0.4 + 0.6 * d));
       rig.poolMat.color.setRGB(l.rgb[0], l.rgb[1], l.rgb[2]);
     } else {
       rig.pool.visible = false;
@@ -292,6 +349,8 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     uSpan: { value: number };
   } | null>(null);
   const discRef = useRef<THREE.Texture | null>(null);
+  /* the LED screens' materials, so paint can drive them with the frame colour */
+  const screensRef = useRef<THREE.MeshBasicMaterial[] | null>(null);
   const failedRef = useRef(false);
   const tearingDownRef = useRef(false);
   /* how many times we have rebuilt after losing a context, so it cannot spin */
@@ -368,8 +427,19 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     glRef.current = gl;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x05070c, 0.022);
+    scene.fog = new THREE.FogExp2(0x05070c, 0.026);   // a little more air for the beams to cut
     sceneRef.current = scene;
+
+    /* Two constant lights, ONLY so the solid hardware — fixtures, truss, deck —
+       has form to read. This is not the show: the beams and the room's own
+       ambient still carry that. It is a fixed cost regardless of fixture count,
+       unlike per-lamp point lights, which is what the note below rules out. The
+       set pieces use MeshStandardMaterial so these actually shade them; the
+       floor and walls stay on the ambient shader and keep reacting to the rig. */
+    scene.add(new THREE.HemisphereLight(0x5a6884, 0x0a0c12, 1.05));
+    const keyLight = new THREE.DirectionalLight(0x9fb0d0, 0.55);
+    keyLight.position.set(3, 10, 8);
+    scene.add(keyLight);
 
     const fixtures: Fixture[] = showRef.current?.fixtures ?? [];
     const room = roomOf(fixtures);
@@ -434,29 +504,88 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
       scene.add(g);
     }
 
-    /* the deck: a low riser upstage, so the rig is lighting something */
-    const stageD = Math.max(2.4, room.depth * 0.5);
-    const deck = new THREE.Mesh(
-      new THREE.BoxGeometry(room.width + 3, 0.6, stageD),
-      roomMaterial(0x0c1119),
-    );
-    deck.position.set(room.centreX, 0.3, room.minZ + stageD / 2 - 1.2);
-    const deckBox: Deck = {
-      top: 0.6,
-      minX: room.centreX - (room.width + 3) / 2,
-      maxX: room.centreX + (room.width + 3) / 2,
-      minZ: deck.position.z - stageD / 2,
-      maxZ: deck.position.z + stageD / 2,
-    };
-    deck.renderOrder = 3;
-    scene.add(deck);
+    /* ── the stage: a raised deck the rig is actually lighting ──────────────── */
+    const stage = deckOf(room);
+    const deckBox: Deck = stage;                 // StageDeck is a Deck; beams land on it
 
-    const deckLines = new THREE.LineSegments(
-      new THREE.EdgesGeometry(deck.geometry),
-      new THREE.LineBasicMaterial({ color: 0x38455f, transparent: true, opacity: 0.8 }),
-    );
-    deckLines.position.copy(deck.position);
-    scene.add(deckLines);
+    /* A raised deck only when the rig hangs in the air. A floor rig gets a flush
+       deck (height 0) — its fixtures stand on the ground plane, so the riser box,
+       its skirt and its front lip are skipped and the floor grid shows through. */
+    if (stage.height > 0.05) {
+      /* the deck top reacts to the show through the ambient shader, like the floor */
+      const deck = new THREE.Mesh(
+        new THREE.BoxGeometry(stage.width, stage.height, stage.depth),
+        roomMaterial(0x0c1119),
+      );
+      deck.position.set(stage.centreX, stage.height / 2, stage.centreZ);
+      deck.renderOrder = 3;
+      scene.add(deck);
+
+      /* a dark fascia skirt across the downstage face, so the deck reads as raised */
+      const skirt = new THREE.Mesh(
+        new THREE.PlaneGeometry(stage.width, stage.height),
+        new THREE.MeshStandardMaterial({ color: 0x05070b, roughness: 0.92, metalness: 0.08 }),
+      );
+      skirt.position.set(stage.centreX, stage.height / 2, stage.frontZ + 0.002);
+      scene.add(skirt);
+
+      /* a bright metal lip along the front edge of the stage */
+      const lip = new THREE.Mesh(
+        new THREE.BoxGeometry(stage.width, 0.05, 0.06),
+        new THREE.MeshStandardMaterial({ color: 0x51618a, roughness: 0.4, metalness: 0.75 }),
+      );
+      lip.position.set(stage.centreX, stage.height, stage.frontZ);
+      scene.add(lip);
+    }
+
+    /* ── the LED screens and DJ booth ─────────────────────────────────────────
+       Stage dressing for a built venue (raised deck): an upstage LED wall + two
+       side pillars, and a booth downstage-of-centre. A floor rig (the desk) is a
+       bare setup — just its fixtures on the ground — so all of this is skipped.
+       Screens are emissive (ignore scene lights) and paint() drives their colour
+       off the frame, throwing that colour across the stage through the bloom. */
+    const screenTexs: THREE.Texture[] = [];
+    const screenMats: THREE.MeshBasicMaterial[] = [];
+    if (stage.height > 0.05) {
+      const makeScreen = (sc: { x: number; y: number; z: number; w: number; h: number }) => {
+        const tex = ledGridTexture();
+        tex.repeat.set(Math.max(1, Math.round(sc.w * 7)), Math.max(1, Math.round(sc.h * 7)));
+        screenTexs.push(tex);
+        const mat = new THREE.MeshBasicMaterial({ map: tex, color: 0x0b0e16, toneMapped: false, fog: false });
+        const panel = new THREE.Mesh(new THREE.PlaneGeometry(sc.w, sc.h), mat);
+        panel.position.set(sc.x, sc.y, sc.z);
+        panel.renderOrder = 2;
+        scene.add(panel);
+        screenMats.push(mat);
+        /* a dark bezel just behind, so the panel reads as a screen in a frame */
+        const bezel = new THREE.Mesh(
+          new THREE.PlaneGeometry(sc.w + 0.22, sc.h + 0.22),
+          new THREE.MeshStandardMaterial({ color: 0x04050a, roughness: 0.8, metalness: 0.3 }),
+        );
+        bezel.position.set(sc.x, sc.y, sc.z - 0.05);
+        scene.add(bezel);
+      };
+      const screens = screensOf(room, stage);
+      makeScreen(screens.wall);
+      for (const p of screens.pillars) makeScreen(p);
+
+      /* the DJ booth, downstage-of-centre, facing the crowd */
+      const booth = boothOf(stage);
+      scene.add(new THREE.Mesh(
+        new THREE.BoxGeometry(booth.w, booth.h, booth.d),
+        new THREE.MeshStandardMaterial({ color: 0x0e1118, roughness: 0.7, metalness: 0.3 }),
+      ).translateX(booth.x).translateY(stage.top + booth.h / 2).translateZ(booth.z));
+      const boothFace = new THREE.Mesh(
+        new THREE.PlaneGeometry(booth.w * 0.92, booth.h * 0.44),
+        new THREE.MeshStandardMaterial({
+          color: 0x16233c, roughness: 0.5, metalness: 0.4,
+          emissive: 0x0b1a34, emissiveIntensity: 0.7,
+        }),
+      );
+      boothFace.position.set(booth.x, stage.top + booth.h * 0.58, booth.z + booth.d / 2 + 0.002);
+      scene.add(boothFace);
+    }
+    screensRef.current = screenMats;
 
     /* upstage wall and two returns, so beams aimed high land on something and
        the room has corners to read the perspective against */
@@ -473,46 +602,106 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
       scene.add(side);
     }
 
-    /* ── the steel ── */
-    const trussMat = new THREE.MeshBasicMaterial({ color: 0x39435a });
-    for (const bar of barsOf(fixtures)) {
-      if (bar.kind === "curve") {
-        /* An arch is one short box per consecutive pair, each turned onto its
-           own segment. A single x0..x1 box — all a straight bar needs — would
-           cut the chord and read as a girder through the middle of the arch. */
-        for (let i = 1; i < bar.points.length; i++) {
-          const a = bar.points[i - 1], b = bar.points[i];
-          const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
-          const segLen = Math.hypot(dx, dy, dz);
-          if (segLen < 1e-6) continue;
-          const seg = new THREE.Mesh(new THREE.BoxGeometry(segLen, 0.09, 0.09), trussMat);
-          seg.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
-          /* the box's long axis is +x, so rotate that onto the segment */
-          seg.quaternion.setFromUnitVectors(
-            new THREE.Vector3(1, 0, 0),
-            new THREE.Vector3(dx, dy, dz).normalize(),
-          );
-          scene.add(seg);
+    /* ── the steel: box-truss, goalpost towers, hanging motors ──────────────── */
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x3c424e, roughness: 0.45, metalness: 0.82 });
+    const motorMat = new THREE.MeshStandardMaterial({ color: 0x17181c, roughness: 0.6, metalness: 0.4 });
+    const TS = 0.26;                              // truss cross-section (square)
+    const CH = 0.04;                              // chord thickness
+
+    /* a curved truss (an arch) is one short box per consecutive pair of points,
+       each turned onto its own segment — a single x0..x1 box would cut the chord
+       and read as a girder through the middle of the arch */
+    const addCurve = (points: [number, number, number][]) => {
+      for (let i = 1; i < points.length; i++) {
+        const a = points[i - 1], b = points[i];
+        const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
+        const segLen = Math.hypot(dx, dy, dz);
+        if (segLen < 1e-6) continue;
+        const seg = new THREE.Mesh(new THREE.BoxGeometry(segLen, 0.1, 0.1), steelMat);
+        seg.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
+        seg.quaternion.setFromUnitVectors(
+          new THREE.Vector3(1, 0, 0),
+          new THREE.Vector3(dx, dy, dz).normalize(),
+        );
+        scene.add(seg);
+      }
+    };
+
+    /* a horizontal box-truss along x: four chords, with vertical and diagonal
+       webbing on the downstage face so it reads as lattice, not a solid beam */
+    const addHTruss = (x0: number, x1: number, y: number, z: number) => {
+      const len = x1 - x0 + 0.9;
+      const cx = (x0 + x1) / 2;
+      const chordGeo = new THREE.BoxGeometry(len, CH, CH);
+      for (const dy of [TS / 2, -TS / 2]) for (const dz of [TS / 2, -TS / 2]) {
+        const c = new THREE.Mesh(chordGeo, steelMat);
+        c.position.set(cx, y + dy, z + dz);
+        scene.add(c);
+      }
+      const bays = Math.max(2, Math.round(len / 0.7));
+      const bay = len / bays;
+      const vGeo = new THREE.BoxGeometry(0.026, TS, 0.026);
+      const dGeo = new THREE.BoxGeometry(0.022, Math.hypot(bay, TS), 0.022);
+      const ang = Math.atan2(bay, TS);
+      for (let i = 0; i <= bays; i++) {
+        const px = x0 - 0.45 + bay * i;
+        const v = new THREE.Mesh(vGeo, steelMat);
+        v.position.set(px, y, z + TS / 2);
+        scene.add(v);
+        if (i < bays) {
+          const d = new THREE.Mesh(dGeo, steelMat);
+          d.position.set(px + bay / 2, y, z + TS / 2);
+          d.rotation.z = i % 2 ? ang : -ang;
+          scene.add(d);
         }
-        continue;
       }
-      const len = bar.x1 - bar.x0 + 0.9;
-      const chord = new THREE.Mesh(new THREE.BoxGeometry(len, 0.07, 0.07), trussMat);
-      /* two chords and a gap reads as truss; one bar reads as wire */
-      for (const dy of [0.16, -0.16]) {
-        const c = chord.clone();
-        c.position.set((bar.x0 + bar.x1) / 2, bar.y + dy, bar.z);
+    };
+
+    /* a vertical goalpost tower from the floor to the truss, with a base plate */
+    const addTower = (x: number, z: number, yTop: number) => {
+      const chordGeo = new THREE.BoxGeometry(CH, yTop, CH);
+      for (const dx of [TS / 2, -TS / 2]) for (const dz of [TS / 2, -TS / 2]) {
+        const c = new THREE.Mesh(chordGeo, steelMat);
+        c.position.set(x + dx, yTop / 2, z + dz);
         scene.add(c);
       }
-      for (const dz of [0.13, -0.13]) {
-        const c = chord.clone();
-        c.position.set((bar.x0 + bar.x1) / 2, bar.y + 0.16, bar.z + dz);
-        scene.add(c);
+      const bays = Math.max(2, Math.round(yTop / 0.95));
+      const rGeo = new THREE.BoxGeometry(TS, 0.024, 0.024);
+      for (let i = 0; i <= bays; i++) {
+        const py = (yTop * i) / bays;
+        const rf = new THREE.Mesh(rGeo, steelMat);
+        rf.position.set(x, py, z + TS / 2);
+        scene.add(rf);
+        const rs = new THREE.Mesh(rGeo, steelMat);
+        rs.rotation.y = Math.PI / 2;
+        rs.position.set(x + TS / 2, py, z);
+        scene.add(rs);
       }
+      const plate = new THREE.Mesh(new THREE.BoxGeometry(TS * 1.9, 0.08, TS * 1.9), steelMat);
+      plate.position.set(x, 0.04, z);
+      scene.add(plate);
+    };
+
+    /* a chain hoist where a bar meets its tower */
+    const addMotor = (x: number, y: number, z: number) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.22, 0.16), motorMat);
+      m.position.set(x, y + TS / 2 + 0.12, z);
+      scene.add(m);
+    };
+
+    const bars = barsOf(fixtures);
+    for (const bar of bars) {
+      if (bar.kind === "curve") { addCurve(bar.points); continue; }   // arches are self-standing
+      if (bar.y < 1) continue;   // a floor rig stands on the deck — no overhead truss or stand
+      addHTruss(bar.x0, bar.x1, bar.y, bar.z);
+      addMotor(bar.x0, bar.y, bar.z);
+      addMotor(bar.x1, bar.y, bar.z);
     }
+    /* goalpost towers only under straight overhead trusses, not arches or floor rigs */
+    for (const t of towersOf(bars.filter((b) => b.kind !== "curve" && b.y > 1))) addTower(t.x, t.z, t.yTop);
 
     /* ── one rig entry per fixture ── */
-    const bodyMat = new THREE.MeshBasicMaterial({ color: 0x1d2432 });
+    const fmats = fixtureMaterials();
     const rigs: Rig[] = [];
     const maxThrow = Math.max(14, room.depth + room.maxY + 12);
 
@@ -521,12 +710,23 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
       const world = worldOf(f.at);
       const body = bodyOf(f.type);
 
-      const yoke = new THREE.Mesh(
-        new THREE.CylinderGeometry(body.radius, body.radius * 0.86, body.length, 12),
-        bodyMat,
-      );
-      yoke.position.set(world[0], world[1], world[2]);
-      scene.add(yoke);
+      /* a fixture below a metre is standing on the deck (a floor uplighter or a
+         head on a base) rather than hung — it gets the deck-standing geometry */
+      const onFloor = world[1] < 1;
+      const fm = buildFixture(f.type, fmats, onFloor);
+      fm.group.position.set(world[0], world[1], world[2]);
+      if (!moves(f.type) && !onFloor) {
+        /* a hung static body is turned to how it was hung — a par points down and
+           a bit downstage, a blinder faces the crowd; the geometry's own emit axis
+           (its lens vector) is rotated onto that aim. A floor uplighter is already
+           built pointing up, so it is left as is. */
+        const aim = staticAim(prof.kind, world[1]);
+        const def = fm.lens.clone().normalize();
+        if (def.lengthSq() > 1e-6) {
+          fm.group.quaternion.setFromUnitVectors(def, new THREE.Vector3(aim[0], aim[1], aim[2]));
+        }
+      }
+      scene.add(fm.group);
 
       /* The cone is built apex-at-origin pointing down -Y, then turned to face
          wherever the lamp is aimed. Building it open-ended matters: a capped
@@ -541,7 +741,9 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
           uIntensity: { value: 0 },
           uLength: { value: 1 },
           uSoft: { value: prof.kind === "spot" || prof.kind === "laser" ? 0 : 1 },
-          uFogDensity: { value: 0.018 },
+          /* more haze than before, so a long throw or a distant view loses
+             strength instead of reading at full brightness across the room */
+          uFogDensity: { value: 0.03 },
           uAxis: { value: new THREE.Vector3(0, -1, 0) },
         },
         vertexShader: BEAM_VERT,
@@ -563,7 +765,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
         blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0,
       });
       const lens = new THREE.Sprite(lensMat);
-      lens.scale.setScalar(body.radius * 4.5);
+      lens.scale.setScalar(body.radius * 2.8);
       lens.position.set(world[0], world[1], world[2]);
       lens.renderOrder = 6;
       scene.add(lens);
@@ -603,6 +805,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
 
       rigs.push({
         lamp: { id: f.id, type: f.type, kind: prof.kind, world },
+        yoke: fm.yoke, head: fm.head, floorHead: onFloor && moves(f.type),
         beam, beamMat, lens, lensMat, pool, poolMat, cells, maxThrow, deck: deckBox,
       });
     }
@@ -640,9 +843,9 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     composer.addPass(new RenderPass(scene, cam));
     const bloom = new UnrealBloomPass(
       new THREE.Vector2(1, 1),
-      0.45,      // strength — enough to bleed, not enough to fog the room
-      0.5,       // radius
-      0.75,      // threshold: only pixels already hot bloom at all
+      0.16,      // strength — a restrained glow, not a halo that smears the room together
+      0.4,       // radius — tighter, so the bloom hugs the source instead of spreading
+      0.85,      // threshold: only genuinely hot pixels bloom at all
     );
     composer.addPass(bloom);
     composerRef.current = composer;
@@ -684,14 +887,19 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
       controls.removeEventListener("change", onControls);
       controls.dispose();
       controlsRef.current = null;
+      const disposedMats = new Set<THREE.Material>();
       scene.traverse((o) => {
         const m = o as THREE.Mesh;
-        if (m.geometry) m.geometry.dispose();
+        /* shared fixture geometry is cached across mounts — leave it alone */
+        if (m.geometry && !m.geometry.userData?.shared) m.geometry.dispose();
         const mat = (m as unknown as { material?: THREE.Material | THREE.Material[] }).material;
-        if (Array.isArray(mat)) mat.forEach((x) => x.dispose());
-        else mat?.dispose();
+        const one = (x: THREE.Material) => { if (!disposedMats.has(x)) { disposedMats.add(x); x.dispose(); } };
+        if (Array.isArray(mat)) mat.forEach(one);
+        else if (mat) one(mat);
       });
       disc.dispose();
+      for (const t of screenTexs) t.dispose();
+      screensRef.current = null;
       /* EffectComposer.dispose() frees its own two targets and nothing its
          passes own; UnrealBloomPass holds eleven more. */
       bloom.dispose();
@@ -743,6 +951,8 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
          the same edge case. */
       const dark = roomUniformsRef.current;
       if (dark) dark.uAmbient.value = 0;
+      const sdark = screensRef.current;
+      if (sdark) for (const m of sdark) m.color.setRGB(0.02, 0.02, 0.03);
       if (floodRef.current) floodRef.current.style.opacity = "0";
       for (const rig of rigsRef.current) blankRig(rig);
       draw();
@@ -764,6 +974,24 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     if (roomU) {
       roomU.uAmbient.value = roomAmbient(fl);
       roomU.uTint.value.setRGB(fl.tint[0], fl.tint[1], fl.tint[2]);
+    }
+
+    /* the LED screens run the show's colour and energy: a faint idle glow plus
+       the frame's output, tinted by the rig's colour. Bloom carries that glow
+       out across the stage, which is what makes a video wall feel like light. */
+    const screenMatsNow = screensRef.current;
+    if (screenMatsNow) {
+      /* The wall is a big emissive surface, so even at half brightness it is the
+         single largest light in frame and washes the room — most of all when the
+         show colour is white. Held to a low ceiling it reads as a moody glowing
+         backdrop that colours the stage instead of a white lightbox. The dark
+         pixel gutters in the texture drop the effective level further still. */
+      const b = 0.03 + Math.min(0.4, fl.output * 0.6);
+      for (const m of screenMatsNow) m.color.setRGB(
+        Math.min(0.5, fl.tint[0] * b + 0.012),
+        Math.min(0.5, fl.tint[1] * b + 0.012),
+        Math.min(0.52, fl.tint[2] * b + 0.016),
+      );
     }
 
     /* A BLINDER TAKES THE ROOM OVER. The beam shader deliberately knocks a cone
