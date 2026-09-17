@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { usePortalStore } from "@/store/portal";
 import { Sheet } from "@/components/ui/Sheet";
 import { Input } from "@/components/ui/Input";
+import { MediaCard, CardTag } from "@/components/ui/MediaCard";
 import { RigPreview } from "./RigPreview";
 import { rigSummary } from "@/lib/profiles";
 import * as api from "@/lib/api";
-import type { Venue } from "@/lib/types";
+import type { Venue, Layout } from "@/lib/types";
 
 interface VenuePickerProps {
   open: boolean;
@@ -16,19 +17,18 @@ interface VenuePickerProps {
 }
 
 /**
- * The thing being chosen here is a RIG, not a room.
+ * Visual venue/rig picker.
  *
- * The list used to name venues and their layouts and nothing else, so a room
- * reconfigured twice offered two pills reading "Main stage (placeholder rig)"
- * with nothing to tell them apart, and the one number that matters — what is
- * actually hanging — only appeared on the target line AFTER the choice was
- * made. Every layout now carries its own rig line, and the one already being
- * designed for says so.
+ * Shows the same card the Venues page draws — live rig preview, title, channel
+ * count, rig summary, layout pills — inside a Sheet. The creator picks by
+ * sight rather than by reading channel numbers. Delegates every card to
+ * MediaCard so spacing, hover states and elevation track the design system
+ * automatically. Uses the project's `card-grid` class for consistent column
+ * sizing and gap.
  */
 export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
   const rooms = usePortalStore((s) => s.rooms);
   const setRooms = usePortalStore((s) => s.setRooms);
-  /* the whole catalogue of rigs, loaded once by the portal layout */
   const layouts = usePortalStore((s) => s.layouts);
   const room = usePortalStore((s) => s.room);
   const show = usePortalStore((s) => s.show);
@@ -37,10 +37,12 @@ export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
   useEffect(() => {
     if (!open) return;
     if (rooms.length) return;
-    api.venues.search("").then((d) => setRooms(d.venues)).catch(() => {});
+    api.venues
+      .search("")
+      .then((d) => setRooms(d.venues))
+      .catch(() => {});
   }, [open, rooms.length, setRooms]);
 
-  /* which rig the editor is on right now, so the list can say "you are here" */
   const liveFile = show?.layout || room?.layout;
 
   const filtered = rooms.filter((v) =>
@@ -48,7 +50,7 @@ export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
   );
 
   return (
-    <Sheet open={open} onClose={onClose}>
+    <Sheet open={open} onClose={onClose} wide>
       <div className="flex-none px-[22px] pt-[20px] pb-[14px]">
         <h2 className="text-[19px] font-semibold tracking-[-0.02em] m-0 text-ink leading-[1.2]">
           Design for
@@ -64,94 +66,153 @@ export function VenuePicker({ open, onClose, onPick }: VenuePickerProps) {
           autoFocus
         />
       </div>
-      {/* No second height cap here: the sheet already stops at 80vh, and a list
-          capped at 60vh inside it threw away a fifth of the screen and hid the
-          last venue below a fold with nothing to say it was there. */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        {filtered.map((v) => (
-          <div
-            key={v.id}
-            className={`px-[22px] py-[14px] border-b border-solid border-[var(--edge)] ${
-              v.locked ? "opacity-60" : ""
-            }`}
-          >
-            <div className="flex items-baseline gap-[var(--spacing-s2)]">
-              <b className="text-[14px] font-semibold tracking-[-0.012em] text-ink">{v.name}</b>
-              {v.locked && (
-                <span className="liquid-well px-[7px] py-[2px] rounded-full text-[10.5px] text-warn leading-[15px]">Locked</span>
-              )}
-            </div>
 
-            <div className="flex flex-col gap-[var(--spacing-s1)] mt-[var(--spacing-s2)]">
-              {v.layouts.map((l) => {
-                const rig = layouts.find((x) => x.file === l.file);
-                /* a rig is only "the one you are on" inside the venue you are
-                   on: two venues may list the same layout file */
-                const live = v.id === room?.id && l.file === liveFile;
-                return (
-                  <button
-                    key={l.file}
-                    type="button"
-                    disabled={v.locked}
-                    aria-current={live ? "true" : undefined}
-                    onClick={() => {
-                      if (!v.locked) onPick(v, l.file);
-                    }}
-                    className={`w-full text-left px-[11px] py-[9px] rounded-[var(--radius-sm)] text-ink border-0 transition-colors duration-[var(--dur-state)] ${
-                      v.locked
-                        ? "cursor-default opacity-55"
-                        : live
-                          ? "liquid liquid-key cursor-pointer"
-                          : "cursor-pointer hover:bg-white/[0.045]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-[10px]">
-                    <RigPreview
-                      fixtures={rig?.fixture_list ?? []}
-                      dimmed={v.locked}
-                      className="w-[58px] h-[34px] rounded-[4px] flex-none"
-                    />
-                    <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline gap-[var(--spacing-s2)]">
-                      <span className="text-[13px] font-medium">{l.name}</span>
-                      {live && (
-                        <span className="text-[10.5px] text-ink-dim">
-                          Designing for
-                        </span>
-                      )}
-                      <span className="flex-1" />
-                      {(l.placeholder || rig?.placeholder) && (
-                        <span className="flex-none text-[10.5px] text-warn">
-                          stand-in rig
-                        </span>
-                      )}
-                      {rig && (
-                        <span className="mono flex-none text-[10.5px] text-ink-dimmer tabular-nums">
-                          {rig.fixtures} fixtures · {rig.channels} channels
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[11.5px] text-ink-dim tabular-nums mt-[3px]">
-                      {rig ? rigSummary(rig.kinds) : "Rig unavailable"}
-                    </div>
-                    </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {v.locked && (
-              <span className="text-[11.5px] text-warn mt-[8px] block leading-[1.5]">
-                {v.locked_because || "locked"}
-              </span>
-            )}
+      <div className="flex-1 min-h-0 overflow-y-auto px-[22px] pb-[22px]">
+        {filtered.length > 0 && (
+          <div className="card-grid pt-[4px]">
+            {filtered.map((v, i) => (
+              <div
+                key={v.id}
+                className="animate-in h-full"
+                style={{ animationDelay: `${Math.min(i * 40, 320)}ms` }}
+              >
+                <PickerCard
+                  venue={v}
+                  layouts={layouts}
+                  liveFile={liveFile}
+                  isLiveVenue={v.id === room?.id}
+                  onPick={onPick}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+        )}
+
         {!filtered.length && (
-          <div className="text-[13px] text-ink-dim text-center py-[40px]">No rooms match that search.</div>
+          <div className="flex flex-col items-center justify-center py-[76px]">
+            <p className="text-[15px] font-semibold text-ink m-0">
+              No rooms match &ldquo;{q}&rdquo;
+            </p>
+            <p className="text-[13px] text-ink-dim mt-[6px] m-0">
+              Try a different name.
+            </p>
+            <button
+              type="button"
+              onClick={() => setQ("")}
+              className="mt-[14px] text-[13px] text-ink border-0 bg-transparent cursor-pointer hover:underline font-medium p-0"
+            >
+              Clear search
+            </button>
+          </div>
         )}
       </div>
     </Sheet>
+  );
+}
+
+/* ── one card inside the picker ──────────────────────────────────────────── */
+
+function PickerCard({
+  venue,
+  layouts,
+  liveFile,
+  isLiveVenue,
+  onPick,
+}: {
+  venue: Venue;
+  layouts: Layout[];
+  liveFile: string | undefined;
+  isLiveVenue: boolean;
+  onPick: (venue: Venue, layout: string) => void;
+}) {
+  const [chosen, setChosen] = useState(venue.default);
+  const locked = venue.locked;
+  const rig = layouts.find((l) => l.file === chosen);
+  const live = isLiveVenue && chosen === liveFile;
+  const many = venue.layouts.length > 1;
+
+  return (
+    <MediaCard
+      title={venue.name}
+      hint={
+        locked
+          ? (venue.locked_because ?? "This rig is not open to you")
+          : `Design for ${venue.name}`
+      }
+      disabled={locked}
+      onOpen={() => onPick(venue, chosen)}
+      media={
+        <>
+          <RigPreview
+            fixtures={rig?.fixture_list ?? []}
+            dimmed={locked}
+            className="absolute inset-0"
+          />
+          {venue.logo_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`${api.BASE}${venue.logo_url}`}
+              alt=""
+              className="absolute left-[10px] top-[10px] h-[16px] w-auto max-w-[70px] object-contain opacity-75"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).style.display = "none";
+              }}
+            />
+          )}
+        </>
+      }
+      overlay={
+        live ? (
+          <span
+            className="absolute top-[8px] right-[8px] px-[8px] py-[3px] rounded-full text-[10.5px] font-medium leading-[15px]"
+            style={{
+              background: "rgba(236,238,246,0.12)",
+              backdropFilter: "blur(8px)",
+              color: "var(--accent)",
+            }}
+          >
+            Designing for
+          </span>
+        ) : undefined
+      }
+      meta={
+        rig
+          ? `${rig.fixtures} fixtures · ${rig.channels} channels`
+          : "Rig unavailable"
+      }
+      body={rig ? rigSummary(rig.kinds) : undefined}
+      tags={
+        <>
+          {locked && <CardTag tone="warn">Locked</CardTag>}
+          {many ? (
+            venue.layouts.map((l) => (
+              <CardTag
+                key={l.file}
+                on={l.file === chosen}
+                onClick={() => setChosen(l.file)}
+                hint={`Preview the ${l.name} rig`}
+              >
+                {l.name}
+              </CardTag>
+            ))
+          ) : (
+            <CardTag>{venue.layouts[0]?.name ?? "—"}</CardTag>
+          )}
+          {(rig?.placeholder || venue.rig_placeholder) && (
+            <CardTag
+              tone="warn"
+              hint="The channel map behind this rig is invented. Every other device here was read from a real fixture definition."
+            >
+              Stand-in rig
+            </CardTag>
+          )}
+        </>
+      }
+      footer={
+        locked
+          ? "Access is granted by the venue"
+          : `${venue.layouts.length} rig${venue.layouts.length === 1 ? "" : "s"}`
+      }
+    />
   );
 }

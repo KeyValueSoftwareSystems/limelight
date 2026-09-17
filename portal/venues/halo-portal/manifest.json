@@ -1,0 +1,26 @@
+{
+ "rig": "halo-portal",
+ "layout_file": "halo-portal.layout.json",
+ "total_channels": 490,
+ "fixtures": {
+  "pars": 24,
+  "pixelbars": 4,
+  "spots": 6,
+  "washes": 6,
+  "blinders": 6,
+  "strobes": 2,
+  "lasers": 2
+ },
+ "supported_effects": [
+  "accent", "anticipation", "beam", "blackout", "bounce", "breakdown",
+  "chase", "cut", "drive", "drone", "follow", "gear", "glare", "hush",
+  "impact", "isolate", "lift", "pulse", "ramp", "ripple", "spin", "split",
+  "stab", "strip", "strobe", "swell", "trade", "wash"
+ ],
+ "unsupported_effects": [],
+ "limits": {
+  "isolate_min_fixtures": 3,
+  "note": "All 28 catalogue effects are supported. 24 arch pars clears the isolate threshold."
+ },
+ "note": "DMX functions for the Halo portal rig. helpers.js READS halo-portal.layout.json and the driver profiles at load; no rig fact is transcribed here or there."
+}

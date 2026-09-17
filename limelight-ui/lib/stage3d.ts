@@ -26,6 +26,7 @@
 import type { Fixture, LampState } from "./types";
 import { DEG } from "./dmx.ts";
 import { profileOf, moves } from "./profiles.ts";
+import { groupStructures } from "./structures.ts";
 
 export type Vec3 = [number, number, number];
 
@@ -182,6 +183,10 @@ export function cameraOf(room: RoomBounds, aspect: number): { position: Vec3; ta
 /* ── trusses ─────────────────────────────────────────────────────────────── */
 
 export interface Bar {
+  /** "bar" is a straight run; "curve" follows every point, which is what an arch needs */
+  kind: "bar" | "curve";
+  /** every member's world position, ordered left to right */
+  points: Vec3[];
   y: number;
   z: number;
   x0: number;
@@ -191,29 +196,27 @@ export interface Bar {
 }
 
 /**
- * The steel. Fixtures sharing a height and a depth are on one bar; a pair that
- * shares only x and z is a vertical tower. Drawing the structure is most of
- * what stops a rig looking like lamps floating in a void.
+ * The steel, in world metres.
+ *
+ * Which fixtures form one structure is NOT decided here — lib/structures.ts owns
+ * that, and the flat renderer reads the same answer through placeFixtures. The
+ * two views each worked out their own version of a shared number once before,
+ * in lib/exposure.ts's territory, and drifted; this is that lesson applied to
+ * geometry. An arch's members vary in height, so the old height-and-depth key
+ * could never have found them.
  */
 export function barsOf(fixtures: Fixture[]): Bar[] {
-  const groups = new Map<string, Vec3[]>();
-  for (const f of fixtures) {
-    const w = worldOf(f.at);
-    const key = `${w[1].toFixed(2)}:${w[2].toFixed(2)}`;
-    const g = groups.get(key);
-    if (g) g.push(w); else groups.set(key, [w]);
-  }
-  const bars: Bar[] = [];
-  for (const g of groups.values()) {
-    if (g.length < 2) continue;
-    const xs = g.map((v) => v[0]);
-    bars.push({
-      y: g[0][1], z: g[0][2],
+  return groupStructures(fixtures).map((g) => {
+    const points = g.members.map((i) => worldOf(fixtures[i].at));
+    const xs = points.map((v) => v[0]);
+    return {
+      kind: g.kind,
+      points,
+      y: points[0][1], z: points[0][2],
       x0: Math.min(...xs), x1: Math.max(...xs),
       vertical: false,
-    });
-  }
-  return bars;
+    };
+  });
 }
 
 /* ── how big a lamp body is ──────────────────────────────────────────────── */
