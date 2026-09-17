@@ -403,7 +403,15 @@ check lit share as well before concluding a lamp is unused.
 
 `portal/cue/faults.py <song> <lights.json>` walks every second and reports named
 defects: `lead-churn`, `blip`, `ping-pong`, `colour-flipflop`, `flicker-out`,
-`lamp-idle`, `head-jitter`, `dark-on-loud`, `bright-on-silence`, `pinned`.
+`lamp-idle`, `head-jitter`, `dark-on-loud`, `bright-on-silence`, `pinned`,
+`blank-over-music`.
+
+`blank-over-music` was added after a regression shipped: the cue-spacing pass
+dropped the opening phrase cue in favour of a hole blackout, and that hole had
+no prior lit cue to restore, so raga opened **7.2 seconds black over playing
+music** and every existing check passed it. Loudness there is judged against the
+song's MEDIAN, not its max — an intro at 10% of a loud chorus is still clearly
+audible, and comparing to the max is why the opener logic missed it too.
 
 **All seven songs currently scan at zero.** Keep it that way: bake, scan, and
 only then look at anything else.

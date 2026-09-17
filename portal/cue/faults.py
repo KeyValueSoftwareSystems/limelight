@@ -183,6 +183,26 @@ def scan(song, lights):
         else:
             i += 1
 
+    temporal0 = sc.get("stems_temporal") or {}
+    win0 = temporal0.get("window_s", 0.5)
+    lanes0 = temporal0.get("stems", {})
+    nw = max((len(v) for v in lanes0.values()), default=0)
+    tot0 = [sum((v[w] if w < len(v) else 0) for v in lanes0.values()) for w in range(nw)]
+    med0 = st.median([x for x in tot0 if x > 0]) if any(tot0) else 1.0
+    loud_windows = [x / (med0 or 1) for x in tot0]
+    run = 0
+    for i in range(n):
+        if rig[i] < 4:
+            run += 1
+        else:
+            if run / fps > 3.0:
+                w0 = int(((i - run) / fps) / win0)
+                seg = loud_windows[w0:max(w0 + 1, int((i / fps) / win0))]
+                if seg and max(seg) > 0.25:
+                    add((i - run) / fps, "blank-over-music",
+                        "the room is dark for %.1fs while the music is playing" % (run / fps))
+            run = 0
+
     lengths = {}
     for k in range(len(OFF)):
         run = 0
@@ -228,6 +248,8 @@ def scan(song, lights):
 
     beats = [b["t"] for b in sc.get("beats", [])]
     length = sc["song"]["length_s"]
+    loud_pre = None
+    loud_windows = []
     temporal = sc.get("stems_temporal") or {}
     win = temporal.get("window_s", 0.5)
     lanes = temporal.get("stems", {})

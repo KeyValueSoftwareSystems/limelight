@@ -27,6 +27,29 @@
    "why": "the audio falls to 20% of its median for 0.28s - a real hole, so the room goes with it"
   },
   {
+   "id": 1,
+   "at": {
+    "second": 4.783
+   },
+   "fade": 0.06,
+   "why": "and back, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.25
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "comet",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.4,
+    "move_head": true
+   }
+  },
+  {
    "id": 0,
    "at": {
     "second": 7.5

@@ -27,6 +27,38 @@
    "why": "the audio falls to 18% of its median for 0.35s - a real hole, so the room goes with it"
   },
   {
+   "id": 1,
+   "at": {
+    "second": 1.672
+   },
+   "fade": 0.06,
+   "why": "and back, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "amber",
+     "l": 0.24
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pitch",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
+  },
+  {
    "id": 2,
    "at": {
     "bar": 3
@@ -168,7 +200,7 @@
    "why": "bars 11-14, the phrase closes down: strings leads, E 10.09, 2 hits, mode +0.32 - pitch in oxblood against scarlet inside",
    "look": {
     "outer": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.37
     },
     "inner": {
@@ -205,7 +237,7 @@
    "why": "bars 11-14, the phrase closes down: brass leads, E 5.01, 0 hits, mode +0.77 - pairs in saffron",
    "look": {
     "lamps": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.3
     },
     "heads": {
@@ -239,7 +271,7 @@
    "why": "the audio falls to 15% of its median for 0.46s - a real hole, so the room goes with it"
   },
   {
-   "id": 4,
+   "id": 1,
    "at": {
     "second": 33.599
    },
@@ -247,24 +279,28 @@
    "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
-     "c": "oxblood",
-     "l": 0.34
+     "c": "violet",
+     "l": 0.24
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.45,
-    "move_head": true
-   },
-   "swell": {
-    "from": 0.62,
-    "to": 0.655,
-    "curve": 1.15
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pitch",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 10,
@@ -275,7 +311,7 @@
    "why": "bars 15-18, the phrase opens out: guitars leads, E 7.58, 10 hits, mode +0.14 - alternate in oxblood against violet inside",
    "look": {
     "outer": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.4
     },
     "inner": {
@@ -316,7 +352,7 @@
    "why": "bars 19-22, the phrase opens out: guitars leads, E 7.01, 6 hits, mode -0.26 - alternate in oxblood against violet inside",
    "look": {
     "outer": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.4
     },
     "inner": {
@@ -356,7 +392,7 @@
    "fade": 0.12,
    "look": {
     "lamps": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.38
     }
    },
@@ -384,7 +420,7 @@
    "why": "bars 19-22, the phrase opens out: guitars leads, E 8.94, 9 hits, mode -0.62 - alternate in oxblood",
    "look": {
     "lamps": {
-     "c": "oxblood",
+     "c": "violet",
      "l": 0.47
     },
     "heads": {
@@ -422,7 +458,7 @@
    "why": "the audio falls to 9% of its median for 0.56s - a real hole, so the room goes with it"
   },
   {
-   "id": 4,
+   "id": 1,
    "at": {
     "second": 48.437
    },
@@ -431,23 +467,27 @@
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.34
+     "l": 0.24
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.45,
-    "move_head": true
-   },
-   "swell": {
-    "from": 0.62,
-    "to": 0.655,
-    "curve": 1.15
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pitch",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 0,
@@ -939,7 +979,7 @@
    "look": {}
   },
   {
-   "id": 4,
+   "id": 1,
    "at": {
     "second": 111.99
    },
@@ -947,24 +987,28 @@
    "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
-     "c": "amber",
-     "l": 0.34
+     "c": "violet",
+     "l": 0.24
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.45,
-    "move_head": true
-   },
-   "swell": {
-    "from": 0.62,
-    "to": 0.655,
-    "curve": 1.15
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pitch",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 0,
@@ -976,7 +1020,7 @@
    "why": "the audio falls to 1% of its median for 0.84s - a real hole, so the room goes with it"
   },
   {
-   "id": 4,
+   "id": 1,
    "at": {
     "second": 113.546
    },
@@ -984,24 +1028,28 @@
    "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
-     "c": "amber",
-     "l": 0.34
+     "c": "violet",
+     "l": 0.24
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.45,
-    "move_head": true
-   },
-   "swell": {
-    "from": 0.62,
-    "to": 0.655,
-    "curve": 1.15
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pitch",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   },
   {
    "id": 33,
@@ -1012,7 +1060,7 @@
    "why": "bars 57-60, the phrase opens out: guitars leads, E 6.44, 3 hits, mode +0.55 - pitch in scarlet",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "violet",
      "l": 0.29
     },
     "heads": {
@@ -1104,7 +1152,7 @@
    "why": "rhythm_change at 126.7s - the figure changes with the music",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "violet",
      "l": 0.16
     }
    },
@@ -1136,11 +1184,11 @@
    "why": "bars 63-63, the phrase travels across: voices leads, E 0.00, 0 hits, mode +0.84 - hocket in oxblood",
    "look": {
     "lamps": {
-     "c": "amber",
+     "c": "violet",
      "l": 0.05
     },
     "heads": {
-     "c": "amber",
+     "c": "violet",
      "l": 0.03,
      "pan": 0.5,
      "tilt": 0.42
@@ -1160,7 +1208,7 @@
    ]
   },
   {
-   "id": 4,
+   "id": 1,
    "at": {
     "second": 131.286
    },
@@ -1168,24 +1216,28 @@
    "why": "and back, the instant the audio returns",
    "look": {
     "lamps": {
-     "c": "oxblood",
-     "l": 0.34
+     "c": "violet",
+     "l": 0.24
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.17,
+     "pan": 0.5,
+     "tilt": 0.35
     }
    },
-   "chase": {
-    "on": "lamps",
-    "figure": "handover",
-    "every": {
-     "hits": 1
-    },
-    "low": 0.45,
-    "move_head": true
-   },
-   "swell": {
-    "from": 0.62,
-    "to": 0.655,
-    "curve": 1.15
-   }
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pitch",
+     "every": {
+      "notes": 1
+     },
+     "fill_beats": 1,
+     "low": 0.22,
+     "move_head": false
+    }
+   ]
   }
  ],
  "accents": [

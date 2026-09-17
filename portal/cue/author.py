@@ -841,6 +841,10 @@ def author(song, out_path=None):
         if a < 0.4:
             continue
         prior = [c for c in cues if c.get("_t", 0) <= a + 1e-6 and c.get("look")]
+        if not prior:
+            later = [c for c in cues if c.get("_t", 0) > b - 1e-6 and c.get("look")]
+            if later:
+                prior = [later[0]]
         cues.append({"id": 0, "at": {"second": round(a, 3)}, "_t": a, "fade": 0.0,
                      "look": {},
                      "why": "the audio falls to %d%% of its median for %.2fs - a real hole, so the room goes with it"
@@ -927,7 +931,9 @@ def author(song, out_path=None):
         if c.get("_t", 0) - last.get("_t", 0) >= MIN_GAP:
             kept.append(c)
             continue
-        if rank(c) > rank(last):
+        if not last.get("look") and c.get("look"):
+            kept.append(c)
+        elif rank(c) > rank(last):
             kept[-1] = c
         elif rank(c) == rank(last) == 5:
             kept.append(c)
