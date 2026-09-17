@@ -47,7 +47,23 @@ module.exports = function beam(params, ctx) {
     let pan, tilt;
     /* how close are we to an accent? 1 on it, falling to 0 over a third of a beat */
     const hit = accents.reduce((m, a) => { const d = beatInBar + 1 - a; return (d >= 0 && d < 0.34) ? Math.max(m, 1 - d / 0.34) : m; }, 0);
-    if (pattern === "glide") {
+    if (pattern === "swing") {
+      /* a repeating, bar-aware figure: the head swings from `pan` to `pan_to` and
+         back once every `swing_beats` beats (default 4: out over beats 1-2, back
+         over 3-4, reversing ON beats 1 and 3), and its tilt nods INTO every beat --
+         rising over the last `nod_lead` of the beat, dropping on it -- the same
+         lean the pars have. Anchored to the bar, so it repeats identically every
+         bar and never drifts. Speeds stay under the fixture's turning limit. */
+      const p0 = params.pan != null ? params.pan : 0.20, p1 = params.pan_to != null ? params.pan_to : 0.80;
+      const t0 = params.tilt != null ? params.tilt : 0.45;
+      const period = params.swing_beats != null ? Math.max(1, Number(params.swing_beats)) : 4;
+      const nod = params.nod != null ? Number(params.nod) : 0.08;
+      const nodLead = params.nod_lead != null ? Math.max(0.05, Math.min(0.5, Number(params.nod_lead))) : 0.25;
+      const u = (beatInBar % period) / period;
+      const pos = u < 0.5 ? u * 2 : 2 - u * 2;
+      const shape = bphase >= 1 - nodLead ? (bphase - (1 - nodLead)) / nodLead : Math.max(0, 1 - bphase / 0.3);
+      pan = p0 + (p1 - p0) * pos; tilt = t0 + nod * shape;
+    } else if (pattern === "glide") {
       /* one continuous, even move from (pan, tilt) to (pan_to, tilt_to) across the
          WHOLE cue. Its
          speed is therefore set by the cue's length -- by the music -- and a glide

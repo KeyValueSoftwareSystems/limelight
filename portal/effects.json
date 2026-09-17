@@ -260,6 +260,33 @@
     },
     "every_beats": {
      "default": 1
+    },
+    "pop": {
+     "default": true
+    },
+    "flash_every": {
+     "default": 1
+    },
+    "flash_bar": {
+     "default": 0
+    },
+    "decay": {
+     "default": 0.55
+    },
+    "punch": {
+     "default": 0.45
+    },
+    "pairs": {
+     "default": true
+    },
+    "flash_len": {
+     "default": 0.15
+    },
+    "split": {
+     "default": "pairs"
+    },
+    "lean": {
+     "default": 0
     }
    },
    "fires_on": [
@@ -1096,6 +1123,15 @@
     },
     "tilt_to": {
      "default": null
+    },
+    "swing_beats": {
+     "default": 4
+    },
+    "nod": {
+     "default": 0.08
+    },
+    "nod_lead": {
+     "default": 0.25
     }
    },
    "fires_on": [

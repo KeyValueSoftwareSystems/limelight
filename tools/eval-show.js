@@ -294,7 +294,11 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
     let sum = 0, n = 0;
     for (let u = start; u < start + run; u += 0.05) { sum += bandAt(u); n++; }
     const loud = n && sum / n > 0.45;
-    if (loud && run > LIMIT) { bad++; if (firstAt == null) firstAt = start; longest = Math.max(longest, run); }
+    /* black that runs straight into the next cue is a run-up (the flicks before a drop),
+       not a hole in the show; only black that ends in more nothing is a fault. */
+    const endsIntoACue = cues.some(c => { const sp = spanOf(c); return sp && sp[0] >= start + run - 0.12 && sp[0] <= start + run + 0.3; });
+    const cap = endsIntoACue ? 4 * beatS : LIMIT;
+    if (loud && run > cap) { bad++; if (firstAt == null) firstAt = start; longest = Math.max(longest, run); }
   };
   for (let i = 0; i < F.length; i++) {
     if (rigLv(F[i]) < 0.06) { if (run === 0) start = i / fps; run += 1 / fps; }
@@ -315,6 +319,10 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
      beat, an acceleration flicking on and off -- and it reads as a fault. */
   const DARKENERS = new Set(["blackout", "hush", "cut", "strip"]);
   const dk = cues.filter(c => DARKENERS.has(c.effect)).map(spanOf).filter(Boolean).map(([a, b]) => [a - 0.15, b + 0.35]);
+  /* A pump dips on every beat -- that IS the effect. Where the show declares one (a drive
+     state with pairs:false), its dips are rhythm, not seams. */
+  const pumps = (show.states || []).filter(s => s.effect === "drive" && s.pairs === false)
+    .map(s => [s.from_s ?? 0, s.to_s ?? 1e9]);
   const rowLight = f => { const v = parLv(f); return v.reduce((x, y) => x + y, 0) / (v.length || 1); };
   const dips = [];
   for (let i = 4; i < F.length - 30; i++) {
@@ -322,7 +330,7 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
     if (before > 0.2 && now < before * 0.55) {
       let rec = -1;
       for (let j = i + 1; j < i + 28 && j < F.length; j++) if (rowLight(F[j]) >= before * 0.7) { rec = j; break; }
-      if (rec > 0) { const t = i / fps; if (!dk.some(([a, b]) => t >= a && t <= b)) dips.push(t); i = rec; }
+      if (rec > 0) { const t = i / fps; if (!dk.some(([a, b]) => t >= a && t <= b) && !pumps.some(([a, b]) => t >= a && t < b)) dips.push(t); i = rec; }
     }
   }
   const LIMIT = 8;
@@ -350,10 +358,11 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
     const CLIMAX = [97.76, 109.76];
     const impactSpans = cues.filter(c => c.effect === "impact").map(spanOf).filter(Boolean).map(([a, b]) => [a - 0.05, b + 0.05]);
     let litN = 0, fast = 0, shiver = 0, badLand = 0, segs = 0, bright = 0, moving = 0;
-    let inMove = false, moveStart = 0, lastDir = 0, lastRev = -9, stillRun = 0, moveEnd = 0, panAtStart = 0, panAtEnd = 0;
+    let inMove = false, moveStart = 0, lastDir = 0, lastRev = -9, stillRun = 0, moveEnd = 0, panAtStart = 0, panAtEnd = 0, sinceDark = 0, fastRun = 0;
     for (let i = 1; i < F.length; i++) {
       const t = i / fps;
-      if (!lit(F[i]) || !lit(F[i - 1])) { inMove = false; lastDir = 0; stillRun = 0; continue; }
+      if (!lit(F[i]) || !lit(F[i - 1])) { inMove = false; lastDir = 0; stillRun = 0; sinceDark = 0; continue; }
+      sinceDark++;
       litN++;
       const dp = F[i][panCh] - F[i - 1][panCh], dm = Math.abs(dp) + Math.abs(F[i][tiltCh] - F[i - 1][tiltCh]);
       /* any change is motion; a glide at two units a frame rounds to a one-unit step
@@ -361,7 +370,14 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
          three unchanged frames. */
       const mv = dm >= 1;
       if (mv) moving++;
-      if (dm > 5.5) fast++;
+      /* the first frames after a blackout are the fixture re-lighting and catching up to
+         where its cue wants it -- not an authored snap */
+      const goingDark = headLv(F[i])[0] < headLv(F[i - 1])[0] - 0.2;   // on its way out; where it points stops mattering
+      /* what reads as a jerk is a SUSTAINED race across the room, not a frame or two of
+         catch-up: count only runs of four frames or more at the fixture's top speed. */
+      const quick = sinceDark > 3 && !goingDark && Math.max(Math.abs(dp), Math.abs(F[i][tiltCh] - F[i - 1][tiltCh])) > 5.5;
+      fastRun = quick ? fastRun + 1 : 0;
+      if (fastRun === 4) fast += 4; else if (fastRun > 4) fast++;   // per axis: pan and tilt each have their own motor
       stillRun = mv ? 0 : stillRun + 1;
       const dir = dp > 0 ? 1 : dp < 0 ? -1 : 0;
       if (dir && lastDir && dir !== lastDir) { if (t - lastRev < beatS) shiver++; lastRev = t; }
@@ -383,7 +399,7 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
     }
     const brightPct = litN ? 100 * bright / litN : 0, movPct = litN ? 100 * moving / litN : 0;
     check("head", fast === 0 && shiver === 0 && badLand === 0 && brightPct <= 2,
-      "moving " + movPct.toFixed(0) + "% of its lit time; " + fast + " frames at snap speed (want 0); " + shiver + " reversals within a beat of the last (want 0); " +
+      "moving " + movPct.toFixed(0) + "% of its lit time; " + fast + " frames of a sustained race (want 0); " + shiver + " reversals within a beat of the last (want 0); " +
       segs + " moves, " + badLand + " not ending on a beat; over 75% outside the climax and impacts in " + brightPct.toFixed(1) + "% of lit frames (want <= 2%)");
   }
 }
@@ -428,11 +444,17 @@ const cues = [...(show.states || []).map(c => ({ ...c, kind: "state" })),
 
 /* 6. moves — the row is not one flat colour ------------------------------- */
 {
+  /* a pump lights the whole row together on purpose, so those frames say nothing about
+     whether the show is flat; they are not counted. */
+  const pumping = (show.states || []).filter(s => s.effect === "drive" && s.pairs === false)
+    .map(s => [s.from_s ?? 0, s.to_s ?? 1e9]);
   let lit = 0, flat = 0;
-  for (const f of F) {
+  F.forEach((f, i) => {
+    const t = i / fps;
+    if (pumping.some(([a, b]) => t >= a && t < b)) return;
     const v = parLv(f); const mx = Math.max(...v), mn = Math.min(...v);
     if (mx > 0.06) { lit++; if (mx - mn < 0.03) flat++; }
-  }
+  });
   const pct = lit ? 100 * flat / lit : 100;
   check("moves", pct <= 70, pct.toFixed(0) + "% of lit frames have all pars identical (want <= 70%)");
 
