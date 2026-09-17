@@ -7,6 +7,10 @@ const H = require("./helpers");
    level, calm — but always moving. Rendered per frame off the clock (bx.t), so
    the roam is continuous over any span instead of a short repeating loop. */
 module.exports = function drone(params, ctx) {
+  /* head: false -- leave the moving head to whichever cue owns it. A state that
+     lights the head cannot be dimmed by a gesture (the baker never lets a
+     gesture make the head darker than its bed), so a still low pin over a
+     pulse state came out at the pulse's brightness, not the pin's. */
   const amount = params.amount != null ? params.amount : 0.12;
   const colour = H.parseColour(params.colour, [1, 0.75, 0.35]);
   const extent = params.extent || "inner";
@@ -21,7 +25,7 @@ module.exports = function drone(params, ctx) {
       H.setPar(f, pars[i], colour, Math.max(0, lvl));
     }
     const ang = 2 * Math.PI * t / 14;                      // slow circle round the whole room
-    H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHead(f, H.HEADS[0], {
       level: amount * 0.5 * (0.7 + 0.3 * Math.sin(2 * Math.PI * t / 3.5)), colour,
       pan: H.clamp(0.498 + 0.40 * Math.sin(ang), 0, 1),
       tilt: H.clamp(0.30 + 0.22 * Math.cos(ang), 0, 1),
@@ -30,5 +34,5 @@ module.exports = function drone(params, ctx) {
     return f;
   }
 
-  return { beat: true, render, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
+  return { beat: true, render, per_fixture: pars.map(p => p.id).concat(params.head === false ? [] : H.HEAD_IDS) };
 };

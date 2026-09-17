@@ -14,7 +14,7 @@ module.exports = function strobe(params, ctx) {
 
   const f = H.emptyFrame();
   for (const par of pars) { H.setPar(f, par, colour, level); H.setParStrobe(f, par, hz); }
-  H.setHead(f, H.HEADS[0], { level, colour, pan: 0.5, tilt: 0.45, strobe: Math.min(25, hz) });
+  if (params.head !== false) H.setHead(f, H.HEADS[0], { level, colour, pan: 0.5, tilt: 0.45, strobe: Math.min(25, hz) });
 
-  return { frames: [f], loop_beats: 0, per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS) };
+  return { frames: [f], loop_beats: 0, per_fixture: params.head === false ? pars.map(p => p.id) : pars.map(p => p.id).concat(H.HEAD_IDS) };
 };

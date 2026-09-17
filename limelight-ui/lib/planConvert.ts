@@ -33,6 +33,9 @@ interface V2Entry {
   to_beat?: number;
   lead_beats?: number;
   why?: string;
+  /** Which lane this cue sits on, 0 being the top and the highest priority.
+   *  The baker resolves an overlap by it. */
+  layer?: number;
   [dial: string]: unknown;
 }
 
@@ -55,7 +58,11 @@ const META = new Set(["effect", "section", "moment", "from_moment", "to_moment",
      wrote it back beside the at_s it had just derived — two anchors in one cue,
      and baker.js:163 prefers at_bar, so the clip jumped back to where it was
      dragged from. */
-  "at_bar", "at_beat", "from_bar", "from_beat", "to_bar", "to_beat"]);
+  "at_bar", "at_beat", "from_bar", "from_beat", "to_bar", "to_beat",
+  /* The lane is a statement about PRIORITY, not a dial the effect renders with.
+     Without it here the inspector would offer to turn it, and editsToPlan would
+     write it back twice — once as the anchor it is and once as a parameter. */
+  "layer"]);
 /* Only `for_beats` is the baker's gesture SPAN, carried by the clip length, so it
    is not shown as a dial. `over_beats` is a different thing — an effect's internal
    animation length (lift/strip) — and stays a normal dial. */
@@ -116,23 +123,47 @@ export function planToEdits(plan: V2Plan, show: Show, catalogue: Effect[] = []):
      mid-beat, so flooring would snap a gesture to the wrong beat (and, on rebake,
      to the wrong moment). Edit.beat is a number, so secondsAtBar(bar, beat)
      recovers the exact time. */
-  const push = (type: string, startS: number, beats: number, params: Record<string, unknown>) => {
+  const push = (
+    type: string, startS: number, beats: number, params: Record<string, unknown>,
+    layer?: number,
+  ) => {
     const bi = beatIndexAt(startS, grid) ?? 0;
     const bar = Math.floor(bi / bpb) + 1;
     const beat = bi - (bar - 1) * bpb + 1;
-    edits.push({ type, bar, beat, beats: Math.max(0.001, beats), params });
+    edits.push({
+      type, bar, beat, beats: Math.max(0.001, beats), params,
+      /* Carried back so a save-and-open round trip returns the lanes the
+         creator arranged, rather than re-deriving them by packing — which would
+         quietly restack a show every time it was opened. A plan written before
+         lanes existed has none, and lib/layers seeds those instead. */
+      ...(typeof layer === "number" && isFinite(layer) ? { layer: Math.max(0, Math.floor(layer)) } : {}),
+    });
   };
+  const layerOf = (e: V2Entry) => (typeof e.layer === "number" ? e.layer : undefined);
 
+  /* A state names the song section it sits in AND may narrow itself with
+     from_s/to_s -- the baker reads both, taking max(section start, from_s) and
+     min(section end, to_s). Reading only the section drew a state across the
+     whole section, so several looks inside one section landed on top of one
+     another and the timeline showed one where the show has four. */
+  const spanOfCue = (c: V2Entry) => {
+    const sec = sections[c.section ?? -1];
+    let a = sec ? sec.start : (c.from_s as number);
+    let b = sec ? sec.end : (c.to_s as number);
+    if (c.from_s != null) a = sec ? Math.max(a, c.from_s as number) : (c.from_s as number);
+    if (c.to_s != null) b = sec ? Math.min(b, c.to_s as number) : (c.to_s as number);
+    return a != null && b != null && b > a ? { a, b } : null;
+  };
   for (const s of plan.states ?? []) {
-    const sec = sections[s.section ?? -1];
-    if (!sec) continue;
-    push(s.effect, sec.start, beatSpan(grid, sec.start, sec.end), dials(s, false));
+    const sp = spanOfCue(s);
+    if (!sp) continue;
+    push(s.effect, sp.a, beatSpan(grid, sp.a, sp.b), dials(s, false), layerOf(s));
   }
   for (const b of plan.bindings ?? []) {
-    const sec = sections[b.section ?? -1];
-    if (!sec) continue;
-    /* a binding fills its section; a dial like accent's for_beats stays a dial */
-    push(b.effect, sec.start, beatSpan(grid, sec.start, sec.end), dials(b, false));
+    const sp = spanOfCue(b);
+    if (!sp) continue;
+    /* a binding fills its span; a dial like accent's for_beats stays a dial */
+    push(b.effect, sp.a, beatSpan(grid, sp.a, sp.b), dials(b, false), layerOf(b));
   }
   for (const g of plan.gestures ?? []) {
     /* anchors, in the baker's own precedence: bars, then absolute seconds, then
@@ -147,25 +178,25 @@ export function planToEdits(plan: V2Plan, show: Show, catalogue: Effect[] = []):
     if (g.at_bar != null) {
       const startS = secondsAtBar(g.at_bar, g.at_beat ?? 1)
         - (g.lead_beats ?? 0) * beatDur;
-      push(g.effect, startS, pointBeats(g), dials(g, true));
+      push(g.effect, startS, pointBeats(g), dials(g, true), layerOf(g));
     } else if (g.from_bar != null && g.to_bar != null) {
       const a = secondsAtBar(g.from_bar, g.from_beat ?? 1);
       const b = secondsAtBar(g.to_bar, g.to_beat ?? 1);
-      push(g.effect, a, beatSpan(grid, a, b), dials(g, true));
+      push(g.effect, a, beatSpan(grid, a, b), dials(g, true), layerOf(g));
     } else if (g.from_s != null && g.to_s != null) {
-      push(g.effect, g.from_s, beatSpan(grid, g.from_s, g.to_s), dials(g, true));
+      push(g.effect, g.from_s, beatSpan(grid, g.from_s, g.to_s), dials(g, true), layerOf(g));
     } else if (g.at_s != null) {
       const startS = g.at_s - (g.lead_beats ?? 0) * beatDur;
       push(g.effect, startS, pointBeats(g), dials(g, true));
     } else if (g.from_moment != null && g.to_moment != null) {
       const fm = moments[g.from_moment], tm = moments[g.to_moment];
       if (!fm || !tm) continue;
-      push(g.effect, fm.t, beatSpan(grid, fm.t, tm.t), dials(g, true));
+      push(g.effect, fm.t, beatSpan(grid, fm.t, tm.t), dials(g, true), layerOf(g));
     } else if (g.moment != null) {
       const m = moments[g.moment];
       if (!m) continue;
       const startS = m.t - (g.lead_beats ?? 0) * beatDur;
-      push(g.effect, startS, pointBeats(g), dials(g, true));
+      push(g.effect, startS, pointBeats(g), dials(g, true), layerOf(g));
     }
   }
   return edits;
@@ -185,21 +216,42 @@ export function editsToPlan(edits: Edit[], show: Show, catalogue: Effect[], plan
   const bindings: V2Entry[] = [];
   const gestures: V2Entry[] = [];
 
+  const layerOf = (e: Edit) =>
+    typeof e.layer === "number" && isFinite(e.layer) ? Math.max(0, Math.floor(e.layer)) : 0;
+
   for (const e of edits) {
     if (e.off) continue;
     const eff = byId.get(e.type);
     const kind = eff?.kind ?? "gesture";
+    const layer = layerOf(e);
     const startS = secondsAtBar(e.bar, e.beat ?? 1);
     const startIdx = (e.bar - 1) * bpb + ((e.beat ?? 1) - 1);
     const endS = secondsAtBeatIndex(startIdx + e.beats);
     const params = { ...(e.params ?? {}) };
 
-    if (kind === "state") {
-      /* a state/binding fills a section; map by the span's MIDPOINT so a start
-         time rounded to the nearest beat cannot fall into the section before. */
-      states.push({ effect: e.type, section: sectionIndexAt((startS + endS) / 2, sections), ...params });
-    } else if (kind === "binding") {
-      bindings.push({ effect: e.type, section: sectionIndexAt((startS + endS) / 2, sections), ...params });
+    if (kind === "state" || kind === "binding") {
+      /* A state names the section it sits in AND the exact span it occupies.
+         Writing only the section was destructive: the baker takes
+         max(section start, from_s) and min(section end, to_s), so a look written
+         for four bars inside a twenty-two-second section came back meaning the
+         whole section. Twenty-five looks collapsed into seven, several of them
+         stacked on the same span where only the first is ever seen -- and since
+         Download and Save write through here, opening a show in the editor and
+         saving it FLATTENED it. The show a person reviewed was not the show that
+         had been written.
+
+         The midpoint picks the section, so a start rounded to the nearest beat
+         cannot fall into the section before. */
+      const round3 = (x: number) => Math.round(x * 1000) / 1000;
+      const entry: V2Entry = {
+        effect: e.type,
+        section: sectionIndexAt((startS + endS) / 2, sections),
+        from_s: round3(startS),
+        to_s: round3(endS),
+        ...params,
+        layer,
+      };
+      (kind === "state" ? states : bindings).push(entry);
     } else {
       /* Emit ABSOLUTE-SECONDS anchors (the baker supports at_s / from_s+to_s).
          Seconds are exact, so a clip round-trips to the same time with no
@@ -207,14 +259,25 @@ export function editsToPlan(edits: Edit[], show: Show, catalogue: Effect[], plan
          time anyway. A span effect (ramp/beam/spin) keeps its span. */
       const round3 = (x: number) => Math.round(x * 1000) / 1000;
       if (spanAnchors(eff)) {
-        gestures.push({ effect: e.type, from_s: round3(startS), to_s: round3(endS), ...params });
+        gestures.push({ effect: e.type, from_s: round3(startS), to_s: round3(endS), ...params, layer });
       } else {
         /* the clip length is for_beats (the baker span); over_beats, if any, is
            already carried through in params as a dial. */
-        gestures.push({ effect: e.type, at_s: round3(startS), ...params, for_beats: round3(e.beats) });
+        gestures.push({ effect: e.type, at_s: round3(startS), ...params, for_beats: round3(e.beats), layer });
       }
     }
   }
+
+  /* Emitted in lane order, top lane first. For states and bindings that IS the
+     priority: baker.js takes the first entry covering a fixture and stops. The
+     baker sorts by `layer` itself as well, so a plan written by hand rather than
+     by this editor still resolves the way its lanes say — but a plan that reads
+     in priority order is also a plan a person can check. Stable, so clips
+     sharing a lane keep the order they were placed in. */
+  const byLayer = (a: V2Entry, b: V2Entry) => (a.layer ?? 0) - (b.layer ?? 0);
+  states.sort(byLayer);
+  bindings.sort(byLayer);
+  gestures.sort(byLayer);
 
   return { plan: planText, states, bindings, gestures };
 }

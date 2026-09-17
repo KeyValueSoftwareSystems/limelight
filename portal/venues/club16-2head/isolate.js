@@ -2,6 +2,10 @@
 const H = require("./helpers");
 
 module.exports = function isolate(params, ctx) {
+  /* head: false -- leave the moving head to whichever cue owns it. A state that
+     lights the head cannot be dimmed by a gesture (the baker never lets a
+     gesture make the head darker than its bed), so a still low pin over a
+     pulse state came out at the pulse's brightness, not the pin's. */
   const which = params.which || H.PARS[Math.floor(H.PARS.length / 2)].id;
   const colour = H.parseColour(params.colour, [1, 0.75, 0.35]);
   const rest = params.rest != null ? params.rest : 0.06;
@@ -22,7 +26,7 @@ module.exports = function isolate(params, ctx) {
       }
     }
     for (const h of H.HEADS) {
-      H.setHead(frame, h, { level: rest * 0.5, colour: [0.3, 0.3, 0.3] });
+      if (params.head !== false) H.setHead(frame, h, { level: rest * 0.5, colour: [0.3, 0.3, 0.3] });
     }
     frames.push(frame);
   }

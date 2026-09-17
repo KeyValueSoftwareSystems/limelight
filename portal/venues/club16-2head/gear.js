@@ -7,6 +7,10 @@ const H = require("./helpers");
    with this gear shift. The DMX function itself just outputs one beat of a
    visible pulse at the target rate so the preview is meaningful. */
 module.exports = function gear(params, ctx) {
+  /* head: false -- leave the moving head to whichever cue owns it. A state that
+     lights the head cannot be dimmed by a gesture (the baker never lets a
+     gesture make the head darker than its bed), so a still low pin over a
+     pulse state came out at the pulse's brightness, not the pin's. */
   const from = params.from != null ? params.from : 1;
   const to = params.to != null ? params.to : 2;
   const ratio = to / (from || 1);

@@ -1,8 +1,11 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useMemo, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 
 /* COLOUR PARITY WITH THE FLAT VIEW.
    three manages colour by default: a Color set to (1, 0, 0) is taken as LINEAR
@@ -15,9 +18,9 @@ THREE.ColorManagement.enabled = false;
 import { usePortalStore } from "@/store/portal";
 import { useAnimationLoop } from "@/hooks/useAnimationLoop";
 import { readFixtures, trimFixtures } from "@/lib/fixtures";
-import { clamp } from "@/lib/grid";
 import { frameFor } from "@/lib/sync";
 import { profileOf } from "@/lib/profiles";
+import { frameLight, roomAmbient } from "@/lib/exposure";
 import {
   worldOf, aimOf, throwOf, landingOf, roomOf, cameraOf, barsOf, bodyOf, type Deck,
 } from "@/lib/stage3d";
@@ -102,6 +105,49 @@ const BEAM_FRAG = /* glsl */ `
     gl_FragColor = vec4(uColour, clamp(a, 0.0, 1.0));
   }
 `;
+
+/* ── the room's own surfaces ─────────────────────────────────────────────────
+   Nothing in this room used to be touched by the rig. The floor, deck and walls
+   were MeshBasicMaterial with hard-coded darks and the scene held no light at
+   all, so the only pixels that ever changed were the beams themselves — which is
+   why a blackout read as cones switching off rather than as a room going dark.
+
+   Real lighting is not available to us: three recompiles its shaders against the
+   light count, and a 46-fixture arena is far past what that handles. So the room
+   gets ONE number and ONE colour for the whole frame, and each surface decides
+   how much of it to catch. Two uniform writes per frame for the entire room. */
+
+const ROOM_VERT = /* glsl */ `
+  varying vec3 vW;
+  void main() {
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vW = wp.xyz;
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }
+`;
+
+const ROOM_FRAG = /* glsl */ `
+  uniform vec3  uBase;       // the surface's own colour, unlit
+  uniform vec3  uTint;       // the rig's colour this frame
+  uniform float uAmbient;    // how much of it to catch, 0..AMBIENT_GAIN
+  uniform vec2  uCentre;     // the room's centre, in x and z
+  uniform float uSpan;       // the larger of the room's two dimensions
+  varying vec3 vW;
+  void main() {
+    /* Distance in the HORIZONTAL plane only. Including height would darken the
+       floor directly beneath the truss, which is the one place a rig most
+       obviously lights. */
+    float d = distance(vW.xz, uCentre) / max(uSpan, 0.001);
+
+    /* A floor of 0.55 rather than a fade to nothing. A hard falloff puts a
+       spotlight on the middle of the room and leaves the corners as black as
+       they were, which reads as a bug rather than as depth. */
+    float fall = mix(0.55, 1.0, 1.0 - clamp(d, 0.0, 1.0));
+
+    gl_FragColor = vec4(uBase + uTint * uAmbient * fall, 1.0);
+  }
+`;
+
 /** One lamp's drawable parts, kept so a frame is an update rather than a rebuild. */
 interface Rig {
   lamp: { id: string; type: string; kind: string; world: [number, number, number] };
@@ -109,7 +155,6 @@ interface Rig {
   beamMat: THREE.ShaderMaterial;
   lens: THREE.Sprite;
   lensMat: THREE.SpriteMaterial;
-  mirror: THREE.Mesh;
   pool: THREE.Mesh | null;
   poolMat: THREE.MeshBasicMaterial | null;
   cells: Array<{ sprite: THREE.Sprite; mat: THREE.SpriteMaterial }>;
@@ -171,13 +216,6 @@ function updateRig(rig: Rig, byId: Map<string, LampState>, t: number, d: number)
   AIM_TO.set(dir[0], dir[1], dir[2]);
   rig.beam.quaternion.setFromUnitVectors(AIM_FROM, AIM_TO);
 
-  /* the reflection is the same beam through the floor plane: mirror the aim in
-     y, and mirror the lamp's height too */
-  rig.mirror.visible = rig.beam.visible;
-  rig.mirror.scale.set(r, -len, r);
-  AIM_TO.set(dir[0], -dir[1], dir[2]);
-  rig.mirror.quaternion.setFromUnitVectors(AIM_FROM, AIM_TO);
-
   rig.lensMat.opacity = Math.min(1, k * (0.5 + 0.65 * d));
   /* the same whitening the flat renderer's emitter() applies, so a hot lamp
      reads the same colour in both views */
@@ -211,6 +249,16 @@ function updateRig(rig: Rig, byId: Map<string, LampState>, t: number, d: number)
   }
 }
 
+/** Put one lamp out. Beside updateRig, and outside the component for the same
+ *  reason: mutating three.js objects in place is how an imperative renderer
+ *  works, and React's compiler is right to stop it happening inside a hook. */
+function blankRig(rig: Rig): void {
+  rig.beam.visible = false;
+  rig.lensMat.opacity = 0;
+  if (rig.pool) rig.pool.visible = false;
+  for (const c of rig.cells) c.mat.opacity = 0;
+}
+
 /* scratch, so a 46-fixture frame does not allocate 92 vectors */
 const AIM_FROM = new THREE.Vector3();
 const AIM_TO = new THREE.Vector3();
@@ -230,15 +278,28 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
   const sceneRef = useRef<THREE.Scene | null>(null);
   const camRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
+  const composerRef = useRef<EffectComposer | null>(null);
   /* the renderer is imperative, so the scene effect reaches the current paint
      (and the current framing) through refs rather than by re-subscribing */
   const paintRef = useRef<() => void>(() => {});
   const homeRef = useRef<() => void>(() => {});
-  /* smoothed auto-exposure, so a 46-lamp rig does not clip to white */
-  const exposureRef = useRef(1);
   const rigsRef = useRef<Rig[]>([]);
+  /* the room's shared uniforms, so paint can write them without rebuilding */
+  const roomUniformsRef = useRef<{
+    uTint: { value: THREE.Color };
+    uAmbient: { value: number };
+    uCentre: { value: THREE.Vector2 };
+    uSpan: { value: number };
+  } | null>(null);
   const discRef = useRef<THREE.Texture | null>(null);
   const failedRef = useRef(false);
+  const tearingDownRef = useRef(false);
+  /* how many times we have rebuilt after losing a context, so it cannot spin */
+  const recoveriesRef = useRef(0);
+  /* a blinder at full does not light a room, it takes it over */
+  const floodRef = useRef<HTMLDivElement>(null);
+  /* bumped to rebuild the scene after the GPU hands the context back */
+  const [generation, setGeneration] = useState(0);
 
   const show = usePortalStore((s) => s.show);
   const frames = usePortalStore((s) => s.frames);
@@ -248,11 +309,25 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
   const syncNudge = usePortalStore((s) => s.syncNudge);
   const syncOffset = syncLatency + syncNudge;
 
+  /* What the scene is actually built from. A re-bake changes `show` without
+     moving a single lamp, and rebuilding on that threw the viewer's camera back
+     to the front-of-house default every time they edited a cue. */
+  const rigKey = useMemo(
+    () => (show?.fixtures ?? [])
+      .map((f) => `${f.id}:${f.type}:${(f.at ?? []).join(",")}`)
+      .join("|"),
+    [show],
+  );
+
+  /* the effect is keyed on the rig, so it reads the current show through a ref */
+  const showRef = useRef(show);
+  useEffect(() => { showRef.current = show; }, [show]);
+
   /* ── build the room and the rig, once per layout ───────────────────────── */
   useEffect(() => {
     const box = boxRef.current;
     if (!box || failedRef.current) return;
-
+    tearingDownRef.current = false;
     let gl: THREE.WebGLRenderer;
     try {
       gl = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
@@ -263,8 +338,30 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     gl.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     gl.setClearColor(0x05070c, 1);
     gl.outputColorSpace = THREE.LinearSRGBColorSpace;   // see the note at the top
-    gl.localClippingEnabled = true;
     box.appendChild(gl.domElement);
+
+    /* A GPU reset used to black this canvas for good: the default action on
+       context loss is to give up, and nothing here asked for it back. */
+    /* A context we lost by accident is one we have to ask for again OURSELVES.
+       Waiting on `webglcontextrestored` is what the spec suggests and it is not
+       enough: a context the browser EVICTED to make room for another is simply
+       taken, and no restore event is ever fired for it. That is how the room
+       went black and stayed black. preventDefault still matters — it is what
+       makes the canvas reusable at all — but the rebuild is ours to schedule.
+
+       Our own teardown calls forceContextLoss after removing these listeners, so
+       a loss arriving here is always a real one. The cap is there because if the
+       GPU cannot keep a context at all, rebuilding forever would be a spin. */
+    const onLost = (e: Event) => {
+      e.preventDefault();
+      if (tearingDownRef.current) return;
+      if (recoveriesRef.current >= 3) return;
+      recoveriesRef.current++;
+      setGeneration((g) => g + 1);
+    };
+    const onRestored = () => { setGeneration((g) => g + 1); };
+    gl.domElement.addEventListener("webglcontextlost", onLost);
+    gl.domElement.addEventListener("webglcontextrestored", onRestored);
     gl.domElement.style.display = "block";
     gl.domElement.style.width = "100%";
     gl.domElement.style.height = "100%";
@@ -274,8 +371,28 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     scene.fog = new THREE.FogExp2(0x05070c, 0.022);
     sceneRef.current = scene;
 
-    const fixtures: Fixture[] = show?.fixtures ?? [];
+    const fixtures: Fixture[] = showRef.current?.fixtures ?? [];
     const room = roomOf(fixtures);
+
+    /* One set of uniform OBJECTS, shared by reference across every room surface.
+       Spreading them into each material copies the references, not the values, so
+       writing roomU.uAmbient.value once updates the floor, the deck and all three
+       walls together. */
+    const roomU = {
+      uTint: { value: new THREE.Color(0, 0, 0) },
+      uAmbient: { value: 0 },
+      uCentre: { value: new THREE.Vector2(room.centreX, room.centreZ) },
+      uSpan: { value: Math.max(room.width, room.depth) },
+    };
+    roomUniformsRef.current = roomU;
+
+    const roomMaterial = (base: number) =>
+      new THREE.ShaderMaterial({
+        uniforms: { ...roomU, uBase: { value: new THREE.Color(base) } },
+        vertexShader: ROOM_VERT,
+        fragmentShader: ROOM_FRAG,
+      });
+
     const disc = discTexture();
     discRef.current = disc;
 
@@ -290,9 +407,12 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     const deckW = room.width + 16;
     const deckD = room.depth + 30;
 
+    /* Opaque now. The 0.82 was there so the mirrored beams below could show
+       through; those are gone, and an opaque floor is what stops anything under
+       the deck ever reading as a reflection again. */
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(deckW, deckD),
-      new THREE.MeshBasicMaterial({ color: 0x080b12, transparent: true, opacity: 0.82 }),
+      roomMaterial(0x080b12),
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(room.centreX, 0, room.centreZ);
@@ -318,7 +438,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     const stageD = Math.max(2.4, room.depth * 0.5);
     const deck = new THREE.Mesh(
       new THREE.BoxGeometry(room.width + 3, 0.6, stageD),
-      new THREE.MeshBasicMaterial({ color: 0x0c1119 }),
+      roomMaterial(0x0c1119),
     );
     deck.position.set(room.centreX, 0.3, room.minZ + stageD / 2 - 1.2);
     const deckBox: Deck = {
@@ -340,7 +460,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
 
     /* upstage wall and two returns, so beams aimed high land on something and
        the room has corners to read the perspective against */
-    const wallMat = new THREE.MeshBasicMaterial({ color: 0x070a11 });
+    const wallMat = roomMaterial(0x070a11);
     const wallH = room.maxY + 7;
     const back = new THREE.Mesh(new THREE.PlaneGeometry(deckW, wallH), wallMat);
     back.position.set(room.centreX, wallH / 2, room.minZ - 2.6);
@@ -461,20 +581,9 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
         scene.add(pool);
       }
 
-      /* The floor throws light back. A mirrored copy of the shaft, squashed and
-         dimmed under the deck, costs one extra draw per lamp and is most of what
-         separates "a room with lights in it" from "cones on a dark background".
-         It shares the beam's material, so it can never disagree about colour. */
-      const mirror = new THREE.Mesh(geo, beamMat);
-      mirror.scale.set(1, -1, 1);
-      mirror.position.set(world[0], -world[1], world[2]);
-      mirror.renderOrder = 4;
-      mirror.frustumCulled = false;
-      scene.add(mirror);
-
       rigs.push({
         lamp: { id: f.id, type: f.type, kind: prof.kind, world },
-        beam, beamMat, lens, lensMat, mirror, pool, poolMat, cells, maxThrow, deck: deckBox,
+        beam, beamMat, lens, lensMat, pool, poolMat, cells, maxThrow, deck: deckBox,
       });
     }
     rigsRef.current = rigs;
@@ -503,6 +612,21 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     controls.maxPolarAngle = Math.PI * 0.495;
     controls.minPolarAngle = 0.08;
 
+    /* BLOOM, and NOT tone mapping. See the note at the top of this file: colour
+       management is off on purpose, so the numbers reaching a pixel are the same
+       ones the flat canvas writes. OutputPass would apply tone mapping and an
+       sRGB conversion and undo exactly that, so the chain ends at the bloom. */
+    const composer = new EffectComposer(gl);
+    composer.addPass(new RenderPass(scene, cam));
+    const bloom = new UnrealBloomPass(
+      new THREE.Vector2(1, 1),
+      0.45,      // strength — enough to bleed, not enough to fog the room
+      0.5,       // radius
+      0.75,      // threshold: only pixels already hot bloom at all
+    );
+    composer.addPass(bloom);
+    composerRef.current = composer;
+
     /* dragging has to repaint even while the show is paused */
     const onControls = () => { paintRef.current(); };
     controls.addEventListener("change", onControls);
@@ -522,6 +646,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
       const r = box.getBoundingClientRect();
       if (!r.width || !r.height) return;
       gl.setSize(r.width, r.height, false);
+      composerRef.current?.setSize(r.width, r.height);
       cam.aspect = r.width / r.height;
       /* frame the rig once; after that the viewpoint is the viewer's, and
          resizing must not throw away where they moved to */
@@ -534,6 +659,7 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     ro.observe(box);
 
     return () => {
+      tearingDownRef.current = true;
       ro.disconnect();
       controls.removeEventListener("change", onControls);
       controls.dispose();
@@ -546,13 +672,31 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
         else mat?.dispose();
       });
       disc.dispose();
+      /* EffectComposer.dispose() frees its own two targets and nothing its
+         passes own; UnrealBloomPass holds eleven more. */
+      bloom.dispose();
+      composer.dispose();
+      composerRef.current = null;
+
+      /* LISTENERS BEFORE forceContextLoss, because that call fires
+         `webglcontextlost` — and a handler still attached would read our own
+         teardown as a GPU fault and schedule a rebuild, which is precisely the
+         loop the next line exists to stop. */
+      gl.domElement.removeEventListener("webglcontextlost", onLost);
+      gl.domElement.removeEventListener("webglcontextrestored", onRestored);
       gl.dispose();
+      /* dispose() releases three's objects and leaves the browser's WebGL
+         context alive until GC gets to it. Chrome caps contexts per page and
+         evicts the OLDEST when a new one is asked for, which arrives as a real
+         "Context Lost" on a canvas still on screen — three rebuilds was enough
+         to trigger it here. This is the only way to hand one back deliberately. */
+      gl.forceContextLoss();
       if (gl.domElement.parentNode === box) box.removeChild(gl.domElement);
       glRef.current = null;
       sceneRef.current = null;
       rigsRef.current = [];
     };
-  }, [show]);
+  }, [rigKey, generation]);
 
   /* ── one frame ─────────────────────────────────────────────────────────── */
   const paint = useCallback(() => {
@@ -560,38 +704,74 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     const scene = sceneRef.current;
     const cam = camRef.current;
     if (!gl || !scene || !cam) return;
-    if (!show || !frames || !place) { gl.render(scene, cam); return; }
+    const draw = () => {
+      const c = composerRef.current;
+      /* gl.render, NOT draw() — a blanket rename once turned this fallback into
+         a call to itself, which is an unbounded recursion the moment there is no
+         composer, and a stack overflow inside a rAF paints the canvas black. */
+      if (c) c.render(); else gl.render(scene, cam);
+    };
+    if (!show || !frames || !place) { draw(); return; }
 
     const t = clockRef.current?.position() ?? 0;
     /* what the listener is hearing NOW is t minus the output latency */
     const idx = frameFor(t, show.fps, show.frame_count, syncOffset);
     const raw = readFixtures(idx, frames, show, place);
-    if (!raw) { gl.render(scene, cam); return; }
+    if (!raw) {
+      /* The flat view draws bare ground here. This one used to leave the last
+         frame's lamps burning, so the two disagreed in opposite directions on
+         the same edge case. */
+      const dark = roomUniformsRef.current;
+      if (dark) dark.uAmbient.value = 0;
+      if (floodRef.current) floodRef.current.style.opacity = "0";
+      for (const rig of rigsRef.current) blankRig(rig);
+      draw();
+      return;
+    }
     const fx = trimFixtures(raw, trims);
 
     const byId = new Map<string, LampState>();
     for (const l of fx.lamps) byId.set(l.id, l);
 
-    /* EXPOSURE. Light ADDS, so a frame with forty lamps up is forty times the
-       light of a frame with one — and additive blending clips long before that.
-       Without this the room swung between washed-out white and barely-lit as
-       the show played, which reads as the renderer being unreliable rather than
-       as the show being loud. The flat view has carried the same term for a
-       while; the 3D view never did, which is why only this one "randomly" got
-       better and worse.
+    /* The same numbers the flat view uses, from the same function. They carry no
+       memory: an identical frame renders at an identical brightness whatever came
+       before it, which is exactly what the old smoothed version could not do. */
+    const fl = frameLight(fx.lamps);
+    const d = fl.density;
 
-       Smoothed over time because the correction must not be visible: snapping
-       it per frame turns every hit into a pump, the way a badly set compressor
-       breathes. Up fast (a blackout must go dark now), down slow. */
-    const lit = fx.lamps.filter((l) => l.k > 0.01);
-    const want = clamp(3.4 / Math.sqrt(Math.max(1, lit.length)), 0.32, 1);
-    const prev = exposureRef.current;
-    exposureRef.current = want < prev ? prev + (want - prev) * 0.25 : prev + (want - prev) * 0.08;
-    const d = exposureRef.current;
+    /* What the room itself catches. Two writes for every surface in it. */
+    const roomU = roomUniformsRef.current;
+    if (roomU) {
+      roomU.uAmbient.value = roomAmbient(fl);
+      roomU.uTint.value.setRGB(fl.tint[0], fl.tint[1], fl.tint[2]);
+    }
+
+    /* A BLINDER TAKES THE ROOM OVER. The beam shader deliberately knocks a cone
+       aimed at the camera down to 22%, which is right for a beam and wrong for
+       the one fixture whose entire job is being in your eyes. Same threshold and
+       slope the flat view uses, so a hit lands with the same weight in both. */
+    const flood = floodRef.current;
+    if (flood) {
+      let hottest = 0;
+      let hot: LampState | null = null;
+      for (const l of fx.lamps) {
+        if (l.kind !== "blinder") continue;
+        const k = l.k * (l.strobe > 0.001 ? ((t * (1 + l.strobe * 22)) % 1 < 0.32 ? 1 : 0.06) : 1);
+        if (k > hottest) { hottest = k; hot = l; }
+      }
+      if (hot && hottest > 0.5) {
+        const c = hot.rgb;
+        flood.style.backgroundColor =
+          `rgb(${(c[0] * 255) | 0} ${(c[1] * 255) | 0} ${(c[2] * 255) | 0})`;
+        flood.style.opacity = String((hottest - 0.5) * 0.12);
+      } else {
+        flood.style.opacity = "0";
+      }
+    }
 
     for (const rig of rigsRef.current) updateRig(rig, byId, t, d);
 
-    gl.render(scene, cam);
+    draw();
   }, [show, frames, place, trims, syncOffset, clockRef]);
 
   useEffect(() => { paintRef.current = paint; }, [paint]);
@@ -609,16 +789,52 @@ export function Stage3D({ clockRef, playing, currentTime, onHome }: Stage3DProps
     paint();
   }, [show, frames, place, trims, currentTime, playing, paint]);
 
-  return <div ref={boxRef} className="absolute inset-0" />;
+  return (
+    <div ref={boxRef} className="absolute inset-0">
+      {/* `screen` rather than `plus-lighter`: the flat view draws its flood under
+          `lighter`, and screen is the blend every browser here agrees on. */}
+      <div
+        ref={floodRef}
+        aria-hidden
+        className="absolute inset-0 pointer-events-none opacity-0"
+        style={{ mixBlendMode: "screen" }}
+      />
+    </div>
+  );
 }
 
 /** Whether this browser can run the 3D view at all. */
+/* Probed once per page, and the answer kept.
+
+   This is read as a useSyncExternalStore SNAPSHOT, which React calls on every
+   single render — and the probe below opens a real WebGL context. StagePreview
+   re-renders once per animation frame while a song plays, because it carries the
+   playhead, so this was opening a context per frame and never closing one.
+
+   A browser keeps a small number of live contexts — Chrome around sixteen — and
+   when asked for one too many it EVICTS THE OLDEST, which is the stage's own
+   renderer. That arrives as `webglcontextlost` on a canvas in the middle of the
+   screen, and an evicted context is never restored. It is why the room went dark
+   partway through a song and stayed dark while every other part of the page went
+   on working: nothing was wrong with the show, the renderer had simply had its
+   context taken away and handed to a probe that only ever answered yes.
+
+   Caching it also satisfies what useSyncExternalStore asks for in the first
+   place: a snapshot is a cached value, not work. */
+let webglOK: boolean | null = null;
+
 export function webglAvailable(): boolean {
   if (typeof document === "undefined") return false;
+  if (webglOK !== null) return webglOK;
   try {
     const cv = document.createElement("canvas");
-    return !!(cv.getContext("webgl2") || cv.getContext("webgl"));
+    const probe = (cv.getContext("webgl2") ?? cv.getContext("webgl")) as
+      WebGLRenderingContext | null;
+    webglOK = !!probe;
+    /* hand the probe's own context straight back rather than waiting for GC */
+    probe?.getExtension("WEBGL_lose_context")?.loseContext();
   } catch {
-    return false;
+    webglOK = false;
   }
+  return webglOK;
 }

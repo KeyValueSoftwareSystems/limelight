@@ -15,7 +15,7 @@ import { profileOf } from "./profiles.ts";
 import type { Fixture, Show, TrimState } from "./types.ts";
 
 const TRIM: TrimState = {
-  master: 1, par: 1, head: 1, blackout: false, strobe_kill: false, hold: false,
+  master: 1, par: 1, head: 1, blackout: false, strobe_kill: false, hold: false, lead_ms: 0,
 };
 
 const LAYOUT = path.join(

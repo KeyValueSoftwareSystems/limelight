@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 
-import { barTicks, timeToX } from "@/lib/timeline";
+import { barTicks, beatTicks, timeToX } from "@/lib/timeline";
 import { mmss } from "@/lib/grid";
 import { useTimeline } from "./Timeline";
 import type { Grid } from "@/lib/types";
@@ -11,9 +11,20 @@ import type { Grid } from "@/lib/types";
 function RulerBase({ grid }: { grid: Grid }) {
   const { view, width } = useTimeline();
   const ticks = barTicks(view, grid, width);
+  /* the beats inside each bar, drawn faint, and only once they are far enough
+     apart to read. Without them a cue can only be placed by eye against a bar
+     line four beats wide. */
+  const beats = beatTicks(view, grid, width).filter((b) => !b.strong);
 
   return (
     <div className="relative h-[var(--ruler-h)] flex-none border-b border-solid border-line cursor-ew-resize">
+      {beats.map((b) => (
+        <span
+          key={"b" + b.t.toFixed(3)}
+          className="absolute bottom-0 h-[6px] w-px bg-line pointer-events-none"
+          style={{ left: timeToX(b.t, view, width) }}
+        />
+      ))}
       {ticks.map((t) => {
         const x = timeToX(t.t, view, width);
         return (

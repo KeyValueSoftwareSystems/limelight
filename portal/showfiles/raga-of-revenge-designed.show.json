@@ -1,0 +1,652 @@
+{
+ "schema": "limelight.show/1",
+ "song": "raga-of-revenge",
+ "grid": {
+  "bpm": 119.982,
+  "first_beat_s": 1.7481,
+  "beats_per_bar": 4,
+  "bars": 65,
+  "tempo": [
+   {
+    "from_beat": 0,
+    "at_s": 1.7481,
+    "bpm": 89.341
+   },
+   {
+    "from_beat": 24,
+    "at_s": 17.8662,
+    "bpm": 119.982
+   }
+  ],
+  "holds_from_s": 37.25,
+  "holds_to_s": 127.61,
+  "holds_measured": true,
+  "sure": 0.753,
+  "first_bar": 0,
+  "last_bar": 64,
+  "holds_from": {
+   "bar": 16,
+   "beat": 4
+  },
+  "holds_to": {
+   "bar": 61,
+   "beat": 4
+  },
+  "duration_s": 131.286
+ },
+ "duration_s": 131.286,
+ "plan": "Something is assembled in the dark, piece by piece, and once it is whole it does not stop. Steel until the turn at 48s, blood after it, white twice.",
+ "states": [
+  {
+   "section": 0,
+   "effect": "drone",
+   "amount": 0.04,
+   "colour": [
+    0.45,
+    0.68,
+    1
+   ],
+   "extent": "inner",
+   "why": "INTRO — the pars are OFF. Four lamps cannot make a statement; the head can. This is the faintest legal glow so the room is not a void, and everything you actually see in the first half minute is the beam and the blackouts between the statements.",
+   "id": "s0",
+   "at": {
+    "bar": 1,
+    "beat": 1,
+    "beats": 42
+   },
+   "start_s": 0,
+   "end_s": 25.56
+  },
+  {
+   "section": 1,
+   "effect": "drone",
+   "amount": 0.06,
+   "colour": [
+    0.45,
+    0.68,
+    1
+   ],
+   "extent": "all",
+   "why": "INSTRUMENTAL — still the head's half. The track here is four statements separated by holes, the last of them nearly six seconds long. A wash across this would fill in the silences that are the whole point of the passage.",
+   "id": "s1",
+   "at": {
+    "bar": 10,
+    "beat": 4,
+    "beats": 45
+   },
+   "start_s": 25.56,
+   "end_s": 48.24
+  },
+  {
+   "section": 2,
+   "effect": "drive",
+   "amount": 0.72,
+   "colours": [
+    [
+     0.9,
+     0.05,
+     0.04
+    ],
+    [
+     0.75,
+     0.18,
+     0.06
+    ]
+   ],
+   "extent": "all",
+   "floor": 0.34,
+   "peak": 0.95,
+   "why": "THE TURN. Steel becomes blood here and never goes back. The colour is the event — the level barely moves across the boundary, so what you register is that the room has changed its mind, not that it got brighter.",
+   "id": "s2",
+   "at": {
+    "bar": 22,
+    "beat": 2,
+    "beats": 67
+   },
+   "start_s": 48.24,
+   "end_s": 81.77
+  },
+  {
+   "section": 3,
+   "effect": "drive",
+   "amount": 0.86,
+   "colours": [
+    [
+     0.9,
+     0.05,
+     0.04
+    ],
+    [
+     1,
+     1,
+     1
+    ]
+   ],
+   "extent": "all",
+   "floor": 0.46,
+   "peak": 1,
+   "why": "Second chorus. White starts bleeding into the red — the room is running out of places to go, which is what makes the peak inside this section land.",
+   "id": "s3",
+   "at": {
+    "bar": 39,
+    "beat": 1,
+    "beats": 31
+   },
+   "start_s": 81.77,
+   "end_s": 97.29
+  },
+  {
+   "section": 4,
+   "effect": "drive",
+   "amount": 0.96,
+   "colours": [
+    [
+     0.9,
+     0.05,
+     0.04
+    ],
+    [
+     1,
+     1,
+     1
+    ]
+   ],
+   "extent": "all",
+   "floor": 0.6,
+   "peak": 1,
+   "why": "The song's loudest stretch. It sits high BETWEEN hits, not only on them, so the section reads as the biggest thing in the show even in the gaps.",
+   "id": "s4",
+   "at": {
+    "bar": 46,
+    "beat": 4,
+    "beats": 25
+   },
+   "start_s": 97.29,
+   "end_s": 109.64
+  },
+  {
+   "section": 5,
+   "effect": "pulse",
+   "amount": 0.4,
+   "colour": [
+    0.75,
+    0.18,
+    0.06
+   ],
+   "extent": "all",
+   "floor": 0.1,
+   "peak": 0.7,
+   "why": "After the break. Embers rather than blood: the act is done. It lands under the opening, or it is not an ending.",
+   "id": "s5",
+   "at": {
+    "bar": 53,
+    "beat": 1,
+    "beats": 37
+   },
+   "start_s": 109.64,
+   "end_s": 128.28
+  },
+  {
+   "section": 6,
+   "effect": "drone",
+   "amount": 0.04,
+   "colour": [
+    0.75,
+    0.18,
+    0.06
+   ],
+   "extent": "inner",
+   "why": "out.",
+   "id": "s6",
+   "at": {
+    "bar": 62,
+    "beat": 2,
+    "beats": 6
+   },
+   "start_s": 128.28,
+   "end_s": 131.29
+  }
+ ],
+ "bindings": [],
+ "gestures": [
+  {
+   "moment": 0,
+   "lead_beats": 10.4518,
+   "effect": "beam",
+   "pattern": "snap",
+   "colour": [
+    0.45,
+    0.68,
+    1
+   ],
+   "why": "STATEMENT 1 — the head alone, in steel, with the pars dark. The track makes a gesture and stops; so does the rig. Between 3.8s and 7.2s.",
+   "id": "g0",
+   "at": {
+    "bar": 1,
+    "beat": 4,
+    "beats": 8
+   },
+   "start_s": 3.83
+  },
+  {
+   "moment": 1,
+   "lead_beats": 8.0764,
+   "effect": "beam",
+   "pattern": "sweep",
+   "colour": [
+    0.45,
+    0.68,
+    1
+   ],
+   "why": "STATEMENT 2 — the head alone, in steel, with the pars dark. The track makes a gesture and stops; so does the rig. Between 9.8s and 14.6s.",
+   "id": "g1",
+   "at": {
+    "bar": 4,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 9.75
+  },
+  {
+   "moment": 3,
+   "lead_beats": 1.9993,
+   "effect": "beam",
+   "pattern": "snap",
+   "colour": [
+    0.45,
+    0.68,
+    1
+   ],
+   "why": "STATEMENT 3 — the head alone, in steel, with the pars dark. The track makes a gesture and stops; so does the rig. Between 20.8s and 21.8s.",
+   "id": "g2",
+   "at": {
+    "bar": 8,
+    "beat": 3,
+    "beats": 8
+   },
+   "start_s": 20.79
+  },
+  {
+   "moment": 4,
+   "lead_beats": 15.2619,
+   "effect": "beam",
+   "pattern": "sweep",
+   "colour": [
+    0.45,
+    0.68,
+    1
+   ],
+   "why": "STATEMENT 4 — the head alone, in steel, with the pars dark. The track makes a gesture and stops; so does the rig. Between 25.3s and 27.9s.",
+   "id": "g3",
+   "at": {
+    "bar": 10,
+    "beat": 4,
+    "beats": 8
+   },
+   "start_s": 25.29
+  },
+  {
+   "moment": 5,
+   "lead_beats": 28.2079,
+   "effect": "beam",
+   "pattern": "snap",
+   "colour": [
+    0.45,
+    0.68,
+    1
+   ],
+   "why": "STATEMENT 5 — the head alone, in steel, with the pars dark. The track makes a gesture and stops; so does the rig. Between 33.8s and 109.5s.",
+   "id": "g4",
+   "at": {
+    "bar": 15,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 33.75
+  },
+  {
+   "moment": 5,
+   "lead_beats": 28.2079,
+   "effect": "beam",
+   "pattern": "figure8",
+   "colour": [
+    0.9,
+    0.05,
+    0.04
+   ],
+   "why": "the head turns red the instant the track comes back out of its longest silence — the first blood in the show",
+   "id": "g5",
+   "at": {
+    "bar": 15,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 33.76
+  },
+  {
+   "moment": 0,
+   "lead_beats": 14.5493,
+   "effect": "blackout",
+   "for_beats": 4,
+   "why": "dark for the 2.0s the track is actually silent. The music returns at 3.83s and so does the light — on that beat, not the one after it.",
+   "id": "g6",
+   "at": {
+    "bar": 1,
+    "beat": 1,
+    "beats": 4
+   },
+   "start_s": 1.861
+  },
+  {
+   "moment": 0,
+   "lead_beats": 3.86,
+   "effect": "blackout",
+   "for_beats": 5,
+   "why": "dark for the 2.5s the track is actually silent. The music returns at 9.75s, which is a downbeat and so does the light — on that beat, not the one after it.",
+   "id": "g7",
+   "at": {
+    "bar": 3,
+    "beat": 1,
+    "beats": 5
+   },
+   "start_s": 7.271
+  },
+  {
+   "moment": 2,
+   "lead_beats": 6.374,
+   "effect": "blackout",
+   "for_beats": 8,
+   "why": "dark for the 6.2s the track is actually silent. The music returns at 20.79s and so does the light — on that beat, not the one after it.",
+   "id": "g8",
+   "at": {
+    "bar": 5,
+    "beat": 4,
+    "beats": 8
+   },
+   "start_s": 14.632
+  },
+  {
+   "moment": 4,
+   "lead_beats": 22.1704,
+   "effect": "blackout",
+   "for_beats": 7,
+   "why": "dark for the 3.5s the track is actually silent. The music returns at 25.29s and so does the light — on that beat, not the one after it.",
+   "id": "g9",
+   "at": {
+    "bar": 9,
+    "beat": 1,
+    "beats": 7
+   },
+   "start_s": 21.877
+  },
+  {
+   "moment": 4,
+   "lead_beats": 10.2538,
+   "effect": "blackout",
+   "for_beats": 8,
+   "why": "dark for the 5.9s the track is actually silent. The music returns at 33.75s, which is a downbeat and so does the light — on that beat, not the one after it.",
+   "id": "g10",
+   "at": {
+    "bar": 12,
+    "beat": 1,
+    "beats": 8
+   },
+   "start_s": 27.914
+  },
+  {
+   "moment": 11,
+   "lead_beats": 0,
+   "effect": "blackout",
+   "for_beats": 5,
+   "why": "dark for the 2.5s the track is actually silent. The music returns at 111.74s, which is a downbeat and so does the light — on that beat, not the one after it.",
+   "id": "g11",
+   "at": {
+    "bar": 52,
+    "beat": 4,
+    "beats": 5
+   },
+   "start_s": 109.555
+  },
+  {
+   "moment": 5,
+   "lead_beats": 28.2079,
+   "effect": "impact",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "for_beats": 2,
+   "why": "MONEY MOMENT 1 — out of the longest silence in the track (5.9 seconds), landing exactly on a downbeat. This is the reveal the whole opening has been saving for, and no earlier show used it.",
+   "id": "g12",
+   "at": {
+    "bar": 15,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 33.76
+  },
+  {
+   "moment": 6,
+   "lead_beats": 8.5514,
+   "effect": "impact",
+   "colour": [
+    0.9,
+    0.05,
+    0.04
+   ],
+   "extent": "all",
+   "for_beats": 2,
+   "why": "MONEY MOMENT 2 — THE TURN at 48.44s. Red, not white: the point is the change of colour, not a flash. The band stops at 47.65 and returns here, so this is the first frame of the second half of the song.",
+   "id": "g13",
+   "at": {
+    "bar": 22,
+    "beat": 2,
+    "beats": 2
+   },
+   "start_s": 48.44
+  },
+  {
+   "moment": 9,
+   "lead_beats": 2.4546,
+   "effect": "blackout",
+   "for_beats": 2,
+   "why": "two beats of nothing before the peak",
+   "id": "g14",
+   "at": {
+    "bar": 43,
+    "beat": 4,
+    "beats": 2
+   },
+   "start_s": 91.49
+  },
+  {
+   "moment": 9,
+   "lead_beats": 0,
+   "effect": "impact",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "extent": "all",
+   "for_beats": 2,
+   "why": "MONEY MOMENT 3 — THE PEAK at 92.50s. The score calls this the loudest stretch of the song and the recording's loudest half-second is the same moment. The only white in the second half.",
+   "id": "g15",
+   "at": {
+    "bar": 44,
+    "beat": 2,
+    "beats": 2
+   },
+   "start_s": 92.5
+  },
+  {
+   "moment": 9,
+   "lead_beats": 0.4751,
+   "effect": "beam",
+   "pattern": "snap",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "why": "the head is IN the peak. It was dark there — the pars at full and the only fixture that can point at anything sitting out the biggest moment in the show.",
+   "id": "g16",
+   "at": {
+    "bar": 44,
+    "beat": 2,
+    "beats": 8
+   },
+   "start_s": 92.5
+  },
+  {
+   "moment": 12,
+   "lead_beats": 1.9993,
+   "effect": "impact",
+   "colour": [
+    0.9,
+    0.05,
+    0.04
+   ],
+   "extent": "all",
+   "for_beats": 2,
+   "why": "MONEY MOMENT 4 — out of the late break. 2.5 seconds of nothing, back on the downbeat at 111.99s.",
+   "id": "g17",
+   "at": {
+    "bar": 54,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 111.99
+  },
+  {
+   "moment": 2,
+   "lead_beats": 0,
+   "effect": "gear",
+   "from": 1,
+   "to": 2,
+   "why": "17.8s — tempo moves 89 to 119 bpm",
+   "id": "g18",
+   "at": {
+    "bar": 7,
+    "beat": 1,
+    "beats": 2
+   },
+   "start_s": 17.75
+  },
+  {
+   "moment": 8,
+   "lead_beats": 7.918,
+   "effect": "ramp",
+   "to": 0.92,
+   "colour": [
+    0.9,
+    0.05,
+    0.04
+   ],
+   "curve": "ease",
+   "for_beats": 8,
+   "why": "83.3s — a build. The score measures its run-up at 4s, so the ramp is exactly that long.",
+   "id": "g19",
+   "at": {
+    "bar": 37,
+    "beat": 4,
+    "beats": 8
+   },
+   "start_s": 79.26
+  },
+  {
+   "moment": 10,
+   "lead_beats": 7.918,
+   "effect": "ramp",
+   "to": 0.92,
+   "colour": [
+    0.9,
+    0.05,
+    0.04
+   ],
+   "curve": "ease",
+   "for_beats": 8,
+   "why": "101.3s — a build. The score measures its run-up at 4s, so the ramp is exactly that long.",
+   "id": "g20",
+   "at": {
+    "bar": 46,
+    "beat": 4,
+    "beats": 8
+   },
+   "start_s": 97.25
+  },
+  {
+   "moment": 13,
+   "lead_beats": 0,
+   "effect": "strip",
+   "to": 0.08,
+   "over_beats": 4,
+   "why": "115.3s — lead-vocal, tambourine and vocal drop out. A controlled pull-back.",
+   "id": "g21",
+   "at": {
+    "bar": 55,
+    "beat": 4,
+    "beats": 4
+   },
+   "start_s": 115.29
+  },
+  {
+   "moment": 14,
+   "lead_beats": 0,
+   "effect": "swell",
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "for_beats": 8,
+   "rise": 0.7,
+   "why": "120.3s — the music goes up an octave. A rise, so it blooms and falls.",
+   "id": "g22",
+   "at": {
+    "bar": 58,
+    "beat": 2,
+    "beats": 8
+   },
+   "start_s": 120.29
+  },
+  {
+   "moment": 16,
+   "lead_beats": 0,
+   "effect": "gear",
+   "from": 1,
+   "to": 2,
+   "why": "126.7s — the beat drops away",
+   "id": "g23",
+   "at": {
+    "bar": 61,
+    "beat": 3,
+    "beats": 2
+   },
+   "start_s": 126.71
+  },
+  {
+   "moment": 9,
+   "lead_beats": 6.4334,
+   "effect": "strobe",
+   "hz": 18,
+   "colour": [
+    1,
+    1,
+    1
+   ],
+   "intensity": 0.8,
+   "extent": "all",
+   "why": "six beats of hardware strobe into the peak — the only strobe in the show, spent on the only place that has earned it",
+   "id": "g24",
+   "at": {
+    "bar": 42,
+    "beat": 4,
+    "beats": 2
+   },
+   "start_s": 89.469
+  }
+ ]
+}

@@ -6,6 +6,8 @@ const H = require("./helpers");
    extent's pars flash white and the head pops with a strobe; below it the rig
    sits very dim, so the hits read as sharp accents. */
 module.exports = function accent(params, ctx) {
+  /* head: false -- a binding on the row must not also light the head; the still
+     pin over the opening was reading at the binding's level, not its own. */
   const threshold = params.threshold != null ? params.threshold : 0.10;
   const extent = params.extent || "all";
   const pars = H.parsForExtent(extent);
@@ -24,7 +26,7 @@ module.exports = function accent(params, ctx) {
       if (over > 0) H.setPar(f, p, colour, H.clamp(rest + (0.98 - rest) * over, 0, 1));
       else H.setPar(f, p, bed, rest);
     }
-    H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHead(f, H.HEADS[0], {
       level: H.clamp(rest * 0.9 + (0.9 - rest) * over, 0, 1),
       colour: over > 0 ? colour : bed,
       pan: 0.662, tilt: 0.45,
@@ -38,7 +40,7 @@ module.exports = function accent(params, ctx) {
     render,
     frames: [render(0, 0)],
     loop_beats: 0,
-    per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS),
+    per_fixture: pars.map(p => p.id).concat(params.head === false ? [] : H.HEAD_IDS),
     threshold,
   };
 };

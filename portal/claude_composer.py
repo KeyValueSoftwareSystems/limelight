@@ -366,9 +366,16 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "selects a group: all, inner, outer, left, right, ends, single - where",
             "single is the rig's centre, one lamp if the count is odd and the middle",
             "pair if it is even. Lamps doing unrelated things is not coordination, and",
-            "neither is all of them doing the same thing. On a symmetric row a lamp",
-            "acting alone reads as a fault rather than a choice, so it is worth",
-            "spending deliberately and briefly.",
+            "neither is all of them doing the same thing.",
+            "",
+            "One lamp lit alone on a symmetric row reads as three broken lamps, not",
+            "as one chosen lamp, and it reads that way however it was reached - an",
+            "extent, an isolate naming a lamp, a binding narrowed to one fixture. It",
+            "is a real device and it is worth spending, but it is a punctuation mark,",
+            "not a look to sit in: held for a phrase it stops looking deliberate. If",
+            "the rig owns a fixture that can point, that is what isolates a person;",
+            "a row of PARs has no way to pick someone out and only looks faulty",
+            "trying.",
             "",
             "A designer builds a CUE LIST against the song's landmarks: intro, verse,",
             "pre, chorus, bridge, breakdown, drop, outro. Each cue is a look with a",
@@ -508,6 +515,23 @@ def brief_for(song, overview, effects_block, hub, rig="arc4-head"):
             "",
             "Mechanics, not taste. These are things the hardware and the baker do,",
             "measured by rendering them, and knowing them saves you a surprise.",
+            "",
+            "  How the three layers compose, which is not obvious and is worth having",
+            "  before you design rather than after:",
+            "",
+            "    A BINDING REPLACES the state on the fixtures it drives. It does not",
+            "    layer over it and it does not brighten it. For as long as a binding",
+            "    covers a lamp, the state you wrote for that section is simply not",
+            "    what that lamp is doing. Bind a narrow extent, or accept that the",
+            "    state is gone there.",
+            "",
+            "    Only ONE GESTURE renders on a fixture at a time. Two gestures over",
+            "    the same bars on the same lamps is not a richer look; one of them",
+            "    does not happen.",
+            "",
+            "    States stack FIRST MATCH WINS. A section-wide state and a state on a",
+            "    bar sub-span inside it do not blend - whichever matches first is the",
+            "    one that renders.",
             "",
             "  the waveform moves rather than when the music does. Six of them in a",
             "  plan of 111 cost 14 points of beat alignment and 13 points of darkness:",
@@ -746,6 +770,10 @@ def compose(song, model=None, hub=None, turns=90, keep=False, notes=None):
     os.makedirs(work, exist_ok=True)
 
     brief = brief_for(song, overview, C.build_effects_block(catalog), hub)
+    if notes is None:
+        standing = os.path.join(REPO, "portal", "notes", f"{song}.md")
+        if os.path.isfile(standing):
+            notes = open(standing).read()
     if notes:
         brief = brief + "\n\n" + notes
     with open(os.path.join(work, "brief.md"), "w") as f:

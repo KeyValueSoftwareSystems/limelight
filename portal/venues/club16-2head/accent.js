@@ -4,10 +4,12 @@ const H = require("./helpers");
 /* Binding: amount follows drum onsets above a threshold. The baker calls render()
    with the onset intensity (0 when no onset, 0..1 when an onset fires). */
 module.exports = function accent(params, ctx) {
+  /* head: false -- a binding on the row must not also light the head; the still
+     pin over the opening was reading at the binding's level, not its own. */
   const threshold = params.threshold != null ? params.threshold : 0.5;
   const extent = params.extent || "all";
   const pars = H.parsForExtent(extent);
-  const driven = pars.map(p => p.id).concat(H.HEAD_IDS);
+  const driven = pars.map(p => p.id).concat(params.head === false ? [] : H.HEAD_IDS);
 
   const rest = params.rest != null ? params.rest : 0.22;
   const bedC = H.parseColour(params.bed_colour,
@@ -25,7 +27,7 @@ module.exports = function accent(params, ctx) {
       else H.setPar(frame, p, bed, rest);
     }
     for (const h of H.HEADS) {
-      H.setHead(frame, h, {
+      if (params.head !== false) H.setHead(frame, h, {
         level: H.clamp(rest * 0.9 + (0.9 - rest) * over, 0, 1),
         colour: over > 0 ? colour : bed,
         strobe: over > 0.6 ? 18 : 0,

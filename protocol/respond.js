@@ -360,6 +360,54 @@ function respond(req) {
   }
   if (want.has("layers") && s.layers) out.layers = s.layers;
 
+  /* EVERY ADDRESSED THING CARRIES AN ABSOLUTE TIME.
+     A bar-and-beat is a musician's name for a position, not the position: it
+     only means something against one particular fitted grid, so anything
+     addressed in bars alone detaches the moment that grid is refitted. Seconds
+     are the anchor and survive a refit; bar and beat travel alongside as the
+     supporting evidence, for musicians and for editors that want to snap. */
+  const tempo = (s.grid.tempo && s.grid.tempo.length)
+    ? [...s.grid.tempo].sort((a, b) => a.from_beat - b.from_beat)
+    : [{ from_beat: 0, at_s: s.grid.first_beat_s || 0, bpm: s.grid.bpm }];
+  const secondsOf = (bar, beat = 1) => {
+    const n = (bar - 1) * bpb + (beat - 1);
+    let seg = tempo[0];
+    for (const c of tempo) { if (c.from_beat <= n) seg = c; else break; }
+    return +(seg.at_s + (n - seg.from_beat) * 60 / seg.bpm).toFixed(3);
+  };
+  const LEN = (s.song && s.song.length_s) || 1e9;
+  const clampS = (x) => +Math.max(0, Math.min(x, LEN)).toFixed(3);
+  /* A thing that already knows its own time is the authority on it. Deriving the
+     time back out of the bar label would round it to the grid and, for anything
+     starting before bar 1, produce a negative second. */
+  const OWN_TIME = { from_s: ["start"], to_s: ["end"], at_s: ["time_s", "t"] };
+  const stamp = (node) => {
+    if (Array.isArray(node)) return node.map(stamp);
+    if (!node || typeof node !== "object") return node;
+    const o = {};
+    for (const k of Object.keys(node)) o[k] = stamp(node[k]);
+    if (typeof o.bar === "number" && typeof o.beat === "number" && o.t == null && o.at_s == null)
+      o.at_s = clampS(secondsOf(o.bar, o.beat));
+    for (const [k, name] of [["from", "from_s"], ["to", "to_s"], ["at", "at_s"]]) {
+      if (o[name] != null) continue;
+      const src = OWN_TIME[name].map(n => o[n]).find(v => typeof v === "number");
+      if (src != null) { o[name] = clampS(src); continue; }
+      if (o[k] && typeof o[k].bar === "number") o[name] = clampS(secondsOf(o[k].bar, o[k].beat ?? 1));
+    }
+    return o;
+  };
+  for (const name of ["sections", "moments", "layers", "phrases", "harmony", "chords"])
+    if (out[name] != null) out[name] = stamp(out[name]);
+  if (out.energy && Array.isArray(out.energy.values) && out.energy.times == null) {
+    const fb = out.energy.from_bar ?? 1;
+    out.energy = {
+      ...out.energy,
+      from_s: clampS(secondsOf(fb)),
+      times: out.energy.values.map((_, i) => clampS(secondsOf(fb + i))),
+      anchored: "one time per value, so the curve can be read without the grid",
+    };
+  }
+
   const person = s.personality || s.profile;
   if (person) {
     out.personality = person;

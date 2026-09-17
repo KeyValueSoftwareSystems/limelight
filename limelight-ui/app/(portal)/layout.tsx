@@ -24,7 +24,22 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     document.body.dataset.role = role;
 
-    api.effects.list().then((d) => setEffects(d.effects)).catch(() => {});
+    /* The catalogue is not optional: buildClips needs it to draw a clip, so a
+       swallowed failure here means an imported show renders as an empty
+       timeline and nothing anywhere says why. Retry once, then say it out loud
+       in the console rather than failing silently. */
+    const loadEffects = (attempt = 0) =>
+      api.effects
+        .list()
+        .then((d) => setEffects(d.effects))
+        .catch((e) => {
+          if (attempt < 2) return setTimeout(() => loadEffects(attempt + 1), 800);
+          console.error(
+            "limelight: could not load the effect catalogue — the timeline will not be able to draw clips. Is the portal running?",
+            e,
+          );
+        });
+    loadEffects();
     api.layouts.list().then((d) => {
       setLayouts(d.layouts);
       setLayout(d.default);

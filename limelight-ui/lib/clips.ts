@@ -43,13 +43,22 @@ export function buildClips(
 
   /* Every span a person has claimed, whether it draws a clip or suppresses one.
      Both kinds take the beat away from the arranger. */
+  const dropped = new Set<string>();
   const claims: { fx: string; span: BeatSpan }[] = [];
   const replaced = new Set(edits.map((e) => e.from).filter(Boolean) as string[]);
   const mine: Clip[] = [];
 
   edits.forEach((edit, i) => {
+    /* An edit naming no known tile is dropped, because the baker drops it too:
+       resolveGesture refuses any effect the catalogue does not carry, so drawing
+       it would promise a clip that will never play.
+
+       But the drop is worth SAYING. The catalogue load swallows its own failure,
+       so one slow or restarted portal at page-load time leaves the catalogue
+       empty and every imported clip disappears with no message anywhere -- which
+       looks exactly like "the import did nothing". */
     const spec = byId.get(edit.type);
-    if (!spec) return;
+    if (!spec) { dropped.add(edit.type); return; }
     /* Schema 2 dropped `fx`; the family is found through the tile itself, so an
        unmapped effect still draws rather than vanishing. */
     const family = familyOfEffect(spec) ?? "hits";
@@ -75,6 +84,11 @@ export function buildClips(
       endS: secondsAtBeatIndex(span.to),
       params: { ...(spec.params ?? {}), ...(edit.params ?? {}) },
       overridden: false,
+      /* Undefined where an edit has not been seeded yet — lib/layers does that
+         on the way in. packRows reads it as "no lane claimed" and packs it,
+         which is the same picture the timeline drew before lanes were stored. */
+      layer: edit.layer,
+      kind: spec.kind ?? "gesture",
     });
   });
 
@@ -104,8 +118,19 @@ export function buildClips(
       overridden:
         replaced.has(p.id) ||
         claims.some((c) => c.fx === planKey(p.fx) && overlaps(c.span, span)),
+      /* No lane of its own: it packs into whatever is left beside the clips
+         that claim one, and takes that lane the moment it is taken over.
+         Punctuation is the arranger's gestures. */
+      kind: "gesture",
     });
   }
+
+  if (dropped.size && typeof console !== "undefined")
+    console.warn(
+      "limelight: " + dropped.size + " effect(s) are not in the loaded catalogue, so their clips are not drawn: "
+      + [...dropped].join(", ")
+      + (catalogue.length ? "" : " — the catalogue is EMPTY, which usually means the portal was unreachable when this page loaded."),
+    );
 
   return [...auto, ...mine].sort((a, b) => a.startS - b.startS);
 }

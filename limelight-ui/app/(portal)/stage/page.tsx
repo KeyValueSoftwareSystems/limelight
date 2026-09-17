@@ -25,11 +25,17 @@ import { ChatPanel } from "@/components/editor/ChatPanel";
 import { RigControl } from "@/components/portal/RigControl";
 import { buildClips, tileForClip } from "@/lib/clips";
 import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
+import { seedLayers } from "@/lib/layers";
 import { buildShowFile, serializeShowFile, showFileName } from "@/lib/showfile";
 import { downloadText } from "@/lib/download";
 import type { Clip, Edit, PaletteColour } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import type { Venue } from "@/lib/types";
+
+/** The undo token every part of one gesture carries — a drag, a trim, a slider
+ *  sweep, and the take-over that may start one. See store/portal.ts: writes
+ *  sharing a token collapse into a single step. */
+const LIVE = "live";
 
 export default function StagePage() {
   const router = useRouter();
@@ -55,6 +61,7 @@ export default function StagePage() {
      for one of those. */
   const [editorH, setEditorH] = useState(300);
   const columnRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<HTMLElement>(null);
 
   const MIN_EDITOR = 160;
   const MIN_PREVIEW = 150;
@@ -69,7 +76,13 @@ export default function StagePage() {
         Math.max(MIN_EDITOR, Math.min(next, box.height - MIN_PREVIEW)),
       );
     };
+    /* The column decides what the editor actually got — see the section below.
+       Taking that back as the new height keeps the number honest, so a later
+       window resize does not suddenly inflate the editor to a height the
+       creator never dragged it to. */
     const up = () => {
+      const got = editorRef.current?.getBoundingClientRect().height;
+      if (got) setEditorH(Math.round(got));
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
     };
@@ -118,6 +131,11 @@ export default function StagePage() {
   const setArm = usePortalStore((s) => s.setArm);
   const setSel = usePortalStore((s) => s.setSel);
   const removeEdit = usePortalStore((s) => s.removeEdit);
+  const undo = usePortalStore((s) => s.undo);
+  const redo = usePortalStore((s) => s.redo);
+  const endEditGroup = usePortalStore((s) => s.endEditGroup);
+  const canUndo = usePortalStore((s) => s.past.length > 0);
+  const canRedo = usePortalStore((s) => s.future.length > 0);
   const addEdit = usePortalStore((s) => s.addEdit);
   const updateEdit = usePortalStore((s) => s.updateEdit);
   const setEdits = usePortalStore((s) => s.setEdits);
@@ -311,8 +329,16 @@ export default function StagePage() {
         setJob(post.job);
         const baked = await pollBake(post.job, token);
         if (baked)
+          /* Every show comes in through here, so this is where lanes are
+             seeded. A plan that carries them keeps them; one written before
+             lanes existed gets the lanes the packing would have drawn it on
+             anyway, ONCE — after which they are the clips' own property and
+             nothing recomputes them. See lib/layers. */
           setEdits(
-            planToEdits(planData, baked, usePortalStore.getState().effects),
+            seedLayers(
+              planToEdits(planData, baked, usePortalStore.getState().effects),
+              baked.grid,
+            ),
           );
       } catch (e) {
         setStageMsg(
@@ -381,7 +407,17 @@ export default function StagePage() {
   const importPlan = useCallback(
     async (file: File) => {
       try {
-        await applyPlan(asPlan(JSON.parse(await file.text())), "imported plan");
+        const raw = JSON.parse(await file.text()) as Record<string, unknown>;
+        const plan = asPlan(raw);
+        /* Say what was loaded. Two files with the same name in two folders can
+           differ by two thirds of their cues, and the only way to tell which one
+           the dialog handed over is to count what came in. */
+        const n = (k: string) => ((plan as Record<string, unknown>)[k] as unknown[] | undefined)?.length ?? 0;
+        setStageMsg(
+          `importing ${file.name} (${(file.size / 1024).toFixed(1)} KB): ` +
+          `${n("states")} looks, ${n("bindings")} bindings, ${n("gestures")} cues…`,
+        );
+        await applyPlan(plan, `imported ${file.name} — ${n("states")}/${n("bindings")}/${n("gestures")}`);
       } catch (e) {
         setStageMsg(
           e instanceof Error ? "import failed: " + e.message : "import failed",
@@ -426,13 +462,24 @@ export default function StagePage() {
      refuses with "no show loaded". So on arm we post the current bake at the
      audio position, THEN arm. The layout polls rig status into the store every
      second, so the pill stays fresh. */
+  /* What the listener is HEARING now: the engine position minus the output
+     latency and the person's nudge -- the same number the preview draws for.
+     The rig used to be sent the raw position, so the real lamps ran ahead of
+     the sound by the whole output buffer while the preview did not, and the
+     two could never agree. The lamps' own delay is the rig's `lead_ms` trim,
+     applied on the portal side. */
+  const heard = useCallback(() => {
+    const st = usePortalStore.getState();
+    return position() - st.syncLatency - st.syncNudge;
+  }, [position]);
+
   const handleRigToggle = useCallback(async () => {
     const st = usePortalStore.getState();
     const current = st.rig;
     if (!current) return;
     const want = !current.armed;
     try {
-      if (want && st.job) await api.rig.at(st.job, position());
+      if (want && st.job) await api.rig.at(st.job, heard());
       const result = await api.rig.arm(want);
       if (result.error) {
         setStageMsg(`rig: ${result.error}`);
@@ -453,10 +500,10 @@ export default function StagePage() {
     const id = setInterval(() => {
       const st = usePortalStore.getState();
       if (st.rig?.armed && st.job)
-        api.rig.at(st.job, position()).catch(() => {});
-    }, 150);
+        api.rig.at(st.job, heard()).catch(() => {});
+    }, 100);
     return () => clearInterval(id);
-  }, [position]);
+  }, [heard]);
 
   /* ── the song's own show file, if the hub has one ──────────────────────────
      Authored show files are the point of the v2 baker, so one is loaded the
@@ -676,7 +723,7 @@ export default function StagePage() {
      bake lands. Blocking the timeline on a 1-3s round trip would make placing
      feel broken even though nothing is wrong. */
   const handlePlace = useCallback(
-    (edit: Edit | Edit[]): number[] => {
+    (edit: Edit | Edit[], displaced?: Map<number, number>): number[] => {
       const list = Array.isArray(edit) ? edit : [edit];
       if (!list.length) return [];
       /* Appended in ONE write, off the live list. A paste of four clips through
@@ -684,7 +731,15 @@ export default function StagePage() {
          and the indices handed back would be stale by the second one. */
       const st = usePortalStore.getState();
       const at = st.edits.length;
-      setEdits([...st.edits, ...list]);
+      /* `displaced` is the clips that had to step down a lane to make room for
+         this one — see displaceForInsert. They ride in the SAME write, so a
+         drop that moves three other clips is still one undo step and one bake.
+         Writing them separately first would take two presses of undo to put
+         back what one press of the pointer did. */
+      const base = displaced?.size
+        ? st.edits.map((e, i) => (displaced.has(i) ? { ...e, layer: displaced.get(i) } : e))
+        : st.edits;
+      setEdits([...base, ...list], "push");
       setSel(at + list.length - 1);
       rebuild();
       return list.map((_, i) => at + i);
@@ -705,13 +760,41 @@ export default function StagePage() {
      the gesture behind a 1-3s round trip for no benefit. */
   const handleUpdateLive = useCallback(
     (index: number, patch: Parameters<typeof updateEdit>[1]) =>
-      updateEdit(index, patch),
+      /* All of them carry the same token, so the store records the state
+         BEFORE the gesture once and nothing after it. Undo then takes back the
+         drag, not the last pixel of it. */
+      updateEdit(index, patch, LIVE),
     [updateEdit],
   );
 
+  /* The gesture is over: bake what it produced, and close the undo step so the
+     next drag of the same clip is a step of its own rather than more of this
+     one. */
   const handleCommit = useCallback(() => {
+    endEditGroup();
     rebuild();
-  }, [rebuild]);
+  }, [endEditGroup, rebuild]);
+
+  /* Stepping through history rebakes, because the lights are derived from the
+     edits and a show that looks undone but still plays the old cues is worse
+     than no undo at all. */
+  const handleUndo = useCallback(() => {
+    const before = usePortalStore.getState().edits;
+    undo();
+    if (usePortalStore.getState().edits === before) return false;
+    setSelection([]);
+    rebuild();
+    return true;
+  }, [undo, rebuild]);
+
+  const handleRedo = useCallback(() => {
+    const before = usePortalStore.getState().edits;
+    redo();
+    if (usePortalStore.getState().edits === before) return false;
+    setSelection([]);
+    rebuild();
+    return true;
+  }, [redo, rebuild]);
 
   /* Taking over one of the arranger's clips: copy what it does into an edit of
      your own at the same place. The machine's version stays on the timeline,
@@ -729,13 +812,21 @@ export default function StagePage() {
       const index = usePortalStore.getState().edits.length;
       /* Record which assignment this replaces. Overlap alone could not carry it:
          moving your copy away let the machine's version play again underneath. */
+      /* Under the gesture's own token: taking a clip over is the first half of
+         the drag that took it over, so one undo takes back both rather than
+         leaving a copy of the arranger's clip behind with nothing done to it. */
       addEdit({
         type: tile.id,
         bar: clip.bar,
         beat: clip.beat,
         beats: clip.beats,
+        /* The lane it was already drawn on. An arranger's clip carries none of
+           its own — the packer places it — so the timeline resolves that and
+           passes it in. Without it the new edit would be drawn wherever the
+           packer put it next while baking as though it sat on the top lane. */
+        ...(typeof clip.layer === "number" ? { layer: clip.layer } : {}),
         ...(clip.planId ? { from: clip.planId } : {}),
-      });
+      }, LIVE);
       return index;
     },
     [effects, addEdit],
@@ -881,9 +972,25 @@ export default function StagePage() {
             className="flex-none h-[7px] cursor-row-resize border-y border-solid border-line hover:bg-bg-raised transition-colors duration-[var(--dur-state)]"
           />
 
+          {/* The dragged height is what the editor ASKS for, not what it takes.
+              `flex-none` made it take it: the clamp above only knew the column
+              and the preview's floor, not the header, the target line, the
+              status line and the divider above it, so ~120px of the drag went
+              straight past the bottom of the column — and since the column hides
+              its overflow, the editor's own bottom edge went with it. What lives
+              down there is the energy band and the lanes' scrollbar, so the
+              timeline lost the two things at its foot exactly when it was made
+              bigger.
+
+              `flex-initial` keeps the height as the request and lets the column
+              shrink it to what is left. The preview's own min-height stops the
+              shrink coming out of the picture instead, so the divider simply
+              stops where there is no more room — which is what a divider that
+              has run out of room should do. */}
           <section
-            style={{ height: editorH }}
-            className="flex-none min-h-0 overflow-hidden"
+            ref={editorRef}
+            style={{ height: editorH, minHeight: MIN_EDITOR }}
+            className="flex-initial overflow-hidden"
           >
             <StageTimeline
               show={show}
@@ -901,6 +1008,10 @@ export default function StagePage() {
               onUpdateLive={handleUpdateLive}
               onMaterialize={handleMaterialize}
               onCommit={handleCommit}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              canUndo={canUndo}
+              canRedo={canRedo}
               reveal={reveal}
               baking={stageMsg}
             />

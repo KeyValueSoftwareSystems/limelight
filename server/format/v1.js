@@ -171,10 +171,15 @@ export function format(raw) {
         s.from_bar != null ? { bar: s.from_bar, beat: 1 } : place(s.start);
       const to =
         s.to_bar != null ? { bar: s.to_bar + 1, beat: 1 } : place(s.end);
-      const row = { from, to, name: s.label, start: s.start, end: s.end,
-                    nth: i + 1, like: s.label };
-      if (raw.sections.findIndex((o) => o.label === s.label) < i)
-        row.repeat = s.label;
+      /* A score that has already been through this formatter once carries the
+         section name under `name`; a raw one carries it under `label`. Reading
+         only `label` silently dropped every section name on the second pass --
+         the response came back with seven unnamed sections and nothing failed. */
+      const label = s.label != null ? s.label : s.name;
+      const row = { from, to, name: label, start: s.start, end: s.end,
+                    nth: i + 1, like: label };
+      if (raw.sections.findIndex((o) => (o.label != null ? o.label : o.name) === label) < i)
+        row.repeat = label;
       if (s.also_heard) row.also_heard = s.also_heard;
       for (const extra of ["confidence", "edge", "sudden", "sure"])
         if (s[extra] !== undefined) row[extra] = s[extra];
@@ -582,6 +587,14 @@ export function format(raw) {
     out.profile = person;
   }
 
+  /* A score that has already been through this formatter carries the chord
+     spans under `chords`; only a raw one has btc_chords_raw. Building solely
+     from the raw field dropped the whole chord track on the second pass -- and
+     the chords are where a lighting designer reads the major-to-minor turn that
+     the loudness curve cannot show. */
+  if (raw.chords && Array.isArray(raw.chords.spans) && raw.chords.spans.length)
+    out.chords = { of: raw.chords.of || "seconds", spans: raw.chords.spans };
+
   if (Array.isArray(raw.btc_chords_raw) && raw.btc_chords_raw.length) {
     const spans = raw.btc_chords_raw
       .filter((c) => c && Number.isFinite(c.start) && Number.isFinite(c.end))
@@ -647,6 +660,48 @@ export function format(raw) {
   if (raw.key_tempo) out.key_tempo = raw.key_tempo;
   if (raw.beat_consensus) out.beat_consensus = raw.beat_consensus;
   if (raw.emotion) out.emotion = raw.emotion;
+
+  /* EVERY ADDRESSED THING CARRIES AN ABSOLUTE TIME.
+     A bar-and-beat is a musician's name for a position, not the position: it
+     only means something against one particular fitted grid, so anything
+     addressed in bars alone detaches the moment that grid is refitted -- which
+     is how `layers` came to describe a song it no longer covered while every
+     test still passed. Seconds are the anchor and survive a refit; bar and beat
+     travel alongside as the supporting evidence, for musicians and for editors
+     that want to snap. Both, on everything, always. */
+  const secondsOf = (bar, beat = 1) => +atBeat((bar - 1) * bpb + (beat - 1)).toFixed(3);
+  const LEN = (raw.song && raw.song.length_s) || 1e9;
+  const clampS = (x) => +Math.max(0, Math.min(x, LEN)).toFixed(3);
+  /* A thing that already knows its own time is the authority on it. Deriving the
+     time back out of the bar label would round it to the grid and, for anything
+     starting before bar 1, produce a negative second. */
+  const OWN_TIME = { from_s: ["start"], to_s: ["end"], at_s: ["time_s", "t"] };
+  const stamp = (node) => {
+    if (Array.isArray(node)) return node.map(stamp);
+    if (!node || typeof node !== "object") return node;
+    const o = {};
+    for (const k of Object.keys(node)) o[k] = stamp(node[k]);
+    if (typeof o.bar === "number" && typeof o.beat === "number" && o.t == null && o.at_s == null)
+      o.at_s = clampS(secondsOf(o.bar, o.beat));
+    for (const [k, name] of [["from", "from_s"], ["to", "to_s"], ["at", "at_s"]]) {
+      if (o[name] != null) continue;
+      const src = OWN_TIME[name].map(n => o[n]).find(v => typeof v === "number");
+      if (src != null) { o[name] = clampS(src); continue; }
+      if (o[k] && typeof o[k].bar === "number") o[name] = clampS(secondsOf(o[k].bar, o[k].beat ?? 1));
+    }
+    return o;
+  };
+  for (const name of ["sections", "moments", "layers", "phrases", "harmony", "chords"])
+    if (out[name] != null) out[name] = stamp(out[name]);
+  if (out.energy && Array.isArray(out.energy.values) && out.energy.times == null) {
+    const fb = out.energy.from_bar ?? firstBar;
+    out.energy = {
+      ...out.energy,
+      from_s: clampS(secondsOf(fb)),
+      times: out.energy.values.map((_, i) => clampS(secondsOf(fb + i))),
+      anchored: "one time per value, so the curve can be read without the grid",
+    };
+  }
 
   return out;
 }

@@ -41,7 +41,8 @@ if (!scoreFile || !planFile || !lightsOut) {
 
 const { load } = require(path.join(LIGHTS, "fromscore.js"));
 const { frameAt, slew, makeStreamSampler, bindingValueFn,
-        makeBeatClock, makePerBeatWeight, makeEnergy } = require("./bakelib.js");
+        makeBeatClock, makePerBeatWeight, makeEnergy,
+        pickGesture, byLayer } = require("./bakelib.js");
 const score = load(scoreFile);
 const plan = JSON.parse(fs.readFileSync(planFile, "utf8"));
 
@@ -78,6 +79,9 @@ const sections = score.sections || [];
    gesture is a departure that brightens and RETURNS to the resting look, so it
    composites OVER the state/binding by max. */
 const REDUCTIVE = new Set(["blackout", "cut", "hush", "strip", "isolate", "anticipation"]);
+const SNAP = new Set(["impact", "stab", "bump", "blackout", "cut", "strobe", "accent", "flare"]);
+const cueFadeMs = (layout.limits && layout.limits.cue_fade_ms != null) ? layout.limits.cue_fade_ms : 180;
+const fadeFrom = {}, fadeLeft = {}, fadeSpan = {}, drivenBy = {}, lastOut = {};
 
 /* ── the real beat grid, per-beat weight, and energy curve ──────────────────
    Beat-locked effects render per frame against these instead of a nominal BPM,
@@ -194,7 +198,17 @@ function resolveGesture(g) {
     return null;
   }
 
-  const SKIP = new Set(["effect", "moment", "from_moment", "to_moment", "lead_beats", "why", "at_s", "from_s", "to_s"]);
+  /* Anchors are not dials. at_bar and friends were not in this list, so every
+     bar-anchored gesture handed the effect an `at_bar` parameter it never asked
+     for -- harmless so far, and exactly the kind of thing that later gets read
+     by accident. */
+  const SKIP = new Set(["effect", "moment", "from_moment", "to_moment", "lead_beats", "why",
+                        "at_s", "from_s", "to_s", "at", "id",
+                        "at_bar", "at_beat", "from_bar", "from_beat", "to_bar", "to_beat",
+                        /* The lane is priority, not a dial. Everything not named
+                           here is handed to the effect as a parameter it never
+                           asked for. */
+                        "layer"]);
   const params = { ...edef.dials };
   for (const [k, v] of Object.entries(g)) {
     if (!SKIP.has(k)) {
@@ -210,8 +224,21 @@ function resolveGesture(g) {
     resolvedParams[k] = typeof v === "object" && v !== null && v.default !== undefined ? v.default : v;
   }
 
-  return { eid, startS: Math.max(0, startS), endS, params: resolvedParams, kind: "gesture" };
+  return { eid, startS: Math.max(0, startS), endS, params: resolvedParams, kind: "gesture",
+           layer: g.layer };
 }
+
+/* A section's own seconds beat a bar label converted back into seconds.
+   Expressing 0.00s as a bar lands on "bar 1 beat 2" = 2.43s, so re-deriving the
+   boundary from the label moved the start of the show forward by two and a half
+   seconds and nothing could be placed there. The response anchors every section
+   in seconds; read those. */
+const secStart = sec => (sec.from_s != null ? sec.from_s
+                      : sec.start != null ? sec.start
+                      : S.secondsAt(sec.from.bar, sec.from.beat || 1));
+const secEnd = sec => (sec.to_s != null ? sec.to_s
+                    : sec.end != null ? sec.end
+                    : S.secondsAt(sec.to.bar, sec.to.beat || 1));
 
 function resolveBinding(b) {
   const eid = b.effect;
@@ -220,16 +247,39 @@ function resolveBinding(b) {
   const secIdx = b.section;
   if (secIdx == null || secIdx < 0 || secIdx >= sections.length) return null;
   const sec = sections[secIdx];
-  const startS = S.secondsAt(sec.from.bar, sec.from.beat || 1);
-  const endS = S.secondsAt(sec.to.bar, sec.to.beat || 1);
+  let startS = secStart(sec);
+  let endS = secEnd(sec);
+
+  /* A BINDING NARROWS ITSELF THE SAME WAY A STATE DOES.
+     resolveState has always honoured from_s/to_s; this did not, so every
+     binding silently spanned its whole song section no matter what it said. A
+     bass follow written for the eight bars of the riff (41.8-51.8s) actually
+     rendered across the entire chorus to 81.8s and held the room at one percent
+     through the biggest thirty seconds of the record; a 0.12s accent spanned
+     nineteen seconds. Nothing reported it, because the cue was doing exactly
+     what it was asked -- over a span nobody had asked for. */
+  if (b.from_bar != null && isFinite(b.from_bar)) {
+    const a = secondAtBeat(beatIndexOfBar(b.from_bar, b.from_beat));
+    if (isFinite(a)) startS = Math.max(startS, a);
+  }
+  if (b.to_bar != null && isFinite(b.to_bar)) {
+    const a = secondAtBeat(beatIndexOfBar(b.to_bar, b.to_beat));
+    if (isFinite(a)) endS = Math.min(endS, a);
+  }
+  if (b.from_s != null && isFinite(b.from_s)) startS = Math.max(startS, b.from_s);
+  if (b.to_s != null && isFinite(b.to_s)) endS = Math.min(endS, b.to_s);
+  if (!(endS > startS)) return null;
 
   const params = {};
   for (const [k, v] of Object.entries(b)) {
-    if (k !== "effect" && k !== "section" && k !== "why") {
+    if (k !== "effect" && k !== "section" && k !== "why" && k !== "layer" &&
+        k !== "from_bar" && k !== "to_bar" && k !== "from_beat" && k !== "to_beat" &&
+        k !== "from_s" && k !== "to_s") {
       params[k] = typeof v === "object" && v !== null && v.default !== undefined ? v.default : v;
     }
   }
-  return { eid, startS, endS, params, kind: "binding", streams: b.streams || b.stream };
+  return { eid, startS, endS, params, kind: "binding", streams: b.streams || b.stream,
+           layer: b.layer };
 }
 
 function resolveState(s) {
@@ -239,8 +289,8 @@ function resolveState(s) {
   const secIdx = s.section;
   if (secIdx == null || secIdx < 0 || secIdx >= sections.length) return null;
   const sec = sections[secIdx];
-  let startS = S.secondsAt(sec.from.bar, sec.from.beat || 1);
-  let endS = S.secondsAt(sec.to.bar, sec.to.beat || 1);
+  let startS = secStart(sec);
+  let endS = secEnd(sec);
 
   if (s.from_bar != null && isFinite(s.from_bar)) {
     const a = secondAtBeat(beatIndexOfBar(s.from_bar, s.from_beat));
@@ -256,13 +306,13 @@ function resolveState(s) {
 
   const params = {};
   for (const [k, v] of Object.entries(s)) {
-    if (k !== "effect" && k !== "section" && k !== "why" &&
+    if (k !== "effect" && k !== "section" && k !== "why" && k !== "layer" &&
         k !== "from_bar" && k !== "to_bar" && k !== "from_beat" && k !== "to_beat" &&
         k !== "from_s" && k !== "to_s") {
       params[k] = typeof v === "object" && v !== null && v.default !== undefined ? v.default : v;
     }
   }
-  return { eid, startS, endS, params, kind: "state" };
+  return { eid, startS, endS, params, kind: "state", layer: s.layer };
 }
 
 const resolvedGestures = (plan.gestures || []).map(resolveGesture).filter(Boolean);
@@ -288,8 +338,13 @@ function generateFrames(entry) {
 
 /* ── bake: compose layers per frame ───────────────────────────────────────── */
 
-const stateResults = resolvedStates.map(s => ({ ...s, dmx: generateFrames(s) })).filter(r => r.dmx);
-const bindingResults = resolvedBindings.map(b => ({ ...b, dmx: generateFrames(b) })).filter(r => r.dmx);
+/* Sorted by lane, because the base loops below take the FIRST binding (else the
+   first state) covering a fixture and stop — so lane order IS resolution order
+   for the bed. The editor already emits them sorted; doing it here too means a
+   plan written by hand resolves the way its lanes say rather than the way its
+   array happens to be ordered. With no lanes it is a stable no-op. */
+const stateResults = byLayer(resolvedStates).map(s => ({ ...s, dmx: generateFrames(s) })).filter(r => r.dmx);
+const bindingResults = byLayer(resolvedBindings).map(b => ({ ...b, dmx: generateFrames(b) })).filter(r => r.dmx);
 const gestureResults = resolvedGestures.map(g => ({ ...g, dmx: generateFrames(g) })).filter(r => r.dmx);
 
 const allFrames = [];
@@ -325,7 +380,13 @@ function sourceFrame(res, cache) {
   if (cache.has(res)) return cache.get(res);
   let f;
   if (res.dmx.beat && typeof res.dmx.render === "function") f = res.dmx.render(beatCtx(res.startS, res.endS, res._t));
-  else if (res.dmx.binding && typeof res.dmx.render === "function") f = res.dmx.render(res.valueAt(res._t), res._t);
+  else if (res.dmx.binding && typeof res.dmx.render === "function")
+    /* A binding-style effect placed as a GESTURE has no stream to follow, so it
+       renders at full value. Without this the baker threw on res.valueAt being
+       undefined, which is why fifteen effects that exist in every venue --
+       chase, ripple, bounce, sweep, converge and the rest -- could only ever be
+       used as bindings and were left out of the catalogue entirely. */
+    f = res.dmx.render(typeof res.valueAt === "function" ? res.valueAt(res._t) : 1, res._t);
   else f = frameAt(res.dmx, res._t - res.startS, res.endS - res.startS, bpm);
   cache.set(res, f);
   return f;
@@ -340,30 +401,33 @@ for (let t = 0; t < dur; t += 1 / fps) {
     if (!fc) continue;
     const o = fc.offset, W = fc.width;
     const isHead = fc.panCh >= 0;
+    const wasDriven = drivenBy[fid];
 
     /* base = the resting look for this fixture: an active binding, else the
        section state. It always sits under a gesture so a departure can return. */
-    let base = null;
+    let base = null, baseRes = null;
     for (const b of bindingResults) {
       if (t < b.startS || t >= b.endS || !b.dmx.per_fixture.includes(fid)) continue;
-      b._t = t; base = sourceFrame(b, cache); break;
+      b._t = t; base = sourceFrame(b, cache); baseRes = b; break;
     }
     if (!base) {
       for (const s of stateResults) {
         if (t < s.startS || t >= s.endS || !s.dmx.per_fixture.includes(fid)) continue;
-        s._t = t; base = sourceFrame(s, cache); break;
+        s._t = t; base = sourceFrame(s, cache); baseRes = s; break;
       }
     }
 
-    /* gesture: among those covering this fixture now, the most recently STARTED
-       one wins the overlap — a blackout placed at the drop supersedes the ramp
-       that has been building into it, not whichever was declared first. */
-    let g = null, gStart = -Infinity;
+    /* gesture: among those covering this fixture now, the TOP LANE wins, and
+       within a lane the most recently STARTED one — a blackout placed at the
+       drop supersedes the ramp that has been building into it, not whichever
+       was declared first. See pickGesture in bakelib.js. */
+    const covering = [];
     for (const cand of gestureResults) {
       if (t < cand.startS || t >= cand.endS) continue;
       if (!cand.dmx.per_fixture.includes(fid)) continue;
-      if (cand.startS >= gStart) { g = cand; gStart = cand.startS; }
+      covering.push(cand);
     }
+    const g = pickGesture(covering);
     let gsrc = null;
     if (g) { g._t = t; gsrc = sourceFrame(g, cache); }
 
@@ -380,6 +444,34 @@ for (let t = 0; t < dur; t += 1 / fps) {
     } else if (base) {
       for (let c = 0; c < W; c++) frame[o + c] = base[o + c] || 0;
     }
+
+    const nowDriven = (baseRes ? baseRes.eid + "@" + baseRes.startS : "-") + "/" + (g ? g.eid + "@" + g.startS : "-");
+    if (wasDriven !== undefined && nowDriven !== wasDriven && lastOut[fid]) {
+      const snap = g && SNAP.has(g.eid) && g.startS >= t - 1 / fps;
+      const ms = snap ? 0
+        : ((g && g.params && g.params.fade_ms != null) ? g.params.fade_ms
+          : (baseRes && baseRes.params && baseRes.params.fade_ms != null) ? baseRes.params.fade_ms : cueFadeMs);
+      const n = Math.round((ms / 1000) * fps);
+      if (n > 0) { fadeFrom[fid] = lastOut[fid].slice(); fadeLeft[fid] = n; fadeSpan[fid] = n; }
+      /* A cue that asks for NO fade arrives now, whatever was mid-fade before
+         it. Without this a hit landing three frames after a blackout ended was
+         blended into the tail of the bed's 180ms fade-up and came in as a
+         six-frame ramp -- the loudest arrival in the first half of the song
+         reading as a slow swell. */
+      else fadeLeft[fid] = 0;
+    }
+    drivenBy[fid] = nowDriven;
+
+    if (fadeLeft[fid] > 0) {
+      const p = 1 - fadeLeft[fid] / (fadeSpan[fid] + 1);
+      const from = fadeFrom[fid];
+      for (let c = 0; c < W; c++) {
+        if (c === fc.panCh - o || c === fc.tiltCh - o) continue;
+        frame[o + c] = Math.round(from[c] * (1 - p) + frame[o + c] * p);
+      }
+      fadeLeft[fid]--;
+    }
+    lastOut[fid] = frame.slice(o, o + W);
   }
 
   allFrames.push(frame);

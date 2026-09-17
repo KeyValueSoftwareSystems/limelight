@@ -64,8 +64,20 @@ function makeStreamSampler(score, opts) {
   const st = (score && score.stems_temporal) || {};
   const fine = (score && score.stems_fine) || null;
   const useFine = fine && fine.window_s > 0 && fine.stems && Object.keys(fine.stems).length;
-  const win = useFine ? fine.window_s : (st.window_s > 0 ? st.window_s : 0.5);
-  const stems = useFine ? fine.stems : (st.stems || {});
+  /* THE FORMAT MOVED. Scores served by the hub carry the per-instrument level
+     series as instruments_over_time.lanes; stems_temporal and stems_fine are
+     the older spelling and are simply absent. Reading only the old names left
+     the sampler with no stems at all, and a binding with no stem renders BLACK
+     -- so follow, split and accent have been painting darkness over every show
+     built from a current score, silently, apart from one line on stderr. */
+  const iot = (score && score.instruments_over_time) || null;
+  const iotLanes = (iot && iot.lanes && Object.keys(iot.lanes).length) ? iot.lanes : null;
+  const win = useFine ? fine.window_s
+            : (st.window_s > 0 ? st.window_s
+            : (iotLanes && iot.window_s > 0 ? iot.window_s : 0.5));
+  const stems = useFine ? fine.stems
+              : (st.stems && Object.keys(st.stems).length ? st.stems
+              : (iotLanes || {}));
   const names = Object.keys(stems);
   const byLower = new Map(names.map(n => [n.toLowerCase(), n]));
 
@@ -263,8 +275,15 @@ function makePerBeatWeight(hits, beats) {
    floor/peak so the room breathes with the mix. */
 function makeEnergy(score) {
   const st = (score && score.stems_temporal) || {};
-  const win = st.window_s > 0 ? st.window_s : 0.5;
-  const stems = st.stems || {};
+  /* same format move as makeStreamSampler above: with no stems this returned a
+     flat 0.5 for the whole song, which froze every state's floor and peak. The
+     room stopped breathing with the mix and nobody saw an error. */
+  const iot = (score && score.instruments_over_time) || null;
+  const iotLanes = (iot && iot.lanes && Object.keys(iot.lanes).length) ? iot.lanes : null;
+  const haveOld = st.stems && Object.keys(st.stems).length;
+  const win = haveOld ? (st.window_s > 0 ? st.window_s : 0.5)
+            : (iotLanes && iot.window_s > 0 ? iot.window_s : 0.5);
+  const stems = haveOld ? st.stems : (iotLanes || {});
   const names = Object.keys(stems);
   const nwin = names.length ? stems[names[0]].length : 0;
   const total = new Array(nwin).fill(0);
@@ -282,7 +301,45 @@ function makeEnergy(score) {
   return { energyAt };
 }
 
+/* ── which of the overlapping gestures plays ────────────────────────────────
+   Lower `layer` wins: that is the lane the creator stacked it on in the
+   timeline, and the whole point of stacking is to say which effect survives an
+   overlap. Within one lane the most recently STARTED wins, which is the rule
+   that has always applied here — a blackout placed at the drop supersedes the
+   ramp that has been building into it, not whichever was declared first.
+
+   A plan written before lanes existed carries none, so every candidate reads as
+   layer 0, they all compare equal, and the start-time rule is the whole rule
+   again. Such a plan bakes to the frames it always did. */
+function pickGesture(candidates) {
+  let best = null;
+  let bestLayer = 0;
+  for (const c of candidates) {
+    const layer = typeof c.layer === "number" && isFinite(c.layer) ? c.layer : 0;
+    if (!best) { best = c; bestLayer = layer; continue; }
+    if (layer < bestLayer) { best = c; bestLayer = layer; continue; }
+    if (layer === bestLayer && c.startS >= best.startS) { best = c; bestLayer = layer; }
+  }
+  return best;
+}
+
+/* Lane order for the BASE layer. baker.js takes the first binding (else the
+   first state) covering a fixture and stops, so sorting here is what makes the
+   lane decide it. Stable, so entries sharing a lane keep plan order — which is
+   what decided it before lanes existed. */
+function byLayer(entries) {
+  return entries
+    .map((e, i) => [e, i])
+    .sort((a, b) => {
+      const al = typeof a[0].layer === "number" && isFinite(a[0].layer) ? a[0].layer : 0;
+      const bl = typeof b[0].layer === "number" && isFinite(b[0].layer) ? b[0].layer : 0;
+      return al - bl || a[1] - b[1];
+    })
+    .map((p) => p[0]);
+}
+
 module.exports = {
   frameAt, slew, makeStreamSampler, bindingValueFn, clamp01,
   makeBeatClock, makePerBeatWeight, makeEnergy,
+  pickGesture, byLayer,
 };

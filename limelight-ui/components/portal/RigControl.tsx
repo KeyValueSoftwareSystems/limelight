@@ -32,11 +32,18 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
   const show = usePortalStore((s) => s.show);
   const { state, text, detail } = rigState(rig);
 
+  /* The chip only appears when it has something to say. "standby" on a rig
+     nobody is using is a permanent red-ish badge that trains people to ignore
+     the one case that matters -- send failing, mid-show. */
+  const worthSaying = state !== "off";
+
   return (
     <div className="flex items-center gap-[var(--spacing-s3)]">
-      <Pill state={state} title={detail}>
-        {text}
-      </Pill>
+      {worthSaying && (
+        <Pill state={state} title={detail}>
+          {text}
+        </Pill>
+      )}
       <Button
         variant="big"
         active={!!rig?.armed}

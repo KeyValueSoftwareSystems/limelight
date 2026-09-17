@@ -155,6 +155,9 @@
     },
     "extent": {
      "default": "inner"
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -192,6 +195,9 @@
     },
     "extent": {
      "default": "all"
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -211,7 +217,7 @@
    "name": "Drive",
    "kind": "state",
    "tier": 1,
-   "blurb": "Every beat hits: the two pairs call and respond, downbeats flash white, the head sweeps the room. The bed for a chorus or drop. stagger delays each lamp by a fraction of a beat across the rig, so the figure arrives left to right instead of all at once; 0 is together, 0.25 is a quarter beat apart",
+   "blurb": "Every beat hits: the two pairs call and respond, downbeats flash white, the head sweeps the room. The bed for a chorus or drop. stagger delays each lamp by a fraction of a beat across the rig, so the figure arrives left to right instead of all at once; 0 is together, 0.25 is a quarter beat apart. Hits and alternates its pairs once per beat unless `every_beats` says otherwise; on a slow or devotional song the bar is usually the right rate and the beat reads as frantic",
    "dimension": "amount",
    "returns": false,
    "dials": {
@@ -251,6 +257,36 @@
      "default": 0,
      "min": 0,
      "max": 0.9
+    },
+    "every_beats": {
+     "default": 1
+    },
+    "pop": {
+     "default": true
+    },
+    "flash_every": {
+     "default": 1
+    },
+    "flash_bar": {
+     "default": 0
+    },
+    "decay": {
+     "default": 0.55
+    },
+    "punch": {
+     "default": 0.45
+    },
+    "pairs": {
+     "default": true
+    },
+    "flash_len": {
+     "default": 0.15
+    },
+    "split": {
+     "default": "pairs"
+    },
+    "lean": {
+     "default": 0
     }
    },
    "fires_on": [
@@ -304,6 +340,9 @@
      "default": 1,
      "min": 0.25,
      "max": 8
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -452,6 +491,13 @@
     },
     "keep": {
      "default": []
+    },
+    "colour": {
+     "default": [
+      1,
+      0.85,
+      0.6
+     ]
     }
    },
    "fires_on": [
@@ -479,6 +525,13 @@
     },
     "curve": {
      "default": "ease"
+    },
+    "colour": {
+     "default": [
+      0.2,
+      0.4,
+      0.9
+     ]
     }
    },
    "span_anchors": [
@@ -552,6 +605,13 @@
      "default": 0.3,
      "min": 0,
      "max": 1
+    },
+    "colour": {
+     "default": [
+      1,
+      0.8,
+      0.5
+     ]
     }
    },
    "fires_on": [
@@ -596,6 +656,9 @@
     },
     "travel": {
      "default": true
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -613,7 +676,7 @@
    "name": "Isolate",
    "kind": "gesture",
    "tier": 2,
-   "blurb": "Place to one lamp, holds for its span. Needs at least three lamps to read as isolation.",
+   "blurb": "Place to one lamp, holds for its span. Needs at least three lamps to read as isolation. By default the moving head carries it and all the PARs drop together, so the row stays symmetric; naming a lamp with `which` puts the whole isolate on one PAR instead, which on a symmetric row reads as three broken lamps rather than one chosen one if it is held. By default the moving head carries it and all the PARs drop together so the row stays symmetric; naming a lamp with `which` puts the whole isolate on one PAR, which on a symmetric row reads as three broken lamps rather than one chosen one if it is held",
    "dimension": "place",
    "returns": true,
    "dials": {
@@ -631,6 +694,9 @@
      "default": 0.06,
      "min": 0,
      "max": 0.3
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -661,6 +727,13 @@
      "default": 4,
      "min": 1,
      "max": 16
+    },
+    "colour": {
+     "default": [
+      0.8,
+      0.7,
+      0.5
+     ]
     }
    },
    "fires_on": [
@@ -751,6 +824,16 @@
      "default": 2,
      "min": 0.5,
      "max": 4
+    },
+    "colour": {
+     "default": [
+      0.9,
+      0.6,
+      0.3
+     ]
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -786,6 +869,27 @@
      "default": 0.3,
      "min": 0,
      "max": 1
+    },
+    "colour": {
+     "default": null
+    },
+    "floor": {
+     "default": 0
+    },
+    "lean": {
+     "default": 0
+    },
+    "response": {
+     "default": 1
+    },
+    "spread": {
+     "default": 0.35
+    },
+    "travel": {
+     "default": 0.22
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -825,6 +929,12 @@
        1
       ]
      ]
+    },
+    "rest": {
+     "default": 0.14
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -858,6 +968,18 @@
      "default": 4,
      "min": 1,
      "max": 16
+    },
+    "bed_colour": {
+     "default": null
+    },
+    "colour": {
+     "default": null
+    },
+    "rest": {
+     "default": 0.22
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -894,6 +1016,9 @@
      "default": 1,
      "min": 0.3,
      "max": 1
+    },
+    "head": {
+     "default": true
     }
    },
    "fires_on": [
@@ -947,7 +1072,7 @@
    "name": "Beam",
    "kind": "gesture",
    "tier": 2,
-   "blurb": "Drives only the moving head \u2014 a room-wide sweep, figure-8 or corner-snap \u2014 while the pars hold. For a solo where the beam tells the story.",
+   "blurb": "The moving head as an instrument: stations snap to a new wall on every downbeat, snap goes wall to wall on the beat, sweep crosses once a bar. Drives only the head.",
    "dimension": "place",
    "returns": true,
    "dials": {
@@ -961,8 +1086,58 @@
       1
      ]
     },
+    "amount": {
+     "default": 0.85,
+     "min": 0,
+     "max": 1
+    },
+    "prism": {
+     "default": 0
+    },
+    "strobe": {
+     "default": 0
+    },
+    "strobe_on": {
+     "default": "downbeat"
+    },
     "gobo": {
      "default": 0
+    },
+    "accents": {
+     "default": []
+    },
+    "anticipate": {
+     "default": true
+    },
+    "prism_on": {
+     "default": "always"
+    },
+    "pan": {
+     "default": 0.66
+    },
+    "tilt": {
+     "default": 0.42
+    },
+    "pan_to": {
+     "default": null
+    },
+    "tilt_to": {
+     "default": null
+    },
+    "swing_beats": {
+     "default": 4
+    },
+    "nod": {
+     "default": 0.08
+    },
+    "nod_lead": {
+     "default": 0.25
+    },
+    "speed": {
+     "default": null
+    },
+    "spin": {
+     "default": null
     }
    },
    "fires_on": [
@@ -1020,6 +1195,174 @@
     "strobe"
    ],
    "default_beats": 1
+  },
+  {
+   "id": "chase",
+   "kind": "gesture",
+   "blurb": "One lamp at a time runs the row, the others dark. The wave: hard edges, a single travelling light, direction and rate you set.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "extent": {
+     "default": "all"
+    },
+    "level": {
+     "default": 0.9
+    },
+    "rest": {
+     "default": 0.0
+    },
+    "per_beat": {
+     "default": 1
+    },
+    "direction": {
+     "default": "lr"
+    },
+    "bounce": {
+     "default": false
+    },
+    "for_beats": {
+     "default": 4
+    },
+    "amount": {
+     "default": 0.9,
+     "min": 0,
+     "max": 1
+    },
+    "head": {
+     "default": true
+    },
+    "step": {
+     "default": false
+    },
+    "rest_colour": {
+     "default": null
+    },
+    "rest_to": {
+     "default": null
+    },
+    "anticipate": {
+     "default": false
+    },
+    "mirror": {
+     "default": false
+    }
+   },
+   "name": "Chase",
+   "dimension": "place",
+   "tier": 2,
+   "default_beats": 4,
+   "returns": true,
+   "min_fixtures": 3,
+   "fires_on": [
+    "a bar where the row should read as one travelling light"
+   ]
+  },
+  {
+   "id": "ripple",
+   "kind": "gesture",
+   "blurb": "A wave spreading out from the middle of the row to both ends.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 4
+    }
+   },
+   "name": "Ripple",
+   "dimension": "place",
+   "tier": 2,
+   "default_beats": 4,
+   "returns": true,
+   "min_fixtures": 4,
+   "fires_on": [
+    "a moment that should open outwards from the middle"
+   ]
+  },
+  {
+   "id": "bounce",
+   "kind": "gesture",
+   "blurb": "A single light running to one end of the row and back.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "extent": {
+     "default": "all"
+    },
+    "for_beats": {
+     "default": 4
+    }
+   },
+   "name": "Bounce",
+   "dimension": "place",
+   "tier": 2,
+   "default_beats": 4,
+   "returns": true,
+   "min_fixtures": 3,
+   "fires_on": [
+    "a figure that goes and comes back inside one bar"
+   ]
+  },
+  {
+   "id": "glare",
+   "kind": "gesture",
+   "blurb": "The whole row held on for the length of the cue. The blaze a travelling light falls out of.",
+   "dials": {
+    "colour": {
+     "default": [
+      1,
+      1,
+      1
+     ]
+    },
+    "extent": {
+     "default": "all"
+    },
+    "level": {
+     "default": 1.0
+    },
+    "rise": {
+     "default": 0
+    },
+    "for_beats": {
+     "default": 2
+    },
+    "amount": {
+     "default": 1.0,
+     "min": 0,
+     "max": 1
+    },
+    "head": {
+     "default": true
+    }
+   },
+   "name": "Glare",
+   "dimension": "amount",
+   "tier": 1,
+   "default_beats": 2,
+   "returns": true,
+   "min_fixtures": 1,
+   "fires_on": [
+    "the half of a bar that carries the weight"
+   ]
   }
  ]
 }

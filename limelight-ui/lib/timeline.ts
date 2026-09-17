@@ -65,6 +65,7 @@ export interface BarTick {
 const BAR_STEPS = [1, 2, 4, 8, 16, 32, 64, 128];
 const MIN_TICK_PX = 40;
 
+
 export function barTicks(view: View, grid: Grid, width: number): BarTick[] {
   const { secondsAtBar, bpb } = makeGridClock(grid);
   const secPerBar = (60 / grid.bpm) * bpb;

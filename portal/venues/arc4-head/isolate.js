@@ -6,6 +6,10 @@ const H = require("./helpers");
    (pan tracks its horizontal position). Holds for its span with a faint breath so
    it isn't a dead frame. Needs >=3 lamps to read; 4 pars is fine. */
 module.exports = function isolate(params, ctx) {
+  /* head: false -- leave the moving head to whichever cue owns it. A state that
+     lights the head cannot be dimmed by a gesture (the baker never lets a
+     gesture make the head darker than its bed), so a still low pin over a
+     pulse state came out at the pulse's brightness, not the pin's. */
   const colour = H.parseColour(params.colour, [1, 0.8, 0.4]);
   const rest = params.rest != null ? params.rest : 0.03;
 
@@ -17,6 +21,7 @@ module.exports = function isolate(params, ctx) {
     if (found >= 0) idx = found;
   }
   const target = H.PARS[idx];
+  const pointer = H.HEADS.length > 0 && params.which == null;
   const panAim = 0.40 + 0.40 * (idx / (H.PARS.length - 1)); // leftmost -> low pan, rightmost -> high
 
   const loopBeats = 2;
@@ -26,16 +31,18 @@ module.exports = function isolate(params, ctx) {
     const breath = 1 + 0.08 * Math.sin(2 * Math.PI * (i / N));
     const f = H.emptyFrame();
     for (const par of H.PARS) {
-      if (par.id === target.id) H.setPar(f, par, colour, 0.7 * breath);
+      if (pointer) H.setPar(f, par, [0.6, 0.6, 0.6], rest);
+      else if (par.id === target.id) H.setPar(f, par, colour, 0.7 * breath);
       else H.setPar(f, par, [0.6, 0.6, 0.6], rest);
     }
-    H.setHead(f, H.HEADS[0], { level: 0.6 * breath, colour, pan: panAim, tilt: 0.30 });
+    if (pointer) H.setHead(f, H.HEADS[0], { level: 0.85 * breath, colour, pan: panAim, tilt: 0.30 });
+    else if (H.HEADS.length) H.setHead(f, H.HEADS[0], { level: 0.6 * breath, colour, pan: panAim, tilt: 0.30 });
     frames.push(f);
   }
 
   return {
     frames,
     loop_beats: loopBeats,
-    per_fixture: H.PAR_IDS.concat(H.HEAD_IDS),
+    per_fixture: H.PAR_IDS.concat(params.head === false ? [] : H.HEAD_IDS),
   };
 };

@@ -28,6 +28,8 @@ const COLOUR_WHEEL = [
 ];
 
 const HEAD_PARK = { pan: 169, tilt: 127, speed: 200, level: 0 };
+/* the colour wheel turns continuously at and above this value (rig.py: COLOUR_SPIN_MIN) */
+const SPIN_MIN = 150;
 
 /* Fixture layout: 16 pars, 2 heads. Addresses are 1-based in the layout but
    DMX frame arrays are 0-based, so par_01 at address 1 starts at index 0. */
@@ -60,7 +62,14 @@ function parsForExtent(extent) {
     case "right":  return RIGHT;
     case "ends":   return ENDS;
     case "single": return CENTRE;
-    case "all": default: return PARS;
+    case "all": default: {
+      /* "lamp3": one lamp by its place in the row, 1 = leftmost. A cue that wants
+         to mark the lamp AHEAD of a walker needs to name a single lamp, and the
+         pairs cannot say that. */
+      const m = /^lamp(\d+)$/.exec(String(extent || ""));
+      if (m) { const p = PARS[Number(m[1]) - 1]; return p ? [p] : []; }
+      return PARS;
+    }
   }
 }
 

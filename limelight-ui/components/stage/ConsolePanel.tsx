@@ -117,6 +117,19 @@ export function ConsolePanel() {
           }
           onChange={(v) => setSyncNudge(v / 1000)}
         />
+        {/* The lamps' own delay: a par takes a frame or two to light after the
+            packet arrives, the head's dimmer longer. Frames are sent this many
+            milliseconds ahead of the heard position so the light lands ON the
+            sound. Set it once per room, by ear, on a hit. */}
+        <Fader
+          label="Lamps lead"
+          value={Math.round(trims.lead_ms ?? 0)}
+          min={0}
+          max={200}
+          displayValue={`${Math.round(trims.lead_ms ?? 0)} ms`}
+          hint="frames go to the rig this early, to cover the lamps' own response · raise it if hits land late"
+          onChange={(v) => setTrimValue({ lead_ms: v })}
+        />
         <Fader
           label="How much"
           value={w !== null && w !== undefined ? Math.round(w * 100) : 50}

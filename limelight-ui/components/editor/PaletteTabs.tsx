@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { effectIcon } from "@/lib/effectIcons";
 import { beginPaletteDrag, useDrag } from "@/store/drag";
+import { EffectCard } from "./EffectCard";
 import type { Effect } from "@/lib/types";
 
 /* The palette: one tabbed section, four across, every tile labelled. An unnamed
@@ -34,6 +35,7 @@ function Tile({
   active,
   onPointerDown,
   onClick,
+  onDescribe,
   title,
 }: {
   src: string;
@@ -41,14 +43,25 @@ function Tile({
   active?: boolean;
   onPointerDown?: (e: React.PointerEvent) => void;
   onClick?: () => void;
+  /** Hand back the tile's own box, or null on the way out, for whatever is
+   *  describing it. The tile knows where it is; nothing else does. */
+  onDescribe?: (box: DOMRect | null) => void;
   title?: string;
 }) {
+  const describe = (e: React.SyntheticEvent) =>
+    onDescribe?.((e.currentTarget as HTMLElement).getBoundingClientRect());
   return (
     <button
       type="button"
       title={title ?? label}
       onPointerDown={onPointerDown}
       onClick={onClick}
+      /* Focus as well as hover: the palette is reachable by tab, and a card
+         only the mouse can summon is a card half the keyboard cannot read. */
+      onPointerEnter={onDescribe ? describe : undefined}
+      onPointerLeave={onDescribe ? () => onDescribe(null) : undefined}
+      onFocus={onDescribe ? describe : undefined}
+      onBlur={onDescribe ? () => onDescribe(null) : undefined}
       aria-pressed={active}
       className="flex flex-col items-center gap-[6px] bg-transparent border-0 p-0 cursor-grab active:cursor-grabbing touch-none group"
     >
@@ -86,6 +99,20 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
   const armed = useDrag((s) => s.armed);
   const arm = useDrag((s) => s.arm);
 
+  /* The effect being read about, and the tile it is being read from. */
+  const [reading, setReading] = useState<{ fx: Effect; box: DOMRect } | null>(null);
+
+  const describe = useCallback(
+    (fx: Effect, box: DOMRect | null) => setReading(box ? { fx, box } : null),
+    [],
+  );
+
+  /* The rail scrolls under the card, and the card is placed in VIEWPORT
+     coordinates off a box measured when the pointer arrived. Rather than
+     re-measure on every scroll frame to keep it pinned to a tile that is
+     sliding away, it is dismissed: you have moved on. */
+  const onScroll = useCallback(() => setReading(null), []);
+
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col">
       <div className="flex-none flex gap-[var(--spacing-s4)] px-[var(--spacing-s4)] pt-[var(--spacing-s3)] border-b border-solid border-line">
@@ -104,7 +131,10 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
       </div>
 
       {/* the only thing in the rail that scrolls */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-[var(--spacing-s3)] py-[var(--spacing-s3)]">
+      <div
+        onScroll={onScroll}
+        className="flex-1 min-h-0 overflow-y-auto px-[var(--spacing-s3)] py-[var(--spacing-s3)]"
+      >
         {tab === "effects" ? (
           <div className={GRID}>
             {effects.map((fx) => (
@@ -112,10 +142,19 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
                 key={fx.id}
                 src={effectIcon(fx)}
                 label={fx.name}
-                title={`${fx.name} — ${fx.blurb}`}
+                /* The blurb has its own card now. Leaving it on `title` as
+                   well meant the browser's tooltip arrived a second later,
+                   underneath, saying the same thing in a different box. */
+                title={fx.name}
                 active={dragging?.id === fx.id || armed?.id === fx.id}
-                onPointerDown={(e) => beginPaletteDrag(fx, e)}
+                /* Picking the tile up is the moment the deciding stops, so the
+                   card goes with the press. It has to be dropped HERE rather
+                   than when the drag ends: a pointer captured by the drag never
+                   gives the tile its pointerleave, so the card would sit in the
+                   rail naming an effect the pointer left two seconds ago. */
+                onPointerDown={(e) => { setReading(null); beginPaletteDrag(fx, e); }}
                 onClick={() => arm(fx)}
+                onDescribe={(box) => describe(fx, box)}
               />
             ))}
           </div>
@@ -147,6 +186,8 @@ export function PaletteTabs({ effects }: { effects: Effect[] }) {
           </span>
         ) : null}
       </div>
+
+      {reading && !dragging && <EffectCard effect={reading.fx} anchor={reading.box} />}
     </div>
   );
 }

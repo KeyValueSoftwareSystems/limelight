@@ -22,6 +22,6 @@ module.exports = function impact(params, ctx) {
   return {
     frames,
     loop_beats: forBeats,
-    per_fixture: pars.map(p => p.id).concat(H.HEAD_IDS),
+    per_fixture: params.head === false ? pars.map(p => p.id) : pars.map(p => p.id).concat(H.HEAD_IDS),
   };
 };
