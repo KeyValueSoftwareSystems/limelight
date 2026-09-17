@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Radio, AlertTriangle, CheckCircle2, XCircle, ChevronDown, RefreshCw, ExternalLink } from "lucide-react";
 import { usePortalStore } from "@/store/portal";
 import type { RigStatus } from "@/lib/types";
 
@@ -8,75 +9,66 @@ type RigState = "ready" | "unreachable" | "sending" | "off";
 
 interface RigInfo {
   state: RigState;
+  icon: typeof Radio;
   colour: string;
+  bgColour: string;
   headline: string;
   detail: string;
   remedy: string | null;
-  action: "send" | "stop" | "retry" | null;
 }
 
 function diagnose(r: RigStatus | null, hasShow: boolean): RigInfo {
   if (!r)
     return {
-      state: "unreachable",
-      colour: "var(--danger)",
+      state: "unreachable", icon: XCircle,
+      colour: "var(--danger)", bgColour: "rgba(248, 113, 113, 0.08)",
       headline: "Portal unreachable",
       detail: "Cannot connect to the lighting server.",
       remedy: "Check that the portal process is running.",
-      action: "retry",
     };
 
   if (!r.can_send)
     return {
-      state: "unreachable",
-      colour: "var(--warn)",
+      state: "unreachable", icon: AlertTriangle,
+      colour: "var(--warn)", bgColour: "rgba(251, 191, 36, 0.08)",
       headline: "No output",
       detail: r.why_not ?? "The Art-Net socket is not open.",
-      remedy: r.why_not
-        ? "Check the cable and the network interface."
-        : null,
-      action: "retry",
+      remedy: r.why_not ? null : "Check the cable and the network interface.",
     };
 
   if (r.sending)
     return {
-      state: "sending",
-      colour: "var(--ok)",
+      state: "sending", icon: Radio,
+      colour: "var(--ok)", bgColour: "rgba(52, 211, 153, 0.08)",
       headline: `Sending · ${r.frames_sent.toLocaleString()} frames`,
       detail: `40 fps → Art-Net ${r.gateway} universe ${r.universe}`,
       remedy: null,
-      action: "stop",
     };
 
   if (r.armed) {
     if (r.last_error)
       return {
-        state: "unreachable",
-        colour: "var(--danger)",
+        state: "unreachable", icon: XCircle,
+        colour: "var(--danger)", bgColour: "rgba(248, 113, 113, 0.08)",
         headline: "Send failing",
         detail: r.last_error,
         remedy: "Check the rig connection and retry.",
-        action: "retry",
       };
     return {
-      state: "ready",
-      colour: "var(--ok)",
-      headline: `Armed · ${r.frames_sent.toLocaleString()} frames sent`,
+      state: "ready", icon: CheckCircle2,
+      colour: "var(--ok)", bgColour: "rgba(52, 211, 153, 0.08)",
+      headline: `Armed · ${r.frames_sent.toLocaleString()} sent`,
       detail: `Socket open to ${r.gateway} universe ${r.universe}`,
       remedy: null,
-      action: "stop",
     };
   }
 
   return {
-    state: "ready",
-    colour: "var(--ink-dimmer)",
-    headline: `Rig ready · universe ${r.universe} · via ${r.route_via ?? r.gateway}`,
-    detail: r.conflict
-      ? `${r.conflict} · socket open, sending nothing`
-      : "Socket open, sending nothing",
+    state: "ready", icon: Radio,
+    colour: "var(--ink-dimmer)", bgColour: "transparent",
+    headline: `Universe ${r.universe} · via ${r.route_via ?? r.gateway}`,
+    detail: r.conflict ? r.conflict : "Standby",
     remedy: null,
-    action: hasShow && r.can_send ? "send" : null,
   };
 }
 
@@ -84,118 +76,114 @@ export function RigControl({ onToggle }: { onToggle: () => void }) {
   const rig = usePortalStore((s) => s.rig);
   const show = usePortalStore((s) => s.show);
   const [expanded, setExpanded] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   const info = diagnose(rig, !!show);
   const isSending = info.state === "sending";
-  const canSend = rig?.can_send && !!show;
 
-  const handleRetry = useCallback(() => {
-    onToggle();
-  }, [onToggle]);
+  useEffect(() => {
+    if (!expanded) return;
+    const close = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setExpanded(false);
+    };
+    window.addEventListener("pointerdown", close);
+    return () => window.removeEventListener("pointerdown", close);
+  }, [expanded]);
+
+  const handleRetry = useCallback(() => { onToggle(); }, [onToggle]);
+
+  const _showStatus = info.state !== "off" as string || info.state === ("ready" as string);
 
   return (
-    <div className="relative flex items-center gap-[8px]">
-      {/* Status indicator */}
+    <div className="relative" ref={ref}>
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-[8px] px-[10px] h-[var(--hit)] rounded-[6px] border border-solid bg-transparent cursor-pointer transition-colors duration-[var(--dur-state)] hover:bg-bg-raised"
-        style={{ borderColor: info.colour === "var(--ink-dimmer)" ? "var(--line)" : info.colour }}
-        title={`${info.headline}\n${info.detail}`}
+        className="flex items-center gap-[7px] h-[32px] px-[10px] rounded-[var(--radius-sm)] border border-solid cursor-pointer transition-all duration-[var(--dur-state)] hover:bg-bg-raised"
+        style={{
+          borderColor: info.colour === "var(--ink-dimmer)" ? "var(--line)" : `color-mix(in srgb, ${info.colour} 30%, transparent)`,
+          background: info.bgColour,
+        }}
       >
         <span
-          className={`w-[7px] h-[7px] rounded-full flex-none ${isSending ? "animate-sending" : ""}`}
+          className={`w-[6px] h-[6px] rounded-full flex-none ${isSending ? "animate-sending" : ""}`}
           style={{ background: info.colour }}
         />
-        <span className="text-[12px] tracking-[0.04em] whitespace-nowrap" style={{ color: info.colour === "var(--ink-dimmer)" ? "var(--ink-dim)" : info.colour }}>
-          {info.state === "ready" && !rig?.armed ? "Standby" : info.state === "sending" ? "Sending" : info.state === "unreachable" ? "No output" : "Armed"}
+        <span className="text-[12px] font-medium" style={{ color: info.colour === "var(--ink-dimmer)" ? "var(--ink-dim)" : info.colour }}>
+          {info.state === "sending" ? "Live" : info.state === "unreachable" ? "Offline" : info.state === "ready" && rig?.armed ? "Armed" : "Standby"}
         </span>
+        <ChevronDown size={11} className="text-ink-dimmer" />
       </button>
 
-      {/* Primary action button */}
-      {info.action === "send" && (
-        <button
-          type="button"
-          onClick={onToggle}
-          disabled={!canSend}
-          className="h-[var(--hit)] px-[16px] rounded-[6px] border-0 bg-accent text-[#0B0C0E] text-[13px] font-medium tracking-[0.02em] cursor-pointer transition-all duration-[var(--dur-state)] hover:brightness-110 disabled:opacity-40 disabled:cursor-default"
-        >
-          Send to the rig
-        </button>
-      )}
-      {info.action === "stop" && (
-        <button
-          type="button"
-          onClick={onToggle}
-          className="h-[var(--hit)] px-[16px] rounded-[6px] border border-solid border-danger bg-transparent text-danger text-[13px] font-medium tracking-[0.02em] cursor-pointer transition-colors duration-[var(--dur-state)] hover:bg-danger hover:text-[#0B0C0E]"
-        >
-          Stop sending
-        </button>
-      )}
-
-      {/* Expanded detail panel */}
       {expanded && (
         <div
-          className="absolute right-0 top-[calc(100%+6px)] z-50 w-[340px] rounded-[8px] border border-solid border-line-strong bg-bg-overlay p-[16px] text-[13px]"
+          className="absolute right-0 top-[calc(100%+6px)] z-50 w-[320px] rounded-[var(--radius-md)] bg-bg-overlay p-0 overflow-hidden animate-scale-in"
           style={{ boxShadow: "var(--elev-popover)" }}
         >
-          <div className="flex items-start gap-[10px] mb-[10px]">
-            <span
-              className={`mt-[3px] w-[8px] h-[8px] rounded-full flex-none ${isSending ? "animate-sending" : ""}`}
-              style={{ background: info.colour }}
-            />
-            <div className="min-w-0">
-              <p className="m-0 font-medium text-ink">{info.headline}</p>
-              <p className="m-0 mt-[4px] text-[12px] text-ink-dim leading-[1.5]">{info.detail}</p>
+          <div className="p-[16px]" style={{ background: info.bgColour }}>
+            <div className="flex items-start gap-[10px]">
+              <info.icon size={16} style={{ color: info.colour }} className="flex-none mt-[1px]" />
+              <div className="min-w-0 flex-1">
+                <p className="m-0 text-[13px] font-semibold text-ink">{info.headline}</p>
+                <p className="m-0 mt-[4px] text-[12px] text-ink-dim leading-[1.6]">{info.detail}</p>
+              </div>
             </div>
           </div>
 
           {info.remedy && (
-            <div className="mt-[12px] pt-[12px] border-t border-solid border-line">
-              <p className="m-0 text-[12px] text-ink-dim leading-[1.5]">
-                <span className="text-warn font-medium">How to fix: </span>
+            <div className="px-[16px] py-[12px] border-t border-solid border-line">
+              <p className="m-0 text-[12px] text-ink-dim leading-[1.6]">
                 {info.remedy}
               </p>
-              {info.action === "retry" && (
-                <button
-                  type="button"
-                  onClick={handleRetry}
-                  className="mt-[8px] h-[28px] px-[12px] rounded-[4px] border border-solid border-line-strong bg-bg-raised text-[12px] text-ink cursor-pointer transition-colors duration-[var(--dur-state)] hover:bg-bg-overlay"
-                >
-                  Retry connection
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="flex items-center gap-[6px] mt-[8px] h-[28px] px-[12px] rounded-[var(--radius-sm)] border border-solid border-line-strong bg-bg-raised text-[12px] font-medium text-ink cursor-pointer hover:bg-bg-overlay transition-all duration-[var(--dur-state)] active:scale-[0.98]"
+              >
+                <RefreshCw size={12} />
+                Retry
+              </button>
             </div>
           )}
 
           {rig && (
-            <div className="mt-[12px] pt-[12px] border-t border-solid border-line">
-              <div className="grid grid-cols-2 gap-x-[16px] gap-y-[4px] text-[11px]">
-                <span className="text-ink-dimmer">Gateway</span>
-                <span className="mono text-ink-dim">{rig.gateway}</span>
-                <span className="text-ink-dimmer">Universe</span>
-                <span className="mono text-ink-dim">{rig.universe}</span>
-                <span className="text-ink-dimmer">Route</span>
-                <span className="mono text-ink-dim">{rig.route_via ?? "—"}</span>
-                <span className="text-ink-dimmer">Frames sent</span>
-                <span className="mono text-ink-dim">{rig.frames_sent.toLocaleString()}</span>
-                {rig.conflict && (
-                  <>
-                    <span className="text-ink-dimmer">Conflict</span>
-                    <span className="text-warn text-[11px]">{rig.conflict}</span>
-                  </>
-                )}
+            <div className="px-[16px] py-[12px] border-t border-solid border-line">
+              <div className="grid grid-cols-[auto_1fr] gap-x-[16px] gap-y-[6px] text-[11px]">
+                {([
+                  ["Gateway", rig.gateway],
+                  ["Universe", String(rig.universe)],
+                  ["Route", rig.route_via ?? "—"],
+                  ["Frames", rig.frames_sent.toLocaleString()],
+                ] as [string, string][]).map(([k, v]) => (
+                  <div key={k} className="contents">
+                    <span className="text-ink-dimmer">{k}</span>
+                    <span className="mono text-ink-dim text-right">{v}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={() => setExpanded(false)}
-            className="absolute top-[10px] right-[10px] w-[24px] h-[24px] flex items-center justify-center rounded-[4px] border-0 bg-transparent text-ink-dimmer cursor-pointer hover:text-ink hover:bg-bg-raised transition-colors"
-          >
-            ×
-          </button>
+          <div className="px-[16px] py-[10px] border-t border-solid border-line flex justify-end">
+            {rig?.armed ? (
+              <button
+                type="button"
+                onClick={() => { onToggle(); setExpanded(false); }}
+                className="h-[30px] px-[14px] rounded-[var(--radius-sm)] border border-solid border-danger/40 bg-danger/10 text-[12px] font-semibold text-danger cursor-pointer hover:bg-danger/20 transition-all duration-[var(--dur-state)] active:scale-[0.97]"
+              >
+                Stop sending
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { onToggle(); setExpanded(false); }}
+                disabled={!rig?.can_send || !show}
+                className="h-[30px] px-[14px] rounded-[var(--radius-sm)] border-0 bg-accent text-[12px] font-semibold text-[#0A0B0E] cursor-pointer hover:brightness-110 transition-all duration-[var(--dur-state)] active:scale-[0.97] disabled:opacity-35 disabled:pointer-events-none"
+              >
+                Send to the rig
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -16,10 +16,10 @@ const HANDLES_FIT_PX = 44;
 
 function clipOpacity(clip: ClipModel): number {
   const amount = clip.params?.amount;
-  if (typeof amount === "number") return 0.4 + amount * 0.6;
-  if (clip.kind === "gesture") return 0.95;
-  if (clip.kind === "binding") return 0.7;
-  return 0.8;
+  if (typeof amount === "number") return 0.35 + amount * 0.65;
+  if (clip.kind === "gesture") return 0.9;
+  if (clip.kind === "binding") return 0.65;
+  return 0.75;
 }
 
 function ClipBase({
@@ -48,11 +48,11 @@ function ClipBase({
   const editable = !!onGesture;
   const showTrim = editable && (selected || w >= HANDLES_FIT_PX);
   const roomy = w >= HANDLES_FIT_PX;
-  const grip = roomy ? { w: 9, out: 0 } : { w: 13, out: 13 };
+  const grip = roomy ? { w: 8, out: 0 } : { w: 12, out: 12 };
 
   const famColour = familyHue(clip.family);
   const opacity = clipOpacity(clip);
-  const isShort = clip.beats <= 1;
+  const isShort = clip.beats <= 2;
 
   return (
     <div
@@ -63,12 +63,9 @@ function ClipBase({
       }}
       onPointerEnter={(e) => { (e.currentTarget as HTMLElement).style.zIndex = "15"; }}
       onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.zIndex = selected ? "20" : "1"; }}
-      onDoubleClick={(e) => {
-        e.stopPropagation();
-        onZoomTo?.(clip);
-      }}
+      onDoubleClick={(e) => { e.stopPropagation(); onZoomTo?.(clip); }}
       data-clip-key={clip.key}
-      className={`absolute touch-none transition-colors duration-[var(--dur-state)] ${
+      className={`absolute touch-none ${
         editable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
       }`}
       style={{
@@ -77,37 +74,37 @@ function ClipBase({
         top: top + 1,
         height: height - 2,
         zIndex: selected ? 20 : 1,
-        borderRadius: isShort ? "3px" : "2px",
+        borderRadius: "4px",
         background: selected
           ? "var(--select)"
-          : `color-mix(in srgb, ${famColour} ${Math.round(opacity * 100)}%, var(--bg-raised))`,
-        border: selected
-          ? "1px solid var(--select)"
-          : `1px solid color-mix(in srgb, ${famColour} 40%, transparent)`,
-        opacity: clip.overridden ? 0.35 : 1,
+          : `color-mix(in srgb, ${famColour} ${Math.round(opacity * 55)}%, var(--bg-raised))`,
+        borderLeft: selected ? "none" : `2px solid color-mix(in srgb, ${famColour} ${Math.round(opacity * 80)}%, transparent)`,
+        boxShadow: selected
+          ? "0 0 0 1px var(--select), 0 2px 4px rgba(0,0,0,0.2)"
+          : `0 0 0 1px color-mix(in srgb, ${famColour} 15%, transparent)`,
+        opacity: clip.overridden ? 0.3 : 1,
+        transition: "box-shadow 150ms ease, opacity 150ms ease",
       }}
       title={
-        `${clip.name} · ${mmssms(clip.startS)} · ${beatsLabel(clip.beats)} beat${clip.beats === 1 ? "" : "s"}` +
-        ` · bar ${clip.bar}\u00b7${beatsLabel(clip.beat)} · double-click to zoom to it`
+        `${clip.name} \u00b7 ${mmssms(clip.startS)} \u00b7 ${beatsLabel(clip.beats)} beat${clip.beats === 1 ? "" : "s"}` +
+        ` \u00b7 bar ${clip.bar}\u00b7${beatsLabel(clip.beat)}`
       }
     >
-      <span
-        className="absolute inset-0 flex items-center gap-[4px] px-[6px] pointer-events-none overflow-hidden"
-      >
-        {w > 30 && (
+      <span className="absolute inset-0 flex items-center gap-[4px] px-[6px] pointer-events-none overflow-hidden">
+        {w > 28 && (
           <Image
             src={effectIcon({ id: clip.tile ?? clip.fx })}
             alt=""
             width={12}
             height={12}
             className="flex-none"
-            style={selected ? { filter: "brightness(0) saturate(0)" } : { opacity: 0.9 }}
+            style={selected ? { filter: "brightness(0) saturate(0)" } : { opacity: 0.85 }}
           />
         )}
-        {w > 54 && (
+        {w > 52 && (
           <span
-            className="text-[10px] truncate font-medium"
-            style={{ color: selected ? "var(--bg)" : "var(--ink)", opacity: selected ? 1 : 0.9 }}
+            className="text-[10px] truncate font-medium leading-[12px]"
+            style={{ color: selected ? "var(--bg)" : "var(--ink)", opacity: selected ? 1 : 0.85 }}
           >
             {clip.name}
           </span>
@@ -116,30 +113,10 @@ function ClipBase({
 
       {showTrim && (
         <>
-          <Grip
-            side="start"
-            width={grip.w}
-            out={grip.out}
-            selected={selected}
-            famColour={famColour}
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              onSelect?.(clip.key, false);
-              onGesture!(clip, "trim-start", e);
-            }}
-          />
-          <Grip
-            side="end"
-            width={grip.w}
-            out={grip.out}
-            selected={selected}
-            famColour={famColour}
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              onSelect?.(clip.key, false);
-              onGesture!(clip, "trim-end", e);
-            }}
-          />
+          <Grip side="start" width={grip.w} out={grip.out} selected={selected} famColour={famColour}
+            onPointerDown={(e) => { e.stopPropagation(); onSelect?.(clip.key, false); onGesture!(clip, "trim-start", e); }} />
+          <Grip side="end" width={grip.w} out={grip.out} selected={selected} famColour={famColour}
+            onPointerDown={(e) => { e.stopPropagation(); onSelect?.(clip.key, false); onGesture!(clip, "trim-end", e); }} />
         </>
       )}
     </div>
@@ -147,40 +124,25 @@ function ClipBase({
 }
 
 function Grip({
-  side,
-  width,
-  out,
-  selected,
-  famColour,
-  onPointerDown,
+  side, width, out, selected, famColour, onPointerDown,
 }: {
-  side: "start" | "end";
-  width: number;
-  out: number;
-  selected: boolean;
-  famColour: string;
-  onPointerDown: (e: React.PointerEvent) => void;
+  side: "start" | "end"; width: number; out: number; selected: boolean;
+  famColour: string; onPointerDown: (e: React.PointerEvent) => void;
 }) {
   const outer = side === "start" ? { left: -out } : { right: -out };
-  const fill = selected ? "var(--select)" : `color-mix(in srgb, ${famColour} 50%, var(--bg-raised))`;
-  const mark = selected ? "rgba(0,0,0,0.5)" : "rgba(230,234,242,0.4)";
+  const fill = selected ? "var(--select)" : `color-mix(in srgb, ${famColour} 40%, var(--bg-raised))`;
+  const mark = selected ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.2)";
   return (
     <span
       onPointerDown={onPointerDown}
-      title={side === "start" ? "Drag to change where it starts" : "Drag to change how long it lasts"}
+      title={side === "start" ? "Drag to change start" : "Drag to change length"}
       className="absolute top-0 bottom-0 flex items-center justify-center cursor-ew-resize"
       style={{
-        ...outer,
-        width,
-        zIndex: 22,
-        background: fill,
-        borderRadius: side === "start" ? "2px 0 0 2px" : "0 2px 2px 0",
+        ...outer, width, zIndex: 22, background: fill,
+        borderRadius: side === "start" ? "4px 0 0 4px" : "0 4px 4px 0",
       }}
     >
-      <span
-        aria-hidden
-        style={{ width: 2, height: "42%", borderLeft: `1px solid ${mark}`, borderRight: `1px solid ${mark}` }}
-      />
+      <span aria-hidden style={{ width: 2, height: "40%", borderLeft: `1px solid ${mark}`, borderRight: `1px solid ${mark}` }} />
     </span>
   );
 }

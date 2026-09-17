@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { Search, Play, AlertTriangle, Music, ChevronRight } from "lucide-react";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
 import type { ShowFile, Song } from "@/lib/types";
@@ -25,10 +26,7 @@ export default function ShowsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    api.shows.list().then((d) => {
-      setShowList(d.shows);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    api.shows.list().then((d) => { setShowList(d.shows); setLoading(false); }).catch(() => setLoading(false));
     if (!songs.length) api.songs.list().then((d) => setSongs(d.songs)).catch(() => {});
   }, []);
 
@@ -47,21 +45,14 @@ export default function ShowsPage() {
       setPlanText(sf.plan_text ?? "");
       router.push(`/stage?song=${encodeURIComponent(sf.song)}&seed=${sf.seed}`);
     },
-    [resetForShow, songs, setSong, setSeed, setEdits, setVenue, setShowId, setShowVersion, setWant,
-     setPendingPlan, setPlanText, router],
+    [resetForShow, songs, setSong, setSeed, setEdits, setVenue, setShowId, setShowVersion, setWant, setPendingPlan, setPlanText, router],
   );
 
   const grouped = useMemo(() => {
     const q = query.toLowerCase();
     const filtered = q
-      ? showList.filter(
-          (sf) =>
-            sf.name.toLowerCase().includes(q) ||
-            sf.song.toLowerCase().includes(q) ||
-            sf.author.toLowerCase().includes(q),
-        )
+      ? showList.filter((sf) => sf.name.toLowerCase().includes(q) || sf.song.toLowerCase().includes(q) || sf.author.toLowerCase().includes(q))
       : showList;
-
     const map = new Map<string, ShowFile[]>();
     for (const sf of filtered) {
       const arr = map.get(sf.song) || [];
@@ -71,78 +62,87 @@ export default function ShowsPage() {
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
   }, [showList, query]);
 
-  const songForName = useCallback(
-    (name: string): Song | undefined => songs.find((s) => s.name === name),
-    [songs],
-  );
+  const songForName = useCallback((name: string): Song | undefined => songs.find((s) => s.name === name), [songs]);
 
   return (
-    <div className="flex flex-col overflow-hidden flex-1">
-      <div className="flex-none px-[16px] pt-[16px] pb-[12px]">
-        <div className="flex items-center justify-between gap-[16px]">
-          <div>
-            <h1 className="text-[22px] font-medium tracking-[-0.01em] m-0">Shows</h1>
-            <p className="text-[12px] text-ink-dimmer mt-[2px] m-0">
-              {loading ? "Loading…" : `${showList.length} saved show${showList.length === 1 ? "" : "s"}`}
-            </p>
-          </div>
-        </div>
+    <div className="flex flex-col overflow-hidden flex-1 animate-in">
+      <div className="flex-none px-[20px] pt-[20px] pb-[16px]">
+        <h1 className="text-[28px] font-semibold tracking-[-0.02em] m-0 leading-[1.1]">Shows</h1>
+        <p className="text-[13px] text-ink-dimmer mt-[6px] m-0">
+          {loading ? "Loading…" : `${showList.length} saved show${showList.length === 1 ? "" : "s"}`}
+        </p>
 
-        <div className="mt-[12px] relative max-w-[320px]">
-          <svg className="absolute left-[10px] top-1/2 -translate-y-1/2 text-ink-dimmer pointer-events-none" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="7" cy="7" r="5" />
-            <path d="M11 11l3.5 3.5" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search shows…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full h-[32px] pl-[32px] pr-[10px] rounded-[6px] border border-solid border-line-strong bg-bg-raised text-[13px] text-ink outline-none focus:border-accent placeholder:text-ink-dimmer"
-          />
-        </div>
+        {showList.length > 0 && (
+          <div className="mt-[16px] relative max-w-[320px]">
+            <Search size={14} className="absolute left-[10px] top-1/2 -translate-y-1/2 text-ink-dimmer pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search shows…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full h-[34px] pl-[32px] pr-[12px] rounded-[var(--radius-sm)] border border-solid border-line bg-bg-raised/60 text-[13px] text-ink outline-none focus:border-accent focus:bg-bg-raised transition-all duration-[var(--dur-state)] placeholder:text-ink-dimmer"
+            />
+          </div>
+        )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-[16px] pb-[40px]">
-        {grouped.map(([songName, shows]) => {
+      <div className="flex-1 overflow-y-auto px-[20px] pb-[48px]">
+        {loading && (
+          <div className="flex flex-col gap-[16px] pt-[8px]">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} style={{ animationDelay: `${i * 80}ms` }}>
+                <div className="h-[16px] w-[120px] skeleton mb-[10px]" />
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-[10px]">
+                  <div className="h-[80px] skeleton rounded-[var(--radius-md)]" />
+                  <div className="h-[80px] skeleton rounded-[var(--radius-md)]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && grouped.map(([songName, shows], gi) => {
           const s = songForName(songName);
           return (
-            <div key={songName} className="mb-[24px]">
-              <div className="flex items-baseline gap-[10px] mb-[8px]">
-                <h2 className="text-[15px] font-medium m-0 truncate">{s?.title ?? songName}</h2>
-                <span className="mono text-[11px] text-ink-dimmer tabular-nums flex-none">
-                  {s ? `${Math.round(s.bpm ?? 0)} BPM` : ""}
-                </span>
+            <div key={songName} className="mb-[28px] animate-in" style={{ animationDelay: `${Math.min(gi * 50, 200)}ms` }}>
+              <div className="flex items-center gap-[8px] mb-[10px]">
+                <Music size={14} className="text-ink-dimmer flex-none" />
+                <h2 className="text-[15px] font-semibold m-0 truncate">{s?.title ?? songName}</h2>
+                {s?.bpm && <span className="mono text-[11px] text-ink-dimmer tabular-nums flex-none">{Math.round(s.bpm)} BPM</span>}
+                <span className="mono text-[11px] text-ink-dimmer flex-none">{shows.length} show{shows.length > 1 ? "s" : ""}</span>
               </div>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-[10px]">
-                {shows.map((sf) => (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-[8px]">
+                {shows.map((sf, si) => (
                   <button
                     key={sf.id}
                     type="button"
                     onClick={() => handleOpen(sf)}
-                    className="text-left p-[14px] rounded-[8px] border border-solid border-line bg-bg-raised cursor-pointer transition-all duration-[var(--dur-state)] hover:border-line-strong hover:bg-bg-overlay group"
+                    className="group text-left p-[14px] rounded-[var(--radius-md)] border border-solid border-line bg-bg-raised/60 cursor-pointer transition-all duration-[var(--dur-state)] ease-[var(--ease)] hover:bg-bg-raised hover:border-line-strong hover:shadow-[var(--elev-card-hover)] hover:-translate-y-[1px] active:scale-[0.99] animate-in"
+                    style={{ animationDelay: `${Math.min((gi * 3 + si) * 40, 300)}ms` }}
                   >
                     <div className="flex items-start justify-between gap-[8px]">
                       <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-medium m-0 truncate text-ink group-hover:text-accent transition-colors">
+                        <p className="text-[14px] font-medium m-0 truncate text-ink group-hover:text-accent transition-colors duration-[var(--dur-state)]">
                           {sf.name}
                         </p>
-                        <p className="mono text-[11px] text-ink-dimmer m-0 mt-[4px] tabular-nums">
-                          v{sf.version} · by {sf.author} · {sf.edits.length} edits
+                        <p className="mono text-[11px] text-ink-dimmer m-0 mt-[4px] tabular-nums leading-[1.5]">
+                          v{sf.version} · {sf.author} · {sf.edits.length} edits
                         </p>
                       </div>
-                      <span className="flex-none text-[11px] text-ink-dimmer tracking-[0.04em] uppercase mt-[2px]">
-                        Open
-                      </span>
+                      <ChevronRight size={14} className="text-ink-dimmer group-hover:text-accent flex-none mt-[2px] transition-all duration-[var(--dur-state)] group-hover:translate-x-[2px]" />
                     </div>
                     {sf.designed_for && (
-                      <p className="text-[11px] text-ink-dimmer m-0 mt-[6px]">
-                        For {sf.designed_for.venue_name}
+                      <p className="text-[11px] text-ink-dimmer m-0 mt-[8px] flex items-center gap-[4px]">
+                        <span className="w-[3px] h-[3px] rounded-full bg-ink-dimmer/50 flex-none" />
+                        {sf.designed_for.venue_name}
                         {sf.designed_for.layout ? ` · ${sf.designed_for.layout}` : ""}
                       </p>
                     )}
                     {sf.invalid && (
-                      <p className="text-[11px] text-warn m-0 mt-[4px]">{sf.invalid}</p>
+                      <p className="text-[11px] text-warn m-0 mt-[6px] flex items-center gap-[4px]">
+                        <AlertTriangle size={10} />
+                        {sf.invalid}
+                      </p>
                     )}
                   </button>
                 ))}
@@ -152,17 +152,27 @@ export default function ShowsPage() {
         })}
 
         {!loading && !showList.length && (
-          <div className="flex flex-col items-center justify-center py-[60px]">
-            <div className="w-[48px] h-[48px] rounded-full bg-bg-raised flex items-center justify-center mb-[12px]">
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="var(--ink-dimmer)" strokeWidth="1.5">
-                <rect x="2" y="2" width="12" height="12" rx="2" />
-                <path d="M6 6l4 4M10 6l-4 4" />
+          <div className="flex flex-col items-center justify-center py-[80px] animate-in">
+            <div className="w-[56px] h-[56px] rounded-[var(--radius-lg)] bg-bg-raised flex items-center justify-center mb-[16px]">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-ink-dimmer">
+                <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M10 8l6 4-6 4V8z" fill="currentColor" opacity="0.3" />
               </svg>
             </div>
-            <p className="text-[13px] text-ink-dimmer m-0">No saved shows yet</p>
-            <p className="text-[12px] text-ink-dimmer m-0 mt-[4px]">
-              Open a song from the Library and save your first show.
+            <p className="text-[16px] font-medium text-ink m-0">No saved shows</p>
+            <p className="text-[13px] text-ink-dimmer mt-[6px] m-0 text-center max-w-[280px] leading-[1.5]">
+              Open a song from the Library, design your show, and save it here.
             </p>
+          </div>
+        )}
+
+        {!loading && showList.length > 0 && grouped.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-[60px] animate-in">
+            <Search size={32} className="text-ink-dimmer/30 mb-[12px]" />
+            <p className="text-[14px] text-ink-dim m-0">No shows match &ldquo;{query}&rdquo;</p>
+            <button type="button" onClick={() => setQuery("")} className="mt-[8px] text-[13px] text-accent border-0 bg-transparent cursor-pointer hover:underline">
+              Clear search
+            </button>
           </div>
         )}
       </div>

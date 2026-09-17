@@ -917,11 +917,11 @@ export default function StagePage() {
           ref={columnRef}
           className="flex-1 min-w-0 flex flex-col min-h-0 overflow-hidden"
         >
-          <header className="flex-none flex items-center gap-[12px] px-[16px] h-[52px] border-b border-solid border-line">
+          <header className="flex-none flex items-center gap-[12px] px-[16px] h-[48px] bg-bg/80 backdrop-blur-xl border-b border-solid border-line">
             <button
               type="button"
               onClick={handleBack}
-              className="flex items-center justify-center w-[32px] h-[32px] rounded-[6px] border-0 bg-transparent text-ink-dim cursor-pointer hover:text-ink hover:bg-bg-raised transition-colors duration-[var(--dur-state)]"
+              className="flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] border-0 bg-transparent text-ink-dimmer cursor-pointer hover:text-ink hover:bg-bg-raised transition-all duration-[var(--dur-state)] active:scale-[0.95]"
               title="Back"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -931,10 +931,10 @@ export default function StagePage() {
 
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline gap-[10px]">
-                <h1 className="text-[18px] font-medium leading-[24px] truncate m-0">
+                <h1 className="text-[16px] font-semibold leading-[20px] truncate m-0 tracking-[-0.01em]">
                   {song?.title ?? "\u2014"}
                 </h1>
-                <span className="mono text-[12px] text-ink-dimmer tabular-nums flex-none">
+                <span className="mono text-[11px] text-ink-dimmer tabular-nums flex-none">
                   {song
                     ? `${mmss(song.duration_s ?? 0)} \u00b7 ${Math.round(song.bpm ?? 0)} BPM \u00b7 ${show?.grid.bars ?? "\u2014"} bars`
                     : ""}
@@ -958,18 +958,18 @@ export default function StagePage() {
                   <button
                     type="button"
                     onClick={() => setMoreOpen(!moreOpen)}
-                    className="flex items-center justify-center w-[32px] h-[32px] rounded-[6px] border border-solid border-line-strong bg-transparent text-ink-dim cursor-pointer hover:text-ink hover:bg-bg-raised transition-colors duration-[var(--dur-state)]"
+                    className="flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] border border-solid border-line bg-transparent text-ink-dimmer cursor-pointer hover:text-ink hover:bg-bg-raised transition-all duration-[var(--dur-state)] active:scale-[0.95]"
                     title="More actions"
                   >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                      <circle cx="8" cy="3" r="1.25" />
-                      <circle cx="8" cy="8" r="1.25" />
-                      <circle cx="8" cy="13" r="1.25" />
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="3.5" r="1.2" />
+                      <circle cx="8" cy="8" r="1.2" />
+                      <circle cx="8" cy="12.5" r="1.2" />
                     </svg>
                   </button>
                   {moreOpen && (
                     <div
-                      className="absolute right-0 top-[calc(100%+4px)] z-50 w-[200px] rounded-[8px] border border-solid border-line-strong bg-bg-overlay py-[4px]"
+                      className="absolute right-0 top-[calc(100%+4px)] z-50 w-[200px] rounded-[var(--radius-md)] bg-bg-overlay py-[4px] animate-scale-in"
                       style={{ boxShadow: "var(--elev-popover)" }}
                     >
                       <input
@@ -984,10 +984,10 @@ export default function StagePage() {
                           setMoreOpen(false);
                         }}
                       />
-                      <button type="button" onClick={() => { importInputRef.current?.click(); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-bg-raised hover:text-ink transition-colors">
+                      <button type="button" onClick={() => { importInputRef.current?.click(); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-bg-raised hover:text-ink transition-colors rounded-[var(--radius-sm)]">
                         Import show file
                       </button>
-                      <button type="button" disabled={!show || !song} onClick={() => { handleDownload(); setMoreOpen(false); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-bg-raised hover:text-ink transition-colors disabled:opacity-40 disabled:cursor-default">
+                      <button type="button" disabled={!show || !song} onClick={() => { handleDownload(); setMoreOpen(false); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-bg-raised hover:text-ink transition-colors rounded-[var(--radius-sm)] disabled:opacity-35 disabled:cursor-default">
                         Download show file
                       </button>
                     </div>
@@ -1002,7 +1002,7 @@ export default function StagePage() {
                     setSaveOpen(true);
                   }}
                 >
-                  {showId ? "Save show" : "Save show\u2026"}
+                  {showId ? "Save" : "Save show\u2026"}
                 </Button>
               </>
             )}
@@ -1031,14 +1031,14 @@ export default function StagePage() {
           {isBaking ? (
             <div className="flex-none px-[16px] py-[8px]">
               <div className="flex items-center gap-[10px]">
-                <div className="flex-1 h-[3px] rounded-full bg-bg-raised overflow-hidden">
-                  <div className="h-full w-[40%] rounded-full bg-accent progress-indeterminate" />
+                <div className="flex-1 h-[2px] rounded-full bg-bg-raised overflow-hidden">
+                  <div className="h-full w-[30%] rounded-full bg-accent progress-indeterminate" />
                 </div>
-                <span className="text-[12px] text-ink-dim flex-none">Building the show\u2026</span>
+                <span className="text-[11px] font-medium text-accent flex-none animate-pulse-bar">Building\u2026</span>
               </div>
             </div>
           ) : stageMsg ? (
-            <div className="flex-none text-center text-[12px] text-ink-dimmer py-[6px]">
+            <div className="flex-none text-center text-[11px] text-ink-dimmer py-[6px]">
               {stageMsg}
             </div>
           ) : null}
@@ -1048,7 +1048,7 @@ export default function StagePage() {
             role="separator"
             aria-orientation="horizontal"
             aria-label="Resize the editor"
-            className="flex-none h-[5px] cursor-row-resize border-y border-solid border-line hover:bg-accent/10 transition-colors duration-[var(--dur-state)]"
+            className="flex-none h-[5px] cursor-row-resize border-y border-solid border-line hover:border-accent/30 transition-colors duration-[var(--dur-state)]"
           />
 
           <section

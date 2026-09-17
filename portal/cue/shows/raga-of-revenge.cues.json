@@ -23,7 +23,7 @@
    "section": 0,
    "from_s": 5.155,
    "to_s": 9.11,
-   "why": "alternate answers sweep, a whole 4 cycles, landing on the hit at 5.16s with a new colour - the opening comes up gradually, 27% to 56% of the look, arriving full at the entrance"
+   "why": "alternate answers breathe, a whole 4 cycles, landing on the hit at 5.16s - the opening comes up gradually, 27% to 56% of the look, arriving full at the entrance"
   },
   {
    "effect": "wash",
@@ -35,7 +35,7 @@
    "section": 0,
    "from_s": 9.11,
    "to_s": 12.562,
-   "why": "hocket answers sweep, a whole 3 cycles, landing on the hit at 9.11s with a new colour - the opening comes up gradually, 54% to 87% of the look, arriving full at the entrance"
+   "why": "hocket answers alternate, a whole 3 cycles, landing on the hit at 9.11s - the opening comes up gradually, 54% to 87% of the look, arriving full at the entrance"
   },
   {
    "effect": "wash",
@@ -53,13 +53,13 @@
    "effect": "wash",
    "extent": "all",
    "head": false,
-   "amount": 1.0,
-   "colour": "#1040ff",
+   "amount": 0.46,
+   "colour": "#ffd000",
    "fade_ms": 259,
    "section": 0,
    "from_s": 21.827,
    "to_s": 25.774,
-   "why": "bars 9-10, the phrase travels across: brass leads, E 10.65, 1 hits, mode +0.55 - twin in violet against amber inside - converge instead, the only shape that finishes in 1.9 bars"
+   "why": "bars 9-10, the phrase travels across: brass leads, E 10.65, 1 hits, mode +0.55 - twin in violet against amber inside - converge instead, the only shape that finishes in 1.9 bars - "
   },
   {
    "effect": "wash",
@@ -113,25 +113,25 @@
    "effect": "wash",
    "extent": "all",
    "head": false,
-   "amount": 0.874,
+   "amount": 0.875,
    "colour": "#ff0030",
    "fade_ms": 259,
    "section": 1,
    "from_s": 45.79,
    "to_s": 47.88,
-   "why": "bars 19-22, the phrase opens out: guitars leads, E 8.94, 9 hits, mode -0.62 - build in crimson - pendulum instead, the only shape that finishes in 1.0 bars"
+   "why": "bars 19-22, the phrase opens out: guitars leads, E 8.94, 9 hits, mode -0.62 - build in crimson - pendulum instead, the only shape that finishes in 1.0 bars - opened to crimson: thi"
   },
   {
    "effect": "wash",
    "extent": "all",
    "head": false,
-   "amount": 0.874,
-   "colour": "#ff0030",
+   "amount": 0.453,
+   "colour": "#ffd000",
    "fade_ms": 0,
    "section": 2,
    "from_s": 48.437,
    "to_s": 51.287,
-   "why": "and back, the instant the audio returns"
+   "why": "and back, the instant the audio returns - opened to saffron: this level needs more than a dark colour can give"
   },
   {
    "effect": "wash",
@@ -143,7 +143,7 @@
    "section": 2,
    "from_s": 51.804,
    "to_s": 55.798,
-   "why": "climax at 52.8s - everything arrives at once - white, because only white carries a hit"
+   "why": "climax at 52.8s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "wash",
@@ -155,7 +155,7 @@
    "section": 2,
    "from_s": 55.798,
    "to_s": 58.793,
-   "why": "bars 26-29, the phrase travels across: drums leads, E 9.80, 10 hits, mode +0.46 - breathe in crimson - pulse instead, the only shape that finishes in 1.4 bars"
+   "why": "bars 26-29, the phrase travels across: drums leads, E 9.80, 10 hits, mode +0.46 - breathe in crimson"
   },
   {
    "effect": "wash",
@@ -167,7 +167,7 @@
    "section": 2,
    "from_s": 58.793,
    "to_s": 63.646,
-   "why": "build answers pulse, a whole 2 cycles, landing on the hit at 58.79s with a new colour"
+   "why": "build answers breathe, a whole 2 cycles, landing on the hit at 58.79s with a new colour"
   },
   {
    "effect": "wash",
@@ -245,7 +245,7 @@
    "effect": "wash",
    "extent": "all",
    "head": false,
-   "amount": 0.874,
+   "amount": 0.927,
    "colour": "#ff0030",
    "fade_ms": 0,
    "section": 3,
@@ -262,38 +262,50 @@
    "fade_ms": 0,
    "section": 3,
    "from_s": 91.788,
-   "to_s": 97.802,
-   "why": "PEAK at 92.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit"
+   "to_s": 94.482,
+   "why": "PEAK at 92.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "wash",
    "extent": "all",
    "head": false,
-   "amount": 0.874,
-   "colour": "#ff0030",
+   "amount": 0.707,
+   "colour": "#ffd000",
+   "fade_ms": 259,
+   "section": 3,
+   "from_s": 94.482,
+   "to_s": 97.802,
+   "why": "split answers pulse, a whole 3 cycles, landing on the hit at 94.48s with a new colour - opened to saffron: this level needs more than a dark colour can give"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.424,
+   "colour": "#ffd000",
    "fade_ms": 259,
    "section": 4,
    "from_s": 97.802,
    "to_s": 103.793,
-   "why": "bars 47-50, the phrase opens out: keys leads, E 9.49, 1 hits, mode +0.50 - breathe in crimson against crimson inside - pulse instead, the only shape that finishes in 1.4 bars"
+   "why": "bars 47-50, the phrase opens out: keys leads, E 9.49, 1 hits, mode +0.50 - breathe in crimson against crimson inside - opened to saffron: this level needs more than a dark colour c"
   },
   {
    "effect": "wash",
    "extent": "all",
    "head": false,
-   "amount": 0.28,
+   "amount": 0.407,
    "colour": "#ffffff",
    "fade_ms": 259,
    "section": 4,
    "from_s": 103.793,
    "to_s": 105.79,
-   "why": "bars 47-50, the phrase opens out: drums leads, E 11.37, 4 hits, mode +0.76 - wipe in crimson - opened from crimson to bone so the level can be seen - split instead, the only shape "
+   "why": "bars 47-50, the phrase opens out: drums leads, E 11.37, 4 hits, mode +0.76 - wipe in crimson - opened from crimson to bone so the level can be seen - pendulum instead, the only sha"
   },
   {
    "effect": "wash",
    "extent": "all",
    "head": false,
-   "amount": 0.28,
+   "amount": 0.38,
    "colour": "#ffffff",
    "fade_ms": 259,
    "section": 4,
@@ -384,18 +396,6 @@
    "from_s": 129.679,
    "to_s": 131.286,
    "why": "bars 63-63, the phrase travels across: voices leads, E 0.00, 0 hits, mode +0.84 - wipe in crimson - split instead, the only shape that finishes in 0.8 bars"
-  },
-  {
-   "effect": "wash",
-   "extent": "all",
-   "head": false,
-   "amount": 0.137,
-   "colour": "#ff0030",
-   "fade_ms": 0,
-   "section": 6,
-   "from_s": 131.286,
-   "to_s": 131.286,
-   "why": "and back, the instant the audio returns"
   }
  ],
  "bindings": [],
@@ -457,7 +457,7 @@
    "from_s": 5.155,
    "to_s": 9.11,
    "fade_ms": 129,
-   "why": "alternate answers sweep, a whole 4 cycles, landing on the hit at 5.16s with a new colour - the opening comes up gradually, 27% to 56% of the look, arriving full at the entrance"
+   "why": "alternate answers breathe, a whole 4 cycles, landing on the hit at 5.16s - the opening comes up gradually, 27% to 56% of the look, arriving full at the entrance"
   },
   {
    "effect": "glare",
@@ -482,7 +482,7 @@
    "from_s": 9.11,
    "to_s": 12.562,
    "fade_ms": 129,
-   "why": "hocket answers sweep, a whole 3 cycles, landing on the hit at 9.11s with a new colour - the opening comes up gradually, 54% to 87% of the look, arriving full at the entrance"
+   "why": "hocket answers alternate, a whole 3 cycles, landing on the hit at 9.11s - the opening comes up gradually, 54% to 87% of the look, arriving full at the entrance"
   },
   {
    "effect": "glare",
@@ -565,7 +565,7 @@
    "from_s": 21.827,
    "to_s": 25.774,
    "fade_ms": 259,
-   "why": "bars 9-10, the phrase travels across: brass leads, E 10.65, 1 hits, mode +0.55 - twin in violet against amber inside - converge instead, the only shape that finishes in 1.9 bars"
+   "why": "bars 9-10, the phrase travels across: brass leads, E 10.65, 1 hits, mode +0.55 - twin in violet against amber inside - converge instead, the only shape that finishes in 1.9 bars - "
   },
   {
    "effect": "glare",
@@ -743,7 +743,7 @@
    "from_s": 45.79,
    "to_s": 47.88,
    "fade_ms": 259,
-   "why": "bars 19-22, the phrase opens out: guitars leads, E 8.94, 9 hits, mode -0.62 - build in crimson - pendulum instead, the only shape that finishes in 1.0 bars"
+   "why": "bars 19-22, the phrase opens out: guitars leads, E 8.94, 9 hits, mode -0.62 - build in crimson - pendulum instead, the only shape that finishes in 1.0 bars - opened to crimson: thi"
   },
   {
    "effect": "glare",
@@ -781,14 +781,14 @@
    "pattern": "nod",
    "pan": 0.5,
    "tilt": 0.31,
-   "colour": "#ff0030",
-   "amount": 0.772,
+   "colour": "#ffd000",
+   "amount": 0.318,
    "prism": 0,
    "strobe": 0,
    "from_s": 48.437,
    "to_s": 51.287,
    "fade_ms": 0,
-   "why": "and back, the instant the audio returns"
+   "why": "and back, the instant the audio returns - opened to saffron: this level needs more than a dark colour can give"
   },
   {
    "effect": "glare",
@@ -812,7 +812,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "hold",
+   "pattern": "circle",
    "pan": 0.5,
    "tilt": 0.3,
    "colour": "#ffffff",
@@ -822,7 +822,7 @@
    "from_s": 51.804,
    "to_s": 55.798,
    "fade_ms": 0,
-   "why": "climax at 52.8s - everything arrives at once - white, because only white carries a hit"
+   "why": "climax at 52.8s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "beam",
@@ -836,7 +836,7 @@
    "from_s": 55.798,
    "to_s": 58.793,
    "fade_ms": 259,
-   "why": "bars 26-29, the phrase travels across: drums leads, E 9.80, 10 hits, mode +0.46 - breathe in crimson - pulse instead, the only shape that finishes in 1.4 bars"
+   "why": "bars 26-29, the phrase travels across: drums leads, E 9.80, 10 hits, mode +0.46 - breathe in crimson"
   },
   {
    "effect": "glare",
@@ -861,7 +861,7 @@
    "from_s": 58.793,
    "to_s": 63.646,
    "fade_ms": 259,
-   "why": "build answers pulse, a whole 2 cycles, landing on the hit at 58.79s with a new colour"
+   "why": "build answers breathe, a whole 2 cycles, landing on the hit at 58.79s with a new colour"
   },
   {
    "effect": "glare",
@@ -1148,7 +1148,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "hold",
+   "pattern": "circle",
    "pan": 0.5,
    "tilt": 0.26,
    "colour": "#ffffff",
@@ -1156,9 +1156,9 @@
    "prism": 60,
    "strobe": 50,
    "from_s": 91.788,
-   "to_s": 97.802,
+   "to_s": 94.482,
    "fade_ms": 0,
-   "why": "PEAK at 92.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit"
+   "why": "PEAK at 92.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "glare",
@@ -1170,6 +1170,20 @@
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.26,
+   "colour": "#ffd000",
+   "amount": 0.707,
+   "prism": 60,
+   "strobe": 50,
+   "from_s": 94.482,
+   "to_s": 97.802,
+   "fade_ms": 259,
+   "why": "split answers pulse, a whole 3 cycles, landing on the hit at 94.48s with a new colour - opened to saffron: this level needs more than a dark colour can give"
   },
   {
    "effect": "glare",
@@ -1187,14 +1201,14 @@
    "pattern": "nod",
    "pan": 0.5,
    "tilt": 0.31,
-   "colour": "#ff0030",
-   "amount": 0.721,
+   "colour": "#ffd000",
+   "amount": 0.297,
    "prism": 0,
    "strobe": 0,
    "from_s": 97.802,
    "to_s": 103.793,
    "fade_ms": 259,
-   "why": "bars 47-50, the phrase opens out: keys leads, E 9.49, 1 hits, mode +0.50 - breathe in crimson against crimson inside - pulse instead, the only shape that finishes in 1.4 bars"
+   "why": "bars 47-50, the phrase opens out: keys leads, E 9.49, 1 hits, mode +0.50 - breathe in crimson against crimson inside - opened to saffron: this level needs more than a dark colour c"
   },
   {
    "effect": "glare",
@@ -1235,13 +1249,13 @@
    "pan": 0.5,
    "tilt": 0.36,
    "colour": "#ffffff",
-   "amount": 0.28,
+   "amount": 0.286,
    "prism": 0,
    "strobe": 0,
    "from_s": 103.793,
    "to_s": 105.79,
    "fade_ms": 259,
-   "why": "bars 47-50, the phrase opens out: drums leads, E 11.37, 4 hits, mode +0.76 - wipe in crimson - opened from crimson to bone so the level can be seen - split instead, the only shape "
+   "why": "bars 47-50, the phrase opens out: drums leads, E 11.37, 4 hits, mode +0.76 - wipe in crimson - opened from crimson to bone so the level can be seen - pendulum instead, the only sha"
   },
   {
    "effect": "glare",
@@ -1535,20 +1549,6 @@
    "to_s": 131.286,
    "fade_ms": 259,
    "why": "bars 63-63, the phrase travels across: voices leads, E 0.00, 0 hits, mode +0.84 - wipe in crimson - split instead, the only shape that finishes in 0.8 bars"
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.5,
-   "tilt": 0.35,
-   "colour": "#ffffff",
-   "amount": 0.033,
-   "prism": 0,
-   "strobe": 0,
-   "from_s": 131.286,
-   "to_s": 131.286,
-   "fade_ms": 0,
-   "why": "and back, the instant the audio returns"
   }
  ],
  "song": "raga-of-revenge",
@@ -1638,7 +1638,7 @@
     "second": 5.155
    },
    "fade": 0.129,
-   "why": "alternate answers sweep, a whole 4 cycles, landing on the hit at 5.16s with a new colour - the opening comes up gradually, 27% to 56% of the look, arriving full at the entrance",
+   "why": "alternate answers breathe, a whole 4 cycles, landing on the hit at 5.16s - the opening comes up gradually, 27% to 56% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "indigo",
@@ -1689,7 +1689,7 @@
     "second": 9.11
    },
    "fade": 0.129,
-   "why": "hocket answers sweep, a whole 3 cycles, landing on the hit at 9.11s with a new colour - the opening comes up gradually, 54% to 87% of the look, arriving full at the entrance",
+   "why": "hocket answers alternate, a whole 3 cycles, landing on the hit at 9.11s - the opening comes up gradually, 54% to 87% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "indigo",
@@ -1790,11 +1790,11 @@
     "second": 21.827
    },
    "fade": 0.259,
-   "why": "bars 9-10, the phrase travels across: brass leads, E 10.65, 1 hits, mode +0.55 - twin in violet against amber inside - converge instead, the only shape that finishes in 1.9 bars",
+   "why": "bars 9-10, the phrase travels across: brass leads, E 10.65, 1 hits, mode +0.55 - twin in violet against amber inside - converge instead, the only shape that finishes in 1.9 bars - opened to saffron: this level needs more than a dark colour can give",
    "look": {
     "lamps": {
-     "c": "indigo",
-     "l": 1.0
+     "c": "saffron",
+     "l": 0.46
     },
     "heads": {
      "c": "saffron",
@@ -1815,8 +1815,8 @@
      "move_head": false,
      "cycles": 4,
      "colours": [
-      "crimson",
-      "indigo"
+      "saffron",
+      "saffron"
      ],
      "colour_every": 8,
      "colour_figure": "hold"
@@ -2041,11 +2041,11 @@
     "second": 45.79
    },
    "fade": 0.259,
-   "why": "bars 19-22, the phrase opens out: guitars leads, E 8.94, 9 hits, mode -0.62 - build in crimson - pendulum instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 19-22, the phrase opens out: guitars leads, E 8.94, 9 hits, mode -0.62 - build in crimson - pendulum instead, the only shape that finishes in 1.0 bars - opened to crimson: this level needs more than a dark colour can give",
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.874
+     "l": 0.875
     },
     "heads": {
      "c": "crimson",
@@ -2068,7 +2068,7 @@
      "cycles": 1,
      "colours": [
       "crimson",
-      "indigo"
+      "crimson"
      ],
      "colour_every": 5,
      "colour_figure": "hold"
@@ -2101,15 +2101,15 @@
     "second": 48.437
    },
    "fade": 0.0,
-   "why": "and back, the instant the audio returns",
+   "why": "and back, the instant the audio returns - opened to saffron: this level needs more than a dark colour can give",
    "look": {
     "lamps": {
-     "c": "crimson",
-     "l": 0.874
+     "c": "saffron",
+     "l": 0.453
     },
     "heads": {
-     "c": "crimson",
-     "l": 0.772,
+     "c": "saffron",
+     "l": 0.318,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -2127,8 +2127,8 @@
      "reverse": true,
      "min_intensity": 0.3,
      "colours": [
-      "crimson",
-      "indigo"
+      "saffron",
+      "saffron"
      ],
      "colour_every": 8,
      "colour_figure": "hold"
@@ -2161,7 +2161,7 @@
     "second": 51.804
    },
    "fade": 0.0,
-   "why": "climax at 52.8s - everything arrives at once - white, because only white carries a hit",
+   "why": "climax at 52.8s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working",
    "look": {
     "lamps": {
      "c": "bone",
@@ -2183,6 +2183,32 @@
      "hits": 1
     },
     "low": 0.45
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "crimson",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
    }
   },
   {
@@ -2191,7 +2217,7 @@
     "second": 55.798
    },
    "fade": 0.259,
-   "why": "bars 26-29, the phrase travels across: drums leads, E 9.80, 10 hits, mode +0.46 - breathe in crimson - pulse instead, the only shape that finishes in 1.4 bars",
+   "why": "bars 26-29, the phrase travels across: drums leads, E 9.80, 10 hits, mode +0.46 - breathe in crimson",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -2207,7 +2233,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "breathe",
      "every": {
       "hits": 2
      },
@@ -2237,7 +2263,7 @@
     "second": 58.793
    },
    "fade": 0.259,
-   "why": "build answers pulse, a whole 2 cycles, landing on the hit at 58.79s with a new colour",
+   "why": "build answers breathe, a whole 2 cycles, landing on the hit at 58.79s with a new colour",
    "look": {
     "lamps": {
      "c": "indigo",
@@ -2567,11 +2593,11 @@
     "second": 89.792
    },
    "fade": 0.0,
-   "why": "bars 43-46, the phrase travels across: drums leads, E 8.35, 3 hits, mode +1.00 - unbuild in crimson against scarlet inside - alternate instead, the only shape that finishes in 0.7 bars",
+   "why": "bars 43-46, the phrase travels across: drums leads, E 8.35, 3 hits, mode +1.00 - unbuild in crimson against scarlet inside - alternate instead, the only shape that finishes in 0.7 bars - opened to crimson: this level needs more than a dark colour can give",
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.874
+     "l": 0.927
     },
     "heads": {
      "c": "crimson",
@@ -2593,7 +2619,7 @@
      "cycles": 1,
      "colours": [
       "crimson",
-      "indigo"
+      "crimson"
      ],
      "colour_every": 5,
      "colour_figure": "hold"
@@ -2626,7 +2652,7 @@
     "second": 91.788
    },
    "fade": 0.0,
-   "why": "PEAK at 92.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit",
+   "why": "PEAK at 92.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working",
    "look": {
     "lamps": {
      "c": "bone",
@@ -2648,6 +2674,89 @@
      "hits": 1
     },
     "low": 0.6
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "crimson",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
+   }
+  },
+  {
+   "id": 16,
+   "at": {
+    "second": 94.482
+   },
+   "fade": 0.259,
+   "why": "split answers pulse, a whole 3 cycles, landing on the hit at 94.48s with a new colour - opened to saffron: this level needs more than a dark colour can give",
+   "look": {
+    "lamps": {
+     "c": "saffron",
+     "l": 0.707
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.707,
+     "pan": 0.5,
+     "tilt": 0.26,
+     "strobe": 0.5,
+     "prism": 0.6
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.6
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "saffron",
+      "saffron"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold",
+     "reverse": true
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -2656,15 +2765,15 @@
     "second": 97.802
    },
    "fade": 0.259,
-   "why": "bars 47-50, the phrase opens out: keys leads, E 9.49, 1 hits, mode +0.50 - breathe in crimson against crimson inside - pulse instead, the only shape that finishes in 1.4 bars",
+   "why": "bars 47-50, the phrase opens out: keys leads, E 9.49, 1 hits, mode +0.50 - breathe in crimson against crimson inside - opened to saffron: this level needs more than a dark colour can give",
    "look": {
     "lamps": {
-     "c": "crimson",
-     "l": 0.874
+     "c": "saffron",
+     "l": 0.424
     },
     "heads": {
-     "c": "crimson",
-     "l": 0.721,
+     "c": "saffron",
+     "l": 0.297,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -2672,7 +2781,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "breathe",
      "every": {
       "beats": 1.0
      },
@@ -2682,8 +2791,8 @@
      "reverse": true,
      "cycles": 3,
      "colours": [
-      "crimson",
-      "indigo"
+      "saffron",
+      "saffron"
      ],
      "colour_every": 8,
      "colour_figure": "hold"
@@ -2707,15 +2816,15 @@
     "second": 103.793
    },
    "fade": 0.259,
-   "why": "bars 47-50, the phrase opens out: drums leads, E 11.37, 4 hits, mode +0.76 - wipe in crimson - opened from crimson to bone so the level can be seen - split instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 47-50, the phrase opens out: drums leads, E 11.37, 4 hits, mode +0.76 - wipe in crimson - opened from crimson to bone so the level can be seen - pendulum instead, the only shape that finishes in 1.0 bars - opened to saffron: this level needs more than a dark colour can give",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.28
+     "l": 0.407
     },
     "heads": {
      "c": "bone",
-     "l": 0.28,
+     "l": 0.286,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -2723,20 +2832,20 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "split",
+     "figure": "pendulum",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 2,
      "low": 0.38,
-     "move_head": false,
+     "move_head": true,
      "reverse": true,
-     "cycles": 2,
+     "cycles": 1,
      "colours": [
-      "crimson",
-      "indigo"
+      "saffron",
+      "saffron"
      ],
-     "colour_every": 8,
+     "colour_every": 5,
      "colour_figure": "hold"
     }
    ],
@@ -2758,11 +2867,11 @@
     "second": 105.79
    },
    "fade": 0.259,
-   "why": "bars 51-52, the phrase closes down: drums leads, E 12.79, 3 hits, mode +0.83 - stack in crimson - opened from crimson to bone so the level can be seen - build instead, the only shape that finishes in 1.8 bars",
+   "why": "bars 51-52, the phrase closes down: drums leads, E 12.79, 3 hits, mode +0.83 - stack in crimson - opened from crimson to bone so the level can be seen - build instead, the only shape that finishes in 1.8 bars - opened to saffron: this level needs more than a dark colour can give",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.28
+     "l": 0.38
     },
     "heads": {
      "c": "bone",
@@ -2784,8 +2893,8 @@
      "reverse": true,
      "cycles": 1,
      "colours": [
-      "crimson",
-      "indigo"
+      "saffron",
+      "saffron"
      ],
      "colour_every": 5,
      "colour_figure": "hold"
@@ -3135,38 +3244,6 @@
      "bars": 1
     }
    }
-  },
-  {
-   "id": 22,
-   "at": {
-    "second": 131.286
-   },
-   "fade": 0.0,
-   "why": "and back, the instant the audio returns",
-   "look": {
-    "lamps": {
-     "c": "crimson",
-     "l": 0.137
-    },
-    "heads": {
-     "c": "bone",
-     "l": 0.033,
-     "pan": 0.5,
-     "tilt": 0.35
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "split",
-     "every": {
-      "beats": 2
-     },
-     "fill_beats": 1,
-     "low": 0.2,
-     "move_head": false
-    }
-   ]
   }
  ],
  "accents": [

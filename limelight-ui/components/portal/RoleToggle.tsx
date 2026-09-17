@@ -2,12 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Palette, Radio } from "lucide-react";
 import { usePortalStore } from "@/store/portal";
 import type { Role } from "@/lib/types";
 
-const ROLES: { id: Role; label: string }[] = [
-  { id: "creator", label: "Designer" },
-  { id: "venue", label: "Operator" },
+const ROLES: { id: Role; label: string; Icon: typeof Palette }[] = [
+  { id: "creator", label: "Designer", Icon: Palette },
+  { id: "venue", label: "Operator", Icon: Radio },
 ];
 
 export function RoleToggle() {
@@ -27,7 +28,7 @@ export function RoleToggle() {
 
   return (
     <div
-      className="flex h-[var(--hit)] rounded-[6px] border border-solid border-line-strong p-[2px] bg-bg-sunken"
+      className="flex h-[32px] rounded-[var(--radius-sm)] bg-bg-raised/50 p-[2px]"
       role="radiogroup"
       aria-label="Mode"
     >
@@ -40,12 +41,13 @@ export function RoleToggle() {
             role="radio"
             aria-checked={active}
             onClick={() => handleRole(r.id)}
-            className={`px-[14px] rounded-[4px] border-0 text-[12px] tracking-[0.08em] uppercase cursor-pointer transition-all duration-[var(--dur-state)] ${
+            className={`flex items-center gap-[5px] px-[10px] rounded-[4px] border-0 text-[12px] font-medium cursor-pointer transition-all duration-[var(--dur-state)] ease-[var(--ease)] ${
               active
-                ? "bg-bg-raised text-ink font-medium shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+                ? "bg-bg-overlay text-ink shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
                 : "bg-transparent text-ink-dimmer hover:text-ink-dim"
             }`}
           >
+            <r.Icon size={12} strokeWidth={active ? 2 : 1.5} />
             {r.label}
           </button>
         );

@@ -9,19 +9,24 @@ interface PillProps {
 }
 
 const stateStyles: Record<PillState, string> = {
-  off: "border-line text-dim",
-  live: "bg-ok border-ok text-[#05130c]",
-  armed: "border-warn text-warn",
-  dead: "border-danger text-danger",
-  unknown: "border-line text-dim",
+  off: "bg-bg-raised text-ink-dimmer",
+  live: "bg-ok/15 text-ok border-ok/30",
+  armed: "bg-warn/10 text-warn border-warn/30",
+  dead: "bg-danger/10 text-danger border-danger/30",
+  unknown: "bg-bg-raised text-ink-dimmer",
 };
 
 export function Pill({ state, children, title }: PillProps) {
   return (
     <span
-      className={`inline-block whitespace-nowrap px-[10px] py-[5px] rounded-full border text-[length:var(--text-xs)] tracking-[0.12em] uppercase tabular-nums ${stateStyles[state]}`}
+      className={`inline-flex items-center gap-[6px] whitespace-nowrap px-[10px] py-[4px] rounded-full border border-solid text-[11px] font-medium tracking-[0.02em] tabular-nums transition-colors duration-[var(--dur-state)] ${stateStyles[state]}`}
       title={title}
     >
+      {(state === "live" || state === "armed") && (
+        <span
+          className={`w-[5px] h-[5px] rounded-full flex-none ${state === "live" ? "bg-ok animate-sending" : "bg-warn"}`}
+        />
+      )}
       {children}
     </span>
   );

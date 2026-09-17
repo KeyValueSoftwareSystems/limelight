@@ -1254,6 +1254,15 @@ def author(song, out_path=None):
         if isinstance(heads, dict):
             heads["strobe"] = 0.5
             heads["prism"] = 0.6
+        # The two biggest moments in the show were holding a static white wash
+        # for four and six seconds with nothing moving at all. A peak is the
+        # most active moment a show has, not the least.
+        if not c.get("chases"):
+            c["chases"] = [{"on": "lamps", "figure": "pulse",
+                            "every": {"beats": 0.5}, "low": 0.55,
+                            "move_head": False, "min_step_beats": 0.5}]
+            c["head"] = {"move": "nod", "every": {"bars": 1}}
+            c["why"] = c["why"] + ", the row pulsing on the half beat and the head working"
 
     dark = []
     for c in punches:
@@ -1446,6 +1455,33 @@ def author(song, out_path=None):
             if isinstance(v, dict) and v.get("c"):
                 in_play.add(v["c"])
         floor_lum = min([lum_of(x) for x in in_play] or [REF_LUM])
+        # Capping every colour at what the darkest one can reach held the whole
+        # show to what a saturated red can do - the loudest bar in the song came
+        # out the same brightness as a middling one. When the music wants more
+        # than the dark member of the ring can give, open the ring instead.
+        lamps0 = (c.get("look") or {}).get("lamps")
+        want = float(lamps0["l"]) * REF_LUM if isinstance(lamps0, dict) and lamps0.get("l") is not None else 0.0
+        if want > floor_lum + 1e-6:
+            better = sorted((x for x in working if lum_of(x) >= want),
+                            key=lum_of)
+            if better:
+                swap_to = better[0]
+                for ch0 in (c.get("chases") or []):
+                    if ch0.get("colours"):
+                        ch0["colours"] = [swap_to if lum_of(x) < want else x
+                                          for x in ch0["colours"]]
+                for v0 in (c.get("look") or {}).values():
+                    if isinstance(v0, dict) and v0.get("c") and lum_of(v0["c"]) < want:
+                        v0["c"] = swap_to
+                in_play = set()
+                for ch0 in (c.get("chases") or []):
+                    in_play.update(ch0.get("colours") or [])
+                for v0 in (c.get("look") or {}).values():
+                    if isinstance(v0, dict) and v0.get("c"):
+                        in_play.add(v0["c"])
+                floor_lum = min([lum_of(x) for x in in_play] or [REF_LUM])
+                c["why"] = (c.get("why") or "") + (
+                    " - opened to %s: this level needs more than a dark colour can give" % swap_to)
         for v in (c.get("look") or {}).values():
             if not isinstance(v, dict) or v.get("l") is None or not v.get("c"):
                 continue
@@ -1518,6 +1554,40 @@ def author(song, out_path=None):
             else:
                 want_beats = 0.125
         c["fade"] = round(step * want_beats, 3)
+
+    # Passes downstream replace a figure or a colour without touching the
+    # sentence that explains it, so a cue could claim to answer a figure that is
+    # no longer there, or to arrive with a colour it did not change. A reason
+    # that is not true is worse than no reason.
+    prev_fig, prev_col = None, None
+    for c in sorted(cues, key=lambda x: x.get("_t", 0)):
+        ch0 = (c.get("chases") or [None])[0]
+        fig0 = ch0.get("figure") if ch0 else None
+        lam0 = (c.get("look") or {}).get("lamps") or {}
+        col0 = lam0.get("c")
+        w = c.get("why") or ""
+        if " answers " in w:
+            head, _, tail = w.partition(" answers ")
+            rest = tail.split(",", 1)[1] if "," in tail else ""
+            said = tail.split(",", 1)[0].strip()
+            if prev_fig and said != prev_fig:
+                w = "%s answers %s%s%s" % (fig0 or head, prev_fig, "," if rest else "", rest)
+            elif not prev_fig:
+                w = "%s opens%s%s" % (fig0 or head, "," if rest else "", rest)
+        if "with a new colour" in w and col0 == prev_col:
+            w = w.replace(" with a new colour", "")
+        c["why"] = w
+        prev_fig, prev_col = fig0 or prev_fig, col0 or prev_col
+
+    # A cue with no room to be seen is not a cue.
+    cues.sort(key=lambda c: c.get("_t", 0))
+    trimmed = []
+    for n, c in enumerate(cues):
+        nxt = cues[n + 1]["_t"] if n + 1 < len(cues) else song_end
+        if nxt - c.get("_t", 0) < 0.12 and c.get("look"):
+            continue
+        trimmed.append(c)
+    cues = trimmed
 
     for c in cues:
         c.pop("_t", None)

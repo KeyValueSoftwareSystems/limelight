@@ -23,7 +23,7 @@
    "section": 0,
    "from_s": 2.345,
    "to_s": 5.805,
-   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 2.35s with a new colour - the opening comes up gradually, 23% to 50% of the look, arriving full at the entrance"
+   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 2.35s - the opening comes up gradually, 23% to 50% of the look, arriving full at the entrance"
   },
   {
    "effect": "wash",
@@ -47,7 +47,7 @@
    "section": 0,
    "from_s": 8.545,
    "to_s": 11.308,
-   "why": "build answers converge, a whole 1 cycles, landing on the hit at 8.54s with a new colour - the opening comes up gradually, 81% to 92% of the look, arriving full at the entrance"
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 8.54s - the opening comes up gradually, 81% to 92% of the look, arriving full at the entrance"
   },
   {
    "effect": "wash",
@@ -203,7 +203,7 @@
    "section": 2,
    "from_s": 54.056,
    "to_s": 55.38,
-   "why": "PEAK at 54.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit"
+   "why": "PEAK at 54.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working - "
   },
   {
    "effect": "wash",
@@ -215,7 +215,7 @@
    "section": 3,
    "from_s": 55.38,
    "to_s": 58.212,
-   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - breathe in violet against teal inside"
+   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - breathe in violet against teal inside - pulse instead, the only shape that finishes in 2.1 bars"
   },
   {
    "effect": "wash",
@@ -227,7 +227,7 @@
    "section": 3,
    "from_s": 58.212,
    "to_s": 60.952,
-   "why": "hocket answers breathe, a whole 4 cycles, landing on the hit at 58.21s with a new colour"
+   "why": "hocket answers pulse, a whole 4 cycles, landing on the hit at 58.21s with a new colour"
   },
   {
    "effect": "wash",
@@ -251,7 +251,7 @@
    "section": 3,
    "from_s": 63.367,
    "to_s": 66.409,
-   "why": "pulse answers diverge, a whole 3 cycles, landing on the hit at 63.37s with a new colour"
+   "why": "blink answers diverge, a whole 1 cycles, landing on the hit at 63.37s with a new colour"
   },
   {
    "effect": "wash",
@@ -478,8 +478,20 @@
    "fade_ms": 0,
    "section": 5,
    "from_s": 122.95,
+   "to_s": 125.109,
+   "why": "climax at 123.3s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.636,
+   "colour": "#ffd000",
+   "fade_ms": 172,
+   "section": 5,
+   "from_s": 125.109,
    "to_s": 127.176,
-   "why": "climax at 123.3s - everything arrives at once - white, because only white carries a hit"
+   "why": "zigzag answers pulse, a whole 1 cycles, landing on the hit at 125.11s with a new colour - opened to saffron: this level needs more than a dark colour can give"
   },
   {
    "effect": "wash",
@@ -491,7 +503,7 @@
    "section": 5,
    "from_s": 127.176,
    "to_s": 129.242,
-   "why": "bars 93-96, the phrase travels across: keys leads, E 8.23, 6 hits, mode +0.52 - twin in violet - diverge instead, the only shape that finishes in 1.5 bars"
+   "why": "bars 93-96, the phrase travels across: keys leads, E 8.23, 6 hits, mode +0.52 - twin in violet - converge instead, the only shape that finishes in 1.5 bars"
   },
   {
    "effect": "wash",
@@ -503,7 +515,7 @@
    "section": 5,
    "from_s": 129.242,
    "to_s": 132.679,
-   "why": "build answers diverge, a whole 1 cycles, landing on the hit at 129.24s with a new colour"
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 129.24s with a new colour"
   },
   {
    "effect": "wash",
@@ -515,7 +527,7 @@
    "section": 6,
    "from_s": 132.679,
    "to_s": 135.79,
-   "why": "bars 97-100, the phrase travels across: keys leads, E 7.30, 3 hits, mode +0.20 - converge in violet against crimson inside"
+   "why": "bars 97-100, the phrase travels across: keys leads, E 7.30, 3 hits, mode +0.20 - converge in violet against crimson inside - diverge instead, the only shape that finishes in 2.3 ba"
   },
   {
    "effect": "wash",
@@ -527,7 +539,7 @@
    "section": 6,
    "from_s": 135.79,
    "to_s": 138.205,
-   "why": "split answers converge, a whole 2 cycles, landing on the hit at 135.79s with a new colour"
+   "why": "alternate answers diverge, a whole 2 cycles, landing on the hit at 135.79s with a new colour"
   },
   {
    "effect": "wash",
@@ -563,7 +575,7 @@
    "section": 6,
    "from_s": 143.662,
    "to_s": 146.44,
-   "why": "bars 105-108, the phrase travels across: keys leads, E 8.94, 5 hits, mode +0.25 - twin in violet against teal inside - diverge instead, the only shape that finishes in 2.0 bars"
+   "why": "bars 105-108, the phrase travels across: keys leads, E 8.94, 5 hits, mode +0.25 - twin in violet against teal inside - converge instead, the only shape that finishes in 2.0 bars"
   },
   {
    "effect": "wash",
@@ -575,7 +587,7 @@
    "section": 6,
    "from_s": 146.44,
    "to_s": 149.235,
-   "why": "breathe answers diverge, a whole 4 cycles, landing on the hit at 146.44s with a new colour"
+   "why": "breathe answers converge, a whole 4 cycles, landing on the hit at 146.44s with a new colour"
   },
   {
    "effect": "wash",
@@ -660,18 +672,6 @@
    "from_s": 168.509,
    "to_s": 171.178,
    "why": "bars 123-124, the phrase travels across: keys leads, E 0.00, 0 hits, mode +1.00 - diverge in violet - converge instead, the only shape that finishes in 1.9 bars"
-  },
-  {
-   "effect": "wash",
-   "extent": "all",
-   "head": false,
-   "amount": 0.121,
-   "colour": "#b026ff",
-   "fade_ms": 0,
-   "section": 8,
-   "from_s": 171.178,
-   "to_s": 171.178,
-   "why": "and back, the instant the audio returns"
   }
  ],
  "bindings": [],
@@ -702,7 +702,7 @@
    "from_s": 2.345,
    "to_s": 5.805,
    "fade_ms": 86,
-   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 2.35s with a new colour - the opening comes up gradually, 23% to 50% of the look, arriving full at the entrance"
+   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 2.35s - the opening comes up gradually, 23% to 50% of the look, arriving full at the entrance"
   },
   {
    "effect": "beam",
@@ -730,7 +730,7 @@
    "from_s": 8.545,
    "to_s": 11.308,
    "fade_ms": 86,
-   "why": "build answers converge, a whole 1 cycles, landing on the hit at 8.54s with a new colour - the opening comes up gradually, 81% to 92% of the look, arriving full at the entrance"
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 8.54s - the opening comes up gradually, 81% to 92% of the look, arriving full at the entrance"
   },
   {
    "effect": "beam",
@@ -1303,7 +1303,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "hold",
+   "pattern": "circle",
    "pan": 0.5,
    "tilt": 0.26,
    "colour": "#ffffff",
@@ -1313,7 +1313,7 @@
    "from_s": 54.056,
    "to_s": 55.38,
    "fade_ms": 0,
-   "why": "PEAK at 54.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit"
+   "why": "PEAK at 54.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working - "
   },
   {
    "effect": "beam",
@@ -1327,7 +1327,7 @@
    "from_s": 55.38,
    "to_s": 58.212,
    "fade_ms": 172,
-   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - breathe in violet against teal inside"
+   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - breathe in violet against teal inside - pulse instead, the only shape that finishes in 2.1 bars"
   },
   {
    "effect": "glare",
@@ -1363,7 +1363,7 @@
    "from_s": 58.212,
    "to_s": 60.952,
    "fade_ms": 172,
-   "why": "hocket answers breathe, a whole 4 cycles, landing on the hit at 58.21s with a new colour"
+   "why": "hocket answers pulse, a whole 4 cycles, landing on the hit at 58.21s with a new colour"
   },
   {
    "effect": "glare",
@@ -1446,7 +1446,7 @@
    "from_s": 63.367,
    "to_s": 66.409,
    "fade_ms": 172,
-   "why": "pulse answers diverge, a whole 3 cycles, landing on the hit at 63.37s with a new colour"
+   "why": "blink answers diverge, a whole 1 cycles, landing on the hit at 63.37s with a new colour"
   },
   {
    "effect": "glare",
@@ -2237,7 +2237,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "hold",
+   "pattern": "circle",
    "pan": 0.5,
    "tilt": 0.3,
    "colour": "#ffffff",
@@ -2245,9 +2245,9 @@
    "prism": 60,
    "strobe": 50,
    "from_s": 122.95,
-   "to_s": 127.176,
+   "to_s": 125.109,
    "fade_ms": 0,
-   "why": "climax at 123.3s - everything arrives at once - white, because only white carries a hit"
+   "why": "climax at 123.3s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "glare",
@@ -2259,6 +2259,20 @@
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "sweep",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ffd000",
+   "amount": 0.636,
+   "prism": 60,
+   "strobe": 50,
+   "from_s": 125.109,
+   "to_s": 127.176,
+   "fade_ms": 172,
+   "why": "zigzag answers pulse, a whole 1 cycles, landing on the hit at 125.11s with a new colour - opened to saffron: this level needs more than a dark colour can give"
   },
   {
    "effect": "glare",
@@ -2294,7 +2308,7 @@
    "from_s": 127.176,
    "to_s": 129.242,
    "fade_ms": 172,
-   "why": "bars 93-96, the phrase travels across: keys leads, E 8.23, 6 hits, mode +0.52 - twin in violet - diverge instead, the only shape that finishes in 1.5 bars"
+   "why": "bars 93-96, the phrase travels across: keys leads, E 8.23, 6 hits, mode +0.52 - twin in violet - converge instead, the only shape that finishes in 1.5 bars"
   },
   {
    "effect": "glare",
@@ -2319,7 +2333,7 @@
    "from_s": 129.242,
    "to_s": 132.679,
    "fade_ms": 172,
-   "why": "build answers diverge, a whole 1 cycles, landing on the hit at 129.24s with a new colour"
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 129.24s with a new colour"
   },
   {
    "effect": "glare",
@@ -2366,7 +2380,7 @@
    "from_s": 132.679,
    "to_s": 135.79,
    "fade_ms": 172,
-   "why": "bars 97-100, the phrase travels across: keys leads, E 7.30, 3 hits, mode +0.20 - converge in violet against crimson inside"
+   "why": "bars 97-100, the phrase travels across: keys leads, E 7.30, 3 hits, mode +0.20 - converge in violet against crimson inside - diverge instead, the only shape that finishes in 2.3 ba"
   },
   {
    "effect": "glare",
@@ -2413,7 +2427,7 @@
    "from_s": 135.79,
    "to_s": 138.205,
    "fade_ms": 172,
-   "why": "split answers converge, a whole 2 cycles, landing on the hit at 135.79s with a new colour"
+   "why": "alternate answers diverge, a whole 2 cycles, landing on the hit at 135.79s with a new colour"
   },
   {
    "effect": "glare",
@@ -2543,7 +2557,7 @@
    "from_s": 143.662,
    "to_s": 146.44,
    "fade_ms": 172,
-   "why": "bars 105-108, the phrase travels across: keys leads, E 8.94, 5 hits, mode +0.25 - twin in violet against teal inside - diverge instead, the only shape that finishes in 2.0 bars"
+   "why": "bars 105-108, the phrase travels across: keys leads, E 8.94, 5 hits, mode +0.25 - twin in violet against teal inside - converge instead, the only shape that finishes in 2.0 bars"
   },
   {
    "effect": "glare",
@@ -2579,7 +2593,7 @@
    "from_s": 146.44,
    "to_s": 149.235,
    "fade_ms": 172,
-   "why": "breathe answers diverge, a whole 4 cycles, landing on the hit at 146.44s with a new colour"
+   "why": "breathe answers converge, a whole 4 cycles, landing on the hit at 146.44s with a new colour"
   },
   {
    "effect": "glare",
@@ -2874,20 +2888,6 @@
    "to_s": 171.178,
    "fade_ms": 172,
    "why": "bars 123-124, the phrase travels across: keys leads, E 0.00, 0 hits, mode +1.00 - diverge in violet - converge instead, the only shape that finishes in 1.9 bars"
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.5,
-   "tilt": 0.3,
-   "colour": "#b026ff",
-   "amount": 0.081,
-   "prism": 0,
-   "strobe": 0,
-   "from_s": 171.178,
-   "to_s": 171.178,
-   "fade_ms": 0,
-   "why": "and back, the instant the audio returns"
   }
  ],
  "song": "afterglow",
@@ -2963,7 +2963,7 @@
     "second": 2.345
    },
    "fade": 0.086,
-   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 2.35s with a new colour - the opening comes up gradually, 23% to 50% of the look, arriving full at the entrance",
+   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 2.35s - the opening comes up gradually, 23% to 50% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "violet",
@@ -3064,7 +3064,7 @@
     "second": 8.545
    },
    "fade": 0.086,
-   "why": "build answers converge, a whole 1 cycles, landing on the hit at 8.54s with a new colour - the opening comes up gradually, 81% to 92% of the look, arriving full at the entrance",
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 8.54s - the opening comes up gradually, 81% to 92% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "violet",
@@ -3709,7 +3709,7 @@
     "second": 54.056
    },
    "fade": 0.0,
-   "why": "PEAK at 54.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit",
+   "why": "PEAK at 54.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working - breathe instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -3731,6 +3731,32 @@
      "hits": 1
     },
     "low": 0.6
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
    }
   },
   {
@@ -3739,7 +3765,7 @@
     "second": 55.38
    },
    "fade": 0.172,
-   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - breathe in violet against teal inside",
+   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - breathe in violet against teal inside - pulse instead, the only shape that finishes in 2.1 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -3755,7 +3781,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "breathe",
+     "figure": "pulse",
      "every": {
       "hits": 2
      },
@@ -3784,7 +3810,7 @@
     "second": 58.212
    },
    "fade": 0.172,
-   "why": "hocket answers breathe, a whole 4 cycles, landing on the hit at 58.21s with a new colour",
+   "why": "hocket answers pulse, a whole 4 cycles, landing on the hit at 58.21s with a new colour",
    "look": {
     "lamps": {
      "c": "violet",
@@ -3876,7 +3902,7 @@
     "second": 63.367
    },
    "fade": 0.172,
-   "why": "pulse answers diverge, a whole 3 cycles, landing on the hit at 63.37s with a new colour",
+   "why": "blink answers diverge, a whole 1 cycles, landing on the hit at 63.37s with a new colour",
    "look": {
     "lamps": {
      "c": "ember",
@@ -3892,7 +3918,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "blink",
      "every": {
       "hits": 1
      },
@@ -4784,7 +4810,7 @@
     "second": 122.95
    },
    "fade": 0.0,
-   "why": "climax at 123.3s - everything arrives at once - white, because only white carries a hit",
+   "why": "climax at 123.3s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working",
    "look": {
     "lamps": {
      "c": "bone",
@@ -4806,6 +4832,90 @@
      "hits": 1
     },
     "low": 0.45
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
+   }
+  },
+  {
+   "id": 26,
+   "at": {
+    "second": 125.109
+   },
+   "fade": 0.172,
+   "why": "zigzag answers pulse, a whole 1 cycles, landing on the hit at 125.11s with a new colour - opened to saffron: this level needs more than a dark colour can give",
+   "look": {
+    "lamps": {
+     "c": "saffron",
+     "l": 0.636
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.636,
+     "pan": 0.5,
+     "tilt": 0.3,
+     "strobe": 0.5,
+     "prism": 0.6
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "zigzag",
+     "every": {
+      "beats": 1.0
+     },
+     "low": 0.55,
+     "move_head": true,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "saffron",
+      "saffron"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold",
+     "reverse": true,
+     "cycles": 1
+    }
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
    }
   },
   {
@@ -4814,7 +4924,7 @@
     "second": 127.176
    },
    "fade": 0.172,
-   "why": "bars 93-96, the phrase travels across: keys leads, E 8.23, 6 hits, mode +0.52 - twin in violet - diverge instead, the only shape that finishes in 1.5 bars",
+   "why": "bars 93-96, the phrase travels across: keys leads, E 8.23, 6 hits, mode +0.52 - twin in violet - converge instead, the only shape that finishes in 1.5 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -4830,7 +4940,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "diverge",
+     "figure": "converge",
      "every": {
       "beats": 1.0
      },
@@ -4860,7 +4970,7 @@
     "second": 129.242
    },
    "fade": 0.172,
-   "why": "build answers diverge, a whole 1 cycles, landing on the hit at 129.24s with a new colour",
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 129.24s with a new colour",
    "look": {
     "lamps": {
      "c": "ember",
@@ -4906,7 +5016,7 @@
     "second": 132.679
    },
    "fade": 0.172,
-   "why": "bars 97-100, the phrase travels across: keys leads, E 7.30, 3 hits, mode +0.20 - converge in violet against crimson inside",
+   "why": "bars 97-100, the phrase travels across: keys leads, E 7.30, 3 hits, mode +0.20 - converge in violet against crimson inside - diverge instead, the only shape that finishes in 2.3 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -4922,7 +5032,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "converge",
+     "figure": "diverge",
      "every": {
       "beats": 1.5
      },
@@ -4951,7 +5061,7 @@
     "second": 135.79
    },
    "fade": 0.172,
-   "why": "split answers converge, a whole 2 cycles, landing on the hit at 135.79s with a new colour",
+   "why": "alternate answers diverge, a whole 2 cycles, landing on the hit at 135.79s with a new colour",
    "look": {
     "lamps": {
      "c": "ember",
@@ -4967,7 +5077,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "split",
+     "figure": "alternate",
      "every": {
       "hits": 1
      },
@@ -5089,7 +5199,7 @@
     "second": 143.662
    },
    "fade": 0.172,
-   "why": "bars 105-108, the phrase travels across: keys leads, E 8.94, 5 hits, mode +0.25 - twin in violet against teal inside - diverge instead, the only shape that finishes in 2.0 bars",
+   "why": "bars 105-108, the phrase travels across: keys leads, E 8.94, 5 hits, mode +0.25 - twin in violet against teal inside - converge instead, the only shape that finishes in 2.0 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -5105,7 +5215,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "diverge",
+     "figure": "converge",
      "every": {
       "beats": 1.0
      },
@@ -5134,7 +5244,7 @@
     "second": 146.44
    },
    "fade": 0.172,
-   "why": "breathe answers diverge, a whole 4 cycles, landing on the hit at 146.44s with a new colour",
+   "why": "breathe answers converge, a whole 4 cycles, landing on the hit at 146.44s with a new colour",
    "look": {
     "lamps": {
      "c": "ember",
@@ -5502,39 +5612,6 @@
      "bars": 2
     }
    }
-  },
-  {
-   "id": 34,
-   "at": {
-    "second": 171.178
-   },
-   "fade": 0.0,
-   "why": "and back, the instant the audio returns",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.121
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.081,
-     "pan": 0.5,
-     "tilt": 0.3
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "alternate",
-     "every": {
-      "beats": 2
-     },
-     "fill_beats": 1,
-     "low": 0.2,
-     "move_head": false,
-     "reverse": true
-    }
-   ]
   }
  ],
  "accents": [

@@ -68,7 +68,7 @@
    "effect": "wash",
    "extent": "all",
    "head": false,
-   "amount": 0.277,
+   "amount": 0.391,
    "colour": "#ffffff",
    "fade_ms": 0,
    "section": 0,
@@ -85,8 +85,20 @@
    "fade_ms": 0,
    "section": 1,
    "from_s": 23.893,
+   "to_s": 26.773,
+   "why": "PEAK at 25.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.707,
+   "colour": "#ffd000",
+   "fade_ms": 240,
+   "section": 1,
+   "from_s": 26.773,
    "to_s": 29.652,
-   "why": "PEAK at 25.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit"
+   "why": "breathe answers pulse, a whole 3 cycles, landing on the hit at 26.77s with a new colour - opened to saffron: this level needs more than a dark colour can give"
   },
   {
    "effect": "wash",
@@ -110,7 +122,7 @@
    "section": 1,
    "from_s": 33.971,
    "to_s": 37.338,
-   "why": "build answers alternate, a whole 1 cycles, landing on the hit at 33.97s with a new colour"
+   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 33.97s with a new colour"
   },
   {
    "effect": "wash",
@@ -134,7 +146,7 @@
    "section": 2,
    "from_s": 41.657,
    "to_s": 45.023,
-   "why": "unbuild answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour"
+   "why": "build answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour"
   },
   {
    "effect": "wash",
@@ -147,18 +159,6 @@
    "from_s": 45.023,
    "to_s": 46.324,
    "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - hocket in scarlet"
-  },
-  {
-   "effect": "wash",
-   "extent": "all",
-   "head": false,
-   "amount": 0.298,
-   "colour": "#e00020",
-   "fade_ms": 0,
-   "section": 2,
-   "from_s": 48.019,
-   "to_s": 48.024,
-   "why": "and back, the instant the audio returns"
   }
  ],
  "gestures": [
@@ -301,8 +301,8 @@
    "pattern": "nod",
    "pan": 0.5,
    "tilt": 0.29,
-   "colour": "#e00020",
-   "amount": 0.993,
+   "colour": "#ffd000",
+   "amount": 0.354,
    "prism": 0,
    "strobe": 0,
    "from_s": 21.478,
@@ -332,7 +332,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "hold",
+   "pattern": "circle",
    "pan": 0.5,
    "tilt": 0.26,
    "colour": "#ffffff",
@@ -340,9 +340,23 @@
    "prism": 60,
    "strobe": 50,
    "from_s": 23.893,
-   "to_s": 29.652,
+   "to_s": 26.773,
    "fade_ms": 0,
-   "why": "PEAK at 25.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit"
+   "why": "PEAK at 25.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working"
+  },
+  {
+   "effect": "beam",
+   "pattern": "circle",
+   "pan": 0.5,
+   "tilt": 0.26,
+   "colour": "#ffd000",
+   "amount": 0.707,
+   "prism": 60,
+   "strobe": 50,
+   "from_s": 26.773,
+   "to_s": 29.652,
+   "fade_ms": 240,
+   "why": "breathe answers pulse, a whole 3 cycles, landing on the hit at 26.77s with a new colour - opened to saffron: this level needs more than a dark colour can give"
   },
   {
    "effect": "glare",
@@ -415,7 +429,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "arc",
+   "pattern": "sweep",
    "pan": 0.5,
    "tilt": 0.41,
    "colour": "#ffd000",
@@ -425,7 +439,7 @@
    "from_s": 33.971,
    "to_s": 37.338,
    "fade_ms": 240,
-   "why": "build answers alternate, a whole 1 cycles, landing on the hit at 33.97s with a new colour"
+   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 33.97s with a new colour"
   },
   {
    "effect": "glare",
@@ -508,7 +522,7 @@
    "from_s": 41.657,
    "to_s": 45.023,
    "fade_ms": 240,
-   "why": "unbuild answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour"
+   "why": "build answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour"
   },
   {
    "effect": "glare",
@@ -573,23 +587,9 @@
    "extent": "all",
    "head": true,
    "from_s": 46.324,
-   "to_s": 48.019,
-   "fade_ms": 0,
-   "why": "the audio falls to 0% of its median for 1.70s - a real hole, so the room goes with it"
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.5,
-   "tilt": 0.29,
-   "colour": "#e00020",
-   "amount": 0.199,
-   "prism": 0,
-   "strobe": 0,
-   "from_s": 48.019,
    "to_s": 48.024,
    "fade_ms": 0,
-   "why": "and back, the instant the audio returns"
+   "why": "the audio falls to 0% of its median for 1.70s - a real hole, so the room goes with it"
   }
  ],
  "effects": [
@@ -872,15 +872,15 @@
     "second": 21.478
    },
    "fade": 0.0,
-   "why": "and back on the look it is arriving at, the instant the audio returns - opened from indigo to bone so the level can be seen - pendulum instead, the only shape that finishes in 1.0 bars",
+   "why": "and back on the look it is arriving at, the instant the audio returns - opened from indigo to bone so the level can be seen - pendulum instead, the only shape that finishes in 1.0 bars - opened to saffron: this level needs more than a dark colour can give",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.277
+     "l": 0.391
     },
     "heads": {
-     "c": "blood",
-     "l": 0.993,
+     "c": "saffron",
+     "l": 0.354,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -897,8 +897,8 @@
      "move_head": true,
      "cycles": 1,
      "colours": [
-      "indigo",
-      "blood"
+      "saffron",
+      "saffron"
      ],
      "colour_every": 5,
      "colour_figure": "hold"
@@ -931,7 +931,7 @@
     "second": 23.893
    },
    "fade": 0.0,
-   "why": "PEAK at 25.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit",
+   "why": "PEAK at 25.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working",
    "look": {
     "lamps": {
      "c": "bone",
@@ -953,6 +953,89 @@
      "hits": 1
     },
     "low": 0.6
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "indigo",
+      "blood"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
+   }
+  },
+  {
+   "id": 4,
+   "at": {
+    "second": 26.773
+   },
+   "fade": 0.24,
+   "why": "breathe answers pulse, a whole 3 cycles, landing on the hit at 26.77s with a new colour - opened to saffron: this level needs more than a dark colour can give",
+   "look": {
+    "lamps": {
+     "c": "saffron",
+     "l": 0.707
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.707,
+     "pan": 0.5,
+     "tilt": 0.26,
+     "strobe": 0.5,
+     "prism": 0.6
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.6
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "hits": 2
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "saffron",
+      "saffron"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold",
+     "reverse": true
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
    }
   },
   {
@@ -1007,7 +1090,7 @@
     "second": 33.971
    },
    "fade": 0.24,
-   "why": "build answers alternate, a whole 1 cycles, landing on the hit at 33.97s with a new colour",
+   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 33.97s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -1023,9 +1106,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "sweep",
      "every": {
-      "beats": 1.5
+      "beats": 1.0
      },
      "fill_beats": 2,
      "low": 0.38,
@@ -1036,13 +1119,13 @@
       "indigo",
       "blood"
      ],
-     "colour_every": 5,
+     "colour_every": 8,
      "colour_figure": "hold",
      "cycles": 1
     }
    ],
    "head": {
-    "move": "arc",
+    "move": "sweep",
     "every": {
      "bars": 2
     }
@@ -1100,7 +1183,7 @@
     "second": 41.657
    },
    "fade": 0.24,
-   "why": "unbuild answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour",
+   "why": "build answers split, a whole 1 cycles, landing on the hit at 41.66s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -1116,7 +1199,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "unbuild",
+     "figure": "build",
      "every": {
       "beats": 1.5
      },
@@ -1194,38 +1277,6 @@
    "fade": 0.0,
    "look": {},
    "why": "the audio falls to 0% of its median for 1.70s - a real hole, so the room goes with it"
-  },
-  {
-   "id": 7,
-   "at": {
-    "second": 48.019
-   },
-   "fade": 0.0,
-   "why": "and back, the instant the audio returns",
-   "look": {
-    "lamps": {
-     "c": "blood",
-     "l": 0.298
-    },
-    "heads": {
-     "c": "blood",
-     "l": 0.199,
-     "pan": 0.5,
-     "tilt": 0.29
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "hocket",
-     "every": {
-      "beats": 2
-     },
-     "fill_beats": 1,
-     "low": 0.2,
-     "move_head": false
-    }
-   ]
   }
  ],
  "rig": "arc4-head",

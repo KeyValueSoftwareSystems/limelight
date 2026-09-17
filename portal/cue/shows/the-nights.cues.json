@@ -155,7 +155,7 @@
    "section": 3,
    "from_s": 44.397,
    "to_s": 48.414,
-   "why": "hocket answers sweep, a whole 4 cycles, landing on the hit at 44.40s with a new colour"
+   "why": "hocket answers sweep, a whole 4 cycles, landing on the hit at 44.40s"
   },
   {
    "effect": "wash",
@@ -203,7 +203,7 @@
    "section": 4,
    "from_s": 61.69,
    "to_s": 63.646,
-   "why": "PEAK at 63.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit"
+   "why": "PEAK at 63.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "wash",
@@ -239,7 +239,7 @@
    "section": 5,
    "from_s": 71.262,
    "to_s": 75.326,
-   "why": "bars 37-40, the phrase opens out: keys leads, E 5.87, 0 hits, mode +0.79 - wave in bone against scarlet inside - build instead, the only shape that finishes in 2.1 bars"
+   "why": "bars 37-40, the phrase opens out: keys leads, E 5.87, 0 hits, mode +0.79 - wave in bone against scarlet inside - sweep instead, the only shape that finishes in 2.1 bars"
   },
   {
    "effect": "wash",
@@ -251,7 +251,7 @@
    "section": 5,
    "from_s": 75.326,
    "to_s": 78.85,
-   "why": "converge answers build, a whole 2 cycles, landing on the hit at 75.33s with a new colour"
+   "why": "converge answers sweep, a whole 2 cycles, landing on the hit at 75.33s with a new colour"
   },
   {
    "effect": "wash",
@@ -275,7 +275,7 @@
    "section": 6,
    "from_s": 82.942,
    "to_s": 86.494,
-   "why": "diverge answers pulse, a whole 2 cycles, landing on the hit at 82.94s with a new colour"
+   "why": "diverge answers pulse, a whole 2 cycles, landing on the hit at 82.94s"
   },
   {
    "effect": "wash",
@@ -287,7 +287,7 @@
    "section": 6,
    "from_s": 86.494,
    "to_s": 94.134,
-   "why": "bars 45-48, the phrase opens out: voices leads, E 5.84, 2 hits, mode -0.41 - cascade in crimson against scarlet inside"
+   "why": "bars 45-48, the phrase opens out: voices leads, E 5.84, 2 hits, mode -0.41 - cascade in crimson against scarlet inside - build instead, the only shape that finishes in 2.1 bars"
   },
   {
    "effect": "wash",
@@ -323,7 +323,7 @@
    "section": 7,
    "from_s": 105.558,
    "to_s": 109.343,
-   "why": "climax at 106.5s - everything arrives at once - white, because only white carries a hit"
+   "why": "climax at 106.5s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "wash",
@@ -347,7 +347,7 @@
    "section": 8,
    "from_s": 112.942,
    "to_s": 116.912,
-   "why": "pulse answers hocket, a whole 4 cycles, landing on the hit at 112.94s with a new colour"
+   "why": "breathe answers hocket, a whole 4 cycles, landing on the hit at 112.94s"
   },
   {
    "effect": "wash",
@@ -492,18 +492,6 @@
    "from_s": 174.036,
    "to_s": 175.682,
    "why": "bars 91-91, the phrase travels across: keys leads, E 0.00, 0 hits, mode +0.64 - split in violet - alternate instead, the only shape that finishes in 0.9 bars"
-  },
-  {
-   "effect": "wash",
-   "extent": "all",
-   "head": false,
-   "amount": 0.039,
-   "colour": "#ffffff",
-   "fade_ms": 0,
-   "section": 12,
-   "from_s": 175.682,
-   "to_s": 175.682,
-   "why": "and back, the instant the audio returns"
   }
  ],
  "bindings": [],
@@ -930,7 +918,7 @@
    "from_s": 44.397,
    "to_s": 48.414,
    "fade_ms": 119,
-   "why": "hocket answers sweep, a whole 4 cycles, landing on the hit at 44.40s with a new colour"
+   "why": "hocket answers sweep, a whole 4 cycles, landing on the hit at 44.40s"
   },
   {
    "effect": "glare",
@@ -1040,7 +1028,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "hold",
+   "pattern": "circle",
    "pan": 0.5,
    "tilt": 0.26,
    "colour": "#ffffff",
@@ -1050,7 +1038,7 @@
    "from_s": 61.69,
    "to_s": 63.646,
    "fade_ms": 0,
-   "why": "PEAK at 63.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit"
+   "why": "PEAK at 63.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "beam",
@@ -1115,7 +1103,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "arc",
+   "pattern": "sweep",
    "pan": 0.5,
    "tilt": 0.36,
    "colour": "#ffd000",
@@ -1125,7 +1113,7 @@
    "from_s": 71.262,
    "to_s": 75.326,
    "fade_ms": 238,
-   "why": "bars 37-40, the phrase opens out: keys leads, E 5.87, 0 hits, mode +0.79 - wave in bone against scarlet inside - build instead, the only shape that finishes in 2.1 bars"
+   "why": "bars 37-40, the phrase opens out: keys leads, E 5.87, 0 hits, mode +0.79 - wave in bone against scarlet inside - sweep instead, the only shape that finishes in 2.1 bars"
   },
   {
    "effect": "glare",
@@ -1150,7 +1138,7 @@
    "from_s": 75.326,
    "to_s": 78.85,
    "fade_ms": 238,
-   "why": "converge answers build, a whole 2 cycles, landing on the hit at 75.33s with a new colour"
+   "why": "converge answers sweep, a whole 2 cycles, landing on the hit at 75.33s with a new colour"
   },
   {
    "effect": "glare",
@@ -1222,7 +1210,7 @@
    "from_s": 82.942,
    "to_s": 86.494,
    "fade_ms": 238,
-   "why": "diverge answers pulse, a whole 2 cycles, landing on the hit at 82.94s with a new colour"
+   "why": "diverge answers pulse, a whole 2 cycles, landing on the hit at 82.94s"
   },
   {
    "effect": "glare",
@@ -1258,7 +1246,7 @@
    "from_s": 86.494,
    "to_s": 94.134,
    "fade_ms": 238,
-   "why": "bars 45-48, the phrase opens out: voices leads, E 5.84, 2 hits, mode -0.41 - cascade in crimson against scarlet inside"
+   "why": "bars 45-48, the phrase opens out: voices leads, E 5.84, 2 hits, mode -0.41 - cascade in crimson against scarlet inside - build instead, the only shape that finishes in 2.1 bars"
   },
   {
    "effect": "glare",
@@ -1387,7 +1375,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "hold",
+   "pattern": "circle",
    "pan": 0.5,
    "tilt": 0.3,
    "colour": "#ffffff",
@@ -1397,7 +1385,7 @@
    "from_s": 105.558,
    "to_s": 109.343,
    "fade_ms": 0,
-   "why": "climax at 106.5s - everything arrives at once - white, because only white carries a hit"
+   "why": "climax at 106.5s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "glare",
@@ -1447,7 +1435,7 @@
    "from_s": 112.942,
    "to_s": 116.912,
    "fade_ms": 119,
-   "why": "pulse answers hocket, a whole 4 cycles, landing on the hit at 112.94s with a new colour"
+   "why": "breathe answers hocket, a whole 4 cycles, landing on the hit at 112.94s"
   },
   {
    "effect": "glare",
@@ -1955,20 +1943,6 @@
    "to_s": 175.682,
    "fade_ms": 238,
    "why": "bars 91-91, the phrase travels across: keys leads, E 0.00, 0 hits, mode +0.64 - split in violet - alternate instead, the only shape that finishes in 0.9 bars"
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.5,
-   "tilt": 0.39,
-   "colour": "#ffffff",
-   "amount": 0.028,
-   "prism": 0,
-   "strobe": 0,
-   "from_s": 175.682,
-   "to_s": 175.682,
-   "fade_ms": 0,
-   "why": "and back, the instant the audio returns"
   }
  ],
  "song": "the-nights",
@@ -2558,7 +2532,7 @@
     "second": 44.397
    },
    "fade": 0.119,
-   "why": "hocket answers sweep, a whole 4 cycles, landing on the hit at 44.40s with a new colour",
+   "why": "hocket answers sweep, a whole 4 cycles, landing on the hit at 44.40s",
    "look": {
     "lamps": {
      "c": "bone",
@@ -2764,7 +2738,7 @@
     "second": 61.69
    },
    "fade": 0.0,
-   "why": "PEAK at 63.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit",
+   "why": "PEAK at 63.5s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working",
    "look": {
     "lamps": {
      "c": "bone",
@@ -2786,6 +2760,32 @@
      "hits": 1
     },
     "low": 0.6
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "bone",
+      "saffron"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
    }
   },
   {
@@ -2885,7 +2885,7 @@
     "second": 71.262
    },
    "fade": 0.238,
-   "why": "bars 37-40, the phrase opens out: keys leads, E 5.87, 0 hits, mode +0.79 - wave in bone against scarlet inside - build instead, the only shape that finishes in 2.1 bars",
+   "why": "bars 37-40, the phrase opens out: keys leads, E 5.87, 0 hits, mode +0.79 - wave in bone against scarlet inside - sweep instead, the only shape that finishes in 2.1 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -2901,7 +2901,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "sweep",
      "every": {
       "beats": 1.0
      },
@@ -2909,7 +2909,7 @@
      "low": 0.2,
      "move_head": true,
      "reverse": true,
-     "cycles": 2,
+     "cycles": 1,
      "colours": [
       "bone",
       "saffron"
@@ -2919,7 +2919,7 @@
     }
    ],
    "head": {
-    "move": "arc",
+    "move": "sweep",
     "every": {
      "bars": 2
     }
@@ -2931,7 +2931,7 @@
     "second": 75.326
    },
    "fade": 0.238,
-   "why": "converge answers build, a whole 2 cycles, landing on the hit at 75.33s with a new colour",
+   "why": "converge answers sweep, a whole 2 cycles, landing on the hit at 75.33s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -3023,7 +3023,7 @@
     "second": 82.942
    },
    "fade": 0.238,
-   "why": "diverge answers pulse, a whole 2 cycles, landing on the hit at 82.94s with a new colour",
+   "why": "diverge answers pulse, a whole 2 cycles, landing on the hit at 82.94s",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -3069,7 +3069,7 @@
     "second": 86.494
    },
    "fade": 0.238,
-   "why": "bars 45-48, the phrase opens out: voices leads, E 5.84, 2 hits, mode -0.41 - cascade in crimson against scarlet inside",
+   "why": "bars 45-48, the phrase opens out: voices leads, E 5.84, 2 hits, mode -0.41 - cascade in crimson against scarlet inside - build instead, the only shape that finishes in 2.1 bars",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -3085,7 +3085,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "cascade",
+     "figure": "build",
      "every": {
       "beats": 1.0
      },
@@ -3093,7 +3093,7 @@
      "low": 0.38,
      "move_head": true,
      "reverse": true,
-     "cycles": 1,
+     "cycles": 2,
      "colours": [
       "bone",
       "saffron"
@@ -3230,7 +3230,7 @@
     "second": 105.558
    },
    "fade": 0.0,
-   "why": "climax at 106.5s - everything arrives at once - white, because only white carries a hit",
+   "why": "climax at 106.5s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working",
    "look": {
     "lamps": {
      "c": "bone",
@@ -3252,6 +3252,31 @@
      "hits": 1
     },
     "low": 0.45
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 1.0
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "cycles": 4,
+     "colours": [
+      "bone",
+      "saffron"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
    }
   },
   {
@@ -3305,7 +3330,7 @@
     "second": 112.942
    },
    "fade": 0.119,
-   "why": "pulse answers hocket, a whole 4 cycles, landing on the hit at 112.94s with a new colour",
+   "why": "breathe answers hocket, a whole 4 cycles, landing on the hit at 112.94s",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -3321,7 +3346,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "breathe",
      "every": {
       "beats": 1.0
      },
@@ -3920,39 +3945,6 @@
      "bars": 1
     }
    }
-  },
-  {
-   "id": 28,
-   "at": {
-    "second": 175.682
-   },
-   "fade": 0.0,
-   "why": "and back, the instant the audio returns",
-   "look": {
-    "lamps": {
-     "c": "bone",
-     "l": 0.039
-    },
-    "heads": {
-     "c": "bone",
-     "l": 0.028,
-     "pan": 0.5,
-     "tilt": 0.39
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "breathe",
-     "every": {
-      "beats": 2
-     },
-     "fill_beats": 1,
-     "low": 0.2,
-     "move_head": false,
-     "reverse": true
-    }
-   ]
   }
  ],
  "accents": [

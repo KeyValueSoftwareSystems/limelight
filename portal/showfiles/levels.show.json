@@ -38,7 +38,7 @@
    "section": 0,
    "from_s": 8.893,
    "to_s": 12.399,
-   "why": "build answers sweep, a whole 1 cycles, landing on the hit at 8.89s with a new colour - the opening comes up gradually, 26% to 55% of the look, arriving full at the entrance"
+   "why": "breathe answers breathe, a whole 1 cycles, landing on the hit at 8.89s - the opening comes up gradually, 26% to 55% of the look, arriving full at the entrance"
   },
   {
    "effect": "wash",
@@ -62,7 +62,7 @@
    "section": 0,
    "from_s": 14.977,
    "to_s": 17.55,
-   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 14.98s with a new colour - the opening comes up gradually, 62% to 92% of the look, arriving full at the entrance"
+   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 14.98s - the opening comes up gradually, 62% to 92% of the look, arriving full at the entrance"
   },
   {
    "effect": "wash",
@@ -98,7 +98,7 @@
    "section": 1,
    "from_s": 23.429,
    "to_s": 27.4,
-   "why": "pulse answers alternate, a whole 4 cycles, landing on the hit at 23.43s with a new colour"
+   "why": "breathe answers alternate, a whole 4 cycles, landing on the hit at 23.43s with a new colour"
   },
   {
    "effect": "wash",
@@ -291,18 +291,6 @@
    "from_s": 94.668,
    "to_s": 99.033,
    "why": "bars 49-52, the phrase closes down: keys leads, E 2.85, 0 hits, mode +1.00 - alternate in violet"
-  },
-  {
-   "effect": "wash",
-   "extent": "all",
-   "head": false,
-   "amount": 0.094,
-   "colour": "#b026ff",
-   "fade_ms": 0,
-   "section": 5,
-   "from_s": 99.358,
-   "to_s": 99.474,
-   "why": "and back, the instant the audio returns"
   },
   {
    "effect": "wash",
@@ -614,7 +602,7 @@
    "section": 12,
    "from_s": 195.907,
    "to_s": 199.877,
-   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 195.91s with a new colour"
+   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 195.91s"
   },
   {
    "effect": "wash",
@@ -662,7 +650,7 @@
    "section": 13,
    "from_s": 214.877,
    "to_s": 220.051,
-   "why": "climax at 214.8s - everything arrives at once - white, because only white carries a hit"
+   "why": "climax at 214.8s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "wash",
@@ -674,7 +662,7 @@
    "section": 13,
    "from_s": 220.52,
    "to_s": 222.378,
-   "why": "PEAK at 221.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit"
+   "why": "PEAK at 221.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working -"
   },
   {
    "effect": "wash",
@@ -698,7 +686,7 @@
    "section": 13,
    "from_s": 225.907,
    "to_s": 229.878,
-   "why": "cascade answers converge, a whole 1 cycles, landing on the hit at 225.91s with a new colour"
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 225.91s with a new colour"
   },
   {
    "effect": "wash",
@@ -710,7 +698,7 @@
    "section": 13,
    "from_s": 229.878,
    "to_s": 232.919,
-   "why": "bars 121-124, the phrase closes down: keys leads, E 5.58, 3 hits, mode +0.56 - pulse in violet"
+   "why": "bars 121-124, the phrase closes down: keys leads, E 5.58, 3 hits, mode +0.56 - pulse in violet - zigzag instead, the only shape that finishes in 1.6 bars"
   },
   {
    "effect": "wash",
@@ -722,19 +710,7 @@
    "section": 13,
    "from_s": 232.919,
    "to_s": 235.404,
-   "why": "alternate answers pulse, a whole 2 cycles, landing on the hit at 232.92s with a new colour"
-  },
-  {
-   "effect": "wash",
-   "extent": "all",
-   "head": false,
-   "amount": 0.202,
-   "colour": "#b026ff",
-   "fade_ms": 0,
-   "section": 13,
-   "from_s": 237.145,
-   "to_s": 237.145,
-   "why": "and back, the instant the audio returns"
+   "why": "alternate answers zigzag, a whole 2 cycles, landing on the hit at 232.92s with a new colour"
   }
  ],
  "gestures": [
@@ -797,7 +773,7 @@
    "from_s": 8.893,
    "to_s": 12.399,
    "fade_ms": 117,
-   "why": "build answers sweep, a whole 1 cycles, landing on the hit at 8.89s with a new colour - the opening comes up gradually, 26% to 55% of the look, arriving full at the entrance"
+   "why": "breathe answers breathe, a whole 1 cycles, landing on the hit at 8.89s - the opening comes up gradually, 26% to 55% of the look, arriving full at the entrance"
   },
   {
    "effect": "glare",
@@ -847,7 +823,7 @@
    "from_s": 14.977,
    "to_s": 17.55,
    "fade_ms": 0,
-   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 14.98s with a new colour - the opening comes up gradually, 62% to 92% of the look, arriving full at the entrance"
+   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 14.98s - the opening comes up gradually, 62% to 92% of the look, arriving full at the entrance"
   },
   {
    "effect": "glare",
@@ -942,7 +918,7 @@
    "from_s": 23.429,
    "to_s": 27.4,
    "fade_ms": 234,
-   "why": "pulse answers alternate, a whole 4 cycles, landing on the hit at 23.43s with a new colour"
+   "why": "breathe answers alternate, a whole 4 cycles, landing on the hit at 23.43s with a new colour"
   },
   {
    "effect": "glare",
@@ -1646,23 +1622,9 @@
    "extent": "all",
    "head": true,
    "from_s": 99.033,
-   "to_s": 99.358,
-   "fade_ms": 0,
-   "why": "the audio falls to 26% of its median for 0.33s - a real hole, so the room goes with it"
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.5,
-   "tilt": 0.41,
-   "colour": "#b026ff",
-   "amount": 0.067,
-   "prism": 0,
-   "strobe": 0,
-   "from_s": 99.358,
    "to_s": 99.474,
    "fade_ms": 0,
-   "why": "and back, the instant the audio returns"
+   "why": "the audio falls to 26% of its median for 0.33s - a real hole, so the room goes with it"
   },
   {
    "effect": "blackout",
@@ -2528,7 +2490,7 @@
    "from_s": 195.907,
    "to_s": 199.877,
    "fade_ms": 234,
-   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 195.91s with a new colour"
+   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 195.91s"
   },
   {
    "effect": "glare",
@@ -2682,7 +2644,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "hold",
+   "pattern": "nod",
    "pan": 0.5,
    "tilt": 0.3,
    "colour": "#ffffff",
@@ -2692,7 +2654,7 @@
    "from_s": 214.877,
    "to_s": 220.051,
    "fade_ms": 0,
-   "why": "climax at 214.8s - everything arrives at once - white, because only white carries a hit"
+   "why": "climax at 214.8s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working"
   },
   {
    "effect": "glare",
@@ -2738,7 +2700,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "hold",
+   "pattern": "circle",
    "pan": 0.5,
    "tilt": 0.26,
    "colour": "#ffffff",
@@ -2748,7 +2710,7 @@
    "from_s": 220.52,
    "to_s": 222.378,
    "fade_ms": 0,
-   "why": "PEAK at 221.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit"
+   "why": "PEAK at 221.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working -"
   },
   {
    "effect": "beam",
@@ -2787,7 +2749,7 @@
    "from_s": 225.907,
    "to_s": 229.878,
    "fade_ms": 234,
-   "why": "cascade answers converge, a whole 1 cycles, landing on the hit at 225.91s with a new colour"
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 225.91s with a new colour"
   },
   {
    "effect": "glare",
@@ -2824,7 +2786,7 @@
   },
   {
    "effect": "beam",
-   "pattern": "circle",
+   "pattern": "sweep",
    "pan": 0.5,
    "tilt": 0.43,
    "colour": "#b026ff",
@@ -2834,7 +2796,7 @@
    "from_s": 229.878,
    "to_s": 232.919,
    "fade_ms": 234,
-   "why": "bars 121-124, the phrase closes down: keys leads, E 5.58, 3 hits, mode +0.56 - pulse in violet"
+   "why": "bars 121-124, the phrase closes down: keys leads, E 5.58, 3 hits, mode +0.56 - pulse in violet - zigzag instead, the only shape that finishes in 1.6 bars"
   },
   {
    "effect": "glare",
@@ -2870,7 +2832,7 @@
    "from_s": 232.919,
    "to_s": 235.404,
    "fade_ms": 234,
-   "why": "alternate answers pulse, a whole 2 cycles, landing on the hit at 232.92s with a new colour"
+   "why": "alternate answers zigzag, a whole 2 cycles, landing on the hit at 232.92s with a new colour"
   },
   {
    "effect": "glare",
@@ -2902,20 +2864,6 @@
    "to_s": 237.145,
    "fade_ms": 0,
    "why": "the audio falls to 0% of its median for 1.74s - a real hole, so the room goes with it"
-  },
-  {
-   "effect": "beam",
-   "pattern": "hold",
-   "pan": 0.5,
-   "tilt": 0.43,
-   "colour": "#b026ff",
-   "amount": 0.135,
-   "prism": 0,
-   "strobe": 0,
-   "from_s": 237.145,
-   "to_s": 237.145,
-   "fade_ms": 0,
-   "why": "and back, the instant the audio returns"
   }
  ],
  "effects": [
@@ -3009,7 +2957,7 @@
     "second": 8.893
    },
    "fade": 0.117,
-   "why": "build answers sweep, a whole 1 cycles, landing on the hit at 8.89s with a new colour - the opening comes up gradually, 26% to 55% of the look, arriving full at the entrance",
+   "why": "breathe answers breathe, a whole 1 cycles, landing on the hit at 8.89s - the opening comes up gradually, 26% to 55% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "violet",
@@ -3109,7 +3057,7 @@
     "second": 14.977
    },
    "fade": 0.0,
-   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 14.98s with a new colour - the opening comes up gradually, 62% to 92% of the look, arriving full at the entrance",
+   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 14.98s - the opening comes up gradually, 62% to 92% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "violet",
@@ -3195,6 +3143,26 @@
     },
     "low": 0.45
    },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
    "head": {
     "move": "park",
     "every": {
@@ -3258,7 +3226,7 @@
     "second": 23.429
    },
    "fade": 0.234,
-   "why": "pulse answers alternate, a whole 4 cycles, landing on the hit at 23.43s with a new colour",
+   "why": "breathe answers alternate, a whole 4 cycles, landing on the hit at 23.43s with a new colour",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -3274,7 +3242,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "breathe",
      "every": {
       "hits": 1
      },
@@ -4050,39 +4018,6 @@
    "fade": 0.0,
    "look": {},
    "why": "the audio falls to 26% of its median for 0.33s - a real hole, so the room goes with it"
-  },
-  {
-   "id": 15,
-   "at": {
-    "second": 99.358
-   },
-   "fade": 0.0,
-   "why": "and back, the instant the audio returns",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.094
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.067,
-     "pan": 0.5,
-     "tilt": 0.41
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "alternate",
-     "every": {
-      "beats": 2
-     },
-     "fill_beats": 1,
-     "low": 0.2,
-     "move_head": false,
-     "reverse": true
-    }
-   ]
   },
   {
    "id": 0,
@@ -5270,7 +5205,7 @@
     "second": 195.907
    },
    "fade": 0.234,
-   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 195.91s with a new colour",
+   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 195.91s",
    "look": {
     "lamps": {
      "c": "bone",
@@ -5468,7 +5403,7 @@
     "second": 214.877
    },
    "fade": 0.0,
-   "why": "climax at 214.8s - everything arrives at once - white, because only white carries a hit",
+   "why": "climax at 214.8s - everything arrives at once - white, because only white carries a hit, the row pulsing on the half beat and the head working",
    "look": {
     "lamps": {
      "c": "bone",
@@ -5495,6 +5430,32 @@
     "from": 0.84,
     "to": 1.0,
     "curve": 1.6
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 1
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "min_intensity": 0.3,
+     "fill_beats": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
    }
   },
   {
@@ -5512,7 +5473,7 @@
     "second": 220.52
    },
    "fade": 0.0,
-   "why": "PEAK at 221.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit",
+   "why": "PEAK at 221.0s - the loudest instant in the recording. Full blast, the only white - white, because only white carries a hit, the row pulsing on the half beat and the head working - breathe instead, the only shape that finishes in 1.0 bars",
    "look": {
     "lamps": {
      "c": "bone",
@@ -5534,6 +5495,31 @@
      "hits": 1
     },
     "low": 0.6
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 1.0
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
    }
   },
   {
@@ -5588,7 +5574,7 @@
     "second": 225.907
    },
    "fade": 0.234,
-   "why": "cascade answers converge, a whole 1 cycles, landing on the hit at 225.91s with a new colour",
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 225.91s with a new colour",
    "look": {
     "lamps": {
      "c": "violet",
@@ -5604,9 +5590,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "cascade",
+     "figure": "build",
      "every": {
-      "beats": 1.0
+      "beats": 1.5
      },
      "fill_beats": 1,
      "low": 0.2,
@@ -5617,7 +5603,7 @@
       "violet",
       "ember"
      ],
-     "colour_every": 8,
+     "colour_every": 5,
      "colour_figure": "hold"
     }
    ],
@@ -5634,7 +5620,7 @@
     "second": 229.878
    },
    "fade": 0.234,
-   "why": "bars 121-124, the phrase closes down: keys leads, E 5.58, 3 hits, mode +0.56 - pulse in violet",
+   "why": "bars 121-124, the phrase closes down: keys leads, E 5.58, 3 hits, mode +0.56 - pulse in violet - zigzag instead, the only shape that finishes in 1.6 bars",
    "look": {
     "lamps": {
      "c": "violet",
@@ -5650,15 +5636,15 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "zigzag",
      "every": {
       "beats": 1.0
      },
      "fill_beats": 1,
      "low": 0.2,
-     "move_head": false,
+     "move_head": true,
      "reverse": true,
-     "cycles": 3,
+     "cycles": 1,
      "colours": [
       "violet",
       "ember"
@@ -5668,9 +5654,9 @@
     }
    ],
    "head": {
-    "move": "circle",
+    "move": "sweep",
     "every": {
-     "bars": 4
+     "bars": 2
     }
    }
   },
@@ -5680,7 +5666,7 @@
     "second": 232.919
    },
    "fade": 0.234,
-   "why": "alternate answers pulse, a whole 2 cycles, landing on the hit at 232.92s with a new colour",
+   "why": "alternate answers zigzag, a whole 2 cycles, landing on the hit at 232.92s with a new colour",
    "look": {
     "lamps": {
      "c": "ember",
@@ -5728,39 +5714,6 @@
    "fade": 0.0,
    "look": {},
    "why": "the audio falls to 0% of its median for 1.74s - a real hole, so the room goes with it"
-  },
-  {
-   "id": 36,
-   "at": {
-    "second": 237.145
-   },
-   "fade": 0.0,
-   "why": "and back, the instant the audio returns",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.202
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.135,
-     "pan": 0.5,
-     "tilt": 0.43
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "pulse",
-     "every": {
-      "hits": 1
-     },
-     "fill_beats": 1,
-     "low": 0.2,
-     "move_head": false,
-     "reverse": true
-    }
-   ]
   }
  ],
  "rig": "arc4-head",
