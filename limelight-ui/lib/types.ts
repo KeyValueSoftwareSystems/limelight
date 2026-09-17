@@ -197,6 +197,16 @@ export interface Edit {
    *  The server builds its rows from a field whitelist, so this never leaves
    *  the browser. */
   from?: string;
+  /** Which lane it sits on, and so which of two overlapping effects plays.
+   *  0 is the top lane and the highest priority.
+   *
+   *  It is STORED rather than derived. The lane used to be a function of where
+   *  a clip's neighbours started — fine while a lane was only a way of not
+   *  hiding things behind each other, and impossible once the lane decides what
+   *  the show plays: moving one clip would have silently changed which effect
+   *  won somewhere else in the song. Optional because shows written before this
+   *  carry none; lib/layers seeds those once, on the way in. */
+  layer?: number;
 }
 
 export interface AppliedEdit {
@@ -276,6 +286,17 @@ export interface Clip {
   endS: number;
   params: Record<string, unknown>;
   overridden: boolean;
+  /** The lane, and so the priority. See Edit.layer. The arranger's own clips
+   *  have no Edit to store one on, so they are packed into whatever lanes are
+   *  left and take the lane they were already on when someone takes them over —
+   *  which is why this is optional rather than a number that lies. */
+  layer?: number;
+  /** What role this plays in a baked frame. The baker composites a base (an
+   *  active binding, else the section state) and lays a gesture over it, so a
+   *  state and a gesture are not competitors for one slot — which is why a
+   *  shared lane only means "one of these loses" between clips of the same
+   *  kind. */
+  kind: "state" | "gesture" | "binding";
 }
 
 /* ── saved shows ─────────────────────────────────────────────────────────── */

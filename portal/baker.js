@@ -41,7 +41,8 @@ if (!scoreFile || !planFile || !lightsOut) {
 
 const { load } = require(path.join(LIGHTS, "fromscore.js"));
 const { frameAt, slew, makeStreamSampler, bindingValueFn,
-        makeBeatClock, makePerBeatWeight, makeEnergy } = require("./bakelib.js");
+        makeBeatClock, makePerBeatWeight, makeEnergy,
+        pickGesture, byLayer } = require("./bakelib.js");
 const score = load(scoreFile);
 const plan = JSON.parse(fs.readFileSync(planFile, "utf8"));
 
@@ -203,7 +204,11 @@ function resolveGesture(g) {
      by accident. */
   const SKIP = new Set(["effect", "moment", "from_moment", "to_moment", "lead_beats", "why",
                         "at_s", "from_s", "to_s", "at", "id",
-                        "at_bar", "at_beat", "from_bar", "from_beat", "to_bar", "to_beat"]);
+                        "at_bar", "at_beat", "from_bar", "from_beat", "to_bar", "to_beat",
+                        /* The lane is priority, not a dial. Everything not named
+                           here is handed to the effect as a parameter it never
+                           asked for. */
+                        "layer"]);
   const params = { ...edef.dials };
   for (const [k, v] of Object.entries(g)) {
     if (!SKIP.has(k)) {
@@ -219,7 +224,8 @@ function resolveGesture(g) {
     resolvedParams[k] = typeof v === "object" && v !== null && v.default !== undefined ? v.default : v;
   }
 
-  return { eid, startS: Math.max(0, startS), endS, params: resolvedParams, kind: "gesture" };
+  return { eid, startS: Math.max(0, startS), endS, params: resolvedParams, kind: "gesture",
+           layer: g.layer };
 }
 
 /* A section's own seconds beat a bar label converted back into seconds.
@@ -266,13 +272,14 @@ function resolveBinding(b) {
 
   const params = {};
   for (const [k, v] of Object.entries(b)) {
-    if (k !== "effect" && k !== "section" && k !== "why" &&
+    if (k !== "effect" && k !== "section" && k !== "why" && k !== "layer" &&
         k !== "from_bar" && k !== "to_bar" && k !== "from_beat" && k !== "to_beat" &&
         k !== "from_s" && k !== "to_s") {
       params[k] = typeof v === "object" && v !== null && v.default !== undefined ? v.default : v;
     }
   }
-  return { eid, startS, endS, params, kind: "binding", streams: b.streams || b.stream };
+  return { eid, startS, endS, params, kind: "binding", streams: b.streams || b.stream,
+           layer: b.layer };
 }
 
 function resolveState(s) {
@@ -299,13 +306,13 @@ function resolveState(s) {
 
   const params = {};
   for (const [k, v] of Object.entries(s)) {
-    if (k !== "effect" && k !== "section" && k !== "why" &&
+    if (k !== "effect" && k !== "section" && k !== "why" && k !== "layer" &&
         k !== "from_bar" && k !== "to_bar" && k !== "from_beat" && k !== "to_beat" &&
         k !== "from_s" && k !== "to_s") {
       params[k] = typeof v === "object" && v !== null && v.default !== undefined ? v.default : v;
     }
   }
-  return { eid, startS, endS, params, kind: "state" };
+  return { eid, startS, endS, params, kind: "state", layer: s.layer };
 }
 
 const resolvedGestures = (plan.gestures || []).map(resolveGesture).filter(Boolean);
@@ -331,8 +338,13 @@ function generateFrames(entry) {
 
 /* ── bake: compose layers per frame ───────────────────────────────────────── */
 
-const stateResults = resolvedStates.map(s => ({ ...s, dmx: generateFrames(s) })).filter(r => r.dmx);
-const bindingResults = resolvedBindings.map(b => ({ ...b, dmx: generateFrames(b) })).filter(r => r.dmx);
+/* Sorted by lane, because the base loops below take the FIRST binding (else the
+   first state) covering a fixture and stop — so lane order IS resolution order
+   for the bed. The editor already emits them sorted; doing it here too means a
+   plan written by hand resolves the way its lanes say rather than the way its
+   array happens to be ordered. With no lanes it is a stable no-op. */
+const stateResults = byLayer(resolvedStates).map(s => ({ ...s, dmx: generateFrames(s) })).filter(r => r.dmx);
+const bindingResults = byLayer(resolvedBindings).map(b => ({ ...b, dmx: generateFrames(b) })).filter(r => r.dmx);
 const gestureResults = resolvedGestures.map(g => ({ ...g, dmx: generateFrames(g) })).filter(r => r.dmx);
 
 const allFrames = [];
@@ -405,15 +417,17 @@ for (let t = 0; t < dur; t += 1 / fps) {
       }
     }
 
-    /* gesture: among those covering this fixture now, the most recently STARTED
-       one wins the overlap — a blackout placed at the drop supersedes the ramp
-       that has been building into it, not whichever was declared first. */
-    let g = null, gStart = -Infinity;
+    /* gesture: among those covering this fixture now, the TOP LANE wins, and
+       within a lane the most recently STARTED one — a blackout placed at the
+       drop supersedes the ramp that has been building into it, not whichever
+       was declared first. See pickGesture in bakelib.js. */
+    const covering = [];
     for (const cand of gestureResults) {
       if (t < cand.startS || t >= cand.endS) continue;
       if (!cand.dmx.per_fixture.includes(fid)) continue;
-      if (cand.startS >= gStart) { g = cand; gStart = cand.startS; }
+      covering.push(cand);
     }
+    const g = pickGesture(covering);
     let gsrc = null;
     if (g) { g._t = t; gsrc = sourceFrame(g, cache); }
 

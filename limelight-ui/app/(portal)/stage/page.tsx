@@ -25,6 +25,7 @@ import { ChatPanel } from "@/components/editor/ChatPanel";
 import { RigControl } from "@/components/portal/RigControl";
 import { buildClips, tileForClip } from "@/lib/clips";
 import { planToEdits, editsToPlan, type V2Plan } from "@/lib/planConvert";
+import { seedLayers } from "@/lib/layers";
 import { buildShowFile, serializeShowFile, showFileName } from "@/lib/showfile";
 import { downloadText } from "@/lib/download";
 import type { Clip, Edit, PaletteColour } from "@/lib/types";
@@ -328,8 +329,16 @@ export default function StagePage() {
         setJob(post.job);
         const baked = await pollBake(post.job, token);
         if (baked)
+          /* Every show comes in through here, so this is where lanes are
+             seeded. A plan that carries them keeps them; one written before
+             lanes existed gets the lanes the packing would have drawn it on
+             anyway, ONCE — after which they are the clips' own property and
+             nothing recomputes them. See lib/layers. */
           setEdits(
-            planToEdits(planData, baked, usePortalStore.getState().effects),
+            seedLayers(
+              planToEdits(planData, baked, usePortalStore.getState().effects),
+              baked.grid,
+            ),
           );
       } catch (e) {
         setStageMsg(
@@ -703,7 +712,7 @@ export default function StagePage() {
      bake lands. Blocking the timeline on a 1-3s round trip would make placing
      feel broken even though nothing is wrong. */
   const handlePlace = useCallback(
-    (edit: Edit | Edit[]): number[] => {
+    (edit: Edit | Edit[], displaced?: Map<number, number>): number[] => {
       const list = Array.isArray(edit) ? edit : [edit];
       if (!list.length) return [];
       /* Appended in ONE write, off the live list. A paste of four clips through
@@ -711,7 +720,15 @@ export default function StagePage() {
          and the indices handed back would be stale by the second one. */
       const st = usePortalStore.getState();
       const at = st.edits.length;
-      setEdits([...st.edits, ...list], "push");
+      /* `displaced` is the clips that had to step down a lane to make room for
+         this one — see displaceForInsert. They ride in the SAME write, so a
+         drop that moves three other clips is still one undo step and one bake.
+         Writing them separately first would take two presses of undo to put
+         back what one press of the pointer did. */
+      const base = displaced?.size
+        ? st.edits.map((e, i) => (displaced.has(i) ? { ...e, layer: displaced.get(i) } : e))
+        : st.edits;
+      setEdits([...base, ...list], "push");
       setSel(at + list.length - 1);
       rebuild();
       return list.map((_, i) => at + i);
@@ -792,6 +809,11 @@ export default function StagePage() {
         bar: clip.bar,
         beat: clip.beat,
         beats: clip.beats,
+        /* The lane it was already drawn on. An arranger's clip carries none of
+           its own — the packer places it — so the timeline resolves that and
+           passes it in. Without it the new edit would be drawn wherever the
+           packer put it next while baking as though it sat on the top lane. */
+        ...(typeof clip.layer === "number" ? { layer: clip.layer } : {}),
         ...(clip.planId ? { from: clip.planId } : {}),
       }, LIVE);
       return index;

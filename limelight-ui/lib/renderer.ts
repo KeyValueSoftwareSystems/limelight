@@ -18,6 +18,7 @@ import type { FixtureStates, LampState } from "./types";
 import { GAMMA, TAU, DEG, PAN_CENTRE, PAN_DEG_PER_DMX, TILT_WALL, TILT_WALL_EL, TILT_DEG_PER_DMX, wheelAt } from "./dmx.ts";
 import { clamp } from "./grid.ts";
 import { profileOf, moves } from "./profiles.ts";
+import { frameLight } from "./exposure.ts";
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 
@@ -572,18 +573,10 @@ export function paintStage(
 
   ctx.globalCompositeOperation = "lighter";
 
-  /* the air. Haze is what makes a beam visible at all, so it has to answer to how
-     much light is actually in the room. */
-  const lit = lamps.filter((l) => l.k > 0.01);
-  const output = lit.reduce((a, l) => a + l.k, 0) / Math.max(6, lamps.length);
-
-  /* DENSITY. Light adds, so a 46-lamp arena under `lighter` clips to a white
-     slab and every colour in the rig is lost — the bigger the rig, the less the
-     picture shows. Scaling each lamp's contribution by the square root of how
-     many are burning keeps total output roughly constant while leaving the
-     relative brightnesses intact, so a big rig reads as MORE BEAMS rather than
-     as more white. */
-  const density = clamp(3.4 / Math.sqrt(Math.max(1, lit.length)), 0.3, 1);
+  /* The air, and how hard to drive it. Both numbers come from lib/exposure.ts
+     because the 3D view needs exactly the same ones — see the note in that file
+     for what happened when each view worked them out for itself. */
+  const { output, density } = frameLight(lamps);
 
   if (output > 0.004) {
     const haze = ctx.createRadialGradient(W * 0.5, H * 0.58, 0, W * 0.5, H * 0.58, Math.max(W, H) * 0.62);

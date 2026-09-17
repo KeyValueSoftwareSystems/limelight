@@ -35,8 +35,10 @@ export function Timeline({
   duration: number;
   onScrub?: (t: number) => void;
   /** Fired on a press that did not land on a clip. Return true to CLAIM that
-   *  press — an armed tile does, because that press is a placement, not a seek. */
-  onBackground?: (clientX: number) => boolean | void;
+   *  press — an armed tile does, because that press is a placement, not a seek.
+   *  It gets the y as well as the x: a placement needs a LANE, and the lane is
+   *  the only thing that says which of two overlapping effects will play. */
+  onBackground?: (clientX: number, clientY: number) => boolean | void;
   onZoom?: (anchorT: number, factor: number) => void;
   onPan?: (dt: number) => void;
   children: React.ReactNode;
@@ -63,7 +65,7 @@ export function Timeline({
      reaching here already means the press landed on empty timeline: there is
      nothing under it for a seek to take away. */
   const scrub = (e: React.PointerEvent) => {
-    if (onBackground?.(e.clientX)) return;
+    if (onBackground?.(e.clientX, e.clientY)) return;
     if (!onScrub || box.width === 0) return;
     const r = ref.current?.getBoundingClientRect();
     if (!r) return;

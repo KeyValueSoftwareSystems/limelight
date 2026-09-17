@@ -1,17 +1,22 @@
 import type { Clip } from "./types";
 
-/* Clips that overlap in time are stacked into rows, the way a video editor
-   spawns a track when you drop something on top of something else. Nothing is
-   ever hidden behind anything else, and a collision becomes visible instead of
-   silent. Rows are packed greedily: each clip takes the lowest row with room
-   for it. */
+/* Clips are stacked into rows, and a row is the clip's LANE: which of two
+   overlapping effects the baked show plays. That makes it the clip's own
+   property rather than something read off its neighbours — see Edit.layer.
+
+   Anything carrying a layer claims that lane outright. The arranger's own
+   clips carry none (they have no Edit to store one on), so they pack greedily
+   into whatever is left: each takes the lowest lane with room for it, the way
+   a video editor spawns a track when you drop something on top of something. */
 
 export interface PackedClip {
   clip: Clip;
   row: number;
-  /** True when this clip shares its lane AND its time with another. The
-   *  renderer resolves one effect per type per beat, so an overlap inside a
-   *  lane means one of them will not be heard. */
+  /** True when this clip shares its lane AND its time with another of the same
+   *  kind. The baker resolves one gesture per fixture per frame and one base
+   *  under it, so a same-kind overlap inside a lane means one of them will not
+   *  be heard. Across kinds it means nothing — a gesture is composited OVER a
+   *  state, not instead of it — so flagging that was crying wolf. */
   collides: boolean;
 }
 
@@ -20,13 +25,7 @@ export interface Packed {
   items: PackedClip[];
 }
 
-/** The clip the creator is holding, and the row it must stay on. */
-export interface Pin {
-  key: string;
-  row: number;
-}
-
-interface Span {
+export interface Span {
   from: number;
   to: number;
 }
@@ -40,8 +39,8 @@ function hits(a: Span, b: Span): boolean {
 function free(rows: Span[][], row: number, span: Span): boolean {
   const taken = rows[row];
   if (!taken) return true;
-  /* Every span in the row, not just the last one. With a pinned clip placed
-     ahead of its turn a row is no longer filled strictly left to right, so
+  /* Every span in the row, not just the last one. With pinned clips placed
+     ahead of their turn a row is no longer filled strictly left to right, so
      "does it clear the last thing here" stops being the same question as "is
      there room here". Rows hold a handful of clips; the honest test is cheap. */
   return !taken.some((s) => hits(s, span));
@@ -53,54 +52,79 @@ function put(rows: Span[][], row: number, span: Span): void {
 }
 
 /**
- * Stack clips into rows.
+ * The row each span lands on, in the order the spans were given.
  *
- * `pin` holds ONE clip on ONE row for as long as the creator has hold of it.
- * Without it, the row a clip lands on is a function of where it starts — so
- * dragging a clip past the end of its neighbour re-packed it onto another row
- * mid-gesture, and the thing under the pointer jumped a lane while being
- * carried. The clip you are moving is the one fixed point of the gesture; it is
- * everything ELSE that should give way, which is what pinning it does: it takes
- * its row first, and the rest pack around it.
+ * `pinned[i]` is the lane span `i` must have; null or undefined lets it fall
+ * where there is room. Pinned spans claim their lane FIRST, before anything is
+ * packed greedily, so the free ones give way to them rather than the other way
+ * round — and two pinned spans may share a lane and overlap, which is exactly
+ * what "these two are fighting over the same lane" looks like.
+ *
+ * Kept span-based so the seeding pass can use it: layers have to be decided for
+ * `Edit[]`, which has no Clip built from it yet.
  */
-export function packRows(clips: Clip[], pin?: Pin | null): Packed {
-  const sorted = [...clips].sort((a, b) => a.startS - b.startS || a.endS - b.endS);
+export function packSpans(spans: Span[], pinned?: (number | null | undefined)[]): number[] {
   const rows: Span[][] = [];
-  const items: PackedClip[] = [];
+  const out: number[] = new Array(spans.length).fill(0);
+  const pinOf = (i: number) => {
+    const p = pinned?.[i];
+    return typeof p === "number" && isFinite(p) ? Math.max(0, Math.floor(p)) : null;
+  };
 
-  const pinned = pin ? sorted.find((c) => c.key === pin.key) : undefined;
-  if (pinned && pin) {
-    const row = Math.max(0, Math.floor(pin.row));
-    put(rows, row, { from: pinned.startS, to: pinned.endS });
-    items.push({ clip: pinned, row, collides: false });
+  for (let i = 0; i < spans.length; i++) {
+    const row = pinOf(i);
+    if (row === null) continue;
+    put(rows, row, spans[i]);
+    out[i] = row;
   }
 
-  for (const clip of sorted) {
-    if (clip === pinned) continue;
-    const span = { from: clip.startS, to: clip.endS };
+  /* Start order among the rest, so a lane fills left to right and reads the way
+     it is played. */
+  const loose = spans
+    .map((_, i) => i)
+    .filter((i) => pinOf(i) === null)
+    .sort((a, b) => spans[a].from - spans[b].from || spans[a].to - spans[b].to);
+
+  for (const i of loose) {
     let row = 0;
-    while (!free(rows, row, span)) row++;
-    put(rows, row, span);
-    items.push({ clip, row, collides: false });
+    while (!free(rows, row, spans[i])) row++;
+    put(rows, row, spans[i]);
+    out[i] = row;
   }
 
-  /* Collision is a fact about TIME, not about which row something landed on.
-     Reading it off the row index was a shortcut that held only while rows were
-     filled strictly in start order — a pinned clip alone on row 2 is not
-     colliding with anything, and the clip it was dragged clear of is no longer
-     colliding either. Asking the question directly cannot go stale. */
+  return out;
+}
+
+/**
+ * Stack clips into rows. A clip's own `layer` is its lane; the arranger's clips
+ * (which have none) pack around them.
+ */
+export function packRows(clips: Clip[]): Packed {
+  const sorted = [...clips].sort((a, b) => a.startS - b.startS || a.endS - b.endS);
+  const spans = sorted.map((c) => ({ from: c.startS, to: c.endS }));
+  /* An arranger clip has no Edit, so no stored lane, so nothing to pin it to. */
+  const pinned = sorted.map((c) => c.layer);
+  const packed = packSpans(spans, pinned);
+
+  const items: PackedClip[] = sorted.map((clip, i) => ({
+    clip,
+    row: packed[i],
+    collides: false,
+  }));
+
+  /* Sharing a lane with something of the same kind, at the same time, is the
+     one overlap that costs you a cue. Asking it directly cannot go stale the
+     way reading it off the packing order could. */
   for (const item of items) {
     item.collides = items.some(
       (o) =>
         o !== item &&
+        o.row === item.row &&
+        o.clip.kind === item.clip.kind &&
         o.clip.startS < item.clip.endS &&
         item.clip.startS < o.clip.endS,
     );
   }
 
-  /* Back into drawing order, so the caller's rows and the clip list agree
-     however the pin reshuffled the placement pass. */
-  items.sort((a, b) => a.clip.startS - b.clip.startS || a.clip.endS - b.clip.endS);
-
-  return { rows: Math.max(1, rows.length), items };
+  return { rows: Math.max(1, packed.length ? Math.max(...packed) + 1 : 0), items };
 }
