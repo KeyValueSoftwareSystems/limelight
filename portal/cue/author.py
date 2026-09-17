@@ -75,10 +75,8 @@ FAMILY_TEMPERATURE = {
 }
 MOVEMENT = {
     "travel": ("sweep", "comet", "wave"),
-    "trade": ("alternate", "pairs", "hocket"),
     "grow": ("build", "cascade", "unbuild"),
-    "meet": ("converge", "diverge", "split"),
-    "pass": ("handover", "bounce", "rotate"),
+    "pass": ("handover", "bounce", "wave"),
 }
 COUNTER = {
     "brass": "indigo", "strings": "amber", "guitars": "teal", "keys": "ember",
@@ -446,6 +444,9 @@ def author(song, out_path=None):
         bar = r["bar"]
         mom = moment_at(bar)
         kind = mom[1] if mom else ""
+        if kind not in ("peak", "climax", "drop"):
+            kind = ""
+            mom = None
         here = set(r["playing"])
         churn = len(here ^ prev_set)
         lead = max(r["fam"], key=lambda f: r["fam"][f]) if r["fam"] else "voices"
@@ -493,7 +494,7 @@ def author(song, out_path=None):
             if rev:
                 a["reverse"] = True
             b = {"on": "lamps", "figure": nxt, "every": {"bars": 2},
-                 "low": 0.86, "reverse": not rev}
+                 "low": 0.97, "reverse": not rev}
             return [a, b]
 
         def from_family(role):
@@ -627,8 +628,8 @@ def author(song, out_path=None):
                 counter = FAMILY_COLOUR.get(second_fam, counter)
             if split_look:
                 look = {
-                    "outer": {"c": main, "l": level},
-                    "inner": {"c": counter, "l": round(level * 0.8, 2)},
+                    "inner": {"c": main, "l": level},
+                    "outer": {"c": counter, "l": round(level * 0.86, 2)},
                 }
             else:
                 look = {"lamps": {"c": main, "l": level}}
@@ -698,8 +699,8 @@ def author(song, out_path=None):
                 layers[0]["reverse"] = True
 
             layers.append({
-                "on": "lamps", "figure": partner, "every": {"bars": 2},
-                "low": 0.86, "reverse": not reverse_it,
+                "attr": "__none__", "on": "lamps", "figure": partner,
+                "every": {"bars": 2}, "low": 0.97, "reverse": not reverse_it,
             })
 
             if dens >= 6 and level > 0.5:
@@ -732,159 +733,30 @@ def author(song, out_path=None):
         add_layers = None
         prev_fam, prev_level, prev_set = top_fam, level, here
 
-    prev_mode = None
-    last_harm = -9.0
-    for e in emo:
-        m = e.get("mode")
-        if m is None:
-            continue
-        t0 = e["start"]
-        if t0 < 1.0 or t0 > rows[-1]["end"] - 1.0:
-            prev_mode = m
-            continue
-        if prev_mode is not None and abs(float(m) - float(prev_mode)) < 0.30:
-            prev_mode = m
-            continue
-        prev_mode = m
-        t = snap_chord(t0)
-        prior = [c for c in cues if c.get("_t", 0) <= t + 1e-6 and c.get("look")]
-        if not prior:
-            continue
-        base = prior[-1]
-        row = min(rows, key=lambda rr: abs(rr["t"] - t))
-        fam = max(row["fam"], key=lambda f: row["fam"][f]) if row["fam"] else "voices"
-        ramp = FAMILY_TEMPERATURE.get(fam, ("indigo", "blood", "crimson", "scarlet"))
-        w = max(0.0, min(1.0, (float(m) + 1.0) / 2.0))
-        b = e.get("brightness")
-        if b is not None:
-            w = max(0.0, min(1.0, w * 0.72 + (float(b) / 10.0) * 0.28))
-        col = ramp[min(len(ramp) - 1, int(w * len(ramp)))]
-        was = None
-        for k in ("lamps", "outer", "inner", "ends"):
-            if k in (base.get("look") or {}) and base["look"][k].get("c"):
-                was = base["look"][k]["c"]
-                break
-        if col == was:
-            continue
-        if t - last_harm < 6.0:
-            continue
-        last_harm = t
-        look = json.loads(json.dumps(base.get("look") or {}))
-        e_here = row["E"] / Emax
-        lvl_here = round(min(0.97, (0.12 + 0.80 * (e_here ** 0.8)) * arc(row["t"])), 2)
-        for k, v in look.items():
-            if not isinstance(v, dict):
-                continue
-            if v.get("c") == was:
-                v["c"] = col
-            if v.get("l") is not None:
-                share = 1.0 if k in ("lamps", "outer") else (0.8 if k == "inner" else 0.7)
-                v["l"] = round(min(0.97, lvl_here * share), 2)
-        nc = {"id": 0, "at": {"second": round(t, 3)}, "_t": t, "fade": 0.55,
-              "look": look,
-              "why": "the harmony turns here - mode %+.2f, %s. Colour moves to %s on the chord change"
-                     % (float(m), e.get("emotion", "?"), col)}
-        if base.get("chases"):
-            nc["chases"] = json.loads(json.dumps(base["chases"]))
-        elif base.get("chase"):
-            nc["chase"] = json.loads(json.dumps(base["chase"]))
-        cues.append(nc)
-    cues.sort(key=lambda c: c.get("_t", 0))
-    for n, c in enumerate(cues):
-        c["id"] = n + 1
-
     first = min((c for c in cues if c.get("look")), key=lambda c: c.get("_t", 9e9), default=None)
-    if first is not None and first.get("_t", 0) > 0.35:
-        w0 = 0
-        if lanes_total:
-            hi_all = max(lanes_total) or 1
-            win_s = (sc.get("stems_temporal") or {}).get("window_s", 0.5)
-            upto = max(1, int(first.get("_t", 0) / win_s))
-            w0 = max(lanes_total[:upto]) / hi_all
-        if w0 > 0.12:
-            opener = json.loads(json.dumps({k: v for k, v in first.items() if k != "_t"}))
-            win_s = (sc.get("stems_temporal") or {}).get("window_s", 0.5)
-            hi_all = max(lanes_total) or 1
+    if first is not None and first.get("_t", 0) > 0.35 and lanes_total:
+        hi_all = max(lanes_total) or 1
+        win_s = (sc.get("stems_temporal") or {}).get("window_s", 0.5)
+        upto = max(1, int(first.get("_t", 0) / win_s))
+        med_all = sorted(x for x in lanes_total if x > 0)
+        med_all = med_all[len(med_all) // 2] if med_all else hi_all
+        loud_early = max(lanes_total[:upto])
+        if loud_early > med_all * 0.25:
             onset = 0.0
             for w, v in enumerate(lanes_total):
-                if v / hi_all > 0.10:
+                if v > med_all * 0.25:
                     onset = max(0.0, w * win_s)
                     break
+            opener = json.loads(json.dumps({k: v for k, v in first.items() if k != "_t"}))
             opener["at"] = {"second": round(onset, 3)}
             opener["_t"] = onset
-            opener["fade"] = 0.0
+            opener["fade"] = 0.4
             for v in (opener.get("look") or {}).values():
                 if isinstance(v, dict) and v.get("l") is not None:
                     v["l"] = round(max(0.06, v["l"] * 0.8), 2)
-            opener["why"] = ("the song is already playing at %.0f%% when it starts, "
-                             "so the room is not dark for it" % (w0 * 100))
+            opener["why"] = "the music is already playing when the show starts, so the room is not dark for it"
             cues.append(opener)
             cues.sort(key=lambda c: c.get("_t", 0))
-
-    big_moments = [(t, k, w) for t, k, w in moments
-                   if k in ("peak", "climax", "drop", "entrance") and w >= 0.6]
-    for t, kind_m, w in big_moments:
-        lead = 2.1
-        t0 = t - lead
-        if t0 < 1.0:
-            continue
-        if any(a - 0.2 <= t0 <= b + 0.2 for a, b, _ in holes):
-            continue
-        prior = [c for c in cues if c.get("_t", 0) <= t0 + 1e-6 and c.get("look")]
-        if not prior:
-            continue
-        base = prior[-1]
-        look = json.loads(json.dumps(base.get("look") or {}))
-        for k2, v in look.items():
-            if isinstance(v, dict) and v.get("l") is not None:
-                v["l"] = round(max(0.05, v["l"] * (0.42 if w >= 0.9 else 0.58)), 2)
-        cues.append({"id": 0, "at": {"second": round(t0, 3)}, "_t": t0, "fade": 0.5,
-                     "look": look,
-                     "why": "two beats before the %s at %.1fs the room draws back, so the arrival has somewhere to arrive from"
-                            % (kind_m, t)})
-        arrivals = [c for c in cues if 0 <= c.get("_t", -9) - t < 1.4 and c.get("look")]
-        for c in arrivals:
-            for v in c["look"].values():
-                if isinstance(v, dict) and v.get("l") is not None:
-                    v["l"] = round(min(0.99, v["l"] * 1.3), 2)
-    cues.sort(key=lambda c: c.get("_t", 0))
-
-    last_swish = -9.0
-    for run in runs:
-        if run["a"] - last_swish < 3.0 or run["rate"] < 5.0:
-            continue
-        room = min((c.get("_t", 9e9) for c in cues
-                    if c.get("_t", 0) > run["a"] + 0.05 and c.get("look")), default=9e9)
-        if room - run["a"] < 1.6:
-            continue
-        prior = [c for c in cues if c.get("_t", 0) <= run["a"] + 1e-6 and c.get("look")]
-        if not prior:
-            continue
-        base = prior[-1]
-        if any(a - 0.15 <= run["a"] <= b + 0.15 for a, b, _ in holes):
-            continue
-        last_swish = run["a"]
-        look = json.loads(json.dumps(base.get("look") or {}))
-        for v in look.values():
-            if isinstance(v, dict) and v.get("l") is not None:
-                v["l"] = round(min(0.97, v["l"] * 1.12), 2)
-        swish = {"id": 0, "at": {"second": round(run["a"], 3)}, "_t": run["a"],
-                 "fade": 0.12, "look": look,
-                 "chases": [{"on": "lamps", "figure": "comet",
-                             "every": {"notes": 1}, "low": 0.3,
-                             "reverse": run["dir"] < 0, "move_head": True,
-                             "fade": 0.05}],
-                 "why": "a %d-note run %s the scale at %.0f notes a second, %.2fs to %.2fs - the row travels with it"
-                        % (run["n"], "up" if run["dir"] > 0 else "down",
-                           run["rate"], run["a"], run["b"])}
-        cues.append(swish)
-        back = json.loads(json.dumps({k: v for k, v in base.items() if k != "_t"}))
-        back["at"] = {"second": round(run["b"] + 0.08, 3)}
-        back["_t"] = run["b"] + 0.08
-        back["fade"] = 0.35
-        back["why"] = "the run lands; back to the look it left"
-        cues.append(back)
-    cues.sort(key=lambda c: c.get("_t", 0))
 
     for a, b, depth in holes:
         if a < 0.4:
@@ -954,12 +826,8 @@ def author(song, out_path=None):
             if run:
                 pos = (bar - min(run)) / max(1, (max(run) - min(run)))
                 amp = min(1.0, 0.45 + 0.5 * pos + inten * 0.25)
-        group = "lamps" if inten >= 0.6 else "auto"
-        acc = {"t": round(t, 3), "l": round(amp, 2),
-               "decay": 0.2 if inten >= 0.6 else 0.15, "on": group}
-        if inten >= 0.72:
-            acc["c"] = "bone"
-        accents.append(acc)
+        accents.append({"t": round(t, 3), "l": round(amp, 2),
+                        "decay": 0.2 if inten >= 0.6 else 0.15, "on": "auto"})
 
     for n, c in enumerate(cues):
         nxt = cues[n + 1] if n + 1 < len(cues) else None

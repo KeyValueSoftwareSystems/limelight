@@ -127,7 +127,12 @@ const FIGURES = {
     return ids.filter((_, i) => i % 2 === step % 2);
   },
   sweep(ids, step) {
-    return ids.length ? [ids[((step % ids.length) + ids.length) % ids.length]] : [];
+    const n = ids.length;
+    if (!n) return [];
+    const span = Math.max(1, 2 * n - 2);
+    let i = ((step % span) + span) % span;
+    if (i >= n) i = span - i;
+    return [ids[i]];
   },
   bounce(ids, step) {
     const n = ids.length;
@@ -140,11 +145,13 @@ const FIGURES = {
   wave(ids, step) {
     const n = ids.length;
     if (!n) return {};
-    const head = ((step % n) + n) % n;
+    const span = Math.max(1, 2 * n - 2);
+    let head = ((step % span) + span) % span;
+    if (head >= n) head = span - head;
     const out = {};
     for (let k = 0; k < n; k++) {
-      const back = (head - k + n) % n;
-      out[ids[back]] = k === 0 ? 1 : k === 1 ? 0.5 : k === 2 ? 0.2 : 0.06;
+      const d = Math.abs(k - head);
+      out[ids[k]] = d === 0 ? 1 : d === 1 ? 0.5 : d === 2 ? 0.2 : 0.06;
     }
     return out;
   },

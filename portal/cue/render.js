@@ -313,7 +313,16 @@ function render(cueFile, score, rigName, opts) {
         }
         return g.length ? m / g.length : 0;
       };
-      ids = E.expandTargets(rig, score("outer") >= score("inner") ? "outer" : "inner");
+      const i1 = Math.max(0, Math.min(frames.length - 1, Math.round(ta * fps)));
+      let best = null, bv = -1;
+      for (const f of rig.lamps) {
+        const c = f.ch;
+        const m = Math.max(frames[i1][f.offset + (c.r >= 0 ? c.r : 0)],
+                           frames[i1][f.offset + (c.g >= 0 ? c.g : 0)],
+                           frames[i1][f.offset + (c.b >= 0 ? c.b : 0)]);
+        if (m > bv) { bv = m; best = f.id; }
+      }
+      ids = best ? [best] : E.expandTargets(rig, "lamps");
     } else {
       ids = (acc.on ? [].concat(acc.on) : ["lamps"])
         .reduce((a, k) => a.concat(E.expandTargets(rig, k)), []);

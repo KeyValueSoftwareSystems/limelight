@@ -73,7 +73,7 @@ def scan(song, lights):
     deliberate = []
     for a in show.get("accents") or []:
         t0 = float(a.get("t", 0))
-        deliberate.append((t0 - 0.06, t0 + float(a.get("decay", 0.2)) * 2.5 + 0.2))
+        deliberate.append((t0 - 0.06, t0 + float(a.get("decay", 0.2)) * 3.5 + 0.4))
     for c in show.get("cuelist") or []:
         t0 = float(c.get("t", 0))
         deliberate.append((t0 - 0.06, t0 + max(0.12, float(c.get("fade") or 0)) + 0.1))
