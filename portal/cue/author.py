@@ -476,6 +476,22 @@ def author(song, out_path=None):
             continue
 
         colour = FAMILY_COLOUR.get(top_fam, "crimson")
+        lab_now = sec_of.get(bar, (None, 1))[0]
+        fam_now = MOVEMENT.get(sig_move.get(lab_now, ""))
+        pidx = phrase_of.get(bar, (0, 0, 1))[0] or 0
+
+        def from_family(role):
+            if not fam_now:
+                return {"grow": "build", "travel": "comet", "pass": "handover"}.get(role, "wave")
+            if role == "grow":
+                for cand in ("build", "cascade", "converge"):
+                    if cand in fam_now:
+                        return cand
+            if role == "pass":
+                for cand in ("handover", "alternate", "split", "wave"):
+                    if cand in fam_now:
+                        return cand
+            return fam_now[pidx % len(fam_now)]
         dens = hit_density(r)
         chase = None
         fade = 0.45
@@ -518,12 +534,12 @@ def author(song, out_path=None):
             why = "breakdown at %.1fs - the room empties to the middle" % mom[0]
         elif kind in ("build",):
             look = {"lamps": {"c": colour, "l": level}}
-            chase = {"on": "lamps", "figure": "build", "every": {"hits": 1}, "low": 0.35}
+            chase = {"on": "lamps", "figure": from_family("grow"), "every": {"hits": 1}, "low": 0.35}
             fade = 0.3
             why = "build at %.1fs, E %.2f - one lamp added at a time" % (mom[0], r["E"])
         elif kind in ("entrance", "vocal_return", "melody_resume"):
             look = {"lamps": {"c": colour, "l": level}}
-            chase = {"on": "lamps", "figure": "handover", "every": {"hits": 1},
+            chase = {"on": "lamps", "figure": from_family("pass"), "every": {"hits": 1},
                      "low": 0.45, "move_head": True}
             fade = 0.12
             why = "%s at %.1fs - %s lead, E %.2f" % (kind, mom[0], top_fam, r["E"])
@@ -539,7 +555,7 @@ def author(song, out_path=None):
                     "l": level,
                 }
             }
-            chase = {"on": "lamps", "figure": "comet", "every": {"hits": 1},
+            chase = {"on": "lamps", "figure": from_family("travel"), "every": {"hits": 1},
                      "low": 0.4, "move_head": True}
             fade = 0.5
             why = "%s at %.1fs - the figure changes with the music" % (kind, mom[0])
@@ -620,13 +636,16 @@ def author(song, out_path=None):
             direction = ph["dir"] if ph is not None else "holds"
             reverse_it = False
             if fam:
+                turn = (pi or 0) % len(fam)
                 if direction == "rises":
-                    fig = fam[0]
+                    fig = fam[turn]
                 elif direction == "falls":
-                    fig = fam[min(1, len(fam) - 1)]
+                    fig = fam[(turn + 1) % len(fam)]
                     reverse_it = True
                 else:
-                    fig = fam[min(2, len(fam) - 1)]
+                    fig = fam[(turn + 2) % len(fam)]
+                if (pi or 0) % 2 == 1:
+                    reverse_it = not reverse_it
             else:
                 pick = busy if dens >= 6 else mid if dens >= 3 else calm
                 fig = pick[len(cues) % len(pick)]
@@ -872,14 +891,30 @@ def author(song, out_path=None):
         cur = by_bar.get(row["bar"])
         if cur is None or inten > cur[1]:
             by_bar[row["bar"]] = (t, inten, row)
+    sec_peak = {}
+    for bar, (t, inten, row) in by_bar.items():
+        lab = None
+        for sx in sections:
+            if sx["start"] - step <= row["t"] < sx["end"]:
+                lab = sx.get("label", "?") + str(round(sx["start"]))
+                break
+        sec_peak.setdefault(lab, []).append(inten)
+    sec_ref = {k: (sorted(v)[int(len(v) * 0.7)] if v else 1.0) for k, v in sec_peak.items()}
+
     last_t = -9.0
     for bar in sorted(by_bar):
         t, inten, row = by_bar[bar]
-        if inten < 0.34:
+        lab = None
+        for sx in sections:
+            if sx["start"] - step <= row["t"] < sx["end"]:
+                lab = sx.get("label", "?") + str(round(sx["start"]))
+                break
+        ref = sec_ref.get(lab, 0.34) or 0.34
+        if inten < max(0.16, ref * 0.62):
             continue
         if any(a - 0.1 <= t <= b + 0.1 for a, b in hole_spans):
             continue
-        if t - last_t < 3.6:
+        if t - last_t < 2.2:
             continue
         last_t = t
         climbing = bar in rising

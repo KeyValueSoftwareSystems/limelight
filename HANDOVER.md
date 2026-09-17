@@ -327,6 +327,26 @@ If he says fluctuation again, move **down** this curve (fewer accents, longer
 spacing in `author.py`'s accent loop). If he says lazy, move up. Do not reach
 for per-frame smoothing; it is not the variable.
 
+## 7h. Accents must be judged locally, and moment cues must not hardcode a figure
+
+Amal: three handovers in the first 20 seconds, and not much happening on the
+hits. Both were real and both had the same shape — a global decision where a
+local one was needed.
+
+**Accents.** The threshold was a global `intensity >= 0.34`, so a quiet intro
+got none at all: the first accent in raga landed at 20.8s. An accent is now
+judged against its OWN section's 70th-percentile hit, floored at 0.16, and
+spaced 2.2s rather than 3.6s. 19 accents became 32, the first moved to 1.81s,
+and rises in the first 20s went 1 to 4.
+
+**Figures.** Section movement families were in place, but the moment branches
+still hardcoded their figure — `build` for a build, `comet` for a tempo change,
+`handover` for an entrance — so moment-heavy stretches all looked the same
+whatever family the section owned. They draw from the family now via a role
+(`grow`, `pass`, `travel`), and the phrase index rotates the variant and flips
+direction on alternate phrases. 11 distinct figure-and-direction combinations
+became 14.
+
 ## 7g. Cues need room, and each section needs its own movement
 
 Amal: from 0:06 to 0:10 every effect must hold and be consistent, not randomly

@@ -60,7 +60,7 @@
     "bar": 5
    },
    "fade": 0.6,
-   "why": "bars 5-8, the phrase travels across: guitars leads, E 2.31, 11 hits, mode ? - hocket in ember against teal inside",
+   "why": "bars 5-8, the phrase travels across: guitars leads, E 2.31, 11 hits, mode ? - alternate in ember against teal inside",
    "look": {
     "outer": {
      "c": "ember",
@@ -80,13 +80,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "hocket",
+     "figure": "alternate",
      "every": {
       "beats": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ],
    "swell": {
@@ -110,7 +111,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -179,7 +180,8 @@
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -211,7 +213,8 @@
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -230,7 +233,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "handover",
     "every": {
      "hits": 1
     },
@@ -266,7 +269,7 @@
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": true,
+     "move_head": false,
      "reverse": true
     },
     {
@@ -285,7 +288,7 @@
     "bar": 18
    },
    "fade": 0.35,
-   "why": "bars 17-20, the phrase closes down: keys leads, E 3.10, 7 hits, mode -1.00 - bounce in crimson against teal inside",
+   "why": "bars 17-20, the phrase closes down: keys leads, E 3.10, 7 hits, mode -1.00 - rotate in crimson against teal inside",
    "look": {
     "outer": {
      "c": "crimson",
@@ -305,13 +308,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "rotate",
      "every": {
       "hits": 2
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": true,
+     "move_head": false,
      "reverse": true
     },
     {
@@ -352,7 +355,8 @@
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -437,7 +441,8 @@
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -524,7 +529,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "handover",
     "every": {
      "hits": 1
     },
@@ -569,7 +574,8 @@
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   }
@@ -582,8 +588,14 @@
    "on": "auto"
   },
   {
-   "t": 6.803,
-   "l": 0.72,
+   "t": 4.807,
+   "l": 0.67,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 8.8,
+   "l": 0.77,
    "decay": 0.15,
    "on": "auto"
   },
@@ -594,15 +606,22 @@
    "on": "lamps"
   },
   {
-   "t": 22.547,
+   "t": 20.55,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 25.054,
    "l": 0.98,
    "decay": 0.2,
    "on": "lamps",
    "c": "bone"
   },
   {
-   "t": 27.051,
-   "l": 1.0,
+   "t": 28.05,
+   "l": 0.97,
    "decay": 0.2,
    "on": "lamps",
    "c": "bone"
@@ -614,8 +633,14 @@
    "on": "lamps"
   },
   {
-   "t": 36.548,
-   "l": 0.76,
+   "t": 34.551,
+   "l": 0.92,
+   "decay": 0.2,
+   "on": "lamps"
+  },
+  {
+   "t": 39.056,
+   "l": 0.8,
    "decay": 0.15,
    "on": "auto"
   },
@@ -626,8 +651,14 @@
    "on": "auto"
   },
   {
-   "t": 51.316,
-   "l": 0.71,
+   "t": 49.807,
+   "l": 0.64,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 52.315,
+   "l": 0.68,
    "decay": 0.15,
    "on": "auto"
   },

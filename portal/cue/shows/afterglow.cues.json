@@ -55,7 +55,7 @@
     "bar": 5
    },
    "fade": 0.35,
-   "why": "bars 5-8, the phrase opens out: keys leads, E 1.19, 2 hits, mode +0.22 - build in violet",
+   "why": "bars 5-8, the phrase opens out: keys leads, E 1.19, 2 hits, mode +0.22 - cascade in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -71,13 +71,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "cascade",
      "every": {
       "hits": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false
+     "move_head": true,
+     "reverse": true
     }
    ]
   },
@@ -96,7 +97,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "cascade",
     "every": {
      "hits": 1
     },
@@ -124,7 +125,7 @@
    "why": "the harmony turns here - mode +0.60, anticipation. Colour moves to crimson on the chord change",
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "cascade",
     "every": {
      "hits": 1
     },
@@ -138,7 +139,7 @@
     "bar": 9
    },
    "fade": 0.6,
-   "why": "bars 9-12, the phrase closes down: voices leads, E 2.68, 3 hits, mode +1.00 - comet in scarlet",
+   "why": "bars 9-12, the phrase closes down: voices leads, E 2.68, 3 hits, mode +1.00 - sweep in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -154,7 +155,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "sweep",
      "every": {
       "beats": 2
      },
@@ -243,7 +244,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "sweep",
      "every": {
       "beats": 2
      },
@@ -290,7 +291,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "sweep",
      "every": {
       "beats": 2
      },
@@ -328,7 +329,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "sweep",
      "every": {
       "beats": 2
      },
@@ -350,7 +351,7 @@
     "bar": 21
    },
    "fade": 0.6,
-   "why": "bars 21-24, the phrase closes down: voices leads, E 4.39, 4 hits, mode +0.35 - comet in scarlet",
+   "why": "bars 21-24, the phrase closes down: voices leads, E 4.39, 4 hits, mode +0.35 - sweep in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -366,14 +367,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "sweep",
      "every": {
       "beats": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true,
-     "reverse": true
+     "move_head": true
     }
    ],
    "swell": {
@@ -397,7 +397,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "build",
+    "figure": "wave",
     "every": {
      "hits": 1
     },
@@ -506,7 +506,7 @@
    "why": "the harmony turns here - mode +0.20, neutral. Colour moves to violet on the chord change",
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "cascade",
     "every": {
      "hits": 1
     },
@@ -520,7 +520,7 @@
     "bar": 29
    },
    "fade": 0.6,
-   "why": "bars 29-32, the phrase travels across: keys leads, E 7.53, 6 hits, mode +0.60 - split in violet",
+   "why": "bars 29-32, the phrase travels across: keys leads, E 7.53, 6 hits, mode +0.60 - alternate in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -536,13 +536,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "split",
+     "figure": "alternate",
      "every": {
       "beats": 2
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ],
    "swell": {
@@ -566,7 +567,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "build",
+    "figure": "pairs",
     "every": {
      "hits": 1
     },
@@ -584,7 +585,7 @@
     "bar": 33
    },
    "fade": 0.6,
-   "why": "bars 33-36, the phrase closes down: drums leads, E 8.98, 4 hits, mode +0.20 - pairs in violet against teal inside",
+   "why": "bars 33-36, the phrase closes down: drums leads, E 8.98, 4 hits, mode +0.20 - alternate in violet against teal inside",
    "look": {
     "outer": {
      "c": "violet",
@@ -604,7 +605,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pairs",
+     "figure": "alternate",
      "every": {
       "beats": 2
      },
@@ -635,7 +636,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -696,7 +697,7 @@
     "bar": 41
    },
    "fade": 0.35,
-   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - rotate in violet against teal inside",
+   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - handover in violet against teal inside",
    "look": {
     "outer": {
      "c": "bone",
@@ -716,13 +717,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "rotate",
+     "figure": "handover",
      "every": {
       "hits": 2
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": false
+     "move_head": true
     },
     {
      "on": "inner",
@@ -749,7 +750,7 @@
    "why": "the harmony turns here - mode -0.18, neutral. Colour moves to violet on the chord change",
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "cascade",
     "every": {
      "hits": 1
     },
@@ -763,7 +764,7 @@
     "bar": 44
    },
    "fade": 0.6,
-   "why": "bars 41-44, the phrase travels across: keys leads, E 7.49, 5 hits, mode +0.18 - rotate in violet",
+   "why": "bars 41-44, the phrase travels across: keys leads, E 7.49, 5 hits, mode +0.18 - handover in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -779,13 +780,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "rotate",
+     "figure": "handover",
      "every": {
       "beats": 2
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": false
+     "move_head": true
     }
    ],
    "swell": {
@@ -800,7 +801,7 @@
     "bar": 45
    },
    "fade": 0.6,
-   "why": "bars 45-48, the phrase travels across: keys leads, E 7.77, 4 hits, mode +0.57 - rotate in violet",
+   "why": "bars 45-48, the phrase travels across: keys leads, E 7.77, 4 hits, mode +0.57 - bounce in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -816,13 +817,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "rotate",
+     "figure": "bounce",
      "every": {
       "beats": 2
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": false
+     "move_head": true,
+     "reverse": true
     }
    ],
    "swell": {
@@ -888,7 +890,7 @@
    "why": "the harmony turns here - mode -0.18, neutral. Colour moves to crimson on the chord change",
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "cascade",
     "every": {
      "hits": 1
     },
@@ -948,7 +950,7 @@
    "why": "the harmony turns here - mode +0.13, neutral. Colour moves to scarlet on the chord change",
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "cascade",
     "every": {
      "hits": 1
     },
@@ -1018,7 +1020,8 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ]
   },
@@ -1037,7 +1040,7 @@
    "why": "the harmony turns here - mode +0.16, neutral. Colour moves to violet on the chord change",
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "cascade",
     "every": {
      "hits": 1
     },
@@ -1113,7 +1116,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "sweep",
      "every": {
       "beats": 2
      },
@@ -1144,7 +1147,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "build",
+    "figure": "sweep",
     "every": {
      "hits": 1
     },
@@ -1171,7 +1174,7 @@
    "why": "the harmony turns here - mode -0.36, neutral. Colour moves to blood on the chord change",
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "cascade",
     "every": {
      "hits": 1
     },
@@ -1218,7 +1221,7 @@
     "bar": 77
    },
    "fade": 0.35,
-   "why": "bars 77-80, the phrase closes down: voices leads, E 4.50, 1 hits, mode -0.64 - comet in crimson",
+   "why": "bars 77-80, the phrase closes down: voices leads, E 4.50, 1 hits, mode -0.64 - wave in crimson",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -1234,14 +1237,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "wave",
      "every": {
       "hits": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true,
-     "reverse": true
+     "move_head": true
     }
    ],
    "swell": {
@@ -1265,7 +1267,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "build",
+    "figure": "comet",
     "every": {
      "hits": 1
     },
@@ -1283,7 +1285,7 @@
     "bar": 81
    },
    "fade": 0.6,
-   "why": "bars 81-84, the phrase travels across: keys leads, E 7.13, 5 hits, mode +0.18 - hocket in violet against crimson inside",
+   "why": "bars 81-84, the phrase travels across: keys leads, E 7.13, 5 hits, mode +0.18 - pairs in violet against crimson inside",
    "look": {
     "outer": {
      "c": "scarlet",
@@ -1303,7 +1305,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "hocket",
+     "figure": "pairs",
      "every": {
       "beats": 2
      },
@@ -1379,7 +1381,8 @@
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     },
     {
      "on": "inner",
@@ -1455,7 +1458,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "sweep",
      "every": {
       "beats": 2
      },
@@ -1477,7 +1480,7 @@
     "bar": 93
    },
    "fade": 0.35,
-   "why": "bars 93-96, the phrase travels across: keys leads, E 8.23, 6 hits, mode +0.52 - hocket in violet",
+   "why": "bars 93-96, the phrase travels across: keys leads, E 8.23, 6 hits, mode +0.52 - pairs in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1493,13 +1496,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "hocket",
+     "figure": "pairs",
      "every": {
       "hits": 2
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -1554,7 +1558,7 @@
    "why": "the harmony turns here - mode -0.18, neutral. Colour moves to violet on the chord change",
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "cascade",
     "every": {
      "hits": 1
     },
@@ -1568,7 +1572,7 @@
     "bar": 101
    },
    "fade": 0.35,
-   "why": "bars 101-104, the phrase travels across: keys leads, E 7.91, 6 hits, mode +0.58 - rotate in violet",
+   "why": "bars 101-104, the phrase travels across: keys leads, E 7.91, 6 hits, mode +0.58 - handover in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1584,13 +1588,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "rotate",
+     "figure": "handover",
      "every": {
       "hits": 2
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": false
+     "move_head": true,
+     "reverse": true
     }
    ]
   },
@@ -1659,7 +1664,8 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ]
   },
@@ -1691,7 +1697,8 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ]
   },
@@ -1710,7 +1717,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "pairs",
     "every": {
      "hits": 1
     },
@@ -1733,7 +1740,7 @@
    "why": "the harmony turns here - mode -0.14, neutral. Colour moves to teal on the chord change",
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "cascade",
     "every": {
      "hits": 1
     },
@@ -1789,8 +1796,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false,
-     "reverse": true
+     "move_head": false
     }
    ]
   },
@@ -1800,7 +1806,7 @@
     "bar": 119
    },
    "fade": 0.35,
-   "why": "bars 117-120, the phrase closes down: keys leads, E 6.07, 3 hits, mode +0.99 - pairs in violet",
+   "why": "bars 117-120, the phrase closes down: keys leads, E 6.07, 3 hits, mode +0.99 - alternate in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1816,14 +1822,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pairs",
+     "figure": "alternate",
      "every": {
       "hits": 1
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false,
-     "reverse": true
+     "move_head": false
     }
    ]
   },
@@ -1842,7 +1847,7 @@
     "bar": 123
    },
    "fade": 0.35,
-   "why": "bars 123-124, the phrase travels across: keys leads, E 0.00, 0 hits, mode +1.00 - split in violet",
+   "why": "bars 123-124, the phrase travels across: keys leads, E 0.00, 0 hits, mode +1.00 - converge in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1858,13 +1863,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "split",
+     "figure": "converge",
      "every": {
       "hits": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -1890,7 +1896,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "comet",
+     "figure": "sweep",
      "every": {
       "beats": 2
      },
@@ -1915,8 +1921,20 @@
    "on": "lamps"
   },
   {
+   "t": 13.723,
+   "l": 0.71,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
    "t": 16.927,
    "l": 0.82,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 19.992,
+   "l": 0.79,
    "decay": 0.15,
    "on": "auto"
   },
@@ -1927,7 +1945,13 @@
    "on": "auto"
   },
   {
-   "t": 28.723,
+   "t": 26.819,
+   "l": 0.82,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 30.279,
    "l": 0.75,
    "decay": 0.15,
    "on": "auto"
@@ -1946,14 +1970,25 @@
    "on": "auto"
   },
   {
-   "t": 41.308,
-   "l": 1.0,
+   "t": 39.242,
+   "l": 0.99,
    "decay": 0.2,
-   "on": "lamps",
-   "c": "bone"
+   "on": "lamps"
+  },
+  {
+   "t": 42.005,
+   "l": 0.86,
+   "decay": 0.2,
+   "on": "lamps"
   },
   {
    "t": 45.441,
+   "l": 0.85,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 48.205,
    "l": 0.85,
    "decay": 0.15,
    "on": "auto"
@@ -1978,10 +2013,18 @@
    "on": "lamps"
   },
   {
-   "t": 63.367,
-   "l": 0.91,
+   "t": 61.997,
+   "l": 0.85,
    "decay": 0.2,
-   "on": "lamps"
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 66.13,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
   },
   {
    "t": 68.894,
@@ -1997,11 +2040,10 @@
    "on": "lamps"
   },
   {
-   "t": 76.997,
-   "l": 1.0,
-   "decay": 0.2,
-   "on": "lamps",
-   "c": "bone"
+   "t": 75.79,
+   "l": 0.86,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
    "t": 82.175,
@@ -2010,7 +2052,13 @@
    "on": "auto"
   },
   {
-   "t": 88.538,
+   "t": 87.841,
+   "l": 0.69,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 90.442,
    "l": 0.81,
    "decay": 0.15,
    "on": "auto"
@@ -2022,16 +2070,28 @@
    "on": "auto"
   },
   {
+   "t": 97.222,
+   "l": 0.65,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
    "t": 99.498,
    "l": 0.69,
    "decay": 0.15,
    "on": "auto"
   },
   {
-   "t": 104.072,
-   "l": 0.86,
-   "decay": 0.2,
-   "on": "lamps"
+   "t": 102.702,
+   "l": 0.77,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 106.138,
+   "l": 0.81,
+   "decay": 0.15,
+   "on": "auto"
   },
   {
    "t": 110.272,
@@ -2040,16 +2100,23 @@
    "on": "lamps"
   },
   {
-   "t": 114.242,
+   "t": 113.035,
    "l": 1.0,
-   "decay": 0.15,
-   "on": "auto"
+   "decay": 0.2,
+   "on": "lamps"
   },
   {
-   "t": 118.538,
-   "l": 0.86,
-   "decay": 0.15,
-   "on": "auto"
+   "t": 117.168,
+   "l": 0.92,
+   "decay": 0.2,
+   "on": "lamps"
+  },
+  {
+   "t": 121.301,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
   },
   {
    "t": 124.064,
@@ -2058,8 +2125,14 @@
    "on": "lamps"
   },
   {
-   "t": 128.197,
-   "l": 0.83,
+   "t": 126.827,
+   "l": 0.92,
+   "decay": 0.2,
+   "on": "lamps"
+  },
+  {
+   "t": 129.242,
+   "l": 0.82,
    "decay": 0.15,
    "on": "auto"
   },
@@ -2077,8 +2150,15 @@
    "on": "lamps"
   },
   {
-   "t": 141.99,
-   "l": 0.81,
+   "t": 140.62,
+   "l": 0.67,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 144.753,
+   "l": 1.0,
    "decay": 0.2,
    "on": "lamps",
    "c": "bone"
@@ -2097,14 +2177,27 @@
    "c": "bone"
   },
   {
-   "t": 156.131,
-   "l": 0.74,
+   "t": 154.413,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 158.894,
+   "l": 0.78,
    "decay": 0.15,
    "on": "auto"
   },
   {
-   "t": 160.682,
-   "l": 0.76,
+   "t": 162.331,
+   "l": 0.79,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 165.094,
+   "l": 0.68,
    "decay": 0.15,
    "on": "auto"
   }

@@ -177,7 +177,8 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ]
   },
@@ -242,7 +243,8 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ],
    "swell": {
@@ -266,7 +268,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "build",
+    "figure": "comet",
     "every": {
      "hits": 1
     },
@@ -284,7 +286,7 @@
     "bar": 9
    },
    "fade": 0.6,
-   "why": "bars 9-12, the phrase opens out: guitars leads, E 6.99, 4 hits, mode +0.37 - sweep in crimson against crimson inside",
+   "why": "bars 9-12, the phrase opens out: guitars leads, E 6.99, 4 hits, mode +0.37 - wave in crimson against crimson inside",
    "look": {
     "outer": {
      "c": "crimson",
@@ -304,7 +306,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "wave",
      "every": {
       "beats": 2
      },
@@ -325,7 +327,7 @@
     "bar": 12
    },
    "fade": 0.6,
-   "why": "bars 9-12, the phrase opens out: guitars leads, E 8.83, 5 hits, mode +0.59 - sweep in crimson against ember inside",
+   "why": "bars 9-12, the phrase opens out: guitars leads, E 8.83, 5 hits, mode +0.59 - wave in crimson against ember inside",
    "look": {
     "outer": {
      "c": "crimson",
@@ -345,7 +347,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "wave",
      "every": {
       "beats": 2
      },
@@ -392,7 +394,8 @@
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ],
    "swell": {
@@ -433,7 +436,8 @@
      },
      "fill_beats": 2,
      "low": 0.5,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ],
    "swell": {
@@ -457,7 +461,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "bounce",
     "every": {
      "hits": 1
     },
@@ -497,8 +501,7 @@
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": true,
-     "reverse": true
+     "move_head": true
     }
    ]
   },
@@ -550,7 +553,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "rotate",
     "every": {
      "hits": 1
     },
@@ -665,7 +668,8 @@
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -761,7 +765,7 @@
     "bar": 33
    },
    "fade": 0.35,
-   "why": "bars 33-36, the phrase travels across: drums leads, E 5.73, 1 hits, mode +0.63 - hocket in bone against scarlet inside",
+   "why": "bars 33-36, the phrase travels across: drums leads, E 5.73, 1 hits, mode +0.63 - pairs in bone against scarlet inside",
    "look": {
     "outer": {
      "c": "bone",
@@ -781,7 +785,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "hocket",
+     "figure": "pairs",
      "every": {
       "hits": 2
      },
@@ -856,7 +860,8 @@
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -888,7 +893,8 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ]
   },
@@ -907,7 +913,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -1013,7 +1019,8 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ]
   },
@@ -1023,7 +1030,7 @@
     "bar": 45
    },
    "fade": 0.6,
-   "why": "bars 45-48, the phrase opens out: voices leads, E 5.84, 2 hits, mode -0.41 - sweep in crimson against ember inside",
+   "why": "bars 45-48, the phrase opens out: voices leads, E 5.84, 2 hits, mode -0.41 - wave in crimson against ember inside",
    "look": {
     "outer": {
      "c": "crimson",
@@ -1043,13 +1050,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "wave",
      "every": {
       "beats": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ],
    "swell": {
@@ -1119,7 +1127,8 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ],
    "swell": {
@@ -1143,7 +1152,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "build",
+    "figure": "wave",
     "every": {
      "hits": 1
     },
@@ -1268,7 +1277,7 @@
     "bar": 53
    },
    "fade": 0.6,
-   "why": "bars 53-56, the phrase opens out: guitars leads, E 8.56, 4 hits, mode +0.61 - sweep in crimson",
+   "why": "bars 53-56, the phrase opens out: guitars leads, E 8.56, 4 hits, mode +0.61 - comet in crimson",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -1284,13 +1293,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "comet",
      "every": {
       "beats": 2
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ],
    "swell": {
@@ -1413,7 +1423,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false
+     "move_head": true
     }
    ]
   },
@@ -1478,7 +1488,8 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ],
    "swell": {
@@ -1546,7 +1557,7 @@
     "bar": 65
    },
    "fade": 0.6,
-   "why": "bars 65-68, the phrase travels across: winds leads, E 8.06, 1 hits, mode +0.58 - rotate in scarlet",
+   "why": "bars 65-68, the phrase travels across: winds leads, E 8.06, 1 hits, mode +0.58 - handover in scarlet",
    "look": {
     "lamps": {
      "c": "bone",
@@ -1562,13 +1573,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "rotate",
+     "figure": "handover",
      "every": {
       "beats": 2
      },
      "fill_beats": 1,
      "low": 0.5,
-     "move_head": false
+     "move_head": true
     }
    ],
    "swell": {
@@ -1638,8 +1649,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true,
-     "reverse": true
+     "move_head": true
     }
    ]
   },
@@ -1686,7 +1696,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "build",
+    "figure": "rotate",
     "every": {
      "hits": 1
     },
@@ -1763,8 +1773,7 @@
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false,
-     "reverse": true
+     "move_head": false
     }
    ]
   },
@@ -1953,7 +1962,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "bounce",
     "every": {
      "hits": 1
     },
@@ -1976,7 +1985,7 @@
     "bar": 91
    },
    "fade": 0.15,
-   "why": "bars 91-91, the phrase travels across: keys leads, E 0.00, 0 hits, mode +0.64 - split in violet",
+   "why": "bars 91-91, the phrase travels across: keys leads, E 0.00, 0 hits, mode +0.64 - diverge in violet",
    "look": {
     "lamps": {
      "c": "violet",
@@ -1992,13 +2001,14 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "split",
+     "figure": "diverge",
      "every": {
       "hits": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -2017,7 +2027,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "bounce",
     "every": {
      "hits": 1
     },
@@ -2041,14 +2051,20 @@
    "c": "bone"
   },
   {
-   "t": 14.35,
-   "l": 0.57,
+   "t": 12.214,
+   "l": 0.84,
    "decay": 0.15,
    "on": "auto"
   },
   {
-   "t": 19.11,
-   "l": 0.66,
+   "t": 17.694,
+   "l": 0.6,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 20.782,
+   "l": 0.71,
    "decay": 0.15,
    "on": "auto"
   },
@@ -2059,8 +2075,44 @@
    "on": "auto"
   },
   {
-   "t": 29.559,
-   "l": 0.78,
+   "t": 28.398,
+   "l": 0.72,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 33.158,
+   "l": 0.71,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 36.13,
+   "l": 0.7,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 38.893,
+   "l": 0.64,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 47.717,
+   "l": 0.87,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 51.27,
+   "l": 0.94,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 54.613,
+   "l": 0.99,
    "decay": 0.15,
    "on": "auto"
   },
@@ -2072,8 +2124,32 @@
    "c": "bone"
   },
   {
-   "t": 81.966,
-   "l": 0.77,
+   "t": 68.661,
+   "l": 0.61,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 71.75,
+   "l": 0.64,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 75.326,
+   "l": 0.67,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 79.83,
+   "l": 0.66,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 83.174,
+   "l": 0.68,
    "decay": 0.15,
    "on": "auto"
   },
@@ -2084,7 +2160,13 @@
    "on": "auto"
   },
   {
-   "t": 90.558,
+   "t": 89.118,
+   "l": 0.61,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 93.878,
    "l": 0.64,
    "decay": 0.15,
    "on": "auto"
@@ -2096,8 +2178,26 @@
    "on": "auto"
   },
   {
+   "t": 101.262,
+   "l": 0.74,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 105.79,
+   "l": 0.78,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
    "t": 108.577,
    "l": 0.81,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 120.001,
+   "l": 0.75,
    "decay": 0.15,
    "on": "auto"
   },
@@ -2108,8 +2208,62 @@
    "on": "auto"
   },
   {
-   "t": 139.831,
-   "l": 0.81,
+   "t": 127.71,
+   "l": 0.77,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 130.798,
+   "l": 0.62,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 134.606,
+   "l": 0.61,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 139.366,
+   "l": 0.75,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 144.846,
+   "l": 0.78,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 147.702,
+   "l": 0.67,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 151.51,
+   "l": 0.67,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 160.078,
+   "l": 0.97,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 162.934,
+   "l": 0.67,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
+   "t": 167.695,
+   "l": 0.69,
    "decay": 0.15,
    "on": "auto"
   }

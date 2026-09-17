@@ -41,7 +41,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -73,7 +73,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -105,7 +105,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "handover",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -128,7 +128,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -160,7 +160,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -183,7 +183,7 @@
    "why": "the harmony turns here - mode +1.00, anticipation. Colour moves to violet on the chord change",
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -197,7 +197,7 @@
     "bar": 8
    },
    "fade": 0.6,
-   "why": "bars 5-8, the phrase closes down: drums leads, E 3.36, 8 hits, mode +1.00 - pairs in teal",
+   "why": "bars 5-8, the phrase closes down: drums leads, E 3.36, 8 hits, mode +1.00 - hocket in teal",
    "look": {
     "lamps": {
      "c": "indigo",
@@ -213,14 +213,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pairs",
+     "figure": "hocket",
      "every": {
       "beats": 2
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": false,
-     "reverse": true
+     "move_head": false
     }
    ]
   },
@@ -248,7 +247,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -323,7 +322,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "handover",
     "every": {
      "hits": 1
     },
@@ -351,7 +350,7 @@
     "bar": 17
    },
    "fade": 0.35,
-   "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - diverge in teal against teal inside",
+   "why": "bars 17-20, the phrase closes down: drums leads, E 8.01, 6 hits, mode +1.00 - split in teal against teal inside",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -367,7 +366,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "diverge",
+     "figure": "split",
      "every": {
       "hits": 2
      },
@@ -392,7 +391,7 @@
     "bar": 19
    },
    "fade": 0.35,
-   "why": "bars 17-20, the phrase closes down: drums leads, E 6.10, 6 hits, mode +1.00 - diverge in teal against teal inside",
+   "why": "bars 17-20, the phrase closes down: drums leads, E 6.10, 6 hits, mode +1.00 - split in teal against teal inside",
    "look": {
     "lamps": {
      "c": "teal",
@@ -408,7 +407,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "diverge",
+     "figure": "split",
      "every": {
       "hits": 2
      },
@@ -433,7 +432,7 @@
     "bar": 21
    },
    "fade": 0.35,
-   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - diverge in teal",
+   "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - converge in teal",
    "look": {
     "lamps": {
      "c": "teal",
@@ -449,14 +448,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "diverge",
+     "figure": "converge",
      "every": {
       "hits": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": false,
-     "reverse": true
+     "move_head": false
     }
    ]
   },
@@ -484,7 +482,7 @@
    },
    "chase": {
     "on": "lamps",
-    "figure": "comet",
+    "figure": "alternate",
     "every": {
      "hits": 1
     },
@@ -501,6 +499,12 @@
    "on": "lamps"
   },
   {
+   "t": 20.062,
+   "l": 0.58,
+   "decay": 0.15,
+   "on": "auto"
+  },
+  {
    "t": 22.941,
    "l": 0.81,
    "decay": 0.2,
@@ -508,7 +512,14 @@
    "c": "bone"
   },
   {
-   "t": 27.26,
+   "t": 25.333,
+   "l": 1.0,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 28.7,
    "l": 1.0,
    "decay": 0.2,
    "on": "lamps",
@@ -522,14 +533,22 @@
    "c": "bone"
   },
   {
-   "t": 36.13,
-   "l": 0.78,
-   "decay": 0.15,
-   "on": "auto"
+   "t": 34.458,
+   "l": 0.98,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
   },
   {
-   "t": 40.217,
-   "l": 0.99,
+   "t": 38.777,
+   "l": 0.98,
+   "decay": 0.2,
+   "on": "lamps",
+   "c": "bone"
+  },
+  {
+   "t": 41.657,
+   "l": 1.0,
    "decay": 0.2,
    "on": "lamps",
    "c": "bone"
