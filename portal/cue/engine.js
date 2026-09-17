@@ -183,13 +183,19 @@ const FIGURES = {
   },
   build(ids, step) {
     const n = ids.length;
-    if (!n) return [];
-    return ids.slice(0, (((step % n) + n) % n) + 1);
+    if (!n) return {};
+    const head = (((step % n) + n) % n);
+    const out = {};
+    for (let k = 0; k < n; k++) out[ids[k]] = k > head ? 0.12 : (k === head ? 1 : 0.5);
+    return out;
   },
   unbuild(ids, step) {
     const n = ids.length;
-    if (!n) return [];
-    return ids.slice(0, n - (((step % n) + n) % n));
+    if (!n) return {};
+    const head = n - 1 - (((step % n) + n) % n);
+    const out = {};
+    for (let k = 0; k < n; k++) out[ids[k]] = k > head ? 0.12 : (k === head ? 1 : 0.5);
+    return out;
   },
   cascade(ids, step) {
     const n = ids.length;
@@ -216,8 +222,14 @@ const FIGURES = {
     if (!n) return {};
     const p = ctx && ctx.pitch != null ? ctx.pitch : null;
     if (p == null) return FIGURES.sweep(ids, step);
-    const lo = ctx.lo != null ? ctx.lo : 30;
-    const hi = ctx.hi != null ? ctx.hi : 90;
+    let lo = ctx.lo != null ? ctx.lo : 30;
+    let hi = ctx.hi != null ? ctx.hi : 90;
+    if (Array.isArray(ctx.all) && ctx.all.length >= 6) {
+      const q = ctx.all.slice().sort((a, b) => a - b);
+      lo = q[Math.floor(q.length * 0.15)];
+      hi = q[Math.floor(q.length * 0.85)];
+      if (hi - lo < 4) { lo = q[0]; hi = q[q.length - 1]; }
+    }
     const x = Math.max(0, Math.min(1, (p - lo) / Math.max(1, hi - lo)));
     const at = x * (n - 1);
     const out = {};
@@ -249,6 +261,31 @@ function noteStepsIn(grid, startS, endS, n) {
   return out;
 }
 
+function fillGaps(out, grid, chase, startS, endS) {
+  const most = chase.max_step_s != null ? +chase.max_step_s : 0.95;
+  const filled = [];
+  let prev = startS;
+  for (const t of out.concat([endS])) {
+    while (t - prev > most) {
+      prev += most;
+      let b = prev, best = Infinity;
+      for (const x of grid.beats) {
+        const d = Math.abs(x - prev);
+        if (d < best) { best = d; b = x; }
+      }
+      if (b > (filled.length ? filled[filled.length - 1] : startS) + 0.2 && b < t - 0.2) {
+        filled.push(b);
+        prev = b;
+      }
+    }
+    if (t < endS) { filled.push(t); prev = t; }
+  }
+  filled.sort((a, b) => a - b);
+  const seen = [];
+  for (const t of filled) if (!seen.length || t - seen[seen.length - 1] > 0.05) seen.push(t);
+  return seen.length ? seen : out;
+}
+
 function gateSteps(out, grid, chase) {
   const sub = chase.min_step_beats != null ? +chase.min_step_beats : 1.0;
   const floor = Math.max(0.22, grid.beatSeconds * sub * 0.92);
@@ -266,7 +303,7 @@ function chaseStepTimes(chase, grid, startS, endS) {
       .map((x) => x.t);
     const out = [];
     for (let k = 0; k < picked.length; k += n) out.push(Math.max(startS, picked[k]));
-    return gateSteps(out.length ? out : [startS], grid, chase);
+    return gateSteps(fillGaps(out.length ? out : [startS], grid, chase, startS, endS), grid, chase);
   }
   if (every.hits != null) {
     const n = Math.max(1, Math.round(+every.hits));
@@ -296,7 +333,7 @@ function chaseStepTimes(chase, grid, startS, endS) {
     merged.sort((a, b) => a - b);
     const out = [];
     for (const t of merged) if (!out.length || t - out[out.length - 1] > 0.05) out.push(t);
-    return gateSteps(out.length ? out : [startS], grid, chase);
+    return gateSteps(fillGaps(out.length ? out : [startS], grid, chase, startS, endS), grid, chase);
   }
   const nBeats = every.beats != null
     ? Math.max(0.25, +every.beats)

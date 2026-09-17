@@ -327,6 +327,23 @@ If he says fluctuation again, move **down** this curve (fewer accents, longer
 spacing in `author.py`'s accent loop). If he says lazy, move up. Do not reach
 for per-frame smoothing; it is not the variable.
 
+## 7e. Two things the scanner cannot see
+
+It reports zero on all seven songs, and Amal still found two faults by watching
+0:02-0:11. Both are about *distribution over time*, which no per-event check
+catches. Add these to any investigation:
+
+  - **lit share per lamp** — how long each lamp spends above 40/255. All four
+    should be within ~10 points of each other (now 77/78/74/68).
+  - **dead stretches** — spans where NO lamp changes by more than 2/255. There
+    are 9 above 1.2s, the longest 2.92s, and that one is the `spotlight` cue
+    deliberately holding the row level while the head works.
+
+And a warning about the lead metric: `argmax` returns the FIRST index on ties,
+and symmetric looks put lamps 1 and 4 at identical levels, so lamp 1 wins every
+tie. 16% of lit frames are ties. Read "lamp 1 leads 49%" with that in mind —
+check lit share as well before concluding a lamp is unused.
+
 ## 7d. The fault scanner
 
 `portal/cue/faults.py <song> <lights.json>` walks every second and reports named

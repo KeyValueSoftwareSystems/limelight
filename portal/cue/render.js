@@ -130,7 +130,17 @@ function render(cueFile, score, rigName, opts) {
   for (let i = 0; i < cues.length; i++) {
     cues[i]._end = i + 1 < cues.length ? cues[i + 1]._t : duration;
     cues[i]._look = resolveLook(rig, cues[i].look, palette);
-    const layers = cues[i].chases || (cues[i].chase ? [cues[i].chase] : []);
+    let layers = cues[i].chases || (cues[i].chase ? [cues[i].chase] : []);
+    layers = layers.map((ch) => {
+      if (!ch || !ch.every || ch.every.notes == null) return ch;
+      const span = Math.max(0.01, cues[i]._end - cues[i]._t);
+      const inside = (grid.notes || []).filter((x) => x.t >= cues[i]._t && x.t < cues[i]._end);
+      const perBeat = inside.length / (span / grid.beatSeconds);
+      if (perBeat >= 0.9) return ch;
+      const alt = { ...ch, every: { beats: 2 } };
+      if (ch.figure === "pitch") alt.figure = "comet";
+      return alt;
+    });
     cues[i]._layers = layers;
     cues[i]._steps = layers.map((ch) => E.chaseStepTimes(ch, grid, cues[i]._t, cues[i]._end));
     if (cues[i]._steps.length > 1) {
@@ -184,7 +194,7 @@ function render(cueFile, score, rigName, opts) {
         if (seq && seq.length) {
           const nn = seq[Math.min(seq.length - 1, steps[li])];
           const ps = seq.map((x) => x.p);
-          cx = { pitch: nn ? nn.p : null, lo: Math.min(...ps), hi: Math.max(...ps) };
+          cx = { pitch: nn ? nn.p : null, lo: Math.min(...ps), hi: Math.max(...ps), all: ps };
         }
         state = applyChase(rig, state, ch, steps[li], palette, cx);
       });
