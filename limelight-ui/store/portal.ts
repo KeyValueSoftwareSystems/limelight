@@ -190,6 +190,7 @@ const initialTrims: TrimState = {
   blackout: false,
   strobe_kill: false,
   hold: false,
+  lead_ms: 40,
 };
 
 /* Deep enough to cover a working session, shallow enough that the stack is

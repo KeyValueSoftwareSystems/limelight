@@ -462,13 +462,24 @@ export default function StagePage() {
      refuses with "no show loaded". So on arm we post the current bake at the
      audio position, THEN arm. The layout polls rig status into the store every
      second, so the pill stays fresh. */
+  /* What the listener is HEARING now: the engine position minus the output
+     latency and the person's nudge -- the same number the preview draws for.
+     The rig used to be sent the raw position, so the real lamps ran ahead of
+     the sound by the whole output buffer while the preview did not, and the
+     two could never agree. The lamps' own delay is the rig's `lead_ms` trim,
+     applied on the portal side. */
+  const heard = useCallback(() => {
+    const st = usePortalStore.getState();
+    return position() - st.syncLatency - st.syncNudge;
+  }, [position]);
+
   const handleRigToggle = useCallback(async () => {
     const st = usePortalStore.getState();
     const current = st.rig;
     if (!current) return;
     const want = !current.armed;
     try {
-      if (want && st.job) await api.rig.at(st.job, position());
+      if (want && st.job) await api.rig.at(st.job, heard());
       const result = await api.rig.arm(want);
       if (result.error) {
         setStageMsg(`rig: ${result.error}`);
@@ -489,10 +500,10 @@ export default function StagePage() {
     const id = setInterval(() => {
       const st = usePortalStore.getState();
       if (st.rig?.armed && st.job)
-        api.rig.at(st.job, position()).catch(() => {});
-    }, 150);
+        api.rig.at(st.job, heard()).catch(() => {});
+    }, 100);
     return () => clearInterval(id);
-  }, [position]);
+  }, [heard]);
 
   /* ── the song's own show file, if the hub has one ──────────────────────────
      Authored show files are the point of the v2 baker, so one is loaded the

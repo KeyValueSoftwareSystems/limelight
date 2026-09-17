@@ -433,6 +433,8 @@ export interface TrimState {
   blackout: boolean;
   strobe_kill: boolean;
   hold: boolean;
+  /** milliseconds the lamps are sent EARLY, to cover their own response time */
+  lead_ms: number;
 }
 
 export interface RigStatus {
