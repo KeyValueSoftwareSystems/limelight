@@ -61,11 +61,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.162
+     "l": 0.081
     },
     "heads": {
      "c": "violet",
-     "l": 0.108,
+     "l": 0.054,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -78,7 +78,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": false,
      "cycles": 3,
      "colours": [
@@ -111,11 +111,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.162
+     "l": 0.081
     },
     "heads": {
      "c": "violet",
-     "l": 0.108,
+     "l": 0.054,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -161,11 +161,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.162
+     "l": 0.081
     },
     "heads": {
      "c": "violet",
-     "l": 0.108,
+     "l": 0.054,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -178,7 +178,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": false,
      "reverse": true,
      "cycles": 4,
@@ -212,11 +212,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.162
+     "l": 0.081
     },
     "heads": {
      "c": "violet",
-     "l": 0.108,
+     "l": 0.054,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -262,11 +262,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.116
+     "l": 0.066
     },
     "heads": {
      "c": "bone",
-     "l": 0.083,
+     "l": 0.044,
      "pan": 0.5,
      "tilt": 0.32
     }
@@ -279,7 +279,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": true,
      "reverse": true,
      "cycles": 1,
@@ -322,11 +322,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.116
+     "l": 0.066
     },
     "heads": {
      "c": "bone",
-     "l": 0.083,
+     "l": 0.044,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -339,7 +339,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": true,
      "reverse": true,
      "cycles": 1,
@@ -368,11 +368,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.283
+     "l": 0.162
     },
     "heads": {
      "c": "violet",
-     "l": 0.202,
+     "l": 0.108,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -385,7 +385,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": false,
      "reverse": false,
      "colours": [
@@ -423,11 +423,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.193
+     "l": 0.138
     },
     "heads": {
      "c": "bone",
-     "l": 0.132,
+     "l": 0.094,
      "pan": 0.5,
      "tilt": 0.3
     }
@@ -440,7 +440,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": true,
      "cycles": 1,
      "colours": [
@@ -468,16 +468,16 @@
    "at": {
     "second": 27.864
    },
-   "fade": 0.086,
+   "fade": 0.172,
    "why": "bars 21-24, the phrase closes down: voices leads, E 4.39, 4 hits, mode +0.35 - split in bone - alternate instead, the only shape that finishes in 1.8 bars",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.193
+     "l": 0.132
     },
     "heads": {
      "c": "bone",
-     "l": 0.132,
+     "l": 0.094,
      "pan": 0.5,
      "tilt": 0.28
     }
@@ -490,7 +490,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": false,
      "min_intensity": 0.3,
      "colours": [
@@ -523,11 +523,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.701
+     "l": 0.593
     },
     "heads": {
      "c": "ember",
-     "l": 0.5,
+     "l": 0.431,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -539,10 +539,10 @@
      "every": {
       "beats": 1.0
      },
-     "fill_beats": 2,
-     "low": 0.3,
+     "fill_beats": 1,
+     "low": 0.78,
      "move_head": false,
-     "cycles": 2,
+     "cycles": 4,
      "colours": [
       "violet",
       "ember"
@@ -561,63 +561,18 @@
   {
    "id": 8,
    "at": {
-    "second": 34.691
-   },
-   "fade": 0.172,
-   "why": "bars 25-28, the phrase opens out: keys leads, E 7.63, 5 hits, mode -0.17 - cascade in violet against crimson inside - pendulum instead, the only shape that finishes in 1.0 bars",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.769
-    },
-    "heads": {
-     "c": "ember",
-     "l": 0.556,
-     "pan": 0.5,
-     "tilt": 0.41
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "pendulum",
-     "every": {
-      "beats": 1.5
-     },
-     "fill_beats": 2,
-     "low": 0.3,
-     "move_head": true,
-     "cycles": 1,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 11,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "sweep",
-    "every": {
-     "bars": 2
-    }
-   }
-  },
-  {
-   "id": 9,
-   "at": {
     "second": 36.13
    },
    "fade": 0.172,
-   "why": "bars 25-28, the phrase opens out: keys leads, E 7.13, 4 hits, mode -0.20 - converge in violet against crimson inside - diverge instead, the only shape that finishes in 1.0 bars",
+   "why": "bars 25-28, the phrase opens out: keys leads, E 7.13, 4 hits, mode -0.20 - cascade in violet against crimson inside - build instead, the only shape that finishes in 2.0 bars",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.823
+     "l": 0.688
     },
     "heads": {
      "c": "ember",
-     "l": 0.598,
+     "l": 0.5,
      "pan": 0.5,
      "tilt": 0.37
     }
@@ -625,248 +580,19 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "diverge",
-     "every": {
-      "beats": 1.0
-     },
-     "fill_beats": 2,
-     "low": 0.3,
-     "move_head": false,
-     "cycles": 2,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 16,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "dip",
-    "every": {
-     "bars": 2
-    }
-   }
-  },
-  {
-   "id": 10,
-   "at": {
-    "second": 37.454
-   },
-   "fade": 0.172,
-   "why": "bars 25-28, the phrase opens out: keys leads, E 7.92, 4 hits, mode +0.20 - cascade in violet against crimson inside - split instead, the only shape that finishes in 1.0 bars",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.877
-    },
-    "heads": {
-     "c": "ember",
-     "l": 0.626,
-     "pan": 0.5,
-     "tilt": 0.36
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "split",
-     "every": {
-      "hits": 1
-     },
-     "fill_beats": 2,
-     "low": 0.3,
-     "move_head": false,
-     "min_intensity": 0.3,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 16,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "nod",
-    "every": {
-     "bars": 1
-    }
-   }
-  },
-  {
-   "id": 11,
-   "at": {
-    "second": 38.893
-   },
-   "fade": 0.172,
-   "why": "bars 29-32, the phrase travels across: keys leads, E 7.53, 6 hits, mode +0.60 - diverge in violet - twin instead, the only shape that finishes in 1.5 bars",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.809
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.566,
-     "pan": 0.5,
-     "tilt": 0.43
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "twin",
+     "figure": "build",
      "every": {
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.22,
-     "move_head": false,
-     "reverse": true,
+     "low": 0.78,
+     "move_head": true,
      "cycles": 1,
      "colours": [
       "violet",
       "ember"
      ],
      "colour_every": 11,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "dip",
-    "every": {
-     "bars": 2
-    }
-   }
-  },
-  {
-   "id": 11,
-   "at": {
-    "second": 40.96
-   },
-   "fade": 0.172,
-   "why": "zigzag answers twin, a whole 1 cycles, landing on the hit at 40.96s with a new colour",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.834
-    },
-    "heads": {
-     "c": "ember",
-     "l": 0.584,
-     "pan": 0.5,
-     "tilt": 0.43
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "zigzag",
-     "every": {
-      "beats": 1.0
-     },
-     "fill_beats": 2,
-     "low": 0.22,
-     "move_head": true,
-     "reverse": false,
-     "cycles": 1,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 16,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "sweep",
-    "every": {
-     "bars": 2
-    }
-   }
-  },
-  {
-   "id": 12,
-   "at": {
-    "second": 42.957
-   },
-   "fade": 0.172,
-   "why": "bars 29-32, the phrase travels across: keys leads, E 7.37, 6 hits, mode +0.22 - split in violet - alternate instead, the only shape that finishes in 1.1 bars",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.863
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.607,
-     "pan": 0.5,
-     "tilt": 0.45
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "alternate",
-     "every": {
-      "hits": 1
-     },
-     "fill_beats": 2,
-     "low": 0.22,
-     "move_head": false,
-     "reverse": true,
-     "min_intensity": 0.3,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 16,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "nod",
-    "every": {
-     "bars": 1
-    }
-   }
-  },
-  {
-   "id": 13,
-   "at": {
-    "second": 44.42
-   },
-   "fade": 0.172,
-   "why": "bars 33-36, the phrase closes down: drums leads, E 8.98, 4 hits, mode +0.20 - wipe in violet against teal inside - opened from violet to bone so the level can be seen - build instead, the only shape that finishes in 2.2 bars",
-   "look": {
-    "lamps": {
-     "c": "bone",
-     "l": 0.396
-    },
-    "heads": {
-     "c": "bone",
-     "l": 0.281,
-     "pan": 0.5,
-     "tilt": 0.36
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "build",
-     "every": {
-      "beats": 1.0
-     },
-     "fill_beats": 2,
-     "low": 0.3,
-     "move_head": true,
-     "reverse": true,
-     "cycles": 2,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 16,
      "colour_figure": "hold"
     }
    ],
@@ -878,33 +604,79 @@
    }
   },
   {
-   "id": 13,
+   "id": 9,
    "at": {
-    "second": 47.508
+    "second": 38.893
    },
-   "fade": 0.086,
-   "why": "hocket answers build, a whole 2 cycles, landing on the hit at 47.51s with a new colour",
+   "fade": 0.172,
+   "why": "bars 29-32, the phrase travels across: keys leads, E 7.53, 6 hits, mode +0.60 - diverge in violet",
    "look": {
     "lamps": {
-     "c": "bone",
-     "l": 0.396
+     "c": "violet",
+     "l": 0.674
     },
     "heads": {
-     "c": "bone",
-     "l": 0.281,
+     "c": "violet",
+     "l": 0.472,
      "pan": 0.5,
-     "tilt": 0.36
+     "tilt": 0.43
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "hocket",
+     "figure": "diverge",
      "every": {
-      "hits": 1
+      "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.72,
+     "move_head": false,
+     "reverse": true,
+     "cycles": 3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 11,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 9,
+   "at": {
+    "second": 41.96
+   },
+   "fade": 0.172,
+   "why": "pulse answers diverge, a whole 2 cycles, landing on the hit at 41.96s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.695
+    },
+    "heads": {
+     "c": "ember",
+     "l": 0.487,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 2
+     },
+     "fill_beats": 2,
+     "low": 0.72,
      "move_head": false,
      "reverse": false,
      "colours": [
@@ -917,6 +689,52 @@
     }
    ],
    "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
+   }
+  },
+  {
+   "id": 10,
+   "at": {
+    "second": 44.42
+   },
+   "fade": 0.172,
+   "why": "bars 33-36, the phrase closes down: drums leads, E 8.98, 4 hits, mode +0.20 - alternate in violet against teal inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.85
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.242,
+     "pan": 0.5,
+     "tilt": 0.36
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.78,
+     "move_head": false,
+     "reverse": true,
+     "min_intensity": 0.3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
     "move": "nod",
     "every": {
      "bars": 1
@@ -924,20 +742,66 @@
    }
   },
   {
-   "id": 14,
+   "id": 10,
+   "at": {
+    "second": 47.508
+   },
+   "fade": 0.172,
+   "why": "split answers alternate, a whole 2 cycles, landing on the hit at 47.51s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.876
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.242,
+     "pan": 0.5,
+     "tilt": 0.36
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.78,
+     "move_head": false,
+     "reverse": false,
+     "min_intensity": 0.3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 11,
    "at": {
     "second": 49.923
    },
-   "fade": 0.172,
+   "fade": 0.0,
    "why": "bars 37-40, the phrase travels across: keys leads, E 7.38, 4 hits, mode +0.57 - converge in violet",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.877
+     "l": 0.742
     },
     "heads": {
      "c": "violet",
-     "l": 0.607,
+     "l": 0.526,
      "pan": 0.5,
      "tilt": 0.4
     }
@@ -950,61 +814,15 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "reverse": true,
-     "cycles": 4,
+     "cycles": 2,
      "colours": [
       "violet",
       "ember"
      ],
      "colour_every": 16,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "dip",
-    "every": {
-     "bars": 2
-    }
-   }
-  },
-  {
-   "id": 15,
-   "at": {
-    "second": 52.686
-   },
-   "fade": 0.0,
-   "why": "bars 37-40, the phrase travels across: keys leads, E 7.71, 5 hits, mode +0.58 - converge in violet - opened from violet to bone so the level can be seen - diverge instead, the only shape that finishes in 0.7 bars",
-   "look": {
-    "lamps": {
-     "c": "bone",
-     "l": 0.374
-    },
-    "heads": {
-     "c": "bone",
-     "l": 0.264,
-     "pan": 0.5,
-     "tilt": 0.43
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "diverge",
-     "every": {
-      "beats": 1.5
-     },
-     "fill_beats": 2,
-     "low": 0.3,
-     "move_head": false,
-     "reverse": true,
-     "cycles": 1,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 11,
      "colour_figure": "hold"
     }
    ],
@@ -1030,7 +848,7 @@
    "why": "one beat of black, so the hit that follows has somewhere to land"
   },
   {
-   "id": 16,
+   "id": 12,
    "at": {
     "second": 54.056
    },
@@ -1060,20 +878,20 @@
    }
   },
   {
-   "id": 17,
+   "id": 13,
    "at": {
     "second": 55.38
    },
    "fade": 0.172,
-   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - breathe in violet against teal inside - pulse instead, the only shape that finishes in 1.3 bars",
+   "why": "bars 41-44, the phrase travels across: keys leads, E 7.88, 5 hits, mode +0.22 - breathe in violet against teal inside",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.336
+     "l": 0.281
     },
     "heads": {
      "c": "bone",
-     "l": 0.237,
+     "l": 0.198,
      "pan": 0.5,
      "tilt": 0.39
     }
@@ -1081,12 +899,12 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pulse",
+     "figure": "breathe",
      "every": {
       "hits": 2
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "min_intensity": 0.3,
      "colours": [
@@ -1105,20 +923,20 @@
    }
   },
   {
-   "id": 17,
+   "id": 13,
    "at": {
-    "second": 57.168
+    "second": 58.212
    },
    "fade": 0.172,
-   "why": "build answers pulse, a whole 1 cycles, landing on the hit at 57.17s with a new colour",
+   "why": "hocket answers breathe, a whole 4 cycles, landing on the hit at 58.21s with a new colour",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.823
+     "l": 0.688
     },
     "heads": {
      "c": "violet",
-     "l": 0.58,
+     "l": 0.485,
      "pan": 0.5,
      "tilt": 0.39
     }
@@ -1126,185 +944,47 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "hocket",
      "every": {
-      "beats": 1.5
+      "hits": 2
      },
      "fill_beats": 2,
-     "low": 0.3,
-     "move_head": true,
+     "low": 0.78,
+     "move_head": false,
      "min_intensity": 0.3,
      "colours": [
       "violet",
       "ember"
      ],
-     "colour_every": 11,
-     "colour_figure": "hold",
-     "reverse": true,
-     "cycles": 1
-    }
-   ],
-   "head": {
-    "move": "arc",
-    "every": {
-     "bars": 2
-    }
-   }
-  },
-  {
-   "id": 18,
-   "at": {
-    "second": 59.513
-   },
-   "fade": 0.172,
-   "why": "bars 41-44, the phrase travels across: keys leads, E 7.49, 5 hits, mode +0.18 - diverge in violet against crimson inside - twin instead, the only shape that finishes in 1.0 bars",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.877
-    },
-    "heads": {
-     "c": "ember",
-     "l": 0.626,
-     "pan": 0.5,
-     "tilt": 0.39
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "twin",
-     "every": {
-      "beats": 1.0
-     },
-     "fill_beats": 2,
-     "low": 0.3,
-     "move_head": false,
-     "cycles": 1,
-     "colours": [
-      "violet",
-      "ember"
-     ],
      "colour_every": 16,
-     "colour_figure": "hold"
+     "colour_figure": "hold",
+     "reverse": true
     }
    ],
    "head": {
-    "move": "dip",
+    "move": "nod",
     "every": {
-     "bars": 2
+     "bars": 1
     }
    }
   },
   {
-   "id": 19,
+   "id": 14,
    "at": {
     "second": 60.952
    },
    "fade": 0.172,
-   "why": "bars 45-48, the phrase travels across: keys leads, E 7.77, 4 hits, mode +0.57 - cascade in violet against crimson inside - unbuild instead, the only shape that finishes in 1.6 bars",
+   "why": "bars 45-48, the phrase travels across: keys leads, E 7.77, 4 hits, mode +0.57 - twin in violet against crimson inside - diverge instead, the only shape that finishes in 1.8 bars",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.863
+     "l": 0.728
     },
     "heads": {
      "c": "ember",
-     "l": 0.626,
+     "l": 0.528,
      "pan": 0.5,
      "tilt": 0.43
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "unbuild",
-     "every": {
-      "beats": 1.0
-     },
-     "fill_beats": 2,
-     "low": 0.3,
-     "move_head": true,
-     "reverse": true,
-     "cycles": 1,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 16,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "arc",
-    "every": {
-     "bars": 2
-    }
-   }
-  },
-  {
-   "id": 19,
-   "at": {
-    "second": 63.205
-   },
-   "fade": 0.172,
-   "why": "converge answers unbuild, a whole 2 cycles, landing on the hit at 63.20s with a new colour",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.89
-    },
-    "heads": {
-     "c": "saffron",
-     "l": 0.318,
-     "pan": 0.5,
-     "tilt": 0.43
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "converge",
-     "every": {
-      "beats": 1.5
-     },
-     "fill_beats": 2,
-     "low": 0.3,
-     "move_head": false,
-     "reverse": false,
-     "cycles": 2,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 11,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "dip",
-    "every": {
-     "bars": 2
-    }
-   }
-  },
-  {
-   "id": 20,
-   "at": {
-    "second": 65.039
-   },
-   "fade": 0.172,
-   "why": "bars 45-48, the phrase travels across: keys leads, E 7.61, 6 hits, mode +0.24 - twin in violet against crimson inside - opened from violet to bone so the level can be seen - diverge instead, the only shape that finishes in 1.0 bars",
-   "look": {
-    "lamps": {
-     "c": "bone",
-     "l": 0.374
-    },
-    "heads": {
-     "c": "ember",
-     "l": 0.667,
-     "pan": 0.5,
-     "tilt": 0.4
     }
    },
    "chases": [
@@ -1312,150 +992,13 @@
      "on": "lamps",
      "figure": "diverge",
      "every": {
-      "beats": 1.0
-     },
-     "fill_beats": 2,
-     "low": 0.22,
-     "move_head": false,
-     "reverse": true,
-     "cycles": 2,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 16,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "dip",
-    "every": {
-     "bars": 2
-    }
-   }
-  },
-  {
-   "id": 21,
-   "at": {
-    "second": 66.409
-   },
-   "fade": 0.172,
-   "why": "bars 49-52, the phrase closes down: drums leads, E 9.07, 5 hits, mode +0.21 - alternate in violet against teal inside",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.674
-    },
-    "heads": {
-     "c": "bone",
-     "l": 0.193,
-     "pan": 0.5,
-     "tilt": 0.4
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "alternate",
-     "every": {
-      "hits": 1
-     },
-     "fill_beats": 2,
-     "low": 0.3,
-     "move_head": false,
-     "reverse": true,
-     "min_intensity": 0.3,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 16,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "nod",
-    "every": {
-     "bars": 1
-    }
-   }
-  },
-  {
-   "id": 21,
-   "at": {
-    "second": 69.242
-   },
-   "fade": 0.172,
-   "why": "split answers alternate, a whole 4 cycles, landing on the hit at 69.24s with a new colour",
-   "look": {
-    "lamps": {
-     "c": "ember",
-     "l": 0.695
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.472,
-     "pan": 0.5,
-     "tilt": 0.4
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "split",
-     "every": {
-      "hits": 1
-     },
-     "fill_beats": 2,
-     "low": 0.3,
-     "move_head": false,
-     "reverse": false,
-     "min_intensity": 0.3,
-     "colours": [
-      "violet",
-      "ember"
-     ],
-     "colour_every": 16,
-     "colour_figure": "hold"
-    }
-   ],
-   "head": {
-    "move": "nod",
-    "every": {
-     "bars": 1
-    }
-   }
-  },
-  {
-   "id": 22,
-   "at": {
-    "second": 71.982
-   },
-   "fade": 0.172,
-   "why": "bars 53-56, the phrase closes down: voices leads, E 5.52, 4 hits, mode +0.53 - diverge in violet - twin instead, the only shape that finishes in 1.8 bars",
-   "look": {
-    "lamps": {
-     "c": "violet",
-     "l": 0.62
-    },
-    "heads": {
-     "c": "violet",
-     "l": 0.432,
-     "pan": 0.5,
-     "tilt": 0.43
-    }
-   },
-   "chases": [
-    {
-     "on": "lamps",
-     "figure": "twin",
-     "every": {
       "beats": 2.0
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
-     "cycles": 1,
+     "reverse": true,
+     "cycles": 2,
      "colours": [
       "violet",
       "ember"
@@ -1472,20 +1015,203 @@
    }
   },
   {
-   "id": 22,
+   "id": 14,
+   "at": {
+    "second": 63.367
+   },
+   "fade": 0.172,
+   "why": "pulse answers diverge, a whole 3 cycles, landing on the hit at 63.37s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.751
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.269,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.78,
+     "move_head": false,
+     "reverse": false,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold",
+     "min_intensity": 0.3
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
+   }
+  },
+  {
+   "id": 15,
+   "at": {
+    "second": 66.409
+   },
+   "fade": 0.172,
+   "why": "bars 49-52, the phrase closes down: drums leads, E 9.07, 5 hits, mode +0.21 - alternate in violet against teal inside",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.526
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.149,
+     "pan": 0.5,
+     "tilt": 0.4
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.78,
+     "move_head": false,
+     "reverse": true,
+     "min_intensity": 0.3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 15,
+   "at": {
+    "second": 69.242
+   },
+   "fade": 0.172,
+   "why": "split answers alternate, a whole 4 cycles, landing on the hit at 69.24s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "ember",
+     "l": 0.542
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.149,
+     "pan": 0.5,
+     "tilt": 0.4
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "split",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.78,
+     "move_head": false,
+     "reverse": false,
+     "min_intensity": 0.3,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 16,
+   "at": {
+    "second": 71.982
+   },
+   "fade": 0.172,
+   "why": "bars 53-56, the phrase closes down: voices leads, E 5.52, 4 hits, mode +0.53 - diverge in violet - converge instead, the only shape that finishes in 1.8 bars",
+   "look": {
+    "lamps": {
+     "c": "violet",
+     "l": 0.459
+    },
+    "heads": {
+     "c": "violet",
+     "l": 0.324,
+     "pan": 0.5,
+     "tilt": 0.43
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 2.0
+     },
+     "fill_beats": 1,
+     "low": 0.62,
+     "move_head": false,
+     "cycles": 2,
+     "colours": [
+      "violet",
+      "ember"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 16,
    "at": {
     "second": 74.397
    },
    "fade": 0.172,
-   "why": "sweep answers twin, a whole 1 cycles, landing on the hit at 74.40s with a new colour",
+   "why": "sweep answers converge, a whole 1 cycles, landing on the hit at 74.40s with a new colour",
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.639
+     "l": 0.473
     },
     "heads": {
      "c": "ember",
-     "l": 0.445,
+     "l": 0.334,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -1497,8 +1223,8 @@
      "every": {
       "beats": 1.0
      },
-     "fill_beats": 2,
-     "low": 0.3,
+     "fill_beats": 1,
+     "low": 0.62,
      "move_head": true,
      "cycles": 1,
      "colours": [
@@ -1518,20 +1244,20 @@
    }
   },
   {
-   "id": 23,
+   "id": 17,
    "at": {
     "second": 77.508
    },
    "fade": 0.172,
-   "why": "bars 57-60, the phrase closes down: drums leads, E 5.24, 0 hits, mode +0.12 - alternate in bone against teal inside",
+   "why": "bars 57-60, the phrase closes down: drums leads, E 5.24, 0 hits, mode +0.12 - alternate in bone",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.231
+     "l": 0.16
     },
     "heads": {
      "c": "bone",
-     "l": 0.16,
+     "l": 0.11,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -1544,7 +1270,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.3,
+     "low": 0.62,
      "move_head": false,
      "reverse": true,
      "cycles": 4,
@@ -1564,7 +1290,7 @@
    }
   },
   {
-   "id": 23,
+   "id": 17,
    "at": {
     "second": 80.24
    },
@@ -1573,11 +1299,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.231
+     "l": 0.16
     },
     "heads": {
      "c": "bone",
-     "l": 0.16,
+     "l": 0.11,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -1590,7 +1316,7 @@
       "beats": 1.5
      },
      "fill_beats": 1,
-     "low": 0.3,
+     "low": 0.62,
      "move_head": true,
      "reverse": false,
      "cycles": 1,
@@ -1610,7 +1336,7 @@
    }
   },
   {
-   "id": 24,
+   "id": 18,
    "at": {
     "second": 83.058
    },
@@ -1619,11 +1345,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.171
+     "l": 0.116
     },
     "heads": {
      "c": "bone",
-     "l": 0.121,
+     "l": 0.083,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -1636,7 +1362,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": true,
      "reverse": true,
      "cycles": 1,
@@ -1656,7 +1382,7 @@
    }
   },
   {
-   "id": 24,
+   "id": 18,
    "at": {
     "second": 85.798
    },
@@ -1665,11 +1391,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.418
+     "l": 0.283
     },
     "heads": {
      "c": "violet",
-     "l": 0.297,
+     "l": 0.202,
      "pan": 0.5,
      "tilt": 0.29
     }
@@ -1682,7 +1408,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": false,
      "reverse": false,
      "cycles": 4,
@@ -1702,20 +1428,20 @@
    }
   },
   {
-   "id": 25,
+   "id": 19,
    "at": {
     "second": 88.538
    },
    "fade": 0.172,
-   "why": "bars 65-68, the phrase closes down: keys leads, E 3.47, 3 hits, mode +0.41 - breathe in bone against teal inside - pulse instead, the only shape that finishes in 1.4 bars",
+   "why": "bars 65-68, the phrase closes down: keys leads, E 3.47, 3 hits, mode +0.41 - breathe in bone - pulse instead, the only shape that finishes in 1.4 bars",
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.176
+     "l": 0.116
     },
     "heads": {
      "c": "bone",
-     "l": 0.121,
+     "l": 0.083,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -1728,7 +1454,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": false,
      "reverse": true,
      "min_intensity": 0.3,
@@ -1748,7 +1474,7 @@
    }
   },
   {
-   "id": 25,
+   "id": 19,
    "at": {
     "second": 90.442
    },
@@ -1757,11 +1483,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.432
+     "l": 0.283
     },
     "heads": {
      "c": "violet",
-     "l": 0.297,
+     "l": 0.202,
      "pan": 0.5,
      "tilt": 0.33
     }
@@ -1774,7 +1500,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": false,
      "reverse": false,
      "min_intensity": 0.3,
@@ -1803,7 +1529,7 @@
    "why": "the audio falls to 21% of its median for 0.86s - a real hole, so the room goes with it"
   },
   {
-   "id": 26,
+   "id": 20,
    "at": {
     "second": 93.693
    },
@@ -1812,11 +1538,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.149
+     "l": 0.094
     },
     "heads": {
      "c": "bone",
-     "l": 0.105,
+     "l": 0.066,
      "pan": 0.5,
      "tilt": 0.31
     }
@@ -1829,7 +1555,7 @@
       "beats": 1.5
      },
      "fill_beats": 1,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": true,
      "reverse": true,
      "cycles": 1,
@@ -1854,7 +1580,7 @@
    }
   },
   {
-   "id": 27,
+   "id": 21,
    "at": {
     "second": 99.59
    },
@@ -1863,11 +1589,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.226
+     "l": 0.165
     },
     "heads": {
      "c": "bone",
-     "l": 0.16,
+     "l": 0.116,
      "pan": 0.5,
      "tilt": 0.3
     }
@@ -1880,7 +1606,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.62,
      "move_head": false,
      "min_intensity": 0.3,
      "colours": [
@@ -1904,7 +1630,7 @@
    }
   },
   {
-   "id": 28,
+   "id": 22,
    "at": {
     "second": 105.094
    },
@@ -1913,11 +1639,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.204
+     "l": 0.138
     },
     "heads": {
      "c": "bone",
-     "l": 0.143,
+     "l": 0.094,
      "pan": 0.5,
      "tilt": 0.28
     }
@@ -1930,7 +1656,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": false,
      "min_intensity": 0.3,
      "colours": [
@@ -1949,7 +1675,7 @@
    }
   },
   {
-   "id": 28,
+   "id": 22,
    "at": {
     "second": 107.83
    },
@@ -1958,11 +1684,11 @@
    "look": {
     "lamps": {
      "c": "bone",
-     "l": 0.204
+     "l": 0.138
     },
     "heads": {
      "c": "bone",
-     "l": 0.143,
+     "l": 0.094,
      "pan": 0.5,
      "tilt": 0.28
     }
@@ -1975,7 +1701,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": true,
      "min_intensity": 0.3,
      "colours": [
@@ -1996,7 +1722,7 @@
    }
   },
   {
-   "id": 29,
+   "id": 23,
    "at": {
     "second": 110.597
    },
@@ -2005,11 +1731,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.769
+     "l": 0.647
     },
     "heads": {
      "c": "ember",
-     "l": 0.556,
+     "l": 0.473,
      "pan": 0.5,
      "tilt": 0.38
     }
@@ -2022,7 +1748,7 @@
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": true,
      "cycles": 1,
      "colours": [
@@ -2046,7 +1772,7 @@
    }
   },
   {
-   "id": 30,
+   "id": 24,
    "at": {
     "second": 116.146
    },
@@ -2055,11 +1781,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.809
+     "l": 0.701
     },
     "heads": {
      "c": "violet",
-     "l": 0.566,
+     "l": 0.485,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -2072,7 +1798,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "reverse": true,
      "cycles": 3,
@@ -2092,7 +1818,7 @@
    }
   },
   {
-   "id": 30,
+   "id": 24,
    "at": {
     "second": 118.538
    },
@@ -2101,11 +1827,11 @@
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.834
+     "l": 0.723
     },
     "heads": {
      "c": "ember",
-     "l": 0.584,
+     "l": 0.5,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -2118,7 +1844,7 @@
       "hits": 2
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "reverse": false,
      "colours": [
@@ -2138,7 +1864,7 @@
    }
   },
   {
-   "id": 31,
+   "id": 25,
    "at": {
     "second": 121.58
    },
@@ -2147,11 +1873,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.647
+     "l": 0.553
     },
     "heads": {
      "c": "ember",
-     "l": 0.473,
+     "l": 0.403,
      "pan": 0.5,
      "tilt": 0.35
     }
@@ -2164,7 +1890,7 @@
       "hits": 2
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "min_intensity": 0.3,
      "colours": [
@@ -2197,7 +1923,7 @@
    "why": "one beat of black, so the hit that follows has somewhere to land"
   },
   {
-   "id": 32,
+   "id": 26,
    "at": {
     "second": 122.95
    },
@@ -2227,7 +1953,7 @@
    }
   },
   {
-   "id": 33,
+   "id": 27,
    "at": {
     "second": 127.176
    },
@@ -2236,11 +1962,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.782
+     "l": 0.674
     },
     "heads": {
      "c": "violet",
-     "l": 0.553,
+     "l": 0.472,
      "pan": 0.5,
      "tilt": 0.39
     }
@@ -2253,7 +1979,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.22,
+     "low": 0.72,
      "move_head": false,
      "reverse": true,
      "cycles": 3,
@@ -2273,7 +1999,7 @@
    }
   },
   {
-   "id": 33,
+   "id": 27,
    "at": {
     "second": 129.242
    },
@@ -2282,11 +2008,11 @@
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.806
+     "l": 0.695
     },
     "heads": {
      "c": "ember",
-     "l": 0.57,
+     "l": 0.487,
      "pan": 0.5,
      "tilt": 0.39
     }
@@ -2299,7 +2025,7 @@
       "beats": 2.0
      },
      "fill_beats": 2,
-     "low": 0.22,
+     "low": 0.72,
      "move_head": true,
      "reverse": false,
      "cycles": 1,
@@ -2319,7 +2045,7 @@
    }
   },
   {
-   "id": 34,
+   "id": 28,
    "at": {
     "second": 132.679
    },
@@ -2328,11 +2054,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.742
+     "l": 0.62
     },
     "heads": {
      "c": "ember",
-     "l": 0.542,
+     "l": 0.445,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -2345,7 +2071,7 @@
       "beats": 1.5
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "cycles": 3,
      "colours": [
@@ -2364,7 +2090,7 @@
    }
   },
   {
-   "id": 34,
+   "id": 28,
    "at": {
     "second": 135.79
    },
@@ -2373,11 +2099,11 @@
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.765
+     "l": 0.639
     },
     "heads": {
      "c": "saffron",
-     "l": 0.276,
+     "l": 0.226,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -2390,7 +2116,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "colours": [
       "violet",
@@ -2410,7 +2136,7 @@
    }
   },
   {
-   "id": 35,
+   "id": 29,
    "at": {
     "second": 138.205
    },
@@ -2419,11 +2145,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.755
+     "l": 0.647
     },
     "heads": {
      "c": "violet",
-     "l": 0.526,
+     "l": 0.459,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -2436,7 +2162,7 @@
       "hits": 2
      },
      "fill_beats": 2,
-     "low": 0.22,
+     "low": 0.72,
      "move_head": false,
      "reverse": true,
      "min_intensity": 0.3,
@@ -2456,7 +2182,7 @@
    }
   },
   {
-   "id": 35,
+   "id": 29,
    "at": {
     "second": 140.968
    },
@@ -2465,11 +2191,11 @@
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.778
+     "l": 0.667
     },
     "heads": {
      "c": "ember",
-     "l": 0.542,
+     "l": 0.473,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -2482,7 +2208,7 @@
       "hits": 2
      },
      "fill_beats": 2,
-     "low": 0.22,
+     "low": 0.72,
      "move_head": false,
      "reverse": false,
      "min_intensity": 0.3,
@@ -2502,7 +2228,7 @@
    }
   },
   {
-   "id": 36,
+   "id": 30,
    "at": {
     "second": 143.662
    },
@@ -2511,11 +2237,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.809
+     "l": 0.715
     },
     "heads": {
      "c": "bone",
-     "l": 0.231,
+     "l": 0.204,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -2528,7 +2254,7 @@
       "beats": 1.0
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "cycles": 4,
      "colours": [
@@ -2547,7 +2273,7 @@
    }
   },
   {
-   "id": 36,
+   "id": 30,
    "at": {
     "second": 146.44
    },
@@ -2556,11 +2282,11 @@
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.834
+     "l": 0.737
     },
     "heads": {
      "c": "bone",
-     "l": 0.231,
+     "l": 0.204,
      "pan": 0.5,
      "tilt": 0.43
     }
@@ -2573,7 +2299,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "colours": [
       "violet",
@@ -2593,7 +2319,7 @@
    }
   },
   {
-   "id": 37,
+   "id": 31,
    "at": {
     "second": 149.235
    },
@@ -2602,11 +2328,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.688
+     "l": 0.607
     },
     "heads": {
      "c": "violet",
-     "l": 0.485,
+     "l": 0.432,
      "pan": 0.5,
      "tilt": 0.35
     }
@@ -2619,7 +2345,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "reverse": true,
      "min_intensity": 0.3,
@@ -2639,7 +2365,7 @@
    }
   },
   {
-   "id": 37,
+   "id": 31,
    "at": {
     "second": 151.998
    },
@@ -2648,11 +2374,11 @@
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.709
+     "l": 0.626
     },
     "heads": {
      "c": "ember",
-     "l": 0.5,
+     "l": 0.445,
      "pan": 0.5,
      "tilt": 0.35
     }
@@ -2665,7 +2391,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.78,
      "move_head": false,
      "reverse": false,
      "min_intensity": 0.3,
@@ -2685,7 +2411,7 @@
    }
   },
   {
-   "id": 38,
+   "id": 32,
    "at": {
     "second": 154.691
    },
@@ -2694,11 +2420,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.539
+     "l": 0.432
     },
     "heads": {
      "c": "violet",
-     "l": 0.378,
+     "l": 0.297,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -2711,7 +2437,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.3,
+     "low": 0.62,
      "move_head": true,
      "cycles": 1,
      "colours": [
@@ -2730,7 +2456,7 @@
    }
   },
   {
-   "id": 38,
+   "id": 32,
    "at": {
     "second": 157.48
    },
@@ -2739,11 +2465,11 @@
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.556
+     "l": 0.445
     },
     "heads": {
      "c": "ember",
-     "l": 0.389,
+     "l": 0.306,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -2756,7 +2482,7 @@
       "beats": 1.5
      },
      "fill_beats": 1,
-     "low": 0.3,
+     "low": 0.62,
      "move_head": true,
      "cycles": 1,
      "colours": [
@@ -2776,7 +2502,7 @@
    }
   },
   {
-   "id": 39,
+   "id": 33,
    "at": {
     "second": 160.264
    },
@@ -2785,11 +2511,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.553
+     "l": 0.432
     },
     "heads": {
      "c": "ember",
-     "l": 0.403,
+     "l": 0.306,
      "pan": 0.5,
      "tilt": 0.32
     }
@@ -2802,7 +2528,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.3,
+     "low": 0.62,
      "move_head": true,
      "cycles": 1,
      "colours": [
@@ -2821,7 +2547,7 @@
    }
   },
   {
-   "id": 39,
+   "id": 33,
    "at": {
     "second": 163.0
    },
@@ -2830,11 +2556,11 @@
    "look": {
     "lamps": {
      "c": "ember",
-     "l": 0.57
+     "l": 0.445
     },
     "heads": {
      "c": "saffron",
-     "l": 0.205,
+     "l": 0.156,
      "pan": 0.5,
      "tilt": 0.32
     }
@@ -2847,7 +2573,7 @@
       "hits": 1
      },
      "fill_beats": 2,
-     "low": 0.3,
+     "low": 0.62,
      "move_head": false,
      "colours": [
       "violet",
@@ -2876,7 +2602,7 @@
    "why": "the audio falls to 0% of its median for 4.71s - a real hole, so the room goes with it"
   },
   {
-   "id": 41,
+   "id": 35,
    "at": {
     "bar": 123
    },
@@ -2902,7 +2628,7 @@
       "beats": 1.0
      },
      "fill_beats": 1,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": false,
      "reverse": true,
      "cycles": 4,
@@ -2922,7 +2648,7 @@
    }
   },
   {
-   "id": 40,
+   "id": 34,
    "at": {
     "second": 171.178
    },
@@ -2931,11 +2657,11 @@
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.229
+     "l": 0.121
     },
     "heads": {
      "c": "violet",
-     "l": 0.162,
+     "l": 0.081,
      "pan": 0.5,
      "tilt": 0.3
     }
@@ -2948,7 +2674,7 @@
       "beats": 2
      },
      "fill_beats": 1,
-     "low": 0.12,
+     "low": 0.62,
      "move_head": false,
      "reverse": true
     }
@@ -2961,1435 +2687,1705 @@
    "t": 11.308,
    "l": 0.73,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 11.726,
-   "l": 0.63,
+   "t": 11.587,
+   "l": 0.62,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 12.074,
    "l": 0.64,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 12.678,
    "l": 0.69,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 13.003,
+   "l": 0.68,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 13.189,
    "l": 0.68,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 13.723,
    "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 14.071,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 16.927,
    "l": 0.82,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 17.879,
    "l": 0.65,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 18.204,
+   "l": 0.65,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 18.692,
    "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 19.04,
-   "l": 0.66,
+   "t": 18.901,
+   "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 19.273,
+   "l": 0.65,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 19.598,
    "l": 0.83,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 19.992,
    "l": 0.84,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 20.317,
+   "l": 0.81,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 23.197,
    "l": 0.86,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 23.382,
+   "l": 0.85,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 23.731,
    "l": 0.91,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 24.335,
    "l": 0.88,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 24.752,
-   "l": 0.9,
+   "t": 24.59,
+   "l": 0.88,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 25.101,
    "l": 0.92,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 25.449,
-   "l": 0.93,
+   "t": 25.287,
+   "l": 0.91,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 25.658,
+   "l": 0.91,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 26.471,
    "l": 0.95,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 26.819,
-   "l": 1.0,
+   "t": 26.657,
+   "l": 0.97,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 27.167,
    "l": 0.97,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 27.516,
-   "l": 0.97,
+   "t": 27.353,
+   "l": 0.96,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 27.864,
    "l": 0.96,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 28.212,
    "l": 0.96,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 28.723,
    "l": 1.0,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 29.164,
    "l": 0.94,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 29.582,
+   "t": 29.42,
    "l": 1.0,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 29.931,
    "l": 1.0,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 30.279,
    "l": 1.0,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 32.183,
    "l": 0.67,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 32.508,
+   "l": 0.66,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 32.694,
    "l": 0.65,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 33.019,
+   "l": 0.75,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 33.205,
    "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 34.412,
    "l": 0.84,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 34.76,
    "l": 0.78,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 35.109,
    "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 35.619,
    "l": 0.7,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 36.316,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 36.827,
    "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 37.523,
    "l": 0.78,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 38.383,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 38.893,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 39.242,
    "l": 0.93,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 39.59,
    "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 39.915,
+   "l": 0.71,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 40.612,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 40.96,
-   "l": 0.75,
+   "t": 40.797,
+   "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 41.308,
    "l": 1.0,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 41.657,
    "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 42.005,
    "l": 0.89,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 42.353,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 42.678,
+   "l": 0.83,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 43.027,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 43.375,
    "l": 0.87,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 43.723,
    "l": 0.78,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 44.048,
+   "l": 0.75,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 44.42,
    "l": 0.8,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 45.279,
    "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 45.79,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 46.138,
    "l": 0.85,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 46.649,
    "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 47.345,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 48.205,
    "l": 0.85,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 48.901,
    "l": 0.84,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 49.412,
    "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 50.271,
    "l": 0.88,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 50.62,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 50.968,
    "l": 0.91,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 51.316,
    "l": 0.78,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 52.175,
    "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 52.686,
    "l": 0.7,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 53.034,
    "l": 0.85,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 53.383,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 53.708,
+   "l": 0.7,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 54.242,
    "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 55.101,
    "l": 0.98,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 55.449,
    "l": 0.8,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 55.798,
    "l": 0.83,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 56.146,
    "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 56.471,
+   "l": 0.84,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 56.819,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 57.168,
-   "l": 0.85,
+   "t": 57.005,
+   "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 58.212,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 59.072,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 59.582,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 59.931,
    "l": 0.8,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 61.138,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 61.997,
    "l": 0.95,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 62.346,
    "l": 0.83,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 62.694,
    "l": 0.9,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 63.042,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 63.367,
+   "l": 0.91,
+   "decay": 0.172,
+   "on": "lamps"
   },
   {
    "t": 64.064,
    "l": 0.88,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 64.575,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 65.109,
    "l": 0.81,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 65.434,
+   "l": 0.73,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 65.968,
    "l": 0.86,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 66.316,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 66.827,
    "l": 0.88,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 67.175,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 67.5,
+   "l": 0.81,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 67.849,
    "l": 0.8,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 68.197,
-   "l": 0.8,
+   "t": 68.034,
+   "l": 0.78,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 68.894,
    "l": 0.95,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 69.242,
    "l": 0.8,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 69.59,
    "l": 0.92,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 69.939,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 70.264,
+   "l": 0.84,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 70.612,
    "l": 0.87,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 70.96,
-   "l": 0.88,
-   "decay": 0.172,
-   "on": "auto"
+   "t": 70.798,
+   "l": 0.76,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 71.308,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 72.168,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 72.864,
    "l": 0.82,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 73.375,
    "l": 0.91,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 73.723,
    "l": 0.89,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 74.072,
    "l": 0.85,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 74.397,
+   "l": 0.77,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 74.931,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 75.442,
    "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 75.79,
    "l": 0.86,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 76.487,
    "l": 0.95,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 76.997,
    "l": 1.0,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 77.346,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 82.175,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 82.547,
    "l": 0.65,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 83.383,
    "l": 0.65,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 87.841,
    "l": 0.69,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 88.538,
    "l": 0.81,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 88.979,
-   "l": 0.65,
+   "t": 88.84,
+   "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 89.327,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 89.931,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 90.233,
+   "l": 0.65,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 90.442,
    "l": 0.81,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 90.627,
+   "l": 0.66,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 90.953,
    "l": 0.67,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 91.301,
    "l": 0.67,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 91.649,
    "l": 0.68,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 92.671,
    "l": 0.51,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 93.901,
    "l": 0.59,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 94.18,
+   "l": 0.61,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 95.132,
    "l": 0.57,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 95.318,
+   "l": 0.6,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 95.945,
    "l": 0.65,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 96.131,
+   "l": 0.61,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 96.525,
    "l": 0.64,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 96.734,
+   "l": 0.61,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 97.222,
    "l": 0.65,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 99.498,
    "l": 0.69,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 100.45,
    "l": 0.69,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 100.96,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 101.146,
+   "l": 0.71,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 101.587,
    "l": 0.7,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 102.005,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 102.354,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 102.702,
    "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 103.213,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 103.724,
    "l": 0.84,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 104.072,
    "l": 0.86,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 104.42,
    "l": 0.82,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 105.953,
    "l": 0.66,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 106.138,
+   "l": 0.81,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 106.487,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 106.835,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 107.183,
    "l": 0.69,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 107.508,
+   "l": 0.66,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 109.761,
    "l": 0.91,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 110.086,
+   "l": 0.94,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 110.272,
    "l": 0.99,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 110.457,
+   "l": 0.95,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 110.968,
    "l": 0.96,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 111.316,
    "l": 0.94,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 111.642,
+   "l": 0.94,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 112.338,
    "l": 0.95,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 113.035,
    "l": 1.0,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 113.383,
    "l": 1.0,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 114.242,
    "l": 1.0,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 114.753,
    "l": 1.0,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 115.101,
    "l": 1.0,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 115.45,
    "l": 1.0,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 116.146,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 116.471,
+   "l": 0.75,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 117.005,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 117.516,
    "l": 0.82,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 117.864,
    "l": 0.84,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 118.213,
    "l": 0.81,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 118.538,
+   "l": 0.86,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 119.072,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 119.583,
    "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 120.279,
    "l": 0.81,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 121.139,
    "l": 0.89,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 121.649,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 121.998,
-   "l": 0.76,
+   "t": 121.835,
+   "l": 0.69,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 122.346,
    "l": 0.69,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 123.043,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 123.368,
+   "l": 0.69,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 124.064,
    "l": 0.89,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
-   "t": 124.413,
-   "l": 0.69,
+   "t": 124.343,
+   "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 124.575,
+   "l": 0.7,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 124.761,
    "l": 0.89,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 125.109,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 125.434,
+   "l": 0.7,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 125.968,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 126.827,
    "l": 0.92,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 127.176,
    "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 127.872,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 128.197,
+   "l": 0.83,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 128.546,
    "l": 0.78,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 128.894,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 129.242,
    "l": 0.82,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 129.939,
    "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 130.264,
+   "l": 0.71,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 130.798,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 131.309,
    "l": 0.82,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 131.657,
    "l": 0.81,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 132.005,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 132.331,
+   "l": 0.81,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 132.516,
    "l": 0.71,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 133.027,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 133.724,
    "l": 0.97,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 134.072,
    "l": 0.8,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 134.931,
    "l": 0.81,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 135.442,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 135.79,
    "l": 0.83,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 136.835,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 137.694,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 138.205,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 138.553,
    "l": 0.86,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 139.064,
    "l": 0.8,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 139.761,
    "l": 0.86,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 140.62,
    "l": 1.0,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 140.968,
    "l": 0.78,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 141.665,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 141.99,
+   "l": 0.95,
+   "decay": 0.172,
+   "on": "lamps"
   },
   {
    "t": 142.338,
    "l": 0.79,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 142.687,
    "l": 0.91,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 143.035,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 143.36,
+   "l": 0.73,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 143.732,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 144.591,
    "l": 0.8,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 145.101,
    "l": 0.82,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 145.45,
    "l": 0.95,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 145.798,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 146.123,
+   "l": 0.83,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 146.657,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 147.516,
    "l": 0.89,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 147.865,
    "l": 0.78,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 148.213,
    "l": 0.83,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 148.886,
    "l": 0.82,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 149.583,
    "l": 0.85,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 150.094,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 150.628,
    "l": 0.77,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 151.487,
    "l": 0.79,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 151.998,
    "l": 0.75,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 152.346,
    "l": 0.86,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 152.694,
    "l": 0.72,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 153.02,
+   "l": 0.75,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 153.554,
    "l": 0.78,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 154.413,
    "l": 1.0,
    "decay": 0.172,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 156.131,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 156.665,
    "l": 0.68,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 157.501,
    "l": 0.63,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 158.894,
    "l": 0.78,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 160.264,
    "l": 0.74,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 160.682,
    "l": 0.76,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 160.984,
+   "l": 0.69,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 161.17,
    "l": 0.64,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 161.657,
    "l": 0.63,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 162.168,
    "l": 0.65,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 162.702,
    "l": 0.66,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 162.934,
+   "l": 0.75,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 163.422,
    "l": 0.73,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
+  },
+  {
+   "t": 163.701,
+   "l": 0.64,
+   "decay": 0.086,
+   "on": "lamps"
   },
   {
    "t": 163.979,
    "l": 0.63,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 164.444,
    "l": 0.65,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 165.094,
    "l": 0.68,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   },
   {
    "t": 165.442,
    "l": 0.65,
    "decay": 0.086,
-   "on": "auto"
+   "on": "lamps"
   }
  ],
  "states": [],

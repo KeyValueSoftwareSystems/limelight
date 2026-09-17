@@ -92,7 +92,9 @@ def scan(song, lights):
         gap = float(nxt["t"]) - float(c["t"])
         lv = max((v.get("l") or 0) for v in nxt["look"].values()
                  if isinstance(v, dict)) if nxt["look"] else 0
-        if gap <= 1.2 and lv >= 0.7:
+        w = (nxt.get("why") or "")
+        arrives = any(k in w for k in ("drop at", "PEAK", "climax", "the drop"))
+        if gap <= 1.2 and (lv >= 0.7 or arrives):
             punch_blacks.append((float(c["t"]) - 0.05, float(nxt["t"]) + 0.05))
 
     def before_a_punch(a, b):

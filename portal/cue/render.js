@@ -391,10 +391,26 @@ function render(cueFile, score, rigName, opts) {
     }
     const hit = new Set(ids);
     const rest = rig.lamps.filter((f) => !hit.has(f.id));
+    const wholeRig = rest.length === 0 && ids.length > 1;
     const i0 = Math.round(ta * fps), i1 = Math.min(frames.length, Math.round((ta + decay) * fps) + 1);
     for (let i = Math.max(0, i0); i < i1; i++) {
       const w = Math.pow(1 - (i - i0) / Math.max(1, i1 - i0), 2);
       let added = 0;
+      let rigGain = 0;
+      if (wholeRig) {
+        let peak = 0;
+        for (const id of ids) {
+          const fx = rig.fixtures.find((f) => f.id === id);
+          if (!fx) continue;
+          const ch = fx.ch;
+          peak = Math.max(peak, fx.brightness === "colour"
+            ? Math.max(frames[i][fx.offset + (ch.r >= 0 ? ch.r : 0)],
+                       frames[i][fx.offset + (ch.g >= 0 ? ch.g : 0)],
+                       frames[i][fx.offset + (ch.b >= 0 ? ch.b : 0)])
+            : (ch.master >= 0 ? frames[i][fx.offset + ch.master] : 0));
+        }
+        if (peak > 4) rigGain = Math.max(1, Math.min(255 / peak, 1 + 3.2 * lvl * w));
+      }
       for (const id of ids) {
         const fx = rig.fixtures.find((f) => f.id === id);
         if (!fx) continue;
@@ -404,7 +420,7 @@ function render(cueFile, score, rigName, opts) {
           const before = Math.max(frames[i][fx.offset + (ch.r >= 0 ? ch.r : 0)],
                                 frames[i][fx.offset + (ch.g >= 0 ? ch.g : 0)],
                                 frames[i][fx.offset + (ch.b >= 0 ? ch.b : 0)]);
-          const target = Math.min(255, Math.round(before * (1 + amp)));
+          const target = Math.min(255, Math.round(before * (rigGain > 0 ? rigGain : 1 + amp)));
           if (target > before) added += target - before;
           if (col) {
             if (ch.r >= 0) frames[i][fx.offset + ch.r] = Math.max(frames[i][fx.offset + ch.r], Math.round(col[0] * amp * 255));
@@ -418,7 +434,8 @@ function render(cueFile, score, rigName, opts) {
           }
         } else if (ch.master >= 0) {
           const held = frames[i][fx.offset + ch.master];
-          frames[i][fx.offset + ch.master] = Math.min(255, Math.round(held * (1 + amp)));
+          frames[i][fx.offset + ch.master] =
+            Math.min(255, Math.round(held * (rigGain > 0 ? rigGain : 1 + amp)));
         }
       }
       if (!rest.length || added <= 0) continue;

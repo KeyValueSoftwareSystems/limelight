@@ -512,12 +512,12 @@ def author(song, out_path=None):
         pi, pk, pn = phrase_of.get(bar, (None, 0, 1))
         ph = phrases[pi] if pi is not None else None
         if ph is not None:
-            band = (0.16 + 0.83 * (spread(ph["E"]) ** 0.85)) * arc(ph["t"]) * hush(ph["E"])
+            band = (0.09 + 0.80 * (spread(ph["E"]) ** 1.05)) * arc(ph["t"]) * hush(ph["E"])
             pos = pk / max(1, pn - 1) if pn > 1 else 1.0
             level = round(min(0.97, band * (ph["a0"] + (ph["a1"] - ph["a0"]) * pos)), 2)
         else:
             e = spread(r["E"])
-            level = round(min(0.99, (0.16 + 0.83 * (e**0.85)) * arc(r["t"]) * hush(r["E"])), 2)
+            level = round(min(0.99, (0.09 + 0.80 * (e**1.05)) * arc(r["t"]) * hush(r["E"])), 2)
 
         is_edge = any(abs(s["start"] - r["t"]) < step for s in sections)
         phrase_start = ph is not None and pk == 0
@@ -720,7 +720,7 @@ def author(song, out_path=None):
             if (pi or 0) % 2 == 1:
                 reverse_it = not reverse_it
 
-            deep = 0.12 if level < 0.38 else (0.22 if dens >= 6 else 0.30)
+            deep = 0.62 if level < 0.38 else (0.72 if dens >= 6 else 0.78)
             moves = want_fam in ("travel", "grow")
             if sings and want_fam == "travel":
                 every = {"notes": 1}
@@ -878,7 +878,7 @@ def author(song, out_path=None):
             continue
         if any(a - 0.1 <= t <= b + 0.1 for a, b in hole_spans):
             continue
-        if t - last_t < step * 0.98:
+        if t - last_t < step * 0.49:
             continue
         last_t = t
         climbing = bar in rising
@@ -890,7 +890,7 @@ def author(song, out_path=None):
                 amp = min(1.0, 0.45 + 0.5 * pos + inten * 0.25)
         accents.append({"t": round(t, 3), "l": round(amp, 2),
                         "decay": round(step * (0.5 if inten >= 0.6 else 0.25), 3),
-                        "on": "auto"})
+                        "on": "lamps"})
 
     for n, c in enumerate(cues):
         nxt = cues[n + 1] if n + 1 < len(cues) else None
@@ -1244,10 +1244,23 @@ def author(song, out_path=None):
     cues.extend(dark)
     cues.sort(key=lambda c: c.get("_t", 0))
 
+    bright_ranked = sorted(working, key=lum_of, reverse=True)
     for c in cues:
         lamps = (c.get("look") or {}).get("lamps")
         if not isinstance(lamps, dict) or lamps.get("l") is None or not lamps.get("c"):
             continue
+        if lamps["l"] >= 0.80 and bright_ranked:
+            top = bright_ranked[0]
+            if lum_of(top) > lum_of(lamps["c"]) + 0.15:
+                was = lamps["c"]
+                for v in (c.get("look") or {}).values():
+                    if isinstance(v, dict) and v.get("c") == was:
+                        v["c"] = top
+                for ch0 in (c.get("chases") or []):
+                    if ch0.get("colours"):
+                        ch0["colours"] = [top if x == was else x for x in ch0["colours"]]
+                c["why"] = (c.get("why") or "") + (
+                    " - opened to %s: at this level colour is the ceiling, not the fader" % top)
         if lamps["l"] < 0.68:
             continue
         opened = open_up(lamps["c"], lamps["l"])
