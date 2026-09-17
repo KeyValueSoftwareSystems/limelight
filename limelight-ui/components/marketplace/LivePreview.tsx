@@ -2,12 +2,13 @@
 
 import { useRef, useEffect, useState } from "react";
 import { miniFrame } from "@/lib/renderer";
-import { bakeOnce } from "@/lib/bakeCache";
+import { bakeOnce, rigFor } from "@/lib/bakeCache";
 import type { Show, FixturePlacement } from "@/lib/types";
 
 interface LivePreviewProps {
   /** Any show's intent: the song, the seed and the edits are all a bake needs. */
   show: {
+    id?: string;
     song: string;
     seed: number;
     edits: Array<{ type: string; bar: number; beats: number }>;
@@ -35,6 +36,7 @@ export function LivePreview({ show: intent, visible }: LivePreviewProps) {
       song: intent.song,
       seed: intent.seed,
       edits: intent.edits,
+      layout: rigFor(intent.id ?? intent.song),
     }).then((baked) => {
       if (!live || !baked) return;
       showRef.current = baked.show;

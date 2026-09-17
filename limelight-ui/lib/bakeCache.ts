@@ -21,6 +21,27 @@ interface Intent {
   song: string;
   seed: number;
   edits: Array<{ type: string; bar: number; beats: number }>;
+  layout?: string;
+}
+
+/* Rigs a preview may run on. A grid where every card is the same four lamps in
+   a line tells you nothing about what these shows DO; the same cue list on an
+   arena and on a desk are different pictures, which is the point of the
+   product. Chosen per show, not at random per render, so a card looks the same
+   every time you come back to it. */
+const RIGS = [
+  "arc4-head.layout.json",
+  "club12-2head.layout.json",
+  "club16-2head.layout.json",
+  "echostage.layout.json",
+  "keycode-arena.layout.json",
+  "keycode-basic.layout.json",
+];
+
+export function rigFor(key: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < key.length; i++) h = Math.imul(h ^ key.charCodeAt(i), 16777619);
+  return RIGS[Math.abs(h) % RIGS.length];
 }
 
 const cache = new Map<string, Promise<Baked | null>>();
@@ -50,7 +71,7 @@ function lane<T>(job: () => Promise<T>): Promise<T> {
   });
 }
 
-const keyOf = (i: Intent) => `${i.song}|${i.seed}|${JSON.stringify(i.edits ?? [])}`;
+const keyOf = (i: Intent) => `${i.song}|${i.seed}|${i.layout ?? ""}|${JSON.stringify(i.edits ?? [])}`;
 
 async function run(intent: Intent): Promise<Baked | null> {
   try {

@@ -1,0 +1,6172 @@
+{
+ "schema": "limelight.show/1",
+ "song": "arz-kiya-hai",
+ "palette": {
+  "ink": "#1a0008",
+  "oxblood": "#a00018",
+  "blood": "#e00020",
+  "crimson": "#ff0030",
+  "scarlet": "#ff0a1e",
+  "ember": "#ff2a00",
+  "amber": "#ff9500",
+  "saffron": "#ffd000",
+  "violet": "#b026ff",
+  "indigo": "#1040ff",
+  "teal": "#00e5ff",
+  "bone": "#ffffff"
+ },
+ "states": [
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.177,
+   "colour": "#1040ff",
+   "fade_ms": 315,
+   "section": 0,
+   "from_s": 0.348,
+   "to_s": 1.788,
+   "why": "bars 1-4, the phrase opens out: guitars leads, E 1.98, 5 hits, mode -1.00 - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.177,
+   "colour": "#1040ff",
+   "fade_ms": 0,
+   "section": 0,
+   "from_s": 2.183,
+   "to_s": 2.601,
+   "why": "and back, the instant the audio returns - the opening comes up gradually, 21% to 48% of the look, arriving full at the entrance"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.177,
+   "colour": "#1040ff",
+   "fade_ms": 0,
+   "section": 0,
+   "from_s": 2.949,
+   "to_s": 4.18,
+   "why": "and back, the instant the audio returns - the opening comes up gradually, 27% to 56% of the look, arriving full at the entrance"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.177,
+   "colour": "#1040ff",
+   "fade_ms": 0,
+   "section": 0,
+   "from_s": 4.621,
+   "to_s": 6.906,
+   "why": "and back, the instant the audio returns - the opening comes up gradually, 42% to 73% of the look, arriving full at the entrance"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.177,
+   "colour": "#1040ff",
+   "fade_ms": 300,
+   "section": 0,
+   "from_s": 7.523,
+   "to_s": 9.056,
+   "why": "drop at 9.5s - the opening comes up gradually, 71% to 92% of the look, arriving full at the entrance"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.836,
+   "colour": "#ff0a1e",
+   "fade_ms": 0,
+   "section": 0,
+   "from_s": 9.451,
+   "to_s": 19.946,
+   "why": "and back on the look it is arriving at, the instant the audio returns - opened to scarlet: this level needs more than a dark colour can give"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.962,
+   "colour": "#1040ff",
+   "fade_ms": 300,
+   "section": 0,
+   "from_s": 19.946,
+   "to_s": 25.99,
+   "why": "bars 9-12, the phrase opens out: guitars leads, E 6.52, 2 hits, mode +0.63 - wave in indigo against scarlet inside - sweep instead, the only shape that finishes in 2.5 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.346,
+   "colour": "#ffd000",
+   "fade_ms": 310,
+   "section": 0,
+   "from_s": 25.99,
+   "to_s": 29.629,
+   "why": "build answers sweep, a whole 1 cycles, landing on the hit at 25.99s with a new colour"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.197,
+   "colour": "#ff0a1e",
+   "fade_ms": 305,
+   "section": 1,
+   "from_s": 29.629,
+   "to_s": 33.344,
+   "why": "bars 13-16, the phrase closes down: voices leads, E 4.74, 4 hits, mode +0.60 - converge in bone"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.197,
+   "colour": "#ff0a1e",
+   "fade_ms": 315,
+   "section": 1,
+   "from_s": 33.344,
+   "to_s": 37.105,
+   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 33.34s"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.689,
+   "colour": "#ff0a1e",
+   "fade_ms": 0,
+   "section": 1,
+   "from_s": 37.407,
+   "to_s": 39.335,
+   "why": "and back on the look it is arriving at, the instant the audio returns - zigzag instead, the only shape that finishes in 0.8 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.689,
+   "colour": "#ff0a1e",
+   "fade_ms": 152,
+   "section": 1,
+   "from_s": 39.335,
+   "to_s": 44.188,
+   "why": "bars 17-20, the phrase closes down: guitars leads, E 8.81, 7 hits, mode +0.59 - tail in bone - cascade instead, the only shape that finishes in 2.0 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.825,
+   "colour": "#1040ff",
+   "fade_ms": 305,
+   "section": 1,
+   "from_s": 44.188,
+   "to_s": 49.041,
+   "why": "diverge answers cascade, a whole 4 cycles, landing on the hit at 44.19s with a new colour"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.149,
+   "colour": "#ffffff",
+   "fade_ms": 300,
+   "section": 2,
+   "from_s": 49.041,
+   "to_s": 53.568,
+   "why": "bars 21-24, the phrase travels across: guitars leads, E 5.37, 5 hits, mode +0.59 - march in bone - build instead, the only shape that finishes in 1.8 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.149,
+   "colour": "#ffffff",
+   "fade_ms": 155,
+   "section": 2,
+   "from_s": 53.568,
+   "to_s": 58.723,
+   "why": "pulse answers build, a whole 4 cycles, landing on the hit at 53.57s"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.476,
+   "colour": "#ff0a1e",
+   "fade_ms": 315,
+   "section": 3,
+   "from_s": 58.723,
+   "to_s": 68.429,
+   "why": "bars 25-28, the phrase travels across: guitars leads, E 5.33, 0 hits, mode +0.39 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.82,
+   "colour": "#ff0a1e",
+   "fade_ms": 305,
+   "section": 3,
+   "from_s": 68.429,
+   "to_s": 73.282,
+   "why": "bars 29-32, the phrase opens out: guitars leads, E 6.87, 6 hits, mode +0.19 - diverge in bone against scarlet inside - converge instead, the only shape that finishes in 2.0 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.951,
+   "colour": "#ff0a1e",
+   "fade_ms": 300,
+   "section": 3,
+   "from_s": 73.282,
+   "to_s": 75.69,
+   "why": "bars 29-32, the phrase opens out: guitars leads, E 8.47, 0 hits, mode +0.38 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.438,
+   "colour": "#ffd000",
+   "fade_ms": 310,
+   "section": 3,
+   "from_s": 75.69,
+   "to_s": 78.112,
+   "why": "bars 29-32, the phrase opens out: guitars leads, E 8.93, 4 hits, mode +0.40 - diverge in bone against violet inside - twin instead, the only shape that finishes in 1.0 bars - opene"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.705,
+   "colour": "#ff0a1e",
+   "fade_ms": 310,
+   "section": 4,
+   "from_s": 78.112,
+   "to_s": 81.479,
+   "why": "bars 33-36, the phrase opens out: guitars leads, E 5.81, 3 hits, mode +0.36 - comet in bone - zigzag instead, the only shape that finishes in 1.4 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.844,
+   "colour": "#1040ff",
+   "fade_ms": 300,
+   "section": 4,
+   "from_s": 81.479,
+   "to_s": 85.403,
+   "why": "diverge answers zigzag, a whole 3 cycles, landing on the hit at 81.48s with a new colour"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.885,
+   "colour": "#ff0a1e",
+   "fade_ms": 295,
+   "section": 4,
+   "from_s": 85.403,
+   "to_s": 87.795,
+   "why": "bars 33-36, the phrase opens out: guitars leads, E 7.47, 2 hits, mode -0.03 - hocket in bone against crimson inside - opened to scarlet: this level needs more than a dark colour ca"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.771,
+   "colour": "#ff0a1e",
+   "fade_ms": 0,
+   "section": 4,
+   "from_s": 87.795,
+   "to_s": 92.077,
+   "why": "bars 37-40, the phrase opens out: guitars leads, E 6.97, 4 hits, mode +0.18 - wave in bone against crimson inside - build instead, the only shape that finishes in 1.7 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.55,
+   "colour": "#ffffff",
+   "fade_ms": 0,
+   "section": 4,
+   "from_s": 92.694,
+   "to_s": 97.501,
+   "why": "PEAK at 93.0s - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.394,
+   "colour": "#ff0a1e",
+   "fade_ms": 315,
+   "section": 5,
+   "from_s": 97.501,
+   "to_s": 101.564,
+   "why": "bars 41-44, the phrase closes down: guitars leads, E 5.92, 6 hits, mode +0.58 - breathe in bone - pulse instead, the only shape that finishes in 1.6 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.471,
+   "colour": "#1040ff",
+   "fade_ms": 305,
+   "section": 5,
+   "from_s": 101.564,
+   "to_s": 107.183,
+   "why": "alternate answers pulse, a whole 9 cycles, landing on the hit at 101.56s with a new colour"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.328,
+   "colour": "#ff0a1e",
+   "fade_ms": 295,
+   "section": 5,
+   "from_s": 107.183,
+   "to_s": 116.912,
+   "why": "bars 45-48, the phrase opens out: voices leads, E 4.55, 5 hits, mode +0.60 - cascade in bone"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.656,
+   "colour": "#ff0a1e",
+   "fade_ms": 305,
+   "section": 6,
+   "from_s": 116.912,
+   "to_s": 123.507,
+   "why": "bars 49-52, the phrase closes down: guitars leads, E 8.33, 3 hits, mode +0.59 - converge in scarlet"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.656,
+   "colour": "#ff0a1e",
+   "fade_ms": 0,
+   "section": 6,
+   "from_s": 123.786,
+   "to_s": 126.618,
+   "why": "and back, the instant the audio returns - diverge instead, the only shape that finishes in 1.1 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.738,
+   "colour": "#ff0a1e",
+   "fade_ms": 300,
+   "section": 6,
+   "from_s": 126.618,
+   "to_s": 136.301,
+   "why": "bars 53-56, the phrase travels across: guitars leads, E 7.12, 1 hits, mode +0.19 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.705,
+   "colour": "#ff0a1e",
+   "fade_ms": 300,
+   "section": 6,
+   "from_s": 136.301,
+   "to_s": 141.619,
+   "why": "bars 57-60, the phrase closes down: guitars leads, E 6.16, 3 hits, mode +0.24 - sweep in scarlet against crimson inside"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.844,
+   "colour": "#1040ff",
+   "fade_ms": 155,
+   "section": 6,
+   "from_s": 141.619,
+   "to_s": 146.007,
+   "why": "hocket answers sweep, a whole 7 cycles, landing on the hit at 141.62s with a new colour"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.623,
+   "colour": "#ff0a1e",
+   "fade_ms": 148,
+   "section": 7,
+   "from_s": 146.007,
+   "to_s": 153.275,
+   "why": "bars 61-64, the phrase opens out: guitars leads, E 6.62, 7 hits, mode +0.60 - build in scarlet"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.771,
+   "colour": "#ff0a1e",
+   "fade_ms": 305,
+   "section": 7,
+   "from_s": 153.275,
+   "to_s": 155.69,
+   "why": "bars 61-64, the phrase opens out: guitars leads, E 8.06, 4 hits, mode +0.16 - split in scarlet - alternate instead, the only shape that finishes in 1.0 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.344,
+   "colour": "#ff0a1e",
+   "fade_ms": 305,
+   "section": 8,
+   "from_s": 155.69,
+   "to_s": 160.566,
+   "why": "bars 65-68, the phrase closes down: guitars leads, E 5.60, 7 hits, mode +0.16 - wave in scarlet - comet instead, the only shape that finishes in 2.0 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.412,
+   "colour": "#1040ff",
+   "fade_ms": 300,
+   "section": 8,
+   "from_s": 160.566,
+   "to_s": 165.396,
+   "why": "cascade answers comet, a whole 1 cycles, landing on the hit at 160.57s with a new colour"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.574,
+   "colour": "#ff0a1e",
+   "fade_ms": 300,
+   "section": 8,
+   "from_s": 165.396,
+   "to_s": 170.249,
+   "why": "bars 69-72, the phrase travels across: voices leads, E 5.63, 3 hits, mode +0.59 - zigzag in scarlet against crimson inside - unbuild instead, the only shape that finishes in 2.0 ba"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.687,
+   "colour": "#1040ff",
+   "fade_ms": 305,
+   "section": 8,
+   "from_s": 170.249,
+   "to_s": 175.102,
+   "why": "build answers unbuild, a whole 1 cycles, landing on the hit at 170.25s with a new colour"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.426,
+   "colour": "#ff0a1e",
+   "fade_ms": 305,
+   "section": 8,
+   "from_s": 175.102,
+   "to_s": 179.955,
+   "why": "bars 73-76, the phrase travels across: voices leads, E 6.12, 3 hits, mode +0.63 - wipe in scarlet - stack instead, the only shape that finishes in 2.0 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.511,
+   "colour": "#1040ff",
+   "fade_ms": 300,
+   "section": 8,
+   "from_s": 179.955,
+   "to_s": 184.808,
+   "why": "alternate answers stack, a whole 4 cycles, landing on the hit at 179.96s with a new colour"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.262,
+   "colour": "#ff0a1e",
+   "fade_ms": 300,
+   "section": 9,
+   "from_s": 184.808,
+   "to_s": 186.828,
+   "why": "bars 77-80, the phrase closes down: voices leads, E 4.65, 0 hits, mode +0.28 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.262,
+   "colour": "#ff0a1e",
+   "fade_ms": 0,
+   "section": 9,
+   "from_s": 187.199,
+   "to_s": 191.913,
+   "why": "and back, the instant the audio returns - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.246,
+   "colour": "#ff0a1e",
+   "fade_ms": 0,
+   "section": 9,
+   "from_s": 192.47,
+   "to_s": 194.514,
+   "why": "and back on the look it is arriving at, the instant the audio returns"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.246,
+   "colour": "#ff0a1e",
+   "fade_ms": 182,
+   "section": 9,
+   "from_s": 194.514,
+   "to_s": 196.209,
+   "why": "bars 81-83, the phrase closes down: voices leads, E 4.92, 3 hits, mode +0.79 - hocket in scarlet"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.246,
+   "colour": "#ff0a1e",
+   "fade_ms": 0,
+   "section": 9,
+   "from_s": 196.557,
+   "to_s": 200.003,
+   "why": "and back, the instant the audio returns"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.495,
+   "colour": "#ffffff",
+   "fade_ms": 430,
+   "section": 9,
+   "from_s": 200.62,
+   "to_s": 201.851,
+   "why": "drop at 203.3s - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.541,
+   "colour": "#ff0a1e",
+   "fade_ms": 0,
+   "section": 9,
+   "from_s": 202.176,
+   "to_s": 204.196,
+   "why": "and back on the look it is arriving at, the instant the audio returns - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.541,
+   "colour": "#ff0a1e",
+   "fade_ms": 225,
+   "section": 10,
+   "from_s": 204.196,
+   "to_s": 216.317,
+   "why": "bars 84-87, the phrase opens out: voices leads, E 5.75, 1 hits, mode +0.40 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.623,
+   "colour": "#ff0a1e",
+   "fade_ms": 305,
+   "section": 10,
+   "from_s": 216.317,
+   "to_s": 226.023,
+   "why": "bars 88-91, the phrase opens out: strings leads, E 5.28, 1 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.902,
+   "colour": "#ff0a1e",
+   "fade_ms": 300,
+   "section": 10,
+   "from_s": 226.023,
+   "to_s": 235.729,
+   "why": "bars 92-95, the phrase travels across: strings leads, E 8.69, 1 hits, mode +0.14 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.721,
+   "colour": "#ff0a1e",
+   "fade_ms": 305,
+   "section": 10,
+   "from_s": 235.729,
+   "to_s": 240.512,
+   "why": "bars 96-97, the phrase closes down: strings leads, E 8.44, 0 hits, mode +0.97 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.705,
+   "colour": "#ff0a1e",
+   "fade_ms": 320,
+   "section": 11,
+   "from_s": 240.512,
+   "to_s": 249.963,
+   "why": "bars 98-101, the phrase opens out: voices leads, E 5.75, 10 hits, mode +0.50 - build in scarlet"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.689,
+   "colour": "#ff0a1e",
+   "fade_ms": 310,
+   "section": 11,
+   "from_s": 249.963,
+   "to_s": 259.947,
+   "why": "bars 102-105, the phrase closes down: brass leads, E 10.07, 1 hits, mode +0.10 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.607,
+   "colour": "#ff0a1e",
+   "fade_ms": 0,
+   "section": 11,
+   "from_s": 259.947,
+   "to_s": 261.467,
+   "why": "bars 106-109, the phrase opens out: guitars leads, E 6.86, 2 hits, mode +0.30 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.495,
+   "colour": "#ffffff",
+   "fade_ms": 0,
+   "section": 11,
+   "from_s": 262.084,
+   "to_s": 269.653,
+   "why": "climax at 262.4s - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.935,
+   "colour": "#ff0a1e",
+   "fade_ms": 153,
+   "section": 11,
+   "from_s": 269.653,
+   "to_s": 279.359,
+   "why": "bars 110-113, the phrase closes down: guitars leads, E 10.89, 2 hits, mode +0.21 - breathe in scarlet - pulse instead, the only shape that finishes in 2.2 bars - opened to scarlet:"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.738,
+   "colour": "#ff0a1e",
+   "fade_ms": 153,
+   "section": 11,
+   "from_s": 279.359,
+   "to_s": 281.774,
+   "why": "bars 114-114, the phrase travels across: guitars leads, E 7.73, 5 hits, mode +0.57 - comet in scarlet - sweep instead, the only shape that finishes in 1.0 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.131,
+   "colour": "#ff0a1e",
+   "fade_ms": 290,
+   "section": 12,
+   "from_s": 281.774,
+   "to_s": 285.095,
+   "why": "bars 115-118, the phrase closes down: guitars leads, E 4.37, 0 hits, mode +0.57 - build in scarlet - unbuild instead, the only shape that finishes in 1.3 bars"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.157,
+   "colour": "#1040ff",
+   "fade_ms": 315,
+   "section": 12,
+   "from_s": 285.095,
+   "to_s": 289.274,
+   "why": "alternate answers unbuild, a whole 3 cycles, landing on the hit at 285.10s with a new colour"
+  },
+  {
+   "effect": "wash",
+   "extent": "all",
+   "head": false,
+   "amount": 0.02,
+   "colour": "#ff0a1e",
+   "fade_ms": 305,
+   "section": 12,
+   "from_s": 291.477,
+   "to_s": 294.754,
+   "why": "bars 119-120, the phrase closes down: guitars leads, E 0.06, 0 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return"
+  }
+ ],
+ "gestures": [
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#1040ff",
+   "amount": 0.118,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 0.348,
+   "to_s": 1.788,
+   "fade_ms": 315,
+   "why": "bars 1-4, the phrase opens out: guitars leads, E 1.98, 5 hits, mode -1.00 - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 1.045,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 1.788,
+   "to_s": 2.183,
+   "fade_ms": 0,
+   "why": "the audio falls to 23% of its median for 0.39s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#1040ff",
+   "amount": 0.118,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 2.183,
+   "to_s": 2.601,
+   "fade_ms": 0,
+   "why": "and back, the instant the audio returns - the opening comes up gradually, 21% to 48% of the look, arriving full at the entrance"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 2.601,
+   "to_s": 2.949,
+   "fade_ms": 0,
+   "why": "the audio falls to 17% of its median for 0.35s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#1040ff",
+   "amount": 0.118,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 2.949,
+   "to_s": 4.18,
+   "fade_ms": 0,
+   "why": "and back, the instant the audio returns - the opening comes up gradually, 27% to 56% of the look, arriving full at the entrance"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 3.46,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 4.18,
+   "to_s": 4.621,
+   "fade_ms": 0,
+   "why": "the audio falls to 24% of its median for 0.44s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#1040ff",
+   "amount": 0.118,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 4.621,
+   "to_s": 6.906,
+   "fade_ms": 0,
+   "why": "and back, the instant the audio returns - the opening comes up gradually, 42% to 73% of the look, arriving full at the entrance"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 6.906,
+   "to_s": 7.523,
+   "fade_ms": 0,
+   "why": "one beat of black, so the hit that follows has somewhere to land"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 7.105,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#1040ff",
+   "amount": 0.118,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 7.523,
+   "to_s": 9.056,
+   "fade_ms": 300,
+   "why": "drop at 9.5s - the opening comes up gradually, 71% to 92% of the look, arriving full at the entrance"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 9.056,
+   "to_s": 9.451,
+   "fade_ms": 0,
+   "why": "the audio falls to 20% of its median for 0.39s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.28,
+   "colour": "#ff0a1e",
+   "amount": 0.59,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 9.451,
+   "to_s": 19.946,
+   "fade_ms": 0,
+   "why": "and back on the look it is arriving at, the instant the audio returns - opened to scarlet: this level needs more than a dark colour can give"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 11.935,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.52,
+   "extent": "all",
+   "at_s": 14.35,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.62,
+   "extent": "all",
+   "at_s": 16.765,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "sweep",
+   "pan": 0.5,
+   "tilt": 0.29,
+   "colour": "#ff0a1e",
+   "amount": 0.557,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 19.946,
+   "to_s": 25.99,
+   "fade_ms": 300,
+   "why": "bars 9-12, the phrase opens out: guitars leads, E 6.52, 2 hits, mode +0.63 - wave in indigo against scarlet inside - sweep instead, the only shape that finishes in 2.5 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 20.364,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "arc",
+   "pan": 0.5,
+   "tilt": 0.29,
+   "colour": "#ff0a1e",
+   "amount": 0.557,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 25.99,
+   "to_s": 29.629,
+   "fade_ms": 310,
+   "why": "build answers sweep, a whole 1 cycles, landing on the hit at 25.99s with a new colour"
+  },
+  {
+   "effect": "beam",
+   "pattern": "dip",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ffffff",
+   "amount": 0.044,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 29.629,
+   "to_s": 33.344,
+   "fade_ms": 305,
+   "why": "bars 13-16, the phrase closes down: voices leads, E 4.74, 4 hits, mode +0.60 - converge in bone"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 29.629,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 32.972,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "arc",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ff0a1e",
+   "amount": 0.131,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 33.344,
+   "to_s": 37.105,
+   "fade_ms": 315,
+   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 33.34s"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 34.946,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 36.92,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 37.105,
+   "to_s": 37.407,
+   "fade_ms": 0,
+   "why": "the audio falls to 21% of its median for 0.30s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "sweep",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ffffff",
+   "amount": 0.16,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 37.407,
+   "to_s": 39.335,
+   "fade_ms": 0,
+   "why": "and back on the look it is arriving at, the instant the audio returns - zigzag instead, the only shape that finishes in 0.8 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.72,
+   "extent": "all",
+   "at_s": 38.104,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "arc",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ffffff",
+   "amount": 0.16,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 39.335,
+   "to_s": 44.188,
+   "fade_ms": 152,
+   "why": "bars 17-20, the phrase closes down: guitars leads, E 8.81, 7 hits, mode +0.59 - tail in bone - cascade instead, the only shape that finishes in 2.0 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.59,
+   "extent": "all",
+   "at_s": 41.006,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.57,
+   "extent": "all",
+   "at_s": 42.655,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "dip",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ffffff",
+   "amount": 0.16,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 44.188,
+   "to_s": 49.041,
+   "fade_ms": 305,
+   "why": "diverge answers cascade, a whole 4 cycles, landing on the hit at 44.19s with a new colour"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.98,
+   "extent": "all",
+   "at_s": 45.093,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "arc",
+   "pan": 0.5,
+   "tilt": 0.29,
+   "colour": "#ffffff",
+   "amount": 0.105,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 49.041,
+   "to_s": 53.568,
+   "fade_ms": 300,
+   "why": "bars 21-24, the phrase travels across: guitars leads, E 5.37, 5 hits, mode +0.59 - march in bone - build instead, the only shape that finishes in 1.8 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.96,
+   "extent": "all",
+   "at_s": 49.041,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.44,
+   "extent": "all",
+   "at_s": 50.875,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "circle",
+   "pan": 0.5,
+   "tilt": 0.29,
+   "colour": "#ffffff",
+   "amount": 0.105,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 53.568,
+   "to_s": 58.723,
+   "fade_ms": 155,
+   "why": "pulse answers build, a whole 4 cycles, landing on the hit at 53.57s"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.58,
+   "extent": "all",
+   "at_s": 53.568,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.64,
+   "extent": "all",
+   "at_s": 55.983,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 56.912,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 58.12,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ffffff",
+   "amount": 0.11,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 58.723,
+   "to_s": 68.429,
+   "fade_ms": 315,
+   "why": "bars 25-28, the phrase travels across: guitars leads, E 5.33, 0 hits, mode +0.39 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.71,
+   "extent": "all",
+   "at_s": 61.161,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.99,
+   "extent": "all",
+   "at_s": 63.599,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.54,
+   "extent": "all",
+   "at_s": 65.387,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ff0a1e",
+   "amount": 0.574,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 68.429,
+   "to_s": 73.282,
+   "fade_ms": 305,
+   "why": "bars 29-32, the phrase opens out: guitars leads, E 6.87, 6 hits, mode +0.19 - diverge in bone against scarlet inside - converge instead, the only shape that finishes in 2.0 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.62,
+   "extent": "all",
+   "at_s": 68.894,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ff0a1e",
+   "amount": 0.672,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 73.282,
+   "to_s": 75.69,
+   "fade_ms": 300,
+   "why": "bars 29-32, the phrase opens out: guitars leads, E 8.47, 0 hits, mode +0.38 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ffd000",
+   "amount": 0.304,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 75.69,
+   "to_s": 78.112,
+   "fade_ms": 310,
+   "why": "bars 29-32, the phrase opens out: guitars leads, E 8.93, 4 hits, mode +0.40 - diverge in bone against violet inside - twin instead, the only shape that finishes in 1.0 bars - opene"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.62,
+   "extent": "all",
+   "at_s": 76.161,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "sweep",
+   "pan": 0.5,
+   "tilt": 0.29,
+   "colour": "#ffffff",
+   "amount": 0.165,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 78.112,
+   "to_s": 81.479,
+   "fade_ms": 310,
+   "why": "bars 33-36, the phrase opens out: guitars leads, E 5.81, 3 hits, mode +0.36 - comet in bone - zigzag instead, the only shape that finishes in 1.4 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.59,
+   "extent": "all",
+   "at_s": 78.112,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.69,
+   "extent": "all",
+   "at_s": 79.459,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "dip",
+   "pan": 0.5,
+   "tilt": 0.29,
+   "colour": "#ffffff",
+   "amount": 0.165,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 81.479,
+   "to_s": 85.403,
+   "fade_ms": 300,
+   "why": "diverge answers zigzag, a whole 3 cycles, landing on the hit at 81.48s with a new colour"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.65,
+   "extent": "all",
+   "at_s": 82.384,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ff0a1e",
+   "amount": 0.623,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 85.403,
+   "to_s": 87.795,
+   "fade_ms": 295,
+   "why": "bars 33-36, the phrase opens out: guitars leads, E 7.47, 2 hits, mode -0.03 - hocket in bone against crimson inside - opened to scarlet: this level needs more than a dark colour ca"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.29,
+   "colour": "#ff0a1e",
+   "amount": 0.541,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 87.795,
+   "to_s": 92.077,
+   "fade_ms": 0,
+   "why": "bars 37-40, the phrase opens out: guitars leads, E 6.97, 4 hits, mode +0.18 - wave in bone against crimson inside - build instead, the only shape that finishes in 1.7 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.67,
+   "extent": "all",
+   "at_s": 88.259,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 92.077,
+   "to_s": 92.694,
+   "fade_ms": 0,
+   "why": "one beat of black, so the hit that follows has somewhere to land"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.26,
+   "colour": "#ffffff",
+   "amount": 0.55,
+   "prism": 60,
+   "strobe": 50,
+   "from_s": 92.694,
+   "to_s": 97.501,
+   "fade_ms": 0,
+   "why": "PEAK at 93.0s - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.62,
+   "extent": "all",
+   "at_s": 95.109,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 96.92,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "circle",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ffffff",
+   "amount": 0.094,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 97.501,
+   "to_s": 101.564,
+   "fade_ms": 315,
+   "why": "bars 41-44, the phrase closes down: guitars leads, E 5.92, 6 hits, mode +0.58 - breathe in bone - pulse instead, the only shape that finishes in 1.6 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.51,
+   "extent": "all",
+   "at_s": 98.871,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.56,
+   "extent": "all",
+   "at_s": 100.798,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ff0a1e",
+   "amount": 0.279,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 101.564,
+   "to_s": 107.183,
+   "fade_ms": 305,
+   "why": "alternate answers pulse, a whole 9 cycles, landing on the hit at 101.56s with a new colour"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 103.956,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.65,
+   "extent": "all",
+   "at_s": 105.837,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ffffff",
+   "amount": 0.077,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 107.183,
+   "to_s": 116.912,
+   "fade_ms": 295,
+   "why": "bars 45-48, the phrase opens out: voices leads, E 4.55, 5 hits, mode +0.60 - cascade in bone"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.71,
+   "extent": "all",
+   "at_s": 108.925,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.57,
+   "extent": "all",
+   "at_s": 110.55,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 112.965,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.6,
+   "extent": "all",
+   "at_s": 116.611,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ff0a1e",
+   "amount": 0.459,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 116.912,
+   "to_s": 123.507,
+   "fade_ms": 305,
+   "why": "bars 49-52, the phrase closes down: guitars leads, E 8.33, 3 hits, mode +0.59 - converge in scarlet"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.44,
+   "extent": "all",
+   "at_s": 119.049,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.56,
+   "extent": "all",
+   "at_s": 121.417,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 122.903,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 123.507,
+   "to_s": 123.786,
+   "fade_ms": 0,
+   "why": "the audio falls to 12% of its median for 0.28s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ff0a1e",
+   "amount": 0.459,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 123.786,
+   "to_s": 126.618,
+   "fade_ms": 0,
+   "why": "and back, the instant the audio returns - diverge instead, the only shape that finishes in 1.1 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.65,
+   "extent": "all",
+   "at_s": 124.111,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 125.991,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#1040ff",
+   "amount": 0.628,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 126.618,
+   "to_s": 136.301,
+   "fade_ms": 300,
+   "why": "bars 53-56, the phrase travels across: guitars leads, E 7.12, 1 hits, mode +0.19 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.6,
+   "extent": "all",
+   "at_s": 129.962,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "sweep",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#ff0a1e",
+   "amount": 0.492,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 136.301,
+   "to_s": 141.619,
+   "fade_ms": 300,
+   "why": "bars 57-60, the phrase closes down: guitars leads, E 6.16, 3 hits, mode +0.24 - sweep in scarlet against crimson inside"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.48,
+   "extent": "all",
+   "at_s": 136.766,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#1040ff",
+   "amount": 0.589,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 141.619,
+   "to_s": 146.007,
+   "fade_ms": 155,
+   "why": "hocket answers sweep, a whole 7 cycles, landing on the hit at 141.62s with a new colour"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.26,
+   "colour": "#ff0a1e",
+   "amount": 0.443,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 146.007,
+   "to_s": 153.275,
+   "fade_ms": 148,
+   "why": "bars 61-64, the phrase opens out: guitars leads, E 6.62, 7 hits, mode +0.60 - build in scarlet"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 146.007,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 146.913,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 149.792,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 152.671,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ff0a1e",
+   "amount": 0.541,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 153.275,
+   "to_s": 155.69,
+   "fade_ms": 305,
+   "why": "bars 61-64, the phrase opens out: guitars leads, E 8.06, 4 hits, mode +0.16 - split in scarlet - alternate instead, the only shape that finishes in 1.0 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 154.18,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "sweep",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#ff0a1e",
+   "amount": 0.246,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 155.69,
+   "to_s": 160.566,
+   "fade_ms": 305,
+   "why": "bars 65-68, the phrase closes down: guitars leads, E 5.60, 7 hits, mode +0.16 - wave in scarlet - comet instead, the only shape that finishes in 2.0 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 155.69,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 156.317,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.69,
+   "extent": "all",
+   "at_s": 159.057,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "arc",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#1040ff",
+   "amount": 0.295,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 160.566,
+   "to_s": 165.396,
+   "fade_ms": 300,
+   "why": "cascade answers comet, a whole 1 cycles, landing on the hit at 160.57s with a new colour"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 161.17,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 163.585,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "arc",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ff0a1e",
+   "amount": 0.394,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 165.396,
+   "to_s": 170.249,
+   "fade_ms": 300,
+   "why": "bars 69-72, the phrase travels across: voices leads, E 5.63, 3 hits, mode +0.59 - zigzag in scarlet against crimson inside - unbuild instead, the only shape that finishes in 2.0 ba"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 167.834,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.63,
+   "extent": "all",
+   "at_s": 169.645,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "arc",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#1040ff",
+   "amount": 0.471,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 170.249,
+   "to_s": 175.102,
+   "fade_ms": 305,
+   "why": "build answers unbuild, a whole 1 cycles, landing on the hit at 170.25s with a new colour"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.62,
+   "extent": "all",
+   "at_s": 172.687,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.56,
+   "extent": "all",
+   "at_s": 174.498,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "arc",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#ff0a1e",
+   "amount": 0.295,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 175.102,
+   "to_s": 179.955,
+   "fade_ms": 305,
+   "why": "bars 73-76, the phrase travels across: voices leads, E 6.12, 3 hits, mode +0.63 - wipe in scarlet - stack instead, the only shape that finishes in 2.0 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 178.747,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#1040ff",
+   "amount": 0.353,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 179.955,
+   "to_s": 184.808,
+   "fade_ms": 300,
+   "why": "alternate answers stack, a whole 4 cycles, landing on the hit at 179.96s with a new colour"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.98,
+   "extent": "all",
+   "at_s": 181.766,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#ff0a1e",
+   "amount": 0.18,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 184.808,
+   "to_s": 186.828,
+   "fade_ms": 300,
+   "why": "bars 77-80, the phrase closes down: voices leads, E 4.65, 0 hits, mode +0.28 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 186.828,
+   "to_s": 187.199,
+   "fade_ms": 0,
+   "why": "the audio falls to 11% of its median for 0.37s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#ff0a1e",
+   "amount": 0.18,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 187.199,
+   "to_s": 191.913,
+   "fade_ms": 0,
+   "why": "and back, the instant the audio returns - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 189.243,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 191.913,
+   "to_s": 192.47,
+   "fade_ms": 0,
+   "why": "the audio falls to 20% of its median for 0.56s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ff0a1e",
+   "amount": 0.164,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 192.47,
+   "to_s": 194.514,
+   "fade_ms": 0,
+   "why": "and back on the look it is arriving at, the instant the audio returns"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 193.26,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ff0a1e",
+   "amount": 0.164,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 194.514,
+   "to_s": 196.209,
+   "fade_ms": 182,
+   "why": "bars 81-83, the phrase closes down: voices leads, E 4.92, 3 hits, mode +0.79 - hocket in scarlet"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 195.93,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 196.209,
+   "to_s": 196.557,
+   "fade_ms": 0,
+   "why": "the audio falls to 20% of its median for 0.35s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ff0a1e",
+   "amount": 0.164,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 196.557,
+   "to_s": 200.003,
+   "fade_ms": 0,
+   "why": "and back, the instant the audio returns"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 198.949,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 199.808,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 200.003,
+   "to_s": 200.62,
+   "fade_ms": 0,
+   "why": "one beat of black, so the hit that follows has somewhere to land"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ffffff",
+   "amount": 0.495,
+   "prism": 60,
+   "strobe": 50,
+   "from_s": 200.62,
+   "to_s": 201.851,
+   "fade_ms": 430,
+   "why": "drop at 203.3s - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 201.851,
+   "to_s": 202.176,
+   "fade_ms": 0,
+   "why": "the audio falls to 17% of its median for 0.33s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#1040ff",
+   "amount": 0.452,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 202.176,
+   "to_s": 204.196,
+   "fade_ms": 0,
+   "why": "and back on the look it is arriving at, the instant the audio returns - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#1040ff",
+   "amount": 0.452,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 204.196,
+   "to_s": 216.317,
+   "fade_ms": 225,
+   "why": "bars 84-87, the phrase opens out: voices leads, E 5.75, 1 hits, mode +0.40 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.68,
+   "extent": "all",
+   "at_s": 208.91,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.29,
+   "colour": "#ff0a1e",
+   "amount": 0.443,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 216.317,
+   "to_s": 226.023,
+   "fade_ms": 305,
+   "why": "bars 88-91, the phrase opens out: strings leads, E 5.28, 1 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.28,
+   "colour": "#ff0a1e",
+   "amount": 0.639,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 226.023,
+   "to_s": 235.729,
+   "fade_ms": 300,
+   "why": "bars 92-95, the phrase travels across: strings leads, E 8.69, 1 hits, mode +0.14 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.31,
+   "colour": "#ff0a1e",
+   "amount": 0.508,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 235.729,
+   "to_s": 240.512,
+   "fade_ms": 305,
+   "why": "bars 96-97, the phrase closes down: strings leads, E 8.44, 0 hits, mode +0.97 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ff0a1e",
+   "amount": 0.492,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 240.512,
+   "to_s": 249.963,
+   "fade_ms": 320,
+   "why": "bars 98-101, the phrase opens out: voices leads, E 5.75, 10 hits, mode +0.50 - build in scarlet"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 240.512,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.67,
+   "extent": "all",
+   "at_s": 241.464,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.59,
+   "extent": "all",
+   "at_s": 247.223,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#ff0a1e",
+   "amount": 0.476,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 249.963,
+   "to_s": 259.947,
+   "fade_ms": 310,
+   "why": "bars 102-105, the phrase closes down: brass leads, E 10.07, 1 hits, mode +0.10 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.62,
+   "extent": "all",
+   "at_s": 253.585,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#1040ff",
+   "amount": 0.511,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 259.947,
+   "to_s": 261.467,
+   "fade_ms": 0,
+   "why": "bars 106-109, the phrase opens out: guitars leads, E 6.86, 2 hits, mode +0.30 - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 261.467,
+   "to_s": 262.084,
+   "fade_ms": 0,
+   "why": "one beat of black, so the hit that follows has somewhere to land"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ffffff",
+   "amount": 0.495,
+   "prism": 60,
+   "strobe": 50,
+   "from_s": 262.084,
+   "to_s": 269.653,
+   "fade_ms": 0,
+   "why": "climax at 262.4s - the drums have stopped, so the room just breathes until they return"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.32,
+   "colour": "#ff0a1e",
+   "amount": 0.656,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 269.653,
+   "to_s": 279.359,
+   "fade_ms": 153,
+   "why": "bars 110-113, the phrase closes down: guitars leads, E 10.89, 2 hits, mode +0.21 - breathe in scarlet - pulse instead, the only shape that finishes in 2.2 bars - opened to scarlet:"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.67,
+   "extent": "all",
+   "at_s": 270.861,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "sweep",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ff0a1e",
+   "amount": 0.525,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 279.359,
+   "to_s": 281.774,
+   "fade_ms": 153,
+   "why": "bars 114-114, the phrase travels across: guitars leads, E 7.73, 5 hits, mode +0.57 - comet in scarlet - sweep instead, the only shape that finishes in 1.0 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.56,
+   "extent": "all",
+   "at_s": 281.17,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "arc",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#ff0a1e",
+   "amount": 0.098,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 281.774,
+   "to_s": 285.095,
+   "fade_ms": 290,
+   "why": "bars 115-118, the phrase closes down: guitars leads, E 4.37, 0 hits, mode +0.57 - build in scarlet - unbuild instead, the only shape that finishes in 1.3 bars"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.38,
+   "extent": "all",
+   "at_s": 283.701,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "beam",
+   "pattern": "nod",
+   "pan": 0.5,
+   "tilt": 0.3,
+   "colour": "#1040ff",
+   "amount": 0.118,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 285.095,
+   "to_s": 289.274,
+   "fade_ms": 315,
+   "why": "alternate answers unbuild, a whole 3 cycles, landing on the hit at 285.10s with a new colour"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.64,
+   "extent": "all",
+   "at_s": 285.095,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 286.465,
+   "for_beats": 1,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "blackout",
+   "extent": "all",
+   "head": true,
+   "from_s": 289.274,
+   "to_s": 291.477,
+   "fade_ms": 0,
+   "why": "the audio falls to 0% of its median for 5.48s - a real hole, so the room goes with it"
+  },
+  {
+   "effect": "beam",
+   "pattern": "park",
+   "pan": 0.5,
+   "tilt": 0.4,
+   "colour": "#ff0a1e",
+   "amount": 0.02,
+   "prism": 0,
+   "strobe": 0,
+   "from_s": 291.477,
+   "to_s": 294.754,
+   "fade_ms": 305,
+   "why": "bars 119-120, the phrase closes down: guitars leads, E 0.06, 0 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return"
+  }
+ ],
+ "effects": [
+  {
+   "attr": "intensity",
+   "on": "lamps",
+   "form": "sine",
+   "size": 0.12,
+   "rate": {
+    "bars": 6
+   },
+   "phase": 0,
+   "why": "a slow breath on the submaster, the whole row together, so the rig is never dead still"
+  },
+  {
+   "attr": "pan",
+   "on": "heads",
+   "form": "sine",
+   "size": 0.16,
+   "rate": {
+    "bars": 8
+   },
+   "phase": 0,
+   "why": "the beam drifts across the room over eight bars"
+  },
+  {
+   "attr": "tilt",
+   "on": "heads",
+   "form": "triangle",
+   "size": 0.07,
+   "rate": {
+    "bars": 6
+   },
+   "phase": 0,
+   "why": "and lifts and settles on a slower cycle, so the two never line up"
+  }
+ ],
+ "cues": [
+  {
+   "id": 1,
+   "at": {
+    "second": 0.348
+   },
+   "fade": 0.315,
+   "why": "bars 1-4, the phrase opens out: guitars leads, E 1.98, 5 hits, mode -1.00 - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.177
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.118,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.62,
+     "move_head": false,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.1,
+    "to": 0.313,
+    "curve": 1.25
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 1.788
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 23% of its median for 0.39s - a real hole, so the room goes with it",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 1,
+   "at": {
+    "second": 2.183
+   },
+   "fade": 0.0,
+   "why": "and back, the instant the audio returns - the opening comes up gradually, 21% to 48% of the look, arriving full at the entrance",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.177
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.118,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.62,
+     "move_head": false,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.21,
+    "to": 0.48,
+    "curve": 1.25
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 2.601
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 17% of its median for 0.35s - a real hole, so the room goes with it",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 1,
+   "at": {
+    "second": 2.949
+   },
+   "fade": 0.0,
+   "why": "and back, the instant the audio returns - the opening comes up gradually, 27% to 56% of the look, arriving full at the entrance",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.177
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.118,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": false,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.271,
+    "to": 0.556,
+    "curve": 1.25
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 4.18
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 24% of its median for 0.44s - a real hole, so the room goes with it",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 1,
+   "at": {
+    "second": 4.621
+   },
+   "fade": 0.0,
+   "why": "and back, the instant the audio returns - the opening comes up gradually, 42% to 73% of the look, arriving full at the entrance",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.177
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.118,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.62,
+     "move_head": false,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.417,
+    "to": 0.728,
+    "curve": 1.25
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 6.906
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "one beat of black, so the hit that follows has somewhere to land",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 2,
+   "at": {
+    "second": 7.523
+   },
+   "fade": 0.3,
+   "why": "drop at 9.5s - the opening comes up gradually, 71% to 92% of the look, arriving full at the entrance",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.177
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.118,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 1.5
+     },
+     "low": 0.55,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 5,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   },
+   "swell": {
+    "from": 0.707,
+    "to": 0.92,
+    "curve": 1.25
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 9.056
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 20% of its median for 0.39s - a real hole, so the room goes with it",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 3,
+   "at": {
+    "second": 9.451
+   },
+   "fade": 0.0,
+   "why": "and back on the look it is arriving at, the instant the audio returns - opened to scarlet: this level needs more than a dark colour can give",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.836
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.59,
+     "pan": 0.5,
+     "tilt": 0.28
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 2,
+     "low": 0.38,
+     "move_head": false,
+     "cycles": 4,
+     "colours": [
+      "scarlet",
+      "scarlet"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 1.0,
+    "to": 1.0,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 4,
+   "at": {
+    "second": 19.946
+   },
+   "fade": 0.3,
+   "why": "bars 9-12, the phrase opens out: guitars leads, E 6.52, 2 hits, mode +0.63 - wave in indigo against scarlet inside - sweep instead, the only shape that finishes in 2.5 bars",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.962
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.557,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "beats": 1.5
+     },
+     "fill_beats": 2,
+     "low": 0.38,
+     "move_head": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 5,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 4,
+   "at": {
+    "second": 25.99
+   },
+   "fade": 0.31,
+   "why": "build answers sweep, a whole 1 cycles, landing on the hit at 25.99s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "saffron",
+     "l": 0.346
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.557,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "build",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 2,
+     "low": 0.38,
+     "move_head": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold",
+     "reverse": true
+    }
+   ],
+   "head": {
+    "move": "arc",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 5,
+   "at": {
+    "second": 29.629
+   },
+   "fade": 0.305,
+   "why": "bars 13-16, the phrase closes down: voices leads, E 4.74, 4 hits, mode +0.60 - converge in bone",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.197
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.044,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": false,
+     "cycles": 3,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 5,
+   "at": {
+    "second": 33.344
+   },
+   "fade": 0.315,
+   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 33.34s",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.197
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.131,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold",
+     "reverse": true
+    }
+   ],
+   "head": {
+    "move": "arc",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 37.105
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 21% of its median for 0.30s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 6,
+   "at": {
+    "second": 37.407
+   },
+   "fade": 0.0,
+   "why": "and back on the look it is arriving at, the instant the audio returns - zigzag instead, the only shape that finishes in 0.8 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.689
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.16,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "zigzag",
+     "every": {
+      "beats": 0.5
+     },
+     "fill_beats": 1,
+     "low": 0.3,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 6,
+   "at": {
+    "second": 39.335
+   },
+   "fade": 0.152,
+   "why": "bars 17-20, the phrase closes down: guitars leads, E 8.81, 7 hits, mode +0.59 - tail in bone - cascade instead, the only shape that finishes in 2.0 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.689
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.16,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "cascade",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.3,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "arc",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 6,
+   "at": {
+    "second": 44.188
+   },
+   "fade": 0.305,
+   "why": "diverge answers cascade, a whole 4 cycles, landing on the hit at 44.19s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.825
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.16,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "diverge",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.3,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 4,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 7,
+   "at": {
+    "second": 49.041
+   },
+   "fade": 0.3,
+   "why": "bars 21-24, the phrase travels across: guitars leads, E 5.37, 5 hits, mode +0.59 - march in bone - build instead, the only shape that finishes in 1.8 bars",
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 0.149
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.105,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "build",
+     "every": {
+      "beats": 1.5
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 5,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "arc",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 7,
+   "at": {
+    "second": 53.568
+   },
+   "fade": 0.155,
+   "why": "pulse answers build, a whole 4 cycles, landing on the hit at 53.57s",
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 0.149
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.105,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.2,
+     "move_head": false,
+     "reverse": false,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold",
+     "min_intensity": 0.3
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
+   }
+  },
+  {
+   "id": 8,
+   "at": {
+    "second": 58.723
+   },
+   "fade": 0.315,
+   "why": "bars 25-28, the phrase travels across: guitars leads, E 5.33, 0 hits, mode +0.39 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.476
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.11,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.72,
+     "move_head": false,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "swell": {
+    "from": 0.842,
+    "to": 0.865,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 9,
+   "at": {
+    "second": 68.429
+   },
+   "fade": 0.305,
+   "why": "bars 29-32, the phrase opens out: guitars leads, E 6.87, 6 hits, mode +0.19 - diverge in bone against scarlet inside - converge instead, the only shape that finishes in 2.0 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.82
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.574,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 2,
+     "low": 0.3,
+     "move_head": false,
+     "reverse": true,
+     "cycles": 4,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.932,
+    "to": 0.955,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 10,
+   "at": {
+    "second": 73.282
+   },
+   "fade": 0.3,
+   "why": "bars 29-32, the phrase opens out: guitars leads, E 8.47, 0 hits, mode +0.38 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.951
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.672,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 2,
+     "low": 0.72,
+     "move_head": false,
+     "reverse": true,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "swell": {
+    "from": 0.977,
+    "to": 1.0,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 11,
+   "at": {
+    "second": 75.69
+   },
+   "fade": 0.31,
+   "why": "bars 29-32, the phrase opens out: guitars leads, E 8.93, 4 hits, mode +0.40 - diverge in bone against violet inside - twin instead, the only shape that finishes in 1.0 bars - opened to saffron: this level needs more than a dark colour can give",
+   "look": {
+    "lamps": {
+     "c": "saffron",
+     "l": 0.438
+    },
+    "heads": {
+     "c": "saffron",
+     "l": 0.304,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "twin",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 2,
+     "low": 0.38,
+     "move_head": false,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "saffron",
+      "saffron"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 1.0,
+    "to": 1.0,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 12,
+   "at": {
+    "second": 78.112
+   },
+   "fade": 0.31,
+   "why": "bars 33-36, the phrase opens out: guitars leads, E 5.81, 3 hits, mode +0.36 - comet in bone - zigzag instead, the only shape that finishes in 1.4 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.705
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.165,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "zigzag",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.38,
+     "move_head": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 12,
+   "at": {
+    "second": 81.479
+   },
+   "fade": 0.3,
+   "why": "diverge answers zigzag, a whole 3 cycles, landing on the hit at 81.48s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.844
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.165,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "diverge",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.38,
+     "move_head": false,
+     "cycles": 3,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold",
+     "reverse": true
+    }
+   ],
+   "head": {
+    "move": "dip",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 13,
+   "at": {
+    "second": 85.403
+   },
+   "fade": 0.295,
+   "why": "bars 33-36, the phrase opens out: guitars leads, E 7.47, 2 hits, mode -0.03 - hocket in bone against crimson inside - opened to scarlet: this level needs more than a dark colour can give",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.885
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.623,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 2,
+     "low": 0.38,
+     "move_head": false,
+     "cycles": 2,
+     "colours": [
+      "scarlet",
+      "scarlet"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 14,
+   "at": {
+    "second": 87.795
+   },
+   "fade": 0.0,
+   "why": "bars 37-40, the phrase opens out: guitars leads, E 6.97, 4 hits, mode +0.18 - wave in bone against crimson inside - build instead, the only shape that finishes in 1.7 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.771
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.541,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "build",
+     "every": {
+      "beats": 0.5
+     },
+     "fill_beats": 2,
+     "low": 0.38,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 3,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.84,
+    "to": 1.0,
+    "curve": 1.6
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 92.077
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "one beat of black, so the hit that follows has somewhere to land"
+  },
+  {
+   "id": 15,
+   "at": {
+    "second": 92.694
+   },
+   "fade": 0.0,
+   "why": "PEAK at 93.0s - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 0.55
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.55,
+     "pan": 0.5,
+     "tilt": 0.26,
+     "strobe": 0.5,
+     "prism": 0.6
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.6
+   },
+   "_hold": true,
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "low": 0.72,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 16,
+   "at": {
+    "second": 97.501
+   },
+   "fade": 0.315,
+   "why": "bars 41-44, the phrase closes down: guitars leads, E 5.92, 6 hits, mode +0.58 - breathe in bone - pulse instead, the only shape that finishes in 1.6 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.394
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.094,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.2,
+     "move_head": false,
+     "reverse": true,
+     "min_intensity": 0.3,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "circle",
+    "every": {
+     "bars": 4
+    }
+   }
+  },
+  {
+   "id": 16,
+   "at": {
+    "second": 101.564
+   },
+   "fade": 0.305,
+   "why": "alternate answers pulse, a whole 9 cycles, landing on the hit at 101.56s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.471
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.279,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.2,
+     "move_head": false,
+     "reverse": false,
+     "min_intensity": 0.3,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 17,
+   "at": {
+    "second": 107.183
+   },
+   "fade": 0.295,
+   "why": "bars 45-48, the phrase opens out: voices leads, E 4.55, 5 hits, mode +0.60 - cascade in bone",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.328
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.077,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "cascade",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.82,
+    "to": 0.84,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 18,
+   "at": {
+    "second": 116.912
+   },
+   "fade": 0.305,
+   "why": "bars 49-52, the phrase closes down: guitars leads, E 8.33, 3 hits, mode +0.59 - converge in scarlet",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.656
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.459,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "converge",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.38,
+     "move_head": false,
+     "reverse": true,
+     "cycles": 3,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.868,
+    "to": 0.88,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 123.507
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 12% of its median for 0.28s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 18,
+   "at": {
+    "second": 123.786
+   },
+   "fade": 0.0,
+   "why": "and back, the instant the audio returns - diverge instead, the only shape that finishes in 1.1 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.656
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.459,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "diverge",
+     "every": {
+      "beats": 0.5
+     },
+     "fill_beats": 1,
+     "low": 0.38,
+     "move_head": false,
+     "reverse": true,
+     "cycles": 5,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.868,
+    "to": 0.88,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 19,
+   "at": {
+    "second": 126.618
+   },
+   "fade": 0.3,
+   "why": "bars 53-56, the phrase travels across: guitars leads, E 7.12, 1 hits, mode +0.19 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.738
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.628,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 2,
+     "low": 0.72,
+     "move_head": false,
+     "reverse": true,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "swell": {
+    "from": 0.896,
+    "to": 0.905,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 20,
+   "at": {
+    "second": 136.301
+   },
+   "fade": 0.3,
+   "why": "bars 57-60, the phrase closes down: guitars leads, E 6.16, 3 hits, mode +0.24 - sweep in scarlet against crimson inside",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.705
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.492,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.38,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 20,
+   "at": {
+    "second": 141.619
+   },
+   "fade": 0.155,
+   "why": "hocket answers sweep, a whole 7 cycles, landing on the hit at 141.62s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.844
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.589,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 0.5
+     },
+     "fill_beats": 1,
+     "low": 0.38,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 7,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 21,
+   "at": {
+    "second": 146.007
+   },
+   "fade": 0.148,
+   "why": "bars 61-64, the phrase opens out: guitars leads, E 6.62, 7 hits, mode +0.60 - build in scarlet",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.623
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.443,
+     "pan": 0.5,
+     "tilt": 0.26
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "build",
+     "every": {
+      "beats": 0.5
+     },
+     "fill_beats": 1,
+     "low": 0.3,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 3,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.958,
+    "to": 0.972,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 22,
+   "at": {
+    "second": 153.275
+   },
+   "fade": 0.305,
+   "why": "bars 61-64, the phrase opens out: guitars leads, E 8.06, 4 hits, mode +0.16 - split in scarlet - alternate instead, the only shape that finishes in 1.0 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.771
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.541,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.38,
+     "move_head": false,
+     "reverse": true,
+     "min_intensity": 0.3,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 1.0,
+    "to": 1.0,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 23,
+   "at": {
+    "second": 155.69
+   },
+   "fade": 0.305,
+   "why": "bars 65-68, the phrase closes down: guitars leads, E 5.60, 7 hits, mode +0.16 - wave in scarlet - comet instead, the only shape that finishes in 2.0 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.344
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.246,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "comet",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 23,
+   "at": {
+    "second": 160.566
+   },
+   "fade": 0.3,
+   "why": "cascade answers comet, a whole 1 cycles, landing on the hit at 160.57s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.412
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.295,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "cascade",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "arc",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 24,
+   "at": {
+    "second": 165.396
+   },
+   "fade": 0.3,
+   "why": "bars 69-72, the phrase travels across: voices leads, E 5.63, 3 hits, mode +0.59 - zigzag in scarlet against crimson inside - unbuild instead, the only shape that finishes in 2.0 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.574
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.394,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 1.5
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 5,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "arc",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 24,
+   "at": {
+    "second": 170.249
+   },
+   "fade": 0.305,
+   "why": "build answers unbuild, a whole 1 cycles, landing on the hit at 170.25s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.687
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.471,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "build",
+     "every": {
+      "beats": 1.5
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": true,
+     "reverse": false,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 5,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "arc",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 25,
+   "at": {
+    "second": 175.102
+   },
+   "fade": 0.305,
+   "why": "bars 73-76, the phrase travels across: voices leads, E 6.12, 3 hits, mode +0.63 - wipe in scarlet - stack instead, the only shape that finishes in 2.0 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.426
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.295,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "stack",
+     "every": {
+      "beats": 1.5
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 5,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "arc",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 25,
+   "at": {
+    "second": 179.955
+   },
+   "fade": 0.3,
+   "why": "alternate answers stack, a whole 4 cycles, landing on the hit at 179.96s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.511
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.353,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.2,
+     "move_head": false,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold",
+     "reverse": true,
+     "min_intensity": 0.3
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 26,
+   "at": {
+    "second": 184.808
+   },
+   "fade": 0.3,
+   "why": "bars 77-80, the phrase closes down: voices leads, E 4.65, 0 hits, mode +0.28 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.262
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.18,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.72,
+     "move_head": false,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 186.828
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 11% of its median for 0.37s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 26,
+   "at": {
+    "second": 187.199
+   },
+   "fade": 0.0,
+   "why": "and back, the instant the audio returns - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.262
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.18,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.72,
+     "move_head": false,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 191.913
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 20% of its median for 0.56s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 27,
+   "at": {
+    "second": 192.47
+   },
+   "fade": 0.0,
+   "why": "and back on the look it is arriving at, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.246
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.164,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "hits": 1
+     },
+     "fill_beats": 2,
+     "low": 0.2,
+     "move_head": false,
+     "reverse": true,
+     "min_intensity": 0.3,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 27,
+   "at": {
+    "second": 194.514
+   },
+   "fade": 0.182,
+   "why": "bars 81-83, the phrase closes down: voices leads, E 4.92, 3 hits, mode +0.79 - hocket in scarlet",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.246
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.164,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": false,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 196.209
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 20% of its median for 0.35s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 27,
+   "at": {
+    "second": 196.557
+   },
+   "fade": 0.0,
+   "why": "and back, the instant the audio returns",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.246
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.164,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "hocket",
+     "every": {
+      "beats": 0.5
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": false,
+     "reverse": true,
+     "cycles": 5,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 200.003
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "one beat of black, so the hit that follows has somewhere to land"
+  },
+  {
+   "id": 28,
+   "at": {
+    "second": 200.62
+   },
+   "fade": 0.43,
+   "why": "drop at 203.3s - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 0.495
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.495,
+     "pan": 0.5,
+     "tilt": 0.3,
+     "strobe": 0.5,
+     "prism": 0.6
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   },
+   "_hold": true,
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "low": 0.72,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 201.851
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 17% of its median for 0.33s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 29,
+   "at": {
+    "second": 202.176
+   },
+   "fade": 0.0,
+   "why": "and back on the look it is arriving at, the instant the audio returns - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.541
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.452,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.72,
+     "move_head": false,
+     "reverse": true,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 29,
+   "at": {
+    "second": 204.196
+   },
+   "fade": 0.225,
+   "why": "bars 84-87, the phrase opens out: voices leads, E 5.75, 1 hits, mode +0.40 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.541
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.452,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.72,
+     "move_head": false,
+     "reverse": true,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 30,
+   "at": {
+    "second": 216.317
+   },
+   "fade": 0.305,
+   "why": "bars 88-91, the phrase opens out: strings leads, E 5.28, 1 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.623
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.443,
+     "pan": 0.5,
+     "tilt": 0.29
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.72,
+     "move_head": false,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "swell": {
+    "from": 0.82,
+    "to": 0.836,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 31,
+   "at": {
+    "second": 226.023
+   },
+   "fade": 0.3,
+   "why": "bars 92-95, the phrase travels across: strings leads, E 8.69, 1 hits, mode +0.14 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.902
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.639,
+     "pan": 0.5,
+     "tilt": 0.28
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 2,
+     "low": 0.72,
+     "move_head": false,
+     "reverse": true,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "swell": {
+    "from": 0.868,
+    "to": 0.88,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 32,
+   "at": {
+    "second": 235.729
+   },
+   "fade": 0.305,
+   "why": "bars 96-97, the phrase closes down: strings leads, E 8.44, 0 hits, mode +0.97 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.721
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.508,
+     "pan": 0.5,
+     "tilt": 0.31
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.72,
+     "move_head": false,
+     "reverse": true,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 33,
+   "at": {
+    "second": 240.512
+   },
+   "fade": 0.32,
+   "why": "bars 98-101, the phrase opens out: voices leads, E 5.75, 10 hits, mode +0.50 - build in scarlet",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.705
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.492,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "build",
+     "every": {
+      "beats": 1.5
+     },
+     "fill_beats": 1,
+     "low": 0.3,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 5,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 0.906,
+    "to": 0.914,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 34,
+   "at": {
+    "second": 249.963
+   },
+   "fade": 0.31,
+   "why": "bars 102-105, the phrase closes down: brass leads, E 10.07, 1 hits, mode +0.10 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.689
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.476,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.72,
+     "move_head": false,
+     "reverse": true,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "swell": {
+    "from": 0.924,
+    "to": 0.934,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 35,
+   "at": {
+    "second": 259.947
+   },
+   "fade": 0.0,
+   "why": "bars 106-109, the phrase opens out: guitars leads, E 6.86, 2 hits, mode +0.30 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.607
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.511,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.72,
+     "move_head": false,
+     "reverse": true,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "swell": {
+    "from": 0.84,
+    "to": 1.0,
+    "curve": 1.6
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 261.467
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "one beat of black, so the hit that follows has somewhere to land"
+  },
+  {
+   "id": 36,
+   "at": {
+    "second": 262.084
+   },
+   "fade": 0.0,
+   "why": "climax at 262.4s - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "bone",
+     "l": 0.495
+    },
+    "heads": {
+     "c": "bone",
+     "l": 0.495,
+     "pan": 0.5,
+     "tilt": 0.3,
+     "strobe": 0.5,
+     "prism": 0.6
+    }
+   },
+   "chase": {
+    "on": "lamps",
+    "figure": "pulse",
+    "every": {
+     "hits": 1
+    },
+    "low": 0.45
+   },
+   "_hold": true,
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "low": 0.72,
+     "move_head": false,
+     "min_step_beats": 0.5,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  },
+  {
+   "id": 37,
+   "at": {
+    "second": 269.653
+   },
+   "fade": 0.153,
+   "why": "bars 110-113, the phrase closes down: guitars leads, E 10.89, 2 hits, mode +0.21 - breathe in scarlet - pulse instead, the only shape that finishes in 2.2 bars - opened to scarlet: this level needs more than a dark colour can give",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.935
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.656,
+     "pan": 0.5,
+     "tilt": 0.32
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "pulse",
+     "every": {
+      "beats": 0.5
+     },
+     "fill_beats": 2,
+     "low": 0.38,
+     "move_head": false,
+     "reverse": true,
+     "cycles": 9,
+     "colours": [
+      "scarlet",
+      "scarlet"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "swell": {
+    "from": 1.0,
+    "to": 1.0,
+    "curve": 1.15
+   },
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 38,
+   "at": {
+    "second": 279.359
+   },
+   "fade": 0.153,
+   "why": "bars 114-114, the phrase travels across: guitars leads, E 7.73, 5 hits, mode +0.57 - comet in scarlet - sweep instead, the only shape that finishes in 1.0 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.738
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.525,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "sweep",
+     "every": {
+      "beats": 0.5
+     },
+     "fill_beats": 2,
+     "low": 0.38,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 16,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "sweep",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 39,
+   "at": {
+    "second": 281.774
+   },
+   "fade": 0.29,
+   "why": "bars 115-118, the phrase closes down: guitars leads, E 4.37, 0 hits, mode +0.57 - build in scarlet - unbuild instead, the only shape that finishes in 1.3 bars",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.131
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.098,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "unbuild",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": true,
+     "reverse": true,
+     "cycles": 1,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "arc",
+    "every": {
+     "bars": 2
+    }
+   }
+  },
+  {
+   "id": 39,
+   "at": {
+    "second": 285.095
+   },
+   "fade": 0.315,
+   "why": "alternate answers unbuild, a whole 3 cycles, landing on the hit at 285.10s with a new colour",
+   "look": {
+    "lamps": {
+     "c": "indigo",
+     "l": 0.157
+    },
+    "heads": {
+     "c": "indigo",
+     "l": 0.118,
+     "pan": 0.5,
+     "tilt": 0.3
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "alternate",
+     "every": {
+      "beats": 1.0
+     },
+     "fill_beats": 1,
+     "low": 0.2,
+     "move_head": false,
+     "reverse": false,
+     "cycles": 3,
+     "colours": [
+      "scarlet",
+      "indigo"
+     ],
+     "colour_every": 8,
+     "colour_figure": "hold"
+    }
+   ],
+   "head": {
+    "move": "nod",
+    "every": {
+     "bars": 1
+    }
+   }
+  },
+  {
+   "id": 0,
+   "at": {
+    "second": 289.274
+   },
+   "fade": 0.0,
+   "look": {},
+   "why": "the audio falls to 0% of its median for 5.48s - a real hole, so the room goes with it"
+  },
+  {
+   "id": 40,
+   "at": {
+    "bar": 119
+   },
+   "fade": 0.305,
+   "why": "bars 119-120, the phrase closes down: guitars leads, E 0.06, 0 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return",
+   "look": {
+    "lamps": {
+     "c": "scarlet",
+     "l": 0.02
+    },
+    "heads": {
+     "c": "scarlet",
+     "l": 0.02,
+     "pan": 0.5,
+     "tilt": 0.4
+    }
+   },
+   "chases": [
+    {
+     "on": "lamps",
+     "figure": "breathe",
+     "every": {
+      "beats": 4.0
+     },
+     "fill_beats": 1,
+     "low": 0.72,
+     "move_head": false,
+     "reverse": true,
+     "colour_figure": "hold"
+    }
+   ],
+   "_hold": true,
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
+  }
+ ],
+ "rig": "arc4-head",
+ "accents": [
+  {
+   "t": 1.045,
+   "l": 1.0,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 3.46,
+   "l": 1.0,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 7.105,
+   "l": 1.0,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 11.935,
+   "l": 1.0,
+   "decay": 0.62,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 14.35,
+   "l": 0.52,
+   "decay": 0.435,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 16.765,
+   "l": 0.62,
+   "decay": 0.472,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 20.364,
+   "l": 1.0,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 29.629,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 32.972,
+   "l": 1.0,
+   "decay": 0.59,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 34.946,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 36.92,
+   "l": 1.0,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 38.104,
+   "l": 0.72,
+   "decay": 0.473,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 41.006,
+   "l": 0.59,
+   "decay": 0.473,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 42.655,
+   "l": 0.57,
+   "decay": 0.472,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 45.093,
+   "l": 0.98,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 49.041,
+   "l": 0.96,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 50.875,
+   "l": 0.44,
+   "decay": 0.45,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 53.568,
+   "l": 0.58,
+   "decay": 0.465,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 55.983,
+   "l": 0.64,
+   "decay": 0.435,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 56.912,
+   "l": 1.0,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 58.12,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 61.161,
+   "l": 0.71,
+   "decay": 0.457,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 63.599,
+   "l": 0.99,
+   "decay": 0.62,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 65.387,
+   "l": 0.54,
+   "decay": 0.457,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 68.894,
+   "l": 0.62,
+   "decay": 0.457,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 76.161,
+   "l": 0.62,
+   "decay": 0.443,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 78.112,
+   "l": 0.59,
+   "decay": 0.465,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 79.459,
+   "l": 0.69,
+   "decay": 0.465,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 82.384,
+   "l": 0.65,
+   "decay": 0.45,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 88.259,
+   "l": 0.67,
+   "decay": 0.465,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 95.109,
+   "l": 0.62,
+   "decay": 0.458,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 96.92,
+   "l": 1.0,
+   "decay": 0.58,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 98.871,
+   "l": 0.51,
+   "decay": 0.435,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 100.798,
+   "l": 0.56,
+   "decay": 0.457,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 103.956,
+   "l": 1.0,
+   "decay": 0.64,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 105.837,
+   "l": 0.65,
+   "decay": 0.465,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 108.925,
+   "l": 0.71,
+   "decay": 0.457,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 110.55,
+   "l": 0.57,
+   "decay": 0.472,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 112.965,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 116.611,
+   "l": 0.6,
+   "decay": 0.45,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 119.049,
+   "l": 0.44,
+   "decay": 0.457,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 121.417,
+   "l": 0.56,
+   "decay": 0.457,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 122.903,
+   "l": 1.0,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 124.111,
+   "l": 0.65,
+   "decay": 0.443,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 125.991,
+   "l": 1.0,
+   "decay": 0.62,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 129.962,
+   "l": 0.6,
+   "decay": 0.457,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 136.766,
+   "l": 0.48,
+   "decay": 0.45,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 146.007,
+   "l": 1.0,
+   "decay": 0.59,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 146.913,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 149.792,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 152.671,
+   "l": 1.0,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 154.18,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 155.69,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 156.317,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 159.057,
+   "l": 0.69,
+   "decay": 0.45,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 161.17,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 163.585,
+   "l": 1.0,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 167.834,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 169.645,
+   "l": 0.63,
+   "decay": 0.457,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 172.687,
+   "l": 0.62,
+   "decay": 0.45,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 174.498,
+   "l": 0.56,
+   "decay": 0.457,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 178.747,
+   "l": 1.0,
+   "decay": 0.6,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 181.766,
+   "l": 0.98,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 189.243,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 193.26,
+   "l": 1.0,
+   "decay": 0.62,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 195.93,
+   "l": 1.0,
+   "decay": 0.71,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 198.949,
+   "l": 1.0,
+   "decay": 0.84,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 199.808,
+   "l": 1.0,
+   "decay": 0.86,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 208.91,
+   "l": 0.68,
+   "decay": 0.592,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 240.512,
+   "l": 1.0,
+   "decay": 0.64,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  },
+  {
+   "t": 241.464,
+   "l": 0.67,
+   "decay": 0.45,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 247.223,
+   "l": 0.59,
+   "decay": 0.45,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 253.585,
+   "l": 0.62,
+   "decay": 0.45,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 270.861,
+   "l": 0.67,
+   "decay": 0.45,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 281.17,
+   "l": 0.56,
+   "decay": 0.458,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 283.701,
+   "l": 0.38,
+   "decay": 0.458,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 285.095,
+   "l": 0.64,
+   "decay": 0.472,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 286.465,
+   "l": 1.0,
+   "decay": 0.61,
+   "mode": "glare",
+   "c": "bone",
+   "on": "lamps"
+  }
+ ],
+ "bindings": []
+}

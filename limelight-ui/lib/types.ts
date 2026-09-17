@@ -491,6 +491,13 @@ export interface Telemetry {
 }
 
 export interface MarketListing {
+  /** Hearts. Not a score - a count of people who kept it. */
+  likes?: number;
+  /** Mean rating out of five, and how many it is the mean of. */
+  rating?: number;
+  ratings_count?: number;
+  /** The designer's name is one a real catalogue stands behind. */
+  verified?: boolean;
   /** What it costs, in whole dollars. 0 is free. */
   price_usd?: number | null;
   show_id: string;

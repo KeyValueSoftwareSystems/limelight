@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Check } from "lucide-react";
+import { X, Check, Heart } from "lucide-react";
+import { Stars, Verified } from "./Stars";
 import { LivePreview } from "./LivePreview";
 import { CardTag } from "@/components/ui";
 import type { MarketListing } from "@/lib/types";
@@ -24,8 +25,9 @@ export function ListingDialog({
   onClose: () => void;
 }) {
   const [bought, setBought] = useState(false);
+  const [liked, setLiked] = useState(false);
 
-  useEffect(() => { setBought(false); }, [listing?.show_id]);
+  useEffect(() => { setBought(false); setLiked(false); }, [listing?.show_id]);
   useEffect(() => {
     if (!listing) return;
     const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -65,10 +67,40 @@ export function ListingDialog({
             <h2 className="text-[19px] font-semibold tracking-[-0.02em] m-0 text-ink leading-[1.2]">
               {show.name}
             </h2>
-            <p className="text-[13px] text-ink-dim mt-[5px] m-0">
-              {show.song}
-              {show.author ? ` · by ${show.author}` : ""}
+            <p className="text-[13px] text-ink-dim mt-[5px] m-0 flex items-center gap-[6px]">
+              <span className="truncate">
+                {show.song}
+                {show.author ? ` · by ${show.author}` : ""}
+              </span>
+              {listing.verified && <Verified size={13} />}
             </p>
+
+            <div className="flex items-center gap-[14px] mt-[10px] flex-wrap">
+              {listing.rating != null && (
+                <span className="flex items-center gap-[6px]">
+                  <Stars rating={listing.rating} size={13} />
+                  <span className="mono text-[12px] text-ink tabular-nums">
+                    {listing.rating.toFixed(1)}
+                  </span>
+                  <span className="mono text-[11.5px] text-ink-dimmer tabular-nums">
+                    from {listing.ratings_count ?? 0} designers
+                  </span>
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => setLiked((v) => !v)}
+                aria-pressed={liked}
+                title={liked ? "Remove your like" : "Like this show"}
+                className="liquid liquid-key inline-flex items-center gap-[6px] h-[26px] px-[10px] rounded-full text-[11.5px] cursor-pointer"
+                style={liked ? { color: "var(--danger)" } : undefined}
+              >
+                <Heart size={12} strokeWidth={2.2} fill={liked ? "currentColor" : "none"} />
+                <span className="mono tabular-nums">
+                  {((listing.likes ?? 0) + (liked ? 1 : 0)).toLocaleString()}
+                </span>
+              </button>
+            </div>
           </div>
 
           {listing.blurb && (
