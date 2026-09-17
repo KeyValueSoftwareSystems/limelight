@@ -612,7 +612,77 @@ register, but the maximum fell from 2.20x to 1.54x and all four over-2x spikes a
 gone. When an accent looks wrong, check its size against the look before doubting the
 score.
 
+## 7m. Verify against the emulator, never against your own bake
+
+Twice in one session a fix was measured, published, reported and wrong, because the
+thing measured was a local bake in `/tmp` while the editor served something else. Two
+checks now close that, and the first is the one to run.
+
+**The exact check.** Bake through the running server and compare all 215,291 channel
+samples against the local bake. Any difference in a par channel is a bug. The head
+legitimately differs by the venue ceiling, currently a median ratio of 0.843 against a
+declared 0.85.
+
+**The on-screen check**, `portal/cue/onscreen.js`, drives headless Chrome over the
+DevTools protocol and reads the rendered canvas at 110 moments. Two things about it are
+load-bearing and easy to get wrong: the transport must be started with
+`Input.dispatchMouseEvent`, because a synthetic `.click()` is not a trusted gesture and
+the canvas only advances while playing; and the play control's text is `▶Play`, not
+`▶`. Correlating each bright column against each fixture's DMX identifies all five
+fixtures — par1 0.86, par2 0.88, par3 0.90, par4 0.91, head 0.80, each against roughly
+zero for every other fixture. On which lamp leads, screen and design agree at 82% of
+moments, adjacent at 16%, far at 2%. The 16% is glow bleed between neighbouring halos
+inside the sampling band; the 2% is jitter between reading the clock from the DOM and
+grabbing pixels. Treat the byte comparison as the proof and this as confirmation that
+the painting follows it.
+
+**The head may not light the bar.** `portal/limits.json` forbids -150 to -110 degrees,
+which is pan dial 0.385 to 0.459, and `server.py` enforces it by zeroing the head's
+dimmer inside the zone — the fixture may travel through, it may not throw light there.
+Nothing downstream of the score knew this, and the head-follow mapped lamps across 0.29
+to 0.71, straight through the middle, so the head was dark for 17 seconds while the
+design believed it lit. `engine.js` now derives the zone from `limits.json` and exposes
+`safePanSpan`, the widest clear arc. Any new code that aims the head must use it.
+
+## 7n. Five gestures were wearing fifteen names
+
+`sweep` and `bounce` are byte-identical functions. `alternate` and `pairs` likewise.
+`converge` and `diverge` differ by one step. `wave`, `comet`, `handover`, `cascade`,
+`build` and `unbuild` are all one bright point travelling a row, differing only in the
+tail. So the vocabulary is really five gestures: travel, grow, halves, odd/even,
+inner/outer, plus the whole room. 92% of chase time was the travelling point, and
+`MOVEMENT`'s three families were all travel families, so the "variety" was a rotation
+between synonyms. One line replaced `pulse` and `hocket` whenever the music was busy
+and loud, which is exactly when a rhythmic gesture is wanted, so neither appeared once
+in 131 seconds.
+
+Amal heard this before any measurement did: "the entire show is just different
+variations of handover going from left to right and right to left and nothing else."
+Gestures are now chosen from what the music is doing — building, percussive, singing,
+sparse — and no family may follow itself. Travel is 24%, five families share the show,
+and the chase rate follows onsets 57% of the time against a fixed beat grid 27%, the
+inversion of what it was. When adding a figure, ask first which of the five gestures it
+actually is; a sixth name for a travelling point adds nothing.
+
 ## 8. Traps — mistakes already made here, do not repeat
+
+- **The emulator did not read the show file either.** `POST /api/show` baked from
+  `portal/work/<song>.plan.json` and never opened `portal/showfiles/`. Fixing
+  `publish.py` was therefore not enough: the emulator went on baking a stale plan.
+  `server.py` now resolves the same source `publish.py` does. **Never trust a local
+  bake as evidence of what is on screen.** The check that settles it bakes through the
+  running server and compares every channel:
+
+  ```
+  python3 portal/cue/verify.py <song>        # see 7m
+  ```
+
+- **`pkill -f <pattern>` kills this shell** when the pattern also matches the command
+  being run. Hit again this session launching Chrome. Collect PIDs with `ps` and kill
+  those.
+- **A node module that runs work at import will run it when you `require` it to check
+  it loads.** `onscreen.js` started a playback session that way, with audio, while Amal
+  was listening. Anything with side effects goes behind `require.main === module`.
 
 - **`publish.py` did not read the cue file, and nothing said so.** It defaulted to
   `portal/work/<song>.plan.json`, which for a cue-list show is whatever the old

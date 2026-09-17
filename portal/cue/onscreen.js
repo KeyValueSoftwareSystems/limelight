@@ -24,7 +24,7 @@ const PROBE = [
   " return {w:o.width,h:o.height,cols:cols,t:secs};",
   "})()"
 ].join("\n");
-(async () => {
+async function main() {
   const tabs = await j("/json/list");
   const tab = tabs.find((t) => t.type === "page");
   const ws = new WebSocket(tab.webSocketDebuggerUrl);
@@ -55,4 +55,10 @@ const PROBE = [
   }
   console.log(JSON.stringify({ plot, play, n: out.length, samples: out }));
   ws.close();
-})().catch((e) => { console.error("ERR " + e.message); process.exit(1); });
+}
+
+if (require.main === module) {
+  main().catch((e) => { console.error("ERR " + e.message); process.exit(1); });
+}
+
+module.exports = { main };
