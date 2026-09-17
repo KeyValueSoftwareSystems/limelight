@@ -52,6 +52,19 @@ mkdir -p logs
 
 # ── hub (:8770) ──────────────────────────────────────────────────────────────
 echo -e "${CYN}starting hub${RST} on :8770 …"
+# The score builder runs in its own interpreter; without this it looks for a
+# .venv that does not exist here and every generate job fails.
+if [[ -z "${LIMELIGHT_SCORE_PYTHON:-}" ]]; then
+  # Build on the GPU VM when we can reach it: the L40S pipeline is the real one,
+  # and this laptop is the only machine on both the team LAN and the VPN.
+  if [[ -x "tools/score-on-vm.sh" ]] && ping -c1 -W1 192.168.1.241 >/dev/null 2>&1; then
+    export LIMELIGHT_SCORE_PYTHON="$(pwd)/tools/score-on-vm.sh"
+    echo -e "${DIM}  scores build on the GPU VM${RST}"
+  elif [[ -x "work/allin1/bin/python" ]]; then
+    export LIMELIGHT_SCORE_PYTHON="$(pwd)/work/allin1/bin/python"
+    echo -e "${YLW}  VM unreachable; scores build locally${RST}"
+  fi
+fi
 python3 serve.py > logs/hub.log 2>&1 &
 HUB_PID=$!
 echo "hub=$HUB_PID" >> "$PIDFILE"

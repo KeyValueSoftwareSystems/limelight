@@ -910,6 +910,39 @@ slowly". So the rule is neither of the two references:
 
 The first thing that travels anywhere is the entrance itself.
 
+## 7w. The hub on the LAN, building scores on the GPU VM
+
+Amal's teammate needs to upload a song and get a score, and has no VPN. Only this
+laptop is on both networks, so it is the bridge:
+
+```
+teammate  --LAN-->  laptop hub :8770  --VPN-->  keycode-vm (L40S)
+```
+
+`serve.py` already binds `0.0.0.0` and prints the LAN address; the machine's real one
+is **192.168.202.189** on `wlp0s20f3`, which is the default route. Ignore
+`192.168.231.194` and `192.168.247.68` - those are the VPN tunnels - and the docker
+bridges. `ufw` is active, so 8770 has to be allowed.
+
+**Score generation would have failed silently.** `hub/generate.py` looks for
+`LIMELIGHT_SCORE_PYTHON`, then `<repo>/.venv/bin/python`, and **there is no `.venv`
+here**; the local score env is `work/allin1`. `start.sh` launched the hub with neither.
+
+`tools/score-on-vm.sh` now stands in for that interpreter. The hub calls it as
+`<py> -c <script> <listen_dir> <mp3> <stem> <out>`; it ignores the script, converts the
+mp3 to wav, ships it to `keycode-vm:~/proj/wav-inbox/`, runs `./venv/bin/python
+pipeline.py <wav>`, brings `score-out/<stem>.score` back to `<out>`, and deletes the
+upload because the VM sits at 82% of its disk. `start.sh` selects it when the VM pings
+and falls back to the local builder when it does not, saying which it chose.
+
+Verified end to end on a 35 second clip: 99 seconds through the real pipeline - 53-stem
+separation, BTC chords, and MOSS for sections, emotion, caption, lyrics and key - and a
+64KB score back on the laptop.
+
+**What is running on the VM is only SGLang**, serving MOSS on `0.0.0.0:30000`. There is
+no hub there and the pipeline is a script, not a daemon, so "the pipeline is up" means
+the model server is up and the script can be invoked.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the
