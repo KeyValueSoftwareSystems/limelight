@@ -1,24 +1,27 @@
 "use client";
 
 import { memo } from "react";
-
 import Image from "next/image";
 import { timeToX } from "@/lib/timeline";
 import { beatsLabel, mmssms } from "@/lib/grid";
 import { effectIcon } from "@/lib/effectIcons";
+import { familyHue } from "@/lib/tokens";
 import { useTimeline } from "./Timeline";
 import type { Clip as ClipModel } from "@/lib/types";
 
 export type Gesture = "move" | "trim-start" | "trim-end";
 
-/** A one-beat effect is about 2px at full-song zoom. Below this it stops being
- *  something you can see or grab, so a clip never renders narrower. */
 const MIN_CLIP_PX = 16;
-/** Wide enough to hold both handles inside without swallowing the body. */
 const HANDLES_FIT_PX = 44;
 
-/* Clips are plain. Colour in the timeline means selection and nothing else, so
-   the one thing that is highlighted is the thing you are working on. */
+function clipOpacity(clip: ClipModel): number {
+  const amount = clip.params?.amount;
+  if (typeof amount === "number") return 0.4 + amount * 0.6;
+  if (clip.kind === "gesture") return 0.95;
+  if (clip.kind === "binding") return 0.7;
+  return 0.8;
+}
+
 function ClipBase({
   clip,
   selected,
@@ -46,11 +49,10 @@ function ClipBase({
   const showTrim = editable && (selected || w >= HANDLES_FIT_PX);
   const roomy = w >= HANDLES_FIT_PX;
   const grip = roomy ? { w: 9, out: 0 } : { w: 13, out: 13 };
-  /* Square corners, everywhere. A clip is a span of bars, and a rounded end
-     reads as slack about where that span actually stops — at one-beat widths
-     the radius was eating most of the clip. Squareness also lets the outboard
-     grips butt flush against the body, so a trimmed clip stays one solid bar
-     instead of three chips with notches at the joins. */
+
+  const famColour = familyHue(clip.family);
+  const opacity = clipOpacity(clip);
+  const isShort = clip.beats <= 1;
 
   return (
     <div
@@ -65,48 +67,47 @@ function ClipBase({
         e.stopPropagation();
         onZoomTo?.(clip);
       }}
-      /* The handle the inspector finds this clip by. It positions itself against
-         the clip's MEASURED rectangle rather than recomputing one from the row
-         index and the scroll offset, which drifted by a border here and a stale
-         scroll position there — and a card whose idea of the clip is 75px out is
-         a card sitting on top of it. */
       data-clip-key={clip.key}
-      className={`absolute border border-solid touch-none transition-colors duration-[var(--dur-state)] ${
+      className={`absolute touch-none transition-colors duration-[var(--dur-state)] ${
         editable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
-      } ${
-        selected
-          ? "bg-select border-select"
-          : "bg-bg-raised border-line-strong hover:border-ink-dimmer"
       }`}
-      style={{ left: x0, width: w, top, height, zIndex: selected ? 20 : 1 }}
-      /* Time first, because that is what is being placed, and every number
-         rounded to something a person would say. Once a clip can be nudged by
-         ten milliseconds its beat stops being whole, and the raw float read
-         "bar 15.2.682696860000007" — which looks like a bug in the clip, not
-         like a clip a third of the way into a beat. */
+      style={{
+        left: x0,
+        width: w,
+        top: top + 1,
+        height: height - 2,
+        zIndex: selected ? 20 : 1,
+        borderRadius: isShort ? "3px" : "2px",
+        background: selected
+          ? "var(--select)"
+          : `color-mix(in srgb, ${famColour} ${Math.round(opacity * 100)}%, var(--bg-raised))`,
+        border: selected
+          ? "1px solid var(--select)"
+          : `1px solid color-mix(in srgb, ${famColour} 40%, transparent)`,
+        opacity: clip.overridden ? 0.35 : 1,
+      }}
       title={
         `${clip.name} · ${mmssms(clip.startS)} · ${beatsLabel(clip.beats)} beat${clip.beats === 1 ? "" : "s"}` +
         ` · bar ${clip.bar}\u00b7${beatsLabel(clip.beat)} · double-click to zoom to it`
       }
     >
       <span
-        className="absolute inset-0 flex items-center gap-[5px] px-[7px] pointer-events-none overflow-hidden"
-        style={{ opacity: selected ? 1 : 0.92 }}
+        className="absolute inset-0 flex items-center gap-[4px] px-[6px] pointer-events-none overflow-hidden"
       >
-        {w > 34 && (
+        {w > 30 && (
           <Image
             src={effectIcon({ id: clip.tile ?? clip.fx })}
             alt=""
-            width={13}
-            height={13}
+            width={12}
+            height={12}
             className="flex-none"
-            style={selected ? { filter: "brightness(0) saturate(0)" } : undefined}
+            style={selected ? { filter: "brightness(0) saturate(0)" } : { opacity: 0.9 }}
           />
         )}
-        {w > 58 && (
+        {w > 54 && (
           <span
-            className="text-[11px] truncate"
-            style={{ color: selected ? "var(--bg)" : "var(--ink)" }}
+            className="text-[10px] truncate font-medium"
+            style={{ color: selected ? "var(--bg)" : "var(--ink)", opacity: selected ? 1 : 0.9 }}
           >
             {clip.name}
           </span>
@@ -120,6 +121,7 @@ function ClipBase({
             width={grip.w}
             out={grip.out}
             selected={selected}
+            famColour={famColour}
             onPointerDown={(e) => {
               e.stopPropagation();
               onSelect?.(clip.key, false);
@@ -131,6 +133,7 @@ function ClipBase({
             width={grip.w}
             out={grip.out}
             selected={selected}
+            famColour={famColour}
             onPointerDown={(e) => {
               e.stopPropagation();
               onSelect?.(clip.key, false);
@@ -143,28 +146,24 @@ function ClipBase({
   );
 }
 
-/** An end-cap on the selection, not a separate object: it butts against the
- *  clip body and carries a grip mark, so the whole thing reads as one bar you
- *  can take hold of at either end. */
 function Grip({
   side,
   width,
   out,
   selected,
+  famColour,
   onPointerDown,
 }: {
   side: "start" | "end";
   width: number;
   out: number;
   selected: boolean;
+  famColour: string;
   onPointerDown: (e: React.PointerEvent) => void;
 }) {
   const outer = side === "start" ? { left: -out } : { right: -out };
-  /* On the selected clip the grip is part of the bar and carries its colour.
-     On the others it is only an offer, so it stays a muted neutral — at full
-     selection brightness every wide clip on the lane looked selected. */
-  const fill = selected ? "var(--select)" : "var(--line-strong)";
-  const mark = selected ? "rgba(0,0,0,0.5)" : "rgba(230,234,242,0.55)";
+  const fill = selected ? "var(--select)" : `color-mix(in srgb, ${famColour} 50%, var(--bg-raised))`;
+  const mark = selected ? "rgba(0,0,0,0.5)" : "rgba(230,234,242,0.4)";
   return (
     <span
       onPointerDown={onPointerDown}
@@ -175,7 +174,7 @@ function Grip({
         width,
         zIndex: 22,
         background: fill,
-        boxShadow: selected ? "inset 0 0 0 1px rgba(0,0,0,0.28)" : "none",
+        borderRadius: side === "start" ? "2px 0 0 2px" : "0 2px 2px 0",
       }}
     >
       <span
@@ -186,11 +185,4 @@ function Grip({
   );
 }
 
-/* Memoised. The playhead moves 60 times a second and it is pushed through React state,
-   so the whole editor re-renders on every animation frame. A clip's props do
-   not change between those frames -- the arrays and callbacks above it are all
-   memoised -- so without this every clip on the timeline was rebuilt 60 times a
-   second to draw the same rectangle. This is the single biggest saving in the
-   editor, because clips are the most numerous thing on screen.
- */
 export const Clip = memo(ClipBase);

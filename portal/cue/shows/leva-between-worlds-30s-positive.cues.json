@@ -172,6 +172,17 @@
    "why": "and back on the look it is arriving at, the instant the audio returns - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance"
   },
   {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 6.618,
+   "for_beats": 2,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
    "effect": "blackout",
    "extent": "all",
    "head": true,
@@ -218,39 +229,6 @@
    "why": "and back on the look it is arriving at, the instant the audio returns"
   },
   {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.76,
-   "extent": "all",
-   "at_s": 14.675,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.71,
-   "extent": "all",
-   "at_s": 15.023,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.77,
-   "extent": "all",
-   "at_s": 15.395,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
    "effect": "blackout",
    "extent": "all",
    "head": true,
@@ -276,9 +254,9 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.88,
+   "amount": 0.46,
    "extent": "all",
-   "at_s": 17.067,
+   "at_s": 17.786,
    "for_beats": 1,
    "fade_ms": 0,
    "head": false,
@@ -287,108 +265,9 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.85,
+   "amount": 0.46,
    "extent": "all",
-   "at_s": 17.554,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.83,
-   "extent": "all",
-   "at_s": 17.903,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.73,
-   "extent": "all",
-   "at_s": 18.274,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.8,
-   "extent": "all",
-   "at_s": 18.622,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.8,
-   "extent": "all",
-   "at_s": 19.11,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.74,
-   "extent": "all",
-   "at_s": 19.458,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.8,
-   "extent": "all",
-   "at_s": 19.714,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.58,
-   "extent": "all",
-   "at_s": 20.062,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.56,
-   "extent": "all",
-   "at_s": 20.434,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.54,
-   "extent": "all",
-   "at_s": 20.782,
+   "at_s": 19.83,
    "for_beats": 1,
    "fade_ms": 0,
    "head": false,
@@ -420,21 +299,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.78,
+   "amount": 1.0,
    "extent": "all",
-   "at_s": 22.709,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.75,
-   "extent": "all",
-   "at_s": 23.406,
-   "for_beats": 1,
+   "at_s": 22.454,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -467,85 +335,8 @@
    "colour": "#ffffff",
    "amount": 1.0,
    "extent": "all",
-   "at_s": 23.893,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "at_s": 24.381,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.92,
-   "extent": "all",
-   "at_s": 24.845,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "at_s": 25.333,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.92,
-   "extent": "all",
-   "at_s": 25.588,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "at_s": 26.285,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "at_s": 26.54,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
    "at_s": 27.26,
-   "for_beats": 1,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -553,32 +344,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.81,
+   "amount": 0.99,
    "extent": "all",
-   "at_s": 27.725,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "at_s": 28.212,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "at_s": 28.468,
-   "for_beats": 1,
+   "at_s": 28.7,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -600,10 +369,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.95,
+   "amount": 1.0,
    "extent": "all",
-   "at_s": 31.092,
-   "for_beats": 1,
+   "at_s": 30.14,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -614,7 +383,7 @@
    "amount": 1.0,
    "extent": "all",
    "at_s": 31.579,
-   "for_beats": 1,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -622,32 +391,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.97,
-   "extent": "all",
-   "at_s": 32.299,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 1.0,
+   "amount": 0.99,
    "extent": "all",
    "at_s": 33.019,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.81,
-   "extent": "all",
-   "at_s": 33.506,
-   "for_beats": 1,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -669,10 +416,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.86,
+   "amount": 0.98,
    "extent": "all",
-   "at_s": 33.971,
-   "for_beats": 1,
+   "at_s": 34.458,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -680,21 +427,21 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.95,
-   "extent": "all",
-   "at_s": 34.226,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.78,
+   "amount": 0.79,
    "extent": "all",
    "at_s": 36.13,
-   "for_beats": 1,
+   "for_beats": 2,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 36.85,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -716,43 +463,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 0.79,
-   "extent": "all",
-   "at_s": 37.338,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.79,
-   "extent": "all",
-   "at_s": 37.825,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.76,
-   "extent": "all",
-   "at_s": 38.29,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.98,
+   "amount": 0.83,
    "extent": "all",
    "at_s": 38.777,
-   "for_beats": 1,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -762,30 +476,8 @@
    "colour": "#ffffff",
    "amount": 0.98,
    "extent": "all",
-   "at_s": 39.265,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.88,
-   "extent": "all",
-   "at_s": 39.729,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.95,
-   "extent": "all",
-   "at_s": 39.985,
-   "for_beats": 1,
+   "at_s": 40.217,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -807,32 +499,10 @@
   {
    "effect": "glare",
    "colour": "#ffffff",
-   "amount": 1.0,
-   "extent": "all",
-   "at_s": 41.657,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
    "amount": 0.98,
    "extent": "all",
-   "at_s": 42.144,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.92,
-   "extent": "all",
-   "at_s": 42.609,
-   "for_beats": 1,
+   "at_s": 41.657,
+   "for_beats": 2,
    "fade_ms": 0,
    "head": false,
    "why": "a flash on the hit, the whole row lifted together"
@@ -842,51 +512,18 @@
    "colour": "#ffffff",
    "amount": 1.0,
    "extent": "all",
+   "at_s": 42.144,
+   "for_beats": 2,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 0.77,
+   "extent": "all",
    "at_s": 43.096,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.75,
-   "extent": "all",
-   "at_s": 43.468,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.85,
-   "extent": "all",
-   "at_s": 43.816,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.95,
-   "extent": "all",
-   "at_s": 44.536,
-   "for_beats": 1,
-   "fade_ms": 0,
-   "head": false,
-   "why": "a flash on the hit, the whole row lifted together"
-  },
-  {
-   "effect": "glare",
-   "colour": "#ffffff",
-   "amount": 0.79,
-   "extent": "all",
-   "at_s": 44.791,
    "for_beats": 1,
    "fade_ms": 0,
    "head": false,
@@ -905,6 +542,17 @@
    "to_s": 46.324,
    "fade_ms": 240,
    "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - hocket in scarlet"
+  },
+  {
+   "effect": "glare",
+   "colour": "#ffffff",
+   "amount": 1.0,
+   "extent": "all",
+   "at_s": 45.023,
+   "for_beats": 2,
+   "fade_ms": 0,
+   "head": false,
+   "why": "a flash on the hit, the whole row lifted together"
   },
   {
    "effect": "blackout",
@@ -1549,303 +1197,129 @@
  ],
  "accents": [
   {
-   "t": 14.675,
-   "l": 0.76,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 15.023,
-   "l": 0.71,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 15.395,
-   "l": 0.77,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 17.067,
-   "l": 0.88,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 17.554,
-   "l": 0.85,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 17.903,
-   "l": 0.83,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 18.274,
-   "l": 0.73,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 18.622,
-   "l": 0.8,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 19.11,
-   "l": 0.8,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 19.458,
-   "l": 0.74,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 19.714,
-   "l": 0.8,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 20.062,
-   "l": 0.58,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 20.434,
-   "l": 0.56,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 20.782,
-   "l": 0.54,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 22.709,
-   "l": 0.78,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 23.406,
-   "l": 0.75,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 23.893,
+   "t": 6.618,
    "l": 1.0,
-   "decay": 0.24,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
-   "t": 24.381,
+   "t": 17.786,
+   "l": 0.46,
+   "decay": 0.36,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 19.83,
+   "l": 0.46,
+   "decay": 0.36,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 22.454,
    "l": 1.0,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 24.845,
-   "l": 0.92,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 25.333,
-   "l": 1.0,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 25.588,
-   "l": 0.92,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 26.285,
-   "l": 1.0,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 26.54,
-   "l": 1.0,
-   "decay": 0.24,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
    "t": 27.26,
    "l": 1.0,
-   "decay": 0.24,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
-   "t": 27.725,
-   "l": 0.81,
-   "decay": 0.12,
+   "t": 28.7,
+   "l": 0.99,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
-   "t": 28.212,
+   "t": 30.14,
    "l": 1.0,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 28.468,
-   "l": 1.0,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 31.092,
-   "l": 0.95,
-   "decay": 0.24,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
    "t": 31.579,
    "l": 1.0,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 32.299,
-   "l": 0.97,
-   "decay": 0.24,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
    "t": 33.019,
-   "l": 1.0,
-   "decay": 0.24,
+   "l": 0.99,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
-   "t": 33.506,
-   "l": 0.81,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 33.971,
-   "l": 0.86,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 34.226,
-   "l": 0.95,
-   "decay": 0.24,
+   "t": 34.458,
+   "l": 0.98,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
    "t": 36.13,
-   "l": 0.78,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 37.338,
    "l": 0.79,
-   "decay": 0.12,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
-   "t": 37.825,
-   "l": 0.79,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 38.29,
-   "l": 0.76,
-   "decay": 0.12,
+   "t": 36.85,
+   "l": 1.0,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
    "t": 38.777,
+   "l": 0.83,
+   "decay": 0.96,
+   "hold": 0.72,
+   "on": "lamps"
+  },
+  {
+   "t": 40.217,
    "l": 0.98,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 39.265,
-   "l": 0.98,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 39.729,
-   "l": 0.88,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 39.985,
-   "l": 0.95,
-   "decay": 0.24,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
    "t": 41.657,
-   "l": 1.0,
-   "decay": 0.24,
+   "l": 0.98,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
    "t": 42.144,
-   "l": 0.98,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 42.609,
-   "l": 0.92,
-   "decay": 0.24,
+   "l": 1.0,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   },
   {
    "t": 43.096,
+   "l": 0.77,
+   "decay": 0.36,
+   "hold": 0.22,
+   "on": "lamps"
+  },
+  {
+   "t": 45.023,
    "l": 1.0,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 43.468,
-   "l": 0.75,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 43.816,
-   "l": 0.85,
-   "decay": 0.12,
-   "on": "lamps"
-  },
-  {
-   "t": 44.536,
-   "l": 0.95,
-   "decay": 0.24,
-   "on": "lamps"
-  },
-  {
-   "t": 44.791,
-   "l": 0.79,
-   "decay": 0.12,
+   "decay": 0.96,
+   "hold": 0.72,
    "on": "lamps"
   }
  ],

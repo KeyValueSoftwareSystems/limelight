@@ -394,7 +394,13 @@ function render(cueFile, score, rigName, opts) {
     const wholeRig = rest.length === 0 && ids.length > 1;
     const i0 = Math.round(ta * fps), i1 = Math.min(frames.length, Math.round((ta + decay) * fps) + 1);
     for (let i = Math.max(0, i0); i < i1; i++) {
-      const w = Math.pow(1 - (i - i0) / Math.max(1, i1 - i0), 2);
+      /* A flash is held and then released, not a spike that decays from the
+         first frame. Renjith's glares run for_beats; ours were dying in three
+         frames, which is why the room sat 1.3x its bed for 11% of the show
+         against his 23%. */
+      const through = (i - i0) / Math.max(1, i1 - i0);
+      const hold = acc.hold != null ? +acc.hold : 0.3;
+      const w = through <= hold ? 1 : Math.pow(1 - (through - hold) / (1 - hold), 0.45);
       let added = 0;
       let rigGain = 0;
       if (wholeRig) {

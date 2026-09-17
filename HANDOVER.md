@@ -943,6 +943,37 @@ separation, BTC chords, and MOSS for sections, emotion, caption, lyrics and key 
 no hub there and the pipeline is a script, not a daemon, so "the pipeline is up" means
 the model server is up and the script can be invoked.
 
+## 7x. Mark what stands out, not everything the track does
+
+Amal: "the lights should change and move only when the song has something, but it
+should not move for everything the song has." That is the difference between a show and
+a VU meter, and we were the VU meter - accents fired on every onset above a threshold,
+1.64 a second, and when everything is marked nothing reads as marked.
+
+**The rule is local, not global.** An onset earns a mark when it is the largest in its
+own half-bar, when the score names it, or when it is a punch the cue list already
+handles. On `raga-of-revenge` that is 499 raw onsets, of which 53 are half-bar maxima
+and 29 are one-bar maxima. Accents land at 0.27 to 0.75 a second across the seven songs,
+against 1.64 before.
+
+**Size follows prominence.** How far a hit stands above the median of its neighbours
+maps across 0.30 to 1.00, so an ordinary mark and a real event no longer look the same.
+Named moments get a further lift. Strengths now spread 0.31 to 1.00 where they had
+saturated at 0.99.
+
+**Shape follows significance.** An ordinary mark holds for 22% of a three-quarter-beat
+envelope; a structural one holds 72% of two beats. That is Renjith's distribution -
+median lift 0.10s, p90 0.78s - rather than a uniform spike.
+
+**Do not mark the same moment twice.** A peak, climax or drop already gets a white punch
+cue. Landing a long accent on it too put all four lamps at 255 for over two seconds and
+the scanner caught it as `pinned`. Accents within three quarters of a bar of a punched
+moment are skipped.
+
+**One boundary trap.** A colour step landing near the end of a cue is reset by the next
+cue, which reads as a colour leaving and coming straight back. Colour now holds unless
+the cue has room for two full colour periods, not one.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the

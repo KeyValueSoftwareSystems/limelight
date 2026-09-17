@@ -194,11 +194,16 @@ export function TransportBar({
           </Btn>
         </span>
       ) : baking ? (
-        <span className={`${LABEL} text-ink-dimmer`}>{baking}</span>
-      ) : (
+        <span className="flex items-center gap-[6px]">
+          <span className="w-[6px] h-[6px] rounded-full bg-accent animate-pulse-bar flex-none" />
+          <span className={`${LABEL} text-accent`}>Building…</span>
+        </span>
+      ) : clipCount > 0 ? (
         <span className={`${LABEL} text-ink-dimmer`}>
           {clipCount} effect{clipCount === 1 ? "" : "s"}
         </span>
+      ) : (
+        <span className={`${LABEL} text-ink-dimmer`}>—</span>
       )}
 
       <Rule />

@@ -857,39 +857,64 @@ def author(song, out_path=None):
         sec_peak.setdefault(lab, []).append(inten)
     sec_ref = {k: (sorted(v)[int(len(v) * 0.7)] if v else 1.0) for k, v in sec_peak.items()}
 
+    # A designer marks what stands out where it stands out, not everything the
+    # track does. Three things earn a mark: a hit that is the largest in its own
+    # neighbourhood, a moment the score names, and the first hit after the drums
+    # change. Everything else is left to the look, which is already moving.
+    one_bar = step * per
+    win = one_bar * 0.5
+    prominent = []
+    for t, inten in hits:
+        near = [w for u, w in hits if abs(u - t) <= win and u != t]
+        if near and inten < max(near):
+            continue
+        rest = sorted(near)
+        median_near = rest[len(rest) // 2] if rest else 0.0
+        lift = inten / median_near if median_near > 0.02 else 3.0
+        prominent.append((t, inten, lift))
+
+    # A peak, climax or drop already gets its own white punch cue. Marking it
+    # again with a long accent stacks two full-rig events on one moment and
+    # pins the row at 255.
+    punched = [t for t, kind0, _ in moments
+               if kind0 in ("peak", "climax", "drop")]
+
+    named = set()
+    for t, kind0, _ in moments:
+        best, bd = None, one_bar * 0.35
+        for u, i0 in hits:
+            if abs(u - t) < bd:
+                best, bd = (u, i0), abs(u - t)
+        named.add(best[0] if best else round(t, 3))
+
+    picked = {}
+    for t, inten, lift in prominent:
+        picked[round(t, 3)] = (inten, lift)
+    for t in named:
+        if round(t, 3) not in picked:
+            here = next((i0 for u, i0 in hits if abs(u - t) < 1e-6), 0.6)
+            picked[round(t, 3)] = (max(here, 0.5), 2.2)
+
     last_t = -9.0
-    every_hit = []
-    for t0, i0 in hits:
-        row0 = None
-        for rr in rows:
-            if rr["t"] <= t0 < rr["end"]:
-                row0 = rr
-                break
-        if row0 is not None:
-            every_hit.append((row0["bar"], t0, i0, row0))
-    for bar, t, inten, row in sorted(every_hit, key=lambda x: x[1]):
-        lab = None
-        for sx in sections:
-            if sx["start"] - step <= row["t"] < sx["end"]:
-                lab = sx.get("label", "?") + str(round(sx["start"]))
-                break
-        ref = sec_ref.get(lab, 0.34) or 0.34
-        if inten < max(0.14, ref * 0.48):
+    for t in sorted(picked):
+        inten, lift = picked[t]
+        if any(a0 - 0.1 <= t <= b0 + 0.1 for a0, b0 in hole_spans):
             continue
-        if any(a - 0.1 <= t <= b + 0.1 for a, b in hole_spans):
+        if t - last_t < step * 0.98:
             continue
-        if t - last_t < step * 0.49:
+        if any(abs(t - p0) < one_bar * 0.75 for p0 in punched):
             continue
         last_t = t
-        climbing = bar in rising
-        amp = min(1.0, 0.5 + inten * 0.6)
-        if climbing:
-            run = [q for q in sorted(rising) if abs(q - bar) < 12]
-            if run:
-                pos = (bar - min(run)) / max(1, (max(run) - min(run)))
-                amp = min(1.0, 0.45 + 0.5 * pos + inten * 0.25)
+        big = lift >= 1.9 or t in named
+        # how far above its neighbours it stands, mapped across the usable
+        # range so an ordinary mark and a real event do not look the same
+        spread_l = max(0.0, min(1.0, (min(2.6, lift) - 1.0) / 1.6))
+        amp = round(0.30 + 0.62 * (spread_l ** 0.8) + 0.08 * inten, 3)
+        if t in named:
+            amp = min(1.0, amp + 0.18)
         accents.append({"t": round(t, 3), "l": round(amp, 2),
-                        "decay": round(step * (0.5 if inten >= 0.6 else 0.25), 3),
+                        "decay": round(step * (2.0 if big else 0.75), 3),
+                        "hold": 0.72 if big else 0.22,
                         "on": "lamps"})
 
     for n, c in enumerate(cues):
@@ -1066,7 +1091,7 @@ def author(song, out_path=None):
         every = max(1, int(round(per * 2.0 / max(0.25, rate))))
         chase["colours"] = list(pair)
         chase["colour_every"] = every
-        holds = span_s is not None and span_s < every * rate * step * 1.25
+        holds = span_s is not None and span_s < every * rate * step * 2.0
         chase["colour_figure"] = "hold" if holds else COLOUR_FOR.get(fam, "halves")
 
     MUSICAL = (0.5, 1.0, 1.5, 2.0, 3.0, 4.0)

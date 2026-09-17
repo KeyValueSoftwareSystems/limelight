@@ -15,9 +15,11 @@ export function Card({ children, onClick, disabled, className = "", title }: Car
       type={onClick ? "button" : undefined}
       onClick={!disabled ? onClick : undefined}
       title={title}
-      className={`flex flex-col text-left p-0 border border-solid border-line rounded-[6px] bg-panel overflow-hidden text-inherit transition-colors duration-[var(--dur-state)] ${
-        onClick && !disabled ? "cursor-pointer hover:border-ink-dimmer hover:bg-bg-overlay" : ""
-      } ${disabled ? "cursor-default opacity-[0.62]" : ""} ${className}`}
+      className={`group flex flex-col text-left p-0 border-0 rounded-[var(--radius-md)] bg-bg-raised overflow-hidden text-inherit transition-all duration-[var(--dur-state)] ${
+        onClick && !disabled
+          ? "cursor-pointer hover:bg-bg-overlay hover:shadow-[var(--elev-card-hover)] hover:-translate-y-[1px]"
+          : ""
+      } ${disabled ? "cursor-default opacity-50" : ""} shadow-[var(--elev-card)] ${className}`}
     >
       {children}
     </Tag>

@@ -889,138 +889,168 @@ export default function StagePage() {
     router.push(venue ? "/shows" : "/library");
   }, [pause, venue, router]);
 
-  /* Bar/beat and frame readouts moved onto the editor's transport, where they
-     sit beside the timeline they describe. */
+  const isDesigner = role === "creator";
+  const isOperator = role === "venue";
+  const isBaking = stageMsg?.startsWith("baking");
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    const close = (e: PointerEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
+    };
+    window.addEventListener("pointerdown", close);
+    return () => window.removeEventListener("pointerdown", close);
+  }, [moreOpen]);
 
   return (
     <>
       <div className="flex flex-1 min-h-0 overflow-hidden bg-bg text-ink">
-        {/* ── rail: navigation and the palettes, independent of the editor ── */}
-        <div className="flex-none w-[248px] min-w-[212px]">
-          <Sidebar effects={effects} onRecolour={handleRecolour} />
-        </div>
+        {isDesigner && (
+          <div className="flex-none w-[248px] min-w-[212px]">
+            <Sidebar effects={effects} onRecolour={handleRecolour} />
+          </div>
+        )}
 
-        {/* ── the work area ─────────────────────────────────────────────── */}
         <div
           ref={columnRef}
           className="flex-1 min-w-0 flex flex-col min-h-0 overflow-hidden"
         >
-          {/* header */}
-          <header className="flex-none flex items-start gap-[var(--spacing-s4)] px-[var(--spacing-s5)] pt-[var(--spacing-s4)] pb-[var(--spacing-s3)]">
-            <div className="min-w-0">
-              <h1 className="text-[length:var(--text-2xl)] leading-[32px] truncate">
-                {song?.title ?? "—"}
-              </h1>
-              <div className="mono text-[length:var(--text-xs)] text-ink-dim mt-[2px]">
-                {song
-                  ? `${mmss(song.duration_s ?? 0)} · ${Math.round(song.bpm ?? 0)} BPM · ${show?.grid.bars ?? "—"} BARS`
-                  : ""}
+          <header className="flex-none flex items-center gap-[12px] px-[16px] h-[52px] border-b border-solid border-line">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex items-center justify-center w-[32px] h-[32px] rounded-[6px] border-0 bg-transparent text-ink-dim cursor-pointer hover:text-ink hover:bg-bg-raised transition-colors duration-[var(--dur-state)]"
+              title="Back"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 12L6 8l4-4" />
+              </svg>
+            </button>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline gap-[10px]">
+                <h1 className="text-[18px] font-medium leading-[24px] truncate m-0">
+                  {song?.title ?? "\u2014"}
+                </h1>
+                <span className="mono text-[12px] text-ink-dimmer tabular-nums flex-none">
+                  {song
+                    ? `${mmss(song.duration_s ?? 0)} \u00b7 ${Math.round(song.bpm ?? 0)} BPM \u00b7 ${show?.grid.bars ?? "\u2014"} bars`
+                    : ""}
+                </span>
               </div>
             </div>
-            <span className="flex-1" />
-            <div className="flex items-center gap-[var(--spacing-s2)] pt-[6px]">
-              {/* Import and send-to-rig are available in every role: a venue
-                  operator loads the authored show file and takes it live from
-                  this same page. Save stays the creator's, below. */}
-              <input
-                ref={importInputRef}
-                type="file"
-                accept="application/json,.json"
-                hidden
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  e.currentTarget.value = "";
-                  if (f) importPlan(f);
-                }}
-              />
-              <Button
-                variant="ghost"
-                onClick={() => importInputRef.current?.click()}
-              >
-                Import show file
-              </Button>
-              {/* Export sits beside import, in every role and on the same side
-                  of the divider, because taking a copy of the file is a read —
-                  the same reasoning that puts import here. Save, which writes to
-                  the hub, stays the creator's below. */}
-              <Button
-                variant="ghost"
-                disabled={!show || !song}
-                onClick={handleDownload}
-              >
-                Download show file
-              </Button>
-              <Button
-                variant="ghost"
-                disabled={!song || generating}
-                onClick={handleGenerate}
-              >
-                {generating ? "Generating…" : "Generate show"}
-              </Button>
-              <RigControl onToggle={handleRigToggle} />
-              {role === "creator" && (
-                <>
-                  <div className="w-px h-[var(--hit)] bg-line mx-[2px]" />
-                  {/* The name is asked for in the dialog this opens, not typed
-                      into the header beforehand. */}
-                  <Button
-                    variant="primary"
-                    disabled={!show || !song}
-                    onClick={() => {
-                      setSaveError(null);
-                      setSaveOpen(true);
-                    }}
+
+            <RigControl onToggle={handleRigToggle} />
+
+            {isDesigner && (
+              <>
+                <Button
+                  variant="ghost"
+                  disabled={!song || generating}
+                  onClick={handleGenerate}
+                >
+                  {generating ? "Generating\u2026" : "Generate show"}
+                </Button>
+
+                <div className="relative" ref={moreRef}>
+                  <button
+                    type="button"
+                    onClick={() => setMoreOpen(!moreOpen)}
+                    className="flex items-center justify-center w-[32px] h-[32px] rounded-[6px] border border-solid border-line-strong bg-transparent text-ink-dim cursor-pointer hover:text-ink hover:bg-bg-raised transition-colors duration-[var(--dur-state)]"
+                    title="More actions"
                   >
-                    {showId ? "Save show" : "Save show…"}
-                  </Button>
-                </>
-              )}
-              <Button variant="link" onClick={handleBack}>
-                Back
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                      <circle cx="8" cy="3" r="1.25" />
+                      <circle cx="8" cy="8" r="1.25" />
+                      <circle cx="8" cy="13" r="1.25" />
+                    </svg>
+                  </button>
+                  {moreOpen && (
+                    <div
+                      className="absolute right-0 top-[calc(100%+4px)] z-50 w-[200px] rounded-[8px] border border-solid border-line-strong bg-bg-overlay py-[4px]"
+                      style={{ boxShadow: "var(--elev-popover)" }}
+                    >
+                      <input
+                        ref={importInputRef}
+                        type="file"
+                        accept="application/json,.json"
+                        hidden
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          e.currentTarget.value = "";
+                          if (f) importPlan(f);
+                          setMoreOpen(false);
+                        }}
+                      />
+                      <button type="button" onClick={() => { importInputRef.current?.click(); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-bg-raised hover:text-ink transition-colors">
+                        Import show file
+                      </button>
+                      <button type="button" disabled={!show || !song} onClick={() => { handleDownload(); setMoreOpen(false); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-bg-raised hover:text-ink transition-colors disabled:opacity-40 disabled:cursor-default">
+                        Download show file
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  variant="primary"
+                  disabled={!show || !song}
+                  onClick={() => {
+                    setSaveError(null);
+                    setSaveOpen(true);
+                  }}
+                >
+                  {showId ? "Save show" : "Save show\u2026"}
+                </Button>
+              </>
+            )}
+
+            {isOperator && (
+              <Button
+                variant="primary"
+                disabled={!show || !song}
+                onClick={handleRigToggle}
+              >
+                {usePortalStore.getState().rig?.armed ? "Stop sending" : "Send to the rig"}
               </Button>
-            </div>
+            )}
           </header>
 
-          <div className="flex-none px-[var(--spacing-s5)]">
+          <div className="flex-none px-[16px] py-[4px]">
             <TargetLine onOpenVenuePicker={() => setVenuePickerOpen(true)} />
           </div>
 
-          {/* live preview */}
           <StagePreview
             clockRef={clockRef}
             playing={isPlaying}
             currentTime={currentTime}
           />
-          {stageMsg && (
-            <div className="flex-none text-center text-[length:var(--text-xs)] text-ink-dimmer py-[4px]">
+
+          {isBaking ? (
+            <div className="flex-none px-[16px] py-[8px]">
+              <div className="flex items-center gap-[10px]">
+                <div className="flex-1 h-[3px] rounded-full bg-bg-raised overflow-hidden">
+                  <div className="h-full w-[40%] rounded-full bg-accent progress-indeterminate" />
+                </div>
+                <span className="text-[12px] text-ink-dim flex-none">Building the show\u2026</span>
+              </div>
+            </div>
+          ) : stageMsg ? (
+            <div className="flex-none text-center text-[12px] text-ink-dimmer py-[6px]">
               {stageMsg}
             </div>
-          )}
+          ) : null}
 
-          {/* divider — only the editor below resizes */}
           <div
             onPointerDown={startResize}
             role="separator"
             aria-orientation="horizontal"
             aria-label="Resize the editor"
-            className="flex-none h-[7px] cursor-row-resize border-y border-solid border-line hover:bg-bg-raised transition-colors duration-[var(--dur-state)]"
+            className="flex-none h-[5px] cursor-row-resize border-y border-solid border-line hover:bg-accent/10 transition-colors duration-[var(--dur-state)]"
           />
 
-          {/* The dragged height is what the editor ASKS for, not what it takes.
-              `flex-none` made it take it: the clamp above only knew the column
-              and the preview's floor, not the header, the target line, the
-              status line and the divider above it, so ~120px of the drag went
-              straight past the bottom of the column — and since the column hides
-              its overflow, the editor's own bottom edge went with it. What lives
-              down there is the energy band and the lanes' scrollbar, so the
-              timeline lost the two things at its foot exactly when it was made
-              bigger.
-
-              `flex-initial` keeps the height as the request and lets the column
-              shrink it to what is left. The preview's own min-height stops the
-              shrink coming out of the picture instead, so the divider simply
-              stops where there is no more room — which is what a divider that
-              has run out of room should do. */}
           <section
             ref={editorRef}
             style={{ height: editorH, minHeight: MIN_EDITOR }}
@@ -1052,9 +1082,8 @@ export default function StagePage() {
           </section>
         </div>
 
-        {/* ── conversation ──────────────────────────────────────────────── */}
         <aside className="flex-none w-[304px] min-w-[240px] border-l border-solid border-line overflow-hidden">
-          {role === "creator" ? (
+          {isDesigner ? (
             <ChatPanel />
           ) : (
             <div className="h-full overflow-y-auto">
@@ -1073,9 +1102,6 @@ export default function StagePage() {
         onPick={handlePickVenue}
       />
 
-      {/* Mounted only while open, so each time it opens it starts from the
-          show's current name rather than from whatever was typed and abandoned
-          last time — no reset effect to keep in step. */}
       {saveOpen && (
         <SaveShowDialog
           initialName={savedName ?? venue?.name ?? ""}

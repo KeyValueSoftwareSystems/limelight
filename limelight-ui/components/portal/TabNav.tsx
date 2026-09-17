@@ -2,38 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { usePortalStore } from "@/store/portal";
 
-const TABS = {
-  creator: [
-    { id: "library", label: "My-Library", href: "/library" },
-    { id: "venues", label: "Venues", href: "/venues" },
-    { id: "marketplace", label: "Marketplace", href: "/marketplace" },
-  ],
-  venue: [
-    { id: "shows", label: "Shows", href: "/shows" },
-    { id: "venues", label: "Venues", href: "/venues" },
-    { id: "marketplace", label: "Marketplace", href: "/marketplace" },
-  ],
-} as const;
+const TABS = [
+  { id: "library", label: "Library", href: "/library" },
+  { id: "shows", label: "Shows", href: "/shows" },
+  { id: "stage", label: "Stage", href: "/stage" },
+];
 
 export function TabNav() {
-  const role = usePortalStore((s) => s.role);
   const pathname = usePathname();
-  const tabs = TABS[role];
 
   return (
-    <nav className="flex gap-[var(--spacing-s5)]">
-      {tabs.map((tab) => {
+    <nav className="flex items-center gap-[2px]">
+      {TABS.map((tab) => {
         const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
         return (
           <Link
             key={tab.id}
             href={tab.href}
-            className={`bg-transparent border-0 border-b-2 border-solid px-0 py-[3px] pb-[5px] cursor-pointer text-[length:var(--text-xs)] tracking-[0.18em] uppercase no-underline transition-colors ${
+            className={`flex items-center h-[var(--hit)] px-[14px] rounded-[6px] border-0 no-underline text-[13px] tracking-[0.03em] font-medium transition-colors duration-[var(--dur-state)] ${
               active
-                ? "text-ink border-b-accent"
-                : "text-dim border-b-transparent hover:text-ink"
+                ? "bg-bg-raised text-ink"
+                : "text-ink-dimmer hover:text-ink hover:bg-bg-raised/50"
             }`}
           >
             {tab.label}

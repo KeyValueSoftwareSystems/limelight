@@ -6,8 +6,8 @@ import { usePortalStore } from "@/store/portal";
 import type { Role } from "@/lib/types";
 
 const ROLES: { id: Role; label: string }[] = [
-  { id: "creator", label: "Creator" },
-  { id: "venue", label: "Venue" },
+  { id: "creator", label: "Designer" },
+  { id: "venue", label: "Operator" },
 ];
 
 export function RoleToggle() {
@@ -16,7 +16,7 @@ export function RoleToggle() {
   const router = useRouter();
 
   useEffect(() => {
-    document.body.dataset.role = role;
+    document.body.dataset.role = role === "creator" ? "designer" : "operator";
   }, [role]);
 
   const handleRole = (r: Role) => {
@@ -26,21 +26,30 @@ export function RoleToggle() {
   };
 
   return (
-    <nav className="flex gap-[var(--spacing-s5)]">
-      {ROLES.map((r) => (
-        <button
-          key={r.id}
-          type="button"
-          onClick={() => handleRole(r.id)}
-          className={`bg-transparent border-0 border-b-2 border-solid px-0 py-[3px] pb-[5px] cursor-pointer text-[length:var(--text-xs)] tracking-[0.18em] uppercase transition-colors ${
-            role === r.id
-              ? "text-ink border-b-accent"
-              : "text-dim border-b-transparent hover:text-ink"
-          }`}
-        >
-          {r.label}
-        </button>
-      ))}
-    </nav>
+    <div
+      className="flex h-[var(--hit)] rounded-[6px] border border-solid border-line-strong p-[2px] bg-bg-sunken"
+      role="radiogroup"
+      aria-label="Mode"
+    >
+      {ROLES.map((r) => {
+        const active = role === r.id;
+        return (
+          <button
+            key={r.id}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => handleRole(r.id)}
+            className={`px-[14px] rounded-[4px] border-0 text-[12px] tracking-[0.08em] uppercase cursor-pointer transition-all duration-[var(--dur-state)] ${
+              active
+                ? "bg-bg-raised text-ink font-medium shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+                : "bg-transparent text-ink-dimmer hover:text-ink-dim"
+            }`}
+          >
+            {r.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }

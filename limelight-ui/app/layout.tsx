@@ -5,13 +5,14 @@ import "./globals.css";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-/* Every number in this product is read against other numbers — bar·beat,
-   timecode, frame counts — so they are monospaced and tabular throughout. */
 const mono = JetBrains_Mono({
   variable: "--font-mono-face",
   subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {

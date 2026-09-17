@@ -2,7 +2,7 @@ import type { FixtureKind } from "./profiles";
 
 /* ── data models for the Limelight portal API ────────────────────────────── */
 
-export type Role = "creator" | "venue";
+export type Role = "creator" | "venue" | "designer" | "operator";
 
 /* ── library / songs ─────────────────────────────────────────────────────── */
 
