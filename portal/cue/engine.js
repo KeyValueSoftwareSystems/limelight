@@ -5,6 +5,36 @@ const path = require("path");
 const ROOT = path.join(__dirname, "..", "..");
 const LIGHTS = path.join(ROOT, "readers", "lights");
 
+const PAN_CENTRE = 169.0;
+const PAN_DEG_PER_DMX = 540.0 / 255.0;
+
+function panKeepOut() {
+  let doc;
+  try {
+    doc = JSON.parse(fs.readFileSync(path.join(ROOT, "portal", "limits.json"), "utf8"));
+  } catch (e) {
+    return [];
+  }
+  return (doc.keep_out || []).map((z) => {
+    const a = PAN_CENTRE + z.pan_from_deg / PAN_DEG_PER_DMX;
+    const b = PAN_CENTRE + z.pan_to_deg / PAN_DEG_PER_DMX;
+    return [Math.min(a, b) / 255, Math.max(a, b) / 255];
+  }).filter((z) => z[1] > 0 && z[0] < 1);
+}
+
+function safePanSpan(rig) {
+  const zones = ((rig.limits && rig.limits.pan_keep_out) || [])
+    .slice().sort((a, b) => a[0] - b[0]);
+  let best = [0, 0], at = 0;
+  for (const z of zones) {
+    if (z[0] - at > best[1] - best[0]) best = [at, z[0]];
+    at = Math.max(at, z[1]);
+  }
+  if (1 - at > best[1] - best[0]) best = [at, 1];
+  const pad = Math.min(0.05, (best[1] - best[0]) * 0.1);
+  return [best[0] + pad, best[1] - pad];
+}
+
 function loadRig(rigName) {
   const manifest = JSON.parse(fs.readFileSync(
     path.join(ROOT, "portal", "venues", rigName, "manifest.json"), "utf8"));
@@ -31,10 +61,11 @@ function loadRig(rigName) {
   });
   const lamps = fixtures.filter((f) => !f.movable).sort((a, b) => a.x - b.x);
   const movers = fixtures.filter((f) => f.movable);
+  const limits = { ...(layout.limits || {}) };
+  limits.pan_keep_out = panKeepOut();
   return {
     name: rigName, channels: manifest.total_channels, layoutFile: manifest.layout_file,
-    fixtures, lamps, movers,
-    limits: layout.limits || {},
+    fixtures, lamps, movers, limits,
   };
 }
 
@@ -410,4 +441,4 @@ function chaseStepTimes(chase, grid, startS, endS) {
   return out.length ? out : [startS];
 }
 
-module.exports = { loadRig, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes, noteStepsIn, FORMS, effectValue, effectPeriod };
+module.exports = { loadRig, safePanSpan, groupsFor, expandTargets, parseColour, makeGrid, cueSeconds, FIGURES, chaseStepSeconds, chaseStepTimes, noteStepsIn, FORMS, effectValue, effectPeriod };

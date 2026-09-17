@@ -106,7 +106,10 @@ function applyChase(rig, base, chase, step, palette, ctx) {
     if (lamp) {
       const xs = rig.lamps.map((f) => f.x);
       const lo = Math.min(...xs), hi = Math.max(...xs);
-      const pan = hi > lo ? 0.5 + 0.42 * ((lamp.x - lo) / (hi - lo) - 0.5) * 2 : 0.5;
+      const span = E.safePanSpan(rig);
+      const pan = hi > lo
+        ? span[0] + (span[1] - span[0]) * ((lamp.x - lo) / (hi - lo))
+        : (span[0] + span[1]) / 2;
       for (const h of rig.movers) {
         const hb = out[h.id] || { l: 0, c: [1, 1, 1] };
         out[h.id] = { ...hb, pan: Math.max(0, Math.min(1, pan)) };
@@ -249,7 +252,8 @@ function render(cueFile, score, rigName, opts) {
             if (!st0) return;
             const v = E.effectValue(ef, grid, ef.__abs ? t : t - cue._t, i, ids.length);
             if (ef.attr === "pan" && st0.pan != null) {
-              st0.pan = Math.max(0, Math.min(1, st0.pan + size * v));
+              const sp = E.safePanSpan(rig);
+              st0.pan = Math.max(sp[0], Math.min(sp[1], st0.pan + size * v));
             } else if (ef.attr === "tilt" && st0.tilt != null) {
               st0.tilt = Math.max(0, Math.min(1, st0.tilt + size * v));
             } else {
@@ -258,6 +262,17 @@ function render(cueFile, score, rigName, opts) {
           });
         }
         state = out;
+      }
+      if (((rig.limits && rig.limits.pan_keep_out) || []).length) {
+        const sp = E.safePanSpan(rig);
+        const steered = { ...state };
+        for (const h of rig.movers) {
+          const s0 = steered[h.id];
+          if (!s0 || s0.pan == null) continue;
+          const p = Math.max(sp[0], Math.min(sp[1], s0.pan));
+          if (p !== s0.pan) steered[h.id] = { ...s0, pan: p };
+        }
+        state = steered;
       }
       for (const fx of rig.fixtures) writeFixture(frame, fx, state[fx.id] || { l: 0 });
     }

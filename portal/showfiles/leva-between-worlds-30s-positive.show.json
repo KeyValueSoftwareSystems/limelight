@@ -84,11 +84,12 @@
      "on": "lamps",
      "figure": "sweep",
      "every": {
-      "hits": 2
+      "beats": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ]
   },
@@ -125,11 +126,12 @@
      "on": "lamps",
      "figure": "sweep",
      "every": {
-      "hits": 2
+      "beats": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": true,
+     "reverse": true
     }
    ]
   },
@@ -164,13 +166,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "wave",
+     "figure": "hocket",
      "every": {
       "hits": 3
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
@@ -205,13 +207,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "wave",
+     "figure": "hocket",
      "every": {
       "hits": 3
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": true
+     "move_head": false
     }
    ]
   },
@@ -246,9 +248,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "bounce",
+     "figure": "unbuild",
      "every": {
-      "beats": 2
+      "hits": 2
      },
      "fill_beats": 2,
      "low": 0.4,
@@ -296,7 +298,7 @@
     "bar": 13
    },
    "fade": 0.35,
-   "why": "bars 13-16, the phrase travels across: drums leads, E 6.71, 2 hits, mode +1.00 - wave in scarlet",
+   "why": "bars 13-16, the phrase travels across: drums leads, E 6.71, 2 hits, mode +1.00 - handover in scarlet",
    "look": {
     "lamps": {
      "c": "scarlet",
@@ -312,9 +314,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "wave",
+     "figure": "handover",
      "every": {
-      "hits": 2
+      "hits": 1
      },
      "fill_beats": 2,
      "low": 0.5,
@@ -351,7 +353,8 @@
      },
      "fill_beats": 2,
      "low": 0.4,
-     "move_head": false
+     "move_head": false,
+     "reverse": true
     }
    ]
   },
@@ -379,7 +382,7 @@
      "on": "lamps",
      "figure": "comet",
      "every": {
-      "hits": 2
+      "beats": 2
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -420,7 +423,7 @@
      "on": "lamps",
      "figure": "comet",
      "every": {
-      "hits": 2
+      "beats": 2
      },
      "fill_beats": 1,
      "low": 0.22,

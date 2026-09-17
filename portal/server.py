@@ -64,6 +64,7 @@ PANEL = os.environ.get("PANEL_URL", "http://127.0.0.1:8766")
 LIMITS_FILE = os.path.join(HERE, "limits.json")
 VENUES_FILE = os.path.join(HERE, "venues.json")
 SHOWFILES = os.path.join(HERE, "showfiles")
+CUESHOWS = os.path.join(HERE, "cue", "shows")
 LOGOS = os.path.join(HERE, "logos")
 LIMITS = None
 
@@ -2027,7 +2028,8 @@ def make_handler(library, baker, rig):
                 seed = int(body.get("seed", 1))
                 edits = body.get("edits") or []
                 appetite = body.get("appetite")
-                composed = os.path.join(WORK, song + ".plan.json")
+                cueshow = os.path.join(CUESHOWS, song + ".cues.json")
+                composed = cueshow if os.path.isfile(cueshow) else os.path.join(WORK, song + ".plan.json")
                 if (not edits and body.get("composed") is not False
                         and os.path.isfile(composed)):
                     try:

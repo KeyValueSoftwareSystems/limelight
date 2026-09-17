@@ -23,7 +23,7 @@
     "bar": 1
    },
    "fade": 0.6,
-   "why": "bars 1-4, the phrase opens out: guitars leads, E 1.46, 9 hits, mode ? - handover in ember",
+   "why": "bars 1-4, the phrase opens out: guitars leads, E 1.46, 9 hits, mode ? - build in ember",
    "look": {
     "lamps": {
      "c": "ember",
@@ -39,9 +39,9 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "handover",
+     "figure": "build",
      "every": {
-      "beats": 2
+      "hits": 3
      },
      "fill_beats": 1,
      "low": 0.22,
@@ -50,7 +50,7 @@
    ],
    "swell": {
     "from": 0.62,
-    "to": 0.658,
+    "to": 0.683,
     "curve": 1.15
    }
   },
@@ -60,7 +60,7 @@
     "bar": 5
    },
    "fade": 0.6,
-   "why": "bars 5-8, the phrase travels across: guitars leads, E 2.31, 11 hits, mode ? - wave in ember against teal inside",
+   "why": "bars 5-8, the phrase travels across: guitars leads, E 2.31, 11 hits, mode ? - hocket in ember against teal inside",
    "look": {
     "lamps": {
      "c": "ember",
@@ -76,18 +76,19 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "wave",
+     "figure": "hocket",
      "every": {
-      "beats": 2
+      "hits": 3
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false,
+     "reverse": true
     }
    ],
    "swell": {
-    "from": 0.772,
-    "to": 0.81,
+    "from": 0.873,
+    "to": 0.937,
     "curve": 1.15
    }
   },
@@ -126,7 +127,7 @@
     "bar": 13
    },
    "fade": 0.35,
-   "why": "bars 13-16, the phrase travels across: drums leads, E 3.11, 9 hits, mode ? - wave in ember",
+   "why": "bars 13-16, the phrase travels across: drums leads, E 3.11, 9 hits, mode ? - pulse in ember",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -142,13 +143,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "wave",
+     "figure": "pulse",
      "every": {
       "hits": 3
      },
      "fill_beats": 1,
      "low": 0.4,
-     "move_head": true,
+     "move_head": false,
      "reverse": true
     }
    ]
@@ -159,7 +160,7 @@
     "bar": 17
    },
    "fade": 0.15,
-   "why": "bars 17-20, the phrase closes down: keys leads, E 5.18, 6 hits, mode -1.00 - wave in crimson",
+   "why": "bars 17-20, the phrase closes down: keys leads, E 5.18, 6 hits, mode -1.00 - sweep in crimson",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -175,7 +176,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "wave",
+     "figure": "sweep",
      "every": {
       "notes": 1
      },
@@ -226,7 +227,7 @@
     "bar": 24
    },
    "fade": 0.35,
-   "why": "bars 21-24, the phrase closes down: keys leads, E 3.26, 0 hits, mode +1.00 - handover in crimson",
+   "why": "bars 21-24, the phrase closes down: keys leads, E 3.26, 0 hits, mode +1.00 - comet in crimson",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -242,7 +243,7 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "handover",
+     "figure": "comet",
      "every": {
       "notes": 1
      },
@@ -317,13 +318,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "wave",
+     "figure": "split",
      "every": {
-      "hits": 2
+      "beats": 2
      },
      "fill_beats": 1,
      "low": 0.22,
-     "move_head": true
+     "move_head": false
     }
    ]
   }
@@ -337,19 +338,19 @@
   },
   {
    "t": 4.807,
-   "l": 0.67,
+   "l": 0.74,
    "decay": 0.15,
    "on": "auto"
   },
   {
    "t": 8.8,
-   "l": 0.77,
+   "l": 0.9,
    "decay": 0.15,
    "on": "auto"
   },
   {
    "t": 17.554,
-   "l": 1.0,
+   "l": 0.89,
    "decay": 0.2,
    "on": "auto"
   },

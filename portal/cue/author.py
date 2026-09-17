@@ -73,11 +73,15 @@ FAMILY_TEMPERATURE = {
     "voices": ("indigo", "blood", "crimson", "scarlet"),
     "drums": ("blood", "crimson", "scarlet", "ember"),
 }
-MOVEMENT = {
-    "travel": ("sweep", "comet", "wave"),
+GESTURES = {
+    "travel": ("sweep", "comet", "wave", "handover"),
     "grow": ("build", "cascade", "unbuild"),
-    "pass": ("handover", "bounce", "wave"),
+    "halves": ("alternate", "split"),
+    "oddeven": ("hocket",),
+    "poles": ("converge", "diverge"),
+    "room": ("pulse",),
 }
+RHYTHMIC = ("room", "halves", "oddeven")
 COUNTER = {
     "brass": "indigo", "strings": "amber", "guitars": "teal", "keys": "ember",
     "winds": "violet", "voices": "indigo", "drums": "teal",
@@ -360,7 +364,7 @@ def author(song, out_path=None):
         lab = sx.get("label", "?")
         if lab not in labels_in_order:
             labels_in_order.append(lab)
-    fam_names = list(MOVEMENT)
+    fam_names = list(GESTURES)
     sig_move = {}
     for idx, lab in enumerate(labels_in_order):
         bars_here = [rr for rr in rows if any(
@@ -371,8 +375,8 @@ def author(song, out_path=None):
             dens_here = sum(
                 sum(1 for t, i in hits if rr["t"] <= t < rr["end"] and i >= 0.28)
                 for rr in bars_here) / len(bars_here)
-        pref = ["grow", "travel", "pass", "trade", "meet"] if dens_here < 4 else \
-               ["trade", "pass", "meet", "travel", "grow"]
+        pref = ["poles", "travel", "grow", "halves", "oddeven"] if dens_here < 4 else \
+               ["halves", "oddeven", "room", "travel", "grow"]
         for cand in pref:
             if cand not in sig_move.values():
                 sig_move[lab] = cand
@@ -427,13 +431,14 @@ def author(song, out_path=None):
         while j + 1 < len(rows) and rows[j + 1]["E"] >= rows[j]["E"] * 0.92:
             j += 1
             run += 1
-        if run >= 3 and rows[j]["E"] >= rows[k]["E"] * 1.25:
+        if run >= 3 and run <= 8 and rows[j]["E"] >= rows[k]["E"] * 1.45:
             for q in range(k, j + 1):
                 rising.add(rows[q]["bar"])
 
     prev_fam = None
     held_fam = None
     held_colour = None
+    held_gesture = None
     held_warmth = 0.0
     held_split = False
     split_since = -9.0
@@ -478,7 +483,7 @@ def author(song, out_path=None):
 
         colour = FAMILY_COLOUR.get(top_fam, "crimson")
         lab_now = sec_of.get(bar, (None, 1))[0]
-        fam_now = MOVEMENT.get(sig_move.get(lab_now, ""))
+        fam_now = GESTURES.get(sig_move.get(lab_now, ""))
         pidx = phrase_of.get(bar, (0, 0, 1))[0] or 0
 
         def pair(fig_main, every_main, low_main, move=False, rev=False):
@@ -640,48 +645,48 @@ def author(song, out_path=None):
                 "tilt": tilt,
             }
             in_build = bar in rising
-            busy = ["handover", "wave", "hocket", "cascade", "comet", "alternate"]
-            mid = ["pairs", "converge", "diverge", "split", "handover", "wave"]
-            calm = ["sweep", "bounce", "comet", "converge"]
-            climb = ["build", "cascade", "converge", "build"]
-            lab_here = sec_of.get(bar, (None, 1))[0]
-            fam = MOVEMENT.get(sig_move.get(lab_here, ""))
             direction = ph["dir"] if ph is not None else "holds"
-            reverse_it = False
-            if fam:
-                turn = (pi or 0) % len(fam)
-                if direction == "rises":
-                    fig = fam[turn]
-                elif direction == "falls":
-                    fig = fam[(turn + 1) % len(fam)]
-                    reverse_it = True
-                else:
-                    fig = fam[(turn + 2) % len(fam)]
-                if (pi or 0) % 2 == 1:
-                    reverse_it = not reverse_it
-            else:
-                pick = busy if dens >= 6 else mid if dens >= 3 else calm
-                fig = pick[len(cues) % len(pick)]
-            deep = 0.22 if level < 0.38 else (0.4 if dens >= 6 else 0.5)
-            moves = fig in ("sweep", "bounce", "wave", "comet", "handover", "cascade")
+            melodic = top_fam in ("voices", "strings", "winds", "keys", "guitars")
+            percussive = top_fam in ("drums", "brass")
+            sings = len(here_notes) >= 7 and melodic and not in_build
+
             if in_build:
-                every = {"beats": 2}
+                want_fam = "grow"
+            elif percussive and dens >= 8:
+                want_fam = "room"
+            elif percussive and dens >= 4:
+                want_fam = "halves"
+            elif sings:
+                want_fam = "travel"
+            elif dens >= 7:
+                want_fam = "oddeven"
+            elif dens >= 3:
+                want_fam = "poles"
+            else:
+                want_fam = "travel"
+
+            order = list(GESTURES)
+            if want_fam == held_gesture:
+                want_fam = order[(order.index(want_fam) + 1 + (pi or 0)) % len(order)]
+            held_gesture = want_fam
+            opts = GESTURES[want_fam]
+            fig = opts[(pi or 0) % len(opts)]
+            reverse_it = direction == "falls"
+            if (pi or 0) % 2 == 1:
+                reverse_it = not reverse_it
+
+            deep = 0.22 if level < 0.38 else (0.4 if dens >= 6 else 0.5)
+            moves = want_fam in ("travel", "grow")
+            if sings and want_fam == "travel":
+                every = {"notes": 1}
             elif dens >= 9:
                 every = {"hits": 3}
-            elif dens >= 5:
+            elif dens >= 6:
                 every = {"hits": 2}
-            elif dens >= 3:
+            elif dens >= 2:
                 every = {"hits": 1}
             else:
-                every = {"hits": 2}
-            if dens >= 6 and level > 0.45:
-                smooth_pick = ["wave", "comet", "handover", "split"]
-                fig = smooth_pick[len(cues) % len(smooth_pick)] if fig in ("pulse", "hocket") else fig
-            melodic = top_fam in ("voices", "strings", "winds", "keys", "guitars")
-            sings = len(here_notes) >= 7 and melodic and not in_build
-            if sings:
-                every = {"notes": 1}
-            partner = fam[(fam.index(fig) + 1) % len(fam)] if fam and fig in fam else "wave"
+                every = {"beats": 2}
 
             layers = [{
                 "on": "lamps", "figure": fig, "every": every,
@@ -700,7 +705,7 @@ def author(song, out_path=None):
                 ph["word"] if ph else "holds",
                 top_fam, r["E"], dens,
                 ("%+.2f" % mode) if mode is not None else "?", fig, main,
-                (" against %s inside" % counter) if (split_look or len(layers) > 1) else "")
+                (" against %s inside" % counter) if split_look else "")
             add_layers = layers
 
         add(bar, fade, look, chase, why, add_layers)
