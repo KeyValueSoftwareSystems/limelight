@@ -43,7 +43,7 @@ module.exports = function breakdown(params, ctx) {
       if (energy > 0.5) lvl += 0.25 * weight * bump(bphase, 0.5, 0.05);
       H.setPar(f, par, c, Math.min(1, lvl));
     }
-    H.setHead(f, H.HEADS[0], {
+    H.setHeadsMirror(f, {
       level: 0.3 + 0.7 * flash(bphase0, 0.4), colour: swap ? cols[0] : cols[1],
       pan: H.clamp(0.498 + 0.45 * Math.sin(bar * 2.4), 0, 1),
       tilt: H.clamp(0.27 + 0.47 * (Math.floor(bar / 2) % 2) + 0.16 * kick(bphase0, 0.3, 0.3), 0, 1),

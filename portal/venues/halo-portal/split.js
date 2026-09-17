@@ -23,7 +23,7 @@ module.exports = function split(params, ctx) {
     for (const p of H.LEFT)  H.setPar(f, p, c0, rest + (0.92 - rest) * l);
     for (const p of H.RIGHT) H.setPar(f, p, c1, rest + (0.92 - rest) * r);
     const balance = r - l;                                  // -1 all-left .. +1 all-right
-    if (params.head !== false) H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHeadsMirror(f, {
       level: rest + (0.85 - rest) * Math.max(l, r),
       colour: l >= r ? c0 : c1,
       pan: 0.60 + 0.20 * H.clamp(balance * 1.5, -1, 1),     // lean toward the louder side

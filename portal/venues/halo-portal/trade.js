@@ -72,7 +72,7 @@ module.exports = function trade(params, ctx) {
         H.setPar(f, pars[k], col, H.clamp(lvl, 0, 1));
       }
       if (params.head !== false) 
-      H.setHead(f, H.HEADS[0], {
+      H.setHeadsAll(f, {
         level: 0.55,
         colour: c0,
         pan: 0.42 + (0.80 - 0.42) * pos,
@@ -92,7 +92,7 @@ module.exports = function trade(params, ctx) {
     for (const par of A)  H.setPar(f, par, c0, hot - (hot - dim) * over);
     for (const par of Bs) H.setPar(f, par, c1, dim + (hot - dim) * over);
     if (params.head !== false) 
-    H.setHead(f, H.HEADS[0], {
+    H.setHeadsAll(f, {
       level: 0.5,
       colour: over < 0.5 ? c0 : c1,
       pan: rl ? 0.80 - (0.80 - 0.42) * over : 0.42 + (0.80 - 0.42) * over,

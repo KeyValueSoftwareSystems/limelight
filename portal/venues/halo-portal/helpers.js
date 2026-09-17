@@ -283,6 +283,39 @@ function easeCurve(name) {
 function hitEnv(t) { return t < 0.08 ? 1 : Math.max(0, 1 - (t - 0.08) / 0.30); }
 function swellEnv(t, rise) { return t < rise ? t / rise : 1 - (t - rise) / (1 - rise); }
 
+/* Drive EVERY mover, not one. This rig has twelve (6 spots + 6 washes), and the
+   effects were written against a single head, so a show ran one lamp while the
+   rest sat dark. Both helpers take one pose and spread it across all movers
+   (ordered left-to-right by x); every other option (level, colour, tilt, gobo,
+   prism, strobe) passes straight through, and setHead still dispatches per type.
+     - setHeadsAll: PARALLEL. Every mover fans the same way around the aimed pan,
+       so a swept aim reads as the whole rig travelling together. For travelling
+       effects (beam, chase, trade, bounce, sweep).
+     - setHeadsMirror: SYMMETRIC. The left half mirrors the right about centre,
+       so an aim off-centre opens the rig out like a butterfly and an aim at
+       centre converges it. For blooming/two-sided effects (impact, drive,
+       pulse, ripple, split, swell, breathe, converge). */
+function fanHeads(frame, opts, mirror, spread) {
+  const n = HEADS.length;
+  if (!n) return;
+  const basePan = opts.pan != null ? opts.pan : 0.5;
+  HEADS.forEach((head, i) => {
+    const t = n > 1 ? i / (n - 1) : 0.5;                 // 0..1 across the movers
+    let pan;
+    if (mirror) {
+      const left = t < 0.5;
+      const local = (left ? 0.5 - t : t - 0.5) * 2;      // 0 at centre .. 1 at the ends
+      const aim = left ? 1 - basePan : basePan;          // mirror the aim across centre
+      pan = aim + (left ? -1 : 1) * local * spread;
+    } else {
+      pan = basePan + (t - 0.5) * 2 * spread;
+    }
+    setHead(frame, head, { ...opts, pan: clamp(pan, 0, 1) });
+  });
+}
+function setHeadsAll(frame, opts, spread = 0.3) { fanHeads(frame, opts, false, spread); }
+function setHeadsMirror(frame, opts, spread = 0.3) { fanHeads(frame, opts, true, spread); }
+
 module.exports = {
   TOTAL_CH, FPS, COLOUR_WHEEL, HEAD_PARK,
   PARS, HEADS, PIXELS, SPOTS, WASHES, BLINDS, STROBES, LASERS,
@@ -291,7 +324,7 @@ module.exports = {
   parsForExtent, fixtureIdsForExtent,
   emptyFrame, clamp, rgb255, nearestWheelColour,
   parseColour, parseColours,
-  setPar, setParStrobe, setHead,
+  setPar, setParStrobe, setHead, setHeadsAll, setHeadsMirror,
   setBlinder, setStrobe, setLaser, setPixel, setPixelAll,
   framesPerBeat, easeLinear, easeInOut, easeSettle, easeCurve,
   hitEnv, swellEnv,

@@ -21,7 +21,7 @@ module.exports = function stab(params, ctx) {
     const f = H.emptyFrame();
     for (const par of pars) H.setPar(f, par, colour, env);
     for (const b of H.BLINDS) H.setBlinder(f, b, env);
-    H.setHead(f, H.HEADS[0], {
+    H.setHeadsMirror(f, {
       level: env, colour,
       pan: 0.662 + (panTo - 0.662) * env,     // snap out on the attack, ease back
       tilt: 0.498 + (tiltTo - 0.498) * env,

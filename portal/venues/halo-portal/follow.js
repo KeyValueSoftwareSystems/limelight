@@ -27,7 +27,7 @@ module.exports = function follow(params, ctx) {
       const tip = 1 + lean * (across - 0.5) * (v - 0.5) * 2;
       H.setPar(f, p, colour, H.clamp(level * wave * tip, 0, 1));
     });
-    if (params.head !== false) H.setHead(f, H.HEADS[0], {
+    if (params.head !== false) H.setHeadsMirror(f, {
       level: level * 0.85, colour,
       pan: 0.5 + travel * (v - 0.5) * 2,
       tilt: 0.28 + 0.14 * v,

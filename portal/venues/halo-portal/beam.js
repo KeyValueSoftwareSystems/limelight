@@ -117,7 +117,7 @@ module.exports = function beam(params, ctx) {
       (strobeOn === "always" || (strobeOn === "beat" && bphase < 0.35) || (strobeOn === "downbeat" && isDown && bphase < 0.5) || hit > 0.4);
     const prismNow = prismOn === "beat" ? (bphase < 0.4 ? prism : 0) : prism;
     const f = H.emptyFrame();
-    H.setHead(f, H.HEADS[0], {
+    H.setHeadsAll(f, {
       level: amount * (0.85 + 0.15 * energy), colour,
       pan: H.clamp(pan, 0, 1), tilt: H.clamp(tilt, 0, 1),
       gobo: params.gobo != null ? params.gobo : 0, prism: prismNow,
