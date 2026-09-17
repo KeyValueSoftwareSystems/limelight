@@ -193,7 +193,17 @@ def grid_of(sc):
             return beats[-1] + (i - len(beats) + 1) * step
         return beats[i]
 
-    return per, at, step
+    def beat_at(t):
+        # The tempo is not constant. raga-of-revenge runs at 89.6bpm for its
+        # first eighteen seconds and 120 after, so one averaged beat is 23% wrong
+        # in the intro and every duration built on it lands off the music.
+        if len(beats) < 2:
+            return step
+        i = bisect.bisect_left(beats, t)
+        i = max(1, min(len(beats) - 1, i))
+        return beats[i] - beats[i - 1]
+
+    return per, at, step, beat_at
 
 
 def bar_rows(sc, per, at, floor=0.04):
@@ -235,7 +245,7 @@ def bar_rows(sc, per, at, floor=0.04):
 
 def author(song, out_path=None):
     sc = score_for(song)
-    per, at, step = grid_of(sc)
+    per, at, step, beat_at = grid_of(sc)
     rows = bar_rows(sc, per, at)
     hits = sorted(
         ((h["t"], h["intensity"]) for h in (sc.get("rhythm") or {}).get("hits", []))
@@ -945,7 +955,7 @@ def author(song, out_path=None):
         if t in named:
             amp = min(1.0, amp + 0.18)
         accents.append({"t": round(t, 3), "l": round(amp, 2),
-                        "decay": round(step * (2.0 if big else 0.75), 3),
+                        "decay": round(beat_at(t) * (2.0 if big else 0.75), 3),
                         "hold": 0.72 if big else 0.22,
                         "on": "lamps"})
 
@@ -1128,13 +1138,14 @@ def author(song, out_path=None):
 
     MUSICAL = (0.5, 1.0, 1.5, 2.0, 3.0, 4.0)
 
-    def fit_rate(fig, span_s, push=1, fam=None):
+    def fit_rate(fig, span_s, push=1, fam=None, at_t=None):
         steps = cycle_steps(fig, n_lamps)
-        beats_in = span_s / step if step > 0 else 0
+        local = beat_at(at_t) if at_t is not None else step
+        beats_in = span_s / local if local > 0 else 0
         if beats_in <= 0 or steps <= 0:
             return None
         home = 1 if (fam in TRAVELS_HOME or FAM_OF.get(fig) in TRAVELS_HOME) else 0
-        floor_beats = max(0.5, 0.26 / step if step > 0 else 0.5)
+        floor_beats = max(0.5, 0.26 / local if local > 0 else 0.5)
         best = None
         for rate in MUSICAL:
             if rate < floor_beats - 1e-6:
@@ -1160,14 +1171,14 @@ def author(song, out_path=None):
 
     recent_fams = []
 
-    def choose_figure(span_s, want_fam, avoid, push=1):
+    def choose_figure(span_s, want_fam, avoid, push=1, at_t=None):
         order = [want_fam] + [f for f in GESTURES if f != want_fam]
         if recent_fams[-3:].count("travel") >= 1:
             order = [f for f in order if f != "travel"] + ["travel"]
         for fam in order:
             opts = [f for f in GESTURES[fam] if f not in avoid] or list(GESTURES[fam])
             for fig in opts:
-                fit = fit_rate(fig, span_s, push, fam)
+                fit = fit_rate(fig, span_s, push, fam, at_t)
                 if fit:
                     recent_fams.append(fam)
                     return fig, fit, fam
@@ -1422,7 +1433,7 @@ def author(song, out_path=None):
                 return True
 
             pair = [working[0], working[1]] if len(working) > 1 else None
-            fig0, fit, fam0 = choose_figure(bounds[1] - bounds[0], here_fam, seen_recent)
+            fig0, fit, fam0 = choose_figure(bounds[1] - bounds[0], here_fam, seen_recent, 1, c["_t"])
             if fig0:
                 if fig0 != ch["figure"]:
                     ch["figure"] = fig0
@@ -1444,7 +1455,7 @@ def author(song, out_path=None):
                 else:
                     pick_fam = fam_ring[(i + k) % len(fam_ring)]
                 nxt, vfit0, pick_fam = choose_figure(
-                    seg, pick_fam, seen_recent, 2 ** k if climbing else 1)
+                    seg, pick_fam, seen_recent, 2 ** k if climbing else 1, at_t)
                 if not nxt:
                     continue
                 seen_recent = (seen_recent + [nxt])[-4:]
@@ -1599,7 +1610,7 @@ def author(song, out_path=None):
                     break
             else:
                 want_beats = 0.125
-        c["fade"] = round(step * want_beats, 3)
+        c["fade"] = round(beat_at(c.get("_t", 0)) * want_beats, 3)
 
     # Passes downstream replace a figure or a colour without touching the
     # sentence that explains it, so a cue could claim to answer a figure that is

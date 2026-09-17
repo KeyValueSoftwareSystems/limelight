@@ -908,7 +908,7 @@ export default function StagePage() {
     <>
       <div className="flex flex-1 min-h-0 overflow-hidden bg-bg text-ink">
         {isDesigner && (
-          <div className="flex-none w-[248px] min-w-[212px] border-r border-solid border-white/[0.06]">
+          <div className="flex-none w-[220px] min-w-[180px] border-r border-solid border-white/[0.05]">
             <Sidebar effects={effects} onRecolour={handleRecolour} />
           </div>
         )}
@@ -917,12 +917,12 @@ export default function StagePage() {
           ref={columnRef}
           className="flex-1 min-w-0 flex flex-col min-h-0 overflow-hidden"
         >
-          <header className="flex-none flex items-center gap-[12px] px-[16px] h-[48px] glass border-b border-solid border-white/[0.06]">
+          <header className="flex-none flex items-center gap-[12px] px-[16px] h-[48px] glass border-b border-solid border-white/[0.05]">
             <button
               type="button"
               onClick={handleBack}
-              className="flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] border-0 bg-transparent text-ink-dimmer cursor-pointer hover:text-ink hover:bg-white/[0.06] transition-all duration-200 active:scale-[0.95]"
-              title="Back"
+              className="flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] border-0 bg-transparent text-ink-dimmer cursor-pointer hover:text-ink hover:bg-accent/[0.08] transition-all duration-200 active:scale-[0.95]"
+              title="Back to library"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M10 12L6 8l4-4" />
@@ -958,7 +958,7 @@ export default function StagePage() {
                   <button
                     type="button"
                     onClick={() => setMoreOpen(!moreOpen)}
-                    className="flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.02] text-ink-dimmer cursor-pointer hover:text-ink hover:bg-white/[0.06] hover:border-white/[0.12] transition-all duration-200 active:scale-[0.95]"
+                    className="flex items-center justify-center w-[30px] h-[30px] rounded-[var(--radius-sm)] border border-solid border-white/[0.06] bg-white/[0.02] text-ink-dimmer cursor-pointer hover:text-ink hover:bg-accent/[0.08] hover:border-accent/20 transition-all duration-200 active:scale-[0.95]"
                     title="More actions"
                   >
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
@@ -970,7 +970,7 @@ export default function StagePage() {
                   {moreOpen && (
                     <div
                       className="absolute right-0 top-[calc(100%+6px)] z-50 w-[210px] rounded-[var(--radius-md)] py-[4px] animate-scale-in"
-                      style={{ background: "linear-gradient(180deg, #1C1D28 0%, #14151D 100%)", boxShadow: "var(--elev-popover)" }}
+                      style={{ background: "linear-gradient(180deg, #1A1B2E 0%, #12131F 100%)", boxShadow: "var(--elev-popover)" }}
                     >
                       <input
                         ref={importInputRef}
@@ -984,10 +984,10 @@ export default function StagePage() {
                           setMoreOpen(false);
                         }}
                       />
-                      <button type="button" onClick={() => { importInputRef.current?.click(); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-white/[0.06] hover:text-ink transition-all duration-150 rounded-[var(--radius-sm)] m-[2px] mx-[4px] w-[calc(100%-8px)]">
+                      <button type="button" onClick={() => { importInputRef.current?.click(); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-accent/[0.08] hover:text-ink transition-all duration-150 rounded-[var(--radius-sm)] m-[2px] mx-[4px] w-[calc(100%-8px)]">
                         Import show file
                       </button>
-                      <button type="button" disabled={!show || !song} onClick={() => { handleDownload(); setMoreOpen(false); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-white/[0.06] hover:text-ink transition-all duration-150 rounded-[var(--radius-sm)] disabled:opacity-35 disabled:cursor-default m-[2px] mx-[4px] w-[calc(100%-8px)]">
+                      <button type="button" disabled={!show || !song} onClick={() => { handleDownload(); setMoreOpen(false); }} className="w-full text-left px-[12px] py-[8px] border-0 bg-transparent text-[13px] text-ink-dim cursor-pointer hover:bg-accent/[0.08] hover:text-ink transition-all duration-150 rounded-[var(--radius-sm)] disabled:opacity-35 disabled:cursor-default m-[2px] mx-[4px] w-[calc(100%-8px)]">
                         Download show file
                       </button>
                     </div>
@@ -1031,14 +1031,14 @@ export default function StagePage() {
           {isBaking ? (
             <div className="flex-none px-[16px] py-[8px]">
               <div className="flex items-center gap-[10px]">
-                <div className="flex-1 h-[2px] rounded-full bg-white/[0.06] overflow-hidden">
-                  <div className="h-full w-[30%] rounded-full bg-accent progress-indeterminate" />
+                <div className="flex-1 h-[2px] rounded-full bg-accent/10 overflow-hidden">
+                  <div className="h-full w-[30%] rounded-full progress-indeterminate" style={{ background: "var(--grad-primary)" }} />
                 </div>
-                <span className="text-[11px] font-medium text-accent flex-none animate-pulse-bar">Building\u2026</span>
+                <span className="text-[11px] font-medium text-accent flex-none animate-pulse-bar">Building show\u2026</span>
               </div>
             </div>
           ) : stageMsg ? (
-            <div className="flex-none text-center text-[11px] text-ink-dimmer py-[6px]">
+            <div className="flex-none text-center text-[11px] text-ink-dim py-[6px]">
               {stageMsg}
             </div>
           ) : null}
@@ -1048,7 +1048,7 @@ export default function StagePage() {
             role="separator"
             aria-orientation="horizontal"
             aria-label="Resize the editor"
-            className="flex-none h-[5px] cursor-row-resize border-y border-solid border-white/[0.04] hover:border-accent/30 hover:bg-accent/[0.03] transition-all duration-200"
+            className="flex-none h-[4px] cursor-row-resize border-y border-solid border-white/[0.04] hover:border-accent/25 hover:bg-accent/[0.04] transition-all duration-200"
           />
 
           <section
@@ -1082,7 +1082,7 @@ export default function StagePage() {
           </section>
         </div>
 
-        <aside className="flex-none w-[304px] min-w-[240px] border-l border-solid border-white/[0.06] overflow-hidden">
+        <aside className="flex-none w-[280px] min-w-[220px] border-l border-solid border-white/[0.05] overflow-hidden">
           {isDesigner ? (
             <ChatPanel />
           ) : (

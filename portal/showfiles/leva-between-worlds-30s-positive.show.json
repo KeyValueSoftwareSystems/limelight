@@ -106,7 +106,7 @@
    "head": false,
    "amount": 0.973,
    "colour": "#e00020",
-   "fade_ms": 240,
+   "fade_ms": 235,
    "section": 1,
    "from_s": 29.652,
    "to_s": 33.971,
@@ -154,7 +154,7 @@
    "head": false,
    "amount": 0.298,
    "colour": "#e00020",
-   "fade_ms": 240,
+   "fade_ms": 245,
    "section": 2,
    "from_s": 45.023,
    "to_s": 46.324,
@@ -380,7 +380,7 @@
    "strobe": 0,
    "from_s": 29.652,
    "to_s": 33.971,
-   "fade_ms": 240,
+   "fade_ms": 235,
    "why": "bars 13-16, the phrase travels across: drums leads, E 6.71, 2 hits, mode +1.00 - split in scarlet - alternate instead, the only shape that finishes in 2.2 bars"
   },
   {
@@ -557,7 +557,7 @@
    "strobe": 0,
    "from_s": 45.023,
    "to_s": 46.324,
-   "fade_ms": 240,
+   "fade_ms": 245,
    "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return"
   },
   {
@@ -1011,7 +1011,7 @@
    "at": {
     "second": 29.652
    },
-   "fade": 0.24,
+   "fade": 0.235,
    "why": "bars 13-16, the phrase travels across: drums leads, E 6.71, 2 hits, mode +1.00 - split in scarlet - alternate instead, the only shape that finishes in 2.2 bars",
    "look": {
     "lamps": {
@@ -1197,7 +1197,7 @@
    "at": {
     "second": 45.023
    },
-   "fade": 0.24,
+   "fade": 0.245,
    "why": "bars 21-22, the phrase closes down: drums leads, E 4.70, 1 hits, mode +1.00 - the drums have stopped, so the room just breathes until they return",
    "look": {
     "lamps": {
@@ -1310,7 +1310,7 @@
   {
    "t": 36.13,
    "l": 0.79,
-   "decay": 0.96,
+   "decay": 0.94,
    "hold": 0.72,
    "on": "lamps"
   },

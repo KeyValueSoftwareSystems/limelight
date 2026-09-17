@@ -1008,6 +1008,47 @@ the body, correlating 0.56 with how busy the music is. The intro is not dead - t
 still swings from 34 to 191 across the quiet stretch - it simply does not step or
 travel.
 
+## 7z. The tempo is not constant, and every duration was built on an average
+
+Amal suggested researching the song. It is worth doing and it found the most serious
+bug in the engine.
+
+**What the song is.** "Raga of Revenge" is an instrumental theme by Anirudh Ravichander
+for the film *DC*, 2:11, written in 48 hours for a Cannes trailer. In his own account he
+laid "a heavy, authentic South Indian rhythmic percussion base, paired with soulful
+Hindustani vocal arrangements... I started with the rhythm first - a proper South Indian
+beat - and then the North came in." The stem lanes show that structure plainly: voice
+alone to 36s, percussion entering 36-54s, both together with percussion leading to 110s,
+voice alone again to the end.
+
+**The score's caption is wrong** - it calls the track a devotional invocation to Krishna.
+Amal: "it's not a devotional song, that caption is wrong." Do not build on it.
+
+**The tempo changes and we averaged across it.** The score names the moment -
+`17.75 tempo_change, tempo moves 89 to 119 bpm` - and the beat list bears it out: 89.6bpm
+for the first eighteen seconds, 120 thereafter. `grid_of` returned one scalar `step`,
+`(last - first) / (n - 1)`, which is **116.0bpm everywhere**. In the intro that beat is
+**153ms wrong, 23% of a beat, drifting 4.89s over eight bars.**
+
+Everything built on it was wrong there: fade lengths, accent decays, the accent spacing
+floor, and - worst - `fit_rate`, which converts a cue's span into beats to decide how
+many cycles fit. A 3.5s intro span read as 6.8 beats when it is really 5.2. So the whole
+"everything must be musical" work in 7u was sound in the body of the song and quietly
+wrong in the intro.
+
+`grid_of` now also returns `beat_at(t)`, the real interval between the beats either side
+of `t`, and every duration uses it. A half-beat fade is 0.335s at 89bpm and 0.250s at
+120bpm: the same musical length, a different number of seconds. Accent decays come out
+at exactly 0.75 or 2.00 local beats throughout.
+
+**The renderer was already right** - `chaseStepTimes` interpolates into the real beats
+array for a beats-based rate, so chase steps always followed the true grid. Only
+`grid.beatSeconds`, used for the step-gate floor and gap filling, is still an average,
+and those are tolerances rather than placements.
+
+**Check any new song for this.** A track with a tempo change will silently mistime
+everything the author computes in seconds unless it goes through `beat_at`.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the

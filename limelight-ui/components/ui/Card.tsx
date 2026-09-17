@@ -17,11 +17,11 @@ export function Card({ children, onClick, disabled, className = "", title }: Car
       title={title}
       className={`group flex flex-col text-left p-0 border border-solid border-white/[0.06] rounded-[var(--radius-md)] overflow-hidden text-inherit transition-all duration-200 ease-[var(--ease)] ${
         onClick && !disabled
-          ? "cursor-pointer hover:border-white/[0.12] hover:-translate-y-[2px]"
+          ? "cursor-pointer hover:border-accent/25 hover:-translate-y-[2px]"
           : ""
-      } ${disabled ? "cursor-default opacity-45" : ""} ${className}`}
+      } ${disabled ? "cursor-default opacity-40" : ""} ${className}`}
       style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)",
+        background: "linear-gradient(180deg, rgba(139,92,246,0.04) 0%, rgba(139,92,246,0.01) 100%)",
         boxShadow: "var(--elev-card)",
       }}
       onMouseEnter={(e) => {

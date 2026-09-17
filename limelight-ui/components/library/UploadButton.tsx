@@ -8,16 +8,16 @@ import * as api from "@/lib/api";
 type Phase = "idle" | "uploading" | "generating" | "done" | "error";
 
 const STATUS_LABELS: Record<string, string> = {
-  queued: "Queued…",
-  generating: "Analysing track…",
-  storing: "Storing…",
+  queued: "Queued\u2026",
+  generating: "Analysing\u2026",
+  storing: "Storing\u2026",
 };
 
 export function UploadButton() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState(0);
-  const [genLabel, setGenLabel] = useState("Queued…");
+  const [genLabel, setGenLabel] = useState("Queued\u2026");
   const [errorMsg, setErrorMsg] = useState("");
   const jobRef = useRef<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -34,7 +34,7 @@ export function UploadButton() {
     cleanup();
     setPhase("idle");
     setProgress(0);
-    setGenLabel("Queued…");
+    setGenLabel("Queued\u2026");
     setErrorMsg("");
     if (inputRef.current) inputRef.current.value = "";
   }, [cleanup]);
@@ -48,7 +48,7 @@ export function UploadButton() {
   const startPolling = useCallback((jobId: string) => {
     jobRef.current = jobId;
     setPhase("generating");
-    setGenLabel("Queued…");
+    setGenLabel("Queued\u2026");
 
     pollRef.current = setInterval(async () => {
       try {
@@ -60,17 +60,17 @@ export function UploadButton() {
           try { const d = await api.songs.list(true); setSongs(d.songs); } catch {}
           setTimeout(reset, 2500);
         } else if (st.status === "error") {
-          fail(st.error ?? "Score generation failed");
+          fail(st.error ?? "Score generation failed.");
         }
       } catch {
-        fail("Lost connection");
+        fail("Connection lost.");
       }
     }, 1500);
   }, [cleanup, reset, fail, setSongs]);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.name.toLowerCase().endsWith(".mp3")) {
-      fail("Only .mp3 files are accepted");
+      fail("Only MP3 files are supported.");
       return;
     }
     setPhase("uploading");
@@ -79,7 +79,7 @@ export function UploadButton() {
       const res = await api.upload.send(file, (pct) => setProgress(pct));
       startPolling(res.job_id);
     } catch (err) {
-      fail(err instanceof api.ApiError ? err.message : "Upload failed");
+      fail(err instanceof api.ApiError ? err.message : "Upload failed.");
     }
   }, [fail, startPolling]);
 
@@ -95,14 +95,14 @@ export function UploadButton() {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex items-center gap-[7px] h-[36px] px-[16px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold text-[#0C0D12] cursor-pointer hover:brightness-110 active:scale-[0.97] transition-all duration-200"
+          className="flex items-center gap-[7px] h-[36px] px-[16px] rounded-[var(--radius-sm)] border-0 text-[13px] font-semibold text-white cursor-pointer hover:brightness-110 active:scale-[0.97] transition-all duration-200"
           style={{
-            background: "linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%)",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2)",
+            background: "var(--grad-primary)",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.3), 0 0 16px -2px rgba(139,92,246,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
           }}
         >
           <Upload size={14} strokeWidth={2.5} />
-          Add a song
+          Upload track
         </button>
       </>
     );
@@ -115,13 +115,13 @@ export function UploadButton() {
         <input ref={inputRef} type="file" accept=".mp3,audio/mpeg" className="hidden" onChange={onInputChange} />
         <div className="flex-1">
           <div className="flex items-center justify-between mb-[4px]">
-            <span className="text-[11px] font-medium text-ink-dim">Uploading…</span>
+            <span className="text-[11px] font-medium text-ink-dim">Uploading\u2026</span>
             <span className="mono text-[11px] text-ink-dimmer tabular-nums">{pct}%</span>
           </div>
           <div className="h-[3px] w-full rounded-full bg-white/[0.06] overflow-hidden">
             <div
               className="h-full rounded-full transition-[width] duration-200 ease-[var(--ease-out)]"
-              style={{ width: `${pct}%`, background: "linear-gradient(90deg, #F59E0B, #FBBF24)" }}
+              style={{ width: `${pct}%`, background: "var(--grad-primary)" }}
             />
           </div>
         </div>
@@ -161,7 +161,7 @@ export function UploadButton() {
         onClick={reset}
         className="text-[12px] font-medium text-ink-dim border-0 bg-transparent cursor-pointer hover:text-ink transition-colors px-[6px]"
       >
-        Try again
+        Retry
       </button>
     </div>
   );
