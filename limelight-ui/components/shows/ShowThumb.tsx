@@ -51,11 +51,6 @@ function fallbackBands(show: ShowFile, song?: Song): Band[] {
   return out;
 }
 
-function gestureCount(show: ShowFile): number {
-  const plan = show.plan as unknown as { gestures?: unknown[] } | null | undefined;
-  return plan?.gestures?.length ?? 0;
-}
-
 export function ShowThumb({
   show,
   song,

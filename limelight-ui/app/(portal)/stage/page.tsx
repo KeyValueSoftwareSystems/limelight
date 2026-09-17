@@ -13,7 +13,6 @@ import * as api from "@/lib/api";
 
 import { StagePreview } from "@/components/stage/StagePreview";
 import { ChatPanel } from "@/components/editor/ChatPanel";
-import { TransportPill } from "@/components/editor/TransportPill";
 import { TargetLine } from "@/components/stage/TargetLine";
 import { ConsolePanel } from "@/components/stage/ConsolePanel";
 import { RigPanel } from "@/components/stage/RigPanel";
@@ -60,7 +59,36 @@ export default function StagePage() {
   /* The editor's height is the creator's to choose: pull it up while placing
      clips, push it down while judging the look. A fixed ratio is always wrong
      for one of those. */
-  const [editorH, setEditorH] = useState(430);
+  const [editorH, setEditorH] = useState(300);
+  /* Once the creator drags the divider, the editor is theirs and stops
+     resizing itself to the lanes. */
+  const userSizedRef = useRef(false);
+
+  const [railW, setRailW] = useState(244);
+  const [asideW, setAsideW] = useState(288);
+
+  /* The rails either side of the editor drag too, so the timeline can be made
+     as wide as the work needs. */
+  const startRail = useCallback((side: "left" | "right") => (e: React.PointerEvent) => {
+    e.preventDefault();
+    const move = (ev: PointerEvent) => {
+      if (side === "left") setRailW(Math.round(Math.min(Math.max(180, ev.clientX), 460)));
+      else setAsideW(Math.round(Math.min(Math.max(220, window.innerWidth - ev.clientX), 520)));
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  }, []);
+
+  const fitEditor = useCallback((natural: number) => {
+    if (userSizedRef.current) return;
+    const box = columnRef.current?.getBoundingClientRect();
+    const cap = box ? box.height - 220 : 520;
+    setEditorH(Math.round(Math.min(Math.max(natural, 220), Math.max(220, cap))));
+  }, []);
   const columnRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLElement>(null);
 
@@ -69,6 +97,7 @@ export default function StagePage() {
 
   const startResize = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
+    userSizedRef.current = true;
     const move = (ev: PointerEvent) => {
       const box = columnRef.current?.getBoundingClientRect();
       if (!box) return;
@@ -954,14 +983,23 @@ export default function StagePage() {
     <>
       <div className="flex flex-1 min-h-0 overflow-hidden bg-bg text-ink">
         {isDesigner && (
-          <div className="flex-none w-[244px] min-w-[210px] border-r border-solid border-white/[0.05]">
-            <Sidebar effects={effects} onRecolour={handleRecolour} />
-          </div>
+          <>
+            <div className="flex-none overflow-hidden" style={{ width: railW }}>
+              <Sidebar effects={effects} onRecolour={handleRecolour} />
+            </div>
+            <div
+              onPointerDown={startRail("left")}
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="Resize the palette"
+              className="flex-none w-[4px] cursor-col-resize border-x border-solid border-white/[0.04] hover:border-accent/25 hover:bg-accent/[0.05] transition-colors duration-200"
+            />
+          </>
         )}
 
         <div
           ref={columnRef}
-          className="flex-1 min-w-0 flex flex-col min-h-0 overflow-hidden"
+          className="relative flex-1 min-w-0 flex flex-col min-h-0 overflow-hidden"
         >
           <header className="liquid liquid-flush flex-none flex items-center gap-[12px] px-[16px] h-[50px] z-20">
             <button
@@ -1069,21 +1107,12 @@ export default function StagePage() {
             <TargetLine onOpenVenuePicker={() => setVenuePickerOpen(true)} />
           </div>
 
-          <div className="relative flex-1 min-h-0 flex flex-col">
+          <div className="flex-1 min-h-0 flex flex-col">
             <StagePreview
               clockRef={clockRef}
               playing={isPlaying}
               currentTime={currentTime}
             />
-            {song && (
-              <TransportPill
-                currentTime={currentTime}
-                duration={show?.duration_s ?? song.duration_s ?? 0}
-                grid={show?.grid ?? null}
-                playing={isPlaying}
-                onToggle={handleToggle}
-              />
-            )}
           </div>
 
           {isBaking ? (
@@ -1115,6 +1144,7 @@ export default function StagePage() {
             className="flex-initial overflow-hidden"
           >
             <StageTimeline
+              onNaturalHeight={fitEditor}
               onGenerate={song ? handleGenerate : undefined}
               generating={generating}
               show={show}
@@ -1140,9 +1170,18 @@ export default function StagePage() {
               baking={stageMsg}
             />
           </section>
+
         </div>
 
-        <aside className="flex-none w-[288px] min-w-[230px] border-l border-solid border-white/[0.05] overflow-hidden">
+        <div
+          onPointerDown={startRail("right")}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize the side panel"
+          className="flex-none w-[4px] cursor-col-resize border-x border-solid border-white/[0.04] hover:border-accent/25 hover:bg-accent/[0.05] transition-colors duration-200"
+        />
+
+        <aside className="flex-none overflow-hidden" style={{ width: asideW }}>
           {isOperator ? (
             <div className="h-full overflow-y-auto">
               <ConsolePanel />

@@ -115,7 +115,7 @@ export default function GalleryPage() {
           <span className="text-[length:var(--text-sm)]">Body 13</span>
           <span className="text-[length:var(--text-xs)] text-ink-dim">Meta 12</span>
           <span className="label">Micro label</span>
-          <span className="mono">bar 33 · beat 2 · 0:34.86 · 9494 frames</span>
+          <span className="mono">Bar 33 · beat 2 · 0:34.86 · 9494 frames</span>
         </div>
       </Section>
 
@@ -132,7 +132,7 @@ export default function GalleryPage() {
 
       <Section title="Input">
         <Field label="Show name">
-          {(id) => <Input id={id} placeholder="name this show" />}
+          {(id) => <Input id={id} placeholder="Name this show" />}
         </Field>
         <Field label="Seed" hint="changes the whole arrangement">
           {(id) => <Input id={id} defaultValue="1" className="mono w-[80px]" />}
@@ -141,7 +141,7 @@ export default function GalleryPage() {
           {(id) => <Input id={id} defaultValue="muzammil" invalid />}
         </Field>
         <Field label="Disabled">
-          {(id) => <Input id={id} placeholder="unavailable" disabled />}
+          {(id) => <Input id={id} placeholder="Unavailable" disabled />}
         </Field>
       </Section>
 

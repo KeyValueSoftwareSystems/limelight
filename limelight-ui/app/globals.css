@@ -439,9 +439,9 @@ button:focus:not(:focus-visible) {
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(59, 227, 255, 0.04) 25%,
-    rgba(59, 227, 255, 0.08) 50%,
-    rgba(59, 227, 255, 0.04) 75%
+    rgba(255, 255, 255, 0.035) 25%,
+    rgba(255, 255, 255, 0.075) 50%,
+    rgba(255, 255, 255, 0.035) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
@@ -739,7 +739,11 @@ button:focus:not(:focus-visible) {
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-min), 1fr));
-  grid-auto-rows: max-content;
+  /* 1fr, not max-content: every card is the same object, so every card is the
+     same size. The body clamps and the pill row is one line, so nothing is
+     stretched far to get there. */
+  grid-auto-rows: 1fr;
   align-content: start;
   gap: 16px;
 }
+.card-grid > * { min-width: 0; }

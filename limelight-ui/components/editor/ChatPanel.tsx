@@ -55,7 +55,7 @@ export function ChatPanel() {
         {turns.length === 0 && (
           <p className="text-[12px] text-ink-dimmer leading-[1.6] m-0">
             Describe a change in plain English — &ldquo;warmer in the chorus&rdquo;,
-            &ldquo;calmer intro&rdquo;. This feature is not connected yet.
+            &ldquo;calmer intro&rdquo;.
           </p>
         )}
 

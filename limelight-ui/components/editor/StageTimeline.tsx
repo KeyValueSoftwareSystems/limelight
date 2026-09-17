@@ -60,6 +60,9 @@ interface Props {
   baking: string | null;
   onGenerate?: () => void;
   generating?: boolean;
+  /** The height this timeline actually needs, so the editor can size to its
+   *  lanes instead of stretching them and leaving a dead band underneath. */
+  onNaturalHeight?: (px: number) => void;
 }
 
 /* The magnet reaches a fixed distance on SCREEN, not a fixed number of beats.
@@ -78,8 +81,8 @@ const DRAG_THRESHOLD_PX = 3;
 const BANDS_H = 22 + 30 + 22 + 1;
 /** --energy-h. The popover stops above the energy band rather than over it. */
 const ENERGY_H = 28;
-const ROW_MIN = 26;
-const ROW_MAX = 52;
+const TRANSPORT_H = 56;
+const ROW_PREF = 34;
 
 /** The shortest a clip may be trimmed to when nothing is pulling at it: a
  *  thirty-second of a beat, about 15ms at 120bpm. With snap on, a beat is
@@ -114,7 +117,7 @@ function clampToSong(v: View, duration: number): View {
 export function StageTimeline({
   show, energy, clips, effects, currentTime, playing, selection,
   onSelect, onSeek, onToggle, onPlace, onRemove, onUpdateLive, onMaterialize,
-  onCommit, onUndo, onRedo, canUndo, canRedo, reveal, baking, onGenerate, generating,
+  onCommit, onUndo, onRedo, canUndo, canRedo, reveal, baking, onGenerate, generating, onNaturalHeight,
 }: Props) {
   const duration = show?.duration_s ?? 0;
   const bpb = show?.grid.beats_per_bar ?? 4;
@@ -125,7 +128,6 @@ export function StageTimeline({
      is opt-in, because six sets of lines at once is a plaid, not a grid. */
   const [guides, setGuides] = useState<GuideKind[]>(["bar"]);
   const [follow, setFollow] = useState(true);
-  const [rowsH, setRowsH] = useState(0);
   const [ghost, setGhost] = useState<{ x: number; y: number } | null>(null);
   const [hover, setHover] = useState<
     { bar: number; beat: number; target: SnapTarget | null; layer: number; top: number } | null
@@ -204,15 +206,6 @@ export function StageTimeline({
     setView(fit(show.duration_s ?? 1));
   }, [show]);
 
-  useEffect(() => {
-    const el = rowsRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([e]) => setRowsH(e.contentRect.height));
-    ro.observe(el);
-    setRowsH(el.getBoundingClientRect().height);
-    return () => ro.disconnect();
-  }, [show]);
-
   /* The lanes scroll inside the timeline's coordinate space, so the inspector
      — which is positioned in that space — has to know when they move. It reads
      the scroller itself through [data-lane-rows] rather than having the offset
@@ -244,10 +237,20 @@ export function StageTimeline({
      alone: closing them up would shift every clip below them a lane, which
      would change the priority of clips nobody touched. */
   const layerCount = Math.max(packed.rows, 1) + 1;
-  const rowHeight = useMemo(() => {
-    if (rowsH === 0) return ROW_MIN + 8;
-    return clamp(Math.floor(rowsH / layerCount) - 1, ROW_MIN, ROW_MAX);
-  }, [rowsH, layerCount]);
+  /* A lane is a fixed height, not a share of whatever is left. Dividing the
+     available space between lanes is what left a dead band under the last one:
+     four lanes in a taller editor hit ROW_MAX and the remainder had nothing in
+     it. Fixed rows let the editor size itself to exactly its lanes, and let
+     the rows scroll when there are more than fit. */
+  const rowHeight = ROW_PREF;
+
+  const naturalRef = useRef(onNaturalHeight);
+  useEffect(() => { naturalRef.current = onNaturalHeight; });
+  useEffect(() => {
+    naturalRef.current?.(
+      TRANSPORT_H + BANDS_H + layerCount * ROW_PREF + ENERGY_H + SCROLLBAR_H,
+    );
+  }, [layerCount]);
 
   /** Which lane a point on screen is over. The drop and the vertical half of a
    *  drag both ask this; it is the y half of `beatAtX`. Clamped to the spare

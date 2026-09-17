@@ -9,3 +9,4 @@ export { Badge } from "./Badge";
 export { Field } from "./Field";
 export { SegmentedControl } from "./SegmentedControl";
 export { MediaCard, CardTag } from "./MediaCard";
+export { CardSkeleton } from "./CardSkeleton";

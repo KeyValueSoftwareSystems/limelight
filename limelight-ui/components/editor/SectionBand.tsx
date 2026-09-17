@@ -12,6 +12,11 @@ import type { Section } from "@/lib/types";
 /** Breathing room between a section's edge and its name. */
 const PAD = 6;
 
+/** The score writes section names in lower case; the UI does not. */
+function titled(name: string | null | undefined): string {
+  return name ? name.charAt(0).toUpperCase() + name.slice(1) : "";
+}
+
 function SectionBandBase({ sections }: { sections: Section[] }) {
   const { view, width } = useTimeline();
 
@@ -45,7 +50,7 @@ function SectionBandBase({ sections }: { sections: Section[] }) {
               className="absolute top-[8px] text-[10px] font-medium tracking-[0.01em] text-ink-dim whitespace-nowrap pointer-events-none"
               style={{ left: labelX }}
             >
-              {s.name || "—"}
+              {titled(s.name) || "\u2014"}
             </span>
           </div>
         );

@@ -130,7 +130,8 @@ export function StageHud({ clockRef, playing, currentTime }: StageHudProps) {
 
     /* where we are */
     const sec = sectionAt(t, show.sections ?? []);
-    const name = sec?.name ?? "—";
+    const secName = sec?.name ?? "";
+    const name = secName ? secName.charAt(0).toUpperCase() + secName.slice(1) : "\u2014";
     if (name !== lastRef.current.name) {
       lastRef.current.name = name;
       if (labelRef.current) labelRef.current.textContent = name;
@@ -138,7 +139,7 @@ export function StageHud({ clockRef, playing, currentTime }: StageHudProps) {
     }
 
     const pos = positionAt(t, show.grid);
-    const bar = pos ? `bar ${pos.bar}·${pos.beat}` : "";
+    const bar = pos ? `Bar ${pos.bar}\u00b7${pos.beat}` : "";
     if (bar !== lastRef.current.bar) {
       lastRef.current.bar = bar;
       if (barRef.current) barRef.current.textContent = bar;
@@ -204,10 +205,8 @@ export function StageHud({ clockRef, playing, currentTime }: StageHudProps) {
             onClick={toggle}
             aria-pressed={open}
             title={open ? "Hide the readout" : "Show the readout"}
-            className={`pointer-events-auto h-[24px] px-[10px] rounded-full border border-solid cursor-pointer backdrop-blur-md transition-colors duration-200 text-[10px] ${
-              open
-                ? "border-[var(--edge-accent)] bg-[var(--surface-accent-2)] text-ink"
-                : "border-white/[0.08] bg-[rgba(10,11,20,0.75)] text-ink-dimmer hover:text-ink-dim"
+            className={`pointer-events-auto h-[28px] px-[12px] rounded-[8px] border-0 cursor-pointer transition-colors duration-200 text-[11.5px] ${
+              open ? "liquid liquid-key font-medium text-ink" : "liquid-well font-normal text-ink-dim hover:text-ink"
             }`}
           >
             Readout

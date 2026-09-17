@@ -178,7 +178,7 @@ export default function ShowsPage() {
             {rows.map((sf, i) => (
               <div
                 key={sf.id}
-                className="animate-in overflow-hidden"
+                className="animate-in h-full"
                 style={{ animationDelay: `${Math.min(i * 26, 360)}ms` }}
               >
                 <ShowCard show={sf} song={songForName(sf.song)} onOpen={handleOpen} />

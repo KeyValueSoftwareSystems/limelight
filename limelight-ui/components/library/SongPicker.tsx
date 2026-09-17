@@ -100,7 +100,7 @@ export function SongPicker({
         {loaded && filtered.length > 0 && (
           <div className="card-grid pt-[4px]">
             {filtered.map((song, i) => (
-              <div key={song.name} className="animate-in overflow-hidden" style={{ animationDelay: `${Math.min(i * 26, 360)}ms` }}>
+              <div key={song.name} className="animate-in h-full" style={{ animationDelay: `${Math.min(i * 26, 360)}ms` }}>
                 <SongCard
                   song={song}
                   onOpen={multi && onToggle ? onToggle : onPick}

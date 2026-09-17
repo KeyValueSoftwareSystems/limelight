@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
 import { VenueCard } from "@/components/venues/VenueCard";
+import { CardSkeleton } from "@/components/ui";
 import { Field, SegmentedControl } from "@/components/ui";
 import { Search } from "lucide-react";
 import type { Venue, Layout } from "@/lib/types";
@@ -97,13 +98,25 @@ export default function VenuesPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto card-grid px-[28px] pt-[18px] pb-[48px]">
-        {shown.map((v) => (
-          <VenueCard key={v.id} venue={v} layouts={layouts} onDesign={handleDesign} />
-        ))}
+      <div className="flex-1 overflow-y-auto px-[28px] pt-[18px] pb-[48px]">
+        {!loaded && <CardSkeleton count={8} />}
+
+        {loaded && shown.length > 0 && (
+          <div className="card-grid">
+            {shown.map((v, i) => (
+              <div
+                key={v.id}
+                className="animate-in h-full"
+                style={{ animationDelay: `${Math.min(i * 40, 320)}ms` }}
+              >
+                <VenueCard venue={v} layouts={layouts} onDesign={handleDesign} />
+              </div>
+            ))}
+          </div>
+        )}
 
         {loaded && !shown.length && (
-          <p className="col-span-full text-dim text-center py-[var(--spacing-s7)] m-0">
+          <p className="text-[13px] text-ink-dim text-center py-[48px] m-0">
             {q
               ? `No venue matches “${q}”.`
               : filter === "locked"

@@ -1,10 +1,11 @@
 "use client";
 
 import { familyHue } from "@/lib/tokens";
-import { beatsLabel, mmss, mmssms, positionAt } from "@/lib/grid";
+import { beatsLabel, mmssms } from "@/lib/grid";
 import type { Clip, Grid } from "@/lib/types";
 import type { SnapStrength } from "@/lib/snap";
 import { Menu } from "@/components/primitives/Menu";
+import { TransportPill } from "./TransportPill";
 import { GUIDES, type GuideKind } from "./Guides";
 
 /* One control system for the whole bar. Before this it carried five text sizes
@@ -128,12 +129,20 @@ export function TransportBar({
   onZoomOut: () => void;
   onFit: () => void;
 }) {
-  const pos = positionAt(currentTime, grid);
   const one = selected.length === 1 ? selected[0] : null;
   const has = selected.length > 0;
 
   return (
-    <div className="flex-none flex items-center gap-[10px] px-[12px] h-[46px] border-b border-solid border-[var(--edge)] bg-bg">
+    <div data-transport-bar className="flex-none flex items-center gap-[10px] px-[12px] h-[56px] border-b border-solid border-[var(--edge)] bg-bg">
+      <TransportPill
+        currentTime={currentTime}
+        duration={duration}
+        grid={grid}
+        playing={playing}
+        onToggle={onToggle}
+      />
+
+      <Rule />
       <Rule />
 
       <span className="flex-1 min-w-0" />
@@ -245,8 +254,8 @@ export function TransportBar({
             } px-[8px] ${LABEL}`}
             title="Rule vertical lines through the timeline"
           >
-            Grid: {guides.length === 0 ? "off" : guides.length === 1
-              ? (GUIDES.find((g) => g.id === guides[0])?.label.toLowerCase() ?? "on")
+            Grid: {guides.length === 0 ? "Off" : guides.length === 1
+              ? (GUIDES.find((g) => g.id === guides[0])?.label ?? "On")
               : guides.length} ▾
           </span>
         }
@@ -270,7 +279,7 @@ export function TransportBar({
             } px-[8px] ${LABEL}`}
             title="Where a clip lands when you drop or drag it"
           >
-            Snap: {snap === "off" ? "free" : snap} ▾
+            Snap: {snap === "off" ? "Free" : snap.charAt(0).toUpperCase() + snap.slice(1)} ▾
           </span>
         }
         items={[

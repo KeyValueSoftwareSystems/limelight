@@ -67,7 +67,7 @@ export function Conversation({ onSubmit }: ConversationProps) {
       </div>
       <div className="flex items-center gap-[var(--spacing-s2)]">
         <Input
-          placeholder="describe a change…"
+          placeholder="Describe a change…"
           wide
           value={input}
           onChange={(e) => setInput(e.target.value)}

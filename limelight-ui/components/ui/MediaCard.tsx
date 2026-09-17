@@ -55,7 +55,7 @@ export function MediaCard({
           : undefined
       }
       title={hint ?? title}
-      className={`panel group flex flex-col rounded-[var(--radius-lg)] overflow-hidden ${
+      className={`panel group flex flex-col h-full rounded-[var(--radius-lg)] overflow-hidden ${
         disabled ? "opacity-70 cursor-default" : live ? "panel-lift cursor-pointer" : "panel-lift"
       }`}
     >
@@ -79,7 +79,7 @@ export function MediaCard({
         {overlay}
       </div>
 
-      <div className="flex flex-col gap-[7px] px-[14px] pt-[12px] pb-[13px] min-w-0">
+      <div className="flex flex-col gap-[7px] px-[14px] pt-[12px] pb-[13px] min-w-0 flex-1">
         <div className="min-w-0">
           <span className="block text-[14px] font-semibold tracking-[-0.012em] text-ink truncate">
             {title}
@@ -104,10 +104,16 @@ export function MediaCard({
           </p>
         )}
 
-        {tags && <div className="flex items-center gap-[5px] flex-wrap min-h-[21px]">{tags}</div>}
+        {tags && (
+          <div className="flex items-center gap-[5px] flex-nowrap overflow-hidden h-[21px] flex-none">
+            {tags}
+          </div>
+        )}
 
         {footer && (
-          <span className="mono text-[10.5px] text-ink-dimmer tabular-nums truncate">{footer}</span>
+          <span className="mono text-[10.5px] text-ink-dimmer tabular-nums truncate mt-auto pt-[1px]">
+            {footer}
+          </span>
         )}
       </div>
     </article>

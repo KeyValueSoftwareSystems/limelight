@@ -5,16 +5,20 @@ import { usePortalStore } from "@/store/portal";
 import * as api from "@/lib/api";
 import { ListingCard } from "@/components/marketplace/ListingCard";
 import { ListForm } from "@/components/marketplace/ListForm";
-import { Button } from "@/components/ui";
+import { Button, CardSkeleton } from "@/components/ui";
 
 export default function MarketplacePage() {
   const market = usePortalStore((s) => s.market);
   const setMarket = usePortalStore((s) => s.setMarket);
   const role = usePortalStore((s) => s.role);
   const [listing, setListing] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const fetchMarket = useCallback(() => {
-    api.market.list().then((d) => setMarket(d.listings)).catch(() => {});
+    api.market
+      .list()
+      .then((d) => { setMarket(d.listings); setLoaded(true); })
+      .catch(() => setLoaded(true));
   }, [setMarket]);
 
   useEffect(() => {
@@ -54,10 +58,18 @@ export default function MarketplacePage() {
             </div>
           )}
 
-          {market.length > 0 ? (
+          {!loaded ? (
+            <CardSkeleton count={8} />
+          ) : market.length > 0 ? (
             <div className="card-grid">
-              {market.map((l) => (
-                <ListingCard key={l.show_id} listing={l} />
+              {market.map((l, i) => (
+                <div
+                  key={l.show_id}
+                  className="animate-in h-full"
+                  style={{ animationDelay: `${Math.min(i * 40, 320)}ms` }}
+                >
+                  <ListingCard listing={l} />
+                </div>
               ))}
             </div>
           ) : (

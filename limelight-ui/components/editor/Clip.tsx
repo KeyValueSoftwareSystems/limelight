@@ -90,15 +90,19 @@ function ClipBase({
         ` \u00b7 bar ${clip.bar}\u00b7${beatsLabel(clip.beat)}`
       }
     >
-      <span className="absolute inset-0 flex items-center gap-[4px] px-[6px] pointer-events-none overflow-hidden">
-        {w > 28 && (
+      <span className="absolute inset-0 flex items-center gap-[4px] px-[4px] pointer-events-none overflow-hidden">
+        {w > 14 && (
           <Image
             src={effectIcon({ id: clip.tile ?? clip.fx })}
             alt=""
-            width={12}
-            height={12}
+            width={15}
+            height={15}
             className="flex-none"
-            style={selected ? { filter: "brightness(0) saturate(0)" } : { opacity: 0.85 }}
+            style={
+              selected
+                ? { filter: "brightness(0) saturate(0)" }
+                : { opacity: 1, filter: "brightness(1.45) contrast(1.15)" }
+            }
           />
         )}
         {w > 44 && (

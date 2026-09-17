@@ -89,11 +89,11 @@ export function StagePreview({ clockRef, playing, currentTime }: StagePreviewPro
         </p>
       )}
 
-      <div className="absolute top-[var(--spacing-s3)] right-[var(--spacing-s3)] z-10 flex items-center gap-[6px]">
+      <div className="absolute top-[12px] right-[12px] z-10 flex items-center gap-[6px]">
         <div id="stage-hud-slot" className="flex items-center" />
         {can3d && (
         <div
-          className="flex gap-px rounded-full border border-solid border-white/[0.08] bg-[rgba(10,11,20,0.75)] p-px backdrop-blur-md"
+          className="liquid-well flex items-stretch gap-[2px] h-[28px] p-[2px] rounded-[8px]"
           role="group"
           aria-label="Stage view"
         >
@@ -103,8 +103,8 @@ export function StagePreview({ clockRef, playing, currentTime }: StagePreviewPro
               type="button"
               aria-pressed={view === v}
               onClick={() => choose(v)}
-              className={`px-[10px] h-[22px] rounded-full text-[length:var(--text-2xs)] cursor-pointer border-0 transition-colors duration-[var(--dur-state)] ${
-                view === v ? "bg-[rgba(230,234,242,0.14)] text-ink" : "bg-transparent text-dimmer hover:text-dim"
+              className={`px-[11px] rounded-[6px] text-[11.5px] cursor-pointer border-0 transition-colors duration-[var(--dur-state)] ${
+                view === v ? "liquid liquid-key font-medium text-ink" : "bg-transparent font-normal text-ink-dim hover:text-ink"
               }`}
             >
               {v === "3d" ? "Room" : "Plot"}

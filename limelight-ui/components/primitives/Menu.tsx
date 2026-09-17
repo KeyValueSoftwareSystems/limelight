@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export interface MenuItem {
   id: string;
@@ -26,13 +27,46 @@ interface MenuProps {
 export function Menu({ trigger, items, onPick, align = "left", keepOpen = false }: MenuProps) {
   const [open, setOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [at, setAt] = useState<{ top: number; left: number } | null>(null);
+
+  /* The menu is portalled to the body and positioned in viewport coordinates.
+     Anchored inside the editor it was clipped: every ancestor between the
+     toolbar and the page root is overflow-hidden, so the panel was sliced off
+     wherever it crossed one. It also flips above the trigger rather than
+     running off the bottom of the window. */
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const t = boxRef.current?.getBoundingClientRect();
+      const p = panelRef.current?.getBoundingClientRect();
+      if (!t) return;
+      const w = p?.width ?? 180;
+      const h = p?.height ?? 0;
+      const GAP = 4;
+      let left = align === "right" ? t.right - w : t.left;
+      left = Math.min(Math.max(8, left), window.innerWidth - w - 8);
+      const below = t.bottom + GAP;
+      const top = below + h > window.innerHeight - 8 ? Math.max(8, t.top - GAP - h) : below;
+      setAt({ top, left });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open, align, items.length]);
 
   /* Close on an outside pointer or on Escape. Both matter: a menu you cannot
      dismiss without choosing something is a trap. */
   useEffect(() => {
     if (!open) return;
     const away = (e: PointerEvent) => {
-      if (!boxRef.current?.contains(e.target as Node)) setOpen(false);
+      const el = e.target as Node;
+      if (boxRef.current?.contains(el) || panelRef.current?.contains(el)) return;
+      setOpen(false);
     };
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -48,12 +82,12 @@ export function Menu({ trigger, items, onPick, align = "left", keepOpen = false 
   return (
     <div ref={boxRef} className="relative inline-block">
       <span onClick={() => setOpen((v) => !v)}>{trigger}</span>
-      {open && (
+      {open && createPortal(
         <div
+          ref={panelRef}
           role="menu"
-          className={`liquid absolute top-[calc(100%+4px)] z-50 min-w-[180px] py-[var(--spacing-s1)] rounded-[var(--radius-md)] ${
-            align === "right" ? "right-0" : "left-0"
-          }`}
+          style={{ position: "fixed", top: at?.top ?? -9999, left: at?.left ?? -9999 }}
+          className="liquid z-[120] min-w-[180px] py-[var(--spacing-s1)] rounded-[var(--radius-md)]"
         >
           {items.map((it) => (
             <button
@@ -79,7 +113,8 @@ export function Menu({ trigger, items, onPick, align = "left", keepOpen = false 
               {it.hint && <span className="mono text-[length:var(--text-xs)] text-ink-dimmer">{it.hint}</span>}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
