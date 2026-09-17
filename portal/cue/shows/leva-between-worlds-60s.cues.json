@@ -23,7 +23,7 @@
     "second": 0.07
    },
    "fade": 0.25,
-   "why": "bars 1-4, the phrase opens out: guitars leads, E 1.46, 9 hits, mode ? - build in crimson",
+   "why": "bars 1-4, the phrase opens out: guitars leads, E 1.46, 9 hits, mode ? - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "crimson",
@@ -39,14 +39,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "breathe",
      "every": {
-      "beats": 1.5
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.12,
-     "move_head": true,
-     "cycles": 1,
+     "low": 0.62,
+     "move_head": false,
      "colours": [
       "crimson",
       "indigo"
@@ -56,14 +55,14 @@
     }
    ],
    "swell": {
-    "from": 0.82,
-    "to": 0.85,
-    "curve": 1.15
+    "from": 0.1,
+    "to": 0.313,
+    "curve": 1.25
    },
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
    }
   },
@@ -73,15 +72,15 @@
     "second": 8.057
    },
    "fade": 0.0,
-   "why": "bars 5-8, the phrase travels across: guitars leads, E 2.31, 11 hits, mode ? - hocket in crimson against teal inside",
+   "why": "bars 5-8, the phrase travels across: guitars leads, E 2.31, 11 hits, mode ? - the opening comes up gradually, 45% to 76% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "crimson",
-     "l": 0.566
+     "l": 0.36
     },
     "heads": {
-     "c": "indigo",
-     "l": 0.452,
+     "c": "crimson",
+     "l": 0.257,
      "pan": 0.5,
      "tilt": 0.45
     }
@@ -107,14 +106,14 @@
     }
    ],
    "swell": {
-    "from": 0.94,
-    "to": 0.97,
-    "curve": 1.15
+    "from": 0.445,
+    "to": 0.76,
+    "curve": 1.25
    },
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
    }
   },
@@ -125,7 +124,13 @@
    },
    "fade": 0.0,
    "look": {},
-   "why": "one beat of black, so the hit that follows has somewhere to land"
+   "why": "one beat of black, so the hit that follows has somewhere to land",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
   },
   {
    "id": 3,

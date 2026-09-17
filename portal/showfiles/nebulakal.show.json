@@ -57,7 +57,7 @@
     "second": 6.45
    },
    "fade": 0.227,
-   "why": "bars 1-4, the phrase opens out: brass leads, E 0.00, 0 hits, mode -1.00 - build in violet",
+   "why": "bars 1-4, the phrase opens out: brass leads, E 0.00, 0 hits, mode -1.00 - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "indigo",
@@ -73,14 +73,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "breathe",
      "every": {
-      "beats": 1.0
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.12,
-     "move_head": true,
-     "cycles": 1,
+     "low": 0.62,
+     "move_head": false,
      "colours": [
       "scarlet",
       "indigo"
@@ -90,14 +89,14 @@
     }
    ],
    "swell": {
-    "from": 0.82,
-    "to": 0.836,
-    "curve": 1.15
+    "from": 0.1,
+    "to": 0.313,
+    "curve": 1.25
    },
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
    }
   },
@@ -108,7 +107,13 @@
    },
    "fade": 0.0,
    "look": {},
-   "why": "the audio falls to 14% of its median for 7.01s - a real hole, so the room goes with it"
+   "why": "the audio falls to 14% of its median for 7.01s - a real hole, so the room goes with it",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
   },
   {
    "id": 2,
@@ -116,17 +121,17 @@
     "second": 13.537
    },
    "fade": 0.227,
-   "why": "bars 5-8, the phrase opens out: voices leads, E 0.52, 0 hits, mode +0.22 - hocket in violet",
+   "why": "bars 5-8, the phrase opens out: voices leads, E 0.52, 0 hits, mode +0.22 - the opening comes up gradually, 45% to 76% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.353
+     "l": 0.098
     },
     "heads": {
      "c": "indigo",
-     "l": 0.255,
+     "l": 0.059,
      "pan": 0.5,
-     "tilt": 0.31
+     "tilt": 0.32
     }
    },
    "chases": [
@@ -150,14 +155,14 @@
     }
    ],
    "swell": {
-    "from": 0.868,
-    "to": 0.88,
-    "curve": 1.15
+    "from": 0.447,
+    "to": 0.762,
+    "curve": 1.25
    },
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
    }
   },
@@ -167,15 +172,15 @@
     "second": 16.115
    },
    "fade": 0.0,
-   "why": "and back brighter, the instant the audio returns - the bar it returns into is 161% louder than the one it left - pendulum instead, the only shape that finishes in 0.7 bars",
+   "why": "and back brighter, the instant the audio returns - the opening comes up gradually, 61% to 92% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.196
+     "l": 0.098
     },
     "heads": {
      "c": "indigo",
-     "l": 0.118,
+     "l": 0.059,
      "pan": 0.5,
      "tilt": 0.32
     }
@@ -183,14 +188,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "pendulum",
+     "figure": "breathe",
      "every": {
-      "beats": 1.0
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.12,
-     "move_head": true,
-     "cycles": 1,
+     "low": 0.62,
+     "move_head": false,
      "colours": [
       "scarlet",
       "indigo"
@@ -200,14 +204,14 @@
     }
    ],
    "swell": {
-    "from": 0.82,
-    "to": 0.836,
-    "curve": 1.15
+    "from": 0.611,
+    "to": 0.92,
+    "curve": 1.25
    },
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
    }
   },
@@ -218,7 +222,13 @@
    },
    "fade": 0.0,
    "look": {},
-   "why": "the audio falls to 19% of its median for 0.84s - a real hole, so the room goes with it"
+   "why": "the audio falls to 19% of its median for 0.84s - a real hole, so the room goes with it",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
   },
   {
    "id": 1,
@@ -226,15 +236,15 @@
     "second": 18.297
    },
    "fade": 0.0,
-   "why": "and back, the instant the audio returns - alternate instead, the only shape that finishes in 1.0 bars",
+   "why": "and back, the instant the audio returns - the opening comes up gradually, 76% to 92% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.196
+     "l": 0.098
     },
     "heads": {
      "c": "indigo",
-     "l": 0.118,
+     "l": 0.059,
      "pan": 0.5,
      "tilt": 0.32
     }
@@ -259,14 +269,14 @@
     }
    ],
    "swell": {
-    "from": 0.82,
-    "to": 0.836,
-    "curve": 1.15
+    "from": 0.76,
+    "to": 0.92,
+    "curve": 1.25
    },
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
    }
   },
@@ -277,7 +287,13 @@
    },
    "fade": 0.0,
    "look": {},
-   "why": "the audio falls to 26% of its median for 0.35s - a real hole, so the room goes with it"
+   "why": "the audio falls to 26% of its median for 0.35s - a real hole, so the room goes with it",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
   },
   {
    "id": 3,
@@ -285,30 +301,29 @@
     "second": 20.457
    },
    "fade": 0.0,
-   "why": "and back on the look it is arriving at, the instant the audio returns",
+   "why": "and back on the look it is arriving at, the instant the audio returns - the opening comes up gradually, 91% to 92% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.668
+     "l": 0.098
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.17,
+     "c": "indigo",
+     "l": 0.059,
      "pan": 0.5,
-     "tilt": 0.31
+     "tilt": 0.32
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "unbuild",
+     "figure": "breathe",
      "every": {
-      "beats": 1.0
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.12,
-     "move_head": true,
-     "cycles": 1,
+     "low": 0.62,
+     "move_head": false,
      "colours": [
       "scarlet",
       "indigo"
@@ -318,14 +333,14 @@
     }
    ],
    "swell": {
-    "from": 0.916,
-    "to": 0.928,
-    "curve": 1.15
+    "from": 0.913,
+    "to": 0.92,
+    "curve": 1.25
    },
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
    }
   },

@@ -1259,6 +1259,17 @@ def author(song, out_path=None):
             c["why"] = (c.get("why") or "") + (
                 " - opened from %s to %s so the level can be seen" % (was, opened))
 
+    arrival = None
+    for t0, kind0, _ in moments:
+        if kind0 in ("entrance", "drop", "climax", "peak", "register_shift"):
+            arrival = t0
+            break
+    if arrival is None and len(sections) > 1:
+        arrival = float(sections[0]["end"])
+    hold_until = 0.0
+    if arrival is not None and bar_s > 0:
+        hold_until = min(float(arrival), bar_s * 16.0)
+
     if bar_s > 0:
         target = bar_s * 2.0
         cues.sort(key=lambda c: c.get("_t", 0))
@@ -1405,6 +1416,41 @@ def author(song, out_path=None):
                 continue
             target = min(v["l"] * REF_LUM, floor_lum)
             v["l"] = round(max(0.02, min(1.0, target / lv)), 3)
+
+    if hold_until > 0:
+        opening = [c for c in cues if c.get("_t", 0) < hold_until - 0.05]
+        keep = None
+        for c in sorted(opening, key=lambda x: x.get("_t", 0)):
+            if c.get("look"):
+                keep = c
+                break
+        for c in opening:
+            ch0 = (c.get("chases") or [None])[0]
+            if ch0 and FAM_OF.get(ch0.get("figure")) in ("travel", "grow"):
+                ch0["figure"] = "breathe"
+                ch0["low"] = 0.62
+                ch0["move_head"] = False
+                ch0["every"] = {"beats": float(per)}
+                ch0.pop("cycles", None)
+                ch0["colour_figure"] = "hold"
+                c["why"] = ((c.get("why") or "").split(" - ")[0] +
+                            " - the room breathes but nothing travels: the first thing that "
+                            "moves across the rig is the entrance at %.2fs" % (arrival or hold_until))
+            if keep is not None and c is not keep and c.get("look") and c.get("_t", 0) > 0.4:
+                c["look"] = json.loads(json.dumps(keep["look"]))
+            c["head"] = {"move": "park", "every": {"bars": 8}}
+        rise = sorted(opening, key=lambda x: x.get("_t", 0))
+        rise = [c for c in rise if c.get("look")]
+        if rise:
+            span = max(1e-6, hold_until - rise[0].get("_t", 0))
+            for c in rise:
+                p0 = (c.get("_t", 0) - rise[0].get("_t", 0)) / span
+                p1 = min(1.0, p0 + 0.34)
+                lo, hi = 0.10 + 0.82 * (p0 ** 1.25), 0.10 + 0.82 * (p1 ** 1.25)
+                c["swell"] = {"from": round(lo, 3), "to": round(hi, 3), "curve": 1.25}
+                c["why"] = ((c.get("why") or "").split(" - ")[0] +
+                            " - the opening comes up gradually, %d%% to %d%% of the look, "
+                            "arriving full at the entrance" % (round(lo * 100), round(hi * 100)))
 
     SUDDEN = ("only white carries a hit", "one beat of black", "a real hole",
               "and back", "PEAK", "climax", "the drop")

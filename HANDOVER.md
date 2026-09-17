@@ -885,6 +885,31 @@ cannot produce 100 *visually distinguishable* effects, and padding the count is 
 five-gestures-in-fifteen-names problem happened. Songs now use 6 to 16 distinct figures
 each.
 
+## 7v. The opening: nothing travels before the first arrival
+
+Amal, on our show opening with a sweep at 1.67s: "an LD would never do that." He is
+right, and the reason is worth stating. **An effect is a departure from a look, so the
+look has to exist first.** Opening on a chase gives the movement nothing to depart from,
+and spends the range before the song has started, so the real entrance has nowhere to
+go. Renjith's own note on his opening says the same thing: "a dim white pin, still. The
+head at rest is what makes" the entrance land.
+
+He then said he did not like Renjith's entrance either - twelve and a half seconds of
+complete stillness - and asked for something that "starts gradually on the beats,
+slowly". So the rule is neither of the two references:
+
+- **Nothing travels before the first arrival.** `arrival` is the first score moment of
+  type entrance, drop, climax, peak or register_shift, else the end of the first
+  section, capped at 16 bars. Before it, travel and grow figures are swapped for
+  `breathe`, the head is parked, and the symmetric families are left alone, so the room
+  articulates the beat without anything crossing the rig.
+- **The level comes up gradually.** Each opening cue carries a swell along a curve from
+  10% to 92% of its look, so the room grows across the intro and is full at the
+  entrance. On `raga-of-revenge` that reads 0, 17, 27, 38, 55 and lands at the 13.83s
+  entrance.
+
+The first thing that travels anywhere is the entrance itself.
+
 ## 8. Traps — mistakes already made here, do not repeat
 
 - **`grid.bpm` disagrees with the score's own beat list.** On `raga-of-revenge` the

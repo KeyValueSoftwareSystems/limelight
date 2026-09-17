@@ -57,7 +57,7 @@
     "second": 4.899
    },
    "fade": 0.234,
-   "why": "bars 1-4, the phrase opens out: keys leads, E 4.59, 2 hits, mode -0.23 - sweep in violet",
+   "why": "bars 1-4, the phrase opens out: keys leads, E 4.59, 2 hits, mode -0.23 - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "violet",
@@ -73,14 +73,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "breathe",
      "every": {
-      "beats": 1.0
+      "beats": 4.0
      },
      "fill_beats": 2,
-     "low": 0.3,
-     "move_head": true,
-     "cycles": 1,
+     "low": 0.62,
+     "move_head": false,
      "colours": [
       "violet",
       "ember"
@@ -90,10 +89,15 @@
     }
    ],
    "head": {
-    "move": "sweep",
+    "move": "park",
     "every": {
-     "bars": 2
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.1,
+    "to": 0.313,
+    "curve": 1.25
    }
   },
   {
@@ -101,16 +105,16 @@
    "at": {
     "second": 8.893
    },
-   "fade": 0.234,
-   "why": "build answers sweep, a whole 1 cycles, landing on the hit at 8.89s with a new colour",
+   "fade": 0.117,
+   "why": "build answers sweep, a whole 1 cycles, landing on the hit at 8.89s with a new colour - the opening comes up gradually, 26% to 55% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.737
+     "c": "violet",
+     "l": 0.715
     },
     "heads": {
-     "c": "ember",
-     "l": 0.514,
+     "c": "violet",
+     "l": 0.499,
      "pan": 0.5,
      "tilt": 0.36
     }
@@ -118,14 +122,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "breathe",
      "every": {
-      "beats": 1.5
+      "beats": 4.0
      },
      "fill_beats": 2,
-     "low": 0.3,
-     "move_head": true,
-     "cycles": 1,
+     "low": 0.62,
+     "move_head": false,
      "colours": [
       "violet",
       "ember"
@@ -136,10 +139,15 @@
     }
    ],
    "head": {
-    "move": "arc",
+    "move": "park",
     "every": {
-     "bars": 2
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.264,
+    "to": 0.547,
+    "curve": 1.25
    }
   },
   {
@@ -147,18 +155,18 @@
    "at": {
     "second": 12.399
    },
-   "fade": 0.234,
-   "why": "bars 5-8, the phrase closes down: brass leads, E 8.87, 3 hits, mode +0.43 - diverge in violet against saffron inside - converge instead, the only shape that finishes in 1.4 bars",
+   "fade": 0.117,
+   "why": "bars 5-8, the phrase closes down: brass leads, E 8.87, 3 hits, mode +0.43 - the opening comes up gradually, 46% to 78% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.809
+     "l": 0.715
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.297,
+     "c": "violet",
+     "l": 0.499,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.36
     }
    },
    "chases": [
@@ -181,10 +189,15 @@
     }
    ],
    "head": {
-    "move": "dip",
+    "move": "park",
     "every": {
-     "bars": 2
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.46,
+    "to": 0.777,
+    "curve": 1.25
    }
   },
   {
@@ -193,30 +206,29 @@
     "second": 14.977
    },
    "fade": 0.0,
-   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 14.98s with a new colour",
+   "why": "unbuild answers converge, a whole 1 cycles, landing on the hit at 14.98s with a new colour - the opening comes up gradually, 62% to 92% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.834
+     "c": "violet",
+     "l": 0.715
     },
     "heads": {
-     "c": "bone",
-     "l": 0.231,
+     "c": "violet",
+     "l": 0.499,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.36
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "unbuild",
+     "figure": "breathe",
      "every": {
-      "beats": 1.0
+      "beats": 4.0
      },
      "fill_beats": 2,
-     "low": 0.3,
-     "move_head": true,
-     "cycles": 1,
+     "low": 0.62,
+     "move_head": false,
      "colours": [
       "violet",
       "ember"
@@ -227,10 +239,15 @@
     }
    ],
    "head": {
-    "move": "arc",
+    "move": "park",
     "every": {
-     "bars": 2
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.621,
+    "to": 0.92,
+    "curve": 1.25
    }
   },
   {
@@ -240,27 +257,31 @@
    },
    "fade": 0.0,
    "look": {},
-   "why": "one beat of black, so the hit that follows has somewhere to land"
+   "why": "one beat of black, so the hit that follows has somewhere to land",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
   },
   {
    "id": 3,
    "at": {
     "second": 18.019
    },
-   "fade": 0.0,
-   "why": "drop at 19.4s - everything arrives at once - white, because only white carries a hit",
+   "fade": 0.234,
+   "why": "drop at 19.4s - the opening comes up gradually, 82% to 92% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
-     "c": "bone",
-     "l": 0.9
+     "c": "violet",
+     "l": 0.715
     },
     "heads": {
-     "c": "bone",
-     "l": 0.9,
+     "c": "violet",
+     "l": 0.499,
      "pan": 0.5,
-     "tilt": 0.3,
-     "strobe": 0.5,
-     "prism": 0.6
+     "tilt": 0.36
     }
    },
    "chase": {
@@ -270,6 +291,17 @@
      "hits": 1
     },
     "low": 0.45
+   },
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   },
+   "swell": {
+    "from": 0.824,
+    "to": 0.92,
+    "curve": 1.25
    }
   },
   {

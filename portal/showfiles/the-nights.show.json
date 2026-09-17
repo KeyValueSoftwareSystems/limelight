@@ -57,7 +57,7 @@
     "second": 1.741
    },
    "fade": 0.238,
-   "why": "the music is already playing when the show starts, so the room is not dark for it",
+   "why": "the music is already playing when the show starts, so the room is not dark for it - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "saffron",
@@ -91,10 +91,15 @@
     }
    ],
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.1,
+    "to": 0.313,
+    "curve": 1.25
    }
   },
   {

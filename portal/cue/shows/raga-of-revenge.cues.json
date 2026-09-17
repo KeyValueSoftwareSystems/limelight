@@ -24,7 +24,13 @@
    },
    "fade": 0.0,
    "look": {},
-   "why": "the audio falls to 18% of its median for 0.35s - a real hole, so the room goes with it"
+   "why": "the audio falls to 18% of its median for 0.35s - a real hole, so the room goes with it",
+   "head": {
+    "move": "park",
+    "every": {
+     "bars": 8
+    }
+   }
   },
   {
    "id": 1,
@@ -32,7 +38,7 @@
     "second": 1.672
    },
    "fade": 0.0,
-   "why": "and back on the look it is arriving at, the instant the audio returns",
+   "why": "and back on the look it is arriving at, the instant the audio returns - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "indigo",
@@ -48,14 +54,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "breathe",
      "every": {
-      "beats": 1.0
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.12,
-     "move_head": true,
-     "cycles": 1,
+     "low": 0.62,
+     "move_head": false,
      "colours": [
       "crimson",
       "indigo"
@@ -65,10 +70,15 @@
     }
    ],
    "head": {
-    "move": "sweep",
+    "move": "park",
     "every": {
-     "bars": 2
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.1,
+    "to": 0.313,
+    "curve": 1.25
    }
   },
   {
@@ -76,16 +86,16 @@
    "at": {
     "second": 5.155
    },
-   "fade": 0.259,
-   "why": "alternate answers sweep, a whole 4 cycles, landing on the hit at 5.16s with a new colour",
+   "fade": 0.129,
+   "why": "alternate answers sweep, a whole 4 cycles, landing on the hit at 5.16s with a new colour - the opening comes up gradually, 27% to 56% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.127
+     "c": "indigo",
+     "l": 0.353
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.092,
+     "c": "indigo",
+     "l": 0.255,
      "pan": 0.5,
      "tilt": 0.35
     }
@@ -111,10 +121,15 @@
     }
    ],
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.272,
+    "to": 0.557,
+    "curve": 1.25
    }
   },
   {
@@ -123,15 +138,15 @@
     "second": 9.11
    },
    "fade": 0.129,
-   "why": "hocket answers sweep, a whole 3 cycles, landing on the hit at 9.11s with a new colour",
+   "why": "hocket answers sweep, a whole 3 cycles, landing on the hit at 9.11s with a new colour - the opening comes up gradually, 54% to 87% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
-     "c": "saffron",
-     "l": 0.127
+     "c": "indigo",
+     "l": 0.353
     },
     "heads": {
-     "c": "saffron",
-     "l": 0.092,
+     "c": "indigo",
+     "l": 0.255,
      "pan": 0.5,
      "tilt": 0.35
     }
@@ -157,10 +172,15 @@
     }
    ],
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.544,
+    "to": 0.871,
+    "curve": 1.25
    }
   },
   {
@@ -168,32 +188,31 @@
    "at": {
     "second": 12.562
    },
-   "fade": 0.259,
-   "why": "bars 5-8, the phrase opens out: brass leads, E 5.92, 0 hits, mode +0.93 - cascade in violet against crimson inside - build instead, the only shape that finishes in 2.5 bars",
+   "fade": 0.129,
+   "why": "bars 5-8, the phrase opens out: brass leads, E 5.92, 0 hits, mode +0.93 - the opening comes up gradually, 81% to 92% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "indigo",
-     "l": 0.628
+     "l": 0.353
     },
     "heads": {
-     "c": "crimson",
-     "l": 0.378,
+     "c": "indigo",
+     "l": 0.255,
      "pan": 0.5,
-     "tilt": 0.32
+     "tilt": 0.35
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "breathe",
      "every": {
-      "beats": 2.0
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.12,
-     "move_head": true,
+     "low": 0.62,
+     "move_head": false,
      "reverse": true,
-     "cycles": 1,
      "colours": [
       "crimson",
       "indigo"
@@ -203,14 +222,14 @@
     }
    ],
    "swell": {
-    "from": 0.82,
-    "to": 0.836,
-    "curve": 1.15
+    "from": 0.815,
+    "to": 0.92,
+    "curve": 1.25
    },
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
    }
   },

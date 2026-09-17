@@ -57,7 +57,7 @@
     "second": 0.255
    },
    "fade": 0.172,
-   "why": "bars 1-4, the phrase travels across: keys leads, E 1.07, 1 hits, mode +0.49 - alternate in violet",
+   "why": "bars 1-4, the phrase travels across: keys leads, E 1.07, 1 hits, mode +0.49 - the opening comes up gradually, 10% to 31% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "violet",
@@ -90,10 +90,15 @@
     }
    ],
    "head": {
-    "move": "nod",
+    "move": "park",
     "every": {
-     "bars": 1
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.1,
+    "to": 0.313,
+    "curve": 1.25
    }
   },
   {
@@ -101,16 +106,16 @@
    "at": {
     "second": 2.345
    },
-   "fade": 0.172,
-   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 2.35s with a new colour",
+   "fade": 0.086,
+   "why": "sweep answers alternate, a whole 1 cycles, landing on the hit at 2.35s with a new colour - the opening comes up gradually, 23% to 50% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.167
+     "c": "violet",
+     "l": 0.162
     },
     "heads": {
-     "c": "ember",
-     "l": 0.111,
+     "c": "violet",
+     "l": 0.108,
      "pan": 0.5,
      "tilt": 0.34
     }
@@ -118,14 +123,13 @@
    "chases": [
     {
      "on": "lamps",
-     "figure": "sweep",
+     "figure": "breathe",
      "every": {
-      "beats": 1.5
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.12,
-     "move_head": true,
-     "cycles": 1,
+     "low": 0.62,
+     "move_head": false,
      "colours": [
       "violet",
       "ember"
@@ -136,10 +140,15 @@
     }
    ],
    "head": {
-    "move": "sweep",
+    "move": "park",
     "every": {
-     "bars": 2
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.227,
+    "to": 0.501,
+    "curve": 1.25
    }
   },
   {
@@ -147,18 +156,18 @@
    "at": {
     "second": 5.805
    },
-   "fade": 0.172,
-   "why": "bars 5-8, the phrase opens out: keys leads, E 1.19, 2 hits, mode +0.22 - diverge in violet - converge instead, the only shape that finishes in 2.0 bars",
+   "fade": 0.086,
+   "why": "bars 5-8, the phrase opens out: keys leads, E 1.19, 2 hits, mode +0.22 - the opening comes up gradually, 53% to 86% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
      "c": "violet",
-     "l": 0.189
+     "l": 0.162
     },
     "heads": {
      "c": "violet",
-     "l": 0.135,
+     "l": 0.108,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.34
     }
    },
    "chases": [
@@ -182,10 +191,15 @@
     }
    ],
    "head": {
-    "move": "dip",
+    "move": "park",
     "every": {
-     "bars": 2
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.53,
+    "to": 0.855,
+    "curve": 1.25
    }
   },
   {
@@ -193,32 +207,31 @@
    "at": {
     "second": 8.545
    },
-   "fade": 0.172,
-   "why": "build answers converge, a whole 1 cycles, landing on the hit at 8.54s with a new colour",
+   "fade": 0.086,
+   "why": "build answers converge, a whole 1 cycles, landing on the hit at 8.54s with a new colour - the opening comes up gradually, 81% to 92% of the look, arriving full at the entrance",
    "look": {
     "lamps": {
-     "c": "ember",
-     "l": 0.195
+     "c": "violet",
+     "l": 0.162
     },
     "heads": {
-     "c": "ember",
-     "l": 0.139,
+     "c": "violet",
+     "l": 0.108,
      "pan": 0.5,
-     "tilt": 0.33
+     "tilt": 0.34
     }
    },
    "chases": [
     {
      "on": "lamps",
-     "figure": "build",
+     "figure": "breathe",
      "every": {
-      "beats": 1.5
+      "beats": 4.0
      },
      "fill_beats": 1,
-     "low": 0.12,
-     "move_head": true,
+     "low": 0.62,
+     "move_head": false,
      "reverse": false,
-     "cycles": 1,
      "colours": [
       "violet",
       "ember"
@@ -228,10 +241,15 @@
     }
    ],
    "head": {
-    "move": "arc",
+    "move": "park",
     "every": {
-     "bars": 2
+     "bars": 8
     }
+   },
+   "swell": {
+    "from": 0.81,
+    "to": 0.92,
+    "curve": 1.25
    }
   },
   {
